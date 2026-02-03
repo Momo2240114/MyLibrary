@@ -1,0 +1,68 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    256.0,
+                    256.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    256.0,
+                    256.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/LoadingIcon.png",
+                "Visible": true,
+                "pivotType": 1
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Movement"
+        },
+        {
+            "Data": {
+                "SpinVec": [
+                    0.0,
+                    0.0,
+                    80.0
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "SpinComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Load",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            1750.0,
+            900.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            357.5307922363281
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.3700000047683716,
+                0.49000000953674316,
+                0.23000000417232513
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                -0.8100000023841858,
+                0.03999999910593033,
+                -0.1599999964237213
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": true
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Layer": 64,
+    "Name": "Obj_Cabinet02Sub__01",
+    "ParentName": "Obj_Cabinet02__01",
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

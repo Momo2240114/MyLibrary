@@ -1,0 +1,50 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "DebugPrimitiveColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "GravityScale": 1.0,
+            "HalfSize": [
+                11.270000457763672,
+                1.190000057220459,
+                0.5
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": true
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Layer": 512,
+    "Name": "WallHit_02",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            2.299999952316284,
+            2.0,
+            -45.720001220703125
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

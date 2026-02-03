@@ -1,0 +1,61 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/Object/emergency_exit_low_poly_gltf/scene.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "Color": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 3.0,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    0.0,
+                    0.05000000074505806
+                ],
+                "OuterAngle": 30.0,
+                "Range": 1.0,
+                "Type": 1
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject_04",
+    "ParentName": "GameObject_02",
+    "Transform": {
+        "Pos": [
+            0.01858774945139885,
+            2.5083584785461426,
+            0.015236377716064453
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

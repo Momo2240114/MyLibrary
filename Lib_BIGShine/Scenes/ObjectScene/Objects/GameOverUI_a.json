@@ -1,0 +1,93 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    1920.0,
+                    1121.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    1920.0,
+                    1121.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/GameOver_a.png",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 0.0,
+                        "py": 0.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 0.0,
+                        "py": -1121.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameOverUI_a",
+    "ParentName": "GameOverUI",
+    "Transform": {
+        "Pos": [
+            0.0,
+            -1121.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

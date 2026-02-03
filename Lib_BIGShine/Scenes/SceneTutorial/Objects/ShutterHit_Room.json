@@ -1,0 +1,44 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.029999999329447746,
+                1.0,
+                0.949999988079071
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Layer": 0,
+    "Name": "ShutterHit_Room",
+    "ParentName": "Shutter_Room_01",
+    "Transform": {
+        "Pos": [
+            0.0,
+            1.805207371711731,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

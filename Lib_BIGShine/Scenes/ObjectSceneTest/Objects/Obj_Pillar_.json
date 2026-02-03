@@ -1,0 +1,56 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.3400000035762787,
+                1.6100000143051147,
+                0.3499999940395355
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                3.1700000762939453,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": true
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/Object/Pillar/pillar_Pillar.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 512,
+    "Name": "Obj_Pillar_",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            -5.0,
+            -0.5,
+            10.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.100000023841858,
+            1.0
+        ]
+    }
+}

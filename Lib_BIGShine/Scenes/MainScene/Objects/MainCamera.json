@@ -1,0 +1,176 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "DebugPrimitiveColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "GravityScale": 1.0,
+            "HalfHeight": 1.0,
+            "IsStatic": false,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Radius": 0.5,
+            "ShapeRenderFlg": true,
+            "UseGravity": false
+        },
+        "Enabled": true,
+        "TypeName": "CapsuleCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eye": [
+                    9.0,
+                    2.0,
+                    0.0
+                ],
+                "farZ": 1000.0,
+                "focus": [
+                    8.0,
+                    2.0,
+                    -1.1920930376163597e-07
+                ],
+                "fovY": 59.96766662597656,
+                "nearZ": 0.10000000149011612,
+                "up": [
+                    0.0,
+                    1.0,
+                    0.0
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CameraComponent"
+        },
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 2.5,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 30.0,
+                "Type": 2
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        },
+        {
+            "Data": {
+                "CombinedWaypoints": [
+                    {
+                        "f_idx": 0,
+                        "t_idx": 0
+                    },
+                    {
+                        "f_idx": 1,
+                        "t_idx": 1
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CameraDirector"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 270.0,
+                        "az": 0.0,
+                        "dur": 2.799999952316284,
+                        "ease": 5,
+                        "px": 9.0,
+                        "py": 2.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 230.0,
+                        "az": 0.0,
+                        "dur": 2.799999952316284,
+                        "ease": 5,
+                        "px": -10.0,
+                        "py": 2.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": {
+                "FovWaypoints": [
+                    {
+                        "dur": 2.0,
+                        "fov": 60.0,
+                        "pr": 0.4860000014305115,
+                        "pv": 70.0
+                    },
+                    {
+                        "dur": 2.0,
+                        "fov": 60.0,
+                        "pr": 0.5,
+                        "pv": 70.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "FovDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 1,
+    "Name": "MainCamera",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            9.0,
+            2.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            270.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

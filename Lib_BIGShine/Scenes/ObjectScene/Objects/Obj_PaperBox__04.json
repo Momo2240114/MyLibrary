@@ -1,0 +1,35 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 3.0,
+                "ModelName": "./Data/Model/Object/paperbox_01_obj_gltf/scene.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Obj_PaperBox__04",
+    "ParentName": "Boxs",
+    "Transform": {
+        "Pos": [
+            -0.3797788619995117,
+            -0.25,
+            0.045993804931640625
+        ],
+        "Rot": [
+            0.0,
+            89.99995422363281,
+            0.0
+        ],
+        "Scale": [
+            0.9999997615814209,
+            1.0,
+            0.9999997615814209
+        ]
+    }
+}

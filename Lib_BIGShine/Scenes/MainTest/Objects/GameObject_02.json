@@ -1,0 +1,34 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/Object/Door/DoorFrame.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject_02",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            -0.2913631498813629,
+            -44.885032653808594
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.5,
+            1.5,
+            6.349999904632568
+        ]
+    }
+}

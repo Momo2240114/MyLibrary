@@ -1,0 +1,56 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.3799999952316284,
+                0.5,
+                0.3499999940395355
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.6800000071525574,
+                0.0,
+                -0.41999998688697815
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": true
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 3.0,
+                "ModelName": "./Data/Model/Object/cabinet/cabinet_2.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Obj_Cabinet02__02",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            -10.280855178833008,
+            0.699999988079071,
+            -6.166670799255371
+        ],
+        "Rot": [
+            0.0,
+            180.00001525878906,
+            0.0
+        ],
+        "Scale": [
+            0.9999995231628418,
+            1.0,
+            0.9999995231628418
+        ]
+    }
+}

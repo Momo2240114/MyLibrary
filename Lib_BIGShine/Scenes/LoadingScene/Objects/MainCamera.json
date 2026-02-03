@@ -1,0 +1,75 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eye": [
+                    0.0,
+                    2.0,
+                    0.0
+                ],
+                "farZ": 1000.0,
+                "focus": [
+                    -1.0,
+                    2.0,
+                    -1.1920930376163597e-07
+                ],
+                "fovY": 60.0,
+                "nearZ": 0.10000000149011612,
+                "up": [
+                    0.0,
+                    1.0,
+                    0.0
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CameraComponent"
+        },
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 3.200000047683716,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 14.100000381469727,
+                "Type": 2
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "MainCamera",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            2.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            270.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

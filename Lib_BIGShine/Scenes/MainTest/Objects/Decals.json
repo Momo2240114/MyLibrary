@@ -1,0 +1,38 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    0.9137254953384399,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "ComponentName": "DecalComponent",
+                "TextureFile": "T_splat0_floor_v1.png"
+            },
+            "Enabled": true,
+            "TypeName": "DecalComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Decals",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            2.5999999046325684,
+            -0.5,
+            -2.0999999046325684
+        ],
+        "Rot": [
+            90.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            2.5,
+            2.5,
+            1.0
+        ]
+    }
+}

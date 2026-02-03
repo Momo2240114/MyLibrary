@@ -1,0 +1,55 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "DebugPrimitiveColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "GravityScale": 1.0,
+            "IsStatic": true,
+            "IsTrigger": true,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Radius": 0.27000001072883606,
+            "ShapeRenderFlg": true,
+            "UseGravity": false
+        },
+        "Enabled": true,
+        "TypeName": "SphereCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "targetNodeIndex": 47,
+                "targetNodeName": "hand_r"
+            },
+            "Enabled": true,
+            "TypeName": "ModelAttachment"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Attachiment",
+    "ParentName": "Enemy",
+    "Transform": {
+        "Pos": [
+            0.29895687103271484,
+            1.707632064819336,
+            -0.39528751373291016
+        ],
+        "Rot": [
+            3.0406343936920166,
+            19.60966682434082,
+            294.45318603515625
+        ],
+        "Scale": [
+            1.9999988079071045,
+            1.9999994039535522,
+            1.9999988079071045
+        ]
+    }
+}

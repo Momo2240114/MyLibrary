@@ -1,0 +1,100 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    1920.0,
+                    1121.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    800.0,
+                    400.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/GameOver_ReStart.png",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 1000.0,
+                        "py": 700.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 3000.0,
+                        "py": 700.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        },
+        {
+            "Data": {
+                "SelectedActionName": "GoSceneGame"
+            },
+            "Enabled": true,
+            "TypeName": "UIButton"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameOverUI_ReStart",
+    "ParentName": "GameOverUI",
+    "Transform": {
+        "Pos": [
+            3000.0,
+            700.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

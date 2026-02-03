@@ -1,0 +1,38 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "ComponentName": "DecalComponent",
+                "TextureFile": "T_splat0_floor_v1.png"
+            },
+            "Enabled": true,
+            "TypeName": "DecalComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Decal_01",
+    "ParentName": "Obj_Pillar__01",
+    "Transform": {
+        "Pos": [
+            0.7958183288574219,
+            3.6644392013549805,
+            0.07995223999023438
+        ],
+        "Rot": [
+            89.96572875976563,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.2100000381469727,
+            0.6099857091903687,
+            7.099908351898193
+        ]
+    }
+}

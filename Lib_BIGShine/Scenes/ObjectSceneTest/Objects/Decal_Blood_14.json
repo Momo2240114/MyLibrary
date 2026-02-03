@@ -1,0 +1,38 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ComponentName": "DecalComponent",
+                "TextureFile": "T_splat0_floor_v2.png"
+            },
+            "Enabled": true,
+            "TypeName": "DecalComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Decal_Blood_14",
+    "ParentName": "Boxs_01",
+    "Transform": {
+        "Pos": [
+            -0.3783740997314453,
+            0.17494343221187592,
+            -9.1552734375e-05
+        ],
+        "Rot": [
+            89.97201538085938,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.75,
+            1.7499840259552002,
+            3.419926643371582
+        ]
+    }
+}

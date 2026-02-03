@@ -1,0 +1,60 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 0.15000000596046448,
+                "ModelName": "./Data/Model/Object/light/scene.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "Color": [
+                    0.9686274528503418,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 6.5,
+                "Intensity": 6.099999904632568,
+                "LocalRotation": [
+                    0.0,
+                    105.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    1.7000000476837158,
+                    -1.0,
+                    1.399999976158142
+                ],
+                "OuterAngle": 30.0,
+                "Range": 28.899999618530273,
+                "Type": 2
+            },
+            "Enabled": false,
+            "TypeName": "LightComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "HandLight",
+    "ParentName": "MainCamera",
+    "Transform": {
+        "Pos": [
+            -0.4000000059604645,
+            -0.30000001192092896,
+            0.800000011920929
+        ],
+        "Rot": [
+            0.0,
+            265.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.23999999463558197,
+                0.8500000238418579,
+                1.7400000095367432
+            ],
+            "IsStatic": false,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Layer": 512,
+    "Name": "wall_02",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            9.95785140991211,
+            1.936970829963684,
+            -6.071646690368652
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

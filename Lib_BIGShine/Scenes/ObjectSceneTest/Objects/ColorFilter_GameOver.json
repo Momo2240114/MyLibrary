@@ -1,0 +1,65 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "ColorFilterWaypoints": [
+                    {
+                        "balance": [
+                            1.0,
+                            0.0,
+                            0.0
+                        ],
+                        "bri": 1.0,
+                        "con": 1.0,
+                        "dur": 3.0,
+                        "ease": 1,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "sat": 1.0
+                    },
+                    {
+                        "balance": [
+                            1.0,
+                            0.9999790191650391,
+                            0.9999790191650391
+                        ],
+                        "bri": 1.0,
+                        "con": 1.0,
+                        "dur": 1.0,
+                        "ease": 1,
+                        "hue": 0.0,
+                        "intensity": 1.0,
+                        "sat": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "ColorFilterDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "ColorFilter_GameOver",
+    "ParentName": "GameOverUI",
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

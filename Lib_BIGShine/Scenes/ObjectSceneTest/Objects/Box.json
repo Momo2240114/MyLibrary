@@ -1,0 +1,56 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.4300000071525574,
+                0.5,
+                0.3100000023841858
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.1599999964237213
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 3.0,
+                "ModelName": "./Data/Model/Object/paperbox_01_obj_gltf/scene.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Box",
+    "ParentName": "Table_03",
+    "Transform": {
+        "Pos": [
+            0.4482707977294922,
+            -0.5899999141693115,
+            0.00012493133544921875
+        ],
+        "Rot": [
+            0.0,
+            89.99995422363281,
+            0.0
+        ],
+        "Scale": [
+            0.9999997615814209,
+            1.0,
+            0.9999997615814209
+        ]
+    }
+}

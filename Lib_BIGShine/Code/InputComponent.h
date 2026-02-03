@@ -1,0 +1,16 @@
+#pragma once
+
+
+#include "ComponentBase.h"
+#include"Vector.h"
+
+class InputComponent :public Component
+{
+public:
+	const std::string& GetName() const override
+	{
+		static std::string name = "Input";
+		return name;
+	}
+	void Update(float deltaTime);
+};

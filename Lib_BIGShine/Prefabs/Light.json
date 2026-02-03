@@ -1,0 +1,58 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 0.009999999776482582,
+                "ModelName": "./Data/Model/Object/hanging_light/scene.gltf",
+                "ShaderID": 1
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 5.099999904632568,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    -2.9000000953674316,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 3.700000047683716,
+                "Type": 1
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "light",
+    "Transform": {
+        "Pos": [
+            0.0,
+            5.699999809265137,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}
