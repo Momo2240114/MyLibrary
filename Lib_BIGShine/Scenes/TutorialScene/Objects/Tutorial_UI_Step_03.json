@@ -1,0 +1,93 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    150.0,
+                    3.799999952316284
+                ],
+                "CatSize": [
+                    1070.0,
+                    769.9600219726563
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    425.0,
+                    275.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/Ttorial_Crouching.png",
+                "Visible": true,
+                "pivotType": 1
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 960.0,
+                        "py": 750.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 960.0,
+                        "py": 1080.0,
+                        "pz": 0.0,
+                        "sx": 0.0,
+                        "sy": 0.0,
+                        "sz": 0.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Tutorial_UI_Step_03",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            960.0,
+            1080.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            0.0,
+            0.0,
+            0.0
+        ]
+    }
+}

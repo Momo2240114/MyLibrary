@@ -1,0 +1,64 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    175.0,
+                    300.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    75.0,
+                    150.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/Nunber.png",
+                "Visible": true,
+                "pivotType": 1
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": {
+                "CurrentDigit": 0,
+                "DigitSize": [
+                    175.0,
+                    300.0
+                ],
+                "MaxColumns": 10
+            },
+            "Enabled": true,
+            "TypeName": "NumberSwitcher"
+        }
+    ],
+    "Layer": 0,
+    "Name": "NumberUI",
+    "ParentName": "Number",
+    "Transform": {
+        "Pos": [
+            750.0,
+            1000.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

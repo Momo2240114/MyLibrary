@@ -1,0 +1,122 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Sequences": [
+                    {
+                        "actions": [
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_G_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.10000000149011612,
+                                "name": "GameOverUI_a_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.20000000298023224,
+                                "name": "GameOverUI_m_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.30000001192092896,
+                                "name": "GameOverUI_e1_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.44999998807907104,
+                                "name": "GameOverUI_O_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.5,
+                                "name": "GameOverUI_v_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.550000011920929,
+                                "name": "GameOverUI_e2_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.6000000238418579,
+                                "name": "GameOverUI_r_Trans_0"
+                            }
+                        ],
+                        "name": "Game Over "
+                    },
+                    {
+                        "actions": [
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_G_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_r_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_e2_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_v_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_m_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_a_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_e1_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GameOverUI_O_Trans_1"
+                            }
+                        ],
+                        "name": "GameOverReset"
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "ActionSequence"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameOverUI",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            -10.222216606140137,
+            -0.5150223970413208,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

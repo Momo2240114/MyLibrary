@@ -1,0 +1,136 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "DebugPrimitiveColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "GravityScale": 1.0,
+            "HalfHeight": 1.0,
+            "IsStatic": false,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Radius": 0.5,
+            "ShapeRenderFlg": true,
+            "UseGravity": false
+        },
+        "Enabled": true,
+        "TypeName": "CapsuleCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eye": [
+                    -4.0,
+                    2.0,
+                    0.0
+                ],
+                "farZ": 1000.0,
+                "focus": [
+                    -3.0004844665527344,
+                    1.9831675291061401,
+                    -0.026181276887655258
+                ],
+                "fovY": 59.84003829956055,
+                "nearZ": 0.10000000149011612,
+                "up": [
+                    0.01682674139738083,
+                    0.9998583197593689,
+                    -0.00044075772166252136
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CameraComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Player"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        },
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 1.0,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 30.0,
+                "Type": 2
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Movement"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.9644787907600403,
+                        "ay": 91.50045776367188,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": -4.0,
+                        "py": 2.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        }
+    ],
+    "Layer": 1,
+    "Name": "MainCamera",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            -4.0,
+            2.0,
+            0.0
+        ],
+        "Rot": [
+            0.9644775390625,
+            91.50045776367188,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

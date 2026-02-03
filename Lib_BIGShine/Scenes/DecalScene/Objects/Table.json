@@ -1,0 +1,54 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/Enemy/BookHeadMonster.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Table",
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.800000011920929,
+            3.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

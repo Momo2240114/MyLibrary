@@ -1,0 +1,222 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Sequences": [
+                    {
+                        "actions": [
+                            {
+                                "cat": "Audio",
+                                "delay": 0.0,
+                                "name": "PlaySE_TapStartMOVE"
+                            },
+                            {
+                                "cat": "Camera",
+                                "delay": 0.0,
+                                "name": "MainCamera_WP_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "Logo_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "UIMoveCamera_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "UI_BackButton_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 1.0,
+                                "name": "GoGameBottan_Trans_2"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_UP_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoTutorial_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_Down_Trans_1"
+                            }
+                        ],
+                        "name": "GoCmera"
+                    },
+                    {
+                        "actions": [
+                            {
+                                "cat": "Audio",
+                                "delay": 0.0,
+                                "name": "PlaySE_TapStartMOVE"
+                            },
+                            {
+                                "cat": "Camera",
+                                "delay": 0.0,
+                                "name": "MainCamera_WP_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "Logo_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "UIMoveCamera_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "UI_BackButton_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoGameBottan_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_UP_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoTutorial_Trans_0"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_Down_Trans_0"
+                            }
+                        ],
+                        "name": "BackCamera"
+                    },
+                    {
+                        "actions": [
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_UP_Trans_2"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoTutorial_Trans_2"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoGameBottan_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_Down_Trans_2"
+                            }
+                        ],
+                        "name": "SwipUI_UP"
+                    },
+                    {
+                        "actions": [
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoTutorial_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_UP_Trans_1"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "GoGameBottan_Trans_2"
+                            },
+                            {
+                                "cat": "Transform",
+                                "delay": 0.0,
+                                "name": "SwipUI_Down_Trans_1"
+                            }
+                        ],
+                        "name": "SwipUI_Down"
+                    },
+                    {
+                        "actions": [
+                            {
+                                "cat": "Audio",
+                                "delay": 0.0,
+                                "name": "PlaySE_TapStart"
+                            },
+                            {
+                                "cat": "Audio",
+                                "delay": 0.10000000149011612,
+                                "name": "StopAllBGM"
+                            },
+                            {
+                                "cat": "Scene",
+                                "delay": 1.0,
+                                "name": "GoSceneGame"
+                            }
+                        ],
+                        "name": "GoGameAction"
+                    },
+                    {
+                        "actions": [
+                            {
+                                "cat": "Audio",
+                                "delay": 0.0,
+                                "name": "PlaySE_TapStart"
+                            },
+                            {
+                                "cat": "Audio",
+                                "delay": 0.10000000149011612,
+                                "name": "StopAllBGM"
+                            },
+                            {
+                                "cat": "Scene",
+                                "delay": 1.0,
+                                "name": "GoSceneTutorial"
+                            }
+                        ],
+                        "name": "GoTutorial"
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "ActionSequence"
+        }
+    ],
+    "Layer": 0,
+    "Name": "ActionManagerObject",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

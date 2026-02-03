@@ -1,0 +1,27 @@
+{
+    "GraphicsSettings": {
+        "Bloom": {
+            "blurPasses": 4,
+            "intensity": 1.0,
+            "kawaseScale": 1.0,
+            "threshold": 0.8999999761581421
+        }
+    },
+    "ObjectList": [
+        "MainCamera",
+        "Light_Room01",
+        "Stage_Room01",
+        "Stage_Room02",
+        "Light_Room02",
+        "Light_Room03",
+        "Stage_Room03",
+        "Stage_Room04",
+        "Light_Room04",
+        "Shutter_Room_01",
+        "Shutter_Room_02",
+        "Shutter_Room_03",
+        "Shutter_Room_04",
+        "ShutterHit_Room"
+    ],
+    "SceneName": "SceneTutorial"
+}

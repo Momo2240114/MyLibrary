@@ -1,0 +1,100 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    850.0,
+                    770.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    200.0,
+                    200.0800018310547
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/Back.png",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": {
+                "SelectedActionName": "BackCamera"
+            },
+            "Enabled": true,
+            "TypeName": "UIButton"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": -250.0,
+                        "py": 860.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 20.0,
+                        "py": 860.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "UI_BackButton",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            -250.0,
+            860.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

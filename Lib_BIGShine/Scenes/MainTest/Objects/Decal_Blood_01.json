@@ -1,0 +1,38 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    0.9607843160629272,
+                    0.05098039284348488,
+                    0.0,
+                    0.8274509906768799
+                ],
+                "ComponentName": "DecalComponent",
+                "TextureFile": "T_pool0_v2_smooth.png"
+            },
+            "Enabled": true,
+            "TypeName": "DecalComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Decal_Blood_01",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            23.36166000366211,
+            1.5459036827087402,
+            -23.83250617980957
+        ],
+        "Rot": [
+            0.0,
+            270.0,
+            0.0
+        ],
+        "Scale": [
+            1.509971261024475,
+            0.9399999976158142,
+            0.5499460697174072
+        ]
+    }
+}

@@ -1,0 +1,31 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Radius": 9.0
+            },
+            "Enabled": true,
+            "TypeName": "AreaComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "SearchObject1",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            14.600000381469727,
+            0.0,
+            4.800000190734863
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

@@ -1,0 +1,316 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 8552,
+      "max": [
+        21.518474578857422,
+        21.657468795776367,
+        189.6661376953125
+      ],
+      "min": [
+        -21.563596725463867,
+        -21.23134422302246,
+        0.00051116943359375
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 102624,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 68416,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 136832,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 205248,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 273664,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 342080,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 410496,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 478912,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 547328,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 615744,
+      "componentType": 5126,
+      "count": 8552,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 44712,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "generator": "fab-model-conversion",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 178848,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 684160,
+      "byteOffset": 178848,
+      "byteStride": 8,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 205248,
+      "byteOffset": 863008,
+      "byteStride": 12,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 136832,
+      "byteOffset": 1068256,
+      "byteStride": 16,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 1205088,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/DefaultMaterial_baseColor.png"
+    },
+    {
+      "uri": "textures/DefaultMaterial_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/DefaultMaterial_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "DefaultMaterial",
+      "normalTexture": {
+        "index": 2
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "flashlightbody_DefaultMaterial_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3,
+            "TEXCOORD_1": 4,
+            "TEXCOORD_2": 5,
+            "TEXCOORD_3": 6,
+            "TEXCOORD_4": 7,
+            "TEXCOORD_5": 8,
+            "TEXCOORD_6": 9,
+            "TEXCOORD_7": 10,
+            "TEXCOORD_8": 11,
+            "TEXCOORD_9": 12
+          },
+          "indices": 13,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.02539999969303608,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02539999969303608,
+        0.0,
+        0.0,
+        -0.02539999969303608,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "831cc656a3fc460eb3577f58aefa16de.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        3.3306690738754696e-16,
+        2.6469779601696886e-23,
+        1.0,
+        0.0,
+        -2.6631610896622455e-07,
+        0.9999999999999646,
+        2.6469779601696886e-23,
+        0.0,
+        -0.9999999999999645,
+        -2.6631610896622455e-07,
+        3.3306690738754696e-16,
+        0.0,
+        94.73670196533203,
+        -0.23381486535072327,
+        0.002416786504909396,
+        1.0
+      ],
+      "name": "flashlightbody"
+    },
+    {
+      "mesh": 0,
+      "name": "flashlightbody_DefaultMaterial_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}

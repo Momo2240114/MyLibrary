@@ -1,0 +1,279 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        0.07743415981531143,
+        0.05004294589161873,
+        0.5491880774497986
+      ],
+      "min": [
+        -0.08466880768537521,
+        -4.291534239087014e-08,
+        -0.5491882562637329
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        0.9848628044128418,
+        1.0,
+        0.9861798882484436
+      ],
+      "min": [
+        -0.9848628044128418,
+        0.1656782180070877,
+        -0.9848628044128418
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        1.0,
+        0.9848628044128418,
+        0.6934080123901367,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -0.6363765001296997,
+        -0.6934080123901367,
+        1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        0.47607421875,
+        0.95654296875
+      ],
+      "min": [
+        0.2052001953125,
+        0.427978515625
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        -40.25,
+        55.90625
+      ],
+      "min": [
+        -56.46875,
+        -53.90625
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        -40.25,
+        55.90625
+      ],
+      "min": [
+        -56.46875,
+        -53.90625
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 56,
+      "max": [
+        0.99169921875,
+        0.9912109375
+      ],
+      "min": [
+        0.00806427001953125,
+        0.00806427001953125
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5125,
+      "count": 114,
+      "max": [
+        55
+      ],
+      "min": [
+        0
+      ],
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 672,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 672,
+      "byteOffset": 672,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 896,
+      "byteOffset": 1344,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 448,
+      "byteOffset": 2240,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 448,
+      "byteOffset": 2688,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 448,
+      "byteOffset": 3136,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 448,
+      "byteOffset": 3584,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 456,
+      "byteOffset": 4032,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 4488,
+      "uri": "SM_LigthCeiling02.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "T_HospitalLamps_01_A.png"
+    },
+    {
+      "uri": "T_HospitalLamps_01_RGB.png"
+    },
+    {
+      "uri": "T_HospitalLamps_01_N.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "MI_HospitalLamps_01_A",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3,
+            "TEXCOORD_1": 4,
+            "TEXCOORD_2": 5,
+            "TEXCOORD_3": 6
+          },
+          "indices": 7,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "node0",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+    "GraphicsSettings": {
+        "Bloom": {
+            "blurPasses": 4,
+            "intensity": 1.0,
+            "kawaseScale": 1.0,
+            "threshold": 1.0
+        }
+    },
+    "ObjectList": [
+        "MainCamera",
+        "Stage",
+        "light",
+        "light2",
+        "Table",
+        "Enemy"
+    ],
+    "SceneName": "MeshTestScene"
+}

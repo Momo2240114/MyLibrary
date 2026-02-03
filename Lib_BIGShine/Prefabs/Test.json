@@ -1,0 +1,79 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 0.0,
+                        "py": 0.8124375343322754,
+                        "pz": 0.0
+                    },
+                    {
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 0.0,
+                        "py": 2.9267525672912598,
+                        "pz": 0.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject_01",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            2.9267525672912598,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

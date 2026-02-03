@@ -1,0 +1,38 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ComponentName": "DecalComponent",
+                "TextureFile": "T_splat0_floor_v2.png"
+            },
+            "Enabled": true,
+            "TypeName": "DecalComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject_01",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            14.453753471374512,
+            -0.057400625199079514,
+            -5.941922664642334
+        ],
+        "Rot": [
+            89.96572875976563,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            4.0,
+            3.999765634536743,
+            0.5499911308288574
+        ]
+    }
+}

@@ -1,0 +1,114 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    600.0,
+                    600.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    150.0,
+                    150.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/Swipe.png",
+                "Visible": true,
+                "pivotType": 1
+            },
+            "Enabled": true,
+            "TypeName": "SpriteRenderer"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 90.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 2000.0,
+                        "py": 1200.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 90.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 1675.0,
+                        "py": 1675.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 0.0,
+                        "az": 90.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": 1475.0,
+                        "py": 800.0,
+                        "pz": 0.0,
+                        "sx": 1.0,
+                        "sy": 1.0,
+                        "sz": 1.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": {
+                "SelectedActionName": "SwipUI_Down"
+            },
+            "Enabled": true,
+            "TypeName": "UIButton"
+        }
+    ],
+    "Layer": 0,
+    "Name": "SwipUI_Down",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            2000.0,
+            1200.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            90.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

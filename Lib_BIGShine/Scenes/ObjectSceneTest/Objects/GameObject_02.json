@@ -1,0 +1,61 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "IsStatic": true,
+            "IsTrigger": true,
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/Object/Door/DoorFrame.gltf",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "ExitComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject_02",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            -0.28097236156463623,
+            -44.885032653808594
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.5,
+            1.5,
+            6.349999904632568
+        ]
+    }
+}

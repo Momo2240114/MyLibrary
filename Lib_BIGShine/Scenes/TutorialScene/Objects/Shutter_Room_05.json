@@ -1,0 +1,104 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "DebugPrimitiveColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.05000000074505806,
+                1.0099999904632568,
+                0.9399999976158142
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.07999999821186066,
+                1.9700000286102295,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": false
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.100000023841858,
+                "ModelName": "./Data/Model/Stage/Tutorial/SM_Shutter.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "TransformWaypoints": [
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 4.160945477060807e-10,
+                        "az": 0.0,
+                        "dur": 3.0,
+                        "ease": 3,
+                        "px": -10.0,
+                        "py": 0.3499999940395355,
+                        "pz": -2.4121763999573886e-06,
+                        "sx": 5.0,
+                        "sy": 1.1749999523162842,
+                        "sz": 1.2000000476837158
+                    },
+                    {
+                        "addflag": false,
+                        "ax": 0.0,
+                        "ay": 5.370607847332565e-10,
+                        "az": 0.0,
+                        "dur": 1.0,
+                        "ease": 5,
+                        "px": -10.0,
+                        "py": 5.5,
+                        "pz": -2.4121763999573886e-06,
+                        "sx": 5.0,
+                        "sy": 1.100000023841858,
+                        "sz": 1.2000000476837158
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "TransformDirector"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Shutter_Room_05",
+    "ParentName": "StageRoom05",
+    "Transform": {
+        "Pos": [
+            -10.0,
+            0.34999990463256836,
+            -2.4121763999573886e-06
+        ],
+        "Rot": [
+            0.0,
+            4.160945477060807e-10,
+            0.0
+        ],
+        "Scale": [
+            5.0,
+            1.1749999523162842,
+            1.2000000476837158
+        ]
+    }
+}

@@ -1,0 +1,35 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.5,
+                "ModelName": "./Data/Model/Object/Door/DoorFrame.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "ExitObject",
+    "ParentName": "StageRoom05",
+    "Transform": {
+        "Pos": [
+            -9.810699462890625,
+            0.43958255648612976,
+            -0.6522476673126221
+        ],
+        "Rot": [
+            0.0,
+            89.99995422363281,
+            0.0
+        ],
+        "Scale": [
+            1.100000023841858,
+            1.000000238418579,
+            0.9999997615814209
+        ]
+    }
+}

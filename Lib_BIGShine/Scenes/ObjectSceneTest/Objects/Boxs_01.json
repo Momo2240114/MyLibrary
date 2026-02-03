@@ -1,0 +1,44 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "GravityScale": 1.0,
+            "HalfSize": [
+                0.33000001311302185,
+                0.6700000166893005,
+                0.7099999785423279
+            ],
+            "IsStatic": true,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.019999999552965164,
+                0.0
+            ],
+            "ShapeRenderFlg": true,
+            "UseGravity": false,
+            "UsedNaviMeshSystemFlg": true
+        },
+        "Enabled": true,
+        "TypeName": "BoxCollider"
+    },
+    "Layer": 0,
+    "Name": "Boxs_01",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            23.86183738708496,
+            0.0,
+            -43.199501037597656
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

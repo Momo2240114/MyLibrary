@@ -1,0 +1,81 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 0.009999999776482582,
+                "ModelName": "./Data/Model/Object/hanging_light/scene.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 0.6979438066482544,
+                "LocalRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    -3.0,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 10.0,
+                "Type": 1
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "Easing"
+        },
+        {
+            "Data": {
+                "Active": true,
+                "BaseIntensity": 0.699999988079071,
+                "BaseRange": 10.0,
+                "EasingType": 5,
+                "IntensityMultiplier": 0.0,
+                "MaxSpeed": 5.0,
+                "MinSpeed": 0.8100000023841858,
+                "RangeMultiplier": 0.0,
+                "UseRangeBlink": false
+            },
+            "Enabled": true,
+            "TypeName": "LightBlinker"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Light_01",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            4.0,
+            5.0
+        ],
+        "Rot": [
+            0.0,
+            90.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}
