@@ -8,7 +8,8 @@
         }
     },
     "ObjectList": [
-        "MainCamera"
+        "MainCamera",
+        "GameObject"
     ],
     "SceneName": "MainScene"
 }

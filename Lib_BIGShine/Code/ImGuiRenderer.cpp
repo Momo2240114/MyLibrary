@@ -1,6 +1,10 @@
+#define IMGUI_DEFINE_MATH_OPERATORS // © ‚±‚ê‚ðÅ‰‚É’Ç‰Á
+#include "imgui.h"
+#include "imgui_internal.h" // ‚à‚µŽg‚Á‚Ä‚¢‚ê‚Î
+#include "ImGuizmo.h"
+
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
-#include "ImGuizmo.h"
 #include "ImGuiRenderer.h"
 
 
@@ -76,7 +80,7 @@ void ImGuiRenderer::NewFrame()
 
 	ImGui::NewFrame();
 
-	ImVec2 pos = ImGui::GetMainViewport()->GetWorkPos();
+	ImVec2 pos = ImGui::GetMainViewport()->WorkPos;
 	ImVec2 size = ImGui::GetIO().DisplaySize;
 	ImGuizmo::BeginFrame();
 	ImGuizmo::SetOrthographic(false);
@@ -122,7 +126,7 @@ void ImGuiRenderer::NewFrame()
 void ImGuiRenderer::RenderAll(ID3D11DeviceContext* context)
 {
 	// Rendering
-	ImGui::RenderAll();
+	ImGui::Render();
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

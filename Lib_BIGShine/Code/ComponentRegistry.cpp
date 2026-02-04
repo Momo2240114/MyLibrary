@@ -12,12 +12,12 @@
 #include "ActionSequence.h"
 #include "FovDirector.h"
 #include "TransformDirector.h"
-//#include "SpinComponent.h"
 #include "LightBlinkerComponent.h"
 #include "EasingComponent.h"
 #include "ModelAttachmentComponent.h"
 #include "ColorFilterDirector.h"
 #include "NumberSwitcher.h"
+#include "CurvePlayerComponent.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -66,7 +66,7 @@ void RegisterAllComponents()
     registry.Register<FovDirector>("FovDirector");
     registry.Register<TransformDirector>("TransformDirector");
     registry.Register<ColorFilterDirector>("ColorFilterDirector");
-    //registry.Register<SpinComponent>("SpinComponent");
+    registry.Register<CurvePlayerComponent>("CurvePlayerComponent");
     registry.Register<LightBlinkerComponent>("LightBlinker");
     registry.Register<EasingComponent>("Easing");
     registry.Register<NumberSwitcher>("NumberSwitcher");

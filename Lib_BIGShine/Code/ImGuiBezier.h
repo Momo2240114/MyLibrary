@@ -71,7 +71,7 @@ namespace ImGui
         Dummy(ImVec2(0, 3));
 
         // prepare canvas
-        const float avail = GetContentRegionAvailWidth();
+        const float avail = ImGui::GetContentRegionAvail().x;
         const float dim = ImMin(avail, 128.f);
         ImVec2 Canvas(dim, dim);
 

@@ -3,8 +3,6 @@
 #include "GameObject.h"
 #include "SpriteRenderSystem.h"
 #include "ModelRenderSystem.h"
-
-#include"NavMeshManager.h"
 #include"IScene.h"
 
 class ColliderComponent;
@@ -12,7 +10,7 @@ class BoxCollider;
 class GltfModelCommponennt;
 
 #include"RayCastManager.h"
-#include"SearchAreaManager.h"
+
 
 
 class GameObjectManager
@@ -98,7 +96,7 @@ public:
         return results;
     }
 
-    void RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderSystem modelSystem_, NavMeshRenderer* naviMeshRenderer = nullptr);
+    void RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderSystem modelSystem_);
 
     void Update(float et_);
 
@@ -133,7 +131,6 @@ public:
         ColliderComponent* colA, ColliderComponent* colB
     );
 
-    void ReBuildNaviNeshManager(NaviMeshManager* target);
 
 
     //メインカメラをセットする
@@ -171,22 +168,12 @@ public:
     // 指定したオブジェクトをプレハブとして保存
     void SaveAsPrefab(std::shared_ptr<GameObject> obj, const std::string& prefabName);
 
-    void SetNaviMeshModel(GltfModelCommponennt* modelComponent)
-    {
-        m_pNaviMeshManager->SetModel(modelComponent);
-    };
-
-    NaviMeshManager* GetNaviMeshManager()
-    {
-        return m_pNaviMeshManager.get();
-    }
-
     RayCastManager* GetRayCastManager()
     {
         return m_pRayCastManager.get();
     }
 
-    SearchAreaManager* GetSearchAreaManager();
+    //SearchAreaManager* GetSearchAreaManager();
 
     void InitializeAllComponents();
 
@@ -204,10 +191,6 @@ public:
 
     void SetShapeRenderFlg(bool f) { shapeRenderFlg = f; }
 
-    // そのまま weak_ptr のリストを返す
-    const std::vector<std::weak_ptr<GameObject>>& GetSneakObjects() const {
-        return sneakObjects;
-    }
 
 private:
     // unique name helper
@@ -233,7 +216,6 @@ private:
     // まだ Startが呼ばれていないオブジェクトのリスト
     std::vector<std::shared_ptr<GameObject>> pendingStarts;
     std::vector<std::shared_ptr<GameObject>> pendingDestroys;
-    std::vector<std::weak_ptr<GameObject>> sneakObjects;
     std::shared_ptr<GameObject> selectedObject = nullptr;
     //メインカメラを保持する
     std::shared_ptr<GameObject> m_pMainCamera;
@@ -241,10 +223,6 @@ private:
     //ナビメッシュマネージャー
     //NaviMeshManager* m_pNaviMeshManager;
     // 所有権をマネージャ側が持つ
-    std::unique_ptr<NaviMeshManager> m_pNaviMeshManager;
-
-    std::unique_ptr<SearchAreaManager> m_pSearchAreaManager;
-    
     std::unique_ptr<RayCastManager>m_pRayCastManager;
     //現在のシーン
     Scene* m_pCurrentScene;

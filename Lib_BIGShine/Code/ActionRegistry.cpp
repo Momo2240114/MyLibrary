@@ -94,9 +94,9 @@ void ActionRegistry::Call(const std::string& name)
 
     for (auto& [cat, actionMap] : actions)
     {
-        auto it = actionMap.find(name);
-        if (actionMap.count(name)) {
-            actionMap[name]();
+        auto it = actionMap.find(name); // count と [] で2回検索するより find が速い
+        if (it != actionMap.end()) {
+            if (it->second) it->second(); // 関数の中身が空（nullptr）でないかチェック
             return;
         }
     }

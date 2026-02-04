@@ -6,9 +6,6 @@
 #include"SpriteRenderSystem.h"
 #include"ShapeRenderer.h"
 
-#include"NavMeshManager.h"
-#include"NavMeshRenderer.h"
-
 class SceneGame :public Scene
 {
 public:
@@ -32,5 +29,4 @@ private:
 	ModelRenderSystem m_ModelRenderSystem;
 	SpriteRenderSystem m_SpriteRenderSystem;
 	ShapeRenderSystem m_ShapeRenderSystem;
-	std::unique_ptr<NavMeshRenderer> m_pNaviMeshRenderer;
 };

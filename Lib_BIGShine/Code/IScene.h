@@ -3,8 +3,6 @@
 
 #include "SceneManager.h"
 
-#include"NavMeshManager.h"
-
 #include "ActionRegistry.h"
 
 // インターフェイスシーン
@@ -26,11 +24,6 @@ public:
 	// GUI描画処理
 	virtual void DrawGUI() {}
 
-	virtual NaviMeshManager* GetNaviMeshManager()
-	{
-		return m_pNaviMeshManager.get();
-	}
-
 	//準備完了しているか
 	bool IsReady()const { return ready; }
 
@@ -48,7 +41,6 @@ protected:
 	bool ready;
 
 	std::shared_ptr<ActionRegistry> actionRegistry;
-	std::unique_ptr<NaviMeshManager> m_pNaviMeshManager;
 
 	std::string sceneName;
 

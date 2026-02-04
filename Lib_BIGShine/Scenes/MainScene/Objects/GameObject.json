@@ -3,13 +3,47 @@
         {
             "Data": {
                 "LocalScale": 1.0,
-                "ModelName": "./Data/Model/Stage/SM_TitleRoom.gltf",
+                "ModelName": "./Data/Model/Enemy/BookHeadMonster.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "UsedNaviMeshSystemFlg": false
             },
             "Enabled": true,
             "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "animationBlendSeconds": 1.0,
+                "customAnims": [],
+                "layers": [
+                    {
+                        "IsRootMotion": false,
+                        "animationIndex": 4,
+                        "blendMode": 0,
+                        "currentTime": 1.6489660739898682,
+                        "customAnimIndex": -1,
+                        "isCustomMode": false,
+                        "loop": true,
+                        "nodeMask": [],
+                        "playbackSpeed": 1.0,
+                        "weight": 1.0
+                    }
+                ],
+                "playbackSpeed": 1.0,
+                "poseLibrary": []
+            },
+            "Enabled": true,
+            "TypeName": "AnimationController"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "CurvePlayerComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "TypeName": "CurveAssetComponent"
         }
     ],
     "Layer": 0,
@@ -17,19 +51,19 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
+            6.192776203155518,
             0.0,
-            -0.5,
             0.0
         ],
         "Rot": [
             0.0,
-            0.0,
+            89.99995422363281,
             0.0
         ],
         "Scale": [
+            0.9999997615814209,
             1.0,
-            1.0,
-            1.0
+            0.9999997615814209
         ]
     }
 }

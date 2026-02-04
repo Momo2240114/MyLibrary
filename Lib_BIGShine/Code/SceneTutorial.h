@@ -5,9 +5,6 @@
 #include"SpriteRenderSystem.h"
 #include"ShapeRenderer.h"
 
-#include"NavMeshManager.h"
-#include"NavMeshRenderer.h"
-
 #include<memory>
 
 class PlayerComponent;
@@ -31,7 +28,6 @@ enum  TutorialState
 class SceneTutorial :public Scene
 {
 public:
-
 	SceneTutorial()
 	{
 		std::string name = "TutorialScene";
@@ -50,7 +46,6 @@ private:
 	ModelRenderSystem m_ModelRenderSystem;
 	SpriteRenderSystem m_SpriteRenderSystem;
 	ShapeRenderSystem m_ShapeRenderSystem;
-	std::unique_ptr<NavMeshRenderer> m_pNaviMeshRenderer;
 
 	
 	//int m_Step = 0;

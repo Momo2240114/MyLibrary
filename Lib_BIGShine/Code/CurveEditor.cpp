@@ -102,46 +102,66 @@ ImVec2 MapToScreenNormalized(const CurveKey& key, ImVec2 origin, ImVec2 size)
     return ImVec2(x, y);
 }
 
-void CurveEditor::DrawGraph(CurveData& curve)
+void CurveEditor::DrawGraph(CurveData & curve)
 {
-    // 折りたたみ可能ヘッダー
-    if (ImGui::CollapsingHeader("Curve Graph"))
-    {
-        // 正規化ボタン
-        if (ImGui::Button("Normalize AllKeys"))
-        {
-            if (!curve.keys.empty())
-            {
-                // 時間の最大値を取得
-                float maxTime = 0.0f;
-                float maxValue = 0.0f;
-                for (const auto& k : curve.keys)
-                {
-                    if (k.time > maxTime) maxTime = k.time;
-                    if (fabsf(k.value) > maxValue) maxValue = fabsf(k.value);
-                }
-                if (maxTime > 0.0f)
-                {
-                    for (auto& k : curve.keys)
-                        k.time /= maxTime;
-                }
-                if (maxValue > 0.0f)
-                {
-                    for (auto& k : curve.keys)
-                        k.value /= maxValue;
-                }
-            }
-        }
+    // ウィンドウの余白をゼロにして開始
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::Begin("CurveEditor", nullptr, ImGuiWindowFlags_NoScrollbar);
 
-        // 横幅をウィンドウの利用可能幅に合わせ、縦は同じ値で正方形
-        ImVec2 avail = ImGui::GetContentRegionAvail();
-        ImVec2 canvasSize(avail.x, avail.x); // 横幅に合わせて縦も同じに
+    ImVec2 avail = ImGui::GetContentRegionAvail();
+    static CurveEditorDelegate delegate(&curve);
 
-        // ImCurveEdit による直接編集
-        static CurveEditorDelegate delegate(&curve);
-        ImCurveEdit::Edit(delegate, canvasSize, 12345);
-    }
+    // 1. まずエディターを描画（ここで内部のサイズが確定する）
+    ImCurveEdit::Edit(delegate, avail, 12345);
+
+    // 2. 「直前に描画されたアイテム（グラフ）」の実際の四角形範囲を取得
+    ImVec2 graphMin = ImGui::GetItemRectMin();
+    ImVec2 graphMax = ImGui::GetItemRectMax();
+    ImVec2 graphSize = ImGui::GetItemRectSize();
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    // 3. 【赤い線】グラフの「描画領域としての右端」に引く
+    // ImCurveEdit の仕様上、右端にマージンがある場合は graphMax.x より少し内側になります
+    // Delegate の Max.x が 1.0 なら、以下の計算でピッタリ合います
+    float endX = graphMax.x;
+
+    draw_list->AddLine(
+        ImVec2(endX, graphMin.y),
+        ImVec2(endX, graphMax.y),
+        IM_COL32(255, 0, 0, 255), 2.0f
+    );
+
+    // 4. 【白い線】中央（1.0倍速）
+    float midY = graphMin.y + graphSize.y * 0.5f;
+    draw_list->AddLine(
+        ImVec2(graphMin.x, midY),
+        ImVec2(graphMax.x, midY),
+        IM_COL32(255, 255, 255, 100), 1.0f
+    );
+
+    ImGui::End();
+    ImGui::PopStyleVar();
 }
+
+    //if (ImGui::Button("Fit to 1.0s Range")) {
+    //    if (!curve.keys.empty()) {
+    //        float maxT = curve.keys.back().time;
+    //        if (maxT > 0) {
+    //            for (auto& k : curve.keys) k.time /= maxT;
+    //        }
+    //    }
+    //}
+
+    //// 横幅をウィンドウの利用可能幅に合わせ、縦は同じ値で正方形
+    //ImVec2 avail = ImGui::GetContentRegionAvail();
+    //// 縦幅を 300~400 くらいに固定すると、非常に見やすくなります
+    //ImVec2 canvasSize(avail.x, 350.0f);
+
+    //// ImCurveEdit による直接編集
+    //static CurveEditorDelegate delegate(&curve);
+    //ImCurveEdit::Edit(delegate, canvasSize, 12345);
+//}
 
 void CurveEditor::DrawBezierEditor(CurveData& curve)
 {

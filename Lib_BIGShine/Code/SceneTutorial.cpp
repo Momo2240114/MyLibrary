@@ -3,7 +3,6 @@
 #include"GraphicsDeviceManager.h"
 #include"CameraComponent.h"
 #include"InputComponent.h"
-#include"PlayerComponent.h"
 #include"BoxCollider.h"
 #include"CapsuleCollider.h"
 
@@ -21,7 +20,6 @@
 
 void SceneTutorial::Finalize()
 {
-	m_pNaviMeshRenderer.reset();
 	m_SpriteRenderSystem.Finalize();
 	GameObjectManager::Instance().Clear();
 	actionRegistry.reset();
@@ -39,8 +37,6 @@ void SceneTutorial::Initialize()
 
 	//GameObjectManager::Instance().Initialize();
 
-	auto navi = GameObjectManager::Instance().GetNaviMeshManager();
-
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
 	MouseInput::Instance().SetDebugFlag(true);
@@ -52,10 +48,6 @@ void SceneTutorial::Initialize()
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 	m_ShapeRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
-
-
-
-	//m_pNaviMeshRenderer = std::make_unique<NavMeshRenderer>(GraphicsDeviceManager::Instance().GetDevice());
 
 	std::weak_ptr<GameObject>PlayerGameObject = GameObjectManager::Instance().Find("MainCamera");
 	AudioManager::Instance().PlayBGM(BGM_TUTORIAL);

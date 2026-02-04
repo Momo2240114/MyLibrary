@@ -55,6 +55,20 @@ public:
 
     bool HasAction(const std::string& name);
 
+    // カテゴリが存在するかチェック
+    bool HasCategory(const std::string& category) const {
+        return actions.find(category) != actions.end();
+    }
+
+    // 特定のカテゴリ内にアクションが存在するかチェック（これも便利です）
+    bool HasActionInCategory(const std::string& category, const std::string& actionName) const {
+        auto catIt = actions.find(category);
+        if (catIt != actions.end()) {
+            return catIt->second.find(actionName) != catIt->second.end();
+        }
+        return false;
+    }
+
     void Clear()
     {
         if(this)
