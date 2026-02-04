@@ -404,6 +404,66 @@ void ShowNodeTree(GltfModelCommponennt::Node* node, const std::vector<GltfModelC
     }
 }
 
+// label         : 表示するラベル（"On Start" など）
+// currentAction : 保存先の std::string（ev.actionStart など）
+// owner         : GameObject のポインタ（ローカルアクション取得用）
+void DrawActionCombo(const char* label, std::string& currentAction, std::shared_ptr<GameObject> owner)
+{
+    // IDを分けるための仕組み
+    ImGui::PushID(label);
+
+    // 現在選択されているアクションがどれかを表示
+    std::string preview = currentAction.empty() ? "(None)" : currentAction;
+
+    if (ImGui::BeginCombo(label, preview.c_str()))
+    {
+        // 1. 選択解除
+        if (ImGui::Selectable("(None)", currentAction.empty())) { currentAction = ""; }
+        ImGui::Separator();
+
+        // 2. タブまたは小さなボタンで「Local / Global」を切り替える
+        // ここでは簡単に、ツリー形式（Selectableの階層）で分けて選ばせます
+
+        // --- LOCAL 選択セクション ---
+        if (owner) {
+            if (ImGui::TreeNodeEx("Local Actions", ImGuiTreeNodeFlags_DefaultOpen)) {
+                for (auto& cat : owner->localRegistry.GetCategories()) {
+                    if (ImGui::BeginMenu(cat.c_str())) {
+                        for (auto& name : owner->localRegistry.GetActionNames(cat)) {
+                            if (ImGui::Selectable(name.c_str(), currentAction == name)) {
+                                currentAction = name;
+                                ImGui::CloseCurrentPopup();
+                            }
+                        }
+                        ImGui::EndMenu();
+                    }
+                }
+                ImGui::TreePop();
+            }
+        }
+
+        // --- GLOBAL 選択セクション ---
+        if (ImGui::TreeNodeEx("Global Actions", ImGuiTreeNodeFlags_DefaultOpen)) {
+            auto& globalReg = ActionRegistry::Instance();
+            for (auto& cat : globalReg.GetCategories()) {
+                if (ImGui::BeginMenu(cat.c_str())) {
+                    for (auto& name : globalReg.GetActionNames(cat)) {
+                        if (ImGui::Selectable(name.c_str(), currentAction == name)) {
+                            currentAction = name;
+                            ImGui::CloseCurrentPopup();
+                        }
+                    }
+                    ImGui::EndMenu();
+                }
+            }
+            ImGui::TreePop();
+        }
+
+        ImGui::EndCombo();
+    }
+
+    ImGui::PopID();
+}
 
 void AnimationController::Gui()
 {
@@ -664,7 +724,7 @@ void AnimationController::Gui()
                     ImGui::Separator();
 
                     // POPな背景色付きの編集エリア
-                    ImGui::BeginChild("EditProperties", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+                    ImGui::BeginChild("EditProperties", ImVec2(0, 0), false, ImGuiChildFlags_AlwaysUseWindowPadding);
 
                     model->ShowNodePoseEditor(nodePose); // 既存の関数を利用
 
@@ -791,7 +851,7 @@ void AnimationController::Gui()
             activeLayer.currentTime *= timeScaleFactor;
         }
         ImGui::Separator();
-        if (ImGui::IsItemHovered()) 
+        if (ImGui::IsItemHovered())
             ImGui::SetTooltip("Multiply all keyframe times and total duration by the scale factor.");
 
         ImGui::Separator();
@@ -831,257 +891,94 @@ void AnimationController::Gui()
     }
     break;
     case EditorMode::EventSetting:
-        // -------------------
-        // レイヤー追加ボタン
-        // -------------------
-        if (ImGui::Button("Add Layer"))
-        {
-            layers.emplace_back();
+   {
+        // --- 1. ズーム倍率と選択レイヤーの取得 ---
+        static float timelineZoom = 100.0f;
+        auto& layer = layers[globalSelectedLayer];
+
+        // タイムラインの長さを確定
+        float animationLength = 10.0f;
+        if (!layer.isCustomMode && model && layer.animationIndex >= 0) {
+            animationLength = model->GetAnimations()[layer.animationIndex].secondsLength;
+        } 
+        else if (layer.isCustomMode && !customAnims.empty()) {
+            animationLength = customAnims[layer.customAnimIndex].duration;
         }
 
-        ImGui::Separator();
-
-        // -------------------
-        // レイヤー一覧（選択可能）
-        // -------------------
-        static int selectedLayer = -1;
-        ImGui::Text("Animation Layers");
-        for (size_t i = 0; i < layers.size(); ++i)
+        // --- 2. 独立したシーケンサーウィンドウ ---
+        ImGui::SetNextWindowSize(ImVec2(900, 400), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Timeline Sequencer", nullptr, ImGuiWindowFlags_HorizontalScrollbar))
         {
-            ImGui::PushID((int)i);
-            bool sel = (selectedLayer == (int)i);
-            if (ImGui::Selectable(("Layer " + std::to_string(i)).c_str(), sel))
-                selectedLayer = (int)i;
+            // --- A. ウィンドウ上部の操作ツールバー ---
+            ImGui::BeginGroup();
+            ImGui::SetNextItemWidth(150);
+            ImGui::DragFloat("Zoom", &timelineZoom, 1.0f, 10.0f, 1000.0f, "%.0f px/s");
+            ImGui::SameLine();
 
-            ImGui::PopID();
-        }
-
-        ImGui::Separator();
-
-        // -------------------
-        // コントローラ全体の再生制御（秒単位で統一）
-        // -------------------
-        ImGui::Text("Controller");
-        ImGui::Checkbox("Play Animations", &animationPlaying);
-        ImGui::SameLine();
-        ImGui::Text("(Global)");
-
-
-        ImGui::DragFloat("Global Playback Speed", &playbackSpeed, 0.01f, 0.01f, 10.0f);
-
-        ImGui::Separator();
-
-        // -------------------
-        // レイヤーごとの設定
-        // -------------------
-        for (size_t i = 0; i < layers.size(); ++i)
-        {
-            auto& layer = layers[i];
-            ImGui::PushID((int)i);
-
-            if (ImGui::TreeNode(("Layer " + std::to_string(i)).c_str()))
-            {
-                // Weight & Loop
-                ImGui::SliderFloat("Weight", &layer.weight, 0.0f, 1.0f);
-                ImGui::Checkbox("Loop", &layer.loop);
-
-                // 個別再生速度（レイヤー単位）
-                ImGui::DragFloat("Controller Time (sec)", &layer.currentTime, 0.01f, 0.0f, 1000.0f);
-                ImGui::DragFloat("Layer Playback Speed", &layer.playbackSpeed, 0.01f, 0.01f, 10.0f);
-
-                if (model)
-                {
-                    auto& anims = model->GetAnimations();
-                    if (!anims.empty())
-                    {
-                        // 安全に名前を保持
-                        static std::vector<std::string> animNameStorage;
-                        animNameStorage.clear();
-                        for (size_t idx = 0; idx < anims.size(); ++idx)
-                        {
-                            const auto& a = anims[idx];
-                            if (a.name.empty())
-                                animNameStorage.push_back("Animation" + std::to_string(idx));
-                            else
-                                animNameStorage.push_back(a.name);
-                        }
-
-                        std::vector<const char*> animNames;
-                        animNames.reserve(animNameStorage.size());
-                        for (auto& s : animNameStorage)
-                            animNames.push_back(s.c_str());
-
-                        if (layer.animationIndex < 0) layer.animationIndex = 0;
-
-                        ImGui::PushID((int)i);
-                        if (ImGui::Combo("Animation", &layer.animationIndex, animNames.data(), (int)animNames.size()))
-                        {
-                            layer.currentTime = currentTime * layer.playbackSpeed;
-                        }
-                        ImGui::PopID();
-
-                        // 選択中のアニメーション名
-                        ImGui::Text("Selected: %s", anims[layer.animationIndex].name.empty()
-                            ? animNameStorage[layer.animationIndex].c_str()
-                            : anims[layer.animationIndex].name.c_str());
-                    }
-                    else
-                    {
-                        ImGui::TextDisabled("Model has no animations");
-                    }
-                }
-                // 削除ボタン
-                ImGui::SameLine();
-                if (ImGui::Button("Delete Layer"))
-                {
-                    layers.erase(layers.begin() + i);
-                    ImGui::TreePop();
-                    ImGui::PopID();
-                    break; // iterator invalidated
-                }
-
-                ImGui::TreePop();
+            if (ImGui::Button("+ Add Event", ImVec2(100, 0))) {
+                layer.eventTrack.AddEvent(EventType::Generic, "New Event", layer.currentTime, layer.currentTime + 1.0f, 0xFFFF00FF);
             }
-
-            ImGui::PopID();
-        }
-
-        ImGui::Separator();
-
-        // -------------------
-        // 選択中レイヤーのイベント表示（下部ウィンドウ）
-        // -------------------
-        if (selectedLayer >= 0 && selectedLayer < (int)layers.size())
-        {
-            auto& layer = layers[selectedLayer];
-
-            // Compute animationLengthSeconds for this layer (from model if available)
-            float animationLength = 10.0f; // fallback
-            if (model && layer.animationIndex >= 0 && layer.animationIndex < (int)model->GetAnimations().size())
-                animationLength = model->GetAnimations()[layer.animationIndex].secondsLength;
-
-            // Event Window
-            ImGui::Begin("EventWindow");
-
-            // Pass controller currentTime (seconds) to sequencer so slider & line sync
-            bool expanded = true;
-            int selectedEvent = -1;
-            float firstVisibleTime = 0.0f;
-
-            // DrawSequencer: expects seconds-based currentTime pointer, etc.
-            // Here we pass address of controller currentTime so the sequencer shows controller position.
-            layer.eventTrack.DrawSequencer(&layer.currentTime, &expanded, &layer.selectedEvent, &firstVisibleTime, animationLength);
-
-            // 選択イベントの編集
-            if (layer.selectedEvent >= 0)
-            {
-                auto& ev = layer.eventTrack.GetEvent(layer.selectedEvent);
-
-                // 表示用バッファ（Label編集は残す場合）
-                static char editLabel[128];
-                static int lastSelectedEvent = -1;
-
-                if (layer.selectedEvent != lastSelectedEvent)
-                {
-                    strncpy_s(editLabel, ev.label.c_str(), sizeof(editLabel));
-                    lastSelectedEvent = layer.selectedEvent;
-                }
-
-                ImGui::Separator();
-                ImGui::Text("Edit Selected Event");
-
-                // ラベルは編集可能
-                ImGui::InputText("Label", editLabel, sizeof(editLabel));
-                ev.label = editLabel; // 即時反映
-
-                // Start / End は表示のみ
-                ImGui::Text("Start: %.3f s", ev.startTime);
-                ImGui::Text("End  : %.3f s", ev.endTime);
-
-                // Type は変更可能
-                static const char* const EventTypeNames[] = { "Generic","Animation","Camera","Sound","UI","Script" };
-                int typeValue = (int)ev.type;
-                if (ImGui::Combo("Type", &typeValue, EventTypeNames, IM_ARRAYSIZE(EventTypeNames)))
-                    ev.type = (EventType)typeValue;
-
-                // 削除ボタン
-                if (ImGui::Button("Delete Selected Event"))
-                {
-                    layer.eventTrack.DeleteEvent(layer.selectedEvent);
-                    layer.selectedEvent = -1;
-                }
-            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("| Layer: %d | Time: %.3fs / %.3fs", globalSelectedLayer, layer.currentTime, animationLength);
+            ImGui::EndGroup();
 
             ImGui::Separator();
 
-            static char addLabel[64] = "NewEvent";
-            static float addStart = 0.0f;
-            static float addEnd = 1.0f;
-            static int selectedEventType = 0;  // 追加したいイベントタイプ
+            // --- B. シーケンサー本体の描画 ---
+            bool expanded = true;
+            float firstVisibleTime = 0.0f;
+            // pixelsPerSecondにtimelineZoomを適用
+            layer.eventTrack.DrawSequencer(&layer.currentTime, &expanded, &layer.selectedEvent, &firstVisibleTime, animationLength,gameObject.lock());
 
-            // イベント名配列（この .cpp 内で有効）
-            static const char* const EventTypeNames[] = {
-                "Generic",
-                "Animation",
-                "Camera",
-                "Sound",
-                "UI",
-                "Script"
-            };
-
-            // New event addition (seconds)
-            ImGui::InputText("Label", addLabel, sizeof(addLabel));
-            ImGui::InputFloat("Start", &addStart);
-            ImGui::InputFloat("End", &addEnd);
-
-            // EventType 選択 UI
-            ImGui::Combo("Type", &selectedEventType, EventTypeNames, IM_ARRAYSIZE(EventTypeNames));
-
-            if (ImGui::Button("Add Event"))
+            // --- C. ウィンドウ下部のイベント編集エリア (イベント選択時のみ表示) ---
+            if (layer.selectedEvent >= 0)
             {
-                if (addEnd >= addStart)
-                {
-                    layer.eventTrack.AddEvent(
-                        static_cast<EventType>(selectedEventType), // ← 選択したタイプ
-                        addLabel,
-                        addStart,
-                        addEnd,
-                        0xFFFF00FF
-                    );
+                ImGui::Separator();
+                auto& ev = layer.eventTrack.GetEvent(layer.selectedEvent);
 
-                    // reset
-                    addStart = addEnd;
-                    strcpy_s(addLabel, "NewEvent");
+                // 編集エリアを2カラムに分割
+                ImGui::Columns(2, "EventEditColumns", false);
+                ImGui::SetColumnWidth(0, 400); // アクション選択側を少し広く
+
+                // --- 左カラム: 3つのタイミング別アクション設定 ---
+                ImGui::TextColored(ImVec4(1, 1, 0, 1), "Action Triggers:");
+
+                // ヘルパー関数を使って3つ並べる（gameObject.lock() を owner として渡す）
+                auto owner = gameObject.lock();
+                DrawActionCombo("On Start ", ev.actionStart, owner);
+                DrawActionCombo("On Update", ev.actionUpdate, owner);
+                DrawActionCombo("On End   ", ev.actionEnd, owner);
+
+                ImGui::NextColumn();
+
+                // --- 右カラム: 時間・色・削除 ---
+                ImGui::TextColored(ImVec4(1, 1, 0, 1), "Event Settings:");
+                ImGui::SetNextItemWidth(-1);
+                ImGui::DragFloatRange2("Duration", &ev.startTime, &ev.endTime, 0.01f, 0.0f, animationLength, "Start: %.2fs", "End: %.2fs");
+
+                ImGui::Spacing();
+                ImGui::ColorEdit4("Bar Color", (float*)&ev.color);
+
+                ImGui::Spacing();
+                if (ImGui::Button("Delete Selected Event", ImVec2(-1, 25))) {
+                    layer.eventTrack.DeleteEvent(layer.selectedEvent);
+                    layer.selectedEvent = -1;
                 }
+
+                ImGui::Columns(1);
+            }
+            else
+            {
+                ImGui::TextDisabled("Click an event to edit properties.");
             }
 
             ImGui::End();
         }
 
-        // -------------------
-        // Optional: quick sync button to copy controller time into selected layer
-        // -------------------
-        ImGui::Separator();
-        if (selectedLayer >= 0 && selectedLayer < (int)layers.size())
-        {
-            if (!animationPlaying)
-            {
-                if (ImGui::Button("Sync Selected Layer Time -> Controller"))
-                {
-                    currentTime = layers[selectedLayer].currentTime;
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Sync Controller Time -> Selected Layer"))
-                {
-                    layers[selectedLayer].currentTime = currentTime;
-                }
-            }
-            else
-            {
-                ImGui::TextDisabled("Stop playback to sync times manually.");
-            }
-        }
+        // メインウィンドウ側には何も表示しないか、簡単な案内のみ
+        ImGui::Text("Sequencer is open in a separate window.");
         break;
+    }
     }
     if (globalSelectedLayer >= 0 && globalSelectedLayer < (int)layers.size())
     {

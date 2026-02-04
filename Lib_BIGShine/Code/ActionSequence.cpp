@@ -1,24 +1,39 @@
 #include "ActionSequence.h"
-#include "ActionRegistry.h"
+
+#include "GameObject.h"
 
 void ActionSequence::Start()
 {
     RegisterSequence("");
 }
+
 void ActionSequence::Update(float et)
 {
+    auto owner = gameObject.lock();
     for (auto it = pendingActions.begin(); it != pendingActions.end(); ) {
         it->timer -= et;
         if (it->timer <= 0.0f) {
-            // 時間が来たら実行
-            ActionRegistry::Instance().Call(it->actionName);
-            it = pendingActions.erase(it); // 実行したのでリストから削除
+
+            bool executed = false;
+            // 1. まず自分のLocalRegistryを探す
+            if (owner && owner->localRegistry.HasAction(it->actionName)) {
+                owner->localRegistry.Call(it->actionName);
+                executed = true;
+            }
+
+            // 2. なければGlobalを探す
+            if (!executed) {
+                ActionRegistry::Instance().Call(it->actionName);
+            }
+
+            it = pendingActions.erase(it);
         }
         else {
             ++it;
         }
     }
 }
+
 
 void ActionSequence::StartSequence(int index)
 {
@@ -58,17 +73,30 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName)
 
 void ActionSequence::Gui()
 {
-    auto& reg = ActionRegistry::Instance();
-    auto categories = reg.GetCategories();
+    auto& globalReg = ActionRegistry::Instance();
+    auto owner = gameObject.lock();
+
+    // --- 追加: カテゴリリストの構築 (Local と Global を統合) ---
+    struct CategoryEntry { std::string name; bool isLocal; };
+    std::vector<CategoryEntry> allCategories;
+
+    // 1. Local カテゴリを優先的に追加
+    if (owner) {
+        for (const auto& cat : owner->localRegistry.GetCategories()) {
+            allCategories.push_back({ cat, true });
+        }
+    }
+    // 2. Global カテゴリを追加
+    for (const auto& cat : globalReg.GetCategories()) {
+        allCategories.push_back({ cat, false });
+    }
 
     for (int s = 0; s < (int)sequences.size(); ++s) {
         ImGui::PushID(s);
-
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap;
 
         if (ImGui::CollapsingHeader(sequences[s].name.empty() ? "Unnamed Sequence" : sequences[s].name.c_str(), nullptr, flags))
         {
-
             // --- 1. 名前入力 ---
             char buf[64];
             strcpy_s(buf, sequences[s].name.c_str());
@@ -87,13 +115,15 @@ void ActionSequence::Gui()
                 ImGui::PushID(i);
                 auto& ref = sequences[s].actions[i];
 
-                // A. カテゴリ選択
-                ImGui::SetNextItemWidth(120);
+                // A. カテゴリ選択 (Local/Global を判別表示)
+                ImGui::SetNextItemWidth(160); // プレフィックス分少し広めに
                 std::string catDisp = ref.category.empty() ? "Category" : ref.category;
                 if (ImGui::BeginCombo("##cat", catDisp.c_str())) {
-                    for (const auto& cat : categories) {
-                        if (ImGui::Selectable(cat.c_str(), ref.category == cat)) {
-                            ref.category = cat;
+                    for (const auto& entry : allCategories) {
+                        // ラベルに [L] や [G] を付けて区別する
+                        std::string label = (entry.isLocal ? "[L] " : "[G] ") + entry.name;
+                        if (ImGui::Selectable(label.c_str(), ref.category == entry.name)) {
+                            ref.category = entry.name;
                             ref.actionName = ""; // リセット
                         }
                     }
@@ -102,12 +132,21 @@ void ActionSequence::Gui()
 
                 ImGui::SameLine();
 
-                // B. アクション選択（カテゴリが選ばれている場合のみ実行）
+                // B. アクション選択
                 ImGui::SetNextItemWidth(200);
                 if (!ref.category.empty()) {
                     std::string actDisp = ref.actionName.empty() ? "Select Action" : ref.actionName;
                     if (ImGui::BeginCombo("##act", actDisp.c_str())) {
-                        auto actionNames = reg.GetActionNames(ref.category);
+
+                        // --- 修正: 選択されたカテゴリが Local か Global かを HasCategory で判断 ---
+                        std::vector<std::string> actionNames;
+                        if (owner && owner->localRegistry.HasCategory(ref.category)) {
+                            actionNames = owner->localRegistry.GetActionNames(ref.category);
+                        }
+                        else {
+                            actionNames = globalReg.GetActionNames(ref.category);
+                        }
+
                         for (const auto& name : actionNames) {
                             if (ImGui::Selectable(name.c_str(), ref.actionName == name)) {
                                 ref.actionName = name;
@@ -117,7 +156,6 @@ void ActionSequence::Gui()
                     }
                 }
                 else {
-                    // カテゴリ未選択時はプレースホルダーを表示（クリック不可）
                     ImGui::TextDisabled("(Select Category First)");
                 }
 
@@ -129,9 +167,7 @@ void ActionSequence::Gui()
 
                 ImGui::Text("delay");
                 ImGui::SameLine();
-                if (ImGui::DragFloat("##delay", &ref.delay, 0.1f, 0.0f, 100.0f)) {
-                    // 値の変更を即時反映（必要に応じて）
-                }
+                ImGui::DragFloat("##delay", &ref.delay, 0.1f, 0.0f, 100.0f);
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Execution delay (seconds)");
 
                 ImGui::PopID();
@@ -142,8 +178,8 @@ void ActionSequence::Gui()
             }
 
             if (ImGui::Button("Register & Play", ImVec2(-1, 25))) {
-                RegisterSequence(""); // 最新の状態を登録
-                StartSequence(s);    // インデックス 's' のシーケンスを開始
+                RegisterSequence("");
+                StartSequence(s);
             }
         }
         ImGui::Separator();
@@ -154,7 +190,6 @@ void ActionSequence::Gui()
         sequences.push_back(SequenceData());
     }
 }
-
 void ActionSequence::Serialize(nlohmann::json& j) const {
     nlohmann::json seqArray = nlohmann::json::array();
     for (const auto& seq : sequences) {

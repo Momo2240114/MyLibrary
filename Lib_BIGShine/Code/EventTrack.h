@@ -25,6 +25,11 @@ struct EventItem
     unsigned int color = 0xFFFFFFFF;   // UI 表示用
     std::string label;                 // 表示名（任意）
   
+    // タイミングごとに違う名前を保存できるようにする
+    std::string actionStart;
+    std::string actionUpdate;
+    std::string actionEnd;
+
     // イベントの状態管理用
     bool started = false;
     bool ended = false;
@@ -36,22 +41,16 @@ struct EventItem
     std::function<void(EventItem&)> onEnd;
 };
 
+class GameObject;
+
 class EventTrack
 {
 public:
     EventTrack(const std::string& name = "", EventType defaultType = EventType::Generic);
 
-    //// 現在時刻に応じてイベントを処理
-    //void UpdateEvents(float currentTime);
-    //// 再生リセット（ループや停止用）
-    //void ResetEvents()
-    //{
-    //    for (auto& ev : events)
-    //    {
-    //        ev.started = false;
-    //        ev.ended = false;
-    //    }
-    //}
+    void Update(float currentTime, std::shared_ptr<GameObject> owner);
+    // 共通の実行ヘルパー
+    void Execute(const std::string& name, std::shared_ptr<GameObject> owner);
 
     // イベント操作
     void AddEvent(EventType type, const std::string& label, float start, float end, unsigned int color);
@@ -69,7 +68,8 @@ public:
         bool* expanded,
         int* selectedEntry,
         float* firstVisibleTime,
-        float lengthSeconds
+        float lengthSeconds,
+        std::shared_ptr<GameObject> owner
     );
     
 
@@ -94,6 +94,9 @@ private:
     // 編集
     int editingEntry = -1;
     int editingPart = 0;
+
+    float zoomScale = 100.0f; // 1秒あたりのピクセル数 (pixelsPerSecond)
+    float labelWidth = 120.0f; // 左側のラベル幅も可変にすると便利
 
     EventItem clipboard;
 };

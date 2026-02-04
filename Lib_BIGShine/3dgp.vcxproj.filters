@@ -244,61 +244,7 @@
     <ClCompile Include="Code\RegisterAllComponents.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourAlloc.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourAssert.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourCommon.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourNavMesh.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourNavMeshBuilder.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourNavMeshQuery.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Detour\Source\DetourNode.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DebugUtils\Source\DebugDraw.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DebugUtils\Source\DetourDebugDraw.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DebugUtils\Source\RecastDebugDraw.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="External\recastnavigation\DebugUtils\Source\RecastDump.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourCrowd\Source\DetourCrowd.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourCrowd\Source\DetourLocalBoundary.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourCrowd\Source\DetourObstacleAvoidance.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourCrowd\Source\DetourPathCorridor.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourCrowd\Source\DetourPathQueue.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourCrowd\Source\DetourProximityGrid.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourTileCache\Source\DetourTileCacheBuilder.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DetourTileCache\Source\DetourTileCache.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="External\recastnavigation\Recast\Source\Recast.cpp">
@@ -334,12 +280,6 @@
     <ClCompile Include="External\recastnavigation\Recast\Source\RecastRegion.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Code\NavMeshRenderer.cpp">
-      <Filter>ソースファイル\NavMesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\NavMeshManager.cpp">
-      <Filter>ソースファイル\NavMesh</Filter>
-    </ClCompile>
     <ClCompile Include="Code\BloomSystem.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
@@ -362,15 +302,6 @@
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\ActionRegistry.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\BehaviorData.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\BehaviorTree.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\NodeBase.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\RandomHelper.cpp">
@@ -431,6 +362,15 @@
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\Transform.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\CurvePlayerComponent.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Curve.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -657,67 +597,7 @@
     <ClInclude Include="Code\PlayerSlidingState.h">
       <Filter>ヘッダーファイル\StateMachine</Filter>
     </ClInclude>
-    <ClInclude Include="External\recastnavigation\DebugUtils\Include\DebugDraw.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourAlloc.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourAssert.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourCommon.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourMath.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourNavMesh.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourNavMeshBuilder.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourNavMeshQuery.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourNode.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\Detour\Include\DetourStatus.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DebugUtils\Include\DetourDebugDraw.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DebugUtils\Include\RecastDebugDraw.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
     <ClInclude Include="External\recastnavigation\DebugUtils\Include\RecastDump.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourCrowd\Include\DetourCrowd.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourCrowd\Include\DetourLocalBoundary.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourCrowd\Include\DetourObstacleAvoidance.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourCrowd\Include\DetourPathCorridor.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourCrowd\Include\DetourPathQueue.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourCrowd\Include\DetourProximityGrid.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourTileCache\Include\DetourTileCache.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="External\recastnavigation\DetourTileCache\Include\DetourTileCacheBuilder.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="External\recastnavigation\Recast\Include\Recast.h">
@@ -728,18 +608,6 @@
     </ClInclude>
     <ClInclude Include="External\recastnavigation\Recast\Include\RecastAssert.h">
       <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\NavMeshManager.h">
-      <Filter>ヘッダーファイル\NavMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\NavMeshRenderer.h">
-      <Filter>ヘッダーファイル\NavMesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\NodeBase.h">
-      <Filter>ヘッダーファイル\BehaviorTree</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\BehaviorTree.h">
-      <Filter>ヘッダーファイル\BehaviorTree</Filter>
     </ClInclude>
     <ClInclude Include="Code\BloomSystem.h">
       <Filter>ヘッダーファイル</Filter>
@@ -773,9 +641,6 @@
     </ClInclude>
     <ClInclude Include="Code\ActionRegistry.h">
       <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\BehaviorData.h">
-      <Filter>ソースファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\RandomHelper.h">
       <Filter>ヘッダーファイル</Filter>

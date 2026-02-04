@@ -3,7 +3,6 @@
 #include"GraphicsDeviceManager.h"
 #include"CameraComponent.h"
 #include"InputComponent.h"
-#include"PlayerComponent.h"
 #include"BoxCollider.h"
 #include"CapsuleCollider.h"
 

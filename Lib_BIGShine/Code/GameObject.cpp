@@ -41,6 +41,93 @@ void GameObject::DrawGizmo(const float* view, const float* projection)
         }
     }
 }
+std::vector<std::string> GameObject::GetComponentNames() const
+{
+    std::vector<std::string> names;
+    for (const auto& comp : components)
+    {
+        names.push_back(comp->GetName());
+    }
+
+    //コライダーコンポーネント
+    if (m_pColliderComponent != nullptr)
+    {
+        names.push_back(m_pColliderComponent->GetName());
+    }
+
+    return names;
+}
+
+void GameObject::CallAllComponentStart()
+{
+
+    if (m_pColliderComponent)
+    {
+        if (!m_pColliderComponent->IsStarted())
+        {
+            m_pColliderComponent->Start();
+            m_pColliderComponent->SetStarted(true);
+        }
+    }
+
+    // ループ中の AddComponent による破壊を防ぐため、コピーを作成して回す
+    auto tempComponents = components;
+
+    for (auto& comp : tempComponents)
+    {
+        // 1. まず NULL チェック
+        if (!comp) continue;
+
+        // 2. メモリが有効かどうかの簡易チェック (MSVCデバッグ時)
+        // 本来は shared_ptr なので起きにくいはずですが、
+        // 0xdddd... を掴んでいる場合は、中身の shared_count が壊れています。
+        try {
+            if (!comp->IsStarted())
+            {
+                comp->Start();
+                comp->SetStarted(true);
+            }
+        }
+        catch (...) {
+            // ここで止まるなら、comp の指す先が既に壊れています
+            assert(false && "Component memory is corrupted!");
+        }
+    }
+
+}
+
+std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& compName_) const
+{
+    for (auto& comp : components)
+    {
+        if (comp->GetName() == compName_)
+            return comp;
+    }
+
+    if (m_pColliderComponent)
+    {
+        if (m_pColliderComponent->GetName() == compName_)
+            return m_pColliderComponent;
+    }
+
+    return nullptr;
+}
+
+
+void GameObject::SetParent(std::shared_ptr<GameObject> parentGO)
+{
+    if (parentGO) {
+        // Transformの親子付け
+        transform->SetParent(parentGO->transform);
+        // 重要：親側のTransformに自分（のGameObject）を教える必要はないが
+        // 自分のTransformは自分のGameObjectを知っておく必要がある
+        transform->gameObject = shared_from_this();
+    }
+    else {
+        transform->SetParent(nullptr);
+    }
+}
+
 void GameObject::Update(float et)
 {
     // 1. まず「物理以外」のコンポーネントを更新（PlayerInput, FollowCamera など）
@@ -76,6 +163,39 @@ void GameObject::LateUpdate(float et)
         if (!comp->IsEnabled()) continue;
         if (comp->GetName() == "PhysicsCollisionComponent")
             comp->LateUpdate(et);
+    }
+}
+
+void GameObject::ExecuteAction(const std::string& actionName, std::shared_ptr<GameObject> target)
+{
+    if (target) {
+        target->localRegistry.Call(actionName);
+    }
+    else {
+        localRegistry.Call(actionName);
+    }
+}
+
+
+void GameObject::Clear()
+{
+    // 1. 各コンポーネントの参照を外す前に、必要なら終了処理を呼ぶ
+    // (コンポーネント側に終了用関数があればここで呼ぶ)
+
+    // 2. 汎用コンポーネントリストをクリア
+    // shared_ptr なので、他で参照されていなければ各コンポーネントのデストラクタが走ります
+    components.clear();
+
+    // 3. 特別扱いしているコライダーコンポーネントをクリア
+    m_pColliderComponent.reset();
+
+    // 4. Transform のリセット（必要に応じて）
+    // 通常は次の Load で上書きされますが、初期状態に戻すと安全です
+    if (transform) {
+        transform->localPosition = { 0, 0, 0 };
+        transform->localRotation = { 0, 0, 0 };
+        transform->localScale = { 1, 1, 1 };
+        transform->UpdateWorldMatrix();
     }
 }
 

@@ -119,7 +119,8 @@ namespace ImCurveEdit
       ImGuiIO& io = ImGui::GetIO();
       ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
       ImGui::PushStyleColor(ImGuiCol_Border, 0);
-      ImGui::BeginChildFrame(id, size);
+      // 固定サイズ(300, 300) を止めて、(0, 0) もしくは (avail.x, avail.y) に変更します
+      ImGui::BeginChild(ImGui::GetID("my_frame"), ImVec2(0, 0), ImGuiChildFlags_FrameStyle);
       delegate.focused = ImGui::IsWindowFocused();
       ImDrawList* draw_list = ImGui::GetWindowDrawList();
       if (clippingRect)
@@ -152,7 +153,7 @@ namespace ImCurveEdit
               scrollingV = true;
           }
       }
-      ImVec2 range = max - min + ImVec2(1.f, 0.f);  // +1 because of inclusive last frame
+      ImVec2 range = max - min;  // +1 because of inclusive last frame
 
       const ImVec2 viewSize(size.x, -size.y);
       const ImVec2 sizeOfPixel = ImVec2(1.f, 1.f) / viewSize;
@@ -171,6 +172,68 @@ namespace ImCurveEdit
 
       auto pointToRange = [&](ImVec2 pt) { return (pt - min) / range; };
       auto rangeToPoint = [&](ImVec2 pt) { return (pt * range) + min; };
+
+      // ★ ここから追記 ★ --------------------------------------------------
+    // 0.1秒ごとの垂直線
+      for (float t = 0.1f; t < 1.0f; t += 0.1f)
+      {
+          float normX = (t - min.x) / range.x;
+          float x = offset.x + normX * viewSize.x;
+          draw_list->AddLine(ImVec2(x, offset.y), ImVec2(x, offset.y + viewSize.y), 0x44FFFFFF, 1.0f);
+      }
+
+      // 0.5倍速(ボリューム)の水平線
+      float normY05 = (0.5f - min.y) / range.y;
+      float y05 = offset.y + normY05 * viewSize.y;
+      draw_list->AddLine(ImVec2(offset.x, y05), ImVec2(offset.x + viewSize.x, y05), 0x88FFFF00, 1.0f);
+
+      // 1.0倍速(標準)の水平線（もし既にあるなら不要ですが、セットで書くと管理しやすいです）
+      float normY10 = (1.0f - min.y) / range.y;
+      float y10 = offset.y + normY10 * viewSize.y;
+      draw_list->AddLine(ImVec2(offset.x, y10), ImVec2(offset.x + viewSize.x, y10), 0x88FFFFFF, 1.0f);
+
+
+      // x = 1.0 の位置を計算
+      ImVec2 line1s_norm = pointToRange(ImVec2(1.0f, 0.0f));
+      float screenX = line1s_norm.x * viewSize.x + offset.x;
+
+      // 縦に赤い線を引く (0xFF0000FF = 赤)
+      // 境界をはっきりさせるため、太めに設定
+      draw_list->AddLine(
+          ImVec2(screenX, offset.y),           // 下端
+          ImVec2(screenX, offset.y + viewSize.y), // 上端
+          0xFF0000FF,                          // 色
+          2.0f                                 // 太さ
+      );
+
+      // 1. 右端の垂直線（Max X = 1.0s の壁）
+      float normXMax = (max.x - min.x) / range.x; // max.xが1.0なら右端に一致
+      float xMax = offset.x + normXMax * viewSize.x;
+      draw_list->AddLine(
+          ImVec2(xMax, offset.y),
+          ImVec2(xMax, offset.y + viewSize.y),
+          0xFF0000FF, 2.5f // 太めの赤色で「壁」を表現
+      );
+
+      // 2. 上端の水平線（Max Y = 2.0 などの上限）
+      float normYMax = (max.y - min.y) / range.y;
+      float yMax = offset.y + normYMax * viewSize.y;
+      draw_list->AddLine(
+          ImVec2(offset.x, yMax),
+          ImVec2(offset.x + viewSize.x, yMax),
+          0x8800FF00, 1.5f // 緑色などで上限を表示
+      );
+
+      // 3. (おまけ) 下端の水平線（Min Y = 0.0 の床）
+      float normYMin = (min.y - min.y) / range.y;
+      float yMin = offset.y + normYMin * viewSize.y;
+      draw_list->AddLine(
+          ImVec2(offset.x, yMin),
+          ImVec2(offset.x + viewSize.x, yMin),
+          0xFF000000, 1.5f // 黒色で「地面」を表現
+      );
+
+      // ★ ここまで ★ --------------------------------------------------
 
       draw_list->AddLine(ImVec2(-1.f, -min.y/range.y) * viewSize + offset, ImVec2(1.f, -min.y / range.y) * viewSize + offset, 0xFF000000, 1.5f);
       bool overCurveOrPoint = false;
@@ -413,7 +476,7 @@ namespace ImCurveEdit
       if (clippingRect)
          draw_list->PopClipRect();
 
-      ImGui::EndChildFrame();
+      ImGui::EndChild();
       ImGui::PopStyleVar();
       ImGui::PopStyleColor(1);
 

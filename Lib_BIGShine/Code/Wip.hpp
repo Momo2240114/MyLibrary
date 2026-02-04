@@ -495,7 +495,7 @@ namespace ImGui
         if (!ItemAdd(bb, NULL))
             return 0;
 
-        const bool hovered = ImGui::ItemHoverable(bb, id);
+        const bool hovered = ImGui::ItemHoverable(bb, id, g.LastItemData.ItemFlags);
 
         int max = 0;
         while (max < maxpoints && points[max].x >= 0) max++;

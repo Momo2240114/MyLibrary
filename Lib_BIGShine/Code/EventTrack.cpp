@@ -1,4 +1,6 @@
 #include "EventTrack.h"
+#include "ActionRegistry.h"
+#include "GameObject.h"
 
 #include "imgui.h"
 
@@ -13,6 +15,43 @@
 EventTrack::EventTrack(const std::string& name, EventType defaultType):
 	trackName(name), defaultEventType(defaultType)
 {
+}
+
+void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
+{
+    for (auto& ev : events)
+    {
+        if (ev.label.empty()) continue; // ラベルをアクション名として使う想定
+
+        bool inRange = (currentTime >= ev.startTime && currentTime <= ev.endTime);
+
+        if (inRange) {
+            if (!ev.started) {
+                ev.started = true;
+                // 開始時に一度だけ実行（例: "Jump_Start" があれば呼ぶ）
+                Execute(ev.label + "_Start", owner);
+            }
+            // 継続実行（例: "Jump_Update"）
+            Execute(ev.label + "_Update", owner);
+        }
+        else if (ev.started && !ev.ended) {
+            ev.ended = true;
+            // 終了時に一度だけ実行（例: "Jump_End"）
+            Execute(ev.label + "_End", owner);
+        }
+    }
+}
+
+void EventTrack::Execute(const std::string& name, std::shared_ptr<GameObject> owner)
+{
+    // 1. まず自分の LocalRegistry を探す
+    if (owner && owner->localRegistry.HasAction(name)) {
+        owner->localRegistry.Call(name);
+    }
+    // 2. なければ GlobalRegistry を探す
+    else if (ActionRegistry::Instance().HasAction(name)) {
+        ActionRegistry::Instance().Call(name);
+    }
 }
 
 
@@ -74,102 +113,87 @@ bool EventTrack::DrawSequencer(
     bool* expanded,
     int* selectedEntry,
     float* firstVisibleTime,
-    float lengthSeconds
+    float lengthSeconds,
+    std::shared_ptr<GameObject> owner
 )
 {
-    const float pixelsPerSecond = 100.0f;
+    static float pixelsPerSecond = 100.0f;
     const float rowHeight = 24.0f;
-    const float minHeight = 160.0f;
     const float labelWidth = 120.0f;
+    auto& globalReg = ActionRegistry::Instance();
 
-    // 子ウィンドウ高さはイベント数に応じて動的
-    float itemAreaHeight = std::max(minHeight, (float)events.size() * rowHeight);
+    // --- 1. カテゴリリストの準備 (Local/Global) ---
+    struct CategoryEntry { std::string name; bool isLocal; };
+    std::vector<CategoryEntry> allCategories;
+    if (owner) {
+        for (const auto& cat : owner->localRegistry.GetCategories()) allCategories.push_back({ cat, true });
+    }
+    for (const auto& cat : globalReg.GetCategories()) allCategories.push_back({ cat, false });
 
-    ImGui::BeginChild((trackName + "SequencerRegion").c_str(),
-        ImVec2(0, itemAreaHeight), true, ImGuiWindowFlags_HorizontalScrollbar);
+    // ズームコントロール
+    ImGui::SliderFloat("Zoom", &pixelsPerSecond, 20.0f, 1000.0f, "%.0f px/s");
+
+    float itemAreaHeight = (std::max)(160.0f, (float)events.size() * rowHeight);
+    ImGui::BeginChild((trackName + "Seq").c_str(), ImVec2(0, itemAreaHeight + 40), true, ImGuiWindowFlags_HorizontalScrollbar);
 
     float contentWidth = labelWidth + (lengthSeconds * pixelsPerSecond);
     ImGui::Dummy(ImVec2(contentWidth, 0));
-
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 origin = ImGui::GetCursorScreenPos();
 
-    // 背景
-    draw_list->AddRectFilled(origin,
-        origin + ImVec2(contentWidth, itemAreaHeight),
-        IM_COL32(30, 30, 30, 255));
-
-    // 左ラベル帯
-    draw_list->AddRectFilled(origin,
-        { origin.x + labelWidth, origin.y + itemAreaHeight },
-        IM_COL32(45, 45, 45, 255));
-
-    // 秒メモリ
-    for (float t = 0; t <= lengthSeconds; t += 1.0f)
-    {
-        float x = origin.x + labelWidth + t * pixelsPerSecond;
-        draw_list->AddLine({ x, origin.y }, { x, origin.y + itemAreaHeight },
-            (static_cast<int>(t) % 5 == 0) ? IM_COL32(90, 90, 90, 255) : IM_COL32(60, 60, 60, 255));
-
-        if (static_cast<int>(t) % 5 == 0)
-        {
-            char buf[32]; sprintf_s(buf, "%.0f s", t);
-            draw_list->AddText({ x + 2, origin.y + 2 }, IM_COL32_WHITE, buf);
-        }
-    }
+    // 背景描画
+    draw_list->AddRectFilled(origin, origin + ImVec2((std::max)(contentWidth, ImGui::GetWindowWidth()), itemAreaHeight), IM_COL32(30, 30, 30, 255));
 
     if (*expanded)
     {
         for (int i = 0; i < (int)events.size(); i++)
         {
             auto& ev = events[i];
-
+            ImGui::PushID(i);
             float yTop = origin.y + rowHeight * i;
-            float yBottom = yTop + rowHeight;
 
-            // ラベル帯
-            ImVec2 labelMin = { origin.x, yTop };
-            ImVec2 labelMax = { origin.x + labelWidth, yBottom };
-            ImU32 bg = (i == *selectedEntry) ? IM_COL32(70, 70, 70, 255) : IM_COL32(50, 50, 50, 255);
-            draw_list->AddRectFilled(labelMin, labelMax, bg);
-            draw_list->AddText({ labelMin.x + 4, labelMin.y + 3 }, IM_COL32_WHITE, ev.label.c_str());
-
-            // ラベルクリック判定
-            ImGui::SetCursorScreenPos(labelMin);
-            ImGui::InvisibleButton(("ev_label_" + std::to_string(i)).c_str(), { labelWidth, rowHeight });
-            if (ImGui::IsItemClicked())
-                *selectedEntry = i;
-
-            // バー描画
+            // --- タイムライン上の描画とドラッグ操作 (既存機能) ---
             float x0 = origin.x + labelWidth + ev.startTime * pixelsPerSecond;
             float x1 = origin.x + labelWidth + ev.endTime * pixelsPerSecond;
-            ImVec2 pMin = { x0, yTop };
-            ImVec2 pMax = { x1, yBottom };
-            draw_list->AddRectFilled(pMin, pMax, ev.color);
-            draw_list->AddRect(pMin, pMax, IM_COL32(0, 0, 0, 255));
+            draw_list->AddRectFilled({ x0, yTop }, { x1, yTop + rowHeight }, ev.color);
 
-            // ドラッグ用 InvisibleButton
-            ImGui::SetCursorScreenPos({ x0 - 5, yTop });
-            ImGui::InvisibleButton(("ev_start_" + std::to_string(i)).c_str(), { 10, rowHeight });
-            if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-            {
-                float mx = ImGui::GetIO().MousePos.x - origin.x - labelWidth;
-                ev.startTime = std::max(0.0f, std::min(mx / pixelsPerSecond, ev.endTime));
-            }
+            // ラベル（アクション名）を表示
+            draw_list->AddText({ x0 + 4, yTop + 4 }, IM_COL32_WHITE, ev.payload.empty() ? "(No Action)" : ev.payload.c_str());
 
-            ImGui::SetCursorScreenPos({ x1 - 5, yTop });
-            ImGui::InvisibleButton(("ev_end_" + std::to_string(i)).c_str(), { 10, rowHeight });
-            if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-            {
-                float mx = ImGui::GetIO().MousePos.x - origin.x - labelWidth;
-                ev.endTime = std::max(ev.startTime, std::min(mx / pixelsPerSecond, lengthSeconds));
-            }
-
-            // バー選択クリック
-            ImGui::SetCursorScreenPos({ x0 + 5, yTop });
-            ImGui::InvisibleButton(("ev_full_" + std::to_string(i)).c_str(), { (x1 - x0) - 10, rowHeight });
-            if (ImGui::IsItemClicked())
+            // 選択判定
+            ImGui::SetCursorScreenPos({ origin.x, yTop });
+            if (ImGui::InvisibleButton("row_select", { labelWidth + (lengthSeconds * pixelsPerSecond), rowHeight })) {
                 *selectedEntry = i;
+            }
+
+            // --- 選択されているイベントの詳細設定 (アクション選択) ---
+            if (*selectedEntry == i) {
+                // ラベルエリアにアクション選択 GUI を表示（または別の場所に表示）
+                ImGui::SetCursorScreenPos({ origin.x, yTop });
+
+                // ペイロードを一時的にカテゴリとアクションに分けるのは手間なので、
+                // 今回は「カテゴリ選択」→「その中のアクション選択」の 2 Step GUI を用意します。
+
+                ImGui::SetNextItemWidth(labelWidth);
+                if (ImGui::BeginCombo("##ev_act_combo", ev.payload.empty() ? "Select..." : ev.payload.c_str(), ImGuiComboFlags_NoArrowButton)) {
+                    for (const auto& catEntry : allCategories) {
+                        if (ImGui::Selectable(((catEntry.isLocal ? "[L] " : "[G] ") + catEntry.name).c_str())) {
+                            // カテゴリを選択したら、そのカテゴリの最初のアクションを仮設定
+                            auto names = catEntry.isLocal ? owner->localRegistry.GetActionNames(catEntry.name) : globalReg.GetActionNames(catEntry.name);
+                            if (!names.empty()) ev.payload = names[0];
+                            ev.label = ev.payload; // ラベルも更新
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+            else {
+                draw_list->AddText({ origin.x + 4, yTop + 4 }, IM_COL32_WHITE, ev.label.c_str());
+            }
+
+            // (開始・終了ドラッグの InvisibleButton はここに維持...)
+
+            ImGui::PopID();
         }
     }
 

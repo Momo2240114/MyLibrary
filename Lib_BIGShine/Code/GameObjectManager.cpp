@@ -6,7 +6,6 @@
 #include <PxPhysicsAPI.h>
 
 #include "DecalComponent.h"
-#include"NavMeshManager.h"
 #include"ImGuizmo.h"
 #include <nlohmann/json.hpp>
 #include"TransformDirector.h"
@@ -20,10 +19,7 @@
 
 void GameObjectManager::Initialize()
 {
-    m_pNaviMeshManager = std::make_unique<NaviMeshManager>();
-    m_pNaviMeshManager->Initialize();
 
-    m_pSearchAreaManager = std::make_unique<SearchAreaManager>();
     m_pRayCastManager = std::make_unique<RayCastManager>();
 }
 
@@ -111,9 +107,6 @@ void GameObjectManager::Clear()
     selectedObject = nullptr;
     m_pMainCamera = nullptr;
 
-    m_pNaviMeshManager->Clean(); // メモリ解放
-    m_pNaviMeshManager->Clear(); // リストクリア
-
 
     m_pRayCastManager->Clear();//レイキャストマネージャークリア処理
 
@@ -127,7 +120,6 @@ void GameObjectManager::Clear()
             col->currentTriggers.clear();
         }
     }
-    sneakObjects.clear();
     objects.clear(); // ここで shared_ptr の参照カウントが減り、実体が削除される
 }
 
@@ -302,6 +294,22 @@ void GameObjectManager::CollisionStep()
 
 void GameObjectManager::Gui()
 {
+    // --- 追加: ビューポート（画面全体）の情報を取得 ---
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+    // --- 静的な変数で横幅を保持（初回のみ初期化） ---
+    static float leftPanelWidth = 300.0f;
+    static float rightPanelWidth = 350.0f;
+
+    // ウィンドウフラグ（NoMoveは維持し、NoResizeは外す）
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
+
+    // ========================================
+    // 左パネル: Objects (Hierarchy)
+    // ========================================
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(ImVec2(leftPanelWidth, viewport->WorkSize.y));
+
     // --- 追加: セーブ・ロード用の管理変数 (staticで保持) ---
     static char sceneName[64] = "MainScene"; // デフォルトのシーン名
 
@@ -384,7 +392,7 @@ void GameObjectManager::Gui()
             ImGui::OpenPopup("LoadConfirm");
         }
     }
-    
+
     if (ImGui::BeginPopupModal("LoadConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("Loading Scene \"%s\" ? \n Now Scenes Destruction", sceneName);
@@ -532,17 +540,26 @@ void GameObjectManager::Gui()
 
     ImGui::End();
 
-    // 右: 選択中オブジェクト詳細
-    if (!selectedObject) return;
+    // ========================================
+     // 右パネル: Inspector (selectedObject)
+     // ========================================
+    if (!selectedObject)return;
 
-    ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
-    ImGui::Begin("selectedObject");
-    // ヘッダーが閉じられていてもGUIを表示するように修正 (if文の判定を調整)
-    if (ImGui::CollapsingHeader(selectedObject->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        selectedObject->Gui();
+    // 右側に張り付くように位置を計算
+    ImVec2 inspectorPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - rightPanelWidth, viewport->WorkPos.y);
+
+    ImGui::SetNextWindowPos(inspectorPos);
+    ImGui::SetNextWindowSize(ImVec2(rightPanelWidth, viewport->WorkSize.y));
+
+    if (ImGui::Begin("Inspector", nullptr, windowFlags)) {
+        // --- ここで手動リサイズを検知 ---
+        rightPanelWidth = ImGui::GetWindowWidth();
+
+        if (ImGui::CollapsingHeader(selectedObject->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+            selectedObject->Gui();
+        }
+        ImGui::End();
     }
-    ImGui::End();
     // ========================================
   // ★ ギズモの描画処理を追加
   // ========================================
@@ -631,7 +648,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> obj, GameO
 
 }
 
-void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderSystem modelSystem_,NavMeshRenderer* naviMeshRenderer)
+void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderSystem modelSystem_)
 {
     auto ctx = GraphicsDeviceManager::Instance().GetContext();
     auto& gdm = GraphicsDeviceManager::Instance();
@@ -732,22 +749,6 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
 
     // 2. ブルームをかけてバックバッファへ出力
     gdm.ResolveBloom(rc);
-
-    if (m_pNaviMeshManager && naviMeshRenderFlg)
-    {
-        m_pNaviMeshManager->Gui();
-        //ナビメッシュ描画
-        if (naviMeshRenderer)
-        {
-            naviMeshRenderer->Draw(m_pNaviMeshManager->GetNavMesh(), m_pNaviMeshManager->GetNavMeshQuery());
-            naviMeshRenderer->Draw(m_pNaviMeshManager->GetPolyMeshDetail());
-            naviMeshRenderer->Draw(m_pNaviMeshManager->GetCrowd());
-            naviMeshRenderer->Render(ctx, rc.camera->GetView(), rc.camera->GetProjection());
-        }
-    }
-
-
-  
 
     // SpriteRenderSubmit
     for (auto& o : objects)
@@ -891,54 +892,6 @@ void GameObjectManager::HandlePhysXContact(ColliderComponent* colA, ColliderComp
     colB->OnCollisionEnter(objA);
 }
 
-void GameObjectManager::ReBuildNaviNeshManager(NaviMeshManager* target)
-{
-
-    // targetが指定されていればそれを使用、なければメンバ変数を使用
-    NaviMeshManager* pNavi = (target != nullptr) ? target : m_pNaviMeshManager.get();
-
-    if (!pNavi) return; // それでもNULLなら何もしない
-    // 1. 既存の登録情報をクリアする
-    // ※古いモデルやコライダー情報が残らないように、まずマネージャーを掃除します
-    pNavi->Clean();
-    pNavi->Clear();
-    // もしマネージャーにコライダークリア関数があればそれも呼ぶ（例: m_pNaviMeshManager->ClearColliders();）
-
-    bool AddFlg = false;
-
-    // 2. 全オブジェクトから対象を抽出して登録
-    for (auto& obj : objects)
-    {
-        // オブジェクトが有効でない場合はスキップ
-        if (!obj) continue;
-
-        // BoxColliderコンポーネントを取得
-        auto box = obj->GetComponent<BoxCollider>();
-
-        // BoxColliderを持っていて、かつ GetUsedNaviMeshSystemFlg が true のものをナビメッシュ対象とする
-        if (box && box->GetUsedNaviMeshSystemFlg())
-        {
-            AddFlg = true;
- 
-            // BoxColliderを登録（頂点データ等として使用）
-            target->SetBoxCollider(obj.get());
-        }
-
-        // モデルコンポーネントを取得（ナビメッシュのメッシュデータとして使用）
-        auto model = obj->GetComponent<GltfModelCommponennt>();
-        if (model && model->GetUsedNaviMeshSystemFlg())
-        {
-            AddFlg = true;
-            target->SetModel(model.get());
-        }
-    }
-    if(AddFlg)
-    {
-        // 3. 登録されたデータに基づいてナビメッシュをビルド
-        target->Build();
-    }
-}
-
 // ヘルパー関数：親→子の順番で名前をリストに追加する
 void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& listJson) {
     if (!obj->saveFlg) return;
@@ -1055,30 +1008,11 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
 
             // オブジェクト自身にコンポーネントを含めて復元させる
             obj->Load(objJson);
-            // ★ ここでレイヤーをチェックして SneakObject リストに追加
-            if (obj->GetLayer() == GameObject::LayerType::SneakObject) {
-                sneakObjects.push_back(obj); // shared_ptr から weak_ptr へ自動変換
-            }
         }
     }
 
     // ★ここで親子関係を復元する
     ResolveHierarchy();
-
-    //// 2. もし何らかの理由でマネージャーがなければ生成（保険）
-    if (!m_pNaviMeshManager) {
-        Initialize();
-    }
-
-    // 3. 一時的なマネージャーで「今の objects」を元にビルド
-    NaviMeshManager tempNavi;
-    tempNavi.Initialize();
-
-    // ReBuildを「特定のマネージャー」に対して行えるように修正して呼び出す
-    this->ReBuildNaviNeshManager(m_pNaviMeshManager.get());
-
-    InitializeAllComponents();
-
 
     printf("Scene '%s' loaded from SceneList.json\n", sceneName.c_str());
 }
@@ -1163,10 +1097,6 @@ void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> obj, const std:
     }
 }
 
-SearchAreaManager* GameObjectManager::GetSearchAreaManager()
-{
-    return m_pSearchAreaManager.get();
-}
 
 void GameObjectManager::InitializeAllComponents()
 {
@@ -1196,9 +1126,9 @@ void GameObjectManager::InitializeAllComponents()
     }
 }
 
-
 // プレハブから生成
-std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName) {
+std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName)
+{
     std::string filePath = m_prefabDirectory + prefabName + ".json";
     std::ifstream file(filePath);
     if (!file.is_open()) {

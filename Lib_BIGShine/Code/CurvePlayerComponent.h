@@ -20,30 +20,10 @@ public:
         return n;
     }
 
-    void Start() override
-    {
-        if (auto obj = GetGameObject())
-            asset = obj->GetComponent<CurveAssetComponent>();
-    }
+    void Start() override;
+    void Update(float et) override;
 
-    void Update(float dt) override
-    {
-        auto a = asset.lock();
-        if (!a || !playing) return;
-
-        time += dt * speed;
-        value = a->curveData.Evaluate(time);
-        ApplyValue(value);
-    }
-
-    void ApplyValue(float v)
-    {
-        if (auto obj = GetGameObject())
-        {
-            auto t = obj->transform;
-            t->localPosition.y = v; // ”CˆÓ—p“r‚É•ÏX‰Â”\
-        }
-    }
+    void ApplyValue(float v);
 
     void Gui() override
     {

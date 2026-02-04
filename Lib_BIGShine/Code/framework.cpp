@@ -159,9 +159,19 @@ int framework::run()
 LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM lParam_)
 {
 	if (ImGuiRenderer::HandleMessage(hWnd_, msg_, wParam_, lParam_))
-		return true;
+		return 0; 
+
 	switch (msg_)
 	{
+	case WM_SIZE:
+		// 最小化中以外、かつデバイス初期化済みならリサイズ実行
+		if (wParam_ != SIZE_MINIMIZED && GraphicsDeviceManager::Instance().GetDevice())
+		{
+			int w = LOWORD(lParam_);
+			int h = HIWORD(lParam_);
+			GraphicsDeviceManager::Instance().OnResize(w, h);
+		}
+		return 0;
 	case WM_MOUSEWHEEL:
 	{
 		int delta = GET_WHEEL_DELTA_WPARAM(wParam_);
@@ -226,16 +236,6 @@ void framework::GuiDraw()
 	SceneManager::DrawGUI();
 	GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ここで呼び出す
 #endif // DEBUG
-
-	
-
-
-	//if (ImGui::Button("GoSceneGame"))
-	//{
-	//	ActionRegistry::Instance().Call("GoSceneGame");
-	//}
-
-
 }
 
 framework::~framework()
