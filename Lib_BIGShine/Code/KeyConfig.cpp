@@ -1,144 +1,129 @@
-#include <string>
-#include <fstream>
-#include <sstream>
-
 #include "KeyConfig.h"
-
+#include "KeyInput.h"
+#include "MouseInput.h"
+#include "ControllerInput.h"
+#include <fstream>
+#include <iomanip>
 #include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
+// --- バインド ---
+void KeyConfig::BindAction(const std::string& action, const InputCombo& combo) {
+    if (combo.empty()) return;
+    m_actionMap[action].push_back(combo);
+}
 
-//
-// -------------------- バインド処理 --------------------
-//
-void KeyConfig::BindAction(const std::string& action, int key, bool allowDuplicate)
-{
-    auto& vec = keyMap[action];
+void KeyConfig::ClearBinds(const std::string& action) {
+    m_actionMap.erase(action);
+}
 
-    // すでに割り当て済みなら追加しない
-    if (!allowDuplicate) {
-        for (int k : vec) {
-            if (k == key) return;
+// --- 内部判定ロジック ---
+bool KeyConfig::CheckUnit(const InputUnit& unit, int type) const {
+    if (unit.device == DeviceType::KBM) {
+        // マウスコード判定 (VK_LBUTTON:0x01, VK_RBUTTON:0x02等)
+        if (unit.code >= 0x01 && unit.code <= 0x06) {
+            return MouseInput::Instance().GetButtonState(unit.code, type);
         }
+        // キーボード判定
+        if (type == 0) return KeyInput::KeyPressed(unit.code);
+        if (type == 1) return KeyInput::KeyPressedIn(unit.code);
+        return KeyInput::KeyPressedOut(unit.code);
+    }
+    else { // Gamepad
+        auto& pad = ControllerInput::Instance();
+        if (type == 0) return pad.ButtonPressed((PadCode)unit.code);
+        if (type == 1) return pad.ButtonPressedIn((PadCode)unit.code);
+        return pad.ButtonPressedOut((PadCode)unit.code);
+    }
+}
+
+bool KeyConfig::CheckCombo(const InputCombo& combo, int type) const {
+    if (combo.empty()) return false;
+
+    // 瞬間入力(In/Out)判定：
+    // 「どれか一つがトリガー(type)を引き、かつ全員が押されている(Hold)」場合に成立
+    if (type != 0) {
+        bool triggered = false;
+        for (const auto& unit : combo) {
+            if (CheckUnit(unit, type)) { triggered = true; break; }
+        }
+        if (!triggered) return false;
+        for (const auto& unit : combo) {
+            if (!CheckUnit(unit, 0)) return false;
+        }
+        return true;
     }
 
-    vec.push_back(key);
+    // 継続入力(Hold)判定
+    for (const auto& unit : combo) {
+        if (!CheckUnit(unit, 0)) return false;
+    }
+    return true;
 }
 
-//
-// -------------------- キー取得 --------------------
-//
-const std::vector<int>& KeyConfig::GetBindedKeys(const std::string& action) const
-{
-    static const std::vector<int> empty;
-
-    auto it = keyMap.find(action);
-    if (it != keyMap.end()) return it->second;
-    return empty;
-}
-
-int KeyConfig::GetPrimaryKey(const std::string& action) const
-{
-    auto it = keyMap.find(action);
-    if (it != keyMap.end() && !it->second.empty())
-        return it->second[0];
-    return -1;
-}
-
-//
-// -------------------- 入力判定 --------------------
-//
-bool KeyConfig::ActionPressed(const std::string& action) const
-{
-    auto it = keyMap.find(action);
-    if (it == keyMap.end()) return false;
-
-    for (int key : it->second)
-        if (KeyInput::KeyPressed(key))
-            return true;
-
+// --- 公開判定関数 ---
+bool KeyConfig::ActionPressed(const std::string& action) const {
+    auto it = m_actionMap.find(action);
+    if (it == m_actionMap.end()) return false;
+    for (const auto& combo : it->second) if (CheckCombo(combo, 0)) return true;
     return false;
 }
 
-bool KeyConfig::ActionPressedIn(const std::string& action) const
-{
-    auto it = keyMap.find(action);
-    if (it == keyMap.end()) return false;
-
-    for (int key : it->second)
-        if (KeyInput::KeyPressedIn(key))
-            return true;
-
+bool KeyConfig::ActionPressedIn(const std::string& action) const {
+    auto it = m_actionMap.find(action);
+    if (it == m_actionMap.end()) return false;
+    for (const auto& combo : it->second) if (CheckCombo(combo, 1)) return true;
     return false;
 }
 
-bool KeyConfig::ActionPressedOut(const std::string& action) const
-{
-    auto it = keyMap.find(action);
-    if (it == keyMap.end()) return false;
-
-    for (int key : it->second)
-        if (KeyInput::KeyPressedOut(key))
-            return true;
-
+bool KeyConfig::ActionPressedOut(const std::string& action) const {
+    auto it = m_actionMap.find(action);
+    if (it == m_actionMap.end()) return false;
+    for (const auto& combo : it->second) if (CheckCombo(combo, 2)) return true;
     return false;
 }
 
-//
-// -------------------- JSON 保存 --------------------
-//
-bool KeyConfig::SaveText(const std::string& filename) const
-{
-    json j;
-
-    for (auto& it : keyMap)
-        j[it.first] = it.second;
-
+// --- JSON保存 ---
+bool KeyConfig::Save(const std::string& filename) {
+    json root = json::object();
+    for (auto& [name, combos] : m_actionMap) {
+        json actionArr = json::array();
+        for (auto& combo : combos) {
+            json comboArr = json::array();
+            for (auto& unit : combo) {
+                comboArr.push_back({ {"dev", (int)unit.device}, {"code", unit.code} });
+            }
+            actionArr.push_back(comboArr);
+        }
+        root[name] = actionArr;
+    }
     std::ofstream ofs(filename);
     if (!ofs) return false;
-
-    ofs << j.dump(4);
+    ofs << root.dump(4);
     return true;
 }
 
-bool KeyConfig::SaveText() const
-{
-    if (m_configFile.empty()) return false;
-    return SaveText(m_configFile);
-}
-
-//
-// -------------------- JSON 読み込み --------------------
-//
-bool KeyConfig::LoadText(const std::string& filename)
-{
+// --- JSON読み込み ---
+bool KeyConfig::Load(const std::string& filename) {
     std::ifstream ifs(filename);
     if (!ifs) return false;
+    json root;
+    try { ifs >> root; }
+    catch (...) { return false; }
 
-    json j;
-    try {
-        ifs >> j;
-    }
-    catch (...) {
-        return false;
-    }
-
-    keyMap.clear();
-
-    for (auto& [action, value] : j.items()) {
-        if (value.is_array()) {
-            keyMap[action] = value.get<std::vector<int>>();
-        }
-        else if (value.is_number_integer()) {
-            // 旧フォーマット互換：単一キー
-            keyMap[action] = { value.get<int>() };
+    m_actionMap.clear();
+    for (auto& [name, actionVal] : root.items()) {
+        for (auto& comboVal : actionVal) {
+            InputCombo combo;
+            for (auto& unitVal : comboVal) {
+                combo.push_back({ (DeviceType)unitVal["dev"].get<int>(), unitVal["code"].get<int>() });
+            }
+            m_actionMap[name].push_back(combo);
         }
     }
     return true;
 }
 
-bool KeyConfig::LoadText()
-{
-    if (m_configFile.empty()) return false;
-    return LoadText(m_configFile);
-}
+bool KeyConfig::Save() { return Save(m_configFile); }
+bool KeyConfig::Load() { return Load(m_configFile); }

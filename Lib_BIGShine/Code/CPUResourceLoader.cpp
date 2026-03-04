@@ -250,3 +250,51 @@ HRESULT CPUResourceLoader::CreateConstantBuffer(ID3D11Device* device, UINT buffe
 
     return hr;
 }
+
+HRESULT CPUResourceLoader::LoadGeometryShader(ID3D11Device* device, const char* filename, ID3D11GeometryShader** geometryShader)
+{
+    // ファイルを開く
+    FILE* fp = nullptr;
+    fopen_s(&fp, filename, "rb");
+    _ASSERT_EXPR_A(fp, "Geometry Shader File not found");
+
+    // ファイルのサイズを求める
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    // メモリ上にシェーダーデータを格納する領域を用意する
+    std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(size);
+    fread(data.get(), size, 1, fp);
+    fclose(fp);
+
+    // ジオメトリシェーダー生成
+    HRESULT hr = device->CreateGeometryShader(data.get(), size, nullptr, geometryShader);
+    _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+    return hr;
+}
+
+HRESULT CPUResourceLoader::LoadComputeShader(ID3D11Device* device, const char* filename, ID3D11ComputeShader** computeShader)
+{
+    // ファイルを開く
+    FILE* fp = nullptr;
+    fopen_s(&fp, filename, "rb");
+    _ASSERT_EXPR_A(fp, "Compute Shader File not found");
+
+    // ファイルのサイズを求める
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    // メモリ上にシェーダーデータを格納する領域を用意する
+    std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(size);
+    fread(data.get(), size, 1, fp);
+    fclose(fp);
+
+    // コンピュートシェーダー生成
+    HRESULT hr = device->CreateComputeShader(data.get(), size, nullptr, computeShader);
+    _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+    return hr;
+}

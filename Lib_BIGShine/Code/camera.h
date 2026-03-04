@@ -1,4 +1,4 @@
-#pragma once
+CameraComponent#pragma once
 //
 //#include <DirectXMath.h>
 //

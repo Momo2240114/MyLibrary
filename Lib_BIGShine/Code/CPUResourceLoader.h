@@ -61,6 +61,18 @@ public:
 		ID3D11Device* device,
 		UINT bufferSize,
 		ID3D11Buffer** constantBuffer);
+
+	// ジオメトリシェーダー読み込み
+	static HRESULT LoadGeometryShader(
+		ID3D11Device* device,
+		const char* filename,
+		ID3D11GeometryShader** geometryShader);
+
+	// コンピュートシェーダー読み込み
+	static HRESULT LoadComputeShader(
+		ID3D11Device* device,
+		const char* filename,
+		ID3D11ComputeShader** computeShader);
 	
 
 };

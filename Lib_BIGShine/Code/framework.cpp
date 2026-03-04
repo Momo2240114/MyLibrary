@@ -69,12 +69,6 @@ bool framework::initialize()
 
 	PhysXSystem::Initialize();
 
-	// ゲーム初期化部分などでキー設定を行う
-	KeyConfig::Instance().BindAction("MoveForward", KeyInput::K_W);  // Wキー
-	KeyConfig::Instance().BindAction("MoveBack",   KeyInput::K_S);     // Sキー
-	KeyConfig::Instance().BindAction("MoveRight",  KeyInput::K_D);    // Dキー
-	KeyConfig::Instance().BindAction("MoveLeft", KeyInput::K_A);     // Aキー
-
 	//Guiでココンポーネントを追加できるようにレジスターにコンポーネントを登録する関数
 	RegisterAllComponents();
 

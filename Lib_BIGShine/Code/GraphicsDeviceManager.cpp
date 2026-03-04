@@ -112,19 +112,38 @@ void GraphicsDeviceManager::Shutdown()
  */
 void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
 {
-    // TODO: 現在のRTV・DSVを解放
+    // 追加：リサイズ中は描画を止める or コンテキストをクリア
+    immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
+    immediateContext->ClearState(); // 念のため一度すべて解除
+
+    // メンバ変数の更新を忘れないように
+    width = newWidth_;
+    height = newHeight_;
+
+    // RTV・DSVを解放
     renderTargetView.Reset();
     depthStencilView.Reset();
-    
-    // TODO: swapChain->ResizeBuffers() を呼び出し
-    swapChain->ResizeBuffers(0, newWidth_, newHeight_, DXGI_FORMAT_UNKNOWN, 0);
-    // TODO: 新しいRenderTargetとDepthStencilを再作成
+    depthStencilTexture.Reset(); // 深度テクスチャ自体もリセットが必要
+
+    // --- 【修正】シーン用バッファとブルームもリセット ---
+    sceneRTV.Reset();
+    sceneSRV.Reset();
+    sceneNormalRTV.Reset();
+    sceneNormalSRV.Reset();
+
+    // swapChain->ResizeBuffers() を呼び出し
+    HRESULT hr = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+    _ASSERT_EXPR(SUCCEEDED(hr), L"ResizeBuffers Failed");
+
+    // リソースの再作成
     CreateRenderTarget();
     CreateDepthStencil();
+    CreateSceneRenderTarget(width, height); // シーンバッファを新しいサイズで作る
+    bloomSystem.Initialize(device.Get(), width, height); // ブルームも再初期化
 
-    // TODO: 新しいビューポートを設定
-    viewPort.Width = static_cast<float>(newWidth_);
-    viewPort.Height = static_cast<float>(newHeight_);
+    // ビューポートの設定
+    viewPort.Width = static_cast<float>(width);
+    viewPort.Height = static_cast<float>(height);
     immediateContext->RSSetViewports(1, &viewPort);
 }
 
@@ -171,7 +190,14 @@ void GraphicsDeviceManager::EndFrame()
     swapChain->Present(1, 0);
 }
 
-void GraphicsDeviceManager::SetSceneRenderTarget() 
+void GraphicsDeviceManager::SetParticleRenderTarget()
+{
+    ID3D11RenderTargetView* rtv = sceneRTV.Get();
+    // ターゲットを1枚（sceneRTVのみ）としてセット
+    immediateContext->OMSetRenderTargets(1, &rtv, depthStencilView.Get());
+}
+
+void GraphicsDeviceManager::SetSceneRenderTarget()
 {
     // 描画先を「シーンカラー」と「シーン法線」の2枚に切り替える
     ID3D11RenderTargetView* rtvs[] = {
@@ -179,7 +205,7 @@ void GraphicsDeviceManager::SetSceneRenderTarget()
         sceneNormalRTV.Get()
     };
 
-    // 第一引数を 2 に変更！
+    // 第一引数を 2 に変更
     immediateContext->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
 }
 
@@ -203,7 +229,7 @@ void GraphicsDeviceManager::ResetFilter()
 void GraphicsDeviceManager::ShowPostEffectGui()
 {
     // ポストプロセス設定ウィンドウの開始
-    ImGui::Begin("Graphics Settings");
+    ImGui::Begin("GraphicsSettings");
 
     if (ImGui::CollapsingHeader("Bloom (Kawase Blur)", ImGuiTreeNodeFlags_DefaultOpen))
     {

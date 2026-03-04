@@ -18,6 +18,9 @@
 #include "ColorFilterDirector.h"
 #include "NumberSwitcher.h"
 #include "CurvePlayerComponent.h"
+#include "ParticleComponent.h"
+#include "PlayerInput.h"
+#include "Movement.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -52,6 +55,7 @@ void RegisterAllComponents()
     // ライト・エフェクト系
     registry.Register<LightComponent>("LightComponent");
     registry.Register<DecalComponent>("DecalComponent");
+    registry.Register<ParticleComponent>("ParticleComponent");
 
 
     // 物理・コリジョン系
@@ -70,6 +74,8 @@ void RegisterAllComponents()
     registry.Register<LightBlinkerComponent>("LightBlinker");
     registry.Register<EasingComponent>("Easing");
     registry.Register<NumberSwitcher>("NumberSwitcher");
+    registry.Register<PlayerInput>("PlayerInput");
+    registry.Register<Movement>("Movement");
 }
 
 

@@ -56,12 +56,6 @@
     <Filter Include="ヘッダーファイル\Component\MurataComponent">
       <UniqueIdentifier>{5b483622-d582-497a-b9ce-06b98d1f37e7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダーファイル\StateMachine">
-      <UniqueIdentifier>{a7438217-8312-4a2c-a48b-1b0dc9c02c02}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソースファイル\StateMachine">
-      <UniqueIdentifier>{83cd2784-bf93-4508-90c3-ffd21e60e9ba}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダーファイル\NavMesh">
       <UniqueIdentifier>{8ce0f4bc-75f4-4752-ba06-72ca4aa84e3f}</UniqueIdentifier>
     </Filter>
@@ -76,6 +70,36 @@
     </Filter>
     <Filter Include="imgui\imnodes">
       <UniqueIdentifier>{2f877b67-599e-47e1-857c-b75ed78ffc1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダーファイル\Component\Particle">
+      <UniqueIdentifier>{6f8c3497-0835-4af2-b8cf-365f10ba321f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソースファイル\Conponent\Particle">
+      <UniqueIdentifier>{d74bd678-f7b0-4f77-b477-6a4b26609610}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Particle">
+      <UniqueIdentifier>{fa90eb59-b4bc-49fd-901c-3905d1fb64e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Basic">
+      <UniqueIdentifier>{cdd654aa-0408-44da-84b9-35bb6b48da68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostEffect">
+      <UniqueIdentifier>{53a22088-31ce-4957-8284-9d30cfaedba5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Sprite">
+      <UniqueIdentifier>{1872be16-6fc6-48f4-9278-370186efcab7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PBR">
+      <UniqueIdentifier>{849f576a-6126-4e25-ab1d-37e30901e8bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Decal">
+      <UniqueIdentifier>{e3ef62cd-7018-42a8-bcc0-6c180e038547}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Shape">
+      <UniqueIdentifier>{727af046-feb6-4eaf-a66d-f170ed7ff5f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Scene">
+      <UniqueIdentifier>{e4aa873e-3a77-4e9c-b259-098ec62e01d1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -373,6 +397,21 @@
     <ClCompile Include="Code\Curve.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Code\ParticleEmitter.cpp">
+      <Filter>ソースファイル\Conponent\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ParticleComponent.cpp">
+      <Filter>ソースファイル\Conponent\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ParticleRenderSystem.cpp">
+      <Filter>ソースファイル\Conponent\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Movement.cpp">
+      <Filter>ソースファイル\Conponent</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ControllerInput.cpp">
+      <Filter>ソースファイル\InputSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\GraphicsDeviceManager.h">
@@ -579,24 +618,6 @@
     <ClInclude Include="Code\EasingComponent.h">
       <Filter>ヘッダーファイル\Component\MurataComponent</Filter>
     </ClInclude>
-    <ClInclude Include="Code\State.h">
-      <Filter>ヘッダーファイル\StateMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\StateMachine.h">
-      <Filter>ヘッダーファイル\StateMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerWalkState.h">
-      <Filter>ヘッダーファイル\StateMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerRunState.h">
-      <Filter>ヘッダーファイル\StateMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerSneakState.h">
-      <Filter>ヘッダーファイル\StateMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerSlidingState.h">
-      <Filter>ヘッダーファイル\StateMachine</Filter>
-    </ClInclude>
     <ClInclude Include="External\recastnavigation\DebugUtils\Include\RecastDump.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
@@ -714,102 +735,126 @@
     <ClInclude Include="Code\Transform.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Code\ParticleRessiource.h">
+      <Filter>ヘッダーファイル\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleComponent.h">
+      <Filter>ヘッダーファイル\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleEmitter.h">
+      <Filter>ヘッダーファイル\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleRenderSystem.h">
+      <Filter>ヘッダーファイル\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Movement.h">
+      <Filter>ヘッダーファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ControllerInput.h">
+      <Filter>ヘッダーファイル\InputSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Basic.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shader\Scene.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shader\ShapeRenderer.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shader\Skinning.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shader\sprite.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shader\filter_functions.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Basic</Filter>
     </None>
     <None Include="Shader\color_filter.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shader\PBRCommon.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
     </None>
     <None Include="Shader\bidirectional_reflectance_distribution_function.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
+    </None>
+    <None Include="Shader\sprite.hlsli">
+      <Filter>Shaders\Sprite</Filter>
+    </None>
+    <None Include="Shader\PBRCommon.hlsli">
+      <Filter>Shaders\PBR</Filter>
     </None>
     <None Include="Shader\decal_common.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Decal</Filter>
+    </None>
+    <None Include="Shader\filter_functions.hlsli">
+      <Filter>Shaders\PostEffect</Filter>
     </None>
     <None Include="Shader\gbuffer.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
     </None>
     <None Include="Shader\gbuffer_functions.hlsli">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
     </None>
-    <None Include="Shader\NavMesh.hlsli">
-      <Filter>Shaders</Filter>
+    <None Include="Shader\ShapeRenderer.hlsli">
+      <Filter>Shaders\Shape</Filter>
+    </None>
+    <None Include="Shader\Scene.hlsli">
+      <Filter>Shaders\Scene</Filter>
+    </None>
+    <None Include="Shader\Skinning.hlsli">
+      <Filter>Shaders\Scene</Filter>
+    </None>
+    <None Include="Shader\ParticleCommon.hlsli">
+      <Filter>Shaders\Particle</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\BasicPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Basic</Filter>
     </FxCompile>
     <FxCompile Include="Shader\BasicVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\sprite_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\sprite_VS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Basic</Filter>
     </FxCompile>
     <FxCompile Include="Shader\color_filter_ps.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\color_filter_vs.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\PBRPS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\PBRVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\BrightPassPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\CompositePS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\Decal_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\Decal_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\FullScreenVS.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="Shader\BrightPassPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\KawaseBlurPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\FullScreenVS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\sprite_PS.hlsl">
+      <Filter>Shaders\Sprite</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\sprite_VS.hlsl">
+      <Filter>Shaders\Sprite</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRPS.hlsl">
+      <Filter>Shaders\PBR</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRVS.hlsl">
+      <Filter>Shaders\PBR</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Decal_PS.hlsl">
+      <Filter>Shaders\Decal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Decal_VS.hlsl">
+      <Filter>Shaders\Decal</Filter>
     </FxCompile>
     <FxCompile Include="Shader\ShapeRendererPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Shape</Filter>
     </FxCompile>
     <FxCompile Include="Shader\ShapeRendererVS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Shape</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\NavMeshPS.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="Shader\ParticleUpdate_CS.hlsl">
+      <Filter>Shaders\Particle</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\NavMeshVS.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="Shader\ParticleDraw_PS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleDraw_GS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleDraw_VS.hlsl">
+      <Filter>Shaders\Particle</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

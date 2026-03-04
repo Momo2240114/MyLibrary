@@ -29,6 +29,8 @@ public:
     bool RightDown()     const { return m_rightDown; }
     bool RightReleased() const { return m_rightReleased; }
 
+    bool GetButtonState(int buttonCode, int type) const;
+
     // ==========================
     // マウス座標取得
     // ==========================

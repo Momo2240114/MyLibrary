@@ -68,6 +68,9 @@ public:
     BloomSystem::Parameters& GetBloomParams() { return bloomParams; }
     BloomSystem::CbColorFilter& GetFilterParams() { return filterParams; }
 
+    // パーティクルはカラーバッファにだけ影響を与えたい
+    void SetParticleRenderTarget();
+
     // バックバッファではなく「シーン用テクスチャ」をセットする関数
     void SetSceneRenderTarget();
     // シーン用テクスチャからバックバッファへブルームを適用して描画

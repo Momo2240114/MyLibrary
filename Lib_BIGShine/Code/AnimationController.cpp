@@ -5,7 +5,20 @@
 #include <fstream>
 
 #include"RandomHelper.h"
+#include"EventTrack.h"
 
+void AnimationController::Start()
+{
+    auto obj = GetGameObject();
+    if (!obj) return;
+    model = obj->GetComponent<GltfModelCommponennt>();
+    if (layers.empty()) {
+        layers.resize(1);
+    }
+    Play(0);
+
+
+}
 void AnimationController::Update(float deltaTime)
 {
     if (!model)
@@ -44,6 +57,8 @@ void AnimationController::Update(float deltaTime)
             else {
                 layer.currentTime = (std::min)(layer.currentTime, animDuration);
             }
+
+            layer.eventTrack.Update(layer.currentTime, GetGameObject());
         }
     }
 
@@ -373,6 +388,24 @@ bool AnimationController::IsAnimationFinished()
     return layer.currentTime >= duration;
 }
 
+
+bool AnimationController::IsActionWindowOpen(const std::string& actionName) const {
+    // 現在再生中の全レイヤーをチェック（通常は globalSelectedLayer だけでもOK）
+    auto& layer = layers[globalSelectedLayer];
+
+    // 現在の時間に重なっているイベントを走査
+    for (int i = 0; i < layer.eventTrack.GetItemCount(); ++i) {
+        auto& ev = layer.eventTrack.GetEvent(i);
+        bool inRange = (layer.currentTime >= ev.startTime && layer.currentTime <= ev.endTime);
+
+        // イベントのラベルやペイロードに「このアクションの受付期間」と書いてあれば true
+        if (inRange && ev.label == actionName) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ShowNodeTree(GltfModelCommponennt::Node* node, const std::vector<GltfModelCommponennt::Node>& allNodes, int& selectedIdx) {
     if (!node) return;
 
@@ -510,12 +543,18 @@ void AnimationController::Gui()
 
     ImGui::Separator();
 
+
     // --- A. 全モード共通のグローバル操作 ---
+
+
     ImGui::Checkbox("Global Play", &animationPlaying);
     ImGui::SameLine();
     ImGui::DragFloat("Speed", &playbackSpeed, 0.01f, 0.0f, 5.0f);
 
 
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(100);
+    ImGui::DragFloat("Speed", &playbackSpeed, 0.01f, 0.0f, 5.0f);
 
     // --- 2. 編集対象レイヤーとアニメーションの設定 (全モード共通ヘッダー) ---
 
@@ -557,13 +596,17 @@ void AnimationController::Gui()
         std::string currentAnimName = activeLayer.isCustomMode ? "Custom (Timeline)" :
             (activeLayer.animationIndex >= 0 ? anims[activeLayer.animationIndex].name : "None");
 
-        if (ImGui::BeginCombo("##AnimCombo", currentAnimName.c_str())) {
+        if (ImGui::BeginCombo("##AnimCombo", currentAnimName.c_str())) 
+        {
             // glTF内蔵アニメーション
-            for (int i = 0; i < (int)anims.size(); i++) {
+            for (int i = 0; i < (int)anims.size(); i++)          
+            {
                 if (ImGui::Selectable(anims[i].name.c_str(), (!activeLayer.isCustomMode && activeLayer.animationIndex == i))) {
                     activeLayer.animationIndex = i;
                     activeLayer.isCustomMode = false;
-                    activeLayer.currentTime = 0.0f; // ★即座に最初から再生させる
+
+                    // ★ ここで Play を呼ぶと、アニメを切り替えた瞬間に滑らかに再生開始
+                    Play(globalSelectedLayer, activeLayer.transitionDuration);
                 }
             }
             // 自作カスタムアニメーション（あれば）
@@ -575,6 +618,14 @@ void AnimationController::Gui()
         }
     }
     ImGui::Columns(1);
+
+
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
+    if (ImGui::Button(" Preview Play ")) {
+        Play(globalSelectedLayer, activeLayer.transitionDuration);
+    }
+    ImGui::PopStyleColor();
 
     // --- B. 現在の時間（シークバー） ---
     // どのアニメーションの長さに基づいているかを判定
@@ -891,23 +942,24 @@ void AnimationController::Gui()
     }
     break;
     case EditorMode::EventSetting:
-   {
-        // --- 1. ズーム倍率と選択レイヤーの取得 ---
+    {
+        // --- 1. データの準備 (Beginの前に出す) ---
         static float timelineZoom = 100.0f;
         auto& layer = layers[globalSelectedLayer];
 
-        // タイムラインの長さを確定
         float animationLength = 10.0f;
         if (!layer.isCustomMode && model && layer.animationIndex >= 0) {
             animationLength = model->GetAnimations()[layer.animationIndex].secondsLength;
-        } 
+        }
         else if (layer.isCustomMode && !customAnims.empty()) {
             animationLength = customAnims[layer.customAnimIndex].duration;
         }
 
         // --- 2. 独立したシーケンサーウィンドウ ---
         ImGui::SetNextWindowSize(ImVec2(900, 400), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Timeline Sequencer", nullptr, ImGuiWindowFlags_HorizontalScrollbar))
+
+        // Beginの結果を変数に格納し、Endは必ず呼ぶようにする
+        if (ImGui::Begin("Timeline Sequencer"))
         {
             // --- A. ウィンドウ上部の操作ツールバー ---
             ImGui::BeginGroup();
@@ -927,23 +979,18 @@ void AnimationController::Gui()
             // --- B. シーケンサー本体の描画 ---
             bool expanded = true;
             float firstVisibleTime = 0.0f;
-            // pixelsPerSecondにtimelineZoomを適用
-            layer.eventTrack.DrawSequencer(&layer.currentTime, &expanded, &layer.selectedEvent, &firstVisibleTime, animationLength,gameObject.lock());
+            layer.eventTrack.DrawSequencer(&layer.currentTime, &expanded, &layer.selectedEvent, &firstVisibleTime, animationLength, gameObject.lock());
 
-            // --- C. ウィンドウ下部のイベント編集エリア (イベント選択時のみ表示) ---
+            // --- C. ウィンドウ下部のイベント編集エリア ---
             if (layer.selectedEvent >= 0)
             {
                 ImGui::Separator();
                 auto& ev = layer.eventTrack.GetEvent(layer.selectedEvent);
 
-                // 編集エリアを2カラムに分割
                 ImGui::Columns(2, "EventEditColumns", false);
-                ImGui::SetColumnWidth(0, 400); // アクション選択側を少し広く
+                ImGui::SetColumnWidth(0, 400);
 
-                // --- 左カラム: 3つのタイミング別アクション設定 ---
                 ImGui::TextColored(ImVec4(1, 1, 0, 1), "Action Triggers:");
-
-                // ヘルパー関数を使って3つ並べる（gameObject.lock() を owner として渡す）
                 auto owner = gameObject.lock();
                 DrawActionCombo("On Start ", ev.actionStart, owner);
                 DrawActionCombo("On Update", ev.actionUpdate, owner);
@@ -951,7 +998,6 @@ void AnimationController::Gui()
 
                 ImGui::NextColumn();
 
-                // --- 右カラム: 時間・色・削除 ---
                 ImGui::TextColored(ImVec4(1, 1, 0, 1), "Event Settings:");
                 ImGui::SetNextItemWidth(-1);
                 ImGui::DragFloatRange2("Duration", &ev.startTime, &ev.endTime, 0.01f, 0.0f, animationLength, "Start: %.2fs", "End: %.2fs");
@@ -965,17 +1011,16 @@ void AnimationController::Gui()
                     layer.selectedEvent = -1;
                 }
 
-                ImGui::Columns(1);
+                ImGui::Columns(1); // ここでカラムをリセット（ifの中にあるので安全）
             }
             else
             {
                 ImGui::TextDisabled("Click an event to edit properties.");
             }
-
-            ImGui::End();
         }
+        ImGui::End(); // Beginがfalseでも必ず呼ぶ
 
-        // メインウィンドウ側には何も表示しないか、簡単な案内のみ
+        // メインウィンドウ側の表示
         ImGui::Text("Sequencer is open in a separate window.");
         break;
     }
@@ -1298,17 +1343,34 @@ void AnimationController::Deserialize(const nlohmann::json& j)
 void AnimationController::LayerToJson(nlohmann::json& j, const AnimationLayer& layer)
 {
     j = nlohmann::json{
-        {"animationIndex", layer.animationIndex},
-        {"currentTime", layer.currentTime},
-        {"weight", layer.weight},
-        {"loop", layer.loop},
-        {"playbackSpeed", layer.playbackSpeed},
-        {"isCustomMode", layer.isCustomMode},
-        {"customAnimIndex", layer.customAnimIndex},
-        {"blendMode", (int)layer.blendMode},
-        {"nodeMask", layer.nodeMask},
-        { "IsRootMotion", layer.m_IsRootMotion }
+           {"animationIndex", layer.animationIndex},
+           {"currentTime", layer.currentTime},
+           {"weight", layer.weight},
+           {"loop", layer.loop},
+           {"playbackSpeed", layer.playbackSpeed},
+           {"isCustomMode", layer.isCustomMode},
+           {"customAnimIndex", layer.customAnimIndex},
+           {"blendMode", (int)layer.blendMode},
+           {"nodeMask", layer.nodeMask},
+           {"IsRootMotion", layer.m_IsRootMotion},
+           {"transitionDuration", layer.transitionDuration}
     };
+
+    // イベントリストの保存
+    j["events"] = nlohmann::json::array();
+    for (int i = 0; i < layer.eventTrack.GetItemCount(); ++i) {
+        auto& ev = layer.eventTrack.GetEvent(i);
+        nlohmann::json ej;
+        ej["label"] = ev.label;
+        ej["startTime"] = ev.startTime;
+        ej["endTime"] = ev.endTime;
+        ImVec4 colV4 = ImGui::ColorConvertU32ToFloat4(ev.color);
+        ej["color"] = { colV4.x, colV4.y, colV4.z, colV4.w };
+        ej["actionStart"] = ev.actionStart;
+        ej["actionUpdate"] = ev.actionUpdate;
+        ej["actionEnd"] = ev.actionEnd;
+        j["events"].push_back(ej);
+    }
 }
 
 
@@ -1322,11 +1384,42 @@ void AnimationController::LayerFromJson(const nlohmann::json& j, AnimationLayer&
     layer.isCustomMode = j.value("isCustomMode", false);
     layer.customAnimIndex = j.value("customAnimIndex", -1);
     layer.blendMode = (AnimationLayer::BlendMode)j.value("blendMode", 0);
+    layer.transitionDuration = j.value("transitionDuration", 0.01f);
+
     if (j.contains("nodeMask")) {
         layer.nodeMask = j.at("nodeMask").get<std::vector<bool>>();
     }
     if (j.contains("IsRootMotion")) {
         layer.m_IsRootMotion = j.at("IsRootMotion").get<bool>();
+    }
+
+    // イベントリストの復元
+    if (j.contains("events")) {
+        // 一旦空にする
+        while (layer.eventTrack.GetItemCount() > 0) layer.eventTrack.DeleteEvent(0);
+
+        for (const auto& ej : j["events"]) {
+            // AddEventに引数を合わせる
+            std::string label = ej.value("label", "");
+            float start = ej.value("startTime", 0.0f);
+            float end = ej.value("endTime", 0.0f);
+
+            // 色の復元
+            ImVec4 color(1, 1, 0, 1); // Default yellow
+            if (ej.contains("color")) {
+                auto& c = ej["color"];
+                color = ImVec4(c[0], c[1], c[2], c[3]);
+            }
+
+            // イベント追加（型はとりあえずGeneric）
+            layer.eventTrack.AddEvent(EventType::Generic, label, start, end, ImGui::ColorConvertFloat4ToU32(color));
+
+            // 追加したイベントに対してアクション名を直接セット
+            auto& newEv = layer.eventTrack.GetEvent(layer.eventTrack.GetItemCount() - 1);
+            newEv.actionStart = ej.value("actionStart", "");
+            newEv.actionUpdate = ej.value("actionUpdate", "");
+            newEv.actionEnd = ej.value("actionEnd", "");
+        }
     }
 }
 

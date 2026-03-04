@@ -79,12 +79,16 @@
             "Data": {
                 "CombinedWaypoints": [
                     {
+                        "autoReturn": false,
                         "f_idx": 0,
-                        "t_idx": 0
+                        "t_idx": 0,
+                        "waitTime": 0.0
                     },
                     {
+                        "autoReturn": false,
                         "f_idx": 1,
-                        "t_idx": 1
+                        "t_idx": 1,
+                        "waitTime": 0.0
                     }
                 ]
             },

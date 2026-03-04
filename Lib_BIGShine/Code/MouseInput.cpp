@@ -84,6 +84,23 @@ void MouseInput::Update(HWND hwnd)
     }
 }
 
+bool MouseInput::GetButtonState(int buttonCode, int type) const
+{
+    // type: 0=Down(Hold), 1=Pressed(In), 2=Released(Out)
+    switch (buttonCode) {
+    case 0x01: // VK_LBUTTON
+        if (type == 0) return LeftDown();
+        if (type == 1) return LeftPressed();
+        return LeftReleased();
+    case 0x02: // VK_RBUTTON
+        if (type == 0) return RightDown();
+        if (type == 1) return RightPressed();
+        return RightReleased();
+        // 必要に応じて中クリック(VK_MBUTTON)なども追加
+    }
+    return false;
+}
+
 //void MouseInput::GetWorldRay(const HWND hwnd)
 //{
 //    auto* cam = CameraController::GetInstance().GetCamera();

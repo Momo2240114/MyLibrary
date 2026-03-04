@@ -159,119 +159,98 @@ void BloomSystem::Execute(
 
 }
 
-void BloomSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView* sceneSRV, ID3D11RenderTargetView* finalRTV, const Parameters& params, const CbColorFilter& colorFilterparamas)
+void BloomSystem::Execute(
+    const RenderContext& rc,
+    ID3D11ShaderResourceView* sceneSRV,
+    ID3D11RenderTargetView* finalRTV,
+    const Parameters& params,
+const CbColorFilter& colorFilterParams) // 引数名を修正
 {
     auto dc = rc.deviceContext;
     auto rs = rc.renderState;
 
-    // 共通ステート設定
+    // --- 0. 共通ステート設定 ---
     dc->RSSetState(rs->GetRasterizerState(RasterizerState::SolidCullNone));
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
-
-    // サンプラーを Clamp に固定！
     ID3D11SamplerState* sampler = rs->GetSamplerState(SamplerState::LinearClamp);
     dc->PSSetSamplers(0, 1, &sampler);
 
     float clearCol[4] = { 0, 0, 0, 1 };
+    ID3D11ShaderResourceView* nullSRVs[2] = { nullptr, nullptr };
 
-    // 1. Bright Pass
-    dc->ClearRenderTargetView(brightTarget.rtv.Get(), clearCol); // 追加
-
-    // ヘルパー：ビューポートをセットする
     auto SetVP = [&](float w, float h) {
         D3D11_VIEWPORT vp = { 0.0f, 0.0f, w, h, 0.0f, 1.0f };
         dc->RSSetViewports(1, &vp);
         };
 
-    ID3D11ShaderResourceView* nullSRVs[2] = { nullptr, nullptr };
-
-
     // --- 1. Bright Pass (sceneSRV -> brightTarget) ---
+    dc->ClearRenderTargetView(brightTarget.rtv.Get(), clearCol);
     SetVP(brightTarget.width, brightTarget.height);
     dc->OMSetRenderTargets(1, brightTarget.rtv.GetAddressOf(), nullptr);
+
     UpdateConstantBuffer(dc, params, 0, brightTarget.width, brightTarget.height);
 
     dc->PSSetShader(brightPS.Get(), nullptr, 0);
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // ★これを追加（b0スロット）
+    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
     dc->PSSetShaderResources(0, 1, &sceneSRV);
     DrawFullScreenQuad(dc);
-
-    // 次のパスのために t0 を解除
     dc->PSSetShaderResources(0, 1, nullSRVs);
 
     // --- 2. Kawase Blur Pass ---
     ID3D11ShaderResourceView* currentSRV = brightTarget.srv.Get();
-
     for (int i = 0; i < params.blurPasses; ++i) {
         int destIdx = i % 2;
-
-        // ★重要：描き込み先のサイズを正確に反映させる
         float targetW = blurTargets[destIdx].width;
         float targetH = blurTargets[destIdx].height;
 
-        SetVP(targetW, targetH); // ここがズレているとチカチカします
+        SetVP(targetW, targetH);
         dc->OMSetRenderTargets(1, blurTargets[destIdx].rtv.GetAddressOf(), nullptr);
 
-        // 定数バッファにも同じサイズを渡す（g_texSize の計算のため）
         UpdateConstantBuffer(dc, params, (float)i, targetW, targetH);
-
         dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-
         dc->PSSetShader(kawasePS.Get(), nullptr, 0);
-        dc->PSSetShaderResources(0, 1, &currentSRV); // 1回前の結果を入力
+        dc->PSSetShaderResources(0, 1, &currentSRV);
         DrawFullScreenQuad(dc);
 
-        // 入力を解除
         dc->PSSetShaderResources(0, 1, nullSRVs);
-
-        // ★重要：今描いた結果を「次の回の入力」に更新する
         currentSRV = blurTargets[destIdx].srv.Get();
     }
 
-    // --- 3. Composite (sceneSRV + currentSRV -> finalRTV) ---
-    // ここで元の画面サイズ(width, height)に戻す
-    SetVP(ScreenSize.x, ScreenSize.y); // ★ここを実際の画面解像度の変数に！
-    dc->OMSetRenderTargets(1, &finalRTV, nullptr);
+    // --- 3. Composite & Color Filter (sceneSRV + Bloom -> finalRTV) ---
+    // 解像度をメンバ変数 ScreenSize から正しく取得
+    SetVP(ScreenSize.x, ScreenSize.y);
 
-    dc->PSSetShader(compositePS.Get(), nullptr, 0);
-    ID3D11ShaderResourceView* inputs[] = { sceneSRV, currentSRV };
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // ★これを追加（b0スロット）
-    dc->PSSetShaderResources(0, 2, inputs);
-    DrawFullScreenQuad(dc);
-
-    // 全て解除
-    dc->PSSetShaderResources(0, 2, nullSRVs);
-
-    // --- 3. Composite (sceneSRV + currentSRV -> finalRTV) ---
-    // 解像度は適宜メンバ変数などから取得してください
-    SetVP(1920.0f, 1080.0f);
-
-    // ★ ここを修正：nullptr ではなく、シーンのデプスバッファ (rc.dsv) をセットする
-    ID3D11DepthStencilView* dsv = GraphicsDeviceManager::Instance().GetDepthStencilView(); // RenderContext に DSV が含まれていると仮定
+    // デプスバッファを戻して、後の描画（UIやデバッグ形状）が正しく遮蔽されるようにする
+    ID3D11DepthStencilView* dsv = nullptr;
+    rc.deviceContext->OMGetRenderTargets(0, nullptr, &dsv);
     dc->OMSetRenderTargets(1, &finalRTV, dsv);
 
+    // ColorFilter 用定数バッファの更新
     D3D11_MAPPED_SUBRESOURCE mapped;
     if (SUCCEEDED(dc->Map(filterBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
-        memcpy(mapped.pData, &colorFilterparamas, sizeof(CbColorFilter));
+        memcpy(mapped.pData, &colorFilterParams, sizeof(CbColorFilter));
         dc->Unmap(filterBuffer.Get(), 0);
     }
 
     dc->PSSetShader(compositePS.Get(), nullptr, 0);
-    ID3D11ShaderResourceView* newinputs[] = { sceneSRV, currentSRV };
-    // 2つのバッファをセット
+
+    // b0: BloomParams, b1: ColorFilterParams
     ID3D11Buffer* cbs[] = { constantBuffer.Get(), filterBuffer.Get() };
     dc->PSSetConstantBuffers(0, 2, cbs);
-    dc->PSSetShaderResources(0, 2, newinputs);
+
+    // t0: 原画, t1: ブルーム結果
+    ID3D11ShaderResourceView* inputs[] = { sceneSRV, currentSRV };
+    dc->PSSetShaderResources(0, 2, inputs);
+
     DrawFullScreenQuad(dc);
 
-    // ★ ここでデプスステートを「テストあり・書き込みなし」等、
-    // 次の描画（ナビメッシュ）が期待する状態に戻しておくとより安全です
-    dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::TestOnly), 0);
-
-    // 全て解除
+    // --- 4. クリーンアップ ---
     dc->PSSetShaderResources(0, 2, nullSRVs);
-
+    // 深度テストを有効に戻す（スプライトやナビメッシュ描画用）
+    dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::TestOnly), 0);
 }
+
+
 void BloomSystem::CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT) {
     D3D11_TEXTURE2D_DESC desc = {};
     desc.Width = w;

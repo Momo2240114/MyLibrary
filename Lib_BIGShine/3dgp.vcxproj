@@ -252,6 +252,7 @@
     <ClCompile Include="Code\ColliderComponent.cpp" />
     <ClCompile Include="Code\ColorFilterDirector.cpp" />
     <ClCompile Include="Code\ComponentBase.cpp" />
+    <ClCompile Include="Code\ControllerInput.cpp" />
     <ClCompile Include="Code\Curve.cpp" />
     <ClCompile Include="Code\CurvePlayerComponent.cpp" />
     <ClCompile Include="Code\DecalComponent.cpp" />
@@ -262,7 +263,11 @@
     <ClCompile Include="Code\ItemComponent.cpp" />
     <ClCompile Include="Code\LightBlinkerComponent.cpp" />
     <ClCompile Include="Code\LightComponent.cpp" />
+    <ClCompile Include="Code\Movement.cpp" />
     <ClCompile Include="Code\NumberSwitcher.cpp" />
+    <ClCompile Include="Code\ParticleComponent.cpp" />
+    <ClCompile Include="Code\ParticleEmitter.cpp" />
+    <ClCompile Include="Code\ParticleRenderSystem.cpp" />
     <ClCompile Include="Code\PbrShader.cpp" />
     <ClCompile Include="Code\PhysicsCollisionComponent.cpp" />
     <ClCompile Include="Code\ComponentRegistry.cpp" />
@@ -356,6 +361,7 @@
     <ClInclude Include="Code\Collision.h" />
     <ClInclude Include="Code\CollisionMath.h" />
     <ClInclude Include="Code\ColorFilterDirector.h" />
+    <ClInclude Include="Code\ControllerInput.h" />
     <ClInclude Include="Code\DecalComponent.h" />
     <ClInclude Include="Code\DecalManager.h" />
     <ClInclude Include="Code\DecalShader.h" />
@@ -368,7 +374,12 @@
     <ClInclude Include="Code\ImVecOperator.h" />
     <ClInclude Include="Code\ItemComponent.h" />
     <ClInclude Include="Code\LightBlinkerComponent.h" />
+    <ClInclude Include="Code\Movement.h" />
     <ClInclude Include="Code\NumberSwitcher.h" />
+    <ClInclude Include="Code\ParticleComponent.h" />
+    <ClInclude Include="Code\ParticleEmitter.h" />
+    <ClInclude Include="Code\ParticleRenderSystem.h" />
+    <ClInclude Include="Code\ParticleRessiource.h" />
     <ClInclude Include="Code\PbrShader.h" />
     <ClInclude Include="Code\PhysicsCollisionComponent.h" />
     <ClInclude Include="Code\ComponentBase.h" />
@@ -411,10 +422,6 @@
     <ClInclude Include="Code\PhysXSystem.h" />
     <ClInclude Include="Code\PlayerAttack.h" />
     <ClInclude Include="Code\PlayerInput.h" />
-    <ClInclude Include="Code\PlayerRunState.h" />
-    <ClInclude Include="Code\PlayerSlidingState.h" />
-    <ClInclude Include="Code\PlayerSneakState.h" />
-    <ClInclude Include="Code\PlayerWalkState.h" />
     <ClInclude Include="Code\RandomHelper.h" />
     <ClInclude Include="Code\RayCastManager.h" />
     <ClInclude Include="Code\RenderContext.h" />
@@ -435,8 +442,6 @@
     <ClInclude Include="Code\SpriteRenderSystem.h" />
     <ClInclude Include="Code\SpriteShader.h" />
     <ClInclude Include="Code\SpriteShaderID.h" />
-    <ClInclude Include="Code\State.h" />
-    <ClInclude Include="Code\StateMachine.h" />
     <ClInclude Include="Code\CameraDirectorComponent.h" />
     <ClInclude Include="Code\Transform.h" />
     <ClInclude Include="Code\TransformDirector.h" />
@@ -458,7 +463,7 @@
     <None Include="Shader\filter_functions.hlsli" />
     <None Include="Shader\gbuffer.hlsli" />
     <None Include="Shader\gbuffer_functions.hlsli" />
-    <None Include="Shader\NavMesh.hlsli" />
+    <None Include="Shader\ParticleCommon.hlsli" />
     <None Include="Shader\PBRCommon.hlsli" />
     <None Include="Shader\Scene.hlsli" />
     <None Include="Shader\ShapeRenderer.hlsli" />
@@ -520,21 +525,50 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shader\NavMeshPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    <FxCompile Include="Shader\ParticleDraw_GS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">4.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Shader\NavMeshVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
+    <FxCompile Include="Shader\ParticleDraw_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleUpdate_CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleDraw_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Vertex</ShaderType>
+      <FileType>Document</FileType>
     </FxCompile>
     <FxCompile Include="Shader\PBRPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
