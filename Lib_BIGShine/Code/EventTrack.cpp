@@ -19,25 +19,40 @@ EventTrack::EventTrack(const std::string& name, EventType defaultType):
 
 void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
 {
+    // ★重要：再生ヘッドが巻き戻った、あるいはループした判定
+    static float lastTime = 0;
+    bool looped = (currentTime < lastTime);
+    lastTime = currentTime;
+
     for (auto& ev : events)
     {
-        if (ev.label.empty()) continue; // ラベルをアクション名として使う想定
-
         bool inRange = (currentTime >= ev.startTime && currentTime <= ev.endTime);
 
-        if (inRange) {
-            if (!ev.started) {
-                ev.started = true;
-                // 開始時に一度だけ実行（例: "Jump_Start" があれば呼ぶ）
-                Execute(ev.label + "_Start", owner);
-            }
-            // 継続実行（例: "Jump_Update"）
-            Execute(ev.label + "_Update", owner);
+        // --- A. 範囲内に入った（Start） ---
+        if (inRange && !ev.started) {
+            ev.started = true;
+            ev.ended = false;
+            if (!ev.actionStart.empty()) Execute(ev.actionStart, owner);
+            return; // ★このフレームは Start だけして抜ける（Update を 1フレーム遅らせる）
         }
-        else if (ev.started && !ev.ended) {
+
+        // --- B. 継続中（Update） ---
+        if (inRange) {
+            if (!ev.actionUpdate.empty()) Execute(ev.actionUpdate, owner);
+            return;
+        }
+
+        // --- C. 範囲から出た、またはループした（End） ---
+        // 「既に開始しているが、今は範囲外」かつ「まだ終了処理をしていない」場合
+        if ((!inRange && ev.started && !ev.ended) || (looped && ev.started && !ev.ended)) {
             ev.ended = true;
-            // 終了時に一度だけ実行（例: "Jump_End"）
-            Execute(ev.label + "_End", owner);
+            // started を false に戻すことで次回の再生に備える
+            ev.started = false;
+
+            if (!ev.actionEnd.empty()) {
+                printf("[Event] Executing End: %s\n", ev.label.c_str());
+                Execute(ev.actionEnd, owner);
+            }
         }
     }
 }
@@ -155,10 +170,39 @@ bool EventTrack::DrawSequencer(
             // --- タイムライン上の描画とドラッグ操作 (既存機能) ---
             float x0 = origin.x + labelWidth + ev.startTime * pixelsPerSecond;
             float x1 = origin.x + labelWidth + ev.endTime * pixelsPerSecond;
-            draw_list->AddRectFilled({ x0, yTop }, { x1, yTop + rowHeight }, ev.color);
+            float width = x1 - x0;
+
+            draw_list->AddRectFilled({ x0, yTop + 2 }, { x1, yTop + rowHeight - 2 }, ev.color, 4.0f);
+            if (*selectedEntry == i) {
+                draw_list->AddRect({ x0, yTop + 2 }, { x1, yTop + rowHeight - 2 }, IM_COL32_WHITE, 4.0f, 0, 2.0f);
+            }
 
             // ラベル（アクション名）を表示
             draw_list->AddText({ x0 + 4, yTop + 4 }, IM_COL32_WHITE, ev.payload.empty() ? "(No Action)" : ev.payload.c_str());
+
+            // --- 3. ドラッグ移動ロジックの追加 ---
+            ImGui::SetCursorScreenPos({ x0, yTop });
+            // バー全体を掴むためのボタン
+            ImGui::InvisibleButton("move_event", { width, rowHeight });
+
+            if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+                float deltaX = ImGui::GetIO().MouseDelta.x;
+                float deltaTime = deltaX / pixelsPerSecond;
+                ev.startTime += deltaTime;
+                ev.endTime += deltaTime;
+
+                // 範囲外チェック
+                if (ev.startTime < 0) {
+                    float d = -ev.startTime;
+                    ev.startTime += d;
+                    ev.endTime += d;
+                }
+                if (ev.endTime > lengthSeconds) {
+                    float d = ev.endTime - lengthSeconds;
+                    ev.startTime -= d;
+                    ev.endTime -= d;
+                }
+            }
 
             // 選択判定
             ImGui::SetCursorScreenPos({ origin.x, yTop });
@@ -170,6 +214,15 @@ bool EventTrack::DrawSequencer(
             if (*selectedEntry == i) {
                 // ラベルエリアにアクション選択 GUI を表示（または別の場所に表示）
                 ImGui::SetCursorScreenPos({ origin.x, yTop });
+
+                // 名前入力用のバッファ（std::string を直接編集）
+                char buf[128];
+                strncpy_s(buf, ev.label.c_str(), sizeof(buf));
+
+                ImGui::SetNextItemWidth(labelWidth - 5); // 少し余白を作る
+                if (ImGui::InputText("##edit_labelName", buf, sizeof(buf))) {
+                    ev.label = buf; // 入力があるたびに即座に反映
+                }
 
                 // ペイロードを一時的にカテゴリとアクションに分けるのは手間なので、
                 // 今回は「カテゴリ選択」→「その中のアクション選択」の 2 Step GUI を用意します。

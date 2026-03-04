@@ -23,8 +23,8 @@
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
-#define FULLSCREEN TRUE
-#define APPLICATION_NAME L"Silent Escape"
+#define FULLSCREEN FALSE
+#define APPLICATION_NAME L"BigShine"
 
 class framework
 {

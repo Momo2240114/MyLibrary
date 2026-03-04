@@ -19,6 +19,9 @@
 
 void GameObjectManager::Initialize()
 {
+    // パーティクルシステムの初期化
+    particleSystem = std::make_unique<ParticleRenderSystem>();
+    particleSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
 
     m_pRayCastManager = std::make_unique<RayCastManager>();
 }
@@ -33,6 +36,12 @@ void GameObjectManager::Update(float et_)
         // STEP 1: Director系（アクションを提供する側）の登録
         for (auto& obj : startList) {
             if (!obj) continue;
+
+            // --- ここでパーティクルコンポーネントをリストに登録 ---
+            if (auto pComp = obj->GetComponent<ParticleComponent>()) {
+                m_particleComponents.push_back(pComp);
+            }
+
             // 既存のコンポーネント初期化（もしあれば）
             obj->CallAllComponentStart();
 
@@ -78,13 +87,17 @@ void GameObjectManager::Update(float et_)
         obj->UpdateTransform();
     }
 
-    //ViewProjectionを更新する
     if (m_pMainCamera != nullptr)
     {
         std::shared_ptr<CameraComponent> cameraComponent = m_pMainCamera->GetComponent<CameraComponent>();
         cameraComponent->UpdateViewProjection(et_);
-    }
 
+        particleSystem->UpdateAll(
+            GraphicsDeviceManager::Instance().GetContext(),
+            et_,
+            cameraComponent->GetViewProjection(),
+            m_particleComponents);
+    }
 
     // ★ 最後にまとめて削除を確定させる
     if (!pendingDestroys.empty()) {
@@ -96,6 +109,15 @@ void GameObjectManager::Update(float et_)
             ApplyDestroys(obj);
         }
     }
+
+    // --- 1. 無効になった（削除された）パーティクルコンポーネントを掃除 ---
+    m_particleComponents.erase(
+        std::remove_if(m_particleComponents.begin(), m_particleComponents.end(),
+            [](const std::weak_ptr<ParticleComponent>& wp) {
+                return wp.expired(); // GameObjectと共に破棄されていたら削除
+            }),
+        m_particleComponents.end()
+    );
 
 
 }
@@ -294,8 +316,26 @@ void GameObjectManager::CollisionStep()
 
 void GameObjectManager::Gui()
 {
-    // --- 追加: ビューポート（画面全体）の情報を取得 ---
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+    // --- 追加: 画面全体を覆う「背景ダミー」 ---
+    // これを置くことで、UI以外の場所をクリックしても「UIを触っている」状態を維持できます
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowBgAlpha(0.0f); // 背景は透明
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+    // 背景クリック判定用ウィンドウ
+    ImGui::Begin("BackgroundSpace", nullptr,
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoInputs | // ← これを外すと完全に背景をクリックできなくなります
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus | // 背景なので前面に来させない
+        ImGuiWindowFlags_NoFocusOnAppearing);
+
+    ImGui::End();
+    ImGui::PopStyleVar(2);
 
     // --- 静的な変数で横幅を保持（初回のみ初期化） ---
     static float leftPanelWidth = 300.0f;
@@ -314,7 +354,6 @@ void GameObjectManager::Gui()
     static char sceneName[64] = "MainScene"; // デフォルトのシーン名
 
     // 左: オブジェクト一覧
-    ImGui::SetNextWindowSize(ImVec2(200, 400), ImGuiCond_FirstUseEver);
     ImGui::Begin("Objects");
 
     if (ImGui::CollapsingHeader("Debug Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -746,6 +785,9 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
     {
         GraphicsDeviceManager::Instance().GetShapeRendererSystem().Render(ctx, rc.camera->GetView(), rc.camera->GetProjection());
     }
+
+    gdm.SetParticleRenderTarget();
+    particleSystem->RenderAll(rc);
 
     // 2. ブルームをかけてバックバッファへ出力
     gdm.ResolveBloom(rc);

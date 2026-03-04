@@ -22,7 +22,7 @@ struct EventItem
     EventType type = EventType::Generic;
     float startTime = 0;
     float endTime = 0;
-    unsigned int color = 0xFFFFFFFF;   // UI 表示用
+    unsigned int color = 0xFFFFFFFF;
     std::string label;                 // 表示名（任意）
   
     // タイミングごとに違う名前を保存できるようにする

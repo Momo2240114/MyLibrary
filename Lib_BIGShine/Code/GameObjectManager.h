@@ -10,6 +10,7 @@ class BoxCollider;
 class GltfModelCommponennt;
 
 #include"RayCastManager.h"
+#include"ParticleRenderSystem.h"
 
 
 
@@ -224,6 +225,9 @@ private:
     //NaviMeshManager* m_pNaviMeshManager;
     // 所有権をマネージャ側が持つ
     std::unique_ptr<RayCastManager>m_pRayCastManager;
+    std::unique_ptr<ParticleRenderSystem> particleSystem;
+    // パーティクルコンポーネントのみを保持するリスト
+    std::vector<std::weak_ptr<ParticleComponent>> m_particleComponents;
     //現在のシーン
     Scene* m_pCurrentScene;
     std::vector<std::string> m_prefabFiles; // プレハブ名のリスト

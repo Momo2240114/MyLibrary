@@ -84,7 +84,7 @@ public:
         m_IsHitFlag = flag;
     }
 
-    virtual bool GetSetHitFlag()
+    virtual bool GetHitFlag()
     {
         return m_IsHitFlag;
     }

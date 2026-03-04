@@ -2,48 +2,64 @@
     "Components": [
         {
             "Data": {
-                "LocalScale": 1.0,
-                "ModelName": "./Data/Model/Enemy/BookHeadMonster.gltf",
-                "RootMotionName": "",
-                "ShaderID": 1,
-                "UsedNaviMeshSystemFlg": false
-            },
-            "Enabled": true,
-            "TypeName": "GltfModel"
-        },
-        {
-            "Data": {
-                "animationBlendSeconds": 1.0,
-                "customAnims": [],
-                "layers": [
+                "Emitters": [
                     {
-                        "IsRootMotion": false,
-                        "animationIndex": 4,
-                        "blendMode": 0,
-                        "currentTime": 1.6489660739898682,
-                        "customAnimIndex": -1,
-                        "isCustomMode": false,
-                        "loop": true,
-                        "nodeMask": [],
-                        "playbackSpeed": 1.0,
-                        "weight": 1.0
+                        "Color": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Delay": 0.0,
+                        "EmissionMode": 1,
+                        "Gravity": 0.0,
+                        "Lifespan": [
+                            1.0,
+                            200.0
+                        ],
+                        "MaxCount": 972,
+                        "PosOffset": [
+                            3.799999952316284,
+                            2.799999952316284,
+                            0.0
+                        ],
+                        "Speed": [
+                            0.0,
+                            0.0
+                        ],
+                        "TexturePath": "Data/Texture/Particle/effect_crack.png"
+                    },
+                    {
+                        "Color": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Delay": 0.0,
+                        "EmissionMode": 1,
+                        "Gravity": 0.0,
+                        "Lifespan": [
+                            1.0,
+                            1.0
+                        ],
+                        "MaxCount": 100,
+                        "PosOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Speed": [
+                            1.0,
+                            1.0
+                        ],
+                        "TexturePath": ""
                     }
                 ],
-                "playbackSpeed": 1.0,
-                "poseLibrary": []
+                "IsPlaying": true
             },
             "Enabled": true,
-            "TypeName": "AnimationController"
-        },
-        {
-            "Data": null,
-            "Enabled": true,
-            "TypeName": "CurvePlayerComponent"
-        },
-        {
-            "Data": null,
-            "Enabled": true,
-            "TypeName": "CurveAssetComponent"
+            "TypeName": "ParticleComponent"
         }
     ],
     "Layer": 0,
@@ -51,19 +67,19 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            6.192776203155518,
             0.0,
-            0.0
+            0.0,
+            7.450580596923828e-09
         ],
         "Rot": [
             0.0,
-            89.99995422363281,
+            0.0,
             0.0
         ],
         "Scale": [
-            0.9999997615814209,
             1.0,
-            0.9999997615814209
+            1.0,
+            1.0
         ]
     }
 }

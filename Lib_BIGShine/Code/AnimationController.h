@@ -53,16 +53,8 @@ public:
         return name;
     }
 
-    void Start() override
-    {
-        auto obj = GetGameObject();
-        if (!obj) return;
-        model = obj->GetComponent<GltfModelCommponennt>();
-        if (layers.empty()) {
-            layers.resize(1);
-        }
-        Play(0);
-    }
+    void Start() override;
+
 
     void Update(float deltaTime) override;
    
@@ -115,7 +107,7 @@ public:
 
 
     bool IsAnimationFinished();
-
+    bool IsActionWindowOpen(const std::string& actionName)const;
 
     void Stop(int layerIndex)
     {

@@ -44,6 +44,11 @@ void CameraDirector::Gui()
             ImGui::SliderInt("T-Idx", &cp.transformIdx, 0, transformDirector->GetCount() - 1);
             ImGui::SliderInt("F-Idx", &cp.fovIdx, 0, fovDirector->GetCount() - 1);
 
+            ImGui::Checkbox("Auto Return", &cp.m_autoReturn);
+            if (cp.m_autoReturn) {
+                ImGui::DragFloat("Wait Time", &cp.m_waitTime, 0.1f, 0.0f, 10.0f);
+            }
+
             if (ImGui::Button("Play Pair")) {
                 PlayCombined(i);
             }
@@ -103,6 +108,7 @@ void CameraDirector::RegisterActions()
             });
     }
 }
+
 void CameraDirector::Serialize(nlohmann::json& j) const 
 {
     nlohmann::json arr = nlohmann::json::array();
@@ -110,6 +116,8 @@ void CameraDirector::Serialize(nlohmann::json& j) const
         nlohmann::json item;
         item["t_idx"] = cp.transformIdx;
         item["f_idx"] = cp.fovIdx;
+        item["autoReturn"] = cp.m_autoReturn; // í«â¡
+        item["waitTime"] = cp.m_waitTime;     // í«â¡
         arr.push_back(item);
     }
     j["CombinedWaypoints"] = arr;
@@ -124,7 +132,8 @@ void CameraDirector::Deserialize(const nlohmann::json& j)
         // JSONÇ…Ç†ÇÈÉLÅ[ "t_idx", "f_idx" Çì«Ç›çûÇﬁ
         cp.transformIdx = item.value("t_idx", 0);
         cp.fovIdx = item.value("f_idx", 0);
-
+        cp.m_autoReturn = item.value("autoReturn", false); // í«â¡
+        cp.m_waitTime = item.value("waitTime", 0.0f);      // í«â¡
         combinedWaypoints.push_back(cp);
     }
 }

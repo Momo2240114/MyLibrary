@@ -7,7 +7,8 @@
 
 void RegisterAllActions();
 
-class ActionRegistry {
+class ActionRegistry 
+{
 public:
     using ActionFunc = std::function<void()>;
 

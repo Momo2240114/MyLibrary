@@ -128,6 +128,11 @@ public:
     float GetFar()  const { return farZ; }
     float GetFovY() const { return fovY; }
     float GetAspect() const { return aspect; }
+    // ビュー行列とプロジェクション行列を掛け合わせた行列を取得
+    DirectX::XMMATRIX GetViewProjection() const
+    {
+        return DirectX::XMLoadFloat4x4(&view) * DirectX::XMLoadFloat4x4(&projection);
+    }
 private:
     void UpdateView()
     {

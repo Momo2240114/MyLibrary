@@ -39,6 +39,10 @@ private:
     struct CombinedWaypoint {
         int transformIdx; // TransformDirector内の何番目か
         int fovIdx;       // FovDirector内の何番目か
+
+        // --- 追加：アクションごとの戻り設定 ---
+        bool m_autoReturn = false;
+        float m_waitTime = 0.0f;
     };
 
     std::shared_ptr<TransformDirector> transformDirector;

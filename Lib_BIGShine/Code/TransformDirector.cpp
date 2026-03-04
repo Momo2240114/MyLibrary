@@ -13,6 +13,7 @@ void TransformDirector::Start()
     // 初期化時にアクションを登録
     RegisterActions();
 }
+
 void TransformDirector::Update(float et)
 {
     auto go = GetGameObject();
@@ -30,52 +31,6 @@ void TransformDirector::Update(float et)
         go->transform->MarkDirty();
         if (easingComp->GetEndFlag(easingIndex)) isMoving = false;
     }
-
-    ////親子関係に対応させていません
-    //else
-    //{
-    //    // --- 加算モード ---
-    //    Vector3 resultPositon = LerpVector(Vector3::Zero, targetPos, easedT);
-    //    Vector3 resultAngle = LerpVector(Vector3::Zero, targetAngle, easedT);
-    //    // スケール加算（1.0をベースとした補間）
-    //    Vector3 resultScale = LerpVector(Vector3(1, 1, 1), targetScale, easedT);
-
-    //    // ラジアン変換
-    //    resultAngle.x = DirectX::XMConvertToRadians(resultAngle.x);
-    //    resultAngle.y = DirectX::XMConvertToRadians(resultAngle.y);
-    //    resultAngle.z = DirectX::XMConvertToRadians(resultAngle.z);
-
-    //    Matrix transition = DirectX::XMMatrixTranslation(resultPositon.x, resultPositon.y, resultPositon.z);
-    //    Matrix rotation = DirectX::XMMatrixRotationRollPitchYaw(resultAngle.x, resultAngle.y, resultAngle.z);
-    //    Matrix scaleMat = DirectX::XMMatrixScaling(resultScale.x, resultScale.y, resultScale.z); // 追加
-
-    //    DirectX::XMVECTOR position, quaternion, scale;
-    //    DirectX::XMMatrixDecompose(&scale, &quaternion, &position, m_WorldMatrix);
-
-    //    Matrix rotMatrix = DirectX::XMMatrixRotationQuaternion(quaternion);
-    //    Matrix rotationMatrix = rotation * rotMatrix;
-    //    Matrix scaleMatrix = scaleMat * DirectX::XMMatrixScalingFromVector(scale); // スケールを掛け合わせる
-    //    Matrix translationMatrix = DirectX::XMMatrixTranslationFromVector(position);
-
-    //    Matrix mat = scaleMatrix * rotationMatrix * translationMatrix;
-    //    Matrix worldMatrix = mat * transition;
-
-    //    DirectX::XMMatrixDecompose(&scale, &quaternion, &position, worldMatrix);
-
-    //    // ローカル値へ書き戻し
-    //    DirectX::XMStoreFloat3(&go->transform->localPosition, position);
-    //    DirectX::XMStoreFloat3(&go->transform->localScale, scale); // 追加
-    //    Vector3 angle = QuaternionToEuler(quaternion);
-
-    //    go->transform->localRotation.x = DirectX::XMConvertToDegrees(angle.x);
-    //    go->transform->localRotation.y = DirectX::XMConvertToDegrees(angle.y);
-    //    go->transform->localRotation.z = DirectX::XMConvertToDegrees(angle.z);
-
-    //    go->transform->MarkDirty();
-    //    if (easingComp->GetEndFlag(easingIndex)) isMoving = false;
-    //}
-
-
      else
      {
          Vector3  resultPositon = LerpVector(Vector3::Zero, targetPos, easedT);

@@ -6,6 +6,7 @@
 #include "GameObject.h"
 
 
+
 struct DirectionalLight
 {
     DirectX::XMFLOAT3	direction = { 0, -1, 0 };
