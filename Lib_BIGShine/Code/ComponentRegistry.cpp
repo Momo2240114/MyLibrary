@@ -19,6 +19,7 @@
 #include "NumberSwitcher.h"
 #include "CurvePlayerComponent.h"
 #include "ParticleComponent.h"
+#include "FollowCameraComponent.h"
 #include "PlayerInput.h"
 #include "Movement.h"
 
@@ -76,6 +77,7 @@ void RegisterAllComponents()
     registry.Register<NumberSwitcher>("NumberSwitcher");
     registry.Register<PlayerInput>("PlayerInput");
     registry.Register<Movement>("Movement");
+    registry.Register<FollowCameraComponent>("FollowCameraComponent");
 }
 
 

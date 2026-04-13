@@ -22,7 +22,7 @@
 
 #include "PhysXSystem.h"
 #include "SceneManager.h"
-#include "AudioManager.h"
+#include "Engine/Audio/AudioManager.h"
 
 #include <imnodes.h>
 #include <imnodes_internal.h>
@@ -105,10 +105,6 @@ void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
 	float color[4] = { 0.5f,0.5f, 0.5f, 1.0f };
 	GraphicsDeviceManager::Instance().BeginFrame(color);
 
-	//GameObjectManager::Instance().RenderAll(GraphicsDeviceManager::Instance().GetSpriteRenderSystem(), GraphicsDeviceManager::Instance().GetModelRenderSystem());
-	 
-	//ƒV[ƒ“•`‰æ
-	//m_pSceneGame->Render(elapsedTime_);
 	SceneManager::Render(elapsedTime_);
 	// IMGUI•`‰æ
 	ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());

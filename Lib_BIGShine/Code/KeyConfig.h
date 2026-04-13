@@ -21,6 +21,7 @@ struct InputUnit {
 
 // “¯‰Ÿ‚µiANDj‚ÌW‡
 using InputCombo = std::vector<InputUnit>;
+
 class KeyConfig {
 public:
     static KeyConfig& Instance() {

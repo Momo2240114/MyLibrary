@@ -5,13 +5,6 @@
       <UniqueIdentifier>{9f64f4ff-d9e0-43d7-88e1-13e6d3656a89}</UniqueIdentifier>
       <Extensions>hlsl;hlsli</Extensions>
     </Filter>
-    <Filter Include="Resources">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{5d2ed881-4062-49d0-a1ce-86240074d016}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソースファイル">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
@@ -65,12 +58,6 @@
     <Filter Include="ヘッダーファイル\BehaviorTree">
       <UniqueIdentifier>{cfc78388-9998-4ddd-99a5-e0970e736730}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Audio">
-      <UniqueIdentifier>{273274ee-ecd9-4894-aa79-f1ea8720dd41}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="imgui\imnodes">
-      <UniqueIdentifier>{2f877b67-599e-47e1-857c-b75ed78ffc1f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダーファイル\Component\Particle">
       <UniqueIdentifier>{6f8c3497-0835-4af2-b8cf-365f10ba321f}</UniqueIdentifier>
     </Filter>
@@ -101,82 +88,130 @@
     <Filter Include="Shaders\Scene">
       <UniqueIdentifier>{e4aa873e-3a77-4e9c-b259-098ec62e01d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code">
+      <UniqueIdentifier>{b710c156-8a18-4c9d-9d64-99f489dc036a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine">
+      <UniqueIdentifier>{b59b31bf-7248-4d8f-ab26-ebfcc8a262c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Audio">
+      <UniqueIdentifier>{3d242e0a-ad8e-4d0d-ae10-0c958a561f3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Common">
+      <UniqueIdentifier>{2b50a7e0-8a69-408b-aa25-836da4394551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Math">
+      <UniqueIdentifier>{b81c020c-e1a1-455c-a8c4-634d5d10333b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics">
+      <UniqueIdentifier>{d1c47783-4f92-4a56-bf77-73292eb1a42b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Core">
+      <UniqueIdentifier>{6ef868c7-c817-425a-b91c-05b254423341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Resource">
+      <UniqueIdentifier>{1cca76ee-8502-44cc-a9f4-060ae9c9851d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem">
+      <UniqueIdentifier>{fc94eeef-2120-4aec-b89b-023a77f0bb75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Shader">
+      <UniqueIdentifier>{895bcc25-d8b2-4150-95c8-a6333017c36b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Particle">
+      <UniqueIdentifier>{e58e76f1-0e8a-4fb5-97ae-b0b84c0ba30c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Physics">
+      <UniqueIdentifier>{36328aef-3afb-4d67-901c-a7bed9c558a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Core">
+      <UniqueIdentifier>{f6ff56f4-56d8-49c7-ab53-952c52d5620b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay">
+      <UniqueIdentifier>{2daadaff-2c71-48fd-bf78-f922ae6118ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\Core">
+      <UniqueIdentifier>{b56fc4d7-9007-471e-8dca-39dbfb87a148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\Core\Object">
+      <UniqueIdentifier>{73948aaa-7ad4-444a-8a56-a55151fc98d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\Transform">
+      <UniqueIdentifier>{3af52ab4-5972-4618-84fe-0f1c342f4625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\Input">
+      <UniqueIdentifier>{9b254ba3-f327-41a9-ba13-f7d2edcade3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\Serialize">
+      <UniqueIdentifier>{dad8ed0d-afc7-4cb7-8891-e37dd7de34a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\IventSystem">
+      <UniqueIdentifier>{6c24e952-e721-46f3-95b8-ba428d1da8e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\GamePlay\Graphics">
+      <UniqueIdentifier>{e058b86a-d519-429d-9d83-40f1dbc45830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game">
+      <UniqueIdentifier>{09a9b4fd-f0ad-408a-9bba-4f8177c087b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics">
+      <UniqueIdentifier>{af7e1257-f89f-4946-bb30-309db29612ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics\Charcter">
+      <UniqueIdentifier>{9e614caa-1064-4f78-bedd-6b583e88bd2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics\Charcter\Player">
+      <UniqueIdentifier>{eb489ffa-e627-4e66-8589-90b9e32913cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Editor">
+      <UniqueIdentifier>{d639210c-2205-4973-aee5-20afd58da4e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Editor\ImGui">
+      <UniqueIdentifier>{a6364433-3536-498a-a3d4-3c37bad008af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Editor\ImGui\imgui">
+      <UniqueIdentifier>{5d2ed881-4062-49d0-a1ce-86240074d016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Editor\ImGui\imgui\imnodes">
+      <UniqueIdentifier>{2f877b67-599e-47e1-857c-b75ed78ffc1f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\GraphicsDeviceManager.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\framework.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\main.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ImGuiRenderer.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\ImGuizmo\ImGradient.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\ImGuizmo\ImGuizmo.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\ImGuizmo\ImSequencer.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_impl_dx11.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_impl_win32.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Sprite.cpp">
-      <Filter>ソースファイル</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Code\CPUResourceLoader.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Code\SpriteRenderSystem.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\FbxModel.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ModelResource.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\GLTFImporter.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\BasicShader.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Code\RenderState.cpp">
       <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ModelRenderSystem.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\MouseInput.cpp">
-      <Filter>ソースファイル\InputSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\KeyInput.cpp">
-      <Filter>ソースファイル\InputSystem</Filter>
     </ClCompile>
     <ClCompile Include="Code\KeyConfig.cpp">
       <Filter>ソースファイル\InputSystem</Filter>
@@ -202,19 +237,7 @@
     <ClCompile Include="Code\PhysXSystem.cpp">
       <Filter>ソースファイル\PhysX</Filter>
     </ClCompile>
-    <ClCompile Include="Code\PhysicsCollisionComponent.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\GameObjectManager.cpp">
-      <Filter>ソースファイル\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\SceneManager.cpp">
-      <Filter>ソースファイル\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Code\PhysXEventCallback.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ComponentRegistry.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\SceneGame.cpp">
@@ -226,46 +249,22 @@
     <ClCompile Include="Code\AnimationController.cpp">
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
-    <ClCompile Include="Code\CapsuleCollider.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\BoxCollider.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ColliderComponent.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
     <ClCompile Include="Code\CurveAssetComponent.cpp">
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
     <ClCompile Include="Code\FollowCameraComponent.cpp">
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
-    <ClCompile Include="Code\GlTFModel.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
     <ClCompile Include="Code\ModelAttachmentComponent.cpp">
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
-    <ClCompile Include="Code\PlayerInput.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\SphereCollider.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
     <ClCompile Include="Code\ComponentBase.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\PbrShader.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\EasingComponent.cpp">
       <Filter>ソースファイル\Conponent\MurataComponent</Filter>
     </ClCompile>
     <ClCompile Include="Code\StateMachine.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\RegisterAllComponents.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="External\recastnavigation\DebugUtils\Source\RecastDump.cpp">
@@ -301,31 +300,13 @@
     <ClCompile Include="External\recastnavigation\Recast\Source\RecastRasterization.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastRegion.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\BloomSystem.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Code\DecalComponent.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\DecalShader.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\GameObject.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\LightComponent.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\SceneTitle.cpp">
       <Filter>ソースファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Code\UIButton.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ActionRegistry.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\RandomHelper.cpp">
@@ -340,21 +321,6 @@
     <ClCompile Include="Code\CameraDirectorComponent.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Code\ActionSequence.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Audio\Audio.cpp">
-      <Filter>Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Audio\AudioResource.cpp">
-      <Filter>Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Audio\AudioSource.cpp">
-      <Filter>Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\AudioManager.cpp">
-      <Filter>Audio</Filter>
-    </ClCompile>
     <ClCompile Include="Code\TransformDirector.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
@@ -363,9 +329,6 @@
     </ClCompile>
     <ClCompile Include="Code\SpinComponent.cpp">
       <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\LightBlinkerComponent.cpp">
-      <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\SceneTutorial.cpp">
       <Filter>ソースファイル\Scene</Filter>
@@ -380,16 +343,13 @@
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
     <ClCompile Include="External\imnodes-master\imnodes.cpp">
-      <Filter>imgui\imnodes</Filter>
+      <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
     </ClCompile>
     <ClCompile Include="Code\NumberSwitcher.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Transform.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_tables.cpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Code\CurvePlayerComponent.cpp">
       <Filter>ソースファイル</Filter>
@@ -397,36 +357,141 @@
     <ClCompile Include="Code\Curve.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Code\ParticleEmitter.cpp">
-      <Filter>ソースファイル\Conponent\Particle</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ParticleComponent.cpp">
-      <Filter>ソースファイル\Conponent\Particle</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ParticleRenderSystem.cpp">
-      <Filter>ソースファイル\Conponent\Particle</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Movement.cpp">
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
+    <ClCompile Include="Code\LightComponent.cpp">
+      <Filter>Code\Engine\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\GlTFModel.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\FbxModel.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ModelResource.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\BloomSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ModelRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SpriteRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ParticleRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\BasicShader.cpp">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\DecalShader.cpp">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\PbrShader.cpp">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\GLTFImporter.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ImGuiRenderer.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\PhysicsCollisionComponent.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\main.cpp">
+      <Filter>Code\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\framework.cpp">
+      <Filter>Code\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SceneManager.cpp">
+      <Filter>Code\Engine\GamePlay\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\GameObjectManager.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\GameObject.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Transform.cpp">
+      <Filter>Code\Engine\GamePlay\Transform</Filter>
+    </ClCompile>
     <ClCompile Include="Code\ControllerInput.cpp">
-      <Filter>ソースファイル\InputSystem</Filter>
+      <Filter>Code\Engine\GamePlay\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\KeyInput.cpp">
+      <Filter>Code\Engine\GamePlay\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\MouseInput.cpp">
+      <Filter>Code\Engine\GamePlay\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ActionRegistry.cpp">
+      <Filter>Code\Engine\GamePlay\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ComponentRegistry.cpp">
+      <Filter>Code\Engine\GamePlay\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="External\recastnavigation\Recast\Source\RecastRegion.cpp">
+      <Filter>Code\Engine\GamePlay\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\RegisterAllComponents.cpp">
+      <Filter>Code\Engine\GamePlay\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Sprite.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ActionSequence.cpp">
+      <Filter>Code\Engine\GamePlay\IventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ParticleEmitter.cpp">
+      <Filter>Code\Engine\Graphics\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ParticleComponent.cpp">
+      <Filter>Code\Engine\Graphics\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\PlayerInput.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\GraphicsDeviceManager.cpp">
+      <Filter>Code\Engine\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\LightBlinkerComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\BoxCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\CapsuleCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\ColliderComponent.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SphereCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Audio\Audio.cpp">
+      <Filter>Code\Engine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Audio\AudioManager.cpp">
+      <Filter>Code\Engine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Audio\AudioResource.cpp">
+      <Filter>Code\Engine\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Audio\AudioSource.cpp">
+      <Filter>Code\Engine\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\GraphicsDeviceManager.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\framework.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Code\high_resolution_timer.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\misc.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ImGuiRenderer.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\ComponentBase.h">
@@ -438,43 +503,7 @@
     <ClInclude Include="Code\CPUResourceLoader.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Code\SpriteRenderSystem.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\SpriteDissolveShader.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\GameObject.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Code\ObjectManager.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\IModel.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ModelResource.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\GLTFImporter.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\GameObjectManager.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ModelRenderSystem.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ModelShader.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ModelResourceManager.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ModelShaderID.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\BasicShader.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\RenderContext.h">
@@ -486,16 +515,7 @@
     <ClInclude Include="Code\camera.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Code\SpriteShaderID.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\KeyInput.h">
-      <Filter>ヘッダーファイル\InputSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Code\KeyConfig.h">
-      <Filter>ヘッダーファイル\InputSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\MouseInput.h">
       <Filter>ヘッダーファイル\InputSystem</Filter>
     </ClInclude>
     <ClInclude Include="Code\CurveData.h">
@@ -526,7 +546,7 @@
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\Wip.hpp">
-      <Filter>imgui</Filter>
+      <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Code\AnimationEventTrack.h">
       <Filter>ヘッダーファイル</Filter>
@@ -549,25 +569,10 @@
     <ClInclude Include="Code\IScene.h">
       <Filter>ヘッダーファイル\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Code\SceneManager.h">
-      <Filter>ヘッダーファイル\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Code\PhysXEventCallback.h">
       <Filter>ヘッダーファイル\PhysX</Filter>
     </ClInclude>
     <ClInclude Include="Code\EventTrackSequencer.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Vector.h">
-      <Filter>ヘッダーファイル\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ComponentRegistry.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Collision.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CollisionMath.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\SceneGame.h">
@@ -576,19 +581,7 @@
     <ClInclude Include="Code\AnimationController.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Code\BoxCollider.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Code\CameraComponent.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CapsuleCollider.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ColliderComponent.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\LightManager.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\ModelAttachmentComponent.h">
@@ -596,24 +589,6 @@
     </ClInclude>
     <ClInclude Include="Code\FollowCameraComponent.h">
       <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerAttack.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PhysicsCollisionComponent.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerInput.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\SphereCollider.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\SpriteShader.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PbrShader.h">
-      <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\EasingComponent.h">
       <Filter>ヘッダーファイル\Component\MurataComponent</Filter>
@@ -630,22 +605,13 @@
     <ClInclude Include="External\recastnavigation\Recast\Include\RecastAssert.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Code\BloomSystem.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Code\DecalComponent.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\DecalManager.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Code\DecalShader.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Code\ImGuiBezier.hpp">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Scene.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\Serializer.h">
@@ -654,13 +620,7 @@
     <ClInclude Include="Code\SceneTitle.h">
       <Filter>ヘッダーファイル\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Sprite.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Code\UIButton.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ActionRegistry.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\RandomHelper.h">
@@ -675,24 +635,6 @@
     <ClInclude Include="Code\CameraDirectorComponent.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Code\ActionSequence.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Audio\Audio.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Audio\AudioResource.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Audio\AudioSource.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Audio\Misc.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\AudioManager.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
     <ClInclude Include="Code\TransformDirector.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
@@ -702,13 +644,7 @@
     <ClInclude Include="Code\SceneLoading.h">
       <Filter>ヘッダーファイル\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Code\GlTFModel.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Code\SpinComponent.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\LightBlinkerComponent.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\SceneTutorial.h">
@@ -721,37 +657,175 @@
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
     <ClInclude Include="External\imnodes-master\imnodes.h">
-      <Filter>imgui\imnodes</Filter>
+      <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
     </ClInclude>
     <ClInclude Include="External\imnodes-master\imnodes_internal.h">
-      <Filter>imgui\imnodes</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\IActionProvider.h">
-      <Filter>ヘッダーファイル</Filter>
+      <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
     </ClInclude>
     <ClInclude Include="Code\NumberSwitcher.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Transform.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ParticleRessiource.h">
-      <Filter>ヘッダーファイル\Component\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ParticleComponent.h">
-      <Filter>ヘッダーファイル\Component\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ParticleEmitter.h">
-      <Filter>ヘッダーファイル\Component\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ParticleRenderSystem.h">
-      <Filter>ヘッダーファイル\Component\Particle</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Movement.h">
       <Filter>ヘッダーファイル\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Code\CollisionMath.h">
+      <Filter>Code\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Vector.h">
+      <Filter>Code\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\LightManager.h">
+      <Filter>Code\Engine\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\GlTFModel.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\IModel.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ModelResource.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ModelResourceManager.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\BloomSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ModelRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SpriteRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\misc.h">
+      <Filter>Code\Engine\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SpriteShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\BasicShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\DecalShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ModelShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ModelShaderID.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\PbrShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SpriteDissolveShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SpriteShaderID.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\GLTFImporter.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ImGuiRenderer.h">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\PhysicsCollisionComponent.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Collision.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\framework.h">
+      <Filter>Code\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SceneManager.h">
+      <Filter>Code\Engine\GamePlay\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\GameObjectManager.h">
+      <Filter>Code\Engine\GamePlay\Core\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\GameObject.h">
+      <Filter>Code\Engine\GamePlay\Core\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Transform.h">
+      <Filter>Code\Engine\GamePlay\Transform</Filter>
+    </ClInclude>
     <ClInclude Include="Code\ControllerInput.h">
-      <Filter>ヘッダーファイル\InputSystem</Filter>
+      <Filter>Code\Engine\GamePlay\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\KeyInput.h">
+      <Filter>Code\Engine\GamePlay\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\MouseInput.h">
+      <Filter>Code\Engine\GamePlay\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ActionRegistry.h">
+      <Filter>Code\Engine\GamePlay\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ComponentRegistry.h">
+      <Filter>Code\Engine\GamePlay\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Sprite.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\IActionProvider.h">
+      <Filter>Code\Engine\GamePlay\IventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ActionSequence.h">
+      <Filter>Code\Engine\GamePlay\IventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleRessiource.h">
+      <Filter>Code\Engine\Graphics\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleComponent.h">
+      <Filter>Code\Engine\Graphics\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ParticleEmitter.h">
+      <Filter>Code\Engine\Graphics\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\PlayerInput.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\PlayerAttack.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\GraphicsDeviceManager.h">
+      <Filter>Code\Engine\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\LightBlinkerComponent.h">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\BoxCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\CapsuleCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\ColliderComponent.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SphereCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Audio\Audio.h">
+      <Filter>Code\Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Audio\AudioManager.h">
+      <Filter>Code\Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Audio\AudioResource.h">
+      <Filter>Code\Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Audio\AudioSource.h">
+      <Filter>Code\Engine\Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
