@@ -5,15 +5,13 @@
 #include <vector.h>
 
 
-// 1. 個々の粒子の構造 (GPU上のStructuredBufferの中身)
-// GPU上のStructuredBufferと一致させる構造体
+
 struct Particle {
     DirectX::XMFLOAT3 position = { 0, 0, 0 };
     float             age = 0.0f;
 
     DirectX::XMFLOAT3 velocity = { 0, 0, 0 };
     float             lifeSpan = 0.0f;
-
     DirectX::XMFLOAT3 acceleration = { 0, 0, 0 };
     float             rotation = 0.0f;
 

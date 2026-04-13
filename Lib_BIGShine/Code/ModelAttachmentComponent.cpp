@@ -131,6 +131,7 @@ void ModelAttachmentComponent::Gui()
         return;
     }
 
+
     auto& nodes = model->GetNodes();
     const char* previewName = (targetNodeIndex >= 0 && targetNodeIndex < (int)nodes.size())
         ? nodes[targetNodeIndex].name.c_str() : "(None)";

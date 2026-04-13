@@ -16,7 +16,7 @@
 
 #include"ColorFilterDirector.h"
 #include"ExitComponent.h"
-#include "AudioManager.h"
+#include "Engine/Audio/AudioManager.h"
 
 void SceneTutorial::Finalize()
 {

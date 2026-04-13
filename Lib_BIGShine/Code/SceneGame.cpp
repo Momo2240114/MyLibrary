@@ -1,4 +1,4 @@
-#include "SceneGame.h"
+#include"SceneGame.h"
 #include"GameObjectManager.h"
 #include"GraphicsDeviceManager.h"
 #include"CameraComponent.h"
@@ -7,7 +7,7 @@
 #include"CapsuleCollider.h"
 #include"ActionRegistry.h"
 #include"MouseInput.h"
-#include"AudioManager.h"
+#include "Engine/Audio/AudioManager.h"
 
 void SceneGame::Finalize()
 {

@@ -1084,6 +1084,8 @@ void GameObjectManager::ResolveHierarchy()
         obj->UpdateTransform();
     }
 }
+
+
 // フォルダ内のJSONファイルをスキャンする
 void GameObjectManager::RefreshPrefabList()
 {

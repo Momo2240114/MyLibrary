@@ -124,7 +124,7 @@ public:
     void Gui() override;
 
     // -------------------------------
-// JSON書き出し
+    // JSON書き出し
     void ExportJson(const std::string& filename);
 
     // -------------------------------
@@ -146,15 +146,17 @@ private:
         int poseIndex;
 
         // 【追加】どのソースから来たかを記録
-    int sourceAnimIdx;   
-    float sourceTime;
+        int sourceAnimIdx;   
+        float sourceTime;
     };
-    struct CustomAnimation { 
+    struct CustomAnimation
+    { 
         std::string name; 
         float duration; 
         std::vector<PoseKeyframe> keyframes; 
     };
-    struct SavedPose { 
+    struct SavedPose 
+    { 
         std::string name;
         std::vector<GltfModelCommponennt::NodePose> nodePoses;
         int sourceAnimIndex = 0;

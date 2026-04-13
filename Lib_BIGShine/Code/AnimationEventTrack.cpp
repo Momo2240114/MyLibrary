@@ -14,7 +14,7 @@ AnimationEventTrack::AnimationEventTrack()
 void AnimationEventTrack::AddEvent(const std::string& label,float start, float end, unsigned int color)
 {
     events.push_back({ start, end, color, label });
-}
+} 
 
 
 void AnimationEventTrack::DeleteEvent(int index)
