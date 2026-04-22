@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ComponentBase.h"
-#include "GLTFModel.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/Graphics/Resource/GLTFModel.h"
 
 // =========================================
 // ModelShader (Model用シェーダを保持するComponent)

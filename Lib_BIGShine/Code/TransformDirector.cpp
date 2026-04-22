@@ -1,6 +1,6 @@
 #include "TransformDirector.h"
-#include "GameObject.h"
-#include "ActionRegistry.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "ColorFilterDirector.h"
 
 

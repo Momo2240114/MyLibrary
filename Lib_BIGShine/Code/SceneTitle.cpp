@@ -1,19 +1,19 @@
 #include "SceneTitle.h"
-#include"GameObjectManager.h"
-#include"GraphicsDeviceManager.h"
-#include"CameraComponent.h"
+#include"Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include"Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include"Engine/GamePlay/Camera/CameraComponent.h"
 #include"InputComponent.h"
-#include"BoxCollider.h"
-#include"CapsuleCollider.h"
+#include"Engine/Physics/BoxCollider.h"
+#include"Engine/Physics/CapsuleCollider.h"
 
-#include"MouseInput.h"
-#include"KeyInput.h"
+#include"Engine/GamePlay/Input/MouseInput.h"
+#include"Engine/GamePlay/Input/KeyInput.h"
 
 #include "SceneGame.h"
 
 #include"TransformDirector.h"
 #include"CameraDirectorComponent.h"
-#include"ActionSequence.h"
+#include"Engine/GamePlay/IventSystem/ActionSequence.h"
 
 #include"ColorFilterDirector.h"
 #include "Engine/Audio/AudioManager.h"

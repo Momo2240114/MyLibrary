@@ -3,14 +3,14 @@
 //基底クラス
 #include "IScene.h"
 //レンダー用のシステム
-#include"ModelRenderSystem.h"
-#include"SpriteRenderSystem.h"
-#include"GameObjectManager.h"
+#include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
+#include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
+#include"Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 #include <thread>
-#include "GlTFModel.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 
-#include"GameObject.h"
+#include"Engine/GamePlay/Core/Object/GameObject.h"
 
 //ローディングシーン
 class SceneLoading : public Scene

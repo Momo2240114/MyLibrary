@@ -1,7 +1,7 @@
 #include "SearchAreaManager.h"
 
 #include"AreaComponent.h"
-#include"Gameobject.h"
+#include"Engine/GamePlay/Core/Object/Gameobject.h"
 
 void SearchAreaManager::SetAreaComponent(AreaComponent* areaComponent)
 {

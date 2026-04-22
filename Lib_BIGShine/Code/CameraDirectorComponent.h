@@ -1,14 +1,14 @@
 #pragma once
 
-#include "ComponentBase.h"
-#include "EasingComponent.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/Math/EasingComponent.h"
 
 #include <queue>
 #include <functional>
 
 #include "transformDirector.h"
 #include "FovDirector.h"
-#include "IActionProvider.h"
+#include "Engine/GamePlay/IventSystem/IActionProvider.h"
 
 
 class CameraComponent;

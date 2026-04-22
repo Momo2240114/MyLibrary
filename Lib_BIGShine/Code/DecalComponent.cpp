@@ -1,6 +1,6 @@
 #include "DecalComponent.h"
-#include "GameObject.h"
-#include "GraphicsDeviceManager.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "CPUResourceLoader.h"
 
 void DecalComponent::SetTexture(const std::string& path)

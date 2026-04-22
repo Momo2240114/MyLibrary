@@ -1,8 +1,9 @@
 #include "ModelAttachmentComponent.h"
-#include "GlTFModel.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 
 #include <directxmath.h>
-#include "Transform.h"
+#include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 
 DirectX::XMFLOAT3 QuaternionToEuler(const DirectX::XMFLOAT4& q_in)
@@ -51,15 +52,18 @@ void ModelAttachmentComponent::LateUpdate(float deltaTime)
 {
     auto myGO = GetGameObject();
     auto myTransform = myGO->transform;
-    auto parentTransform = myTransform->parent.lock();
-    if (!parentTransform) return;
 
     // ターゲットモデルの取得
     auto model = targetModel.lock();
     if (!model) {
         // 親がモデルを持っている前提で取得を試みる
-        targetModel = parentTransform->gameObject.lock()->GetComponent<GltfModelCommponennt>();
-        model = targetModel.lock();
+        ////targetModel = parentTransform->gameObject.lock()->GetComponent<GltfModelCommponennt>();
+        auto targetObject = GameObjectManager::Instance().Find(targetGameObjectName.c_str());
+        if(targetObject)
+        {
+            targetModel = targetObject->GetComponent<GltfModelCommponennt>();
+            model = targetModel.lock();
+        }
     }
 
     if (!model || targetNodeIndex == -1) return;
@@ -96,7 +100,9 @@ void ModelAttachmentComponent::LateUpdate(float deltaTime)
 }
 
 // --- 再帰的なツリー表示関数 (引数に const 修飾などを追加) ---
-void ShowNodeTree(const GltfModelCommponennt::Node* node, const std::vector<GltfModelCommponennt::Node>& allNodes, int& tempSelectedIdx) {
+void ShowNodeTree(const GltfModelCommponennt::Node* node,
+    const std::vector<GltfModelCommponennt::Node>& allNodes,
+    int& tempSelectedIdx) {
     if (!node) return;
 
     int nodeIdx = static_cast<int>(node - allNodes.data());
@@ -121,65 +127,106 @@ void ShowNodeTree(const GltfModelCommponennt::Node* node, const std::vector<Gltf
     }
 }
 
+void ShowNodeTree(const GltfModelCommponennt::Node* node,
+    const std::vector<GltfModelCommponennt::Node>& allNodes,
+    int& tempSelectedIdx,
+    std::shared_ptr<GltfModelCommponennt>& tempTargetModel,
+    const std::shared_ptr<GltfModelCommponennt>& currentProcessingModel)
+{
+    if (!node) return;
+    int nodeIdx = static_cast<int>(node - allNodes.data());
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+    // モデルとインデックスの両方が一致する場合のみ Selected フラグを立てる
+    if (tempTargetModel == currentProcessingModel && tempSelectedIdx == nodeIdx) {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+
+    if (node->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+    std::string label = (node->name.empty() ? "Node_" + std::to_string(nodeIdx) : node->name);
+
+    bool isOpen = ImGui::TreeNodeEx((void*)(intptr_t)nodeIdx, flags, "%s", label.c_str());
+
+    if (ImGui::IsItemClicked()) {
+        tempSelectedIdx = nodeIdx;
+    }
+
+    if (ImGui::IsItemClicked()) {
+        tempSelectedIdx = nodeIdx;
+        tempTargetModel = currentProcessingModel; // どのモデルのノードか記録
+    }
+
+    if (isOpen && !node->children.empty()) {
+        for (auto* child : node->children) {
+            ShowNodeTree(child, allNodes, tempSelectedIdx);
+        }
+        ImGui::TreePop();
+    }
+
+}
 
 void ModelAttachmentComponent::Gui()
 {
+    // --- 現在の状態表示 ---
+    auto currentModel = targetModel.lock();
+    std::string currentLabel = (currentModel && targetNodeIndex != -1)
+        ? currentModel->GetNodes()[targetNodeIndex].name
+        : "(None)";
 
-    auto model = targetModel.lock();
-    if (!model) {
-        ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target Model is not set!");
-        return;
+    ImGui::Text("Attachment Node: %s", currentLabel.c_str());
+
+    if (ImGui::Button("Select Node from Scene...")) {
+        ImGui::OpenPopup("GlobalNodeSelectorPopup");
     }
 
-
-    auto& nodes = model->GetNodes();
-    const char* previewName = (targetNodeIndex >= 0 && targetNodeIndex < (int)nodes.size())
-        ? nodes[targetNodeIndex].name.c_str() : "(None)";
-
-    ImGui::Text("Target Node: %s", previewName);
-
-    // --- ノード選択を開始するボタン ---
-    if (ImGui::Button("Select Attachment Node...")) {
-        ImGui::OpenPopup("NodeSelectorPopup");
-        // ポップアップを開くときに一時的な選択用インデックスを初期化
-        tempSelectedIdx = targetNodeIndex;
-    }
-
-    // --- ポップアップウィンドウの設定 ---
-    if (ImGui::BeginPopupModal("NodeSelectorPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Select a node from the hierarchy:");
+    // --- ポップアップウィンドウ ---
+    if (ImGui::BeginPopupModal("GlobalNodeSelectorPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Select a Model and its Node:");
         ImGui::Separator();
 
-        // スクロールエリアの確保
-        ImGui::BeginChild("TreeChild", ImVec2(600, 400), true);
+        ImGui::BeginChild("SelectorScroll", ImVec2(500, 400), true);
 
-        // ルートノードを探して描画（親がいないノードを起点にする）
-        // ※GLTFモデル構造に合わせ、ルートを順に描画
-        for (const auto& node : nodes) {
-            // モデル全体のルートのみを起点とする場合、親子関係の構築ロジックに合わせて呼び出し
-            // 今回は簡易的に「allNodes[0]」などを起点にするか、全ノードをスキャン
-            // ここでは仮に最初の数件がルートであると想定、または全部表示
-            if (/* nodeがルートである条件 */ true) {
-                // ShowNodeTree を呼び出し（モデル構造に合わせて調整）
+        // 1. GameObjectManager から全オブジェクトを取得
+        auto& allObjects = GameObjectManager::Instance().GetObjects();
+
+        for (auto& go : allObjects) {
+            if (!go) continue;
+
+            // 2. そのオブジェクトが GltfModelComponent を持っているか確認
+            // ※Tはプロジェクトで定義しているモデルコンポーネント名に書き換えてください
+            auto modelComp = go->GetComponent<GltfModelCommponennt>();
+            if (!modelComp) continue;
+
+            // 3. オブジェクト名をツリーの親にする
+            ImGui::PushID(go.get());
+            if (ImGui::TreeNode(go->GetName().c_str())) {
+                const auto& nodes = modelComp->GetNodes();
+
+                // 4. モデル内の全ノードを走査
+                for (const auto& node : nodes) {
+                    // ルートノードから再帰開始（親がいないノードを起点にする）
+                    if (node.parent == nullptr) {
+                        ShowNodeTree(&node, nodes, tempSelectedIdx, tempTargetModel, modelComp);
+                    }
+                }
+                ImGui::TreePop();
             }
+            ImGui::PopID();
         }
-        // 簡易実装用：全ノードから親を持たないものを探して表示
-        for (int i = 0; i < (int)nodes.size(); ++i) {
-            // node->parent が nullptr のものだけを ShowNodeTree の起点にする
-            // (GltfModelの構造に依存します)
-        }
-
-        // --- 実装例: allNodes[0] をルートとする場合 ---
-        ShowNodeTree(&nodes[0], nodes, tempSelectedIdx);
 
         ImGui::EndChild();
-
         ImGui::Separator();
 
-        // --- 確定・キャンセルボタン ---
+        // --- 確定・キャンセル ---
         if (ImGui::Button("OK", ImVec2(120, 0))) {
+            targetModel = tempTargetModel;
             targetNodeIndex = tempSelectedIdx;
-            if (targetNodeIndex != -1) targetNodeName = nodes[targetNodeIndex].name;
+            // 決定時に名前をキャッシュしておく（ノード検索用）
+            if (auto m = targetModel.lock()) {
+                targetNodeName = m->GetNodes()[targetNodeIndex].name;
+            }
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
@@ -189,16 +236,13 @@ void ModelAttachmentComponent::Gui()
 
         ImGui::EndPopup();
     }
-
-    if (targetNodeIndex != -1) {
-        ImGui::Text("Node Index: %d", targetNodeIndex);
-    }
 }
 
 void ModelAttachmentComponent::Serialize(nlohmann::json& j) const
 {
     // 名前とインデックスを保存
     j["targetNodeName"] = targetNodeName;
+    j["targetGameObjectName"] = targetGameObjectName;
     j["targetNodeIndex"] = targetNodeIndex;
 }
 
@@ -207,6 +251,11 @@ void ModelAttachmentComponent::Deserialize(const nlohmann::json& j)
     // 名前を優先的に復元
     if (j.contains("targetNodeName")) {
         targetNodeName = j.at("targetNodeName").get<std::string>();
+    }
+
+    // 名前を優先的に復元
+    if (j.contains("targetGameObjectName")) {
+        targetGameObjectName = j.at("targetGameObjectName").get<std::string>();
     }
 
     // インデックスも読み出すが、モデルロード後に名前から再検索することを推奨

@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "SceneManager.h"
-#include "ActionRegistry.h"
+#include "Engine/GamePlay/Core/SceneManager.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 // インターフェイスシーン
 class Scene

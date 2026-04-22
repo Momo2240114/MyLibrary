@@ -2,7 +2,7 @@
 #include "PlayerInput.h"
 #include "Movement.h"
 #include "AnimationController.h"
-#include "GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 
 void PlayerStateMachine::Update(float deltaTime)
 {

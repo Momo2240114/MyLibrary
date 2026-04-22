@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComponentBase.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
 class GltfModelCommponennt;
 
@@ -25,7 +25,12 @@ public:
     void Deserialize(const nlohmann::json& j);
 private:
     std::weak_ptr<GltfModelCommponennt> targetModel;
+    std::string targetGameObjectName; // アタッチ先GameObjectの名前（保存用）
     std::string targetNodeName;
+
+    // --- ポップアップでの一時選択用 (temp) ---
+    std::shared_ptr<GltfModelCommponennt> tempTargetModel; // モデルの仮置き
+
     int targetNodeIndex = -1;
     int tempSelectedIdx = -1;
 };

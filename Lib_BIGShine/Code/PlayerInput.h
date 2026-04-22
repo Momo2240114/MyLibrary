@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ComponentBase.h"
-#include "KeyConfig.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/GamePlay/Input/KeyConfig.h"
 
 
 #include <DirectXMath.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include"ComponentBase.h"
+#include"Engine/GamePlay/Core/Component/ComponentBase.h"
 
 
 class PlayerComponent;

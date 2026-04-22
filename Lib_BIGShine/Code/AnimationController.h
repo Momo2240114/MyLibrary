@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "GlTFModel.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 #include "EventTrack.h"
 #include "CurveData.h"
 

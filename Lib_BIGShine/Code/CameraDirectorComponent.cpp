@@ -1,6 +1,6 @@
 #include "CameraDirectorComponent.h"
-#include "CameraComponent.h"
-#include "ActionRegistry.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 
 void CameraDirector::Start()

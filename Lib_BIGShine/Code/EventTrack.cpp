@@ -1,6 +1,6 @@
 #include "EventTrack.h"
-#include "ActionRegistry.h"
-#include "GameObject.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 
 #include "imgui.h"
 
