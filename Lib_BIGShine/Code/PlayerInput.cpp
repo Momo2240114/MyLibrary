@@ -1,10 +1,10 @@
 #include "PlayerInput.h"
-#include "GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "PlayerAttack.h"
 #include <algorithm>
 #include <cmath>
 #include <DirectXMath.h>
-#include "Transform.h"
+#include "Engine/GamePlay/Transform/Transform.h"
 #include "Movement.h"
 #include <Windows.h>
 #include <AnimationController.h>

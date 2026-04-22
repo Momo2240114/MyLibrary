@@ -2,8 +2,8 @@
 
 
 #include"IScene.h"
-#include"ModelRenderSystem.h"
-#include"SpriteRenderSystem.h"
+#include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
+#include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include"ShapeRenderer.h"
 
 class SceneGame :public Scene

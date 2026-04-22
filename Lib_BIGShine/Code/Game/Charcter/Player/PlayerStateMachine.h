@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComponentBase.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
 #include <string>
 #include <vector>

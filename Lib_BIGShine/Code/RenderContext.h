@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "LightManager.h"
-#include "CameraComponent.h"
+#include "Engine/Graphics/Core/LightManager.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "RenderState.h"
 #include "DecalManager.h"
 

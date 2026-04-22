@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ComponentBase.h"
-#include "EasingComponent.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/Math/EasingComponent.h"
 
 struct FovWayPoint {
     float fov;

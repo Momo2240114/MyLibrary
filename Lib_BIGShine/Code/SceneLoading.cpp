@@ -1,10 +1,10 @@
 #include "SceneLoading.h"
 
-#include"GraphicsDeviceManager.h"
+#include"Engine/Graphics/Core/GraphicsDeviceManager.h"
 
-#include"ModelRenderSystem.h"
-#include"SpriteRenderSystem.h"
-#include "GlTFModel.h"
+#include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
+#include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 
 #include <format>
 

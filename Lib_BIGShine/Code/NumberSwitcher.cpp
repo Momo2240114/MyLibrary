@@ -1,7 +1,7 @@
 #include "NumberSwitcher.h"
-#include "Sprite.h"
-#include "GameObject.h"
-#include "GameObjectManager.h"
+#include "Engine/Graphics/Resource/Sprite.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 void NumberSwitcher::Start() {
     // 自分のオブジェクトにある SpriteRenderer を取得

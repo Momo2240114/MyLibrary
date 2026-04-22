@@ -1,6 +1,6 @@
 #pragma once
-#include "ComponentBase.h"
-#include "GameObject.h"
+#include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "CurveAssetComponent.h"
 #include <imgui.h>
 

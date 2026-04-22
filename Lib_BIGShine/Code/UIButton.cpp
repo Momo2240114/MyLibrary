@@ -1,8 +1,8 @@
 #include "UIButton.h"
-#include "GameObject.h"
-#include "Sprite.h" // SpriteRenderer‚Ì’è‹`
-#include "MouseInput.h" 
-#include "ActionRegistry.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Graphics/Resource/Sprite.h" // SpriteRenderer‚Ì’è‹`
+#include "Engine/GamePlay/Input/MouseInput.h" 
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 
 void UIButton::Start() {
