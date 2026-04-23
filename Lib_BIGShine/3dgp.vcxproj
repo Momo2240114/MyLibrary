@@ -240,8 +240,6 @@
     <ClCompile Include="Code\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\BasicShader.cpp" />
     <ClCompile Include="Code\ColorFilterDirector.cpp" />
-    <ClCompile Include="Code\Curve.cpp" />
-    <ClCompile Include="Code\CurvePlayerComponent.cpp" />
     <ClCompile Include="Code\DecalComponent.cpp" />
     <ClCompile Include="Code\DecalShader.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
@@ -275,6 +273,8 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFImporter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp" />
@@ -295,10 +295,6 @@
     <ClCompile Include="Code\NumberSwitcher.cpp" />
     <ClCompile Include="Code\PbrShader.cpp" />
     <ClCompile Include="Code\CPUResourceLoader.cpp" />
-    <ClCompile Include="Code\CurveAssetComponent.cpp" />
-    <ClCompile Include="Code\CurveEditor.cpp" />
-    <ClCompile Include="Code\CurveEditorDelegate.cpp" />
-    <ClCompile Include="Code\CurveSerializer.cpp" />
     <ClCompile Include="Code\EventTrack.cpp" />
     <ClCompile Include="Code\ModelAttachmentComponent.cpp" />
     <ClCompile Include="Code\PlayerInput.cpp" />
@@ -321,6 +317,7 @@
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_impl_dx11.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_impl_win32.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui_stdlib.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_tables.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_widgets.cpp" />
     <ClCompile Include="External\imgui-node-editor\crude_json.cpp" />
@@ -385,6 +382,10 @@
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GlTFModel.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h" />
@@ -413,13 +414,6 @@
     <ClInclude Include="Code\NumberSwitcher.h" />
     <ClInclude Include="Code\PbrShader.h" />
     <ClInclude Include="Code\CPUResourceLoader.h" />
-    <ClInclude Include="Code\Curve.h" />
-    <ClInclude Include="Code\CurveAssetComponent.h" />
-    <ClInclude Include="Code\CurveData.h" />
-    <ClInclude Include="Code\CurveEditor.h" />
-    <ClInclude Include="Code\CurveEditorDelegate.h" />
-    <ClInclude Include="Code\CurvePlayerComponent.h" />
-    <ClInclude Include="Code\CurveSerializer.h" />
     <ClInclude Include="Code\EventTrack.h" />
     <ClInclude Include="Code\EventTrackSequencer.h" />
     <ClInclude Include="Code\GpuResourceUtils.h" />
@@ -451,6 +445,7 @@
     <ClInclude Include="Code\TransformDirector.h" />
     <ClInclude Include="Code\UIButton.h" />
     <ClInclude Include="Code\Wip.hpp" />
+    <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
     <ClInclude Include="External\imgui-node-editor\crude_json.h" />
     <ClInclude Include="External\imgui-node-editor\imgui_bezier_math.h" />
     <ClInclude Include="External\imgui-node-editor\imgui_canvas.h" />

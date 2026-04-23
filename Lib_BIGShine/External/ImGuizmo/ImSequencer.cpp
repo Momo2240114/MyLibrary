@@ -51,8 +51,8 @@ namespace ImSequencer
 
         bool popupOpened = false;
         int sequenceCount = sequence->GetItemCount();
-        if (!sequenceCount)
-            return false;
+
+
         ImGui::BeginGroup();
         
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -278,7 +278,6 @@ namespace ImSequencer
             // clipping rect so items bars are not visible in the legend on the left when scrolled
             //
 
-            // slots background
             customHeight = 0;
             for (int i = 0; i < sequenceCount; i++)
             {
@@ -287,12 +286,38 @@ namespace ImSequencer
                 size_t localCustomHeight = sequence->GetCustomHeight(i);
                 ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
                 ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
-                if (!popupOpened && cy >= pos.y && cy < pos.y + (ItemHeight + localCustomHeight) && movingEntry == -1 && cx>contentMin.x && cx < contentMin.x + canvas_size.x)
+
+                // --- 修正箇所：行全体の判定 ---
+                // 行全体の矩形（ラベル部分含む）を定義
+                ImRect rowClickRect(ImVec2(contentMin.x, pos.y), ImVec2(contentMin.x + canvas_size.x, pos.y + ItemHeight + localCustomHeight));
+
+                if (rowClickRect.Contains(io.MousePos))
                 {
-                    col += 0x80201008;
-                    pos.x -= legendWidth;
+                    // ホバー時の色変更（既存の処理を整理）
+                    if (!popupOpened && movingEntry == -1)
+                    {
+                        col += 0x80201008;
+                    }
+
+                    // 左クリックされたら選択状態を更新
+                    if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame && movingEntry == -1)
+                    {
+                        if (selectedEntry)
+                        {
+                            *selectedEntry = i;
+                            ret = true; // 変更があったことを通知
+                        }
+                    }
                 }
-                draw_list->AddRectFilled(pos, sz, col, 0);
+                // ----------------------------
+
+                // 背景描画（pos.x を調整せずに rowClickRect を使うことも可能ですが、既存の描画ロジックを維持）
+                ImVec2 bgPos = pos;
+                if (rowClickRect.Contains(io.MousePos) && !popupOpened && movingEntry == -1) {
+                    bgPos.x -= legendWidth; // ホバー時は左端から色を変える既存挙動
+                }
+                draw_list->AddRectFilled(bgPos, sz, col, 0);
+
                 customHeight += localCustomHeight;
             }
 
@@ -337,13 +362,37 @@ namespace ImSequencer
                     draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 2);
                     draw_list->AddRectFilled(slotP1, slotP2, slotColor, 2);
                 }
+
                 if (ImRect(slotP1, slotP2).Contains(io.MousePos) && io.MouseDoubleClicked[0])
                 {
                     sequence->DoubleClick(i);
                 }
+              
+
+
+
+
                 ImRect rects[3] = { ImRect(slotP1, ImVec2(slotP1.x + framePixelWidth / 2, slotP2.y))
                     , ImRect(ImVec2(slotP2.x - framePixelWidth / 2, slotP1.y), slotP2)
                     , ImRect(slotP1, slotP2) };
+
+                ImRect slotRect(slotP1, slotP2); // 判定用に矩形を変数化
+
+                // --- ここから追加：右クリック判定 ---
+                if (slotRect.Contains(io.MousePos))
+                {
+                    if (io.MouseDoubleClicked[0])
+                    {
+                        sequence->DoubleClick(i);
+                    }
+
+                    // 右クリックされたらポップアップを開く準備
+                    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                    {
+                        ImGui::OpenPopup("DeletePopup");
+                        movingEntry = i; // どの項目を右クリックしたかを movingEntry に一時保存
+                    }
+                }
 
                 const unsigned int quadColor[] = { 0xFFFFFFFF, 0xFFFFFFFF, slotColor + (selected ? 0 : 0x202020) };
                 if (movingEntry == -1 && (sequenceOptions&SEQUENCER_EDIT_STARTEND))// TODOFOCUS && backgroundRect.Contains(io.MousePos))
@@ -399,46 +448,50 @@ namespace ImSequencer
             }
 
 
-            // moving
-            if (/*backgroundRect.Contains(io.MousePos) && */movingEntry >= 0)
+            // moving (ドラッグ中の処理)
+            if (movingEntry >= 0)
             {
                 ImGui::SetNextFrameWantCaptureMouse(true);
                 int diffFrame = int((cx - movingPos) / framePixelWidth);
                 if (std::abs(diffFrame) > 0)
                 {
-                    int *start, *end;
+                    int* start, * end;
                     sequence->Get(movingEntry, &start, &end, NULL, NULL);
+
                     if (selectedEntry)
                         *selectedEntry = movingEntry;
-                    int & l = *start;
-                    int & r = *end;
-                    if (movingPart & 1)
-                        l += diffFrame;
-                    if (movingPart & 2)
-                        r += diffFrame;
-                    if (l < 0)
-                    {
-                        if (movingPart & 2)
-                            r -= l;
+
+                    int& l = *start;
+                    int& r = *end;
+
+                    // movingPart: 1=Start, 2=End, 3=Center(Both)
+                    if (movingPart & 1) l += diffFrame;
+                    if (movingPart & 2) r += diffFrame;
+
+                    // 最小値ガード
+                    if (l < 0) {
+                        if (movingPart & 2) r -= l;
                         l = 0;
                     }
-                    if (movingPart & 1 && l > r)
-                        l = r;
-                    if (movingPart & 2 && r < l)
-                        r = l;
+                    if (movingPart & 1 && l > r) l = r;
+                    if (movingPart & 2 && r < l) r = l;
+
                     movingPos += int(diffFrame * framePixelWidth);
+
+                    // --- 追加：ドラッグ中に構造体の startTime/endTime を更新 ---
+                    sequence->EndEdit();
                 }
+
                 if (!io.MouseDown[0])
                 {
-                    // single select
+                    // マウスを離したときの確定処理
                     if (!diffFrame && movingPart && selectedEntry)
                     {
                         *selectedEntry = movingEntry;
                         ret = true;
                     }
-
                     movingEntry = -1;
-                    sequence->EndEdit();
+                    sequence->EndEdit(); // 最終同期
                 }
             }
 
@@ -485,9 +538,28 @@ namespace ImSequencer
                     sequence->Paste();
                 }
             }
-            //
 
-            ImGui::EndChild();
+            // --- ここから追加：削除ポップアップの実体 ---
+            if (ImGui::BeginPopup("DeletePopup"))
+            {
+                if (ImGui::Selectable("Delete Event"))
+                {
+                    if (movingEntry >= 0)
+                    {
+                        sequence->Del(movingEntry); // アダプター側の Del を呼び出す
+                        movingEntry = -1;
+                        ret = true; // 変更があったことを返り値で通知
+                    }
+                }
+                if (ImGui::Selectable("Cancel"))
+                {
+                    movingEntry = -1;
+                }
+                ImGui::EndPopup();
+            }
+            // ------------------------------------------
+
+            ImGui::EndChild(); // 既存のコード
             ImGui::PopStyleColor();
             if (hasScrollBar)
             {

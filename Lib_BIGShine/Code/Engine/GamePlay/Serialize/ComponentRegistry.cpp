@@ -8,6 +8,7 @@
 #include "DecalComponent.h"
 #include "UIButton.h"
 #include "AnimationController.h"
+#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "CameraDirectorComponent.h"
 #include "Engine/GamePlay//IventSystem/ActionSequence.h"
 #include "FovDirector.h"
@@ -17,7 +18,7 @@
 #include "ModelAttachmentComponent.h"
 #include "ColorFilterDirector.h"
 #include "NumberSwitcher.h"
-#include "CurvePlayerComponent.h"
+//#include "CurvePlayerComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 #include "PlayerInput.h"
@@ -51,6 +52,7 @@ void RegisterAllComponents()
     registry.Register<GltfModelCommponennt>("GltfModel");
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
     registry.Register<AnimationController>("AnimationController");
+    registry.Register<AnimationControllerComponent>("AnimationControllerComponent");
     registry.Register<SpriteRenderer>("SpriteRenderer");
 
     // ライト・エフェクト系
@@ -71,7 +73,7 @@ void RegisterAllComponents()
     registry.Register<FovDirector>("FovDirector");
     registry.Register<TransformDirector>("TransformDirector");
     registry.Register<ColorFilterDirector>("ColorFilterDirector");
-    registry.Register<CurvePlayerComponent>("CurvePlayerComponent");
+    //registry.Register<CurvePlayerComponent>("CurvePlayerComponent");
     registry.Register<LightBlinkerComponent>("LightBlinker");
     registry.Register<EasingComponent>("Easing");
     registry.Register<NumberSwitcher>("NumberSwitcher");

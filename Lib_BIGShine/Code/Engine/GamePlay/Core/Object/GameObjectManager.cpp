@@ -134,7 +134,7 @@ void GameObjectManager::Clear()
 
     // 各オブジェクトが持っているComPtrを確実に解放させるため、
     // リストをクリアする前に念のため各オブジェクトの終了処理を呼ぶのが理想です
-// 1. まず全てのトリガーリストをクリアして循環参照を解く
+    // 1. まず全てのトリガーリストをクリアして循環参照を解く
     for (auto& obj : objects) {
         if (!obj) continue;
         auto col = obj->GetComponent<ColliderComponent>();
