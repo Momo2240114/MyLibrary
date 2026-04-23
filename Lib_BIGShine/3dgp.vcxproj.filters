@@ -181,6 +181,9 @@
     <Filter Include="Code\Engine\GamePlay\Camera">
       <UniqueIdentifier>{0e664530-1f41-4034-b113-27cfe8537b61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\Graphics\Resource\Animation">
+      <UniqueIdentifier>{7e42c25a-d4da-4c63-94ad-1d09a01a6f1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -219,15 +222,6 @@
     <ClCompile Include="Code\RenderState.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Code\CurveSerializer.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\CurveEditor.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\CurveEditorDelegate.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Code\AnimationEventTrack.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
@@ -241,9 +235,6 @@
       <Filter>ソースファイル\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Code\AnimationController.cpp">
-      <Filter>ソースファイル\Conponent</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\CurveAssetComponent.cpp">
       <Filter>ソースファイル\Conponent</Filter>
     </ClCompile>
     <ClCompile Include="Code\ModelAttachmentComponent.cpp">
@@ -335,12 +326,6 @@
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_tables.cpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\CurvePlayerComponent.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Curve.cpp">
-      <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="Code\Movement.cpp">
       <Filter>ソースファイル\Conponent</Filter>
@@ -504,6 +489,15 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui_stdlib.cpp">
+      <Filter>Code\Editor\ImGui\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\high_resolution_timer.h">
@@ -527,27 +521,6 @@
     <ClInclude Include="Code\camera.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Code\CurveData.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CurveSerializer.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CurveEditor.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CurveAssetComponent.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CurvePlayerComponent.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Curve.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\CurveEditorDelegate.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Code\ImVecOperator.h">
       <Filter>ヘッダーファイル</Filter>
     </ClInclude>
@@ -556,9 +529,6 @@
     </ClInclude>
     <ClInclude Include="Code\Wip.hpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\AnimationEventTrack.h">
-      <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="Code\BaseEvent.h">
       <Filter>ヘッダーファイル</Filter>
@@ -859,6 +829,24 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\AnimationEventTrack.h">
+      <Filter>ヘッダーファイル\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\imgui_stdlib.h">
+      <Filter>Code\Editor\ImGui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

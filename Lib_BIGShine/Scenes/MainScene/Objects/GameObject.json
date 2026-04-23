@@ -13,29 +13,76 @@
         },
         {
             "Data": {
-                "animationBlendSeconds": 1.0,
-                "customAnims": [],
-                "layers": [
+                "Blackboard": {},
+                "CurrentStateName": "Walk",
+                "States": [
                     {
-                        "IsRootMotion": false,
-                        "animationIndex": -1,
-                        "blendMode": 0,
-                        "currentTime": 0.5170110464096069,
-                        "customAnimIndex": -1,
                         "events": [],
-                        "isCustomMode": false,
                         "loop": true,
-                        "nodeMask": [],
-                        "playbackSpeed": 1.0,
-                        "transitionDuration": 0.5,
-                        "weight": 1.0
+                        "name": "Bit",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [
+                            {
+                                "actionEnd": "",
+                                "actionStart": "",
+                                "actionUpdate": "",
+                                "endTime": 1.0333333015441895,
+                                "label": "New Event",
+                                "startTime": 0.0
+                            }
+                        ],
+                        "loop": true,
+                        "name": "Walk",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "Crawl",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "Run",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "turn",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "Idle",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "KillMotion",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "Attack",
+                        "speed": 1.0
+                    },
+                    {
+                        "events": [],
+                        "loop": true,
+                        "name": "CrouchIdle",
+                        "speed": 1.0
                     }
-                ],
-                "playbackSpeed": 1.0,
-                "poseLibrary": []
+                ]
             },
             "Enabled": true,
-            "TypeName": "AnimationController"
+            "TypeName": "AnimationControllerComponent"
         }
     ],
     "Layer": 0,
@@ -44,12 +91,12 @@
     "Transform": {
         "Pos": [
             0.0,
-            0.0,
-            3.4000000953674316
+            1.100000023841858,
+            2.5999999046325684
         ],
         "Rot": [
             0.0,
-            0.0,
+            197.0,
             0.0
         ],
         "Scale": [
