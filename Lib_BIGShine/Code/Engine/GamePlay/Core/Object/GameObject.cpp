@@ -41,6 +41,7 @@ void GameObject::DrawGizmo(const float* view, const float* projection)
         }
     }
 }
+
 std::vector<std::string> GameObject::GetComponentNames() const
 {
     std::vector<std::string> names;
@@ -304,7 +305,7 @@ void GameObject::Gui()
 
         // シーン上の全オブジェクトをリストアップ（自分自身と自分の子は除外すべき）
         // GameObjectManager経由で全オブジェクトにアクセス
-        auto& allObjects = GameObjectManager::Instance().GetObjects();
+        auto& allObjects = m_pManager->GetObjects();
         for (auto& obj : allObjects)
         {
             // 自分自身には親子付けできない
@@ -315,7 +316,7 @@ void GameObject::Gui()
             {
                 SetParent(obj); // GameObject::SetParent を呼び出す
 
-                GameObjectManager::Instance().ResolveHierarchy();
+                m_pManager->ResolveHierarchy();
             }
         }
         ImGui::EndCombo();

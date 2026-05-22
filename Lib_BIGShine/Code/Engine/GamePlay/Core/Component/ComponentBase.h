@@ -16,6 +16,7 @@
 
 
 class GameObject; // 前方宣言
+class GameObjectManager; // 前方宣言
 class GlTFModel; // 前方宣言
 
 // =========================================
@@ -54,6 +55,10 @@ public:
     {
         return gameObject.lock();
     }
+
+    //あたかも自身のメンバであるかのようにマネージャーを返す
+    GameObjectManager& GetManager();
+
 
     bool IsEnabled() const { return enabled; }
     void SetEnabled(bool e) { enabled = e; }

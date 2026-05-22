@@ -24,7 +24,7 @@ class Transform : public std::enable_shared_from_this<Transform>
 public:
     // --- ローカル情報 ---
     DirectX::XMFLOAT3 localPosition{ 0, 0, 0 };   // ローカル位置
-    DirectX::XMFLOAT3 localRotation{ 0, 0, 0 };   // ローカル回転（オイラー角）
+    DirectX::XMFLOAT3 localRotation{ 0, 0, 0 };   // ローカル回転
     //Quaternion localRotation = Quaternion::Identity;//クォータニオン
     DirectX::XMFLOAT3 localScale{ 1, 1, 1 };      // スケール
 

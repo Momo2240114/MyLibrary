@@ -18,43 +18,37 @@
 #include"ColorFilterDirector.h"
 #include "Engine/Audio/AudioManager.h"
 
+
 void SceneTitle::Finalize()
 {
-	m_SpriteRenderSystem.Finalize();
-	GameObjectManager::Instance().Clear();
-	actionRegistry.reset();
+	SceneBase::Finalize();
 }
 
 void SceneTitle::DrawGUI()
 {
-	GameObjectManager::Instance().Gui();
+	SceneBase::DrawGUI();
+
+
 }
 
 
 void SceneTitle::Initialize()
 {
-	actionRegistry = std::make_shared<ActionRegistry>();
-	ActionRegistry::SetInstance(actionRegistry);
-	RegisterAllActions();
+	SceneBase::Initialize();
 
-	MouseInput::Instance().SetDebugFlag(true);
 
-	GameObjectManager::Instance().LoadScene("MainScene");
+	_GameObjectManager->LoadScene("MainScene");
 
-	//ƒ‚ƒfƒ‹‚ÌƒŒƒ“ƒ_ƒ‰[‚ðì¬
-	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
-	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
-
-	GameObjectManager::Instance().ResolveHierarchy();
+	_GameObjectManager->ResolveHierarchy();
 }
 
 void SceneTitle::Update(float elapsedTime)
 {
-	GameObjectManager::Instance().Update(elapsedTime);
+	SceneBase::Update(elapsedTime);
 }
 
 void SceneTitle::Render(float elapsedTime)
 {
-	GameObjectManager::Instance().RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem);
+	SceneBase::Render(elapsedTime);
 }
 

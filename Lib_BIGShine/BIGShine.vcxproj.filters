@@ -190,6 +190,9 @@
     <Filter Include="Code\Editor\NodeEditor">
       <UniqueIdentifier>{af3ef53f-b592-404a-a33a-1c2a276c422e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\GamePlay\Core\Resource">
+      <UniqueIdentifier>{6f80551e-12fc-440d-9c76-269759e869db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -459,9 +462,6 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\Resource\ModelResource.cpp">
-      <Filter>Code\Engine\Graphics\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
@@ -506,6 +506,12 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp">
       <Filter>Code\Engine\Math\Curve</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\SceneBase.cpp">
+      <Filter>ソースファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -865,6 +871,12 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationDataAsset.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\SceneBase.h">
+      <Filter>ヘッダーファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Resource\ResourceManager.h">
+      <Filter>Code\Engine\GamePlay\Core\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

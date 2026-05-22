@@ -82,9 +82,7 @@ private:
     SpriteRenderSystem spriteRenderSystem;
     ModelRenderSystem modelRenderSystem;
     ShapeRenderSystem shapeRendererSystem; 
-    //====================================================
-    // Instance参照用
-    //====================================================
+
 
     //====================================================
     // DirectX11 リソース

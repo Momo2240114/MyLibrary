@@ -10,12 +10,12 @@
 
 void SceneLoading::Initialize()
 {
-	GameObjectManager::Instance().SetShapeRenderFlg(false);
-	GameObjectManager::LoadingInstance().SetShapeRenderFlg(false);
+	SceneBase::Initialize();
 
-	GameObjectManager::LoadingInstance().Initialize();
-	GameObjectManager::LoadingInstance().LoadScene("LoadingScene");
-
+	if (_GameObjectManager) {
+		_GameObjectManager->SetShapeRenderFlg(false);
+		_GameObjectManager->LoadScene("LoadingScene");
+	}
 
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
@@ -27,7 +27,7 @@ void SceneLoading::Initialize()
 void SceneLoading::Finalize()
 {
 	m_SpriteRenderSystem.Finalize();
-	GameObjectManager::LoadingInstance().Clear();
+
 
 	if (thread && thread->joinable()) {
 		thread->join(); // スレッドの終了を待機
@@ -36,25 +36,29 @@ void SceneLoading::Finalize()
 
 void SceneLoading::Update(float elapsedTime)
 {
-	GameObjectManager::LoadingInstance().Update(elapsedTime);
-	// nextScene自体が空でないこともチェック
+	SceneBase::Update(elapsedTime);
+
+	// ★自身のマネージャーを更新
+	if (_GameObjectManager) {
+		_GameObjectManager->Update(elapsedTime);
+	}
+
 	if (nextScene && nextScene->IsReady())
 	{
-		// 確実にポインタを渡す
 		auto tempScene = std::move(nextScene);
 		SceneManager::ChangeScene(std::move(tempScene), false);
-		// これ以降、この関数内で nextScene に触れてはいけない
 		return;
 	}
 }
 
 void SceneLoading::Render(float elapsedTime)
 {
-	GameObjectManager::LoadingInstance().RenderAll(m_SpriteRenderSystem,m_ModelRenderSystem);
+	SceneBase::Render(elapsedTime);
 }
 
 void SceneLoading::DrawGUI()
 {
+	SceneBase::DrawGUI();
 }
 
 void SceneLoading::LoadingThread(SceneLoading* scene)

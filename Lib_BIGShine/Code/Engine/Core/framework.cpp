@@ -3,7 +3,7 @@
 #include "ImGui.h"
 
 #include "CPUResourceLoader.h"
-#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+
 #include "Engine/Graphics/Resource/GltfModel.h"
 
 #include "CurveAssetComponent.h"
@@ -62,10 +62,6 @@ bool framework::initialize()
 #endif
 
 	AudioManager::Instance().LoadFile();
-
-	GameObjectManager::Instance().RefreshPrefabList();
-
-	GameObjectManager::Instance().Initialize();
 
 	PhysXSystem::Initialize();
 
@@ -205,7 +201,6 @@ bool framework::uninitialize()
 {
 	//m_pSceneGame->Finalize();
 	SceneManager::Clear();
-	GameObjectManager::Instance().Clear();
 
 	PhysXSystem::Finalize();
 

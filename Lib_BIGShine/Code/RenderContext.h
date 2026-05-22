@@ -17,7 +17,9 @@ class ShapeRenderSystem;
 // ===========================
 struct RenderContext
 {
+    ID3D11Device* device = nullptr; // 【追加】リソース生成の魔力
     ID3D11DeviceContext* deviceContext;
+
     const RenderState* renderState;
     const CameraComponent* camera = nullptr;       // シーンカメラ
     const LightManager* lights = nullptr; // シーンライト
@@ -27,4 +29,8 @@ struct RenderContext
     ID3D11ShaderResourceView* depthSRV = nullptr;    // 現在の深度バッファのSRV
     ID3D11ShaderResourceView* baseColorSRV = nullptr;
     ShapeRenderSystem* shapeSystem = nullptr;        // Boxメッシュの供給源
+
+    // 必要であれば、ポストプロセス等で重宝する画面サイズ
+    float screenWidth = 0.0f;
+    float screenHeight = 0.0f;
 };

@@ -45,6 +45,8 @@ public:
 		return m_RootMotionName;
 	}
 
+	void RebindInternalPointers();
+
 	struct Node
 	{
 		std::string			name;
@@ -296,65 +298,3 @@ private:
 
 	std::string m_RootMotionName;
 };
-
-// =========================================
-// GltfModel component
-//  - ModelResource の参照
-//  - Transform（GameObject 側の Transform を利用）
-//  - アニメーション制御（シンプル）
-//  - ShaderID を持つ
-// =========================================
-//class GltfModel : public Component
-//{
-//public:
-//    using Ptr = std::shared_ptr<GltfModel>;
-//
-//    GltfModel() = default;
-//    explicit GltfModel(std::shared_ptr<ModelResource> resource_)
-//        : resource(resource_) {
-//    }
-//
-//    const std::string& GetName() const override
-//    {
-//        static std::string name = "GltfModel";
-//        return name;
-//    }
-//
-//    void SetModelPath(const std::string& path_) { modelPath = path_; }
-//    std::shared_ptr<ModelResource> GetResource(ID3D11Device* device_)
-//    {
-//        if (!resource && !modelPath.empty())
-//            resource = ModelResourceManager::Instance().Load(device_, modelPath);
-//        return resource;
-//    }
-//
-//    // ===== ShaderID =====
-//    void SetShaderID(ModelShaderID id) { shaderID = id; }
-//    ModelShaderID GetShaderID() const { return shaderID; }
-//
-//    // Animation
-//    void PlayAnimation(int idx) { playingAnimation = idx; time = 0.0f; playing = true; }
-//    void StopAnimation() { playing = false; }
-//    void SetTime(float t) { time = t; }
-//    float GetTime() const { return time; }
-//
-//    void Update(float elapsedTime_) override
-//    {
-//        if (!playing || !resource) return;
-//        time += elapsedTime_;
-//        //resource->ApplyAnimation(playingAnimation, time, local_node_poses);
-//    }
-//
-//    bool GetDrawingFlg() const { return drawingFlg; }
-//
-//private:
-//    std::string modelPath;
-//    std::shared_ptr<ModelResource> resource;
-//    ModelShaderID shaderID = ModelShaderID::Default;
-//    bool playing = false;
-//    int playingAnimation = -1;
-//    float time = 0.0f;
-//    bool drawingFlg = true;
-//};
-//
-

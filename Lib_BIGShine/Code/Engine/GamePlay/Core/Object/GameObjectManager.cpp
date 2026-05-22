@@ -64,9 +64,6 @@ void GameObjectManager::Update(float et_)
 
     // 1. 速度の更新（入力 ＋ 重力）
     for (auto& obj : objects) {
-        //if (auto col = obj->GetComponent<ColliderComponent>()) {
-        //    col->ApplyGravity(et_); // ここで velocity.y を更新し、仮移動(pos += v*dt)を行う
-        //}
         obj->Update(et_); // PlayerInputなどで velocity.x, z を設定
     }
 
@@ -318,24 +315,24 @@ void GameObjectManager::Gui()
 {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-    // --- 追加: 画面全体を覆う「背景ダミー」 ---
-    // これを置くことで、UI以外の場所をクリックしても「UIを触っている」状態を維持できます
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(viewport->WorkSize);
-    ImGui::SetNextWindowBgAlpha(0.0f); // 背景は透明
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    //// --- 追加: 画面全体を覆う「背景ダミー」 ---
+    //// これを置くことで、UI以外の場所をクリックしても「UIを触っている」状態を維持できます
+    //ImGui::SetNextWindowPos(viewport->WorkPos);
+    //ImGui::SetNextWindowSize(viewport->WorkSize);
+    //ImGui::SetNextWindowBgAlpha(0.0f); // 背景は透明
+    //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-    // 背景クリック判定用ウィンドウ
-    ImGui::Begin("BackgroundSpace", nullptr,
-        ImGuiWindowFlags_NoDecoration |
-        ImGuiWindowFlags_NoInputs | // ← これを外すと完全に背景をクリックできなくなります
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus | // 背景なので前面に来させない
-        ImGuiWindowFlags_NoFocusOnAppearing);
+    //// 背景クリック判定用ウィンドウ
+    //ImGui::Begin("BackgroundSpace", nullptr,
+    //    ImGuiWindowFlags_NoDecoration |
+    //    ImGuiWindowFlags_NoInputs | // ← これを外すと完全に背景をクリックできなくなります
+    //    ImGuiWindowFlags_NoMove |
+    //    ImGuiWindowFlags_NoBringToFrontOnFocus | // 背景なので前面に来させない
+    //    ImGuiWindowFlags_NoFocusOnAppearing);
 
-    ImGui::End();
-    ImGui::PopStyleVar(2);
+    //ImGui::End();
+    //ImGui::PopStyleVar(2);
 
     // --- 静的な変数で横幅を保持（初回のみ初期化） ---
     static float leftPanelWidth = 300.0f;
@@ -863,8 +860,10 @@ void GameObjectManager::Destroy(std::shared_ptr<GameObject> obj)
 
 void GameObjectManager::Destroy(std::string objName)
 {
-    for (auto& obj : objects) {
-        if (obj && obj->GetName() == objName) {
+    for (auto& obj : objects)
+    {
+        if (obj && obj->GetName() == objName) 
+        {
             Destroy(obj); // 上のDestroyを呼ぶ
             return; // 1つ見つけたら終了（全部消すならreturnしない）
         }
@@ -1047,6 +1046,8 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
             if (objName == "MainCamera") {
                 SetMainCamera(obj);
             }
+
+            obj->SetManager(this);
 
             // オブジェクト自身にコンポーネントを含めて復元させる
             obj->Load(objJson);

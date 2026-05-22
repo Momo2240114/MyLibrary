@@ -73,15 +73,15 @@ void MouseInput::Update(HWND hwnd)
 
     m_wheelDeltaThisFrame = m_wheelDelta; // フレーム単位で保持
 
-    //デバッグ状態ではなければマウスカーソルを固定する
-    if (!m_DebugFlag)
-    {
-        //マウスの差分を求める
-        m_SubMousePos = m_CurrentMousePos - center;
+    ////デバッグ状態ではなければマウスカーソルを固定する
+    //if (!m_DebugFlag)
+    //{
+    //    //マウスの差分を求める
+    //    m_SubMousePos = m_CurrentMousePos - center;
 
-        SetCursorPos(windowCenter.x, windowCenter.y);
+    //    SetCursorPos(windowCenter.x, windowCenter.y);
 
-    }
+    //}
 }
 
 bool MouseInput::GetButtonState(int buttonCode, int type) const
