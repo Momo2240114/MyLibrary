@@ -466,7 +466,7 @@ namespace ImGui
         return points[left].y + (points[left + 1].y - points[left].y) * d;
     }
 
-    int Curve(const char *label, const ImVec2& size, const int maxpoints, ImVec2 *points)
+    int curvecomp(const char *label, const ImVec2& size, const int maxpoints, ImVec2 *points)
     {
         int modified = 0;
         int i;

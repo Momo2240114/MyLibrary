@@ -204,13 +204,38 @@ void GameObject::Gui()
     // -----------------------------
     // Add Component
     // -----------------------------
-    if (ImGui::Button("Add Component"))
+    if (ImGui::Button("Add Component", ImVec2(-1, 0))) // 横幅いっぱいのボタン
         ImGui::OpenPopup("AddComponentPopup");
 
     if (ImGui::BeginPopup("AddComponentPopup"))
     {
+        // 検索窓用のバッファ
+        static char searchFilter[64] = "";
+
+        // ポップアップが開いた初回のみ検索窓にフォーカスを当てる
+        if (ImGui::IsWindowAppearing()) {
+            ImGui::SetKeyboardFocusHere();
+            memset(searchFilter, 0, sizeof(searchFilter)); // 開くたびにリセット
+        }
+
+        ImGui::InputText("##Search", searchFilter, IM_ARRAYSIZE(searchFilter));
+        ImGui::Separator();
+
+        // 検索文字列を小文字に変換して比較するとより使いやすくなりますが、
+        // ここではシンプルに部分一致(strstr)で実装します。
+        std::string filter(searchFilter);
+
         for (auto& [name, _] : ComponentRegistry::Instance().GetAll())
         {
+            // 検索フィルタによる絞り込み（空文字の場合は常にtrue）
+            if (!filter.empty()) {
+                // 名前の中に検索語が含まれているか（大文字小文字を区別する簡易版）
+                // より高度にするなら std::search とかで見やすく変換してください
+                if (name.find(filter) == std::string::npos) {
+                    continue;
+                }
+            }
+
             bool has = (GetComponentByName(name) != nullptr);
 
             if (ImGui::MenuItem(name.c_str(), nullptr, false, !has))
@@ -219,6 +244,7 @@ void GameObject::Gui()
                 ImGui::CloseCurrentPopup();
             }
         }
+
         ImGui::EndPopup();
     }
 
@@ -471,6 +497,9 @@ void GameObject::Load(const nlohmann::json& j)
         std::string typeName = cJson["TypeName"];
         // 1. インスタンス生成
         auto comp = ComponentRegistry::Instance().Create(typeName, shared_from_this(), false);
+
+        printf("Loading component: %s\n", typeName.c_str());
+        if (comp) printf("Instance created successfully.\n");
 
         if (comp) {
             // 2. 基本設定とデータの復元

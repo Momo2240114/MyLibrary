@@ -280,6 +280,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResource.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\BoxCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\CapsuleCollider.cpp" />
@@ -382,6 +383,7 @@
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationDataAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
@@ -393,6 +395,8 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Sprite.h" />
     <ClInclude Include="Code\Engine\Math\CollisionMath.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveComponent.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveData.h" />
     <ClInclude Include="Code\Engine\Math\EasingComponent.h" />
     <ClInclude Include="Code\Engine\Math\Vector.h" />
     <ClInclude Include="Code\Engine\Physics\BoxCollider.h" />

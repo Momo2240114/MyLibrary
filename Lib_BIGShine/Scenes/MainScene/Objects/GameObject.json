@@ -3,7 +3,7 @@
         {
             "Data": {
                 "LocalScale": 1.0,
-                "ModelName": "./Data/Model/Enemy/BookHeadMonster.gltf",
+                "ModelName": "./Data/Model/M/MurielAmethyst/MurielAmethyst.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "UsedNaviMeshSystemFlg": false
@@ -13,76 +13,443 @@
         },
         {
             "Data": {
-                "Blackboard": {},
-                "CurrentStateName": "Walk",
+                "Blackboard": null,
+                "CurrentStateName": "Ultimate_Teleport_Start",
                 "States": [
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 0,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "Bit",
-                        "speed": 1.0
+                        "name": "LevelStart",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
-                        "events": [
-                            {
-                                "actionEnd": "",
-                                "actionStart": "",
-                                "actionUpdate": "",
-                                "endTime": 1.0333333015441895,
-                                "label": "New Event",
-                                "startTime": 0.0
-                            }
-                        ],
-                        "loop": true,
-                        "name": "Walk",
-                        "speed": 1.0
-                    },
-                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 5,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "Crawl",
-                        "speed": 1.0
+                        "name": "Jog_Bwd_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 7,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "Run",
-                        "speed": 1.0
+                        "name": "Jog_Bwd_Stop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 24,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "turn",
-                        "speed": 1.0
+                        "name": "Travel_Bwd_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 1,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "Idle",
-                        "speed": 1.0
+                        "name": "Idle_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 4,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "KillMotion",
-                        "speed": 1.0
+                        "name": "Jog_Fwd_Stop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 29,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "Attack",
-                        "speed": 1.0
+                        "name": "Ultimate_Prepare",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
                     },
                     {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 21,
+                        "blendParamName": "BlendAlpha",
                         "events": [],
                         "loop": true,
-                        "name": "CrouchIdle",
-                        "speed": 1.0
+                        "name": "Travel_Fwd_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 19,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Cast",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 2,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Fwd_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 3,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Fwd_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 6,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Bwd_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 8,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Left_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 9,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Left_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 28,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Ultimate_Land",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 10,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Left_Stop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 11,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Right_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 12,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Right_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 13,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jog_Right_Stop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 14,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jump_Start_Small",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 15,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jump_Start_Big",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 16,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jump_Apex",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 17,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jump_Fall_Loop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 18,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Jump_Land",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 25,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Travel_Bwd_Stop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 20,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Travel_Fwd_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 23,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Travel_Bwd_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 22,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Travel_Fwd_Stop",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 31,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Ultimate_Teleport_Land",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 26,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Recall",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 27,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Ultimate_Flare",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 30,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Ultimate_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "",
+                        "type": 0
+                    },
+                    {
+                        "animIndexA": -1,
+                        "animIndexB": -1,
+                        "animationIndex": 32,
+                        "blendParamName": "BlendAlpha",
+                        "events": [],
+                        "loop": true,
+                        "name": "Ultimate_Teleport_Start",
+                        "speed": 1.0,
+                        "speedCurveName": "Track 0",
+                        "type": 0
                     }
                 ]
             },
             "Enabled": true,
             "TypeName": "AnimationControllerComponent"
+        },
+        {
+            "Data": {
+                "MaxBounds": [
+                    1.0,
+                    1.7332382202148438
+                ],
+                "MinBounds": [
+                    -0.009999999776482582,
+                    0.19838029146194458
+                ],
+                "Tracks": [
+                    {
+                        "Name": "Track 0",
+                        "Points": [
+                            [
+                                0.003998422995209694,
+                                0.23266446590423584
+                            ],
+                            [
+                                0.42075714468955994,
+                                1.1926672458648682
+                            ],
+                            [
+                                0.9921689033508301,
+                                1.2117706537246704
+                            ]
+                        ],
+                        "Type": 3
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CurveComponent"
         }
     ],
     "Layer": 0,

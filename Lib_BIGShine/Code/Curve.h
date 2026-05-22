@@ -2,13 +2,13 @@
 #include "CurveData.h"
 #include <imgui.h>
 
-class Curve
+class curvecomp
 {
 public:
     CurveData* data = nullptr;
 
-    Curve() = default;
-    Curve(CurveData* d) : data(d) {}
+    curvecomp() = default;
+    curvecomp(CurveData* d) : data(d) {}
 
     float Evaluate(float t);
     void ShowEditorUI();
