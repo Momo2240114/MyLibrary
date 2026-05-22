@@ -1,6 +1,6 @@
 #pragma once
 
-#include"IScene.h"
+#include"SceneBase.h"
 #include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include"ShapeRenderer.h"
@@ -25,7 +25,7 @@ enum  TutorialState
 	Phase_05_End,
 };
 
-class SceneTutorial :public Scene
+class SceneTutorial :public SceneBase
 {
 public:
 	SceneTutorial()

@@ -58,7 +58,7 @@ void ModelAttachmentComponent::LateUpdate(float deltaTime)
     if (!model) {
         // 親がモデルを持っている前提で取得を試みる
         ////targetModel = parentTransform->gameObject.lock()->GetComponent<GltfModelCommponennt>();
-        auto targetObject = GameObjectManager::Instance().Find(targetGameObjectName.c_str());
+        auto targetObject = GetManager().Find(targetGameObjectName.c_str());
         if(targetObject)
         {
             targetModel = targetObject->GetComponent<GltfModelCommponennt>();
@@ -189,7 +189,7 @@ void ModelAttachmentComponent::Gui()
         ImGui::BeginChild("SelectorScroll", ImVec2(500, 400), true);
 
         // 1. GameObjectManager から全オブジェクトを取得
-        auto& allObjects = GameObjectManager::Instance().GetObjects();
+        auto& allObjects = GetManager().GetObjects();
 
         for (auto& go : allObjects) {
             if (!go) continue;

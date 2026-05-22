@@ -11,24 +11,12 @@ class GltfModelCommponennt;
 
 #include"RayCastManager.h"
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
-
+#include "Engine/GamePlay/Core/Resource/ResourceManager.h"
 
 
 class GameObjectManager
 {
 public:
-    static GameObjectManager& Instance()
-    {
-        static GameObjectManager inst;
-        return inst;
-    }
-
-    static GameObjectManager& LoadingInstance()
-    {
-        static GameObjectManager loadInst;
-        return loadInst;
-    }
-
     void Initialize();
 
     template<typename... Args>
@@ -54,11 +42,16 @@ public:
             finalName_ += buf_;
         }
 
-        // オブジェクト作成
-        auto obj = std::make_shared<GameObject>(finalName_, std::forward<Args>(args_)...);
-        objects.emplace_back(obj);       // 全体リストに追加
-        pendingStarts.emplace_back(obj); // ★初期化待ちリストに追加
-        return obj;
+        // オブジェクトの生成
+        auto newObj = std::make_shared<GameObject>();
+        newObj->name = finalName_;
+
+        //ここで「自身」をオブジェクトに授ける！
+        newObj->SetManager(this);
+        objects.emplace_back(newObj);       // 全体リストに追加
+        // --- 既存の pendingStarts への追加や初期化処理 ---
+        pendingStarts.push_back(newObj);
+        return newObj;
     }
 
 
@@ -185,7 +178,8 @@ public:
 
     void SetShapeRenderFlg(bool f) { shapeRenderFlg = f; }
 
-
+    //すべてのオブジェクトやコンポーネントが平等にアクセスするための窓口
+    ResourceManager* GetResourceManager() { return _ResourceManager.get(); }
 private:
     // unique name helper
     std::string MakeUniqueName(std::string base)
@@ -206,6 +200,7 @@ private:
 
 
 private:
+    std::unique_ptr<ResourceManager> _ResourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
     // まだ Startが呼ばれていないオブジェクトのリスト
     std::vector<std::shared_ptr<GameObject>> pendingStarts;

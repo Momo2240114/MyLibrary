@@ -26,7 +26,7 @@ void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
 
         // PhysX 5 ‚Å‚Í status ƒtƒ‰ƒO‚Å‚Í‚È‚­ currentTriggers ‚ðŒ©‚Ä”»’è
         bool currentlyHit = true; // PxTriggerPair ‚ª“n‚Á‚Ä‚«‚½ = “–‚½‚Á‚Ä‚¢‚é
-        GameObjectManager::Instance().HandlePhysXTrigger(colA.get(), colB.get(), currentlyHit);
+        //GetManager().HandlePhysXTrigger(colA.get(), colB.get(), currentlyHit);
     }
 }
 
@@ -52,7 +52,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
         const PxContactPair& cp = pairs[i];
         if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
         {
-            GameObjectManager::Instance().HandlePhysXContact(colA.get(), colB.get());
+            //GameObjectManager::Instance().HandlePhysXContact(colA.get(), colB.get());
             break;
         }
     }

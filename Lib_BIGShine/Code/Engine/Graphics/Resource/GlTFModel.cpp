@@ -9,6 +9,7 @@
 #include "Misc.h"
 #include "GLTFImporter.h"
 #include "CPUResourceLoader.h"
+#include "ModelResourceManager.h"
 #include "Model.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -214,158 +215,35 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 {
 	Clear();
 
-	// --- モデル名の抽出処理 ---
-	std::string pathStr = filename;
-	modelFullPass = pathStr;
+	// 1. 名前の記憶
+	std::filesystem::path filePath(filename);
+	modelFullPass = filename;
+	modelName = filePath.stem().string();
 
-	// 1. 最後から検索して拡張子 (.gltf) を除去
-	size_t lastDot = pathStr.find_last_of(".");
-	std::string nameWithoutExt = (lastDot != std::string::npos) ? pathStr.substr(0, lastDot) : pathStr;
+	// 2. 神殿からすでにGPUバッファ等も構築済みのリソースを得る
+	auto resource = ModelResourceManager::Instance().GetOrCreateResource(device, filename);
+	if (!resource) return;
 
-	// 2. パス区切り文字 (\ か /) の後ろを取得
-	size_t lastSlash = nameWithoutExt.find_last_of("\\/");
-	if (lastSlash != std::string::npos) {
-		modelName = nameWithoutExt.substr(lastSlash + 1);
-	}
-	else {
-		modelName = nameWithoutExt;
-	}
+	// 3. データを引き写す（アニメーション再生などで個別に書き換えるためコピーする）
+	this->materials = resource->materials;
+	this->nodes = resource->nodes;
+	this->meshes = resource->meshes;
+	this->animations = resource->animations;
 
+	// 4. コピーしたことによってポインタが古い場所（神殿）を指しているので、
+	//    「自分自身の vector」を指すように再結線する（これだけはコンポーネント側に残す！）
+	RebindInternalPointers();
 
-	std::filesystem::path filepath(filename);
-	std::filesystem::path dirpath(filepath.parent_path());
+	// 5. 行列の確定
+	UpdateTransform();
+}
 
-	std::filesystem::path extension = filepath.extension();
-
-	// 独自形式のモデルファイルの存在確認
-	filepath.replace_extension(".cereal");
-	if (std::filesystem::exists(filepath))
-	{
-		// 独自形式のモデルファイルの読み込み
-		Deserialize(filepath.string().c_str());
-	}
-	else if (extension == ".gltf" || extension == ".glb")
-	{
-		// 汎用モデルファイルの読み込み
-		GLTFImporter importer(filename);
-
-		// マテリアルデータ読み取り
-		importer.LoadMaterials(materials, device);
-
-		// ノードデータ読み取り
-		importer.LoadNodes(nodes);
-
-		// メッシュデータ読み取り
-		importer.LoadMeshes(meshes, nodes);
-
-		// アニメーションデータ読み取り
-		importer.LoadAnimations(animations, nodes, sampleRate);
-
-		// 独自形式のモデルファイルを保存a
-		Serialize(filepath.string().c_str());
-	}
-	else
-	{
-		_ASSERT_EXPR_A(false, "found not model file");
-	}
-
-	// マテリアル構築
-	for (Material& material : materials)
-	{
-		if (material.baseMap == nullptr)
-		{
-			if (material.baseTextureFileName.empty())
-			{
-				// ダミーテクスチャ作成
-				HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF,
-					material.baseMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-			else
-			{
-				// ベーステクスチャ読み込み
-				std::filesystem::path diffuseTexturePath(dirpath / material.baseTextureFileName);
-				HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, diffuseTexturePath.wstring().c_str(),
-					material.baseMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-		}
-
-		if (material.normalMap == nullptr)
-		{
-			if (material.normalTextureFileName.empty())
-			{
-				// 法線ダミーテクスチャ作成
-				HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0xFFFF7F7F,
-					material.normalMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-			else
-			{
-				// 法線テクスチャ読み込み
-				std::filesystem::path texturePath(dirpath / material.normalTextureFileName);
-				HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, texturePath.wstring().c_str(),
-					material.normalMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-		}
-
-
-		// エミッシブマップ
-		if (material.emissiveMap == nullptr)
-		{
-			if (material.emissiveTextureFileName.empty())
-			{
-				HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0x00000000, material.emissiveMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-			else
-			{
-				std::filesystem::path path = dirpath / material.emissiveTextureFileName;
-				HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(), material.emissiveMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-		}
-
-		// オクルージョンマップ
-		if (material.occlusionMap == nullptr)
-		{
-			if (material.occlusionTextureFileName.empty())
-			{
-				HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, material.occlusionMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-			else
-			{
-				std::filesystem::path path = dirpath / material.occlusionTextureFileName;
-				HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(), material.occlusionMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-		}
-
-		// MetalnessRoughnessマップ
-		if (material.metalnessRoughnessMap == nullptr)
-		{
-			if (material.metalnessRoughnessTextureFileName.empty())
-			{
-				HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0x8080FF, material.metalnessRoughnessMap.GetAddressOf()); // M=0.5 R=1.0 的な色
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-			else
-			{
-				std::filesystem::path path = dirpath / material.metalnessRoughnessTextureFileName;
-				HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(), material.metalnessRoughnessMap.GetAddressOf());
-				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-			}
-		}
-	}
-
-	// ノード構築
+void GltfModelCommponennt::RebindInternalPointers()
+{
+	// ノードの親子関係を再結線
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
 	{
 		Node& node = nodes.at(nodeIndex);
-
-		// 親子関係を構築
 		node.parent = node.parentIndex >= 0 ? &nodes.at(node.parentIndex) : nullptr;
 		if (node.parent != nullptr)
 		{
@@ -373,61 +251,17 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 		}
 	}
 
-	// メッシュ構築
+	// メッシュとマテリアル・ノード・ボーンの再結線
 	for (Mesh& mesh : meshes)
 	{
-		// 参照マテリアル設定
 		mesh.material = &materials.at(mesh.materialIndex);
-
-		// 参照ノード設定
 		mesh.node = &nodes.at(mesh.nodeIndex);
 
-		// 頂点バッファ
-		{
-			D3D11_BUFFER_DESC bufferDesc = {};
-			D3D11_SUBRESOURCE_DATA subresourceData = {};
-
-			bufferDesc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * mesh.vertices.size());
-			bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-			bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bufferDesc.CPUAccessFlags = 0;
-			bufferDesc.MiscFlags = 0;
-			bufferDesc.StructureByteStride = 0;
-			subresourceData.pSysMem = mesh.vertices.data();
-			subresourceData.SysMemPitch = 0;
-			subresourceData.SysMemSlicePitch = 0;
-
-			HRESULT hr = device->CreateBuffer(&bufferDesc, &subresourceData, mesh.vertexBuffer.GetAddressOf());
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		}
-
-		// インデックスバッファ
-		{
-			D3D11_BUFFER_DESC bufferDesc = {};
-			D3D11_SUBRESOURCE_DATA subresourceData = {};
-
-			bufferDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh.indices.size());
-			bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-			bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-			bufferDesc.CPUAccessFlags = 0;
-			bufferDesc.MiscFlags = 0;
-			bufferDesc.StructureByteStride = 0;
-			subresourceData.pSysMem = mesh.indices.data();
-			subresourceData.SysMemPitch = 0;
-			subresourceData.SysMemSlicePitch = 0;
-			HRESULT hr = device->CreateBuffer(&bufferDesc, &subresourceData, mesh.indexBuffer.GetAddressOf());
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		}
-
-		// ボーン構築
 		for (Bone& bone : mesh.bones)
 		{
-			// 参照ノード設定
 			bone.node = &nodes.at(bone.nodeIndex);
 		}
 	}
-
-	UpdateTransform();
 }
 
 void GltfModelCommponennt::Gui()

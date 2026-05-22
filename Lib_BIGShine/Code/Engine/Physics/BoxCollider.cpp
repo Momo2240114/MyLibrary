@@ -8,7 +8,7 @@
 void BoxCollider::Start()
 {
     //ゲームオブジェクトを追加する
-    GameObjectManager::Instance().GetRayCastManager()->AddGameObject(GetGameObject());
+    GetManager().GetRayCastManager()->AddGameObject(GetGameObject());
 }
 
 void BoxCollider::Gui() {

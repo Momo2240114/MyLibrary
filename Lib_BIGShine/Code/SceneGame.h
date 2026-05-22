@@ -1,12 +1,13 @@
 #pragma once
 
 
-#include"IScene.h"
+#include"SceneBase.h"
 #include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include"ShapeRenderer.h"
 
-class SceneGame :public Scene
+
+class SceneGame :public SceneBase
 {
 public:
 	SceneGame()
@@ -25,8 +26,4 @@ public:
 
 	void DrawGUI();
 
-private:
-	ModelRenderSystem m_ModelRenderSystem;
-	SpriteRenderSystem m_SpriteRenderSystem;
-	ShapeRenderSystem m_ShapeRenderSystem;
 };

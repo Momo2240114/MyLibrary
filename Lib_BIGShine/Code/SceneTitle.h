@@ -1,12 +1,12 @@
 #pragma once
 
-#include"IScene.h"
+#include"SceneBase.h"
 #include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include"ShapeRenderer.h"
 
 
-class SceneTitle :public Scene
+class SceneTitle :public SceneBase
 {
 public:
 	SceneTitle()
@@ -23,8 +23,4 @@ public:
 
 	// ï`âÊèàóù
 	void Render(float elapsedTime);
-private:
-	ModelRenderSystem m_ModelRenderSystem;
-	SpriteRenderSystem m_SpriteRenderSystem;
-	ShapeRenderSystem m_ShapeRenderSystem;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 //基底クラス
-#include "IScene.h"
+#include "SceneBase.h"
 //レンダー用のシステム
 #include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
@@ -13,10 +13,10 @@
 #include"Engine/GamePlay/Core/Object/GameObject.h"
 
 //ローディングシーン
-class SceneLoading : public Scene
+class SceneLoading : public SceneBase
 {
 public:
-	SceneLoading(std::unique_ptr<Scene> next) : nextScene(std::move(next)) {}
+	SceneLoading(std::unique_ptr<SceneBase> next) : nextScene(std::move(next)) {}
 	~SceneLoading()override {}
 
 	//初期化
@@ -47,7 +47,7 @@ private:
 	SpriteRenderSystem m_SpriteRenderSystem;
 
 	// 生ポインタではなく unique_ptr で保持する
-	std::unique_ptr<Scene> nextScene;
+	std::unique_ptr<SceneBase> nextScene;
 	std::unique_ptr<std::thread> thread;
 };
 

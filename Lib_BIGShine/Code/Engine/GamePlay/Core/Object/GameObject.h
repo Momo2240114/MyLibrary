@@ -13,6 +13,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 class ColliderComponent;
+class GameObjectManager;
 
 
 class GameObject : public std::enable_shared_from_this<GameObject>
@@ -47,7 +48,16 @@ public:
     std::shared_ptr<Component> m_pColliderComponent;
     // --- 追加：自分専用のレジスタ ---
     ActionRegistry localRegistry;
+
+    //自身が属する宇宙（マネージャー）へのポインタ
+    GameObjectManager* m_pManager = nullptr;
 public:
+    //このオブジェクトを統べるマネージャーへのアクセス
+    GameObjectManager& GetManager() const { return *m_pManager; }
+
+    // マネージャーを設定する（生成時に呼ばれる）
+    void SetManager(GameObjectManager* manager) { m_pManager = manager; }
+
     // ゲッター
     ActionRegistry& GetLocalRegistry() { return localRegistry; };
 
