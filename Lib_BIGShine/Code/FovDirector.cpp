@@ -1,6 +1,6 @@
 #include "FovDirector.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
-#include "CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
 
 void FovDirector::Start()
 {

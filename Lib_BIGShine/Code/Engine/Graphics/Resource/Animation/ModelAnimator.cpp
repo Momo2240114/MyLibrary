@@ -1,13 +1,45 @@
 #include "ModelAnimator.h"
 
-void ModelAnimator::Update(float et, GltfModelCommponennt* model)
+void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp)
 {
-    if (!model || !current.state) return;
+    // 1. 時間の更新（イベント発火含む）
+      // ※ブレンド時は基準となる A の Duration を使う例
+    float baseDuration = model->GetAnimationDuration(
+        current.state->type == AnimStateType::Single ? current.state->animationIndex : current.state->animIndexA
+    );
+    current.Update(et, baseDuration, curvecomp);
 
-    // 1. 現在のアニメーションの時間を更新
-    float currentDuration = model->GetAnimationDuration(current.state->animationIndex);
-    current.Update(et, currentDuration);
-    model->ComputeAnimation(current.state->animationIndex, current.time, tempPoseA);
+    // 2. ポーズの計算
+    if (current.state->type == AnimStateType::Single) {
+        model->ComputeAnimation(current.state->animationIndex, current.time, tempPoseA);
+    }
+    else if (current.state->type == AnimStateType::Blend1D) {
+        // --- ブレンド計算 ---
+        // Blackboard 等から alpha を取得する仕組みが必要（後述）
+        float alpha = 0.5f; // 仮：本来は Controller の Blackboard から取得
+
+        model->ComputeAnimation(current.state->animIndexA, current.time, tempPoseA);
+
+        // B の時間は A と同期させる（Duration比を考慮）
+        float durationB = model->GetAnimationDuration(current.state->animIndexB);
+        float timeB = (current.time / baseDuration) * durationB;
+        model->ComputeAnimation(current.state->animIndexB, timeB, tempPoseB);
+
+        // tempPoseA をブレンド結果で上書き
+        for (size_t i = 0; i < tempPoseA.size(); ++i) {
+            DirectX::XMVECTOR pA = DirectX::XMLoadFloat3(&tempPoseA[i].position);
+            DirectX::XMVECTOR pB = DirectX::XMLoadFloat3(&tempPoseB[i].position);
+            DirectX::XMStoreFloat3(&tempPoseA[i].position, DirectX::XMVectorLerp(pA, pB, alpha));
+
+            DirectX::XMVECTOR qA = DirectX::XMLoadFloat4(&tempPoseA[i].rotation);
+            DirectX::XMVECTOR qB = DirectX::XMLoadFloat4(&tempPoseB[i].rotation);
+            DirectX::XMStoreFloat4(&tempPoseA[i].rotation, DirectX::XMQuaternionSlerp(qA, qB, alpha));
+
+            DirectX::XMVECTOR sA = DirectX::XMLoadFloat3(&tempPoseA[i].scale);
+            DirectX::XMVECTOR sB = DirectX::XMLoadFloat3(&tempPoseB[i].scale);
+            DirectX::XMStoreFloat3(&finalPose[i].scale, DirectX::XMQuaternionSlerp(sA, sB, alpha));
+        }
+    }
 
     // 2. クロスフェード（ミキシング）処理
     if (isMixing && previous.state)
@@ -26,7 +58,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model)
         {
             // 前のアニメーションを計算
             float prevDuration = model->GetAnimationDuration(previous.state->animationIndex);
-            previous.Update(et, prevDuration);
+            previous.Update(et, prevDuration,curvecomp);
             model->ComputeAnimation(previous.state->animationIndex, previous.time, tempPoseB);
 
             // tempPoseB(前) と tempPoseA(次) をブレンドして finalPose に格納
@@ -58,6 +90,43 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model)
     }
 }
 
+void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed)
+{
+    if (!model) return;
+
+    // 1. 各アニメーションの時間を進める (簡易化のため共通の時間管理)
+    static float internalTime = 0.0f;
+    float durationA = model->GetAnimationDuration(indexA);
+    internalTime += et * speed;
+    if (loop) internalTime = fmod(internalTime, durationA);
+
+    // 2. AとBのポーズをそれぞれ計算
+    model->ComputeAnimation(indexA, internalTime, tempPoseA);
+    // BはAの時間に合わせるか、B自身のDurationで正規化し直す
+    float durationB = model->GetAnimationDuration(indexB);
+    float timeB = (internalTime / durationA) * durationB;
+    model->ComputeAnimation(indexB, timeB, tempPoseB);
+
+    // 3. alpha を用いて線形補間
+    if (finalPose.size() != tempPoseA.size()) finalPose.resize(tempPoseA.size());
+
+    for (size_t i = 0; i < tempPoseA.size(); ++i)
+    {
+        // Position / Scale は Lerp, Rotation は Slerp
+        DirectX::XMVECTOR pA = DirectX::XMLoadFloat3(&tempPoseA[i].position);
+        DirectX::XMVECTOR pB = DirectX::XMLoadFloat3(&tempPoseB[i].position);
+        DirectX::XMStoreFloat3(&finalPose[i].position, DirectX::XMVectorLerp(pA, pB, alpha));
+
+        DirectX::XMVECTOR qA = DirectX::XMLoadFloat4(&tempPoseA[i].rotation);
+        DirectX::XMVECTOR qB = DirectX::XMLoadFloat4(&tempPoseB[i].rotation);
+        DirectX::XMStoreFloat4(&finalPose[i].rotation, DirectX::XMQuaternionSlerp(qA, qB, alpha));
+
+        DirectX::XMVECTOR sA = DirectX::XMLoadFloat3(&tempPoseA[i].scale);
+        DirectX::XMVECTOR sB = DirectX::XMLoadFloat3(&tempPoseB[i].scale);
+        DirectX::XMStoreFloat3(&finalPose[i].scale, DirectX::XMQuaternionSlerp(sA, sB, alpha));
+    }
+}
+
 void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
 {
     if (!newState) return;
@@ -79,12 +148,24 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
     isMixing = true;
 }
 
-void ModelAnimator::ActiveSlot::Update(float et, float duration)
+void ModelAnimator::ActiveSlot::Update(float et, float duration,CurveComponent* curveComp)
 {
     if (!state) return;
 
+    float currentSpeed = state->playbackSpeed;
+
+    // ★カーブの指定があり、コンポーネントが存在する場合
+    if (curveComp && !state->speedCurveName.empty())
+    {
+        // アニメーションの正規化時間 (0.0 - 1.0) を計算
+        float normalizedTime = (duration > 0.0f) ? (time / duration) : 0.0f;
+
+        // 指定された名前のカーブから速度を取得
+        currentSpeed = curveComp->GetValue(state->speedCurveName, normalizedTime);
+    }
+
     float prevTime = time;
-    time += et * state->playbackSpeed;
+    time += et * currentSpeed;
 
     // イベントの発火判定
     for (auto& ev : const_cast<AnimState*>(state)->events)

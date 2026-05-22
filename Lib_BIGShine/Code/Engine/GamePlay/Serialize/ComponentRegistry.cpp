@@ -15,6 +15,7 @@
 #include "TransformDirector.h"
 #include "Engine/GamePlay/Graphics/LightBlinkerComponent.h"
 #include "Engine/Math/EasingComponent.h"
+#include "Engine/Math/Curve/CurveComponent.h"
 #include "ModelAttachmentComponent.h"
 #include "ColorFilterDirector.h"
 #include "NumberSwitcher.h"
@@ -73,9 +74,9 @@ void RegisterAllComponents()
     registry.Register<FovDirector>("FovDirector");
     registry.Register<TransformDirector>("TransformDirector");
     registry.Register<ColorFilterDirector>("ColorFilterDirector");
-    //registry.Register<CurvePlayerComponent>("CurvePlayerComponent");
     registry.Register<LightBlinkerComponent>("LightBlinker");
     registry.Register<EasingComponent>("Easing");
+    registry.Register<CurveComponent>("CurveComponent");
     registry.Register<NumberSwitcher>("NumberSwitcher");
     registry.Register<PlayerInput>("PlayerInput");
     registry.Register<Movement>("Movement");
@@ -89,8 +90,6 @@ std::shared_ptr<Component> ComponentRegistry::Create(const std::string& name, st
     if (it == creators.end())
         return nullptr;
 
-    // š d•¡–hŽ~i”CˆÓj
-// š C³FŠù‚É‚ ‚é‚È‚ç‚»‚ê‚ðŽg‚í‚¹‚éinullptr‚ð•Ô‚³‚È‚¢j
     auto existing = go->GetComponentByName(name);
     if (existing)
         return existing;

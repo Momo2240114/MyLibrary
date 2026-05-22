@@ -2,6 +2,7 @@
 
 #include "Engine/Graphics/Resource/GlTFModel.h"
 #include "AnimationState.h"
+#include "Engine/Math/Curve/CurveComponent.h"
 
 class ModelAnimator
 {
@@ -13,11 +14,15 @@ public:
         float time = 0.0f;
         float weight = 1.0f; // ブレンド重み
 
-        void Update(float et, float duration);
+
+        void Update(float et, float duration, CurveComponent* curvecomp);
     };
 
 
-    void Update(float deltaTime, GltfModelCommponennt* model);
+    void Update(float deltaTime, GltfModelCommponennt* model, CurveComponent* curvecomp);
+
+    // ModelAnimator.h
+    void UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed);
 
     // ノードエディタ側から呼ばれる命令
     void CrossFadeTo(const AnimState* newState, float duration);

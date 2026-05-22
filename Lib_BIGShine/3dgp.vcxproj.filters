@@ -184,6 +184,12 @@
     <Filter Include="Code\Engine\Graphics\Resource\Animation">
       <UniqueIdentifier>{7e42c25a-d4da-4c63-94ad-1d09a01a6f1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\Math\Curve">
+      <UniqueIdentifier>{b5b908da-199a-4766-b4f3-703c3dc4b1fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Editor\NodeEditor">
+      <UniqueIdentifier>{af3ef53f-b592-404a-a33a-1c2a276c422e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -497,6 +503,9 @@
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_stdlib.cpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp">
+      <Filter>Code\Engine\Math\Curve</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -846,6 +855,15 @@
       <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Math\Curve\CurveData.h">
+      <Filter>Code\Engine\Math\Curve</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Math\Curve\CurveComponent.h">
+      <Filter>Code\Engine\Math\Curve</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationDataAsset.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
   </ItemGroup>

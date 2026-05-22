@@ -1,6 +1,6 @@
 #include "Curve.h"
 
-float Curve::Evaluate(float t)
+float curvecomp::Evaluate(float t)
 {
     if (!data || data->keys.empty()) return 0.0f;
     auto& keys = data->keys;
@@ -20,7 +20,7 @@ float Curve::Evaluate(float t)
     return 0.0f;
 }
 
-void Curve::ShowEditorUI()
+void curvecomp::ShowEditorUI()
 {
     if (!data) return;
 
