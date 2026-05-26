@@ -27,9 +27,16 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
     }
     else
     {
-        hr = DirectX::CreateWICTextureFromFile(device_, filename_, resource_.GetAddressOf(), srv_.GetAddressOf());
-        _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
-        textureResources.insert({ filename_, srv_ });
+        // WICではなくDDS専用の関数を使用する
+        hr = DirectX::CreateDDSTextureFromFile(device_, filename_, resource_.GetAddressOf(), srv_.GetAddressOf());
+
+        // 失敗した場合はWICで試す
+        if (FAILED(hr))
+        {
+            hr = DirectX::CreateWICTextureFromFile(device_, filename_, resource_.GetAddressOf(), srv_.GetAddressOf());
+            _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+            textureResources.insert({ filename_, srv_ });
+        }
     }
 
 
@@ -55,6 +62,9 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
     HRESULT hr = S_OK;
     Microsoft::WRL::ComPtr<ID3D11Resource> resource;
 
+
+    //DDS形式のテクスチャデータをして読み込む
+    if (hr != S_OK)
     // DDSで試す
     hr = CreateDDSTextureFromMemory(device_,
         reinterpret_cast<const uint8_t*>(data),

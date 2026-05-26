@@ -7,6 +7,7 @@
 #include"ShapeRenderer.h"
 
 #include"Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Editor/Window/EditorWindowManager.h"
 
 class SceneBase :public Scene
 {
@@ -35,12 +36,13 @@ protected:
 		SceneManager::ChangeScene(std::make_unique<T>());
 	}
 
-
+	EditorWindowManager editorWindowManager;
 	bool ready;
 	std::shared_ptr<ActionRegistry> actionRegistry;
 	std::string sceneName;
 	bool isFirstUpdate = true;
-
+	// 窓の表示状態を管理する変数（クラスメンバとして保持すること）
+	bool isEditorVisible = true;
 	ModelRenderSystem m_ModelRenderSystem;
 	SpriteRenderSystem m_SpriteRenderSystem;
 	ShapeRenderSystem m_ShapeRenderSystem;

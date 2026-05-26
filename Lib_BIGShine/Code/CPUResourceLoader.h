@@ -6,6 +6,7 @@ using namespace DirectX;
 #include <string> 
 #include <map>
 #include <d3d11.h>
+#include <d3dcompiler.h>
 
 class CPUResourceLoader
 {

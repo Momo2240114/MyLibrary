@@ -9,6 +9,17 @@
 #include "GLTFImporter.h"
 #include <DDSTextureLoader.h>
 
+
+
+bool LoadImageData(tinygltf::Image*, const int, std::string*,
+	std::string*, int, int,
+	const unsigned char*, int,
+	void* user_pointer)
+{
+	return true;
+}
+
+
 // コンストラクタ
 GLTFImporter::GLTFImporter(const char* filename)
 	: filepath(filename)
@@ -17,6 +28,9 @@ GLTFImporter::GLTFImporter(const char* filename)
 	std::string extension = filepath.extension().string();
 	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);	// 小文字化
 	tinygltf::TinyGLTF gltf;
+
+	//TinyGLTFの画像読み込みが行われないようにする
+	gltf.SetImageLoader(LoadImageData, this);
 
 	std::string error, warning;
 	bool result = false;

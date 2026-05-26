@@ -1,3 +1,6 @@
+#ifndef SCENE_HLSLI // もし定義されていなければ…
+#define SCENE_HLSLI // 定義する
+
 cbuffer CbScene : register(b7)
 {
     row_major float4x4 viewProjection;
@@ -39,3 +42,5 @@ struct SpotLightData
 // --- 構造化バッファ (t5) ---
 StructuredBuffer<PointLightData> pointLights : register(t5);
 StructuredBuffer<SpotLightData> spotLights : register(t6); // 追加
+
+#endif // SCENE_HLSLI の終わり

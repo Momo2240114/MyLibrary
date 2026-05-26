@@ -8,7 +8,15 @@
 namespace ed = ax::NodeEditor;
 
 
-
+struct RootMotionSettings {
+    bool enable = false;        // この秘術を起動するか否か
+    bool applyPositionX = true; // X軸の歩みを許すか
+    bool applyPositionY = true; // Y軸（天と地）の歩みを許すか
+    bool applyPositionZ = true; // Z軸の歩みを許すか
+    bool applyRotationX = true; // X軸の傾き（Pitch）を許すか
+    bool applyRotationY = true; // Y軸の振り向く力（Yaw）を許すか
+    bool applyRotationZ = true; // Z軸の傾げ（Roll）を許すか
+};
 
 struct AnimEvent 
 {
@@ -29,13 +37,17 @@ struct AnimEvent
 enum class AnimStateType 
 {
     Single,   // 通常の単一再生
-    Blend1D   // 2つのアニメーションをパラメータでブレンド
+    Blend1D ,  // 2つのアニメーションをパラメータでブレンド
+    Custom
 };
 
 // ノードエディタ上の各「状態」を表現するベース
 struct AnimState 
 {
     AnimStateType type = AnimStateType::Single; // デフォルトは単一再生
+    RootMotionSettings rootMotion;
+
+    std::string sequencerDataName; // これがシーケンサーのファイルパス
 
     // --- Single 用データ ---
     int animationIndex = -1;
@@ -44,6 +56,9 @@ struct AnimState
     int animIndexA = -1;
     int animIndexB = -1;
     std::string blendParamName = "BlendAlpha";
+
+    // --- Custom (ポーズライブラリ) 用データ 【追加】 ---
+    int customAnimIndex = -1; // PoseLibraryResource内の customAnims のインデックス
 
     std::string name;
     float playbackSpeed = 1.0f;
@@ -55,7 +70,8 @@ struct AnimState
     std::vector<AnimEvent> events;
 };
 
-enum class ConditionType {
+enum class ConditionType 
+{
     Variable,      // 通常の変数比較 (Speed > 1.0 など)
     AnimationEnd,  // アニメーションが最後まで再生されたか
     Trigger        // 1回だけ反応するフラグ
@@ -72,12 +88,13 @@ struct AnimCondition {
 };
 
 // 遷移（リンク）
-struct AnimTransition {
-    ed::LinkId id;
-    ed::PinId startPin;
-    ed::PinId endPin;
-    float duration = 0.2f;     // クロスフェード時間
+struct AnimTransition 
+{
+    std::string fromStateName; // 始まりのステート名
+    std::string toStateName;   // 行き先のステート名
+    float duration = 0.2f;
     std::vector<AnimCondition> conditions;
+    ed::LinkId id;
 };
 
 // ノード（ステート）
@@ -88,8 +105,32 @@ struct AnimGraphNode {
     ed::PinId outputPin;
     ImVec2 pos;
 };
+
 // 宣言だけを記述
 void to_json(nlohmann::json& j, const AnimEvent& e);
 void from_json(const nlohmann::json& j, AnimEvent& e);
 void to_json(nlohmann::json& j, const AnimState& s);
 void from_json(const nlohmann::json& j, AnimState& s);
+
+//RootMotionSettings に加えて、個々のステートのシリアライズに統合する
+inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
+    j = nlohmann::json{
+        {"enable", r.enable},
+        {"applyPositionX", r.applyPositionX},
+        {"applyPositionY", r.applyPositionY},
+        {"applyPositionZ", r.applyPositionZ},
+        {"applyRotationX", r.applyRotationX},
+        {"applyRotationY", r.applyRotationY},
+        {"applyRotationZ", r.applyRotationZ}
+    };
+}
+
+inline void from_json(const nlohmann::json& j, RootMotionSettings& r) {
+    r.enable = j.value("enable", false);
+    r.applyPositionX = j.value("applyPositionX", true);
+    r.applyPositionY = j.value("applyPositionY", true);
+    r.applyPositionZ = j.value("applyPositionZ", true);
+    r.applyRotationX = j.value("applyRotationX", true);
+    r.applyRotationY = j.value("applyRotationY", true);
+    r.applyRotationZ = j.value("applyRotationZ", true);
+}

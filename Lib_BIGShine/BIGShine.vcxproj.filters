@@ -193,6 +193,12 @@
     <Filter Include="Code\Engine\GamePlay\Core\Resource">
       <UniqueIdentifier>{6f80551e-12fc-440d-9c76-269759e869db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Editor\Window">
+      <UniqueIdentifier>{06bdadee-0bcf-4ffe-9016-26e67d9408c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Lighting">
+      <UniqueIdentifier>{c44cecb9-c650-4798-9577-92d4a6b43f18}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -512,6 +518,27 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp">
+      <Filter>Code\Editor\NodeEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\InspectorWindow.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Shader\LightingShader.cpp">
+      <Filter>ソースファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -878,6 +905,36 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Resource\ResourceManager.h">
       <Filter>Code\Engine\GamePlay\Core\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResource.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\EditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h">
+      <Filter>Code\Editor\NodeEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\EditorWindowManager.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\HierarchyWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\InspectorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Shader\LightingShader.h">
+      <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Basic.hlsli">
@@ -980,6 +1037,9 @@
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_VS.hlsl">
       <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\LightingPS.hlsl">
+      <Filter>Shaders\Lighting</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
