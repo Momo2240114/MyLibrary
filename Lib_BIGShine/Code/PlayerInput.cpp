@@ -15,7 +15,7 @@ void PlayerInput::Start()
 {
     auto& config = KeyConfig::Instance();
 
-// --- ˆÚ“® (Keyboard) ---
+    // --- ˆÚ“® (Keyboard) ---
     config.BindAction("MoveForward", { { DeviceType::KBM, 'W' } });
     config.BindAction("MoveBackward", { { DeviceType::KBM, 'S' } });
     config.BindAction("MoveLeft", { { DeviceType::KBM, 'A' } });

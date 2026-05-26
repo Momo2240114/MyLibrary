@@ -111,6 +111,12 @@ public:
     void SelectObject(std::shared_ptr<GameObject> obj) { selectedObject = obj; }
     std::shared_ptr<GameObject> GetSelectedObject() { return selectedObject; }
 
+    void AddObject(std::shared_ptr<GameObject> obj);
+    void RemoveObject(const std::string& name);
+
+    // 状態を尋ねる窓口
+    const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
+
     void CollisionStep();
 
     // GUI は選択中オブジェクトだけ表示
@@ -125,7 +131,8 @@ public:
         ColliderComponent* colA, ColliderComponent* colB
     );
 
-
+    std::shared_ptr<GameObject> GetSelectedObject() const { return selectedObject; }
+    void SetSelectedObject(std::shared_ptr<GameObject> obj) { selectedObject = obj; }
 
     //メインカメラをセットする
     void SetMainCamera(std::shared_ptr<GameObject> mainCamera)

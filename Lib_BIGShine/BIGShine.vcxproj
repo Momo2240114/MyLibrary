@@ -139,7 +139,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\imgui-node-editor</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\imgui-node-editor;.\External\DirectXTex</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -191,7 +191,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\DirectXTex</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
@@ -243,6 +243,10 @@
     <ClCompile Include="Code\ColorFilterDirector.cpp" />
     <ClCompile Include="Code\DecalComponent.cpp" />
     <ClCompile Include="Code\DecalShader.cpp" />
+    <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\InspectorWindow.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioResource.cpp" />
@@ -275,12 +279,15 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFImporter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\LightingShader.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\BoxCollider.cpp" />
@@ -348,7 +355,17 @@
     <ClInclude Include="Code\AnimationController.h" />
     <ClInclude Include="Code\BaseEvent.h" />
     <ClInclude Include="Code\AnimationEventTrack.h" />
+    <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
+    <ClInclude Include="Code\Editor\Window\HierarchyWindow.h" />
+    <ClInclude Include="Code\Editor\Window\InspectorWindow.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Resource\ResourceManager.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResource.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\LightingShader.h" />
     <ClInclude Include="Code\SceneBase.h" />
     <ClInclude Include="Code\BasicShader.h" />
     <ClInclude Include="Code\camera.h" />
@@ -536,6 +553,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\LightingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_GS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>

@@ -6,8 +6,10 @@
 #include"Engine/Physics/BoxCollider.h"
 #include"Engine/Physics/CapsuleCollider.h"
 #include"Engine/GamePlay/Serialize/ActionRegistry.h"
-#include"Engine/GamePlay/Input/MouseInput.h"
+#include"Engine/GamePlay/Input/KeyInput.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Editor/Window/HierarchyWindow.h"
+#include "Editor/Window/InspectorWindow.h"
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 { 
@@ -32,6 +34,8 @@ void SceneBase::Initialize()
 	_GameObjectManager = std::make_shared<GameObjectManager>();
 	_GameObjectManager->Initialize(); // マネージャーの初期化
 
+	editorWindowManager.AddWindow(std::make_unique<HierarchyWindow>(_GameObjectManager.get()));
+
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
 
@@ -43,15 +47,24 @@ void SceneBase::Initialize()
 
 void SceneBase::Update(float elapsedTime)
 {
+	if (KeyInput::KeyPressedIn(KeyInput::Key::K_F1))
+	{
+		isEditorVisible = !isEditorVisible;
+	}
 	_GameObjectManager->Update(elapsedTime);
 }
 
 void SceneBase::Render(float elapsedTime)
 {
 	_GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem);
+
 }
 
 void SceneBase::DrawGUI()
 {
-	_GameObjectManager->Gui();
+	if(isEditorVisible)
+	{
+		editorWindowManager.DrawAll();
+		GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ここで呼び出す
+	}
 }

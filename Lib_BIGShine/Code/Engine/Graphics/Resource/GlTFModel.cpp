@@ -346,15 +346,42 @@ void GltfModelCommponennt::Gui()
 
 	ImGui::Text("Current: %s", modelName.c_str());
 
-	//ルートモーションのノードを保存する
-	// std::string用の一時バッファ
-	char buffer[256];
-	strcpy_s(buffer, sizeof(buffer), m_RootMotionName.c_str());
+	ImGui::Text("RootMotion Selector");
 
-	if (ImGui::InputText("RootMotionNodeName", buffer, sizeof(buffer)))
+	// 現在のRootMotion名を保持するインデックスを特定
+	int currentRootMotionIdx = -1;
+	for (int i = 0; i < nodes.size(); ++i) {
+		if (nodes[i].name == m_RootMotionName) {
+			currentRootMotionIdx = i;
+			break;
+		}
+	}
+
+	// 選択用のコンボボックスを作成
+	const char* previewValue = (currentRootMotionIdx != -1) ? nodes[currentRootMotionIdx].name.c_str() : "None";
+
+	if (ImGui::BeginCombo("RootMotion Node", previewValue))
 	{
-		// 変更があったらstd::stringに反映
-		m_RootMotionName = buffer;
+		// Noneを選択できるようにする
+		if (ImGui::Selectable("None", currentRootMotionIdx == -1)) {
+			m_RootMotionName = "";
+		}
+
+		// すべてのノードをリスト化
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			bool isSelected = (i == currentRootMotionIdx);
+			if (ImGui::Selectable(nodes[i].name.c_str(), isSelected))
+			{
+				m_RootMotionName = nodes[i].name;
+			}
+
+			// 選択されたら自動的にスクロールする機能を付与
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
 	}
 }
 

@@ -142,6 +142,38 @@ void GameObjectManager::Clear()
     objects.clear(); // ここで shared_ptr の参照カウントが減り、実体が削除される
 }
 
+// オブジェクトを追加
+void GameObjectManager::AddObject(std::shared_ptr<GameObject> obj)
+{
+    if (!obj) return; // Nullならreturn
+
+    // 重複を避ける
+    for (const auto& existing : objects) {
+        if (existing->GetName() == obj->GetName()) {
+            return;
+        }
+    }
+
+    objects.push_back(obj);
+}
+
+// 謁見の間：オブジェクトを追放する
+void GameObjectManager::RemoveObject(const std::string& name)
+{
+    // 追放の儀式
+    auto it = std::remove_if(objects.begin(), objects.end(),
+        [&name](const std::shared_ptr<GameObject>& obj) {
+            return obj->GetName() == name;
+        });
+
+    if (it != objects.end()) {
+        // もし追放する者が現在選ばれているなら、選択を解除する（世界崩壊を防ぐ）
+        if (selectedObject && selectedObject->GetName() == name) {
+            selectedObject = nullptr;
+        }
+        objects.erase(it, objects.end());
+    }
+}
 
 std::vector<std::string> GetSceneDirectories() {
     std::vector<std::string> folders;
@@ -171,8 +203,7 @@ void GameObjectManager::CollisionStep()
     //コリジョンのコンポーネントがあるゲームオブジェクトを取得する
     for (auto& obj : objects) {
         auto col = obj->GetComponent<ColliderComponent>();
-        //if (obj->m_pColliderComponent == nullptr) continue;
-        //auto col = obj->m_pColliderComponent;
+
         if (col && col->IsEnabled()) {
             activeColliders.push_back({ obj, col });
         }
@@ -243,16 +274,30 @@ void GameObjectManager::CollisionStep()
                         DirectX::XMVECTOR sepA = DirectX::XMVectorScale(manifold.normal, -manifold.depth * weightA);
                         DirectX::XMVECTOR sepB = DirectX::XMVectorScale(manifold.normal, manifold.depth * weightB);
 
-                        auto ApplyMove = [](std::shared_ptr<GameObject> obj, DirectX::XMVECTOR sep) {
-                            DirectX::XMFLOAT3 m;
-                            DirectX::XMStoreFloat3(&m, sep);
-                            obj->transform->localPosition.x += m.x;
-                            obj->transform->localPosition.y += m.y;
-                            obj->transform->localPosition.z += m.z;
+                        // 改善案：オフセットを考慮した位置補正
+                        auto ApplyMove = [](std::shared_ptr<GameObject> obj, std::shared_ptr<ColliderComponent> col, DirectX::XMVECTOR sep) 
+                            {
+                                // 修正：const で受け取るか、一度変数に格納して左辺値にする
+                                const DirectX::XMFLOAT4X4& worldMatrix = obj->transform->GetWorld();
+                                DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&worldMatrix);
+
+                            // オフセットをワールド変換
+                            DirectX::XMVECTOR offsetVec = DirectX::XMLoadFloat3(&col->offset);
+                            DirectX::XMVECTOR rotatedOffset = DirectX::XMVector3TransformNormal(offsetVec, world);
+
+                            // オフセット分を引いた位置を求めることで、「コライダーの中心」ではなく
+                            // 「GameObjectのピボット」を適切に動かす
+                            DirectX::XMFLOAT3 sepFloat;
+                            DirectX::XMStoreFloat3(&sepFloat, sep);
+
+                            obj->transform->localPosition.x += sepFloat.x;
+                            obj->transform->localPosition.y += sepFloat.y;
+                            obj->transform->localPosition.z += sepFloat.z;
+
                             obj->transform->MarkDirty();
                             };
-                        ApplyMove(A.obj, sepA);
-                        ApplyMove(B.obj, sepB);
+                        ApplyMove(A.obj, A.col, sepA);
+                        ApplyMove(B.obj, B.col, sepB);
 
                         // 3. 垂直・水平の判定と速度リセット
                         // 法線のY成分を確認 (0.7f 程度以上なら「床」とみなす)
@@ -314,25 +359,6 @@ void GameObjectManager::CollisionStep()
 void GameObjectManager::Gui()
 {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-    //// --- 追加: 画面全体を覆う「背景ダミー」 ---
-    //// これを置くことで、UI以外の場所をクリックしても「UIを触っている」状態を維持できます
-    //ImGui::SetNextWindowPos(viewport->WorkPos);
-    //ImGui::SetNextWindowSize(viewport->WorkSize);
-    //ImGui::SetNextWindowBgAlpha(0.0f); // 背景は透明
-    //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-    //// 背景クリック判定用ウィンドウ
-    //ImGui::Begin("BackgroundSpace", nullptr,
-    //    ImGuiWindowFlags_NoDecoration |
-    //    ImGuiWindowFlags_NoInputs | // ← これを外すと完全に背景をクリックできなくなります
-    //    ImGuiWindowFlags_NoMove |
-    //    ImGuiWindowFlags_NoBringToFrontOnFocus | // 背景なので前面に来させない
-    //    ImGuiWindowFlags_NoFocusOnAppearing);
-
-    //ImGui::End();
-    //ImGui::PopStyleVar(2);
 
     // --- 静的な変数で横幅を保持（初回のみ初期化） ---
     static float leftPanelWidth = 300.0f;
@@ -777,6 +803,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
     gdm.SetSceneRenderTarget();
 
     modelSystem_.RenderAll(rc);
+
 
     if(shapeRenderFlg)
     {

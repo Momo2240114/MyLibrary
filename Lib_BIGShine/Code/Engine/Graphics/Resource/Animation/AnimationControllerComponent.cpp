@@ -2,6 +2,7 @@
 #include "AnimSequenceAdapter.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "AnimationDataAsset.h"
+#include "PoseLibraryResourceManager.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h> // std::string用
@@ -10,6 +11,39 @@
 
 
 namespace ed = ax::NodeEditor;
+
+// ベジェ曲線の中点に三角形の矢印を描画するヘルパー
+static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
+{
+    if (p0.x == 0.0f && p0.y == 0.0f) return;
+    if (p3.x == 0.0f && p3.y == 0.0f) return;
+
+    float strength = std::fmax(std::abs(p3.x - p0.x) * 0.5f, 50.0f);
+    ImVec2 p1 = { p0.x + strength, p0.y };
+    ImVec2 p2 = { p3.x - strength, p3.y };
+
+    // t=0.5 の点と接線を計算
+    float w1 = 0.125f, w2 = 0.375f, w3 = 0.375f, w4 = 0.125f;
+    ImVec2 mid = {
+        w1 * p0.x + w2 * p1.x + w3 * p2.x + w4 * p3.x,
+        w1 * p0.y + w2 * p1.y + w3 * p2.y + w4 * p3.y
+    };
+    ImVec2 tan = {
+        -3 * 0.25f * p0.x + (3 * 0.25f - 6 * 0.25f) * p1.x + (6 * 0.25f - 3 * 0.25f) * p2.x + 3 * 0.25f * p3.x,
+        -3 * 0.25f * p0.y + (3 * 0.25f - 6 * 0.25f) * p1.y + (6 * 0.25f - 3 * 0.25f) * p2.y + 3 * 0.25f * p3.y
+    };
+    float len = std::sqrt(tan.x * tan.x + tan.y * tan.y);
+    if (len > 0.0001f) { tan.x /= len; tan.y /= len; }
+    else { tan = { 1.0f, 0.0f }; }
+
+    const float S = 10.0f;
+    ImVec2 perp = { -tan.y, tan.x };
+    ImVec2 pt1 = { mid.x + tan.x * S,                         mid.y + tan.y * S };
+    ImVec2 pt2 = { mid.x - tan.x * S + perp.x * S * 0.7f,         mid.y - tan.y * S + perp.y * S * 0.7f };
+    ImVec2 pt3 = { mid.x - tan.x * S - perp.x * S * 0.7f,         mid.y - tan.y * S - perp.y * S * 0.7f };
+
+    drawList->AddTriangleFilled(pt1, pt2, pt3, color);
+}
 
 
 const std::string ASSET_DIR = "Data/Animation/StateData/";
@@ -41,6 +75,18 @@ void AnimationControllerComponent::Start()
     // 同一オブジェクトからカーブコンポーネントを取得（取得できない場合は nullptr）
 
     if (!modelComp) return;
+
+    // 【追加】モデルが存在する場合、その真名からポーズライブラリリソースを自動的に取得・錬成する
+    if (modelComp)
+    {
+
+        std::string modelName = modelComp->GetModelName();
+
+        if (!modelName.empty()) {
+            // 世界にただ一つのマネージャーより、このモデル専用の書庫を受け取る
+            m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelName);
+        }
+    }
 
     const auto& animations = modelComp->GetAnimations();
     std::string objName = MyObject->GetName();
@@ -84,24 +130,93 @@ void AnimationControllerComponent::Start()
         ChangeState(animations[0].name, 0.0f);
     }
 
-    // 設定が必要な場合は nodeEditorConfig を編集してから渡します
-    nodeEditorContext =ed::CreateEditor(&nodeEditorConfig);
+    nodeEditorConfig.SettingsFile = "Data/Editor/AnimationEditor.json";     // 自前保存なら任意。外部 json と二重管理を避ける
+    nodeEditorConfig.DragButtonIndex = 0;        // 左ドラッグでノード移動
+    nodeEditorConfig.SelectButtonIndex = 0;      // 左クリックで選択
+    nodeEditorConfig.NavigateButtonIndex = 2;    // 中ドラッグで視点移動
+    nodeEditorConfig.ContextMenuButtonIndex = 1; // 右クリックで背景メニュー
+
+    nodeEditorContext = ed::CreateEditor(&nodeEditorConfig);
 }
 
 void AnimationControllerComponent::Update(float deltaTime)
 {
-    if (!modelComp) return;
+    if (!modelComp)
+    {
+        return;
+    }
     if (!curvecomp)
     {
         auto MyObject = GetGameObject().get();
         curvecomp = MyObject->GetComponent<CurveComponent>().get();
     }
 
-    // 1. ノードグラフに基づく遷移判定
+    // Start時点でリソースが取得できておらず、後からモデルがロードされた場合の安全弁
+    if (!m_poseLibrary && !modelComp->GetModelName().empty())
+    {
+        m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComp->GetModelName());
+    }
+
+    // 状態遷移の評価
     EvaluateGraphTransitions();
 
-    // ポーズ計算とブレンド
-    animator.Update(deltaTime, modelComp, curvecomp);
+    //ModelAnimator::Updateを呼ぶ際、ポーズライブラリのリソースポインタを第三引数に授ける
+    animator.Update(deltaTime, modelComp, curvecomp, m_poseLibrary);
+
+    // ーーー 抽出されたルートモーションを、 Transform に反映する ーーー
+    const AnimState* currentState = animator.GetCurrentState();
+    if (currentState && currentState->rootMotion.enable)
+    {
+        auto delta = animator.GetRootMotionDelta();
+        auto transform = GetGameObject()->transform;
+
+        if (transform)
+        {
+            using namespace DirectX;
+
+            // 1. 度数法のオイラー角をラジアンへと変換する
+            float roll = XMConvertToRadians(transform->localRotation.x);
+            float pitch = XMConvertToRadians(transform->localRotation.y);
+            float yaw = XMConvertToRadians(transform->localRotation.z);
+
+            // 2. 現在の回転から、一時的にクォータニオンの力を編み出す
+            XMMATRIX currentRotMat = XMMatrixRotationRollPitchYaw(roll, pitch, yaw);
+            SimpleMath::Quaternion currentRot = SimpleMath::Quaternion::CreateFromRotationMatrix(currentRotMat);
+
+            // 3. キャラクターの向いている方向（クォータニオン）に合わせて、ローカルな歩みをワールドの力へ変換
+            SimpleMath::Vector3 worldDeltaPos = SimpleMath::Vector3::Transform(delta.deltaPosition, currentRot);
+
+            transform->localPosition.x += worldDeltaPos.x;
+            transform->localPosition.y += worldDeltaPos.y;
+            transform->localPosition.z += worldDeltaPos.z;
+
+            // 5. アニメーションがもたらす回転の差分（クォータニオン）を掛け合わせ、新たなる魂の向きを計算
+            SimpleMath::Quaternion nextRot = currentRot * delta.deltaRotation;
+
+            // 6. 新たなる向きを、そなたの Transform が好む「YXZ順序のオイラー角」へと分解する
+            XMFLOAT4 q = nextRot;
+            float xsqr = q.x * q.x;
+
+            // Pitch (Y軸周りの回転)
+            float t0 = 2.0f * (q.w * q.y + q.x * q.z);
+            float t1 = 1.0f - 2.0f * (q.y * q.y + xsqr);
+            float nextPitch = atan2f(t0, t1);
+
+            // Roll (X軸周りの回転)
+            float t2 = 2.0f * (q.w * q.x - q.y * q.z);
+            t2 = t2 > 1.0f ? 1.0f : (t2 < -1.0f ? -1.0f : t2);
+            float nextRoll = asinf(t2);
+
+            // Yaw (Z軸周りの回転)
+            float t3 = 2.0f * (q.w * q.z + q.x * q.y);
+            float t4 = 1.0f - 2.0f * (q.z * q.z + xsqr);
+            float nextYaw = atan2f(t3, t4);
+
+            // 8. 座標や回転が変わったことを世界（子階層）に通知する、汚れの印（Dirtyフラグ）を刻む
+            transform->MarkDirty();
+        }
+    }
+
     // 計算された姿勢をモデルに書き戻し
     modelComp->SetNodePoses(animator.GetCurrentPose());
     // 行列の最終更新
@@ -267,6 +382,37 @@ void AnimationControllerComponent::Gui()
         ImGui::DragFloat("Speed", &editingState->playbackSpeed, 0.05f);
         ImGui::Checkbox("Loop", &editingState->isLoop);
 
+        // ーーー 【追加】ルートモーションの細かな設定エリア ーーー
+        ImGui::Spacing();
+        if (ImGui::TreeNode("Root Motion Settings"))
+        {
+            // ルートモーション全体の有効・無効切り替え
+            ImGui::Checkbox("Enable Root Motion", &editingState->rootMotion.enable);
+
+            if (editingState->rootMotion.enable)
+            {
+                ImGui::Indent(); // 視覚的に分かりやすくするためインデントを入れる
+
+                // 位置（XYZ）の適応フラグ。##Pos をつけて一意のIDにする
+                ImGui::Text("Apply Position:");
+                ImGui::Checkbox("X##Pos", &editingState->rootMotion.applyPositionX); ImGui::SameLine();
+                ImGui::Checkbox("Y##Pos", &editingState->rootMotion.applyPositionY); ImGui::SameLine();
+                ImGui::Checkbox("Z##Pos", &editingState->rootMotion.applyPositionZ);
+
+                // 回転（XYZ）の適応フラグ。##Rot をつけて一意のIDにする
+                ImGui::Text("Apply Rotation:");
+                ImGui::Checkbox("X##Rot", &editingState->rootMotion.applyRotationX); ImGui::SameLine();
+                ImGui::Checkbox("Y##Rot", &editingState->rootMotion.applyRotationY); ImGui::SameLine();
+                ImGui::Checkbox("Z##Rot", &editingState->rootMotion.applyRotationZ);
+
+                ImGui::Unindent(); // インデントを戻す
+            }
+
+            ImGui::TreePop();
+        }
+
+
+
         if (ImGui::Button("Edit Events in Sequencer", ImVec2(-1, 0))) {
             showSequencerWindow = true;
         }
@@ -280,20 +426,78 @@ void AnimationControllerComponent::Gui()
     // --- 3. Blackboard (変数) の監視セクション ---
     if (ImGui::CollapsingHeader("Blackboard (Params)", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        // --- 変数の新規追加エリア ---
         static char newVarName[64] = "";
         static int selectedType = 0; // 0:Float, 1:Int, 2:Bool, 3:Vector2
         const char* typeNames[] = { "Float", "Int", "Bool", "Vector2" };
 
+        // --- 新規パラメータ追加エリア ---
         ImGui::SeparatorText("Add New Parameter");
         ImGui::SetNextItemWidth(150.0f);
-        ImGui::InputText("Name", newVarName, IM_ARRAYSIZE(newVarName));
+        ImGui::InputText("Name##BB", newVarName, IM_ARRAYSIZE(newVarName));
         ImGui::SameLine();
         ImGui::SetNextItemWidth(100.0f);
-        ImGui::Combo("Type", &selectedType, typeNames, IM_ARRAYSIZE(typeNames));
+        ImGui::Combo("Type##BB", &selectedType, typeNames, IM_ARRAYSIZE(typeNames));
         ImGui::SameLine();
+        if (ImGui::Button("Add##BB"))
+        {
+            std::string name(newVarName);
+            if (!name.empty() && blackboard.find(name) == blackboard.end())
+            {
+                switch (selectedType)
+                {
+                case 0: blackboard[name] = 0.0f;                                   break;
+                case 1: blackboard[name] = 0;                                      break;
+                case 2: blackboard[name] = false;                                  break;
+                case 3: blackboard[name] = DirectX::SimpleMath::Vector2(0.0f, 0.0f); break;
+                }
+                newVarName[0] = '\0'; // 入力欄をクリア
+            }
+        }
 
-      
+        // --- 既存パラメータ 一覧・編集・削除 ---
+        ImGui::SeparatorText("Parameters");
+
+        if (blackboard.empty())
+        {
+            ImGui::TextDisabled("No parameters defined.");
+        }
+        else
+        {
+            std::string toDelete;
+            for (auto& [key, val] : blackboard)
+            {
+                ImGui::PushID(key.c_str());
+
+                // 変数名
+                ImGui::Text("%-20s", key.c_str());
+                ImGui::SameLine();
+
+                // 型に応じた編集ウィジェット
+                if (auto* f = std::get_if<float>(&val)) {
+                    ImGui::SetNextItemWidth(100.0f);
+                    ImGui::DragFloat("##v", f, 0.01f);
+                }
+                else if (auto* i = std::get_if<int>(&val)) {
+                    ImGui::SetNextItemWidth(100.0f);
+                    ImGui::DragInt("##v", i);
+                }
+                else if (auto* b = std::get_if<bool>(&val)) {
+                    ImGui::Checkbox("##v", b);
+                }
+                else if (auto* v = std::get_if<DirectX::SimpleMath::Vector2>(&val)) {
+                    ImGui::SetNextItemWidth(180.0f);
+                    ImGui::DragFloat2("##v", &v->x, 0.01f);
+                }
+
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
+                if (ImGui::Button("X##del")) { toDelete = key; }
+                ImGui::PopStyleColor();
+
+                ImGui::PopID();
+            }
+            if (!toDelete.empty()) { blackboard.erase(toDelete); }
+        }
     }
 
 }
@@ -469,21 +673,49 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName, flo
 
 void AnimationControllerComponent::Serialize(nlohmann::json& j) const
 {
-    // コンポーネント自体はパスだけを記録する
     j["AssetPath"] = m_assetFilePath;
 
-    //nlohmann::json statesArray = nlohmann::json::array();
-    //for (auto const& [name, statePtr] : states) {
-    //    if (!statePtr) continue;
+    // --- グラフノードの保存 ---
+    nlohmann::json nodesArray = nlohmann::json::array();
+    for (auto& node : graphNodes)
+    {
+        nlohmann::json n;
+        n["stateName"] = node.stateName;
+        n["id"]        = static_cast<uintptr_t>(node.id.Get());
+        n["inputPin"]  = static_cast<uintptr_t>(node.inputPin.Get());
+        n["outputPin"] = static_cast<uintptr_t>(node.outputPin.Get());
+        // エディタ上の座標を保存
+        auto pos = ed::GetNodePosition(node.id);
+        n["posX"] = pos.x;
+        n["posY"] = pos.y;
+        nodesArray.push_back(n);
+    }
+    j["GraphNodes"] = nodesArray;
 
-    //    // AnimStateのto_jsonを明示的または暗黙的に呼び出す
-    //    nlohmann::json s = *statePtr;
-    //    statesArray.push_back(s);
-    //}
-    //j["States"] = statesArray;
+    // --- トランジション(リンク+条件)の保存 ---
+    nlohmann::json transArray = nlohmann::json::array();
+    for (auto& t : graphTransitions)
+    {
+        nlohmann::json tr;
+        tr["from"]     = t.fromStateName;
+        tr["to"]       = t.toStateName;
+        tr["duration"] = t.duration;
+        tr["id"]       = static_cast<uintptr_t>(t.id.Get());
 
-    //if (currentState) j["CurrentStateName"] = currentState->name;
-
+        nlohmann::json condsArray = nlohmann::json::array();
+        for (auto& c : t.conditions)
+        {
+            nlohmann::json cj;
+            cj["type"]      = static_cast<int>(c.type);
+            cj["param"]     = c.parameterName;
+            cj["op"]        = static_cast<int>(c.op);
+            cj["threshold"] = c.threshold;
+            condsArray.push_back(cj);
+        }
+        tr["conditions"] = condsArray;
+        transArray.push_back(tr);
+    }
+    j["GraphTransitions"] = transArray;
 }
 
 void AnimationControllerComponent::Deserialize(const nlohmann::json& j)
@@ -493,7 +725,6 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& j)
         LoadAsset(m_assetFilePath);
     }
 
-    // 2. あとでモデルが見つかった時のために、animationIndex などの整合性をとる
     if (!modelComp) {
         modelComp = GetGameObject()->GetComponent<GltfModelCommponennt>().get();
     }
@@ -501,7 +732,6 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& j)
     if (modelComp) {
         const auto& anims = modelComp->GetAnimations();
         for (auto& [name, state] : states) {
-            // 名前が一致するアニメーションの Index を再設定する
             for (int i = 0; i < (int)anims.size(); ++i) {
                 if (anims[i].name == name) {
                     state->animationIndex = i;
@@ -511,20 +741,69 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& j)
         }
     }
 
-    //if (j.contains("CurrentStateName"))
-    //{
-    //    std::string currentName = j.value("CurrentStateName", "");
-    //    if (!currentName.empty() && states.count(currentName))
-    //    {
-    //        const AnimState* nextState = states[currentName].get();
-    //        currentState = nextState;
-    //        // アニメーターの中身（ポインタとデータ）を強制同期
-    //        animator.CrossFadeTo(nextState, 0.0f);
-    //    }
-    //}
+    // --- グラフノードの復元 ---
+    if (j.contains("GraphNodes") && j["GraphNodes"].is_array())
+    {
+        graphNodes.clear();
+        uintptr_t maxId = 0;
+
+        for (auto& n : j["GraphNodes"])
+        {
+            AnimGraphNode node;
+            node.stateName = n.value("stateName", "");
+            auto rawId = n.value("id", (uintptr_t)0);
+            auto rawIn = n.value("inputPin", (uintptr_t)0);
+            auto rawOut = n.value("outputPin", (uintptr_t)0);
+            node.id = ed::NodeId(rawId);
+            node.inputPin = ed::PinId(rawIn);
+            node.outputPin = ed::PinId(rawOut);
+            node.pos = ImVec2(n.value("posX", 0.0f), n.value("posY", 0.0f));
+            graphNodes.push_back(node);
+
+            maxId = (std::max)({ maxId, rawId, rawIn, rawOut });
+        }
+
+        // IDカウンタを復元済みIDの最大値より大きい値に更新
+        // ※ GetNextID() が内部カウンタを持つ前提。以下を実装側に合わせて調整すること。
+        // SetIDCounter(maxId + 1);
+    }
+
+    // --- トランジションの復元 ---
+    if (j.contains("GraphTransitions") && j["GraphTransitions"].is_array())
+    {
+        graphTransitions.clear();
+        uintptr_t maxId = 0;
+
+        for (auto& tr : j["GraphTransitions"])
+        {
+            AnimTransition t;
+            t.fromStateName = tr.value("from", "");
+            t.toStateName = tr.value("to", "");
+            t.duration = tr.value("duration", 0.2f);
+            auto rawId = tr.value("id", (uintptr_t)0);
+            t.id = ed::LinkId(rawId);
+            maxId = (std::max)(maxId, rawId);
+
+            if (tr.contains("conditions") && tr["conditions"].is_array())
+            {
+                for (auto& cj : tr["conditions"])
+                {
+                    AnimCondition c;
+                    c.type = static_cast<ConditionType>(cj.value("type", 0));
+                    c.parameterName = cj.value("param", "");
+                    c.op = static_cast<ConditionOp>(cj.value("op", 0));
+                    c.threshold = cj.value("threshold", 0.0f);
+                    t.conditions.push_back(c);
+                }
+            }
+            graphTransitions.push_back(t);
+        }
+    }
+
+    m_needsPositionRestore = true;
 }
 
-void AnimationControllerComponent::AddState(const std::string& stateName, int animIndex) 
+void AnimationControllerComponent::AddState(const std::string& stateName, int animIndex)
 {
     if (states.count(stateName)) return; // 重複チェック
 
@@ -594,55 +873,79 @@ AnimGraphNode* AnimationControllerComponent::AFindNodeByPin(ed::PinId pinId)
     return nullptr; // 見つからなかった場合
 }
 
+AnimGraphNode* AnimationControllerComponent::FindNodeByName(const std::string& name)
+{
+    for (auto& node : graphNodes)
+    {
+        if (node.stateName == name)
+        {
+            return &node;
+        }
+    }
+    return nullptr;
+}
 
+
+void AnimationControllerComponent::SetIDCounterFloor(uintptr_t minVal)
+{
+    if (m_NextID <= minVal)
+        m_NextID = minVal + 1;
+}
 void AnimationControllerComponent::EvaluateGraphTransitions()
 {
-    // --- グラフによる遷移チェック ---
     const AnimState* currentState = animator.GetCurrentState();
-    if (currentState)
+    if (!currentState) return;
+
+    for (auto& transition : graphTransitions)
     {
-        for (auto& transition : graphTransitions)
-        {
-            // 現在のステートの出力ピンから出ているリンクか？
-            auto* startNode = AFindNodeByPin(transition.startPin);
-            if (startNode && startNode->stateName == currentState->name) {
+        // 始まりのノードが、現在のステートと一致するか確認
+        if (transition.fromStateName == currentState->name) {
 
-                // 全ての条件を満たしているか判定
-                bool isMet = true;
-                for (auto& cond : transition.conditions) {
-                    if (!EvaluateCondition(cond)) {
-                        isMet = false;
-                        break;
-                    }
-                }
-
-                if (isMet) {
-                    auto* endNode = AFindNodeByPin(transition.endPin);
-                    ChangeState(endNode->stateName, transition.duration);
+            // 全条件チェック
+            bool isMet = true;
+            for (auto& cond : transition.conditions) {
+                if (!EvaluateCondition(cond)) {
+                    isMet = false;
                     break;
                 }
+            }
+
+            if (isMet) {
+                // Trigger条件のBlackboard値をリセット
+                for (auto& cond : transition.conditions)
+                {
+                    if (cond.type == ConditionType::Trigger)
+                    {
+                        auto it = blackboard.find(cond.parameterName);
+                        if (it != blackboard.end())
+                        {
+                            it->second = false; // bool false でリセット
+                        }
+                    }
+                }
+                ChangeState(transition.toStateName, transition.duration);
+                break;
             }
         }
     }
 }
-
 bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& cond)
 {
-    // --- 1. アニメーション終了判定 ---
+    // 1. アニメーション終了判定
     if (cond.type == ConditionType::AnimationEnd) {
         const auto* state = animator.GetCurrentState();
+        if (!state) return false;
+
         float duration = modelComp->GetAnimationDuration(
             state->type == AnimStateType::Single ? state->animationIndex : state->animIndexA
         );
-        // 現在の再生時間が長さ以上なら終了とみなす
         return animator.GetCurrentFadeTime() >= duration;
     }
 
-    // --- 2. 変数・トリガー判定 ---
+    // 2. 変数・トリガー判定
     if (blackboard.find(cond.parameterName) == blackboard.end()) return false;
-    const auto& bbValue = blackboard[cond.parameterName];
+    const auto& bbValue = blackboard.at(cond.parameterName);
 
-    // variantから数値(float)として評価値を取り出すヘルパー
     auto ToFloat = [](const BlackBoardValue& v) -> float {
         return std::visit([](auto&& arg) -> float {
             using T = std::decay_t<decltype(arg)>;
@@ -656,21 +959,18 @@ bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& cond)
 
     float currentVal = ToFloat(bbValue);
 
-    // トリガーの場合は「true(1.0)であるか」のみを見る（演算子は基本無視）
-    if (cond.type == ConditionType::Trigger) {
-        return currentVal >= 0.5f;
-    }
+    if (cond.type == ConditionType::Trigger) return currentVal >= 0.5f;
 
-    // 通常の変数比較
     switch (cond.op) {
     case ConditionOp::Greater:  return currentVal > cond.threshold;
     case ConditionOp::Less:     return currentVal < cond.threshold;
     case ConditionOp::Equal:    return std::abs(currentVal - cond.threshold) < 0.001f;
     case ConditionOp::NotEqual: return std::abs(currentVal - cond.threshold) >= 0.001f;
     }
-
     return false;
 }
+
+
 void AnimationControllerComponent::LoadAsset(const std::string& assetName)
 {
     std::string fullPath = GetFullAssetPath(assetName);
@@ -738,147 +1038,332 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName)
 
 void AnimationControllerComponent::OnGuiNodeEditor()
 {
-    ImGui::Begin("Animation Graph Editor");
+    if (!nodeEditorContext) return;
+
     ed::SetCurrentEditor(nodeEditorContext);
-    ed::Begin("Animation Graph");
 
+    ImGui::Begin("Animation Graph Editor");
+
+    if (ImGui::Button("全表示 (Focus All)"))
+        ed::NavigateToContent();
+
+    ImGui::SameLine();
+    ImGui::TextDisabled("左ドラッグ: ノード移動 / 中ドラッグ: 視点移動 / 右クリック: ノード追加");
+
+    ed::Begin("Animation Graph", ImVec2(0.0f, 0.0f));
+
+
+    // ピン座標記録マップ (矢印描画用)
+    std::unordered_map<uintptr_t, ImVec2> pinPositions;
+
+    // ================================================================
     // 1. ノードの描画
-    for (auto& node : graphNodes) {
-        ed::BeginNode(node.id);
-        ImGui::Text("%s", node.stateName.c_str());
+    // ================================================================
+    for (auto& node : graphNodes)
+    {
+        const bool isActive = (node.stateName == _runtimeActiveStateName);
 
-        // 入力ピン（左側）
+        // 背景色
+        ed::PushStyleColor(ed::StyleColor_NodeBg,
+            isActive ? ImVec4(0.1f, 0.4f, 0.6f, 1.0f)
+            : ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+
+        // アクティブ時: 枠線パルス
+        if (isActive)
+        {
+            float pulse = (sinf((float)ImGui::GetTime() * 8.0f) + 1.0f) * 0.5f;
+            ed::PushStyleColor(ed::StyleColor_NodeBorder,
+                ImVec4(0.2f + pulse * 0.4f, 0.7f + pulse * 0.3f, 1.0f, 1.0f));
+            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, 2.5f + pulse * 2.0f);
+        }
+
+        ed::BeginNode(node.id);
+
+        // ステート名 (アクティブ時は>  付き)
+        std::string label = isActive ? (">" + node.stateName) : node.stateName;
+        if (isActive)
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", label.c_str());
+        else
+            ImGui::TextUnformatted(label.c_str());
+
+        // Input ピン
         ed::BeginPin(node.inputPin, ed::PinKind::Input);
         ImGui::Text("-> In");
         ed::EndPin();
+        pinPositions[(uintptr_t)node.inputPin.Get()] = {
+            ImGui::GetItemRectMin().x + ImGui::GetItemRectSize().x * 0.5f,
+            ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y * 0.5f
+        };
 
         ImGui::SameLine();
 
-        // 出力ピン（右側）
+        // Output ピン
         ed::BeginPin(node.outputPin, ed::PinKind::Output);
         ImGui::Text("Out ->");
         ed::EndPin();
+        pinPositions[(uintptr_t)node.outputPin.Get()] = {
+            ImGui::GetItemRectMin().x + ImGui::GetItemRectSize().x * 0.5f,
+            ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y * 0.5f
+        };
+
         ed::EndNode();
+
+        if (isActive)
+        {
+            ed::PopStyleVar();    // NodeBorderWidth
+            ed::PopStyleColor();  // NodeBorder
+        }
+        ed::PopStyleColor(); // NodeBg
+
+        // ロード直後の座標復元
+        if (m_needsPositionRestore)
+            ed::SetNodePosition(node.id, node.pos);
     }
 
-    // 2. リンクの描画
-    for (auto& link : graphTransitions) {
-        ed::Link(link.id, link.startPin, link.endPin);
-    }
-
-    // 3. リンク作成のハンドリング
-    if (ed::BeginCreate()) {
-        ed::PinId startPinId, endPinId;
-        if (ed::QueryNewLink(&startPinId, &endPinId)) {
-
-            // AFindNodeByPin を使ってピンの属性をチェック
-            auto startNode = AFindNodeByPin(startPinId);
-            auto endNode = AFindNodeByPin(endPinId);
-
-            // 自己接続防止 ＆ 常に「出力から入力へ」繋ぐように制限
-            bool canConnect = (startNode != endNode);
-            // ※ startPinId が出力ピン、endPinId が入力ピンであることを確認するのが理想的
-
-            if (canConnect && ed::AcceptNewItem()) {
-                graphTransitions.emplace_back(AnimTransition{
-                    ed::LinkId(GetNextID()), startPinId, endPinId
-                    });
+    // 右クリックで追加したノードをその場に配置
+    if (_nodeToPlaceHash != 0)
+    {
+        for (auto& n : graphNodes) {
+            if ((uintptr_t)n.id.Get() == _nodeToPlaceHash) {
+                ed::SetNodePosition(n.id, _newNodeSpawnPos);
+                ed::SelectNode(n.id);
+                break;
             }
         }
+        _nodeToPlaceHash = 0;
+    }
+
+    // ================================================================
+    // 2. リンクの描画 + 矢印のオーバーレイ
+    // ================================================================
+    for (auto& link : graphTransitions)
+    {
+        auto* startNode = FindNodeByName(link.fromStateName);
+        auto* endNode = FindNodeByName(link.toStateName);
+        if (startNode && endNode)
+            ed::Link(link.id, startNode->outputPin, endNode->inputPin);
+    }
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    for (auto& link : graphTransitions)
+    {
+        auto* startNode = FindNodeByName(link.fromStateName);
+        auto* endNode = FindNodeByName(link.toStateName);
+        if (!startNode || !endNode) continue;
+
+        auto srcKey = (uintptr_t)startNode->outputPin.Get();
+        auto dstKey = (uintptr_t)endNode->inputPin.Get();
+        if (pinPositions.count(srcKey) && pinPositions.count(dstKey))
+        {
+            ImU32 color = (link.fromStateName == _runtimeActiveStateName)
+                ? IM_COL32(100, 200, 255, 255)
+                : IM_COL32(200, 200, 200, 255);
+            DrawLinkArrow(drawList, pinPositions[srcKey], pinPositions[dstKey], color);
+        }
+    }
+
+    if (m_needsPositionRestore)
+    {
+        ed::NavigateToContent();
+        m_needsPositionRestore = false;
+    }
+
+    // ================================================================
+    // 3. リンク作成 (安全なピン判定 + 重複チェック)
+    // ================================================================
+    if (ed::BeginCreate())
+    {
+        auto getPinInfo = [&](uintptr_t pinId, bool& isInput, std::string& nodeName) -> bool {
+            for (auto& n : graphNodes) {
+                if ((uintptr_t)n.inputPin.Get() == pinId) { isInput = true;  nodeName = n.stateName; return true; }
+                if ((uintptr_t)n.outputPin.Get() == pinId) { isInput = false; nodeName = n.stateName; return true; }
+            }
+            return false;
+            };
+
+        ed::PinId startPinId, endPinId;
+        if (ed::QueryNewLink(&startPinId, &endPinId))
+        {
+            bool isStartInput = false, isEndInput = false;
+            std::string srcName, dstName;
+
+            if (getPinInfo((uintptr_t)startPinId.Get(), isStartInput, srcName) &&
+                getPinInfo((uintptr_t)endPinId.Get(), isEndInput, dstName))
+            {
+                if (isStartInput == isEndInput)
+                {
+                    // Input同士 / Output同士は拒否
+                    ed::RejectNewItem(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 2.0f);
+                }
+                else
+                {
+                    // 逆方向ドラッグ対応
+                    const std::string& finalFrom = isStartInput ? dstName : srcName;
+                    const std::string& finalTo = isStartInput ? srcName : dstName;
+
+                    if (ed::AcceptNewItem(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), 2.0f))
+                    {
+                        bool exists = false;
+                        for (auto& t : graphTransitions)
+                            if (t.fromStateName == finalFrom && t.toStateName == finalTo) { exists = true; break; }
+
+                        if (!exists)
+                            graphTransitions.push_back(AnimTransition{
+                                finalFrom, finalTo, 0.2f, {}, ed::LinkId(GetNextID())
+                                });
+                    }
+                }
+            }
+            else
+            {
+                ed::RejectNewItem(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 2.0f);
+            }
+        }
+
+        ed::PinId unusedPin;
+        if (ed::QueryNewNode(&unusedPin)) ed::RejectNewItem();
     }
     ed::EndCreate();
 
-    // 4. 削除のハンドリング
-    if (ed::BeginDelete()) {
+    // ================================================================
+    // 4. 削除 (ノード削除時は関連遷移も大掃除)
+    // ================================================================
+    if (ed::BeginDelete())
+    {
         ed::LinkId linkId;
-        while (ed::QueryDeletedLink(&linkId)) {
-            if (ed::AcceptDeletedItem()) {
-                // graphTransitions から一致するIDを消す
+        while (ed::QueryDeletedLink(&linkId))
+        {
+            if (ed::AcceptDeletedItem())
+            {
                 graphTransitions.erase(
                     std::remove_if(graphTransitions.begin(), graphTransitions.end(),
                         [&](const auto& t) { return t.id == linkId; }),
-                    graphTransitions.end()
-                );
+                    graphTransitions.end());
+            }
+        }
+
+        ed::NodeId nodeId;
+        while (ed::QueryDeletedNode(&nodeId))
+        {
+            if (ed::AcceptDeletedItem())
+            {
+                std::string deletedName;
+                for (auto& n : graphNodes)
+                    if (n.id == nodeId) { deletedName = n.stateName; break; }
+
+                if (!deletedName.empty())
+                {
+                    // 関連する遷移をすべて削除
+                    graphTransitions.erase(
+                        std::remove_if(graphTransitions.begin(), graphTransitions.end(),
+                            [&](const auto& t) {
+                                return t.fromStateName == deletedName || t.toStateName == deletedName;
+                            }),
+                        graphTransitions.end());
+
+                    graphNodes.erase(
+                        std::remove_if(graphNodes.begin(), graphNodes.end(),
+                            [&](const auto& n) { return n.stateName == deletedName; }),
+                        graphNodes.end());
+
+                    if (editingState && editingState->name == deletedName)
+                        editingState = nullptr;
+
+                    RemoveState(deletedName);
+                }
             }
         }
     }
     ed::EndDelete();
 
-    // 5. 選択状態のハンドリング
-    if (ed::HasSelectionChanged()) {
+    // ================================================================
+    // 5. 選択状態ハンドリング
+    // ================================================================
+    if (ed::HasSelectionChanged())
+    {
         ed::NodeId selectedNodeId;
-        // 選択されているノードが1つ以上ある場合
-        if (ed::GetSelectedNodes(&selectedNodeId, 1) > 0) {
-            // IDから該当する graphNodes を探す
+        if (ed::GetSelectedNodes(&selectedNodeId, 1) > 0)
+        {
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
                 [&](const auto& n) { return n.id == selectedNodeId; });
-
-            if (it != graphNodes.end()) {
-                // states マップから AnimState の生ポインタを取得して切り替え
-                if (states.count(it->stateName)) {
-                    editingState = states[it->stateName].get();
-
-                    // シーケンサーを表示している場合は対象を更新
-                    // ※アダプターにセットする関数などがあればここで呼ぶ
-                    // animSequenceAdapter.targetState = m_EditingState;
-                }
-            }
+            if (it != graphNodes.end() && states.count(it->stateName))
+                editingState = states[it->stateName].get();
         }
     }
 
-    // --- 5.5 リンク選択のハンドリング ---
+    // ================================================================
+    // 5.5 リンク選択 → Transition Properties ウィンドウ
+    // ================================================================
     static ed::LinkId selectedLinkId;
-    if (ed::GetSelectedLinks(&selectedLinkId, 1) > 0) {
-        // 選択されたリンク ID から遷移データを特定
+    if (ed::GetSelectedLinks(&selectedLinkId, 1) > 0)
+    {
         auto it = std::find_if(graphTransitions.begin(), graphTransitions.end(),
             [&](const auto& t) { return t.id == selectedLinkId; });
 
-        if (it != graphTransitions.end()) {
-            // ノードエディタのウィンドウとは別に、詳細編集用パネルを表示
+        if (it != graphTransitions.end())
+        {
             ImGui::Begin("Transition Properties");
 
-            ImGui::Text("Transition: %s -> %s",
-                AFindNodeByPin(it->startPin)->stateName.c_str(),
-                AFindNodeByPin(it->endPin)->stateName.c_str());
+            auto* fromNode = FindNodeByName(it->fromStateName);
+            auto* toNode = FindNodeByName(it->toStateName);
+            if (fromNode && toNode)
+                ImGui::Text("Transition: %s -> %s", fromNode->stateName.c_str(), toNode->stateName.c_str());
+            else
+                ImGui::Text("Transition: (Invalid Nodes)");
 
             ImGui::Separator();
             ImGui::DragFloat("Fade Duration", &it->duration, 0.01f, 0.0f, 2.0f);
 
-            // 条件の編集 (AnimCondition)
             ImGui::TextColored(ImVec4(0, 1, 1, 1), "Conditions");
-            if (ImGui::Button("+ Add Condition")) {
+            if (ImGui::Button("+ Add Condition"))
                 it->conditions.push_back(AnimCondition());
-            }
 
-            for (int i = 0; i < (int)it->conditions.size(); i++) {
+            for (int i = 0; i < (int)it->conditions.size(); i++)
+            {
                 ImGui::PushID(i);
                 auto& cond = it->conditions[i];
 
-                // 条件タイプ (Variable か AnimationEnd か)
                 const char* condTypes[] = { "Variable", "AnimationEnd", "Trigger" };
                 int typeIdx = (int)cond.type;
-                if (ImGui::Combo("Type", &typeIdx, condTypes, IM_ARRAYSIZE(condTypes))) {
+                if (ImGui::Combo("Type", &typeIdx, condTypes, IM_ARRAYSIZE(condTypes)))
                     cond.type = (ConditionType)typeIdx;
+
+                // パラメータ名: Blackboardが空でなければドロップダウン
+                if (cond.type == ConditionType::Variable || cond.type == ConditionType::Trigger)
+                {
+                    if (!blackboard.empty())
+                    {
+                        std::vector<const char*> keys;
+                        for (auto& [k, v] : blackboard) keys.push_back(k.c_str());
+                        int curIdx = 0;
+                        for (int k = 0; k < (int)keys.size(); k++)
+                            if (cond.parameterName == keys[k]) { curIdx = k; break; }
+                        ImGui::SetNextItemWidth(160.0f);
+                        if (ImGui::Combo("Parameter", &curIdx, keys.data(), (int)keys.size()))
+                            cond.parameterName = keys[curIdx];
+                    }
+                    else
+                    {
+                        ImGui::InputText("Parameter", &cond.parameterName);
+                        ImGui::SameLine();
+                        ImGui::TextDisabled("(Blackboardにパラメータを追加してください)");
+                    }
                 }
 
-                if (cond.type == ConditionType::Variable || cond.type == ConditionType::Trigger) {
-                    ImGui::InputText("Parameter", &cond.parameterName);
-                }
-
-                if (cond.type == ConditionType::Variable) {
+                if (cond.type == ConditionType::Variable)
+                {
                     const char* ops[] = { "==", "!=", ">", "<" };
                     int opIdx = (int)cond.op;
                     ImGui::SetNextItemWidth(60);
-                    if (ImGui::Combo("Op", &opIdx, ops, IM_ARRAYSIZE(ops))) {
+                    if (ImGui::Combo("Op", &opIdx, ops, IM_ARRAYSIZE(ops)))
                         cond.op = (ConditionOp)opIdx;
-                    }
                     ImGui::SameLine();
                     ImGui::DragFloat("Threshold", &cond.threshold, 0.1f);
                 }
 
-                if (ImGui::Button("Remove Condition")) {
+                if (ImGui::Button("Remove Condition"))
                     it->conditions.erase(it->conditions.begin() + i);
-                }
+
                 ImGui::Separator();
                 ImGui::PopID();
             }
@@ -887,64 +1372,61 @@ void AnimationControllerComponent::OnGuiNodeEditor()
         }
     }
 
-    // 6. 右クリックコンテキストメニューのハンドリング
-        // 背景をクリックしたときにポップアップを開く
+    // ================================================================
+    // 6. 右クリックコンテキストメニュー
+    // ================================================================
     ed::Suspend();
     if (ed::ShowBackgroundContextMenu()) {
         ImGui::OpenPopup("Create New Node");
+        _newNodeSpawnPos = ed::ScreenToCanvas(ImGui::GetMousePos());
     }
     ed::Resume();
 
-    // ポップアップの中身
     ed::Suspend();
-    if (ImGui::BeginPopup("Create New Node")) {
-        auto cursorCanvasPos = ed::ScreenToCanvas(ImGui::GetMousePosOnOpeningCurrentPopup());
-
+    if (ImGui::BeginPopup("Create New Node"))
+    {
         ImGui::Text("Create State Node");
         ImGui::Separator();
 
-        // パターンA: 既存の登録済みステートから選んで配置
-        // すでにグラフにあるものは除外するか、重複を許すかは運用次第
-        for (auto& [name, statePtr] : states) {
-            // すでにグラフに存在するかチェック
+        for (auto& [name, statePtr] : states)
+        {
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
                 [&](const auto& n) { return n.stateName == name; });
 
-            if (it == graphNodes.end()) { // まだグラフにないステートのみ表示
-                if (ImGui::MenuItem(name.c_str())) {
-                    // 新規ノードの構築
+            if (it == graphNodes.end())
+            {
+                if (ImGui::MenuItem(name.c_str()))
+                {
                     AnimGraphNode newNode;
                     newNode.id = GetNextID();
                     newNode.stateName = name;
                     newNode.inputPin = GetNextID();
                     newNode.outputPin = GetNextID();
-
                     graphNodes.push_back(newNode);
+                    _nodeToPlaceHash = (uintptr_t)newNode.id.Get();
                 }
             }
         }
 
         ImGui::Separator();
-        // パターンB: まったく新しいステートを作成して配置
-        if (ImGui::MenuItem("Create Empty State")) {
+        if (ImGui::MenuItem("Create Empty State"))
+        {
             std::string newName = "NewState_" + std::to_string(graphNodes.size());
-            AddState(newName, 0); // 既存の AddState メソッドを利用
+            AddState(newName, 0); // graphNodes にも追加される
 
-            AnimGraphNode newNode;
-            newNode.id = GetNextID();
-            newNode.stateName = newName;
-            newNode.inputPin = GetNextID();
-            newNode.outputPin = GetNextID();
-
-            graphNodes.push_back(newNode);
-            ed::SetNodePosition(newNode.id, cursorCanvasPos);
+            for (auto& n : graphNodes) {
+                if (n.stateName == newName) {
+                    _nodeToPlaceHash = (uintptr_t)n.id.Get();
+                    break;
+                }
+            }
         }
-
         ImGui::EndPopup();
     }
     ed::Resume();
 
     ed::End();
+    ed::SetCurrentEditor(nullptr);
     ImGui::End();
 }
 
@@ -972,9 +1454,11 @@ void from_json(const nlohmann::json& j, AnimEvent& e) {
     e.endAction = j.value("actionEnd", "");
     e.isFired = false;
 }
+
 void to_json(nlohmann::json& j, const AnimState& s) {
     j = nlohmann::json
     {
+        {"sequencer", s.sequencerDataName},
         {"name", s.name},
         {"type", (int)s.type}, // enumをintとして保存
         {"speed", s.playbackSpeed},
@@ -986,12 +1470,16 @@ void to_json(nlohmann::json& j, const AnimState& s) {
         // Blend1D用
         {"animIndexA", s.animIndexA},
         {"animIndexB", s.animIndexB},
-        {"blendParamName", s.blendParamName}
+        {"blendParamName", s.blendParamName},
+        // Custom用 【追加】
+        {"customAnimIndex", s.customAnimIndex},
+        {"rootMotion", s.rootMotion},
     };
 }
 
 void from_json(const nlohmann::json& j, AnimState& s)
 {
+    s.sequencerDataName = j.value("sequencer", "");
     s.name = j.value("name", "");
     s.type = (AnimStateType)j.value("type", (int)AnimStateType::Single);
     s.playbackSpeed = j.value("speed", 1.0f);
@@ -1006,6 +1494,9 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.animIndexB = j.value("animIndexB", -1);
     s.blendParamName = j.value("blendParamName", "BlendAlpha");
 
+    // Custom用 【追加】
+    s.customAnimIndex = j.value("customAnimIndex", -1);
+    s.rootMotion = j.value("rootMotion", RootMotionSettings{});
     if (j.contains("events") && j["events"].is_array()) {
         s.events = j.at("events").get<std::vector<AnimEvent>>();
     }
