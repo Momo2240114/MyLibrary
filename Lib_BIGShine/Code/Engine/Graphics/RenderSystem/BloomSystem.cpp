@@ -1,12 +1,14 @@
 #include "BloomSystem.h"
-#include "CPUResourceLoader.h"
-#include "RenderContext.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
 bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
 {
+    blurTargets.clear();
+
     // 1. 高輝度抽出用テクスチャ (1/2サイズ)
-    CreateRenderTarget(device, width / 2, width / 2, brightTarget);
+    CreateRenderTarget(device, width / 2, height / 2, brightTarget);
     
     ScreenSize = {
         static_cast<float>(width),static_cast<float>(height)
@@ -135,20 +137,6 @@ void BloomSystem::Execute(
 
     // 全て解除
     dc->PSSetShaderResources(0, 2, nullSRVs);
-
-    // --- 3. Composite (sceneSRV + currentSRV -> finalRTV) ---
-    // 解像度は適宜メンバ変数などから取得してください
-    SetVP(1920.0f, 1080.0f);
-
-    // ★ ここを修正：nullptr ではなく、シーンのデプスバッファ (rc.dsv) をセットする
-    ID3D11DepthStencilView* dsv = GraphicsDeviceManager::Instance().GetDepthStencilView(); // RenderContext に DSV が含まれていると仮定
-    dc->OMSetRenderTargets(1, &finalRTV, dsv);
-
-    dc->PSSetShader(compositePS.Get(), nullptr, 0);
-    ID3D11ShaderResourceView* newinputs[] = { sceneSRV, currentSRV };
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-    dc->PSSetShaderResources(0, 2, newinputs);
-    DrawFullScreenQuad(dc);
 
     // ★ ここでデプスステートを「テストあり・書き込みなし」等、
     // 次の描画（ナビメッシュ）が期待する状態に戻しておくとより安全です
@@ -293,3 +281,5 @@ void BloomSystem::DrawFullScreenQuad(ID3D11DeviceContext* dc)
     dc->VSSetShader(fullScreenVS.Get(), nullptr, 0);
     dc->Draw(3, 0);
 }
+
+

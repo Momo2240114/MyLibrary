@@ -1,6 +1,8 @@
 #include "ModelRenderSystem.h"
-#include "CPUResourceLoader.h"
-#include "PBRShader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Shader/PBRShader.h"
+#include "Engine/Graphics/Shader/ToonPBRShader.h"
+#include "Engine/Graphics/Shader/ToonShader.h"
 #include "ShapeRenderer.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
@@ -24,8 +26,9 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	// シェーダー生成
 	shaders[static_cast<int>(ModelShaderID::Basic)] = std::make_shared<BasicShader>(device);
-	//shaders[static_cast<int>(ShaderId::Lambert)] = std::make_shared<LambertShader>(device);
+	shaders[static_cast<int>(ModelShaderID::Toon)] = std::make_shared<ToonShader>(device);
 	shaders[static_cast<int>(ModelShaderID::PBR)] = std::make_shared<PbrShader>(device);
+	shaders[static_cast<int>(ModelShaderID::ToonPBR)] = std::make_shared<ToonPBRShader>(device);
 
 	// デカールシェーダーの生成
 	decalShader = std::make_shared<DecalShader>(device);
@@ -41,6 +44,19 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 	CreateDefaultTextures(device);
 }
 
+void ModelRenderSystem::Gui()
+{
+	for (auto shader : shaders)
+	{
+		if (shader)
+		{
+			if (ImGui::CollapsingHeader(shader->GetName().c_str()))
+			{
+				shader->Gui();
+			}
+		}
+	}
+}
 
 //描画登録
 //---
@@ -78,10 +94,21 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		// ★デカール座標復元用の逆行列を計算
 		DirectX::XMStoreFloat4x4(&cbScene.invViewProjection, DirectX::XMMatrixInverse(nullptr, VP));
 
-		// 平行光源
-		const DirectionalLight& dl = lightManager->GetDirectionalLight();
-		cbScene.lightDirection = { dl.direction.x, dl.direction.y, dl.direction.z, dl.intensity };
-		cbScene.lightColor = { dl.color.x, dl.color.y, dl.color.z, 0.0f };
+		const auto& directionalLights = lightManager->GetAllDirectionalLights(); // 複数保持していると仮定
+		DirectionalLight strongestLight = lightManager->GetDirectionalLight();   // デフォルトの1つ
+
+		// 複数ある場合は、その中で強度が最大のものを探し出す
+		for (const auto& light : directionalLights)
+		{
+			if (light.intensity > strongestLight.intensity)
+			{
+				strongestLight = light;
+			}
+		}
+
+		// ここで選ばれた最強の光をバッファにセットする
+		cbScene.lightDirection = { strongestLight.direction.x, strongestLight.direction.y, strongestLight.direction.z, strongestLight.intensity };
+		cbScene.lightColor = { strongestLight.color.x, strongestLight.color.y, strongestLight.color.z, 0.0f };
 
 		const auto& pointLights = lightManager->GetPointLights();
 		const auto& spotLights = lightManager->GetSpotLights();
@@ -107,6 +134,19 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 		dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 	}
+
+
+	// ★重要: StructuredBuffer (点光源) をレジスタ t5 にセット
+	if (lightSRV)
+	{
+		dc->PSSetShaderResources(5, 1, lightSRV.GetAddressOf());
+	}
+	// ★重要: StructuredBuffer (スポット光源) をレジスタ t6 にセット
+	if (spotLightSRV)
+	{
+		dc->PSSetShaderResources(6, 1, spotLightSRV.GetAddressOf());
+	}
+
 
 	// 定数バッファ設定
 	ID3D11Buffer* vsConstantBuffers[] =
@@ -172,6 +212,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
 
 
+	GraphicsDeviceManager::Instance().RenderSkyBox(rc);
+
 
 	// ブレンドステート設定
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
@@ -179,11 +221,16 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	// 不透明描画処理
 	for (DrawInfo& drawInfo : drawInfos)
 	{
-		ModelShader* shader = shaders[static_cast<int>(drawInfo.shaderId)].get();
-		shader->Begin(rc);
 
 		for (const GltfModelCommponennt::Mesh& mesh : drawInfo.model->GetMeshes())
 		{
+			// マテリアルからシェーダーIDを取得
+			ModelShaderID currentShaderId = mesh.material->shaderId;
+			ModelShader* shader = shaders[static_cast<int>(currentShaderId)].get();
+
+			// ここでシェーダーを開始
+			shader->Begin(rc);
+
 			// 半透明メッシュ登録
 			if (mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend ||
 				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f))
@@ -204,9 +251,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			// 描画
 			drawMesh(mesh, shader);
+			shader->End(rc);
 		}
-
-		shader->End(rc);
 	}
 	drawInfos.clear();
 
@@ -241,17 +287,6 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
-
-	// ★重要: StructuredBuffer (点光源) をレジスタ t5 にセット
-	if (lightSRV)
-	{
-		dc->PSSetShaderResources(5, 1, lightSRV.GetAddressOf());
-	}
-	// ★重要: StructuredBuffer (スポット光源) をレジスタ t6 にセット
-	if (spotLightSRV)
-	{
-		dc->PSSetShaderResources(6, 1, spotLightSRV.GetAddressOf());
-	}
 
 	// サンプラステート設定解除
 	for (ID3D11SamplerState*& samplerState : samplerStates) { samplerState = nullptr; }
@@ -504,4 +539,8 @@ void ModelRenderSystem::CreateDefaultTextures(ID3D11Device* device)
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 	device->CreateTexture2D(&desc, &data, texture.GetAddressOf());
 	device->CreateShaderResourceView(texture.Get(), nullptr, whiteTextureSRV.GetAddressOf());
+}
+
+void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascadeIndex)
+{
 }

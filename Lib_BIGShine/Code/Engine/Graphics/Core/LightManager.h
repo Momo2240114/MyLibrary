@@ -14,7 +14,7 @@ struct DirectionalLight
     float intensity;            // 強度
 };
 
-struct PointLight 
+struct PointLight
 {
     DirectX::XMFLOAT3 position; // 位置
     float range;                // 影響範囲（半径）
@@ -49,13 +49,32 @@ public:
     void AddSpotLight(const SpotLight& light) { spotLights.push_back(light); }
     const std::vector<SpotLight>& GetSpotLights() const { return spotLights; }
 
-    // 毎フレームのクリア処理（Componentから集計する場合に必要）
+    // 平行光源を追加・クリアするメソッドを追加
+    void AddDirectionalLight(const DirectionalLight& light) { directionalLights.push_back(light); }
+
+    std::vector<DirectionalLight> GetAllDirectionalLights() const { return directionalLights; }
+
+    // 最強のライトを返す
+    DirectionalLight GetStrongestDirectionalLight() const {
+        if (directionalLights.empty()) return DirectionalLight(); // なければデフォルトを返す
+
+        const DirectionalLight* strongest = &directionalLights[0];
+        for (const auto& light : directionalLights) {
+            if (light.intensity > strongest->intensity) {
+                strongest = &light;
+            }
+        }
+        return *strongest;
+    }
+
     void ClearLights() {
+        directionalLights.clear(); // クリアリストに追加
         pointLights.clear();
         spotLights.clear();
     }
 
 private:
+    std::vector<DirectionalLight> directionalLights;
     DirectionalLight	directionalLight;
     std::vector<PointLight> pointLights;
     std::vector<SpotLight> spotLights;
@@ -96,7 +115,7 @@ public:
     }
 
     void Update(float et) override;
-   
+
 
     void Gui() override
     {
@@ -121,7 +140,7 @@ public:
             ImGui::DragFloat3("Local Rotation", &localRotation.x, 0.5f);
         }
 
-        
+
 
         ImGui::Separator();
 

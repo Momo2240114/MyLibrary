@@ -1,5 +1,5 @@
 #include "SpriteRenderSystem.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 
 void SpriteRenderSystem::Finalize()
 {

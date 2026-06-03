@@ -8,7 +8,7 @@
 #include <cereal/types/vector.hpp>
 #include "Misc.h"
 #include "GLTFImporter.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "ModelResourceManager.h"
 #include "Model.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
@@ -108,6 +108,7 @@ void GltfModelCommponennt::Material::serialize(Archive& archive)
 {
 	// enumを明示的にintにキャストして扱うのが最も安全です
 	int tempAlphaMode = static_cast<int>(alphaMode);
+	int tempShaderId = static_cast<int>(shaderId);
 	archive(
 		CEREAL_NVP(name),
 		CEREAL_NVP(baseTextureFileName),
@@ -129,12 +130,17 @@ void GltfModelCommponennt::Material::serialize(Archive& archive)
 		CEREAL_NVP(roughness),
 		CEREAL_NVP(occlusionStrength),
 		CEREAL_NVP(alphaCutoff),
-		cereal::make_nvp("alphaMode", tempAlphaMode)
+		cereal::make_nvp("alphaMode", tempAlphaMode),
+		cereal::make_nvp("shaderId", tempShaderId)
 	);
 
 	if (Archive::is_loading::value)
 	{
 		alphaMode = static_cast<AlphaMode>(tempAlphaMode);
+	}
+	if (Archive::is_loading::value)
+	{
+		shaderId = static_cast<ModelShaderID>(tempShaderId);
 	}
 }
 
@@ -230,8 +236,14 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 	this->meshes = resource->meshes;
 	this->animations = resource->animations;
 
-	// 4. コピーしたことによってポインタが古い場所（神殿）を指しているので、
-	//    「自分自身の vector」を指すように再結線する（これだけはコンポーネント側に残す！）
+	int materialIdCounter = 0;
+	for (auto& material : this->materials) {
+		material.id = materialIdCounter++;
+	}
+
+
+	// 4. コピーしたことによってポインタが古い場所を指しているので、
+	// 「自分自身の vector」を指すように再結線する
 	RebindInternalPointers();
 
 	// 5. 行列の確定
@@ -269,8 +281,27 @@ void GltfModelCommponennt::Gui()
 	ImGui::DragFloat("localScale", &localScale, 0.01f,0.0f,100.0f);
 	ImGui::Checkbox("usedNaviMeshSystemFlg", &usedNaviMeshSystemFlg);
 
+	ImGui::Separator();
+	ImGui::Text("Root Rotation Offset");
+
+	// 四元数を float 4つとして編集する
+	// Quaternion は {x, y, z, w} の順で並んでおるため、そのように扱う
+	float rot[4] = { _RootRotationOffset.x, _RootRotationOffset.y, _RootRotationOffset.z, _RootRotationOffset.w };
+
+	if (ImGui::DragFloat4("##RootOffset", rot, 0.01f))
+	{
+		_RootRotationOffset.x = rot[0];
+		_RootRotationOffset.y = rot[1];
+		_RootRotationOffset.z = rot[2];
+		_RootRotationOffset.w = rot[3];
+		// 念のため正規化しておく
+		_RootRotationOffset.Normalize();
+	}
+
+
+
 	// 表示用の名前リスト
-	static const char* shaderNames[] = { "Basic" ,"PBR"};
+	static const char* shaderNames[] = { "Basic" ,"PBR","Toon","ToonPBR"};
 
 	// 現在のIDをint型として扱う
 	int currentIdx = static_cast<int>(shaderId);
@@ -383,6 +414,9 @@ void GltfModelCommponennt::Gui()
 		}
 		ImGui::EndCombo();
 	}
+
+	ShowMeshDetailsUI();
+	ShowNodeTransformEditor();
 }
 
 // アニメーション追加読み込み
@@ -761,11 +795,28 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 		}
 	}
 
+	nlohmann::json materialSettings = nlohmann::json::array();
+	for (const auto& mat : materials) {
+		materialSettings.push_back({
+			{"id", mat.id},
+			{"shaderId", static_cast<int>(mat.shaderId)},
+			{"baseColor", {mat.baseColor.x, mat.baseColor.y, mat.baseColor.z, mat.baseColor.w}}
+			});
+	}
+	j["MaterialOverrides"] = materialSettings;
+
 	j["ModelName"] = pathForSave;
 	j["ShaderID"] = static_cast<int>(shaderId);
 	j["LocalScale"] = localScale;
 	j["UsedNaviMeshSystemFlg"] = usedNaviMeshSystemFlg;
 	j["RootMotionName"] = m_RootMotionName;
+	// クォータニオンをx, y, z, wの成分に分解して保存する
+	j["_RootRotationOffset"] = {
+		{ "x", _RootRotationOffset.x },
+		{ "y", _RootRotationOffset.y },
+		{ "z", _RootRotationOffset.z },
+		{ "w", _RootRotationOffset.w }
+	};
 }
 
 
@@ -792,6 +843,20 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 			UpdateTransform();
 		}
 	}
+
+	if (j.contains("MaterialOverrides")) {
+		for (const auto& item : j["MaterialOverrides"]) {
+			int id = item["id"];
+			// IDをキーにして、現在のmaterials配列から該当するものを探して上書きする
+			for (auto& mat : materials) {
+				if (mat.id == id) {
+					mat.shaderId = static_cast<ModelShaderID>(item["shaderId"]);
+					// 色情報なども同様に反映
+				}
+			}
+		}
+	}
+
 	if (j.contains("LocalScale")) {
 		localScale = static_cast<float>(j["LocalScale"].get<float>());
 	}
@@ -804,8 +869,64 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 		m_RootMotionName = j["RootMotionName"];
 	}
 
+	// 保存された成分からクォータニオンを再構築する
+	if (j.contains("_RootRotationOffset"))
+	{
+		auto& rot = j["_RootRotationOffset"];
+		_RootRotationOffset.x = rot.value("x", 0.0f);
+		_RootRotationOffset.y = rot.value("y", 0.0f);
+		_RootRotationOffset.z = rot.value("z", 0.0f);
+		_RootRotationOffset.w = rot.value("w", 1.0f); // wはデフォルトで1（単位クォータニオン）にするのが無難だ
+	}
+
 }
 
+void GltfModelCommponennt::ShowMeshDetailsUI()
+{
+	if (ImGui::Begin("Mesh & Material Editor"))
+	{
+		// 1. ユニークなマテリアルを特定する（または事前に用意したマテリアル配列を使う）
+			// もしマテリアルが配列として管理されているなら、それを使うのが一番じゃ
+		for (auto& material : materials)
+		{
+			ImGui::PushID(material.id); // マテリアル固有のIDで区別
+
+			ImGui::Text("Material: %s", material.name.c_str());
+
+			// シェーダーの選択用コンボボックス
+			const char* shaderItems[] = { "Basic", "PBR", "Toon" ,"ToonPBR"};
+			int currentShaderIdx = static_cast<int>(material.shaderId);
+
+			if (ImGui::Combo("Shader", &currentShaderIdx, shaderItems, IM_ARRAYSIZE(shaderItems)))
+			{
+				material.shaderId = static_cast<ModelShaderID>(currentShaderIdx);
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+	}
+	ImGui::End();
+}
+
+void GltfModelCommponennt::ShowNodeTransformEditor()
+{
+	if (ImGui::Begin("Node Transform Editor"))
+	{
+		for (auto& node : nodes)
+		{
+			if (ImGui::TreeNode(node.name.c_str()))
+			{
+				// ノードのスケールを直接いじる（鎧のメッシュが属するノードを探せ）
+				ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&node.scale), 0.01f, 0.1f, 2.0f);
+				ImGui::DragFloat3("Position", reinterpret_cast<float*>(&node.position), 0.01f);
+
+				ImGui::TreePop();
+			}
+		}
+	}
+	ImGui::End();
+}
 // シリアライズ
 void GltfModelCommponennt::Serialize(const char* filename)
 {

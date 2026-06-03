@@ -72,10 +72,13 @@ void CameraComponent::Serialize(nlohmann::json& j) const
     j["aspect"] = aspect;
     j["nearZ"] = nearZ;
     j["farZ"] = farZ;
+    j["priority"] = priority;
     // 注視点モードを使っている場合のために eye, focus, up も保存
     j["eye"] = { eye.x, eye.y, eye.z };
     j["focus"] = { focus.x, focus.y, focus.z };
     j["up"] = { up.x, up.y, up.z };
+
+
 }
 
 void CameraComponent::Deserialize(const nlohmann::json& j)
@@ -84,6 +87,7 @@ void CameraComponent::Deserialize(const nlohmann::json& j)
     aspect = j.value("aspect", 16.0f / 9.0f);
     nearZ = j.value("nearZ", 0.001f);
     farZ = j.value("farZ", 1000.0f);
+    priority = j.value("priority", 0.0f);
 
     if (j.contains("eye")) {
         eye = { j["eye"][0], j["eye"][1], j["eye"][2] };

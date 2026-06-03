@@ -5,26 +5,25 @@
 #include "Engine/Physics/BoxCollider.h"
 #include "Engine/Physics/CapsuleCollider.h"
 #include "Engine/Physics/SphereCollider.h"
-#include "DecalComponent.h"
+#include "Engine/Graphics/Decal/DecalComponent.h"
 #include "UIButton.h"
-#include "AnimationController.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
-#include "CameraDirectorComponent.h"
-#include "Engine/GamePlay//IventSystem/ActionSequence.h"
-#include "FovDirector.h"
-#include "TransformDirector.h"
+#include "Engine/GamePlay/Camera/CameraDirectorComponent.h"
+#include "Engine/GamePlay/EventSystem/ActionSequence.h"
+#include "Engine/GamePlay/Camera/FovDirector.h"
+#include "Engine/GamePlay/Transform/TransformDirector.h"
 #include "Engine/GamePlay/Graphics/LightBlinkerComponent.h"
 
 #include "Engine/Math/EasingComponent.h"
 #include "Engine/Math/Curve/CurveComponent.h"
-#include "ModelAttachmentComponent.h"
-#include "ColorFilterDirector.h"
+#include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
+#include "Engine/Graphics/PostEffect/ColorFilterDirector.h"
 #include "NumberSwitcher.h"
 //#include "CurvePlayerComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 #include "PlayerInput.h"
-#include "Movement.h"
+#include "Engine/GamePlay/Core/Component/Movement.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -53,7 +52,6 @@ void RegisterAllComponents()
     registry.Register<CameraComponent>("CameraComponent");
     registry.Register<GltfModelCommponennt>("GltfModel");
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
-    registry.Register<AnimationController>("AnimationController");
     registry.Register<AnimationControllerComponent>("AnimationControllerComponent");
     registry.Register<SpriteRenderer>("SpriteRenderer");
 

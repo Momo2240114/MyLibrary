@@ -1,0 +1,50 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "Color": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999
+                ],
+                "InnerAngle": 20.0,
+                "Intensity": 24.299999237060547,
+                "LocalRotation": [
+                    -160.5,
+                    -405.5,
+                    0.0
+                ],
+                "OffsetPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OuterAngle": 30.0,
+                "Range": 10.0,
+                "Type": 0
+            },
+            "Enabled": true,
+            "TypeName": "LightComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject_01",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

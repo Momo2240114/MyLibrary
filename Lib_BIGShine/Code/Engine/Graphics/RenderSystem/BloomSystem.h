@@ -7,7 +7,7 @@
 #include <vector>
 #include <DirectXMath.h>
 
-#include "RenderContext.h"
+#include "Engine/Graphics/Core/RenderContext.h"
 #include "Vector.h"
 
 class BloomSystem 
@@ -46,7 +46,8 @@ public:
         const CbColorFilter& colorFilterparamas );
 
 private:
-    struct RenderTarget {
+    struct RenderTarget 
+    {
         Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
         float width, height;

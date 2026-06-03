@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
-#include "SpriteShaderID.h"
+#include "Engine/Graphics/Shader/SpriteShaderID.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 
 enum class PosOfsset

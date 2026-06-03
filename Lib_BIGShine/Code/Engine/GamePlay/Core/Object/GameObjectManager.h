@@ -3,15 +3,17 @@
 #include "GameObject.h"
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
-#include"IScene.h"
+#include "Engine/GamePlay/Scene/IScene.h"
 
 class ColliderComponent;
 class BoxCollider;
 class GltfModelCommponennt;
+class TimeManager;
+class CameraManager;
 
 #include"RayCastManager.h"
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
-#include "Engine/GamePlay/Core/Resource/ResourceManager.h"
+#include"Engine/GamePlay/Core/Resource/ResourceManager.h"
 
 
 class GameObjectManager
@@ -28,7 +30,7 @@ public:
         int count_ = 0;
         for (auto& o : objects)
         {
-            const std::string& n_ = o->name;
+            const std::string& n_ = o->nameComponent->name;
             if (n_ == baseName_ || n_.rfind(baseName_ + "_", 0) == 0)
                 count_++;
         }
@@ -44,7 +46,7 @@ public:
 
         // オブジェクトの生成
         auto newObj = std::make_shared<GameObject>();
-        newObj->name = finalName_;
+        newObj->nameComponent->name = finalName_;
 
         //ここで「自身」をオブジェクトに授ける！
         newObj->SetManager(this);
@@ -58,11 +60,8 @@ public:
     // name検索
     std::shared_ptr<GameObject> Find(const std::string& name_)
     {
-        if (name_ == "MainCamera")
-            return m_pMainCamera;
-
         for (auto& o : objects)
-            if (o->name == name_)
+            if (o->nameComponent->name == name_)
             {
                 return o;
             }
@@ -90,7 +89,7 @@ public:
         return results;
     }
 
-    void RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderSystem modelSystem_);
+    void RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_);
 
     void Update(float et_);
 
@@ -134,18 +133,6 @@ public:
     std::shared_ptr<GameObject> GetSelectedObject() const { return selectedObject; }
     void SetSelectedObject(std::shared_ptr<GameObject> obj) { selectedObject = obj; }
 
-    //メインカメラをセットする
-    void SetMainCamera(std::shared_ptr<GameObject> mainCamera)
-    {
-        m_pMainCamera = mainCamera;
-    }
-
-    GameObject* GetMainCamera()
-    {
-        return m_pMainCamera.get();
-    }
-
-
     void ChangeScene(Scene* scene)
     {
         //delete m_pCurrentScene;
@@ -159,7 +146,7 @@ public:
 
     void ResolveHierarchy();
 
-
+    std::vector<std::string> GetSceneDirectories();
 
     // 指定したオブジェクトをプレハブとして保存
     void SaveAsPrefab(std::shared_ptr<GameObject> obj, const std::string& prefabName);
@@ -176,6 +163,8 @@ public:
         return objects;
     }
 
+    CameraManager* GetCameraManager();
+
     // プレハブからオブジェクトを生成
     std::shared_ptr<GameObject> Instantiate(const std::string& prefabName);
     // Prefabsフォルダ内のファイル一覧を更新
@@ -187,6 +176,12 @@ public:
 
     //すべてのオブジェクトやコンポーネントが平等にアクセスするための窓口
     ResourceManager* GetResourceManager() { return _ResourceManager.get(); }
+
+    void DrawHierarchyGui();   // ヒストリー(階層)GUI
+    void DrawInspectorGui();   // インスペクターGUI
+    void DrawSceneModals(); // モーダルを描画する専用の儀式
+    void RefreshSceneList() { m_sceneState.list = GetSceneDirectories(); }
+    std::shared_ptr<TimeManager> GetTimeManger() { return _TimeManager; }
 private:
     // unique name helper
     std::string MakeUniqueName(std::string base)
@@ -207,15 +202,27 @@ private:
 
 
 private:
+    // GUIの状態を保持する専用の構造体
+    struct SceneState {
+        char name[64] = "MainScene";
+        std::vector<std::string> list;
+        int selectedIndex = -1;
+        std::vector<std::string> sceneFiles; // 読み込まれたJSONファイル名のリスト
+        bool showSavePopup = false;
+        bool showLoadPopup = false;
+    }    m_sceneState;
+
+
     std::unique_ptr<ResourceManager> _ResourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
     // まだ Startが呼ばれていないオブジェクトのリスト
     std::vector<std::shared_ptr<GameObject>> pendingStarts;
     std::vector<std::shared_ptr<GameObject>> pendingDestroys;
     std::shared_ptr<GameObject> selectedObject = nullptr;
-    //メインカメラを保持する
-    std::shared_ptr<GameObject> m_pMainCamera;
 
+    std::shared_ptr<CameraManager> _CameraManager;
+
+    std::shared_ptr<TimeManager> _TimeManager;
     //ナビメッシュマネージャー
     //NaviMeshManager* m_pNaviMeshManager;
     // 所有権をマネージャ側が持つ
@@ -230,5 +237,7 @@ private:
     const std::string m_prefabDirectory = "Prefabs/";
     bool shapeRenderFlg = true;
     bool naviMeshRenderFlg = false;
+public:
+        SceneState& GetSceneState() { return m_sceneState; }
 };
 

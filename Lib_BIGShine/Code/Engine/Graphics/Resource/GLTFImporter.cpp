@@ -5,7 +5,7 @@
 #define STBI_MSC_SECURE_CRT
 
 #include "Misc.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "GLTFImporter.h"
 #include <DDSTextureLoader.h>
 

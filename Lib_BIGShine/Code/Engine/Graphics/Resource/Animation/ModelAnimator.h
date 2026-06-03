@@ -7,6 +7,8 @@
 
 
 
+class GameObject;
+
 class ModelAnimator
 {
 public:
@@ -18,7 +20,7 @@ public:
         float weight = 1.0f; // ÉuÉåÉìÉhèdÇ›
 
 
-        void Update(float et, float duration, CurveComponent* curvecomp);
+        void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner);
     };
     struct RootMotionDelta {
         DirectX::SimpleMath::Vector3 deltaPosition = { 0, 0, 0 };
@@ -27,7 +29,7 @@ public:
 
     const RootMotionDelta& GetRootMotionDelta() const { return currentRootMotionDelta; }
 
-    void Update(float deltaTime, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib = nullptr);
+    void Update(float deltaTime, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib = nullptr, std::shared_ptr<GameObject> owner = nullptr);
 
     // ModelAnimator.h
     void UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed);
@@ -63,8 +65,10 @@ private:
     bool isMixing = false;
     bool isTransitioning = false;
     GltfModelCommponennt::NodePose prevRootPose;
+    const AnimState* _prevRootMotionState = nullptr;
     bool hasPrevPose = false;
     std::vector<GltfModelCommponennt::NodePose> finalPose;
     std::vector<GltfModelCommponennt::NodePose> tempPoseA;
     std::vector<GltfModelCommponennt::NodePose> tempPoseB;
 };
+

@@ -1,5 +1,7 @@
 #include "Transform.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
+#include "ModelAttachmentComponent.h"
 
 DirectX::XMFLOAT3 Transform::GetWorldRotation()
 {
@@ -98,6 +100,13 @@ void Transform::ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat)
 
         MarkDirty();
     }
+}
+
+void Transform::SetParentOverride(bool enable, DirectX::XMMATRIX matrix)
+{
+    m_IsOverriding = enable;
+    m_OverrideParentMatrix = matrix;
+    MarkDirty();
 }
 
 Vector3 Transform::GetFront()
@@ -204,9 +213,19 @@ void Transform::UpdateWorldMatrix()
         DirectX::XMMatrixRotationQuaternion(q) *
         DirectX::XMMatrixTranslation(localPosition.x, localPosition.y, localPosition.z);
 
-    worldMatrix = localMat;
+    // 2. 親行列の適用
+    // もし親が設定されており、かつ親のノードが指定されていれば、その行列を親とする
+    if (m_IsOverriding) {
+        worldMatrix = localMat * m_OverrideParentMatrix;
+    }
+    else if (auto p = parent.lock()) {
+        worldMatrix = localMat * p->GetWorldMatrix();
+    }
+    else {
+        worldMatrix = localMat;
+    }
 
-    // フラグを戻す
+calculated:
     isDirty = false;
 
     // 4. 子に親の変化を伝播させて再計算させる

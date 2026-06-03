@@ -6,9 +6,9 @@
 #include <d3d11.h>
 #include <imgui.h>
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
-
-#include "ModelShaderID.h"
-#include "RenderContext.h"
+#include "Engine/Math/Vector.h"
+#include "Engine/Graphics/Shader/ModelShaderID.h"
+#include "Engine/Graphics/Core/RenderContext.h"
 
 // 前方宣言だけでよいもの
 //class ModelResource;
@@ -62,6 +62,7 @@ public:
 		Node* parent = nullptr;
 		std::vector<Node*>	children;
 
+
 		template<class Archive>
 		void serialize(Archive& archive);
 	};
@@ -75,6 +76,7 @@ public:
 
 	struct Material
 	{
+		int id; //マテリアルを一意に識別するためのID
 		std::string			name;
 		std::string			baseTextureFileName;
 		std::string			normalTextureFileName;
@@ -88,6 +90,8 @@ public:
 		float				occlusionStrength = 0.0f;
 		float				alphaCutoff = 0.5f;
 		AlphaMode			alphaMode = AlphaMode::Opaque;
+		ModelShaderID shaderId = ModelShaderID::PBR;
+
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	baseMap;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	normalMap;
@@ -179,7 +183,7 @@ public:
 	struct NodePose
 	{
 		DirectX::XMFLOAT3	position = { 0, 0, 0 };
-		DirectX::XMFLOAT4	rotation = { 0, 0, 0, 1 };
+		Vector4	rotation = { 0, 0, 0, 1 };
 		DirectX::XMFLOAT3	scale = { 1, 1, 1 };
 	};
 
@@ -277,6 +281,11 @@ public:
 	{
 		localScale = scale;
 	}
+
+	void ShowMeshDetailsUI();
+	void ShowNodeTransformEditor();
+
+	DirectX::SimpleMath::Quaternion GetRootRotationOffset() { return _RootRotationOffset; }
 private:
 	// シリアライズ
 	void Serialize(const char* filename);
@@ -294,7 +303,8 @@ private:
 	std::vector<Node>		nodes;
 	std::vector<Animation>	animations;
 
-	float localScale = 1.0;
 
+	float localScale = 1.0;
+	DirectX::SimpleMath::Quaternion _RootRotationOffset;
 	std::string m_RootMotionName;
 };

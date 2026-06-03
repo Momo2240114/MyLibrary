@@ -1,6 +1,6 @@
 #include "ParticleComponent.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include <filesystem>
 
 void ParticleComponent::Start() {

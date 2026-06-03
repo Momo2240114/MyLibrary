@@ -15,8 +15,8 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 
-#include"SceneGame.h"
-#include"SceneTitle.h"
+#include"Engine/GamePlay/Scene/SceneGame.h"
+#include"Engine/GamePlay/Scene/SceneTitle.h"
 
 
 #define SCREEN_WIDTH 1920

@@ -31,6 +31,10 @@ public:
     //アタッチメントを設定する親のノード名
     std::string m_ParentNodeName;
 
+    DirectX::XMMATRIX m_OverrideParentMatrix = DirectX::XMMatrixIdentity();
+    bool m_IsOverriding = false;
+
+
     // --- 階層関係 ---
     std::weak_ptr<GameObject> gameObject; // ポインタなので前方宣言だけでOK
     std::string parentNameDuringLoad;    // ロード時に親の名前を一時保存
@@ -67,6 +71,8 @@ public:
         }
     }dynamics;
 public:
+    void SetParentOverride(bool enable, DirectX::XMMATRIX matrix);
+
     void Gui()
     {
         // 値が変わったらバージョンを上げる

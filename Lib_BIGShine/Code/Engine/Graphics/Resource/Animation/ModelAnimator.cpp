@@ -1,165 +1,212 @@
 #include "ModelAnimator.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
-void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib)
+static void CallAnimationAction(const std::shared_ptr<GameObject>& owner, const std::string& actionName)
+{
+    if (actionName.empty()) return;
+
+    if (owner && owner->localRegistry.HasAction(actionName)) {
+        owner->localRegistry.Call(actionName);
+        return;
+    }
+
+    ActionRegistry::Instance().Call(actionName);
+}
+void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner)
 {
     if (!current.state || !model) return;
 
-    // ーーー 秘術の仕込み：過去の刻におけるルートノードの姿勢を記録 ーーー
-    DirectX::SimpleMath::Vector3 prevRootPos;
-    DirectX::SimpleMath::Quaternion prevRootRot;
-    int rootNodeIdx = -1;
-
-    std::string rootName = model->GetRootMotionName();
-    if (!rootName.empty() && current.state->rootMotion.enable) {
-        rootNodeIdx = model->GetNodeIndex(rootName.c_str());
-        if (rootNodeIdx != -1) {
-            // 単純化のため、ここでは「現在計算されている姿勢」を前フレームの姿として記憶する
-            // （厳密には前の時間を元にComputeAnimationを叩く手もあるが、前回更新結果のfinalPoseを使えば容易い）
-            if (finalPose.size() > rootNodeIdx) {
-                prevRootPos = finalPose[rootNodeIdx].position;
-                prevRootRot = finalPose[rootNodeIdx].rotation;
-            }
-        }
-    }
-
-    // --- 1. 時間の更新（イベント発火含む） ---
-    float baseDuration = 1.0f;
-
-    // 新たなる分岐：もし状態が「カスタムアニメーション」を求めており、ライブラリが存在するなら
-    if (current.state->type == AnimStateType::Custom && poseLib && current.state->customAnimIndex >= 0)
-    {
-        if (current.state->customAnimIndex < (int)poseLib->customAnims.size()) {
-            baseDuration = poseLib->customAnims[current.state->customAnimIndex].duration;
-        }
-    }
-    else
-    {
-        // 通常のSingle / Blend1D の再生時間を取得
-        baseDuration = model->GetAnimationDuration(
-            current.state->type == AnimStateType::Single ? current.state->animationIndex : current.state->animIndexA
-        );
-    }
-
-    // ループ処理などを考慮しつつ時間を進める
-    current.Update(et, baseDuration, curvecomp);
-
-    // --- 2. ポーズの計算 ---
-    size_t nodeCount = model->GetNodes().size();
+    const size_t nodeCount = model->GetNodes().size();
     if (tempPoseA.size() != nodeCount) tempPoseA.resize(nodeCount);
     if (tempPoseB.size() != nodeCount) tempPoseB.resize(nodeCount);
     if (finalPose.size() != nodeCount) finalPose.resize(nodeCount);
 
-    // A) カスタムアニメーションの再生処理
-    if (current.state->type == AnimStateType::Custom && poseLib && current.state->customAnimIndex >= 0)
+    // ------------------------------------------------------------
+    // 補助: 状態から pose をサンプルする
+    // ------------------------------------------------------------
+    auto SamplePose = [&](const AnimState* state, float time, std::vector<GltfModelCommponennt::NodePose>& outPose)
+        {
+            if (!state) return;
+
+            switch (state->type)
+            {
+            case AnimStateType::Custom:
+                if (poseLib &&
+                    state->customAnimIndex >= 0 &&
+                    state->customAnimIndex < (int)poseLib->customAnims.size())
+                {
+                    ComputeCustomAnimationPose(
+                        poseLib->customAnims[state->customAnimIndex],
+                        time,
+                        poseLib->poseLibrary,
+                        outPose,
+                        model
+                    );
+                }
+                break;
+
+            case AnimStateType::Single:
+                model->ComputeAnimation(state->animationIndex, time, outPose);
+                break;
+
+            case AnimStateType::Blend1D:
+            {
+                float alpha = 0.5f; // TODO: Blackboard 等から取得
+
+                model->ComputeAnimation(state->animIndexA, time, outPose);
+
+                float durationA = model->GetAnimationDuration(state->animIndexA);
+                float durationB = model->GetAnimationDuration(state->animIndexB);
+                float timeB = (durationA > 0.0f) ? (time / durationA) * durationB : 0.0f;
+
+                model->ComputeAnimation(state->animIndexB, timeB, tempPoseB);
+
+                for (size_t i = 0; i < nodeCount; ++i)
+                {
+                    outPose[i].position = DirectX::SimpleMath::Vector3::Lerp(outPose[i].position, tempPoseB[i].position, alpha);
+                    outPose[i].rotation = DirectX::SimpleMath::Quaternion::Slerp(outPose[i].rotation, tempPoseB[i].rotation, alpha);
+                    outPose[i].rotation.Normalize();
+                    outPose[i].scale = DirectX::SimpleMath::Vector3::Lerp(outPose[i].scale, tempPoseB[i].scale, alpha);
+                }
+            }
+            break;
+
+            default:
+                break;
+            }
+        };
+
+    // ------------------------------------------------------------
+    // 1. Duration 取得
+    // ------------------------------------------------------------
+    float baseDuration = 1.0f;
+
+    if (current.state->type == AnimStateType::Custom &&
+        poseLib &&
+        current.state->customAnimIndex >= 0 &&
+        current.state->customAnimIndex < (int)poseLib->customAnims.size())
     {
-        if (current.state->customAnimIndex < (int)poseLib->customAnims.size()) {
-            // ライブラリの記憶から、現在の時間に合わせたポーズをtempPoseAに抽出する
-            ComputeCustomAnimationPose(poseLib->customAnims[current.state->customAnimIndex], current.time, poseLib->poseLibrary, tempPoseA, model);
-        }
+        baseDuration = poseLib->customAnims[current.state->customAnimIndex].duration;
     }
-    // B) 通常の単体アニメーション再生
-    else if (current.state->type == AnimStateType::Single) {
-        model->ComputeAnimation(current.state->animationIndex, current.time, tempPoseA);
+    else if (current.state->type == AnimStateType::Single)
+    {
+        baseDuration = model->GetAnimationDuration(current.state->animationIndex);
     }
-    // C) 1Dブレンドアニメーション再生
-    else if (current.state->type == AnimStateType::Blend1D) {
-        float alpha = 0.5f; // 本来はBlackboard等から取得
-        model->ComputeAnimation(current.state->animIndexA, current.time, tempPoseA);
-
-        float durationB = model->GetAnimationDuration(current.state->animIndexB);
-        float timeB = (baseDuration > 0.0f) ? (current.time / baseDuration) * durationB : 0.0f;
-        model->ComputeAnimation(current.state->animIndexB, timeB, tempPoseB);
-
-        // tempPoseA と tempPoseB をブレンド
-        for (size_t i = 0; i < nodeCount; ++i) {
-            tempPoseA[i].position = DirectX::SimpleMath::Vector3::Lerp(tempPoseA[i].position, tempPoseB[i].position, alpha);
-            tempPoseA[i].rotation = DirectX::SimpleMath::Quaternion::Lerp(tempPoseA[i].rotation, tempPoseB[i].rotation, alpha);
-            tempPoseA[i].scale = DirectX::SimpleMath::Vector3::Lerp(tempPoseA[i].scale, tempPoseB[i].scale, alpha);
-        }
+    else if (current.state->type == AnimStateType::Blend1D)
+    {
+        baseDuration = model->GetAnimationDuration(current.state->animIndexA);
     }
 
-    // --- 3. クロスフェード（状態遷移）の処理 ---
+    // ------------------------------------------------------------
+    // 2. 時間更新
+    // ------------------------------------------------------------
+    current.Update(et, baseDuration, curvecomp, owner);
+
+    // ------------------------------------------------------------
+    // 3. 現在ポーズ計算
+    // ------------------------------------------------------------
+    SamplePose(current.state, current.time, tempPoseA);
+
+    // ------------------------------------------------------------
+    // 4. クロスフェード
+    // ------------------------------------------------------------
     if (isTransitioning)
     {
         fadeTimer += et;
-        float alpha = fadeTimer / fadeDuration;
-        if (alpha >= 1.0f) {
+        float alpha = fadeDuration > 0.0f ? (fadeTimer / fadeDuration) : 1.0f;
+        if (alpha >= 1.0f)
+        {
             alpha = 1.0f;
             isTransitioning = false;
         }
 
-        // 過去の遺志（previous）のポーズを tempPoseB に計算
-        if (previous.state) {
-            // 過去がカスタムだった場合
-            if (previous.state->type == AnimStateType::Custom && poseLib && previous.state->customAnimIndex >= 0) {
-                ComputeCustomAnimationPose(poseLib->customAnims[previous.state->customAnimIndex], previous.time, poseLib->poseLibrary, tempPoseB, model);
-            }
-            else {
-                model->ComputeAnimation(previous.state->animationIndex, previous.time, tempPoseB);
-            }
+        if (previous.state)
+        {
+            SamplePose(previous.state, previous.time, tempPoseB);
         }
 
-        // 過去（tempPoseB）から現在（tempPoseA）へと肉体を滑らかに変化させる
-        for (size_t i = 0; i < nodeCount; ++i) {
+        for (size_t i = 0; i < nodeCount; ++i)
+        {
             finalPose[i].position = DirectX::SimpleMath::Vector3::Lerp(tempPoseB[i].position, tempPoseA[i].position, alpha);
-            finalPose[i].rotation = DirectX::SimpleMath::Quaternion::Lerp(tempPoseB[i].rotation, tempPoseA[i].rotation, alpha);
+            finalPose[i].rotation = DirectX::SimpleMath::Quaternion::Slerp(tempPoseB[i].rotation, tempPoseA[i].rotation, alpha);
+            finalPose[i].rotation.Normalize();
             finalPose[i].scale = DirectX::SimpleMath::Vector3::Lerp(tempPoseB[i].scale, tempPoseA[i].scale, alpha);
         }
     }
     else
     {
-        // 遷移中でなければ、現在のポーズがそのまま最終的な肉体となる
         finalPose = tempPoseA;
     }
 
-    // ーーー 修正されたデルタ抽出と打ち消し処理 ーーー
-    currentRootMotionDelta.deltaPosition = { 0, 0, 0 };
+
+
+    // ------------------------------------------------------------
+    // 5. RootMotion 抽出
+    // ------------------------------------------------------------
+    currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
     currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
+
+
+    int rootNodeIdx = -1;
+    const std::string rootName = model->GetRootMotionName();
+
+    if (current.state->rootMotion.enable && !rootName.empty())
+    {
+        rootNodeIdx = model->GetNodeIndex(rootName.c_str());
+    }
 
     if (rootNodeIdx != -1 && finalPose.size() > rootNodeIdx)
     {
-        DirectX::SimpleMath::Vector3 currentRawPos = finalPose[rootNodeIdx].position;
-        DirectX::SimpleMath::Quaternion currentRawRot = finalPose[rootNodeIdx].rotation;
+        using namespace DirectX::SimpleMath;
 
-        // ループ判定：時間が戻った場合は差分を0とする（もしくは補完する）
-        bool isLooping = (current.time < _prevTime);
+        Vector3 rawPos = finalPose[rootNodeIdx].position;
+        Quaternion rawRot = finalPose[rootNodeIdx].rotation;
+        rawRot.Normalize();
 
-        if (_isFirstFrame || isLooping) {
-            _prevRootPos = currentRawPos;
-            _prevRootRot = currentRawRot;
+        const bool looped = (current.time < _prevTime);
+        const bool stateChanged = (_prevRootMotionState != current.state);
+
+        if (_isFirstFrame || looped || stateChanged)
+        {
+            _prevRootPos = rawPos;
+            _prevRootRot = rawRot;
+            _prevTime = current.time;
+            _prevRootMotionState = current.state;
             _isFirstFrame = false;
         }
+        else
+        {
+            Vector3 deltaPos = rawPos - _prevRootPos;
 
-        // --- 1. 位置の差分算出 ---
-        DirectX::SimpleMath::Vector3 deltaPos = currentRawPos - _prevRootPos;
+            if (!current.state->rootMotion.applyPositionX) deltaPos.x = 0.0f;
+            if (!current.state->rootMotion.applyPositionY) deltaPos.y = 0.0f;
+            if (!current.state->rootMotion.applyPositionZ) deltaPos.z = 0.0f;
 
-        // 軸封印
-        if (!current.state->rootMotion.applyPositionX) deltaPos.x = 0.0f;
-        if (!current.state->rootMotion.applyPositionY) deltaPos.y = 0.0f;
-        if (!current.state->rootMotion.applyPositionZ) deltaPos.z = 0.0f;
+            currentRootMotionDelta.deltaPosition = deltaPos;
 
-        // --- 2. 回転の差分算出 (Quaternionの逆数を使って差分を抽出) ---
-        DirectX::SimpleMath::Quaternion prevInv;
-        _prevRootRot.Inverse(prevInv);
-        DirectX::SimpleMath::Quaternion deltaRot = prevInv * currentRawRot;
 
-        // 回転結果を格納
-        currentRootMotionDelta.deltaPosition = deltaPos;
-        currentRootMotionDelta.deltaRotation = deltaRot;
 
-        // --- 3. 【重要】打ち消し ---
-        // モデルのルートノードは「常に前フレームの姿勢」に戻すことでその場に固定される
-        // ※ループ時は不連続を避けるため、現在の位置を前フレーム位置として保持し続けるのが最も安全だ
-        finalPose[rootNodeIdx].position = _prevRootPos;
-        finalPose[rootNodeIdx].rotation = _prevRootRot;
-
-        // 4. 次フレームのための記憶更新
-        if (!isLooping) {
-            _prevRootPos = currentRawPos;
-            _prevRootRot = currentRawRot;
+            _prevRootPos = rawPos;
+            _prevRootRot = rawRot;
+            _prevTime = current.time;
+            _prevRootMotionState = current.state;
         }
 
-        _prevTime = current.time;
+        // Root ノードは位置も回転もモデル空間で固定
+        finalPose[rootNodeIdx].position = Vector3::Zero;
+      
+        finalPose[rootNodeIdx].rotation *= model->GetRootRotationOffset();
+        finalPose[rootNodeIdx].rotation.Normalize();
+    }
+    else
+    {
+        // RootMotion 無効時は内部状態をリセット
+        _isFirstFrame = true;
+        _prevTime = 0.0f;
+        _prevRootMotionState = nullptr;
+        currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
+        currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
     }
 }
 
@@ -302,7 +349,7 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
     }
 }
 
-void ModelAnimator::ActiveSlot::Update(float et, float duration,CurveComponent* curveComp)
+void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner)
 {
     if (!state) return;
 
@@ -328,7 +375,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration,CurveComponent* 
         if (!ev.isFired && time >= ev.startTime)
         {
             if (!ev.startAction.empty()) {
-                ActionRegistry::Instance().Call(ev.startAction);
+                CallAnimationAction(owner, ev.startAction);
             }
             ev.isFired = true;
         }
@@ -337,7 +384,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration,CurveComponent* 
         if (time >= ev.startTime && time <= ev.endTime)
         {
             if (!ev.updateAction.empty()) {
-                ActionRegistry::Instance().Call(ev.updateAction);
+                CallAnimationAction(owner, ev.updateAction);
             }
         }
     }
@@ -357,3 +404,5 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration,CurveComponent* 
         }
     }
 }
+
+

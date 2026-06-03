@@ -1,6 +1,6 @@
 #include "ItemComponent.h"
 
-#include"EventManager.h"
+#include"Engine/GamePlay/EventSystem/EventManager.h"
 
 void ItemComponent::SetItem(ItemType itemType)
 {

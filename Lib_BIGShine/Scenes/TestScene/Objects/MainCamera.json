@@ -1,57 +1,29 @@
 {
-    "ColliderComponent": {
-        "Data": {
-            "GravityScale": 1.0,
-            "HalfHeight": 1.0,
-            "IsStatic": false,
-            "IsTrigger": false,
-            "Offset": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "Radius": 0.5,
-            "ShapeRenderFlg": true,
-            "UseGravity": false
-        },
-        "Enabled": true,
-        "TypeName": "CapsuleCollider"
-    },
     "Components": [
         {
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    1.4684884548187256,
+                    0.0,
                     2.0,
-                    -1.2882691621780396
+                    0.0
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    0.4810568690299988,
-                    1.8421481847763062,
-                    -1.2804125547409058
+                    0.0,
+                    2.0,
+                    1.0
                 ],
-                "fovY": 59.99403381347656,
+                "fovY": 59.96766662597656,
                 "nearZ": 0.10000000149011612,
                 "up": [
-                    -0.1578468382358551,
-                    0.9874628186225891,
-                    0.001255907118320465
+                    0.0,
+                    1.0,
+                    0.0
                 ]
             },
             "Enabled": true,
             "TypeName": "CameraComponent"
-        },
-        {
-            "Data": null,
-            "Enabled": true,
-            "TypeName": "Player"
-        },
-        {
-            "Data": null,
-            "Enabled": true,
-            "TypeName": "Easing"
         },
         {
             "Data": {
@@ -61,7 +33,7 @@
                     1.0
                 ],
                 "InnerAngle": 20.0,
-                "Intensity": 1.0,
+                "Intensity": 2.5,
                 "LocalRotation": [
                     0.0,
                     0.0,
@@ -78,11 +50,6 @@
             },
             "Enabled": true,
             "TypeName": "LightComponent"
-        },
-        {
-            "Data": null,
-            "Enabled": true,
-            "TypeName": "Movement"
         }
     ],
     "Layer": 1,
@@ -90,13 +57,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            1.4684884548187256,
+            0.0,
             2.0,
-            -1.2882691621780396
+            0.0
         ],
         "Rot": [
-            9.082231521606445,
-            270.45587158203125,
+            0.0,
+            0.0,
             0.0
         ],
         "Scale": [

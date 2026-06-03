@@ -1,5 +1,5 @@
 #include "Sprite.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "ImGui.h"
 
 #include "format"

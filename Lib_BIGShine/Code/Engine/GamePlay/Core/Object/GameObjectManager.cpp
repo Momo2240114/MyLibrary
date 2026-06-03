@@ -5,17 +5,20 @@
 #include "Engine/Physics/BoxCollider.h"
 #include <PxPhysicsAPI.h>
 
-#include "DecalComponent.h"
+#include "Engine/Graphics/Decal/DecalComponent.h"
 #include"ImGuizmo.h"
 #include <nlohmann/json.hpp>
-#include"TransformDirector.h"
-#include"CameraDirectorComponent.h"
-#include"Engine/GamePlay/IventSystem/ActionSequence.h"
+#include"Engine/GamePlay/Transform/TransformDirector.h"
+#include"Engine/GamePlay/Camera/CameraDirectorComponent.h"
+#include"Engine/GamePlay/EventSystem/ActionSequence.h"
 
-#include"ColorFilterDirector.h"
+#include"Engine/Graphics/PostEffect/ColorFilterDirector.h"
 
 #include <fstream>
-#include"EventManager.h"
+#include"Engine/GamePlay/EventSystem/EventManager.h"
+
+#include "Engine/GamePlay/System/TimeManager.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 
 void GameObjectManager::Initialize()
 {
@@ -23,11 +26,17 @@ void GameObjectManager::Initialize()
     particleSystem = std::make_unique<ParticleRenderSystem>();
     particleSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
 
+    _TimeManager = std::make_shared<TimeManager>();
     m_pRayCastManager = std::make_unique<RayCastManager>();
+
+    _CameraManager = std::make_shared<CameraManager>();
+    _CameraManager->Initialize();
 }
 
 void GameObjectManager::Update(float et_)
 {
+    _TimeManager->Update(et_);
+
     // ★ 1. 新しく追加されたオブジェクトを一度だけ初期化 (StartObjects)
     if (!pendingStarts.empty()) {
         std::vector<std::shared_ptr<GameObject>> startList = std::move(pendingStarts);
@@ -62,11 +71,15 @@ void GameObjectManager::Update(float et_)
     }
 
 
-    // 1. 速度の更新（入力 ＋ 重力）
-    for (auto& obj : objects) {
-        obj->Update(et_); // PlayerInputなどで velocity.x, z を設定
-    }
+    _TimeManager->Update(et_);
+    _TimeManager->PrepareCache();
 
+    // 2. オブジェクトの更新
+    for (auto& obj : objects) {
+        // ループの外、あるいは事前に取得したキャッシュを参照
+        float scale = _TimeManager->GetCachedScale(obj->GetLayerBit());
+        obj->Update(et_ * scale);
+    }
     // 2. 衝突判定と「最終補正」
     // ここで座標の押し戻し(pos += sep)と、velocity.y のリセットを行う
     CollisionStep();
@@ -84,17 +97,7 @@ void GameObjectManager::Update(float et_)
         obj->UpdateTransform();
     }
 
-    if (m_pMainCamera != nullptr)
-    {
-        std::shared_ptr<CameraComponent> cameraComponent = m_pMainCamera->GetComponent<CameraComponent>();
-        cameraComponent->UpdateViewProjection(et_);
-
-        particleSystem->UpdateAll(
-            GraphicsDeviceManager::Instance().GetContext(),
-            et_,
-            cameraComponent->GetViewProjection(),
-            m_particleComponents);
-    }
+    int highestPriority = -2147483648; // 最低値から開始
 
     // ★ 最後にまとめて削除を確定させる
     if (!pendingDestroys.empty()) {
@@ -116,7 +119,7 @@ void GameObjectManager::Update(float et_)
         m_particleComponents.end()
     );
 
-
+    _CameraManager->Update(et_,objects);
 }
 
 void GameObjectManager::Clear()
@@ -124,7 +127,6 @@ void GameObjectManager::Clear()
     GraphicsDeviceManager::Instance().ResetFilter();
 
     selectedObject = nullptr;
-    m_pMainCamera = nullptr;
 
 
     m_pRayCastManager->Clear();//レイキャストマネージャークリア処理
@@ -177,7 +179,7 @@ void GameObjectManager::RemoveObject(const std::string& name)
 
 std::vector<std::string> GetSceneDirectories() {
     std::vector<std::string> folders;
-    std::string path = "Scenes/";
+    std::string path = "Data/Scenes/";
 
     // Scenesフォルダが存在するか確認
     if (!std::filesystem::exists(path)) return folders;
@@ -358,292 +360,157 @@ void GameObjectManager::CollisionStep()
 
 void GameObjectManager::Gui()
 {
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-    // --- 静的な変数で横幅を保持（初回のみ初期化） ---
-    static float leftPanelWidth = 300.0f;
-    static float rightPanelWidth = 350.0f;
+}
 
-    // ウィンドウフラグ（NoMoveは維持し、NoResizeは外す）
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
+// ヒストリー（階層）GUIの儀式
+void GameObjectManager::DrawHierarchyGui()
+{
 
-    // ========================================
-    // 左パネル: Objects (Hierarchy)
-    // ========================================
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(ImVec2(leftPanelWidth, viewport->WorkSize.y));
-
-    // --- 追加: セーブ・ロード用の管理変数 (staticで保持) ---
-    static char sceneName[64] = "MainScene"; // デフォルトのシーン名
-
-    // 左: オブジェクト一覧
-    ImGui::Begin("Objects");
-
-    if (ImGui::CollapsingHeader("Debug Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Checkbox("Render Shapes", &shapeRenderFlg); // コライダーなどの描画
-        ImGui::Checkbox("Render NaviMesh", &naviMeshRenderFlg); // ナビメッシュの描画
-    }
-
-    // ========================================
-    // ★ Scene Save / Load UI
-    // ========================================
-  // 静的な変数として保持（毎フレームスキャンすると重いため）
-    static std::vector<std::string> sceneList = GetSceneDirectories();
-    static int selectedSceneIndex = -1;
-
-    ImGui::Text("Scene Management");
-
-    // --- シーン選択コンボボックス ---
-    if (ImGui::Button("Refresh List")) {
-        sceneList = GetSceneDirectories(); // フォルダが増えた時の更新ボタン
-    }
-
-    ImGui::InputText("SceneName", sceneName, IM_ARRAYSIZE(sceneName));
-
-    const char* previewValue = (selectedSceneIndex >= 0) ? sceneList[selectedSceneIndex].c_str() : "Select a scene...";
-
-    if (ImGui::BeginCombo("Select Scene", previewValue)) {
-        for (int i = 0; i < sceneList.size(); i++) {
-            const bool isSelected = (selectedSceneIndex == i);
-            if (ImGui::Selectable(sceneList[i].c_str(), isSelected)) {
-                selectedSceneIndex = i;
-                // 選択された名前をsceneNameバッファにコピー
-                strncpy_s(sceneName, sceneList[i].c_str(), IM_ARRAYSIZE(sceneName));
-            }
-
-            if (isSelected) {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
-        ImGui::EndCombo();
-    }
-
-
-    // --- 保存・読み込みボタン ---
-    static bool openSaveConfirm = false;
-    static bool openLoadConfirm = false;
-    if (ImGui::Button("Save Scene")) {
-        openSaveConfirm = true;
-        ImGui::OpenPopup("SaveConfirm");
-    }
-
-    if (ImGui::BeginPopupModal("SaveConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("Saves Scene \"%s\" ?", sceneName);
-        ImGui::Separator();
-
-        if (ImGui::Button("Yes", ImVec2(120, 0))) {
-            SaveScene(sceneName);
-            sceneList = GetSceneDirectories(); // リスト更新
-            openSaveConfirm = false;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("No", ImVec2(120, 0))) {
-            openSaveConfirm = false;
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::EndPopup();
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Load Scene")) {
-        if (strlen(sceneName) > 0) {
-            openLoadConfirm = true;
-            ImGui::OpenPopup("LoadConfirm");
-        }
-    }
-
-    if (ImGui::BeginPopupModal("LoadConfirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("Loading Scene \"%s\" ? \n Now Scenes Destruction", sceneName);
-        ImGui::Separator();
-
-        if (ImGui::Button("Yes", ImVec2(120, 0))) {
-            LoadScene(sceneName);
-            openLoadConfirm = false;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("No", ImVec2(120, 0))) {
-            openLoadConfirm = false;
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::EndPopup();
-    }
-
-    ImGui::Separator();
-
-
-    // === Create UI（上部）===
+    // --- Create UI ---
     static char createName[64] = "GameObject";
-
     ImGui::Text("Create GameObject");
     ImGui::InputText("##CreateName", createName, IM_ARRAYSIZE(createName));
-
-    if (ImGui::Button("Create"))
-    {
-        // ★ 必ず Create() を通す
-        selectedObject = Create(createName);
-    }
+    if (ImGui::Button("Create")) selectedObject = Create(createName);
 
     ImGui::Separator();
 
-    // === ★ プレハブ管理 (Prefab Management) ===
+    // --- プレハブ管理 ---
     if (ImGui::CollapsingHeader("Prefabs", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::Button("Refresh")) RefreshPrefabList();
-
         static char newPrefabName[64] = "";
-
-        // プレハブ選択コンボボックス
         if (!m_prefabFiles.empty()) {
             const char* currentItem = m_prefabFiles[m_selectedPrefabIndex].c_str();
             if (ImGui::BeginCombo("Select Prefab", currentItem)) {
                 for (int n = 0; n < m_prefabFiles.size(); n++) {
-                    bool isSelected = (m_selectedPrefabIndex == n);
-                    if (ImGui::Selectable(m_prefabFiles[n].c_str(), isSelected)) {
-                        m_selectedPrefabIndex = n;
-                    }
+                    if (ImGui::Selectable(m_prefabFiles[n].c_str(), m_selectedPrefabIndex == n)) m_selectedPrefabIndex = n;
                 }
                 ImGui::EndCombo();
             }
-
-            if (ImGui::Button("Instantiate (Create from Prefab)")) {
-                selectedObject = Instantiate(m_prefabFiles[m_selectedPrefabIndex]);
-                memset(newPrefabName, 0, sizeof(newPrefabName));
-            }
+            if (ImGui::Button("Instantiate (Create from Prefab)")) selectedObject = Instantiate(m_prefabFiles[m_selectedPrefabIndex]);
         }
-        else {
-            ImGui::Text("No prefabs found in /Prefabs");
-        }
-
-        // 選択中のオブジェクトをプレハブとして保存するボタン
         if (selectedObject) {
-
             ImGui::InputText("New Prefab Name", newPrefabName, IM_ARRAYSIZE(newPrefabName));
             if (ImGui::Button("Save Selected as Prefab")) {
-                if (strlen(newPrefabName) > 0) {
-                    SaveAsPrefab(selectedObject, newPrefabName);
-                    RefreshPrefabList();
-                    memset(newPrefabName, 0, sizeof(newPrefabName));
-                }
+                if (strlen(newPrefabName) > 0) { SaveAsPrefab(selectedObject, newPrefabName); RefreshPrefabList(); memset(newPrefabName, 0, sizeof(newPrefabName)); }
             }
         }
     }
 
     ImGui::Separator();
 
-    // === オブジェクト一覧描画 ===
+    // --- オブジェクト一覧 ---
     GameObject* objectToDelete = nullptr;
-
-    // スクロール可能な領域を作る
     ImGui::BeginChild("HierarchyRegion", ImVec2(0, 0), true);
 
-    for (auto& obj : objects)
-    {
-        // 親がいない（expired == 親がセットされていない）オブジェクトだけを描画の起点にする
-        if (obj->transform->parent.expired())
-        {
-            DrawHierarchyNode(obj, &objectToDelete);
-        }
+    for (auto& obj : objects) {
+        if (obj->transform->parent.expired()) DrawHierarchyNode(obj, &objectToDelete);
     }
-
-    ImGui::Dummy(ImGui::GetContentRegionAvail()); // 残りの領域をダミーで埋める
 
     if (ImGui::BeginDragDropTarget()) {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_GAMEOBJECT")) {
             std::shared_ptr<GameObject> draggedObj = *(std::shared_ptr<GameObject>*)payload->Data;
-
-            // 親を nullptr にしてルート階層に戻す
             draggedObj->SetParent(nullptr);
         }
         ImGui::EndDragDropTarget();
     }
-
     ImGui::EndChild();
 
-    // 実際の削除処理 (shared_ptr版)
-    if (objectToDelete)
-    {
+    // 削除の確定
+    if (objectToDelete) {
         if (selectedObject && selectedObject.get() == objectToDelete) selectedObject = nullptr;
-
-        // 削除されるオブジェクトを特定
-        auto it = std::find_if(objects.begin(), objects.end(),
-            [&](const std::shared_ptr<GameObject>& ptr) { return ptr.get() == objectToDelete; });
-
-        if (it != objects.end())
-        {
-            // ★重要：削除されるオブジェクトの子供たちを救出する
+        auto it = std::find_if(objects.begin(), objects.end(), [&](const std::shared_ptr<GameObject>& ptr) { return ptr.get() == objectToDelete; });
+        if (it != objects.end()) {
             auto targetObj = *it;
-            auto& children = targetObj->transform->children;
-
-            // 子供たちの親を nullptr にしてルートへ戻す
-            // ループ内で中身が変わる可能性があるのでコピーを取るか、慎重に回す
-            auto childrenCopy = children;
-            for (auto& childTrans : childrenCopy)
-            {
-                if (auto childGO = childTrans->gameObject.lock())
-                {
-                    childGO->SetParent(nullptr); // 親を外してルートへ
-                }
+            for (auto& childTrans : targetObj->transform->children) {
+                if (auto childGO = childTrans->gameObject.lock()) childGO->SetParent(nullptr);
             }
-
-            // 選択解除などの既存処理
             if (selectedObject == targetObj) selectedObject = nullptr;
-            if (m_pMainCamera == targetObj) m_pMainCamera = nullptr;
-
-            // リストから削除
             objects.erase(it);
         }
-
     }
 
-    ImGui::End();
+}
 
-    // ========================================
-     // 右パネル: Inspector (selectedObject)
-     // ========================================
-    if (!selectedObject)return;
+void GameObjectManager::DrawInspectorGui()
+{
 
-    // 右側に張り付くように位置を計算
-    ImVec2 inspectorPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - rightPanelWidth, viewport->WorkPos.y);
+    ImGui::SeparatorText(selectedObject->GetName().c_str());
+    selectedObject->Gui();
 
-    ImGui::SetNextWindowPos(inspectorPos);
-    ImGui::SetNextWindowSize(ImVec2(rightPanelWidth, viewport->WorkSize.y));
-
-    if (ImGui::Begin("Inspector", nullptr, windowFlags)) {
-        // --- ここで手動リサイズを検知 ---
-        rightPanelWidth = ImGui::GetWindowWidth();
-
-        if (ImGui::CollapsingHeader(selectedObject->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-            selectedObject->Gui();
-        }
-        ImGui::End();
+    auto cameraComp = _CameraManager->GetActiveCamera();
+    if (cameraComp) {
+        ImGuizmo::BeginFrame();
+        DirectX::XMFLOAT4X4 view = cameraComp->GetView();
+        DirectX::XMFLOAT4X4 proj = cameraComp->GetProjection();
+        selectedObject->DrawGizmo(&view._11, &proj._11);
     }
-    // ========================================
-  // ★ ギズモの描画処理を追加
-  // ========================================
-  // メインカメラコンポーネントを取得
-    auto cameraObj = Find("MainCamera");
-    if (cameraObj)
-    {
-        auto cameraComp = cameraObj->GetComponent<CameraComponent>();
-        if (cameraComp)
-        {
-            // ImGuizmoのフレーム開始準備
-            ImGuizmo::BeginFrame();
 
-            // カメラの行列を準備
-            DirectX::XMFLOAT4X4 view, proj;
-            view = cameraComp->GetView();       // CameraComponentの実装に合わせて適宜変更
-            proj = cameraComp->GetProjection();
+}
 
-            // 選択中のオブジェクトに対してギズモを描画
-            // &view._11 のように float* 型で渡す
-            selectedObject->DrawGizmo(&view._11, &proj._11);
+void GameObjectManager::DrawSceneModals()
+{
+    // --- 保存の儀式 ---
+    if (m_sceneState.showSavePopup) {
+        // 保存時にも最新のシーン名簿を読み込む
+        GetSceneDirectories();
+        ImGui::OpenPopup("SaveScenePopup");
+        m_sceneState.showSavePopup = false;
+    }
+
+    if (ImGui::BeginPopupModal("SaveScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::BeginCombo("Select/Input Scene", m_sceneState.name)) {
+            for (const auto& file : m_sceneState.sceneFiles) {
+                bool isSelected = (strcmp(m_sceneState.name, file.c_str()) == 0);
+                if (ImGui::Selectable(file.c_str(), isSelected)) {
+                    strcpy_s(m_sceneState.name, file.c_str());
+                }
+            }
+            ImGui::EndCombo();
         }
+
+        ImGui::InputText("Filename", m_sceneState.name, IM_ARRAYSIZE(m_sceneState.name));
+
+        if (ImGui::Button("Save", ImVec2(120, 0))) {
+            SaveScene(m_sceneState.name);
+            GetSceneDirectories(); // 最新の名簿に更新
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
+
+        ImGui::EndPopup();
+    }
+
+    // --- 読み込みの儀式 ---
+    if (m_sceneState.showLoadPopup) {
+        // 読み込み時にも最新のシーン名簿を読み込む
+        GetSceneDirectories();
+        ImGui::OpenPopup("LoadScenePopup");
+        m_sceneState.showLoadPopup = false;
+    }
+
+    if (ImGui::BeginPopupModal("LoadScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::BeginCombo("Select Scene", m_sceneState.name)) {
+            for (const auto& file : m_sceneState.sceneFiles) {
+                bool isSelected = (strcmp(m_sceneState.name, file.c_str()) == 0);
+                if (ImGui::Selectable(file.c_str(), isSelected)) {
+                    strcpy_s(m_sceneState.name, file.c_str());
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::Button("Load", ImVec2(120, 0))) {
+            if (strlen(m_sceneState.name) > 0) {
+                LoadScene(m_sceneState.name);
+            }
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
+
+        ImGui::EndPopup();
     }
 }
 
@@ -710,7 +577,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> obj, GameO
 
 }
 
-void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderSystem modelSystem_)
+void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_)
 {
     auto ctx = GraphicsDeviceManager::Instance().GetContext();
     auto& gdm = GraphicsDeviceManager::Instance();
@@ -719,7 +586,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
     LightManager lightManager;
     // デフォルトの平行光源設定（必要に応じて）
     DirectionalLight dl;
-    dl.direction = { -1, -1, 1 };
+    dl.direction = {1, 1, 1 };
     lightManager.SetDirectionalLight(dl);
 
     DecalManager decalManager; // デカール用マネージャー
@@ -736,7 +603,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
                 dl.direction = lightComp->finalWorldDirection;
                 dl.color = lightComp->color;
                 dl.intensity = lightComp->intensity;
-                lightManager.SetDirectionalLight(dl);
+                lightManager.AddDirectionalLight(dl);
             }
             // B. 点光源
             else if (lightComp->type == LightComponent::Type::Point)
@@ -784,7 +651,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
     RenderContext rc;
 
     rc.deviceContext = ctx;
-    rc.camera = m_pMainCamera->GetComponent<CameraComponent>().get();
+    rc.camera = _CameraManager->GetActiveCamera().get();
     rc.renderState = GraphicsDeviceManager::Instance().GetRenderState();
     rc.lights = &lightManager;
     rc.decal = &decalManager;
@@ -813,8 +680,15 @@ void GameObjectManager::RenderAll(SpriteRenderSystem spriteSystem_, ModelRenderS
     gdm.SetParticleRenderTarget();
     particleSystem->RenderAll(rc);
 
-    // 2. ブルームをかけてバックバッファへ出力
-    gdm.ResolveBloom(rc);
+    auto* finalRTV = gdm.GetRenderTargetView();
+
+    // 2. ポストレンダーシステムを実行
+    gdm.GetPostRenderSystem().Execute(
+        rc,
+        gdm.GetSceneSRV(), // 描画結果のSRV
+        finalRTV           // 最終出力先
+    );
+
 
     // SpriteRenderSubmit
     for (auto& o : objects)
@@ -960,12 +834,13 @@ void GameObjectManager::HandlePhysXContact(ColliderComponent* colA, ColliderComp
     colB->OnCollisionEnter(objA);
 }
 
+
 // ヘルパー関数：親→子の順番で名前をリストに追加する
 void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& listJson) {
     if (!obj->saveFlg) return;
 
     // 自分の名前を登録
-    listJson["ObjectList"].push_back(obj->name);
+    listJson["ObjectList"].push_back(obj->nameComponent->name);
 
     // 子供たちの名前を再帰的に登録
     for (auto& child : obj->transform->children) {
@@ -975,7 +850,7 @@ void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& 
 
 void GameObjectManager::SaveScene(const std::string& sceneName)
 {
-    std::string basePath = "Scenes/" + sceneName + "/";
+    std::string basePath = "Data/Scenes/" + sceneName + "/";
     std::string objectsPath = basePath + "Objects/";
     std::filesystem::create_directories(objectsPath);
 
@@ -997,7 +872,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName)
     for (auto& obj : objects) {
         if (!obj->saveFlg) continue;
 
-        std::string filePath = objectsPath + obj->name + ".json";
+        std::string filePath = objectsPath + obj->nameComponent->name + ".json";
         nlohmann::json objJson = obj->Save();
         std::ofstream file(filePath);
         if (file.is_open()) {
@@ -1026,7 +901,7 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
 {
 
     Clear(); // 現在のシーンをクリア
-    std::string basePath = "Scenes/" + sceneName + "/";
+    std::string basePath = "Data/Scenes/" + sceneName + "/";
     std::string listFilePath = basePath + "SceneList.json";
 
     std::ifstream listFile(listFilePath);
@@ -1069,11 +944,6 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
             // オブジェクト生成
             auto obj = Create(objName);
 
-            //メインカメラの再設定
-            if (objName == "MainCamera") {
-                SetMainCamera(obj);
-            }
-
             obj->SetManager(this);
 
             // オブジェクト自身にコンポーネントを含めて復元させる
@@ -1113,6 +983,28 @@ void GameObjectManager::ResolveHierarchy()
     }
 }
 
+std::vector<std::string> GameObjectManager::GetSceneDirectories()
+{
+    m_sceneState.sceneFiles.clear();
+    std::string rootPath = "Data/Scenes";
+
+    if (std::filesystem::exists(rootPath)) {
+        for (const auto& entry : std::filesystem::directory_iterator(rootPath)) {
+            if (entry.is_directory()) {
+                std::string sceneName = entry.path().filename().string();
+
+                // シーンフォルダの中に「SceneList.json」が存在するかを確認する
+                std::filesystem::path jsonPath = entry.path() / "SceneList.json";
+
+                if (std::filesystem::exists(jsonPath)) {
+                    m_sceneState.sceneFiles.push_back(sceneName);
+                }
+            }
+        }
+    }
+    return m_sceneState.sceneFiles;
+}
+
 
 // フォルダ内のJSONファイルをスキャンする
 void GameObjectManager::RefreshPrefabList()
@@ -1144,7 +1036,6 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> obj)
 
     // 2. 特殊な参照を外す
     if (selectedObject == obj) selectedObject = nullptr;
-    if (m_pMainCamera == obj) m_pMainCamera = nullptr;
 
     // 3. マネージャーのメインリストから自分を削除
     auto it = std::remove(objects.begin(), objects.end(), obj);
@@ -1197,6 +1088,8 @@ void GameObjectManager::InitializeAllComponents()
         }
     }
 }
+
+CameraManager* GameObjectManager::GetCameraManager(){ return _CameraManager.get(); }
 
 // プレハブから生成
 std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName)

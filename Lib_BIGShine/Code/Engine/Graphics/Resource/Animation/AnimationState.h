@@ -79,6 +79,15 @@ enum class ConditionType
 // 判定演算子
 enum class ConditionOp { Equal, NotEqual, Greater, Less };
 
+enum class TransitionLogic { And, Or };
+
+enum class AnimGraphNodeType
+{
+    State,
+    Start,
+    Any
+};
+
 // 遷移条件
 struct AnimCondition {
     ConditionType type = ConditionType::Variable;
@@ -93,6 +102,7 @@ struct AnimTransition
     std::string fromStateName; // 始まりのステート名
     std::string toStateName;   // 行き先のステート名
     float duration = 0.2f;
+    TransitionLogic logic = TransitionLogic::And;
     std::vector<AnimCondition> conditions;
     ed::LinkId id;
 };
@@ -104,6 +114,7 @@ struct AnimGraphNode {
     ed::PinId inputPin;
     ed::PinId outputPin;
     ImVec2 pos;
+    AnimGraphNodeType type = AnimGraphNodeType::State;
 };
 
 // 宣言だけを記述
@@ -134,3 +145,5 @@ inline void from_json(const nlohmann::json& j, RootMotionSettings& r) {
     r.applyRotationY = j.value("applyRotationY", true);
     r.applyRotationZ = j.value("applyRotationZ", true);
 }
+
+
