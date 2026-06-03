@@ -1,5 +1,5 @@
 #include "LightingShader.h"
-#include "CPUResourceLoader.h" // 君が使っているローダーに合わせてくれ
+#include "Engine/Graphics/Core/CPUResourceLoader.h" // 君が使っているローダーに合わせてくれ
 
 LightingShader::LightingShader(ID3D11Device* device)
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
-#include "CurveData.h"
+#include "CurveTrack.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include <unordered_map>
 #include <memory>

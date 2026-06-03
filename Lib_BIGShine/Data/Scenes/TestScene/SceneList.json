@@ -1,0 +1,66 @@
+{
+    "GraphicsSettings": {
+        "Bloom": {
+            "blurPasses": 4,
+            "intensity": 1.0,
+            "kawaseScale": 1.0,
+            "threshold": 1.0
+        }
+    },
+    "RootObjects": [
+        {
+            "children": [],
+            "name": "MainCamera"
+        },
+        {
+            "children": [],
+            "name": "Stage"
+        },
+        {
+            "children": [],
+            "name": "Stage_01"
+        },
+        {
+            "children": [
+                {
+                    "children": [],
+                    "name": "GameObject_G"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_a"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_m"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_e1"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_O"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_v"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_e2"
+                },
+                {
+                    "children": [],
+                    "name": "GameObject_r"
+                },
+                {
+                    "children": [],
+                    "name": "FilterDirector"
+                }
+            ],
+            "name": "GameObject"
+        }
+    ],
+    "SceneName": "TestScene"
+}

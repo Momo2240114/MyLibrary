@@ -2,111 +2,48 @@
     "Components": [
         {
             "Data": {
-                "Sequences": [
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/SwordPlayer/SwordWuman.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "MaxBounds": [
+                    1.0,
+                    1.7332382202148438
+                ],
+                "MinBounds": [
+                    -0.009999999776482582,
+                    0.19838029146194458
+                ],
+                "Tracks": [
                     {
-                        "actions": [
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_G_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.10000000149011612,
-                                "name": "GameObject_a_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.20000000298023224,
-                                "name": "GameObject_m_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.30000001192092896,
-                                "name": "GameObject_e1_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.44999998807907104,
-                                "name": "GameObject_O_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.5,
-                                "name": "GameObject_v_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.550000011920929,
-                                "name": "GameObject_e2_Trans_0"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.6000000238418579,
-                                "name": "GameObject_r_Trans_0"
-                            },
-                            {
-                                "cat": "PostProcess",
-                                "delay": 0.0,
-                                "name": "FilterDirector_Color_0"
-                            }
+                        "Name": "Track 0",
+                        "Points": [
+                            [
+                                0.003998422995209694,
+                                0.23266446590423584
+                            ],
+                            [
+                                0.42075714468955994,
+                                1.1926672458648682
+                            ],
+                            [
+                                0.9921689033508301,
+                                1.2117706537246704
+                            ]
                         ],
-                        "name": "Game Over "
-                    },
-                    {
-                        "actions": [
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_G_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_r_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_e2_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_v_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_m_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_a_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_e1_Trans_1"
-                            },
-                            {
-                                "cat": "Transform",
-                                "delay": 0.0,
-                                "name": "GameObject_O_Trans_1"
-                            },
-                            {
-                                "cat": "PostProcess",
-                                "delay": 0.0,
-                                "name": "FilterDirector_Color_1"
-                            }
-                        ],
-                        "name": "GameOverReset"
+                        "Type": 3
                     }
                 ]
             },
             "Enabled": true,
-            "TypeName": "ActionSequence"
+            "TypeName": "CurveComponent"
         }
     ],
     "Layer": 0,
@@ -114,13 +51,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -10.222216606140137,
-            -0.5150223970413208,
-            0.0
+            0.0,
+            1.100000023841858,
+            2.5999999046325684
         ],
         "Rot": [
             0.0,
-            0.0,
+            197.0,
             0.0
         ],
         "Scale": [

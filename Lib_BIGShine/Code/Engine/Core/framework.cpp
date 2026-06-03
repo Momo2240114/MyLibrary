@@ -2,13 +2,11 @@
 #include "Engine/Graphics/RenderSystem/ImGuiRenderer.h"
 #include "ImGui.h"
 
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 
 #include "Engine/Graphics/Resource/GltfModel.h"
 
-#include "CurveAssetComponent.h"
-#include "CurvePlayerComponent.h"
-#include "AnimationController.h"
+
 #include "Engine/Physics/BoxCollider.h"
 #include "Engine/Physics/SphereCollider.h"
 #include "Engine/Physics/CapsuleCollider.h"
@@ -21,7 +19,7 @@
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 
 #include "Engine/Physics/PhysXSystem.h"
-#include "Engine/GamePlay/Core/SceneManager.h"
+#include "Engine/GamePlay/Scene/SceneManager.h"
 #include "Engine/Audio/AudioManager.h"
 
 #include <imnodes.h>
@@ -219,7 +217,7 @@ void framework::GuiDraw()
 {
 #if defined(DEBUG) || defined(_DEBUG)
 	SceneManager::DrawGUI();
-	GraphicsDeviceManager::Instance().ShowPostEffectGui(); // Ç±Ç±Ç≈åƒÇ—èoÇ∑
+	//GraphicsDeviceManager::Instance().ShowPostEffectGui(); // Ç±Ç±Ç≈åƒÇ—èoÇ∑
 #endif // DEBUG
 }
 

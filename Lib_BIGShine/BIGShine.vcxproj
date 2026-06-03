@@ -237,16 +237,12 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Code\AnimationController.cpp" />
-    <ClCompile Include="Code\AnimationEventTrack.cpp" />
-    <ClCompile Include="Code\BasicShader.cpp" />
-    <ClCompile Include="Code\ColorFilterDirector.cpp" />
-    <ClCompile Include="Code\DecalComponent.cpp" />
-    <ClCompile Include="Code\DecalShader.cpp" />
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\InspectorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\ShaderWindow.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioResource.cpp" />
@@ -254,31 +250,58 @@
     <ClCompile Include="Code\Engine\Core\framework.cpp" />
     <ClCompile Include="Code\Engine\Core\main.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\FovDirector.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\Movement.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\MovementComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\SpinComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObject.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.cpp" />
-    <ClCompile Include="Code\Engine\GamePlay\Core\SceneManager.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActionSequence.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\EventTrack.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\ControllerInput.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\KeyConfig.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\KeyInput.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\MouseInput.cpp" />
-    <ClCompile Include="Code\Engine\GamePlay\IventSystem\ActionSequence.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneBase.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneGame.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneLoading.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneManager.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneTitle.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneTutorial.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ActionRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ComponentRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\RegisterAllComponents.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\Transform.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Transform\TransformDirector.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Core\CPUResourceLoader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Core\GraphicsDeviceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Core\LightComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Core\RenderState.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Decal\DecalComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\BloomSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\Pipeline\RadialBlurPass.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\Pipeline\RenderPipeline.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationController.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.cpp" />
@@ -287,8 +310,20 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\BasicShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\DecalShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\LightingShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\PbrShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\ShadowCasterShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\ToonPBRShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\Curve.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\CurveAssetComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\CurveEditor.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\CurveEditorDelegate.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\CurvePlayerComponent.cpp" />
+    <ClCompile Include="Code\Engine\Math\Curve\CurveSerializer.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\BoxCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\CapsuleCollider.cpp" />
@@ -297,30 +332,14 @@
     <ClCompile Include="Code\Engine\Physics\PhysXEventCallback.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysXSystem.cpp" />
     <ClCompile Include="Code\Engine\Physics\SphereCollider.cpp" />
-    <ClCompile Include="Code\FovDirector.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
     <ClCompile Include="Code\ItemComponent.cpp" />
-    <ClCompile Include="Code\Movement.cpp" />
     <ClCompile Include="Code\NumberSwitcher.cpp" />
-    <ClCompile Include="Code\PbrShader.cpp" />
-    <ClCompile Include="Code\CPUResourceLoader.cpp" />
-    <ClCompile Include="Code\EventTrack.cpp" />
-    <ClCompile Include="Code\ModelAttachmentComponent.cpp" />
     <ClCompile Include="Code\PlayerInput.cpp" />
     <ClCompile Include="Code\RandomHelper.cpp" />
     <ClCompile Include="Code\RayCastManager.cpp" />
-    <ClCompile Include="Code\RenderState.cpp" />
-    <ClCompile Include="Code\SceneBase.cpp" />
-    <ClCompile Include="Code\SceneGame.cpp" />
-    <ClCompile Include="Code\SceneLoading.cpp" />
-    <ClCompile Include="Code\SceneTitle.cpp" />
-    <ClCompile Include="Code\SceneTutorial.cpp" />
     <ClCompile Include="Code\SearchAreaManager.cpp" />
-    <ClCompile Include="Code\ShapeRenderer.cpp" />
-    <ClCompile Include="Code\SpinComponent.cpp" />
     <ClCompile Include="Code\StateMachine.cpp" />
-    <ClCompile Include="Code\CameraDirectorComponent.cpp" />
-    <ClCompile Include="Code\TransformDirector.cpp" />
     <ClCompile Include="Code\UIButton.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
@@ -352,27 +371,69 @@
     <ClCompile Include="External\recastnavigation\Recast\Source\RecastRasterization.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\AnimationController.h" />
-    <ClInclude Include="Code\BaseEvent.h" />
-    <ClInclude Include="Code\AnimationEventTrack.h" />
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h" />
     <ClInclude Include="Code\Editor\Window\InspectorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\ShaderWindow.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\FovDirector.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\Movement.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\MovementComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\NameComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\SpinComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Resource\ResourceManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\ActionSequence.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\BaseEvent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\EventManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\EventTrack.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\EventTrackSequencer.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\IActionProvider.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\IScene.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneBase.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneGame.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneLoading.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTitle.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTutorial.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Transform\TransformDirector.h" />
+    <ClInclude Include="Code\Engine\Graphics\Core\CPUResourceLoader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Core\GpuResourceUtils.h" />
+    <ClInclude Include="Code\Engine\Graphics\Core\RenderContext.h" />
+    <ClInclude Include="Code\Engine\Graphics\Core\RenderState.h" />
+    <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\BloomPass.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\IRenderPass.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\RadialBlurPass.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\RenderPipeline.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationController.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResource.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\BasicShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\DecalShader.h" />
     <ClInclude Include="Code\Engine\Graphics\Shader\LightingShader.h" />
-    <ClInclude Include="Code\SceneBase.h" />
-    <ClInclude Include="Code\BasicShader.h" />
-    <ClInclude Include="Code\camera.h" />
-    <ClInclude Include="Code\ColorFilterDirector.h" />
-    <ClInclude Include="Code\DecalComponent.h" />
-    <ClInclude Include="Code\DecalManager.h" />
-    <ClInclude Include="Code\DecalShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\ModelShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\ModelShaderID.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\PbrShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\ShadowCasterShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\SpriteDissolveShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\SpriteShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\SpriteShaderID.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\ToonPBRShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\Shader\ToonShader.h" />
     <ClInclude Include="Code\Engine\Audio\Audio.h" />
     <ClInclude Include="Code\Engine\Audio\AudioManager.h" />
     <ClInclude Include="Code\Engine\Audio\AudioResource.h" />
@@ -383,14 +444,11 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h" />
-    <ClInclude Include="Code\Engine\GamePlay\Core\SceneManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\ControllerInput.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\KeyConfig.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\KeyInput.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\MouseInput.h" />
-    <ClInclude Include="Code\Engine\GamePlay\IventSystem\ActionSequence.h" />
-    <ClInclude Include="Code\Engine\GamePlay\IventSystem\IActionProvider.h" />
     <ClInclude Include="Code\Engine\GamePlay\Serialize\ActionRegistry.h" />
     <ClInclude Include="Code\Engine\GamePlay\Serialize\ComponentRegistry.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\Transform.h" />
@@ -416,8 +474,14 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Sprite.h" />
     <ClInclude Include="Code\Engine\Math\CollisionMath.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\Curve.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveAssetComponent.h" />
     <ClInclude Include="Code\Engine\Math\Curve\CurveComponent.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\CurveData.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveTrack.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveEditor.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveEditorDelegate.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurvePlayerComponent.h" />
+    <ClInclude Include="Code\Engine\Math\Curve\CurveSerializer.h" />
     <ClInclude Include="Code\Engine\Math\EasingComponent.h" />
     <ClInclude Include="Code\Engine\Math\Vector.h" />
     <ClInclude Include="Code\Engine\Physics\BoxCollider.h" />
@@ -429,45 +493,16 @@
     <ClInclude Include="Code\Engine\Physics\PhysXMath.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXSystem.h" />
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
-    <ClInclude Include="Code\FovDirector.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
-    <ClInclude Include="Code\ImGuiBezier.h" />
-    <ClInclude Include="Code\ImGuiBezier.hpp" />
-    <ClInclude Include="Code\ImVecOperator.h" />
     <ClInclude Include="Code\ItemComponent.h" />
-    <ClInclude Include="Code\Movement.h" />
     <ClInclude Include="Code\NumberSwitcher.h" />
-    <ClInclude Include="Code\PbrShader.h" />
-    <ClInclude Include="Code\CPUResourceLoader.h" />
-    <ClInclude Include="Code\EventTrack.h" />
-    <ClInclude Include="Code\EventTrackSequencer.h" />
-    <ClInclude Include="Code\GpuResourceUtils.h" />
-    <ClInclude Include="Code\high_resolution_timer.h" />
-    <ClInclude Include="Code\IScene.h" />
     <ClInclude Include="Code\misc.h" />
-    <ClInclude Include="Code\ModelAttachmentComponent.h" />
-    <ClInclude Include="Code\ModelShader.h" />
-    <ClInclude Include="Code\ModelShaderID.h" />
-    <ClInclude Include="Code\ObjectManager.h" />
     <ClInclude Include="Code\PlayerAttack.h" />
     <ClInclude Include="Code\PlayerInput.h" />
     <ClInclude Include="Code\RandomHelper.h" />
     <ClInclude Include="Code\RayCastManager.h" />
-    <ClInclude Include="Code\RenderContext.h" />
-    <ClInclude Include="Code\RenderState.h" />
-    <ClInclude Include="Code\SceneGame.h" />
-    <ClInclude Include="Code\SceneLoading.h" />
-    <ClInclude Include="Code\SceneTitle.h" />
-    <ClInclude Include="Code\SceneTutorial.h" />
     <ClInclude Include="Code\SearchAreaManager.h" />
     <ClInclude Include="Code\Serializer.h" />
-    <ClInclude Include="Code\ShapeRenderer.h" />
-    <ClInclude Include="Code\SpinComponent.h" />
-    <ClInclude Include="Code\SpriteDissolveShader.h" />
-    <ClInclude Include="Code\SpriteShader.h" />
-    <ClInclude Include="Code\SpriteShaderID.h" />
-    <ClInclude Include="Code\CameraDirectorComponent.h" />
-    <ClInclude Include="Code\TransformDirector.h" />
     <ClInclude Include="Code\UIButton.h" />
     <ClInclude Include="Code\Wip.hpp" />
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
@@ -479,10 +514,6 @@
     <ClInclude Include="External\imgui-node-editor\imgui_node_editor_internal.h" />
     <ClInclude Include="External\imnodes-master\imnodes.h" />
     <ClInclude Include="External\imnodes-master\imnodes_internal.h" />
-    <ClInclude Include="External\recastnavigation\DebugUtils\Include\RecastDump.h" />
-    <ClInclude Include="External\recastnavigation\Recast\Include\Recast.h" />
-    <ClInclude Include="External\recastnavigation\Recast\Include\RecastAlloc.h" />
-    <ClInclude Include="External\recastnavigation\Recast\Include\RecastAssert.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Basic.hlsli" />
@@ -616,12 +647,36 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\RadialBlur_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\ShapeRendererPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\ShapeRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -633,6 +688,30 @@
     <FxCompile Include="Shader\sprite_VS.hlsl">
       <ShaderType>Vertex</ShaderType>
       <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonPBRPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

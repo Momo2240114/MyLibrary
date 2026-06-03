@@ -6,13 +6,13 @@
 #include <wrl.h>
 #include <map>
 #include "Engine/Graphics/Resource/ModelResource.h"
-#include "ModelShader.h"
-#include "BasicShader.h"
+#include "Engine/Graphics/Shader/ModelShader.h"
+#include "Engine/Graphics/Shader/BasicShader.h"
 #include "Engine/Graphics/Resource/GltfModel.h"
 
-#include "ModelShaderID.h"
-#include "DecalShader.h"
-#include "RenderContext.h"
+#include "Engine/Graphics/Shader/ModelShaderID.h"
+#include "Engine/Graphics/Shader/DecalShader.h"
+#include "Engine/Graphics/Core/RenderContext.h"
 
 class DecalComponent;
 
@@ -29,6 +29,8 @@ public:
 	// 描画実行
 	void RenderAll(const RenderContext& rc);
 	void RenderDecals(const RenderContext& rc);
+	const auto& GetShaders() const { return shaders; }
+	void Gui();
 private:
 	struct CbScene
 	{
@@ -93,6 +95,11 @@ private:
 		float					distance;
 	};
 
+	struct CbShadowData {
+		DirectX::XMFLOAT4X4 lightViewProjections[4]; // 4つのカスケードの行列
+		DirectX::XMFLOAT4   cascadeSplits;           // 各カスケードの境界距離
+	};
+
 	std::shared_ptr<ModelShader>			shaders[static_cast<int>(ModelShaderID::EnumCount)];
 	std::vector<DrawInfo>					drawInfos;
 	std::vector<TransparencyDrawInfo>		transparencyDrawInfos;
@@ -128,6 +135,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> whiteTextureSRV;
 	void CreateDefaultTextures(ID3D11Device* device);
 
+	void RenderShadowCasters(const RenderContext& rc, int cascadeIndex);
 public:
 	void PushDecalSubmit(std::shared_ptr<DecalComponent> decal) {
 		decalDrawInfos.push_back({ decal });

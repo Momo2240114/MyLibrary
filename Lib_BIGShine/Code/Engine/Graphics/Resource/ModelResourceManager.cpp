@@ -1,6 +1,6 @@
 #include "ModelResourceManager.h"
 #include "GLTFImporter.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Misc.h"
 #include <fstream>
 #include <cereal/cereal.hpp>
@@ -82,56 +82,55 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
                 _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
             }
         }
-
-        // 法線マップ
+        // 法線マップ：光を操る「データ」である
         if (material.normalMap == nullptr) {
             if (material.normalTextureFileName.empty()) {
-                HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0xFFFF7F7F, material.normalMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::CreateDummyTexture(device, 0xFFFF7F7F, material.normalMap.GetAddressOf());
             }
             else {
                 std::filesystem::path texturePath(dirpath / material.normalTextureFileName);
-                HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, texturePath.wstring().c_str(), material.normalMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::LoadTextureFromFile(device, texturePath.wstring().c_str(),
+                    material.normalMap.GetAddressOf(), nullptr,
+                    TextureType::Data); // データの理
             }
         }
 
-        // エミッシブマップ
+        // エミッシブマップ：発光の「色」である
         if (material.emissiveMap == nullptr) {
             if (material.emissiveTextureFileName.empty()) {
-                HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0x00000000, material.emissiveMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::CreateDummyTexture(device, 0x00000000, material.emissiveMap.GetAddressOf());
             }
             else {
                 std::filesystem::path path = dirpath / material.emissiveTextureFileName;
-                HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(), material.emissiveMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(),
+                    material.emissiveMap.GetAddressOf(), nullptr,
+                    TextureType::Color); // 色の理
             }
         }
 
-        // オクルージョンマップ
+        // オクルージョンマップ：遮蔽の「データ」である
         if (material.occlusionMap == nullptr) {
             if (material.occlusionTextureFileName.empty()) {
-                HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, material.occlusionMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, material.occlusionMap.GetAddressOf());
             }
             else {
                 std::filesystem::path path = dirpath / material.occlusionTextureFileName;
-                HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(), material.occlusionMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(),
+                    material.occlusionMap.GetAddressOf(), nullptr,
+                    TextureType::Data); // データの理
             }
         }
 
-        // MetalnessRoughnessマップ
+        // MetalnessRoughnessマップ：材質の特性を決める極めて重要な「データ」である
         if (material.metalnessRoughnessMap == nullptr) {
             if (material.metalnessRoughnessTextureFileName.empty()) {
-                HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0x008080FF, material.metalnessRoughnessMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::CreateDummyTexture(device, 0x008080FF, material.metalnessRoughnessMap.GetAddressOf());
             }
             else {
                 std::filesystem::path path = dirpath / material.metalnessRoughnessTextureFileName;
-                HRESULT hr = CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(), material.metalnessRoughnessMap.GetAddressOf());
-                _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+                CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(),
+                    material.metalnessRoughnessMap.GetAddressOf(), nullptr,
+                    TextureType::Data); // データの理
             }
         }
     }

@@ -1,0 +1,17 @@
+{
+    "GraphicsSettings": {
+        "Bloom": {
+            "blurPasses": 4,
+            "intensity": 1.0,
+            "kawaseScale": 1.0,
+            "threshold": 1.0
+        }
+    },
+    "ObjectList": [
+        "MainCamera",
+        "PlayerModel",
+        "DirLight",
+        "Stage"
+    ],
+    "SceneName": "MainScene"
+}

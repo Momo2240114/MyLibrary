@@ -51,9 +51,10 @@ public:
     // =====================
     // 更新
     // =====================
-    void Update(float deltaTime) override
+    void LateUpdate(float deltaTime) override
     {
-        UpdateProjection();
+        // カメラの「動き」を確定させる
+        UpdateViewProjection(deltaTime);
     }
 
     //ビュープロジェクションを更新する処理
@@ -87,8 +88,6 @@ public:
 
     void Gui()
     {
-        bool changed = false;
-
         // === Projection Settings ===
         ImGui::Text("Projection Settings");
         bool projChanged = false;
@@ -96,6 +95,7 @@ public:
         projChanged |= ImGui::DragFloat("Aspect", &aspect, 0.001f, 0.1f, 3.0f, "%.2f");
         projChanged |= ImGui::DragFloatRange2("Near/Far", &nearZ, &farZ, 0.001f, 0.001f, 5000.0f, "Near: %.2f", "Far: %.2f");
 
+        ImGui::DragInt("Priority", &priority);
 
         ImGui::Separator();
 
@@ -132,6 +132,34 @@ public:
     DirectX::XMMATRIX GetViewProjection() const
     {
         return DirectX::XMLoadFloat4x4(&view) * DirectX::XMLoadFloat4x4(&projection);
+    }
+    int GetPriority() { return priority; }
+    // 現在の状態
+    bool IsTransitioning() const { return _isMoving; }
+
+    // --- 行列を直接上書きするセッター ---
+    // これにより、Managerが計算した「補間中の行列」をレンダラーへ渡せる
+    void SetViewMatrix(const DirectX::XMFLOAT4X4& view_) {
+        view = view_;
+    }
+
+    void SetProjectionMatrix(const DirectX::XMFLOAT4X4& proj_) {
+        projection = proj_;
+    }
+
+    // --- 他のカメラの全状態をコピーする機能 ---
+    // 通常時に「最高優先度のカメラ」の値をまるごとクローンする際に便利
+    void CopyFrom(const CameraComponent* other) {
+        if (!other) return;
+        eye = other->eye;
+        focus = other->focus;
+        up = other->up;
+        fovY = other->fovY;
+        aspect = other->aspect;
+        nearZ = other->nearZ;
+        farZ = other->farZ;
+        view = other->view;
+        projection = other->projection;
     }
 private:
     void UpdateView()
@@ -170,6 +198,9 @@ private:
     float aspect = 16.0f / 9.0f;
     float nearZ = 0.1f;
     float farZ = 1000.0f;
+    float transitionSpeed = 2.0f; // 速度
+    int transitionType = 0;       // 0: 線形, 1: 緩急あり(EaseIn/Out) など
+    bool _isMoving;
 
-
+    int priority = 0;
 };

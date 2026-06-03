@@ -1,0 +1,108 @@
+{
+    "ColliderComponent": {
+        "Data": {
+            "DebugPrimitiveColor": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "GravityScale": 1.0,
+            "HalfHeight": 0.7799999713897705,
+            "IsStatic": false,
+            "IsTrigger": false,
+            "Offset": [
+                0.0,
+                0.8100000023841858,
+                0.0
+            ],
+            "Radius": 0.33000001311302185,
+            "ShapeRenderFlg": true,
+            "UseGravity": true
+        },
+        "Enabled": true,
+        "TypeName": "CapsuleCollider"
+    },
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 1.0,
+                "ModelName": "./Data/Model/SwordPlayer/SwordWuman.gltf",
+                "RootMotionName": "root",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 0.7141431570053101,
+                    "x": 0.6999997496604919,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "MaxBounds": [
+                    1.0,
+                    1.7332382202148438
+                ],
+                "MinBounds": [
+                    -0.009999999776482582,
+                    0.19838029146194458
+                ],
+                "Tracks": [
+                    {
+                        "Name": "Track 0",
+                        "Points": [
+                            [
+                                0.003998422995209694,
+                                0.23266446590423584
+                            ],
+                            [
+                                0.42075714468955994,
+                                1.1926672458648682
+                            ],
+                            [
+                                0.9921689033508301,
+                                1.2117706537246704
+                            ]
+                        ],
+                        "Type": 3
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "CurveComponent"
+        },
+        {
+            "Data": {
+                "AssetPath": "",
+                "GraphNodes": [],
+                "GraphTransitions": []
+            },
+            "Enabled": true,
+            "TypeName": "AnimationControllerComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "GameObject",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            -0.224296435713768,
+            5.056405530281909e-16,
+            4.944446563720703
+        ],
+        "Rot": [
+            0.0,
+            185.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

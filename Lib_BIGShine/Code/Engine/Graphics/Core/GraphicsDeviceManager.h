@@ -7,11 +7,15 @@
 #include <wrl.h> 
 
 #include "misc.h"
-#include "ShapeRenderer.h"
+#include "Engine/Graphics/RenderSystem/ShapeRenderer.h"
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include "RenderState.h"
 #include "Engine/Graphics/RenderSystem/BloomSystem.h"
+#include "Engine/Graphics/RenderSystem/PostRenderSystem.h"
+#include "Engine/Graphics/RenderSystem/RadialBlurSystem.h"
+#include "Engine/Graphics/RenderSystem/Pipeline/RenderPipeline.h" 
+#include "Engine/Graphics/RenderSystem/CascadeShadowMap.h" 
 
 // ============================================================================
 // GraphicsDeviceManager
@@ -47,8 +51,6 @@ public:
     ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView.Get(); }
     ID3D11ShaderResourceView* GetMainDepthSRV() const { return depthStencilSRV.Get(); }
     HWND GetWindowHandle() { return hWnd; }
-    SpriteRenderSystem& GetSpriteRenderSystem() { return spriteRenderSystem; }
-    ModelRenderSystem& GetModelRenderSystem() { return modelRenderSystem; }
     ShapeRenderSystem& GetShapeRendererSystem() { return shapeRendererSystem; }
     // レンダーステート取得
     RenderState* GetRenderState() { return renderState.get(); }
@@ -56,6 +58,12 @@ public:
     ID3D11ShaderResourceView* GetSceneSRV(){ return sceneSRV.Get(); }
     ID3D11ShaderResourceView* GetNormalSRV() { return sceneNormalSRV.Get(); }
 
+    ID3D11ShaderResourceView* GetIBLDiffuseSRV() { return iblDiffuseIemSRV.Get(); }
+    ID3D11ShaderResourceView* GetIBLSpecularSRV() { return iblSpecularPmremSRV.Get(); }
+    ID3D11ShaderResourceView* GetIBLLutGGXSRV() { return iblLutGgxSRV.Get(); }
+
+    CascadeShadowMap& GetCascadeShadowMap() { return cascadeShadowMap; }
+    PostRenderSystem& GetPostRenderSystem() { return postRenderSystem; }
     //====================================================
     // Instanceアクセッサ
     //====================================================
@@ -66,6 +74,7 @@ public:
 
     // ブルーム設定の取得・操作用
     BloomSystem::Parameters& GetBloomParams() { return bloomParams; }
+    RadialBlurSystem::Parameters& GetRadialBlurParams() { return radialBlurParams; }
     BloomSystem::CbColorFilter& GetFilterParams() { return filterParams; }
 
     // パーティクルはカラーバッファにだけ影響を与えたい
@@ -75,14 +84,13 @@ public:
     void SetSceneRenderTarget();
     // シーン用テクスチャからバックバッファへブルームを適用して描画
     void ResolveBloom(const RenderContext& rc);
+    void RenderSkyBox(const RenderContext& rc);
     // ブルーム調整用GUI
     void ResetFilter();
     void ShowPostEffectGui();
 private:
-    SpriteRenderSystem spriteRenderSystem;
-    ModelRenderSystem modelRenderSystem;
     ShapeRenderSystem shapeRendererSystem; 
-
+    PostRenderSystem postRenderSystem;
 
     //====================================================
     // DirectX11 リソース
@@ -120,7 +128,12 @@ private:
     // 内部状態
     //====================================================
     D3D11_VIEWPORT viewPort;
-    D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
+    D3D_FEATURE_LEVEL featureLevels[2] =
+    {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+    };
+
     DXGI_SWAP_CHAIN_DESC swapChainDesc{};
     int width = 0;
     int height = 0;
@@ -135,15 +148,43 @@ private:
     void ReleaseResources();
     void SetRenderTargets();
 private:
-
     // --- ブルーム関連リソース ---
     BloomSystem bloomSystem;
     BloomSystem::Parameters bloomParams;
     BloomSystem::CbColorFilter filterParams;
+    RadialBlurSystem::Parameters radialBlurParams;
+
+    CascadeShadowMap cascadeShadowMap;
 
     // ポストプロセス用のソーステクスチャ (HDR対応)
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneSRV;
+
+    // -------------------------------------------------------
+    // IBL テクスチャ
+    // register(t10) diffuse_iem
+    // register(t11) specular_pmrem
+    // register(t12) lut_ggx
+    // -------------------------------------------------------
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblDiffuseIemSRV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblSpecularPmremSRV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblLutGgxSRV;
+
+    bool LoadIBLTextures();
+
+    // -------------------------------------------------------
+    // スカイボックス
+    // -------------------------------------------------------
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> skyBoxVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>  skyBoxPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout>  skyBoxInputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> skyBoxVertexBuffer; // NDC フルスクリーンクワッド
+    Microsoft::WRL::ComPtr<ID3D11Buffer> skyBoxIndexBuffer;
+
+
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> skyBoxDepthStencilState;
+
+    bool InitializeSkyBox();
 
     // 内部ヘルパー
     bool CreateSceneRenderTarget(int width_, int height_);

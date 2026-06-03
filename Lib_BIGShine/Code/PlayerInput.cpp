@@ -1,13 +1,14 @@
 #include "PlayerInput.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "PlayerAttack.h"
 #include <algorithm>
 #include <cmath>
 #include <DirectXMath.h>
 #include "Engine/GamePlay/Transform/Transform.h"
-#include "Movement.h"
+#include "Engine/GamePlay/Core/Component/Movement.h"
 #include <Windows.h>
-#include <AnimationController.h>
+#include "Engine//GamePlay/Camera/CameraManager.h"
 
 using namespace DirectX;
 
@@ -39,6 +40,8 @@ void PlayerInput::Start()
 
     auto obj = GetGameObject();
     auto& localReg = obj->localRegistry;
+
+    mainCamera = obj->GetManager().GetCameraManager()->GetActiveCamera()->gameObject.lock();
 
     // --- 「先行入力」カテゴリとして登録 ---
     const std::string cat = "InputWindow";
@@ -117,9 +120,6 @@ void PlayerInput::RegisterComboAction(const std::string& actionName, int nextAni
     // --- End: 入力があれば次のアニメへ ---
     localReg.RegisterAction(cat, endLabel, [this, obj, actionName, nextAnimIndex]() {
         if (this->HasInput(actionName)) {
-            if (auto anim = obj->GetComponent<AnimationController>()) {
-                anim->Play(nextAnimIndex);
-            }
             this->ClearInput(actionName);
         }
         });

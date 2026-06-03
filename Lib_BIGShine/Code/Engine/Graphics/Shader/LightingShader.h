@@ -1,5 +1,5 @@
 #pragma once
-#include "RenderContext.h"
+#include "Engine/Graphics/Core/RenderContext.h"
 #include <wrl/client.h>
 
 class LightingShader

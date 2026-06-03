@@ -1,5 +1,5 @@
 #include "ParticleRenderSystem.h"
-#include "CPUResourceLoader.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include <DirectXMath.h>
 

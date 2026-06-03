@@ -202,6 +202,21 @@ void GameObject::Clear()
 
 void GameObject::Gui()
 {
+    // --- 名前編集 UI ---
+    if (nameComponent)
+    {
+        // 編集用に一時的なバッファを用意
+        char nameBuf[128];
+        strncpy_s(nameBuf, nameComponent->name.c_str(), sizeof(nameBuf));
+
+        if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
+        {
+            // 名前が変更されたらNameComponentに反映
+            nameComponent->name = std::string(nameBuf);
+        }
+        ImGui::Separator();
+    }
+
     // -----------------------------
     // Add Component
     // -----------------------------
@@ -419,7 +434,7 @@ nlohmann::json GameObject::Save() const
     nlohmann::json j;
 
     // 1. 基本情報の保存
-    j["Name"] = name;
+    j["Name"] = nameComponent->name;
     j["Layer"] = static_cast<uint32_t>(layer);
 
     // 親のTransformがある場合、その親が属するGameObjectの名前を保存
@@ -472,7 +487,7 @@ nlohmann::json GameObject::Save() const
 void GameObject::Load(const nlohmann::json& j)
 {
     // 1. 基本情報の復元
-    name = j.value("Name", "GameObject");
+    nameComponent->name = j.value("Name", "GameObject");
     layer = static_cast<LayerType>(j.value("Layer", 0));
 
     // 所有者の設定を忘れないように

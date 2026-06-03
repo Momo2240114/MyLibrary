@@ -24,6 +24,7 @@ public:
 
     void Gui() override;
     void ShowSequencerEditor();
+    void SetSequencerWindowVisible(bool visible) { showSequencerWindow = visible; }
     // エディタ用表示関数
     void OnGuiNodeEditor();
 
@@ -57,6 +58,7 @@ public:
     AnimGraphNode* AFindNodeByPin(ed::PinId pinId);
     // 宣言
     AnimGraphNode* FindNodeByName(const std::string& name);
+    //const AnimGraphNode* FindNodeByNameCons(const std::string& name) const;
 
     // Blackboard へのアクセス権を授ける
     const std::unordered_map<std::string, BlackBoardValue>& GetBlackboard() const { return blackboard; }
@@ -74,6 +76,11 @@ public:
     bool EvaluateCondition(const AnimCondition& cond);
 
 private:
+    std::string m_graphAssetFilePath;
+
+    void SaveGraphAsset(const std::string& assetName);
+    void LoadGraphAsset(const std::string& assetName);
+
     int m_nextId = 1;
     // 【新設】何が選ばれているかを記録する賢者の記録
     struct Selection {
@@ -115,6 +122,8 @@ private:
     uintptr_t    _nodeToPlaceHash = 0;
     bool         m_needsPositionRestore = false;
 
+    void EnsureSpecialGraphNodes();
+    void TryEnterStartState();
     void LoadAsset(const std::string& path);
     void SaveAsset(const std::string& path);
 
@@ -126,3 +135,4 @@ public:
     // 外部からのパラメータ入力
     void SetParam(const std::string& name, BlackBoardValue value) { blackboard[name] = value; }
 };
+

@@ -5,6 +5,132 @@
 #include <d3d11.h>
 #include <d3d11sdklayers.h>
 
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/RenderSystem/Pipeline/RadialBlurPass.h"
+
+struct SkyBoxVertex
+{
+    float position[3];
+    float color[4];
+    float texcoord[2];
+};
+
+bool GraphicsDeviceManager::LoadIBLTextures()
+{
+    // ---- パスをプロジェクトに合わせて書き換えてください ----
+    const wchar_t* diffusePath = L"Data/Texture/IBL/diffuse_iem.dds";
+    const wchar_t* specularPath = L"Data/Texture/IBL/skybox_highres.dds";
+    const wchar_t* lutPath = L"Data/Texture/IBL/lut_ggx.dds";
+    // ---------------------------------------------------------
+
+    D3D11_TEXTURE2D_DESC dummy{};
+
+    // 拡散反射 IEM（IrradianceMap）
+    if (FAILED(CPUResourceLoader::LoadTextureFromFile(
+        device.Get(), diffusePath,
+        iblDiffuseIemSRV.GetAddressOf(), &dummy)))
+    {
+        OutputDebugStringW(L"[IBL] Failed to load diffuse_iem.dds\n");
+        return false;
+    }
+
+    // 鏡面反射 PMREM（RadianceMap）
+    if (FAILED(CPUResourceLoader::LoadTextureFromFile(
+        device.Get(), specularPath,
+        iblSpecularPmremSRV.GetAddressOf(), &dummy)))
+    {
+        OutputDebugStringW(L"[IBL] Failed to load specular_pmrem.dds\n");
+        return false;
+    }
+
+    // GGX BRDF LUT
+    if (FAILED(CPUResourceLoader::LoadTextureFromFile(
+        device.Get(), lutPath,
+        iblLutGgxSRV.GetAddressOf(), &dummy)))
+    {
+        OutputDebugStringW(L"[IBL] Failed to load lut_ggx.dds\n");
+        return false;
+    }
+
+    return true;
+}
+
+// ----------------------------------------------------------------
+// スカイボックス用シェーダーとスプライトの初期化
+// ----------------------------------------------------------------
+bool GraphicsDeviceManager::InitializeSkyBox()
+{
+    // スプライトと同じ入力レイアウト（Position / Color / TexCoord）
+    D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+    // ---- CSO パスをプロジェクトに合わせて変更してください ----
+    CPUResourceLoader::CreateVSFromCSO(device.Get(), "Shader/SkyBoxVS.cso",
+        skyBoxVertexShader.GetAddressOf(),
+        skyBoxInputLayout.GetAddressOf(),
+        inputElementDesc, _countof(inputElementDesc));
+
+    CPUResourceLoader::CreatePSFromCSO(device.Get(), "Shader/SkyBoxPS.cso",
+        skyBoxPixelShader.GetAddressOf());
+    // ----------------------------------------------------------
+
+
+    SkyBoxVertex vertices[4] =
+    {
+        // position (NDC)         color (白・不透明)              texcoord
+        { { -1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 0.0f } }, // 左上
+        { {  1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 0.0f } }, // 右上
+        { { -1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 1.0f } }, // 左下
+        { {  1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 1.0f } }, // 右下
+    };
+
+    D3D11_BUFFER_DESC vbDesc = {};
+    vbDesc.ByteWidth = sizeof(vertices);
+    vbDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA vbData = {};
+    vbData.pSysMem = vertices;
+
+    if (FAILED(device->CreateBuffer(&vbDesc, &vbData,
+        skyBoxVertexBuffer.GetAddressOf())))
+    {
+        OutputDebugStringW(L"[SkyBox] Failed to create vertex buffer\n");
+        return false;
+    }
+
+    // インデックスバッファ（三角形 2 枚 = 6 インデックス）
+    UINT indices[6] = { 0, 1, 2, 1, 3, 2 };
+
+    D3D11_BUFFER_DESC ibDesc = {};
+    ibDesc.ByteWidth = sizeof(indices);
+    ibDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+    D3D11_DEPTH_STENCIL_DESC dsDesc{};
+    dsDesc.DepthEnable = TRUE;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+    device->CreateDepthStencilState(&dsDesc, skyBoxDepthStencilState.GetAddressOf());
+
+    D3D11_SUBRESOURCE_DATA ibData = {};
+    ibData.pSysMem = indices;
+
+    if (FAILED(device->CreateBuffer(&ibDesc, &ibData,
+        skyBoxIndexBuffer.GetAddressOf())))
+    {
+        OutputDebugStringW(L"[SkyBox] Failed to create index buffer\n");
+        return false;
+    }
+
+
+    return true;
+}
+
 //---
 //@brief Direct3D 11 デバイスとスワップチェーンを初期化する
 //@param hwnd_ ウィンドウハンドル
@@ -21,7 +147,7 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
     // 引数をメンバ変数に保存
-    width =  width_;
+    width = width_;
     height = height_;
     fullscreen = fullscreen_;
     hWnd = hWnd_;
@@ -55,28 +181,31 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
     viewPort.Height = height;
     viewPort.MaxDepth = 1.0f;
     viewPort.MinDepth = 0.0f;
-    
+
     //TODO: OMSetRenderTargets でRTVとDSVをセット
     immediateContext->RSSetViewports(1, &viewPort);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
-    
+
+    if (!LoadIBLTextures())  return false;
+    if (!InitializeSkyBox()) return false;
+
     // --- 追加：シーンバッファの作成 ---
     if (!CreateSceneRenderTarget(width_, height_)) return false;
 
-    // --- 追加：ブルームシステムの初期化 ---
-    if (!bloomSystem.Initialize(device.Get(), width_, height_)) return false;
+
+    if (!postRenderSystem.Initialize(device.Get(), width_, height_)) return false;
 
     //modelRenderSystem.Init(device, immediateContext);
-    spriteRenderSystem.Initialize(device.Get(), immediateContext.Get());
-    modelRenderSystem.Initialize(device.Get());
     shapeRendererSystem.Initialize(device.Get());
 
     // レンダーステート生成
     renderState = std::make_unique<RenderState>(device.Get());
 
+
+
     //TODO: 成功したら true を返す
-    
+
     return true;
 }
 
@@ -101,6 +230,9 @@ void GraphicsDeviceManager::Shutdown()
     sceneSRV.Reset();
     swapChain.Reset();
     immediateContext.Reset();
+
+    skyBoxVertexBuffer.Reset();
+    skyBoxIndexBuffer.Reset();
 
     // 最後にデバイスを消す
     device.Reset();
@@ -139,7 +271,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     CreateRenderTarget();
     CreateDepthStencil();
     CreateSceneRenderTarget(width, height); // シーンバッファを新しいサイズで作る
-    bloomSystem.Initialize(device.Get(), width, height); // ブルームも再初期化
+    postRenderSystem.Initialize(device.Get(), width, height); // ポストプロセスも再初期化
 
     // ビューポートの設定
     viewPort.Width = static_cast<float>(width);
@@ -213,8 +345,53 @@ void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
     auto dsv = depthStencilView.Get();
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), dsv);
 
-    bloomSystem.Execute(rc, sceneSRV.Get(), renderTargetView.Get(), bloomParams, filterParams);
+    postRenderSystem.GetBloomSystem().Execute(rc, sceneSRV.Get(), renderTargetView.Get(), bloomParams, filterParams);
 }
+
+
+void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
+{
+    ID3D11DeviceContext* dc = immediateContext.Get();
+
+    // IBL specular_pmrem を t10 にバインド
+    ID3D11ShaderResourceView* srvs[] = { iblSpecularPmremSRV.Get() };
+    dc->PSSetShaderResources(10, 1, srvs);
+
+    // 深度テスト LESS_EQUAL・書き込みOFF
+    dc->OMSetDepthStencilState(skyBoxDepthStencilState.Get(), 0);
+
+    // カリング OFF
+    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+    // アルファブレンド OFF
+    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+
+    // シェーダー・入力レイアウト
+    dc->VSSetShader(skyBoxVertexShader.Get(), nullptr, 0);
+    dc->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
+    dc->IASetInputLayout(skyBoxInputLayout.Get());
+    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // 頂点・インデックスバッファ
+    UINT stride = sizeof(SkyBoxVertex);
+    UINT offset = 0;
+    dc->IASetVertexBuffers(0, 1, skyBoxVertexBuffer.GetAddressOf(), &stride, &offset);
+    dc->IASetIndexBuffer(skyBoxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+    dc->DrawIndexed(6, 0, 0);
+
+    // ---- 後始末 ----
+    dc->VSSetShader(nullptr, nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
+    dc->IASetInputLayout(nullptr);
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    dc->PSSetShaderResources(10, 1, &nullSRV);
+
+    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+}
+
 
 void GraphicsDeviceManager::ResetFilter()
 {
@@ -277,9 +454,34 @@ void GraphicsDeviceManager::ShowPostEffectGui()
         // 適用強度
         ImGui::SliderFloat("Filter Intensity", &filterParams.filterIntensity, 0.0f, 1.0f);
 
-        if (ImGui::Button("Reset Filter")) 
+        if (ImGui::Button("Reset Filter"))
         {
             ResetFilter();
+        }
+    }
+    // --- 【追加】ラジアルブラー設定 ---
+    if (ImGui::CollapsingHeader("Radial Blur", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        // 1. ブラー半径 (Blur Radius)
+        ImGui::DragFloat("Blur Radius", &radialBlurParams.blurRadius, 0.001f, 0.0f, 0.5f, "%.3f");
+
+        // 2. サンプリング数 (Sampling Count)
+        ImGui::SliderInt("Sampling Count", &radialBlurParams.blurSamplingCount, 4, 32);
+
+        // 3. ブラーの中心点 (Center)
+        ImGui::DragFloat2("Blur Center", &radialBlurParams.blurCenter.x, 0.01f, 0.0f, 1.0f, "%.2f");
+
+        // 4. マスク半径 (Mask Radius)
+        ImGui::DragFloat("Mask Radius", &radialBlurParams.blurMaskRadius, 0.01f, 0.0f, 2.0f, "%.2f");
+
+        ImGui::Separator();
+
+        // 5. リセットボタン
+        if (ImGui::Button("Reset Radial Blur")) {
+            radialBlurParams.blurRadius = 0.05f;
+            radialBlurParams.blurSamplingCount = 16;
+            radialBlurParams.blurCenter = { 0.5f, 0.5f };
+            radialBlurParams.blurMaskRadius = 0.5f;
         }
     }
 
@@ -316,26 +518,35 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     // TODO: D3D11CreateDeviceAndSwapChain() を呼び出し
     //device / context / swapChain を取得
     //featureLevel_ を保存
+    D3D_FEATURE_LEVEL featureLevels[] =
+    {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+    };
+
+    D3D_FEATURE_LEVEL createdFeatureLevel;
+
     hr = D3D11CreateDeviceAndSwapChain(
-        NULL, 
-        D3D_DRIVER_TYPE_HARDWARE, 
-        NULL,
+        nullptr,
+        D3D_DRIVER_TYPE_HARDWARE,
+        nullptr,
         createDeviceFlags_,
-        &featureLevel, 
-        1, 
+        featureLevels,
+        _countof(featureLevels),
         D3D11_SDK_VERSION,
         &swapChainDesc,
-        swapChain.GetAddressOf(), 
+        swapChain.GetAddressOf(),
         device.GetAddressOf(),
-        NULL,
+        &createdFeatureLevel,
         immediateContext.GetAddressOf());
 
-    
     // TODO: エラーチェック
     _ASSERT_EXPR(SUCCEEDED(hr), L"D3D11CreateDeviceAndSwapChain");
-        if (FAILED(hr)) return false;
+    if (FAILED(hr)) return false;
 
-        return true;  // 成功時
+    return true;  // 成功時
 }
 
 /**
@@ -439,7 +650,7 @@ void GraphicsDeviceManager::ReleaseResources()
 
     // 3. ブルーム実行
     // 引数1に rc を渡す（ポインタではなく実体なので変換エラーが消えます）
-    bloomSystem.Execute(
+    postRenderSystem.GetBloomSystem().Execute(
         rc,
         sceneSRV.Get(),
         renderTargetView.Get(),

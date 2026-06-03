@@ -8,6 +8,7 @@
 #include <string>
 
 #include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/GamePlay/Core/Component/NameComponent.h"
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
@@ -39,7 +40,8 @@ public:
     uint32_t m_Mask = (uint32_t)LayerType::Default;//コリジョンマスク
 
     bool saveFlg = true;
-    std::string name;
+    // 代わりに、素早くアクセスするためのキャッシュ用ポインタを保持する
+    std::shared_ptr<NameComponent> nameComponent;
     std::shared_ptr<Transform> transform;
     std::vector<std::shared_ptr<Component>> components;
 
@@ -62,9 +64,13 @@ public:
     ActionRegistry& GetLocalRegistry() { return localRegistry; };
 
     GameObject(const std::string& name_ = "GameObject")
-        : name(name_)
+
     {
         transform = std::make_shared<Transform>();
+
+        // コンポーネントとして名前を付与
+        nameComponent = std::make_shared<NameComponent>();
+        nameComponent->name = name_;
     }
 
     void DrawGizmo(const float* view, const float* projection);
@@ -82,8 +88,9 @@ public:
         return AddComponent<T>(collStartFlg);
     }
 
-    void SetName(const char* name_) { name = name_; }
-    std::string GetName() { return name; }
+    // 名前へのアクセスを簡潔に
+    const std::string& GetName() const { return nameComponent->name; }
+    void SetName(const std::string& newName) { nameComponent->name = newName; }
 
 
     template<typename T, typename... Args>
@@ -187,7 +194,7 @@ public:
     // 選択中オブジェクト用ウィンドウ
     void GuiWindow()
     {
-        ImGui::Begin(name.c_str());
+        ImGui::Begin(nameComponent->name.c_str());
         Gui(); // 元の GUI 呼び出し
         ImGui::End();
     }
@@ -201,4 +208,5 @@ public:
     void SetNoSaveObject() { saveFlg = false; };
     void SetLayer(LayerType type) { layer = type; }
     LayerType GetLayer() const { return layer; }
+    uint32_t GetLayerBit() const { return static_cast<uint32_t>(layer); }
 };

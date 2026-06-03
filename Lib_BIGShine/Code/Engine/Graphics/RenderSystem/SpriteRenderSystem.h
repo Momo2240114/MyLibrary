@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Engine/Graphics/Resource/Sprite.h"
-#include "SpriteShader.h"
+#include "Engine/Graphics/Shader/SpriteShader.h"
 
 
 #include <vector>
 #include <map>
 #include <memory>
 #include <d3d11.h>
-#include "SpriteShaderID.h"
+#include "Engine/Graphics/Shader/SpriteShaderID.h"
 
 
 class SpriteRenderSystem
