@@ -16,6 +16,11 @@
 namespace ed = ax::NodeEditor;
 static constexpr const char* START_NODE_NAME = "__Start__";
 static constexpr const char* ANY_NODE_NAME = "__Any__";
+static constexpr const char* ENTRY_NODE_PREFIX = "__Entry__:";
+static constexpr const char* EXIT_NODE_PREFIX = "__Exit__:";
+
+static std::string MakeEntryNodeName(const std::string& scopeId) { return std::string(ENTRY_NODE_PREFIX) + scopeId; }
+static std::string MakeExitNodeName(const std::string& scopeId) { return std::string(EXIT_NODE_PREFIX) + scopeId; }
 
 static const char* GetGraphNodeDisplayName(const AnimGraphNode& node)
 {
@@ -23,13 +28,17 @@ static const char* GetGraphNodeDisplayName(const AnimGraphNode& node)
     {
     case AnimGraphNodeType::Start: return "Start";
     case AnimGraphNodeType::Any: return "Any";
+    case AnimGraphNodeType::SubGraph: return node.stateName.c_str();
+    case AnimGraphNodeType::Entry: return "Entry";
+    case AnimGraphNodeType::Exit: return "Exit";
     default: return node.stateName.c_str();
     }
 }
 
 static bool IsSpecialGraphNode(const AnimGraphNode& node)
 {
-    return node.type == AnimGraphNodeType::Start || node.type == AnimGraphNodeType::Any;
+    return node.type == AnimGraphNodeType::Start || node.type == AnimGraphNodeType::Any ||
+        node.type == AnimGraphNodeType::Entry || node.type == AnimGraphNodeType::Exit;
 }
 
 static bool IsSpecialGraphNodeName(const std::string& name)
@@ -37,38 +46,131 @@ static bool IsSpecialGraphNodeName(const std::string& name)
     return name == START_NODE_NAME || name == ANY_NODE_NAME;
 }
 
+static ImU32 GetGraphNodeFillColor(const AnimGraphNode& node_, bool isActive_)
+{
+    if (isActive_)
+        return IM_COL32(150, 220, 255, 255);
+
+    switch (node_.type)
+    {
+    case AnimGraphNodeType::Start: return IM_COL32(120, 170, 245, 255);
+    case AnimGraphNodeType::Any: return IM_COL32(185, 135, 235, 255);
+    case AnimGraphNodeType::Entry: return IM_COL32(120, 205, 145, 255);
+    case AnimGraphNodeType::Exit: return IM_COL32(240, 165, 105, 255);
+    case AnimGraphNodeType::SubGraph: return IM_COL32(105, 195, 205, 255);
+    default: return IM_COL32(215, 215, 215, 255);
+    }
+}
+
+static ImU32 GetGraphNodeBorderColor(const AnimGraphNode& node_, bool isActive_)
+{
+    if (isActive_)
+        return IM_COL32(45, 170, 255, 255);
+
+    switch (node_.type)
+    {
+    case AnimGraphNodeType::Start: return IM_COL32(55, 125, 220, 255);
+    case AnimGraphNodeType::Any: return IM_COL32(135, 90, 220, 255);
+    case AnimGraphNodeType::Entry: return IM_COL32(55, 160, 95, 255);
+    case AnimGraphNodeType::Exit: return IM_COL32(215, 120, 55, 255);
+    case AnimGraphNodeType::SubGraph: return IM_COL32(45, 145, 155, 255);
+    default: return IM_COL32(125, 125, 125, 255);
+    }
+}
+
+static ImU32 GetGraphNodeTitleColor(const AnimGraphNode& node_)
+{
+    switch (node_.type)
+    {
+    case AnimGraphNodeType::Start: return IM_COL32(40, 90, 220, 255);
+    case AnimGraphNodeType::Any: return IM_COL32(115, 70, 210, 255);
+    case AnimGraphNodeType::Entry: return IM_COL32(35, 135, 75, 255);
+    case AnimGraphNodeType::Exit: return IM_COL32(200, 90, 35, 255);
+    case AnimGraphNodeType::SubGraph: return IM_COL32(20, 115, 125, 255);
+    default: return IM_COL32(0, 0, 0, 255);
+    }
+}
 // ベジェ曲線の中点に三角形の矢印を描画するヘルパー
 static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
 {
     if (p0.x == 0.0f && p0.y == 0.0f) return;
     if (p3.x == 0.0f && p3.y == 0.0f) return;
 
+    float distance = std::sqrt((p3.x - p0.x) * (p3.x - p0.x) + (p3.y - p0.y) * (p3.y - p0.y));
+    if (distance < 45.0f) return;
+
     float strength = std::fmax(std::abs(p3.x - p0.x) * 0.5f, 50.0f);
     ImVec2 p1 = { p0.x + strength, p0.y };
     ImVec2 p2 = { p3.x - strength, p3.y };
 
-    float w1 = 0.125f, w2 = 0.375f, w3 = 0.375f, w4 = 0.125f;
-    ImVec2 mid = {
-        w1 * p0.x + w2 * p1.x + w3 * p2.x + w4 * p3.x,
-        w1 * p0.y + w2 * p1.y + w3 * p2.y + w4 * p3.y
-    };
-    ImVec2 tan = {
-        -3 * 0.25f * p0.x + (3 * 0.25f - 6 * 0.25f) * p1.x + (6 * 0.25f - 3 * 0.25f) * p2.x + 3 * 0.25f * p3.x,
-        -3 * 0.25f * p0.y + (3 * 0.25f - 6 * 0.25f) * p1.y + (6 * 0.25f - 3 * 0.25f) * p2.y + 3 * 0.25f * p3.y
-    };
-    float len = std::sqrt(tan.x * tan.x + tan.y * tan.y);
-    if (len > 0.0001f) { tan.x /= len; tan.y /= len; }
-    else { tan = { 1.0f, 0.0f }; }
+    auto evalBezier = [&](float t) -> ImVec2
+        {
+            float u = 1.0f - t;
+            float uu = u * u;
+            float tt = t * t;
+            float uuu = uu * u;
+            float ttt = tt * t;
 
-    const float S = 10.0f;
-    ImVec2 perp = { -tan.y, tan.x };
-    ImVec2 pt1 = { mid.x + tan.x * S,                         mid.y + tan.y * S };
-    ImVec2 pt2 = { mid.x - tan.x * S + perp.x * S * 0.7f,     mid.y - tan.y * S + perp.y * S * 0.7f };
-    ImVec2 pt3 = { mid.x - tan.x * S - perp.x * S * 0.7f,     mid.y - tan.y * S - perp.y * S * 0.7f };
+            return ImVec2(
+                uuu * p0.x + 3.0f * uu * t * p1.x + 3.0f * u * tt * p2.x + ttt * p3.x,
+                uuu * p0.y + 3.0f * uu * t * p1.y + 3.0f * u * tt * p2.y + ttt * p3.y
+            );
+        };
 
-    drawList->AddTriangleFilled(pt1, pt2, pt3, color);
+    auto evalTangent = [&](float t) -> ImVec2
+        {
+            float u = 1.0f - t;
+
+            ImVec2 tan(
+                3.0f * u * u * (p1.x - p0.x) +
+                6.0f * u * t * (p2.x - p1.x) +
+                3.0f * t * t * (p3.x - p2.x),
+
+                3.0f * u * u * (p1.y - p0.y) +
+                6.0f * u * t * (p2.y - p1.y) +
+                3.0f * t * t * (p3.y - p2.y)
+            );
+
+            float len = std::sqrt(tan.x * tan.x + tan.y * tan.y);
+            if (len > 0.0001f)
+            {
+                tan.x /= len;
+                tan.y /= len;
+            }
+            else
+            {
+                tan = ImVec2(1.0f, 0.0f);
+            }
+
+            return tan;
+        };
+
+    auto drawArrowAt = [&](float t)
+        {
+            ImVec2 center = evalBezier(t);
+            ImVec2 tan = evalTangent(t);
+            ImVec2 perp = ImVec2(-tan.y, tan.x);
+
+            const float size = 14.0f;
+
+            ImVec2 tip = ImVec2(center.x + tan.x * size, center.y + tan.y * size);
+            ImVec2 backA = ImVec2(
+                center.x - tan.x * size + perp.x * size * 0.75f,
+                center.y - tan.y * size + perp.y * size * 0.75f
+            );
+            ImVec2 backB = ImVec2(
+                center.x - tan.x * size - perp.x * size * 0.75f,
+                center.y - tan.y * size - perp.y * size * 0.75f
+            );
+
+            drawList->AddTriangleFilled(tip, backA, backB, IM_COL32(255, 190, 40, 255));
+            drawList->AddTriangle(tip, backA, backB, IM_COL32(70, 45, 0, 255), 2.0f);
+        };
+
+
+    drawArrowAt(0.75f);
+    drawArrowAt(0.35f);
 }
-
 
 const std::string ASSET_DIR = "Data/Animation/StateData/";
 
@@ -171,6 +273,24 @@ void AnimationControllerComponent::Update(float deltaTime)
     {
         m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComp->GetModelName());
     }
+
+    if (m_pendingGraphAssetLoad)
+    {
+        m_pendingGraphAssetLoad = false;
+
+        if (!m_pendingGraphAssetPath.empty())
+        {
+            LoadGraphAsset(m_pendingGraphAssetPath);
+            TryEnterStartState();
+        }
+    }
+
+    if (m_editorPoseOverride)
+    {
+        modelComp->UpdateTransform();
+        return;
+    }
+
 
     // 状態遷移の評価
     EvaluateGraphTransitions();
@@ -343,7 +463,7 @@ void AnimationControllerComponent::Gui()
         ImGui::Text("Editing: %s", editingState->name.c_str());
 
         // --- ここに元の open の中にあった編集ロジックを集約 ---
-        const char* typeNames[] = { "Single", "Blend1D" };
+        const char* typeNames[] = { "Single", "Blend1D", "Custom" };
         int currentType = (int)editingState->type;
         if (ImGui::Combo("Type", &currentType, typeNames, IM_ARRAYSIZE(typeNames))) {
             editingState->type = (AnimStateType)currentType;
@@ -373,6 +493,24 @@ void AnimationControllerComponent::Gui()
             ComboAnim("Anim A", editingState->animIndexA);
             ComboAnim("Anim B", editingState->animIndexB);
             ImGui::InputText("Blend Param", &editingState->blendParamName);
+        }
+        else if (editingState->type == AnimStateType::Custom) {
+            if (m_poseLibrary && !m_poseLibrary->customAnims.empty()) {
+                int selectedCustom = editingState->customAnimIndex;
+                if (selectedCustom < 0 || selectedCustom >= (int)m_poseLibrary->customAnims.size()) selectedCustom = 0;
+                const std::string& previewName = m_poseLibrary->customAnims[selectedCustom].name;
+                if (ImGui::BeginCombo("Custom Animation", previewName.c_str())) {
+                    for (int i = 0; i < (int)m_poseLibrary->customAnims.size(); ++i) {
+                        if (ImGui::Selectable(m_poseLibrary->customAnims[i].name.c_str(), selectedCustom == i)) {
+                            editingState->customAnimIndex = i;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+            else {
+                ImGui::TextDisabled("Create a custom animation in Pose Animation Creator.");
+            }
         }
 
         ImGui::DragFloat("Speed", &editingState->playbackSpeed, 0.05f);
@@ -694,154 +832,34 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName, flo
 void AnimationControllerComponent::Serialize(nlohmann::json& j) const
 {
     j["AssetPath"] = m_assetFilePath;
-
-    // --- グラフノードの保存 ---
-    nlohmann::json nodesArray = nlohmann::json::array();
-    for (auto& node : graphNodes)
-    {
-        nlohmann::json n;
-        n["stateName"] = node.stateName;
-        n["id"]        = static_cast<uintptr_t>(node.id.Get());
-        n["inputPin"]  = static_cast<uintptr_t>(node.inputPin.Get());
-        n["outputPin"] = static_cast<uintptr_t>(node.outputPin.Get());
-        n["nodeType"]  = static_cast<int>(node.type);
-        // エディタ上の座標を保存
-        auto pos = ed::GetNodePosition(node.id);
-        n["posX"] = pos.x;
-        n["posY"] = pos.y;
-        nodesArray.push_back(n);
-    }
-    j["GraphNodes"] = nodesArray;
-
-    // --- トランジション(リンク+条件)の保存 ---
-    nlohmann::json transArray = nlohmann::json::array();
-    for (auto& t : graphTransitions)
-    {
-        nlohmann::json tr;
-        tr["from"]     = t.fromStateName;
-        tr["to"]       = t.toStateName;
-        tr["duration"] = t.duration;
-        tr["logic"]    = static_cast<int>(t.logic);
-        tr["id"]       = static_cast<uintptr_t>(t.id.Get());
-
-        nlohmann::json condsArray = nlohmann::json::array();
-        for (auto& c : t.conditions)
-        {
-            nlohmann::json cj;
-            cj["type"]      = static_cast<int>(c.type);
-            cj["param"]     = c.parameterName;
-            cj["op"]        = static_cast<int>(c.op);
-            cj["threshold"] = c.threshold;
-            condsArray.push_back(cj);
-        }
-        tr["conditions"] = condsArray;
-        transArray.push_back(tr);
-    }
-    j["GraphTransitions"] = transArray;
+    j["GraphAssetPath"] = m_graphAssetFilePath;
 }
 
 void AnimationControllerComponent::Deserialize(const nlohmann::json& j)
 {
-    if (j.contains("AssetPath")) {
-        m_assetFilePath = j.value("AssetPath", "");
+    m_assetFilePath = j.value("AssetPath", "");
+    m_graphAssetFilePath = j.value("GraphAssetPath", "");
+
+    if (!m_assetFilePath.empty())
+    {
         LoadAsset(m_assetFilePath);
     }
 
-    if (!modelComp) {
-        modelComp = GetGameObject()->GetComponent<GltfModelCommponennt>().get();
-    }
+    graphNodes.clear();
+    graphTransitions.clear();
 
-    if (modelComp) {
-        const auto& anims = modelComp->GetAnimations();
-        for (auto& [name, state] : states) {
-            for (int i = 0; i < (int)anims.size(); ++i) {
-                if (anims[i].name == name) {
-                    state->animationIndex = i;
-                    break;
-                }
-            }
-        }
-    }
-
-    // --- グラフノードの復元 ---
-    if (j.contains("GraphNodes") && j["GraphNodes"].is_array())
+    if (!m_graphAssetFilePath.empty())
     {
-        graphNodes.clear();
-        uintptr_t maxId = 0;
-
-        for (auto& n : j["GraphNodes"])
-        {
-            AnimGraphNode node;
-            node.stateName = n.value("stateName", "");
-            auto rawId = n.value("id", (uintptr_t)0);
-            auto rawIn = n.value("inputPin", (uintptr_t)0);
-            auto rawOut = n.value("outputPin", (uintptr_t)0);
-            node.id = ed::NodeId(rawId);
-            node.inputPin = ed::PinId(rawIn);
-            node.outputPin = ed::PinId(rawOut);
-            node.pos = ImVec2(n.value("posX", 0.0f), n.value("posY", 0.0f));
-            node.type = static_cast<AnimGraphNodeType>(n.value("nodeType", (int)AnimGraphNodeType::State));
-            if (node.stateName == START_NODE_NAME) node.type = AnimGraphNodeType::Start;
-            if (node.stateName == ANY_NODE_NAME) node.type = AnimGraphNodeType::Any;
-            graphNodes.push_back(node);
-
-            maxId = (std::max)({ maxId, rawId, rawIn, rawOut });
-        }
-
-        // IDカウンタを復元済みIDの最大値より大きい値に更新
-        // ※ GetNextID() が内部カウンタを持つ前提。以下を実装側に合わせて調整すること。
-        // SetIDCounter(maxId + 1);
+        m_pendingGraphAssetPath = m_graphAssetFilePath;
+        m_pendingGraphAssetLoad = true;
     }
-
-    // --- トランジションの復元 ---
-    if (j.contains("GraphTransitions") && j["GraphTransitions"].is_array())
+    else
     {
-        graphTransitions.clear();
-        uintptr_t maxId = 0;
-
-        for (auto& tr : j["GraphTransitions"])
-        {
-            AnimTransition t;
-            t.fromStateName = tr.value("from", "");
-            t.toStateName = tr.value("to", "");
-            t.duration = tr.value("duration", 0.2f);
-            t.logic = static_cast<TransitionLogic>(tr.value("logic", (int)TransitionLogic::And));
-            auto rawId = tr.value("id", (uintptr_t)0);
-            t.id = ed::LinkId(rawId);
-            maxId = (std::max)(maxId, rawId);
-
-            if (tr.contains("conditions") && tr["conditions"].is_array())
-            {
-                for (auto& cj : tr["conditions"])
-                {
-                    AnimCondition c;
-                    c.type = static_cast<ConditionType>(cj.value("type", 0));
-                    c.parameterName = cj.value("param", "");
-                    c.op = static_cast<ConditionOp>(cj.value("op", 0));
-                    c.threshold = cj.value("threshold", 0.0f);
-                    t.conditions.push_back(c);
-                }
-            }
-            graphTransitions.push_back(t);
-        }
+        EnsureSpecialGraphNodes();
     }
 
-    uintptr_t maxGraphId = 0;
-    for (const auto& node : graphNodes)
-    {
-        maxGraphId = (std::max)({ maxGraphId,
-            (uintptr_t)node.id.Get(),
-            (uintptr_t)node.inputPin.Get(),
-            (uintptr_t)node.outputPin.Get() });
-    }
-    for (const auto& transition : graphTransitions)
-        maxGraphId = (std::max)(maxGraphId, (uintptr_t)transition.id.Get());
-    SetIDCounterFloor(maxGraphId);
-
-    EnsureSpecialGraphNodes();
-    m_needsPositionRestore = true;
+    TryEnterStartState();
 }
-
 void AnimationControllerComponent::AddState(const std::string& stateName, int animIndex)
 {
     if (states.count(stateName)) return; // 重複チェック
@@ -918,12 +936,14 @@ void AnimationControllerComponent::EnsureSpecialGraphNodes()
             node.outputPin = ed::PinId(GetNextID());
             node.pos = defaultPos;
             node.type = type;
+            node.scopeId = "Root";
             graphNodes.push_back(node);
             return;
         }
 
         it->stateName = internalName;
         it->type = type;
+        it->scopeId = "Root";
         if ((uintptr_t)it->id.Get() == 0)
             it->id = ed::NodeId(GetNextID());
         it->inputPin = ed::PinId(0);
@@ -937,19 +957,46 @@ void AnimationControllerComponent::EnsureSpecialGraphNodes()
 
 void AnimationControllerComponent::TryEnterStartState()
 {
-    if (currentState)
-        return;
-
     for (auto& transition : graphTransitions)
     {
         if (transition.fromStateName != START_NODE_NAME)
             continue;
+
+        auto* toNode = FindNodeByName(transition.toStateName);
+        if (toNode && toNode->type == AnimGraphNodeType::SubGraph)
+        {
+            if (TryEnterSubGraph(*toNode, 0.0f))
+                return;
+        }
+
         if (states.count(transition.toStateName) == 0)
             continue;
 
-        ChangeState(transition.toStateName, transition.duration);
+        ChangeState(transition.toStateName, 0.0f);
         return;
     }
+}
+
+bool AnimationControllerComponent::TryEnterSubGraph(const AnimGraphNode& subGraphNode, float duration)
+{
+    if (subGraphNode.type != AnimGraphNodeType::SubGraph || subGraphNode.childScopeId.empty())
+        return false;
+
+    const std::string entryName = MakeEntryNodeName(subGraphNode.childScopeId);
+    for (auto& transition : graphTransitions)
+    {
+        if (transition.scopeId != subGraphNode.childScopeId)
+            continue;
+        if (transition.fromStateName != entryName)
+            continue;
+        if (states.count(transition.toStateName) == 0)
+            continue;
+
+        ChangeState(transition.toStateName, duration);
+        return true;
+    }
+
+    return false;
 }
 AnimGraphNode* AnimationControllerComponent::AFindNodeByPin(ed::PinId pinId)
 {
@@ -993,39 +1040,32 @@ void AnimationControllerComponent::EvaluateGraphTransitions()
 
     _runtimeActiveStateName = activeState->name;
 
-    for (auto& transition : graphTransitions)
-    {
-        const bool fromCurrent = (transition.fromStateName == activeState->name);
-        const bool fromAny = (transition.fromStateName == ANY_NODE_NAME);
-
-        if (!fromCurrent && !fromAny)
-            continue;
-        if (transition.toStateName == activeState->name)
-            continue;
-        if (states.count(transition.toStateName) == 0)
-            continue;
-
-        bool isMet = transition.conditions.empty();
-        if (!transition.conditions.empty())
+    auto areConditionsMet = [&](AnimTransition& transition) -> bool
         {
-            isMet = (transition.logic == TransitionLogic::And);
-            for (auto& cond : transition.conditions)
+            bool isMet = transition.conditions.empty();
+            if (!transition.conditions.empty())
             {
-                const bool conditionMet = EvaluateCondition(cond);
-                if (transition.logic == TransitionLogic::And && !conditionMet)
+                isMet = (transition.logic == TransitionLogic::And);
+                for (auto& cond : transition.conditions)
                 {
-                    isMet = false;
-                    break;
-                }
-                if (transition.logic == TransitionLogic::Or && conditionMet)
-                {
-                    isMet = true;
-                    break;
+                    const bool conditionMet = EvaluateCondition(cond);
+                    if (transition.logic == TransitionLogic::And && !conditionMet)
+                    {
+                        isMet = false;
+                        break;
+                    }
+                    if (transition.logic == TransitionLogic::Or && conditionMet)
+                    {
+                        isMet = true;
+                        break;
+                    }
                 }
             }
-        }
+            return isMet;
+        };
 
-        if (isMet) {
+    auto resetTriggerConditions = [&](AnimTransition& transition)
+        {
             for (auto& cond : transition.conditions)
             {
                 if (cond.type == ConditionType::Trigger)
@@ -1037,12 +1077,87 @@ void AnimationControllerComponent::EvaluateGraphTransitions()
                     }
                 }
             }
+        };
+
+    auto enterTransitionTarget = [&](AnimTransition& transition) -> bool
+        {
+            auto* toNode = FindNodeByName(transition.toStateName);
+            if (toNode && toNode->type == AnimGraphNodeType::SubGraph)
+            {
+                if (TryEnterSubGraph(*toNode, transition.duration))
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            if (states.count(transition.toStateName) == 0)
+                return false;
+
             ChangeState(transition.toStateName, transition.duration);
-            break;
+            return true;
+        };
+
+    auto exitSubGraph = [&](AnimTransition& exitTransition) -> bool
+        {
+            AnimGraphNode* ownerSubGraph = nullptr;
+            for (auto& node : graphNodes)
+            {
+                if (node.type == AnimGraphNodeType::SubGraph && node.childScopeId == exitTransition.scopeId)
+                {
+                    ownerSubGraph = &node;
+                    break;
+                }
+            }
+            if (!ownerSubGraph)
+                return false;
+
+            for (auto& parentTransition : graphTransitions)
+            {
+                if (parentTransition.fromStateName != ownerSubGraph->stateName)
+                    continue;
+                if (!areConditionsMet(parentTransition))
+                    continue;
+
+                resetTriggerConditions(parentTransition);
+                return enterTransitionTarget(parentTransition);
+            }
+
+            return false;
+        };
+
+    for (auto& transition : graphTransitions)
+    {
+        const bool fromCurrent = (transition.fromStateName == activeState->name);
+        const bool fromAny = (transition.fromStateName == ANY_NODE_NAME);
+
+        if (!fromCurrent && !fromAny)
+            continue;
+        if (transition.toStateName == activeState->name)
+            continue;
+
+        auto* toNode = FindNodeByName(transition.toStateName);
+        const bool toExit = toNode && toNode->type == AnimGraphNodeType::Exit;
+        const bool toSubGraph = toNode && toNode->type == AnimGraphNodeType::SubGraph;
+        if (!toExit && !toSubGraph && states.count(transition.toStateName) == 0)
+            continue;
+
+        if (!areConditionsMet(transition))
+            continue;
+
+        resetTriggerConditions(transition);
+
+        if (toExit)
+        {
+            if (exitSubGraph(transition))
+                break;
+            continue;
         }
+
+        if (enterTransitionTarget(transition))
+            break;
     }
 }
-
 bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& cond)
 {
     // 1. アニメーション終了判定
@@ -1104,8 +1219,63 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName)
     }
 
     nlohmann::json j;
-    Serialize(j);
+    j["AssetPath"] = m_assetFilePath;
     j["GraphAssetPath"] = assetName;
+
+    nlohmann::json nodesArray = nlohmann::json::array();
+    for (auto& node : graphNodes)
+    {
+        nlohmann::json n;
+        n["stateName"] = node.stateName;
+        n["id"] = static_cast<uintptr_t>(node.id.Get());
+        n["inputPin"] = static_cast<uintptr_t>(node.inputPin.Get());
+        n["outputPin"] = static_cast<uintptr_t>(node.outputPin.Get());
+        n["nodeType"] = static_cast<int>(node.type);
+        n["scopeId"] = node.scopeId;
+        n["childScopeId"] = node.childScopeId;
+
+        ImVec2 pos = node.pos;
+        const std::string nodeScope = node.scopeId.empty() ? std::string("Root") : node.scopeId;
+        const std::string currentScope = m_currentGraphScopeId.empty() ? std::string("Root") : m_currentGraphScopeId;
+        if (nodeEditorContext && nodeScope == currentScope)
+        {
+            ed::SetCurrentEditor(nodeEditorContext);
+            pos = ed::GetNodePosition(node.id);
+        }
+
+        n["posX"] = pos.x;
+        n["posY"] = pos.y;
+
+        nodesArray.push_back(n);
+    }
+    j["GraphNodes"] = nodesArray;
+
+    nlohmann::json transArray = nlohmann::json::array();
+    for (auto& t : graphTransitions)
+    {
+        nlohmann::json tr;
+        tr["from"] = t.fromStateName;
+        tr["to"] = t.toStateName;
+        tr["duration"] = t.duration;
+        tr["logic"] = static_cast<int>(t.logic);
+        tr["id"] = static_cast<uintptr_t>(t.id.Get());
+        tr["scopeId"] = t.scopeId;
+
+        nlohmann::json condsArray = nlohmann::json::array();
+        for (auto& c : t.conditions)
+        {
+            nlohmann::json cj;
+            cj["type"] = static_cast<int>(c.type);
+            cj["param"] = c.parameterName;
+            cj["op"] = static_cast<int>(c.op);
+            cj["threshold"] = c.threshold;
+            condsArray.push_back(cj);
+        }
+
+        tr["conditions"] = condsArray;
+        transArray.push_back(tr);
+    }
+    j["GraphTransitions"] = transArray;
 
     std::ofstream file(GetFullGraphAssetPath(assetName));
     if (file.is_open()) {
@@ -1113,7 +1283,6 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName)
         m_graphAssetFilePath = assetName;
     }
 }
-
 void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName)
 {
     if (assetName.empty()) return;
@@ -1124,9 +1293,114 @@ void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName)
     nlohmann::json j;
     file >> j;
 
-    Deserialize(j);
     m_graphAssetFilePath = assetName;
+    m_currentGraphScopeId = "Root";
+    m_graphScopeStack.clear();
+
+    std::string stateAssetPath = j.value("AssetPath", "");
+    if (!stateAssetPath.empty())
+    {
+        m_assetFilePath = stateAssetPath;
+        LoadAsset(m_assetFilePath);
+    }
+
+    graphNodes.clear();
+    graphTransitions.clear();
+
+    uintptr_t maxId = 0;
+
+    auto readId = [&](const nlohmann::json& src, const char* key, bool allowZero = false) -> uintptr_t
+        {
+            uintptr_t id = src.value(key, static_cast<uintptr_t>(0));
+            if (id == 0 && !allowZero)
+            {
+                id = GetNextID();
+            }
+
+            if (id > maxId)
+            {
+                maxId = id;
+            }
+
+            return id;
+        };
+
+    if (j.contains("GraphNodes") && j["GraphNodes"].is_array())
+    {
+        for (auto& n : j["GraphNodes"])
+        {
+            AnimGraphNode node;
+            node.stateName = n.value("stateName", "");
+            node.type = static_cast<AnimGraphNodeType>(n.value("nodeType", static_cast<int>(AnimGraphNodeType::State)));
+            node.scopeId = n.value("scopeId", "Root");
+            node.childScopeId = n.value("childScopeId", "");
+
+            node.id = ed::NodeId(readId(n, "id"));
+
+            if (node.type == AnimGraphNodeType::Start || node.type == AnimGraphNodeType::Any ||
+                node.stateName == START_NODE_NAME || node.stateName == ANY_NODE_NAME)
+            {
+                node.inputPin = ed::PinId(0);
+                node.outputPin = ed::PinId(readId(n, "outputPin"));
+            }
+            else if (node.type == AnimGraphNodeType::Entry)
+            {
+                node.inputPin = ed::PinId(0);
+                node.outputPin = ed::PinId(readId(n, "outputPin"));
+            }
+            else if (node.type == AnimGraphNodeType::Exit)
+            {
+                node.inputPin = ed::PinId(readId(n, "inputPin"));
+                node.outputPin = ed::PinId(0);
+            }
+            else
+            {
+                node.inputPin = ed::PinId(readId(n, "inputPin"));
+                node.outputPin = ed::PinId(readId(n, "outputPin"));
+            }
+
+            node.pos = ImVec2(n.value("posX", 0.0f), n.value("posY", 0.0f));
+
+            graphNodes.push_back(node);
+        }
+    }
+
+    if (j.contains("GraphTransitions") && j["GraphTransitions"].is_array())
+    {
+        for (auto& tr : j["GraphTransitions"])
+        {
+            AnimTransition transition;
+            transition.fromStateName = tr.value("from", "");
+            transition.toStateName = tr.value("to", "");
+            transition.duration = tr.value("duration", 0.2f);
+            transition.logic = static_cast<TransitionLogic>(tr.value("logic", static_cast<int>(TransitionLogic::And)));
+            transition.id = ed::LinkId(readId(tr, "id"));
+            transition.scopeId = tr.value("scopeId", "Root");
+
+            if (tr.contains("conditions") && tr["conditions"].is_array())
+            {
+                for (auto& cj : tr["conditions"])
+                {
+                    AnimCondition cond;
+                    cond.type = static_cast<ConditionType>(cj.value("type", static_cast<int>(ConditionType::Variable)));
+                    cond.parameterName = cj.value("param", "");
+                    cond.op = static_cast<ConditionOp>(cj.value("op", static_cast<int>(ConditionOp::Equal)));
+                    cond.threshold = cj.value("threshold", 0.0f);
+
+                    transition.conditions.push_back(cond);
+                }
+            }
+
+            if (!transition.fromStateName.empty() && !transition.toStateName.empty())
+            {
+                graphTransitions.push_back(transition);
+            }
+        }
+    }
+
+    SetIDCounterFloor(maxId);
     EnsureSpecialGraphNodes();
+
     m_needsPositionRestore = true;
 }
 
@@ -1204,6 +1478,55 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
     ImGui::Begin("Animation Graph Editor");
 
+    auto currentScopeName = [&]() -> std::string {
+        return m_currentGraphScopeId.empty() ? std::string("Root") : m_currentGraphScopeId;
+        };
+    auto ensureScopedEntryExitNodes = [&]() {
+        const std::string scope = currentScopeName();
+        if (scope == "Root") return;
+
+        auto ensureScopedNode = [&](AnimGraphNodeType type, const std::string& internalName, const ImVec2& defaultPos) {
+            auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
+                [&](const AnimGraphNode& node) { return node.stateName == internalName; });
+            if (it == graphNodes.end())
+            {
+                AnimGraphNode node;
+                node.id = ed::NodeId(GetNextID());
+                node.stateName = internalName;
+                node.inputPin = (type == AnimGraphNodeType::Exit) ? ed::PinId(GetNextID()) : ed::PinId(0);
+                node.outputPin = (type == AnimGraphNodeType::Entry) ? ed::PinId(GetNextID()) : ed::PinId(0);
+                node.pos = defaultPos;
+                node.type = type;
+                node.scopeId = scope;
+                graphNodes.push_back(node);
+                m_needsPositionRestore = true;
+                return;
+            }
+
+            it->type = type;
+            it->scopeId = scope;
+            if ((uintptr_t)it->id.Get() == 0) it->id = ed::NodeId(GetNextID());
+            if (type == AnimGraphNodeType::Entry)
+            {
+                it->inputPin = ed::PinId(0);
+                if ((uintptr_t)it->outputPin.Get() == 0) it->outputPin = ed::PinId(GetNextID());
+            }
+            else if (type == AnimGraphNodeType::Exit)
+            {
+                if ((uintptr_t)it->inputPin.Get() == 0) it->inputPin = ed::PinId(GetNextID());
+                it->outputPin = ed::PinId(0);
+            }
+            };
+
+        ensureScopedNode(AnimGraphNodeType::Entry, MakeEntryNodeName(scope), ImVec2(-360.0f, -80.0f));
+        ensureScopedNode(AnimGraphNodeType::Exit, MakeExitNodeName(scope), ImVec2(360.0f, 120.0f));
+        };
+    ensureScopedEntryExitNodes();
+
+    auto isNodeInCurrentScope = [&](const AnimGraphNode& node) {
+        return node.scopeId.empty() ? currentScopeName() == "Root" : node.scopeId == currentScopeName();
+        };
+
     ImGui::SetNextItemWidth(220.0f);
     ImGui::InputText("Graph Asset", &m_graphAssetFilePath);
 
@@ -1221,8 +1544,22 @@ void AnimationControllerComponent::OnGuiNodeEditor()
         ed::NavigateToContent();
 
     ImGui::SameLine();
+    if (ImGui::Button("Back") && !m_graphScopeStack.empty())
+    {
+        for (auto& node : graphNodes)
+        {
+            if (isNodeInCurrentScope(node))
+                node.pos = ed::GetNodePosition(node.id);
+        }
+        m_currentGraphScopeId = m_graphScopeStack.back();
+        m_graphScopeStack.pop_back();
+        m_needsPositionRestore = true;
+    }
 
-    ImGui::TextDisabled("Left-click and drag: Move node / Middle-click and drag: Move view / Right-click: Add node");
+    ImGui::SameLine();
+    ImGui::Text("Scope: %s", currentScopeName().c_str());
+    ImGui::SameLine();
+    ImGui::TextDisabled("Double-click SubGraph to enter / Right-click: Add node");
 
     ed::Begin("Animation Graph", ImVec2(0.0f, 0.0f));
 
@@ -1252,12 +1589,14 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                     (dx * dx + dy * dy) <= (hitRadius * hitRadius);
                 };
 
+            ImU32 fillColor = GetGraphNodeFillColor(node, isActive);
+            ImU32 borderColor = GetGraphNodeBorderColor(node, isActive);
+
             ed::PushStyleVar(ed::StyleVar_NodeRounding, isSpecial ? 18.0f : 10.0f);
             ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
-            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, isActive ? 3.0f : 1.5f);
+            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, isActive ? 3.0f : 2.0f);
             ed::PushStyleColor(ed::StyleColor_NodeBg, ImVec4(0, 0, 0, 0));
-            ed::PushStyleColor(ed::StyleColor_NodeBorder,
-                isActive ? ImVec4(0.25f, 0.75f, 1.0f, 1.0f) : ImVec4(0.48f, 0.48f, 0.48f, 1.0f));
+            ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(0, 0, 0, 0));
 
             ed::BeginNode(node.id);
             ImGui::PushID((int)(uintptr_t)node.id.Get());
@@ -1267,10 +1606,8 @@ void AnimationControllerComponent::OnGuiNodeEditor()
             ImVec2 nodeMax(nodeMin.x + nodeW, nodeMin.y + nodeH);
 
             ImDrawList* drawList = ImGui::GetWindowDrawList();
-            ImU32 fillColor = isActive ? IM_COL32(225, 247, 255, 255) : IM_COL32(232, 232, 232, 255);
-            ImU32 borderColor = isActive ? IM_COL32(45, 170, 255, 255) : IM_COL32(125, 125, 125, 255);
             ImU32 lineColor = IM_COL32(20, 20, 20, 255);
-            ImU32 titleColor = isSpecial ? IM_COL32(55, 70, 220, 255) : IM_COL32(0, 0, 0, 255);
+            ImU32 titleColor = GetGraphNodeTitleColor(node);
 
             drawList->AddRectFilled(nodeMin, nodeMax, fillColor, isSpecial ? 28.0f : 10.0f);
             drawList->AddRect(nodeMin, nodeMax, borderColor, isSpecial ? 28.0f : 10.0f, 0, isActive ? 3.0f : 2.0f);
@@ -1286,18 +1623,30 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
             if (isSpecial)
             {
-                ImVec2 outCenter(nodeMin.x + nodeW * 0.5f, nodeMin.y + titleH + bodyH * 0.5f);
-                ImGui::SetCursorScreenPos(ImVec2(outCenter.x - pinR, outCenter.y - pinR));
-                ed::BeginPin(node.outputPin, ed::PinKind::Output);
-                ImGui::Dummy(pinSize);
-                ed::EndPin();
-                pinPositions[(uintptr_t)node.outputPin.Get()] = outCenter;
+                ImVec2 pinCenter(nodeMin.x + nodeW * 0.5f, nodeMin.y + titleH + bodyH * 0.5f);
 
-                ImU32 outColor = isPinCircleHovered(outCenter)
+                if ((uintptr_t)node.outputPin.Get() != 0)
+                {
+                    ImGui::SetCursorScreenPos(ImVec2(pinCenter.x - pinR, pinCenter.y - pinR));
+                    ed::BeginPin(node.outputPin, ed::PinKind::Output);
+                    ImGui::Dummy(pinSize);
+                    ed::EndPin();
+                    pinPositions[(uintptr_t)node.outputPin.Get()] = pinCenter;
+                }
+                else if ((uintptr_t)node.inputPin.Get() != 0)
+                {
+                    ImGui::SetCursorScreenPos(ImVec2(pinCenter.x - pinR, pinCenter.y - pinR));
+                    ed::BeginPin(node.inputPin, ed::PinKind::Input);
+                    ImGui::Dummy(pinSize);
+                    ed::EndPin();
+                    pinPositions[(uintptr_t)node.inputPin.Get()] = pinCenter;
+                }
+
+                ImU32 pinColor = isPinCircleHovered(pinCenter)
                     ? IM_COL32(255, 255, 255, 255)
                     : IM_COL32(235, 220, 0, 255);
 
-                drawList->AddCircle(outCenter, pinR, outColor, 24, 3.0f);
+                drawList->AddCircle(pinCenter, pinR, pinColor, 24, 3.0f);
             }
             else
             {
@@ -1349,12 +1698,16 @@ void AnimationControllerComponent::OnGuiNodeEditor()
             ed::PopStyleVar(3);
         };
 
-    for (auto& node : graphNodes) drawGraphNode(node);
+    for (auto& node : graphNodes)
+    {
+        if (isNodeInCurrentScope(node))
+            drawGraphNode(node);
+    }
 
     if (_nodeToPlaceHash != 0)
     {
         for (auto& n : graphNodes) {
-            if ((uintptr_t)n.id.Get() == _nodeToPlaceHash) {
+            if ((uintptr_t)n.id.Get() == _nodeToPlaceHash && isNodeInCurrentScope(n)) {
                 ed::SetNodePosition(n.id, _newNodeSpawnPos);
                 ed::SelectNode(n.id);
                 break;
@@ -1367,7 +1720,8 @@ void AnimationControllerComponent::OnGuiNodeEditor()
     {
         auto* startNode = FindNodeByName(link.fromStateName);
         auto* endNode = FindNodeByName(link.toStateName);
-        if (startNode && endNode && (uintptr_t)startNode->outputPin.Get() != 0 && (uintptr_t)endNode->inputPin.Get() != 0)
+        if (link.scopeId != currentScopeName()) continue;
+        if (startNode && endNode && isNodeInCurrentScope(*startNode) && isNodeInCurrentScope(*endNode) && (uintptr_t)startNode->outputPin.Get() != 0 && (uintptr_t)endNode->inputPin.Get() != 0)
         {
             ImVec4 color = (link.fromStateName == _runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
                 ? ImVec4(0.25f, 0.65f, 1.0f, 1.0f)
@@ -1381,7 +1735,8 @@ void AnimationControllerComponent::OnGuiNodeEditor()
     {
         auto* startNode = FindNodeByName(link.fromStateName);
         auto* endNode = FindNodeByName(link.toStateName);
-        if (!startNode || !endNode) continue;
+        if (link.scopeId != currentScopeName()) continue;
+        if (!startNode || !endNode || !isNodeInCurrentScope(*startNode) || !isNodeInCurrentScope(*endNode)) continue;
 
         auto srcKey = (uintptr_t)startNode->outputPin.Get();
         auto dstKey = (uintptr_t)endNode->inputPin.Get();
@@ -1396,6 +1751,12 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
     if (m_needsPositionRestore)
     {
+        for (auto& node : graphNodes)
+        {
+            if (isNodeInCurrentScope(node))
+                ed::SetNodePosition(node.id, node.pos);
+        }
+
         ed::NavigateToContent();
         m_needsPositionRestore = false;
     }
@@ -1404,6 +1765,7 @@ void AnimationControllerComponent::OnGuiNodeEditor()
     {
         auto getPinInfo = [&](uintptr_t pinId, bool& isInput, std::string& nodeName) -> bool {
             for (auto& n : graphNodes) {
+                if (!isNodeInCurrentScope(n)) continue;
                 if ((uintptr_t)n.inputPin.Get() != 0 && (uintptr_t)n.inputPin.Get() == pinId) { isInput = true;  nodeName = n.stateName; return true; }
                 if ((uintptr_t)n.outputPin.Get() != 0 && (uintptr_t)n.outputPin.Get() == pinId) { isInput = false; nodeName = n.stateName; return true; }
             }
@@ -1427,10 +1789,16 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                 {
                     const std::string finalFrom = isStartInput ? dstName : srcName;
                     const std::string finalTo = isStartInput ? srcName : dstName;
-                    const bool invalidToSpecial = (finalTo == START_NODE_NAME || finalTo == ANY_NODE_NAME);
+                    auto* finalFromNode = FindNodeByName(finalFrom);
+                    auto* finalToNode = FindNodeByName(finalTo);
+                    const bool invalidToSpecial = finalToNode &&
+                        (finalToNode->type == AnimGraphNodeType::Start ||
+                         finalToNode->type == AnimGraphNodeType::Any ||
+                         finalToNode->type == AnimGraphNodeType::Entry);
+                    const bool invalidFromExit = finalFromNode && finalFromNode->type == AnimGraphNodeType::Exit;
                     const bool invalidFromStartToStart = (finalFrom == START_NODE_NAME && finalTo == START_NODE_NAME);
 
-                    if (invalidToSpecial || invalidFromStartToStart)
+                    if (invalidToSpecial || invalidFromExit || invalidFromStartToStart)
                     {
                         ed::RejectNewItem(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), 2.0f);
                     }
@@ -1438,7 +1806,7 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                     {
                         bool exists = false;
                         for (auto& t : graphTransitions)
-                            if (t.fromStateName == finalFrom && t.toStateName == finalTo) { exists = true; break; }
+                            if (t.scopeId == currentScopeName() && t.fromStateName == finalFrom && t.toStateName == finalTo) { exists = true; break; }
 
                         if (!exists)
                         {
@@ -1446,7 +1814,7 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                             {
                                 graphTransitions.erase(
                                     std::remove_if(graphTransitions.begin(), graphTransitions.end(),
-                                        [](const auto& t) { return t.fromStateName == START_NODE_NAME; }),
+                                        [&](const auto& t) { return t.scopeId == currentScopeName() && t.fromStateName == START_NODE_NAME; }),
                                     graphTransitions.end());
                             }
 
@@ -1455,6 +1823,7 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                             transition.toStateName = finalTo;
                             transition.duration = 0.2f;
                             transition.id = ed::LinkId(GetNextID());
+                            transition.scopeId = currentScopeName();
                             graphTransitions.push_back(transition);
                         }
                     }
@@ -1518,11 +1887,30 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                 if (editingState && editingState->name == deletedName)
                     editingState = nullptr;
 
-                RemoveState(deletedName);
             }
         }
     }
     ed::EndDelete();
+
+    ed::NodeId doubleClickedNodeId = ed::GetDoubleClickedNode();
+    if ((uintptr_t)doubleClickedNodeId.Get() != 0)
+    {
+        auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
+            [&](const auto& n) { return n.id == doubleClickedNodeId; });
+        if (it != graphNodes.end() && it->type == AnimGraphNodeType::SubGraph)
+        {
+            if (it->childScopeId.empty())
+                it->childScopeId = it->stateName;
+            for (auto& node : graphNodes)
+            {
+                if (isNodeInCurrentScope(node))
+                    node.pos = ed::GetNodePosition(node.id);
+            }
+            m_graphScopeStack.push_back(currentScopeName());
+            m_currentGraphScopeId = it->childScopeId;
+            m_needsPositionRestore = true;
+        }
+    }
 
     if (ed::HasSelectionChanged())
     {
@@ -1536,13 +1924,58 @@ void AnimationControllerComponent::OnGuiNodeEditor()
         }
     }
 
+    ed::NodeId selectedSubGraphNodeId_;
+    if (ed::GetSelectedNodes(&selectedSubGraphNodeId_, 1) > 0)
+    {
+        auto subGraphIt_ = std::find_if(graphNodes.begin(), graphNodes.end(),
+            [&](const auto& node_) { return node_.id == selectedSubGraphNodeId_ && node_.type == AnimGraphNodeType::SubGraph; });
+
+        if (subGraphIt_ != graphNodes.end() && subGraphIt_->scopeId == currentScopeName())
+        {
+            ed::Suspend();
+
+            ImGui::Begin("SubGraph Properties");
+
+            std::string newName_ = subGraphIt_->stateName;
+            if (ImGui::InputText("Name", &newName_))
+            {
+                const bool isEmpty_ = newName_.empty();
+                const bool isSpecialName_ = IsSpecialGraphNodeName(newName_) ||
+                    newName_.rfind(ENTRY_NODE_PREFIX, 0) == 0 ||
+                    newName_.rfind(EXIT_NODE_PREFIX, 0) == 0;
+                const bool exists_ = std::any_of(graphNodes.begin(), graphNodes.end(),
+                    [&](const auto& node_) { return node_.id != subGraphIt_->id && node_.stateName == newName_; });
+
+                if (!isEmpty_ && !isSpecialName_ && !exists_ && newName_ != subGraphIt_->stateName)
+                {
+                    const std::string oldName_ = subGraphIt_->stateName;
+                    subGraphIt_->stateName = newName_;
+
+                    for (auto& transition_ : graphTransitions)
+                    {
+                        if (transition_.fromStateName == oldName_)
+                            transition_.fromStateName = newName_;
+                        if (transition_.toStateName == oldName_)
+                            transition_.toStateName = newName_;
+                    }
+                }
+            }
+
+            ImGui::TextDisabled("Internal Scope: %s", subGraphIt_->childScopeId.c_str());
+            ImGui::TextDisabled("Double-click the node to edit its internal graph.");
+
+            ImGui::End();
+
+            ed::Resume();
+        }
+    }
     static ed::LinkId selectedLinkId;
     if (ed::GetSelectedLinks(&selectedLinkId, 1) > 0)
     {
         auto it = std::find_if(graphTransitions.begin(), graphTransitions.end(),
             [&](const auto& t) { return t.id == selectedLinkId; });
 
-        if (it != graphTransitions.end())
+        if (it != graphTransitions.end() && it->scopeId == currentScopeName())
         {
             ed::Suspend();
 
@@ -1660,6 +2093,7 @@ void AnimationControllerComponent::OnGuiNodeEditor()
                     newNode.inputPin = ed::PinId(GetNextID());
                     newNode.outputPin = ed::PinId(GetNextID());
                     newNode.type = AnimGraphNodeType::State;
+                    newNode.scopeId = currentScopeName();
                     graphNodes.push_back(newNode);
                     _nodeToPlaceHash = (uintptr_t)newNode.id.Get();
                 }
@@ -1674,10 +2108,36 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
             for (auto& n : graphNodes) {
                 if (n.stateName == newName) {
+                    n.scopeId = currentScopeName();
                     _nodeToPlaceHash = (uintptr_t)n.id.Get();
                     break;
                 }
             }
+        }
+        ImGui::Separator();
+        if (ImGui::MenuItem("Create SubGraph"))
+        {
+            std::string baseName = "SubGraph";
+            int index = 1;
+            std::string graphName;
+            bool exists = false;
+            do
+            {
+                graphName = baseName + "_" + std::to_string(index++);
+                exists = std::any_of(graphNodes.begin(), graphNodes.end(),
+                    [&](const auto& n) { return n.stateName == graphName || n.childScopeId == graphName; });
+            } while (exists);
+
+            AnimGraphNode subGraphNode;
+            subGraphNode.id = ed::NodeId(GetNextID());
+            subGraphNode.stateName = graphName;
+            subGraphNode.childScopeId = graphName;
+            subGraphNode.inputPin = ed::PinId(GetNextID());
+            subGraphNode.outputPin = ed::PinId(GetNextID());
+            subGraphNode.type = AnimGraphNodeType::SubGraph;
+            subGraphNode.scopeId = currentScopeName();
+            graphNodes.push_back(subGraphNode);
+            _nodeToPlaceHash = (uintptr_t)subGraphNode.id.Get();
         }
         ImGui::EndPopup();
     }

@@ -1,7 +1,7 @@
 #include "ModelResourceManager.h"
 #include "GLTFImporter.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
-#include "Misc.h"
+#include "Engine/Common/Misc.h"
 #include <fstream>
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>

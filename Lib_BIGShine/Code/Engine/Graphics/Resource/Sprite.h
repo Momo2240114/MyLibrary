@@ -50,9 +50,16 @@ public:
     void SetVisible(bool v) { visible = v; }
     void SetLocalSize(const DirectX::XMFLOAT2& s) { localSize = s; }
     void SetPivot(PosOfsset p) { pivotType = p; }
-    void SetUVRect(float x, float y, float width, float height) {
-        catPos = { x, y };
-        catSize = { width, height };
+    void SetUVRect(float x_, float y_, float width_, float height_) {
+        catPos = { x_, y_ };
+        catSize = { width_, height_ };
+    }
+
+    void SetUVGridIndex(int index_, int columns_, const DirectX::XMFLOAT2& cellSize_) {
+        if (columns_ < 1) columns_ = 1;
+        const int column_ = index_ % columns_;
+        const int row_ = index_ / columns_;
+        SetUVRect(cellSize_.x * column_, cellSize_.y * row_, cellSize_.x, cellSize_.y);
     }
 
     // ===== ƒQƒbƒ^[  =====

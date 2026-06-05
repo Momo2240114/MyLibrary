@@ -1,7 +1,7 @@
 #include "Skinning.hlsli"
 
 #include "Scene.hlsli"
-#include "PBRCommon.hlsli" 
+#include "ModelCommon.hlsli" 
 
 
 // GltfModelCommponennt::InputElementDescs ‚Ì’è‹`‡‚É‡‚í‚¹‚é

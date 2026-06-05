@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <variant>
 #include <memory>
+#include <vector>
 
 // Blackboardが持てる型の定義
 using BlackBoardValue = std::variant<float, int, bool, DirectX::SimpleMath::Vector2>;
@@ -63,6 +64,9 @@ public:
     // Blackboard へのアクセス権を授ける
     const std::unordered_map<std::string, BlackBoardValue>& GetBlackboard() const { return blackboard; }
     const AnimState* GetCurrentState() { return currentState; };
+    float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
+    void SetEditorPoseOverride(bool enabled) { m_editorPoseOverride = enabled; }
+    bool IsEditorPoseOverride() const { return m_editorPoseOverride; }
 
     // ーーー 窓にデータを差し出すためのゲッター群 ーーー
     std::vector<AnimGraphNode>& GetGraphNodes() { return graphNodes; }
@@ -100,6 +104,7 @@ private:
 
     // 【追加】このコンポーネントが紐づくモデル固有のポーズの記憶
     std::shared_ptr<PoseLibraryResource> m_poseLibrary = nullptr;
+    bool m_editorPoseOverride = false;
 
     // ノードエディタで管理されるステート群
     std::unordered_map<std::string, std::unique_ptr<AnimState>> states;
@@ -121,12 +126,17 @@ private:
     ImVec2       _newNodeSpawnPos = { 0,0 };
     uintptr_t    _nodeToPlaceHash = 0;
     bool         m_needsPositionRestore = false;
+    std::string  m_currentGraphScopeId = "Root";
+    std::vector<std::string> m_graphScopeStack;
 
     void EnsureSpecialGraphNodes();
     void TryEnterStartState();
+    bool TryEnterSubGraph(const AnimGraphNode& subGraphNode, float duration);
     void LoadAsset(const std::string& path);
     void SaveAsset(const std::string& path);
 
+    bool m_pendingGraphAssetLoad = false;
+    std::string m_pendingGraphAssetPath;
 
     // ActionRegistryへの登録名リスト（削除用）
     std::vector<std::string> registeredFullNames;

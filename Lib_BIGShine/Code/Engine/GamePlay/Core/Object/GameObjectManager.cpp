@@ -23,11 +23,10 @@
 void GameObjectManager::Initialize()
 {
     // パーティクルシステムの初期化
-    particleSystem = std::make_unique<ParticleRenderSystem>();
-    particleSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
+    _ParticleSystem = std::make_unique<ParticleRenderSystem>();
+    _ParticleSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
 
     _TimeManager = std::make_shared<TimeManager>();
-    m_pRayCastManager = std::make_unique<RayCastManager>();
 
     _CameraManager = std::make_shared<CameraManager>();
     _CameraManager->Initialize();
@@ -37,10 +36,10 @@ void GameObjectManager::Update(float et_)
 {
     _TimeManager->Update(et_);
 
-    // ★ 1. 新しく追加されたオブジェクトを一度だけ初期化 (StartObjects)
-    if (!pendingStarts.empty()) {
-        std::vector<std::shared_ptr<GameObject>> startList = std::move(pendingStarts);
-        pendingStarts.clear();
+    // 新しく追加されたオブジェクトを一度だけ初期化 (StartObjects)
+    if (!_PendingStarts.empty()) {
+        std::vector<std::shared_ptr<GameObject>> startList = std::move(_PendingStarts);
+        _PendingStarts.clear();
 
         // STEP 1: Director系（アクションを提供する側）の登録
         for (auto& obj : startList) {
@@ -48,7 +47,7 @@ void GameObjectManager::Update(float et_)
 
             // --- ここでパーティクルコンポーネントをリストに登録 ---
             if (auto pComp = obj->GetComponent<ParticleComponent>()) {
-                m_particleComponents.push_back(pComp);
+                _ParticleComponents.push_back(pComp);
             }
 
             // 既存のコンポーネント初期化（もしあれば）
@@ -75,7 +74,7 @@ void GameObjectManager::Update(float et_)
     _TimeManager->PrepareCache();
 
     // 2. オブジェクトの更新
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         // ループの外、あるいは事前に取得したキャッシュを参照
         float scale = _TimeManager->GetCachedScale(obj->GetLayerBit());
         obj->Update(et_ * scale);
@@ -85,7 +84,7 @@ void GameObjectManager::Update(float et_)
     CollisionStep();
 
     //LateUpdate
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         if (auto col = obj->GetComponent<ColliderComponent>()) {
             col->ApplyGravity(et_); // ここで velocity.y を更新し、仮移動(pos += v*dt)を行う
         }
@@ -93,17 +92,17 @@ void GameObjectManager::Update(float et_)
     }
 
     // 3. 確定した座標を反映（ここでこれ以上座標を動かさない！）
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         obj->UpdateTransform();
     }
 
     int highestPriority = -2147483648; // 最低値から開始
 
     // ★ 最後にまとめて削除を確定させる
-    if (!pendingDestroys.empty()) {
+    if (!_PendingDestroys.empty()) {
         // 削除中にさらにDestroyが呼ばれる可能性に備え、一旦ローカルにコピー
-        std::vector<std::shared_ptr<GameObject>> currentDestroys = std::move(pendingDestroys);
-        pendingDestroys.clear();
+        std::vector<std::shared_ptr<GameObject>> currentDestroys = std::move(_PendingDestroys);
+        _PendingDestroys.clear();
 
         for (auto& obj : currentDestroys) {
             ApplyDestroys(obj);
@@ -111,37 +110,36 @@ void GameObjectManager::Update(float et_)
     }
 
     // --- 1. 無効になった（削除された）パーティクルコンポーネントを掃除 ---
-    m_particleComponents.erase(
-        std::remove_if(m_particleComponents.begin(), m_particleComponents.end(),
+    _ParticleComponents.erase(
+        std::remove_if(_ParticleComponents.begin(), _ParticleComponents.end(),
             [](const std::weak_ptr<ParticleComponent>& wp) {
                 return wp.expired(); // GameObjectと共に破棄されていたら削除
             }),
-        m_particleComponents.end()
+        _ParticleComponents.end()
     );
 
-    _CameraManager->Update(et_,objects);
+    _CameraManager->Update(et_,_Objects);
 }
 
 void GameObjectManager::Clear()
 {
     GraphicsDeviceManager::Instance().ResetFilter();
 
-    selectedObject = nullptr;
+    _SelectedObject = nullptr;
 
 
-    m_pRayCastManager->Clear();//レイキャストマネージャークリア処理
 
     // 各オブジェクトが持っているComPtrを確実に解放させるため、
     // リストをクリアする前に念のため各オブジェクトの終了処理を呼ぶのが理想です
     // 1. まず全てのトリガーリストをクリアして循環参照を解く
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         if (!obj) continue;
         auto col = obj->GetComponent<ColliderComponent>();
         if (col) {
             col->currentTriggers.clear();
         }
     }
-    objects.clear(); // ここで shared_ptr の参照カウントが減り、実体が削除される
+    _Objects.clear(); // ここで shared_ptr の参照カウントが減り、実体が削除される
 }
 
 // オブジェクトを追加
@@ -150,30 +148,30 @@ void GameObjectManager::AddObject(std::shared_ptr<GameObject> obj)
     if (!obj) return; // Nullならreturn
 
     // 重複を避ける
-    for (const auto& existing : objects) {
+    for (const auto& existing : _Objects) {
         if (existing->GetName() == obj->GetName()) {
             return;
         }
     }
 
-    objects.push_back(obj);
+    _Objects.push_back(obj);
 }
 
 // 謁見の間：オブジェクトを追放する
 void GameObjectManager::RemoveObject(const std::string& name)
 {
     // 追放の儀式
-    auto it = std::remove_if(objects.begin(), objects.end(),
+    auto it = std::remove_if(_Objects.begin(), _Objects.end(),
         [&name](const std::shared_ptr<GameObject>& obj) {
             return obj->GetName() == name;
         });
 
-    if (it != objects.end()) {
+    if (it != _Objects.end()) {
         // もし追放する者が現在選ばれているなら、選択を解除する（世界崩壊を防ぐ）
-        if (selectedObject && selectedObject->GetName() == name) {
-            selectedObject = nullptr;
+        if (_SelectedObject && _SelectedObject->GetName() == name) {
+            _SelectedObject = nullptr;
         }
-        objects.erase(it, objects.end());
+        _Objects.erase(it, _Objects.end());
     }
 }
 
@@ -203,7 +201,7 @@ void GameObjectManager::CollisionStep()
     std::vector<ColliderPair> activeColliders;
 
     //コリジョンのコンポーネントがあるゲームオブジェクトを取得する
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         auto col = obj->GetComponent<ColliderComponent>();
 
         if (col && col->IsEnabled()) {
@@ -237,7 +235,7 @@ void GameObjectManager::CollisionStep()
                 {
                     //レイヤーがかぶっていたらその時だけは押し出し処理をやめる
                     int a = (uint32_t)B.obj->layer;
-                    if ((A.obj->m_Mask & (uint32_t)B.obj->layer) != 0)
+                    if ((A.obj->mask & (uint32_t)B.obj->layer) != 0)
                     {
                         HandlePhysXTrigger(A.col.get(), B.col.get(), true);
                     }
@@ -258,7 +256,7 @@ void GameObjectManager::CollisionStep()
                         else
                         {
                             //トータルの重さを求める
-                            float total = A.col->m_Mass + B.col->m_Mass;
+                            float total = A.col->mass + B.col->mass;
 
                             //ゼロ除算をなくすため
                             if (total == 0.0f)
@@ -267,8 +265,8 @@ void GameObjectManager::CollisionStep()
                             }
                             else
                             {
-                                weightA = B.col->m_Mass / total;
-                                weightB = A.col->m_Mass / total;
+                                weightA = B.col->mass / total;
+                                weightB = A.col->mass / total;
                             }
                         }
 
@@ -371,7 +369,7 @@ void GameObjectManager::DrawHierarchyGui()
     static char createName[64] = "GameObject";
     ImGui::Text("Create GameObject");
     ImGui::InputText("##CreateName", createName, IM_ARRAYSIZE(createName));
-    if (ImGui::Button("Create")) selectedObject = Create(createName);
+    if (ImGui::Button("Create")) _SelectedObject = Create(createName);
 
     ImGui::Separator();
 
@@ -379,20 +377,20 @@ void GameObjectManager::DrawHierarchyGui()
     if (ImGui::CollapsingHeader("Prefabs", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::Button("Refresh")) RefreshPrefabList();
         static char newPrefabName[64] = "";
-        if (!m_prefabFiles.empty()) {
-            const char* currentItem = m_prefabFiles[m_selectedPrefabIndex].c_str();
+        if (!_PrefabFiles.empty()) {
+            const char* currentItem = _PrefabFiles[_SelectedPrefabIndex].c_str();
             if (ImGui::BeginCombo("Select Prefab", currentItem)) {
-                for (int n = 0; n < m_prefabFiles.size(); n++) {
-                    if (ImGui::Selectable(m_prefabFiles[n].c_str(), m_selectedPrefabIndex == n)) m_selectedPrefabIndex = n;
+                for (int n = 0; n < _PrefabFiles.size(); n++) {
+                    if (ImGui::Selectable(_PrefabFiles[n].c_str(), _SelectedPrefabIndex == n)) _SelectedPrefabIndex = n;
                 }
                 ImGui::EndCombo();
             }
-            if (ImGui::Button("Instantiate (Create from Prefab)")) selectedObject = Instantiate(m_prefabFiles[m_selectedPrefabIndex]);
+            if (ImGui::Button("Instantiate (Create from Prefab)")) _SelectedObject = Instantiate(_PrefabFiles[_SelectedPrefabIndex]);
         }
-        if (selectedObject) {
+        if (_SelectedObject) {
             ImGui::InputText("New Prefab Name", newPrefabName, IM_ARRAYSIZE(newPrefabName));
             if (ImGui::Button("Save Selected as Prefab")) {
-                if (strlen(newPrefabName) > 0) { SaveAsPrefab(selectedObject, newPrefabName); RefreshPrefabList(); memset(newPrefabName, 0, sizeof(newPrefabName)); }
+                if (strlen(newPrefabName) > 0) { SaveAsPrefab(_SelectedObject, newPrefabName); RefreshPrefabList(); memset(newPrefabName, 0, sizeof(newPrefabName)); }
             }
         }
     }
@@ -403,7 +401,7 @@ void GameObjectManager::DrawHierarchyGui()
     GameObject* objectToDelete = nullptr;
     ImGui::BeginChild("HierarchyRegion", ImVec2(0, 0), true);
 
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         if (obj->transform->parent.expired()) DrawHierarchyNode(obj, &objectToDelete);
     }
 
@@ -418,15 +416,15 @@ void GameObjectManager::DrawHierarchyGui()
 
     // 削除の確定
     if (objectToDelete) {
-        if (selectedObject && selectedObject.get() == objectToDelete) selectedObject = nullptr;
-        auto it = std::find_if(objects.begin(), objects.end(), [&](const std::shared_ptr<GameObject>& ptr) { return ptr.get() == objectToDelete; });
-        if (it != objects.end()) {
+        if (_SelectedObject && _SelectedObject.get() == objectToDelete) _SelectedObject = nullptr;
+        auto it = std::find_if(_Objects.begin(), _Objects.end(), [&](const std::shared_ptr<GameObject>& ptr) { return ptr.get() == objectToDelete; });
+        if (it != _Objects.end()) {
             auto targetObj = *it;
             for (auto& childTrans : targetObj->transform->children) {
                 if (auto childGO = childTrans->gameObject.lock()) childGO->SetParent(nullptr);
             }
-            if (selectedObject == targetObj) selectedObject = nullptr;
-            objects.erase(it);
+            if (_SelectedObject == targetObj) _SelectedObject = nullptr;
+            _Objects.erase(it);
         }
     }
 
@@ -435,15 +433,15 @@ void GameObjectManager::DrawHierarchyGui()
 void GameObjectManager::DrawInspectorGui()
 {
 
-    ImGui::SeparatorText(selectedObject->GetName().c_str());
-    selectedObject->Gui();
+    ImGui::SeparatorText(_SelectedObject->GetName().c_str());
+    _SelectedObject->Gui();
 
     auto cameraComp = _CameraManager->GetActiveCamera();
     if (cameraComp) {
         ImGuizmo::BeginFrame();
         DirectX::XMFLOAT4X4 view = cameraComp->GetView();
         DirectX::XMFLOAT4X4 proj = cameraComp->GetProjection();
-        selectedObject->DrawGizmo(&view._11, &proj._11);
+        _SelectedObject->DrawGizmo(&view._11, &proj._11);
     }
 
 }
@@ -451,28 +449,28 @@ void GameObjectManager::DrawInspectorGui()
 void GameObjectManager::DrawSceneModals()
 {
     // --- 保存の儀式 ---
-    if (m_sceneState.showSavePopup) {
+    if (_SceneState.showSavePopup) {
         // 保存時にも最新のシーン名簿を読み込む
         GetSceneDirectories();
         ImGui::OpenPopup("SaveScenePopup");
-        m_sceneState.showSavePopup = false;
+        _SceneState.showSavePopup = false;
     }
 
     if (ImGui::BeginPopupModal("SaveScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (ImGui::BeginCombo("Select/Input Scene", m_sceneState.name)) {
-            for (const auto& file : m_sceneState.sceneFiles) {
-                bool isSelected = (strcmp(m_sceneState.name, file.c_str()) == 0);
+        if (ImGui::BeginCombo("Select/Input Scene", _SceneState.name)) {
+            for (const auto& file : _SceneState.sceneFiles) {
+                bool isSelected = (strcmp(_SceneState.name, file.c_str()) == 0);
                 if (ImGui::Selectable(file.c_str(), isSelected)) {
-                    strcpy_s(m_sceneState.name, file.c_str());
+                    strcpy_s(_SceneState.name, file.c_str());
                 }
             }
             ImGui::EndCombo();
         }
 
-        ImGui::InputText("Filename", m_sceneState.name, IM_ARRAYSIZE(m_sceneState.name));
+        ImGui::InputText("Filename", _SceneState.name, IM_ARRAYSIZE(_SceneState.name));
 
         if (ImGui::Button("Save", ImVec2(120, 0))) {
-            SaveScene(m_sceneState.name);
+            SaveScene(_SceneState.name);
             GetSceneDirectories(); // 最新の名簿に更新
             ImGui::CloseCurrentPopup();
         }
@@ -482,28 +480,28 @@ void GameObjectManager::DrawSceneModals()
         ImGui::EndPopup();
     }
 
-    // --- 読み込みの儀式 ---
-    if (m_sceneState.showLoadPopup) {
+    // --- 読み込み ---
+    if (_SceneState.showLoadPopup) {
         // 読み込み時にも最新のシーン名簿を読み込む
         GetSceneDirectories();
         ImGui::OpenPopup("LoadScenePopup");
-        m_sceneState.showLoadPopup = false;
+        _SceneState.showLoadPopup = false;
     }
 
     if (ImGui::BeginPopupModal("LoadScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (ImGui::BeginCombo("Select Scene", m_sceneState.name)) {
-            for (const auto& file : m_sceneState.sceneFiles) {
-                bool isSelected = (strcmp(m_sceneState.name, file.c_str()) == 0);
+        if (ImGui::BeginCombo("Select Scene", _SceneState.name)) {
+            for (const auto& file : _SceneState.sceneFiles) {
+                bool isSelected = (strcmp(_SceneState.name, file.c_str()) == 0);
                 if (ImGui::Selectable(file.c_str(), isSelected)) {
-                    strcpy_s(m_sceneState.name, file.c_str());
+                    strcpy_s(_SceneState.name, file.c_str());
                 }
             }
             ImGui::EndCombo();
         }
 
         if (ImGui::Button("Load", ImVec2(120, 0))) {
-            if (strlen(m_sceneState.name) > 0) {
-                LoadScene(m_sceneState.name);
+            if (strlen(_SceneState.name) > 0) {
+                LoadScene(_SceneState.name);
             }
             ImGui::CloseCurrentPopup();
         }
@@ -518,7 +516,7 @@ void GameObjectManager::DrawSceneModals()
 void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> obj, GameObject** toDelete)
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-    if (obj == selectedObject) flags |= ImGuiTreeNodeFlags_Selected;
+    if (obj == _SelectedObject) flags |= ImGuiTreeNodeFlags_Selected;
     if (obj->transform->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
 
     bool opened = ImGui::TreeNodeEx((void*)(uintptr_t)obj.get(), flags, "%s", obj->GetName().c_str());
@@ -551,12 +549,12 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> obj, GameO
 
     // クリックで選択
     if (ImGui::IsItemClicked()) {
-        selectedObject = obj;
+        _SelectedObject = obj;
     }
 
     // 右クリックメニュー
     if (ImGui::BeginPopupContextItem()) {
-        selectedObject = obj;
+        _SelectedObject = obj;
         if (ImGui::MenuItem("Delete GameObject")) {
             //*toDelete = obj.get();
             Destroy(obj->GetName());
@@ -577,7 +575,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> obj, GameO
 
 }
 
-void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_)
+void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem)
 {
     auto ctx = GraphicsDeviceManager::Instance().GetContext();
     auto& gdm = GraphicsDeviceManager::Instance();
@@ -591,7 +589,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 
     DecalManager decalManager; // デカール用マネージャー
 
-    for (auto& o : objects)
+    for (auto& o : _Objects)
     {
         auto lightComp = o->GetComponent<LightComponent>();
         if (lightComp && lightComp->IsEnabled())
@@ -642,11 +640,11 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     }
 
 
-    for (auto& o : objects)
+    for (auto& o : _Objects)
     {
         auto md = o->GetComponent<GltfModelCommponennt>();
         if (md)
-            modelSystem_.PushSubmit(md->GetShaderID(), md);
+            modelSystem.PushSubmit(md->GetShaderID(), md);
     }
     RenderContext rc;
 
@@ -658,6 +656,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     rc.baseColorSRV = GraphicsDeviceManager::Instance().GetSceneSRV();
     rc.depthSRV = GraphicsDeviceManager::Instance().GetMainDepthSRV();
     rc.shapeSystem = &GraphicsDeviceManager::Instance().GetShapeRendererSystem();
+    rc.cascadeShadowMap = &GraphicsDeviceManager::Instance().GetCascadeShadowMap();
 
     // ここでレンダー状態をリセット
     ctx->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
@@ -669,16 +668,28 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     // 1. シーンバッファ（HDR）へ描画開始
     gdm.SetSceneRenderTarget();
 
-    modelSystem_.RenderAll(rc);
+    modelSystem.RenderAll(rc);
 
 
-    if(shapeRenderFlg)
+    if(_ShapeRenderFlg)
     {
         GraphicsDeviceManager::Instance().GetShapeRendererSystem().Render(ctx, rc.camera->GetView(), rc.camera->GetProjection());
     }
 
     gdm.SetParticleRenderTarget();
-    particleSystem->RenderAll(rc);
+
+    for (auto& obj : _Objects)
+    {
+        if (!obj) continue;
+
+        auto particle = obj->GetComponent<ParticleComponent>();
+        if (particle && particle->IsEnabled())
+        {
+            _ParticleSystem->PushSubmit(particle.get());
+        }
+    }
+
+    _ParticleSystem->RenderAll(rc);
 
     auto* finalRTV = gdm.GetRenderTargetView();
 
@@ -691,16 +702,16 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 
 
     // SpriteRenderSubmit
-    for (auto& o : objects)
+    for (auto& o : _Objects)
     {
         auto sr = o->GetComponent<SpriteRenderer>();
         if (sr && sr->enabled)
-            spriteSystem_.Submit(sr, sr->GetSpriteShaderID());
+            spriteSystem.Submit(sr, sr->GetSpriteShaderID());
     }
 
     ctx->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
 
-    spriteSystem_.RenderAll(ctx);
+    spriteSystem.RenderAll(ctx);
 }
 
 void HandleTrigger(
@@ -756,12 +767,12 @@ void GameObjectManager::Destroy(std::shared_ptr<GameObject> obj)
 {
     if (!obj) return;
     // 即座に消さず、予約リストに入れる
-    pendingDestroys.push_back(obj);
+    _PendingDestroys.push_back(obj);
 }
 
 void GameObjectManager::Destroy(std::string objName)
 {
-    for (auto& obj : objects)
+    for (auto& obj : _Objects)
     {
         if (obj && obj->GetName() == objName) 
         {
@@ -837,14 +848,14 @@ void GameObjectManager::HandlePhysXContact(ColliderComponent* colA, ColliderComp
 
 // ヘルパー関数：親→子の順番で名前をリストに追加する
 void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& listJson) {
-    if (!obj->saveFlg) return;
+    if (!obj || !obj->saveFlg) return;
 
     // 自分の名前を登録
     listJson["ObjectList"].push_back(obj->nameComponent->name);
 
     // 子供たちの名前を再帰的に登録
     for (auto& child : obj->transform->children) {
-        CollectObjectNames(child->gameObject.lock(), listJson);
+        CollectObjectNames(child ? child->gameObject.lock() : nullptr, listJson);
     }
 }
 
@@ -869,7 +880,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName)
 
     // 1. 各オブジェクトの個別ファイルを保存
     // (ここは順不同でOKなので、まずは全ファイルを書き出す)
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         if (!obj->saveFlg) continue;
 
         std::string filePath = objectsPath + obj->nameComponent->name + ".json";
@@ -882,7 +893,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName)
 
     // 2. リスト JSON に「親 → 子」の順で名前を記録
     // 親がいない（ルート）オブジェクトを探して、そこから再帰を開始する
-    for (auto& obj : objects) {
+    for (auto& obj : _Objects) {
         if (obj->saveFlg && obj->transform->parent.lock() == nullptr) {
             CollectObjectNames(obj, listJson);
         }
@@ -959,8 +970,10 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
 
 void GameObjectManager::ResolveHierarchy()
 {
-    for (auto& obj : objects)
+    for (auto& obj : _Objects)
     {
+        if (!obj) continue;
+
         // ロード時に一時保存した「親の名前」を取得
         std::string pName = obj->transform->parentNameDuringLoad;
 
@@ -968,24 +981,27 @@ void GameObjectManager::ResolveHierarchy()
         {
             // 名前でマネージャー内のオブジェクトを検索
             auto parentObj = Find(pName);
-            if (parentObj)
+            if (parentObj && parentObj != obj)
             {
                 // 親が見つかったら、Transformの親子付けを実行
                 obj->SetParent(parentObj);
             }
         }
+
+        // ロード用の一時情報を残すと、後でResolveHierarchyを呼んだ時に古い親へ戻ってしまう
+        obj->transform->parentNameDuringLoad.clear();
     }
 
     // 全体の親子が確定したので、一度行列を正しく計算させる
-    for (auto& obj : objects)
+    for (auto& obj : _Objects)
     {
-        obj->UpdateTransform();
+        if (obj) obj->UpdateTransform();
     }
 }
 
 std::vector<std::string> GameObjectManager::GetSceneDirectories()
 {
-    m_sceneState.sceneFiles.clear();
+    _SceneState.sceneFiles.clear();
     std::string rootPath = "Data/Scenes";
 
     if (std::filesystem::exists(rootPath)) {
@@ -997,27 +1013,27 @@ std::vector<std::string> GameObjectManager::GetSceneDirectories()
                 std::filesystem::path jsonPath = entry.path() / "SceneList.json";
 
                 if (std::filesystem::exists(jsonPath)) {
-                    m_sceneState.sceneFiles.push_back(sceneName);
+                    _SceneState.sceneFiles.push_back(sceneName);
                 }
             }
         }
     }
-    return m_sceneState.sceneFiles;
+    return _SceneState.sceneFiles;
 }
 
 
 // フォルダ内のJSONファイルをスキャンする
 void GameObjectManager::RefreshPrefabList()
 {
-    m_prefabFiles.clear();
-    if (!std::filesystem::exists(m_prefabDirectory)) {
-        std::filesystem::create_directories(m_prefabDirectory);
+    _PrefabFiles.clear();
+    if (!std::filesystem::exists(_PrefabDirectory)) {
+        std::filesystem::create_directories(_PrefabDirectory);
     }
 
-    for (const auto& entry : std::filesystem::directory_iterator(m_prefabDirectory)) {
+    for (const auto& entry : std::filesystem::directory_iterator(_PrefabDirectory)) {
         if (entry.path().extension() == ".json") {
             // ファイル名（拡張子なし）をリストに追加
-            m_prefabFiles.push_back(entry.path().stem().string());
+            _PrefabFiles.push_back(entry.path().stem().string());
         }
     }
 }
@@ -1035,12 +1051,12 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> obj)
     }
 
     // 2. 特殊な参照を外す
-    if (selectedObject == obj) selectedObject = nullptr;
+    if (_SelectedObject == obj) _SelectedObject = nullptr;
 
     // 3. マネージャーのメインリストから自分を削除
-    auto it = std::remove(objects.begin(), objects.end(), obj);
-    if (it != objects.end()) {
-        objects.erase(it, objects.end());
+    auto it = std::remove(_Objects.begin(), _Objects.end(), obj);
+    if (it != _Objects.end()) {
+        _Objects.erase(it, _Objects.end());
     }
 }
 
@@ -1049,8 +1065,8 @@ void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> obj, const std:
 {
     if (!obj) return;
 
-    std::filesystem::create_directories(m_prefabDirectory);
-    std::string filePath = m_prefabDirectory + prefabName + ".json";
+    std::filesystem::create_directories(_PrefabDirectory);
+    std::string filePath = _PrefabDirectory + prefabName + ".json";
 
     nlohmann::json j = obj->Save();
     std::ofstream file(filePath);
@@ -1064,7 +1080,7 @@ void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> obj, const std:
 void GameObjectManager::InitializeAllComponents()
 {
     // ★ 現在存在しているオブジェクトをスナップショット
-    auto objectsSnapshot = objects;
+    auto objectsSnapshot = _Objects;
 
     for (auto& obj : objectsSnapshot)
     {
@@ -1094,7 +1110,7 @@ CameraManager* GameObjectManager::GetCameraManager(){ return _CameraManager.get(
 // プレハブから生成
 std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName)
 {
-    std::string filePath = m_prefabDirectory + prefabName + ".json";
+    std::string filePath = _PrefabDirectory + prefabName + ".json";
     std::ifstream file(filePath);
     if (!file.is_open()) {
         printf("Error: Prefab '%s' not found!\n", prefabName.c_str());

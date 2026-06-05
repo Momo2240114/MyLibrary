@@ -7,17 +7,10 @@
 void ShaderWindow::Draw() {
     if (!isVisible) return;
 
-    // スタイルの適用
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, style.backgroundColor);
-    ImGui::PushStyleColor(ImGuiCol_TitleBgActive, style.titleBarColor);
 
-    if (ImGui::Begin(windowName.c_str(), &isVisible)) {
-        // スタイル変更用ポップアップ
+    if (BeginEditorWindow()) {
         DrawStylePopup();
-        modelRenderSystem.Gui();
+        modelRenderSystem.ShaderSettingGui();
     }
-    ImGui::End();
-
-    // スタイル終了
-    ImGui::PopStyleColor(2);
+    EndEditorWindow();
 }

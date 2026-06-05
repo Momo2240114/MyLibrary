@@ -1,6 +1,11 @@
+ï»¿#pragma once
+
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "ParticleEmitter.h"
 #include <filesystem>
+#include <memory>
+#include <string>
+#include <vector>
 
 class ParticleComponent : public Component
 {
@@ -8,9 +13,15 @@ private:
     struct EmitterTrack
     {
         std::unique_ptr<ParticleEmitter> emitter;
-        ParticleSystemConstants settings; // •ÒW’†‚Ìİ’è’l
+        ParticleSystemConstants settings;
+
         std::string texturePath;
-        std::string textureFileName; // ƒRƒ“ƒ{ƒ{ƒbƒNƒX•\¦—p
+        std::string textureFileName;
+        std::string maskTexturePath;
+        std::string maskTextureFileName;
+        std::string gradientTexturePath;
+        std::string gradientTextureFileName;
+
         float delay = 0.0f;
         bool isStarted = false;
 
@@ -25,27 +36,25 @@ public:
 
     void Start() override;
     void Update(float deltaTime) override;
-    void Gui() override; // ImGui—p
+    void Gui() override;
 
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;
 
-    // ƒwƒ‹ƒp[
     void Play();
     void RefreshTextureList();
 
-    // ƒGƒ~ƒbƒ^[ƒgƒ‰ƒbƒN‚ÌƒŠƒXƒg‚ğæ“¾
     const std::vector<EmitterTrack>& GetTracks() const { return tracks; }
     std::vector<EmitterTrack>& GetTracks() { return tracks; }
 
 private:
+    bool LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath);
+    bool LoadEmitterTextureSlot(EmitterTrack& track, const std::string& fullPath, int slot);
 
+private:
     std::vector<EmitterTrack> tracks;
-    std::vector<std::string> textureFiles; // ƒtƒHƒ‹ƒ_“à‚Ìƒtƒ@ƒCƒ‹ƒŠƒXƒg
-    int selectedEmitterIndex = 0;          // Œ»İ•ÒW’†‚ÌƒGƒ~ƒbƒ^[
+    std::vector<std::string> textureFiles;
+    int selectedEmitterIndex = 0;
     float timer = 0.0f;
     bool isPlaying = false;
-
-    // ƒ[ƒh—pƒwƒ‹ƒp[
-    bool LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath);
 };

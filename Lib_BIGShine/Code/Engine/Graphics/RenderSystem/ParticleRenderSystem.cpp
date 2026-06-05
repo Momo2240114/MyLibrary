@@ -1,33 +1,18 @@
-#include "ParticleRenderSystem.h"
-#include "Engine/Graphics/Core/CPUResourceLoader.h"
+ï»¿#include "ParticleRenderSystem.h"
+
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Graphics/Core/RenderContext.h"
 #include <DirectXMath.h>
 
 void ParticleRenderSystem::Initialize(ID3D11Device* device)
 {
-    // ŠeŽíƒVƒF[ƒ_[‚ð CSO ‚©‚çƒ[ƒh
-    CPUResourceLoader::LoadVertexShader(device, "Shader/ParticleDraw_VS.cso", nullptr, 0, nullptr, vertexShader.GetAddressOf());
-    CPUResourceLoader::LoadGeometryShader(device, "Shader/ParticleDraw_GS.cso", geometryShader.GetAddressOf());
-    CPUResourceLoader::LoadPixelShader(device, "Shader/ParticleDraw_PS.cso", pixelShader.GetAddressOf());
-    CPUResourceLoader::LoadComputeShader(device, "Shader/ParticleUpdate_CS.cso", computeShader.GetAddressOf());
+    ParticleEmitter::InitializeSharedShaders(device);
 
-    // ƒp[ƒeƒBƒNƒ‹—p‹¤’Ê’è”ƒoƒbƒtƒ@ (ƒV[ƒ“ƒXƒƒbƒg—p)
-    // b7—p‚Ìƒoƒbƒtƒ@‚ðA³‚µ‚¢\‘¢‘ÌƒTƒCƒY (CbScene) ‚Åì¬‚·‚é
-    D3D11_BUFFER_DESC cbDesc = {};
+    D3D11_BUFFER_DESC cbDesc{};
     cbDesc.ByteWidth = sizeof(CbScene);
     cbDesc.Usage = D3D11_USAGE_DEFAULT;
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cbDesc.CPUAccessFlags = 0;
     device->CreateBuffer(&cbDesc, nullptr, sceneConstantBuffer.GetAddressOf());
-
-    // ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg (üŒ`•âŠÔ)
-    D3D11_SAMPLER_DESC samplerDesc = {};
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    device->CreateSamplerState(&samplerDesc, linearSampler.GetAddressOf());
 }
 
 void ParticleRenderSystem::PushSubmit(ParticleComponent* component)
@@ -36,113 +21,79 @@ void ParticleRenderSystem::PushSubmit(ParticleComponent* component)
     drawInfos.push_back({ component });
 }
 
-void ParticleRenderSystem::RenderAll(const RenderContext& rc)
-{
-    ID3D11DeviceContext* dc = rc.deviceContext;
-    if (drawInfos.empty()) return;
-
-    // --- 1. ƒV[ƒ“‹¤’Ê’è”ƒoƒbƒtƒ@ (b7) ‚ÌXV‚ÆƒoƒCƒ“ƒh ---
-    {
-        CbScene cbScene{};
-        DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&rc.camera->GetView());
-        DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&rc.camera->GetProjection());
-        DirectX::XMStoreFloat4x4(&cbScene.viewProjection, V * P);
-
-        const DirectX::XMFLOAT3& eye = rc.camera->GetEye();
-        cbScene.cameraPosition = { eye.x, eye.y, eye.z, 0.0f };
-
-        // ƒoƒbƒtƒ@ƒTƒCƒY‚ª sizeof(CbScene) ‚Åì‚ç‚ê‚Ä‚¢‚é‚±‚Æ‚ª‘O’ñ
-        dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
-
-        // GS‚És—ñ‚ð“Í‚¯‚È‚¢‚Æƒrƒ‹ƒ{[ƒhŒvŽZ‚ª0‚É‚È‚é
-        ID3D11Buffer* b7 = sceneConstantBuffer.Get();
-        dc->VSSetConstantBuffers(7, 1, &b7);
-        dc->GSSetConstantBuffers(7, 1, &b7);
-        dc->PSSetConstantBuffers(7, 1, &b7);
-    }
-
-    // --- 2. ‹¤’ÊƒXƒe[ƒg‚ÌÝ’è ---
-    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
-    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-
-    float blendFactor[4] = { 0, 0, 0, 0 };
-    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), blendFactor, 0xffffffff);
-
-
-
-    dc->VSSetShader(vertexShader.Get(), nullptr, 0);
-    dc->GSSetShader(geometryShader.Get(), nullptr, 0);
-    dc->PSSetShader(pixelShader.Get(), nullptr, 0);
-    dc->IASetInputLayout(nullptr);
-    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-    // ƒeƒNƒXƒ`ƒƒ‚ª•âŠÔ‚³‚ê‚é‚æ‚¤ LinearWrap ‚â LinearClamp ‚ð‘I‘ð
-    ID3D11SamplerState* sampler = rc.renderState->GetSamplerState(SamplerState::LinearWrap);
-    dc->PSSetSamplers(0, 1, &sampler);
-
-    // --- 3. ŒÂ•ÊƒGƒ~ƒbƒ^[‚Ì•`‰æƒ‹[ƒv ---
-    for (auto& info : drawInfos)
-    {
-        for (auto& track : info.component->GetTracks())
-        {
-            if (!track.isStarted || !track.emitter) continue;
-
-            // 2. ƒGƒ~ƒbƒ^[ŒÂ•Ê‚ÌƒŠƒ\[ƒXƒoƒCƒ“ƒh
-            // SRV(t9) ‚ÉŒ»Ý‚Ìƒp[ƒeƒBƒNƒ‹ƒoƒbƒtƒ@‚ðƒZƒbƒg
-            ID3D11ShaderResourceView* srv = track.emitter->GetSRV();
-            dc->GSSetShaderResources(9, 1, &srv);
-
-            // ŒÂ•Ê’è”(b9)
-            auto cb = track.emitter->GetConstantBuffer(); // getter‚ª•K—v
-            dc->VSSetConstantBuffers(9, 1, &cb);
-            dc->GSSetConstantBuffers(9, 1, &cb);
-            dc->PSSetConstantBuffers(9, 1, &cb);
-
-            // ƒeƒNƒXƒ`ƒƒ(t0)
-            ID3D11ShaderResourceView* tex = track.emitter->GetTextureSRV();
-            dc->PSSetShaderResources(0, 1, &tex);
-
-            // 3. •`‰æŽÀs
-            dc->IASetInputLayout(nullptr); // ’¸“_ƒŒƒCƒAƒEƒg•s—v
-            dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-            // •`‰æŽÀs
-            dc->Draw(track.settings.maxParticleCount, 0);
-        }
-    }
-
-    // --- 4. ƒNƒŠ[ƒ“ƒAƒbƒv (ƒuƒ‹[ƒ€ƒGƒ‰[–hŽ~‚Ì—v) ---
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    ID3D11Buffer* nullCB = nullptr;
-
-    // ‘SƒXƒe[ƒW‚Ì“Á’èƒXƒƒbƒg‚ð‘|œ
-    dc->VSSetShaderResources(9, 1, &nullSRV);
-    dc->GSSetShaderResources(9, 1, &nullSRV);
-    dc->PSSetShaderResources(0, 1, &nullSRV);
-
-    dc->VSSetConstantBuffers(7, 1, &nullCB);
-    dc->GSSetConstantBuffers(7, 1, &nullCB);
-    dc->GSSetConstantBuffers(9, 1, &nullCB);
-
-    dc->VSSetShader(nullptr, nullptr, 0);
-    dc->GSSetShader(nullptr, nullptr, 0);
-    dc->PSSetShader(nullptr, nullptr, 0);
-
-
-
-    drawInfos.clear();
-}
-
-
-void ParticleRenderSystem::UpdateAll(ID3D11DeviceContext* context, float et, const DirectX::XMMATRIX& vpMatrix, const std::vector<std::weak_ptr<ParticleComponent>>& components)
+void ParticleRenderSystem::UpdateAll(ID3D11DeviceContext*, float, const DirectX::XMMATRIX&, const std::vector<std::weak_ptr<ParticleComponent>>& components)
 {
     drawInfos.clear();
     for (auto& wp : components)
     {
         auto comp = wp.lock();
         if (!comp || !comp->IsEnabled()) continue;
-
-        // •`‰æƒŠƒXƒg‚É“o˜^
         drawInfos.push_back({ comp.get() });
     }
 }
+
+void ParticleRenderSystem::RenderAll(const RenderContext& rc)
+{
+    ID3D11DeviceContext* dc = rc.deviceContext;
+    if (!dc || !rc.camera || drawInfos.empty()) return;
+
+    CbScene cbScene{};
+    DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&rc.camera->GetView());
+    DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&rc.camera->GetProjection());
+    DirectX::XMMATRIX viewProjection = view * projection;
+    DirectX::XMMATRIX invViewProjection = DirectX::XMMatrixInverse(nullptr, viewProjection);
+    DirectX::XMStoreFloat4x4(&cbScene.viewProjection, viewProjection);
+    DirectX::XMStoreFloat4x4(&cbScene.invViewProjection, invViewProjection);
+
+    const DirectX::XMFLOAT3& eye = rc.camera->GetEye();
+    cbScene.cameraPosition = { eye.x, eye.y, eye.z, 0.0f };
+    dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, nullptr, &cbScene, 0, 0);
+
+    ID3D11Buffer* sceneCB = sceneConstantBuffer.Get();
+    dc->VSSetConstantBuffers(7, 1, &sceneCB);
+    dc->GSSetConstantBuffers(7, 1, &sceneCB);
+    dc->PSSetConstantBuffers(7, 1, &sceneCB);
+
+    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+    float blendFactor[4] = { 0, 0, 0, 0 };
+    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), blendFactor, 0xffffffff);
+
+    dc->IASetInputLayout(nullptr);
+    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+    ParticleEmitter::BindSharedRenderShaders(dc);
+
+    ID3D11SamplerState* sampler = rc.renderState->GetSamplerState(SamplerState::LinearWrap);
+    dc->PSSetSamplers(0, 1, &sampler);
+
+    for (auto& info : drawInfos)
+    {
+        if (!info.component) continue;
+        for (auto& track : info.component->GetTracks())
+        {
+            if (!track.isStarted || !track.emitter) continue;
+            track.emitter->Render(dc);
+        }
+    }
+
+    ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr };
+    dc->GSSetShaderResources(9, 2, nullSRVs);
+    ID3D11ShaderResourceView* nullPSViews[] = { nullptr, nullptr, nullptr };
+    dc->PSSetShaderResources(0, _countof(nullPSViews), nullPSViews);
+
+    ID3D11Buffer* nullCB = nullptr;
+    dc->VSSetConstantBuffers(7, 1, &nullCB);
+    dc->GSSetConstantBuffers(7, 1, &nullCB);
+    dc->PSSetConstantBuffers(7, 1, &nullCB);
+    dc->VSSetConstantBuffers(9, 1, &nullCB);
+    dc->GSSetConstantBuffers(9, 1, &nullCB);
+    dc->PSSetConstantBuffers(9, 1, &nullCB);
+
+    dc->VSSetShader(nullptr, nullptr, 0);
+    dc->GSSetShader(nullptr, nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
+
+    drawInfos.clear();
+}
+

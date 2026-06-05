@@ -1,0 +1,82 @@
+{
+    "AssetPath": "Player",
+    "GraphAssetPath": "PlayerTest",
+    "GraphNodes": [
+        {
+            "id": 1,
+            "inputPin": 0,
+            "nodeType": 1,
+            "outputPin": 2,
+            "posX": -442.0,
+            "posY": -88.0,
+            "stateName": "__Start__"
+        },
+        {
+            "id": 3,
+            "inputPin": 0,
+            "nodeType": 2,
+            "outputPin": 4,
+            "posX": -442.0,
+            "posY": 104.0,
+            "stateName": "__Any__"
+        },
+        {
+            "id": 5,
+            "inputPin": 6,
+            "nodeType": 0,
+            "outputPin": 7,
+            "posX": -76.0,
+            "posY": 107.0,
+            "stateName": "SS_Idle"
+        },
+        {
+            "id": 10,
+            "inputPin": 11,
+            "nodeType": 0,
+            "outputPin": 12,
+            "posX": 288.0,
+            "posY": 107.0,
+            "stateName": "SS_Die"
+        }
+    ],
+    "GraphTransitions": [
+        {
+            "conditions": [],
+            "duration": 0.20000000298023224,
+            "from": "__Start__",
+            "id": 8,
+            "logic": 0,
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 9,
+            "logic": 0,
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "Dead",
+                    "threshold": 0.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "SS_Idle",
+            "id": 13,
+            "logic": 0,
+            "to": "SS_Die"
+        }
+    ]
+}

@@ -3,7 +3,7 @@
 
 void ColliderComponent::Gui()
 {
-    ImGui::Checkbox("ShapeRenderFlg", &shapeRenderFlg);
+    ImGui::Checkbox("ShapeRenderFlg", &_ShapeRenderFlg);
     ImGui::Checkbox("Enabled", &enabled);
     ImGui::Checkbox("Is Static", &isStatic);
     ImGui::Checkbox("Is Trigger", &isTrigger);
@@ -17,5 +17,5 @@ void ColliderComponent::Gui()
     }
     ImGui::Separator();
     ImGui::DragFloat3("Offset", &offset.x, 0.01f);
-    ImGui::ColorEdit3("PrimitiveColor", &m_DebugPrimitiveColor.x);
+    ImGui::ColorEdit3("PrimitiveColor", &debugPrimitiveColor.x);
 }

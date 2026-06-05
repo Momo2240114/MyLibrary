@@ -24,6 +24,9 @@ public:
     // ロード用：引数の json オブジェクトから自分の変数を読み出す
     void Deserialize(const nlohmann::json& j);
 private:
+    std::shared_ptr<GltfModelCommponennt> ResolveTargetModel();
+    bool ResolveTargetNodeIndex(const std::shared_ptr<GltfModelCommponennt>& model);
+
     std::weak_ptr<GltfModelCommponennt> targetModel;
     std::string targetGameObjectName; // アタッチ先GameObjectの名前（保存用）
     std::string targetNodeName;

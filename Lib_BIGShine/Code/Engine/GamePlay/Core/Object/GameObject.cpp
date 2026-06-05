@@ -51,9 +51,9 @@ std::vector<std::string> GameObject::GetComponentNames() const
     }
 
     //コライダーコンポーネント
-    if (m_pColliderComponent != nullptr)
+    if (colliderComponent != nullptr)
     {
-        names.push_back(m_pColliderComponent->GetName());
+        names.push_back(colliderComponent->GetName());
     }
 
     return names;
@@ -62,12 +62,12 @@ std::vector<std::string> GameObject::GetComponentNames() const
 void GameObject::CallAllComponentStart()
 {
 
-    if (m_pColliderComponent)
+    if (colliderComponent)
     {
-        if (!m_pColliderComponent->IsStarted())
+        if (!colliderComponent->IsStarted())
         {
-            m_pColliderComponent->Start();
-            m_pColliderComponent->SetStarted(true);
+            colliderComponent->Start();
+            colliderComponent->SetStarted(true);
         }
     }
 
@@ -105,10 +105,10 @@ std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& com
             return comp;
     }
 
-    if (m_pColliderComponent)
+    if (colliderComponent)
     {
-        if (m_pColliderComponent->GetName() == compName_)
-            return m_pColliderComponent;
+        if (colliderComponent->GetName() == compName_)
+            return colliderComponent;
     }
 
     return nullptr;
@@ -117,12 +117,12 @@ std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& com
 
 void GameObject::SetParent(std::shared_ptr<GameObject> parentGO)
 {
+    transform->gameObject = shared_from_this();
+
     if (parentGO) {
+        parentGO->transform->gameObject = parentGO;
         // Transformの親子付け
         transform->SetParent(parentGO->transform);
-        // 重要：親側のTransformに自分（のGameObject）を教える必要はないが
-        // 自分のTransformは自分のGameObjectを知っておく必要がある
-        transform->gameObject = shared_from_this();
     }
     else {
         transform->SetParent(nullptr);
@@ -142,9 +142,9 @@ void GameObject::Update(float et)
 
 
     //コライダーのコンポーネントを更新
-    if (m_pColliderComponent != nullptr)
+    if (colliderComponent != nullptr)
     {
-        m_pColliderComponent->Update(et);
+        colliderComponent->Update(et);
     }
 }
 
@@ -188,7 +188,7 @@ void GameObject::Clear()
     components.clear();
 
     // 3. 特別扱いしているコライダーコンポーネントをクリア
-    m_pColliderComponent.reset();
+    colliderComponent.reset();
 
     // 4. Transform のリセット（必要に応じて）
     // 通常は次の Load で上書きされますが、初期状態に戻すと安全です
@@ -320,7 +320,7 @@ void GameObject::Gui()
 
         // シーン上の全オブジェクトをリストアップ（自分自身と自分の子は除外すべき）
         // GameObjectManager経由で全オブジェクトにアクセス
-        auto& allObjects = m_pManager->GetObjects();
+        auto& allObjects = manager->GetObjects();
         for (auto& obj : allObjects)
         {
             // 自分自身には親子付けできない
@@ -331,7 +331,7 @@ void GameObject::Gui()
             {
                 SetParent(obj); // GameObject::SetParent を呼び出す
 
-                m_pManager->ResolveHierarchy();
+                manager->ResolveHierarchy();
             }
         }
         ImGui::EndCombo();
@@ -382,18 +382,18 @@ void GameObject::Gui()
     // -----------------------------
     // Collider Component (個別メンバ)
     // -----------------------------
-    if (m_pColliderComponent != nullptr)
+    if (colliderComponent != nullptr)
     {
-        ImGui::PushID(m_pColliderComponent.get());
+        ImGui::PushID(colliderComponent.get());
 
-        bool enabled = m_pColliderComponent->IsEnabled();
-        if (ImGui::Checkbox("##Enabled", &enabled)) m_pColliderComponent->SetEnabled(enabled);
+        bool enabled = colliderComponent->IsEnabled();
+        if (ImGui::Checkbox("##Enabled", &enabled)) colliderComponent->SetEnabled(enabled);
 
         ImGui::SameLine();
 
         if (!enabled) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
 
-        bool open = ImGui::CollapsingHeader(m_pColliderComponent->GetName().c_str());
+        bool open = ImGui::CollapsingHeader(colliderComponent->GetName().c_str());
 
         // ★ コンテキストメニュー
         if (ImGui::BeginPopupContextItem("ColliderContextMenu"))
@@ -407,7 +407,7 @@ void GameObject::Gui()
 
         if (!enabled) ImGui::PopStyleVar();
 
-        if (open && enabled) m_pColliderComponent->Gui();
+        if (open && enabled) colliderComponent->Gui();
 
         ImGui::PopID();
     }
@@ -425,7 +425,7 @@ void GameObject::Gui()
     // 2. 個別メンバの削除
     if (removeCollider)
     {
-        m_pColliderComponent.reset(); // shared_ptr なら reset() で解放
+        colliderComponent.reset(); // shared_ptr なら reset() で解放
     }
 }
 
@@ -468,13 +468,13 @@ nlohmann::json GameObject::Save() const
     }
 
     // 4. 特別扱いしているコライダーの保存
-    if (m_pColliderComponent) {
+    if (colliderComponent) {
         nlohmann::json cj;
-        cj["TypeName"] = m_pColliderComponent->GetName();
-        cj["Enabled"] = m_pColliderComponent->IsEnabled();
+        cj["TypeName"] = colliderComponent->GetName();
+        cj["Enabled"] = colliderComponent->IsEnabled();
 
         nlohmann::json data;
-        m_pColliderComponent->Serialize(data);
+        colliderComponent->Serialize(data);
         cj["Data"] = data;
 
         j["ColliderComponent"] = cj;
@@ -527,7 +527,7 @@ void GameObject::Load(const nlohmann::json& j)
             // <ColliderComponent> を指定してキャスト
             auto col = std::dynamic_pointer_cast<ColliderComponent>(comp);
             if (col) {
-                m_pColliderComponent = col;
+                colliderComponent = col;
             }
         }
         };

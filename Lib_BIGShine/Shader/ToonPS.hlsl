@@ -1,6 +1,6 @@
 // ToonPS.hlsl
 #include "Scene.hlsli" // ‚±‚ê‚ÅCbScene‚âStructuredBuffer‚ªŽg‚¦‚é‚æ‚¤‚É‚È‚é
-#include "PBRCommon.hlsli"
+#include "ModelCommon.hlsli"
 
 
 cbuffer CbMesh : register(b0)

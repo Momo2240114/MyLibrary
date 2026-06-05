@@ -36,7 +36,8 @@
                             1.0
                         ],
                         "id": 0,
-                        "shaderId": 2
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.8999999761581421
                     },
                     {
                         "baseColor": [
@@ -46,7 +47,8 @@
                             1.0
                         ],
                         "id": 1,
-                        "shaderId": 2
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.8999999761581421
                     },
                     {
                         "baseColor": [
@@ -56,7 +58,8 @@
                             1.0
                         ],
                         "id": 2,
-                        "shaderId": 2
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.0
                     },
                     {
                         "baseColor": [
@@ -66,7 +69,8 @@
                             1.0
                         ],
                         "id": 3,
-                        "shaderId": 2
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.75
                     },
                     {
                         "baseColor": [
@@ -76,7 +80,8 @@
                             1.0
                         ],
                         "id": 4,
-                        "shaderId": 2
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.4020000100135803
                     },
                     {
                         "baseColor": [
@@ -86,7 +91,8 @@
                             1.0
                         ],
                         "id": 5,
-                        "shaderId": 0
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.8999999761581421
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/SwordWuman.gltf",
@@ -140,8 +146,7 @@
         {
             "Data": {
                 "AssetPath": "Player",
-                "GraphNodes": [],
-                "GraphTransitions": []
+                "GraphAssetPath": "Player"
             },
             "Enabled": true,
             "TypeName": "AnimationControllerComponent"
@@ -152,13 +157,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -0.224296435713768,
-            3.3314551204505216e-15,
-            4.944446563720703
+            -0.0668453723192215,
+            3.181256527737958e-13,
+            2.784632921218872
         ],
         "Rot": [
             0.0,
-            175.0,
+            171.48300170898438,
             0.0
         ],
         "Scale": [

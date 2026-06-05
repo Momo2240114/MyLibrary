@@ -195,6 +195,7 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
 
 
     if (!postRenderSystem.Initialize(device.Get(), width_, height_)) return false;
+    if (!cascadeShadowMap.Initialize(device.Get())) return false;
 
     //modelRenderSystem.Init(device, immediateContext);
     shapeRendererSystem.Initialize(device.Get());
@@ -339,6 +340,8 @@ void GraphicsDeviceManager::SetSceneRenderTarget()
 
     // ‘æˆêˆø”‚ð 2 ‚É•ÏX
     immediateContext->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
+
+    immediateContext->RSSetViewports(1, &viewPort);
 }
 
 void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {

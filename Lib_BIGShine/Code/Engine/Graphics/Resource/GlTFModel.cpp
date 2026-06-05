@@ -6,7 +6,7 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
-#include "Misc.h"
+#include "Engine/Common/Misc.h"
 #include "GLTFImporter.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "ModelResourceManager.h"
@@ -130,6 +130,7 @@ void GltfModelCommponennt::Material::serialize(Archive& archive)
 		CEREAL_NVP(roughness),
 		CEREAL_NVP(occlusionStrength),
 		CEREAL_NVP(alphaCutoff),
+		CEREAL_NVP(toonPbrBlend),
 		cereal::make_nvp("alphaMode", tempAlphaMode),
 		cereal::make_nvp("shaderId", tempShaderId)
 	);
@@ -416,7 +417,6 @@ void GltfModelCommponennt::Gui()
 	}
 
 	ShowMeshDetailsUI();
-	ShowNodeTransformEditor();
 }
 
 // アニメーション追加読み込み
@@ -800,6 +800,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 		materialSettings.push_back({
 			{"id", mat.id},
 			{"shaderId", static_cast<int>(mat.shaderId)},
+			{"toonPbrBlend", mat.toonPbrBlend},
 			{"baseColor", {mat.baseColor.x, mat.baseColor.y, mat.baseColor.z, mat.baseColor.w}}
 			});
 	}
@@ -851,6 +852,10 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 			for (auto& mat : materials) {
 				if (mat.id == id) {
 					mat.shaderId = static_cast<ModelShaderID>(item["shaderId"]);
+					if (item.contains("toonPbrBlend"))
+					{
+						mat.toonPbrBlend = item["toonPbrBlend"].get<float>();
+					}
 					// 色情報なども同様に反映
 				}
 			}
@@ -900,6 +905,12 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 			if (ImGui::Combo("Shader", &currentShaderIdx, shaderItems, IM_ARRAYSIZE(shaderItems)))
 			{
 				material.shaderId = static_cast<ModelShaderID>(currentShaderIdx);
+			}
+
+			if (material.shaderId == ModelShaderID::ToonPBR)
+			{
+				ImGui::DragFloat("ToonPbrBlend", &material.toonPbrBlend, 0.001f, 0.0f, 1.0f);
+				material.toonPbrBlend = std::clamp(material.toonPbrBlend, 0.0f, 1.0f);
 			}
 
 			ImGui::Separator();

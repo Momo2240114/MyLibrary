@@ -1,15 +1,17 @@
 {
     "GraphicsSettings": {
         "Bloom": {
-            "blurPasses": 4,
-            "intensity": 1.0,
-            "kawaseScale": 1.0,
-            "threshold": 1.0
+            "blurPasses": 8,
+            "intensity": 0.10000000149011612,
+            "kawaseScale": 0.07000000029802322,
+            "threshold": 3.180000066757202
         }
     },
     "ObjectList": [
         "MainCamera",
         "PlayerModel",
+        "Weapon",
+        "Shield",
         "DirLight",
         "Stage"
     ],

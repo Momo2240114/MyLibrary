@@ -61,8 +61,8 @@ void ToonShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mes
 void ToonShader::Gui()
 {
     // マテリアル単位の設定を表示
-    ImGui::SliderFloat("Shade Step", &shadeStep, 0.0f, 1.0f);
-    ImGui::SliderFloat("Shade Feather", &shadeFeather, 0.001f, 0.6f);
+    ImGui::SliderFloat("Toon_Shade Step", &shadeStep, 0.0f, 1.0f);
+    ImGui::SliderFloat("Toon_Shade Feather", &shadeFeather, 0.001f, 0.6f);
 }
 
 void ToonShader::End(const RenderContext& rc)

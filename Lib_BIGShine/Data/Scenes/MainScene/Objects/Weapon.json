@@ -1,0 +1,63 @@
+{
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 0.8999999761581421,
+                "MaterialOverrides": [
+                    {
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "id": 0,
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.5
+                    }
+                ],
+                "ModelName": "./Data/Model/SwordPlayer/Weapon/SwordModel.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "targetGameObjectName": "PlayerModel",
+                "targetNodeIndex": 42,
+                "targetNodeName": "hand_r"
+            },
+            "Enabled": true,
+            "TypeName": "ModelAttachment"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Weapon",
+    "ParentName": "PlayerModel",
+    "Transform": {
+        "Pos": [
+            -2.700000047683716,
+            3.5,
+            3.0999999046325684
+        ],
+        "Rot": [
+            335.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

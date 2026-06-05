@@ -37,7 +37,7 @@ public:
     };
 
     LayerType layer = LayerType::Default;   // ★追加
-    uint32_t m_Mask = (uint32_t)LayerType::Default;//コリジョンマスク
+    uint32_t mask = (uint32_t)LayerType::Default;//コリジョンマスク
 
     bool saveFlg = true;
     // 代わりに、素早くアクセスするためのキャッシュ用ポインタを保持する
@@ -46,19 +46,18 @@ public:
     std::vector<std::shared_ptr<Component>> components;
 
     //コリジョン用のコンポーネント
-    //std::vector<std::shared_ptr<Component>> m_pColliderComponents;
-    std::shared_ptr<Component> m_pColliderComponent;
+    std::shared_ptr<Component> colliderComponent;
     // --- 追加：自分専用のレジスタ ---
     ActionRegistry localRegistry;
 
     //自身が属する宇宙（マネージャー）へのポインタ
-    GameObjectManager* m_pManager = nullptr;
+    GameObjectManager* manager = nullptr;
 public:
     //このオブジェクトを統べるマネージャーへのアクセス
-    GameObjectManager& GetManager() const { return *m_pManager; }
+    GameObjectManager& GetManager() const { return *manager; }
 
     // マネージャーを設定する（生成時に呼ばれる）
-    void SetManager(GameObjectManager* manager) { m_pManager = manager; }
+    void SetManager(GameObjectManager* manager_) { manager = manager_; }
 
     // ゲッター
     ActionRegistry& GetLocalRegistry() { return localRegistry; };
@@ -106,7 +105,7 @@ public:
         //コライダーコンポーネントを来てクラスするクラスがTなのであれば
         if constexpr (std::is_base_of<ColliderComponent, T>::value)
         {
-            m_pColliderComponent = comp;
+            colliderComponent = comp;
         }
         else
         {
@@ -118,9 +117,9 @@ public:
         {
             if constexpr (std::is_base_of<ColliderComponent, T>::value)
             {
-                m_pColliderComponent->gameObject = shared_from_this();
-                m_pColliderComponent->Start();
-                m_pColliderComponent->SetStarted(true);
+                colliderComponent->gameObject = shared_from_this();
+                colliderComponent->Start();
+                colliderComponent->SetStarted(true);
             }
             else
             {
@@ -143,9 +142,9 @@ public:
         }
 
         //コライダーコンポーネント
-        if (m_pColliderComponent != nullptr)
+        if (colliderComponent != nullptr)
         {
-            if (auto casted = std::dynamic_pointer_cast<T>(m_pColliderComponent))
+            if (auto casted = std::dynamic_pointer_cast<T>(colliderComponent))
                 return casted;
         }
         return nullptr;

@@ -85,7 +85,10 @@ enum class AnimGraphNodeType
 {
     State,
     Start,
-    Any
+    Any,
+    SubGraph,
+    Entry,
+    Exit
 };
 
 // 遷移条件
@@ -105,6 +108,7 @@ struct AnimTransition
     TransitionLogic logic = TransitionLogic::And;
     std::vector<AnimCondition> conditions;
     ed::LinkId id;
+    std::string scopeId = "Root";
 };
 
 // ノード（ステート）
@@ -115,6 +119,8 @@ struct AnimGraphNode {
     ed::PinId outputPin;
     ImVec2 pos;
     AnimGraphNodeType type = AnimGraphNodeType::State;
+    std::string scopeId = "Root";
+    std::string childScopeId;
 };
 
 // 宣言だけを記述

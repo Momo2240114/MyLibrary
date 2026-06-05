@@ -3,6 +3,7 @@
 #include "Engine/Graphics/Shader/PBRShader.h"
 #include "Engine/Graphics/Shader/ToonPBRShader.h"
 #include "Engine/Graphics/Shader/ToonShader.h"
+#include "Engine/Graphics/Shader/ShadowCasterShader.h"
 #include "ShapeRenderer.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
@@ -24,11 +25,40 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 		sizeof(CbSkeleton),
 		skeletonConstantBuffer.GetAddressOf());
 
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
+		sizeof(CbShadowData),
+		cascadeShadowConstantBuffer.GetAddressOf());
+
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
+		sizeof(CbShadowCaster),
+		shadowCasterConstantBuffer.GetAddressOf());
+
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
+		sizeof(CbOutline),
+		outlineConstantBuffer.GetAddressOf());
+
+	CPUResourceLoader::LoadVertexShader(
+		device,
+		"Shader/OutlineVS.cso",
+		GltfModelCommponennt::InputElementDescs.data(),
+		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
+		outlineInputLayout.GetAddressOf(),
+		outlineVertexShader.GetAddressOf());
+
+	CPUResourceLoader::LoadPixelShader(
+		device,
+		"Shader/OutlinePS.cso",
+		outlinePixelShader.GetAddressOf());
+
 	// シェーダー生成
 	shaders[static_cast<int>(ModelShaderID::Basic)] = std::make_shared<BasicShader>(device);
 	shaders[static_cast<int>(ModelShaderID::Toon)] = std::make_shared<ToonShader>(device);
 	shaders[static_cast<int>(ModelShaderID::PBR)] = std::make_shared<PbrShader>(device);
 	shaders[static_cast<int>(ModelShaderID::ToonPBR)] = std::make_shared<ToonPBRShader>(device);
+	shaders[static_cast<int>(ModelShaderID::ShadowCaster)] = std::make_shared<ShadowCasterShader>(device);
 
 	// デカールシェーダーの生成
 	decalShader = std::make_shared<DecalShader>(device);
@@ -44,7 +74,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 	CreateDefaultTextures(device);
 }
 
-void ModelRenderSystem::Gui()
+void ModelRenderSystem::ShaderSettingGui()
 {
 	for (auto shader : shaders)
 	{
@@ -55,6 +85,65 @@ void ModelRenderSystem::Gui()
 				shader->Gui();
 			}
 		}
+	}
+
+	if (ImGui::CollapsingHeader("Toon Outline"))
+	{
+		ImGui::ColorEdit4("Outline Color", reinterpret_cast<float*>(&outlineColor));
+		ImGui::DragFloat("Outline Thickness", &outlineThickness, 0.0001f, 0.0f, 0.2f, "%.3f");
+	}
+}
+
+void ModelRenderSystem::ShadowSettingGui()
+{
+	CascadeShadowMap& cascadeShadowMap =
+		GraphicsDeviceManager::Instance().GetCascadeShadowMap();
+
+	if (ImGui::CollapsingHeader("Cascade Shadow Map"))
+	{
+		bool useCascadeShadow = cascadeShadowMap.IsUseCascadeShadow();
+		if (ImGui::Checkbox("Use Cascade Shadow", &useCascadeShadow))
+		{
+			cascadeShadowMap.SetUseCascadeShadow(useCascadeShadow);
+		}
+
+		bool displayCascadeArea = cascadeShadowMap.IsDisplayCascadeArea();
+		if (ImGui::Checkbox("Display Cascade Area", &displayCascadeArea))
+		{
+			cascadeShadowMap.SetDisplayCascadeArea(displayCascadeArea);
+		}
+
+		float* splits = cascadeShadowMap.GetCascadeSplitDistances();
+
+		ImGui::DragFloat("Cascade 0 Far", &splits[0], 0.1f, 0.1f, 5000.0f);
+		ImGui::DragFloat("Cascade 1 Far", &splits[1], 0.1f, splits[0] + 0.1f, 5000.0f);
+		ImGui::DragFloat("Cascade 2 Far", &splits[2], 0.1f, splits[1] + 0.1f, 5000.0f);
+		ImGui::DragFloat("Cascade 3 Far", &splits[3], 0.1f, splits[2] + 0.1f, 5000.0f);
+
+
+		ImGui::Separator();
+
+		ImGui::Text("Shadow Strength");
+		ImGui::SliderFloat("Shadow Attenuation", &shadowAttenuation, 0.0f, 1.0f);
+
+		ImGui::Separator();
+
+		ImGui::Text("Cascade Bias");
+		ImGui::DragFloat("Bias 0", &cascadeShadowBias.x, 0.00001f, 0.0f, 0.1f, "%.6f");
+		ImGui::DragFloat("Bias 1", &cascadeShadowBias.y, 0.00001f, 0.0f, 0.1f, "%.6f");
+		ImGui::DragFloat("Bias 2", &cascadeShadowBias.z, 0.00001f, 0.0f, 0.1f, "%.6f");
+		ImGui::DragFloat("Bias 3", &cascadeShadowBias.w, 0.00001f, 0.0f, 0.1f, "%.6f");
+
+
+		DirectX::XMFLOAT4 appliedSplits = cascadeShadowMap.GetCascadeSplits();
+
+		ImGui::Separator();
+		ImGui::Text("Applied Splits");
+		ImGui::Text("%.2f / %.2f / %.2f / %.2f",
+			appliedSplits.x,
+			appliedSplits.y,
+			appliedSplits.z,
+			appliedSplits.w);
 	}
 }
 
@@ -110,6 +199,13 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		cbScene.lightDirection = { strongestLight.direction.x, strongestLight.direction.y, strongestLight.direction.z, strongestLight.intensity };
 		cbScene.lightColor = { strongestLight.color.x, strongestLight.color.y, strongestLight.color.z, 0.0f };
 
+		if (rc.cascadeShadowMap && rc.camera && rc.cascadeShadowMap->IsUseCascadeShadow())
+		{
+			DirectX::XMFLOAT3 shadowLightDirection{ strongestLight.direction.x, strongestLight.direction.y, strongestLight.direction.z };
+			RenderContext shadowRc = rc;
+			RenderCascadeShadowMaps(shadowRc, shadowLightDirection);
+		}
+
 		const auto& pointLights = lightManager->GetPointLights();
 		const auto& spotLights = lightManager->GetSpotLights();
 
@@ -161,12 +257,36 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
+	if (rc.cascadeShadowMap)
+	{
+		CbShadowData shadowData{};
+		for (int i = 0; i < CascadeShadowMap::CascadeCount; ++i)
+		{
+			shadowData.lightViewProjections[i] = rc.cascadeShadowMap->GetLightViewProjection(i);
+		}
+		shadowData.cascadeSplits = rc.cascadeShadowMap->GetCascadeSplits();
+		shadowData.cascadeShadowBias = cascadeShadowBias;
+		shadowData.shadowAttenuation = shadowAttenuation;
+
+		dc->UpdateSubresource(cascadeShadowConstantBuffer.Get(), 0, nullptr, &shadowData, 0, 0);
+		dc->PSSetConstantBuffers(8, 1, cascadeShadowConstantBuffer.GetAddressOf());
+
+		ID3D11ShaderResourceView* shadowSRVs[CascadeShadowMap::CascadeCount] = {};
+		for (int i = 0; i < CascadeShadowMap::CascadeCount; ++i)
+		{
+			shadowSRVs[i] = rc.cascadeShadowMap->GetSRV(i);
+		}
+		dc->PSSetShaderResources(13, CascadeShadowMap::CascadeCount, shadowSRVs);
+	}
+
 	// サンプラステート設定
 	ID3D11SamplerState* samplerStates[] =
 	{
 		rc.renderState->GetSamplerState(SamplerState::LinearWrap)
 	};
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+	ID3D11SamplerState* shadowSampler = rc.renderState->GetSamplerState(SamplerState::LinearBorder);
+	dc->PSSetSamplers(1, 1, &shadowSampler);
 
 	// レンダーステート設定
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -206,6 +326,44 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			// 描画
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+		};
+
+	auto isOutlineTarget = [](ModelShaderID shaderId)
+		{
+			return shaderId == ModelShaderID::Toon || shaderId == ModelShaderID::ToonPBR;
+		};
+
+	auto drawOutlineMesh = [&](const GltfModelCommponennt::Mesh& mesh)
+		{
+			if (outlineThickness <= 0.0f)
+			{
+				return;
+			}
+
+			CbOutline cbOutline{};
+			cbOutline.outlineColor = outlineColor;
+			cbOutline.outlineThickness = outlineThickness;
+			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
+
+			UINT stride = sizeof(GltfModelCommponennt::Vertex);
+			UINT offset = 0;
+			dc->IASetInputLayout(outlineInputLayout.Get());
+			dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
+			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			dc->VSSetShader(outlineVertexShader.Get(), nullptr, 0);
+			dc->PSSetShader(outlinePixelShader.Get(), nullptr, 0);
+			dc->VSSetConstantBuffers(0, 1, outlineConstantBuffer.GetAddressOf());
+			dc->PSSetConstantBuffers(0, 1, outlineConstantBuffer.GetAddressOf());
+			dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+			dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
+			dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));
+
+			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+
+			dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+			dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 		};
 
 	DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
@@ -251,6 +409,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			// 描画
 			drawMesh(mesh, shader);
+			if (isOutlineTarget(currentShaderId))
+			{
+				drawOutlineMesh(mesh);
+			}
 			shader->End(rc);
 		}
 	}
@@ -288,9 +450,17 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
 
+
+
 	// サンプラステート設定解除
 	for (ID3D11SamplerState*& samplerState : samplerStates) { samplerState = nullptr; }
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+	ID3D11SamplerState* nullSampler = nullptr;
+	dc->PSSetSamplers(1, 1, &nullSampler);
+	ID3D11Buffer* nullBuffer = nullptr;
+	dc->PSSetConstantBuffers(8, 1, &nullBuffer);
+	ID3D11ShaderResourceView* nullShadowSRVs[CascadeShadowMap::CascadeCount] = {};
+	dc->PSSetShaderResources(13, CascadeShadowMap::CascadeCount, nullShadowSRVs);
 }
 
 void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const std::vector<PointLight>& lights)
@@ -541,6 +711,83 @@ void ModelRenderSystem::CreateDefaultTextures(ID3D11Device* device)
 	device->CreateShaderResourceView(texture.Get(), nullptr, whiteTextureSRV.GetAddressOf());
 }
 
+void ModelRenderSystem::RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection)
+{
+	if (!rc.cascadeShadowMap || !rc.camera) return;
+
+	ID3D11DeviceContext* dc = rc.deviceContext;
+	rc.cascadeShadowMap->UpdateMatrices(*rc.camera, lightDirection);
+	rc.cascadeShadowMap->SetViewport(dc);
+
+	ID3D11ShaderResourceView* nullShadowSRVs[CascadeShadowMap::CascadeCount] = {};
+	dc->PSSetShaderResources(13, CascadeShadowMap::CascadeCount, nullShadowSRVs);
+
+	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+
+	for (int cascadeIndex = 0; cascadeIndex < CascadeShadowMap::CascadeCount; ++cascadeIndex)
+	{
+		ID3D11DepthStencilView* dsv = rc.cascadeShadowMap->GetDSV(cascadeIndex);
+		dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
+		dc->OMSetRenderTargets(0, nullptr, dsv);
+		RenderShadowCasters(rc, cascadeIndex);
+	}
+
+	GraphicsDeviceManager::Instance().SetSceneRenderTarget();
+}
+
 void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascadeIndex)
 {
+	ID3D11DeviceContext* dc = rc.deviceContext;
+	ModelShader* shader = shaders[static_cast<int>(ModelShaderID::ShadowCaster)].get();
+	if (!shader || !rc.cascadeShadowMap) return;
+
+	CbShadowCaster shadowCaster{};
+	shadowCaster.lightViewProjection = rc.cascadeShadowMap->GetLightViewProjection(cascadeIndex);
+	dc->UpdateSubresource(shadowCasterConstantBuffer.Get(), 0, nullptr, &shadowCaster, 0, 0);
+	dc->VSSetConstantBuffers(8, 1, shadowCasterConstantBuffer.GetAddressOf());
+
+	ID3D11Buffer* vsConstantBuffers[] = { skeletonConstantBuffer.Get() };
+	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
+
+	shader->Begin(rc);
+	for (const DrawInfo& drawInfo : drawInfos)
+	{
+		for (const GltfModelCommponennt::Mesh& mesh : drawInfo.model->GetMeshes())
+		{
+			if (mesh.material && mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend)
+			{
+				continue;
+			}
+
+			UINT stride = sizeof(GltfModelCommponennt::Vertex);
+			UINT offset = 0;
+			dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
+			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			CbSkeleton cbSkeleton{};
+			if (!mesh.bones.empty())
+			{
+				for (size_t i = 0; i < mesh.bones.size(); ++i)
+				{
+					const GltfModelCommponennt::Bone& bone = mesh.bones.at(i);
+					DirectX::XMMATRIX worldTransform = DirectX::XMLoadFloat4x4(&bone.node->worldTransform);
+					DirectX::XMMATRIX offsetTransform = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+					DirectX::XMStoreFloat4x4(&cbSkeleton.boneTransforms[i], offsetTransform * worldTransform);
+				}
+			}
+			else
+			{
+				cbSkeleton.boneTransforms[0] = mesh.node->worldTransform;
+			}
+			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton, 0, 0);
+			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+		}
+	}
+	shader->End(rc);
+
+	ID3D11Buffer* nullBuffer = nullptr;
+	dc->VSSetConstantBuffers(8, 1, &nullBuffer);
 }

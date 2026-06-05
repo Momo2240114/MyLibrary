@@ -8,23 +8,40 @@
 // ポーズを構成するキーフレームの記憶
 struct PoseKeyframe 
 {
-    float time;
-    int poseIndex;
+    float time = 0.0f;
+    int poseIndex = -1;
 
-    int sourceAnimIdx;
-    float sourceTime;
+    int sourceAnimIdx = -1;
+    float sourceTime = 0.0f;
+
+    // 0: Linear, 1: SmoothStep, 2: EaseIn, 3: EaseOut, 4: EaseInOut, 5: Hold
+    int interpolation = 1;
 
     //cerealやjsonへの書記と解読
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(PoseKeyframe, time, poseIndex, sourceAnimIdx, sourceTime)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(PoseKeyframe, time, poseIndex, sourceAnimIdx, sourceTime, interpolation)
+};
+
+struct NaturalMotionSettings
+{
+    bool enabled = false;
+    std::string nodeFilter = "";
+    float rotationAmplitudeDeg = 2.0f;
+    float positionAmplitude = 0.0f;
+    float frequency = 1.5f;
+    float phase = 0.0f;
+    float blend = 0.35f;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(NaturalMotionSettings, enabled, nodeFilter, rotationAmplitudeDeg, positionAmplitude, frequency, phase, blend)
 };
 
 // ポーズを繋ぎ合わせて創り出す、新たなアニメーション
 struct CustomAnimation {
     std::string name;
-    float duration;
+    float duration = 1.0f;
     std::vector<PoseKeyframe> keyframes;
+    NaturalMotionSettings naturalMotion;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(CustomAnimation, name, duration, keyframes)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(CustomAnimation, name, duration, keyframes, naturalMotion)
 };
 
 // 切りとられた一瞬のポーズ（姿勢）の記憶

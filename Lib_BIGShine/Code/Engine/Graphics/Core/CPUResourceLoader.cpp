@@ -1,5 +1,5 @@
 #include "CPUResourceLoader.h"
-#include "Misc.h"
+#include "Engine/Common/Misc.h"
 
 #include <WICTextureLoader.h>
 using namespace DirectX;
@@ -48,7 +48,7 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
         {
             hr = CreateDDSTextureFromFile(device_, dds_filename.c_str(),
                 resource_.GetAddressOf(), srv_.GetAddressOf()); // Å© srv_ Ç…éÛÇØÇÈ
-            _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+            _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
         else
         {
@@ -57,7 +57,7 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
             hr = CreateWICTextureFromFileEx(device_, filename_, 0, D3D11_USAGE_DEFAULT,
                 D3D11_BIND_SHADER_RESOURCE, 0, 0, flags,
                 resource_.GetAddressOf(), srv_.GetAddressOf());
-            _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+            _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
 
         //textureResourcesÅimapÅjÇ…ìoò^
@@ -69,7 +69,7 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
     {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d_;
         hr = resource_.As(&texture2d_);
-        _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+        _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         texture2d_->GetDesc(texture2d_desc_);
     }
 
@@ -187,12 +187,12 @@ HRESULT CPUResourceLoader::CreateVSFromCSO(
     fclose(fp_);
 
     HRESULT hr = device_->CreateVertexShader(csoData_.get(), csoSz_, nullptr, vertexShader_);
-    _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+    _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
     if (inputLayout_)
     {
         hr = device_->CreateInputLayout(inputElementDesc_, numElements_, csoData_.get(), csoSz_, inputLayout_);
-        _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+        _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 
     return hr;
@@ -217,7 +217,7 @@ HRESULT CPUResourceLoader::CreatePSFromCSO(ID3D11Device* device_, const char* cs
 
     HRESULT hr{ S_OK };
     hr = device_->CreatePixelShader(csoData_.get(), csoSz_, nullptr, pixelShader_);
-    _ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+    _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
     return hr;
 

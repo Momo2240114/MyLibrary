@@ -1,33 +1,49 @@
-// ParticleCommon.hlsli
+#ifndef PARTICLE_COMMON_HLSLI
+#define PARTICLE_COMMON_HLSLI
 
 #include "Scene.hlsli"
 
-#define PI 3.1415926535f
-#define NUMTHREADS_X 16
-#define STATE_DEAD 0
-#define STATE_ALIVE 1
+static const uint NumParticleThread = 1024;
 
-// 1粒あたりのデータ（C++側と完全に一致させる）
+static const uint IndirectArgumentsNumCurrentParticle = 0;
+static const uint IndirectArgumentsNumPreviousParticle = 4;
+static const uint IndirectArgumentsNumDeadParticle = 8;
+static const uint IndirectArgumentsEmitParticleDispatchIndirect = 12;
+static const uint IndirectArgumentsUpdateParticleDispatchIndirect = 24;
+static const uint IndirectArgumentsNumEmitParticleIndex = 36;
+static const uint IndirectArgumentsDrawIndirect = 40;
+
 struct Particle
 {
-    float3 position; // 12
-    float age; // 4 (合計16)
-    
-    float3 velocity; // 12
-    float lifeSpan; // 4 (合計16)
-    
-    float3 acceleration; // 12
-    float rotation; // 4 (合計16)
-    
-    float4 startColor; // 16
-    float4 endColor; // 16
-    
-    float2 size; // 8
-    uint type; // 4
-    uint isActive; // 4 (合計16)
+    float4 parameter;
+    float4 position;
+    float4 rotation;
+    float4 scale;
+    float4 velocity;
+    float4 acceleration;
+    float4 texcoord;
+    float4 color;
 };
 
-// 定数バッファ (b9)
+struct EmitParticleData
+{
+    float4 parameter;
+    float4 position;
+    float4 rotation;
+    float4 scale;
+    float4 velocity;
+    float4 acceleration;
+    float4 color;
+};
+
+struct ParticleHeader
+{
+    uint alive;
+    uint particleIndex;
+    float depth;
+    uint dummy;
+};
+
 cbuffer ParticleSystemConstants : register(b9)
 {
     float4 emissionPosition;
@@ -49,27 +65,46 @@ cbuffer ParticleSystemConstants : register(b9)
     uint emissionMode;
     uint burstCount;
     float burstTrigger;
+    uint spawnShape;
+    uint useMaskTexture;
+    uint useGradientTexture;
+    float4 shapeStart;
+    float4 shapeEnd;
+    float4 shapeSize;
+    uint useNoiseTexture;
     float3 padding;
 };
 
-// お手本流：ランダム数値生成
-float rand(uint seed)
+cbuffer ParticleCommonConstants : register(b10)
 {
-    return frac(sin(seed * 12.9898) * 43758.5453);
-}
+    float elapsedTime;
+    uint2 textureSplitCount;
+    uint systemNumParticles;
+    uint totalEmitCount;
+    uint commonDummy[3];
+};
 
-// ジオメトリシェーダーからピクセルシェーダーへ渡す構造体
+cbuffer ParticleBitonicSortConstants : register(b11)
+{
+    uint increment;
+    uint direction;
+    uint sortDummy[2];
+};
+
+static const uint BitonicSortB2Thread = 256;
+static const uint BitonicSortC2Thread = 512;
+
+struct VS_OUT
+{
+    uint vertexID : TEXCOORD0;
+};
+
 struct GS_OUT
 {
     float4 pos : SV_POSITION;
     float4 color : COLOR;
     float2 tex : TEXCOORD0;
-    float3 worldPos : TEXCOORD1; // ワールド座標を渡すための変数
-    uint type : BLENDWEIGHT0; 
+    float lifeRate : TEXCOORD1;
 };
 
-// 頂点シェーダーからジオメトリシェーダーへ渡す構造体
-struct VS_OUT
-{
-    uint vertexID : TEXCOORD0;
-};
+#endif

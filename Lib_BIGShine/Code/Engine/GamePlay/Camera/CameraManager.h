@@ -9,7 +9,7 @@ public:
     CameraManager() = default;
     void Initialize();
     // 全カメラを探索し、最も優先度の高いものを決定
-    void Update(float et, const std::vector<std::shared_ptr<GameObject>>& objects);
+    void Update(float et, const std::vector<std::shared_ptr<GameObject>>& _Objects);
 
     // レンダリングで呼び出す「今使うべきカメラ」
     std::shared_ptr<CameraComponent> GetActiveCamera() const;
