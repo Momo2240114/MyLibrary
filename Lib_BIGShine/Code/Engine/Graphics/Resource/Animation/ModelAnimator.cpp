@@ -1,6 +1,8 @@
 #include "ModelAnimator.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include <algorithm>
+#include <cmath>
 
 static void CallAnimationAction(const std::shared_ptr<GameObject>& owner, const std::string& actionName)
 {
@@ -12,6 +14,28 @@ static void CallAnimationAction(const std::shared_ptr<GameObject>& owner, const 
     }
 
     ActionRegistry::Instance().Call(actionName);
+}
+
+static float ApplyPoseInterpolation(int interpolation, float t)
+{
+    t = (std::max)(0.0f, (std::min)(1.0f, t));
+
+    switch (interpolation)
+    {
+    case 0: return t;
+    case 2: return t * t;
+    case 3: return 1.0f - (1.0f - t) * (1.0f - t);
+    case 4: return t < 0.5f ? 2.0f * t * t : 1.0f - std::pow(-2.0f * t + 2.0f, 2.0f) * 0.5f;
+    case 5: return 0.0f;
+    case 1:
+    default:
+        return t * t * (3.0f - 2.0f * t);
+    }
+}
+
+static bool MatchesNaturalMotionNode(const std::string& filter, const std::string& nodeName)
+{
+    return filter.empty() || nodeName.find(filter) != std::string::npos;
 }
 void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner)
 {
@@ -266,6 +290,7 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
     fadeDuration = (duration > 0.0f) ? duration : 0.001f;
     fadeTimer = 0.0f;
     isMixing = true;
+    isTransitioning = true;
 }
 
 void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim, float time, const std::vector<SavedPose>& poseLibrary, std::vector<GltfModelCommponennt::NodePose>& outPose, GltfModelCommponennt* model)
@@ -329,7 +354,8 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
     // 二つのポーズの間を滑らかに繋ぐ重み（t）を算出する
     float tL = customAnim.keyframes[lKey].time;
     float tR = customAnim.keyframes[rKey].time;
-    float factor = (time - tL) / (tR - tL);
+    float rawFactor = (time - tL) / (tR - tL);
+    float factor = ApplyPoseInterpolation(customAnim.keyframes[lKey].interpolation, rawFactor);
 
     int pIdxL = customAnim.keyframes[lKey].poseIndex;
     int pIdxR = customAnim.keyframes[rKey].poseIndex;
@@ -338,12 +364,42 @@ void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim
         const auto& poseL = poseLibrary[pIdxL].nodePoses;
         const auto& poseR = poseLibrary[pIdxR].nodePoses;
 
-        // 左のポーズと右のポーズを、算出された重みで線形補間（エルプ）する
         for (size_t i = 0; i < nodeCount; ++i) {
             if (i < poseL.size() && i < poseR.size()) {
                 outPose[i].position = DirectX::SimpleMath::Vector3::Lerp(poseL[i].position, poseR[i].position, factor);
-                outPose[i].rotation = DirectX::SimpleMath::Quaternion::Lerp(poseL[i].rotation, poseR[i].rotation, factor);
+                outPose[i].rotation = DirectX::SimpleMath::Quaternion::Slerp(poseL[i].rotation, poseR[i].rotation, factor);
+                outPose[i].rotation.Normalize();
                 outPose[i].scale = DirectX::SimpleMath::Vector3::Lerp(poseL[i].scale, poseR[i].scale, factor);
+            }
+        }
+
+        if (customAnim.naturalMotion.enabled)
+        {
+            const auto& settings = customAnim.naturalMotion;
+            const auto& nodes = model->GetNodes();
+            const float envelope = std::sin((std::max)(0.0f, (std::min)(1.0f, rawFactor)) * DirectX::XM_PI);
+            const float blend = (std::max)(0.0f, (std::min)(1.0f, settings.blend));
+
+            for (size_t i = 0; i < nodeCount && i < nodes.size(); ++i)
+            {
+                if (!MatchesNaturalMotionNode(settings.nodeFilter, nodes[i].name)) continue;
+
+                const float wave = std::sin((time * settings.frequency + settings.phase + (float)i * 0.173f) * DirectX::XM_2PI);
+                const float strength = wave * envelope * blend;
+
+                if (settings.rotationAmplitudeDeg != 0.0f)
+                {
+                    const float rad = DirectX::XMConvertToRadians(settings.rotationAmplitudeDeg * strength);
+                    auto addRot = DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(rad * 0.25f, rad * 0.5f, rad);
+                    DirectX::SimpleMath::Quaternion baseRot(outPose[i].rotation.x, outPose[i].rotation.y, outPose[i].rotation.z, outPose[i].rotation.w);
+                    outPose[i].rotation = baseRot * addRot;
+                    outPose[i].rotation.Normalize();
+                }
+
+                if (settings.positionAmplitude != 0.0f)
+                {
+                    outPose[i].position.y += settings.positionAmplitude * strength;
+                }
             }
         }
     }

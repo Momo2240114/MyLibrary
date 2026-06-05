@@ -1167,9 +1167,9 @@ void ed::EditorContext::Begin(const char* id, const ImVec2& size)
     //ImGui::LogToClipboard();
     //Log("---- begin ----");
 
-    static auto resetAndCollect = [](auto& objects)
+    static auto resetAndCollect = [](auto& _Objects)
     {
-        objects.erase(std::remove_if(objects.begin(), objects.end(), [](auto objectWrapper)
+        _Objects.erase(std::remove_if(_Objects.begin(), _Objects.end(), [](auto objectWrapper)
         {
             if (objectWrapper->m_DeleteOnNewFrame)
             {
@@ -1181,7 +1181,7 @@ void ed::EditorContext::Begin(const char* id, const ImVec2& size)
                 objectWrapper->Reset();
                 return false;
             }
-        }), objects.end());
+        }), _Objects.end());
     };
 
     resetAndCollect(m_Nodes);
@@ -1309,10 +1309,10 @@ void ed::EditorContext::End()
         if (auto selectAction = m_CurrentAction ? m_CurrentAction->AsSelect() : nullptr)
             selectedObjects = &selectAction->m_CandidateObjects;
 
-        for (auto selectedObject : *selectedObjects)
+        for (auto _SelectedObject : *selectedObjects)
         {
-            if (selectedObject->IsVisible())
-                selectedObject->Draw(m_DrawList, Object::Selected);
+            if (_SelectedObject->IsVisible())
+                _SelectedObject->Draw(m_DrawList, Object::Selected);
         }
 
         // Highlight adjacent links
@@ -3932,8 +3932,8 @@ ed::EditorAction::AcceptResult ed::DragAction::Accept(const Control& control)
 
         if (Editor->IsSelected(m_DraggedObject))
         {
-            for (auto selectedObject : Editor->GetSelectedObjects())
-                if (auto selectedNode = selectedObject->AsNode())
+            for (auto _SelectedObject : Editor->GetSelectedObjects())
+                if (auto selectedNode = _SelectedObject->AsNode())
                     if (selectedNode != m_DraggedObject && selectedNode->AcceptDrag())
                         m_Objects.push_back(selectedNode);
         }

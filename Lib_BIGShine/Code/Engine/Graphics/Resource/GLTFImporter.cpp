@@ -4,7 +4,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STBI_MSC_SECURE_CRT
 
-#include "Misc.h"
+#include "Engine/Common/Misc.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "GLTFImporter.h"
 #include <DDSTextureLoader.h>
@@ -463,10 +463,10 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 
 								Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 								HRESULT hr = device->CreateTexture2D(&desc, &initData, texture.GetAddressOf());
-								_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+								_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 								hr = device->CreateShaderResourceView(texture.Get(), nullptr, srv);
-								_ASSERT_EXPR(SUCCEEDED(hr), hr_trace(hr));
+								_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 							}
 						}
 						else

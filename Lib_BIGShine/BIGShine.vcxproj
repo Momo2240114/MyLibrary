@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="checked|Win32">
@@ -243,6 +243,7 @@
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\InspectorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ShaderWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\ShadowWindow.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioResource.cpp" />
@@ -299,7 +300,6 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
-    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationController.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
@@ -317,14 +317,9 @@
     <ClCompile Include="Code\Engine\Graphics\Shader\ShadowCasterShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonPBRShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp" />
-    <ClCompile Include="Code\Engine\Math\Curve\Curve.cpp" />
-    <ClCompile Include="Code\Engine\Math\Curve\CurveAssetComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
-    <ClCompile Include="Code\Engine\Math\Curve\CurveEditor.cpp" />
-    <ClCompile Include="Code\Engine\Math\Curve\CurveEditorDelegate.cpp" />
-    <ClCompile Include="Code\Engine\Math\Curve\CurvePlayerComponent.cpp" />
-    <ClCompile Include="Code\Engine\Math\Curve\CurveSerializer.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
+    <ClCompile Include="Code\Engine\Math\RandomHelper.cpp" />
     <ClCompile Include="Code\Engine\Physics\BoxCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\CapsuleCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp" />
@@ -332,15 +327,10 @@
     <ClCompile Include="Code\Engine\Physics\PhysXEventCallback.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysXSystem.cpp" />
     <ClCompile Include="Code\Engine\Physics\SphereCollider.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerInput.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
-    <ClCompile Include="Code\ItemComponent.cpp" />
-    <ClCompile Include="Code\NumberSwitcher.cpp" />
-    <ClCompile Include="Code\PlayerInput.cpp" />
-    <ClCompile Include="Code\RandomHelper.cpp" />
-    <ClCompile Include="Code\RayCastManager.cpp" />
-    <ClCompile Include="Code\SearchAreaManager.cpp" />
-    <ClCompile Include="Code\StateMachine.cpp" />
-    <ClCompile Include="Code\UIButton.cpp" />
+    <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
@@ -358,17 +348,6 @@
     <ClCompile Include="External\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="External\ImGuizmo\ImSequencer.cpp" />
     <ClCompile Include="External\imnodes-master\imnodes.cpp" />
-    <ClCompile Include="External\recastnavigation\DebugUtils\Source\RecastDump.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\Recast.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastAlloc.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastArea.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastAssert.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastContour.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastFilter.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastLayers.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastMesh.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastMeshDetail.cpp" />
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastRasterization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
@@ -378,6 +357,8 @@
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h" />
     <ClInclude Include="Code\Editor\Window\InspectorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ShaderWindow.h" />
+    <ClInclude Include="Code\Editor\Window\ShadowWindow.h" />
+    <ClInclude Include="Code\Engine\Common\misc.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\FovDirector.h" />
@@ -417,7 +398,6 @@
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h" />
-    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationController.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResource.h" />
@@ -474,15 +454,10 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Sprite.h" />
     <ClInclude Include="Code\Engine\Math\CollisionMath.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\Curve.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\CurveAssetComponent.h" />
     <ClInclude Include="Code\Engine\Math\Curve\CurveComponent.h" />
     <ClInclude Include="Code\Engine\Math\Curve\CurveTrack.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\CurveEditor.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\CurveEditorDelegate.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\CurvePlayerComponent.h" />
-    <ClInclude Include="Code\Engine\Math\Curve\CurveSerializer.h" />
     <ClInclude Include="Code\Engine\Math\EasingComponent.h" />
+    <ClInclude Include="Code\Engine\Math\RandomHelper.h" />
     <ClInclude Include="Code\Engine\Math\Vector.h" />
     <ClInclude Include="Code\Engine\Physics\BoxCollider.h" />
     <ClInclude Include="Code\Engine\Physics\CapsuleCollider.h" />
@@ -493,17 +468,11 @@
     <ClInclude Include="Code\Engine\Physics\PhysXMath.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXSystem.h" />
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
+    <ClInclude Include="Code\Engine\UI\UIButton.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerAttack.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerInput.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
-    <ClInclude Include="Code\ItemComponent.h" />
-    <ClInclude Include="Code\NumberSwitcher.h" />
-    <ClInclude Include="Code\misc.h" />
-    <ClInclude Include="Code\PlayerAttack.h" />
-    <ClInclude Include="Code\PlayerInput.h" />
-    <ClInclude Include="Code\RandomHelper.h" />
-    <ClInclude Include="Code\RayCastManager.h" />
-    <ClInclude Include="Code\SearchAreaManager.h" />
-    <ClInclude Include="Code\Serializer.h" />
-    <ClInclude Include="Code\UIButton.h" />
+    <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
     <ClInclude Include="Code\Wip.hpp" />
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
     <ClInclude Include="External\imgui-node-editor\crude_json.h" />
@@ -523,8 +492,9 @@
     <None Include="Shader\filter_functions.hlsli" />
     <None Include="Shader\gbuffer.hlsli" />
     <None Include="Shader\gbuffer_functions.hlsli" />
+    <None Include="Shader\ParticleBitonicSort.hlsli" />
     <None Include="Shader\ParticleCommon.hlsli" />
-    <None Include="Shader\PBRCommon.hlsli" />
+    <None Include="Shader\ModelCommon.hlsli" />
     <None Include="Shader\Scene.hlsli" />
     <None Include="Shader\ShapeRenderer.hlsli" />
     <None Include="Shader\Skinning.hlsli" />
@@ -617,17 +587,41 @@
     </FxCompile>
     <FxCompile Include="Shader\ParticleUpdate_CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|x64'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleInit_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleBeginFrame_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleEmit_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleEndFrame_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleBitonicSortB2_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleBitonicSortC2_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -637,6 +631,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Vertex</ShaderType>
       <FileType>Document</FileType>
+    </FxCompile>
+    <FxCompile Include="Shader\OutlineVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\OutlinePS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\PBRPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -659,6 +661,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowCasterVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\ShapeRendererVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

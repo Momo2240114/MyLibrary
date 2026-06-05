@@ -1,0 +1,317 @@
+[Project Structure] 
+ 
+Folder PATH listing for volume Windows
+Volume serial number is 0000005E 0255:C8DA
+C:.
+„    structure.txt
+„    _dump_structure.bat
+„    
+„¥„Ÿ„Ÿ„ŸEditor
+„    „¥„Ÿ„Ÿ„ŸNodeEditor
+„    „        AnimNodeEditorWindow.cpp
+„    „        AnimNodeEditorWindow.h
+„    „        
+„    „¤„Ÿ„Ÿ„ŸWindow
+„            AnimationEditorWindow.cpp
+„            AnimationEditorWindow.h
+„            EditorWindow.h
+„            EditorWindowManager.cpp
+„            EditorWindowManager.h
+„            HierarchyWindow.cpp
+„            HierarchyWindow.h
+„            InspectorWindow.cpp
+„            InspectorWindow.h
+„            ShaderWindow.cpp
+„            ShaderWindow.h
+„            ShadowWindow.cpp
+„            ShadowWindow.h
+„            
+„¥„Ÿ„Ÿ„ŸEngine
+„    „¥„Ÿ„Ÿ„ŸAudio
+„    „        Audio.cpp
+„    „        Audio.h
+„    „        AudioManager.cpp
+„    „        AudioManager.h
+„    „        AudioResource.cpp
+„    „        AudioResource.h
+„    „        AudioSource.cpp
+„    „        AudioSource.h
+„    „        
+„    „¥„Ÿ„Ÿ„ŸCommon
+„    „        misc.h
+„    „        
+„    „¥„Ÿ„Ÿ„ŸCore
+„    „        framework.cpp
+„    „        framework.h
+„    „        high_resolution_timer.h
+„    „        main.cpp
+„    „        
+„    „¥„Ÿ„Ÿ„ŸGamePlay
+„    „    „¥„Ÿ„Ÿ„ŸCamera
+„    „    „        CameraComponent.cpp
+„    „    „        CameraComponent.h
+„    „    „        CameraDirectorComponent.cpp
+„    „    „        CameraDirectorComponent.h
+„    „    „        CameraManager.cpp
+„    „    „        CameraManager.h
+„    „    „        FollowCameraComponent.cpp
+„    „    „        FollowCameraComponent.h
+„    „    „        FovDirector.cpp
+„    „    „        FovDirector.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸCore
+„    „    „    „¥„Ÿ„Ÿ„ŸComponent
+„    „    „    „        AreaComponent.cpp
+„    „    „    „        AreaComponent.h
+„    „    „    „        ComponentBase.cpp
+„    „    „    „        ComponentBase.h
+„    „    „    „        ExitComponent.cpp
+„    „    „    „        ExitComponent.h
+„    „    „    „        Movement.cpp
+„    „    „    „        Movement.h
+„    „    „    „        MovementComponent.cpp
+„    „    „    „        MovementComponent.h
+„    „    „    „        NameComponent.h
+„    „    „    „        SpinComponent.cpp
+„    „    „    „        SpinComponent.h
+„    „    „    „        
+„    „    „    „¥„Ÿ„Ÿ„ŸObject
+„    „    „    „        GameObject.cpp
+„    „    „    „        GameObject.h
+„    „    „    „        GameObjectManager.cpp
+„    „    „    „        GameObjectManager.h
+„    „    „    „        
+„    „    „    „¥„Ÿ„Ÿ„ŸResource
+„    „    „    „        ResourceManager.h
+„    „    „    „        
+„    „    „    „¤„Ÿ„Ÿ„ŸState
+„    „    „¥„Ÿ„Ÿ„ŸEventSystem
+„    „    „        ActionSequence.cpp
+„    „    „        ActionSequence.h
+„    „    „        BaseEvent.h
+„    „    „        EventManager.h
+„    „    „        EventTrack.cpp
+„    „    „        EventTrack.h
+„    „    „        EventTrackSequencer.h
+„    „    „        IActionProvider.h
+„    „    „        JudgmentBase.h
+„    „    „        JudgmentDerived.cpp
+„    „    „        JudgmentDerived.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸGraphics
+„    „    „        LightBlinkerComponent.cpp
+„    „    „        LightBlinkerComponent.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸInput
+„    „    „        ControllerInput.cpp
+„    „    „        ControllerInput.h
+„    „    „        InputComponent.cpp
+„    „    „        InputComponent.h
+„    „    „        KeyConfig.cpp
+„    „    „        KeyConfig.h
+„    „    „        KeyInput.cpp
+„    „    „        KeyInput.h
+„    „    „        MouseInput.cpp
+„    „    „        MouseInput.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸScene
+„    „    „        IScene.h
+„    „    „        SceneBase.cpp
+„    „    „        SceneBase.h
+„    „    „        SceneGame.cpp
+„    „    „        SceneGame.h
+„    „    „        SceneLoading.cpp
+„    „    „        SceneLoading.h
+„    „    „        SceneManager.cpp
+„    „    „        SceneManager.h
+„    „    „        SceneTitle.cpp
+„    „    „        SceneTitle.h
+„    „    „        SceneTutorial.cpp
+„    „    „        SceneTutorial.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸSerialize
+„    „    „        ActionRegistry.cpp
+„    „    „        ActionRegistry.h
+„    „    „        ComponentRegistry.cpp
+„    „    „        ComponentRegistry.h
+„    „    „        RegisterAllComponents.cpp
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸSystem
+„    „    „        TimeManager.cpp
+„    „    „        TimeManager.h
+„    „    „        
+„    „    „¤„Ÿ„Ÿ„ŸTransform
+„    „            ModelAttachmentComponent.cpp
+„    „            ModelAttachmentComponent.h
+„    „            Transform.cpp
+„    „            Transform.h
+„    „            TransformDirector.cpp
+„    „            TransformDirector.h
+„    „            
+„    „¥„Ÿ„Ÿ„ŸGraphics
+„    „    „¥„Ÿ„Ÿ„ŸCore
+„    „    „        CPUResourceLoader.cpp
+„    „    „        CPUResourceLoader.h
+„    „    „        GpuResourceUtils.h
+„    „    „        GraphicsDeviceManager.cpp
+„    „    „        GraphicsDeviceManager.h
+„    „    „        LightComponent.cpp
+„    „    „        LightManager.h
+„    „    „        RenderContext.h
+„    „    „        RenderState.cpp
+„    „    „        RenderState.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸDecal
+„    „    „        DecalComponent.cpp
+„    „    „        DecalComponent.h
+„    „    „        DecalManager.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸParticle
+„    „    „        ParticleComponent.cpp
+„    „    „        ParticleComponent.h
+„    „    „        ParticleEmitter.cpp
+„    „    „        ParticleEmitter.h
+„    „    „        ParticleRessiource.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸPostEffect
+„    „    „        ColorFilterDirector.cpp
+„    „    „        ColorFilterDirector.h
+„    „    „        
+„    „    „¥„Ÿ„Ÿ„ŸRenderSystem
+„    „    „    „    BloomSystem.cpp
+„    „    „    „    BloomSystem.h
+„    „    „    „    CascadeShadowMap.cpp
+„    „    „    „    CascadeShadowMap.h
+„    „    „    „    ImGuiRenderer.cpp
+„    „    „    „    ImGuiRenderer.h
+„    „    „    „    ModelRenderSystem.cpp
+„    „    „    „    ModelRenderSystem.h
+„    „    „    „    ParticleRenderSystem.cpp
+„    „    „    „    ParticleRenderSystem.h
+„    „    „    „    PostRenderSystem.cpp
+„    „    „    „    PostRenderSystem.h
+„    „    „    „    RadialBlurSystem.cpp
+„    „    „    „    RadialBlurSystem.h
+„    „    „    „    ShapeRenderer.cpp
+„    „    „    „    ShapeRenderer.h
+„    „    „    „    SpriteRenderSystem.cpp
+„    „    „    „    SpriteRenderSystem.h
+„    „    „    „    
+„    „    „    „¤„Ÿ„Ÿ„ŸPipeline
+„    „    „            BloomPass.h
+„    „    „            IRenderPass.h
+„    „    „            RadialBlurPass.cpp
+„    „    „            RadialBlurPass.h
+„    „    „            RenderPipeline.cpp
+„    „    „            RenderPipeline.h
+„    „    „            
+„    „    „¥„Ÿ„Ÿ„ŸResource
+„    „    „    „    FbxModel.cpp
+„    „    „    „    GLTFImporter.cpp
+„    „    „    „    GLTFImporter.h
+„    „    „    „    GlTFModel.cpp
+„    „    „    „    GlTFModel.h
+„    „    „    „    IModel.h
+„    „    „    „    ModelResource.h
+„    „    „    „    ModelResourceManager.cpp
+„    „    „    „    ModelResourceManager.h
+„    „    „    „    Sprite.cpp
+„    „    „    „    Sprite.h
+„    „    „    „    
+„    „    „    „¤„Ÿ„Ÿ„ŸAnimation
+„    „    „            AnimationControllerComponent.cpp
+„    „    „            AnimationControllerComponent.h
+„    „    „            AnimationDataAsset.h
+„    „    „            AnimationEventTrack.cpp
+„    „    „            AnimationEventTrack.h
+„    „    „            AnimationState.h
+„    „    „            AnimationStateMachineComponent.cpp
+„    „    „            AnimationStateMachineComponent.h
+„    „    „            AnimSequenceAdapter.h
+„    „    „            ModelAnimator.cpp
+„    „    „            ModelAnimator.h
+„    „    „            PoseLibraryResource.h
+„    „    „            PoseLibraryResourceManager.cpp
+„    „    „            PoseLibraryResourceManager.h
+„    „    „            
+„    „    „¤„Ÿ„Ÿ„ŸShader
+„    „            BasicShader.cpp
+„    „            BasicShader.h
+„    „            DecalShader.cpp
+„    „            DecalShader.h
+„    „            LightingShader.cpp
+„    „            LightingShader.h
+„    „            ModelShader.h
+„    „            ModelShaderID.h
+„    „            PbrShader.cpp
+„    „            PbrShader.h
+„    „            ShadowCasterShader.cpp
+„    „            ShadowCasterShader.h
+„    „            SpriteDissolveShader.h
+„    „            SpriteShader.h
+„    „            SpriteShaderID.h
+„    „            ToonPBRShader.cpp
+„    „            ToonPBRShader.h
+„    „            ToonShader.cpp
+„    „            ToonShader.h
+„    „            
+„    „¥„Ÿ„Ÿ„ŸMath
+„    „    „    CollisionMath.h
+„    „    „    EasingComponent.cpp
+„    „    „    EasingComponent.h
+„    „    „    RandomHelper.cpp
+„    „    „    RandomHelper.h
+„    „    „    Vector.h
+„    „    „    
+„    „    „¤„Ÿ„Ÿ„ŸCurve
+„    „            CurveComponent.cpp
+„    „            CurveComponent.h
+„    „            CurveTrack.h
+„    „            
+„    „¥„Ÿ„Ÿ„ŸNodeSystemAA
+„    „        AnimationNodes.h
+„    „        LogicNodes.h
+„    „        MathNodes.h
+„    „        NodeBase.h
+„    „        NodeGraph.cpp
+„    „        NodeGraph.h
+„    „        NodeValue.h
+„    „        
+„    „¥„Ÿ„Ÿ„ŸPhysics
+„    „        BoxCollider.cpp
+„    „        BoxCollider.h
+„    „        CapsuleCollider.cpp
+„    „        CapsuleCollider.h
+„    „        ColliderComponent.cpp
+„    „        ColliderComponent.h
+„    „        Collision.h
+„    „        PhysicsCollisionComponent.cpp
+„    „        PhysicsCollisionComponent.h
+„    „        PhysXEventCallback.cpp
+„    „        PhysXEventCallback.h
+„    „        PhysXMath.h
+„    „        PhysXSystem.cpp
+„    „        PhysXSystem.h
+„    „        SphereCollider.cpp
+„    „        SphereCollider.h
+„    „        
+„    „¤„Ÿ„Ÿ„ŸUI
+„            NumberSwitcher.cpp
+„            NumberSwitcher.h
+„            UIButton.cpp
+„            UIButton.h
+„            
+„¤„Ÿ„Ÿ„ŸGame
+    „¤„Ÿ„Ÿ„ŸCharcter
+        „¥„Ÿ„Ÿ„ŸEnemy
+        „¥„Ÿ„Ÿ„ŸPlayer
+        „        PlayerAttack.h
+        „        PlayerInput.cpp
+        „        PlayerInput.h
+        „        PlayerStateMachine.cpp
+        „        PlayerStateMachine.h
+        „        
+        „¤„Ÿ„Ÿ„ŸStateMachine
+                State.h
+                StateMachine.h
+                

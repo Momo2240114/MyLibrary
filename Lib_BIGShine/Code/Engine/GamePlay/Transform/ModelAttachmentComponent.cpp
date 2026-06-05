@@ -46,27 +46,92 @@ void ModelAttachmentComponent::SetTargetNode(std::shared_ptr<GltfModelCommponenn
     targetModel = modelComp;
     targetNodeName = nodeName;
     targetNodeIndex = -1; // インデックスをリセットして再検索を促す
+
+    if (modelComp) {
+        if (auto targetGO = modelComp->GetGameObject()) {
+            targetGameObjectName = targetGO->GetName();
+        }
+    }
+}
+std::shared_ptr<GltfModelCommponennt> ModelAttachmentComponent::ResolveTargetModel()
+{
+    auto model = targetModel.lock();
+    if (model) return model;
+
+    auto ownerGO = GetGameObject();
+    if (!ownerGO) return nullptr;
+
+    if (!targetGameObjectName.empty() && ownerGO->manager) {
+        auto targetObject = ownerGO->GetManager().Find(targetGameObjectName);
+        if (targetObject) {
+            model = targetObject->GetComponent<GltfModelCommponennt>();
+            if (model) {
+                targetModel = model;
+                return model;
+            }
+        }
+    }
+
+    auto currentParent = ownerGO->transform->parent.lock();
+    while (currentParent) {
+        auto parentGO = currentParent->gameObject.lock();
+        if (parentGO) {
+            model = parentGO->GetComponent<GltfModelCommponennt>();
+            if (model) {
+                targetModel = model;
+                targetGameObjectName = parentGO->GetName();
+                return model;
+            }
+        }
+        currentParent = currentParent->parent.lock();
+    }
+
+    return nullptr;
+}
+
+bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<GltfModelCommponennt>& model)
+{
+    if (!model) {
+        targetNodeIndex = -1;
+        return false;
+    }
+
+    const auto& nodes = model->GetNodes();
+    const bool hasValidIndex = targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size());
+
+    if (!targetNodeName.empty()) {
+        if (hasValidIndex && nodes[targetNodeIndex].name == targetNodeName) {
+            return true;
+        }
+
+        for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
+            if (nodes[i].name == targetNodeName) {
+                targetNodeIndex = i;
+                return true;
+            }
+        }
+    }
+
+    if (hasValidIndex) {
+        if (targetNodeName.empty()) {
+            targetNodeName = nodes[targetNodeIndex].name;
+        }
+        return true;
+    }
+
+    targetNodeIndex = -1;
+    return false;
 }
 
 void ModelAttachmentComponent::LateUpdate(float deltaTime)
 {
     auto myGO = GetGameObject();
+    if (!myGO) return;
+
     auto myTransform = myGO->transform;
+    auto model = ResolveTargetModel();
 
-    // ターゲットモデルの取得
-    auto model = targetModel.lock();
-    if (!model) {
-        // 親がモデルを持っている前提で取得を試みる
-        ////targetModel = parentTransform->gameObject.lock()->GetComponent<GltfModelCommponennt>();
-        auto targetObject = GetManager().Find(targetGameObjectName.c_str());
-        if(targetObject)
-        {
-            targetModel = targetObject->GetComponent<GltfModelCommponennt>();
-            model = targetModel.lock();
-        }
-    }
-
-    if (model && targetNodeIndex != -1) {
+    if (ResolveTargetNodeIndex(model)) {
         const auto& node = model->GetNodes()[targetNodeIndex];
         DirectX::XMMATRIX nodeMat = DirectX::XMLoadFloat4x4(&node.worldTransform);
 
@@ -77,7 +142,6 @@ void ModelAttachmentComponent::LateUpdate(float deltaTime)
         myTransform->SetParentOverride(false, DirectX::XMMatrixIdentity());
     }
 }
-
 // --- 再帰的なツリー表示関数 (引数に const 修飾などを追加) ---
 void ShowNodeTree(const GltfModelCommponennt::Node* node,
     const std::vector<GltfModelCommponennt::Node>& allNodes,
@@ -159,8 +223,10 @@ void ModelAttachmentComponent::Gui()
 {
     // --- 現在の状態表示 ---
     auto currentModel = targetModel.lock();
-    std::string currentLabel = (currentModel && targetNodeIndex != -1)
-        ? currentModel->GetNodes()[targetNodeIndex].name
+    const auto* currentNodes = currentModel ? &currentModel->GetNodes() : nullptr;
+    bool hasCurrentNode = currentNodes && targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(currentNodes->size());
+    std::string currentLabel = hasCurrentNode
+        ? (*currentNodes)[targetNodeIndex].name
         : "(None)";
 
     ImGui::Text("Attachment Node: %s", currentLabel.c_str());
@@ -218,7 +284,26 @@ void ModelAttachmentComponent::Gui()
             targetNodeIndex = tempSelectedIdx;
             // 決定時に名前をキャッシュしておく（ノード検索用）
             if (auto m = targetModel.lock()) {
-                targetNodeName = m->GetNodes()[targetNodeIndex].name;
+                const auto& nodes = m->GetNodes();
+                if (targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size())) {
+                    targetNodeName = nodes[targetNodeIndex].name;
+                }
+
+                targetGameObjectName.clear();
+                if (auto targetGO = m->GetGameObject()) {
+                    targetGameObjectName = targetGO->GetName();
+                }
+                else if (auto ownerGO = GetGameObject()) {
+                    auto currentParent = ownerGO->transform->parent.lock();
+                    while (currentParent) {
+                        auto parentGO = currentParent->gameObject.lock();
+                        if (parentGO && parentGO->GetComponent<GltfModelCommponennt>() == m) {
+                            targetGameObjectName = parentGO->GetName();
+                            break;
+                        }
+                        currentParent = currentParent->parent.lock();
+                    }
+                }
             }
             ImGui::CloseCurrentPopup();
         }

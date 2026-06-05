@@ -11,7 +11,7 @@ class GltfModelCommponennt;
 class TimeManager;
 class CameraManager;
 
-#include"RayCastManager.h"
+
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
 #include"Engine/GamePlay/Core/Resource/ResourceManager.h"
 
@@ -22,46 +22,47 @@ public:
     void Initialize();
 
     template<typename... Args>
-    std::shared_ptr<GameObject> Create(const std::string& name_, Args && ...args_)
+    std::shared_ptr<GameObject> Create(const std::string& name, Args && ...args)
     {
-        const std::string& baseName_ = name_; // ← これ追加
+        const std::string& baseName = name; // ← これ追加
 
         // 重複名数える
         int count_ = 0;
-        for (auto& o : objects)
+        for (auto& o : _Objects)
         {
             const std::string& n_ = o->nameComponent->name;
-            if (n_ == baseName_ || n_.rfind(baseName_ + "_", 0) == 0)
+            if (n_ == baseName || n_.rfind(baseName + "_", 0) == 0)
                 count_++;
         }
 
         // final name 決定
-        std::string finalName_ = baseName_;
+        std::string finalName = baseName;
         if (count_ > 0)
         {
             char buf_[32];
             sprintf_s(buf_, sizeof(buf_), "_%02d", count_);   // ← こっち
-            finalName_ += buf_;
+            finalName += buf_;
         }
 
         // オブジェクトの生成
         auto newObj = std::make_shared<GameObject>();
-        newObj->nameComponent->name = finalName_;
+        newObj->nameComponent->name = finalName;
+        newObj->transform->gameObject = newObj;
 
         //ここで「自身」をオブジェクトに授ける！
         newObj->SetManager(this);
-        objects.emplace_back(newObj);       // 全体リストに追加
+        _Objects.emplace_back(newObj);       // 全体リストに追加
         // --- 既存の pendingStarts への追加や初期化処理 ---
-        pendingStarts.push_back(newObj);
+        _PendingStarts.push_back(newObj);
         return newObj;
     }
 
 
     // name検索
-    std::shared_ptr<GameObject> Find(const std::string& name_)
+    std::shared_ptr<GameObject> Find(const std::string& name)
     {
-        for (auto& o : objects)
-            if (o->nameComponent->name == name_)
+        for (auto& o : _Objects)
+            if (o->nameComponent->name == name)
             {
                 return o;
             }
@@ -74,7 +75,7 @@ public:
         std::vector<std::shared_ptr<T>> results;
 
         // 全オブジェクトを走査
-        for (auto& obj : objects)
+        for (auto& obj : _Objects)
         {
             if (!obj) continue;
 
@@ -89,14 +90,14 @@ public:
         return results;
     }
 
-    void RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_);
+    void RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem);
 
-    void Update(float et_);
+    void Update(float et);
 
-    void Submit(ID3D11DeviceContext* context_)
+    void Submit(ID3D11DeviceContext* context)
     {
-        for (auto& obj : objects)
-            obj->Submit(context_);
+        for (auto& obj : _Objects)
+            obj->Submit(context);
     }
 
     // 1. 指定したオブジェクトを削除する
@@ -107,14 +108,14 @@ public:
     void Clear();
 
     // 選択中オブジェクト
-    void SelectObject(std::shared_ptr<GameObject> obj) { selectedObject = obj; }
-    std::shared_ptr<GameObject> GetSelectedObject() { return selectedObject; }
+    void SelectObject(std::shared_ptr<GameObject> obj) { _SelectedObject = obj; }
+    std::shared_ptr<GameObject> GetSelectedObject() { return _SelectedObject; }
 
     void AddObject(std::shared_ptr<GameObject> obj);
     void RemoveObject(const std::string& name);
 
     // 状態を尋ねる窓口
-    const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
+    const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return _Objects; }
 
     void CollisionStep();
 
@@ -130,15 +131,12 @@ public:
         ColliderComponent* colA, ColliderComponent* colB
     );
 
-    std::shared_ptr<GameObject> GetSelectedObject() const { return selectedObject; }
-    void SetSelectedObject(std::shared_ptr<GameObject> obj) { selectedObject = obj; }
+    std::shared_ptr<GameObject> GetSelectedObject() const { return _SelectedObject; }
+    void SetSelectedObject(std::shared_ptr<GameObject> obj) { _SelectedObject = obj; }
 
     void ChangeScene(Scene* scene)
     {
-        //delete m_pCurrentScene;
-        //m_pCurrentScene = nullptr;
-
-        m_pCurrentScene = scene;
+        _CurrentScene = scene;
     }
 
     void SaveScene(const std::string& sceneName);
@@ -151,16 +149,12 @@ public:
     // 指定したオブジェクトをプレハブとして保存
     void SaveAsPrefab(std::shared_ptr<GameObject> obj, const std::string& prefabName);
 
-    RayCastManager* GetRayCastManager()
-    {
-        return m_pRayCastManager.get();
-    }
 
     void InitializeAllComponents();
 
     std::vector<std::shared_ptr<GameObject>>& GetObjects()
     {
-        return objects;
+        return _Objects;
     }
 
     CameraManager* GetCameraManager();
@@ -172,7 +166,7 @@ public:
 
     void ApplyDestroys(std::shared_ptr<GameObject> obj);
 
-    void SetShapeRenderFlg(bool f) { shapeRenderFlg = f; }
+    void SetShapeRenderFlg(bool f) { _ShapeRenderFlg = f; }
 
     //すべてのオブジェクトやコンポーネントが平等にアクセスするための窓口
     ResourceManager* GetResourceManager() { return _ResourceManager.get(); }
@@ -180,7 +174,7 @@ public:
     void DrawHierarchyGui();   // ヒストリー(階層)GUI
     void DrawInspectorGui();   // インスペクターGUI
     void DrawSceneModals(); // モーダルを描画する専用の儀式
-    void RefreshSceneList() { m_sceneState.list = GetSceneDirectories(); }
+    void RefreshSceneList() { _SceneState.list = GetSceneDirectories(); }
     std::shared_ptr<TimeManager> GetTimeManger() { return _TimeManager; }
 private:
     // unique name helper
@@ -210,34 +204,32 @@ private:
         std::vector<std::string> sceneFiles; // 読み込まれたJSONファイル名のリスト
         bool showSavePopup = false;
         bool showLoadPopup = false;
-    }    m_sceneState;
+    }    _SceneState;
 
 
     std::unique_ptr<ResourceManager> _ResourceManager;
-    std::vector<std::shared_ptr<GameObject>> objects;
+    std::vector<std::shared_ptr<GameObject>> _Objects;
     // まだ Startが呼ばれていないオブジェクトのリスト
-    std::vector<std::shared_ptr<GameObject>> pendingStarts;
-    std::vector<std::shared_ptr<GameObject>> pendingDestroys;
-    std::shared_ptr<GameObject> selectedObject = nullptr;
+    std::vector<std::shared_ptr<GameObject>> _PendingStarts;
+    std::vector<std::shared_ptr<GameObject>> _PendingDestroys;
+    std::shared_ptr<GameObject> _SelectedObject = nullptr;
 
     std::shared_ptr<CameraManager> _CameraManager;
 
     std::shared_ptr<TimeManager> _TimeManager;
-    //ナビメッシュマネージャー
-    //NaviMeshManager* m_pNaviMeshManager;
+
     // 所有権をマネージャ側が持つ
-    std::unique_ptr<RayCastManager>m_pRayCastManager;
-    std::unique_ptr<ParticleRenderSystem> particleSystem;
+    std::unique_ptr<ParticleRenderSystem> _ParticleSystem;
     // パーティクルコンポーネントのみを保持するリスト
-    std::vector<std::weak_ptr<ParticleComponent>> m_particleComponents;
+    std::vector<std::weak_ptr<ParticleComponent>> _ParticleComponents;
     //現在のシーン
-    Scene* m_pCurrentScene;
-    std::vector<std::string> m_prefabFiles; // プレハブ名のリスト
-    int m_selectedPrefabIndex = 0;          // GUIでの選択位置
-    const std::string m_prefabDirectory = "Prefabs/";
-    bool shapeRenderFlg = true;
-    bool naviMeshRenderFlg = false;
+    Scene* _CurrentScene;
+    std::vector<std::string> _PrefabFiles; // プレハブ名のリスト
+    int _SelectedPrefabIndex = 0;          // GUIでの選択位置
+    const std::string _PrefabDirectory = "Data/Prefabs/";
+    bool _ShapeRenderFlg = true;
+    bool _NaviMeshRenderFlg = false;
 public:
-        SceneState& GetSceneState() { return m_sceneState; }
+        SceneState& GetSceneState() { return _SceneState; }
 };
 

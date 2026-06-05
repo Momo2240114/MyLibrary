@@ -1394,11 +1394,11 @@ struct EditorContext
     Link* FindLinkAt(const ImVec2& p);
 
     template <typename T>
-    ImRect GetBounds(const std::vector<T*>& objects)
+    ImRect GetBounds(const std::vector<T*>& _Objects)
     {
         ImRect bounds(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-        for (auto object : objects)
+        for (auto object : _Objects)
             if (object->m_IsLive)
                 bounds.Add(object->GetBounds());
 
@@ -1409,11 +1409,11 @@ struct EditorContext
     }
 
     template <typename T>
-    ImRect GetBounds(const std::vector<ObjectWrapper<T>>& objects)
+    ImRect GetBounds(const std::vector<ObjectWrapper<T>>& _Objects)
     {
         ImRect bounds(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-        for (auto object : objects)
+        for (auto object : _Objects)
             if (object.m_Object->m_IsLive)
                 bounds.Add(object.m_Object->GetBounds());
 

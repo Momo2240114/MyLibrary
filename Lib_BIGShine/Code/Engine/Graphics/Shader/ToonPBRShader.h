@@ -31,6 +31,8 @@ private:
         float shadeStep;
         float shadeFeather;
         float occlusionStrength;
+        float toonPbrBlend;
+        float padding[3];
     };
 
     float shadeStep = 0.45f;

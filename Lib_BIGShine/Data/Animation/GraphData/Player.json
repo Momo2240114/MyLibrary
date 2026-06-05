@@ -1,0 +1,43 @@
+{
+    "AssetPath": "Player",
+    "GraphAssetPath": "Player",
+    "GraphNodes": [
+        {
+            "id": 5,
+            "inputPin": 0,
+            "nodeType": 1,
+            "outputPin": 6,
+            "posX": -360.0,
+            "posY": -80.0,
+            "stateName": "__Start__"
+        },
+        {
+            "id": 7,
+            "inputPin": 0,
+            "nodeType": 2,
+            "outputPin": 8,
+            "posX": -362.0,
+            "posY": 136.0,
+            "stateName": "__Any__"
+        },
+        {
+            "id": 9,
+            "inputPin": 10,
+            "nodeType": 0,
+            "outputPin": 11,
+            "posX": -92.0,
+            "posY": -69.0,
+            "stateName": "SS_Idle"
+        }
+    ],
+    "GraphTransitions": [
+        {
+            "conditions": [],
+            "duration": 0.20000000298023224,
+            "from": "__Start__",
+            "id": 12,
+            "logic": 0,
+            "to": "SS_Idle"
+        }
+    ]
+}

@@ -89,6 +89,7 @@ public:
 		float				roughness = 0.0f;
 		float				occlusionStrength = 0.0f;
 		float				alphaCutoff = 0.5f;
+		float				toonPbrBlend = 0.5f;
 		AlphaMode			alphaMode = AlphaMode::Opaque;
 		ModelShaderID shaderId = ModelShaderID::PBR;
 

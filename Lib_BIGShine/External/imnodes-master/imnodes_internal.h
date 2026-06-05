@@ -365,24 +365,24 @@ static inline ImNodesEditorContext& EditorContextGet()
 // [SECTION] ObjectPool implementation
 
 template<typename T>
-static inline int ObjectPoolFind(const ImObjectPool<T>& objects, const int id)
+static inline int ObjectPoolFind(const ImObjectPool<T>& _Objects, const int id)
 {
-    const int index = objects.IdMap.GetInt(static_cast<ImGuiID>(id), -1);
+    const int index = _Objects.IdMap.GetInt(static_cast<ImGuiID>(id), -1);
     return index;
 }
 
 template<typename T>
-static inline void ObjectPoolUpdate(ImObjectPool<T>& objects)
+static inline void ObjectPoolUpdate(ImObjectPool<T>& _Objects)
 {
-    for (int i = 0; i < objects.InUse.size(); ++i)
+    for (int i = 0; i < _Objects.InUse.size(); ++i)
     {
-        const int id = objects.Pool[i].Id;
+        const int id = _Objects.Pool[i].Id;
 
-        if (!objects.InUse[i] && objects.IdMap.GetInt(id, -1) == i)
+        if (!_Objects.InUse[i] && _Objects.IdMap.GetInt(id, -1) == i)
         {
-            objects.IdMap.SetInt(id, -1);
-            objects.FreeList.push_back(i);
-            (objects.Pool.Data + i)->~T();
+            _Objects.IdMap.SetInt(id, -1);
+            _Objects.FreeList.push_back(i);
+            (_Objects.Pool.Data + i)->~T();
         }
     }
 }
@@ -418,41 +418,41 @@ inline void ObjectPoolUpdate(ImObjectPool<ImNodeData>& nodes)
 }
 
 template<typename T>
-static inline void ObjectPoolReset(ImObjectPool<T>& objects)
+static inline void ObjectPoolReset(ImObjectPool<T>& _Objects)
 {
-    if (!objects.InUse.empty())
+    if (!_Objects.InUse.empty())
     {
-        memset(objects.InUse.Data, 0, objects.InUse.size_in_bytes());
+        memset(_Objects.InUse.Data, 0, _Objects.InUse.size_in_bytes());
     }
 }
 
 template<typename T>
-static inline int ObjectPoolFindOrCreateIndex(ImObjectPool<T>& objects, const int id)
+static inline int ObjectPoolFindOrCreateIndex(ImObjectPool<T>& _Objects, const int id)
 {
-    int index = objects.IdMap.GetInt(static_cast<ImGuiID>(id), -1);
+    int index = _Objects.IdMap.GetInt(static_cast<ImGuiID>(id), -1);
 
     // Construct new object
     if (index == -1)
     {
-        if (objects.FreeList.empty())
+        if (_Objects.FreeList.empty())
         {
-            index = objects.Pool.size();
-            IM_ASSERT(objects.Pool.size() == objects.InUse.size());
-            const int new_size = objects.Pool.size() + 1;
-            objects.Pool.resize(new_size);
-            objects.InUse.resize(new_size);
+            index = _Objects.Pool.size();
+            IM_ASSERT(_Objects.Pool.size() == _Objects.InUse.size());
+            const int new_size = _Objects.Pool.size() + 1;
+            _Objects.Pool.resize(new_size);
+            _Objects.InUse.resize(new_size);
         }
         else
         {
-            index = objects.FreeList.back();
-            objects.FreeList.pop_back();
+            index = _Objects.FreeList.back();
+            _Objects.FreeList.pop_back();
         }
-        IM_PLACEMENT_NEW(objects.Pool.Data + index) T(id);
-        objects.IdMap.SetInt(static_cast<ImGuiID>(id), index);
+        IM_PLACEMENT_NEW(_Objects.Pool.Data + index) T(id);
+        _Objects.IdMap.SetInt(static_cast<ImGuiID>(id), index);
     }
 
     // Flag it as used
-    objects.InUse[index] = true;
+    _Objects.InUse[index] = true;
 
     return index;
 }
@@ -492,9 +492,9 @@ inline int ObjectPoolFindOrCreateIndex(ImObjectPool<ImNodeData>& nodes, const in
 }
 
 template<typename T>
-static inline T& ObjectPoolFindOrCreateObject(ImObjectPool<T>& objects, const int id)
+static inline T& ObjectPoolFindOrCreateObject(ImObjectPool<T>& _Objects, const int id)
 {
-    const int index = ObjectPoolFindOrCreateIndex(objects, id);
-    return objects.Pool[index];
+    const int index = ObjectPoolFindOrCreateIndex(_Objects, id);
+    return _Objects.Pool[index];
 }
 } // namespace IMNODES_NAMESPACE

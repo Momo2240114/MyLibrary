@@ -25,10 +25,10 @@ public:
     bool isStatic = false;                           // 地面や壁など動かないものか
     bool enabled = true;                               // 有効フラグ
     bool isGrounded = false;
-    bool shapeRenderFlg = true;
-    float m_Mass = 0.0f;
+    bool _ShapeRenderFlg = true;
+    float mass = 0.0f;
 
-    Vector4 m_DebugPrimitiveColor = { 0,0,0,1 };
+    Vector4 debugPrimitiveColor = { 0,0,0,1 };
     bool useGravity = false;            // 重力フラグ
     float gravityScale = 1.0f;          // 重力の強さ倍率
     DirectX::XMFLOAT3 velocity = { 0, 0, 0 }; // 現在の移動速度（落下速度用）
@@ -38,10 +38,10 @@ public:
         j["Offset"] = { offset.x, offset.y, offset.z };
         j["IsTrigger"] = isTrigger;
         j["IsStatic"] = isStatic;
-        j["ShapeRenderFlg"] = shapeRenderFlg;
+        j["ShapeRenderFlg"] = _ShapeRenderFlg;
         j["UseGravity"] = useGravity;
         j["GravityScale"] = gravityScale;
-        j["DebugPrimitiveColor"] = { m_DebugPrimitiveColor.x,m_DebugPrimitiveColor.y,m_DebugPrimitiveColor.z,m_DebugPrimitiveColor.w };
+        j["DebugPrimitiveColor"] = { debugPrimitiveColor.x,debugPrimitiveColor.y,debugPrimitiveColor.z,debugPrimitiveColor.w };
     }
 
     void Deserialize(const nlohmann::json& j) override {
@@ -52,14 +52,14 @@ public:
         }
         isTrigger = j.value("IsTrigger", false);
         isStatic = j.value("IsStatic", false);
-        shapeRenderFlg = j.value("ShapeRenderFlg", true);
+        _ShapeRenderFlg = j.value("ShapeRenderFlg", true);
         useGravity = j.value("UseGravity", false);
         gravityScale = j.value("GravityScale", 1.0f);
         if (j.contains("DebugPrimitiveColor")) {
-            m_DebugPrimitiveColor.x = j["DebugPrimitiveColor"][0];
-            m_DebugPrimitiveColor.y = j["DebugPrimitiveColor"][1];
-            m_DebugPrimitiveColor.z = j["DebugPrimitiveColor"][2];
-            m_DebugPrimitiveColor.w = j["DebugPrimitiveColor"][3];
+            debugPrimitiveColor.x = j["DebugPrimitiveColor"][0];
+            debugPrimitiveColor.y = j["DebugPrimitiveColor"][1];
+            debugPrimitiveColor.z = j["DebugPrimitiveColor"][2];
+            debugPrimitiveColor.w = j["DebugPrimitiveColor"][3];
         }
 
     }

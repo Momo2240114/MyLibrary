@@ -69,8 +69,8 @@ public:
         obb.halfSize[1] = halfSize.y * scale.y * 2.0f;
         obb.halfSize[2] = halfSize.z * scale.z * 2.0f;
 
-        m_Obb = obb;
+        obb = obb;
         return obb;
     }
-    OBB m_Obb;
+    OBB obb;
 };

@@ -1,64 +1,29 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Shaders">
       <UniqueIdentifier>{9f64f4ff-d9e0-43d7-88e1-13e6d3656a89}</UniqueIdentifier>
       <Extensions>hlsl;hlsli</Extensions>
     </Filter>
-    <Filter Include="ソースファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダーファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="ヘッダーファイル\InputSystem">
-      <UniqueIdentifier>{61979544-f3f5-4875-a6a2-e22423fd96c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソースファイル\InputSystem">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\InputSystem">
       <UniqueIdentifier>{50903ed7-215c-40e7-94af-3288874f2c7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダーファイル\PhysX">
-      <UniqueIdentifier>{2c3f4d53-ff6d-4f09-aa24-6b3df7445e83}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソースファイル\PhysX">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\PhysX">
       <UniqueIdentifier>{d3e4449b-0b3b-468e-bb95-c0e9bd5c0ba9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソースファイル\Conponent">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\Conponent">
       <UniqueIdentifier>{cdf37a72-06cc-4121-8adc-5715329f6882}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソースファイル\Object">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\Object">
       <UniqueIdentifier>{21513c3e-c628-4302-93d3-2decbe747bf1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソースファイル\Scene">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\Scene">
       <UniqueIdentifier>{670f35b0-152f-4142-bc2d-287135c2c852}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダーファイル\Scene">
-      <UniqueIdentifier>{6d8718a0-c1bc-45f5-baee-488714ea5435}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダーファイル\Math">
-      <UniqueIdentifier>{744ba343-9370-4b88-a55e-b62184e6742d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダーファイル\Component">
-      <UniqueIdentifier>{e2b86c23-acbf-4918-a37c-e4808a7a0561}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダーファイル\Component\MurataComponent">
-      <UniqueIdentifier>{5b483622-d582-497a-b9ce-06b98d1f37e7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダーファイル\NavMesh">
-      <UniqueIdentifier>{8ce0f4bc-75f4-4752-ba06-72ca4aa84e3f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソースファイル\NavMesh">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\NavMesh">
       <UniqueIdentifier>{3598e4e4-5c84-48ef-a0fb-e2dccfcceb7e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダーファイル\BehaviorTree">
-      <UniqueIdentifier>{cfc78388-9998-4ddd-99a5-e0970e736730}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダーファイル\Component\Particle">
-      <UniqueIdentifier>{6f8c3497-0835-4af2-b8cf-365f10ba321f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソースファイル\Conponent\Particle">
+    <Filter Include="�E�\�E�[�E�X�E�t�E�@�E�C�E��E�\Conponent\Particle">
       <UniqueIdentifier>{d74bd678-f7b0-4f77-b477-6a4b26609610}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\Particle">
@@ -223,6 +188,24 @@
     <Filter Include="Code\Engine\GamePlay\PostEffect">
       <UniqueIdentifier>{df10fb6a-cef0-4114-a285-9c49a41ce2fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\GamePlay\UI">
+      <UniqueIdentifier>{b91ca42d-3e09-47d6-9599-755ef4da51c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics\Charcter\Enemy">
+      <UniqueIdentifier>{5c1f3e2f-05d7-464d-8315-050d4ef6fd28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics\Charcter\StateMachine">
+      <UniqueIdentifier>{2f078a0c-5efd-455f-ae5d-cdad0b417a64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\OutLine">
+      <UniqueIdentifier>{e17a21e2-6316-4ab0-ba25-c11bc1d5d677}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Toon">
+      <UniqueIdentifier>{3e9a3d0e-24bc-4a91-a189-8118eef45e4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ToonPBR">
+      <UniqueIdentifier>{5a281832-f7e8-4cd0-b12a-657f4f548e57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -255,68 +238,11 @@
     <ClCompile Include="External\imgui-docking\imgui_widgets.cpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Code\StateMachine.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\DebugUtils\Source\RecastDump.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\Recast.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastAlloc.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastArea.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastAssert.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastContour.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastFilter.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastLayers.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastMesh.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastMeshDetail.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="External\recastnavigation\Recast\Source\RecastRasterization.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\UIButton.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\RandomHelper.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\SearchAreaManager.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\RayCastManager.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\ItemComponent.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="External\imnodes-master\imnodes.cpp">
       <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
     </ClCompile>
-    <ClCompile Include="Code\NumberSwitcher.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_tables.cpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\PlayerInput.cpp">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
@@ -588,29 +514,8 @@
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationController.cpp">
-      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Math\Curve\Curve.cpp">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Math\Curve\CurveAssetComponent.cpp">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Math\Curve\CurveEditor.cpp">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Math\Curve\CurveEditorDelegate.cpp">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Math\Curve\CurvePlayerComponent.cpp">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Math\Curve\CurveSerializer.cpp">
-      <Filter>Code\Engine\Math\Curve</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
@@ -621,46 +526,31 @@
     <ClCompile Include="Code\Engine\Graphics\Shader\ShadowCasterShader.cpp">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\ShadowWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIButton.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerInput.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Math\RandomHelper.cpp">
+      <Filter>Code\Engine\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Wip.hpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Serializer.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\UIButton.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\RandomHelper.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\SearchAreaManager.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\RayCastManager.h">
-      <Filter>ヘッダーファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\ItemComponent.h">
-      <Filter>ヘッダーファイル</Filter>
     </ClInclude>
     <ClInclude Include="External\imnodes-master\imnodes.h">
       <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
     </ClInclude>
     <ClInclude Include="External\imnodes-master\imnodes_internal.h">
       <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\NumberSwitcher.h">
-      <Filter>ヘッダーファイル\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\misc.h">
-      <Filter>Code\Engine\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerInput.h">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\PlayerAttack.h">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
@@ -1022,35 +912,35 @@
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationController.h">
-      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Math\Curve\Curve.h">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Math\Curve\CurveAssetComponent.h">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Math\Curve\CurveEditor.h">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Math\Curve\CurveEditorDelegate.h">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Math\Curve\CurvePlayerComponent.h">
-      <Filter>Code\Engine\Math\Curve</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Math\Curve\CurveSerializer.h">
-      <Filter>Code\Engine\Math\Curve</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h">
       <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Shader\ShadowCasterShader.h">
       <Filter>Code\Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\ShadowWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIButton.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\NumberSwitcher.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerAttack.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerInput.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Common\misc.h">
+      <Filter>Code\Engine\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Math\RandomHelper.h">
+      <Filter>Code\Engine\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1066,7 +956,7 @@
     <None Include="Shader\sprite.hlsli">
       <Filter>Shaders\Sprite</Filter>
     </None>
-    <None Include="Shader\PBRCommon.hlsli">
+    <None Include="Shader\ModelCommon.hlsli">
       <Filter>Shaders\PBR</Filter>
     </None>
     <None Include="Shader\decal_common.hlsli">
@@ -1091,6 +981,9 @@
       <Filter>Shaders\Scene</Filter>
     </None>
     <None Include="Shader\ParticleCommon.hlsli">
+      <Filter>Shaders\Particle</Filter>
+    </None>
+    <None Include="Shader\ParticleBitonicSort.hlsli">
       <Filter>Shaders\Particle</Filter>
     </None>
   </ItemGroup>
@@ -1140,6 +1033,9 @@
     <FxCompile Include="Shader\ShapeRendererPS.hlsl">
       <Filter>Shaders\Shape</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\ShadowCasterVS.hlsl">
+      <Filter>Shaders\PBR</Filter>
+    </FxCompile>
     <FxCompile Include="Shader\ShapeRendererVS.hlsl">
       <Filter>Shaders\Shape</Filter>
     </FxCompile>
@@ -1150,6 +1046,24 @@
       <Filter>Shaders\Particle</Filter>
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_GS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleInit_CS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleBeginFrame_CS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleEmit_CS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleEndFrame_CS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleBitonicSortB2_CS.hlsl">
+      <Filter>Shaders\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ParticleBitonicSortC2_CS.hlsl">
       <Filter>Shaders\Particle</Filter>
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_VS.hlsl">
@@ -1164,17 +1078,23 @@
     <FxCompile Include="Shader\SkyBoxVS.hlsl">
       <Filter>Shaders\Pass\SkyBox</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\ToonPS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shader\ToonVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shader\RadialBlur_PS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\OutlineVS.hlsl">
+      <Filter>Shaders\OutLine</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\OutlinePS.hlsl">
+      <Filter>Shaders\OutLine</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonPS.hlsl">
+      <Filter>Shaders\Toon</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonVS.hlsl">
+      <Filter>Shaders\Toon</Filter>
+    </FxCompile>
     <FxCompile Include="Shader\ToonPBRPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\ToonPBR</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

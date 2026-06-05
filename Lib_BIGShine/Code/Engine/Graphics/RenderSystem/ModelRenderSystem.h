@@ -30,7 +30,8 @@ public:
 	void RenderAll(const RenderContext& rc);
 	void RenderDecals(const RenderContext& rc);
 	const auto& GetShaders() const { return shaders; }
-	void Gui();
+	void ShaderSettingGui();
+	void ShadowSettingGui();
 private:
 	struct CbScene
 	{
@@ -82,6 +83,13 @@ private:
 		DirectX::XMFLOAT4X4		boneTransforms[256];
 	};
 
+	struct CbOutline
+	{
+		DirectX::XMFLOAT4 outlineColor;
+		float outlineThickness;
+		DirectX::XMFLOAT3 padding;
+	};
+
 	struct DrawInfo
 	{
 		ModelShaderID				shaderId;
@@ -96,8 +104,11 @@ private:
 	};
 
 	struct CbShadowData {
-		DirectX::XMFLOAT4X4 lightViewProjections[4]; // 4つのカスケードの行列
-		DirectX::XMFLOAT4   cascadeSplits;           // 各カスケードの境界距離
+		DirectX::XMFLOAT4X4 lightViewProjections[4];
+		DirectX::XMFLOAT4   cascadeSplits;
+		DirectX::XMFLOAT4   cascadeShadowBias{ 0.001f, 0.002f, 0.003f, 0.004f };
+		float shadowAttenuation = 0.35f;
+		DirectX::XMFLOAT3 padding{};
 	};
 
 	std::shared_ptr<ModelShader>			shaders[static_cast<int>(ModelShaderID::EnumCount)];
@@ -106,6 +117,13 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	sceneConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	skeletonConstantBuffer;
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> outlineVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> outlinePixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> outlineInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> outlineConstantBuffer;
+	DirectX::XMFLOAT4 outlineColor = { 0.02f, 0.02f, 0.025f, 1.0f };
+	float outlineThickness = 0.00f;
 
 	// --- StructuredBuffer 管理用 ---
 	Microsoft::WRL::ComPtr<ID3D11Buffer> lightStructuredBuffer;
@@ -135,6 +153,26 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> whiteTextureSRV;
 	void CreateDefaultTextures(ID3D11Device* device);
 
+	struct CbShadowCaster
+	{
+		DirectX::XMFLOAT4X4 lightViewProjection;
+	};
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> cascadeShadowConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> shadowCasterConstantBuffer;
+
+	DirectX::XMFLOAT4 cascadeShadowBias =
+	{
+		0.001f,
+		0.002f,
+		0.003f,
+		0.004f,
+	};
+
+	bool useCascadeShadow;
+	float shadowAttenuation = 0.35f;
+
+	void RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection);
 	void RenderShadowCasters(const RenderContext& rc, int cascadeIndex);
 public:
 	void PushDecalSubmit(std::shared_ptr<DecalComponent> decal) {

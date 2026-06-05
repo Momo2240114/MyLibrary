@@ -7,8 +7,6 @@
 
 void BoxCollider::Start()
 {
-    //ゲームオブジェクトを追加する
-    GetManager().GetRayCastManager()->AddGameObject(GetGameObject());
 }
 
 void BoxCollider::Gui() {
@@ -50,16 +48,16 @@ void BoxCollider::Update(float dt) {
         halfSize.y * 2.0f * scale.y,
         halfSize.z * 2.0f * scale.z
     };
-    if(shapeRenderFlg)
+    if(_ShapeRenderFlg)
     {
-        renderer.DrawBox(pos, rotRad, drawSize,m_DebugPrimitiveColor);
+        renderer.DrawBox(pos, rotRad, drawSize,debugPrimitiveColor);
     }
 }
 
 CollisionManifold BoxCollider::CheckCollision(std::shared_ptr<ColliderComponent> other)
 {
     OBB self = CreateOBB();
-    m_Obb = self;
+    obb = self;
     switch (other->GetColliderType()) {
     case ColliderType::Sphere:
         return CollisionMath::OBBVsSphere(self, ((SphereCollider*)other.get())->GetSphereData());

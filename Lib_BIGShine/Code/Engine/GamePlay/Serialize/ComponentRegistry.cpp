@@ -6,7 +6,7 @@
 #include "Engine/Physics/CapsuleCollider.h"
 #include "Engine/Physics/SphereCollider.h"
 #include "Engine/Graphics/Decal/DecalComponent.h"
-#include "UIButton.h"
+#include "Engine/UI/UIButton.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/GamePlay/Camera/CameraDirectorComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
@@ -18,11 +18,11 @@
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/Graphics/PostEffect/ColorFilterDirector.h"
-#include "NumberSwitcher.h"
+#include "Engine/UI/NumberSwitcher.h"
 //#include "CurvePlayerComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
-#include "PlayerInput.h"
+#include "Game/Charcter/Player/PlayerInput.h"
 #include "Engine/GamePlay/Core/Component/Movement.h"
 
 

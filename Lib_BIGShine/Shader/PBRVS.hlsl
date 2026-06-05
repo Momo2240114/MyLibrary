@@ -1,5 +1,5 @@
 #include "Skinning.hlsli"
-#include "PBRCommon.hlsli"
+#include "ModelCommon.hlsli"
 
 
 VS_OUT main(

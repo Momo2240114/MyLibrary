@@ -1,61 +1,68 @@
-#include "ParticleComponent.h"
-#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+Ôªø#include "ParticleComponent.h"
+
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include <filesystem>
 
-void ParticleComponent::Start() {
+void ParticleComponent::Start()
+{
     RefreshTextureList();
-    // Startéûì_Ç≈äeÉGÉ~ÉbÉ^Å[ÇÃé¿ëÃÇ™Ç»Ç¢èÍçáÇÕçÏê¨
+
     auto device = GraphicsDeviceManager::Instance().GetDevice();
-    for (auto& track : tracks) {
-        if (!track.emitter) {
+    for (auto& track : tracks)
+    {
+        if (!track.emitter)
+        {
             track.emitter = std::make_unique<ParticleEmitter>(device, track.settings, track.settings.maxParticleCount);
-            if (!track.texturePath.empty()) {
-                LoadEmitterTexture(track, track.texturePath);
-            }
         }
+
+        if (!track.texturePath.empty()) LoadEmitterTextureSlot(track, track.texturePath, 0);
+        if (!track.maskTexturePath.empty()) LoadEmitterTextureSlot(track, track.maskTexturePath, 1);
+        if (!track.gradientTexturePath.empty()) LoadEmitterTextureSlot(track, track.gradientTexturePath, 2);
     }
 }
 
-
 void ParticleComponent::Gui()
 {
-    // --- êßå‰ån ---
     if (ImGui::Button("Play Effect")) Play();
     ImGui::SameLine();
     if (ImGui::Button("Stop")) isPlaying = false;
     ImGui::SameLine();
-    if (ImGui::Button("Reset All")) {
-        for (auto& t : tracks) t.isStarted = false;
+    if (ImGui::Button("Reset All"))
+    {
+        for (auto& track : tracks) track.Reset();
     }
 
     ImGui::Separator();
 
-    // --- ÉGÉ~ÉbÉ^Å[ä«óù ---
-    if (ImGui::Button("Add Emitter")) {
+    if (ImGui::Button("Add Emitter"))
+    {
         EmitterTrack newTrack;
-        // ç\ë¢ëÃÇÃèâä˙âªÅiÉSÉ~ÉfÅ[É^ñhé~Åj
         newTrack.settings = ParticleSystemConstants();
-        newTrack.settings.maxParticleCount = 100;
+        newTrack.settings.maxParticleCount = 1000;
+        newTrack.settings.burstCount = 100;
+        newTrack.settings.shapeSize = { 1, 1, 1, 0 };
         newTrack.emitter = std::make_unique<ParticleEmitter>(
             GraphicsDeviceManager::Instance().GetDevice(),
-            newTrack.settings, newTrack.settings.maxParticleCount);
+            newTrack.settings,
+            newTrack.settings.maxParticleCount);
         tracks.push_back(std::move(newTrack));
     }
 
-    if (tracks.empty()) {
+    if (tracks.empty())
+    {
         ImGui::TextColored(ImVec4(1, 1, 0, 1), "No Emitters. Click 'Add Emitter'.");
         return;
     }
 
-    // ÉGÉ~ÉbÉ^Å[ëIëÇÃà¿ëSÉ`ÉFÉbÉN
-    if (selectedEmitterIndex >= (int)tracks.size()) selectedEmitterIndex = (int)tracks.size() - 1;
+    if (selectedEmitterIndex >= static_cast<int>(tracks.size())) selectedEmitterIndex = static_cast<int>(tracks.size()) - 1;
+    if (selectedEmitterIndex < 0) selectedEmitterIndex = 0;
 
-    ImGui::Text("Emitter List:");
-    // éqÉEÉBÉìÉhÉE ID ÇÃå≈íË
-    ImGui::BeginChild("EmitterList", ImVec2(150, 80), true);
-    for (int i = 0; i < (int)tracks.size(); i++) {
-        ImGui::PushID(i); // óvëfÇ≤Ç∆ÇÃ ID ÉvÉbÉVÉÖ
+    ImGui::Text("Emitter List");
+    ImGui::BeginChild("EmitterList", ImVec2(160, 96), true);
+    for (int i = 0; i < static_cast<int>(tracks.size()); ++i)
+    {
+        ImGui::PushID(i);
         char label[32];
         sprintf_s(label, "Emitter %d", i);
         if (ImGui::Selectable(label, selectedEmitterIndex == i)) selectedEmitterIndex = i;
@@ -65,136 +72,195 @@ void ParticleComponent::Gui()
     ImGui::SameLine();
 
     ImGui::BeginGroup();
-    // çÌèúÉtÉâÉO
-    bool shouldRemove = false;
-    if (ImGui::Button("Remove Selected")) {
-        shouldRemove = true;
-    }
-    if (ImGui::Button("Refresh Folder")) RefreshTextureList();
+    bool shouldRemove = ImGui::Button("Remove Selected");
+    if (ImGui::Button("Refresh Textures")) RefreshTextureList();
     ImGui::EndGroup();
 
-    // çÌèúÇ™é¿çsÇ≥ÇÍÇΩèÍçáÅAUI ÇÃê[ïîÅiTabBarÅjÇ…ì¸ÇÈëOÇ… return Ç∑ÇÈ
-    if (shouldRemove) {
+    if (shouldRemove)
+    {
         tracks.erase(tracks.begin() + selectedEmitterIndex);
-        if (selectedEmitterIndex > 0) selectedEmitterIndex--;
-        // BeginTabBar ÇåƒÇ‘ëOÇ…î≤ÇØÇÈÇÃÇ≈à¿ëS
+        if (selectedEmitterIndex > 0) --selectedEmitterIndex;
         return;
     }
 
     ImGui::Separator();
 
-    // --- ÉpÉâÉÅÅ[É^è⁄ç◊ï“èW ---
-    // ëIëíÜÇÃÉGÉ~ÉbÉ^Å[ ID Ç≈ÉâÉbÉvÇµÇƒÅAÉXÉâÉCÉ_Å[ÇÃílÇÃåÎîFéØÇñhÇÆ
     ImGui::PushID(selectedEmitterIndex);
-
     auto& track = tracks[selectedEmitterIndex];
     auto& s = track.settings;
 
-    if (ImGui::BeginTabBar("EmitterParams")) {
-
-        // 1. ï˙èoÅiSpawnÅjÇ…ä÷Ç∑ÇÈê›íË
-        if (ImGui::BeginTabItem("Emission")) {
-            int maxCount = (int)s.maxParticleCount;
-            if (ImGui::SliderInt("Max Particle Count", &maxCount, 1, 5000)) {
-                s.maxParticleCount = (uint32_t)maxCount;
-                // íçà”ÅFé¿çsíÜÇ…êîÇïœÇ¶ÇÈèÍçáÇÕ Emitter ë§ÇÃÉoÉbÉtÉ@çƒê∂ê¨Ç™ïKóv
-            }
-
-            ImGui::DragFloat3("Pos Offset", &s.emissionPosition.x, 0.1f);
-            ImGui::DragFloat2("Spawn Range (Min/Max)", &s.emissionOffset.x, 0.1f);
-            ImGui::SliderFloat2("Cone Angle (Rad)", &s.emissionConeAngle.x, 0.0f, 6.28f);
-            ImGui::DragFloat2("Speed Range", &s.emissionSpeed.x, 0.1f);
-            ImGui::DragFloat2("Spawn Delay (Min/Max)", &s.spawnDelay.x, 0.01f);
-
-            const char* modes[] = { "Continuous (éùë±)", "Burst (àÍêƒ)" };
-            ImGui::Combo("Emission Mode", (int*)&s.emissionMode, modes, IM_ARRAYSIZE(modes));
-
-            if (s.emissionMode == 1) { // Burst ÉÇÅ[Éh
-                ImGui::DragInt("Burst Count", (int*)&s.burstCount, 1, 0, (int)s.maxParticleCount);
-                if (ImGui::Button("FIRE BURST!")) {
-                    s.burstTrigger = 1.0f;
+    auto textureCombo = [&](const char* label, std::string& fileName, std::string& path, int slot)
+    {
+        const char* preview = fileName.empty() ? "None" : fileName.c_str();
+        if (ImGui::BeginCombo(label, preview))
+        {
+            if (ImGui::Selectable("None", fileName.empty()))
+            {
+                fileName.clear();
+                path.clear();
+                if (track.emitter)
+                {
+                    if (slot == 1) { track.emitter->SetMaskTexture(nullptr); s.useMaskTexture = 0; }
+                    else if (slot == 2) { track.emitter->SetGradientTexture(nullptr); s.useGradientTexture = 0; }
                 }
             }
-            ImGui::EndTabItem();
-        }
 
-        // 2. ãììÆÅiPhysicsÅjÇ…ä÷Ç∑ÇÈê›íË
-        if (ImGui::BeginTabItem("Physics")) {
-            ImGui::DragFloat2("Lifespan (Min/Max)", &s.lifespan.x, 0.1f, 0.1f, 20.0f);
-            ImGui::DragFloat("Gravity", &s.gravity, 0.01f);
-            ImGui::DragFloat("Noise Scale", &s.noiseScale, 0.01f);
-            ImGui::DragFloat2("Rotation Speed", &s.emissionAngularSpeed.x, 0.1f);
-            ImGui::EndTabItem();
-        }
-
-        // 3. å©ÇΩñ⁄ÅiVisualÅjÇ…ä÷Ç∑ÇÈê›íË
-        if (ImGui::BeginTabItem("Visual")) {
-            ImGui::ColorEdit4("Color Tint", &s.manualColor.x);
-            ImGui::DragFloat2("Size (Start/End)", &s.emissionSize.x, 0.05f, 0.01f, 10.0f);
-            ImGui::DragFloat2("Fade Duration (In/Out)", &s.fadeDuration.x, 0.01f, 0.0f, 5.0f);
-
-            const char* types[] = { "Billboard", "Stretched" };
-            ImGui::Combo("Render Type", (int*)&s.type, types, IM_ARRAYSIZE(types));
-
-            ImGui::Separator();
-
-            const char* preview = track.textureFileName.empty() ? "Select..." : track.textureFileName.c_str();
-            if (ImGui::BeginCombo("Texture", preview)) {
-                for (const auto& file : textureFiles) {
-                    if (ImGui::Selectable(file.c_str(), track.textureFileName == file)) {
-                        track.textureFileName = file;
-                        track.texturePath = "Data/Texture/Particle/" + file;
-                        LoadEmitterTexture(track, track.texturePath);
-                    }
+            for (const auto& file : textureFiles)
+            {
+                bool selected = fileName == file;
+                if (ImGui::Selectable(file.c_str(), selected))
+                {
+                    fileName = file;
+                    path = "Data/Texture/Particle/" + file;
+                    LoadEmitterTextureSlot(track, path, slot);
+                    if (slot == 1) s.useMaskTexture = 1;
+                    if (slot == 2) s.useGradientTexture = 1;
                 }
-                ImGui::EndCombo();
+            }
+            ImGui::EndCombo();
+        }
+    };
+
+    if (ImGui::BeginTabBar("EmitterParams"))
+    {
+        if (ImGui::BeginTabItem("Emission"))
+        {
+            int maxCount = static_cast<int>(s.maxParticleCount);
+            if (ImGui::SliderInt("Max Count", &maxCount, 1, 20000)) s.maxParticleCount = static_cast<uint32_t>(maxCount);
+            ImGui::DragFloat("Delay", &track.delay, 0.01f, 0.0f, 60.0f);
+            ImGui::DragFloat2("Life Min/Max", &s.lifespan.x, 0.05f, 0.01f, 60.0f);
+            ImGui::DragFloat2("Speed Min/Max", &s.emissionSpeed.x, 0.05f, 0.0f, 100.0f);
+
+            const char* modes[] = { "Continuous", "Burst" };
+            ImGui::Combo("Mode", reinterpret_cast<int*>(&s.emissionMode), modes, IM_ARRAYSIZE(modes));
+            if (s.emissionMode == 0)
+            {
+                ImGui::DragInt("Spawn Rate", reinterpret_cast<int*>(&s.burstCount), 1, 0, 20000);
+            }
+            else
+            {
+                ImGui::DragInt("Burst Count", reinterpret_cast<int*>(&s.burstCount), 1, 0, static_cast<int>(s.maxParticleCount));
+                if (ImGui::Button("Fire Burst")) s.burstTrigger = 1.0f;
             }
             ImGui::EndTabItem();
         }
 
-        ImGui::EndTabBar(); // BeginTabBar Ç…ëŒÇ∑ÇÈ End
+        if (ImGui::BeginTabItem("Physics"))
+        {
+            ImGui::DragFloat("Gravity", &s.gravity, 0.01f, -100.0f, 100.0f);
+            ImGui::DragFloat2("Cone Angle", &s.emissionConeAngle.x, 0.01f, 0.0f, 6.28f);
+            ImGui::DragFloat2("Rotation Speed", &s.emissionAngularSpeed.x, 0.01f, -50.0f, 50.0f);
+            ImGui::DragFloat("Noise Scale", &s.noiseScale, 0.01f, 0.0f, 100.0f);
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Shape"))
+        {
+            const char* shapes[] = { "Point", "Box", "Circle", "Sphere", "Line" };
+            ImGui::Combo("Spawn Shape", reinterpret_cast<int*>(&s.spawnShape), shapes, IM_ARRAYSIZE(shapes));
+            ImGui::DragFloat3("Emitter Offset", &s.emissionPosition.x, 0.05f);
+            ImGui::DragFloat3("Shape Size", &s.shapeSize.x, 0.05f, 0.0f, 100.0f);
+            if (s.spawnShape == 4)
+            {
+                ImGui::DragFloat3("Line Start", &s.shapeStart.x, 0.05f);
+                ImGui::DragFloat3("Line End", &s.shapeEnd.x, 0.05f);
+            }
+            ImGui::DragFloat2("Legacy Radius Min/Max", &s.emissionOffset.x, 0.05f, 0.0f, 100.0f);
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Visual"))
+        {
+            ImGui::ColorEdit4("Color", &s.manualColor.x);
+            ImGui::DragFloat2("Size Start/End", &s.emissionSize.x, 0.02f, 0.01f, 100.0f);
+            ImGui::DragFloat2("Fade In/Out", &s.fadeDuration.x, 0.01f, 0.0f, 10.0f);
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Texture"))
+        {
+            textureCombo("Color Texture", track.textureFileName, track.texturePath, 0);
+            
+            textureCombo("Mask Texture", track.maskTextureFileName, track.maskTexturePath, 1);
+            textureCombo("Gradient Texture", track.gradientTextureFileName, track.gradientTexturePath, 2);
+            bool useMask = s.useMaskTexture != 0;
+            bool useGradient = s.useGradientTexture != 0;
+            if (ImGui::Checkbox("Use Mask", &useMask)) s.useMaskTexture = useMask ? 1u : 0u;
+            if (ImGui::Checkbox("Use Gradient", &useGradient)) s.useGradientTexture = useGradient ? 1u : 0u;
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Render"))
+        {
+            const char* renderTypes[] = { "Billboard", "Stretched" };
+            ImGui::Combo("Render Type", reinterpret_cast<int*>(&s.type), renderTypes, IM_ARRAYSIZE(renderTypes));
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
     }
 
-    ImGui::PopID(); // BeginChild à»ç~ÇÃ PushID Ç…ëŒÇ∑ÇÈ Pop
+    ImGui::PopID();
 }
 
+bool ParticleComponent::LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath)
+{
+    return LoadEmitterTextureSlot(track, fullPath, 0);
+}
 
-bool ParticleComponent::LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath) {
-    if (!track.emitter) return false;
+bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::string& fullPath, int slot)
+{
+    if (!track.emitter || fullPath.empty()) return false;
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     std::wstring wpath(fullPath.begin(), fullPath.end());
 
-    // CPUResourceLoaderÇégópÇµÇƒSRVÇçÏê¨
     if (SUCCEEDED(CPUResourceLoader::LoadTextureFromFile(
         GraphicsDeviceManager::Instance().GetDevice(),
         wpath.c_str(), srv.GetAddressOf(), nullptr)))
     {
-        track.emitter->SetTexture(srv); // EmitterÇ…SRVÇÉZÉbÉgÇ∑ÇÈä÷êîÇ™ïKóv
-        track.texturePath = fullPath;
+        if (slot == 1)
+        {
+            track.emitter->SetMaskTexture(srv);
+            track.maskTexturePath = fullPath;
+            track.settings.useMaskTexture = 1;
+        }
+        else if (slot == 2)
+        {
+            track.emitter->SetGradientTexture(srv);
+            track.gradientTexturePath = fullPath;
+            track.settings.useGradientTexture = 1;
+        }
+        else
+        {
+            track.emitter->SetTexture(srv);
+            track.texturePath = fullPath;
+        }
         return true;
     }
     return false;
 }
 
-void ParticleComponent::RefreshTextureList() {
+void ParticleComponent::RefreshTextureList()
+{
     textureFiles.clear();
     std::string path = "Data/Texture/Particle/";
     if (!std::filesystem::exists(path)) return;
-    for (const auto& entry : std::filesystem::directory_iterator(path)) {
+
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
         if (entry.is_regular_file()) textureFiles.push_back(entry.path().filename().string());
     }
 }
 
 void ParticleComponent::Play()
 {
-    isPlaying = true; // Ç±ÇÍÇ™ïKóvÅI
-    for (auto& track : tracks) {
+    isPlaying = true;
+    timer = 0.0f;
+    for (auto& track : tracks)
+    {
         track.isStarted = true;
-        // ÉoÅ[ÉXÉgÉÇÅ[ÉhÇ…Ç∑ÇÈèÍçá
-        track.settings.emissionMode = 1;
-        track.settings.burstCount = 100; // àÍãCÇ…100å¬èoÇ∑
-        track.settings.burstTrigger = 1.0f; // CSë§Ç≈Ç±ÇÍÇå©Çƒï˙èoÇ≥ÇπÇÈ
+        if (track.settings.emissionMode == 1) track.settings.burstTrigger = 1.0f;
     }
 }
 
@@ -207,38 +273,27 @@ void ParticleComponent::Update(float deltaTime)
     auto owner = GetGameObject();
     if (!owner) return;
 
-    // GameObjectÇÃTransformÇ©ÇÁç≈êVÇÃç¿ïWÇéÊìæ
     Vector3 worldPos = owner->transform->GetWorldPosition();
 
     for (auto& track : tracks)
     {
-        // 1. äJénîªíË
         if (!track.isStarted && timer >= track.delay)
         {
             track.isStarted = true;
-            // î≠ê∂íºå„ÇÃ1ÉtÉåÅ[ÉÄÇæÇØÉoÅ[ÉXÉgÉgÉäÉKÅ[ÇÉIÉìÇ…Ç∑ÇÈ
-            track.settings.burstTrigger = 1.0f;
+            if (track.settings.emissionMode == 1) track.settings.burstTrigger = 1.0f;
         }
 
-        // 2. é¿çs
         if (track.isStarted && track.emitter)
         {
-            // GUIÇ≈ï“èWÇµÇΩê›íË(settings)ÇÉGÉ~ÉbÉ^Å[ë§Ç…ìØä˙
-            // ç¿ïWÇÕTransformÇÃílÇóDêÊÇµÇƒÉIÉtÉZÉbÉgÇâ¡éZ
             ParticleSystemConstants tempSettings = track.settings;
-
-            // åvéZåãâ ÇÃÇ›ÇàÍéûïœêîÇ…ì¸ÇÍÇÈ
             tempSettings.emissionPosition.x = worldPos.x + track.settings.emissionPosition.x;
             tempSettings.emissionPosition.y = worldPos.y + track.settings.emissionPosition.y;
             tempSettings.emissionPosition.z = worldPos.z + track.settings.emissionPosition.z;
 
-            track.emitter->ApplySettings(tempSettings); // àÍéûìIÇ»ê›íËÇìKóp
+            track.emitter->ApplySettings(tempSettings);
             track.emitter->Update(context, deltaTime);
 
-            // ÉoÅ[ÉXÉgÉtÉâÉOÇÕ1âÒ Dispatch ÇµÇΩÇÁâ∫Ç∞ÇƒÇ®Ç≠
-            if (track.settings.burstTrigger > 0.0f) {
-                track.settings.burstTrigger = 0.0f;
-            }
+            if (track.settings.burstTrigger > 0.0f) track.settings.burstTrigger = 0.0f;
         }
     }
 }
@@ -252,18 +307,30 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         nlohmann::json ej;
         const auto& s = track.settings;
 
-        // --- ã§í ÉpÉâÉÅÅ[É^ ---
         ej["TexturePath"] = track.texturePath;
+        ej["MaskTexturePath"] = track.maskTexturePath;
+        ej["GradientTexturePath"] = track.gradientTexturePath;
         ej["Delay"] = track.delay;
         ej["MaxCount"] = s.maxParticleCount;
-
-        // --- ç\ë¢ëÃÇÃíÜêg (éÂóvÇ»Ç‡ÇÃ) ---
+        ej["EmissionMode"] = s.emissionMode;
+        ej["BurstCount"] = s.burstCount;
+        ej["SpawnShape"] = s.spawnShape;
+        ej["UseMask"] = s.useMaskTexture;
+        ej["UseGradient"] = s.useGradientTexture;
         ej["PosOffset"] = { s.emissionPosition.x, s.emissionPosition.y, s.emissionPosition.z };
+        ej["ShapeStart"] = { s.shapeStart.x, s.shapeStart.y, s.shapeStart.z };
+        ej["ShapeEnd"] = { s.shapeEnd.x, s.shapeEnd.y, s.shapeEnd.z };
+        ej["ShapeSize"] = { s.shapeSize.x, s.shapeSize.y, s.shapeSize.z };
+        ej["LegacyRadius"] = { s.emissionOffset.x, s.emissionOffset.y };
         ej["Lifespan"] = { s.lifespan.x, s.lifespan.y };
+        ej["Speed"] = { s.emissionSpeed.x, s.emissionSpeed.y };
+        ej["ConeAngle"] = { s.emissionConeAngle.x, s.emissionConeAngle.y };
+        ej["RotationSpeed"] = { s.emissionAngularSpeed.x, s.emissionAngularSpeed.y };
         ej["Gravity"] = s.gravity;
         ej["Color"] = { s.manualColor.x, s.manualColor.y, s.manualColor.z, s.manualColor.w };
-        ej["Speed"] = { s.emissionSpeed.x, s.emissionSpeed.y };
-        ej["EmissionMode"] = s.emissionMode; // 0:Continuous, 1:Burst
+        ej["Size"] = { s.emissionSize.x, s.emissionSize.y };
+        ej["Fade"] = { s.fadeDuration.x, s.fadeDuration.y };
+        ej["RenderType"] = s.type;
 
         emitterList.push_back(ej);
     }
@@ -283,31 +350,35 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             EmitterTrack track;
             auto& s = track.settings;
 
-            // --- ã§í ÉpÉâÉÅÅ[É^ïúå≥ ---
             track.texturePath = ej.value("TexturePath", "");
-            if (!track.texturePath.empty()) {
-                // ÉtÉ@ÉCÉãñºÇæÇØíäèoÇµÇƒï€éùÅiGUIÉRÉìÉ{É{ÉbÉNÉXópÅj
-                std::filesystem::path p(track.texturePath);
-                track.textureFileName = p.filename().string();
-            }
-            track.delay = ej.value("Delay", 0.0f);
-            s.maxParticleCount = ej.value("MaxCount", 1000);
+            track.maskTexturePath = ej.value("MaskTexturePath", "");
+            track.gradientTexturePath = ej.value("GradientTexturePath", "");
+            if (!track.texturePath.empty()) track.textureFileName = std::filesystem::path(track.texturePath).filename().string();
+            if (!track.maskTexturePath.empty()) track.maskTextureFileName = std::filesystem::path(track.maskTexturePath).filename().string();
+            if (!track.gradientTexturePath.empty()) track.gradientTextureFileName = std::filesystem::path(track.gradientTexturePath).filename().string();
 
-            // --- ç\ë¢ëÃïúå≥ (îzóÒÇ©ÇÁVectorÇ÷) ---
-            if (ej.contains("PosOffset")) {
-                s.emissionPosition = Vector4(ej["PosOffset"][0], ej["PosOffset"][1], ej["PosOffset"][2], 1.0f);
-            }
-            if (ej.contains("Lifespan")) {
-                s.lifespan = Vector2(ej["Lifespan"][0], ej["Lifespan"][1]);
-            }
+            track.delay = ej.value("Delay", 0.0f);
+            s.maxParticleCount = ej.value("MaxCount", 1000u);
+            s.emissionMode = ej.value("EmissionMode", 0u);
+            s.burstCount = ej.value("BurstCount", 100u);
+            s.spawnShape = ej.value("SpawnShape", 0u);
+            s.useMaskTexture = ej.value("UseMask", 0u);
+            s.useGradientTexture = ej.value("UseGradient", 0u);
             s.gravity = ej.value("Gravity", 0.0f);
-            if (ej.contains("Color")) {
-                s.manualColor = Color(ej["Color"][0], ej["Color"][1], ej["Color"][2], ej["Color"][3]);
-            }
-            if (ej.contains("Speed")) {
-                s.emissionSpeed = Vector2(ej["Speed"][0], ej["Speed"][1]);
-            }
-            s.emissionMode = ej.value("EmissionMode", 0);
+            s.type = ej.value("RenderType", 0u);
+
+            if (ej.contains("PosOffset")) s.emissionPosition = { ej["PosOffset"][0], ej["PosOffset"][1], ej["PosOffset"][2], 1.0f };
+            if (ej.contains("ShapeStart")) s.shapeStart = { ej["ShapeStart"][0], ej["ShapeStart"][1], ej["ShapeStart"][2], 1.0f };
+            if (ej.contains("ShapeEnd")) s.shapeEnd = { ej["ShapeEnd"][0], ej["ShapeEnd"][1], ej["ShapeEnd"][2], 1.0f };
+            if (ej.contains("ShapeSize")) s.shapeSize = { ej["ShapeSize"][0], ej["ShapeSize"][1], ej["ShapeSize"][2], 0.0f };
+            if (ej.contains("LegacyRadius")) s.emissionOffset = { ej["LegacyRadius"][0], ej["LegacyRadius"][1] };
+            if (ej.contains("Lifespan")) s.lifespan = { ej["Lifespan"][0], ej["Lifespan"][1] };
+            if (ej.contains("Speed")) s.emissionSpeed = { ej["Speed"][0], ej["Speed"][1] };
+            if (ej.contains("ConeAngle")) s.emissionConeAngle = { ej["ConeAngle"][0], ej["ConeAngle"][1] };
+            if (ej.contains("RotationSpeed")) s.emissionAngularSpeed = { ej["RotationSpeed"][0], ej["RotationSpeed"][1] };
+            if (ej.contains("Color")) s.manualColor = { ej["Color"][0], ej["Color"][1], ej["Color"][2], ej["Color"][3] };
+            if (ej.contains("Size")) s.emissionSize = { ej["Size"][0], ej["Size"][1] };
+            if (ej.contains("Fade")) s.fadeDuration = { ej["Fade"][0], ej["Fade"][1] };
 
             tracks.push_back(std::move(track));
         }
@@ -315,3 +386,4 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
 
     if (j.value("IsPlaying", false)) Play();
 }
+

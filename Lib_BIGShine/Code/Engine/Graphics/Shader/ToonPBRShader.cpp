@@ -67,6 +67,7 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
     cb.shadeStep = shadeStep;
     cb.shadeFeather = shadeFeather;
     cb.occlusionStrength = mesh.material->occlusionStrength;
+    cb.toonPbrBlend = mesh.material->toonPbrBlend;
 
     dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cb, 0, 0);
 
@@ -83,8 +84,8 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
 
 void ToonPBRShader::Gui()
 {
-    ImGui::SliderFloat("Shade Step", &shadeStep, 0.0f, 1.0f);
-    ImGui::SliderFloat("Shade Feather", &shadeFeather, 0.001f, 0.6f);
+    ImGui::SliderFloat("ToonPBRPS_Shade Step", &shadeStep, 0.0f, 1.0f);
+    ImGui::SliderFloat("ToonPBRPS_Shade Feather", &shadeFeather, 0.001f, 1.0f);
 }
 
 void ToonPBRShader::End(const RenderContext& rc)

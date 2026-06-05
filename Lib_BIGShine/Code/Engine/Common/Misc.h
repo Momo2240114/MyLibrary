@@ -12,6 +12,8 @@
 #define  _ASSERT_EXPR_A(expr, expr_str) ((void)0)
 #endif
 
+
+
 inline LPWSTR HRTrace(HRESULT hr)
 {
 	LPWSTR msg;
@@ -19,26 +21,34 @@ inline LPWSTR HRTrace(HRESULT hr)
 	return msg;
 }
 
-class Benchmark
+
+class benchmark
 {
-	LARGE_INTEGER ticksPerSecond;
-	LARGE_INTEGER startTicks;
-	LARGE_INTEGER currentTicks;
+	LARGE_INTEGER ticks_per_second;
+	LARGE_INTEGER start_ticks;
+	LARGE_INTEGER current_ticks;
 
 public:
-	Benchmark()
+	benchmark()
 	{
-		QueryPerformanceFrequency(&ticksPerSecond);
-		QueryPerformanceCounter(&startTicks);
-		QueryPerformanceCounter(&currentTicks);
+		QueryPerformanceFrequency(&ticks_per_second);
+		QueryPerformanceCounter(&start_ticks);
+		QueryPerformanceCounter(&current_ticks);
 	}
+	~benchmark() = default;
+	benchmark(const benchmark&) = delete;
+	benchmark& operator=(const benchmark&) = delete;
+	benchmark(benchmark&&) noexcept = delete;
+	benchmark& operator=(benchmark&&) noexcept = delete;
+
 	void begin()
 	{
-		QueryPerformanceCounter(&startTicks);
+		QueryPerformanceCounter(&start_ticks);
 	}
 	float end()
 	{
-		QueryPerformanceCounter(&currentTicks);
-		return static_cast<float>(currentTicks.QuadPart - startTicks.QuadPart) / static_cast<float>(ticksPerSecond.QuadPart);
+		QueryPerformanceCounter(&current_ticks);
+		return static_cast<float>(current_ticks.QuadPart - start_ticks.QuadPart) / static_cast<float>(ticks_per_second.QuadPart);
 	}
 };
+

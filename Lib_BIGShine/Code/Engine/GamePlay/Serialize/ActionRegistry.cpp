@@ -1,9 +1,9 @@
 #include "ActionRegistry.h"
-#include "Engine/GamePlay/Core/SceneManager.h"
-#include "SceneGame.h"
-#include "SceneTitle.h"
-#include "SceneLoading.h"
-#include "SceneTutorial.h"
+#include "Engine/GamePlay/Scene/SceneManager.h"
+#include "Engine/GamePlay/Scene/SceneGame.h"
+#include "Engine/GamePlay/Scene/SceneTitle.h"
+#include "Engine/GamePlay/Scene/SceneLoading.h"
+#include "Engine/GamePlay/Scene/SceneTutorial.h"
 #include "Engine/Audio/AudioManager.h"
 
 

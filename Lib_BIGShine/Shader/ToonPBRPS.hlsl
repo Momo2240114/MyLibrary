@@ -1,5 +1,5 @@
 // ToonPBRPS.hlsl
-#include "PBRCommon.hlsli"
+#include "ModelCommon.hlsli"
 #include "bidirectional_reflectance_distribution_function.hlsli"
 
 cbuffer CbMesh : register(b0)
@@ -11,7 +11,9 @@ cbuffer CbMesh : register(b0)
     float shadeStep;
     float shadeFeather;
     float occlusionStrength;
-};
+    float toonPbrBlend;
+    float padding[3];
+}
 
 Texture2D BaseMap : register(t0);
 Texture2D NormalMap : register(t1);
@@ -91,12 +93,19 @@ float3 DirectToonPBR(float3 base, float3 N, float3 V, float3 L, float3 light, fl
     float3 f90 = float3(1.0f, 1.0f, 1.0f);
 
     float3 toonDiffuse = ToonDiffuseColor(base, toonLight) * (1.0f - metalness);
-    float3 spec = brdf_specular_ggx(f0, f90, alphaRoughness, VoH, NdotL, NdotV, NdotH);
+    //float3 spec = brdf_specular_ggx(f0, f90, alphaRoughness, VoH, NdotL, NdotV, NdotH);
+    
+    float3 pbrDiffuse = brdf_lambertian(f0, f90, base, VoH) * (1.0f - metalness);
+    float3 pbrSpec = brdf_specular_ggx(f0, f90, alphaRoughness, VoH, NdotL, NdotV, NdotH);
+    float3 toonSpec = pbrSpec;
 
-    float specMask = smoothstep(0.25f, 0.75f, saturate(max(spec.r, max(spec.g, spec.b)) * (1.0f - roughness)));
-    spec *= lerp(0.35f, 1.0f, specMask);
 
-    return (toonDiffuse + spec) * light * toonLight;
+    float specMask = smoothstep(0.25f, 0.75f, saturate(max(toonSpec.r, max(toonSpec.g, toonSpec.b)) * (1.0f - roughness)));
+    toonSpec *= lerp(0.35f, 1.0f, specMask);
+ 
+    float3 pbrResult = (pbrDiffuse + pbrSpec) * light * NdotL;
+    float3 toonResult = (toonDiffuse + toonSpec) * light * toonLight;
+    return lerp(pbrResult, toonResult, saturate(toonPbrBlend));
 }
 
 PS_OUT main(VS_OUT pin)
@@ -123,13 +132,13 @@ PS_OUT main(VS_OUT pin)
     float3 diffuseReflectance = base.rgb * (1.0f - metalness);
 
     float3 totalDirectLighting = 0.0f;
-
     {
         float3 L = normalize(-lightDirection.xyz);
         float directionalIntensity = lightDirection.w;
+        float shadow = CalcCascadeShadow(pin.position);
         totalDirectLighting += DirectToonPBR(
             base.rgb, N, V, L,
-            lightColor.rgb * directionalIntensity,
+            lightColor.rgb * directionalIntensity * shadow,
             metalness, roughness, f0);
     }
 
@@ -185,7 +194,17 @@ PS_OUT main(VS_OUT pin)
     float ao = lerp(1.0f, aoSample, occlusionStrength);
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
 
-    float3 finalColor = totalDirectLighting + iblDiffuse * ao * 0.65f + iblSpecular * 0.55f + emissive;
+    float blend = saturate(toonPbrBlend);
+
+    float iblDiffuseStrength = lerp(1.0f, 0.4f, blend);
+    float iblSpecularStrength = lerp(1.0f, 0.03f, blend);
+    
+    float3 finalColor =
+    totalDirectLighting +
+    iblDiffuse * ao * iblDiffuseStrength +
+    iblSpecular * iblSpecularStrength +
+    emissive;
+    
     finalColor = ACESFilm(finalColor);
     finalColor = pow(max(finalColor, 0.0f), 1.0f / 2.2f);
 

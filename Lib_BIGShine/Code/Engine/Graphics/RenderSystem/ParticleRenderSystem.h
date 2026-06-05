@@ -1,81 +1,45 @@
-#pragma once
+ï»¿#pragma once
 
 #include <d3d11.h>
 #include <wrl.h>
 #include <vector>
-#include <vector.h>
 #include <memory>
+#include <DirectXMath.h>
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 
 struct RenderContext;
 
-class ParticleRenderSystem {
+class ParticleRenderSystem
+{
 public:
     void Initialize(ID3D11Device* device);
-
-    // •`‰æ“o˜^
     void PushSubmit(ParticleComponent* component);
-
-    // XVi•¨—‰‰Zj
     void UpdateAll(ID3D11DeviceContext* context,
         float et,
         const DirectX::XMMATRIX& vpMatrix,
         const std::vector<std::weak_ptr<ParticleComponent>>& components);
-
-    // •`‰æÀs
     void RenderAll(const RenderContext& rc);
 
 private:
-    struct DrawInfo {
-        ParticleComponent* component;
+    struct DrawInfo
+    {
+        ParticleComponent* component = nullptr;
     };
 
-	struct CbScene
-	{
-		DirectX::XMFLOAT4X4		viewProjection;
-		DirectX::XMFLOAT4		lightDirection;
-		DirectX::XMFLOAT4		lightColor;
-		DirectX::XMFLOAT4		cameraPosition;
+    struct CbScene
+    {
+        DirectX::XMFLOAT4X4 viewProjection;
+        DirectX::XMFLOAT4 lightDirection;
+        DirectX::XMFLOAT4 lightColor;
+        DirectX::XMFLOAT4 cameraPosition;
+        DirectX::XMFLOAT4 zBufferParameteres;
+        int numPointLights;
+        int numSpotLights;
+        float padding[2];
+        DirectX::XMFLOAT4X4 invViewProjection;
+    };
 
-		DirectX::XMFLOAT4 zBufferParameteres;
-
-		int numPointLights;   // —LŒø‚Èƒ|ƒCƒ“ƒgƒ‰ƒCƒg‚Ì”
-		int numSpotLights;   // —LŒø‚ÈƒXƒ|ƒbƒgƒ‰ƒCƒg‚Ì”
-		float padding[2];     // 16ƒoƒCƒg‹«ŠE‡‚í‚¹
-
-		//‹ts—ñ
-		DirectX::XMFLOAT4X4 invViewProjection;
-	};
-
-	// GPU‘¤‚Ì StructuredBuffer ‚Æ“¯‚¶\‘¢‚É‚·‚é
-	struct PointLightData
-	{
-		DirectX::XMFLOAT3 position;
-		float range;
-		DirectX::XMFLOAT3 color;
-		float intensity;
-	};
-
-	struct SpotLightData
-	{
-		DirectX::XMFLOAT3 position;
-		float range;
-		DirectX::XMFLOAT3 direction;
-		float intensity;
-		DirectX::XMFLOAT3 color;
-		float innerAngle;
-		float outerAngle;
-		float padding[3]; // HLSL‘¤‚Ì16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚É‡‚í‚¹‚é
-	};
+private:
     std::vector<DrawInfo> drawInfos;
-
-    // ƒVƒF[ƒ_[
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>   vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>    pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11ComputeShader>  computeShader;
-
-    // ‹¤—LƒŠƒ\[ƒX
-    Microsoft::WRL::ComPtr<ID3D11SamplerState>   linearSampler;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>         sceneConstantBuffer; // b9—p
+    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;
 };
