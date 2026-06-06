@@ -160,7 +160,8 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 
     CommonConstants common{};
     common.elapsedTime = dt;
-    common.textureSplitCount = textureSplitCount;
+    common.textureSplitCount.x = (std::max)(1u, settings.textureSplitCount.x);
+    common.textureSplitCount.y = (std::max)(1u, settings.textureSplitCount.y);
     common.systemNumParticles = numParticles;
     common.totalEmitCount = static_cast<UINT>(emitParticles.size());
 
@@ -293,7 +294,11 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     float angle = r0 * pi * 2.0f;
     float radius = Lerp(settings.emissionOffset.x, settings.emissionOffset.y, r1);
 
-    data.parameter.x = static_cast<float>(settings.type);
+    const UINT splitX_ = (std::max)(1u, settings.textureSplitCount.x);
+    const UINT splitY_ = (std::max)(1u, settings.textureSplitCount.y);
+    const UINT spriteX_ = (std::min)(settings.spriteSheetIndex.x, splitX_ - 1u);
+    const UINT spriteY_ = (std::min)(settings.spriteSheetIndex.y, splitY_ - 1u);
+    data.parameter.x = static_cast<float>(spriteY_ * splitX_ + spriteX_);
     data.parameter.y = (std::max)(0.01f, Lerp(settings.lifespan.x, settings.lifespan.y, r2));
     data.parameter.z = 0.0f;
     data.parameter.w = static_cast<float>(settings.type);

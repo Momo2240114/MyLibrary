@@ -77,6 +77,17 @@ struct ParticleSystemConstants
     uint32_t padding0 = 0;
     uint32_t padding1 = 0;
 
+    DirectX::XMUINT2 textureSplitCount = { 1, 1 };
+    DirectX::XMUINT2 spriteSheetIndex = { 0, 0 };
+
+    uint32_t useSpriteAnimation = 0;
+    uint32_t spriteAnimationLoop = 1;
+    uint32_t spriteAnimationStartIndex = 0;
+    uint32_t spriteAnimationEndIndex = 0;
+
+    float spriteAnimationFps = 12.0f;
+    DirectX::XMFLOAT3 spritePadding = { 0, 0, 0 };
+
     uint32_t useNoiseTexture = 0;
     DirectX::XMFLOAT3 padding = { 0, 0, 0 };
 };
