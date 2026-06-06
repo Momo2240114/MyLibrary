@@ -79,6 +79,14 @@ cbuffer ParticleSystemConstants : register(b9)
     uint useRandomSize;
     uint padding0;
     uint padding1;
+    uint2 textureSplitCountSetting;
+    uint2 spriteSheetIndex;
+    uint useSpriteAnimation;
+    uint spriteAnimationLoop;
+    uint spriteAnimationStartIndex;
+    uint spriteAnimationEndIndex;
+    float spriteAnimationFps;
+    float3 spritePadding;
     uint useNoiseTexture;
     float3 padding;
 };

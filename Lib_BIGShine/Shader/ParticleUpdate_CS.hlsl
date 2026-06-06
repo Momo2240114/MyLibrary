@@ -34,6 +34,24 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     data.rotation.z += data.rotation.w * elapsedTime;
 
     uint type = (uint)(data.parameter.x + 0.5f);
+    if (useSpriteAnimation != 0)
+    {
+        uint animationStart = min(spriteAnimationStartIndex, spriteAnimationEndIndex);
+        uint animationEnd = max(spriteAnimationStartIndex, spriteAnimationEndIndex);
+        uint animationLength = max(1u, animationEnd - animationStart + 1u);
+        float age = max(0.0f, data.parameter.z - data.parameter.y);
+        uint animationFrame = (uint)floor(age * max(spriteAnimationFps, 0.0f));
+        if (spriteAnimationLoop != 0)
+        {
+            animationFrame %= animationLength;
+        }
+        else
+        {
+            animationFrame = min(animationFrame, animationLength - 1u);
+        }
+        type = animationStart + animationFrame;
+    }
+    type = min(type, max(1u, textureSplitCount.x * textureSplitCount.y) - 1u);
     float w = 1.0f / max(1u, textureSplitCount.x);
     float h = 1.0f / max(1u, textureSplitCount.y);
     data.texcoord.xy = float2((type % textureSplitCount.x) * w, (type / textureSplitCount.x) * h);

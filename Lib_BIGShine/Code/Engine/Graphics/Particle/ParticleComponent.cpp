@@ -308,6 +308,38 @@ void ParticleComponent::Gui()
             bool useGradient = s.useGradientTexture != 0;
             if (ImGui::Checkbox("Use Mask", &useMask)) s.useMaskTexture = useMask ? 1u : 0u;
             if (ImGui::Checkbox("Use Gradient", &useGradient)) s.useGradientTexture = useGradient ? 1u : 0u;
+
+            ImGui::SeparatorText("Sprite Sheet");
+            int splitCount_[2] = { static_cast<int>(s.textureSplitCount.x), static_cast<int>(s.textureSplitCount.y) };
+            if (ImGui::InputInt2("Columns / Rows", splitCount_))
+            {
+                s.textureSplitCount.x = static_cast<uint32_t>((std::max)(1, splitCount_[0]));
+                s.textureSplitCount.y = static_cast<uint32_t>((std::max)(1, splitCount_[1]));
+            }
+
+            int spriteIndex_[2] = { static_cast<int>(s.spriteSheetIndex.x), static_cast<int>(s.spriteSheetIndex.y) };
+            if (ImGui::InputInt2("Cell X / Y", spriteIndex_))
+            {
+                s.spriteSheetIndex.x = static_cast<uint32_t>((std::clamp)(spriteIndex_[0], 0, static_cast<int>(s.textureSplitCount.x) - 1));
+                s.spriteSheetIndex.y = static_cast<uint32_t>((std::clamp)(spriteIndex_[1], 0, static_cast<int>(s.textureSplitCount.y) - 1));
+            }
+
+            const uint32_t totalCells_ = s.textureSplitCount.x * s.textureSplitCount.y;
+            bool useSpriteAnimation_ = s.useSpriteAnimation != 0;
+            if (ImGui::Checkbox("Animate Sprite Index", &useSpriteAnimation_)) s.useSpriteAnimation = useSpriteAnimation_ ? 1u : 0u;
+            if (s.useSpriteAnimation != 0)
+            {
+                int animationRange_[2] = { static_cast<int>(s.spriteAnimationStartIndex), static_cast<int>(s.spriteAnimationEndIndex) };
+                if (ImGui::InputInt2("Start / End Index", animationRange_))
+                {
+                    s.spriteAnimationStartIndex = static_cast<uint32_t>((std::clamp)(animationRange_[0], 0, static_cast<int>(totalCells_) - 1));
+                    s.spriteAnimationEndIndex = static_cast<uint32_t>((std::clamp)(animationRange_[1], 0, static_cast<int>(totalCells_) - 1));
+                }
+                ImGui::DragFloat("Frames Per Second", &s.spriteAnimationFps, 0.1f, 0.0f, 120.0f, "%.1f");
+                bool spriteAnimationLoop_ = s.spriteAnimationLoop != 0;
+                if (ImGui::Checkbox("Loop Sprite Animation", &spriteAnimationLoop_)) s.spriteAnimationLoop = spriteAnimationLoop_ ? 1u : 0u;
+            }
+            ImGui::Text("Selected Linear Index: %u", s.spriteSheetIndex.y * s.textureSplitCount.x + s.spriteSheetIndex.x);
             ImGui::EndTabItem();
         }
 
@@ -637,6 +669,12 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["SizeRandomEnd"] = { s.sizeRandomEnd.x, s.sizeRandomEnd.y };
         ej["UseRandomSize"] = s.useRandomSize;
         ej["Fade"] = { s.fadeDuration.x, s.fadeDuration.y };
+        ej["TextureSplitCount"] = { s.textureSplitCount.x, s.textureSplitCount.y };
+        ej["SpriteSheetIndex"] = { s.spriteSheetIndex.x, s.spriteSheetIndex.y };
+        ej["UseSpriteAnimation"] = s.useSpriteAnimation;
+        ej["SpriteAnimationLoop"] = s.spriteAnimationLoop;
+        ej["SpriteAnimationRange"] = { s.spriteAnimationStartIndex, s.spriteAnimationEndIndex };
+        ej["SpriteAnimationFps"] = s.spriteAnimationFps;
         ej["RenderType"] = s.type;
 
         emitterList.push_back(ej);
@@ -696,6 +734,16 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             if (ej.contains("SizeRandomEnd")) s.sizeRandomEnd = { ej["SizeRandomEnd"][0], ej["SizeRandomEnd"][1] };
             s.useRandomSize = ej.value("UseRandomSize", 0u);
             if (ej.contains("Fade")) s.fadeDuration = { ej["Fade"][0], ej["Fade"][1] };
+            if (ej.contains("TextureSplitCount")) s.textureSplitCount = { ej["TextureSplitCount"][0], ej["TextureSplitCount"][1] };
+            if (ej.contains("SpriteSheetIndex")) s.spriteSheetIndex = { ej["SpriteSheetIndex"][0], ej["SpriteSheetIndex"][1] };
+            s.useSpriteAnimation = ej.value("UseSpriteAnimation", 0u);
+            s.spriteAnimationLoop = ej.value("SpriteAnimationLoop", 1u);
+            if (ej.contains("SpriteAnimationRange"))
+            {
+                s.spriteAnimationStartIndex = ej["SpriteAnimationRange"][0];
+                s.spriteAnimationEndIndex = ej["SpriteAnimationRange"][1];
+            }
+            s.spriteAnimationFps = ej.value("SpriteAnimationFps", 12.0f);
 
             tracks.push_back(std::move(track));
         }
