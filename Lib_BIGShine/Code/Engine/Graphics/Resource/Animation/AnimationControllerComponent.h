@@ -2,15 +2,13 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "ModelAnimator.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
 
 #include <unordered_map>
-#include <variant>
 #include <memory>
 #include <vector>
 
-// Blackboardが持てる型の定義
-using BlackBoardValue = std::variant<float, int, bool, DirectX::SimpleMath::Vector2>;
 // 前方宣言
 namespace ax { namespace NodeEditor { struct EditorContext; } }
 
@@ -28,6 +26,7 @@ public:
     void SetSequencerWindowVisible(bool visible) { showSequencerWindow = visible; }
     // エディタ用表示関数
     void OnGuiNodeEditor();
+    void DrawNodeEditorContent();
 
     // エディタ側からポーズライブラリを直接操作・保存できるように、ゲッターを用意すると便利です
     std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return m_poseLibrary; }
@@ -40,29 +39,21 @@ public:
 
     // ステートを手動で追加する
     void AddState(const std::string& stateName, int animIndex);
+    bool AddOrUpdateCustomState(int customAnimIndex_);
+    bool PreviewCustomAnimation(int customAnimIndex_, float time_);
+    bool SelectStateForEditing(const std::string& stateName_);
 
     // ステートを削除する
     void RemoveState(const std::string& stateName);
-
-    // 外部からトリガーを引く
-    void SetTrigger(const std::string& name)
-    {
-        blackboard[name] = true;
-    }
-    // 内部でトリガーをリセットする
-    void ResetTrigger(const std::string& name)
-    {
-        if (blackboard.count(name)) {
-            blackboard[name] = false;
-        }
-    }
+    void SetTrigger(const std::string& name_);
+    void ResetTrigger(const std::string& name_);
     AnimGraphNode* AFindNodeByPin(ed::PinId pinId);
     // 宣言
     AnimGraphNode* FindNodeByName(const std::string& name);
     //const AnimGraphNode* FindNodeByNameCons(const std::string& name) const;
 
     // Blackboard へのアクセス権を授ける
-    const std::unordered_map<std::string, BlackBoardValue>& GetBlackboard() const { return blackboard; }
+    const BlackboardCategory& GetBlackboard() const;
     const AnimState* GetCurrentState() { return currentState; };
     float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
     void SetEditorPoseOverride(bool enabled) { m_editorPoseOverride = enabled; }
@@ -84,6 +75,12 @@ private:
 
     void SaveGraphAsset(const std::string& assetName);
     void LoadGraphAsset(const std::string& assetName);
+    bool SaveStateAsset(const std::string& stateName_);
+    bool LoadStateAsset(const std::string& assetName_);
+    void RegisterStateAction(const std::string& stateName_);
+    void EnsureGraphNodeForState(const std::string& stateName_);
+    void EnsureNodeEditorContext();
+    void EnsureStatesFromModel();
 
     int m_nextId = 1;
     // 【新設】何が選ばれているかを記録する賢者の記録
@@ -113,8 +110,8 @@ private:
 
     std::string m_assetFilePath; // 保存するパス
 
-    // 外部から値を書き換え、グラフがそれを監視する
-    std::unordered_map<std::string, BlackBoardValue> blackboard;
+    BlackboardComponent* blackboardComponent = nullptr;
+    std::string animationBlackboardCategory = "Anim";
     // グラフデータ
     std::vector<AnimGraphNode> graphNodes;
     std::vector<AnimTransition> graphTransitions;
@@ -135,6 +132,9 @@ private:
     void LoadAsset(const std::string& path);
     void SaveAsset(const std::string& path);
 
+    BlackboardCategory& GetEditableBlackboard();
+    const BlackboardCategory& GetCurrentBlackboard() const;
+
     bool m_pendingGraphAssetLoad = false;
     std::string m_pendingGraphAssetPath;
 
@@ -143,6 +143,8 @@ private:
     uintptr_t m_NextID = 1; // 0は無効値(Invalid)として扱われることが多いため1から開始
 public:
     // 外部からのパラメータ入力
-    void SetParam(const std::string& name, BlackBoardValue value) { blackboard[name] = value; }
+    void SetParam(const std::string& name_, BlackBoardValue value_);
+    void SetBlackboardCategory(const std::string& category_) { animationBlackboardCategory = category_; }
+    const std::string& GetBlackboardCategory() const { return animationBlackboardCategory; }
 };
 

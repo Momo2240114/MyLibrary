@@ -48,6 +48,10 @@ struct ParticleSystemConstants
     DirectX::XMFLOAT2 spawnDelay = { 0, 0 };
     DirectX::XMFLOAT2 fadeDuration = { 0, 0 };
     DirectX::XMFLOAT4 manualColor = { 1, 1, 1, 1 };
+    DirectX::XMFLOAT4 colorStart = { 1, 1, 1, 1 };
+    DirectX::XMFLOAT4 colorEnd = { 1, 1, 1, 1 };
+    DirectX::XMFLOAT2 sizeRandomStart = { 1, 1 };
+    DirectX::XMFLOAT2 sizeRandomEnd = { 1, 1 };
 
     float time = 0.0f;
     float deltaTime = 0.0f;
@@ -67,6 +71,11 @@ struct ParticleSystemConstants
     DirectX::XMFLOAT4 shapeStart = { 0, 0, 0, 1 };
     DirectX::XMFLOAT4 shapeEnd = { 0, 0, 0, 1 };
     DirectX::XMFLOAT4 shapeSize = { 1, 1, 1, 0 };
+
+    uint32_t useColorOverLife = 0;
+    uint32_t useRandomSize = 0;
+    uint32_t padding0 = 0;
+    uint32_t padding1 = 0;
 
     uint32_t useNoiseTexture = 0;
     DirectX::XMFLOAT3 padding = { 0, 0, 0 };

@@ -18,6 +18,7 @@ public:
         float et,
         const DirectX::XMMATRIX& vpMatrix,
         const std::vector<std::weak_ptr<ParticleComponent>>& components);
+    void ApplySceneConstants(const RenderContext& rc);
     void RenderAll(const RenderContext& rc);
 
 private:

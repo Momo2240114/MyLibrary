@@ -13,6 +13,7 @@
 #include "Engine/Graphics/Shader/ModelShaderID.h"
 #include "Engine/Graphics/Shader/DecalShader.h"
 #include "Engine/Graphics/Core/RenderContext.h"
+#include <nlohmann/json_fwd.hpp>
 
 class DecalComponent;
 
@@ -32,6 +33,8 @@ public:
 	const auto& GetShaders() const { return shaders; }
 	void ShaderSettingGui();
 	void ShadowSettingGui();
+	void SerializeGraphicsSettings(nlohmann::json& j_) const;
+	void DeserializeGraphicsSettings(const nlohmann::json& j_);
 private:
 	struct CbScene
 	{

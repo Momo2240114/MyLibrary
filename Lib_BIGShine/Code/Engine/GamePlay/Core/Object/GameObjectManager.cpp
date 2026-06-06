@@ -878,6 +878,11 @@ void GameObjectManager::SaveScene(const std::string& sceneName)
         {"blurPasses", params.blurPasses}
     };
 
+    if (modelRenderSystem)
+    {
+        modelRenderSystem->SerializeGraphicsSettings(listJson["GraphicsSettings"]);
+    }
+
     // 1. 各オブジェクトの個別ファイルを保存
     // (ここは順不同でOKなので、まずは全ファイルを書き出す)
     for (auto& obj : _Objects) {
@@ -930,14 +935,23 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
 
 
     // --- ★ グラフィックス設定（ブルーム）の読み込みを追加 ---
-    if (listJson.contains("GraphicsSettings") && listJson["GraphicsSettings"].contains("Bloom")) {
-        auto& bloomJson = listJson["GraphicsSettings"]["Bloom"];
-        auto& params = GraphicsDeviceManager::Instance().GetBloomParams(); // 書き込み先の参照取得
+    if (listJson.contains("GraphicsSettings")) {
+        auto& graphicsJson = listJson["GraphicsSettings"];
 
-        params.threshold = bloomJson.value("threshold", 1.0f);
-        params.intensity = bloomJson.value("intensity", 1.0f);
-        params.kawaseScale = bloomJson.value("kawaseScale", 1.0f);
-        params.blurPasses = bloomJson.value("blurPasses", 4);
+        if (graphicsJson.contains("Bloom")) {
+            auto& bloomJson = graphicsJson["Bloom"];
+            auto& params = GraphicsDeviceManager::Instance().GetBloomParams();
+
+            params.threshold = bloomJson.value("threshold", 1.0f);
+            params.intensity = bloomJson.value("intensity", 1.0f);
+            params.kawaseScale = bloomJson.value("kawaseScale", 1.0f);
+            params.blurPasses = bloomJson.value("blurPasses", 4);
+        }
+
+        if (modelRenderSystem)
+        {
+            modelRenderSystem->DeserializeGraphicsSettings(graphicsJson);
+        }
     }
 
 

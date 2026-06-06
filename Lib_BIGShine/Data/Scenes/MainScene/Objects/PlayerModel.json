@@ -150,6 +150,11 @@
             },
             "Enabled": true,
             "TypeName": "AnimationControllerComponent"
+        },
+        {
+            "Data": {},
+            "Enabled": true,
+            "TypeName": "BlackboardComponent"
         }
     ],
     "Layer": 0,

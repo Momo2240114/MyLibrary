@@ -24,6 +24,7 @@
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 #include "Game/Charcter/Player/PlayerInput.h"
 #include "Engine/GamePlay/Core/Component/Movement.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -79,6 +80,7 @@ void RegisterAllComponents()
     registry.Register<NumberSwitcher>("NumberSwitcher");
     registry.Register<PlayerInput>("PlayerInput");
     registry.Register<Movement>("Movement");
+    registry.Register<BlackboardComponent>("BlackboardComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");
 }
 

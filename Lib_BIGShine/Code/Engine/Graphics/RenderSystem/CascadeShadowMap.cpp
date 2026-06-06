@@ -1,4 +1,4 @@
-﻿#include "CascadeShadowMap.h"
+#include "CascadeShadowMap.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include <algorithm>
 #include <cfloat>
@@ -143,4 +143,10 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
 void CascadeShadowMap::SetViewport(ID3D11DeviceContext* dc) const
 {
     dc->RSSetViewports(1, &viewport);
+}
+
+void CascadeShadowMap::SetCascadeSplitDistance(int index_, float distance_)
+{
+    if (index_ < 0 || index_ >= CascadeCount) return;
+    cascadeSplitDistances[index_] = distance_;
 }

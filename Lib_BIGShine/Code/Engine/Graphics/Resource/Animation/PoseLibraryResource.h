@@ -38,10 +38,14 @@ struct NaturalMotionSettings
 struct CustomAnimation {
     std::string name;
     float duration = 1.0f;
+    int baseAnimationIndex = -1;
+    float baseAnimationStartTime = 0.0f;
+    float baseAnimationSpeed = 1.0f;
+    float poseBlend = 1.0f;
     std::vector<PoseKeyframe> keyframes;
     NaturalMotionSettings naturalMotion;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(CustomAnimation, name, duration, keyframes, naturalMotion)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(CustomAnimation, name, duration, baseAnimationIndex, baseAnimationStartTime, baseAnimationSpeed, poseBlend, keyframes, naturalMotion)
 };
 
 // 切りとられた一瞬のポーズ（姿勢）の記憶
