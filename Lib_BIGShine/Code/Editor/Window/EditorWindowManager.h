@@ -15,9 +15,14 @@ public:
         windows.push_back(std::move(window));
     }
 
+    void Update(float deltaTime_);
     void DrawAll();
+    bool IsWorkspaceMode() const { return activeWorkspaceIndex >= 0 && activeWorkspaceIndex < static_cast<int>(windows.size()) && windows[activeWorkspaceIndex]->IsVisible(); }
+    bool ShouldPauseScene() const { return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldPauseScene(); }
 private:
     void DrawMenuBar();
+    void DrawWorkspaceSelectorBar();
+    float GetWorkspaceSelectorHeight() const;
     void ApplyEngineLayout(ImVec2& scenePos, ImVec2& sceneSize);
     void DrawSceneView(const ImVec2& pos, const ImVec2& size);
     void DrawLayoutSplitters();
@@ -28,6 +33,7 @@ private:
     float rightPanelWidth = 350.0f;
     float bottomPanelHeight = 300.0f;
     int selectedBottomTool = 0;
+    int activeWorkspaceIndex = -1;
     GameObjectManager* gameObjectManager; // Ç±Ç±Ç™åqÇ™ÇÈÅI
     std::vector<std::unique_ptr<EditorWindow>> windows;
 };

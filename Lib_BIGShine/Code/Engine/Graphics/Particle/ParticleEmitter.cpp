@@ -317,11 +317,19 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     data.rotation.z = Random01(seed * 17u + 7u) * pi * 2.0f;
     data.rotation.w = Lerp(settings.emissionAngularSpeed.x, settings.emissionAngularSpeed.y, Random01(seed * 17u + 8u));
 
-    data.scale.x = settings.emissionSize.x;
-    data.scale.y = settings.emissionSize.x;
-    data.scale.z = settings.emissionSize.y;
+    float startSize_ = settings.emissionSize.x;
+    float endSize_ = settings.emissionSize.y;
+    if (settings.useRandomSize != 0)
+    {
+        startSize_ *= Lerp(settings.sizeRandomStart.x, settings.sizeRandomStart.y, Random01(seed * 17u + 9u));
+        endSize_ *= Lerp(settings.sizeRandomEnd.x, settings.sizeRandomEnd.y, Random01(seed * 17u + 10u));
+    }
+
+    data.scale.x = startSize_;
+    data.scale.y = startSize_;
+    data.scale.z = endSize_;
     data.scale.w = 0.0f;
-    data.color = settings.manualColor;
+    data.color = settings.useColorOverLife != 0 ? settings.colorStart : settings.manualColor;
 
     return data;
 }

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../Window/EditorWindow.h"
+#include "Editor/Workspace/EditorWorkspaceWindow.h"
 
 class AnimationControllerComponent;
 class GltfModelCommponennt;
 
-class AnimNodeEditorWindow : public EditorWindow
+class AnimNodeEditorWindow : public EditorWorkspaceWindow
 {
 public:
     AnimNodeEditorWindow(GameObjectManager* manager)
-        : EditorWindow("Animation Node Graph", manager)
+        : EditorWorkspaceWindow("Animation Node Graph", manager)
     {
         isVisible = false;
     }
@@ -18,5 +18,10 @@ public:
 
 private:
     bool ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const;
+    void DrawScenePreviewPanel();
+    void DrawSceneHierarchyPanel();
+    void DrawSceneInspectorPanel();
+    void DrawGraphPanel(AnimationControllerComponent* animController_);
+    void DrawStatePanel(AnimationControllerComponent* animController_);
 };
 

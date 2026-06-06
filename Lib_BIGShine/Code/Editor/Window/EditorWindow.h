@@ -20,8 +20,11 @@ public:
     virtual ~EditorWindow() = default;
 
     virtual void Draw() = 0; // 各ウィンドウ固有の描画
+    virtual void Update(float deltaTime_) {}
     virtual void DrawMenuBar() {}
     virtual void OnVisibilityChanged(bool visible) {}
+    virtual bool IsEditorWorkspace() const { return false; }
+    virtual bool ShouldPauseScene() const { return false; }
 
     // この窓が表示されているかを確認し、設定する術
     bool IsVisible() const { return isVisible; }

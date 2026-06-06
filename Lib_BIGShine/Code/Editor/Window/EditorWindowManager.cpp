@@ -10,12 +10,12 @@ void EditorWindowManager::ApplyEngineLayout(ImVec2& scenePos, ImVec2& sceneSize)
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     if (!viewport) return;
 
-    const float menuHeight = ImGui::GetFrameHeight();
+    const float workspaceSelectorHeight = GetWorkspaceSelectorHeight();
     const ImVec2 workPos = viewport->WorkPos;
     const ImVec2 workSize = viewport->WorkSize;
 
-    const float top = workPos.y + menuHeight;
-    const float usableHeight = (std::max)(120.0f, workSize.y - menuHeight);
+    const float top = workPos.y + workspaceSelectorHeight;
+    const float usableHeight = (std::max)(120.0f, workSize.y - workspaceSelectorHeight);
     leftPanelWidth = (std::max)(180.0f, (std::min)(leftPanelWidth, workSize.x * 0.45f));
     rightPanelWidth = (std::max)(220.0f, (std::min)(rightPanelWidth, workSize.x * 0.45f));
     bottomPanelHeight = (std::max)(120.0f, (std::min)(bottomPanelHeight, usableHeight * 0.65f));
@@ -59,78 +59,78 @@ void EditorWindowManager::DrawLayoutSplitters()
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     if (!viewport) return;
 
-    const float menuHeight = ImGui::GetFrameHeight();
+    const float workspaceSelectorHeight = GetWorkspaceSelectorHeight();
     const ImVec2 workPos = viewport->WorkPos;
     const ImVec2 workSize = viewport->WorkSize;
-    const float top = workPos.y + menuHeight;
-    const float usableHeight = (std::max)(120.0f, workSize.y - menuHeight);
+    const float top = workPos.y + workspaceSelectorHeight;
+    const float usableHeight = (std::max)(120.0f, workSize.y - workspaceSelectorHeight);
     const float splitterSize = 6.0f;
 
     auto drawVerticalSplitter = [&](const char* name, float x, bool leftSide)
-    {
-        ImGui::SetNextWindowPos(ImVec2(x - splitterSize * 0.5f, top), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(splitterSize, usableHeight), ImGuiCond_Always);
-        ImGui::SetNextWindowBgAlpha(0.0f);
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_NoScrollbar |
-            ImGuiWindowFlags_NoScrollWithMouse |
-            ImGuiWindowFlags_NoBackground;
-
-        if (ImGui::Begin(name, nullptr, flags))
         {
-            ImGui::InvisibleButton("##splitter", ImVec2(splitterSize, usableHeight));
-            if (ImGui::IsItemHovered() || ImGui::IsItemActive())
+            ImGui::SetNextWindowPos(ImVec2(x - splitterSize * 0.5f, top), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(splitterSize, usableHeight), ImGuiCond_Always);
+            ImGui::SetNextWindowBgAlpha(0.0f);
+            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_NoScrollbar |
+                ImGuiWindowFlags_NoScrollWithMouse |
+                ImGuiWindowFlags_NoBackground;
+
+            if (ImGui::Begin(name, nullptr, flags))
             {
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-            }
-            if (ImGui::IsItemActive())
-            {
-                const float delta = ImGui::GetIO().MouseDelta.x;
-                if (leftSide)
+                ImGui::InvisibleButton("##splitter", ImVec2(splitterSize, usableHeight));
+                if (ImGui::IsItemHovered() || ImGui::IsItemActive())
                 {
-                    leftPanelWidth += delta;
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
                 }
-                else
+                if (ImGui::IsItemActive())
                 {
-                    rightPanelWidth -= delta;
+                    const float delta = ImGui::GetIO().MouseDelta.x;
+                    if (leftSide)
+                    {
+                        leftPanelWidth += delta;
+                    }
+                    else
+                    {
+                        rightPanelWidth -= delta;
+                    }
                 }
             }
-        }
-        ImGui::End();
-    };
+            ImGui::End();
+        };
 
     auto drawHorizontalSplitter = [&]()
-    {
-        ImGui::SetNextWindowPos(ImVec2(bottomDockPos.x, bottomDockPos.y - splitterSize * 0.5f), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(bottomDockSize.x, splitterSize), ImGuiCond_Always);
-        ImGui::SetNextWindowBgAlpha(0.0f);
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_NoScrollbar |
-            ImGuiWindowFlags_NoScrollWithMouse |
-            ImGuiWindowFlags_NoBackground;
-
-        if (ImGui::Begin("Bottom Splitter", nullptr, flags))
         {
-            ImGui::InvisibleButton("##splitter", ImVec2(bottomDockSize.x, splitterSize));
-            if (ImGui::IsItemHovered() || ImGui::IsItemActive())
+            ImGui::SetNextWindowPos(ImVec2(bottomDockPos.x, bottomDockPos.y - splitterSize * 0.5f), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(bottomDockSize.x, splitterSize), ImGuiCond_Always);
+            ImGui::SetNextWindowBgAlpha(0.0f);
+            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_NoScrollbar |
+                ImGuiWindowFlags_NoScrollWithMouse |
+                ImGuiWindowFlags_NoBackground;
+
+            if (ImGui::Begin("Bottom Splitter", nullptr, flags))
             {
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+                ImGui::InvisibleButton("##splitter", ImVec2(bottomDockSize.x, splitterSize));
+                if (ImGui::IsItemHovered() || ImGui::IsItemActive())
+                {
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+                }
+                if (ImGui::IsItemActive())
+                {
+                    bottomPanelHeight -= ImGui::GetIO().MouseDelta.y;
+                }
             }
-            if (ImGui::IsItemActive())
-            {
-                bottomPanelHeight -= ImGui::GetIO().MouseDelta.y;
-            }
-        }
-        ImGui::End();
-    };
+            ImGui::End();
+        };
 
     drawVerticalSplitter("Hierarchy Splitter", workPos.x + leftPanelWidth, true);
     drawVerticalSplitter("Inspector Splitter", workPos.x + workSize.x - rightPanelWidth, false);
@@ -200,7 +200,7 @@ void EditorWindowManager::DrawMenuBar()
                 bool visible = window->IsVisible();
                 if (ImGui::MenuItem(window->GetName().c_str(), nullptr, &visible)) {
                     window->SetVisible(visible);
-                   
+
                 }
             }
             ImGui::EndMenu();
@@ -209,25 +209,114 @@ void EditorWindowManager::DrawMenuBar()
     }
 }
 
+float EditorWindowManager::GetWorkspaceSelectorHeight() const
+{
+    return ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2.0f;
+}
+
+void EditorWindowManager::DrawWorkspaceSelectorBar()
+{
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    if (!viewport) return;
+
+    const float selectorHeight = GetWorkspaceSelectorHeight();
+    ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, selectorHeight), ImGuiCond_Always);
+    ImGui::SetNextWindowBgAlpha(0.95f);
+
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoScrollWithMouse;
+
+    if (ImGui::Begin("Workspace Selector", nullptr, flags))
+    {
+        if (ImGui::Selectable("Scene Editor", activeWorkspaceIndex < 0, 0, ImVec2(120.0f, 0.0f)))
+        {
+            activeWorkspaceIndex = -1;
+            for (auto& window : windows)
+            {
+                if (window->IsEditorWorkspace()) window->SetVisible(false);
+            }
+        }
+
+        for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
+        {
+            auto& window_ = windows[index_];
+            if (!window_->IsEditorWorkspace()) continue;
+
+            ImGui::SameLine();
+            const bool selected_ = activeWorkspaceIndex == index_;
+            if (ImGui::Selectable(window_->GetName().c_str(), selected_, 0, ImVec2(140.0f, 0.0f)))
+            {
+                activeWorkspaceIndex = index_;
+                for (int otherIndex_ = 0; otherIndex_ < static_cast<int>(windows.size()); ++otherIndex_)
+                {
+                    if (windows[otherIndex_]->IsEditorWorkspace())
+                    {
+                        windows[otherIndex_]->SetVisible(otherIndex_ == activeWorkspaceIndex);
+                    }
+                }
+            }
+        }
+    }
+    ImGui::End();
+}
+
+void EditorWindowManager::Update(float deltaTime_)
+{
+    if (activeWorkspaceIndex < 0 || activeWorkspaceIndex >= static_cast<int>(windows.size())) return;
+    if (!windows[activeWorkspaceIndex]->IsEditorWorkspace()) return;
+
+    windows[activeWorkspaceIndex]->Update(deltaTime_);
+}
+
 void EditorWindowManager::DrawAll()
 {
-    ImVec2 scenePos(0.0f, 0.0f);
-    ImVec2 sceneSize(0.0f, 0.0f);
-    ApplyEngineLayout(scenePos, sceneSize);
-    //DrawSceneView(scenePos, sceneSize);
+    if (activeWorkspaceIndex >= static_cast<int>(windows.size()) ||
+        (activeWorkspaceIndex >= 0 && !windows[activeWorkspaceIndex]->IsEditorWorkspace()))
+    {
+        activeWorkspaceIndex = -1;
+    }
 
-    DrawLayoutSplitters();
+    const bool hasActiveWorkspace = activeWorkspaceIndex >= 0;
+    DrawWorkspaceSelectorBar();
 
-    for (auto& window : windows) {
+    if (!hasActiveWorkspace)
+    {
+        ImVec2 scenePos(0.0f, 0.0f);
+        ImVec2 sceneSize(0.0f, 0.0f);
+        ApplyEngineLayout(scenePos, sceneSize);
+        //DrawSceneView(scenePos, sceneSize);
+
+        DrawLayoutSplitters();
+    }
+
+    for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_) {
+        auto& window = windows[index_];
 
         if (!window->IsVisible()) {
+            continue;
+        }
+
+        if (hasActiveWorkspace && index_ != activeWorkspaceIndex) {
+            continue;
+        }
+
+        if (!hasActiveWorkspace && window->IsEditorWorkspace()) {
             continue;
         }
 
         window->Draw();
     }
 
-    gameObjectManager->DrawSceneModals();
+    if (!hasActiveWorkspace)
+    {
+        gameObjectManager->DrawSceneModals();
+    }
 
     EditorWindow::SetMenuInteractionActive(true);
     DrawMenuBar();

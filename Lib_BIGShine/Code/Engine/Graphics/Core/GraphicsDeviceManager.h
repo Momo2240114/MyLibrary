@@ -82,11 +82,13 @@ public:
 
     // バックバッファではなく「シーン用テクスチャ」をセットする関数
     void SetSceneRenderTarget();
+    void SetBackBufferRenderTarget();
     // シーン用テクスチャからバックバッファへブルームを適用して描画
     void ResolveBloom(const RenderContext& rc);
     void RenderSkyBox(const RenderContext& rc);
     // ブルーム調整用GUI
     void ResetFilter();
+    void DrawPostEffectGuiContent();
     void ShowPostEffectGui();
 private:
     ShapeRenderSystem shapeRendererSystem; 

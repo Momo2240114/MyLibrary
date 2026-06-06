@@ -40,7 +40,18 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     data.texcoord.zw = float2(w, h);
 
     float lifeRate = saturate(data.parameter.y / max(data.parameter.z, 0.0001f));
-    data.color.a = manualColor.a * lifeRate;
+    if (useColorOverLife != 0)
+    {
+        float colorRate = 1.0f - lifeRate;
+        float4 lifeColor = lerp(colorStart, colorEnd, colorRate);
+        data.color.rgb = lifeColor.rgb;
+        data.color.a = lifeColor.a * lifeRate;
+    }
+    else
+    {
+        data.color.rgb = manualColor.rgb;
+        data.color.a = manualColor.a * lifeRate;
+    }
 
     float4 clip = mul(float4(data.position.xyz, 1.0f), viewProjection);
     header.depth = clip.w;

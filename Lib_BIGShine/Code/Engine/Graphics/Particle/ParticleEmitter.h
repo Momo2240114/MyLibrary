@@ -28,6 +28,8 @@ public:
     ID3D11ShaderResourceView* GetSRV() const { return particleDataSRV.Get(); }
     ID3D11ShaderResourceView* GetHeaderSRV() const { return particleHeaderSRV.Get(); }
     ID3D11ShaderResourceView* GetTextureSRV() const { return textureSRV.Get(); }
+    ID3D11ShaderResourceView* GetMaskTextureSRV() const { return maskTextureSRV.Get(); }
+    ID3D11ShaderResourceView* GetGradientTextureSRV() const { return gradientTextureSRV.Get(); }
     ID3D11Buffer* GetConstantBuffer() const { return emitterConstantBuffer.Get(); }
     UINT GetMaxParticles() const { return numParticles; }
 

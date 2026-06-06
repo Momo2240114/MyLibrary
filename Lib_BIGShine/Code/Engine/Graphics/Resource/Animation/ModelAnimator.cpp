@@ -37,6 +37,14 @@ static bool MatchesNaturalMotionNode(const std::string& filter, const std::strin
 {
     return filter.empty() || nodeName.find(filter) != std::string::npos;
 }
+void ModelAnimator::SetCurrentTime(float time_)
+{
+    current.time = (std::max)(0.0f, time_);
+    previous = current;
+    isTransitioning = false;
+    fadeTimer = 0.0f;
+}
+
 void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner)
 {
     if (!current.state || !model) return;
@@ -295,116 +303,152 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
 
 void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim, float time, const std::vector<SavedPose>& poseLibrary, std::vector<GltfModelCommponennt::NodePose>& outPose, GltfModelCommponennt* model)
 {
-    size_t nodeCount = model->GetNodes().size();
-    if (outPose.size() != nodeCount) outPose.resize(nodeCount);
+    const size_t nodeCount_ = model->GetNodes().size();
+    const auto& nodes_ = model->GetNodes();
 
-    // キーフレームが皆無、あるいはライブラリが空なら初期姿勢（バインドポーズ）を返す
-    if (customAnim.keyframes.empty() || poseLibrary.empty()) {
-        const auto& nodes = model->GetNodes();
-        for (size_t i = 0; i < nodeCount; ++i) {
-            // Nodeが記憶している初期のトランスフォームを、NodePoseの器へと写し取る
-            outPose[i].position = nodes[i].position;
-            outPose[i].rotation = nodes[i].rotation;
-            outPose[i].scale = nodes[i].scale;
-        }
-        return;
-    }
-
-    // 1つしかキーフレームがない場合は、そのポーズをそのまま維持する
-    if (customAnim.keyframes.size() == 1) {
-        int idx = customAnim.keyframes[0].poseIndex;
-        if (idx >= 0 && idx < (int)poseLibrary.size()) {
-            outPose = poseLibrary[idx].nodePoses;
-        }
-        return;
-    }
-
-    // 現在の時間が、どの2つのキーフレームの間にあるかを探索する
-    int lKey = -1;
-    int rKey = -1;
-
-    for (size_t i = 0; i < customAnim.keyframes.size() - 1; ++i) {
-        if (time >= customAnim.keyframes[i].time && time <= customAnim.keyframes[i + 1].time) {
-            lKey = static_cast<int>(i);
-            rKey = static_cast<int>(i + 1);
-            break;
-        }
-    }
-
-    // もし時間の果て（末尾を越えた）に達していたなら、最後のキーフレームで固定
-    if (lKey == -1) {
-        if (time < customAnim.keyframes.front().time) {
-            rKey = 0; lKey = 0;
-        }
-        else {
-            lKey = static_cast<int>(customAnim.keyframes.size() - 1);
-            rKey = lKey;
-        }
-    }
-
-    // 二つの鍵（キーフレーム）が同じ、あるいは時間の差がないなら、そのポーズをそのまま写し取る
-    if (lKey == rKey) {
-        int pIdx = customAnim.keyframes[lKey].poseIndex;
-        if (pIdx >= 0 && pIdx < (int)poseLibrary.size()) {
-            outPose = poseLibrary[pIdx].nodePoses;
-        }
-        return;
-    }
-
-    // 二つのポーズの間を滑らかに繋ぐ重み（t）を算出する
-    float tL = customAnim.keyframes[lKey].time;
-    float tR = customAnim.keyframes[rKey].time;
-    float rawFactor = (time - tL) / (tR - tL);
-    float factor = ApplyPoseInterpolation(customAnim.keyframes[lKey].interpolation, rawFactor);
-
-    int pIdxL = customAnim.keyframes[lKey].poseIndex;
-    int pIdxR = customAnim.keyframes[rKey].poseIndex;
-
-    if (pIdxL >= 0 && pIdxL < (int)poseLibrary.size() && pIdxR >= 0 && pIdxR < (int)poseLibrary.size()) {
-        const auto& poseL = poseLibrary[pIdxL].nodePoses;
-        const auto& poseR = poseLibrary[pIdxR].nodePoses;
-
-        for (size_t i = 0; i < nodeCount; ++i) {
-            if (i < poseL.size() && i < poseR.size()) {
-                outPose[i].position = DirectX::SimpleMath::Vector3::Lerp(poseL[i].position, poseR[i].position, factor);
-                outPose[i].rotation = DirectX::SimpleMath::Quaternion::Slerp(poseL[i].rotation, poseR[i].rotation, factor);
-                outPose[i].rotation.Normalize();
-                outPose[i].scale = DirectX::SimpleMath::Vector3::Lerp(poseL[i].scale, poseR[i].scale, factor);
-            }
-        }
-
-        if (customAnim.naturalMotion.enabled)
+    auto fillBindPose_ = [&](std::vector<GltfModelCommponennt::NodePose>& pose_)
         {
-            const auto& settings = customAnim.naturalMotion;
-            const auto& nodes = model->GetNodes();
-            const float envelope = std::sin((std::max)(0.0f, (std::min)(1.0f, rawFactor)) * DirectX::XM_PI);
-            const float blend = (std::max)(0.0f, (std::min)(1.0f, settings.blend));
-
-            for (size_t i = 0; i < nodeCount && i < nodes.size(); ++i)
+            pose_.resize(nodeCount_);
+            for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
             {
-                if (!MatchesNaturalMotionNode(settings.nodeFilter, nodes[i].name)) continue;
-
-                const float wave = std::sin((time * settings.frequency + settings.phase + (float)i * 0.173f) * DirectX::XM_2PI);
-                const float strength = wave * envelope * blend;
-
-                if (settings.rotationAmplitudeDeg != 0.0f)
-                {
-                    const float rad = DirectX::XMConvertToRadians(settings.rotationAmplitudeDeg * strength);
-                    auto addRot = DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(rad * 0.25f, rad * 0.5f, rad);
-                    DirectX::SimpleMath::Quaternion baseRot(outPose[i].rotation.x, outPose[i].rotation.y, outPose[i].rotation.z, outPose[i].rotation.w);
-                    outPose[i].rotation = baseRot * addRot;
-                    outPose[i].rotation.Normalize();
-                }
-
-                if (settings.positionAmplitude != 0.0f)
-                {
-                    outPose[i].position.y += settings.positionAmplitude * strength;
-                }
+                pose_[nodeIndex_].position = nodes_[nodeIndex_].position;
+                pose_[nodeIndex_].rotation = nodes_[nodeIndex_].rotation;
+                pose_[nodeIndex_].scale = nodes_[nodeIndex_].scale;
             }
+        };
+
+    auto sampleModelAnimation_ = [&](int animationIndex_, float sampleTime_, std::vector<GltfModelCommponennt::NodePose>& pose_) -> bool
+        {
+            if (animationIndex_ < 0 || animationIndex_ >= static_cast<int>(model->GetAnimations().size())) return false;
+
+            fillBindPose_(pose_);
+            const float duration_ = model->GetAnimationDuration(animationIndex_);
+            if (duration_ > 0.0f)
+            {
+                sampleTime_ = (std::max)(0.0f, sampleTime_);
+                if (sampleTime_ > duration_) sampleTime_ = std::fmod(sampleTime_, duration_);
+            }
+            model->ComputeAnimation(animationIndex_, sampleTime_, pose_);
+            return true;
+        };
+
+    auto sampleKeyframe_ = [&](const PoseKeyframe& keyframe_, std::vector<GltfModelCommponennt::NodePose>& pose_) -> bool
+        {
+            if (keyframe_.poseIndex >= 0 && keyframe_.poseIndex < static_cast<int>(poseLibrary.size()))
+            {
+                fillBindPose_(pose_);
+                const auto& savedPose_ = poseLibrary[keyframe_.poseIndex].nodePoses;
+                for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_ && nodeIndex_ < savedPose_.size(); ++nodeIndex_)
+                {
+                    pose_[nodeIndex_] = savedPose_[nodeIndex_];
+                }
+                return true;
+            }
+
+            return sampleModelAnimation_(keyframe_.sourceAnimIdx, keyframe_.sourceTime, pose_);
+        };
+
+    std::vector<GltfModelCommponennt::NodePose> basePose_;
+    std::vector<GltfModelCommponennt::NodePose> editPose_;
+    const float baseTime_ = customAnim.baseAnimationStartTime + time * customAnim.baseAnimationSpeed;
+    const bool hasBasePose_ = sampleModelAnimation_(customAnim.baseAnimationIndex, baseTime_, basePose_);
+    bool hasEditPose_ = false;
+
+    if (!customAnim.keyframes.empty())
+    {
+        int leftKey_ = -1;
+        int rightKey_ = -1;
+        for (int keyIndex_ = 0; keyIndex_ < static_cast<int>(customAnim.keyframes.size()); ++keyIndex_)
+        {
+            const float keyTime_ = customAnim.keyframes[keyIndex_].time;
+            if (keyTime_ <= time && (leftKey_ < 0 || keyTime_ > customAnim.keyframes[leftKey_].time)) leftKey_ = keyIndex_;
+            if (keyTime_ >= time && (rightKey_ < 0 || keyTime_ < customAnim.keyframes[rightKey_].time)) rightKey_ = keyIndex_;
+        }
+        if (leftKey_ < 0) leftKey_ = rightKey_;
+        if (rightKey_ < 0) rightKey_ = leftKey_;
+
+        std::vector<GltfModelCommponennt::NodePose> leftPose_;
+        std::vector<GltfModelCommponennt::NodePose> rightPose_;
+        const bool hasLeftPose_ = sampleKeyframe_(customAnim.keyframes[leftKey_], leftPose_);
+        const bool hasRightPose_ = sampleKeyframe_(customAnim.keyframes[rightKey_], rightPose_);
+
+        if (hasLeftPose_ && hasRightPose_)
+        {
+            editPose_.resize(nodeCount_);
+            const float leftTime_ = customAnim.keyframes[leftKey_].time;
+            const float rightTime_ = customAnim.keyframes[rightKey_].time;
+            const float rawFactor_ = rightTime_ > leftTime_ ? (time - leftTime_) / (rightTime_ - leftTime_) : 0.0f;
+            const float factor_ = ApplyPoseInterpolation(customAnim.keyframes[leftKey_].interpolation, rawFactor_);
+            for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
+            {
+                editPose_[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(leftPose_[nodeIndex_].position, rightPose_[nodeIndex_].position, factor_);
+                editPose_[nodeIndex_].rotation = DirectX::SimpleMath::Quaternion::Slerp(leftPose_[nodeIndex_].rotation, rightPose_[nodeIndex_].rotation, factor_);
+                editPose_[nodeIndex_].rotation.Normalize();
+                editPose_[nodeIndex_].scale = DirectX::SimpleMath::Vector3::Lerp(leftPose_[nodeIndex_].scale, rightPose_[nodeIndex_].scale, factor_);
+            }
+            hasEditPose_ = true;
+        }
+        else if (hasLeftPose_)
+        {
+            editPose_ = leftPose_;
+            hasEditPose_ = true;
+        }
+        else if (hasRightPose_)
+        {
+            editPose_ = rightPose_;
+            hasEditPose_ = true;
+        }
+    }
+
+    if (hasBasePose_ && hasEditPose_)
+    {
+        const float poseBlend_ = (std::max)(0.0f, (std::min)(1.0f, customAnim.poseBlend));
+        outPose.resize(nodeCount_);
+        for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
+        {
+            outPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(basePose_[nodeIndex_].position, editPose_[nodeIndex_].position, poseBlend_);
+            outPose[nodeIndex_].rotation = DirectX::SimpleMath::Quaternion::Slerp(basePose_[nodeIndex_].rotation, editPose_[nodeIndex_].rotation, poseBlend_);
+            outPose[nodeIndex_].rotation.Normalize();
+            outPose[nodeIndex_].scale = DirectX::SimpleMath::Vector3::Lerp(basePose_[nodeIndex_].scale, editPose_[nodeIndex_].scale, poseBlend_);
+        }
+    }
+    else if (hasEditPose_)
+    {
+        outPose = editPose_;
+    }
+    else if (hasBasePose_)
+    {
+        outPose = basePose_;
+    }
+    else
+    {
+        fillBindPose_(outPose);
+    }
+
+    if (!customAnim.naturalMotion.enabled) return;
+
+    const auto& settings_ = customAnim.naturalMotion;
+    const float blend_ = (std::max)(0.0f, (std::min)(1.0f, settings_.blend));
+    for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
+    {
+        if (!MatchesNaturalMotionNode(settings_.nodeFilter, nodes_[nodeIndex_].name)) continue;
+
+        const float wave_ = std::sin((time * settings_.frequency + settings_.phase + static_cast<float>(nodeIndex_) * 0.173f) * DirectX::XM_2PI);
+        const float strength_ = wave_ * blend_;
+        if (settings_.rotationAmplitudeDeg != 0.0f)
+        {
+            const float radians_ = DirectX::XMConvertToRadians(settings_.rotationAmplitudeDeg * strength_);
+            const auto additionalRotation_ = DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(radians_ * 0.25f, radians_ * 0.5f, radians_);
+            DirectX::SimpleMath::Quaternion baseRotation_(outPose[nodeIndex_].rotation.x, outPose[nodeIndex_].rotation.y, outPose[nodeIndex_].rotation.z, outPose[nodeIndex_].rotation.w);
+            outPose[nodeIndex_].rotation = baseRotation_ * additionalRotation_;
+            outPose[nodeIndex_].rotation.Normalize();
+        }
+        if (settings_.positionAmplitude != 0.0f)
+        {
+            outPose[nodeIndex_].position.y += settings_.positionAmplitude * strength_;
         }
     }
 }
-
 void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent* curveComp, std::shared_ptr<GameObject> owner)
 {
     if (!state) return;
@@ -423,6 +467,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
 
     float prevTime = time;
     time += et * currentSpeed;
+    if (et == 0.0f) return;
 
     // イベントの発火判定
     for (auto& ev : const_cast<AnimState*>(state)->events)

@@ -158,6 +158,9 @@
     <Filter Include="Code\Editor\Window">
       <UniqueIdentifier>{06bdadee-0bcf-4ffe-9016-26e67d9408c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Editor\Workspace">
+      <UniqueIdentifier>{8c10a04d-a633-40da-b073-a1a933f23ff0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders\Lighting">
       <UniqueIdentifier>{c44cecb9-c650-4798-9577-92d4a6b43f18}</UniqueIdentifier>
     </Filter>
@@ -406,6 +409,12 @@
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp">
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -527,6 +536,9 @@
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
     <ClCompile Include="Code\Editor\Window\ShadowWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\PostEffectWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\UI\UIButton.cpp">
@@ -753,6 +765,15 @@
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h">
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -922,6 +943,9 @@
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\ShadowWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\PostEffectWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIButton.h">

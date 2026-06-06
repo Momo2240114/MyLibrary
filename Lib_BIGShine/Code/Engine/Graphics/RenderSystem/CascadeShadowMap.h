@@ -1,4 +1,4 @@
-Ôªø#pragma once
+#pragma once
 #include <d3d11.h>
 #include <wrl.h>
 #include <vector>
@@ -22,7 +22,7 @@ public:
 
     void SetViewport(ID3D11DeviceContext* dc) const;
 
-    //„Ç≤„ÉÉ„Çø„Éº
+    //ÉQÉbÉ^Å[
     bool IsUseCascadeShadow() const { return useCascadeShadow; }
     void SetUseCascadeShadow(bool enable) { useCascadeShadow = enable; }
 
@@ -31,6 +31,7 @@ public:
 
     float* GetCascadeSplitDistances() { return cascadeSplitDistances; }
     const float* GetCascadeSplitDistances() const { return cascadeSplitDistances; }
+    void SetCascadeSplitDistance(int index_, float distance_);
 
 private:
     Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTextures[CascadeCount];

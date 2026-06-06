@@ -19,6 +19,11 @@ public:
     void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override;
     void End(const RenderContext& rc) override;
     void Gui();
+    float GetShadeStep() const { return shadeStep; }
+    float GetShadeFeather() const { return shadeFeather; }
+    void SetShadeStep(float shadeStep_) { shadeStep = shadeStep_; }
+    void SetShadeFeather(float shadeFeather_) { shadeFeather = shadeFeather_; }
+    void SetShadeSettings(float shadeStep_, float shadeFeather_) { shadeStep = shadeStep_; shadeFeather = shadeFeather_; }
 private:
     // PBRと同様、メッシュ固有のパラメータをb0に集約する
     struct CbMesh

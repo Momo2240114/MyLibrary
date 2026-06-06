@@ -91,6 +91,7 @@ public:
     }
 
     void RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem);
+    void SetModelRenderSystem(ModelRenderSystem* modelRenderSystem_) { modelRenderSystem = modelRenderSystem_; }
 
     void Update(float et);
 
@@ -229,6 +230,7 @@ private:
     const std::string _PrefabDirectory = "Data/Prefabs/";
     bool _ShapeRenderFlg = true;
     bool _NaviMeshRenderFlg = false;
+    ModelRenderSystem* modelRenderSystem = nullptr;
 public:
         SceneState& GetSceneState() { return _SceneState; }
 };

@@ -3,7 +3,7 @@
 #include "MovementComponent.h"
 #include"Engine/GamePlay/Core/Object/GameObject.h"
 
-#include"RandomHelper.h"
+#include"Engine/Math/RandomHelper.h"
 
 void MovementComponent::Start()
 {

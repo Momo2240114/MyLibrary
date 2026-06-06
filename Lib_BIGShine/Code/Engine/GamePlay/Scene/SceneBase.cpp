@@ -13,7 +13,9 @@
 #include "Editor/Window/ShaderWindow.h"
 #include "Editor/Window/AnimationEditorWindow.h"
 #include "Editor/Window/ShadowWindow.h"
+#include "Editor/Window/PostEffectWindow.h"
 #include "Editor/NodeEditor/AnimNodeEditorWindow.h"
+#include "Editor/Workspace/ParticleEditorWindow.h"
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 { 
@@ -37,6 +39,7 @@ void SceneBase::Initialize()
 	// シーン独自のマネージャーを生成する
 	_GameObjectManager = std::make_shared<GameObjectManager>();
 	_GameObjectManager->Initialize(); // マネージャーの初期化
+	_GameObjectManager->SetModelRenderSystem(&m_ModelRenderSystem);
 
 	editorWindowManager = std::make_unique<EditorWindowManager>(_GameObjectManager.get());
 
@@ -44,8 +47,10 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<InspectorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ShaderWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<ShadowWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
+	editorWindowManager->AddWindow(std::make_unique<PostEffectWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimationEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimNodeEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<ParticleEditorWindow>(_GameObjectManager.get()));
 
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
@@ -62,11 +67,28 @@ void SceneBase::Update(float elapsedTime)
 	{
 		isEditorVisible = !isEditorVisible;
 	}
+
+	if (editorWindowManager)
+	{
+		editorWindowManager->Update(elapsedTime);
+	}
+
+	if (isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene())
+	{
+		return;
+	}
+
 	_GameObjectManager->Update(elapsedTime);
 }
 
 void SceneBase::Render(float elapsedTime)
 {
+	if (isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene())
+	{
+		GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
+		return;
+	}
+
 	_GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem);
 
 }
@@ -76,7 +98,6 @@ void SceneBase::DrawGUI()
 	if(isEditorVisible)
 	{
 		editorWindowManager->DrawAll();
-		GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ここで呼び出す
 	}
 }
 

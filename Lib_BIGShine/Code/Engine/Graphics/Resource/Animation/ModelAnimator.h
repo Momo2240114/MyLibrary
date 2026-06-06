@@ -39,6 +39,7 @@ public:
 
     const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
     float GetCurrentFadeTime() const { return current.time; }
+    void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
 private:
     // 【追加】カスタムアニメーション（ポーズの系譜）から一本のポーズを編み出す秘術

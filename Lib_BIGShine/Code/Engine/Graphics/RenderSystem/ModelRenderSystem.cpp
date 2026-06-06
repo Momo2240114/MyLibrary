@@ -6,6 +6,8 @@
 #include "Engine/Graphics/Shader/ShadowCasterShader.h"
 #include "ShapeRenderer.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include <algorithm>
+#include <nlohmann/json.hpp>
 
 //---
 // @brief モデル描画に必要なバッファとシェーダーを初期化する
@@ -74,6 +76,109 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 	CreateDefaultTextures(device);
 }
 
+
+void ModelRenderSystem::SerializeGraphicsSettings(nlohmann::json& j_) const
+{
+    if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
+    {
+        j_["Toon"] = {
+            {"shadeStep", toonShader_->GetShadeStep()},
+            {"shadeFeather", toonShader_->GetShadeFeather()}
+        };
+    }
+
+    if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
+    {
+        j_["ToonPBR"] = {
+            {"shadeStep", toonPbrShader_->GetShadeStep()},
+            {"shadeFeather", toonPbrShader_->GetShadeFeather()}
+        };
+    }
+
+    const CascadeShadowMap& cascadeShadowMap_ = GraphicsDeviceManager::Instance().GetCascadeShadowMap();
+    const float* splits_ = cascadeShadowMap_.GetCascadeSplitDistances();
+
+    j_["ShadowMap"] = {
+        {"useCascadeShadow", cascadeShadowMap_.IsUseCascadeShadow()},
+        {"displayCascadeArea", cascadeShadowMap_.IsDisplayCascadeArea()},
+        {"cascadeSplitDistances", {splits_[0], splits_[1], splits_[2], splits_[3]}},
+        {"shadowAttenuation", shadowAttenuation},
+        {"cascadeShadowBias", {cascadeShadowBias.x, cascadeShadowBias.y, cascadeShadowBias.z, cascadeShadowBias.w}}
+    };
+
+    j_["ToonOutline"] = {
+        {"color", {outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w}},
+        {"thickness", outlineThickness}
+    };
+}
+
+void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
+{
+    if (j_.contains("Toon"))
+    {
+        const auto& toonJson_ = j_["Toon"];
+        if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
+        {
+            toonShader_->SetShadeSettings(
+                toonJson_.value("shadeStep", toonShader_->GetShadeStep()),
+                toonJson_.value("shadeFeather", toonShader_->GetShadeFeather()));
+        }
+    }
+
+    if (j_.contains("ToonPBR"))
+    {
+        const auto& toonPbrJson_ = j_["ToonPBR"];
+        if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
+        {
+            toonPbrShader_->SetShadeSettings(
+                toonPbrJson_.value("shadeStep", toonPbrShader_->GetShadeStep()),
+                toonPbrJson_.value("shadeFeather", toonPbrShader_->GetShadeFeather()));
+        }
+    }
+
+    if (j_.contains("ShadowMap"))
+    {
+        const auto& shadowJson_ = j_["ShadowMap"];
+        CascadeShadowMap& cascadeShadowMap_ = GraphicsDeviceManager::Instance().GetCascadeShadowMap();
+        cascadeShadowMap_.SetUseCascadeShadow(shadowJson_.value("useCascadeShadow", cascadeShadowMap_.IsUseCascadeShadow()));
+        cascadeShadowMap_.SetDisplayCascadeArea(shadowJson_.value("displayCascadeArea", cascadeShadowMap_.IsDisplayCascadeArea()));
+
+        if (shadowJson_.contains("cascadeSplitDistances") && shadowJson_["cascadeSplitDistances"].is_array())
+        {
+            const auto& splitsJson_ = shadowJson_["cascadeSplitDistances"];
+            for (int i_ = 0; i_ < CascadeShadowMap::CascadeCount && i_ < static_cast<int>(splitsJson_.size()); ++i_)
+            {
+                cascadeShadowMap_.SetCascadeSplitDistance(i_, splitsJson_[i_].get<float>());
+            }
+        }
+
+        shadowAttenuation = shadowJson_.value("shadowAttenuation", shadowAttenuation);
+
+        if (shadowJson_.contains("cascadeShadowBias") && shadowJson_["cascadeShadowBias"].is_array())
+        {
+            const auto& biasJson_ = shadowJson_["cascadeShadowBias"];
+            if (biasJson_.size() > 0) cascadeShadowBias.x = biasJson_[0].get<float>();
+            if (biasJson_.size() > 1) cascadeShadowBias.y = biasJson_[1].get<float>();
+            if (biasJson_.size() > 2) cascadeShadowBias.z = biasJson_[2].get<float>();
+            if (biasJson_.size() > 3) cascadeShadowBias.w = biasJson_[3].get<float>();
+        }
+    }
+
+    if (j_.contains("ToonOutline"))
+    {
+        const auto& outlineJson_ = j_["ToonOutline"];
+        outlineThickness = outlineJson_.value("thickness", outlineThickness);
+
+        if (outlineJson_.contains("color") && outlineJson_["color"].is_array())
+        {
+            const auto& colorJson_ = outlineJson_["color"];
+            if (colorJson_.size() > 0) outlineColor.x = colorJson_[0].get<float>();
+            if (colorJson_.size() > 1) outlineColor.y = colorJson_[1].get<float>();
+            if (colorJson_.size() > 2) outlineColor.z = colorJson_[2].get<float>();
+            if (colorJson_.size() > 3) outlineColor.w = colorJson_[3].get<float>();
+        }
+    }
+}
 void ModelRenderSystem::ShaderSettingGui()
 {
 	for (auto shader : shaders)

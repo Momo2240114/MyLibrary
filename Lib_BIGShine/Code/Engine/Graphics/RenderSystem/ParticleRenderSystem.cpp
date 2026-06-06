@@ -32,10 +32,10 @@ void ParticleRenderSystem::UpdateAll(ID3D11DeviceContext*, float, const DirectX:
     }
 }
 
-void ParticleRenderSystem::RenderAll(const RenderContext& rc)
+void ParticleRenderSystem::ApplySceneConstants(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
-    if (!dc || !rc.camera || drawInfos.empty()) return;
+    if (!dc || !rc.camera || !sceneConstantBuffer) return;
 
     CbScene cbScene{};
     DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&rc.camera->GetView());
@@ -53,6 +53,14 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc)
     dc->VSSetConstantBuffers(7, 1, &sceneCB);
     dc->GSSetConstantBuffers(7, 1, &sceneCB);
     dc->PSSetConstantBuffers(7, 1, &sceneCB);
+}
+
+void ParticleRenderSystem::RenderAll(const RenderContext& rc)
+{
+    ID3D11DeviceContext* dc = rc.deviceContext;
+    if (!dc || !rc.camera || drawInfos.empty()) return;
+
+    ApplySceneConstants(rc);
 
     dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
     dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));

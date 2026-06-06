@@ -330,6 +330,12 @@ void GraphicsDeviceManager::SetParticleRenderTarget()
     immediateContext->OMSetRenderTargets(1, &rtv, depthStencilView.Get());
 }
 
+void GraphicsDeviceManager::SetBackBufferRenderTarget()
+{
+    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+}
+
 void GraphicsDeviceManager::SetSceneRenderTarget()
 {
     // 描画先を「シーンカラー」と「シーン法線」の2枚に切り替える
@@ -406,11 +412,8 @@ void GraphicsDeviceManager::ResetFilter()
     filterParams.filterIntensity = 1.0f;
 }
 
-void GraphicsDeviceManager::ShowPostEffectGui()
+void GraphicsDeviceManager::DrawPostEffectGuiContent()
 {
-    // ポストプロセス設定ウィンドウの開始
-    ImGui::Begin("GraphicsSettings");
-
     if (ImGui::CollapsingHeader("Bloom (Kawase Blur)", ImGuiTreeNodeFlags_DefaultOpen))
     {
         // 1. 閾値 (Threshold): どの明るさから光らせるか
@@ -487,7 +490,12 @@ void GraphicsDeviceManager::ShowPostEffectGui()
             radialBlurParams.blurMaskRadius = 0.5f;
         }
     }
+}
 
+void GraphicsDeviceManager::ShowPostEffectGui()
+{
+    ImGui::Begin("GraphicsSettings");
+    DrawPostEffectGuiContent();
     ImGui::End();
 }
 

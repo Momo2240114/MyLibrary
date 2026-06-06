@@ -56,6 +56,10 @@ cbuffer ParticleSystemConstants : register(b9)
     float2 spawnDelay;
     float2 fadeDuration;
     float4 manualColor;
+    float4 colorStart;
+    float4 colorEnd;
+    float2 sizeRandomStart;
+    float2 sizeRandomEnd;
     float time;
     float deltaTime;
     float noiseScale;
@@ -71,6 +75,10 @@ cbuffer ParticleSystemConstants : register(b9)
     float4 shapeStart;
     float4 shapeEnd;
     float4 shapeSize;
+    uint useColorOverLife;
+    uint useRandomSize;
+    uint padding0;
+    uint padding1;
     uint useNoiseTexture;
     float3 padding;
 };

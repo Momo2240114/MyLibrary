@@ -186,6 +186,131 @@ std::string GetFullAssetPath(const std::string& assetName) {
 }
 
 
+void AnimationControllerComponent::SetTrigger(const std::string& name_)
+{
+    GetEditableBlackboard()[name_] = true;
+}
+
+void AnimationControllerComponent::ResetTrigger(const std::string& name_)
+{
+    if (GetEditableBlackboard().count(name_))
+    {
+        GetEditableBlackboard()[name_] = false;
+    }
+}
+
+const BlackboardCategory& AnimationControllerComponent::GetBlackboard() const
+{
+    return GetCurrentBlackboard();
+}
+
+void AnimationControllerComponent::SetParam(const std::string& name_, BlackBoardValue value_)
+{
+    GetEditableBlackboard()[name_] = value_;
+}
+
+BlackboardCategory& AnimationControllerComponent::GetEditableBlackboard()
+{
+    static BlackboardCategory fallbackBlackboard_;
+
+    if (!blackboardComponent)
+    {
+        auto owner_ = GetGameObject();
+        if (!owner_) return fallbackBlackboard_;
+
+        auto component_ = owner_->GetComponent<BlackboardComponent>();
+        if (!component_)
+        {
+            component_ = owner_->AddComponent<BlackboardComponent>();
+        }
+
+        blackboardComponent = component_.get();
+    }
+
+    return blackboardComponent->GetOrCreateCategory(animationBlackboardCategory);
+}
+
+const BlackboardCategory& AnimationControllerComponent::GetCurrentBlackboard() const
+{
+    static const BlackboardCategory emptyBlackboard_;
+    if (!blackboardComponent) return emptyBlackboard_;
+
+    return blackboardComponent->GetCategory(animationBlackboardCategory);
+}
+
+void AnimationControllerComponent::EnsureNodeEditorContext()
+{
+    if (nodeEditorContext) return;
+
+    nodeEditorConfig.SettingsFile = "Data/Editor/AnimationEditor.json";
+    nodeEditorConfig.DragButtonIndex = 0;
+    nodeEditorConfig.SelectButtonIndex = 0;
+    nodeEditorConfig.NavigateButtonIndex = 2;
+    nodeEditorConfig.ContextMenuButtonIndex = 1;
+    nodeEditorContext = ed::CreateEditor(&nodeEditorConfig);
+}
+
+void AnimationControllerComponent::EnsureStatesFromModel()
+{
+    if (!modelComp || !GetGameObject()) return;
+
+    const auto& animations_ = modelComp->GetAnimations();
+    if (animations_.empty()) return;
+
+    bool addedState_ = false;
+    for (int animIndex_ = 0; animIndex_ < static_cast<int>(animations_.size()); ++animIndex_)
+    {
+        const std::string& animName_ = animations_[animIndex_].name;
+        if (animName_.empty()) continue;
+
+        auto stateIt_ = states.find(animName_);
+        if (stateIt_ == states.end())
+        {
+            auto state_ = std::make_unique<AnimState>();
+            state_->name = animName_;
+            state_->playbackSpeed = 1.0f;
+            state_->isLoop = true;
+            state_->animationIndex = animIndex_;
+            states[animName_] = std::move(state_);
+            RegisterStateAction(animName_);
+            EnsureGraphNodeForState(animName_);
+            addedState_ = true;
+        }
+        else if (stateIt_->second)
+        {
+            stateIt_->second->animationIndex = animIndex_;
+        }
+    }
+
+    if (!m_poseLibrary && !modelComp->GetModelName().empty())
+    {
+        m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComp->GetModelName());
+    }
+
+    if (m_poseLibrary)
+    {
+        for (int customAnimationIndex_ = 0; customAnimationIndex_ < static_cast<int>(m_poseLibrary->customAnims.size()); ++customAnimationIndex_)
+        {
+            const CustomAnimation& customAnimation_ = m_poseLibrary->customAnims[customAnimationIndex_];
+            auto stateIt_ = states.find(customAnimation_.name);
+            if (stateIt_ == states.end() || !stateIt_->second ||
+                stateIt_->second->type != AnimStateType::Custom ||
+                stateIt_->second->customAnimIndex != customAnimationIndex_)
+            {
+                AddOrUpdateCustomState(customAnimationIndex_);
+            }
+        }
+    }
+
+    if (!currentState && !states.empty())
+    {
+        ChangeState(animations_[0].name, 0.0f);
+    }
+    if (addedState_)
+    {
+        EnsureSpecialGraphNodes();
+    }
+}
 AnimationControllerComponent::~AnimationControllerComponent()
 {
     if (nodeEditorContext)
@@ -197,9 +322,18 @@ AnimationControllerComponent::~AnimationControllerComponent()
 
 void AnimationControllerComponent::Start()
 {
-    auto MyObject = GetGameObject().get();
+    auto owner_ = GetGameObject();
+    auto blackboard_ = owner_->GetComponent<BlackboardComponent>();
+    if (!blackboard_)
+    {
+        blackboard_ = owner_->AddComponent<BlackboardComponent>();
+    }
+    blackboardComponent = blackboard_.get();
+
+    auto MyObject = owner_.get();
     modelComp = MyObject->GetComponent<GltfModelCommponennt>().get();
 
+    EnsureNodeEditorContext();
     if (!modelComp) return;
 
     std::string modelName = modelComp->GetModelName();
@@ -238,6 +372,8 @@ void AnimationControllerComponent::Start()
 
     EnsureSpecialGraphNodes();
 
+    EnsureNodeEditorContext();
+
     if (currentState) {
         animator.CrossFadeTo(currentState, 0.0f);
     }
@@ -248,30 +384,27 @@ void AnimationControllerComponent::Start()
         }
     }
 
-    nodeEditorConfig.SettingsFile = "Data/Editor/AnimationEditor.json";
-    nodeEditorConfig.DragButtonIndex = 0;
-    nodeEditorConfig.SelectButtonIndex = 0;
-    nodeEditorConfig.NavigateButtonIndex = 2;
-    nodeEditorConfig.ContextMenuButtonIndex = 1;
 
-    nodeEditorContext = ed::CreateEditor(&nodeEditorConfig);
 }
 void AnimationControllerComponent::Update(float deltaTime)
 {
+    EnsureNodeEditorContext();
     if (!modelComp)
     {
-        return;
-    }
-    if (!curvecomp)
-    {
-        auto MyObject = GetGameObject().get();
-        curvecomp = MyObject->GetComponent<CurveComponent>().get();
+        auto owner_ = GetGameObject();
+        modelComp = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
+        if (!modelComp)
+        {
+            return;
+        }
     }
 
-    // Start時点でリソースが取得できておらず、後からモデルがロードされた場合の安全弁
-    if (!m_poseLibrary && !modelComp->GetModelName().empty())
+    EnsureStatesFromModel();
+
+    if (!curvecomp)
     {
-        m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComp->GetModelName());
+        auto owner_ = GetGameObject();
+        curvecomp = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
     }
 
     if (m_pendingGraphAssetLoad)
@@ -408,6 +541,15 @@ void AnimationControllerComponent::Gui()
     ImGui::Separator();
 
     // --- 2. ステート一覧 (選択用) ---
+    ImGui::SeparatorText("State Asset Import");
+    static std::string loadStateAssetName_;
+    ImGui::SetNextItemWidth(260.0f);
+    ImGui::InputText("Load State", &loadStateAssetName_);
+    ImGui::SameLine();
+    if (ImGui::Button("Load State Asset") && !loadStateAssetName_.empty())
+    {
+        LoadStateAsset(loadStateAssetName_);
+    }
     ImGui::TextColored(ImVec4(1, 1, 0, 1), "Registered Animation States");
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
@@ -461,6 +603,11 @@ void AnimationControllerComponent::Gui()
     {
         // 編集中のステート名を表示
         ImGui::Text("Editing: %s", editingState->name.c_str());
+        ImGui::SameLine();
+        if (ImGui::Button("Save Editing State"))
+        {
+            SaveStateAsset(editingState->name);
+        }
 
         // --- ここに元の open の中にあった編集ロジックを集約 ---
         const char* typeNames[] = { "Single", "Blend1D", "Custom" };
@@ -570,14 +717,14 @@ void AnimationControllerComponent::Gui()
         if (ImGui::Button("Add##BB"))
         {
             std::string name(newVarName);
-            if (!name.empty() && blackboard.find(name) == blackboard.end())
+            if (!name.empty() && GetEditableBlackboard().find(name) == GetEditableBlackboard().end())
             {
                 switch (selectedType)
                 {
-                case 0: blackboard[name] = 0.0f;                                   break;
-                case 1: blackboard[name] = 0;                                      break;
-                case 2: blackboard[name] = false;                                  break;
-                case 3: blackboard[name] = DirectX::SimpleMath::Vector2(0.0f, 0.0f); break;
+                case 0: GetEditableBlackboard()[name] = 0.0f;                                   break;
+                case 1: GetEditableBlackboard()[name] = 0;                                      break;
+                case 2: GetEditableBlackboard()[name] = false;                                  break;
+                case 3: GetEditableBlackboard()[name] = DirectX::SimpleMath::Vector2(0.0f, 0.0f); break;
                 }
                 newVarName[0] = '\0'; // 入力欄をクリア
             }
@@ -586,14 +733,14 @@ void AnimationControllerComponent::Gui()
         // --- 既存パラメータ 一覧・編集・削除 ---
         ImGui::SeparatorText("Parameters");
 
-        if (blackboard.empty())
+        if (GetEditableBlackboard().empty())
         {
             ImGui::TextDisabled("No parameters defined.");
         }
         else
         {
             std::string toDelete;
-            for (auto& [key, val] : blackboard)
+            for (auto& [key, val] : GetEditableBlackboard())
             {
                 ImGui::PushID(key.c_str());
 
@@ -625,7 +772,7 @@ void AnimationControllerComponent::Gui()
 
                 ImGui::PopID();
             }
-            if (!toDelete.empty()) { blackboard.erase(toDelete); }
+            if (!toDelete.empty()) { GetEditableBlackboard().erase(toDelete); }
         }
     }
 
@@ -890,6 +1037,71 @@ void AnimationControllerComponent::AddState(const std::string& stateName, int an
     graphNodes.push_back(node);
 }
 
+bool AnimationControllerComponent::AddOrUpdateCustomState(int customAnimIndex_)
+{
+    if (!m_poseLibrary || customAnimIndex_ < 0 || customAnimIndex_ >= static_cast<int>(m_poseLibrary->customAnims.size())) return false;
+
+    const CustomAnimation& customAnimation_ = m_poseLibrary->customAnims[customAnimIndex_];
+    if (customAnimation_.name.empty()) return false;
+
+    auto stateIt_ = states.find(customAnimation_.name);
+    if (stateIt_ == states.end())
+    {
+        auto state_ = std::make_unique<AnimState>();
+        state_->name = customAnimation_.name;
+        state_->playbackSpeed = 1.0f;
+        state_->isLoop = true;
+        stateIt_ = states.emplace(customAnimation_.name, std::move(state_)).first;
+    }
+
+    AnimState* state_ = stateIt_->second.get();
+    if (!state_) return false;
+
+    state_->type = AnimStateType::Custom;
+    state_->customAnimIndex = customAnimIndex_;
+    state_->animationIndex = customAnimation_.baseAnimationIndex >= 0 ? customAnimation_.baseAnimationIndex : 0;
+    editingState = state_;
+
+    RegisterStateAction(customAnimation_.name);
+    EnsureGraphNodeForState(customAnimation_.name);
+    return true;
+}
+
+bool AnimationControllerComponent::PreviewCustomAnimation(int customAnimIndex_, float time_)
+{
+    if (!AddOrUpdateCustomState(customAnimIndex_)) return false;
+
+    if (!modelComp)
+    {
+        auto owner_ = GetGameObject();
+        modelComp = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
+    }
+    if (!modelComp) return false;
+
+    if (!curvecomp)
+    {
+        auto owner_ = GetGameObject();
+        curvecomp = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
+    }
+
+    const CustomAnimation& customAnimation_ = m_poseLibrary->customAnims[customAnimIndex_];
+    ChangeState(customAnimation_.name, 0.0f);
+    animator.SetCurrentTime(time_);
+    animator.Update(0.0f, modelComp, curvecomp, m_poseLibrary, GetGameObject());
+    modelComp->SetNodePoses(animator.GetCurrentPose());
+    modelComp->UpdateTransform();
+    m_editorPoseOverride = true;
+    return true;
+}
+
+bool AnimationControllerComponent::SelectStateForEditing(const std::string& stateName_)
+{
+    auto stateIt_ = states.find(stateName_);
+    if (stateIt_ == states.end() || !stateIt_->second) return false;
+
+    editingState = stateIt_->second.get();
+    return true;
+}
 void AnimationControllerComponent::RemoveState(const std::string& stateName)
 {
     auto it = states.find(stateName);
@@ -1070,8 +1282,8 @@ void AnimationControllerComponent::EvaluateGraphTransitions()
             {
                 if (cond.type == ConditionType::Trigger)
                 {
-                    auto it = blackboard.find(cond.parameterName);
-                    if (it != blackboard.end())
+                    auto it = GetEditableBlackboard().find(cond.parameterName);
+                    if (it != GetEditableBlackboard().end())
                     {
                         it->second = false;
                     }
@@ -1172,8 +1384,8 @@ bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& cond)
     }
 
     // 2. 変数・トリガー判定
-    if (blackboard.find(cond.parameterName) == blackboard.end()) return false;
-    const auto& bbValue = blackboard.at(cond.parameterName);
+    if (GetEditableBlackboard().find(cond.parameterName) == GetEditableBlackboard().end()) return false;
+    const auto& bbValue = GetEditableBlackboard().at(cond.parameterName);
 
     auto ToFloat = [](const BlackBoardValue& v) -> float {
         return std::visit([](auto&& arg) -> float {
@@ -1200,7 +1412,17 @@ bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& cond)
 }
 
 const std::string GRAPH_ASSET_DIR = "Data/Animation/GraphData/";
+const std::string STATE_ASSET_DIR = "Data/Animation/StateData/";
 
+
+static std::string GetFullStateAssetPath(const std::string& assetName_)
+{
+    std::string name_ = assetName_;
+    if (name_.find(".json") == std::string::npos) {
+        name_ += ".json";
+    }
+    return STATE_ASSET_DIR + name_;
+}
 static std::string GetFullGraphAssetPath(const std::string& assetName)
 {
     std::string name = assetName;
@@ -1209,6 +1431,100 @@ static std::string GetFullGraphAssetPath(const std::string& assetName)
     }
     return GRAPH_ASSET_DIR + name;
 }
+
+void AnimationControllerComponent::RegisterStateAction(const std::string& stateName_)
+{
+    if (stateName_.empty() || !GetGameObject()) return;
+
+    std::string objectName_ = GetGameObject()->GetName();
+    std::string fullActionName_ = objectName_ + "_" + stateName_;
+    ActionRegistry::Instance().RegisterAction("Animation", fullActionName_, [this, stateName_]() {
+        this->ChangeState(stateName_);
+        });
+}
+
+void AnimationControllerComponent::EnsureGraphNodeForState(const std::string& stateName_)
+{
+    if (stateName_.empty()) return;
+
+    auto exists_ = std::any_of(graphNodes.begin(), graphNodes.end(), [&](const AnimGraphNode& node_) {
+        return node_.stateName == stateName_;
+        });
+    if (exists_) return;
+
+    AnimGraphNode node_;
+    node_.id = ed::NodeId(GetNextID());
+    node_.stateName = stateName_;
+    node_.inputPin = ed::PinId(GetNextID());
+    node_.outputPin = ed::PinId(GetNextID());
+    node_.pos = ImVec2(0.0f, 0.0f);
+    node_.type = AnimGraphNodeType::State;
+    node_.scopeId = m_currentGraphScopeId.empty() ? "Root" : m_currentGraphScopeId;
+    graphNodes.push_back(node_);
+}
+
+bool AnimationControllerComponent::SaveStateAsset(const std::string& stateName_)
+{
+    auto stateIt_ = states.find(stateName_);
+    if (stateIt_ == states.end() || !stateIt_->second) return false;
+
+    if (!std::filesystem::exists(STATE_ASSET_DIR))
+    {
+        std::filesystem::create_directories(STATE_ASSET_DIR);
+    }
+
+    nlohmann::json json_;
+    json_["AssetType"] = "AnimationState";
+    json_["AssetVersion"] = 1;
+    json_["State"] = *stateIt_->second;
+
+    std::ofstream file_(GetFullStateAssetPath(stateName_), std::ios::out | std::ios::trunc);
+    if (!file_.is_open()) return false;
+
+    file_ << json_.dump(4);
+    return true;
+}
+
+bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
+{
+    if (assetName_.empty()) return false;
+
+    std::ifstream file_(GetFullStateAssetPath(assetName_));
+    if (!file_.is_open()) return false;
+
+    nlohmann::json json_;
+    file_ >> json_;
+
+    AnimState state_;
+    if (json_.contains("State"))
+    {
+        state_ = json_["State"].get<AnimState>();
+    }
+    else
+    {
+        state_ = json_.get<AnimState>();
+    }
+
+    if (state_.name.empty())
+    {
+        state_.name = std::filesystem::path(assetName_).stem().string();
+    }
+
+    const bool wasCurrent_ = currentState && currentState->name == state_.name;
+    states[state_.name] = std::make_unique<AnimState>(state_);
+    editingState = states[state_.name].get();
+
+    RegisterStateAction(state_.name);
+    EnsureGraphNodeForState(state_.name);
+
+    if (wasCurrent_)
+    {
+        ChangeState(state_.name, 0.0f);
+    }
+
+    return true;
+}
+
 
 void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName)
 {
@@ -1472,11 +1788,19 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 {
     if (!nodeEditorContext) return;
 
+    ImGui::Begin("Animation Graph Editor");
+    DrawNodeEditorContent();
+    ImGui::End();
+}
+
+void AnimationControllerComponent::DrawNodeEditorContent()
+{
+    if (!nodeEditorContext) return;
+
     EnsureSpecialGraphNodes();
 
     ed::SetCurrentEditor(nodeEditorContext);
 
-    ImGui::Begin("Animation Graph Editor");
 
     auto currentScopeName = [&]() -> std::string {
         return m_currentGraphScopeId.empty() ? std::string("Root") : m_currentGraphScopeId;
@@ -2018,10 +2342,10 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
                     if (cond.type == ConditionType::Variable || cond.type == ConditionType::Trigger)
                     {
-                        if (!blackboard.empty())
+                        if (!GetEditableBlackboard().empty())
                         {
                             std::vector<const char*> keys;
-                            for (auto& [k, v] : blackboard) keys.push_back(k.c_str());
+                            for (auto& [k, v] : GetEditableBlackboard()) keys.push_back(k.c_str());
                             int curIdx = 0;
                             for (int k = 0; k < (int)keys.size(); k++)
                                 if (cond.parameterName == keys[k]) { curIdx = k; break; }
@@ -2145,7 +2469,6 @@ void AnimationControllerComponent::OnGuiNodeEditor()
 
     ed::End();
     ed::SetCurrentEditor(nullptr);
-    ImGui::End();
 }
 
 void to_json(nlohmann::json& j, const AnimEvent& e) {
