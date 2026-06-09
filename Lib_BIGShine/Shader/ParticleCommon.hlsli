@@ -63,7 +63,20 @@ cbuffer ParticleSystemConstants : register(b9)
     float time;
     float deltaTime;
     float noiseScale;
-    float gravity;
+    float gravity; // Y acceleration. Default is -9.8 on C++ side.
+
+    float noiseFrequency;
+    float noiseSpeed;
+    float noiseStrength;
+    float drag;
+
+    float4 windVelocity; // xyz: additional acceleration. Kept name for compatibility.
+
+    float radialVelocity;
+    float orbitVelocity;
+    float stretchScale;
+    float stretchMax;
+
     uint maxParticleCount;
     uint particleRenderType;
     uint emissionMode;

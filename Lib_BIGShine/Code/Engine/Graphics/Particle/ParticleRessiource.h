@@ -42,7 +42,7 @@ struct ParticleSystemConstants
     DirectX::XMFLOAT2 emissionOffset = { 0, 0 };
     DirectX::XMFLOAT2 emissionSize = { 1, 1 };
     DirectX::XMFLOAT2 emissionConeAngle = { 0, 0 };
-    DirectX::XMFLOAT2 emissionSpeed = { 1, 1 };
+    DirectX::XMFLOAT2 emissionSpeed = { 0, 0 };
     DirectX::XMFLOAT2 emissionAngularSpeed = { 0, 0 };
     DirectX::XMFLOAT2 lifespan = { 1, 1 };
     DirectX::XMFLOAT2 spawnDelay = { 0, 0 };
@@ -55,8 +55,21 @@ struct ParticleSystemConstants
 
     float time = 0.0f;
     float deltaTime = 0.0f;
-    float noiseScale = 0.0f;
-    float gravity = 0.0f;
+    float noiseScale = 0.0f;      // 互換用: 旧Noise Scale。0以外ならnoiseStrengthとして扱う
+    float gravity = -9.8f;       // Y方向の加速度。物理寄りの初期値: -9.8m/s^2
+
+    // Niagara / Effekseer寄りのGPU側モジュール設定
+    float noiseFrequency = 1.0f;  // ノイズの細かさ。大きいほど細かく揺れる
+    float noiseSpeed = 1.0f;      // ノイズ場のスクロール速度
+    float noiseStrength = 0.0f;   // ノイズ加速度の強さ。旧noiseScaleよりこっちを使う
+    float drag = 0.0f;            // 空気抵抗。0=なし、値が大きいほど減速
+
+    DirectX::XMFLOAT4 windVelocity = { 0, 0, 0, 0 }; // xyz: 追加加速度。旧名Wind。Acceleration XYZとしてGUI表示
+
+    float radialVelocity = 0.0f;  // エミッター中心から外へ押し出す速度加算
+    float orbitVelocity = 0.0f;   // Y軸周りの回転速度加算
+    float stretchScale = 0.04f;   // Stretched Billboardの伸び率
+    float stretchMax = 100.0f;    // Stretched Billboardの最大長
 
     uint32_t maxParticleCount = 1000;
     uint32_t type = 0;

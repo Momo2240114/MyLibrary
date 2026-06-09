@@ -319,9 +319,6 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClCompile>
@@ -540,6 +537,9 @@
       <Filter>Code\Engine\Platform</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Wip.hpp">
@@ -630,9 +630,6 @@
       <Filter>Code\Engine\Graphics\Particle</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEmitter.h">
-      <Filter>Code\Engine\Graphics\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\Particle\ParticleRessiource.h">
       <Filter>Code\Engine\Graphics\Particle</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\BloomSystem.h">
@@ -959,6 +956,9 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\FreeCamera.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Particle\ParticleRessiource.h">
+      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

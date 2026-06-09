@@ -98,6 +98,15 @@ void ParticleComponent::Gui()
         newTrack.settings = ParticleSystemConstants();
         newTrack.settings.maxParticleCount = 1000;
         newTrack.settings.burstCount = 100;
+
+
+        newTrack.settings.emissionSpeed = { 0.0f, 0.0f };
+        newTrack.settings.gravity = -9.8f;
+        newTrack.settings.emissionAngularSpeed = { 0.0f, 0.0f };
+        newTrack.settings.noiseScale = 0.0f;
+        newTrack.settings.noiseStrength = 0.0f;
+        newTrack.settings.drag = 0.0f;
+        newTrack.settings.windVelocity = { 0.0f, 0.0f, 0.0f, 0.0f };
         newTrack.settings.shapeSize = { 1, 1, 1, 0 };
         newTrack.emitter = std::make_unique<ParticleEmitter>(
             GraphicsDeviceManager::Instance().GetDevice(),
@@ -149,105 +158,14 @@ void ParticleComponent::Gui()
     bool openTextureBrowser_ = false;
 
     auto textureCombo = [&](const char* label, std::string& fileName, std::string& path, int slot)
-    {
-        const char* preview = fileName.empty() ? "None" : fileName.c_str();
-        if (ImGui::BeginCombo(label, preview))
         {
-            if (ImGui::Selectable("None", fileName.empty()))
+            const char* preview = fileName.empty() ? "None" : fileName.c_str();
+            if (ImGui::BeginCombo(label, preview))
             {
-                fileName.clear();
-                path.clear();
-                if (track.emitter)
+                if (ImGui::Selectable("None", fileName.empty()))
                 {
-                    auto device_ = GraphicsDeviceManager::Instance().GetDevice();
-                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummySRV_;
-                    CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
-
-                    if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
-                    else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); s.useMaskTexture = 0; }
-                    else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); s.useGradientTexture = 0; }
-                }
-            }
-
-            for (const auto& file : textureFiles)
-            {
-                bool selected = fileName == file;
-                if (ImGui::Selectable(file.c_str(), selected))
-                {
-                    fileName = file;
-                    path = "Data/Texture/Particle/" + file;
-                    LoadEmitterTextureSlot(track, path, slot);
-                    if (slot == 1) s.useMaskTexture = 1;
-                    if (slot == 2) s.useGradientTexture = 1;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        ID3D11ShaderResourceView* srv_ = nullptr;
-        if (track.emitter)
-        {
-            if (slot == 0) srv_ = track.emitter->GetTextureSRV();
-            else if (slot == 1) srv_ = track.emitter->GetMaskTextureSRV();
-            else if (slot == 2) srv_ = track.emitter->GetGradientTextureSRV();
-        }
-
-        ImGui::PushID(slot);
-        bool browsePressed_ = false;
-        if (srv_)
-        {
-            browsePressed_ = ImGui::ImageButton("##TextureBrowse", reinterpret_cast<ImTextureID>(srv_), ImVec2(64.0f, 64.0f));
-        }
-        else
-        {
-            browsePressed_ = ImGui::Button("Select Texture", ImVec2(96.0f, 64.0f));
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("Browse %s", label);
-        }
-        ImGui::PopID();
-
-        if (browsePressed_)
-        {
-            pendingTextureSlot = slot;
-
-            const wchar_t* title_ =
-                slot == 0 ? L"Select Color Texture" :
-                slot == 1 ? L"Select Mask Texture" :
-                L"Select Gradient Texture";
-
-            const std::string initDir_ = path.empty()
-                ? "Data/Texture/Particle/"
-                : std::filesystem::path(path).parent_path().generic_string();
-
-            // モーダルダイアログを開く（この間、メインループは一時停止する）
-            const std::string selected_ = WindowsDialogHelper::OpenTextureDialog(title_, initDir_);
-
-            if (!selected_.empty())
-            {
-                // 【重要】いきなりEmitterや現在のパスを破壊せず、読み込みが成功するかを見極める
-                // ※LoadEmitterTextureSlotの内部で、失敗時に古いテクスチャを維持するか、
-                //   あるいは完全に安全な状態（nullptr等）にクリアされている必要があります。
-                if (LoadEmitterTextureSlot(track, selected_, slot))
-                {
-                    // 読み込みが完全に成功した時のみ、聖なる碑文（パスと名前）を書き換える
-                    fileName = std::filesystem::path(selected_).filename().string();
-                    path = selected_;
-                    if (slot == 1) s.useMaskTexture = 1;
-                    if (slot == 2) s.useGradientTexture = 1;
-                }
-                else
-                {
-                    // 【対策】もし読み込みに失敗した場合、EmitterのSRVが nullptr になっている可能性が高い！
-                    // その場合、次のフレームの ImGui::ImageButton でクラッシュするのを防ぐため、
-                    // ここで安全なダミーテクスチャを再設定するか、fileNameを"None"に戻すなどの救済措置を行う。
                     fileName.clear();
                     path.clear();
-                    if (slot == 1) s.useMaskTexture = 0;
-                    if (slot == 2) s.useGradientTexture = 0;
-
-                    // 安全なダミーを割り当てる、あるいはnullptrのままにしてImageButton側で弾く
                     if (track.emitter)
                     {
                         auto device_ = GraphicsDeviceManager::Instance().GetDevice();
@@ -255,14 +173,105 @@ void ParticleComponent::Gui()
                         CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
 
                         if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
-                        else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); }
-                        else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); }
+                        else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); s.useMaskTexture = 0; }
+                        else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); s.useGradientTexture = 0; }
                     }
                 }
+
+                for (const auto& file : textureFiles)
+                {
+                    bool selected = fileName == file;
+                    if (ImGui::Selectable(file.c_str(), selected))
+                    {
+                        fileName = file;
+                        path = "Data/Texture/Particle/" + file;
+                        LoadEmitterTextureSlot(track, path, slot);
+                        if (slot == 1) s.useMaskTexture = 1;
+                        if (slot == 2) s.useGradientTexture = 1;
+                    }
+                }
+                ImGui::EndCombo();
             }
-            pendingTextureSlot = -1;
-        }
-    };
+
+            ID3D11ShaderResourceView* srv_ = nullptr;
+            if (track.emitter)
+            {
+                if (slot == 0) srv_ = track.emitter->GetTextureSRV();
+                else if (slot == 1) srv_ = track.emitter->GetMaskTextureSRV();
+                else if (slot == 2) srv_ = track.emitter->GetGradientTextureSRV();
+            }
+
+            ImGui::PushID(slot);
+            bool browsePressed_ = false;
+            if (srv_)
+            {
+                browsePressed_ = ImGui::ImageButton("##TextureBrowse", reinterpret_cast<ImTextureID>(srv_), ImVec2(64.0f, 64.0f));
+            }
+            else
+            {
+                browsePressed_ = ImGui::Button("Select Texture", ImVec2(96.0f, 64.0f));
+            }
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Browse %s", label);
+            }
+            ImGui::PopID();
+
+            if (browsePressed_)
+            {
+                pendingTextureSlot = slot;
+
+                const wchar_t* title_ =
+                    slot == 0 ? L"Select Color Texture" :
+                    slot == 1 ? L"Select Mask Texture" :
+                    L"Select Gradient Texture";
+
+                const std::string initDir_ = path.empty()
+                    ? "Data/Texture/Particle/"
+                    : std::filesystem::path(path).parent_path().generic_string();
+
+
+                const std::string selected_ = WindowsDialogHelper::OpenTextureDialog(title_, initDir_);
+
+                if (!selected_.empty())
+                {
+
+
+
+                    if (LoadEmitterTextureSlot(track, selected_, slot))
+                    {
+
+                        fileName = std::filesystem::path(selected_).filename().string();
+                        path = selected_;
+                        if (slot == 1) s.useMaskTexture = 1;
+                        if (slot == 2) s.useGradientTexture = 1;
+                    }
+                    else
+                    {
+
+
+
+                        fileName.clear();
+                        path.clear();
+                        if (slot == 1) s.useMaskTexture = 0;
+                        if (slot == 2) s.useGradientTexture = 0;
+
+
+                        if (track.emitter)
+                        {
+                            auto device_ = GraphicsDeviceManager::Instance().GetDevice();
+                            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummySRV_;
+                            CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
+
+                            if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
+                            else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); }
+                            else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); }
+                        }
+                    }
+                }
+                pendingTextureSlot = -1;
+            }
+        };
 
     if (ImGui::BeginTabBar("EmitterParams"))
     {
@@ -272,7 +281,7 @@ void ParticleComponent::Gui()
             if (ImGui::SliderInt("Max Count", &maxCount, 1, 20000)) s.maxParticleCount = static_cast<uint32_t>(maxCount);
             ImGui::DragFloat("Delay", &track.delay, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat2("Life Min/Max", &s.lifespan.x, 0.05f, 0.01f, 60.0f);
-            ImGui::DragFloat2("Speed Min/Max", &s.emissionSpeed.x, 0.05f, 0.0f, 100.0f);
+            ImGui::DragFloat2("Initial Speed Min/Max", &s.emissionSpeed.x, 0.05f, 0.0f, 100.0f);
 
             const char* modes[] = { "Continuous", "Burst" };
             ImGui::Combo("Mode", reinterpret_cast<int*>(&s.emissionMode), modes, IM_ARRAYSIZE(modes));
@@ -290,10 +299,22 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Physics"))
         {
-            ImGui::DragFloat("Gravity", &s.gravity, 0.01f, -100.0f, 100.0f);
-            ImGui::DragFloat2("Cone Angle", &s.emissionConeAngle.x, 0.01f, 0.0f, 6.28f);
-            ImGui::DragFloat2("Rotation Speed", &s.emissionAngularSpeed.x, 0.01f, -50.0f, 50.0f);
-            ImGui::DragFloat("Noise Scale", &s.noiseScale, 0.01f, 0.0f, 100.0f);
+            ImGui::DragFloat("Gravity / Acceleration Y", &s.gravity, 0.01f, -100.0f, 100.0f);
+            ImGui::DragFloat3("Additional Acceleration XYZ", &s.windVelocity.x, 0.01f, -100.0f, 100.0f);
+            ImGui::DragFloat("Drag", &s.drag, 0.01f, 0.0f, 20.0f);
+            ImGui::DragFloat2("Direction Cone Angle", &s.emissionConeAngle.x, 0.01f, 0.0f, 6.28f);
+            ImGui::DragFloat2("Angular Velocity", &s.emissionAngularSpeed.x, 0.01f, -50.0f, 50.0f);
+
+            ImGui::SeparatorText("Turbulence / Noise");
+            ImGui::DragFloat("Noise Strength", &s.noiseStrength, 0.01f, 0.0f, 100.0f);
+            ImGui::DragFloat("Noise Frequency", &s.noiseFrequency, 0.01f, 0.01f, 20.0f);
+            ImGui::DragFloat("Noise Speed", &s.noiseSpeed, 0.01f, -20.0f, 20.0f);
+            s.noiseScale = s.noiseStrength;
+
+            ImGui::SeparatorText("Velocity Modules");
+            ImGui::DragFloat("Radial Velocity", &s.radialVelocity, 0.01f, -100.0f, 100.0f);
+            ImGui::DragFloat("Orbit Velocity", &s.orbitVelocity, 0.01f, -100.0f, 100.0f);
+            ImGui::TextDisabled("Default: Initial Speed 0, Gravity -9.8, Angular Velocity 0, Noise 0.");
             ImGui::EndTabItem();
         }
 
@@ -368,7 +389,7 @@ void ParticleComponent::Gui()
         if (ImGui::BeginTabItem("Texture"))
         {
             textureCombo("Color Texture", track.textureFileName, track.texturePath, 0);
-            
+
             textureCombo("Mask Texture", track.maskTextureFileName, track.maskTexturePath, 1);
             textureCombo("Gradient Texture", track.gradientTextureFileName, track.gradientTexturePath, 2);
             bool useMask = s.useMaskTexture != 0;
@@ -414,6 +435,11 @@ void ParticleComponent::Gui()
         {
             const char* renderTypes[] = { "Billboard", "Stretched" };
             ImGui::Combo("Render Type", reinterpret_cast<int*>(&s.type), renderTypes, IM_ARRAYSIZE(renderTypes));
+            if (s.type == 1)
+            {
+                ImGui::DragFloat("Stretch Scale", &s.stretchScale, 0.001f, 0.0f, 2.0f, "%.3f");
+                ImGui::DragFloat("Stretch Max", &s.stretchMax, 0.1f, 0.01f, 1000.0f);
+            }
             ImGui::EndTabItem();
         }
 
@@ -484,10 +510,10 @@ void ParticleComponent::Gui()
             }
         }
         std::sort(browserEntries_.begin(), browserEntries_.end(), [](const auto& left_, const auto& right_)
-        {
-            if (left_.is_directory() != right_.is_directory()) return left_.is_directory();
-            return left_.path().filename().string() < right_.path().filename().string();
-        });
+            {
+                if (left_.is_directory() != right_.is_directory()) return left_.is_directory();
+                return left_.path().filename().string() < right_.path().filename().string();
+            });
 
         for (const auto& entry_ : browserEntries_)
         {
@@ -734,6 +760,16 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["ConeAngle"] = { s.emissionConeAngle.x, s.emissionConeAngle.y };
         ej["RotationSpeed"] = { s.emissionAngularSpeed.x, s.emissionAngularSpeed.y };
         ej["Gravity"] = s.gravity;
+        ej["Wind"] = { s.windVelocity.x, s.windVelocity.y, s.windVelocity.z };
+        ej["Acceleration"] = { s.windVelocity.x, s.windVelocity.y, s.windVelocity.z };
+        ej["Drag"] = s.drag;
+        ej["NoiseStrength"] = s.noiseStrength;
+        ej["NoiseFrequency"] = s.noiseFrequency;
+        ej["NoiseSpeed"] = s.noiseSpeed;
+        ej["RadialVelocity"] = s.radialVelocity;
+        ej["OrbitVelocity"] = s.orbitVelocity;
+        ej["StretchScale"] = s.stretchScale;
+        ej["StretchMax"] = s.stretchMax;
         ej["Color"] = { s.manualColor.x, s.manualColor.y, s.manualColor.z, s.manualColor.w };
         ej["ColorStart"] = { s.colorStart.x, s.colorStart.y, s.colorStart.z, s.colorStart.w };
         ej["ColorEnd"] = { s.colorEnd.x, s.colorEnd.y, s.colorEnd.z, s.colorEnd.w };
@@ -786,7 +822,18 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.spawnShape = ej.value("SpawnShape", 0u);
             s.useMaskTexture = ej.value("UseMask", 0u);
             s.useGradientTexture = ej.value("UseGradient", 0u);
-            s.gravity = ej.value("Gravity", 0.0f);
+            s.gravity = ej.value("Gravity", -9.8f);
+            if (ej.contains("Acceleration")) s.windVelocity = { ej["Acceleration"][0], ej["Acceleration"][1], ej["Acceleration"][2], 0.0f };
+            else if (ej.contains("Wind")) s.windVelocity = { ej["Wind"][0], ej["Wind"][1], ej["Wind"][2], 0.0f };
+            s.drag = ej.value("Drag", 0.0f);
+            s.noiseStrength = ej.value("NoiseStrength", ej.value("NoiseScale", 0.0f));
+            s.noiseScale = s.noiseStrength;
+            s.noiseFrequency = ej.value("NoiseFrequency", 1.0f);
+            s.noiseSpeed = ej.value("NoiseSpeed", 1.0f);
+            s.radialVelocity = ej.value("RadialVelocity", 0.0f);
+            s.orbitVelocity = ej.value("OrbitVelocity", 0.0f);
+            s.stretchScale = ej.value("StretchScale", 0.04f);
+            s.stretchMax = ej.value("StretchMax", 100.0f);
             s.type = ej.value("RenderType", 0u);
 
             if (ej.contains("PosOffset")) s.emissionPosition = { ej["PosOffset"][0], ej["PosOffset"][1], ej["PosOffset"][2], 1.0f };
