@@ -17,6 +17,8 @@ public:
     void Draw() override;
 
 private:
+
+
     bool ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const;
     void DrawScenePreviewPanel();
     void DrawSceneHierarchyPanel();

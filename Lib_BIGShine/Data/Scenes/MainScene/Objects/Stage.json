@@ -11,9 +11,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 0,
-                        "shaderId": 1,
-                        "toonPbrBlend": 0.5
+                        "outlineThicknessOffset": 0.019999999552965164,
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.41999998688697815
                     },
                     {
                         "baseColor": [
@@ -22,9 +24,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": true,
                         "id": 1,
-                        "shaderId": 1,
-                        "toonPbrBlend": 0.5
+                        "outlineThicknessOffset": 0.019999999552965164,
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.953000009059906
                     },
                     {
                         "baseColor": [
@@ -33,9 +37,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 2,
-                        "shaderId": 1,
-                        "toonPbrBlend": 0.5
+                        "outlineThicknessOffset": 1.0,
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.9990000128746033
                     },
                     {
                         "baseColor": [
@@ -44,8 +50,10 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 3,
-                        "shaderId": 1,
+                        "outlineThicknessOffset": 1.0,
+                        "shaderId": 3,
                         "toonPbrBlend": 0.5
                     },
                     {
@@ -55,8 +63,10 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 4,
-                        "shaderId": 1,
+                        "outlineThicknessOffset": 1.0,
+                        "shaderId": 3,
                         "toonPbrBlend": 0.5
                     },
                     {
@@ -66,8 +76,10 @@
                             0.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 5,
-                        "shaderId": 1,
+                        "outlineThicknessOffset": 1.0,
+                        "shaderId": 3,
                         "toonPbrBlend": 0.5
                     }
                 ],

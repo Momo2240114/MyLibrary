@@ -303,16 +303,6 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
     // ビューポートの設定
     immediateContext->RSSetViewports(1, &viewPort);
 }
-//{
-//    // TODO: RenderTargetViewをクリア
-//    immediateContext->ClearRenderTargetView(renderTargetView.Get(), clearColor_);
-//
-//    // TODO: DepthStencilViewをクリア
-//    immediateContext->ClearDepthStencilView(depthStencilView.Get(),
-//        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-//
-//    SetRenderTargets();
-//}
 
 /**
  * @brief フレームの描画を終了して画面に反映する

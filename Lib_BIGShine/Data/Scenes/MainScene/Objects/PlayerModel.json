@@ -26,7 +26,7 @@
     "Components": [
         {
             "Data": {
-                "LocalScale": 1.0,
+                "LocalScale": 0.009999999776482582,
                 "MaterialOverrides": [
                     {
                         "baseColor": [
@@ -35,9 +35,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 0,
+                        "outlineThicknessOffset": 0.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.8999999761581421
+                        "toonPbrBlend": 1.0
                     },
                     {
                         "baseColor": [
@@ -46,9 +48,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 1,
+                        "outlineThicknessOffset": 0.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.8999999761581421
+                        "toonPbrBlend": 1.0
                     },
                     {
                         "baseColor": [
@@ -57,9 +61,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 2,
+                        "outlineThicknessOffset": 0.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.0
+                        "toonPbrBlend": 0.003000000026077032
                     },
                     {
                         "baseColor": [
@@ -68,9 +74,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 3,
+                        "outlineThicknessOffset": 0.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.75
+                        "toonPbrBlend": 1.0
                     },
                     {
                         "baseColor": [
@@ -79,9 +87,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 4,
+                        "outlineThicknessOffset": 0.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.4020000100135803
+                        "toonPbrBlend": 0.30000001192092896
                     },
                     {
                         "baseColor": [
@@ -90,12 +100,14 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": false,
                         "id": 5,
+                        "outlineThicknessOffset": 0.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.8999999761581421
+                        "toonPbrBlend": 0.7059999704360962
                     }
                 ],
-                "ModelName": "./Data/Model/SwordPlayer/SwordWuman.gltf",
+                "ModelName": "./Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
                 "RootMotionName": "root",
                 "ShaderID": 1,
                 "UsedNaviMeshSystemFlg": false,
@@ -144,17 +156,17 @@
             "TypeName": "CurveComponent"
         },
         {
+            "Data": {},
+            "Enabled": true,
+            "TypeName": "BlackboardComponent"
+        },
+        {
             "Data": {
                 "AssetPath": "Player",
                 "GraphAssetPath": "Player"
             },
             "Enabled": true,
             "TypeName": "AnimationControllerComponent"
-        },
-        {
-            "Data": {},
-            "Enabled": true,
-            "TypeName": "BlackboardComponent"
         }
     ],
     "Layer": 0,
@@ -164,11 +176,11 @@
         "Pos": [
             -0.0668453723192215,
             3.181256527737958e-13,
-            2.784632921218872
+            -1.9149999618530273
         ],
         "Rot": [
             0.0,
-            171.48300170898438,
+            141.98199462890625,
             0.0
         ],
         "Scale": [

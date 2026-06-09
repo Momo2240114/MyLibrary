@@ -19,11 +19,10 @@ public:
     void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override;
     void End(const RenderContext& rc) override;
     void Gui();
-    float GetShadeStep() const { return shadeStep; }
-    float GetShadeFeather() const { return shadeFeather; }
-    void SetShadeStep(float shadeStep_) { shadeStep = shadeStep_; }
-    void SetShadeFeather(float shadeFeather_) { shadeFeather = shadeFeather_; }
-    void SetShadeSettings(float shadeStep_, float shadeFeather_) { shadeStep = shadeStep_; shadeFeather = shadeFeather_; }
+    const DirectX::XMFLOAT4& GetShadeSteps() const { return shadeSteps; }
+    DirectX::XMFLOAT4 GetShadeFeather() const { return shadeFeathers; }
+    void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_) { shadeFeathers = shadeFeather_; }
+    void SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, DirectX::XMFLOAT4 shadeFeather_);
 private:
     // PBRと同様、メッシュ固有のパラメータをb0に集約する
     struct CbMesh
@@ -32,14 +31,17 @@ private:
         DirectX::XMFLOAT3 emissiveColor;
         float             metalness;      // Toonでは使わぬがパディングとして保持
         float             roughness;      // Toonでは使わぬがパディングとして保持
-        float  shadeStep;      // 影のしきい値
-        float  shadeFeather;   // 影の境界ぼかし
-        float  occlusionStrength; // パディングの代わりにここへ移動
+        
+        float  occlusionStrength;
+
+        DirectX::XMFLOAT4 shadeSteps;
+        DirectX::XMFLOAT4  shadeFeather;   // 影の境界ぼかし
+        float  padding[2];
     };
 
     // トゥーン用パラメータを追加
-    float shadeStep = 0.05f;
-    float shadeFeather = 0.05f;
+    DirectX::XMFLOAT4 shadeSteps{ 0.05f, 0.05f, 0.05f, 0.05f };
+    DirectX::XMFLOAT4 shadeFeathers = { 0.05f, 0.05f, 0.05f, 0.05f };
 
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>  vertexShader;

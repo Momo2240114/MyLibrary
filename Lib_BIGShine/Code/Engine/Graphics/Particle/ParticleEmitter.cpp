@@ -303,9 +303,22 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     data.parameter.z = 0.0f;
     data.parameter.w = static_cast<float>(settings.type);
 
-    data.position.x = settings.emissionPosition.x + std::cos(angle) * radius;
-    data.position.y = settings.emissionPosition.y;
-    data.position.z = settings.emissionPosition.z + std::sin(angle) * radius;
+    if (settings.spawnShape == 5 && !meshSpawnPositions.empty())
+    {
+        const size_t meshIndex_ = (std::min)(
+            static_cast<size_t>(r0 * static_cast<float>(meshSpawnPositions.size())),
+            meshSpawnPositions.size() - 1);
+        const DirectX::XMFLOAT3& meshPosition_ = meshSpawnPositions[meshIndex_];
+        data.position.x = settings.emissionPosition.x + meshPosition_.x;
+        data.position.y = settings.emissionPosition.y + meshPosition_.y;
+        data.position.z = settings.emissionPosition.z + meshPosition_.z;
+    }
+    else
+    {
+        data.position.x = settings.emissionPosition.x + std::cos(angle) * radius;
+        data.position.y = settings.emissionPosition.y;
+        data.position.z = settings.emissionPosition.z + std::sin(angle) * radius;
+    }
     data.position.w = 1.0f;
 
     float theta = Lerp(settings.emissionConeAngle.x, settings.emissionConeAngle.y, r3);

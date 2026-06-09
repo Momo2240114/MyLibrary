@@ -20,11 +20,10 @@ public:
     void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override;
     void End(const RenderContext& rc) override;
     void Gui() override;
-    float GetShadeStep() const { return shadeStep; }
-    float GetShadeFeather() const { return shadeFeather; }
-    void SetShadeStep(float shadeStep_) { shadeStep = shadeStep_; }
-    void SetShadeFeather(float shadeFeather_) { shadeFeather = shadeFeather_; }
-    void SetShadeSettings(float shadeStep_, float shadeFeather_) { shadeStep = shadeStep_; shadeFeather = shadeFeather_; }
+    const DirectX::XMFLOAT4& GetShadeSteps() const { return shadeSteps; }
+    DirectX::XMFLOAT4 GetShadeFeather() const { return shadeFeathers; }
+    void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_) { shadeFeathers = shadeFeather_; }
+    void SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, const DirectX::XMFLOAT4& shadeFeather_);
 
 private:
     struct CbMesh
@@ -33,15 +32,15 @@ private:
         DirectX::XMFLOAT3 emissiveColor;
         float metalness;
         float roughness;
-        float shadeStep;
-        float shadeFeather;
         float occlusionStrength;
         float toonPbrBlend;
-        float padding[3];
+        DirectX::XMFLOAT4  shadeFeathers;
+        DirectX::XMFLOAT4 shadeSteps;
+        float             pading;
     };
 
-    float shadeStep = 0.45f;
-    float shadeFeather = 0.08f;
+    DirectX::XMFLOAT4 shadeSteps{ 0.45f, 0.45f, 0.45f, 0.45f };
+    DirectX::XMFLOAT4 shadeFeathers = { 0.1f,0.1f,0.1f,0.1f };
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;

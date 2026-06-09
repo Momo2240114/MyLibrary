@@ -351,4 +351,24 @@ RenderState::RenderState(ID3D11Device* device)
 
 		device->CreateDepthStencilState(&desc, depthStencilStates[static_cast<int>(DepthState::Decal)].GetAddressOf());
 	}
+
+	// ★ [追加] パーティクルエディタ用：RGBはアルファブレンド、アルファチャンネルは書き込まない
+	{
+		D3D11_BLEND_DESC desc{};
+		desc.AlphaToCoverageEnable = false;
+		desc.IndependentBlendEnable = false;
+		desc.RenderTarget[0].BlendEnable = true;
+		desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;   // パーティクルのαで上書きしない
+		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;    // RTのαをそのまま保持
+		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_RED
+			| D3D11_COLOR_WRITE_ENABLE_GREEN
+			| D3D11_COLOR_WRITE_ENABLE_BLUE; // αへの書き込みをマスク
+		HRESULT hr = device->CreateBlendState(&desc,
+			blendStates[static_cast<int>(BlendState::TransparencyKeepAlpha)].GetAddressOf());
+	}
+
 }

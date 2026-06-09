@@ -1,7 +1,10 @@
 #include "ParticleComponent.h"
 
+
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include <algorithm>
@@ -34,6 +37,7 @@ void ParticleComponent::RegisterActions()
     registry_.RegisterAction("Particle", objectName_ + "_Particle_Play", [this]() { Play(); });
     registry_.RegisterAction("Particle", objectName_ + "_Particle_Stop", [this]() { Stop(); });
 }
+
 void ParticleComponent::Gui()
 {
     if (textureDialogKey.empty())
@@ -142,6 +146,8 @@ void ParticleComponent::Gui()
     auto& track = tracks[selectedEmitterIndex];
     auto& s = track.settings;
 
+    bool openTextureBrowser_ = false;
+
     auto textureCombo = [&](const char* label, std::string& fileName, std::string& path, int slot)
     {
         const char* preview = fileName.empty() ? "None" : fileName.c_str();
@@ -153,9 +159,13 @@ void ParticleComponent::Gui()
                 path.clear();
                 if (track.emitter)
                 {
-                    if (slot == 0) { track.emitter->SetTexture(nullptr); }
-                    else if (slot == 1) { track.emitter->SetMaskTexture(nullptr); s.useMaskTexture = 0; }
-                    else if (slot == 2) { track.emitter->SetGradientTexture(nullptr); s.useGradientTexture = 0; }
+                    auto device_ = GraphicsDeviceManager::Instance().GetDevice();
+                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummySRV_;
+                    CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
+
+                    if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
+                    else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); s.useMaskTexture = 0; }
+                    else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); s.useGradientTexture = 0; }
                 }
             }
 
@@ -201,13 +211,57 @@ void ParticleComponent::Gui()
         if (browsePressed_)
         {
             pendingTextureSlot = slot;
-            textureBrowserDirectory = path.empty()
-                ? "Data/Texture/Particle"
-                : std::filesystem::path(path).parent_path().generic_string();
-            textureBrowserSelection.clear();
-            ImGui::OpenPopup(textureDialogKey.c_str());
-        }
 
+            const wchar_t* title_ =
+                slot == 0 ? L"Select Color Texture" :
+                slot == 1 ? L"Select Mask Texture" :
+                L"Select Gradient Texture";
+
+            const std::string initDir_ = path.empty()
+                ? "Data/Texture/Particle/"
+                : std::filesystem::path(path).parent_path().generic_string();
+
+            // モーダルダイアログを開く（この間、メインループは一時停止する）
+            const std::string selected_ = WindowsDialogHelper::OpenTextureDialog(title_, initDir_);
+
+            if (!selected_.empty())
+            {
+                // 【重要】いきなりEmitterや現在のパスを破壊せず、読み込みが成功するかを見極める
+                // ※LoadEmitterTextureSlotの内部で、失敗時に古いテクスチャを維持するか、
+                //   あるいは完全に安全な状態（nullptr等）にクリアされている必要があります。
+                if (LoadEmitterTextureSlot(track, selected_, slot))
+                {
+                    // 読み込みが完全に成功した時のみ、聖なる碑文（パスと名前）を書き換える
+                    fileName = std::filesystem::path(selected_).filename().string();
+                    path = selected_;
+                    if (slot == 1) s.useMaskTexture = 1;
+                    if (slot == 2) s.useGradientTexture = 1;
+                }
+                else
+                {
+                    // 【対策】もし読み込みに失敗した場合、EmitterのSRVが nullptr になっている可能性が高い！
+                    // その場合、次のフレームの ImGui::ImageButton でクラッシュするのを防ぐため、
+                    // ここで安全なダミーテクスチャを再設定するか、fileNameを"None"に戻すなどの救済措置を行う。
+                    fileName.clear();
+                    path.clear();
+                    if (slot == 1) s.useMaskTexture = 0;
+                    if (slot == 2) s.useGradientTexture = 0;
+
+                    // 安全なダミーを割り当てる、あるいはnullptrのままにしてImageButton側で弾く
+                    if (track.emitter)
+                    {
+                        auto device_ = GraphicsDeviceManager::Instance().GetDevice();
+                        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummySRV_;
+                        CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
+
+                        if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
+                        else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); }
+                        else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); }
+                    }
+                }
+            }
+            pendingTextureSlot = -1;
+        }
     };
 
     if (ImGui::BeginTabBar("EmitterParams"))
@@ -245,7 +299,7 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Shape"))
         {
-            const char* shapes[] = { "Point", "Box", "Circle", "Sphere", "Line" };
+            const char* shapes[] = { "Point", "Box", "Circle", "Sphere", "Line", "Mesh Vertices" };
             ImGui::Combo("Spawn Shape", reinterpret_cast<int*>(&s.spawnShape), shapes, IM_ARRAYSIZE(shapes));
             ImGui::DragFloat3("Emitter Offset", &s.emissionPosition.x, 0.05f);
             ImGui::DragFloat3("Shape Size", &s.shapeSize.x, 0.05f, 0.0f, 100.0f);
@@ -253,6 +307,19 @@ void ParticleComponent::Gui()
             {
                 ImGui::DragFloat3("Line Start", &s.shapeStart.x, 0.05f);
                 ImGui::DragFloat3("Line End", &s.shapeEnd.x, 0.05f);
+            }
+            else if (s.spawnShape == 5)
+            {
+                int meshSampleCount_ = static_cast<int>(track.meshVertexSampleCount);
+                if (ImGui::SliderInt("Mesh Vertex Samples", &meshSampleCount_, 1, 20000))
+                {
+                    track.meshVertexSampleCount = static_cast<uint32_t>(meshSampleCount_);
+                }
+                auto owner_ = GetGameObject();
+                const bool hasSourceModel_ = owner_ && owner_->GetComponent<GltfModelCommponennt>() != nullptr;
+                ImGui::TextColored(
+                    hasSourceModel_ ? ImVec4(0.25f, 1.0f, 0.40f, 1.0f) : ImVec4(1.0f, 0.45f, 0.25f, 1.0f),
+                    hasSourceModel_ ? "Source: GltfModel on this GameObject" : "Add GltfModel to this GameObject");
             }
             ImGui::DragFloat2("Legacy Radius Min/Max", &s.emissionOffset.x, 0.05f, 0.0f, 100.0f);
             ImGui::EndTabItem();
@@ -352,6 +419,7 @@ void ParticleComponent::Gui()
 
         ImGui::EndTabBar();
     }
+
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -618,6 +686,11 @@ void ParticleComponent::Update(float deltaTime)
 
         if (track.isStarted && track.emitter)
         {
+            if (track.settings.spawnShape == 5)
+            {
+                UpdateMeshSpawnPositions(track);
+            }
+
             ParticleSystemConstants tempSettings = track.settings;
             tempSettings.emissionPosition.x = worldPos.x + track.settings.emissionPosition.x;
             tempSettings.emissionPosition.y = worldPos.y + track.settings.emissionPosition.y;
@@ -644,6 +717,7 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["MaskTexturePath"] = track.maskTexturePath;
         ej["GradientTexturePath"] = track.gradientTexturePath;
         ej["Delay"] = track.delay;
+        ej["MeshVertexSampleCount"] = track.meshVertexSampleCount;
         ej["MaxCount"] = s.maxParticleCount;
         ej["EmissionMode"] = s.emissionMode;
         ej["BurstCount"] = s.burstCount;
@@ -705,6 +779,7 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             if (!track.gradientTexturePath.empty()) track.gradientTextureFileName = std::filesystem::path(track.gradientTexturePath).filename().string();
 
             track.delay = ej.value("Delay", 0.0f);
+            track.meshVertexSampleCount = ej.value("MeshVertexSampleCount", 2048u);
             s.maxParticleCount = ej.value("MaxCount", 1000u);
             s.emissionMode = ej.value("EmissionMode", 0u);
             s.burstCount = ej.value("BurstCount", 100u);
@@ -752,6 +827,53 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
     RebuildEmitterResources();
 
     if (j.value("IsPlaying", false)) Play();
+}
+
+void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
+{
+    if (!track_.emitter) return;
+
+    auto owner_ = GetGameObject();
+    auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_)
+    {
+        track_.emitter->SetMeshSpawnPositions({});
+        return;
+    }
+
+    size_t totalVertexCount_ = 0;
+    for (const auto& mesh_ : model_->GetMeshes()) totalVertexCount_ += mesh_.vertices.size();
+    if (totalVertexCount_ == 0)
+    {
+        track_.emitter->SetMeshSpawnPositions({});
+        return;
+    }
+
+    const size_t sampleLimit_ = (std::max)(static_cast<size_t>(1), static_cast<size_t>(track_.meshVertexSampleCount));
+    const size_t sampleStride_ = (std::max)(static_cast<size_t>(1), totalVertexCount_ / sampleLimit_);
+    std::vector<DirectX::XMFLOAT3> positions_;
+    positions_.reserve((std::min)(totalVertexCount_, sampleLimit_));
+
+    size_t vertexIndex_ = 0;
+    for (const auto& mesh_ : model_->GetMeshes())
+    {
+        const DirectX::XMMATRIX meshTransform_ = mesh_.node
+            ? DirectX::XMLoadFloat4x4(&mesh_.node->globalTransform)
+            : DirectX::XMMatrixIdentity();
+        for (const auto& vertex_ : mesh_.vertices)
+        {
+            if ((vertexIndex_++ % sampleStride_) != 0) continue;
+            DirectX::XMVECTOR position_ = DirectX::XMLoadFloat3(&vertex_.position);
+            position_ = DirectX::XMVector3TransformCoord(position_, meshTransform_);
+            DirectX::XMFLOAT3 transformedPosition_{};
+            DirectX::XMStoreFloat3(&transformedPosition_, position_);
+            positions_.push_back(transformedPosition_);
+            if (positions_.size() >= sampleLimit_) break;
+        }
+        if (positions_.size() >= sampleLimit_) break;
+    }
+
+    track_.emitter->SetMeshSpawnPositions(positions_);
 }
 
 void ParticleComponent::RebuildEmitterResources()

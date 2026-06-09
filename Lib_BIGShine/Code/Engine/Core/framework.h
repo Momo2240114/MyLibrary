@@ -53,17 +53,22 @@ private:
 	float count_by_seconds{ 0.0f };
 	void calculate_frame_stats()
 	{
-		//if (++frames_per_second, (tictoc.time_stamp() - count_by_seconds) >= 1.0f)
-		//{
-		//	float fps = static_cast<float>(frames_per_second);
-		//	std::wostringstream outs;
-		//	outs.precision(6);
-		//	outs << L"Silent Escape";
-		//	SetWindowTextW(hwnd, outs.str().c_str());
+		if (++frames_per_second, (tictoc.time_stamp() - count_by_seconds) >= 1.0f)
+		{
+			float fps = static_cast<float>(frames_per_second);
+			float mspf = 1000.0f / fps;
+			std::wostringstream outs;
+			outs.precision(6);
+			//outs << L"Silent Escape";
+			//SetWindowTextW(hwnd, outs.str().c_str());
+			outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
+			SetWindowTextW(hwnd, outs.str().c_str());
 
-		//	frames_per_second = 0;
-		//	count_by_seconds += 1.0f;
-		//}
+				// Reset for next average.
+
+			frames_per_second = 0;
+			count_by_seconds += 1.0f;
+		}
 	}
 
 private:

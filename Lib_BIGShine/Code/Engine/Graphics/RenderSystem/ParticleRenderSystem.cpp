@@ -55,7 +55,7 @@ void ParticleRenderSystem::ApplySceneConstants(const RenderContext& rc)
     dc->PSSetConstantBuffers(7, 1, &sceneCB);
 }
 
-void ParticleRenderSystem::RenderAll(const RenderContext& rc)
+void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindow_ )
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
     if (!dc || !rc.camera || drawInfos.empty()) return;
@@ -66,7 +66,13 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc)
     dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
     float blendFactor[4] = { 0, 0, 0, 0 };
-    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), blendFactor, 0xffffffff);
+    if (isEditorWindow_) {
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::TransparencyKeepAlpha), blendFactor, 0xffffffff);
+    }
+    else
+    {
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), blendFactor, 0xffffffff);
+    }
 
     dc->IASetInputLayout(nullptr);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);

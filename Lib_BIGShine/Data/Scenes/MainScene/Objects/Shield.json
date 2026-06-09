@@ -11,9 +11,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": true,
                         "id": 0,
+                        "outlineThicknessOffset": 0.007000000216066837,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.5
+                        "toonPbrBlend": 1.0
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Weapon/Sword_ShiledModel.gltf",
@@ -33,7 +35,7 @@
         {
             "Data": {
                 "targetGameObjectName": "PlayerModel",
-                "targetNodeIndex": 66,
+                "targetNodeIndex": 85,
                 "targetNodeName": "lowerarm_l"
             },
             "Enabled": true,

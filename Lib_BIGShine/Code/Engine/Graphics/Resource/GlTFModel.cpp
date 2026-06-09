@@ -131,8 +131,10 @@ void GltfModelCommponennt::Material::serialize(Archive& archive)
 		CEREAL_NVP(occlusionStrength),
 		CEREAL_NVP(alphaCutoff),
 		CEREAL_NVP(toonPbrBlend),
+		CEREAL_NVP(outlineThicknessOffset),
 		cereal::make_nvp("alphaMode", tempAlphaMode),
-		cereal::make_nvp("shaderId", tempShaderId)
+		cereal::make_nvp("shaderId", tempShaderId),
+		CEREAL_NVP(disableOutline)
 	);
 
 	if (Archive::is_loading::value)
@@ -801,7 +803,10 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 			{"id", mat.id},
 			{"shaderId", static_cast<int>(mat.shaderId)},
 			{"toonPbrBlend", mat.toonPbrBlend},
-			{"baseColor", {mat.baseColor.x, mat.baseColor.y, mat.baseColor.z, mat.baseColor.w}}
+			{"baseColor", {mat.baseColor.x, mat.baseColor.y, mat.baseColor.z, mat.baseColor.w}},
+			// ★ トゥーン・アウトライン用のパラメータを個別保存のリストへ追加します
+			{"disableOutline", mat.disableOutline},
+			{"outlineThicknessOffset", mat.outlineThicknessOffset}
 			});
 	}
 	j["MaterialOverrides"] = materialSettings;
@@ -856,7 +861,16 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 					{
 						mat.toonPbrBlend = item["toonPbrBlend"].get<float>();
 					}
-					// 色情報なども同様に反映
+					// ★ トゥーン・アウトライン用のパラメータを安全に復元します
+					// 過去に保存された古いシーンファイルを読み込んでもエラーにならないよう、containsでチェックします
+					if (item.contains("disableOutline"))
+					{
+						mat.disableOutline = item["disableOutline"].get<bool>();
+					}
+					if (item.contains("outlineThicknessOffset"))
+					{
+						mat.outlineThicknessOffset = item["outlineThicknessOffset"].get<float>();
+					}
 				}
 			}
 		}
@@ -911,6 +925,13 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 			{
 				ImGui::DragFloat("ToonPbrBlend", &material.toonPbrBlend, 0.001f, 0.0f, 1.0f);
 				material.toonPbrBlend = std::clamp(material.toonPbrBlend, 0.0f, 1.0f);
+			}
+
+			// ★ アウトラインを無効化するためのチェックボックスを追加
+			if (material.shaderId == ModelShaderID::ToonPBR || material.shaderId == ModelShaderID::Toon)
+			{
+				ImGui::Checkbox("Disable Outline", &material.disableOutline);
+				ImGui::DragFloat("OutlineThicknessOffset", &material.outlineThicknessOffset,0.001,0.0f,2.0f);
 			}
 
 			ImGui::Separator();

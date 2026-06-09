@@ -11,9 +11,11 @@
                             1.0,
                             1.0
                         ],
+                        "disableOutline": true,
                         "id": 0,
+                        "outlineThicknessOffset": 0.004999999888241291,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.5
+                        "toonPbrBlend": 0.057999998331069946
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Weapon/SwordModel.gltf",
@@ -33,7 +35,7 @@
         {
             "Data": {
                 "targetGameObjectName": "PlayerModel",
-                "targetNodeIndex": 42,
+                "targetNodeIndex": 52,
                 "targetNodeName": "hand_r"
             },
             "Enabled": true,

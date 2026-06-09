@@ -258,6 +258,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\FovDirector.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\Movement.cpp" />
@@ -311,7 +312,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\PoseLibraryResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFImporter.cpp" />
-    <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\GLTFModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\BasicShader.cpp" />
@@ -331,6 +332,7 @@
     <ClCompile Include="Code\Engine\Physics\PhysXEventCallback.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysXSystem.cpp" />
     <ClCompile Include="Code\Engine\Physics\SphereCollider.cpp" />
+    <ClCompile Include="Code\Engine\Platform\WindowsDialogHelper.cpp" />
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerInput.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
@@ -370,6 +372,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\FovDirector.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\FreeCamera.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\Movement.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\MovementComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\NameComponent.h" />
@@ -457,7 +460,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />
-    <ClInclude Include="Code\Engine\Graphics\Resource\GlTFModel.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\GLTFModel.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResource.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h" />
@@ -477,6 +480,7 @@
     <ClInclude Include="Code\Engine\Physics\PhysXMath.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXSystem.h" />
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
+    <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerAttack.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerInput.h" />

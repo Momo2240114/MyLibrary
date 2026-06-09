@@ -3,6 +3,18 @@
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
+#include <algorithm>
+
+namespace
+{
+    void SortShadeSteps(DirectX::XMFLOAT4& shadeSteps_)
+    {
+        float steps_[] = { shadeSteps_.x, shadeSteps_.y, shadeSteps_.z, shadeSteps_.w };
+        std::sort(steps_, steps_ + 4);
+        shadeSteps_ = { steps_[0], steps_[1], steps_[2], steps_[3] };
+    }
+}
+
 ToonPBRShader::ToonPBRShader(ID3D11Device* device)
 {
     CPUResourceLoader::LoadVertexShader(
@@ -64,8 +76,8 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
     cb.emissiveColor = mesh.material->emissiveColor;
     cb.metalness = mesh.material->metalness;
     cb.roughness = mesh.material->roughness;
-    cb.shadeStep = shadeStep;
-    cb.shadeFeather = shadeFeather;
+    cb.shadeSteps = shadeSteps;
+    cb.shadeFeathers = shadeFeathers;
     cb.occlusionStrength = mesh.material->occlusionStrength;
     cb.toonPbrBlend = mesh.material->toonPbrBlend;
 
@@ -84,8 +96,20 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
 
 void ToonPBRShader::Gui()
 {
-    ImGui::SliderFloat("ToonPBRPS_Shade Step", &shadeStep, 0.0f, 1.0f);
-    ImGui::SliderFloat("ToonPBRPS_Shade Feather", &shadeFeather, 0.001f, 1.0f);
+    if (ImGui::SliderFloat4("ToonPBRPS_Shade Thresholds", &shadeSteps.x, 0.001f, 1.0f))
+    {
+        SortShadeSteps(shadeSteps);
+    }
+    if (ImGui::SliderFloat4("ToonPBRPS_Shade Feather", &shadeFeathers.x, 0.001f, 1.0f))
+    {
+    }
+}
+
+void ToonPBRShader::SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, const DirectX::XMFLOAT4& shadeFeather_)
+{
+    shadeSteps = shadeSteps_;
+    SortShadeSteps(shadeSteps);
+    shadeFeathers = shadeFeather_;
 }
 
 void ToonPBRShader::End(const RenderContext& rc)

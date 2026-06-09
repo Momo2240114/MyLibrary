@@ -70,6 +70,7 @@ public:
     void EvaluateGraphTransitions();
     bool EvaluateCondition(const AnimCondition& cond);
 
+    void SetTransitionFlg(bool flg) {usedTransitionGraph = flg;}
 private:
     std::string m_graphAssetFilePath;
 
@@ -137,6 +138,8 @@ private:
 
     bool m_pendingGraphAssetLoad = false;
     std::string m_pendingGraphAssetPath;
+
+    bool usedTransitionGraph = true;
 
     // ActionRegistryへの登録名リスト（削除用）
     std::vector<std::string> registeredFullNames;
