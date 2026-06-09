@@ -19,6 +19,16 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
 
     float lifeRate = saturate(p.parameter.y / max(p.parameter.z, 0.0001f));
     float size = lerp(p.scale.z, p.scale.x, lifeRate);
+    float renderType = p.parameter.w;
+
+    // Render Type 1: stretched billboard. Velocity direction is used as long axis.
+    if (renderType > 0.5f && dot(p.velocity.xyz, p.velocity.xyz) > 0.0001f)
+    {
+        up = normalize(p.velocity.xyz);
+        right = normalize(cross(up, toCamera));
+        up = normalize(cross(toCamera, right));
+    }
+
     float s = sin(p.rotation.z);
     float c = cos(p.rotation.z);
 
@@ -42,7 +52,15 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
         local.x = offsets[i].x * c - offsets[i].y * s;
         local.y = offsets[i].x * s + offsets[i].y * c;
 
-        float3 worldPos = p.position.xyz + right * local.x * size + up * local.y * size;
+        float width = size;
+        float height = size;
+        if (renderType > 0.5f)
+        {
+            width = size * 0.5f;
+            height = min(stretchMax, max(size, length(p.velocity.xyz) * max(stretchScale, 0.0f) + size));
+        }
+
+        float3 worldPos = p.position.xyz + right * local.x * width + up * local.y * height;
 
         GS_OUT output;
         output.pos = mul(float4(worldPos, 1.0f), viewProjection);
@@ -53,6 +71,3 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
     }
     outStream.RestartStrip();
 }
-
-
-

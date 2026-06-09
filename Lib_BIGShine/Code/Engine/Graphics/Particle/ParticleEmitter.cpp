@@ -289,58 +289,118 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     float r2 = Random01(seed * 17u + 3u);
     float r3 = Random01(seed * 17u + 4u);
     float r4 = Random01(seed * 17u + 5u);
+    float r5 = Random01(seed * 17u + 6u);
+    float r6 = Random01(seed * 17u + 7u);
+    float r7 = Random01(seed * 17u + 8u);
+    float r8 = Random01(seed * 17u + 9u);
+    float r9 = Random01(seed * 17u + 10u);
 
     constexpr float pi = 3.1415926535f;
-    float angle = r0 * pi * 2.0f;
-    float radius = Lerp(settings.emissionOffset.x, settings.emissionOffset.y, r1);
 
     const UINT splitX_ = (std::max)(1u, settings.textureSplitCount.x);
     const UINT splitY_ = (std::max)(1u, settings.textureSplitCount.y);
     const UINT spriteX_ = (std::min)(settings.spriteSheetIndex.x, splitX_ - 1u);
     const UINT spriteY_ = (std::min)(settings.spriteSheetIndex.y, splitY_ - 1u);
-    data.parameter.x = static_cast<float>(spriteY_ * splitX_ + spriteX_);
-    data.parameter.y = (std::max)(0.01f, Lerp(settings.lifespan.x, settings.lifespan.y, r2));
-    data.parameter.z = 0.0f;
-    data.parameter.w = static_cast<float>(settings.type);
+    data.parameter.x = static_cast<float>(spriteY_ * splitX_ + spriteX_); // sprite linear index
+    data.parameter.y = (std::max)(0.01f, Lerp(settings.lifespan.x, settings.lifespan.y, r2)); // remaining life
+    data.parameter.z = 0.0f; // total life is filled in Emit_CS
+    data.parameter.w = static_cast<float>(settings.type); // render type: 0=billboard, 1=stretched
 
-    if (settings.spawnShape == 5 && !meshSpawnPositions.empty())
+    // Spawn position.  GUIの Spawn Shape が全部ここに反映される。
+    DirectX::XMFLOAT3 localPosition{ 0.0f, 0.0f, 0.0f };
+    switch (settings.spawnShape)
     {
-        const size_t meshIndex_ = (std::min)(
-            static_cast<size_t>(r0 * static_cast<float>(meshSpawnPositions.size())),
-            meshSpawnPositions.size() - 1);
-        const DirectX::XMFLOAT3& meshPosition_ = meshSpawnPositions[meshIndex_];
-        data.position.x = settings.emissionPosition.x + meshPosition_.x;
-        data.position.y = settings.emissionPosition.y + meshPosition_.y;
-        data.position.z = settings.emissionPosition.z + meshPosition_.z;
+    case 1: // Box
+        localPosition.x = (r0 - 0.5f) * settings.shapeSize.x;
+        localPosition.y = (r1 - 0.5f) * settings.shapeSize.y;
+        localPosition.z = (r3 - 0.5f) * settings.shapeSize.z;
+        break;
+
+    case 2: // Circle / Disk on XZ plane
+    {
+        const float angle_ = r0 * pi * 2.0f;
+        const float radius_ = std::sqrt(r1) * settings.shapeSize.x * 0.5f;
+        localPosition.x = std::cos(angle_) * radius_;
+        localPosition.y = 0.0f;
+        localPosition.z = std::sin(angle_) * radius_;
+        break;
+    }
+
+    case 3: // Sphere
+    {
+        const float z_ = r0 * 2.0f - 1.0f;
+        const float a_ = r1 * pi * 2.0f;
+        const float len_ = std::sqrt((std::max)(0.0f, 1.0f - z_ * z_));
+        const float radius_ = std::cbrt(r3) * settings.shapeSize.x * 0.5f;
+        localPosition.x = std::cos(a_) * len_ * radius_;
+        localPosition.y = z_ * radius_;
+        localPosition.z = std::sin(a_) * len_ * radius_;
+        break;
+    }
+
+    case 4: // Line
+        localPosition.x = Lerp(settings.shapeStart.x, settings.shapeEnd.x, r0);
+        localPosition.y = Lerp(settings.shapeStart.y, settings.shapeEnd.y, r0);
+        localPosition.z = Lerp(settings.shapeStart.z, settings.shapeEnd.z, r0);
+        break;
+
+    case 5: // Mesh Vertices
+        if (!meshSpawnPositions.empty())
+        {
+            const size_t meshIndex_ = (std::min)(
+                static_cast<size_t>(r0 * static_cast<float>(meshSpawnPositions.size())),
+                meshSpawnPositions.size() - 1);
+            localPosition = meshSpawnPositions[meshIndex_];
+        }
+        break;
+
+    default: // Point + legacy radius ring support
+    {
+        const float angle_ = r0 * pi * 2.0f;
+        const float radius_ = Lerp(settings.emissionOffset.x, settings.emissionOffset.y, r1);
+        localPosition.x = std::cos(angle_) * radius_;
+        localPosition.y = 0.0f;
+        localPosition.z = std::sin(angle_) * radius_;
+        break;
+    }
+    }
+
+    data.position.x = settings.emissionPosition.x + localPosition.x;
+    data.position.y = settings.emissionPosition.y + localPosition.y;
+    data.position.z = settings.emissionPosition.z + localPosition.z;
+    data.position.w = 1.0f;
+
+    // 初速。Initial Speed が 0 の時は完全に停止開始にする。
+    // Cone Angle 0 は「上向き方向」だが、速度0なら勝手に上へ飛ばない。
+    float speed = Lerp(settings.emissionSpeed.x, settings.emissionSpeed.y, r5);
+    if (std::abs(speed) <= 0.000001f)
+    {
+        data.velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
     }
     else
     {
-        data.position.x = settings.emissionPosition.x + std::cos(angle) * radius;
-        data.position.y = settings.emissionPosition.y;
-        data.position.z = settings.emissionPosition.z + std::sin(angle) * radius;
+        float theta = Lerp(settings.emissionConeAngle.x, settings.emissionConeAngle.y, r3);
+        float phi = r4 * pi * 2.0f;
+        DirectX::XMFLOAT3 dir{
+            std::sin(theta) * std::cos(phi),
+            std::cos(theta),
+            std::sin(theta) * std::sin(phi)
+        };
+        data.velocity = { dir.x * speed, dir.y * speed, dir.z * speed, 0.0f };
     }
-    data.position.w = 1.0f;
 
-    float theta = Lerp(settings.emissionConeAngle.x, settings.emissionConeAngle.y, r3);
-    float phi = r4 * pi * 2.0f;
-    DirectX::XMFLOAT3 dir{
-        std::sin(theta) * std::cos(phi),
-        std::cos(theta),
-        std::sin(theta) * std::sin(phi)
-    };
-    float speed = Lerp(settings.emissionSpeed.x, settings.emissionSpeed.y, Random01(seed * 17u + 6u));
-    data.velocity = { dir.x * speed, dir.y * speed, dir.z * speed, 0.0f };
+    // 基本加速度。追加加速度XYZはUpdate_CS側で windVelocity.xyz として加算される。
     data.acceleration = { 0.0f, settings.gravity, 0.0f, 0.0f };
 
-    data.rotation.z = Random01(seed * 17u + 7u) * pi * 2.0f;
-    data.rotation.w = Lerp(settings.emissionAngularSpeed.x, settings.emissionAngularSpeed.y, Random01(seed * 17u + 8u));
+    data.rotation.z = r6 * pi * 2.0f;
+    data.rotation.w = Lerp(settings.emissionAngularSpeed.x, settings.emissionAngularSpeed.y, r7);
 
     float startSize_ = settings.emissionSize.x;
     float endSize_ = settings.emissionSize.y;
     if (settings.useRandomSize != 0)
     {
-        startSize_ *= Lerp(settings.sizeRandomStart.x, settings.sizeRandomStart.y, Random01(seed * 17u + 9u));
-        endSize_ *= Lerp(settings.sizeRandomEnd.x, settings.sizeRandomEnd.y, Random01(seed * 17u + 10u));
+        startSize_ *= Lerp(settings.sizeRandomStart.x, settings.sizeRandomStart.y, r8);
+        endSize_ *= Lerp(settings.sizeRandomEnd.x, settings.sizeRandomEnd.y, r9);
     }
 
     data.scale.x = startSize_;
