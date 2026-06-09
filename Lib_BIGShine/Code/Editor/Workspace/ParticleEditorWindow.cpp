@@ -60,10 +60,12 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     if (isInitialized) return;
 
     auto& graphics_ = GraphicsDeviceManager::Instance();
+    modelRenderSystem.Initialize(graphics_.GetDevice());
     particleRenderSystem.Initialize(graphics_.GetDevice());
 
     previewObject = std::make_shared<GameObject>("ParticlePreviewObject");
     previewObject->transform->gameObject = previewObject;
+    previewModel = previewObject->AddComponent<GltfModelCommponennt>();
     previewParticle = previewObject->AddComponent<ParticleComponent>();
     if (previewParticle)
     {
@@ -169,7 +171,22 @@ void ParticleEditorWindow::DrawInspectorPanel()
         return;
     }
 
-    previewParticle->Gui();
+    if (ImGui::BeginTabBar("ParticleInspectorTabs"))
+    {
+        if (ImGui::BeginTabItem("Particle"))
+        {
+            previewParticle->Gui();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Source Model"))
+        {
+            if (previewObject->transform) previewObject->transform->Gui();
+            ImGui::Separator();
+            if (previewModel) previewModel->Gui();
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
 }
 
 void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
@@ -185,10 +202,22 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     previewCamera.SetPerspectiveFov(45.0f, static_cast<float>(width_) / static_cast<float>(height_), 0.01f, 100.0f);
 
-    const float clearColor_[4] = { 0.025f, 0.028f, 0.032f, 1.0f };
+    const float clearColor_[4] = { 0.025f, 0.028f, 0.032f,0.0f };
     previewTarget.Begin(context_, clearColor_);
 
     const float deltaTime_ = ImGui::GetIO().DeltaTime;
+
+    if (previewObject && previewObject->transform)
+    {
+        // UI(ImGui)で変更された Pos/Rot/Scale から、最新の worldMatrix を再計算する
+        // ※Transformクラスにこれに類する関数（ComputeMatrix等）があればそれを呼ぶのだ
+        previewObject->transform->UpdateWorldMatrix();
+    }
+
+    if (previewModel)
+    {
+        previewModel->Update(deltaTime_);
+    }
     if (autoPlay)
     {
         previewParticle->Update(deltaTime_);
@@ -204,11 +233,20 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     renderContext_.screenWidth = static_cast<float>(width_);
     renderContext_.screenHeight = static_cast<float>(height_);
 
-    particleRenderSystem.ApplySceneConstants(renderContext_);
-    graphics_.RenderSkyBox(renderContext_);
+    if (previewModel && !previewModel->GetMeshes().empty())
+    {
+        modelRenderSystem.PushSubmit(previewModel->GetShaderID(), previewModel);
+        modelRenderSystem.RenderAll(renderContext_);
+        previewTarget.ResetRenderTarget(context_);
+    }
+    else
+    {
+        particleRenderSystem.ApplySceneConstants(renderContext_);
+        graphics_.RenderSkyBox(renderContext_);
+    }
 
     particleRenderSystem.PushSubmit(previewParticle.get());
-    particleRenderSystem.RenderAll(renderContext_);
+    particleRenderSystem.RenderAll(renderContext_,true);
 
     previewTarget.End(context_);
 }

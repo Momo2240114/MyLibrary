@@ -5,7 +5,9 @@
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
+#include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
 
 #include <memory>
 #include <string>
@@ -29,9 +31,11 @@ private:
 
 private:
     EditorRenderTarget previewTarget;
+    ModelRenderSystem modelRenderSystem;
     ParticleRenderSystem particleRenderSystem;
     CameraComponent previewCamera;
     std::shared_ptr<GameObject> previewObject;
+    std::shared_ptr<GltfModelCommponennt> previewModel;
     std::shared_ptr<ParticleComponent> previewParticle;
     std::vector<std::string> particleAssetPaths;
     int selectedAssetIndex = -1;

@@ -3,41 +3,111 @@
     "GraphAssetPath": "Player",
     "GraphNodes": [
         {
+            "childScopeId": "",
             "id": 5,
             "inputPin": 0,
             "nodeType": 1,
             "outputPin": 6,
-            "posX": -360.0,
-            "posY": -80.0,
+            "posX": -362.0,
+            "posY": -72.0,
+            "scopeId": "Root",
             "stateName": "__Start__"
         },
         {
+            "childScopeId": "",
             "id": 7,
             "inputPin": 0,
             "nodeType": 2,
             "outputPin": 8,
             "posX": -362.0,
             "posY": 136.0,
+            "scopeId": "Root",
             "stateName": "__Any__"
         },
         {
-            "id": 9,
-            "inputPin": 10,
+            "childScopeId": "",
+            "id": 26,
+            "inputPin": 27,
             "nodeType": 0,
-            "outputPin": 11,
-            "posX": -92.0,
+            "outputPin": 28,
+            "posX": -80.0,
             "posY": -69.0,
-            "stateName": "SS_Idle"
+            "scopeId": "Root",
+            "stateName": "SS_SP_Idle"
+        },
+        {
+            "childScopeId": "",
+            "id": 29,
+            "inputPin": 30,
+            "nodeType": 0,
+            "outputPin": 31,
+            "posX": 324.0,
+            "posY": -69.0,
+            "scopeId": "Root",
+            "stateName": "SS_Attack1"
+        },
+        {
+            "childScopeId": "",
+            "id": 32,
+            "inputPin": 33,
+            "nodeType": 0,
+            "outputPin": 34,
+            "posX": 116.0,
+            "posY": 123.0,
+            "scopeId": "Root",
+            "stateName": "SS_Attack2"
         }
     ],
     "GraphTransitions": [
         {
             "conditions": [],
             "duration": 0.20000000298023224,
-            "from": "__Start__",
-            "id": 12,
+            "from": "SS_SP_Idle",
+            "id": 35,
             "logic": 0,
-            "to": "SS_Idle"
+            "scopeId": "Root",
+            "to": "SS_Attack1"
+        },
+        {
+            "conditions": [],
+            "duration": 0.20000000298023224,
+            "from": "__Start__",
+            "id": 36,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_SP_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "SS_Attack1",
+            "id": 37,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Attack2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "SS_Attack2",
+            "id": 38,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_SP_Idle"
         }
     ]
 }

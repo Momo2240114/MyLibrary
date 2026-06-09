@@ -2,6 +2,18 @@
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
+#include <algorithm>
+
+namespace
+{
+    void SortShadeSteps(DirectX::XMFLOAT4& shadeSteps_)
+    {
+        float steps_[] = { shadeSteps_.x, shadeSteps_.y, shadeSteps_.z, shadeSteps_.w };
+        std::sort(steps_, steps_ + 4);
+        shadeSteps_ = { steps_[0], steps_[1], steps_[2], steps_[3] };
+    }
+}
+
 ToonShader::ToonShader(ID3D11Device* device)
 {
     CPUResourceLoader::LoadVertexShader(device, "Shader/ToonVS.cso",
@@ -30,6 +42,14 @@ void ToonShader::Begin(const RenderContext& rc)
     dc->PSSetConstantBuffers(0, 1, meshConstantBuffer.GetAddressOf());
     dc->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
+    auto& gdm = GraphicsDeviceManager::Instance();
+    ID3D11ShaderResourceView* iblSRVs[] =
+    {
+        gdm.GetIBLDiffuseSRV(),
+        gdm.GetIBLSpecularSRV(),
+        gdm.GetIBLLutGGXSRV(),
+    };
+    dc->PSSetShaderResources(10, _countof(iblSRVs), iblSRVs);
 }
 
 void ToonShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh)
@@ -41,8 +61,8 @@ void ToonShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mes
     cb.emissiveColor = mesh.material->emissiveColor;
     cb.metalness = mesh.material->metalness; 
     cb.roughness = mesh.material->roughness; 
-    cb.shadeStep = this->shadeStep;      // クラス保持の値を使用
-    cb.shadeFeather = this->shadeFeather; // クラス保持の値を使用
+    cb.shadeSteps = shadeSteps;
+    cb.shadeFeather = this->shadeFeathers; // クラス保持の値を使用
     cb.occlusionStrength = mesh.material->occlusionStrength;
 
     dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cb, 0, 0);
@@ -60,16 +80,31 @@ void ToonShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mes
 
 void ToonShader::Gui()
 {
-    // マテリアル単位の設定を表示
-    ImGui::SliderFloat("Toon_Shade Step", &shadeStep, 0.0f, 1.0f);
-    ImGui::SliderFloat("Toon_Shade Feather", &shadeFeather, 0.001f, 0.6f);
+    if (ImGui::SliderFloat4("Toon_Shade Thresholds", &shadeSteps.x, 0.001f, 1.0f))
+    {
+        SortShadeSteps(shadeSteps);
+    }
+    ImGui::SliderFloat4("Toon_Shade Feather", &shadeFeathers.x, 0.001f, 1.0f);
+}
+
+void ToonShader::SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, DirectX::XMFLOAT4 shadeFeather_)
+{
+    shadeSteps = shadeSteps_;
+    SortShadeSteps(shadeSteps);
+    shadeFeathers = shadeFeather_;
 }
 
 void ToonShader::End(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
-    // 自分が使ったテクスチャ（t0）だけをクリアする
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    dc->PSSetShaderResources(0, 1, &nullSRV);
+    dc->VSSetShader(nullptr, nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
+    dc->IASetInputLayout(nullptr);
+
+    ID3D11ShaderResourceView* nullSRVs[5] = { nullptr };
+    dc->PSSetShaderResources(0, 5, nullSRVs);
+
+    ID3D11ShaderResourceView* nullIBL[3] = { nullptr };
+    dc->PSSetShaderResources(10, 3, nullIBL);
 }

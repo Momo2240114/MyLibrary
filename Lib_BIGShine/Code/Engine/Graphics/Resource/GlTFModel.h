@@ -91,7 +91,7 @@ public:
 		float				alphaCutoff = 0.5f;
 		float				toonPbrBlend = 0.5f;
 		AlphaMode			alphaMode = AlphaMode::Opaque;
-		ModelShaderID shaderId = ModelShaderID::PBR;
+		ModelShaderID shaderId = ModelShaderID::ToonPBR;
 
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	baseMap;
@@ -99,6 +99,10 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	emissiveMap;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	occlusionMap;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	metalnessRoughnessMap;
+
+		// ★追加するトゥーン・アウトライン用パラメータ
+		bool disableOutline = false;    // 目などでアウトラインを消すためのフラグ
+		float outlineThicknessOffset = 1.0f; // マテリアルごとの太さ倍率
 
 		template<class Archive>
 		void serialize(Archive& archive);
@@ -285,7 +289,7 @@ public:
 
 	void ShowMeshDetailsUI();
 	void ShowNodeTransformEditor();
-
+	float GetLocalScale() {return localScale;}
 	DirectX::SimpleMath::Quaternion GetRootRotationOffset() { return _RootRotationOffset; }
 private:
 	// シリアライズ

@@ -25,6 +25,7 @@ public:
     void SetTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { textureSRV = srv; }
     void SetMaskTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { maskTextureSRV = srv; settings.useMaskTexture = srv ? 1u : 0u; }
     void SetGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { gradientTextureSRV = srv; settings.useGradientTexture = srv ? 1u : 0u; }
+    void SetMeshSpawnPositions(const std::vector<DirectX::XMFLOAT3>& positions_) { meshSpawnPositions = positions_; }
     ID3D11ShaderResourceView* GetSRV() const { return particleDataSRV.Get(); }
     ID3D11ShaderResourceView* GetHeaderSRV() const { return particleHeaderSRV.Get(); }
     ID3D11ShaderResourceView* GetTextureSRV() const { return textureSRV.Get(); }
@@ -91,6 +92,7 @@ private:
     DirectX::XMUINT2 textureSplitCount = { 1, 1 };
 
     std::vector<EmitParticleData> emitParticles;
+    std::vector<DirectX::XMFLOAT3> meshSpawnPositions;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> emitterConstantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> commonConstantBuffer;

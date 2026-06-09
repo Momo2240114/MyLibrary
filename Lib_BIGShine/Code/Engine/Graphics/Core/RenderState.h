@@ -37,6 +37,7 @@ enum class BlendState
 	Additive,
 	Subtraction,
 	Multiply,
+	TransparencyKeepAlpha,
 	None,
 	EnumCount
 };

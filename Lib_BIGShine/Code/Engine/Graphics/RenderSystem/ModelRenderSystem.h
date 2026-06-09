@@ -33,6 +33,7 @@ public:
 	const auto& GetShaders() const { return shaders; }
 	void ShaderSettingGui();
 	void ShadowSettingGui();
+	void OutLineSettingGui();
 	void SerializeGraphicsSettings(nlohmann::json& j_) const;
 	void DeserializeGraphicsSettings(const nlohmann::json& j_);
 private:

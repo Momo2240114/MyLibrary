@@ -19,7 +19,7 @@ public:
         const DirectX::XMMATRIX& vpMatrix,
         const std::vector<std::weak_ptr<ParticleComponent>>& components);
     void ApplySceneConstants(const RenderContext& rc);
-    void RenderAll(const RenderContext& rc);
+    void RenderAll(const RenderContext& rc,bool isEditorWindow_ = false);
 
 private:
     struct DrawInfo

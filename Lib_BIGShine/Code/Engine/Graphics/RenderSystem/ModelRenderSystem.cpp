@@ -81,17 +81,21 @@ void ModelRenderSystem::SerializeGraphicsSettings(nlohmann::json& j_) const
 {
     if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
     {
+        const DirectX::XMFLOAT4& shadeSteps_ = toonShader_->GetShadeSteps();
+		const DirectX::XMFLOAT4& shadeFeathers_ = toonShader_->GetShadeFeather();
         j_["Toon"] = {
-            {"shadeStep", toonShader_->GetShadeStep()},
-            {"shadeFeather", toonShader_->GetShadeFeather()}
+            {"shadeSteps", {shadeSteps_.x, shadeSteps_.y, shadeSteps_.z, shadeSteps_.w}},
+			{"shadeFeathers",{ shadeFeathers_.x,shadeFeathers_.y,shadeFeathers_.z,shadeFeathers_.w}}
         };
     }
 
     if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
     {
+        const DirectX::XMFLOAT4& shadeSteps_ = toonPbrShader_->GetShadeSteps();
+        const DirectX::XMFLOAT4& shadeFeathers_ = toonPbrShader_->GetShadeFeather();
         j_["ToonPBR"] = {
-            {"shadeStep", toonPbrShader_->GetShadeStep()},
-            {"shadeFeather", toonPbrShader_->GetShadeFeather()}
+            {"shadeSteps", {shadeSteps_.x, shadeSteps_.y, shadeSteps_.z, shadeSteps_.w}},
+			{"shadeFeathers",{ shadeFeathers_.x,shadeFeathers_.y,shadeFeathers_.z,shadeFeathers_.w}}
         };
     }
 
@@ -119,9 +123,36 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
         const auto& toonJson_ = j_["Toon"];
         if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
         {
-            toonShader_->SetShadeSettings(
-                toonJson_.value("shadeStep", toonShader_->GetShadeStep()),
-                toonJson_.value("shadeFeather", toonShader_->GetShadeFeather()));
+            DirectX::XMFLOAT4 shadeSteps_ = toonShader_->GetShadeSteps();
+            if (toonJson_.contains("shadeSteps") && toonJson_["shadeSteps"].is_array())
+            {
+                const auto& stepsJson_ = toonJson_["shadeSteps"];
+                if (stepsJson_.size() > 0) shadeSteps_.x = stepsJson_[0].get<float>();
+                if (stepsJson_.size() > 1) shadeSteps_.y = stepsJson_[1].get<float>();
+                if (stepsJson_.size() > 2) shadeSteps_.z = stepsJson_[2].get<float>();
+                if (stepsJson_.size() > 3) shadeSteps_.w = stepsJson_[3].get<float>();
+            }
+            else if (toonJson_.contains("shadeStep"))
+            {
+                const float shadeStep_ = toonJson_["shadeStep"].get<float>();
+                shadeSteps_ = { shadeStep_, shadeStep_, shadeStep_, shadeStep_ };
+            }
+			DirectX::XMFLOAT4 shadeFeathers_ = toonShader_->GetShadeFeather();
+			if (toonJson_.contains("shadeFeathers") && toonJson_["shadeFeathers"].is_array())
+			{
+				const auto& feathersJson_ = toonJson_["shadeFeathers"];
+				if (feathersJson_.size() > 0) shadeFeathers_.x = feathersJson_[0].get<float>();
+				if (feathersJson_.size() > 1) shadeFeathers_.y = feathersJson_[1].get<float>();
+				if (feathersJson_.size() > 2) shadeFeathers_.z = feathersJson_[2].get<float>();
+				if (feathersJson_.size() > 3) shadeFeathers_.w = feathersJson_[3].get<float>();
+			}
+			else if (toonJson_.contains("shadeFeather"))
+			{
+				// 過去の古いセーブデータ（単一の数値）だった場合は、すべての段階に一律で適用し破綻を防ぐ
+				//const float oldFeather_ = toonJson_["shadeFeather"].get<float>();
+				//shadeFeathers_ = { oldFeather_, oldFeather_, oldFeather_, oldFeather_ };
+			}
+            toonShader_->SetShadeSettings(shadeSteps_,shadeFeathers_);
         }
     }
 
@@ -130,9 +161,36 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
         const auto& toonPbrJson_ = j_["ToonPBR"];
         if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
         {
-            toonPbrShader_->SetShadeSettings(
-                toonPbrJson_.value("shadeStep", toonPbrShader_->GetShadeStep()),
-                toonPbrJson_.value("shadeFeather", toonPbrShader_->GetShadeFeather()));
+            DirectX::XMFLOAT4 shadeSteps_ = toonPbrShader_->GetShadeSteps();
+            if (toonPbrJson_.contains("shadeSteps") && toonPbrJson_["shadeSteps"].is_array())
+            {
+                const auto& stepsJson_ = toonPbrJson_["shadeSteps"];
+                if (stepsJson_.size() > 0) shadeSteps_.x = stepsJson_[0].get<float>();
+                if (stepsJson_.size() > 1) shadeSteps_.y = stepsJson_[1].get<float>();
+                if (stepsJson_.size() > 2) shadeSteps_.z = stepsJson_[2].get<float>();
+                if (stepsJson_.size() > 3) shadeSteps_.w = stepsJson_[3].get<float>();
+            }
+            else if (toonPbrJson_.contains("shadeStep"))
+            {
+                const float shadeStep_ = toonPbrJson_["shadeStep"].get<float>();
+                shadeSteps_ = { shadeStep_, shadeStep_, shadeStep_, shadeStep_ };
+            }
+			DirectX::XMFLOAT4 shadeFeathers_ = toonPbrShader_->GetShadeFeather();
+			if (toonPbrJson_.contains("shadeFeathers") && toonPbrJson_["shadeFeathers"].is_array())
+			{
+				const auto& feathersJson_ = toonPbrJson_["shadeFeathers"];
+				if (feathersJson_.size() > 0) shadeFeathers_.x = feathersJson_[0].get<float>();
+				if (feathersJson_.size() > 1) shadeFeathers_.y = feathersJson_[1].get<float>();
+				if (feathersJson_.size() > 2) shadeFeathers_.z = feathersJson_[2].get<float>();
+				if (feathersJson_.size() > 3) shadeFeathers_.w = feathersJson_[3].get<float>();
+			}
+			else if (toonPbrJson_.contains("shadeFeather"))
+			{
+				//// 過去の古いセーブデータ（単一の数値）だった場合は、すべての段階に一律で適用し破綻を防ぐ
+				//const float oldFeather_ = toonPbrJson_["shadeFeather"].get<float>();
+				//shadeFeathers_ = { oldFeather_, oldFeather_, oldFeather_, oldFeather_ };
+			}
+			toonPbrShader_->SetShadeSettings(shadeSteps_, shadeFeathers_);
         }
     }
 
@@ -250,6 +308,11 @@ void ModelRenderSystem::ShadowSettingGui()
 			appliedSplits.z,
 			appliedSplits.w);
 	}
+}
+
+void ModelRenderSystem::OutLineSettingGui()
+{
+	ImGui::ColorEdit4("OutLineColor", &outlineColor.x);
 }
 
 //描画登録
@@ -440,14 +503,14 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 	auto drawOutlineMesh = [&](const GltfModelCommponennt::Mesh& mesh)
 		{
-			if (outlineThickness <= 0.0f)
+			if (!mesh.material->disableOutline || mesh.material->outlineThicknessOffset < 0)
 			{
 				return;
 			}
 
 			CbOutline cbOutline{};
 			cbOutline.outlineColor = outlineColor;
-			cbOutline.outlineThickness = outlineThickness;
+			cbOutline.outlineThickness = mesh.material->outlineThicknessOffset;
 			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
 
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
@@ -687,7 +750,8 @@ void ModelRenderSystem::UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std
 void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 {
 	// 必要なリソースが揃っているかチェック
-	if (rc.decal->GetDecals().empty() || !rc.shapeSystem || !rc.depthSRV) return;
+	if (!rc.decal || !rc.shapeSystem || !rc.depthSRV || !rc.deviceContext || !rc.renderState) return;
+	if (rc.decal->GetDecals().empty()) return;
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	auto& gdm = GraphicsDeviceManager::Instance();

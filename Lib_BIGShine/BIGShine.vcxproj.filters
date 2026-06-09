@@ -5,27 +5,6 @@
       <UniqueIdentifier>{9f64f4ff-d9e0-43d7-88e1-13e6d3656a89}</UniqueIdentifier>
       <Extensions>hlsl;hlsli</Extensions>
     </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\InputSystem">
-      <UniqueIdentifier>{50903ed7-215c-40e7-94af-3288874f2c7f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\PhysX">
-      <UniqueIdentifier>{d3e4449b-0b3b-468e-bb95-c0e9bd5c0ba9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\Conponent">
-      <UniqueIdentifier>{cdf37a72-06cc-4121-8adc-5715329f6882}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\Object">
-      <UniqueIdentifier>{21513c3e-c628-4302-93d3-2decbe747bf1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\Scene">
-      <UniqueIdentifier>{670f35b0-152f-4142-bc2d-287135c2c852}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\NavMesh">
-      <UniqueIdentifier>{3598e4e4-5c84-48ef-a0fb-e2dccfcceb7e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="・ｽ\・ｽ[・ｽX・ｽt・ｽ@・ｽC・ｽ・ｽ\Conponent\Particle">
-      <UniqueIdentifier>{d74bd678-f7b0-4f77-b477-6a4b26609610}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Particle">
       <UniqueIdentifier>{fa90eb59-b4bc-49fd-901c-3905d1fb64e7}</UniqueIdentifier>
     </Filter>
@@ -209,6 +188,9 @@
     <Filter Include="Shaders\ToonPBR">
       <UniqueIdentifier>{5a281832-f7e8-4cd0-b12a-657f4f548e57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\Platform">
+      <UniqueIdentifier>{f7a5f017-e4fe-405b-9a11-f57e57888449}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -349,7 +331,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFImporter.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\Resource\GlTFModel.cpp">
+    <ClCompile Include="Code\Engine\Graphics\Resource\GLTFModel.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp">
@@ -553,6 +535,11 @@
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp">
       <Filter>Code\Engine\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
+    <ClCompile Include="Code\Engine\Platform\WindowsDialogHelper.cpp">
+      <Filter>Code\Engine\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Wip.hpp">
@@ -666,7 +653,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\Resource\GlTFModel.h">
+    <ClInclude Include="Code\Engine\Graphics\Resource\GLTFModel.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h">
@@ -965,6 +952,13 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Math\RandomHelper.h">
       <Filter>Code\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
+    <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h">
+      <Filter>Code\Engine\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\FreeCamera.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -24,6 +24,7 @@ private:
         std::string gradientTextureFileName;
 
         float delay = 0.0f;
+        uint32_t meshVertexSampleCount = 2048;
         bool isStarted = false;
 
         void Reset() { isStarted = false; }
@@ -57,6 +58,7 @@ public:
 private:
     bool LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath);
     bool LoadEmitterTextureSlot(EmitterTrack& track, const std::string& fullPath, int slot);
+    void UpdateMeshSpawnPositions(EmitterTrack& track_);
     void RebuildEmitterResources();
     std::string BuildAssetPathFromName() const;
 

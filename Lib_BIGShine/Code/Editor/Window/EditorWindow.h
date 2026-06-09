@@ -131,6 +131,7 @@ protected:
         ImGui::End();
         ImGui::PopStyleColor(8);
     }
+
     std::string windowName;
     GameObjectManager* gameObjectManager; // データを扱うための窓口
     bool isVisible; // 顕現のフラグ

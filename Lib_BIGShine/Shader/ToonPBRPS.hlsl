@@ -8,11 +8,11 @@ cbuffer CbMesh : register(b0)
     float3 emissiveColor;
     float metalnessParam;
     float roughnessParam;
-    float shadeStep;
-    float shadeFeather;
     float occlusionStrength;
     float toonPbrBlend;
-    float padding[3];
+    float4 shadeFeathers;
+    float4 shadeSteps;
+    float pading;
 }
 
 Texture2D BaseMap : register(t0);
@@ -39,7 +39,15 @@ float3 ACESFilm(float3 x)
 
 float ToonRamp(float value)
 {
-    return smoothstep(shadeStep - shadeFeather, shadeStep + shadeFeather, value);
+    float toonAmount = 0.0f;
+    
+    // それぞれのステップ（閾値）に対して、対応する個別のフェザー（ボカシ幅）を適用します
+    toonAmount += smoothstep(shadeSteps.x - shadeFeathers.x, shadeSteps.x + shadeFeathers.x, value);
+    toonAmount += smoothstep(shadeSteps.y - shadeFeathers.y, shadeSteps.y + shadeFeathers.y, value);
+    toonAmount += smoothstep(shadeSteps.z - shadeFeathers.z, shadeSteps.z + shadeFeathers.z, value);
+    toonAmount += smoothstep(shadeSteps.w - shadeFeathers.w, shadeSteps.w + shadeFeathers.w, value);
+    
+    return toonAmount * 0.25f;
 }
 
 float3 CalcFresnelRoughness(float3 f0, float NdotV, float roughness)

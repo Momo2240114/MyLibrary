@@ -11,6 +11,7 @@ void ShaderWindow::Draw() {
     if (BeginEditorWindow()) {
         DrawStylePopup();
         modelRenderSystem.ShaderSettingGui();
+        modelRenderSystem.OutLineSettingGui();
     }
     EndEditorWindow();
 }

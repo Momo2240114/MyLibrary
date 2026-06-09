@@ -22,7 +22,7 @@ public:
     void Draw() override;
     void OnVisibilityChanged(bool visible) override;
     void Update(float deltaTime_) override;
-
+    bool ShouldPauseScene() const override { return true; }
 private:
     bool ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const;
     void EnsurePreviewScene();

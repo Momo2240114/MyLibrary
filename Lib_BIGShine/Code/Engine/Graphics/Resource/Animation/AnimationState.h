@@ -60,6 +60,9 @@ struct AnimState
     // --- Custom (ポーズライブラリ) 用データ 【追加】 ---
     int customAnimIndex = -1; // PoseLibraryResource内の customAnims のインデックス
 
+    //animationごとにRootMotionの移動値が違う可能性があるのでそれ用に設定できるように
+    float rootMotionScale = 1.0f;
+
     std::string name;
     float playbackSpeed = 1.0f;
     bool isLoop = true;

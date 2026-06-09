@@ -62,7 +62,10 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     {
         float colorRate = 1.0f - lifeRate;
         float4 lifeColor = lerp(colorStart, colorEnd, colorRate);
+    
+    // RGBはグラデーションの色をそのまま維持
         data.color.rgb = lifeColor.rgb;
+    //アルファもグラデーションのアルファ、または純粋なlifeRateによる減衰のみにする
         data.color.a = lifeColor.a * lifeRate;
     }
     else

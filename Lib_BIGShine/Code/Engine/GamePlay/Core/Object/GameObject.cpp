@@ -200,6 +200,10 @@ void GameObject::Clear()
     }
 }
 
+void GameObject::TransformGui()
+{
+}
+
 void GameObject::Gui()
 {
     // --- ñºëOï“èW UI ---

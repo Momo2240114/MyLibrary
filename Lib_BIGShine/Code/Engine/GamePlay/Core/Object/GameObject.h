@@ -188,6 +188,7 @@ public:
                 comp->Submit(context_);
     }
 
+    void TransformGui();
     void Gui();
 
     // 選択中オブジェクト用ウィンドウ

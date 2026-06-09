@@ -53,11 +53,11 @@ static ImU32 GetGraphNodeFillColor(const AnimGraphNode& node_, bool isActive_)
 
     switch (node_.type)
     {
-    case AnimGraphNodeType::Start: return IM_COL32(120, 170, 245, 255);
-    case AnimGraphNodeType::Any: return IM_COL32(185, 135, 235, 255);
-    case AnimGraphNodeType::Entry: return IM_COL32(120, 205, 145, 255);
-    case AnimGraphNodeType::Exit: return IM_COL32(240, 165, 105, 255);
-    case AnimGraphNodeType::SubGraph: return IM_COL32(105, 195, 205, 255);
+    //case AnimGraphNodeType::Start: return IM_COL32(120, 170, 245, 255);
+    //case AnimGraphNodeType::Any: return IM_COL32(185, 135, 235, 255);
+    //case AnimGraphNodeType::Entry: return IM_COL32(120, 205, 145, 255);
+    //case AnimGraphNodeType::Exit: return IM_COL32(240, 165, 105, 255);
+    //case AnimGraphNodeType::SubGraph: return IM_COL32(105, 195, 205, 255);
     default: return IM_COL32(215, 215, 215, 255);
     }
 }
@@ -90,19 +90,25 @@ static ImU32 GetGraphNodeTitleColor(const AnimGraphNode& node_)
     default: return IM_COL32(0, 0, 0, 255);
     }
 }
+
 // ベジェ曲線の中点に三角形の矢印を描画するヘルパー
 static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
 {
     if (p0.x == 0.0f && p0.y == 0.0f) return;
     if (p3.x == 0.0f && p3.y == 0.0f) return;
 
+    // 始点と終点の直線距離を測る
     float distance = std::sqrt((p3.x - p0.x) * (p3.x - p0.x) + (p3.y - p0.y) * (p3.y - p0.y));
-    if (distance < 45.0f) return;
 
+    // あまりにもノードが近すぎる場合は、めり込みを防ぐため矢印を描画しない
+    if (distance < 50.0f) return;
+
+    // imgui_node_editorのデフォルトに近いベジェの制御点を計算
     float strength = std::fmax(std::abs(p3.x - p0.x) * 0.5f, 50.0f);
     ImVec2 p1 = { p0.x + strength, p0.y };
     ImVec2 p2 = { p3.x - strength, p3.y };
 
+    // ベジェ曲線上の点を評価するラムダ式
     auto evalBezier = [&](float t) -> ImVec2
         {
             float u = 1.0f - t;
@@ -117,6 +123,64 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
             );
         };
 
+    // --- 【新規】弧長サンプリングによる「真の中央」の探求 ---
+    // 曲線の上を等間隔に歩み、実際の長さを計測する
+    const int SAMPLE_COUNT = 8;
+    float lengths[SAMPLE_COUNT + 1];
+    lengths[0] = 0.0f;
+
+    ImVec2 prevPoint = p0;
+    float totalLength = 0.0f;
+
+    for (int i = 1; i <= SAMPLE_COUNT; ++i)
+    {
+        float t = (float)i / (float)SAMPLE_COUNT;
+        ImVec2 currPoint = evalBezier(t);
+        float dx = currPoint.x - prevPoint.x;
+        float dy = currPoint.y - prevPoint.y;
+        totalLength += std::sqrt(dx * dx + dy * dy);
+        lengths[i] = totalLength;
+        prevPoint = currPoint;
+    }
+
+    // 目標とするのは、全体の長さのちょうど半分
+    float targetLength = totalLength * 0.5f;
+    float targetT = 0.5f; // フォールバック用
+
+    // 目標の長さに到達する parameter 't' を線形補間で見つけ出す
+    for (int i = 0; i < SAMPLE_COUNT; ++i)
+    {
+        if (targetLength >= lengths[i] && targetLength <= lengths[i + 1])
+        {
+            float tMin = (float)i / (float)SAMPLE_COUNT;
+            float tMax = (float)i + 1 / (float)SAMPLE_COUNT; // 実際には (float)(i+1)/SAMPLE_COUNT
+            tMax = (float)(i + 1) / (float)SAMPLE_COUNT;
+
+            float segmentLength = lengths[i + 1] - lengths[i];
+            if (segmentLength > 0.0001f)
+            {
+                float localRatio = (targetLength - lengths[i]) / segmentLength;
+                targetT = tMin + localRatio * (tMax - tMin);
+            }
+            break;
+        }
+    }
+
+    // 【安全弁】ノードのピン（半径14.0fなど）に矢印がめり込まないよう、tの範囲を制限する
+    // 距離が短いときは、より厳しく中央付近に留まらせる
+    float minT = 40.0f / totalLength; // 始点から最低25ドット離す
+    float maxT = 1.0f - (40.0f / totalLength); // 終点から最低25ドット離す
+    if (minT < maxT)
+    {
+        targetT = std::fmax(minT, std::fmin(targetT, maxT));
+    }
+    else
+    {
+        targetT = 0.5f; // 逆転するほど近いなら中央固定
+    }
+    // ----------------------------------------------------
+
+    // 接線（向き）を評価するラムダ式
     auto evalTangent = [&](float t) -> ImVec2
         {
             float u = 1.0f - t;
@@ -153,6 +217,7 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
 
             const float size = 14.0f;
 
+            // 矢印の先端と後方の羽を構築
             ImVec2 tip = ImVec2(center.x + tan.x * size, center.y + tan.y * size);
             ImVec2 backA = ImVec2(
                 center.x - tan.x * size + perp.x * size * 0.75f,
@@ -167,11 +232,9 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
             drawList->AddTriangle(tip, backA, backB, IM_COL32(70, 45, 0, 255), 2.0f);
         };
 
-
-    drawArrowAt(0.75f);
-    drawArrowAt(0.35f);
+    // 導き出された比率で描画
+    drawArrowAt(targetT);
 }
-
 const std::string ASSET_DIR = "Data/Animation/StateData/";
 
 // ヘルパー関数: パスを構築する
@@ -424,9 +487,11 @@ void AnimationControllerComponent::Update(float deltaTime)
         return;
     }
 
-
-    // 状態遷移の評価
-    EvaluateGraphTransitions();
+    if (usedTransitionGraph)
+    {
+        // 状態遷移の評価
+        EvaluateGraphTransitions();
+    }
 
     //ModelAnimator::Updateを呼ぶ際、ポーズライブラリのリソースポインタを第三引数に授ける
     animator.Update(deltaTime, modelComp, curvecomp, m_poseLibrary, GetGameObject());
@@ -457,33 +522,6 @@ void AnimationControllerComponent::Update(float deltaTime)
             transform->localPosition.y += worldDeltaPos.y;
             transform->localPosition.z += worldDeltaPos.z;
 
-            // 回転 RootMotion
-            Quaternion nextRot = currentRot * delta.deltaRotation;
-            nextRot.Normalize();
-
-            XMFLOAT4 q = nextRot;
-
-            float xsqr = q.x * q.x;
-
-            // Y
-            float t0 = 2.0f * (q.w * q.y + q.x * q.z);
-            float t1 = 1.0f - 2.0f * (q.y * q.y + xsqr);
-            float nextY = atan2f(t0, t1);
-
-            // X
-            float t2 = 2.0f * (q.w * q.x - q.y * q.z);
-            t2 = (std::max)(-1.0f, (std::min)(1.0f, t2));
-            float nextX = asinf(t2);
-
-            // Z
-            float t3 = 2.0f * (q.w * q.z + q.x * q.y);
-            float t4 = 1.0f - 2.0f * (q.z * q.z + xsqr);
-            float nextZ = atan2f(t3, t4);
-
-            // ← これが今のコードに足りていない
-            transform->localRotation.x = XMConvertToDegrees(nextX);
-            transform->localRotation.y = XMConvertToDegrees(nextY);
-            transform->localRotation.z = XMConvertToDegrees(nextZ);
 
             transform->MarkDirty();
         }
@@ -512,6 +550,9 @@ void AnimationControllerComponent::Gui()
 
     ImGui::Separator();
 
+    ImGui::Checkbox("usedTransitionGraph", &usedTransitionGraph);
+
+    ImGui::Separator();
 
     // --- 準備：カーブ名の取得 ---
     std::vector<std::string> curveNames;
@@ -580,7 +621,11 @@ void AnimationControllerComponent::Gui()
 
             // 右側に操作ボタンを配置
             ImGui::SameLine(ImGui::GetContentRegionAvail().x - 65);
-            if (ImGui::Button("Play")) { ChangeState(name, 0.2f); }
+            if (ImGui::Button("Play")) {
+                ChangeState(name, 0.2f);
+                //プレイを押したときはグラフを無効化しておく
+                usedTransitionGraph = false;
+            }
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
             if (ImGui::Button("X")) { targetToDelete = name; }
@@ -1918,7 +1963,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
             ed::PushStyleVar(ed::StyleVar_NodeRounding, isSpecial ? 18.0f : 10.0f);
             ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
-            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, isActive ? 3.0f : 2.0f);
+            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, isActive ? 7.5f : 5.0f);
             ed::PushStyleColor(ed::StyleColor_NodeBg, ImVec4(0, 0, 0, 0));
             ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(0, 0, 0, 0));
 
@@ -2149,6 +2194,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                             transition.id = ed::LinkId(GetNextID());
                             transition.scopeId = currentScopeName();
                             graphTransitions.push_back(transition);
+
+                            usedTransitionGraph = true;
                         }
                     }
                 }
@@ -2175,6 +2222,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                     std::remove_if(graphTransitions.begin(), graphTransitions.end(),
                         [&](const auto& t) { return t.id == linkId; }),
                     graphTransitions.end());
+
+                usedTransitionGraph = true;
             }
         }
 
@@ -2211,6 +2260,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 if (editingState && editingState->name == deletedName)
                     editingState = nullptr;
 
+                usedTransitionGraph = true;
             }
         }
     }
@@ -2282,6 +2332,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                         if (transition_.toStateName == oldName_)
                             transition_.toStateName = newName_;
                     }
+
+                    usedTransitionGraph = true;
                 }
             }
 
@@ -2324,9 +2376,10 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 ImGui::TextColored(ImVec4(0, 1, 1, 1), "Conditions");
                 int logic = static_cast<int>(it->logic);
                 const char* logicItems[] = { "AND", "OR" };
-                if (ImGui::Combo("Logic", &logic, logicItems, IM_ARRAYSIZE(logicItems)))
+                if (ImGui::Combo("Logic", &logic, logicItems, IM_ARRAYSIZE(logicItems))) {
                     it->logic = static_cast<TransitionLogic>(logic);
-
+                    usedTransitionGraph = true;
+                }
                 if (ImGui::Button("+ Add Condition"))
                     it->conditions.push_back(AnimCondition());
 
@@ -2337,8 +2390,10 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
                     const char* condTypes[] = { "Variable", "AnimationEnd", "Trigger" };
                     int typeIdx = (int)cond.type;
-                    if (ImGui::Combo("Type", &typeIdx, condTypes, IM_ARRAYSIZE(condTypes)))
+                    if (ImGui::Combo("Type", &typeIdx, condTypes, IM_ARRAYSIZE(condTypes))) {
                         cond.type = (ConditionType)typeIdx;
+                        usedTransitionGraph = true;
+                    }
 
                     if (cond.type == ConditionType::Variable || cond.type == ConditionType::Trigger)
                     {
@@ -2350,12 +2405,16 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                             for (int k = 0; k < (int)keys.size(); k++)
                                 if (cond.parameterName == keys[k]) { curIdx = k; break; }
                             ImGui::SetNextItemWidth(160.0f);
-                            if (ImGui::Combo("Parameter", &curIdx, keys.data(), (int)keys.size()))
+                            if (ImGui::Combo("Parameter", &curIdx, keys.data(), (int)keys.size())) {
                                 cond.parameterName = keys[curIdx];
+                                usedTransitionGraph = true;
+                            }
                         }
                         else
                         {
-                            ImGui::InputText("Parameter", &cond.parameterName);
+                            if (ImGui::InputText("Parameter", &cond.parameterName)) {
+                                usedTransitionGraph = true;
+                            }
                             ImGui::SameLine();
                             ImGui::TextDisabled("(Blackboardにパラメータを追加してください)");
                         }
@@ -2367,15 +2426,22 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                         int opIdx = (int)cond.op;
                         ImGui::SetNextItemWidth(60);
                         if (ImGui::Combo("Op", &opIdx, ops, IM_ARRAYSIZE(ops)))
+                        {
                             cond.op = (ConditionOp)opIdx;
+                            usedTransitionGraph = true;
+                        }
                         ImGui::SameLine();
-                        ImGui::DragFloat("Threshold", &cond.threshold, 0.1f);
+                        if(ImGui::DragFloat("Threshold", &cond.threshold, 0.1f))
+                        {
+                            usedTransitionGraph = true;
+                        }
                     }
 
                     if (ImGui::Button("Remove Condition"))
                     {
                         it->conditions.erase(it->conditions.begin() + i);
                         --i;
+                        usedTransitionGraph = true;
                     }
 
                     ImGui::Separator();
@@ -2420,8 +2486,11 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                     newNode.scopeId = currentScopeName();
                     graphNodes.push_back(newNode);
                     _nodeToPlaceHash = (uintptr_t)newNode.id.Get();
+
+                    usedTransitionGraph = true;
                 }
             }
+
         }
 
         ImGui::Separator();
@@ -2437,6 +2506,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                     break;
                 }
             }
+
+            usedTransitionGraph = true;
         }
         ImGui::Separator();
         if (ImGui::MenuItem("Create SubGraph"))
@@ -2462,6 +2533,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             subGraphNode.scopeId = currentScopeName();
             graphNodes.push_back(subGraphNode);
             _nodeToPlaceHash = (uintptr_t)subGraphNode.id.Get();
+
+            usedTransitionGraph = true;
         }
         ImGui::EndPopup();
     }
