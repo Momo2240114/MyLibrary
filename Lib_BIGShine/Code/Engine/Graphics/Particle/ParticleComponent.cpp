@@ -278,7 +278,7 @@ void ParticleComponent::Gui()
         if (ImGui::BeginTabItem("Emission"))
         {
             int maxCount = static_cast<int>(s.maxParticleCount);
-            if (ImGui::SliderInt("Max Count", &maxCount, 1, 20000)) s.maxParticleCount = static_cast<uint32_t>(maxCount);
+            if (ImGui::DragInt("Max Count", &maxCount, 1, 2000000)) s.maxParticleCount = static_cast<uint32_t>(maxCount);
             ImGui::DragFloat("Delay", &track.delay, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat2("Life Min/Max", &s.lifespan.x, 0.05f, 0.01f, 60.0f);
             ImGui::DragFloat2("Initial Speed Min/Max", &s.emissionSpeed.x, 0.05f, 0.0f, 100.0f);

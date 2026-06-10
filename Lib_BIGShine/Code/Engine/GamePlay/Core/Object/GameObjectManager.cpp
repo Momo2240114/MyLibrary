@@ -69,8 +69,6 @@ void GameObjectManager::Update(float et_)
         }
     }
 
-
-    _TimeManager->Update(et_);
     _TimeManager->PrepareCache();
 
     // 2. オブジェクトの更新
@@ -1093,10 +1091,10 @@ void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> obj, const std:
 
 void GameObjectManager::InitializeAllComponents()
 {
-    // ★ 現在存在しているオブジェクトをスナップショット
-    auto objectsSnapshot = _Objects;
+    //// ★ 現在存在しているオブジェクトをスナップショット
+    //auto objectsSnapshot = _Objects;
 
-    for (auto& obj : objectsSnapshot)
+    for (auto& obj : _Objects)
     {
         if (!obj) continue;
 
@@ -1109,7 +1107,7 @@ void GameObjectManager::InitializeAllComponents()
 
     // 2. 次に「アクションを利用する側」の Start を呼ぶ
     // ここで ActionSequence が RegisterSequence を実行する
-    for (auto& obj : objectsSnapshot)
+    for (auto& obj : _Objects)
     {
         if (!obj) continue;
 

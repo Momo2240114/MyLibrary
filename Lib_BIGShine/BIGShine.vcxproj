@@ -191,7 +191,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\DirectXTex</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\DirectXTex;.\External\imgui-node-editor</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>

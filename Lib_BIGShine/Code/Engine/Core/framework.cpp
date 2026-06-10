@@ -215,10 +215,10 @@ bool framework::uninitialize()
 
 void framework::GuiDraw()
 {
-#if defined(DEBUG) || defined(_DEBUG)
+	//#if defined(DEBUG) || defined(_DEBUG)
 	SceneManager::DrawGUI();
 	//GraphicsDeviceManager::Instance().ShowPostEffectGui(); // Ç±Ç±Ç≈åƒÇ—èoÇ∑
-#endif // DEBUG
+	//#endif // DEBUG
 }
 
 framework::~framework()
