@@ -6,11 +6,15 @@ RWByteAddressBuffer indirectDataBuffer : register(u2);
 void main()
 {
     uint deadCount = indirectDataBuffer.Load(IndirectArgumentsNumDeadParticle);
+    uint currentNumParticle = indirectDataBuffer.Load(IndirectArgumentsNumCurrentParticle);
+
+    uint liveCount = currentNumParticle >= deadCount
+        ? currentNumParticle - deadCount
+        : 0;
+
+    indirectDataBuffer.Store(IndirectArgumentsNumCurrentParticle, liveCount);
     indirectDataBuffer.Store(IndirectArgumentsNumDeadParticle, 0);
 
-    uint currentNumParticle = indirectDataBuffer.Load(IndirectArgumentsNumCurrentParticle);
-    uint liveCount = currentNumParticle >= deadCount ? currentNumParticle - deadCount : 0;
-    indirectDataBuffer.Store(IndirectArgumentsNumCurrentParticle, liveCount);
+    // DrawInstancedIndirect ‚Ì vertexCountPerInstance
     indirectDataBuffer.Store(IndirectArgumentsDrawIndirect, liveCount);
 }
-

@@ -60,12 +60,25 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     data.parameter.y -= elapsedTime;
     if (data.parameter.y <= 0.0f)
     {
+        data.parameter.y = 0.0f;
+        data.color.a = 0.0f;
+
         header.alive = 0;
+        header.depth = -3.402823466e+38f;
+        header.dummy = 0;
+
+        particleDataBuffer[dataIndex] = data;
         particleHeaderBuffer[headerIndex] = header;
+
         unusedIndexBuffer.Append(dataIndex);
 
         uint originalDeadCount;
-        indirectDataBuffer.InterlockedAdd(IndirectArgumentsNumDeadParticle, 1u, originalDeadCount);
+        indirectDataBuffer.InterlockedAdd(
+        IndirectArgumentsNumDeadParticle,
+        1u,
+        originalDeadCount
+    );
+
         return;
     }
 
