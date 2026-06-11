@@ -1,4 +1,5 @@
 #include "PhysXSystem.h"
+#include "PhysXEventCallback.h"
 
 using namespace physx;
 
@@ -11,6 +12,67 @@ static PxDefaultCpuDispatcher* gDispatcher = nullptr;
 static PxPvd* gPvd = nullptr;
 static PxPvdTransport* gPvdTransport = nullptr;
 static PxMaterial* gDefaultMaterial = nullptr;
+static CollisionCallback gCollisionCallback;
+
+static PxFilterFlags PhysXFilterShader(
+    PxFilterObjectAttributes attributes0_,
+    PxFilterData filterData0_,
+    PxFilterObjectAttributes attributes1_,
+    PxFilterData filterData1_,
+    PxPairFlags& pairFlags_,
+    const void*,
+    PxU32)
+{
+    const PxU32 rolePhysical_ = 0;
+    const PxU32 roleCharacter_ = 1;
+    const PxU32 roleHitBox_ = 2;
+    const PxU32 roleHurtBox_ = 3;
+    const PxU32 ownerMask_ = 0x7FFFFFFFu;
+    const PxU32 responseMask_ = 0x80000000u;
+
+    if ((filterData0_.word3 & ownerMask_) == (filterData1_.word3 & ownerMask_))
+    {
+        return PxFilterFlag::eSUPPRESS;
+    }
+
+    const bool hitHurtPair_ =
+        (filterData0_.word2 == roleHitBox_ && filterData1_.word2 == roleHurtBox_)
+        || (filterData1_.word2 == roleHitBox_ && filterData0_.word2 == roleHurtBox_);
+    const bool combatOnlyRole_ =
+        filterData0_.word2 == roleHitBox_ || filterData0_.word2 == roleHurtBox_
+        || filterData1_.word2 == roleHitBox_ || filterData1_.word2 == roleHurtBox_;
+    if (combatOnlyRole_ && !hitHurtPair_)
+    {
+        return PxFilterFlag::eSUPPRESS;
+    }
+
+    if (PxFilterObjectIsTrigger(attributes0_) || PxFilterObjectIsTrigger(attributes1_))
+    {
+        pairFlags_ = PxPairFlag::eTRIGGER_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_PERSISTS;
+        return PxFilterFlag::eDEFAULT;
+    }
+
+    pairFlags_ = PxPairFlag::eCONTACT_DEFAULT
+        | PxPairFlag::eNOTIFY_TOUCH_FOUND
+        | PxPairFlag::eNOTIFY_TOUCH_PERSISTS
+        | PxPairFlag::eNOTIFY_TOUCH_LOST
+        | PxPairFlag::eNOTIFY_CONTACT_POINTS;
+
+    const bool maskOnly_ =
+        (filterData0_.word1 & filterData1_.word0) != 0
+        || (filterData1_.word1 & filterData0_.word0) != 0;
+    const bool bothRespond_ =
+        (filterData0_.word3 & responseMask_) != 0
+        && (filterData1_.word3 & responseMask_) != 0;
+    const bool physicalPair_ =
+        (filterData0_.word2 == rolePhysical_ || filterData0_.word2 == roleCharacter_)
+        && (filterData1_.word2 == rolePhysical_ || filterData1_.word2 == roleCharacter_);
+    if (maskOnly_ || !bothRespond_ || !physicalPair_)
+    {
+        pairFlags_.clear(PxPairFlag::eSOLVE_CONTACT);
+    }
+    return PxFilterFlag::eDEFAULT;
+}
 
 void PhysXSystem::Initialize()
 {
@@ -45,7 +107,8 @@ void PhysXSystem::Initialize()
 
     gDispatcher = PxDefaultCpuDispatcherCreate(2);
     desc.cpuDispatcher = gDispatcher;
-    desc.filterShader = PxDefaultSimulationFilterShader;
+    desc.filterShader = PhysXFilterShader;
+    desc.simulationEventCallback = &gCollisionCallback;
 
     gScene = gPhysics->createScene(desc);
 
@@ -85,6 +148,7 @@ void PhysXSystem::Finalize()
 
 void PhysXSystem::Step(float dt)
 {
+    if (!gScene || dt <= 0.0f) return;
     gScene->simulate(dt);
     gScene->fetchResults(true);
 }
@@ -166,4 +230,37 @@ physx::PxMaterial* PhysXSystem::GetDefaultMaterial()
 
 PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }
 PxScene* PhysXSystem::GetScene() { return gScene; }
+
+PxConvexMesh* PhysXSystem::CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_)
+{
+    if (!gPhysics || vertices_.size() < 4) return nullptr;
+
+    PxConvexMeshDesc desc_;
+    desc_.points.count = static_cast<PxU32>(vertices_.size());
+    desc_.points.stride = sizeof(DirectX::XMFLOAT3);
+    desc_.points.data = vertices_.data();
+    desc_.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eQUANTIZE_INPUT;
+    desc_.vertexLimit = 255;
+
+    PxCookingParams params_(gPhysics->getTolerancesScale());
+    return PxCreateConvexMesh(params_, desc_, gPhysics->getPhysicsInsertionCallback());
+}
+
+PxTriangleMesh* PhysXSystem::CreateTriangleMesh(
+    const std::vector<DirectX::XMFLOAT3>& vertices_,
+    const std::vector<uint32_t>& indices_)
+{
+    if (!gPhysics || vertices_.size() < 3 || indices_.size() < 3) return nullptr;
+
+    PxTriangleMeshDesc desc_;
+    desc_.points.count = static_cast<PxU32>(vertices_.size());
+    desc_.points.stride = sizeof(DirectX::XMFLOAT3);
+    desc_.points.data = vertices_.data();
+    desc_.triangles.count = static_cast<PxU32>(indices_.size() / 3);
+    desc_.triangles.stride = sizeof(uint32_t) * 3;
+    desc_.triangles.data = indices_.data();
+
+    PxCookingParams params_(gPhysics->getTolerancesScale());
+    return PxCreateTriangleMesh(params_, desc_, gPhysics->getPhysicsInsertionCallback());
+}
 

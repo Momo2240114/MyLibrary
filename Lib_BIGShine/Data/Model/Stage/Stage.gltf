@@ -1,158 +1,213 @@
 {
-	"asset":{
-		"generator":"Khronos glTF Blender I/O v5.1.20",
-		"version":"2.0"
-	},
-	"scene":0,
-	"scenes":[
-		{
-			"name":"Scene",
-			"nodes":[
-				0
-			]
-		}
-	],
-	"nodes":[
-		{
-			"mesh":0,
-			"name":"tripo_node_8b45173f-e689-41c1-9f51-dc772d667835"
-		}
-	],
-	"materials":[
-		{
-			"name":"tripo_material_8b45173f-e689-41c1-9f51-dc772d667835",
-			"normalTexture":{
-				"index":0
-			},
-			"pbrMetallicRoughness":{
-				"baseColorTexture":{
-					"index":1
-				},
-				"metallicRoughnessTexture":{
-					"index":2
-				}
-			}
-		}
-	],
-	"meshes":[
-		{
-			"name":"meshes[0]",
-			"primitives":[
-				{
-					"attributes":{
-						"POSITION":0,
-						"NORMAL":1,
-						"TEXCOORD_0":2
-					},
-					"indices":3,
-					"material":0
-				}
-			]
-		}
-	],
-	"textures":[
-		{
-			"sampler":0,
-			"source":0
-		},
-		{
-			"sampler":0,
-			"source":1
-		},
-		{
-			"sampler":0,
-			"source":2
-		}
-	],
-	"images":[
-		{
-			"mimeType":"image/jpeg",
-			"name":"ancient+circular+platform+3d+model_normal",
-			"uri":"ancient%2Bcircular%2Bplatform%2B3d%2Bmodel_normal.jpg"
-		},
-		{
-			"mimeType":"image/jpeg",
-			"name":"ancient+circular+platform+3d+model_basecolor",
-			"uri":"ancient%2Bcircular%2Bplatform%2B3d%2Bmodel_basecolor.jpg"
-		},
-		{
-			"mimeType":"image/jpeg",
-			"name":"ancient+circular+platform+3d+model_rm",
-			"uri":"ancient%2Bcircular%2Bplatform%2B3d%2Bmodel_rm.jpg"
-		}
-	],
-	"accessors":[
-		{
-			"bufferView":0,
-			"componentType":5126,
-			"count":226390,
-			"max":[
-				24.9969482421875,
-				0.1384429931640625,
-				25
-			],
-			"min":[
-				-24.99847412109375,
-				-0.138458251953125,
-				-25
-			],
-			"type":"VEC3"
-		},
-		{
-			"bufferView":1,
-			"componentType":5126,
-			"count":226390,
-			"type":"VEC3"
-		},
-		{
-			"bufferView":2,
-			"componentType":5126,
-			"count":226390,
-			"type":"VEC2"
-		},
-		{
-			"bufferView":3,
-			"componentType":5125,
-			"count":1304112,
-			"type":"SCALAR"
-		}
-	],
-	"bufferViews":[
-		{
-			"buffer":0,
-			"byteLength":2716680,
-			"byteOffset":0,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":2716680,
-			"byteOffset":2716680,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":1811120,
-			"byteOffset":5433360,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":5216448,
-			"byteOffset":7244480,
-			"target":34963
-		}
-	],
-	"samplers":[
-		{
-			"magFilter":9729,
-			"minFilter":9987
-		}
-	],
-	"buffers":[
-		{
-			"byteLength":12460928,
-			"uri":"Stage.bin"
-		}
-	]
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 226298,
+      "max": [
+        0.49993896484375,
+        0.1384429931640625,
+        0.5
+      ],
+      "min": [
+        -0.499969482421875,
+        -0.138458251953125,
+        -0.5
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 226298,
+      "max": [
+        0.9999688267707825,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -0.9999696016311646,
+        -1.0,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 226298,
+      "max": [
+        1.0,
+        1.0,
+        0.999998927116394,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 226298,
+      "max": [
+        1.0,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.0
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5125,
+      "count": 1304112,
+      "max": [
+        226297
+      ],
+      "min": [
+        0
+      ],
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 2715576,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 2715576,
+      "byteOffset": 2715576,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 3620768,
+      "byteOffset": 5431152,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1810384,
+      "byteOffset": 9051920,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 5216448,
+      "byteOffset": 10862304,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 16078752,
+      "uri": "Stage.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "Base.jpg"
+    },
+    {
+      "uri": "MetallicRoughnes.jpg"
+    },
+    {
+      "uri": "Normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "name": "tripo_material_8b45173f-e689-41c1-9f51-dc772d667835",
+      "normalTexture": {
+        "index": 2
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "tripo_node_8b45173f-e689-41c1-9f51-dc772d667835",
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        100.0,
+        100.0,
+        100.0
+      ],
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
 }

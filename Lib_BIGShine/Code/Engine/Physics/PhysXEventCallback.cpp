@@ -1,59 +1,86 @@
 #include "PhysXEventCallback.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
-#include "PhysicsCollisionComponent.h"
 #include "ColliderComponent.h"
 
 using namespace physx;
 
+namespace
+{
+bool IsMaskOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
+{
+    auto objA_ = colA_ ? colA_->GetGameObject() : nullptr;
+    auto objB_ = colB_ ? colB_->GetGameObject() : nullptr;
+    if (!objA_ || !objB_) return false;
+
+    return (objA_->mask & static_cast<uint32_t>(objB_->layer)) != 0
+        || (objB_->mask & static_cast<uint32_t>(objA_->layer)) != 0;
+}
+
+bool IsDetectionOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
+{
+    return !colA_->UsesPhysicsResponse() || !colB_->UsesPhysicsResponse()
+        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::HIT_BOX
+        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::HURT_BOX
+        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR
+        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::HIT_BOX
+        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::HURT_BOX
+        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR;
+}
+}
+
 void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
 {
-    for (PxU32 i = 0; i < count; ++i)
+    for (PxU32 i_ = 0; i_ < count; ++i_)
     {
-        PxTriggerPair& p = pairs[i];
+        PxTriggerPair& pair_ = pairs[i_];
+        if (pair_.flags & (PxTriggerPairFlag::eREMOVED_SHAPE_TRIGGER | PxTriggerPairFlag::eREMOVED_SHAPE_OTHER))
+        {
+            continue;
+        }
 
-        auto* cA = reinterpret_cast<PhysicsCollisionComponent*>(p.triggerActor ? p.triggerActor->userData : nullptr);
-        auto* cB = reinterpret_cast<PhysicsCollisionComponent*>(p.otherActor ? p.otherActor->userData : nullptr);
+        auto colA_ = reinterpret_cast<ColliderComponent*>(pair_.triggerActor ? pair_.triggerActor->userData : nullptr);
+        auto colB_ = reinterpret_cast<ColliderComponent*>(pair_.otherActor ? pair_.otherActor->userData : nullptr);
+        if (!colA_ || !colB_) continue;
 
-        if (!cA || !cB) continue;
-
-        auto goA = cA->GetGameObject();
-        auto goB = cB->GetGameObject();
-        if (!goA || !goB) continue;
-
-        auto colA = goA->GetComponent<ColliderComponent>();
-        auto colB = goB->GetComponent<ColliderComponent>();
-        if (!colA || !colB) continue;
-
-        // PhysX 5 では status フラグではなく currentTriggers を見て判定
-        bool currentlyHit = true; // PxTriggerPair が渡ってきた = 当たっている
-        //GetManager().HandlePhysXTrigger(colA.get(), colB.get(), currentlyHit);
+        const bool hit_ = pair_.status != PxPairFlag::eNOTIFY_TOUCH_LOST;
+        colA_->GetManager().HandlePhysXTrigger(colA_, colB_, hit_);
     }
 }
 
 void CollisionCallback::onContact(const PxContactPairHeader& header, const PxContactPair* pairs, PxU32 nbPairs)
 {
-    // header.actors[] は actor ポインタ（注意：削除済みの可能性もあるが簡易実装）
-    PhysicsCollisionComponent* cA = reinterpret_cast<PhysicsCollisionComponent*>(header.actors[0] ? header.actors[0]->userData : nullptr);
-    PhysicsCollisionComponent* cB = reinterpret_cast<PhysicsCollisionComponent*>(header.actors[1] ? header.actors[1]->userData : nullptr);
-
-    if (!cA || !cB) return;
-
-    auto goA = cA->GetGameObject();
-    auto goB = cB->GetGameObject();
-    if (!goA || !goB) return;
-
-    auto colA = goA->GetComponent<ColliderComponent>();
-    auto colB = goB->GetComponent<ColliderComponent>();
-    if (!colA || !colB) return;
-
-    // pairs[] を走査して Found（最初の接触）を検知したらコール
-    for (PxU32 i = 0; i < nbPairs; ++i)
+    auto colA_ = reinterpret_cast<ColliderComponent*>(header.actors[0] ? header.actors[0]->userData : nullptr);
+    auto colB_ = reinterpret_cast<ColliderComponent*>(header.actors[1] ? header.actors[1]->userData : nullptr);
+    if (!colA_ || !colB_) return;
+// header.actors[] は actor ポインタ（注意：削除済みの可能性もあるが簡易実装）
+    for (PxU32 i_ = 0; i_ < nbPairs; ++i_)
     {
-        const PxContactPair& cp = pairs[i];
-        if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
+        const PxContactPair& pair_ = pairs[i_];
+        const bool lost_ = pair_.events & PxPairFlag::eNOTIFY_TOUCH_LOST;
+        const bool touching_ = pair_.events & (PxPairFlag::eNOTIFY_TOUCH_FOUND | PxPairFlag::eNOTIFY_TOUCH_PERSISTS);
+
+        if (IsMaskOnlyPair(colA_, colB_) || IsDetectionOnlyPair(colA_, colB_))
         {
-            //GameObjectManager::Instance().HandlePhysXContact(colA.get(), colB.get());
-            break;
+            if (touching_ || lost_)
+            {
+                colA_->GetManager().HandlePhysXTrigger(colA_, colB_, !lost_);
+            }
+            continue;
+        }
+
+        if (!touching_) continue;
+
+        colA_->SetHitFlag(true);
+        colB_->SetHitFlag(true);
+        colA_->GetManager().HandlePhysXContact(colA_, colB_);
+
+        PxContactPairPoint contacts_[8];
+        const PxU32 contactCount_ = pair_.extractContacts(contacts_, 8);
+        for (PxU32 contactIndex_ = 0; contactIndex_ < contactCount_; ++contactIndex_)
+        {
+            const float normalY_ = contacts_[contactIndex_].normal.y;
+            if (normalY_ > 0.5f && !colB_->isStatic) colB_->isGrounded = true;
+            if (normalY_ < -0.5f && !colA_->isStatic) colA_->isGrounded = true;
         }
     }
 }

@@ -5,6 +5,11 @@
 #include "Engine/Physics/BoxCollider.h"
 #include "Engine/Physics/CapsuleCollider.h"
 #include "Engine/Physics/SphereCollider.h"
+#include "Engine/Physics/CylinderCollider.h"
+#include "Engine/Physics/MeshCollider.h"
+#include "Engine/Physics/CharacterCollider.h"
+#include "Engine/Physics/HitBox.h"
+#include "Engine/Physics/HurtBox.h"
 #include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/UI/UIButton.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
@@ -67,6 +72,11 @@ void RegisterAllComponents()
     registry.Register<BoxCollider>("BoxCollider");
     registry.Register<CapsuleCollider>("CapsuleCollider");
     registry.Register<SphereCollider>("SphereCollider");
+    registry.Register<CylinderCollider>("CylinderCollider");
+    registry.Register<MeshCollider>("MeshCollider");
+    registry.Register<CharacterCollider>("CharacterCollider");
+    registry.Register<HitBox>("HitBox");
+    registry.Register<HurtBox>("HurtBox");
 
     //ゲームシステム
     registry.Register<UIButton>("UIButton");

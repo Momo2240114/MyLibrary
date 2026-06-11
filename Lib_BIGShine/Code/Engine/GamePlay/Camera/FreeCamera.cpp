@@ -50,25 +50,61 @@ void CameraFreeController::Update(float deltaTime)
 
 void CameraFreeController::UpdateRotation(float deltaTime)
 {
+    // シングルトンからマウス入力を取得
     auto& mouse = MouseInput::Instance();
 
     // MouseInput内で計算されているマウスの移動量（差分）を取得
     Vector2 mouseDelta = mouse.GetSubMousePos();
 
-    // 移動量に感度を乗算して現在の角度に加算（delta.xが横移動、delta.yが縦移動）
-    currentYaw += mouseDelta.x * lookSpeed;
-    currentPitch += mouseDelta.y * lookSpeed;
+    // 【防酔い修正1】右クリックを押している間だけ視点を動かすようにする
+    // ※もし常に動かしたい場合は、このif文の条件を外すか調整するが良い
+    if (mouse.RightDown())
+    {
+        // 【防酔い修正2】deltaTimeを乗算し、PCの性能（FPS）による回転速度の爆発を防ぐ
+        // ※マウスの生データ（delta）の仕様によっては、lookSpeedの調整（0.2fから10.0f程度）が必要になるぞ
+        currentYaw += mouseDelta.x * lookSpeed * deltaTime;
+        currentPitch += mouseDelta.y * lookSpeed * deltaTime; // 上下反転（FPS挙動）にする場合はマイナスにする
 
-    // 首が反転しないように、上下のピッチ回転を -89度 から 89度の範囲に制限
-    currentPitch = (std::max)(-89.0f, (std::min)(89.0f, currentPitch));
+        // 首が反転して天変地異が起きぬよう、上下のピッチ回転を -89.9度 から 89.9度の範囲に制限
+        currentPitch = std::clamp(currentPitch, -89.9f, 89.9f);
+    }
 
-    // 計算した角度を Transform に適用する
+    // 計算した角度から「視線方向」を割り出し、Transform に適用する
     if (auto t = GetGameObject()->transform)
     {
-        Vector3 newRot = { currentPitch, currentYaw, 0.0f };
+        // 度数法（Degree）から 弧度法（Radian）への聖なる変換
+        float toRadians = 3.14159265f / 180.0f;
+        float yawRad = currentYaw * toRadians;
+        float pitchRad = currentPitch * toRadians;
+
+        // 【防酔い修正3】球面座標系を用いて、常に世界の上（Y軸）を基準とした回転を作る
+        // これにより、カメラが斜めに傾く「不快なローリング」を完全に封殺する！
+        using namespace DirectX;
+        XMVECTOR Front = XMVector3Normalize(XMVectorSet(
+            cosf(pitchRad) * sinf(yawRad),
+            sinf(pitchRad),
+            cosf(pitchRad) * cosf(yawRad),
+            0.0f
+        ));
+
+        // 常に頭をまっすぐ上（0, 1, 0）に向けさせるための上方向ベクトル
+        XMVECTOR WorldUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+        // Front（前）と WorldUp（上）から、傾きのない純粋な回転行列を生成
+        XMMATRIX lookMat = XMMatrixLookToLH(XMVectorZero(), Front, WorldUp);
+
+        // LookTo行列はView用（逆行列）なので、反転させてワールドの回転行列にする
+        XMVECTOR det;
+        XMMATRIX worldRot = XMMatrixInverse(&det, lookMat);
+
+        // 行列からクォータニオンを抽出し、Transformへセットするのだ！
+        // ※もしお使いの変数がQuaternion型であれば、以下のように直接代入できる
+        Vector3 newRot = { currentPitch * toRadians, currentYaw * toRadians, 0.0f };
         t->SetRotation(newRot);
+
     }
 }
+
 
 void CameraFreeController::UpdateMovement(float deltaTime)
 {
@@ -110,6 +146,15 @@ void CameraFreeController::UpdateMovement(float deltaTime)
         moveDir.x -= right.x;
         moveDir.y -= right.y;
         moveDir.z -= right.z;
+    }
+
+    if (KeyInput::KeyPressed(KeyInput::Key::K_E))
+    {
+        moveDir.y += t->GetUp().y;
+    }
+    if (KeyInput::KeyPressed(KeyInput::Key::K_Q))
+    {
+        moveDir.y -= t->GetUp().y;
     }
 
     // DirectXMathを使用して移動ベクトルの長さを正規化（斜め移動の速度を一定にする）

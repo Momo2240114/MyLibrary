@@ -329,7 +329,12 @@
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp" />
     <ClCompile Include="Code\Engine\Physics\BoxCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\CapsuleCollider.cpp" />
+    <ClCompile Include="Code\Engine\Physics\CharacterCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp" />
+    <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp" />
+    <ClCompile Include="Code\Engine\Physics\HitBox.cpp" />
+    <ClCompile Include="Code\Engine\Physics\HurtBox.cpp" />
+    <ClCompile Include="Code\Engine\Physics\MeshCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysicsCollisionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysXEventCallback.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysXSystem.cpp" />
@@ -477,7 +482,12 @@
     <ClInclude Include="Code\Engine\Math\Vector.h" />
     <ClInclude Include="Code\Engine\Physics\BoxCollider.h" />
     <ClInclude Include="Code\Engine\Physics\CapsuleCollider.h" />
+    <ClInclude Include="Code\Engine\Physics\CharacterCollider.h" />
     <ClInclude Include="Code\Engine\Physics\ColliderComponent.h" />
+    <ClInclude Include="Code\Engine\Physics\CylinderCollider.h" />
+    <ClInclude Include="Code\Engine\Physics\HitBox.h" />
+    <ClInclude Include="Code\Engine\Physics\HurtBox.h" />
+    <ClInclude Include="Code\Engine\Physics\MeshCollider.h" />
     <ClInclude Include="Code\Engine\Physics\Collision.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXEventCallback.h" />

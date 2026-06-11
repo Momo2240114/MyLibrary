@@ -2,7 +2,7 @@
     "Components": [
         {
             "Data": {
-                "LocalScale": 1.0,
+                "LocalScale": 1.7999999523162842,
                 "MaterialOverrides": [
                     {
                         "baseColor": [
@@ -11,79 +11,14 @@
                             1.0,
                             1.0
                         ],
-                        "disableOutline": false,
-                        "id": 0,
-                        "outlineThicknessOffset": 0.019999999552965164,
-                        "shaderId": 3,
-                        "toonPbrBlend": 0.41999998688697815
-                    },
-                    {
-                        "baseColor": [
-                            1.0,
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
                         "disableOutline": true,
-                        "id": 1,
-                        "outlineThicknessOffset": 0.019999999552965164,
+                        "id": 0,
+                        "outlineThicknessOffset": 0.16599999368190765,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.953000009059906
-                    },
-                    {
-                        "baseColor": [
-                            0.23113200068473816,
-                            0.628136157989502,
-                            1.0,
-                            1.0
-                        ],
-                        "disableOutline": false,
-                        "id": 2,
-                        "outlineThicknessOffset": 1.0,
-                        "shaderId": 3,
-                        "toonPbrBlend": 0.9990000128746033
-                    },
-                    {
-                        "baseColor": [
-                            1.0,
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "disableOutline": false,
-                        "id": 3,
-                        "outlineThicknessOffset": 1.0,
-                        "shaderId": 3,
-                        "toonPbrBlend": 0.5
-                    },
-                    {
-                        "baseColor": [
-                            1.0,
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "disableOutline": false,
-                        "id": 4,
-                        "outlineThicknessOffset": 1.0,
-                        "shaderId": 3,
-                        "toonPbrBlend": 0.5
-                    },
-                    {
-                        "baseColor": [
-                            0.8910671472549438,
-                            1.0,
-                            0.0,
-                            1.0
-                        ],
-                        "disableOutline": false,
-                        "id": 5,
-                        "outlineThicknessOffset": 1.0,
-                        "shaderId": 3,
-                        "toonPbrBlend": 0.5
+                        "toonPbrBlend": 0.30000001192092896
                     }
                 ],
-                "ModelName": "./Data/Model/ExampleStage/ExampleStage.gltf",
+                "ModelName": "./Data/Model/Stage/Stage.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "UsedNaviMeshSystemFlg": false,
@@ -104,12 +39,12 @@
     "Transform": {
         "Pos": [
             0.0,
-            0.0,
+            -20.0,
             0.0
         ],
         "Rot": [
             0.0,
-            0.0,
+            275.0,
             0.0
         ],
         "Scale": [

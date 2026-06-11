@@ -1,10 +1,10 @@
 {
     "GraphicsSettings": {
         "Bloom": {
-            "blurPasses": 7,
-            "intensity": 0.10000000149011612,
-            "kawaseScale": 0.07000000029802322,
-            "threshold": 3.180000066757202
+            "blurPasses": 5,
+            "intensity": 0.46000000834465027,
+            "kawaseScale": 3.0,
+            "threshold": 1.7000000476837158
         },
         "ShadowMap": {
             "cascadeShadowBias": [
@@ -17,7 +17,7 @@
                 25.0,
                 100.0,
                 250.0,
-                500.0
+                1000.0
             ],
             "displayCascadeArea": false,
             "shadowAttenuation": 0.0,
@@ -67,7 +67,14 @@
         "Weapon",
         "Shield",
         "DirLight",
-        "Stage"
+        "Stage",
+        "RockWall",
+        "RockWall_01",
+        "RockWall_02",
+        "RockWall_03",
+        "RockWall_04",
+        "RockWall_05",
+        "RockWall_06"
     ],
     "SceneName": "MainScene"
 }

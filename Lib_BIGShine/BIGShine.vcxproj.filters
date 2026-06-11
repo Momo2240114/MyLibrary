@@ -520,11 +520,9 @@
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp">
       <Filter>Code\Engine\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\Platform\WindowsDialogHelper.cpp">
       <Filter>Code\Engine\Platform</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClCompile>
@@ -572,6 +570,27 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\CharacterCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\HitBox.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\HurtBox.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\MeshCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -935,7 +954,6 @@
     <ClInclude Include="Code\Engine\Math\RandomHelper.h">
       <Filter>Code\Engine\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h">
       <Filter>Code\Engine\Platform</Filter>
     </ClInclude>
@@ -998,6 +1016,24 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.h">
       <Filter>Code\Engine\Graphics\RenderSystem\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\MeshCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\CharacterCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\CylinderCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\HitBox.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\HurtBox.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
