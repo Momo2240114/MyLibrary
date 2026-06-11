@@ -1,6 +1,7 @@
 #include "RadialBlurSystem.h"
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "OutlineSystem.h"
 
 bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
 {

@@ -22,9 +22,9 @@
 //#include "CurvePlayerComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
-#include "Game/Charcter/Player/PlayerInput.h"
 #include "Engine/GamePlay/Core/Component/Movement.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/Graphics/VFX/MeshVFXComponent.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -60,6 +60,7 @@ void RegisterAllComponents()
     registry.Register<LightComponent>("LightComponent");
     registry.Register<DecalComponent>("DecalComponent");
     registry.Register<ParticleComponent>("ParticleComponent");
+    registry.Register<MeshVFXComponent>("MeshVFXComponent");
 
 
     // 物理・コリジョン系
@@ -78,7 +79,6 @@ void RegisterAllComponents()
     registry.Register<EasingComponent>("Easing");
     registry.Register<CurveComponent>("CurveComponent");
     registry.Register<NumberSwitcher>("NumberSwitcher");
-    registry.Register<PlayerInput>("PlayerInput");
     registry.Register<Movement>("Movement");
     registry.Register<BlackboardComponent>("BlackboardComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");

@@ -59,6 +59,15 @@ void SceneBase::Initialize()
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 	m_ShapeRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
+
+	const int TestLightObNum = 100;
+	for (int i = 0; TestLightObNum > i; i++)
+	{
+		std::string name_ = "TestLight";
+		auto obj = _GameObjectManager->Create(name_);
+		obj->AddComponent<LightComponent>();
+	}
+
 }
 
 void SceneBase::Update(float elapsedTime)

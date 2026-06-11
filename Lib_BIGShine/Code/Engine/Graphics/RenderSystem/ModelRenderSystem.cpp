@@ -55,6 +55,24 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 		"Shader/OutlinePS.cso",
 		outlinePixelShader.GetAddressOf());
 
+	CPUResourceLoader::LoadVertexShader(
+		device,
+		"Shader/PBRVS.cso",
+		GltfModelCommponennt::InputElementDescs.data(),
+		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
+		gBufferInputLayout.GetAddressOf(),
+		gBufferVertexShader.GetAddressOf());
+
+	CPUResourceLoader::LoadPixelShader(
+		device,
+		"Shader/GBufferPS.cso",
+		gBufferPixelShader.GetAddressOf());
+
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
+		sizeof(CbGBufferMaterial),
+		gBufferMaterialConstantBuffer.GetAddressOf());
+
 	// シェーダー生成
 	shaders[static_cast<int>(ModelShaderID::Basic)] = std::make_shared<BasicShader>(device);
 	shaders[static_cast<int>(ModelShaderID::Toon)] = std::make_shared<ToonShader>(device);
@@ -64,6 +82,7 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	// デカールシェーダーの生成
 	decalShader = std::make_shared<DecalShader>(device);
+	lightingShader = std::make_shared<LightingShader>(device);
 
 
 	// PS用
@@ -496,6 +515,57 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 		};
 
+	auto drawGBufferMesh = [&](const GltfModelCommponennt::Mesh& mesh, ModelShaderID shaderId_)
+		{
+			UINT stride_ = sizeof(GltfModelCommponennt::Vertex);
+			UINT offset_ = 0;
+			dc->IASetInputLayout(gBufferInputLayout.Get());
+			dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride_, &offset_);
+			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			dc->VSSetShader(gBufferVertexShader.Get(), nullptr, 0);
+			dc->PSSetShader(gBufferPixelShader.Get(), nullptr, 0);
+			dc->PSSetConstantBuffers(0, 1, gBufferMaterialConstantBuffer.GetAddressOf());
+
+			CbSkeleton cbSkeleton_{};
+			if (!mesh.bones.empty())
+			{
+				for (size_t boneIndex_ = 0; boneIndex_ < mesh.bones.size(); ++boneIndex_)
+				{
+					const GltfModelCommponennt::Bone& bone_ = mesh.bones.at(boneIndex_);
+					DirectX::XMMATRIX worldTransform_ = DirectX::XMLoadFloat4x4(&bone_.node->worldTransform);
+					DirectX::XMMATRIX offsetTransform_ = DirectX::XMLoadFloat4x4(&bone_.offsetTransform);
+					DirectX::XMStoreFloat4x4(&cbSkeleton_.boneTransforms[boneIndex_], offsetTransform_ * worldTransform_);
+				}
+			}
+			else
+			{
+				cbSkeleton_.boneTransforms[0] = mesh.node->worldTransform;
+			}
+			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+
+			CbGBufferMaterial material_{};
+			material_.baseColor = mesh.material->baseColor;
+			material_.emissiveColor = mesh.material->emissiveColor;
+			material_.metalness = mesh.material->metalness;
+			material_.roughness = mesh.material->roughness;
+			material_.occlusionStrength = mesh.material->occlusionStrength;
+			material_.toonPbrBlend = mesh.material->toonPbrBlend;
+			material_.shadingModel = static_cast<int>(shaderId_);
+			dc->UpdateSubresource(gBufferMaterialConstantBuffer.Get(), 0, nullptr, &material_, 0, 0);
+
+			ID3D11ShaderResourceView* materialSrvs_[] =
+			{
+				mesh.material->baseMap.Get(),
+				mesh.material->normalMap.Get(),
+				mesh.material->emissiveMap.Get(),
+				mesh.material->occlusionMap.Get(),
+				mesh.material->metalnessRoughnessMap.Get(),
+			};
+			dc->PSSetShaderResources(0, _countof(materialSrvs_), materialSrvs_);
+			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+		};
+
 	auto isOutlineTarget = [](ModelShaderID shaderId)
 		{
 			return shaderId == ModelShaderID::Toon || shaderId == ModelShaderID::ToonPBR;
@@ -512,6 +582,23 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			cbOutline.outlineColor = outlineColor;
 			cbOutline.outlineThickness = mesh.material->outlineThicknessOffset;
 			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
+
+			CbSkeleton cbSkeleton_{};
+			if (!mesh.bones.empty())
+			{
+				for (size_t boneIndex_ = 0; boneIndex_ < mesh.bones.size(); ++boneIndex_)
+				{
+					const GltfModelCommponennt::Bone& bone_ = mesh.bones.at(boneIndex_);
+					DirectX::XMMATRIX worldTransform_ = DirectX::XMLoadFloat4x4(&bone_.node->worldTransform);
+					DirectX::XMMATRIX offsetTransform_ = DirectX::XMLoadFloat4x4(&bone_.offsetTransform);
+					DirectX::XMStoreFloat4x4(&cbSkeleton_.boneTransforms[boneIndex_], offsetTransform_ * worldTransform_);
+				}
+			}
+			else
+			{
+				cbSkeleton_.boneTransforms[0] = mesh.node->worldTransform;
+			}
+			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
 
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
 			UINT offset = 0;
@@ -538,7 +625,16 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
 
 
-	GraphicsDeviceManager::Instance().RenderSkyBox(rc);
+	GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
+	const bool useDeferredRendering_ = rc.cascadeShadowMap != nullptr;
+	if (useDeferredRendering_)
+	{
+		graphics_.SetGBufferRenderTargets();
+	}
+	else
+	{
+		graphics_.RenderSkyBox(rc);
+	}
 
 
 	// ブレンドステート設定
@@ -554,14 +650,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			ModelShaderID currentShaderId = mesh.material->shaderId;
 			ModelShader* shader = shaders[static_cast<int>(currentShaderId)].get();
 
-			// ここでシェーダーを開始
-			shader->Begin(rc);
-
 			// 半透明メッシュ登録
 			if (mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend ||
 				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f))
 			{
 				TransparencyDrawInfo& transparencyDrawInfo = transparencyDrawInfos.emplace_back();
+				transparencyDrawInfo.shaderId = currentShaderId;
 				transparencyDrawInfo.mesh = &mesh;
 				// カメラとの距離を算出
 				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
@@ -575,13 +669,82 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				continue;
 			}
 
-			// 描画
-			drawMesh(mesh, shader);
-			if (isOutlineTarget(currentShaderId))
+			if (useDeferredRendering_)
 			{
-				drawOutlineMesh(mesh);
+				drawGBufferMesh(mesh, currentShaderId);
 			}
-			shader->End(rc);
+			else
+			{
+				shader->Begin(rc);
+				drawMesh(mesh, shader);
+				if (isOutlineTarget(currentShaderId))
+				{
+					drawOutlineMesh(mesh);
+				}
+				shader->End(rc);
+			}
+		}
+	}
+
+	if (useDeferredRendering_)
+	{
+		ID3D11ShaderResourceView* nullMaterialSrvs_[5] = {};
+		dc->PSSetShaderResources(0, _countof(nullMaterialSrvs_), nullMaterialSrvs_);
+		graphics_.SetSceneColorRenderTarget();
+		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+		ID3D11ShaderResourceView* iblSrvs_[] =
+		{
+			graphics_.GetIBLDiffuseSRV(),
+			graphics_.GetIBLSpecularSRV(),
+			graphics_.GetIBLLutGGXSRV(),
+		};
+		dc->PSSetShaderResources(10, _countof(iblSrvs_), iblSrvs_);
+
+		DirectX::XMFLOAT4 toonSteps_{ 0.05f, 0.05f, 0.05f, 0.05f };
+		DirectX::XMFLOAT4 toonFeathers_{ 0.05f, 0.05f, 0.05f, 0.05f };
+		DirectX::XMFLOAT4 toonPbrSteps_{ 0.45f, 0.45f, 0.45f, 0.45f };
+		DirectX::XMFLOAT4 toonPbrFeathers_{ 0.1f, 0.1f, 0.1f, 0.1f };
+		if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
+		{
+			toonSteps_ = toonShader_->GetShadeSteps();
+			toonFeathers_ = toonShader_->GetShadeFeather();
+		}
+		if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
+		{
+			toonPbrSteps_ = toonPbrShader_->GetShadeSteps();
+			toonPbrFeathers_ = toonPbrShader_->GetShadeFeather();
+		}
+		lightingShader->Execute(
+			rc,
+			graphics_.GetGBufferBaseColorSRV(),
+			graphics_.GetGBufferNormalSRV(),
+			graphics_.GetGBufferMaterialSRV(),
+			graphics_.GetGBufferEmissiveSRV(),
+			graphics_.GetMainDepthSRV(),
+			lightSRV.Get(),
+			spotLightSRV.Get(),
+			sceneConstantBuffer.Get(),
+			toonSteps_,
+			toonFeathers_,
+			toonPbrSteps_,
+			toonPbrFeathers_);
+
+		graphics_.SetSceneRenderTarget();
+		graphics_.RenderSkyBox(rc);
+
+		for (DrawInfo& drawInfo : drawInfos)
+		{
+			for (const GltfModelCommponennt::Mesh& mesh : drawInfo.model->GetMeshes())
+			{
+				if (mesh.material->alphaMode != GltfModelCommponennt::AlphaMode::Blend &&
+					isOutlineTarget(mesh.material->shaderId))
+				{
+					drawOutlineMesh(mesh);
+				}
+			}
 		}
 	}
 	drawInfos.clear();

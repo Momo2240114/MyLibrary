@@ -13,6 +13,7 @@ class CameraManager;
 
 
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
+#include"Engine/Graphics/VFX/MeshVFXRenderSystem.h"
 #include"Engine/GamePlay/Core/Resource/ResourceManager.h"
 
 
@@ -49,7 +50,7 @@ public:
         newObj->nameComponent->name = finalName;
         newObj->transform->gameObject = newObj;
 
-        //ここで「自身」をオブジェクトに授ける！
+        //ここで「自身」をオブジェクトに
         newObj->SetManager(this);
         _Objects.emplace_back(newObj);       // 全体リストに追加
         // --- 既存の pendingStarts への追加や初期化処理 ---
@@ -221,6 +222,7 @@ private:
 
     // 所有権をマネージャ側が持つ
     std::unique_ptr<ParticleRenderSystem> _ParticleSystem;
+    std::unique_ptr<MeshVFXRenderSystem> meshVFXRenderSystem;
     // パーティクルコンポーネントのみを保持するリスト
     std::vector<std::weak_ptr<ParticleComponent>> _ParticleComponents;
     //現在のシーン

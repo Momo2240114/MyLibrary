@@ -14,7 +14,7 @@
 #include "Engine/Graphics/RenderSystem/BloomSystem.h"
 #include "Engine/Graphics/RenderSystem/PostRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/RadialBlurSystem.h"
-#include "Engine/Graphics/RenderSystem/Pipeline/RenderPipeline.h" 
+
 #include "Engine/Graphics/RenderSystem/CascadeShadowMap.h" 
 
 // ============================================================================
@@ -56,7 +56,11 @@ public:
     RenderState* GetRenderState() { return renderState.get(); }
     // アクセッサ欄に追加
     ID3D11ShaderResourceView* GetSceneSRV(){ return sceneSRV.Get(); }
-    ID3D11ShaderResourceView* GetNormalSRV() { return sceneNormalSRV.Get(); }
+    ID3D11ShaderResourceView* GetNormalSRV() { return gBufferNormalSRV.Get(); }
+    ID3D11ShaderResourceView* GetGBufferBaseColorSRV() { return gBufferBaseColorSRV.Get(); }
+    ID3D11ShaderResourceView* GetGBufferNormalSRV() { return gBufferNormalSRV.Get(); }
+    ID3D11ShaderResourceView* GetGBufferMaterialSRV() { return gBufferMaterialSRV.Get(); }
+    ID3D11ShaderResourceView* GetGBufferEmissiveSRV() { return gBufferEmissiveSRV.Get(); }
 
     ID3D11ShaderResourceView* GetIBLDiffuseSRV() { return iblDiffuseIemSRV.Get(); }
     ID3D11ShaderResourceView* GetIBLSpecularSRV() { return iblSpecularPmremSRV.Get(); }
@@ -82,6 +86,8 @@ public:
 
     // バックバッファではなく「シーン用テクスチャ」をセットする関数
     void SetSceneRenderTarget();
+    void SetSceneColorRenderTarget();
+    void SetGBufferRenderTargets();
     void SetBackBufferRenderTarget();
     // シーン用テクスチャからバックバッファへブルームを適用して描画
     void ResolveBloom(const RenderContext& rc);
@@ -162,6 +168,15 @@ private:
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneSRV;
 
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferBaseColorRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferBaseColorSRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferNormalRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferNormalSRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferMaterialRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferMaterialSRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferEmissiveRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferEmissiveSRV;
+
     // -------------------------------------------------------
     // IBL テクスチャ
     // register(t10) diffuse_iem
@@ -190,4 +205,5 @@ private:
 
     // 内部ヘルパー
     bool CreateSceneRenderTarget(int width_, int height_);
+    bool CreateGBufferTargets(int width_, int height_);
 };

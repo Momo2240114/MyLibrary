@@ -18,6 +18,10 @@ LightingShader::LightingShader(ID3D11Device* device)
         "Shader/LightingPS.cso",
         pixelShader.GetAddressOf());
 
+    CPUResourceLoader::CreateConstantBuffer(
+        device,
+        sizeof(CbDeferredSettings),
+        deferredSettingsConstantBuffer.GetAddressOf());
 
     // 4. サンプラーステートの作成
     D3D11_SAMPLER_DESC samplerDesc = {};
@@ -32,9 +36,15 @@ void LightingShader::Execute(const RenderContext& rc,
     ID3D11ShaderResourceView* color, 
     ID3D11ShaderResourceView* normal, 
     ID3D11ShaderResourceView* material,
+    ID3D11ShaderResourceView* emissive,
+    ID3D11ShaderResourceView* depth,
     ID3D11ShaderResourceView* pointLightSRV,  // 追加
     ID3D11ShaderResourceView* spotLightSRV,
-    ID3D11Buffer* sceneConstantBuffer) // b7 を受け取るために追加// 追加
+    ID3D11Buffer* sceneConstantBuffer,
+    const DirectX::XMFLOAT4& toonShadeSteps_,
+    const DirectX::XMFLOAT4& toonShadeFeathers_,
+    const DirectX::XMFLOAT4& toonPbrShadeSteps_,
+    const DirectX::XMFLOAT4& toonPbrShadeFeathers_)
 {
     auto dc = rc.deviceContext;
 
@@ -42,6 +52,8 @@ void LightingShader::Execute(const RenderContext& rc,
     _ASSERT_EXPR(color != nullptr, L"Color SRV is null!");
     _ASSERT_EXPR(normal != nullptr, L"Normal SRV is null!");
     _ASSERT_EXPR(material != nullptr, L"Material SRV is null!");
+    _ASSERT_EXPR(emissive != nullptr, L"Emissive SRV is null!");
+    _ASSERT_EXPR(depth != nullptr, L"Depth SRV is null!");
     _ASSERT_EXPR(sceneConstantBuffer != nullptr, L"Constant Buffer is null!");
 
     // 1. シェーダーとサンプラーセット
@@ -49,14 +61,21 @@ void LightingShader::Execute(const RenderContext& rc,
     dc->PSSetShader(pixelShader.Get(), nullptr, 0);
     dc->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
-    // 2. G-Bufferの3枚をバインド (t0, t1, t2)
-    ID3D11ShaderResourceView* srvs[] = { color, normal, material };
-    dc->PSSetShaderResources(0, 3, srvs);
+    ID3D11ShaderResourceView* srvs[] = { color, normal, material, emissive, depth };
+    dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
 
     // 3. ライティングに必要なライト情報を定数バッファへ更新
     // rc.lights を使って lightConstantBuffer を更新せよ
     dc->PSSetConstantBuffers(7, 1, &sceneConstantBuffer); // b7 (CbScene)
+
+    CbDeferredSettings settings_{};
+    settings_.toonShadeSteps = toonShadeSteps_;
+    settings_.toonShadeFeathers = toonShadeFeathers_;
+    settings_.toonPbrShadeSteps = toonPbrShadeSteps_;
+    settings_.toonPbrShadeFeathers = toonPbrShadeFeathers_;
+    dc->UpdateSubresource(deferredSettingsConstantBuffer.Get(), 0, nullptr, &settings_, 0, 0);
+    dc->PSSetConstantBuffers(9, 1, deferredSettingsConstantBuffer.GetAddressOf());
 
     ID3D11ShaderResourceView* lights[] = { pointLightSRV, spotLightSRV };
     dc->PSSetShaderResources(5, 2, lights); // t5, t6 (StructuredBuffers)
@@ -68,6 +87,8 @@ void LightingShader::Execute(const RenderContext& rc,
     dc->Draw(3, 0);
 
     // 5. 解除 (バインドしたものをすべてnullptrにする)
-    ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-    dc->PSSetShaderResources(0, 7, nullSRVs);
+    ID3D11ShaderResourceView* nullGBufferSRVs[5] = {};
+    dc->PSSetShaderResources(0, _countof(nullGBufferSRVs), nullGBufferSRVs);
+    ID3D11ShaderResourceView* nullIblSRVs[3] = {};
+    dc->PSSetShaderResources(10, _countof(nullIblSRVs), nullIblSRVs);
 }

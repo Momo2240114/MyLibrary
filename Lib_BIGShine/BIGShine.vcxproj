@@ -298,9 +298,8 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp" />
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\Pipeline\RadialBlurPass.cpp" />
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\Pipeline\RenderPipeline.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp" />
@@ -322,6 +321,9 @@
     <ClCompile Include="Code\Engine\Graphics\Shader\ShadowCasterShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonPBRShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp" />
@@ -334,9 +336,10 @@
     <ClCompile Include="Code\Engine\Physics\SphereCollider.cpp" />
     <ClCompile Include="Code\Engine\Platform\WindowsDialogHelper.cpp" />
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
-    <ClCompile Include="Code\Game\Charcter\Player\PlayerInput.cpp" />
-    <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
@@ -402,10 +405,7 @@
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h" />
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\BloomPass.h" />
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\IRenderPass.h" />
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\RadialBlurPass.h" />
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\RenderPipeline.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h" />
@@ -425,6 +425,10 @@
     <ClInclude Include="Code\Engine\Graphics\Shader\SpriteShaderID.h" />
     <ClInclude Include="Code\Engine\Graphics\Shader\ToonPBRShader.h" />
     <ClInclude Include="Code\Engine\Graphics\Shader\ToonShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h" />
     <ClInclude Include="Code\Engine\Audio\Audio.h" />
     <ClInclude Include="Code\Engine\Audio\AudioManager.h" />
     <ClInclude Include="Code\Engine\Audio\AudioResource.h" />
@@ -482,10 +486,11 @@
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
-    <ClInclude Include="Code\Game\Charcter\Player\PlayerAttack.h" />
-    <ClInclude Include="Code\Game\Charcter\Player\PlayerInput.h" />
-    <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h" />
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
     <ClInclude Include="Code\Wip.hpp" />
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
     <ClInclude Include="External\imgui-node-editor\crude_json.h" />
@@ -505,6 +510,7 @@
     <None Include="Shader\filter_functions.hlsli" />
     <None Include="Shader\gbuffer.hlsli" />
     <None Include="Shader\gbuffer_functions.hlsli" />
+    <None Include="Shader\MeshVFX.hlsli" />
     <None Include="Shader\ParticleBitonicSort.hlsli" />
     <None Include="Shader\ParticleCommon.hlsli" />
     <None Include="Shader\ModelCommon.hlsli" />
@@ -563,6 +569,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\GBufferPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Shader\KawaseBlurPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
@@ -575,6 +585,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\MeshVFXPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\MeshVFXVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_GS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>

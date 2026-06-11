@@ -1,11 +1,10 @@
 #pragma once
+
+#include <Windows.h>
+
+#include <filesystem>
 #include <string>
 #include <vector>
-#include <filesystem>
-#include <shobjidl.h>
-#include <shlobj.h>
-#include <wrl/client.h>
-
 
 class WindowsDialogHelper
 {
@@ -16,30 +15,32 @@ public:
         const wchar_t* pattern;
     };
 
-    // 単一ファイル選択ダイアログ（基底）
-    // 戻り値: 選択されたパス（スラッシュ区切り）、キャンセル時は空文字
     static std::string OpenFileDialog(
-        const wchar_t* title,
-        const std::vector<FilterSpec>& filters,
-        const std::string& initialDir = "");
+        const wchar_t* title_,
+        const std::vector<FilterSpec>& filters_,
+        const std::string& initialDir_ = "",
+        HWND ownerWindow_ = nullptr);
 
-    // テクスチャ専用
     static std::string OpenTextureDialog(
-        const wchar_t* title,
-        const std::string& initialDir = "Data/Texture/Particle");
+        const wchar_t* title_,
+        const std::string& initialDir_ = "Data/Texture/Particle",
+        HWND ownerWindow_ = nullptr);
 
-    // JSON専用
     static std::string OpenJsonDialog(
-        const wchar_t* title,
-        const std::string& initialDir = "Data");
+        const wchar_t* title_,
+        const std::string& initialDir_ = "Data",
+        HWND ownerWindow_ = nullptr);
 
-    // glTF / GLB 専用
     static std::string OpenGltfDialog(
-        const wchar_t* title,
-        const std::string& initialDir = "Data/Model");
+        const wchar_t* title_,
+        const std::string& initialDir_ = "Data/Model",
+        HWND ownerWindow_ = nullptr);
 
-    // 全アセット汎用（テクスチャ・JSON・glTF）
     static std::string OpenAssetDialog(
-        const wchar_t* title,
-        const std::string& initialDir = "Data");
+        const wchar_t* title_,
+        const std::string& initialDir_ = "Data",
+        HWND ownerWindow_ = nullptr);
+
+    static std::filesystem::path Utf8ToPath(const std::string& path_);
+    static std::string PathToUtf8(const std::filesystem::path& path_);
 };

@@ -40,11 +40,6 @@ void ParticleComponent::RegisterActions()
 
 void ParticleComponent::Gui()
 {
-    if (textureDialogKey.empty())
-    {
-        textureDialogKey = "ParticleTextureBrowser_" + std::to_string(reinterpret_cast<uintptr_t>(this));
-    }
-
     RefreshAssetList();
 
     ImGui::SeparatorText("Particle Asset");
@@ -60,6 +55,19 @@ void ParticleComponent::Gui()
     if (ImGui::Button("Reload Asset") && !assetPath.empty())
     {
         LoadAsset(assetPath);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Open Asset File"))
+    {
+        const std::string initialDirectory_ = assetPath.empty()
+            ? "Data/Particle"
+            : WindowsDialogHelper::PathToUtf8(
+                WindowsDialogHelper::Utf8ToPath(assetPath).parent_path());
+        const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
+            L"Select Particle Asset",
+            initialDirectory_,
+            GraphicsDeviceManager::Instance().GetWindowHandle());
+        if (!selectedPath_.empty()) LoadAsset(selectedPath_);
     }
 
     const char* assetPreview_ = selectedAssetIndex >= 0 && selectedAssetIndex < static_cast<int>(assetFiles.size())
@@ -155,8 +163,6 @@ void ParticleComponent::Gui()
     auto& track = tracks[selectedEmitterIndex];
     auto& s = track.settings;
 
-    bool openTextureBrowser_ = false;
-
     auto textureCombo = [&](const char* label, std::string& fileName, std::string& path, int slot)
         {
             const char* preview = fileName.empty() ? "None" : fileName.c_str();
@@ -219,8 +225,6 @@ void ParticleComponent::Gui()
 
             if (browsePressed_)
             {
-                pendingTextureSlot = slot;
-
                 const wchar_t* title_ =
                     slot == 0 ? L"Select Color Texture" :
                     slot == 1 ? L"Select Mask Texture" :
@@ -228,29 +232,25 @@ void ParticleComponent::Gui()
 
                 const std::string initDir_ = path.empty()
                     ? "Data/Texture/Particle/"
-                    : std::filesystem::path(path).parent_path().generic_string();
-
-
-                const std::string selected_ = WindowsDialogHelper::OpenTextureDialog(title_, initDir_);
+                    : WindowsDialogHelper::PathToUtf8(
+                        WindowsDialogHelper::Utf8ToPath(path).parent_path());
+                const std::string selected_ = WindowsDialogHelper::OpenTextureDialog(
+                    title_,
+                    initDir_,
+                    GraphicsDeviceManager::Instance().GetWindowHandle());
 
                 if (!selected_.empty())
                 {
-
-
-
                     if (LoadEmitterTextureSlot(track, selected_, slot))
                     {
-
-                        fileName = std::filesystem::path(selected_).filename().string();
+                        fileName = WindowsDialogHelper::PathToUtf8(
+                            WindowsDialogHelper::Utf8ToPath(selected_).filename());
                         path = selected_;
                         if (slot == 1) s.useMaskTexture = 1;
                         if (slot == 2) s.useGradientTexture = 1;
                     }
                     else
                     {
-
-
-
                         fileName.clear();
                         path.clear();
                         if (slot == 1) s.useMaskTexture = 0;
@@ -269,7 +269,6 @@ void ParticleComponent::Gui()
                         }
                     }
                 }
-                pendingTextureSlot = -1;
             }
         };
 
@@ -471,96 +470,6 @@ void ParticleComponent::Gui()
         ImGui::TextColored(ImVec4(1.0f, 0.72f, 0.18f, 1.0f), "Press APPLY CHANGES to confirm edited settings.");
     }
 
-    if (ImGui::BeginPopupModal(textureDialogKey.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::TextUnformatted(pendingTextureSlot == 0 ? "Select Color Texture" : (pendingTextureSlot == 1 ? "Select Mask Texture" : "Select Gradient Texture"));
-        ImGui::Separator();
-        ImGui::TextWrapped("%s", textureBrowserDirectory.c_str());
-
-        if (ImGui::Button("Up"))
-        {
-            const std::filesystem::path parentPath_ = std::filesystem::path(textureBrowserDirectory).parent_path();
-            if (!parentPath_.empty()) textureBrowserDirectory = parentPath_.generic_string();
-            textureBrowserSelection.clear();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Particle Textures"))
-        {
-            textureBrowserDirectory = "Data/Texture/Particle";
-            textureBrowserSelection.clear();
-        }
-
-        ImGui::BeginChild("TextureFileList", ImVec2(620.0f, 360.0f), true);
-        std::vector<std::filesystem::directory_entry> browserEntries_;
-        std::error_code browserError_;
-        for (const auto& entry_ : std::filesystem::directory_iterator(textureBrowserDirectory, browserError_))
-        {
-            if (entry_.is_directory())
-            {
-                browserEntries_.push_back(entry_);
-                continue;
-            }
-
-            std::string extension_ = entry_.path().extension().string();
-            std::transform(extension_.begin(), extension_.end(), extension_.begin(), [](unsigned char char_) { return static_cast<char>(std::tolower(char_)); });
-            if (extension_ == ".png" || extension_ == ".jpg" || extension_ == ".jpeg" || extension_ == ".bmp" ||
-                extension_ == ".tga" || extension_ == ".dds" || extension_ == ".hdr")
-            {
-                browserEntries_.push_back(entry_);
-            }
-        }
-        std::sort(browserEntries_.begin(), browserEntries_.end(), [](const auto& left_, const auto& right_)
-            {
-                if (left_.is_directory() != right_.is_directory()) return left_.is_directory();
-                return left_.path().filename().string() < right_.path().filename().string();
-            });
-
-        for (const auto& entry_ : browserEntries_)
-        {
-            const std::string entryPath_ = entry_.path().generic_string();
-            const std::string entryLabel_ = entry_.is_directory()
-                ? "[DIR] " + entry_.path().filename().string()
-                : entry_.path().filename().string();
-            const bool selected_ = textureBrowserSelection == entryPath_;
-            if (ImGui::Selectable(entryLabel_.c_str(), selected_, ImGuiSelectableFlags_AllowDoubleClick))
-            {
-                if (entry_.is_directory() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-                {
-                    textureBrowserDirectory = entryPath_;
-                    textureBrowserSelection.clear();
-                    break;
-                }
-                textureBrowserSelection = entryPath_;
-            }
-        }
-        ImGui::EndChild();
-
-        ImGui::Text("Selected: %s", textureBrowserSelection.empty() ? "None" : textureBrowserSelection.c_str());
-        const bool canLoad_ = !textureBrowserSelection.empty() && std::filesystem::is_regular_file(textureBrowserSelection);
-        if (!canLoad_) ImGui::BeginDisabled();
-        if (ImGui::Button("Load Texture", ImVec2(160.0f, 0.0f)))
-        {
-            if (LoadEmitterTextureSlot(track, textureBrowserSelection, pendingTextureSlot))
-            {
-                const std::string selectedFileName_ = std::filesystem::path(textureBrowserSelection).filename().string();
-                if (pendingTextureSlot == 0) track.textureFileName = selectedFileName_;
-                else if (pendingTextureSlot == 1) track.maskTextureFileName = selectedFileName_;
-                else track.gradientTextureFileName = selectedFileName_;
-                applyFeedbackUntil = ImGui::GetTime() + 2.5;
-            }
-            pendingTextureSlot = -1;
-            ImGui::CloseCurrentPopup();
-        }
-        if (!canLoad_) ImGui::EndDisabled();
-        ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f)))
-        {
-            pendingTextureSlot = -1;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-
     ImGui::PopID();
 }
 
@@ -574,7 +483,7 @@ bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::s
     if (!track.emitter || fullPath.empty()) return false;
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-    std::wstring wpath(fullPath.begin(), fullPath.end());
+    const std::wstring wpath = WindowsDialogHelper::Utf8ToPath(fullPath).wstring();
 
     if (SUCCEEDED(CPUResourceLoader::LoadTextureFromFile(
         GraphicsDeviceManager::Instance().GetDevice(),
@@ -662,9 +571,9 @@ bool ParticleComponent::SaveAsset(const std::string& path_)
 
 bool ParticleComponent::LoadAsset(const std::string& path_)
 {
-    if (path_.empty() || !std::filesystem::exists(path_)) return false;
+    if (path_.empty() || !std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_))) return false;
 
-    std::ifstream file_(path_);
+    std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
     if (!file_.is_open()) return false;
 
     nlohmann::json json_;
@@ -882,47 +791,72 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 
     auto owner_ = GetGameObject();
     auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-    if (!model_)
+    if (!owner_ || !owner_->transform || !model_)
     {
         track_.emitter->SetMeshSpawnPositions({});
         return;
     }
 
     size_t totalVertexCount_ = 0;
-    for (const auto& mesh_ : model_->GetMeshes()) totalVertexCount_ += mesh_.vertices.size();
+    for (const auto& mesh_ : model_->GetMeshes())
+    {
+        totalVertexCount_ += mesh_.vertices.size();
+    }
+
     if (totalVertexCount_ == 0)
     {
         track_.emitter->SetMeshSpawnPositions({});
         return;
     }
 
+    const DirectX::XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
+
+    const DirectX::XMVECTOR emitterOffset_ = DirectX::XMVectorSet(
+        track_.settings.emissionPosition.x,
+        track_.settings.emissionPosition.y,
+        track_.settings.emissionPosition.z,
+        0.0f);
+
     const size_t sampleLimit_ = (std::max)(static_cast<size_t>(1), static_cast<size_t>(track_.meshVertexSampleCount));
     const size_t sampleStride_ = (std::max)(static_cast<size_t>(1), totalVertexCount_ / sampleLimit_);
+
     std::vector<DirectX::XMFLOAT3> positions_;
     positions_.reserve((std::min)(totalVertexCount_, sampleLimit_));
 
     size_t vertexIndex_ = 0;
     for (const auto& mesh_ : model_->GetMeshes())
     {
-        const DirectX::XMMATRIX meshTransform_ = mesh_.node
+        const DirectX::XMMATRIX meshLocal_ = mesh_.node
             ? DirectX::XMLoadFloat4x4(&mesh_.node->globalTransform)
             : DirectX::XMMatrixIdentity();
+
+        const DirectX::XMMATRIX finalWorld_ = meshLocal_ * ownerWorld_;
+
         for (const auto& vertex_ : mesh_.vertices)
         {
             if ((vertexIndex_++ % sampleStride_) != 0) continue;
-            DirectX::XMVECTOR position_ = DirectX::XMLoadFloat3(&vertex_.position);
-            position_ = DirectX::XMVector3TransformCoord(position_, meshTransform_);
-            DirectX::XMFLOAT3 transformedPosition_{};
-            DirectX::XMStoreFloat3(&transformedPosition_, position_);
-            positions_.push_back(transformedPosition_);
+
+            DirectX::XMVECTOR pos_ = DirectX::XMLoadFloat3(&vertex_.position);
+            pos_ = DirectX::XMVector3TransformCoord(pos_, finalWorld_);
+
+            // Emitter Offset ‚àƒI[ƒi[‰ñ“]‚É’Ç]‚³‚¹‚½‚¢‚Ì‚Å normal •ÏŠ·
+            DirectX::XMVECTOR rotatedOffset_ =
+                DirectX::XMVector3TransformNormal(emitterOffset_, ownerWorld_);
+
+            pos_ = DirectX::XMVectorAdd(pos_, rotatedOffset_);
+
+            DirectX::XMFLOAT3 out_{};
+            DirectX::XMStoreFloat3(&out_, pos_);
+            positions_.push_back(out_);
+
             if (positions_.size() >= sampleLimit_) break;
         }
+
         if (positions_.size() >= sampleLimit_) break;
     }
 
     track_.emitter->SetMeshSpawnPositions(positions_);
 }
-
 void ParticleComponent::RebuildEmitterResources()
 {
     auto device_ = GraphicsDeviceManager::Instance().GetDevice();

@@ -1,115 +1,200 @@
 #include "WindowsDialogHelper.h"
-#include <algorithm>
-#include <string>
 
+#include <commdlg.h>
+#include <filesystem>
+#include <system_error>
+
+#pragma comment(lib, "Comdlg32.lib")
+
+namespace
+{
+    std::wstring Utf8ToWide(const std::string& text_)
+    {
+        if (text_.empty()) return {};
+
+        const int length_ = MultiByteToWideChar(
+            CP_UTF8, MB_ERR_INVALID_CHARS, text_.c_str(), -1, nullptr, 0);
+        if (length_ <= 0)
+        {
+            return std::filesystem::path(text_).wstring();
+        }
+
+        std::wstring result_(static_cast<size_t>(length_), L'\0');
+        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text_.c_str(), -1, result_.data(), length_);
+        result_.pop_back();
+        return result_;
+    }
+
+    std::string WideToUtf8(const std::wstring& text_)
+    {
+        if (text_.empty()) return {};
+
+        const int length_ = WideCharToMultiByte(
+            CP_UTF8, 0, text_.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (length_ <= 0) return {};
+
+        std::string result_(static_cast<size_t>(length_), '\0');
+        WideCharToMultiByte(CP_UTF8, 0, text_.c_str(), -1, result_.data(), length_, nullptr, nullptr);
+        result_.pop_back();
+        return result_;
+    }
+
+    std::wstring BuildFilterString(const std::vector<WindowsDialogHelper::FilterSpec>& filters_)
+    {
+        std::wstring filterString_;
+        for (const auto& filter_ : filters_)
+        {
+            if (!filter_.name || !filter_.pattern) continue;
+            filterString_.append(filter_.name);
+            filterString_.push_back(L'\0');
+            filterString_.append(filter_.pattern);
+            filterString_.push_back(L'\0');
+        }
+        filterString_.push_back(L'\0');
+        return filterString_;
+    }
+
+    std::filesystem::path ResolveInitialDirectory(const std::string& initialDir_)
+    {
+        std::error_code error_;
+        std::filesystem::path directory_ = initialDir_.empty()
+            ? std::filesystem::current_path(error_)
+            : WindowsDialogHelper::Utf8ToPath(initialDir_);
+
+        if (std::filesystem::is_regular_file(directory_, error_))
+        {
+            directory_ = directory_.parent_path();
+        }
+        if (directory_.is_relative())
+        {
+            directory_ = std::filesystem::absolute(directory_, error_);
+        }
+        if (error_ || !std::filesystem::is_directory(directory_, error_))
+        {
+            directory_ = std::filesystem::current_path(error_);
+        }
+        return directory_;
+    }
+
+    std::string MakeProjectRelativePath(const std::filesystem::path& selectedPath_)
+    {
+        std::error_code error_;
+        const std::filesystem::path basePath_ = std::filesystem::current_path(error_);
+        if (!error_)
+        {
+            const std::filesystem::path relativePath_ =
+                std::filesystem::relative(selectedPath_, basePath_, error_);
+            if (!error_ && !relativePath_.empty())
+            {
+                const std::wstring relativeText_ = relativePath_.generic_wstring();
+                if (relativeText_.rfind(L"..", 0) != 0)
+                {
+                    return WideToUtf8(relativeText_);
+                }
+            }
+        }
+        return WideToUtf8(selectedPath_.generic_wstring());
+    }
+}
 
 std::string WindowsDialogHelper::OpenFileDialog(
-    const wchar_t* title,
-    const std::vector<FilterSpec>& filters,
-    const std::string& initialDir)
+    const wchar_t* title_,
+    const std::vector<FilterSpec>& filters_,
+    const std::string& initialDir_,
+    HWND ownerWindow_)
 {
-    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog_;
-    if (FAILED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
-        IID_IFileOpenDialog, reinterpret_cast<void**>(dialog_.GetAddressOf()))))
-        return "";
+    constexpr DWORD BUFFER_LENGTH = 32768;
+    std::vector<wchar_t> fileBuffer_(BUFFER_LENGTH, L'\0');
+    const std::wstring filterString_ = BuildFilterString(filters_);
+    const std::filesystem::path initialDirectory_ = ResolveInitialDirectory(initialDir_);
+    const std::wstring initialDirectoryText_ = initialDirectory_.wstring();
 
-    // フィルター設定
-    std::vector<COMDLG_FILTERSPEC> specs_;
-    specs_.reserve(filters.size());
-    for (const auto& f : filters)
-        specs_.push_back({ f.name, f.pattern });
-    dialog_->SetFileTypes(static_cast<UINT>(specs_.size()), specs_.data());
+    OPENFILENAMEW dialog_{};
+    dialog_.lStructSize = sizeof(dialog_);
+    dialog_.hwndOwner = ownerWindow_ ? ownerWindow_ : GetActiveWindow();
+    dialog_.lpstrFilter = filterString_.c_str();
+    dialog_.nFilterIndex = 1;
+    dialog_.lpstrFile = fileBuffer_.data();
+    dialog_.nMaxFile = static_cast<DWORD>(fileBuffer_.size());
+    dialog_.lpstrInitialDir = initialDirectoryText_.c_str();
+    dialog_.lpstrTitle = title_;
+    dialog_.Flags =
+        OFN_EXPLORER |
+        OFN_FILEMUSTEXIST |
+        OFN_PATHMUSTEXIST |
+        OFN_NOCHANGEDIR |
+        OFN_DONTADDTORECENT;
 
-    // タイトル
-    dialog_->SetTitle(title);
+    if (!GetOpenFileNameW(&dialog_)) return {};
 
-    // 初期ディレクトリ（SHCreateItemFromParsingName はフルパス必須）
-    if (!initialDir.empty())
-    {
-        std::filesystem::path absPath_ = std::filesystem::absolute(initialDir);
-        std::wstring wdir_ = absPath_.wstring();
-        Microsoft::WRL::ComPtr<IShellItem> shellItem_;
-        if (SUCCEEDED(SHCreateItemFromParsingName(wdir_.c_str(), nullptr,
-            IID_IShellItem, reinterpret_cast<void**>(shellItem_.GetAddressOf()))))
-        {
-            dialog_->SetFolder(shellItem_.Get());
-        }
-    }
-
-    // ダイアログ表示（キャンセル時は空文字を返す）
-    if (FAILED(dialog_->Show(nullptr))) return "";
-
-    Microsoft::WRL::ComPtr<IShellItem> result_;
-    if (FAILED(dialog_->GetResult(result_.GetAddressOf()))) return "";
-
-    PWSTR rawPath_ = nullptr;
-    if (FAILED(result_->GetDisplayName(SIGDN_FILESYSPATH, &rawPath_))) return "";
-
-    std::wstring wpath_(rawPath_);
-    CoTaskMemFree(rawPath_);
-
-    // フルパス → exe基準の相対パスに変換
-    std::filesystem::path selectedPath_(wpath_);
-    std::filesystem::path basePath_ = std::filesystem::current_path();
-    std::string outPath_;
-    std::error_code ec_;
-    std::filesystem::path relPath_ = std::filesystem::relative(selectedPath_, basePath_, ec_);
-    if (!ec_ && !relPath_.empty())
-    {
-        outPath_ = relPath_.generic_string(); // スラッシュ区切り
-    }
-    else
-    {
-        // 相対化できなかった場合はフルパスをスラッシュ区切りで返す
-        outPath_ = selectedPath_.generic_string();
-    }
-
-    return outPath_;
+    return MakeProjectRelativePath(std::filesystem::path(fileBuffer_.data()));
 }
 
 std::string WindowsDialogHelper::OpenTextureDialog(
-    const wchar_t* title,
-    const std::string& initialDir)
+    const wchar_t* title_,
+    const std::string& initialDir_,
+    HWND ownerWindow_)
 {
-    return OpenFileDialog(title,
+    return OpenFileDialog(title_,
         {
             { L"Texture Files", L"*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds;*.hdr" },
-            { L"All Files",     L"*.*" }
-        }, initialDir);
+            { L"All Files", L"*.*" },
+        },
+        initialDir_,
+        ownerWindow_);
 }
 
 std::string WindowsDialogHelper::OpenJsonDialog(
-    const wchar_t* title,
-    const std::string& initialDir)
+    const wchar_t* title_,
+    const std::string& initialDir_,
+    HWND ownerWindow_)
 {
-    return OpenFileDialog(title,
+    return OpenFileDialog(title_,
         {
             { L"JSON Files", L"*.json" },
-            { L"All Files",  L"*.*"   }
-        }, initialDir);
+            { L"All Files", L"*.*" },
+        },
+        initialDir_,
+        ownerWindow_);
 }
 
 std::string WindowsDialogHelper::OpenGltfDialog(
-    const wchar_t* title,
-    const std::string& initialDir)
+    const wchar_t* title_,
+    const std::string& initialDir_,
+    HWND ownerWindow_)
 {
-    return OpenFileDialog(title,
+    return OpenFileDialog(title_,
         {
             { L"glTF Files", L"*.gltf;*.glb" },
-            { L"All Files",  L"*.*"          }
-        }, initialDir);
+            { L"All Files", L"*.*" },
+        },
+        initialDir_,
+        ownerWindow_);
 }
 
 std::string WindowsDialogHelper::OpenAssetDialog(
-    const wchar_t* title,
-    const std::string& initialDir)
+    const wchar_t* title_,
+    const std::string& initialDir_,
+    HWND ownerWindow_)
 {
-    return OpenFileDialog(title,
+    return OpenFileDialog(title_,
         {
             { L"All Asset Files", L"*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds;*.hdr;*.json;*.gltf;*.glb" },
-            { L"Texture Files",   L"*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds;*.hdr" },
-            { L"JSON Files",      L"*.json"       },
-            { L"glTF Files",      L"*.gltf;*.glb" },
-            { L"All Files",       L"*.*"          }
-        }, initialDir);
+            { L"Texture Files", L"*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds;*.hdr" },
+            { L"JSON Files", L"*.json" },
+            { L"glTF Files", L"*.gltf;*.glb" },
+            { L"All Files", L"*.*" },
+        },
+        initialDir_,
+        ownerWindow_);
+}
+
+std::filesystem::path WindowsDialogHelper::Utf8ToPath(const std::string& path_)
+{
+    return std::filesystem::path(Utf8ToWide(path_));
+}
+
+std::string WindowsDialogHelper::PathToUtf8(const std::filesystem::path& path_)
+{
+    return WideToUtf8(path_.generic_wstring());
 }

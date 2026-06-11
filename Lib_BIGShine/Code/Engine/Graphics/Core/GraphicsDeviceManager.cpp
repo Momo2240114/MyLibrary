@@ -6,7 +6,6 @@
 #include <d3d11sdklayers.h>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
-#include "Engine/Graphics/RenderSystem/Pipeline/RadialBlurPass.h"
 
 struct SkyBoxVertex
 {
@@ -192,6 +191,7 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
 
     // --- 追加：シーンバッファの作成 ---
     if (!CreateSceneRenderTarget(width_, height_)) return false;
+    if (!CreateGBufferTargets(width_, height_)) return false;
 
 
     if (!postRenderSystem.Initialize(device.Get(), width_, height_)) return false;
@@ -263,6 +263,14 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     sceneSRV.Reset();
     sceneNormalRTV.Reset();
     sceneNormalSRV.Reset();
+    gBufferBaseColorRTV.Reset();
+    gBufferBaseColorSRV.Reset();
+    gBufferNormalRTV.Reset();
+    gBufferNormalSRV.Reset();
+    gBufferMaterialRTV.Reset();
+    gBufferMaterialSRV.Reset();
+    gBufferEmissiveRTV.Reset();
+    gBufferEmissiveSRV.Reset();
 
     // swapChain->ResizeBuffers() を呼び出し
     HRESULT hr = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
@@ -272,6 +280,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     CreateRenderTarget();
     CreateDepthStencil();
     CreateSceneRenderTarget(width, height); // シーンバッファを新しいサイズで作る
+    CreateGBufferTargets(width, height);
     postRenderSystem.Initialize(device.Get(), width, height); // ポストプロセスも再初期化
 
     // ビューポートの設定
@@ -290,6 +299,10 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
     immediateContext->ClearRenderTargetView(sceneRTV.Get(), clearColor_);
     const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; // 修正：{} を使い、変数名を black に
     immediateContext->ClearRenderTargetView(sceneNormalRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferBaseColorRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferNormalRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferEmissiveRTV.Get(), black);
 
     // 深度バッファをクリア（これは共通）
     immediateContext->ClearDepthStencilView(depthStencilView.Get(),
@@ -337,6 +350,26 @@ void GraphicsDeviceManager::SetSceneRenderTarget()
     // 第一引数を 2 に変更
     immediateContext->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
 
+    immediateContext->RSSetViewports(1, &viewPort);
+}
+
+void GraphicsDeviceManager::SetSceneColorRenderTarget()
+{
+    ID3D11RenderTargetView* rtv_ = sceneRTV.Get();
+    immediateContext->OMSetRenderTargets(1, &rtv_, nullptr);
+    immediateContext->RSSetViewports(1, &viewPort);
+}
+
+void GraphicsDeviceManager::SetGBufferRenderTargets()
+{
+    ID3D11RenderTargetView* rtvs_[] =
+    {
+        gBufferBaseColorRTV.Get(),
+        gBufferNormalRTV.Get(),
+        gBufferMaterialRTV.Get(),
+        gBufferEmissiveRTV.Get(),
+    };
+    immediateContext->OMSetRenderTargets(_countof(rtvs_), rtvs_, depthStencilView.Get());
     immediateContext->RSSetViewports(1, &viewPort);
 }
 
@@ -708,6 +741,52 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     hr = device->CreateShaderResourceView(copyNormalTexture.Get(), nullptr, copyNormalSRV.ReleaseAndGetAddressOf());
     if (FAILED(hr)) return false;
 
+    return true;
+}
+
+bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
+{
+    struct Target_
+    {
+        DXGI_FORMAT format_;
+        Microsoft::WRL::ComPtr<ID3D11RenderTargetView>* rtv_;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>* srv_;
+    };
+
+    Target_ targets_[] =
+    {
+        { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferBaseColorRTV, &gBufferBaseColorSRV },
+        { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferNormalRTV, &gBufferNormalSRV },
+        { DXGI_FORMAT_R8G8B8A8_UNORM, &gBufferMaterialRTV, &gBufferMaterialSRV },
+        { DXGI_FORMAT_R16G16B16A16_FLOAT, &gBufferEmissiveRTV, &gBufferEmissiveSRV },
+    };
+
+    for (Target_& target_ : targets_)
+    {
+        D3D11_TEXTURE2D_DESC desc_{};
+        desc_.Width = width_;
+        desc_.Height = height_;
+        desc_.MipLevels = 1;
+        desc_.ArraySize = 1;
+        desc_.Format = target_.format_;
+        desc_.SampleDesc.Count = 1;
+        desc_.Usage = D3D11_USAGE_DEFAULT;
+        desc_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture_;
+        if (FAILED(device->CreateTexture2D(&desc_, nullptr, texture_.GetAddressOf())))
+        {
+            return false;
+        }
+        if (FAILED(device->CreateRenderTargetView(texture_.Get(), nullptr, target_.rtv_->ReleaseAndGetAddressOf())))
+        {
+            return false;
+        }
+        if (FAILED(device->CreateShaderResourceView(texture_.Get(), nullptr, target_.srv_->ReleaseAndGetAddressOf())))
+        {
+            return false;
+        }
+    }
     return true;
 }
 void GraphicsDeviceManager::Finalize()
