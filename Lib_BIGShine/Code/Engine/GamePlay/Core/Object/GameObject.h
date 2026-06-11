@@ -46,7 +46,7 @@ public:
     std::vector<std::shared_ptr<Component>> components;
 
     //コリジョン用のコンポーネント
-    std::shared_ptr<Component> colliderComponent;
+    std::vector<std::shared_ptr<Component>> colliderComponents;
     // --- 追加：自分専用のレジスタ ---
     ActionRegistry localRegistry;
 
@@ -105,7 +105,7 @@ public:
         //コライダーコンポーネントを来てクラスするクラスがTなのであれば
         if constexpr (std::is_base_of<ColliderComponent, T>::value)
         {
-            colliderComponent = comp;
+            colliderComponents.push_back(comp);
         }
         else
         {
@@ -117,9 +117,8 @@ public:
         {
             if constexpr (std::is_base_of<ColliderComponent, T>::value)
             {
-                colliderComponent->gameObject = shared_from_this();
-                colliderComponent->Start();
-                colliderComponent->SetStarted(true);
+                comp->Start();
+                comp->SetStarted(true);
             }
             else
             {
@@ -141,13 +140,27 @@ public:
             }
         }
 
-        //コライダーコンポーネント
-        if (colliderComponent != nullptr)
+        for (auto& collider_ : colliderComponents)
         {
-            if (auto casted = std::dynamic_pointer_cast<T>(colliderComponent))
+            if (auto casted = std::dynamic_pointer_cast<T>(collider_))
                 return casted;
         }
         return nullptr;
+    }
+
+    template<typename T>
+    std::vector<std::shared_ptr<T>> GetComponents()
+    {
+        std::vector<std::shared_ptr<T>> results_;
+        for (auto& comp_ : components)
+        {
+            if (auto casted_ = std::dynamic_pointer_cast<T>(comp_)) results_.push_back(casted_);
+        }
+        for (auto& collider_ : colliderComponents)
+        {
+            if (auto casted_ = std::dynamic_pointer_cast<T>(collider_)) results_.push_back(casted_);
+        }
+        return results_;
     }
 
     std::vector<std::string> GetComponentNames() const;

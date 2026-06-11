@@ -50,10 +50,9 @@ std::vector<std::string> GameObject::GetComponentNames() const
         names.push_back(comp->GetName());
     }
 
-    //コライダーコンポーネント
-    if (colliderComponent != nullptr)
+    for (const auto& collider_ : colliderComponents)
     {
-        names.push_back(colliderComponent->GetName());
+        names.push_back(collider_->GetName());
     }
 
     return names;
@@ -62,12 +61,12 @@ std::vector<std::string> GameObject::GetComponentNames() const
 void GameObject::CallAllComponentStart()
 {
 
-    if (colliderComponent)
+    for (auto& collider_ : colliderComponents)
     {
-        if (!colliderComponent->IsStarted())
+        if (!collider_->IsStarted())
         {
-            colliderComponent->Start();
-            colliderComponent->SetStarted(true);
+            collider_->Start();
+            collider_->SetStarted(true);
         }
     }
 
@@ -105,10 +104,9 @@ std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& com
             return comp;
     }
 
-    if (colliderComponent)
+    for (auto& collider_ : colliderComponents)
     {
-        if (colliderComponent->GetName() == compName_)
-            return colliderComponent;
+        if (collider_->GetName() == compName_) return collider_;
     }
 
     return nullptr;
@@ -141,10 +139,9 @@ void GameObject::Update(float et)
     }
 
 
-    //コライダーのコンポーネントを更新
-    if (colliderComponent != nullptr)
+    for (auto& collider_ : colliderComponents)
     {
-        colliderComponent->Update(et);
+        if (collider_->IsEnabled()) collider_->Update(et);
     }
 }
 
@@ -188,7 +185,7 @@ void GameObject::Clear()
     components.clear();
 
     // 3. 特別扱いしているコライダーコンポーネントをクリア
-    colliderComponent.reset();
+    colliderComponents.clear();
 
     // 4. Transform のリセット（必要に応じて）
     // 通常は次の Load で上書きされますが、初期状態に戻すと安全です
@@ -300,7 +297,9 @@ void GameObject::Gui()
 
     ImGui::Separator();
 
+    ImGui::SeparatorText("Transform");
     transform->Gui();
+    ImGui::TextDisabled("Game-controlled colliders follow these values. Enable Physics Controls Transform only for simulated objects.");
 
     // --- 親子付け UI の追加 ---
     ImGui::Separator();
@@ -346,7 +345,7 @@ void GameObject::Gui()
 
     // 削除予約用のポインタ
     Component* componentToRemove = nullptr;
-    bool removeCollider = false;
+    Component* colliderToRemove = nullptr;
 
     // -----------------------------
     // Components (可変リスト)
@@ -378,7 +377,7 @@ void GameObject::Gui()
 
         if (!enabled) ImGui::PopStyleVar();
 
-        if (open && enabled) comp->Gui();
+        if (open) comp->Gui();
 
         ImGui::PopID();
     }
@@ -386,32 +385,32 @@ void GameObject::Gui()
     // -----------------------------
     // Collider Component (個別メンバ)
     // -----------------------------
-    if (colliderComponent != nullptr)
+    for (auto& collider_ : colliderComponents)
     {
-        ImGui::PushID(colliderComponent.get());
+        ImGui::PushID(collider_.get());
 
-        bool enabled = colliderComponent->IsEnabled();
-        if (ImGui::Checkbox("##Enabled", &enabled)) colliderComponent->SetEnabled(enabled);
+        bool enabled = collider_->IsEnabled();
+        if (ImGui::Checkbox("##Enabled", &enabled)) collider_->SetEnabled(enabled);
 
         ImGui::SameLine();
 
         if (!enabled) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
 
-        bool open = ImGui::CollapsingHeader(colliderComponent->GetName().c_str());
+        bool open = ImGui::CollapsingHeader(collider_->GetName().c_str());
 
         // ★ コンテキストメニュー
         if (ImGui::BeginPopupContextItem("ColliderContextMenu"))
         {
             if (ImGui::MenuItem("Remove Component"))
             {
-                removeCollider = true;
+                colliderToRemove = collider_.get();
             }
             ImGui::EndPopup();
         }
 
         if (!enabled) ImGui::PopStyleVar();
 
-        if (open && enabled) colliderComponent->Gui();
+        if (open) collider_->Gui();
 
         ImGui::PopID();
     }
@@ -427,9 +426,12 @@ void GameObject::Gui()
     }
 
     // 2. 個別メンバの削除
-    if (removeCollider)
+    if (colliderToRemove)
     {
-        colliderComponent.reset(); // shared_ptr なら reset() で解放
+        colliderComponents.erase(
+            std::remove_if(colliderComponents.begin(), colliderComponents.end(),
+                [&](const auto& collider_) { return collider_.get() == colliderToRemove; }),
+            colliderComponents.end());
     }
 }
 
@@ -440,6 +442,7 @@ nlohmann::json GameObject::Save() const
     // 1. 基本情報の保存
     j["Name"] = nameComponent->name;
     j["Layer"] = static_cast<uint32_t>(layer);
+    j["CollisionMask"] = mask;
 
     // 親のTransformがある場合、その親が属するGameObjectの名前を保存
     if (auto pTrans = transform->parent.lock()) {
@@ -472,16 +475,16 @@ nlohmann::json GameObject::Save() const
     }
 
     // 4. 特別扱いしているコライダーの保存
-    if (colliderComponent) {
+    for (const auto& collider_ : colliderComponents) {
         nlohmann::json cj;
-        cj["TypeName"] = colliderComponent->GetName();
-        cj["Enabled"] = colliderComponent->IsEnabled();
+        cj["TypeName"] = collider_->GetName();
+        cj["Enabled"] = collider_->IsEnabled();
 
         nlohmann::json data;
-        colliderComponent->Serialize(data);
+        collider_->Serialize(data);
         cj["Data"] = data;
 
-        j["ColliderComponent"] = cj;
+        j["ColliderComponents"].push_back(cj);
     }
 
     return j;
@@ -493,6 +496,7 @@ void GameObject::Load(const nlohmann::json& j)
     // 1. 基本情報の復元
     nameComponent->name = j.value("Name", "GameObject");
     layer = static_cast<LayerType>(j.value("Layer", 0));
+    mask = j.value("CollisionMask", static_cast<uint32_t>(LayerType::Default));
 
     // 所有者の設定を忘れないように
     transform->gameObject = shared_from_this();
@@ -531,7 +535,8 @@ void GameObject::Load(const nlohmann::json& j)
             // <ColliderComponent> を指定してキャスト
             auto col = std::dynamic_pointer_cast<ColliderComponent>(comp);
             if (col) {
-                colliderComponent = col;
+                const auto exists_ = std::find(colliderComponents.begin(), colliderComponents.end(), comp);
+                if (exists_ == colliderComponents.end()) colliderComponents.push_back(col);
             }
         }
         };
@@ -546,6 +551,11 @@ void GameObject::Load(const nlohmann::json& j)
     // 特別なコライダー枠（もしJSONに分かれて残っているなら）の処理
     if (j.contains("ColliderComponent")) {
         loadComponent(j["ColliderComponent"]);
+    }
+    if (j.contains("ColliderComponents")) {
+        for (const auto& colliderJson_ : j["ColliderComponents"]) {
+            loadComponent(colliderJson_);
+        }
     }
 
 }

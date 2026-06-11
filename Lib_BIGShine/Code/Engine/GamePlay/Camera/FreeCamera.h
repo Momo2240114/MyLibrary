@@ -33,7 +33,7 @@ private:
 
 private:
     float moveSpeed = 10.0f;  // カメラが風を駆ける基本速度
-    float lookSpeed = 0.15f;  // 視線を動かす際の感度 (Degree)
+    float lookSpeed = 0.001f;  // 視線を動かす際の感度 (Degree)
     float speedMultiplier = 1.0f; // ホイールの魔術によって変動する速度倍率
 
     float currentYaw = 0.0f;   // Y軸の周りを巡る方位角 (度数法)

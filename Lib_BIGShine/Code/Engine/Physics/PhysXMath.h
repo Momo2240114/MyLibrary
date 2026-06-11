@@ -8,7 +8,7 @@ using namespace physx;
 
 
 
-DirectX::XMFLOAT3 QuaternionToEuler(const physx::PxQuat& q)
+inline DirectX::XMFLOAT3 QuaternionToEuler(const physx::PxQuat& q)
 {
 	DirectX::XMFLOAT3 euler;
 

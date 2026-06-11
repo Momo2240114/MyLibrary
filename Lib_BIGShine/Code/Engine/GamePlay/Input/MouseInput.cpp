@@ -73,6 +73,9 @@ void MouseInput::Update(HWND hwnd)
 
     m_wheelDeltaThisFrame = m_wheelDelta; // フレーム単位で保持
 
+    //マウスの差分を求める
+    m_SubMousePos = m_CurrentMousePos - center;
+
     ////デバッグ状態ではなければマウスカーソルを固定する
     //if (!m_DebugFlag)
     //{

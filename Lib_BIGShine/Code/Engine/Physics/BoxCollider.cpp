@@ -7,6 +7,7 @@
 
 void BoxCollider::Start()
 {
+    ColliderComponent::Start();
 }
 
 void BoxCollider::Gui() {

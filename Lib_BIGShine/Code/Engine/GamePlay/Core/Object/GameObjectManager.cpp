@@ -76,6 +76,13 @@ void GameObjectManager::Update(float et_)
 
     // 2. オブジェクトの更新
     for (auto& obj : _Objects) {
+        for (auto& col_ : obj->GetComponents<ColliderComponent>()) {
+            col_->SyncFromPhysics();
+        }
+    }
+
+    // 2. ?I?u?W?F?N?g??X?V
+    for (auto& obj : _Objects) {
         // ループの外、あるいは事前に取得したキャッシュを参照
         float scale = _TimeManager->GetCachedScale(obj->GetLayerBit());
         obj->Update(et_ * scale);
@@ -86,9 +93,6 @@ void GameObjectManager::Update(float et_)
 
     //LateUpdate
     for (auto& obj : _Objects) {
-        if (auto col = obj->GetComponent<ColliderComponent>()) {
-            col->ApplyGravity(et_); // ここで velocity.y を更新し、仮移動(pos += v*dt)を行う
-        }
         obj->LateUpdate(et_); // PlayerInputなどで velocity.x, z を設定
     }
 
@@ -135,9 +139,8 @@ void GameObjectManager::Clear()
     // 1. まず全てのトリガーリストをクリアして循環参照を解く
     for (auto& obj : _Objects) {
         if (!obj) continue;
-        auto col = obj->GetComponent<ColliderComponent>();
-        if (col) {
-            col->currentTriggers.clear();
+        for (auto& col_ : obj->GetComponents<ColliderComponent>()) {
+            col_->currentTriggers.clear();
         }
     }
     _Objects.clear(); // ここで shared_ptr の参照カウントが減り、実体が削除される
@@ -195,167 +198,16 @@ std::vector<std::string> GetSceneDirectories() {
 
 void GameObjectManager::CollisionStep()
 {
-    struct ColliderPair {
-        std::shared_ptr<GameObject> obj;
-        std::shared_ptr<ColliderComponent> col;
-    };
-    std::vector<ColliderPair> activeColliders;
-
-    //コリジョンのコンポーネントがあるゲームオブジェクトを取得する
-    for (auto& obj : _Objects) {
-        auto col = obj->GetComponent<ColliderComponent>();
-
-        if (col && col->IsEnabled()) {
-            activeColliders.push_back({ obj, col });
-        }
-    }
-
-    for (size_t i = 0; i < activeColliders.size(); ++i) {
-        for (size_t j = i + 1; j < activeColliders.size(); ++j) {
-
-            ColliderPair A = activeColliders[i];
-            ColliderPair B = activeColliders[j];
-
-
-
-            //動かないオブジェクト同士なら当たり判定は行わない
-            if (A.col->isStatic && B.col->isStatic)
-            {
-                continue;
-            }
-
-            CollisionManifold manifold = A.col->CheckCollision(B.col);
-
-            if (manifold.isHit)
-            {
-
-                if (A.col->isTrigger || B.col->isTrigger) {
-                    HandlePhysXTrigger(A.col.get(), B.col.get(), true);
-                }
-                else 
-                {
-                    //レイヤーがかぶっていたらその時だけは押し出し処理をやめる
-                    int a = (uint32_t)B.obj->layer;
-                    if ((A.obj->mask & (uint32_t)B.obj->layer) != 0)
-                    {
-                        HandlePhysXTrigger(A.col.get(), B.col.get(), true);
-                    }
-                    else
-                    {
-                        HandlePhysXContact(A.col.get(), B.col.get());
-
-                        // 1. 押し戻し比率
-                        float weightA = 0.5f; float weightB = 0.5f;
-                        if (A.col->isStatic) 
-                        { 
-                            weightA = 0.0f; weightB = 1.0f;
-                        }
-                        else if (B.col->isStatic) 
-                        {
-                            weightA = 1.0f; weightB = 0.0f;
-                        }
-                        else
-                        {
-                            //トータルの重さを求める
-                            float total = A.col->mass + B.col->mass;
-
-                            //ゼロ除算をなくすため
-                            if (total == 0.0f)
-                            {
-                                weightA = weightB = 0.5f;
-                            }
-                            else
-                            {
-                                weightA = B.col->mass / total;
-                                weightB = A.col->mass / total;
-                            }
-                        }
-
-                        // 2. 座標の押し戻し（めり込み解消）
-                        DirectX::XMVECTOR sepA = DirectX::XMVectorScale(manifold.normal, -manifold.depth * weightA);
-                        DirectX::XMVECTOR sepB = DirectX::XMVectorScale(manifold.normal, manifold.depth * weightB);
-
-                        // 改善案：オフセットを考慮した位置補正
-                        auto ApplyMove = [](std::shared_ptr<GameObject> obj, std::shared_ptr<ColliderComponent> col, DirectX::XMVECTOR sep) 
-                            {
-                                // 修正：const で受け取るか、一度変数に格納して左辺値にする
-                                const DirectX::XMFLOAT4X4& worldMatrix = obj->transform->GetWorld();
-                                DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&worldMatrix);
-
-                            // オフセットをワールド変換
-                            DirectX::XMVECTOR offsetVec = DirectX::XMLoadFloat3(&col->offset);
-                            DirectX::XMVECTOR rotatedOffset = DirectX::XMVector3TransformNormal(offsetVec, world);
-
-                            // オフセット分を引いた位置を求めることで、「コライダーの中心」ではなく
-                            // 「GameObjectのピボット」を適切に動かす
-                            DirectX::XMFLOAT3 sepFloat;
-                            DirectX::XMStoreFloat3(&sepFloat, sep);
-
-                            obj->transform->localPosition.x += sepFloat.x;
-                            obj->transform->localPosition.y += sepFloat.y;
-                            obj->transform->localPosition.z += sepFloat.z;
-
-                            obj->transform->MarkDirty();
-                            };
-                        ApplyMove(A.obj, A.col, sepA);
-                        ApplyMove(B.obj, B.col, sepB);
-
-                        // 3. 垂直・水平の判定と速度リセット
-                        // 法線のY成分を確認 (0.7f 程度以上なら「床」とみなす)
-                        float normalY = DirectX::XMVectorGetY(manifold.normal);
-
-                        auto ResolveVelocitySplit = [&](std::shared_ptr<ColliderComponent> col, float sign)
-                            {
-                                if (col->isStatic) return;
-
-                                // signを考慮した法線の向き
-                                float adjustedNormalY = DirectX::XMVectorGetY(manifold.normal) * sign;
-
-                                if (adjustedNormalY > 0.7f) { // 床に接触
-                                    col->isGrounded = true;   // ★接地フラグをオン
-                                    if (col->velocity.y < 0.0f) {
-                                        col->velocity.y = 0.0f; // 落下速度をリセット
-                                        col->isGrounded = true;
-                                    }
-                                    else
-                                    {
-                                        col->isGrounded = false;
-                                    }
-                                }
-                                else if (adjustedNormalY < -0.7f) { // 天井に接触
-                                    if (col->velocity.y > 0.0f) {
-                                        col->velocity.y = 0.0f; // 上昇速度をリセット
-                                        col->isGrounded = false;
-                                    }
-                                }
-                                else {
-                                    // 水平方向（壁）
-                                    DirectX::XMVECTOR vel = DirectX::XMLoadFloat3(&col->velocity);
-                                    DirectX::XMVECTOR dotVec = DirectX::XMVector3Dot(vel, manifold.normal);
-                                    float dot = DirectX::XMVectorGetX(dotVec) * sign;
-
-                                    if (dot < 0.0f) {
-                                        DirectX::XMVECTOR correction = DirectX::XMVectorScale(manifold.normal, dot * sign);
-                                        vel = DirectX::XMVectorSubtract(vel, correction);
-                                        DirectX::XMStoreFloat3(&col->velocity, vel);
-                                    }
-                                }
-                            };
-
-                        ResolveVelocitySplit(A.col, 1.0f);
-                        ResolveVelocitySplit(B.col, -1.0f);
-                    }
-         
-                }
-            }
-            else
-            {
-                HandlePhysXTrigger(A.col.get(), B.col.get(), false);
-            }
+    for (auto& obj_ : _Objects)
+    {
+        for (auto& col_ : obj_->GetComponents<ColliderComponent>())
+        {
+            col_->isGrounded = false;
+            col_->SetHitFlag(false);
+            col_->PreparePhysicsStep();
         }
     }
 }
-
 
 void GameObjectManager::Gui()
 {

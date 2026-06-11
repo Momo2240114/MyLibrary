@@ -1,5 +1,7 @@
 #pragma once
 #include <PxPhysicsAPI.h>
+#include <DirectXMath.h>
+#include <vector>
 
 class PhysXSystem
 {
@@ -18,4 +20,8 @@ public:
     static physx::PxRigidStatic* CreateGround(const physx::PxVec3& pos);
 
     static physx::PxMaterial* GetDefaultMaterial();
+    static physx::PxConvexMesh* CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_);
+    static physx::PxTriangleMesh* CreateTriangleMesh(
+        const std::vector<DirectX::XMFLOAT3>& vertices_,
+        const std::vector<uint32_t>& indices_);
 };
