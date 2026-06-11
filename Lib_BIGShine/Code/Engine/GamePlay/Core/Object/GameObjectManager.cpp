@@ -19,12 +19,15 @@
 
 #include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
+#include "Engine/Graphics/VFX/MeshVFXComponent.h"
 
 void GameObjectManager::Initialize()
 {
     // パーティクルシステムの初期化
     _ParticleSystem = std::make_unique<ParticleRenderSystem>();
     _ParticleSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
+    meshVFXRenderSystem = std::make_unique<MeshVFXRenderSystem>();
+    meshVFXRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
 
     _TimeManager = std::make_shared<TimeManager>();
 
@@ -359,7 +362,7 @@ void GameObjectManager::Gui()
 
 }
 
-// ヒストリー（階層）GUIの儀式
+// ヒストリー（階層）GUI
 void GameObjectManager::DrawHierarchyGui()
 {
 
@@ -675,6 +678,17 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderS
     }
 
     gdm.SetParticleRenderTarget();
+
+    for (auto& obj : _Objects)
+    {
+        if (!obj) continue;
+        auto meshVFX_ = obj->GetComponent<MeshVFXComponent>();
+        if (meshVFX_ && meshVFX_->IsEnabled())
+        {
+            meshVFXRenderSystem->PushSubmit(meshVFX_.get());
+        }
+    }
+    meshVFXRenderSystem->RenderAll(rc);
 
     for (auto& obj : _Objects)
     {

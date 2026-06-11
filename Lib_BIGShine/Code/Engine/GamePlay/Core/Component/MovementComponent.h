@@ -1,7 +1,7 @@
 #pragma once
 
 #include"ComponentBase.h"
-#include"Vector.h"
+#include "Engine/Math/Vector.h"
 
 
 enum class RotationType

@@ -67,13 +67,9 @@ private:
     std::vector<std::string> textureFiles;
     std::vector<std::string> assetFiles;
     std::string assetPath;
-    std::string textureDialogKey;
-    std::string textureBrowserDirectory = "Data/Texture/Particle";
-    std::string textureBrowserSelection;
     char assetNameBuffer[128] = "NewParticle";
     int selectedEmitterIndex = 0;
     int selectedAssetIndex = -1;
-    int pendingTextureSlot = -1;
     float timer = 0.0f;
     double applyFeedbackUntil = 0.0;
     bool isPlaying = false;

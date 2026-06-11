@@ -12,6 +12,7 @@
 
 #include "Engine/Graphics/Shader/ModelShaderID.h"
 #include "Engine/Graphics/Shader/DecalShader.h"
+#include "Engine/Graphics/Shader/LightingShader.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include <nlohmann/json_fwd.hpp>
 
@@ -94,6 +95,17 @@ private:
 		DirectX::XMFLOAT3 padding;
 	};
 
+	struct CbGBufferMaterial
+	{
+		DirectX::XMFLOAT4 baseColor;
+		DirectX::XMFLOAT3 emissiveColor;
+		float metalness;
+		float roughness;
+		float occlusionStrength;
+		float toonPbrBlend;
+		int shadingModel;
+	};
+
 	struct DrawInfo
 	{
 		ModelShaderID				shaderId;
@@ -128,6 +140,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> outlineConstantBuffer;
 	DirectX::XMFLOAT4 outlineColor = { 0.02f, 0.02f, 0.025f, 1.0f };
 	float outlineThickness = 0.00f;
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> gBufferVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferPixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> gBufferInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
+	std::shared_ptr<LightingShader> lightingShader;
 
 	// --- StructuredBuffer ä«óùóp ---
 	Microsoft::WRL::ComPtr<ID3D11Buffer> lightStructuredBuffer;

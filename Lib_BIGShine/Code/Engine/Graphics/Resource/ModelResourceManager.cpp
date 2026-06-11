@@ -14,9 +14,10 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
     // 1. パスの深淵から、純粋なる「真名（Model名）」を抽出する
     std::filesystem::path filePath(filename);
     std::string pureModelName = filePath.stem().string();
+    const std::string resourceKey = filePath.lexically_normal().generic_string();
 
     // 2. すでにその名が記憶に刻まれているか確認
-    auto it = m_resources.find(pureModelName);
+    auto it = m_resources.find(resourceKey);
     if (it != m_resources.end()) {
         // 「おお、そなたの探す記憶（GPUバッファ等も構築済み）はここにある！」
         return it->second;
@@ -192,7 +193,7 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
     }
 
     // 5. 完成した結晶を神殿リソースを書き留める
-    m_resources[pureModelName] = newResource;
+    m_resources[resourceKey] = newResource;
 
     printf("新たにモデルリソースを神殿に奉納せり: %s\n", pureModelName.c_str());
     return newResource;

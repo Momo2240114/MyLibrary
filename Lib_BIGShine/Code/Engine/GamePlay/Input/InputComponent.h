@@ -2,7 +2,7 @@
 
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
-#include"Vector.h"
+#include "Engine/Math/Vector.h"
 
 class InputComponent :public Component
 {

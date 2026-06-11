@@ -3,7 +3,7 @@
 #include <directxmath.h>
 #include <cstdint>
 #include <string>
-#include <vector.h>
+#include <vector>
 
 struct Particle
 {
@@ -58,7 +58,6 @@ struct ParticleSystemConstants
     float noiseScale = 0.0f;      // 互換用: 旧Noise Scale。0以外ならnoiseStrengthとして扱う
     float gravity = -9.8f;       // Y方向の加速度。物理寄りの初期値: -9.8m/s^2
 
-    // Niagara / Effekseer寄りのGPU側モジュール設定
     float noiseFrequency = 1.0f;  // ノイズの細かさ。大きいほど細かく揺れる
     float noiseSpeed = 1.0f;      // ノイズ場のスクロール速度
     float noiseStrength = 0.0f;   // ノイズ加速度の強さ。旧noiseScaleよりこっちを使う

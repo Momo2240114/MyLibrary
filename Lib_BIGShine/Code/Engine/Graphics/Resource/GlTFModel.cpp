@@ -14,6 +14,8 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
+#include "Engine/Platform/WindowsDialogHelper.h"
+
 const std::vector<D3D11_INPUT_ELEMENT_DESC> GltfModelCommponennt::InputElementDescs =
 {
 	{ "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -377,6 +379,53 @@ void GltfModelCommponennt::Gui()
 			LoadModel(device, fullPath.c_str());
 		}
 	}
+
+	// --- 追加：ダイアログでのファイル選択 ---
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
+	// エクスプローラーから直接モデルを読みこむボタン
+	if (ImGui::Button("Browse via Dialog...", ImVec2(-1, 0)))
+	{
+		// Windowsのダイアログを開き、glTF/glbファイルを選択させる
+		// 初期ディレクトリは "Data/Model" を起点とする
+		std::string filePath = WindowsDialogHelper::OpenGltfDialog(L"モデルファイルを選択してください", rootPath);
+
+		if (!filePath.empty())
+		{
+			// 例: "Data/Model/Hero/Knight/knight.gltf" というパスが返ってきた場合の処理
+			std::filesystem::path selectedPath(filePath);
+			std::filesystem::path base(rootPath);
+
+			// rootPath ("Data/Model") からの相対パスを計算する
+			// 例: "Hero/Knight/knight.gltf"
+			std::filesystem::path relativeToRoot = std::filesystem::relative(selectedPath, base);
+
+			if (!relativeToRoot.empty() && relativeToRoot.string().find("..") == std::string::npos)
+			{
+				// 最初の階層を selectedDir とする (例: "Hero")
+				auto it = relativeToRoot.begin();
+				selectedDir = it->string();
+
+				// 残りの部分（サブフォルダを含むファイルパス）を selectedFile とする (例: "Knight/knight.gltf")
+				std::filesystem::path remainingPath;
+				for (++it; it != relativeToRoot.end(); ++it)
+				{
+					remainingPath /= *it;
+				}
+				// ImGuiの既存ロジックに合わせて、区切り文字を汎用的なフォーマットに統一
+				selectedFile = remainingPath.generic_string();
+			}
+			else
+			{
+				// 万が一 Data/Model 外のファイルが選ばれた場合の安全弁
+				selectedDir = "";
+				selectedFile = "";
+			}
+		}
+	}
+
 
 	ImGui::Text("Current: %s", modelName.c_str());
 

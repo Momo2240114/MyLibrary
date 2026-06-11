@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
-#include "Vector.h"
+#include "Engine/Math/Vector.h"
 
 
 enum class RotationType {

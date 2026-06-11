@@ -17,9 +17,6 @@
     <Filter Include="Shaders\Sprite">
       <UniqueIdentifier>{1872be16-6fc6-48f4-9278-370186efcab7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\PBR">
-      <UniqueIdentifier>{849f576a-6126-4e25-ab1d-37e30901e8bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Decal">
       <UniqueIdentifier>{e3ef62cd-7018-42a8-bcc0-6c180e038547}</UniqueIdentifier>
     </Filter>
@@ -143,12 +140,6 @@
     <Filter Include="Shaders\Lighting">
       <UniqueIdentifier>{c44cecb9-c650-4798-9577-92d4a6b43f18}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Code\Engine\Graphics\RenderSystem\Pipeline">
-      <UniqueIdentifier>{d5bc7a82-5319-42a1-84f9-02649179ed6b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Code\Engine\Graphics\RenderSystem\Pipeline\Pass">
-      <UniqueIdentifier>{6274888d-6ca4-4f07-9564-eb39b73ad609}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Pass">
       <UniqueIdentifier>{2544b267-50aa-456e-8d71-02a72c1458cc}</UniqueIdentifier>
     </Filter>
@@ -191,6 +182,39 @@
     <Filter Include="Code\Engine\Platform">
       <UniqueIdentifier>{f7a5f017-e4fe-405b-9a11-f57e57888449}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Game\Logics\Charcter\Player\State">
+      <UniqueIdentifier>{48e898f8-9714-42da-9fac-e02f4cedadd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\MeshVFX">
+      <UniqueIdentifier>{62fb086d-369f-4c03-b18d-f36cc8f9f42f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PBR">
+      <UniqueIdentifier>{849f576a-6126-4e25-ab1d-37e30901e8bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\VFX">
+      <UniqueIdentifier>{57c29c79-f488-4bdb-96db-e9197bf13532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\Model">
+      <UniqueIdentifier>{83f4bb2f-c6fa-4c43-8b1d-01051cd584f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\Sprite">
+      <UniqueIdentifier>{97f44e0a-c8be-4acc-9cae-36f36b106b5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\PostEffect">
+      <UniqueIdentifier>{3648de2c-e61d-44e0-a31b-45f5c4fc77c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\Particle">
+      <UniqueIdentifier>{a0ace4d4-2f99-45e2-bf7c-597f5b2aa447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\Shape">
+      <UniqueIdentifier>{14f035a3-2e64-4a20-95e6-81863d64252c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\Shadow">
+      <UniqueIdentifier>{e8a178db-e98b-4532-8a96-a8cded49e690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\GUI">
+      <UniqueIdentifier>{50b10bf2-5501-46ad-b6a9-90b8ea7efb83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -228,9 +252,6 @@
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui_tables.cpp">
       <Filter>Code\Editor\ImGui\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Audio\Audio.cpp">
       <Filter>Code\Engine\Audio</Filter>
@@ -309,18 +330,6 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp">
       <Filter>Code\Engine\Graphics\Particle</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\BloomSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
@@ -406,18 +415,6 @@
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\Pipeline\RenderPipeline.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\Pipeline\RadialBlurPass.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem\Pipeline\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
@@ -441,9 +438,6 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Core\RenderState.cpp">
       <Filter>Code\Engine\Graphics\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Decal\DecalComponent.cpp">
       <Filter>Code\Engine\Graphics\Decal</Filter>
@@ -508,9 +502,6 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Shader\ShadowCasterShader.cpp">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
@@ -526,9 +517,6 @@
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Game\Charcter\Player\PlayerInput.cpp">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp">
       <Filter>Code\Engine\Math</Filter>
     </ClCompile>
@@ -537,8 +525,53 @@
       <Filter>Code\Engine\Platform</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXComponent.cpp">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\Sprite</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+      <Filter>Code\Engine\Graphics\RenderSystem\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\BloomSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -550,9 +583,6 @@
     </ClInclude>
     <ClInclude Include="External\imnodes-master\imnodes_internal.h">
       <Filter>Code\Editor\ImGui\imgui\imnodes</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Audio\Audio.h">
       <Filter>Code\Engine\Audio</Filter>
@@ -631,21 +661,6 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEmitter.h">
       <Filter>Code\Engine\Graphics\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\BloomSystem.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
@@ -773,26 +788,8 @@
     <ClInclude Include="Code\Engine\Graphics\Shader\LightingShader.h">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\IRenderPass.h">
-      <Filter>Code\Engine\Graphics\RenderSystem\Pipeline\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\RenderPipeline.h">
-      <Filter>Code\Engine\Graphics\RenderSystem\Pipeline</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Shader\ToonShader.h">
       <Filter>Code\Engine\Graphics\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\RadialBlurPass.h">
-      <Filter>Code\Engine\Graphics\RenderSystem\Pipeline\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\Pipeline\BloomPass.h">
-      <Filter>Code\Engine\Graphics\RenderSystem\Pipeline\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
@@ -844,9 +841,6 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Core\RenderState.h">
       <Filter>Code\Engine\Graphics\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h">
       <Filter>Code\Engine\Graphics\Decal</Filter>
@@ -920,9 +914,6 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Shader\ShadowCasterShader.h">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClInclude>
@@ -938,12 +929,6 @@
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Game\Charcter\Player\PlayerAttack.h">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Game\Charcter\Player\PlayerInput.h">
-      <Filter>Code\Game\Logics\Charcter\Player</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Engine\Common\misc.h">
       <Filter>Code\Engine\Common</Filter>
     </ClInclude>
@@ -957,8 +942,62 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\FreeCamera.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXComponent.h">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\Particle</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleRessiource.h">
-      <Filter>Code\Engine\Graphics\RenderSystem</Filter>
+      <Filter>Code\Engine\Graphics\RenderSystem\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\BloomSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1004,6 +1043,9 @@
     <None Include="Shader\ParticleBitonicSort.hlsli">
       <Filter>Shaders\Particle</Filter>
     </None>
+    <None Include="Shader\MeshVFX.hlsli">
+      <Filter>Shaders\VFX</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\BasicPS.hlsl">
@@ -1029,6 +1071,9 @@
     </FxCompile>
     <FxCompile Include="Shader\FullScreenVS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GBufferPS.hlsl">
+      <Filter>Shaders\Lighting</Filter>
     </FxCompile>
     <FxCompile Include="Shader\sprite_PS.hlsl">
       <Filter>Shaders\Sprite</Filter>
@@ -1113,6 +1158,12 @@
     </FxCompile>
     <FxCompile Include="Shader\ToonPBRPS.hlsl">
       <Filter>Shaders\ToonPBR</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MeshVFXVS.hlsl">
+      <Filter>Shaders\VFX</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MeshVFXPS.hlsl">
+      <Filter>Shaders\VFX</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
