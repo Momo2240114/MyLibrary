@@ -225,6 +225,8 @@ public:
 	// トランスフォーム更新処理
 	void UpdateTransform();
 
+	void UpdateNodeTransformFrom(int nodeIndex_);
+
 	// アニメーション計算
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, NodePose& nodePose) const;
 	void ComputeAnimation(int animationIndex, float time, std::vector<NodePose>& nodePoses) const;

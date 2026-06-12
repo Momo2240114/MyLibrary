@@ -305,6 +305,7 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.cpp" />
@@ -466,6 +467,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationDataAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />

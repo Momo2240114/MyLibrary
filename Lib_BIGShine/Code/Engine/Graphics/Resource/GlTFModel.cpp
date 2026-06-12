@@ -583,6 +583,22 @@ void GltfModelCommponennt::UpdateTransform()
 		}
 	}
 }
+void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
+{
+	if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes.size()))
+	{
+		return;
+	}
+
+	DirectX::XMMATRIX parentWorldTransform_ =
+		this->GetGameObject()->transform->worldMatrix;
+
+	DirectX::XMMATRIX modelScaleMat_ =
+		DirectX::XMMatrixScaling(localScale, localScale, localScale);
+
+	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
+}
+
 //{
 //	DirectX::XMMATRIX ParentWorldTransform = this->GetGameObject()->transform->worldMatrix;
 //

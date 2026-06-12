@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cmath>
 
+
+
 static void CallAnimationAction(const std::shared_ptr<GameObject>& owner, const std::string& actionName)
 {
     if (actionName.empty()) return;
@@ -299,6 +301,8 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
     fadeTimer = 0.0f;
     isMixing = true;
     isTransitioning = true;
+
+
 }
 
 void ModelAnimator::ComputeCustomAnimationPose(const CustomAnimation& customAnim, float time, const std::vector<SavedPose>& poseLibrary, std::vector<GltfModelCommponennt::NodePose>& outPose, GltfModelCommponennt* model)

@@ -1,4 +1,36 @@
 {
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionRole": 0,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0
+                ],
+                "GravityScale": 1.0,
+                "HalfHeight": 1.3300000429153442,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    20.170000076293945,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 80.0,
+                "Segments": 16,
+                "ShapeRenderFlg": true,
+                "UseGravity": false,
+                "UsePhysicsResponse": true
+            },
+            "Enabled": true,
+            "TypeName": "CylinderCollider"
+        }
+    ],
+    "CollisionMask": 0,
     "Components": [
         {
             "Data": {
