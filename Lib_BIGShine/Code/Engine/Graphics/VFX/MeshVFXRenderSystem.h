@@ -18,4 +18,5 @@ public:
 private:
     std::unique_ptr<MeshVFXShader> shader;
     std::vector<MeshVFXComponent*> components;
+    bool isInitialized = false;
 };
