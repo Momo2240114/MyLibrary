@@ -1,28 +1,35 @@
 {
-    "ColliderComponent": {
-        "Data": {
-            "DebugPrimitiveColor": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "GravityScale": 1.0,
-            "HalfHeight": 0.7799999713897705,
-            "IsStatic": false,
-            "IsTrigger": false,
-            "Offset": [
-                0.0,
-                0.8100000023841858,
-                0.0
-            ],
-            "Radius": 0.33000001311302185,
-            "ShapeRenderFlg": true,
-            "UseGravity": true
-        },
-        "Enabled": true,
-        "TypeName": "CapsuleCollider"
-    },
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionRole": 0,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "GravityScale": 1.0,
+                "HalfHeight": 0.7799999713897705,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Offset": [
+                    0.0,
+                    0.8100000023841858,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.33000001311302185,
+                "ShapeRenderFlg": true,
+                "UseGravity": false,
+                "UsePhysicsResponse": true
+            },
+            "Enabled": true,
+            "TypeName": "CapsuleCollider"
+        }
+    ],
+    "CollisionMask": 0,
     "Components": [
         {
             "Data": {
@@ -167,6 +174,177 @@
             },
             "Enabled": true,
             "TypeName": "AnimationControllerComponent"
+        },
+        {
+            "Data": {
+                "BodyCollisionShapeColor": [
+                    1.0,
+                    0.44999998807907104,
+                    0.10000000149011612,
+                    1.0
+                ],
+                "BodyCollisionSpheres": [
+                    {
+                        "Enabled": true,
+                        "Name": "Head",
+                        "Node": "upperarm_l",
+                        "Offset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Radius": 0.07800000160932541
+                    },
+                    {
+                        "Enabled": true,
+                        "Name": "Head",
+                        "Node": "upperarm_r",
+                        "Offset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Radius": 0.06499999761581421
+                    },
+                    {
+                        "Enabled": true,
+                        "Name": "Head",
+                        "Node": "neck_01",
+                        "Offset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Radius": 0.06400000303983688
+                    },
+                    {
+                        "Enabled": true,
+                        "Name": "Head",
+                        "Node": "head",
+                        "Offset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Radius": 0.06300000101327896
+                    }
+                ],
+                "Chains": [
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 0,
+                        "CollideWithBodyColliders": true,
+                        "CollisionRadius": 0.01899999938905239,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "Name": "Hair",
+                        "RootNode": "Bone_hair_L01",
+                        "RootRotationFollow": 0.3319999873638153,
+                        "SolverIterations": 4,
+                        "SolverSubsteps": 2,
+                        "Stiffness": 0.014000000432133675,
+                        "TipNode": "Bone_hair_L02_end",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 2
+                    },
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 2,
+                        "CollideWithBodyColliders": true,
+                        "CollisionRadius": 0.027000000700354576,
+                        "Damping": 0.8889999985694885,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "Name": "Hair",
+                        "RootNode": "Bone_hair_B01",
+                        "RootRotationFollow": 0.46399998664855957,
+                        "SolverIterations": 4,
+                        "SolverSubsteps": 2,
+                        "Stiffness": 0.004999999888241291,
+                        "TipNode": "Bone_hair_B_End_end",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 2
+                    },
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 4,
+                        "CollideWithBodyColliders": true,
+                        "CollisionRadius": 0.019999999552965164,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "Name": "Hair",
+                        "RootNode": "Bone_hair_R01",
+                        "RootRotationFollow": 0.699999988079071,
+                        "SolverIterations": 4,
+                        "SolverSubsteps": 2,
+                        "Stiffness": 0.004999999888241291,
+                        "TipNode": "Bone_hair_R02_end",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 2
+                    },
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 3,
+                        "CollideWithBodyColliders": true,
+                        "CollisionRadius": 0.05700000002980232,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "Name": "Hair",
+                        "RootNode": "Bone_hair_B_R_01",
+                        "RootRotationFollow": 0.6259999871253967,
+                        "SolverIterations": 4,
+                        "SolverSubsteps": 2,
+                        "Stiffness": 0.004999999888241291,
+                        "TipNode": "Bone_hair_B_R_End_end",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 2
+                    },
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 1,
+                        "CollideWithBodyColliders": true,
+                        "CollisionRadius": 0.05400000140070915,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "Name": "Hair",
+                        "RootNode": "Bone_hair_B_L_01",
+                        "RootRotationFollow": 0.699999988079071,
+                        "SolverIterations": 4,
+                        "SolverSubsteps": 2,
+                        "Stiffness": 0.008999999612569809,
+                        "TipNode": "Bone_hair_B_L_End_end",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 2
+                    }
+                ],
+                "ShowBodyCollisionShapes": true
+            },
+            "Enabled": true,
+            "TypeName": "IKMapComponent"
         }
     ],
     "Layer": 0,
@@ -174,13 +352,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -0.0668453723192215,
-            1.399999976158142,
-            -1.862400770187378
+            0.0,
+            1.7999978065490723,
+            0.0
         ],
         "Rot": [
             0.0,
-            222.98199462890625,
+            42.481998443603516,
             0.0
         ],
         "Scale": [

@@ -1,4 +1,5 @@
 {
+    "CollisionMask": 0,
     "Components": [
         {
             "Data": {

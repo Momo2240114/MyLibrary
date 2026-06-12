@@ -27,5 +27,5 @@ void CylinderCollider::Update(float dt_)
     world_._43 += offset.z;
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
-    renderer_.DrawCapsule(world_, radius * scale_.x, halfHeight * 2.0f * scale_.y, debugPrimitiveColor);
+    renderer_.DrawCylinder(world_, radius * scale_.x, halfHeight * 2.0f * scale_.y, debugPrimitiveColor);
 }

@@ -125,6 +125,13 @@ protected:
 private:
     void CreatePhysXActor();
     void UpdatePhysXShape();
+    bool HasExternalTransformChange();
+    void CaptureTransformSnapshot();
+    void PushTransformToPhysics();
+
+    DirectX::XMFLOAT3 lastTransformPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 lastTransformRotation = { 0.0f, 0.0f, 0.0f };
+    bool hasTransformSnapshot = false;
 };
 
 

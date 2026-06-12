@@ -13,6 +13,7 @@
 #include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/UI/UIButton.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
+#include "Engine/Graphics/Resource/Animation/IKMapComponent.h"
 #include "Engine/GamePlay/Camera/CameraDirectorComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Camera/FovDirector.h"
@@ -59,6 +60,7 @@ void RegisterAllComponents()
     registry.Register<GltfModelCommponennt>("GltfModel");
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
     registry.Register<AnimationControllerComponent>("AnimationControllerComponent");
+    registry.Register<IKMapComponent>("IKMapComponent");
     registry.Register<SpriteRenderer>("SpriteRenderer");
 
     // ライト・エフェクト系

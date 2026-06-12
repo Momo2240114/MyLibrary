@@ -103,11 +103,11 @@ std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& com
         if (comp->GetName() == compName_)
             return comp;
     }
-
-    for (auto& collider_ : colliderComponents)
-    {
-        if (collider_->GetName() == compName_) return collider_;
-    }
+    //コリジョンは複数のものをもてるようにしたのであわせて無効化
+    //for (auto& collider_ : colliderComponents)
+    //{
+    //    if (collider_->GetName() == compName_) return collider_;
+    //}
 
     return nullptr;
 }
@@ -318,7 +318,7 @@ void GameObject::Gui()
         // 親を解除するオプション
         if (ImGui::Selectable("None (Root)", currentParentName == "None (Root)")) {
             // 親を解除する処理（Transformに解除関数を作ると良い）
-             transform->SetParent(nullptr); 
+            transform->SetParent(nullptr);
         }
 
         // シーン上の全オブジェクトをリストアップ（自分自身と自分の子は除外すべき）

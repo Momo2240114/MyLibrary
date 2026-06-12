@@ -13,6 +13,8 @@
 #include <unordered_map>
 #include <cmath>
 
+#include "IKMapComponent.h"
+
 namespace ed = ax::NodeEditor;
 static constexpr const char* START_NODE_NAME = "__Start__";
 static constexpr const char* ANY_NODE_NAME = "__Any__";
@@ -521,7 +523,7 @@ void AnimationControllerComponent::Update(float deltaTime)
             transform->localPosition.x += worldDeltaPos.x;
             transform->localPosition.y += worldDeltaPos.y;
             transform->localPosition.z += worldDeltaPos.z;
-
+            transform->AddMoveOffset(worldDeltaPos);
 
             transform->MarkDirty();
         }
@@ -1015,6 +1017,14 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName, flo
 
     const AnimState* nextState = it->second.get();
     if (currentState == nextState) return;
+
+    if (auto owner_ = GetGameObject())
+    {
+        if (auto ik_ = owner_->GetComponent<IKMapComponent>())
+        {
+            ik_->RequestSimulationWarmup();
+        }
+    }
 
     // AnimatorƒNƒ‰ƒX‚É‘JˆÚ‚ð–½—ß
     animator.CrossFadeTo(nextState, duration);

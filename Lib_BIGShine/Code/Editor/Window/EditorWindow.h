@@ -88,6 +88,13 @@ protected:
             ImGui::SetNextWindowViewport(mainViewport->ID);
         }
 
+        if (!hasLayoutRect && !hasDockId)
+        {
+            ImGui::SetNextWindowSize(
+                defaultWindowSize,
+                ImGuiCond_FirstUseEver);
+        }
+
 
         if (hasLayoutRect)
         {
@@ -96,13 +103,14 @@ protected:
             ImGui::SetNextWindowSize(layoutSize, layoutCond);
             if (layoutLocked)
             {
-                flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+                flags |= ImGuiWindowFlags_NoMove;
             }
         }
         else if (hasDockId)
         {
             ImGui::SetNextWindowDockID(dockId, ImGuiCond_Once);
         }
+
 
         ImGui::PushStyleColor(ImGuiCol_WindowBg, style.backgroundColor);
         ImGui::PushStyleColor(ImGuiCol_ChildBg, style.backgroundColor);
@@ -132,6 +140,7 @@ protected:
         ImGui::PopStyleColor(8);
     }
 
+    ImVec2 defaultWindowSize = ImVec2(400.0f, 600.0f);
     std::string windowName;
     GameObjectManager* gameObjectManager; // データを扱うための窓口
     bool isVisible; // 顕現のフラグ

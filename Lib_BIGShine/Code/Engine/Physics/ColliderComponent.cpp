@@ -79,6 +79,7 @@ void ColliderComponent::CreatePhysXActor()
     UpdatePhysXShape();
     actor->setActorFlag(PxActorFlag::eDISABLE_SIMULATION, !enabled);
     scene_->addActor(*actor);
+    CaptureTransformSnapshot();
 }
 
 void ColliderComponent::UpdatePhysXShape()
@@ -289,11 +290,19 @@ void ColliderComponent::SyncFromPhysics()
     auto dynamicActor_ = actor->is<PxRigidDynamic>();
     if (!owner_ || !dynamicActor_) return;
 
+    if (HasExternalTransformChange())
+    {
+        PushTransformToPhysics();
+        CaptureTransformSnapshot();
+        return;
+    }
+
     const PxTransform pose_ = dynamicActor_->getGlobalPose();
     owner_->transform->localPosition = { pose_.p.x, pose_.p.y, pose_.p.z };
     const PxVec3 velocity_ = dynamicActor_->getLinearVelocity();
     velocity = { velocity_.x, velocity_.y, velocity_.z };
     owner_->transform->MarkDirty();
+    CaptureTransformSnapshot();
 }
 
 void ColliderComponent::PreparePhysicsStep()
@@ -317,6 +326,7 @@ void ColliderComponent::PreparePhysicsStep()
         PxVec3(transform_->localPosition.x, transform_->localPosition.y, transform_->localPosition.z),
         EulerToPxQuat(transform_->localRotation));
     actor->setGlobalPose(pose_);
+    CaptureTransformSnapshot();
 
     if (auto dynamicActor_ = actor->is<PxRigidDynamic>())
     {
@@ -336,6 +346,51 @@ void ColliderComponent::PreparePhysicsStep()
         }
         PxRigidBodyExt::setMassAndUpdateInertia(*dynamicActor_, std::max<float>(mass, 1.0f));
     }
+}
+
+bool ColliderComponent::HasExternalTransformChange()
+{
+    if (!hasTransformSnapshot) return false;
+
+    auto owner_ = GetGameObject();
+    if (!owner_) return false;
+
+    constexpr float epsilon_ = 0.0001f;
+    const auto angleDifference_ = [](float angleA_, float angleB_)
+        {
+            return std::abs(std::remainder(angleA_ - angleB_, 360.0f));
+        };
+    const auto& position_ = owner_->transform->localPosition;
+    const auto& rotation_ = owner_->transform->localRotation;
+    return std::abs(position_.x - lastTransformPosition.x) > epsilon_
+        || std::abs(position_.y - lastTransformPosition.y) > epsilon_
+        || std::abs(position_.z - lastTransformPosition.z) > epsilon_
+        || angleDifference_(rotation_.x, lastTransformRotation.x) > epsilon_
+        || angleDifference_(rotation_.y, lastTransformRotation.y) > epsilon_
+        || angleDifference_(rotation_.z, lastTransformRotation.z) > epsilon_;
+}
+
+void ColliderComponent::CaptureTransformSnapshot()
+{
+    auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    lastTransformPosition = owner_->transform->localPosition;
+    lastTransformRotation = owner_->transform->localRotation;
+    hasTransformSnapshot = true;
+}
+
+void ColliderComponent::PushTransformToPhysics()
+{
+    if (!actor) return;
+
+    auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const auto transform_ = owner_->transform;
+    actor->setGlobalPose(PxTransform(
+        PxVec3(transform_->localPosition.x, transform_->localPosition.y, transform_->localPosition.z),
+        EulerToPxQuat(transform_->localRotation)));
 }
 
 void ColliderComponent::ApplyRoleDefaults()
@@ -395,7 +450,7 @@ void ColliderComponent::Gui()
         ImGui::Checkbox("Physical Response", &usePhysicsResponse);
         ImGui::TextDisabled("OFF: overlap events only; objects are never pushed.");
         ImGui::Checkbox("Physics Controls Transform", &physicsControlsTransform);
-        ImGui::TextDisabled("OFF: Inspector/scripts control Transform. ON: PhysX moves it.");
+        ImGui::TextDisabled("ON: PhysX moves it. Inspector/script edits teleport the PhysX actor.");
         ImGui::Checkbox("Static Body", &isStatic);
         ImGui::Checkbox("Trigger Shape", &isTrigger);
         ImGui::Separator();

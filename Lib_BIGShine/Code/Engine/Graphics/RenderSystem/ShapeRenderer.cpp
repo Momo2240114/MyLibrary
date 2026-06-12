@@ -147,6 +147,30 @@ void ShapeRenderSystem::DrawCapsule(
 	}
 }
 
+void ShapeRenderSystem::DrawCylinder(
+	const DirectX::XMFLOAT4X4& transform,
+	float radius,
+	float height,
+	const DirectX::XMFLOAT4& color)
+{
+	Instance& instance = instances.emplace_back();
+
+	DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
+
+	instance.mesh = &cylinderMesh;
+	instance.color = color;
+
+	// 円柱メッシュは Y 軸方向に 1.0 の長さを想定して作っている（CreateCylinderMesh の start/height に依存）
+	// ここでは Transform の X/Y/Z 軸ベクトルを radius/height スケールして World 行列を作る
+	DirectX::XMMATRIX World;
+	World.r[0] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[0]), radius);
+	World.r[1] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[1]), height);
+	World.r[2] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[2]), radius);
+	World.r[3] = Transform.r[3]; // 位置は Transform の原点（円柱は原点中心から伸びる仕様）
+	DirectX::XMStoreFloat4x4(&instance.worldTransform, World);
+}
+
+
 // 骨描画
 void ShapeRenderSystem::DrawBone(
 	const DirectX::XMFLOAT4X4& transform,
