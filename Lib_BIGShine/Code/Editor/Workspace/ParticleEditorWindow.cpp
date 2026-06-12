@@ -3,11 +3,15 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 
+#include <algorithm>
 #include <DirectXMath.h>
+#include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 ParticleEditorWindow::ParticleEditorWindow(GameObjectManager* manager_)
-    : EditorWorkspaceWindow("Particle Editor", manager_)
+    : EditorWorkspaceWindow("VFX Editor", manager_)
 {
     isVisible = false;
     style.backgroundColor = ImVec4(0.08f, 0.09f, 0.10f, 1.0f);
@@ -30,25 +34,85 @@ void ParticleEditorWindow::Draw()
         ImGui::EndMenuBar();
     }
 
-    const float rightWidth_ = 360.0f;
-    const float bottomHeight_ = 190.0f;
+    const float splitterSize_ = 6.0f;
+    const float minimumLeftWidth_ = 280.0f;
+    const float minimumInspectorWidth_ = 240.0f;
+    const float minimumPreviewHeight_ = 160.0f;
+    const float minimumTimelineHeight_ = 120.0f;
+    const float verticalSpacing_ = ImGui::GetStyle().ItemSpacing.y * 2.0f;
     ImVec2 available_ = ImGui::GetContentRegionAvail();
-    float leftWidth_ = (std::max)(240.0f, available_.x - rightWidth_);
-    float previewHeight_ = (std::max)(140.0f, available_.y - bottomHeight_);
+    inspectorWidth = std::clamp(
+        inspectorWidth,
+        minimumInspectorWidth_,
+        (std::max)(minimumInspectorWidth_, available_.x - minimumLeftWidth_ - splitterSize_));
+    timelineHeight = std::clamp(
+        timelineHeight,
+        minimumTimelineHeight_,
+        (std::max)(
+            minimumTimelineHeight_,
+            available_.y - minimumPreviewHeight_ - splitterSize_ - verticalSpacing_));
+
+    const float leftWidth_ = (std::max)(minimumLeftWidth_, available_.x - inspectorWidth - splitterSize_);
+    const float previewHeight_ =
+        (std::max)(
+            minimumPreviewHeight_,
+            available_.y - timelineHeight - splitterSize_ - verticalSpacing_);
 
     ImGui::BeginGroup();
     ImGui::BeginChild("ParticlePreviewPanel", ImVec2(leftWidth_, previewHeight_), true);
     DrawPreviewPanel();
     ImGui::EndChild();
 
-    ImGui::BeginChild("ParticleAssetBrowserPanel", ImVec2(leftWidth_, 0.0f), true);
-    DrawAssetBrowserPanel();
+    ImGui::InvisibleButton("##VFXHorizontalSplitter", ImVec2(leftWidth_, splitterSize_));
+    const bool isHorizontalSplitterHovered_ = ImGui::IsItemHovered();
+    const bool isHorizontalSplitterActive_ = ImGui::IsItemActive();
+    const ImU32 horizontalSplitterColor_ = ImGui::GetColorU32(
+        isHorizontalSplitterHovered_ || isHorizontalSplitterActive_
+        ? ImGuiCol_SeparatorHovered
+        : ImGuiCol_Separator);
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImGui::GetItemRectMin(),
+        ImGui::GetItemRectMax(),
+        horizontalSplitterColor_);
+    if (isHorizontalSplitterHovered_ || isHorizontalSplitterActive_)
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    }
+    if (isHorizontalSplitterActive_)
+    {
+        timelineHeight -= ImGui::GetIO().MouseDelta.y;
+    }
+
+    ImGui::BeginChild("VFXTimelinePanel", ImVec2(leftWidth_, timelineHeight), true);
+    DrawTimelinePanel();
     ImGui::EndChild();
     ImGui::EndGroup();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0.0f, 0.0f);
 
-    ImGui::BeginChild("ParticleInspectorPanel", ImVec2(0.0f, 0.0f), true);
+    ImGui::InvisibleButton("##VFXVerticalSplitter", ImVec2(splitterSize_, available_.y));
+    const bool isVerticalSplitterHovered_ = ImGui::IsItemHovered();
+    const bool isVerticalSplitterActive_ = ImGui::IsItemActive();
+    const ImU32 verticalSplitterColor_ = ImGui::GetColorU32(
+        isVerticalSplitterHovered_ || isVerticalSplitterActive_
+        ? ImGuiCol_SeparatorHovered
+        : ImGuiCol_Separator);
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImGui::GetItemRectMin(),
+        ImGui::GetItemRectMax(),
+        verticalSplitterColor_);
+    if (isVerticalSplitterHovered_ || isVerticalSplitterActive_)
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    }
+    if (isVerticalSplitterActive_)
+    {
+        inspectorWidth -= ImGui::GetIO().MouseDelta.x;
+    }
+
+    ImGui::SameLine(0.0f, 0.0f);
+
+    ImGui::BeginChild("ParticleInspectorPanel", ImVec2(inspectorWidth, available_.y), true);
     DrawInspectorPanel();
     ImGui::EndChild();
 
@@ -62,20 +126,27 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     auto& graphics_ = GraphicsDeviceManager::Instance();
     modelRenderSystem.Initialize(graphics_.GetDevice());
     particleRenderSystem.Initialize(graphics_.GetDevice());
+    meshVFXRenderSystem.Initialize(graphics_.GetDevice());
 
-    previewObject = std::make_shared<GameObject>("ParticlePreviewObject");
+    previewObject = std::make_shared<GameObject>("VFXPreviewObject");
     previewObject->transform->gameObject = previewObject;
     previewModel = previewObject->AddComponent<GltfModelCommponennt>();
     previewParticle = previewObject->AddComponent<ParticleComponent>();
+    previewMeshVFX = previewObject->AddComponent<MeshVFXComponent>();
     if (previewParticle)
     {
         previewParticle->RefreshTextureList();
+    }
+    if (previewMeshVFX)
+    {
+        previewMeshVFX->Stop();
     }
 
     previewCamera.SetLookAt({ 0.0f, 1.5f, -6.0f }, { 0.0f, 0.4f, 0.0f }, { 0.0f, 1.0f, 0.0f });
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 100.0f);
 
     RefreshParticleAssets();
+    RefreshSequenceAssets();
     isInitialized = true;
 }
 
@@ -84,17 +155,31 @@ void ParticleEditorWindow::DrawToolbar()
     if (ImGui::MenuItem("Refresh Assets"))
     {
         RefreshParticleAssets();
+        RefreshSequenceAssets();
     }
 
     ImGui::Separator();
 
-    if (ImGui::MenuItem("Play", nullptr, false, previewParticle != nullptr))
+    if (ImGui::MenuItem(sequencePlaying ? "Pause" : "Play"))
     {
-        previewParticle->Play();
+        sequencePlaying = !sequencePlaying;
     }
-
-    ImGui::MenuItem("Auto Play", nullptr, &autoPlay);
+    if (ImGui::MenuItem("Stop"))
+    {
+        sequencePlaying = false;
+        ResetSequence();
+    }
+    if (ImGui::MenuItem("Reset"))
+    {
+        ResetSequence();
+    }
+    ImGui::MenuItem("Loop", nullptr, &sequenceLoop);
     ImGui::MenuItem("Grid", nullptr, &showGrid);
+    if (ImGui::MenuItem("Reset Layout"))
+    {
+        inspectorWidth = 360.0f;
+        timelineHeight = 190.0f;
+    }
 }
 
 void ParticleEditorWindow::DrawPreviewPanel()
@@ -120,15 +205,42 @@ void ParticleEditorWindow::DrawPreviewPanel()
 
 void ParticleEditorWindow::DrawAssetBrowserPanel()
 {
-    ImGui::TextUnformatted("Data/Particle");
+    ImGui::TextUnformatted("VFX Sequences");
     ImGui::Separator();
 
-    if (ImGui::Button("Refresh"))
+    ImGui::InputText("Sequence Name", sequenceNameBuffer, IM_ARRAYSIZE(sequenceNameBuffer));
+    if (ImGui::Button("Save Sequence"))
     {
-        RefreshParticleAssets();
+        SaveSequence("Data/VFXSequence/" + std::string(sequenceNameBuffer) + ".json");
+        RefreshSequenceAssets();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load Selected") &&
+    if (ImGui::Button("Load Sequence") &&
+        selectedSequenceIndex >= 0 &&
+        selectedSequenceIndex < static_cast<int>(sequenceAssetPaths.size()))
+    {
+        LoadSequence(sequenceAssetPaths[selectedSequenceIndex]);
+    }
+
+    for (int sequenceIndex_ = 0;
+        sequenceIndex_ < static_cast<int>(sequenceAssetPaths.size());
+        ++sequenceIndex_)
+    {
+        const std::filesystem::path path_(sequenceAssetPaths[sequenceIndex_]);
+        if (ImGui::Selectable(path_.filename().string().c_str(), selectedSequenceIndex == sequenceIndex_))
+        {
+            selectedSequenceIndex = sequenceIndex_;
+        }
+    }
+
+    ImGui::SeparatorText("Particle Assets");
+    if (ImGui::Button("Refresh Assets"))
+    {
+        RefreshParticleAssets();
+        RefreshSequenceAssets();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load Particle") &&
         previewParticle &&
         selectedAssetIndex >= 0 &&
         selectedAssetIndex < static_cast<int>(particleAssetPaths.size()))
@@ -136,8 +248,6 @@ void ParticleEditorWindow::DrawAssetBrowserPanel()
         previewParticle->LoadAsset(particleAssetPaths[selectedAssetIndex]);
         previewParticle->Play();
     }
-
-    ImGui::Separator();
 
     if (particleAssetPaths.empty())
     {
@@ -160,22 +270,124 @@ void ParticleEditorWindow::DrawAssetBrowserPanel()
     }
 }
 
+void ParticleEditorWindow::DrawTimelinePanel()
+{
+    ImGui::Text("VFX Timeline  %.2f / %.2f", sequenceTime, sequenceDuration);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(140.0f);
+    ImGui::DragFloat("Duration", &sequenceDuration, 0.05f, 0.1f, 600.0f);
+
+    float requestedTime_ = sequenceTime;
+    if (ImGui::SliderFloat("Playhead", &requestedTime_, 0.0f, sequenceDuration, "%.2f sec"))
+    {
+        sequencePlaying = false;
+        ResetSequence();
+        sequenceTime = requestedTime_;
+    }
+
+    if (ImGui::Button("Add Particle Track"))
+    {
+        TimelineTrack track_{};
+        track_.type = TimelineTrackType::PARTICLE_EMITTER;
+        if (previewParticle && !previewParticle->GetTracks().empty())
+        {
+            track_.targetName = previewParticle->GetTracks().front().name;
+        }
+        timelineTracks.push_back(track_);
+        selectedTimelineTrack = static_cast<int>(timelineTracks.size()) - 1;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Add Mesh VFX Track"))
+    {
+        TimelineTrack track_{};
+        track_.type = TimelineTrackType::MESH_VFX;
+        track_.targetName = "Mesh VFX";
+        timelineTracks.push_back(track_);
+        selectedTimelineTrack = static_cast<int>(timelineTracks.size()) - 1;
+    }
+
+    ImGui::Separator();
+    for (int trackIndex_ = 0; trackIndex_ < static_cast<int>(timelineTracks.size()); ++trackIndex_)
+    {
+        TimelineTrack& track_ = timelineTracks[trackIndex_];
+        ImGui::PushID(trackIndex_);
+        const char* typeLabel_ = track_.type == TimelineTrackType::PARTICLE_EMITTER
+            ? "Particle"
+            : "MeshVFX";
+        const std::string label_ = std::string(typeLabel_) + " | " + track_.targetName;
+        if (ImGui::Selectable(label_.c_str(), selectedTimelineTrack == trackIndex_))
+        {
+            selectedTimelineTrack = trackIndex_;
+        }
+
+        ImGui::SameLine(220.0f);
+        ImGui::SetNextItemWidth(90.0f);
+        ImGui::DragFloat("Start", &track_.startTime, 0.01f, 0.0f, sequenceDuration);
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(90.0f);
+        ImGui::DragFloat("Length", &track_.duration, 0.01f, 0.01f, sequenceDuration);
+        ImGui::PopID();
+    }
+
+    if (selectedTimelineTrack < 0 ||
+        selectedTimelineTrack >= static_cast<int>(timelineTracks.size()))
+    {
+        return;
+    }
+
+    TimelineTrack& selectedTrack_ = timelineTracks[selectedTimelineTrack];
+    ImGui::Separator();
+    ImGui::TextUnformatted("Selected Track");
+    if (selectedTrack_.type == TimelineTrackType::PARTICLE_EMITTER && previewParticle)
+    {
+        if (ImGui::BeginCombo("Emitter", selectedTrack_.targetName.c_str()))
+        {
+            for (const auto& emitterTrack_ : previewParticle->GetTracks())
+            {
+                if (ImGui::Selectable(
+                    emitterTrack_.name.c_str(),
+                    selectedTrack_.targetName == emitterTrack_.name))
+                {
+                    selectedTrack_.targetName = emitterTrack_.name;
+                }
+            }
+            ImGui::EndCombo();
+        }
+    }
+
+    if (ImGui::Button("Remove Track"))
+    {
+        timelineTracks.erase(timelineTracks.begin() + selectedTimelineTrack);
+        selectedTimelineTrack = -1;
+    }
+}
+
 void ParticleEditorWindow::DrawInspectorPanel()
 {
-    ImGui::TextUnformatted("Particle Settings");
+    ImGui::TextUnformatted("VFX Assets / Inspector");
     ImGui::Separator();
 
-    if (!previewParticle)
+    if (!previewParticle || !previewMeshVFX)
     {
         ImGui::TextDisabled("Preview particle is not ready.");
         return;
     }
 
-    if (ImGui::BeginTabBar("ParticleInspectorTabs"))
+    if (ImGui::BeginTabBar("VFXInspectorTabs"))
     {
+        if (ImGui::BeginTabItem("Assets"))
+        {
+            DrawAssetBrowserPanel();
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("Particle"))
         {
             previewParticle->Gui();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Mesh VFX"))
+        {
+            previewMeshVFX->Gui();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Source Model"))
@@ -194,7 +406,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
-    if (!device_ || !context_ || !previewParticle) return;
+    if (!device_ || !context_ || !previewParticle || !previewMeshVFX) return;
 
     const int width_ = (std::max)(1, static_cast<int>(previewSize_.x));
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
@@ -209,8 +421,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     if (previewObject && previewObject->transform)
     {
-        // UI(ImGui)で変更された Pos/Rot/Scale から、最新の worldMatrix を再計算する
-        // ※Transformクラスにこれに類する関数（ComputeMatrix等）があればそれを呼ぶのだ
+        // Keep the preview world matrix synchronized with inspector edits.
         previewObject->transform->UpdateWorldMatrix();
     }
 
@@ -218,10 +429,9 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     {
         previewModel->Update(deltaTime_);
     }
-    if (autoPlay)
-    {
-        previewParticle->Update(deltaTime_);
-    }
+    UpdateSequence(deltaTime_);
+    previewParticle->Update(deltaTime_);
+    previewMeshVFX->Update(deltaTime_);
 
     RenderContext renderContext_{};
     renderContext_.device = device_;
@@ -247,8 +457,161 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     particleRenderSystem.PushSubmit(previewParticle.get());
     particleRenderSystem.RenderAll(renderContext_,true);
+    previewTarget.ResetRenderTarget(context_);
+    meshVFXRenderSystem.PushSubmit(previewMeshVFX.get());
+    meshVFXRenderSystem.RenderAll(renderContext_);
 
     previewTarget.End(context_);
+}
+
+void ParticleEditorWindow::UpdateSequence(float deltaTime_)
+{
+    if (!sequencePlaying) return;
+
+    sequenceTime += deltaTime_;
+    for (TimelineTrack& track_ : timelineTracks)
+    {
+        const bool shouldBeActive_ =
+            sequenceTime >= track_.startTime &&
+            sequenceTime < track_.startTime + track_.duration;
+
+        if (shouldBeActive_ && !track_.active)
+        {
+            track_.active = true;
+            if (track_.type == TimelineTrackType::PARTICLE_EMITTER && previewParticle)
+            {
+                previewParticle->TriggerEmitter(track_.targetName);
+            }
+            else if (track_.type == TimelineTrackType::MESH_VFX && previewMeshVFX)
+            {
+                previewMeshVFX->Reset();
+                previewMeshVFX->Play();
+            }
+        }
+        else if (!shouldBeActive_ && track_.active)
+        {
+            track_.active = false;
+            if (track_.type == TimelineTrackType::PARTICLE_EMITTER && previewParticle)
+            {
+                previewParticle->StopEmitter(track_.targetName);
+            }
+            else if (track_.type == TimelineTrackType::MESH_VFX && previewMeshVFX)
+            {
+                previewMeshVFX->Stop();
+            }
+        }
+    }
+
+    if (sequenceTime >= sequenceDuration)
+    {
+        const bool shouldContinue_ = sequenceLoop;
+        ResetSequence();
+        sequencePlaying = shouldContinue_;
+    }
+}
+
+void ParticleEditorWindow::ResetSequence()
+{
+    sequenceTime = 0.0f;
+    if (previewParticle) previewParticle->Stop();
+    if (previewMeshVFX)
+    {
+        previewMeshVFX->Stop();
+        previewMeshVFX->Reset();
+    }
+    for (TimelineTrack& track_ : timelineTracks)
+    {
+        track_.active = false;
+    }
+}
+
+bool ParticleEditorWindow::SaveSequence(const std::string& path_)
+{
+    if (path_.empty()) return false;
+
+    nlohmann::json sequenceJson_;
+    sequenceJson_["AssetType"] = "VFXSequence";
+    sequenceJson_["AssetVersion"] = 1;
+    sequenceJson_["Duration"] = sequenceDuration;
+    sequenceJson_["Loop"] = sequenceLoop;
+    sequenceJson_["Tracks"] = nlohmann::json::array();
+
+    for (const TimelineTrack& track_ : timelineTracks)
+    {
+        sequenceJson_["Tracks"].push_back(
+            {
+                { "Type", static_cast<int>(track_.type) },
+                { "Target", track_.targetName },
+                { "StartTime", track_.startTime },
+                { "Duration", track_.duration },
+            });
+    }
+
+    if (previewParticle)
+    {
+        previewParticle->Serialize(sequenceJson_["Particle"]);
+        sequenceJson_["Particle"]["IsPlaying"] = false;
+    }
+    if (previewMeshVFX)
+    {
+        previewMeshVFX->Serialize(sequenceJson_["MeshVFX"]);
+    }
+
+    const std::filesystem::path sequencePath_(path_);
+    std::filesystem::create_directories(sequencePath_.parent_path());
+    std::ofstream file_(sequencePath_, std::ios::out | std::ios::trunc);
+    if (!file_.is_open()) return false;
+
+    file_ << sequenceJson_.dump(4);
+    return true;
+}
+
+bool ParticleEditorWindow::LoadSequence(const std::string& path_)
+{
+    if (path_.empty() || !std::filesystem::exists(path_)) return false;
+
+    std::ifstream file_(path_);
+    if (!file_.is_open()) return false;
+
+    nlohmann::json sequenceJson_;
+    file_ >> sequenceJson_;
+    if (sequenceJson_.value("AssetType", "") != "VFXSequence") return false;
+
+    sequencePlaying = false;
+    ResetSequence();
+    sequenceDuration = (std::max)(0.1f, sequenceJson_.value("Duration", 5.0f));
+    sequenceLoop = sequenceJson_.value("Loop", true);
+    timelineTracks.clear();
+
+    if (sequenceJson_.contains("Tracks") && sequenceJson_["Tracks"].is_array())
+    {
+        for (const auto& trackJson_ : sequenceJson_["Tracks"])
+        {
+            TimelineTrack track_{};
+            track_.type = static_cast<TimelineTrackType>(
+                std::clamp(trackJson_.value("Type", 0), 0, 1));
+            track_.targetName = trackJson_.value("Target", "");
+            track_.startTime = (std::max)(0.0f, trackJson_.value("StartTime", 0.0f));
+            track_.duration = (std::max)(0.01f, trackJson_.value("Duration", 1.0f));
+            timelineTracks.push_back(track_);
+        }
+    }
+
+    if (previewParticle && sequenceJson_.contains("Particle"))
+    {
+        previewParticle->Deserialize(sequenceJson_["Particle"]);
+    }
+    if (previewMeshVFX && sequenceJson_.contains("MeshVFX"))
+    {
+        previewMeshVFX->Deserialize(sequenceJson_["MeshVFX"]);
+        previewMeshVFX->Stop();
+    }
+
+    const std::string sequenceName_ = std::filesystem::path(path_).stem().string();
+    strncpy_s(sequenceNameBuffer, sequenceName_.c_str(), sizeof(sequenceNameBuffer) - 1);
+    sequenceNameBuffer[sizeof(sequenceNameBuffer) - 1] = '\0';
+    selectedTimelineTrack = -1;
+    return true;
 }
 
 void ParticleEditorWindow::RefreshParticleAssets()
@@ -264,5 +627,18 @@ void ParticleEditorWindow::RefreshParticleAssets()
         {
             particleAssetPaths.push_back(entry_.path().generic_string());
         }
+    }
+}
+
+void ParticleEditorWindow::RefreshSequenceAssets()
+{
+    sequenceAssetPaths.clear();
+    const std::filesystem::path sequenceDirectory_("Data/VFXSequence");
+    if (!std::filesystem::exists(sequenceDirectory_)) return;
+
+    for (const auto& entry_ : std::filesystem::directory_iterator(sequenceDirectory_))
+    {
+        if (!entry_.is_regular_file() || entry_.path().extension() != ".json") continue;
+        sequenceAssetPaths.push_back(entry_.path().generic_string());
     }
 }

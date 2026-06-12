@@ -104,18 +104,34 @@ namespace
 bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
 {
     shader = std::make_unique<MeshVFXShader>();
-    return shader->Initialize(device_);
+    isInitialized = shader->Initialize(device_);
+    if (!isInitialized)
+    {
+        shader.reset();
+    }
+    return isInitialized;
 }
 
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
-    if (!component_ || !component_->IsEnabled()) return;
+    if (!isInitialized || !component_ || !component_->IsEnabled()) return;
+
+    const auto& runtimeParts_ = component_->GetRuntimeParts();
+    const bool hasRenderablePart_ = std::any_of(
+        runtimeParts_.begin(),
+        runtimeParts_.end(),
+        [](const MeshVFXRuntimePart& runtimePart_)
+        {
+            return runtimePart_.modelResource != nullptr;
+        });
+    if (!hasRenderablePart_) return;
+
     components.push_back(component_);
 }
 
 void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_)
 {
-    if (!shader || !renderContext_.deviceContext || !renderContext_.camera ||
+    if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())
     {
         components.clear();
@@ -154,7 +170,7 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_)
             if (!animation_.active) continue;
 
             const BlendState blendState_ = part_.blendMode == MeshVFXBlendMode::ADDITIVE
-                ? BlendState::Additive
+                ? BlendState::AdditiveKeepAlpha
                 : BlendState::Transparency;
             deviceContext_->OMSetBlendState(
                 renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
