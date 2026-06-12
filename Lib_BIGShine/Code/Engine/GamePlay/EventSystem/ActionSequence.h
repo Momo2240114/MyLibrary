@@ -5,12 +5,19 @@
 struct ActionReference {
     std::string category;
     std::string actionName;
-    float delay = 0.0f; // 実行までの待ち時間（秒）
+    float executionTime = 0.0f;
+    int timelineStartFrame = 0;
+    int timelineEndFrame = 1;
 };
 
 struct SequenceData {
     std::string name = "New Sequence";
-    std::vector<ActionReference> actions; // std::string から構造体へ変更
+    std::vector<ActionReference> actions;
+    float duration = 10.0f;
+    int currentFrame = 0;
+    int firstFrame = 0;
+    int selectedAction = -1;
+    bool timelineExpanded = true;
 };
 
 struct PendingAction {
@@ -28,15 +35,16 @@ public:
     void Update(float et) override;
     void StartSequence(int index);
 
-    // GUIで登録したアクション名を一斉に実行するアクションを登録
+    // Register actions that start each configured sequence.
     void RegisterSequence(const std::string& sequenceName);
 
     void Gui() override;
+    void DrawEditorGui();
 
     void Serialize(nlohmann::json& j) const;
     void Deserialize(const nlohmann::json& j);
 
 private:
-    std::vector<SequenceData> sequences; // 複数のアクションリストを保持
-    std::vector<PendingAction> pendingActions; // 現在進行中のディレイアクション
+    std::vector<SequenceData> sequences;
+    std::vector<PendingAction> pendingActions;
 };

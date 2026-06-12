@@ -9,6 +9,8 @@ cbuffer CbBloom : register(b0)
     float g_kawaseScale;
     float g_offset;
     float2 g_texSize;
+    float g_exposure;
+    float g_toneMappingEnabled;
 };
 
 // Slot 1: カラーフィルター用
@@ -41,6 +43,16 @@ float3 HSVtoRGB(float3 c)
     return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+float3 ToneMapACES(float3 color_)
+{
+    const float a_ = 2.51f;
+    const float b_ = 0.03f;
+    const float c_ = 2.43f;
+    const float d_ = 0.59f;
+    const float e_ = 0.14f;
+    return saturate((color_ * (a_ * color_ + b_)) / (color_ * (c_ * color_ + d_) + e_));
+}
+
 float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 {
     float3 base = sceneTex.Sample(sam, uv).rgb;
@@ -52,6 +64,11 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
 
     // 1. ブルーム合成
     float3 combined = base + (bloom * g_intensity);
+
+    // Bloom合成後のHDRカラーをLDRへ変換
+    if (g_toneMappingEnabled > 0.5f)
+        combined = ToneMapACES(max(0.0f, combined) * max(0.0f, g_exposure));
+
     float3 original = combined; // フィルタ適用前の色を保存
 
     // --- 2. カラーフィルター処理 ---

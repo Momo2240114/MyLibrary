@@ -268,6 +268,8 @@ void BloomSystem::UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters
         cb->kawaseScale = params.kawaseScale;
         cb->offset = offset;
         cb->texSize = { 1.0f / w, 1.0f / h };
+        cb->exposure = params.exposure;
+        cb->toneMappingEnabled = params.toneMappingEnabled ? 1.0f : 0.0f;
         dc->Unmap(constantBuffer.Get(), 0);
     }
 }

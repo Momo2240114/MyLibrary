@@ -457,12 +457,23 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
         ImGui::Separator();
 
-        // 5. リセットボタン
+        // 5. トーンマッピング
+        ImGui::Checkbox("Tone Mapping", &bloomParams.toneMappingEnabled);
+        if (bloomParams.toneMappingEnabled)
+        {
+            ImGui::DragFloat("Exposure", &bloomParams.exposure, 0.01f, 0.0f, 10.0f, "%.2f");
+        }
+
+        ImGui::Separator();
+
+        // 6. リセットボタン
         if (ImGui::Button("Reset Parameters")) {
             bloomParams.threshold = 1.0f;
             bloomParams.intensity = 1.0f;
             bloomParams.kawaseScale = 1.0f;
             bloomParams.blurPasses = 4;
+            bloomParams.toneMappingEnabled = true;
+            bloomParams.exposure = 1.0f;
         }
     }
 

@@ -60,6 +60,7 @@ public:
         std::string nodeName;
         DirectX::XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f };
         float radius = 0.15f;
+        bool connectToNext = false;
         bool enabled = true;
         int nodeIndex = -1;
     };
@@ -109,6 +110,7 @@ private:
     void SolveClothConstraints();
     void SolveClothConstraint(const ClothConstraint& constraint_);
     void ResolveBodyCollision(IKChain& chain_, size_t pointIndex_);
+    bool GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, DirectX::XMFLOAT3& center_);
     void ApplySpringChain(IKChain& chain_);
     void DrawBodyCollisionShapes();
     void DrawHairCollisionShapes();

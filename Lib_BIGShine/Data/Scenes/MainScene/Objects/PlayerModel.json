@@ -19,10 +19,10 @@
                     0.8100000023841858,
                     0.0
                 ],
-                "PhysicsControlsTransform": false,
+                "PhysicsControlsTransform": true,
                 "Radius": 0.33000001311302185,
                 "ShapeRenderFlg": true,
-                "UseGravity": false,
+                "UseGravity": true,
                 "UsePhysicsResponse": true
             },
             "Enabled": true,
@@ -185,6 +185,7 @@
                 ],
                 "BodyCollisionSpheres": [
                     {
+                        "ConnectToNext": false,
                         "Enabled": true,
                         "Name": "Head",
                         "Node": "upperarm_l",
@@ -196,6 +197,7 @@
                         "Radius": 0.07800000160932541
                     },
                     {
+                        "ConnectToNext": false,
                         "Enabled": true,
                         "Name": "Head",
                         "Node": "upperarm_r",
@@ -207,6 +209,7 @@
                         "Radius": 0.06499999761581421
                     },
                     {
+                        "ConnectToNext": true,
                         "Enabled": true,
                         "Name": "Head",
                         "Node": "neck_01",
@@ -218,6 +221,7 @@
                         "Radius": 0.06400000303983688
                     },
                     {
+                        "ConnectToNext": false,
                         "Enabled": true,
                         "Name": "Head",
                         "Node": "head",
@@ -247,6 +251,8 @@
                         "RootRotationFollow": 0.3319999873638153,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
                         "Stiffness": 0.014000000432133675,
                         "TipNode": "Bone_hair_L02_end",
                         "TipStiffnessScale": 0.20000000298023224,
@@ -269,6 +275,8 @@
                         "RootRotationFollow": 0.46399998664855957,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
@@ -291,6 +299,8 @@
                         "RootRotationFollow": 0.699999988079071,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_R02_end",
                         "TipStiffnessScale": 0.20000000298023224,
@@ -313,6 +323,8 @@
                         "RootRotationFollow": 0.6259999871253967,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_R_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
@@ -335,6 +347,8 @@
                         "RootRotationFollow": 0.699999988079071,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
                         "Stiffness": 0.008999999612569809,
                         "TipNode": "Bone_hair_B_L_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
@@ -352,13 +366,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            0.0,
+            -1.68152916431427,
             1.7999978065490723,
-            0.0
+            3.5700793266296387
         ],
         "Rot": [
             0.0,
-            42.481998443603516,
+            246.48199462890625,
             0.0
         ],
         "Scale": [

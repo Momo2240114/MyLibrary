@@ -18,6 +18,8 @@ public:
         float intensity = 1.0f;    // 光の強さ
         float kawaseScale = 1.0f;  // ぼかしの広がり具合
         int blurPasses = 4;        // ぼかしの回数
+        bool toneMappingEnabled = true;
+        float exposure = 1.0f;
     };
 
     // 【新規】カラーフィルター用（Slot 1想定）
@@ -67,7 +69,8 @@ private:
         float kawaseScale;
         float offset; // 川瀬式のパスごとのオフセット
         DirectX::XMFLOAT2 texSize;
-        float padding[2];
+        float exposure;
+        float toneMappingEnabled;
     };
     Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> filterBuffer;
