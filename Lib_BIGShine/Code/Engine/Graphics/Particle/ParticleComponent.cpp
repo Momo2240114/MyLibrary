@@ -12,10 +12,10 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <imgui_stdlib.h>
 
 void ParticleComponent::Start()
 {
-    RegisterActions();
     RefreshTextureList();
     RefreshAssetList();
 
@@ -32,10 +32,31 @@ void ParticleComponent::RegisterActions()
     auto gameObject_ = GetGameObject();
     if (!gameObject_) return;
 
-    std::string objectName_ = gameObject_->GetName();
     auto& registry_ = gameObject_->GetLocalRegistry();
-    registry_.RegisterAction("Particle", objectName_ + "_Particle_Play", [this]() { Play(); });
-    registry_.RegisterAction("Particle", objectName_ + "_Particle_Stop", [this]() { Stop(); });
+    for (const std::string& actionName_ : registeredActionNames)
+    {
+        registry_.RemoveAction("Particle", actionName_);
+    }
+    registeredActionNames.clear();
+
+    const std::string objectName_ = gameObject_->GetName();
+    auto registerAction_ = [&](const std::string& actionName_, ActionRegistry::ActionFunc action_)
+        {
+            registry_.RegisterAction("Particle", actionName_, std::move(action_));
+            registeredActionNames.push_back(actionName_);
+        };
+
+    registerAction_(objectName_ + "_Particle_Play", [this]() { Play(); });
+    registerAction_(objectName_ + "_Particle_Stop", [this]() { Stop(); });
+
+    for (const EmitterTrack& track_ : tracks)
+    {
+        const std::string emitterName_ = track_.name;
+        const std::string actionPrefix_ = objectName_ + "_Particle_" + emitterName_;
+        registerAction_(actionPrefix_ + "_Play", [this, emitterName_]() { PlayEmitter(emitterName_); });
+        registerAction_(actionPrefix_ + "_Stop", [this, emitterName_]() { StopEmitter(emitterName_); });
+        registerAction_(actionPrefix_ + "_Trigger", [this, emitterName_]() { TriggerEmitter(emitterName_); });
+    }
 }
 
 void ParticleComponent::Gui()
@@ -103,6 +124,7 @@ void ParticleComponent::Gui()
     if (ImGui::Button("Add Emitter"))
     {
         EmitterTrack newTrack;
+        newTrack.name = "Emitter_" + std::to_string(tracks.size());
         newTrack.settings = ParticleSystemConstants();
         newTrack.settings.maxParticleCount = 1000;
         newTrack.settings.burstCount = 100;
@@ -121,11 +143,20 @@ void ParticleComponent::Gui()
             newTrack.settings,
             newTrack.settings.maxParticleCount);
         tracks.push_back(std::move(newTrack));
+        RegisterActions();
     }
 
     if (tracks.empty())
     {
-        ImGui::TextColored(ImVec4(1, 1, 0, 1), "No Emitters. Click 'Add Emitter'.");
+        ImGui::TextColored(ImVec4(1, 1, 0, 1), "No Emitters. Click 'Add Emitter' or import one.");
+        if (ImGui::Button("Import Emitter File"))
+        {
+            const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
+                L"Select Particle Emitter Asset",
+                "Data/Particle/Emitter",
+                GraphicsDeviceManager::Instance().GetWindowHandle());
+            if (!selectedPath_.empty()) LoadEmitterAsset(selectedPath_);
+        }
         return;
     }
 
@@ -137,9 +168,8 @@ void ParticleComponent::Gui()
     for (int i = 0; i < static_cast<int>(tracks.size()); ++i)
     {
         ImGui::PushID(i);
-        char label[32];
-        sprintf_s(label, "Emitter %d", i);
-        if (ImGui::Selectable(label, selectedEmitterIndex == i)) selectedEmitterIndex = i;
+        const std::string label_ = std::to_string(i) + ": " + tracks[i].name;
+        if (ImGui::Selectable(label_.c_str(), selectedEmitterIndex == i)) selectedEmitterIndex = i;
         ImGui::PopID();
     }
     ImGui::EndChild();
@@ -147,6 +177,23 @@ void ParticleComponent::Gui()
 
     ImGui::BeginGroup();
     bool shouldRemove = ImGui::Button("Remove Selected");
+    if (ImGui::Button("Save Selected Emitter"))
+    {
+        SaveEmitterAsset(
+            static_cast<size_t>(selectedEmitterIndex),
+            BuildEmitterAssetPathFromName(static_cast<size_t>(selectedEmitterIndex)));
+    }
+    if (ImGui::Button("Import Emitter File"))
+    {
+        const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
+            L"Select Particle Emitter Asset",
+            "Data/Particle/Emitter",
+            GraphicsDeviceManager::Instance().GetWindowHandle());
+        if (!selectedPath_.empty() && LoadEmitterAsset(selectedPath_))
+        {
+            selectedEmitterIndex = static_cast<int>(tracks.size()) - 1;
+        }
+    }
     if (ImGui::Button("Refresh Textures")) RefreshTextureList();
     ImGui::EndGroup();
 
@@ -154,6 +201,7 @@ void ParticleComponent::Gui()
     {
         tracks.erase(tracks.begin() + selectedEmitterIndex);
         if (selectedEmitterIndex > 0) --selectedEmitterIndex;
+        RegisterActions();
         return;
     }
 
@@ -162,6 +210,23 @@ void ParticleComponent::Gui()
     ImGui::PushID(selectedEmitterIndex);
     auto& track = tracks[selectedEmitterIndex];
     auto& s = track.settings;
+
+    if (ImGui::InputText("Emitter Name", &track.name)) RegisterActions();
+    ImGui::SameLine();
+    if (ImGui::Button("Play Emitter")) PlayEmitter(track.name);
+    ImGui::SameLine();
+    if (ImGui::Button("Stop Emitter")) StopEmitter(track.name);
+    ImGui::SameLine();
+    if (ImGui::Button("Trigger Emitter")) TriggerEmitter(track.name);
+
+    const bool hasDuplicateName_ = std::count_if(tracks.begin(), tracks.end(),
+        [&](const EmitterTrack& track_) { return track_.name == track.name; }) > 1;
+    if (hasDuplicateName_)
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.45f, 0.25f, 1.0f),
+            "Emitter names must be unique for individual Actions.");
+    }
+    ImGui::TextDisabled("Individual Actions: <Object>_Particle_%s_Play / Stop / Trigger", track.name.c_str());
 
     auto textureCombo = [&](const char* label, std::string& fileName, std::string& path, int slot)
         {
@@ -321,7 +386,15 @@ void ParticleComponent::Gui()
         {
             const char* shapes[] = { "Point", "Box", "Circle", "Sphere", "Line", "Mesh Vertices" };
             ImGui::Combo("Spawn Shape", reinterpret_cast<int*>(&s.spawnShape), shapes, IM_ARRAYSIZE(shapes));
-            ImGui::DragFloat3("Emitter Offset", &s.emissionPosition.x, 0.05f);
+            const char* spawnSpaces_[] = { "Owner Relative", "World" };
+            int spawnSpace_ = static_cast<int>(track.spawnSpace);
+            if (ImGui::Combo("Position Space", &spawnSpace_, spawnSpaces_, IM_ARRAYSIZE(spawnSpaces_)))
+            {
+                track.spawnSpace = static_cast<ParticleSpawnSpace>(spawnSpace_);
+            }
+            ImGui::DragFloat3(
+                track.spawnSpace == ParticleSpawnSpace::WORLD ? "World Position" : "Emitter Offset",
+                &s.emissionPosition.x, 0.05f);
             ImGui::DragFloat3("Shape Size", &s.shapeSize.x, 0.05f, 0.0f, 100.0f);
             if (s.spawnShape == 4)
             {
@@ -439,6 +512,24 @@ void ParticleComponent::Gui()
                 ImGui::DragFloat("Stretch Scale", &s.stretchScale, 0.001f, 0.0f, 2.0f, "%.3f");
                 ImGui::DragFloat("Stretch Max", &s.stretchMax, 0.1f, 0.01f, 1000.0f);
             }
+
+            const char* blendModes_[] = { "Alpha", "Additive" };
+            int blendMode_ = static_cast<int>(track.blendMode);
+            if (ImGui::Combo("Blend Mode", &blendMode_, blendModes_, IM_ARRAYSIZE(blendModes_)))
+            {
+                track.blendMode = static_cast<ParticleBlendMode>(blendMode_);
+            }
+
+            bool useFresnel_ = s.useFresnel != 0;
+            if (ImGui::Checkbox("Use Fresnel", &useFresnel_))
+            {
+                s.useFresnel = useFresnel_ ? 1u : 0u;
+            }
+            if (s.useFresnel != 0)
+            {
+                ImGui::DragFloat("Fresnel Power", &s.fresnelPower, 0.01f, 0.1f, 10.0f);
+                ImGui::DragFloat("Fresnel Strength", &s.fresnelStrength, 0.01f, 0.0f, 10.0f);
+            }
             ImGui::EndTabItem();
         }
 
@@ -514,6 +605,11 @@ bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::s
 void ParticleComponent::Stop()
 {
     isPlaying = false;
+    for (EmitterTrack& track_ : tracks)
+    {
+        track_.isPlaybackEnabled = false;
+        if (track_.emitter) track_.emitter->SetEmissionEnabled(false);
+    }
 }
 void ParticleComponent::RefreshTextureList()
 {
@@ -589,53 +685,178 @@ bool ParticleComponent::LoadAsset(const std::string& path_)
     return true;
 }
 
+bool ParticleComponent::SaveEmitterAsset(size_t emitterIndex_, const std::string& path_)
+{
+    if (path_.empty() || emitterIndex_ >= tracks.size()) return false;
+
+    nlohmann::json componentJson_;
+    Serialize(componentJson_);
+    if (!componentJson_.contains("Emitters") ||
+        emitterIndex_ >= componentJson_["Emitters"].size())
+    {
+        return false;
+    }
+
+    const std::filesystem::path emitterPath_ = WindowsDialogHelper::Utf8ToPath(path_);
+    std::filesystem::create_directories(emitterPath_.parent_path());
+
+    nlohmann::json emitterJson_;
+    emitterJson_["AssetType"] = "ParticleEmitter";
+    emitterJson_["AssetVersion"] = 1;
+    emitterJson_["Emitter"] = componentJson_["Emitters"][emitterIndex_];
+
+    std::ofstream file_(emitterPath_, std::ios::out | std::ios::trunc);
+    if (!file_.is_open()) return false;
+
+    file_ << emitterJson_.dump(4);
+    return true;
+}
+
+bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
+{
+    const std::filesystem::path emitterPath_ = WindowsDialogHelper::Utf8ToPath(path_);
+    if (path_.empty() || !std::filesystem::exists(emitterPath_)) return false;
+
+    std::ifstream file_(emitterPath_);
+    if (!file_.is_open()) return false;
+
+    nlohmann::json emitterAssetJson_;
+    file_ >> emitterAssetJson_;
+    if (emitterAssetJson_.contains("AssetType") &&
+        emitterAssetJson_.value("AssetType", "") != "ParticleEmitter")
+    {
+        return false;
+    }
+
+    const nlohmann::json& emitterJson_ = emitterAssetJson_.contains("Emitter")
+        ? emitterAssetJson_["Emitter"]
+        : emitterAssetJson_;
+    if (!emitterJson_.is_object()) return false;
+
+    nlohmann::json componentJson_;
+    componentJson_["Emitters"] = nlohmann::json::array({ emitterJson_ });
+    componentJson_["IsPlaying"] = false;
+
+    ParticleComponent loadedComponent_;
+    loadedComponent_.Deserialize(componentJson_);
+    if (loadedComponent_.tracks.empty()) return false;
+
+    tracks.push_back(std::move(loadedComponent_.tracks.front()));
+    RegisterActions();
+    return true;
+}
+
 void ParticleComponent::Play()
 {
     isPlaying = true;
     timer = 0.0f;
-    for (auto& track : tracks)
+    for (EmitterTrack& track_ : tracks)
     {
-        track.isStarted = true;
-        if (track.settings.emissionMode == 1) track.settings.burstTrigger = 1.0f;
+        track_.isPlaybackEnabled = true;
+        track_.isStarted = track_.delay <= 0.0f;
+        if (track_.emitter) track_.emitter->SetEmissionEnabled(track_.isStarted);
+        if (track_.isStarted && track_.settings.emissionMode == 1)
+        {
+            track_.settings.burstTrigger = 1.0f;
+        }
     }
+}
+
+bool ParticleComponent::PlayEmitter(const std::string& emitterName_)
+{
+    EmitterTrack* track_ = FindEmitterTrack(emitterName_);
+    if (!track_) return false;
+
+    isPlaying = true;
+    track_->isPlaybackEnabled = true;
+    track_->isStarted = true;
+    if (track_->emitter) track_->emitter->SetEmissionEnabled(true);
+    if (track_->settings.emissionMode == 1) track_->settings.burstTrigger = 1.0f;
+    return true;
+}
+
+bool ParticleComponent::StopEmitter(const std::string& emitterName_)
+{
+    EmitterTrack* track_ = FindEmitterTrack(emitterName_);
+    if (!track_) return false;
+
+    track_->isPlaybackEnabled = false;
+    if (track_->emitter) track_->emitter->SetEmissionEnabled(false);
+    return true;
+}
+
+bool ParticleComponent::TriggerEmitter(const std::string& emitterName_)
+{
+    EmitterTrack* track_ = FindEmitterTrack(emitterName_);
+    if (!track_) return false;
+
+    isPlaying = true;
+    track_->isPlaybackEnabled = true;
+    track_->isStarted = true;
+    if (track_->emitter) track_->emitter->SetEmissionEnabled(true);
+    track_->settings.burstTrigger = 1.0f;
+    return true;
+}
+
+bool ParticleComponent::SetEmitterPosition(
+    const std::string& emitterName_,
+    const DirectX::XMFLOAT3& position_,
+    ParticleSpawnSpace spawnSpace_)
+{
+    EmitterTrack* track_ = FindEmitterTrack(emitterName_);
+    if (!track_) return false;
+
+    track_->settings.emissionPosition = { position_.x, position_.y, position_.z, 1.0f };
+    track_->spawnSpace = spawnSpace_;
+    return true;
+}
+
+bool ParticleComponent::TriggerEmitterAtPosition(
+    const std::string& emitterName_,
+    const DirectX::XMFLOAT3& worldPosition_)
+{
+    return SetEmitterPosition(emitterName_, worldPosition_, ParticleSpawnSpace::WORLD) &&
+        TriggerEmitter(emitterName_);
 }
 
 void ParticleComponent::Update(float deltaTime)
 {
-    if (!isPlaying) return;
+    if (isPlaying) timer += deltaTime;
 
-    timer += deltaTime;
-    auto context = GraphicsDeviceManager::Instance().GetContext();
-    auto owner = GetGameObject();
-    if (!owner) return;
+    auto context_ = GraphicsDeviceManager::Instance().GetContext();
+    auto owner_ = GetGameObject();
+    if (!owner_) return;
 
-    Vector3 worldPos = owner->transform->GetWorldPosition();
+    const Vector3 worldPosition_ = owner_->transform->GetWorldPosition();
 
-    for (auto& track : tracks)
+    for (EmitterTrack& track_ : tracks)
     {
-        if (!track.isStarted && timer >= track.delay)
+        if (isPlaying && track_.isPlaybackEnabled && !track_.isStarted && timer >= track_.delay)
         {
-            track.isStarted = true;
-            if (track.settings.emissionMode == 1) track.settings.burstTrigger = 1.0f;
+            track_.isStarted = true;
+            if (track_.emitter) track_.emitter->SetEmissionEnabled(true);
+            if (track_.settings.emissionMode == 1) track_.settings.burstTrigger = 1.0f;
         }
 
-        if (track.isStarted && track.emitter)
+        if (!track_.isStarted || !track_.emitter) continue;
+
+        if (track_.settings.spawnShape == 5)
         {
-            if (track.settings.spawnShape == 5)
-            {
-                UpdateMeshSpawnPositions(track);
-            }
-
-            ParticleSystemConstants tempSettings = track.settings;
-            tempSettings.emissionPosition.x = worldPos.x + track.settings.emissionPosition.x;
-            tempSettings.emissionPosition.y = worldPos.y + track.settings.emissionPosition.y;
-            tempSettings.emissionPosition.z = worldPos.z + track.settings.emissionPosition.z;
-
-            track.emitter->ApplySettings(tempSettings);
-            track.emitter->Update(context, deltaTime);
-
-            if (track.settings.burstTrigger > 0.0f) track.settings.burstTrigger = 0.0f;
+            UpdateMeshSpawnPositions(track_);
         }
+
+        ParticleSystemConstants tempSettings_ = track_.settings;
+        if (track_.spawnSpace == ParticleSpawnSpace::OWNER_RELATIVE)
+        {
+            tempSettings_.emissionPosition.x = worldPosition_.x + track_.settings.emissionPosition.x;
+            tempSettings_.emissionPosition.y = worldPosition_.y + track_.settings.emissionPosition.y;
+            tempSettings_.emissionPosition.z = worldPosition_.z + track_.settings.emissionPosition.z;
+        }
+
+        track_.emitter->ApplySettings(tempSettings_);
+        track_.emitter->Update(context_, deltaTime);
+
+        if (track_.settings.burstTrigger > 0.0f) track_.settings.burstTrigger = 0.0f;
     }
 }
 
@@ -648,6 +869,8 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         nlohmann::json ej;
         const auto& s = track.settings;
 
+        ej["Name"] = track.name;
+        ej["SpawnSpace"] = static_cast<int>(track.spawnSpace);
         ej["TexturePath"] = track.texturePath;
         ej["MaskTexturePath"] = track.maskTexturePath;
         ej["GradientTexturePath"] = track.gradientTexturePath;
@@ -695,6 +918,10 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["SpriteAnimationRange"] = { s.spriteAnimationStartIndex, s.spriteAnimationEndIndex };
         ej["SpriteAnimationFps"] = s.spriteAnimationFps;
         ej["RenderType"] = s.type;
+        ej["BlendMode"] = static_cast<int>(track.blendMode);
+        ej["UseFresnel"] = s.useFresnel;
+        ej["FresnelPower"] = s.fresnelPower;
+        ej["FresnelStrength"] = s.fresnelStrength;
 
         emitterList.push_back(ej);
     }
@@ -714,6 +941,9 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
         for (const auto& ej : j["Emitters"])
         {
             EmitterTrack track;
+            track.name = ej.value("Name", "Emitter_" + std::to_string(tracks.size()));
+            track.spawnSpace = static_cast<ParticleSpawnSpace>(
+                std::clamp(ej.value("SpawnSpace", 0), 0, 1));
             auto& s = track.settings;
 
             track.texturePath = ej.value("TexturePath", "");
@@ -744,6 +974,11 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.stretchScale = ej.value("StretchScale", 0.04f);
             s.stretchMax = ej.value("StretchMax", 100.0f);
             s.type = ej.value("RenderType", 0u);
+            track.blendMode = static_cast<ParticleBlendMode>(
+                std::clamp(ej.value("BlendMode", 0), 0, 1));
+            s.useFresnel = ej.value("UseFresnel", 0u);
+            s.fresnelPower = ej.value("FresnelPower", 2.0f);
+            s.fresnelStrength = ej.value("FresnelStrength", 1.0f);
 
             if (ej.contains("PosOffset")) s.emissionPosition = { ej["PosOffset"][0], ej["PosOffset"][1], ej["PosOffset"][2], 1.0f };
             if (ej.contains("ShapeStart")) s.shapeStart = { ej["ShapeStart"][0], ej["ShapeStart"][1], ej["ShapeStart"][2], 1.0f };
@@ -870,7 +1105,9 @@ void ParticleComponent::RebuildEmitterResources()
         if (!track_.texturePath.empty()) LoadEmitterTextureSlot(track_, track_.texturePath, 0);
         if (!track_.maskTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.maskTexturePath, 1);
         if (!track_.gradientTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.gradientTexturePath, 2);
+        track_.emitter->SetEmissionEnabled(track_.isPlaybackEnabled);
     }
+    RegisterActions();
 }
 
 std::string ParticleComponent::BuildAssetPathFromName() const
@@ -888,5 +1125,36 @@ std::string ParticleComponent::BuildAssetPathFromName() const
     }
 
     return "Data/Particle/" + name_ + ".json";
+}
+
+ParticleComponent::EmitterTrack* ParticleComponent::FindEmitterTrack(const std::string& emitterName_)
+{
+    const auto trackIterator_ = std::find_if(tracks.begin(), tracks.end(),
+        [&](const EmitterTrack& track_) { return track_.name == emitterName_; });
+    return trackIterator_ != tracks.end() ? &*trackIterator_ : nullptr;
+}
+
+const ParticleComponent::EmitterTrack* ParticleComponent::FindEmitterTrack(const std::string& emitterName_) const
+{
+    const auto trackIterator_ = std::find_if(tracks.begin(), tracks.end(),
+        [&](const EmitterTrack& track_) { return track_.name == emitterName_; });
+    return trackIterator_ != tracks.end() ? &*trackIterator_ : nullptr;
+}
+
+std::string ParticleComponent::BuildEmitterAssetPathFromName(size_t emitterIndex_) const
+{
+    std::string name_ = emitterIndex_ < tracks.size() ? tracks[emitterIndex_].name : "Emitter";
+    if (name_.empty()) name_ = "Emitter";
+
+    for (char& char_ : name_)
+    {
+        if (char_ == '\\' || char_ == '/' || char_ == ':' || char_ == '*' || char_ == '?' ||
+            char_ == '"' || char_ == '<' || char_ == '>' || char_ == '|')
+        {
+            char_ = '_';
+        }
+    }
+
+    return "Data/Particle/Emitter/" + name_ + ".json";
 }
 

@@ -70,6 +70,7 @@ void MeshVFXShader::UpdatePart(
     const MeshVFXPart& part_,
     const MeshVFXRuntimePart& runtimePart_,
     ID3D11ShaderResourceView* baseTexture_,
+    ID3D11ShaderResourceView* normalTexture_,
     const DirectX::XMMATRIX& world_,
     float partTime_,
     float alpha_)
@@ -83,6 +84,7 @@ void MeshVFXShader::UpdatePart(
     constants_.uvRotationCenter = part_.uvRotationCenter;
     constants_.time = partTime_;
     constants_.alpha = alpha_;
+    constants_.normalStrength = part_.normalStrength;
     constants_.noiseStrength = part_.noiseStrength;
     constants_.fresnelPower = part_.fresnelPower;
     constants_.fresnelStrength = part_.fresnelStrength;
@@ -92,6 +94,7 @@ void MeshVFXShader::UpdatePart(
     constants_.noiseUVRotation = DirectX::XMConvertToRadians(part_.noiseUVRotationSpeed * partTime_);
     constants_.useMask = part_.useMask ? 1u : 0u;
     constants_.useNoise = part_.useNoise ? 1u : 0u;
+    constants_.useNormal = part_.useNormal ? 1u : 0u;
     constants_.useFresnel = part_.useFresnel ? 1u : 0u;
 
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
@@ -101,6 +104,7 @@ void MeshVFXShader::UpdatePart(
         baseTexture_ ? baseTexture_ : runtimePart_.baseTexture.Get(),
         runtimePart_.maskTexture.Get(),
         runtimePart_.noiseTexture.Get(),
+        normalTexture_ ? normalTexture_ : runtimePart_.normalTexture.Get(),
     };
     deviceContext_->PSSetShaderResources(0, _countof(textures_), textures_);
 }
@@ -108,7 +112,7 @@ void MeshVFXShader::UpdatePart(
 void MeshVFXShader::End(const RenderContext& renderContext_)
 {
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
-    ID3D11ShaderResourceView* nullTextures_[] = { nullptr, nullptr, nullptr };
+    ID3D11ShaderResourceView* nullTextures_[] = { nullptr, nullptr, nullptr, nullptr };
     ID3D11Buffer* nullBuffer_ = nullptr;
     deviceContext_->PSSetShaderResources(0, _countof(nullTextures_), nullTextures_);
     deviceContext_->VSSetConstantBuffers(0, 1, &nullBuffer_);

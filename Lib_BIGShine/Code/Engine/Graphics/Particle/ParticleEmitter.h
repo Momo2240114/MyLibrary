@@ -19,6 +19,7 @@ public:
     void PrepareRender(ID3D11DeviceContext* context);
 
     void ApplySettings(const ParticleSystemConstants& nextSettings);
+    void SetEmissionEnabled(bool enabled_) { emissionEnabled = enabled_; }
     ParticleSystemConstants& GetSettings() { return settings; }
     const ParticleSystemConstants& GetSettings() const { return settings; }
 
@@ -88,6 +89,7 @@ private:
     UINT numParticles = 0;
     UINT numEmitParticles = 0;
     bool initialized = false;
+    bool emissionEnabled = true;
     float continuousAccumulator = 0.0f;
     DirectX::XMUINT2 textureSplitCount = { 1, 1 };
 

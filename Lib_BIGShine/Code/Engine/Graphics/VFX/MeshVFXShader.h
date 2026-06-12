@@ -20,6 +20,7 @@ public:
         const MeshVFXPart& part_,
         const MeshVFXRuntimePart& runtimePart_,
         ID3D11ShaderResourceView* baseTexture_,
+        ID3D11ShaderResourceView* normalTexture_,
         const DirectX::XMMATRIX& world_,
         float partTime_,
         float alpha_);
@@ -49,6 +50,7 @@ private:
         DirectX::XMFLOAT2 uvRotationCenter;
         float time;
         float alpha;
+        float normalStrength;
         float noiseStrength;
         float fresnelPower;
         float fresnelStrength;
@@ -58,7 +60,9 @@ private:
         float noiseUVRotation;
         uint32_t useMask;
         uint32_t useNoise;
+        uint32_t useNormal;
         uint32_t useFresnel;
+        DirectX::XMUINT2 padding;
     };
     static_assert(sizeof(CbMeshVFX) % 16 == 0);
 

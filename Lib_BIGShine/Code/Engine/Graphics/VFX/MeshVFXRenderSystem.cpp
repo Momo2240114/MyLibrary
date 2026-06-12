@@ -178,8 +178,15 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_)
                 {
                     baseTexture_ = mesh_.material->baseMap.Get();
                 }
+                ID3D11ShaderResourceView* normalTexture_ = runtimePart_.normalTexture.Get();
+                if (part_.useMaterialNormalTexture && part_.normalTexturePath.empty() &&
+                    mesh_.material && mesh_.material->normalMap)
+                {
+                    normalTexture_ = mesh_.material->normalMap.Get();
+                }
                 shader->UpdatePart(
-                    renderContext_, part_, runtimePart_, baseTexture_, world_, animation_.time, animation_.alpha);
+                    renderContext_, part_, runtimePart_, baseTexture_, normalTexture_,
+                    world_, animation_.time, animation_.alpha);
 
                 UINT stride_ = sizeof(GltfModelCommponennt::Vertex);
                 UINT offset_ = 0;

@@ -66,13 +66,6 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
     dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
     float blendFactor[4] = { 0, 0, 0, 0 };
-    if (isEditorWindow_) {
-        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::TransparencyKeepAlpha), blendFactor, 0xffffffff);
-    }
-    else
-    {
-        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), blendFactor, 0xffffffff);
-    }
 
     dc->IASetInputLayout(nullptr);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -87,6 +80,12 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
         for (auto& track : info.component->GetTracks())
         {
             if (!track.isStarted || !track.emitter) continue;
+
+            const BlendState blendState_ = track.blendMode == ParticleBlendMode::ADDITIVE
+                ? BlendState::AdditiveKeepAlpha
+                : (isEditorWindow_ ? BlendState::TransparencyKeepAlpha : BlendState::Transparency);
+            dc->OMSetBlendState(
+                rc.renderState->GetBlendState(blendState_), blendFactor, 0xffffffff);
             track.emitter->Render(dc);
         }
     }
@@ -107,6 +106,13 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->GSSetShader(nullptr, nullptr, 0);
     dc->PSSetShader(nullptr, nullptr, 0);
+
+    dc->OMSetBlendState(
+        rc.renderState->GetBlendState(BlendState::Opaque), blendFactor, 0xffffffff);
+    dc->OMSetDepthStencilState(
+        rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+    dc->RSSetState(
+        rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
     drawInfos.clear();
 }

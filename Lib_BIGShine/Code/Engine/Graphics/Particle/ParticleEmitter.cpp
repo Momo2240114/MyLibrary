@@ -259,6 +259,8 @@ void ParticleEmitter::PrepareRender(ID3D11DeviceContext* context)
 
 void ParticleEmitter::BuildEmitList(float dt)
 {
+    if (!emissionEnabled) return;
+
     if (settings.emissionMode == 1)
     {
         if (settings.burstTrigger > 0.5f)
