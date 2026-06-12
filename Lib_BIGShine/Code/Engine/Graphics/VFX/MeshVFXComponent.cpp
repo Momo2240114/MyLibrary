@@ -85,39 +85,7 @@ void MeshVFXComponent::Gui()
                 ImGui::TextDisabled("Model information only");
             }
 
-            // Draw an asset combo.
-            auto drawAssetCombo_ = [&](
-                const char* label_,
-                std::string& path_,
-                const std::vector<std::string>& assetPaths_,
-                bool allowNone_)
-                {
-                    const std::string preview_ = path_.empty()
-                        ? (allowNone_ ? "None" : "Select Asset")
-                        : GetAssetLabel(path_);
-                    bool changed_ = false;
-
-                    if (ImGui::BeginCombo(label_, preview_.c_str()))
-                    {
-                        if (allowNone_ && ImGui::Selectable("None", path_.empty()))
-                        {
-                            path_.clear();
-                            changed_ = true;
-                        }
-                        for (const std::string& assetPath_ : assetPaths_)
-                        {
-                            const std::string itemLabel_ = GetAssetLabel(assetPath_);
-                            if (ImGui::Selectable(itemLabel_.c_str(), path_ == assetPath_))
-                            {
-                                path_ = assetPath_;
-                                changed_ = true;
-                            }
-                        }
-                        ImGui::EndCombo();
-                    }
-                    return changed_;
-                };
-
+         
             // Draw a separate native file dialog button.
             auto drawFileDialogButton_ = [&](
                 const char* buttonLabel_,
@@ -182,7 +150,8 @@ void MeshVFXComponent::Gui()
                 };
 
             // Model asset selection
-            bool modelChanged_ = drawAssetCombo_("Model Asset", part_.modelPath, modelAssetPaths, false);
+            //bool modelChanged_ = drawAssetCombo_("Model Asset", part_.modelPath, modelAssetPaths, false);
+            bool modelChanged_ = false;
             ImGui::Spacing();
             if (drawFileDialogButton_("Browse Model via Dialog...", part_.modelPath, false))
             {
@@ -257,7 +226,7 @@ void MeshVFXComponent::Gui()
             }
 
             // Base texture selection
-            bool baseTextureChanged_ = drawAssetCombo_("Base Texture", part_.baseTexturePath, textureAssetPaths, true);
+            bool baseTextureChanged_= false;
             if (drawFileDialogButton_("Browse Base Texture via Dialog...", part_.baseTexturePath, true))
             {
                 baseTextureChanged_ = true;
@@ -266,14 +235,14 @@ void MeshVFXComponent::Gui()
             ImGui::Checkbox("Use Material Base Texture", &part_.useMaterialBaseTexture);
 
             // Mask texture selection
-            bool maskTextureChanged_ = drawAssetCombo_("Mask Texture", part_.maskTexturePath, textureAssetPaths, true);
+            bool maskTextureChanged_ = false;
             if (drawFileDialogButton_("Browse Mask Texture via Dialog...", part_.maskTexturePath, true))
             {
                 maskTextureChanged_ = true;
             }
 
             // Noise texture selection
-            bool noiseTextureChanged_ = drawAssetCombo_("Noise Texture", part_.noiseTexturePath, textureAssetPaths, true);
+            bool noiseTextureChanged_ = false;
             if (drawFileDialogButton_("Browse Noise Texture via Dialog...", part_.noiseTexturePath, true))
             {
                 noiseTextureChanged_ = true;

@@ -1,6 +1,112 @@
 #include "ActionSequence.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "ImSequencer.h"
+
+#include <algorithm>
+#include <cmath>
+
+namespace
+{
+    constexpr float SEQUENCE_FPS = 60.0f;
+    constexpr unsigned int ACTION_COLOR = 0xFF4FA3FF;
+
+    struct ActionSequenceAdapter : public ImSequencer::SequenceInterface
+    {
+        SequenceData* sequence = nullptr;
+        int* currentFrame = nullptr;
+
+        int ToFrame(float time_) const
+        {
+            return static_cast<int>(std::round(time_ * SEQUENCE_FPS));
+        }
+
+        float ToTime(int frame_) const
+        {
+            return static_cast<float>(frame_) / SEQUENCE_FPS;
+        }
+
+        void SyncFrames()
+        {
+            if (!sequence) return;
+
+            for (auto& action_ : sequence->actions)
+            {
+                action_.timelineStartFrame = ToFrame(action_.executionTime);
+                action_.timelineEndFrame = action_.timelineStartFrame + 1;
+            }
+        }
+
+        int GetFrameMin() const override { return 0; }
+        int GetFrameMax() const override
+        {
+            return sequence ? (std::max)(1, ToFrame(sequence->duration)) : 1;
+        }
+        int GetItemCount() const override
+        {
+            return sequence ? static_cast<int>(sequence->actions.size()) : 0;
+        }
+        int GetItemTypeCount() const override { return 1; }
+        const char* GetItemTypeName(int typeIndex_) const override { return "Action"; }
+
+        const char* GetItemLabel(int index_) const override
+        {
+            if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return "";
+            const auto& action_ = sequence->actions[index_];
+            return action_.actionName.empty() ? "(Select Action)" : action_.actionName.c_str();
+        }
+
+        void Get(int index_, int** start_, int** end_, int* type_, unsigned int* color_) override
+        {
+            if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return;
+
+            auto& action_ = sequence->actions[index_];
+            if (start_) *start_ = &action_.timelineStartFrame;
+            if (end_) *end_ = &action_.timelineEndFrame;
+            if (type_) *type_ = 0;
+            if (color_) *color_ = ACTION_COLOR;
+        }
+
+        void EndEdit() override
+        {
+            if (!sequence) return;
+
+            for (auto& action_ : sequence->actions)
+            {
+                action_.timelineStartFrame = (std::max)(0, action_.timelineStartFrame);
+                action_.timelineEndFrame = action_.timelineStartFrame + 1;
+                action_.executionTime = ToTime(action_.timelineStartFrame);
+                sequence->duration = (std::max)(sequence->duration, action_.executionTime);
+            }
+        }
+
+        void Add(int typeIndex_) override
+        {
+            if (!sequence) return;
+
+            ActionReference action_;
+            action_.executionTime = currentFrame ? ToTime(*currentFrame) : 0.0f;
+            sequence->actions.push_back(action_);
+            SyncFrames();
+        }
+
+        void Del(int index_) override
+        {
+            if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return;
+            sequence->actions.erase(sequence->actions.begin() + index_);
+        }
+
+        void Duplicate(int index_) override
+        {
+            if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return;
+
+            auto action_ = sequence->actions[index_];
+            action_.executionTime = (std::min)(sequence->duration, action_.executionTime + (1.0f / SEQUENCE_FPS));
+            sequence->actions.push_back(action_);
+            SyncFrames();
+        }
+    };
+}
 
 void ActionSequence::Start()
 {
@@ -15,13 +121,13 @@ void ActionSequence::Update(float et)
         if (it->timer <= 0.0f) {
 
             bool executed = false;
-            // 1. まず自分のLocalRegistryを探す
+            // Prefer actions registered on the owner.
             if (owner && owner->localRegistry.HasAction(it->actionName)) {
                 owner->localRegistry.Call(it->actionName);
                 executed = true;
             }
 
-            // 2. なければGlobalを探す
+            // Fall back to the global registry.
             if (!executed) {
                 ActionRegistry::Instance().Call(it->actionName);
             }
@@ -41,16 +147,20 @@ void ActionSequence::StartSequence(int index)
 
     pendingActions.clear();
 
-    float accumulatedTime = 0.0f;
     for (const auto& act : sequences[index].actions) {
-        accumulatedTime += act.delay;
+        if (act.actionName.empty()) continue;
 
-        if (accumulatedTime <= 0.0f) {
-            ActionRegistry::Instance().Call(act.actionName);
+        if (act.executionTime <= 0.0f) {
+            auto owner = gameObject.lock();
+            if (owner && owner->localRegistry.HasAction(act.actionName)) {
+                owner->localRegistry.Call(act.actionName);
+            }
+            else {
+                ActionRegistry::Instance().Call(act.actionName);
+            }
         }
         else {
-            // Updateで処理するために予約
-            pendingActions.push_back({ accumulatedTime, act.actionName });
+            pendingActions.push_back({ act.executionTime, act.actionName });
         }
     }
 }
@@ -63,7 +173,6 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName)
     for (int i = 0; i < (int)sequences.size(); ++i) {
         if (sequences[i].name.empty()) continue;
 
-        // インデックスをキャプチャして登録
         int seqIndex = i;
         reg.RegisterAction("Sequence", sequences[i].name, [this, seqIndex]() {
             this->StartSequence(seqIndex);
@@ -73,113 +182,123 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName)
 
 void ActionSequence::Gui()
 {
+    ImGui::TextDisabled("Edit sequences from Window > Action Sequence Editor.");
+}
+
+void ActionSequence::DrawEditorGui()
+{
     auto& globalReg = ActionRegistry::Instance();
     auto owner = gameObject.lock();
 
-    // --- 追加: カテゴリリストの構築 (Local と Global を統合) ---
     struct CategoryEntry { std::string name; bool isLocal; };
     std::vector<CategoryEntry> allCategories;
 
-    // 1. Local カテゴリを優先的に追加
     if (owner) {
         for (const auto& cat : owner->localRegistry.GetCategories()) {
             allCategories.push_back({ cat, true });
         }
     }
-    // 2. Global カテゴリを追加
     for (const auto& cat : globalReg.GetCategories()) {
         allCategories.push_back({ cat, false });
     }
 
-    for (int s = 0; s < (int)sequences.size(); ++s) {
-        ImGui::PushID(s);
+    for (int sequenceIndex_ = 0; sequenceIndex_ < (int)sequences.size(); ++sequenceIndex_) {
+        ImGui::PushID(sequenceIndex_);
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowOverlap;
+        auto& sequence_ = sequences[sequenceIndex_];
 
-        if (ImGui::CollapsingHeader(sequences[s].name.empty() ? "Unnamed Sequence" : sequences[s].name.c_str(), nullptr, flags))
+        if (ImGui::CollapsingHeader(sequence_.name.empty() ? "Unnamed Sequence" : sequence_.name.c_str(), nullptr, flags))
         {
-            // --- 1. 名前入力 ---
             char buf[64];
-            strcpy_s(buf, sequences[s].name.c_str());
+            strcpy_s(buf, sequence_.name.c_str());
             if (ImGui::InputText("Sequence Name", buf, sizeof(buf))) {
-                sequences[s].name = buf;
+                sequence_.name = buf;
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Delete List")) {
-                sequences.erase(sequences.begin() + s);
-                ImGui::PopID(); --s; continue;
+                sequences.erase(sequences.begin() + sequenceIndex_);
+                ImGui::PopID();
+                --sequenceIndex_;
+                continue;
             }
 
-            // --- 2. アクションスロット ---
-            for (int i = 0; i < (int)sequences[s].actions.size(); ++i) {
-                ImGui::PushID(i);
-                auto& ref = sequences[s].actions[i];
+            ImGui::SetNextItemWidth(180.0f);
+            if (ImGui::DragFloat("Timeline Length", &sequence_.duration, 0.1f, 0.1f, 600.0f, "%.2f sec")) {
+                sequence_.duration = (std::max)(0.1f, sequence_.duration);
+            }
 
-                // A. カテゴリ選択 (Local/Global を判別表示)
-                ImGui::SetNextItemWidth(160); // プレフィックス分少し広めに
-                std::string catDisp = ref.category.empty() ? "Category" : ref.category;
-                if (ImGui::BeginCombo("##cat", catDisp.c_str())) {
-                    for (const auto& entry : allCategories) {
-                        // ラベルに [L] や [G] を付けて区別する
-                        std::string label = (entry.isLocal ? "[L] " : "[G] ") + entry.name;
-                        if (ImGui::Selectable(label.c_str(), ref.category == entry.name)) {
-                            ref.category = entry.name;
-                            ref.actionName = ""; // リセット
+            ActionSequenceAdapter adapter_;
+            adapter_.sequence = &sequence_;
+            adapter_.currentFrame = &sequence_.currentFrame;
+            adapter_.SyncFrames();
+
+            const bool showSequencer_ = ImGui::BeginChild("ActionSequenceTimeline", ImVec2(0, 260), true);
+            if (showSequencer_) {
+                ImSequencer::Sequencer(
+                    &adapter_,
+                    &sequence_.currentFrame,
+                    &sequence_.timelineExpanded,
+                    &sequence_.selectedAction,
+                    &sequence_.firstFrame,
+                    ImSequencer::SEQUENCER_EDIT_ALL |
+                    ImSequencer::SEQUENCER_ADD |
+                    ImSequencer::SEQUENCER_DEL |
+                    ImSequencer::SEQUENCER_CHANGE_FRAME);
+            }
+            ImGui::EndChild();
+
+            if (ImGui::Button("Register & Play", ImVec2(-1, 25))) {
+                RegisterSequence("");
+                StartSequence(sequenceIndex_);
+            }
+
+            if (sequence_.selectedAction >= 0 && sequence_.selectedAction < static_cast<int>(sequence_.actions.size())) {
+                auto& action_ = sequence_.actions[sequence_.selectedAction];
+                ImGui::SeparatorText("Selected Action");
+
+                ImGui::SetNextItemWidth(180.0f);
+                const std::string categoryLabel_ = action_.category.empty() ? "Category" : action_.category;
+                if (ImGui::BeginCombo("Category", categoryLabel_.c_str())) {
+                    for (const auto& entry_ : allCategories) {
+                        const std::string label_ = (entry_.isLocal ? "[L] " : "[G] ") + entry_.name;
+                        if (ImGui::Selectable(label_.c_str(), action_.category == entry_.name)) {
+                            action_.category = entry_.name;
+                            action_.actionName.clear();
                         }
                     }
                     ImGui::EndCombo();
                 }
 
-                ImGui::SameLine();
-
-                // B. アクション選択
-                ImGui::SetNextItemWidth(200);
-                if (!ref.category.empty()) {
-                    std::string actDisp = ref.actionName.empty() ? "Select Action" : ref.actionName;
-                    if (ImGui::BeginCombo("##act", actDisp.c_str())) {
-
-                        // --- 修正: 選択されたカテゴリが Local か Global かを HasCategory で判断 ---
-                        std::vector<std::string> actionNames;
-                        if (owner && owner->localRegistry.HasCategory(ref.category)) {
-                            actionNames = owner->localRegistry.GetActionNames(ref.category);
+                ImGui::SetNextItemWidth(260.0f);
+                if (!action_.category.empty()) {
+                    const std::string actionLabel_ = action_.actionName.empty() ? "Select Action" : action_.actionName;
+                    if (ImGui::BeginCombo("Action", actionLabel_.c_str())) {
+                        std::vector<std::string> actionNames_;
+                        if (owner && owner->localRegistry.HasCategory(action_.category)) {
+                            actionNames_ = owner->localRegistry.GetActionNames(action_.category);
                         }
                         else {
-                            actionNames = globalReg.GetActionNames(ref.category);
+                            actionNames_ = globalReg.GetActionNames(action_.category);
                         }
 
-                        for (const auto& name : actionNames) {
-                            if (ImGui::Selectable(name.c_str(), ref.actionName == name)) {
-                                ref.actionName = name;
+                        for (const auto& actionName_ : actionNames_) {
+                            if (ImGui::Selectable(actionName_.c_str(), action_.actionName == actionName_)) {
+                                action_.actionName = actionName_;
                             }
                         }
                         ImGui::EndCombo();
                     }
                 }
                 else {
-                    ImGui::TextDisabled("(Select Category First)");
+                    ImGui::TextDisabled("Select a category first.");
                 }
 
-                ImGui::SameLine();
-                if (ImGui::Button("X")) {
-                    sequences[s].actions.erase(sequences[s].actions.begin() + i);
-                    --i;
+                ImGui::SetNextItemWidth(180.0f);
+                if (ImGui::DragFloat("Execution Time", &action_.executionTime, 0.01f, 0.0f, sequence_.duration, "%.3f sec")) {
+                    action_.executionTime = (std::clamp)(action_.executionTime, 0.0f, sequence_.duration);
+                    adapter_.SyncFrames();
                 }
-
-                ImGui::Text("delay");
-                ImGui::SameLine();
-                ImGui::DragFloat("##delay", &ref.delay, 0.1f, 0.0f, 100.0f);
-                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Execution delay (seconds)");
-
-                ImGui::PopID();
-            }
-
-            if (ImGui::Button("+ Add Slot")) {
-                sequences[s].actions.push_back(ActionReference());
-            }
-
-            if (ImGui::Button("Register & Play", ImVec2(-1, 25))) {
-                RegisterSequence("");
-                StartSequence(s);
             }
         }
         ImGui::Separator();
@@ -197,14 +316,14 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
     for (const auto& seq : sequences) {
         nlohmann::json seqItem;
         seqItem["name"] = seq.name;
+        seqItem["duration"] = seq.duration;
 
         nlohmann::json actArray = nlohmann::json::array();
         for (const auto& act : seq.actions) {
-            // delay を保存に追加
             actArray.push_back({
                 {"cat", act.category},
                 {"name", act.actionName},
-                {"delay", act.delay}
+                {"time", act.executionTime}
                 });
         }
         seqItem["actions"] = actArray;
@@ -223,15 +342,25 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
 
         SequenceData data;
         data.name = seqItem.value("name", "New Sequence");
+        data.duration = seqItem.value("duration", 10.0f);
 
         if (seqItem.contains("actions") && seqItem["actions"].is_array()) {
+            float accumulatedTime_ = 0.0f;
             for (const auto& actItem : seqItem["actions"]) {
                 if (actItem.is_object()) {
                     ActionReference ref;
                     ref.category = actItem.value("cat", "");
                     ref.actionName = actItem.value("name", "");
-                    // delay を読み込みに追加（デフォルト 0.0f）
-                    ref.delay = actItem.value("delay", 0.0f);
+                    if (actItem.contains("time")) {
+                        ref.executionTime = actItem.value("time", 0.0f);
+                        accumulatedTime_ = ref.executionTime;
+                    }
+                    else {
+                        // Legacy ActionSequence data stored relative delays.
+                        accumulatedTime_ += actItem.value("delay", 0.0f);
+                        ref.executionTime = accumulatedTime_;
+                    }
+                    data.duration = (std::max)(data.duration, ref.executionTime);
 
                     if (!ref.actionName.empty()) {
                         data.actions.push_back(ref);

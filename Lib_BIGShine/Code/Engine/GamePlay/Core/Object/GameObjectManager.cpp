@@ -739,7 +739,9 @@ void GameObjectManager::SaveScene(const std::string& sceneName)
         {"threshold", params.threshold},
         {"intensity", params.intensity},
         {"kawaseScale", params.kawaseScale},
-        {"blurPasses", params.blurPasses}
+        {"blurPasses", params.blurPasses},
+        {"toneMappingEnabled", params.toneMappingEnabled},
+        {"exposure", params.exposure}
     };
 
     if (modelRenderSystem)
@@ -810,6 +812,8 @@ void GameObjectManager::LoadScene(const std::string& sceneName)
             params.intensity = bloomJson.value("intensity", 1.0f);
             params.kawaseScale = bloomJson.value("kawaseScale", 1.0f);
             params.blurPasses = bloomJson.value("blurPasses", 4);
+            params.toneMappingEnabled = bloomJson.value("toneMappingEnabled", true);
+            params.exposure = bloomJson.value("exposure", 1.0f);
         }
 
         if (modelRenderSystem)

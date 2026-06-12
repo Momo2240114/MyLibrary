@@ -26,17 +26,3 @@ float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
     return float4(c.rgb * 0.2, 1.0);
 }
 
-
-//float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET
-//{
-//    float2 offsetUV = (g_offset * g_kawaseScale + 0.5) * g_texSize;
-    
-//    float4 color = 0;
-//    color += tex.Sample(sam, uv + float2(offsetUV.x, offsetUV.y));
-//    color += tex.Sample(sam, uv + float2(-offsetUV.x, offsetUV.y));
-//    color += tex.Sample(sam, uv + float2(offsetUV.x, -offsetUV.y));
-//    color += tex.Sample(sam, uv + float2(-offsetUV.x, -offsetUV.y));
-
-//    // 修正ポイント：色の平均（RGB）を出し、A は 1.0 にする
-//    return float4(color.rgb * 0.25, 1.0);
-//}

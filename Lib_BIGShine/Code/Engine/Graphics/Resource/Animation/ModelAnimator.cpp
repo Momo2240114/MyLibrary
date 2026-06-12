@@ -1,4 +1,4 @@
-#include "ModelAnimator.h"
+ï»¿#include "ModelAnimator.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include <algorithm>
@@ -55,9 +55,11 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     if (tempPoseA.size() != nodeCount) tempPoseA.resize(nodeCount);
     if (tempPoseB.size() != nodeCount) tempPoseB.resize(nodeCount);
     if (finalPose.size() != nodeCount) finalPose.resize(nodeCount);
+    if (rootMotionLoopStartPose.size() != nodeCount) rootMotionLoopStartPose.resize(nodeCount);
+    if (rootMotionLoopEndPose.size() != nodeCount) rootMotionLoopEndPose.resize(nodeCount);
 
     // ------------------------------------------------------------
-    // •â•: ó‘Ô‚©‚ç pose ‚ğƒTƒ“ƒvƒ‹‚·‚é
+    // è£œåŠ©: çŠ¶æ…‹ã‹ã‚‰ pose ã‚’ã‚µãƒ³ãƒ—ãƒ«ã™ã‚‹
     // ------------------------------------------------------------
     auto SamplePose = [&](const AnimState* state, float time, std::vector<GltfModelCommponennt::NodePose>& outPose)
         {
@@ -86,7 +88,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
             case AnimStateType::Blend1D:
             {
-                float alpha = 0.5f; // TODO: Blackboard “™‚©‚çæ“¾
+                float alpha = 0.5f; // TODO: Blackboard ç­‰ã‹ã‚‰å–å¾—
 
                 model->ComputeAnimation(state->animIndexA, time, outPose);
 
@@ -112,7 +114,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         };
 
     // ------------------------------------------------------------
-    // 1. Duration æ“¾
+    // 1. Duration å–å¾—
     // ------------------------------------------------------------
     float baseDuration = 1.0f;
 
@@ -133,17 +135,17 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     }
 
     // ------------------------------------------------------------
-    // 2. ŠÔXV
+    // 2. æ™‚é–“æ›´æ–°
     // ------------------------------------------------------------
     current.Update(et, baseDuration, curvecomp, owner);
 
     // ------------------------------------------------------------
-    // 3. Œ»İƒ|[ƒYŒvZ
+    // 3. ç¾åœ¨ãƒãƒ¼ã‚ºè¨ˆç®—
     // ------------------------------------------------------------
     SamplePose(current.state, current.time, tempPoseA);
 
     // ------------------------------------------------------------
-    // 4. ƒNƒƒXƒtƒF[ƒh
+    // 4. ã‚¯ãƒ­ã‚¹ãƒ•ã‚§ãƒ¼ãƒ‰
     // ------------------------------------------------------------
     if (isTransitioning)
     {
@@ -176,14 +178,16 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
 
     // ------------------------------------------------------------
-    // 5. RootMotion ’Šo
+    // 5. RootMotion æŠ½å‡º
     // ------------------------------------------------------------
     currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
     currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
 
 
     int rootNodeIdx = -1;
-    const std::string rootName = model->GetRootMotionName();
+    const std::string rootName = current.state->rootMotion.sourceNodeName.empty()
+        ? model->GetRootMotionName()
+        : current.state->rootMotion.sourceNodeName;
 
     if (current.state->rootMotion.enable && !rootName.empty())
     {
@@ -195,50 +199,79 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         using namespace DirectX::SimpleMath;
 
         Vector3 rawPos = finalPose[rootNodeIdx].position;
-        Quaternion rawRot = finalPose[rootNodeIdx].rotation;
-        rawRot.Normalize();
-
         const bool looped = (current.time < _prevTime);
         const bool stateChanged = (_prevRootMotionState != current.state);
+        const bool sourceNodeChanged_ = (previousRootMotionNodeIndex != rootNodeIdx);
 
-        if (_isFirstFrame || looped || stateChanged)
+        if (_isFirstFrame || stateChanged || sourceNodeChanged_)
         {
             _prevRootPos = rawPos;
-            _prevRootRot = rawRot;
+            rootMotionBasePosition = rawPos;
             _prevTime = current.time;
             _prevRootMotionState = current.state;
+            previousRootMotionNodeIndex = rootNodeIdx;
             _isFirstFrame = false;
         }
         else
         {
-            Vector3 deltaPos = rawPos - _prevRootPos;
+            Vector3 deltaPos;
+            if (looped)
+            {
+                SamplePose(current.state, 0.0f, rootMotionLoopStartPose);
+                SamplePose(current.state, baseDuration, rootMotionLoopEndPose);
+
+                const Vector3 loopStartPos_ = rootMotionLoopStartPose[rootNodeIdx].position;
+                const Vector3 loopEndPos_ = rootMotionLoopEndPose[rootNodeIdx].position;
+                deltaPos = (loopEndPos_ - _prevRootPos) + (rawPos - loopStartPos_);
+            }
+            else
+            {
+                deltaPos = rawPos - _prevRootPos;
+            }
 
             if (!current.state->rootMotion.applyPositionX) deltaPos.x = 0.0f;
             if (!current.state->rootMotion.applyPositionY) deltaPos.y = 0.0f;
             if (!current.state->rootMotion.applyPositionZ) deltaPos.z = 0.0f;
 
+            //currentRootMotionDelta.deltaPosition = deltaPos;
+
+            // ------------------------------------------------------------
+            // RootMotion ã®ç§»å‹•é‡å€ç‡
+            // è¦‹ãŸç›®ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å§¿å‹¢ã¯ãã®ã¾ã¾ã«ã—ã¦ã€
+            // GameObject ã«é©ç”¨ã™ã‚‹ç§»å‹•å·®åˆ†ã ã‘ã‚’èª¿æ•´ã™ã‚‹ã€‚
+            // ------------------------------------------------------------
+            float rootMotionScale_ = current.state->rootMotionScale;
+
+            if (curvecomp && !current.state->rootMotionScaleCurveName.empty())
+            {
+                float normalizedTime_ = (baseDuration > 0.0f) ? (current.time / baseDuration) : 0.0f;
+                normalizedTime_ = (std::max)(0.0f, (std::min)(1.0f, normalizedTime_));
+
+                rootMotionScale_ *= curvecomp->GetValue(current.state->rootMotionScaleCurveName, normalizedTime_);
+            }
+
+            deltaPos *= rootMotionScale_;
+
             currentRootMotionDelta.deltaPosition = deltaPos;
 
 
-
             _prevRootPos = rawPos;
-            _prevRootRot = rawRot;
             _prevTime = current.time;
             _prevRootMotionState = current.state;
+            previousRootMotionNodeIndex = rootNodeIdx;
         }
 
-        // Root ƒm[ƒh‚ÍˆÊ’u‚à‰ñ“]‚àƒ‚ƒfƒ‹‹óŠÔ‚ÅŒÅ’è
-        finalPose[rootNodeIdx].position = Vector3::Zero;
-      
-        finalPose[rootNodeIdx].rotation *= model->GetRootRotationOffset();
-        finalPose[rootNodeIdx].rotation.Normalize();
+        // RootMotionæœ‰åŠ¹æ™‚ã¯æŠ½å‡ºå…ƒãƒãƒ¼ãƒ‰ã®ä½ç½®å¤‰åŒ–ã‚’å¸¸ã«ç„¡åŠ¹åŒ–ã™ã‚‹ã€‚
+        // Apply Positionã¯GameObjectã®Transformã¸å·®åˆ†ã‚’åŠ ãˆã‚‹è»¸ã ã‘ã‚’åˆ¶å¾¡ã™ã‚‹ã€‚
+        finalPose[rootNodeIdx].position = rootMotionBasePosition;
     }
     else
     {
-        // RootMotion –³Œø‚Í“à•”ó‘Ô‚ğƒŠƒZƒbƒg
+        // RootMotion ç„¡åŠ¹æ™‚ã¯å†…éƒ¨çŠ¶æ…‹ã‚’ãƒªã‚»ãƒƒãƒˆ
         _isFirstFrame = true;
         _prevTime = 0.0f;
         _prevRootMotionState = nullptr;
+        previousRootMotionNodeIndex = -1;
         currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
         currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
     }
@@ -248,25 +281,25 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
 {
     if (!model) return;
 
-    // 1. ŠeƒAƒjƒ[ƒVƒ‡ƒ“‚ÌŠÔ‚ği‚ß‚é (ŠÈˆÕ‰»‚Ì‚½‚ß‹¤’Ê‚ÌŠÔŠÇ—)
+    // 1. å„ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ™‚é–“ã‚’é€²ã‚ã‚‹ (ç°¡æ˜“åŒ–ã®ãŸã‚å…±é€šã®æ™‚é–“ç®¡ç†)
     static float internalTime = 0.0f;
     float durationA = model->GetAnimationDuration(indexA);
     internalTime += et * speed;
     if (loop) internalTime = fmod(internalTime, durationA);
 
-    // 2. A‚ÆB‚Ìƒ|[ƒY‚ğ‚»‚ê‚¼‚êŒvZ
+    // 2. Aã¨Bã®ãƒãƒ¼ã‚ºã‚’ãã‚Œãã‚Œè¨ˆç®—
     model->ComputeAnimation(indexA, internalTime, tempPoseA);
-    // B‚ÍA‚ÌŠÔ‚É‡‚í‚¹‚é‚©AB©g‚ÌDuration‚Å³‹K‰»‚µ’¼‚·
+    // Bã¯Aã®æ™‚é–“ã«åˆã‚ã›ã‚‹ã‹ã€Bè‡ªèº«ã®Durationã§æ­£è¦åŒ–ã—ç›´ã™
     float durationB = model->GetAnimationDuration(indexB);
     float timeB = (internalTime / durationA) * durationB;
     model->ComputeAnimation(indexB, timeB, tempPoseB);
 
-    // 3. alpha ‚ğ—p‚¢‚ÄüŒ`•âŠÔ
+    // 3. alpha ã‚’ç”¨ã„ã¦ç·šå½¢è£œé–“
     if (finalPose.size() != tempPoseA.size()) finalPose.resize(tempPoseA.size());
 
     for (size_t i = 0; i < tempPoseA.size(); ++i)
     {
-        // Position / Scale ‚Í Lerp, Rotation ‚Í Slerp
+        // Position / Scale ã¯ Lerp, Rotation ã¯ Slerp
         DirectX::XMVECTOR pA = DirectX::XMLoadFloat3(&tempPoseA[i].position);
         DirectX::XMVECTOR pB = DirectX::XMLoadFloat3(&tempPoseB[i].position);
         DirectX::XMStoreFloat3(&finalPose[i].position, DirectX::XMVectorLerp(pA, pB, alpha));
@@ -292,7 +325,7 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
     current.time = 0.0f;
     current.weight = 1.0f;
 
-    // V‚µ‚¢ƒXƒe[ƒg‚ÉØ‚è‘Ö‚í‚éÛAƒCƒxƒ“ƒgƒtƒ‰ƒO‚ğƒŠƒZƒbƒg‚µ‚Ä‚¨‚­
+    // æ–°ã—ã„ã‚¹ãƒ†ãƒ¼ãƒˆã«åˆ‡ã‚Šæ›¿ã‚ã‚‹éš›ã€ã‚¤ãƒ™ãƒ³ãƒˆãƒ•ãƒ©ã‚°ã‚’ãƒªã‚»ãƒƒãƒˆã—ã¦ãŠã
     for (auto& ev : const_cast<AnimState*>(current.state)->events) {
         ev.isFired = false;
     }
@@ -459,13 +492,13 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
 
     float currentSpeed = state->playbackSpeed;
 
-    // šƒJ[ƒu‚Ìw’è‚ª‚ ‚èAƒRƒ“ƒ|[ƒlƒ“ƒg‚ª‘¶İ‚·‚éê‡
+    // â˜…ã‚«ãƒ¼ãƒ–ã®æŒ‡å®šãŒã‚ã‚Šã€ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒå­˜åœ¨ã™ã‚‹å ´åˆ
     if (curveComp && !state->speedCurveName.empty())
     {
-        // ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì³‹K‰»ŠÔ (0.0 - 1.0) ‚ğŒvZ
+        // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ­£è¦åŒ–æ™‚é–“ (0.0 - 1.0) ã‚’è¨ˆç®—
         float normalizedTime = (duration > 0.0f) ? (time / duration) : 0.0f;
 
-        // w’è‚³‚ê‚½–¼‘O‚ÌƒJ[ƒu‚©‚ç‘¬“x‚ğæ“¾
+        // æŒ‡å®šã•ã‚ŒãŸåå‰ã®ã‚«ãƒ¼ãƒ–ã‹ã‚‰é€Ÿåº¦ã‚’å–å¾—
         currentSpeed = curveComp->GetValue(state->speedCurveName, normalizedTime);
     }
 
@@ -473,10 +506,10 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
     time += et * currentSpeed;
     if (et == 0.0f) return;
 
-    // ƒCƒxƒ“ƒg‚Ì”­‰Î”»’è
+    // ã‚¤ãƒ™ãƒ³ãƒˆã®ç™ºç«åˆ¤å®š
     for (auto& ev : const_cast<AnimState*>(state)->events)
     {
-        // 1. ŠJnƒCƒxƒ“ƒg (startTime ‚ğŒ×‚¢‚¾uŠÔ)
+        // 1. é–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆ (startTime ã‚’è·¨ã„ã ç¬é–“)
         if (!ev.isFired && time >= ev.startTime)
         {
             if (!ev.startAction.empty()) {
@@ -485,7 +518,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
             ev.isFired = true;
         }
 
-        // 2. XVƒCƒxƒ“ƒg (”ÍˆÍ“à‚É‚¢‚éŠÔ‚¸‚Á‚Æ)
+        // 2. æ›´æ–°ã‚¤ãƒ™ãƒ³ãƒˆ (ç¯„å›²å†…ã«ã„ã‚‹é–“ãšã£ã¨)
         if (time >= ev.startTime && time <= ev.endTime)
         {
             if (!ev.updateAction.empty()) {
@@ -494,12 +527,12 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         }
     }
 
-    // ƒ‹[ƒvˆ—‚Æƒtƒ‰ƒO‚ÌƒŠƒZƒbƒg
+    // ãƒ«ãƒ¼ãƒ—å‡¦ç†ã¨ãƒ•ãƒ©ã‚°ã®ãƒªã‚»ãƒƒãƒˆ
     if (time >= duration)
     {
         if (state->isLoop) {
             time = fmod(time, duration);
-            // ƒ‹[ƒv‚µ‚½‚Ì‚Å”­‰Îƒtƒ‰ƒO‚ğƒŠƒZƒbƒg
+            // ãƒ«ãƒ¼ãƒ—ã—ãŸã®ã§ç™ºç«ãƒ•ãƒ©ã‚°ã‚’ãƒªã‚»ãƒƒãƒˆ
             for (auto& ev : const_cast<AnimState*>(state)->events) {
                 ev.isFired = false;
             }

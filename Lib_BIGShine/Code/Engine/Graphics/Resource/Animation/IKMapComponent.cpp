@@ -471,20 +471,10 @@ void IKMapComponent::SolveClothConstraint(const ClothConstraint& constraint_)
 void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
 {
     auto& position_ = chain_.simulatedPositions[pointIndex_];
-    const auto& nodes_ = model->GetNodes();
     for (auto& sphere_ : bodyCollisionSpheres)
     {
-        if (!sphere_.enabled || sphere_.nodeName.empty()) continue;
-        if (sphere_.nodeIndex < 0)
-        {
-            sphere_.nodeIndex = model->GetNodeIndex(sphere_.nodeName.c_str());
-        }
-        if (sphere_.nodeIndex < 0) continue;
-
-        const XMMATRIX nodeWorld_ = XMLoadFloat4x4(&nodes_.at(sphere_.nodeIndex).worldTransform);
-        XMVECTOR centerVector_ = XMVector3TransformCoord(XMLoadFloat3(&sphere_.offset), nodeWorld_);
         XMFLOAT3 center_;
-        XMStoreFloat3(&center_, centerVector_);
+        if (!sphere_.enabled || !GetBodyCollisionSphereCenter(sphere_, center_)) continue;
 
         const XMFLOAT3 difference_ = Subtract(position_, center_);
         const float distance_ = Length(difference_);
@@ -496,6 +486,59 @@ void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
         position_ = Add(center_, Scale(direction_, minimumDistance_));
         chain_.previousPositions[pointIndex_] = position_;
     }
+
+    for (size_t sphereIndex_ = 0; sphereIndex_ + 1 < bodyCollisionSpheres.size(); ++sphereIndex_)
+    {
+        auto& sphereA_ = bodyCollisionSpheres[sphereIndex_];
+        auto& sphereB_ = bodyCollisionSpheres[sphereIndex_ + 1];
+        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled) continue;
+
+        XMFLOAT3 centerA_;
+        XMFLOAT3 centerB_;
+        if (!GetBodyCollisionSphereCenter(sphereA_, centerA_)
+            || !GetBodyCollisionSphereCenter(sphereB_, centerB_)) continue;
+
+        const XMFLOAT3 segment_ = Subtract(centerB_, centerA_);
+        const float segmentLengthSquared_ =
+            segment_.x * segment_.x + segment_.y * segment_.y + segment_.z * segment_.z;
+        if (segmentLengthSquared_ <= 0.00001f) continue;
+
+        const XMFLOAT3 fromA_ = Subtract(position_, centerA_);
+        const float interpolation_ = std::clamp(
+            (fromA_.x * segment_.x + fromA_.y * segment_.y + fromA_.z * segment_.z)
+            / segmentLengthSquared_,
+            0.0f,
+            1.0f);
+        const XMFLOAT3 closestPoint_ = Add(centerA_, Scale(segment_, interpolation_));
+        const float interpolatedRadius_ =
+            sphereA_.radius + (sphereB_.radius - sphereA_.radius) * interpolation_;
+        const float minimumDistance_ = interpolatedRadius_ + chain_.collisionRadius;
+        const XMFLOAT3 difference_ = Subtract(position_, closestPoint_);
+        const float distance_ = Length(difference_);
+        if (distance_ >= minimumDistance_) continue;
+
+        XMFLOAT3 direction_ = Normalize(difference_);
+        if (distance_ <= 0.00001f) direction_ = { 0.0f, 0.0f, 1.0f };
+        position_ = Add(closestPoint_, Scale(direction_, minimumDistance_));
+        chain_.previousPositions[pointIndex_] = position_;
+    }
+}
+
+bool IKMapComponent::GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, XMFLOAT3& center_)
+{
+    if (!model || sphere_.nodeName.empty()) return false;
+    if (sphere_.nodeIndex < 0)
+    {
+        sphere_.nodeIndex = model->GetNodeIndex(sphere_.nodeName.c_str());
+    }
+    if (sphere_.nodeIndex < 0) return false;
+
+    const auto& nodes_ = model->GetNodes();
+    const XMMATRIX nodeWorld_ = XMLoadFloat4x4(&nodes_.at(sphere_.nodeIndex).worldTransform);
+    XMStoreFloat3(
+        &center_,
+        XMVector3TransformCoord(XMLoadFloat3(&sphere_.offset), nodeWorld_));
+    return true;
 }
 
 void IKMapComponent::DrawBodyCollisionShapes()
@@ -503,24 +546,36 @@ void IKMapComponent::DrawBodyCollisionShapes()
     if (!showBodyCollisionShapes) return;
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
-    const auto& nodes_ = model->GetNodes();
     for (auto& sphere_ : bodyCollisionSpheres)
     {
-        if (sphere_.nodeName.empty()) continue;
-        if (sphere_.nodeIndex < 0)
-        {
-            sphere_.nodeIndex = model->GetNodeIndex(sphere_.nodeName.c_str());
-        }
-        if (sphere_.nodeIndex < 0) continue;
-
-        const XMMATRIX nodeWorld_ = XMLoadFloat4x4(&nodes_.at(sphere_.nodeIndex).worldTransform);
-        const XMVECTOR centerVector_ = XMVector3TransformCoord(XMLoadFloat3(&sphere_.offset), nodeWorld_);
         XMFLOAT3 center_;
-        XMStoreFloat3(&center_, centerVector_);
+        if (!GetBodyCollisionSphereCenter(sphere_, center_)) continue;
 
         XMFLOAT4 color_ = bodyCollisionShapeColor;
         if (!sphere_.enabled) color_.w *= 0.25f;
         renderer_.DrawSphere(center_, sphere_.radius, color_);
+    }
+
+    constexpr int connectionSamples_ = 6;
+    for (size_t sphereIndex_ = 0; sphereIndex_ + 1 < bodyCollisionSpheres.size(); ++sphereIndex_)
+    {
+        auto& sphereA_ = bodyCollisionSpheres[sphereIndex_];
+        auto& sphereB_ = bodyCollisionSpheres[sphereIndex_ + 1];
+        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled) continue;
+
+        XMFLOAT3 centerA_;
+        XMFLOAT3 centerB_;
+        if (!GetBodyCollisionSphereCenter(sphereA_, centerA_)
+            || !GetBodyCollisionSphereCenter(sphereB_, centerB_)) continue;
+
+        for (int sampleIndex_ = 1; sampleIndex_ < connectionSamples_; ++sampleIndex_)
+        {
+            const float interpolation_ =
+                static_cast<float>(sampleIndex_) / static_cast<float>(connectionSamples_);
+            const XMFLOAT3 center_ = Add(centerA_, Scale(Subtract(centerB_, centerA_), interpolation_));
+            const float radius_ = sphereA_.radius + (sphereB_.radius - sphereA_.radius) * interpolation_;
+            renderer_.DrawSphere(center_, radius_, bodyCollisionShapeColor);
+        }
     }
 }
 
@@ -671,6 +726,11 @@ void IKMapComponent::Gui()
             }
             ImGui::DragFloat3("Offset", &sphere_.offset.x, 0.001f);
             ImGui::DragFloat("Radius", &sphere_.radius, 0.001f, 0.0f, 10.0f);
+            if (sphereIndex_ + 1 < bodyCollisionSpheres.size())
+            {
+                ImGui::Checkbox("Connect To Next", &sphere_.connectToNext);
+                ImGui::TextDisabled("Fills the gap to the next sphere with a tapered capsule.");
+            }
             if (ImGui::Button("Remove Sphere")) removeSphereIndex_ = static_cast<int>(sphereIndex_);
             ImGui::TreePop();
         }
@@ -805,6 +865,7 @@ void IKMapComponent::Serialize(nlohmann::json& j_) const
             { "Node", sphere_.nodeName },
             { "Offset", { sphere_.offset.x, sphere_.offset.y, sphere_.offset.z } },
             { "Radius", sphere_.radius },
+            { "ConnectToNext", sphere_.connectToNext },
             { "Enabled", sphere_.enabled }
         });
     }
@@ -869,6 +930,7 @@ void IKMapComponent::Deserialize(const nlohmann::json& j_)
                 };
             }
             sphere_.radius = sphereJson_.value("Radius", 0.15f);
+            sphere_.connectToNext = sphereJson_.value("ConnectToNext", false);
             sphere_.enabled = sphereJson_.value("Enabled", true);
             bodyCollisionSpheres.push_back(sphere_);
         }

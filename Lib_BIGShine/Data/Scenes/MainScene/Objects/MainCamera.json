@@ -26,11 +26,6 @@
             },
             "Enabled": true,
             "TypeName": "CameraComponent"
-        },
-        {
-            "Data": null,
-            "Enabled": true,
-            "TypeName": "CameraFreeController"
         }
     ],
     "Layer": 1,

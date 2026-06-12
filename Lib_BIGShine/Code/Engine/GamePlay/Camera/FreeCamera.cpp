@@ -66,41 +66,22 @@ void CameraFreeController::UpdateRotation(float deltaTime)
         currentPitch += mouseDelta.y * lookSpeed * deltaTime; // 上下反転（FPS挙動）にする場合はマイナスにする
 
         // 首が反転して天変地異が起きぬよう、上下のピッチ回転を -89.9度 から 89.9度の範囲に制限
-        currentPitch = std::clamp(currentPitch, -89.9f, 89.9f);
+        currentPitch = std::clamp(currentPitch, -2090.0f, 2090.0f);
     }
 
     // 計算した角度から「視線方向」を割り出し、Transform に適用する
     if (auto t = GetGameObject()->transform)
     {
-        // 度数法（Degree）から 弧度法（Radian）への聖なる変換
-        float toRadians = 3.14159265f / 180.0f;
-        float yawRad = currentYaw * toRadians;
-        float pitchRad = currentPitch * toRadians;
+        float toRadians_ = 3.14159265f / 180.0f;
 
-        // 【防酔い修正3】球面座標系を用いて、常に世界の上（Y軸）を基準とした回転を作る
-        // これにより、カメラが斜めに傾く「不快なローリング」を完全に封殺する！
-        using namespace DirectX;
-        XMVECTOR Front = XMVector3Normalize(XMVectorSet(
-            cosf(pitchRad) * sinf(yawRad),
-            sinf(pitchRad),
-            cosf(pitchRad) * cosf(yawRad),
+        Vector3 newRot_ =
+        {
+            currentPitch * toRadians_,
+            currentYaw * toRadians_,
             0.0f
-        ));
+        };
 
-        // 常に頭をまっすぐ上（0, 1, 0）に向けさせるための上方向ベクトル
-        XMVECTOR WorldUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-        // Front（前）と WorldUp（上）から、傾きのない純粋な回転行列を生成
-        XMMATRIX lookMat = XMMatrixLookToLH(XMVectorZero(), Front, WorldUp);
-
-        // LookTo行列はView用（逆行列）なので、反転させてワールドの回転行列にする
-        XMVECTOR det;
-        XMMATRIX worldRot = XMMatrixInverse(&det, lookMat);
-
-        // 行列からクォータニオンを抽出し、Transformへセットするのだ！
-        // ※もしお使いの変数がQuaternion型であれば、以下のように直接代入できる
-        Vector3 newRot = { currentPitch * toRadians, currentYaw * toRadians, 0.0f };
-        t->SetRotation(newRot);
+        t->SetRotation(newRot_);
 
     }
 }
