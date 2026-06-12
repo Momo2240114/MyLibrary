@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 
 #include <vector>
@@ -18,6 +18,8 @@
 
 class DecalComponent;
 
+/// 1フレーム分のモデル描画要求を収集し、描画パスごとにGPUへ発行するシステム。
+/// 通常モデル、透過モデル、デカール、アウトライン、カスケードシャドウをまとめて管理する。
 class ModelRenderSystem
 {
 public:
@@ -25,10 +27,10 @@ public:
 	~ModelRenderSystem() {}
 
 	void Initialize(ID3D11Device* device);
-	// ���`��
+	/// モデルを当該フレームの描画キューへ登録する。
 	void PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model);
 
-	// �`����s
+	/// 登録済みモデルを描画パスごとに処理し、完了後に描画キューを破棄する。
 	void RenderAll(const RenderContext& rc);
 	void RenderDecals(const RenderContext& rc);
 	const auto& GetShaders() const { return shaders; }
@@ -38,6 +40,7 @@ public:
 	void SerializeGraphicsSettings(nlohmann::json& j_) const;
 	void DeserializeGraphicsSettings(const nlohmann::json& j_);
 private:
+	// CPUとHLSL間で共有する定数バッファ構造体。16バイト境界を維持すること。
 	struct CbScene
 	{
 		DirectX::XMFLOAT4X4		viewProjection;
@@ -47,15 +50,15 @@ private:
 
 		DirectX::XMFLOAT4 zBufferParameteres;
 
-		int numPointLights;   // �L���ȃ|�C���g���C�g�̐�
-		int numSpotLights;   // �L���ȃX�|�b�g���C�g�̐�
-		float padding[2];     // 16�o�C�g���E���킹
+		int numPointLights;   // 有効なポイントライトの数
+		int numSpotLights;   // 有効なスポットライトの数
+		float padding[2];     // 16バイト境界合わせ
 
-		//�t�s��
+		// デカール描画時にスクリーン座標からワールド座標を復元するための逆行列。
 		DirectX::XMFLOAT4X4 invViewProjection;
 	};
 
-	// GPU���� StructuredBuffer �Ɠ����\���ɂ���
+	// GPU側のStructuredBufferと同一レイアウトを維持すること。
 	struct PointLightData
 	{
 		DirectX::XMFLOAT3 position;
@@ -73,14 +76,14 @@ private:
 		DirectX::XMFLOAT3 color;
 		float innerAngle;
 		float outerAngle;
-		float padding[3]; // HLSL����16�o�C�g�A���C�����g�ɍ��킹��
+		float padding[3]; // HLSL側の16バイトアライメントに合わせる
 	};
 
 	struct GBufferDecalConstants {
-		DirectX::XMFLOAT4X4 decal_world_matrix;      // VS�p�F����u��
-		DirectX::XMFLOAT4X4 decal_inverse_transform; // PS�p�F�����W�𔠋�Ԃɖ߂�
-		DirectX::XMFLOAT4   decal_direction;         // �\���E��������p
-		DirectX::XMFLOAT4   decalBaseColor;          // �F�E�A���t�@
+		DirectX::XMFLOAT4X4 decal_world_matrix;      // VS用：箱を置く
+		DirectX::XMFLOAT4X4 decal_inverse_transform; // PS用：床座標を箱空間に戻す
+		DirectX::XMFLOAT4   decal_direction;         // 予備・方向制御用
+		DirectX::XMFLOAT4   decalBaseColor;          // 色・アルファ
 	};
 
 	struct CbSkeleton
@@ -112,6 +115,7 @@ private:
 		std::shared_ptr<GltfModelCommponennt>	model;
 	};
 
+	// 半透明メッシュはカメラから遠い順に描画するため、距離を併せて保持する。
 	struct TransparencyDrawInfo
 	{
 		ModelShaderID				shaderId;
@@ -147,26 +151,24 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
 	std::shared_ptr<LightingShader> lightingShader;
 
-	// --- StructuredBuffer �Ǘ��p ---
+	// ライト数に応じて容量を拡張するGPUバッファ。毎フレームの再生成を避ける。
 	Microsoft::WRL::ComPtr<ID3D11Buffer> lightStructuredBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> lightSRV;
-	UINT currentLightBufferSize = 0; // ���݂̃o�b�t�@�e�ʁi���j
+	UINT currentLightBufferSize = 0;
 
-	// �����I�ȃo�b�t�@�X�V�p���\�b�h�iRenderAll���X�b�L�������邽�߁j
 	void UpdatePointLightBuffer(ID3D11DeviceContext* dc, const std::vector<PointLight>& lights);
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> spotLightStructuredBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> spotLightSRV;
 	UINT currentSpotLightBufferSize = 0;
 
-	// �X�V�p�֐�
 	void UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std::vector<SpotLight>& lights);
 
 
 private:
-	std::shared_ptr<DecalShader> decalShader; // �f�J�[����p�V�F�[�_�[�N���X
+	// デカール描画に必要なシェーダー、定数バッファ、当該フレームの描画要求。
+	std::shared_ptr<DecalShader> decalShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> decalConstantBuffer;
-	// �`��o�^�p���X�g
 	struct DecalDrawInfo {
 		std::shared_ptr<DecalComponent> component;
 	};
@@ -194,6 +196,7 @@ private:
 	bool useCascadeShadow;
 	float shadowAttenuation = 0.35f;
 
+	// カスケードごとの深度マップを生成し、後段のライティングパスで参照できる状態にする。
 	void RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection);
 	void RenderShadowCasters(const RenderContext& rc, int cascadeIndex);
 public:

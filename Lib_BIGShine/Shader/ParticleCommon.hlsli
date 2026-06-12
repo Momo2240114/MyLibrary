@@ -102,6 +102,10 @@ cbuffer ParticleSystemConstants : register(b9)
     float3 spritePadding;
     uint useNoiseTexture;
     float3 padding;
+    float fresnelPower;
+    float fresnelStrength;
+    uint useFresnel;
+    uint fresnelPadding;
 };
 
 cbuffer ParticleCommonConstants : register(b10)
@@ -134,6 +138,7 @@ struct GS_OUT
     float4 color : COLOR;
     float2 tex : TEXCOORD0;
     float lifeRate : TEXCOORD1;
+    float2 localTex : TEXCOORD2;
 };
 
 #endif

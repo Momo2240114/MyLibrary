@@ -3,6 +3,7 @@
 Texture2D BaseTexture : register(t0);
 Texture2D MaskTexture : register(t1);
 Texture2D NoiseTexture : register(t2);
+Texture2D NormalTexture : register(t3);
 
 SamplerState LinearSampler : register(s0);
 
@@ -52,6 +53,16 @@ float4 main(VS_OUT input) : SV_TARGET
     {
         float3 viewDir = normalize(cameraPosition.xyz - input.worldPosition);
         float3 normal = normalize(input.normal);
+
+        if (useNormal != 0)
+        {
+            float3 tangent_ = normalize(input.tangent.xyz);
+            float3 bitangent_ = normalize(cross(normal, tangent_)) * input.tangent.w;
+            float3x3 tangentBasis_ = float3x3(tangent_, bitangent_, normal);
+            float3 sampledNormal_ = NormalTexture.Sample(LinearSampler, baseUV).xyz * 2.0f - 1.0f;
+            sampledNormal_.xy *= normalStrength;
+            normal = normalize(mul(sampledNormal_, tangentBasis_));
+        }
 
         float f = 1.0f - saturate(dot(viewDir, normal));
         fresnel = 1.0f + pow(f, fresnelPower) * fresnelStrength;

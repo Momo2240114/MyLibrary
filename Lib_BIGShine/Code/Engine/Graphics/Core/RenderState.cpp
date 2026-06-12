@@ -370,5 +370,23 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateBlendState(&desc,
 			blendStates[static_cast<int>(BlendState::TransparencyKeepAlpha)].GetAddressOf());
 	}
+	// Particle additive blending: preserve the destination alpha channel.
+	{
+		D3D11_BLEND_DESC desc{};
+		desc.AlphaToCoverageEnable = false;
+		desc.IndependentBlendEnable = false;
+		desc.RenderTarget[0].BlendEnable = true;
+		desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_RED
+			| D3D11_COLOR_WRITE_ENABLE_GREEN
+			| D3D11_COLOR_WRITE_ENABLE_BLUE;
+		HRESULT hr = device->CreateBlendState(&desc,
+			blendStates[static_cast<int>(BlendState::AdditiveKeepAlpha)].GetAddressOf());
+	}
 
 }

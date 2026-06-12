@@ -22,6 +22,14 @@ float4 main(GS_OUT input) : SV_TARGET
         color.a *= mask;
     }
 
+    if (useFresnel != 0)
+    {
+        float2 centeredUV_ = input.localTex * 2.0f - 1.0f;
+        float normalZ_ = sqrt(saturate(1.0f - dot(centeredUV_, centeredUV_)));
+        float fresnel_ = pow(1.0f - normalZ_, fresnelPower) * fresnelStrength;
+        color.rgb *= 1.0f + fresnel_;
+    }
+
     if (color.a < 0.01f) discard;
     return color;
 }

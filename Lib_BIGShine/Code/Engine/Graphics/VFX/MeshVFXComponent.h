@@ -11,7 +11,7 @@ class MeshVFXComponent : public Component
 {
 public:
     MeshVFXComponent() = default;
-    ~MeshVFXComponent() override = default;
+
 
     const std::string& GetName() const override
     {

@@ -234,6 +234,15 @@ void MeshVFXComponent::Gui()
 
             ImGui::Checkbox("Use Material Base Texture", &part_.useMaterialBaseTexture);
 
+            // Normal texture selection
+            bool normalTextureChanged_ = false;
+            if (drawFileDialogButton_("Browse Normal Texture via Dialog...", part_.normalTexturePath, true))
+            {
+                normalTextureChanged_ = true;
+            }
+
+            ImGui::Checkbox("Use Material Normal Texture", &part_.useMaterialNormalTexture);
+
             // Mask texture selection
             bool maskTextureChanged_ = false;
             if (drawFileDialogButton_("Browse Mask Texture via Dialog...", part_.maskTexturePath, true))
@@ -248,7 +257,7 @@ void MeshVFXComponent::Gui()
                 noiseTextureChanged_ = true;
             }
 
-            if (baseTextureChanged_ || maskTextureChanged_ || noiseTextureChanged_)
+            if (baseTextureChanged_ || normalTextureChanged_ || maskTextureChanged_ || noiseTextureChanged_)
             {
                 LoadPartResource(static_cast<size_t>(partIndex_));
             }
@@ -289,12 +298,14 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat2("Mask UV Speed", &part_.maskUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Noise UV Speed", &part_.noiseUVSpeed.x, 0.01f);
             ImGui::DragFloat("Alpha", &part_.alpha, 0.01f, 0.0f, 1.0f);
+            ImGui::DragFloat("Normal Strength", &part_.normalStrength, 0.01f, 0.0f, 4.0f);
             ImGui::DragFloat("Noise Strength", &part_.noiseStrength, 0.001f, 0.0f, 1.0f);
             ImGui::DragFloat("Fresnel Power", &part_.fresnelPower, 0.01f, 0.1f, 10.0f);
             ImGui::DragFloat("Fresnel Strength", &part_.fresnelStrength, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Dissolve Threshold", &part_.dissolveThreshold, 0.01f, 0.0f, 1.0f);
             ImGui::Checkbox("Use Mask", &part_.useMask);
             ImGui::Checkbox("Use Noise", &part_.useNoise);
+            ImGui::Checkbox("Use Normal", &part_.useNormal);
             ImGui::Checkbox("Use Fresnel", &part_.useFresnel);
 
             const char* blendItems_[] = { "Alpha", "Additive" };
@@ -365,6 +376,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["MeshIndex"] = part_.meshIndex;
         partJson_["RenderEnabled"] = part_.renderEnabled;
         partJson_["UseMaterialBaseTexture"] = part_.useMaterialBaseTexture;
+        partJson_["UseMaterialNormalTexture"] = part_.useMaterialNormalTexture;
         partJson_["Position"] = { part_.position.x, part_.position.y, part_.position.z };
         partJson_["Rotation"] = { part_.rotation.x, part_.rotation.y, part_.rotation.z };
         partJson_["Scale"] = { part_.scale.x, part_.scale.y, part_.scale.z };
@@ -383,6 +395,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["AlphaStart"] = part_.alphaStart;
         partJson_["AlphaEnd"] = part_.alphaEnd;
         partJson_["BaseTexturePath"] = part_.baseTexturePath;
+        partJson_["NormalTexturePath"] = part_.normalTexturePath;
         partJson_["MaskTexturePath"] = part_.maskTexturePath;
         partJson_["NoiseTexturePath"] = part_.noiseTexturePath;
         partJson_["Color"] = { part_.color.x, part_.color.y, part_.color.z, part_.color.w };
@@ -394,12 +407,14 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["MaskUVRotationSpeed"] = part_.maskUVRotationSpeed;
         partJson_["NoiseUVRotationSpeed"] = part_.noiseUVRotationSpeed;
         partJson_["Alpha"] = part_.alpha;
+        partJson_["NormalStrength"] = part_.normalStrength;
         partJson_["NoiseStrength"] = part_.noiseStrength;
         partJson_["FresnelPower"] = part_.fresnelPower;
         partJson_["FresnelStrength"] = part_.fresnelStrength;
         partJson_["DissolveThreshold"] = part_.dissolveThreshold;
         partJson_["UseMask"] = part_.useMask;
         partJson_["UseNoise"] = part_.useNoise;
+        partJson_["UseNormal"] = part_.useNormal;
         partJson_["UseFresnel"] = part_.useFresnel;
         partJson_["BlendMode"] = static_cast<int>(part_.blendMode);
         json_["Parts"].push_back(partJson_);
@@ -421,6 +436,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.meshIndex = partJson_.value("MeshIndex", -1);
         part_.renderEnabled = partJson_.value("RenderEnabled", false);
         part_.useMaterialBaseTexture = partJson_.value("UseMaterialBaseTexture", true);
+        part_.useMaterialNormalTexture = partJson_.value("UseMaterialNormalTexture", true);
         ReadFloatArray(partJson_, "Position", part_.position, 3);
         ReadFloatArray(partJson_, "Rotation", part_.rotation, 3);
         ReadFloatArray(partJson_, "Scale", part_.scale, 3);
@@ -434,6 +450,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.alphaStart = partJson_.value("AlphaStart", 1.0f);
         part_.alphaEnd = partJson_.value("AlphaEnd", 1.0f);
         part_.baseTexturePath = partJson_.value("BaseTexturePath", "");
+        part_.normalTexturePath = partJson_.value("NormalTexturePath", "");
         part_.maskTexturePath = partJson_.value("MaskTexturePath", "");
         part_.noiseTexturePath = partJson_.value("NoiseTexturePath", "");
         ReadFloatArray(partJson_, "Color", part_.color, 4);
@@ -445,12 +462,14 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.maskUVRotationSpeed = partJson_.value("MaskUVRotationSpeed", 0.0f);
         part_.noiseUVRotationSpeed = partJson_.value("NoiseUVRotationSpeed", 0.0f);
         part_.alpha = partJson_.value("Alpha", 1.0f);
+        part_.normalStrength = partJson_.value("NormalStrength", 1.0f);
         part_.noiseStrength = partJson_.value("NoiseStrength", 0.05f);
         part_.fresnelPower = partJson_.value("FresnelPower", 2.0f);
         part_.fresnelStrength = partJson_.value("FresnelStrength", 1.0f);
         part_.dissolveThreshold = partJson_.value("DissolveThreshold", 0.0f);
         part_.useMask = partJson_.value("UseMask", false);
         part_.useNoise = partJson_.value("UseNoise", false);
+        part_.useNormal = partJson_.value("UseNormal", false);
         part_.useFresnel = partJson_.value("UseFresnel", false);
         part_.blendMode = static_cast<MeshVFXBlendMode>(std::clamp(partJson_.value("BlendMode", 0), 0, 1));
         asset.parts.push_back(part_);
@@ -484,6 +503,7 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     }
 
     LoadTexture(device_, part_.baseTexturePath, 0xFFFFFFFF, runtimePart_.baseTexture);
+    LoadTexture(device_, part_.normalTexturePath, 0xFFFF7F7F, runtimePart_.normalTexture);
     LoadTexture(device_, part_.maskTexturePath, 0xFFFFFFFF, runtimePart_.maskTexture);
     LoadTexture(device_, part_.noiseTexturePath, 0xFF808080, runtimePart_.noiseTexture);
 }

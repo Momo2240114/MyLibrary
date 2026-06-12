@@ -5,6 +5,18 @@
 #include <string>
 #include <vector>
 
+enum class ParticleBlendMode
+{
+    ALPHA,
+    ADDITIVE,
+};
+
+enum class ParticleSpawnSpace
+{
+    OWNER_RELATIVE,
+    WORLD,
+};
+
 struct Particle
 {
     DirectX::XMFLOAT4 parameter = { 0, 0, 0, 0 };
@@ -102,7 +114,13 @@ struct ParticleSystemConstants
 
     uint32_t useNoiseTexture = 0;
     DirectX::XMFLOAT3 padding = { 0, 0, 0 };
+
+    float fresnelPower = 2.0f;
+    float fresnelStrength = 1.0f;
+    uint32_t useFresnel = 0;
+    uint32_t fresnelPadding = 0;
 };
+static_assert(sizeof(ParticleSystemConstants) % 16 == 0);
 
 struct particle_system_settings
 {

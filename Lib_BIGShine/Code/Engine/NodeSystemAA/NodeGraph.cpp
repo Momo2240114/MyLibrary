@@ -1,4 +1,4 @@
-#include "NodeGraph.h"
+ï»¿#include "NodeGraph.h"
 
 namespace NodeSystem 
 {
@@ -7,7 +7,7 @@ namespace NodeSystem
     {
         if (m_NeedsRebuild) Rebuild();
 
-        // 1. Ú‘±‚³‚ê‚Ä‚¢‚éƒsƒ“ŠÔ‚Å’l‚ğƒRƒs[
+        // ãƒãƒ¼ãƒ‰è©•ä¾¡å‰ã«ãƒªãƒ³ã‚¯å…ˆã¸å€¤ã‚’è»¢é€ã—ã€å„ãƒãƒ¼ãƒ‰ãŒæœ€æ–°ã®å…¥åŠ›ã‚’å‚ç…§ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
         for (const auto& link : m_Links) {
             Pin* start = FindPin(link.StartPinID);
             Pin* end = FindPin(link.EndPinID);
@@ -16,7 +16,7 @@ namespace NodeSystem
             }
         }
 
-        // 2. ³‚µ‚¢‡˜‚ÅŒvZÀs
+        // æ¥ç¶šé–¢ä¿‚ã‹ã‚‰æ§‹ç¯‰ã—ãŸé †åºã«å¾“ã£ã¦ãƒãƒ¼ãƒ‰ã‚’è©•ä¾¡ã™ã‚‹ã€‚
         for (Node* node : m_EvaluationOrder) 
         {
             node->Evaluate();
@@ -29,24 +29,21 @@ namespace NodeSystem
         m_NeedsRebuild = true;
     }
 
-    // --- ƒŠƒ“ƒN‚Ìíœ ---
     void NodeGraph::RemoveLink(uintptr_t linkID)
     {
-        // w’è‚³‚ê‚½ID‚ğ‚ÂƒŠƒ“ƒN‚ğƒŠƒXƒg‚©‚çíœ‚·‚é
         m_Links.erase(
             std::remove_if(m_Links.begin(), m_Links.end(),
                 [linkID](const Link& link) { return link.ID == linkID; }),
             m_Links.end()
         );
 
-        // ƒOƒ‰ƒt\‘¢‚ª•Ï‚í‚Á‚½‚½‚ßÄ\’zƒtƒ‰ƒO‚ğ—§‚Ä‚é
+        // æ¥ç¶šé–¢ä¿‚ã®å¤‰æ›´ã‚’æ¬¡å›Updateæ™‚ã®è©•ä¾¡é †åºã¸åæ˜ ã™ã‚‹ã€‚
         m_NeedsRebuild = true;
     }
 
     void NodeGraph::Rebuild() 
     {
-        // –{—ˆ‚ÍˆË‘¶ŠÖŒW‚ğ‰ğÍ‚µ‚Äƒgƒ|ƒƒWƒJƒ‹ƒ\[ƒg‚ğs‚¢‚Ü‚·‚ªA
-        // ƒVƒ“ƒvƒ‹‚ÈÀ‘•‚Æ‚µ‚ÄA‚Ü‚¸‚Í“o˜^‡‚ÉƒŠƒXƒg‰»‚µ‚Ü‚·
+        // ç¾æ®µéšã§ã¯ç™»éŒ²é †ã«è©•ä¾¡ã™ã‚‹ã€‚å¾ªç’°æ¤œå‡ºã‚’å«ã‚€ãƒˆãƒãƒ­ã‚¸ã‚«ãƒ«ã‚½ãƒ¼ãƒˆã¯ä»Šå¾Œã®æ‹¡å¼µç‚¹ã€‚
         m_EvaluationOrder.clear();
         for (auto& node : m_Nodes) {
             m_EvaluationOrder.push_back(node.get());
@@ -63,23 +60,20 @@ namespace NodeSystem
         return nullptr;
     }
 
-    // --- ƒsƒ“ID‚©‚ç‚»‚ÌŠ—Lƒm[ƒh‚ğŒŸõ ---
     Node* NodeGraph::FindNodeByPin(uintptr_t pinID)
     {
         for (auto& node : m_Nodes)
         {
-            // “ü—Íƒsƒ“‚ğƒ`ƒFƒbƒN
             for (auto& pin : node->Inputs)
             {
                 if (pin.ID == pinID) return node.get();
             }
-            // o—Íƒsƒ“‚ğƒ`ƒFƒbƒN
             for (auto& pin : node->Outputs)
             {
                 if (pin.ID == pinID) return node.get();
             }
         }
-        return nullptr; // Œ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
+        return nullptr;
     }
 
 } // namespace NodeSystem

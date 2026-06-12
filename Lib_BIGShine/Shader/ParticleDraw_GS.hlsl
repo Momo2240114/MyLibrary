@@ -67,6 +67,7 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
         output.color = p.color;
         output.tex = p.texcoord.xy + p.texcoord.zw * uvs[i];
         output.lifeRate = 1.0f - lifeRate;
+        output.localTex = uvs[i];
         outStream.Append(output);
     }
     outStream.RestartStrip();

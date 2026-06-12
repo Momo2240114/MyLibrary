@@ -13,6 +13,7 @@ cbuffer CbMeshVFX : register(b0)
     float2 uvRotationCenter;
     float time;
     float alpha;
+    float normalStrength;
     float noiseStrength;
     float fresnelPower;
     float fresnelStrength;
@@ -22,7 +23,9 @@ cbuffer CbMeshVFX : register(b0)
     float noiseUVRotation;
     uint useMask;
     uint useNoise;
+    uint useNormal;
     uint useFresnel;
+    uint2 padding;
 };
 
 struct VS_IN
@@ -41,6 +44,7 @@ struct VS_OUT
     float3 worldPosition : TEXCOORD0;
     float3 normal : TEXCOORD1;
     float2 texcoord : TEXCOORD2;
+    float4 tangent : TEXCOORD3;
 };
 
 #endif
