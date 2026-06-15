@@ -10,6 +10,11 @@
 
 using namespace DirectX;
 
+//--- テスト用 Static 風パラメータ-- -
+DirectX::XMFLOAT3 IKMapComponent::windDirection = { 1.0f, 0.0f, 0.0f };
+float             IKMapComponent::windStrength = 0.0f;
+bool              IKMapComponent::windEnabled = false;
+
 namespace
 {
 XMFLOAT3 GetTranslation(const XMFLOAT4X4& matrix_)
@@ -301,8 +306,16 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
                 0.0f, -chain_.gravity * substepDeltaTime_ * substepDeltaTime_, 0.0f
             };
 
+            // テスト用風力（root は固定なのでスキップ）
+            XMFLOAT3 wind_ = { 0.0f, 0.0f, 0.0f };
+            if (windEnabled && windStrength > 0.0f)
+            {
+                const float windScale_ = windStrength * substepDeltaTime_ * substepDeltaTime_;
+                wind_ = Scale(windDirection, windScale_);
+            }
+
             chain_.previousPositions[pointIndex_] = current_;
-            chain_.simulatedPositions[pointIndex_] = Add(Add(Add(current_, velocity_), animationPull_), gravity_);
+            chain_.simulatedPositions[pointIndex_] = Add(Add(Add(Add(current_, velocity_), animationPull_), gravity_), wind_);
         }
 
         for (int iterationIndex_ = 0; iterationIndex_ < iterations_; ++iterationIndex_)
@@ -670,6 +683,43 @@ void IKMapComponent::Gui()
         ImGui::TextDisabled("Requires GltfModel on the same GameObject.");
         return;
     }
+
+    // ---- テスト用風設定 ----
+    ImGui::SeparatorText("Wind (Test)");
+    ImGui::Checkbox("Enable Wind", &windEnabled);
+    if (windEnabled)
+    {
+        ImGui::DragFloat("Wind Strength", &windStrength, 0.1f, 0.0f, 200.0f, "%.2f");
+        ImGui::TextDisabled("Direction XYZ (normalized automatically)");
+        if (ImGui::DragFloat3("Wind Direction", &windDirection.x, 0.01f, -1.0f, 1.0f))
+        {
+            // 入力後に正規化
+            const float len_ = std::sqrt(
+                windDirection.x * windDirection.x +
+                windDirection.y * windDirection.y +
+                windDirection.z * windDirection.z);
+            if (len_ > 0.0001f)
+            {
+                windDirection.x /= len_;
+                windDirection.y /= len_;
+                windDirection.z /= len_;
+            }
+        }
+        // プリセットボタン
+        ImGui::TextDisabled("Direction Presets:");
+        if (ImGui::Button("+X"))  windDirection = { 1.0f, 0.0f, 0.0f };
+        ImGui::SameLine();
+        if (ImGui::Button("-X"))  windDirection = { -1.0f, 0.0f, 0.0f };
+        ImGui::SameLine();
+        if (ImGui::Button("+Z"))  windDirection = { 0.0f, 0.0f, 1.0f };
+        ImGui::SameLine();
+        if (ImGui::Button("-Z"))  windDirection = { 0.0f, 0.0f, -1.0f };
+        ImGui::SameLine();
+        if (ImGui::Button("Up"))  windDirection = { 0.0f, 1.0f, 0.0f };
+        if (ImGui::Button("Stop Wind")) { windStrength = 0.0f; }
+    }
+    ImGui::Separator();
+
 
     ImGui::TextDisabled("Spring Bone and Cloth Bone run after animation in LateUpdate.");
     if (ImGui::Button("Add Hair Chain"))

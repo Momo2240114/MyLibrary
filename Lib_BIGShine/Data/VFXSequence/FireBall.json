@@ -1,0 +1,380 @@
+{
+    "AssetType": "VFXSequence",
+    "AssetVersion": 1,
+    "Duration": 1.0,
+    "Loop": true,
+    "MeshVFX": {
+        "IsPlaying": true,
+        "Parts": [
+            {
+                "Alpha": 1.0,
+                "AlphaEnd": 1.0,
+                "AlphaStart": 1.0,
+                "AnimateAlpha": false,
+                "AnimateScale": false,
+                "BaseTexturePath": "",
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    -0.5
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    0.7764706015586853,
+                    0.0,
+                    1.0
+                ],
+                "DissolveThreshold": 0.0,
+                "Duration": 0.0,
+                "FresnelPower": 1.0,
+                "FresnelStrength": 0.0,
+                "Loop": true,
+                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Trail.PNG",
+                "MaskUVRotationSpeed": 0.0,
+                "MaskUVSpeed": [
+                    -5.0,
+                    5.0
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "Data/Model/VFX/Sphere.glb",
+                "NoiseStrength": 0.05000000074505806,
+                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVSpeed": [
+                    0.20000000298023224,
+                    -0.800000011920929
+                ],
+                "NormalStrength": 1.0,
+                "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                "Position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    0.5,
+                    0.5,
+                    0.5
+                ],
+                "ScaleEnd": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleStart": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UseFresnel": true,
+                "UseMask": true,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": true,
+                "UseNormal": false
+            }
+        ]
+    },
+    "Particle": {
+        "AssetPath": "",
+        "Emitters": [
+            {
+                "Acceleration": [
+                    0.0,
+                    18.0,
+                    0.0
+                ],
+                "BlendMode": 1,
+                "BurstCount": 500,
+                "Color": [
+                    1.0,
+                    1.0,
+                    0.886274516582489,
+                    1.0
+                ],
+                "ColorEnd": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ColorStart": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ConeAngle": [
+                    0.0,
+                    0.0
+                ],
+                "Delay": 0.0,
+                "Drag": 0.0,
+                "EmissionMode": 0,
+                "Fade": [
+                    0.0,
+                    0.0
+                ],
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "GradientTexturePath": "Data/Texture/Particle/Sunset.jpg",
+                "Gravity": -9.800000190734863,
+                "LegacyRadius": [
+                    0.0,
+                    0.8500000238418579
+                ],
+                "Lifespan": [
+                    1.0,
+                    1.0
+                ],
+                "MaskTexturePath": "Data/Texture/Particle/Particle02.png",
+                "MaxCount": 1000,
+                "MeshVertexSampleCount": 2048,
+                "Name": "Emitter_0",
+                "NoiseFrequency": 1.0,
+                "NoiseSpeed": 1.0,
+                "NoiseStrength": 0.0,
+                "OrbitVelocity": -8.449999809265137,
+                "PosOffset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "RadialVelocity": 0.0,
+                "RenderType": 0,
+                "RotationSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "ShapeEnd": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ShapeSize": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ShapeStart": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Size": [
+                    1.0,
+                    1.0
+                ],
+                "SizeRandomEnd": [
+                    1.0,
+                    1.0
+                ],
+                "SizeRandomStart": [
+                    1.0,
+                    1.0
+                ],
+                "SpawnShape": 0,
+                "SpawnSpace": 0,
+                "Speed": [
+                    0.0,
+                    0.0
+                ],
+                "SpriteAnimationFps": 12.0,
+                "SpriteAnimationLoop": 1,
+                "SpriteAnimationRange": [
+                    0,
+                    0
+                ],
+                "SpriteSheetIndex": [
+                    0,
+                    0
+                ],
+                "StretchMax": 100.0,
+                "StretchScale": 0.03999999910593033,
+                "TexturePath": "Data/Texture/Particle/Particles/Particles/Complex/circle/rounded_15.png",
+                "TextureSplitCount": [
+                    1,
+                    1
+                ],
+                "UseColorOverLife": 0,
+                "UseFresnel": 0,
+                "UseGradient": 1,
+                "UseMask": 1,
+                "UseRandomSize": 0,
+                "UseSpriteAnimation": 0,
+                "Wind": [
+                    0.0,
+                    18.0,
+                    0.0
+                ]
+            },
+            {
+                "Acceleration": [
+                    0.0,
+                    20.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "BurstCount": 100,
+                "Color": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "ColorEnd": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "ColorStart": [
+                    1.0,
+                    0.8705882430076599,
+                    0.0,
+                    1.0
+                ],
+                "ConeAngle": [
+                    0.0,
+                    0.0
+                ],
+                "Delay": 0.0,
+                "Drag": 0.0,
+                "EmissionMode": 0,
+                "Fade": [
+                    0.0,
+                    0.0
+                ],
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "GradientTexturePath": "",
+                "Gravity": -9.800000190734863,
+                "LegacyRadius": [
+                    0.0,
+                    1.149999976158142
+                ],
+                "Lifespan": [
+                    1.0,
+                    1.0
+                ],
+                "MaskTexturePath": "Data/Texture/Particle/Particle02.png",
+                "MaxCount": 1000,
+                "MeshVertexSampleCount": 2048,
+                "Name": "Emitter_1",
+                "NoiseFrequency": 1.0,
+                "NoiseSpeed": 1.0,
+                "NoiseStrength": 0.0,
+                "OrbitVelocity": -0.0,
+                "PosOffset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "RadialVelocity": 0.0,
+                "RenderType": 0,
+                "RotationSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "ShapeEnd": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ShapeSize": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ShapeStart": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Size": [
+                    1.0,
+                    1.0
+                ],
+                "SizeRandomEnd": [
+                    1.0,
+                    1.0
+                ],
+                "SizeRandomStart": [
+                    1.0,
+                    1.0
+                ],
+                "SpawnShape": 0,
+                "SpawnSpace": 0,
+                "Speed": [
+                    0.0,
+                    0.0
+                ],
+                "SpriteAnimationFps": 12.0,
+                "SpriteAnimationLoop": 1,
+                "SpriteAnimationRange": [
+                    0,
+                    0
+                ],
+                "SpriteSheetIndex": [
+                    0,
+                    0
+                ],
+                "StretchMax": 100.0,
+                "StretchScale": 0.03999999910593033,
+                "TexturePath": "",
+                "TextureSplitCount": [
+                    1,
+                    1
+                ],
+                "UseColorOverLife": 1,
+                "UseFresnel": 0,
+                "UseGradient": 0,
+                "UseMask": 1,
+                "UseRandomSize": 0,
+                "UseSpriteAnimation": 0,
+                "Wind": [
+                    0.0,
+                    20.0,
+                    0.0
+                ]
+            }
+        ],
+        "IsPlaying": false
+    },
+    "Tracks": [
+        {
+            "Duration": 1.0,
+            "StartTime": 0.0,
+            "Target": "Emitter_0",
+            "Type": 0
+        },
+        {
+            "Duration": 1.0,
+            "StartTime": 0.0,
+            "Target": "Emitter_1",
+            "Type": 0
+        },
+        {
+            "Duration": 1.0,
+            "StartTime": 0.0,
+            "Target": "Mesh VFX",
+            "Type": 1
+        }
+    ]
+}

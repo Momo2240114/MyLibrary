@@ -2,6 +2,8 @@
 
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
+#include "ImSequencer.h"
+#include "imgui_internal.h"
 
 #include <algorithm>
 #include <DirectXMath.h>
@@ -9,6 +11,11 @@
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
+
+namespace
+{
+    constexpr float TIMELINE_FPS = 60.0f;
+}
 
 ParticleEditorWindow::ParticleEditorWindow(GameObjectManager* manager_)
     : EditorWorkspaceWindow("VFX Editor", manager_)
@@ -272,72 +279,177 @@ void ParticleEditorWindow::DrawAssetBrowserPanel()
 
 void ParticleEditorWindow::DrawTimelinePanel()
 {
+    struct TimelineSequenceAdapter : public ImSequencer::SequenceInterface
+    {
+        std::vector<TimelineTrack>* tracks = nullptr;
+        ParticleComponent* particle = nullptr;
+        float duration = 0.0f;
+
+        int ToFrame(float time_) const { return static_cast<int>(time_ * TIMELINE_FPS); }
+        float ToTime(int frame_) const { return static_cast<float>(frame_) / TIMELINE_FPS; }
+
+        int GetFrameMin() const override { return 0; }
+        int GetFrameMax() const override { return (std::max)(1, ToFrame(duration)); }
+        int GetItemCount() const override { return tracks ? static_cast<int>(tracks->size()) : 0; }
+        int GetItemTypeCount() const override { return 2; }
+        const char* GetItemTypeName(int typeIndex_) const override
+        {
+            return typeIndex_ == 0 ? "Particle Emitter" : "Mesh VFX";
+        }
+
+        void BeginEdit(int index_) override {}
+
+        void EndEdit() override
+        {
+            if (!tracks) return;
+
+            for (TimelineTrack& track_ : *tracks)
+            {
+                track_.frameStart = std::clamp(track_.frameStart, 0, GetFrameMax() - 1);
+                track_.frameEnd = std::clamp(track_.frameEnd, track_.frameStart + 1, GetFrameMax());
+                track_.startTime = ToTime(track_.frameStart);
+                track_.duration = ToTime(track_.frameEnd - track_.frameStart);
+            }
+        }
+
+        void Get(int index_, int** start_, int** end_, int* type_, unsigned int* color_) override
+        {
+            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return;
+
+            TimelineTrack& track_ = (*tracks)[index_];
+            track_.frameStart = ToFrame(track_.startTime);
+            track_.frameEnd = ToFrame(track_.startTime + track_.duration);
+            if (start_) *start_ = &track_.frameStart;
+            if (end_) *end_ = &track_.frameEnd;
+            if (type_) *type_ = static_cast<int>(track_.type);
+            if (color_)
+            {
+                *color_ = track_.type == TimelineTrackType::PARTICLE_EMITTER
+                    ? 0xFF4FA3FF
+                    : 0xFFFF8A4F;
+            }
+        }
+
+        const char* GetItemLabel(int index_) const override
+        {
+            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return "";
+            const TimelineTrack& track_ = (*tracks)[index_];
+            return track_.targetName.empty()
+                ? (track_.type == TimelineTrackType::PARTICLE_EMITTER ? "Particle Emitter" : "Mesh VFX")
+                : track_.targetName.c_str();
+        }
+
+        void CustomDraw(
+            int index_,
+            ImDrawList* drawList_,
+            const ImRect& rect_,
+            const ImRect& legendRect_,
+            const ImRect& clippingRect_,
+            const ImRect& legendClippingRect_) override
+        {
+            drawList_->PushClipRect(rect_.Min, rect_.Max, true);
+            drawList_->AddText(
+                ImVec2(rect_.Min.x + 3.0f, rect_.Min.y + 2.0f),
+                0xFFFFFFFF,
+                GetItemLabel(index_));
+            drawList_->PopClipRect();
+        }
+
+        void Add(int type_) override
+        {
+            if (!tracks) return;
+
+            TimelineTrack track_{};
+            track_.type = type_ == 0
+                ? TimelineTrackType::PARTICLE_EMITTER
+                : TimelineTrackType::MESH_VFX;
+            if (track_.type == TimelineTrackType::PARTICLE_EMITTER)
+            {
+                if (particle && !particle->GetTracks().empty())
+                {
+                    track_.targetName = particle->GetTracks().front().name;
+                }
+            }
+            else
+            {
+                track_.targetName = "Mesh VFX";
+            }
+
+            track_.startTime = 0.0f;
+            track_.duration = (std::min)(1.0f, duration);
+            tracks->push_back(track_);
+        }
+
+        void Del(int index_) override
+        {
+            if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return;
+            tracks->erase(tracks->begin() + index_);
+        }
+    };
+
     ImGui::Text("VFX Timeline  %.2f / %.2f", sequenceTime, sequenceDuration);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(140.0f);
-    ImGui::DragFloat("Duration", &sequenceDuration, 0.05f, 0.1f, 600.0f);
+    if (ImGui::DragFloat("Duration", &sequenceDuration, 0.05f, 0.1f, 600.0f))
+    {
+        sequenceDuration = (std::max)(0.1f, sequenceDuration);
+        const float maximumStartTime_ = (std::max)(0.0f, sequenceDuration - (1.0f / TIMELINE_FPS));
+        for (TimelineTrack& track_ : timelineTracks)
+        {
+            track_.startTime = std::clamp(track_.startTime, 0.0f, maximumStartTime_);
+            track_.duration = std::clamp(
+                track_.duration,
+                1.0f / TIMELINE_FPS,
+                sequenceDuration - track_.startTime);
+        }
+    }
 
-    float requestedTime_ = sequenceTime;
-    if (ImGui::SliderFloat("Playhead", &requestedTime_, 0.0f, sequenceDuration, "%.2f sec"))
+    TimelineSequenceAdapter adapter_;
+    adapter_.tracks = &timelineTracks;
+    adapter_.particle = previewParticle.get();
+    adapter_.duration = sequenceDuration;
+
+    int currentFrame_ = adapter_.ToFrame(sequenceTime);
+    const int previousFrame_ = currentFrame_;
+    ImGui::PushItemWidth(-1.0f);
+    ImSequencer::Sequencer(
+        &adapter_,
+        &currentFrame_,
+        &timelineExpanded,
+        &selectedTimelineTrack,
+        &firstTimelineFrame,
+        ImSequencer::SEQUENCER_EDIT_ALL |
+        ImSequencer::SEQUENCER_ADD |
+        ImSequencer::SEQUENCER_DEL |
+        ImSequencer::SEQUENCER_CHANGE_FRAME);
+    ImGui::PopItemWidth();
+
+    if (currentFrame_ != previousFrame_)
     {
         sequencePlaying = false;
         ResetSequence();
-        sequenceTime = requestedTime_;
-    }
-
-    if (ImGui::Button("Add Particle Track"))
-    {
-        TimelineTrack track_{};
-        track_.type = TimelineTrackType::PARTICLE_EMITTER;
-        if (previewParticle && !previewParticle->GetTracks().empty())
-        {
-            track_.targetName = previewParticle->GetTracks().front().name;
-        }
-        timelineTracks.push_back(track_);
-        selectedTimelineTrack = static_cast<int>(timelineTracks.size()) - 1;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Add Mesh VFX Track"))
-    {
-        TimelineTrack track_{};
-        track_.type = TimelineTrackType::MESH_VFX;
-        track_.targetName = "Mesh VFX";
-        timelineTracks.push_back(track_);
-        selectedTimelineTrack = static_cast<int>(timelineTracks.size()) - 1;
-    }
-
-    ImGui::Separator();
-    for (int trackIndex_ = 0; trackIndex_ < static_cast<int>(timelineTracks.size()); ++trackIndex_)
-    {
-        TimelineTrack& track_ = timelineTracks[trackIndex_];
-        ImGui::PushID(trackIndex_);
-        const char* typeLabel_ = track_.type == TimelineTrackType::PARTICLE_EMITTER
-            ? "Particle"
-            : "MeshVFX";
-        const std::string label_ = std::string(typeLabel_) + " | " + track_.targetName;
-        if (ImGui::Selectable(label_.c_str(), selectedTimelineTrack == trackIndex_))
-        {
-            selectedTimelineTrack = trackIndex_;
-        }
-
-        ImGui::SameLine(220.0f);
-        ImGui::SetNextItemWidth(90.0f);
-        ImGui::DragFloat("Start", &track_.startTime, 0.01f, 0.0f, sequenceDuration);
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(90.0f);
-        ImGui::DragFloat("Length", &track_.duration, 0.01f, 0.01f, sequenceDuration);
-        ImGui::PopID();
+        sequenceTime = std::clamp(adapter_.ToTime(currentFrame_), 0.0f, sequenceDuration);
     }
 
     if (selectedTimelineTrack < 0 ||
         selectedTimelineTrack >= static_cast<int>(timelineTracks.size()))
     {
+        ImGui::TextDisabled("Add or select a Particle / Mesh VFX bar to edit it.");
         return;
     }
 
     TimelineTrack& selectedTrack_ = timelineTracks[selectedTimelineTrack];
-    ImGui::Separator();
-    ImGui::TextUnformatted("Selected Track");
+    ImGui::SeparatorText("Selected Track");
+    const char* trackTypes_[] = { "Particle Emitter", "Mesh VFX" };
+    int selectedType_ = static_cast<int>(selectedTrack_.type);
+    if (ImGui::Combo("Type", &selectedType_, trackTypes_, IM_ARRAYSIZE(trackTypes_)))
+    {
+        selectedTrack_.type = static_cast<TimelineTrackType>(selectedType_);
+        selectedTrack_.targetName = selectedTrack_.type == TimelineTrackType::MESH_VFX
+            ? "Mesh VFX"
+            : "";
+    }
+
     if (selectedTrack_.type == TimelineTrackType::PARTICLE_EMITTER && previewParticle)
     {
         if (ImGui::BeginCombo("Emitter", selectedTrack_.targetName.c_str()))
@@ -355,10 +467,15 @@ void ParticleEditorWindow::DrawTimelinePanel()
         }
     }
 
-    if (ImGui::Button("Remove Track"))
+    float endTime_ = selectedTrack_.startTime + selectedTrack_.duration;
+    bool timeChanged_ = ImGui::DragFloat("Start Time", &selectedTrack_.startTime, 0.01f, 0.0f, sequenceDuration);
+    timeChanged_ |= ImGui::DragFloat("End Time", &endTime_, 0.01f, 0.0f, sequenceDuration);
+    if (timeChanged_)
     {
-        timelineTracks.erase(timelineTracks.begin() + selectedTimelineTrack);
-        selectedTimelineTrack = -1;
+        const float maximumStartTime_ = (std::max)(0.0f, sequenceDuration - (1.0f / TIMELINE_FPS));
+        selectedTrack_.startTime = std::clamp(selectedTrack_.startTime, 0.0f, maximumStartTime_);
+        endTime_ = std::clamp(endTime_, selectedTrack_.startTime + (1.0f / TIMELINE_FPS), sequenceDuration);
+        selectedTrack_.duration = endTime_ - selectedTrack_.startTime;
     }
 }
 
@@ -459,7 +576,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     particleRenderSystem.RenderAll(renderContext_,true);
     previewTarget.ResetRenderTarget(context_);
     meshVFXRenderSystem.PushSubmit(previewMeshVFX.get());
-    meshVFXRenderSystem.RenderAll(renderContext_);
+    meshVFXRenderSystem.RenderAll(renderContext_, true);
 
     previewTarget.End(context_);
 }

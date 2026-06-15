@@ -35,6 +35,8 @@ private:
         std::string targetName;
         float startTime = 0.0f;
         float duration = 1.0f;
+        int frameStart = 0;
+        int frameEnd = 60;
         bool active = false;
     };
 
@@ -68,6 +70,7 @@ private:
     int selectedAssetIndex = -1;
     int selectedSequenceIndex = -1;
     int selectedTimelineTrack = -1;
+    int firstTimelineFrame = 0;
     char sequenceNameBuffer[128] = "NewVFXSequence";
     float sequenceTime = 0.0f;
     float sequenceDuration = 5.0f;
@@ -76,5 +79,6 @@ private:
     bool isInitialized = false;
     bool sequencePlaying = false;
     bool sequenceLoop = true;
+    bool timelineExpanded = true;
     bool showGrid = true;
 };

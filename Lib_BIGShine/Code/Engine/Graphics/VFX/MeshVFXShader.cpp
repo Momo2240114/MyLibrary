@@ -4,6 +4,9 @@
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Resource/GLTFModel.h"
 
+#include <cmath>
+#include <numbers>
+
 bool MeshVFXShader::Initialize(ID3D11Device* device_)
 {
     if (!device_) return false;
@@ -89,9 +92,14 @@ void MeshVFXShader::UpdatePart(
     constants_.fresnelPower = part_.fresnelPower;
     constants_.fresnelStrength = part_.fresnelStrength;
     constants_.dissolveThreshold = part_.dissolveThreshold;
-    constants_.baseUVRotation = DirectX::XMConvertToRadians(part_.baseUVRotationSpeed * partTime_);
-    constants_.maskUVRotation = DirectX::XMConvertToRadians(part_.maskUVRotationSpeed * partTime_);
-    constants_.noiseUVRotation = DirectX::XMConvertToRadians(part_.noiseUVRotationSpeed * partTime_);
+    const auto calculateRotation_ = [partTime_](float rotationSpeed_)
+        {
+            const float rotation_ = DirectX::XMConvertToRadians(rotationSpeed_ * partTime_);
+            return std::fmod(rotation_, 2.0f * std::numbers::pi_v<float>);
+        };
+    constants_.baseUVRotation = calculateRotation_(part_.baseUVRotationSpeed);
+    constants_.maskUVRotation = calculateRotation_(part_.maskUVRotationSpeed);
+    constants_.noiseUVRotation = calculateRotation_(part_.noiseUVRotationSpeed);
     constants_.useMask = part_.useMask ? 1u : 0u;
     constants_.useNoise = part_.useNoise ? 1u : 0u;
     constants_.useNormal = part_.useNormal ? 1u : 0u;
