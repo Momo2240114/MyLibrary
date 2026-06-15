@@ -1,0 +1,333 @@
+{
+    "AssetType": "VFXSequence",
+    "AssetVersion": 1,
+    "Duration": 1.0,
+    "Loop": true,
+    "MeshVFX": {
+        "IsPlaying": false,
+        "Parts": [
+            {
+                "Alpha": 1.0,
+                "AlphaEnd": 1.0,
+                "AlphaStart": 1.0,
+                "AnimateAlpha": false,
+                "AnimateScale": false,
+                "BaseTexturePath": "",
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    0.0,
+                    0.0117647061124444,
+                    1.0
+                ],
+                "DissolveThreshold": 0.0,
+                "Duration": 0.0,
+                "FresnelPower": 2.0,
+                "FresnelStrength": 0.8899999856948853,
+                "Loop": true,
+                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Circle.PNG",
+                "MaskUVRotationSpeed": 25.0,
+                "MaskUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Plane1.glb",
+                "NoiseStrength": 0.05000000074505806,
+                "NoiseTexturePath": "",
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "NormalStrength": 1.0,
+                "NormalTexturePath": "",
+                "Position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleEnd": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleStart": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UseFresnel": true,
+                "UseMask": true,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": false,
+                "UseNormal": false
+            },
+            {
+                "Alpha": 0.3499999940395355,
+                "AlphaEnd": 1.0,
+                "AlphaStart": 1.0,
+                "AnimateAlpha": false,
+                "AnimateScale": false,
+                "BaseTexturePath": "",
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "DissolveThreshold": 0.0,
+                "Duration": 0.0,
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "Loop": true,
+                "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                "MaskUVRotationSpeed": 0.0,
+                "MaskUVSpeed": [
+                    -0.05000000074505806,
+                    0.20000000298023224
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "Data/Model/VFX/Cylinder_Cavity.gltf",
+                "NoiseStrength": 0.05000000074505806,
+                "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVSpeed": [
+                    0.20000000298023224,
+                    -0.800000011920929
+                ],
+                "NormalStrength": 1.0,
+                "NormalTexturePath": "",
+                "Position": [
+                    0.0,
+                    -2.359999895095825,
+                    12.619999885559082
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    2.0,
+                    0.8600000143051147,
+                    2.0
+                ],
+                "ScaleEnd": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleStart": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UseFresnel": false,
+                "UseMask": true,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": true,
+                "UseNormal": false
+            }
+        ]
+    },
+    "Particle": {
+        "AssetPath": "Data/Particle/FireParticle.json",
+        "Emitters": [
+            {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "BurstCount": 7000,
+                "Color": [
+                    1.0,
+                    0.8666666746139526,
+                    1.0,
+                    1.0
+                ],
+                "ColorEnd": [
+                    1.0,
+                    0.019607843831181526,
+                    0.0,
+                    0.9960784316062927
+                ],
+                "ColorStart": [
+                    1.0,
+                    0.5254902243614197,
+                    0.10980392247438431,
+                    1.0
+                ],
+                "ConeAngle": [
+                    0.09000000357627869,
+                    0.699999988079071
+                ],
+                "Delay": 0.0,
+                "Drag": 0.0,
+                "EmissionMode": 0,
+                "Fade": [
+                    0.07999999821186066,
+                    3.940000057220459
+                ],
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "GradientTexturePath": "",
+                "Gravity": 1.9199999570846558,
+                "LegacyRadius": [
+                    0.0,
+                    0.75
+                ],
+                "Lifespan": [
+                    0.1599999964237213,
+                    2.5
+                ],
+                "MaskTexturePath": "Data/Texture/Particle/Particle02.png",
+                "MaxCount": 20000,
+                "MeshVertexSampleCount": 2048,
+                "Name": "Emitter_0",
+                "NoiseFrequency": 1.0,
+                "NoiseSpeed": 1.0,
+                "NoiseStrength": 0.0,
+                "OrbitVelocity": 0.0,
+                "PosOffset": [
+                    0.0,
+                    0.5,
+                    0.949999988079071
+                ],
+                "RadialVelocity": 0.0,
+                "RenderType": 0,
+                "RotationSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "ShapeEnd": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ShapeSize": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ShapeStart": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Size": [
+                    0.10999999940395355,
+                    0.7799999713897705
+                ],
+                "SizeRandomEnd": [
+                    0.38999998569488525,
+                    1.0
+                ],
+                "SizeRandomStart": [
+                    0.699999988079071,
+                    1.1799999475479126
+                ],
+                "SpawnShape": 3,
+                "SpawnSpace": 0,
+                "Speed": [
+                    0.15000000596046448,
+                    2.25
+                ],
+                "SpriteAnimationFps": 12.0,
+                "SpriteAnimationLoop": 1,
+                "SpriteAnimationRange": [
+                    0,
+                    0
+                ],
+                "SpriteSheetIndex": [
+                    0,
+                    0
+                ],
+                "StretchMax": 100.0,
+                "StretchScale": 0.03999999910593033,
+                "TexturePath": "",
+                "TextureSplitCount": [
+                    1,
+                    1
+                ],
+                "UseColorOverLife": 1,
+                "UseFresnel": 0,
+                "UseGradient": 0,
+                "UseMask": 1,
+                "UseRandomSize": 1,
+                "UseSpriteAnimation": 0,
+                "Wind": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        ],
+        "IsPlaying": false
+    },
+    "Tracks": [
+        {
+            "Duration": 1.0,
+            "StartTime": 0.0,
+            "Target": "Emitter_0",
+            "Type": 0
+        },
+        {
+            "Duration": 1.0,
+            "StartTime": 0.0,
+            "Target": "Mesh VFX",
+            "Type": 1
+        },
+        {
+            "Duration": 1.0,
+            "StartTime": 0.0,
+            "Target": "Mesh VFX",
+            "Type": 1
+        }
+    ]
+}

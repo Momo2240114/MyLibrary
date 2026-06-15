@@ -129,7 +129,7 @@ void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
     components.push_back(component_);
 }
 
-void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_)
+void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool isEditorWindow_)
 {
     if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())
@@ -143,9 +143,12 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_)
         renderContext_.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
     deviceContext_->RSSetState(
         renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-    ID3D11SamplerState* sampler_ =
-        renderContext_.renderState->GetSamplerState(SamplerState::LinearWrap);
-    deviceContext_->PSSetSamplers(0, 1, &sampler_);
+    ID3D11SamplerState* samplers_[] =
+    {
+        renderContext_.renderState->GetSamplerState(SamplerState::LinearWrap),
+        renderContext_.renderState->GetSamplerState(SamplerState::LinearBorder),
+    };
+    deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
 
     shader->Begin(renderContext_);
     shader->UpdateScene(renderContext_);
@@ -171,7 +174,7 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_)
 
             const BlendState blendState_ = part_.blendMode == MeshVFXBlendMode::ADDITIVE
                 ? BlendState::AdditiveKeepAlpha
-                : BlendState::Transparency;
+                : (isEditorWindow_ ? BlendState::TransparencyKeepAlpha : BlendState::Transparency);
             deviceContext_->OMSetBlendState(
                 renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
 

@@ -206,7 +206,7 @@
                             0.0,
                             0.0
                         ],
-                        "Radius": 0.06499999761581421
+                        "Radius": 0.05400000140070915
                     },
                     {
                         "ConnectToNext": true,
@@ -218,7 +218,7 @@
                             0.0,
                             0.0
                         ],
-                        "Radius": 0.06400000303983688
+                        "Radius": 0.020999999716877937
                     },
                     {
                         "ConnectToNext": false,
@@ -230,7 +230,7 @@
                             0.0,
                             0.0
                         ],
-                        "Radius": 0.06300000101327896
+                        "Radius": 0.041999999433755875
                     }
                 ],
                 "Chains": [
@@ -239,7 +239,7 @@
                         "ClothGroup": 0,
                         "ClothOrder": 0,
                         "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.01899999938905239,
+                        "CollisionRadius": 0.0,
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
@@ -253,7 +253,7 @@
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
                         "StartLift": 0.07999999821186066,
-                        "Stiffness": 0.014000000432133675,
+                        "Stiffness": 0.17499999701976776,
                         "TipNode": "Bone_hair_L02_end",
                         "TipStiffnessScale": 0.20000000298023224,
                         "Type": 2
@@ -263,7 +263,7 @@
                         "ClothGroup": 0,
                         "ClothOrder": 2,
                         "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.027000000700354576,
+                        "CollisionRadius": 0.019999999552965164,
                         "Damping": 0.8889999985694885,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
@@ -283,11 +283,11 @@
                         "Type": 2
                     },
                     {
-                        "BendStiffness": 0.019999999552965164,
+                        "BendStiffness": 0.0,
                         "ClothGroup": 0,
                         "ClothOrder": 4,
                         "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.019999999552965164,
+                        "CollisionRadius": 0.020999999716877937,
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
@@ -296,12 +296,12 @@
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
                         "RootNode": "Bone_hair_R01",
-                        "RootRotationFollow": 0.699999988079071,
+                        "RootRotationFollow": 0.7390000224113464,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
                         "StartLift": 0.07999999821186066,
-                        "Stiffness": 0.004999999888241291,
+                        "Stiffness": 0.4880000054836273,
                         "TipNode": "Bone_hair_R02_end",
                         "TipStiffnessScale": 0.20000000298023224,
                         "Type": 2
@@ -366,13 +366,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -1.68152916431427,
-            1.7999978065490723,
-            3.5700793266296387
+            -1.6797714233398438,
+            1.7999975681304932,
+            3.5808846950531006
         ],
         "Rot": [
             0.0,
-            246.48199462890625,
+            194.48199462890625,
             0.0
         ],
         "Scale": [

@@ -681,6 +681,39 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     }
     ed::EndDelete();
 
+    // ------------------------------------------------------------
+    // 追加：選択中のリンクを Delete / Backspace で直接削除
+    // BeginDelete 側の判定が拾いにくい場合の保険
+    // ------------------------------------------------------------
+    ed::LinkId selectedLinkId_;
+    if (ed::GetSelectedLinks(&selectedLinkId_, 1) > 0)
+    {
+        const bool deletePressed_ =
+            ImGui::IsKeyPressed(ImGuiKey_Delete) ||
+            ImGui::IsKeyPressed(ImGuiKey_Backspace);
+
+        if (deletePressed_)
+        {
+            const auto oldSize_ = graphTransitions.size();
+
+            graphTransitions.erase(
+                std::remove_if(graphTransitions.begin(), graphTransitions.end(),
+                    [&](const auto& transition_)
+                    {
+                        return transition_.id == selectedLinkId_ &&
+                            transition_.scopeId == currentScopeName();
+                    }),
+                graphTransitions.end());
+
+            if (graphTransitions.size() != oldSize_)
+            {
+                ed::ClearSelection();
+                usedTransitionGraph = true;
+            }
+        }
+    }
+
+
     ed::NodeId doubleClickedNodeId = ed::GetDoubleClickedNode();
     if ((uintptr_t)doubleClickedNodeId.Get() != 0)
     {

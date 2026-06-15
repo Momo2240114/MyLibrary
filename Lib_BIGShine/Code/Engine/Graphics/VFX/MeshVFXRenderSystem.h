@@ -13,7 +13,7 @@ class MeshVFXRenderSystem
 public:
     bool Initialize(ID3D11Device* device_);
     void PushSubmit(MeshVFXComponent* component_);
-    void RenderAll(const RenderContext& renderContext_);
+    void RenderAll(const RenderContext& renderContext_, bool isEditorWindow_ = false);
 
 private:
     std::unique_ptr<MeshVFXShader> shader;
