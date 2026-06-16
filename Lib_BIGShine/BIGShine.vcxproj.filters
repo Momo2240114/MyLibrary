@@ -50,9 +50,6 @@
     <Filter Include="Code\Engine\Graphics\Resource">
       <UniqueIdentifier>{1cca76ee-8502-44cc-a9f4-060ae9c9851d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Code\Engine\Graphics\RenderSystem">
-      <UniqueIdentifier>{fc94eeef-2120-4aec-b89b-023a77f0bb75}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Code\Engine\Graphics\Shader">
       <UniqueIdentifier>{895bcc25-d8b2-4150-95c8-a6333017c36b}</UniqueIdentifier>
     </Filter>
@@ -193,6 +190,9 @@
     </Filter>
     <Filter Include="Shaders\VFX">
       <UniqueIdentifier>{57c29c79-f488-4bdb-96db-e9197bf13532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem">
+      <UniqueIdentifier>{fc94eeef-2120-4aec-b89b-023a77f0bb75}</UniqueIdentifier>
     </Filter>
     <Filter Include="Code\Engine\Graphics\RenderSystem\Model">
       <UniqueIdentifier>{83f4bb2f-c6fa-4c43-8b1d-01051cd584f4}</UniqueIdentifier>
@@ -415,6 +415,9 @@
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
@@ -493,6 +496,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.cpp">
       <Filter>Code\Engine\GamePlay\Transform</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Transform\BoneSegmentAttachmentComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Transform</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Transform\TransformDirector.cpp">
       <Filter>Code\Engine\GamePlay\Transform</Filter>
     </ClCompile>
@@ -529,7 +535,16 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
@@ -537,6 +552,15 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXComponent.cpp">
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\TextureResourceManager.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\AssetBrowserWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
@@ -577,6 +601,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Physics\CharacterCollider.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
@@ -595,7 +622,6 @@
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -603,6 +629,9 @@
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.NodeEditor.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
   </ItemGroup>
@@ -814,6 +843,9 @@
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Window\InputEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
@@ -876,6 +908,15 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Core\RenderState.h">
       <Filter>Code\Engine\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\TextureResourceManager.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\AssetBrowserWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\AssetBrowserPayload.h">
+      <Filter>Code\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h">
       <Filter>Code\Engine\Graphics\Decal</Filter>
@@ -940,6 +981,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.h">
       <Filter>Code\Engine\GamePlay\Transform</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Transform\BoneSegmentAttachmentComponent.h">
+      <Filter>Code\Engine\GamePlay\Transform</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Transform\TransformDirector.h">
       <Filter>Code\Engine\GamePlay\Transform</Filter>
     </ClInclude>
@@ -976,8 +1020,17 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\FreeCamera.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerActionState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
@@ -988,10 +1041,16 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerMoveState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXComponent.h">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h">
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h">
@@ -1051,7 +1110,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Basic.hlsli">
@@ -1216,6 +1277,12 @@
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MeshVFXPS.hlsl">
+      <Filter>Shaders\VFX</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MeshVFXTextureMixPS.hlsl">
+      <Filter>Shaders\VFX</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MaterialOverlayVS.hlsl">
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
   </ItemGroup>

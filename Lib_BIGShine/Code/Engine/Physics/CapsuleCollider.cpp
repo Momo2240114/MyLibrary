@@ -31,7 +31,7 @@ void CapsuleCollider::Update(float dt) {
     float r = radius * scale;
     float h = (halfHeight * 2.0f) * t->GetWorldScale().y;
 
-    if(_ShapeRenderFlg)
+    if(shapeRenderEnabled)
     {
         renderer.DrawCapsule(drawWorld, r, h, isTrigger ? DirectX::XMFLOAT4(0, 1, 1, 1) : DirectX::XMFLOAT4(1, 0, 1, 1));
     }

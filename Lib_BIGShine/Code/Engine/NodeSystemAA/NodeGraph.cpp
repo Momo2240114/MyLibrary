@@ -1,76 +1,78 @@
-ï»¿#include "NodeGraph.h"
+#include "NodeGraph.h"
 
-namespace NodeSystem 
+#include <algorithm>
+
+namespace NodeSystem
 {
 
-    void NodeGraph::Update() 
+    void NodeGraph::Update()
     {
-        if (m_NeedsRebuild) Rebuild();
+        if (needsRebuild) Rebuild();
 
-        // ãƒŽãƒ¼ãƒ‰è©•ä¾¡å‰ã«ãƒªãƒ³ã‚¯å…ˆã¸å€¤ã‚’è»¢é€ã—ã€å„ãƒŽãƒ¼ãƒ‰ãŒæœ€æ–°ã®å…¥åŠ›ã‚’å‚ç…§ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
-        for (const auto& link : m_Links) {
-            Pin* start = FindPin(link.StartPinID);
-            Pin* end = FindPin(link.EndPinID);
-            if (start && end) {
-                end->Value = start->Value;
+        // ƒm[ƒh•]‰¿‘O‚ÉƒŠƒ“ƒNæ‚Ö’l‚ð“]‘—‚µAŠeƒm[ƒh‚ªÅV‚Ì“ü—Í‚ðŽQÆ‚Å‚«‚é‚æ‚¤‚É‚·‚éB
+        for (const auto& link_ : links) {
+            Pin* start_ = FindPin(link_.startPinId);
+            Pin* end_ = FindPin(link_.endPinId);
+            if (start_ && end_) {
+                end_->value = start_->value;
             }
         }
 
-        // æŽ¥ç¶šé–¢ä¿‚ã‹ã‚‰æ§‹ç¯‰ã—ãŸé †åºã«å¾“ã£ã¦ãƒŽãƒ¼ãƒ‰ã‚’è©•ä¾¡ã™ã‚‹ã€‚
-        for (Node* node : m_EvaluationOrder) 
+        // Ú‘±ŠÖŒW‚©‚ç\’z‚µ‚½‡˜‚É]‚Á‚Äƒm[ƒh‚ð•]‰¿‚·‚éB
+        for (Node* node_ : evaluationOrder)
         {
-            node->Evaluate();
+            node_->Evaluate();
         }
     }
 
-    void NodeGraph::AddLink(uintptr_t id, uintptr_t startPinID, uintptr_t endPinID) 
+    void NodeGraph::AddLink(uintptr_t id_, uintptr_t startPinId_, uintptr_t endPinId_)
     {
-        m_Links.push_back({ id, startPinID, endPinID });
-        m_NeedsRebuild = true;
+        links.push_back({ id_, startPinId_, endPinId_ });
+        needsRebuild = true;
     }
 
-    void NodeGraph::RemoveLink(uintptr_t linkID)
+    void NodeGraph::RemoveLink(uintptr_t linkId_)
     {
-        m_Links.erase(
-            std::remove_if(m_Links.begin(), m_Links.end(),
-                [linkID](const Link& link) { return link.ID == linkID; }),
-            m_Links.end()
+        links.erase(
+            std::remove_if(links.begin(), links.end(),
+                [linkId_](const Link& link_) { return link_.id == linkId_; }),
+            links.end()
         );
 
-        // æŽ¥ç¶šé–¢ä¿‚ã®å¤‰æ›´ã‚’æ¬¡å›žUpdateæ™‚ã®è©•ä¾¡é †åºã¸åæ˜ ã™ã‚‹ã€‚
-        m_NeedsRebuild = true;
+        // Ú‘±ŠÖŒW‚Ì•ÏX‚ðŽŸ‰ñUpdateŽž‚Ì•]‰¿‡˜‚Ö”½‰f‚·‚éB
+        needsRebuild = true;
     }
 
-    void NodeGraph::Rebuild() 
+    void NodeGraph::Rebuild()
     {
-        // ç¾æ®µéšŽã§ã¯ç™»éŒ²é †ã«è©•ä¾¡ã™ã‚‹ã€‚å¾ªç’°æ¤œå‡ºã‚’å«ã‚€ãƒˆãƒãƒ­ã‚¸ã‚«ãƒ«ã‚½ãƒ¼ãƒˆã¯ä»Šå¾Œã®æ‹¡å¼µç‚¹ã€‚
-        m_EvaluationOrder.clear();
-        for (auto& node : m_Nodes) {
-            m_EvaluationOrder.push_back(node.get());
+        // Œ»’iŠK‚Å‚Í“o˜^‡‚É•]‰¿‚·‚éBzŠÂŒŸo‚ðŠÜ‚Þƒgƒ|ƒƒWƒJƒ‹ƒ\[ƒg‚Í¡Œã‚ÌŠg’£“_B
+        evaluationOrder.clear();
+        for (auto& node_ : nodes) {
+            evaluationOrder.push_back(node_.get());
         }
-        m_NeedsRebuild = false;
+        needsRebuild = false;
     }
 
-    Pin* NodeGraph::FindPin(uintptr_t pinID) 
+    Pin* NodeGraph::FindPin(uintptr_t pinId_)
     {
-        for (auto& node : m_Nodes) {
-            for (auto& p : node->Inputs) if (p.ID == pinID) return &p;
-            for (auto& p : node->Outputs) if (p.ID == pinID) return &p;
+        for (auto& node_ : nodes) {
+            for (auto& pin_ : node_->inputs) if (pin_.id == pinId_) return &pin_;
+            for (auto& pin_ : node_->outputs) if (pin_.id == pinId_) return &pin_;
         }
         return nullptr;
     }
 
-    Node* NodeGraph::FindNodeByPin(uintptr_t pinID)
+    Node* NodeGraph::FindNodeByPin(uintptr_t pinId_)
     {
-        for (auto& node : m_Nodes)
+        for (auto& node_ : nodes)
         {
-            for (auto& pin : node->Inputs)
+            for (auto& pin_ : node_->inputs)
             {
-                if (pin.ID == pinID) return node.get();
+                if (pin_.id == pinId_) return node_.get();
             }
-            for (auto& pin : node->Outputs)
+            for (auto& pin_ : node_->outputs)
             {
-                if (pin.ID == pinID) return node.get();
+                if (pin_.id == pinId_) return node_.get();
             }
         }
         return nullptr;

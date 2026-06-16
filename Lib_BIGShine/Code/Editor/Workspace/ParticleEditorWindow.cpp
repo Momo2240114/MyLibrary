@@ -18,7 +18,8 @@ namespace
 }
 
 ParticleEditorWindow::ParticleEditorWindow(GameObjectManager* manager_)
-    : EditorWorkspaceWindow("VFX Editor", manager_)
+    : EditorWorkspaceWindow("VFX Editor", manager_),
+    assetBrowser(manager_)
 {
     isVisible = false;
     style.backgroundColor = ImVec4(0.08f, 0.09f, 0.10f, 1.0f);
@@ -490,6 +491,12 @@ void ParticleEditorWindow::DrawInspectorPanel()
         return;
     }
 
+    const float splitterSize_ = 6.0f;
+    const float availableHeight_ = ImGui::GetContentRegionAvail().y;
+    assetBrowserHeight = std::clamp(assetBrowserHeight, 140.0f, (std::max)(140.0f, availableHeight_ - 180.0f));
+    const float inspectorHeight_ = (std::max)(180.0f, availableHeight_ - assetBrowserHeight - splitterSize_);
+
+    ImGui::BeginChild("VFXInspectorContent", ImVec2(0.0f, inspectorHeight_), false);
     if (ImGui::BeginTabBar("VFXInspectorTabs"))
     {
         if (ImGui::BeginTabItem("Assets"))
@@ -516,6 +523,21 @@ void ParticleEditorWindow::DrawInspectorPanel()
         }
         ImGui::EndTabBar();
     }
+    ImGui::EndChild();
+
+    ImGui::InvisibleButton("##VFXAssetBrowserSplitter", ImVec2(-1.0f, splitterSize_));
+    if (ImGui::IsItemHovered() || ImGui::IsItemActive())
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    }
+    if (ImGui::IsItemActive())
+    {
+        assetBrowserHeight -= ImGui::GetIO().MouseDelta.y;
+    }
+
+    ImGui::BeginChild("VFXEmbeddedAssetBrowser", ImVec2(0.0f, assetBrowserHeight), true);
+    assetBrowser.DrawContent();
+    ImGui::EndChild();
 }
 
 void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
@@ -557,6 +579,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     renderContext_.camera = &previewCamera;
     renderContext_.backBufferRTV = nullptr;
     renderContext_.depthSRV = previewTarget.GetDepthShaderResourceView();
+    renderContext_.baseColorSRV = previewTarget.GetShaderResourceView();
     renderContext_.screenWidth = static_cast<float>(width_);
     renderContext_.screenHeight = static_cast<float>(height_);
 
@@ -576,7 +599,11 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     particleRenderSystem.RenderAll(renderContext_,true);
     previewTarget.ResetRenderTarget(context_);
     meshVFXRenderSystem.PushSubmit(previewMeshVFX.get());
-    meshVFXRenderSystem.RenderAll(renderContext_, true);
+    meshVFXRenderSystem.RenderAll(
+        renderContext_,
+        true,
+        previewTarget.GetRenderTargetView(),
+        previewTarget.GetDepthStencilView());
 
     previewTarget.End(context_);
 }

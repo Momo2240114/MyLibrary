@@ -62,8 +62,8 @@ void CameraFreeController::UpdateRotation(float deltaTime)
     {
         // 【防酔い修正2】deltaTimeを乗算し、PCの性能（FPS）による回転速度の爆発を防ぐ
         // ※マウスの生データ（delta）の仕様によっては、lookSpeedの調整（0.2fから10.0f程度）が必要になるぞ
-        currentYaw += mouseDelta.x * lookSpeed * deltaTime;
-        currentPitch += mouseDelta.y * lookSpeed * deltaTime; // 上下反転（FPS挙動）にする場合はマイナスにする
+        currentYaw += mouseDelta.x * lookSpeed;
+        currentPitch += mouseDelta.y * lookSpeed; // 上下反転（FPS挙動）にする場合はマイナスにする
 
         // 首が反転して天変地異が起きぬよう、上下のピッチ回転を -89.9度 から 89.9度の範囲に制限
         currentPitch = std::clamp(currentPitch, -2090.0f, 2090.0f);

@@ -24,6 +24,10 @@ public:
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
+    bool SaveAsset(const std::string& path_) const;
+    bool LoadAsset(const std::string& path_);
+    void SetAsset(const MeshVFXAsset& asset_);
+    void RebuildRuntimeResources();
 
     void Play();
     void Stop();
@@ -35,6 +39,7 @@ public:
 
     float GetTime() const { return time; }
     bool IsPlaying() const { return isPlaying; }
+    virtual bool UsesOwnerModel() const { return false; }
 
 private:
     void RefreshAssetLists();

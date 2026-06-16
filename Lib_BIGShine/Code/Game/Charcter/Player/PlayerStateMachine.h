@@ -1,31 +1,33 @@
 #pragma once
 
-#include <unordered_map>
 #include <memory>
-#include "PlayerState.h"
+#include <unordered_map>
+#include <utility>
 
+#include "PlayerState.h"
 
 class PlayerControllerComponent;
 
 class PlayerStateMachine
 {
 public:
-    template<class T>
-    void AddState(PLAYER_STATE stateType_)
+    template<class T, class... Args>
+    void AddState(PLAYER_ACTION action_, Args&&... args_)
     {
-        states[stateType_] = std::make_unique<T>();
+        states[action_] = std::make_unique<T>(std::forward<Args>(args_)...);
     }
 
     void ChangeState(
         PlayerControllerComponent& player_,
-        PLAYER_STATE nextStateType_);
+        PLAYER_ACTION nextAction_);
 
-    void Update(PlayerControllerComponent& player_, float dt_);
+    void Update(float dt_);
 
     const char* GetCurrentStateName() const;
+    PLAYER_ACTION GetCurrentAction() const { return currentAction; }
 
 private:
-    std::unordered_map<PLAYER_STATE, std::unique_ptr<PlayerState>> states;
+    std::unordered_map<PLAYER_ACTION, std::unique_ptr<PlayerState>> states;
     PlayerState* currentState = nullptr;
-    PLAYER_STATE currentStateType = PLAYER_STATE::NONE;
+    PLAYER_ACTION currentAction = PLAYER_ACTION::NONE;
 };

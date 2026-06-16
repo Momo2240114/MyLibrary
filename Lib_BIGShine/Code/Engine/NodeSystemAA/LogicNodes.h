@@ -3,58 +3,57 @@
 
 namespace NodeSystem {
 
-    // --- 比較ノード (Greater Than) ---
+    /// 入力Aが入力Bより大きいかを判定する比較ノード。
     class GreaterNode : public Node {
     public:
-        GreaterNode(uintptr_t id) : Node(id, "Greater Than") {
-            Inputs.emplace_back(0, "A", PinType::Float, PinDirection::Input);
-            Inputs.emplace_back(0, "B", PinType::Float, PinDirection::Input);
-            Outputs.emplace_back(0, "Result", PinType::Bool, PinDirection::Output);
+        GreaterNode(uintptr_t id_) : Node(id_, "Greater Than") {
+            inputs.emplace_back(0, "A", PinType::FLOAT, PinDirection::INPUT);
+            inputs.emplace_back(0, "B", PinType::FLOAT, PinDirection::INPUT);
+            outputs.emplace_back(0, "Result", PinType::BOOL, PinDirection::OUTPUT);
         }
 
         void Evaluate() override {
-            float a = AsFloat(Inputs[0].Value);
-            float b = AsFloat(Inputs[1].Value);
-            Outputs[0].Value = (a > b);
+            float valueA_ = AsFloat(inputs[0].value);
+            float valueB_ = AsFloat(inputs[1].value);
+            outputs[0].value = valueA_ > valueB_;
         }
     };
 
-    // --- 論理積ノード (AND) ---
+    /// 2つの真偽値の論理積を出力するノード。
     class AndNode : public Node {
     public:
-        AndNode(uintptr_t id) : Node(id, "Logical AND") {
-            Inputs.emplace_back(0, "A", PinType::Bool, PinDirection::Input);
-            Inputs.emplace_back(0, "B", PinType::Bool, PinDirection::Input);
-            Outputs.emplace_back(0, "Result", PinType::Bool, PinDirection::Output);
+        AndNode(uintptr_t id_) : Node(id_, "Logical AND") {
+            inputs.emplace_back(0, "A", PinType::BOOL, PinDirection::INPUT);
+            inputs.emplace_back(0, "B", PinType::BOOL, PinDirection::INPUT);
+            outputs.emplace_back(0, "Result", PinType::BOOL, PinDirection::OUTPUT);
         }
 
         void Evaluate() override {
-            // boolの場合は variant から直接取り出す（AsFloatを使わない場合）
-            bool a = false;
-            if (auto p = std::get_if<bool>(&Inputs[0].Value)) a = *p;
+            bool valueA_ = false;
+            if (auto boolValue_ = std::get_if<bool>(&inputs[0].value)) valueA_ = *boolValue_;
 
-            bool b = false;
-            if (auto p = std::get_if<bool>(&Inputs[1].Value)) b = *p;
+            bool valueB_ = false;
+            if (auto boolValue_ = std::get_if<bool>(&inputs[1].value)) valueB_ = *boolValue_;
 
-            Outputs[0].Value = a && b;
+            outputs[0].value = valueA_ && valueB_;
         }
     };
 
-    // --- セレクターノード (Condition ? A : B) ---
+    /// 条件に応じて2つの入力値から一方を選択するノード。
     class SelectNode : public Node {
     public:
-        SelectNode(uintptr_t id) : Node(id, "Select (Float)") {
-            Inputs.emplace_back(0, "Condition", PinType::Bool, PinDirection::Input);
-            Inputs.emplace_back(0, "True Value", PinType::Float, PinDirection::Input);
-            Inputs.emplace_back(0, "False Value", PinType::Float, PinDirection::Input);
-            Outputs.emplace_back(0, "Result", PinType::Float, PinDirection::Output);
+        SelectNode(uintptr_t id_) : Node(id_, "Select (Float)") {
+            inputs.emplace_back(0, "Condition", PinType::BOOL, PinDirection::INPUT);
+            inputs.emplace_back(0, "True Value", PinType::FLOAT, PinDirection::INPUT);
+            inputs.emplace_back(0, "False Value", PinType::FLOAT, PinDirection::INPUT);
+            outputs.emplace_back(0, "Result", PinType::FLOAT, PinDirection::OUTPUT);
         }
 
         void Evaluate() override {
-            bool cond = false;
-            if (auto p = std::get_if<bool>(&Inputs[0].Value)) cond = *p;
+            bool condition_ = false;
+            if (auto boolValue_ = std::get_if<bool>(&inputs[0].value)) condition_ = *boolValue_;
 
-            Outputs[0].Value = cond ? Inputs[1].Value : Inputs[2].Value;
+            outputs[0].value = condition_ ? inputs[1].value : inputs[2].value;
         }
     };
 }

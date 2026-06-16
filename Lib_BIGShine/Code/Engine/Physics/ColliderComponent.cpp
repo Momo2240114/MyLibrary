@@ -35,6 +35,12 @@ void ColliderComponent::ReleasePhysXActor()
     actor->userData = nullptr;
     actor->release();
     actor = nullptr;
+
+    if (shapeMaterial)
+    {
+        shapeMaterial->release();
+        shapeMaterial = nullptr;
+    }
 }
 
 void ColliderComponent::RecreatePhysXActor()
@@ -69,6 +75,7 @@ void ColliderComponent::CreatePhysXActor()
     {
         auto dynamicActor_ = physics_->createRigidDynamic(pose_);
         dynamicActor_->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, !physicsControlsTransform);
+        ApplyDynamicActorSettings(*dynamicActor_);
         PxRigidBodyExt::setMassAndUpdateInertia(*dynamicActor_, std::max<float>(mass, 1.0f));
         actor = dynamicActor_;
     }
@@ -98,7 +105,7 @@ void ColliderComponent::UpdatePhysXShape()
     auto scale_ = owner_->transform->GetWorldScale();
     if (!shape_)
     {
-        auto material_ = PhysXSystem::GetDefaultMaterial();
+        auto material_ = GetShapeMaterial();
         if (!material_) return;
 
         switch (GetColliderType())
@@ -282,7 +289,7 @@ void ColliderComponent::UpdatePhysXShape()
     shape_->setSimulationFilterData(filterData_);
 }
 
-void ColliderComponent::SyncFromPhysics()
+void ColliderComponent::SyncFromPhysics(float dt_)
 {
     if (!actor || actorIsStatic || !physicsControlsTransform) return;
 
@@ -301,6 +308,54 @@ void ColliderComponent::SyncFromPhysics()
     owner_->transform->localPosition = { pose_.p.x, pose_.p.y, pose_.p.z };
     const PxVec3 velocity_ = dynamicActor_->getLinearVelocity();
     velocity = { velocity_.x, velocity_.y, velocity_.z };
+    if (collisionRole == CollisionRole::CHARACTER &&
+        stopCharacterSlideWhenNoInput)
+    {
+        const float horizontalSpeedSq_ =
+            velocity.x * velocity.x +
+            velocity.z * velocity.z;
+
+        const float stopThresholdSq_ =
+            characterSlideStopThreshold * characterSlideStopThreshold;
+
+        if (horizontalSpeedSq_ < stopThresholdSq_)
+        {
+            velocity.x = 0.0f;
+            velocity.z = 0.0f;
+
+            dynamicActor_->setLinearVelocity(
+                PxVec3(0.0f, velocity.y, 0.0f)
+            );
+        }
+    }
+
+    const float velocityLengthSq_ =
+        velocity.x * velocity.x +
+        velocity.y * velocity.y +
+        velocity.z * velocity.z;
+
+    const float thresholdSq_ =
+        rotateVelocityThreshold * rotateVelocityThreshold;
+
+    if (velocityRotationMode != VelocityRotationMode::NONE &&
+        velocityLengthSq_ >= thresholdSq_)
+    {
+        if (velocityRotationMode == VelocityRotationMode::YAW_ONLY)
+        {
+            owner_->transform->SetForwardYawOnly(
+                { velocity.x, 0.0f, velocity.z },
+                dt_,
+                10
+            );
+        }
+        else if (velocityRotationMode == VelocityRotationMode::FULL_3D)
+        {
+            owner_->transform->SetForward(
+                { velocity.x, velocity.y, velocity.z }
+            );
+        }
+    }
+
     owner_->transform->MarkDirty();
     CaptureTransformSnapshot();
 }
@@ -332,6 +387,7 @@ void ColliderComponent::PreparePhysicsStep()
     {
         dynamicActor_->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, !physicsControlsTransform);
         dynamicActor_->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, !useGravity);
+        ApplyDynamicActorSettings(*dynamicActor_);
         if (physicsControlsTransform)
         {
             dynamicActor_->setLinearVelocity(PxVec3(velocity.x, velocity.y, velocity.z));
@@ -346,6 +402,42 @@ void ColliderComponent::PreparePhysicsStep()
         }
         PxRigidBodyExt::setMassAndUpdateInertia(*dynamicActor_, std::max<float>(mass, 1.0f));
     }
+}
+
+void ColliderComponent::ApplyDynamicActorSettings(PxRigidDynamic& actor_)
+{
+    if (collisionRole != CollisionRole::CHARACTER)
+    {
+        actor_.setRigidDynamicLockFlags(PxRigidDynamicLockFlags());
+        return;
+    }
+
+    actor_.setRigidDynamicLockFlag(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X, true);
+    actor_.setRigidDynamicLockFlag(PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y, true);
+    actor_.setRigidDynamicLockFlag(PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z, true);
+    actor_.setAngularVelocity(PxVec3(0.0f, 0.0f, 0.0f));
+    actor_.setAngularDamping(100.0f);
+    actor_.setLinearDamping(0.0f);
+}
+
+PxMaterial* ColliderComponent::GetShapeMaterial()
+{
+    if (collisionRole != CollisionRole::CHARACTER)
+    {
+        return PhysXSystem::GetDefaultMaterial();
+    }
+
+    if (!shapeMaterial)
+    {
+        auto physics_ = PhysXSystem::GetPhysics();
+        if (!physics_) return nullptr;
+
+        shapeMaterial = physics_->createMaterial(0.0f, 0.0f, 0.0f);
+        shapeMaterial->setFrictionCombineMode(PxCombineMode::eMIN);
+        shapeMaterial->setRestitutionCombineMode(PxCombineMode::eMIN);
+    }
+
+    return shapeMaterial;
 }
 
 bool ColliderComponent::HasExternalTransformChange()
@@ -441,6 +533,40 @@ void ColliderComponent::Gui()
     }
     ImGui::TextDisabled("Physical/Character: body collision. HitBox/HurtBox/Sensor: detection only.");
 
+
+    ImGui::Separator();
+
+    const char* velocityRotationModeNames_[] =
+    {
+        "None",
+        "Yaw Only",
+        "Full 3D"
+    };
+
+    int velocityRotationModeIndex_ = static_cast<int>(velocityRotationMode);
+    if (ImGui::Combo(
+        "Velocity Rotation",
+        &velocityRotationModeIndex_,
+        velocityRotationModeNames_,
+        IM_ARRAYSIZE(velocityRotationModeNames_)))
+    {
+        velocityRotationMode =
+            static_cast<VelocityRotationMode>(velocityRotationModeIndex_);
+    }
+
+    ImGui::TextDisabled("None: no rotation. Yaw Only: character-style Y rotation. Full 3D: bullet/missile-style rotation.");
+
+    if (velocityRotationMode != VelocityRotationMode::NONE)
+    {
+        ImGui::DragFloat(
+            "Velocity Rotate Threshold",
+            &rotateVelocityThreshold,
+            0.001f,
+            0.0f,
+            10.0f
+        );
+    }
+
     if (HasFixedPhysicsBehavior())
     {
         ImGui::TextDisabled("Detection only: no gravity, physical response, or Transform control.");
@@ -458,7 +584,7 @@ void ColliderComponent::Gui()
         ImGui::TextDisabled("Gravity defaults to OFF.");
     }
 
-    ImGui::Checkbox("Debug Shape", &_ShapeRenderFlg);
+    ImGui::Checkbox("Debug Shape", &shapeRenderEnabled);
     ImGui::Text("Touching: %s", m_IsHitFlag ? "Yes" : "No");
 
     if (useGravity) {
@@ -466,6 +592,7 @@ void ColliderComponent::Gui()
     }
     ImGui::Separator();
     ImGui::DragFloat3("Offset", &offset.x, 0.01f);
+    ImGui::DragFloat("mass", &mass, 0.01f);
     ImGui::ColorEdit3("PrimitiveColor", &debugPrimitiveColor.x);
 
     if (previousStatic_ != isStatic || previousTrigger_ != isTrigger

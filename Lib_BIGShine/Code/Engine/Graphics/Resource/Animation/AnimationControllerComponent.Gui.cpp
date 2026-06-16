@@ -1,4 +1,4 @@
-﻿// 通常 Inspector GUI / Sequencer GUI
+// �ʏ� Inspector GUI / Sequencer GUI
 
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"
@@ -19,29 +19,29 @@ namespace ed = ax::NodeEditor;
 
 void AnimationControllerComponent::Gui()
 {
-    if (!modelComp) return;
+    if (!modelComponent) return;
 
-    ImGui::Text("Model: %s", modelComp->GetModelName().c_str());
+    ImGui::Text("Model: %s", modelComponent->GetModelName().c_str());
     ImGui::TextDisabled("Animation editors are opened from the main Window menu.");
 
 
     ImGui::SeparatorText("Animation Asset");
 
-    ImGui::InputText("Path", &m_assetFilePath);
-    if (ImGui::Button("Save to File")) {SaveAsset(m_assetFilePath);}
+    ImGui::InputText("Path", &assetFilePath);
+    if (ImGui::Button("Save to File")) {SaveAsset(assetFilePath);}
     ImGui::SameLine();
-    if (ImGui::Button("Load from File")) { LoadAsset(m_assetFilePath);}
+    if (ImGui::Button("Load from File")) { LoadAsset(assetFilePath);}
 
     ImGui::Separator();
 
-    ImGui::Checkbox("usedTransitionGraph", &usedTransitionGraph);
+    ImGui::Checkbox("useTransitionGraph", &useTransitionGraph);
 
     ImGui::Separator();
 
 
     std::vector<std::string> curveNames;
-    if (curvecomp) {
-        curveNames = curvecomp->GetTrackNames();
+    if (curveComponent) {
+        curveNames = curveComponent->GetTrackNames();
     }
 
 
@@ -51,7 +51,7 @@ void AnimationControllerComponent::Gui()
         static int selectedAnimIdx = 0;
         ImGui::InputText("State Name", newStateName, 64);
 
-        const auto& anims = modelComp->GetAnimations();
+        const auto& anims = modelComponent->GetAnimations();
         if (ImGui::BeginCombo("Base Animation", anims[selectedAnimIdx].name.c_str()))
         {
             for (int i = 0; i < (int)anims.size(); i++)
@@ -108,7 +108,7 @@ void AnimationControllerComponent::Gui()
             if (ImGui::Button("Play")) {
                 ChangeState(name, 0.2f);
 
-                usedTransitionGraph = false;
+                useTransitionGraph = false;
             }
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
@@ -146,7 +146,7 @@ void AnimationControllerComponent::Gui()
         }
 
         if (editingState->type == AnimStateType::Single) {
-            const auto& anims = modelComp->GetAnimations();
+            const auto& anims = modelComponent->GetAnimations();
             if (ImGui::BeginCombo("Animation", anims[editingState->animationIndex].name.c_str())) {
                 for (int i = 0; i < (int)anims.size(); i++) {
                     if (ImGui::Selectable(anims[i].name.c_str(), editingState->animationIndex == i))
@@ -156,7 +156,7 @@ void AnimationControllerComponent::Gui()
             }
         }
         else if (editingState->type == AnimStateType::Blend1D) {
-            const auto& anims = modelComp->GetAnimations();
+            const auto& anims = modelComponent->GetAnimations();
             auto ComboAnim = [&](const char* label, int& targetIdx) {
                 std::string cName = (targetIdx >= 0) ? anims[targetIdx].name : "None";
                 if (ImGui::BeginCombo(label, cName.c_str())) {
@@ -171,13 +171,13 @@ void AnimationControllerComponent::Gui()
             ImGui::InputText("Blend Param", &editingState->blendParamName);
         }
         else if (editingState->type == AnimStateType::Custom) {
-            if (m_poseLibrary && !m_poseLibrary->customAnims.empty()) {
+            if (poseLibrary && !poseLibrary->customAnims.empty()) {
                 int selectedCustom = editingState->customAnimIndex;
-                if (selectedCustom < 0 || selectedCustom >= (int)m_poseLibrary->customAnims.size()) selectedCustom = 0;
-                const std::string& previewName = m_poseLibrary->customAnims[selectedCustom].name;
+                if (selectedCustom < 0 || selectedCustom >= (int)poseLibrary->customAnims.size()) selectedCustom = 0;
+                const std::string& previewName = poseLibrary->customAnims[selectedCustom].name;
                 if (ImGui::BeginCombo("Custom Animation", previewName.c_str())) {
-                    for (int i = 0; i < (int)m_poseLibrary->customAnims.size(); ++i) {
-                        if (ImGui::Selectable(m_poseLibrary->customAnims[i].name.c_str(), selectedCustom == i)) {
+                    for (int i = 0; i < (int)poseLibrary->customAnims.size(); ++i) {
+                        if (ImGui::Selectable(poseLibrary->customAnims[i].name.c_str(), selectedCustom == i)) {
                             editingState->customAnimIndex = i;
                         }
                     }
@@ -211,7 +211,7 @@ void AnimationControllerComponent::Gui()
                 ImGui::TextDisabled("Final RootMotion = Delta * Scale * CurveValue");
 
                 const std::string sourcePreview_ = editingState->rootMotion.sourceNodeName.empty()
-                    ? std::string("Model Default (") + modelComp->GetRootMotionName() + ")"
+                    ? std::string("Model Default (") + modelComponent->GetRootMotionName() + ")"
                     : editingState->rootMotion.sourceNodeName;
                 if (ImGui::BeginCombo("Motion Source Node", sourcePreview_.c_str()))
                 {
@@ -221,7 +221,7 @@ void AnimationControllerComponent::Gui()
                         editingState->rootMotion.sourceNodeName.clear();
                     }
 
-                    for (const auto& node_ : modelComp->GetNodes())
+                    for (const auto& node_ : modelComponent->GetNodes())
                     {
                         const bool selected_ = editingState->rootMotion.sourceNodeName == node_.name;
                         if (ImGui::Selectable(node_.name.c_str(), selected_))
@@ -350,14 +350,14 @@ void AnimationControllerComponent::ShowSequencerEditor()
         ImGui::TextDisabled("Select a state to edit events.");
         ImGui::End();
         return;
-        
+
     }
     else
     {
 
         AnimSequenceAdapter adapter;
         adapter.targetState = const_cast<AnimState*>(editingState);
-        adapter.duration = modelComp->GetAnimationDuration(editingState->animationIndex);
+        adapter.duration = modelComponent->GetAnimationDuration(editingState->animationIndex);
         adapter.fps = 60.0f;
 
         static int selectedEntry = -1;
@@ -437,17 +437,55 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 auto& globalReg = ActionRegistry::Instance();
                 auto owner = GetGameObject();
 
-                struct CategoryEntry { std::string name; bool isLocal; };
+                struct CategoryEntry
+                {
+                    std::string category;
+                    std::string menuLabel;
+                    ActionRegistry* registry = nullptr;
+                };
                 std::vector<CategoryEntry> allCategories;
 
-                if (owner) {
-                    for (const auto& cat : owner->localRegistry.GetCategories()) {
-                        allCategories.push_back({ cat, true });
+                auto addRegistryCategories_ = [&](ActionRegistry& registry_, const std::string& sourceLabel_)
+                    {
+                        for (const auto& category_ : registry_.GetCategories())
+                        {
+                            allCategories.push_back({ category_, sourceLabel_ + " " + category_, &registry_ });
+                        }
+                    };
+
+                if (owner)
+                {
+                    addRegistryCategories_(owner->localRegistry, "[Self]");
+
+                    auto parentTransform_ = owner->transform ? owner->transform->parent.lock() : nullptr;
+                    while (parentTransform_)
+                    {
+                        auto parentObject_ = parentTransform_->gameObject.lock();
+                        if (!parentObject_) break;
+
+                        addRegistryCategories_(parentObject_->localRegistry, "[Parent:" + parentObject_->GetName() + "]");
+                        parentTransform_ = parentObject_->transform ? parentObject_->transform->parent.lock() : nullptr;
                     }
+
+                    auto collectChildActions_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
+                        {
+                            if (!object_ || !object_->transform) return;
+
+                            for (const auto& childTransform_ : object_->transform->children)
+                            {
+                                if (!childTransform_) continue;
+
+                                auto childObject_ = childTransform_->gameObject.lock();
+                                if (!childObject_) continue;
+
+                                addRegistryCategories_(childObject_->localRegistry, "[Child:" + childObject_->GetName() + "]");
+                                self_(self_, childObject_);
+                            }
+                        };
+                    collectChildActions_(collectChildActions_, owner);
                 }
-                for (const auto& cat : globalReg.GetCategories()) {
-                    allCategories.push_back({ cat, false });
-                }
+
+                addRegistryCategories_(globalReg, "[Global]");
 
                 auto ActionField = [&](const char* label, std::string& targetStr) {
                     ImGui::SetNextItemWidth(250.0f);
@@ -466,14 +504,10 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         ImGui::Separator();
 
                         for (const auto& entry : allCategories) {
-                            std::string menuLabel = (entry.isLocal ? "[L] " : "[G] ") + entry.name;
-                            if (ImGui::BeginMenu(menuLabel.c_str())) {
+                            if (ImGui::BeginMenu(entry.menuLabel.c_str())) {
                                 std::vector<std::string> actionNames;
-                                if (entry.isLocal && owner) {
-                                    actionNames = owner->localRegistry.GetActionNames(entry.name);
-                                }
-                                else {
-                                    actionNames = globalReg.GetActionNames(entry.name);
+                                if (entry.registry) {
+                                    actionNames = entry.registry->GetActionNames(entry.category);
                                 }
 
                                 for (const auto& actionName : actionNames) {
@@ -491,6 +525,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 ActionField("Start Action", ev.startAction);
                 ActionField("Update Action", ev.updateAction);
                 ActionField("End Action", ev.endAction);
+                ImGui::Checkbox("Call End On State Exit", &ev.callEndOnStateExit);
 
                 ImGui::Separator();
 

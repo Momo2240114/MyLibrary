@@ -101,6 +101,9 @@ private:
     int m_wheelDelta = 0;
     int m_wheelDeltaThisFrame = 0;
 
+    Vector2 m_PrevMousePos = {};
+    bool m_IsFirstMouseUpdate = true;
+
     // ç¿ïW
     POINT m_clientPos = { 0, 0 };
     DirectX::XMFLOAT2 m_screenPos = { 0.0f, 0.0f };

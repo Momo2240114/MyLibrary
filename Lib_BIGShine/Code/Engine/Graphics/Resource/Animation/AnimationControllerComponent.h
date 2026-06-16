@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "ModelAnimator.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
@@ -9,73 +9,72 @@
 #include <memory>
 #include <vector>
 
-// å‰æ–¹å®£è¨€
+// ‘O•ûéŒ¾
 namespace ax { namespace NodeEditor { struct EditorContext; } }
 
 
 class AnimationControllerComponent : public Component
 {
 public:
-    const std::string& GetName() const override { static std::string name = "AnimationControllerComponent"; return name; }
+    const std::string& GetName() const override { static std::string name_ = "AnimationControllerComponent"; return name_; }
     ~AnimationControllerComponent();
     void Start() override;
-    void Update(float deltaTime) override;
+    void Update(float deltaTime_) override;
 
     void Gui() override;
     void ShowSequencerEditor();
-    void SetSequencerWindowVisible(bool visible) { showSequencerWindow = visible; }
-    // ã‚¨ãƒ‡ã‚£ã‚¿ç”¨è¡¨ç¤ºé–¢æ•°
+    void SetSequencerWindowVisible(bool visible_) { showSequencerWindow = visible_; }
+    // ƒGƒfƒBƒ^—p•\¦ŠÖ”
     void OnGuiNodeEditor();
     void DrawNodeEditorContent();
 
-    // ã‚¨ãƒ‡ã‚£ã‚¿å´ã‹ã‚‰ãƒãƒ¼ã‚ºãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’ç›´æ¥æ“ä½œãƒ»ä¿å­˜ã§ãã‚‹ã‚ˆã†ã«ã€ã‚²ãƒƒã‚¿ãƒ¼ã‚’ç”¨æ„ã™ã‚‹ã¨ä¾¿åˆ©ã§ã™
-    std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return m_poseLibrary; }
-    // ç‰¹å®šã®ã‚¹ãƒ†ãƒ¼ãƒˆã¸é·ç§»ã•ã›ã‚‹ï¼ˆç›´æ¥å‘¼ã³å‡ºã—ç”¨ï¼‰
-    void ChangeState(const std::string& stateName, float duration = 0.2f);
+    // ƒGƒfƒBƒ^‘¤‚©‚çƒ|[ƒYƒ‰ƒCƒuƒ‰ƒŠ‚ğ’¼Ú‘€ìE•Û‘¶‚Å‚«‚é‚æ‚¤‚ÉAƒQƒbƒ^[‚ğ—pˆÓ‚·‚é‚Æ•Ö—˜‚Å‚·
+    std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return poseLibrary; }
+    // “Á’è‚ÌƒXƒe[ƒg‚Ö‘JˆÚ‚³‚¹‚éi’¼ÚŒÄ‚Ño‚µ—pj
+    void ChangeState(const std::string& stateName_, float duration_ = 0.2f);
 
-    // ã‚»ãƒ¼ãƒ–ãƒ»ãƒ­ãƒ¼ãƒ‰ã®å®Ÿè£…
-    void Serialize(nlohmann::json& j) const override;
-    void Deserialize(const nlohmann::json& j) override;
+    // ƒZ[ƒuEƒ[ƒh‚ÌÀ‘•
+    void Serialize(nlohmann::json& json_) const override;
+    void Deserialize(const nlohmann::json& json_) override;
 
-    // ã‚¹ãƒ†ãƒ¼ãƒˆã‚’æ‰‹å‹•ã§è¿½åŠ ã™ã‚‹
-    void AddState(const std::string& stateName, int animIndex);
+    // ƒXƒe[ƒg‚ğè“®‚Å’Ç‰Á‚·‚é
+    void AddState(const std::string& stateName_, int animationIndex_);
     bool AddOrUpdateCustomState(int customAnimIndex_);
     bool PreviewCustomAnimation(int customAnimIndex_, float time_);
     bool SelectStateForEditing(const std::string& stateName_);
 
-    // ã‚¹ãƒ†ãƒ¼ãƒˆã‚’å‰Šé™¤ã™ã‚‹
-    void RemoveState(const std::string& stateName);
+    // ƒXƒe[ƒg‚ğíœ‚·‚é
+    void RemoveState(const std::string& stateName_);
     void SetTrigger(const std::string& name_);
     void ResetTrigger(const std::string& name_);
-    AnimGraphNode* AFindNodeByPin(ed::PinId pinId);
-    // å®£è¨€
-    AnimGraphNode* FindNodeByName(const std::string& name);
-    //const AnimGraphNode* FindNodeByNameCons(const std::string& name) const;
+    AnimGraphNode* FindNodeByPin(ed::PinId pinId_);
+    // éŒ¾
+    AnimGraphNode* FindNodeByName(const std::string& name_);
 
-    // Blackboard ã¸ã®ã‚¢ã‚¯ã‚»ã‚¹æ¨©ã‚’æˆã‘ã‚‹
+    // Blackboard ‚Ö‚ÌƒAƒNƒZƒXŒ ‚ğö‚¯‚é
     const BlackboardCategory& GetBlackboard() const;
-    const AnimState* GetCurrentState() { return currentState; };
+    const AnimState* GetCurrentState() { return currentState; }
     float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
-    void SetEditorPoseOverride(bool enabled) { m_editorPoseOverride = enabled; }
-    bool IsEditorPoseOverride() const { return m_editorPoseOverride; }
+    void SetEditorPoseOverride(bool enabled_) { editorPoseOverride = enabled_; }
+    bool IsEditorPoseOverride() const { return editorPoseOverride; }
 
-    // ãƒ¼ãƒ¼ãƒ¼ çª“ã«ãƒ‡ãƒ¼ã‚¿ã‚’å·®ã—å‡ºã™ãŸã‚ã®ã‚²ãƒƒã‚¿ãƒ¼ç¾¤ ãƒ¼ãƒ¼ãƒ¼
+    // [[[ ‘‹‚Éƒf[ƒ^‚ğ·‚µo‚·‚½‚ß‚ÌƒQƒbƒ^[ŒQ [[[
     std::vector<AnimGraphNode>& GetGraphNodes() { return graphNodes; }
     std::vector<AnimTransition>& GetTransitions() { return graphTransitions; }
     std::unordered_map<std::string, std::unique_ptr<AnimState>>& GetStates() { return states; }
 
-    uintptr_t GetNextID() { return m_NextID++; }
-    void SetIDCounterFloor(uintptr_t minVal);
-    // å†…éƒ¨å‡¦ç†ç”¨
+    uintptr_t GetNextId() { return nextGraphElementId++; }
+    void SetIdCounterFloor(uintptr_t minValue_);
+    // “à•”ˆ——p
     void EvaluateGraphTransitions();
-    bool EvaluateCondition(const AnimCondition& cond);
+    bool EvaluateCondition(const AnimCondition& condition_);
 
-    void SetTransitionFlg(bool flg) {usedTransitionGraph = flg;}
+    void SetUseTransitionGraph(bool useTransitionGraph_) { useTransitionGraph = useTransitionGraph_; }
 private:
-    std::string m_graphAssetFilePath;
+    std::string graphAssetFilePath;
 
-    void SaveGraphAsset(const std::string& assetName);
-    void LoadGraphAsset(const std::string& assetName);
+    void SaveGraphAsset(const std::string& assetName_);
+    void LoadGraphAsset(const std::string& assetName_);
     bool SaveStateAsset(const std::string& stateName_);
     bool LoadStateAsset(const std::string& assetName_);
     void RegisterStateAction(const std::string& stateName_);
@@ -83,69 +82,60 @@ private:
     void EnsureNodeEditorContext();
     void EnsureStatesFromModel();
 
-    int m_nextId = 1;
-    // ã€æ–°è¨­ã€‘ä½•ãŒé¸ã°ã‚Œã¦ã„ã‚‹ã‹ã‚’è¨˜éŒ²ã™ã‚‹è³¢è€…ã®è¨˜éŒ²
-    struct Selection {
-        ed::NodeId nodeId;
-        ed::LinkId linkId;
-    } m_selection;
-
-    // ä¸€æ„ãªIDã‚’ç™ºè¡Œã™ã‚‹ç§˜è¡“
-    int GetNextId() { return m_nextId++; }
 
     ModelAnimator animator;
-    CurveComponent* curvecomp;
-    GltfModelCommponennt* modelComp = nullptr;
+    CurveComponent* curveComponent = nullptr;
+    GltfModelCommponennt* modelComponent = nullptr;
 
-    bool showSequencerWindow = false; // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®è¡¨ç¤ºçŠ¶æ…‹ã‚’ç®¡ç†
-    bool m_ShowNodeEditor = false; // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®è¡¨ç¤ºçŠ¶æ…‹ã‚’ç®¡ç†
+    bool showSequencerWindow = false; // ƒEƒBƒ“ƒhƒE‚Ì•\¦ó‘Ô‚ğŠÇ—
+    bool showNodeEditor = false; // ƒEƒBƒ“ƒhƒE‚Ì•\¦ó‘Ô‚ğŠÇ—
 
-    // ã€è¿½åŠ ã€‘ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒç´ã¥ããƒ¢ãƒ‡ãƒ«å›ºæœ‰ã®ãƒãƒ¼ã‚ºã®è¨˜æ†¶
-    std::shared_ptr<PoseLibraryResource> m_poseLibrary = nullptr;
-    bool m_editorPoseOverride = false;
+    // y’Ç‰Áz‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ª•R‚Ã‚­ƒ‚ƒfƒ‹ŒÅ—L‚Ìƒ|[ƒY‚Ì‹L‰¯
+    std::shared_ptr<PoseLibraryResource> poseLibrary = nullptr;
+    bool editorPoseOverride = false;
 
-    // ãƒãƒ¼ãƒ‰ã‚¨ãƒ‡ã‚£ã‚¿ã§ç®¡ç†ã•ã‚Œã‚‹ã‚¹ãƒ†ãƒ¼ãƒˆç¾¤
+    // ƒm[ƒhƒGƒfƒBƒ^‚ÅŠÇ—‚³‚ê‚éƒXƒe[ƒgŒQ
     std::unordered_map<std::string, std::unique_ptr<AnimState>> states;
     const AnimState* currentState = nullptr;
-    AnimState* editingState = nullptr;// ç·¨é›†ä¸­ã®ã‚¹ãƒ†ãƒ¼ãƒˆã‚’æŒ‡ã™
+    AnimState* editingState = nullptr;// •ÒW’†‚ÌƒXƒe[ƒg‚ğw‚·
 
-    std::string m_assetFilePath; // ä¿å­˜ã™ã‚‹ãƒ‘ã‚¹
+    std::string assetFilePath; // •Û‘¶‚·‚éƒpƒX
 
     BlackboardComponent* blackboardComponent = nullptr;
     std::string animationBlackboardCategory = "Anim";
-    // ã‚°ãƒ©ãƒ•ãƒ‡ãƒ¼ã‚¿
+    // ƒOƒ‰ƒtƒf[ƒ^
     std::vector<AnimGraphNode> graphNodes;
     std::vector<AnimTransition> graphTransitions;
-    // ã‚¨ãƒ‡ã‚£ã‚¿ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹çŠ¶æ…‹ã‚’ä¿æŒã™ã‚‹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+    // ƒGƒfƒBƒ^‚ÌƒCƒ“ƒXƒ^ƒ“ƒXó‘Ô‚ğ•Û‚·‚éƒRƒ“ƒeƒLƒXƒg
     ed::EditorContext* nodeEditorContext = nullptr;
-    // ã‚¨ãƒ‡ã‚£ã‚¿ã®åˆæœŸè¨­å®šç”¨
+    // ƒGƒfƒBƒ^‚Ì‰Šúİ’è—p
     ed::Config nodeEditorConfig;
-    std::string  _runtimeActiveStateName;
-    ImVec2       _newNodeSpawnPos = { 0,0 };
-    uintptr_t    _nodeToPlaceHash = 0;
-    bool         m_needsPositionRestore = false;
-    std::string  m_currentGraphScopeId = "Root";
-    std::vector<std::string> m_graphScopeStack;
+    std::string  runtimeActiveStateName;
+    ImVec2       newNodeSpawnPosition = { 0,0 };
+    uintptr_t    nodeToPlaceId = 0;
+    bool         needsPositionRestore = false;
+    std::string  currentGraphScopeId = "Root";
+    std::vector<std::string> graphScopeStack;
 
     void EnsureSpecialGraphNodes();
     void TryEnterStartState();
-    bool TryEnterSubGraph(const AnimGraphNode& subGraphNode, float duration);
-    void LoadAsset(const std::string& path);
-    void SaveAsset(const std::string& path);
+    bool TryEnterSubGraph(const AnimGraphNode& subGraphNode_, float duration_);
+    void LoadAsset(const std::string& assetName_);
+    void SaveAsset(const std::string& assetName_);
 
     BlackboardCategory& GetEditableBlackboard();
     const BlackboardCategory& GetCurrentBlackboard() const;
 
-    bool m_pendingGraphAssetLoad = false;
-    std::string m_pendingGraphAssetPath;
+    bool pendingGraphAssetLoad = false;
+    std::string pendingGraphAssetPath;
 
-    bool usedTransitionGraph = true;
+    bool useTransitionGraph = true;
 
-    // ActionRegistryã¸ã®ç™»éŒ²åãƒªã‚¹ãƒˆï¼ˆå‰Šé™¤ç”¨ï¼‰
-    std::vector<std::string> registeredFullNames;
-    uintptr_t m_NextID = 1; // 0ã¯ç„¡åŠ¹å€¤(Invalid)ã¨ã—ã¦æ‰±ã‚ã‚Œã‚‹ã“ã¨ãŒå¤šã„ãŸã‚1ã‹ã‚‰é–‹å§‹
+    // ActionRegistry‚Ö‚Ì“o˜^–¼ƒŠƒXƒgiíœ—pj
+    std::vector<std::string> registeredActionNames;
+    uintptr_t nextGraphElementId = 1; // 0‚Í–³Œø’l(Invalid)‚Æ‚µ‚Äˆµ‚í‚ê‚é‚±‚Æ‚ª‘½‚¢‚½‚ß1‚©‚çŠJn
 public:
-    // å¤–éƒ¨ã‹ã‚‰ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å…¥åŠ›
+    // ŠO•”‚©‚ç‚Ìƒpƒ‰ƒ[ƒ^“ü—Í
     void SetParam(const std::string& name_, BlackBoardValue value_);
     void SetBlackboardCategory(const std::string& category_) { animationBlackboardCategory = category_; }
     const std::string& GetBlackboardCategory() const { return animationBlackboardCategory; }

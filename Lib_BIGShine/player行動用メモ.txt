@@ -1,0 +1,56 @@
+Playerが送るアクション名
+CanCancelOn
+CanCancelOff
+InputBufferOn
+InputBufferOff
+CanComboOn
+CanComboOff
+ActionEnd
+NotifyActionEnd
+
+それぞれ
+CanCancelOn	Trigger	CanCancel = true にする
+CanCancelOff	Trigger	CanCancel = false にする
+InputBufferOn	Trigger	CanBufferInput = true にする
+InputBufferOff	Trigger	CanBufferInput = false にする
+CanComboOn	Trigger	CanCombo = true にする
+CanComboOff	Trigger	CanCombo = false にする
+ActionEnd	Trigger	現在アクション終了通知。先行入力があれば消費
+NotifyActionEnd	Trigger	ActionEnd と同じ。別名
+
+PlayerがBlackboardへ送る値の名前
+Player.Action
+Player.ActionGroup
+Player.AttackType
+Player.ComboIndex
+Player.MoveInput
+Player.IsIdle
+Player.IsMove
+Player.IsLocomotion
+Player.IsAttack
+Player.IsGuard
+Player.IsDodge
+Player.IsSkill
+Player.CanCancel
+Player.CanBufferInput
+Player.CanCombo
+Player.ActionEnded
+
+PlayerがBlackboardへ送る値
+Blackboard名	型	内容
+Player.Action	Int	PLAYER_ACTION のenum値
+Player.ActionGroup	Int	PLAYER_ACTION_GROUP のenum値
+Player.AttackType	Int	PLAYER_ATTACK_TYPE のenum値
+Player.ComboIndex	Int	弱攻撃コンボ段数。通常は 0
+Player.MoveInput	Vector2	{ x, z } の移動入力
+Player.IsIdle	Bool	現在ActionがIdle
+Player.IsMove	Bool	現在ActionがMove
+Player.IsLocomotion	Bool	ActionGroupがLocomotion
+Player.IsAttack	Bool	ActionGroupがAttack
+Player.IsGuard	Bool	ActionGroupがGuard
+Player.IsDodge	Bool	ActionGroupがDodge
+Player.IsSkill	Bool	AttackTypeがSkillAまたはSkillB
+Player.CanCancel	Bool	現在キャンセル可能か
+Player.CanBufferInput	Bool	先行入力受付中か
+Player.CanCombo	Bool	コンボ入力受付中か
+Player.ActionEnded	Bool	ActionEnd/NotifyActionEndが呼ばれた後true

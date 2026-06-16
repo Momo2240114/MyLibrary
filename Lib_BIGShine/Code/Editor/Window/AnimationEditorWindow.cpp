@@ -239,11 +239,11 @@ bool AnimationEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, Anim
     modelComp = nullptr;
     animController = nullptr;
 
-    auto _SelectedObject = GetPreviewManager() ? GetPreviewManager()->GetSelectedObject() : nullptr;
-    if (!_SelectedObject) return false;
+    auto selectedObject = GetPreviewManager() ? GetPreviewManager()->GetSelectedObject() : nullptr;
+    if (!selectedObject) return false;
 
-    auto model = _SelectedObject->GetComponent<GltfModelCommponennt>();
-    auto animation = _SelectedObject->GetComponent<AnimationControllerComponent>();
+    auto model = selectedObject->GetComponent<GltfModelCommponennt>();
+    auto animation = selectedObject->GetComponent<AnimationControllerComponent>();
     if (!model || !animation) return false;
 
     modelComp = model.get();
@@ -1616,23 +1616,58 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
 
     ImGui::Separator();
 
-    auto _SelectedObject = GetPreviewManager() ? GetPreviewManager()->GetSelectedObject() : nullptr;
+    auto selectedObject = GetPreviewManager() ? GetPreviewManager()->GetSelectedObject() : nullptr;
     auto& globalReg = ActionRegistry::Instance();
 
-    struct CategoryEntry { std::string name; bool isLocal; };
+    struct CategoryEntry
+    {
+        std::string category;
+        std::string menuLabel;
+        ActionRegistry* registry = nullptr;
+    };
     std::vector<CategoryEntry> allCategories;
 
-    if (_SelectedObject)
-    {
-        for (const auto& cat : _SelectedObject->localRegistry.GetCategories())
+    auto addRegistryCategories_ = [&](ActionRegistry& registry_, const std::string& sourceLabel_)
         {
-            allCategories.push_back({ cat, true });
-        }
-    }
-    for (const auto& cat : globalReg.GetCategories())
+            for (const auto& category_ : registry_.GetCategories())
+            {
+                allCategories.push_back({ category_, sourceLabel_ + " " + category_, &registry_ });
+            }
+        };
+
+    if (selectedObject)
     {
-        allCategories.push_back({ cat, false });
+        addRegistryCategories_(selectedObject->localRegistry, "[Self]");
+
+        auto parentTransform_ = selectedObject->transform ? selectedObject->transform->parent.lock() : nullptr;
+        while (parentTransform_)
+        {
+            auto parentObject_ = parentTransform_->gameObject.lock();
+            if (!parentObject_) break;
+
+            addRegistryCategories_(parentObject_->localRegistry, "[Parent:" + parentObject_->GetName() + "]");
+            parentTransform_ = parentObject_->transform ? parentObject_->transform->parent.lock() : nullptr;
+        }
+
+        auto collectChildActions_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
+            {
+                if (!object_ || !object_->transform) return;
+
+                for (const auto& childTransform_ : object_->transform->children)
+                {
+                    if (!childTransform_) continue;
+
+                    auto childObject_ = childTransform_->gameObject.lock();
+                    if (!childObject_) continue;
+
+                    addRegistryCategories_(childObject_->localRegistry, "[Child:" + childObject_->GetName() + "]");
+                    self_(self_, childObject_);
+                }
+            };
+        collectChildActions_(collectChildActions_, selectedObject);
     }
+
+    addRegistryCategories_(globalReg, "[Global]");
 
     auto actionField = [&](const char* label, std::string& targetStr)
         {
@@ -1656,17 +1691,12 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
 
                 for (const auto& entry : allCategories)
                 {
-                    std::string menuLabel = (entry.isLocal ? "[L] " : "[G] ") + entry.name;
-                    if (ImGui::BeginMenu(menuLabel.c_str()))
+                    if (ImGui::BeginMenu(entry.menuLabel.c_str()))
                     {
                         std::vector<std::string> actionNames;
-                        if (entry.isLocal && _SelectedObject)
+                        if (entry.registry)
                         {
-                            actionNames = _SelectedObject->localRegistry.GetActionNames(entry.name);
-                        }
-                        else
-                        {
-                            actionNames = globalReg.GetActionNames(entry.name);
+                            actionNames = entry.registry->GetActionNames(entry.category);
                         }
 
                         for (const auto& actionName : actionNames)
@@ -1686,6 +1716,7 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     actionField("Start Action", ev.startAction);
     actionField("Update Action", ev.updateAction);
     actionField("End Action", ev.endAction);
+    ImGui::Checkbox("Call End On State Exit", &ev.callEndOnStateExit);
 
     ImGui::Separator();
     ImGui::PushItemWidth(130.0f);

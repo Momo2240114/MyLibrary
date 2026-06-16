@@ -1,0 +1,265 @@
+#include "BoneSegmentAttachmentComponent.h"
+
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/Graphics/Particle/ParticleComponent.h"
+#include "Engine/Graphics/Resource/GlTFModel.h"
+#include "Engine/Physics/CapsuleCollider.h"
+
+#include <algorithm>
+#include <cmath>
+#include <imgui_stdlib.h>
+
+using namespace DirectX;
+
+namespace
+{
+XMFLOAT3 TransformOffset(const XMFLOAT3& offset_, const XMFLOAT4X4& transform_)
+{
+    XMFLOAT3 position_;
+    XMStoreFloat3(
+        &position_,
+        XMVector3TransformCoord(XMLoadFloat3(&offset_), XMLoadFloat4x4(&transform_)));
+    return position_;
+}
+
+XMMATRIX CreateSegmentTransform(
+    const XMFLOAT3& startPosition_,
+    const XMFLOAT3& endPosition_,
+    float thickness_)
+{
+    const XMVECTOR start_ = XMLoadFloat3(&startPosition_);
+    const XMVECTOR end_ = XMLoadFloat3(&endPosition_);
+    const XMVECTOR difference_ = XMVectorSubtract(end_, start_);
+    const float length_ = XMVectorGetX(XMVector3Length(difference_));
+    const XMVECTOR yAxis_ = XMVector3Normalize(difference_);
+
+    XMVECTOR referenceAxis_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+    if (std::abs(XMVectorGetX(XMVector3Dot(yAxis_, referenceAxis_))) > 0.99f)
+    {
+        referenceAxis_ = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+    const XMVECTOR xAxis_ = XMVector3Normalize(XMVector3Cross(yAxis_, referenceAxis_));
+    const XMVECTOR zAxis_ = XMVector3Normalize(XMVector3Cross(xAxis_, yAxis_));
+    const XMVECTOR center_ = XMVectorScale(XMVectorAdd(start_, end_), 0.5f);
+
+    XMMATRIX rotationTranslation_ = XMMatrixIdentity();
+    rotationTranslation_.r[0] = XMVectorSetW(xAxis_, 0.0f);
+    rotationTranslation_.r[1] = XMVectorSetW(yAxis_, 0.0f);
+    rotationTranslation_.r[2] = XMVectorSetW(zAxis_, 0.0f);
+    rotationTranslation_.r[3] = XMVectorSetW(center_, 1.0f);
+    return XMMatrixScaling(thickness_, length_, thickness_) * rotationTranslation_;
+}
+}
+
+void BoneSegmentAttachmentComponent::Update(float deltaTime_)
+{
+    SyncTargets();
+}
+
+void BoneSegmentAttachmentComponent::LateUpdate(float deltaTime_)
+{
+    SyncTargets();
+}
+
+std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTargetModel()
+{
+    if (auto model_ = targetModel.lock()) return model_;
+
+    auto owner_ = GetGameObject();
+    if (!owner_) return nullptr;
+
+    if (!targetGameObjectName.empty() && owner_->manager)
+    {
+        if (auto targetObject_ = owner_->GetManager().Find(targetGameObjectName))
+        {
+            if (auto model_ = targetObject_->GetComponent<GltfModelCommponennt>())
+            {
+                targetModel = model_;
+                return model_;
+            }
+        }
+    }
+
+    if (auto model_ = owner_->GetComponent<GltfModelCommponennt>())
+    {
+        targetModel = model_;
+        targetGameObjectName = owner_->GetName();
+        return model_;
+    }
+
+    auto parent_ = owner_->transform->parent.lock();
+    while (parent_)
+    {
+        auto parentObject_ = parent_->gameObject.lock();
+        if (parentObject_)
+        {
+            if (auto model_ = parentObject_->GetComponent<GltfModelCommponennt>())
+            {
+                targetModel = model_;
+                targetGameObjectName = parentObject_->GetName();
+                return model_;
+            }
+        }
+        parent_ = parent_->parent.lock();
+    }
+    return nullptr;
+}
+
+bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
+    const std::shared_ptr<GltfModelCommponennt>& model_)
+{
+    if (!model_ || startNodeName.empty() || endNodeName.empty()) return false;
+
+    const auto& nodes_ = model_->GetNodes();
+    const bool validStart_ = startNodeIndex >= 0 &&
+        startNodeIndex < static_cast<int>(nodes_.size()) &&
+        nodes_[startNodeIndex].name == startNodeName;
+    const bool validEnd_ = endNodeIndex >= 0 &&
+        endNodeIndex < static_cast<int>(nodes_.size()) &&
+        nodes_[endNodeIndex].name == endNodeName;
+
+    if (!validStart_) startNodeIndex = model_->GetNodeIndex(startNodeName.c_str());
+    if (!validEnd_) endNodeIndex = model_->GetNodeIndex(endNodeName.c_str());
+    return startNodeIndex >= 0 && endNodeIndex >= 0;
+}
+
+bool BoneSegmentAttachmentComponent::GetSegment(
+    XMFLOAT3& startPosition_,
+    XMFLOAT3& endPosition_) const
+{
+    auto model_ = targetModel.lock();
+    if (!model_) return false;
+
+    const auto& nodes_ = model_->GetNodes();
+    if (startNodeIndex < 0 || endNodeIndex < 0 ||
+        startNodeIndex >= static_cast<int>(nodes_.size()) ||
+        endNodeIndex >= static_cast<int>(nodes_.size()))
+    {
+        return false;
+    }
+
+    startPosition_ = TransformOffset(startOffset, nodes_[startNodeIndex].worldTransform);
+    endPosition_ = TransformOffset(endOffset, nodes_[endNodeIndex].worldTransform);
+    return true;
+}
+
+void BoneSegmentAttachmentComponent::SyncTargets()
+{
+    auto owner_ = GetGameObject();
+    auto model_ = ResolveTargetModel();
+    if (!owner_ || !ResolveNodeIndices(model_)) return;
+
+    XMFLOAT3 startPosition_;
+    XMFLOAT3 endPosition_;
+    if (!GetSegment(startPosition_, endPosition_)) return;
+
+    const XMVECTOR difference_ = XMVectorSubtract(
+        XMLoadFloat3(&endPosition_), XMLoadFloat3(&startPosition_));
+    const float length_ = XMVectorGetX(XMVector3Length(difference_));
+    if (length_ <= 0.00001f) return;
+
+    const XMMATRIX segmentTransform_ =
+        CreateSegmentTransform(startPosition_, endPosition_, (std::max)(meshVFXThickness, 0.0001f));
+    if (applyTransform || applyCapsule)
+    {
+        owner_->transform->ApplyWorldMatrix(segmentTransform_);
+    }
+
+    if (applyParticleLine)
+    {
+        if (auto particle_ = owner_->GetComponent<ParticleComponent>())
+        {
+            particle_->SetEmitterLine(particleEmitterName, startPosition_, endPosition_);
+        }
+    }
+
+    if (applyCapsule)
+    {
+        if (auto capsule_ = owner_->GetComponent<CapsuleCollider>())
+        {
+            capsule_->radius = capsuleRadius / (std::max)(meshVFXThickness, 0.0001f);
+            capsule_->halfHeight = 0.5f;
+        }
+    }
+}
+
+void BoneSegmentAttachmentComponent::Gui()
+{
+    if (ImGui::InputText("Target GameObject", &targetGameObjectName))
+    {
+        targetModel.reset();
+        startNodeIndex = -1;
+        endNodeIndex = -1;
+    }
+    if (ImGui::InputText("Start Node", &startNodeName)) startNodeIndex = -1;
+    if (ImGui::InputText("End Node", &endNodeName)) endNodeIndex = -1;
+    ImGui::DragFloat3("Start Offset", &startOffset.x, 0.01f);
+    ImGui::DragFloat3("End Offset", &endOffset.x, 0.01f);
+
+    ImGui::Checkbox("Apply Segment Transform / Mesh VFX", &applyTransform);
+    ImGui::DragFloat("Mesh VFX Thickness", &meshVFXThickness, 0.01f, 0.0001f, 100.0f);
+
+    ImGui::Checkbox("Apply Particle Line", &applyParticleLine);
+    ImGui::InputText("Particle Emitter", &particleEmitterName);
+    ImGui::TextDisabled("Leave emitter empty to apply to every emitter.");
+
+    ImGui::Checkbox("Apply Capsule", &applyCapsule);
+    ImGui::DragFloat("Capsule Radius", &capsuleRadius, 0.01f, 0.0f, 100.0f);
+
+    if (ImGui::Button("Resolve Again"))
+    {
+        targetModel.reset();
+        startNodeIndex = -1;
+        endNodeIndex = -1;
+    }
+}
+
+void BoneSegmentAttachmentComponent::Serialize(nlohmann::json& json_) const
+{
+    json_["TargetGameObjectName"] = targetGameObjectName;
+    json_["StartNodeName"] = startNodeName;
+    json_["EndNodeName"] = endNodeName;
+    json_["ParticleEmitterName"] = particleEmitterName;
+    json_["StartOffset"] = { startOffset.x, startOffset.y, startOffset.z };
+    json_["EndOffset"] = { endOffset.x, endOffset.y, endOffset.z };
+    json_["MeshVFXThickness"] = meshVFXThickness;
+    json_["CapsuleRadius"] = capsuleRadius;
+    json_["ApplyTransform"] = applyTransform;
+    json_["ApplyParticleLine"] = applyParticleLine;
+    json_["ApplyCapsule"] = applyCapsule;
+}
+
+void BoneSegmentAttachmentComponent::Deserialize(const nlohmann::json& json_)
+{
+    targetGameObjectName = json_.value("TargetGameObjectName", std::string{});
+    startNodeName = json_.value("StartNodeName", std::string{});
+    endNodeName = json_.value("EndNodeName", std::string{});
+    particleEmitterName = json_.value("ParticleEmitterName", std::string{});
+    meshVFXThickness = json_.value("MeshVFXThickness", 1.0f);
+    capsuleRadius = json_.value("CapsuleRadius", 0.1f);
+    applyTransform = json_.value("ApplyTransform", true);
+    applyParticleLine = json_.value("ApplyParticleLine", true);
+    applyCapsule = json_.value("ApplyCapsule", true);
+
+    if (json_.contains("StartOffset") && json_["StartOffset"].size() >= 3)
+    {
+        startOffset = {
+            json_["StartOffset"][0].get<float>(),
+            json_["StartOffset"][1].get<float>(),
+            json_["StartOffset"][2].get<float>() };
+    }
+    if (json_.contains("EndOffset") && json_["EndOffset"].size() >= 3)
+    {
+        endOffset = {
+            json_["EndOffset"][0].get<float>(),
+            json_["EndOffset"][1].get<float>(),
+            json_["EndOffset"][2].get<float>() };
+    }
+
+    targetModel.reset();
+    startNodeIndex = -1;
+    endNodeIndex = -1;
+}

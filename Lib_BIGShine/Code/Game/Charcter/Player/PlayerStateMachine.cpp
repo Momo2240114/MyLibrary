@@ -1,16 +1,15 @@
 #include "PlayerStateMachine.h"
-#include "PlayerState.h"
 #include "PlayerControllerComponent.h"
 
-
-void PlayerStateMachine::ChangeState(PlayerControllerComponent& player_, PLAYER_STATE nextStateType_)
+void PlayerState::Bind(PlayerControllerComponent& player_)
 {
-    if (currentStateType == nextStateType_)
-    {
-        return;
-    }
+    playerController = &player_;
+    owner = player_.GetGameObject();
+}
 
-    auto it_ = states.find(nextStateType_);
+void PlayerStateMachine::ChangeState(PlayerControllerComponent& player_, PLAYER_ACTION nextAction_)
+{
+    auto it_ = states.find(nextAction_);
     if (it_ == states.end())
     {
         return;
@@ -18,19 +17,21 @@ void PlayerStateMachine::ChangeState(PlayerControllerComponent& player_, PLAYER_
 
     if (currentState)
     {
-        currentState->Exit(player_);
+        currentState->Exit();
     }
 
     currentState = it_->second.get();
-    currentStateType = nextStateType_;
-
-    currentState->Enter(player_);
+    currentAction = nextAction_;
+    currentState->Bind(player_);
+    currentState->Enter();
 }
 
-void PlayerStateMachine::Update(PlayerControllerComponent& player_, float dt_)
+void PlayerStateMachine::Update(float dt_)
 {
     if (currentState)
-        currentState->Update(player_, dt_);
+    {
+        currentState->Execute(dt_);
+    }
 }
 
 const char* PlayerStateMachine::GetCurrentStateName() const

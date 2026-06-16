@@ -1,66 +1,67 @@
-ï»¿#pragma once
+#pragma once
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <utility>
 #include "NodeBase.h"
 
 namespace NodeSystem {
 
-    /// ãƒãƒ¼ãƒ‰é–“ã‚’æ¥ç¶šã™ã‚‹ãƒªãƒ³ã‚¯æƒ…å ±ã€‚
-    /// å‡ºåŠ›ãƒ”ãƒ³ã‹ã‚‰å…¥åŠ›ãƒ”ãƒ³ã¸ã®ä¸€æ–¹å‘ã®ãƒ‡ãƒ¼ã‚¿ãƒ•ãƒ­ãƒ¼ã‚’è¡¨ã™ã€‚
+    /// ƒm[ƒhŠÔ‚ğÚ‘±‚·‚éƒŠƒ“ƒNî•ñB
+    /// o—Íƒsƒ“‚©‚ç“ü—Íƒsƒ“‚Ö‚Ìˆê•ûŒü‚Ìƒf[ƒ^ƒtƒ[‚ğ•\‚·B
     struct Link {
-        uintptr_t ID;
-        uintptr_t StartPinID; // å‡ºåŠ›ãƒ”ãƒ³
-        uintptr_t EndPinID;   // å…¥åŠ›ãƒ”ãƒ³
+        uintptr_t id;
+        uintptr_t startPinId;
+        uintptr_t endPinId;
     };
 
-    /// ãƒãƒ¼ãƒ‰ã®æ‰€æœ‰ã€æ¥ç¶šé–¢ä¿‚ã€è©•ä¾¡é †åºã‚’ä¸€å…ƒç®¡ç†ã™ã‚‹å®Ÿè¡Œã‚°ãƒ©ãƒ•ã€‚
-    /// ã‚°ãƒ©ãƒ•æ§‹é€ ãŒå¤‰æ›´ã•ã‚ŒãŸå ´åˆã®ã¿è©•ä¾¡é †åºã‚’å†æ§‹ç¯‰ã—ã€é€šå¸¸æ›´æ–°æ™‚ã®å‡¦ç†è² è·ã‚’æŠ‘ãˆã‚‹ã€‚
+    /// ƒm[ƒh‚ÌŠ—LAÚ‘±ŠÖŒWA•]‰¿‡˜‚ğˆêŒ³ŠÇ—‚·‚éÀsƒOƒ‰ƒtB
+    /// ƒOƒ‰ƒt\‘¢‚ª•ÏX‚³‚ê‚½ê‡‚Ì‚İ•]‰¿‡˜‚ğÄ\’z‚µA’ÊíXV‚Ìˆ—•‰‰×‚ğ—}‚¦‚éB
     class NodeGraph {
     public:
-        NodeGraph() : m_NextID(1) {} // 0ã‚’ç„¡åŠ¹IDã¨ã—ã¦æ‰±ãˆã‚‹ã‚ˆã†ã€1ã‹ã‚‰æ¡ç•ªã™ã‚‹
+        NodeGraph() : nextId(1) {} // 0‚ğ–³ŒøID‚Æ‚µ‚Äˆµ‚¦‚é‚æ‚¤A1‚©‚çÌ”Ô‚·‚é
 
-        /// ãƒãƒ¼ãƒ‰ã€ãƒ”ãƒ³ã€ãƒªãƒ³ã‚¯ã§å…±æœ‰ã§ãã‚‹ä¸€æ„ãªIDã‚’ç™ºè¡Œã™ã‚‹ã€‚
-        uintptr_t GenerateUniqueID() {
-            return m_NextID++;
+        /// ƒm[ƒhAƒsƒ“AƒŠƒ“ƒN‚Å‹¤—L‚Å‚«‚éˆêˆÓ‚ÈID‚ğ”­s‚·‚éB
+        uintptr_t GenerateUniqueId() {
+            return nextId++;
         }
 
-        /// æ¥ç¶šã•ã‚ŒãŸãƒ”ãƒ³ã¸å€¤ã‚’è»¢é€ã—ãŸå¾Œã€è©•ä¾¡é †åºã«å¾“ã£ã¦å…¨ãƒãƒ¼ãƒ‰ã‚’å®Ÿè¡Œã™ã‚‹ã€‚
+        /// Ú‘±‚³‚ê‚½ƒsƒ“‚Ö’l‚ğ“]‘—‚µ‚½ŒãA•]‰¿‡˜‚É]‚Á‚Ä‘Sƒm[ƒh‚ğÀs‚·‚éB
         void Update();
 
-        /// ç¾åœ¨ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹ãƒãƒ¼ãƒ‰ã‹ã‚‰è©•ä¾¡é †åºã‚’å†æ§‹ç¯‰ã™ã‚‹ã€‚
+        /// Œ»İ“o˜^‚³‚ê‚Ä‚¢‚éƒm[ƒh‚©‚ç•]‰¿‡˜‚ğÄ\’z‚·‚éB
         void Rebuild();
 
-        /// æŒ‡å®šå‹ã®ãƒãƒ¼ãƒ‰ã‚’ç”Ÿæˆã—ã¦ã‚°ãƒ©ãƒ•ã¸è¿½åŠ ã™ã‚‹ã€‚
-        /// æˆ»ã‚Šå€¤ã®ãƒã‚¤ãƒ³ã‚¿ã®æ‰€æœ‰æ¨©ã¯NodeGraphãŒä¿æŒã™ã‚‹ã€‚
+        /// w’èŒ^‚Ìƒm[ƒh‚ğ¶¬‚µ‚ÄƒOƒ‰ƒt‚Ö’Ç‰Á‚·‚éB
+        /// –ß‚è’l‚Ìƒ|ƒCƒ“ƒ^‚ÌŠ—LŒ ‚ÍNodeGraph‚ª•Û‚·‚éB
         template<typename T, typename... Args>
-        T* CreateNode(uintptr_t id, Args&&... args) {
-            auto node = std::make_unique<T>(id, std::forward<Args>(args)...);
-            auto ptr = node.get();
-            m_Nodes.push_back(std::move(node));
-            m_NeedsRebuild = true;
-            return ptr;
+        T* CreateNode(uintptr_t id_, Args&&... args_) {
+            auto node_ = std::make_unique<T>(id_, std::forward<Args>(args_)...);
+            auto pointer_ = node_.get();
+            nodes.push_back(std::move(node_));
+            needsRebuild = true;
+            return pointer_;
         }
 
-        void AddLink(uintptr_t id, uintptr_t startPinID, uintptr_t endPinID);
-        void RemoveLink(uintptr_t linkID);
+        void AddLink(uintptr_t id_, uintptr_t startPinId_, uintptr_t endPinId_);
+        void RemoveLink(uintptr_t linkId_);
 
-        // --- ã‚¨ãƒ‡ã‚£ã‚¿ç”¨ã‚¢ã‚¯ã‚»ã‚µ ---
-        const std::vector<std::unique_ptr<Node>>& GetNodes() const { return m_Nodes; }
-        const std::vector<Link>& GetLinks() const { return m_Links; }
+        // --- ƒGƒfƒBƒ^—pƒAƒNƒZƒT ---
+        const std::vector<std::unique_ptr<Node>>& GetNodes() const { return nodes; }
+        const std::vector<Link>& GetLinks() const { return links; }
 
     private:
-        // ãƒãƒ¼ãƒ‰æœ¬ä½“ã¯ã‚°ãƒ©ãƒ•ãŒæ‰€æœ‰ã—ã€ãƒªãƒ³ã‚¯ã¯IDã«ã‚ˆã£ã¦ãƒ”ãƒ³ã‚’å‚ç…§ã™ã‚‹ã€‚
-        std::vector<std::unique_ptr<Node>> m_Nodes;
-        std::vector<Link> m_Links;
-        uintptr_t m_NextID;
+        // ƒm[ƒh–{‘Ì‚ÍƒOƒ‰ƒt‚ªŠ—L‚µAƒŠƒ“ƒN‚ÍID‚É‚æ‚Á‚Äƒsƒ“‚ğQÆ‚·‚éB
+        std::vector<std::unique_ptr<Node>> nodes;
+        std::vector<Link> links;
+        uintptr_t nextId;
 
-        // Updateæ™‚ã«ä½¿ç”¨ã™ã‚‹è©•ä¾¡é †åºã€‚æ§‹é€ å¤‰æ›´æ™‚ã«ã®ã¿å†æ§‹ç¯‰ã™ã‚‹ã€‚
-        std::vector<Node*> m_EvaluationOrder;
-        bool m_NeedsRebuild = true;
+        // Update‚Ég—p‚·‚é•]‰¿‡˜B\‘¢•ÏX‚É‚Ì‚İÄ\’z‚·‚éB
+        std::vector<Node*> evaluationOrder;
+        bool needsRebuild = true;
 
-        // IDå‚ç…§ã‚’å®Ÿä½“ã¸è§£æ±ºã™ã‚‹å†…éƒ¨æ¤œç´¢é–¢æ•°ã€‚
-        Pin* FindPin(uintptr_t pinID);
-        Node* FindNodeByPin(uintptr_t pinID);
+        // IDQÆ‚ğÀ‘Ì‚Ö‰ğŒˆ‚·‚é“à•”ŒŸõŠÖ”B
+        Pin* FindPin(uintptr_t pinId_);
+        Node* FindNodeByPin(uintptr_t pinId_);
     };
 }

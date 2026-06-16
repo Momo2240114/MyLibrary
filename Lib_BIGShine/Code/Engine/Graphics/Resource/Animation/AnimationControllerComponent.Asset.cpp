@@ -1,7 +1,7 @@
-ï»¿// Serialize / Asset Save Load / JSON å¤‰æ›
-// AnimationControllerComponent ã®å®Ÿè£…ã‚’å½¹å‰²ã”ã¨ã«åˆ†ã‘ãŸãƒ•ã‚¡ã‚¤ãƒ«ã§ã™ã€‚
-// ã‚¯ãƒ©ã‚¹è‡ªä½“ã¯åˆ†é›¢ã›ãšã€åŒã˜ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°å®šç¾©ã ã‘ã‚’åˆ¥ cpp ã«ç½®ã„ã¦ã„ã¾ã™ã€‚
-// ãã®ãŸã‚æ—¢å­˜ã®å‚ç…§é–¢ä¿‚ã‚„ public/private ã®æ‰±ã„ã¯ãã®ã¾ã¾ã§ã™ã€‚
+// Serialize / Asset Save Load / JSON •ÏŠ·
+// AnimationControllerComponent ‚ÌÀ‘•‚ğ–ğŠ„‚²‚Æ‚É•ª‚¯‚½ƒtƒ@ƒCƒ‹‚Å‚·B
+// ƒNƒ‰ƒX©‘Ì‚Í•ª—£‚¹‚¸A“¯‚¶ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”’è‹`‚¾‚¯‚ğ•Ê cpp ‚É’u‚¢‚Ä‚¢‚Ü‚·B
+// ‚»‚Ì‚½‚ßŠù‘¶‚ÌQÆŠÖŒW‚â public/private ‚Ìˆµ‚¢‚Í‚»‚Ì‚Ü‚Ü‚Å‚·B
 
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"
@@ -22,7 +22,7 @@ namespace ed = ax::NodeEditor;
 
 namespace
 {
-    // æ—¢å­˜ã®ä¿å­˜å…ˆã€‚æ—¢å­˜ã‚¢ã‚»ãƒƒãƒˆã¨ã®äº’æ›æ€§ã‚’å„ªå…ˆã™ã‚‹ãŸã‚ãƒ‘ã‚¹ã¯æ®ãˆç½®ãã€‚
+    // Šù‘¶‚Ì•Û‘¶æBŠù‘¶ƒAƒZƒbƒg‚Æ‚ÌŒİŠ·«‚ğ—Dæ‚·‚é‚½‚ßƒpƒX‚Í˜‚¦’u‚«B
     const std::string ASSET_DIR = "Data/Animation/StateData/";
     const std::string GRAPH_ASSET_DIR = "Data/Animation/GraphData/";
     const std::string STATE_ASSET_DIR = "Data/Animation/StateData/";
@@ -62,29 +62,29 @@ namespace
     }
 }
 
-void AnimationControllerComponent::Serialize(nlohmann::json& j) const
+void AnimationControllerComponent::Serialize(nlohmann::json& json_) const
 {
-    j["AssetPath"] = m_assetFilePath;
-    j["GraphAssetPath"] = m_graphAssetFilePath;
+    json_["AssetPath"] = assetFilePath;
+    json_["GraphAssetPath"] = graphAssetFilePath;
 }
 
-void AnimationControllerComponent::Deserialize(const nlohmann::json& j)
+void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
 {
-    m_assetFilePath = j.value("AssetPath", "");
-    m_graphAssetFilePath = j.value("GraphAssetPath", "");
+    assetFilePath = json_.value("AssetPath", "");
+    graphAssetFilePath = json_.value("GraphAssetPath", "");
 
-    if (!m_assetFilePath.empty())
+    if (!assetFilePath.empty())
     {
-        LoadAsset(m_assetFilePath);
+        LoadAsset(assetFilePath);
     }
 
     graphNodes.clear();
     graphTransitions.clear();
 
-    if (!m_graphAssetFilePath.empty())
+    if (!graphAssetFilePath.empty())
     {
-        m_pendingGraphAssetPath = m_graphAssetFilePath;
-        m_pendingGraphAssetLoad = true;
+        pendingGraphAssetPath = graphAssetFilePath;
+        pendingGraphAssetLoad = true;
     }
     else
     {
@@ -157,17 +157,17 @@ bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 }
 
 
-void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName)
+void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
 {
-    if (assetName.empty()) return;
+    if (assetName_.empty()) return;
 
     if (!std::filesystem::exists(GRAPH_ASSET_DIR)) {
         std::filesystem::create_directories(GRAPH_ASSET_DIR);
     }
 
     nlohmann::json j;
-    j["AssetPath"] = m_assetFilePath;
-    j["GraphAssetPath"] = assetName;
+    j["AssetPath"] = assetFilePath;
+    j["GraphAssetPath"] = assetName_;
 
     nlohmann::json nodesArray = nlohmann::json::array();
     for (auto& node : graphNodes)
@@ -183,7 +183,7 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName)
 
         ImVec2 pos = node.pos;
         const std::string nodeScope = node.scopeId.empty() ? std::string("Root") : node.scopeId;
-        const std::string currentScope = m_currentGraphScopeId.empty() ? std::string("Root") : m_currentGraphScopeId;
+        const std::string currentScope = currentGraphScopeId.empty() ? std::string("Root") : currentGraphScopeId;
         if (nodeEditorContext && nodeScope == currentScope)
         {
             ed::SetCurrentEditor(nodeEditorContext);
@@ -224,31 +224,31 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName)
     }
     j["GraphTransitions"] = transArray;
 
-    std::ofstream file(GetFullGraphAssetPath(assetName));
+    std::ofstream file(GetFullGraphAssetPath(assetName_));
     if (file.is_open()) {
         file << j.dump(4);
-        m_graphAssetFilePath = assetName;
+        graphAssetFilePath = assetName_;
     }
 }
-void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName)
+void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
 {
-    if (assetName.empty()) return;
+    if (assetName_.empty()) return;
 
-    std::ifstream file(GetFullGraphAssetPath(assetName));
+    std::ifstream file(GetFullGraphAssetPath(assetName_));
     if (!file.is_open()) return;
 
     nlohmann::json j;
     file >> j;
 
-    m_graphAssetFilePath = assetName;
-    m_currentGraphScopeId = "Root";
-    m_graphScopeStack.clear();
+    graphAssetFilePath = assetName_;
+    currentGraphScopeId = "Root";
+    graphScopeStack.clear();
 
     std::string stateAssetPath = j.value("AssetPath", "");
     if (!stateAssetPath.empty())
     {
-        m_assetFilePath = stateAssetPath;
-        LoadAsset(m_assetFilePath);
+        assetFilePath = stateAssetPath;
+        LoadAsset(assetFilePath);
     }
 
     graphNodes.clear();
@@ -261,7 +261,7 @@ void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName)
             uintptr_t id = src.value(key, static_cast<uintptr_t>(0));
             if (id == 0 && !allowZero)
             {
-                id = GetNextID();
+                id = GetNextId();
             }
 
             if (id > maxId)
@@ -345,15 +345,15 @@ void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName)
         }
     }
 
-    SetIDCounterFloor(maxId);
+    SetIdCounterFloor(maxId);
     EnsureSpecialGraphNodes();
 
-    m_needsPositionRestore = true;
+    needsPositionRestore = true;
 }
 
-void AnimationControllerComponent::LoadAsset(const std::string& assetName)
+void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
 {
-    std::string fullPath = GetFullAssetPath(assetName);
+    std::string fullPath = GetFullAssetPath(assetName_);
 
     std::ifstream file(fullPath);
     if (!file.is_open()) return;
@@ -369,23 +369,23 @@ void AnimationControllerComponent::LoadAsset(const std::string& assetName)
         states[s.name] = std::make_unique<AnimState>(s);
     }
 
-    m_assetFilePath = assetName;
+    assetFilePath = assetName_;
 
-    if (!asset.defaultStateName.empty() && states.count(asset.defaultStateName)) 
+    if (!asset.defaultStateName.empty() && states.count(asset.defaultStateName))
     {
         ChangeState(asset.defaultStateName, 0.0f);
     }
 }
 
 
-void AnimationControllerComponent::SaveAsset(const std::string& assetName)
+void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
 {
-    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒå­˜åœ¨ã—ãªã„å ´åˆã¯ä½œæˆã™ã‚‹
+    // ƒfƒBƒŒƒNƒgƒŠ‚ª‘¶İ‚µ‚È‚¢ê‡‚Íì¬‚·‚é
     if (!std::filesystem::exists(ASSET_DIR)) {
         std::filesystem::create_directories(ASSET_DIR);
     }
 
-    std::string fullPath = GetFullAssetPath(assetName);
+    std::string fullPath = GetFullAssetPath(assetName_);
 
     AnimationDataAsset asset;
     for (auto& [name, ptr] : states) {
@@ -399,7 +399,7 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName)
     std::ofstream file(fullPath);
     if (file.is_open()) {
         file << j.dump(4);
-        m_assetFilePath = assetName; // ã‚¨ãƒ‡ã‚£ã‚¿ä¸Šã§ã®è¡¨ç¤ºç”¨ã«åå‰ã‚’ä¿å­˜
+        assetFilePath = assetName_; // ƒGƒfƒBƒ^ã‚Å‚Ì•\¦—p‚É–¼‘O‚ğ•Û‘¶
     }
 
 }
@@ -411,7 +411,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName)
             {"endTime", e.endTime},
             {"actionStart", e.startAction},
             {"actionUpdate", e.updateAction},
-            {"actionEnd", e.endAction}
+            {"actionEnd", e.endAction},
+            {"callEndOnStateExit", e.callEndOnStateExit}
         };
     }
 
@@ -422,7 +423,9 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName)
         e.startAction = j.value("actionStart", "");
         e.updateAction = j.value("actionUpdate", "");
         e.endAction = j.value("actionEnd", "");
+        e.callEndOnStateExit = j.value("callEndOnStateExit", false);
         e.isFired = false;
+        e.isEndFired = false;
     }
 
 
@@ -431,7 +434,7 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName)
         {
             {"sequencer", s.sequencerDataName},
             {"name", s.name},
-            {"type", (int)s.type}, // enumã‚’intã¨ã—ã¦ä¿å­˜
+            {"type", (int)s.type}, // enum‚ğint‚Æ‚µ‚Ä•Û‘¶
             {"speed", s.playbackSpeed},
             {"loop", s.isLoop},
             {"rootMotion", s.rootMotion},
@@ -439,13 +442,13 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName)
             {"rootMotionScaleCurveName", s.rootMotionScaleCurveName},
             {"speedCurveName", s.speedCurveName},
             {"events", s.events},
-            // Singleç”¨
+            // Single—p
             {"animationIndex", s.animationIndex},
-            // Blend1Dç”¨
+            // Blend1D—p
             {"animIndexA", s.animIndexA},
             {"animIndexB", s.animIndexB},
             {"blendParamName", s.blendParamName},
-            // Customç”¨ ã€è¿½åŠ ã€‘
+            // Custom—p y’Ç‰Áz
             {"customAnimIndex", s.customAnimIndex},
         };
     }
@@ -461,15 +464,15 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.rootMotionScaleCurveName = j.value("rootMotionScaleCurveName", "");
     s.speedCurveName = j.value("speedCurveName", "");
 
-    // Singleç”¨å¾©å…ƒ
+    // Single—p•œŒ³
     s.animationIndex = j.value("animationIndex", -1);
 
-    // Blend1Dç”¨å¾©å…ƒ
+    // Blend1D—p•œŒ³
     s.animIndexA = j.value("animIndexA", -1);
     s.animIndexB = j.value("animIndexB", -1);
     s.blendParamName = j.value("blendParamName", "BlendAlpha");
 
-    // Customç”¨ ã€è¿½åŠ ã€‘
+    // Custom—p y’Ç‰Áz
     s.customAnimIndex = j.value("customAnimIndex", -1);
     if (j.contains("rootMotion") && j["rootMotion"].is_object())
     {

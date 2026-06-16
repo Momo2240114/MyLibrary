@@ -6,7 +6,7 @@ class InspectorWindow : public EditorWindow {
 public:
     InspectorWindow(GameObjectManager* manager) : EditorWindow("InspectorWindow", manager) 
     {
-        defaultWindowSize = ImVec2(700.0f, 800.0f);
+        defaultWindowSize = ImVec2(1200.0f, 800.0f);
     }
 
     void Draw() override;

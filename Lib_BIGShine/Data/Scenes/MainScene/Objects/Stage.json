@@ -10,21 +10,23 @@
                     1.0
                 ],
                 "GravityScale": 1.0,
-                "HalfHeight": 1.3300000429153442,
+                "HalfHeight": 0.5,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
-                    20.170000076293945,
+                    21.139999389648438,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
                 "Radius": 80.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
                 "Segments": 16,
                 "ShapeRenderFlg": true,
                 "UseGravity": false,
-                "UsePhysicsResponse": true
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0
             },
             "Enabled": true,
             "TypeName": "CylinderCollider"
@@ -63,6 +65,134 @@
             },
             "Enabled": true,
             "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "IsPlaying": true,
+                "Parts": [
+                    {
+                        "Alpha": 1.0,
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BaseTexturePath": "",
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVSpeed": [
+                            0.0,
+                            -0.5
+                        ],
+                        "BlendMode": 0,
+                        "Color": [
+                            0.47058823704719543,
+                            0.47058823704719543,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "IntersectionEdgeStrength": 8.300000190734863,
+                        "IntersectionEdgeWidth": 0.04769999906420708,
+                        "Loop": true,
+                        "MaskDistortionOpacity": 0.5,
+                        "MaskDistortionStrength": 8.0,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Trail.PNG"
+                            }
+                        ],
+                        "MaskTexturePath": "",
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVSpeed": [
+                            0.0,
+                            0.20000000298023224
+                        ],
+                        "MeshIndex": 0,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "Data/Model/VFX/Cylinder_Cavity.gltf",
+                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [],
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVSpeed": [
+                            0.20000000298023224,
+                            -0.800000011920929
+                        ],
+                        "NormalStrength": 1.0800000429153442,
+                        "NormalTexturePath": "",
+                        "Position": [
+                            0.0,
+                            22.510000228881836,
+                            0.0
+                        ],
+                        "RenderEnabled": true,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            50.0,
+                            50.0,
+                            50.0
+                        ],
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": true,
+                        "UseMask": true,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": true,
+                        "UseMaterialNormalTexture": true,
+                        "UseNoise": true,
+                        "UseNormal": true,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "MeshVFXComponent"
         }
     ],
     "Layer": 0,
@@ -70,13 +200,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            0.0,
-            -20.0,
-            0.0
+            1.9705034901562613e-06,
+            -21.399999618530273,
+            -9.673185559222475e-06
         ],
         "Rot": [
             0.0,
-            275.0,
+            0.0,
             0.0
         ],
         "Scale": [

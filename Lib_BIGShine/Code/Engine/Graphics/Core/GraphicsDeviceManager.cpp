@@ -16,18 +16,18 @@ struct SkyBoxVertex
 
 bool GraphicsDeviceManager::LoadIBLTextures()
 {
-    // ---- パスをプロジェクトに合わせて書き換えてください ----
-    const wchar_t* diffusePath = L"Data/Texture/IBL/diffuse_iem.dds";
-    const wchar_t* specularPath = L"Data/Texture/IBL/skybox_highres.dds";
-    const wchar_t* lutPath = L"Data/Texture/IBL/lut_ggx.dds";
+    // ---- プロジェクトに合わせて書き換える ----
+    const wchar_t* diffusePath_ = L"Data/Texture/IBL/diffuse_iem.dds";
+    const wchar_t* specularPath_ = L"Data/Texture/IBL/skybox_highres.dds";
+    const wchar_t* lutPath_ = L"Data/Texture/IBL/lut_ggx.dds";
     // ---------------------------------------------------------
 
-    D3D11_TEXTURE2D_DESC dummy{};
+    D3D11_TEXTURE2D_DESC textureDescription_{};
 
     // 拡散反射 IEM（IrradianceMap）
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
-        device.Get(), diffusePath,
-        iblDiffuseIemSRV.GetAddressOf(), &dummy)))
+        device.Get(), diffusePath_,
+        iblDiffuseIemSRV.GetAddressOf(), &textureDescription_)))
     {
         OutputDebugStringW(L"[IBL] Failed to load diffuse_iem.dds\n");
         return false;
@@ -35,8 +35,8 @@ bool GraphicsDeviceManager::LoadIBLTextures()
 
     // 鏡面反射 PMREM（RadianceMap）
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
-        device.Get(), specularPath,
-        iblSpecularPmremSRV.GetAddressOf(), &dummy)))
+        device.Get(), specularPath_,
+        iblSpecularPmremSRV.GetAddressOf(), &textureDescription_)))
     {
         OutputDebugStringW(L"[IBL] Failed to load specular_pmrem.dds\n");
         return false;
@@ -44,8 +44,8 @@ bool GraphicsDeviceManager::LoadIBLTextures()
 
     // GGX BRDF LUT
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
-        device.Get(), lutPath,
-        iblLutGgxSRV.GetAddressOf(), &dummy)))
+        device.Get(), lutPath_,
+        iblLutGgxSRV.GetAddressOf(), &textureDescription_)))
     {
         OutputDebugStringW(L"[IBL] Failed to load lut_ggx.dds\n");
         return false;
@@ -60,7 +60,7 @@ bool GraphicsDeviceManager::LoadIBLTextures()
 bool GraphicsDeviceManager::InitializeSkyBox()
 {
     // スプライトと同じ入力レイアウト（Position / Color / TexCoord）
-    D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
+    D3D11_INPUT_ELEMENT_DESC inputElementDescription_[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -71,14 +71,14 @@ bool GraphicsDeviceManager::InitializeSkyBox()
     CPUResourceLoader::CreateVSFromCSO(device.Get(), "Shader/SkyBoxVS.cso",
         skyBoxVertexShader.GetAddressOf(),
         skyBoxInputLayout.GetAddressOf(),
-        inputElementDesc, _countof(inputElementDesc));
+        inputElementDescription_, _countof(inputElementDescription_));
 
     CPUResourceLoader::CreatePSFromCSO(device.Get(), "Shader/SkyBoxPS.cso",
         skyBoxPixelShader.GetAddressOf());
     // ----------------------------------------------------------
 
 
-    SkyBoxVertex vertices[4] =
+    SkyBoxVertex vertices_[4] =
     {
         // position (NDC)         color (白・不透明)              texcoord
         { { -1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 0.0f } }, // 左上
@@ -87,15 +87,15 @@ bool GraphicsDeviceManager::InitializeSkyBox()
         { {  1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 1.0f } }, // 右下
     };
 
-    D3D11_BUFFER_DESC vbDesc = {};
-    vbDesc.ByteWidth = sizeof(vertices);
-    vbDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_BUFFER_DESC vertexBufferDescription_ = {};
+    vertexBufferDescription_.ByteWidth = sizeof(vertices_);
+    vertexBufferDescription_.Usage = D3D11_USAGE_IMMUTABLE;
+    vertexBufferDescription_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-    D3D11_SUBRESOURCE_DATA vbData = {};
-    vbData.pSysMem = vertices;
+    D3D11_SUBRESOURCE_DATA vertexBufferData_ = {};
+    vertexBufferData_.pSysMem = vertices_;
 
-    if (FAILED(device->CreateBuffer(&vbDesc, &vbData,
+    if (FAILED(device->CreateBuffer(&vertexBufferDescription_, &vertexBufferData_,
         skyBoxVertexBuffer.GetAddressOf())))
     {
         OutputDebugStringW(L"[SkyBox] Failed to create vertex buffer\n");
@@ -103,23 +103,23 @@ bool GraphicsDeviceManager::InitializeSkyBox()
     }
 
     // インデックスバッファ（三角形 2 枚 = 6 インデックス）
-    UINT indices[6] = { 0, 1, 2, 1, 3, 2 };
+    UINT indices_[6] = { 0, 1, 2, 1, 3, 2 };
 
-    D3D11_BUFFER_DESC ibDesc = {};
-    ibDesc.ByteWidth = sizeof(indices);
-    ibDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    D3D11_BUFFER_DESC indexBufferDescription_ = {};
+    indexBufferDescription_.ByteWidth = sizeof(indices_);
+    indexBufferDescription_.Usage = D3D11_USAGE_IMMUTABLE;
+    indexBufferDescription_.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
-    D3D11_DEPTH_STENCIL_DESC dsDesc{};
-    dsDesc.DepthEnable = TRUE;
-    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-    device->CreateDepthStencilState(&dsDesc, skyBoxDepthStencilState.GetAddressOf());
+    D3D11_DEPTH_STENCIL_DESC depthStencilDescription_{};
+    depthStencilDescription_.DepthEnable = TRUE;
+    depthStencilDescription_.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    depthStencilDescription_.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+    device->CreateDepthStencilState(&depthStencilDescription_, skyBoxDepthStencilState.GetAddressOf());
 
-    D3D11_SUBRESOURCE_DATA ibData = {};
-    ibData.pSysMem = indices;
+    D3D11_SUBRESOURCE_DATA indexBufferData_ = {};
+    indexBufferData_.pSysMem = indices_;
 
-    if (FAILED(device->CreateBuffer(&ibDesc, &ibData,
+    if (FAILED(device->CreateBuffer(&indexBufferDescription_, &indexBufferData_,
         skyBoxIndexBuffer.GetAddressOf())))
     {
         OutputDebugStringW(L"[SkyBox] Failed to create index buffer\n");
@@ -138,7 +138,7 @@ bool GraphicsDeviceManager::InitializeSkyBox()
 //@param fullscreen_ フルスクリーンモードかどうか
 //@return 初期化成功で true、失敗で false
 //---
-bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool fullscreen_)
+bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int height_, bool fullscreen_)
 {
     HRESULT hr_ = S_OK;
     UINT createDeviceFlags_ = 0;
@@ -149,23 +149,23 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
     width = width_;
     height = height_;
     fullscreen = fullscreen_;
-    hWnd = hWnd_;
+    windowHandle = windowHandle_;
 
-    // TODO: デバイスとスワップチェーンを作成
-    if (!CreateDeviceAndSwapChain(hWnd_))
+    // デバイスとスワップチェーンを作成
+    if (!CreateDeviceAndSwapChain(windowHandle_))
     {
         _ASSERT_EXPR(false, L"Failed: CreateDeviceAndSwapChain");
         return false;
     }
 
-    // TODO: バックバッファRTVを作成
+    // バックバッファRTVを作成
     if (!CreateRenderTarget())
     {
         _ASSERT_EXPR(false, L"Failed: CreateRenderTarget");
         return false;
     }
 
-    // TODO: 深度ステンシル作成
+    // 深度ステンシル作成
     if (!CreateDepthStencil())
     {
         _ASSERT_EXPR(false, L"Failed: CreateDepthStencil");
@@ -173,16 +173,16 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
     }
 
 
-    //TODO: ビューポート設定
-    viewPort.TopLeftX = 0;
-    viewPort.TopLeftY = 0;
-    viewPort.Width = width;
-    viewPort.Height = height;
-    viewPort.MaxDepth = 1.0f;
-    viewPort.MinDepth = 0.0f;
+    // ビューポート設定
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.Width = width;
+    viewport.Height = height;
+    viewport.MaxDepth = 1.0f;
+    viewport.MinDepth = 0.0f;
 
-    //TODO: OMSetRenderTargets でRTVとDSVをセット
-    immediateContext->RSSetViewports(1, &viewPort);
+    //OMSetRenderTargets でRTVとDSVをセット
+    immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
 
@@ -205,7 +205,7 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
 
 
 
-    //TODO: 成功したら true を返す
+    //成功したら true を返す
 
     return true;
 }
@@ -216,7 +216,7 @@ bool GraphicsDeviceManager::Initialize(HWND hWnd_, int width_, int height_, bool
  */
 void GraphicsDeviceManager::Shutdown()
 {
-    // TODO: GPU待機（context->ClearState / Flush）
+    // GPU待機（context->ClearState / Flush）
     if (immediateContext)
     {
         immediateContext->ClearState();
@@ -273,8 +273,8 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     gBufferEmissiveSRV.Reset();
 
     // swapChain->ResizeBuffers() を呼び出し
-    HRESULT hr = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
-    _ASSERT_EXPR(SUCCEEDED(hr), L"ResizeBuffers Failed");
+    HRESULT result_ = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+    _ASSERT_EXPR(SUCCEEDED(result_), L"ResizeBuffers Failed");
 
     // リソースの再作成
     CreateRenderTarget();
@@ -284,9 +284,9 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     postRenderSystem.Initialize(device.Get(), width, height); // ポストプロセスも再初期化
 
     // ビューポートの設定
-    viewPort.Width = static_cast<float>(width);
-    viewPort.Height = static_cast<float>(height);
-    immediateContext->RSSetViewports(1, &viewPort);
+    viewport.Width = static_cast<float>(width);
+    viewport.Height = static_cast<float>(height);
+    immediateContext->RSSetViewports(1, &viewport);
 }
 
 /**
@@ -310,11 +310,11 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
 
     // --- 変更点：描画先を「シーンバッファ」に固定する ---
     // これにより、GameObjectManagerの通常の描画がすべてHDRテクスチャに描き込まれます
-    ID3D11RenderTargetView* rtvs[] = { sceneRTV.Get(), sceneNormalRTV.Get() };
-    immediateContext->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
+    ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneNormalRTV.Get() };
+    immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
 
     // ビューポートの設定
-    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->RSSetViewports(1, &viewport);
 }
 
 /**
@@ -322,42 +322,42 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
  */
 void GraphicsDeviceManager::EndFrame()
 {
-    // TODO: swapChain->Present() を呼び出し
+    // swapChain->Present() を呼び出し
     swapChain->Present(1, 0);
 }
 
 void GraphicsDeviceManager::SetParticleRenderTarget()
 {
-    ID3D11RenderTargetView* rtv = sceneRTV.Get();
+    ID3D11RenderTargetView* renderTarget_ = sceneRTV.Get();
     // ターゲットを1枚（sceneRTVのみ）としてセット
-    immediateContext->OMSetRenderTargets(1, &rtv, depthStencilView.Get());
+    immediateContext->OMSetRenderTargets(1, &renderTarget_, depthStencilView.Get());
 }
 
 void GraphicsDeviceManager::SetBackBufferRenderTarget()
 {
-    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 }
 
 void GraphicsDeviceManager::SetSceneRenderTarget()
 {
     // 描画先を「シーンカラー」と「シーン法線」の2枚に切り替える
-    ID3D11RenderTargetView* rtvs[] = {
+    ID3D11RenderTargetView* renderTargets_[] = {
         sceneRTV.Get(),
         sceneNormalRTV.Get()
     };
 
     // 第一引数を 2 に変更
-    immediateContext->OMSetRenderTargets(2, rtvs, depthStencilView.Get());
+    immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
 
-    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->RSSetViewports(1, &viewport);
 }
 
 void GraphicsDeviceManager::SetSceneColorRenderTarget()
 {
     ID3D11RenderTargetView* rtv_ = sceneRTV.Get();
     immediateContext->OMSetRenderTargets(1, &rtv_, nullptr);
-    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->RSSetViewports(1, &viewport);
 }
 
 void GraphicsDeviceManager::SetGBufferRenderTargets()
@@ -370,12 +370,12 @@ void GraphicsDeviceManager::SetGBufferRenderTargets()
         gBufferEmissiveRTV.Get(),
     };
     immediateContext->OMSetRenderTargets(_countof(rtvs_), rtvs_, depthStencilView.Get());
-    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->RSSetViewports(1, &viewport);
 }
 
 void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
-    auto dsv = depthStencilView.Get();
-    immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), dsv);
+    auto depthStencil_ = depthStencilView.Get();
+    immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencil_);
 
     postRenderSystem.GetBloomSystem().Execute(rc, sceneSRV.Get(), renderTargetView.Get(), bloomParams, filterParams);
 }
@@ -383,45 +383,45 @@ void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
 
 void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
 {
-    ID3D11DeviceContext* dc = immediateContext.Get();
+    ID3D11DeviceContext* deviceContext_ = immediateContext.Get();
 
     // IBL specular_pmrem を t10 にバインド
-    ID3D11ShaderResourceView* srvs[] = { iblSpecularPmremSRV.Get() };
-    dc->PSSetShaderResources(10, 1, srvs);
+    ID3D11ShaderResourceView* shaderResources_[] = { iblSpecularPmremSRV.Get() };
+    deviceContext_->PSSetShaderResources(10, 1, shaderResources_);
 
     // 深度テスト LESS_EQUAL・書き込みOFF
-    dc->OMSetDepthStencilState(skyBoxDepthStencilState.Get(), 0);
+    deviceContext_->OMSetDepthStencilState(skyBoxDepthStencilState.Get(), 0);
 
     // カリング OFF
-    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+    deviceContext_->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
     // アルファブレンド OFF
-    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+    deviceContext_->OMSetBlendState(renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
     // シェーダー・入力レイアウト
-    dc->VSSetShader(skyBoxVertexShader.Get(), nullptr, 0);
-    dc->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
-    dc->IASetInputLayout(skyBoxInputLayout.Get());
-    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    deviceContext_->VSSetShader(skyBoxVertexShader.Get(), nullptr, 0);
+    deviceContext_->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
+    deviceContext_->IASetInputLayout(skyBoxInputLayout.Get());
+    deviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // 頂点・インデックスバッファ
-    UINT stride = sizeof(SkyBoxVertex);
-    UINT offset = 0;
-    dc->IASetVertexBuffers(0, 1, skyBoxVertexBuffer.GetAddressOf(), &stride, &offset);
-    dc->IASetIndexBuffer(skyBoxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+    UINT vertexStride_ = sizeof(SkyBoxVertex);
+    UINT vertexOffset_ = 0;
+    deviceContext_->IASetVertexBuffers(0, 1, skyBoxVertexBuffer.GetAddressOf(), &vertexStride_, &vertexOffset_);
+    deviceContext_->IASetIndexBuffer(skyBoxIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-    dc->DrawIndexed(6, 0, 0);
+    deviceContext_->DrawIndexed(6, 0, 0);
 
     // ---- 後始末 ----
-    dc->VSSetShader(nullptr, nullptr, 0);
-    dc->PSSetShader(nullptr, nullptr, 0);
-    dc->IASetInputLayout(nullptr);
+    deviceContext_->VSSetShader(nullptr, nullptr, 0);
+    deviceContext_->PSSetShader(nullptr, nullptr, 0);
+    deviceContext_->IASetInputLayout(nullptr);
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    dc->PSSetShaderResources(10, 1, &nullSRV);
+    ID3D11ShaderResourceView* nullShaderResource_ = nullptr;
+    deviceContext_->PSSetShaderResources(10, 1, &nullShaderResource_);
 
-    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+    deviceContext_->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+    deviceContext_->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 }
 
 
@@ -540,7 +540,7 @@ void GraphicsDeviceManager::ShowPostEffectGui()
  */
 bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
 {
-    HRESULT hr = S_OK;
+    HRESULT result_ = S_OK;
     UINT createDeviceFlags_ = 0;
 #if defined(DEBUG) || defined(_DEBUG)
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
@@ -560,7 +560,8 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     swapChainDesc.Windowed = !fullscreen;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-    // TODO: D3D11CreateDeviceAndSwapChain() を呼び出し
+
+    //D3D11CreateDeviceAndSwapChain() を呼び出し
     //device / context / swapChain を取得
     //featureLevel_ を保存
     D3D_FEATURE_LEVEL featureLevels[] =
@@ -571,9 +572,9 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
         D3D_FEATURE_LEVEL_10_0,
     };
 
-    D3D_FEATURE_LEVEL createdFeatureLevel;
+    D3D_FEATURE_LEVEL createdFeatureLevel_;
 
-    hr = D3D11CreateDeviceAndSwapChain(
+    result_ = D3D11CreateDeviceAndSwapChain(
         nullptr,
         D3D_DRIVER_TYPE_HARDWARE,
         nullptr,
@@ -584,12 +585,12 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
         &swapChainDesc,
         swapChain.GetAddressOf(),
         device.GetAddressOf(),
-        &createdFeatureLevel,
+        &createdFeatureLevel_,
         immediateContext.GetAddressOf());
 
-    // TODO: エラーチェック
-    _ASSERT_EXPR(SUCCEEDED(hr), L"D3D11CreateDeviceAndSwapChain");
-    if (FAILED(hr)) return false;
+    // エラーチェック
+    _ASSERT_EXPR(SUCCEEDED(result_), L"D3D11CreateDeviceAndSwapChain");
+    if (FAILED(result_)) return false;
 
     return true;  // 成功時
 }
@@ -602,17 +603,17 @@ bool GraphicsDeviceManager::CreateRenderTarget()
 {
     HRESULT hr_ = S_OK;
 
-    // TODO: swapChain_->GetBuffer() でバックバッファ取得
+    // swapChain_->GetBuffer() でバックバッファ取得
     Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer_;
 
     hr_ = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer_.GetAddressOf()));
     _ASSERT_EXPR(SUCCEEDED(hr_), (L"miss GetBuffer"));
-    // TODO: device_->CreateRenderTargetView() でRTV作成
+    //device_->CreateRenderTargetView() でRTV作成
     hr_ = device->CreateRenderTargetView(backBuffer_.Get(), NULL, renderTargetView.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr_), L"miss CreateRenderTargetView");
 
 
-    // TODO: 成功時 true を返す
+    //成功時 true を返す
     return SUCCEEDED(hr_);
 }
 
@@ -673,7 +674,7 @@ bool GraphicsDeviceManager::CreateDepthStencil()
         // メンバ変数の depthStencilTexture に保存（SRV作成に必要）
         hr_ = device->CreateTexture2D(&texture2dDesc_, NULL, copyDepthStencilTexture.ReleaseAndGetAddressOf());
         hr_ = device->CreateShaderResourceView(copyDepthStencilTexture.Get(), &srvDesc,
-            copyDepthStenciSRV.ReleaseAndGetAddressOf());
+            copyDepthStencilSRV.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr_), L"Failed to CreateShaderResourceView for Depth");
     }
     return SUCCEEDED(hr_);
@@ -704,7 +705,7 @@ void GraphicsDeviceManager::ReleaseResources()
 }
 void GraphicsDeviceManager::SetRenderTargets()
 {
-    immediateContext->RSSetViewports(1, &viewPort);
+    immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 }
 
@@ -721,8 +722,8 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-    HRESULT hr = device->CreateTexture2D(&desc, nullptr, texture.GetAddressOf());
-    if (FAILED(hr)) return false;
+    HRESULT result_ = device->CreateTexture2D(&desc, nullptr, texture.GetAddressOf());
+    if (FAILED(result_)) return false;
 
     device->CreateRenderTargetView(texture.Get(), nullptr, sceneRTV.ReleaseAndGetAddressOf());
     device->CreateShaderResourceView(texture.Get(), nullptr, sceneSRV.ReleaseAndGetAddressOf());
@@ -739,18 +740,18 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
 
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
-    hr = device->CreateTexture2D(&desc, nullptr, copySceneColorTexture.ReleaseAndGetAddressOf());
-    if (FAILED(hr)) return false;
+    result_ = device->CreateTexture2D(&desc, nullptr, copySceneColorTexture.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
 
-    hr = device->CreateShaderResourceView(copySceneColorTexture.Get(), nullptr, copySceneColorSRV.ReleaseAndGetAddressOf());
-    if (FAILED(hr)) return false;
+    result_ = device->CreateShaderResourceView(copySceneColorTexture.Get(), nullptr, copySceneColorSRV.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
 
     // --- 法線のコピー用 ---
-    hr = device->CreateTexture2D(&desc, nullptr, copyNormalTexture.ReleaseAndGetAddressOf());
-    if (FAILED(hr)) return false;
+    result_ = device->CreateTexture2D(&desc, nullptr, copyNormalTexture.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
 
-    hr = device->CreateShaderResourceView(copyNormalTexture.Get(), nullptr, copyNormalSRV.ReleaseAndGetAddressOf());
-    if (FAILED(hr)) return false;
+    result_ = device->CreateShaderResourceView(copyNormalTexture.Get(), nullptr, copyNormalSRV.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
 
     return true;
 }

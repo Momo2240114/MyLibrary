@@ -62,6 +62,10 @@ public:
         const std::string& emitterName_,
         const DirectX::XMFLOAT3& position_,
         ParticleSpawnSpace spawnSpace_ = ParticleSpawnSpace::WORLD);
+    bool SetEmitterLine(
+        const std::string& emitterName_,
+        const DirectX::XMFLOAT3& startPosition_,
+        const DirectX::XMFLOAT3& endPosition_);
     bool TriggerEmitterAtPosition(
         const std::string& emitterName_,
         const DirectX::XMFLOAT3& worldPosition_);
