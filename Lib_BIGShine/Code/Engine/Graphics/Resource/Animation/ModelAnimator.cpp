@@ -6,16 +6,92 @@
 
 
 
-static void CallAnimationAction(const std::shared_ptr<GameObject>& owner, const std::string& actionName)
+static bool CallLocalAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
-    if (actionName.empty()) return;
+    if (!owner_ || actionName_.empty()) return false;
 
-    if (owner && owner->localRegistry.HasAction(actionName)) {
-        owner->localRegistry.Call(actionName);
+    if (owner_->localRegistry.HasAction(actionName_)) {
+        owner_->localRegistry.Call(actionName_);
+        return true;
+    }
+
+    return false;
+}
+
+static std::shared_ptr<GameObject> GetParentObject(const std::shared_ptr<GameObject>& owner_)
+{
+    if (!owner_ || !owner_->transform) return nullptr;
+
+    auto parentTransform_ = owner_->transform->parent.lock();
+    return parentTransform_ ? parentTransform_->gameObject.lock() : nullptr;
+}
+
+static bool CallAncestorAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
+{
+    auto parent_ = GetParentObject(owner_);
+    while (parent_)
+    {
+        if (CallLocalAnimationAction(parent_, actionName_))
+        {
+            return true;
+        }
+
+        parent_ = GetParentObject(parent_);
+    }
+
+    return false;
+}
+
+static bool CallChildAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
+{
+    if (!owner_ || !owner_->transform) return false;
+
+    for (const auto& childTransform_ : owner_->transform->children)
+    {
+        if (!childTransform_) continue;
+
+        auto child_ = childTransform_->gameObject.lock();
+        if (CallLocalAnimationAction(child_, actionName_) ||
+            CallChildAnimationAction(child_, actionName_))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static void CallAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
+{
+    if (actionName_.empty()) return;
+
+    if (CallLocalAnimationAction(owner_, actionName_) ||
+        CallAncestorAnimationAction(owner_, actionName_) ||
+        CallChildAnimationAction(owner_, actionName_))
+    {
         return;
     }
 
-    ActionRegistry::Instance().Call(actionName);
+    ActionRegistry::Instance().Call(actionName_);
+}
+
+static void CallStateExitEndActions(ModelAnimator::ActiveSlot& slot_, const std::shared_ptr<GameObject>& owner_)
+{
+    if (!slot_.state) return;
+
+    for (auto& ev_ : const_cast<AnimState*>(slot_.state)->events)
+    {
+        if (!ev_.callEndOnStateExit || !ev_.isFired || ev_.isEndFired)
+        {
+            continue;
+        }
+
+        if (!ev_.endAction.empty())
+        {
+            CallAnimationAction(owner_, ev_.endAction);
+        }
+        ev_.isEndFired = true;
+    }
 }
 
 static float ApplyPoseInterpolation(int interpolation, float t)
@@ -88,7 +164,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
             case AnimStateType::Blend1D:
             {
-                float alpha = 0.5f; // TODO: Blackboard 等から取得
+                float alpha = 0.5f; //Blackboard 等から取得
 
                 model->ComputeAnimation(state->animIndexA, time, outPose);
 
@@ -314,11 +390,12 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
     }
 }
 
-void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
+void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner)
 {
     if (!newState) return;
     if (current.state == newState) return;
 
+    CallStateExitEndActions(current, owner);
     previous = current;
 
     current.state = newState;
@@ -328,6 +405,7 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration)
     // 新しいステートに切り替わる際、イベントフラグをリセットしておく
     for (auto& ev : const_cast<AnimState*>(current.state)->events) {
         ev.isFired = false;
+        ev.isEndFired = false;
     }
 
     fadeDuration = (duration > 0.0f) ? duration : 0.001f;
@@ -525,6 +603,15 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
                 CallAnimationAction(owner, ev.updateAction);
             }
         }
+
+        // 3. End event, fired when endTime is crossed.
+        if (!ev.isEndFired && prevTime <= ev.endTime && time >= ev.endTime)
+        {
+            if (!ev.endAction.empty()) {
+                CallAnimationAction(owner, ev.endAction);
+            }
+            ev.isEndFired = true;
+        }
     }
 
     // ループ処理とフラグのリセット
@@ -535,6 +622,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
             // ループしたので発火フラグをリセット
             for (auto& ev : const_cast<AnimState*>(state)->events) {
                 ev.isFired = false;
+                ev.isEndFired = false;
             }
         }
         else {

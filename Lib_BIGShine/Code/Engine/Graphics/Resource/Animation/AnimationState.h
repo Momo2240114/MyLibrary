@@ -31,6 +31,8 @@ struct AnimEvent
     int frameStart = 0;
     int frameEnd = 0;
     bool isFired = false;    // そのループ内で実行済みか
+    bool isEndFired = false; // End action fired in this loop.
+    bool callEndOnStateExit = false;
 
 };
 

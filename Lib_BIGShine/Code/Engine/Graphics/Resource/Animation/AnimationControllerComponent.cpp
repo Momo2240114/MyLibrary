@@ -100,9 +100,9 @@ void AnimationControllerComponent::EnsureNodeEditorContext()
 
 void AnimationControllerComponent::EnsureStatesFromModel()
 {
-    if (!modelComp || !GetGameObject()) return;
+    if (!modelComponent || !GetGameObject()) return;
 
-    const auto& animations_ = modelComp->GetAnimations();
+    const auto& animations_ = modelComponent->GetAnimations();
     if (animations_.empty()) return;
 
     bool addedState_ = false;
@@ -130,16 +130,16 @@ void AnimationControllerComponent::EnsureStatesFromModel()
         }
     }
 
-    if (!m_poseLibrary && !modelComp->GetModelName().empty())
+    if (!poseLibrary && !modelComponent->GetModelName().empty())
     {
-        m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComp->GetModelName());
+        poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComponent->GetModelName());
     }
 
-    if (m_poseLibrary)
+    if (poseLibrary)
     {
-        for (int customAnimationIndex_ = 0; customAnimationIndex_ < static_cast<int>(m_poseLibrary->customAnims.size()); ++customAnimationIndex_)
+        for (int customAnimationIndex_ = 0; customAnimationIndex_ < static_cast<int>(poseLibrary->customAnims.size()); ++customAnimationIndex_)
         {
-            const CustomAnimation& customAnimation_ = m_poseLibrary->customAnims[customAnimationIndex_];
+            const CustomAnimation& customAnimation_ = poseLibrary->customAnims[customAnimationIndex_];
             auto stateIt_ = states.find(customAnimation_.name);
             if (stateIt_ == states.end() || !stateIt_->second ||
                 stateIt_->second->type != AnimStateType::Custom ||
@@ -178,44 +178,44 @@ void AnimationControllerComponent::Start()
     }
     blackboardComponent = blackboard_.get();
 
-    auto MyObject = owner_.get();
-    modelComp = MyObject->GetComponent<GltfModelCommponennt>().get();
+    auto object_ = owner_.get();
+    modelComponent = object_->GetComponent<GltfModelCommponennt>().get();
 
     EnsureNodeEditorContext();
-    if (!modelComp) return;
+    if (!modelComponent) return;
 
-    std::string modelName = modelComp->GetModelName();
-    if (!modelName.empty()) {
-        m_poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelName);
+    std::string modelName_ = modelComponent->GetModelName();
+    if (!modelName_.empty()) {
+        poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelName_);
     }
 
-    const auto& animations = modelComp->GetAnimations();
-    std::string objName = MyObject->GetName();
+    const auto& animations_ = modelComponent->GetAnimations();
+    std::string objectName_ = object_->GetName();
 
-    for (int i = 0; i < (int)animations.size(); ++i)
+    for (int index_ = 0; index_ < (int)animations_.size(); ++index_)
     {
-        const std::string& animName = animations[i].name;
+        const std::string& animationName_ = animations_[index_].name;
 
-        auto it = states.find(animName);
+        auto iterator_ = states.find(animationName_);
 
-        if (it == states.end()) {
-            auto newState = std::make_unique<AnimState>();
-            newState->name = animName;
-            newState->playbackSpeed = 1.0f;
-            newState->isLoop = true;
-            states[animName] = std::move(newState);
-            it = states.find(animName);
+        if (iterator_ == states.end()) {
+            auto newState_ = std::make_unique<AnimState>();
+            newState_->name = animationName_;
+            newState_->playbackSpeed = 1.0f;
+            newState_->isLoop = true;
+            states[animationName_] = std::move(newState_);
+            iterator_ = states.find(animationName_);
         }
 
-        auto& state = it->second;
-        state->animationIndex = i;
+        auto& state_ = iterator_->second;
+        state_->animationIndex = index_;
 
-        std::string fullActionName = objName + "_" + animName;
-        ActionRegistry::Instance().RegisterAction("Animation", fullActionName, [this, animName]() {
-            this->ChangeState(animName);
+        std::string fullActionName_ = objectName_ + "_" + animationName_;
+        ActionRegistry::Instance().RegisterAction("Animation", fullActionName_, [this, animationName_]() {
+            this->ChangeState(animationName_);
             });
 
-        registeredFullNames.push_back(fullActionName);
+        registeredActionNames.push_back(fullActionName_);
     }
 
     EnsureSpecialGraphNodes();
@@ -223,25 +223,25 @@ void AnimationControllerComponent::Start()
     EnsureNodeEditorContext();
 
     if (currentState) {
-        animator.CrossFadeTo(currentState, 0.0f);
+        animator.CrossFadeTo(currentState, 0.0f, GetGameObject());
     }
     else {
         TryEnterStartState();
-        if (!currentState && !states.empty() && !animations.empty()) {
-            ChangeState(animations[0].name, 0.0f);
+        if (!currentState && !states.empty() && !animations_.empty()) {
+            ChangeState(animations_[0].name, 0.0f);
         }
     }
 
 
 }
-void AnimationControllerComponent::Update(float deltaTime)
+void AnimationControllerComponent::Update(float deltaTime_)
 {
     EnsureNodeEditorContext();
-    if (!modelComp)
+    if (!modelComponent)
     {
         auto owner_ = GetGameObject();
-        modelComp = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
-        if (!modelComp)
+        modelComponent = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
+        if (!modelComponent)
         {
             return;
         }
@@ -249,83 +249,83 @@ void AnimationControllerComponent::Update(float deltaTime)
 
     EnsureStatesFromModel();
 
-    if (!curvecomp)
+    if (!curveComponent)
     {
         auto owner_ = GetGameObject();
-        curvecomp = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
+        curveComponent = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
     }
 
-    if (m_pendingGraphAssetLoad)
+    if (pendingGraphAssetLoad)
     {
-        m_pendingGraphAssetLoad = false;
+        pendingGraphAssetLoad = false;
 
-        if (!m_pendingGraphAssetPath.empty())
+        if (!pendingGraphAssetPath.empty())
         {
-            LoadGraphAsset(m_pendingGraphAssetPath);
+            LoadGraphAsset(pendingGraphAssetPath);
             TryEnterStartState();
         }
     }
 
-    if (m_editorPoseOverride)
+    if (editorPoseOverride)
     {
-        modelComp->UpdateTransform();
+        modelComponent->UpdateTransform();
         return;
     }
 
-    if (usedTransitionGraph)
+    if (useTransitionGraph)
     {
         // 状態遷移の評価
         EvaluateGraphTransitions();
     }
 
     //ModelAnimator::Updateを呼ぶ際、ポーズライブラリのリソースポインタを第三引数に授ける
-    animator.Update(deltaTime, modelComp, curvecomp, m_poseLibrary, GetGameObject());
+    animator.Update(deltaTime_, modelComponent, curveComponent, poseLibrary, GetGameObject());
 
-    const AnimState* currentState = animator.GetCurrentState();
-    if (currentState && currentState->rootMotion.enable)
+    const AnimState* activeState_ = animator.GetCurrentState();
+    if (activeState_ && activeState_->rootMotion.enable)
     {
-        auto delta = animator.GetRootMotionDelta();
-        auto transform = GetGameObject()->transform;
+        auto rootMotionDelta_ = animator.GetRootMotionDelta();
+        auto transform_ = GetGameObject()->transform;
 
-        if (transform)
+        if (transform_)
         {
             using namespace DirectX;
             using namespace DirectX::SimpleMath;
 
             // localRotation は degree 前提
-            float xRad = XMConvertToRadians(transform->localRotation.x);
-            float yRad = XMConvertToRadians(transform->localRotation.y);
-            float zRad = XMConvertToRadians(transform->localRotation.z);
+            float xRadians_ = XMConvertToRadians(transform_->localRotation.x);
+            float yRadians_ = XMConvertToRadians(transform_->localRotation.y);
+            float zRadians_ = XMConvertToRadians(transform_->localRotation.z);
 
             // YXZ 運用なら yaw(Y), pitch(X), roll(Z) の順で作る
-            Quaternion currentRot = Quaternion::CreateFromYawPitchRoll(yRad, xRad, zRad);
-            currentRot.Normalize();
+            Quaternion currentRotation_ = Quaternion::CreateFromYawPitchRoll(yRadians_, xRadians_, zRadians_);
+            currentRotation_.Normalize();
 
             // 位置 RootMotion
-            Vector3 worldDeltaPos = Vector3::Transform(delta.deltaPosition, currentRot);
-            transform->localPosition.x += worldDeltaPos.x;
-            transform->localPosition.y += worldDeltaPos.y;
-            transform->localPosition.z += worldDeltaPos.z;
-            transform->AddMoveOffset(worldDeltaPos);
+            Vector3 worldDeltaPosition_ = Vector3::Transform(rootMotionDelta_.deltaPosition, currentRotation_);
+            transform_->localPosition.x += worldDeltaPosition_.x;
+            transform_->localPosition.y += worldDeltaPosition_.y;
+            transform_->localPosition.z += worldDeltaPosition_.z;
+            transform_->AddMoveOffset(worldDeltaPosition_);
 
-            transform->MarkDirty();
+            transform_->MarkDirty();
         }
     }
 
     // 計算された姿勢をモデルに書き戻し
-    modelComp->SetNodePoses(animator.GetCurrentPose());
+    modelComponent->SetNodePoses(animator.GetCurrentPose());
     // 行列の最終更新
-    modelComp->UpdateTransform();
+    modelComponent->UpdateTransform();
 }
 
 
-void AnimationControllerComponent::ChangeState(const std::string& stateName, float duration)
+void AnimationControllerComponent::ChangeState(const std::string& stateName_, float duration_)
 {
-    auto it = states.find(stateName);
-    if (it == states.end()) return;
+    auto iterator_ = states.find(stateName_);
+    if (iterator_ == states.end()) return;
 
-    const AnimState* nextState = it->second.get();
-    if (currentState == nextState) return;
+    const AnimState* nextState_ = iterator_->second.get();
+    if (currentState == nextState_) return;
 
     if (auto owner_ = GetGameObject())
     {
@@ -336,45 +336,45 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName, flo
     }
 
     // Animatorクラスに遷移を命令
-    animator.CrossFadeTo(nextState, duration);
-    currentState = nextState;
+    animator.CrossFadeTo(nextState_, duration_, GetGameObject());
+    currentState = nextState_;
 }
 
-void AnimationControllerComponent::AddState(const std::string& stateName, int animIndex)
+void AnimationControllerComponent::AddState(const std::string& stateName_, int animationIndex_)
 {
-    if (states.count(stateName)) return; // 重複チェック
+    if (states.count(stateName_)) return; // 重複チェック
 
-    auto newState = std::make_unique<AnimState>();
-    newState->name = stateName;
-    newState->animationIndex = animIndex;
-    newState->playbackSpeed = 1.0f;
-    newState->isLoop = true;
-    states[stateName] = std::move(newState);
+    auto newState_ = std::make_unique<AnimState>();
+    newState_->name = stateName_;
+    newState_->animationIndex = animationIndex_;
+    newState_->playbackSpeed = 1.0f;
+    newState_->isLoop = true;
+    states[stateName_] = std::move(newState_);
 
     // アクションも登録
-    std::string objName = GetGameObject()->GetName();
-    std::string fullActionName = objName + "_" + stateName;
-    ActionRegistry::Instance().RegisterAction("Animation", fullActionName, [this, stateName]() {
-        this->ChangeState(stateName);
+    std::string objectName_ = GetGameObject()->GetName();
+    std::string fullActionName_ = objectName_ + "_" + stateName_;
+    ActionRegistry::Instance().RegisterAction("Animation", fullActionName_, [this, stateName_]() {
+        this->ChangeState(stateName_);
         });
 
     // グラフ用ノードデータの作成
-    AnimGraphNode node;
-    node.id = ed::NodeId(GetNextID());
-    node.stateName = stateName;
-    node.inputPin = ed::PinId(GetNextID());
-    node.outputPin = ed::PinId(GetNextID());
-    node.pos = ImVec2(0, 0); // 初期座標
-    node.type = AnimGraphNodeType::State;
+    AnimGraphNode node_;
+    node_.id = ed::NodeId(GetNextId());
+    node_.stateName = stateName_;
+    node_.inputPin = ed::PinId(GetNextId());
+    node_.outputPin = ed::PinId(GetNextId());
+    node_.pos = ImVec2(0, 0); // 初期座標
+    node_.type = AnimGraphNodeType::State;
 
-    graphNodes.push_back(node);
+    graphNodes.push_back(node_);
 }
 
 bool AnimationControllerComponent::AddOrUpdateCustomState(int customAnimIndex_)
 {
-    if (!m_poseLibrary || customAnimIndex_ < 0 || customAnimIndex_ >= static_cast<int>(m_poseLibrary->customAnims.size())) return false;
+    if (!poseLibrary || customAnimIndex_ < 0 || customAnimIndex_ >= static_cast<int>(poseLibrary->customAnims.size())) return false;
 
-    const CustomAnimation& customAnimation_ = m_poseLibrary->customAnims[customAnimIndex_];
+    const CustomAnimation& customAnimation_ = poseLibrary->customAnims[customAnimIndex_];
     if (customAnimation_.name.empty()) return false;
 
     auto stateIt_ = states.find(customAnimation_.name);
@@ -404,26 +404,26 @@ bool AnimationControllerComponent::PreviewCustomAnimation(int customAnimIndex_, 
 {
     if (!AddOrUpdateCustomState(customAnimIndex_)) return false;
 
-    if (!modelComp)
+    if (!modelComponent)
     {
         auto owner_ = GetGameObject();
-        modelComp = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
+        modelComponent = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
     }
-    if (!modelComp) return false;
+    if (!modelComponent) return false;
 
-    if (!curvecomp)
+    if (!curveComponent)
     {
         auto owner_ = GetGameObject();
-        curvecomp = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
+        curveComponent = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
     }
 
-    const CustomAnimation& customAnimation_ = m_poseLibrary->customAnims[customAnimIndex_];
+    const CustomAnimation& customAnimation_ = poseLibrary->customAnims[customAnimIndex_];
     ChangeState(customAnimation_.name, 0.0f);
     animator.SetCurrentTime(time_);
-    animator.Update(0.0f, modelComp, curvecomp, m_poseLibrary, GetGameObject());
-    modelComp->SetNodePoses(animator.GetCurrentPose());
-    modelComp->UpdateTransform();
-    m_editorPoseOverride = true;
+    animator.Update(0.0f, modelComponent, curveComponent, poseLibrary, GetGameObject());
+    modelComponent->SetNodePoses(animator.GetCurrentPose());
+    modelComponent->UpdateTransform();
+    editorPoseOverride = true;
     return true;
 }
 
@@ -435,19 +435,19 @@ bool AnimationControllerComponent::SelectStateForEditing(const std::string& stat
     editingState = stateIt_->second.get();
     return true;
 }
-void AnimationControllerComponent::RemoveState(const std::string& stateName)
+void AnimationControllerComponent::RemoveState(const std::string& stateName_)
 {
-    auto it = states.find(stateName);
-    if (it == states.end()) return;
+    auto iterator_ = states.find(stateName_);
+    if (iterator_ == states.end()) return;
 
     // --- 安全策: 消そうとしているステートが現在再生中なら、他のステートへ逃がす ---
-    if (currentState == it->second.get())
+    if (currentState == iterator_->second.get())
     {
         currentState = nullptr;
         // 他にステートがあれば最初のやつに、なければ停止
         if (states.size() > 1) {
-            for (auto& [name, ptr] : states) {
-                if (name != stateName) {
+            for (auto& [name, statePointer_] : states) {
+                if (name != stateName_) {
                     ChangeState(name, 0.0f);
                     break;
                 }
@@ -456,290 +456,290 @@ void AnimationControllerComponent::RemoveState(const std::string& stateName)
     }
 
     // AddState で登録した時と同じ形式の名前を構築
-    std::string objName = GetGameObject()->GetName();
-    std::string fullActionName = objName + "_" + stateName;
-    ActionRegistry::Instance().RemoveAction("Animation", fullActionName);
+    std::string objectName_ = GetGameObject()->GetName();
+    std::string fullActionName_ = objectName_ + "_" + stateName_;
+    ActionRegistry::Instance().RemoveAction("Animation", fullActionName_);
 
     // 削除実行
-    states.erase(it);
+    states.erase(iterator_);
 }
 
 
 void AnimationControllerComponent::EnsureSpecialGraphNodes()
 {
-    auto ensureNode = [&](AnimGraphNodeType type, const char* internalName, const ImVec2& defaultPos)
+    auto ensureNode_ = [&](AnimGraphNodeType nodeType_, const char* internalName_, const ImVec2& defaultPosition_)
     {
-        auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
-            [&](const AnimGraphNode& node) { return node.type == type || node.stateName == internalName; });
+        auto iterator_ = std::find_if(graphNodes.begin(), graphNodes.end(),
+            [&](const AnimGraphNode& node_) { return node_.type == nodeType_ || node_.stateName == internalName_; });
 
-        if (it == graphNodes.end())
+        if (iterator_ == graphNodes.end())
         {
-            AnimGraphNode node;
-            node.id = ed::NodeId(GetNextID());
-            node.stateName = internalName;
-            node.inputPin = ed::PinId(0);
-            node.outputPin = ed::PinId(GetNextID());
-            node.pos = defaultPos;
-            node.type = type;
-            node.scopeId = "Root";
-            graphNodes.push_back(node);
+            AnimGraphNode node_;
+            node_.id = ed::NodeId(GetNextId());
+            node_.stateName = internalName_;
+            node_.inputPin = ed::PinId(0);
+            node_.outputPin = ed::PinId(GetNextId());
+            node_.pos = defaultPosition_;
+            node_.type = nodeType_;
+            node_.scopeId = "Root";
+            graphNodes.push_back(node_);
             return;
         }
 
-        it->stateName = internalName;
-        it->type = type;
-        it->scopeId = "Root";
-        if ((uintptr_t)it->id.Get() == 0)
-            it->id = ed::NodeId(GetNextID());
-        it->inputPin = ed::PinId(0);
-        if ((uintptr_t)it->outputPin.Get() == 0)
-            it->outputPin = ed::PinId(GetNextID());
+        iterator_->stateName = internalName_;
+        iterator_->type = nodeType_;
+        iterator_->scopeId = "Root";
+        if ((uintptr_t)iterator_->id.Get() == 0)
+            iterator_->id = ed::NodeId(GetNextId());
+        iterator_->inputPin = ed::PinId(0);
+        if ((uintptr_t)iterator_->outputPin.Get() == 0)
+            iterator_->outputPin = ed::PinId(GetNextId());
     };
 
-    ensureNode(AnimGraphNodeType::Start, START_NODE_NAME, ImVec2(-360.0f, -80.0f));
-    ensureNode(AnimGraphNodeType::Any, ANY_NODE_NAME, ImVec2(-360.0f, 140.0f));
+    ensureNode_(AnimGraphNodeType::Start, START_NODE_NAME, ImVec2(-360.0f, -80.0f));
+    ensureNode_(AnimGraphNodeType::Any, ANY_NODE_NAME, ImVec2(-360.0f, 140.0f));
 }
 
 void AnimationControllerComponent::TryEnterStartState()
 {
-    for (auto& transition : graphTransitions)
+    for (auto& transition_ : graphTransitions)
     {
-        if (transition.fromStateName != START_NODE_NAME)
+        if (transition_.fromStateName != START_NODE_NAME)
             continue;
 
-        auto* toNode = FindNodeByName(transition.toStateName);
-        if (toNode && toNode->type == AnimGraphNodeType::SubGraph)
+        auto* toNode_ = FindNodeByName(transition_.toStateName);
+        if (toNode_ && toNode_->type == AnimGraphNodeType::SubGraph)
         {
-            if (TryEnterSubGraph(*toNode, 0.0f))
+            if (TryEnterSubGraph(*toNode_, 0.0f))
                 return;
         }
 
-        if (states.count(transition.toStateName) == 0)
+        if (states.count(transition_.toStateName) == 0)
             continue;
 
-        ChangeState(transition.toStateName, 0.0f);
+        ChangeState(transition_.toStateName, 0.0f);
         return;
     }
 }
 
-bool AnimationControllerComponent::TryEnterSubGraph(const AnimGraphNode& subGraphNode, float duration)
+bool AnimationControllerComponent::TryEnterSubGraph(const AnimGraphNode& subGraphNode_, float duration_)
 {
-    if (subGraphNode.type != AnimGraphNodeType::SubGraph || subGraphNode.childScopeId.empty())
+    if (subGraphNode_.type != AnimGraphNodeType::SubGraph || subGraphNode_.childScopeId.empty())
         return false;
 
-    const std::string entryName = MakeEntryNodeName(subGraphNode.childScopeId);
-    for (auto& transition : graphTransitions)
+    const std::string entryName_ = MakeEntryNodeName(subGraphNode_.childScopeId);
+    for (auto& transition_ : graphTransitions)
     {
-        if (transition.scopeId != subGraphNode.childScopeId)
+        if (transition_.scopeId != subGraphNode_.childScopeId)
             continue;
-        if (transition.fromStateName != entryName)
+        if (transition_.fromStateName != entryName_)
             continue;
-        if (states.count(transition.toStateName) == 0)
+        if (states.count(transition_.toStateName) == 0)
             continue;
 
-        ChangeState(transition.toStateName, duration);
+        ChangeState(transition_.toStateName, duration_);
         return true;
     }
 
     return false;
 }
-AnimGraphNode* AnimationControllerComponent::AFindNodeByPin(ed::PinId pinId)
+AnimGraphNode* AnimationControllerComponent::FindNodeByPin(ed::PinId pinId_)
 {
-    for (auto& node : graphNodes) 
+    for (auto& node_ : graphNodes)
     {
         // ノードが持つ入力ピンまたは出力ピンのIDが、探しているIDと一致するかチェック
-        if (node.inputPin == pinId || node.outputPin == pinId) {
-            return &node;
+        if (node_.inputPin == pinId_ || node_.outputPin == pinId_) {
+            return &node_;
         }
     }
     return nullptr; // 見つからなかった場合
 }
 
-AnimGraphNode* AnimationControllerComponent::FindNodeByName(const std::string& name)
+AnimGraphNode* AnimationControllerComponent::FindNodeByName(const std::string& name_)
 {
-    for (auto& node : graphNodes)
+    for (auto& node_ : graphNodes)
     {
-        if (node.stateName == name)
+        if (node_.stateName == name_)
         {
-            return &node;
+            return &node_;
         }
     }
     return nullptr;
 }
 
 
-void AnimationControllerComponent::SetIDCounterFloor(uintptr_t minVal)
+void AnimationControllerComponent::SetIdCounterFloor(uintptr_t minValue_)
 {
-    if (m_NextID <= minVal)
-        m_NextID = minVal + 1;
+    if (nextGraphElementId <= minValue_)
+        nextGraphElementId = minValue_ + 1;
 }
 void AnimationControllerComponent::EvaluateGraphTransitions()
 {
-    const AnimState* activeState = animator.GetCurrentState();
-    if (!activeState)
+    const AnimState* activeState_ = animator.GetCurrentState();
+    if (!activeState_)
     {
         TryEnterStartState();
-        activeState = animator.GetCurrentState();
+        activeState_ = animator.GetCurrentState();
     }
-    if (!activeState) return;
+    if (!activeState_) return;
 
-    _runtimeActiveStateName = activeState->name;
+    runtimeActiveStateName = activeState_->name;
 
-    auto areConditionsMet = [&](AnimTransition& transition) -> bool
+    auto areConditionsMet_ = [&](AnimTransition& transition_) -> bool
         {
-            bool isMet = transition.conditions.empty();
-            if (!transition.conditions.empty())
+            bool conditionsMet_ = transition_.conditions.empty();
+            if (!transition_.conditions.empty())
             {
-                isMet = (transition.logic == TransitionLogic::And);
-                for (auto& cond : transition.conditions)
+                conditionsMet_ = (transition_.logic == TransitionLogic::And);
+                for (auto& condition_ : transition_.conditions)
                 {
-                    const bool conditionMet = EvaluateCondition(cond);
-                    if (transition.logic == TransitionLogic::And && !conditionMet)
+                    const bool conditionMet_ = EvaluateCondition(condition_);
+                    if (transition_.logic == TransitionLogic::And && !conditionMet_)
                     {
-                        isMet = false;
+                        conditionsMet_ = false;
                         break;
                     }
-                    if (transition.logic == TransitionLogic::Or && conditionMet)
+                    if (transition_.logic == TransitionLogic::Or && conditionMet_)
                     {
-                        isMet = true;
+                        conditionsMet_ = true;
                         break;
                     }
                 }
             }
-            return isMet;
+            return conditionsMet_;
         };
 
-    auto resetTriggerConditions = [&](AnimTransition& transition)
+    auto resetTriggerConditions_ = [&](AnimTransition& transition_)
         {
-            for (auto& cond : transition.conditions)
+            for (auto& condition_ : transition_.conditions)
             {
-                if (cond.type == ConditionType::Trigger)
+                if (condition_.type == ConditionType::Trigger)
                 {
-                    auto it = GetEditableBlackboard().find(cond.parameterName);
-                    if (it != GetEditableBlackboard().end())
+                    auto iterator_ = GetEditableBlackboard().find(condition_.parameterName);
+                    if (iterator_ != GetEditableBlackboard().end())
                     {
-                        it->second = false;
+                        iterator_->second = false;
                     }
                 }
             }
         };
 
-    auto enterTransitionTarget = [&](AnimTransition& transition) -> bool
+    auto enterTransitionTarget_ = [&](AnimTransition& transition_) -> bool
         {
-            auto* toNode = FindNodeByName(transition.toStateName);
-            if (toNode && toNode->type == AnimGraphNodeType::SubGraph)
+            auto* toNode_ = FindNodeByName(transition_.toStateName);
+            if (toNode_ && toNode_->type == AnimGraphNodeType::SubGraph)
             {
-                if (TryEnterSubGraph(*toNode, transition.duration))
+                if (TryEnterSubGraph(*toNode_, transition_.duration))
                 {
                     return true;
                 }
                 return false;
             }
 
-            if (states.count(transition.toStateName) == 0)
+            if (states.count(transition_.toStateName) == 0)
                 return false;
 
-            ChangeState(transition.toStateName, transition.duration);
+            ChangeState(transition_.toStateName, transition_.duration);
             return true;
         };
 
-    auto exitSubGraph = [&](AnimTransition& exitTransition) -> bool
+    auto exitSubGraph_ = [&](AnimTransition& exitTransition_) -> bool
         {
-            AnimGraphNode* ownerSubGraph = nullptr;
-            for (auto& node : graphNodes)
+            AnimGraphNode* ownerSubGraph_ = nullptr;
+            for (auto& node_ : graphNodes)
             {
-                if (node.type == AnimGraphNodeType::SubGraph && node.childScopeId == exitTransition.scopeId)
+                if (node_.type == AnimGraphNodeType::SubGraph && node_.childScopeId == exitTransition_.scopeId)
                 {
-                    ownerSubGraph = &node;
+                    ownerSubGraph_ = &node_;
                     break;
                 }
             }
-            if (!ownerSubGraph)
+            if (!ownerSubGraph_)
                 return false;
 
-            for (auto& parentTransition : graphTransitions)
+            for (auto& parentTransition_ : graphTransitions)
             {
-                if (parentTransition.fromStateName != ownerSubGraph->stateName)
+                if (parentTransition_.fromStateName != ownerSubGraph_->stateName)
                     continue;
-                if (!areConditionsMet(parentTransition))
+                if (!areConditionsMet_(parentTransition_))
                     continue;
 
-                resetTriggerConditions(parentTransition);
-                return enterTransitionTarget(parentTransition);
+                resetTriggerConditions_(parentTransition_);
+                return enterTransitionTarget_(parentTransition_);
             }
 
             return false;
         };
 
-    for (auto& transition : graphTransitions)
+    for (auto& transition_ : graphTransitions)
     {
-        const bool fromCurrent = (transition.fromStateName == activeState->name);
-        const bool fromAny = (transition.fromStateName == ANY_NODE_NAME);
+        const bool fromCurrent_ = (transition_.fromStateName == activeState_->name);
+        const bool fromAny_ = (transition_.fromStateName == ANY_NODE_NAME);
 
-        if (!fromCurrent && !fromAny)
+        if (!fromCurrent_ && !fromAny_)
             continue;
-        if (transition.toStateName == activeState->name)
-            continue;
-
-        auto* toNode = FindNodeByName(transition.toStateName);
-        const bool toExit = toNode && toNode->type == AnimGraphNodeType::Exit;
-        const bool toSubGraph = toNode && toNode->type == AnimGraphNodeType::SubGraph;
-        if (!toExit && !toSubGraph && states.count(transition.toStateName) == 0)
+        if (transition_.toStateName == activeState_->name)
             continue;
 
-        if (!areConditionsMet(transition))
+        auto* toNode_ = FindNodeByName(transition_.toStateName);
+        const bool toExit_ = toNode_ && toNode_->type == AnimGraphNodeType::Exit;
+        const bool toSubGraph_ = toNode_ && toNode_->type == AnimGraphNodeType::SubGraph;
+        if (!toExit_ && !toSubGraph_ && states.count(transition_.toStateName) == 0)
             continue;
 
-        resetTriggerConditions(transition);
+        if (!areConditionsMet_(transition_))
+            continue;
 
-        if (toExit)
+        resetTriggerConditions_(transition_);
+
+        if (toExit_)
         {
-            if (exitSubGraph(transition))
+            if (exitSubGraph_(transition_))
                 break;
             continue;
         }
 
-        if (enterTransitionTarget(transition))
+        if (enterTransitionTarget_(transition_))
             break;
     }
 }
-bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& cond)
+bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& condition_)
 {
     // 1. アニメーション終了判定
-    if (cond.type == ConditionType::AnimationEnd) {
-        const auto* state = animator.GetCurrentState();
-        if (!state) return false;
+    if (condition_.type == ConditionType::AnimationEnd) {
+        const auto* state_ = animator.GetCurrentState();
+        if (!state_) return false;
 
-        float duration = modelComp->GetAnimationDuration(
-            state->type == AnimStateType::Single ? state->animationIndex : state->animIndexA
+        float animationDuration_ = modelComponent->GetAnimationDuration(
+            state_->type == AnimStateType::Single ? state_->animationIndex : state_->animIndexA
         );
-        return animator.GetCurrentFadeTime() >= duration;
+        return animator.GetCurrentFadeTime() >= animationDuration_;
     }
 
     // 2. 変数・トリガー判定
-    if (GetEditableBlackboard().find(cond.parameterName) == GetEditableBlackboard().end()) return false;
-    const auto& bbValue = GetEditableBlackboard().at(cond.parameterName);
+    if (GetEditableBlackboard().find(condition_.parameterName) == GetEditableBlackboard().end()) return false;
+    const auto& blackboardValue_ = GetEditableBlackboard().at(condition_.parameterName);
 
-    auto ToFloat = [](const BlackBoardValue& v) -> float {
-        return std::visit([](auto&& arg) -> float {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, float>) return arg;
-            if constexpr (std::is_same_v<T, int>)   return (float)arg;
-            if constexpr (std::is_same_v<T, bool>)  return arg ? 1.0f : 0.0f;
-            if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>) return arg.Length();
+    auto toFloat_ = [](const BlackBoardValue& value_) -> float {
+        return std::visit([](auto&& value_) -> float {
+            using ValueType = std::decay_t<decltype(value_)>;
+            if constexpr (std::is_same_v<ValueType, float>) return value_;
+            if constexpr (std::is_same_v<ValueType, int>)   return (float)value_;
+            if constexpr (std::is_same_v<ValueType, bool>)  return value_ ? 1.0f : 0.0f;
+            if constexpr (std::is_same_v<ValueType, DirectX::SimpleMath::Vector2>) return value_.Length();
             return 0.0f;
-            }, v);
+            }, value_);
         };
 
-    float currentVal = ToFloat(bbValue);
+    float currentValue_ = toFloat_(blackboardValue_);
 
-    if (cond.type == ConditionType::Trigger) return currentVal >= 0.5f;
+    if (condition_.type == ConditionType::Trigger) return currentValue_ >= 0.5f;
 
-    switch (cond.op) {
-    case ConditionOp::Greater:  return currentVal > cond.threshold;
-    case ConditionOp::Less:     return currentVal < cond.threshold;
-    case ConditionOp::Equal:    return std::abs(currentVal - cond.threshold) < 0.001f;
-    case ConditionOp::NotEqual: return std::abs(currentVal - cond.threshold) >= 0.001f;
+    switch (condition_.op) {
+    case ConditionOp::Greater:  return currentValue_ > condition_.threshold;
+    case ConditionOp::Less:     return currentValue_ < condition_.threshold;
+    case ConditionOp::Equal:    return std::abs(currentValue_ - condition_.threshold) < 0.001f;
+    case ConditionOp::NotEqual: return std::abs(currentValue_ - condition_.threshold) >= 0.001f;
     }
     return false;
 }
@@ -769,13 +769,13 @@ void AnimationControllerComponent::EnsureGraphNodeForState(const std::string& st
     if (exists_) return;
 
     AnimGraphNode node_;
-    node_.id = ed::NodeId(GetNextID());
+    node_.id = ed::NodeId(GetNextId());
     node_.stateName = stateName_;
-    node_.inputPin = ed::PinId(GetNextID());
-    node_.outputPin = ed::PinId(GetNextID());
+    node_.inputPin = ed::PinId(GetNextId());
+    node_.outputPin = ed::PinId(GetNextId());
     node_.pos = ImVec2(0.0f, 0.0f);
     node_.type = AnimGraphNodeType::State;
-    node_.scopeId = m_currentGraphScopeId.empty() ? "Root" : m_currentGraphScopeId;
+    node_.scopeId = currentGraphScopeId.empty() ? "Root" : currentGraphScopeId;
     graphNodes.push_back(node_);
 }
 

@@ -1,0 +1,108 @@
+{
+    "actions": {
+        "Player.DebugGuardHit": [
+            [
+                {
+                    "dev": 0,
+                    "code": 70
+                }
+            ]
+        ],
+        "Player.Dodge": [
+            [
+                {
+                    "dev": 0,
+                    "code": 16
+                }
+            ]
+        ],
+        "Player.Guard": [
+            [
+                {
+                    "dev": 0,
+                    "code": 81
+                }
+            ]
+        ],
+        "Player.SkillA": [
+            [
+                {
+                    "dev": 0,
+                    "code": 69
+                }
+            ]
+        ],
+        "Player.SkillB": [
+            [
+                {
+                    "dev": 0,
+                    "code": 82
+                }
+            ]
+        ],
+        "Player.StrongAttack": [
+            [
+                {
+                    "dev": 0,
+                    "code": 2
+                }
+            ]
+        ],
+        "Player.WeakAttack": [
+            [
+                {
+                    "dev": 0,
+                    "code": 1
+                }
+            ]
+        ]
+    },
+    "axes": {
+        "Player.MoveX": [
+            {
+                "sourceType": 0,
+                "dev": 0,
+                "code": 65,
+                "scale": -1.0,
+                "deadZone": 0.15
+            },
+            {
+                "sourceType": 0,
+                "dev": 0,
+                "code": 68,
+                "scale": 1.0,
+                "deadZone": 0.15
+            },
+            {
+                "sourceType": 2,
+                "dev": 1,
+                "code": 2,
+                "scale": 1.0,
+                "deadZone": 0.15
+            }
+        ],
+        "Player.MoveZ": [
+            {
+                "sourceType": 0,
+                "dev": 0,
+                "code": 83,
+                "scale": -1.0,
+                "deadZone": 0.15
+            },
+            {
+                "sourceType": 0,
+                "dev": 0,
+                "code": 87,
+                "scale": 1.0,
+                "deadZone": 0.15
+            },
+            {
+                "sourceType": 2,
+                "dev": 1,
+                "code": 3,
+                "scale": 1.0,
+                "deadZone": 0.15
+            }
+        ]
+    }
+}

@@ -2,6 +2,7 @@
 
 #include "EditorWorkspaceWindow.h"
 #include "EditorRenderTarget.h"
+#include "Editor/Window/AssetBrowserWindow.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
@@ -59,6 +60,7 @@ private:
     ModelRenderSystem modelRenderSystem;
     ParticleRenderSystem particleRenderSystem;
     MeshVFXRenderSystem meshVFXRenderSystem;
+    AssetBrowserWindow assetBrowser;
     CameraComponent previewCamera;
     std::shared_ptr<GameObject> previewObject;
     std::shared_ptr<GltfModelCommponennt> previewModel;
@@ -76,6 +78,7 @@ private:
     float sequenceDuration = 5.0f;
     float inspectorWidth = 360.0f;
     float timelineHeight = 190.0f;
+    float assetBrowserHeight = 280.0f;
     bool isInitialized = false;
     bool sequencePlaying = false;
     bool sequenceLoop = true;

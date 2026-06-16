@@ -12,6 +12,7 @@ class ColliderComponent : public Component
 public:
     enum class ColliderType { Box, Sphere, Capsule, Cylinder, Mesh };
     enum class CollisionRole { PHYSICAL, CHARACTER, HIT_BOX, HURT_BOX, SENSOR };
+    enum class VelocityRotationMode{NONE,YAW_ONLY,FULL_3D};
 public:
 
     //現在ヒットしているコリジョン
@@ -25,11 +26,11 @@ public:
     DirectX::XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f }; // モデル中心からのズレ
     bool isTrigger = false;                          // すり抜けるか
     bool isStatic = false;                           // 地面や壁など動かないものか
-    bool usePhysicsResponse = true;                  // Enables physical push-back and contact solving
-    bool physicsControlsTransform = false;           // ON: PhysX writes position back to Transform
+    bool usePhysicsResponse = true;                  // 物理的な押し戻しと接触判定を有効にする
+    bool physicsControlsTransform = false;           // ONにするとPhysXが位置情報をTransformに書き戻す
     bool enabled = true;                               // 有効フラグ
     bool isGrounded = false;
-    bool _ShapeRenderFlg = true;
+    bool shapeRenderEnabled = true;
     float mass = 0.0f;
 
     Vector4 debugPrimitiveColor = { 0,0,0,1 };
@@ -46,9 +47,12 @@ public:
         j["UsePhysicsResponse"] = usePhysicsResponse;
         j["PhysicsControlsTransform"] = physicsControlsTransform;
         j["CollisionRole"] = static_cast<int>(collisionRole);
-        j["ShapeRenderFlg"] = _ShapeRenderFlg;
+        j["ShapeRenderFlg"] = shapeRenderEnabled;
         j["UseGravity"] = useGravity;
         j["GravityScale"] = gravityScale;
+        j["VelocityRotationMode"] = static_cast<int>(velocityRotationMode);
+        j["RotateVelocityThreshold"] = rotateVelocityThreshold;
+
         j["Mass"] = mass;
         j["DebugPrimitiveColor"] = { debugPrimitiveColor.x,debugPrimitiveColor.y,debugPrimitiveColor.z,debugPrimitiveColor.w };
     }
@@ -64,10 +68,21 @@ public:
         usePhysicsResponse = j.value("UsePhysicsResponse", true);
         physicsControlsTransform = j.value("PhysicsControlsTransform", false);
         collisionRole = static_cast<CollisionRole>(j.value("CollisionRole", static_cast<int>(CollisionRole::PHYSICAL)));
-        _ShapeRenderFlg = j.value("ShapeRenderFlg", true);
+        shapeRenderEnabled = j.value("ShapeRenderFlg", true);
         useGravity = j.value("UseGravity", false);
         gravityScale = j.value("GravityScale", 1.0f);
         mass = j.value("Mass", 1.0f);
+
+        velocityRotationMode = static_cast<VelocityRotationMode>(
+            j.value(
+                "VelocityRotationMode",
+                static_cast<int>(VelocityRotationMode::NONE)
+            )
+            );
+
+        rotateVelocityThreshold =
+            j.value("RotateVelocityThreshold", 0.001f);
+
         if (j.contains("DebugPrimitiveColor")) {
             debugPrimitiveColor.x = j["DebugPrimitiveColor"][0];
             debugPrimitiveColor.y = j["DebugPrimitiveColor"][1];
@@ -77,7 +92,7 @@ public:
 
     }
 
-    void SyncFromPhysics();
+    void SyncFromPhysics(float dt_);
     void PreparePhysicsStep();
     void RecreatePhysXActor();
     void ReleasePhysXActor();
@@ -125,13 +140,22 @@ protected:
 private:
     void CreatePhysXActor();
     void UpdatePhysXShape();
+    void ApplyDynamicActorSettings(physx::PxRigidDynamic& actor_);
+    physx::PxMaterial* GetShapeMaterial();
     bool HasExternalTransformChange();
     void CaptureTransformSnapshot();
     void PushTransformToPhysics();
 
+    physx::PxMaterial* shapeMaterial = nullptr;
     DirectX::XMFLOAT3 lastTransformPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 lastTransformRotation = { 0.0f, 0.0f, 0.0f };
     bool hasTransformSnapshot = false;
+
+    VelocityRotationMode velocityRotationMode = VelocityRotationMode::NONE;
+    float rotateVelocityThreshold = 0.001f;
+
+    bool stopCharacterSlideWhenNoInput = true;
+    float characterSlideStopThreshold = 0.2f;
 };
 
 

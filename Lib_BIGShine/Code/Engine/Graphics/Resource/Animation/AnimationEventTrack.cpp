@@ -11,27 +11,28 @@ AnimationEventTrack::AnimationEventTrack()
 {
 }
 
-void AnimationEventTrack::AddEvent(const std::string& label,float start, float end, unsigned int color)
+void AnimationEventTrack::AddEvent(const std::string& label_, float start_, float end_, unsigned int color_)
 {
-    events.push_back({ start, end, color, label });
-} 
-
-
-void AnimationEventTrack::DeleteEvent(int index)
-{
-    if (index >= 0 && index < (int)events.size())
-        events.erase(events.begin() + index);
+    events.push_back({ start_, end_, color_, label_ });
 }
 
-void AnimationEventTrack::DuplicateEvent(int index)
+
+void AnimationEventTrack::DeleteEvent(int index_)
 {
-    if (index >= 0 && index < (int)events.size())
-        events.push_back(events[index]);
+    // UIから渡された選択値が無効な場合は、既存イベントを変更しない。
+    if (index_ >= 0 && index_ < static_cast<int>(events.size()))
+        events.erase(events.begin() + index_);
 }
 
-void AnimationEventTrack::BeginEdit(int index)
+void AnimationEventTrack::DuplicateEvent(int index_)
 {
-    editingEntry = index;
+    if (index_ >= 0 && index_ < static_cast<int>(events.size()))
+        events.push_back(events[index_]);
+}
+
+void AnimationEventTrack::BeginEdit(int index_)
+{
+    editingEntry = index_;
 }
 
 void AnimationEventTrack::EndEdit()
@@ -40,9 +41,10 @@ void AnimationEventTrack::EndEdit()
     editingPart = 0;
 }
 
-void AnimationEventTrack::DoubleClick(int index)
+void AnimationEventTrack::DoubleClick(int index_)
 {
-    // TODO: ダブルクリックで何かする場合
+    // 詳細編集ダイアログなどを追加する際の拡張ポイントとして保持する。
+    (void)index_;
 }
 
 void AnimationEventTrack::Copy()
@@ -58,94 +60,92 @@ void AnimationEventTrack::Paste()
 }
 
 bool AnimationEventTrack::DrawSequencer(
-    float* currentTime,             // 現在の秒数
-    bool* expanded,
-    int* selectedEntry,
-    float* firstVisibleTime,        // スクロール位置（秒）
-    float animationLengthSeconds
+    float* currentTime_,
+    bool* expanded_,
+    int* selectedEntry_,
+    float* firstVisibleTime_,
+    float animationLengthSeconds_
 )
 {
-    const float pixelsPerSecond = 100.0f;      // 1 秒 = 100px
-    const float rowHeight = 24.0f;
+    const float pixelsPerSecond_ = 100.0f;
+    const float rowHeight_ = 24.0f;
+    (void)firstVisibleTime_; // ImGuiのスクロール機能へ移行済み。互換性維持のため引数は残す。
 
     ImGui::BeginChild("SequencerRegion", ImVec2(0, 180), true, ImGuiWindowFlags_HorizontalScrollbar);
-    float contentWidth = animationLengthSeconds * pixelsPerSecond;
-    ImGui::Dummy(ImVec2(contentWidth, 0));   // スクロール可能領域確保
+    float contentWidth_ = animationLengthSeconds_ * pixelsPerSecond_;
+    ImGui::Dummy(ImVec2(contentWidth_, 0)); // アニメーション尺に応じた横スクロール領域を確保する。
 
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImVec2 origin = ImGui::GetCursorScreenPos();
+    ImDrawList* drawList_ = ImGui::GetWindowDrawList();
+    ImVec2 origin_ = ImGui::GetCursorScreenPos();
 
-    // 背景
-    draw_list->AddRectFilled(origin, origin + ImVec2(contentWidth, 180), IM_COL32(30, 30, 30, 255));
+    drawList_->AddRectFilled(origin_, origin_ + ImVec2(contentWidth_, 180), IM_COL32(30, 30, 30, 255));
 
-    // 時間メモリ線（5秒ごと）
-    for (float t = 0; t <= animationLengthSeconds; t += 5.0f)
+    // 長いアニメーションでも時間位置を把握できるよう、5秒間隔で目盛りを描画する。
+    for (float time_ = 0; time_ <= animationLengthSeconds_; time_ += 5.0f)
     {
-        float x = origin.x + t * pixelsPerSecond;
-        draw_list->AddLine(ImVec2(x, origin.y), ImVec2(x, origin.y + 180), IM_COL32(100, 100, 100, 255));
-        char buf[32]; sprintf_s(buf, "%.0f s", t);
-        draw_list->AddText(ImVec2(x + 2, origin.y + 2), IM_COL32_WHITE, buf);
+        float x_ = origin_.x + time_ * pixelsPerSecond_;
+        drawList_->AddLine(ImVec2(x_, origin_.y), ImVec2(x_, origin_.y + 180), IM_COL32(100, 100, 100, 255));
+        char timeText_[32];
+        sprintf_s(timeText_, "%.0f s", time_);
+        drawList_->AddText(ImVec2(x_ + 2, origin_.y + 2), IM_COL32_WHITE, timeText_);
     }
 
-    if (*expanded)
+    if (*expanded_)
     {
-        for (int i = 0; i < events.size(); ++i)
+        for (int index_ = 0; index_ < static_cast<int>(events.size()); ++index_)
         {
-            auto& ev = events[i];
+            auto& event_ = events[index_];
 
-            float x0 = origin.x + ev.startTime * pixelsPerSecond;
-            float x1 = origin.x + ev.endTime * pixelsPerSecond;
+            float startX_ = origin_.x + event_.startTime * pixelsPerSecond_;
+            float endX_ = origin_.x + event_.endTime * pixelsPerSecond_;
 
-            // バー描画
-            draw_list->AddRectFilled(ImVec2(x0, origin.y + rowHeight * i),
-                ImVec2(x1, origin.y + rowHeight * (i + 1)), ev.color);
-            draw_list->AddRect(ImVec2(x0, origin.y + rowHeight * i),
-                ImVec2(x1, origin.y + rowHeight * (i + 1)), IM_COL32(0, 0, 0, 255));
-            draw_list->AddText(ImVec2(x0 + 4, origin.y + rowHeight * i + 4), IM_COL32(0, 0, 0, 255), ev.label.c_str());
+            // イベントの有効期間をバーとして可視化する。
+            drawList_->AddRectFilled(ImVec2(startX_, origin_.y + rowHeight_ * index_),
+                ImVec2(endX_, origin_.y + rowHeight_ * (index_ + 1)), event_.color);
+            drawList_->AddRect(ImVec2(startX_, origin_.y + rowHeight_ * index_),
+                ImVec2(endX_, origin_.y + rowHeight_ * (index_ + 1)), IM_COL32(0, 0, 0, 255));
+            drawList_->AddText(ImVec2(startX_ + 4, origin_.y + rowHeight_ * index_ + 4),
+                IM_COL32(0, 0, 0, 255), event_.label.c_str());
 
-            // -----------------------------
-            // start ハンドル
-            // -----------------------------
-            ImGui::SetCursorScreenPos(ImVec2(x0 - 5, origin.y + rowHeight * i));
-            ImGui::InvisibleButton(("ev_start_" + std::to_string(i)).c_str(), ImVec2(10, rowHeight));
+            // 左右のハンドルを別々に判定し、イベント期間が逆転しない範囲で編集する。
+            ImGui::SetCursorScreenPos(ImVec2(startX_ - 5, origin_.y + rowHeight_ * index_));
+            ImGui::InvisibleButton(("ev_start_" + std::to_string(index_)).c_str(), ImVec2(10, rowHeight_));
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
             {
-                float mx = ImGui::GetIO().MousePos.x - origin.x;
-                ev.startTime = std::max(0.0f, std::min(mx / pixelsPerSecond, ev.endTime));
+                float mouseX_ = ImGui::GetIO().MousePos.x - origin_.x;
+                event_.startTime = std::max(0.0f, std::min(mouseX_ / pixelsPerSecond_, event_.endTime));
             }
 
-            // -----------------------------
-            // end ハンドル
-            // -----------------------------
-            ImGui::SetCursorScreenPos(ImVec2(x1 - 5, origin.y + rowHeight * i));
-            ImGui::InvisibleButton(("ev_end_" + std::to_string(i)).c_str(), ImVec2(10, rowHeight));
+            ImGui::SetCursorScreenPos(ImVec2(endX_ - 5, origin_.y + rowHeight_ * index_));
+            ImGui::InvisibleButton(("ev_end_" + std::to_string(index_)).c_str(), ImVec2(10, rowHeight_));
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
             {
-                float mx = ImGui::GetIO().MousePos.x - origin.x;
-                ev.endTime = std::max(ev.startTime, std::min(mx / pixelsPerSecond, animationLengthSeconds));
+                float mouseX_ = ImGui::GetIO().MousePos.x - origin_.x;
+                event_.endTime = std::max(event_.startTime,
+                    std::min(mouseX_ / pixelsPerSecond_, animationLengthSeconds_));
             }
 
-            // -----------------------------
-            // バー全体クリック用 InvisibleButton（start/end の後に置く）
-            // -----------------------------
-            ImGui::SetCursorScreenPos(ImVec2(x0 + 5, origin.y + rowHeight * i));  // 中央部分だけ
-            ImGui::InvisibleButton(("ev_full_" + std::to_string(i)).c_str(), ImVec2((x1 - x0) - 10, rowHeight));
+            // ハンドルを優先して判定するため、バー本体のクリック領域は最後に配置する。
+            ImGui::SetCursorScreenPos(ImVec2(startX_ + 5, origin_.y + rowHeight_ * index_));
+            ImGui::InvisibleButton(("ev_full_" + std::to_string(index_)).c_str(),
+                ImVec2((endX_ - startX_) - 10, rowHeight_));
             if (ImGui::IsItemClicked())
-                *selectedEntry = i;
+                *selectedEntry_ = index_;
         }
     }
 
-    // 現在時間カーソル
-    float cx = origin.x + (*currentTime) * pixelsPerSecond;
-    draw_list->AddLine(ImVec2(cx, origin.y), ImVec2(cx, origin.y + 180), IM_COL32(255, 0, 0, 255), 2.0f);
+    // 再生位置を示すカーソルは、ドラッグ操作によるシークにも使用する。
+    float cursorX_ = origin_.x + (*currentTime_) * pixelsPerSecond_;
+    drawList_->AddLine(ImVec2(cursorX_, origin_.y), ImVec2(cursorX_, origin_.y + 180),
+        IM_COL32(255, 0, 0, 255), 2.0f);
 
-    // カーソルドラッグ用
-    ImGui::SetCursorScreenPos(ImVec2(cx - 5, origin.y));
+    ImGui::SetCursorScreenPos(ImVec2(cursorX_ - 5, origin_.y));
     ImGui::InvisibleButton("CurrentTimeDragZone", ImVec2(10, 180));
     if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
     {
-        float mouseX = ImGui::GetIO().MousePos.x;
-        *currentTime = std::max(0.0f, std::min((mouseX - origin.x) / pixelsPerSecond, animationLengthSeconds));
+        float mouseX_ = ImGui::GetIO().MousePos.x;
+        *currentTime_ = std::max(0.0f,
+            std::min((mouseX_ - origin_.x) / pixelsPerSecond_, animationLengthSeconds_));
     }
 
     ImGui::EndChild();

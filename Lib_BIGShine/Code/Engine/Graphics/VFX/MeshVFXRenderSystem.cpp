@@ -1,6 +1,8 @@
 #include "MeshVFXRenderSystem.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Resource/ModelResource.h"
 #include "MeshVFXComponent.h"
@@ -101,10 +103,127 @@ namespace
     }
 }
 
+bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
+{
+    if (!device_) return false;
+    if (FAILED(CPUResourceLoader::LoadVertexShader(
+        device_,
+        "Shader/FullScreenVS.cso",
+        nullptr,
+        0,
+        nullptr,
+        fullScreenVertexShader.ReleaseAndGetAddressOf()))) return false;
+    if (FAILED(CPUResourceLoader::LoadPixelShader(
+        device_,
+        "Shader/MeshVFXTextureMixPS.cso",
+        mixPixelShader.ReleaseAndGetAddressOf()))) return false;
+    if (FAILED(CPUResourceLoader::CreateConstantBuffer(
+        device_,
+        sizeof(MixConstants),
+        constantBuffer.ReleaseAndGetAddressOf()))) return false;
+    return CreateTarget(device_, targets[0]) && CreateTarget(device_, targets[1]);
+}
+
+bool MeshVFXTextureMixer::CreateTarget(ID3D11Device* device_, Target& target_)
+{
+    D3D11_TEXTURE2D_DESC description_{};
+    description_.Width = 1024;
+    description_.Height = 1024;
+    description_.MipLevels = 1;
+    description_.ArraySize = 1;
+    description_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    description_.SampleDesc.Count = 1;
+    description_.Usage = D3D11_USAGE_DEFAULT;
+    description_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    if (FAILED(device_->CreateTexture2D(&description_, nullptr, target_.texture.ReleaseAndGetAddressOf()))) return false;
+    if (FAILED(device_->CreateRenderTargetView(
+        target_.texture.Get(),
+        nullptr,
+        target_.renderTargetView.ReleaseAndGetAddressOf()))) return false;
+    return SUCCEEDED(device_->CreateShaderResourceView(
+        target_.texture.Get(),
+        nullptr,
+        target_.shaderResourceView.ReleaseAndGetAddressOf()));
+}
+
+ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
+    const RenderContext& renderContext_,
+    const std::vector<ID3D11ShaderResourceView*>& textures_,
+    const std::vector<MeshVFXMaskBlendMode>* blendModes_,
+    const std::vector<bool>* invertLayers_,
+    bool average_)
+{
+    if (textures_.empty() || !renderContext_.deviceContext || !renderContext_.renderState) return nullptr;
+    if (textures_.size() == 1 && (!invertLayers_ || invertLayers_->empty() || !(*invertLayers_)[0]))
+    {
+        return textures_[0];
+    }
+
+    ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
+    D3D11_VIEWPORT previousViewport_{};
+    UINT previousViewportCount_ = 1;
+    deviceContext_->RSGetViewports(&previousViewportCount_, &previousViewport_);
+    ID3D11SamplerState* sampler_ = renderContext_.renderState->GetSamplerState(SamplerState::LinearClamp);
+    deviceContext_->PSSetSamplers(0, 1, &sampler_);
+    deviceContext_->OMSetDepthStencilState(
+        renderContext_.renderState->GetDepthStencilState(DepthState::NoTestNoWrite),
+        0);
+    deviceContext_->OMSetBlendState(
+        renderContext_.renderState->GetBlendState(BlendState::Opaque),
+        nullptr,
+        0xFFFFFFFF);
+    deviceContext_->RSSetState(
+        renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+    deviceContext_->IASetInputLayout(nullptr);
+    deviceContext_->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
+    deviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    deviceContext_->VSSetShader(fullScreenVertexShader.Get(), nullptr, 0);
+    deviceContext_->PSSetShader(mixPixelShader.Get(), nullptr, 0);
+    deviceContext_->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+
+    D3D11_VIEWPORT viewport_{};
+    viewport_.Width = 1024.0f;
+    viewport_.Height = 1024.0f;
+    viewport_.MaxDepth = 1.0f;
+    deviceContext_->RSSetViewports(1, &viewport_);
+
+    int outputIndex_ = 0;
+    ID3D11ShaderResourceView* currentTexture_ = textures_[0];
+    for (size_t layerIndex_ = 0; layerIndex_ < textures_.size(); ++layerIndex_)
+    {
+        MixConstants constants_{};
+        constants_.blendMode = layerIndex_ == 0
+            ? 2u
+            : (average_ ? 2u : static_cast<uint32_t>((*blendModes_)[layerIndex_]));
+        constants_.invertLayer =
+            invertLayers_ && layerIndex_ < invertLayers_->size() && (*invertLayers_)[layerIndex_] ? 1u : 0u;
+        constants_.blendWeight = average_ ? 1.0f / static_cast<float>(layerIndex_ + 1) : 1.0f;
+        deviceContext_->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+
+        ID3D11RenderTargetView* renderTargetView_ = targets[outputIndex_].renderTargetView.Get();
+        deviceContext_->OMSetRenderTargets(1, &renderTargetView_, nullptr);
+        ID3D11ShaderResourceView* resources_[] = { currentTexture_, textures_[layerIndex_] };
+        deviceContext_->PSSetShaderResources(0, _countof(resources_), resources_);
+        deviceContext_->Draw(3, 0);
+        ID3D11ShaderResourceView* nullResources_[] = { nullptr, nullptr };
+        deviceContext_->PSSetShaderResources(0, _countof(nullResources_), nullResources_);
+        currentTexture_ = targets[outputIndex_].shaderResourceView.Get();
+        outputIndex_ = 1 - outputIndex_;
+    }
+    if (previousViewportCount_ > 0)
+    {
+        deviceContext_->RSSetViewports(1, &previousViewport_);
+    }
+    return currentTexture_;
+}
+
 bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
 {
     shader = std::make_unique<MeshVFXShader>();
-    isInitialized = shader->Initialize(device_);
+    isInitialized =
+        shader->Initialize(device_) &&
+        maskTextureMixer.Initialize(device_) &&
+        noiseTextureMixer.Initialize(device_);
     if (!isInitialized)
     {
         shader.reset();
@@ -115,6 +234,13 @@ bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
     if (!isInitialized || !component_ || !component_->IsEnabled()) return;
+
+    if (component_->UsesOwnerModel())
+    {
+        const std::shared_ptr<GameObject> owner_ = component_->GetGameObject();
+        if (owner_ && owner_->GetComponent<GltfModelCommponennt>()) components.push_back(component_);
+        return;
+    }
 
     const auto& runtimeParts_ = component_->GetRuntimeParts();
     const bool hasRenderablePart_ = std::any_of(
@@ -129,7 +255,109 @@ void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
     components.push_back(component_);
 }
 
-void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool isEditorWindow_)
+bool MeshVFXRenderSystem::EnsureCopyTexture(
+    ID3D11Device* device_,
+    ID3D11ShaderResourceView* source_,
+    Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_)
+{
+    if (!device_ || !source_) return false;
+
+    Microsoft::WRL::ComPtr<ID3D11Resource> sourceResource_;
+    source_->GetResource(sourceResource_.GetAddressOf());
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> sourceTexture_;
+    if (FAILED(sourceResource_.As(&sourceTexture_))) return false;
+
+    D3D11_TEXTURE2D_DESC sourceDescription_{};
+    sourceTexture_->GetDesc(&sourceDescription_);
+
+    bool recreate_ = !texture_ || !shaderResourceView_;
+    if (texture_)
+    {
+        D3D11_TEXTURE2D_DESC currentDescription_{};
+        texture_->GetDesc(&currentDescription_);
+        recreate_ =
+            currentDescription_.Width != sourceDescription_.Width ||
+            currentDescription_.Height != sourceDescription_.Height ||
+            currentDescription_.Format != sourceDescription_.Format ||
+            currentDescription_.SampleDesc.Count != sourceDescription_.SampleDesc.Count;
+    }
+
+    if (recreate_)
+    {
+        texture_.Reset();
+        shaderResourceView_.Reset();
+        sourceDescription_.Usage = D3D11_USAGE_DEFAULT;
+        sourceDescription_.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        sourceDescription_.CPUAccessFlags = 0;
+        sourceDescription_.MiscFlags = 0;
+        if (FAILED(device_->CreateTexture2D(
+            &sourceDescription_,
+            nullptr,
+            texture_.ReleaseAndGetAddressOf())))
+        {
+            return false;
+        }
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC viewDescription_{};
+        source_->GetDesc(&viewDescription_);
+        if (FAILED(device_->CreateShaderResourceView(
+            texture_.Get(),
+            &viewDescription_,
+            shaderResourceView_.ReleaseAndGetAddressOf())))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool MeshVFXRenderSystem::PrepareSceneSampling(
+    const RenderContext& renderContext_,
+    bool isEditorWindow_,
+    ID3D11RenderTargetView* activeRenderTarget_,
+    ID3D11DepthStencilView* activeDepthStencil_)
+{
+    ID3D11Device* device_ = renderContext_.device
+        ? renderContext_.device
+        : GraphicsDeviceManager::Instance().GetDevice();
+    ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
+    if (!device_ || !deviceContext_ || !renderContext_.baseColorSRV || !renderContext_.depthSRV)
+    {
+        return false;
+    }
+    if (!EnsureCopyTexture(device_, renderContext_.baseColorSRV, sceneColorCopy, sceneColorCopySRV) ||
+        !EnsureCopyTexture(device_, renderContext_.depthSRV, sceneDepthCopy, sceneDepthCopySRV))
+    {
+        return false;
+    }
+
+    deviceContext_->OMSetRenderTargets(0, nullptr, nullptr);
+
+    Microsoft::WRL::ComPtr<ID3D11Resource> colorSource_;
+    Microsoft::WRL::ComPtr<ID3D11Resource> depthSource_;
+    renderContext_.baseColorSRV->GetResource(colorSource_.GetAddressOf());
+    renderContext_.depthSRV->GetResource(depthSource_.GetAddressOf());
+    deviceContext_->CopyResource(sceneColorCopy.Get(), colorSource_.Get());
+    deviceContext_->CopyResource(sceneDepthCopy.Get(), depthSource_.Get());
+
+    if (isEditorWindow_ && activeRenderTarget_)
+    {
+        deviceContext_->OMSetRenderTargets(1, &activeRenderTarget_, activeDepthStencil_);
+    }
+    else
+    {
+        GraphicsDeviceManager::Instance().SetParticleRenderTarget();
+    }
+    return true;
+}
+
+void MeshVFXRenderSystem::RenderAll(
+    const RenderContext& renderContext_,
+    bool isEditorWindow_,
+    ID3D11RenderTargetView* activeRenderTarget_,
+    ID3D11DepthStencilView* activeDepthStencil_)
 {
     if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())
@@ -150,8 +378,28 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool is
     };
     deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
 
-    shader->Begin(renderContext_);
-    shader->UpdateScene(renderContext_);
+    const bool needsSceneSampling_ = std::any_of(
+        components.begin(),
+        components.end(),
+        [](const MeshVFXComponent* component_)
+        {
+            if (!component_) return false;
+            const auto& parts_ = component_->GetAsset().parts;
+            return std::any_of(
+                parts_.begin(),
+                parts_.end(),
+                [](const MeshVFXPart& part_)
+                {
+                    return part_.renderEnabled &&
+                        (part_.useMaskDistortion ||
+                            (part_.useEdgeHighlight && part_.intersectionEdgeStrength > 0.0f));
+                });
+        });
+    const bool sceneSamplingReady_ = needsSceneSampling_ && PrepareSceneSampling(
+        renderContext_,
+        isEditorWindow_,
+        activeRenderTarget_,
+        activeDepthStencil_);
 
     for (MeshVFXComponent* component_ : components)
     {
@@ -166,7 +414,10 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool is
         {
             const MeshVFXPart& part_ = asset_.parts[partIndex_];
             const MeshVFXRuntimePart& runtimePart_ = runtimeParts_[partIndex_];
-            if (!part_.renderEnabled || !runtimePart_.modelResource) continue;
+            const bool useOwnerModel_ = component_->UsesOwnerModel();
+            const std::shared_ptr<GltfModelCommponennt> ownerModel_ =
+                useOwnerModel_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+            if (!part_.renderEnabled || (useOwnerModel_ ? !ownerModel_ : !runtimePart_.modelResource)) continue;
 
             const PartAnimationState animation_ =
                 CalculatePartAnimation(part_, component_->GetTime());
@@ -178,7 +429,7 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool is
             deviceContext_->OMSetBlendState(
                 renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
 
-            const auto& meshes_ = runtimePart_.modelResource->meshes;
+            const auto& meshes_ = useOwnerModel_ ? ownerModel_->GetMeshes() : runtimePart_.modelResource->meshes;
             for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
             {
                 if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
@@ -186,10 +437,11 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool is
                 const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
                 if (!mesh_.vertexBuffer || !mesh_.indexBuffer) continue;
 
-                const DirectX::XMMATRIX world_ =
-                    CreateNodeTransform(mesh_.node) *
-                    CreatePartTransform(part_, animation_) *
-                    owner_->transform->GetWorldMatrix();
+                const DirectX::XMMATRIX world_ = useOwnerModel_
+                    ? DirectX::XMMatrixIdentity()
+                    : CreateNodeTransform(mesh_.node) *
+                        CreatePartTransform(part_, animation_) *
+                        owner_->transform->GetWorldMatrix();
 
                 ID3D11ShaderResourceView* baseTexture_ = runtimePart_.baseTexture.Get();
                 if (part_.useMaterialBaseTexture && part_.baseTexturePath.empty() &&
@@ -203,8 +455,60 @@ void MeshVFXRenderSystem::RenderAll(const RenderContext& renderContext_, bool is
                 {
                     normalTexture_ = mesh_.material->normalMap.Get();
                 }
+
+                std::vector<ID3D11ShaderResourceView*> maskTextures_;
+                std::vector<MeshVFXMaskBlendMode> maskBlendModes_;
+                std::vector<bool> invertMaskLayers_;
+                for (size_t layerIndex_ = 0;
+                    layerIndex_ < runtimePart_.maskTextures.size() && layerIndex_ < part_.maskLayers.size();
+                    ++layerIndex_)
+                {
+                    maskTextures_.push_back(runtimePart_.maskTextures[layerIndex_].Get());
+                    maskBlendModes_.push_back(part_.maskLayers[layerIndex_].blendMode);
+                    invertMaskLayers_.push_back(part_.maskLayers[layerIndex_].invert);
+                }
+                if (maskTextures_.empty() && !runtimePart_.maskTextures.empty())
+                {
+                    maskTextures_.push_back(runtimePart_.maskTextures.front().Get());
+                    maskBlendModes_.push_back(MeshVFXMaskBlendMode::MULTIPLY);
+                    invertMaskLayers_.push_back(false);
+                }
+                std::vector<ID3D11ShaderResourceView*> noiseTextures_;
+                for (const auto& texture_ : runtimePart_.noiseTextures)
+                {
+                    noiseTextures_.push_back(texture_.Get());
+                }
+
+                ID3D11ShaderResourceView* maskTexture_ = maskTextureMixer.Mix(
+                    renderContext_, maskTextures_, &maskBlendModes_, &invertMaskLayers_, false);
+                ID3D11ShaderResourceView* noiseTexture_ = noiseTextureMixer.Mix(
+                    renderContext_, noiseTextures_, nullptr, nullptr, true);
+
+                if (isEditorWindow_ && activeRenderTarget_)
+                {
+                    deviceContext_->OMSetRenderTargets(1, &activeRenderTarget_, activeDepthStencil_);
+                }
+                else
+                {
+                    GraphicsDeviceManager::Instance().SetParticleRenderTarget();
+                }
+                deviceContext_->OMSetBlendState(
+                    renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
+                deviceContext_->OMSetDepthStencilState(
+                    renderContext_.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
+                deviceContext_->RSSetState(
+                    renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+                deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
+                shader->Begin(
+                    renderContext_,
+                    sceneSamplingReady_ ? sceneColorCopySRV.Get() : nullptr,
+                    sceneSamplingReady_ ? sceneDepthCopySRV.Get() : nullptr,
+                    useOwnerModel_);
+                shader->UpdateScene(renderContext_);
+                if (useOwnerModel_) shader->UpdateSkeleton(renderContext_, mesh_);
                 shader->UpdatePart(
                     renderContext_, part_, runtimePart_, baseTexture_, normalTexture_,
+                    maskTexture_, noiseTexture_,
                     world_, animation_.time, animation_.alpha);
 
                 UINT stride_ = sizeof(GltfModelCommponennt::Vertex);

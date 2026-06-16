@@ -242,5 +242,10 @@ public:
     // Transform.h “à‚É’Ç‰Á
     void ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat);
    
+    void SetForwardYawOnly(
+        const Vector3& forward_,
+        float deltaTime_,
+        float turnSpeed_);
+    void SetForward(const Vector3& forward_);
 };
 

@@ -8,83 +8,71 @@
 
 void MouseInput::Update(HWND hwnd)
 {
-    //画面固定をなくす
+    // デバッグ切り替え
     if (KeyInput::KeyPressedIn(KeyInput::Key::K_Enter))
     {
-        if (m_DebugFlag)
-        {
-            m_DebugFlag = false;
-        }
-        else
-        {
-            m_DebugFlag = true;
-        }
+        m_DebugFlag = !m_DebugFlag;
     }
 
+    // マウス座標取得
+    POINT p_;
+    GetCursorPos(&p_);
+    ScreenToClient(hwnd, &p_);
 
-    // マウス座標をクライアント座標で取得
-    POINT p;
-    GetCursorPos(&p);
-    ScreenToClient(hwnd, &p);
-    m_clientPos = p;
-    m_screenPos = DirectX::XMFLOAT2((float)p.x, (float)p.y); // これを外に出す
+    m_clientPos = p_;
+    m_screenPos = Vector2(
+        static_cast<float>(p_.x),
+        static_cast<float>(p_.y)
+    );
 
-
-    // ウィンドウサイズを取得 (DirectX座標系用)
-    RECT rc;
-    GetClientRect(hwnd, &rc);
-    width  = rc.right - rc.left;
-    height = rc.bottom - rc.top;
-
-    //POINT型にする
-    POINT windowCenter = { (float)width / 2.0f,(float)height / 2.0f };
-
-    //計算しやすいVector2型にする
-    Vector2 center = { (float)windowCenter.x,(float)windowCenter.y };
-
-    //クライアント座標をスクリーン座標に変換する
-    ClientToScreen(hwnd, &windowCenter);
-
-
-
-    //現在のマウスの位置を取得する
+    // 現在位置保存
     m_CurrentMousePos = m_screenPos;
 
-    // マウスボタン状態
-    SHORT leftState = GetAsyncKeyState(VK_LBUTTON);
-    SHORT rightState = GetAsyncKeyState(VK_RBUTTON);
+    // 初回のみ差分を0にする
+    if (m_IsFirstMouseUpdate)
+    {
+        m_SubMousePos = Vector2(0.0f, 0.0f);
+        m_IsFirstMouseUpdate = false;
+    }
+    else
+    {
+        // 前フレームとの差分
+        m_SubMousePos = m_CurrentMousePos - m_PrevMousePos;
+    }
 
-    bool leftNow = (leftState & 0x8000) != 0;
-    bool rightNow = (rightState & 0x8000) != 0;
+    // 次フレーム用に保存
+    m_PrevMousePos = m_CurrentMousePos;
+
+    // ウィンドウサイズ取得
+    RECT rc_;
+    GetClientRect(hwnd, &rc_);
+
+    width = rc_.right - rc_.left;
+    height = rc_.bottom - rc_.top;
+
+    // マウスボタン状態
+    SHORT leftState_ = GetAsyncKeyState(VK_LBUTTON);
+    SHORT rightState_ = GetAsyncKeyState(VK_RBUTTON);
+
+    bool leftNow_ = (leftState_ & 0x8000) != 0;
+    bool rightNow_ = (rightState_ & 0x8000) != 0;
 
     // 左クリック
-    m_leftPressed = (leftNow && !m_prevLeft);
-    m_leftDown = leftNow;
-    m_leftReleased = (!leftNow && m_prevLeft);
+    m_leftPressed = leftNow_ && !m_prevLeft;
+    m_leftDown = leftNow_;
+    m_leftReleased = !leftNow_ && m_prevLeft;
 
     // 右クリック
-    m_rightPressed = (rightNow && !m_prevRight);
-    m_rightDown = rightNow;
-    m_rightReleased = (!rightNow && m_prevRight);
+    m_rightPressed = rightNow_ && !m_prevRight;
+    m_rightDown = rightNow_;
+    m_rightReleased = !rightNow_ && m_prevRight;
 
     // 状態保存
-    m_prevLeft = leftNow;
-    m_prevRight = rightNow;
+    m_prevLeft = leftNow_;
+    m_prevRight = rightNow_;
 
-    m_wheelDeltaThisFrame = m_wheelDelta; // フレーム単位で保持
-
-    //マウスの差分を求める
-    m_SubMousePos = m_CurrentMousePos - center;
-
-    ////デバッグ状態ではなければマウスカーソルを固定する
-    //if (!m_DebugFlag)
-    //{
-    //    //マウスの差分を求める
-    //    m_SubMousePos = m_CurrentMousePos - center;
-
-    //    SetCursorPos(windowCenter.x, windowCenter.y);
-
-    //}
+    // ホイール値
+    m_wheelDeltaThisFrame = m_wheelDelta;
 }
 
 bool MouseInput::GetButtonState(int buttonCode, int type) const

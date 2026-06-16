@@ -15,7 +15,7 @@ void CylinderCollider::Gui()
 void CylinderCollider::Update(float dt_)
 {
     (void)dt_;
-    if (!_ShapeRenderFlg) return;
+    if (!shapeRenderEnabled) return;
 
     auto owner_ = GetGameObject();
     if (!owner_) return;

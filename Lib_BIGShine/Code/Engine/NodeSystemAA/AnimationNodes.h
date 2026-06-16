@@ -4,48 +4,43 @@
 #include <string>
 #include <variant>
 
-// アップロードされたファイル名と構造に合わせる
 #include "NodeValue.h"
 #include "NodeBase.h"
 
 namespace NodeSystem {
 
-    // --- Blackboard (変数) 読み込みノード ---
-    // 基底クラス Node も NodeSystem 内にあるため、正しく継承させる
+    /// Blackboardから指定されたパラメータを読み出し、後続ノードへ出力する。
     class GetParamNode : public NodeSystem::Node {
     public:
-        std::string ParamName;
-        // NodeValue.h で定義されている NodeValue を使用
-        std::unordered_map<std::string, NodeSystem::NodeValue>* BlackboardRef;
+        std::string paramName;
+        std::unordered_map<std::string, NodeSystem::NodeValue>* blackboardRef;
 
-        GetParamNode(uintptr_t id, const std::string& paramName, std::unordered_map<std::string, NodeSystem::NodeValue>* bb)
-            : NodeSystem::Node(id, "Get: " + paramName), ParamName(paramName), BlackboardRef(bb)
+        GetParamNode(uintptr_t id_, const std::string& paramName_, std::unordered_map<std::string, NodeSystem::NodeValue>* blackboard_)
+            : NodeSystem::Node(id_, "Get: " + paramName_), paramName(paramName_), blackboardRef(blackboard_)
         {
-            // ピンの作成 (NodeSystem 内の列挙型をフルネームで指定)
-            Outputs.emplace_back(id + 1, "Value", NodeSystem::PinType::Float, NodeSystem::PinDirection::Output);
+            outputs.emplace_back(id_ + 1, "Value", NodeSystem::PinType::FLOAT, NodeSystem::PinDirection::OUTPUT);
         }
 
         void Evaluate() override {
-            if (BlackboardRef) {
-                auto it = BlackboardRef->find(ParamName);
-                if (it != BlackboardRef->end()) {
-                    // Outputs は基底クラス Node のメンバ
-                    Outputs[0].Value = it->second;
+            if (blackboardRef) {
+                auto iterator_ = blackboardRef->find(paramName);
+                if (iterator_ != blackboardRef->end()) {
+                    outputs[0].value = iterator_->second;
                 }
             }
         }
     };
 
-    // --- アニメーション最終出力ノード ---
+    /// アニメーショングラフの最終結果を外部コンポーネントへ公開する終端ノード。
     class AnimOutputNode : public NodeSystem::Node {
     public:
-        AnimOutputNode(uintptr_t id) : NodeSystem::Node(id, "Anim Output") {
-            Inputs.emplace_back(id + 1, "Blend Alpha", NodeSystem::PinType::Float, NodeSystem::PinDirection::Input);
-            Inputs.emplace_back(id + 2, "Playback Speed", NodeSystem::PinType::Float, NodeSystem::PinDirection::Input);
+        AnimOutputNode(uintptr_t id_) : NodeSystem::Node(id_, "Anim Output") {
+            inputs.emplace_back(id_ + 1, "Blend Alpha", NodeSystem::PinType::FLOAT, NodeSystem::PinDirection::INPUT);
+            inputs.emplace_back(id_ + 2, "Playback Speed", NodeSystem::PinType::FLOAT, NodeSystem::PinDirection::INPUT);
         }
 
         void Evaluate() override {
-            // 値の読み出しは外部（Component）から行うため空でOK
+            // 終端ノードの入力値は外部コンポーネントが参照するため、追加の評価処理は不要。
         }
     };
 

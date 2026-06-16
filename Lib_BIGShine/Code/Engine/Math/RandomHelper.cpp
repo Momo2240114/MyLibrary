@@ -1,44 +1,48 @@
+#include "RandomHelper.h"
 
-#include"RandomHelper.h"
 #include <cmath>
 #include <DirectXMath.h>
-#include <cmath>
-float RandomRangeCreat(float min, float max)
-{
-	// 0.0～1.0の間までのランダム値
-	float value = static_cast<float>(rand()) / RAND_MAX;
 
-	// min～maxまでのランダム値に変換
-	return min + (max - min) * value;
+float RandomRangeCreate(float min_, float max_)
+{
+    // randの結果を0.0～1.0へ正規化し、指定された範囲へ線形変換する。
+    float normalizedValue_ = static_cast<float>(rand()) / RAND_MAX;
+    return min_ + (max_ - min_) * normalizedValue_;
 }
 
-DirectX::XMFLOAT3 QuaternionToEuler(DirectX::XMVECTOR q)
+DirectX::XMFLOAT3 QuaternionToEuler(DirectX::XMVECTOR quaternion_)
 {
-    DirectX::XMFLOAT4 Q;
-    DirectX::XMStoreFloat4(&Q, q);
+    DirectX::XMFLOAT4 quaternionElements_;
+    DirectX::XMStoreFloat4(&quaternionElements_, quaternion_);
 
-    DirectX::XMFLOAT3 euler;
+    DirectX::XMFLOAT3 eulerAngles_;
 
-    // 1. Pitch (X軸) - 真ん中の回転なので asin で計算
-    // Y -> X -> Z の順序では、X成分と、Y*Zの組み合わせで判定します
-    double sinp = 2.0 * (Q.w * Q.x - Q.z * Q.y);
+    // Y-X-Z回転順の中央軸となるX回転を算出する。
+    double sinPitch_ = 2.0 * (quaternionElements_.w * quaternionElements_.x
+        - quaternionElements_.z * quaternionElements_.y);
 
-    // ジンバルロック対策 (±90度)
-    if (std::abs(sinp) >= 1.0)
-        euler.x = (float)std::copysign(DirectX::XM_PIDIV2, sinp);
+    // 誤差でasinの定義域を超える場合は、ジンバルロック位置の±90度へ固定する。
+    if (std::abs(sinPitch_) >= 1.0)
+    {
+        eulerAngles_.x = static_cast<float>(std::copysign(DirectX::XM_PIDIV2, sinPitch_));
+    }
     else
-        euler.x = (float)std::asin(sinp);
+    {
+        eulerAngles_.x = static_cast<float>(std::asin(sinPitch_));
+    }
 
-    // 2. Yaw (Y軸) - 最初の回転
-    double siny_cosr = 2.0 * (Q.w * Q.y + Q.x * Q.z);
-    double cosy_cosr = 1.0 - 2.0 * (Q.x * Q.x + Q.y * Q.y);
-    euler.y = (float)std::atan2(siny_cosr, cosy_cosr);
+    // 最初のY回転と最後のZ回転はatan2で象限を維持したまま算出する。
+    double sinYawCosPitch_ = 2.0 * (quaternionElements_.w * quaternionElements_.y
+        + quaternionElements_.x * quaternionElements_.z);
+    double cosYawCosPitch_ = 1.0 - 2.0 * (quaternionElements_.x * quaternionElements_.x
+        + quaternionElements_.y * quaternionElements_.y);
+    eulerAngles_.y = static_cast<float>(std::atan2(sinYawCosPitch_, cosYawCosPitch_));
 
-    // 3. Roll (Z軸) - 最後の回転
-    double sinr_cosp = 2.0 * (Q.w * Q.z + Q.x * Q.y);
-    double cosr_cosp = 1.0 - 2.0 * (Q.x * Q.x + Q.z * Q.z);
-    euler.z = (float)std::atan2(sinr_cosp, cosr_cosp);
+    double sinRollCosPitch_ = 2.0 * (quaternionElements_.w * quaternionElements_.z
+        + quaternionElements_.x * quaternionElements_.y);
+    double cosRollCosPitch_ = 1.0 - 2.0 * (quaternionElements_.x * quaternionElements_.x
+        + quaternionElements_.z * quaternionElements_.z);
+    eulerAngles_.z = static_cast<float>(std::atan2(sinRollCosPitch_, cosRollCosPitch_));
 
-    return euler;
+    return eulerAngles_;
 }
-

@@ -811,6 +811,27 @@ bool ParticleComponent::SetEmitterPosition(
     return true;
 }
 
+bool ParticleComponent::SetEmitterLine(
+    const std::string& emitterName_,
+    const DirectX::XMFLOAT3& startPosition_,
+    const DirectX::XMFLOAT3& endPosition_)
+{
+    bool changed_ = false;
+    for (EmitterTrack& track_ : tracks)
+    {
+        if (!emitterName_.empty() && track_.name != emitterName_) continue;
+
+        track_.settings.spawnShape = 4;
+        track_.settings.emissionPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
+        track_.settings.shapeStart = {
+            startPosition_.x, startPosition_.y, startPosition_.z, 1.0f };
+        track_.settings.shapeEnd = {
+            endPosition_.x, endPosition_.y, endPosition_.z, 1.0f };
+        track_.spawnSpace = ParticleSpawnSpace::WORLD;
+        changed_ = true;
+    }
+    return changed_;
+}
 bool ParticleComponent::TriggerEmitterAtPosition(
     const std::string& emitterName_,
     const DirectX::XMFLOAT3& worldPosition_)

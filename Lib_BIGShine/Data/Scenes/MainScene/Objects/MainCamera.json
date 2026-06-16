@@ -1,36 +1,83 @@
 {
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionRole": 0,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "GravityScale": 1.0,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": true,
+                "Radius": 0.5,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0
+            },
+            "Enabled": true,
+            "TypeName": "SphereCollider"
+        }
+    ],
     "CollisionMask": 0,
     "Components": [
         {
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    -1.6933494806289673,
-                    3.438812017440796,
-                    1.9826018810272217
+                    -7.923567771911621,
+                    7.2839274406433105,
+                    -3.720494031906128
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    -1.689921259880066,
-                    3.43817138671875,
-                    2.982595920562744
+                    -8.130387306213379,
+                    6.38408088684082,
+                    -3.3364341259002686
                 ],
                 "fovY": 59.96766662597656,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
-                    2.196388777520042e-06,
-                    0.9999998211860657,
-                    0.0006406690808944404
+                    -0.4266456365585327,
+                    0.4362066984176636,
+                    0.792273223400116
                 ]
             },
             "Enabled": true,
             "TypeName": "CameraComponent"
         },
         {
-            "Data": null,
+            "Data": {
+                "currentPitch": -64.13789367675781,
+                "currentYaw": 118.30284118652344,
+                "distance": 6.0,
+                "followSpeed": 15.0,
+                "lookSpeedX": 300.0,
+                "lookSpeedY": 200.0,
+                "maxPitch": 20.0,
+                "minPitch": -80.0,
+                "mouseSensitivity": 0.10000000149011612,
+                "targetName": "PlayerModel",
+                "targetOffset": [
+                    0.0,
+                    1.5,
+                    0.0
+                ]
+            },
             "Enabled": true,
-            "TypeName": "CameraFreeController"
+            "TypeName": "ThirdPersonCameraComponent"
         }
     ],
     "Layer": 1,
@@ -38,19 +85,19 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -1.6933494806289673,
-            3.438812017440796,
-            1.9826018810272217
+            -7.923567771911621,
+            7.2839274406433105,
+            -3.720494031906128
         ],
         "Rot": [
-            0.03670785203576088,
-            0.19642484188079834,
+            64.13788604736328,
+            331.6971740722656,
             0.0
         ],
         "Scale": [
-            1.0,
-            1.0,
-            1.0
+            0.9999999403953552,
+            0.9999998807907104,
+            0.9999998807907104
         ]
     }
 }

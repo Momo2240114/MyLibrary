@@ -3,8 +3,8 @@
 #include <windows.h>
 #include <tchar.h>
 #include <sstream>
-#include <d3d11.h> 
-#include <wrl.h> 
+#include <d3d11.h>
+#include <wrl.h>
 
 #include "Engine/Common/misc.h"
 #include "Engine/Graphics/RenderSystem/ShapeRenderer.h"
@@ -15,11 +15,11 @@
 #include "Engine/Graphics/RenderSystem/PostRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/RadialBlurSystem.h"
 
-#include "Engine/Graphics/RenderSystem/CascadeShadowMap.h" 
+#include "Engine/Graphics/RenderSystem/CascadeShadowMap.h"
 
 // ============================================================================
 // GraphicsDeviceManager
-//  Direct3D11 デバイスとスワップチェーン、描画制御を管理するクラス
+// Direct3D11デバイス、描画ターゲット、ポストエフェクトの生存期間を一元管理する。
 // ============================================================================
 class GraphicsDeviceManager
 {
@@ -30,7 +30,7 @@ public:
     //====================================================
     // 初期化と破棄
     //====================================================
-    bool Initialize(HWND hWnd_, int width_, int height_, bool fullscreen_);
+    bool Initialize(HWND windowHandle_, int width_, int height_, bool fullscreen_);
 
     void Shutdown();
     void OnResize(int newWidth_, int newHeight_);
@@ -50,7 +50,7 @@ public:
     ID3D11RenderTargetView* GetRenderTargetView() const { return renderTargetView.Get(); }
     ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView.Get(); }
     ID3D11ShaderResourceView* GetMainDepthSRV() const { return depthStencilSRV.Get(); }
-    HWND GetWindowHandle() { return hWnd; }
+    HWND GetWindowHandle() { return windowHandle; }
     ShapeRenderSystem& GetShapeRendererSystem() { return shapeRendererSystem; }
     // レンダーステート取得
     RenderState* GetRenderState() { return renderState.get(); }
@@ -97,11 +97,11 @@ public:
     void DrawPostEffectGuiContent();
     void ShowPostEffectGui();
 private:
-    ShapeRenderSystem shapeRendererSystem; 
+    ShapeRenderSystem shapeRendererSystem;
     PostRenderSystem postRenderSystem;
 
     //====================================================
-    // DirectX11 リソース
+    // DirectX11の中核リソース。破棄順序を制御するため、このクラスが所有する。
     //====================================================
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
@@ -112,7 +112,7 @@ private:
 
 public:
     Microsoft::WRL::ComPtr<ID3D11Texture2D> copyDepthStencilTexture; // 深度バッファ本体
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyDepthStenciSRV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyDepthStencilSRV;
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D>          copySceneColorTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copySceneColorSRV;
@@ -130,12 +130,12 @@ public:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneNormalSRV;
 private:
 
-    HWND											hWnd = nullptr;
+    HWND											windowHandle = nullptr;
 
     //====================================================
-    // 内部状態
+    // ウィンドウサイズと描画領域に依存する実行時状態。
     //====================================================
-    D3D11_VIEWPORT viewPort;
+    D3D11_VIEWPORT viewport;
     D3D_FEATURE_LEVEL featureLevels[2] =
     {
         D3D_FEATURE_LEVEL_11_1,

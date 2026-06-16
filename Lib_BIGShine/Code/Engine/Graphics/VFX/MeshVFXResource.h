@@ -15,6 +15,19 @@ enum class MeshVFXBlendMode
     ADDITIVE,
 };
 
+enum class MeshVFXMaskBlendMode
+{
+    MULTIPLY,
+    UNION,
+};
+
+struct MeshVFXMaskLayer
+{
+    std::string path;
+    MeshVFXMaskBlendMode blendMode = MeshVFXMaskBlendMode::MULTIPLY;
+    bool invert = false;
+};
+
 struct MeshVFXPart
 {
     std::string modelPath;
@@ -41,6 +54,10 @@ struct MeshVFXPart
     std::string normalTexturePath;
     std::string maskTexturePath;
     std::string noiseTexturePath;
+    std::string distortionNoiseTexturePath;
+    std::string vertexNoiseTexturePath;
+    std::vector<MeshVFXMaskLayer> maskLayers;
+    std::vector<std::string> noiseTexturePaths;
 
     DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT2 baseUVSpeed = { 0.0f, -0.5f };
@@ -50,16 +67,33 @@ struct MeshVFXPart
     float baseUVRotationSpeed = 0.0f;
     float maskUVRotationSpeed = 0.0f;
     float noiseUVRotationSpeed = 0.0f;
+    float uvRadialScale = 1.0f;
+    float uvRadialScaleSpeed = 0.0f;
 
     float alpha = 1.0f;
     float normalStrength = 1.0f;
     float noiseStrength = 0.05f;
+    float vertexNoiseHorizontalStrength = 0.1f;
+    float vertexNoiseVerticalStrength = 0.1f;
+    float vertexNoiseHorizontalScale = 1.0f;
+    float vertexNoiseVerticalScale = 1.0f;
+    DirectX::XMFLOAT3 vertexNoiseSpeed = { 0.0f, 1.0f, 0.0f };
+    float maskDistortionStrength = 8.0f;
+    float maskDistortionOpacity = 0.5f;
+    DirectX::XMFLOAT4 edgeColor = { 0.25f, 0.75f, 1.0f, 1.0f };
+    float silhouetteEdgeStrength = 0.0f;
+    float silhouetteEdgePower = 3.0f;
+    float intersectionEdgeStrength = 0.0f;
+    float intersectionEdgeWidth = 0.002f;
     float fresnelPower = 2.0f;
     float fresnelStrength = 1.0f;
     float dissolveThreshold = 0.0f;
 
     bool useMask = false;
     bool useNoise = false;
+    bool useVertexNoise = false;
+    bool useMaskDistortion = false;
+    bool useEdgeHighlight = false;
     bool useNormal = false;
     bool useFresnel = false;
     MeshVFXBlendMode blendMode = MeshVFXBlendMode::ALPHA;
@@ -70,8 +104,10 @@ struct MeshVFXRuntimePart
     std::shared_ptr<ModelResource> modelResource;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalTexture;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> maskTexture;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> noiseTexture;
+    std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> maskTextures;
+    std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> noiseTextures;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> distortionNoiseTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> vertexNoiseTexture;
 };
 
 struct MeshVFXAsset

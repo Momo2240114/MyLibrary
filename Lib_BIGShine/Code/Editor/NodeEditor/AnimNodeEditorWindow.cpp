@@ -13,11 +13,11 @@ bool AnimNodeEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, Anima
 
     if (!gameObjectManager) return false;
 
-    auto _SelectedObject = gameObjectManager->GetSelectedObject();
-    if (!_SelectedObject) return false;
+    auto selectedObject = gameObjectManager->GetSelectedObject();
+    if (!selectedObject) return false;
 
-    auto model = _SelectedObject->GetComponent<GltfModelCommponennt>();
-    auto animation = _SelectedObject->GetComponent<AnimationControllerComponent>();
+    auto model = selectedObject->GetComponent<GltfModelCommponennt>();
+    auto animation = selectedObject->GetComponent<AnimationControllerComponent>();
     if (!model || !animation) return false;
 
     modelComp = model.get();

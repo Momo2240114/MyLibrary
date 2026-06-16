@@ -4,6 +4,9 @@ Texture2D BaseTexture : register(t0);
 Texture2D MaskTexture : register(t1);
 Texture2D NoiseTexture : register(t2);
 Texture2D NormalTexture : register(t3);
+Texture2D DistortionNoiseTexture : register(t4);
+Texture2D SceneColorTexture : register(t7);
+Texture2D<float> SceneDepthTexture : register(t8);
 
 SamplerState LinearWrapSampler : register(s0);
 SamplerState LinearBorderSampler : register(s1);
@@ -19,20 +22,38 @@ float2 RotateUV(float2 uv, float angle)
         centeredUV.x * sine + centeredUV.y * cosine) + uvRotationCenter;
 }
 
+float2 ScaleUVFromCenter(float2 uv, float scale)
+{
+    return (uv - uvRotationCenter) / max(scale, 0.001f) + uvRotationCenter;
+}
+
 float4 main(VS_OUT input) : SV_TARGET
 {
-    float2 baseUV = RotateUV(input.texcoord, baseUVRotation) + baseUVSpeed * time;
-    float2 maskUV = RotateUV(input.texcoord, maskUVRotation) + maskUVSpeed * time;
+    float radialScale = max(uvRadialScale + uvRadialScaleSpeed * time, 0.001f);
+    float2 baseUV = ScaleUVFromCenter(RotateUV(input.texcoord, baseUVRotation), radialScale) + baseUVSpeed * time;
+    float2 maskUV = ScaleUVFromCenter(RotateUV(input.texcoord, maskUVRotation), radialScale) + maskUVSpeed * time;
     float2 noiseUV = RotateUV(input.texcoord, noiseUVRotation) + noiseUVSpeed * time;
+    float2 sampledNoise = float2(0.0f, 0.0f);
+    float2 distortionNoise = float2(0.0f, 0.0f);
+    bool distortionEnabled = useMaskDistortion != 0 && hasDistortionNoiseTexture != 0;
 
     if (useNoise != 0)
     {
-        float2 noise = (abs(noiseUVRotation) > 0.0001f
+        sampledNoise = (abs(noiseUVRotation) > 0.0001f
             ? NoiseTexture.Sample(LinearBorderSampler, noiseUV)
             : NoiseTexture.Sample(LinearWrapSampler, noiseUV)).rg * 2.0f - 1.0f;
 
-        baseUV += noise * noiseStrength;
-        maskUV += noise * noiseStrength;
+        if (useNoise != 0)
+        {
+            baseUV += sampledNoise * noiseStrength;
+            maskUV += sampledNoise * noiseStrength;
+        }
+    }
+    if (distortionEnabled)
+    {
+        distortionNoise = (abs(noiseUVRotation) > 0.0001f
+            ? DistortionNoiseTexture.Sample(LinearBorderSampler, noiseUV)
+            : DistortionNoiseTexture.Sample(LinearWrapSampler, noiseUV)).rg * 2.0f - 1.0f;
     }
 
     float4 baseColor = abs(baseUVRotation) > 0.0001f
@@ -49,18 +70,17 @@ float4 main(VS_OUT input) : SV_TARGET
             : MaskTexture.Sample(LinearWrapSampler, maskUV).r;
     }
 
-    if (mask <= dissolveThreshold || baseColor.a <= 0.0001f)
+    if (!distortionEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
     {
         discard;
     }
 
+    float3 viewDir = normalize(cameraPosition.xyz - input.worldPosition);
+    float3 normal = normalize(input.normal);
     float fresnelFactor = 0.0f;
 
     if (useFresnel != 0)
     {
-        float3 viewDir = normalize(cameraPosition.xyz - input.worldPosition);
-        float3 normal = normalize(input.normal);
-
         if (useNormal != 0)
         {
             float3 tangent_ = normalize(input.tangent.xyz);
@@ -82,6 +102,47 @@ float4 main(VS_OUT input) : SV_TARGET
     if (useFresnel != 0)
     {
         finalAlpha = saturate(finalAlpha + fresnelFactor * mask * alpha);
+    }
+
+    if (distortionEnabled)
+    {
+        uint sceneWidth;
+        uint sceneHeight;
+        SceneColorTexture.GetDimensions(sceneWidth, sceneHeight);
+        float2 screenSize = max(float2(sceneWidth, sceneHeight), float2(1.0f, 1.0f));
+        float2 screenUV = input.position.xy / screenSize;
+        float2 distortedUV = screenUV + distortionNoise * maskDistortionStrength / screenSize;
+        float3 distortedScene = SceneColorTexture.Sample(LinearBorderSampler, distortedUV).rgb;
+        float hiddenMask = saturate(max(
+            max(1.0f - mask, 1.0f - baseColor.a),
+            step(mask, dissolveThreshold)));
+        finalColor = lerp(finalColor, distortedScene, hiddenMask);
+        finalAlpha = lerp(finalAlpha, maskDistortionOpacity, hiddenMask);
+    }
+
+    if (useEdgeHighlight != 0)
+    {
+        float silhouetteEdge =
+            pow(1.0f - saturate(abs(dot(viewDir, normal))), silhouetteEdgePower) *
+            silhouetteEdgeStrength;
+
+        float intersectionEdge = 0.0f;
+        if (intersectionEdgeStrength > 0.0f)
+        {
+            uint depthWidth;
+            uint depthHeight;
+            SceneDepthTexture.GetDimensions(depthWidth, depthHeight);
+            float2 depthSize = max(float2(depthWidth, depthHeight), float2(1.0f, 1.0f));
+            float2 screenUV = input.position.xy / depthSize;
+            float sceneDepth = SceneDepthTexture.Sample(LinearBorderSampler, screenUV);
+            float depthDifference = abs(sceneDepth - input.position.z);
+            intersectionEdge =
+                (1.0f - smoothstep(0.0f, intersectionEdgeWidth, depthDifference)) *
+                intersectionEdgeStrength;
+        }
+        float edgeAmount = saturate(silhouetteEdge + intersectionEdge);
+        finalColor += edgeColor.rgb * edgeAmount;
+        finalAlpha = saturate(finalAlpha + edgeColor.a * edgeAmount);
     }
 
     return float4(finalColor, finalAlpha);

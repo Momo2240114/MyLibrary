@@ -946,9 +946,9 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 	ID3D11ShaderResourceView* normalSRV = gdm.copyNormalSRV.Get();
 	dc->PSSetShaderResources(2, 1, &normalSRV);
 
-	 
+
 	// コピーした深度(t4)をセット
-	ID3D11ShaderResourceView* depthSRV = gdm.copyDepthStenciSRV.Get();
+	ID3D11ShaderResourceView* depthSRV = gdm.copyDepthStencilSRV.Get();
 	dc->PSSetShaderResources(4, 1, &depthSRV);
 
 	// 各種ステート (デカール中は深度テストをしない)

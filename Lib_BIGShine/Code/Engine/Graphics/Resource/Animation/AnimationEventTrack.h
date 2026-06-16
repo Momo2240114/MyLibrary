@@ -18,22 +18,22 @@ class AnimationEventTrack
 public:
 	AnimationEventTrack();
 	// イベント操作
-	void AddEvent(const std::string& label, float start, float end, unsigned int color);
-	void DeleteEvent(int index);
-	void DuplicateEvent(int index);
-	void BeginEdit(int index);
+	void AddEvent(const std::string& label_, float start_, float end_, unsigned int color_);
+	void DeleteEvent(int index_);
+	void DuplicateEvent(int index_);
+	void BeginEdit(int index_);
 	void EndEdit();
-	void DoubleClick(int index);
+	void DoubleClick(int index_);
 	void Copy();
 	void Paste();
 
 	// ImGui 描画
 	bool DrawSequencer(
-		float* currentTime,             // 現在の秒数
-		bool* expanded,
-		int* selectedEntry,
-		float* firstVisibleTime,        // スクロール位置（秒）
-		float animationLengthSeconds
+		float* currentTime_,             // 現在の秒数
+		bool* expanded_,
+		int* selectedEntry_,
+		float* firstVisibleTime_,        // スクロール位置（秒）
+		float animationLengthSeconds_
 	);
 
 	// データアクセス

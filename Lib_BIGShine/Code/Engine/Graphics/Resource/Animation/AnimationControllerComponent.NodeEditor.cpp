@@ -1,7 +1,7 @@
-ï»¿// Node Editor GUI
-// AnimationControllerComponent ã®å®Ÿè£…ã‚’å½¹å‰²ã”ã¨ã«åˆ†ã‘ãŸãƒ•ã‚¡ã‚¤ãƒ«ã§ã™ã€‚
-// ã‚¯ãƒ©ã‚¹è‡ªä½“ã¯åˆ†é›¢ã›ãšã€åŒã˜ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°å®šç¾©ã ã‘ã‚’åˆ¥ cpp ã«ç½®ã„ã¦ã„ã¾ã™ã€‚
-// ãã®ãŸã‚æ—¢å­˜ã®å‚ç…§é–¢ä¿‚ã‚„ public/private ã®æ‰±ã„ã¯ãã®ã¾ã¾ã§ã™ã€‚
+// Node Editor GUI
+// AnimationControllerComponent ‚ÌÀ‘•‚ğ–ğŠ„‚²‚Æ‚É•ª‚¯‚½ƒtƒ@ƒCƒ‹‚Å‚·B
+// ƒNƒ‰ƒX©‘Ì‚Í•ª—£‚¹‚¸A“¯‚¶ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”’è‹`‚¾‚¯‚ğ•Ê cpp ‚É’u‚¢‚Ä‚¢‚Ü‚·B
+// ‚»‚Ì‚½‚ßŠù‘¶‚ÌQÆŠÖŒW‚â public/private ‚Ìˆµ‚¢‚Í‚»‚Ì‚Ü‚Ü‚Å‚·B
 
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"
@@ -97,24 +97,24 @@ static ImU32 GetGraphNodeTitleColor(const AnimGraphNode& node_)
     }
 }
 
-// ãƒ™ã‚¸ã‚§æ›²ç·šã®ä¸­ç‚¹ã«ä¸‰è§’å½¢ã®çŸ¢å°ã‚’æç”»ã™ã‚‹ãƒ˜ãƒ«ãƒ‘ãƒ¼
+// ƒxƒWƒF‹Èü‚Ì’†“_‚ÉOŠpŒ`‚Ì–îˆó‚ğ•`‰æ‚·‚éƒwƒ‹ƒp[
 static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
 {
     if (p0.x == 0.0f && p0.y == 0.0f) return;
     if (p3.x == 0.0f && p3.y == 0.0f) return;
 
-    // å§‹ç‚¹ã¨çµ‚ç‚¹ã®ç›´ç·šè·é›¢ã‚’æ¸¬ã‚‹
+    // n“_‚ÆI“_‚Ì’¼ü‹——£‚ğ‘ª‚é
     float distance = std::sqrt((p3.x - p0.x) * (p3.x - p0.x) + (p3.y - p0.y) * (p3.y - p0.y));
 
-    // ã‚ã¾ã‚Šã«ã‚‚ãƒãƒ¼ãƒ‰ãŒè¿‘ã™ãã‚‹å ´åˆã¯ã€ã‚ã‚Šè¾¼ã¿ã‚’é˜²ããŸã‚çŸ¢å°ã‚’æç”»ã—ãªã„
+    // ‚ ‚Ü‚è‚É‚àƒm[ƒh‚ª‹ß‚·‚¬‚éê‡‚ÍA‚ß‚è‚İ‚ğ–h‚®‚½‚ß–îˆó‚ğ•`‰æ‚µ‚È‚¢
     if (distance < 50.0f) return;
 
-    // imgui_node_editorã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã«è¿‘ã„ãƒ™ã‚¸ã‚§ã®åˆ¶å¾¡ç‚¹ã‚’è¨ˆç®—
+    // imgui_node_editor‚ÌƒfƒtƒHƒ‹ƒg‚É‹ß‚¢ƒxƒWƒF‚Ì§Œä“_‚ğŒvZ
     float strength = std::fmax(std::abs(p3.x - p0.x) * 0.5f, 50.0f);
     ImVec2 p1 = { p0.x + strength, p0.y };
     ImVec2 p2 = { p3.x - strength, p3.y };
 
-    // ãƒ™ã‚¸ã‚§æ›²ç·šä¸Šã®ç‚¹ã‚’è©•ä¾¡ã™ã‚‹ãƒ©ãƒ ãƒ€å¼
+    // ƒxƒWƒF‹Èüã‚Ì“_‚ğ•]‰¿‚·‚éƒ‰ƒ€ƒ_®
     auto evalBezier = [&](float t) -> ImVec2
         {
             float u = 1.0f - t;
@@ -129,8 +129,8 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
             );
         };
 
-    // --- ã€æ–°è¦ã€‘å¼§é•·ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã«ã‚ˆã‚‹ã€ŒçœŸã®ä¸­å¤®ã€ã®æ¢æ±‚ ---
-    // æ›²ç·šã®ä¸Šã‚’ç­‰é–“éš”ã«æ­©ã¿ã€å®Ÿéš›ã®é•·ã•ã‚’è¨ˆæ¸¬ã™ã‚‹
+    // --- yV‹KzŒÊ’·ƒTƒ“ƒvƒŠƒ“ƒO‚É‚æ‚éu^‚Ì’†‰›v‚Ì’T‹ ---
+    // ‹Èü‚Ìã‚ğ“™ŠÔŠu‚É•à‚İAÀÛ‚Ì’·‚³‚ğŒv‘ª‚·‚é
     const int SAMPLE_COUNT = 8;
     float lengths[SAMPLE_COUNT + 1];
     lengths[0] = 0.0f;
@@ -149,17 +149,17 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
         prevPoint = currPoint;
     }
 
-    // ç›®æ¨™ã¨ã™ã‚‹ã®ã¯ã€å…¨ä½“ã®é•·ã•ã®ã¡ã‚‡ã†ã©åŠåˆ†
+    // –Ú•W‚Æ‚·‚é‚Ì‚ÍA‘S‘Ì‚Ì’·‚³‚Ì‚¿‚å‚¤‚Ç”¼•ª
     float targetLength = totalLength * 0.5f;
-    float targetT = 0.5f; // ãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯ç”¨
+    float targetT = 0.5f; // ƒtƒH[ƒ‹ƒoƒbƒN—p
 
-    // ç›®æ¨™ã®é•·ã•ã«åˆ°é”ã™ã‚‹ parameter 't' ã‚’ç·šå½¢è£œé–“ã§è¦‹ã¤ã‘å‡ºã™
+    // –Ú•W‚Ì’·‚³‚É“’B‚·‚é parameter 't' ‚ğüŒ`•âŠÔ‚ÅŒ©‚Â‚¯o‚·
     for (int i = 0; i < SAMPLE_COUNT; ++i)
     {
         if (targetLength >= lengths[i] && targetLength <= lengths[i + 1])
         {
             float tMin = (float)i / (float)SAMPLE_COUNT;
-            float tMax = (float)i + 1 / (float)SAMPLE_COUNT; // å®Ÿéš›ã«ã¯ (float)(i+1)/SAMPLE_COUNT
+            float tMax = (float)i + 1 / (float)SAMPLE_COUNT; // ÀÛ‚É‚Í (float)(i+1)/SAMPLE_COUNT
             tMax = (float)(i + 1) / (float)SAMPLE_COUNT;
 
             float segmentLength = lengths[i + 1] - lengths[i];
@@ -172,21 +172,21 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
         }
     }
 
-    // ã€å®‰å…¨å¼ã€‘ãƒãƒ¼ãƒ‰ã®ãƒ”ãƒ³ï¼ˆåŠå¾„14.0fãªã©ï¼‰ã«çŸ¢å°ãŒã‚ã‚Šè¾¼ã¾ãªã„ã‚ˆã†ã€tã®ç¯„å›²ã‚’åˆ¶é™ã™ã‚‹
-    // è·é›¢ãŒçŸ­ã„ã¨ãã¯ã€ã‚ˆã‚Šå³ã—ãä¸­å¤®ä»˜è¿‘ã«ç•™ã¾ã‚‰ã›ã‚‹
-    float minT = 40.0f / totalLength; // å§‹ç‚¹ã‹ã‚‰æœ€ä½25ãƒ‰ãƒƒãƒˆé›¢ã™
-    float maxT = 1.0f - (40.0f / totalLength); // çµ‚ç‚¹ã‹ã‚‰æœ€ä½25ãƒ‰ãƒƒãƒˆé›¢ã™
+    // yˆÀ‘S•Ùzƒm[ƒh‚Ìƒsƒ“i”¼Œa14.0f‚È‚Çj‚É–îˆó‚ª‚ß‚è‚Ü‚È‚¢‚æ‚¤At‚Ì”ÍˆÍ‚ğ§ŒÀ‚·‚é
+    // ‹——£‚ª’Z‚¢‚Æ‚«‚ÍA‚æ‚èŒµ‚µ‚­’†‰›•t‹ß‚É—¯‚Ü‚ç‚¹‚é
+    float minT = 40.0f / totalLength; // n“_‚©‚çÅ’á25ƒhƒbƒg—£‚·
+    float maxT = 1.0f - (40.0f / totalLength); // I“_‚©‚çÅ’á25ƒhƒbƒg—£‚·
     if (minT < maxT)
     {
         targetT = std::fmax(minT, std::fmin(targetT, maxT));
     }
     else
     {
-        targetT = 0.5f; // é€†è»¢ã™ã‚‹ã»ã©è¿‘ã„ãªã‚‰ä¸­å¤®å›ºå®š
+        targetT = 0.5f; // ‹t“]‚·‚é‚Ù‚Ç‹ß‚¢‚È‚ç’†‰›ŒÅ’è
     }
     // ----------------------------------------------------
 
-    // æ¥ç·šï¼ˆå‘ãï¼‰ã‚’è©•ä¾¡ã™ã‚‹ãƒ©ãƒ ãƒ€å¼
+    // ÚüiŒü‚«j‚ğ•]‰¿‚·‚éƒ‰ƒ€ƒ_®
     auto evalTangent = [&](float t) -> ImVec2
         {
             float u = 1.0f - t;
@@ -223,7 +223,7 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
 
             const float size = 14.0f;
 
-            // çŸ¢å°ã®å…ˆç«¯ã¨å¾Œæ–¹ã®ç¾½ã‚’æ§‹ç¯‰
+            // –îˆó‚Ìæ’[‚ÆŒã•û‚Ì‰H‚ğ\’z
             ImVec2 tip = ImVec2(center.x + tan.x * size, center.y + tan.y * size);
             ImVec2 backA = ImVec2(
                 center.x - tan.x * size + perp.x * size * 0.75f,
@@ -238,7 +238,7 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
             drawList->AddTriangle(tip, backA, backB, IM_COL32(70, 45, 0, 255), 2.0f);
         };
 
-    // å°ãå‡ºã•ã‚ŒãŸæ¯”ç‡ã§æç”»
+    // “±‚«o‚³‚ê‚½”ä—¦‚Å•`‰æ
     drawArrowAt(targetT);
 }
 const std::string ASSET_DIR = "Data/Animation/StateData/";
@@ -263,7 +263,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
 
     auto currentScopeName = [&]() -> std::string {
-        return m_currentGraphScopeId.empty() ? std::string("Root") : m_currentGraphScopeId;
+        return currentGraphScopeId.empty() ? std::string("Root") : currentGraphScopeId;
         };
     auto ensureScopedEntryExitNodes = [&]() {
         const std::string scope = currentScopeName();
@@ -275,29 +275,29 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             if (it == graphNodes.end())
             {
                 AnimGraphNode node;
-                node.id = ed::NodeId(GetNextID());
+                node.id = ed::NodeId(GetNextId());
                 node.stateName = internalName;
-                node.inputPin = (type == AnimGraphNodeType::Exit) ? ed::PinId(GetNextID()) : ed::PinId(0);
-                node.outputPin = (type == AnimGraphNodeType::Entry) ? ed::PinId(GetNextID()) : ed::PinId(0);
+                node.inputPin = (type == AnimGraphNodeType::Exit) ? ed::PinId(GetNextId()) : ed::PinId(0);
+                node.outputPin = (type == AnimGraphNodeType::Entry) ? ed::PinId(GetNextId()) : ed::PinId(0);
                 node.pos = defaultPos;
                 node.type = type;
                 node.scopeId = scope;
                 graphNodes.push_back(node);
-                m_needsPositionRestore = true;
+                needsPositionRestore = true;
                 return;
             }
 
             it->type = type;
             it->scopeId = scope;
-            if ((uintptr_t)it->id.Get() == 0) it->id = ed::NodeId(GetNextID());
+            if ((uintptr_t)it->id.Get() == 0) it->id = ed::NodeId(GetNextId());
             if (type == AnimGraphNodeType::Entry)
             {
                 it->inputPin = ed::PinId(0);
-                if ((uintptr_t)it->outputPin.Get() == 0) it->outputPin = ed::PinId(GetNextID());
+                if ((uintptr_t)it->outputPin.Get() == 0) it->outputPin = ed::PinId(GetNextId());
             }
             else if (type == AnimGraphNodeType::Exit)
             {
-                if ((uintptr_t)it->inputPin.Get() == 0) it->inputPin = ed::PinId(GetNextID());
+                if ((uintptr_t)it->inputPin.Get() == 0) it->inputPin = ed::PinId(GetNextId());
                 it->outputPin = ed::PinId(0);
             }
             };
@@ -312,32 +312,32 @@ void AnimationControllerComponent::DrawNodeEditorContent()
         };
 
     ImGui::SetNextItemWidth(220.0f);
-    ImGui::InputText("Graph Asset", &m_graphAssetFilePath);
+    ImGui::InputText("Graph Asset", &graphAssetFilePath);
 
     ImGui::SameLine();
     if (ImGui::Button("Save Graph")) {
-        SaveGraphAsset(m_graphAssetFilePath);
+        SaveGraphAsset(graphAssetFilePath);
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Load Graph")) {
-        LoadGraphAsset(m_graphAssetFilePath);
+        LoadGraphAsset(graphAssetFilePath);
     }
 
     if (ImGui::Button("Focus All"))
         ed::NavigateToContent();
 
     ImGui::SameLine();
-    if (ImGui::Button("Back") && !m_graphScopeStack.empty())
+    if (ImGui::Button("Back") && !graphScopeStack.empty())
     {
         for (auto& node : graphNodes)
         {
             if (isNodeInCurrentScope(node))
                 node.pos = ed::GetNodePosition(node.id);
         }
-        m_currentGraphScopeId = m_graphScopeStack.back();
-        m_graphScopeStack.pop_back();
-        m_needsPositionRestore = true;
+        currentGraphScopeId = graphScopeStack.back();
+        graphScopeStack.pop_back();
+        needsPositionRestore = true;
     }
 
     ImGui::SameLine();
@@ -352,8 +352,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     auto drawGraphNode = [&](AnimGraphNode& node)
         {
             const bool isSpecial = IsSpecialGraphNode(node);
-            const bool isActive = !_runtimeActiveStateName.empty() &&
-                (node.stateName == _runtimeActiveStateName) &&
+            const bool isActive = !runtimeActiveStateName.empty() &&
+                (node.stateName == runtimeActiveStateName) &&
                 !isSpecial;
             const char* displayName = GetGraphNodeDisplayName(node);
 
@@ -488,16 +488,16 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             drawGraphNode(node);
     }
 
-    if (_nodeToPlaceHash != 0)
+    if (nodeToPlaceId != 0)
     {
         for (auto& n : graphNodes) {
-            if ((uintptr_t)n.id.Get() == _nodeToPlaceHash && isNodeInCurrentScope(n)) {
-                ed::SetNodePosition(n.id, _newNodeSpawnPos);
+            if ((uintptr_t)n.id.Get() == nodeToPlaceId && isNodeInCurrentScope(n)) {
+                ed::SetNodePosition(n.id, newNodeSpawnPosition);
                 ed::SelectNode(n.id);
                 break;
             }
         }
-        _nodeToPlaceHash = 0;
+        nodeToPlaceId = 0;
     }
 
     for (auto& link : graphTransitions)
@@ -507,7 +507,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
         if (link.scopeId != currentScopeName()) continue;
         if (startNode && endNode && isNodeInCurrentScope(*startNode) && isNodeInCurrentScope(*endNode) && (uintptr_t)startNode->outputPin.Get() != 0 && (uintptr_t)endNode->inputPin.Get() != 0)
         {
-            ImVec4 color = (link.fromStateName == _runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
+            ImVec4 color = (link.fromStateName == runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
                 ? ImVec4(0.25f, 0.65f, 1.0f, 1.0f)
                 : ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
             ed::Link(link.id, startNode->outputPin, endNode->inputPin, color, 3.0f);
@@ -526,14 +526,14 @@ void AnimationControllerComponent::DrawNodeEditorContent()
         auto dstKey = (uintptr_t)endNode->inputPin.Get();
         if (pinPositions.count(srcKey) && pinPositions.count(dstKey))
         {
-            ImU32 color = (link.fromStateName == _runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
+            ImU32 color = (link.fromStateName == runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
                 ? IM_COL32(80, 165, 255, 255)
                 : IM_COL32(120, 120, 120, 255);
             DrawLinkArrow(drawList, pinPositions[srcKey], pinPositions[dstKey], color);
         }
     }
 
-    if (m_needsPositionRestore)
+    if (needsPositionRestore)
     {
         for (auto& node : graphNodes)
         {
@@ -542,7 +542,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
         }
 
         ed::NavigateToContent();
-        m_needsPositionRestore = false;
+        needsPositionRestore = false;
     }
 
     if (ed::BeginCreate())
@@ -606,11 +606,11 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                             transition.fromStateName = finalFrom;
                             transition.toStateName = finalTo;
                             transition.duration = 0.2f;
-                            transition.id = ed::LinkId(GetNextID());
+                            transition.id = ed::LinkId(GetNextId());
                             transition.scopeId = currentScopeName();
                             graphTransitions.push_back(transition);
 
-                            usedTransitionGraph = true;
+                            useTransitionGraph = true;
                         }
                     }
                 }
@@ -638,7 +638,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                         [&](const auto& t) { return t.id == linkId; }),
                     graphTransitions.end());
 
-                usedTransitionGraph = true;
+                useTransitionGraph = true;
             }
         }
 
@@ -675,15 +675,15 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 if (editingState && editingState->name == deletedName)
                     editingState = nullptr;
 
-                usedTransitionGraph = true;
+                useTransitionGraph = true;
             }
         }
     }
     ed::EndDelete();
 
     // ------------------------------------------------------------
-    // è¿½åŠ ï¼šé¸æŠä¸­ã®ãƒªãƒ³ã‚¯ã‚’ Delete / Backspace ã§ç›´æ¥å‰Šé™¤
-    // BeginDelete å´ã®åˆ¤å®šãŒæ‹¾ã„ã«ãã„å ´åˆã®ä¿é™º
+    // ’Ç‰ÁF‘I‘ğ’†‚ÌƒŠƒ“ƒN‚ğ Delete / Backspace ‚Å’¼Úíœ
+    // BeginDelete ‘¤‚Ì”»’è‚ªE‚¢‚É‚­‚¢ê‡‚Ì•ÛŒ¯
     // ------------------------------------------------------------
     ed::LinkId selectedLinkId_;
     if (ed::GetSelectedLinks(&selectedLinkId_, 1) > 0)
@@ -708,7 +708,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             if (graphTransitions.size() != oldSize_)
             {
                 ed::ClearSelection();
-                usedTransitionGraph = true;
+                useTransitionGraph = true;
             }
         }
     }
@@ -728,9 +728,9 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 if (isNodeInCurrentScope(node))
                     node.pos = ed::GetNodePosition(node.id);
             }
-            m_graphScopeStack.push_back(currentScopeName());
-            m_currentGraphScopeId = it->childScopeId;
-            m_needsPositionRestore = true;
+            graphScopeStack.push_back(currentScopeName());
+            currentGraphScopeId = it->childScopeId;
+            needsPositionRestore = true;
         }
     }
 
@@ -781,7 +781,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                             transition_.toStateName = newName_;
                     }
 
-                    usedTransitionGraph = true;
+                    useTransitionGraph = true;
                 }
             }
 
@@ -826,7 +826,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 const char* logicItems[] = { "AND", "OR" };
                 if (ImGui::Combo("Logic", &logic, logicItems, IM_ARRAYSIZE(logicItems))) {
                     it->logic = static_cast<TransitionLogic>(logic);
-                    usedTransitionGraph = true;
+                    useTransitionGraph = true;
                 }
                 if (ImGui::Button("+ Add Condition"))
                     it->conditions.push_back(AnimCondition());
@@ -840,7 +840,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                     int typeIdx = (int)cond.type;
                     if (ImGui::Combo("Type", &typeIdx, condTypes, IM_ARRAYSIZE(condTypes))) {
                         cond.type = (ConditionType)typeIdx;
-                        usedTransitionGraph = true;
+                        useTransitionGraph = true;
                     }
 
                     if (cond.type == ConditionType::Variable || cond.type == ConditionType::Trigger)
@@ -855,16 +855,16 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                             ImGui::SetNextItemWidth(160.0f);
                             if (ImGui::Combo("Parameter", &curIdx, keys.data(), (int)keys.size())) {
                                 cond.parameterName = keys[curIdx];
-                                usedTransitionGraph = true;
+                                useTransitionGraph = true;
                             }
                         }
                         else
                         {
                             if (ImGui::InputText("Parameter", &cond.parameterName)) {
-                                usedTransitionGraph = true;
+                                useTransitionGraph = true;
                             }
                             ImGui::SameLine();
-                            ImGui::TextDisabled("(Blackboardã«ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¿½åŠ ã—ã¦ãã ã•ã„)");
+                            ImGui::TextDisabled("(Blackboard‚Éƒpƒ‰ƒ[ƒ^‚ğ’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢)");
                         }
                     }
 
@@ -876,12 +876,12 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                         if (ImGui::Combo("Op", &opIdx, ops, IM_ARRAYSIZE(ops)))
                         {
                             cond.op = (ConditionOp)opIdx;
-                            usedTransitionGraph = true;
+                            useTransitionGraph = true;
                         }
                         ImGui::SameLine();
                         if(ImGui::DragFloat("Threshold", &cond.threshold, 0.1f))
                         {
-                            usedTransitionGraph = true;
+                            useTransitionGraph = true;
                         }
                     }
 
@@ -889,7 +889,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                     {
                         it->conditions.erase(it->conditions.begin() + i);
                         --i;
-                        usedTransitionGraph = true;
+                        useTransitionGraph = true;
                     }
 
                     ImGui::Separator();
@@ -906,7 +906,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     ed::Suspend();
     if (ed::ShowBackgroundContextMenu()) {
         ImGui::OpenPopup("Create New Node");
-        _newNodeSpawnPos = ed::ScreenToCanvas(ImGui::GetMousePos());
+        newNodeSpawnPosition = ed::ScreenToCanvas(ImGui::GetMousePos());
     }
     ed::Resume();
 
@@ -926,16 +926,16 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 if (ImGui::MenuItem(name.c_str()))
                 {
                     AnimGraphNode newNode;
-                    newNode.id = ed::NodeId(GetNextID());
+                    newNode.id = ed::NodeId(GetNextId());
                     newNode.stateName = name;
-                    newNode.inputPin = ed::PinId(GetNextID());
-                    newNode.outputPin = ed::PinId(GetNextID());
+                    newNode.inputPin = ed::PinId(GetNextId());
+                    newNode.outputPin = ed::PinId(GetNextId());
                     newNode.type = AnimGraphNodeType::State;
                     newNode.scopeId = currentScopeName();
                     graphNodes.push_back(newNode);
-                    _nodeToPlaceHash = (uintptr_t)newNode.id.Get();
+                    nodeToPlaceId = (uintptr_t)newNode.id.Get();
 
-                    usedTransitionGraph = true;
+                    useTransitionGraph = true;
                 }
             }
 
@@ -950,12 +950,12 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             for (auto& n : graphNodes) {
                 if (n.stateName == newName) {
                     n.scopeId = currentScopeName();
-                    _nodeToPlaceHash = (uintptr_t)n.id.Get();
+                    nodeToPlaceId = (uintptr_t)n.id.Get();
                     break;
                 }
             }
 
-            usedTransitionGraph = true;
+            useTransitionGraph = true;
         }
         ImGui::Separator();
         if (ImGui::MenuItem("Create SubGraph"))
@@ -972,17 +972,17 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             } while (exists);
 
             AnimGraphNode subGraphNode;
-            subGraphNode.id = ed::NodeId(GetNextID());
+            subGraphNode.id = ed::NodeId(GetNextId());
             subGraphNode.stateName = graphName;
             subGraphNode.childScopeId = graphName;
-            subGraphNode.inputPin = ed::PinId(GetNextID());
-            subGraphNode.outputPin = ed::PinId(GetNextID());
+            subGraphNode.inputPin = ed::PinId(GetNextId());
+            subGraphNode.outputPin = ed::PinId(GetNextId());
             subGraphNode.type = AnimGraphNodeType::SubGraph;
             subGraphNode.scopeId = currentScopeName();
             graphNodes.push_back(subGraphNode);
-            _nodeToPlaceHash = (uintptr_t)subGraphNode.id.Get();
+            nodeToPlaceId = (uintptr_t)subGraphNode.id.Get();
 
-            usedTransitionGraph = true;
+            useTransitionGraph = true;
         }
         ImGui::EndPopup();
     }

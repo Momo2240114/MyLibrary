@@ -13,7 +13,7 @@ void SceneLoading::Initialize()
 	SceneBase::Initialize();
 
 	if (_GameObjectManager) {
-		_GameObjectManager->SetShapeRenderFlg(false);
+		_GameObjectManager->SetShapeRenderEnabled(false);
 		_GameObjectManager->LoadScene("LoadingScene");
 	}
 

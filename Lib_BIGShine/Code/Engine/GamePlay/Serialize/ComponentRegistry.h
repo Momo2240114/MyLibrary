@@ -21,7 +21,7 @@ public:
     }
 
     template<typename T>
-    inline void Register(const std::string& name,bool csllStart = true);
+    inline void Register(const std::string& name, bool csllStart = true);
 
 
     std::shared_ptr<Component> Create(

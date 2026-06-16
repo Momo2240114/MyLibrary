@@ -34,77 +34,14 @@
             "posY": -69.0,
             "scopeId": "Root",
             "stateName": "SS_SP_Idle"
-        },
-        {
-            "childScopeId": "",
-            "id": 29,
-            "inputPin": 30,
-            "nodeType": 0,
-            "outputPin": 31,
-            "posX": 324.0,
-            "posY": -69.0,
-            "scopeId": "Root",
-            "stateName": "SS_Attack1"
-        },
-        {
-            "childScopeId": "",
-            "id": 32,
-            "inputPin": 33,
-            "nodeType": 0,
-            "outputPin": 34,
-            "posX": 116.0,
-            "posY": 123.0,
-            "scopeId": "Root",
-            "stateName": "SS_Attack2"
         }
     ],
     "GraphTransitions": [
         {
             "conditions": [],
             "duration": 0.20000000298023224,
-            "from": "SS_SP_Idle",
-            "id": 35,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "SS_Attack1"
-        },
-        {
-            "conditions": [],
-            "duration": 0.20000000298023224,
             "from": "__Start__",
             "id": 36,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "SS_SP_Idle"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "SS_Attack1",
-            "id": 37,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "SS_Attack2"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "SS_Attack2",
-            "id": 38,
             "logic": 0,
             "scopeId": "Root",
             "to": "SS_SP_Idle"

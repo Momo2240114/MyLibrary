@@ -11,13 +11,13 @@ void CameraManager::Initialize()
 }
 
 
-void CameraManager::Update(float et, const std::vector<std::shared_ptr<GameObject>>& _Objects) 
+void CameraManager::Update(float et, const std::vector<std::shared_ptr<GameObject>>& objects)
 {
     // 1. —Dæ“x’Tõ
     std::shared_ptr<CameraComponent> highestCam = nullptr;
     int highestPriority = -2147483648;
 
-    for (auto& obj : _Objects) {
+    for (auto& obj : objects) {
         if (!obj) continue;
         auto cam = obj->GetComponent<CameraComponent>();
         if (cam && cam->IsEnabled()) {

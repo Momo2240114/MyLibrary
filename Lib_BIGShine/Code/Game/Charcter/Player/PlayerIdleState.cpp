@@ -1,36 +1,25 @@
 #include "PlayerIdleState.h"
+
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "PlayerControllerComponent.h"
 
-//ステートのinclude例
-//#include "PlayerMoveState.h"
-//#include "PlayerJumpState.h"
-//#include "PlayerFallState.h"
-
-void PlayerIdleState::Enter(PlayerControllerComponent& player_)
+void PlayerIdleState::Enter()
 {
-    player_.SetHorizontalVelocity({ 0, 0, 0 }, 0.0f);
+    auto owner_ = GetOwner();
+    playerComponent = owner_ ? owner_->GetComponent<PlayerControllerComponent>() : nullptr;
+
+    auto player_ = playerComponent.lock();
+    if (!player_) return;
+
+    player_->EnterAction(PLAYER_ACTION::IDLE);
+    player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
 }
 
-void PlayerIdleState::Update(PlayerControllerComponent& player_, float dt_)
+void PlayerIdleState::Execute(float)
 {
-    auto input = player_.GetMoveInput();
+    auto player_ = playerComponent.lock();
+    if (!player_) return;
 
-    if (player_.IsJumpPressed() && player_.IsGrounded())
-    {
-        player_.Jump();
-        // player.ChangeState が必要なので後述
-        return;
-    }
-
-    if (!player_.IsGrounded())
-    {
-        // Fallへ
-        return;
-    }
-
-    if (input.x != 0.0f || input.z != 0.0f)
-    {
-        // Moveへ
-        return;
-    }
+    player_->SendMoveInputToBlackboard(player_->GetMoveInput());
+    player_->ProcessActionInput();
 }

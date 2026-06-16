@@ -21,11 +21,30 @@ cbuffer CbMeshVFX : register(b0)
     float baseUVRotation;
     float maskUVRotation;
     float noiseUVRotation;
+    float uvRadialScale;
+    float uvRadialScaleSpeed;
+    float vertexNoiseHorizontalStrength;
+    float vertexNoiseVerticalStrength;
+    float vertexNoiseHorizontalScale;
+    float vertexNoiseVerticalScale;
+    float3 vertexNoiseSpeed;
+    uint useVertexNoise;
     uint useMask;
     uint useNoise;
     uint useNormal;
     uint useFresnel;
-    uint2 padding;
+    float4 edgeColor;
+    float maskDistortionStrength;
+    float maskDistortionOpacity;
+    float silhouetteEdgeStrength;
+    float silhouetteEdgePower;
+    float intersectionEdgeStrength;
+    float intersectionEdgeWidth;
+    uint useMaskDistortion;
+    uint useEdgeHighlight;
+    uint hasDistortionNoiseTexture;
+    uint hasVertexNoiseTexture;
+    uint2 texturePadding;
 };
 
 struct VS_IN

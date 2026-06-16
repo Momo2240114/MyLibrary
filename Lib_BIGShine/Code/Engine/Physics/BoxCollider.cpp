@@ -49,7 +49,7 @@ void BoxCollider::Update(float dt) {
         halfSize.y * 2.0f * scale.y,
         halfSize.z * 2.0f * scale.z
     };
-    if(_ShapeRenderFlg)
+    if(shapeRenderEnabled)
     {
         renderer.DrawBox(pos, rotRad, drawSize,debugPrimitiveColor);
     }

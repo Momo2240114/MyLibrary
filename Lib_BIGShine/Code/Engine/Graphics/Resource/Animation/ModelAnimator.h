@@ -35,7 +35,7 @@ public:
     void UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed);
 
     // ノードエディタ側から呼ばれる命令
-    void CrossFadeTo(const AnimState* newState, float duration);
+    void CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner = nullptr);
 
     const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
     float GetCurrentFadeTime() const { return current.time; }

@@ -102,6 +102,112 @@ void Transform::ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat)
     }
 }
 
+
+void Transform::SetForwardYawOnly(const Vector3& forward_, float deltaTime_, float turnSpeed_)
+{
+    const float lengthSq_ =
+        forward_.x * forward_.x +
+        forward_.z * forward_.z;
+
+    if (lengthSq_ < 0.0001f)
+    {
+        return;
+    }
+
+    const float targetYaw_ = DirectX::XMConvertToDegrees(
+        std::atan2(forward_.x, forward_.z)
+    );
+
+    auto NormalizeAngle_ = [](float angle_)
+        {
+            angle_ = std::fmod(angle_, 360.0f);
+            if (angle_ < 0.0f)
+            {
+                angle_ += 360.0f;
+            }
+            return angle_;
+        };
+
+    auto DeltaAngle_ = [](float current_, float target_)
+        {
+            return std::fmod(target_ - current_ + 540.0f, 360.0f) - 180.0f;
+        };
+
+    const float currentYaw_ = NormalizeAngle_(localRotation.y);
+    const float deltaYaw_ = DeltaAngle_(currentYaw_, targetYaw_);
+
+    const float rate_ = std::clamp(turnSpeed_ * deltaTime_, 0.0f, 1.0f);
+
+    localRotation.y = NormalizeAngle_(currentYaw_ + deltaYaw_ * rate_);
+
+    MarkDirty();
+}
+
+void Transform::SetForward(const Vector3& forward_)
+{
+    using namespace DirectX;
+
+    XMVECTOR forwardVec_ = XMVectorSet(
+        forward_.x,
+        forward_.y,
+        forward_.z,
+        0.0f
+    );
+
+    if (XMVectorGetX(XMVector3LengthSq(forwardVec_)) < 0.0001f)
+    {
+        return;
+    }
+
+    forwardVec_ = XMVector3Normalize(forwardVec_);
+
+    const XMVECTOR worldUp_ = XMVectorSet(0, 1, 0, 0);
+
+    XMMATRIX lookMatrix_ = XMMatrixLookToLH(
+        XMVectorZero(),
+        forwardVec_,
+        worldUp_
+    );
+
+    lookMatrix_ = XMMatrixInverse(nullptr, lookMatrix_);
+
+    XMVECTOR scale_;
+    XMVECTOR rotation_;
+    XMVECTOR translation_;
+
+    XMMatrixDecompose(
+        &scale_,
+        &rotation_,
+        &translation_,
+        lookMatrix_
+    );
+
+    XMFLOAT4 q_;
+    XMStoreFloat4(&q_, rotation_);
+
+    float ysqr_ = q_.y * q_.y;
+
+    float t0_ = 2.0f * (q_.w * q_.x + q_.y * q_.z);
+    float t1_ = 1.0f - 2.0f * (q_.x * q_.x + ysqr_);
+    float pitch_ = std::atan2(t0_, t1_);
+
+    float t2_ = 2.0f * (q_.w * q_.y - q_.z * q_.x);
+    t2_ = std::clamp(t2_, -1.0f, 1.0f);
+    float yaw_ = std::asin(t2_);
+
+    float t3_ = 2.0f * (q_.w * q_.z + q_.x * q_.y);
+    float t4_ = 1.0f - 2.0f * (ysqr_ + q_.z * q_.z);
+    float roll_ = std::atan2(t3_, t4_);
+
+    localRotation =
+    {
+        XMConvertToDegrees(pitch_),
+        XMConvertToDegrees(yaw_),
+        XMConvertToDegrees(roll_)
+    };
+
+    MarkDirty();
+}
 void Transform::SetParentOverride(bool enable, DirectX::XMMATRIX matrix)
 {
     m_IsOverriding = enable;
