@@ -10,6 +10,7 @@
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/UI/UIButton.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
@@ -30,6 +31,7 @@
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 #include "Engine/GamePlay/Camera/ThirdPersonCameraComponent.h"
+#include "Engine/GamePlay/Camera/LockOnTargetComponent.h"
 #include "Engine/GamePlay/Core/Component/Movement.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
@@ -84,6 +86,7 @@ void RegisterAllComponents()
     registry.Register<CharacterCollider>("CharacterCollider");
     registry.Register<HitBox>("HitBox");
     registry.Register<HurtBox>("HurtBox");
+    registry.Register<ContainmentVolumeComponent>("ContainmentVolumeComponent");
 
     //ゲームシステム
     registry.Register<UIButton>("UIButton");
@@ -100,6 +103,7 @@ void RegisterAllComponents()
     registry.Register<BlackboardComponent>("BlackboardComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");
     registry.Register<ThirdPersonCameraComponent>("ThirdPersonCameraComponent");
+    registry.Register<LockOnTargetComponent>("LockOnTargetComponent");
 }
 
 

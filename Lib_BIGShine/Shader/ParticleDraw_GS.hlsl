@@ -12,10 +12,16 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
 
     Particle p = particleDataBuffer[header.particleIndex];
 
-    float3 toCamera = normalize(cameraPosition.xyz - p.position.xyz);
-    float3 upSeed = abs(toCamera.y) > 0.98f ? float3(0, 0, 1) : float3(0, 1, 0);
-    float3 right = normalize(cross(upSeed, toCamera));
-    float3 up = normalize(cross(toCamera, right));
+    float4 centerWorld = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), invViewProjection);
+    float4 rightWorld = mul(float4(1.0f, 0.0f, 0.0f, 1.0f), invViewProjection);
+    float4 upWorld = mul(float4(0.0f, 1.0f, 0.0f, 1.0f), invViewProjection);
+    centerWorld.xyz /= centerWorld.w;
+    rightWorld.xyz /= rightWorld.w;
+    upWorld.xyz /= upWorld.w;
+
+    float3 right = normalize(rightWorld.xyz - centerWorld.xyz);
+    float3 up = normalize(upWorld.xyz - centerWorld.xyz);
+    float3 cameraForward = normalize(cross(right, up));
 
     float lifeRate = saturate(p.parameter.y / max(p.parameter.z, 0.0001f));
     float size = lerp(p.scale.z, p.scale.x, lifeRate);
@@ -25,8 +31,9 @@ void main(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
     if (renderType > 0.5f && dot(p.velocity.xyz, p.velocity.xyz) > 0.0001f)
     {
         up = normalize(p.velocity.xyz);
-        right = normalize(cross(up, toCamera));
-        up = normalize(cross(toCamera, right));
+        float3 stretchedRight = cross(up, cameraForward);
+        right = dot(stretchedRight, stretchedRight) > 0.0001f ? normalize(stretchedRight) : right;
+        up = normalize(cross(cameraForward, right));
     }
 
     float s = sin(p.rotation.z);

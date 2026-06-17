@@ -1,5 +1,36 @@
 #include "MeshCollider.h"
 
+#include "Engine/Graphics/Resource/GlTFModel.h"
+
+void MeshCollider::Start()
+{
+    if (!CanBuildMesh())
+    {
+        waitingForModel = true;
+        return;
+    }
+
+    waitingForModel = false;
+    ColliderComponent::Start();
+}
+
+void MeshCollider::Update(float)
+{
+    if (!waitingForModel && actor && actor->getNbShapes() > 0)
+    {
+        return;
+    }
+
+    if (!CanBuildMesh())
+    {
+        waitingForModel = true;
+        return;
+    }
+
+    waitingForModel = false;
+    RecreatePhysXActor();
+}
+
 void MeshCollider::Gui()
 {
     ColliderComponent::Gui();
@@ -16,4 +47,13 @@ void MeshCollider::Gui()
     {
         RecreatePhysXActor();
     }
+}
+
+bool MeshCollider::CanBuildMesh() const
+{
+    auto owner_ = gameObject.lock();
+    if (!owner_) return false;
+
+    auto model_ = owner_->GetComponent<GltfModelCommponennt>();
+    return model_ && !model_->GetMeshes().empty();
 }

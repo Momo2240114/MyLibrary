@@ -21,7 +21,9 @@ public:
     }
 
     ColliderType GetColliderType() const override { return ColliderType::Mesh; }
+    void Start() override;
     void Gui() override;
+    void Update(float dt_) override;
 
     void Serialize(nlohmann::json& j_) const override
     {
@@ -34,5 +36,10 @@ public:
         ColliderComponent::Deserialize(j_);
         convex = j_.value("Convex", false);
         if (!convex) isStatic = true;
+        waitingForModel = true;
     }
+
+private:
+    bool CanBuildMesh() const;
+    bool waitingForModel = true;
 };

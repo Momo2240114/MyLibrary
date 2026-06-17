@@ -355,6 +355,9 @@
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Physics\SphereCollider.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
@@ -602,6 +605,9 @@
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Physics\CharacterCollider.cpp">
@@ -1023,6 +1029,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
     </ClInclude>
@@ -1096,6 +1105,9 @@
       <Filter>Code\Engine\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Physics\CharacterCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\ContainmentVolumeComponent.h">
       <Filter>Code\Engine\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Physics\CylinderCollider.h">

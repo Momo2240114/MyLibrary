@@ -174,6 +174,11 @@ void ColliderComponent::UpdatePhysXShape()
             auto model_ = owner_->GetComponent<GltfModelCommponennt>();
             if (!model_) break;
 
+            const DirectX::XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
+            DirectX::XMVECTOR ownerWorldDeterminant_;
+            const DirectX::XMMATRIX actorLocalFromWorld_ =
+                DirectX::XMMatrixInverse(&ownerWorldDeterminant_, ownerWorld_);
+
             std::vector<DirectX::XMFLOAT3> vertices_;
             std::vector<uint32_t> indices_;
             for (const auto& modelMesh_ : model_->GetMeshes())
@@ -188,6 +193,7 @@ void ColliderComponent::UpdatePhysXShape()
                 {
                     DirectX::XMVECTOR position_ = DirectX::XMLoadFloat3(&vertex_.position);
                     position_ = DirectX::XMVector3TransformCoord(position_, meshTransform_);
+                    position_ = DirectX::XMVector3TransformCoord(position_, actorLocalFromWorld_);
                     DirectX::XMFLOAT3 transformedPosition_;
                     DirectX::XMStoreFloat3(&transformedPosition_, position_);
                     vertices_.push_back(transformedPosition_);
@@ -195,7 +201,7 @@ void ColliderComponent::UpdatePhysXShape()
                 for (const auto index_ : modelMesh_.indices) indices_.push_back(vertexOffset_ + index_);
             }
 
-            const PxMeshScale meshScale_(PxVec3(scale_.x, scale_.y, scale_.z));
+            const PxMeshScale meshScale_(PxVec3(1.0f, 1.0f, 1.0f));
             if (meshCollider_->convex)
             {
                 auto mesh_ = PhysXSystem::CreateConvexMesh(vertices_);
@@ -308,7 +314,16 @@ void ColliderComponent::SyncFromPhysics(float dt_)
     owner_->transform->localPosition = { pose_.p.x, pose_.p.y, pose_.p.z };
     const PxVec3 velocity_ = dynamicActor_->getLinearVelocity();
     velocity = { velocity_.x, velocity_.y, velocity_.z };
+    characterGroundedForStep = collisionRole == CollisionRole::CHARACTER && isGrounded;
+
+    if (characterGroundedForStep && velocity.y > 0.0f)
+    {
+        velocity.y = 0.0f;
+        dynamicActor_->setLinearVelocity(PxVec3(velocity.x, 0.0f, velocity.z));
+    }
+
     if (collisionRole == CollisionRole::CHARACTER &&
+        characterGroundedForStep &&
         stopCharacterSlideWhenNoInput)
     {
         const float horizontalSpeedSq_ =
@@ -318,7 +333,7 @@ void ColliderComponent::SyncFromPhysics(float dt_)
         const float stopThresholdSq_ =
             characterSlideStopThreshold * characterSlideStopThreshold;
 
-        if (horizontalSpeedSq_ < stopThresholdSq_)
+        if (horizontalSpeedSq_ <= stopThresholdSq_)
         {
             velocity.x = 0.0f;
             velocity.z = 0.0f;
@@ -386,12 +401,20 @@ void ColliderComponent::PreparePhysicsStep()
     if (auto dynamicActor_ = actor->is<PxRigidDynamic>())
     {
         dynamicActor_->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, !physicsControlsTransform);
-        dynamicActor_->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, !useGravity);
+        const bool disableCharacterGroundGravity_ =
+            collisionRole == CollisionRole::CHARACTER &&
+            characterGroundedForStep &&
+            velocity.y <= 0.0f;
+        dynamicActor_->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, !useGravity || disableCharacterGroundGravity_);
         ApplyDynamicActorSettings(*dynamicActor_);
         if (physicsControlsTransform)
         {
+            if (disableCharacterGroundGravity_)
+            {
+                velocity.y = 0.0f;
+            }
             dynamicActor_->setLinearVelocity(PxVec3(velocity.x, velocity.y, velocity.z));
-            if (useGravity && gravityScale != 1.0f)
+            if (useGravity && !disableCharacterGroundGravity_ && gravityScale != 1.0f)
             {
                 dynamicActor_->addForce(PxVec3(0.0f, -9.8f * (gravityScale - 1.0f), 0.0f), PxForceMode::eACCELERATION);
             }
@@ -535,6 +558,25 @@ void ColliderComponent::Gui()
 
 
     ImGui::Separator();
+
+    const char* containmentModeNames_[] =
+    {
+        "None",
+        "Keep Inside"
+    };
+
+    int containmentModeIndex_ = static_cast<int>(containmentMode);
+    if (ImGui::Combo(
+        "Containment Mode",
+        &containmentModeIndex_,
+        containmentModeNames_,
+        IM_ARRAYSIZE(containmentModeNames_)))
+    {
+        containmentMode =
+            static_cast<CollisionContainmentMode>(containmentModeIndex_);
+    }
+
+
 
     const char* velocityRotationModeNames_[] =
     {

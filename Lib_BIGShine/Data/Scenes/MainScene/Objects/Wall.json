@@ -1,0 +1,167 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "IsPlaying": true,
+                "Parts": [
+                    {
+                        "Alpha": 0.20000000298023224,
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BaseTexturePath": "",
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVSpeed": [
+                            0.0,
+                            0.0
+                        ],
+                        "BlendMode": 0,
+                        "Color": [
+                            0.0,
+                            0.7372549176216125,
+                            0.9686274528503418,
+                            1.0
+                        ],
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            0.0,
+                            0.7058823704719543,
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "IntersectionEdgeStrength": 0.10000000149011612,
+                        "IntersectionEdgeWidth": 500.0,
+                        "Loop": true,
+                        "MaskDistortionOpacity": 0.5,
+                        "MaskDistortionStrength": 8.0,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                            }
+                        ],
+                        "MaskTexturePath": "",
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVSpeed": [
+                            0.0,
+                            0.05000000074505806
+                        ],
+                        "MeshIndex": 0,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "Data/Model/VFX/Cylinder_Cavity.gltf",
+                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                        ],
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVSpeed": [
+                            -0.02500000037252903,
+                            0.05000000074505806
+                        ],
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                        "Position": [
+                            0.0,
+                            50.0,
+                            0.0
+                        ],
+                        "RenderEnabled": true,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            75.0,
+                            100.0,
+                            75.0
+                        ],
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 0.10000000149011612,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UseEdgeHighlight": true,
+                        "UseFresnel": true,
+                        "UseMask": true,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": true,
+                        "UseMaterialNormalTexture": true,
+                        "UseNoise": true,
+                        "UseNormal": true,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "MeshVFXComponent"
+        },
+        {
+            "Data": {
+                "ConstrainHeight": true,
+                "HalfHeight": 100.0,
+                "Radius": 74.5,
+                "Shape": 0,
+                "TargetMask": 1,
+                "TargetRadius": 0.3499999940395355
+            },
+            "Enabled": true,
+            "TypeName": "ContainmentVolumeComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "Wall",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

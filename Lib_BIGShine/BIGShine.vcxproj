@@ -261,6 +261,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\FovDirector.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
@@ -342,6 +343,7 @@
     <ClCompile Include="Code\Engine\Physics\CapsuleCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\CharacterCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp" />
+    <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\HitBox.cpp" />
     <ClCompile Include="Code\Engine\Physics\HurtBox.cpp" />
@@ -462,6 +464,7 @@
     <ClInclude Include="Code\Engine\Core\framework.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
@@ -507,6 +510,7 @@
     <ClInclude Include="Code\Engine\Physics\CapsuleCollider.h" />
     <ClInclude Include="Code\Engine\Physics\CharacterCollider.h" />
     <ClInclude Include="Code\Engine\Physics\ColliderComponent.h" />
+    <ClInclude Include="Code\Engine\Physics\ContainmentVolumeComponent.h" />
     <ClInclude Include="Code\Engine\Physics\CylinderCollider.h" />
     <ClInclude Include="Code\Engine\Physics\HitBox.h" />
     <ClInclude Include="Code\Engine\Physics\HurtBox.h" />

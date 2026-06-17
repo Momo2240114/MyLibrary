@@ -195,6 +195,15 @@ void PlayerControllerComponent::Start()
 
     owner_->SetLayer(GameObject::LayerType::Player);
     collider = owner_->GetComponent<ColliderComponent>();
+    if (collider)
+    {
+        collider->collisionRole = ColliderComponent::CollisionRole::CHARACTER;
+        collider->usePhysicsResponse = true;
+        collider->physicsControlsTransform = true;
+        collider->isTrigger = false;
+        collider->mass = (std::max)(collider->mass, 1.0f);
+        collider->RecreatePhysXActor();
+    }
     blackboard = owner_->GetOrAddComponent<BlackboardComponent>();
     RegisterPlayerAnimationActions();
 

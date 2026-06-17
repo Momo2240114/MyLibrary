@@ -651,7 +651,10 @@ void IKMapComponent::ApplySpringChain(IKChain& chain_)
         }
         else
         {
-            parentWorldRotation_ = GetGameObject()->transform->worldMatrix;
+            auto owner_ = GetGameObject();
+            if (!owner_ || !owner_->transform) continue;
+
+            parentWorldRotation_ = owner_->transform->GetWorldMatrix();
             parentWorldRotation_.r[3] = XMVectorSet(0, 0, 0, 1);
         }
 

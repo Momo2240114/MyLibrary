@@ -3,17 +3,18 @@
         {
             "Data": {
                 "CollisionRole": 1,
+                "ContainmentMode": 0,
                 "DebugPrimitiveColor": [
                     0.0,
                     0.0,
                     0.0,
                     1.0
                 ],
-                "GravityScale": 1.7999999523162842,
+                "GravityScale": 1.0,
                 "HalfHeight": 0.550000011920929,
                 "IsStatic": false,
                 "IsTrigger": false,
-                "Mass": 25.0,
+                "Mass": 1000.0,
                 "Offset": [
                     0.0,
                     0.75,
@@ -506,7 +507,7 @@
         {
             "Data": {
                 "DodgeSpeed": 12.0,
-                "MoveSpeed": 16.0
+                "MoveSpeed": 15.0
             },
             "Enabled": true,
             "TypeName": "PlayerControllerComponent"
@@ -517,19 +518,19 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -8.984757423400879,
-            0.3900027871131897,
-            -1.7614637613296509
+            -6.130344390869141,
+            -1.5467023849487305,
+            16.514259338378906
         ],
         "Rot": [
             0.0,
-            277.1480712890625,
+            18.122966766357422,
             0.0
         ],
         "Scale": [
-            0.9999992847442627,
+            0.9990753531455994,
             1.0,
-            0.9999992847442627
+            0.9990753531455994
         ]
     }
 }
