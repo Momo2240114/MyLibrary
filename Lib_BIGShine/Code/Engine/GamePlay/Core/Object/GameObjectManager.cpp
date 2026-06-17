@@ -1,6 +1,7 @@
 #include "GameObjectManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/Physics/Collision.h"
 #include "Engine/Physics/BoxCollider.h"
 #include <PxPhysicsAPI.h>
@@ -77,6 +78,14 @@ void GameObjectManager::Update(float elapsedTime_)
     for (auto& object_ : objects) {
         float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
         object_->Update(elapsedTime_ * scale_);
+    }
+
+    for (auto& containment_ : FindComponents<ContainmentVolumeComponent>())
+    {
+        if (containment_ && containment_->IsEnabled())
+        {
+            containment_->ApplyContainment();
+        }
     }
 
     CollisionStep();

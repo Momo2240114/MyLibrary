@@ -20,20 +20,31 @@
             "nodeType": 2,
             "outputPin": 8,
             "posX": -362.0,
-            "posY": 136.0,
+            "posY": 104.0,
             "scopeId": "Root",
             "stateName": "__Any__"
         },
         {
             "childScopeId": "",
-            "id": 26,
-            "inputPin": 27,
+            "id": 37,
+            "inputPin": 38,
             "nodeType": 0,
-            "outputPin": 28,
-            "posX": -80.0,
+            "outputPin": 39,
+            "posX": -96.0,
             "posY": -69.0,
             "scopeId": "Root",
-            "stateName": "SS_SP_Idle"
+            "stateName": "SS_Idle"
+        },
+        {
+            "childScopeId": "",
+            "id": 42,
+            "inputPin": 43,
+            "nodeType": 0,
+            "outputPin": 44,
+            "posX": 224.0,
+            "posY": 139.0,
+            "scopeId": "Root",
+            "stateName": "SS_Sprint"
         }
     ],
     "GraphTransitions": [
@@ -41,10 +52,48 @@
             "conditions": [],
             "duration": 0.20000000298023224,
             "from": "__Start__",
-            "id": 36,
+            "id": 40,
             "logic": 0,
             "scopeId": "Root",
-            "to": "SS_SP_Idle"
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "Action",
+                    "threshold": 0.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 41,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Idle"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsMove",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "SS_Idle",
+            "id": 45,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_Sprint"
         }
     ]
 }

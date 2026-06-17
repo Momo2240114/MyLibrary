@@ -29,13 +29,18 @@ public:
 
 private:
     void ResolveTarget();
+    void ResolveLockOnTarget();
     void ResolveCamera();
     void SetTarget(std::shared_ptr<GameObject> target_);
+    void SetLockOnTarget(std::shared_ptr<GameObject> target_);
+    DirectX::XMFLOAT3 GetFocusPosition(const std::shared_ptr<GameObject>& target_, const DirectX::XMFLOAT3& fallbackOffset_) const;
 
 private:
     std::weak_ptr<GameObject> target;
+    std::weak_ptr<GameObject> lockOnTarget;
     std::weak_ptr<CameraComponent> camera;
     std::string targetName;
+    std::string lockOnTargetName;
 
     float distance = 6.0f;
     float currentPitch = 20.0f;
@@ -46,6 +51,7 @@ private:
     float lookSpeedY = 200.0f;
     float mouseSensitivity = 0.1f;
     float followSpeed = 15.0f;
+    bool lockOnEnabled = false;
 
     DirectX::XMFLOAT3 targetOffset{ 0.0f, 1.5f, 0.0f };
 };

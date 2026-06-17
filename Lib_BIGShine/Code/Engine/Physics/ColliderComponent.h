@@ -13,6 +13,7 @@ public:
     enum class ColliderType { Box, Sphere, Capsule, Cylinder, Mesh };
     enum class CollisionRole { PHYSICAL, CHARACTER, HIT_BOX, HURT_BOX, SENSOR };
     enum class VelocityRotationMode{NONE,YAW_ONLY,FULL_3D};
+    enum class CollisionContainmentMode {NONE, KEEP_INSIDE };
 public:
 
     //現在ヒットしているコリジョン
@@ -52,7 +53,7 @@ public:
         j["GravityScale"] = gravityScale;
         j["VelocityRotationMode"] = static_cast<int>(velocityRotationMode);
         j["RotateVelocityThreshold"] = rotateVelocityThreshold;
-
+        j["ContainmentMode"] = static_cast<int>(containmentMode);
         j["Mass"] = mass;
         j["DebugPrimitiveColor"] = { debugPrimitiveColor.x,debugPrimitiveColor.y,debugPrimitiveColor.z,debugPrimitiveColor.w };
     }
@@ -78,6 +79,10 @@ public:
                 "VelocityRotationMode",
                 static_cast<int>(VelocityRotationMode::NONE)
             )
+            );
+
+        containmentMode = static_cast<CollisionContainmentMode>(
+            j.value("ContainmentMode", static_cast<int>(CollisionContainmentMode::NONE))
             );
 
         rotateVelocityThreshold =
@@ -156,6 +161,9 @@ private:
 
     bool stopCharacterSlideWhenNoInput = true;
     float characterSlideStopThreshold = 0.2f;
+    bool characterGroundedForStep = false;
+
+    CollisionContainmentMode containmentMode = CollisionContainmentMode::NONE;
 };
 
 

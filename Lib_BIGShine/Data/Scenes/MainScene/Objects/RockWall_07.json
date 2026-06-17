@@ -1,0 +1,57 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 5.0,
+                "MaterialOverrides": [
+                    {
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "id": 0,
+                        "outlineThicknessOffset": 0.25,
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.9959999918937683
+                    }
+                ],
+                "ModelName": "./Data/Model/Stage/Rock/Rock01.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        }
+    ],
+    "Layer": 0,
+    "Name": "RockWall_07",
+    "ParentName": "Stage",
+    "Transform": {
+        "Pos": [
+            71.3544921875,
+            -25.058639526367188,
+            -79.42440795898438
+        ],
+        "Rot": [
+            0.0,
+            226.5,
+            0.0
+        ],
+        "Scale": [
+            0.9999560117721558,
+            1.2999999523162842,
+            0.9999560117721558
+        ]
+    }
+}

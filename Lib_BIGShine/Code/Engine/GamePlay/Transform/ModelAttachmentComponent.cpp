@@ -123,23 +123,34 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
     return false;
 }
 
-void ModelAttachmentComponent::LateUpdate(float deltaTime)
+void ModelAttachmentComponent::LateUpdate(float deltaTime_)
 {
-    auto myGO = GetGameObject();
-    if (!myGO) return;
+    auto myGo_ = GetGameObject();
+    if (!myGo_) return;
 
-    auto myTransform = myGO->transform;
-    auto model = ResolveTargetModel();
+    auto myTransform_ = myGo_->transform;
+    auto model_ = ResolveTargetModel();
+    if (model_)
+    {
+        model_->UpdateTransform();
+    }
 
-    if (ResolveTargetNodeIndex(model)) {
-        const auto& node = model->GetNodes()[targetNodeIndex];
-        DirectX::XMMATRIX nodeMat = DirectX::XMLoadFloat4x4(&node.worldTransform);
+    if (ResolveTargetNodeIndex(model_)) {
+        const auto& node_ = model_->GetNodes()[targetNodeIndex];
+        DirectX::XMMATRIX nodeMat_ = DirectX::XMLoadFloat4x4(&node_.worldTransform);
 
         // Transform に「これを使って！」と渡す
-        myTransform->SetParentOverride(true, nodeMat);
+        myTransform_->SetParentOverride(true, nodeMat_);
+        myTransform_->UpdateWorldMatrix();
+
+        if (auto attachedModel_ = myGo_->GetComponent<GltfModelCommponennt>())
+        {
+            attachedModel_->UpdateTransform();
+        }
     }
     else {
-        myTransform->SetParentOverride(false, DirectX::XMMatrixIdentity());
+        myTransform_->SetParentOverride(false, DirectX::XMMatrixIdentity());
+        myTransform_->UpdateWorldMatrix();
     }
 }
 // --- 再帰的なツリー表示関数 (引数に const 修飾などを追加) ---

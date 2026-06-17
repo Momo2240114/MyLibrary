@@ -568,18 +568,26 @@ void GltfModelCommponennt::UpdateNodeRecursive(Node& node, const DirectX::XMMATR
 // トランスフォーム更新処理
 void GltfModelCommponennt::UpdateTransform()
 {
+	auto owner_ = this->GetGameObject();
+	if (!owner_ || !owner_->transform)
+	{
+		return;
+	}
+
 	// 1. モデルが置かれているGameObjectのワールド行列
-	DirectX::XMMATRIX ParentWorldTransform = this->GetGameObject()->transform->worldMatrix;
+	// worldMatrixを直接読むと、移動直後のdirtyなTransformでは前フレームの行列を使ってしまう。
+	// アタッチメントがボーンに遅れて見えるので、必ずここで最新化してからノード行列を作る。
+	DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
 
 	// 2. モデル全体の補正スケール（一箇所だけで適用するように注意）
-	DirectX::XMMATRIX ModelScaleMat = DirectX::XMMatrixScaling(localScale, localScale, localScale);
+	DirectX::XMMATRIX modelScaleMat_ = DirectX::XMMatrixScaling(localScale, localScale, localScale);
 
 	// 3. 全てのルートノード（親がいないノード）から再帰を開始
-	for (Node& node : nodes)
+	for (Node& node_ : nodes)
 	{
-		if (node.parent == nullptr)
+		if (node_.parent == nullptr)
 		{
-			UpdateNodeRecursive(node, ParentWorldTransform, ModelScaleMat);
+			UpdateNodeRecursive(node_, parentWorldTransform_, modelScaleMat_);
 		}
 	}
 }
@@ -590,15 +598,20 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
 		return;
 	}
 
+	auto owner_ = this->GetGameObject();
+	if (!owner_ || !owner_->transform)
+	{
+		return;
+	}
+
 	DirectX::XMMATRIX parentWorldTransform_ =
-		this->GetGameObject()->transform->worldMatrix;
+		owner_->transform->GetWorldMatrix();
 
 	DirectX::XMMATRIX modelScaleMat_ =
 		DirectX::XMMatrixScaling(localScale, localScale, localScale);
 
 	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
 }
-
 //{
 //	DirectX::XMMATRIX ParentWorldTransform = this->GetGameObject()->transform->worldMatrix;
 //

@@ -1,6 +1,7 @@
 #include "ThirdPersonCameraComponent.h"
 
 #include "CameraComponent.h"
+#include "LockOnTargetComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Input/ControllerInput.h"
@@ -40,6 +41,7 @@ void ThirdPersonCameraComponent::Update(float deltaTime_)
 {
     ResolveCamera();
     ResolveTarget();
+    ResolveLockOnTarget();
 
     auto targetObject_ = target.lock();
     auto owner_ = GetGameObject();
@@ -74,9 +76,14 @@ void ThirdPersonCameraComponent::Update(float deltaTime_)
     DirectX::XMStoreFloat3(&front_, frontVec_);
 
     DirectX::XMFLOAT3 targetWorldPos_ = targetObject_->transform->GetWorldPosition();
-    DirectX::XMFLOAT3 lookAtPos_ = AddFloat3(targetWorldPos_, targetOffset);
+    DirectX::XMFLOAT3 followPos_ = AddFloat3(targetWorldPos_, targetOffset);
 
-    DirectX::XMVECTOR lookAtVec_ = DirectX::XMLoadFloat3(&lookAtPos_);
+    auto lockOnObject_ = lockOnEnabled ? lockOnTarget.lock() : nullptr;
+    DirectX::XMFLOAT3 lookAtPos_ = lockOnObject_
+        ? GetFocusPosition(lockOnObject_, targetOffset)
+        : followPos_;
+
+    DirectX::XMVECTOR lookAtVec_ = DirectX::XMLoadFloat3(&followPos_);
     DirectX::XMVECTOR goalPosVec_ = DirectX::XMVectorSubtract(lookAtVec_, DirectX::XMVectorScale(frontVec_, distance));
     DirectX::XMFLOAT3 goalPos_;
     DirectX::XMStoreFloat3(&goalPos_, goalPosVec_);
@@ -85,9 +92,24 @@ void ThirdPersonCameraComponent::Update(float deltaTime_)
     float lerpRate_ = 1.0f - std::exp(-followSpeed * deltaTime_);
     DirectX::XMFLOAT3 nextPos_ = LerpFloat3(currentPos_, goalPos_, lerpRate_);
 
+    DirectX::XMVECTOR cameraToTarget_ = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lookAtPos_), DirectX::XMLoadFloat3(&nextPos_));
+    float cameraToTargetLengthSq_ = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(cameraToTarget_));
+    DirectX::XMVECTOR cameraForward_ = cameraToTargetLengthSq_ > 0.0001f
+        ? DirectX::XMVector3Normalize(cameraToTarget_)
+        : frontVec_;
+    DirectX::XMFLOAT3 cameraForwardFloat_;
+    DirectX::XMStoreFloat3(&cameraForwardFloat_, cameraForward_);
+
+    if (std::abs(cameraForwardFloat_.x) > 0.0001f || std::abs(cameraForwardFloat_.y) > 0.0001f || std::abs(cameraForwardFloat_.z) > 0.0001f)
+    {
+        currentYaw = DirectX::XMConvertToDegrees(std::atan2(cameraForwardFloat_.z, cameraForwardFloat_.x));
+        currentPitch = DirectX::XMConvertToDegrees(std::asin(std::clamp(cameraForwardFloat_.y, -1.0f, 1.0f)));
+        currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
+    }
+
     DirectX::XMMATRIX viewMatrix_ = DirectX::XMMatrixLookToLH(
         DirectX::XMLoadFloat3(&nextPos_),
-        frontVec_,
+        cameraForward_,
         DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
     );
     DirectX::XMVECTOR determinant_;
@@ -131,6 +153,37 @@ void ThirdPersonCameraComponent::Gui()
     }
 
     ImGui::Separator();
+    ImGui::Checkbox("Lock On", &lockOnEnabled);
+
+    char lockOnTargetBuffer_[128] = {};
+    strcpy_s(lockOnTargetBuffer_, lockOnTargetName.c_str());
+    if (ImGui::InputText("LockOn Target Object", lockOnTargetBuffer_, sizeof(lockOnTargetBuffer_)))
+    {
+        lockOnTargetName = lockOnTargetBuffer_;
+        lockOnTarget.reset();
+        ResolveLockOnTarget();
+    }
+
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload("DND_GAMEOBJECT"))
+        {
+            std::shared_ptr<GameObject> droppedObject_ = *(std::shared_ptr<GameObject>*)payload_->Data;
+            SetLockOnTarget(droppedObject_);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    if (auto lockOnObject_ = lockOnTarget.lock())
+    {
+        ImGui::Text("Current LockOn: %s", lockOnObject_->GetName().c_str());
+    }
+    else
+    {
+        ImGui::TextDisabled("Drop a LockOn target here.");
+    }
+
+    ImGui::Separator();
     ImGui::DragFloat("Distance", &distance, 0.1f, 0.1f, 100.0f, "%.2f");
     ImGui::DragFloat("Pitch", &currentPitch, 0.1f, minPitch, maxPitch, "%.2f");
     ImGui::DragFloat("Yaw", &currentYaw, 0.1f, -360.0f, 360.0f, "%.2f");
@@ -145,6 +198,8 @@ void ThirdPersonCameraComponent::Gui()
 void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 {
     json_["targetName"] = targetName;
+    json_["lockOnTargetName"] = lockOnTargetName;
+    json_["lockOnEnabled"] = lockOnEnabled;
     json_["distance"] = distance;
     json_["currentPitch"] = currentPitch;
     json_["currentYaw"] = currentYaw;
@@ -160,6 +215,8 @@ void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
 {
     targetName = json_.value("targetName", "");
+    lockOnTargetName = json_.value("lockOnTargetName", "");
+    lockOnEnabled = json_.value("lockOnEnabled", false);
     distance = json_.value("distance", 6.0f);
     currentPitch = json_.value("currentPitch", 20.0f);
     currentYaw = json_.value("currentYaw", 0.0f);
@@ -191,6 +248,16 @@ void ThirdPersonCameraComponent::ResolveTarget()
     target = owner_->manager->Find(targetName);
 }
 
+void ThirdPersonCameraComponent::ResolveLockOnTarget()
+{
+    if (lockOnTarget.lock() || lockOnTargetName.empty()) return;
+
+    auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return;
+
+    lockOnTarget = owner_->manager->Find(lockOnTargetName);
+}
+
 void ThirdPersonCameraComponent::ResolveCamera()
 {
     if (camera.lock()) return;
@@ -205,6 +272,31 @@ void ThirdPersonCameraComponent::SetTarget(std::shared_ptr<GameObject> target_)
 {
     target = target_;
     targetName = target_ ? target_->GetName() : "";
+}
+
+void ThirdPersonCameraComponent::SetLockOnTarget(std::shared_ptr<GameObject> target_)
+{
+    lockOnTarget = target_;
+    lockOnTargetName = target_ ? target_->GetName() : "";
+    lockOnEnabled = target_ != nullptr;
+}
+
+DirectX::XMFLOAT3 ThirdPersonCameraComponent::GetFocusPosition(
+    const std::shared_ptr<GameObject>& target_,
+    const DirectX::XMFLOAT3& fallbackOffset_) const
+{
+    if (!target_ || !target_->transform)
+    {
+        return fallbackOffset_;
+    }
+
+    if (auto lockOnTarget_ = target_->GetComponent<LockOnTargetComponent>())
+    {
+        return lockOnTarget_->GetFocusPosition();
+    }
+
+    const DirectX::XMFLOAT3 position_ = target_->transform->GetWorldPosition();
+    return AddFloat3(position_, fallbackOffset_);
 }
 
 REGISTER_COMPONENT(ThirdPersonCameraComponent, "ThirdPersonCameraComponent")

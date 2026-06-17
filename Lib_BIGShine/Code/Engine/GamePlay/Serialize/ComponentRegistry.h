@@ -41,9 +41,16 @@ public:
     class AutoRegister
     {
     public:
-        AutoRegister(const std::string& name, CreateFunc func)
+        AutoRegister(const std::string& name_, bool callStart_, CreateFunc func_)
         {
-            ComponentRegistry::Instance().AddCreator(name, func);
+            ComponentRegistry::Instance().AddCreator(
+                name_,
+                [=](std::shared_ptr<GameObject> go_, bool overrideStart_) -> std::shared_ptr<Component>
+                {
+                    const bool finalStart_ = callStart_ && overrideStart_;
+                    return func_(go_, finalStart_);
+                }
+            );
         }
     };
 
@@ -56,8 +63,9 @@ private:
 #define REGISTER_COMPONENT(Type, Name) \
 static ComponentRegistry::AutoRegister g_Register##Type( \
     Name, \
-    [](std::shared_ptr<GameObject> go, bool overrideStart) -> std::shared_ptr<Component> { \
-        auto comp = go->AddComponent<Type>(overrideStart); \
-        return std::static_pointer_cast<Component>(comp); \
+    true, \
+    [](std::shared_ptr<GameObject> go_, bool callStart_) -> std::shared_ptr<Component> { \
+        auto comp_ = go_->AddComponent<Type>(callStart_); \
+        return std::static_pointer_cast<Component>(comp_); \
     } \
 );
