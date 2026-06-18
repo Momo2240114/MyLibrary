@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 void RegisterAllComponents();
 
@@ -21,7 +22,7 @@ public:
     }
 
     template<typename T>
-    inline void Register(const std::string& name, bool csllStart = true);
+    inline void Register(const std::string& name_, bool callStart_ = true);
 
 
     std::shared_ptr<Component> Create(
@@ -41,16 +42,21 @@ public:
     class AutoRegister
     {
     public:
-        AutoRegister(const std::string& name_, bool callStart_, CreateFunc func_)
+        AutoRegister(const std::string& name_, const std::string& typeName_, bool callStart_, CreateFunc func_)
         {
-            ComponentRegistry::Instance().AddCreator(
-                name_,
-                [=](std::shared_ptr<GameObject> go_, bool overrideStart_) -> std::shared_ptr<Component>
-                {
-                    const bool finalStart_ = callStart_ && overrideStart_;
-                    return func_(go_, finalStart_);
-                }
-            );
+            auto wrappedFunc_ = [=](std::shared_ptr<GameObject> go_, bool overrideStart_) -> std::shared_ptr<Component>
+            {
+                const bool finalStart_ = callStart_ && overrideStart_;
+                return func_(go_, finalStart_);
+            };
+
+            auto& registry_ = ComponentRegistry::Instance();
+            registry_.AddCreator(name_, wrappedFunc_);
+
+            if (!typeName_.empty() && typeName_ != name_)
+            {
+                registry_.AddCreator(typeName_, wrappedFunc_);
+            }
         }
     };
 
@@ -63,6 +69,7 @@ private:
 #define REGISTER_COMPONENT(Type, Name) \
 static ComponentRegistry::AutoRegister g_Register##Type( \
     Name, \
+    Type().GetName(), \
     true, \
     [](std::shared_ptr<GameObject> go_, bool callStart_) -> std::shared_ptr<Component> { \
         auto comp_ = go_->AddComponent<Type>(callStart_); \

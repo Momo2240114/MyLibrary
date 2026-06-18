@@ -1,9 +1,10 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Engine/Graphics/Resource/GlTFModel.h"
 #include "AnimationState.h"
 #include "Engine/Math/Curve/CurveComponent.h"
-#include "PoseLibraryResource.h" // ã€è¿½åŠ ã€‘ãƒãƒ¼ã‚ºãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®å®šç¾©ã‚’å‘¼ã³å‡ºã™
+#include "PoseLibraryResource.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
 
 
@@ -12,12 +13,13 @@ class GameObject;
 class ModelAnimator
 {
 public:
-    // ç¾åœ¨è¨ˆç®—ä¸­ã®ãƒãƒ¼ã‚ºãƒ‡ãƒ¼ã‚¿
+    // Œ»İŒvZ’†‚Ìƒ|[ƒYƒf[ƒ^
     struct ActiveSlot 
     {
         const AnimState* state = nullptr;
         float time = 0.0f;
-        float weight = 1.0f; // ãƒ–ãƒ¬ãƒ³ãƒ‰é‡ã¿
+        float weight = 1.0f; // ƒuƒŒƒ“ƒhd‚İ
+        float sampleDuration = 0.0f;
 
 
         void Update(float et, float duration, CurveComponent* curvecomp, std::shared_ptr<GameObject> owner);
@@ -29,12 +31,18 @@ public:
 
     const RootMotionDelta& GetRootMotionDelta() const { return currentRootMotionDelta; }
 
-    void Update(float deltaTime, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib = nullptr, std::shared_ptr<GameObject> owner = nullptr);
+    void Update(
+        float deltaTime_,
+        GltfModelCommponennt* model_,
+        CurveComponent* curveComponent_,
+        const std::shared_ptr<PoseLibraryResource>& poseLibrary_ = nullptr,
+        std::shared_ptr<GameObject> owner_ = nullptr,
+        const BlackboardCategory* blackboard_ = nullptr);
 
     // ModelAnimator.h
     void UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed);
 
-    // ãƒãƒ¼ãƒ‰ã‚¨ãƒ‡ã‚£ã‚¿å´ã‹ã‚‰å‘¼ã°ã‚Œã‚‹å‘½ä»¤
+    // ƒm[ƒhƒGƒfƒBƒ^‘¤‚©‚çŒÄ‚Î‚ê‚é–½—ß
     void CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner = nullptr);
 
     const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
@@ -42,7 +50,7 @@ public:
     void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
 private:
-    // ã€è¿½åŠ ã€‘ã‚«ã‚¹ã‚¿ãƒ ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ï¼ˆãƒãƒ¼ã‚ºã®ç³»è­œï¼‰ã‹ã‚‰ä¸€æœ¬ã®ãƒãƒ¼ã‚ºã‚’ç·¨ã¿å‡ºã™ç§˜è¡“
+    // y’Ç‰ÁzƒJƒXƒ^ƒ€ƒAƒjƒ[ƒVƒ‡ƒ“iƒ|[ƒY‚ÌŒn•ˆj‚©‚çˆê–{‚Ìƒ|[ƒY‚ğ•Ò‚İo‚·”ép
     void ComputeCustomAnimationPose(
         const CustomAnimation& customAnim,
         float time,
@@ -52,13 +60,13 @@ private:
     );
     RootMotionDelta currentRootMotionDelta;
     ActiveSlot current;
-    ActiveSlot previous; // ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆç”¨
+    ActiveSlot previous; // ƒtƒF[ƒhƒAƒEƒg—p
 
-    // å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®åº§æ¨™ã‚’ä¿æŒã™ã‚‹å¤‰æ•°
+    // ‘OƒtƒŒ[ƒ€‚ÌÀ•W‚ğ•Û‚·‚é•Ï”
     DirectX::SimpleMath::Vector3 _prevRootPos = { 0, 0, 0 };
     DirectX::SimpleMath::Vector3 rootMotionBasePosition = { 0, 0, 0 };
     int previousRootMotionNodeIndex = -1;
-    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒåˆ‡ã‚Šæ›¿ã‚ã£ãŸã“ã¨ã‚’æ¤œçŸ¥ã™ã‚‹ãƒ•ãƒ©ã‚°
+    // ƒAƒjƒ[ƒVƒ‡ƒ“‚ªØ‚è‘Ö‚í‚Á‚½‚±‚Æ‚ğŒŸ’m‚·‚éƒtƒ‰ƒO
     bool _isFirstFrame = true;
 
     float _prevTime = 0.0f;
@@ -66,12 +74,14 @@ private:
     float fadeDuration = 0.0f;
     bool isMixing = false;
     bool isTransitioning = false;
+    float manualBlendTime = 0.0f;
     GltfModelCommponennt::NodePose prevRootPose;
     const AnimState* _prevRootMotionState = nullptr;
     bool hasPrevPose = false;
     std::vector<GltfModelCommponennt::NodePose> finalPose;
     std::vector<GltfModelCommponennt::NodePose> tempPoseA;
     std::vector<GltfModelCommponennt::NodePose> tempPoseB;
+    std::vector<GltfModelCommponennt::NodePose> blendPoseScratch;
     std::vector<GltfModelCommponennt::NodePose> rootMotionLoopStartPose;
     std::vector<GltfModelCommponennt::NodePose> rootMotionLoopEndPose;
 };

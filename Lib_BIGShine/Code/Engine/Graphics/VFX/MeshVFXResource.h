@@ -30,6 +30,7 @@ struct MeshVFXMaskLayer
 
 struct MeshVFXPart
 {
+    std::string partAssetPath;
     std::string modelPath;
     int meshIndex = -1;
     bool renderEnabled = false;
@@ -64,6 +65,9 @@ struct MeshVFXPart
     DirectX::XMFLOAT2 maskUVSpeed = { 0.0f, -0.2f };
     DirectX::XMFLOAT2 noiseUVSpeed = { 0.2f, -0.8f };
     DirectX::XMFLOAT2 uvRotationCenter = { 0.5f, 0.5f };
+    float baseUVRotation = 0.0f;
+    float maskUVRotation = 0.0f;
+    float noiseUVRotation = 0.0f;
     float baseUVRotationSpeed = 0.0f;
     float maskUVRotationSpeed = 0.0f;
     float noiseUVRotationSpeed = 0.0f;
@@ -108,6 +112,16 @@ struct MeshVFXRuntimePart
     std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> noiseTextures;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> distortionNoiseTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> vertexNoiseTexture;
+};
+
+// Runtime-generated mesh view rendered with MeshVFX settings.
+// The component retains ownership of these buffers.
+struct MeshVFXDynamicMesh
+{
+    ID3D11Buffer* vertexBuffer = nullptr;
+    ID3D11Buffer* indexBuffer = nullptr;
+    UINT indexCount = 0;
+    UINT vertexStride = 0;
 };
 
 struct MeshVFXAsset

@@ -242,6 +242,13 @@ void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
         return;
     }
 
+    MeshVFXDynamicMesh dynamicMesh_{};
+    if (component_->GetDynamicMesh(dynamicMesh_))
+    {
+        components.push_back(component_);
+        return;
+    }
+
     const auto& runtimeParts_ = component_->GetRuntimeParts();
     const bool hasRenderablePart_ = std::any_of(
         runtimeParts_.begin(),
@@ -417,7 +424,10 @@ void MeshVFXRenderSystem::RenderAll(
             const bool useOwnerModel_ = component_->UsesOwnerModel();
             const std::shared_ptr<GltfModelCommponennt> ownerModel_ =
                 useOwnerModel_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
-            if (!part_.renderEnabled || (useOwnerModel_ ? !ownerModel_ : !runtimePart_.modelResource)) continue;
+            MeshVFXDynamicMesh dynamicMesh_{};
+            const bool useDynamicMesh_ = component_->GetDynamicMesh(dynamicMesh_);
+            if (!part_.renderEnabled ||
+                (useOwnerModel_ ? !ownerModel_ : (!useDynamicMesh_ && !runtimePart_.modelResource))) continue;
 
             const PartAnimationState animation_ =
                 CalculatePartAnimation(part_, component_->GetTime());
@@ -429,31 +439,23 @@ void MeshVFXRenderSystem::RenderAll(
             deviceContext_->OMSetBlendState(
                 renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
 
-            const auto& meshes_ = useOwnerModel_ ? ownerModel_->GetMeshes() : runtimePart_.modelResource->meshes;
-            for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
+            const auto renderMesh_ = [&](ID3D11Buffer* vertexBuffer_, ID3D11Buffer* indexBuffer_,
+                UINT indexCount_, UINT stride_, const DirectX::XMMATRIX& world_,
+                const GltfModelCommponennt::Mesh* sourceMesh_)
             {
-                if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
-
-                const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
-                if (!mesh_.vertexBuffer || !mesh_.indexBuffer) continue;
-
-                const DirectX::XMMATRIX world_ = useOwnerModel_
-                    ? DirectX::XMMatrixIdentity()
-                    : CreateNodeTransform(mesh_.node) *
-                        CreatePartTransform(part_, animation_) *
-                        owner_->transform->GetWorldMatrix();
+                if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0) return;
 
                 ID3D11ShaderResourceView* baseTexture_ = runtimePart_.baseTexture.Get();
                 if (part_.useMaterialBaseTexture && part_.baseTexturePath.empty() &&
-                    mesh_.material && mesh_.material->baseMap)
+                    sourceMesh_ && sourceMesh_->material && sourceMesh_->material->baseMap)
                 {
-                    baseTexture_ = mesh_.material->baseMap.Get();
+                    baseTexture_ = sourceMesh_->material->baseMap.Get();
                 }
                 ID3D11ShaderResourceView* normalTexture_ = runtimePart_.normalTexture.Get();
                 if (part_.useMaterialNormalTexture && part_.normalTexturePath.empty() &&
-                    mesh_.material && mesh_.material->normalMap)
+                    sourceMesh_ && sourceMesh_->material && sourceMesh_->material->normalMap)
                 {
-                    normalTexture_ = mesh_.material->normalMap.Get();
+                    normalTexture_ = sourceMesh_->material->normalMap.Get();
                 }
 
                 std::vector<ID3D11ShaderResourceView*> maskTextures_;
@@ -505,19 +507,41 @@ void MeshVFXRenderSystem::RenderAll(
                     sceneSamplingReady_ ? sceneDepthCopySRV.Get() : nullptr,
                     useOwnerModel_);
                 shader->UpdateScene(renderContext_);
-                if (useOwnerModel_) shader->UpdateSkeleton(renderContext_, mesh_);
+                if (useOwnerModel_ && sourceMesh_) shader->UpdateSkeleton(renderContext_, *sourceMesh_);
                 shader->UpdatePart(
                     renderContext_, part_, runtimePart_, baseTexture_, normalTexture_,
                     maskTexture_, noiseTexture_,
                     world_, animation_.time, animation_.alpha);
 
-                UINT stride_ = sizeof(GltfModelCommponennt::Vertex);
                 UINT offset_ = 0;
-                ID3D11Buffer* vertexBuffer_ = mesh_.vertexBuffer.Get();
                 deviceContext_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride_, &offset_);
-                deviceContext_->IASetIndexBuffer(mesh_.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+                deviceContext_->IASetIndexBuffer(indexBuffer_, DXGI_FORMAT_R32_UINT, 0);
                 deviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                deviceContext_->DrawIndexed(static_cast<UINT>(mesh_.indices.size()), 0, 0);
+                deviceContext_->DrawIndexed(indexCount_, 0, 0);
+            };
+
+            if (useDynamicMesh_)
+            {
+                renderMesh_(dynamicMesh_.vertexBuffer, dynamicMesh_.indexBuffer,
+                    dynamicMesh_.indexCount, dynamicMesh_.vertexStride,
+                    DirectX::XMMatrixIdentity(), nullptr);
+                continue;
+            }
+
+            const auto& meshes_ = useOwnerModel_ ? ownerModel_->GetMeshes() : runtimePart_.modelResource->meshes;
+            for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
+            {
+                if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
+
+                const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
+                const DirectX::XMMATRIX world_ = useOwnerModel_
+                    ? DirectX::XMMatrixIdentity()
+                    : CreateNodeTransform(mesh_.node) *
+                        CreatePartTransform(part_, animation_) *
+                        owner_->transform->GetWorldMatrix();
+                renderMesh_(mesh_.vertexBuffer.Get(), mesh_.indexBuffer.Get(),
+                    static_cast<UINT>(mesh_.indices.size()),
+                    sizeof(GltfModelCommponennt::Vertex), world_, &mesh_);
             }
         }
     }

@@ -538,16 +538,60 @@ void GraphicsDeviceManager::ShowPostEffectGui()
  * @param hwnd_ ウィンドウハンドル
  * @return 成功時 true、失敗時 false
  */
+
 bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
 {
     HRESULT result_ = S_OK;
+
     UINT createDeviceFlags_ = 0;
 #if defined(DEBUG) || defined(_DEBUG)
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-    // --- 修正箇所 ---
-    swapChainDesc.BufferCount = 2; // 1から2に変更 (Flipモデルの必須条件)
+    // =========================
+    // 一番VRAMが大きいGPUを探す
+    // =========================
+    Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory_;
+    result_ = CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(dxgiFactory_.GetAddressOf()));
+    if (FAILED(result_)) return false;
+
+    Microsoft::WRL::ComPtr<IDXGIAdapter> bestAdapter_;
+    SIZE_T bestVideoMemory_ = 0;
+
+    for (UINT adapterIndex_ = 0;; ++adapterIndex_)
+    {
+        Microsoft::WRL::ComPtr<IDXGIAdapter> adapter_;
+        if (dxgiFactory_->EnumAdapters(adapterIndex_, adapter_.GetAddressOf()) == DXGI_ERROR_NOT_FOUND)
+        {
+            break;
+        }
+
+        DXGI_ADAPTER_DESC adapterDesc_{};
+        adapter_->GetDesc(&adapterDesc_);
+
+        // Microsoft Basic Render Driver は除外
+        if (adapterDesc_.VendorId == 0x1414)
+        {
+            continue;
+        }
+
+        if (adapterDesc_.DedicatedVideoMemory > bestVideoMemory_)
+        {
+            bestVideoMemory_ = adapterDesc_.DedicatedVideoMemory;
+            bestAdapter_ = adapter_;
+        }
+    }
+
+    if (!bestAdapter_)
+    {
+        return false;
+    }
+
+    // =========================
+    // スワップチェーン設定
+    // =========================
+    swapChainDesc = {};
+    swapChainDesc.BufferCount = 2;
     swapChainDesc.BufferDesc.Width = width;
     swapChainDesc.BufferDesc.Height = height;
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -561,10 +605,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-    //D3D11CreateDeviceAndSwapChain() を呼び出し
-    //device / context / swapChain を取得
-    //featureLevel_ を保存
-    D3D_FEATURE_LEVEL featureLevels[] =
+    D3D_FEATURE_LEVEL featureLevels_[] =
     {
         D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_11_0,
@@ -572,27 +613,31 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
         D3D_FEATURE_LEVEL_10_0,
     };
 
-    D3D_FEATURE_LEVEL createdFeatureLevel_;
+    D3D_FEATURE_LEVEL createdFeatureLevel_{};
 
+    // =========================
+    // 選んだGPUでDevice作成
+    // 注意: adapter指定時は DRIVER_TYPE_UNKNOWN
+    // =========================
     result_ = D3D11CreateDeviceAndSwapChain(
-        nullptr,
-        D3D_DRIVER_TYPE_HARDWARE,
+        bestAdapter_.Get(),
+        D3D_DRIVER_TYPE_UNKNOWN,
         nullptr,
         createDeviceFlags_,
-        featureLevels,
-        _countof(featureLevels),
+        featureLevels_,
+        _countof(featureLevels_),
         D3D11_SDK_VERSION,
         &swapChainDesc,
         swapChain.GetAddressOf(),
         device.GetAddressOf(),
         &createdFeatureLevel_,
-        immediateContext.GetAddressOf());
+        immediateContext.GetAddressOf()
+    );
 
-    // エラーチェック
     _ASSERT_EXPR(SUCCEEDED(result_), L"D3D11CreateDeviceAndSwapChain");
     if (FAILED(result_)) return false;
 
-    return true;  // 成功時
+    return true;
 }
 
 /**

@@ -88,7 +88,7 @@ void CameraComponent::Deserialize(const nlohmann::json& j)
     aspect = j.value("aspect", 16.0f / 9.0f);
     nearZ = j.value("nearZ", 0.001f);
     farZ = j.value("farZ", 1000.0f);
-    priority = j.value("priority", 0.0f);
+    priority = j.value("priority", 0);
 
     if (j.contains("eye")) {
         eye = { j["eye"][0], j["eye"][1], j["eye"][2] };

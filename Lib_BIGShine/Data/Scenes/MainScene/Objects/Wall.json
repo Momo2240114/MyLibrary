@@ -6,12 +6,13 @@
                 "IsPlaying": true,
                 "Parts": [
                     {
-                        "Alpha": 0.20000000298023224,
+                        "Alpha": 1.0,
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
                         "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
                         "BaseUVSpeed": [
                             0.0,
@@ -39,7 +40,7 @@
                         "IntersectionEdgeWidth": 500.0,
                         "Loop": true,
                         "MaskDistortionOpacity": 0.5,
-                        "MaskDistortionStrength": 8.0,
+                        "MaskDistortionStrength": 4.0,
                         "MaskLayers": [
                             {
                                 "BlendMode": 0,
@@ -48,6 +49,7 @@
                             }
                         ],
                         "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
                         "MaskUVSpeed": [
                             0.0,
@@ -65,6 +67,7 @@
                         "NoiseTexturePaths": [
                             "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
                         ],
+                        "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
                         "NoiseUVSpeed": [
                             -0.02500000037252903,
@@ -106,10 +109,10 @@
                             0.5,
                             0.5
                         ],
-                        "UseEdgeHighlight": true,
+                        "UseEdgeHighlight": false,
                         "UseFresnel": true,
                         "UseMask": true,
-                        "UseMaskDistortion": false,
+                        "UseMaskDistortion": true,
                         "UseMaterialBaseTexture": true,
                         "UseMaterialNormalTexture": true,
                         "UseNoise": true,
@@ -136,12 +139,153 @@
                 "ConstrainHeight": true,
                 "HalfHeight": 100.0,
                 "Radius": 74.5,
+                "Segments": 64,
                 "Shape": 0,
                 "TargetMask": 1,
                 "TargetRadius": 0.3499999940395355
             },
             "Enabled": true,
             "TypeName": "ContainmentVolumeComponent"
+        },
+        {
+            "Data": {
+                "AssetPath": "",
+                "Emitters": [
+                    {
+                        "Acceleration": [
+                            0.0,
+                            20.0,
+                            0.0
+                        ],
+                        "BlendMode": 0,
+                        "BurstCount": 10000,
+                        "Color": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ColorEnd": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ColorStart": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ConeAngle": [
+                            0.0,
+                            0.0
+                        ],
+                        "Delay": 0.0,
+                        "Drag": 0.25,
+                        "EmissionMode": 0,
+                        "Fade": [
+                            3.2300000190734863,
+                            0.0
+                        ],
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientTexturePath": "",
+                        "Gravity": -9.800000190734863,
+                        "LegacyRadius": [
+                            75.0,
+                            75.0
+                        ],
+                        "Lifespan": [
+                            1.0,
+                            5.5
+                        ],
+                        "MaskTexturePath": "",
+                        "MaxCount": 10000,
+                        "MeshVertexSampleCount": 2048,
+                        "Name": "Emitter_0",
+                        "NoiseFrequency": 2.2300000190734863,
+                        "NoiseSpeed": 1.0,
+                        "NoiseStrength": 6.449999809265137,
+                        "OrbitVelocity": 0.0,
+                        "PosOffset": [
+                            0.0,
+                            -1.2999999523162842,
+                            0.0
+                        ],
+                        "RadialVelocity": 0.0,
+                        "RenderType": 0,
+                        "RotationSpeed": [
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeEnd": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeSize": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ShapeStart": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Size": [
+                            0.5,
+                            0.5
+                        ],
+                        "SizeRandomEnd": [
+                            1.0,
+                            1.0
+                        ],
+                        "SizeRandomStart": [
+                            1.0,
+                            1.0
+                        ],
+                        "SpawnShape": 0,
+                        "SpawnSpace": 0,
+                        "Speed": [
+                            0.0,
+                            0.0
+                        ],
+                        "SpriteAnimationFps": 12.0,
+                        "SpriteAnimationLoop": 1,
+                        "SpriteAnimationRange": [
+                            0,
+                            0
+                        ],
+                        "SpriteSheetIndex": [
+                            0,
+                            0
+                        ],
+                        "StretchMax": 100.0,
+                        "StretchScale": 0.03999999910593033,
+                        "TexturePath": "Data/Texture/Particle/Particles/Particles/Color/burst/color_burst_25.png",
+                        "TextureSplitCount": [
+                            1,
+                            1
+                        ],
+                        "UseColorOverLife": 0,
+                        "UseFresnel": 0,
+                        "UseGradient": 0,
+                        "UseMask": 0,
+                        "UseRandomSize": 0,
+                        "UseSpriteAnimation": 0,
+                        "Wind": [
+                            0.0,
+                            20.0,
+                            0.0
+                        ]
+                    }
+                ],
+                "IsPlaying": true
+            },
+            "Enabled": true,
+            "TypeName": "ParticleComponent"
         }
     ],
     "Layer": 0,

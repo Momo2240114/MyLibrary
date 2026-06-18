@@ -4,11 +4,13 @@
 // そのため既存の参照関係や public/private の扱いはそのままです。
 
 #include "AnimationControllerComponent.h"
+#include "Editor/AssetBrowserPayload.h"
 #include "AnimSequenceAdapter.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "AnimationDataAsset.h"
 #include "PoseLibraryResourceManager.h"
 #include "IKMapComponent.h"
+#include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -16,6 +18,7 @@
 #include <filesystem>
 #include <fstream>
 #include <cmath>
+#include <cctype>
 #include <unordered_map>
 
 namespace ed = ax::NodeEditor;
@@ -27,6 +30,19 @@ static constexpr const char* EXIT_NODE_PREFIX = "__Exit__:";
 
 static std::string MakeEntryNodeName(const std::string& scopeId) { return std::string(ENTRY_NODE_PREFIX) + scopeId; }
 static std::string MakeExitNodeName(const std::string& scopeId) { return std::string(EXIT_NODE_PREFIX) + scopeId; }
+
+static bool ContainsCaseInsensitive(const std::string& text_, const std::string& query_)
+{
+    if (query_.empty()) return true;
+
+    return std::search(
+        text_.begin(), text_.end(),
+        query_.begin(), query_.end(),
+        [](unsigned char left_, unsigned char right_)
+        {
+            return std::tolower(left_) == std::tolower(right_);
+        }) != text_.end();
+}
 
 static const char* GetGraphNodeDisplayName(const AnimGraphNode& node)
 {
@@ -59,11 +75,11 @@ static ImU32 GetGraphNodeFillColor(const AnimGraphNode& node_, bool isActive_)
 
     switch (node_.type)
     {
-    //case AnimGraphNodeType::Start: return IM_COL32(120, 170, 245, 255);
-    //case AnimGraphNodeType::Any: return IM_COL32(185, 135, 235, 255);
-    //case AnimGraphNodeType::Entry: return IM_COL32(120, 205, 145, 255);
-    //case AnimGraphNodeType::Exit: return IM_COL32(240, 165, 105, 255);
-    //case AnimGraphNodeType::SubGraph: return IM_COL32(105, 195, 205, 255);
+    case AnimGraphNodeType::Start: return IM_COL32(120, 170, 245, 255);
+    case AnimGraphNodeType::Any: return IM_COL32(185, 135, 235, 255);
+    case AnimGraphNodeType::Entry: return IM_COL32(120, 205, 145, 255);
+    case AnimGraphNodeType::Exit: return IM_COL32(240, 165, 105, 255);
+    case AnimGraphNodeType::SubGraph: return IM_COL32(105, 195, 205, 255);
     default: return IM_COL32(215, 215, 215, 255);
     }
 }
@@ -88,12 +104,12 @@ static ImU32 GetGraphNodeTitleColor(const AnimGraphNode& node_)
 {
     switch (node_.type)
     {
-    case AnimGraphNodeType::Start: return IM_COL32(40, 90, 220, 255);
-    case AnimGraphNodeType::Any: return IM_COL32(115, 70, 210, 255);
-    case AnimGraphNodeType::Entry: return IM_COL32(35, 135, 75, 255);
-    case AnimGraphNodeType::Exit: return IM_COL32(200, 90, 35, 255);
-    case AnimGraphNodeType::SubGraph: return IM_COL32(20, 115, 125, 255);
-    default: return IM_COL32(0, 0, 0, 255);
+    case AnimGraphNodeType::Start: return IM_COL32(25, 65, 145, 255);
+    case AnimGraphNodeType::Any: return IM_COL32(80, 40, 145, 255);
+    case AnimGraphNodeType::Entry: return IM_COL32(25, 100, 55, 255);
+    case AnimGraphNodeType::Exit: return IM_COL32(145, 65, 20, 255);
+    case AnimGraphNodeType::SubGraph: return IM_COL32(15, 90, 100, 255);
+    default: return IM_COL32(15, 15, 15, 255);
     }
 }
 
@@ -313,6 +329,36 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
     ImGui::SetNextItemWidth(220.0f);
     ImGui::InputText("Graph Asset", &graphAssetFilePath);
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::JSON))
+        {
+            const char* path_ = static_cast<const char*>(payload_->Data);
+            if (path_ && path_[0] != '\0')
+            {
+                const bool loaded_ = LoadGraphAsset(path_);
+                graphAssetStatus = loaded_
+                    ? "Loaded Graph: " + graphAssetFilePath
+                    : "Failed to load Animation Graph: " + std::string(path_);
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Browse Graph..."))
+    {
+        const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
+            L"Open Animation Graph",
+            "Data/Animation/GraphData");
+        if (!selectedPath_.empty())
+        {
+            const bool loaded_ = LoadGraphAsset(selectedPath_);
+            graphAssetStatus = loaded_
+                ? "Loaded Graph: " + graphAssetFilePath
+                : "Failed to load Animation Graph: " + selectedPath_;
+        }
+    }
 
     ImGui::SameLine();
     if (ImGui::Button("Save Graph")) {
@@ -321,7 +367,19 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
     ImGui::SameLine();
     if (ImGui::Button("Load Graph")) {
-        LoadGraphAsset(graphAssetFilePath);
+        const bool loaded_ = LoadGraphAsset(graphAssetFilePath);
+        graphAssetStatus = loaded_
+            ? "Loaded Graph: " + graphAssetFilePath
+            : "Failed to load Animation Graph: " + graphAssetFilePath;
+    }
+
+    if (!graphAssetStatus.empty())
+    {
+        ImGui::TextWrapped(
+            "%s | Nodes: %d | Transitions: %d",
+            graphAssetStatus.c_str(),
+            static_cast<int>(graphNodes.size()),
+            static_cast<int>(graphTransitions.size()));
     }
 
     if (ImGui::Button("Focus All"))
@@ -347,135 +405,159 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
     ed::Begin("Animation Graph", ImVec2(0.0f, 0.0f));
 
-    std::unordered_map<uintptr_t, ImVec2> pinPositions;
+    std::unordered_map<uintptr_t, ImVec2> pinPositions_;
 
-    auto drawGraphNode = [&](AnimGraphNode& node)
+    auto drawGraphNode_ = [&](AnimGraphNode& node_)
         {
-            const bool isSpecial = IsSpecialGraphNode(node);
-            const bool isActive = !runtimeActiveStateName.empty() &&
-                (node.stateName == runtimeActiveStateName) &&
-                !isSpecial;
-            const char* displayName = GetGraphNodeDisplayName(node);
+            const bool isSpecial_ = IsSpecialGraphNode(node_);
+            const bool isActive_ = !runtimeActiveStateName.empty() &&
+                (node_.stateName == runtimeActiveStateName) &&
+                !isSpecial_;
+            const char* displayName_ = GetGraphNodeDisplayName(node_);
 
-            const float nodeW = isSpecial ? 180.0f : 220.0f;
-            const float titleH = isSpecial ? 62.0f : 58.0f;
-            const float bodyH = isSpecial ? 52.0f : 54.0f;
-            const float nodeH = titleH + bodyH;
-            const float pinR = 14.0f;
-            const ImVec2 pinSize(pinR * 2.0f, pinR * 2.0f);
+            const float nodeWidth_ = isSpecial_ ? 180.0f : 220.0f;
+            const float titleHeight_ = isSpecial_ ? 62.0f : 58.0f;
+            const float bodyHeight_ = isSpecial_ ? 52.0f : 54.0f;
+            const float nodeHeight_ = titleHeight_ + bodyHeight_;
+            const float pinRadius_ = 14.0f;
+            const ImVec2 pinSize_(pinRadius_ * 2.0f, pinRadius_ * 2.0f);
 
-            auto isPinCircleHovered = [&](const ImVec2& center) {
-                const ImVec2 mouse = ImGui::GetMousePos();
-                const float dx = mouse.x - center.x;
-                const float dy = mouse.y - center.y;
-                const float hitRadius = pinR + 3.0f;
-                return ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) &&
-                    (dx * dx + dy * dy) <= (hitRadius * hitRadius);
+            const auto isPinCircleHovered_ = [&](const ImVec2& center_)
+                {
+                    const ImVec2 mouse_ = ImGui::GetMousePos();
+                    const float deltaX_ = mouse_.x - center_.x;
+                    const float deltaY_ = mouse_.y - center_.y;
+                    const float hitRadius_ = pinRadius_ + 3.0f;
+                    return ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) &&
+                        (deltaX_ * deltaX_ + deltaY_ * deltaY_) <= (hitRadius_ * hitRadius_);
                 };
 
-            ImU32 fillColor = GetGraphNodeFillColor(node, isActive);
-            ImU32 borderColor = GetGraphNodeBorderColor(node, isActive);
+            const ImU32 fillColor_ = GetGraphNodeFillColor(node_, isActive_);
+            const ImU32 borderColor_ = GetGraphNodeBorderColor(node_, isActive_);
 
-            ed::PushStyleVar(ed::StyleVar_NodeRounding, isSpecial ? 18.0f : 10.0f);
+            ed::PushStyleVar(ed::StyleVar_NodeRounding, isSpecial_ ? 18.0f : 10.0f);
             ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
-            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, isActive ? 7.5f : 5.0f);
+            ed::PushStyleVar(ed::StyleVar_NodeBorderWidth, isActive_ ? 7.5f : 5.0f);
             ed::PushStyleColor(ed::StyleColor_NodeBg, ImVec4(0, 0, 0, 0));
             ed::PushStyleColor(ed::StyleColor_NodeBorder, ImVec4(0, 0, 0, 0));
 
-            ed::BeginNode(node.id);
-            ImGui::PushID((int)(uintptr_t)node.id.Get());
+            ed::BeginNode(node_.id);
+            ImGui::PushID(static_cast<int>(node_.id.Get()));
 
-            ImVec2 nodeMin = ImGui::GetCursorScreenPos();
-            ImGui::Dummy(ImVec2(nodeW, nodeH));
-            ImVec2 nodeMax(nodeMin.x + nodeW, nodeMin.y + nodeH);
+            const ImVec2 nodeMinimum_ = ImGui::GetCursorScreenPos();
+            ImGui::Dummy(ImVec2(nodeWidth_, nodeHeight_));
+            const ImVec2 nodeMaximum_(
+                nodeMinimum_.x + nodeWidth_,
+                nodeMinimum_.y + nodeHeight_);
 
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            ImU32 lineColor = IM_COL32(20, 20, 20, 255);
-            ImU32 titleColor = GetGraphNodeTitleColor(node);
+            ImDrawList* drawList_ = ImGui::GetWindowDrawList();
+            const ImU32 lineColor_ = IM_COL32(20, 20, 20, 255);
+            const ImU32 titleColor_ = GetGraphNodeTitleColor(node_);
 
-            drawList->AddRectFilled(nodeMin, nodeMax, fillColor, isSpecial ? 28.0f : 10.0f);
-            drawList->AddRect(nodeMin, nodeMax, borderColor, isSpecial ? 28.0f : 10.0f, 0, isActive ? 3.0f : 2.0f);
-            drawList->AddLine(ImVec2(nodeMin.x, nodeMin.y + titleH), ImVec2(nodeMax.x, nodeMin.y + titleH), lineColor, 2.0f);
+            drawList_->AddRectFilled(
+                nodeMinimum_, nodeMaximum_, fillColor_, isSpecial_ ? 28.0f : 10.0f);
+            drawList_->AddRect(
+                nodeMinimum_, nodeMaximum_, borderColor_, isSpecial_ ? 28.0f : 10.0f,
+                0, isActive_ ? 3.0f : 2.0f);
+            drawList_->AddLine(
+                ImVec2(nodeMinimum_.x, nodeMinimum_.y + titleHeight_),
+                ImVec2(nodeMaximum_.x, nodeMinimum_.y + titleHeight_),
+                lineColor_, 2.0f);
 
-            ImVec2 titleSize = ImGui::CalcTextSize(displayName);
-            float titleScale = isSpecial ? 1.45f : 1.15f;
-            ImGui::SetWindowFontScale(titleScale);
-            titleSize = ImGui::CalcTextSize(displayName);
-            ImGui::SetCursorScreenPos(ImVec2(nodeMin.x + (nodeW - titleSize.x) * 0.5f, nodeMin.y + (titleH - titleSize.y) * 0.5f));
-            ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(titleColor), "%s", displayName);
+            ImGui::SetWindowFontScale(isSpecial_ ? 1.45f : 1.15f);
+            const ImVec2 titleSize_ = ImGui::CalcTextSize(displayName_);
+            ImGui::SetCursorScreenPos(ImVec2(
+                nodeMinimum_.x + (nodeWidth_ - titleSize_.x) * 0.5f,
+                nodeMinimum_.y + (titleHeight_ - titleSize_.y) * 0.5f));
+            ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(titleColor_), "%s", displayName_);
             ImGui::SetWindowFontScale(1.0f);
 
-            if (isSpecial)
+            if (isSpecial_)
             {
-                ImVec2 pinCenter(nodeMin.x + nodeW * 0.5f, nodeMin.y + titleH + bodyH * 0.5f);
+                const ImVec2 pinCenter_(
+                    nodeMinimum_.x + nodeWidth_ * 0.5f,
+                    nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f);
 
-                if ((uintptr_t)node.outputPin.Get() != 0)
+                if (static_cast<uintptr_t>(node_.outputPin.Get()) != 0)
                 {
-                    ImGui::SetCursorScreenPos(ImVec2(pinCenter.x - pinR, pinCenter.y - pinR));
-                    ed::BeginPin(node.outputPin, ed::PinKind::Output);
-                    ImGui::Dummy(pinSize);
+                    ImGui::SetCursorScreenPos(ImVec2(
+                        pinCenter_.x - pinRadius_, pinCenter_.y - pinRadius_));
+                    ed::BeginPin(node_.outputPin, ed::PinKind::Output);
+                    ImGui::Dummy(pinSize_);
                     ed::EndPin();
-                    pinPositions[(uintptr_t)node.outputPin.Get()] = pinCenter;
+                    pinPositions_[static_cast<uintptr_t>(node_.outputPin.Get())] = pinCenter_;
                 }
-                else if ((uintptr_t)node.inputPin.Get() != 0)
+                else if (static_cast<uintptr_t>(node_.inputPin.Get()) != 0)
                 {
-                    ImGui::SetCursorScreenPos(ImVec2(pinCenter.x - pinR, pinCenter.y - pinR));
-                    ed::BeginPin(node.inputPin, ed::PinKind::Input);
-                    ImGui::Dummy(pinSize);
+                    ImGui::SetCursorScreenPos(ImVec2(
+                        pinCenter_.x - pinRadius_, pinCenter_.y - pinRadius_));
+                    ed::BeginPin(node_.inputPin, ed::PinKind::Input);
+                    ImGui::Dummy(pinSize_);
                     ed::EndPin();
-                    pinPositions[(uintptr_t)node.inputPin.Get()] = pinCenter;
+                    pinPositions_[static_cast<uintptr_t>(node_.inputPin.Get())] = pinCenter_;
                 }
 
-                ImU32 pinColor = isPinCircleHovered(pinCenter)
+                const ImU32 pinColor_ = isPinCircleHovered_(pinCenter_)
                     ? IM_COL32(255, 255, 255, 255)
                     : IM_COL32(235, 220, 0, 255);
-
-                drawList->AddCircle(pinCenter, pinR, pinColor, 24, 3.0f);
+                drawList_->AddCircle(pinCenter_, pinRadius_, pinColor_, 24, 3.0f);
             }
             else
             {
-                drawList->AddLine(
-                    ImVec2(nodeMin.x + nodeW * 0.5f, nodeMin.y + titleH),
-                    ImVec2(nodeMin.x + nodeW * 0.5f, nodeMax.y),
-                    lineColor, 2.0f
-                );
+                drawList_->AddLine(
+                    ImVec2(nodeMinimum_.x + nodeWidth_ * 0.5f, nodeMinimum_.y + titleHeight_),
+                    ImVec2(nodeMinimum_.x + nodeWidth_ * 0.5f, nodeMaximum_.y),
+                    lineColor_, 2.0f);
 
-                const char* inText = "In";
-                const char* outText = "Out";
-                ImVec2 inTextSize = ImGui::CalcTextSize(inText);
-                ImVec2 outTextSize = ImGui::CalcTextSize(outText);
-                float leftHalfCenter = nodeMin.x + (nodeW * 0.25f);
-                float rightHalfCenter = nodeMin.x + (nodeW * 0.75f);
-                float textY = nodeMin.y + titleH + (bodyH - inTextSize.y) * 0.5f;
+                const char* inputText_ = "In";
+                const char* outputText_ = "Out";
+                const ImVec2 inputTextSize_ = ImGui::CalcTextSize(inputText_);
+                const ImVec2 outputTextSize_ = ImGui::CalcTextSize(outputText_);
+                const float leftHalfCenter_ = nodeMinimum_.x + nodeWidth_ * 0.25f;
+                const float rightHalfCenter_ = nodeMinimum_.x + nodeWidth_ * 0.75f;
+                const float textY_ = nodeMinimum_.y + titleHeight_ +
+                    (bodyHeight_ - inputTextSize_.y) * 0.5f;
 
-                drawList->AddText(ImVec2(leftHalfCenter - inTextSize.x * 0.5f, textY), IM_COL32(0, 0, 0, 255), inText);
-                drawList->AddText(ImVec2(rightHalfCenter - outTextSize.x * 0.5f, textY), IM_COL32(0, 0, 0, 255), outText);
+                drawList_->AddText(
+                    ImVec2(leftHalfCenter_ - inputTextSize_.x * 0.5f, textY_),
+                    IM_COL32(0, 0, 0, 255), inputText_);
+                drawList_->AddText(
+                    ImVec2(rightHalfCenter_ - outputTextSize_.x * 0.5f, textY_),
+                    IM_COL32(0, 0, 0, 255), outputText_);
 
-                ImVec2 inCenter(nodeMin.x + 28.0f, nodeMin.y + titleH + bodyH * 0.5f);
-                ImGui::SetCursorScreenPos(ImVec2(inCenter.x - pinR, inCenter.y - pinR));
-                ed::BeginPin(node.inputPin, ed::PinKind::Input);
-                ImGui::Dummy(pinSize);
+                const ImVec2 inputCenter_(
+                    nodeMinimum_.x + 28.0f,
+                    nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f);
+                ImGui::SetCursorScreenPos(ImVec2(
+                    inputCenter_.x - pinRadius_, inputCenter_.y - pinRadius_));
+                ed::BeginPin(node_.inputPin, ed::PinKind::Input);
+                ImGui::Dummy(pinSize_);
                 ed::EndPin();
-                pinPositions[(uintptr_t)node.inputPin.Get()] = inCenter;
+                pinPositions_[static_cast<uintptr_t>(node_.inputPin.Get())] = inputCenter_;
 
-                ImU32 inColor = isPinCircleHovered(inCenter)
+                const ImU32 inputColor_ = isPinCircleHovered_(inputCenter_)
                     ? IM_COL32(255, 255, 255, 255)
                     : IM_COL32(235, 220, 0, 255);
-                drawList->AddCircle(inCenter, pinR, inColor, 24, 3.0f);
+                drawList_->AddCircle(inputCenter_, pinRadius_, inputColor_, 24, 3.0f);
 
-                ImVec2 outCenter(nodeMax.x - 28.0f, nodeMin.y + titleH + bodyH * 0.5f);
-                ImGui::SetCursorScreenPos(ImVec2(outCenter.x - pinR, outCenter.y - pinR));
-                ed::BeginPin(node.outputPin, ed::PinKind::Output);
-                ImGui::Dummy(pinSize);
+                const ImVec2 outputCenter_(
+                    nodeMaximum_.x - 28.0f,
+                    nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f);
+                ImGui::SetCursorScreenPos(ImVec2(
+                    outputCenter_.x - pinRadius_, outputCenter_.y - pinRadius_));
+                ed::BeginPin(node_.outputPin, ed::PinKind::Output);
+                ImGui::Dummy(pinSize_);
                 ed::EndPin();
-                pinPositions[(uintptr_t)node.outputPin.Get()] = outCenter;
+                pinPositions_[static_cast<uintptr_t>(node_.outputPin.Get())] = outputCenter_;
 
-                ImU32 outColor = isPinCircleHovered(outCenter)
+                const ImU32 outputColor_ = isPinCircleHovered_(outputCenter_)
                     ? IM_COL32(255, 255, 255, 255)
                     : IM_COL32(230, 45, 55, 255);
-                drawList->AddCircle(outCenter, pinR, outColor, 24, 3.0f);
+                drawList_->AddCircle(outputCenter_, pinRadius_, outputColor_, 24, 3.0f);
             }
 
+            // 絶対位置で配置したタイトルとピンの後でも、NodeEditorへ正しい矩形を渡す。
+            ImGui::SetCursorScreenPos(nodeMaximum_);
             ImGui::PopID();
             ed::EndNode();
             ed::PopStyleColor(2);
@@ -485,7 +567,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     for (auto& node : graphNodes)
     {
         if (isNodeInCurrentScope(node))
-            drawGraphNode(node);
+            drawGraphNode_(node);
     }
 
     if (nodeToPlaceId != 0)
@@ -514,23 +596,40 @@ void AnimationControllerComponent::DrawNodeEditorContent()
         }
     }
 
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    for (auto& link : graphTransitions)
+    ImDrawList* arrowDrawList_ = ImGui::GetWindowDrawList();
+    for (auto& link_ : graphTransitions)
     {
-        auto* startNode = FindNodeByName(link.fromStateName);
-        auto* endNode = FindNodeByName(link.toStateName);
-        if (link.scopeId != currentScopeName()) continue;
-        if (!startNode || !endNode || !isNodeInCurrentScope(*startNode) || !isNodeInCurrentScope(*endNode)) continue;
+        if (link_.scopeId != currentScopeName()) continue;
 
-        auto srcKey = (uintptr_t)startNode->outputPin.Get();
-        auto dstKey = (uintptr_t)endNode->inputPin.Get();
-        if (pinPositions.count(srcKey) && pinPositions.count(dstKey))
+        const AnimGraphNode* startNode_ = FindNodeByName(link_.fromStateName);
+        const AnimGraphNode* endNode_ = FindNodeByName(link_.toStateName);
+        if (!startNode_ || !endNode_ ||
+            !isNodeInCurrentScope(*startNode_) ||
+            !isNodeInCurrentScope(*endNode_))
         {
-            ImU32 color = (link.fromStateName == runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
-                ? IM_COL32(80, 165, 255, 255)
-                : IM_COL32(120, 120, 120, 255);
-            DrawLinkArrow(drawList, pinPositions[srcKey], pinPositions[dstKey], color);
+            continue;
         }
+
+        const uintptr_t sourcePinId_ = static_cast<uintptr_t>(startNode_->outputPin.Get());
+        const uintptr_t targetPinId_ = static_cast<uintptr_t>(endNode_->inputPin.Get());
+        const auto sourcePosition_ = pinPositions_.find(sourcePinId_);
+        const auto targetPosition_ = pinPositions_.find(targetPinId_);
+        if (sourcePosition_ == pinPositions_.end() ||
+            targetPosition_ == pinPositions_.end())
+        {
+            continue;
+        }
+
+        const ImU32 arrowColor_ =
+            link_.fromStateName == runtimeActiveStateName ||
+            link_.fromStateName == ANY_NODE_NAME
+            ? IM_COL32(80, 165, 255, 255)
+            : IM_COL32(120, 120, 120, 255);
+        DrawLinkArrow(
+            arrowDrawList_,
+            sourcePosition_->second,
+            targetPosition_->second,
+            arrowColor_);
     }
 
     if (needsPositionRestore)
@@ -915,9 +1014,14 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     {
         ImGui::Text("Create State Node");
         ImGui::Separator();
+        ImGui::SetNextItemWidth(260.0f);
+        ImGui::InputTextWithHint("##GraphStateSearch", "Search states...", &graphStateSearchText);
+        ImGui::Separator();
 
         for (auto& [name, statePtr] : states)
         {
+            if (!ContainsCaseInsensitive(name, graphStateSearchText)) continue;
+
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
                 [&](const auto& n) { return n.stateName == name; });
 

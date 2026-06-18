@@ -40,20 +40,20 @@
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
 template<typename T>
-void ComponentRegistry::Register(const std::string& name, bool csllStart) {
-    // [=] を追加して csllStart をキャプチャする
-    creators[name] = [=](std::shared_ptr<GameObject> go, bool overrideStart) -> std::shared_ptr<Component> {
-
-        // 1. Register時の設定(csllStart)とCreate時の引数(overrideStart)を組み合わせて判断
-        // ここでは Create 呼び出し時の引数を優先する例
-        bool finalStart = csllStart && overrideStart;
-
-        // 2. AddComponent は <T> までの型指定。引数として bool を渡す
-        auto comp = go->AddComponent<T>(finalStart);
-
-        // 3. static_pointer_cast に第2引数は不要
-        return std::static_pointer_cast<Component>(comp);
+void ComponentRegistry::Register(const std::string& name_, bool callStart_) {
+    auto createFunc_ = [=](std::shared_ptr<GameObject> go_, bool overrideStart_) -> std::shared_ptr<Component> {
+        const bool finalStart_ = callStart_ && overrideStart_;
+        auto comp_ = go_->AddComponent<T>(finalStart_);
+        return std::static_pointer_cast<Component>(comp_);
         };
+
+    AddCreator(name_, createFunc_);
+
+    const std::string typeName_ = T().GetName();
+    if (!typeName_.empty() && typeName_ != name_)
+    {
+        AddCreator(typeName_, createFunc_);
+    }
 }
    
 void RegisterAllComponents()

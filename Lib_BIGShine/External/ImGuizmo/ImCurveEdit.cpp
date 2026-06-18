@@ -2,6 +2,10 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include <stdint.h>
+#include <algorithm>
+#include <cstdio>
+#include <cfloat>
+#include <cmath>
 #include <set>
 #include <vector>
 
@@ -112,6 +116,14 @@ namespace ImCurveEdit
       static int movingCurve = -1;
       static bool scrollingV = false;
       static std::set<EditPoint> selection;
+      if (selectedPoints)
+      {
+         selection.clear();
+         for (const EditPoint& selectedPoint_ : *selectedPoints)
+         {
+            selection.insert(selectedPoint_);
+         }
+      }
       static bool overSelectedPoint = false;
 
       int ret = 0;
@@ -173,69 +185,54 @@ namespace ImCurveEdit
       auto pointToRange = [&](ImVec2 pt) { return (pt - min) / range; };
       auto rangeToPoint = [&](ImVec2 pt) { return (pt * range) + min; };
 
-      // ★ ここから追記 ★ --------------------------------------------------
-    // 0.1秒ごとの垂直線
-      for (float t = 0.1f; t < 1.0f; t += 0.1f)
+      const float top_ = offset.y - size.y;
+      const float bottom_ = offset.y;
+      const int xDivisionCount_ = (std::max)(2, (std::min)(10, static_cast<int>(size.x / 80.0f)));
+      const int yDivisionCount_ = (std::max)(2, (std::min)(10, static_cast<int>(size.y / 44.0f)));
+      const ImU32 gridColor_ = ImGui::GetColorU32(ImVec4(0.42f, 0.45f, 0.50f, 0.28f));
+      const ImU32 labelColor_ = ImGui::GetColorU32(ImVec4(0.78f, 0.80f, 0.84f, 0.92f));
+      const ImU32 zeroAxisColor_ = ImGui::GetColorU32(ImVec4(0.95f, 0.72f, 0.25f, 0.95f));
+
+      for (int divisionIndex_ = 0; divisionIndex_ <= xDivisionCount_; ++divisionIndex_)
       {
-          float normX = (t - min.x) / range.x;
-          float x = offset.x + normX * viewSize.x;
-          draw_list->AddLine(ImVec2(x, offset.y), ImVec2(x, offset.y + viewSize.y), 0x44FFFFFF, 1.0f);
+         const float ratio_ = static_cast<float>(divisionIndex_) / static_cast<float>(xDivisionCount_);
+         const float value_ = ImLerp(min.x, max.x, ratio_);
+         const float x_ = offset.x + ratio_ * size.x;
+         draw_list->AddLine(ImVec2(x_, top_), ImVec2(x_, bottom_), gridColor_, 1.0f);
+
+         char label_[32]{};
+         snprintf(label_, sizeof(label_), "%.2f", value_);
+         const ImVec2 textSize_ = ImGui::CalcTextSize(label_);
+         const float textX_ = (std::max)(offset.x + 2.0f, (std::min)(x_ - textSize_.x * 0.5f, offset.x + size.x - textSize_.x - 2.0f));
+         draw_list->AddText(ImVec2(textX_, bottom_ - textSize_.y - 2.0f), labelColor_, label_);
       }
 
-      // 0.5倍速(ボリューム)の水平線
-      float normY05 = (0.5f - min.y) / range.y;
-      float y05 = offset.y + normY05 * viewSize.y;
-      draw_list->AddLine(ImVec2(offset.x, y05), ImVec2(offset.x + viewSize.x, y05), 0x88FFFF00, 1.0f);
+      for (int divisionIndex_ = 0; divisionIndex_ <= yDivisionCount_; ++divisionIndex_)
+      {
+         const float ratio_ = static_cast<float>(divisionIndex_) / static_cast<float>(yDivisionCount_);
+         const float value_ = ImLerp(min.y, max.y, ratio_);
+         const float y_ = bottom_ - ratio_ * size.y;
+         draw_list->AddLine(ImVec2(offset.x, y_), ImVec2(offset.x + size.x, y_), gridColor_, 1.0f);
 
-      // 1.0倍速(標準)の水平線（もし既にあるなら不要ですが、セットで書くと管理しやすいです）
-      float normY10 = (1.0f - min.y) / range.y;
-      float y10 = offset.y + normY10 * viewSize.y;
-      draw_list->AddLine(ImVec2(offset.x, y10), ImVec2(offset.x + viewSize.x, y10), 0x88FFFFFF, 1.0f);
+         char label_[32]{};
+         snprintf(label_, sizeof(label_), "%.2f", value_);
+         const ImVec2 textSize_ = ImGui::CalcTextSize(label_);
+         const float textY_ = (std::max)(top_ + 2.0f, (std::min)(y_ - textSize_.y * 0.5f, bottom_ - textSize_.y - 2.0f));
+         draw_list->AddText(ImVec2(offset.x + 4.0f, textY_), labelColor_, label_);
+      }
 
-
-      // x = 1.0 の位置を計算
-      ImVec2 line1s_norm = pointToRange(ImVec2(1.0f, 0.0f));
-      float screenX = line1s_norm.x * viewSize.x + offset.x;
-
-      // 縦に赤い線を引く (0xFF0000FF = 赤)
-      // 境界をはっきりさせるため、太めに設定
-      draw_list->AddLine(
-          ImVec2(screenX, offset.y),           // 下端
-          ImVec2(screenX, offset.y + viewSize.y), // 上端
-          0xFF0000FF,                          // 色
-          2.0f                                 // 太さ
-      );
-
-      // 1. 右端の垂直線（Max X = 1.0s の壁）
-      float normXMax = (max.x - min.x) / range.x; // max.xが1.0なら右端に一致
-      float xMax = offset.x + normXMax * viewSize.x;
-      draw_list->AddLine(
-          ImVec2(xMax, offset.y),
-          ImVec2(xMax, offset.y + viewSize.y),
-          0xFF0000FF, 2.5f // 太めの赤色で「壁」を表現
-      );
-
-      // 2. 上端の水平線（Max Y = 2.0 などの上限）
-      float normYMax = (max.y - min.y) / range.y;
-      float yMax = offset.y + normYMax * viewSize.y;
-      draw_list->AddLine(
-          ImVec2(offset.x, yMax),
-          ImVec2(offset.x + viewSize.x, yMax),
-          0x8800FF00, 1.5f // 緑色などで上限を表示
-      );
-
-      // 3. (おまけ) 下端の水平線（Min Y = 0.0 の床）
-      float normYMin = (min.y - min.y) / range.y;
-      float yMin = offset.y + normYMin * viewSize.y;
-      draw_list->AddLine(
-          ImVec2(offset.x, yMin),
-          ImVec2(offset.x + viewSize.x, yMin),
-          0xFF000000, 1.5f // 黒色で「地面」を表現
-      );
-
-      // ★ ここまで ★ --------------------------------------------------
-
-      draw_list->AddLine(ImVec2(-1.f, -min.y/range.y) * viewSize + offset, ImVec2(1.f, -min.y / range.y) * viewSize + offset, 0xFF000000, 1.5f);
+      if (min.x <= 0.0f && max.x >= 0.0f && fabsf(range.x) > FLT_EPSILON)
+      {
+         const float zeroX_ = offset.x + ((0.0f - min.x) / range.x) * size.x;
+         draw_list->AddLine(ImVec2(zeroX_, top_), ImVec2(zeroX_, bottom_), zeroAxisColor_, 2.0f);
+         draw_list->AddText(ImVec2(zeroX_ + 4.0f, top_ + 3.0f), zeroAxisColor_, "X = 0");
+      }
+      if (min.y <= 0.0f && max.y >= 0.0f && fabsf(range.y) > FLT_EPSILON)
+      {
+         const float zeroY_ = bottom_ - ((0.0f - min.y) / range.y) * size.y;
+         draw_list->AddLine(ImVec2(offset.x, zeroY_), ImVec2(offset.x + size.x, zeroY_), zeroAxisColor_, 2.0f);
+         draw_list->AddText(ImVec2(offset.x + 4.0f, zeroY_ + 3.0f), zeroAxisColor_, "Y = 0");
+      }
       bool overCurveOrPoint = false;
 
       int localOverCurve = -1;

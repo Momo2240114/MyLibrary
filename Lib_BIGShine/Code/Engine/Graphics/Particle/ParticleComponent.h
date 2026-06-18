@@ -95,6 +95,7 @@ private:
     std::vector<std::string> textureFiles;
     std::vector<std::string> assetFiles;
     std::string assetPath;
+    std::string emitterAssetPath;
     char assetNameBuffer[128] = "NewParticle";
     int selectedEmitterIndex = 0;
     int selectedAssetIndex = -1;

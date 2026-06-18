@@ -236,6 +236,30 @@
       <ObjectFileOutput>$(ProjectDir)Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)External\SDL3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\SDL3\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)External\SDL3\lib\x64\SDL3.dll" "$(OutDir)SDL3.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)External\SDL3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\SDL3\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)External\SDL3\lib\x86\SDL3.dll" "$(OutDir)SDL3.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
@@ -331,6 +355,8 @@
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonPBRShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\TrailMeshComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp" />
@@ -356,6 +382,7 @@
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
@@ -428,6 +455,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\TextureResourceManager.h" />
     <ClInclude Include="Code\Editor\Window\AssetBrowserWindow.h" />
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h" />
+    <ClInclude Include="Code\Editor\AssetSlotGui.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
@@ -453,6 +481,8 @@
     <ClInclude Include="Code\Engine\Graphics\Shader\ToonPBRShader.h" />
     <ClInclude Include="Code\Engine\Graphics\Shader\ToonShader.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\TrailMeshComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h" />
@@ -524,6 +554,7 @@
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerActionState.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerAttackState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h" />

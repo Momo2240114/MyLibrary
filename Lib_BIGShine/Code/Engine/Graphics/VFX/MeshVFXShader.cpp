@@ -144,14 +144,15 @@ void MeshVFXShader::UpdatePart(
     constants_.fresnelPower = part_.fresnelPower;
     constants_.fresnelStrength = part_.fresnelStrength;
     constants_.dissolveThreshold = part_.dissolveThreshold;
-    const auto calculateRotation_ = [partTime_](float rotationSpeed_)
+    const auto calculateRotation_ = [partTime_](float initialRotation_, float rotationSpeed_)
         {
-            const float rotation_ = DirectX::XMConvertToRadians(rotationSpeed_ * partTime_);
+            const float rotation_ = DirectX::XMConvertToRadians(
+                initialRotation_ + rotationSpeed_ * partTime_);
             return std::fmod(rotation_, 2.0f * std::numbers::pi_v<float>);
         };
-    constants_.baseUVRotation = calculateRotation_(part_.baseUVRotationSpeed);
-    constants_.maskUVRotation = calculateRotation_(part_.maskUVRotationSpeed);
-    constants_.noiseUVRotation = calculateRotation_(part_.noiseUVRotationSpeed);
+    constants_.baseUVRotation = calculateRotation_(part_.baseUVRotation, part_.baseUVRotationSpeed);
+    constants_.maskUVRotation = calculateRotation_(part_.maskUVRotation, part_.maskUVRotationSpeed);
+    constants_.noiseUVRotation = calculateRotation_(part_.noiseUVRotation, part_.noiseUVRotationSpeed);
     constants_.uvRadialScale = part_.uvRadialScale;
     constants_.uvRadialScaleSpeed = part_.uvRadialScaleSpeed;
     constants_.vertexNoiseHorizontalStrength = part_.vertexNoiseHorizontalStrength;

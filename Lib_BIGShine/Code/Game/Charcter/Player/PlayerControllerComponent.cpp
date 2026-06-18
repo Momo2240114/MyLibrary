@@ -11,12 +11,15 @@
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "PlayerActionState.h"
+#include "PlayerAttackState.h"
 #include "PlayerDodgeState.h"
 #include "PlayerIdleState.h"
 #include "PlayerMoveState.h"
 
 namespace
 {
+inline constexpr int WEAK_ATTACK_COMBO_COUNT = 4;
+
 namespace PlayerInputAction
 {
     inline constexpr const char* MOVE_X = "Player.MoveX";
@@ -210,7 +213,9 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
     stateMachine.AddState<PlayerMoveState>(PLAYER_ACTION::MOVE);
     stateMachine.AddState<PlayerDodgeState>(PLAYER_ACTION::DODGE);
-    stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::WEAK_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(
+        PLAYER_ACTION::WEAK_ATTACK,
+        PLAYER_ACTION::WEAK_ATTACK);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::GUARD, PLAYER_ACTION::GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::JUST_GUARD);
@@ -275,13 +280,34 @@ void PlayerControllerComponent::SetHorizontalVelocity(
 
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 {
-    if (!CanTransitionPlayerAction(GetCurrentAction(), nextAction_))
+    if (nextAction_ == PLAYER_ACTION::NONE)
+    {
+        return false;
+    }
+
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    const bool isComboInput_ =
+        currentAction_ == PLAYER_ACTION::WEAK_ATTACK &&
+        nextAction_ == PLAYER_ACTION::WEAK_ATTACK &&
+        (actionRuntime.canBufferInput || actionRuntime.canCombo);
+
+    if (currentAction_ == nextAction_ && !isComboInput_)
     {
         return false;
     }
 
     const int requestedComboIndex_ = GetRequestedComboIndex(nextAction_);
-    if (!actionRuntime.canCancel)
+    const bool isLocomotion_ =
+        GetPlayerActionGroup(currentAction_) == PLAYER_ACTION_GROUP::LOCOMOTION;
+    const bool canUseCancelTransition_ =
+        actionRuntime.canCancel &&
+        IsCancelTransitionAllowed(currentAction_, nextAction_);
+    const bool canChangeImmediately_ =
+        currentAction_ == PLAYER_ACTION::NONE ||
+        isLocomotion_ ||
+        canUseCancelTransition_;
+
+    if (!canChangeImmediately_)
     {
         if (actionRuntime.canBufferInput || actionRuntime.canCombo)
         {
@@ -294,6 +320,19 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     pendingComboIndex = requestedComboIndex_;
     stateMachine.ChangeState(*this, nextAction_);
     return true;
+}
+
+bool PlayerControllerComponent::IsCancelTransitionAllowed(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_) const
+{
+    return std::any_of(
+        cancelTransitions.begin(),
+        cancelTransitions.end(),
+        [from_, to_](const PlayerCancelTransition& transition_)
+        {
+            return transition_.from == from_ && transition_.to == to_;
+        });
 }
 
 void PlayerControllerComponent::NotifyGuardedAttack()
@@ -339,6 +378,22 @@ void PlayerControllerComponent::SetCanCombo(bool enabled_)
     }
 }
 
+void PlayerControllerComponent::NotifyComboTransition()
+{
+    SetCanBufferInput(false);
+    SetCanCombo(false);
+    if (GetCurrentAction() != PLAYER_ACTION::WEAK_ATTACK ||
+        actionRuntime.bufferedAction != PLAYER_ACTION::WEAK_ATTACK)
+    {
+        return;
+    }
+
+    pendingComboIndex = actionRuntime.bufferedComboIndex;
+    actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+    actionRuntime.bufferedComboIndex = 0;
+    stateMachine.ChangeState(*this, PLAYER_ACTION::WEAK_ATTACK);
+}
+
 void PlayerControllerComponent::NotifyActionEnd()
 {
     actionRuntime.actionEnded = true;
@@ -351,13 +406,24 @@ void PlayerControllerComponent::NotifyActionEnd()
         blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
     }
 
+    if (GetCurrentAction() == PLAYER_ACTION::WEAK_ATTACK &&
+        actionRuntime.bufferedAction == PLAYER_ACTION::WEAK_ATTACK)
+    {
+        actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+        actionRuntime.bufferedComboIndex = 0;
+    }
+
     if (ConsumeBufferedAction())
     {
         return;
     }
 
     const DirectX::XMFLOAT3 input_ = GetMoveInput();
-    RequestAction((input_.x != 0.0f || input_.z != 0.0f) ? PLAYER_ACTION::MOVE : PLAYER_ACTION::IDLE);
+    const PLAYER_ACTION locomotionAction_ =
+        (input_.x != 0.0f || input_.z != 0.0f)
+        ? PLAYER_ACTION::MOVE
+        : PLAYER_ACTION::IDLE;
+    stateMachine.ChangeState(*this, locomotionAction_);
 }
 
 bool PlayerControllerComponent::ConsumeBufferedAction()
@@ -372,12 +438,8 @@ bool PlayerControllerComponent::ConsumeBufferedAction()
     actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
     actionRuntime.bufferedComboIndex = 0;
 
-    if (!CanTransitionPlayerAction(GetCurrentAction(), nextAction_))
-    {
-        return false;
-    }
-
     stateMachine.ChangeState(*this, nextAction_);
+
     return true;
 }
 
@@ -393,7 +455,6 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     actionRuntime.bufferedComboIndex = 0;
 
     SendActionToBlackboard(action_);
-
 }
 
 int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_) const
@@ -403,9 +464,10 @@ int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_)
         return 0;
     }
 
-    if (GetCurrentAction() == PLAYER_ACTION::WEAK_ATTACK && actionRuntime.canCombo)
+    if (GetCurrentAction() == PLAYER_ACTION::WEAK_ATTACK &&
+        (actionRuntime.canBufferInput || actionRuntime.canCombo))
     {
-        return comboIndex + 1;
+        return (comboIndex + 1) % WEAK_ATTACK_COMBO_COUNT;
     }
 
     return 0;
@@ -415,28 +477,30 @@ void PlayerControllerComponent::ProcessActionInput()
 {
     auto& keyConfig_ = KeyConfig::Instance();
 
-    //if (keyConfig_.ActionPressedIn(PlayerInputAction::DEBUG_GUARD_HIT) &&
-    //    GetCurrentAction() == PLAYER_ACTION::GUARD)
-    //{
-    //    NotifyGuardedAttack();
-    //    return;
-    //}
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::DEBUG_GUARD_HIT) &&
+        GetCurrentAction() == PLAYER_ACTION::GUARD)
+    {
+        NotifyGuardedAttack();
+        return;
+    }
 
-    //if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) && RequestAction(PLAYER_ACTION::DODGE)) return;
-    //if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
-    //if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
-    //if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) && RequestAction(PLAYER_ACTION::WEAK_ATTACK)) return;
-    //if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) && RequestAction(PLAYER_ACTION::STRONG_ATTACK)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) && RequestAction(PLAYER_ACTION::DODGE)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) && RequestAction(PLAYER_ACTION::WEAK_ATTACK)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) && RequestAction(PLAYER_ACTION::STRONG_ATTACK)) return;
 
-    //if (keyConfig_.ActionPressed(PlayerInputAction::GUARD))
-    //{
-    //    if (RequestAction(PLAYER_ACTION::GUARD)) return;
-    //}
-    //else if (GetCurrentAction() == PLAYER_ACTION::GUARD)
-    //{
-    //    RequestAction(PLAYER_ACTION::IDLE);
-    //    return;
-    //}
+    if (keyConfig_.ActionPressed(PlayerInputAction::GUARD))
+    {
+        if (RequestAction(PLAYER_ACTION::GUARD)) return;
+    }
+    else if (GetCurrentAction() == PLAYER_ACTION::GUARD)
+    {
+        RequestAction(PLAYER_ACTION::IDLE);
+        return;
+    }
+
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) && RequestAction(PLAYER_ACTION::DODGE)) return;
 
     const DirectX::XMFLOAT3 input_ = GetMoveInput();
     if ((input_.x != 0.0f || input_.z != 0.0f) && RequestAction(PLAYER_ACTION::MOVE))
@@ -474,6 +538,10 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     registry_.RegisterAction("Player", "CanComboOff", [this]()
         {
             SetCanCombo(false);
+        });
+    registry_.RegisterAction("Player", "ComboTransition", [this]()
+        {
+            NotifyComboTransition();
         });
     registry_.RegisterAction("Player", "ActionEnd", [this]()
         {
@@ -522,7 +590,42 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_COMBO, actionRuntime.canCombo);
         blackboard->SetBool(category_, PlayerBlackboardKey::ACTION_ENDED, actionRuntime.actionEnded);
     }
+
+    const bool shouldEnterAttack_ =
+        group_ == PLAYER_ACTION_GROUP::ATTACK &&
+        comboIndex == 0;
+    if (shouldEnterAttack_)
+    {
+        blackboard->SetBool(
+            PlayerBlackboardCategory::ANIM,
+            PlayerBlackboardKey::ATTACK_ENTER,
+            true);
+    }
+
     SendMoveInputToBlackboard(GetMoveInput());
+}
+
+bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
+{
+    if (action_ == PLAYER_ACTION::NONE)
+    {
+        return false;
+    }
+
+    // デバッグ切り替えなので、入力バッファやコンボ待ちを全部リセット
+    actionRuntime.canCancel = true;
+    actionRuntime.canBufferInput = false;
+    actionRuntime.canCombo = false;
+    actionRuntime.actionEnded = false;
+    actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+    actionRuntime.bufferedComboIndex = 0;
+
+    pendingComboIndex = 0;
+    comboIndex = 0;
+
+    // ChangeState 内で現在ステートの Exit() が呼ばれる
+    stateMachine.ChangeState(*this, action_);
+    return true;
 }
 
 void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_)
@@ -536,26 +639,181 @@ void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT
 void PlayerControllerComponent::Gui()
 {
     ImGui::Text("State: %s", stateMachine.GetCurrentStateName());
+    ImGui::Text("Current Action: %s", GetPlayerActionName(GetCurrentAction()));
+
+    ImGui::SeparatorText("Runtime");
+
     ImGui::Text("Can Cancel: %s", actionRuntime.canCancel ? "true" : "false");
     ImGui::Text("Can Buffer Input: %s", actionRuntime.canBufferInput ? "true" : "false");
     ImGui::Text("Can Combo: %s", actionRuntime.canCombo ? "true" : "false");
+    ImGui::Text("Action Ended: %s", actionRuntime.actionEnded ? "true" : "false");
     ImGui::Text("Combo Index: %d", comboIndex);
     ImGui::Text("Buffered Action: %s", GetPlayerActionName(actionRuntime.bufferedAction));
+
+    ImGui::SeparatorText("Cancel Transitions");
+    constexpr PLAYER_ACTION cancelActions_[] =
+    {
+        PLAYER_ACTION::IDLE,
+        PLAYER_ACTION::MOVE,
+        PLAYER_ACTION::WEAK_ATTACK,
+        PLAYER_ACTION::STRONG_ATTACK,
+        PLAYER_ACTION::GUARD,
+        PLAYER_ACTION::JUST_GUARD,
+        PLAYER_ACTION::DODGE,
+        PLAYER_ACTION::SKILL_A,
+        PLAYER_ACTION::SKILL_B,
+        PLAYER_ACTION::COUNTER_ATTACK
+    };
+    int removeCancelTransitionIndex_ = -1;
+    for (int transitionIndex_ = 0;
+        transitionIndex_ < static_cast<int>(cancelTransitions.size());
+        ++transitionIndex_)
+    {
+        PlayerCancelTransition& transition_ = cancelTransitions[transitionIndex_];
+        ImGui::PushID(transitionIndex_);
+        ImGui::SetNextItemWidth(140.0f);
+        if (ImGui::BeginCombo("##From", GetPlayerActionName(transition_.from)))
+        {
+            for (const PLAYER_ACTION action_ : cancelActions_)
+            {
+                if (ImGui::Selectable(GetPlayerActionName(action_), transition_.from == action_))
+                {
+                    transition_.from = action_;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        ImGui::TextUnformatted("->");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(140.0f);
+        if (ImGui::BeginCombo("##To", GetPlayerActionName(transition_.to)))
+        {
+            for (const PLAYER_ACTION action_ : cancelActions_)
+            {
+                if (ImGui::Selectable(GetPlayerActionName(action_), transition_.to == action_))
+                {
+                    transition_.to = action_;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::SmallButton("X")) removeCancelTransitionIndex_ = transitionIndex_;
+        ImGui::PopID();
+    }
+    if (removeCancelTransitionIndex_ >= 0)
+    {
+        cancelTransitions.erase(cancelTransitions.begin() + removeCancelTransitionIndex_);
+    }
+    if (ImGui::Button("Add Cancel Transition"))
+    {
+        cancelTransitions.push_back({ PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::DODGE });
+    }
+
+    ImGui::SeparatorText("Debug Change Action");
+
+    if (ImGui::BeginCombo("Action", GetPlayerActionName(debugSelectedAction)))
+    {
+        constexpr PLAYER_ACTION actions_[] =
+        {
+            PLAYER_ACTION::IDLE,
+            PLAYER_ACTION::MOVE,
+            PLAYER_ACTION::WEAK_ATTACK,
+            PLAYER_ACTION::STRONG_ATTACK,
+            PLAYER_ACTION::GUARD,
+            PLAYER_ACTION::JUST_GUARD,
+            PLAYER_ACTION::DODGE,
+            PLAYER_ACTION::SKILL_A,
+            PLAYER_ACTION::SKILL_B,
+            PLAYER_ACTION::COUNTER_ATTACK
+        };
+
+        for (const PLAYER_ACTION action_ : actions_)
+        {
+            const bool selected_ = debugSelectedAction == action_;
+            if (ImGui::Selectable(GetPlayerActionName(action_), selected_))
+            {
+                debugSelectedAction = action_;
+            }
+
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
+    if (ImGui::Button("Force Change Action"))
+    {
+        ForceChangeAction(debugSelectedAction);
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Notify Action End"))
+    {
+        NotifyActionEnd();
+    }
+
+    ImGui::SeparatorText("Runtime Command");
+
+    if (ImGui::Button("Cancel On"))
+    {
+        SetCanCancel(true);
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel Off"))
+    {
+        SetCanCancel(false);
+    }
+
+    ImGui::SeparatorText("Params");
+
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat("Dodge Speed", &dodgeSpeed, 0.1f, 0.0f, 100.0f);
 }
 
 void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
-    j_["DodgeSpeed"] = dodgeSpeed;
+    j_["CancelTransitions"] = nlohmann::json::array();
+    for (const PlayerCancelTransition& transition_ : cancelTransitions)
+    {
+        j_["CancelTransitions"].push_back(
+            {
+                { "From", static_cast<int>(transition_.from) },
+                { "To", static_cast<int>(transition_.to) }
+            });
+    }
 }
 
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     moveSpeed = j_.value("MoveSpeed", moveSpeed);
-    dodgeSpeed = j_.value("DodgeSpeed", dodgeSpeed);
+    if (j_.contains("CancelTransitions") && j_["CancelTransitions"].is_array())
+    {
+        cancelTransitions.clear();
+        for (const auto& transitionJson_ : j_["CancelTransitions"])
+        {
+            const int from_ = transitionJson_.value("From", static_cast<int>(PLAYER_ACTION::NONE));
+            const int to_ = transitionJson_.value("To", static_cast<int>(PLAYER_ACTION::NONE));
+            if (from_ < 0 || from_ >= static_cast<int>(PLAYER_ACTION::NONE) ||
+                to_ < 0 || to_ >= static_cast<int>(PLAYER_ACTION::NONE))
+            {
+                continue;
+            }
+            cancelTransitions.push_back(
+                {
+                    static_cast<PLAYER_ACTION>(from_),
+                    static_cast<PLAYER_ACTION>(to_)
+                });
+        }
+    }
 }
 
 REGISTER_COMPONENT(PlayerControllerComponent, "PlayerController")

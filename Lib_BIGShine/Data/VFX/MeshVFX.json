@@ -1,0 +1,130 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": false,
+        "Parts": [
+            {
+                "Alpha": 1.0,
+                "AlphaEnd": 1.0,
+                "AlphaStart": 1.0,
+                "AnimateAlpha": false,
+                "AnimateScale": false,
+                "BaseTexturePath": "",
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "DissolveThreshold": 0.0,
+                "DistortionNoiseTexturePath": "",
+                "Duration": 0.0,
+                "EdgeColor": [
+                    0.25,
+                    0.75,
+                    1.0,
+                    1.0
+                ],
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "IntersectionEdgeStrength": 0.0,
+                "IntersectionEdgeWidth": 0.0020000000949949026,
+                "Loop": false,
+                "MaskDistortionOpacity": 0.6100000143051147,
+                "MaskDistortionStrength": 16.0,
+                "MaskLayers": [
+                    {
+                        "BlendMode": 0,
+                        "Invert": false,
+                        "Path": "Data/Texture/Trail/T_TrailMask_09.PNG"
+                    }
+                ],
+                "MaskTexturePath": "",
+                "MaskUVRotationSpeed": 0.0,
+                "MaskUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Plane1.glb",
+                "NoiseStrength": 0.05000000074505806,
+                "NoiseTexturePath": "",
+                "NoiseTexturePaths": [
+                    "Data/Texture/Trail/T_TrailMask_06.PNG"
+                ],
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVSpeed": [
+                    0.20000000298023224,
+                    -0.20000000298023224
+                ],
+                "NormalStrength": 1.0,
+                "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                "Position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleEnd": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleStart": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "SilhouetteEdgePower": 3.0,
+                "SilhouetteEdgeStrength": 0.0,
+                "UVRadialScale": 1.0,
+                "UVRadialScaleSpeed": 0.0010000000474974513,
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UseEdgeHighlight": false,
+                "UseFresnel": true,
+                "UseMask": true,
+                "UseMaskDistortion": true,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": true,
+                "UseNormal": true,
+                "UseVertexNoise": false,
+                "VertexNoiseHorizontalScale": 1.0,
+                "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                "VertexNoiseSpeed": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "VertexNoiseTexturePath": "",
+                "VertexNoiseVerticalScale": 1.0,
+                "VertexNoiseVerticalStrength": 0.10000000149011612
+            }
+        ]
+    }
+}

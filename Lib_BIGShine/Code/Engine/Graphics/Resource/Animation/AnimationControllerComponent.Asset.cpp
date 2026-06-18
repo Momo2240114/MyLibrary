@@ -17,18 +17,27 @@
 #include <fstream>
 #include <cmath>
 #include <unordered_map>
+#include <utility>
 
 namespace ed = ax::NodeEditor;
 
 namespace
 {
-    // 既存の保存先。既存アセットとの互換性を優先するためパスは据え置き。
     const std::string ASSET_DIR = "Data/Animation/StateData/";
     const std::string GRAPH_ASSET_DIR = "Data/Animation/GraphData/";
     const std::string STATE_ASSET_DIR = "Data/Animation/StateData/";
 
     constexpr const char* START_NODE_NAME = "__Start__";
     constexpr const char* ANY_NODE_NAME = "__Any__";
+
+    bool IsValidGraphPosition(const ImVec2& position_)
+    {
+        constexpr float positionLimit_ = 100000.0f;
+        return std::isfinite(position_.x) &&
+            std::isfinite(position_.y) &&
+            std::abs(position_.x) < positionLimit_ &&
+            std::abs(position_.y) < positionLimit_;
+    }
 
     std::string GetFullAssetPath(const std::string& assetName_)
     {
@@ -43,22 +52,53 @@ namespace
 
     std::string GetFullStateAssetPath(const std::string& assetName_)
     {
-        std::string name_ = assetName_;
-        if (name_.find(".json") == std::string::npos)
+        std::filesystem::path path_(assetName_);
+        if (path_.extension() != ".json")
         {
-            name_ += ".json";
+            path_ += ".json";
         }
-        return STATE_ASSET_DIR + name_;
+
+        if (path_.has_parent_path())
+        {
+            return path_.lexically_normal().string();
+        }
+        return (std::filesystem::path(STATE_ASSET_DIR) / path_).lexically_normal().string();
     }
 
     std::string GetFullGraphAssetPath(const std::string& assetName_)
     {
-        std::string name_ = assetName_;
-        if (name_.find(".json") == std::string::npos)
+        std::filesystem::path path_(assetName_);
+        if (path_.extension() != ".json")
         {
-            name_ += ".json";
+            path_ += ".json";
         }
-        return GRAPH_ASSET_DIR + name_;
+
+        if (path_.has_parent_path())
+        {
+            return path_.lexically_normal().string();
+        }
+        return (std::filesystem::path(GRAPH_ASSET_DIR) / path_).lexically_normal().string();
+    }
+
+    AnimationDataAsset BuildAnimationDataAsset(
+        const std::unordered_map<std::string, std::unique_ptr<AnimState>>& states_,
+        const AnimState* currentState_)
+    {
+        AnimationDataAsset asset_;
+        for (const auto& [name_, state_] : states_)
+        {
+            if (state_)
+            {
+                asset_.states.push_back(*state_);
+            }
+        }
+
+        if (currentState_)
+        {
+            asset_.defaultStateName = currentState_->name;
+        }
+
+        return asset_;
     }
 }
 
@@ -66,18 +106,68 @@ void AnimationControllerComponent::Serialize(nlohmann::json& json_) const
 {
     json_["AssetPath"] = assetFilePath;
     json_["GraphAssetPath"] = graphAssetFilePath;
+    json_["UseTransitionGraph"] = useTransitionGraph;
+    json_["StateAssets"] = nlohmann::json::object();
+    for (const auto& [stateName_, path_] : stateAssetPaths)
+    {
+        if (!path_.empty())
+        {
+            json_["StateAssets"][stateName_] = path_;
+        }
+    }
+
+    AnimationDataAsset asset_ = BuildAnimationDataAsset(states, currentState);
+    nlohmann::json animationData_;
+    asset_.Serialize(animationData_);
+    json_["AnimationData"] = animationData_;
 }
 
 void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
 {
     assetFilePath = json_.value("AssetPath", "");
     graphAssetFilePath = json_.value("GraphAssetPath", "");
+    useTransitionGraph = json_.value("UseTransitionGraph", useTransitionGraph);
+    stateAssetPaths.clear();
+    pendingStateAssetPaths.clear();
+    std::string defaultStateName_;
 
     if (!assetFilePath.empty())
     {
         LoadAsset(assetFilePath);
     }
 
+    if (json_.contains("AnimationData") && json_["AnimationData"].is_object())
+    {
+        AnimationDataAsset asset_;
+        asset_.Deserialize(json_["AnimationData"]);
+
+        animator = ModelAnimator{};
+        currentState = nullptr;
+        editingState = nullptr;
+        states.clear();
+        for (const AnimState& state_ : asset_.states)
+        {
+            states[state_.name] = std::make_unique<AnimState>(state_);
+        }
+
+        defaultStateName_ = asset_.defaultStateName;
+    }
+
+    if (json_.contains("StateAssets") && json_["StateAssets"].is_object())
+    {
+        for (const auto& [stateName_, pathJson_] : json_["StateAssets"].items())
+        {
+            if (pathJson_.is_string())
+            {
+                pendingStateAssetPaths[stateName_] = pathJson_.get<std::string>();
+            }
+        }
+    }
+
+    if (!defaultStateName_.empty() && states.count(defaultStateName_))
+    {
+        ChangeState(defaultStateName_, 0.0f);
+    }
     graphNodes.clear();
     graphTransitions.clear();
 
@@ -88,13 +178,16 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
     }
     else
     {
+        ApplyPendingStateAssets();
         EnsureSpecialGraphNodes();
     }
 
     TryEnterStartState();
 }
 
-bool AnimationControllerComponent::SaveStateAsset(const std::string& stateName_)
+bool AnimationControllerComponent::SaveStateAsset(
+    const std::string& stateName_,
+    const std::string& assetPath_)
 {
     auto stateIt_ = states.find(stateName_);
     if (stateIt_ == states.end() || !stateIt_->second) return false;
@@ -106,54 +199,125 @@ bool AnimationControllerComponent::SaveStateAsset(const std::string& stateName_)
 
     nlohmann::json json_;
     json_["AssetType"] = "AnimationState";
-    json_["AssetVersion"] = 1;
+    json_["AssetVersion"] = 2;
     json_["State"] = *stateIt_->second;
 
-    std::ofstream file_(GetFullStateAssetPath(stateName_), std::ios::out | std::ios::trunc);
+    const std::string path_ = assetPath_.empty()
+        ? BuildDefaultStateAssetPath(stateName_)
+        : GetFullStateAssetPath(assetPath_);
+    const std::filesystem::path parentPath_ = std::filesystem::path(path_).parent_path();
+    if (!parentPath_.empty())
+    {
+        std::filesystem::create_directories(parentPath_);
+    }
+
+    std::ofstream file_(path_, std::ios::out | std::ios::trunc);
     if (!file_.is_open()) return false;
 
     file_ << json_.dump(4);
+    stateAssetPaths[stateName_] = path_;
+    if (!graphAssetFilePath.empty()) SaveGraphAsset(graphAssetFilePath);
     return true;
+}
+
+std::string AnimationControllerComponent::BuildDefaultStateAssetPath(
+    const std::string& stateName_) const
+{
+    std::filesystem::path ownerPath_(assetFilePath);
+    if (ownerPath_.empty())
+    {
+        ownerPath_ = std::filesystem::path(graphAssetFilePath);
+    }
+
+    std::string ownerName_ = ownerPath_.stem().string();
+    if (ownerName_.empty())
+    {
+        ownerName_ = "Shared";
+    }
+
+    std::filesystem::path statePath_(stateName_);
+    if (statePath_.extension() != ".json")
+    {
+        statePath_ += ".json";
+    }
+
+    return (std::filesystem::path(STATE_ASSET_DIR) /
+        ownerName_ /
+        "States" /
+        statePath_.filename()).lexically_normal().string();
 }
 
 bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 {
     if (assetName_.empty()) return false;
 
-    std::ifstream file_(GetFullStateAssetPath(assetName_));
+    const std::string path_ = GetFullStateAssetPath(assetName_);
+    std::ifstream file_(path_);
     if (!file_.is_open()) return false;
 
-    nlohmann::json json_;
-    file_ >> json_;
-
     AnimState state_;
-    if (json_.contains("State"))
+    try
     {
-        state_ = json_["State"].get<AnimState>();
-    }
-    else
-    {
-        state_ = json_.get<AnimState>();
-    }
+        nlohmann::json json_;
+        file_ >> json_;
 
+        if (json_.contains("AssetType") &&
+            json_.value("AssetType", "") != "AnimationState")
+        {
+            return false;
+        }
+
+        if (json_.contains("State"))
+        {
+            state_ = json_["State"].get<AnimState>();
+        }
+        else
+        {
+            if (!json_.contains("name") || !json_.contains("type"))
+            {
+                return false;
+            }
+            state_ = json_.get<AnimState>();
+        }
+    }
+    catch (const nlohmann::json::exception&)
+    {
+        return false;
+    }
     if (state_.name.empty())
     {
         state_.name = std::filesystem::path(assetName_).stem().string();
     }
 
-    const bool wasCurrent_ = currentState && currentState->name == state_.name;
-    states[state_.name] = std::make_unique<AnimState>(state_);
+    auto stateIterator_ = states.find(state_.name);
+    if (stateIterator_ != states.end() && stateIterator_->second)
+    {
+        // Animatorが保持しているStateポインタを無効化しないよう、実体を維持して内容だけ更新する。
+        *stateIterator_->second = state_;
+    }
+    else
+    {
+        states[state_.name] = std::make_unique<AnimState>(state_);
+    }
+    stateAssetPaths[state_.name] = path_;
     editingState = states[state_.name].get();
 
     RegisterStateAction(state_.name);
-    EnsureGraphNodeForState(state_.name);
-
-    if (wasCurrent_)
-    {
-        ChangeState(state_.name, 0.0f);
-    }
 
     return true;
+}
+
+void AnimationControllerComponent::ApplyPendingStateAssets()
+{
+    if (pendingStateAssetPaths.empty()) return;
+
+    const auto pendingAssets_ = std::move(pendingStateAssetPaths);
+    pendingStateAssetPaths.clear();
+    for (const auto& [stateName_, path_] : pendingAssets_)
+    {
+        (void)stateName_;
+        if (!path_.empty()) LoadStateAsset(path_);
+    }
 }
 
 
@@ -168,6 +332,17 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
     nlohmann::json j;
     j["AssetPath"] = assetFilePath;
     j["GraphAssetPath"] = assetName_;
+    j["UseTransitionGraph"] = useTransitionGraph;
+    j["StateAssets"] = nlohmann::json::object();
+    for (const auto& [stateName_, path_] : stateAssetPaths)
+    {
+        if (!path_.empty()) j["StateAssets"][stateName_] = path_;
+    }
+
+    AnimationDataAsset asset_ = BuildAnimationDataAsset(states, currentState);
+    nlohmann::json animationData_;
+    asset_.Serialize(animationData_);
+    j["AnimationData"] = animationData_;
 
     nlohmann::json nodesArray = nlohmann::json::array();
     for (auto& node : graphNodes)
@@ -187,7 +362,17 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
         if (nodeEditorContext && nodeScope == currentScope)
         {
             ed::SetCurrentEditor(nodeEditorContext);
-            pos = ed::GetNodePosition(node.id);
+            const ImVec2 editorPosition_ = ed::GetNodePosition(node.id);
+            if (IsValidGraphPosition(editorPosition_))
+            {
+                pos = editorPosition_;
+                node.pos = editorPosition_;
+            }
+        }
+        if (!IsValidGraphPosition(pos))
+        {
+            pos = ImVec2(0.0f, 0.0f);
+            node.pos = pos;
         }
 
         n["posX"] = pos.x;
@@ -230,26 +415,62 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
         graphAssetFilePath = assetName_;
     }
 }
-void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
+bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
 {
-    if (assetName_.empty()) return;
+    if (assetName_.empty()) return false;
 
     std::ifstream file(GetFullGraphAssetPath(assetName_));
-    if (!file.is_open()) return;
+    if (!file.is_open()) return false;
 
     nlohmann::json j;
-    file >> j;
+    try
+    {
+        file >> j;
+    }
+    catch (const nlohmann::json::exception&)
+    {
+        return false;
+    }
+    if (!j.is_object() ||
+        !j.contains("GraphNodes") || !j["GraphNodes"].is_array() ||
+        !j.contains("GraphTransitions") || !j["GraphTransitions"].is_array())
+    {
+        return false;
+    }
 
     graphAssetFilePath = assetName_;
     currentGraphScopeId = "Root";
     graphScopeStack.clear();
+    stateAssetPaths.clear();
 
     std::string stateAssetPath = j.value("AssetPath", "");
-    if (!stateAssetPath.empty())
+    if (j.contains("AnimationData") && j["AnimationData"].is_object())
+    {
+        AnimationDataAsset asset;
+        asset.Deserialize(j["AnimationData"]);
+
+        animator = ModelAnimator{};
+        currentState = nullptr;
+        editingState = nullptr;
+        states.clear();
+        for (auto& s : asset.states) {
+            states[s.name] = std::make_unique<AnimState>(s);
+        }
+
+        assetFilePath = stateAssetPath;
+
+        if (!asset.defaultStateName.empty() && states.count(asset.defaultStateName))
+        {
+            ChangeState(asset.defaultStateName, 0.0f);
+        }
+    }
+    else if (!stateAssetPath.empty())
     {
         assetFilePath = stateAssetPath;
         LoadAsset(assetFilePath);
     }
+
+    useTransitionGraph = j.value("UseTransitionGraph", useTransitionGraph);
 
     graphNodes.clear();
     graphTransitions.clear();
@@ -274,6 +495,7 @@ void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
 
     if (j.contains("GraphNodes") && j["GraphNodes"].is_array())
     {
+        std::unordered_map<std::string, int> scopeNodeCounts_;
         for (auto& n : j["GraphNodes"])
         {
             AnimGraphNode node;
@@ -307,6 +529,16 @@ void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
             }
 
             node.pos = ImVec2(n.value("posX", 0.0f), n.value("posY", 0.0f));
+            if (!IsValidGraphPosition(node.pos))
+            {
+                const std::string scopeName_ = node.scopeId.empty() ? "Root" : node.scopeId;
+                const int nodeIndex_ = scopeNodeCounts_[scopeName_]++;
+                const int column_ = nodeIndex_ % 4;
+                const int row_ = nodeIndex_ / 4;
+                node.pos = ImVec2(
+                    -480.0f + static_cast<float>(column_) * 260.0f,
+                    -180.0f + static_cast<float>(row_) * 180.0f);
+            }
 
             graphNodes.push_back(node);
         }
@@ -348,7 +580,23 @@ void AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
     SetIdCounterFloor(maxId);
     EnsureSpecialGraphNodes();
 
+    if (j.contains("StateAssets") && j["StateAssets"].is_object())
+    {
+        for (const auto& [stateName_, pathJson_] : j["StateAssets"].items())
+        {
+            (void)stateName_;
+            if (pathJson_.is_string()) LoadStateAsset(pathJson_.get<std::string>());
+        }
+    }
+
+    if (nodeEditorContext)
+    {
+        ed::DestroyEditor(nodeEditorContext);
+        nodeEditorContext = nullptr;
+    }
+    EnsureNodeEditorContext();
     needsPositionRestore = true;
+    return true;
 }
 
 void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
@@ -364,6 +612,9 @@ void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
     AnimationDataAsset asset;
     asset.Deserialize(j);
 
+    animator = ModelAnimator{};
+    currentState = nullptr;
+    editingState = nullptr;
     states.clear();
     for (auto& s : asset.states) {
         states[s.name] = std::make_unique<AnimState>(s);
@@ -380,18 +631,12 @@ void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
 
 void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
 {
-    // ディレクトリが存在しない場合は作成する
-    if (!std::filesystem::exists(ASSET_DIR)) {
-        std::filesystem::create_directories(ASSET_DIR);
-    }
+    if (assetName_.empty()) return;
 
     std::string fullPath = GetFullAssetPath(assetName_);
+    std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
 
-    AnimationDataAsset asset;
-    for (auto& [name, ptr] : states) {
-        asset.states.push_back(*ptr);
-    }
-    if (currentState) asset.defaultStateName = currentState->name;
+    AnimationDataAsset asset = BuildAnimationDataAsset(states, currentState);
 
     nlohmann::json j;
     asset.Serialize(j);
@@ -399,9 +644,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
     std::ofstream file(fullPath);
     if (file.is_open()) {
         file << j.dump(4);
-        assetFilePath = assetName_; // エディタ上での表示用に名前を保存
+        assetFilePath = assetName_;
     }
-
 }
 
     void to_json(nlohmann::json & j, const AnimEvent & e) {
@@ -412,6 +656,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"actionStart", e.startAction},
             {"actionUpdate", e.updateAction},
             {"actionEnd", e.endAction},
+            {"overridePlaybackSpeed", e.overridePlaybackSpeed},
+            {"playbackSpeed", e.playbackSpeed},
             {"callEndOnStateExit", e.callEndOnStateExit}
         };
     }
@@ -423,6 +669,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         e.startAction = j.value("actionStart", "");
         e.updateAction = j.value("actionUpdate", "");
         e.endAction = j.value("actionEnd", "");
+        e.overridePlaybackSpeed = j.value("overridePlaybackSpeed", false);
+        e.playbackSpeed = j.value("playbackSpeed", 1.0f);
         e.callEndOnStateExit = j.value("callEndOnStateExit", false);
         e.isFired = false;
         e.isEndFired = false;
@@ -448,6 +696,14 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"animIndexA", s.animIndexA},
             {"animIndexB", s.animIndexB},
             {"blendParamName", s.blendParamName},
+            {"blendDefaultWeight", s.blendDefaultWeight},
+            {"blendParameterMin", s.blendParameterMin},
+            {"blendParameterMax", s.blendParameterMax},
+            {"blendPhaseOffsetA", s.blendPhaseOffsetA},
+            {"blendPhaseOffsetB", s.blendPhaseOffsetB},
+            {"blendSyncNormalizedTime", s.blendSyncNormalizedTime},
+            {"blendUseMask", s.blendUseMask},
+            {"blendMaskRootNodes", s.blendMaskRootNodes},
             // Custom用 【追加】
             {"customAnimIndex", s.customAnimIndex},
         };
@@ -471,6 +727,16 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.animIndexA = j.value("animIndexA", -1);
     s.animIndexB = j.value("animIndexB", -1);
     s.blendParamName = j.value("blendParamName", "BlendAlpha");
+    s.blendDefaultWeight = j.value("blendDefaultWeight", 0.5f);
+    s.blendParameterMin = j.value("blendParameterMin", 0.0f);
+    s.blendParameterMax = j.value("blendParameterMax", 1.0f);
+    s.blendPhaseOffsetA = j.value("blendPhaseOffsetA", 0.0f);
+    s.blendPhaseOffsetB = j.value("blendPhaseOffsetB", 0.0f);
+    s.blendSyncNormalizedTime = j.value("blendSyncNormalizedTime", true);
+    s.blendUseMask = j.value("blendUseMask", false);
+    s.blendMaskRootNodes = j.value(
+        "blendMaskRootNodes",
+        std::vector<std::string>{});
 
     // Custom用 【追加】
     s.customAnimIndex = j.value("customAnimIndex", -1);
@@ -490,4 +756,3 @@ void from_json(const nlohmann::json& j, AnimState& s)
         s.events.clear();
     }
 }
-

@@ -55,6 +55,9 @@ public:
     const BlackboardCategory& GetBlackboard() const;
     const AnimState* GetCurrentState() { return currentState; }
     float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
+    void SetAnimatorTime(float time_) { animator.SetCurrentTime(time_); }
+    void SetAnimationPaused(bool paused_) { animationPaused = paused_; }
+    bool IsAnimationPaused() const { return animationPaused; }
     void SetEditorPoseOverride(bool enabled_) { editorPoseOverride = enabled_; }
     bool IsEditorPoseOverride() const { return editorPoseOverride; }
 
@@ -72,11 +75,14 @@ public:
     void SetUseTransitionGraph(bool useTransitionGraph_) { useTransitionGraph = useTransitionGraph_; }
 private:
     std::string graphAssetFilePath;
+    std::string graphAssetStatus;
 
     void SaveGraphAsset(const std::string& assetName_);
-    void LoadGraphAsset(const std::string& assetName_);
-    bool SaveStateAsset(const std::string& stateName_);
+    bool LoadGraphAsset(const std::string& assetName_);
+    bool SaveStateAsset(const std::string& stateName_, const std::string& assetPath_ = "");
     bool LoadStateAsset(const std::string& assetName_);
+    std::string BuildDefaultStateAssetPath(const std::string& stateName_) const;
+    void ApplyPendingStateAssets();
     void RegisterStateAction(const std::string& stateName_);
     void EnsureGraphNodeForState(const std::string& stateName_);
     void EnsureNodeEditorContext();
@@ -93,11 +99,19 @@ private:
     // 【追加】このコンポーネントが紐づくモデル固有のポーズの記憶
     std::shared_ptr<PoseLibraryResource> poseLibrary = nullptr;
     bool editorPoseOverride = false;
+    bool animationPaused = false;
 
     // ノードエディタで管理されるステート群
     std::unordered_map<std::string, std::unique_ptr<AnimState>> states;
+    std::unordered_map<std::string, std::string> stateAssetPaths;
+    std::unordered_map<std::string, std::string> pendingStateAssetPaths;
     const AnimState* currentState = nullptr;
     AnimState* editingState = nullptr;// 編集中のステートを指す
+    std::string stateSearchText;
+    std::string animationClipSearchText;
+    std::string graphStateSearchText;
+    std::string stateAssetImportPath;
+    std::string stateAssetStatus;
 
     std::string assetFilePath; // 保存するパス
 

@@ -19,6 +19,7 @@ private:
         FILE,
         TEXTURE,
         MODEL,
+        JSON,
     };
 
     struct AssetNode

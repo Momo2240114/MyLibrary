@@ -26,15 +26,26 @@ void ColliderComponent::Start()
 
 void ColliderComponent::ReleasePhysXActor()
 {
-    if (!actor) return;
+    if (!actor && !shapeMaterial) return;
 
-    if (auto scene_ = actor->getScene())
+    // PhysX本体の終了後はactor/materialも既に無効なので参照しない。
+    if (!PhysXSystem::GetPhysics())
     {
-        scene_->removeActor(*actor);
+        actor = nullptr;
+        shapeMaterial = nullptr;
+        return;
     }
-    actor->userData = nullptr;
-    actor->release();
-    actor = nullptr;
+
+    if (actor)
+    {
+        if (auto scene_ = actor->getScene())
+        {
+            scene_->removeActor(*actor);
+        }
+        actor->userData = nullptr;
+        actor->release();
+        actor = nullptr;
+    }
 
     if (shapeMaterial)
     {

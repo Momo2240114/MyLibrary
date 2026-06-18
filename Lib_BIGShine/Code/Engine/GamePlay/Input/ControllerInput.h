@@ -1,90 +1,92 @@
 #pragma once
-#include <Windows.h>
-#include <Xinput.h>
-#include <vector>
+
+#include <SDL3/SDL_gamepad.h>
+#include <SDL3/SDL_init.h>
 #include <DirectXMath.h>
 
-#pragma comment(lib, "xinput.lib")
+#include <array>
+#include <string>
 
-// ボタン定数の抽象化
-enum class PadCode {
-    A = XINPUT_GAMEPAD_A,             // PS: ×
-    B = XINPUT_GAMEPAD_B,             // PS: ○
-    X = XINPUT_GAMEPAD_X,             // PS: □
-    Y = XINPUT_GAMEPAD_Y,             // PS: △
-    L1 = XINPUT_GAMEPAD_LEFT_SHOULDER,
-    R1 = XINPUT_GAMEPAD_RIGHT_SHOULDER,
-    L3 = XINPUT_GAMEPAD_LEFT_THUMB,
-    R3 = XINPUT_GAMEPAD_RIGHT_THUMB,
-    Start = XINPUT_GAMEPAD_START,     // PS: Options
-    Back = XINPUT_GAMEPAD_BACK,       // PS: Share / Touchpad(Click)
-    Up = XINPUT_GAMEPAD_DPAD_UP,
-    Down = XINPUT_GAMEPAD_DPAD_DOWN,
-    Left = XINPUT_GAMEPAD_DPAD_LEFT,
-    Right = XINPUT_GAMEPAD_DPAD_RIGHT,
 
-    // 特殊拡張：XInputの16ビット範囲(0xFFFF)を超えた値を割り当てる
+enum class PadCode
+{
+    A = 0x1000,
+    B = 0x2000,
+    X = 0x4000,
+    Y = 0x8000,
+    L1 = 0x0100,
+    R1 = 0x0200,
+    L3 = 0x0040,
+    R3 = 0x0080,
+    START = 0x0010,
+    BACK = 0x0020,
+    UP = 0x0001,
+    DOWN = 0x0002,
+    LEFT = 0x0004,
+    RIGHT = 0x0008,
     L2 = 0x10000,
     R2 = 0x20000,
-    StickL_Up = 0x40000,
-    StickL_Down = 0x80000,
-    StickL_Left = 0x100000,
-    StickL_Right = 0x200000,
-    StickR_Up = 0x400000,
-    StickR_Down = 0x800000,
-    StickR_Left = 0x1000000,
-    StickR_Right = 0x2000000
+    STICK_L_UP = 0x40000,
+    STICK_L_DOWN = 0x80000,
+    STICK_L_LEFT = 0x100000,
+    STICK_L_RIGHT = 0x200000,
+    STICK_R_UP = 0x400000,
+    STICK_R_DOWN = 0x800000,
+    STICK_R_LEFT = 0x1000000,
+    STICK_R_RIGHT = 0x2000000,
+    TOUCHPAD = 0x4000000,
+    GUIDE = 0x8000000
 };
 
-class ControllerInput 
+class ControllerInput
 {
 public:
-    static ControllerInput& Instance() {
-        static ControllerInput instance;
-        return instance;
-    }
+    static ControllerInput& Instance();
 
-    void Update() {
-        m_prevState = m_state;
-        DWORD result = XInputGetState(0, &m_state); // 1番目のコントローラ
-        m_connected = (result == ERROR_SUCCESS);
-    }
+    bool Initialize();
+    void Shutdown();
+    void Update();
 
-    bool IsConnected() const { return m_connected; }
+    bool IsConnected() const { return connected; }
+    const std::string& GetName() const { return gamepadName; }
 
-    // ボタン判定
-    bool ButtonPressed(PadCode code) const;
+    bool ButtonPressed(PadCode code_) const;
+    bool ButtonPressedIn(PadCode code_) const;
+    bool ButtonPressedOut(PadCode code_) const;
 
-    bool ButtonPressedIn(PadCode code) const {
-        return ButtonPressed(code) && !PrevButtonPressed(code);
-    }
-
-    bool ButtonPressedOut(PadCode code) const {
-        return !ButtonPressed(code) && PrevButtonPressed(code);
-    }
-
-    // 左スティックの傾きを取得 (-1.0f ～ 1.0f)
-    DirectX::XMFLOAT2 GetLeftStick() const {
-        return CalculateStickValue(m_state.Gamepad.sThumbLX, m_state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
-    }
-
-    // 右スティックの傾きを取得 (-1.0f ～ 1.0f)
-    DirectX::XMFLOAT2 GetRightStick() const {
-        return CalculateStickValue(m_state.Gamepad.sThumbRX, m_state.Gamepad.sThumbRY, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
-    }
+    DirectX::XMFLOAT2 GetLeftStick() const;
+    DirectX::XMFLOAT2 GetRightStick() const;
+    float GetLeftTrigger() const;
+    float GetRightTrigger() const;
 
 private:
-    bool PrevButtonPressed(PadCode code) const {
-        if (code == PadCode::L2) return m_prevState.Gamepad.bLeftTrigger > 128;
-        if (code == PadCode::R2) return m_prevState.Gamepad.bRightTrigger > 128;
-        return (m_prevState.Gamepad.wButtons & (int)code) != 0;
-    }
+    struct ControllerState
+    {
+        std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> buttons{};
+        std::array<Sint16, SDL_GAMEPAD_AXIS_COUNT> axes{};
+    };
 
-    // スティック計算の共通ロジック
-    DirectX::XMFLOAT2 CalculateStickValue(short rawX, short rawY, short deadzoneThreshold) const;
+    ControllerInput() = default;
+    ~ControllerInput();
+    ControllerInput(const ControllerInput&) = delete;
+    ControllerInput& operator=(const ControllerInput&) = delete;
 
-    ControllerInput() : m_connected(false) { ZeroMemory(&m_state, sizeof(XINPUT_STATE)); }
-    XINPUT_STATE m_state;
-    XINPUT_STATE m_prevState;
-    bool m_connected;
+    bool TryOpenGamepad();
+    void CloseGamepad();
+    void CaptureState();
+    bool ButtonPressed(const ControllerState& state_, PadCode code_) const;
+    DirectX::XMFLOAT2 CalculateStickValue(Sint16 rawX_, Sint16 rawY_) const;
+    float NormalizeTrigger(Sint16 rawValue_) const;
+    SDL_GamepadButton ConvertButton(PadCode code_) const;
+
+    SDL_Gamepad* gamepad = nullptr;
+    ControllerState state{};
+    ControllerState previousState{};
+    std::string gamepadName;
+    bool initialized = false;
+    bool connected = false;
+    bool gamepadEventsWereEnabled = false;
+    float stickDeadZone = 0.20f;
+    float virtualButtonThreshold = 0.50f;
+    float triggerThreshold = 0.50f;
 };

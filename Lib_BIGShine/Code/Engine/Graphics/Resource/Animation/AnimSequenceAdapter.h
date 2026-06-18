@@ -23,6 +23,17 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
     int GetItemTypeCount() const override { return 1; }
     const char* GetItemTypeName(int typeIndex) const override { return "Animation Event"; }
 
+    void SyncFrames()
+    {
+        if (!targetState) return;
+
+        for (auto& event_ : targetState->events)
+        {
+            event_.frameStart = ToFrame(event_.startTime);
+            event_.frameEnd = ToFrame(event_.endTime);
+        }
+    }
+
     // ドラッグ開始時に呼ばれる（必要に応じて初期状態の保存などが可能）
     void BeginEdit(int index) override {
         // 特になければ空でもOKですが、インターフェースとして存在を確認
@@ -46,9 +57,6 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
         if (!targetState || index >= (int)targetState->events.size()) return;
 
         auto& ev = targetState->events[index];
-        // 現在の秒から最新の表示用フレームを計算して代入
-        ev.frameStart = ToFrame(ev.startTime);
-        ev.frameEnd = ToFrame(ev.endTime);
 
         if (start) *start = &ev.frameStart; // int* へのポインタを渡す
         if (end) *end = &ev.frameEnd;

@@ -165,7 +165,8 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
     {
         const char* icon_ = node_.isDirectory ? "[Folder]" :
             (node_.type == AssetType::TEXTURE ? "[Texture]" :
-                (node_.type == AssetType::MODEL ? "[Model]" : "[File]"));
+                (node_.type == AssetType::MODEL ? "[Model]" :
+                    (node_.type == AssetType::JSON ? "[JSON]" : "[File]")));
         ImGui::Button(icon_, ImVec2(iconSize, iconSize));
     }
 
@@ -202,6 +203,10 @@ void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
     else if (node_.type == AssetType::MODEL)
     {
         payloadType_ = AssetBrowserPayload::MODEL;
+    }
+    else if (node_.type == AssetType::JSON)
+    {
+        payloadType_ = AssetBrowserPayload::JSON;
     }
     ImGui::SetDragDropPayload(payloadType_, node_.path.c_str(), node_.path.size() + 1);
     ImGui::TextUnformatted(node_.name.c_str());
@@ -244,5 +249,6 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
     {
         return AssetType::MODEL;
     }
+    if (extension_ == ".json") return AssetType::JSON;
     return AssetType::FILE;
 }

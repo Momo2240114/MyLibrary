@@ -21,6 +21,13 @@ public:
         const std::string& initialDir_ = "",
         HWND ownerWindow_ = nullptr);
 
+    static std::string SaveFileDialog(
+        const wchar_t* title_,
+        const std::vector<FilterSpec>& filters_,
+        const std::string& initialPath_ = "",
+        const wchar_t* defaultExtension_ = nullptr,
+        HWND ownerWindow_ = nullptr);
+
     static std::string OpenTextureDialog(
         const wchar_t* title_,
         const std::string& initialDir_ = "Data/Texture/Particle",
@@ -29,6 +36,11 @@ public:
     static std::string OpenJsonDialog(
         const wchar_t* title_,
         const std::string& initialDir_ = "Data",
+        HWND ownerWindow_ = nullptr);
+
+    static std::string SaveJsonDialog(
+        const wchar_t* title_,
+        const std::string& initialPath_ = "Data",
         HWND ownerWindow_ = nullptr);
 
     static std::string OpenGltfDialog(

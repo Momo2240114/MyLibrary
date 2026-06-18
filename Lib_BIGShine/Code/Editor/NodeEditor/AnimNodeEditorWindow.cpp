@@ -6,6 +6,63 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include <algorithm>
 
+namespace
+{
+    void DrawVerticalSplitter(
+        const char* id_,
+        float height_,
+        float& size_,
+        float deltaScale_)
+    {
+        constexpr float SPLITTER_SIZE = 6.0f;
+        ImGui::InvisibleButton(id_, ImVec2(SPLITTER_SIZE, height_));
+        const bool hovered_ = ImGui::IsItemHovered();
+        const bool active_ = ImGui::IsItemActive();
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            ImGui::GetItemRectMin(),
+            ImGui::GetItemRectMax(),
+            ImGui::GetColorU32(
+                hovered_ || active_
+                ? ImGuiCol_SeparatorHovered
+                : ImGuiCol_Separator));
+        if (hovered_ || active_)
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+        }
+        if (active_)
+        {
+            size_ += ImGui::GetIO().MouseDelta.x * deltaScale_;
+        }
+    }
+
+    void DrawHorizontalSplitter(
+        const char* id_,
+        float width_,
+        float& size_,
+        float deltaScale_)
+    {
+        constexpr float SPLITTER_SIZE = 6.0f;
+        ImGui::InvisibleButton(id_, ImVec2(width_, SPLITTER_SIZE));
+        const bool hovered_ = ImGui::IsItemHovered();
+        const bool active_ = ImGui::IsItemActive();
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            ImGui::GetItemRectMin(),
+            ImGui::GetItemRectMax(),
+            ImGui::GetColorU32(
+                hovered_ || active_
+                ? ImGuiCol_SeparatorHovered
+                : ImGuiCol_Separator));
+        if (hovered_ || active_)
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+        }
+        if (active_)
+        {
+            size_ += ImGui::GetIO().MouseDelta.y * deltaScale_;
+        }
+    }
+}
+
 bool AnimNodeEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const
 {
     modelComp = nullptr;
@@ -40,37 +97,106 @@ void AnimNodeEditorWindow::Draw()
     DrawStylePopup();
 
     ImVec2 available_ = ImGui::GetContentRegionAvail();
-    const float rightWidth_ = (std::max)(360.0f, available_.x * 0.40f);
-    const float leftWidth_ = (std::max)(320.0f, available_.x - rightWidth_ - ImGui::GetStyle().ItemSpacing.x);
-    const float sceneHeight_ = (std::max)(220.0f, available_.y * 0.66f);
-    const float graphHeight_ = (std::max)(260.0f, available_.y * 0.70f);
+    constexpr float SPLITTER_SIZE = 6.0f;
+    const float verticalSpacing_ = ImGui::GetStyle().ItemSpacing.y * 2.0f;
+    const float minimumLeftWidth_ = 420.0f;
+    const float minimumRightWidth_ = 360.0f;
+    const float minimumSceneHeight_ = 180.0f;
+    const float minimumLeftBottomHeight_ = 180.0f;
+    const float minimumGraphHeight_ = 240.0f;
+    const float minimumAssetHeight_ = 180.0f;
+    const float minimumHierarchyWidth_ = 180.0f;
+    const float minimumInspectorWidth_ = 220.0f;
+
+    if (!layoutSizeInitialized)
+    {
+        rightPanelWidth = available_.x * 0.42f;
+        scenePreviewHeight = available_.y * 0.64f;
+        hierarchyWidth = available_.x * 0.24f;
+        assetBrowserHeight = available_.y * 0.30f;
+        layoutSizeInitialized = true;
+    }
+
+    rightPanelWidth = std::clamp(
+        rightPanelWidth,
+        minimumRightWidth_,
+        (std::max)(minimumRightWidth_, available_.x - minimumLeftWidth_ - SPLITTER_SIZE));
+    const float leftWidth_ = (std::max)(
+        minimumLeftWidth_,
+        available_.x - rightPanelWidth - SPLITTER_SIZE);
+
+    scenePreviewHeight = std::clamp(
+        scenePreviewHeight,
+        minimumSceneHeight_,
+        (std::max)(
+            minimumSceneHeight_,
+            available_.y - minimumLeftBottomHeight_ - SPLITTER_SIZE - verticalSpacing_));
+    assetBrowserHeight = std::clamp(
+        assetBrowserHeight,
+        minimumAssetHeight_,
+        (std::max)(
+            minimumAssetHeight_,
+            available_.y - minimumGraphHeight_ - SPLITTER_SIZE - verticalSpacing_));
+    hierarchyWidth = std::clamp(
+        hierarchyWidth,
+        minimumHierarchyWidth_,
+        (std::max)(minimumHierarchyWidth_, leftWidth_ - minimumInspectorWidth_ - SPLITTER_SIZE));
+
+    const float graphHeight_ = (std::max)(
+        minimumGraphHeight_,
+        available_.y - assetBrowserHeight - SPLITTER_SIZE - verticalSpacing_);
 
     ImGui::BeginGroup();
-    ImGui::BeginChild("AnimNodeScenePreviewPanel", ImVec2(leftWidth_, sceneHeight_), true);
+    ImGui::BeginChild("AnimNodeScenePreviewPanel", ImVec2(leftWidth_, scenePreviewHeight), true);
     DrawScenePreviewPanel();
     ImGui::EndChild();
 
+    DrawHorizontalSplitter(
+        "##AnimNodeLeftHorizontalSplitter",
+        leftWidth_,
+        scenePreviewHeight,
+        1.0f);
+
     ImGui::BeginChild("AnimNodeLeftBottomPanel", ImVec2(leftWidth_, 0.0f), false);
-    const float hierarchyWidth_ = (std::max)(180.0f, leftWidth_ * 0.50f - ImGui::GetStyle().ItemSpacing.x * 0.5f);
-    ImGui::BeginChild("AnimNodeSceneHierarchyPanel", ImVec2(hierarchyWidth_, 0.0f), true);
+    ImGui::BeginChild("AnimNodeSceneHierarchyPanel", ImVec2(hierarchyWidth, 0.0f), true);
     DrawSceneHierarchyPanel();
     ImGui::EndChild();
-    ImGui::SameLine();
+
+    ImGui::SameLine(0.0f, 0.0f);
+    DrawVerticalSplitter(
+        "##AnimNodeHierarchySplitter",
+        ImGui::GetContentRegionAvail().y,
+        hierarchyWidth,
+        1.0f);
+
+    ImGui::SameLine(0.0f, 0.0f);
     ImGui::BeginChild("AnimNodeSceneInspectorPanel", ImVec2(0.0f, 0.0f), true);
     DrawSceneInspectorPanel();
     ImGui::EndChild();
     ImGui::EndChild();
     ImGui::EndGroup();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0.0f, 0.0f);
+    DrawVerticalSplitter(
+        "##AnimNodeMainVerticalSplitter",
+        available_.y,
+        rightPanelWidth,
+        -1.0f);
 
+    ImGui::SameLine(0.0f, 0.0f);
     ImGui::BeginGroup();
-    ImGui::BeginChild("AnimNodeGraphPanel", ImVec2(0.0f, graphHeight_), true);
+    ImGui::BeginChild("AnimNodeGraphPanel", ImVec2(rightPanelWidth, graphHeight_), true);
     DrawGraphPanel(animController);
     ImGui::EndChild();
 
-    ImGui::BeginChild("AnimNodeStatePanel", ImVec2(0.0f, 0.0f), true);
-    DrawStatePanel(animController);
+    DrawHorizontalSplitter(
+        "##AnimNodeRightHorizontalSplitter",
+        rightPanelWidth,
+        assetBrowserHeight,
+        -1.0f);
+
+    ImGui::BeginChild("AnimNodeAssetBrowserPanel", ImVec2(rightPanelWidth, 0.0f), true);
+    DrawAssetBrowserPanel();
     ImGui::EndChild();
     ImGui::EndGroup();
 
@@ -139,16 +265,9 @@ void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animCont
     animController_->DrawNodeEditorContent();
 }
 
-void AnimNodeEditorWindow::DrawStatePanel(AnimationControllerComponent* animController_)
+void AnimNodeEditorWindow::DrawAssetBrowserPanel()
 {
-    ImGui::TextUnformatted("Animation State");
+    ImGui::TextUnformatted("Asset Browser");
     ImGui::Separator();
-
-    if (!animController_)
-    {
-        ImGui::TextDisabled("AnimationControllerComponent is required.");
-        return;
-    }
-
-    animController_->Gui();
+    assetBrowser.DrawContent();
 }

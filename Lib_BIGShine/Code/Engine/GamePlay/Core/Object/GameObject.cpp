@@ -210,7 +210,7 @@ void GameObject::Gui()
         char nameBuf[128];
         strncpy_s(nameBuf, nameComponent->name.c_str(), sizeof(nameBuf));
 
-        if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
+        if (ImGui::InputText(IM_U8("–¼‘O"), nameBuf, sizeof(nameBuf)))
         {
             // –¼‘O‚ª•ÏX‚³‚ê‚½‚çNameComponent‚É”½‰f
             nameComponent->name = std::string(nameBuf);
