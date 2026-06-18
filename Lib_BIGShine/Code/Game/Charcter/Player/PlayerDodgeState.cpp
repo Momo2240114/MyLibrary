@@ -12,6 +12,7 @@ void PlayerDodgeState::Enter()
     if (!player_) return;
 
     player_->EnterAction(PLAYER_ACTION::DODGE);
+    //player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
 
     dodgeDirection = player_->GetMoveInput();
     if (dodgeDirection.x == 0.0f && dodgeDirection.z == 0.0f)
@@ -26,6 +27,13 @@ void PlayerDodgeState::Execute(float)
     if (!player_) return;
 
     player_->SendMoveInputToBlackboard(dodgeDirection);
-    player_->SetHorizontalVelocity(dodgeDirection, player_->dodgeSpeed);
     player_->ProcessActionInput();
+}
+
+void PlayerDodgeState::Exit()
+{
+    auto player_ = playerComponent.lock();
+    if (!player_) return;
+
+    player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
 }

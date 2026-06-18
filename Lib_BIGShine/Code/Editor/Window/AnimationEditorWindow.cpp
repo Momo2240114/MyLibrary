@@ -14,6 +14,7 @@
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Graphics/Resource/Animation/PoseLibraryResourceManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/Math/Curve/CurveComponent.h"
 #include "ImSequencer.h"
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
@@ -22,6 +23,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 #include <DirectXMath.h>
 #include "SimpleMath.h"
 #include <string>
@@ -29,6 +31,19 @@
 
 namespace
 {
+    static bool ContainsCaseInsensitive(const std::string& text_, const std::string& query_)
+    {
+        if (query_.empty()) return true;
+
+        return std::search(
+            text_.begin(), text_.end(),
+            query_.begin(), query_.end(),
+            [](unsigned char left_, unsigned char right_)
+            {
+                return std::tolower(left_) == std::tolower(right_);
+            }) != text_.end();
+    }
+
     static std::string GetPoseLibraryAssetPath(const std::string& modelName)
     {
         return "Data/AnimeJson/" + modelName + "/" + modelName + "_PoseLib.json";
@@ -226,7 +241,9 @@ namespace
 }
 
 AnimationEditorWindow::AnimationEditorWindow(GameObjectManager* manager_)
-    : EditorWorkspaceWindow("Animation Editor", manager_)
+    : EditorWorkspaceWindow("Animation Editor", manager_),
+    sceneGameObjectManager(manager_),
+    assetBrowser(manager_)
 {
     isVisible = false;
     previewGameObjectManager = std::make_unique<GameObjectManager>();
@@ -254,6 +271,45 @@ bool AnimationEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, Anim
 GameObjectManager* AnimationEditorWindow::GetPreviewManager() const
 {
     return previewGameObjectManager.get();
+}
+
+bool AnimationEditorWindow::CopySceneObjectToPreview(
+    const std::shared_ptr<GameObject>& sourceObject_)
+{
+    if (!sourceObject_ || !previewGameObjectManager)
+    {
+        return false;
+    }
+
+    if (!sourceObject_->GetComponent<GltfModelCommponennt>() ||
+        !sourceObject_->GetComponent<AnimationControllerComponent>())
+    {
+        return false;
+    }
+
+    nlohmann::json objectJson_ = sourceObject_->Save();
+    objectJson_["ParentName"] = "";
+    if (!keepSceneTransformOnCopy && objectJson_.contains("Transform"))
+    {
+        objectJson_["Transform"]["Pos"] = { 0.0f, 0.0f, 0.0f };
+        objectJson_["Transform"]["Rot"] = { 0.0f, 0.0f, 0.0f };
+    }
+
+    auto previewObject_ = previewGameObjectManager->Create(
+        sourceObject_->GetName() + "_Preview");
+    objectJson_["Name"] = previewObject_->GetName();
+    previewObject_->Load(objectJson_);
+    previewGameObjectManager->SetSelectedObject(previewObject_);
+
+    selectedPose = -1;
+    selectedCustom = -1;
+    selectedKeyframe = -1;
+    selectedEvent = -1;
+    selectedEditNode = -1;
+    customPreviewEnabled = false;
+    poseEditEnabled = false;
+    editorPlaybackEnabled = false;
+    return true;
 }
 
 void AnimationEditorWindow::EnsurePreviewScene()
@@ -365,6 +421,63 @@ void AnimationEditorWindow::DrawPreviewHierarchyPanel()
         return;
     }
 
+    ImGui::SeparatorText("Copy From Current Scene");
+    const std::vector<std::shared_ptr<GameObject>> emptySceneObjects_;
+    const auto& sceneObjects_ = sceneGameObjectManager
+        ? sceneGameObjectManager->GetObjects()
+        : emptySceneObjects_;
+    if (selectedSceneObjectIndex >= static_cast<int>(sceneObjects_.size()))
+    {
+        selectedSceneObjectIndex = -1;
+    }
+
+    const char* selectedName_ = selectedSceneObjectIndex >= 0
+        ? sceneObjects_[selectedSceneObjectIndex]->GetName().c_str()
+        : "Select a scene object";
+    if (ImGui::BeginCombo("Scene Object", selectedName_))
+    {
+        for (int objectIndex_ = 0; objectIndex_ < static_cast<int>(sceneObjects_.size()); ++objectIndex_)
+        {
+            const auto& object_ = sceneObjects_[objectIndex_];
+            if (!object_ ||
+                !object_->GetComponent<GltfModelCommponennt>() ||
+                !object_->GetComponent<AnimationControllerComponent>())
+            {
+                continue;
+            }
+
+            const bool selected_ = selectedSceneObjectIndex == objectIndex_;
+            if (ImGui::Selectable(object_->GetName().c_str(), selected_))
+            {
+                selectedSceneObjectIndex = objectIndex_;
+            }
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::Checkbox("Keep Scene Position / Rotation", &keepSceneTransformOnCopy);
+    const bool canCopy_ = selectedSceneObjectIndex >= 0 &&
+        selectedSceneObjectIndex < static_cast<int>(sceneObjects_.size());
+    ImGui::BeginDisabled(!canCopy_);
+    if (ImGui::Button("Copy Object To Animation Preview"))
+    {
+        const auto& sourceObject_ = sceneObjects_[selectedSceneObjectIndex];
+        sceneObjectCopyStatus = CopySceneObjectToPreview(sourceObject_)
+            ? "Copied: " + sourceObject_->GetName()
+            : "Copy failed: GltfModel and AnimationController are required.";
+    }
+    ImGui::EndDisabled();
+    if (!sceneObjectCopyStatus.empty())
+    {
+        ImGui::TextWrapped("%s", sceneObjectCopyStatus.c_str());
+    }
+
+    ImGui::SeparatorText("Preview Objects");
+
     if (ImGui::Button("Add Attachment Object"))
     {
         auto object_ = previewGameObjectManager->Create("Attachment");
@@ -428,14 +541,14 @@ void AnimationEditorWindow::DrawEditorTimelinePanel()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Current Pose Preview"))
+        if (ImGui::BeginTabItem("Curve Editor"))
         {
             if (poseEditEnabled)
             {
                 poseEditEnabled = false;
                 animController->SetEditorPoseOverride(false);
             }
-            DrawPosePreview(modelComp, animController);
+            DrawCurveEditor(animController);
             ImGui::EndTabItem();
         }
 
@@ -456,6 +569,145 @@ void AnimationEditorWindow::DrawEditorTimelinePanel()
     }
 }
 
+void AnimationEditorWindow::DrawCurveEditor(AnimationControllerComponent* animController_)
+{
+    if (!animController_)
+    {
+        ImGui::TextDisabled("AnimationControllerComponent is required.");
+        return;
+    }
+
+    auto owner_ = animController_->GetGameObject();
+    if (!owner_)
+    {
+        ImGui::TextDisabled("Animation owner is not available.");
+        return;
+    }
+
+    auto curveComponent_ = owner_->GetComponent<CurveComponent>();
+    if (!curveComponent_)
+    {
+        ImGui::TextDisabled("CurveComponent is required to edit animation curves.");
+        if (ImGui::Button("Add Curve Component"))
+        {
+            curveComponent_ = owner_->AddComponent<CurveComponent>();
+        }
+        if (!curveComponent_)
+        {
+            return;
+        }
+    }
+
+    auto& states_ = animController_->GetStates();
+    if (states_.empty())
+    {
+        ImGui::TextDisabled("No animation states are registered.");
+        return;
+    }
+
+    if (selectedCurveStateName.empty() || !states_.count(selectedCurveStateName))
+    {
+        const AnimState* currentState_ = animController_->GetCurrentState();
+        selectedCurveStateName = currentState_ && states_.count(currentState_->name)
+            ? currentState_->name
+            : states_.begin()->first;
+    }
+
+    std::vector<std::string> stateNames_;
+    stateNames_.reserve(states_.size());
+    for (const auto& [stateName_, state_] : states_)
+    {
+        stateNames_.push_back(stateName_);
+    }
+    std::sort(stateNames_.begin(), stateNames_.end());
+
+    ImGui::SetNextItemWidth(260.0f);
+    if (ImGui::BeginCombo("State", selectedCurveStateName.c_str()))
+    {
+        ImGui::SetNextItemWidth(240.0f);
+        ImGui::InputTextWithHint("##CurveStateSearch", "Search states...", &curveStateSearchText);
+        ImGui::Separator();
+
+        for (const std::string& stateName_ : stateNames_)
+        {
+            if (!ContainsCaseInsensitive(stateName_, curveStateSearchText)) continue;
+
+            const bool selected_ = selectedCurveStateName == stateName_;
+            if (ImGui::Selectable(stateName_.c_str(), selected_))
+            {
+                selectedCurveStateName = stateName_;
+                animController_->SelectStateForEditing(stateName_);
+            }
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    AnimState* state_ = states_.at(selectedCurveStateName).get();
+    const std::vector<std::string> curveNames_ = curveComponent_->GetTrackNames();
+    auto drawCurveSelector_ = [&](
+        const char* label_,
+        std::string& curveName_,
+        const char* nameSuffix_)
+        {
+            ImGui::PushID(label_);
+            ImGui::SetNextItemWidth(220.0f);
+            const char* preview_ = curveName_.empty() ? "No Curve" : curveName_.c_str();
+            if (ImGui::BeginCombo("##Curve", preview_))
+            {
+                if (ImGui::Selectable("No Curve", curveName_.empty()))
+                {
+                    curveName_.clear();
+                }
+                for (const std::string& curveNameOption_ : curveNames_)
+                {
+                    if (ImGui::Selectable(
+                        curveNameOption_.c_str(),
+                        curveName_ == curveNameOption_))
+                    {
+                        curveName_ = curveNameOption_;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("+"))
+            {
+                curveName_ = curveComponent_->CreateTrack(
+                    state_->name + nameSuffix_,
+                    1.0f);
+            }
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Create and assign a multiplier curve");
+            }
+            ImGui::SameLine();
+            ImGui::TextUnformatted(label_);
+            ImGui::PopID();
+        };
+
+    ImGui::SetNextItemWidth(120.0f);
+    ImGui::DragFloat("Base Speed", &state_->playbackSpeed, 0.01f, 0.0f, 10.0f);
+    drawCurveSelector_("Speed Curve", state_->speedCurveName, ".Speed");
+
+    ImGui::SetNextItemWidth(120.0f);
+    ImGui::DragFloat("Root Scale", &state_->rootMotionScale, 0.01f, 0.0f, 10.0f);
+    drawCurveSelector_("Root Scale Curve", state_->rootMotionScaleCurveName, ".RootScale");
+
+    ImGui::Separator();
+    const float trackPanelWidth_ = (std::min)(280.0f, ImGui::GetContentRegionAvail().x * 0.32f);
+    ImGui::BeginChild("AnimationCurveTrackManager", ImVec2(trackPanelWidth_, 0.0f), true);
+    curveComponent_->DrawTrackManager();
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+    ImGui::BeginChild("AnimationCurveEditorContent", ImVec2(0.0f, 0.0f), true);
+    curveComponent_->DrawEditorContent();
+    ImGui::EndChild();
+}
 void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
 {
     if (!previewGameObjectManager) return;
@@ -570,11 +822,39 @@ void AnimationEditorWindow::Draw()
     DrawStylePopup();
 
     ImVec2 available_ = ImGui::GetContentRegionAvail();
-    const float timelineHeight_ = (std::max)(260.0f, available_.y * 0.34f);
-    const float topHeight_ = (std::max)(180.0f, available_.y - timelineHeight_ - ImGui::GetStyle().ItemSpacing.y);
+    const float splitterSize_ = 6.0f;
+    const float verticalSpacing_ = ImGui::GetStyle().ItemSpacing.y * 2.0f;
+    const float minimumTopHeight_ = 180.0f;
+    const float minimumTimelineHeight_ = 220.0f;
+    const float minimumEditorWidth_ = 420.0f;
+    const float minimumAssetBrowserWidth_ = 280.0f;
+
+    if (!layoutSizeInitialized)
+    {
+        timelineHeight = available_.y * 0.34f;
+        assetBrowserWidth = available_.x / 3.0f;
+        layoutSizeInitialized = true;
+    }
+
+    timelineHeight = std::clamp(
+        timelineHeight,
+        minimumTimelineHeight_,
+        (std::max)(
+            minimumTimelineHeight_,
+            available_.y - minimumTopHeight_ - splitterSize_ - verticalSpacing_));
+    assetBrowserWidth = std::clamp(
+        assetBrowserWidth,
+        minimumAssetBrowserWidth_,
+        (std::max)(minimumAssetBrowserWidth_, available_.x - minimumEditorWidth_ - splitterSize_));
+
+    const float topHeight_ = (std::max)(
+        minimumTopHeight_,
+        available_.y - timelineHeight - splitterSize_ - verticalSpacing_);
     const float hierarchyWidth_ = 330.0f;
     const float inspectorWidth_ = 390.0f;
-    const float previewWidth_ = (std::max)(260.0f, available_.x - hierarchyWidth_ - inspectorWidth_ - ImGui::GetStyle().ItemSpacing.x * 2.0f);
+    const float previewWidth_ = (std::max)(
+        260.0f,
+        available_.x - hierarchyWidth_ - inspectorWidth_ - ImGui::GetStyle().ItemSpacing.x * 2.0f);
 
     ImGui::BeginChild("AnimationPreviewPanel", ImVec2(previewWidth_, topHeight_), true);
     DrawPreviewPanel();
@@ -592,8 +872,59 @@ void AnimationEditorWindow::Draw()
     DrawPreviewHierarchyPanel();
     ImGui::EndChild();
 
-    ImGui::BeginChild("AnimationEditorTimelinePanel", ImVec2(0.0f, 0.0f), true);
+    ImGui::InvisibleButton("##AnimationEditorHorizontalSplitter", ImVec2(-1.0f, splitterSize_));
+    const bool horizontalHovered_ = ImGui::IsItemHovered();
+    const bool horizontalActive_ = ImGui::IsItemActive();
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImGui::GetItemRectMin(),
+        ImGui::GetItemRectMax(),
+        ImGui::GetColorU32(
+            horizontalHovered_ || horizontalActive_
+            ? ImGuiCol_SeparatorHovered
+            : ImGuiCol_Separator));
+    if (horizontalHovered_ || horizontalActive_)
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    }
+    if (horizontalActive_)
+    {
+        timelineHeight -= ImGui::GetIO().MouseDelta.y;
+    }
+
+    const float editorWidth_ = (std::max)(
+        minimumEditorWidth_,
+        available_.x - assetBrowserWidth - splitterSize_);
+
+    ImGui::BeginChild("AnimationEditorTimelinePanel", ImVec2(editorWidth_, timelineHeight), true);
     DrawEditorTimelinePanel();
+    ImGui::EndChild();
+
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::InvisibleButton("##AnimationEditorAssetSplitter", ImVec2(splitterSize_, timelineHeight));
+    const bool assetSplitterHovered_ = ImGui::IsItemHovered();
+    const bool assetSplitterActive_ = ImGui::IsItemActive();
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImGui::GetItemRectMin(),
+        ImGui::GetItemRectMax(),
+        ImGui::GetColorU32(
+            assetSplitterHovered_ || assetSplitterActive_
+            ? ImGuiCol_SeparatorHovered
+            : ImGuiCol_Separator));
+    if (assetSplitterHovered_ || assetSplitterActive_)
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    }
+    if (assetSplitterActive_)
+    {
+        assetBrowserWidth -= ImGui::GetIO().MouseDelta.x;
+    }
+
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::BeginChild(
+        "AnimationEditorAssetBrowserPanel",
+        ImVec2(assetBrowserWidth, timelineHeight),
+        true);
+    assetBrowser.DrawContent();
     ImGui::EndChild();
 
     EndEditorWindow();
@@ -910,9 +1241,18 @@ void AnimationEditorWindow::DrawPoseAnimationCreator(GltfModelCommponennt* model
     ImGui::SetNextItemWidth(240.0f);
     if (ImGui::BeginCombo("Registered State", selectedStateName_.c_str()))
     {
+        ImGui::SetNextItemWidth(220.0f);
+        ImGui::InputTextWithHint(
+            "##RegisteredStateSearch",
+            "Search states...",
+            &registeredStateSearchText);
+        ImGui::Separator();
+
         for (auto& [stateName_, state_] : animController->GetStates())
         {
             if (!state_) continue;
+            if (!ContainsCaseInsensitive(stateName_, registeredStateSearchText)) continue;
+
             const bool selected_ = stateName_ == selectedStateName_;
             if (ImGui::Selectable(stateName_.c_str(), selected_))
             {
@@ -1511,27 +1851,26 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
         selectedEvent = -1;
     }
 
-    std::vector<const char*> stateNames;
-    std::vector<std::string> stateNameStorage;
-    stateNameStorage.reserve(states.size());
-    int selectedStateIndex = 0;
-    int index = 0;
-    for (auto& [name, state] : states)
-    {
-        stateNameStorage.push_back(name);
-        if (name == selectedEventStateName) selectedStateIndex = index;
-        ++index;
-    }
-    for (auto& name : stateNameStorage)
-    {
-        stateNames.push_back(name.c_str());
-    }
-
     ImGui::SetNextItemWidth(240.0f);
-    if (ImGui::Combo("Editing State", &selectedStateIndex, stateNames.data(), (int)stateNames.size()))
+    if (ImGui::BeginCombo("Editing State", selectedEventStateName.c_str()))
     {
-        selectedEventStateName = stateNameStorage[selectedStateIndex];
-        selectedEvent = -1;
+        ImGui::SetNextItemWidth(220.0f);
+        ImGui::InputTextWithHint("##EventStateSearch", "Search states...", &eventStateSearchText);
+        ImGui::Separator();
+
+        for (const auto& [stateName_, state_] : states)
+        {
+            if (!state_ || !ContainsCaseInsensitive(stateName_, eventStateSearchText)) continue;
+
+            const bool selected_ = stateName_ == selectedEventStateName;
+            if (ImGui::Selectable(stateName_.c_str(), selected_))
+            {
+                selectedEventStateName = stateName_;
+                selectedEvent = -1;
+            }
+            if (selected_) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
     }
 
     AnimState* targetState = states[selectedEventStateName].get();
@@ -1555,12 +1894,40 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
         duration = modelComp->GetAnimationDuration(targetState->animationIndex);
     }
 
+    if (ImGui::Button(animController->IsAnimationPaused() ? "Play" : "Pause"))
+    {
+        if (animController->IsAnimationPaused())
+        {
+            const AnimState* currentState_ = animController->GetCurrentState();
+            if (!currentState_ || currentState_->name != selectedEventStateName)
+            {
+                animController->ChangeState(selectedEventStateName, 0.0f);
+            }
+            animController->SetAnimationPaused(false);
+        }
+        else
+        {
+            animController->SetAnimationPaused(true);
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Stop"))
+    {
+        animController->ChangeState(selectedEventStateName, 0.0f);
+        animController->SetAnimatorTime(0.0f);
+        animController->SetAnimationPaused(true);
+    }
+    ImGui::SameLine();
+    ImGui::Text("Time: %.3f s / %.3f s", animController->GetAnimatorTime(), duration);
+
     AnimSequenceAdapter adapter;
     adapter.targetState = targetState;
     adapter.duration = (std::max)(0.05f, duration);
     adapter.fps = 60.0f;
+    adapter.SyncFrames();
 
     int currentFrame = (int)(animController->GetAnimatorTime() * adapter.fps);
+    const int previousFrame_ = currentFrame;
 
     ImGui::PushItemWidth(-1);
     const bool showEventSequencer_ = ImGui::BeginChild("InlineEventSequencerRegion", ImVec2(0, 300), true);
@@ -1574,6 +1941,16 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     }
     ImGui::EndChild();
     ImGui::PopItemWidth();
+
+    if (currentFrame != previousFrame_)
+    {
+        const int clampedFrame_ = (std::max)(
+            adapter.GetFrameMin(),
+            (std::min)(adapter.GetFrameMax(), currentFrame));
+        animController->ChangeState(selectedEventStateName, 0.0f);
+        animController->SetAnimatorTime(adapter.ToTime(clampedFrame_));
+        animController->SetAnimationPaused(true);
+    }
 
     if (selectedEvent < 0 || selectedEvent >= (int)targetState->events.size())
     {
@@ -1732,30 +2109,4 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     ImGui::PopItemWidth();
 
     ImGui::EndChild();
-}
-
-void AnimationEditorWindow::DrawPosePreview(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController)
-{
-    ImGui::Text("Model: %s", modelComp->GetModelName().c_str());
-    if (const AnimState* state = animController->GetCurrentState())
-    {
-        ImGui::Text("State: %s", state->name.c_str());
-        ImGui::Text("Time: %.3f", animController->GetAnimatorTime());
-    }
-    else
-    {
-        ImGui::TextDisabled("No animation state is playing.");
-    }
-
-    ID3D11ShaderResourceView* sceneSRV = GraphicsDeviceManager::Instance().GetSceneSRV();
-    if (!sceneSRV)
-    {
-        ImGui::TextDisabled("Scene texture is not ready.");
-        return;
-    }
-
-    ImVec2 avail = ImGui::GetContentRegionAvail();
-    const float width = (std::max)(160.0f, avail.x);
-    const float height = (std::max)(120.0f, width * 0.5625f);
-    ImGui::Image((void*)sceneSRV, ImVec2(width, height));
 }

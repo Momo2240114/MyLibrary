@@ -46,7 +46,7 @@
                             1.0,
                             1.0
                         ],
-                        "disableOutline": true,
+                        "disableOutline": false,
                         "id": 0,
                         "outlineThicknessOffset": 1.0,
                         "shaderId": 3,

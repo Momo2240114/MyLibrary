@@ -35,6 +35,11 @@ public:
     }
 
     std::vector<std::string> GetTrackNames() const;
+    std::string CreateTrack(const std::string& preferredName_, float defaultValue_ = 1.0f);
+    bool SaveTrackAsset(size_t trackIndex_, const std::string& assetPath_ = "");
+    bool LoadTrackAsset(const std::string& assetPath_);
+    void DrawTrackManager();
+    void DrawEditorContent(const ImVec2& size_ = ImVec2(0.0f, 0.0f));
 
     unsigned int GetBackgroundColor() override { return 0xFF202020; }
     void BeginEdit(int index) override {}
@@ -49,7 +54,9 @@ public:
     float GetValue(const std::string& name, float t) const;
 
 private:
-    bool isWindowOpen = false; // エディタウィンドウの表示フラグ
+    bool isWindowOpen = false;
+    std::string curveAssetStatus;
+    ImVector<ImCurveEdit::EditPoint> selectedPoints;
     std::vector<CurveTrack> tracks;
     ImVec2 minBounds = { 0.0f, 0.0f };
     ImVec2 maxBounds = { 1.0f, 1.0f };

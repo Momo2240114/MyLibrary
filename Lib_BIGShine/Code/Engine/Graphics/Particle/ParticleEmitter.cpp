@@ -367,9 +367,18 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     }
     }
 
-    data.position.x = settings.emissionPosition.x + localPosition.x;
-    data.position.y = settings.emissionPosition.y + localPosition.y;
-    data.position.z = settings.emissionPosition.z + localPosition.z;
+    if (settings.spawnShape == 5 && !meshSpawnPositions.empty())
+    {
+        data.position.x = localPosition.x;
+        data.position.y = localPosition.y;
+        data.position.z = localPosition.z;
+    }
+    else
+    {
+        data.position.x = settings.emissionPosition.x + localPosition.x;
+        data.position.y = settings.emissionPosition.y + localPosition.y;
+        data.position.z = settings.emissionPosition.z + localPosition.z;
+    }
     data.position.w = 1.0f;
 
     // 初速。Initial Speed が 0 の時は完全に停止開始にする。

@@ -1,0 +1,83 @@
+{
+    "AssetType": "AnimationState",
+    "AssetVersion": 2,
+    "State": {
+        "animIndexA": -1,
+        "animIndexB": -1,
+        "animationIndex": 13,
+        "blendDefaultWeight": 0.5,
+        "blendMaskRootNodes": [],
+        "blendParamName": "BlendAlpha",
+        "blendParameterMax": 1.0,
+        "blendParameterMin": 0.0,
+        "blendPhaseOffsetA": 0.0,
+        "blendPhaseOffsetB": 0.0,
+        "blendSyncNormalizedTime": true,
+        "blendUseMask": false,
+        "customAnimIndex": -1,
+        "events": [
+            {
+                "actionEnd": "",
+                "actionStart": "InputBufferOn",
+                "actionUpdate": "",
+                "callEndOnStateExit": false,
+                "endTime": 1.3166667222976685,
+                "label": "InputBufferOn",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 0.06666667014360428
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "ActionEnd",
+                "actionUpdate": "",
+                "callEndOnStateExit": false,
+                "endTime": 1.5166666507720947,
+                "label": "ActionEnd",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 1.1166666746139526
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "ComboTransition",
+                "actionUpdate": "",
+                "callEndOnStateExit": false,
+                "endTime": 1.1666666269302368,
+                "label": "ComboTransition",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 0.8166666626930237
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "CanCancelOn",
+                "actionUpdate": "",
+                "callEndOnStateExit": false,
+                "endTime": 0.9333333373069763,
+                "label": "CanCancelOn",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 0.550000011920929
+            }
+        ],
+        "loop": false,
+        "name": "SS_Attack2",
+        "rootMotion": {
+            "applyPositionX": true,
+            "applyPositionY": true,
+            "applyPositionZ": true,
+            "applyRotationX": true,
+            "applyRotationY": true,
+            "applyRotationZ": true,
+            "enable": true,
+            "sourceNodeName": ""
+        },
+        "rootMotionScale": 0.019999999552965164,
+        "rootMotionScaleCurveName": "",
+        "sequencer": "",
+        "speed": 1.5,
+        "speedCurveName": "",
+        "type": 0
+    }
+}

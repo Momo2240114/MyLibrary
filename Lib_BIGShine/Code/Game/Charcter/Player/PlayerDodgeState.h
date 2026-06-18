@@ -12,6 +12,7 @@ public:
     const char* GetName() const override { return GetPlayerActionName(PLAYER_ACTION::DODGE); }
     void Enter() override;
     void Execute(float elapsedTime_) override;
+    void Exit() override;
 
 private:
     std::weak_ptr<PlayerControllerComponent> playerComponent;

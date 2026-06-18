@@ -35,7 +35,7 @@
 #define IMGUI_HAS_TEXTURES          // Added ImGuiBackendFlags_RendererHasTextures - from IMGUI_VERSION_NUM >= 19198
 #define IMGUI_HAS_VIEWPORT          // In 'docking' WIP branch.
 #define IMGUI_HAS_DOCK              // In 'docking' WIP branch.
-
+#define IM_U8(text_) reinterpret_cast<const char*>(u8##text_)
 /*
 
 Index of this file:

@@ -57,8 +57,8 @@
             ],
             "shadeSteps": [
                 0.0010000000474974513,
-                0.6710000038146973,
-                0.8080000281333923,
+                0.3050000071525574,
+                0.550000011920929,
                 1.0
             ]
         }
@@ -67,8 +67,8 @@
         "MainCamera",
         "PlayerModel",
         "Weapon",
+        "Test",
         "Shield",
-        "PlayerParticle",
         "DirLight",
         "Stage",
         "RockWall",

@@ -1,5 +1,7 @@
 #include "ParticleComponent.h"
 
+#include "Editor/AssetSlotGui.h"
+
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -67,45 +69,32 @@ void ParticleComponent::Gui()
     ImGui::InputText("Asset Name", assetNameBuffer, IM_ARRAYSIZE(assetNameBuffer));
     ImGui::Text("Current: %s", assetPath.empty() ? "Unsaved" : assetPath.c_str());
 
-    if (ImGui::Button("Save Asset"))
+    std::string selectedAssetPath_ = assetPath;
+    if (AssetSlotGui::Draw(
+        "Particle JSON Asset",
+        AssetSlotType::JSON,
+        selectedAssetPath_,
+        nullptr,
+        "Data/Particle"))
     {
-        SaveAsset(BuildAssetPathFromName());
-        RefreshAssetList();
+        if (!selectedAssetPath_.empty()) LoadAsset(selectedAssetPath_);
+    }
+
+    if (ImGui::Button("Save Particle JSON..."))
+    {
+        const std::string initialPath_ = assetPath.empty()
+            ? BuildAssetPathFromName()
+            : assetPath;
+        const std::string selectedPath_ = WindowsDialogHelper::SaveJsonDialog(
+            L"Save Particle Asset",
+            initialPath_,
+            GraphicsDeviceManager::Instance().GetWindowHandle());
+        if (!selectedPath_.empty() && SaveAsset(selectedPath_)) RefreshAssetList();
     }
     ImGui::SameLine();
     if (ImGui::Button("Reload Asset") && !assetPath.empty())
     {
         LoadAsset(assetPath);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Open Asset File"))
-    {
-        const std::string initialDirectory_ = assetPath.empty()
-            ? "Data/Particle"
-            : WindowsDialogHelper::PathToUtf8(
-                WindowsDialogHelper::Utf8ToPath(assetPath).parent_path());
-        const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
-            L"Select Particle Asset",
-            initialDirectory_,
-            GraphicsDeviceManager::Instance().GetWindowHandle());
-        if (!selectedPath_.empty()) LoadAsset(selectedPath_);
-    }
-
-    const char* assetPreview_ = selectedAssetIndex >= 0 && selectedAssetIndex < static_cast<int>(assetFiles.size())
-        ? assetFiles[selectedAssetIndex].c_str()
-        : "Select Particle Asset";
-    if (ImGui::BeginCombo("Load From Data/Particle", assetPreview_))
-    {
-        for (int assetIndex_ = 0; assetIndex_ < static_cast<int>(assetFiles.size()); ++assetIndex_)
-        {
-            bool selected_ = selectedAssetIndex == assetIndex_;
-            if (ImGui::Selectable(assetFiles[assetIndex_].c_str(), selected_))
-            {
-                selectedAssetIndex = assetIndex_;
-                LoadAsset("Data/Particle/" + assetFiles[assetIndex_]);
-            }
-        }
-        ImGui::EndCombo();
     }
 
     ImGui::SeparatorText("Playback");
@@ -149,13 +138,14 @@ void ParticleComponent::Gui()
     if (tracks.empty())
     {
         ImGui::TextColored(ImVec4(1, 1, 0, 1), "No Emitters. Click 'Add Emitter' or import one.");
-        if (ImGui::Button("Import Emitter File"))
+        if (AssetSlotGui::Draw(
+            "Emitter JSON Asset",
+            AssetSlotType::JSON,
+            emitterAssetPath,
+            nullptr,
+            "Data/Particle/Emitter"))
         {
-            const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
-                L"Select Particle Emitter Asset",
-                "Data/Particle/Emitter",
-                GraphicsDeviceManager::Instance().GetWindowHandle());
-            if (!selectedPath_.empty()) LoadEmitterAsset(selectedPath_);
+            if (!emitterAssetPath.empty()) LoadEmitterAsset(emitterAssetPath);
         }
         return;
     }
@@ -177,19 +167,29 @@ void ParticleComponent::Gui()
 
     ImGui::BeginGroup();
     bool shouldRemove = ImGui::Button("Remove Selected");
-    if (ImGui::Button("Save Selected Emitter"))
+    if (ImGui::Button("Save Emitter JSON..."))
     {
-        SaveEmitterAsset(
-            static_cast<size_t>(selectedEmitterIndex),
-            BuildEmitterAssetPathFromName(static_cast<size_t>(selectedEmitterIndex)));
-    }
-    if (ImGui::Button("Import Emitter File"))
-    {
-        const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(
-            L"Select Particle Emitter Asset",
-            "Data/Particle/Emitter",
+        const std::string initialPath_ = emitterAssetPath.empty()
+            ? BuildEmitterAssetPathFromName(static_cast<size_t>(selectedEmitterIndex))
+            : emitterAssetPath;
+        const std::string selectedPath_ = WindowsDialogHelper::SaveJsonDialog(
+            L"Save Particle Emitter",
+            initialPath_,
             GraphicsDeviceManager::Instance().GetWindowHandle());
-        if (!selectedPath_.empty() && LoadEmitterAsset(selectedPath_))
+        if (!selectedPath_.empty() &&
+            SaveEmitterAsset(static_cast<size_t>(selectedEmitterIndex), selectedPath_))
+        {
+            emitterAssetPath = selectedPath_;
+        }
+    }
+    if (AssetSlotGui::Draw(
+        "Emitter JSON Asset",
+        AssetSlotType::JSON,
+        emitterAssetPath,
+        nullptr,
+        "Data/Particle/Emitter"))
+    {
+        if (!emitterAssetPath.empty() && LoadEmitterAsset(emitterAssetPath))
         {
             selectedEmitterIndex = static_cast<int>(tracks.size()) - 1;
         }
@@ -227,115 +227,6 @@ void ParticleComponent::Gui()
             "Emitter names must be unique for individual Actions.");
     }
     ImGui::TextDisabled("Individual Actions: <Object>_Particle_%s_Play / Stop / Trigger", track.name.c_str());
-
-    auto textureCombo = [&](const char* label, std::string& fileName, std::string& path, int slot)
-        {
-            const char* preview = fileName.empty() ? "None" : fileName.c_str();
-            if (ImGui::BeginCombo(label, preview))
-            {
-                if (ImGui::Selectable("None", fileName.empty()))
-                {
-                    fileName.clear();
-                    path.clear();
-                    if (track.emitter)
-                    {
-                        auto device_ = GraphicsDeviceManager::Instance().GetDevice();
-                        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummySRV_;
-                        CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
-
-                        if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
-                        else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); s.useMaskTexture = 0; }
-                        else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); s.useGradientTexture = 0; }
-                    }
-                }
-
-                for (const auto& file : textureFiles)
-                {
-                    bool selected = fileName == file;
-                    if (ImGui::Selectable(file.c_str(), selected))
-                    {
-                        fileName = file;
-                        path = "Data/Texture/Particle/" + file;
-                        LoadEmitterTextureSlot(track, path, slot);
-                        if (slot == 1) s.useMaskTexture = 1;
-                        if (slot == 2) s.useGradientTexture = 1;
-                    }
-                }
-                ImGui::EndCombo();
-            }
-
-            ID3D11ShaderResourceView* srv_ = nullptr;
-            if (track.emitter)
-            {
-                if (slot == 0) srv_ = track.emitter->GetTextureSRV();
-                else if (slot == 1) srv_ = track.emitter->GetMaskTextureSRV();
-                else if (slot == 2) srv_ = track.emitter->GetGradientTextureSRV();
-            }
-
-            ImGui::PushID(slot);
-            bool browsePressed_ = false;
-            if (srv_)
-            {
-                browsePressed_ = ImGui::ImageButton("##TextureBrowse", reinterpret_cast<ImTextureID>(srv_), ImVec2(64.0f, 64.0f));
-            }
-            else
-            {
-                browsePressed_ = ImGui::Button("Select Texture", ImVec2(96.0f, 64.0f));
-            }
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::SetTooltip("Browse %s", label);
-            }
-            ImGui::PopID();
-
-            if (browsePressed_)
-            {
-                const wchar_t* title_ =
-                    slot == 0 ? L"Select Color Texture" :
-                    slot == 1 ? L"Select Mask Texture" :
-                    L"Select Gradient Texture";
-
-                const std::string initDir_ = path.empty()
-                    ? "Data/Texture/Particle/"
-                    : WindowsDialogHelper::PathToUtf8(
-                        WindowsDialogHelper::Utf8ToPath(path).parent_path());
-                const std::string selected_ = WindowsDialogHelper::OpenTextureDialog(
-                    title_,
-                    initDir_,
-                    GraphicsDeviceManager::Instance().GetWindowHandle());
-
-                if (!selected_.empty())
-                {
-                    if (LoadEmitterTextureSlot(track, selected_, slot))
-                    {
-                        fileName = WindowsDialogHelper::PathToUtf8(
-                            WindowsDialogHelper::Utf8ToPath(selected_).filename());
-                        path = selected_;
-                        if (slot == 1) s.useMaskTexture = 1;
-                        if (slot == 2) s.useGradientTexture = 1;
-                    }
-                    else
-                    {
-                        fileName.clear();
-                        path.clear();
-                        if (slot == 1) s.useMaskTexture = 0;
-                        if (slot == 2) s.useGradientTexture = 0;
-
-
-                        if (track.emitter)
-                        {
-                            auto device_ = GraphicsDeviceManager::Instance().GetDevice();
-                            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummySRV_;
-                            CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummySRV_.GetAddressOf());
-
-                            if (slot == 0) { track.emitter->SetTexture(dummySRV_); }
-                            else if (slot == 1) { track.emitter->SetMaskTexture(dummySRV_); }
-                            else if (slot == 2) { track.emitter->SetGradientTexture(dummySRV_); }
-                        }
-                    }
-                }
-            }
-        };
 
     if (ImGui::BeginTabBar("EmitterParams"))
     {
@@ -460,10 +351,45 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Texture"))
         {
-            textureCombo("Color Texture", track.textureFileName, track.texturePath, 0);
+            auto drawTextureSlot_ = [&](const char* label_, std::string& fileName_, std::string& path_, int slot_)
+                {
+                    ID3D11ShaderResourceView* texture_ = nullptr;
+                    if (track.emitter)
+                    {
+                        if (slot_ == 0) texture_ = track.emitter->GetTextureSRV();
+                        else if (slot_ == 1) texture_ = track.emitter->GetMaskTextureSRV();
+                        else texture_ = track.emitter->GetGradientTextureSRV();
+                    }
+                    if (!AssetSlotGui::Draw(
+                        label_, AssetSlotType::TEXTURE, path_, texture_, "Data/Texture/Particle")) return;
 
-            textureCombo("Mask Texture", track.maskTextureFileName, track.maskTexturePath, 1);
-            textureCombo("Gradient Texture", track.gradientTextureFileName, track.gradientTexturePath, 2);
+                    fileName_ = path_.empty()
+                        ? std::string()
+                        : WindowsDialogHelper::PathToUtf8(
+                            WindowsDialogHelper::Utf8ToPath(path_).filename());
+                    if (!path_.empty() && LoadEmitterTextureSlot(track, path_, slot_))
+                    {
+                        if (slot_ == 1) s.useMaskTexture = 1;
+                        if (slot_ == 2) s.useGradientTexture = 1;
+                        return;
+                    }
+
+                    auto device_ = GraphicsDeviceManager::Instance().GetDevice();
+                    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dummyTexture_;
+                    CPUResourceLoader::CreateDummyTexture(device_, 0xFFFFFFFFu, dummyTexture_.GetAddressOf());
+                    if (track.emitter)
+                    {
+                        if (slot_ == 0) track.emitter->SetTexture(dummyTexture_);
+                        else if (slot_ == 1) track.emitter->SetMaskTexture(dummyTexture_);
+                        else track.emitter->SetGradientTexture(dummyTexture_);
+                    }
+                    if (slot_ == 1) s.useMaskTexture = 0;
+                    if (slot_ == 2) s.useGradientTexture = 0;
+                };
+
+            drawTextureSlot_("Color Texture", track.textureFileName, track.texturePath, 0);
+            drawTextureSlot_("Mask Texture", track.maskTextureFileName, track.maskTexturePath, 1);
+            drawTextureSlot_("Gradient Texture", track.gradientTextureFileName, track.gradientTexturePath, 2);
             bool useMask = s.useMaskTexture != 0;
             bool useGradient = s.useGradientTexture != 0;
             if (ImGui::Checkbox("Use Mask", &useMask)) s.useMaskTexture = useMask ? 1u : 0u;
@@ -1113,6 +1039,8 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 
     track_.emitter->SetMeshSpawnPositions(positions_);
 }
+
+
 void ParticleComponent::RebuildEmitterResources()
 {
     auto device_ = GraphicsDeviceManager::Instance().GetDevice();

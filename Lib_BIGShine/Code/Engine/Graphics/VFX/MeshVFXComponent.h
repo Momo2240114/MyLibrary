@@ -26,6 +26,8 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
     bool SaveAsset(const std::string& path_) const;
     bool LoadAsset(const std::string& path_);
+    bool SavePartAsset(size_t partIndex_, const std::string& path_) const;
+    bool LoadPartAsset(size_t partIndex_, const std::string& path_);
     void SetAsset(const MeshVFXAsset& asset_);
     void RebuildRuntimeResources();
 
@@ -40,6 +42,11 @@ public:
     float GetTime() const { return time; }
     bool IsPlaying() const { return isPlaying; }
     virtual bool UsesOwnerModel() const { return false; }
+    virtual bool GetDynamicMesh(MeshVFXDynamicMesh& mesh_) const
+    {
+        mesh_ = {};
+        return false;
+    }
 
 private:
     void RefreshAssetLists();
@@ -56,6 +63,7 @@ private:
     std::vector<MeshVFXRuntimePart> runtimeParts;
     std::vector<std::string> modelAssetPaths;
     std::vector<std::string> textureAssetPaths;
+    std::string assetPath;
     float time = 0.0f;
     bool isPlaying = true;
 };

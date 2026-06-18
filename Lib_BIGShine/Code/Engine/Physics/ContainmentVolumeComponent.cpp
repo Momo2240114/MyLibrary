@@ -2,134 +2,261 @@
 
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
-#include "ColliderComponent.h"
-#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "PhysXSystem.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 
+using namespace physx;
+
 namespace
 {
-DirectX::XMFLOAT3 Subtract(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
+constexpr PxU32 PHYSICAL_ROLE = 0;
+constexpr PxU32 PHYSICS_RESPONSE_BIT = 0x80000000u;
+constexpr float FLOAT_EPSILON = 0.0001f;
+
+bool NearlyEqual(float a_, float b_)
 {
-    return { a_.x - b_.x, a_.y - b_.y, a_.z - b_.z };
+    return std::abs(a_ - b_) <= FLOAT_EPSILON;
 }
 
-DirectX::XMFLOAT3 Add(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
+bool NearlyEqual(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
 {
-    return { a_.x + b_.x, a_.y + b_.y, a_.z + b_.z };
+    return NearlyEqual(a_.x, b_.x)
+        && NearlyEqual(a_.y, b_.y)
+        && NearlyEqual(a_.z, b_.z);
 }
 
-DirectX::XMFLOAT3 Scale(const DirectX::XMFLOAT3& value_, float scale_)
+bool BuildWorldPose(
+    const std::shared_ptr<GameObject>& owner_,
+    PxTransform& pose_,
+    DirectX::XMFLOAT3& scale_)
 {
-    return { value_.x * scale_, value_.y * scale_, value_.z * scale_ };
-}
+    if (!owner_ || !owner_->transform) return false;
 
-float Dot(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
-{
-    return a_.x * b_.x + a_.y * b_.y + a_.z * b_.z;
-}
+    const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
+    DirectX::XMVECTOR scaleVector_;
+    DirectX::XMVECTOR rotationVector_;
+    DirectX::XMVECTOR positionVector_;
 
-float LengthSquared(const DirectX::XMFLOAT3& value_)
-{
-    return Dot(value_, value_);
-}
-
-DirectX::XMFLOAT3 NormalizeOrZero(const DirectX::XMFLOAT3& value_)
-{
-    const float lengthSquared_ = LengthSquared(value_);
-    if (lengthSquared_ <= 0.000001f)
+    if (!DirectX::XMMatrixDecompose(
+        &scaleVector_,
+        &rotationVector_,
+        &positionVector_,
+        world_))
     {
-        return { 0.0f, 0.0f, 0.0f };
+        return false;
     }
 
-    return Scale(value_, 1.0f / std::sqrt(lengthSquared_));
+    DirectX::XMFLOAT3 position_;
+    DirectX::XMFLOAT4 rotation_;
+    DirectX::XMStoreFloat3(&scale_, scaleVector_);
+    DirectX::XMStoreFloat3(&position_, positionVector_);
+    DirectX::XMStoreFloat4(&rotation_, rotationVector_);
+
+    PxQuat quat_(rotation_.x, rotation_.y, rotation_.z, rotation_.w);
+    if (!quat_.isSane())
+    {
+        quat_ = PxQuat(PxIdentity);
+    }
+
+    pose_ = PxTransform(PxVec3(position_.x, position_.y, position_.z), quat_.getNormalized());
+    return pose_.isSane();
 }
 
-void RemoveOutwardVelocity(
-    const std::shared_ptr<GameObject>& target_,
-    const DirectX::XMFLOAT3& outwardNormal_)
+void AddCylinderMesh(
+    std::vector<DirectX::XMFLOAT3>& vertices_,
+    std::vector<uint32_t>& indices_,
+    float radius_,
+    float halfHeight_,
+    int segments_,
+    bool addCaps_)
 {
-    auto collider_ = target_ ? target_->GetComponent<ColliderComponent>() : nullptr;
-    if (!collider_) return;
+    vertices_.reserve(static_cast<size_t>(segments_) * 2 + 2);
+    indices_.reserve(static_cast<size_t>(segments_) * (addCaps_ ? 12 : 6));
 
-    const float outwardSpeed_ = Dot(collider_->velocity, outwardNormal_);
-    if (outwardSpeed_ <= 0.0f) return;
+    for (int index_ = 0; index_ < segments_; ++index_)
+    {
+        const float angle_ = DirectX::XM_2PI * static_cast<float>(index_) / static_cast<float>(segments_);
+        const float x_ = std::cos(angle_) * radius_;
+        const float z_ = std::sin(angle_) * radius_;
+        vertices_.push_back({ x_, -halfHeight_, z_ });
+        vertices_.push_back({ x_, halfHeight_, z_ });
+    }
 
-    collider_->velocity = Subtract(collider_->velocity, Scale(outwardNormal_, outwardSpeed_));
+    for (int index_ = 0; index_ < segments_; ++index_)
+    {
+        const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
+        const uint32_t topCurrent_ = bottomCurrent_ + 1;
+        const uint32_t bottomNext_ = static_cast<uint32_t>(((index_ + 1) % segments_) * 2);
+        const uint32_t topNext_ = bottomNext_ + 1;
+
+        indices_.push_back(bottomCurrent_);
+        indices_.push_back(bottomNext_);
+        indices_.push_back(topCurrent_);
+
+        indices_.push_back(bottomNext_);
+        indices_.push_back(topNext_);
+        indices_.push_back(topCurrent_);
+    }
+
+    if (!addCaps_) return;
+
+    const uint32_t bottomCenter_ = static_cast<uint32_t>(vertices_.size());
+    vertices_.push_back({ 0.0f, -halfHeight_, 0.0f });
+    const uint32_t topCenter_ = static_cast<uint32_t>(vertices_.size());
+    vertices_.push_back({ 0.0f, halfHeight_, 0.0f });
+
+    for (int index_ = 0; index_ < segments_; ++index_)
+    {
+        const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
+        const uint32_t bottomNext_ = static_cast<uint32_t>(((index_ + 1) % segments_) * 2);
+        const uint32_t topCurrent_ = bottomCurrent_ + 1;
+        const uint32_t topNext_ = bottomNext_ + 1;
+
+        indices_.push_back(bottomCenter_);
+        indices_.push_back(bottomNext_);
+        indices_.push_back(bottomCurrent_);
+
+        indices_.push_back(topCenter_);
+        indices_.push_back(topCurrent_);
+        indices_.push_back(topNext_);
+    }
 }
+}
+
+ContainmentVolumeComponent::~ContainmentVolumeComponent()
+{
+    ReleasePhysicsVolume();
+}
+
+void ContainmentVolumeComponent::Start()
+{
+    RebuildPhysicsVolume();
 }
 
 void ContainmentVolumeComponent::ApplyContainment()
 {
     auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->manager) return;
+    if (!owner_) return;
 
-    for (const auto& target_ : owner_->GetManager().GetObjects())
+    PxTransform pose_;
+    DirectX::XMFLOAT3 scale_;
+    if (!BuildWorldPose(owner_, pose_, scale_)) return;
+
+    const bool settingsChanged_ =
+        physicsDirty ||
+        !actor ||
+        cachedShape != shape ||
+        !NearlyEqual(cachedRadius, radius) ||
+        !NearlyEqual(cachedHalfHeight, halfHeight) ||
+        cachedConstrainHeight != constrainHeight ||
+        cachedSegments != segments ||
+        !NearlyEqual(cachedScale, scale_);
+
+    if (settingsChanged_)
     {
-        if (!target_ || target_.get() == owner_.get()) continue;
-        if ((static_cast<uint32_t>(target_->layer) & targetMask) == 0) continue;
-
-        ConstrainObject(target_);
-    }
-}
-
-void ContainmentVolumeComponent::ConstrainObject(const std::shared_ptr<GameObject>& target_)
-{
-    auto owner_ = GetGameObject();
-    if (!owner_ || !target_) return;
-
-    const DirectX::XMFLOAT3 center_ = owner_->transform->GetWorldPosition();
-    const DirectX::XMFLOAT3 scale_ = owner_->transform->GetWorldScale();
-    const float volumeRadius_ = (std::max)(radius * (std::max)(std::abs(scale_.x), std::abs(scale_.z)) - targetRadius, 0.001f);
-    const float volumeHalfHeight_ = (std::max)(halfHeight * std::abs(scale_.y) - targetRadius, 0.001f);
-
-    DirectX::XMFLOAT3 position_ = target_->transform->GetWorldPosition();
-    DirectX::XMFLOAT3 corrected_ = position_;
-
-    if (shape == CONTAINMENT_SHAPE::CYLINDER)
-    {
-        if (constrainHeight)
-        {
-            corrected_.y = std::clamp(position_.y, center_.y - volumeHalfHeight_, center_.y + volumeHalfHeight_);
-        }
-
-        const float dx_ = position_.x - center_.x;
-        const float dz_ = position_.z - center_.z;
-        const float horizontalLengthSquared_ = dx_ * dx_ + dz_ * dz_;
-        if (horizontalLengthSquared_ > volumeRadius_ * volumeRadius_)
-        {
-            const float inverseLength_ = 1.0f / std::sqrt(horizontalLengthSquared_);
-            corrected_.x = center_.x + dx_ * inverseLength_ * volumeRadius_;
-            corrected_.z = center_.z + dz_ * inverseLength_ * volumeRadius_;
-        }
-    }
-    else
-    {
-        const float segmentMinY_ = center_.y - volumeHalfHeight_;
-        const float segmentMaxY_ = center_.y + volumeHalfHeight_;
-        const float closestY_ = constrainHeight ? std::clamp(position_.y, segmentMinY_, segmentMaxY_) : position_.y;
-        const DirectX::XMFLOAT3 closestOnSegment_{ center_.x, closestY_, center_.z };
-        const DirectX::XMFLOAT3 fromAxis_ = Subtract(position_, closestOnSegment_);
-        const float distanceSquared_ = LengthSquared(fromAxis_);
-
-        if (distanceSquared_ > volumeRadius_ * volumeRadius_)
-        {
-            corrected_ = Add(closestOnSegment_, Scale(NormalizeOrZero(fromAxis_), volumeRadius_));
-        }
-    }
-
-    const DirectX::XMFLOAT3 correction_ = Subtract(corrected_, position_);
-    if (LengthSquared(correction_) <= 0.000001f)
-    {
+        RebuildPhysicsVolume();
         return;
     }
 
-    const DirectX::XMFLOAT3 outwardNormal_ = NormalizeOrZero(Subtract(position_, corrected_));
-    DirectX::XMMATRIX world_ = target_->transform->GetWorldMatrix();
-    world_.r[3] = DirectX::XMVectorSet(corrected_.x, corrected_.y, corrected_.z, 1.0f);
-    target_->transform->ApplyWorldMatrix(world_);
-    RemoveOutwardVelocity(target_, outwardNormal_);
+    actor->setGlobalPose(pose_);
+}
+
+void ContainmentVolumeComponent::RebuildPhysicsVolume()
+{
+    auto owner_ = GetGameObject();
+    auto physics_ = PhysXSystem::GetPhysics();
+    auto scene_ = PhysXSystem::GetScene();
+    if (!owner_ || !physics_ || !scene_) return;
+
+    PxTransform pose_;
+    DirectX::XMFLOAT3 scale_;
+    if (!BuildWorldPose(owner_, pose_, scale_)) return;
+
+    ReleasePhysicsVolume();
+
+    const float scaleRadius_ = (std::max)(std::abs(scale_.x), std::abs(scale_.z));
+    const float volumeRadius_ = (std::max)(radius * scaleRadius_, 0.001f);
+    const float volumeHalfHeight_ = (std::max)(halfHeight * std::abs(scale_.y), 0.001f);
+    const int segments_ = std::clamp(segments, 8, 128);
+
+    std::vector<DirectX::XMFLOAT3> vertices_;
+    std::vector<uint32_t> indices_;
+    AddCylinderMesh(vertices_, indices_, volumeRadius_, volumeHalfHeight_, segments_, constrainHeight);
+
+    auto mesh_ = PhysXSystem::CreateTriangleMesh(vertices_, indices_);
+    if (!mesh_) return;
+
+    actor = physics_->createRigidStatic(pose_);
+    if (!actor)
+    {
+        mesh_->release();
+        return;
+    }
+
+    actor->userData = nullptr;
+
+    auto material_ = PhysXSystem::GetDefaultMaterial();
+    if (!material_)
+    {
+        mesh_->release();
+        ReleasePhysicsVolume();
+        return;
+    }
+
+    auto shape_ = PxRigidActorExt::createExclusiveShape(
+        *actor,
+        PxTriangleMeshGeometry(mesh_),
+        *material_);
+    mesh_->release();
+
+    if (!shape_)
+    {
+        ReleasePhysicsVolume();
+        return;
+    }
+
+    shape_->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+    shape_->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
+
+    PxFilterData filterData_;
+    filterData_.word0 = static_cast<PxU32>(GameObject::LayerType::Wall);
+    filterData_.word1 = 0;
+    filterData_.word2 = PHYSICAL_ROLE;
+    const PxU32 ownerId_ = static_cast<PxU32>(reinterpret_cast<uintptr_t>(this) & 0x7FFFFFFF);
+    filterData_.word3 = ownerId_ | PHYSICS_RESPONSE_BIT;
+    shape_->setSimulationFilterData(filterData_);
+
+    scene_->addActor(*actor);
+
+    cachedShape = shape;
+    cachedRadius = radius;
+    cachedHalfHeight = halfHeight;
+    cachedConstrainHeight = constrainHeight;
+    cachedSegments = segments;
+    cachedScale = scale_;
+    physicsDirty = false;
+}
+
+void ContainmentVolumeComponent::ReleasePhysicsVolume()
+{
+    if (!actor) return;
+
+    if (auto scene_ = actor->getScene())
+    {
+        scene_->removeActor(*actor);
+    }
+
+    actor->userData = nullptr;
+    actor->release();
+    actor = nullptr;
+}
+
+void ContainmentVolumeComponent::MarkPhysicsDirty()
+{
+    physicsDirty = true;
 }
 
 void ContainmentVolumeComponent::Gui()
@@ -139,13 +266,36 @@ void ContainmentVolumeComponent::Gui()
     if (ImGui::Combo("Shape", &shapeIndex_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
     {
         shape = static_cast<CONTAINMENT_SHAPE>(shapeIndex_);
+        MarkPhysicsDirty();
     }
 
-    ImGui::DragFloat("Radius", &radius, 0.05f, 0.01f, 1000.0f);
-    ImGui::DragFloat("Half Height", &halfHeight, 0.05f, 0.01f, 1000.0f);
-    ImGui::DragFloat("Target Radius", &targetRadius, 0.01f, 0.0f, 100.0f);
-    ImGui::Checkbox("Constrain Height", &constrainHeight);
-    ImGui::InputScalar("Target Mask", ImGuiDataType_U32, &targetMask);
+    if (shape == CONTAINMENT_SHAPE::CAPSULE)
+    {
+        ImGui::TextDisabled("Capsule currently uses the same inward cylinder wall.");
+    }
+
+    if (ImGui::DragFloat("Radius", &radius, 0.05f, 0.01f, 1000.0f))
+    {
+        MarkPhysicsDirty();
+    }
+    if (ImGui::DragFloat("Half Height", &halfHeight, 0.05f, 0.01f, 1000.0f))
+    {
+        MarkPhysicsDirty();
+    }
+    if (ImGui::Checkbox("Constrain Height", &constrainHeight))
+    {
+        MarkPhysicsDirty();
+    }
+    if (ImGui::DragInt("Segments", &segments, 1.0f, 8, 128))
+    {
+        segments = std::clamp(segments, 8, 128);
+        MarkPhysicsDirty();
+    }
+
+    ImGui::Separator();
+    ImGui::TextDisabled("PhysX wall mode does not manually move target objects.");
+    ImGui::DragFloat("Legacy Target Radius", &targetRadius, 0.01f, 0.0f, 100.0f);
+    ImGui::InputScalar("Legacy Target Mask", ImGuiDataType_U32, &targetMask);
 }
 
 void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
@@ -156,6 +306,7 @@ void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
     json_["HalfHeight"] = halfHeight;
     json_["TargetRadius"] = targetRadius;
     json_["ConstrainHeight"] = constrainHeight;
+    json_["Segments"] = segments;
 }
 
 void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
@@ -166,6 +317,8 @@ void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
     halfHeight = json_.value("HalfHeight", halfHeight);
     targetRadius = json_.value("TargetRadius", targetRadius);
     constrainHeight = json_.value("ConstrainHeight", constrainHeight);
+    segments = std::clamp(json_.value("Segments", segments), 8, 128);
+    MarkPhysicsDirty();
 }
 
 REGISTER_COMPONENT(ContainmentVolumeComponent, "ContainmentVolumeComponent")

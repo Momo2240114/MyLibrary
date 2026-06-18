@@ -90,7 +90,9 @@ void AnimationControllerComponent::EnsureNodeEditorContext()
 {
     if (nodeEditorContext) return;
 
-    nodeEditorConfig.SettingsFile = "Data/Editor/AnimationEditor.json";
+    // Node positions belong to each graph asset. A shared settings file mixes
+    // layouts from different graphs/scopes and can restore invalid positions.
+    nodeEditorConfig.SettingsFile = nullptr;
     nodeEditorConfig.DragButtonIndex = 0;
     nodeEditorConfig.SelectButtonIndex = 0;
     nodeEditorConfig.NavigateButtonIndex = 2;
@@ -262,6 +264,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         if (!pendingGraphAssetPath.empty())
         {
             LoadGraphAsset(pendingGraphAssetPath);
+            ApplyPendingStateAssets();
             TryEnterStartState();
         }
     }
@@ -272,14 +275,16 @@ void AnimationControllerComponent::Update(float deltaTime_)
         return;
     }
 
-    if (useTransitionGraph)
+    if (useTransitionGraph && !animationPaused)
     {
         // 状態遷移の評価
         EvaluateGraphTransitions();
     }
 
     //ModelAnimator::Updateを呼ぶ際、ポーズライブラリのリソースポインタを第三引数に授ける
-    animator.Update(deltaTime_, modelComponent, curveComponent, poseLibrary, GetGameObject());
+    const BlackboardCategory& animationBlackboard_ = GetCurrentBlackboard();
+    const float animationDeltaTime_ = animationPaused ? 0.0f : deltaTime_;
+    animator.Update(animationDeltaTime_, modelComponent, curveComponent, poseLibrary, GetGameObject(), &animationBlackboard_);
 
     const AnimState* activeState_ = animator.GetCurrentState();
     if (activeState_ && activeState_->rootMotion.enable)
@@ -303,10 +308,8 @@ void AnimationControllerComponent::Update(float deltaTime_)
 
             // 位置 RootMotion
             Vector3 worldDeltaPosition_ = Vector3::Transform(rootMotionDelta_.deltaPosition, currentRotation_);
-            transform_->localPosition.x += worldDeltaPosition_.x;
-            transform_->localPosition.y += worldDeltaPosition_.y;
-            transform_->localPosition.z += worldDeltaPosition_.z;
             transform_->AddMoveOffset(worldDeltaPosition_);
+
 
             transform_->MarkDirty();
         }
@@ -420,7 +423,8 @@ bool AnimationControllerComponent::PreviewCustomAnimation(int customAnimIndex_, 
     const CustomAnimation& customAnimation_ = poseLibrary->customAnims[customAnimIndex_];
     ChangeState(customAnimation_.name, 0.0f);
     animator.SetCurrentTime(time_);
-    animator.Update(0.0f, modelComponent, curveComponent, poseLibrary, GetGameObject());
+    const BlackboardCategory& animationBlackboard_ = GetCurrentBlackboard();
+    animator.Update(0.0f, modelComponent, curveComponent, poseLibrary, GetGameObject(), &animationBlackboard_);
     modelComponent->SetNodePoses(animator.GetCurrentPose());
     modelComponent->UpdateTransform();
     editorPoseOverride = true;
@@ -462,6 +466,7 @@ void AnimationControllerComponent::RemoveState(const std::string& stateName_)
 
     // 削除実行
     states.erase(iterator_);
+    stateAssetPaths.erase(stateName_);
 }
 
 

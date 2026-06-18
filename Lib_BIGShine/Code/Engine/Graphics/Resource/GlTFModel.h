@@ -236,6 +236,7 @@ public:
 
 	// ノードポーズ取得
 	void GetNodePoses(std::vector<NodePose>& nodePoses) const;
+        const NodePose& GetBindNodePose(int nodeIndex_) const;
 
 	float GetAnimationDuration(int animationIndex) const;
 
@@ -255,6 +256,7 @@ public:
 		materials.clear();
 		meshes.clear();
 		nodes.clear();
+                bindNodePoses.clear();
 		animations.clear();
 		modelName = "";
 	}
@@ -308,6 +310,7 @@ private:
 	std::vector<Material>	materials;
 	std::vector<Mesh>		meshes;
 	std::vector<Node>		nodes;
+	std::vector<NodePose>	bindNodePoses;
 	std::vector<Animation>	animations;
 
 

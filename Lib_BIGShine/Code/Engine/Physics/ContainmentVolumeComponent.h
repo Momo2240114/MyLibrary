@@ -3,6 +3,11 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 
+namespace physx
+{
+    class PxRigidStatic;
+}
+
 enum class CONTAINMENT_SHAPE
 {
     CYLINDER,
@@ -12,12 +17,15 @@ enum class CONTAINMENT_SHAPE
 class ContainmentVolumeComponent : public Component
 {
 public:
+    ~ContainmentVolumeComponent() override;
+
     const std::string& GetName() const override
     {
         static std::string name = "ContainmentVolumeComponent";
         return name;
     }
 
+    void Start() override;
     void ApplyContainment();
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
@@ -29,7 +37,19 @@ public:
     float halfHeight = 2.0f;
     float targetRadius = 0.35f;
     bool constrainHeight = true;
+    int segments = 64;
 
 private:
-    void ConstrainObject(const std::shared_ptr<GameObject>& target_);
+    void RebuildPhysicsVolume();
+    void ReleasePhysicsVolume();
+    void MarkPhysicsDirty();
+
+    physx::PxRigidStatic* actor = nullptr;
+    bool physicsDirty = true;
+    CONTAINMENT_SHAPE cachedShape = CONTAINMENT_SHAPE::CYLINDER;
+    float cachedRadius = -1.0f;
+    float cachedHalfHeight = -1.0f;
+    bool cachedConstrainHeight = false;
+    int cachedSegments = -1;
+    DirectX::XMFLOAT3 cachedScale = { 0.0f, 0.0f, 0.0f };
 };

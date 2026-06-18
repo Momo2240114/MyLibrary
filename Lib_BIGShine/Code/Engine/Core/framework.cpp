@@ -15,6 +15,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 #include "Engine/GamePlay/Input/MouseInput.h"
+#include "Engine/GamePlay/Input/ControllerInput.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 
 #include "Engine/Physics/PhysXSystem.h"
@@ -85,6 +86,7 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 	ImGuiRenderer::NewFrame();
 
 	MouseInput::Instance().Update(hwnd);
+	ControllerInput::Instance().Update();
 
 	//シーン更新
 	//m_pSceneGame->Update(elapsedTime_);

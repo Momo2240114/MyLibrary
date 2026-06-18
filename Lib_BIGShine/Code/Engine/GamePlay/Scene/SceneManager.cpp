@@ -31,12 +31,13 @@ void SceneManager::Update(float elapsedTime)
     // シーン切り替え予約（NextScene）がある場合の跳躍儀式
     if (NextScene)
     {
+        std::unique_ptr<SceneBase> nextScene_ = std::move(NextScene);
+
         // 1. 旧世界の終焉（Finalize と GameObjectManager の破棄）
         Clear();
 
         // 2. 新世界への主権移譲
-        NowScene = std::move(NextScene);
-        NextScene = nullptr;
+        NowScene = std::move(nextScene_);
 
         if (NowScene)
         {
@@ -90,6 +91,10 @@ void SceneManager::Clear()
     {
         NowScene->Finalize();
     }
+
+    // PhysXなどの基盤が終了する前に、Sceneが所有するComponentを破棄する。
+    NowScene.reset();
+    NextScene.reset();
 }
 
 SceneBase* SceneManager::GetCurrentScene()

@@ -9,6 +9,7 @@
 struct CurveTrack 
 {
     std::string name;
+    std::string assetPath;
     std::vector<ImVec2> points;
     ImCurveEdit::CurveType type;
     uint32_t color;

@@ -48,13 +48,14 @@ InputEditorWindow::InputEditorWindow(GameObjectManager* manager_)
         {"Pad L1", DeviceType::Gamepad, static_cast<int>(PadCode::L1)}, {"Pad R1", DeviceType::Gamepad, static_cast<int>(PadCode::R1)},
         {"Pad L2", DeviceType::Gamepad, static_cast<int>(PadCode::L2)}, {"Pad R2", DeviceType::Gamepad, static_cast<int>(PadCode::R2)},
         {"Pad L3", DeviceType::Gamepad, static_cast<int>(PadCode::L3)}, {"Pad R3", DeviceType::Gamepad, static_cast<int>(PadCode::R3)},
-        {"Pad Start", DeviceType::Gamepad, static_cast<int>(PadCode::Start)}, {"Pad Back", DeviceType::Gamepad, static_cast<int>(PadCode::Back)},
-        {"Pad Up", DeviceType::Gamepad, static_cast<int>(PadCode::Up)}, {"Pad Down", DeviceType::Gamepad, static_cast<int>(PadCode::Down)},
-        {"Pad Left", DeviceType::Gamepad, static_cast<int>(PadCode::Left)}, {"Pad Right", DeviceType::Gamepad, static_cast<int>(PadCode::Right)},
-        {"L Stick Up", DeviceType::Gamepad, static_cast<int>(PadCode::StickL_Up)}, {"L Stick Down", DeviceType::Gamepad, static_cast<int>(PadCode::StickL_Down)},
-        {"L Stick Left", DeviceType::Gamepad, static_cast<int>(PadCode::StickL_Left)}, {"L Stick Right", DeviceType::Gamepad, static_cast<int>(PadCode::StickL_Right)},
-        {"R Stick Up", DeviceType::Gamepad, static_cast<int>(PadCode::StickR_Up)}, {"R Stick Down", DeviceType::Gamepad, static_cast<int>(PadCode::StickR_Down)},
-        {"R Stick Left", DeviceType::Gamepad, static_cast<int>(PadCode::StickR_Left)}, {"R Stick Right", DeviceType::Gamepad, static_cast<int>(PadCode::StickR_Right)}
+        {"Pad Start", DeviceType::Gamepad, static_cast<int>(PadCode::START)}, {"Pad Back", DeviceType::Gamepad, static_cast<int>(PadCode::BACK)},
+        {"Pad Up", DeviceType::Gamepad, static_cast<int>(PadCode::UP)}, {"Pad Down", DeviceType::Gamepad, static_cast<int>(PadCode::DOWN)},
+        {"Pad Left", DeviceType::Gamepad, static_cast<int>(PadCode::LEFT)}, {"Pad Right", DeviceType::Gamepad, static_cast<int>(PadCode::RIGHT)},
+        {"L Stick Up", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_L_UP)}, {"L Stick Down", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_L_DOWN)},
+        {"L Stick Left", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_L_LEFT)}, {"L Stick Right", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_L_RIGHT)},
+        {"R Stick Up", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_R_UP)}, {"R Stick Down", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_R_DOWN)},
+        {"R Stick Left", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_R_LEFT)}, {"R Stick Right", DeviceType::Gamepad, static_cast<int>(PadCode::STICK_R_RIGHT)},
+        {"Pad Touchpad", DeviceType::Gamepad, static_cast<int>(PadCode::TOUCHPAD)}, {"Pad Guide", DeviceType::Gamepad, static_cast<int>(PadCode::GUIDE)}
     };
 
     mouseAxisOptions = {

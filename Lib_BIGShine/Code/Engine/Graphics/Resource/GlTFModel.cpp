@@ -251,6 +251,14 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 	// 「自分自身の vector」を指すように再結線する
 	RebindInternalPointers();
 
+    bindNodePoses.resize(nodes.size());
+    for (size_t nodeIndex_ = 0; nodeIndex_ < nodes.size(); ++nodeIndex_)
+    {
+        bindNodePoses[nodeIndex_].position = nodes[nodeIndex_].position;
+        bindNodePoses[nodeIndex_].rotation = nodes[nodeIndex_].rotation;
+        bindNodePoses[nodeIndex_].scale = nodes[nodeIndex_].scale;
+    }
+
 	// 5. 行列の確定
 	UpdateTransform();
 }
@@ -756,6 +764,18 @@ void GltfModelCommponennt::GetNodePoses(std::vector<NodePose>& nodePoses) const
 		pose.rotation = node.rotation;
 		pose.scale = node.scale;
 	}
+}
+
+
+const GltfModelCommponennt::NodePose& GltfModelCommponennt::GetBindNodePose(int nodeIndex_) const
+{
+    if (nodeIndex_ >= 0 && nodeIndex_ < static_cast<int>(bindNodePoses.size()))
+    {
+        return bindNodePoses[nodeIndex_];
+    }
+
+    static const NodePose fallbackPose_{};
+    return fallbackPose_;
 }
 
 float GltfModelCommponennt::GetAnimationDuration(int animationIndex) const

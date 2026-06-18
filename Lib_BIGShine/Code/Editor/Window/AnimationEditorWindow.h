@@ -1,7 +1,8 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Editor/Workspace/EditorWorkspaceWindow.h"
 #include "Editor/Workspace/EditorRenderTarget.h"
+#include "Editor/Window/AssetBrowserWindow.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
@@ -14,8 +15,8 @@ class GltfModelCommponennt;
 class PoseLibraryResource;
 struct CustomAnimation;
 
-/// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³åˆ¶ä½œã«å¿…è¦ãªãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã€ãƒãƒ¼ã‚ºç·¨é›†ã€ã‚¤ãƒ™ãƒ³ãƒˆç·¨é›†ã‚’çµ±åˆã—ãŸãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹ã€‚
-/// ç·¨é›†å¯¾è±¡ã¨ã¯ç‹¬ç«‹ã—ãŸãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã‚·ãƒ¼ãƒ³ã‚’æ‰€æœ‰ã—ã€ã‚²ãƒ¼ãƒ æœ¬ç·¨ã®çŠ¶æ…‹ã‚’å¤‰æ›´ã›ãšã«çµæœã‚’ç¢ºèªã§ãã‚‹ã€‚
+/// ƒAƒjƒ[ƒVƒ‡ƒ“§ì‚É•K—v‚ÈƒvƒŒƒrƒ…[Aƒ|[ƒY•ÒWAƒCƒxƒ“ƒg•ÒW‚ğ“‡‚µ‚½ƒ[ƒNƒXƒy[ƒXB
+/// •ÒW‘ÎÛ‚Æ‚Í“Æ—§‚µ‚½ƒvƒŒƒrƒ…[ƒV[ƒ“‚ğŠ—L‚µAƒQ[ƒ€–{•Ò‚Ìó‘Ô‚ğ•ÏX‚¹‚¸‚ÉŒ‹‰Ê‚ğŠm”F‚Å‚«‚éB
 class AnimationEditorWindow : public EditorWorkspaceWindow
 {
 public:
@@ -26,10 +27,10 @@ public:
     void Update(float deltaTime_) override;
     bool ShouldPauseScene() const override { return true; }
 private:
-    // ç·¨é›†å¯¾è±¡ã®ãƒ¢ãƒ‡ãƒ«ã¨ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³åˆ¶å¾¡ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å®‰å…¨ã«è§£æ±ºã™ã‚‹ã€‚
+    // •ÒW‘ÎÛ‚Ìƒ‚ƒfƒ‹‚ÆƒAƒjƒ[ƒVƒ‡ƒ“§ŒäƒRƒ“ƒ|[ƒlƒ“ƒg‚ğˆÀ‘S‚É‰ğŒˆ‚·‚éB
     bool ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const;
 
-    // ç‹¬ç«‹ã—ãŸãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã‚·ãƒ¼ãƒ³ã®ç”Ÿæˆãƒ»è¡¨ç¤ºã‚’æ‹…å½“ã™ã‚‹ã€‚
+    // “Æ—§‚µ‚½ƒvƒŒƒrƒ…[ƒV[ƒ“‚Ì¶¬E•\¦‚ğ’S“–‚·‚éB
     void EnsurePreviewScene();
     void DrawPreviewPanel();
     void DrawPreviewInspectorPanel();
@@ -37,33 +38,38 @@ private:
     void DrawEditorTimelinePanel();
     void RenderPreview(const ImVec2& previewSize_);
     GameObjectManager* GetPreviewManager() const;
+    bool CopySceneObjectToPreview(const std::shared_ptr<GameObject>& sourceObject_);
 
-    // ãƒãƒ¼ã‚ºã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã¨ã‚¤ãƒ™ãƒ³ãƒˆãƒˆãƒ©ãƒƒã‚¯ã®ç·¨é›†UIã‚’æ§‹ç¯‰ã™ã‚‹ã€‚
+    // ƒ|[ƒYƒAƒjƒ[ƒVƒ‡ƒ“‚ÆƒCƒxƒ“ƒgƒgƒ‰ƒbƒN‚Ì•ÒWUI‚ğ\’z‚·‚éB
     void DrawPoseAnimationCreator(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
     void DrawPoseKeyframeSequencer(CustomAnimation& anim, PoseLibraryResource& poseLibrary, GltfModelCommponennt* modelComp);
     void DrawEventSequencer(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
-    void DrawPosePreview(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
+    void DrawCurveEditor(AnimationControllerComponent* animController_);
 
-    // ãƒ¢ãƒ‡ãƒ«ã®ãƒãƒ¼ãƒ‰å§¿å‹¢ã‚’ç›´æ¥ç·¨é›†ã—ã€ãƒãƒ¼ã‚ºãƒ‡ãƒ¼ã‚¿ã¸åæ˜ ã™ã‚‹ã€‚
+    // ƒ‚ƒfƒ‹‚Ìƒm[ƒhp¨‚ğ’¼Ú•ÒW‚µAƒ|[ƒYƒf[ƒ^‚Ö”½‰f‚·‚éB
     void DrawPoseEditMode(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
     void SampleEditPoseFromAnimation(GltfModelCommponennt* modelComp);
     void ApplyEditPoseToModel(GltfModelCommponennt* modelComp);
     void DrawSelectedNodeGizmo(GltfModelCommponennt* modelComp);
 
-    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ä¸Šã§ç¾åœ¨é¸æŠã•ã‚Œã¦ã„ã‚‹ç·¨é›†è¦ç´ ã€‚
+    // ƒ^ƒCƒ€ƒ‰ƒCƒ“ã‚ÅŒ»İ‘I‘ğ‚³‚ê‚Ä‚¢‚é•ÒW—v‘fB
     int selectedPose = -1;
     int selectedCustom = -1;
     int selectedKeyframe = -1;
     int selectedEvent = -1;
 
-    // ã‚·ãƒ¼ã‚±ãƒ³ã‚µãƒ¼ã®è¡¨ç¤ºç¯„å›²ã¨å±•é–‹çŠ¶æ…‹ã€‚
+    // ƒV[ƒPƒ“ƒT[‚Ì•\¦”ÍˆÍ‚Æ“WŠJó‘ÔB
     int firstPoseFrame = 0;
     int firstEventFrame = 0;
     bool poseSequencerExpanded = true;
     bool eventSequencerExpanded = true;
 
-    // æ–°è¦ã‚¢ã‚»ãƒƒãƒˆä½œæˆãŠã‚ˆã³ãƒ™ã‚¤ã‚¯å‡¦ç†ã®å…¥åŠ›å€¤ã€‚
+    // V‹KƒAƒZƒbƒgì¬‚¨‚æ‚ÑƒxƒCƒNˆ—‚Ì“ü—Í’lB
     std::string selectedEventStateName;
+    std::string selectedCurveStateName;
+    std::string eventStateSearchText;
+    std::string curveStateSearchText;
+    std::string registeredStateSearchText;
     std::string newPoseName = "Pose";
     std::string newCustomName = "CustomAnim";
     float newCustomDuration = 1.0f;
@@ -72,14 +78,14 @@ private:
     float bakeSampleInterval = 0.2f;
     std::string bakeStatusMessage;
 
-    // ã‚¨ãƒ‡ã‚£ã‚¿å†…ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼å†ç”Ÿã®çŠ¶æ…‹ã€‚ã‚²ãƒ¼ãƒ æœ¬ç·¨ã®å†ç”ŸçŠ¶æ…‹ã¨ã¯åˆ†é›¢ã—ã¦ç®¡ç†ã™ã‚‹ã€‚
+    // ƒGƒfƒBƒ^“àƒvƒŒƒrƒ…[Ä¶‚Ìó‘ÔBƒQ[ƒ€–{•Ò‚ÌÄ¶ó‘Ô‚Æ‚Í•ª—£‚µ‚ÄŠÇ—‚·‚éB
     bool customPreviewEnabled = false;
     bool editorPlaybackEnabled = false;
     bool editorPlaybackLoop = true;
     float editorPlaybackTime = 0.0f;
     float editorPlaybackSpeed = 1.0f;
 
-    // ãƒãƒ¼ã‚ºç›´æ¥ç·¨é›†ãƒ¢ãƒ¼ãƒ‰ã®ä½œæ¥­çŠ¶æ…‹ã€‚
+    // ƒ|[ƒY’¼Ú•ÒWƒ‚[ƒh‚Ìì‹Æó‘ÔB
     bool poseEditEnabled = false;
     bool poseEditPoseDirty = false;
     int poseEditAnimIndex = 0;
@@ -93,14 +99,22 @@ private:
     std::string editPoseName = "EditedPose";
     std::vector<GltfModelCommponennt::NodePose> editPoseBuffer;
 
-    // ç·¨é›†å°‚ç”¨ã‚·ãƒ¼ãƒ³ã¨æç”»ãƒªã‚½ãƒ¼ã‚¹ã€‚å®Ÿã‚²ãƒ¼ãƒ ã®GameObjectManagerã«ã¯ç™»éŒ²ã—ãªã„ã€‚
+    // •ÒWê—pƒV[ƒ“‚Æ•`‰æƒŠƒ\[ƒXBÀƒQ[ƒ€‚ÌGameObjectManager‚É‚Í“o˜^‚µ‚È‚¢B
     std::unique_ptr<GameObjectManager> previewGameObjectManager;
+    GameObjectManager* sceneGameObjectManager = nullptr;
     EditorRenderTarget previewTarget;
     ModelRenderSystem previewModelRenderSystem;
     ParticleRenderSystem previewParticleRenderSystem;
+    AssetBrowserWindow assetBrowser;
     CameraComponent previewCamera;
+    float timelineHeight = 300.0f;
+    float assetBrowserWidth = 360.0f;
+    bool layoutSizeInitialized = false;
     bool isPreviewSceneInitialized = false;
     bool autoUpdatePreview = true;
     bool showPreviewGrid = true;
+    bool keepSceneTransformOnCopy = false;
+    int selectedSceneObjectIndex = -1;
+    std::string sceneObjectCopyStatus;
 };
 

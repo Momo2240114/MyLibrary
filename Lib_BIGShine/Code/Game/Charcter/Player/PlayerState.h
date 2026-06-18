@@ -67,6 +67,7 @@ namespace PlayerBlackboardKey
     inline constexpr const char* CAN_BUFFER_INPUT = "CanBufferInput";
     inline constexpr const char* CAN_COMBO = "CanCombo";
     inline constexpr const char* ACTION_ENDED = "ActionEnded";
+    inline constexpr const char* ATTACK_ENTER = "AttackEnter";
 }
 
 inline const char* GetPlayerActionName(PLAYER_ACTION action_)
@@ -141,64 +142,6 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::COUNTER_ATTACK:
         return true;
-    default:
-        return false;
-    }
-}
-
-inline bool CanTransitionPlayerAction(PLAYER_ACTION from_, PLAYER_ACTION to_)
-{
-    if (from_ == PLAYER_ACTION::NONE)
-    {
-        return to_ == PLAYER_ACTION::IDLE;
-    }
-
-    switch (from_)
-    {
-    case PLAYER_ACTION::IDLE:
-        return to_ == PLAYER_ACTION::MOVE ||
-            to_ == PLAYER_ACTION::WEAK_ATTACK ||
-            to_ == PLAYER_ACTION::STRONG_ATTACK ||
-            to_ == PLAYER_ACTION::GUARD ||
-            to_ == PLAYER_ACTION::DODGE ||
-            to_ == PLAYER_ACTION::SKILL_A ||
-            to_ == PLAYER_ACTION::SKILL_B;
-    case PLAYER_ACTION::MOVE:
-        return to_ == PLAYER_ACTION::IDLE ||
-            to_ == PLAYER_ACTION::WEAK_ATTACK ||
-            to_ == PLAYER_ACTION::STRONG_ATTACK ||
-            to_ == PLAYER_ACTION::GUARD ||
-            to_ == PLAYER_ACTION::DODGE ||
-            to_ == PLAYER_ACTION::SKILL_A ||
-            to_ == PLAYER_ACTION::SKILL_B;
-    case PLAYER_ACTION::WEAK_ATTACK:
-        return to_ == PLAYER_ACTION::IDLE ||
-            to_ == PLAYER_ACTION::WEAK_ATTACK ||
-            to_ == PLAYER_ACTION::STRONG_ATTACK ||
-            to_ == PLAYER_ACTION::SKILL_A ||
-            to_ == PLAYER_ACTION::SKILL_B;
-    case PLAYER_ACTION::STRONG_ATTACK:
-        return to_ == PLAYER_ACTION::IDLE ||
-            to_ == PLAYER_ACTION::SKILL_A ||
-            to_ == PLAYER_ACTION::SKILL_B;
-    case PLAYER_ACTION::GUARD:
-        return to_ == PLAYER_ACTION::IDLE ||
-            to_ == PLAYER_ACTION::JUST_GUARD ||
-            to_ == PLAYER_ACTION::DODGE;
-    case PLAYER_ACTION::JUST_GUARD:
-        return to_ == PLAYER_ACTION::COUNTER_ATTACK;
-    case PLAYER_ACTION::DODGE:
-        return to_ == PLAYER_ACTION::IDLE ||
-            to_ == PLAYER_ACTION::WEAK_ATTACK ||
-            to_ == PLAYER_ACTION::SKILL_A ||
-            to_ == PLAYER_ACTION::SKILL_B;
-    case PLAYER_ACTION::SKILL_A:
-    case PLAYER_ACTION::SKILL_B:
-        return to_ == PLAYER_ACTION::IDLE;
-    case PLAYER_ACTION::COUNTER_ATTACK:
-        return to_ == PLAYER_ACTION::IDLE ||
-            to_ == PLAYER_ACTION::WEAK_ATTACK ||
-            to_ == PLAYER_ACTION::STRONG_ATTACK;
     default:
         return false;
     }

@@ -1,6 +1,6 @@
 #include "MeshVFXComponent.h"
 
-#include "Editor/AssetBrowserPayload.h"
+#include "Editor/AssetSlotGui.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Resource/ModelResource.h"
@@ -15,6 +15,7 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
+#include <utility>
 
 namespace
 {
@@ -67,6 +68,29 @@ void MeshVFXComponent::Gui()
     if (ImGui::Button("Refresh Assets")) RefreshAssetLists();
     ImGui::Text("Time: %.2f", time);
 
+    std::string selectedAssetPath_ = assetPath;
+    if (AssetSlotGui::Draw(
+        "Mesh VFX JSON Asset",
+        AssetSlotType::JSON,
+        selectedAssetPath_,
+        nullptr,
+        "Data/VFX"))
+    {
+        if (selectedAssetPath_.empty()) assetPath.clear();
+        else if (LoadAsset(selectedAssetPath_)) assetPath = selectedAssetPath_;
+    }
+    if (ImGui::Button("Save Mesh VFX JSON..."))
+    {
+        const std::string initialPath_ = assetPath.empty()
+            ? "Data/VFX/MeshVFX.json"
+            : assetPath;
+        const std::string selectedPath_ = WindowsDialogHelper::SaveJsonDialog(
+            L"Save Mesh VFX",
+            initialPath_,
+            GraphicsDeviceManager::Instance().GetWindowHandle());
+        if (!selectedPath_.empty() && SaveAsset(selectedPath_)) assetPath = selectedPath_;
+    }
+
     if (ImGui::Button("Add Part"))
     {
         asset.parts.emplace_back();
@@ -81,6 +105,34 @@ void MeshVFXComponent::Gui()
 
         if (ImGui::TreeNode("Part"))
         {
+            if (AssetSlotGui::Draw(
+                "Part JSON Asset",
+                AssetSlotType::JSON,
+                part_.partAssetPath,
+                nullptr,
+                "Data/VFX/Parts"))
+            {
+                if (!part_.partAssetPath.empty())
+                {
+                    LoadPartAsset(static_cast<size_t>(partIndex_), part_.partAssetPath);
+                }
+            }
+            if (ImGui::Button("Save Part JSON..."))
+            {
+                const std::string initialPath_ = part_.partAssetPath.empty()
+                    ? "Data/VFX/Parts/MeshVFXPart.json"
+                    : part_.partAssetPath;
+                const std::string selectedPath_ = WindowsDialogHelper::SaveJsonDialog(
+                    L"Save Mesh VFX Part",
+                    initialPath_,
+                    GraphicsDeviceManager::Instance().GetWindowHandle());
+                if (!selectedPath_.empty() &&
+                    SavePartAsset(static_cast<size_t>(partIndex_), selectedPath_))
+                {
+                    part_.partAssetPath = selectedPath_;
+                }
+            }
+
             ImGui::Checkbox("Render Part", &part_.renderEnabled);
             if (!part_.renderEnabled)
             {
@@ -88,115 +140,9 @@ void MeshVFXComponent::Gui()
                 ImGui::TextDisabled("Model information only");
             }
 
-         
-            // Draw a separate native file dialog button.
-            auto drawFileDialogButton_ = [&](
-                const char* buttonLabel_,
-                std::string& path_,
-                bool isTexture_)
-                {
-                    bool changed_ = false;
-
-                    if (ImGui::Button(buttonLabel_, ImVec2(-1, 0)))
-                    {
-                        namespace fs = std::filesystem;
-
-                        fs::path initialPath_;
-
-                        if (path_.empty())
-                        {
-                            initialPath_ = isTexture_ ? fs::path("Data/Texture") : fs::path("Data/Model");
-                        }
-                        else
-                        {
-                            initialPath_ = WindowsDialogHelper::Utf8ToPath(path_);
-
-                            if (fs::is_regular_file(initialPath_))
-                            {
-                                initialPath_ = initialPath_.parent_path();
-                            }
-                        }
-
-                        std::error_code error_;
-                        initialPath_ = fs::absolute(initialPath_, error_);
-
-                        if (error_ || !fs::exists(initialPath_))
-                        {
-                            initialPath_ = fs::current_path();
-                        }
-
-                        const std::string initialDirectory_ =
-                            WindowsDialogHelper::PathToUtf8(initialPath_);
-
-                        const HWND hwnd_ =
-                            GraphicsDeviceManager::Instance().GetWindowHandle();
-
-                        const std::string selectedPath_ = isTexture_
-                            ? WindowsDialogHelper::OpenTextureDialog(
-                                L"Select Mesh VFX Texture",
-                                initialDirectory_,
-                                hwnd_)
-                            : WindowsDialogHelper::OpenGltfDialog(
-                                L"Select Mesh VFX Model",
-                                initialDirectory_,
-                                hwnd_);
-
-                        if (!selectedPath_.empty())
-                        {
-                            path_ = selectedPath_;
-                            changed_ = true;
-                            RefreshAssetLists();
-                        }
-                    }
-
-                    return changed_;
-                };
-            auto drawTextureAssetSlot_ = [](const char* label_, std::string& path_)
-                {
-                    bool changed_ = false;
-                    ImGui::PushID(label_);
-                    ImGui::TextUnformatted(label_);
-                    ID3D11ShaderResourceView* texture_ =
-                        TextureResourceManager::Instance().GetTexture(path_);
-                    if (texture_)
-                    {
-                        ImGui::Image(reinterpret_cast<void*>(texture_), ImVec2(64.0f, 64.0f));
-                    }
-                    else
-                    {
-                        ImGui::Button(path_.empty() ? "No Texture" : "Drop Texture", ImVec2(64.0f, 64.0f));
-                    }
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* payload_ =
-                            ImGui::AcceptDragDropPayload(AssetBrowserPayload::TEXTURE))
-                        {
-                            path_ = static_cast<const char*>(payload_->Data);
-                            changed_ = true;
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
-                    ImGui::SameLine();
-                    ImGui::BeginGroup();
-                    ImGui::TextWrapped("%s", path_.empty() ? "Not selected" : path_.c_str());
-                    if (ImGui::Button("Clear"))
-                    {
-                        path_.clear();
-                        changed_ = true;
-                    }
-                    ImGui::EndGroup();
-                    ImGui::PopID();
-                    return changed_;
-                };
-
-            // Model asset selection
-            //bool modelChanged_ = drawAssetCombo_("Model Asset", part_.modelPath, modelAssetPaths, false);
-            bool modelChanged_ = false;
             ImGui::Spacing();
-            if (drawFileDialogButton_("Browse Model via Dialog...", part_.modelPath, false))
-            {
-                modelChanged_ = true;
-            }
+            const bool modelChanged_ = AssetSlotGui::Draw(
+                "Model Asset", AssetSlotType::MODEL, part_.modelPath, nullptr, "Data/Model");
 
             if (modelChanged_)
             {
@@ -267,22 +213,22 @@ void MeshVFXComponent::Gui()
 
             ImGui::SeparatorText("Textures");
             // Base texture selection
-            bool baseTextureChanged_= false;
-            if (drawFileDialogButton_("Browse Base Texture via Dialog...", part_.baseTexturePath, true))
-            {
-                baseTextureChanged_ = true;
-            }
-            baseTextureChanged_ |= drawTextureAssetSlot_("Base Texture Asset", part_.baseTexturePath);
+            bool baseTextureChanged_ = AssetSlotGui::Draw(
+                "Base Texture Asset",
+                AssetSlotType::TEXTURE,
+                part_.baseTexturePath,
+                runtimePart_ ? runtimePart_->baseTexture.Get() : nullptr,
+                "Data/Texture");
 
             ImGui::Checkbox("Use Material Base Texture", &part_.useMaterialBaseTexture);
 
             // Normal texture selection
-            bool normalTextureChanged_ = false;
-            if (drawFileDialogButton_("Browse Normal Texture via Dialog...", part_.normalTexturePath, true))
-            {
-                normalTextureChanged_ = true;
-            }
-            normalTextureChanged_ |= drawTextureAssetSlot_("Normal Texture Asset", part_.normalTexturePath);
+            bool normalTextureChanged_ = AssetSlotGui::Draw(
+                "Normal Texture Asset",
+                AssetSlotType::TEXTURE,
+                part_.normalTexturePath,
+                runtimePart_ ? runtimePart_->normalTexture.Get() : nullptr,
+                "Data/Texture");
 
             ImGui::Checkbox("Use Material Normal Texture", &part_.useMaterialNormalTexture);
 
@@ -299,11 +245,12 @@ void MeshVFXComponent::Gui()
                 {
                     ImGui::PushID(layerIndex_);
                     MeshVFXMaskLayer& layer_ = part_.maskLayers[layerIndex_];
-                    const std::string buttonLabel_ = layer_.path.empty()
-                        ? "Select Mask Texture..."
-                        : std::filesystem::path(layer_.path).filename().string();
-                    layeredTextureChanged_ |= drawFileDialogButton_(buttonLabel_.c_str(), layer_.path, true);
-                    layeredTextureChanged_ |= drawTextureAssetSlot_("Mask Texture Asset", layer_.path);
+                    ID3D11ShaderResourceView* previewTexture_ = runtimePart_ &&
+                        layerIndex_ < static_cast<int>(runtimePart_->maskTextures.size())
+                        ? runtimePart_->maskTextures[layerIndex_].Get()
+                        : nullptr;
+                    layeredTextureChanged_ |= AssetSlotGui::Draw(
+                        "Mask Texture Asset", AssetSlotType::TEXTURE, layer_.path, previewTexture_, "Data/Texture");
                     const char* blendItems_[] = { "Multiply / Narrow", "Union / Expand" };
                     int blendMode_ = static_cast<int>(layer_.blendMode);
                     if (ImGui::Combo("Blend", &blendMode_, blendItems_, IM_ARRAYSIZE(blendItems_)))
@@ -335,11 +282,12 @@ void MeshVFXComponent::Gui()
                 {
                     ImGui::PushID(layerIndex_);
                     std::string& path_ = part_.noiseTexturePaths[layerIndex_];
-                    const std::string buttonLabel_ = path_.empty()
-                        ? "Select Noise Texture..."
-                        : std::filesystem::path(path_).filename().string();
-                    layeredTextureChanged_ |= drawFileDialogButton_(buttonLabel_.c_str(), path_, true);
-                    layeredTextureChanged_ |= drawTextureAssetSlot_("Noise Texture Asset", path_);
+                    ID3D11ShaderResourceView* previewTexture_ = runtimePart_ &&
+                        layerIndex_ < static_cast<int>(runtimePart_->noiseTextures.size())
+                        ? runtimePart_->noiseTextures[layerIndex_].Get()
+                        : nullptr;
+                    layeredTextureChanged_ |= AssetSlotGui::Draw(
+                        "Noise Texture Asset", AssetSlotType::TEXTURE, path_, previewTexture_, "Data/Texture");
                     if (ImGui::Button("Remove Noise Layer")) removeLayerIndex_ = layerIndex_;
                     ImGui::Separator();
                     ImGui::PopID();
@@ -354,31 +302,23 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Distortion Noise Texture"))
             {
-                const std::string buttonLabel_ = part_.distortionNoiseTexturePath.empty()
-                    ? "Select Distortion Noise Texture..."
-                    : std::filesystem::path(part_.distortionNoiseTexturePath).filename().string();
-                layeredTextureChanged_ |= drawFileDialogButton_(
-                    buttonLabel_.c_str(),
-                    part_.distortionNoiseTexturePath,
-                    true);
-                layeredTextureChanged_ |= drawTextureAssetSlot_(
+                layeredTextureChanged_ |= AssetSlotGui::Draw(
                     "Distortion Noise Texture Asset",
-                    part_.distortionNoiseTexturePath);
+                    AssetSlotType::TEXTURE,
+                    part_.distortionNoiseTexturePath,
+                    runtimePart_ ? runtimePart_->distortionNoiseTexture.Get() : nullptr,
+                    "Data/Texture");
                 ImGui::TreePop();
             }
 
             if (ImGui::TreeNode("Vertex Deformation Noise Texture"))
             {
-                const std::string buttonLabel_ = part_.vertexNoiseTexturePath.empty()
-                    ? "Select Vertex Noise Texture..."
-                    : std::filesystem::path(part_.vertexNoiseTexturePath).filename().string();
-                layeredTextureChanged_ |= drawFileDialogButton_(
-                    buttonLabel_.c_str(),
-                    part_.vertexNoiseTexturePath,
-                    true);
-                layeredTextureChanged_ |= drawTextureAssetSlot_(
+                layeredTextureChanged_ |= AssetSlotGui::Draw(
                     "Vertex Noise Texture Asset",
-                    part_.vertexNoiseTexturePath);
+                    AssetSlotType::TEXTURE,
+                    part_.vertexNoiseTexturePath,
+                    runtimePart_ ? runtimePart_->vertexNoiseTexture.Get() : nullptr,
+                    "Data/Texture");
                 ImGui::TextDisabled("Used only for vertex displacement. Empty uses procedural noise.");
                 ImGui::TreePop();
             }
@@ -413,6 +353,11 @@ void MeshVFXComponent::Gui()
                 }
 
                 ImGui::DragFloat2("UV Rotation Center", &part_.uvRotationCenter.x, 0.01f);
+                ImGui::SeparatorText("Initial UV Rotation (Degrees)");
+                ImGui::DragFloat("Base UV Rotation", &part_.baseUVRotation, 1.0f, -360.0f, 360.0f);
+                ImGui::DragFloat("Mask UV Rotation", &part_.maskUVRotation, 1.0f, -360.0f, 360.0f);
+                ImGui::DragFloat("Noise UV Rotation", &part_.noiseUVRotation, 1.0f, -360.0f, 360.0f);
+                ImGui::SeparatorText("UV Rotation Speed (Degrees / Second)");
                 ImGui::DragFloat("Base UV Rotation Speed", &part_.baseUVRotationSpeed, 1.0f);
                 ImGui::DragFloat("Mask UV Rotation Speed", &part_.maskUVRotationSpeed, 1.0f);
                 ImGui::DragFloat("Noise UV Rotation Speed", &part_.noiseUVRotationSpeed, 1.0f);
@@ -629,6 +574,9 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["MaskUVSpeed"] = { part_.maskUVSpeed.x, part_.maskUVSpeed.y };
         partJson_["NoiseUVSpeed"] = { part_.noiseUVSpeed.x, part_.noiseUVSpeed.y };
         partJson_["UVRotationCenter"] = { part_.uvRotationCenter.x, part_.uvRotationCenter.y };
+        partJson_["BaseUVRotation"] = part_.baseUVRotation;
+        partJson_["MaskUVRotation"] = part_.maskUVRotation;
+        partJson_["NoiseUVRotation"] = part_.noiseUVRotation;
         partJson_["BaseUVRotationSpeed"] = part_.baseUVRotationSpeed;
         partJson_["MaskUVRotationSpeed"] = part_.maskUVRotationSpeed;
         partJson_["NoiseUVRotationSpeed"] = part_.noiseUVRotationSpeed;
@@ -741,6 +689,9 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         ReadFloatArray(partJson_, "MaskUVSpeed", part_.maskUVSpeed, 2);
         ReadFloatArray(partJson_, "NoiseUVSpeed", part_.noiseUVSpeed, 2);
         ReadFloatArray(partJson_, "UVRotationCenter", part_.uvRotationCenter, 2);
+        part_.baseUVRotation = partJson_.value("BaseUVRotation", 0.0f);
+        part_.maskUVRotation = partJson_.value("MaskUVRotation", 0.0f);
+        part_.noiseUVRotation = partJson_.value("NoiseUVRotation", 0.0f);
         part_.baseUVRotationSpeed = partJson_.value("BaseUVRotationSpeed", 0.0f);
         part_.maskUVRotationSpeed = partJson_.value("MaskUVRotationSpeed", 0.0f);
         part_.noiseUVRotationSpeed = partJson_.value("NoiseUVRotationSpeed", 0.0f);
@@ -825,6 +776,69 @@ bool MeshVFXComponent::LoadAsset(const std::string& path_)
             json_.contains("MeshVFX") ? json_["MeshVFX"] : json_;
         if (!meshVFXJson_.contains("Parts") || !meshVFXJson_["Parts"].is_array()) return false;
         Deserialize(meshVFXJson_);
+        assetPath = path_;
+    }
+    catch (const nlohmann::json::exception&)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_) const
+{
+    if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
+
+    nlohmann::json componentJson_;
+    Serialize(componentJson_);
+    nlohmann::json json_;
+    json_["AssetType"] = "MeshVFXPart";
+    json_["AssetVersion"] = 1;
+    json_["Part"] = componentJson_["Parts"][partIndex_];
+
+    const std::filesystem::path assetPath_ = WindowsDialogHelper::Utf8ToPath(path_);
+    std::error_code error_;
+    if (assetPath_.has_parent_path())
+    {
+        std::filesystem::create_directories(assetPath_.parent_path(), error_);
+        if (error_) return false;
+    }
+    std::ofstream file_(assetPath_, std::ios::out | std::ios::trunc);
+    if (!file_.is_open()) return false;
+    file_ << json_.dump(4);
+    return file_.good();
+}
+
+bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_)
+{
+    if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
+    std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
+    if (!file_.is_open()) return false;
+
+    try
+    {
+        nlohmann::json json_;
+        file_ >> json_;
+        if (json_.contains("AssetType") && json_.value("AssetType", "") != "MeshVFXPart")
+        {
+            return false;
+        }
+        const nlohmann::json& partJson_ = json_.contains("Part") ? json_["Part"] : json_;
+        if (!partJson_.is_object() || partJson_.contains("Parts") || partJson_.contains("MeshVFX"))
+        {
+            return false;
+        }
+
+        nlohmann::json componentJson_;
+        componentJson_["IsPlaying"] = isPlaying;
+        componentJson_["Parts"] = nlohmann::json::array({ partJson_ });
+        MeshVFXComponent parsedComponent_;
+        parsedComponent_.Deserialize(componentJson_);
+        if (parsedComponent_.asset.parts.empty()) return false;
+
+        asset.parts[partIndex_] = std::move(parsedComponent_.asset.parts.front());
+        asset.parts[partIndex_].partAssetPath = path_;
+        LoadPartResource(partIndex_);
     }
     catch (const nlohmann::json::exception&)
     {

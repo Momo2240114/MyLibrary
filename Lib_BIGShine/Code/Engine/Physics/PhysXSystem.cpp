@@ -130,6 +130,7 @@ void PhysXSystem::Finalize()
 {
     if (gScene) { gScene->release(); gScene = nullptr; }
     if (gDispatcher) { gDispatcher->release(); gDispatcher = nullptr; }
+    if (gDefaultMaterial) { gDefaultMaterial->release(); gDefaultMaterial = nullptr; }
     if (gPhysics) { gPhysics->release(); gPhysics = nullptr; }
 
     // PVD ‚ÌŒãŽn––
