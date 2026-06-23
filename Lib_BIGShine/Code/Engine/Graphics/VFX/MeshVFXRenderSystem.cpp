@@ -8,6 +8,8 @@
 #include "MeshVFXComponent.h"
 
 #include <algorithm>
+#include <cstring>
+#include <unordered_map>
 #include <cmath>
 
 namespace
@@ -231,6 +233,134 @@ bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
     return isInitialized;
 }
 
+bool MeshVFXRenderSystem::EnsureAfterimageBuffers(
+    ID3D11Device* device_,
+    UINT instanceCapacity_)
+{
+    if (!device_ || instanceCapacity_ == 0) return false;
+    if (afterimageInstanceCapacity >= instanceCapacity_ &&
+        afterimageBoneBuffer && afterimageInstanceBuffer)
+    {
+        return true;
+    }
+
+    UINT newCapacity_ = 1;
+    while (newCapacity_ < instanceCapacity_) newCapacity_ *= 2;
+
+    auto createStructuredBuffer_ = [device_](
+        UINT elementCount_, UINT stride_,
+        Microsoft::WRL::ComPtr<ID3D11Buffer>& buffer_,
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_)
+        {
+            D3D11_BUFFER_DESC bufferDesc_{};
+            bufferDesc_.ByteWidth = elementCount_ * stride_;
+            bufferDesc_.Usage = D3D11_USAGE_DYNAMIC;
+            bufferDesc_.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+            bufferDesc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            bufferDesc_.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+            bufferDesc_.StructureByteStride = stride_;
+            if (FAILED(device_->CreateBuffer(&bufferDesc_, nullptr, buffer_.ReleaseAndGetAddressOf())))
+            {
+                return false;
+            }
+
+            D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc_{};
+            viewDesc_.Format = DXGI_FORMAT_UNKNOWN;
+            viewDesc_.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+            viewDesc_.Buffer.FirstElement = 0;
+            viewDesc_.Buffer.NumElements = elementCount_;
+            return SUCCEEDED(device_->CreateShaderResourceView(
+                buffer_.Get(), &viewDesc_, shaderResourceView_.ReleaseAndGetAddressOf()));
+        };
+
+    if (!createStructuredBuffer_(
+        newCapacity_ * 256,
+        sizeof(DirectX::XMFLOAT4X4),
+        afterimageBoneBuffer,
+        afterimageBoneSRV))
+    {
+        return false;
+    }
+    if (!createStructuredBuffer_(
+        newCapacity_,
+        sizeof(MeshVFXTextureMixer::AfterimageInstanceData),
+        afterimageInstanceBuffer,
+        afterimageInstanceSRV))
+    {
+        return false;
+    }
+
+    afterimageInstanceCapacity = newCapacity_;
+    return true;
+}
+
+UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
+    const RenderContext& renderContext_,
+    const std::vector<const MeshVFXModelPoseView*>& poses_,
+    size_t meshIndex_)
+{
+    if (poses_.empty() || !renderContext_.deviceContext)
+    {
+        return 0;
+    }
+    ID3D11Device* device_ = renderContext_.device
+        ? renderContext_.device
+        : GraphicsDeviceManager::Instance().GetDevice();
+    if (!EnsureAfterimageBuffers(
+        device_,
+        static_cast<UINT>(poses_.size())))
+    {
+        return 0;
+    }
+
+    D3D11_MAPPED_SUBRESOURCE mappedBones_{};
+    if (FAILED(renderContext_.deviceContext->Map(
+        afterimageBoneBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBones_)))
+    {
+        return 0;
+    }
+    auto* destinationBones_ = static_cast<DirectX::XMFLOAT4X4*>(mappedBones_.pData);
+    std::memset(
+        destinationBones_, 0,
+        sizeof(DirectX::XMFLOAT4X4) * afterimageInstanceCapacity * 256);
+    for (size_t poseIndex_ = 0; poseIndex_ < poses_.size(); ++poseIndex_)
+    {
+        const MeshVFXModelPoseView* pose_ = poses_[poseIndex_];
+        if (!pose_ || !pose_->meshTransforms ||
+            meshIndex_ >= pose_->meshTransforms->size()) continue;
+        const auto& transforms_ = (*pose_->meshTransforms)[meshIndex_];
+        const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
+        std::memcpy(
+            destinationBones_ + poseIndex_ * 256,
+            transforms_.data(),
+            sizeof(DirectX::XMFLOAT4X4) * transformCount_);
+    }
+    renderContext_.deviceContext->Unmap(afterimageBoneBuffer.Get(), 0);
+
+    D3D11_MAPPED_SUBRESOURCE mappedInstances_{};
+    if (FAILED(renderContext_.deviceContext->Map(
+        afterimageInstanceBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstances_)))
+    {
+        return 0;
+    }
+    auto* destinationInstances_ = static_cast<MeshVFXTextureMixer::AfterimageInstanceData*>(mappedInstances_.pData);
+    for (size_t poseIndex_ = 0; poseIndex_ < poses_.size(); ++poseIndex_)
+    {
+        const MeshVFXModelPoseView* pose_ = poses_[poseIndex_];
+        destinationInstances_[poseIndex_].time = pose_ ? pose_->time : 0.0f;
+        destinationInstances_[poseIndex_].alpha = pose_ ? pose_->alpha : 0.0f;
+    }
+    renderContext_.deviceContext->Unmap(afterimageInstanceBuffer.Get(), 0);
+
+    ID3D11ShaderResourceView* resources_[] =
+    {
+        afterimageBoneSRV.Get(),
+        afterimageInstanceSRV.Get(),
+    };
+    renderContext_.deviceContext->VSSetShaderResources(5, _countof(resources_), resources_);
+    return static_cast<UINT>(poses_.size());
+}
+
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
     if (!isInitialized || !component_ || !component_->IsEnabled()) return;
@@ -238,7 +368,15 @@ void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
     if (component_->UsesOwnerModel())
     {
         const std::shared_ptr<GameObject> owner_ = component_->GetGameObject();
-        if (owner_ && owner_->GetComponent<GltfModelCommponennt>()) components.push_back(component_);
+        if (component_->UsesModelPoses())
+        {
+            if (component_->HasModelPoses()) components.push_back(component_);
+            return;
+        }
+        if (owner_ && owner_->GetComponent<GltfModelCommponennt>())
+        {
+            components.push_back(component_);
+        }
         return;
     }
 
@@ -416,6 +554,9 @@ void MeshVFXRenderSystem::RenderAll(
         const MeshVFXAsset& asset_ = component_->GetAsset();
         const std::vector<MeshVFXRuntimePart>& runtimeParts_ = component_->GetRuntimeParts();
         const size_t partCount_ = (std::min)(asset_.parts.size(), runtimeParts_.size());
+        std::vector<MeshVFXModelPoseView> modelPoses_;
+        const bool hasModelPoses_ =
+            component_->GetModelPoseViews(modelPoses_) && !modelPoses_.empty();
 
         for (size_t partIndex_ = 0; partIndex_ < partCount_; ++partIndex_)
         {
@@ -423,11 +564,14 @@ void MeshVFXRenderSystem::RenderAll(
             const MeshVFXRuntimePart& runtimePart_ = runtimeParts_[partIndex_];
             const bool useOwnerModel_ = component_->UsesOwnerModel();
             const std::shared_ptr<GltfModelCommponennt> ownerModel_ =
-                useOwnerModel_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+                useOwnerModel_ && !component_->UsesModelPoses()
+                ? owner_->GetComponent<GltfModelCommponennt>()
+                : nullptr;
             MeshVFXDynamicMesh dynamicMesh_{};
             const bool useDynamicMesh_ = component_->GetDynamicMesh(dynamicMesh_);
             if (!part_.renderEnabled ||
-                (useOwnerModel_ ? !ownerModel_ : (!useDynamicMesh_ && !runtimePart_.modelResource))) continue;
+                (useOwnerModel_ ? (!ownerModel_ && !hasModelPoses_) :
+                    (!useDynamicMesh_ && !runtimePart_.modelResource))) continue;
 
             const PartAnimationState animation_ =
                 CalculatePartAnimation(part_, component_->GetTime());
@@ -441,7 +585,10 @@ void MeshVFXRenderSystem::RenderAll(
 
             const auto renderMesh_ = [&](ID3D11Buffer* vertexBuffer_, ID3D11Buffer* indexBuffer_,
                 UINT indexCount_, UINT stride_, const DirectX::XMMATRIX& world_,
-                const GltfModelCommponennt::Mesh* sourceMesh_)
+                const GltfModelCommponennt::Mesh* sourceMesh_,
+                const std::vector<DirectX::XMFLOAT4X4>* poseTransforms_,
+                float poseTime_, float poseAlpha_,
+                UINT instanceCount_, bool useInstancedPose_)
             {
                 if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0) return;
 
@@ -505,26 +652,73 @@ void MeshVFXRenderSystem::RenderAll(
                     renderContext_,
                     sceneSamplingReady_ ? sceneColorCopySRV.Get() : nullptr,
                     sceneSamplingReady_ ? sceneDepthCopySRV.Get() : nullptr,
-                    useOwnerModel_);
+                    useOwnerModel_, useInstancedPose_);
                 shader->UpdateScene(renderContext_);
-                if (useOwnerModel_ && sourceMesh_) shader->UpdateSkeleton(renderContext_, *sourceMesh_);
+                if (!useInstancedPose_ && useOwnerModel_ && poseTransforms_)
+                {
+                    shader->UpdateSkeleton(renderContext_, *poseTransforms_);
+                }
+                else if (!useInstancedPose_ && useOwnerModel_ && sourceMesh_)
+                {
+                    shader->UpdateSkeleton(renderContext_, *sourceMesh_);
+                }
                 shader->UpdatePart(
                     renderContext_, part_, runtimePart_, baseTexture_, normalTexture_,
                     maskTexture_, noiseTexture_,
-                    world_, animation_.time, animation_.alpha);
+                    world_, poseTime_, animation_.alpha * poseAlpha_);
 
                 UINT offset_ = 0;
                 deviceContext_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride_, &offset_);
                 deviceContext_->IASetIndexBuffer(indexBuffer_, DXGI_FORMAT_R32_UINT, 0);
                 deviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                deviceContext_->DrawIndexed(indexCount_, 0, 0);
+                if (useInstancedPose_)
+                {
+                    deviceContext_->DrawIndexedInstanced(indexCount_, instanceCount_, 0, 0, 0);
+                }
+                else
+                {
+                    deviceContext_->DrawIndexed(indexCount_, 0, 0);
+                }
             };
 
             if (useDynamicMesh_)
             {
                 renderMesh_(dynamicMesh_.vertexBuffer, dynamicMesh_.indexBuffer,
                     dynamicMesh_.indexCount, dynamicMesh_.vertexStride,
-                    DirectX::XMMatrixIdentity(), nullptr);
+                    DirectX::XMMatrixIdentity(), nullptr, nullptr,
+                    animation_.time, 1.0f, 1, false);
+                continue;
+            }
+
+            if (hasModelPoses_)
+            {
+                std::unordered_map<
+                    GltfModelCommponennt*,
+                    std::vector<const MeshVFXModelPoseView*>> poseGroups_;
+                for (const MeshVFXModelPoseView& pose_ : modelPoses_)
+                {
+                    if (!pose_.model) continue;
+                    poseGroups_[pose_.model.get()].push_back(&pose_);
+                }
+
+                for (const auto& [model_, poses_] : poseGroups_)
+                {
+                    if (!model_ || poses_.empty()) continue;
+                    const auto& meshes_ = model_->GetMeshes();
+                    for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
+                    {
+                        if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
+                        const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
+                        const UINT instanceCount_ = UpdateAfterimageBuffers(
+                            renderContext_, poses_, meshIndex_);
+                        if (instanceCount_ == 0) continue;
+                        renderMesh_(mesh_.vertexBuffer.Get(), mesh_.indexBuffer.Get(),
+                            static_cast<UINT>(mesh_.indices.size()),
+                            sizeof(GltfModelCommponennt::Vertex),
+                            DirectX::XMMatrixIdentity(), &mesh_, nullptr,
+                            0.0f, 1.0f, instanceCount_, true);
+                    }
+                }
                 continue;
             }
 
@@ -541,11 +735,14 @@ void MeshVFXRenderSystem::RenderAll(
                         owner_->transform->GetWorldMatrix();
                 renderMesh_(mesh_.vertexBuffer.Get(), mesh_.indexBuffer.Get(),
                     static_cast<UINT>(mesh_.indices.size()),
-                    sizeof(GltfModelCommponennt::Vertex), world_, &mesh_);
+                    sizeof(GltfModelCommponennt::Vertex), world_, &mesh_, nullptr,
+                    animation_.time, 1.0f, 1, false);
             }
         }
     }
 
+    ID3D11ShaderResourceView* nullAfterimageResources_[2] = {};
+    deviceContext_->VSSetShaderResources(5, _countof(nullAfterimageResources_), nullAfterimageResources_);
     shader->End(renderContext_);
     deviceContext_->OMSetBlendState(
         renderContext_.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);

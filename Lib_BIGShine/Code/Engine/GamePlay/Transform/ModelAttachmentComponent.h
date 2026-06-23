@@ -16,8 +16,10 @@ public:
 
     // アタッチ先のノード名を設定
     void SetTargetNode(std::shared_ptr<GltfModelCommponennt> modelComp, const std::string& nodeName);
+    void Update(float deltaTime_) override;
     void LateUpdate(float deltaTime) override;
     void Gui() override;
+    void SyncAttachment();
 
     // セーブ用：引数の json オブジェクトに自分の変数を書き込む
     void Serialize(nlohmann::json& j) const;
@@ -29,7 +31,7 @@ private:
 
     std::weak_ptr<GltfModelCommponennt> targetModel;
     std::string targetGameObjectName; // アタッチ先GameObjectの名前（保存用）
-    std::string targetNodeName;
+    std::string targetStartNodeName;
 
     // --- ポップアップでの一時選択用 (temp) ---
     std::shared_ptr<GltfModelCommponennt> tempTargetModel; // モデルの仮置き

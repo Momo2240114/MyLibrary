@@ -62,5 +62,7 @@ VS_OUT main(VS_IN input)
     output.normal = normalize(mul(float4(input.normal, 0.0f), world).xyz);
     output.tangent = float4(normalize(mul(float4(input.tangent.xyz, 0.0f), world).xyz), input.tangent.w);
     output.texcoord = input.texcoord;
+    output.instanceTime = 0.0f;
+    output.instanceAlpha = 1.0f;
     return output;
 }

@@ -18,7 +18,6 @@ struct PS_OUT
 {
     float4 color : SV_TARGET0; // ?V?[???J???[
     float4 normal : SV_TARGET1; // ?@???o?b?t?@
-    float depth : SV_TARGET2;
 };
 
 static const int CascadeShadowCount = 4;

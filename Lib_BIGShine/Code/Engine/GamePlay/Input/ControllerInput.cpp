@@ -1,5 +1,7 @@
 #include "ControllerInput.h"
 
+#include <SDL3/SDL_events.h>
+
 #include <algorithm>
 #include <cmath>
 
@@ -27,9 +29,9 @@ bool ControllerInput::Initialize()
         return false;
     }
 
-    // This engine reads state every frame instead of consuming SDL events.
     gamepadEventsWereEnabled = SDL_GamepadEventsEnabled();
-    SDL_SetGamepadEventsEnabled(false);
+    SDL_SetGamepadEventsEnabled(true);
+    SDL_PumpEvents();
     SDL_UpdateGamepads();
     TryOpenGamepad();
     CaptureState();
@@ -61,6 +63,9 @@ void ControllerInput::Update()
         return;
     }
 
+    // The engine owns the Win32 message loop, so SDL's device events must be
+    // pumped explicitly before polling the current gamepad state.
+    SDL_PumpEvents();
     SDL_UpdateGamepads();
 
     if (gamepad != nullptr && !SDL_GamepadConnected(gamepad))

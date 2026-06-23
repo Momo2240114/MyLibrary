@@ -75,6 +75,35 @@ static void CallAnimationAction(const std::shared_ptr<GameObject>& owner_, const
     ActionRegistry::Instance().Call(actionName_);
 }
 
+static void ApplyAnimationBlackboardWrites(
+    const std::shared_ptr<GameObject>& owner_,
+    const std::vector<AnimBlackboardWrite>& writes_)
+{
+    if (!owner_ || writes_.empty()) return;
+
+    const std::shared_ptr<BlackboardComponent> blackboard_ =
+        owner_->GetComponent<BlackboardComponent>();
+    if (!blackboard_) return;
+
+    for (const AnimBlackboardWrite& write_ : writes_)
+    {
+        if (write_.category.empty() || write_.key.empty()) continue;
+
+        switch (write_.type)
+        {
+        case ANIM_BLACKBOARD_VALUE_TYPE::FLOAT:
+            blackboard_->SetFloat(write_.category, write_.key, write_.floatValue);
+            break;
+        case ANIM_BLACKBOARD_VALUE_TYPE::INT:
+            blackboard_->SetInt(write_.category, write_.key, write_.intValue);
+            break;
+        case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
+            blackboard_->SetBool(write_.category, write_.key, write_.boolValue);
+            break;
+        }
+    }
+}
+
 static void CallStateExitEndActions(ModelAnimator::ActiveSlot& slot_, const std::shared_ptr<GameObject>& owner_)
 {
     if (!slot_.state) return;
@@ -176,6 +205,100 @@ static float ResolveBlendDuration(
     const float durationB_ = (std::max)(model_->GetAnimationDuration(state_->animIndexB), 0.0001f);
     const float weight_ = ResolveBlendWeight(state_, blackboard_);
     return durationA_ + (durationB_ - durationA_) * weight_;
+}
+
+struct Blend2DSelection
+{
+    int animationIndexA = -1;
+    int animationIndexB = -1;
+    float phaseOffsetA = 0.0f;
+    float phaseOffsetB = 0.0f;
+    float weightB = 0.0f;
+};
+
+static Blend2DSelection ResolveBlend2DSelection(
+    const AnimState* state_,
+    const BlackboardCategory* blackboard_)
+{
+    Blend2DSelection selection_{};
+    if (!state_) return selection_;
+
+    DirectX::SimpleMath::Vector2 input_
+    {
+        state_->blend2DDefaultInput.x,
+        state_->blend2DDefaultInput.y
+    };
+    if (blackboard_ && !state_->blend2DParamName.empty())
+    {
+        const auto valueIterator_ = blackboard_->find(state_->blend2DParamName);
+        if (valueIterator_ != blackboard_->end())
+        {
+            if (const auto* vectorValue_ =
+                std::get_if<DirectX::SimpleMath::Vector2>(&valueIterator_->second))
+            {
+                input_ = *vectorValue_;
+            }
+        }
+    }
+
+    input_.x = (std::clamp)(input_.x, -1.0f, 1.0f);
+    input_.y = (std::clamp)(input_.y, -1.0f, 1.0f);
+    float absoluteX_ = std::abs(input_.x);
+    float absoluteY_ = std::abs(input_.y);
+    if (absoluteX_ + absoluteY_ <= 0.000001f)
+    {
+        input_ = { state_->blend2DDefaultInput.x, state_->blend2DDefaultInput.y };
+        absoluteX_ = std::abs(input_.x);
+        absoluteY_ = std::abs(input_.y);
+    }
+
+    if (absoluteX_ > 0.000001f)
+    {
+        const bool useLeft_ = input_.x < 0.0f;
+        selection_.animationIndexA = useLeft_
+            ? state_->blend2DLeftAnimationIndex
+            : state_->blend2DRightAnimationIndex;
+        selection_.phaseOffsetA = useLeft_
+            ? state_->blend2DLeftPhaseOffset
+            : state_->blend2DRightPhaseOffset;
+    }
+    if (absoluteY_ > 0.000001f)
+    {
+        const bool useBackward_ = input_.y < 0.0f;
+        selection_.animationIndexB = useBackward_
+            ? state_->blend2DBackwardAnimationIndex
+            : state_->blend2DForwardAnimationIndex;
+        selection_.phaseOffsetB = useBackward_
+            ? state_->blend2DBackwardPhaseOffset
+            : state_->blend2DForwardPhaseOffset;
+    }
+
+    const float totalWeight_ = absoluteX_ + absoluteY_;
+    selection_.weightB = totalWeight_ > 0.000001f
+        ? absoluteY_ / totalWeight_
+        : 1.0f;
+    return selection_;
+}
+
+static float ResolveBlend2DDuration(
+    const AnimState* state_,
+    GltfModelCommponennt* model_,
+    const BlackboardCategory* blackboard_)
+{
+    const Blend2DSelection selection_ = ResolveBlend2DSelection(state_, blackboard_);
+    const bool validA_ = IsValidAnimationIndex(model_, selection_.animationIndexA);
+    const bool validB_ = IsValidAnimationIndex(model_, selection_.animationIndexB);
+    if (!validA_ && !validB_) return 1.0f;
+    if (!validA_) return (std::max)(model_->GetAnimationDuration(selection_.animationIndexB), 0.0001f);
+    if (!validB_) return (std::max)(model_->GetAnimationDuration(selection_.animationIndexA), 0.0001f);
+
+    const float durationA_ = (std::max)(
+        model_->GetAnimationDuration(selection_.animationIndexA), 0.0001f);
+    if (!state_->blend2DSyncNormalizedTime) return durationA_;
+
+    const float durationB_ = (std::max)(
+        model_->GetAnimationDuration(selection_.animationIndexB), 0.0001f);
+    return durationA_ + (durationB_ - durationA_) * selection_.weightB;
 }
 
 static float ResolveBlendSampleTime(
@@ -348,6 +471,64 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             }
             break;
 
+            case AnimStateType::BLEND_2D:
+            {
+                const Blend2DSelection selection_ = ResolveBlend2DSelection(state, blackboard_);
+                const bool validA_ = IsValidAnimationIndex(model, selection_.animationIndexA);
+                const bool validB_ = IsValidAnimationIndex(model, selection_.animationIndexB);
+                if (!validA_ && !validB_) break;
+                if (!validA_)
+                {
+                    model->ComputeAnimation(selection_.animationIndexB, time, outPose);
+                    break;
+                }
+                if (!validB_)
+                {
+                    model->ComputeAnimation(selection_.animationIndexA, time, outPose);
+                    break;
+                }
+
+                const float durationA_ = model->GetAnimationDuration(selection_.animationIndexA);
+                const float durationB_ = model->GetAnimationDuration(selection_.animationIndexB);
+                const float stateDuration_ = sampleDuration_ > 0.0001f
+                    ? sampleDuration_
+                    : ResolveBlend2DDuration(state, model, blackboard_);
+                const float timeA_ = ResolveBlendSampleTime(
+                    time,
+                    stateDuration_,
+                    durationA_,
+                    selection_.phaseOffsetA,
+                    state->blend2DSyncNormalizedTime,
+                    state->isLoop);
+                const float timeB_ = ResolveBlendSampleTime(
+                    time,
+                    stateDuration_,
+                    durationB_,
+                    selection_.phaseOffsetB,
+                    state->blend2DSyncNormalizedTime,
+                    state->isLoop);
+
+                model->ComputeAnimation(selection_.animationIndexA, timeA_, outPose);
+                model->ComputeAnimation(selection_.animationIndexB, timeB_, blendPoseScratch);
+                for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
+                {
+                    outPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
+                        outPose[nodeIndex_].position,
+                        blendPoseScratch[nodeIndex_].position,
+                        selection_.weightB);
+                    outPose[nodeIndex_].rotation = DirectX::SimpleMath::Quaternion::Slerp(
+                        outPose[nodeIndex_].rotation,
+                        blendPoseScratch[nodeIndex_].rotation,
+                        selection_.weightB);
+                    outPose[nodeIndex_].rotation.Normalize();
+                    outPose[nodeIndex_].scale = DirectX::SimpleMath::Vector3::Lerp(
+                        outPose[nodeIndex_].scale,
+                        blendPoseScratch[nodeIndex_].scale,
+                        selection_.weightB);
+                }
+            }
+            break;
+
             default:
                 break;
             }
@@ -373,11 +554,16 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     {
         baseDuration = ResolveBlendDuration(current.state, model, blackboard_);
     }
+    else if (current.state->type == AnimStateType::BLEND_2D)
+    {
+        baseDuration = ResolveBlend2DDuration(current.state, model, blackboard_);
+    }
 
     // ------------------------------------------------------------
     // 2. 時間更新
     // ------------------------------------------------------------
-    if (current.state->type == AnimStateType::Blend1D)
+    if (current.state->type == AnimStateType::Blend1D ||
+        current.state->type == AnimStateType::BLEND_2D)
     {
         if (current.sampleDuration > 0.0001f &&
             std::abs(current.sampleDuration - baseDuration) > 0.0001f)
@@ -759,6 +945,8 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
 {
     if (!state) return;
 
+    const AnimState* updatingState_ = state;
+
     float currentSpeed = state->playbackSpeed;
 
     // ★カーブの指定があり、コンポーネントが存在する場合
@@ -791,8 +979,10 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         // 1. 開始イベント (startTime を跨いだ瞬間)
         if (!ev.isFired && time >= ev.startTime)
         {
+            ApplyAnimationBlackboardWrites(owner, ev.blackboardWrites);
             if (!ev.startAction.empty()) {
                 CallAnimationAction(owner, ev.startAction);
+                if (state != updatingState_) return;
             }
             ev.isFired = true;
         }
@@ -802,6 +992,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         {
             if (!ev.updateAction.empty()) {
                 CallAnimationAction(owner, ev.updateAction);
+                if (state != updatingState_) return;
             }
         }
 
@@ -810,6 +1001,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         {
             if (!ev.endAction.empty()) {
                 CallAnimationAction(owner, ev.endAction);
+                if (state != updatingState_) return;
             }
             ev.isEndFired = true;
         }

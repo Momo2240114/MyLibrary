@@ -224,6 +224,5 @@ PS_OUT main(VS_OUT pin)
     PS_OUT output;
     output.color = float4(finalColor, base.a);
     output.normal = float4(N * 0.5f + 0.5f, 1.0f);
-    output.depth = length(pin.position - cameraPosition.xyz);
     return output;
 }

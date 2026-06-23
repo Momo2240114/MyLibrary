@@ -4,6 +4,9 @@
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include "Engine/GamePlay/Scene/IScene.h"
+#include "Engine/Physics/CollisionStepSystem.h"
+#include "Engine/GamePlay/System/AttackSystem.h"
+#include "Engine/GamePlay/System/VFXManager.h"
 
 class ColliderComponent;
 class BoxCollider;
@@ -121,19 +124,9 @@ public:
     // 状態を尋ねる窓口
     const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
 
-    void CollisionStep();
-
     // GUI は選択中オブジェクトだけ表示
     void Gui();
     void DrawHierarchyNode(std::shared_ptr<GameObject> object_, GameObject** objectToDelete_);
-
-    void HandlePhysXTrigger(
-        ColliderComponent* colliderA_, ColliderComponent* colliderB_,
-        bool hit_
-    );
-    void HandlePhysXContact(
-        ColliderComponent* colliderA_, ColliderComponent* colliderB_
-    );
 
     std::shared_ptr<GameObject> GetSelectedObject() const { return selectedObject; }
     void SetSelectedObject(std::shared_ptr<GameObject> object_) { selectedObject = object_; }
@@ -180,6 +173,9 @@ public:
     void DrawSceneModals(); // モーダルを描画する専用の儀式
     void RefreshSceneList() { sceneState.list = GetSceneDirectories(); }
     std::shared_ptr<TimeManager> GetTimeManager() { return timeManager; }
+    CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
+    AttackSystem& GetAttackSystem() { return *attackSystem; }
+    VFXManager& GetVFXManager() { return *vfxManager; }
 private:
     // unique name helper
     std::string MakeUniqueName(std::string baseName_)
@@ -221,6 +217,12 @@ private:
     std::shared_ptr<CameraManager> cameraManager;
 
     std::shared_ptr<TimeManager> timeManager;
+    std::unique_ptr<AttackSystem> attackSystem =
+        std::make_unique<AttackSystem>();
+    std::unique_ptr<CollisionStepSystem> collisionStepSystem =
+        std::make_unique<CollisionStepSystem>();
+    std::unique_ptr<VFXManager> vfxManager =
+        std::make_unique<VFXManager>();
 
     // 描画システムの所有権はマネージャが保持し、シーン全体で共有する。
     std::unique_ptr<ParticleRenderSystem> particleRenderSystem;
@@ -235,6 +237,7 @@ private:
     bool shapeRenderEnabled = true;
     bool navMeshRenderEnabled = false;
     ModelRenderSystem* modelRenderSystem = nullptr;
+    void RegisterAttackCallbacks();
 public:
         SceneState& GetSceneState() { return sceneState; }
 };

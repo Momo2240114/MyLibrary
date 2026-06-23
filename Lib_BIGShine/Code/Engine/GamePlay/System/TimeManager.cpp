@@ -6,88 +6,88 @@
 
 TimeManager::TimeManager()
 {
-    for (float& scale : m_cachedLayerScales)
+    for (float& scale : cachedLayerScales)
     {
         scale = 1.0f;
     }
 }
 
-void TimeManager::Update(float rawDt)
+void TimeManager::Update(float rawDt_)
 {
-    for (auto& [type, state] : m_states)
+    for (auto& [type, state] : states)
     {
-        state.Update(rawDt);
+        state.Update(rawDt_);
     }
 }
 
-void TimeManager::SetTargetScale(uint32_t layerMask, float scale, float speed)
+void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_)
 {
-    if (layerMask == 0u) return;
+    if (layerMask_ == 0u) return;
 
-    for (uint32_t i = 0; i < 32; ++i)
+    for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
-        uint32_t bit = 1u << i;
+        uint32_t bit_ = 1u << i_;
 
-        if ((layerMask & bit) != 0u)
+        if ((layerMask_ & bit_) != 0u)
         {
-            auto& state = m_states[static_cast<TarGetLayerType>(bit)];
-            state.targetScale = scale;
-            state.lerpSpeed = speed;
+            auto& state = states[static_cast<TarGetLayerType>(bit_)];
+            state.targetScale = scale_;
+            state.lerpSpeed = speed_;
         }
     }
 }
 
-void TimeManager::TriggerHitStop(uint32_t layerMask, float duration)
+void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_)
 {
-    if (layerMask == 0u) return;
+    if (layerMask_ == 0u) return;
 
     for (uint32_t i = 0; i < 32; ++i)
     {
         uint32_t bit = 1u << i;
 
-        if ((layerMask & bit) != 0u)
+        if ((layerMask_ & bit) != 0u)
         {
-            m_states[static_cast<TarGetLayerType>(bit)].hitStopTimer = duration;
+            states[static_cast<TarGetLayerType>(bit)].hitStopTimer = duration_;
         }
     }
 }
 
 void TimeManager::PrepareCache()
 {
-    for (uint32_t i = 0; i < 32; ++i)
+    for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
-        uint32_t bit = 1u << i;
-        TarGetLayerType type = static_cast<TarGetLayerType>(bit);
+        uint32_t bit_ = 1u << i_;
+        TarGetLayerType type_ = static_cast<TarGetLayerType>(bit_);
 
-        auto it = m_states.find(type);
-        if (it != m_states.end())
+        auto it = states.find(type_);
+        if (it != states.end())
         {
-            m_cachedLayerScales[i] = it->second.currentScale;
+            cachedLayerScales[i_] = it->second.currentScale;
         }
         else
         {
-            m_cachedLayerScales[i] = 1.0f;
+            cachedLayerScales[i_] = 1.0f;
         }
     }
 }
 
-float TimeManager::GetCachedScale(uint32_t layerMask) const
+float TimeManager::GetCachedScale(uint32_t layerMask_) const
 {
     // Default = 0 ëŒçÙ
-    if (layerMask == 0u)
+    if (layerMask_ == 0u)
     {
         return 1.0f;
     }
 
-    float result = 1.0f;
+    float result_ = 1.0f;
 
-    uint32_t mask = layerMask;
+    uint32_t mask_ = layerMask_;
 
-    while (mask != 0u)
+    while (mask_ != 0u)
     {
 #if defined(_MSC_VER)
-        unsigned long index = 0;
-        if (!_BitScanForward(&index, mask))
+        unsigned long index_ = 0;
+        if (!_BitScanForward(&index_, mask_))
         {
             break;
         }
@@ -95,13 +95,13 @@ float TimeManager::GetCachedScale(uint32_t layerMask) const
         uint32_t index = static_cast<uint32_t>(__builtin_ctz(mask));
 #endif
 
-        if (index < 32)
+        if (index_ < 32)
         {
-            result *= m_cachedLayerScales[index];
+            result_ *= cachedLayerScales[index_];
         }
 
-        mask &= ~(1u << index);
+        mask_ &= ~(1u << index_);
     }
 
-    return result;
+    return result_;
 }

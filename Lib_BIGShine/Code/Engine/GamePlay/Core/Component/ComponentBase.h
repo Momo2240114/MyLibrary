@@ -25,7 +25,7 @@ class Component
 {
 public:
     bool enabled = true;
-    std::weak_ptr<GameObject> gameObject;
+
     virtual ~Component() = default;
     virtual const std::string& GetName() const = 0;
     virtual void Start() {}
@@ -70,4 +70,5 @@ public:
 
 protected:
     bool isStarted = false;
+    std::weak_ptr<GameObject> gameObject;
 };

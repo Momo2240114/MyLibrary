@@ -369,6 +369,9 @@ void MeshVFXComponent::Gui()
             }
 
             ImGui::ColorEdit4("Color", &part_.color.x);
+            ImGui::DragFloat("Emissive Strength", &part_.emissiveStrength, 0.05f, 0.0f, 50.0f);
+            ImGui::DragFloat("Emissive Pulse Speed", &part_.emissivePulseSpeed, 0.05f, 0.0f, 30.0f);
+            ImGui::DragFloat("Emissive Pulse Amount", &part_.emissivePulseAmount, 0.01f, 0.0f, 2.0f);
             ImGui::DragFloat2("Base UV Speed", &part_.baseUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Mask UV Speed", &part_.maskUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Noise UV Speed", &part_.noiseUVSpeed.x, 0.01f);
@@ -583,6 +586,9 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["UVRadialScale"] = part_.uvRadialScale;
         partJson_["UVRadialScaleSpeed"] = part_.uvRadialScaleSpeed;
         partJson_["Alpha"] = part_.alpha;
+        partJson_["EmissiveStrength"] = part_.emissiveStrength;
+        partJson_["EmissivePulseSpeed"] = part_.emissivePulseSpeed;
+        partJson_["EmissivePulseAmount"] = part_.emissivePulseAmount;
         partJson_["NormalStrength"] = part_.normalStrength;
         partJson_["NoiseStrength"] = part_.noiseStrength;
         partJson_["VertexNoiseHorizontalStrength"] = part_.vertexNoiseHorizontalStrength;
@@ -698,6 +704,9 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.uvRadialScale = (std::max)(partJson_.value("UVRadialScale", 1.0f), 0.001f);
         part_.uvRadialScaleSpeed = partJson_.value("UVRadialScaleSpeed", 0.0f);
         part_.alpha = partJson_.value("Alpha", 1.0f);
+        part_.emissiveStrength = (std::max)(partJson_.value("EmissiveStrength", 3.0f), 0.0f);
+        part_.emissivePulseSpeed = (std::max)(partJson_.value("EmissivePulseSpeed", 2.0f), 0.0f);
+        part_.emissivePulseAmount = (std::max)(partJson_.value("EmissivePulseAmount", 0.35f), 0.0f);
         part_.normalStrength = partJson_.value("NormalStrength", 1.0f);
         part_.noiseStrength = partJson_.value("NoiseStrength", 0.05f);
         const float legacyVertexNoiseStrength_ =

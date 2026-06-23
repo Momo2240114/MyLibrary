@@ -31,11 +31,16 @@
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
 #include "Engine/GamePlay/Camera/ThirdPersonCameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
+#include "Engine/GamePlay/Camera/CameraCollisionComponent.h"
 #include "Engine/GamePlay/Camera/LockOnTargetComponent.h"
 #include "Engine/GamePlay/Core/Component/Movement.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
+#include "Engine/Graphics/VFX/AfterimageComponent.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -75,6 +80,7 @@ void RegisterAllComponents()
     registry.Register<ParticleComponent>("ParticleComponent");
     registry.Register<MeshVFXComponent>("MeshVFXComponent");
     registry.Register<MaterialOverlayComponent>("MaterialOverlayComponent");
+    registry.Register<AfterimageComponent>("AfterimageComponent");
 
 
     // 物理・コリジョン系
@@ -100,9 +106,13 @@ void RegisterAllComponents()
     registry.Register<CurveComponent>("CurveComponent");
     registry.Register<NumberSwitcher>("NumberSwitcher");
     registry.Register<Movement>("Movement");
+    registry.Register<CharacterMovementComponent>("CharacterMovementComponent");
     registry.Register<BlackboardComponent>("BlackboardComponent");
+    registry.Register<HitReactionComponent>("HitReactionComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");
     registry.Register<ThirdPersonCameraComponent>("ThirdPersonCameraComponent");
+    registry.Register<CameraLockOnComponent>("CameraLockOnComponent");
+    registry.Register<CameraCollisionComponent>("CameraCollisionComponent");
     registry.Register<LockOnTargetComponent>("LockOnTargetComponent");
 }
 

@@ -23,6 +23,9 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     void SetTarget(const std::string& gameObjectName_, const std::string& nodeName_ = {});
+    void SetTargetNodes(
+        const std::string& startNodeName_,
+        const std::string& endNodeName_);
     void SetBladeOffsets(
         const DirectX::XMFLOAT3& rootOffset_,
         const DirectX::XMFLOAT3& tipOffset_);
@@ -40,7 +43,10 @@ private:
     std::shared_ptr<GameObject> ResolveTargetObject();
     std::shared_ptr<GltfModelCommponennt> ResolveTargetModel(
         const std::shared_ptr<GameObject>& targetObject_);
-    bool ResolveTargetNodeIndex(const std::shared_ptr<GltfModelCommponennt>& model_);
+    bool ResolveTargetNodeIndex(
+        const std::shared_ptr<GltfModelCommponennt>& model_,
+        const std::string& nodeName_,
+        int& nodeIndex_);
     void DrawBladeGuide(
         const DirectX::XMFLOAT3& startPosition_,
         const DirectX::XMFLOAT3& endPosition_);
@@ -50,11 +56,17 @@ private:
     std::weak_ptr<GameObject> targetObject;
     std::weak_ptr<GltfModelCommponennt> targetModel;
     std::string targetGameObjectName;
-    std::string targetNodeName;
+
+    std::string targetStartNodeName;
+    std::string targetEndNodeName;
+    std::string targetObjectSearchText;
+    std::string targetStartNodeSearchText;
+    std::string targetEndNodeSearchText;
     DirectX::XMFLOAT3 rootOffset = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 rotationOffsetDegrees = { 0.0f, 0.0f, 0.0f };
     float bladeLength = 1.0f;
     float bladeGuideRadius = 0.03f;
     bool showBladeGuide = true;
-    int targetNodeIndex = -1;
+    int targetStartNodeIndex = -1;
+    int targetEndNodeIndex = -1;
 };

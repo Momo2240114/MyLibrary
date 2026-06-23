@@ -34,6 +34,9 @@
                             1.0,
                             1.0
                         ],
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveStrength": 3.0,
                         "FresnelPower": 2.0,
                         "FresnelStrength": 1.0,
                         "IntersectionEdgeStrength": 0.10000000149011612,

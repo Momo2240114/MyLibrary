@@ -5,14 +5,16 @@
 cbuffer CbMesh : register(b0)
 {
     float4 baseColor;
+    
     float3 emissiveColor;
     float metalnessParam;
     float roughnessParam;
     float occlusionStrength;
     float toonPbrBlend;
+    float normalScale;
+    
     float4 shadeFeathers;
     float4 shadeSteps;
-    float pading;
 }
 
 Texture2D BaseMap : register(t0);
@@ -121,14 +123,26 @@ PS_OUT main(VS_OUT pin)
     float4 base = BaseMap.Sample(LinearSampler, pin.texcoord) * baseColor;
     if (base.a < 0.1f)
         discard;
-
+  
     float3 N = normalize(pin.normal);
     float3 T = normalize(pin.tangent);
-    float3 B = normalize(cross(N, T));
-    float3x3 TBN = float3x3(T, B, N);
-    float3 normalSample = NormalMap.Sample(LinearSampler, pin.texcoord).xyz * 2.0f - 1.0f;
-    N = normalize(mul(normalSample, TBN));
 
+    T = normalize(T - N * dot(N, T));
+    float3 B = normalize(cross(N, T));
+
+    float3x3 TBN = float3x3(T, B, N);
+
+    float3 normalSample = NormalMap.Sample(LinearSampler, pin.texcoord).xyz * 2.0f - 1.0f;
+    normalSample.xy *= normalScale;
+    normalSample.z = sqrt(saturate(1.0f - dot(normalSample.xy, normalSample.xy)));
+
+    N = normalize(mul(normalSample, TBN));
+    
+    // normalScale ‚ª 0 ‚È‚ç•½‚çA1 ‚È‚ç’ÊíA2 ˆÈã‚Å‰š“Ê‹­‚ß
+    normalSample.xy *= normalScale;
+
+    // XY‚ð‹­‚ß‚½‚ ‚ÆZ‚ðÄŒvŽZ‚µ‚Ä”j’]‚ðŒ¸‚ç‚·
+    normalSample.z = sqrt(saturate(1.0f - dot(normalSample.xy, normalSample.xy)));
     float3 V = normalize(cameraPosition.xyz - pin.position);
 
     float2 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord).gr;
@@ -200,16 +214,16 @@ PS_OUT main(VS_OUT pin)
 
     float aoSample = AOMap.Sample(LinearSampler, pin.texcoord).r;
     float ao = lerp(1.0f, aoSample, occlusionStrength);
+    float toonAo = lerp(ao, 1.0f, toonPbrBlend * 0.7f);
+
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
 
-    float blend = saturate(toonPbrBlend);
+    float iblDiffuseStrength = lerp(0.2f, 0.05f, toonPbrBlend);
+    float iblSpecularStrength = lerp(0.15f, 0.03f * metalness, toonPbrBlend);
 
-    float iblDiffuseStrength = lerp(1.0f, 0.4f, blend);
-    float iblSpecularStrength = lerp(1.0f, 0.03f, blend);
-    
     float3 finalColor =
     totalDirectLighting +
-    iblDiffuse * ao * iblDiffuseStrength +
+    iblDiffuse * toonAo * iblDiffuseStrength +
     iblSpecular * iblSpecularStrength +
     emissive;
     
@@ -219,6 +233,5 @@ PS_OUT main(VS_OUT pin)
     PS_OUT output;
     output.color = float4(finalColor, base.a);
     output.normal = float4(N * 0.5f + 0.5f, 1.0f);
-    output.depth = length(pin.position - cameraPosition.xyz);
     return output;
 }

@@ -2,10 +2,28 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <DirectXMath.h>
 
 #include "imgui_node_editor.h"
 #include "imgui_node_editor_internal.h"
 namespace ed = ax::NodeEditor;
+
+enum class ANIM_BLACKBOARD_VALUE_TYPE
+{
+    FLOAT,
+    INT,
+    BOOL
+};
+
+struct AnimBlackboardWrite
+{
+    std::string category = "Attack";
+    std::string key = "Damage";
+    ANIM_BLACKBOARD_VALUE_TYPE type = ANIM_BLACKBOARD_VALUE_TYPE::FLOAT;
+    float floatValue = 0.0f;
+    int intValue = 0;
+    bool boolValue = false;
+};
 
 
 struct RootMotionSettings {
@@ -35,6 +53,7 @@ struct AnimEvent
     bool isFired = false;    // そのループ内で実行済みか
     bool isEndFired = false; // End action fired in this loop.
     bool callEndOnStateExit = false;
+    std::vector<AnimBlackboardWrite> blackboardWrites;
 
 };
 
@@ -42,8 +61,9 @@ struct AnimEvent
 enum class AnimStateType 
 {
     Single,   // 通常の単一再生
-    Blend1D ,  // 2つのアニメーションをパラメータでブレンド
-    Custom
+    Blend1D,  // 2つのアニメーションをパラメータでブレンド
+    Custom,
+    BLEND_2D   // Vector2入力から前後左右のアニメーションをブレンド
 };
 
 // ノードエディタ上の各「状態」を表現するベース
@@ -69,6 +89,19 @@ struct AnimState
     bool blendSyncNormalizedTime = true;
     bool blendUseMask = false;
     std::vector<std::string> blendMaskRootNodes;
+
+    // --- Blend2D 用データ ---
+    int blend2DForwardAnimationIndex = -1;
+    int blend2DBackwardAnimationIndex = -1;
+    int blend2DLeftAnimationIndex = -1;
+    int blend2DRightAnimationIndex = -1;
+    std::string blend2DParamName = "MoveInput";
+    DirectX::XMFLOAT2 blend2DDefaultInput = { 0.0f, 1.0f };
+    bool blend2DSyncNormalizedTime = true;
+    float blend2DForwardPhaseOffset = 0.0f;
+    float blend2DBackwardPhaseOffset = 0.0f;
+    float blend2DLeftPhaseOffset = 0.0f;
+    float blend2DRightPhaseOffset = 0.0f;
 
     // --- Custom (ポーズライブラリ) 用データ 【追加】 ---
     int customAnimIndex = -1; // PoseLibraryResource内の customAnims のインデックス
@@ -142,6 +175,8 @@ struct AnimGraphNode {
 };
 
 // 宣言だけを記述
+void to_json(nlohmann::json& json_, const AnimBlackboardWrite& write_);
+void from_json(const nlohmann::json& json_, AnimBlackboardWrite& write_);
 void to_json(nlohmann::json& j, const AnimEvent& e);
 void from_json(const nlohmann::json& j, AnimEvent& e);
 void to_json(nlohmann::json& j, const AnimState& s);

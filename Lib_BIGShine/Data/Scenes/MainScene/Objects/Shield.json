@@ -37,7 +37,7 @@
             "Data": {
                 "targetGameObjectName": "PlayerModel",
                 "targetNodeIndex": 85,
-                "targetNodeName": "lowerarm_l"
+                "targetStartNodeName": "lowerarm_l"
             },
             "Enabled": true,
             "TypeName": "ModelAttachment"

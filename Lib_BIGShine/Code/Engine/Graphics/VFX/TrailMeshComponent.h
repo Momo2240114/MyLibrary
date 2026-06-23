@@ -19,6 +19,7 @@ public:
         return name_;
     }
 
+    void RegisterActions();
     void Start() override;
     void Update(float deltaTime_) override;
     void LateUpdate(float deltaTime_) override;
@@ -37,6 +38,10 @@ public:
     void SetLifeTime(float lifeTime_);
     void SetMaxSampleCount(size_t maxSampleCount_);
     void SetMinimumSampleDistance(float distance_);
+
+    void StartTrail();
+    void StopTrail();
+    void ClearTrail();
 
 protected:
     struct TrailSample
@@ -59,9 +64,10 @@ private:
     std::vector<uint32_t> indices;
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+    std::vector<std::string> registeredActionNames;
     size_t maxSampleCount = 64;
     float lifeTime = 0.35f;
     float minimumSampleDistance = 0.01f;
-    bool emitting = true;
+    bool emitting = false;
     bool meshDirty = true;
 };

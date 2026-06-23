@@ -12,35 +12,33 @@ class GameObject;
 class ThirdPersonCameraComponent : public Component
 {
 public:
-    ThirdPersonCameraComponent() = default;
-    ~ThirdPersonCameraComponent() override = default;
-
     const std::string& GetName() const override
     {
-        static std::string name = "ThirdPersonCameraComponent";
-        return name;
+        static std::string name_ = "ThirdPersonCameraComponent";
+        return name_;
     }
 
     void Start() override;
-    void Update(float deltaTime_) override;
+    void LateUpdate(float deltaTime_) override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
+    void SetControlSuppressed(bool suppressed_);
+    void SynchronizeViewAngles(
+        const DirectX::XMFLOAT3& cameraPosition_,
+        const DirectX::XMFLOAT3& lookAtPosition_);
+
 private:
     void ResolveTarget();
-    void ResolveLockOnTarget();
     void ResolveCamera();
+    void ResetFollowTracking();
     void SetTarget(std::shared_ptr<GameObject> target_);
-    void SetLockOnTarget(std::shared_ptr<GameObject> target_);
-    DirectX::XMFLOAT3 GetFocusPosition(const std::shared_ptr<GameObject>& target_, const DirectX::XMFLOAT3& fallbackOffset_) const;
 
 private:
     std::weak_ptr<GameObject> target;
-    std::weak_ptr<GameObject> lockOnTarget;
     std::weak_ptr<CameraComponent> camera;
     std::string targetName;
-    std::string lockOnTargetName;
 
     float distance = 6.0f;
     float currentPitch = 20.0f;
@@ -50,8 +48,10 @@ private:
     float lookSpeedX = 300.0f;
     float lookSpeedY = 200.0f;
     float mouseSensitivity = 0.1f;
-    float followSpeed = 15.0f;
-    bool lockOnEnabled = false;
+    float objectFollowSpeed = 5.0f;
 
     DirectX::XMFLOAT3 targetOffset{ 0.0f, 1.5f, 0.0f };
+    DirectX::XMFLOAT3 smoothedCameraCenter{ 0.0f, 0.0f, 0.0f };
+    bool hasCameraCenter = false;
+    bool controlSuppressed = false;
 };

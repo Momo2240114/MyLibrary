@@ -90,6 +90,8 @@ public:
 		float				occlusionStrength = 0.0f;
 		float				alphaCutoff = 0.5f;
 		float				toonPbrBlend = 0.5f;
+		float				normalScale = 1.0f;
+
 		AlphaMode			alphaMode = AlphaMode::Opaque;
 		ModelShaderID shaderId = ModelShaderID::ToonPBR;
 

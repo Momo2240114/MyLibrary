@@ -637,6 +637,27 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     _ASSERT_EXPR(SUCCEEDED(result_), L"D3D11CreateDeviceAndSwapChain");
     if (FAILED(result_)) return false;
 
+    Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice_;
+    Microsoft::WRL::ComPtr<IDXGIAdapter> activeAdapter_;
+    DXGI_ADAPTER_DESC activeAdapterDesc_{};
+    if (SUCCEEDED(device.As(&dxgiDevice_)) &&
+        SUCCEEDED(dxgiDevice_->GetAdapter(activeAdapter_.GetAddressOf())) &&
+        SUCCEEDED(activeAdapter_->GetDesc(&activeAdapterDesc_)))
+    {
+        std::wostringstream message_;
+        message_ << L"[Graphics] Active GPU: " << activeAdapterDesc_.Description
+            << L" (Dedicated VRAM: "
+            << activeAdapterDesc_.DedicatedVideoMemory / (1024ull * 1024ull)
+            << L" MB)\n";
+        OutputDebugStringW(message_.str().c_str());
+
+        wchar_t currentTitle_[256]{};
+        GetWindowTextW(hwnd_, currentTitle_, static_cast<int>(_countof(currentTitle_)));
+        std::wostringstream title_;
+        title_ << currentTitle_ << L" [GPU: " << activeAdapterDesc_.Description << L"]";
+        SetWindowTextW(hwnd_, title_.str().c_str());
+    }
+
     return true;
 }
 

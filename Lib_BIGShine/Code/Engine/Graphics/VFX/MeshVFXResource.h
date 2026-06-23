@@ -8,6 +8,7 @@
 #include <wrl.h>
 
 class ModelResource;
+class GltfModelCommponennt;
 
 enum class MeshVFXBlendMode
 {
@@ -75,6 +76,9 @@ struct MeshVFXPart
     float uvRadialScaleSpeed = 0.0f;
 
     float alpha = 1.0f;
+    float emissiveStrength = 3.0f;
+    float emissivePulseSpeed = 2.0f;
+    float emissivePulseAmount = 0.35f;
     float normalStrength = 1.0f;
     float noiseStrength = 0.05f;
     float vertexNoiseHorizontalStrength = 0.1f;
@@ -122,6 +126,22 @@ struct MeshVFXDynamicMesh
     ID3D11Buffer* indexBuffer = nullptr;
     UINT indexCount = 0;
     UINT vertexStride = 0;
+};
+
+struct MeshVFXModelPose
+{
+    std::shared_ptr<GltfModelCommponennt> model;
+    std::vector<std::vector<DirectX::XMFLOAT4X4>> meshTransforms;
+    float time = 0.0f;
+    float alpha = 1.0f;
+};
+
+struct MeshVFXModelPoseView
+{
+    std::shared_ptr<GltfModelCommponennt> model;
+    const std::vector<std::vector<DirectX::XMFLOAT4X4>>* meshTransforms = nullptr;
+    float time = 0.0f;
+    float alpha = 1.0f;
 };
 
 struct MeshVFXAsset

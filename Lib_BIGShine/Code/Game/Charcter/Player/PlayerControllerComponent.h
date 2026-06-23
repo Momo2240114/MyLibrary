@@ -7,6 +7,7 @@
 
 class ColliderComponent;
 class BlackboardComponent;
+class CharacterMovementComponent;
 
 struct PlayerActionRuntime
 {
@@ -41,14 +42,21 @@ public:
     void Deserialize(const nlohmann::json& j_) override;
 
     DirectX::XMFLOAT3 GetMoveInput() const;
+    DirectX::XMFLOAT3 GetMoveInputAxis() const;
     DirectX::XMFLOAT3 GetCameraForwardDirection() const;
+    void SetFacingDirection(const DirectX::XMFLOAT3& direction_);
     void SetHorizontalVelocity(const DirectX::XMFLOAT3& dir_, float speed_);
 
     ColliderComponent* GetCollider() const { return collider.get(); }
+    CharacterMovementComponent* GetMovement() const { return movement.get(); }
     PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); }
     int GetComboIndex() const { return comboIndex; }
+    const std::vector<PlayerCancelTransition>& GetCancelTransitions() const { return cancelTransitions; }
 
     bool RequestAction(PLAYER_ACTION nextAction_);
+    bool HasCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_) const;
+    bool AddCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_);
+    bool RemoveCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_);
     void NotifyGuardedAttack();
     void SetCanCancel(bool enabled_);
     void SetCanBufferInput(bool enabled_);
@@ -59,19 +67,20 @@ public:
     void EnterAction(PLAYER_ACTION action_);
     void ProcessActionInput();
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
+    void SendDodgeInputToBlackboard(const DirectX::XMFLOAT3& input_);
 
     float moveSpeed = 6.0f;
 
 private:
     void EnsurePlayerInputBindings();
     int GetRequestedComboIndex(PLAYER_ACTION nextAction_) const;
-    bool IsCancelTransitionAllowed(PLAYER_ACTION from_, PLAYER_ACTION to_) const;
     void RegisterPlayerAnimationActions();
     void SendActionToBlackboard(PLAYER_ACTION action_);
 
     bool ForceChangeAction(PLAYER_ACTION action_);
 
     std::shared_ptr<ColliderComponent> collider;
+    std::shared_ptr<CharacterMovementComponent> movement;
     std::shared_ptr<BlackboardComponent> blackboard;
     PlayerStateMachine stateMachine;
     PlayerActionRuntime actionRuntime;

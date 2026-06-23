@@ -10,6 +10,8 @@
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
+
 namespace
 {
     DirectX::XMFLOAT3 CalculateCenter(
@@ -47,10 +49,98 @@ TrailMeshComponent::TrailMeshComponent()
     SetAsset(asset_);
 }
 
+void TrailMeshComponent::RegisterActions()
+{
+    auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    auto unregisterActions_ = [&](ActionRegistry& registry_)
+        {
+            for (const std::string& actionName_ : registeredActionNames)
+            {
+                registry_.RemoveAction("Trail", actionName_);
+            }
+        };
+
+    unregisterActions_(owner_->GetLocalRegistry());
+
+    if (!owner_->transform) return;
+
+    auto parentTransform_ = owner_->transform->parent.lock();
+    if (!parentTransform_) return;
+
+    auto parentObject_ = parentTransform_->gameObject.lock();
+    if (!parentObject_) return;
+
+
+   unregisterActions_(parentObject_->GetLocalRegistry());
+
+    registeredActionNames.clear();
+
+    auto registerToRegistry_ = [&](ActionRegistry& registry_, const std::string& actionName_)
+        {
+            if (actionName_ == "Trail_Start")
+            {
+                registry_.RegisterAction("Trail", actionName_, [this]()
+                    {
+                        StartTrail();
+                    });
+            }
+            else if (actionName_ == "Trail_Stop")
+            {
+                registry_.RegisterAction("Trail", actionName_, [this]()
+                    {
+                        StopTrail();
+                    });
+            }
+            else if (actionName_ == "Trail_Clear")
+            {
+                registry_.RegisterAction("Trail", actionName_, [this]()
+                    {
+                        ClearTrail();
+                    });
+            }
+
+            registeredActionNames.push_back(actionName_);
+        };
+
+    registerToRegistry_(owner_->GetLocalRegistry(), "Trail_Start");
+    registerToRegistry_(owner_->GetLocalRegistry(), "Trail_Stop");
+    registerToRegistry_(owner_->GetLocalRegistry(), "Trail_Clear");
+
+    if (parentObject_)
+    {
+        const std::string ownerName_ = owner_->GetName();
+
+        auto& parentRegistry_ = parentObject_->GetLocalRegistry();
+
+        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Start", [this]()
+            {
+                StartTrail();
+            });
+
+        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Stop", [this]()
+            {
+                StopTrail();
+            });
+
+        parentRegistry_.RegisterAction("Trail", ownerName_ + "_Trail_Clear", [this]()
+            {
+                ClearTrail();
+            });
+
+        registeredActionNames.push_back(ownerName_ + "_Trail_Start");
+        registeredActionNames.push_back(ownerName_ + "_Trail_Stop");
+        registeredActionNames.push_back(ownerName_ + "_Trail_Clear");
+    }
+}
+
+
 void TrailMeshComponent::Start()
 {
     MeshVFXComponent::Start();
     CreateBuffers();
+    RegisterActions();
 }
 
 void TrailMeshComponent::Update(float deltaTime_)
@@ -130,6 +220,21 @@ void TrailMeshComponent::SetMaxSampleCount(size_t maxSampleCount_)
 void TrailMeshComponent::SetMinimumSampleDistance(float distance_)
 {
     minimumSampleDistance = (std::max)(distance_, 0.0f);
+}
+
+void TrailMeshComponent::StartTrail()
+{
+    SetEmitting(true);
+}
+
+void TrailMeshComponent::StopTrail()
+{
+    SetEmitting(false);
+}
+
+void TrailMeshComponent::ClearTrail()
+{
+    Clear();
 }
 
 bool TrailMeshComponent::CreateBuffers()
@@ -281,6 +386,11 @@ void TrailMeshComponent::Gui()
     }
     ImGui::Text("Current Samples: %zu", samples.size());
     if (ImGui::Button("Clear Trail")) Clear();
+
+    if (ImGui::Button("ActionRegistory"))
+    {
+        RegisterActions();
+    }
 }
 
 void TrailMeshComponent::Serialize(nlohmann::json& json_) const

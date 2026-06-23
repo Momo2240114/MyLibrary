@@ -134,6 +134,7 @@ void GltfModelCommponennt::Material::serialize(Archive& archive)
 		CEREAL_NVP(alphaCutoff),
 		CEREAL_NVP(toonPbrBlend),
 		CEREAL_NVP(outlineThicknessOffset),
+		CEREAL_NVP(normalScale),
 		cereal::make_nvp("alphaMode", tempAlphaMode),
 		cereal::make_nvp("shaderId", tempShaderId),
 		CEREAL_NVP(disableOutline)
@@ -1018,6 +1019,8 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 			{
 				material.shaderId = static_cast<ModelShaderID>(currentShaderIdx);
 			}
+
+			ImGui::DragFloat("normalScale", &material.normalScale, 0.001f, 0.0f, 1.0f);
 
 			if (material.shaderId == ModelShaderID::ToonPBR)
 			{

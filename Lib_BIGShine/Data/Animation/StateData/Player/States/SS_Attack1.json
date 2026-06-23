@@ -5,6 +5,20 @@
         "animIndexA": -1,
         "animIndexB": -1,
         "animationIndex": 12,
+        "blend2DBackwardAnimationIndex": -1,
+        "blend2DBackwardPhaseOffset": 0.0,
+        "blend2DDefaultInput": [
+            0.0,
+            1.0
+        ],
+        "blend2DForwardAnimationIndex": -1,
+        "blend2DForwardPhaseOffset": 0.0,
+        "blend2DLeftAnimationIndex": -1,
+        "blend2DLeftPhaseOffset": 0.0,
+        "blend2DParamName": "MoveInput",
+        "blend2DRightAnimationIndex": -1,
+        "blend2DRightPhaseOffset": 0.0,
+        "blend2DSyncNormalizedTime": true,
         "blendDefaultWeight": 0.5,
         "blendMaskRootNodes": [],
         "blendParamName": "BlendAlpha",
@@ -20,7 +34,8 @@
                 "actionEnd": "ComboTransition",
                 "actionStart": "InputBufferOn",
                 "actionUpdate": "",
-                "callEndOnStateExit": false,
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
                 "endTime": 1.1666666269302368,
                 "label": "InputBufferOn",
                 "overridePlaybackSpeed": false,
@@ -31,6 +46,7 @@
                 "actionEnd": "",
                 "actionStart": "ActionEnd",
                 "actionUpdate": "",
+                "blackboardWrites": [],
                 "callEndOnStateExit": false,
                 "endTime": 1.6333333253860474,
                 "label": "ActionEnd",
@@ -42,23 +58,66 @@
                 "actionEnd": "CanComboOff",
                 "actionStart": "ComboTransition",
                 "actionUpdate": "",
+                "blackboardWrites": [],
                 "callEndOnStateExit": false,
                 "endTime": 1.3166667222976685,
                 "label": "ComboTransition",
                 "overridePlaybackSpeed": false,
                 "playbackSpeed": 1.0,
-                "startTime": 0.75
+                "startTime": 0.7166666388511658
             },
             {
                 "actionEnd": "",
                 "actionStart": "CanCancelOn",
                 "actionUpdate": "",
-                "callEndOnStateExit": false,
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
                 "endTime": 1.6333333253860474,
-                "label": "New Event",
+                "label": "CanCancelOn",
                 "overridePlaybackSpeed": false,
                 "playbackSpeed": 1.0,
                 "startTime": 0.800000011920929
+            },
+            {
+                "actionEnd": "Weapon_Trail_Stop",
+                "actionStart": "Weapon_Trail_Start",
+                "actionUpdate": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.550000011920929,
+                "label": "Weapon_Trail_Start",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 0.11666666716337204
+            },
+            {
+                "actionEnd": "DisableHitBox",
+                "actionStart": "EnableHitBox",
+                "actionUpdate": "",
+                "blackboardWrites": [
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 5.0,
+                        "intValue": 0,
+                        "key": "Damage",
+                        "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.05000000074505806,
+                        "intValue": 0,
+                        "key": "HitStopTime",
+                        "type": 0
+                    }
+                ],
+                "callEndOnStateExit": true,
+                "endTime": 0.5666666626930237,
+                "label": "Attack",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 0.38333332538604736
             }
         ],
         "loop": false,

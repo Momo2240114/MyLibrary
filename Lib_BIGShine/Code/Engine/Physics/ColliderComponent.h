@@ -12,8 +12,8 @@ class ColliderComponent : public Component
 public:
     enum class ColliderType { Box, Sphere, Capsule, Cylinder, Mesh };
     enum class CollisionRole { PHYSICAL, CHARACTER, HIT_BOX, HURT_BOX, SENSOR };
-    enum class VelocityRotationMode{NONE,YAW_ONLY,FULL_3D};
-    enum class CollisionContainmentMode {NONE, KEEP_INSIDE };
+    enum class VelocityRotationMode { NONE, YAW_ONLY, FULL_3D };
+    enum class CollisionContainmentMode { NONE, KEEP_INSIDE };
 public:
 
     //現在ヒットしているコリジョン
@@ -39,69 +39,20 @@ public:
     float gravityScale = 1.0f;          // 重力の強さ倍率
     DirectX::XMFLOAT3 velocity = { 0, 0, 0 }; // 現在の移動速度（落下速度用）
     CollisionRole collisionRole = CollisionRole::PHYSICAL;
+    float shapeSizeScale = 1.0f;
 
     // ColliderComponent.h 内
-    void Serialize(nlohmann::json& j) const override {
-        j["Offset"] = { offset.x, offset.y, offset.z };
-        j["IsTrigger"] = isTrigger;
-        j["IsStatic"] = isStatic;
-        j["UsePhysicsResponse"] = usePhysicsResponse;
-        j["PhysicsControlsTransform"] = physicsControlsTransform;
-        j["CollisionRole"] = static_cast<int>(collisionRole);
-        j["ShapeRenderFlg"] = shapeRenderEnabled;
-        j["UseGravity"] = useGravity;
-        j["GravityScale"] = gravityScale;
-        j["VelocityRotationMode"] = static_cast<int>(velocityRotationMode);
-        j["RotateVelocityThreshold"] = rotateVelocityThreshold;
-        j["ContainmentMode"] = static_cast<int>(containmentMode);
-        j["Mass"] = mass;
-        j["DebugPrimitiveColor"] = { debugPrimitiveColor.x,debugPrimitiveColor.y,debugPrimitiveColor.z,debugPrimitiveColor.w };
-    }
+    void Serialize(nlohmann::json& j) const override;
 
-    void Deserialize(const nlohmann::json& j) override {
-        if (j.contains("Offset")) {
-            offset.x = j["Offset"][0];
-            offset.y = j["Offset"][1];
-            offset.z = j["Offset"][2];
-        }
-        isTrigger = j.value("IsTrigger", false);
-        isStatic = j.value("IsStatic", false);
-        usePhysicsResponse = j.value("UsePhysicsResponse", true);
-        physicsControlsTransform = j.value("PhysicsControlsTransform", false);
-        collisionRole = static_cast<CollisionRole>(j.value("CollisionRole", static_cast<int>(CollisionRole::PHYSICAL)));
-        shapeRenderEnabled = j.value("ShapeRenderFlg", true);
-        useGravity = j.value("UseGravity", false);
-        gravityScale = j.value("GravityScale", 1.0f);
-        mass = j.value("Mass", 1.0f);
-
-        velocityRotationMode = static_cast<VelocityRotationMode>(
-            j.value(
-                "VelocityRotationMode",
-                static_cast<int>(VelocityRotationMode::NONE)
-            )
-            );
-
-        containmentMode = static_cast<CollisionContainmentMode>(
-            j.value("ContainmentMode", static_cast<int>(CollisionContainmentMode::NONE))
-            );
-
-        rotateVelocityThreshold =
-            j.value("RotateVelocityThreshold", 0.001f);
-
-        if (j.contains("DebugPrimitiveColor")) {
-            debugPrimitiveColor.x = j["DebugPrimitiveColor"][0];
-            debugPrimitiveColor.y = j["DebugPrimitiveColor"][1];
-            debugPrimitiveColor.z = j["DebugPrimitiveColor"][2];
-            debugPrimitiveColor.w = j["DebugPrimitiveColor"][3];
-        }
-
-    }
+    void Deserialize(const nlohmann::json& j) override;
 
     void SyncFromPhysics(float dt_);
     void PreparePhysicsStep();
     void RecreatePhysXActor();
     void ReleasePhysXActor();
     CollisionRole GetCollisionRole() const { return collisionRole; }
+    void SetVelocityRotationMode(VelocityRotationMode mode_) { velocityRotationMode = mode_; }
+    VelocityRotationMode GetVelocityRotationMode() const { return velocityRotationMode; }
     bool UsesPhysicsResponse() const { return usePhysicsResponse; }
     virtual bool HasFixedCollisionRole() const { return false; }
     virtual bool HasFixedPhysicsBehavior() const { return false; }
@@ -138,13 +89,15 @@ public:
 
     void Start()override;
 protected:
+    void UpdatePhysXShape();
+    virtual void OnPhysicsShapePrepared() {}
+
     bool m_IsHitFlag = false;
     physx::PxRigidActor* actor = nullptr;
     bool actorIsStatic = false;
 
 private:
     void CreatePhysXActor();
-    void UpdatePhysXShape();
     void ApplyDynamicActorSettings(physx::PxRigidDynamic& actor_);
     physx::PxMaterial* GetShapeMaterial();
     bool HasExternalTransformChange();

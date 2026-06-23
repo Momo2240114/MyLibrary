@@ -6,6 +6,7 @@
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "AnimationDataAsset.h"
 #include "PoseLibraryResourceManager.h"
 #include "IKMapComponent.h"
@@ -116,6 +117,17 @@ void AnimationControllerComponent::EnsureStatesFromModel()
         auto stateIt_ = states.find(animName_);
         if (stateIt_ == states.end())
         {
+            const bool animationAlreadyUsed_ = std::any_of(
+                states.begin(),
+                states.end(),
+                [animIndex_](const auto& stateEntry_)
+                {
+                    return stateEntry_.second &&
+                        stateEntry_.second->type != AnimStateType::Custom &&
+                        stateEntry_.second->animationIndex == animIndex_;
+                });
+            if (animationAlreadyUsed_) continue;
+
             auto state_ = std::make_unique<AnimState>();
             state_->name = animName_;
             state_->playbackSpeed = 1.0f;
@@ -143,6 +155,16 @@ void AnimationControllerComponent::EnsureStatesFromModel()
         {
             const CustomAnimation& customAnimation_ = poseLibrary->customAnims[customAnimationIndex_];
             auto stateIt_ = states.find(customAnimation_.name);
+            const bool customAnimationAlreadyUsed_ = std::any_of(
+                states.begin(),
+                states.end(),
+                [customAnimationIndex_](const auto& stateEntry_)
+                {
+                    return stateEntry_.second &&
+                        stateEntry_.second->type == AnimStateType::Custom &&
+                        stateEntry_.second->customAnimIndex == customAnimationIndex_;
+                });
+            if (stateIt_ == states.end() && customAnimationAlreadyUsed_) continue;
             if (stateIt_ == states.end() || !stateIt_->second ||
                 stateIt_->second->type != AnimStateType::Custom ||
                 stateIt_->second->customAnimIndex != customAnimationIndex_)
@@ -173,6 +195,9 @@ AnimationControllerComponent::~AnimationControllerComponent()
 void AnimationControllerComponent::Start()
 {
     auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    owner_->GetOrAddComponent<CharacterMovementComponent>();
     auto blackboard_ = owner_->GetComponent<BlackboardComponent>();
     if (!blackboard_)
     {
@@ -308,10 +333,28 @@ void AnimationControllerComponent::Update(float deltaTime_)
 
             // ˆÊ’u RootMotion
             Vector3 worldDeltaPosition_ = Vector3::Transform(rootMotionDelta_.deltaPosition, currentRotation_);
-            transform_->AddMoveOffset(worldDeltaPosition_);
 
+            // ƒ[ƒ‹ƒh•ÏŠ·Œã‚É‚à‚¤ˆê‰ñY‚ðØ‚é
+            if (!activeState_->rootMotion.applyPositionY)
+            {
+                worldDeltaPosition_.y = 0.0f;
+            }
 
-            transform_->MarkDirty();
+            const std::shared_ptr<GameObject> owner_ = GetGameObject();
+            const std::shared_ptr<CharacterMovementComponent> movement_ = owner_
+                ? owner_->GetComponent<CharacterMovementComponent>()
+                : nullptr;
+            if (movement_)
+            {
+                rootMotionDelta = worldDeltaPosition_;
+
+                movement_->AddRootMotionDelta(worldDeltaPosition_);
+            }
+            else
+            {
+                transform_->AddMoveOffset(worldDeltaPosition_);
+                transform_->MarkDirty();
+            }
         }
     }
 
@@ -439,6 +482,73 @@ bool AnimationControllerComponent::SelectStateForEditing(const std::string& stat
     editingState = stateIt_->second.get();
     return true;
 }
+
+bool AnimationControllerComponent::RenameState(
+    const std::string& oldName_,
+    const std::string& newName_)
+{
+    if (oldName_.empty() || newName_.empty()) return false;
+    if (oldName_ == newName_) return true;
+
+    auto stateIterator_ = states.find(oldName_);
+    if (stateIterator_ == states.end() || !stateIterator_->second) return false;
+    if (states.find(newName_) != states.end()) return false;
+
+    const bool graphNameUsed_ = std::any_of(
+        graphNodes.begin(),
+        graphNodes.end(),
+        [&](const AnimGraphNode& node_)
+        {
+            return node_.stateName == newName_;
+        });
+    if (graphNameUsed_) return false;
+
+    std::unique_ptr<AnimState> renamedState_ = std::move(stateIterator_->second);
+    AnimState* renamedStatePointer_ = renamedState_.get();
+    states.erase(stateIterator_);
+    renamedState_->name = newName_;
+    states.emplace(newName_, std::move(renamedState_));
+
+    for (AnimGraphNode& node_ : graphNodes)
+    {
+        if (node_.type == AnimGraphNodeType::State && node_.stateName == oldName_)
+        {
+            node_.stateName = newName_;
+        }
+    }
+    for (AnimTransition& transition_ : graphTransitions)
+    {
+        if (transition_.fromStateName == oldName_) transition_.fromStateName = newName_;
+        if (transition_.toStateName == oldName_) transition_.toStateName = newName_;
+    }
+
+    const auto assetPathIterator_ = stateAssetPaths.find(oldName_);
+    if (assetPathIterator_ != stateAssetPaths.end())
+    {
+        const std::string assetPath_ = assetPathIterator_->second;
+        stateAssetPaths.erase(assetPathIterator_);
+        stateAssetPaths[newName_] = assetPath_;
+    }
+    const auto pendingPathIterator_ = pendingStateAssetPaths.find(oldName_);
+    if (pendingPathIterator_ != pendingStateAssetPaths.end())
+    {
+        const std::string pendingPath_ = pendingPathIterator_->second;
+        pendingStateAssetPaths.erase(pendingPathIterator_);
+        pendingStateAssetPaths[newName_] = pendingPath_;
+    }
+
+    if (runtimeActiveStateName == oldName_) runtimeActiveStateName = newName_;
+    if (editingState == renamedStatePointer_) editingState = renamedStatePointer_;
+
+    if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+    {
+        const std::string oldActionName_ = owner_->GetName() + "_" + oldName_;
+        ActionRegistry::Instance().RemoveAction("Animation", oldActionName_);
+    }
+    RegisterStateAction(newName_);
+    return true;
+}
+
 void AnimationControllerComponent::RemoveState(const std::string& stateName_)
 {
     auto iterator_ = states.find(stateName_);
@@ -541,6 +651,40 @@ bool AnimationControllerComponent::TryEnterSubGraph(const AnimGraphNode& subGrap
             continue;
         if (states.count(transition_.toStateName) == 0)
             continue;
+
+        bool conditionsMet_ = transition_.conditions.empty();
+        if (!transition_.conditions.empty())
+        {
+            conditionsMet_ = transition_.logic == TransitionLogic::And;
+            for (const AnimCondition& condition_ : transition_.conditions)
+            {
+                const bool conditionMet_ = EvaluateCondition(condition_);
+                if (transition_.logic == TransitionLogic::And && !conditionMet_)
+                {
+                    conditionsMet_ = false;
+                    break;
+                }
+                if (transition_.logic == TransitionLogic::Or && conditionMet_)
+                {
+                    conditionsMet_ = true;
+                    break;
+                }
+            }
+        }
+        if (!conditionsMet_)
+            continue;
+
+        for (const AnimCondition& condition_ : transition_.conditions)
+        {
+            if (condition_.type != ConditionType::Trigger)
+                continue;
+
+            auto iterator_ = GetEditableBlackboard().find(condition_.parameterName);
+            if (iterator_ != GetEditableBlackboard().end())
+            {
+                iterator_->second = false;
+            }
+        }
 
         ChangeState(transition_.toStateName, duration_);
         return true;
@@ -715,9 +859,11 @@ bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& condit
         const auto* state_ = animator.GetCurrentState();
         if (!state_) return false;
 
-        float animationDuration_ = modelComponent->GetAnimationDuration(
-            state_->type == AnimStateType::Single ? state_->animationIndex : state_->animIndexA
-        );
+        float animationDuration_ = animator.GetCurrentSampleDuration();
+        if (animationDuration_ <= 0.0001f && state_->type == AnimStateType::Single)
+        {
+            animationDuration_ = modelComponent->GetAnimationDuration(state_->animationIndex);
+        }
         return animator.GetCurrentFadeTime() >= animationDuration_;
     }
 

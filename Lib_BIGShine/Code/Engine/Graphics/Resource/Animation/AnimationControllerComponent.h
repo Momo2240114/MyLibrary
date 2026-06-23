@@ -42,6 +42,7 @@ public:
     bool AddOrUpdateCustomState(int customAnimIndex_);
     bool PreviewCustomAnimation(int customAnimIndex_, float time_);
     bool SelectStateForEditing(const std::string& stateName_);
+    bool RenameState(const std::string& oldName_, const std::string& newName_);
 
     // ステートを削除する
     void RemoveState(const std::string& stateName_);
@@ -112,6 +113,8 @@ private:
     std::string graphStateSearchText;
     std::string stateAssetImportPath;
     std::string stateAssetStatus;
+    std::string stateRenameText;
+    std::string stateRenameSourceName;
 
     std::string assetFilePath; // 保存するパス
 
@@ -144,6 +147,8 @@ private:
     std::string pendingGraphAssetPath;
 
     bool useTransitionGraph = true;
+
+    DirectX::XMFLOAT3 rootMotionDelta;
 
     // ActionRegistryへの登録名リスト（削除用）
     std::vector<std::string> registeredActionNames;

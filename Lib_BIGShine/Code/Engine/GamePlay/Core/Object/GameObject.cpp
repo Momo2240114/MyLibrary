@@ -5,6 +5,50 @@
 #include "ImGuizmo.h"
 
 
+void GameObject::SetManager(GameObjectManager* manager_)
+{
+    if (manager == manager_) return;
+
+    UnregisterAllColliderComponents();
+    manager = manager_;
+    for (const std::shared_ptr<Component>& component_ : colliderComponents)
+    {
+        RegisterColliderComponent(
+            std::dynamic_pointer_cast<ColliderComponent>(component_));
+    }
+}
+
+void GameObject::RegisterColliderComponent(
+    const std::shared_ptr<ColliderComponent>& collider_)
+{
+    if (!manager || !collider_) return;
+    manager->GetCollisionStepSystem().RegisterCollider(collider_);
+}
+
+void GameObject::UnregisterColliderComponent(ColliderComponent* collider_)
+{
+    if (!manager || !collider_) return;
+    manager->GetCollisionStepSystem().UnregisterCollider(collider_);
+}
+
+void GameObject::UnregisterAllColliderComponents()
+{
+    if (!manager) return;
+    for (const std::shared_ptr<Component>& component_ : colliderComponents)
+    {
+        const std::shared_ptr<ColliderComponent> collider_ =
+            std::dynamic_pointer_cast<ColliderComponent>(component_);
+        UnregisterColliderComponent(collider_.get());
+    }
+}
+void GameObject::RegisterAction(
+    const std::string& category_,
+    const std::string& name_,
+    const ActionRegistry::ActionFunc& func_)
+{
+    localRegistry.RegisterAction(category_, name_, func_);
+}
+
 void GameObject::DrawGizmo(const float* view, const float* projection)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -134,7 +178,16 @@ void GameObject::Update(float et)
     for (auto& comp : components)
     {
         if (!comp->IsEnabled()) continue;
-        if (comp->GetName() != "PhysicsCollisionComponent")
+        if (comp->GetName() != "PhysicsCollisionComponent" &&
+            comp->GetName() != "CharacterMovementComponent")
+            comp->Update(et);
+    }
+
+    // Movement consumes input, RootMotion, and impulses after every producer updated.
+    for (auto& comp : components)
+    {
+        if (!comp->IsEnabled()) continue;
+        if (comp->GetName() == "CharacterMovementComponent")
             comp->Update(et);
     }
 
@@ -164,19 +217,57 @@ void GameObject::LateUpdate(float et)
     }
 }
 
-void GameObject::ExecuteAction(const std::string& actionName, std::shared_ptr<GameObject> target)
+void GameObject::ExecuteAction(
+    const std::string& actionName_,
+    std::shared_ptr<GameObject> target_)
 {
-    if (target) {
-        target->localRegistry.Call(actionName);
+    const std::shared_ptr<GameObject> startObject_ =
+        target_ ? target_ : shared_from_this();
+    if (!startObject_ || actionName_.empty()) return;
+
+    auto callLocal_ = [&actionName_](const std::shared_ptr<GameObject>& object_)
+    {
+        if (!object_ || !object_->localRegistry.HasAction(actionName_)) return false;
+        object_->localRegistry.Call(actionName_);
+        return true;
+    };
+
+    if (callLocal_(startObject_)) return;
+
+    std::shared_ptr<Transform> parentTransform_ =
+        startObject_->transform ? startObject_->transform->parent.lock() : nullptr;
+    while (parentTransform_)
+    {
+        const std::shared_ptr<GameObject> parentObject_ =
+            parentTransform_->gameObject.lock();
+        if (!parentObject_) break;
+        if (callLocal_(parentObject_)) return;
+        parentTransform_ = parentObject_->transform
+            ? parentObject_->transform->parent.lock()
+            : nullptr;
     }
-    else {
-        localRegistry.Call(actionName);
-    }
+
+    auto callChildren_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> bool
+    {
+        if (!object_ || !object_->transform) return false;
+        for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
+        {
+            if (!childTransform_) continue;
+            const std::shared_ptr<GameObject> childObject_ =
+                childTransform_->gameObject.lock();
+            if (callLocal_(childObject_) || self_(self_, childObject_)) return true;
+        }
+        return false;
+    };
+    if (callChildren_(callChildren_, startObject_)) return;
+
+    ActionRegistry::Instance().Call(actionName_);
 }
 
 
 void GameObject::Clear()
 {
+    UnregisterAllColliderComponents();
     // 1. 各コンポーネントの参照を外す前に、必要なら終了処理を呼ぶ
     // (コンポーネント側に終了用関数があればここで呼ぶ)
 
@@ -428,6 +519,8 @@ void GameObject::Gui()
     // 2. 個別メンバの削除
     if (colliderToRemove)
     {
+        UnregisterColliderComponent(
+            dynamic_cast<ColliderComponent*>(colliderToRemove));
         colliderComponents.erase(
             std::remove_if(colliderComponents.begin(), colliderComponents.end(),
                 [&](const auto& collider_) { return collider_.get() == colliderToRemove; }),

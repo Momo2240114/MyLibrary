@@ -264,10 +264,12 @@
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\TimeManagerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\InspectorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ShaderWindow.cpp" />
@@ -287,7 +289,10 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\FreeCamera.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\Movement.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MovementComponent.cpp" />
@@ -311,6 +316,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ComponentRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\RegisterAllComponents.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\VFXManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\BoneSegmentAttachmentComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\Transform.cpp" />
@@ -358,6 +364,7 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\TrailMeshComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\TextureResourceManager.cpp" />
@@ -369,6 +376,9 @@
     <ClCompile Include="Code\Engine\Physics\CapsuleCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\CharacterCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp" />
+    <ClCompile Include="Code\Engine\Physics\CollisionStepSystem.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\AttackSystem.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\HitBox.cpp" />
@@ -411,11 +421,13 @@
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\TimeManagerWindow.h" />
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h" />
     <ClInclude Include="Code\Editor\Window\InspectorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ShaderWindow.h" />
@@ -445,6 +457,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTitle.h" />
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTutorial.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\VFXManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\BoneSegmentAttachmentComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\TransformDirector.h" />
@@ -484,6 +497,7 @@
     <ClInclude Include="Code\Engine\Graphics\VFX\TrailMeshComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\AfterimageComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h" />
@@ -496,7 +510,10 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\FollowCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h" />
@@ -546,6 +563,9 @@
     <ClInclude Include="Code\Engine\Physics\HurtBox.h" />
     <ClInclude Include="Code\Engine\Physics\MeshCollider.h" />
     <ClInclude Include="Code\Engine\Physics\Collision.h" />
+    <ClInclude Include="Code\Engine\Physics\CollisionStepSystem.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\AttackSystem.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXEventCallback.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXMath.h" />
@@ -670,6 +690,10 @@
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\MaterialOverlayVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\AfterimageInstancedVS.hlsl">
       <ShaderType>Vertex</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>

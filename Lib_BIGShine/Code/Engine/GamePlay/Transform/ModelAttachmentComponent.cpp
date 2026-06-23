@@ -44,7 +44,7 @@ DirectX::XMFLOAT3 QuaternionToEuler(const DirectX::XMFLOAT4& q_in)
 void ModelAttachmentComponent::SetTargetNode(std::shared_ptr<GltfModelCommponennt> modelComp, const std::string& nodeName)
 {
     targetModel = modelComp;
-    targetNodeName = nodeName;
+    targetStartNodeName = nodeName;
     targetNodeIndex = -1; // インデックスをリセットして再検索を促す
 
     if (modelComp) {
@@ -99,13 +99,13 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
     const auto& nodes = model->GetNodes();
     const bool hasValidIndex = targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size());
 
-    if (!targetNodeName.empty()) {
-        if (hasValidIndex && nodes[targetNodeIndex].name == targetNodeName) {
+    if (!targetStartNodeName.empty()) {
+        if (hasValidIndex && nodes[targetNodeIndex].name == targetStartNodeName) {
             return true;
         }
 
         for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
-            if (nodes[i].name == targetNodeName) {
+            if (nodes[i].name == targetStartNodeName) {
                 targetNodeIndex = i;
                 return true;
             }
@@ -113,8 +113,8 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
     }
 
     if (hasValidIndex) {
-        if (targetNodeName.empty()) {
-            targetNodeName = nodes[targetNodeIndex].name;
+        if (targetStartNodeName.empty()) {
+            targetStartNodeName = nodes[targetNodeIndex].name;
         }
         return true;
     }
@@ -123,7 +123,19 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
     return false;
 }
 
+void ModelAttachmentComponent::Update(float deltaTime_)
+{
+    (void)deltaTime_;
+    SyncAttachment();
+}
+
 void ModelAttachmentComponent::LateUpdate(float deltaTime_)
+{
+    (void)deltaTime_;
+    SyncAttachment();
+}
+
+void ModelAttachmentComponent::SyncAttachment()
 {
     auto myGo_ = GetGameObject();
     if (!myGo_) return;
@@ -297,7 +309,7 @@ void ModelAttachmentComponent::Gui()
             if (auto m = targetModel.lock()) {
                 const auto& nodes = m->GetNodes();
                 if (targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size())) {
-                    targetNodeName = nodes[targetNodeIndex].name;
+                    targetStartNodeName = nodes[targetNodeIndex].name;
                 }
 
                 targetGameObjectName.clear();
@@ -330,7 +342,7 @@ void ModelAttachmentComponent::Gui()
 void ModelAttachmentComponent::Serialize(nlohmann::json& j) const
 {
     // 名前とインデックスを保存
-    j["targetNodeName"] = targetNodeName;
+    j["targetStartNodeName"] = targetStartNodeName;
     j["targetGameObjectName"] = targetGameObjectName;
     j["targetNodeIndex"] = targetNodeIndex;
 }
@@ -338,8 +350,8 @@ void ModelAttachmentComponent::Serialize(nlohmann::json& j) const
 void ModelAttachmentComponent::Deserialize(const nlohmann::json& j)
 {
     // 名前を優先的に復元
-    if (j.contains("targetNodeName")) {
-        targetNodeName = j.at("targetNodeName").get<std::string>();
+    if (j.contains("targetStartNodeName")) {
+        targetStartNodeName = j.at("targetStartNodeName").get<std::string>();
     }
 
     // 名前を優先的に復元

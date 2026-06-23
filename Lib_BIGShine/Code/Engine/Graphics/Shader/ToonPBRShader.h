@@ -34,9 +34,10 @@ private:
         float roughness;
         float occlusionStrength;
         float toonPbrBlend;
+        float normalScale;
         DirectX::XMFLOAT4  shadeFeathers;
         DirectX::XMFLOAT4 shadeSteps;
-        float             pading;
+
     };
 
     DirectX::XMFLOAT4 shadeSteps{ 0.45f, 0.45f, 0.45f, 0.45f };

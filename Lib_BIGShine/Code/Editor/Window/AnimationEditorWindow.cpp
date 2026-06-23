@@ -287,19 +287,47 @@ bool AnimationEditorWindow::CopySceneObjectToPreview(
         return false;
     }
 
-    nlohmann::json objectJson_ = sourceObject_->Save();
-    objectJson_["ParentName"] = "";
-    if (!keepSceneTransformOnCopy && objectJson_.contains("Transform"))
+    std::vector<std::shared_ptr<GameObject>> sourceObjects_;
+    auto collectHierarchy_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
     {
-        objectJson_["Transform"]["Pos"] = { 0.0f, 0.0f, 0.0f };
-        objectJson_["Transform"]["Rot"] = { 0.0f, 0.0f, 0.0f };
+        if (!object_)
+        {
+            return;
+        }
+
+        sourceObjects_.push_back(object_);
+        for (const auto& childTransform_ : object_->transform->children)
+        {
+            self_(self_, childTransform_ ? childTransform_->gameObject.lock() : nullptr);
+        }
+    };
+    collectHierarchy_(collectHierarchy_, sourceObject_);
+
+    // WeaponTrailなどの名前参照を維持するため、元のObject名を変えずに
+    // プレビュー専用Managerへ親子階層ごと複製する。
+    previewGameObjectManager->Clear();
+    for (const auto& hierarchyObject_ : sourceObjects_)
+    {
+        nlohmann::json objectJson_ = hierarchyObject_->Save();
+        if (hierarchyObject_ == sourceObject_)
+        {
+            objectJson_["ParentName"] = "";
+            if (!keepSceneTransformOnCopy && objectJson_.contains("Transform"))
+            {
+                objectJson_["Transform"]["Pos"] = { 0.0f, 0.0f, 0.0f };
+                objectJson_["Transform"]["Rot"] = { 0.0f, 0.0f, 0.0f };
+            }
+        }
+
+        auto previewObject_ = previewGameObjectManager->Create(hierarchyObject_->GetName());
+        objectJson_["Name"] = previewObject_->GetName();
+        previewObject_->Load(objectJson_);
     }
 
-    auto previewObject_ = previewGameObjectManager->Create(
-        sourceObject_->GetName() + "_Preview");
-    objectJson_["Name"] = previewObject_->GetName();
-    previewObject_->Load(objectJson_);
-    previewGameObjectManager->SetSelectedObject(previewObject_);
+    previewGameObjectManager->ResolveHierarchy();
+    auto previewRootObject_ = previewGameObjectManager->Find(sourceObject_->GetName());
+    previewGameObjectManager->SetSelectedObject(previewRootObject_);
+    previewGameObjectManager->Update(0.0f);
 
     selectedPose = -1;
     selectedCustom = -1;
@@ -309,7 +337,7 @@ bool AnimationEditorWindow::CopySceneObjectToPreview(
     customPreviewEnabled = false;
     poseEditEnabled = false;
     editorPlaybackEnabled = false;
-    return true;
+    return previewRootObject_ != nullptr;
 }
 
 void AnimationEditorWindow::EnsurePreviewScene()
@@ -463,11 +491,11 @@ void AnimationEditorWindow::DrawPreviewHierarchyPanel()
     const bool canCopy_ = selectedSceneObjectIndex >= 0 &&
         selectedSceneObjectIndex < static_cast<int>(sceneObjects_.size());
     ImGui::BeginDisabled(!canCopy_);
-    if (ImGui::Button("Copy Object To Animation Preview"))
+    if (ImGui::Button("Copy Object Hierarchy To Animation Preview"))
     {
         const auto& sourceObject_ = sceneObjects_[selectedSceneObjectIndex];
         sceneObjectCopyStatus = CopySceneObjectToPreview(sourceObject_)
-            ? "Copied: " + sourceObject_->GetName()
+            ? "Copied hierarchy: " + sourceObject_->GetName()
             : "Copy failed: GltfModel and AnimationController are required.";
     }
     ImGui::EndDisabled();
@@ -730,7 +758,7 @@ void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
     DirectionalLight directionalLight_;
     directionalLight_.direction = { 0.35f, -0.8f, 0.45f };
     directionalLight_.color = { 1.0f, 0.97f, 0.92f };
-    directionalLight_.intensity = 1.0f;
+    directionalLight_.intensity = 5.0f;
     lightManager_.SetDirectionalLight(directionalLight_);
 
     DecalManager decalManager_;
@@ -2093,6 +2121,49 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     actionField("Start Action", ev.startAction);
     actionField("Update Action", ev.updateAction);
     actionField("End Action", ev.endAction);
+    ImGui::SeparatorText("Blackboard Writes");
+    int removeWriteIndex_ = -1;
+    for (int writeIndex_ = 0;
+        writeIndex_ < static_cast<int>(ev.blackboardWrites.size());
+        ++writeIndex_)
+    {
+        AnimBlackboardWrite& write_ = ev.blackboardWrites[writeIndex_];
+        ImGui::PushID(writeIndex_);
+        ImGui::InputText("Category", &write_.category);
+        ImGui::InputText("Key", &write_.key);
+
+        int typeIndex_ = static_cast<int>(write_.type);
+        const char* typeNames_[] = { "Float", "Int", "Bool" };
+        if (ImGui::Combo("Type", &typeIndex_, typeNames_, 3))
+        {
+            write_.type = static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
+        }
+
+        switch (write_.type)
+        {
+        case ANIM_BLACKBOARD_VALUE_TYPE::FLOAT:
+            ImGui::DragFloat("Value", &write_.floatValue, 0.1f);
+            break;
+        case ANIM_BLACKBOARD_VALUE_TYPE::INT:
+            ImGui::DragInt("Value", &write_.intValue);
+            break;
+        case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
+            ImGui::Checkbox("Value", &write_.boolValue);
+            break;
+        }
+        if (ImGui::Button("Remove Write")) removeWriteIndex_ = writeIndex_;
+        ImGui::Separator();
+        ImGui::PopID();
+    }
+    if (removeWriteIndex_ >= 0)
+    {
+        ev.blackboardWrites.erase(ev.blackboardWrites.begin() + removeWriteIndex_);
+    }
+    if (ImGui::Button("Add Blackboard Write"))
+    {
+        ev.blackboardWrites.push_back(AnimBlackboardWrite{});
+    }
+
     ImGui::Checkbox("Call End On State Exit", &ev.callEndOnStateExit);
 
     ImGui::Separator();

@@ -40,7 +40,6 @@ public:
     uint32_t mask = (uint32_t)LayerType::Default;//コリジョンマスク
 
     bool saveFlg = true;
-    // 代わりに、素早くアクセスするためのキャッシュ用ポインタを保持する
     std::shared_ptr<NameComponent> nameComponent;
     std::shared_ptr<Transform> transform;
     std::vector<std::shared_ptr<Component>> components;
@@ -57,13 +56,19 @@ public:
     GameObjectManager& GetManager() const { return *manager; }
 
     // マネージャーを設定する（生成時に呼ばれる）
-    void SetManager(GameObjectManager* manager_) { manager = manager_; }
+    void SetManager(GameObjectManager* manager_);
+
+    void RegisterAction(
+        const std::string& category_,
+        const std::string& name_,
+        const ActionRegistry::ActionFunc& func_
+    );
+
 
     // ゲッター
     ActionRegistry& GetLocalRegistry() { return localRegistry; };
 
     GameObject(const std::string& name_ = "GameObject")
-
     {
         transform = std::make_shared<Transform>();
 
@@ -100,12 +105,13 @@ public:
         auto comp = std::make_shared<T>(std::forward<Args>(args_)...);
         if (!comp) return nullptr; // 生成失敗
 
-        comp->gameObject = shared_from_this();
+        comp->SetGameObject(shared_from_this());
 
         //コライダーコンポーネントを来てクラスするクラスがTなのであれば
         if constexpr (std::is_base_of<ColliderComponent, T>::value)
         {
             colliderComponents.push_back(comp);
+            RegisterColliderComponent(comp);
         }
         else
         {
@@ -212,7 +218,7 @@ public:
         ImGui::End();
     }
 
-    void ExecuteAction(const std::string& actionName, std::shared_ptr<GameObject> target = nullptr);
+    void ExecuteAction(const std::string& actionName_, std::shared_ptr<GameObject> target_ = nullptr);
 
     void Clear();
     nlohmann::json Save() const;
@@ -222,4 +228,9 @@ public:
     void SetLayer(LayerType type) { layer = type; }
     LayerType GetLayer() const { return layer; }
     uint32_t GetLayerBit() const { return static_cast<uint32_t>(layer); }
+
+private:
+    void RegisterColliderComponent(const std::shared_ptr<ColliderComponent>& collider_);
+    void UnregisterColliderComponent(ColliderComponent* collider_);
+    void UnregisterAllColliderComponents();
 };

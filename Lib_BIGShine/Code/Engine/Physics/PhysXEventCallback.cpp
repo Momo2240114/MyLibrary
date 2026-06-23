@@ -43,7 +43,7 @@ void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
         if (!colA_ || !colB_) continue;
 
         const bool hit_ = pair_.status != PxPairFlag::eNOTIFY_TOUCH_LOST;
-        colA_->GetManager().HandlePhysXTrigger(colA_, colB_, hit_);
+        colA_->GetManager().GetCollisionStepSystem().HandlePhysXTrigger(colA_, colB_, hit_);
     }
 }
 
@@ -63,7 +63,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
         {
             if (touching_ || lost_)
             {
-                colA_->GetManager().HandlePhysXTrigger(colA_, colB_, !lost_);
+                colA_->GetManager().GetCollisionStepSystem().HandlePhysXTrigger(colA_, colB_, !lost_);
             }
             continue;
         }
@@ -72,7 +72,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
 
         colA_->SetHitFlag(true);
         colB_->SetHitFlag(true);
-        colA_->GetManager().HandlePhysXContact(colA_, colB_);
+        colA_->GetManager().GetCollisionStepSystem().HandlePhysXContact(colA_, colB_);
 
         PxContactPairPoint contacts_[8];
         const PxU32 contactCount_ = pair_.extractContacts(contacts_, 8);

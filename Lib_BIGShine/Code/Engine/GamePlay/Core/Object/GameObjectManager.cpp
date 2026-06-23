@@ -2,6 +2,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/ContainmentVolumeComponent.h"
+#include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/Physics/Collision.h"
 #include "Engine/Physics/BoxCollider.h"
 #include <PxPhysicsAPI.h>
@@ -19,11 +20,14 @@
 #include"Engine/GamePlay/EventSystem/EventManager.h"
 
 #include "Engine/GamePlay/System/TimeManager.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 
 void GameObjectManager::Initialize()
 {
+    collisionStepSystem->SetAttackSystem(attackSystem.get());
+
     particleRenderSystem = std::make_unique<ParticleRenderSystem>();
     particleRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
 
@@ -32,6 +36,8 @@ void GameObjectManager::Initialize()
 
     resourceManager = std::make_unique<ResourceManager>();
     timeManager = std::make_shared<TimeManager>();
+    vfxManager->Initialize(this);
+    RegisterAttackCallbacks();
 
     cameraManager = std::make_shared<CameraManager>();
     cameraManager->Initialize();
@@ -39,6 +45,7 @@ void GameObjectManager::Initialize()
 
 void GameObjectManager::Update(float elapsedTime_)
 {
+    attackSystem->BeginFrame();
     timeManager->Update(elapsedTime_);
 
     if (!pendingStarts.empty()) {
@@ -69,15 +76,22 @@ void GameObjectManager::Update(float elapsedTime_)
 
     timeManager->PrepareCache();
 
-    for (auto& object_ : objects) {
-        for (auto& collider_ : object_->GetComponents<ColliderComponent>()) {
-            collider_->SyncFromPhysics(elapsedTime_);
-        }
-    }
+    collisionStepSystem->SyncFromPhysics(elapsedTime_);
 
     for (auto& object_ : objects) {
         float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
+        if (auto movement_ = object_->GetComponent<CharacterMovementComponent>()) {
+            movement_->SetUnscaledDeltaTime(elapsedTime_);
+        }
         object_->Update(elapsedTime_ * scale_);
+    }
+
+    for (auto& attachment_ : FindComponents<ModelAttachmentComponent>())
+    {
+        if (attachment_ && attachment_->IsEnabled())
+        {
+            attachment_->SyncAttachment();
+        }
     }
 
     for (auto& containment_ : FindComponents<ContainmentVolumeComponent>())
@@ -88,7 +102,7 @@ void GameObjectManager::Update(float elapsedTime_)
         }
     }
 
-    CollisionStep();
+    collisionStepSystem->Step();
 
     for (auto& object_ : objects) {
         object_->LateUpdate(elapsedTime_);
@@ -97,6 +111,8 @@ void GameObjectManager::Update(float elapsedTime_)
     for (auto& object_ : objects) {
         object_->UpdateTransform();
     }
+
+    vfxManager->Update(elapsedTime_);
 
     if (!pendingDestroys.empty()) {
         std::vector<std::shared_ptr<GameObject>> currentDestroys_ = std::move(pendingDestroys);
@@ -124,12 +140,10 @@ void GameObjectManager::Clear()
 
     selectedObject = nullptr;
 
-    for (auto& object_ : objects) {
-        if (!object_) continue;
-        for (auto& collider_ : object_->GetComponents<ColliderComponent>()) {
-            collider_->currentTriggers.clear();
-        }
-    }
+    collisionStepSystem->Clear();
+    attackSystem->Clear();
+    vfxManager->Clear();
+
     objects.clear();
     pendingStarts.clear();
     pendingDestroys.clear();
@@ -153,17 +167,27 @@ void GameObjectManager::AddObject(std::shared_ptr<GameObject> object_)
 
 void GameObjectManager::RemoveObject(const std::string& name_)
 {
-    auto iterator_ = std::remove_if(objects.begin(), objects.end(),
-        [&name_](const std::shared_ptr<GameObject>& object_) {
-            return object_->GetName() == name_;
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_ || object_->GetName() != name_) continue;
+        for (const std::shared_ptr<ColliderComponent>& collider_ :
+            object_->GetComponents<ColliderComponent>())
+        {
+            collisionStepSystem->UnregisterCollider(collider_.get());
+        }
+    }
+
+    const auto iterator_ = std::remove_if(
+        objects.begin(),
+        objects.end(),
+        [&name_](const std::shared_ptr<GameObject>& object_)
+        {
+            return object_ && object_->GetName() == name_;
         });
 
-    if (iterator_ != objects.end()) {
-        if (selectedObject && selectedObject->GetName() == name_) {
-            selectedObject = nullptr;
-        }
-        objects.erase(iterator_, objects.end());
-    }
+    if (iterator_ == objects.end()) return;
+    if (selectedObject && selectedObject->GetName() == name_) selectedObject = nullptr;
+    objects.erase(iterator_, objects.end());
 }
 
 std::vector<std::string> GetSceneDirectories()
@@ -179,19 +203,6 @@ std::vector<std::string> GetSceneDirectories()
         }
     }
     return folders_;
-}
-
-void GameObjectManager::CollisionStep()
-{
-    for (auto& object_ : objects)
-    {
-        for (auto& collider_ : object_->GetComponents<ColliderComponent>())
-        {
-            collider_->isGrounded = false;
-            collider_->SetHitFlag(false);
-            collider_->PreparePhysicsStep();
-        }
-    }
 }
 
 void GameObjectManager::Gui()
@@ -477,6 +488,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     }
     RenderContext renderContext_;
 
+    renderContext_.device = GraphicsDeviceManager::Instance().GetDevice();
     renderContext_.deviceContext = deviceContext_;
     renderContext_.camera = cameraManager->GetActiveCamera().get();
     renderContext_.renderState = GraphicsDeviceManager::Instance().GetRenderState();
@@ -556,53 +568,6 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     spriteSystem_.RenderAll(deviceContext_);
 }
 
-void HandleTrigger(
-    std::shared_ptr<ColliderComponent> colA,
-    std::shared_ptr<ColliderComponent> colB,
-    std::shared_ptr<GameObject> objA,
-    std::shared_ptr<GameObject> objB,
-    bool hit)
-{
-    auto existsA = colA->currentTriggers.count(objB);
-    auto existsB = colB->currentTriggers.count(objA);
-
-    if (hit)
-    {
-        if (!existsA)
-        {
-            colA->currentTriggers.insert(objB);
-            colA->OnTriggerEnter(objB);
-        }
-        else
-        {
-            colA->OnTriggerStay(objB);
-        }
-
-        if (!existsB)
-        {
-            colB->currentTriggers.insert(objA);
-            colB->OnTriggerEnter(objA);
-        }
-        else
-        {
-            colB->OnTriggerStay(objA);
-        }
-    }
-    else
-    {
-        if (existsA)
-        {
-            colA->currentTriggers.erase(objB);
-            colA->OnTriggerExit(objB);
-        }
-        if (existsB)
-        {
-            colB->currentTriggers.erase(objA);
-            colB->OnTriggerExit(objA);
-        }
-    }
-}
-
 
 
 void GameObjectManager::Destroy(std::shared_ptr<GameObject> object_)
@@ -622,69 +587,6 @@ void GameObjectManager::Destroy(std::string objectName_)
             return; // 1つ見つけたら終了（全部消すならreturnしない）
         }
     }
-}
-
-void GameObjectManager::HandlePhysXTrigger(ColliderComponent* colliderA_, ColliderComponent* colliderB_, bool hit_)
-{
-    if (!colliderA_ || !colliderB_) return;
-    auto objA = colliderA_->GetGameObject();
-    auto objB = colliderB_->GetGameObject();
-    if (!objA || !objB) return;
-
-    //そのリストの中に存在するかどうかをチェックする
-    auto existsA = colliderA_->currentTriggers.count(objB);
-    auto existsB = colliderB_->currentTriggers.count(objA);
-
-    //ヒットしているのなら
-    if (hit_)
-    {
-        //存在していなければ追加
-        if (!existsA)
-        {
-            colliderA_->currentTriggers.insert(objB);
-            colliderA_->OnTriggerEnter(objB);
-        }
-        else
-        {
-            colliderA_->OnTriggerStay(objB);
-        }
-
-        //存在していなければ
-        if (!existsB)
-        {
-            colliderB_->currentTriggers.insert(objA);
-            colliderB_->OnTriggerEnter(objA);
-        }
-        else
-        {
-            colliderB_->OnTriggerStay(objA);
-        }
-    }
-    //リストにあれば削除する
-    else
-    {
-        if (existsA)
-        {
-            colliderA_->currentTriggers.erase(objB);
-            colliderA_->OnTriggerExit(objB);
-        }
-        if (existsB)
-        {
-            colliderB_->currentTriggers.erase(objA);
-            colliderB_->OnTriggerExit(objA);
-        }
-    }
-}
-
-void GameObjectManager::HandlePhysXContact(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
-{
-    if (!colliderA_ || !colliderB_) return;
-    auto objA = colliderA_->GetGameObject();
-    auto objB = colliderB_->GetGameObject();
-    if (!objA || !objB) return;
-
-    colliderA_->OnCollisionEnter(objB);
-    colliderB_->OnCollisionEnter(objA);
 }
 
 
@@ -900,6 +802,13 @@ void GameObjectManager::RefreshPrefabList()
 
 void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
 {
+    if (!object_) return;
+    for (const std::shared_ptr<ColliderComponent>& collider_ :
+        object_->GetComponents<ColliderComponent>())
+    {
+        collisionStepSystem->UnregisterCollider(collider_.get());
+    }
+
     // 1. 子供を先に全て削除する（再帰）
     auto childrenCopy = object_->transform->children;
     for (auto& childTrans : childrenCopy)
@@ -999,4 +908,23 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
 
     printf("Instantiated: %s\n", uniqueName.c_str());
     return newObj;
+}
+
+void GameObjectManager::RegisterAttackCallbacks()
+{
+    attackSystem->AddHitCallback(
+        [this](const AttackHitEvent& event_)
+        {
+            if (timeManager && event_.hitStopTime > 0.0f && event_.hitStopLayerMask != 0u)
+            {
+                timeManager->TriggerHitStop(
+                    event_.hitStopLayerMask,
+                    event_.hitStopTime);
+            }
+
+            if (vfxManager && event_.hasHitContact)
+            {
+                vfxManager->SpawnForHit(event_);
+            }
+        });
 }

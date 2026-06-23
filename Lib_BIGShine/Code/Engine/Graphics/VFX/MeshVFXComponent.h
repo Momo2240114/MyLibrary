@@ -42,9 +42,21 @@ public:
     float GetTime() const { return time; }
     bool IsPlaying() const { return isPlaying; }
     virtual bool UsesOwnerModel() const { return false; }
+    virtual bool UsesModelPoses() const { return false; }
+    virtual bool HasModelPoses() const { return false; }
     virtual bool GetDynamicMesh(MeshVFXDynamicMesh& mesh_) const
     {
         mesh_ = {};
+        return false;
+    }
+    virtual bool GetModelPoses(std::vector<MeshVFXModelPose>& poses_) const
+    {
+        poses_.clear();
+        return false;
+    }
+    virtual bool GetModelPoseViews(std::vector<MeshVFXModelPoseView>& poses_) const
+    {
+        poses_.clear();
         return false;
     }
 

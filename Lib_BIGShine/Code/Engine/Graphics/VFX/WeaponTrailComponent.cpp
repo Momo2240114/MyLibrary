@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -15,6 +16,21 @@
 
 namespace
 {
+    bool ContainsCaseInsensitive(const std::string& text_, const std::string& searchText_)
+    {
+        if (searchText_.empty()) return true;
+
+        auto toLower_ = [](unsigned char character_)
+        {
+            return static_cast<char>(std::tolower(character_));
+        };
+        std::string lowerText_(text_.size(), '\0');
+        std::string lowerSearchText_(searchText_.size(), '\0');
+        std::transform(text_.begin(), text_.end(), lowerText_.begin(), toLower_);
+        std::transform(searchText_.begin(), searchText_.end(), lowerSearchText_.begin(), toLower_);
+        return lowerText_.find(lowerSearchText_) != std::string::npos;
+    }
+
     DirectX::XMFLOAT3 TransformPosition(
         const DirectX::XMFLOAT3& position_,
         const DirectX::XMMATRIX& transform_)
@@ -114,8 +130,19 @@ void WeaponTrailComponent::SetTarget(
     const std::string& nodeName_)
 {
     targetGameObjectName = gameObjectName_;
-    targetNodeName = nodeName_;
+    targetStartNodeName = nodeName_;
     InvalidateTarget();
+}
+
+void WeaponTrailComponent::SetTargetNodes(
+    const std::string& startNodeName_,
+    const std::string& endNodeName_)
+{
+    targetStartNodeName = startNodeName_;
+    targetEndNodeName = endNodeName_;
+    targetModel.reset();
+    targetStartNodeIndex = -1;
+    targetEndNodeIndex = -1;
 }
 
 void WeaponTrailComponent::SetBladeOffsets(
@@ -169,7 +196,6 @@ std::shared_ptr<GameObject> WeaponTrailComponent::ResolveTargetObject()
     if (targetGameObjectName.empty() || owner_->GetName() == targetGameObjectName)
     {
         targetObject = owner_;
-        if (targetGameObjectName.empty()) targetGameObjectName = owner_->GetName();
         return owner_;
     }
 
@@ -214,21 +240,23 @@ std::shared_ptr<GltfModelCommponennt> WeaponTrailComponent::ResolveTargetModel(
 }
 
 bool WeaponTrailComponent::ResolveTargetNodeIndex(
-    const std::shared_ptr<GltfModelCommponennt>& model_)
+    const std::shared_ptr<GltfModelCommponennt>& model_,
+    const std::string& nodeName_,
+    int& nodeIndex_)
 {
-    if (targetNodeName.empty())
+    if (nodeName_.empty())
     {
-        targetNodeIndex = -1;
-        return true;
+        nodeIndex_ = -1;
+        return false;
     }
     if (!model_) return false;
 
     const auto& nodes_ = model_->GetNodes();
-    const bool validIndex_ = targetNodeIndex >= 0 &&
-        targetNodeIndex < static_cast<int>(nodes_.size()) &&
-        nodes_[targetNodeIndex].name == targetNodeName;
-    if (!validIndex_) targetNodeIndex = model_->GetNodeIndex(targetNodeName.c_str());
-    return targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes_.size());
+    const bool validIndex_ = nodeIndex_ >= 0 &&
+        nodeIndex_ < static_cast<int>(nodes_.size()) &&
+        nodes_[nodeIndex_].name == nodeName_;
+    if (!validIndex_) nodeIndex_ = model_->GetNodeIndex(nodeName_.c_str());
+    return nodeIndex_ >= 0 && nodeIndex_ < static_cast<int>(nodes_.size());
 }
 
 bool WeaponTrailComponent::GetBladeSegment(
@@ -238,13 +266,31 @@ bool WeaponTrailComponent::GetBladeSegment(
     const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
     if (!targetObject_ || !targetObject_->transform) return false;
 
-    DirectX::XMMATRIX referenceTransform_ = targetObject_->transform->GetWorldMatrix();
-    if (!targetNodeName.empty())
+    const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
+    const bool hasStartNode_ = ResolveTargetNodeIndex(
+        model_, targetStartNodeName, targetStartNodeIndex);
+    const bool hasEndNode_ = ResolveTargetNodeIndex(
+        model_, targetEndNodeName, targetEndNodeIndex);
+
+    // Explicit Start/End nodes describe the complete blade segment and take priority
+    // over the procedural length and rotation settings.
+    if (hasStartNode_ && hasEndNode_)
     {
-        const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
-        if (!ResolveTargetNodeIndex(model_)) return false;
+        const DirectX::XMFLOAT3 nodeOrigin_ = { 0.0f, 0.0f, 0.0f };
+        rootPosition_ = TransformPosition(
+            nodeOrigin_,
+            DirectX::XMLoadFloat4x4(&model_->GetNodes()[targetStartNodeIndex].worldTransform));
+        tipPosition_ = TransformPosition(
+            nodeOrigin_,
+            DirectX::XMLoadFloat4x4(&model_->GetNodes()[targetEndNodeIndex].worldTransform));
+        return true;
+    }
+
+    DirectX::XMMATRIX referenceTransform_ = targetObject_->transform->GetWorldMatrix();
+    if (hasStartNode_)
+    {
         referenceTransform_ = DirectX::XMLoadFloat4x4(
-            &model_->GetNodes()[targetNodeIndex].worldTransform);
+            &model_->GetNodes()[targetStartNodeIndex].worldTransform);
     }
 
     const DirectX::XMMATRIX rotationOffset_ = DirectX::XMMatrixRotationRollPitchYaw(
@@ -304,19 +350,90 @@ void WeaponTrailComponent::InvalidateTarget()
 {
     targetObject.reset();
     targetModel.reset();
-    targetNodeIndex = -1;
+    targetStartNodeIndex = -1;
+    targetEndNodeIndex = -1;
 }
 
 void WeaponTrailComponent::Gui()
 {
     TrailMeshComponent::Gui();
     ImGui::SeparatorText("Weapon Trail");
-    if (ImGui::InputText("Target GameObject", &targetGameObjectName)) InvalidateTarget();
-    if (ImGui::InputText("Target Node", &targetNodeName))
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const char* objectPreview_ = targetGameObjectName.empty()
+        ? "(Owner)"
+        : targetGameObjectName.c_str();
+    if (ImGui::BeginCombo("Target GameObject", objectPreview_))
     {
-        targetModel.reset();
-        targetNodeIndex = -1;
+        ImGui::SetNextItemWidth(-1.0f);
+        ImGui::InputTextWithHint("##ObjectSearch", "Search GameObject...", &targetObjectSearchText);
+        if (ImGui::Selectable("(Owner)", targetGameObjectName.empty()))
+        {
+            targetGameObjectName.clear();
+            InvalidateTarget();
+        }
+        if (owner_ && owner_->manager)
+        {
+            for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
+            {
+                if (!object_ || !ContainsCaseInsensitive(object_->GetName(), targetObjectSearchText)) continue;
+                const bool selected_ = object_->GetName() == targetGameObjectName;
+                if (ImGui::Selectable(object_->GetName().c_str(), selected_))
+                {
+                    targetGameObjectName = object_->GetName();
+                    InvalidateTarget();
+                }
+            }
+        }
+        ImGui::EndCombo();
     }
+
+    const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
+    const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
+    auto drawNodeCombo_ = [this, &model_](
+        const char* label_,
+        std::string& nodeName_,
+        std::string& searchText_,
+        int& nodeIndex_)
+    {
+        const char* preview_ = nodeName_.empty() ? "(None)" : nodeName_.c_str();
+        if (!ImGui::BeginCombo(label_, preview_)) return;
+
+        ImGui::PushID(label_);
+        ImGui::SetNextItemWidth(-1.0f);
+        ImGui::InputTextWithHint("##NodeSearch", "Search Node...", &searchText_);
+        if (ImGui::Selectable("(None)", nodeName_.empty()))
+        {
+            nodeName_.clear();
+            nodeIndex_ = -1;
+        }
+        if (model_)
+        {
+            const auto& nodes_ = model_->GetNodes();
+            for (int index_ = 0; index_ < static_cast<int>(nodes_.size()); ++index_)
+            {
+                const std::string& candidateName_ = nodes_[index_].name;
+                if (!ContainsCaseInsensitive(candidateName_, searchText_)) continue;
+                const bool selected_ = candidateName_ == nodeName_;
+                if (ImGui::Selectable(candidateName_.c_str(), selected_))
+                {
+                    nodeName_ = candidateName_;
+                    nodeIndex_ = index_;
+                }
+            }
+        }
+        else
+        {
+            ImGui::TextDisabled("Target has no GLTF model.");
+        }
+        ImGui::PopID();
+        ImGui::EndCombo();
+    };
+    drawNodeCombo_(
+        "Start Node", targetStartNodeName, targetStartNodeSearchText, targetStartNodeIndex);
+    drawNodeCombo_(
+        "End Node", targetEndNodeName, targetEndNodeSearchText, targetEndNodeIndex);
+
     ImGui::DragFloat3("Blade Start Offset", &rootOffset.x, 0.01f);
     ImGui::DragFloat("Blade Length", &bladeLength, 0.01f, 0.0f, 10000.0f);
     ImGui::DragFloat3("Blade Rotation Offset", &rotationOffsetDegrees.x, 0.25f);
@@ -326,7 +443,8 @@ void WeaponTrailComponent::Gui()
         ImGui::DragFloat("Blade Capsule Radius", &bladeGuideRadius, 0.005f, 0.001f, 10.0f);
     }
     ImGui::TextDisabled("Rotation is in degrees. The base blade axis is local +Z.");
-    ImGui::TextDisabled("Empty Target Node uses the target GameObject transform.");
+    ImGui::TextDisabled("Valid Start + End Nodes override offset, length, and rotation.");
+    ImGui::TextDisabled("Without both Nodes, Start + Length + Rotation is used.");
     if (ImGui::Button("Begin Weapon Trail")) BeginTrail();
     ImGui::SameLine();
     if (ImGui::Button("End Weapon Trail")) EndTrail();
@@ -338,7 +456,9 @@ void WeaponTrailComponent::Serialize(nlohmann::json& json_) const
 {
     TrailMeshComponent::Serialize(json_);
     json_["WeaponTargetGameObjectName"] = targetGameObjectName;
-    json_["WeaponTargetNodeName"] = targetNodeName;
+    json_["WeaponTargetNodeName"] = targetStartNodeName;
+    json_["WeaponTargetStartNodeName"] = targetStartNodeName;
+    json_["WeaponTargetEndNodeName"] = targetEndNodeName;
     json_["WeaponRootOffset"] = { rootOffset.x, rootOffset.y, rootOffset.z };
     json_["WeaponBladeLength"] = bladeLength;
     json_["WeaponRotationOffsetDegrees"] =
@@ -356,7 +476,10 @@ void WeaponTrailComponent::Deserialize(const nlohmann::json& json_)
     TrailMeshComponent::Deserialize(json_);
     if (!json_.contains("TrailEmitting")) SetEmitting(false);
     targetGameObjectName = json_.value("WeaponTargetGameObjectName", std::string{});
-    targetNodeName = json_.value("WeaponTargetNodeName", std::string{});
+    targetStartNodeName = json_.value(
+        "WeaponTargetStartNodeName",
+        json_.value("WeaponTargetNodeName", std::string{}));
+    targetEndNodeName = json_.value("WeaponTargetEndNodeName", std::string{});
     ReadPosition(json_, "WeaponRootOffset", rootOffset);
     if (json_.contains("WeaponBladeLength"))
     {

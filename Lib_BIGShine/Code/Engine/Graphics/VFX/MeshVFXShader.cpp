@@ -30,6 +30,15 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
         materialOverlayVertexShader.GetAddressOf());
     if (FAILED(result_)) return false;
 
+    result_ = CPUResourceLoader::LoadVertexShader(
+        device_,
+        "Shader/AfterimageInstancedVS.cso",
+        GltfModelCommponennt::InputElementDescs.data(),
+        static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
+        nullptr,
+        afterimageInstancedVertexShader.GetAddressOf());
+    if (FAILED(result_)) return false;
+
     result_ = CPUResourceLoader::LoadPixelShader(
         device_, "Shader/MeshVFXPS.cso", pixelShader.GetAddressOf());
     if (FAILED(result_)) return false;
@@ -49,12 +58,21 @@ void MeshVFXShader::Begin(
     const RenderContext& renderContext_,
     ID3D11ShaderResourceView* sceneColor_,
     ID3D11ShaderResourceView* sceneDepth_,
-    bool useMaterialOverlay_)
+    bool useMaterialOverlay_,
+    bool useInstancedPose_)
 {
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->IASetInputLayout(inputLayout.Get());
-    deviceContext_->VSSetShader(
-        useMaterialOverlay_ ? materialOverlayVertexShader.Get() : vertexShader.Get(), nullptr, 0);
+    ID3D11VertexShader* selectedVertexShader_ = vertexShader.Get();
+    if (useInstancedPose_)
+    {
+        selectedVertexShader_ = afterimageInstancedVertexShader.Get();
+    }
+    else if (useMaterialOverlay_)
+    {
+        selectedVertexShader_ = materialOverlayVertexShader.Get();
+    }
+    deviceContext_->VSSetShader(selectedVertexShader_, nullptr, 0);
     deviceContext_->GSSetShader(nullptr, nullptr, 0);
     deviceContext_->PSSetShader(pixelShader.Get(), nullptr, 0);
     ID3D11SamplerState* vertexSampler_ =
@@ -97,6 +115,20 @@ void MeshVFXShader::UpdateSkeleton(
     }
     renderContext_.deviceContext->UpdateSubresource(
         skeletonConstantBuffer.Get(), 0, nullptr, transforms_, 0, 0);
+}
+
+void MeshVFXShader::UpdateSkeleton(
+    const RenderContext& renderContext_,
+    const std::vector<DirectX::XMFLOAT4X4>& transforms_)
+{
+    DirectX::XMFLOAT4X4 bufferTransforms_[256]{};
+    const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
+    for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
+    {
+        bufferTransforms_[transformIndex_] = transforms_[transformIndex_];
+    }
+    renderContext_.deviceContext->UpdateSubresource(
+        skeletonConstantBuffer.Get(), 0, nullptr, bufferTransforms_, 0, 0);
 }
 
 void MeshVFXShader::UpdateScene(const RenderContext& renderContext_)
