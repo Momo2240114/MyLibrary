@@ -899,13 +899,24 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	nlohmann::json materialSettings = nlohmann::json::array();
 	for (const auto& mat : materials) {
 		materialSettings.push_back({
-			{"id", mat.id},
-			{"shaderId", static_cast<int>(mat.shaderId)},
-			{"toonPbrBlend", mat.toonPbrBlend},
-			{"baseColor", {mat.baseColor.x, mat.baseColor.y, mat.baseColor.z, mat.baseColor.w}},
-			// ★ トゥーン・アウトライン用のパラメータを個別保存のリストへ追加します
-			{"disableOutline", mat.disableOutline},
-			{"outlineThicknessOffset", mat.outlineThicknessOffset}
+	{"id", mat.id},
+	{"name", mat.name},
+	{"shaderId", static_cast<int>(mat.shaderId)},
+
+	{"baseColor", {mat.baseColor.x, mat.baseColor.y, mat.baseColor.z, mat.baseColor.w}},
+	{"emissiveColor", {mat.emissiveColor.x, mat.emissiveColor.y, mat.emissiveColor.z}},
+
+	{"metalness", mat.metalness},
+	{"roughness", mat.roughness},
+	{"occlusionStrength", mat.occlusionStrength},
+	{"alphaCutoff", mat.alphaCutoff},
+	{"normalScale", mat.normalScale},
+
+	{"alphaMode", static_cast<int>(mat.alphaMode)},
+
+	{"toonPbrBlend", mat.toonPbrBlend},
+	{"disableOutline", mat.disableOutline},
+	{"outlineThicknessOffset", mat.outlineThicknessOffset}
 			});
 	}
 	j["MaterialOverrides"] = materialSettings;
@@ -955,17 +966,68 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 			// IDをキーにして、現在のmaterials配列から該当するものを探して上書きする
 			for (auto& mat : materials) {
 				if (mat.id == id) {
-					mat.shaderId = static_cast<ModelShaderID>(item["shaderId"]);
+					if (item.contains("shaderId"))
+					{
+						mat.shaderId = static_cast<ModelShaderID>(item["shaderId"].get<int>());
+					}
+
+					if (item.contains("baseColor"))
+					{
+						const auto& color_ = item["baseColor"];
+						mat.baseColor.x = color_.at(0).get<float>();
+						mat.baseColor.y = color_.at(1).get<float>();
+						mat.baseColor.z = color_.at(2).get<float>();
+						mat.baseColor.w = color_.at(3).get<float>();
+					}
+
+					if (item.contains("emissiveColor"))
+					{
+						const auto& color_ = item["emissiveColor"];
+						mat.emissiveColor.x = color_.at(0).get<float>();
+						mat.emissiveColor.y = color_.at(1).get<float>();
+						mat.emissiveColor.z = color_.at(2).get<float>();
+					}
+
+					if (item.contains("metalness"))
+					{
+						mat.metalness = item["metalness"].get<float>();
+					}
+
+					if (item.contains("roughness"))
+					{
+						mat.roughness = item["roughness"].get<float>();
+					}
+
+					if (item.contains("occlusionStrength"))
+					{
+						mat.occlusionStrength = item["occlusionStrength"].get<float>();
+					}
+
+					if (item.contains("alphaCutoff"))
+					{
+						mat.alphaCutoff = item["alphaCutoff"].get<float>();
+					}
+
+					if (item.contains("normalScale"))
+					{
+						mat.normalScale = item["normalScale"].get<float>();
+					}
+
+					if (item.contains("alphaMode"))
+					{
+						mat.alphaMode = static_cast<AlphaMode>(item["alphaMode"].get<int>());
+					}
+
 					if (item.contains("toonPbrBlend"))
 					{
 						mat.toonPbrBlend = item["toonPbrBlend"].get<float>();
 					}
-					// ★ トゥーン・アウトライン用のパラメータを安全に復元します
-					// 過去に保存された古いシーンファイルを読み込んでもエラーにならないよう、containsでチェックします
+
 					if (item.contains("disableOutline"))
 					{
 						mat.disableOutline = item["disableOutline"].get<bool>();
 					}
+
 					if (item.contains("outlineThicknessOffset"))
 					{
 						mat.outlineThicknessOffset = item["outlineThicknessOffset"].get<float>();
@@ -998,47 +1060,115 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 	}
 
 }
-
 void GltfModelCommponennt::ShowMeshDetailsUI()
 {
-	if (ImGui::Begin("Mesh & Material Editor"))
+	if (!ImGui::Begin("Mesh & Material Editor"))
 	{
-		// 1. ユニークなマテリアルを特定する（または事前に用意したマテリアル配列を使う）
-			// もしマテリアルが配列として管理されているなら、それを使うのが一番じゃ
-		for (auto& material : materials)
+		ImGui::End();
+		return;
+	}
+
+	for (auto& material : materials)
+	{
+		ImGui::PushID(material.id);
+
+		std::string headerName_ =
+			"Material [" + std::to_string(material.id) + "] : " + material.name;
+
+		if (ImGui::CollapsingHeader(headerName_.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::PushID(material.id); // マテリアル固有のIDで区別
+			ImGui::Indent();
 
-			ImGui::Text("Material: %s", material.name.c_str());
+			ImGui::SeparatorText("Shader");
 
-			// シェーダーの選択用コンボボックス
-			const char* shaderItems[] = { "Basic", "PBR", "Toon" ,"ToonPBR"};
-			int currentShaderIdx = static_cast<int>(material.shaderId);
-
-			if (ImGui::Combo("Shader", &currentShaderIdx, shaderItems, IM_ARRAYSIZE(shaderItems)))
+			const char* shaderItems_[] =
 			{
-				material.shaderId = static_cast<ModelShaderID>(currentShaderIdx);
+				"Basic",
+				"PBR",
+				"Toon",
+				"ToonPBR"
+			};
+
+			int currentShaderIndex_ = static_cast<int>(material.shaderId);
+
+			if (ImGui::Combo("Shader", &currentShaderIndex_, shaderItems_, IM_ARRAYSIZE(shaderItems_)))
+			{
+				material.shaderId = static_cast<ModelShaderID>(currentShaderIndex_);
 			}
 
-			ImGui::DragFloat("normalScale", &material.normalScale, 0.001f, 0.0f, 1.0f);
+			ImGui::SeparatorText("Color");
+
+			ImGui::ColorEdit4("Base Color", &material.baseColor.x);
+			ImGui::ColorEdit3("Emissive Color", &material.emissiveColor.x);
+
+			ImGui::SeparatorText("PBR");
+
+			ImGui::DragFloat("Metalness", &material.metalness, 0.001f, 0.0f, 1.0f);
+			ImGui::DragFloat("Roughness", &material.roughness, 0.001f, 0.0f, 1.0f);
+			ImGui::DragFloat("Occlusion Strength", &material.occlusionStrength, 0.001f, 0.0f, 1.0f);
+			ImGui::DragFloat("Alpha Cutoff", &material.alphaCutoff, 0.001f, 0.0f, 1.0f);
+			ImGui::DragFloat("Normal Scale", &material.normalScale, 0.001f, 0.0f, 3.0f);
+
+			material.metalness = std::clamp(material.metalness, 0.0f, 1.0f);
+			material.roughness = std::clamp(material.roughness, 0.0f, 1.0f);
+			material.occlusionStrength = std::clamp(material.occlusionStrength, 0.0f, 1.0f);
+			material.alphaCutoff = std::clamp(material.alphaCutoff, 0.0f, 1.0f);
+			material.normalScale = std::clamp(material.normalScale, 0.0f, 3.0f);
+
+			ImGui::SeparatorText("Alpha Mode");
+
+			const char* alphaModeItems_[] =
+			{
+				"Opaque",
+				"Mask",
+				"Blend"
+			};
+
+			int currentAlphaModeIndex_ = static_cast<int>(material.alphaMode);
+
+			if (ImGui::Combo("Alpha Mode", &currentAlphaModeIndex_, alphaModeItems_, IM_ARRAYSIZE(alphaModeItems_)))
+			{
+				material.alphaMode = static_cast<AlphaMode>(currentAlphaModeIndex_);
+			}
 
 			if (material.shaderId == ModelShaderID::ToonPBR)
 			{
-				ImGui::DragFloat("ToonPbrBlend", &material.toonPbrBlend, 0.001f, 0.0f, 1.0f);
+				ImGui::SeparatorText("Toon PBR");
+
+				ImGui::DragFloat("Toon PBR Blend", &material.toonPbrBlend, 0.001f, 0.0f, 1.0f);
 				material.toonPbrBlend = std::clamp(material.toonPbrBlend, 0.0f, 1.0f);
 			}
 
-			// ★ アウトラインを無効化するためのチェックボックスを追加
-			if (material.shaderId == ModelShaderID::ToonPBR || material.shaderId == ModelShaderID::Toon)
+			if (material.shaderId == ModelShaderID::ToonPBR ||
+				material.shaderId == ModelShaderID::Toon)
 			{
+				ImGui::SeparatorText("Outline");
+
 				ImGui::Checkbox("Disable Outline", &material.disableOutline);
-				ImGui::DragFloat("OutlineThicknessOffset", &material.outlineThicknessOffset,0.001,0.0f,2.0f);
+				ImGui::DragFloat("Outline Thickness Offset", &material.outlineThicknessOffset, 0.001f, 0.0f, 2.0f);
+
+				material.outlineThicknessOffset =
+					std::clamp(material.outlineThicknessOffset, 0.0f, 2.0f);
 			}
 
-			ImGui::Separator();
-			ImGui::PopID();
+			ImGui::SeparatorText("Texture Files");
+
+			ImGui::Text("Base: %s", material.baseTextureFileName.c_str());
+			ImGui::Text("Normal: %s", material.normalTextureFileName.c_str());
+			ImGui::Text("Emissive: %s", material.emissiveTextureFileName.c_str());
+			ImGui::Text("Occlusion: %s", material.occlusionTextureFileName.c_str());
+			ImGui::Text("MetalRough: %s", material.metalnessRoughnessTextureFileName.c_str());
+
+			ImGui::Unindent();
 		}
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::PopID();
 	}
+
 	ImGui::End();
 }
 

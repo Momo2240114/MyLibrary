@@ -53,9 +53,6 @@
     <Filter Include="Code\Engine\Graphics\Shader">
       <UniqueIdentifier>{895bcc25-d8b2-4150-95c8-a6333017c36b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Code\Engine\Graphics\Particle">
-      <UniqueIdentifier>{e58e76f1-0e8a-4fb5-97ae-b0b84c0ba30c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Code\Engine\Physics">
       <UniqueIdentifier>{36328aef-3afb-4d67-901c-a7bed9c558a0}</UniqueIdentifier>
     </Filter>
@@ -182,9 +179,6 @@
     <Filter Include="Code\Game\Logics\Charcter\Player\State">
       <UniqueIdentifier>{48e898f8-9714-42da-9fac-e02f4cedadd4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Code\Engine\Graphics\MeshVFX">
-      <UniqueIdentifier>{62fb086d-369f-4c03-b18d-f36cc8f9f42f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\PBR">
       <UniqueIdentifier>{849f576a-6126-4e25-ab1d-37e30901e8bf}</UniqueIdentifier>
     </Filter>
@@ -203,9 +197,6 @@
     <Filter Include="Code\Engine\Graphics\RenderSystem\PostEffect">
       <UniqueIdentifier>{3648de2c-e61d-44e0-a31b-45f5c4fc77c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Code\Engine\Graphics\RenderSystem\Particle">
-      <UniqueIdentifier>{a0ace4d4-2f99-45e2-bf7c-597f5b2aa447}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Code\Engine\Graphics\RenderSystem\Shape">
       <UniqueIdentifier>{14f035a3-2e64-4a20-95e6-81863d64252c}</UniqueIdentifier>
     </Filter>
@@ -214,6 +205,21 @@
     </Filter>
     <Filter Include="Code\Engine\Graphics\RenderSystem\GUI">
       <UniqueIdentifier>{50b10bf2-5501-46ad-b6a9-90b8ea7efb83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Effect">
+      <UniqueIdentifier>{f3e045ee-2d56-4cbc-b9a4-7bac6504e263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Effect\MeshVFX">
+      <UniqueIdentifier>{62fb086d-369f-4c03-b18d-f36cc8f9f42f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\Particle">
+      <UniqueIdentifier>{a0ace4d4-2f99-45e2-bf7c-597f5b2aa447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\RenderSystem\MeshVFX">
+      <UniqueIdentifier>{08451981-8369-4318-9309-2e0000614c73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Engine\Graphics\Effect\Particle">
+      <UniqueIdentifier>{e58e76f1-0e8a-4fb5-97ae-b0b84c0ba30c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -326,10 +332,10 @@
       <Filter>Code\Engine\Graphics\Core</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleComponent.cpp">
-      <Filter>Code\Engine\Graphics\Particle</Filter>
+      <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp">
-      <Filter>Code\Engine\Graphics\Particle</Filter>
+      <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
@@ -431,9 +437,6 @@
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp">
-      <Filter>Code\Engine\GamePlay\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Engine\GamePlay\System\ParticleManager.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraManager.cpp">
@@ -563,19 +566,19 @@
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXComponent.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\TrailMeshComponent.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageComponent.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\TextureResourceManager.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
@@ -583,11 +586,8 @@
     <ClCompile Include="Code\Editor\Window\AssetBrowserWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\Model</Filter>
@@ -679,6 +679,12 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\System\VFXManager.cpp">
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Wip.hpp">
@@ -763,10 +769,10 @@
       <Filter>Code\Engine\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleComponent.h">
-      <Filter>Code\Engine\Graphics\Particle</Filter>
+      <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEmitter.h">
-      <Filter>Code\Engine\Graphics\Particle</Filter>
+      <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
@@ -910,9 +916,6 @@
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h">
-      <Filter>Code\Engine\GamePlay\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\GamePlay\System\ParticleManager.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\ShaderWindow.h">
@@ -1113,29 +1116,23 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerMoveState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXComponent.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\TrailMeshComponent.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\AfterimageComponent.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h">
-      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.h">
       <Filter>Code\Engine\Graphics\RenderSystem\Model</Filter>
@@ -1205,6 +1202,15 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\System\VFXManager.h">
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

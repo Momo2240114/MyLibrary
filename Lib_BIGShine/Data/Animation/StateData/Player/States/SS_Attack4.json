@@ -79,8 +79,8 @@
                 "startTime": 0.0833333358168602
             },
             {
-                "actionEnd": "DisableHitBox",
-                "actionStart": "EnableHitBox",
+                "actionEnd": "HitBox_DisableHitBox",
+                "actionStart": "HitBox_EnableHitBox",
                 "actionUpdate": "",
                 "blackboardWrites": [
                     {
@@ -89,14 +89,6 @@
                         "floatValue": 5.0,
                         "intValue": 0,
                         "key": "Damage",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.800000011920929,
-                        "intValue": 0,
-                        "key": "HitStopTime",
                         "type": 0
                     }
                 ],

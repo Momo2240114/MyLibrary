@@ -20,7 +20,15 @@
                 "EndNodeName": "TrailEnd",
                 "GravityScale": 1.0,
                 "HalfHeight": 1.0,
+                "HitMeshVFXAssetPath": "",
+                "HitMeshVFXLifeTime": 1.0,
+                "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
+                "HitParticleAssetPath": "HitParticle",
+                "HitParticleEmitterName": "HitParticle",
+                "HitParticleLifeTime": 0.20000000298023224,
+                "HitParticleNormalOffset": 0.0,
+                "HitStopLayerMask": 3,
                 "HitStopTime": 0.05000000074505806,
                 "HitStopTimeKey": "HitStopTime",
                 "IsStatic": false,
@@ -54,17 +62,29 @@
                 "LocalScale": 1.0,
                 "MaterialOverrides": [
                     {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 1,
                         "baseColor": [
                             1.0,
                             1.0,
                             1.0,
                             1.0
                         ],
-                        "disableOutline": false,
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
                         "id": 0,
-                        "outlineThicknessOffset": 1.0,
+                        "metalness": 1.0,
+                        "name": "Weapon_Sword_Shiled.001",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 0.9879999756813049,
+                        "outlineThicknessOffset": 0.0024999999441206455,
+                        "roughness": 1.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.5
+                        "toonPbrBlend": 1.0
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Blender/Sword.gltf",

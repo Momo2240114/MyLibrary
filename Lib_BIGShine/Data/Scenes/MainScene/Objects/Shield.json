@@ -6,6 +6,8 @@
                 "LocalScale": 1.0,
                 "MaterialOverrides": [
                     {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 2,
                         "baseColor": [
                             1.0,
                             1.0,
@@ -13,10 +15,20 @@
                             1.0
                         ],
                         "disableOutline": true,
+                        "emissiveColor": [
+                            0.9529411792755127,
+                            0.003921568859368563,
+                            0.0
+                        ],
                         "id": 0,
+                        "metalness": 0.5,
+                        "name": "Weapon_Sword_Shiled.001",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
                         "outlineThicknessOffset": 0.004999999888241291,
+                        "roughness": 0.75,
                         "shaderId": 3,
-                        "toonPbrBlend": 1.0
+                        "toonPbrBlend": 0.800000011920929
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Weapon/Sword_ShiledModel.gltf",

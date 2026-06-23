@@ -20,7 +20,7 @@
                     0.0
                 ],
                 "PhysicsControlsTransform": true,
-                "Radius": 3.0,
+                "Radius": 0.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": false,
                 "UseGravity": false,
@@ -38,15 +38,15 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    -34.078094482421875,
-                    1.9428704977035522,
-                    -35.03755569458008
+                    -3.7692501544952393,
+                    2.953244686126709,
+                    -39.80879211425781
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    -10.575044631958008,
-                    -0.06236114725470543,
-                    -52.52082824707031
+                    0.0658954307436943,
+                    -0.06251583248376846,
+                    -56.8358268737793
                 ],
                 "fovY": 59.96766662597656,
                 "nearZ": 0.10000000149011612,
@@ -62,8 +62,8 @@
         },
         {
             "Data": {
-                "currentPitch": -3.9160823822021484,
-                "currentYaw": -36.64453887939453,
+                "currentPitch": -9.80318546295166,
+                "currentYaw": -77.30660247802734,
                 "distance": 14.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -84,13 +84,13 @@
         {
             "Data": {
                 "baseDistance": 7.0,
-                "cameraHeight": 0.0,
+                "cameraHeight": 1.0,
                 "closeDistance": 8.0,
                 "closeFocusBias": 0.2800000011920929,
                 "currentSide": 1.0,
                 "distanceScale": 0.44999998807907104,
                 "farFocusBias": 0.5,
-                "heightDifferenceScale": 0.3499999940395355,
+                "heightDifferenceScale": 1.0,
                 "lockOnEnabled": true,
                 "lockOnTargetName": "TestTarget",
                 "lookAtInterpolationSpeed": 12.5,
@@ -103,9 +103,9 @@
                     0.0
                 ],
                 "playerTargetName": "PlayerModel",
-                "positionInterpolationSpeed": 10.0,
-                "separationHeightScale": 0.07999999821186066,
-                "sideOffset": 1.25,
+                "positionInterpolationSpeed": 7.0,
+                "separationHeightScale": 0.05000000074505806,
+                "sideOffset": 0.0,
                 "targetOffset": [
                     0.0,
                     1.7999999523162842,
@@ -138,19 +138,19 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -34.07809829711914,
-            1.9428703784942627,
-            -35.037559509277344
+            -3.7692508697509766,
+            2.9532458782196045,
+            -39.80879211425781
         ],
         "Rot": [
-            3.9160823822021484,
-            126.64453887939453,
+            9.803184509277344,
+            167.3065948486328,
             360.0
         ],
         "Scale": [
-            0.9999999403953552,
-            0.9999999403953552,
-            0.9999999403953552
+            1.0,
+            1.0000001192092896,
+            1.0000001192092896
         ]
     }
 }

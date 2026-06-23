@@ -1,6 +1,6 @@
 {
     "AnimationData": {
-        "DefaultState": "SS_Attack4",
+        "DefaultState": "SS_Dodge",
         "States": [
             {
                 "animIndexA": -1,
@@ -236,14 +236,14 @@
                         "startTime": 0.01666666753590107
                     },
                     {
-                        "actionEnd": "DisableHitBox",
-                        "actionStart": "EnableHitBox",
+                        "actionEnd": "HitBox_DisableHitBox",
+                        "actionStart": "HitBox_EnableHitBox",
                         "actionUpdate": "",
                         "blackboardWrites": [
                             {
                                 "boolValue": false,
                                 "category": "Attack",
-                                "floatValue": 5.0,
+                                "floatValue": 12.0,
                                 "intValue": 0,
                                 "key": "Damage",
                                 "type": 0
@@ -251,7 +251,7 @@
                             {
                                 "boolValue": false,
                                 "category": "Attack",
-                                "floatValue": 0.07500000298023224,
+                                "floatValue": 0.10000000149011612,
                                 "intValue": 0,
                                 "key": "HitStopTime",
                                 "type": 0
@@ -362,8 +362,8 @@
                         "startTime": 0.0833333358168602
                     },
                     {
-                        "actionEnd": "DisableHitBox",
-                        "actionStart": "EnableHitBox",
+                        "actionEnd": "HitBox_DisableHitBox",
+                        "actionStart": "HitBox_EnableHitBox",
                         "actionUpdate": "",
                         "blackboardWrites": [
                             {
@@ -372,14 +372,6 @@
                                 "floatValue": 5.0,
                                 "intValue": 0,
                                 "key": "Damage",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.800000011920929,
-                                "intValue": 0,
-                                "key": "HitStopTime",
                                 "type": 0
                             }
                         ],
@@ -1005,8 +997,8 @@
                         "startTime": 0.21666666865348816
                     },
                     {
-                        "actionEnd": "DisableHitBox",
-                        "actionStart": "EnableHitBox",
+                        "actionEnd": "HitBox_DisableHitBox",
+                        "actionStart": "HitBox_EnableHitBox",
                         "actionUpdate": "",
                         "blackboardWrites": [
                             {
@@ -1411,8 +1403,8 @@
                         "startTime": 0.800000011920929
                     },
                     {
-                        "actionEnd": "Weapon_Trail_Stop",
-                        "actionStart": "Weapon_Trail_Start",
+                        "actionEnd": "Trail_Stop",
+                        "actionStart": "Trail_Start",
                         "actionUpdate": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
@@ -1423,8 +1415,8 @@
                         "startTime": 0.11666666716337204
                     },
                     {
-                        "actionEnd": "DisableHitBox",
-                        "actionStart": "EnableHitBox",
+                        "actionEnd": "HitBox_DisableHitBox",
+                        "actionStart": "HitBox_EnableHitBox",
                         "actionUpdate": "",
                         "blackboardWrites": [
                             {
@@ -1549,8 +1541,8 @@
                         "startTime": 0.550000011920929
                     },
                     {
-                        "actionEnd": "Weapon_Trail_Start",
-                        "actionStart": "Weapon_Trail_Start",
+                        "actionEnd": "Trail_Stop",
+                        "actionStart": "Trail_Start",
                         "actionUpdate": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
@@ -1561,8 +1553,8 @@
                         "startTime": 0.0
                     },
                     {
-                        "actionEnd": "DisableHitBox",
-                        "actionStart": "EnableHitBox",
+                        "actionEnd": "HitBox_DisableHitBox",
+                        "actionStart": "HitBox_EnableHitBox",
                         "actionUpdate": "",
                         "blackboardWrites": [
                             {
@@ -3676,7 +3668,7 @@
                         "label": "ActionEnd",
                         "overridePlaybackSpeed": false,
                         "playbackSpeed": 1.0,
-                        "startTime": 0.6499999761581421
+                        "startTime": 0.75
                     },
                     {
                         "actionEnd": "",
@@ -3696,7 +3688,7 @@
                         "actionUpdate": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 0.7666666507720947,
+                        "endTime": 0.7333333492279053,
                         "label": "CanCancelOn",
                         "overridePlaybackSpeed": false,
                         "playbackSpeed": 1.0,

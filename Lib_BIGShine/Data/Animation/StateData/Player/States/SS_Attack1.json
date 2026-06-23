@@ -79,8 +79,8 @@
                 "startTime": 0.800000011920929
             },
             {
-                "actionEnd": "Weapon_Trail_Stop",
-                "actionStart": "Weapon_Trail_Start",
+                "actionEnd": "Trail_Stop",
+                "actionStart": "Trail_Start",
                 "actionUpdate": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
@@ -91,8 +91,8 @@
                 "startTime": 0.11666666716337204
             },
             {
-                "actionEnd": "DisableHitBox",
-                "actionStart": "EnableHitBox",
+                "actionEnd": "HitBox_DisableHitBox",
+                "actionStart": "HitBox_EnableHitBox",
                 "actionUpdate": "",
                 "blackboardWrites": [
                     {

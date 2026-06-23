@@ -6,7 +6,7 @@
 
 #include"KeyInput.h"
 
-void MouseInput::Update(HWND hwnd)
+void MouseInput::Update(HWND hwnd_)
 {
     // デバッグ切り替え
     if (KeyInput::KeyPressedIn(KeyInput::Key::K_Enter))
@@ -14,41 +14,113 @@ void MouseInput::Update(HWND hwnd)
         m_DebugFlag = !m_DebugFlag;
     }
 
-    // マウス座標取得
-    POINT p_;
-    GetCursorPos(&p_);
-    ScreenToClient(hwnd, &p_);
-
-    m_clientPos = p_;
-    m_screenPos = Vector2(
-        static_cast<float>(p_.x),
-        static_cast<float>(p_.y)
-    );
-
-    // 現在位置保存
-    m_CurrentMousePos = m_screenPos;
-
-    // 初回のみ差分を0にする
-    if (m_IsFirstMouseUpdate)
-    {
-        m_SubMousePos = Vector2(0.0f, 0.0f);
-        m_IsFirstMouseUpdate = false;
-    }
-    else
-    {
-        // 前フレームとの差分
-        m_SubMousePos = m_CurrentMousePos - m_PrevMousePos;
-    }
-
-    // 次フレーム用に保存
-    m_PrevMousePos = m_CurrentMousePos;
-
     // ウィンドウサイズ取得
     RECT rc_;
-    GetClientRect(hwnd, &rc_);
+    GetClientRect(hwnd_, &rc_);
 
     width = rc_.right - rc_.left;
     height = rc_.bottom - rc_.top;
+
+    const bool isWindowActive_ = GetForegroundWindow() == hwnd_;
+    const bool isWindowKeyDown_ =
+        (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0 ||
+        (GetAsyncKeyState(VK_RWIN) & 0x8000) != 0;
+
+    // ゲーム操作中として扱うか
+    // Debug中、非アクティブ中、Windowsキー中は固定しない
+    const bool shouldLockCursor_ =
+        m_IsCursorLockEnabled &&
+        !m_DebugFlag &&
+        isWindowActive_ &&
+        !isWindowKeyDown_;
+
+    POINT clientCenter_;
+    clientCenter_.x = width / 2;
+    clientCenter_.y = height / 2;
+
+    POINT screenCenter_ = clientCenter_;
+    ClientToScreen(hwnd_, &screenCenter_);
+
+    // マウス座標取得
+    POINT p_;
+    GetCursorPos(&p_);
+
+    POINT clientPos_ = p_;
+    ScreenToClient(hwnd_, &clientPos_);
+
+    m_clientPos = clientPos_;
+    m_screenPos = Vector2(
+        static_cast<float>(clientPos_.x),
+        static_cast<float>(clientPos_.y)
+    );
+
+    m_CurrentMousePos = m_screenPos;
+
+    if (shouldLockCursor_)
+    {
+        // 固定開始フレームは差分を捨てる
+        if (!m_IsCursorLocked || m_IsFirstMouseUpdate)
+        {
+            m_SubMousePos = Vector2(0.0f, 0.0f);
+            m_IsFirstMouseUpdate = false;
+            m_IsCursorLocked = true;
+        }
+        else
+        {
+            // 固定中は「中央からどれだけ動いたか」を差分にする
+            m_SubMousePos = Vector2(
+                static_cast<float>(clientPos_.x - clientCenter_.x),
+                static_cast<float>(clientPos_.y - clientCenter_.y)
+            );
+        }
+
+        // 次フレームも中央基準にする
+        m_CurrentMousePos = Vector2(
+            static_cast<float>(clientCenter_.x),
+            static_cast<float>(clientCenter_.y)
+        );
+
+        m_PrevMousePos = m_CurrentMousePos;
+
+        // カーソルを中央に戻す
+        SetCursorPos(screenCenter_.x, screenCenter_.y);
+
+        // カーソル非表示
+        if (m_IsCursorVisible)
+        {
+            while (ShowCursor(FALSE) >= 0) {}
+            m_IsCursorVisible = false;
+        }
+    }
+    else
+    {
+        // 固定解除された瞬間
+        if (m_IsCursorLocked)
+        {
+            m_IsCursorLocked = false;
+            m_IsFirstMouseUpdate = true;
+            m_SubMousePos = Vector2(0.0f, 0.0f);
+        }
+        else if (m_IsFirstMouseUpdate)
+        {
+            m_SubMousePos = Vector2(0.0f, 0.0f);
+            m_IsFirstMouseUpdate = false;
+        }
+        else
+        {
+            // 通常時は前フレームとの差分
+            m_SubMousePos = m_CurrentMousePos - m_PrevMousePos;
+        }
+
+        m_PrevMousePos = m_CurrentMousePos;
+
+        // カーソル表示
+        if (!m_IsCursorVisible)
+        {
+            while (ShowCursor(TRUE) < 0) {}
+            m_IsCursorVisible = true;
+        }
+    }
 
     // マウスボタン状態
     SHORT leftState_ = GetAsyncKeyState(VK_LBUTTON);
@@ -90,6 +162,53 @@ bool MouseInput::GetButtonState(int buttonCode, int type) const
         // 必要に応じて中クリック(VK_MBUTTON)なども追加
     }
     return false;
+}
+
+void MouseInput::ReleaseCursorLock()
+{
+    m_IsCursorLocked = false;
+    m_IsFirstMouseUpdate = true;
+    m_SubMousePos = Vector2(0.0f, 0.0f);
+
+    if (!m_IsCursorVisible)
+    {
+        while (ShowCursor(TRUE) < 0) {}
+        m_IsCursorVisible = true;
+    }
+
+    ClipCursor(nullptr);
+}
+
+void MouseInput::CenterCursor(HWND hwnd_)
+{
+    RECT rc_;
+    GetClientRect(hwnd_, &rc_);
+
+    POINT center_;
+    center_.x = (rc_.right - rc_.left) / 2;
+    center_.y = (rc_.bottom - rc_.top) / 2;
+
+    ClientToScreen(hwnd_, &center_);
+
+    SetCursorPos(center_.x, center_.y);
+}
+
+void MouseInput::SetCursorLockEnabled(bool enabled_)
+{
+    m_IsCursorLockEnabled = enabled_;
+
+    if (!enabled_)
+    {
+        m_IsCursorLocked = false;
+        m_IsFirstMouseUpdate = true;
+        m_SubMousePos = Vector2(0.0f, 0.0f);
+
+        if (!m_IsCursorVisible)
+        {
+            while (ShowCursor(true) < 0) {}
+            m_IsCursorVisible = true;
+        }
+    }
 }
 
 //void MouseInput::GetWorldRay(const HWND hwnd)

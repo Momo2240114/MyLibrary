@@ -70,7 +70,9 @@ std::shared_ptr<GameObject> VFXManager::SpawnParticle(
         object_->AddComponent<ParticleComponent>();
     if (!particle_) return object_;
 
-    if (!particle_->LoadAsset(request_.assetPath))
+    const std::string assetPath_ = ResolveParticleAssetPath(request_.assetPath);
+
+    if (!particle_->LoadAsset(assetPath_))
     {
         gameObjectManager->Destroy(object_);
         return nullptr;
@@ -118,7 +120,9 @@ std::shared_ptr<GameObject> VFXManager::SpawnMeshVFX(
         object_->AddComponent<MeshVFXComponent>();
     if (!meshVFX_) return object_;
 
-    if (!meshVFX_->LoadAsset(request_.assetPath))
+    const std::string assetPath_ = ResolveMeshVFXAssetPath(request_.assetPath);
+
+    if (!meshVFX_->LoadAsset(assetPath_))
     {
         gameObjectManager->Destroy(object_);
         return nullptr;
@@ -196,4 +200,107 @@ void VFXManager::RegisterManagedEffect(
         managedEffect_.lifeTimer = 1.0f;
     }
     managedEffects.push_back(managedEffect_);
+}
+
+std::string VFXManager::AddJsonExtensionIfNeeded(const std::string& assetPath_) const
+{
+    if (assetPath_.empty()) return assetPath_;
+
+    const size_t slashPosition_ = assetPath_.find_last_of('/');
+    const size_t dotPosition_ = assetPath_.find_last_of('.');
+
+    // ÅŒã‚Ì / ‚æ‚èŒã‚ë‚É . ‚ª‚ ‚ê‚ÎA‰½‚©‚µ‚çŠg’£Žq‚ ‚è‚Æ”»’f
+    if (dotPosition_ != std::string::npos)
+    {
+        if (slashPosition_ == std::string::npos || dotPosition_ > slashPosition_)
+        {
+            return assetPath_;
+        }
+    }
+
+    return assetPath_ + ".json";
+}
+
+std::string VFXManager::ResolveParticleAssetPath(const std::string& assetPath_) const
+{
+    std::string normalizedPath_ = NormalizeAssetPath(assetPath_);
+    if (normalizedPath_.empty()) return normalizedPath_;
+
+    normalizedPath_ = AddJsonExtensionIfNeeded(normalizedPath_);
+
+    if (IsPathRooted(normalizedPath_))
+    {
+        return normalizedPath_;
+    }
+
+    if (normalizedPath_.rfind("Data/Particle/", 0) == 0)
+    {
+        return normalizedPath_;
+    }
+
+    if (normalizedPath_.rfind("Data/", 0) == 0)
+    {
+        return normalizedPath_;
+    }
+
+    return "Data/Particle/" + normalizedPath_;
+}
+
+std::string VFXManager::ResolveMeshVFXAssetPath(const std::string& assetPath_) const
+{
+    std::string normalizedPath_ = NormalizeAssetPath(assetPath_);
+    if (normalizedPath_.empty()) return normalizedPath_;
+
+    normalizedPath_ = AddJsonExtensionIfNeeded(normalizedPath_);
+
+    if (IsPathRooted(normalizedPath_))
+    {
+        return normalizedPath_;
+    }
+
+    if (normalizedPath_.rfind("Data/VFX/", 0) == 0)
+    {
+        return normalizedPath_;
+    }
+
+    if (normalizedPath_.rfind("Data/", 0) == 0)
+    {
+        return normalizedPath_;
+    }
+
+    return "Data/VFX/" + normalizedPath_;
+}
+
+std::string VFXManager::NormalizeAssetPath(const std::string& assetPath_) const
+{
+    std::string normalizedPath_ = assetPath_;
+
+    std::replace(
+        normalizedPath_.begin(),
+        normalizedPath_.end(),
+        '\\',
+        '/');
+
+    while (!normalizedPath_.empty() &&
+        (normalizedPath_.front() == '/' || normalizedPath_.front() == '\\'))
+    {
+        normalizedPath_.erase(normalizedPath_.begin());
+    }
+
+    return normalizedPath_;
+}
+
+bool VFXManager::IsPathRooted(const std::string& assetPath_) const
+{
+    if (assetPath_.size() >= 2 && assetPath_[1] == ':')
+    {
+        return true;
+    }
+
+    if (assetPath_.rfind("//", 0) == 0)
+    {
+        return true;
+    }
+
+    return false;
 }

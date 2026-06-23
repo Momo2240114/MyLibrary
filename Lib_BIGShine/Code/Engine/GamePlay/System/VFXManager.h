@@ -58,6 +58,11 @@ private:
         const std::shared_ptr<GameObject>& object_,
         float lifeTime_);
 
+    std::string AddJsonExtensionIfNeeded(const std::string& assetPath_) const;
+    std::string ResolveParticleAssetPath(const std::string& assetPath_) const;
+    std::string ResolveMeshVFXAssetPath(const std::string& assetPath_) const;
+    std::string NormalizeAssetPath(const std::string& assetPath_) const;
+    bool IsPathRooted(const std::string& assetPath_) const;
 private:
     GameObjectManager* gameObjectManager = nullptr;
     std::vector<ManagedEffect> managedEffects;

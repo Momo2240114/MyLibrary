@@ -140,59 +140,110 @@ int framework::run()
 
 	return uninitialize() ? static_cast<int>(msg.wParam) : 0;
 }
-
 LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM lParam_)
 {
-	if (ImGuiRenderer::HandleMessage(hWnd_, msg_, wParam_, lParam_))
-		return 0; 
+    if (ImGuiRenderer::HandleMessage(hWnd_, msg_, wParam_, lParam_))
+    {
+        return 0;
+    }
 
-	switch (msg_)
-	{
-	case WM_SIZE:
-		// 最小化中以外、かつデバイス初期化済みならリサイズ実行
-		if (wParam_ != SIZE_MINIMIZED && GraphicsDeviceManager::Instance().GetDevice())
-		{
-			int w = LOWORD(lParam_);
-			int h = HIWORD(lParam_);
-			GraphicsDeviceManager::Instance().OnResize(w, h);
-		}
-		return 0;
-	case WM_MOUSEWHEEL:
-	{
-		int delta = GET_WHEEL_DELTA_WPARAM(wParam_);
-		MouseInput::Instance().OnMouseWheel(delta);
-		break;
-	}
-	case WM_PAINT:
-	{
-		PAINTSTRUCT ps{};
-		BeginPaint(hwnd, &ps);
+    switch (msg_)
+    {
+    case WM_SIZE:
+    {
+        // 最小化中以外、かつデバイス初期化済みならリサイズ実行
+        if (wParam_ != SIZE_MINIMIZED && GraphicsDeviceManager::Instance().GetDevice())
+        {
+            int w_ = LOWORD(lParam_);
+            int h_ = HIWORD(lParam_);
+            GraphicsDeviceManager::Instance().OnResize(w_, h_);
+        }
+        return 0;
+    }
 
-		EndPaint(hwnd, &ps);
-	}
-	break;
+    case WM_MOUSEWHEEL:
+    {
+        int delta_ = GET_WHEEL_DELTA_WPARAM(wParam_);
+        MouseInput::Instance().OnMouseWheel(delta_);
+        return 0;
+    }
 
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	case WM_CREATE:
-		break;
-	case WM_KEYDOWN:
-		if (wParam_ == VK_ESCAPE)
-		{
-			PostMessage(hWnd_, WM_CLOSE, 0, 0);
-		}
-		break;
-	case WM_ENTERSIZEMOVE:
-		tictoc.stop();
-		break;
-	case WM_EXITSIZEMOVE:
-		tictoc.start();
-		break;
-	default:
-		return DefWindowProc(hWnd_, msg_, wParam_, lParam_);
-	}
-	return 0;
+    case WM_KILLFOCUS:
+    {
+        // Alt+Tab、Windowsキー、別ウィンドウ選択などで一時解除
+        MouseInput::Instance().ReleaseCursorLock();
+        return 0;
+    }
+
+    case WM_ACTIVATEAPP:
+    {
+        // wParam_ == FALSE のときアプリが非アクティブ
+        if (wParam_ == FALSE)
+        {
+            MouseInput::Instance().ReleaseCursorLock();
+        }
+        return 0;
+    }
+
+    case WM_SETCURSOR:
+    {
+        // ゲーム中カーソル固定が有効ならカーソル表示を抑える
+        if (MouseInput::Instance().IsCursorLockEnabled())
+        {
+            SetCursor(nullptr);
+            return TRUE;
+        }
+        break;
+    }
+
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps_{};
+        BeginPaint(hWnd_, &ps_);
+        EndPaint(hWnd_, &ps_);
+        return 0;
+    }
+
+    case WM_DESTROY:
+    {
+        MouseInput::Instance().ReleaseCursorLock();
+        PostQuitMessage(0);
+        return 0;
+    }
+
+    case WM_CREATE:
+    {
+        return 0;
+    }
+
+    case WM_KEYDOWN:
+    {
+        if (wParam_ == VK_ESCAPE)
+        {
+            MouseInput::Instance().ReleaseCursorLock();
+            PostMessage(hWnd_, WM_CLOSE, 0, 0);
+        }
+        return 0;
+    }
+
+    case WM_ENTERSIZEMOVE:
+    {
+        MouseInput::Instance().ReleaseCursorLock();
+        tictoc.stop();
+        return 0;
+    }
+
+    case WM_EXITSIZEMOVE:
+    {
+        tictoc.start();
+        return 0;
+    }
+
+    default:
+        return DefWindowProc(hWnd_, msg_, wParam_, lParam_);
+    }
+
+    return DefWindowProc(hWnd_, msg_, wParam_, lParam_);
 }
 
 

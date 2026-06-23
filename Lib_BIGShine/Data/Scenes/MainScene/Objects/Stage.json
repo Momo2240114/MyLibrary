@@ -41,6 +41,8 @@
                 "LocalScale": 90.0,
                 "MaterialOverrides": [
                     {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
                         "baseColor": [
                             1.0,
                             1.0,
@@ -48,8 +50,18 @@
                             1.0
                         ],
                         "disableOutline": false,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
                         "id": 0,
+                        "metalness": 0.0,
+                        "name": "Mat",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
                         "outlineThicknessOffset": 1.0,
+                        "roughness": 0.5,
                         "shaderId": 3,
                         "toonPbrBlend": 1.0
                     }

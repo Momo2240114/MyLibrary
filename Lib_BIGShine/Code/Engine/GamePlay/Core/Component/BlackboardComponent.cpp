@@ -33,6 +33,11 @@ namespace
                 valueJson_["type"] = "vector2";
                 valueJson_["value"] = { arg_.x, arg_.y };
             }
+            else if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>)
+            {
+                valueJson_["type"] = "vector3";
+                valueJson_["value"] = { arg_.x, arg_.y, arg_.z };
+            }
             }, value_);
 
         return valueJson_;
@@ -60,7 +65,17 @@ namespace
             }
             return value_;
         }
-
+        if (type_ == "vector3")
+        {
+            DirectX::SimpleMath::Vector3 value_{ 0.0f, 0.0f, 0.0f };
+            if (valueJson_.contains("value") && valueJson_["value"].is_array())
+            {
+                if (valueJson_["value"].size() > 0) value_.x = valueJson_["value"][0].get<float>();
+                if (valueJson_["value"].size() > 1) value_.y = valueJson_["value"][1].get<float>();
+                if (valueJson_["value"].size() > 2) value_.z = valueJson_["value"][2].get<float>();
+            }
+            return value_;
+        }
         return valueJson_.value("value", 0.0f);
     }
 }
@@ -70,7 +85,7 @@ void BlackboardComponent::Gui()
     static char newCategory_[64] = "Anim";
     static char newKey_[64] = "";
     static int newType_ = 0;
-    const char* typeNames_[] = { "Float", "Int", "Bool", "Vector2", "Trigger" };
+    const char* typeNames_[] = { "Float", "Int", "Bool", "Vector2", "Vector3", "Trigger" };
 
     ImGui::InputText("Category", newCategory_, IM_ARRAYSIZE(newCategory_));
     ImGui::InputText("Key", newKey_, IM_ARRAYSIZE(newKey_));
@@ -89,7 +104,8 @@ void BlackboardComponent::Gui()
             case 1: SetInt(category_, key_, 0); break;
             case 2: SetBool(category_, key_, false); break;
             case 3: SetVector2(category_, key_, { 0.0f, 0.0f }); break;
-            case 4: SetTrigger(category_, key_); ResetTrigger(category_, key_); break;
+            case 4: SetVector3(category_, key_, { 0.0f, 0.0f, 0.0f }); break;
+            case 5: SetTrigger(category_, key_); ResetTrigger(category_, key_); break;
             default: break;
             }
 
@@ -135,7 +151,10 @@ void BlackboardComponent::Gui()
             {
                 ImGui::DragFloat2("##Value", &vector2Value_->x, 0.05f);
             }
-
+            else if (auto* vector3Value_ = std::get_if<DirectX::SimpleMath::Vector3>(&value_))
+            {
+                ImGui::DragFloat3("##Value", &vector3Value_->x, 0.05f);
+            }
             ImGui::SameLine();
             if (ImGui::Button("Remove"))
             {
@@ -217,6 +236,11 @@ void BlackboardComponent::SetBool(const std::string& category_, const std::strin
 }
 
 void BlackboardComponent::SetVector2(const std::string& category_, const std::string& key_, const DirectX::SimpleMath::Vector2& value_)
+{
+    SetValue(category_, key_, value_);
+}
+
+void BlackboardComponent::SetVector3(const std::string& category_, const std::string& key_, const DirectX::SimpleMath::Vector3& value_)
 {
     SetValue(category_, key_, value_);
 }
@@ -303,6 +327,18 @@ bool BlackboardComponent::GetVector2(const std::string& category_, const std::st
     return false;
 }
 
+bool BlackboardComponent::GetVector3(const std::string& category_, const std::string& key_, DirectX::SimpleMath::Vector3& value_) const
+{
+    const auto* valuePtr_ = GetValue(category_, key_);
+    if (!valuePtr_) return false;
+    if (auto vector3Value_ = std::get_if<DirectX::SimpleMath::Vector3>(valuePtr_))
+    {
+        value_ = *vector3Value_;
+        return true;
+    }
+    return false;
+}
+
 bool BlackboardComponent::ConsumeTrigger(const std::string& category_, const std::string& key_)
 {
     auto* valuePtr_ = GetValue(category_, key_);
@@ -366,7 +402,8 @@ float BlackboardComponent::ToFloat(const BlackBoardValue& value_)
         if constexpr (std::is_same_v<T, int>) return static_cast<float>(arg_);
         if constexpr (std::is_same_v<T, bool>) return arg_ ? 1.0f : 0.0f;
         if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>) return arg_.Length();
-
+        if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>) return arg_.Length();
         return 0.0f;
-        }, value_);
+    }, value_);
+
 }
