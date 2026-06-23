@@ -61,11 +61,8 @@ public:
         return static_cast<float>(temp);
     }
 
-    //マウスの表示の有無
-    void ShowCursor(bool flag)
-    {
-        ShowCursor(flag);
-    }
+    void ReleaseCursorLock();
+    
 
     Vector2 GetSubMousePos()
     {
@@ -76,6 +73,9 @@ public:
     {
         m_SubMousePos = delta;
     }
+
+    void CenterCursor(HWND hwnd_);
+    
 
     /*void GetWorldRay(const HWND hwnd);*/
     DirectX::XMFLOAT3 GetRayStart() { return RayStart; }
@@ -122,4 +122,12 @@ private:
     Vector2 m_SubMousePos;
 
     bool m_DebugFlag = false;
+private:
+        bool m_IsCursorLockEnabled = false;
+        bool m_IsCursorLocked = false;
+        bool m_IsCursorVisible = true;
+
+public:
+    void SetCursorLockEnabled(bool enabled_);
+    bool IsCursorLockEnabled() const { return m_IsCursorLockEnabled; }
 };

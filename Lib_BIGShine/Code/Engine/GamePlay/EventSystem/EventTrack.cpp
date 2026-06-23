@@ -104,7 +104,7 @@ void EventTrack::EndEdit()
 
 void EventTrack::DoubleClick(int index)
 {
-    // TODO: イベント詳細設定ウィンドウを開くなど
+
 }
 
 void EventTrack::Copy()
