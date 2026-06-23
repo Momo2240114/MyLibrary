@@ -22,7 +22,7 @@ void SphereCollider::Update(float dt) {
     float worldRadius = radius * t->GetWorldScale().x;
     if(shapeRenderEnabled)
     {
-        renderer.DrawSphere(pos, worldRadius, isTrigger ? DirectX::XMFLOAT4(0, 1, 1, 1) : DirectX::XMFLOAT4(0, 1, 0, 1));
+        renderer.DrawSphere(pos, worldRadius, debugPrimitiveColor);
     }
 }
 

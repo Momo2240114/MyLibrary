@@ -47,6 +47,7 @@ public:
 
     const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
     float GetCurrentFadeTime() const { return current.time; }
+    float GetCurrentSampleDuration() const { return current.sampleDuration; }
     void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
 private:

@@ -64,6 +64,8 @@ struct VS_OUT
     float3 normal : TEXCOORD1;
     float2 texcoord : TEXCOORD2;
     float4 tangent : TEXCOORD3;
+    float instanceTime : TEXCOORD4;
+    float instanceAlpha : TEXCOORD5;
 };
 
 #endif

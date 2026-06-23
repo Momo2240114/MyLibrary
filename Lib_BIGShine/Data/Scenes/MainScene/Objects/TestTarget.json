@@ -1,26 +1,195 @@
 {
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionRole": 1,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.680999994277954,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 100.0,
+                "Offset": [
+                    0.0,
+                    6.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": true,
+                "Radius": 5.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "UseGravity": true,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "TypeName": "CapsuleCollider"
+        },
+        {
+            "Data": {
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 1.0,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.649999976158142,
+                "HurtTag": "Body",
+                "InvincibilityDuration": 0.07999999821186066,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    6.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 5.5,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "TypeName": "HurtBox"
+        }
+    ],
     "CollisionMask": 0,
     "Components": [
         {
             "Data": {
                 "Offset": [
                     0.0,
-                    -5.0,
+                    2.9000000953674316,
                     0.0
                 ]
             },
             "Enabled": true,
             "TypeName": "LockOnTargetComponent"
+        },
+        {
+            "Data": {
+                "LocalScale": 3.0,
+                "MaterialOverrides": [
+                    {
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "id": 0,
+                        "outlineThicknessOffset": 0.125,
+                        "shaderId": 3,
+                        "toonPbrBlend": 1.0
+                    }
+                ],
+                "ModelName": "./Data/Model/Plains Dragon/PoseTest/PoseTest.gltf",
+                "RootMotionName": "Armature",
+                "ShaderID": 1,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "TypeName": "GltfModel"
+        },
+        {
+            "Data": {
+                "FacingTurnSpeed": 10.0,
+                "UsePhysicsVelocity": true
+            },
+            "Enabled": true,
+            "TypeName": "CharacterMovementComponent"
+        },
+        {
+            "Data": {
+                "CurrentHealth": 0.0,
+                "HitStopLayerMask": 3,
+                "MaxHealth": 100.0,
+                "OverlayDuration": 0.11999999731779099,
+                "OverlayStartActionName": "MaterialOverlay_Start",
+                "OverlayStopActionName": "MaterialOverlay_Stop",
+                "ReactionActionName": "",
+                "UseHitStop": true,
+                "UseKnockBack": true
+            },
+            "Enabled": true,
+            "TypeName": "HitReactionComponent"
+        },
+        {
+            "Data": {
+                "Categories": {
+                    "Hit": {
+                        "CurrentHealth": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "Damage": {
+                            "type": "float",
+                            "value": 5.0
+                        },
+                        "Dead": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "Direction": {
+                            "type": "vector2",
+                            "value": [
+                                0.5881989002227783,
+                                0.8087162375450134
+                            ]
+                        },
+                        "HitStopTime": {
+                            "type": "float",
+                            "value": 0.05000000074505806
+                        },
+                        "KnockBackPower": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "Received": {
+                            "type": "bool",
+                            "value": true
+                        }
+                    }
+                }
+            },
+            "Enabled": true,
+            "TypeName": "BlackboardComponent"
         }
     ],
-    "Layer": 0,
+    "Layer": 1,
     "Name": "TestTarget",
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -33.717559814453125,
-            0.0,
-            0.0
+            1.2740799188613892,
+            -1.4963783025741577,
+            -62.18648910522461
         ],
         "Rot": [
             0.0,

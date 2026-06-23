@@ -18,10 +18,14 @@ public:
         const RenderContext& renderContext_,
         ID3D11ShaderResourceView* sceneColor_,
         ID3D11ShaderResourceView* sceneDepth_,
-        bool useMaterialOverlay_);
+        bool useMaterialOverlay_,
+        bool useInstancedPose_ = false);
     void UpdateSkeleton(
         const RenderContext& renderContext_,
         const GltfModelCommponennt::Mesh& mesh_);
+    void UpdateSkeleton(
+        const RenderContext& renderContext_,
+        const std::vector<DirectX::XMFLOAT4X4>& transforms_);
     void UpdateScene(const RenderContext& renderContext_);
     void UpdatePart(
         const RenderContext& renderContext_,
@@ -97,6 +101,7 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> materialOverlayVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> afterimageInstancedVertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;

@@ -648,6 +648,29 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
     }
 }
 
+    void to_json(nlohmann::json& json_, const AnimBlackboardWrite& write_)
+    {
+        json_ = nlohmann::json{
+            {"category", write_.category},
+            {"key", write_.key},
+            {"type", static_cast<int>(write_.type)},
+            {"floatValue", write_.floatValue},
+            {"intValue", write_.intValue},
+            {"boolValue", write_.boolValue}
+        };
+    }
+
+    void from_json(const nlohmann::json& json_, AnimBlackboardWrite& write_)
+    {
+        write_.category = json_.value("category", std::string("Attack"));
+        write_.key = json_.value("key", std::string("Damage"));
+        const int typeIndex_ = (std::clamp)(json_.value("type", 0), 0, 2);
+        write_.type = static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
+        write_.floatValue = json_.value("floatValue", 0.0f);
+        write_.intValue = json_.value("intValue", 0);
+        write_.boolValue = json_.value("boolValue", false);
+    }
+
     void to_json(nlohmann::json & j, const AnimEvent & e) {
         j = nlohmann::json{
             {"label", e.eventLabel},
@@ -658,7 +681,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"actionEnd", e.endAction},
             {"overridePlaybackSpeed", e.overridePlaybackSpeed},
             {"playbackSpeed", e.playbackSpeed},
-            {"callEndOnStateExit", e.callEndOnStateExit}
+            {"callEndOnStateExit", e.callEndOnStateExit},
+            {"blackboardWrites", e.blackboardWrites}
         };
     }
 
@@ -672,6 +696,9 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         e.overridePlaybackSpeed = j.value("overridePlaybackSpeed", false);
         e.playbackSpeed = j.value("playbackSpeed", 1.0f);
         e.callEndOnStateExit = j.value("callEndOnStateExit", false);
+        e.blackboardWrites = j.value(
+            "blackboardWrites",
+            std::vector<AnimBlackboardWrite>{});
         e.isFired = false;
         e.isEndFired = false;
     }
@@ -704,6 +731,18 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"blendSyncNormalizedTime", s.blendSyncNormalizedTime},
             {"blendUseMask", s.blendUseMask},
             {"blendMaskRootNodes", s.blendMaskRootNodes},
+            // Blend2Dóp
+            {"blend2DForwardAnimationIndex", s.blend2DForwardAnimationIndex},
+            {"blend2DBackwardAnimationIndex", s.blend2DBackwardAnimationIndex},
+            {"blend2DLeftAnimationIndex", s.blend2DLeftAnimationIndex},
+            {"blend2DRightAnimationIndex", s.blend2DRightAnimationIndex},
+            {"blend2DParamName", s.blend2DParamName},
+            {"blend2DDefaultInput", {s.blend2DDefaultInput.x, s.blend2DDefaultInput.y}},
+            {"blend2DSyncNormalizedTime", s.blend2DSyncNormalizedTime},
+            {"blend2DForwardPhaseOffset", s.blend2DForwardPhaseOffset},
+            {"blend2DBackwardPhaseOffset", s.blend2DBackwardPhaseOffset},
+            {"blend2DLeftPhaseOffset", s.blend2DLeftPhaseOffset},
+            {"blend2DRightPhaseOffset", s.blend2DRightPhaseOffset},
             // Customóp Åyí«â¡Åz
             {"customAnimIndex", s.customAnimIndex},
         };
@@ -737,6 +776,28 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.blendMaskRootNodes = j.value(
         "blendMaskRootNodes",
         std::vector<std::string>{});
+
+    // Blend2Dópïúå≥
+    s.blend2DForwardAnimationIndex = j.value("blend2DForwardAnimationIndex", -1);
+    s.blend2DBackwardAnimationIndex = j.value("blend2DBackwardAnimationIndex", -1);
+    s.blend2DLeftAnimationIndex = j.value("blend2DLeftAnimationIndex", -1);
+    s.blend2DRightAnimationIndex = j.value("blend2DRightAnimationIndex", -1);
+    s.blend2DParamName = j.value("blend2DParamName", "MoveInput");
+    if (j.contains("blend2DDefaultInput") &&
+        j["blend2DDefaultInput"].is_array() &&
+        j["blend2DDefaultInput"].size() >= 2)
+    {
+        s.blend2DDefaultInput =
+        {
+            j["blend2DDefaultInput"][0].get<float>(),
+            j["blend2DDefaultInput"][1].get<float>()
+        };
+    }
+    s.blend2DSyncNormalizedTime = j.value("blend2DSyncNormalizedTime", true);
+    s.blend2DForwardPhaseOffset = j.value("blend2DForwardPhaseOffset", 0.0f);
+    s.blend2DBackwardPhaseOffset = j.value("blend2DBackwardPhaseOffset", 0.0f);
+    s.blend2DLeftPhaseOffset = j.value("blend2DLeftPhaseOffset", 0.0f);
+    s.blend2DRightPhaseOffset = j.value("blend2DRightPhaseOffset", 0.0f);
 
     // Customóp Åyí«â¡Åz
     s.customAnimIndex = j.value("customAnimIndex", -1);

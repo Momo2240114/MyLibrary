@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
@@ -18,175 +19,112 @@
 
 namespace
 {
-inline constexpr int WEAK_ATTACK_COMBO_COUNT = 4;
+    inline constexpr int WEAK_ATTACK_COMBO_COUNT = 4;
 
-namespace PlayerInputAction
-{
-    inline constexpr const char* MOVE_X = "Player.MoveX";
-    inline constexpr const char* MOVE_Z = "Player.MoveZ";
-    inline constexpr const char* WEAK_ATTACK = "Player.WeakAttack";
-    inline constexpr const char* STRONG_ATTACK = "Player.StrongAttack";
-    inline constexpr const char* GUARD = "Player.Guard";
-    inline constexpr const char* DODGE = "Player.Dodge";
-    inline constexpr const char* SKILL_A = "Player.SkillA";
-    inline constexpr const char* SKILL_B = "Player.SkillB";
-    inline constexpr const char* DEBUG_GUARD_HIT = "Player.DebugGuardHit";
-}
-
-DirectX::XMFLOAT3 NormalizeHorizontalDirection(
-    const DirectX::XMFLOAT3& direction_,
-    const DirectX::XMFLOAT3& fallback_)
-{
-    DirectX::XMFLOAT3 result_{ direction_.x, 0.0f, direction_.z };
-    const float lengthSquared_ = result_.x * result_.x + result_.z * result_.z;
-    if (lengthSquared_ <= 0.0001f)
+    namespace PlayerInputAction
     {
-        return fallback_;
+        inline constexpr const char* MOVE_X = "Player.MoveX";
+        inline constexpr const char* MOVE_Z = "Player.MoveZ";
+        inline constexpr const char* WEAK_ATTACK = "Player.WeakAttack";
+        inline constexpr const char* STRONG_ATTACK = "Player.StrongAttack";
+        inline constexpr const char* GUARD = "Player.Guard";
+        inline constexpr const char* DODGE = "Player.Dodge";
+        inline constexpr const char* SKILL_A = "Player.SkillA";
+        inline constexpr const char* SKILL_B = "Player.SkillB";
+        inline constexpr const char* DEBUG_GUARD_HIT = "Player.DebugGuardHit";
     }
 
-    const float inverseLength_ = 1.0f / std::sqrt(lengthSquared_);
-    result_.x *= inverseLength_;
-    result_.z *= inverseLength_;
-    return result_;
-}
-
-DirectX::XMFLOAT3 GetCameraForwardDirection(const std::shared_ptr<GameObject>& owner_)
-{
-    if (!owner_ || !owner_->manager) return { 0.0f, 0.0f, 1.0f };
-
-    auto* cameraManager_ = owner_->GetManager().GetCameraManager();
-    if (!cameraManager_) return { 0.0f, 0.0f, 1.0f };
-
-    auto camera_ = cameraManager_->GetActiveCamera();
-    if (!camera_) return { 0.0f, 0.0f, 1.0f };
-
-    const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&camera_->GetView());
-    DirectX::XMVECTOR determinant_;
-    const DirectX::XMMATRIX inverseView_ = DirectX::XMMatrixInverse(&determinant_, view_);
-    const DirectX::XMVECTOR forward_ = DirectX::XMVector3TransformNormal(
-        DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),
-        inverseView_);
-
-    DirectX::XMFLOAT3 direction_;
-    DirectX::XMStoreFloat3(&direction_, forward_);
-    return NormalizeHorizontalDirection(direction_, { 0.0f, 0.0f, 1.0f });
-}
-
-DirectX::XMFLOAT3 GetCameraRelativeMoveDirection(
-    const std::shared_ptr<GameObject>& owner_,
-    const DirectX::XMFLOAT3& input_)
-{
-    const float inputLengthSquared_ = input_.x * input_.x + input_.z * input_.z;
-    if (inputLengthSquared_ <= 0.0001f)
+    DirectX::XMFLOAT3 NormalizeHorizontalDirection(
+        const DirectX::XMFLOAT3& direction_,
+        const DirectX::XMFLOAT3& fallback_)
     {
-        return { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3 result_{ direction_.x, 0.0f, direction_.z };
+        const float lengthSquared_ = result_.x * result_.x + result_.z * result_.z;
+        if (lengthSquared_ <= 0.0001f)
+        {
+            return fallback_;
+        }
+
+        const float inverseLength_ = 1.0f / std::sqrt(lengthSquared_);
+        result_.x *= inverseLength_;
+        result_.z *= inverseLength_;
+        return result_;
     }
 
-    if (!owner_ || !owner_->manager)
+    DirectX::XMFLOAT3 GetCameraForwardDirection(const std::shared_ptr<GameObject>& owner_)
     {
-        return NormalizeHorizontalDirection(input_, { 0.0f, 0.0f, 1.0f });
+        if (!owner_ || !owner_->manager) return { 0.0f, 0.0f, 1.0f };
+
+        auto* cameraManager_ = owner_->GetManager().GetCameraManager();
+        if (!cameraManager_) return { 0.0f, 0.0f, 1.0f };
+
+        auto camera_ = cameraManager_->GetActiveCamera();
+        if (!camera_) return { 0.0f, 0.0f, 1.0f };
+
+        const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&camera_->GetView());
+        DirectX::XMVECTOR determinant_;
+        const DirectX::XMMATRIX inverseView_ = DirectX::XMMatrixInverse(&determinant_, view_);
+        const DirectX::XMVECTOR forward_ = DirectX::XMVector3TransformNormal(
+            DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),
+            inverseView_);
+
+        DirectX::XMFLOAT3 direction_;
+        DirectX::XMStoreFloat3(&direction_, forward_);
+        return NormalizeHorizontalDirection(direction_, { 0.0f, 0.0f, 1.0f });
     }
 
-    auto* cameraManager_ = owner_->GetManager().GetCameraManager();
-    auto camera_ = cameraManager_ ? cameraManager_->GetActiveCamera() : nullptr;
-    if (!camera_)
+    DirectX::XMFLOAT3 GetCameraRelativeMoveDirection(
+        const std::shared_ptr<GameObject>& owner_,
+        const DirectX::XMFLOAT3& input_)
     {
-        return NormalizeHorizontalDirection(input_, { 0.0f, 0.0f, 1.0f });
+        const float inputLengthSquared_ = input_.x * input_.x + input_.z * input_.z;
+        if (inputLengthSquared_ <= 0.0001f)
+        {
+            return { 0.0f, 0.0f, 0.0f };
+        }
+
+        if (!owner_ || !owner_->manager)
+        {
+            return NormalizeHorizontalDirection(input_, { 0.0f, 0.0f, 1.0f });
+        }
+
+        auto* cameraManager_ = owner_->GetManager().GetCameraManager();
+        auto camera_ = cameraManager_ ? cameraManager_->GetActiveCamera() : nullptr;
+        if (!camera_)
+        {
+            return NormalizeHorizontalDirection(input_, { 0.0f, 0.0f, 1.0f });
+        }
+
+        const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&camera_->GetView());
+        DirectX::XMVECTOR determinant_;
+        const DirectX::XMMATRIX inverseView_ = DirectX::XMMatrixInverse(&determinant_, view_);
+
+        DirectX::XMFLOAT3 forward_;
+        DirectX::XMFLOAT3 right_;
+        DirectX::XMStoreFloat3(
+            &forward_,
+            DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), inverseView_));
+        DirectX::XMStoreFloat3(
+            &right_,
+            DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), inverseView_));
+
+        forward_ = NormalizeHorizontalDirection(forward_, { 0.0f, 0.0f, 1.0f });
+        right_ = NormalizeHorizontalDirection(right_, { 1.0f, 0.0f, 0.0f });
+
+        DirectX::XMFLOAT3 direction_
+        {
+            right_.x * input_.x + forward_.x * input_.z,
+            0.0f,
+            right_.z * input_.x + forward_.z * input_.z
+        };
+        return NormalizeHorizontalDirection(direction_, { 0.0f, 0.0f, 1.0f });
     }
-
-    const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&camera_->GetView());
-    DirectX::XMVECTOR determinant_;
-    const DirectX::XMMATRIX inverseView_ = DirectX::XMMatrixInverse(&determinant_, view_);
-
-    DirectX::XMFLOAT3 forward_;
-    DirectX::XMFLOAT3 right_;
-    DirectX::XMStoreFloat3(
-        &forward_,
-        DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), inverseView_));
-    DirectX::XMStoreFloat3(
-        &right_,
-        DirectX::XMVector3TransformNormal(DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), inverseView_));
-
-    forward_ = NormalizeHorizontalDirection(forward_, { 0.0f, 0.0f, 1.0f });
-    right_ = NormalizeHorizontalDirection(right_, { 1.0f, 0.0f, 0.0f });
-
-    DirectX::XMFLOAT3 direction_
-    {
-        right_.x * input_.x + forward_.x * input_.z,
-        0.0f,
-        right_.z * input_.x + forward_.z * input_.z
-    };
-    return NormalizeHorizontalDirection(direction_, { 0.0f, 0.0f, 1.0f });
-}
 
 }
 
 void PlayerControllerComponent::EnsurePlayerInputBindings()
 {
-    auto& keyConfig_ = KeyConfig::Instance();
-    if (keyConfig_.GetConfigFile().empty())
-    {
-        keyConfig_.SetConfigFile("Data/Input/KeyConfig.json");
-        keyConfig_.Load();
-    }
 
-    const auto hasAction_ = [&keyConfig_](const char* actionName_)
-        {
-            return keyConfig_.GetActionMap().find(actionName_) != keyConfig_.GetActionMap().end();
-        };
-    const auto hasAxis_ = [&keyConfig_](const char* axisName_)
-        {
-            return keyConfig_.GetAxisMap().find(axisName_) != keyConfig_.GetAxisMap().end();
-        };
-
-    if (!hasAxis_(PlayerInputAction::MOVE_X))
-    {
-        keyConfig_.SetAxisBinds(PlayerInputAction::MOVE_X,
-            {
-                AxisUnit{ AxisSourceType::Button, DeviceType::KBM, KeyInput::Key::K_A, -1.0f },
-                AxisUnit{ AxisSourceType::Button, DeviceType::KBM, KeyInput::Key::K_D, 1.0f },
-                AxisUnit{ AxisSourceType::GamepadStick, DeviceType::Gamepad, static_cast<int>(AxisCode::LeftStickX), 1.0f, 0.15f }
-            });
-    }
-
-    if (!hasAxis_(PlayerInputAction::MOVE_Z))
-    {
-        keyConfig_.SetAxisBinds(PlayerInputAction::MOVE_Z,
-            {
-                AxisUnit{ AxisSourceType::Button, DeviceType::KBM, KeyInput::Key::K_S, -1.0f },
-                AxisUnit{ AxisSourceType::Button, DeviceType::KBM, KeyInput::Key::K_W, 1.0f },
-                AxisUnit{ AxisSourceType::GamepadStick, DeviceType::Gamepad, static_cast<int>(AxisCode::LeftStickY), 1.0f, 0.15f }
-            });
-    }
-
-    if (!hasAction_(PlayerInputAction::WEAK_ATTACK))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::WEAK_ATTACK, { InputCombo{ InputUnit{ DeviceType::KBM, VK_LBUTTON } } });
-    }
-    if (!hasAction_(PlayerInputAction::STRONG_ATTACK))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::STRONG_ATTACK, { InputCombo{ InputUnit{ DeviceType::KBM, VK_RBUTTON } } });
-    }
-    if (!hasAction_(PlayerInputAction::GUARD))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::GUARD, { InputCombo{ InputUnit{ DeviceType::KBM, KeyInput::Key::K_Q } } });
-    }
-    if (!hasAction_(PlayerInputAction::DODGE))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::DODGE, { InputCombo{ InputUnit{ DeviceType::KBM, KeyInput::Key::K_Shift } } });
-    }
-    if (!hasAction_(PlayerInputAction::SKILL_A))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::SKILL_A, { InputCombo{ InputUnit{ DeviceType::KBM, KeyInput::Key::K_E } } });
-    }
-    if (!hasAction_(PlayerInputAction::SKILL_B))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::SKILL_B, { InputCombo{ InputUnit{ DeviceType::KBM, KeyInput::Key::K_R } } });
-    }
-    if (!hasAction_(PlayerInputAction::DEBUG_GUARD_HIT))
-    {
-        keyConfig_.SetBinds(PlayerInputAction::DEBUG_GUARD_HIT, { InputCombo{ InputUnit{ DeviceType::KBM, KeyInput::Key::K_F } } });
-    }
 }
 
 void PlayerControllerComponent::Start()
@@ -198,6 +136,7 @@ void PlayerControllerComponent::Start()
 
     owner_->SetLayer(GameObject::LayerType::Player);
     collider = owner_->GetComponent<ColliderComponent>();
+    movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
     if (collider)
     {
         collider->collisionRole = ColliderComponent::CollisionRole::CHARACTER;
@@ -208,6 +147,7 @@ void PlayerControllerComponent::Start()
         collider->RecreatePhysXActor();
     }
     blackboard = owner_->GetOrAddComponent<BlackboardComponent>();
+    SendDodgeInputToBlackboard({ 0.0f, 0.0f, 1.0f });
     RegisterPlayerAnimationActions();
 
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
@@ -216,7 +156,7 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerAttackState>(
         PLAYER_ACTION::WEAK_ATTACK,
         PLAYER_ACTION::WEAK_ATTACK);
-    stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::GUARD, PLAYER_ACTION::GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::JUST_GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
@@ -232,6 +172,11 @@ void PlayerControllerComponent::Update(float dt_)
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
+{
+    return GetCameraRelativeMoveDirection(gameObject.lock(), GetMoveInputAxis());
+}
+
+DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInputAxis() const
 {
     auto& keyConfig_ = KeyConfig::Instance();
     DirectX::XMFLOAT3 input_
@@ -249,7 +194,7 @@ DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
         input_.z *= inverseLength_;
     }
 
-    return GetCameraRelativeMoveDirection(gameObject.lock(), input_);
+    return input_;
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetCameraForwardDirection() const
@@ -257,15 +202,52 @@ DirectX::XMFLOAT3 PlayerControllerComponent::GetCameraForwardDirection() const
     return ::GetCameraForwardDirection(gameObject.lock());
 }
 
+void PlayerControllerComponent::SetFacingDirection(const DirectX::XMFLOAT3& direction_)
+{
+    if (movement)
+    {
+        movement->SetFacingDirection(direction_, true);
+        return;
+    }
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const float horizontalLengthSquared_ =
+        direction_.x * direction_.x + direction_.z * direction_.z;
+    if (horizontalLengthSquared_ <= 0.0001f) return;
+
+    // Dodge start needs an immediate camera-relative basis, so use a full interpolation rate.
+    owner_->transform->SetForwardYawOnly(
+        { direction_.x, 0.0f, direction_.z },
+        1.0f,
+        1.0f);
+}
+
 void PlayerControllerComponent::SetHorizontalVelocity(
     const DirectX::XMFLOAT3& dir_,
     float speed_)
 {
-    if (!collider) return;
-
     const float inputLengthSq_ =
         dir_.x * dir_.x +
         dir_.z * dir_.z;
+
+    if (movement)
+    {
+        if (inputLengthSq_ < 0.0001f)
+        {
+            movement->StopHorizontalMovement();
+        }
+        else
+        {
+            movement->SetHorizontalVelocity(
+                { dir_.x * speed_, 0.0f, dir_.z * speed_ });
+            movement->SetFacingDirection(dir_, false);
+        }
+        return;
+    }
+
+    if (!collider) return;
 
     if (inputLengthSq_ < 0.0001f)
     {
@@ -286,13 +268,16 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     }
 
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
-    const bool isComboInput_ =
-        currentAction_ == PLAYER_ACTION::WEAK_ATTACK &&
-        nextAction_ == PLAYER_ACTION::WEAK_ATTACK &&
-        (actionRuntime.canBufferInput || actionRuntime.canCombo);
-
-    if (currentAction_ == nextAction_ && !isComboInput_)
+    if (currentAction_ == nextAction_)
     {
+        const bool canQueueCombo_ =
+            currentAction_ == PLAYER_ACTION::WEAK_ATTACK &&
+            (actionRuntime.canBufferInput || actionRuntime.canCombo);
+        if (canQueueCombo_)
+        {
+            actionRuntime.bufferedAction = nextAction_;
+            actionRuntime.bufferedComboIndex = GetRequestedComboIndex(nextAction_);
+        }
         return false;
     }
 
@@ -301,7 +286,7 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
         GetPlayerActionGroup(currentAction_) == PLAYER_ACTION_GROUP::LOCOMOTION;
     const bool canUseCancelTransition_ =
         actionRuntime.canCancel &&
-        IsCancelTransitionAllowed(currentAction_, nextAction_);
+        HasCancelTransition(currentAction_, nextAction_);
     const bool canChangeImmediately_ =
         currentAction_ == PLAYER_ACTION::NONE ||
         isLocomotion_ ||
@@ -322,7 +307,7 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     return true;
 }
 
-bool PlayerControllerComponent::IsCancelTransitionAllowed(
+bool PlayerControllerComponent::HasCancelTransition(
     PLAYER_ACTION from_,
     PLAYER_ACTION to_) const
 {
@@ -333,6 +318,40 @@ bool PlayerControllerComponent::IsCancelTransitionAllowed(
         {
             return transition_.from == from_ && transition_.to == to_;
         });
+}
+
+bool PlayerControllerComponent::AddCancelTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_)
+{
+    if (from_ == PLAYER_ACTION::NONE || to_ == PLAYER_ACTION::NONE ||
+        from_ == to_ || HasCancelTransition(from_, to_))
+    {
+        return false;
+    }
+
+    cancelTransitions.push_back({ from_, to_ });
+    return true;
+}
+
+bool PlayerControllerComponent::RemoveCancelTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_)
+{
+    const auto removeBegin_ = std::remove_if(
+        cancelTransitions.begin(),
+        cancelTransitions.end(),
+        [from_, to_](const PlayerCancelTransition& transition_)
+        {
+            return transition_.from == from_ && transition_.to == to_;
+        });
+    if (removeBegin_ == cancelTransitions.end())
+    {
+        return false;
+    }
+
+    cancelTransitions.erase(removeBegin_, cancelTransitions.end());
+    return true;
 }
 
 void PlayerControllerComponent::NotifyGuardedAttack()
@@ -396,6 +415,11 @@ void PlayerControllerComponent::NotifyComboTransition()
 
 void PlayerControllerComponent::NotifyActionEnd()
 {
+    if (!IsPlayerActionTimelineDriven(GetCurrentAction()))
+    {
+        return;
+    }
+
     actionRuntime.actionEnded = true;
     actionRuntime.canCancel = true;
     if (blackboard)
@@ -500,10 +524,12 @@ void PlayerControllerComponent::ProcessActionInput()
         return;
     }
 
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) && RequestAction(PLAYER_ACTION::DODGE)) return;
-
     const DirectX::XMFLOAT3 input_ = GetMoveInput();
-    if ((input_.x != 0.0f || input_.z != 0.0f) && RequestAction(PLAYER_ACTION::MOVE))
+    const bool isLocomotion_ =
+        GetPlayerActionGroup(GetCurrentAction()) == PLAYER_ACTION_GROUP::LOCOMOTION;
+    if (isLocomotion_ &&
+        (input_.x != 0.0f || input_.z != 0.0f) &&
+        RequestAction(PLAYER_ACTION::MOVE))
     {
         return;
     }
@@ -594,13 +620,10 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
     const bool shouldEnterAttack_ =
         group_ == PLAYER_ACTION_GROUP::ATTACK &&
         comboIndex == 0;
-    if (shouldEnterAttack_)
-    {
-        blackboard->SetBool(
-            PlayerBlackboardCategory::ANIM,
-            PlayerBlackboardKey::ATTACK_ENTER,
-            true);
-    }
+    blackboard->SetBool(
+        PlayerBlackboardCategory::ANIM,
+        PlayerBlackboardKey::ATTACK_ENTER,
+        shouldEnterAttack_);
 
     SendMoveInputToBlackboard(GetMoveInput());
 }
@@ -636,6 +659,20 @@ void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT
     blackboard->SetVector2(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::MOVE_INPUT, { input_.x, input_.z });
 }
 
+void PlayerControllerComponent::SendDodgeInputToBlackboard(const DirectX::XMFLOAT3& input_)
+{
+    if (!blackboard) return;
+
+    blackboard->SetVector2(
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardKey::DODGE_INPUT,
+        { input_.x, input_.z });
+    blackboard->SetVector2(
+        PlayerBlackboardCategory::ANIM,
+        PlayerBlackboardKey::DODGE_INPUT,
+        { input_.x, input_.z });
+}
+
 void PlayerControllerComponent::Gui()
 {
     ImGui::Text("State: %s", stateMachine.GetCurrentStateName());
@@ -651,65 +688,8 @@ void PlayerControllerComponent::Gui()
     ImGui::Text("Buffered Action: %s", GetPlayerActionName(actionRuntime.bufferedAction));
 
     ImGui::SeparatorText("Cancel Transitions");
-    constexpr PLAYER_ACTION cancelActions_[] =
-    {
-        PLAYER_ACTION::IDLE,
-        PLAYER_ACTION::MOVE,
-        PLAYER_ACTION::WEAK_ATTACK,
-        PLAYER_ACTION::STRONG_ATTACK,
-        PLAYER_ACTION::GUARD,
-        PLAYER_ACTION::JUST_GUARD,
-        PLAYER_ACTION::DODGE,
-        PLAYER_ACTION::SKILL_A,
-        PLAYER_ACTION::SKILL_B,
-        PLAYER_ACTION::COUNTER_ATTACK
-    };
-    int removeCancelTransitionIndex_ = -1;
-    for (int transitionIndex_ = 0;
-        transitionIndex_ < static_cast<int>(cancelTransitions.size());
-        ++transitionIndex_)
-    {
-        PlayerCancelTransition& transition_ = cancelTransitions[transitionIndex_];
-        ImGui::PushID(transitionIndex_);
-        ImGui::SetNextItemWidth(140.0f);
-        if (ImGui::BeginCombo("##From", GetPlayerActionName(transition_.from)))
-        {
-            for (const PLAYER_ACTION action_ : cancelActions_)
-            {
-                if (ImGui::Selectable(GetPlayerActionName(action_), transition_.from == action_))
-                {
-                    transition_.from = action_;
-                }
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::SameLine();
-        ImGui::TextUnformatted("->");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(140.0f);
-        if (ImGui::BeginCombo("##To", GetPlayerActionName(transition_.to)))
-        {
-            for (const PLAYER_ACTION action_ : cancelActions_)
-            {
-                if (ImGui::Selectable(GetPlayerActionName(action_), transition_.to == action_))
-                {
-                    transition_.to = action_;
-                }
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::SameLine();
-        if (ImGui::SmallButton("X")) removeCancelTransitionIndex_ = transitionIndex_;
-        ImGui::PopID();
-    }
-    if (removeCancelTransitionIndex_ >= 0)
-    {
-        cancelTransitions.erase(cancelTransitions.begin() + removeCancelTransitionIndex_);
-    }
-    if (ImGui::Button("Add Cancel Transition"))
-    {
-        cancelTransitions.push_back({ PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::DODGE });
-    }
+    ImGui::Text("Routes: %zu", cancelTransitions.size());
+    ImGui::TextWrapped("Edit routes in the Player State Graph workspace.");
 
     ImGui::SeparatorText("Debug Change Action");
 

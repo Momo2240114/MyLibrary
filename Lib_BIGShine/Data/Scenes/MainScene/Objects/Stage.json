@@ -17,7 +17,7 @@
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
-                    -11.670000076293945,
+                    -11.5,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
@@ -27,7 +27,8 @@
                 "ShapeRenderFlg": true,
                 "UseGravity": false,
                 "UsePhysicsResponse": true,
-                "VelocityRotationMode": 0
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
             "TypeName": "CylinderCollider"
@@ -53,7 +54,7 @@
                         "toonPbrBlend": 1.0
                     }
                 ],
-                "ModelName": "./Data/Model/Stage/Stage_Floor.gltf",
+                "ModelName": "./Data/Model/Stage/Stage_Floor04.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "UsedNaviMeshSystemFlg": false,

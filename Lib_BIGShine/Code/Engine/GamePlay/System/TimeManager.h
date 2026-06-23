@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <cmath>
 
+class BlackboardComponent;
+
 enum class TarGetLayerType : uint32_t
 {
     Default = 0,
@@ -48,13 +50,13 @@ struct TimeState
 class TimeManager
 {
 private:
-    std::unordered_map<TarGetLayerType, TimeState> m_states;
-    float m_cachedLayerScales[32]{};
+    std::unordered_map<TarGetLayerType, TimeState> states;
+    float cachedLayerScales[32]{};
 
 public:
     TimeManager();
 
-    void Update(float rawDt);
+    void Update(float rawDt_);
     void SetTargetScale(uint32_t layerMask, float scale, float speed = 10.0f);
     void TriggerHitStop(uint32_t layerMask, float duration);
     void PrepareCache();

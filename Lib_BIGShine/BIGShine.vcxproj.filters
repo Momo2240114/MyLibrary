@@ -409,6 +409,9 @@
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -421,10 +424,16 @@
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\TimeManagerWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Shader\ToonShader.cpp">
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\System\ParticleManager.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraManager.cpp">
@@ -565,6 +574,9 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp">
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageComponent.cpp">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\TextureResourceManager.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
@@ -613,6 +625,12 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
@@ -625,6 +643,15 @@
     <ClCompile Include="Code\Engine\Physics\HitBox.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\CollisionStepSystem.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\System\AttackSystem.cpp">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Physics\HurtBox.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
@@ -632,6 +659,9 @@
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp">
@@ -852,6 +882,9 @@
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -859,6 +892,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\TimeManagerWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h">
@@ -874,6 +910,9 @@
       <Filter>Code\Engine\Graphics\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\System\ParticleManager.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\ShaderWindow.h">
@@ -1041,6 +1080,12 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
@@ -1081,6 +1126,9 @@
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h">
+      <Filter>Code\Engine\Graphics\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\AfterimageComponent.h">
       <Filter>Code\Engine\Graphics\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h">
@@ -1137,10 +1185,22 @@
     <ClInclude Include="Code\Engine\Physics\HitBox.h">
       <Filter>Code\Engine\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\CollisionStepSystem.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\System\AttackSystem.h">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Physics\HurtBox.h">
       <Filter>Code\Engine\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">
@@ -1316,6 +1376,9 @@
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MaterialOverlayVS.hlsl">
+      <Filter>Shaders\VFX</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\AfterimageInstancedVS.hlsl">
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
   </ItemGroup>

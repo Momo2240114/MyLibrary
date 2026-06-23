@@ -17,4 +17,5 @@ public:
 private:
     std::weak_ptr<PlayerControllerComponent> playerComponent;
     DirectX::XMFLOAT3 dodgeDirection{ 0.0f, 0.0f, 1.0f };
+    DirectX::XMFLOAT3 dodgeBlendInput{ 0.0f, 0.0f, 1.0f };
 };

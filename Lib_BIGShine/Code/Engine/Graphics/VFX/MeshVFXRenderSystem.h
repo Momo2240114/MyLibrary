@@ -21,7 +21,15 @@ public:
         const std::vector<bool>* invertLayers_,
         bool average_);
 
+    struct AfterimageInstanceData
+    {
+        float time = 0.0f;
+        float alpha = 1.0f;
+        DirectX::XMFLOAT2 padding{};
+    };
+    static_assert(sizeof(AfterimageInstanceData) == 16);
 private:
+
     struct MixConstants
     {
         uint32_t blendMode = 0;
@@ -66,6 +74,11 @@ private:
         ID3D11ShaderResourceView* source_,
         Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_);
+    bool EnsureAfterimageBuffers(ID3D11Device* device_, UINT instanceCapacity_);
+    UINT UpdateAfterimageBuffers(
+        const RenderContext& renderContext_,
+        const std::vector<const MeshVFXModelPoseView*>& poses_,
+        size_t meshIndex_);
 
     std::unique_ptr<MeshVFXShader> shader;
     std::vector<MeshVFXComponent*> components;
@@ -75,5 +88,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneDepthCopySRV;
     MeshVFXTextureMixer maskTextureMixer;
     MeshVFXTextureMixer noiseTextureMixer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> afterimageBoneBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> afterimageBoneSRV;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> afterimageInstanceBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> afterimageInstanceSRV;
+    UINT afterimageInstanceCapacity = 0;
     bool isInitialized = false;
 };

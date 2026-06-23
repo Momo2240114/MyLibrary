@@ -56,6 +56,7 @@ namespace PlayerBlackboardKey
     inline constexpr const char* ATTACK_TYPE = "AttackType";
     inline constexpr const char* COMBO_INDEX = "ComboIndex";
     inline constexpr const char* MOVE_INPUT = "MoveInput";
+    inline constexpr const char* DODGE_INPUT = "DodgeInput";
     inline constexpr const char* IS_IDLE = "IsIdle";
     inline constexpr const char* IS_MOVE = "IsMove";
     inline constexpr const char* IS_LOCOMOTION = "IsLocomotion";

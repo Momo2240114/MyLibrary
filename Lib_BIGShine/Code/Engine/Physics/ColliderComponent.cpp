@@ -28,7 +28,7 @@ void ColliderComponent::ReleasePhysXActor()
 {
     if (!actor && !shapeMaterial) return;
 
-    // PhysX本体の終了後はactor/materialも既に無効なので参照しない。
+    // PhysX本体�E終亁E���Eactor/materialも既に無効なので参�EしなぁE��E
     if (!PhysXSystem::GetPhysics())
     {
         actor = nullptr;
@@ -62,6 +62,12 @@ void ColliderComponent::RecreatePhysXActor()
 
 void ColliderComponent::CreatePhysXActor()
 {
+    if (collisionRole == CollisionRole::HIT_BOX ||
+        collisionRole == CollisionRole::HURT_BOX)
+    {
+        return;
+    }
+
     auto owner_ = GetGameObject();
     auto physics_ = PhysXSystem::GetPhysics();
     auto scene_ = PhysXSystem::GetScene();
@@ -95,6 +101,7 @@ void ColliderComponent::CreatePhysXActor()
 
     actor->userData = this;
     UpdatePhysXShape();
+    OnPhysicsShapePrepared();
     actor->setActorFlag(PxActorFlag::eDISABLE_SIMULATION, !enabled);
     scene_->addActor(*actor);
     CaptureTransformSnapshot();
@@ -114,6 +121,10 @@ void ColliderComponent::UpdatePhysXShape()
     if (!owner_) return;
 
     auto scale_ = owner_->transform->GetWorldScale();
+    scale_.x *= shapeSizeScale;
+    scale_.y *= shapeSizeScale;
+    scale_.z *= shapeSizeScale;
+
     if (!shape_)
     {
         auto material_ = GetShapeMaterial();
@@ -388,6 +399,12 @@ void ColliderComponent::SyncFromPhysics(float dt_)
 
 void ColliderComponent::PreparePhysicsStep()
 {
+    if (collisionRole == CollisionRole::HIT_BOX ||
+        collisionRole == CollisionRole::HURT_BOX)
+    {
+        return;
+    }
+
     if (!actor || actorIsStatic != isStatic)
     {
         RecreatePhysXActor();
@@ -436,10 +453,16 @@ void ColliderComponent::PreparePhysicsStep()
         }
         PxRigidBodyExt::setMassAndUpdateInertia(*dynamicActor_, std::max<float>(mass, 1.0f));
     }
+
+    OnPhysicsShapePrepared();
 }
 
 void ColliderComponent::ApplyDynamicActorSettings(PxRigidDynamic& actor_)
 {
+    actor_.setRigidBodyFlag(
+        PxRigidBodyFlag::eENABLE_CCD,
+        collisionRole == CollisionRole::CHARACTER);
+
     if (collisionRole != CollisionRole::CHARACTER)
     {
         actor_.setRigidDynamicLockFlags(PxRigidDynamicLockFlags());
@@ -646,11 +669,75 @@ void ColliderComponent::Gui()
     ImGui::Separator();
     ImGui::DragFloat3("Offset", &offset.x, 0.01f);
     ImGui::DragFloat("mass", &mass, 0.01f);
-    ImGui::ColorEdit3("PrimitiveColor", &debugPrimitiveColor.x);
+    if (ImGui::DragFloat("Shape Size Scale", &shapeSizeScale, 0.01f, 0.01f, 100.0f))
+    {
+        UpdatePhysXShape();
+    }
+    ImGui::ColorEdit4("PrimitiveColor", &debugPrimitiveColor.x);
 
     if (previousStatic_ != isStatic || previousTrigger_ != isTrigger
         || previousPhysicsControlsTransform_ != physicsControlsTransform)
     {
         RecreatePhysXActor();
     }
+}
+
+
+// ColliderComponent.h 冁E
+void ColliderComponent::Serialize(nlohmann::json& j) const  {
+    j["Offset"] = { offset.x, offset.y, offset.z };
+    j["shapeSizeScale"] = shapeSizeScale;
+    j["IsTrigger"] = isTrigger;
+    j["IsStatic"] = isStatic;
+    j["UsePhysicsResponse"] = usePhysicsResponse;
+    j["PhysicsControlsTransform"] = physicsControlsTransform;
+    j["CollisionRole"] = static_cast<int>(collisionRole);
+    j["ShapeRenderFlg"] = shapeRenderEnabled;
+    j["UseGravity"] = useGravity;
+    j["GravityScale"] = gravityScale;
+    j["VelocityRotationMode"] = static_cast<int>(velocityRotationMode);
+    j["RotateVelocityThreshold"] = rotateVelocityThreshold;
+    j["ContainmentMode"] = static_cast<int>(containmentMode);
+    j["Mass"] = mass;
+    j["DebugPrimitiveColor"] = { debugPrimitiveColor.x,debugPrimitiveColor.y,debugPrimitiveColor.z,debugPrimitiveColor.w };
+}
+
+void ColliderComponent::Deserialize(const nlohmann::json& j) {
+    if (j.contains("Offset")) {
+        offset.x = j["Offset"][0];
+        offset.y = j["Offset"][1];
+        offset.z = j["Offset"][2];
+    }
+    shapeSizeScale = j.value("shapeSizeScale", 1.0f);
+    isTrigger = j.value("IsTrigger", false);
+    isStatic = j.value("IsStatic", false);
+    usePhysicsResponse = j.value("UsePhysicsResponse", true);
+    physicsControlsTransform = j.value("PhysicsControlsTransform", false);
+    collisionRole = static_cast<CollisionRole>(j.value("CollisionRole", static_cast<int>(CollisionRole::PHYSICAL)));
+    shapeRenderEnabled = j.value("ShapeRenderFlg", true);
+    useGravity = j.value("UseGravity", false);
+    gravityScale = j.value("GravityScale", 1.0f);
+    mass = j.value("Mass", 1.0f);
+
+    velocityRotationMode = static_cast<VelocityRotationMode>(
+        j.value(
+            "VelocityRotationMode",
+            static_cast<int>(VelocityRotationMode::NONE)
+        )
+        );
+
+    containmentMode = static_cast<CollisionContainmentMode>(
+        j.value("ContainmentMode", static_cast<int>(CollisionContainmentMode::NONE))
+        );
+
+    rotateVelocityThreshold =
+        j.value("RotateVelocityThreshold", 0.001f);
+
+    if (j.contains("DebugPrimitiveColor")) {
+        debugPrimitiveColor.x = j["DebugPrimitiveColor"][0];
+        debugPrimitiveColor.y = j["DebugPrimitiveColor"][1];
+        debugPrimitiveColor.z = j["DebugPrimitiveColor"][2];
+        debugPrimitiveColor.w = j["DebugPrimitiveColor"][3];
+    }
+
 }

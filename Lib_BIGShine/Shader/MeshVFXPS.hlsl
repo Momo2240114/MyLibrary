@@ -29,10 +29,11 @@ float2 ScaleUVFromCenter(float2 uv, float scale)
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-    float radialScale = max(uvRadialScale + uvRadialScaleSpeed * time, 0.001f);
-    float2 baseUV = ScaleUVFromCenter(RotateUV(input.texcoord, baseUVRotation), radialScale) + baseUVSpeed * time;
-    float2 maskUV = ScaleUVFromCenter(RotateUV(input.texcoord, maskUVRotation), radialScale) + maskUVSpeed * time;
-    float2 noiseUV = RotateUV(input.texcoord, noiseUVRotation) + noiseUVSpeed * time;
+    float effectTime = time + input.instanceTime;
+    float radialScale = max(uvRadialScale + uvRadialScaleSpeed * effectTime, 0.001f);
+    float2 baseUV = ScaleUVFromCenter(RotateUV(input.texcoord, baseUVRotation), radialScale) + baseUVSpeed * effectTime;
+    float2 maskUV = ScaleUVFromCenter(RotateUV(input.texcoord, maskUVRotation), radialScale) + maskUVSpeed * effectTime;
+    float2 noiseUV = RotateUV(input.texcoord, noiseUVRotation) + noiseUVSpeed * effectTime;
     float2 sampledNoise = float2(0.0f, 0.0f);
     float2 distortionNoise = float2(0.0f, 0.0f);
     bool distortionEnabled = useMaskDistortion != 0 && hasDistortionNoiseTexture != 0;
@@ -98,10 +99,10 @@ float4 main(VS_OUT input) : SV_TARGET
     }
 
     float3 finalColor = baseColor.rgb + vfxColor.rgb * fresnelFactor;
-    float finalAlpha = baseColor.a * mask * alpha;
+    float finalAlpha = baseColor.a * mask * alpha * input.instanceAlpha;
     if (useFresnel != 0)
     {
-        finalAlpha = saturate(finalAlpha + fresnelFactor * mask * alpha);
+        finalAlpha = saturate(finalAlpha + fresnelFactor * mask * alpha * input.instanceAlpha);
     }
 
     if (distortionEnabled)
@@ -117,7 +118,10 @@ float4 main(VS_OUT input) : SV_TARGET
             max(1.0f - mask, 1.0f - baseColor.a),
             step(mask, dissolveThreshold)));
         finalColor = lerp(finalColor, distortedScene, hiddenMask);
-        finalAlpha = lerp(finalAlpha, maskDistortionOpacity, hiddenMask);
+        finalAlpha = lerp(
+            finalAlpha,
+            maskDistortionOpacity * input.instanceAlpha,
+            hiddenMask);
     }
 
     if (useEdgeHighlight != 0)
@@ -142,7 +146,8 @@ float4 main(VS_OUT input) : SV_TARGET
         }
         float edgeAmount = saturate(silhouetteEdge + intersectionEdge);
         finalColor += edgeColor.rgb * edgeAmount;
-        finalAlpha = saturate(finalAlpha + edgeColor.a * edgeAmount);
+        finalAlpha = saturate(
+            finalAlpha + edgeColor.a * edgeAmount * input.instanceAlpha);
     }
 
     return float4(finalColor, finalAlpha);

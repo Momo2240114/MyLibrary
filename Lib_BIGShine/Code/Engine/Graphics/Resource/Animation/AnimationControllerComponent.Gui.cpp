@@ -44,6 +44,12 @@ void AnimationControllerComponent::Gui()
     ImGui::TextDisabled("Animation editors are opened from the main Window menu.");
 
 
+    ImGui::Text(
+        "RootMotion %.3f %.3f %.3f",
+        rootMotionDelta.x,
+        rootMotionDelta.y,
+        rootMotionDelta.z);
+
     ImGui::SeparatorText("State Assets");
     if (AssetSlotGui::Draw(
         "Import State",
@@ -187,6 +193,33 @@ void AnimationControllerComponent::Gui()
 
         ImGui::Text("Editing: %s", editingState->name.c_str());
 
+        if (stateRenameSourceName != editingState->name)
+        {
+            stateRenameSourceName = editingState->name;
+            stateRenameText = editingState->name;
+        }
+        ImGui::SetNextItemWidth(-90.0f);
+        const bool renameSubmitted_ = ImGui::InputText(
+            "##StateName",
+            &stateRenameText,
+            ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::SameLine();
+        const bool renameClicked_ = ImGui::Button("Rename");
+        if (renameSubmitted_ || renameClicked_)
+        {
+            const std::string oldName_ = editingState->name;
+            if (RenameState(oldName_, stateRenameText))
+            {
+                stateRenameSourceName = stateRenameText;
+                stateAssetStatus = "Renamed state: " + oldName_ + " -> " + stateRenameText;
+            }
+            else
+            {
+                stateAssetStatus = "Failed to rename state. Name is empty or already in use.";
+                stateRenameText = oldName_;
+            }
+        }
+
         const auto statePathIt_ = stateAssetPaths.find(editingState->name);
         const std::string currentStatePath_ = statePathIt_ != stateAssetPaths.end()
             ? statePathIt_->second
@@ -241,6 +274,11 @@ void AnimationControllerComponent::Gui()
             editingState->type = AnimStateType::Blend1D;
         }
         ImGui::SameLine();
+        if (ImGui::RadioButton("Blend 2D", currentType_ == static_cast<int>(AnimStateType::BLEND_2D)))
+        {
+            editingState->type = AnimStateType::BLEND_2D;
+        }
+        ImGui::SameLine();
         if (ImGui::RadioButton("Custom", currentType_ == static_cast<int>(AnimStateType::Custom)))
         {
             editingState->type = AnimStateType::Custom;
@@ -289,8 +327,8 @@ void AnimationControllerComponent::Gui()
             ImGui::TextUnformatted("Blend Parameter");
             if (ImGui::Button(
                 editingState->blendParamName.empty()
-                    ? "Select Blackboard Parameter"
-                    : editingState->blendParamName.c_str(),
+                ? "Select Blackboard Parameter"
+                : editingState->blendParamName.c_str(),
                 ImVec2(-1.0f, 0.0f)))
             {
                 ImGui::OpenPopup("BlendParameterPopup");
@@ -413,6 +451,90 @@ void AnimationControllerComponent::Gui()
                 ImGui::EndChild();
             }
         }
+        else if (editingState->type == AnimStateType::BLEND_2D)
+        {
+            ImGui::SeparatorText("Directional Animations");
+            if (ImGui::TreeNode("Forward (0, +1)"))
+            {
+                DrawAnimationIndex_(
+                    "Forward Animation", editingState->blend2DForwardAnimationIndex);
+                ImGui::SliderFloat(
+                    "Forward Phase",
+                    &editingState->blend2DForwardPhaseOffset,
+                    -1.0f,
+                    1.0f);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Backward (0, -1)"))
+            {
+                DrawAnimationIndex_(
+                    "Backward Animation", editingState->blend2DBackwardAnimationIndex);
+                ImGui::SliderFloat(
+                    "Backward Phase",
+                    &editingState->blend2DBackwardPhaseOffset,
+                    -1.0f,
+                    1.0f);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Left (-1, 0)"))
+            {
+                DrawAnimationIndex_(
+                    "Left Animation", editingState->blend2DLeftAnimationIndex);
+                ImGui::SliderFloat(
+                    "Left Phase",
+                    &editingState->blend2DLeftPhaseOffset,
+                    -1.0f,
+                    1.0f);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Right (+1, 0)"))
+            {
+                DrawAnimationIndex_(
+                    "Right Animation", editingState->blend2DRightAnimationIndex);
+                ImGui::SliderFloat(
+                    "Right Phase",
+                    &editingState->blend2DRightPhaseOffset,
+                    -1.0f,
+                    1.0f);
+                ImGui::TreePop();
+            }
+
+            ImGui::SeparatorText("Blend Input");
+            if (ImGui::Button(
+                editingState->blend2DParamName.empty()
+                ? "Select Vector2 Parameter"
+                : editingState->blend2DParamName.c_str(),
+                ImVec2(-1.0f, 0.0f)))
+            {
+                ImGui::OpenPopup("Blend2DParameterPopup");
+            }
+            if (ImGui::BeginPopup("Blend2DParameterPopup"))
+            {
+                for (const auto& [parameterName_, value_] : GetEditableBlackboard())
+                {
+                    if (std::holds_alternative<DirectX::SimpleMath::Vector2>(value_) &&
+                        ImGui::MenuItem(parameterName_.c_str()))
+                    {
+                        editingState->blend2DParamName = parameterName_;
+                    }
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::DragFloat2(
+                "Default Input",
+                &editingState->blend2DDefaultInput.x,
+                0.01f,
+                -1.0f,
+                1.0f);
+            ImGui::Checkbox(
+                "Synchronize Normalized Time##Blend2D",
+                &editingState->blend2DSyncNormalizedTime);
+            ImGui::TextDisabled(
+                "X blends Left/Right. Y blends Backward/Forward.");
+            ImGui::TextDisabled(
+                "Diagonal input automatically blends the two matching directions.");
+        }
         else if (editingState->type == AnimStateType::Custom)
         {
             if (poseLibrary && !poseLibrary->customAnims.empty())
@@ -454,8 +576,8 @@ void AnimationControllerComponent::Gui()
                 ImGui::TextUnformatted("Root Motion Scale Curve");
                 if (ImGui::Button(
                     editingState->rootMotionScaleCurveName.empty()
-                        ? "No Curve"
-                        : editingState->rootMotionScaleCurveName.c_str(),
+                    ? "No Curve"
+                    : editingState->rootMotionScaleCurveName.c_str(),
                     ImVec2(-1.0f, 0.0f)))
                 {
                     ImGui::OpenPopup("RootMotionCurvePopup");
@@ -802,11 +924,54 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         }
                         ImGui::EndPopup();
                     }
-                };
+                    };
 
                 ActionField("Start Action", ev.startAction);
                 ActionField("Update Action", ev.updateAction);
                 ActionField("End Action", ev.endAction);
+                ImGui::SeparatorText("Blackboard Writes");
+                int removeWriteIndex_ = -1;
+                for (int writeIndex_ = 0;
+                    writeIndex_ < static_cast<int>(ev.blackboardWrites.size());
+                    ++writeIndex_)
+                {
+                    AnimBlackboardWrite& write_ = ev.blackboardWrites[writeIndex_];
+                    ImGui::PushID(writeIndex_);
+                    ImGui::InputText("Category", &write_.category);
+                    ImGui::InputText("Key", &write_.key);
+
+                    int typeIndex_ = static_cast<int>(write_.type);
+                    const char* typeNames_[] = { "Float", "Int", "Bool" };
+                    if (ImGui::Combo("Type", &typeIndex_, typeNames_, 3))
+                    {
+                        write_.type = static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
+                    }
+
+                    switch (write_.type)
+                    {
+                    case ANIM_BLACKBOARD_VALUE_TYPE::FLOAT:
+                        ImGui::DragFloat("Value", &write_.floatValue, 0.1f);
+                        break;
+                    case ANIM_BLACKBOARD_VALUE_TYPE::INT:
+                        ImGui::DragInt("Value", &write_.intValue);
+                        break;
+                    case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
+                        ImGui::Checkbox("Value", &write_.boolValue);
+                        break;
+                    }
+                    if (ImGui::Button("Remove Write")) removeWriteIndex_ = writeIndex_;
+                    ImGui::Separator();
+                    ImGui::PopID();
+                }
+                if (removeWriteIndex_ >= 0)
+                {
+                    ev.blackboardWrites.erase(ev.blackboardWrites.begin() + removeWriteIndex_);
+                }
+                if (ImGui::Button("Add Blackboard Write"))
+                {
+                    ev.blackboardWrites.push_back(AnimBlackboardWrite{});
+                }
+
                 ImGui::Checkbox("Call End On State Exit", &ev.callEndOnStateExit);
                 ImGui::Checkbox("Override Playback Speed", &ev.overridePlaybackSpeed);
                 if (ev.overridePlaybackSpeed)

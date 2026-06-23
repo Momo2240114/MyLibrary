@@ -1,6 +1,7 @@
 #include "ActionSequence.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "ImSequencer.h"
 
 #include <algorithm>
@@ -113,59 +114,45 @@ void ActionSequence::Start()
     RegisterSequence("");
 }
 
-void ActionSequence::Update(float et)
+void ActionSequence::Update(float elapsedTime_)
 {
-    auto owner = gameObject.lock();
-    for (auto it = pendingActions.begin(); it != pendingActions.end(); ) {
-        it->timer -= et;
-        if (it->timer <= 0.0f) {
-
-            bool executed = false;
-            // Prefer actions registered on the owner.
-            if (owner && owner->localRegistry.HasAction(it->actionName)) {
-                owner->localRegistry.Call(it->actionName);
-                executed = true;
-            }
-
-            // Fall back to the global registry.
-            if (!executed) {
-                ActionRegistry::Instance().Call(it->actionName);
-            }
-
-            it = pendingActions.erase(it);
+    for (auto iterator_ = pendingActions.begin(); iterator_ != pendingActions.end(); ) {
+        iterator_->timer -= elapsedTime_;
+        if (iterator_->timer <= 0.0f) {
+            ApplyBlackboardWrites(iterator_->blackboardWrites);
+            ExecuteAction(iterator_->actionName);
+            iterator_ = pendingActions.erase(iterator_);
         }
         else {
-            ++it;
+            ++iterator_;
         }
     }
 }
 
 
-void ActionSequence::StartSequence(int index)
+void ActionSequence::StartSequence(int index_)
 {
-    if (index < 0 || index >= (int)sequences.size()) return;
+    if (index_ < 0 || index_ >= (int)sequences.size()) return;
 
     pendingActions.clear();
 
-    for (const auto& act : sequences[index].actions) {
-        if (act.actionName.empty()) continue;
+    for (const ActionReference& action_ : sequences[index_].actions) {
+        if (action_.actionName.empty()) continue;
 
-        if (act.executionTime <= 0.0f) {
-            auto owner = gameObject.lock();
-            if (owner && owner->localRegistry.HasAction(act.actionName)) {
-                owner->localRegistry.Call(act.actionName);
-            }
-            else {
-                ActionRegistry::Instance().Call(act.actionName);
-            }
+        if (action_.executionTime <= 0.0f) {
+            ApplyBlackboardWrites(action_.blackboardWrites);
+            ExecuteAction(action_.actionName);
         }
         else {
-            pendingActions.push_back({ act.executionTime, act.actionName });
+            pendingActions.push_back({
+                action_.executionTime,
+                action_.actionName,
+                action_.blackboardWrites });
         }
     }
 }
 
-void ActionSequence::RegisterSequence(const std::string& sequenceName)
+void ActionSequence::RegisterSequence(const std::string& sequenceName_)
 {
     auto& reg = ActionRegistry::Instance();
 
@@ -183,6 +170,41 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName)
 void ActionSequence::Gui()
 {
     ImGui::TextDisabled("Edit sequences from Window > Action Sequence Editor.");
+}
+
+void ActionSequence::ApplyBlackboardWrites(
+    const std::vector<BlackboardValueWrite>& writes_)
+{
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
+    if (!owner_ || writes_.empty()) return;
+
+    const std::shared_ptr<BlackboardComponent> blackboard_ =
+        owner_->GetComponent<BlackboardComponent>();
+    if (!blackboard_) return;
+
+    for (const BlackboardValueWrite& write_ : writes_)
+    {
+        if (write_.category.empty() || write_.key.empty()) continue;
+
+        switch (write_.type)
+        {
+        case BLACKBOARD_VALUE_TYPE::FLOAT:
+            blackboard_->SetFloat(write_.category, write_.key, write_.floatValue);
+            break;
+        case BLACKBOARD_VALUE_TYPE::INT:
+            blackboard_->SetInt(write_.category, write_.key, write_.intValue);
+            break;
+        case BLACKBOARD_VALUE_TYPE::BOOL:
+            blackboard_->SetBool(write_.category, write_.key, write_.boolValue);
+            break;
+        }
+    }
+}
+
+void ActionSequence::ExecuteAction(const std::string& actionName_)
+{
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
+    if (owner_) owner_->ExecuteAction(actionName_);
 }
 
 void ActionSequence::DrawEditorGui()
@@ -299,6 +321,64 @@ void ActionSequence::DrawEditorGui()
                     action_.executionTime = (std::clamp)(action_.executionTime, 0.0f, sequence_.duration);
                     adapter_.SyncFrames();
                 }
+
+                ImGui::SeparatorText("Blackboard Writes");
+                int removeWriteIndex_ = -1;
+                for (int writeIndex_ = 0;
+                    writeIndex_ < static_cast<int>(action_.blackboardWrites.size());
+                    ++writeIndex_)
+                {
+                    BlackboardValueWrite& write_ = action_.blackboardWrites[writeIndex_];
+                    ImGui::PushID(writeIndex_);
+
+                    char categoryBuffer_[64];
+                    strcpy_s(categoryBuffer_, write_.category.c_str());
+                    if (ImGui::InputText("Blackboard Category", categoryBuffer_, sizeof(categoryBuffer_)))
+                    {
+                        write_.category = categoryBuffer_;
+                    }
+
+                    char keyBuffer_[64];
+                    strcpy_s(keyBuffer_, write_.key.c_str());
+                    if (ImGui::InputText("Key", keyBuffer_, sizeof(keyBuffer_)))
+                    {
+                        write_.key = keyBuffer_;
+                    }
+
+                    int typeIndex_ = static_cast<int>(write_.type);
+                    const char* typeNames_[] = { "Float", "Int", "Bool" };
+                    if (ImGui::Combo("Type", &typeIndex_, typeNames_, 3))
+                    {
+                        write_.type = static_cast<BLACKBOARD_VALUE_TYPE>(typeIndex_);
+                    }
+
+                    switch (write_.type)
+                    {
+                    case BLACKBOARD_VALUE_TYPE::FLOAT:
+                        ImGui::DragFloat("Value", &write_.floatValue, 0.1f);
+                        break;
+                    case BLACKBOARD_VALUE_TYPE::INT:
+                        ImGui::DragInt("Value", &write_.intValue, 1.0f);
+                        break;
+                    case BLACKBOARD_VALUE_TYPE::BOOL:
+                        ImGui::Checkbox("Value", &write_.boolValue);
+                        break;
+                    }
+
+                    if (ImGui::Button("Remove Write")) removeWriteIndex_ = writeIndex_;
+                    ImGui::Separator();
+                    ImGui::PopID();
+                }
+
+                if (removeWriteIndex_ >= 0)
+                {
+                    action_.blackboardWrites.erase(
+                        action_.blackboardWrites.begin() + removeWriteIndex_);
+                }
+                if (ImGui::Button("Add Blackboard Write"))
+                {
+                    action_.blackboardWrites.push_back(BlackboardValueWrite{});
+                }
             }
         }
         ImGui::Separator();
@@ -320,11 +400,26 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
 
         nlohmann::json actArray = nlohmann::json::array();
         for (const auto& act : seq.actions) {
-            actArray.push_back({
+            nlohmann::json actItem_ = {
                 {"cat", act.category},
                 {"name", act.actionName},
                 {"time", act.executionTime}
+            };
+
+            nlohmann::json writesArray_ = nlohmann::json::array();
+            for (const BlackboardValueWrite& write_ : act.blackboardWrites)
+            {
+                writesArray_.push_back({
+                    {"category", write_.category},
+                    {"key", write_.key},
+                    {"type", static_cast<int>(write_.type)},
+                    {"floatValue", write_.floatValue},
+                    {"intValue", write_.intValue},
+                    {"boolValue", write_.boolValue}
                 });
+            }
+            actItem_["blackboardWrites"] = writesArray_;
+            actArray.push_back(actItem_);
         }
         seqItem["actions"] = actArray;
         seqArray.push_back(seqItem);
@@ -361,6 +456,25 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                         ref.executionTime = accumulatedTime_;
                     }
                     data.duration = (std::max)(data.duration, ref.executionTime);
+
+                    if (actItem.contains("blackboardWrites") &&
+                        actItem["blackboardWrites"].is_array())
+                    {
+                        for (const auto& writeItem_ : actItem["blackboardWrites"])
+                        {
+                            if (!writeItem_.is_object()) continue;
+
+                            BlackboardValueWrite write_;
+                            write_.category = writeItem_.value("category", std::string("Attack"));
+                            write_.key = writeItem_.value("key", std::string("Damage"));
+                            const int typeIndex_ = (std::clamp)(writeItem_.value("type", 0), 0, 2);
+                            write_.type = static_cast<BLACKBOARD_VALUE_TYPE>(typeIndex_);
+                            write_.floatValue = writeItem_.value("floatValue", 0.0f);
+                            write_.intValue = writeItem_.value("intValue", 0);
+                            write_.boolValue = writeItem_.value("boolValue", false);
+                            ref.blackboardWrites.push_back(write_);
+                        }
+                    }
 
                     if (!ref.actionName.empty()) {
                         data.actions.push_back(ref);

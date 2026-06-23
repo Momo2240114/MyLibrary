@@ -17,6 +17,18 @@ enum class AssetSlotType
 
 namespace AssetSlotGui
 {
+    inline void ReleasePreviewTexture(
+        const ImDrawList*,
+        const ImDrawCmd* command_)
+    {
+        ID3D11ShaderResourceView* texture_ =
+            static_cast<ID3D11ShaderResourceView*>(command_->UserCallbackData);
+        if (texture_)
+        {
+            texture_->Release();
+        }
+    }
+
     inline const char* GetPayloadType(AssetSlotType type_)
     {
         switch (type_)
@@ -78,10 +90,17 @@ namespace AssetSlotGui
         const ImVec2 previewSize_(72.0f, 72.0f);
         if (previewTexture_)
         {
+            // ImGui stores only the raw SRV pointer in its draw command. Asset changes can
+            // rebuild MeshVFX resources later in this frame, so retain the SRV until the
+            // command has actually been rendered.
+            previewTexture_->AddRef();
             browseRequested_ = ImGui::ImageButton(
                 "##AssetPreview",
                 reinterpret_cast<ImTextureID>(previewTexture_),
                 previewSize_);
+            ImGui::GetWindowDrawList()->AddCallback(
+                ReleasePreviewTexture,
+                previewTexture_);
         }
         else
         {

@@ -17,8 +17,10 @@
 #include "Editor/Window/ShadowWindow.h"
 #include "Editor/Window/PostEffectWindow.h"
 #include "Editor/Window/InputEditorWindow.h"
+#include "Editor/Window/TimeManagerWindow.h"
 #include "Editor/NodeEditor/AnimNodeEditorWindow.h"
 #include "Editor/Workspace/ParticleEditorWindow.h"
+#include "Editor/Workspace/PlayerStateEditorWindow.h"
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 { 
@@ -52,10 +54,12 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<ShadowWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<PostEffectWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InputEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<TimeManagerWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ActionSequenceEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimationEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimNodeEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ParticleEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<PlayerStateEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));
 
 	actionRegistry = std::make_shared<ActionRegistry>();
@@ -65,15 +69,6 @@ void SceneBase::Initialize()
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 	m_ShapeRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
-
-	const int TestLightObNum = 100;
-	for (int i = 0; TestLightObNum > i; i++)
-	{
-		std::string name_ = "TestLight";
-		auto obj = _GameObjectManager->Create(name_);
-		obj->AddComponent<LightComponent>();
-	}
-
 }
 
 void SceneBase::Update(float elapsedTime)

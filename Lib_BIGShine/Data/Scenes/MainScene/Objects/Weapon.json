@@ -2,25 +2,31 @@
     "ColliderComponents": [
         {
             "Data": {
+                "ActionPrefix": "HitBox",
+                "ActivateActionName": "EnableHitBox",
                 "AttackTag": "Attack",
+                "BlackboardCategory": "Attack",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
-                "Damage": 1.0,
+                "Damage": 5.0,
+                "DamageKey": "Damage",
+                "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
                     1.0,
                     0.20000000298023224,
                     0.20000000298023224,
                     1.0
                 ],
+                "EndNodeName": "TrailEnd",
                 "GravityScale": 1.0,
-                "HalfSize": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
+                "HalfHeight": 1.0,
                 "HitOncePerActivation": true,
+                "HitStopTime": 0.05000000074505806,
+                "HitStopTimeKey": "HitStopTime",
                 "IsStatic": false,
                 "IsTrigger": false,
+                "KnockBackPower": 0.0,
+                "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
@@ -28,14 +34,16 @@
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
+                "Radius": 30.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
+                "StartNodeName": "TrailStart",
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
-                "UsedNaviMeshSystemFlg": false,
-                "VelocityRotationMode": 0
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
             },
-            "Enabled": true,
+            "Enabled": false,
             "TypeName": "HitBox"
         }
     ],
@@ -52,14 +60,14 @@
                             1.0,
                             1.0
                         ],
-                        "disableOutline": true,
+                        "disableOutline": false,
                         "id": 0,
-                        "outlineThicknessOffset": 0.004999999888241291,
+                        "outlineThicknessOffset": 1.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.057999998331069946
+                        "toonPbrBlend": 0.5
                     }
                 ],
-                "ModelName": "./Data/Model/SwordPlayer/Weapon/SwordModel.gltf",
+                "ModelName": "./Data/Model/SwordPlayer/Blender/Sword.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
                 "UsedNaviMeshSystemFlg": false,
@@ -77,147 +85,10 @@
             "Data": {
                 "targetGameObjectName": "PlayerModel",
                 "targetNodeIndex": 52,
-                "targetNodeName": "hand_r"
+                "targetStartNodeName": "hand_r"
             },
             "Enabled": true,
             "TypeName": "ModelAttachment"
-        },
-        {
-            "Data": {
-                "IsPlaying": false,
-                "Parts": [
-                    {
-                        "Alpha": 1.0,
-                        "AlphaEnd": 1.0,
-                        "AlphaStart": 1.0,
-                        "AnimateAlpha": false,
-                        "AnimateScale": false,
-                        "BaseTexturePath": "",
-                        "BaseUVRotation": 0.0,
-                        "BaseUVRotationSpeed": 0.0,
-                        "BaseUVSpeed": [
-                            0.0,
-                            0.0
-                        ],
-                        "BlendMode": 0,
-                        "Color": [
-                            1.0,
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "DissolveThreshold": 0.0,
-                        "DistortionNoiseTexturePath": "",
-                        "Duration": 0.0,
-                        "EdgeColor": [
-                            0.25,
-                            0.75,
-                            1.0,
-                            1.0
-                        ],
-                        "FresnelPower": 2.0,
-                        "FresnelStrength": 1.0,
-                        "IntersectionEdgeStrength": 0.0,
-                        "IntersectionEdgeWidth": 0.0020000000949949026,
-                        "Loop": false,
-                        "MaskDistortionOpacity": 0.6100000143051147,
-                        "MaskDistortionStrength": 16.0,
-                        "MaskLayers": [
-                            {
-                                "BlendMode": 0,
-                                "Invert": false,
-                                "Path": "Data/Texture/Trail/T_TrailMask_09.PNG"
-                            }
-                        ],
-                        "MaskTexturePath": "",
-                        "MaskUVRotation": 0.0,
-                        "MaskUVRotationSpeed": 0.0,
-                        "MaskUVSpeed": [
-                            0.0,
-                            0.0
-                        ],
-                        "MeshIndex": 0,
-                        "MeshRotationSpeed": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "ModelPath": "Data/Model/VFX/SM_Free_Magic_Plane1.glb",
-                        "NoiseStrength": 0.05000000074505806,
-                        "NoiseTexturePath": "",
-                        "NoiseTexturePaths": [
-                            "Data/Texture/Trail/T_TrailMask_06.PNG"
-                        ],
-                        "NoiseUVRotation": 0.0,
-                        "NoiseUVRotationSpeed": 0.0,
-                        "NoiseUVSpeed": [
-                            0.20000000298023224,
-                            -0.20000000298023224
-                        ],
-                        "NormalStrength": 1.0,
-                        "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
-                        "Position": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "RenderEnabled": true,
-                        "Rotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "Scale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "ScaleEnd": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "ScaleStart": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "SilhouetteEdgePower": 3.0,
-                        "SilhouetteEdgeStrength": 0.0,
-                        "UVRadialScale": 1.0,
-                        "UVRadialScaleSpeed": 0.0010000000474974513,
-                        "UVRotationCenter": [
-                            0.5,
-                            0.5
-                        ],
-                        "UseEdgeHighlight": false,
-                        "UseFresnel": true,
-                        "UseMask": true,
-                        "UseMaskDistortion": true,
-                        "UseMaterialBaseTexture": true,
-                        "UseMaterialNormalTexture": true,
-                        "UseNoise": true,
-                        "UseNormal": true,
-                        "UseVertexNoise": false,
-                        "VertexNoiseHorizontalScale": 1.0,
-                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
-                        "VertexNoiseSpeed": [
-                            0.0,
-                            1.0,
-                            0.0
-                        ],
-                        "VertexNoiseTexturePath": "",
-                        "VertexNoiseVerticalScale": 1.0,
-                        "VertexNoiseVerticalStrength": 0.10000000149011612
-                    }
-                ],
-                "TrailEmitting": true,
-                "TrailLifeTime": 1.7300000190734863,
-                "TrailMaxSampleCount": 64,
-                "TrailMinimumSampleDistance": 0.35600000619888306
-            },
-            "Enabled": true,
-            "TypeName": "TrailMeshComponent"
         },
         {
             "Data": {
@@ -252,8 +123,11 @@
                             1.0,
                             1.0
                         ],
-                        "FresnelPower": 2.0,
-                        "FresnelStrength": 1.0,
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveStrength": 3.0,
+                        "FresnelPower": 0.10000000149011612,
+                        "FresnelStrength": 0.019999999552965164,
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": false,
@@ -364,12 +238,151 @@
                     2.7090001106262207,
                     0.0
                 ],
-                "WeaponShowBladeGuide": true,
+                "WeaponShowBladeGuide": false,
+                "WeaponTargetEndNodeName": "",
                 "WeaponTargetGameObjectName": "Weapon",
-                "WeaponTargetNodeName": ""
+                "WeaponTargetNodeName": "",
+                "WeaponTargetStartNodeName": ""
             },
             "Enabled": true,
             "TypeName": "WeaponTrailComponent"
+        },
+        {
+            "Data": {
+                "FadeInDuration": 0.44999998807907104,
+                "FadeOutDuration": 0.5,
+                "IsPlaying": false,
+                "OverlayActive": false,
+                "Parts": [
+                    {
+                        "Alpha": 1.0,
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVSpeed": [
+                            0.0,
+                            0.0
+                        ],
+                        "BlendMode": 1,
+                        "Color": [
+                            1.0,
+                            0.007843137718737125,
+                            0.007843137718737125,
+                            1.0
+                        ],
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            1.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "EmissivePulseAmount": 0.75,
+                        "EmissivePulseSpeed": 4.0,
+                        "EmissiveStrength": 0.44999998807907104,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 0.800000011920929,
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": true,
+                        "MaskDistortionOpacity": 0.5,
+                        "MaskDistortionStrength": 8.0,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/Weapon/sword_Mask.png"
+                            }
+                        ],
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVSpeed": [
+                            0.0,
+                            0.0
+                        ],
+                        "MeshIndex": -1,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "",
+                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVSpeed": [
+                            0.20000000298023224,
+                            -0.800000011920929
+                        ],
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                        "Position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RenderEnabled": true,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.9800000190734863,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UseEdgeHighlight": true,
+                        "UseFresnel": true,
+                        "UseMask": true,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": true,
+                        "UseMaterialNormalTexture": true,
+                        "UseNoise": false,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "MaterialOverlayComponent"
         }
     ],
     "Layer": 0,

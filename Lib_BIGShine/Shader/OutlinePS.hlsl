@@ -19,6 +19,5 @@ PS_OUT main(OUTLINE_VS_OUT pin)
     PS_OUT output;
     output.color = outlineColor;
     output.normal = float4(normalize(pin.normal) * 0.5f + 0.5f, 1.0f);
-    output.depth = length(pin.position - cameraPosition.xyz);
     return output;
 }

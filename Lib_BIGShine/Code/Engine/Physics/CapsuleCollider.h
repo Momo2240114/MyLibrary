@@ -2,57 +2,49 @@
 
 #include "ColliderComponent.h"
 
+#include <string>
 
-// CapsuleCollider.h
-class CapsuleCollider : public ColliderComponent {
+class GltfModelCommponennt;
+
+class CapsuleCollider : public ColliderComponent
+{
 public:
     const std::string& GetName() const override
     {
-        static std::string name = "CapsuleCollider";
-        return name;
+        static std::string name_ = "CapsuleCollider";
+        return name_;
     }
 
     float radius = 0.5f;
-
-    float halfHeight = 1.0f; // 中心から端までの長さ
+    float halfHeight = 1.0f;
+    std::string startNodeName;
+    std::string endNodeName;
 
     ColliderType GetColliderType() const override { return ColliderType::Capsule; }
 
-    void Gui()  override;
-    void Update(float dt) override;
+    void Gui() override;
+    void Update(float deltaTime_) override;
+    void Serialize(nlohmann::json& json_) const override;
+    void Deserialize(const nlohmann::json& json_) override;
 
-    // CapsuleCollider.h 内
-    void Serialize(nlohmann::json& j) const override {
-        ColliderComponent::Serialize(j); // 親の保存を呼ぶ
-        j["Radius"] = radius;
-        j["HalfHeight"] = halfHeight;
-    }
+    bool TryGetNodeSegment(
+        DirectX::XMFLOAT3& startPosition_,
+        DirectX::XMFLOAT3& endPosition_);
+    Capsule GetCapsuleData();
+    CollisionManifold CheckCollision(std::shared_ptr<ColliderComponent> other_) override;
 
-    void Deserialize(const nlohmann::json& j) override {
-        ColliderComponent::Deserialize(j); // 親の読み込みを呼ぶ
-        radius = j.value("Radius", 0.5f);
-        halfHeight = j.value("HalfHeight", 1.0f);
-    }
+private:
+    void OnPhysicsShapePrepared() override;
+    std::shared_ptr<GltfModelCommponennt> ResolveNodeModel();
+    bool ResolveNodeIndex(
+        const std::shared_ptr<GltfModelCommponennt>& model_,
+        const std::string& nodeName_,
+        int& nodeIndex_);
+    void UpdateNodeSegmentShape(
+        const DirectX::XMFLOAT3& startPosition_,
+        const DirectX::XMFLOAT3& endPosition_);
 
-    // CapsuleCollider.h
-    Capsule GetCapsuleData() {
-        auto t = GetGameObject()->transform;
-
-        // 一度変数に受ける
-        DirectX::XMFLOAT4X4 worldFloat = t->GetWorld();
-        DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&worldFloat);
-
-        // Y軸方向に伸びるカプセルを想定
-        DirectX::XMVECTOR up = DirectX::XMVector3Normalize(world.r[1]);
-        DirectX::XMVECTOR center = world.r[3];
-        float h = halfHeight * t->GetWorldScale().y;
-
-        Capsule cap;
-        cap.p0 = DirectX::XMVectorAdd(center, DirectX::XMVectorScale(up, h));
-        cap.p1 = DirectX::XMVectorSubtract(center, DirectX::XMVectorScale(up, h));
-        cap.radius = radius * t->GetWorldScale().x;
-        return cap;
-    }
-
-    CollisionManifold CheckCollision(std::shared_ptr<ColliderComponent> other) override;
+private:
+    int startNodeIndex = -1;
+    int endNodeIndex = -1;
 };

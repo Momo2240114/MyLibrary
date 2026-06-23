@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <cstdint>
 #include <wrl.h>
 #include <map>
 #include "Engine/Graphics/Resource/ModelResource.h"
@@ -17,6 +18,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 class DecalComponent;
+class MaterialOverlayComponent;
 
 /// 1フレーム分のモデル描画要求を収集し、描画パスごとにGPUへ発行するシステム。
 /// 通常モデル、透過モデル、デカール、アウトライン、カスケードシャドウをまとめて管理する。
@@ -109,10 +111,30 @@ private:
 		int shadingModel;
 	};
 
+	struct CbMaterialOverlay
+	{
+		DirectX::XMFLOAT4 color;
+		DirectX::XMFLOAT2 maskUVSpeed;
+		DirectX::XMFLOAT2 noiseUVSpeed;
+		float time;
+		float alpha;
+		float noiseStrength;
+		float dissolveThreshold;
+		uint32_t enabled;
+		uint32_t useMask;
+		uint32_t useNoise;
+		float emissiveStrength;
+		float emissivePulseSpeed;
+		float emissivePulseAmount;
+		DirectX::XMFLOAT2 padding;
+	};
+	static_assert(sizeof(CbMaterialOverlay) % 16 == 0);
+
 	struct DrawInfo
 	{
 		ModelShaderID				shaderId;
 		std::shared_ptr<GltfModelCommponennt>	model;
+		std::shared_ptr<MaterialOverlayComponent> materialOverlay;
 	};
 
 	// 半透明メッシュはカメラから遠い順に描画するため、距離を併せて保持する。
@@ -149,6 +171,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferPixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> gBufferInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> materialOverlayConstantBuffer;
 	std::shared_ptr<LightingShader> lightingShader;
 
 	// ライト数に応じて容量を拡張するGPUバッファ。毎フレームの再生成を避ける。

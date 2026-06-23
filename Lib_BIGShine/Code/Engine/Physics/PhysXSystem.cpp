@@ -109,6 +109,7 @@ void PhysXSystem::Initialize()
     desc.cpuDispatcher = gDispatcher;
     desc.filterShader = PhysXFilterShader;
     desc.simulationEventCallback = &gCollisionCallback;
+    desc.flags |= PxSceneFlag::eENABLE_CCD;
 
     gScene = gPhysics->createScene(desc);
 

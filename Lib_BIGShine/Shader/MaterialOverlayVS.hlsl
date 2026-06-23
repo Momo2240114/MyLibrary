@@ -13,5 +13,7 @@ VS_OUT main(VS_IN input)
     output.normal = skinnedNormal;
     output.tangent = float4(skinnedTangent, input.tangent.w);
     output.texcoord = input.texcoord;
+    output.instanceTime = 0.0f;
+    output.instanceAlpha = 1.0f;
     return output;
 }
