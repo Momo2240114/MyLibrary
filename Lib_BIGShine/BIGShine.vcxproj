@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="checked|Win32">
@@ -73,15 +73,27 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='checked|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(ProjectDir)CustomExternalDependencies.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -112,19 +124,19 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>USE_IMGUI;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\tinygltf-release;./PhisXLib\include;.\External\imnodes-master</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;PhysXExtensions_static_64.lib;PhysXPvdSDK_static_64.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
-      <AdditionalLibraryDirectories>$(VC_LibraryPath_x86);.\PhisXLib\lib\x64\debug;{CPP_LIB}/PhysX/PhysX-5.1.3/lib/$(Platform)/$(Configuration);.\PhysXMatu\physx\bin\win.x86_64.vc143.mt\debug</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -139,15 +151,15 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\imgui-node-editor;.\External\DirectXTex</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\External\DirectXTK-main\Bin\Desktop_2022\x64\Debug;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\lib\vs2022\x64\debug;{CPP_LIB}.\External/PhysX/PhysX-5.1.3/lib/$(Platform)/$(Configuration);.\External\PhisXLib\lib\x64\debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;DirectXTK.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -164,7 +176,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\tinygltf-release;./PhisXLib\include;.\External\imnodes-master</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -173,8 +185,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>;./PhisXLib\lib\x64\release;{CPP_LIB}/PhysX/PhysX-5.1.3/lib/$(Platform)/$(Configuration);.\PhysXMatu\physx\bin\win.x86_64.vc143.mt\release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;PhysXExtensions_static_64.lib;PhysXPvdSDK_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -191,7 +203,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\External\ImGuizmo;.\External\imgui-docking;.\External\DirectXTK-main\Inc;.\Code;.\Shader;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\include;.\External\cereal-master\include;%(AdditionalIncludeDirectories);.\External\tinygltf-release;.\External\json-develop\include;.\External\PhisXLib\include;.\External.\recastnavigation.\DebugUtils.\Include;.\External.\recastnavigation.\Detour.\Include;.\External.\recastnavigation.\DetourCrowd.\Include;.\External.\recastnavigation.\DetourTileCache.\Include;.\External.\recastnavigation.\Recast.\Include;.\External\imnodes-master;.\External\DirectXTex;.\External\imgui-node-editor</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
@@ -200,8 +212,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\External\DirectXTK-main\Bin\Desktop_2022\x64\Release;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\lib\vs2022\x64\release;{CPP_LIB}.\External/PhysX/PhysX-5.1.3/lib/$(Platform)/$(Configuration);.\External\PhisXLib\lib\x64\release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;DirectXTK.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -210,11 +222,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">
     <Link>
-      <AdditionalLibraryDirectories>.\PhisXLib\lib\x64\checked;%(AdditionalLibraryDirectories);{CPP_LIB}/PhysX/PhysX-5.1.3/lib/$(Platform)/$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;PhysXExtensions_static_64.lib;PhysXPvdSDK_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\PhisXLib\include;%(AdditionalIncludeDirectories);.\PhysXMatu\physx\include;.\External\imnodes-master</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
     </ClCompile>
@@ -224,11 +236,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='checked|x64'">
     <Link>
-      <AdditionalLibraryDirectories>.\PhisXLib\lib\x64\checked;%(AdditionalLibraryDirectories);{CPP_LIB}/PhysX/PhysX-5.1.3/lib/$(Platform)/$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;PhysXExtensions_static_64.lib;PhysXPvdSDK_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\PhisXLib\include;%(AdditionalIncludeDirectories);.\PhysXMatu\physx\include;.\External\imnodes-master</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
     </ClCompile>
@@ -238,31 +250,32 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)External\SDL3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\SDL3\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;PhysXCharacterKinematic_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)External\SDL3\lib\x64\SDL3.dll" "$(OutDir)SDL3.dll"</Command>
+      <Command>%(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)External\SDL3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ProjectDir)External\SDL3\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)External\SDL3\lib\x86\SDL3.dll" "$(OutDir)SDL3.dll"</Command>
+      <Command>%(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
@@ -276,6 +289,7 @@
     <ClCompile Include="Code\Editor\Window\ShadowWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\PostEffectWindow.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
+    <ClCompile Include="Code\Engine\Audio\AudioComponent.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioResource.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioSource.cpp" />
@@ -291,6 +305,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\AI\AIActionComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\AI\AIBehaviorGraph.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\AI\AIControllerComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
@@ -316,7 +333,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ComponentRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\RegisterAllComponents.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp" />
-    <ClCompile Include="Code\Engine\GamePlay\System\VFXManager.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\EffectManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\BoneSegmentAttachmentComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\Transform.cpp" />
@@ -420,6 +437,7 @@
   <ItemGroup>
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />
+    <ClInclude Include="Code\Editor\Workspace\AudioWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
@@ -458,7 +476,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTitle.h" />
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTutorial.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h" />
-    <ClInclude Include="Code\Engine\GamePlay\System\VFXManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\EffectManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\BoneSegmentAttachmentComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\TransformDirector.h" />
@@ -504,6 +522,7 @@
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h" />
     <ClInclude Include="Code\Engine\Audio\Audio.h" />
+    <ClInclude Include="Code\Engine\Audio\AudioComponent.h" />
     <ClInclude Include="Code\Engine\Audio\AudioManager.h" />
     <ClInclude Include="Code\Engine\Audio\AudioResource.h" />
     <ClInclude Include="Code\Engine\Audio\AudioSource.h" />
@@ -514,6 +533,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\AI\AIActionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\AI\AIBehaviorGraph.h" />
+    <ClInclude Include="Code\Engine\GamePlay\AI\AIControllerComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
@@ -597,6 +619,7 @@
     <ClInclude Include="External\imnodes-master\imnodes_internal.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CustomExternalDependencies.props" />
     <None Include="Shader\Basic.hlsli" />
     <None Include="Shader\bidirectional_reflectance_distribution_function.hlsli" />
     <None Include="Shader\color_filter.hlsli" />

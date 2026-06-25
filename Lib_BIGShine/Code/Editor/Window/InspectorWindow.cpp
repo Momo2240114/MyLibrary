@@ -4,7 +4,7 @@ void InspectorWindow::Draw()
 {
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 
-    if (BeginEditorWindow(nullptr, windowFlags)) 
+    if (BeginEditorWindow(nullptr, windowFlags))
     {
         DrawStylePopup();
 

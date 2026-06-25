@@ -48,18 +48,21 @@ namespace
 
 void MeshVFXComponent::Start()
 {
+    // Assetに書かれたTexture/Modelを実行用RuntimePartへ読み込む。
     RefreshAssetLists();
     LoadPartResources();
 }
 
 void MeshVFXComponent::Update(float deltaTime_)
 {
+    // 再生中だけComponent全体の時間を進める。Part個別の時間はRenderSystem側で計算する。
     if (isPlaying) time += deltaTime_;
 }
 
 
 void MeshVFXComponent::Gui()
 {
+    // MeshVFX Asset、Part、Texture、UV、Noise、Edgeなどの編集UIをまとめる。
     ImGui::SeparatorText("Mesh VFX");
     if (ImGui::Button(isPlaying ? "Stop" : "Play")) isPlaying ? Stop() : Play();
     ImGui::SameLine();
@@ -419,6 +422,7 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Masked Area Distortion"))
             {
+                // Maskで消える領域に背景歪みを重ね、熱気や空間歪みのような表現を作る。
                 ImGui::Checkbox("Use Mask Distortion", &part_.useMaskDistortion);
                 ImGui::TextDisabled("Distorts the background where the mask becomes transparent. Uses Distortion Noise Resource.");
                 ImGui::DragFloat(
@@ -439,7 +443,9 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Edge Highlight"))
             {
+                // 頂点を膨らませず、Mesh面の内側だけでシルエットや交差部分を強調する。
                 ImGui::Checkbox("Use Edge Highlight", &part_.useEdgeHighlight);
+                ImGui::TextDisabled("Highlights the mesh silhouette/intersection inside the mesh surface. It does not expand vertices.");
                 ImGui::ColorEdit4("Edge Color", &part_.edgeColor.x);
                 ImGui::DragFloat(
                     "Silhouette Edge Strength",
@@ -466,6 +472,19 @@ void MeshVFXComponent::Gui()
                     0.0001f,
                     0.1f,
                     "%.4f");
+                const char* edgePatternModes_[] = { "None", "Base Texture", "Mask Texture" };
+                int edgePatternMode_ = static_cast<int>(part_.edgePatternMode);
+                if (ImGui::Combo("Edge Pattern Source", &edgePatternMode_, edgePatternModes_, IM_ARRAYSIZE(edgePatternModes_)))
+                {
+                    part_.edgePatternMode = static_cast<MESH_VFX_EDGE_PATTERN_MODE>(
+                        std::clamp(edgePatternMode_, 0, IM_ARRAYSIZE(edgePatternModes_) - 1));
+                }
+                ImGui::DragFloat(
+                    "Edge Pattern Strength",
+                    &part_.edgePatternStrength,
+                    0.01f,
+                    0.0f,
+                    1.0f);
                 ImGui::TreePop();
             }
 
@@ -528,6 +547,7 @@ void MeshVFXComponent::RefreshAssetLists()
 
 void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 {
+    // MeshVFX全体をJSONへ保存する。Part単体保存でもこの形式から該当Partだけ抜き出す。
     json_["IsPlaying"] = isPlaying;
     json_["Parts"] = nlohmann::json::array();
     for (const MeshVFXPart& part_ : asset.parts)
@@ -614,6 +634,8 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["SilhouetteEdgePower"] = part_.silhouetteEdgePower;
         partJson_["IntersectionEdgeStrength"] = part_.intersectionEdgeStrength;
         partJson_["IntersectionEdgeWidth"] = part_.intersectionEdgeWidth;
+        partJson_["EdgePatternMode"] = static_cast<int>(part_.edgePatternMode);
+        partJson_["EdgePatternStrength"] = part_.edgePatternStrength;
         partJson_["FresnelPower"] = part_.fresnelPower;
         partJson_["FresnelStrength"] = part_.fresnelStrength;
         partJson_["DissolveThreshold"] = part_.dissolveThreshold;
@@ -631,6 +653,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 
 void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 {
+    // JSONからPart設定を復元する。旧形式のMask/Noise単体パスもLayer配列へ補完する。
     asset.parts.clear();
     runtimeParts.clear();
     isPlaying = json_.value("IsPlaying", true);
@@ -733,6 +756,9 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.silhouetteEdgePower = (std::max)(partJson_.value("SilhouetteEdgePower", 3.0f), 0.1f);
         part_.intersectionEdgeStrength = (std::max)(partJson_.value("IntersectionEdgeStrength", 0.0f), 0.0f);
         part_.intersectionEdgeWidth = (std::max)(partJson_.value("IntersectionEdgeWidth", 0.002f), 0.0001f);
+        part_.edgePatternMode = static_cast<MESH_VFX_EDGE_PATTERN_MODE>(
+            std::clamp(partJson_.value("EdgePatternMode", 0), 0, 2));
+        part_.edgePatternStrength = std::clamp(partJson_.value("EdgePatternStrength", 0.0f), 0.0f, 1.0f);
         part_.fresnelPower = partJson_.value("FresnelPower", 2.0f);
         part_.fresnelStrength = partJson_.value("FresnelStrength", 1.0f);
         part_.dissolveThreshold = partJson_.value("DissolveThreshold", 0.0f);
@@ -751,6 +777,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 
 bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 {
+    // 現在のMeshVFX全体をAsset JSONとして保存する。
     if (path_.empty()) return false;
     nlohmann::json json_;
     json_["AssetType"] = "MeshVFX";
@@ -772,6 +799,7 @@ bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 
 bool MeshVFXComponent::LoadAsset(const std::string& path_)
 {
+    // MeshVFX Asset JSONを読み込み、関連Runtimeリソースを再構築する。
     if (path_.empty()) return false;
     const std::filesystem::path assetPath_ = WindowsDialogHelper::Utf8ToPath(path_);
     std::ifstream file_(assetPath_);
@@ -796,6 +824,7 @@ bool MeshVFXComponent::LoadAsset(const std::string& path_)
 
 bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_) const
 {
+    // 選択中Partだけを単体Assetとして保存し、他のMeshVFXへ再利用できるようにする。
     if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
 
     nlohmann::json componentJson_;
@@ -820,6 +849,7 @@ bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_
 
 bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_)
 {
+    // 単体Part Assetを読み込み、現在のPartスロットへ差し替える。
     if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
     if (!file_.is_open()) return false;
@@ -858,6 +888,7 @@ bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_
 
 void MeshVFXComponent::SetAsset(const MeshVFXAsset& asset_)
 {
+    // 外部から渡されたAsset設定を適用し、Texture/Modelを再読み込みする。
     asset = asset_;
     time = 0.0f;
     RebuildRuntimeResources();
@@ -865,11 +896,13 @@ void MeshVFXComponent::SetAsset(const MeshVFXAsset& asset_)
 
 void MeshVFXComponent::RebuildRuntimeResources()
 {
+    // Editor変更後など、保存データから実行時GPUリソースを作り直す。
     LoadPartResources();
 }
 
 void MeshVFXComponent::LoadPartResources()
 {
+    // 全PartのRuntimeリソースを再読み込みする。
     runtimeParts.resize(asset.parts.size());
     for (size_t partIndex_ = 0; partIndex_ < asset.parts.size(); ++partIndex_)
     {
@@ -879,6 +912,7 @@ void MeshVFXComponent::LoadPartResources()
 
 void MeshVFXComponent::LoadPartResource(size_t partIndex_)
 {
+    // 指定PartのModel/Textureを読み込み、描画時に参照するRuntimePartへ詰める。
     if (partIndex_ >= asset.parts.size()) return;
     if (runtimeParts.size() < asset.parts.size()) runtimeParts.resize(asset.parts.size());
 
@@ -947,6 +981,7 @@ void MeshVFXComponent::LoadTexture(
     UINT fallbackColor_,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& texture_)
 {
+    // Texture未設定や読み込み失敗時もShaderが安全に動くよう、指定色のDummy Textureへフォールバックする。
     texture_.Reset();
     if (!path_.empty() && std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_)))
     {

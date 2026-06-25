@@ -10,6 +10,8 @@
 
 struct RenderContext;
 
+// MeshVFX用Shader一式とConstantBuffer更新をまとめるクラス。
+// RenderSystemは描画するPartごとにUpdatePartを呼び、ここがHLSLへ値を橋渡しする。
 class MeshVFXShader
 {
 public:
@@ -41,70 +43,73 @@ public:
     void End(const RenderContext& renderContext_);
 
 private:
+    // Scene.hlsli側のカメラ・ライト情報と揃えるScene用ConstantBuffer。
     struct CbScene
     {
-        DirectX::XMFLOAT4X4 viewProjection;
-        DirectX::XMFLOAT4 lightDirection{};
-        DirectX::XMFLOAT4 lightColor{};
-        DirectX::XMFLOAT4 cameraPosition{};
-        DirectX::XMFLOAT4 zBufferParameters{};
-        int numPointLights = 0;
-        int numSpotLights = 0;
-        DirectX::XMFLOAT2 scenePadding{};
-        DirectX::XMFLOAT4X4 invViewProjection;
+        DirectX::XMFLOAT4X4 viewProjection;      // View * Projection行列。
+        DirectX::XMFLOAT4 lightDirection{};      // 平行光の方向。
+        DirectX::XMFLOAT4 lightColor{};          // 平行光の色。
+        DirectX::XMFLOAT4 cameraPosition{};      // ワールド空間のカメラ位置。
+        DirectX::XMFLOAT4 zBufferParameters{};   // 深度復元用パラメータ。
+        int numPointLights = 0;                  // 点光源数。
+        int numSpotLights = 0;                   // スポットライト数。
+        DirectX::XMFLOAT2 scenePadding{};        // 16byteアライン用。
+        DirectX::XMFLOAT4X4 invViewProjection;   // Screen/DepthからWorld復元するための逆行列。
     };
 
+    // MeshVFX.hlsliのCbMeshVFXと同じ順序で並べるPart用ConstantBuffer。
     struct CbMeshVFX
     {
-        DirectX::XMFLOAT4X4 world;
-        DirectX::XMFLOAT4 color;
-        DirectX::XMFLOAT2 baseUVSpeed;
-        DirectX::XMFLOAT2 maskUVSpeed;
-        DirectX::XMFLOAT2 noiseUVSpeed;
-        DirectX::XMFLOAT2 uvRotationCenter;
-        float time;
-        float alpha;
-        float normalStrength;
-        float noiseStrength;
-        float fresnelPower;
-        float fresnelStrength;
-        float dissolveThreshold;
-        float baseUVRotation;
-        float maskUVRotation;
-        float noiseUVRotation;
-        float uvRadialScale;
-        float uvRadialScaleSpeed;
-        float vertexNoiseHorizontalStrength;
-        float vertexNoiseVerticalStrength;
-        float vertexNoiseHorizontalScale;
-        float vertexNoiseVerticalScale;
-        DirectX::XMFLOAT3 vertexNoiseSpeed;
-        uint32_t useVertexNoise;
-        uint32_t useMask;
-        uint32_t useNoise;
-        uint32_t useNormal;
-        uint32_t useFresnel;
-        DirectX::XMFLOAT4 edgeColor;
-        float maskDistortionStrength;
-        float maskDistortionOpacity;
-        float silhouetteEdgeStrength;
-        float silhouetteEdgePower;
-        float intersectionEdgeStrength;
-        float intersectionEdgeWidth;
-        uint32_t useMaskDistortion;
-        uint32_t useEdgeHighlight;
-        uint32_t hasDistortionNoiseTexture;
-        uint32_t hasVertexNoiseTexture;
-        DirectX::XMUINT2 texturePadding;
+        DirectX::XMFLOAT4X4 world;       // Partのワールド行列。
+        DirectX::XMFLOAT4 color;         // BaseTextureに掛ける色。
+        DirectX::XMFLOAT2 baseUVSpeed;   // Base UVスクロール速度。
+        DirectX::XMFLOAT2 maskUVSpeed;   // Mask UVスクロール速度。
+        DirectX::XMFLOAT2 noiseUVSpeed;  // Noise UVスクロール速度。
+        DirectX::XMFLOAT2 uvRotationCenter; // UV回転・放射拡縮の中心。
+        float time;                      // Partごとの再生時間。
+        float alpha;                     // Partごとの最終Alpha。
+        float normalStrength;            // Normal Textureの強度。
+        float noiseStrength;             // UV Noiseの強度。
+        float fresnelPower;              // Fresnelの鋭さ。
+        float fresnelStrength;           // Fresnelの強さ。
+        float dissolveThreshold;         // Mask/Alpha破棄閾値。
+        float baseUVRotation;            // Base UV回転。ラジアン。
+        float maskUVRotation;            // Mask UV回転。ラジアン。
+        float noiseUVRotation;           // Noise UV回転。ラジアン。
+        float uvRadialScale;             // UV放射拡縮倍率。
+        float uvRadialScaleSpeed;        // UV放射拡縮速度。
+        float vertexNoiseHorizontalStrength; // 頂点横揺れ強度。
+        float vertexNoiseVerticalStrength;   // 頂点縦揺れ強度。
+        float vertexNoiseHorizontalScale;    // 頂点横Noiseの細かさ。
+        float vertexNoiseVerticalScale;      // 頂点縦Noiseの細かさ。
+        DirectX::XMFLOAT3 vertexNoiseSpeed;  // 頂点Noiseスクロール速度。
+        uint32_t useVertexNoise;        // 頂点Noiseを使うか。
+        uint32_t useMask;               // Maskを使うか。
+        uint32_t useNoise;              // UV Noiseを使うか。
+        uint32_t useNormal;             // Normal Textureを使うか。
+        uint32_t useFresnel;            // Fresnelを使うか。
+        DirectX::XMFLOAT4 edgeColor;    // Edge Highlight色。
+        float maskDistortionStrength;   // 背景歪み強度。
+        float maskDistortionOpacity;    // 背景歪みAlpha。
+        float silhouetteEdgeStrength;   // シルエット強調強度。
+        float silhouetteEdgePower;      // シルエット強調の細さ。
+        float intersectionEdgeStrength; // 深度交差強調強度。
+        float intersectionEdgeWidth;    // 深度交差幅。
+        uint32_t useMaskDistortion;     // 背景歪みを使うか。
+        uint32_t useEdgeHighlight;      // Edge Highlightを使うか。
+        uint32_t hasDistortionNoiseTexture; // 歪みNoiseが読み込めているか。
+        uint32_t hasVertexNoiseTexture; // 頂点Noiseが読み込めているか。
+        uint32_t edgePatternMode;       // Edge模様参照元。
+        float edgePatternStrength;      // Edge模様の反映割合。
     };
     static_assert(sizeof(CbMeshVFX) % 16 == 0);
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> materialOverlayVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> afterimageInstancedVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> partConstantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> skeletonConstantBuffer;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader; // 通常MeshVFX用VS。
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> materialOverlayVertexShader; // MaterialOverlay用VS。
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> afterimageInstancedVertexShader; // Afterimage Instancing用VS。
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader; // MeshVFX共通PS。
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout; // GltfModel頂点形式のInputLayout。
+    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer; // Scene用CB。
+    Microsoft::WRL::ComPtr<ID3D11Buffer> partConstantBuffer; // Part用CB。
+    Microsoft::WRL::ComPtr<ID3D11Buffer> skeletonConstantBuffer; // Skinning用ボーン行列CB。
 };

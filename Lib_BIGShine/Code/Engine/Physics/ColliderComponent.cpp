@@ -600,6 +600,15 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         }
 
         const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
+        if (useGravity && !characterGroundedForStep)
+        {
+            velocity.y += -9.8f * gravityScale * safeDeltaTime_;
+        }
+        else if (!useGravity)
+        {
+            velocity.y = 0.0f;
+        }
+
         const PxVec3 displacement_(
             velocity.x * safeDeltaTime_,
             velocity.y * safeDeltaTime_,

@@ -10,6 +10,7 @@
 
 bool MeshVFXShader::Initialize(ID3D11Device* device_)
 {
+    // MeshVFXで使うShaderとConstantBufferをまとめて作成する。
     if (!device_) return false;
 
     HRESULT result_ = CPUResourceLoader::LoadVertexShader(
@@ -61,6 +62,7 @@ void MeshVFXShader::Begin(
     bool useMaterialOverlay_,
     bool useInstancedPose_)
 {
+    // 描画モードに応じてVertexShaderを選び、Scene情報と背景TextureをPixelShaderへ渡す。
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->IASetInputLayout(inputLayout.Get());
     ID3D11VertexShader* selectedVertexShader_ = vertexShader.Get();
@@ -95,6 +97,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const GltfModelCommponennt::Mesh& mesh_)
 {
+    // 通常モデル描画用に、現在Meshのボーン行列をSkinning用CBへ転送する。
     DirectX::XMFLOAT4X4 transforms_[256]{};
     if (!mesh_.bones.empty())
     {
@@ -111,6 +114,7 @@ void MeshVFXShader::UpdateSkeleton(
     }
     else if (mesh_.node)
     {
+        // Boneを持たないMeshはNodeのWorldTransformだけを0番へ入れる。
         transforms_[0] = mesh_.node->worldTransform;
     }
     renderContext_.deviceContext->UpdateSubresource(
@@ -121,6 +125,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const std::vector<DirectX::XMFLOAT4X4>& transforms_)
 {
+    // Afterimageなど、外部で保存したPose行列をそのままSkinning用CBへ転送する。
     DirectX::XMFLOAT4X4 bufferTransforms_[256]{};
     const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
     for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
@@ -133,6 +138,7 @@ void MeshVFXShader::UpdateSkeleton(
 
 void MeshVFXShader::UpdateScene(const RenderContext& renderContext_)
 {
+    // Camera/Depth復元情報をHLSLのScene定数へ合わせて更新する。
     if (!renderContext_.camera) return;
 
     const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&renderContext_.camera->GetView());
@@ -162,6 +168,7 @@ void MeshVFXShader::UpdatePart(
     float partTime_,
     float alpha_)
 {
+    // 1Part分の編集値とRuntime TextureをShaderへ送る。ここがC++設定とHLSL表現の接続点。
     CbMeshVFX constants_{};
     DirectX::XMStoreFloat4x4(&constants_.world, world_);
     constants_.color = part_.color;
@@ -178,6 +185,7 @@ void MeshVFXShader::UpdatePart(
     constants_.dissolveThreshold = part_.dissolveThreshold;
     const auto calculateRotation_ = [partTime_](float initialRotation_, float rotationSpeed_)
         {
+            // GUIは度数法で扱い、Shaderへはラジアンで渡す。
             const float rotation_ = DirectX::XMConvertToRadians(
                 initialRotation_ + rotationSpeed_ * partTime_);
             return std::fmod(rotation_, 2.0f * std::numbers::pi_v<float>);
@@ -208,6 +216,8 @@ void MeshVFXShader::UpdatePart(
     constants_.useEdgeHighlight = part_.useEdgeHighlight ? 1u : 0u;
     constants_.hasDistortionNoiseTexture = runtimePart_.distortionNoiseTexture ? 1u : 0u;
     constants_.hasVertexNoiseTexture = runtimePart_.vertexNoiseTexture ? 1u : 0u;
+    constants_.edgePatternMode = static_cast<uint32_t>(part_.edgePatternMode);
+    constants_.edgePatternStrength = part_.edgePatternStrength;
 
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->UpdateSubresource(partConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
@@ -227,6 +237,7 @@ void MeshVFXShader::UpdatePart(
 
 void MeshVFXShader::End(const RenderContext& renderContext_)
 {
+    // 次の描画へTexture/CB/Shader状態を持ち越さないよう、MeshVFXで使ったSlotを解除する。
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     ID3D11ShaderResourceView* nullTextures_[9] = {};
     ID3D11Buffer* nullBuffer_ = nullptr;

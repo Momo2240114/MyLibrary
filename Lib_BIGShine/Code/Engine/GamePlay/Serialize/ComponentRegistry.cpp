@@ -42,6 +42,7 @@
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/Graphics/VFX/AfterimageComponent.h"
+#include "Engine/Audio/AudioComponent.h"
 
 
 // Registerの実装。GameObject.h の定義を知っている必要がある。
@@ -83,6 +84,7 @@ void RegisterAllComponents()
     registry.Register<MeshVFXComponent>("MeshVFXComponent");
     registry.Register<MaterialOverlayComponent>("MaterialOverlayComponent");
     registry.Register<AfterimageComponent>("AfterimageComponent");
+    registry.Register<AudioComponent>("AudioComponent");
 
 
     // 物理・コリジョン系
@@ -131,4 +133,5 @@ std::shared_ptr<Component> ComponentRegistry::Create(const std::string& name, st
 
     return it->second(go,casllStart);
 }
+
 

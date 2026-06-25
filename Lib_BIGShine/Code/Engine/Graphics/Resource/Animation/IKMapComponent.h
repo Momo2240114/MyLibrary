@@ -118,6 +118,4 @@ private:
     void ResolveBodyCollision(IKChain& chain_, size_t pointIndex_);
     bool GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, DirectX::XMFLOAT3& center_);
     void ApplySpringChain(IKChain& chain_);
-    void DrawBodyCollisionShapes();
-    void DrawHairCollisionShapes();
 };

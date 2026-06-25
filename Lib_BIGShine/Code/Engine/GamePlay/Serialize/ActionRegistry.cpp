@@ -21,6 +21,7 @@ void RegisterAllActions()
     reg.RegisterAction("Sequence", "---", nullptr);
     reg.RegisterAction("Audio", "---", nullptr);
     reg.RegisterAction("Scene", "---", nullptr);
+    audio.RegisterAudioWorkspaceActions();
 
     //// ƒ^ƒCƒgƒ‹BGM
     reg.RegisterAction("Audio", "PlayBGM_Title", [&]() {

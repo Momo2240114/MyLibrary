@@ -58,6 +58,10 @@ void AttackSystem::HandleHit(
     event_.hitMeshVFXAssetPath = hitBox_.hitMeshVFXAssetPath;
     event_.hitMeshVFXLifeTime = hitBox_.hitMeshVFXLifeTime;
     event_.hitMeshVFXNormalOffset = hitBox_.hitMeshVFXNormalOffset;
+    event_.hitSoundPath = hitBox_.hitSoundPath;
+    event_.hitSoundVolume = hitBox_.hitSoundVolume;
+    event_.hitSoundMuffled = hitBox_.hitSoundMuffled;
+    event_.hitSoundMuffledCutoff = hitBox_.hitSoundMuffledCutoff;
 
     frameHitEvents.push_back(event_);
     PublishHitToBlackboard(event_);
@@ -158,3 +162,4 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
         receiver_->localRegistry.Call("OnHit");
     }
 }
+

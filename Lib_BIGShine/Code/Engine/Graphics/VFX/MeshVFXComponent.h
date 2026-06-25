@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+// Meshを使ったVFXをGameObject上で再生・編集する基底Component。
+// 通常のMeshVFX、WeaponTrail、AfterimageなどはこのAsset/Runtime管理を共有する。
 class MeshVFXComponent : public Component
 {
 public:
@@ -71,11 +73,11 @@ private:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& texture_);
 
 private:
-    MeshVFXAsset asset;
-    std::vector<MeshVFXRuntimePart> runtimeParts;
-    std::vector<std::string> modelAssetPaths;
-    std::vector<std::string> textureAssetPaths;
-    std::string assetPath;
-    float time = 0.0f;
-    bool isPlaying = true;
+    MeshVFXAsset asset;                          // 保存対象となるMeshVFX設定。
+    std::vector<MeshVFXRuntimePart> runtimeParts;// asset.partsに対応するGPUリソースキャッシュ。
+    std::vector<std::string> modelAssetPaths;    // GUI候補として列挙したモデルAssetパス。
+    std::vector<std::string> textureAssetPaths;  // GUI候補として列挙したTexture Assetパス。
+    std::string assetPath;                       // 現在読み書きしているMeshVFX JSONパス。
+    float time = 0.0f;                           // Component全体の再生時間。
+    bool isPlaying = true;                       // trueならUpdateでtimeを進める。
 };

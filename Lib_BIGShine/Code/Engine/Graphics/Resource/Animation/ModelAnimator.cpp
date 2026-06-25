@@ -100,6 +100,9 @@ static void ApplyAnimationBlackboardWrites(
         case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
             blackboard_->SetBool(write_.category, write_.key, write_.boolValue);
             break;
+        case ANIM_BLACKBOARD_VALUE_TYPE::STRING:
+            blackboard_->SetString(write_.category, write_.key, write_.stringValue);
+            break;
         }
     }
 }

@@ -16,10 +16,10 @@ class GameObjectManager;
 
 struct ParticleSpawnRequest
 {
-    // Asset cache name. Example: "Hit/Spark" for Data/Particle/Hit/Spark.json
+    // Assetキャッシュ名。例: Data/Particle/Hit/Spark.jsonなら"Hit/Spark"。
     std::string assetName;
 
-    // Compatibility field. This can be either old path or asset-name-like string.
+    // 互換用フィールド。旧形式のパス、またはAsset名風の文字列を受け取る。
     std::string assetPath;
 
     std::string emitterName;
@@ -31,10 +31,10 @@ struct ParticleSpawnRequest
 
 struct MeshVFXSpawnRequest
 {
-    // Asset cache name. Example: "Slash/Impact" for Data/VFX/Slash/Impact.json
+    // Assetキャッシュ名。例: Data/VFX/Slash/Impact.jsonなら"Slash/Impact"。
     std::string assetName;
 
-    // Compatibility field. This can be either old path or asset-name-like string.
+    // 互換用フィールド。旧形式のパス、またはAsset名風の文字列を受け取る。
     std::string assetPath;
 
     DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };

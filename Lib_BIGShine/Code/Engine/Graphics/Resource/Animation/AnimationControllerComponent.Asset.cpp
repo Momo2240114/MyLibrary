@@ -656,7 +656,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"type", static_cast<int>(write_.type)},
             {"floatValue", write_.floatValue},
             {"intValue", write_.intValue},
-            {"boolValue", write_.boolValue}
+            {"boolValue", write_.boolValue},
+            {"stringValue", write_.stringValue}
         };
     }
 
@@ -664,11 +665,12 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
     {
         write_.category = json_.value("category", std::string("Attack"));
         write_.key = json_.value("key", std::string("Damage"));
-        const int typeIndex_ = (std::clamp)(json_.value("type", 0), 0, 2);
+        const int typeIndex_ = (std::clamp)(json_.value("type", 0), 0, 3);
         write_.type = static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
         write_.floatValue = json_.value("floatValue", 0.0f);
         write_.intValue = json_.value("intValue", 0);
         write_.boolValue = json_.value("boolValue", false);
+        write_.stringValue = json_.value("stringValue", std::string{});
     }
 
     void to_json(nlohmann::json & j, const AnimEvent & e) {

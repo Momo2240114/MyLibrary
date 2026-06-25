@@ -91,6 +91,7 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 	//シーン更新
 	//m_pSceneGame->Update(elapsedTime_);
 	SceneManager::Update(elapsedTime_);
+	AudioManager::Instance().Update();
 
 	PhysXSystem::Step(elapsedTime_);
 }
@@ -253,6 +254,7 @@ bool framework::uninitialize()
 	SceneManager::Clear();
 
 	PhysXSystem::Finalize();
+	AudioManager::Instance().Finalize();
 
 	spriteRenderSystem.Finalize();
 	GraphicsDeviceManager::Instance().Finalize();
@@ -276,3 +278,5 @@ void framework::GuiDraw()
 framework::~framework()
 {
 }
+
+

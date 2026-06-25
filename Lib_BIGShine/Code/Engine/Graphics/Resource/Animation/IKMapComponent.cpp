@@ -519,69 +519,6 @@ bool IKMapComponent::GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, 
     return true;
 }
 
-void IKMapComponent::DrawBodyCollisionShapes()
-{
-    if (!showBodyCollisionShapes) return;
-
-    auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
-    for (auto& sphere_ : bodyCollisionSpheres)
-    {
-        XMFLOAT3 center_;
-        if (!GetBodyCollisionSphereCenter(sphere_, center_)) continue;
-
-        XMFLOAT4 color_ = bodyCollisionShapeColor;
-        if (!sphere_.enabled) color_.w *= 0.25f;
-        renderer_.DrawSphere(center_, sphere_.radius, color_);
-    }
-
-    constexpr int connectionSamples_ = 6;
-    for (size_t sphereIndex_ = 0; sphereIndex_ + 1 < bodyCollisionSpheres.size(); ++sphereIndex_)
-    {
-        auto& sphereA_ = bodyCollisionSpheres[sphereIndex_];
-        auto& sphereB_ = bodyCollisionSpheres[sphereIndex_ + 1];
-        if (!sphereA_.connectToNext || !sphereA_.enabled || !sphereB_.enabled) continue;
-
-        XMFLOAT3 centerA_;
-        XMFLOAT3 centerB_;
-        if (!GetBodyCollisionSphereCenter(sphereA_, centerA_)
-            || !GetBodyCollisionSphereCenter(sphereB_, centerB_)) continue;
-
-        for (int sampleIndex_ = 1; sampleIndex_ < connectionSamples_; ++sampleIndex_)
-        {
-            const float interpolation_ =
-                static_cast<float>(sampleIndex_) / static_cast<float>(connectionSamples_);
-            const XMFLOAT3 center_ = Add(centerA_, Scale(Subtract(centerB_, centerA_), interpolation_));
-            const float radius_ = sphereA_.radius + (sphereB_.radius - sphereA_.radius) * interpolation_;
-            renderer_.DrawSphere(center_, radius_, bodyCollisionShapeColor);
-        }
-    }
-}
-
-void IKMapComponent::DrawHairCollisionShapes()
-{
-    if (!showHairCollisionShapes) return;
-    if (!model) return;
-
-    auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
-
-    for (const auto& chain_ : chains)
-    {
-        if (!chain_.enabled
-            || (chain_.type != IK_TYPE::SPRING_BONE && chain_.type != IK_TYPE::CLOTH_BONE)) continue;
-        if (!chain_.initialized) continue;
-        if (chain_.simulatedPositions.empty()) continue;
-
-        const float radius_ = (std::max)(chain_.collisionRadius, 0.005f);
-
-        for (size_t pointIndex_ = 1; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
-        {
-            renderer_.DrawSphere(
-                chain_.simulatedPositions[pointIndex_],
-                radius_,
-                hairCollisionShapeColor);
-        }
-    }
-}
 void IKMapComponent::ApplySpringChain(IKChain& chain_)
 {
     auto& nodes_ = model->GetNodes();

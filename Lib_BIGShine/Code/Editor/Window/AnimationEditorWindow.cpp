@@ -289,18 +289,18 @@ bool AnimationEditorWindow::CopySceneObjectToPreview(
 
     std::vector<std::shared_ptr<GameObject>> sourceObjects_;
     auto collectHierarchy_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
-    {
-        if (!object_)
         {
-            return;
-        }
+            if (!object_)
+            {
+                return;
+            }
 
-        sourceObjects_.push_back(object_);
-        for (const auto& childTransform_ : object_->transform->children)
-        {
-            self_(self_, childTransform_ ? childTransform_->gameObject.lock() : nullptr);
-        }
-    };
+            sourceObjects_.push_back(object_);
+            for (const auto& childTransform_ : object_->transform->children)
+            {
+                self_(self_, childTransform_ ? childTransform_->gameObject.lock() : nullptr);
+            }
+        };
     collectHierarchy_(collectHierarchy_, sourceObject_);
 
     // WeaponTrail‚È‚Ç‚Ì–¼‘OŽQÆ‚ðˆÛŽ‚·‚é‚½‚ßAŒ³‚ÌObject–¼‚ð•Ï‚¦‚¸‚É
@@ -800,6 +800,14 @@ void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     previewModelRenderSystem.RenderAll(renderContext_);
     previewTarget.ResetRenderTarget(context_);
+    context_->OMSetDepthStencilState(
+        renderContext_.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    graphics_.GetShapeRendererSystem().Render(
+        context_,
+        renderContext_.camera->GetView(),
+        renderContext_.camera->GetProjection());
+    context_->OMSetDepthStencilState(
+        renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     previewParticleRenderSystem.RenderAll(renderContext_);
 
     previewTarget.End(context_);
@@ -2133,8 +2141,8 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
         ImGui::InputText("Key", &write_.key);
 
         int typeIndex_ = static_cast<int>(write_.type);
-        const char* typeNames_[] = { "Float", "Int", "Bool" };
-        if (ImGui::Combo("Type", &typeIndex_, typeNames_, 3))
+        const char* typeNames_[] = { "Float", "Int", "Bool", "String" };
+        if (ImGui::Combo("Type", &typeIndex_, typeNames_, IM_ARRAYSIZE(typeNames_)))
         {
             write_.type = static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
         }
@@ -2150,6 +2158,31 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
         case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
             ImGui::Checkbox("Value", &write_.boolValue);
             break;
+        case ANIM_BLACKBOARD_VALUE_TYPE::STRING:
+        {
+            const bool isParticleAsset_ = write_.key == "HitParticleAssetPath";
+            const bool isMeshVFXAsset_ = write_.key == "HitMeshVFXAssetPath";
+            if ((isParticleAsset_ || isMeshVFXAsset_) && gameObjectManager)
+            {
+                const std::vector<std::string>& assets_ = isParticleAsset_
+                    ? gameObjectManager->GetEffectManager().GetParticleAssetPaths()
+                    : gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+                if (ImGui::BeginCombo("Value", write_.stringValue.empty() ? "(None)" : write_.stringValue.c_str()))
+                {
+                    if (ImGui::Selectable("(None)", write_.stringValue.empty())) write_.stringValue.clear();
+                    for (const std::string& assetPath_ : assets_)
+                    {
+                        if (ImGui::Selectable(assetPath_.c_str(), write_.stringValue == assetPath_)) write_.stringValue = assetPath_;
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+            else
+            {
+                ImGui::InputText("Value", &write_.stringValue);
+            }
+            break;
+        }
         }
         if (ImGui::Button("Remove Write")) removeWriteIndex_ = writeIndex_;
         ImGui::Separator();
@@ -2159,6 +2192,27 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     {
         ev.blackboardWrites.erase(ev.blackboardWrites.begin() + removeWriteIndex_);
     }
+    auto addAttackWrite_ = [&ev](const char* key_, ANIM_BLACKBOARD_VALUE_TYPE type_)
+        {
+            AnimBlackboardWrite write_{};
+            write_.category = "Attack";
+            write_.key = key_;
+            write_.type = type_;
+            ev.blackboardWrites.push_back(write_);
+        };
+    if (ImGui::Button("+ Damage")) addAttackWrite_("Damage", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+    ImGui::SameLine();
+    if (ImGui::Button("+ HitStopTime")) addAttackWrite_("HitStopTime", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+    ImGui::SameLine();
+    if (ImGui::Button("+ HitStopDir")) addAttackWrite_("HitStopDir", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+    ImGui::SameLine();
+    if (ImGui::Button("+ HitStopLayer")) addAttackWrite_("HitStopLayerMask", ANIM_BLACKBOARD_VALUE_TYPE::INT);
+    ImGui::SameLine();
+    if (ImGui::Button("+ KnockBack")) addAttackWrite_("KnockBackPower", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+    ImGui::SameLine();
+    if (ImGui::Button("+ HitParticle")) addAttackWrite_("HitParticleAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+    ImGui::SameLine();
+    if (ImGui::Button("+ HitMeshVFX")) addAttackWrite_("HitMeshVFXAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
     if (ImGui::Button("Add Blackboard Write"))
     {
         ev.blackboardWrites.push_back(AnimBlackboardWrite{});

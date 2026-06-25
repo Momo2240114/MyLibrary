@@ -72,13 +72,7 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
 
         // ★通常時はプロキシを本物と同期させる
         if (activeCameraComponent) {
-            m_proxyCamera->SetViewMatrix(activeCameraComponent->GetView());
-            m_proxyCamera->SetPerspectiveFov(
-                activeCameraComponent->GetFovY(),
-                activeCameraComponent->GetAspect(),
-                activeCameraComponent->GetNear(),
-                activeCameraComponent->GetFar()
-            );
+            m_proxyCamera->CopyFrom(activeCameraComponent.get());
         }
     }
 }
@@ -105,3 +99,4 @@ void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)
         startViewMatrix = nextCam->GetView();
     }
 }
+

@@ -26,7 +26,7 @@ public:
     virtual bool IsEditorWorkspace() const { return false; }
     virtual bool ShouldPauseScene() const { return false; }
 
-    // この窓が表示されているかを確認し、設定する術
+    // この窓が表示されているかを確認し、設定する
     bool IsVisible() const { return isVisible; }
     void SetVisible(bool visible) { if (isVisible != visible) { isVisible = visible; OnVisibilityChanged(visible); } }
     bool IsKeepOnTop() const { return keepOnTop; }

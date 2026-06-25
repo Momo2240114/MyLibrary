@@ -21,6 +21,7 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader> ParticleEmitter::pixelShader;
 ParticleEmitter::ParticleEmitter(ID3D11Device* device, const ParticleSystemConstants& initialSettings, int maxParticles)
     : settings(initialSettings)
 {
+    // GPUのDispatch効率とBitonicSortの都合に合わせ、Particle数は安全な単位へ丸める。
     settings.maxParticleCount = static_cast<uint32_t>((std::max)(1, maxParticles));
     numParticles = RoundParticleCount(settings.maxParticleCount);
     numEmitParticles = (std::min<UINT>)(numParticles, 10000);
@@ -32,6 +33,7 @@ ParticleEmitter::ParticleEmitter(ID3D11Device* device, const ParticleSystemConst
 
 void ParticleEmitter::InitializeSharedShaders(ID3D11Device* device)
 {
+    // Shaderは全Emitterで同じものを使うため、初回だけ読み込む。
     if (!device || initShader) return;
 
     CPUResourceLoader::LoadComputeShader(device, "Shader/ParticleInit_CS.cso", initShader.GetAddressOf());
@@ -58,6 +60,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
 {
     if (!device) return;
 
+    // 各Compute Shader / Draw Shaderへ渡すConstantBufferを作る。
     D3D11_BUFFER_DESC cbDesc{};
     cbDesc.Usage = D3D11_USAGE_DEFAULT;
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -71,6 +74,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
     cbDesc.ByteWidth = sizeof(SortConstants);
     device->CreateBuffer(&cbDesc, nullptr, sortConstantBuffer.GetAddressOf());
 
+    // Particle本体はCompute Shaderから読み書きするため、SRV/UAV両方を持つStructuredBufferにする。
     D3D11_BUFFER_DESC bufferDesc{};
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
@@ -81,6 +85,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
     device->CreateShaderResourceView(particleDataBuffer.Get(), nullptr, particleDataSRV.GetAddressOf());
     device->CreateUnorderedAccessView(particleDataBuffer.Get(), nullptr, particleDataUAV.GetAddressOf());
 
+    // 未使用Particle番号をAppend/Consumeすることで、死んだParticle枠を再利用する。
     bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
     bufferDesc.ByteWidth = sizeof(UINT) * numParticles;
     bufferDesc.StructureByteStride = sizeof(UINT);
@@ -93,12 +98,14 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
     appendUavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
     device->CreateUnorderedAccessView(unusedIndexBuffer.Get(), &appendUavDesc, unusedIndexUAV.GetAddressOf());
 
+    // CPUで決めた発生位置・速度をEmit_CSへまとめて渡す一時バッファ。
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     bufferDesc.ByteWidth = sizeof(EmitParticleData) * numEmitParticles;
     bufferDesc.StructureByteStride = sizeof(EmitParticleData);
     device->CreateBuffer(&bufferDesc, nullptr, emitBuffer.GetAddressOf());
     device->CreateShaderResourceView(emitBuffer.Get(), nullptr, emitSRV.GetAddressOf());
 
+    // Headerは生存状態とDepthSortのための参照情報を持つ。
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
     bufferDesc.ByteWidth = sizeof(ParticleHeader) * numParticles;
     bufferDesc.StructureByteStride = sizeof(ParticleHeader);
@@ -106,6 +113,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
     device->CreateShaderResourceView(particleHeaderBuffer.Get(), nullptr, particleHeaderSRV.GetAddressOf());
     device->CreateUnorderedAccessView(particleHeaderBuffer.Get(), nullptr, particleHeaderUAV.GetAddressOf());
 
+    // GPU側でDispatch/Draw数を決めるため、Indirect引数用バッファを用意する。
     D3D11_BUFFER_DESC indirectDesc{};
     indirectDesc.Usage = D3D11_USAGE_DEFAULT;
     indirectDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
@@ -131,6 +139,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
     rawUavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW;
     device->CreateUnorderedAccessView(indirectDataBuffer.Get(), &rawUavDesc, indirectDataUAV.GetAddressOf());
 
+    // Texture未設定でもShaderが安全にSampleできるよう、白Textureを初期値にする。
     CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, textureSRV.GetAddressOf());
     CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, maskTextureSRV.GetAddressOf());
     CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, gradientTextureSRV.GetAddressOf());
@@ -138,6 +147,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
 
 void ParticleEmitter::ApplySettings(const ParticleSystemConstants& nextSettings)
 {
+    // Editorから設定を差し替えても、再生中のEmitter時間は維持する。
     const float oldTime = settings.time;
     settings = nextSettings;
     settings.time = oldTime;
@@ -154,6 +164,7 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 {
     if (!context) return;
 
+    // CPU側で今フレーム発生するParticleリストを作ってからGPU更新へ渡す。
     settings.time += dt;
     settings.deltaTime = dt;
     BuildEmitList(dt);
@@ -190,6 +201,7 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 
     if (!initialized)
     {
+        // 初回だけGPU上のParticle/Index状態を初期化する。
         initialized = true;
         context->CSSetShader(initShader.Get(), nullptr, 0);
         context->Dispatch(numParticles / NumParticleThread, 1, 1);
@@ -200,6 +212,7 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 
     if (!emitParticles.empty())
     {
+        // CPUで作ったEmitParticleDataをGPUへ転送し、Emit_CSで空きParticleへ割り当てる。
         D3D11_BOX box{};
         box.right = static_cast<UINT>(emitParticles.size() * sizeof(EmitParticleData));
         box.bottom = 1;
@@ -211,6 +224,7 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
         emitParticles.clear();
     }
 
+    // 生存Particleの寿命、速度、位置、色、深度を更新する。
     context->CSSetShader(updateShader.Get(), nullptr, 0);
     context->DispatchIndirect(indirectDataBuffer.Get(), UpdateDispatchIndirectOffset);
 
@@ -263,6 +277,7 @@ void ParticleEmitter::BuildEmitList(float dt)
 
     if (settings.emissionMode == 1)
     {
+        // BurstはGUI/Actionからtriggerが立った瞬間だけ指定数を発生させる。
         if (settings.burstTrigger > 0.5f)
         {
             UINT count = settings.burstCount > 0 ? settings.burstCount : numEmitParticles;
@@ -272,6 +287,7 @@ void ParticleEmitter::BuildEmitList(float dt)
         return;
     }
 
+    // Continuousは「秒間発生数 * dt」を蓄積し、小数分を次フレームへ持ち越す。
     float rate = settings.burstCount > 0 ? static_cast<float>(settings.burstCount) : 60.0f;
     continuousAccumulator += rate * dt;
     UINT count = static_cast<UINT>(continuousAccumulator);
@@ -286,6 +302,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
 {
     EmitParticleData data{};
 
+    // seedから複数の乱数を作り、位置・速度・寿命・サイズへ別々に使う。
     float r0 = Random01(seed * 17u + 1u);
     float r1 = Random01(seed * 17u + 2u);
     float r2 = Random01(seed * 17u + 3u);
@@ -296,6 +313,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     float r7 = Random01(seed * 17u + 8u);
     float r8 = Random01(seed * 17u + 9u);
     float r9 = Random01(seed * 17u + 10u);
+    float r10_ = Random01(seed * 17u + 11u);
 
     constexpr float pi = 3.1415926535f;
 
@@ -308,7 +326,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     data.parameter.z = 0.0f; // total life is filled in Emit_CS
     data.parameter.w = static_cast<float>(settings.type); // render type: 0=billboard, 1=stretched
 
-    // Spawn position.  GUIの Spawn Shape が全部ここに反映される。
+    // Spawn position. GUIのSpawn Shape設定をここで実際の発生座標へ変換する。
     DirectX::XMFLOAT3 localPosition{ 0.0f, 0.0f, 0.0f };
     switch (settings.spawnShape)
     {
@@ -367,6 +385,13 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     }
     }
 
+    // Point/Circle/Meshは平面に寄りやすいので、必要な時だけY方向の厚みを追加する。
+    if ((settings.spawnShape == 0 || settings.spawnShape == 2 || settings.spawnShape == 5) &&
+        settings.verticalSpawnRange > 0.0001f)
+    {
+        localPosition.y += (r10_ - 0.5f) * settings.verticalSpawnRange;
+    }
+
     if (settings.spawnShape == 5 && !meshSpawnPositions.empty())
     {
         data.position.x = localPosition.x;
@@ -381,7 +406,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
     }
     data.position.w = 1.0f;
 
-    // 初速。Initial Speed が 0 の時は完全に停止開始にする。
+    // 初速。Initial Speed が0の時は完全に停止開始にする。
     // Cone Angle 0 は「上向き方向」だが、速度0なら勝手に上へ飛ばない。
     float speed = Lerp(settings.emissionSpeed.x, settings.emissionSpeed.y, r5);
     if (std::abs(speed) <= 0.000001f)
@@ -397,6 +422,45 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
             std::cos(theta),
             std::sin(theta) * std::sin(phi)
         };
+
+        // Cone以外が選ばれている場合は、発生位置と中心の関係から外向き/内向きの初速へ置き換える。
+        if (settings.spawnDirectionMode ==
+            static_cast<uint32_t>(PARTICLE_SPAWN_DIRECTION_MODE::OUTWARD) ||
+            settings.spawnDirectionMode ==
+            static_cast<uint32_t>(PARTICLE_SPAWN_DIRECTION_MODE::INWARD))
+        {
+            DirectX::XMFLOAT3 radialVector_{
+                localPosition.x,
+                localPosition.y,
+                localPosition.z
+            };
+
+            if (settings.spawnShape == 5 && !meshSpawnPositions.empty())
+            {
+                radialVector_.x = localPosition.x - settings.emissionPosition.x;
+                radialVector_.y = localPosition.y - settings.emissionPosition.y;
+                radialVector_.z = localPosition.z - settings.emissionPosition.z;
+            }
+
+            const float radialLengthSq_ =
+                radialVector_.x * radialVector_.x +
+                radialVector_.y * radialVector_.y +
+                radialVector_.z * radialVector_.z;
+
+            if (radialLengthSq_ > 0.000001f)
+            {
+                const float invRadialLength_ = 1.0f / std::sqrt(radialLengthSq_);
+                const float directionSign_ =
+                    settings.spawnDirectionMode ==
+                    static_cast<uint32_t>(PARTICLE_SPAWN_DIRECTION_MODE::INWARD)
+                    ? -1.0f
+                    : 1.0f;
+                dir.x = radialVector_.x * invRadialLength_ * directionSign_;
+                dir.y = radialVector_.y * invRadialLength_ * directionSign_;
+                dir.z = radialVector_.z * invRadialLength_ * directionSign_;
+            }
+        }
+
         data.velocity = { dir.x * speed, dir.y * speed, dir.z * speed, 0.0f };
     }
 
@@ -425,6 +489,7 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
 
 void ParticleEmitter::RunBitonicSort(ID3D11DeviceContext* context)
 {
+    // 半透明Particleを奥から描けるように、GPU上でHeaderを深度順に並べる。
     float exponentF = std::log2(static_cast<float>(numParticles));
     UINT exponent = static_cast<UINT>(std::ceil(exponentF) + 0.5f);
 
@@ -476,8 +541,6 @@ float ParticleEmitter::Lerp(float a, float b, float t)
 {
     return a + (b - a) * t;
 }
-
-
 
 
 

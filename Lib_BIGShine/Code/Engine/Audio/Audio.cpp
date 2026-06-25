@@ -1,53 +1,44 @@
-#include "Engine/Common/misc.h"
+Ôªø#include "Engine/Common/misc.h"
 #include "Audio.h"
 
-// èâä˙âª
+#include <fmod_errors.h>
+
 void Audio::Initialize()
 {
-	HRESULT hr;
+    if (initialized) return;
 
-	// COMÇÃèâä˙âª
-	hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+    FMOD_RESULT result_ = FMOD::System_Create(&system);
+    _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
 
-	UINT32 createFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	//createFlags |= XAUDIO2_DEBUG_ENGINE;
-#endif
+    result_ = system->init(512, FMOD_INIT_NORMAL, nullptr);
+    _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
 
-	// XAudioèâä˙âª
-	hr = XAudio2Create(&xaudio, createFlags);
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-	// É}ÉXÉ^ÉäÉìÉOÉ{ÉCÉXê∂ê¨
-	hr = xaudio->CreateMasteringVoice(&masteringVoice);
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+    initialized = true;
 }
 
-// èIóπâª
 void Audio::Finalize()
 {
-	// É}ÉXÉ^ÉäÉìÉOÉ{ÉCÉXîjä¸
-	if (masteringVoice != nullptr)
-	{
-		masteringVoice->DestroyVoice();
-		masteringVoice = nullptr;
-	}
+    if (system != nullptr)
+    {
+        system->close();
+        system->release();
+        system = nullptr;
+    }
 
-	// XAudioèIóπâª
-	if (xaudio != nullptr)
-	{
-		xaudio->Release();
-		xaudio = nullptr;
-	}
-
-	// COMèIóπâª
-	CoUninitialize();
+    initialized = false;
 }
 
-// ÉIÅ[ÉfÉBÉIÉ\Å[ÉXì«Ç›çûÇ›
-AudioSource* Audio::LoadAudioSource(const char* filename)
+void Audio::Update()
 {
-	std::shared_ptr<AudioResource> resource = std::make_shared<AudioResource>(filename);
-	return new AudioSource(xaudio, resource);
+    if (system != nullptr)
+    {
+        system->update();
+    }
+}
+
+AudioSource* Audio::LoadAudioSource(const char* filename_)
+{
+    if (!initialized) Initialize();
+    if (system == nullptr) return nullptr;
+    return new AudioSource(system, filename_);
 }
