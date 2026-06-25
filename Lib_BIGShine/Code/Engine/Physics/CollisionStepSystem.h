@@ -19,7 +19,7 @@ public:
     void Clear();
 
     void SyncFromPhysics(float deltaTime_);
-    void Step();
+    void Step(float deltaTime_);
 
     void HandlePhysXTrigger(
         ColliderComponent* colliderA_,

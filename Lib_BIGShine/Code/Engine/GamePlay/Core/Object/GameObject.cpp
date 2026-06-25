@@ -41,6 +41,7 @@ void GameObject::UnregisterAllColliderComponents()
         UnregisterColliderComponent(collider_.get());
     }
 }
+
 void GameObject::RegisterAction(
     const std::string& category_,
     const std::string& name_,

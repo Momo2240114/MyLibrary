@@ -47,7 +47,7 @@ public:
     void Deserialize(const nlohmann::json& j) override;
 
     void SyncFromPhysics(float dt_);
-    void PreparePhysicsStep();
+    void PreparePhysicsStep(float deltaTime_);
     void RecreatePhysXActor();
     void ReleasePhysXActor();
     CollisionRole GetCollisionRole() const { return collisionRole; }
@@ -94,9 +94,13 @@ protected:
 
     bool m_IsHitFlag = false;
     physx::PxRigidActor* actor = nullptr;
+    physx::PxController* characterController = nullptr;
     bool actorIsStatic = false;
 
 private:
+    void CreateCharacterController();
+    void ReleaseCharacterController();
+    bool UsesCharacterController() const;
     void CreatePhysXActor();
     void ApplyDynamicActorSettings(physx::PxRigidDynamic& actor_);
     physx::PxMaterial* GetShapeMaterial();

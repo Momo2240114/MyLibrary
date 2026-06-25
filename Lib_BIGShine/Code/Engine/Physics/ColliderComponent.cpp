@@ -26,9 +26,10 @@ void ColliderComponent::Start()
 
 void ColliderComponent::ReleasePhysXActor()
 {
+    ReleaseCharacterController();
+
     if (!actor && !shapeMaterial) return;
 
-    // PhysX譛ｬ菴薙・邨ゆｺ・ｾ後・actor/material繧よ里縺ｫ辟｡蜉ｹ縺ｪ縺ｮ縺ｧ蜿ら・縺励↑縺・・
     if (!PhysXSystem::GetPhysics())
     {
         actor = nullptr;
@@ -54,14 +55,128 @@ void ColliderComponent::ReleasePhysXActor()
     }
 }
 
+
 void ColliderComponent::RecreatePhysXActor()
 {
     ReleasePhysXActor();
     CreatePhysXActor();
 }
 
+void ColliderComponent::CreateCharacterController()
+{
+    auto owner_ = GetGameObject();
+    auto physics_ = PhysXSystem::GetPhysics();
+    auto scene_ = PhysXSystem::GetScene();
+    auto controllerManager_ = PhysXSystem::GetControllerManager();
+
+    if (!owner_ || !physics_ || !scene_ || !controllerManager_) return;
+
+    auto capsule_ = dynamic_cast<CapsuleCollider*>(this);
+    if (!capsule_) return;
+
+    auto transform_ = owner_->transform;
+    if (!transform_) return;
+
+    auto scale_ = transform_->GetWorldScale();
+    scale_.x *= shapeSizeScale;
+    scale_.y *= shapeSizeScale;
+    scale_.z *= shapeSizeScale;
+
+    auto material_ = GetShapeMaterial();
+    if (!material_) return;
+
+    physx::PxCapsuleControllerDesc desc_;
+    desc_.material = material_;
+    desc_.position = physx::PxExtendedVec3(
+        transform_->localPosition.x + offset.x,
+        transform_->localPosition.y + offset.y,
+        transform_->localPosition.z + offset.z
+    );
+
+    desc_.radius = std::max<float>(capsule_->radius * scale_.x, 0.001f);
+
+    // PxCapsuleControllerDesc::height は「円柱部分の高さ」。
+    // 既存 CapsuleCollider の halfHeight が PhysX PxCapsuleGeometry の halfHeight と同じ意味なら *2。
+    desc_.height = std::max<float>(capsule_->halfHeight * 2.0f * scale_.y, 0.001f);
+
+    desc_.upDirection = physx::PxVec3(0.0f, 1.0f, 0.0f);
+    desc_.slopeLimit = 0.707f;      // 約45度
+    desc_.stepOffset = 0.3f;
+    desc_.contactOffset = 0.05f;
+    desc_.density = std::max<float>(mass, 1.0f);
+    desc_.scaleCoeff = 0.8f;
+    desc_.volumeGrowth = 1.5f;
+
+    if (!desc_.isValid()) return;
+
+    characterController = controllerManager_->createController(desc_);
+    if (!characterController) return;
+
+    if (auto controllerActor_ = characterController->getActor())
+    {
+        controllerActor_->userData = this;
+
+        physx::PxShape* shape_ = nullptr;
+        if (controllerActor_->getNbShapes() > 0)
+        {
+            controllerActor_->getShapes(&shape_, 1);
+        }
+
+        if (shape_)
+        {
+            auto filterData_ = physx::PxFilterData();
+            filterData_.word0 = static_cast<physx::PxU32>(owner_->layer);
+            filterData_.word1 = owner_->mask;
+            filterData_.word2 = static_cast<physx::PxU32>(collisionRole);
+
+            const physx::PxU32 ownerId_ =
+                static_cast<physx::PxU32>(
+                    reinterpret_cast<uintptr_t>(owner_.get()) & 0x7FFFFFFF
+                    );
+
+            filterData_.word3 = ownerId_ | 0x80000000u;
+
+            shape_->setSimulationFilterData(filterData_);
+            shape_->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+            shape_->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
+        }
+    }
+
+    physicsControlsTransform = true;
+    isTrigger = false;
+    usePhysicsResponse = true;
+
+    CaptureTransformSnapshot();
+}
+
+void ColliderComponent::ReleaseCharacterController()
+{
+    if (characterController)
+    {
+        if (auto controllerActor_ = characterController->getActor())
+        {
+            controllerActor_->userData = nullptr;
+        }
+
+        characterController->release();
+        characterController = nullptr;
+    }
+}
+
+bool ColliderComponent::UsesCharacterController() const
+{
+    return collisionRole == CollisionRole::CHARACTER &&
+        GetColliderType() == ColliderType::Capsule;
+}
+
 void ColliderComponent::CreatePhysXActor()
 {
+    if (UsesCharacterController())
+    {
+        CreateCharacterController();
+        return;
+    }
+
     if (collisionRole == CollisionRole::HIT_BOX ||
         collisionRole == CollisionRole::HURT_BOX)
     {
@@ -319,6 +434,58 @@ void ColliderComponent::UpdatePhysXShape()
 
 void ColliderComponent::SyncFromPhysics(float dt_)
 {
+    if (characterController && physicsControlsTransform)
+    {
+        auto owner_ = GetGameObject();
+        if (!owner_ || !owner_->transform) return;
+
+        if (HasExternalTransformChange())
+        {
+            characterController->setPosition(
+                PxExtendedVec3(
+                    owner_->transform->localPosition.x + offset.x,
+                    owner_->transform->localPosition.y + offset.y,
+                    owner_->transform->localPosition.z + offset.z));
+            CaptureTransformSnapshot();
+            return;
+        }
+
+        const PxExtendedVec3 position_ = characterController->getPosition();
+        owner_->transform->localPosition =
+        {
+            static_cast<float>(position_.x) - offset.x,
+            static_cast<float>(position_.y) - offset.y,
+            static_cast<float>(position_.z) - offset.z
+        };
+
+        const float velocityLengthSq_ =
+            velocity.x * velocity.x +
+            velocity.y * velocity.y +
+            velocity.z * velocity.z;
+        const float thresholdSq_ =
+            rotateVelocityThreshold * rotateVelocityThreshold;
+
+        if (velocityRotationMode != VelocityRotationMode::NONE &&
+            velocityLengthSq_ >= thresholdSq_)
+        {
+            if (velocityRotationMode == VelocityRotationMode::YAW_ONLY)
+            {
+                owner_->transform->SetForwardYawOnly(
+                    { velocity.x, 0.0f, velocity.z },
+                    dt_,
+                    10);
+            }
+            else if (velocityRotationMode == VelocityRotationMode::FULL_3D)
+            {
+                owner_->transform->SetForward({ velocity.x, velocity.y, velocity.z });
+            }
+        }
+
+        owner_->transform->MarkDirty();
+        CaptureTransformSnapshot();
+        return;
+    }
+
     if (!actor || actorIsStatic || !physicsControlsTransform) return;
 
     auto owner_ = GetGameObject();
@@ -397,11 +564,67 @@ void ColliderComponent::SyncFromPhysics(float dt_)
     CaptureTransformSnapshot();
 }
 
-void ColliderComponent::PreparePhysicsStep()
+void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 {
     if (collisionRole == CollisionRole::HIT_BOX ||
         collisionRole == CollisionRole::HURT_BOX)
     {
+        return;
+    }
+
+    if (UsesCharacterController())
+    {
+        if (!characterController)
+        {
+            RecreatePhysXActor();
+        }
+        if (!characterController) return;
+
+        auto owner_ = GetGameObject();
+        if (!owner_ || !owner_->transform) return;
+
+        if (auto controllerActor_ = characterController->getActor())
+        {
+            controllerActor_->setActorFlag(PxActorFlag::eDISABLE_SIMULATION, !enabled);
+        }
+        if (!enabled) return;
+
+        if (HasExternalTransformChange())
+        {
+            characterController->setPosition(
+                PxExtendedVec3(
+                    owner_->transform->localPosition.x + offset.x,
+                    owner_->transform->localPosition.y + offset.y,
+                    owner_->transform->localPosition.z + offset.z));
+            CaptureTransformSnapshot();
+        }
+
+        const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
+        const PxVec3 displacement_(
+            velocity.x * safeDeltaTime_,
+            velocity.y * safeDeltaTime_,
+            velocity.z * safeDeltaTime_);
+        PxControllerFilters filters_;
+        const PxControllerCollisionFlags collisionFlags_ =
+            characterController->move(displacement_, 0.001f, safeDeltaTime_, filters_);
+
+        isGrounded = collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_DOWN);
+        characterGroundedForStep = isGrounded;
+        if ((isGrounded && velocity.y < 0.0f) ||
+            (collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_UP) && velocity.y > 0.0f))
+        {
+            velocity.y = 0.0f;
+        }
+
+        const PxExtendedVec3 position_ = characterController->getPosition();
+        owner_->transform->localPosition =
+        {
+            static_cast<float>(position_.x) - offset.x,
+            static_cast<float>(position_.y) - offset.y,
+            static_cast<float>(position_.z) - offset.z
+        };
+        owner_->transform->MarkDirty();
+        CaptureTransformSnapshot();
         return;
     }
 

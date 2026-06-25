@@ -15,6 +15,7 @@
 #include "Engine/UI/UIButton.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Graphics/Resource/Animation/IKMapComponent.h"
+#include "Engine/Graphics/Resource/Animation/SpringBoneSimulationComponent.h"
 #include "Engine/GamePlay/Camera/CameraDirectorComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Camera/FovDirector.h"
@@ -72,6 +73,7 @@ void RegisterAllComponents()
     registry.Register<BoneSegmentAttachmentComponent>("BoneSegmentAttachment");
     registry.Register<AnimationControllerComponent>("AnimationControllerComponent");
     registry.Register<IKMapComponent>("IKMapComponent");
+    registry.Register<SpringBoneSimulationComponent>("SpringBoneSimulationComponent");
     registry.Register<SpriteRenderer>("SpriteRenderer");
 
     // ライト・エフェクト系
