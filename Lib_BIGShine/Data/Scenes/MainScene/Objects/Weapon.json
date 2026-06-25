@@ -28,6 +28,12 @@
                 "HitParticleEmitterName": "HitParticle",
                 "HitParticleLifeTime": 0.20000000298023224,
                 "HitParticleNormalOffset": 0.0,
+                "HitSoundMuffled": false,
+                "HitSoundMuffledCutoff": 1200.0,
+                "HitSoundPath": "",
+                "HitSoundPathKey": "HitSoundPath",
+                "HitSoundVolume": 1.0,
+                "HitStopDir": 0.0,
                 "HitStopLayerMask": 3,
                 "HitStopTime": 0.05000000074505806,
                 "HitStopTimeKey": "HitStopTime",
@@ -112,7 +118,6 @@
         },
         {
             "Data": {
-                "IsPlaying": false,
                 "Parts": [
                     {
                         "Alpha": 1.0,
@@ -143,6 +148,8 @@
                             1.0,
                             1.0
                         ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -271,7 +278,6 @@
             "Data": {
                 "FadeInDuration": 0.44999998807907104,
                 "FadeOutDuration": 0.5,
-                "IsPlaying": false,
                 "OverlayActive": false,
                 "Parts": [
                     {
@@ -303,6 +309,8 @@
                             0.0,
                             1.0
                         ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
                         "EmissivePulseAmount": 0.75,
                         "EmissivePulseSpeed": 4.0,
                         "EmissiveStrength": 0.44999998807907104,

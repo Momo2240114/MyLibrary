@@ -9,7 +9,8 @@
 
 using BlackBoardValue = std::variant<float, int, bool,
     DirectX::SimpleMath::Vector2,
-    DirectX::SimpleMath::Vector3>;
+    DirectX::SimpleMath::Vector3,
+    std::string>;
 using BlackboardCategory = std::unordered_map<std::string, BlackBoardValue>;
 
 class BlackboardComponent : public Component
@@ -27,6 +28,7 @@ public:
     void SetBool(const std::string& category_, const std::string& key_, bool value_);
     void SetVector2(const std::string& category_, const std::string& key_, const DirectX::SimpleMath::Vector2& value_);
     void SetVector3(const std::string& category_, const std::string& key_, const DirectX::SimpleMath::Vector3& value_);
+    void SetString(const std::string& category_, const std::string& key_, const std::string& value_);
     void SetTrigger(const std::string& category_, const std::string& key_);
 
     bool HasValue(const std::string& category_, const std::string& key_) const;
@@ -38,6 +40,7 @@ public:
     bool GetBool(const std::string& category_, const std::string& key_, bool& value_) const;
     bool GetVector2(const std::string& category_, const std::string& key_, DirectX::SimpleMath::Vector2& value_) const;
     bool GetVector3(const std::string& category_, const std::string& key_, DirectX::SimpleMath::Vector3& value_) const;
+    bool GetString(const std::string& category_, const std::string& key_, std::string& value_) const;
     bool ConsumeTrigger(const std::string& category_, const std::string& key_);
 
     void ResetTrigger(const std::string& category_, const std::string& key_);

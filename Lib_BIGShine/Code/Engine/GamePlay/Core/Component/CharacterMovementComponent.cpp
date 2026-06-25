@@ -48,7 +48,14 @@ void CharacterMovementComponent::Update(float deltaTime_)
             desiredHorizontalVelocity.z + rootMotionVelocity_.z + pendingImpulse.z;
         if (std::dynamic_pointer_cast<CharacterCollider>(collider_))
         {
-            collider_->velocity.y = rootMotionVelocity_.y + pendingImpulse.y;
+            if (collider_->useGravity)
+            {
+                collider_->velocity.y += rootMotionVelocity_.y + pendingImpulse.y;
+            }
+            else
+            {
+                collider_->velocity.y = rootMotionVelocity_.y + pendingImpulse.y;
+            }
         }
         else
         {

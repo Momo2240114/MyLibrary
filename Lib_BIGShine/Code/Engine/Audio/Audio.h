@@ -1,33 +1,33 @@
-#pragma once
+Ôªø#pragma once
 
-#include <xaudio2.h>
 #include "AudioSource.h"
 
-// ÉIÅ[ÉfÉBÉI
+namespace FMOD
+{
+    class System;
+}
+
 class Audio
 {
 private:
-	Audio() = default;
-	~Audio() = default;
+    Audio() = default;
+    ~Audio() = default;
 
 public:
-	// ÉCÉìÉXÉ^ÉìÉXéÊìæ
-	static Audio& Instance()
-	{
-		static Audio instance;
-		return instance;
-	}
+    static Audio& Instance()
+    {
+        static Audio instance;
+        return instance;
+    }
 
-	// èâä˙âª
-	void Initialize();
+    void Initialize();
+    void Finalize();
+    void Update();
 
-	// èIóπâª
-	void Finalize();
-
-	// ÉIÅ[ÉfÉBÉIÉ\Å[ÉXì«Ç›çûÇ›
-	AudioSource* LoadAudioSource(const char* filename);
+    AudioSource* LoadAudioSource(const char* filename_);
+    FMOD::System* GetSystem() const { return system; }
 
 private:
-	IXAudio2*				xaudio = nullptr;
-	IXAudio2MasteringVoice* masteringVoice = nullptr;
+    FMOD::System* system = nullptr;
+    bool initialized = false;
 };

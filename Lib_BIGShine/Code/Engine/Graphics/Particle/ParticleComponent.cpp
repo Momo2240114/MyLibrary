@@ -19,6 +19,7 @@
 
 void ParticleComponent::Start()
 {
+    // Editor候補の更新と、保存済みAssetが指定されている場合の遅延読み込みを行う。
     RefreshTextureList();
     RefreshAssetList();
 
@@ -32,6 +33,7 @@ void ParticleComponent::Start()
 
 void ParticleComponent::RegisterActions()
 {
+    // ActionSequencerなどからParticleを操作できるよう、GameObjectローカルActionを登録する。
     auto gameObject_ = GetGameObject();
     if (!gameObject_) return;
 
@@ -64,6 +66,7 @@ void ParticleComponent::RegisterActions()
 
 void ParticleComponent::Gui()
 {
+    // Particle Asset全体、Emitter単体、各EmitterパラメータをこのGUIで編集する。
     RefreshAssetList();
 
     ImGui::SeparatorText("Particle Asset");
@@ -113,6 +116,7 @@ void ParticleComponent::Gui()
 
     if (ImGui::Button("Add Emitter"))
     {
+        // 新規Emitterは、勝手に暴れすぎない安全な初期値から作る。
         EmitterTrack newTrack;
         newTrack.name = "Emitter_" + std::to_string(tracks.size());
         newTrack.settings = ParticleSystemConstants();
@@ -233,6 +237,7 @@ void ParticleComponent::Gui()
     {
         if (ImGui::BeginTabItem("Emission"))
         {
+            // 発生数・寿命・初速など、Particleがいつ何個生まれるかを調整する。
             int maxCount = static_cast<int>(s.maxParticleCount);
             if (ImGui::DragInt("Max Count", &maxCount, 1, 2000000)) s.maxParticleCount = static_cast<uint32_t>(maxCount);
             ImGui::DragFloat("Delay", &track.delay, 0.01f, 0.0f, 60.0f);
@@ -255,11 +260,21 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Physics"))
         {
+            // 生成後の移動、Noise、中心方向の速度など、軌道の性格を調整する。
             ImGui::DragFloat("Gravity / Acceleration Y", &s.gravity, 0.01f, -100.0f, 100.0f);
             ImGui::DragFloat3("Additional Acceleration XYZ", &s.windVelocity.x, 0.01f, -100.0f, 100.0f);
             ImGui::DragFloat("Drag", &s.drag, 0.01f, 0.0f, 20.0f);
             ImGui::DragFloat2("Direction Cone Angle", &s.emissionConeAngle.x, 0.01f, 0.0f, 6.28f);
             ImGui::DragFloat2("Angular Velocity", &s.emissionAngularSpeed.x, 0.01f, -50.0f, 50.0f);
+
+            const char* spawnDirectionModes_[] = { "Cone / Up", "From Center Outward", "To Center Inward" };
+            int spawnDirectionMode_ = static_cast<int>(s.spawnDirectionMode);
+            if (ImGui::Combo("Initial Direction", &spawnDirectionMode_, spawnDirectionModes_, IM_ARRAYSIZE(spawnDirectionModes_)))
+            {
+                s.spawnDirectionMode = static_cast<uint32_t>(
+                    std::clamp(spawnDirectionMode_, 0, IM_ARRAYSIZE(spawnDirectionModes_) - 1));
+            }
+            ImGui::TextDisabled("Inward uses Initial Speed and points particles toward the emitter center.");
 
             ImGui::SeparatorText("Turbulence / Noise");
             ImGui::DragFloat("Noise Strength", &s.noiseStrength, 0.01f, 0.0f, 100.0f);
@@ -276,6 +291,7 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Shape"))
         {
+            // 発生位置の形状を調整する。見た目の広がりはここ、飛ぶ方向はPhysics側で分けて扱う。
             const char* shapes[] = { "Point", "Box", "Circle", "Sphere", "Line", "Mesh Vertices" };
             ImGui::Combo("Spawn Shape", reinterpret_cast<int*>(&s.spawnShape), shapes, IM_ARRAYSIZE(shapes));
             const char* spawnSpaces_[] = { "Owner Relative", "World" };
@@ -288,6 +304,8 @@ void ParticleComponent::Gui()
                 track.spawnSpace == ParticleSpawnSpace::WORLD ? "World Position" : "Emitter Offset",
                 &s.emissionPosition.x, 0.05f);
             ImGui::DragFloat3("Shape Size", &s.shapeSize.x, 0.05f, 0.0f, 100.0f);
+            ImGui::DragFloat("Vertical Spawn Range", &s.verticalSpawnRange, 0.05f, 0.0f, 100.0f);
+            ImGui::TextDisabled("Adds random Y spread for Point, Circle and Mesh Vertices.");
             if (s.spawnShape == 4)
             {
                 ImGui::DragFloat3("Line Start", &s.shapeStart.x, 0.05f);
@@ -312,6 +330,7 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Visual"))
         {
+            // 色、サイズ、フェードなど、Particle 1枚ごとの見た目を調整する。
             bool useColorOverLife_ = s.useColorOverLife != 0;
             if (ImGui::Checkbox("Color Over Life", &useColorOverLife_))
             {
@@ -352,6 +371,7 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Texture"))
         {
+            // 色Texture、Mask、Gradient、SpriteSheetを差し替える。
             auto drawTextureSlot_ = [&](const char* label_, std::string& fileName_, std::string& path_, int slot_)
                 {
                     ID3D11ShaderResourceView* texture_ = nullptr;
@@ -432,6 +452,7 @@ void ParticleComponent::Gui()
 
         if (ImGui::BeginTabItem("Render"))
         {
+            // Billboardの種類や合成方法など、描画時の扱いを決める。
             const char* renderTypes[] = { "Billboard", "Stretched" };
             ImGui::Combo("Render Type", reinterpret_cast<int*>(&s.type), renderTypes, IM_ARRAYSIZE(renderTypes));
             if (s.type == 1)
@@ -500,6 +521,7 @@ bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::s
 {
     if (!track.emitter || fullPath.empty()) return false;
 
+    // slot番号でColor/Mask/Gradientを切り替え、Emitter内部のSRVへ反映する。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     const std::wstring wpath = WindowsDialogHelper::Utf8ToPath(fullPath).wstring();
 
@@ -569,6 +591,7 @@ void ParticleComponent::RefreshAssetList()
 
 ParticleEffectAsset ParticleComponent::GetAsset() const
 {
+    // Component内部状態を外部保存用Asset形式へ詰め直す。
     ParticleEffectAsset asset_{};
     asset_.isPlaying = isPlaying;
 
@@ -596,6 +619,7 @@ ParticleEffectAsset ParticleComponent::GetAsset() const
 
 void ParticleComponent::SetAsset(const ParticleEffectAsset& asset_)
 {
+    // AssetデータをComponent内部のEmitterTrackへ展開する。Runtimeリソースは後でRebuildする。
     Stop();
 
     tracks.clear();
@@ -631,6 +655,7 @@ bool ParticleComponent::LoadAssetDataOnly(
     const std::string& path_,
     ParticleEffectAsset& asset_)
 {
+    // VFXManagerなどが一覧読み込みするため、Componentとして起動せずAsset情報だけ読む。
     if (path_.empty()) return false;
 
     const std::filesystem::path filePath_ =
@@ -667,6 +692,7 @@ bool ParticleComponent::LoadAssetDataOnly(
 
 bool ParticleComponent::SaveAsset(const std::string& path_)
 {
+    // 編集中の全Emitterを1つのParticleEffect JSONとして保存する。
     if (path_.empty()) return false;
 
     std::filesystem::path assetPath_ = path_;
@@ -693,6 +719,7 @@ bool ParticleComponent::SaveAsset(const std::string& path_)
 
 bool ParticleComponent::LoadAsset(const std::string& path_)
 {
+    // ParticleEffect JSONを読み込み、TextureやEmitterのGPUリソースを再構築する。
     if (path_.empty() || !std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_))) return false;
 
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
@@ -713,6 +740,7 @@ bool ParticleComponent::LoadAsset(const std::string& path_)
 
 bool ParticleComponent::SaveEmitterAsset(size_t emitterIndex_, const std::string& path_)
 {
+    // 選択中Emitterだけを単体JSONとして保存し、別Particleへ再利用できるようにする。
     if (path_.empty() || emitterIndex_ >= tracks.size()) return false;
 
     nlohmann::json componentJson_;
@@ -740,6 +768,7 @@ bool ParticleComponent::SaveEmitterAsset(size_t emitterIndex_, const std::string
 
 bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
 {
+    // 単体Emitter JSONを読み込み、現在のParticleComponentへ追加する。
     const std::filesystem::path emitterPath_ = WindowsDialogHelper::Utf8ToPath(path_);
     if (path_.empty() || !std::filesystem::exists(emitterPath_)) return false;
 
@@ -774,6 +803,7 @@ bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
 
 void ParticleComponent::Play()
 {
+    // 全Emitterを先頭から再生する。delayがないEmitterは即座に発生を開始する。
     isPlaying = true;
     timer = 0.0f;
     for (EmitterTrack& track_ : tracks)
@@ -813,6 +843,7 @@ bool ParticleComponent::StopEmitter(const std::string& emitterName_)
 
 bool ParticleComponent::TriggerEmitter(const std::string& emitterName_)
 {
+    // 指定Emitterだけを即時再生する。Burstの場合はtriggerを立てて1回だけ発生させる。
     EmitterTrack* track_ = FindEmitterTrack(emitterName_);
     if (!track_) return false;
 
@@ -829,6 +860,7 @@ bool ParticleComponent::SetEmitterPosition(
     const DirectX::XMFLOAT3& position_,
     ParticleSpawnSpace spawnSpace_)
 {
+    // AnimationEventやVFXManagerから、Emitterの発生位置を直接差し替えるための入口。
     EmitterTrack* track_ = FindEmitterTrack(emitterName_);
     if (!track_) return false;
 
@@ -842,6 +874,7 @@ bool ParticleComponent::SetEmitterLine(
     const DirectX::XMFLOAT3& startPosition_,
     const DirectX::XMFLOAT3& endPosition_)
 {
+    // BoneSegmentなどから線分上にParticleを出すため、対象EmitterをLine形状へ切り替える。
     bool changed_ = false;
     for (EmitterTrack& track_ : tracks)
     {
@@ -858,6 +891,7 @@ bool ParticleComponent::SetEmitterLine(
     }
     return changed_;
 }
+
 bool ParticleComponent::TriggerEmitterAtPosition(
     const std::string& emitterName_,
     const DirectX::XMFLOAT3& worldPosition_)
@@ -868,6 +902,7 @@ bool ParticleComponent::TriggerEmitterAtPosition(
 
 void ParticleComponent::Update(float deltaTime)
 {
+    // Component再生時間、Emitterのdelay、Owner相対座標、Mesh頂点発生をまとめて処理する。
     if (isPlaying) timer += deltaTime;
 
     auto context_ = GraphicsDeviceManager::Instance().GetContext();
@@ -880,6 +915,7 @@ void ParticleComponent::Update(float deltaTime)
     {
         if (isPlaying && track_.isPlaybackEnabled && !track_.isStarted && timer >= track_.delay)
         {
+            // delayが終わったEmitterだけを有効化し、Burstならこの瞬間に発火させる
             track_.isStarted = true;
             if (track_.emitter) track_.emitter->SetEmissionEnabled(true);
             if (track_.settings.emissionMode == 1) track_.settings.burstTrigger = 1.0f;
@@ -889,12 +925,14 @@ void ParticleComponent::Update(float deltaTime)
 
         if (track_.settings.spawnShape == 5)
         {
+            // Mesh Vertices発生はモデル姿勢が毎フレーム変わる可能性があるため、描画前に座標を更新する
             UpdateMeshSpawnPositions(track_);
         }
 
         ParticleSystemConstants tempSettings_ = track_.settings;
         if (track_.spawnSpace == ParticleSpawnSpace::OWNER_RELATIVE)
         {
+            // Owner Relativeは保存値をローカルオフセットとして扱い、実行時だけワールド位置へ変換する
             tempSettings_.emissionPosition.x = worldPosition_.x + track_.settings.emissionPosition.x;
             tempSettings_.emissionPosition.y = worldPosition_.y + track_.settings.emissionPosition.y;
             tempSettings_.emissionPosition.z = worldPosition_.z + track_.settings.emissionPosition.z;
@@ -909,6 +947,7 @@ void ParticleComponent::Update(float deltaTime)
 
 void ParticleComponent::Serialize(nlohmann::json& j) const
 {
+    // Editorで調整した値を、Textureパスも含めて復元可能なJSONへ保存する
     nlohmann::json emitterList = nlohmann::json::array();
 
     for (const auto& track : tracks)
@@ -947,6 +986,8 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["NoiseSpeed"] = s.noiseSpeed;
         ej["RadialVelocity"] = s.radialVelocity;
         ej["OrbitVelocity"] = s.orbitVelocity;
+        ej["VerticalSpawnRange"] = s.verticalSpawnRange;
+        ej["SpawnDirectionMode"] = s.spawnDirectionMode;
         ej["StretchScale"] = s.stretchScale;
         ej["StretchMax"] = s.stretchMax;
         ej["Color"] = { s.manualColor.x, s.manualColor.y, s.manualColor.z, s.manualColor.w };
@@ -980,6 +1021,7 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
 
 void ParticleComponent::Deserialize(const nlohmann::json& j)
 {
+    // JSONからEmitterTrackを復元する古いキーも読めるように一部互換処理を残す
     tracks.clear();
     assetPath = j.value("AssetPath", assetPath);
 
@@ -1018,6 +1060,9 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.noiseSpeed = ej.value("NoiseSpeed", 1.0f);
             s.radialVelocity = ej.value("RadialVelocity", 0.0f);
             s.orbitVelocity = ej.value("OrbitVelocity", 0.0f);
+            s.verticalSpawnRange = ej.value("VerticalSpawnRange", 0.0f);
+            s.spawnDirectionMode = static_cast<uint32_t>(
+                std::clamp(ej.value("SpawnDirectionMode", 0), 0, 2));
             s.stretchScale = ej.value("StretchScale", 0.04f);
             s.stretchMax = ej.value("StretchMax", 100.0f);
             s.type = ej.value("RenderType", 0u);
@@ -1069,6 +1114,7 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
 
 void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 {
+    // 現在のGltfModel頂点をワールド座標へ変換し、Particleの発生候補点としてEmitterへ渡す
     if (!track_.emitter) return;
 
     auto owner_ = GetGameObject();
@@ -1121,7 +1167,7 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
             DirectX::XMVECTOR pos_ = DirectX::XMLoadFloat3(&vertex_.position);
             pos_ = DirectX::XMVector3TransformCoord(pos_, finalWorld_);
 
-            // Emitter Offset I[i[]ɒǏ]̂ normal ϊ
+            // Emitter Offset?Owner?????????Mesh???????????????
             DirectX::XMVECTOR rotatedOffset_ =
                 DirectX::XMVector3TransformNormal(emitterOffset_, ownerWorld_);
 
@@ -1143,6 +1189,7 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 
 void ParticleComponent::RebuildEmitterResources()
 {
+    // 設定変更後はGPUバッファとTexture SRVを作り直し、Emitterへ最新設定を反映する
     auto device_ = GraphicsDeviceManager::Instance().GetDevice();
     if (!device_) return;
 
@@ -1206,4 +1253,3 @@ std::string ParticleComponent::BuildEmitterAssetPathFromName(size_t emitterIndex
 
     return "Data/Particle/Emitter/" + name_ + ".json";
 }
-

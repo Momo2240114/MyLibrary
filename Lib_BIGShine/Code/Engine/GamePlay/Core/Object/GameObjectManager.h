@@ -6,7 +6,7 @@
 #include "Engine/GamePlay/Scene/IScene.h"
 #include "Engine/Physics/CollisionStepSystem.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
-#include "Engine/GamePlay/System/VFXManager.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 
 class ColliderComponent;
 class BoxCollider;
@@ -175,7 +175,7 @@ public:
     std::shared_ptr<TimeManager> GetTimeManager() { return timeManager; }
     CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
     AttackSystem& GetAttackSystem() { return *attackSystem; }
-    VFXManager& GetVFXManager() { return *vfxManager; }
+    EffectManager& GetEffectManager() { return *effectManager; }
 private:
     // unique name helper
     std::string MakeUniqueName(std::string baseName_)
@@ -221,8 +221,8 @@ private:
         std::make_unique<AttackSystem>();
     std::unique_ptr<CollisionStepSystem> collisionStepSystem =
         std::make_unique<CollisionStepSystem>();
-    std::unique_ptr<VFXManager> vfxManager =
-        std::make_unique<VFXManager>();
+    std::unique_ptr<EffectManager> effectManager =
+        std::make_unique<EffectManager>();
 
     // 描画システムの所有権はマネージャが保持し、シーン全体で共有する。
     std::unique_ptr<ParticleRenderSystem> particleRenderSystem;

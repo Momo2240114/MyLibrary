@@ -3,7 +3,6 @@
     "Components": [
         {
             "Data": {
-                "IsPlaying": true,
                 "Parts": [
                     {
                         "Alpha": 1.0,
@@ -34,6 +33,8 @@
                             1.0,
                             1.0
                         ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -249,6 +250,7 @@
                             1.0,
                             1.0
                         ],
+                        "SpawnDirectionMode": 0,
                         "SpawnShape": 0,
                         "SpawnSpace": 0,
                         "Speed": [
@@ -278,6 +280,7 @@
                         "UseMask": 0,
                         "UseRandomSize": 0,
                         "UseSpriteAnimation": 0,
+                        "VerticalSpawnRange": 0.0,
                         "Wind": [
                             0.0,
                             20.0,

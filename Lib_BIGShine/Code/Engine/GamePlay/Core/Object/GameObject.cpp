@@ -184,7 +184,7 @@ void GameObject::Update(float et)
             comp->Update(et);
     }
 
-    // Movement consumes input, RootMotion, and impulses after every producer updated.
+
     for (auto& comp : components)
     {
         if (!comp->IsEnabled()) continue;

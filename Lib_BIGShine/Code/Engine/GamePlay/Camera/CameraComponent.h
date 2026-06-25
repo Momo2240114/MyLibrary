@@ -154,6 +154,8 @@ public:
         eye = other->eye;
         focus = other->focus;
         up = other->up;
+        front = other->front;
+        right = other->right;
         fovY = other->fovY;
         aspect = other->aspect;
         nearZ = other->nearZ;
@@ -204,3 +206,4 @@ private:
 
     int priority = 0;
 };
+

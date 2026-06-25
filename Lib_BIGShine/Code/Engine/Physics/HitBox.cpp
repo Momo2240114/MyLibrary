@@ -44,6 +44,7 @@ void HitBox::Gui()
     ImGui::SeparatorText("Attack");
     ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Hit Stop Time", &hitStopTime, 0.001f, 0.0f, 10.0f);
+    ImGui::DragFloat("Hit Stop Dir", &hitStopDir, 0.01f);
     ImGui::InputScalar("Hit Stop Layer Mask", ImGuiDataType_U32, &hitStopLayerMask);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
     ImGui::Checkbox("Hit Once Per Activation", &hitOncePerActivation);
@@ -73,6 +74,14 @@ void HitBox::Gui()
     if (ImGui::InputText("MeshVFX Asset", meshVFXAssetBuffer_, sizeof(meshVFXAssetBuffer_))) hitMeshVFXAssetPath = meshVFXAssetBuffer_;
     ImGui::DragFloat("MeshVFX Life Time", &hitMeshVFXLifeTime, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("MeshVFX Normal Offset", &hitMeshVFXNormalOffset, 0.01f, -10.0f, 10.0f);
+
+    ImGui::SeparatorText("Hit Sound");
+    char hitSoundPathBuffer_[256];
+    strncpy_s(hitSoundPathBuffer_, hitSoundPath.c_str(), sizeof(hitSoundPathBuffer_));
+    if (ImGui::InputText("Hit Sound Path", hitSoundPathBuffer_, sizeof(hitSoundPathBuffer_))) hitSoundPath = hitSoundPathBuffer_;
+    ImGui::DragFloat("Hit Sound Volume", &hitSoundVolume, 0.01f, 0.0f, 1.0f);
+    ImGui::Checkbox("Hit Sound Muffled", &hitSoundMuffled);
+    ImGui::DragFloat("Hit Sound Cutoff", &hitSoundMuffledCutoff, 10.0f, 10.0f, 22000.0f);
 
     ImGui::SeparatorText("Actions");
     char actionPrefixBuffer_[64];
@@ -105,6 +114,9 @@ void HitBox::Gui()
     char knockBackKeyBuffer_[64];
     strncpy_s(knockBackKeyBuffer_, knockBackPowerKey.c_str(), sizeof(knockBackKeyBuffer_));
     if (ImGui::InputText("Knock Back Key", knockBackKeyBuffer_, sizeof(knockBackKeyBuffer_))) knockBackPowerKey = knockBackKeyBuffer_;
+    char hitSoundKeyBuffer_[64];
+    strncpy_s(hitSoundKeyBuffer_, hitSoundPathKey.c_str(), sizeof(hitSoundKeyBuffer_));
+    if (ImGui::InputText("Hit Sound Path Key", hitSoundKeyBuffer_, sizeof(hitSoundKeyBuffer_))) hitSoundPathKey = hitSoundKeyBuffer_;
 }
 
 void HitBox::Serialize(nlohmann::json& j_) const
@@ -112,6 +124,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     CapsuleCollider::Serialize(j_);
     j_["Damage"] = damage;
     j_["HitStopTime"] = hitStopTime;
+    j_["HitStopDir"] = hitStopDir;
     j_["HitStopLayerMask"] = hitStopLayerMask;
     j_["KnockBackPower"] = knockBackPower;
     j_["HitOncePerActivation"] = hitOncePerActivation;
@@ -123,6 +136,10 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitMeshVFXAssetPath"] = hitMeshVFXAssetPath;
     j_["HitMeshVFXLifeTime"] = hitMeshVFXLifeTime;
     j_["HitMeshVFXNormalOffset"] = hitMeshVFXNormalOffset;
+    j_["HitSoundPath"] = hitSoundPath;
+    j_["HitSoundVolume"] = hitSoundVolume;
+    j_["HitSoundMuffled"] = hitSoundMuffled;
+    j_["HitSoundMuffledCutoff"] = hitSoundMuffledCutoff;
     j_["ActionPrefix"] = actionPrefix;
     j_["ActivateActionName"] = activateActionName;
     j_["DeactivateActionName"] = deactivateActionName;
@@ -130,6 +147,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["DamageKey"] = damageKey;
     j_["HitStopTimeKey"] = hitStopTimeKey;
     j_["KnockBackPowerKey"] = knockBackPowerKey;
+    j_["HitSoundPathKey"] = hitSoundPathKey;
 }
 
 void HitBox::Deserialize(const nlohmann::json& j_)
@@ -137,6 +155,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     CapsuleCollider::Deserialize(j_);
     damage = j_.value("Damage", 1.0f);
     hitStopTime = j_.value("HitStopTime", 0.0f);
+    hitStopDir = j_.value("HitStopDir", 0.0f);
     hitStopLayerMask = j_.value("HitStopLayerMask", 3u);
     knockBackPower = j_.value("KnockBackPower", 0.0f);
     hitOncePerActivation = j_.value("HitOncePerActivation", true);
@@ -148,6 +167,10 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitMeshVFXAssetPath = j_.value("HitMeshVFXAssetPath", std::string{});
     hitMeshVFXLifeTime = (std::max)(j_.value("HitMeshVFXLifeTime", 1.0f), 0.0f);
     hitMeshVFXNormalOffset = j_.value("HitMeshVFXNormalOffset", 0.0f);
+    hitSoundPath = j_.value("HitSoundPath", std::string{});
+    hitSoundVolume = (std::max)(j_.value("HitSoundVolume", 1.0f), 0.0f);
+    hitSoundMuffled = j_.value("HitSoundMuffled", false);
+    hitSoundMuffledCutoff = (std::max)(j_.value("HitSoundMuffledCutoff", 1200.0f), 10.0f);
     actionPrefix = j_.value("ActionPrefix", std::string("HitBox"));
     activateActionName = "EnableHitBox";
     deactivateActionName = "DisableHitBox";
@@ -155,6 +178,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     damageKey = j_.value("DamageKey", std::string("Damage"));
     hitStopTimeKey = j_.value("HitStopTimeKey", std::string("HitStopTime"));
     knockBackPowerKey = j_.value("KnockBackPowerKey", std::string("KnockBackPower"));
+    hitSoundPathKey = j_.value("HitSoundPathKey", std::string("HitSoundPath"));
     EnforceHitBoxSettings();
 }
 
@@ -224,9 +248,65 @@ void HitBox::ApplyBlackboardValues()
     {
         hitStopTime = value_;
     }
+    if (blackboard_->GetFloat(blackboardCategory, "HitStopDir", value_))
+    {
+        hitStopDir = value_;
+    }
+    int intValue_ = 0;
+    if (blackboard_->GetInt(blackboardCategory, "HitStopLayerMask", intValue_))
+    {
+        hitStopLayerMask = static_cast<uint32_t>((std::max)(intValue_, 0));
+    }
     if (!knockBackPowerKey.empty() && blackboard_->GetFloat(blackboardCategory, knockBackPowerKey, value_))
     {
         knockBackPower = value_;
+    }
+
+    std::string stringValue_;
+    if (blackboard_->GetString(blackboardCategory, "HitParticleAssetPath", stringValue_))
+    {
+        hitParticleAssetPath = stringValue_;
+    }
+    if (blackboard_->GetString(blackboardCategory, "HitParticleEmitterName", stringValue_))
+    {
+        hitParticleEmitterName = stringValue_;
+    }
+    if (blackboard_->GetString(blackboardCategory, "HitMeshVFXAssetPath", stringValue_))
+    {
+        hitMeshVFXAssetPath = stringValue_;
+    }
+    if (!hitSoundPathKey.empty() && blackboard_->GetString(blackboardCategory, hitSoundPathKey, stringValue_))
+    {
+        hitSoundPath = stringValue_;
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitParticleLifeTime", value_))
+    {
+        hitParticleLifeTime = (std::max)(value_, 0.0f);
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitParticleNormalOffset", value_))
+    {
+        hitParticleNormalOffset = value_;
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitMeshVFXLifeTime", value_))
+    {
+        hitMeshVFXLifeTime = (std::max)(value_, 0.0f);
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitMeshVFXNormalOffset", value_))
+    {
+        hitMeshVFXNormalOffset = value_;
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitSoundVolume", value_))
+    {
+        hitSoundVolume = (std::max)(value_, 0.0f);
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitSoundMuffledCutoff", value_))
+    {
+        hitSoundMuffledCutoff = (std::max)(value_, 10.0f);
+    }
+    bool boolValue_ = false;
+    if (blackboard_->GetBool(blackboardCategory, "HitSoundMuffled", boolValue_))
+    {
+        hitSoundMuffled = boolValue_;
     }
 }
 
@@ -280,3 +360,5 @@ void HitBox::EnforceHitBoxSettings()
     useGravity = false;
     isTrigger = false;
 }
+
+

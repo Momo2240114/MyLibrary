@@ -12,7 +12,8 @@ enum class ANIM_BLACKBOARD_VALUE_TYPE
 {
     FLOAT,
     INT,
-    BOOL
+    BOOL,
+    STRING
 };
 
 struct AnimBlackboardWrite
@@ -23,6 +24,7 @@ struct AnimBlackboardWrite
     float floatValue = 0.0f;
     int intValue = 0;
     bool boolValue = false;
+    std::string stringValue;
 };
 
 

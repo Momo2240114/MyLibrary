@@ -107,6 +107,7 @@ namespace
 
 bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 {
+    // 複数TextureをGPU上で合成するための全画面Shaderと一時RTを準備する。
     if (!device_) return false;
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
@@ -128,6 +129,7 @@ bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 
 bool MeshVFXTextureMixer::CreateTarget(ID3D11Device* device_, Target& target_)
 {
+    // Mask/Noise合成結果を保持する1024x1024の一時Textureを作る。
     D3D11_TEXTURE2D_DESC description_{};
     description_.Width = 1024;
     description_.Height = 1024;
@@ -155,6 +157,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     const std::vector<bool>* invertLayers_,
     bool average_)
 {
+    // Textureが1枚だけなら合成せずそのまま返し、複数枚の場合だけPing-Pong合成する。
     if (textures_.empty() || !renderContext_.deviceContext || !renderContext_.renderState) return nullptr;
     if (textures_.size() == 1 && (!invertLayers_ || invertLayers_->empty() || !(*invertLayers_)[0]))
     {
@@ -193,6 +196,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     ID3D11ShaderResourceView* currentTexture_ = textures_[0];
     for (size_t layerIndex_ = 0; layerIndex_ < textures_.size(); ++layerIndex_)
     {
+        // 1Layerずつ現在結果と次Textureを合成し、出力先を交互に切り替える。
         MixConstants constants_{};
         constants_.blendMode = layerIndex_ == 0
             ? 2u
@@ -221,6 +225,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
 
 bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
 {
+    // Shader本体と、Mask/Noise用TextureMixerをまとめて初期化する。
     shader = std::make_unique<MeshVFXShader>();
     isInitialized =
         shader->Initialize(device_) &&
@@ -237,6 +242,7 @@ bool MeshVFXRenderSystem::EnsureAfterimageBuffers(
     ID3D11Device* device_,
     UINT instanceCapacity_)
 {
+    // Afterimageの数が増えたときだけ、必要数以上のStructuredBufferへ拡張する。
     if (!device_ || instanceCapacity_ == 0) return false;
     if (afterimageInstanceCapacity >= instanceCapacity_ &&
         afterimageBoneBuffer && afterimageInstanceBuffer)
@@ -299,6 +305,7 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
     const std::vector<const MeshVFXModelPoseView*>& poses_,
     size_t meshIndex_)
 {
+    // 複数Poseのボーン行列とAlpha/TimeをInstancing用Bufferへ詰める。
     if (poses_.empty() || !renderContext_.deviceContext)
     {
         return 0;
@@ -363,6 +370,7 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
 
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
+    // 描画可能なComponentだけを今フレームのRenderAll対象へ積む。
     if (!isInitialized || !component_ || !component_->IsEnabled()) return;
 
     if (component_->UsesOwnerModel())
@@ -406,6 +414,7 @@ bool MeshVFXRenderSystem::EnsureCopyTexture(
     Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_)
 {
+    // Scene Color/DepthをShaderからSampleするため、サイズと形式が合うコピーTextureを確保する。
     if (!device_ || !source_) return false;
 
     Microsoft::WRL::ComPtr<ID3D11Resource> sourceResource_;
@@ -464,6 +473,7 @@ bool MeshVFXRenderSystem::PrepareSceneSampling(
     ID3D11RenderTargetView* activeRenderTarget_,
     ID3D11DepthStencilView* activeDepthStencil_)
 {
+    // 背景歪みや深度交差Edgeで使うため、現在のScene Color/Depthを描画前に退避する。
     ID3D11Device* device_ = renderContext_.device
         ? renderContext_.device
         : GraphicsDeviceManager::Instance().GetDevice();
@@ -504,6 +514,7 @@ void MeshVFXRenderSystem::RenderAll(
     ID3D11RenderTargetView* activeRenderTarget_,
     ID3D11DepthStencilView* activeDepthStencil_)
 {
+    // PushSubmitされた全MeshVFXを、通常Mesh・動的Mesh・Afterimage Poseの3系統に分けて描画する。
     if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())
     {
@@ -540,6 +551,7 @@ void MeshVFXRenderSystem::RenderAll(
                             (part_.useEdgeHighlight && part_.intersectionEdgeStrength > 0.0f));
                 });
         });
+    // 必要なPartがある場合だけScene Color/Depthをコピーし、不要なフレームのコストを避ける。
     const bool sceneSamplingReady_ = needsSceneSampling_ && PrepareSceneSampling(
         renderContext_,
         isEditorWindow_,
@@ -590,6 +602,7 @@ void MeshVFXRenderSystem::RenderAll(
                 float poseTime_, float poseAlpha_,
                 UINT instanceCount_, bool useInstancedPose_)
             {
+                // Mesh1つ分のTexture解決、Shader更新、Vertex/Index設定、Draw呼び出しを共通化する。
                 if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0) return;
 
                 ID3D11ShaderResourceView* baseTexture_ = runtimePart_.baseTexture.Get();
@@ -683,6 +696,7 @@ void MeshVFXRenderSystem::RenderAll(
 
             if (useDynamicMesh_)
             {
+                // Trailなどの実行時生成Meshは、Component側が持つBufferをそのまま描画する。
                 renderMesh_(dynamicMesh_.vertexBuffer, dynamicMesh_.indexBuffer,
                     dynamicMesh_.indexCount, dynamicMesh_.vertexStride,
                     DirectX::XMMatrixIdentity(), nullptr, nullptr,
@@ -692,6 +706,7 @@ void MeshVFXRenderSystem::RenderAll(
 
             if (hasModelPoses_)
             {
+                // Afterimageは同じMeshを複数PoseでInstancing描画し、DrawCallを抑える。
                 std::unordered_map<
                     GltfModelCommponennt*,
                     std::vector<const MeshVFXModelPoseView*>> poseGroups_;
@@ -725,6 +740,7 @@ void MeshVFXRenderSystem::RenderAll(
             const auto& meshes_ = useOwnerModel_ ? ownerModel_->GetMeshes() : runtimePart_.modelResource->meshes;
             for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
             {
+                // 通常MeshVFXはPartTransformとOwnerTransformを合成して描画する。
                 if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
 
                 const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];

@@ -3,50 +3,54 @@
 
 #include "Scene.hlsli"
 
+// MeshVFXのPartごとにC++から渡される定数。
+// MeshVFXShader::CbMeshVFXと並び順を必ず合わせる。
 cbuffer CbMeshVFX : register(b0)
 {
-    row_major float4x4 world;
-    float4 vfxColor;
-    float2 baseUVSpeed;
-    float2 maskUVSpeed;
-    float2 noiseUVSpeed;
-    float2 uvRotationCenter;
-    float time;
-    float alpha;
-    float normalStrength;
-    float noiseStrength;
-    float fresnelPower;
-    float fresnelStrength;
-    float dissolveThreshold;
-    float baseUVRotation;
-    float maskUVRotation;
-    float noiseUVRotation;
-    float uvRadialScale;
-    float uvRadialScaleSpeed;
-    float vertexNoiseHorizontalStrength;
-    float vertexNoiseVerticalStrength;
-    float vertexNoiseHorizontalScale;
-    float vertexNoiseVerticalScale;
-    float3 vertexNoiseSpeed;
-    uint useVertexNoise;
-    uint useMask;
-    uint useNoise;
-    uint useNormal;
-    uint useFresnel;
-    float4 edgeColor;
-    float maskDistortionStrength;
-    float maskDistortionOpacity;
-    float silhouetteEdgeStrength;
-    float silhouetteEdgePower;
-    float intersectionEdgeStrength;
-    float intersectionEdgeWidth;
-    uint useMaskDistortion;
-    uint useEdgeHighlight;
-    uint hasDistortionNoiseTexture;
-    uint hasVertexNoiseTexture;
-    uint2 texturePadding;
+    row_major float4x4 world; // Partのワールド行列。
+    float4 vfxColor; // BaseTextureへ掛ける色。
+    float2 baseUVSpeed; // Base UVのスクロール速度。
+    float2 maskUVSpeed; // Mask UVのスクロール速度。
+    float2 noiseUVSpeed; // Noise UVのスクロール速度。
+    float2 uvRotationCenter; // UV回転・放射拡縮の中心。
+    float time; // Partの再生時間。
+    float alpha; // Partの最終Alpha。
+    float normalStrength; // Normal Textureの凹凸強度。
+    float noiseStrength; // NoiseでBase/Mask UVを歪ませる強さ。
+    float fresnelPower; // Fresnelの細さ。
+    float fresnelStrength; // Fresnelの強さ。
+    float dissolveThreshold; // Mask/Alphaで破棄する閾値。
+    float baseUVRotation; // Base UV回転。ラジアン。
+    float maskUVRotation; // Mask UV回転。ラジアン。
+    float noiseUVRotation; // Noise UV回転。ラジアン。
+    float uvRadialScale; // UV中心からの拡縮倍率。
+    float uvRadialScaleSpeed; // UV拡縮の時間変化。
+    float vertexNoiseHorizontalStrength; // 頂点横揺れ強度。
+    float vertexNoiseVerticalStrength; // 頂点縦揺れ強度。
+    float vertexNoiseHorizontalScale; // 横揺れNoiseの細かさ。
+    float vertexNoiseVerticalScale; // 縦揺れNoiseの細かさ。
+    float3 vertexNoiseSpeed; // 頂点Noiseのスクロール速度。
+    uint useVertexNoise; // 頂点Noiseを使うか。
+    uint useMask; // Mask Textureを使うか。
+    uint useNoise; // UV Noiseを使うか。
+    uint useNormal; // Normal Textureを使うか。
+    uint useFresnel; // Fresnel発光を使うか。
+    float4 edgeColor; // Edge Highlightの色。
+    float maskDistortionStrength; // 背景歪みの強さ。
+    float maskDistortionOpacity; // 背景歪み部分のAlpha。
+    float silhouetteEdgeStrength; // シルエットEdgeの強さ。
+    float silhouetteEdgePower; // シルエットEdgeの細さ。
+    float intersectionEdgeStrength; // 深度交差Edgeの強さ。
+    float intersectionEdgeWidth; // 深度交差Edgeの幅。
+    uint useMaskDistortion; // Mask Distortionを使うか。
+    uint useEdgeHighlight; // Edge Highlightを使うか。
+    uint hasDistortionNoiseTexture; // 歪みNoiseがあるか。
+    uint hasVertexNoiseTexture; // 頂点Noiseがあるか。
+    uint edgePatternMode; // 0:なし 1:BaseTexture 2:MaskTexture。
+    float edgePatternStrength; // Edge模様を混ぜる割合。
 };
 
+// GltfModelの頂点入力。
 struct VS_IN
 {
     float3 position : POSITION;
@@ -57,6 +61,7 @@ struct VS_IN
     uint4 boneIndices : BONE_INDICES;
 };
 
+// VertexShaderからPixelShaderへ渡す値。
 struct VS_OUT
 {
     float4 position : SV_POSITION;

@@ -3,6 +3,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 void EditorWindowManager::ApplyEngineLayout(ImVec2& scenePos, ImVec2& sceneSize)
@@ -234,38 +235,59 @@ void EditorWindowManager::DrawWorkspaceSelectorBar()
 
     if (ImGui::Begin("Workspace Selector", nullptr, flags))
     {
-        if (ImGui::Selectable("Scene Editor", activeWorkspaceIndex < 0, 0, ImVec2(120.0f, 0.0f)))
+        ImGui::TextUnformatted("Workspace");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth((std::min)(360.0f, viewport->WorkSize.x - 120.0f));
+
+        const std::string activeName_ = GetActiveWorkspaceName();
+        if (ImGui::BeginCombo("##WorkspaceSelect", activeName_.c_str()))
         {
-            activeWorkspaceIndex = -1;
-            for (auto& window : windows)
+            if (ImGui::Selectable("Scene Editor", activeWorkspaceIndex < 0))
             {
-                if (window->IsEditorWorkspace()) window->SetVisible(false);
+                SetActiveWorkspace(-1);
             }
-        }
 
-        for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
-        {
-            auto& window_ = windows[index_];
-            if (!window_->IsEditorWorkspace()) continue;
-
-            ImGui::SameLine();
-            const bool selected_ = activeWorkspaceIndex == index_;
-            if (ImGui::Selectable(window_->GetName().c_str(), selected_, 0, ImVec2(140.0f, 0.0f)))
+            for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
             {
-                activeWorkspaceIndex = index_;
-                for (int otherIndex_ = 0; otherIndex_ < static_cast<int>(windows.size()); ++otherIndex_)
+                const auto& window_ = windows[index_];
+                if (!window_->IsEditorWorkspace()) continue;
+
+                const bool selected_ = activeWorkspaceIndex == index_;
+                if (ImGui::Selectable(window_->GetName().c_str(), selected_))
                 {
-                    if (windows[otherIndex_]->IsEditorWorkspace())
-                    {
-                        windows[otherIndex_]->SetVisible(otherIndex_ == activeWorkspaceIndex);
-                    }
+                    SetActiveWorkspace(index_);
                 }
+                if (selected_) ImGui::SetItemDefaultFocus();
             }
+            ImGui::EndCombo();
         }
     }
     ImGui::End();
 }
 
+void EditorWindowManager::SetActiveWorkspace(int workspaceIndex_)
+{
+    activeWorkspaceIndex = workspaceIndex_;
+    for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
+    {
+        if (windows[index_]->IsEditorWorkspace())
+        {
+            windows[index_]->SetVisible(index_ == activeWorkspaceIndex);
+        }
+    }
+}
+
+std::string EditorWindowManager::GetActiveWorkspaceName() const
+{
+    if (activeWorkspaceIndex < 0 ||
+        activeWorkspaceIndex >= static_cast<int>(windows.size()) ||
+        !windows[activeWorkspaceIndex]->IsEditorWorkspace())
+    {
+        return "Scene Editor";
+    }
+
+    return windows[activeWorkspaceIndex]->GetName();
+}
 void EditorWindowManager::Update(float deltaTime_)
 {
     if (activeWorkspaceIndex < 0 || activeWorkspaceIndex >= static_cast<int>(windows.size())) return;
@@ -322,3 +344,4 @@ void EditorWindowManager::DrawAll()
     DrawMenuBar();
     EditorWindow::SetMenuInteractionActive(false);
 }
+

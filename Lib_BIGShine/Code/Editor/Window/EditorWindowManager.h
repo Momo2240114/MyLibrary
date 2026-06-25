@@ -1,6 +1,7 @@
 // EditorWindowManager.h
 #include <vector>
 #include <memory>
+#include <string>
 #include "EditorWindow.h" 
 
 class GameObjectManager;
@@ -22,6 +23,8 @@ public:
 private:
     void DrawMenuBar();
     void DrawWorkspaceSelectorBar();
+    void SetActiveWorkspace(int workspaceIndex_);
+    std::string GetActiveWorkspaceName() const;
     float GetWorkspaceSelectorHeight() const;
     void ApplyEngineLayout(ImVec2& scenePos, ImVec2& sceneSize);
     void DrawSceneView(const ImVec2& pos, const ImVec2& size);
@@ -37,3 +40,4 @@ private:
     GameObjectManager* gameObjectManager; // Ç±Ç±Ç™åqÇ™ÇÈÅI
     std::vector<std::unique_ptr<EditorWindow>> windows;
 };
+

@@ -1,4 +1,5 @@
 #include "GameObjectManager.h"
+#include "Engine/Audio/AudioManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/ContainmentVolumeComponent.h"
@@ -36,7 +37,7 @@ void GameObjectManager::Initialize()
 
     resourceManager = std::make_unique<ResourceManager>();
     timeManager = std::make_shared<TimeManager>();
-    vfxManager->Initialize(this);
+    effectManager->Initialize(this);
     RegisterAttackCallbacks();
 
     cameraManager = std::make_shared<CameraManager>();
@@ -112,7 +113,7 @@ void GameObjectManager::Update(float elapsedTime_)
         object_->UpdateTransform();
     }
 
-    vfxManager->Update(elapsedTime_);
+    effectManager->Update(elapsedTime_);
 
     if (!pendingDestroys.empty()) {
         std::vector<std::shared_ptr<GameObject>> currentDestroys_ = std::move(pendingDestroys);
@@ -132,6 +133,9 @@ void GameObjectManager::Update(float elapsedTime_)
     );
 
     cameraManager->Update(elapsedTime_, objects);
+    AudioManager::Instance().UpdateListenerFromCamera(
+        cameraManager->GetActiveCamera().get(),
+        elapsedTime_);
 }
 
 void GameObjectManager::Clear()
@@ -142,7 +146,7 @@ void GameObjectManager::Clear()
 
     collisionStepSystem->Clear();
     attackSystem->Clear();
-    vfxManager->Clear();
+    effectManager->Clear();
 
     objects.clear();
     pendingStarts.clear();
@@ -515,6 +519,8 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     if(shapeRenderEnabled)
     {
         GraphicsDeviceManager::Instance().GetShapeRendererSystem().Render(deviceContext_, renderContext_.camera->GetView(), renderContext_.camera->GetProjection());
+        deviceContext_->OMSetDepthStencilState(
+            renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     }
 
     graphicsDeviceManager_.SetParticleRenderTarget();
@@ -922,9 +928,24 @@ void GameObjectManager::RegisterAttackCallbacks()
                     event_.hitStopTime);
             }
 
-            if (vfxManager && event_.hasHitContact)
+            if (effectManager && event_.hasHitContact)
             {
-                vfxManager->SpawnForHit(event_);
+                effectManager->SpawnForHit(event_);
+            }
+
+            if (!event_.hitSoundPath.empty())
+            {
+                AudioManager& audioManager_ = AudioManager::Instance();
+                audioManager_.AddAudioFromFile(event_.hitSoundPath, false);
+                audioManager_.SetVolumeByPath(event_.hitSoundPath, event_.hitSoundVolume);
+                audioManager_.SetMuffledByPath(
+                    event_.hitSoundPath,
+                    event_.hitSoundMuffled,
+                    event_.hitSoundMuffledCutoff);
+                audioManager_.PlaySEByPath(event_.hitSoundPath);
             }
         });
 }
+
+
+

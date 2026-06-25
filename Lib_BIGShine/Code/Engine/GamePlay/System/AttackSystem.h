@@ -41,6 +41,10 @@ struct AttackHitEvent
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;
+    std::string hitSoundPath;
+    float hitSoundVolume = 1.0f;
+    bool hitSoundMuffled = false;
+    float hitSoundMuffledCutoff = 1200.0f;
 };
 
 class AttackSystem
@@ -74,3 +78,4 @@ private:
     std::vector<AttackHitEvent> frameHitEvents;
     std::vector<HitCallback> hitCallbacks;
 };
+

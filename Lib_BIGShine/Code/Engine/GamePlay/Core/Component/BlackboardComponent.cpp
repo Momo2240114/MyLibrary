@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <type_traits>
 
 namespace
@@ -37,6 +38,11 @@ namespace
             {
                 valueJson_["type"] = "vector3";
                 valueJson_["value"] = { arg_.x, arg_.y, arg_.z };
+            }
+            else if constexpr (std::is_same_v<T, std::string>)
+            {
+                valueJson_["type"] = "string";
+                valueJson_["value"] = arg_;
             }
             }, value_);
 
@@ -76,6 +82,10 @@ namespace
             }
             return value_;
         }
+        if (type_ == "string")
+        {
+            return valueJson_.value("value", std::string{});
+        }
         return valueJson_.value("value", 0.0f);
     }
 }
@@ -85,7 +95,7 @@ void BlackboardComponent::Gui()
     static char newCategory_[64] = "Anim";
     static char newKey_[64] = "";
     static int newType_ = 0;
-    const char* typeNames_[] = { "Float", "Int", "Bool", "Vector2", "Vector3", "Trigger" };
+    const char* typeNames_[] = { "Float", "Int", "Bool", "Vector2", "Vector3", "String", "Trigger" };
 
     ImGui::InputText("Category", newCategory_, IM_ARRAYSIZE(newCategory_));
     ImGui::InputText("Key", newKey_, IM_ARRAYSIZE(newKey_));
@@ -105,7 +115,8 @@ void BlackboardComponent::Gui()
             case 2: SetBool(category_, key_, false); break;
             case 3: SetVector2(category_, key_, { 0.0f, 0.0f }); break;
             case 4: SetVector3(category_, key_, { 0.0f, 0.0f, 0.0f }); break;
-            case 5: SetTrigger(category_, key_); ResetTrigger(category_, key_); break;
+            case 5: SetString(category_, key_, ""); break;
+            case 6: SetTrigger(category_, key_); ResetTrigger(category_, key_); break;
             default: break;
             }
 
@@ -154,6 +165,10 @@ void BlackboardComponent::Gui()
             else if (auto* vector3Value_ = std::get_if<DirectX::SimpleMath::Vector3>(&value_))
             {
                 ImGui::DragFloat3("##Value", &vector3Value_->x, 0.05f);
+            }
+            else if (auto* stringValue_ = std::get_if<std::string>(&value_))
+            {
+                ImGui::InputText("##Value", stringValue_);
             }
             ImGui::SameLine();
             if (ImGui::Button("Remove"))
@@ -241,6 +256,11 @@ void BlackboardComponent::SetVector2(const std::string& category_, const std::st
 }
 
 void BlackboardComponent::SetVector3(const std::string& category_, const std::string& key_, const DirectX::SimpleMath::Vector3& value_)
+{
+    SetValue(category_, key_, value_);
+}
+
+void BlackboardComponent::SetString(const std::string& category_, const std::string& key_, const std::string& value_)
 {
     SetValue(category_, key_, value_);
 }
@@ -339,6 +359,18 @@ bool BlackboardComponent::GetVector3(const std::string& category_, const std::st
     return false;
 }
 
+bool BlackboardComponent::GetString(const std::string& category_, const std::string& key_, std::string& value_) const
+{
+    const auto* valuePtr_ = GetValue(category_, key_);
+    if (!valuePtr_) return false;
+    if (auto stringValue_ = std::get_if<std::string>(valuePtr_))
+    {
+        value_ = *stringValue_;
+        return true;
+    }
+    return false;
+}
+
 bool BlackboardComponent::ConsumeTrigger(const std::string& category_, const std::string& key_)
 {
     auto* valuePtr_ = GetValue(category_, key_);
@@ -403,6 +435,7 @@ float BlackboardComponent::ToFloat(const BlackBoardValue& value_)
         if constexpr (std::is_same_v<T, bool>) return arg_ ? 1.0f : 0.0f;
         if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector2>) return arg_.Length();
         if constexpr (std::is_same_v<T, DirectX::SimpleMath::Vector3>) return arg_.Length();
+        if constexpr (std::is_same_v<T, std::string>) return arg_.empty() ? 0.0f : 1.0f;
         return 0.0f;
     }, value_);
 

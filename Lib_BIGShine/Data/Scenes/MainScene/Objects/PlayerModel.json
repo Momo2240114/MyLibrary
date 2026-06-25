@@ -5,34 +5,34 @@
                 "CollisionRole": 1,
                 "ContainmentMode": 0,
                 "DebugPrimitiveColor": [
-                    0.0,
-                    0.9686274528503418,
-                    0.0,
+                    0.20000000298023224,
+                    0.6000000238418579,
+                    1.0,
                     1.0
                 ],
                 "EndNodeName": "",
                 "GravityScale": 1.0,
-                "HalfHeight": 0.8500000238418579,
+                "HalfHeight": 1.0,
                 "IsStatic": false,
                 "IsTrigger": false,
-                "Mass": 1000.0,
+                "Mass": 1.0,
                 "Offset": [
                     0.0,
-                    1.4199999570846558,
+                    1.5,
                     0.0
                 ],
                 "PhysicsControlsTransform": true,
                 "Radius": 0.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
-                "UseGravity": true,
+                "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0499999523162842
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
-            "TypeName": "CapsuleCollider"
+            "TypeName": "CharacterCollider"
         }
     ],
     "CollisionMask": 0,
@@ -43,7 +43,7 @@
                 "MaterialOverrides": [
                     {
                         "alphaCutoff": 0.5,
-                        "alphaMode": 2,
+                        "alphaMode": 0,
                         "baseColor": [
                             1.0,
                             1.0,
@@ -68,7 +68,7 @@
                     },
                     {
                         "alphaCutoff": 0.5,
-                        "alphaMode": 2,
+                        "alphaMode": 0,
                         "baseColor": [
                             1.0,
                             1.0,
@@ -287,7 +287,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                1.0
                             ]
                         },
                         "IsAttack": {
@@ -373,7 +373,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                1.0
                             ]
                         },
                         "IsAttack": {
@@ -473,54 +473,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 22,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "SS_Hit_R",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 0,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -549,6 +501,54 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Quickshift_B",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 22,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SS_Hit_R",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -666,6 +666,7 @@
                                             "floatValue": 12.0,
                                             "intValue": 0,
                                             "key": "Damage",
+                                            "stringValue": "",
                                             "type": 0
                                         },
                                         {
@@ -674,6 +675,7 @@
                                             "floatValue": 0.10000000149011612,
                                             "intValue": 0,
                                             "key": "HitStopTime",
+                                            "stringValue": "",
                                             "type": 0
                                         }
                                     ],
@@ -792,6 +794,7 @@
                                             "floatValue": 5.0,
                                             "intValue": 0,
                                             "key": "Damage",
+                                            "stringValue": "",
                                             "type": 0
                                         }
                                     ],
@@ -1427,6 +1430,7 @@
                                             "floatValue": 5.0,
                                             "intValue": 0,
                                             "key": "Damage",
+                                            "stringValue": "",
                                             "type": 0
                                         }
                                     ],
@@ -1845,6 +1849,7 @@
                                             "floatValue": 5.0,
                                             "intValue": 0,
                                             "key": "Damage",
+                                            "stringValue": "",
                                             "type": 0
                                         },
                                         {
@@ -1853,6 +1858,7 @@
                                             "floatValue": 0.05000000074505806,
                                             "intValue": 0,
                                             "key": "HitStopTime",
+                                            "stringValue": "",
                                             "type": 0
                                         }
                                     ],
@@ -1983,6 +1989,7 @@
                                             "floatValue": 5.0,
                                             "intValue": 0,
                                             "key": "Damage",
+                                            "stringValue": "",
                                             "type": 0
                                         },
                                         {
@@ -1991,6 +1998,7 @@
                                             "floatValue": 0.05000000074505806,
                                             "intValue": 0,
                                             "key": "HitStopTime",
+                                            "stringValue": "",
                                             "type": 0
                                         }
                                     ],
@@ -2408,54 +2416,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 62,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Run_Attack_02_Seq_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 39,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -2484,6 +2444,54 @@
                             "events": [],
                             "loop": true,
                             "name": "Combo_Attack_03_All_Seq_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 62,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Run_Attack_02_Seq_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3752,54 +3760,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 56,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Jump_Combat_Loop_0_Seq_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 65,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -3828,6 +3788,54 @@
                             "events": [],
                             "loop": true,
                             "name": "Run_Combat_Stop_F_0_RM_Seq_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 56,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Jump_Combat_Loop_0_Seq_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -4088,7 +4096,7 @@
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.6499999761581421
+                                    "startTime": 0.75
                                 },
                                 {
                                     "actionEnd": "",
@@ -4108,7 +4116,7 @@
                                     "actionUpdate": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 0.7666666507720947,
+                                    "endTime": 0.7333333492279053,
                                     "label": "CanCancelOn",
                                     "overridePlaybackSpeed": false,
                                     "playbackSpeed": 1.0,
@@ -4197,7 +4205,7 @@
                             0.0,
                             0.0
                         ],
-                        "Radius": 0.020999999716877937
+                        "Radius": 0.09700000286102295
                     },
                     {
                         "ConnectToNext": false,
@@ -4364,10 +4372,372 @@
             "Data": {
                 "BurstCount": 3,
                 "IncludeChildren": true,
-                "IsPlaying": false,
                 "Lifetime": 0.4000000059604645,
                 "MaxSnapshots": 8,
                 "Parts": [
+                    {
+                        "Alpha": 1.0,
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVSpeed": [
+                            0.0,
+                            -0.5
+                        ],
+                        "BlendMode": 1,
+                        "Color": [
+                            0.20000000298023224,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveStrength": 3.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 0.800000011920929,
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": true,
+                        "MaskDistortionOpacity": 0.5,
+                        "MaskDistortionStrength": 8.0,
+                        "MaskLayers": [],
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVSpeed": [
+                            0.0,
+                            -0.20000000298023224
+                        ],
+                        "MeshIndex": -1,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "",
+                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVSpeed": [
+                            0.20000000298023224,
+                            -0.800000011920929
+                        ],
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "Position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RenderEnabled": true,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": true,
+                        "UseMask": false,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": false,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    },
+                    {
+                        "Alpha": 1.0,
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVSpeed": [
+                            0.0,
+                            -0.5
+                        ],
+                        "BlendMode": 1,
+                        "Color": [
+                            0.20000000298023224,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveStrength": 3.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 0.800000011920929,
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": true,
+                        "MaskDistortionOpacity": 0.5,
+                        "MaskDistortionStrength": 8.0,
+                        "MaskLayers": [],
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVSpeed": [
+                            0.0,
+                            -0.20000000298023224
+                        ],
+                        "MeshIndex": -1,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "",
+                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVSpeed": [
+                            0.20000000298023224,
+                            -0.800000011920929
+                        ],
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "Position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RenderEnabled": true,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": true,
+                        "UseMask": false,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": false,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    },
+                    {
+                        "Alpha": 1.0,
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVSpeed": [
+                            0.0,
+                            -0.5
+                        ],
+                        "BlendMode": 1,
+                        "Color": [
+                            0.20000000298023224,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveStrength": 3.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 0.800000011920929,
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": true,
+                        "MaskDistortionOpacity": 0.5,
+                        "MaskDistortionStrength": 8.0,
+                        "MaskLayers": [],
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVSpeed": [
+                            0.0,
+                            -0.20000000298023224
+                        ],
+                        "MeshIndex": -1,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "",
+                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVSpeed": [
+                            0.20000000298023224,
+                            -0.800000011920929
+                        ],
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "Position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RenderEnabled": true,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": true,
+                        "UseMask": false,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": false,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    },
                     {
                         "Alpha": 1.0,
                         "AlphaEnd": 1.0,
@@ -4397,6 +4767,8 @@
                             1.0,
                             1.0
                         ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternStrength": 0.0,
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -4501,6 +4873,26 @@
             },
             "Enabled": true,
             "TypeName": "CharacterMovementComponent"
+        },
+        {
+            "Data": {
+                "BodyCollisionShapeColor": [
+                    1.0,
+                    0.44999998807907104,
+                    0.10000000149011612,
+                    1.0
+                ],
+                "HairCollisionShapeColor": [
+                    0.20000000298023224,
+                    0.800000011920929,
+                    1.0,
+                    0.6000000238418579
+                ],
+                "ShowBodyCollisionShapes": false,
+                "ShowHairCollisionShapes": false
+            },
+            "Enabled": true,
+            "TypeName": "SpringBoneSimulationComponent"
         }
     ],
     "Layer": 1,
@@ -4508,13 +4900,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -1.1223689317703247,
-            -1.5286592245101929,
-            -51.596343994140625
+            -53.08108139038086,
+            -1.4767651557922363,
+            16.66598892211914
         ],
         "Rot": [
             3.0,
-            164.4467315673828,
+            49.64896774291992,
             0.0
         ],
         "Scale": [

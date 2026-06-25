@@ -600,6 +600,7 @@ void GltfModelCommponennt::UpdateTransform()
 		}
 	}
 }
+
 void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
 {
 	if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes.size()))

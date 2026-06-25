@@ -21,6 +21,10 @@ public:
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;
+    std::string hitSoundPath;
+    float hitSoundVolume = 1.0f;
+    bool hitSoundMuffled = false;
+    float hitSoundMuffledCutoff = 1200.0f;
 
     // ‹ó‚È‚ç GameObject –¼‚ðŽg‚¤
     std::string actionPrefix = "";
@@ -32,6 +36,7 @@ public:
     std::string damageKey = "Damage";
     std::string hitStopTimeKey = "HitStopTime";
     std::string knockBackPowerKey = "KnockBackPower";
+    std::string hitSoundPathKey = "HitSoundPath";
 
     HitBox();
 
@@ -56,3 +61,4 @@ private:
 private:
     uint64_t activationId = 0;
 };
+
