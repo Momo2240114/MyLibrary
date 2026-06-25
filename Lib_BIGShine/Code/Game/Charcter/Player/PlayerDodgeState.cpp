@@ -1,8 +1,8 @@
 #include "PlayerDodgeState.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
-#include "PlayerControllerComponent.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "PlayerControllerComponent.h"
 
 void PlayerDodgeState::Enter()
 {
@@ -36,8 +36,7 @@ void PlayerDodgeState::Enter()
     player_->SendDodgeInputToBlackboard(dodgeBlendInput);
 
     // DodgeŠJŽnŽž‚Éc‘¬“x‚ðŽE‚·
-    auto collider_ = owner_ ? owner_->GetComponent<ColliderComponent>() : nullptr;
-    if (collider_)
+    if (ColliderComponent* collider_ = player_->GetCollider())
     {
         collider_->velocity.y = 0.0f;
     }

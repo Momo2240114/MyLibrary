@@ -242,7 +242,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)External\SDL3\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;PhysXCharacterKinematic_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)External\SDL3\lib\x64\SDL3.dll" "$(OutDir)SDL3.dll"</Command>
@@ -344,6 +344,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Gui.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.NodeEditor.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.cpp" />
@@ -465,6 +466,7 @@
     <ClInclude Include="Code\Engine\Graphics\Core\GpuResourceUtils.h" />
     <ClInclude Include="Code\Engine\Graphics\Core\RenderContext.h" />
     <ClInclude Include="Code\Engine\Graphics\Core\RenderState.h" />
+    <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEffectAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\TextureResourceManager.h" />
     <ClInclude Include="Code\Editor\Window\AssetBrowserWindow.h" />
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h" />
@@ -539,6 +541,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />

@@ -93,6 +93,7 @@ public:
     {
         simulationWarmupRequested = true;
     }
+    bool ConsumeSimulationWarmupRequest();
 
     // テスト用グローバル風パラメータ（全インスタンス共通）
     static DirectX::XMFLOAT3 windDirection;   // 正規化済み風向き

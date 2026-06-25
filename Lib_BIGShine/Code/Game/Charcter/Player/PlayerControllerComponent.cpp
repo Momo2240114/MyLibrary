@@ -9,6 +9,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
+#include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "PlayerActionState.h"
@@ -135,14 +136,10 @@ void PlayerControllerComponent::Start()
     EnsurePlayerInputBindings();
 
     owner_->SetLayer(GameObject::LayerType::Player);
-    collider = owner_->GetComponent<ColliderComponent>();
+    collider = owner_->GetOrAddComponent<CharacterCollider>();
     movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
     if (collider)
     {
-        collider->collisionRole = ColliderComponent::CollisionRole::CHARACTER;
-        collider->usePhysicsResponse = true;
-        collider->physicsControlsTransform = true;
-        collider->isTrigger = false;
         collider->mass = (std::max)(collider->mass, 1.0f);
         collider->RecreatePhysXActor();
     }

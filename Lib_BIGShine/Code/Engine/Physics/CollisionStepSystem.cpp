@@ -193,7 +193,7 @@ void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
     }
 }
 
-void CollisionStepSystem::Step()
+void CollisionStepSystem::Step(float deltaTime_)
 {
     RemoveExpiredColliders();
     for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
@@ -203,7 +203,7 @@ void CollisionStepSystem::Step()
 
         collider_->isGrounded = false;
         collider_->SetHitFlag(false);
-        collider_->PreparePhysicsStep();
+        collider_->PreparePhysicsStep(deltaTime_);
     }
 
     StepCombatPairs();

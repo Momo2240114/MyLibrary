@@ -676,6 +676,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
@@ -1203,6 +1206,9 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\VFXManager.h">
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
@@ -1211,6 +1217,9 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
       <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEffectAsset.h">
+      <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

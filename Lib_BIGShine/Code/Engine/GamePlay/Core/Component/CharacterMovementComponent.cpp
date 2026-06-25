@@ -3,6 +3,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 
 #include <algorithm>
@@ -45,7 +46,14 @@ void CharacterMovementComponent::Update(float deltaTime_)
             desiredHorizontalVelocity.x + rootMotionVelocity_.x + pendingImpulse.x;
         collider_->velocity.z =
             desiredHorizontalVelocity.z + rootMotionVelocity_.z + pendingImpulse.z;
-        collider_->velocity.y += rootMotionVelocity_.y + pendingImpulse.y;
+        if (std::dynamic_pointer_cast<CharacterCollider>(collider_))
+        {
+            collider_->velocity.y = rootMotionVelocity_.y + pendingImpulse.y;
+        }
+        else
+        {
+            collider_->velocity.y += rootMotionVelocity_.y + pendingImpulse.y;
+        }
         lastAppliedVelocity = collider_->velocity;
     }
     else
@@ -114,23 +122,32 @@ void CharacterMovementComponent::SetFacingDirection(
 
 std::shared_ptr<ColliderComponent> CharacterMovementComponent::ResolveCollider()
 {
-    if (const std::shared_ptr<ColliderComponent> collider_ = collider.lock())
-    {
-        return collider_;
-    }
-
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
 
-    const std::shared_ptr<ColliderComponent> collider_ =
-        owner_->GetComponent<ColliderComponent>();
-    if (collider_)
+    if (const std::shared_ptr<ColliderComponent> characterCollider_ =
+        owner_->GetComponent<CharacterCollider>())
     {
-        collider_->SetVelocityRotationMode(
+        characterCollider_->SetVelocityRotationMode(
+            ColliderComponent::VelocityRotationMode::NONE);
+        collider = characterCollider_;
+        return characterCollider_;
+    }
+
+    if (const std::shared_ptr<ColliderComponent> cachedCollider_ = collider.lock())
+    {
+        return cachedCollider_;
+    }
+
+    const std::shared_ptr<ColliderComponent> fallbackCollider_ =
+        owner_->GetComponent<ColliderComponent>();
+    if (fallbackCollider_)
+    {
+        fallbackCollider_->SetVelocityRotationMode(
             ColliderComponent::VelocityRotationMode::NONE);
     }
-    collider = collider_;
-    return collider_;
+    collider = fallbackCollider_;
+    return fallbackCollider_;
 }
 
 void CharacterMovementComponent::ApplyFacing(float deltaTime_)

@@ -3,6 +3,7 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "Engine/GamePlay/EventSystem/IActionProvider.h"
 #include "ParticleEmitter.h"
+#include "ParticleEffectAsset.h"
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -52,6 +53,12 @@ public:
 
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;
+
+    void SetAsset(const ParticleEffectAsset& asset_);
+    ParticleEffectAsset GetAsset() const;
+    static bool LoadAssetDataOnly(
+        const std::string& path_,
+        ParticleEffectAsset& asset_);
 
     void Play();
     void Stop();

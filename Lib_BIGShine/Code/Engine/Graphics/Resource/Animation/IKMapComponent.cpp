@@ -1,4 +1,5 @@
 #include "IKMapComponent.h"
+#include "SpringBoneSimulationComponent.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
@@ -123,59 +124,23 @@ void IKMapComponent::Start()
 {
     auto owner_ = GetGameObject();
     model = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
+    if (owner_)
+    {
+        owner_->GetOrAddComponent<SpringBoneSimulationComponent>();
+    }
     ResetSimulation();
 }
 
 void IKMapComponent::LateUpdate(float deltaTime_)
 {
-    if (!model)
-    {
-        auto owner_ = GetGameObject();
-        model = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
-    }
-    if (!model) return;
+    (void)deltaTime_;
+}
 
-    const float safeDeltaTime_ = std::clamp(deltaTime_, 0.0f, 1.0f / 20.0f);
-    for (auto& chain_ : chains)
-    {
-        if (!chain_.enabled || chain_.type != IK_TYPE::SPRING_BONE) continue;
-        if (!ResolveChain(chain_)) continue;
-        SimulateSpringChain(chain_, safeDeltaTime_);
-        ApplySpringChain(chain_);
-    }
-
-    bool hasClothChains_ = false;
-    for (auto& chain_ : chains)
-    {
-        if (!chain_.enabled || chain_.type != IK_TYPE::CLOTH_BONE) continue;
-        if (!ResolveChain(chain_)) continue;
-        SimulateSpringChain(chain_, safeDeltaTime_);
-        hasClothChains_ = true;
-    }
-    if (hasClothChains_)
-    {
-        SolveClothConstraints();
-        for (auto& chain_ : chains)
-        {
-            if (!chain_.enabled || chain_.type != IK_TYPE::CLOTH_BONE || !chain_.initialized) continue;
-            ApplySpringChain(chain_);
-        }
-    }
-    DrawBodyCollisionShapes();
-    DrawHairCollisionShapes();
-
-    if (simulationWarmupRequested)
-    {
-        simulationWarmupRequested = false;
-
-        for (auto& chain_ : chains)
-        {
-            chain_.initialized = false;
-        }
-
-        clothConstraints.clear();
-        clothConstraintsInitialized = false;
-    }
+bool IKMapComponent::ConsumeSimulationWarmupRequest()
+{
+    const bool requested_ = simulationWarmupRequested;
+    simulationWarmupRequested = false;
+    return requested_;
 }
 
 bool IKMapComponent::ResolveChain(IKChain& chain_)
@@ -686,45 +651,7 @@ void IKMapComponent::Gui()
         ImGui::TextDisabled("Requires GltfModel on the same GameObject.");
         return;
     }
-
-    // ---- テスト用風設定 ----
-    ImGui::SeparatorText("Wind (Test)");
-    ImGui::Checkbox("Enable Wind", &windEnabled);
-    if (windEnabled)
-    {
-        ImGui::DragFloat("Wind Strength", &windStrength, 0.1f, 0.0f, 200.0f, "%.2f");
-        ImGui::TextDisabled("Direction XYZ (normalized automatically)");
-        if (ImGui::DragFloat3("Wind Direction", &windDirection.x, 0.01f, -1.0f, 1.0f))
-        {
-            // 入力後に正規化
-            const float len_ = std::sqrt(
-                windDirection.x * windDirection.x +
-                windDirection.y * windDirection.y +
-                windDirection.z * windDirection.z);
-            if (len_ > 0.0001f)
-            {
-                windDirection.x /= len_;
-                windDirection.y /= len_;
-                windDirection.z /= len_;
-            }
-        }
-        // プリセットボタン
-        ImGui::TextDisabled("Direction Presets:");
-        if (ImGui::Button("+X"))  windDirection = { 1.0f, 0.0f, 0.0f };
-        ImGui::SameLine();
-        if (ImGui::Button("-X"))  windDirection = { -1.0f, 0.0f, 0.0f };
-        ImGui::SameLine();
-        if (ImGui::Button("+Z"))  windDirection = { 0.0f, 0.0f, 1.0f };
-        ImGui::SameLine();
-        if (ImGui::Button("-Z"))  windDirection = { 0.0f, 0.0f, -1.0f };
-        ImGui::SameLine();
-        if (ImGui::Button("Up"))  windDirection = { 0.0f, 1.0f, 0.0f };
-        if (ImGui::Button("Stop Wind")) { windStrength = 0.0f; }
-    }
-    ImGui::Separator();
-
-
-    ImGui::TextDisabled("Spring Bone and Cloth Bone run after animation in LateUpdate.");
+    ImGui::TextDisabled("IKMap stores IK chain definitions. SpringBoneSimulationComponent runs simulation.");
     if (ImGui::Button("Add Hair Chain"))
     {
         chains.emplace_back();
@@ -738,16 +665,6 @@ void IKMapComponent::Gui()
     const auto& nodes_ = model->GetNodes();
     ImGui::SeparatorText("Body Collision Spheres");
     ImGui::TextDisabled("Lightweight approximation used to keep hair outside the body.");
-    ImGui::Checkbox("Show Body Collision Shapes", &showBodyCollisionShapes);
-    if (showBodyCollisionShapes)
-    {
-        ImGui::ColorEdit4("Body Collision Shape Color", &bodyCollisionShapeColor.x);
-    }
-    ImGui::Checkbox("Show Hair Collision Shapes", &showHairCollisionShapes);
-    if (showHairCollisionShapes)
-    {
-        ImGui::ColorEdit4("Hair Collision Shape Color", &hairCollisionShapeColor.x);
-    }
     if (ImGui::Button("Add Body Collision Sphere"))
     {
         bodyCollisionSpheres.emplace_back();

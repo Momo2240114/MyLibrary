@@ -14,6 +14,8 @@ static PxPvdTransport* gPvdTransport = nullptr;
 static PxMaterial* gDefaultMaterial = nullptr;
 static CollisionCallback gCollisionCallback;
 
+static PxControllerManager* gControllerManager = nullptr;
+
 static PxFilterFlags PhysXFilterShader(
     PxFilterObjectAttributes attributes0_,
     PxFilterData filterData0_,
@@ -113,6 +115,9 @@ void PhysXSystem::Initialize()
 
     gScene = gPhysics->createScene(desc);
 
+    // Character Controller Manager
+    gControllerManager = PxCreateControllerManager(*gScene);
+
     //// Scene ì¬Œã‚É PVD SceneClient ‚ðŽæ“¾
     PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
     if (pvdClient)
@@ -129,6 +134,13 @@ void PhysXSystem::Initialize()
 
 void PhysXSystem::Finalize()
 {
+    // Scene‚æ‚èæ‚É‰ð•ú
+    if (gControllerManager)
+    {
+        gControllerManager->release();
+        gControllerManager = nullptr;
+    }
+
     if (gScene) { gScene->release(); gScene = nullptr; }
     if (gDispatcher) { gDispatcher->release(); gDispatcher = nullptr; }
     if (gDefaultMaterial) { gDefaultMaterial->release(); gDefaultMaterial = nullptr; }
@@ -232,6 +244,11 @@ physx::PxMaterial* PhysXSystem::GetDefaultMaterial()
 
 PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }
 PxScene* PhysXSystem::GetScene() { return gScene; }
+
+PxControllerManager* PhysXSystem::GetControllerManager()
+{
+    return gControllerManager;
+}
 
 PxConvexMesh* PhysXSystem::CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_)
 {

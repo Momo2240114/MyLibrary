@@ -102,7 +102,7 @@ void GameObjectManager::Update(float elapsedTime_)
         }
     }
 
-    collisionStepSystem->Step();
+    collisionStepSystem->Step(elapsedTime_);
 
     for (auto& object_ : objects) {
         object_->LateUpdate(elapsedTime_);

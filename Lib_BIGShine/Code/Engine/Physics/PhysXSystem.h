@@ -24,4 +24,10 @@ public:
     static physx::PxTriangleMesh* CreateTriangleMesh(
         const std::vector<DirectX::XMFLOAT3>& vertices_,
         const std::vector<uint32_t>& indices_);
+
+public:
+    static physx::PxControllerManager* GetControllerManager();
+
+private:
+    static physx::PxControllerManager* controllerManager;
 };

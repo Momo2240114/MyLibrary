@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <fstream>
 #include <imgui_stdlib.h>
+#include <nlohmann/json.hpp>
 
 void ParticleComponent::Start()
 {
@@ -565,6 +566,105 @@ void ParticleComponent::RefreshAssetList()
     }
 }
 
+
+ParticleEffectAsset ParticleComponent::GetAsset() const
+{
+    ParticleEffectAsset asset_{};
+    asset_.isPlaying = isPlaying;
+
+    for (const EmitterTrack& track_ : tracks)
+    {
+        ParticleEmitterAsset emitterAsset_{};
+        emitterAsset_.settings = track_.settings;
+        emitterAsset_.name = track_.name;
+        emitterAsset_.texturePath = track_.texturePath;
+        emitterAsset_.textureFileName = track_.textureFileName;
+        emitterAsset_.maskTexturePath = track_.maskTexturePath;
+        emitterAsset_.maskTextureFileName = track_.maskTextureFileName;
+        emitterAsset_.gradientTexturePath = track_.gradientTexturePath;
+        emitterAsset_.gradientTextureFileName = track_.gradientTextureFileName;
+        emitterAsset_.delay = track_.delay;
+        emitterAsset_.meshVertexSampleCount = track_.meshVertexSampleCount;
+        emitterAsset_.blendMode = track_.blendMode;
+        emitterAsset_.spawnSpace = track_.spawnSpace;
+
+        asset_.emitters.push_back(emitterAsset_);
+    }
+
+    return asset_;
+}
+
+void ParticleComponent::SetAsset(const ParticleEffectAsset& asset_)
+{
+    Stop();
+
+    tracks.clear();
+    timer = 0.0f;
+    isPlaying = false;
+
+    for (const ParticleEmitterAsset& emitterAsset_ : asset_.emitters)
+    {
+        EmitterTrack track_{};
+        track_.settings = emitterAsset_.settings;
+        track_.name = emitterAsset_.name;
+        track_.texturePath = emitterAsset_.texturePath;
+        track_.textureFileName = emitterAsset_.textureFileName;
+        track_.maskTexturePath = emitterAsset_.maskTexturePath;
+        track_.maskTextureFileName = emitterAsset_.maskTextureFileName;
+        track_.gradientTexturePath = emitterAsset_.gradientTexturePath;
+        track_.gradientTextureFileName = emitterAsset_.gradientTextureFileName;
+        track_.delay = emitterAsset_.delay;
+        track_.meshVertexSampleCount = emitterAsset_.meshVertexSampleCount;
+        track_.blendMode = emitterAsset_.blendMode;
+        track_.spawnSpace = emitterAsset_.spawnSpace;
+        track_.isPlaybackEnabled = false;
+        track_.isStarted = false;
+
+        tracks.push_back(std::move(track_));
+    }
+
+    RebuildEmitterResources();
+    RegisterActions();
+}
+
+bool ParticleComponent::LoadAssetDataOnly(
+    const std::string& path_,
+    ParticleEffectAsset& asset_)
+{
+    if (path_.empty()) return false;
+
+    const std::filesystem::path filePath_ =
+        WindowsDialogHelper::Utf8ToPath(path_);
+
+    if (!std::filesystem::exists(filePath_)) return false;
+
+    std::ifstream file_(filePath_);
+    if (!file_.is_open()) return false;
+
+    nlohmann::json json_;
+    try
+    {
+        file_ >> json_;
+    }
+    catch (const nlohmann::json::exception&)
+    {
+        return false;
+    }
+
+    if (json_.contains("AssetType") &&
+        json_.value("AssetType", std::string{}) == "ParticleEmitter")
+    {
+        return false;
+    }
+
+    ParticleComponent component_;
+    component_.Deserialize(json_);
+    if (component_.tracks.empty()) return false;
+
+    asset_ = component_.GetAsset();
+    return true;
+}
+
 bool ParticleComponent::SaveAsset(const std::string& path_)
 {
     if (path_.empty()) return false;
@@ -1021,7 +1121,7 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
             DirectX::XMVECTOR pos_ = DirectX::XMLoadFloat3(&vertex_.position);
             pos_ = DirectX::XMVector3TransformCoord(pos_, finalWorld_);
 
-            // Emitter Offset Ç‡ÉIÅ[ÉiÅ[âÒì]Ç…í«è]Ç≥ÇπÇΩÇ¢ÇÃÇ≈ normal ïœä∑
+            // Emitter Offset I[i[]…í«è]ÃÇ normal œä
             DirectX::XMVECTOR rotatedOffset_ =
                 DirectX::XMVector3TransformNormal(emitterOffset_, ownerWorld_);
 
