@@ -24,6 +24,8 @@ public:
 
     void ApplySettings(const ParticleSystemConstants& nextSettings);
     void SetEmissionEnabled(bool enabled_) { emissionEnabled = enabled_; }
+    void SetDepthSortEnabled(bool enabled_) { depthSortEnabled = enabled_; }
+    void SetDepthSortInterval(UINT interval_) { depthSortInterval = interval_ > 0 ? interval_ : 1; }
     ParticleSystemConstants& GetSettings() { return settings; }
     const ParticleSystemConstants& GetSettings() const { return settings; }
 
@@ -31,6 +33,7 @@ public:
     void SetMaskTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { maskTextureSRV = srv; settings.useMaskTexture = srv ? 1u : 0u; }
     void SetGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { gradientTextureSRV = srv; settings.useGradientTexture = srv ? 1u : 0u; }
     void SetMeshSpawnPositions(const std::vector<DirectX::XMFLOAT3>& positions_) { meshSpawnPositions = positions_; }
+    std::vector<DirectX::XMFLOAT3>& GetMeshSpawnPositions() { return meshSpawnPositions; }
     ID3D11ShaderResourceView* GetSRV() const { return particleDataSRV.Get(); }
     ID3D11ShaderResourceView* GetHeaderSRV() const { return particleHeaderSRV.Get(); }
     ID3D11ShaderResourceView* GetTextureSRV() const { return textureSRV.Get(); }
@@ -97,6 +100,9 @@ private:
     UINT numEmitParticles = 0;                 // 1フレームで送れる発生データの最大数。
     bool initialized = false;                  // 初回Update時にGPUバッファを初期化済みか。
     bool emissionEnabled = true;               // falseなら新規発生だけ止め、既存Particleは更新する。
+    bool depthSortEnabled = true;              // Alpha合成時だけ深度ソートする。Additiveでは省略して負荷を下げる。
+    UINT depthSortInterval = 2;                // Alpha Particleの深度ソート間隔。1なら毎フレーム。
+    UINT depthSortFrame = 0;                   // ソート間隔管理用カウンタ。
     float continuousAccumulator = 0.0f;        // 連続発生の小数分を次フレームへ持ち越す。
     DirectX::XMUINT2 textureSplitCount = { 1, 1 }; // 旧互換用。現在はsettings側を主に使う。
 

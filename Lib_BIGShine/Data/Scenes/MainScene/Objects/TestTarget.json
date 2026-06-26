@@ -162,7 +162,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 12.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -171,13 +171,13 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.15725809335708618,
-                                -0.987557590007782
+                                -0.9951146841049194,
+                                0.09872522950172424
                             ]
                         },
                         "HitStopTime": {
                             "type": "float",
-                            "value": 0.05000000074505806
+                            "value": 0.10000000149011612
                         },
                         "KnockBackPower": {
                             "type": "float",
@@ -186,17 +186,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.09660692512989044,
-                                0.21891646087169647,
-                                -0.9709494113922119
+                                -0.8556312918663025,
+                                0.5057308077812195,
+                                0.11014283448457718
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                1.7972908020019531,
-                                2.369019031524658,
-                                -56.927947998046875
+                                5.894289016723633,
+                                0.8238064050674438,
+                                -62.78123474121094
                             ]
                         },
                         "Received": {
@@ -208,6 +208,125 @@
             },
             "Enabled": true,
             "TypeName": "BlackboardComponent"
+        },
+        {
+            "Data": {
+                "Actions": [
+                    {
+                        "AIActionName": "AI.Action0",
+                        "ActionEndedKey": "ActionEnded",
+                        "BlackboardCategory": "AI",
+                        "ClearActionEndedOnStart": true,
+                        "CurrentActionKey": "CurrentAction",
+                        "ExecuteActionName": "",
+                        "ExecuteTarget": "Owner",
+                        "IsActingKey": "IsActing",
+                        "SetIsActing": true,
+                        "WaitForActionEnd": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "TypeName": "AIActionComponent"
+        },
+        {
+            "Data": {
+                "Graph": {
+                    "Links": [
+                        {
+                            "FromNodeId": 1,
+                            "FromPinId": 3,
+                            "Id": 7,
+                            "ToNodeId": 4,
+                            "ToPinId": 5
+                        }
+                    ],
+                    "NextId": 8,
+                    "Nodes": [
+                        {
+                            "ActionEndCategory": "AI",
+                            "ActionEndKey": "ActionEnded",
+                            "ActionName": "",
+                            "BlackboardCategory": "AI",
+                            "BlackboardKey": "",
+                            "BoolValue": false,
+                            "Comment": "",
+                            "CompareType": "Equal",
+                            "FloatValue": 0.0,
+                            "Id": 1,
+                            "InputPinId": 0,
+                            "IntValue": 0,
+                            "Name": "Root",
+                            "OutputPinId": 3,
+                            "Position": [
+                                40.0,
+                                120.0
+                            ],
+                            "Priority": 0,
+                            "ScopeId": "Root",
+                            "StringValue": "",
+                            "SubGraphName": "",
+                            "Type": "Root",
+                            "ValueType": "Bool",
+                            "Vector2Value": [
+                                0.0,
+                                0.0
+                            ],
+                            "Vector3Value": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "WaitForActionEnd": true,
+                            "WaitSeconds": 0.0,
+                            "Weight": 1.0
+                        },
+                        {
+                            "ActionEndCategory": "AI",
+                            "ActionEndKey": "ActionEnded",
+                            "ActionName": "",
+                            "BlackboardCategory": "AI",
+                            "BlackboardKey": "",
+                            "BoolValue": false,
+                            "Comment": "",
+                            "CompareType": "Equal",
+                            "FloatValue": 0.0,
+                            "Id": 4,
+                            "InputPinId": 5,
+                            "IntValue": 0,
+                            "Name": "Selector",
+                            "OutputPinId": 6,
+                            "Position": [
+                                280.0,
+                                120.0
+                            ],
+                            "Priority": 0,
+                            "ScopeId": "Root",
+                            "StringValue": "",
+                            "SubGraphName": "",
+                            "Type": "Selector",
+                            "ValueType": "Bool",
+                            "Vector2Value": [
+                                0.0,
+                                0.0
+                            ],
+                            "Vector3Value": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "WaitForActionEnd": true,
+                            "WaitSeconds": 0.0,
+                            "Weight": 1.0
+                        }
+                    ],
+                    "Version": 1
+                },
+                "GraphAssetPath": "Data/AI/BehaviorGraph/DefaultAI.json",
+                "IsRunning": true
+            },
+            "Enabled": true,
+            "TypeName": "AIControllerComponent"
         }
     ],
     "Layer": 1,
@@ -215,9 +334,9 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            1.2740799188613892,
-            -0.7953567504882813,
-            -62.18648910522461
+            1.3262617588043213,
+            -0.7953658103942871,
+            -62.2607421875
         ],
         "Rot": [
             0.0,

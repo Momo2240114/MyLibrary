@@ -14,6 +14,7 @@ class BloomSystem
 {
 public:
     struct Parameters {
+        bool enabled = true;
         float threshold = 1.0f;    // ‚Ç‚Ì–¾‚é‚³‚©‚çŒõ‚ç‚¹‚é‚©
         float intensity = 1.0f;    // Œõ‚Ì‹­‚³
         float kawaseScale = 1.0f;  // ‚Ú‚©‚µ‚ÌL‚ª‚è‹ï‡

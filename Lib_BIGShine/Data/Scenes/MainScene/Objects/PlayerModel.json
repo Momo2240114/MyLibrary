@@ -24,9 +24,9 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 0.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": false,
+                "ShapeRenderFlg": true,
                 "StartNodeName": "",
-                "UseGravity": false,
+                "UseGravity": true,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
@@ -61,7 +61,7 @@
                         "name": "Body.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9959999918937683,
-                        "outlineThicknessOffset": 0.0024999999441206455,
+                        "outlineThicknessOffset": 0.014999999664723873,
                         "roughness": 1.0,
                         "shaderId": 3,
                         "toonPbrBlend": 1.0
@@ -136,7 +136,7 @@
                         "name": "Squire_Cloth.002",
                         "normalScale": 1.0,
                         "occlusionStrength": 0.9330000281333923,
-                        "outlineThicknessOffset": 0.004999999888241291,
+                        "outlineThicknessOffset": 0.009999999776482582,
                         "roughness": 0.9980000257492065,
                         "shaderId": 3,
                         "toonPbrBlend": 0.8999999761581421
@@ -164,7 +164,7 @@
                         "outlineThicknessOffset": 0.009999999776482582,
                         "roughness": 0.9819999933242798,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.3499999940395355
+                        "toonPbrBlend": 0.8500000238418579
                     },
                     {
                         "alphaCutoff": 0.5,
@@ -286,8 +286,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                1.0
+                                1.0,
+                                0.0
                             ]
                         },
                         "IsAttack": {
@@ -372,8 +372,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                1.0
+                                1.0,
+                                0.0
                             ]
                         },
                         "IsAttack": {
@@ -4181,7 +4181,7 @@
                             0.0,
                             0.0
                         ],
-                        "Radius": 0.07800000160932541
+                        "Radius": 0.10000000149011612
                     },
                     {
                         "ConnectToNext": false,
@@ -4193,7 +4193,7 @@
                             0.0,
                             0.0
                         ],
-                        "Radius": 0.05400000140070915
+                        "Radius": 0.13600000739097595
                     },
                     {
                         "ConnectToNext": true,
@@ -4222,51 +4222,51 @@
                 ],
                 "Chains": [
                     {
-                        "BendStiffness": 0.019999999552965164,
+                        "BendStiffness": 0.0,
                         "ClothGroup": 0,
                         "ClothOrder": 0,
                         "CollideWithBodyColliders": true,
                         "CollisionRadius": 0.0,
-                        "Damping": 0.8799999952316284,
+                        "Damping": 0.0,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
                         "Gravity": 9.800000190734863,
-                        "Influence": 1.0,
-                        "LateralStiffness": 0.3499999940395355,
+                        "Influence": 0.0,
+                        "LateralStiffness": 0.3790000081062317,
                         "Name": "Hair",
-                        "RootNode": "Bone_hair_L01",
-                        "RootRotationFollow": 0.3319999873638153,
+                        "RootNode": "Hair_Root",
+                        "RootRotationFollow": 1.0,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
-                        "StartCollisionWarmup": 4,
-                        "StartLift": 0.07999999821186066,
-                        "Stiffness": 0.17499999701976776,
+                        "StartCollisionWarmup": 6,
+                        "StartLift": 0.0,
+                        "Stiffness": 1.0,
                         "TipNode": "Bone_hair_L02_end",
-                        "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 2
+                        "TipStiffnessScale": 1.0,
+                        "Type": 0
                     },
                     {
-                        "BendStiffness": 0.019999999552965164,
+                        "BendStiffness": 1.0,
                         "ClothGroup": 0,
                         "ClothOrder": 2,
                         "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.019999999552965164,
-                        "Damping": 0.8889999985694885,
+                        "CollisionRadius": 0.04500000178813934,
+                        "Damping": 0.8619999885559082,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
                         "Gravity": 9.800000190734863,
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Bone_hair_B01",
-                        "RootRotationFollow": 0.46399998664855957,
+                        "RootNode": "Hair_Root",
+                        "RootRotationFollow": 1.0,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
                         "StartLift": 0.07999999821186066,
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_End_end",
-                        "TipStiffnessScale": 0.20000000298023224,
+                        "TipStiffnessScale": 1.0,
                         "Type": 2
                     },
                     {
@@ -4274,24 +4274,24 @@
                         "ClothGroup": 0,
                         "ClothOrder": 4,
                         "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.020999999716877937,
-                        "Damping": 0.8799999952316284,
+                        "CollisionRadius": 0.0,
+                        "Damping": 0.0,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
                         "Gravity": 9.800000190734863,
-                        "Influence": 1.0,
+                        "Influence": 0.10400000214576721,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Bone_hair_R01",
-                        "RootRotationFollow": 0.7390000224113464,
+                        "RootNode": "Hair_Root",
+                        "RootRotationFollow": 0.4740000069141388,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
                         "StartLift": 0.07999999821186066,
-                        "Stiffness": 0.4880000054836273,
+                        "Stiffness": 1.0,
                         "TipNode": "Bone_hair_R02_end",
                         "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 2
+                        "Type": 0
                     },
                     {
                         "BendStiffness": 0.019999999552965164,
@@ -4306,7 +4306,7 @@
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Bone_hair_B_R_01",
+                        "RootNode": "Hair_Root",
                         "RootRotationFollow": 0.6259999871253967,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
@@ -4318,11 +4318,11 @@
                         "Type": 2
                     },
                     {
-                        "BendStiffness": 0.019999999552965164,
+                        "BendStiffness": 0.014000000432133675,
                         "ClothGroup": 0,
                         "ClothOrder": 1,
                         "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.05400000140070915,
+                        "CollisionRadius": 0.057999998331069946,
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
@@ -4330,8 +4330,8 @@
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Bone_hair_B_L_01",
-                        "RootRotationFollow": 0.699999988079071,
+                        "RootNode": "Hair_Root",
+                        "RootRotationFollow": 0.7910000085830688,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
@@ -4372,6 +4372,7 @@
             "Data": {
                 "BurstCount": 3,
                 "IncludeChildren": true,
+                "IsPlaying": true,
                 "Lifetime": 0.4000000059604645,
                 "MaxSnapshots": 8,
                 "Parts": [
@@ -4384,6 +4385,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             -0.5
@@ -4397,6 +4402,10 @@
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.25,
@@ -4406,9 +4415,19 @@
                         ],
                         "EdgePatternMode": 0,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
                         "IntersectionEdgeStrength": 0.0,
@@ -4420,6 +4439,10 @@
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             -0.20000000298023224
@@ -4436,12 +4459,20 @@
                         "NoiseTexturePaths": [],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             0.20000000298023224,
                             -0.800000011920929
                         ],
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
                             0.0,
@@ -4505,6 +4536,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             -0.5
@@ -4518,6 +4553,10 @@
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.25,
@@ -4527,9 +4566,19 @@
                         ],
                         "EdgePatternMode": 0,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
                         "IntersectionEdgeStrength": 0.0,
@@ -4541,6 +4590,10 @@
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             -0.20000000298023224
@@ -4557,12 +4610,20 @@
                         "NoiseTexturePaths": [],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             0.20000000298023224,
                             -0.800000011920929
                         ],
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
                             0.0,
@@ -4626,6 +4687,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             -0.5
@@ -4639,6 +4704,10 @@
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.25,
@@ -4648,9 +4717,19 @@
                         ],
                         "EdgePatternMode": 0,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
                         "IntersectionEdgeStrength": 0.0,
@@ -4662,6 +4741,10 @@
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             -0.20000000298023224
@@ -4678,12 +4761,20 @@
                         "NoiseTexturePaths": [],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             0.20000000298023224,
                             -0.800000011920929
                         ],
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
                             0.0,
@@ -4747,6 +4838,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             -0.5
@@ -4760,6 +4855,10 @@
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.25,
@@ -4769,9 +4868,19 @@
                         ],
                         "EdgePatternMode": 0,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.9800000190734863,
                         "IntersectionEdgeStrength": 0.0,
@@ -4783,6 +4892,10 @@
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             -0.20000000298023224
@@ -4799,12 +4912,20 @@
                         "NoiseTexturePaths": [],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             0.20000000298023224,
                             -0.800000011920929
                         ],
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
                             0.0,
@@ -4888,8 +5009,8 @@
                     1.0,
                     0.6000000238418579
                 ],
-                "ShowBodyCollisionShapes": false,
-                "ShowHairCollisionShapes": false
+                "ShowBodyCollisionShapes": true,
+                "ShowHairCollisionShapes": true
             },
             "Enabled": true,
             "TypeName": "SpringBoneSimulationComponent"
@@ -4900,19 +5021,19 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -53.08108139038086,
-            -1.4767651557922363,
-            16.66598892211914
+            31.03542137145996,
+            -1.4768353700637817,
+            7.073530197143555
         ],
         "Rot": [
-            3.0,
-            49.64896774291992,
-            0.0
+            3.000000238418579,
+            358.6483154296875,
+            1.1004080988641363e-05
         ],
         "Scale": [
-            0.9990658760070801,
+            0.9990606904029846,
             1.0,
-            0.9990658760070801
+            0.9990586042404175
         ]
     }
 }

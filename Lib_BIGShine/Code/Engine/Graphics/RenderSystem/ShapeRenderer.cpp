@@ -43,7 +43,7 @@ void ShapeRenderSystem::Initialize(ID3D11Device* device)
 	CreateHalfSphereMesh(device, 1.0f, 32);
 
 	// 円柱メッシュ生成
-	CreateCylinderMesh(device, 1.0f, 1.0f, -0.5f, 1.0f, 32);
+	CreateCylinderMesh(device, 1.0f, 1.0f, -0.5f, 1.0f, 64);
 
 	// 骨メッシュ生成
 	CreateBoneMesh(device, 1.0f);
@@ -371,49 +371,54 @@ void ShapeRenderSystem::CreateHalfSphereMesh(ID3D11Device* device, float radius,
 void ShapeRenderSystem::CreateCylinderMesh(ID3D11Device* device, float radius1, float radius2, float start, float height, int subdivisions)
 {
 	std::vector<DirectX::XMFLOAT3> vertices;
+	vertices.reserve(static_cast<size_t>(subdivisions) * 4 + 8);
 
-	float theta_step = DirectX::XM_2PI / subdivisions;
+	const float thetaStep_ = DirectX::XM_2PI / static_cast<float>(subdivisions);
+	const float end_ = start + height;
 
-	// XZ平面
-	for (int i = 0; i < subdivisions; ++i)
+	for (int index_ = 0; index_ < subdivisions; ++index_)
 	{
-		for (int j = 0; j < 2; ++j)
-		{
-			float theta = theta_step * ((i + j) % subdivisions);
+		const float currentTheta_ = thetaStep_ * static_cast<float>(index_);
+		const float nextTheta_ = thetaStep_ * static_cast<float>((index_ + 1) % subdivisions);
 
-			DirectX::XMFLOAT3& v = vertices.emplace_back();
+		const DirectX::XMFLOAT3 bottomCurrent_ = {
+			sinf(currentTheta_) * radius1,
+			start,
+			cosf(currentTheta_) * radius1
+		};
+		const DirectX::XMFLOAT3 bottomNext_ = {
+			sinf(nextTheta_) * radius1,
+			start,
+			cosf(nextTheta_) * radius1
+		};
+		const DirectX::XMFLOAT3 topCurrent_ = {
+			sinf(currentTheta_) * radius2,
+			end_,
+			cosf(currentTheta_) * radius2
+		};
+		const DirectX::XMFLOAT3 topNext_ = {
+			sinf(nextTheta_) * radius2,
+			end_,
+			cosf(nextTheta_) * radius2
+		};
 
-			v.x = sinf(theta) * radius1;
-			v.y = start;
-			v.z = cosf(theta) * radius1;
-		}
+		vertices.emplace_back(bottomCurrent_);
+		vertices.emplace_back(bottomNext_);
+		vertices.emplace_back(topCurrent_);
+		vertices.emplace_back(topNext_);
 	}
-	for (int i = 0; i < subdivisions; ++i)
-	{
-		for (int j = 0; j < 2; ++j)
-		{
-			float theta = theta_step * ((i + j) % subdivisions);
 
-			DirectX::XMFLOAT3& v = vertices.emplace_back();
-
-			v.x = sinf(theta) * radius2;
-			v.y = start + height;
-			v.z = cosf(theta) * radius2;
-		}
-	}
-	// XY平面
+	for (int guideIndex_ = 0; guideIndex_ < 4; ++guideIndex_)
 	{
-		vertices.emplace_back(DirectX::XMFLOAT3(0.0f, start, radius1));
-		vertices.emplace_back(DirectX::XMFLOAT3(0.0f, start + height, radius2));
-		vertices.emplace_back(DirectX::XMFLOAT3(0.0f, start, -radius1));
-		vertices.emplace_back(DirectX::XMFLOAT3(0.0f, start + height, -radius2));
-	}
-	// YZ平面
-	{
-		vertices.emplace_back(DirectX::XMFLOAT3(radius1, start, 0.0f));
-		vertices.emplace_back(DirectX::XMFLOAT3(radius2, start + height, 0.0f));
-		vertices.emplace_back(DirectX::XMFLOAT3(-radius1, start, 0.0f));
-		vertices.emplace_back(DirectX::XMFLOAT3(-radius2, start + height, 0.0f));
+		const float theta_ = DirectX::XM_PIDIV2 * static_cast<float>(guideIndex_);
+		vertices.emplace_back(DirectX::XMFLOAT3(
+			sinf(theta_) * radius1,
+			start,
+			cosf(theta_) * radius1));
+		vertices.emplace_back(DirectX::XMFLOAT3(
+			sinf(theta_) * radius2,
+			end_,
+			cosf(theta_) * radius2));
 	}
 
 	// メッシュ生成

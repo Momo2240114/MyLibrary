@@ -1,4 +1,4 @@
-ï»¿#include"SceneBase.h"
+#include"SceneBase.h"
 
 #include"Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include"Engine/GamePlay/Camera/CameraComponent.h"
@@ -22,6 +22,7 @@
 #include "Editor/Workspace/ParticleEditorWindow.h"
 #include "Editor/Workspace/PlayerStateEditorWindow.h"
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
+#include "Editor/Workspace/AIBehaviorEditorWindow.h"
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 { 
@@ -36,15 +37,15 @@ void SceneBase::Finalize()
 
 	if (_GameObjectManager) {
 		_GameObjectManager->Clear();
-		_GameObjectManager.reset(); // ä¸–ç•Œã®å´©å£Šï¼ˆãƒ¡ãƒ¢ãƒªè§£æ”¾ï¼‰
+		_GameObjectManager.reset(); // ¢ŠE‚Ì•ö‰óiƒƒ‚ƒŠ‰ğ•új
 	}
 }
 
 void SceneBase::Initialize()
 {
-	// ã‚·ãƒ¼ãƒ³ç‹¬è‡ªã®ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’ç”Ÿæˆã™ã‚‹
+	// ƒV[ƒ““Æ©‚Ìƒ}ƒl[ƒWƒƒ[‚ğ¶¬‚·‚é
 	_GameObjectManager = std::make_shared<GameObjectManager>();
-	_GameObjectManager->Initialize(); // ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®åˆæœŸåŒ–
+	_GameObjectManager->Initialize(); // ƒ}ƒl[ƒWƒƒ[‚Ì‰Šú‰»
 	_GameObjectManager->SetModelRenderSystem(&m_ModelRenderSystem);
 
 	editorWindowManager = std::make_unique<EditorWindowManager>(_GameObjectManager.get());
@@ -62,12 +63,13 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<ParticleEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<PlayerStateEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<AIBehaviorEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));
 
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
 
-	//ãƒ¢ãƒ‡ãƒ«ã®ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼ã‚’ä½œæˆ
+	//ƒ‚ƒfƒ‹‚ÌƒŒƒ“ƒ_ƒ‰[‚ğì¬
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 	m_ShapeRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
@@ -95,7 +97,10 @@ void SceneBase::Update(float elapsedTime)
 
 void SceneBase::Render(float elapsedTime)
 {
-	if (isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene())
+	if (isEditorVisible &&
+		editorWindowManager &&
+		editorWindowManager->ShouldPauseScene() &&
+		!editorWindowManager->ShouldRenderSceneWhenPaused())
 	{
 		GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
 		return;
@@ -112,8 +117,3 @@ void SceneBase::DrawGUI()
 		editorWindowManager->DrawAll();
 	}
 }
-
-
-
-
-

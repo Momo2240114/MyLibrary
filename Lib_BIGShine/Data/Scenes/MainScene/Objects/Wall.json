@@ -3,6 +3,7 @@
     "Components": [
         {
             "Data": {
+                "IsPlaying": true,
                 "Parts": [
                     {
                         "Alpha": 1.0,
@@ -13,6 +14,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             0.0
@@ -20,41 +25,59 @@
                         "BlendMode": 0,
                         "Color": [
                             0.0,
-                            0.7372549176216125,
+                            0.6392157077789307,
                             0.9686274528503418,
-                            1.0
+                            0.29411765933036804
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
-                        "Duration": 0.0,
-                        "EdgeColor": [
-                            0.0,
-                            0.7058823704719543,
+                        "DistortionNoiseUVScale": [
                             1.0,
                             1.0
                         ],
-                        "EdgePatternMode": 0,
+                        "Duration": 0.0,
+                        "EdgeColor": [
+                            0.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 1,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.3499999940395355,
-                        "EmissivePulseSpeed": 2.0,
-                        "EmissiveStrength": 3.0,
-                        "FresnelPower": 2.0,
-                        "FresnelStrength": 1.0,
-                        "IntersectionEdgeStrength": 0.10000000149011612,
-                        "IntersectionEdgeWidth": 500.0,
+                        "EmissivePulseSpeed": 30.0,
+                        "EmissiveStrength": 6.050000190734863,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelPower": 1.0,
+                        "FresnelStrength": 0.18000000715255737,
+                        "IntersectionEdgeStrength": 0.23000000417232513,
+                        "IntersectionEdgeWidth": 0.00011999999696854502,
                         "Loop": true,
                         "MaskDistortionOpacity": 0.5,
                         "MaskDistortionStrength": 4.0,
                         "MaskLayers": [
                             {
                                 "BlendMode": 0,
-                                "Invert": false,
-                                "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                                "Invert": true,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG"
                             }
                         ],
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             0.05000000074505806
@@ -73,16 +96,24 @@
                         ],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             -0.02500000037252903,
                             0.05000000074505806
                         ],
-                        "NormalStrength": 1.0,
+                        "NormalStrength": 9.890000343322754,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
-                            50.0,
-                            0.0
+                            25.0,
+                            2.369999885559082
                         ],
                         "RenderEnabled": true,
                         "Rotation": [
@@ -92,8 +123,8 @@
                         ],
                         "Scale": [
                             75.0,
-                            100.0,
-                            75.0
+                            75.0,
+                            77.70999908447266
                         ],
                         "ScaleEnd": [
                             1.0,
@@ -106,7 +137,7 @@
                             1.0
                         ],
                         "SilhouetteEdgePower": 0.10000000149011612,
-                        "SilhouetteEdgeStrength": 0.0,
+                        "SilhouetteEdgeStrength": 3.740000009536743,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0,
                         "UVRotationCenter": [
@@ -116,7 +147,7 @@
                         "UseEdgeHighlight": false,
                         "UseFresnel": true,
                         "UseMask": true,
-                        "UseMaskDistortion": true,
+                        "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": true,
                         "UseMaterialNormalTexture": true,
                         "UseNoise": true,
@@ -141,10 +172,17 @@
         {
             "Data": {
                 "ConstrainHeight": true,
+                "DebugShapeColor": [
+                    0.0,
+                    0.75,
+                    1.0,
+                    1.0
+                ],
                 "HalfHeight": 100.0,
                 "Radius": 74.5,
                 "Segments": 64,
                 "Shape": 0,
+                "ShowDebugShape": true,
                 "TargetMask": 1,
                 "TargetRadius": 0.3499999940395355
             },
@@ -162,7 +200,7 @@
                             0.0
                         ],
                         "BlendMode": 0,
-                        "BurstCount": 10000,
+                        "BurstCount": 30000,
                         "Color": [
                             1.0,
                             1.0,
@@ -205,7 +243,7 @@
                             5.5
                         ],
                         "MaskTexturePath": "",
-                        "MaxCount": 10000,
+                        "MaxCount": 100000,
                         "MeshVertexSampleCount": 2048,
                         "Name": "Emitter_0",
                         "NoiseFrequency": 2.2300000190734863,

@@ -118,6 +118,7 @@
         },
         {
             "Data": {
+                "IsPlaying": false,
                 "Parts": [
                     {
                         "Alpha": 1.0,
@@ -128,6 +129,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             0.0
@@ -141,18 +146,32 @@
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Duration": 0.0,
                         "EdgeColor": [
-                            0.25,
-                            0.75,
                             1.0,
+                            0.7490196228027344,
+                            0.0,
                             1.0
                         ],
                         "EdgePatternMode": 0,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "FresnelPower": 0.10000000149011612,
                         "FresnelStrength": 0.019999999552965164,
                         "IntersectionEdgeStrength": 0.0,
@@ -170,6 +189,10 @@
                         "MaskTexturePath": "",
                         "MaskUVRotation": -90.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             0.0
@@ -188,12 +211,20 @@
                         ],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             0.20000000298023224,
                             -0.20000000298023224
                         ],
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
                             0.0,
@@ -220,8 +251,8 @@
                             1.0,
                             1.0
                         ],
-                        "SilhouetteEdgePower": 3.0,
-                        "SilhouetteEdgeStrength": 0.0,
+                        "SilhouetteEdgePower": 11.350000381469727,
+                        "SilhouetteEdgeStrength": 16.0,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0010000000474974513,
                         "UVRotationCenter": [
@@ -278,6 +309,7 @@
             "Data": {
                 "FadeInDuration": 0.44999998807907104,
                 "FadeOutDuration": 0.5,
+                "IsPlaying": false,
                 "OverlayActive": false,
                 "Parts": [
                     {
@@ -289,6 +321,10 @@
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "BaseUVSpeed": [
                             0.0,
                             0.0
@@ -302,6 +338,10 @@
                         ],
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Duration": 0.0,
                         "EdgeColor": [
                             1.0,
@@ -311,9 +351,19 @@
                         ],
                         "EdgePatternMode": 0,
                         "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "EmissivePulseAmount": 0.75,
                         "EmissivePulseSpeed": 4.0,
                         "EmissiveStrength": 0.44999998807907104,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
                         "IntersectionEdgeStrength": 0.0,
@@ -331,6 +381,10 @@
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "MaskUVSpeed": [
                             0.0,
                             0.0
@@ -347,12 +401,20 @@
                         "NoiseTexturePaths": [],
                         "NoiseUVRotation": 0.0,
                         "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "NoiseUVSpeed": [
                             0.20000000298023224,
                             -0.800000011920929
                         ],
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
                         "Position": [
                             0.0,
                             0.0,

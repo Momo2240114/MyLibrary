@@ -16,6 +16,9 @@
 
 #include "Engine/Platform/WindowsDialogHelper.h"
 
+#include "Engine/Debug/TracyProfiler.h"
+
+
 const std::vector<D3D11_INPUT_ELEMENT_DESC> GltfModelCommponennt::InputElementDescs =
 {
 	{ "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -538,7 +541,76 @@ GltfModelCommponennt::Node& GltfModelCommponennt::GetNodes(std::string nodeName)
 	assert(L"ノードが見つかりません");
 }
 
-void GltfModelCommponennt::UpdateNodeRecursive(Node& node, const DirectX::XMMATRIX& ParentWorldTransform, const DirectX::XMMATRIX& ModelScaleMat)
+void GltfModelCommponennt::UpdateNodeRecursive(
+	Node& node_,
+	const DirectX::XMMATRIX& parentGlobalTransform_,
+	const DirectX::XMMATRIX& parentWorldTransform_,
+	const DirectX::XMMATRIX& modelScaleMat_,
+	bool isRoot_)
+{
+	const DirectX::XMMATRIX scaleTransform_ =
+		DirectX::XMMatrixScaling(node_.scale.x, node_.scale.y, node_.scale.z);
+
+	const DirectX::XMMATRIX rotationTransform_ =
+		DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&node_.rotation));
+
+	const DirectX::XMMATRIX translationTransform_ =
+		DirectX::XMMatrixTranslation(node_.position.x, node_.position.y, node_.position.z);
+
+	const DirectX::XMMATRIX localTransform_ =
+		scaleTransform_ * rotationTransform_ * translationTransform_;
+
+	const DirectX::XMMATRIX globalTransform_ = isRoot_
+		? localTransform_ * modelScaleMat_
+		: localTransform_ * parentGlobalTransform_;
+
+	const DirectX::XMMATRIX worldTransform_ =
+		globalTransform_ * parentWorldTransform_;
+
+	DirectX::XMStoreFloat4x4(&node_.localTransform, localTransform_);
+	DirectX::XMStoreFloat4x4(&node_.globalTransform, globalTransform_);
+	DirectX::XMStoreFloat4x4(&node_.worldTransform, worldTransform_);
+
+	for (Node* child_ : node_.children)
+	{
+		if (!child_) continue;
+
+		UpdateNodeRecursive(
+			*child_,
+			globalTransform_,
+			parentWorldTransform_,
+			modelScaleMat_,
+			false);
+	}
+}
+
+void GltfModelCommponennt::MarkPoseDirty()
+{
+	poseDirty = true;
+}
+
+void GltfModelCommponennt::MarkTransformDirty()
+{
+	transformDirty = true;
+}
+
+void GltfModelCommponennt::UpdateTransformIfDirty()
+{
+	if (!poseDirty && !transformDirty)
+	{
+		return;
+	}
+
+	UpdateTransform();
+
+	poseDirty = false;
+	transformDirty = false;
+}
+
+void GltfModelCommponennt::UpdateNodeRecursive(
+	Node& node, 
+	const DirectX::XMMATRIX& ParentWorldTransform, 
+	const DirectX::XMMATRIX& ModelScaleMat)
 {
 	// アニメーション適用後のSRTからローカル行列を作成
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
@@ -577,26 +649,23 @@ void GltfModelCommponennt::UpdateNodeRecursive(Node& node, const DirectX::XMMATR
 // トランスフォーム更新処理
 void GltfModelCommponennt::UpdateTransform()
 {
+	BS_PROFILE_SCOPE("GltfModelCommponennt::UpdateTransform");
+
 	auto owner_ = this->GetGameObject();
 	if (!owner_ || !owner_->transform)
 	{
 		return;
 	}
 
-	// 1. モデルが置かれているGameObjectのワールド行列
-	// worldMatrixを直接読むと、移動直後のdirtyなTransformでは前フレームの行列を使ってしまう。
-	// アタッチメントがボーンに遅れて見えるので、必ずここで最新化してからノード行列を作る。
 	DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
-
-	// 2. モデル全体の補正スケール（一箇所だけで適用するように注意）
 	DirectX::XMMATRIX modelScaleMat_ = DirectX::XMMatrixScaling(localScale, localScale, localScale);
 
-	// 3. 全てのルートノード（親がいないノード）から再帰を開始
 	for (Node& node_ : nodes)
 	{
 		if (node_.parent == nullptr)
 		{
-			UpdateNodeRecursive(node_, parentWorldTransform_, modelScaleMat_);
+			DirectX::XMMATRIX rootParentGlobal_ = DirectX::XMMatrixIdentity();
+			UpdateNodeRecursive(node_, rootParentGlobal_, parentWorldTransform_, modelScaleMat_, true);
 		}
 	}
 }
@@ -622,6 +691,17 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
 
 	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
 }
+
+void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_, const DirectX::XMMATRIX& parentWorldTransform_, const DirectX::XMMATRIX& modelScaleMat_)
+{
+	if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes.size()))
+	{
+		return;
+	}
+
+	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
+}
+
 //{
 //	DirectX::XMMATRIX ParentWorldTransform = this->GetGameObject()->transform->worldMatrix;
 //

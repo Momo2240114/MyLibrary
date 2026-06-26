@@ -10,6 +10,8 @@
 #include <map>
 #include <imgui.h>
 
+#include "Engine/Debug/TracyProfiler.h"
+
 using namespace DirectX;
 
 //--- テスト用 Static 風パラメータ-- -
@@ -50,6 +52,7 @@ namespace
         if (length_ <= 0.00001f) return { 0.0f, 0.0f, 0.0f };
         return Scale(value_, 1.0f / length_);
     }
+
 
     XMFLOAT3 ApplyRootMotion(
         const XMFLOAT3& position_, const XMFLOAT4X4& previousRootTransform_,
@@ -195,39 +198,75 @@ bool SpringBoneSimulationComponent::ResolveDependencies()
 
 void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("SpringBoneSimulationComponent::LateUpdate");
+
     if (!ResolveDependencies()) return;
 
     const float safeDeltaTime_ = std::clamp(deltaTime_, 0.0f, 1.0f / 20.0f);
-    for (auto& chain_ : ikMap->GetChains())
+
     {
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE) continue;
-        if (!ResolveChain(chain_)) continue;
-        SimulateSpringChain(chain_, safeDeltaTime_);
-        ApplySpringChain(chain_);
+        BS_PROFILE_SCOPE("SpringBone::SpringChains");
+
+        for (auto& chain_ : ikMap->GetChains())
+        {
+            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE) continue;
+            if (!ResolveChain(chain_)) continue;
+
+            {
+                BS_PROFILE_SCOPE("SpringBone::SimulateSpringChain");
+                SimulateSpringChain(chain_, safeDeltaTime_);
+            }
+
+            {
+                BS_PROFILE_SCOPE("SpringBone::ApplySpringChain");
+                ApplySpringChain(chain_);
+            }
+        }
     }
 
     bool hasClothChains_ = false;
-    for (auto& chain_ : ikMap->GetChains())
+
     {
-        if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE) continue;
-        if (!ResolveChain(chain_)) continue;
-        SimulateSpringChain(chain_, safeDeltaTime_);
-        hasClothChains_ = true;
-    }
-    if (hasClothChains_)
-    {
-        SolveClothConstraints();
+        BS_PROFILE_SCOPE("SpringBone::ClothChainsSimulate");
+
         for (auto& chain_ : ikMap->GetChains())
         {
-            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || !chain_.initialized) continue;
-            ApplySpringChain(chain_);
+            if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE) continue;
+            if (!ResolveChain(chain_)) continue;
+
+            SimulateSpringChain(chain_, safeDeltaTime_);
+            hasClothChains_ = true;
         }
     }
-    DrawBodyCollisionShapes();
-    DrawHairCollisionShapes();
+
+    if (hasClothChains_)
+    {
+        {
+            BS_PROFILE_SCOPE("SpringBone::SolveClothConstraints");
+            SolveClothConstraints();
+        }
+
+        {
+            BS_PROFILE_SCOPE("SpringBone::ApplyClothChains");
+
+            for (auto& chain_ : ikMap->GetChains())
+            {
+                if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE || !chain_.initialized) continue;
+                ApplySpringChain(chain_);
+            }
+        }
+    }
+
+    {
+        BS_PROFILE_SCOPE("SpringBone::DebugDraw");
+        DrawBodyCollisionShapes();
+        DrawHairCollisionShapes();
+    }
 
     if (ikMap->ConsumeSimulationWarmupRequest())
     {
+        BS_PROFILE_SCOPE("SpringBone::WarmupReset");
+
         for (auto& chain_ : ikMap->GetChains())
         {
             chain_.initialized = false;
@@ -747,7 +786,19 @@ void SpringBoneSimulationComponent::DrawHairCollisionShapes()
 }
 void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& chain_)
 {
+    BS_PROFILE_SCOPE("SpringBone::ApplySpringChain");
+
     auto& nodes_ = model->GetNodes();
+
+    auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const DirectX::XMMATRIX parentWorldTransform_ =
+        owner_->transform->GetWorldMatrix();
+
+    const DirectX::XMMATRIX modelScaleMat_ =
+        DirectX::XMMatrixScaling(model->GetLocalScale(), model->GetLocalScale(), model->GetLocalScale());
+
     for (size_t nodeIndex_ = 0; nodeIndex_ + 1 < chain_.nodeIndices.size(); ++nodeIndex_)
     {
         auto& node_ = nodes_.at(chain_.nodeIndices[nodeIndex_]);
@@ -794,8 +845,13 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
         if (XMMatrixDecompose(&scale_, &rotation_, &translation_, desiredLocalRotation_))
         {
             XMStoreFloat4(&node_.rotation, XMQuaternionNormalize(rotation_));
-
-            model->UpdateNodeTransformFrom(chain_.nodeIndices.front());
+            {
+                BS_PROFILE_SCOPE("SpringBone::UpdateNodeTransformFrom");
+                model->UpdateNodeTransformFrom(
+                    chain_.nodeIndices[nodeIndex_],
+                    parentWorldTransform_,
+                    modelScaleMat_);
+            }
         }
     }
 

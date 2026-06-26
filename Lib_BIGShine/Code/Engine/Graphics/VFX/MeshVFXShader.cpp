@@ -10,7 +10,7 @@
 
 bool MeshVFXShader::Initialize(ID3D11Device* device_)
 {
-    // MeshVFXで使うShaderとConstantBufferをまとめて作成する。
+    // MeshVFXで使ぁEhaderとConstantBufferをまとめて作�Eする、E
     if (!device_) return false;
 
     HRESULT result_ = CPUResourceLoader::LoadVertexShader(
@@ -44,6 +44,10 @@ bool MeshVFXShader::Initialize(ID3D11Device* device_)
         device_, "Shader/MeshVFXPS.cso", pixelShader.GetAddressOf());
     if (FAILED(result_)) return false;
 
+    result_ = CPUResourceLoader::LoadPixelShader(
+        device_, "Shader/MeshVFXDistortionPS.cso", distortionPixelShader.GetAddressOf());
+    if (FAILED(result_)) return false;
+
     result_ = CPUResourceLoader::CreateConstantBuffer(
         device_, sizeof(CbScene), sceneConstantBuffer.GetAddressOf());
     if (FAILED(result_)) return false;
@@ -62,7 +66,7 @@ void MeshVFXShader::Begin(
     bool useMaterialOverlay_,
     bool useInstancedPose_)
 {
-    // 描画モードに応じてVertexShaderを選び、Scene情報と背景TextureをPixelShaderへ渡す。
+    // 描画モードに応じてVertexShaderを選び、Scene惁E��と背景TextureをPixelShaderへ渡す、E
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->IASetInputLayout(inputLayout.Get());
     ID3D11VertexShader* selectedVertexShader_ = vertexShader.Get();
@@ -93,11 +97,43 @@ void MeshVFXShader::Begin(
     deviceContext_->PSSetShaderResources(8, 1, &sceneDepth_);
 }
 
+void MeshVFXShader::BeginDistortion(
+    const RenderContext& renderContext_,
+    bool useMaterialOverlay_,
+    bool useInstancedPose_)
+{
+    ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
+    deviceContext_->IASetInputLayout(inputLayout.Get());
+    ID3D11VertexShader* selectedVertexShader_ = vertexShader.Get();
+    if (useInstancedPose_)
+    {
+        selectedVertexShader_ = afterimageInstancedVertexShader.Get();
+    }
+    else if (useMaterialOverlay_)
+    {
+        selectedVertexShader_ = materialOverlayVertexShader.Get();
+    }
+    deviceContext_->VSSetShader(selectedVertexShader_, nullptr, 0);
+    deviceContext_->GSSetShader(nullptr, nullptr, 0);
+    deviceContext_->PSSetShader(distortionPixelShader.Get(), nullptr, 0);
+    ID3D11SamplerState* vertexSampler_ =
+        renderContext_.renderState->GetSamplerState(SamplerState::LinearWrap);
+    deviceContext_->VSSetSamplers(0, 1, &vertexSampler_);
+
+    ID3D11Buffer* sceneBuffer_ = sceneConstantBuffer.Get();
+    ID3D11Buffer* partBuffer_ = partConstantBuffer.Get();
+    deviceContext_->VSSetConstantBuffers(7, 1, &sceneBuffer_);
+    ID3D11Buffer* skeletonBuffer_ = skeletonConstantBuffer.Get();
+    deviceContext_->VSSetConstantBuffers(6, 1, &skeletonBuffer_);
+    deviceContext_->PSSetConstantBuffers(7, 1, &sceneBuffer_);
+    deviceContext_->VSSetConstantBuffers(0, 1, &partBuffer_);
+    deviceContext_->PSSetConstantBuffers(0, 1, &partBuffer_);
+}
 void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const GltfModelCommponennt::Mesh& mesh_)
 {
-    // 通常モデル描画用に、現在Meshのボーン行列をSkinning用CBへ転送する。
+    // 通常モチE��描画用に、現在Meshのボ�Eン行�EをSkinning用CBへ転送する、E
     DirectX::XMFLOAT4X4 transforms_[256]{};
     if (!mesh_.bones.empty())
     {
@@ -114,7 +150,7 @@ void MeshVFXShader::UpdateSkeleton(
     }
     else if (mesh_.node)
     {
-        // Boneを持たないMeshはNodeのWorldTransformだけを0番へ入れる。
+        // Boneを持たないMeshはNodeのWorldTransformだけを0番へ入れる、E
         transforms_[0] = mesh_.node->worldTransform;
     }
     renderContext_.deviceContext->UpdateSubresource(
@@ -125,7 +161,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const std::vector<DirectX::XMFLOAT4X4>& transforms_)
 {
-    // Afterimageなど、外部で保存したPose行列をそのままSkinning用CBへ転送する。
+    // Afterimageなど、外部で保存したPose行�EをそのままSkinning用CBへ転送する、E
     DirectX::XMFLOAT4X4 bufferTransforms_[256]{};
     const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
     for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
@@ -138,7 +174,7 @@ void MeshVFXShader::UpdateSkeleton(
 
 void MeshVFXShader::UpdateScene(const RenderContext& renderContext_)
 {
-    // Camera/Depth復元情報をHLSLのScene定数へ合わせて更新する。
+    // Camera/Depth復允E��報をHLSLのScene定数へ合わせて更新する、E
     if (!renderContext_.camera) return;
 
     const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&renderContext_.camera->GetView());
@@ -168,13 +204,20 @@ void MeshVFXShader::UpdatePart(
     float partTime_,
     float alpha_)
 {
-    // 1Part分の編集値とRuntime TextureをShaderへ送る。ここがC++設定とHLSL表現の接続点。
+    // 1Part刁E�E編雁E��とRuntime TextureをShaderへ送る。ここがC++設定とHLSL表現の接続点、E
     CbMeshVFX constants_{};
     DirectX::XMStoreFloat4x4(&constants_.world, world_);
     constants_.color = part_.color;
     constants_.baseUVSpeed = part_.baseUVSpeed;
     constants_.maskUVSpeed = part_.maskUVSpeed;
     constants_.noiseUVSpeed = part_.noiseUVSpeed;
+    constants_.baseUVScale = part_.baseUVScale;
+    constants_.maskUVScale = part_.maskUVScale;
+    constants_.noiseUVScale = part_.noiseUVScale;
+    constants_.normalUVScale = part_.normalUVScale;
+    constants_.distortionNoiseUVScale = part_.distortionNoiseUVScale;
+    constants_.edgePatternUVScale = part_.edgePatternUVScale;
+    constants_.emissiveUVScale = part_.emissiveUVScale;
     constants_.uvRotationCenter = part_.uvRotationCenter;
     constants_.time = partTime_;
     constants_.alpha = alpha_;
@@ -185,7 +228,7 @@ void MeshVFXShader::UpdatePart(
     constants_.dissolveThreshold = part_.dissolveThreshold;
     const auto calculateRotation_ = [partTime_](float initialRotation_, float rotationSpeed_)
         {
-            // GUIは度数法で扱い、Shaderへはラジアンで渡す。
+            // GUIは度数法で扱ぁE��Shaderへはラジアンで渡す、E
             const float rotation_ = DirectX::XMConvertToRadians(
                 initialRotation_ + rotationSpeed_ * partTime_);
             return std::fmod(rotation_, 2.0f * std::numbers::pi_v<float>);
@@ -218,6 +261,11 @@ void MeshVFXShader::UpdatePart(
     constants_.hasVertexNoiseTexture = runtimePart_.vertexNoiseTexture ? 1u : 0u;
     constants_.edgePatternMode = static_cast<uint32_t>(part_.edgePatternMode);
     constants_.edgePatternStrength = part_.edgePatternStrength;
+    constants_.emissiveStrength = part_.emissiveStrength;
+    constants_.emissivePulseSpeed = part_.emissivePulseSpeed;
+    constants_.emissivePulseAmount = part_.emissivePulseAmount;
+    constants_.hasEdgePatternTexture = runtimePart_.edgePatternTexture ? 1u : 0u;
+    constants_.hasEmissiveTexture = runtimePart_.emissiveTexture ? 1u : 0u;
 
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->UpdateSubresource(partConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
@@ -231,13 +279,17 @@ void MeshVFXShader::UpdatePart(
     deviceContext_->PSSetShaderResources(3, 1, &normalTextureView_);
     ID3D11ShaderResourceView* distortionNoiseTextureView_ = runtimePart_.distortionNoiseTexture.Get();
     deviceContext_->PSSetShaderResources(4, 1, &distortionNoiseTextureView_);
+    ID3D11ShaderResourceView* edgePatternTextureView_ = runtimePart_.edgePatternTexture.Get();
+    deviceContext_->PSSetShaderResources(5, 1, &edgePatternTextureView_);
+    ID3D11ShaderResourceView* emissiveTextureView_ = runtimePart_.emissiveTexture.Get();
+    deviceContext_->PSSetShaderResources(6, 1, &emissiveTextureView_);
     ID3D11ShaderResourceView* vertexNoiseTextureView_ = runtimePart_.vertexNoiseTexture.Get();
     deviceContext_->VSSetShaderResources(0, 1, &vertexNoiseTextureView_);
 }
 
 void MeshVFXShader::End(const RenderContext& renderContext_)
 {
-    // 次の描画へTexture/CB/Shader状態を持ち越さないよう、MeshVFXで使ったSlotを解除する。
+    // 次の描画へTexture/CB/Shader状態を持ち越さなぁE��ぁE��MeshVFXで使ったSlotを解除する、E
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     ID3D11ShaderResourceView* nullTextures_[9] = {};
     ID3D11Buffer* nullBuffer_ = nullptr;

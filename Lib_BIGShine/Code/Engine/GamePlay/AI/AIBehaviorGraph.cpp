@@ -478,7 +478,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
         float totalWeight_ = 0.0f;
         for (const AIBehaviorNode* child_ : children_)
         {
-            totalWeight_ += std::max(0.0f, child_->weight);
+            totalWeight_ += (std::max)(0.0f, child_->weight);
         }
 
         if (totalWeight_ > 0.0001f)
@@ -487,7 +487,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
             float pick_ = distribution_(randomEngine_);
             for (AIBehaviorNode* child_ : children_)
             {
-                pick_ -= std::max(0.0f, child_->weight);
+                pick_ -= (std::max)(0.0f, child_->weight);
                 if (pick_ <= 0.0f)
                 {
                     return TickNode(*child_, context_);

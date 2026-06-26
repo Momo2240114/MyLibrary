@@ -57,6 +57,9 @@ public:
     // アクセッサ欄に追加
     ID3D11ShaderResourceView* GetSceneSRV(){ return sceneSRV.Get(); }
     ID3D11ShaderResourceView* GetNormalSRV() { return gBufferNormalSRV.Get(); }
+    ID3D11ShaderResourceView* GetSceneNormalSRV() { return sceneNormalSRV.Get(); }
+    ID3D11ShaderResourceView* GetSceneDistortionSRV() { return sceneDistortionSRV.Get(); }
+    bool IsSceneDistortionUsed() const { return sceneDistortionUsed; }
     ID3D11ShaderResourceView* GetGBufferBaseColorSRV() { return gBufferBaseColorSRV.Get(); }
     ID3D11ShaderResourceView* GetGBufferNormalSRV() { return gBufferNormalSRV.Get(); }
     ID3D11ShaderResourceView* GetGBufferMaterialSRV() { return gBufferMaterialSRV.Get(); }
@@ -79,14 +82,19 @@ public:
     // ブルーム設定の取得・操作用
     BloomSystem::Parameters& GetBloomParams() { return bloomParams; }
     RadialBlurSystem::Parameters& GetRadialBlurParams() { return radialBlurParams; }
+    XeGtaoSystem::Parameters& GetXeGtaoParams() { return xeGtaoParams; }
+    MotionBlurSystem::Parameters& GetMotionBlurParams() { return motionBlurParams; }
+    VignetteSystem::Parameters& GetVignetteParams() { return vignetteParams; }
     BloomSystem::CbColorFilter& GetFilterParams() { return filterParams; }
 
     // パーティクルはカラーバッファにだけ影響を与えたい
     void SetParticleRenderTarget();
+    void SetParticleRenderTargetWithDistortion();
 
     // バックバッファではなく「シーン用テクスチャ」をセットする関数
     void SetSceneRenderTarget();
     void SetSceneColorRenderTarget();
+    void SetSceneDistortionRenderTarget();
     void SetGBufferRenderTargets();
     void SetBackBufferRenderTarget();
     // シーン用テクスチャからバックバッファへブルームを適用して描画
@@ -128,6 +136,8 @@ public:
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneNormalRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneNormalSRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneDistortionRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneDistortionSRV;
 private:
 
     HWND											windowHandle = nullptr;
@@ -146,6 +156,7 @@ private:
     int width = 0;
     int height = 0;
     bool fullscreen = false;
+    bool vsyncEnabled = false;
 
     //====================================================
     // 内部ヘルパ関数
@@ -161,12 +172,16 @@ private:
     BloomSystem::Parameters bloomParams;
     BloomSystem::CbColorFilter filterParams;
     RadialBlurSystem::Parameters radialBlurParams;
+    XeGtaoSystem::Parameters xeGtaoParams;
+    MotionBlurSystem::Parameters motionBlurParams;
+    VignetteSystem::Parameters vignetteParams;
 
     CascadeShadowMap cascadeShadowMap;
 
     // ポストプロセス用のソーステクスチャ (HDR対応)
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneSRV;
+    bool sceneDistortionUsed = false;
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferBaseColorRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferBaseColorSRV;

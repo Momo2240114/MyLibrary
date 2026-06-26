@@ -53,6 +53,7 @@ struct MeshVFXPart
     DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };          // Partのローカル位置。
     DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };          // Partのローカル回転。度数法。
     DirectX::XMFLOAT3 scale = { 1.0f, 1.0f, 1.0f };             // Partのローカル拡縮。
+    float shapeCylinderRadius = 1.0f;
     DirectX::XMFLOAT3 meshRotationSpeed = { 0.0f, 0.0f, 0.0f }; // 時間で加算する回転速度。度/秒。
 
     float duration = 0.0f;            // 0なら時間制限なし。正の値ならPartの再生長。
@@ -70,6 +71,8 @@ struct MeshVFXPart
     std::string noiseTexturePath;             // 旧互換用Noise Textureパス。
     std::string distortionNoiseTexturePath;   // 背景歪みに使うNoise Textureパス。
     std::string vertexNoiseTexturePath;       // 頂点揺らしに使うNoise Textureパス。
+    std::string edgePatternTexturePath;
+    std::string emissiveTexturePath;
     std::vector<MeshVFXMaskLayer> maskLayers; // 複数Maskの合成設定。
     std::vector<std::string> noiseTexturePaths;// 複数Noiseの平均合成用Textureパス。
 
@@ -77,6 +80,13 @@ struct MeshVFXPart
     DirectX::XMFLOAT2 baseUVSpeed = { 0.0f, -0.5f };      // BaseTextureのUVスクロール速度。
     DirectX::XMFLOAT2 maskUVSpeed = { 0.0f, -0.2f };      // MaskTextureのUVスクロール速度。
     DirectX::XMFLOAT2 noiseUVSpeed = { 0.2f, -0.8f };     // NoiseTextureのUVスクロール速度。
+    DirectX::XMFLOAT2 baseUVScale = { 1.0f, 1.0f };
+    DirectX::XMFLOAT2 maskUVScale = { 1.0f, 1.0f };
+    DirectX::XMFLOAT2 noiseUVScale = { 1.0f, 1.0f };
+    DirectX::XMFLOAT2 normalUVScale = { 1.0f, 1.0f };
+    DirectX::XMFLOAT2 distortionNoiseUVScale = { 1.0f, 1.0f };
+    DirectX::XMFLOAT2 edgePatternUVScale = { 1.0f, 1.0f };
+    DirectX::XMFLOAT2 emissiveUVScale = { 1.0f, 1.0f };
     DirectX::XMFLOAT2 uvRotationCenter = { 0.5f, 0.5f };  // UV回転・放射拡縮の中心。
     float baseUVRotation = 0.0f;          // BaseTextureの初期UV回転。度数法。
     float maskUVRotation = 0.0f;          // MaskTextureの初期UV回転。度数法。
@@ -131,6 +141,8 @@ struct MeshVFXRuntimePart
     std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> noiseTextures; // 合成前Noise Texture群。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> distortionNoiseTexture; // 背景歪み用Noise。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> vertexNoiseTexture; // 頂点揺らし用Noise。
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> edgePatternTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> emissiveTexture;
 };
 
 // Trailなどが実行時に作ったMeshをMeshVFXとして描くためのバッファ参照。

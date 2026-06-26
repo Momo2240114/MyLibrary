@@ -281,6 +281,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     auto currentScopeName = [&]() -> std::string {
         return currentGraphScopeId.empty() ? std::string("Root") : currentGraphScopeId;
         };
+
     auto ensureScopedEntryExitNodes = [&]() {
         const std::string scope = currentScopeName();
         if (scope == "Root") return;
@@ -321,6 +322,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
         ensureScopedNode(AnimGraphNodeType::Entry, MakeEntryNodeName(scope), ImVec2(-360.0f, -80.0f));
         ensureScopedNode(AnimGraphNodeType::Exit, MakeExitNodeName(scope), ImVec2(360.0f, 120.0f));
         };
+
     ensureScopedEntryExitNodes();
 
     auto isNodeInCurrentScope = [&](const AnimGraphNode& node) {
@@ -329,6 +331,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
     ImGui::SetNextItemWidth(220.0f);
     ImGui::InputText("Graph Asset", &graphAssetFilePath);
+
     if (ImGui::BeginDragDropTarget())
     {
         if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::JSON))
@@ -346,6 +349,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     }
 
     ImGui::SameLine();
+
     if (ImGui::Button("Browse Graph..."))
     {
         const std::string selectedPath_ = WindowsDialogHelper::OpenJsonDialog(

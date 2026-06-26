@@ -26,6 +26,7 @@ public:
     }
 
     void Start() override;
+    void Update(float deltaTime_) override;
     void ApplyContainment();
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
@@ -38,6 +39,8 @@ public:
     float targetRadius = 0.35f;
     bool constrainHeight = true;
     int segments = 64;
+    bool showDebugShape = true;
+    DirectX::XMFLOAT4 debugShapeColor = { 0.0f, 0.75f, 1.0f, 1.0f };
 
 private:
     void RebuildPhysicsVolume();

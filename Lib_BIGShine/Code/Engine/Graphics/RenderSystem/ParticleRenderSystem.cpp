@@ -4,6 +4,8 @@
 #include "Engine/Graphics/Core/RenderContext.h"
 #include <DirectXMath.h>
 
+#include "Engine/Debug/TracyProfiler.h"
+
 void ParticleRenderSystem::Initialize(ID3D11Device* device)
 {
     ParticleEmitter::InitializeSharedShaders(device);
@@ -60,60 +62,94 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
     ID3D11DeviceContext* dc = rc.deviceContext;
     if (!dc || !rc.camera || drawInfos.empty()) return;
 
-    ApplySceneConstants(rc);
+    {
+        BS_PROFILE_SCOPE("ParticleRender::ApplySceneConstants");
+        ApplySceneConstants(rc);
+    }
 
-    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
-    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+    {
+        BS_PROFILE_SCOPE("ParticleRender::SetupPipeline");
+
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+        dc->IASetInputLayout(nullptr);
+        dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+        ParticleEmitter::BindSharedRenderShaders(dc);
+
+        ID3D11SamplerState* sampler = rc.renderState->GetSamplerState(SamplerState::LinearWrap);
+        dc->PSSetSamplers(0, 1, &sampler);
+    }
 
     float blendFactor[4] = { 0, 0, 0, 0 };
-
-    dc->IASetInputLayout(nullptr);
-    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-    ParticleEmitter::BindSharedRenderShaders(dc);
-
-    ID3D11SamplerState* sampler = rc.renderState->GetSamplerState(SamplerState::LinearWrap);
-    dc->PSSetSamplers(0, 1, &sampler);
-
-    for (auto& info : drawInfos)
     {
-        if (!info.component) continue;
-        for (auto& track : info.component->GetTracks())
-        {
-            if (!track.isStarted || !track.emitter) continue;
+        BS_PROFILE_SCOPE("ParticleRender::Tracks");
 
-            const BlendState blendState_ = track.blendMode == ParticleBlendMode::ADDITIVE
-                ? BlendState::AdditiveKeepAlpha
-                : (isEditorWindow_ ? BlendState::TransparencyKeepAlpha : BlendState::Transparency);
-            dc->OMSetBlendState(
-                rc.renderState->GetBlendState(blendState_), blendFactor, 0xffffffff);
-            track.emitter->Render(dc);
+        for (auto& info : drawInfos)
+        {
+            if (!info.component) continue;
+
+            BS_PROFILE_SCOPE("ParticleRender::Component");
+
+            for (auto& track : info.component->GetTracks())
+            {
+                if (!track.isStarted || !track.emitter) continue;
+
+                BS_PROFILE_SCOPE("ParticleRender::Track");
+
+                const BlendState blendState_ = track.blendMode == ParticleBlendMode::ADDITIVE
+                    ? BlendState::AdditiveKeepAlpha
+                    : (isEditorWindow_ ? BlendState::TransparencyKeepAlpha : BlendState::Transparency);
+
+                {
+                    BS_PROFILE_SCOPE("ParticleRender::SetBlendState");
+
+                    dc->OMSetBlendState(
+                        rc.renderState->GetBlendState(blendState_), blendFactor, 0xffffffff);
+                }
+
+                {
+                    BS_PROFILE_SCOPE("ParticleEmitter::Render");
+                    track.emitter->Render(dc);
+                }
+            }
         }
     }
 
-    ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr };
-    dc->GSSetShaderResources(9, 2, nullSRVs);
-    ID3D11ShaderResourceView* nullPSViews[] = { nullptr, nullptr, nullptr };
-    dc->PSSetShaderResources(0, _countof(nullPSViews), nullPSViews);
+    {
+        BS_PROFILE_SCOPE("ParticleRender::CleanupPipeline");
 
-    ID3D11Buffer* nullCB = nullptr;
-    dc->VSSetConstantBuffers(7, 1, &nullCB);
-    dc->GSSetConstantBuffers(7, 1, &nullCB);
-    dc->PSSetConstantBuffers(7, 1, &nullCB);
-    dc->VSSetConstantBuffers(9, 1, &nullCB);
-    dc->GSSetConstantBuffers(9, 1, &nullCB);
-    dc->PSSetConstantBuffers(9, 1, &nullCB);
+        ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr };
+        dc->GSSetShaderResources(9, 2, nullSRVs);
 
-    dc->VSSetShader(nullptr, nullptr, 0);
-    dc->GSSetShader(nullptr, nullptr, 0);
-    dc->PSSetShader(nullptr, nullptr, 0);
+        ID3D11ShaderResourceView* nullPSViews[] = { nullptr, nullptr, nullptr };
+        dc->PSSetShaderResources(0, _countof(nullPSViews), nullPSViews);
 
-    dc->OMSetBlendState(
-        rc.renderState->GetBlendState(BlendState::Opaque), blendFactor, 0xffffffff);
-    dc->OMSetDepthStencilState(
-        rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-    dc->RSSetState(
-        rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+        ID3D11Buffer* nullCB = nullptr;
+        dc->VSSetConstantBuffers(7, 1, &nullCB);
+        dc->GSSetConstantBuffers(7, 1, &nullCB);
+        dc->PSSetConstantBuffers(7, 1, &nullCB);
+        dc->VSSetConstantBuffers(9, 1, &nullCB);
+        dc->GSSetConstantBuffers(9, 1, &nullCB);
+        dc->PSSetConstantBuffers(9, 1, &nullCB);
 
-    drawInfos.clear();
+        dc->VSSetShader(nullptr, nullptr, 0);
+        dc->GSSetShader(nullptr, nullptr, 0);
+        dc->PSSetShader(nullptr, nullptr, 0);
+
+        dc->OMSetBlendState(
+            rc.renderState->GetBlendState(BlendState::Opaque), blendFactor, 0xffffffff);
+
+        dc->OMSetDepthStencilState(
+            rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+
+        dc->RSSetState(
+            rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+    }
+
+    {
+        BS_PROFILE_SCOPE("ParticleRender::ClearDrawInfos");
+        drawInfos.clear();
+    }
 }
-

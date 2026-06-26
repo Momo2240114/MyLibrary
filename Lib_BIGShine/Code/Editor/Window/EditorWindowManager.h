@@ -20,6 +20,7 @@ public:
     void DrawAll();
     bool IsWorkspaceMode() const { return activeWorkspaceIndex >= 0 && activeWorkspaceIndex < static_cast<int>(windows.size()) && windows[activeWorkspaceIndex]->IsVisible(); }
     bool ShouldPauseScene() const { return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldPauseScene(); }
+    bool ShouldRenderSceneWhenPaused() const { return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldRenderSceneWhenPaused(); }
 private:
     void DrawMenuBar();
     void DrawWorkspaceSelectorBar();

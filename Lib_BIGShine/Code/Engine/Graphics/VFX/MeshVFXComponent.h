@@ -40,6 +40,7 @@ public:
     MeshVFXAsset& GetAsset() { return asset; }
     const MeshVFXAsset& GetAsset() const { return asset; }
     const std::vector<MeshVFXRuntimePart>& GetRuntimeParts() const { return runtimeParts; }
+    virtual size_t GetMaxRenderParts() const { return static_cast<size_t>(-1); }
 
     float GetTime() const { return time; }
     bool IsPlaying() const { return isPlaying; }

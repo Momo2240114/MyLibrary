@@ -69,6 +69,8 @@ void AfterimageComponent::Gui()
     ImGui::DragFloat("Lifetime", &lifetime, 0.01f, 0.01f, 10.0f);
     ImGui::DragFloat("Start Alpha", &startAlpha, 0.01f, 0.0f, 1.0f);
     ImGui::DragInt("Max Snapshots", &maxSnapshots, 1.0f, 1, 64);
+    ImGui::DragInt("Max Render Snapshots", &maxRenderSnapshots, 1.0f, 1, 64);
+    ImGui::DragInt("Max Render Parts", &maxRenderParts, 1.0f, 1, 16);
     ImGui::DragInt("Burst Count", &burstCount, 1.0f, 1, 32);
     ImGui::Checkbox("Include Children", &includeChildren);
     ImGui::Text("Active: %zu", snapshots.size());
@@ -92,6 +94,8 @@ void AfterimageComponent::Serialize(nlohmann::json& json_) const
     json_["Lifetime"] = lifetime;
     json_["StartAlpha"] = startAlpha;
     json_["MaxSnapshots"] = maxSnapshots;
+    json_["MaxRenderSnapshots"] = maxRenderSnapshots;
+    json_["MaxRenderParts"] = maxRenderParts;
     json_["BurstCount"] = burstCount;
     json_["IncludeChildren"] = includeChildren;
 }
@@ -103,16 +107,36 @@ void AfterimageComponent::Deserialize(const nlohmann::json& json_)
     lifetime = (std::max)(json_.value("Lifetime", 0.4f), 0.01f);
     startAlpha = std::clamp(json_.value("StartAlpha", 0.8f), 0.0f, 1.0f);
     maxSnapshots = std::clamp(json_.value("MaxSnapshots", 8), 1, 64);
+    maxRenderSnapshots = std::clamp(json_.value("MaxRenderSnapshots", 4), 1, maxSnapshots);
+    maxRenderParts = std::clamp(json_.value("MaxRenderParts", 1), 1, 16);
     burstCount = std::clamp(json_.value("BurstCount", 3), 1, 32);
     includeChildren = json_.value("IncludeChildren", true);
     Clear();
 }
 
+size_t AfterimageComponent::GetMaxRenderParts() const
+{
+    return static_cast<size_t>((std::max)(maxRenderParts, 1));
+}
+
 bool AfterimageComponent::GetModelPoseViews(std::vector<MeshVFXModelPoseView>& poses_) const
 {
     poses_.clear();
-    for (const Snapshot& snapshot_ : snapshots)
+    const size_t snapshotCount_ = snapshots.size();
+    const size_t renderSnapshotCount_ = (std::min)(
+        snapshotCount_,
+        static_cast<size_t>((std::max)(maxRenderSnapshots, 1)));
+    const size_t firstSnapshotIndex_ = snapshotCount_ - renderSnapshotCount_;
+    size_t poseCount_ = 0;
+    for (size_t snapshotIndex_ = firstSnapshotIndex_; snapshotIndex_ < snapshotCount_; ++snapshotIndex_)
     {
+        poseCount_ += snapshots[snapshotIndex_].poses.size();
+    }
+    poses_.reserve(poseCount_);
+
+    for (size_t snapshotIndex_ = firstSnapshotIndex_; snapshotIndex_ < snapshotCount_; ++snapshotIndex_)
+    {
+        const Snapshot& snapshot_ = snapshots[snapshotIndex_];
         const float normalizedAge_ = std::clamp(snapshot_.age / lifetime, 0.0f, 1.0f);
         const float alpha_ = startAlpha * (1.0f - normalizedAge_);
         for (const MeshVFXModelPose& sourcePose_ : snapshot_.poses)
@@ -149,6 +173,7 @@ void AfterimageComponent::Burst()
 void AfterimageComponent::Clear()
 {
     snapshots.clear();
+    snapshots.reserve(static_cast<size_t>(maxSnapshots));
     pendingBurstCount = 0;
     spawnTimer = 0.0f;
 }
@@ -171,6 +196,7 @@ void AfterimageComponent::CaptureSnapshot()
     if (!owner_) return;
 
     Snapshot snapshot_;
+    snapshot_.poses.reserve(includeChildren ? 4 : 1);
     CaptureObject(owner_, snapshot_);
     if (snapshot_.poses.empty()) return;
 
@@ -191,13 +217,14 @@ void AfterimageComponent::CaptureObject(
         object_->GetComponent<GltfModelCommponennt>();
     if (model_)
     {
-        model_->UpdateTransform();
+        model_->UpdateTransformIfDirty();
+        const auto& meshes_ = model_->GetMeshes();
         MeshVFXModelPose pose_;
         pose_.model = model_;
-        pose_.meshTransforms.resize(model_->GetMeshes().size());
-        for (size_t meshIndex_ = 0; meshIndex_ < model_->GetMeshes().size(); ++meshIndex_)
+        pose_.meshTransforms.resize(meshes_.size());
+        for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
         {
-            const GltfModelCommponennt::Mesh& mesh_ = model_->GetMeshes()[meshIndex_];
+            const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];
             std::vector<DirectX::XMFLOAT4X4>& transforms_ = pose_.meshTransforms[meshIndex_];
             if (!mesh_.bones.empty())
             {

@@ -1,0 +1,91 @@
+{
+    "Links": [
+        {
+            "FromNodeId": 1,
+            "FromPinId": 3,
+            "Id": 7,
+            "ToNodeId": 4,
+            "ToPinId": 5
+        }
+    ],
+    "NextId": 8,
+    "Nodes": [
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 1,
+            "InputPinId": 0,
+            "IntValue": 0,
+            "Name": "Root",
+            "OutputPinId": 3,
+            "Position": [
+                273.0,
+                -92.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Root",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 4,
+            "InputPinId": 5,
+            "IntValue": 0,
+            "Name": "Selector",
+            "OutputPinId": 6,
+            "Position": [
+                280.0,
+                120.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Selector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        }
+    ],
+    "Version": 1
+}

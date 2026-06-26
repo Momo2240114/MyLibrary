@@ -141,30 +141,47 @@ void ModelAttachmentComponent::SyncAttachment()
     if (!myGo_) return;
 
     auto myTransform_ = myGo_->transform;
+    if (!myTransform_) return;
+
     auto model_ = ResolveTargetModel();
-    if (model_)
+    if (!model_)
     {
-        model_->UpdateTransform();
+        myTransform_->SetParentOverride(false, DirectX::XMMatrixIdentity());
+        myTransform_->UpdateWorldMatrix();
+        return;
     }
 
-    if (ResolveTargetNodeIndex(model_)) {
+    // ボーンを読む直前に、必要なら最新化する
+    model_->UpdateTransformIfDirty();
+
+    if (ResolveTargetNodeIndex(model_))
+    {
         const auto& node_ = model_->GetNodes()[targetNodeIndex];
         DirectX::XMMATRIX nodeMat_ = DirectX::XMLoadFloat4x4(&node_.worldTransform);
 
-        // Transform に「これを使って！」と渡す
         myTransform_->SetParentOverride(true, nodeMat_);
         myTransform_->UpdateWorldMatrix();
 
         if (auto attachedModel_ = myGo_->GetComponent<GltfModelCommponennt>())
         {
-            attachedModel_->UpdateTransform();
+            // 親Transformが変わったので、アタッチされた側のモデル行列も更新が必要
+            attachedModel_->MarkTransformDirty();
+            attachedModel_->UpdateTransformIfDirty();
         }
     }
-    else {
+    else
+    {
         myTransform_->SetParentOverride(false, DirectX::XMMatrixIdentity());
         myTransform_->UpdateWorldMatrix();
+
+        if (auto attachedModel_ = myGo_->GetComponent<GltfModelCommponennt>())
+        {
+            attachedModel_->MarkTransformDirty();
+            attachedModel_->UpdateTransformIfDirty();
+        }
     }
 }
+
 // --- 再帰的なツリー表示関数 (引数に const 修飾などを追加) ---
 void ShowNodeTree(const GltfModelCommponennt::Node* node,
     const std::vector<GltfModelCommponennt::Node>& allNodes,

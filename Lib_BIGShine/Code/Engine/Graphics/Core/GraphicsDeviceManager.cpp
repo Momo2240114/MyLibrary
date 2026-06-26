@@ -229,6 +229,8 @@ void GraphicsDeviceManager::Shutdown()
     depthStencilView.Reset();
     sceneRTV.Reset();
     sceneSRV.Reset();
+    sceneDistortionRTV.Reset();
+    sceneDistortionSRV.Reset();
     swapChain.Reset();
     immediateContext.Reset();
 
@@ -261,6 +263,8 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     // --- 【修正】シーン用バッファとブルームもリセット ---
     sceneRTV.Reset();
     sceneSRV.Reset();
+    sceneDistortionRTV.Reset();
+    sceneDistortionSRV.Reset();
     sceneNormalRTV.Reset();
     sceneNormalSRV.Reset();
     gBufferBaseColorRTV.Reset();
@@ -296,9 +300,14 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
 void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
 {
     // --- 変更点：バックバッファではなく、シーン用HDRバッファをクリアする ---
+    sceneDistortionUsed = false;
     immediateContext->ClearRenderTargetView(sceneRTV.Get(), clearColor_);
     const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; // 修正：{} を使い、変数名を black に
     immediateContext->ClearRenderTargetView(sceneNormalRTV.Get(), black);
+    if (sceneDistortionRTV)
+    {
+        immediateContext->ClearRenderTargetView(sceneDistortionRTV.Get(), black);
+    }
     immediateContext->ClearRenderTargetView(gBufferBaseColorRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferNormalRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
@@ -323,7 +332,7 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
 void GraphicsDeviceManager::EndFrame()
 {
     // swapChain->Present() を呼び出し
-    swapChain->Present(1, 0);
+    swapChain->Present(vsyncEnabled ? 1 : 0, 0);
 }
 
 void GraphicsDeviceManager::SetParticleRenderTarget()
@@ -333,6 +342,12 @@ void GraphicsDeviceManager::SetParticleRenderTarget()
     immediateContext->OMSetRenderTargets(1, &renderTarget_, depthStencilView.Get());
 }
 
+void GraphicsDeviceManager::SetParticleRenderTargetWithDistortion()
+{
+    sceneDistortionUsed = true;
+    ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneDistortionRTV.Get() };
+    immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
+}
 void GraphicsDeviceManager::SetBackBufferRenderTarget()
 {
     immediateContext->RSSetViewports(1, &viewport);
@@ -360,6 +375,14 @@ void GraphicsDeviceManager::SetSceneColorRenderTarget()
     immediateContext->RSSetViewports(1, &viewport);
 }
 
+void GraphicsDeviceManager::SetSceneDistortionRenderTarget()
+{
+    sceneDistortionUsed = true;
+    ID3D11RenderTargetView* rtv_ = sceneDistortionRTV.Get();
+    immediateContext->OMSetRenderTargets(1, &rtv_, depthStencilView.Get());
+    immediateContext->RSSetViewports(1, &viewport);
+}
+
 void GraphicsDeviceManager::SetGBufferRenderTargets()
 {
     ID3D11RenderTargetView* rtvs_[] =
@@ -377,7 +400,7 @@ void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
     auto depthStencil_ = depthStencilView.Get();
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencil_);
 
-    postRenderSystem.GetBloomSystem().Execute(rc, sceneSRV.Get(), renderTargetView.Get(), bloomParams, filterParams);
+    postRenderSystem.Execute(rc, sceneSRV.Get(), renderTargetView.Get());
 }
 
 
@@ -437,8 +460,12 @@ void GraphicsDeviceManager::ResetFilter()
 
 void GraphicsDeviceManager::DrawPostEffectGuiContent()
 {
+    ImGui::Checkbox("VSync", &vsyncEnabled);
+    ImGui::Separator();
+
     if (ImGui::CollapsingHeader("Bloom (Kawase Blur)", ImGuiTreeNodeFlags_DefaultOpen))
     {
+        ImGui::Checkbox("Bloom Enabled", &bloomParams.enabled);
         // 1. 閾値 (Threshold): どの明るさから光らせるか
         ImGui::DragFloat("Threshold", &bloomParams.threshold, 0.01f, 0.0f, 5.0f, "%.2f");
         //ImGui::SetItemTooltip("この値より明るいピクセルが抽出されます。低いほど画面全体が光ります。");
@@ -452,7 +479,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
         //ImGui::SetItemTooltip("光を拡散させる距離です。上げると「ぶれる」感じが強くなります。");
 
         // 4. パス回数 (Blur Passes): ぼかしの質
-        ImGui::SliderInt("Blur Passes", &bloomParams.blurPasses, 1, 8);
+        ImGui::SliderInt("Blur Passes", &bloomParams.blurPasses, 0, 8);
         //ImGui::SetItemTooltip("ぼかしを繰り返す回数です。多いほど滑らかに遠くまで光が届きます。");
 
         ImGui::Separator();
@@ -468,6 +495,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
         // 6. リセットボタン
         if (ImGui::Button("Reset Parameters")) {
+            bloomParams.enabled = true;
             bloomParams.threshold = 1.0f;
             bloomParams.intensity = 1.0f;
             bloomParams.kawaseScale = 1.0f;
@@ -497,6 +525,41 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
         if (ImGui::Button("Reset Filter"))
         {
             ResetFilter();
+        }
+    }
+    if (ImGui::CollapsingHeader("Motion Blur", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::Checkbox("Motion Blur Enabled", &motionBlurParams.enabled);
+        ImGui::SliderInt("Motion Blur Samples", &motionBlurParams.sampleCount, 2, 16);
+        ImGui::DragFloat("Motion Blur Strength", &motionBlurParams.strength, 0.01f, 0.0f, 2.0f, "%.2f");
+        ImGui::DragFloat("Motion Blur Max Velocity", &motionBlurParams.maxVelocity, 0.001f, 0.001f, 0.2f, "%.3f");
+    }
+
+    if (ImGui::CollapsingHeader("Vignette", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::Checkbox("Vignette Enabled", &vignetteParams.enabled);
+        ImGui::ColorEdit4("Vignette Color", &vignetteParams.color.x);
+        ImGui::DragFloat2("Vignette Center", &vignetteParams.center.x, 0.01f, 0.0f, 1.0f, "%.2f");
+        ImGui::DragFloat("Vignette Intensity", &vignetteParams.intensity, 0.01f, 0.0f, 4.0f, "%.2f");
+        ImGui::DragFloat("Vignette Smoothness", &vignetteParams.smoothness, 0.01f, 0.01f, 4.0f, "%.2f");
+        ImGui::SliderFloat("Vignette Rounded", &vignetteParams.rounded, 0.0f, 1.0f, "%.2f");
+        ImGui::DragFloat("Vignette Roundness", &vignetteParams.roundness, 0.01f, 0.1f, 8.0f, "%.2f");
+        ImGui::SliderFloat("Vignette Opacity", &vignetteParams.opacity, 0.0f, 1.0f, "%.2f");
+    }
+    if (ImGui::CollapsingHeader("XeGTAO", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::Checkbox("AO Enabled", &xeGtaoParams.enabled);
+        ImGui::Checkbox("AO Only", &xeGtaoParams.showOnly);
+        ImGui::DragFloat("AO Radius", &xeGtaoParams.radius, 0.01f, 0.01f, 20.0f, "%.2f");
+        ImGui::DragFloat("AO Intensity", &xeGtaoParams.intensity, 0.01f, 0.0f, 3.0f, "%.2f");
+        ImGui::DragFloat("AO Power", &xeGtaoParams.power, 0.01f, 0.1f, 5.0f, "%.2f");
+        ImGui::DragFloat("AO Sample Radius", &xeGtaoParams.sampleRadius, 0.1f, 1.0f, 64.0f, "%.1f");
+        ImGui::SliderInt("AO Samples", &xeGtaoParams.sampleCount, 1, 8);
+        ImGui::SliderInt("AO Update Interval", &xeGtaoParams.updateInterval, 1, 8);
+
+        if (ImGui::Button("Reset XeGTAO"))
+        {
+            xeGtaoParams = XeGtaoSystem::Parameters{};
         }
     }
     // --- 【追加】ラジアルブラー設定 ---
@@ -803,6 +866,15 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     device->CreateRenderTargetView(nTexture.Get(), nullptr, sceneNormalRTV.ReleaseAndGetAddressOf());
     device->CreateShaderResourceView(nTexture.Get(), nullptr, sceneNormalSRV.ReleaseAndGetAddressOf());
 
+    D3D11_TEXTURE2D_DESC distortionDesc_ = desc;
+    distortionDesc_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> distortionTexture_;
+    result_ = device->CreateTexture2D(&distortionDesc_, nullptr, distortionTexture_.GetAddressOf());
+    if (FAILED(result_)) return false;
+    result_ = device->CreateRenderTargetView(distortionTexture_.Get(), nullptr, sceneDistortionRTV.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
+    result_ = device->CreateShaderResourceView(distortionTexture_.Get(), nullptr, sceneDistortionSRV.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
 
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
