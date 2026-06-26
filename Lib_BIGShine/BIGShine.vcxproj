@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="checked|Win32">
@@ -274,6 +274,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
@@ -350,10 +351,14 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ParticleRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\XeGtaoSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\SpriteRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp" />
@@ -436,6 +441,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />
     <ClInclude Include="Code\Editor\Workspace\AudioWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
@@ -453,6 +459,7 @@
     <ClInclude Include="Code\Editor\Window\ShadowWindow.h" />
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h" />
     <ClInclude Include="Code\Engine\Common\misc.h" />
+    <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\FovDirector.h" />
@@ -493,9 +500,13 @@
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\XeGtaoSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h" />
@@ -711,6 +722,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\MeshVFXDistortionPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\MeshVFXTextureMixPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
@@ -725,6 +744,18 @@
     </FxCompile>
     <FxCompile Include="Shader\MeshVFXVS.hlsl">
       <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionBlurPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\PostDistortionPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\VignettePS.hlsl">
+      <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\ParticleDraw_GS.hlsl">
@@ -820,6 +851,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\XeGTAO_Post_CS.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\XeGTAO_CompositePS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\ShapeRendererPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

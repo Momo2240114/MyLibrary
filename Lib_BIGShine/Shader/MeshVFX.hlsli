@@ -12,6 +12,13 @@ cbuffer CbMeshVFX : register(b0)
     float2 baseUVSpeed; // Base UVのスクロール速度。
     float2 maskUVSpeed; // Mask UVのスクロール速度。
     float2 noiseUVSpeed; // Noise UVのスクロール速度。
+    float2 baseUVScale;
+    float2 maskUVScale;
+    float2 noiseUVScale;
+    float2 normalUVScale;
+    float2 distortionNoiseUVScale;
+    float2 edgePatternUVScale;
+    float2 emissiveUVScale;
     float2 uvRotationCenter; // UV回転・放射拡縮の中心。
     float time; // Partの再生時間。
     float alpha; // Partの最終Alpha。
@@ -48,6 +55,12 @@ cbuffer CbMeshVFX : register(b0)
     uint hasVertexNoiseTexture; // 頂点Noiseがあるか。
     uint edgePatternMode; // 0:なし 1:BaseTexture 2:MaskTexture。
     float edgePatternStrength; // Edge模様を混ぜる割合。
+    float emissiveStrength;
+    float emissivePulseSpeed;
+    float emissivePulseAmount;
+    uint hasEdgePatternTexture;
+    uint hasEmissiveTexture;
+    float padding;
 };
 
 // GltfModelの頂点入力。

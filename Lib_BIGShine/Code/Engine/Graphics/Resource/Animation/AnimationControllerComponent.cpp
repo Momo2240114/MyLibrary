@@ -19,6 +19,9 @@
 #include <cmath>
 #include <unordered_map>
 
+#include "Engine/Debug/TracyProfiler.h"
+
+
 namespace ed = ax::NodeEditor;
 
 namespace
@@ -263,9 +266,17 @@ void AnimationControllerComponent::Start()
 }
 void AnimationControllerComponent::Update(float deltaTime_)
 {
-    EnsureNodeEditorContext();
+    BS_PROFILE_SCOPE("AnimationControllerComponent::Update");
+
+    {
+        BS_PROFILE_SCOPE("Animation::EnsureNodeEditorContext");
+        EnsureNodeEditorContext();
+    }
+
     if (!modelComponent)
     {
+        BS_PROFILE_SCOPE("Animation::ResolveModelComponent");
+
         auto owner_ = GetGameObject();
         modelComponent = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
         if (!modelComponent)
@@ -274,96 +285,134 @@ void AnimationControllerComponent::Update(float deltaTime_)
         }
     }
 
-    EnsureStatesFromModel();
+    {
+        BS_PROFILE_SCOPE("Animation::EnsureStatesFromModel");
+        EnsureStatesFromModel();
+    }
 
     if (!curveComponent)
     {
+        BS_PROFILE_SCOPE("Animation::ResolveCurveComponent");
+
         auto owner_ = GetGameObject();
         curveComponent = owner_ ? owner_->GetComponent<CurveComponent>().get() : nullptr;
     }
 
     if (pendingGraphAssetLoad)
     {
+        BS_PROFILE_SCOPE("Animation::PendingGraphAssetLoad");
+
         pendingGraphAssetLoad = false;
 
         if (!pendingGraphAssetPath.empty())
         {
-            LoadGraphAsset(pendingGraphAssetPath);
-            ApplyPendingStateAssets();
-            TryEnterStartState();
+            {
+                BS_PROFILE_SCOPE("Animation::LoadGraphAsset");
+                LoadGraphAsset(pendingGraphAssetPath);
+            }
+
+            {
+                BS_PROFILE_SCOPE("Animation::ApplyPendingStateAssets");
+                ApplyPendingStateAssets();
+            }
+
+            {
+                BS_PROFILE_SCOPE("Animation::TryEnterStartState");
+                TryEnterStartState();
+            }
         }
     }
 
     if (editorPoseOverride)
     {
+        BS_PROFILE_SCOPE("Animation::EditorPoseOverrideUpdateTransform");
         modelComponent->UpdateTransform();
         return;
     }
 
     if (useTransitionGraph && !animationPaused)
     {
-        // 状態遷移の評価
+        BS_PROFILE_SCOPE("Animation::EvaluateGraphTransitions");
         EvaluateGraphTransitions();
     }
 
-    //ModelAnimator::Updateを呼ぶ際、ポーズライブラリのリソースポインタを第三引数に授ける
     const BlackboardCategory& animationBlackboard_ = GetCurrentBlackboard();
     const float animationDeltaTime_ = animationPaused ? 0.0f : deltaTime_;
-    animator.Update(animationDeltaTime_, modelComponent, curveComponent, poseLibrary, GetGameObject(), &animationBlackboard_);
 
-    const AnimState* activeState_ = animator.GetCurrentState();
-    if (activeState_ && activeState_->rootMotion.enable)
     {
-        auto rootMotionDelta_ = animator.GetRootMotionDelta();
-        auto transform_ = GetGameObject()->transform;
+        BS_PROFILE_SCOPE("ModelAnimator::Update");
+        animator.Update(
+            animationDeltaTime_,
+            modelComponent,
+            curveComponent,
+            poseLibrary,
+            GetGameObject(),
+            &animationBlackboard_);
+    }
 
-        if (transform_)
+    {
+        BS_PROFILE_SCOPE("Animation::RootMotion");
+
+        const AnimState* activeState_ = animator.GetCurrentState();
+        if (activeState_ && activeState_->rootMotion.enable)
         {
-            using namespace DirectX;
-            using namespace DirectX::SimpleMath;
+            auto rootMotionDelta_ = animator.GetRootMotionDelta();
+            auto transform_ = GetGameObject()->transform;
 
-            // localRotation は degree 前提
-            float xRadians_ = XMConvertToRadians(transform_->localRotation.x);
-            float yRadians_ = XMConvertToRadians(transform_->localRotation.y);
-            float zRadians_ = XMConvertToRadians(transform_->localRotation.z);
-
-            // YXZ 運用なら yaw(Y), pitch(X), roll(Z) の順で作る
-            Quaternion currentRotation_ = Quaternion::CreateFromYawPitchRoll(yRadians_, xRadians_, zRadians_);
-            currentRotation_.Normalize();
-
-            // 位置 RootMotion
-            Vector3 worldDeltaPosition_ = Vector3::Transform(rootMotionDelta_.deltaPosition, currentRotation_);
-
-            // ワールド変換後にもう一回Yを切る
-            if (!activeState_->rootMotion.applyPositionY)
+            if (transform_)
             {
-                worldDeltaPosition_.y = 0.0f;
-            }
+                using namespace DirectX;
+                using namespace DirectX::SimpleMath;
 
-            const std::shared_ptr<GameObject> owner_ = GetGameObject();
-            const std::shared_ptr<CharacterMovementComponent> movement_ = owner_
-                ? owner_->GetComponent<CharacterMovementComponent>()
-                : nullptr;
-            if (movement_)
-            {
-                rootMotionDelta = worldDeltaPosition_;
+                float xRadians_ = XMConvertToRadians(transform_->localRotation.x);
+                float yRadians_ = XMConvertToRadians(transform_->localRotation.y);
+                float zRadians_ = XMConvertToRadians(transform_->localRotation.z);
 
-                movement_->AddRootMotionDelta(worldDeltaPosition_);
-            }
-            else
-            {
-                transform_->AddMoveOffset(worldDeltaPosition_);
-                transform_->MarkDirty();
+                Quaternion currentRotation_ = Quaternion::CreateFromYawPitchRoll(
+                    yRadians_,
+                    xRadians_,
+                    zRadians_);
+
+                currentRotation_.Normalize();
+
+                Vector3 worldDeltaPosition_ =
+                    Vector3::Transform(rootMotionDelta_.deltaPosition, currentRotation_);
+
+                if (!activeState_->rootMotion.applyPositionY)
+                {
+                    worldDeltaPosition_.y = 0.0f;
+                }
+
+                const std::shared_ptr<GameObject> owner_ = GetGameObject();
+                const std::shared_ptr<CharacterMovementComponent> movement_ = owner_
+                    ? owner_->GetComponent<CharacterMovementComponent>()
+                    : nullptr;
+
+                if (movement_)
+                {
+                    rootMotionDelta = worldDeltaPosition_;
+                    movement_->AddRootMotionDelta(worldDeltaPosition_);
+                }
+                else
+                {
+                    transform_->AddMoveOffset(worldDeltaPosition_);
+                    transform_->MarkDirty();
+                }
             }
         }
     }
 
-    // 計算された姿勢をモデルに書き戻し
-    modelComponent->SetNodePoses(animator.GetCurrentPose());
-    // 行列の最終更新
-    modelComponent->UpdateTransform();
-}
+    {
+        BS_PROFILE_SCOPE("GltfModel::SetNodePoses");
+        modelComponent->SetNodePoses(animator.GetCurrentPose());
+        modelComponent->MarkPoseDirty();
+    }
 
+    {
+        BS_PROFILE_SCOPE("GltfModel::UpdateTransform");
+        modelComponent->UpdateTransformIfDirty();
+    }
+}
 
 void AnimationControllerComponent::ChangeState(const std::string& stateName_, float duration_)
 {

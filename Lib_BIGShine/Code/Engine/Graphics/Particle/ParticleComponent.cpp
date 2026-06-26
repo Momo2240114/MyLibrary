@@ -939,6 +939,8 @@ void ParticleComponent::Update(float deltaTime)
         }
 
         track_.emitter->ApplySettings(tempSettings_);
+        track_.emitter->SetDepthSortEnabled(track_.blendMode == ParticleBlendMode::ALPHA);
+        track_.emitter->SetDepthSortInterval(2);
         track_.emitter->Update(context_, deltaTime);
 
         if (track_.settings.burstTrigger > 0.0f) track_.settings.burstTrigger = 0.0f;
@@ -1121,7 +1123,7 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
     auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
     if (!owner_ || !owner_->transform || !model_)
     {
-        track_.emitter->SetMeshSpawnPositions({});
+        track_.emitter->GetMeshSpawnPositions().clear();
         return;
     }
 
@@ -1133,7 +1135,7 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
 
     if (totalVertexCount_ == 0)
     {
-        track_.emitter->SetMeshSpawnPositions({});
+        track_.emitter->GetMeshSpawnPositions().clear();
         return;
     }
 
@@ -1144,11 +1146,14 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
         track_.settings.emissionPosition.y,
         track_.settings.emissionPosition.z,
         0.0f);
+    const DirectX::XMVECTOR rotatedOffset_ =
+        DirectX::XMVector3TransformNormal(emitterOffset_, ownerWorld_);
 
     const size_t sampleLimit_ = (std::max)(static_cast<size_t>(1), static_cast<size_t>(track_.meshVertexSampleCount));
     const size_t sampleStride_ = (std::max)(static_cast<size_t>(1), totalVertexCount_ / sampleLimit_);
 
-    std::vector<DirectX::XMFLOAT3> positions_;
+    std::vector<DirectX::XMFLOAT3>& positions_ = track_.emitter->GetMeshSpawnPositions();
+    positions_.clear();
     positions_.reserve((std::min)(totalVertexCount_, sampleLimit_));
 
     size_t vertexIndex_ = 0;
@@ -1167,10 +1172,6 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
             DirectX::XMVECTOR pos_ = DirectX::XMLoadFloat3(&vertex_.position);
             pos_ = DirectX::XMVector3TransformCoord(pos_, finalWorld_);
 
-            // Emitter Offset?Owner?????????Mesh???????????????
-            DirectX::XMVECTOR rotatedOffset_ =
-                DirectX::XMVector3TransformNormal(emitterOffset_, ownerWorld_);
-
             pos_ = DirectX::XMVectorAdd(pos_, rotatedOffset_);
 
             DirectX::XMFLOAT3 out_{};
@@ -1183,7 +1184,6 @@ void ParticleComponent::UpdateMeshSpawnPositions(EmitterTrack& track_)
         if (positions_.size() >= sampleLimit_) break;
     }
 
-    track_.emitter->SetMeshSpawnPositions(positions_);
 }
 
 

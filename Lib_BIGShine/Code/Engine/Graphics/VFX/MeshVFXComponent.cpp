@@ -15,10 +15,101 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
+#include <cmath>
 #include <utility>
 
 namespace
 {
+    constexpr const char* SHAPE_CYLINDER_MODEL_PATH = "__ShapeCylinder__";
+    constexpr int SHAPE_CYLINDER_SEGMENTS = 256;
+
+    std::shared_ptr<ModelResource> CreateShapeCylinderModelResource(
+        ID3D11Device* device_,
+        float radius_)
+    {
+        if (!device_) return nullptr;
+        const float safeRadius_ = (std::max)(radius_, 0.0001f);
+
+        auto resource_ = std::make_shared<ModelResource>();
+        resource_->modelName = SHAPE_CYLINDER_MODEL_PATH;
+
+        auto& node_ = resource_->nodes.emplace_back();
+        node_.name = "ShapeCylinder";
+
+        auto& material_ = resource_->materials.emplace_back();
+        material_.id = 0;
+        material_.name = "ShapeCylinder";
+
+        auto& mesh_ = resource_->meshes.emplace_back();
+        mesh_.nodeIndex = 0;
+        mesh_.materialIndex = 0;
+        mesh_.node = &resource_->nodes[0];
+        mesh_.material = &resource_->materials[0];
+        mesh_.vertices.reserve(static_cast<size_t>(SHAPE_CYLINDER_SEGMENTS) * 2);
+        mesh_.indices.reserve(static_cast<size_t>(SHAPE_CYLINDER_SEGMENTS) * 6);
+
+        for (int index_ = 0; index_ < SHAPE_CYLINDER_SEGMENTS; ++index_)
+        {
+            const float angle_ = DirectX::XM_2PI * static_cast<float>(index_)
+                / static_cast<float>(SHAPE_CYLINDER_SEGMENTS);
+            const float x_ = std::sin(angle_) * safeRadius_;
+            const float z_ = std::cos(angle_) * safeRadius_;
+            const float u_ = static_cast<float>(index_)
+                / static_cast<float>(SHAPE_CYLINDER_SEGMENTS);
+
+            for (int heightIndex_ = 0; heightIndex_ < 2; ++heightIndex_)
+            {
+                const float y_ = heightIndex_ == 0 ? -1.0f : 1.0f;
+                GltfModelCommponennt::Vertex vertex_{};
+                vertex_.position = { x_, y_, z_ };
+                vertex_.normal = { -x_, 0.0f, -z_ };
+                vertex_.tangent = { z_, 0.0f, -x_, 1.0f };
+                vertex_.texcoord = { u_, heightIndex_ == 0 ? 1.0f : 0.0f };
+                mesh_.vertices.push_back(vertex_);
+            }
+        }
+
+        for (int index_ = 0; index_ < SHAPE_CYLINDER_SEGMENTS; ++index_)
+        {
+            const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
+            const uint32_t topCurrent_ = bottomCurrent_ + 1;
+            const uint32_t bottomNext_ = static_cast<uint32_t>(
+                ((index_ + 1) % SHAPE_CYLINDER_SEGMENTS) * 2);
+            const uint32_t topNext_ = bottomNext_ + 1;
+
+            mesh_.indices.push_back(bottomCurrent_);
+            mesh_.indices.push_back(topCurrent_);
+            mesh_.indices.push_back(bottomNext_);
+            mesh_.indices.push_back(bottomNext_);
+            mesh_.indices.push_back(topCurrent_);
+            mesh_.indices.push_back(topNext_);
+        }
+
+        D3D11_BUFFER_DESC vertexDesc_{};
+        vertexDesc_.ByteWidth = static_cast<UINT>(sizeof(GltfModelCommponennt::Vertex) * mesh_.vertices.size());
+        vertexDesc_.Usage = D3D11_USAGE_IMMUTABLE;
+        vertexDesc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        D3D11_SUBRESOURCE_DATA vertexData_{};
+        vertexData_.pSysMem = mesh_.vertices.data();
+        if (FAILED(device_->CreateBuffer(&vertexDesc_, &vertexData_, mesh_.vertexBuffer.GetAddressOf())))
+        {
+            return nullptr;
+        }
+
+        D3D11_BUFFER_DESC indexDesc_{};
+        indexDesc_.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh_.indices.size());
+        indexDesc_.Usage = D3D11_USAGE_IMMUTABLE;
+        indexDesc_.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        D3D11_SUBRESOURCE_DATA indexData_{};
+        indexData_.pSysMem = mesh_.indices.data();
+        if (FAILED(device_->CreateBuffer(&indexDesc_, &indexData_, mesh_.indexBuffer.GetAddressOf())))
+        {
+            return nullptr;
+        }
+
+        return resource_;
+    }
+
     bool HasExtension(const std::filesystem::path& path_, const std::vector<std::string>& extensions_)
     {
         std::string extension_ = path_.extension().string();
@@ -155,6 +246,14 @@ void MeshVFXComponent::Gui()
                     ? 0
                     : -1;
             }
+            if (ImGui::Button("Use Shape Cylinder"))
+            {
+                part_.modelPath = SHAPE_CYLINDER_MODEL_PATH;
+                part_.meshIndex = 0;
+                part_.shapeCylinderRadius = (std::max)(part_.shapeCylinderRadius, 0.0001f);
+                LoadPartResource(static_cast<size_t>(partIndex_));
+            }
+
 
             const MeshVFXRuntimePart* runtimePart_ =
                 partIndex_ < static_cast<int>(runtimeParts.size()) ? &runtimeParts[partIndex_] : nullptr;
@@ -326,6 +425,28 @@ void MeshVFXComponent::Gui()
                 ImGui::TreePop();
             }
 
+            if (ImGui::TreeNode("Edge Pattern Texture"))
+            {
+                layeredTextureChanged_ |= AssetSlotGui::Draw(
+                    "Edge Pattern Texture Asset",
+                    AssetSlotType::TEXTURE,
+                    part_.edgePatternTexturePath,
+                    runtimePart_ ? runtimePart_->edgePatternTexture.Get() : nullptr,
+                    "Data/Texture");
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode("Emissive Texture"))
+            {
+                layeredTextureChanged_ |= AssetSlotGui::Draw(
+                    "Emissive Texture Asset",
+                    AssetSlotType::TEXTURE,
+                    part_.emissiveTexturePath,
+                    runtimePart_ ? runtimePart_->emissiveTexture.Get() : nullptr,
+                    "Data/Texture");
+                ImGui::TreePop();
+            }
+
             if (baseTextureChanged_ || normalTextureChanged_ || layeredTextureChanged_)
             {
                 LoadPartResource(static_cast<size_t>(partIndex_));
@@ -334,6 +455,13 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat3("Position", &part_.position.x, 0.01f);
             ImGui::DragFloat3("Rotation", &part_.rotation.x, 0.5f);
             ImGui::DragFloat3("Scale", &part_.scale.x, 0.01f);
+            if (part_.modelPath == SHAPE_CYLINDER_MODEL_PATH)
+            {
+                if (ImGui::DragFloat("Shape Cylinder Radius", &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
+                {
+                    LoadPartResource(static_cast<size_t>(partIndex_));
+                }
+            }
 
             if (ImGui::TreeNode("Animation"))
             {
@@ -378,6 +506,13 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat2("Base UV Speed", &part_.baseUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Mask UV Speed", &part_.maskUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Noise UV Speed", &part_.noiseUVSpeed.x, 0.01f);
+            ImGui::DragFloat2("Base UV Scale", &part_.baseUVScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::DragFloat2("Mask UV Scale", &part_.maskUVScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::DragFloat2("Noise UV Scale", &part_.noiseUVScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::DragFloat2("Normal UV Scale", &part_.normalUVScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::DragFloat2("Distortion Noise UV Scale", &part_.distortionNoiseUVScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::DragFloat2("Edge Pattern UV Scale", &part_.edgePatternUVScale.x, 0.01f, 0.001f, 100.0f);
+            ImGui::DragFloat2("Emissive UV Scale", &part_.emissiveUVScale.x, 0.01f, 0.001f, 100.0f);
             ImGui::DragFloat("Alpha", &part_.alpha, 0.01f, 0.0f, 1.0f);
             ImGui::DragFloat("Normal Strength", &part_.normalStrength, 0.01f, 0.0f, 10.0f);
             ImGui::DragFloat("Noise Strength", &part_.noiseStrength, 0.001f, 0.0f, 1.0f);
@@ -561,6 +696,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["Position"] = { part_.position.x, part_.position.y, part_.position.z };
         partJson_["Rotation"] = { part_.rotation.x, part_.rotation.y, part_.rotation.z };
         partJson_["Scale"] = { part_.scale.x, part_.scale.y, part_.scale.z };
+        partJson_["ShapeCylinderRadius"] = part_.shapeCylinderRadius;
         partJson_["MeshRotationSpeed"] =
         {
             part_.meshRotationSpeed.x,
@@ -581,6 +717,8 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["NoiseTexturePath"] = part_.noiseTexturePath;
         partJson_["DistortionNoiseTexturePath"] = part_.distortionNoiseTexturePath;
         partJson_["VertexNoiseTexturePath"] = part_.vertexNoiseTexturePath;
+        partJson_["EdgePatternTexturePath"] = part_.edgePatternTexturePath;
+        partJson_["EmissiveTexturePath"] = part_.emissiveTexturePath;
         partJson_["MaskLayers"] = nlohmann::json::array();
         for (const MeshVFXMaskLayer& layer_ : part_.maskLayers)
         {
@@ -596,6 +734,13 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["BaseUVSpeed"] = { part_.baseUVSpeed.x, part_.baseUVSpeed.y };
         partJson_["MaskUVSpeed"] = { part_.maskUVSpeed.x, part_.maskUVSpeed.y };
         partJson_["NoiseUVSpeed"] = { part_.noiseUVSpeed.x, part_.noiseUVSpeed.y };
+        partJson_["BaseUVScale"] = { part_.baseUVScale.x, part_.baseUVScale.y };
+        partJson_["MaskUVScale"] = { part_.maskUVScale.x, part_.maskUVScale.y };
+        partJson_["NoiseUVScale"] = { part_.noiseUVScale.x, part_.noiseUVScale.y };
+        partJson_["NormalUVScale"] = { part_.normalUVScale.x, part_.normalUVScale.y };
+        partJson_["DistortionNoiseUVScale"] = { part_.distortionNoiseUVScale.x, part_.distortionNoiseUVScale.y };
+        partJson_["EdgePatternUVScale"] = { part_.edgePatternUVScale.x, part_.edgePatternUVScale.y };
+        partJson_["EmissiveUVScale"] = { part_.emissiveUVScale.x, part_.emissiveUVScale.y };
         partJson_["UVRotationCenter"] = { part_.uvRotationCenter.x, part_.uvRotationCenter.y };
         partJson_["BaseUVRotation"] = part_.baseUVRotation;
         partJson_["MaskUVRotation"] = part_.maskUVRotation;
@@ -671,6 +816,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         ReadFloatArray(partJson_, "Position", part_.position, 3);
         ReadFloatArray(partJson_, "Rotation", part_.rotation, 3);
         ReadFloatArray(partJson_, "Scale", part_.scale, 3);
+        part_.shapeCylinderRadius = (std::max)(partJson_.value("ShapeCylinderRadius", 1.0f), 0.0001f);
         ReadFloatArray(partJson_, "MeshRotationSpeed", part_.meshRotationSpeed, 3);
         part_.duration = (std::max)(partJson_.value("Duration", 0.0f), 0.0f);
         part_.loop = partJson_.value("Loop", true);
@@ -686,6 +832,8 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.noiseTexturePath = partJson_.value("NoiseTexturePath", "");
         part_.distortionNoiseTexturePath = partJson_.value("DistortionNoiseTexturePath", "");
         part_.vertexNoiseTexturePath = partJson_.value("VertexNoiseTexturePath", "");
+        part_.edgePatternTexturePath = partJson_.value("EdgePatternTexturePath", "");
+        part_.emissiveTexturePath = partJson_.value("EmissiveTexturePath", "");
         if (partJson_.contains("MaskLayers") && partJson_["MaskLayers"].is_array())
         {
             for (const auto& layerJson_ : partJson_["MaskLayers"])
@@ -717,6 +865,13 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         ReadFloatArray(partJson_, "BaseUVSpeed", part_.baseUVSpeed, 2);
         ReadFloatArray(partJson_, "MaskUVSpeed", part_.maskUVSpeed, 2);
         ReadFloatArray(partJson_, "NoiseUVSpeed", part_.noiseUVSpeed, 2);
+        ReadFloatArray(partJson_, "BaseUVScale", part_.baseUVScale, 2);
+        ReadFloatArray(partJson_, "MaskUVScale", part_.maskUVScale, 2);
+        ReadFloatArray(partJson_, "NoiseUVScale", part_.noiseUVScale, 2);
+        ReadFloatArray(partJson_, "NormalUVScale", part_.normalUVScale, 2);
+        ReadFloatArray(partJson_, "DistortionNoiseUVScale", part_.distortionNoiseUVScale, 2);
+        ReadFloatArray(partJson_, "EdgePatternUVScale", part_.edgePatternUVScale, 2);
+        ReadFloatArray(partJson_, "EmissiveUVScale", part_.emissiveUVScale, 2);
         ReadFloatArray(partJson_, "UVRotationCenter", part_.uvRotationCenter, 2);
         part_.baseUVRotation = partJson_.value("BaseUVRotation", 0.0f);
         part_.maskUVRotation = partJson_.value("MaskUVRotation", 0.0f);
@@ -922,7 +1077,11 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     MeshVFXPart& part_ = asset.parts[partIndex_];
     MeshVFXRuntimePart& runtimePart_ = runtimeParts[partIndex_];
     runtimePart_.modelResource.reset();
-    if (!part_.modelPath.empty())
+    if (part_.modelPath == SHAPE_CYLINDER_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateShapeCylinderModelResource(device_, part_.shapeCylinderRadius);
+    }
+    else if (!part_.modelPath.empty())
     {
         runtimePart_.modelResource = ModelResourceManager::Instance().GetOrCreateResource(device_, part_.modelPath);
     }
@@ -972,6 +1131,24 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
             part_.vertexNoiseTexturePath,
             0xFF808080,
             runtimePart_.vertexNoiseTexture);
+    }
+    runtimePart_.edgePatternTexture.Reset();
+    if (!part_.edgePatternTexturePath.empty())
+    {
+        LoadTexture(
+            device_,
+            part_.edgePatternTexturePath,
+            0xFFFFFFFF,
+            runtimePart_.edgePatternTexture);
+    }
+    runtimePart_.emissiveTexture.Reset();
+    if (!part_.emissiveTexturePath.empty())
+    {
+        LoadTexture(
+            device_,
+            part_.emissiveTexturePath,
+            0xFFFFFFFF,
+            runtimePart_.emissiveTexture);
     }
 }
 

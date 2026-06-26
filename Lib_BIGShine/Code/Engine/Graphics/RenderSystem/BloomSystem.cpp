@@ -165,43 +165,53 @@ const CbColorFilter& colorFilterParams) // ˆø”–¼‚ðC³
 
     float clearCol[4] = { 0, 0, 0, 1 };
     ID3D11ShaderResourceView* nullSRVs[2] = { nullptr, nullptr };
+    const bool bloomEnabled_ = params.enabled && params.intensity > 0.0001f && params.blurPasses > 0;
+    Parameters safeParams_ = params;
+    if (!bloomEnabled_)
+    {
+        safeParams_.intensity = 0.0f;
+        safeParams_.blurPasses = 0;
+    }
 
     auto SetVP = [&](float w, float h) {
         D3D11_VIEWPORT vp = { 0.0f, 0.0f, w, h, 0.0f, 1.0f };
         dc->RSSetViewports(1, &vp);
         };
 
-    // --- 1. Bright Pass (sceneSRV -> brightTarget) ---
-    dc->ClearRenderTargetView(brightTarget.rtv.Get(), clearCol);
-    SetVP(brightTarget.width, brightTarget.height);
-    dc->OMSetRenderTargets(1, brightTarget.rtv.GetAddressOf(), nullptr);
-
-    UpdateConstantBuffer(dc, params, 0, brightTarget.width, brightTarget.height);
-
-    dc->PSSetShader(brightPS.Get(), nullptr, 0);
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-    dc->PSSetShaderResources(0, 1, &sceneSRV);
-    DrawFullScreenQuad(dc);
-    dc->PSSetShaderResources(0, 1, nullSRVs);
-
-    // --- 2. Kawase Blur Pass ---
     ID3D11ShaderResourceView* currentSRV = brightTarget.srv.Get();
-    for (int i = 0; i < params.blurPasses; ++i) {
-        int destIdx = i % 2;
-        float targetW = blurTargets[destIdx].width;
-        float targetH = blurTargets[destIdx].height;
+    if (bloomEnabled_)
+    {
+        // --- 1. Bright Pass (sceneSRV -> brightTarget) ---
+        dc->ClearRenderTargetView(brightTarget.rtv.Get(), clearCol);
+        SetVP(brightTarget.width, brightTarget.height);
+        dc->OMSetRenderTargets(1, brightTarget.rtv.GetAddressOf(), nullptr);
 
-        SetVP(targetW, targetH);
-        dc->OMSetRenderTargets(1, blurTargets[destIdx].rtv.GetAddressOf(), nullptr);
+        UpdateConstantBuffer(dc, safeParams_, 0, brightTarget.width, brightTarget.height);
 
-        UpdateConstantBuffer(dc, params, (float)i, targetW, targetH);
+        dc->PSSetShader(brightPS.Get(), nullptr, 0);
         dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-        dc->PSSetShader(kawasePS.Get(), nullptr, 0);
-        dc->PSSetShaderResources(0, 1, &currentSRV);
+        dc->PSSetShaderResources(0, 1, &sceneSRV);
         DrawFullScreenQuad(dc);
-
         dc->PSSetShaderResources(0, 1, nullSRVs);
-        currentSRV = blurTargets[destIdx].srv.Get();
+
+        // --- 2. Kawase Blur Pass ---
+        for (int i = 0; i < safeParams_.blurPasses; ++i) {
+            int destIdx = i % 2;
+            float targetW = blurTargets[destIdx].width;
+            float targetH = blurTargets[destIdx].height;
+
+            SetVP(targetW, targetH);
+            dc->OMSetRenderTargets(1, blurTargets[destIdx].rtv.GetAddressOf(), nullptr);
+
+            UpdateConstantBuffer(dc, safeParams_, (float)i, targetW, targetH);
+            dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+            dc->PSSetShader(kawasePS.Get(), nullptr, 0);
+            dc->PSSetShaderResources(0, 1, &currentSRV);
+            DrawFullScreenQuad(dc);
+
+            dc->PSSetShaderResources(0, 1, nullSRVs);
+            currentSRV = blurTargets[destIdx].srv.Get();
+        }
     }
 
     // --- 3. Composite & Color Filter (sceneSRV + Bloom -> finalRTV) ---
@@ -223,6 +233,7 @@ const CbColorFilter& colorFilterParams) // ˆø”–¼‚ðC³
     dc->PSSetShader(compositePS.Get(), nullptr, 0);
 
     // b0: BloomParams, b1: ColorFilterParams
+    UpdateConstantBuffer(dc, safeParams_, 0.0f, ScreenSize.x, ScreenSize.y);
     ID3D11Buffer* cbs[] = { constantBuffer.Get(), filterBuffer.Get() };
     dc->PSSetConstantBuffers(0, 2, cbs);
 

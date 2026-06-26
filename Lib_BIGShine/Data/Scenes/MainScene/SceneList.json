@@ -2,6 +2,7 @@
     "GraphicsSettings": {
         "Bloom": {
             "blurPasses": 5,
+            "enabled": true,
             "exposure": 1.0,
             "intensity": 0.46000000834465027,
             "kawaseScale": 3.0,
@@ -51,14 +52,14 @@
         "ToonPBR": {
             "shadeFeathers": [
                 0.0010000000474974513,
+                0.03500000014901161,
                 0.0010000000474974513,
-                1.0,
                 0.0010000000474974513
             ],
             "shadeSteps": [
-                0.0010000000474974513,
-                0.3050000071525574,
-                0.550000011920929,
+                0.3720000088214874,
+                0.8349999785423279,
+                0.847000002861023,
                 1.0
             ]
         }
@@ -79,7 +80,8 @@
         "RockWall_06",
         "RockWall_07",
         "Wall",
-        "TestTarget"
+        "TestTarget",
+        "GameObject"
     ],
     "SceneName": "MainScene"
 }

@@ -27,6 +27,7 @@ public:
     bool UsesOwnerModel() const override { return true; }
     bool UsesModelPoses() const override { return true; }
     bool HasModelPoses() const override { return !snapshots.empty(); }
+    size_t GetMaxRenderParts() const override;
     bool GetModelPoseViews(std::vector<MeshVFXModelPoseView>& poses_) const override;
 
     void StartEmission();
@@ -51,6 +52,8 @@ private:
     float startAlpha = 0.8f;
     float spawnTimer = 0.0f;
     int maxSnapshots = 8;
+    int maxRenderSnapshots = 4;
+    int maxRenderParts = 1;
     int burstCount = 3;
     int pendingBurstCount = 0;
     bool includeChildren = true;

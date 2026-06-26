@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Shaders">
@@ -415,6 +415,9 @@
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp">
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
@@ -617,6 +620,18 @@
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\XeGtaoSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.cpp">
@@ -903,6 +918,9 @@
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h">
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
@@ -1185,6 +1203,18 @@
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\RadialBlurSystem.h">
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\XeGtaoSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\ShapeRenderer.h">
       <Filter>Code\Engine\Graphics\RenderSystem\Shape</Filter>
     </ClInclude>
@@ -1400,6 +1430,12 @@
     <FxCompile Include="Shader\RadialBlur_PS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\XeGTAO_Post_CS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\XeGTAO_CompositePS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
     <FxCompile Include="Shader\OutlineVS.hlsl">
       <Filter>Shaders\OutLine</Filter>
     </FxCompile>
@@ -1418,7 +1454,19 @@
     <FxCompile Include="Shader\MeshVFXVS.hlsl">
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\MotionBlurPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostDistortionPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\VignettePS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
     <FxCompile Include="Shader\MeshVFXPS.hlsl">
+      <Filter>Shaders\VFX</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MeshVFXDistortionPS.hlsl">
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MeshVFXTextureMixPS.hlsl">

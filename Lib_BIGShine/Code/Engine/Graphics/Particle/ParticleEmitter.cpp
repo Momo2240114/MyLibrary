@@ -228,7 +228,18 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
     context->CSSetShader(updateShader.Get(), nullptr, 0);
     context->DispatchIndirect(indirectDataBuffer.Get(), UpdateDispatchIndirectOffset);
 
-    RunBitonicSort(context);
+    if (depthSortEnabled)
+    {
+        if ((depthSortFrame % depthSortInterval) == 0)
+        {
+            RunBitonicSort(context);
+        }
+        ++depthSortFrame;
+    }
+    else
+    {
+        depthSortFrame = 0;
+    }
 
     context->CSSetShader(endFrameShader.Get(), nullptr, 0);
     context->Dispatch(1, 1, 1);

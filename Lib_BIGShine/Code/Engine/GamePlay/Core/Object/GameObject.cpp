@@ -4,6 +4,7 @@
 
 #include "ImGuizmo.h"
 
+#include "Engine/Debug/TracyProfiler.h"
 
 void GameObject::SetManager(GameObjectManager* manager_)
 {
@@ -174,47 +175,92 @@ void GameObject::SetParent(std::shared_ptr<GameObject> parentGO)
 
 void GameObject::Update(float et)
 {
-    // 1. まず「物理以外」のコンポーネントを更新（PlayerInput, FollowCamera など）
-    // ここで移動の意思（Offset）が決まる
-    for (auto& comp : components)
+    BS_PROFILE_SCOPE("GameObject::Update");
+
     {
-        if (!comp->IsEnabled()) continue;
-        if (comp->GetName() != "PhysicsCollisionComponent" &&
-            comp->GetName() != "CharacterMovementComponent")
-            comp->Update(et);
+        BS_PROFILE_SCOPE("GameObject::UpdateComponents");
+
+        for (auto& comp_ : components)
+        {
+            if (!comp_ || !comp_->IsEnabled()) continue;
+
+            const std::string& name_ = comp_->GetName();
+
+            if (name_ != "PhysicsCollisionComponent" &&
+                name_ != "CharacterMovementComponent")
+            {
+                BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
+                comp_->Update(et);
+            }
+        }
     }
 
-
-    for (auto& comp : components)
     {
-        if (!comp->IsEnabled()) continue;
-        if (comp->GetName() == "CharacterMovementComponent")
-            comp->Update(et);
+        BS_PROFILE_SCOPE("GameObject::CharacterMovementUpdate");
+
+        for (auto& comp_ : components)
+        {
+            if (!comp_ || !comp_->IsEnabled()) continue;
+
+            const std::string& name_ = comp_->GetName();
+
+            if (name_ == "CharacterMovementComponent")
+            {
+                BS_PROFILE_SCOPE("CharacterMovementComponent::Update");
+                comp_->Update(et);
+            }
+        }
     }
 
-
-    for (auto& collider_ : colliderComponents)
     {
-        if (collider_->IsEnabled()) collider_->Update(et);
+        BS_PROFILE_SCOPE("GameObject::ColliderUpdate");
+
+        for (auto& collider_ : colliderComponents)
+        {
+            if (!collider_ || !collider_->IsEnabled()) continue;
+
+            BS_PROFILE_SCOPE("ColliderComponent::Update");
+            collider_->Update(et);
+        }
     }
 }
 
 void GameObject::LateUpdate(float et)
 {
-    for (auto& comp : components)
+    BS_PROFILE_SCOPE("GameObject::LateUpdate");
+
     {
-        if (!comp->IsEnabled()) continue;
-        if (comp->GetName() != "PhysicsCollisionComponent")
-            comp->LateUpdate(et);
+        BS_PROFILE_SCOPE("GameObject::LateUpdateComponents");
+
+        for (auto& comp_ : components)
+        {
+            if (!comp_ || !comp_->IsEnabled()) continue;
+
+            const std::string& name_ = comp_->GetName();
+
+            if (name_ != "PhysicsCollisionComponent")
+            {
+                BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
+                comp_->LateUpdate(et);
+            }
+        }
     }
 
-    // 2. 次に「物理」コンポーネントを更新
-    // 溜まった Offset を PhysX に伝え、シミュレーション結果を Transform に書き戻す
-    for (auto& comp : components)
     {
-        if (!comp->IsEnabled()) continue;
-        if (comp->GetName() == "PhysicsCollisionComponent")
-            comp->LateUpdate(et);
+        BS_PROFILE_SCOPE("GameObject::PhysicsLateUpdate");
+
+        for (auto& comp_ : components)
+        {
+            if (!comp_ || !comp_->IsEnabled()) continue;
+
+            const std::string& name_ = comp_->GetName();
+
+            if (name_ == "PhysicsCollisionComponent")
+            {
+                BS_PROFILE_SCOPE("PhysicsCollisionComponent::LateUpdate");
+                comp_->LateUpdate(et);
+            }
+        }
     }
 }
 

@@ -22,6 +22,8 @@
 #include "Engine/GamePlay/Scene/SceneManager.h"
 #include "Engine/Audio/AudioManager.h"
 
+#include "Engine/Debug/TracyProfiler.h"
+
 #include <imnodes.h>
 #include <imnodes_internal.h>
 
@@ -83,31 +85,88 @@ bool framework::initialize()
 
 void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 {
-	ImGuiRenderer::NewFrame();
+	BS_PROFILE_SCOPE("framework::update");
 
-	MouseInput::Instance().Update(hwnd);
-	ControllerInput::Instance().Update();
+	{
+		BS_PROFILE_SCOPE("ImGuiRenderer::NewFrame");
+		ImGuiRenderer::NewFrame();
+	}
 
-	//シーン更新
-	//m_pSceneGame->Update(elapsedTime_);
-	SceneManager::Update(elapsedTime_);
-	AudioManager::Instance().Update();
+	{
+		BS_PROFILE_SCOPE("Input");
+		MouseInput::Instance().Update(hwnd);
+		ControllerInput::Instance().Update();
+	}
 
-	PhysXSystem::Step(elapsedTime_);
+	{
+		BS_PROFILE_SCOPE("SceneManager::Update");
+		SceneManager::Update(elapsedTime_);
+	}
+
+	{
+		BS_PROFILE_SCOPE("AudioManager::Update");
+		AudioManager::Instance().Update();
+	}
+
+	{
+		BS_PROFILE_SCOPE("PhysXSystem::Step");
+		PhysXSystem::Step(elapsedTime_);
+	}
 }
+
+//void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
+//{
+//	ImGuiRenderer::NewFrame();
+//
+//	MouseInput::Instance().Update(hwnd);
+//	ControllerInput::Instance().Update();
+//
+//	//シーン更新
+//	//m_pSceneGame->Update(elapsedTime_);
+//	SceneManager::Update(elapsedTime_);
+//	AudioManager::Instance().Update();
+//
+//	PhysXSystem::Step(elapsedTime_);
+//}
+
+//void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
+//{
+//	float color[4] = { 0.5f,0.5f, 0.5f, 1.0f };
+//	GraphicsDeviceManager::Instance().BeginFrame(color);
+//
+//	SceneManager::Render(elapsedTime_);
+//	// IMGUI描画
+//	ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
+//
+//	GraphicsDeviceManager::Instance().EndFrame();
+//}
 
 void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
 {
+	BS_PROFILE_SCOPE("framework::render");
+
 	float color[4] = { 0.5f,0.5f, 0.5f, 1.0f };
-	GraphicsDeviceManager::Instance().BeginFrame(color);
 
-	SceneManager::Render(elapsedTime_);
-	// IMGUI描画
-	ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
+	{
+		BS_PROFILE_SCOPE("GraphicsDeviceManager::BeginFrame");
+		GraphicsDeviceManager::Instance().BeginFrame(color);
+	}
 
-	GraphicsDeviceManager::Instance().EndFrame();
+	{
+		BS_PROFILE_SCOPE("SceneManager::Render");
+		SceneManager::Render(elapsedTime_);
+	}
+
+	{
+		BS_PROFILE_SCOPE("ImGuiRenderer::RenderAll");
+		ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
+	}
+
+	{
+		BS_PROFILE_SCOPE("GraphicsDeviceManager::EndFrame");
+		GraphicsDeviceManager::Instance().EndFrame();
+	}
 }
-
 
 int framework::run()
 {
@@ -122,25 +181,49 @@ int framework::run()
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
+			BS_PROFILE_SCOPE("Win32 Message");
+
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 		else
 		{
-			tictoc.tick();
-			calculate_frame_stats();
+			BS_PROFILE_SCOPE("Frame");
 
-			update(tictoc.time_interval());
-			GuiDraw();
-			render(tictoc.time_interval());
+			{
+				BS_PROFILE_SCOPE("tictoc.tick");
+				tictoc.tick();
+			}
+
+			{
+				BS_PROFILE_SCOPE("calculate_frame_stats");
+				calculate_frame_stats();
+			}
+
+			const float elapsedTime_ = tictoc.time_interval();
+
+			{
+				BS_PROFILE_SCOPE("framework::update");
+				update(elapsedTime_);
+			}
+
+			{
+				BS_PROFILE_SCOPE("framework::GuiDraw");
+				GuiDraw();
+			}
+
+			{
+				BS_PROFILE_SCOPE("framework::render");
+				render(elapsedTime_);
+			}
+
+			BS_PROFILE_FRAME_MARK();
 		}
 	}
 
-
-
-
 	return uninitialize() ? static_cast<int>(msg.wParam) : 0;
 }
+
 LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM lParam_)
 {
     if (ImGuiRenderer::HandleMessage(hWnd_, msg_, wParam_, lParam_))

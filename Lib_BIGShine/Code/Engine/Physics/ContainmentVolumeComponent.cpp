@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "PhysXSystem.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 
@@ -12,120 +13,119 @@ using namespace physx;
 
 namespace
 {
-constexpr PxU32 PHYSICAL_ROLE = 0;
-constexpr PxU32 PHYSICS_RESPONSE_BIT = 0x80000000u;
-constexpr float FLOAT_EPSILON = 0.0001f;
+    constexpr PxU32 PHYSICAL_ROLE = 0;
+    constexpr PxU32 PHYSICS_RESPONSE_BIT = 0x80000000u;
+    constexpr float FLOAT_EPSILON = 0.0001f;
 
-bool NearlyEqual(float a_, float b_)
-{
-    return std::abs(a_ - b_) <= FLOAT_EPSILON;
-}
-
-bool NearlyEqual(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
-{
-    return NearlyEqual(a_.x, b_.x)
-        && NearlyEqual(a_.y, b_.y)
-        && NearlyEqual(a_.z, b_.z);
-}
-
-bool BuildWorldPose(
-    const std::shared_ptr<GameObject>& owner_,
-    PxTransform& pose_,
-    DirectX::XMFLOAT3& scale_)
-{
-    if (!owner_ || !owner_->transform) return false;
-
-    const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
-    DirectX::XMVECTOR scaleVector_;
-    DirectX::XMVECTOR rotationVector_;
-    DirectX::XMVECTOR positionVector_;
-
-    if (!DirectX::XMMatrixDecompose(
-        &scaleVector_,
-        &rotationVector_,
-        &positionVector_,
-        world_))
+    bool NearlyEqual(float a_, float b_)
     {
-        return false;
+        return std::abs(a_ - b_) <= FLOAT_EPSILON;
     }
 
-    DirectX::XMFLOAT3 position_;
-    DirectX::XMFLOAT4 rotation_;
-    DirectX::XMStoreFloat3(&scale_, scaleVector_);
-    DirectX::XMStoreFloat3(&position_, positionVector_);
-    DirectX::XMStoreFloat4(&rotation_, rotationVector_);
-
-    PxQuat quat_(rotation_.x, rotation_.y, rotation_.z, rotation_.w);
-    if (!quat_.isSane())
+    bool NearlyEqual(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
     {
-        quat_ = PxQuat(PxIdentity);
+        return NearlyEqual(a_.x, b_.x)
+            && NearlyEqual(a_.y, b_.y)
+            && NearlyEqual(a_.z, b_.z);
     }
 
-    pose_ = PxTransform(PxVec3(position_.x, position_.y, position_.z), quat_.getNormalized());
-    return pose_.isSane();
+    bool BuildWorldPose(
+        const std::shared_ptr<GameObject>& owner_,
+        PxTransform& pose_,
+        DirectX::XMFLOAT3& scale_)
+    {
+        if (!owner_ || !owner_->transform) return false;
+
+        const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
+        DirectX::XMVECTOR scaleVector_;
+        DirectX::XMVECTOR rotationVector_;
+        DirectX::XMVECTOR positionVector_;
+
+        if (!DirectX::XMMatrixDecompose(
+            &scaleVector_,
+            &rotationVector_,
+            &positionVector_,
+            world_))
+        {
+            return false;
+        }
+
+        DirectX::XMFLOAT3 position_;
+        DirectX::XMFLOAT4 rotation_;
+        DirectX::XMStoreFloat3(&scale_, scaleVector_);
+        DirectX::XMStoreFloat3(&position_, positionVector_);
+        DirectX::XMStoreFloat4(&rotation_, rotationVector_);
+
+        PxQuat quat_(rotation_.x, rotation_.y, rotation_.z, rotation_.w);
+        if (!quat_.isSane())
+        {
+            quat_ = PxQuat(PxIdentity);
+        }
+
+        pose_ = PxTransform(PxVec3(position_.x, position_.y, position_.z), quat_.getNormalized());
+        return pose_.isSane();
+    }
+
+    void AddCylinderMesh(
+        std::vector<DirectX::XMFLOAT3>& vertices_,
+        std::vector<uint32_t>& indices_,
+        float radius_,
+        float halfHeight_,
+        int segments_,
+        bool addCaps_)
+    {
+        vertices_.reserve(static_cast<size_t>(segments_) * 2 + 2);
+        indices_.reserve(static_cast<size_t>(segments_) * (addCaps_ ? 12 : 6));
+
+        for (int index_ = 0; index_ < segments_; ++index_)
+        {
+            const float angle_ = DirectX::XM_2PI * static_cast<float>(index_) / static_cast<float>(segments_);
+            const float x_ = std::cos(angle_) * radius_;
+            const float z_ = std::sin(angle_) * radius_;
+            vertices_.push_back({ x_, -halfHeight_, z_ });
+            vertices_.push_back({ x_, halfHeight_, z_ });
+        }
+
+        for (int index_ = 0; index_ < segments_; ++index_)
+        {
+            const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
+            const uint32_t topCurrent_ = bottomCurrent_ + 1;
+            const uint32_t bottomNext_ = static_cast<uint32_t>(((index_ + 1) % segments_) * 2);
+            const uint32_t topNext_ = bottomNext_ + 1;
+
+            indices_.push_back(bottomCurrent_);
+            indices_.push_back(bottomNext_);
+            indices_.push_back(topCurrent_);
+
+            indices_.push_back(bottomNext_);
+            indices_.push_back(topNext_);
+            indices_.push_back(topCurrent_);
+        }
+
+        if (!addCaps_) return;
+
+        const uint32_t bottomCenter_ = static_cast<uint32_t>(vertices_.size());
+        vertices_.push_back({ 0.0f, -halfHeight_, 0.0f });
+        const uint32_t topCenter_ = static_cast<uint32_t>(vertices_.size());
+        vertices_.push_back({ 0.0f, halfHeight_, 0.0f });
+
+        for (int index_ = 0; index_ < segments_; ++index_)
+        {
+            const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
+            const uint32_t bottomNext_ = static_cast<uint32_t>(((index_ + 1) % segments_) * 2);
+            const uint32_t topCurrent_ = bottomCurrent_ + 1;
+            const uint32_t topNext_ = bottomNext_ + 1;
+
+            indices_.push_back(bottomCenter_);
+            indices_.push_back(bottomNext_);
+            indices_.push_back(bottomCurrent_);
+
+            indices_.push_back(topCenter_);
+            indices_.push_back(topCurrent_);
+            indices_.push_back(topNext_);
+        }
+    }
 }
-
-void AddCylinderMesh(
-    std::vector<DirectX::XMFLOAT3>& vertices_,
-    std::vector<uint32_t>& indices_,
-    float radius_,
-    float halfHeight_,
-    int segments_,
-    bool addCaps_)
-{
-    vertices_.reserve(static_cast<size_t>(segments_) * 2 + 2);
-    indices_.reserve(static_cast<size_t>(segments_) * (addCaps_ ? 12 : 6));
-
-    for (int index_ = 0; index_ < segments_; ++index_)
-    {
-        const float angle_ = DirectX::XM_2PI * static_cast<float>(index_) / static_cast<float>(segments_);
-        const float x_ = std::cos(angle_) * radius_;
-        const float z_ = std::sin(angle_) * radius_;
-        vertices_.push_back({ x_, -halfHeight_, z_ });
-        vertices_.push_back({ x_, halfHeight_, z_ });
-    }
-
-    for (int index_ = 0; index_ < segments_; ++index_)
-    {
-        const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
-        const uint32_t topCurrent_ = bottomCurrent_ + 1;
-        const uint32_t bottomNext_ = static_cast<uint32_t>(((index_ + 1) % segments_) * 2);
-        const uint32_t topNext_ = bottomNext_ + 1;
-
-        indices_.push_back(bottomCurrent_);
-        indices_.push_back(bottomNext_);
-        indices_.push_back(topCurrent_);
-
-        indices_.push_back(bottomNext_);
-        indices_.push_back(topNext_);
-        indices_.push_back(topCurrent_);
-    }
-
-    if (!addCaps_) return;
-
-    const uint32_t bottomCenter_ = static_cast<uint32_t>(vertices_.size());
-    vertices_.push_back({ 0.0f, -halfHeight_, 0.0f });
-    const uint32_t topCenter_ = static_cast<uint32_t>(vertices_.size());
-    vertices_.push_back({ 0.0f, halfHeight_, 0.0f });
-
-    for (int index_ = 0; index_ < segments_; ++index_)
-    {
-        const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
-        const uint32_t bottomNext_ = static_cast<uint32_t>(((index_ + 1) % segments_) * 2);
-        const uint32_t topCurrent_ = bottomCurrent_ + 1;
-        const uint32_t topNext_ = bottomNext_ + 1;
-
-        indices_.push_back(bottomCenter_);
-        indices_.push_back(bottomNext_);
-        indices_.push_back(bottomCurrent_);
-
-        indices_.push_back(topCenter_);
-        indices_.push_back(topCurrent_);
-        indices_.push_back(topNext_);
-    }
-}
-}
-
 ContainmentVolumeComponent::~ContainmentVolumeComponent()
 {
     ReleasePhysicsVolume();
@@ -134,6 +134,29 @@ ContainmentVolumeComponent::~ContainmentVolumeComponent()
 void ContainmentVolumeComponent::Start()
 {
     RebuildPhysicsVolume();
+}
+
+void ContainmentVolumeComponent::Update(float deltaTime_)
+{
+    (void)deltaTime_;
+    if (!showDebugShape) return;
+
+    auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const DirectX::XMFLOAT3 scale_ = owner_->transform->GetWorldScale();
+    const float worldRadius_ = radius * (std::max)(std::abs(scale_.x), std::abs(scale_.z));
+    const float worldHeight_ = halfHeight * 2.0f * std::abs(scale_.y);
+
+    auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
+    const DirectX::XMFLOAT4X4 world_ = owner_->transform->GetWorld();
+    if (shape == CONTAINMENT_SHAPE::CAPSULE)
+    {
+        renderer_.DrawCapsule(world_, worldRadius_, worldHeight_, debugShapeColor);
+        return;
+    }
+
+    renderer_.DrawCylinder(world_, worldRadius_, worldHeight_, debugShapeColor);
 }
 
 void ContainmentVolumeComponent::ApplyContainment()
@@ -282,6 +305,7 @@ void ContainmentVolumeComponent::Gui()
     {
         MarkPhysicsDirty();
     }
+
     if (ImGui::Checkbox("Constrain Height", &constrainHeight))
     {
         MarkPhysicsDirty();
@@ -290,6 +314,13 @@ void ContainmentVolumeComponent::Gui()
     {
         segments = std::clamp(segments, 8, 128);
         MarkPhysicsDirty();
+    }
+
+    ImGui::Separator();
+    ImGui::Checkbox("Debug Shape", &showDebugShape);
+    if (showDebugShape)
+    {
+        ImGui::ColorEdit4("Debug Shape Color", &debugShapeColor.x);
     }
 
     ImGui::Separator();
@@ -307,6 +338,13 @@ void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
     json_["TargetRadius"] = targetRadius;
     json_["ConstrainHeight"] = constrainHeight;
     json_["Segments"] = segments;
+    json_["ShowDebugShape"] = showDebugShape;
+    json_["DebugShapeColor"] = {
+        debugShapeColor.x,
+        debugShapeColor.y,
+        debugShapeColor.z,
+        debugShapeColor.w
+    };
 }
 
 void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
@@ -318,6 +356,16 @@ void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
     targetRadius = json_.value("TargetRadius", targetRadius);
     constrainHeight = json_.value("ConstrainHeight", constrainHeight);
     segments = std::clamp(json_.value("Segments", segments), 8, 128);
+    showDebugShape = json_.value("ShowDebugShape", showDebugShape);
+    if (json_.contains("DebugShapeColor"))
+    {
+        debugShapeColor = {
+            json_["DebugShapeColor"][0],
+            json_["DebugShapeColor"][1],
+            json_["DebugShapeColor"][2],
+            json_["DebugShapeColor"][3]
+        };
+    }
     MarkPhysicsDirty();
 }
 

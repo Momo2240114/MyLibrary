@@ -25,6 +25,8 @@
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 
+#include "Engine/Debug/TracyProfiler.h"
+
 void GameObjectManager::Initialize()
 {
     collisionStepSystem->SetAttackSystem(attackSystem.get());
@@ -46,96 +48,199 @@ void GameObjectManager::Initialize()
 
 void GameObjectManager::Update(float elapsedTime_)
 {
-    attackSystem->BeginFrame();
-    timeManager->Update(elapsedTime_);
+    BS_PROFILE_SCOPE("GameObjectManager::Update");
 
-    if (!pendingStarts.empty()) {
+    {
+        BS_PROFILE_SCOPE("AttackSystem::BeginFrame");
+        attackSystem->BeginFrame();
+    }
+
+    {
+        BS_PROFILE_SCOPE("TimeManager::Update");
+        timeManager->Update(elapsedTime_);
+    }
+
+    if (!pendingStarts.empty())
+    {
+        BS_PROFILE_SCOPE("GameObjectManager::PendingStarts");
+
         std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
         pendingStarts.clear();
 
-        for (auto& object_ : startList_) {
+        {
+            BS_PROFILE_SCOPE("PendingStarts::StartComponents");
+
+            for (auto& object_ : startList_)
+            {
+                if (!object_) continue;
+
+                if (auto particleComponent_ = object_->GetComponent<ParticleComponent>())
+                {
+                    particleComponents.push_back(particleComponent_);
+                }
+
+                {
+                    BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
+                    object_->CallAllComponentStart();
+                }
+
+                {
+                    BS_PROFILE_SCOPE("Director::RegisterActions");
+
+                    if (auto director_ = object_->GetComponent<TransformDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+
+                    if (auto director_ = object_->GetComponent<ColorFilterDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+
+                    if (auto director_ = object_->GetComponent<CameraDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+                }
+            }
+        }
+
+        {
+            BS_PROFILE_SCOPE("PendingStarts::RegisterSequence");
+
+            for (auto& object_ : startList_)
+            {
+                if (!object_) continue;
+
+                if (auto sequence_ = object_->GetComponent<ActionSequence>())
+                {
+                    sequence_->RegisterSequence("");
+                }
+            }
+        }
+    }
+
+    {
+        BS_PROFILE_SCOPE("TimeManager::PrepareCache");
+        timeManager->PrepareCache();
+    }
+
+    {
+        BS_PROFILE_SCOPE("CollisionStepSystem::SyncFromPhysics");
+        collisionStepSystem->SyncFromPhysics(elapsedTime_);
+    }
+
+    {
+        BS_PROFILE_SCOPE("GameObjectManager::ObjectsUpdate");
+
+        for (auto& object_ : objects)
+        {
             if (!object_) continue;
 
-            if (auto particleComponent_ = object_->GetComponent<ParticleComponent>()) {
-                particleComponents.push_back(particleComponent_);
+            const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
+
+            if (auto movement_ = object_->GetComponent<CharacterMovementComponent>())
+            {
+                movement_->SetUnscaledDeltaTime(elapsedTime_);
             }
 
-            object_->CallAllComponentStart();
-
-            if (auto director_ = object_->GetComponent<TransformDirector>()) director_->RegisterActions();
-            if (auto director_ = object_->GetComponent<ColorFilterDirector>()) director_->RegisterActions();
-            if (auto director_ = object_->GetComponent<CameraDirector>()) director_->RegisterActions();
+            object_->Update(elapsedTime_ * scale_);
         }
+    }
 
-        for (auto& object_ : startList_) {
+    {
+        BS_PROFILE_SCOPE("ModelAttachmentComponent::SyncAttachment");
+
+        for (auto& attachment_ : FindComponents<ModelAttachmentComponent>())
+        {
+            if (attachment_ && attachment_->IsEnabled())
+            {
+                attachment_->SyncAttachment();
+            }
+        }
+    }
+
+    {
+        BS_PROFILE_SCOPE("ContainmentVolumeComponent::ApplyContainment");
+
+        for (auto& containment_ : FindComponents<ContainmentVolumeComponent>())
+        {
+            if (containment_ && containment_->IsEnabled())
+            {
+                containment_->ApplyContainment();
+            }
+        }
+    }
+
+    {
+        BS_PROFILE_SCOPE("CollisionStepSystem::Step");
+        collisionStepSystem->Step(elapsedTime_);
+    }
+
+    {
+        BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
+
+        for (auto& object_ : objects)
+        {
             if (!object_) continue;
-            if (auto sequence_ = object_->GetComponent<ActionSequence>()) {
-                sequence_->RegisterSequence("");
-            }
+            object_->LateUpdate(elapsedTime_);
         }
     }
 
-    timeManager->PrepareCache();
-
-    collisionStepSystem->SyncFromPhysics(elapsedTime_);
-
-    for (auto& object_ : objects) {
-        float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
-        if (auto movement_ = object_->GetComponent<CharacterMovementComponent>()) {
-            movement_->SetUnscaledDeltaTime(elapsedTime_);
-        }
-        object_->Update(elapsedTime_ * scale_);
-    }
-
-    for (auto& attachment_ : FindComponents<ModelAttachmentComponent>())
     {
-        if (attachment_ && attachment_->IsEnabled())
+        BS_PROFILE_SCOPE("GameObjectManager::UpdateTransform");
+
+        for (auto& object_ : objects)
         {
-            attachment_->SyncAttachment();
+            if (!object_) continue;
+            object_->UpdateTransform();
         }
     }
 
-    for (auto& containment_ : FindComponents<ContainmentVolumeComponent>())
     {
-        if (containment_ && containment_->IsEnabled())
-        {
-            containment_->ApplyContainment();
-        }
+        BS_PROFILE_SCOPE("EffectManager::Update");
+        effectManager->Update(elapsedTime_);
     }
 
-    collisionStepSystem->Step(elapsedTime_);
+    if (!pendingDestroys.empty())
+    {
+        BS_PROFILE_SCOPE("GameObjectManager::PendingDestroys");
 
-    for (auto& object_ : objects) {
-        object_->LateUpdate(elapsedTime_);
-    }
-
-    for (auto& object_ : objects) {
-        object_->UpdateTransform();
-    }
-
-    effectManager->Update(elapsedTime_);
-
-    if (!pendingDestroys.empty()) {
         std::vector<std::shared_ptr<GameObject>> currentDestroys_ = std::move(pendingDestroys);
         pendingDestroys.clear();
 
-        for (auto& object_ : currentDestroys_) {
+        for (auto& object_ : currentDestroys_)
+        {
             ApplyDestroys(object_);
         }
     }
 
-    particleComponents.erase(
-        std::remove_if(particleComponents.begin(), particleComponents.end(),
-            [](const std::weak_ptr<ParticleComponent>& component_) {
-                return component_.expired();
-            }),
-        particleComponents.end()
-    );
+    {
+        BS_PROFILE_SCOPE("ParticleComponents::EraseExpired");
 
-    cameraManager->Update(elapsedTime_, objects);
-    AudioManager::Instance().UpdateListenerFromCamera(
-        cameraManager->GetActiveCamera().get(),
-        elapsedTime_);
+        particleComponents.erase(
+            std::remove_if(
+                particleComponents.begin(),
+                particleComponents.end(),
+                [](const std::weak_ptr<ParticleComponent>& component_)
+                {
+                    return component_.expired();
+                }),
+            particleComponents.end()
+        );
+    }
+
+    {
+        BS_PROFILE_SCOPE("CameraManager::Update");
+        cameraManager->Update(elapsedTime_, objects);
+    }
+
+    {
+        BS_PROFILE_SCOPE("AudioManager::UpdateListenerFromCamera");
+        AudioManager::Instance().UpdateListenerFromCamera(
+            cameraManager->GetActiveCamera().get(),
+            elapsedTime_);
+    }
 }
 
 void GameObjectManager::Clear()
@@ -622,6 +727,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
     // --- グラフィックス設定（そのまま） ---
     auto& params = GraphicsDeviceManager::Instance().GetBloomParams();
     listJson["GraphicsSettings"]["Bloom"] = {
+        {"enabled", params.enabled},
         {"threshold", params.threshold},
         {"intensity", params.intensity},
         {"kawaseScale", params.kawaseScale},
@@ -694,6 +800,7 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
             auto& bloomJson = graphicsJson["Bloom"];
             auto& params = GraphicsDeviceManager::Instance().GetBloomParams();
 
+            params.enabled = bloomJson.value("enabled", true);
             params.threshold = bloomJson.value("threshold", 1.0f);
             params.intensity = bloomJson.value("intensity", 1.0f);
             params.kawaseScale = bloomJson.value("kawaseScale", 1.0f);

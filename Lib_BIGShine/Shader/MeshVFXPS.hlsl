@@ -5,6 +5,8 @@ Texture2D MaskTexture : register(t1);
 Texture2D NoiseTexture : register(t2);
 Texture2D NormalTexture : register(t3);
 Texture2D DistortionNoiseTexture : register(t4);
+Texture2D EdgePatternTexture : register(t5);
+Texture2D EmissiveTexture : register(t6);
 Texture2D SceneColorTexture : register(t7);
 Texture2D<float> SceneDepthTexture : register(t8);
 
@@ -23,6 +25,11 @@ float2 RotateUV(float2 uv, float angle)
         centeredUV.x * sine + centeredUV.y * cosine) + uvRotationCenter;
 }
 
+float2 ApplyTextureScale(float2 uv, float2 scale)
+{
+    return uv * max(scale, float2(0.001f, 0.001f));
+}
+
 float2 ScaleUVFromCenter(float2 uv, float scale)
 {
     // UV中心から拡大縮小し、中心から広がる/縮むようなTexture演出を作る。
@@ -34,12 +41,15 @@ float4 main(VS_OUT input) : SV_TARGET
     // Component時間とAfterimageなどのインスタンス時間を足して、このPixelの演出時間を作る。
     float effectTime = time + input.instanceTime;
     float radialScale = max(uvRadialScale + uvRadialScaleSpeed * effectTime, 0.001f);
-    float2 baseUV = ScaleUVFromCenter(RotateUV(input.texcoord, baseUVRotation), radialScale) + baseUVSpeed * effectTime;
-    float2 maskUV = ScaleUVFromCenter(RotateUV(input.texcoord, maskUVRotation), radialScale) + maskUVSpeed * effectTime;
-    float2 noiseUV = RotateUV(input.texcoord, noiseUVRotation) + noiseUVSpeed * effectTime;
+    float2 baseUV = ScaleUVFromCenter(RotateUV(ApplyTextureScale(input.texcoord, baseUVScale), baseUVRotation), radialScale) + baseUVSpeed * effectTime;
+    float2 maskUV = ScaleUVFromCenter(RotateUV(ApplyTextureScale(input.texcoord, maskUVScale), maskUVRotation), radialScale) + maskUVSpeed * effectTime;
+    float2 noiseUV = RotateUV(ApplyTextureScale(input.texcoord, noiseUVScale), noiseUVRotation) + noiseUVSpeed * effectTime;
+    float2 normalUV = ScaleUVFromCenter(RotateUV(ApplyTextureScale(input.texcoord, normalUVScale), baseUVRotation), radialScale) + baseUVSpeed * effectTime;
+    float2 distortionUV = RotateUV(ApplyTextureScale(input.texcoord, distortionNoiseUVScale), noiseUVRotation) + noiseUVSpeed * effectTime;
+    float2 edgePatternUV = RotateUV(ApplyTextureScale(input.texcoord, edgePatternUVScale), baseUVRotation) + baseUVSpeed * effectTime;
+    float2 emissiveUV = RotateUV(ApplyTextureScale(input.texcoord, emissiveUVScale), baseUVRotation) + baseUVSpeed * effectTime;
     float2 sampledNoise = float2(0.0f, 0.0f);
     float2 distortionNoise = float2(0.0f, 0.0f);
-    bool distortionEnabled = useMaskDistortion != 0 && hasDistortionNoiseTexture != 0;
 
     if (useNoise != 0)
     {
@@ -53,13 +63,6 @@ float4 main(VS_OUT input) : SV_TARGET
             baseUV += sampledNoise * noiseStrength;
             maskUV += sampledNoise * noiseStrength;
         }
-    }
-    if (distortionEnabled)
-    {
-        // 背景歪み専用Noise。Maskの透明側でScene Colorをずらすために使う。
-        distortionNoise = (abs(noiseUVRotation) > 0.0001f
-            ? DistortionNoiseTexture.Sample(LinearBorderSampler, noiseUV)
-            : DistortionNoiseTexture.Sample(LinearWrapSampler, noiseUV)).rg * 2.0f - 1.0f;
     }
 
     // BaseTextureは色として使うだけでなく、Edge Patternの模様元にも使う。
@@ -78,9 +81,13 @@ float4 main(VS_OUT input) : SV_TARGET
             : MaskTexture.Sample(LinearWrapSampler, maskUV).r;
     }
 
-    if (!distortionEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
+    bool distortionEnabled = useMaskDistortion != 0 && hasDistortionNoiseTexture != 0;
+    bool edgeEnabled = useEdgeHighlight != 0;
+    float hiddenMask = saturate(max(
+        max(1.0f - mask, 1.0f - baseColor.a),
+        step(mask, dissolveThreshold)));
+    if (!distortionEnabled && !edgeEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
     {
-        // 歪み表現を使わない場合は、見えないPixelを早めに破棄して描画負荷と不要なAlphaを減らす。
         discard;
     }
 
@@ -97,8 +104,8 @@ float4 main(VS_OUT input) : SV_TARGET
             float3 bitangent_ = normalize(cross(normal, tangent_)) * input.tangent.w;
             float3x3 tangentBasis_ = float3x3(tangent_, bitangent_, normal);
             float3 sampledNormal_ = (abs(baseUVRotation) > 0.0001f
-                ? NormalTexture.Sample(LinearBorderSampler, baseUV)
-                : NormalTexture.Sample(LinearWrapSampler, baseUV)).xyz * 2.0f - 1.0f;
+                ? NormalTexture.Sample(LinearBorderSampler, normalUV)
+                : NormalTexture.Sample(LinearWrapSampler, normalUV)).xyz * 2.0f - 1.0f;
             sampledNormal_.xy *= normalStrength;
             normal = normalize(mul(sampledNormal_, tangentBasis_));
         }
@@ -109,33 +116,27 @@ float4 main(VS_OUT input) : SV_TARGET
     }
 
     float3 finalColor = baseColor.rgb + vfxColor.rgb * fresnelFactor;
-    float finalAlpha = baseColor.a * mask * alpha * input.instanceAlpha;
+    float finalAlpha = distortionEnabled
+        ? baseColor.a * mask * alpha * input.instanceAlpha * (1.0f - hiddenMask)
+        : baseColor.a * mask * alpha * input.instanceAlpha;
     if (useFresnel != 0)
     {
         finalAlpha = saturate(finalAlpha + fresnelFactor * mask * alpha * input.instanceAlpha);
     }
 
-    if (distortionEnabled)
+
+    if (emissiveStrength > 0.0f)
     {
-        // Maskで隠れる側だけScene ColorをNoise方向へずらし、熱気や空間の揺らぎを表現する。
-        uint sceneWidth;
-        uint sceneHeight;
-        SceneColorTexture.GetDimensions(sceneWidth, sceneHeight);
-        float2 screenSize = max(float2(sceneWidth, sceneHeight), float2(1.0f, 1.0f));
-        float2 screenUV = input.position.xy / screenSize;
-        float2 distortedUV = screenUV + distortionNoise * maskDistortionStrength / screenSize;
-        float3 distortedScene = SceneColorTexture.Sample(LinearBorderSampler, distortedUV).rgb;
-        float hiddenMask = saturate(max(
-            max(1.0f - mask, 1.0f - baseColor.a),
-            step(mask, dissolveThreshold)));
-        finalColor = lerp(finalColor, distortedScene, hiddenMask);
-        finalAlpha = lerp(
-            finalAlpha,
-            maskDistortionOpacity * input.instanceAlpha,
-            hiddenMask);
+        float4 emissiveSample = hasEmissiveTexture != 0
+            ? (abs(baseUVRotation) > 0.0001f
+                ? EmissiveTexture.Sample(LinearBorderSampler, emissiveUV)
+                : EmissiveTexture.Sample(LinearWrapSampler, emissiveUV))
+            : baseSample;
+        float emissivePulse = 1.0f + sin(effectTime * emissivePulseSpeed) * emissivePulseAmount;
+        finalColor += emissiveSample.rgb * vfxColor.rgb * max(emissiveStrength, 0.0f) * max(emissivePulse, 0.0f) * saturate(emissiveSample.a * finalAlpha);
     }
 
-    if (useEdgeHighlight != 0)
+    if (edgeEnabled)
     {
         // 頂点を押し出さず、Mesh表面の内側だけで外周っぽい部分を強調する。
         float silhouetteEdge =
@@ -157,26 +158,74 @@ float4 main(VS_OUT input) : SV_TARGET
                 (1.0f - smoothstep(0.0f, intersectionEdgeWidth, depthDifference)) *
                 intersectionEdgeStrength;
         }
+        uint baseTextureWidth_;
+        uint baseTextureHeight_;
+        BaseTexture.GetDimensions(baseTextureWidth_, baseTextureHeight_);
+        float2 baseTexelSize_ = 1.0f / max(float2(baseTextureWidth_, baseTextureHeight_), float2(1.0f, 1.0f));
+        float centerVisible_ = step(0.0001f, baseColor.a) * step(dissolveThreshold, mask);
+        float maskBoundaryEdge = 0.0f;
+        float2 edgeOffsets_[4] =
+        {
+            float2(baseTexelSize_.x, 0.0f),
+            float2(-baseTexelSize_.x, 0.0f),
+            float2(0.0f, baseTexelSize_.y),
+            float2(0.0f, -baseTexelSize_.y)
+        };
+
+        [unroll]
+        for (int edgeOffsetIndex_ = 0; edgeOffsetIndex_ < 4; ++edgeOffsetIndex_)
+        {
+            float4 neighborBase_ = abs(baseUVRotation) > 0.0001f
+                ? BaseTexture.Sample(LinearBorderSampler, baseUV + edgeOffsets_[edgeOffsetIndex_])
+                : BaseTexture.Sample(LinearWrapSampler, baseUV + edgeOffsets_[edgeOffsetIndex_]);
+            float neighborMask_ = 1.0f;
+            if (useMask != 0)
+            {
+                neighborMask_ = abs(maskUVRotation) > 0.0001f
+                    ? MaskTexture.Sample(LinearBorderSampler, maskUV + edgeOffsets_[edgeOffsetIndex_]).r
+                    : MaskTexture.Sample(LinearWrapSampler, maskUV + edgeOffsets_[edgeOffsetIndex_]).r;
+            }
+            float neighborVisible_ = step(0.0001f, neighborBase_.a * vfxColor.a) * step(dissolveThreshold, neighborMask_);
+            maskBoundaryEdge = max(maskBoundaryEdge, abs(centerVisible_ - neighborVisible_));
+        }
+
+        if (useMask != 0)
+        {
+            float maskEdgeWidth_ = max(fwidth(mask) * 2.0f, 0.001f);
+            maskBoundaryEdge = max(
+                maskBoundaryEdge,
+                1.0f - smoothstep(0.0f, maskEdgeWidth_, abs(mask - dissolveThreshold)));
+        }
+
+        float boundaryEdgeStrength = max(
+            max(silhouetteEdgeStrength, intersectionEdgeStrength),
+            1.0f);
+        float boundaryEdge = maskBoundaryEdge * boundaryEdgeStrength;
         float edgePattern = 1.0f;
         if (edgePatternMode == 1)
         {
-            // BaseTextureの明度とAlphaでEdgeの中に模様を作る。
-            edgePattern = saturate(
-                dot(baseSample.rgb, float3(0.299f, 0.587f, 0.114f)) *
-                baseSample.a);
+            float4 edgeSample = hasEdgePatternTexture != 0
+                ? (abs(baseUVRotation) > 0.0001f
+                    ? EdgePatternTexture.Sample(LinearBorderSampler, edgePatternUV)
+                    : EdgePatternTexture.Sample(LinearWrapSampler, edgePatternUV))
+                : baseSample;
+            edgePattern = saturate(dot(edgeSample.rgb, float3(0.299f, 0.587f, 0.114f)) * edgeSample.a);
         }
-        else if (edgePatternMode == 2 && useMask != 0)
+        else if (edgePatternMode == 2)
         {
-            // Mask値をそのままEdge模様として使う。
-            edgePattern = mask;
+            edgePattern = hasEdgePatternTexture != 0
+                ? (abs(baseUVRotation) > 0.0001f
+                    ? EdgePatternTexture.Sample(LinearBorderSampler, edgePatternUV).r
+                    : EdgePatternTexture.Sample(LinearWrapSampler, edgePatternUV).r)
+                : (useMask != 0 ? mask : 1.0f);
         }
 
         edgePattern = lerp(1.0f, edgePattern, saturate(edgePatternStrength));
 
-        float edgeAmount = saturate(silhouetteEdge + intersectionEdge) * edgePattern;
+        float edgeAmount = saturate(silhouetteEdge + intersectionEdge + boundaryEdge) * edgePattern;
+        float edgeAlpha = edgeColor.a * edgeAmount * alpha * input.instanceAlpha;
         finalColor += edgeColor.rgb * edgeAmount;
-        finalAlpha = saturate(
-            finalAlpha + edgeColor.a * edgeAmount * input.instanceAlpha);
+        finalAlpha = saturate(max(finalAlpha, edgeAlpha));
     }
 
     return float4(finalColor, finalAlpha);

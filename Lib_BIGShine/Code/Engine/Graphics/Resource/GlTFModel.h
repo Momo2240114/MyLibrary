@@ -224,10 +224,26 @@ public:
 	int GetNodeIndex(const char* name) const;
 
 	void UpdateNodeRecursive(Node& node, const DirectX::XMMATRIX& ParentWorldTransform, const DirectX::XMMATRIX& ModelScaleMat);
+	void UpdateNodeRecursive(
+		Node& node_,
+		const DirectX::XMMATRIX& parentGlobalTransform_,
+		const DirectX::XMMATRIX& parentWorldTransform_,
+		const DirectX::XMMATRIX& modelScaleMat_,
+		bool isRoot_);
+
+	void MarkPoseDirty();
+	void MarkTransformDirty();
+	void UpdateTransformIfDirty();
+
+
 	// トランスフォーム更新処理
 	void UpdateTransform();
 
 	void UpdateNodeTransformFrom(int nodeIndex_);
+	void UpdateNodeTransformFrom(
+		int nodeIndex_,
+		const DirectX::XMMATRIX& parentWorldTransform_,
+		const DirectX::XMMATRIX& modelScaleMat_);
 
 	// アニメーション計算
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, NodePose& nodePose) const;
@@ -315,6 +331,8 @@ private:
 	std::vector<NodePose>	bindNodePoses;
 	std::vector<Animation>	animations;
 
+	bool poseDirty = true;
+	bool transformDirty = true;
 
 	float localScale = 1.0;
 	DirectX::SimpleMath::Quaternion _RootRotationOffset;

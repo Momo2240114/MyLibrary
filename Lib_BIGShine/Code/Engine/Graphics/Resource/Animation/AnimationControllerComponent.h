@@ -52,7 +52,7 @@ public:
     // 宣言
     AnimGraphNode* FindNodeByName(const std::string& name_);
 
-    // Blackboard へのアクセス権を授ける
+    // Blackboard へのアクセス権を渡す
     const BlackboardCategory& GetBlackboard() const;
     const AnimState* GetCurrentState() { return currentState; }
     float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
