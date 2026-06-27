@@ -86,7 +86,7 @@ float4 main(VS_OUT input) : SV_TARGET
     float hiddenMask = saturate(max(
         max(1.0f - mask, 1.0f - baseColor.a),
         step(mask, dissolveThreshold)));
-    if (!distortionEnabled && !edgeEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
+    if (!distortionEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
     {
         discard;
     }
@@ -158,49 +158,6 @@ float4 main(VS_OUT input) : SV_TARGET
                 (1.0f - smoothstep(0.0f, intersectionEdgeWidth, depthDifference)) *
                 intersectionEdgeStrength;
         }
-        uint baseTextureWidth_;
-        uint baseTextureHeight_;
-        BaseTexture.GetDimensions(baseTextureWidth_, baseTextureHeight_);
-        float2 baseTexelSize_ = 1.0f / max(float2(baseTextureWidth_, baseTextureHeight_), float2(1.0f, 1.0f));
-        float centerVisible_ = step(0.0001f, baseColor.a) * step(dissolveThreshold, mask);
-        float maskBoundaryEdge = 0.0f;
-        float2 edgeOffsets_[4] =
-        {
-            float2(baseTexelSize_.x, 0.0f),
-            float2(-baseTexelSize_.x, 0.0f),
-            float2(0.0f, baseTexelSize_.y),
-            float2(0.0f, -baseTexelSize_.y)
-        };
-
-        [unroll]
-        for (int edgeOffsetIndex_ = 0; edgeOffsetIndex_ < 4; ++edgeOffsetIndex_)
-        {
-            float4 neighborBase_ = abs(baseUVRotation) > 0.0001f
-                ? BaseTexture.Sample(LinearBorderSampler, baseUV + edgeOffsets_[edgeOffsetIndex_])
-                : BaseTexture.Sample(LinearWrapSampler, baseUV + edgeOffsets_[edgeOffsetIndex_]);
-            float neighborMask_ = 1.0f;
-            if (useMask != 0)
-            {
-                neighborMask_ = abs(maskUVRotation) > 0.0001f
-                    ? MaskTexture.Sample(LinearBorderSampler, maskUV + edgeOffsets_[edgeOffsetIndex_]).r
-                    : MaskTexture.Sample(LinearWrapSampler, maskUV + edgeOffsets_[edgeOffsetIndex_]).r;
-            }
-            float neighborVisible_ = step(0.0001f, neighborBase_.a * vfxColor.a) * step(dissolveThreshold, neighborMask_);
-            maskBoundaryEdge = max(maskBoundaryEdge, abs(centerVisible_ - neighborVisible_));
-        }
-
-        if (useMask != 0)
-        {
-            float maskEdgeWidth_ = max(fwidth(mask) * 2.0f, 0.001f);
-            maskBoundaryEdge = max(
-                maskBoundaryEdge,
-                1.0f - smoothstep(0.0f, maskEdgeWidth_, abs(mask - dissolveThreshold)));
-        }
-
-        float boundaryEdgeStrength = max(
-            max(silhouetteEdgeStrength, intersectionEdgeStrength),
-            1.0f);
-        float boundaryEdge = maskBoundaryEdge * boundaryEdgeStrength;
         float edgePattern = 1.0f;
         if (edgePatternMode == 1)
         {
@@ -222,9 +179,9 @@ float4 main(VS_OUT input) : SV_TARGET
 
         edgePattern = lerp(1.0f, edgePattern, saturate(edgePatternStrength));
 
-        float edgeAmount = saturate(silhouetteEdge + intersectionEdge + boundaryEdge) * edgePattern;
+        float edgeAmount = saturate(silhouetteEdge + intersectionEdge) * edgePattern;
         float edgeAlpha = edgeColor.a * edgeAmount * alpha * input.instanceAlpha;
-        finalColor += edgeColor.rgb * edgeAmount;
+        finalColor = lerp(finalColor, edgeColor.rgb, saturate(edgeAmount * edgeColor.a));
         finalAlpha = saturate(max(finalAlpha, edgeAlpha));
     }
 

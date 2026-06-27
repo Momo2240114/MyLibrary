@@ -790,14 +790,6 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
 
     auto& nodes_ = model->GetNodes();
 
-    auto owner_ = GetGameObject();
-    if (!owner_ || !owner_->transform) return;
-
-    const DirectX::XMMATRIX parentWorldTransform_ =
-        owner_->transform->GetWorldMatrix();
-
-    const DirectX::XMMATRIX modelScaleMat_ =
-        DirectX::XMMatrixScaling(model->GetLocalScale(), model->GetLocalScale(), model->GetLocalScale());
 
     for (size_t nodeIndex_ = 0; nodeIndex_ + 1 < chain_.nodeIndices.size(); ++nodeIndex_)
     {
@@ -847,10 +839,7 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
             XMStoreFloat4(&node_.rotation, XMQuaternionNormalize(rotation_));
             {
                 BS_PROFILE_SCOPE("SpringBone::UpdateNodeTransformFrom");
-                model->UpdateNodeTransformFrom(
-                    chain_.nodeIndices[nodeIndex_],
-                    parentWorldTransform_,
-                    modelScaleMat_);
+                model->UpdateNodeTransformFrom(chain_.nodeIndices.front());
             }
         }
     }
