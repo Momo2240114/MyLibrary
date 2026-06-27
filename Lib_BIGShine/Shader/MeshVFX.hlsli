@@ -36,6 +36,7 @@ cbuffer CbMeshVFX : register(b0)
     float vertexNoiseVerticalStrength; // 頂点縦揺れ強度。
     float vertexNoiseHorizontalScale; // 横揺れNoiseの細かさ。
     float vertexNoiseVerticalScale; // 縦揺れNoiseの細かさ。
+    float2 vertexNoisePadding;
     float3 vertexNoiseSpeed; // 頂点Noiseのスクロール速度。
     uint useVertexNoise; // 頂点Noiseを使うか。
     uint useMask; // Mask Textureを使うか。
@@ -60,7 +61,7 @@ cbuffer CbMeshVFX : register(b0)
     float emissivePulseAmount;
     uint hasEdgePatternTexture;
     uint hasEmissiveTexture;
-    float padding;
+    float3 padding;
 };
 
 // GltfModelの頂点入力。

@@ -667,6 +667,15 @@ void MeshVFXRenderSystem::RenderAll(
                 ID3D11ShaderResourceView* noiseTexture_ = noiseTextureMixer.Mix(
                     renderContext_, noiseTextures_, nullptr, nullptr, true);
 
+                const MeshVFXPart* shaderPart_ = &part_;
+                MeshVFXPart depthSafePart_;
+                if (!sceneSamplingReady_ && part_.intersectionEdgeStrength > 0.0f)
+                {
+                    depthSafePart_ = part_;
+                    depthSafePart_.intersectionEdgeStrength = 0.0f;
+                    shaderPart_ = &depthSafePart_;
+                }
+
                 restoreMeshTarget_(false);
                 deviceContext_->OMSetBlendState(
                     renderContext_.renderState->GetBlendState(blendState_), nullptr, 0xFFFFFFFF);
@@ -690,7 +699,7 @@ void MeshVFXRenderSystem::RenderAll(
                     shader->UpdateSkeleton(renderContext_, *sourceMesh_);
                 }
                 shader->UpdatePart(
-                    renderContext_, part_, runtimePart_, baseTexture_, normalTexture_,
+                    renderContext_, *shaderPart_, runtimePart_, baseTexture_, normalTexture_,
                     maskTexture_, noiseTexture_,
                     world_, poseTime_, animation_.alpha * poseAlpha_);
 
@@ -730,7 +739,7 @@ void MeshVFXRenderSystem::RenderAll(
                         shader->UpdateSkeleton(renderContext_, *sourceMesh_);
                     }
                     shader->UpdatePart(
-                        renderContext_, part_, runtimePart_, baseTexture_, normalTexture_,
+                        renderContext_, *shaderPart_, runtimePart_, baseTexture_, normalTexture_,
                         maskTexture_, noiseTexture_,
                         world_, poseTime_, animation_.alpha * poseAlpha_);
 

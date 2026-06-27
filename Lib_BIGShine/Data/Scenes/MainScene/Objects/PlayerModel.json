@@ -286,8 +286,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                1.0,
-                                0.0
+                                0.0,
+                                1.0
                             ]
                         },
                         "IsAttack": {
@@ -372,8 +372,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                1.0,
-                                0.0
+                                0.0,
+                                1.0
                             ]
                         },
                         "IsAttack": {
@@ -4234,7 +4234,7 @@
                         "Influence": 0.0,
                         "LateralStiffness": 0.3790000081062317,
                         "Name": "Hair",
-                        "RootNode": "Hair_Root",
+                        "RootNode": "Bone_hair_L01",
                         "RootRotationFollow": 1.0,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
@@ -4243,7 +4243,7 @@
                         "Stiffness": 1.0,
                         "TipNode": "Bone_hair_L02_end",
                         "TipStiffnessScale": 1.0,
-                        "Type": 0
+                        "Type": 2
                     },
                     {
                         "BendStiffness": 1.0,
@@ -4258,7 +4258,7 @@
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Hair_Root",
+                        "RootNode": "Bone_hair_B01",
                         "RootRotationFollow": 1.0,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
@@ -4282,7 +4282,7 @@
                         "Influence": 0.10400000214576721,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Hair_Root",
+                        "RootNode": "Bone_hair_R01",
                         "RootRotationFollow": 0.4740000069141388,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
@@ -4291,7 +4291,7 @@
                         "Stiffness": 1.0,
                         "TipNode": "Bone_hair_R02_end",
                         "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 0
+                        "Type": 2
                     },
                     {
                         "BendStiffness": 0.019999999552965164,
@@ -4306,7 +4306,7 @@
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Hair_Root",
+                        "RootNode": "Bone_hair_B_R_01",
                         "RootRotationFollow": 0.6259999871253967,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
@@ -4330,7 +4330,7 @@
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
                         "Name": "Hair",
-                        "RootNode": "Hair_Root",
+                        "RootNode": "Bone_hair_B_L_01",
                         "RootRotationFollow": 0.7910000085830688,
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
@@ -4374,6 +4374,8 @@
                 "IncludeChildren": true,
                 "IsPlaying": true,
                 "Lifetime": 0.4000000059604645,
+                "MaxRenderParts": 1,
+                "MaxRenderSnapshots": 4,
                 "MaxSnapshots": 8,
                 "Parts": [
                     {
@@ -4499,6 +4501,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.0,
                         "UVRadialScale": 1.0,
@@ -4650,6 +4653,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.0,
                         "UVRadialScale": 1.0,
@@ -4801,6 +4805,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.0,
                         "UVRadialScale": 1.0,
@@ -4952,6 +4957,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.9800000190734863,
                         "UVRadialScale": 1.0,
@@ -5021,13 +5027,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            31.03542137145996,
-            -1.4768353700637817,
-            7.073530197143555
+            14.058276176452637,
+            -1.4768354892730713,
+            -14.979820251464844
         ],
         "Rot": [
             3.000000238418579,
-            358.6483154296875,
+            150.7472686767578,
             1.1004080988641363e-05
         ],
         "Scale": [

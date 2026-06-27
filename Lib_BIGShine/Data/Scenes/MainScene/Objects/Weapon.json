@@ -251,6 +251,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 11.350000381469727,
                         "SilhouetteEdgeStrength": 16.0,
                         "UVRadialScale": 1.0,
@@ -441,6 +442,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.9800000190734863,
                         "UVRadialScale": 1.0,

@@ -50,8 +50,8 @@
                             1.0
                         ],
                         "EmissivePulseAmount": 0.3499999940395355,
-                        "EmissivePulseSpeed": 30.0,
-                        "EmissiveStrength": 6.050000190734863,
+                        "EmissivePulseSpeed": 1.0,
+                        "EmissiveStrength": 0.0,
                         "EmissiveTexturePath": "",
                         "EmissiveUVScale": [
                             1.0,
@@ -136,6 +136,7 @@
                             1.0,
                             1.0
                         ],
+                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 0.10000000149011612,
                         "SilhouetteEdgeStrength": 3.740000009536743,
                         "UVRadialScale": 1.0,
