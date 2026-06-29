@@ -233,6 +233,17 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     switch (msg_)
     {
+    case WM_SYSKEYDOWN:
+    {
+        if (wParam_ == VK_RETURN && (lParam_ & (1LL << 29)) != 0)
+        {
+            auto& graphics_ = GraphicsDeviceManager::Instance();
+            graphics_.SetFullscreen(!graphics_.IsFullscreen());
+            return 0;
+        }
+        break;
+    }
+
     case WM_SIZE:
     {
         // 最小化中以外、かつデバイス初期化済みならリサイズ実行

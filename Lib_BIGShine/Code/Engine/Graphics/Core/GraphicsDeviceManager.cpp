@@ -145,10 +145,20 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
 #if defined(DEBUG) || defined(_DEBUG)
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-    // 引数をメンバ変数に保存
-    width = width_;
-    height = height_;
-    fullscreen = fullscreen_;
+    // 実際のクライアント領域に合わせて描画リソースを作成する。
+    RECT clientRect_{};
+    if (GetClientRect(windowHandle_, &clientRect_))
+    {
+        width = clientRect_.right - clientRect_.left;
+        height = clientRect_.bottom - clientRect_.top;
+    }
+    else
+    {
+        width = width_;
+        height = height_;
+    }
+    const bool requestedFullscreen_ = fullscreen_;
+    fullscreen = false;
     windowHandle = windowHandle_;
 
     // デバイスとスワップチェーンを作成
@@ -190,11 +200,11 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     if (!InitializeSkyBox()) return false;
 
     // --- 追加：シーンバッファの作成 ---
-    if (!CreateSceneRenderTarget(width_, height_)) return false;
-    if (!CreateGBufferTargets(width_, height_)) return false;
+    if (!CreateSceneRenderTarget(width, height)) return false;
+    if (!CreateGBufferTargets(width, height)) return false;
 
 
-    if (!postRenderSystem.Initialize(device.Get(), width_, height_)) return false;
+    if (!postRenderSystem.Initialize(device.Get(), width, height)) return false;
     if (!cascadeShadowMap.Initialize(device.Get())) return false;
 
     //modelRenderSystem.Init(device, immediateContext);
@@ -202,6 +212,11 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
 
     // レンダーステート生成
     renderState = std::make_unique<RenderState>(device.Get());
+
+    if (requestedFullscreen_)
+    {
+        SetFullscreen(true);
+    }
 
 
 
@@ -247,6 +262,11 @@ void GraphicsDeviceManager::Shutdown()
  */
 void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
 {
+    if (!device || !immediateContext || !swapChain || newWidth_ <= 0 || newHeight_ <= 0)
+    {
+        return;
+    }
+
     // 追加：リサイズ中は描画を止める or コンテキストをクリア
     immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
     immediateContext->ClearState(); // 念のため一度すべて解除
@@ -279,6 +299,10 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     // swapChain->ResizeBuffers() を呼び出し
     HRESULT result_ = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
     _ASSERT_EXPR(SUCCEEDED(result_), L"ResizeBuffers Failed");
+    if (FAILED(result_))
+    {
+        return;
+    }
 
     // リソースの再作成
     CreateRenderTarget();
@@ -291,6 +315,47 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     viewport.Width = static_cast<float>(width);
     viewport.Height = static_cast<float>(height);
     immediateContext->RSSetViewports(1, &viewport);
+}
+
+void GraphicsDeviceManager::SetFullscreen(bool enabled_)
+{
+    if (!windowHandle || fullscreen == enabled_)
+    {
+        return;
+    }
+
+    if (enabled_)
+    {
+        windowedStyle = static_cast<DWORD>(GetWindowLongPtrW(windowHandle, GWL_STYLE));
+        windowedPlacement.length = sizeof(WINDOWPLACEMENT);
+        GetWindowPlacement(windowHandle, &windowedPlacement);
+
+        const HMONITOR monitor_ = MonitorFromWindow(windowHandle, MONITOR_DEFAULTTONEAREST);
+        MONITORINFO monitorInfo_{ sizeof(MONITORINFO) };
+        if (!GetMonitorInfoW(monitor_, &monitorInfo_))
+        {
+            return;
+        }
+
+        SetWindowLongPtrW(windowHandle, GWL_STYLE,
+            static_cast<LONG_PTR>(windowedStyle & ~WS_OVERLAPPEDWINDOW));
+        SetWindowPos(windowHandle, HWND_TOP,
+            monitorInfo_.rcMonitor.left,
+            monitorInfo_.rcMonitor.top,
+            monitorInfo_.rcMonitor.right - monitorInfo_.rcMonitor.left,
+            monitorInfo_.rcMonitor.bottom - monitorInfo_.rcMonitor.top,
+            SWP_FRAMECHANGED | SWP_NOOWNERZORDER);
+    }
+    else
+    {
+        SetWindowLongPtrW(windowHandle, GWL_STYLE, static_cast<LONG_PTR>(windowedStyle));
+        SetWindowPlacement(windowHandle, &windowedPlacement);
+        SetWindowPos(windowHandle, nullptr, 0, 0, 0, 0,
+            SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE |
+            SWP_NOZORDER | SWP_NOOWNERZORDER);
+    }
+
+    fullscreen = enabled_;
 }
 
 /**
@@ -664,9 +729,10 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     swapChainDesc.OutputWindow = hwnd_;
     swapChainDesc.SampleDesc.Count = 1;
     swapChainDesc.SampleDesc.Quality = 0;
-    swapChainDesc.Windowed = !fullscreen;
+    // Flip modelでは排他モードへ切り替えず、ウィンドウ側をボーダーレス化する。
+    swapChainDesc.Windowed = TRUE;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    swapChainDesc.Flags = 0;
 
     D3D_FEATURE_LEVEL featureLevels_[] =
     {
@@ -699,6 +765,9 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
 
     _ASSERT_EXPR(SUCCEEDED(result_), L"D3D11CreateDeviceAndSwapChain");
     if (FAILED(result_)) return false;
+
+    // 独自のボーダーレス切替とDXGI標準のAlt+Enterが二重に動かないようにする。
+    dxgiFactory_->MakeWindowAssociation(hwnd_, DXGI_MWA_NO_ALT_ENTER);
 
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice_;
     Microsoft::WRL::ComPtr<IDXGIAdapter> activeAdapter_;
@@ -941,12 +1010,5 @@ bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
 }
 void GraphicsDeviceManager::Finalize()
 {
-#if 1
-    BOOL fullscreen = 0;
-    swapChain->GetFullscreenState(&fullscreen, 0);
-    if (fullscreen)
-    {
-        swapChain->SetFullscreenState(FALSE, 0);
-    }
-#endif
+    // スワップチェーンは常にウィンドウモードなので、DXGIの排他解除は不要。
 }

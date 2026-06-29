@@ -155,7 +155,8 @@ namespace
 
         const XMFLOAT3 correction_ = Scale(
             difference_, ((distance_ - targetLength_) / distance_) * stiffness_);
-        if (indexA_ == 0)
+        if (indexB_ <= 1) return;
+        if (indexA_ <= 1)
         {
             positions_[indexB_] = Subtract(positions_[indexB_], correction_);
             return;
@@ -367,38 +368,50 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
     }
 
     const XMFLOAT4X4 currentRootTransform_ = nodes_.at(chain_.nodeIndices.front()).worldTransform;
+    std::vector<XMFLOAT3> currentWorldPositions_;
+    currentWorldPositions_.reserve(chain_.nodeIndices.size());
+    for (const int nodeIndex_ : chain_.nodeIndices)
+    {
+        currentWorldPositions_.push_back(GetTranslation(nodes_.at(nodeIndex_).worldTransform));
+    }
+
     for (size_t pointIndex_ = 0; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
     {
         const float normalizedPoint_ = GetNormalizedPointPosition(chain_, pointIndex_);
         const float tipWeight_ = SmoothStep(normalizedPoint_);
-        const float rotationFollow_ = chain_.rootRotationFollow * (1.0f - 0.55f * tipWeight_);
-        const float translationFollow_ = 1.0f - 0.32f * tipWeight_;
+        if (pointIndex_ <= 1 || normalizedPoint_ <= 0.35f)
+        {
+            chain_.simulatedPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
+            chain_.previousPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
+            continue;
+        }
+
         chain_.simulatedPositions[pointIndex_] = ApplyRootMotion(
             chain_.simulatedPositions[pointIndex_],
             chain_.previousRootTransform,
             currentRootTransform_,
-            rotationFollow_,
-            translationFollow_);
+            1.0f,
+            1.0f);
         chain_.previousPositions[pointIndex_] = ApplyRootMotion(
             chain_.previousPositions[pointIndex_],
             chain_.previousRootTransform,
             currentRootTransform_,
-            rotationFollow_,
-            translationFollow_);
+            1.0f,
+            1.0f);
 
         if (pointIndex_ > 0)
         {
-            const XMFLOAT3 animatedPosition_ = GetTranslation(nodes_.at(chain_.nodeIndices[pointIndex_]).worldTransform);
+            const XMFLOAT3 targetWorldPosition_ = currentWorldPositions_[pointIndex_];
             const float maxLag_ = (std::max)(
                 0.02f,
                 GetChainLengthToPoint(chain_, pointIndex_) * (0.35f + 0.35f * tipWeight_));
             chain_.simulatedPositions[pointIndex_] = ClampPointLag(
                 chain_.simulatedPositions[pointIndex_],
-                animatedPosition_,
+                targetWorldPosition_,
                 maxLag_);
             chain_.previousPositions[pointIndex_] = ClampPointLag(
                 chain_.previousPositions[pointIndex_],
-                animatedPosition_,
+                targetWorldPosition_,
                 maxLag_);
         }
     }
@@ -418,6 +431,13 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
         {
             const XMFLOAT3 current_ = chain_.simulatedPositions[pointIndex_];
             const float normalizedPoint_ = GetNormalizedPointPosition(chain_, pointIndex_);
+            if (pointIndex_ <= 1 || normalizedPoint_ <= 0.35f)
+            {
+                chain_.simulatedPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
+                chain_.previousPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
+                continue;
+            }
+
             const float tipWeight_ = SmoothStep(normalizedPoint_);
             const float middleFlexWeight_ = GetMiddleFlexWeight(normalizedPoint_);
             const float pointDamping_ = std::clamp(
@@ -431,13 +451,13 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
             const XMFLOAT3 velocity_ = ClampLength(
                 rawVelocity_,
                 baseSegmentLength_ * (0.45f + 0.35f * tipWeight_ + 0.18f * middleFlexWeight_));
-            const XMFLOAT3 animatedPosition_ = GetTranslation(nodes_.at(chain_.nodeIndices[pointIndex_]).worldTransform);
+            const XMFLOAT3 targetWorldPosition_ = currentWorldPositions_[pointIndex_];
             const float stiffnessScale_ = GetStiffnessScale(chain_, pointIndex_);
             const float pointStiffness_ = std::clamp(chain_.stiffness * stiffnessScale_, 0.0f, 1.0f);
             const float substepStiffness_ = 1.0f - std::pow(1.0f - pointStiffness_, 1.0f / substeps_);
             const float followScale_ = 1.0f - 0.35f * tipWeight_ - 0.22f * middleFlexWeight_;
             const XMFLOAT3 animationPull_ = Scale(
-                Subtract(animatedPosition_, current_),
+                Subtract(targetWorldPosition_, current_),
                 substepStiffness_ * followScale_);
             const XMFLOAT3 gravity_ = {
                 0.0f,
@@ -490,6 +510,14 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
             }
         }
     }
+
+    for (size_t pointIndex_ = 0; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
+    {
+        if (pointIndex_ > 1 && GetNormalizedPointPosition(chain_, pointIndex_) > 0.35f) break;
+        chain_.simulatedPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
+        chain_.previousPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
+    }
+
 }
 
 void SpringBoneSimulationComponent::BuildClothConstraints()
@@ -630,6 +658,8 @@ void SpringBoneSimulationComponent::SolveClothConstraint(const ClothConstraint& 
 
 void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain& chain_, size_t pointIndex_)
 {
+    if (pointIndex_ <= 1 || GetNormalizedPointPosition(chain_, pointIndex_) <= 0.35f) return;
+
     auto& position_ = chain_.simulatedPositions[pointIndex_];
     const auto& nodes_ = model->GetNodes();
     const XMFLOAT3 animatedPosition_ =
@@ -809,7 +839,19 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
         const float dot_ = std::clamp(XMVectorGetX(XMVector3Dot(currentDirectionVector_, targetDirectionVector_)), -1.0f, 1.0f);
         if (axisLength_ <= 0.00001f) continue;
 
-        const float angle_ = std::acos(dot_) * std::clamp(chain_.influence, 0.0f, 1.0f);
+        if (nodeIndex_ <= 1) continue;
+
+        const float normalizedNodePosition_ = static_cast<float>(nodeIndex_)
+            / static_cast<float>(chain_.nodeIndices.size() - 1);
+        const float simulationWeight_ = SmoothStep(std::clamp(
+            (normalizedNodePosition_ - 0.35f) / 0.65f,
+            0.0f,
+            1.0f));
+        if (simulationWeight_ <= 0.00001f) continue;
+
+        const float angle_ = std::acos(dot_)
+            * std::clamp(chain_.influence, 0.0f, 1.0f)
+            * simulationWeight_;
         const XMMATRIX deltaWorldRotation_ = XMMatrixRotationAxis(axis_, angle_);
         XMMATRIX nodeWorldRotation_ = XMLoadFloat4x4(&node_.worldTransform);
         nodeWorldRotation_.r[3] = XMVectorSet(0, 0, 0, 1);
