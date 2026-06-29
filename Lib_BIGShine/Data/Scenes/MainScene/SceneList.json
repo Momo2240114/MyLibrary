@@ -69,6 +69,7 @@
         "PlayerModel",
         "Weapon",
         "Shield",
+        "KickHit",
         "DirLight",
         "Stage",
         "RockWall",

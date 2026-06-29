@@ -2202,9 +2202,9 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
         };
     if (ImGui::Button("+ Damage")) addAttackWrite_("Damage", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
     ImGui::SameLine();
-    if (ImGui::Button("+ HitStopTime")) addAttackWrite_("HitStopTime", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+    if (ImGui::Button("+ HitStopDuration")) addAttackWrite_("HitStopDuration", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
     ImGui::SameLine();
-    if (ImGui::Button("+ HitStopDir")) addAttackWrite_("HitStopDir", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+    if (ImGui::Button("+ HitStopScale")) addAttackWrite_("HitStopScale", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
     ImGui::SameLine();
     if (ImGui::Button("+ HitStopLayer")) addAttackWrite_("HitStopLayerMask", ANIM_BLACKBOARD_VALUE_TYPE::INT);
     ImGui::SameLine();

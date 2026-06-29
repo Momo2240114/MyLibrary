@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <DirectXMath.h>
 
@@ -25,13 +27,17 @@ struct AttackHitEvent
     HitBox* hitBox = nullptr;
     HurtBox* hurtBox = nullptr;
     float damage = 0.0f;
-    float hitStopTime = 0.0f;
-    float hitStopDir = 0.0f;
+    float hitStopDuration = 0.0f;
+    float hitStopScale = 0.0f;
     uint32_t hitStopLayerMask = 0u;
     float knockBackPower = 0.0f;
     DirectX::XMFLOAT3 hitPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 hitNormal = { 0.0f, 1.0f, 0.0f };
     bool hasHitContact = false;
+    uint32_t attackInstanceId = 0u;
+    uint32_t hitGroupId = 0u;
+    std::string sourceAction;
+    int teamId = 0;
     std::string attackTag;
     std::string hurtTag;
     std::string hitParticleAssetPath;
@@ -54,6 +60,8 @@ public:
 
     void BeginFrame();
     void Clear();
+    uint32_t CreateAttackInstance();
+    void ClearAttackInstance(uint32_t attackInstanceId_);
     void HandleHit(HitBox& hitBox_, HurtBox& hurtBox_);
     void HandleHit(
         HitBox& hitBox_,
@@ -67,6 +75,11 @@ public:
     }
 
 private:
+    bool RegisterAttackHit(
+        uint32_t attackInstanceId_,
+        uint32_t hitGroupId_,
+        const GameObject* target_,
+        bool allowMultiHit_);
     bool IsSameHierarchy(
         const std::shared_ptr<GameObject>& objectA_,
         const std::shared_ptr<GameObject>& objectB_) const;
@@ -77,5 +90,7 @@ private:
 private:
     std::vector<AttackHitEvent> frameHitEvents;
     std::vector<HitCallback> hitCallbacks;
+    std::unordered_map<uint64_t, std::unordered_set<const GameObject*>> registeredHitTargets;
+    uint32_t nextAttackInstanceId = 1u;
 };
 

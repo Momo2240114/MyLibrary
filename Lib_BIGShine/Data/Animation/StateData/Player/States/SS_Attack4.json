@@ -89,15 +89,83 @@
                         "floatValue": 5.0,
                         "intValue": 0,
                         "key": "Damage",
+                        "stringValue": "",
                         "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.0,
+                        "intValue": 0,
+                        "key": "HitParticleAssetPath",
+                        "stringValue": "Data/Particle/HitParticle.json",
+                        "type": 3
                     }
                 ],
                 "callEndOnStateExit": false,
                 "endTime": 0.44999998807907104,
-                "label": "Attack",
+                "label": "Sword_Attack",
                 "overridePlaybackSpeed": false,
                 "playbackSpeed": 1.0,
                 "startTime": 0.2666666805744171
+            },
+            {
+                "actionEnd": "KickHit_DisableHitBox",
+                "actionStart": "KickHit_EnableHitBox",
+                "actionUpdate": "",
+                "blackboardWrites": [
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 6.0,
+                        "intValue": 0,
+                        "key": "Damage",
+                        "stringValue": "",
+                        "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 5.0,
+                        "intValue": 0,
+                        "key": "KnockBackPower",
+                        "stringValue": "",
+                        "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.0,
+                        "intValue": 0,
+                        "key": "HitParticleAssetPath",
+                        "stringValue": "Data/Particle/HitParticle.json",
+                        "type": 3
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.25,
+                        "intValue": 0,
+                        "key": "HitStopTime",
+                        "stringValue": "",
+                        "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.25,
+                        "intValue": 0,
+                        "key": "HitStopDir",
+                        "stringValue": "",
+                        "type": 0
+                    }
+                ],
+                "callEndOnStateExit": false,
+                "endTime": 1.0333333015441895,
+                "label": "Foot_Attack",
+                "overridePlaybackSpeed": false,
+                "playbackSpeed": 1.0,
+                "startTime": 0.6833333373069763
             }
         ],
         "loop": false,

@@ -3,14 +3,22 @@
 #include "CapsuleCollider.h"
 
 #include <cstdint>
+#include <unordered_set>
 
 class HitBox : public CapsuleCollider
 {
 public:
     float damage = 1.0f;
-    float hitStopTime = 0.0f;
-    float hitStopDir = 0.0f;
+    float hitStopDuration = 0.0f;
+    float hitStopScale = 0.0f;
     uint32_t hitStopLayerMask = 3u;
+    GameObject* ownerObject = nullptr;
+    std::string sourceAction;
+    uint32_t attackInstanceId = 0u;
+    uint32_t hitGroupId = 0u;
+    bool allowMultiHit = false;
+    bool canHitOwner = false;
+    int teamId = 0;
     float knockBackPower = 0.0f;
     bool hitOncePerActivation = true;
     std::string attackTag = "Attack";
@@ -34,7 +42,7 @@ public:
 
     std::string blackboardCategory = "Attack";
     std::string damageKey = "Damage";
-    std::string hitStopTimeKey = "HitStopTime";
+    std::string hitStopDurationKey = "HitStopDuration";
     std::string knockBackPowerKey = "KnockBackPower";
     std::string hitSoundPathKey = "HitSoundPath";
 
@@ -47,6 +55,16 @@ public:
     void Activate();
     void Deactivate();
     uint64_t GetActivationId() const { return activationId; }
+    void SetOwner(GameObject* owner_);
+    void SetAttackInstanceId(uint32_t attackInstanceId_);
+    void SetHitGroupId(uint32_t hitGroupId_);
+    void SetDamage(float damage_);
+    void SetKnockBackPower(float knockBackPower_);
+    void SetHitEffectPath(const std::string& path_);
+    void ClearHitTargets();
+    bool CanHit(GameObject* target_) const;
+    void RegisterHit(GameObject* target_);
+    std::shared_ptr<GameObject> GetAttackOwner();
     void Gui() override;
     void Serialize(nlohmann::json& j_) const override;
     void Deserialize(const nlohmann::json& j_) override;
@@ -60,5 +78,6 @@ private:
 
 private:
     uint64_t activationId = 0;
+    std::unordered_set<GameObject*> alreadyHitTargets;
 };
 

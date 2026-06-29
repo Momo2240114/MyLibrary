@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <unordered_map>
 #include <cstdint>
 #include <cmath>
@@ -27,13 +28,14 @@ struct TimeState
     float targetScale = 1.0f;
     float lerpSpeed = 10.0f;
     float hitStopTimer = 0.0f;
+    float hitStopScale = 0.0f;
 
     void Update(float rawDt)
     {
         if (hitStopTimer > 0.0f)
         {
             hitStopTimer -= rawDt;
-            currentScale = 0.0f;
+            currentScale = hitStopScale;
             if (hitStopTimer <= 0.0f) hitStopTimer = 0.0f;
         }
         else
@@ -58,7 +60,7 @@ public:
 
     void Update(float rawDt_);
     void SetTargetScale(uint32_t layerMask, float scale, float speed = 10.0f);
-    void TriggerHitStop(uint32_t layerMask, float duration);
+    void TriggerHitStop(uint32_t layerMask_, float duration_, float scale_ = 0.0f);
     void PrepareCache();
     float GetCachedScale(uint32_t layerMask) const;
 };

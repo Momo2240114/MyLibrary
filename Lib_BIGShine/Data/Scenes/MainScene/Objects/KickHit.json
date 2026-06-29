@@ -1,0 +1,96 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "ActivateActionName": "EnableHitBox",
+                "AttackTag": "Attack",
+                "BlackboardCategory": "Attack",
+                "CollisionRole": 2,
+                "ContainmentMode": 0,
+                "Damage": 1.0,
+                "DamageKey": "Damage",
+                "DeactivateActionName": "DisableHitBox",
+                "DebugPrimitiveColor": [
+                    1.0,
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 10.0,
+                "HitMeshVFXAssetPath": "",
+                "HitMeshVFXLifeTime": 1.0,
+                "HitMeshVFXNormalOffset": 0.0,
+                "HitOncePerActivation": true,
+                "HitParticleAssetPath": "",
+                "HitParticleEmitterName": "",
+                "HitParticleLifeTime": 1.0,
+                "HitParticleNormalOffset": 0.0,
+                "HitSoundMuffled": false,
+                "HitSoundMuffledCutoff": 1200.0,
+                "HitSoundPath": "",
+                "HitSoundPathKey": "HitSoundPath",
+                "HitSoundVolume": 1.0,
+                "HitStopDir": 0.0,
+                "HitStopLayerMask": 3,
+                "HitStopTime": 0.0,
+                "HitStopTimeKey": "HitStopTime",
+                "IsStatic": false,
+                "IsTrigger": false,
+                "KnockBackPower": 0.0,
+                "KnockBackPowerKey": "KnockBackPower",
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    12.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 4.420000076293945,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 2.5799999237060547
+            },
+            "Enabled": true,
+            "TypeName": "HitBox"
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "PlayerModel",
+                "targetNodeIndex": 112,
+                "targetStartNodeName": "calf_twist_01_l"
+            },
+            "Enabled": true,
+            "TypeName": "ModelAttachment"
+        }
+    ],
+    "Layer": 0,
+    "Name": "KickHit",
+    "ParentName": "PlayerModel",
+    "Transform": {
+        "Pos": [
+            0.03428459167480469,
+            0.422146201133728,
+            -0.1259746551513672
+        ],
+        "Rot": [
+            0.0,
+            180.0,
+            180.0
+        ],
+        "Scale": [
+            0.0,
+            0.0,
+            0.0
+        ]
+    }
+}

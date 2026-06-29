@@ -37,17 +37,19 @@ void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_
     }
 }
 
-void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_)
+void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_, float scale_)
 {
     if (layerMask_ == 0u) return;
 
-    for (uint32_t i = 0; i < 32; ++i)
+    for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
-        uint32_t bit = 1u << i;
+        uint32_t bit_ = 1u << i_;
 
-        if ((layerMask_ & bit) != 0u)
+        if ((layerMask_ & bit_) != 0u)
         {
-            states[static_cast<TarGetLayerType>(bit)].hitStopTimer = duration_;
+            TimeState& state_ = states[static_cast<TarGetLayerType>(bit_)];
+            state_.hitStopTimer = duration_;
+            state_.hitStopScale = (std::clamp)(scale_, 0.0f, 1.0f);
         }
     }
 }

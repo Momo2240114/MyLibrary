@@ -15,6 +15,30 @@ void AttackSystem::BeginFrame()
 void AttackSystem::Clear()
 {
     frameHitEvents.clear();
+    registeredHitTargets.clear();
+}
+
+uint32_t AttackSystem::CreateAttackInstance()
+{
+    const uint32_t attackInstanceId_ = nextAttackInstanceId++;
+    if (nextAttackInstanceId == 0u) nextAttackInstanceId = 1u;
+    return attackInstanceId_;
+}
+
+void AttackSystem::ClearAttackInstance(uint32_t attackInstanceId_)
+{
+    if (attackInstanceId_ == 0u) return;
+    for (auto iterator_ = registeredHitTargets.begin(); iterator_ != registeredHitTargets.end();)
+    {
+        if (static_cast<uint32_t>(iterator_->first >> 32u) == attackInstanceId_)
+        {
+            iterator_ = registeredHitTargets.erase(iterator_);
+        }
+        else
+        {
+            ++iterator_;
+        }
+    }
 }
 
 void AttackSystem::HandleHit(HitBox& hitBox_, HurtBox& hurtBox_)
@@ -28,12 +52,21 @@ void AttackSystem::HandleHit(
     HurtBox& hurtBox_,
     const AttackHitContact& contact_)
 {
-    const std::shared_ptr<GameObject> attacker_ = hitBox_.GetGameObject();
+    const std::shared_ptr<GameObject> hitBoxObject_ = hitBox_.GetGameObject();
+    const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
     const std::shared_ptr<GameObject> target_ = hurtBox_.GetGameObject();
-    if (!attacker_ || !target_ || IsSameHierarchy(attacker_, target_)) return;
+    if (!hitBoxObject_ || !attacker_ || !target_) return;
+    if (!hitBox_.canHitOwner && IsSameHierarchy(attacker_, target_)) return;
     if (!hitBox_.IsEnabled() || !hurtBox_.IsEnabled()) return;
+    if (!hitBox_.CanHit(target_.get())) return;
     if (!hurtBox_.CanReceiveHit(hitBox_)) return;
+    if (!RegisterAttackHit(
+        hitBox_.attackInstanceId,
+        hitBox_.hitGroupId,
+        target_.get(),
+        hitBox_.allowMultiHit)) return;
 
+    hitBox_.RegisterHit(target_.get());
     hurtBox_.RecordHit(hitBox_);
 
     AttackHitEvent event_;
@@ -42,13 +75,17 @@ void AttackSystem::HandleHit(
     event_.hitBox = &hitBox_;
     event_.hurtBox = &hurtBox_;
     event_.damage = hitBox_.damage * hurtBox_.damageMultiplier;
-    event_.hitStopTime = hitBox_.hitStopTime;
-    event_.hitStopDir = hitBox_.hitStopDir;
+    event_.hitStopDuration = hitBox_.hitStopDuration;
+    event_.hitStopScale = hitBox_.hitStopScale;
     event_.hitStopLayerMask = hitBox_.hitStopLayerMask;
     event_.knockBackPower = hitBox_.knockBackPower;
     event_.hitPosition = contact_.position;
     event_.hitNormal = contact_.normal;
     event_.hasHitContact = contact_.isValid;
+    event_.attackInstanceId = hitBox_.attackInstanceId;
+    event_.hitGroupId = hitBox_.hitGroupId;
+    event_.sourceAction = hitBox_.sourceAction;
+    event_.teamId = hitBox_.teamId;
     event_.attackTag = hitBox_.attackTag;
     event_.hurtTag = hurtBox_.hurtTag;
     event_.hitParticleAssetPath = hitBox_.hitParticleAssetPath;
@@ -70,6 +107,19 @@ void AttackSystem::HandleHit(
     {
         if (callback_) callback_(event_);
     }
+}
+
+bool AttackSystem::RegisterAttackHit(
+    uint32_t attackInstanceId_,
+    uint32_t hitGroupId_,
+    const GameObject* target_,
+    bool allowMultiHit_)
+{
+    if (allowMultiHit_ || attackInstanceId_ == 0u || target_ == nullptr) return true;
+    const uint64_t hitKey_ =
+        (static_cast<uint64_t>(attackInstanceId_) << 32u) |
+        static_cast<uint64_t>(hitGroupId_);
+    return registeredHitTargets[hitKey_].insert(target_).second;
 }
 
 void AttackSystem::AddHitCallback(HitCallback callback_)
@@ -127,7 +177,8 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     if (!blackboard_) return;
 
     blackboard_->SetFloat("Hit", "Damage", event_.damage);
-    blackboard_->SetFloat("Hit", "HitStopTime", event_.hitStopTime);
+    blackboard_->SetFloat("Hit", "HitStopDuration", event_.hitStopDuration);
+    blackboard_->SetFloat("Hit", "HitStopScale", event_.hitStopScale);
     blackboard_->SetFloat("Hit", "KnockBackPower", event_.knockBackPower);
     blackboard_->SetVector3("Hit", "Position", event_.hitPosition);
     blackboard_->SetVector3("Hit", "Normal", event_.hitNormal);
