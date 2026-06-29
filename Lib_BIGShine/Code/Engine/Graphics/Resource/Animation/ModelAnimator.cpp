@@ -1,6 +1,7 @@
 #include "ModelAnimator.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/GamePlay/Combat/AttackTemplateRuntime.h"
 #include <algorithm>
 #include <cmath>
 
@@ -118,6 +119,10 @@ static void CallStateExitEndActions(ModelAnimator::ActiveSlot& slot_, const std:
             continue;
         }
 
+        if (ev_.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+        {
+            AttackTemplateRuntime::End(owner_, ev_);
+        }
         if (!ev_.endAction.empty())
         {
             CallAnimationAction(owner_, ev_.endAction);
@@ -982,6 +987,10 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         // 1. 開始イベント (startTime を跨いだ瞬間)
         if (!ev.isFired && time >= ev.startTime)
         {
+            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            {
+                AttackTemplateRuntime::Start(owner, ev);
+            }
             ApplyAnimationBlackboardWrites(owner, ev.blackboardWrites);
             if (!ev.startAction.empty()) {
                 CallAnimationAction(owner, ev.startAction);
@@ -993,6 +1002,10 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         // 2. 更新イベント (範囲内にいる間ずっと)
         if (time >= ev.startTime && time <= ev.endTime)
         {
+            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            {
+                AttackTemplateRuntime::Update(owner, ev, time - ev.startTime);
+            }
             if (!ev.updateAction.empty()) {
                 CallAnimationAction(owner, ev.updateAction);
                 if (state != updatingState_) return;
@@ -1002,6 +1015,10 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         // 3. End event, fired when endTime is crossed.
         if (!ev.isEndFired && prevTime <= ev.endTime && time >= ev.endTime)
         {
+            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
+            {
+                AttackTemplateRuntime::End(owner, ev);
+            }
             if (!ev.endAction.empty()) {
                 CallAnimationAction(owner, ev.endAction);
                 if (state != updatingState_) return;

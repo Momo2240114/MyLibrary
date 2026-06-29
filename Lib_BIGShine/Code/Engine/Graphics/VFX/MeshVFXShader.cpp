@@ -10,7 +10,7 @@
 
 bool MeshVFXShader::Initialize(ID3D11Device* device_)
 {
-    // MeshVFX縺ｧ菴ｿ縺・hader縺ｨConstantBuffer繧偵∪縺ｨ繧√※菴懈・縺吶ｋ縲・
+    // MeshVFXで使用するShaderとConstantBufferをまとめて作成する。
     if (!device_) return false;
 
     HRESULT result_ = CPUResourceLoader::LoadVertexShader(
@@ -66,7 +66,7 @@ void MeshVFXShader::Begin(
     bool useMaterialOverlay_,
     bool useInstancedPose_)
 {
-    // 謠冗判繝｢繝ｼ繝峨↓蠢懊§縺ｦVertexShader繧帝∈縺ｳ縲ヾcene諠・ｱ縺ｨ閭梧勹Texture繧単ixelShader縺ｸ貂｡縺吶・
+    // 描画モードに応じてVertexShaderを選び、Scene情報と背景TextureをPixelShaderへ渡す。
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->IASetInputLayout(inputLayout.Get());
     ID3D11VertexShader* selectedVertexShader_ = vertexShader.Get();
@@ -133,7 +133,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const GltfModelCommponennt::Mesh& mesh_)
 {
-    // 騾壼ｸｸ繝｢繝・Ν謠冗判逕ｨ縺ｫ縲∫樟蝨ｨMesh縺ｮ繝懊・繝ｳ陦悟・繧担kinning逕ｨCB縺ｸ霆｢騾√☆繧九・
+    // 通常モデル描画用に、現在MeshのBone行列をSkinning用CBへ転送する。
     DirectX::XMFLOAT4X4 transforms_[256]{};
     if (!mesh_.bones.empty())
     {
@@ -150,7 +150,7 @@ void MeshVFXShader::UpdateSkeleton(
     }
     else if (mesh_.node)
     {
-        // Bone繧呈戟縺溘↑縺Мesh縺ｯNode縺ｮWorldTransform縺縺代ｒ0逡ｪ縺ｸ蜈･繧後ｋ縲・
+        // Boneを持たないMeshはNodeのWorldTransformだけを0番へ入れる。
         transforms_[0] = mesh_.node->worldTransform;
     }
     renderContext_.deviceContext->UpdateSubresource(
@@ -161,7 +161,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const std::vector<DirectX::XMFLOAT4X4>& transforms_)
 {
-    // Afterimage縺ｪ縺ｩ縲∝､夜Κ縺ｧ菫晏ｭ倥＠縺蘖ose陦悟・繧偵◎縺ｮ縺ｾ縺ｾSkinning逕ｨCB縺ｸ霆｢騾√☆繧九・
+    // Afterimageなど、外部で保存したPose行列をそのままSkinning用CBへ転送する。
     DirectX::XMFLOAT4X4 bufferTransforms_[256]{};
     const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
     for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
@@ -174,7 +174,7 @@ void MeshVFXShader::UpdateSkeleton(
 
 void MeshVFXShader::UpdateScene(const RenderContext& renderContext_)
 {
-    // Camera/Depth蠕ｩ蜈・ュ蝣ｱ繧辿LSL縺ｮScene螳壽焚縺ｸ蜷医ｏ縺帙※譖ｴ譁ｰ縺吶ｋ縲・
+    // CameraとDepth復元用の情報をHLSLのScene定数へ合わせて更新する。
     if (!renderContext_.camera) return;
 
     const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&renderContext_.camera->GetView());
@@ -204,7 +204,7 @@ void MeshVFXShader::UpdatePart(
     float partTime_,
     float alpha_)
 {
-    // 1Part蛻・・邱ｨ髮・､縺ｨRuntime Texture繧担hader縺ｸ騾√ｋ縲ゅ％縺薙′C++險ｭ螳壹→HLSL陦ｨ迴ｾ縺ｮ謗･邯夂せ縲・
+    // 1Part分の編集値とRuntime TextureをShaderへ送る。ここがC++設定とHLSL表現の接続点。
     CbMeshVFX constants_{};
     DirectX::XMStoreFloat4x4(&constants_.world, world_);
     constants_.color = part_.color;
@@ -228,7 +228,7 @@ void MeshVFXShader::UpdatePart(
     constants_.dissolveThreshold = part_.dissolveThreshold;
     const auto calculateRotation_ = [partTime_](float initialRotation_, float rotationSpeed_)
         {
-            // GUI縺ｯ蠎ｦ謨ｰ豕輔〒謇ｱ縺・ヾhader縺ｸ縺ｯ繝ｩ繧ｸ繧｢繝ｳ縺ｧ貂｡縺吶・
+            // GUIは度数法で扱い、Shaderへはラジアンで渡す。
             const float rotation_ = DirectX::XMConvertToRadians(
                 initialRotation_ + rotationSpeed_ * partTime_);
             return std::fmod(rotation_, 2.0f * std::numbers::pi_v<float>);
@@ -289,7 +289,7 @@ void MeshVFXShader::UpdatePart(
 
 void MeshVFXShader::End(const RenderContext& renderContext_)
 {
-    // 谺｡縺ｮ謠冗判縺ｸTexture/CB/Shader迥ｶ諷九ｒ謖√■雜翫＆縺ｪ縺・ｈ縺・｀eshVFX縺ｧ菴ｿ縺｣縺欖lot繧定ｧ｣髯､縺吶ｋ縲・
+    // 次の描画へTexture/CB/Shader状態を持ち越さないよう、MeshVFXで使用したSlotを解除する。
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     ID3D11ShaderResourceView* nullTextures_[9] = {};
     ID3D11Buffer* nullBuffer_ = nullptr;

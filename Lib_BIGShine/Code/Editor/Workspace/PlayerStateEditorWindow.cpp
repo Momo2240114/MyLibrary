@@ -641,10 +641,13 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     meshVFXRenderSystem.Initialize(graphics_.GetDevice());
 
     previewObject = std::make_shared<GameObject>("VFXPreviewObject");
+    previewObject->SetManager(gameObjectManager);
     previewObject->transform->gameObject = previewObject;
     previewModel = previewObject->AddComponent<GltfModelCommponennt>();
     previewParticle = previewObject->AddComponent<ParticleComponent>();
     previewMeshVFX = previewObject->AddComponent<MeshVFXComponent>();
+    previewAttackHit = previewObject->AddComponent<AttackEffectHitComponent>();
+    if (previewAttackHit) previewAttackHit->SetDestroyOnLifeEnd(false);
     if (previewParticle)
     {
         previewParticle->RefreshTextureList();
@@ -675,6 +678,7 @@ void ParticleEditorWindow::DrawToolbar()
     if (ImGui::MenuItem(sequencePlaying ? "Pause" : "Play"))
     {
         sequencePlaying = !sequencePlaying;
+        if (sequencePlaying && previewAttackHit) previewAttackHit->Play();
     }
     if (ImGui::MenuItem("Stop"))
     {
@@ -1018,6 +1022,11 @@ void ParticleEditorWindow::DrawInspectorPanel()
             previewMeshVFX->Gui();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Attack Hit"))
+        {
+            if (previewAttackHit) previewAttackHit->Gui();
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("Source Model"))
         {
             if (previewObject->transform) previewObject->transform->Gui();
@@ -1117,6 +1126,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
     if (!sequencePlaying) return;
 
     sequenceTime += deltaTime_;
+    if (previewAttackHit) previewAttackHit->Update(deltaTime_);
     for (TimelineTrack& track_ : timelineTracks)
     {
         const bool shouldBeActive_ =
@@ -1155,6 +1165,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
         const bool shouldContinue_ = sequenceLoop;
         ResetSequence();
         sequencePlaying = shouldContinue_;
+        if (sequencePlaying && previewAttackHit) previewAttackHit->Play();
     }
 }
 
@@ -1166,6 +1177,11 @@ void ParticleEditorWindow::ResetSequence()
     {
         previewMeshVFX->Stop();
         previewMeshVFX->Reset();
+    }
+    if (previewAttackHit)
+    {
+        previewAttackHit->Stop();
+        previewAttackHit->ResetRuntime();
     }
     for (TimelineTrack& track_ : timelineTracks)
     {
@@ -1203,6 +1219,10 @@ bool ParticleEditorWindow::SaveSequence(const std::string& path_)
     if (previewMeshVFX)
     {
         previewMeshVFX->Serialize(sequenceJson_["MeshVFX"]);
+    }
+    if (previewAttackHit)
+    {
+        previewAttackHit->Serialize(sequenceJson_["AttackEffectHit"]);
     }
 
     const std::filesystem::path sequencePath_(path_);
@@ -1253,6 +1273,11 @@ bool ParticleEditorWindow::LoadSequence(const std::string& path_)
     {
         previewMeshVFX->Deserialize(sequenceJson_["MeshVFX"]);
         previewMeshVFX->Stop();
+    }
+    if (previewAttackHit && sequenceJson_.contains("AttackEffectHit"))
+    {
+        previewAttackHit->Deserialize(sequenceJson_["AttackEffectHit"]);
+        previewAttackHit->Stop();
     }
 
     const std::string sequenceName_ = std::filesystem::path(path_).stem().string();

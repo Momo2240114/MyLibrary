@@ -14,6 +14,7 @@
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Graphics/Resource/Animation/PoseLibraryResourceManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/GamePlay/Combat/AttackTemplateManager.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "ImSequencer.h"
 #include "ImGuizmo.h"
@@ -1864,26 +1865,32 @@ void AnimationEditorWindow::DrawPoseEditMode(GltfModelCommponennt* modelComp, An
         ImGui::TextDisabled("Unsaved edits");
     }
 }
-
-void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController)
+void AnimationEditorWindow::DrawEventSequencer(
+    GltfModelCommponennt* modelComp,
+    AnimationControllerComponent* animController)
 {
-    auto& states = animController->GetStates();
-    if (states.empty())
+    AttackTemplateManager& attackTemplateManager_ =
+        AttackTemplateManager::Instance();
+
+    auto& states_ = animController->GetStates();
+    if (states_.empty())
     {
         ImGui::TextDisabled("No animation states are registered.");
         return;
     }
 
-    if (selectedEventStateName.empty() || !states.count(selectedEventStateName))
+    if (selectedEventStateName.empty() || !states_.count(selectedEventStateName))
     {
-        if (const AnimState* current = animController->GetCurrentState())
+        if (const AnimState* currentState_ = animController->GetCurrentState())
         {
-            selectedEventStateName = current->name;
+            selectedEventStateName = currentState_->name;
         }
-        if (selectedEventStateName.empty() || !states.count(selectedEventStateName))
+
+        if (selectedEventStateName.empty() || !states_.count(selectedEventStateName))
         {
-            selectedEventStateName = states.begin()->first;
+            selectedEventStateName = states_.begin()->first;
         }
+
         selectedEvent = -1;
     }
 
@@ -1891,12 +1898,20 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     if (ImGui::BeginCombo("Editing State", selectedEventStateName.c_str()))
     {
         ImGui::SetNextItemWidth(220.0f);
-        ImGui::InputTextWithHint("##EventStateSearch", "Search states...", &eventStateSearchText);
+        ImGui::InputTextWithHint(
+            "##EventStateSearch",
+            "Search states...",
+            &eventStateSearchText);
+
         ImGui::Separator();
 
-        for (const auto& [stateName_, state_] : states)
+        for (const auto& [stateName_, state_] : states_)
         {
-            if (!state_ || !ContainsCaseInsensitive(stateName_, eventStateSearchText)) continue;
+            if (!state_ ||
+                !ContainsCaseInsensitive(stateName_, eventStateSearchText))
+            {
+                continue;
+            }
 
             const bool selected_ = stateName_ == selectedEventStateName;
             if (ImGui::Selectable(stateName_.c_str(), selected_))
@@ -1904,41 +1919,61 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
                 selectedEventStateName = stateName_;
                 selectedEvent = -1;
             }
-            if (selected_) ImGui::SetItemDefaultFocus();
+
+            if (selected_)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
         }
+
         ImGui::EndCombo();
     }
 
-    AnimState* targetState = states[selectedEventStateName].get();
-    float duration = 1.0f;
-    if (targetState->type == AnimStateType::Custom)
+    AnimState* targetState_ = states_[selectedEventStateName].get();
+    if (!targetState_)
     {
-        auto poseLibrary = animController->GetPoseLibrary();
-        if (poseLibrary &&
-            targetState->customAnimIndex >= 0 &&
-            targetState->customAnimIndex < (int)poseLibrary->customAnims.size())
+        ImGui::TextDisabled("Selected animation state is invalid.");
+        return;
+    }
+
+    float duration_ = 1.0f;
+
+    if (targetState_->type == AnimStateType::Custom)
+    {
+        auto poseLibrary_ = animController->GetPoseLibrary();
+        if (poseLibrary_ &&
+            targetState_->customAnimIndex >= 0 &&
+            targetState_->customAnimIndex < static_cast<int>(poseLibrary_->customAnims.size()))
         {
-            duration = poseLibrary->customAnims[targetState->customAnimIndex].duration;
+            duration_ =
+                poseLibrary_->customAnims[targetState_->customAnimIndex].duration;
         }
     }
-    else if (targetState->type == AnimStateType::Blend1D && targetState->animIndexA >= 0)
+    else if (targetState_->type == AnimStateType::Blend1D &&
+        targetState_->animIndexA >= 0)
     {
-        duration = modelComp->GetAnimationDuration(targetState->animIndexA);
+        duration_ = modelComp->GetAnimationDuration(targetState_->animIndexA);
     }
-    else if (targetState->animationIndex >= 0)
+    else if (targetState_->animationIndex >= 0)
     {
-        duration = modelComp->GetAnimationDuration(targetState->animationIndex);
+        duration_ =
+            modelComp->GetAnimationDuration(targetState_->animationIndex);
     }
+
+    duration_ = (std::max)(0.05f, duration_);
 
     if (ImGui::Button(animController->IsAnimationPaused() ? "Play" : "Pause"))
     {
         if (animController->IsAnimationPaused())
         {
-            const AnimState* currentState_ = animController->GetCurrentState();
+            const AnimState* currentState_ =
+                animController->GetCurrentState();
+
             if (!currentState_ || currentState_->name != selectedEventStateName)
             {
                 animController->ChangeState(selectedEventStateName, 0.0f);
             }
+
             animController->SetAnimationPaused(false);
         }
         else
@@ -1946,77 +1981,164 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
             animController->SetAnimationPaused(true);
         }
     }
+
     ImGui::SameLine();
+
     if (ImGui::Button("Stop"))
     {
         animController->ChangeState(selectedEventStateName, 0.0f);
         animController->SetAnimatorTime(0.0f);
         animController->SetAnimationPaused(true);
     }
+
     ImGui::SameLine();
-    ImGui::Text("Time: %.3f s / %.3f s", animController->GetAnimatorTime(), duration);
 
-    AnimSequenceAdapter adapter;
-    adapter.targetState = targetState;
-    adapter.duration = (std::max)(0.05f, duration);
-    adapter.fps = 60.0f;
-    adapter.SyncFrames();
+    ImGui::Text(
+        "Time: %.3f s / %.3f s",
+        animController->GetAnimatorTime(),
+        duration_);
 
-    int currentFrame = (int)(animController->GetAnimatorTime() * adapter.fps);
-    const int previousFrame_ = currentFrame;
+    AnimSequenceAdapter adapter_;
+    adapter_.targetState = targetState_;
+    adapter_.duration = duration_;
+    adapter_.fps = 60.0f;
+    adapter_.SyncFrames();
 
-    ImGui::PushItemWidth(-1);
-    const bool showEventSequencer_ = ImGui::BeginChild("InlineEventSequencerRegion", ImVec2(0, 300), true);
+    if (ImGui::Button("Add Attack Template Event"))
+    {
+        attackTemplateManager_.LoadAll();
+
+        if (attackTemplateManager_.GetTemplates().empty())
+        {
+            AttackTemplate defaultTemplate_{};
+            defaultTemplate_.id = "NewAttackTemplate";
+            defaultTemplate_.displayName = "New Attack Template";
+
+            attackTemplateManager_.SaveTemplate(defaultTemplate_);
+            attackTemplateManager_.LoadAll();
+        }
+
+        AnimEvent attackEvent_{};
+        attackEvent_.eventLabel = "AttackTemplate";
+        attackEvent_.startAction = "AttackTemplate_Start";
+        attackEvent_.updateAction = "AttackTemplate_Update";
+        attackEvent_.endAction = "AttackTemplate_End";
+        attackEvent_.eventTemplateType =
+            ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+        attackEvent_.ownerTarget = "Self";
+        attackEvent_.startTime = animController->GetAnimatorTime();
+        attackEvent_.endTime =
+            (std::min)(attackEvent_.startTime + 0.2f, adapter_.duration);
+        attackEvent_.callEndOnStateExit = true;
+
+        if (!attackTemplateManager_.GetTemplates().empty())
+        {
+            attackEvent_.attackTemplateId =
+                attackTemplateManager_.GetTemplates().front().id;
+        }
+
+        targetState_->events.push_back(attackEvent_);
+        selectedEvent = static_cast<int>(targetState_->events.size()) - 1;
+
+        adapter_.SyncFrames();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Reload Attack Templates"))
+    {
+        attackTemplateManager_.LoadAll();
+    }
+
+    int currentFrame_ =
+        static_cast<int>(animController->GetAnimatorTime() * adapter_.fps);
+
+    const int previousFrame_ = currentFrame_;
+
+    ImGui::PushItemWidth(-1.0f);
+
+    const bool showEventSequencer_ =
+        ImGui::BeginChild(
+            "InlineEventSequencerRegion",
+            ImVec2(0.0f, 300.0f),
+            true);
+
     if (showEventSequencer_)
     {
-        if (ImSequencer::Sequencer(&adapter, &currentFrame, &eventSequencerExpanded, &selectedEvent, &firstEventFrame,
-            ImSequencer::SEQUENCER_EDIT_ALL | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_CHANGE_FRAME))
+        if (ImSequencer::Sequencer(
+            &adapter_,
+            &currentFrame_,
+            &eventSequencerExpanded,
+            &selectedEvent,
+            &firstEventFrame,
+            ImSequencer::SEQUENCER_EDIT_ALL |
+            ImSequencer::SEQUENCER_ADD |
+            ImSequencer::SEQUENCER_DEL |
+            ImSequencer::SEQUENCER_CHANGE_FRAME))
         {
-            adapter.EndEdit();
+            adapter_.EndEdit();
         }
     }
+
     ImGui::EndChild();
     ImGui::PopItemWidth();
 
-    if (currentFrame != previousFrame_)
+    if (currentFrame_ != previousFrame_)
     {
-        const int clampedFrame_ = (std::max)(
-            adapter.GetFrameMin(),
-            (std::min)(adapter.GetFrameMax(), currentFrame));
+        const int clampedFrame_ =
+            (std::max)(
+                adapter_.GetFrameMin(),
+                (std::min)(adapter_.GetFrameMax(), currentFrame_));
+
         animController->ChangeState(selectedEventStateName, 0.0f);
-        animController->SetAnimatorTime(adapter.ToTime(clampedFrame_));
+        animController->SetAnimatorTime(adapter_.ToTime(clampedFrame_));
         animController->SetAnimationPaused(true);
     }
 
-    if (selectedEvent < 0 || selectedEvent >= (int)targetState->events.size())
+    if (selectedEvent < 0 ||
+        selectedEvent >= static_cast<int>(targetState_->events.size()))
     {
         ImGui::TextDisabled("Click an event bar or name to edit details.");
         return;
     }
 
-    if (!ImGui::BeginChild("InlineEventDetails", ImVec2(0, 0), true))
+    if (!ImGui::BeginChild("InlineEventDetails", ImVec2(0.0f, 0.0f), true))
     {
         ImGui::EndChild();
         return;
     }
 
-    auto& ev = targetState->events[selectedEvent];
-    ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Editing Event #%d", selectedEvent);
+    AnimEvent& ev_ = targetState_->events[selectedEvent];
+
+    ImGui::TextColored(
+        ImVec4(0.4f, 0.8f, 1.0f, 1.0f),
+        "Editing Event #%d",
+        selectedEvent);
+
     ImGui::SameLine();
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.1f, 0.1f, 1.0f));
+    ImGui::PushStyleColor(
+        ImGuiCol_Button,
+        ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+
+    ImGui::PushStyleColor(
+        ImGuiCol_ButtonHovered,
+        ImVec4(0.8f, 0.1f, 0.1f, 1.0f));
+
     if (ImGui::Button("Delete Event"))
     {
-        adapter.Del(selectedEvent);
+        adapter_.Del(selectedEvent);
         selectedEvent = -1;
+
         ImGui::PopStyleColor(2);
         ImGui::EndChild();
         return;
     }
+
     ImGui::PopStyleColor(2);
 
     ImGui::SameLine();
+
     if (ImGui::Button("Deselect"))
     {
         selectedEvent = -1;
@@ -2025,12 +2147,180 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
     }
 
     ImGui::SetNextItemWidth(220.0f);
-    ImGui::InputText("Display Label", &ev.eventLabel);
+    ImGui::InputText("Display Label", &ev_.eventLabel);
+
+    const bool isAttackTemplateEvent_ =
+        ev_.eventTemplateType ==
+        ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+
+    if (isAttackTemplateEvent_)
+    {
+        ImGui::SeparatorText("Attack Template Event");
+
+        ImGui::BeginDisabled(true);
+
+        ImGui::SetNextItemWidth(240.0f);
+        ImGui::InputText("Start Action", &ev_.startAction);
+
+        ImGui::SetNextItemWidth(240.0f);
+        ImGui::InputText("Update Action", &ev_.updateAction);
+
+        ImGui::SetNextItemWidth(240.0f);
+        ImGui::InputText("End Action", &ev_.endAction);
+
+        ImGui::EndDisabled();
+
+        if (ImGui::Button("Fix Attack Template Actions"))
+        {
+            ev_.startAction = "AttackTemplate_Start";
+            ev_.updateAction = "AttackTemplate_Update";
+            ev_.endAction = "AttackTemplate_End";
+        }
+
+        if (attackTemplateManager_.GetTemplates().empty())
+        {
+            attackTemplateManager_.LoadAll();
+        }
+
+        const char* preview_ = ev_.attackTemplateId.empty()
+            ? "(Select Template)"
+            : ev_.attackTemplateId.c_str();
+
+        ImGui::SetNextItemWidth(280.0f);
+        if (ImGui::BeginCombo("Attack Template", preview_))
+        {
+            for (const AttackTemplate& attackTemplate_ :
+                attackTemplateManager_.GetTemplates())
+            {
+                const bool selected_ =
+                    ev_.attackTemplateId == attackTemplate_.id;
+
+                std::string label_ = attackTemplate_.displayName.empty()
+                    ? attackTemplate_.id
+                    : attackTemplate_.displayName;
+
+                if (label_ != attackTemplate_.id)
+                {
+                    label_ += "##" + attackTemplate_.id;
+                }
+
+                if (ImGui::Selectable(label_.c_str(), selected_))
+                {
+                    ev_.attackTemplateId = attackTemplate_.id;
+                    attackTemplateManager_.OpenEditor(ev_.attackTemplateId);
+                }
+
+                if (selected_)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Reload Templates"))
+        {
+            attackTemplateManager_.LoadAll();
+        }
+
+        const char* ownerTargets_[] =
+        {
+            "Self",
+            "Owner",
+            "Weapon",
+            "Target",
+            "LockOnTarget"
+        };
+
+        int ownerTargetIndex_ = 0;
+        for (int index_ = 0; index_ < IM_ARRAYSIZE(ownerTargets_); ++index_)
+        {
+            if (ev_.ownerTarget == ownerTargets_[index_])
+            {
+                ownerTargetIndex_ = index_;
+                break;
+            }
+        }
+
+        ImGui::SetNextItemWidth(180.0f);
+        if (ImGui::Combo(
+            "Owner Target",
+            &ownerTargetIndex_,
+            ownerTargets_,
+            IM_ARRAYSIZE(ownerTargets_)))
+        {
+            ev_.ownerTarget = ownerTargets_[ownerTargetIndex_];
+        }
+
+        if (ImGui::Button("Duplicate Attack Template") &&
+            !ev_.attackTemplateId.empty())
+        {
+            const AttackTemplate* sourceTemplate_ =
+                attackTemplateManager_.FindTemplate(ev_.attackTemplateId);
+
+            if (sourceTemplate_)
+            {
+                std::string newId_ = ev_.attackTemplateId + "_Copy";
+                int copyIndex_ = 2;
+
+                while (attackTemplateManager_.FindTemplate(newId_))
+                {
+                    newId_ =
+                        ev_.attackTemplateId +
+                        "_Copy" +
+                        std::to_string(copyIndex_++);
+                }
+
+                if (attackTemplateManager_.DuplicateTemplate(
+                    *sourceTemplate_,
+                    newId_))
+                {
+                    ev_.attackTemplateId = newId_;
+                    attackTemplateManager_.OpenEditor(newId_);
+                }
+            }
+        }
+
+        ImGui::TextDisabled(
+            "Damage / HitStop / VFX / HitBox are edited in the template below.");
+
+        ImGui::Separator();
+
+        if (ev_.attackTemplateId.empty())
+        {
+            ImGui::TextDisabled("Select an AttackTemplate to edit.");
+        }
+        else
+        {
+            if (ImGui::CollapsingHeader(
+                "Inline Attack Template Editor",
+                ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::BeginChild(
+                    "InlineAttackTemplateEditor",
+                    ImVec2(0.0f, 520.0f),
+                    true);
+
+                attackTemplateManager_.DrawInlineEditor(
+                    ev_.attackTemplateId,
+                    gameObjectManager);
+
+                ImGui::EndChild();
+            }
+        }
+    }
 
     ImGui::Separator();
 
-    auto selectedObject = GetPreviewManager() ? GetPreviewManager()->GetSelectedObject() : nullptr;
-    auto& globalReg = ActionRegistry::Instance();
+    auto selectedObject_ =
+        GetPreviewManager()
+        ? GetPreviewManager()->GetSelectedObject()
+        : nullptr;
+
+    ActionRegistry& globalReg_ = ActionRegistry::Instance();
 
     struct CategoryEntry
     {
@@ -2038,199 +2328,380 @@ void AnimationEditorWindow::DrawEventSequencer(GltfModelCommponennt* modelComp, 
         std::string menuLabel;
         ActionRegistry* registry = nullptr;
     };
-    std::vector<CategoryEntry> allCategories;
 
-    auto addRegistryCategories_ = [&](ActionRegistry& registry_, const std::string& sourceLabel_)
+    std::vector<CategoryEntry> allCategories_;
+
+    auto addRegistryCategories_ =
+        [&](ActionRegistry& registry_, const std::string& sourceLabel_)
         {
             for (const auto& category_ : registry_.GetCategories())
             {
-                allCategories.push_back({ category_, sourceLabel_ + " " + category_, &registry_ });
+                allCategories_.push_back(
+                    {
+                        category_,
+                        sourceLabel_ + " " + category_,
+                        &registry_
+                    });
             }
         };
 
-    if (selectedObject)
+    if (selectedObject_)
     {
-        addRegistryCategories_(selectedObject->localRegistry, "[Self]");
+        addRegistryCategories_(selectedObject_->localRegistry, "[Self]");
 
-        auto parentTransform_ = selectedObject->transform ? selectedObject->transform->parent.lock() : nullptr;
+        auto parentTransform_ =
+            selectedObject_->transform
+            ? selectedObject_->transform->parent.lock()
+            : nullptr;
+
         while (parentTransform_)
         {
             auto parentObject_ = parentTransform_->gameObject.lock();
-            if (!parentObject_) break;
+            if (!parentObject_)
+            {
+                break;
+            }
 
-            addRegistryCategories_(parentObject_->localRegistry, "[Parent:" + parentObject_->GetName() + "]");
-            parentTransform_ = parentObject_->transform ? parentObject_->transform->parent.lock() : nullptr;
+            addRegistryCategories_(
+                parentObject_->localRegistry,
+                "[Parent:" + parentObject_->GetName() + "]");
+
+            parentTransform_ =
+                parentObject_->transform
+                ? parentObject_->transform->parent.lock()
+                : nullptr;
         }
 
-        auto collectChildActions_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
+        auto collectChildActions_ =
+            [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
             {
-                if (!object_ || !object_->transform) return;
+                if (!object_ || !object_->transform)
+                {
+                    return;
+                }
 
                 for (const auto& childTransform_ : object_->transform->children)
                 {
-                    if (!childTransform_) continue;
+                    if (!childTransform_)
+                    {
+                        continue;
+                    }
 
-                    auto childObject_ = childTransform_->gameObject.lock();
-                    if (!childObject_) continue;
+                    auto childObject_ =
+                        childTransform_->gameObject.lock();
 
-                    addRegistryCategories_(childObject_->localRegistry, "[Child:" + childObject_->GetName() + "]");
+                    if (!childObject_)
+                    {
+                        continue;
+                    }
+
+                    addRegistryCategories_(
+                        childObject_->localRegistry,
+                        "[Child:" + childObject_->GetName() + "]");
+
                     self_(self_, childObject_);
                 }
             };
-        collectChildActions_(collectChildActions_, selectedObject);
+
+        collectChildActions_(collectChildActions_, selectedObject_);
     }
 
-    addRegistryCategories_(globalReg, "[Global]");
+    addRegistryCategories_(globalReg_, "[Global]");
 
-    auto actionField = [&](const char* label, std::string& targetStr)
+    auto actionField_ =
+        [&](const char* label_, std::string& targetStr_)
         {
             ImGui::SetNextItemWidth(260.0f);
-            ImGui::InputText(label, &targetStr);
+            ImGui::InputText(label_, &targetStr_);
 
             ImGui::SameLine();
-            std::string popupName = std::string("ActionSelect##Inline") + label;
-            if (ImGui::Button((std::string("Select##Inline") + label).c_str()))
+
+            std::string popupName_ =
+                std::string("ActionSelect##Inline") + label_;
+
+            if (ImGui::Button(
+                (std::string("Select##Inline") + label_).c_str()))
             {
-                ImGui::OpenPopup(popupName.c_str());
+                ImGui::OpenPopup(popupName_.c_str());
             }
 
-            if (ImGui::BeginPopup(popupName.c_str()))
+            if (ImGui::BeginPopup(popupName_.c_str()))
             {
                 if (ImGui::MenuItem("Clear"))
                 {
-                    targetStr.clear();
+                    targetStr_.clear();
                 }
+
                 ImGui::Separator();
 
-                for (const auto& entry : allCategories)
+                for (const CategoryEntry& entry_ : allCategories_)
                 {
-                    if (ImGui::BeginMenu(entry.menuLabel.c_str()))
+                    if (ImGui::BeginMenu(entry_.menuLabel.c_str()))
                     {
-                        std::vector<std::string> actionNames;
-                        if (entry.registry)
+                        std::vector<std::string> actionNames_;
+
+                        if (entry_.registry)
                         {
-                            actionNames = entry.registry->GetActionNames(entry.category);
+                            actionNames_ =
+                                entry_.registry->GetActionNames(entry_.category);
                         }
 
-                        for (const auto& actionName : actionNames)
+                        for (const std::string& actionName_ : actionNames_)
                         {
-                            if (ImGui::MenuItem(actionName.c_str()))
+                            if (ImGui::MenuItem(actionName_.c_str()))
                             {
-                                targetStr = actionName;
+                                targetStr_ = actionName_;
                             }
                         }
+
                         ImGui::EndMenu();
                     }
                 }
+
                 ImGui::EndPopup();
             }
         };
 
-    actionField("Start Action", ev.startAction);
-    actionField("Update Action", ev.updateAction);
-    actionField("End Action", ev.endAction);
-    ImGui::SeparatorText("Blackboard Writes");
-    int removeWriteIndex_ = -1;
-    for (int writeIndex_ = 0;
-        writeIndex_ < static_cast<int>(ev.blackboardWrites.size());
-        ++writeIndex_)
+    if (!isAttackTemplateEvent_)
     {
-        AnimBlackboardWrite& write_ = ev.blackboardWrites[writeIndex_];
-        ImGui::PushID(writeIndex_);
-        ImGui::InputText("Category", &write_.category);
-        ImGui::InputText("Key", &write_.key);
+        ImGui::SeparatorText("Actions");
 
-        int typeIndex_ = static_cast<int>(write_.type);
-        const char* typeNames_[] = { "Float", "Int", "Bool", "String" };
-        if (ImGui::Combo("Type", &typeIndex_, typeNames_, IM_ARRAYSIZE(typeNames_)))
-        {
-            write_.type = static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
-        }
+        actionField_("Start Action", ev_.startAction);
+        actionField_("Update Action", ev_.updateAction);
+        actionField_("End Action", ev_.endAction);
+    }
 
-        switch (write_.type)
+    const bool showBlackboardWrites_ =
+        !isAttackTemplateEvent_ ||
+        ImGui::CollapsingHeader("Advanced Blackboard Writes");
+
+    if (showBlackboardWrites_)
+    {
+        ImGui::SeparatorText("Blackboard Writes");
+
+        int removeWriteIndex_ = -1;
+
+        for (int writeIndex_ = 0;
+            writeIndex_ < static_cast<int>(ev_.blackboardWrites.size());
+            ++writeIndex_)
         {
-        case ANIM_BLACKBOARD_VALUE_TYPE::FLOAT:
-            ImGui::DragFloat("Value", &write_.floatValue, 0.1f);
-            break;
-        case ANIM_BLACKBOARD_VALUE_TYPE::INT:
-            ImGui::DragInt("Value", &write_.intValue);
-            break;
-        case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
-            ImGui::Checkbox("Value", &write_.boolValue);
-            break;
-        case ANIM_BLACKBOARD_VALUE_TYPE::STRING:
-        {
-            const bool isParticleAsset_ = write_.key == "HitParticleAssetPath";
-            const bool isMeshVFXAsset_ = write_.key == "HitMeshVFXAssetPath";
-            if ((isParticleAsset_ || isMeshVFXAsset_) && gameObjectManager)
+            AnimBlackboardWrite& write_ =
+                ev_.blackboardWrites[writeIndex_];
+
+            ImGui::PushID(writeIndex_);
+
+            ImGui::InputText("Category", &write_.category);
+            ImGui::InputText("Key", &write_.key);
+
+            int typeIndex_ = static_cast<int>(write_.type);
+            const char* typeNames_[] =
             {
-                const std::vector<std::string>& assets_ = isParticleAsset_
-                    ? gameObjectManager->GetEffectManager().GetParticleAssetPaths()
-                    : gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
-                if (ImGui::BeginCombo("Value", write_.stringValue.empty() ? "(None)" : write_.stringValue.c_str()))
+                "Float",
+                "Int",
+                "Bool",
+                "String"
+            };
+
+            if (ImGui::Combo(
+                "Type",
+                &typeIndex_,
+                typeNames_,
+                IM_ARRAYSIZE(typeNames_)))
+            {
+                write_.type =
+                    static_cast<ANIM_BLACKBOARD_VALUE_TYPE>(typeIndex_);
+            }
+
+            switch (write_.type)
+            {
+            case ANIM_BLACKBOARD_VALUE_TYPE::FLOAT:
+                ImGui::DragFloat("Value", &write_.floatValue, 0.1f);
+                break;
+
+            case ANIM_BLACKBOARD_VALUE_TYPE::INT:
+                ImGui::DragInt("Value", &write_.intValue);
+                break;
+
+            case ANIM_BLACKBOARD_VALUE_TYPE::BOOL:
+                ImGui::Checkbox("Value", &write_.boolValue);
+                break;
+
+            case ANIM_BLACKBOARD_VALUE_TYPE::STRING:
+            {
+                const bool isParticleAsset_ =
+                    write_.key == "HitParticleAssetPath";
+
+                const bool isMeshVFXAsset_ =
+                    write_.key == "HitMeshVFXAssetPath";
+
+                if ((isParticleAsset_ || isMeshVFXAsset_) &&
+                    gameObjectManager)
                 {
-                    if (ImGui::Selectable("(None)", write_.stringValue.empty())) write_.stringValue.clear();
-                    for (const std::string& assetPath_ : assets_)
+                    const std::vector<std::string>& assets_ =
+                        isParticleAsset_
+                        ? gameObjectManager->GetEffectManager().GetParticleAssetPaths()
+                        : gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+
+                    if (ImGui::BeginCombo(
+                        "Value",
+                        write_.stringValue.empty()
+                        ? "(None)"
+                        : write_.stringValue.c_str()))
                     {
-                        if (ImGui::Selectable(assetPath_.c_str(), write_.stringValue == assetPath_)) write_.stringValue = assetPath_;
+                        if (ImGui::Selectable(
+                            "(None)",
+                            write_.stringValue.empty()))
+                        {
+                            write_.stringValue.clear();
+                        }
+
+                        for (const std::string& assetPath_ : assets_)
+                        {
+                            if (ImGui::Selectable(
+                                assetPath_.c_str(),
+                                write_.stringValue == assetPath_))
+                            {
+                                write_.stringValue = assetPath_;
+                            }
+                        }
+
+                        ImGui::EndCombo();
                     }
-                    ImGui::EndCombo();
                 }
+                else
+                {
+                    ImGui::InputText("Value", &write_.stringValue);
+                }
+
+                break;
             }
-            else
+            }
+
+            if (ImGui::Button("Remove Write"))
             {
-                ImGui::InputText("Value", &write_.stringValue);
+                removeWriteIndex_ = writeIndex_;
             }
-            break;
+
+            ImGui::Separator();
+
+            ImGui::PopID();
         }
-        }
-        if (ImGui::Button("Remove Write")) removeWriteIndex_ = writeIndex_;
-        ImGui::Separator();
-        ImGui::PopID();
-    }
-    if (removeWriteIndex_ >= 0)
-    {
-        ev.blackboardWrites.erase(ev.blackboardWrites.begin() + removeWriteIndex_);
-    }
-    auto addAttackWrite_ = [&ev](const char* key_, ANIM_BLACKBOARD_VALUE_TYPE type_)
+
+        if (removeWriteIndex_ >= 0)
         {
-            AnimBlackboardWrite write_{};
-            write_.category = "Attack";
-            write_.key = key_;
-            write_.type = type_;
-            ev.blackboardWrites.push_back(write_);
-        };
-    if (ImGui::Button("+ Damage")) addAttackWrite_("Damage", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
-    ImGui::SameLine();
-    if (ImGui::Button("+ HitStopDuration")) addAttackWrite_("HitStopDuration", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
-    ImGui::SameLine();
-    if (ImGui::Button("+ HitStopScale")) addAttackWrite_("HitStopScale", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
-    ImGui::SameLine();
-    if (ImGui::Button("+ HitStopLayer")) addAttackWrite_("HitStopLayerMask", ANIM_BLACKBOARD_VALUE_TYPE::INT);
-    ImGui::SameLine();
-    if (ImGui::Button("+ KnockBack")) addAttackWrite_("KnockBackPower", ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
-    ImGui::SameLine();
-    if (ImGui::Button("+ HitParticle")) addAttackWrite_("HitParticleAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
-    ImGui::SameLine();
-    if (ImGui::Button("+ HitMeshVFX")) addAttackWrite_("HitMeshVFXAssetPath", ANIM_BLACKBOARD_VALUE_TYPE::STRING);
-    if (ImGui::Button("Add Blackboard Write"))
-    {
-        ev.blackboardWrites.push_back(AnimBlackboardWrite{});
+            ev_.blackboardWrites.erase(
+                ev_.blackboardWrites.begin() + removeWriteIndex_);
+        }
+
+        auto addAttackWrite_ =
+            [&ev_](const char* key_, ANIM_BLACKBOARD_VALUE_TYPE type_)
+            {
+                AnimBlackboardWrite write_{};
+                write_.category = "Attack";
+                write_.key = key_;
+                write_.type = type_;
+
+                ev_.blackboardWrites.push_back(write_);
+            };
+
+        if (!isAttackTemplateEvent_)
+        {
+            if (ImGui::Button("+ Damage"))
+            {
+                addAttackWrite_(
+                    "Damage",
+                    ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("+ HitStopDuration"))
+            {
+                addAttackWrite_(
+                    "HitStopDuration",
+                    ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("+ HitStopScale"))
+            {
+                addAttackWrite_(
+                    "HitStopScale",
+                    ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("+ HitStopLayer"))
+            {
+                addAttackWrite_(
+                    "HitStopLayerMask",
+                    ANIM_BLACKBOARD_VALUE_TYPE::INT);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("+ KnockBack"))
+            {
+                addAttackWrite_(
+                    "KnockBackPower",
+                    ANIM_BLACKBOARD_VALUE_TYPE::FLOAT);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("+ HitParticle"))
+            {
+                addAttackWrite_(
+                    "HitParticleAssetPath",
+                    ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("+ HitMeshVFX"))
+            {
+                addAttackWrite_(
+                    "HitMeshVFXAssetPath",
+                    ANIM_BLACKBOARD_VALUE_TYPE::STRING);
+            }
+        }
+
+        if (ImGui::Button("Add Blackboard Write"))
+        {
+            ev_.blackboardWrites.push_back(AnimBlackboardWrite{});
+        }
     }
 
-    ImGui::Checkbox("Call End On State Exit", &ev.callEndOnStateExit);
+    ImGui::Checkbox("Call End On State Exit", &ev_.callEndOnStateExit);
 
     ImGui::Separator();
+
     ImGui::PushItemWidth(130.0f);
-    if (ImGui::DragFloat("Start (s)", &ev.startTime, 0.01f, 0.0f, ev.endTime))
+
+    if (ImGui::DragFloat(
+        "Start (s)",
+        &ev_.startTime,
+        0.01f,
+        0.0f,
+        ev_.endTime))
     {
-        ev.frameStart = adapter.ToFrame(ev.startTime);
+        ev_.frameStart = adapter_.ToFrame(ev_.startTime);
     }
+
     ImGui::SameLine();
-    if (ImGui::DragFloat("End (s)", &ev.endTime, 0.01f, ev.startTime, adapter.duration))
+
+    if (ImGui::DragFloat(
+        "End (s)",
+        &ev_.endTime,
+        0.01f,
+        ev_.startTime,
+        adapter_.duration))
     {
-        ev.frameEnd = adapter.ToFrame(ev.endTime);
+        ev_.frameEnd = adapter_.ToFrame(ev_.endTime);
     }
+
     ImGui::PopItemWidth();
 
     ImGui::EndChild();

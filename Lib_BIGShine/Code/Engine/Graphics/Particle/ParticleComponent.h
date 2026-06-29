@@ -27,6 +27,8 @@ private:
         std::string maskTextureFileName;           // GUI表示用のMask Textureファイル名
         std::string gradientTexturePath;           // Gradient Textureの保存パス
         std::string gradientTextureFileName;       // GUI表示用のGradient Textureファイル名
+        std::string shadeGradientTexturePath;      // Shade Gradient Textureの保存パス
+        std::string shadeGradientTextureFileName;  // GUI表示用のShade Gradient Textureファイル名
 
         float delay = 0.0f;                        // 再生開始からEmitterを有効化するまでの待ち時間
         uint32_t meshVertexSampleCount = 2048;     // Mesh Vertices発生で使う頂点サンプル最大数

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <d3d11.h>
 #include <wrl.h>
@@ -32,6 +32,7 @@ public:
     void SetTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { textureSRV = srv; }
     void SetMaskTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { maskTextureSRV = srv; settings.useMaskTexture = srv ? 1u : 0u; }
     void SetGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { gradientTextureSRV = srv; settings.useGradientTexture = srv ? 1u : 0u; }
+    void SetShadeGradientTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) { shadeGradientTextureSRV = srv; settings.useShadeGradientTexture = srv ? 1u : 0u; }
     void SetMeshSpawnPositions(const std::vector<DirectX::XMFLOAT3>& positions_) { meshSpawnPositions = positions_; }
     std::vector<DirectX::XMFLOAT3>& GetMeshSpawnPositions() { return meshSpawnPositions; }
     ID3D11ShaderResourceView* GetSRV() const { return particleDataSRV.Get(); }
@@ -39,6 +40,7 @@ public:
     ID3D11ShaderResourceView* GetTextureSRV() const { return textureSRV.Get(); }
     ID3D11ShaderResourceView* GetMaskTextureSRV() const { return maskTextureSRV.Get(); }
     ID3D11ShaderResourceView* GetGradientTextureSRV() const { return gradientTextureSRV.Get(); }
+    ID3D11ShaderResourceView* GetShadeGradientTextureSRV() const { return shadeGradientTextureSRV.Get(); }
     ID3D11Buffer* GetConstantBuffer() const { return emitterConstantBuffer.Get(); }
     UINT GetMaxParticles() const { return numParticles; }
 
@@ -133,6 +135,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;         // Particle本体の色Texture。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> maskTextureSRV;     // Alpha/形状制御用Mask Texture。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gradientTextureSRV; // Color Over Life用Gradient Texture。
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadeGradientTextureSRV; // RGB明暗制御用Gradient Texture。
 
     // 全Emitterで共有するShader。Emitterごとに作ると重いのでstaticで共有する。
     static Microsoft::WRL::ComPtr<ID3D11ComputeShader> initShader;

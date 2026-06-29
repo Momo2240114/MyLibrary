@@ -2,13 +2,16 @@
     "ColliderComponents": [
         {
             "Data": {
-                "ActionPrefix": "",
+                "ActionPrefix": "Kick",
                 "ActivateActionName": "EnableHitBox",
+                "AllowMultiHit": false,
+                "AttackInstanceId": 98,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
+                "CanHitOwner": false,
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
-                "Damage": 1.0,
+                "Damage": 6.0,
                 "DamageKey": "Damage",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
@@ -20,12 +23,13 @@
                 "EndNodeName": "",
                 "GravityScale": 1.0,
                 "HalfHeight": 10.0,
+                "HitGroupId": 0,
                 "HitMeshVFXAssetPath": "",
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
-                "HitParticleAssetPath": "",
-                "HitParticleEmitterName": "",
+                "HitParticleAssetPath": "Data/Particle/HitParticle.json",
+                "HitParticleEmitterName": "HitParticle.",
                 "HitParticleLifeTime": 1.0,
                 "HitParticleNormalOffset": 0.0,
                 "HitSoundMuffled": false,
@@ -33,13 +37,13 @@
                 "HitSoundPath": "",
                 "HitSoundPathKey": "HitSoundPath",
                 "HitSoundVolume": 1.0,
-                "HitStopDir": 0.0,
+                "HitStopDuration": 0.125,
+                "HitStopDurationKey": "HitStopDuration",
                 "HitStopLayerMask": 3,
-                "HitStopTime": 0.0,
-                "HitStopTimeKey": "HitStopTime",
+                "HitStopScale": 0.15000000596046448,
                 "IsStatic": false,
                 "IsTrigger": false,
-                "KnockBackPower": 0.0,
+                "KnockBackPower": 5.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
                 "Offset": [
@@ -51,13 +55,15 @@
                 "Radius": 4.420000076293945,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
+                "SourceAction": "",
                 "StartNodeName": "",
+                "TeamId": 0,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 2.5799999237060547
             },
-            "Enabled": true,
+            "Enabled": false,
             "TypeName": "HitBox"
         }
     ],
@@ -78,9 +84,9 @@
     "ParentName": "PlayerModel",
     "Transform": {
         "Pos": [
-            0.03428459167480469,
-            0.422146201133728,
-            -0.1259746551513672
+            -0.2633476257324219,
+            0.5138373374938965,
+            -0.2708015441894531
         ],
         "Rot": [
             0.0,

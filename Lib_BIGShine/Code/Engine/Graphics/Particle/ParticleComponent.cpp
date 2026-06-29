@@ -379,7 +379,8 @@ void ParticleComponent::Gui()
                     {
                         if (slot_ == 0) texture_ = track.emitter->GetTextureSRV();
                         else if (slot_ == 1) texture_ = track.emitter->GetMaskTextureSRV();
-                        else texture_ = track.emitter->GetGradientTextureSRV();
+                        else if (slot_ == 2) texture_ = track.emitter->GetGradientTextureSRV();
+                        else texture_ = track.emitter->GetShadeGradientTextureSRV();
                     }
                     if (!AssetSlotGui::Draw(
                         label_, AssetSlotType::TEXTURE, path_, texture_, "Data/Texture/Particle")) return;
@@ -392,6 +393,7 @@ void ParticleComponent::Gui()
                     {
                         if (slot_ == 1) s.useMaskTexture = 1;
                         if (slot_ == 2) s.useGradientTexture = 1;
+                        if (slot_ == 3) s.useShadeGradientTexture = 1;
                         return;
                     }
 
@@ -402,19 +404,54 @@ void ParticleComponent::Gui()
                     {
                         if (slot_ == 0) track.emitter->SetTexture(dummyTexture_);
                         else if (slot_ == 1) track.emitter->SetMaskTexture(dummyTexture_);
-                        else track.emitter->SetGradientTexture(dummyTexture_);
+                        else if (slot_ == 2) track.emitter->SetGradientTexture(dummyTexture_);
+                        else track.emitter->SetShadeGradientTexture(dummyTexture_);
                     }
                     if (slot_ == 1) s.useMaskTexture = 0;
                     if (slot_ == 2) s.useGradientTexture = 0;
+                    if (slot_ == 3) s.useShadeGradientTexture = 0;
                 };
 
-            drawTextureSlot_("Color Texture", track.textureFileName, track.texturePath, 0);
+            drawTextureSlot_("Base Texture", track.textureFileName, track.texturePath, 0);
             drawTextureSlot_("Mask Texture", track.maskTextureFileName, track.maskTexturePath, 1);
             drawTextureSlot_("Gradient Texture", track.gradientTextureFileName, track.gradientTexturePath, 2);
+            drawTextureSlot_("Shade Gradient Texture", track.shadeGradientTextureFileName, track.shadeGradientTexturePath, 3);
             bool useMask = s.useMaskTexture != 0;
             bool useGradient = s.useGradientTexture != 0;
+            bool useShadeGradient_ = s.useShadeGradientTexture != 0;
             if (ImGui::Checkbox("Use Mask", &useMask)) s.useMaskTexture = useMask ? 1u : 0u;
-            if (ImGui::Checkbox("Use Gradient", &useGradient)) s.useGradientTexture = useGradient ? 1u : 0u;
+            if (ImGui::Checkbox("Use Gradient Texture", &useGradient)) s.useGradientTexture = useGradient ? 1u : 0u;
+            if (s.useGradientTexture != 0)
+            {
+                ImGui::TextDisabled("GradientTexture enabled: Particle RGB color is ignored. Alpha is still used.");
+                int sampleMode_ = static_cast<int>(s.gradientSampleMode);
+                const char* sampleModeNames_[] = { "Horizontal", "Vertical" };
+                if (ImGui::Combo("Gradient Sample Mode", &sampleMode_, sampleModeNames_, IM_ARRAYSIZE(sampleModeNames_)))
+                    s.gradientSampleMode = static_cast<uint32_t>(sampleMode_);
+                int direction_ = static_cast<int>(s.gradientDirection);
+                const char* directionNames_[] = { "Forward", "Reverse" };
+                if (ImGui::Combo("Gradient Direction", &direction_, directionNames_, IM_ARRAYSIZE(directionNames_)))
+                    s.gradientDirection = static_cast<uint32_t>(direction_);
+                ImGui::SliderFloat("Gradient Fixed UV", &s.gradientFixedUv, 0.0f, 1.0f);
+                ImGui::SliderFloat("Gradient Start UV", &s.gradientStartUv, 0.0f, 1.0f);
+                ImGui::SliderFloat("Gradient End UV", &s.gradientEndUv, 0.0f, 1.0f);
+            }
+            if (ImGui::Checkbox("Use Shade Gradient Texture", &useShadeGradient_))
+                s.useShadeGradientTexture = useShadeGradient_ ? 1u : 0u;
+            if (s.useShadeGradientTexture != 0)
+            {
+                int sampleMode_ = static_cast<int>(s.shadeGradientSampleMode);
+                const char* sampleModeNames_[] = { "Horizontal", "Vertical" };
+                if (ImGui::Combo("Shade Gradient Sample Mode", &sampleMode_, sampleModeNames_, IM_ARRAYSIZE(sampleModeNames_)))
+                    s.shadeGradientSampleMode = static_cast<uint32_t>(sampleMode_);
+                int direction_ = static_cast<int>(s.shadeGradientDirection);
+                const char* directionNames_[] = { "Forward", "Reverse" };
+                if (ImGui::Combo("Shade Gradient Direction", &direction_, directionNames_, IM_ARRAYSIZE(directionNames_)))
+                    s.shadeGradientDirection = static_cast<uint32_t>(direction_);
+                ImGui::SliderFloat("Shade Gradient Fixed UV", &s.shadeGradientFixedUv, 0.0f, 1.0f);
+                ImGui::SliderFloat("Shade Gradient Start UV", &s.shadeGradientStartUv, 0.0f, 1.0f);
+                ImGui::SliderFloat("Shade Gradient End UV", &s.shadeGradientEndUv, 0.0f, 1.0f);
+            }
 
             ImGui::SeparatorText("Sprite Sheet");
             int splitCount_[2] = { static_cast<int>(s.textureSplitCount.x), static_cast<int>(s.textureSplitCount.y) };
@@ -541,6 +578,12 @@ bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::s
             track.gradientTexturePath = fullPath;
             track.settings.useGradientTexture = 1;
         }
+        else if (slot == 3)
+        {
+            track.emitter->SetShadeGradientTexture(srv);
+            track.shadeGradientTexturePath = fullPath;
+            track.settings.useShadeGradientTexture = 1;
+        }
         else
         {
             track.emitter->SetTexture(srv);
@@ -606,6 +649,8 @@ ParticleEffectAsset ParticleComponent::GetAsset() const
         emitterAsset_.maskTextureFileName = track_.maskTextureFileName;
         emitterAsset_.gradientTexturePath = track_.gradientTexturePath;
         emitterAsset_.gradientTextureFileName = track_.gradientTextureFileName;
+        emitterAsset_.shadeGradientTexturePath = track_.shadeGradientTexturePath;
+        emitterAsset_.shadeGradientTextureFileName = track_.shadeGradientTextureFileName;
         emitterAsset_.delay = track_.delay;
         emitterAsset_.meshVertexSampleCount = track_.meshVertexSampleCount;
         emitterAsset_.blendMode = track_.blendMode;
@@ -637,6 +682,8 @@ void ParticleComponent::SetAsset(const ParticleEffectAsset& asset_)
         track_.maskTextureFileName = emitterAsset_.maskTextureFileName;
         track_.gradientTexturePath = emitterAsset_.gradientTexturePath;
         track_.gradientTextureFileName = emitterAsset_.gradientTextureFileName;
+        track_.shadeGradientTexturePath = emitterAsset_.shadeGradientTexturePath;
+        track_.shadeGradientTextureFileName = emitterAsset_.shadeGradientTextureFileName;
         track_.delay = emitterAsset_.delay;
         track_.meshVertexSampleCount = emitterAsset_.meshVertexSampleCount;
         track_.blendMode = emitterAsset_.blendMode;
@@ -960,8 +1007,12 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["Name"] = track.name;
         ej["SpawnSpace"] = static_cast<int>(track.spawnSpace);
         ej["TexturePath"] = track.texturePath;
+        ej["texturePath"] = track.texturePath;
         ej["MaskTexturePath"] = track.maskTexturePath;
+        ej["maskTexturePath"] = track.maskTexturePath;
         ej["GradientTexturePath"] = track.gradientTexturePath;
+        ej["gradientTexturePath"] = track.gradientTexturePath;
+        ej["shadeGradientTexturePath"] = track.shadeGradientTexturePath;
         ej["Delay"] = track.delay;
         ej["MeshVertexSampleCount"] = track.meshVertexSampleCount;
         ej["MaxCount"] = s.maxParticleCount;
@@ -970,6 +1021,18 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
         ej["SpawnShape"] = s.spawnShape;
         ej["UseMask"] = s.useMaskTexture;
         ej["UseGradient"] = s.useGradientTexture;
+        ej["useGradientTexture"] = s.useGradientTexture;
+        ej["gradientSampleMode"] = s.gradientSampleMode;
+        ej["gradientDirection"] = s.gradientDirection;
+        ej["gradientFixedUv"] = s.gradientFixedUv;
+        ej["gradientStartUv"] = s.gradientStartUv;
+        ej["gradientEndUv"] = s.gradientEndUv;
+        ej["useShadeGradientTexture"] = s.useShadeGradientTexture;
+        ej["shadeGradientSampleMode"] = s.shadeGradientSampleMode;
+        ej["shadeGradientDirection"] = s.shadeGradientDirection;
+        ej["shadeGradientFixedUv"] = s.shadeGradientFixedUv;
+        ej["shadeGradientStartUv"] = s.shadeGradientStartUv;
+        ej["shadeGradientEndUv"] = s.shadeGradientEndUv;
         ej["PosOffset"] = { s.emissionPosition.x, s.emissionPosition.y, s.emissionPosition.z };
         ej["ShapeStart"] = { s.shapeStart.x, s.shapeStart.y, s.shapeStart.z };
         ej["ShapeEnd"] = { s.shapeEnd.x, s.shapeEnd.y, s.shapeEnd.z };
@@ -1037,12 +1100,18 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
                 std::clamp(ej.value("SpawnSpace", 0), 0, 1));
             auto& s = track.settings;
 
-            track.texturePath = ej.value("TexturePath", "");
-            track.maskTexturePath = ej.value("MaskTexturePath", "");
-            track.gradientTexturePath = ej.value("GradientTexturePath", "");
+            track.texturePath = ej.value(
+                "texturePath", ej.value("TexturePath", ej.value("texture_path", std::string{})));
+            track.maskTexturePath = ej.value(
+                "maskTexturePath", ej.value("MaskTexturePath", std::string{}));
+            track.gradientTexturePath = ej.value(
+                "gradientTexturePath",
+                ej.value("GradientTexturePath", ej.value("color_temper_path", std::string{})));
+            track.shadeGradientTexturePath = ej.value("shadeGradientTexturePath", std::string{});
             if (!track.texturePath.empty()) track.textureFileName = std::filesystem::path(track.texturePath).filename().string();
             if (!track.maskTexturePath.empty()) track.maskTextureFileName = std::filesystem::path(track.maskTexturePath).filename().string();
             if (!track.gradientTexturePath.empty()) track.gradientTextureFileName = std::filesystem::path(track.gradientTexturePath).filename().string();
+            if (!track.shadeGradientTexturePath.empty()) track.shadeGradientTextureFileName = std::filesystem::path(track.shadeGradientTexturePath).filename().string();
 
             track.delay = ej.value("Delay", 0.0f);
             track.meshVertexSampleCount = ej.value("MeshVertexSampleCount", 2048u);
@@ -1051,7 +1120,18 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
             s.burstCount = ej.value("BurstCount", 100u);
             s.spawnShape = ej.value("SpawnShape", 0u);
             s.useMaskTexture = ej.value("UseMask", 0u);
-            s.useGradientTexture = ej.value("UseGradient", 0u);
+            s.useGradientTexture = ej.value("useGradientTexture", ej.value("UseGradient", 0u));
+            s.gradientSampleMode = ej.value("gradientSampleMode", static_cast<uint32_t>(PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL));
+            s.gradientDirection = ej.value("gradientDirection", static_cast<uint32_t>(PARTICLE_GRADIENT_DIRECTION_FORWARD));
+            s.gradientFixedUv = ej.value("gradientFixedUv", 0.5f);
+            s.gradientStartUv = ej.value("gradientStartUv", 0.0f);
+            s.gradientEndUv = ej.value("gradientEndUv", 1.0f);
+            s.useShadeGradientTexture = ej.value("useShadeGradientTexture", 0u);
+            s.shadeGradientSampleMode = ej.value("shadeGradientSampleMode", static_cast<uint32_t>(PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL));
+            s.shadeGradientDirection = ej.value("shadeGradientDirection", static_cast<uint32_t>(PARTICLE_GRADIENT_DIRECTION_FORWARD));
+            s.shadeGradientFixedUv = ej.value("shadeGradientFixedUv", 0.5f);
+            s.shadeGradientStartUv = ej.value("shadeGradientStartUv", 0.0f);
+            s.shadeGradientEndUv = ej.value("shadeGradientEndUv", 1.0f);
             s.gravity = ej.value("Gravity", -9.8f);
             if (ej.contains("Acceleration")) s.windVelocity = { ej["Acceleration"][0], ej["Acceleration"][1], ej["Acceleration"][2], 0.0f };
             else if (ej.contains("Wind")) s.windVelocity = { ej["Wind"][0], ej["Wind"][1], ej["Wind"][2], 0.0f };
@@ -1197,10 +1277,18 @@ void ParticleComponent::RebuildEmitterResources()
 
     for (auto& track_ : tracks)
     {
+        const uint32_t useMaskTexture_ = track_.settings.useMaskTexture;
+        const uint32_t useGradientTexture_ = track_.settings.useGradientTexture;
+        const uint32_t useShadeGradientTexture_ = track_.settings.useShadeGradientTexture;
         track_.emitter = std::make_unique<ParticleEmitter>(device_, track_.settings, track_.settings.maxParticleCount);
         if (!track_.texturePath.empty()) LoadEmitterTextureSlot(track_, track_.texturePath, 0);
         if (!track_.maskTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.maskTexturePath, 1);
         if (!track_.gradientTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.gradientTexturePath, 2);
+        if (!track_.shadeGradientTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.shadeGradientTexturePath, 3);
+        track_.settings.useMaskTexture = useMaskTexture_;
+        track_.settings.useGradientTexture = useGradientTexture_;
+        track_.settings.useShadeGradientTexture = useShadeGradientTexture_;
+        track_.emitter->ApplySettings(track_.settings);
         track_.emitter->SetEmissionEnabled(track_.isPlaybackEnabled);
     }
     RegisterActions();

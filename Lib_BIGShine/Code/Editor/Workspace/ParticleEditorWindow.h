@@ -5,6 +5,7 @@
 #include "Editor/Window/AssetBrowserWindow.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
@@ -70,6 +71,7 @@ private:
     std::shared_ptr<GltfModelCommponennt> previewModel; // 参照モデル。
     std::shared_ptr<ParticleComponent> previewParticle; // 編集対象Particle。
     std::shared_ptr<MeshVFXComponent> previewMeshVFX;   // 編集対象MeshVFX。
+    std::shared_ptr<AttackEffectHitComponent> previewAttackHit; // VFX同期攻撃判定。
     std::vector<std::string> particleAssetPaths;        // Particle Asset候補。
     std::vector<std::string> sequenceAssetPaths;        // Sequence Asset候補。
     std::vector<TimelineTrack> timelineTracks;          // Timeline上の再生トラック一覧。

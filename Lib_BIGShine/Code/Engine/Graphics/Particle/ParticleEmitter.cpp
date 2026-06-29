@@ -1,4 +1,4 @@
-﻿#include "ParticleEmitter.h"
+#include "ParticleEmitter.h"
 
 #include <algorithm>
 #include <cmath>
@@ -143,6 +143,7 @@ void ParticleEmitter::CreateGPUResources(ID3D11Device* device)
     CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, textureSRV.GetAddressOf());
     CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, maskTextureSRV.GetAddressOf());
     CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, gradientTextureSRV.GetAddressOf());
+    CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFFu, shadeGradientTextureSRV.GetAddressOf());
 }
 
 void ParticleEmitter::ApplySettings(const ParticleSystemConstants& nextSettings)
@@ -255,6 +256,7 @@ void ParticleEmitter::Render(ID3D11DeviceContext* context)
     ID3D11ShaderResourceView* texSRV = textureSRV.Get();
     ID3D11ShaderResourceView* maskSRV = maskTextureSRV.Get();
     ID3D11ShaderResourceView* gradientSRV = gradientTextureSRV.Get();
+    ID3D11ShaderResourceView* shadeGradientSRV = shadeGradientTextureSRV.Get();
     ID3D11Buffer* emitterCB = emitterConstantBuffer.Get();
 
     context->GSSetShaderResources(9, 1, &dataSRV);
@@ -262,7 +264,7 @@ void ParticleEmitter::Render(ID3D11DeviceContext* context)
     context->VSSetConstantBuffers(9, 1, &emitterCB);
     context->GSSetConstantBuffers(9, 1, &emitterCB);
     context->PSSetConstantBuffers(9, 1, &emitterCB);
-    ID3D11ShaderResourceView* particleTextures[] = { texSRV, maskSRV, gradientSRV };
+    ID3D11ShaderResourceView* particleTextures[] = { texSRV, maskSRV, gradientSRV, shadeGradientSRV };
     context->PSSetShaderResources(0, _countof(particleTextures), particleTextures);
 
     context->DrawInstancedIndirect(indirectDataBuffer.Get(), DrawIndirectOffset);

@@ -1,4 +1,4 @@
-﻿#include "ParticleRenderSystem.h"
+#include "ParticleRenderSystem.h"
 
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
@@ -123,7 +123,7 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
         ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr };
         dc->GSSetShaderResources(9, 2, nullSRVs);
 
-        ID3D11ShaderResourceView* nullPSViews[] = { nullptr, nullptr, nullptr };
+        ID3D11ShaderResourceView* nullPSViews[] = { nullptr, nullptr, nullptr, nullptr };
         dc->PSSetShaderResources(0, _countof(nullPSViews), nullPSViews);
 
         ID3D11Buffer* nullCB = nullptr;

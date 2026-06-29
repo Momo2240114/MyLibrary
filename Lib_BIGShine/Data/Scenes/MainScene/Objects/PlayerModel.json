@@ -249,7 +249,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -257,7 +257,7 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackEnter": {
                             "type": "bool",
@@ -265,15 +265,15 @@
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -287,12 +287,12 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                1.0
+                                -1.0
                             ]
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -304,11 +304,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -335,15 +335,31 @@
                             "type": "string",
                             "value": "Data/Particle/HitParticle.json"
                         },
+                        "HitStopDir": {
+                            "type": "float",
+                            "value": 0.25
+                        },
+                        "HitStopDuration": {
+                            "type": "float",
+                            "value": 0.125
+                        },
+                        "HitStopScale": {
+                            "type": "float",
+                            "value": 0.15000000596046448
+                        },
                         "HitStopTime": {
                             "type": "float",
                             "value": 0.05000000074505806
+                        },
+                        "KnockBackPower": {
+                            "type": "float",
+                            "value": 5.0
                         }
                     },
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -351,19 +367,19 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -377,12 +393,12 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                1.0
+                                -1.0
                             ]
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -394,11 +410,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -424,7 +440,7 @@
         {
             "Data": {
                 "AnimationData": {
-                    "DefaultState": "SS_Idle",
+                    "DefaultState": "SS_Attack1",
                     "States": [
                         {
                             "animIndexA": -1,
@@ -603,11 +619,14 @@
                                     "actionEnd": "",
                                     "actionStart": "InputBufferOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.3166667222976685,
+                                    "eventTemplateType": "NONE",
                                     "label": "InputBufferOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.0
                                 },
@@ -615,11 +634,14 @@
                                     "actionEnd": "CanComboOff",
                                     "actionStart": "CanCancelOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 2.383333444595337,
+                                    "eventTemplateType": "NONE",
                                     "label": "CanCancel",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.3333333730697632
                                 },
@@ -627,11 +649,14 @@
                                     "actionEnd": "Trail_Stop",
                                     "actionStart": "Trail_Start",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 1.0333333015441895,
+                                    "eventTemplateType": "NONE",
                                     "label": "Trail_",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.3166666626930237
                                 },
@@ -639,11 +664,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 2.883333444595337,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.7833333015441895
                                 },
@@ -651,18 +679,22 @@
                                     "actionEnd": "MaterialOverlay_Stop",
                                     "actionStart": "MaterialOverlay_Start",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.2666666507720947,
+                                    "eventTemplateType": "NONE",
                                     "label": "MaterialOverlay",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.01666666753590107
                                 },
                                 {
-                                    "actionEnd": "HitBox_DisableHitBox",
-                                    "actionStart": "HitBox_EnableHitBox",
+                                    "actionEnd": "Sword_DisableHitBox",
+                                    "actionStart": "Sword_EnableHitBox",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [
                                         {
                                             "boolValue": false,
@@ -676,26 +708,37 @@
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
-                                            "floatValue": 0.10000000149011612,
+                                            "floatValue": 0.0,
                                             "intValue": 0,
-                                            "key": "HitStopTime",
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.125,
+                                            "intValue": 0,
+                                            "key": "HitStopDuration",
                                             "stringValue": "",
                                             "type": 0
                                         },
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
-                                            "floatValue": 0.0,
+                                            "floatValue": 0.15000000596046448,
                                             "intValue": 0,
-                                            "key": "HitParticleAssetPath",
-                                            "stringValue": "Data/Particle/HitParticle.json",
-                                            "type": 3
+                                            "key": "HitStopScale",
+                                            "stringValue": "",
+                                            "type": 0
                                         }
                                     ],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.9333333373069763,
+                                    "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.6499999761581421
                                 }
@@ -752,11 +795,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.7999999523162842,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.600000023841858
                                 },
@@ -764,11 +810,14 @@
                                     "actionEnd": "",
                                     "actionStart": "CanCancelOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.5833333730697632,
+                                    "eventTemplateType": "NONE",
                                     "label": "CanCancelOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.2833333015441895
                                 },
@@ -776,11 +825,14 @@
                                     "actionEnd": "",
                                     "actionStart": "InputBufferOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.5,
+                                    "eventTemplateType": "NONE",
                                     "label": "InputBufferOff",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.3333333432674408
                                 },
@@ -788,18 +840,22 @@
                                     "actionEnd": "Weapon_Trail_Stop",
                                     "actionStart": "Weapon_Trail_Start",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.4333333373069763,
+                                    "eventTemplateType": "NONE",
                                     "label": "Weapon_Trail",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.0833333358168602
                                 },
                                 {
-                                    "actionEnd": "HitBox_DisableHitBox",
-                                    "actionStart": "HitBox_EnableHitBox",
+                                    "actionEnd": "Sword_DisableHitBox",
+                                    "actionStart": "Sword_EnableHitBox",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [
                                         {
                                             "boolValue": false,
@@ -822,10 +878,73 @@
                                     ],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.44999998807907104,
-                                    "label": "Attack",
+                                    "eventTemplateType": "NONE",
+                                    "label": "Sword_Attack",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.2666666805744171
+                                },
+                                {
+                                    "actionEnd": "Kick_DisableHitBox",
+                                    "actionStart": "Kick_EnableHitBox",
+                                    "actionUpdate": "",
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 6.0,
+                                            "intValue": 0,
+                                            "key": "Damage",
+                                            "stringValue": "",
+                                            "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 5.0,
+                                            "intValue": 0,
+                                            "key": "KnockBackPower",
+                                            "stringValue": "",
+                                            "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.0,
+                                            "intValue": 0,
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.25,
+                                            "intValue": 0,
+                                            "key": "HitStopTime",
+                                            "stringValue": "",
+                                            "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.25,
+                                            "intValue": 0,
+                                            "key": "HitStopDir",
+                                            "stringValue": "",
+                                            "type": 0
+                                        }
+                                    ],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.0333333015441895,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Foot_Attack",
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.6833333373069763
                                 }
                             ],
                             "loop": false,
@@ -880,11 +999,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.9833333492279053,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.6666666865348816
                                 },
@@ -892,11 +1014,14 @@
                                     "actionEnd": "AfterimageStop",
                                     "actionStart": "AfterimageStart",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.5,
+                                    "eventTemplateType": "NONE",
                                     "label": "AfterimageBurst",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.0
                                 }
@@ -1385,11 +1510,14 @@
                                     "actionEnd": "ComboTransition",
                                     "actionStart": "InputBufferOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.2000000476837158,
+                                    "eventTemplateType": "NONE",
                                     "label": "ComboInputWindow",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.06666667014360428
                                 },
@@ -1397,11 +1525,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.4500000476837158,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.2166666984558105
                                 },
@@ -1409,11 +1540,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ComboTransition",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.2000000476837158,
+                                    "eventTemplateType": "NONE",
                                     "label": "ComboTransition",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.7333333492279053
                                 },
@@ -1421,11 +1555,14 @@
                                     "actionEnd": "",
                                     "actionStart": "CanCancelOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.2000000476837158,
+                                    "eventTemplateType": "NONE",
                                     "label": "CanCancelOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.4833333194255829
                                 },
@@ -1433,18 +1570,22 @@
                                     "actionEnd": "Weapon_Trail_Stop",
                                     "actionStart": "Weapon_Trail_Start",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.5166666507720947,
+                                    "eventTemplateType": "NONE",
                                     "label": "Weapon_Trail",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.21666666865348816
                                 },
                                 {
-                                    "actionEnd": "HitBox_DisableHitBox",
-                                    "actionStart": "HitBox_EnableHitBox",
+                                    "actionEnd": "Sword_DisableHitBox",
+                                    "actionStart": "Sword_EnableHitBox",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [
                                         {
                                             "boolValue": false,
@@ -1458,8 +1599,10 @@
                                     ],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.46666666865348816,
+                                    "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.28333333134651184
                                 }
@@ -1804,11 +1947,14 @@
                                     "actionEnd": "ComboTransition",
                                     "actionStart": "InputBufferOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 1.1666666269302368,
+                                    "eventTemplateType": "NONE",
                                     "label": "InputBufferOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.10000000149011612
                                 },
@@ -1816,11 +1962,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.6333333253860474,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.3333333730697632
                                 },
@@ -1828,11 +1977,14 @@
                                     "actionEnd": "CanComboOff",
                                     "actionStart": "ComboTransition",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.3166667222976685,
+                                    "eventTemplateType": "NONE",
                                     "label": "ComboTransition",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.7166666388511658
                                 },
@@ -1840,11 +1992,14 @@
                                     "actionEnd": "",
                                     "actionStart": "CanCancelOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 1.6333333253860474,
+                                    "eventTemplateType": "NONE",
                                     "label": "CanCancelOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.800000011920929
                                 },
@@ -1852,18 +2007,22 @@
                                     "actionEnd": "Trail_Stop",
                                     "actionStart": "Trail_Start",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.550000011920929,
+                                    "eventTemplateType": "NONE",
                                     "label": "Weapon_Trail_Start",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.11666666716337204
                                 },
                                 {
-                                    "actionEnd": "HitBox_DisableHitBox",
-                                    "actionStart": "HitBox_EnableHitBox",
+                                    "actionEnd": "Sword_DisableHitBox",
+                                    "actionStart": "Sword_EnableHitBox",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [
                                         {
                                             "boolValue": false,
@@ -1895,8 +2054,10 @@
                                     ],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.5666666626930237,
+                                    "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.38333332538604736
                                 }
@@ -1953,11 +2114,14 @@
                                     "actionEnd": "",
                                     "actionStart": "InputBufferOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.3166667222976685,
+                                    "eventTemplateType": "NONE",
                                     "label": "InputBufferOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.06666667014360428
                                 },
@@ -1965,11 +2129,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.5166666507720947,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 1.1166666746139526
                                 },
@@ -1977,11 +2144,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ComboTransition",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 1.1666666269302368,
+                                    "eventTemplateType": "NONE",
                                     "label": "ComboTransition",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.8166666626930237
                                 },
@@ -1989,11 +2159,14 @@
                                     "actionEnd": "",
                                     "actionStart": "CanCancelOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.9333333373069763,
+                                    "eventTemplateType": "NONE",
                                     "label": "CanCancelOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.550000011920929
                                 },
@@ -2001,18 +2174,22 @@
                                     "actionEnd": "Trail_Stop",
                                     "actionStart": "Trail_Start",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.44999998807907104,
+                                    "eventTemplateType": "NONE",
                                     "label": "Weapon_Trail",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.0
                                 },
                                 {
-                                    "actionEnd": "HitBox_DisableHitBox",
-                                    "actionStart": "HitBox_EnableHitBox",
+                                    "actionEnd": "Sword_DisableHitBox",
+                                    "actionStart": "Sword_EnableHitBox",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [
                                         {
                                             "boolValue": false,
@@ -2044,8 +2221,10 @@
                                     ],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.44999998807907104,
+                                    "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.25
                                 }
@@ -4118,11 +4297,14 @@
                                     "actionEnd": "AfterimageStop",
                                     "actionStart": "AfterimageStart",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.28333333134651184,
+                                    "eventTemplateType": "NONE",
                                     "label": "AfterimageEvent",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.0
                                 },
@@ -4130,11 +4312,14 @@
                                     "actionEnd": "",
                                     "actionStart": "ActionEnd",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.9833333492279053,
+                                    "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.75
                                 },
@@ -4142,11 +4327,14 @@
                                     "actionEnd": "",
                                     "actionStart": "InputBufferOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.6499999761581421,
+                                    "eventTemplateType": "NONE",
                                     "label": "InputBufferOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.0
                                 },
@@ -4154,11 +4342,14 @@
                                     "actionEnd": "",
                                     "actionStart": "CanCancelOn",
                                     "actionUpdate": "",
+                                    "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
                                     "endTime": 0.7333333492279053,
+                                    "eventTemplateType": "NONE",
                                     "label": "CanCancelOn",
                                     "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.4833333194255829
                                 }
@@ -5019,13 +5210,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -32.8359375,
-            -1.4768255949020386,
-            -23.232038497924805
+            -13.098653793334961,
+            -1.4768353700637817,
+            -61.48816680908203
         ],
         "Rot": [
             3.000000238418579,
-            112.61963653564453,
+            315.6551208496094,
             1.1004080988641363e-05
         ],
         "Scale": [

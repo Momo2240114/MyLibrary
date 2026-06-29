@@ -41,6 +41,15 @@ void AttackSystem::ClearAttackInstance(uint32_t attackInstanceId_)
     }
 }
 
+void AttackSystem::ClearAttackHitGroup(uint32_t attackInstanceId_, uint32_t hitGroupId_)
+{
+    if (attackInstanceId_ == 0u) return;
+    const uint64_t hitKey_ =
+        (static_cast<uint64_t>(attackInstanceId_) << 32u) |
+        static_cast<uint64_t>(hitGroupId_);
+    registeredHitTargets.erase(hitKey_);
+}
+
 void AttackSystem::HandleHit(HitBox& hitBox_, HurtBox& hurtBox_)
 {
     AttackHitContact contact_{};
