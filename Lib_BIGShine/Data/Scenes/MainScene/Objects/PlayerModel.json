@@ -4222,30 +4222,6 @@
                 ],
                 "Chains": [
                     {
-                        "BendStiffness": 0.0,
-                        "ClothGroup": 0,
-                        "ClothOrder": 0,
-                        "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.0,
-                        "Damping": 0.0,
-                        "DiagonalStiffness": 0.15000000596046448,
-                        "Enabled": true,
-                        "Gravity": 9.800000190734863,
-                        "Influence": 0.0,
-                        "LateralStiffness": 0.3790000081062317,
-                        "Name": "Hair",
-                        "RootNode": "Bone_hair_L01",
-                        "RootRotationFollow": 1.0,
-                        "SolverIterations": 4,
-                        "SolverSubsteps": 2,
-                        "StartCollisionWarmup": 6,
-                        "StartLift": 0.0,
-                        "Stiffness": 1.0,
-                        "TipNode": "Bone_hair_L02_end",
-                        "TipStiffnessScale": 1.0,
-                        "Type": 2
-                    },
-                    {
                         "BendStiffness": 1.0,
                         "ClothGroup": 0,
                         "ClothOrder": 2,
@@ -4263,35 +4239,11 @@
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
-                        "StartLift": 0.07999999821186066,
+                        "StartLift": 0.0,
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_End_end",
                         "TipStiffnessScale": 1.0,
-                        "Type": 2
-                    },
-                    {
-                        "BendStiffness": 0.0,
-                        "ClothGroup": 0,
-                        "ClothOrder": 4,
-                        "CollideWithBodyColliders": true,
-                        "CollisionRadius": 0.0,
-                        "Damping": 0.0,
-                        "DiagonalStiffness": 0.15000000596046448,
-                        "Enabled": true,
-                        "Gravity": 9.800000190734863,
-                        "Influence": 0.10400000214576721,
-                        "LateralStiffness": 0.3499999940395355,
-                        "Name": "Hair",
-                        "RootNode": "Bone_hair_R01",
-                        "RootRotationFollow": 0.4740000069141388,
-                        "SolverIterations": 4,
-                        "SolverSubsteps": 2,
-                        "StartCollisionWarmup": 4,
-                        "StartLift": 0.07999999821186066,
-                        "Stiffness": 1.0,
-                        "TipNode": "Bone_hair_R02_end",
-                        "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 2
+                        "Type": 0
                     },
                     {
                         "BendStiffness": 0.019999999552965164,
@@ -4311,11 +4263,11 @@
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
-                        "StartLift": 0.07999999821186066,
+                        "StartLift": 0.0,
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_R_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 2
+                        "Type": 0
                     },
                     {
                         "BendStiffness": 0.014000000432133675,
@@ -4335,11 +4287,11 @@
                         "SolverIterations": 4,
                         "SolverSubsteps": 2,
                         "StartCollisionWarmup": 4,
-                        "StartLift": 0.07999999821186066,
+                        "StartLift": 0.0,
                         "Stiffness": 0.008999999612569809,
                         "TipNode": "Bone_hair_B_L_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 2
+                        "Type": 0
                     }
                 ],
                 "ShowBodyCollisionShapes": true
@@ -5027,13 +4979,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            14.058276176452637,
-            -1.4768354892730713,
-            -14.979820251464844
+            62.96574401855469,
+            -1.476834774017334,
+            -1.7828478813171387
         ],
         "Rot": [
             3.000000238418579,
-            150.7472686767578,
+            117.69032287597656,
             1.1004080988641363e-05
         ],
         "Scale": [

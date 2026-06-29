@@ -34,6 +34,8 @@ public:
 
     void Shutdown();
     void OnResize(int newWidth_, int newHeight_);
+    void SetFullscreen(bool enabled_);
+    bool IsFullscreen() const { return fullscreen; }
     void Finalize();
     //====================================================
     // ÉtÉåÅ[ÉÄêßå‰
@@ -156,6 +158,8 @@ private:
     int width = 0;
     int height = 0;
     bool fullscreen = false;
+    WINDOWPLACEMENT windowedPlacement{ sizeof(WINDOWPLACEMENT) };
+    DWORD windowedStyle = WS_OVERLAPPEDWINDOW;
     bool vsyncEnabled = false;
 
     //====================================================
