@@ -4,11 +4,67 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
+#include "Engine/Physics/HitBox.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <DirectXMath.h>
 #include <algorithm>
 #include <filesystem>
+
+void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
+{
+    json_ = {
+        { "vfxPath", setting_.vfxPath },
+        { "spawnTime", setting_.spawnTime },
+        { "lifeTime", setting_.lifeTime },
+        { "offset", { setting_.localOffset.x, setting_.localOffset.y, setting_.localOffset.z } },
+        { "rotation", { setting_.localRotation.x, setting_.localRotation.y, setting_.localRotation.z } },
+        { "scale", { setting_.localScale.x, setting_.localScale.y, setting_.localScale.z } },
+        { "hasHitBox", setting_.hasHitBox },
+        { "hitStartTime", setting_.hitStartTime },
+        { "hitEndTime", setting_.hitEndTime },
+        { "hitBoxRadius", setting_.hitBoxRadius },
+        { "hitBoxHalfHeight", setting_.hitBoxHalfHeight },
+        { "damage", setting_.damage },
+        { "knockBackPower", setting_.knockBackPower },
+        { "hitStopDuration", setting_.hitStopDuration },
+        { "hitStopScale", setting_.hitStopScale },
+        { "hitEffectPath", setting_.hitEffectPath },
+        { "hitGroupId", setting_.hitGroupId },
+        { "allowMultiHit", setting_.allowMultiHit },
+        { "followOwner", setting_.followOwner },
+    };
+}
+
+void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
+{
+    setting_.vfxPath = json_.value("vfxPath", std::string{});
+    setting_.spawnTime = json_.value("spawnTime", 0.0f);
+    setting_.lifeTime = json_.value("lifeTime", 0.18f);
+    auto readVector3_ = [&json_](const char* key_, const DirectX::XMFLOAT3& fallback_)
+        {
+            const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
+            if (!value_.is_array() || value_.size() < 3u) return fallback_;
+            return DirectX::XMFLOAT3{
+                value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
+        };
+    setting_.localOffset = readVector3_("offset", { 0.0f, 1.0f, 1.2f });
+    setting_.localRotation = readVector3_("rotation", { 0.0f, 0.0f, 0.0f });
+    setting_.localScale = readVector3_("scale", { 1.0f, 1.0f, 1.0f });
+    setting_.hasHitBox = json_.value("hasHitBox", false);
+    setting_.hitStartTime = json_.value("hitStartTime", 0.0f);
+    setting_.hitEndTime = json_.value("hitEndTime", 0.08f);
+    setting_.hitBoxRadius = json_.value("hitBoxRadius", 0.5f);
+    setting_.hitBoxHalfHeight = json_.value("hitBoxHalfHeight", 1.0f);
+    setting_.damage = json_.value("damage", 10.0f);
+    setting_.knockBackPower = json_.value("knockBackPower", 3.0f);
+    setting_.hitStopDuration = json_.value("hitStopDuration", json_.value("hitStopTime", 0.0f));
+    setting_.hitStopScale = json_.value("hitStopScale", 0.0f);
+    setting_.hitEffectPath = json_.value("hitEffectPath", std::string{});
+    setting_.hitGroupId = json_.value("hitGroupId", 0u);
+    setting_.allowMultiHit = json_.value("allowMultiHit", false);
+    setting_.followOwner = json_.value("followOwner", false);
+}
 
 void EffectManager::Initialize(GameObjectManager* gameObjectManager_)
 {
@@ -20,9 +76,45 @@ void EffectManager::Update(float deltaTime_)
 {
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
 
+    for (ScheduledAttackEffect& scheduledEffect_ : scheduledAttackEffects)
+    {
+        scheduledEffect_.timeRemaining -= safeDeltaTime_;
+    }
+    std::vector<AttackEffectSpawnRequest> readyRequests_;
+    for (const ScheduledAttackEffect& scheduledEffect_ : scheduledAttackEffects)
+    {
+        if (scheduledEffect_.timeRemaining <= 0.0f)
+        {
+            readyRequests_.push_back(scheduledEffect_.request);
+        }
+    }
+    scheduledAttackEffects.erase(
+        std::remove_if(
+            scheduledAttackEffects.begin(),
+            scheduledAttackEffects.end(),
+            [](const ScheduledAttackEffect& scheduledEffect_)
+            {
+                return scheduledEffect_.timeRemaining <= 0.0f;
+            }),
+        scheduledAttackEffects.end());
+    for (AttackEffectSpawnRequest& readyRequest_ : readyRequests_)
+    {
+        readyRequest_.setting.spawnTime = 0.0f;
+        SpawnSlashEffect(readyRequest_);
+    }
+
     for (ManagedEffect& effect_ : managedEffects)
     {
         effect_.lifeTimer -= safeDeltaTime_;
+        effect_.elapsedTime += safeDeltaTime_;
+        if (const std::shared_ptr<HitBox> hitBox_ = effect_.hitBox.lock())
+        {
+            const bool shouldEnable_ =
+                effect_.elapsedTime >= effect_.hitStartTime &&
+                effect_.elapsedTime <= effect_.hitEndTime;
+            if (shouldEnable_ && !hitBox_->IsEnabled()) hitBox_->Activate();
+            if (!shouldEnable_ && hitBox_->IsEnabled()) hitBox_->Deactivate();
+        }
     }
 
     managedEffects.erase(
@@ -48,6 +140,7 @@ void EffectManager::Update(float deltaTime_)
 void EffectManager::Clear()
 {
     managedEffects.clear();
+    scheduledAttackEffects.clear();
 }
 
 void EffectManager::RefreshAssetCache()
@@ -102,6 +195,121 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
 
     RegisterManagedEffect(object_, request_.lifeTime);
     return object_;
+}
+
+std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
+    const AttackEffectSpawnRequest& request_)
+{
+    if (!gameObjectManager || request_.setting.vfxPath.empty()) return nullptr;
+    if (request_.setting.spawnTime > 0.0f)
+    {
+        ScheduledAttackEffect scheduledEffect_{};
+        scheduledEffect_.request = request_;
+        scheduledEffect_.timeRemaining = request_.setting.spawnTime;
+        scheduledAttackEffects.push_back(scheduledEffect_);
+        return nullptr;
+    }
+
+    MeshVFXSpawnRequest vfxRequest_{};
+    vfxRequest_.assetPath = request_.setting.vfxPath;
+    vfxRequest_.lifeTime = request_.setting.lifeTime;
+    std::shared_ptr<GameObject> object_ = SpawnMeshVFX(vfxRequest_);
+    if (!object_) return nullptr;
+
+    using namespace DirectX;
+    const XMMATRIX localMatrix_ =
+        XMMatrixScaling(
+            request_.setting.localScale.x,
+            request_.setting.localScale.y,
+            request_.setting.localScale.z) *
+        XMMatrixRotationRollPitchYaw(
+            XMConvertToRadians(request_.setting.localRotation.x),
+            XMConvertToRadians(request_.setting.localRotation.y),
+            XMConvertToRadians(request_.setting.localRotation.z)) *
+        XMMatrixTranslation(
+            request_.setting.localOffset.x,
+            request_.setting.localOffset.y,
+            request_.setting.localOffset.z);
+    const XMMATRIX ownerWorldMatrix_ = request_.ownerObject && request_.ownerObject->transform
+        ? request_.ownerObject->transform->GetWorldMatrix()
+        : XMMatrixIdentity();
+    if (request_.setting.followOwner && request_.ownerObject && request_.ownerObject->transform)
+    {
+        object_->transform->SetParent(request_.ownerObject->transform);
+        object_->transform->localPosition = request_.setting.localOffset;
+        object_->transform->localRotation = request_.setting.localRotation;
+        object_->transform->localScale = request_.setting.localScale;
+        object_->transform->MarkDirty();
+    }
+    else
+    {
+        object_->transform->ApplyWorldMatrix(localMatrix_ * ownerWorldMatrix_);
+    }
+    object_->UpdateTransform();
+
+    std::shared_ptr<HitBox> hitBox_;
+    if (request_.setting.hasHitBox)
+    {
+        uint32_t attackInstanceId_ = request_.attackInstanceId;
+        std::shared_ptr<HitBox> sourceHitBox_;
+        if (request_.ownerObject != nullptr)
+        {
+            sourceHitBox_ = request_.ownerObject->GetComponent<HitBox>();
+            if (attackInstanceId_ == 0u && sourceHitBox_)
+            {
+                attackInstanceId_ = sourceHitBox_->attackInstanceId;
+            }
+        }
+        if (attackInstanceId_ == 0u)
+        {
+            attackInstanceId_ = gameObjectManager->GetAttackSystem().CreateAttackInstance();
+            if (sourceHitBox_) sourceHitBox_->SetAttackInstanceId(attackInstanceId_);
+        }
+
+        hitBox_ = object_->AddComponent<HitBox>();
+        if (hitBox_)
+        {
+            hitBox_->SetOwner(request_.ownerObject);
+            hitBox_->SetAttackInstanceId(attackInstanceId_);
+            hitBox_->SetHitGroupId(request_.setting.hitGroupId);
+            hitBox_->SetDamage(request_.setting.damage);
+            hitBox_->SetKnockBackPower(request_.setting.knockBackPower);
+            hitBox_->SetHitEffectPath(request_.setting.hitEffectPath);
+            hitBox_->hitStopDuration = request_.setting.hitStopDuration;
+            hitBox_->hitStopScale = request_.setting.hitStopScale;
+            hitBox_->allowMultiHit = request_.setting.allowMultiHit;
+            hitBox_->radius = request_.setting.hitBoxRadius;
+            hitBox_->halfHeight = request_.setting.hitBoxHalfHeight;
+            hitBox_->Deactivate();
+            hitBox_->RecreatePhysXActor();
+        }
+    }
+
+    for (ManagedEffect& effect_ : managedEffects)
+    {
+        if (effect_.object.lock() == object_)
+        {
+            effect_.hitBox = hitBox_;
+            effect_.hitStartTime = (std::max)(request_.setting.hitStartTime, 0.0f);
+            effect_.hitEndTime = (std::max)(request_.setting.hitEndTime, effect_.hitStartTime);
+            break;
+        }
+    }
+    return object_;
+}
+
+std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
+    const AttackEffectSpawnRequest& request_)
+{
+    return SpawnSlashEffect(request_);
+}
+
+std::shared_ptr<GameObject> EffectManager::SpawnEffectWithHitBox(
+    const AttackEffectSpawnRequest& request_)
+{
+    AttackEffectSpawnRequest hitBoxRequest_ = request_;
+    hitBoxRequest_.setting.hasHitBox = true;
+    return SpawnSlashEffect(hitBoxRequest_);
 }
 
 std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
@@ -193,17 +401,23 @@ DirectX::XMFLOAT3 EffectManager::ApplyNormalOffset(
 
 void EffectManager::RegisterManagedEffect(
     const std::shared_ptr<GameObject>& object_,
-    float lifeTime_)
+    float lifeTime_,
+    const std::shared_ptr<HitBox>& hitBox_,
+    float hitStartTime_,
+    float hitEndTime_)
 {
     if (!object_) return;
 
     ManagedEffect managedEffect_{};
     managedEffect_.object = object_;
+    managedEffect_.hitBox = hitBox_;
     managedEffect_.lifeTimer = (std::max)(lifeTime_, 0.0f);
     if (managedEffect_.lifeTimer <= 0.0f)
     {
         managedEffect_.lifeTimer = 1.0f;
     }
+    managedEffect_.hitStartTime = (std::max)(hitStartTime_, 0.0f);
+    managedEffect_.hitEndTime = (std::max)(hitEndTime_, managedEffect_.hitStartTime);
     managedEffects.push_back(managedEffect_);
 }
 

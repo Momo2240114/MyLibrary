@@ -286,8 +286,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                1.0,
-                                0.0
+                                0.0,
+                                1.0
                             ]
                         },
                         "IsAttack": {
@@ -331,6 +331,10 @@
                             "type": "float",
                             "value": 5.0
                         },
+                        "HitParticleAssetPath": {
+                            "type": "string",
+                            "value": "Data/Particle/HitParticle.json"
+                        },
                         "HitStopTime": {
                             "type": "float",
                             "value": 0.05000000074505806
@@ -372,8 +376,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                1.0,
-                                0.0
+                                0.0,
+                                1.0
                             ]
                         },
                         "IsAttack": {
@@ -473,54 +477,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 0,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "SS_Quickshift_B",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 22,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -549,6 +505,54 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Hit_R",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 0,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SS_Quickshift_B",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -677,6 +681,15 @@
                                             "key": "HitStopTime",
                                             "stringValue": "",
                                             "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.0,
+                                            "intValue": 0,
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
                                         }
                                     ],
                                     "callEndOnStateExit": true,
@@ -796,6 +809,15 @@
                                             "key": "Damage",
                                             "stringValue": "",
                                             "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.0,
+                                            "intValue": 0,
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
                                         }
                                     ],
                                     "callEndOnStateExit": false,
@@ -1860,6 +1882,15 @@
                                             "key": "HitStopTime",
                                             "stringValue": "",
                                             "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.0,
+                                            "intValue": 0,
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
                                         }
                                     ],
                                     "callEndOnStateExit": true,
@@ -2000,6 +2031,15 @@
                                             "key": "HitStopTime",
                                             "stringValue": "",
                                             "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.0,
+                                            "intValue": 0,
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
                                         }
                                     ],
                                     "callEndOnStateExit": true,
@@ -2416,54 +2456,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 39,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Combo_Attack_03_All_Seq_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 62,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -2492,6 +2484,54 @@
                             "events": [],
                             "loop": true,
                             "name": "Run_Attack_02_Seq_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 39,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Combo_Attack_03_All_Seq_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3760,54 +3800,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 65,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Run_Combat_Stop_F_0_RM_Seq_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 56,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -3836,6 +3828,54 @@
                             "events": [],
                             "loop": true,
                             "name": "Jump_Combat_Loop_0_Seq_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 65,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Run_Combat_Stop_F_0_RM_Seq_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -4979,13 +5019,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            19.175086975097656,
-            -1.4768257141113281,
-            25.471397399902344
+            -32.8359375,
+            -1.4768255949020386,
+            -23.232038497924805
         ],
         "Rot": [
             3.000000238418579,
-            352.9437561035156,
+            112.61963653564453,
             1.1004080988641363e-05
         ],
         "Scale": [

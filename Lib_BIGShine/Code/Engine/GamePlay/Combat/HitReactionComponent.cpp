@@ -37,11 +37,16 @@ void HitReactionComponent::HandleHit()
     if (!blackboard_) return;
 
     float damage_ = 0.0f;
-    float hitStopTime_ = 0.0f;
+    float hitStopDuration_ = 0.0f;
+    float hitStopScale_ = 0.0f;
     float knockBackPower_ = 0.0f;
     DirectX::SimpleMath::Vector2 hitDirection_{ 0.0f, 0.0f };
     blackboard_->GetFloat("Hit", "Damage", damage_);
-    blackboard_->GetFloat("Hit", "HitStopTime", hitStopTime_);
+    if (!blackboard_->GetFloat("Hit", "HitStopDuration", hitStopDuration_))
+    {
+        blackboard_->GetFloat("Hit", "HitStopTime", hitStopDuration_);
+    }
+    blackboard_->GetFloat("Hit", "HitStopScale", hitStopScale_);
     blackboard_->GetFloat("Hit", "KnockBackPower", knockBackPower_);
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
 
@@ -51,13 +56,13 @@ void HitReactionComponent::HandleHit()
     blackboard_->SetFloat("Hit", "CurrentHealth", currentHealth);
     blackboard_->SetBool("Hit", "Dead", currentHealth <= 0.0f);
 
-    if (useHitStop && hitStopTime_ > 0.0f)
+    if (useHitStop && hitStopDuration_ > 0.0f)
     {
         const std::shared_ptr<TimeManager> timeManager_ =
             owner_->GetManager().GetTimeManager();
         if (timeManager_)
         {
-            timeManager_->TriggerHitStop(hitStopLayerMask, hitStopTime_);
+            timeManager_->TriggerHitStop(hitStopLayerMask, hitStopDuration_, hitStopScale_);
         }
     }
 

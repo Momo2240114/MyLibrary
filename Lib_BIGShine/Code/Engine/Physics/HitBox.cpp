@@ -2,6 +2,9 @@
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+
+#include <algorithm>
 
 HitBox::HitBox()
 {
@@ -16,6 +19,63 @@ const std::string& HitBox::GetName() const
     return name;
 }
 
+void HitBox::SetOwner(GameObject* owner_)
+{
+    ownerObject = owner_;
+}
+
+void HitBox::SetAttackInstanceId(uint32_t attackInstanceId_)
+{
+    attackInstanceId = attackInstanceId_;
+    ClearHitTargets();
+}
+
+void HitBox::SetHitGroupId(uint32_t hitGroupId_)
+{
+    hitGroupId = hitGroupId_;
+}
+
+void HitBox::SetDamage(float damage_)
+{
+    damage = damage_;
+}
+
+void HitBox::SetKnockBackPower(float knockBackPower_)
+{
+    knockBackPower = knockBackPower_;
+}
+
+void HitBox::SetHitEffectPath(const std::string& path_)
+{
+    hitMeshVFXAssetPath = path_;
+}
+
+void HitBox::ClearHitTargets()
+{
+    alreadyHitTargets.clear();
+}
+
+bool HitBox::CanHit(GameObject* target_) const
+{
+    if (target_ == nullptr) return false;
+    if (!canHitOwner && ownerObject == target_) return false;
+    return allowMultiHit || alreadyHitTargets.count(target_) == 0u;
+}
+
+void HitBox::RegisterHit(GameObject* target_)
+{
+    if (target_ != nullptr) alreadyHitTargets.insert(target_);
+}
+
+std::shared_ptr<GameObject> HitBox::GetAttackOwner()
+{
+    if (ownerObject != nullptr)
+    {
+        return ownerObject->shared_from_this();
+    }
+    return GetGameObject();
+}
+
 void HitBox::Start()
 {
     CapsuleCollider::Start();
@@ -26,6 +86,16 @@ void HitBox::Start()
 void HitBox::Activate()
 {
     ApplyBlackboardValues();
+    if (ownerObject == nullptr)
+    {
+        const std::shared_ptr<GameObject> object_ = GetGameObject();
+        if (object_)
+        {
+            SetAttackInstanceId(
+                object_->GetManager().GetAttackSystem().CreateAttackInstance());
+        }
+    }
+    ClearHitTargets();
     ++activationId;
     if (activationId == 0) ++activationId;
     currentTriggers.clear();
@@ -36,6 +106,7 @@ void HitBox::Deactivate()
 {
     SetEnabled(false);
     currentTriggers.clear();
+    ClearHitTargets();
 }
 
 void HitBox::Gui()
@@ -43,9 +114,15 @@ void HitBox::Gui()
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Attack");
     ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f, 99999.0f);
-    ImGui::DragFloat("Hit Stop Time", &hitStopTime, 0.001f, 0.0f, 10.0f);
-    ImGui::DragFloat("Hit Stop Dir", &hitStopDir, 0.01f);
+    ImGui::DragFloat("Hit Stop Duration", &hitStopDuration, 0.001f, 0.0f, 10.0f, "%.3f s");
+    ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f, "%.2fx");
     ImGui::InputScalar("Hit Stop Layer Mask", ImGuiDataType_U32, &hitStopLayerMask);
+    ImGui::InputScalar("Attack Instance ID", ImGuiDataType_U32, &attackInstanceId);
+    ImGui::InputScalar("Hit Group ID", ImGuiDataType_U32, &hitGroupId);
+    ImGui::Checkbox("Allow Multi Hit", &allowMultiHit);
+    ImGui::Checkbox("Can Hit Owner", &canHitOwner);
+    ImGui::Text("Hit Targets: %zu", alreadyHitTargets.size());
+    ImGui::Text("Owner: %s", ownerObject ? ownerObject->GetName().c_str() : "(Self)");
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
     ImGui::Checkbox("Hit Once Per Activation", &hitOncePerActivation);
     ImGui::TextColored(
@@ -109,8 +186,8 @@ void HitBox::Gui()
     strncpy_s(damageKeyBuffer_, damageKey.c_str(), sizeof(damageKeyBuffer_));
     if (ImGui::InputText("Damage Key", damageKeyBuffer_, sizeof(damageKeyBuffer_))) damageKey = damageKeyBuffer_;
     char hitStopKeyBuffer_[64];
-    strncpy_s(hitStopKeyBuffer_, hitStopTimeKey.c_str(), sizeof(hitStopKeyBuffer_));
-    if (ImGui::InputText("Hit Stop Key", hitStopKeyBuffer_, sizeof(hitStopKeyBuffer_))) hitStopTimeKey = hitStopKeyBuffer_;
+    strncpy_s(hitStopKeyBuffer_, hitStopDurationKey.c_str(), sizeof(hitStopKeyBuffer_));
+    if (ImGui::InputText("Hit Stop Duration Key", hitStopKeyBuffer_, sizeof(hitStopKeyBuffer_))) hitStopDurationKey = hitStopKeyBuffer_;
     char knockBackKeyBuffer_[64];
     strncpy_s(knockBackKeyBuffer_, knockBackPowerKey.c_str(), sizeof(knockBackKeyBuffer_));
     if (ImGui::InputText("Knock Back Key", knockBackKeyBuffer_, sizeof(knockBackKeyBuffer_))) knockBackPowerKey = knockBackKeyBuffer_;
@@ -123,9 +200,15 @@ void HitBox::Serialize(nlohmann::json& j_) const
 {
     CapsuleCollider::Serialize(j_);
     j_["Damage"] = damage;
-    j_["HitStopTime"] = hitStopTime;
-    j_["HitStopDir"] = hitStopDir;
+    j_["HitStopDuration"] = hitStopDuration;
+    j_["HitStopScale"] = hitStopScale;
     j_["HitStopLayerMask"] = hitStopLayerMask;
+    j_["AttackInstanceId"] = attackInstanceId;
+    j_["HitGroupId"] = hitGroupId;
+    j_["AllowMultiHit"] = allowMultiHit;
+    j_["CanHitOwner"] = canHitOwner;
+    j_["TeamId"] = teamId;
+    j_["SourceAction"] = sourceAction;
     j_["KnockBackPower"] = knockBackPower;
     j_["HitOncePerActivation"] = hitOncePerActivation;
     j_["AttackTag"] = attackTag;
@@ -145,7 +228,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["DeactivateActionName"] = deactivateActionName;
     j_["BlackboardCategory"] = blackboardCategory;
     j_["DamageKey"] = damageKey;
-    j_["HitStopTimeKey"] = hitStopTimeKey;
+    j_["HitStopDurationKey"] = hitStopDurationKey;
     j_["KnockBackPowerKey"] = knockBackPowerKey;
     j_["HitSoundPathKey"] = hitSoundPathKey;
 }
@@ -154,9 +237,15 @@ void HitBox::Deserialize(const nlohmann::json& j_)
 {
     CapsuleCollider::Deserialize(j_);
     damage = j_.value("Damage", 1.0f);
-    hitStopTime = j_.value("HitStopTime", 0.0f);
-    hitStopDir = j_.value("HitStopDir", 0.0f);
+    hitStopDuration = j_.value("HitStopDuration", j_.value("HitStopTime", 0.0f));
+    hitStopScale = (std::clamp)(j_.value("HitStopScale", j_.value("HitStopDir", 0.0f)), 0.0f, 1.0f);
     hitStopLayerMask = j_.value("HitStopLayerMask", 3u);
+    attackInstanceId = j_.value("AttackInstanceId", 0u);
+    hitGroupId = j_.value("HitGroupId", 0u);
+    allowMultiHit = j_.value("AllowMultiHit", false);
+    canHitOwner = j_.value("CanHitOwner", false);
+    teamId = j_.value("TeamId", 0);
+    sourceAction = j_.value("SourceAction", std::string{});
     knockBackPower = j_.value("KnockBackPower", 0.0f);
     hitOncePerActivation = j_.value("HitOncePerActivation", true);
     attackTag = j_.value("AttackTag", std::string("Attack"));
@@ -176,7 +265,12 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     deactivateActionName = "DisableHitBox";
     blackboardCategory = j_.value("BlackboardCategory", std::string("Attack"));
     damageKey = j_.value("DamageKey", std::string("Damage"));
-    hitStopTimeKey = j_.value("HitStopTimeKey", std::string("HitStopTime"));
+    hitStopDurationKey = j_.value("HitStopDurationKey", std::string{});
+    if (hitStopDurationKey.empty())
+    {
+        hitStopDurationKey = j_.value("HitStopTimeKey", std::string("HitStopDuration"));
+        if (hitStopDurationKey == "HitStopTime") hitStopDurationKey = "HitStopDuration";
+    }
     knockBackPowerKey = j_.value("KnockBackPowerKey", std::string("KnockBackPower"));
     hitSoundPathKey = j_.value("HitSoundPathKey", std::string("HitSoundPath"));
     EnforceHitBoxSettings();
@@ -244,18 +338,31 @@ void HitBox::ApplyBlackboardValues()
     {
         damage = value_;
     }
-    if (!hitStopTimeKey.empty() && blackboard_->GetFloat(blackboardCategory, hitStopTimeKey, value_))
+    if (!hitStopDurationKey.empty() && blackboard_->GetFloat(blackboardCategory, hitStopDurationKey, value_))
     {
-        hitStopTime = value_;
+        hitStopDuration = value_;
     }
-    if (blackboard_->GetFloat(blackboardCategory, "HitStopDir", value_))
+    else if (blackboard_->GetFloat(blackboardCategory, "HitStopTime", value_))
     {
-        hitStopDir = value_;
+        hitStopDuration = value_;
+    }
+    if (blackboard_->GetFloat(blackboardCategory, "HitStopScale", value_) ||
+        blackboard_->GetFloat(blackboardCategory, "HitStopDir", value_))
+    {
+        hitStopScale = (std::clamp)(value_, 0.0f, 1.0f);
     }
     int intValue_ = 0;
     if (blackboard_->GetInt(blackboardCategory, "HitStopLayerMask", intValue_))
     {
         hitStopLayerMask = static_cast<uint32_t>((std::max)(intValue_, 0));
+    }
+    if (blackboard_->GetInt(blackboardCategory, "AttackInstanceId", intValue_))
+    {
+        attackInstanceId = static_cast<uint32_t>((std::max)(intValue_, 0));
+    }
+    if (blackboard_->GetInt(blackboardCategory, "HitGroupId", intValue_))
+    {
+        hitGroupId = static_cast<uint32_t>((std::max)(intValue_, 0));
     }
     if (!knockBackPowerKey.empty() && blackboard_->GetFloat(blackboardCategory, knockBackPowerKey, value_))
     {
@@ -350,6 +457,31 @@ void HitBox::RegisterActions()
                 }
             });
     }
+
+    const std::string actionPrefix_ = GetActionPrefix();
+    owner_->RegisterAction("Combat", actionPrefix_ + "_NewAttackInstance", [weakHitBox_]()
+        {
+            if (const std::shared_ptr<HitBox> hitBox_ = weakHitBox_.lock())
+            {
+                const std::shared_ptr<GameObject> object_ = hitBox_->GetGameObject();
+                if (!object_) return;
+                hitBox_->SetAttackInstanceId(
+                    object_->GetManager().GetAttackSystem().CreateAttackInstance());
+            }
+        });
+    owner_->RegisterAction("Combat", actionPrefix_ + "_ClearAttackHits", [weakHitBox_]()
+        {
+            if (const std::shared_ptr<HitBox> hitBox_ = weakHitBox_.lock())
+            {
+                hitBox_->ClearHitTargets();
+                const std::shared_ptr<GameObject> object_ = hitBox_->GetGameObject();
+                if (object_)
+                {
+                    object_->GetManager().GetAttackSystem().ClearAttackInstance(
+                        hitBox_->attackInstanceId);
+                }
+            }
+        });
 }
 
 void HitBox::EnforceHitBoxSettings()

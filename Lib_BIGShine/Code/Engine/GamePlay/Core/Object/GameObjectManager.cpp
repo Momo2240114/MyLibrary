@@ -1032,11 +1032,12 @@ void GameObjectManager::RegisterAttackCallbacks()
     attackSystem->AddHitCallback(
         [this](const AttackHitEvent& event_)
         {
-            if (timeManager && event_.hitStopTime > 0.0f && event_.hitStopLayerMask != 0u)
+            if (timeManager && event_.hitStopDuration > 0.0f && event_.hitStopLayerMask != 0u)
             {
                 timeManager->TriggerHitStop(
                     event_.hitStopLayerMask,
-                    event_.hitStopTime);
+                    event_.hitStopDuration,
+                    event_.hitStopScale);
             }
 
             if (effectManager && event_.hasHitContact)
