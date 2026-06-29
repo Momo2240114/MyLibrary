@@ -643,6 +643,10 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     }
     meshVFXRenderSystem->RenderAll(renderContext_);
 
+    // MeshVFX can switch between temporary and distortion render targets.
+    // Rebind the scene color target so particles are included in the post-process input.
+    graphicsDeviceManager_.SetParticleRenderTarget();
+
     for (auto& obj : objects)
     {
         if (!obj) continue;

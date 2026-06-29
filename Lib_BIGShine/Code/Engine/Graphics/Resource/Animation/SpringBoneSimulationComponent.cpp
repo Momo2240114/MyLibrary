@@ -376,7 +376,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
                 : chain_.segmentLengths[(std::min)(pointIndex_ - 1, chain_.segmentLengths.size() - 1)];
             const XMFLOAT3 velocity_ = ClampLength(
                 rawVelocity_,
-                baseSegmentLength_ * (0.45f + 0.35f * tipWeight_ + 0.18f * middleFlexWeight_));
+                baseSegmentLength_ * (0.65f + 0.55f * tipWeight_ + 0.25f * middleFlexWeight_));
             const XMFLOAT3 targetWorldPosition_ = currentWorldPositions_[pointIndex_];
             const float stiffnessScale_ = GetStiffnessScale(chain_, pointIndex_);
             const float pointStiffness_ = std::clamp(chain_.stiffness * stiffnessScale_, 0.0f, 1.0f);
@@ -386,6 +386,12 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
                 Subtract(targetWorldPosition_, current_),
                 substepStiffness_ * followScale_);
             const XMFLOAT3 gravity_ = { 0.0f, 0.0f, 0.0f };
+            const float liftAcceleration_ = (std::max)(chain_.startLift, 0.0f) * 20.0f;
+            const XMFLOAT3 lift_ = {
+                0.0f,
+                liftAcceleration_ * tipWeight_ * substepDeltaTime_ * substepDeltaTime_,
+                0.0f
+            };
 
             XMFLOAT3 wind_ = { 0.0f, 0.0f, 0.0f };
             if (windEnabled && windStrength > 0.0f)
@@ -395,7 +401,9 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
             }
 
             chain_.previousPositions[pointIndex_] = current_;
-            chain_.simulatedPositions[pointIndex_] = Add(Add(Add(Add(current_, velocity_), animationPull_), gravity_), wind_);
+            chain_.simulatedPositions[pointIndex_] = Add(
+                Add(Add(Add(Add(current_, velocity_), animationPull_), gravity_), lift_),
+                wind_);
         }
 
         for (int iterationIndex_ = 0; iterationIndex_ < iterations_; ++iterationIndex_)

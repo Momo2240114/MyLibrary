@@ -639,6 +639,7 @@
     <None Include="Shader\gbuffer.hlsli" />
     <None Include="Shader\gbuffer_functions.hlsli" />
     <None Include="Shader\MeshVFX.hlsli" />
+    <None Include="Shader\MotionBlurCommon.hlsli" />
     <None Include="Shader\ParticleBitonicSort.hlsli" />
     <None Include="Shader\ParticleCommon.hlsli" />
     <None Include="Shader\ModelCommon.hlsli" />
@@ -747,6 +748,18 @@
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\MotionBlurPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionVelocityPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionVelocityTileMaxPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionVelocityNeighborMaxPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>

@@ -1332,6 +1332,9 @@
     <None Include="Shader\MeshVFX.hlsli">
       <Filter>Shaders\VFX</Filter>
     </None>
+    <None Include="Shader\MotionBlurCommon.hlsli">
+      <Filter>Shaders\PostEffect</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\BasicPS.hlsl">
@@ -1455,6 +1458,15 @@
       <Filter>Shaders\VFX</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MotionBlurPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionVelocityPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionVelocityTileMaxPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionVelocityNeighborMaxPS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\PostDistortionPS.hlsl">

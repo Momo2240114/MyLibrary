@@ -32,6 +32,11 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     const bool vignetteEnabled_ = vignetteParams_.enabled && vignetteParams_.opacity > 0.0f;
     const bool distortionEnabled_ = graphics_.IsSceneDistortionUsed() && graphics_.GetSceneDistortionSRV() != nullptr;
 
+    if (!motionBlurEnabled_)
+    {
+        motionBlur.SynchronizeCameraHistory(rc);
+    }
+
     if (!radialBlurEnabled_ && !xeGtaoEnabled_ && !motionBlurEnabled_ && !vignetteEnabled_ && !distortionEnabled_)
     {
         bloom.Execute(
