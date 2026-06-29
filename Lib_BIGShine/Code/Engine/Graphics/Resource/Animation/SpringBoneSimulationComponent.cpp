@@ -431,7 +431,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
         {
             const XMFLOAT3 current_ = chain_.simulatedPositions[pointIndex_];
             const float normalizedPoint_ = GetNormalizedPointPosition(chain_, pointIndex_);
-            if (pointIndex_ <= 1 || normalizedPoint_ <= 0.35f)
+            if (pointIndex_ <= 1 || normalizedPoint_ <= 0.15f)
             {
                 chain_.simulatedPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
                 chain_.previousPositions[pointIndex_] = currentWorldPositions_[pointIndex_];
@@ -459,11 +459,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
             const XMFLOAT3 animationPull_ = Scale(
                 Subtract(targetWorldPosition_, current_),
                 substepStiffness_ * followScale_);
-            const XMFLOAT3 gravity_ = {
-                0.0f,
-                -chain_.gravity * (0.45f + 0.55f * tipWeight_) * substepDeltaTime_ * substepDeltaTime_,
-                0.0f
-            };
+            const XMFLOAT3 gravity_ = { 0.0f, 0.0f, 0.0f };
 
             XMFLOAT3 wind_ = { 0.0f, 0.0f, 0.0f };
             if (windEnabled && windStrength > 0.0f)
@@ -507,6 +503,8 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
                 {
                     ResolveBodyCollision(chain_, pointIndex_);
                 }
+
+                ConstrainHairBehindBody(chain_);
             }
         }
     }
@@ -814,6 +812,47 @@ void SpringBoneSimulationComponent::DrawHairCollisionShapes()
         }
     }
 }
+
+void SpringBoneSimulationComponent::ConstrainHairBehindBody(IKMapComponent::IKChain& chain_)
+{
+    if (!model || chain_.simulatedPositions.size() < 2) return;
+
+    auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
+
+    XMFLOAT3 ownerForward_;
+    XMStoreFloat3(&ownerForward_, XMVector3Normalize(ownerWorld_.r[2]));
+
+    const XMFLOAT3 rootPosition_ = chain_.simulatedPositions.front();
+
+    // 前側にどれくらい出ることを許可するか
+    const float allowedForwardDistance_ = 0.02f;
+
+    // 根元付近はアニメーション追従なので制限しすぎない
+    for (size_t pointIndex_ = 2; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
+    {
+        const float normalizedPoint_ = GetNormalizedPointPosition(chain_, pointIndex_);
+        if (normalizedPoint_ <= 0.35f) continue;
+
+        XMFLOAT3& position_ = chain_.simulatedPositions[pointIndex_];
+
+        const XMFLOAT3 rootToPoint_ = Subtract(position_, rootPosition_);
+        const float forwardDistance_ =
+            rootToPoint_.x * ownerForward_.x +
+            rootToPoint_.y * ownerForward_.y +
+            rootToPoint_.z * ownerForward_.z;
+
+        if (forwardDistance_ <= allowedForwardDistance_) continue;
+
+        const float pushBackDistance_ = forwardDistance_ - allowedForwardDistance_;
+        position_ = Subtract(position_, Scale(ownerForward_, pushBackDistance_));
+
+        chain_.previousPositions[pointIndex_] = position_;
+    }
+}
+
 void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& chain_)
 {
     BS_PROFILE_SCOPE("SpringBone::ApplySpringChain");
@@ -839,7 +878,7 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
         const float dot_ = std::clamp(XMVectorGetX(XMVector3Dot(currentDirectionVector_, targetDirectionVector_)), -1.0f, 1.0f);
         if (axisLength_ <= 0.00001f) continue;
 
-        if (nodeIndex_ <= 1) continue;
+        if (nodeIndex_ <= 3) continue;
 
         const float normalizedNodePosition_ = static_cast<float>(nodeIndex_)
             / static_cast<float>(chain_.nodeIndices.size() - 1);
