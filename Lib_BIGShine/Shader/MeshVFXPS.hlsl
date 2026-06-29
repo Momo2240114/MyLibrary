@@ -86,7 +86,7 @@ float4 main(VS_OUT input) : SV_TARGET
     float hiddenMask = saturate(max(
         max(1.0f - mask, 1.0f - baseColor.a),
         step(mask, dissolveThreshold)));
-    if (!distortionEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
+    if (!distortionEnabled && !edgeEnabled && (mask <= dissolveThreshold || baseColor.a <= 0.0001f))
     {
         discard;
     }
@@ -139,8 +139,10 @@ float4 main(VS_OUT input) : SV_TARGET
     if (edgeEnabled)
     {
         // 頂点を押し出さず、Mesh表面の内側だけで外周っぽい部分を強調する。
+        float silhouetteFactor_ = 1.0f - saturate(abs(dot(viewDir, normal)));
+        float silhouetteCoverage_ = max(fwidth(silhouetteFactor_) * 1.5f, 0.02f);
         float silhouetteEdge =
-            pow(1.0f - saturate(abs(dot(viewDir, normal))), silhouetteEdgePower) *
+            pow(saturate(silhouetteFactor_ + silhouetteCoverage_), silhouetteEdgePower) *
             silhouetteEdgeStrength;
 
         float intersectionEdge = 0.0f;
