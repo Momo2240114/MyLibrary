@@ -113,7 +113,7 @@
                         "Position": [
                             0.0,
                             25.0,
-                            2.369999885559082
+                            0.0
                         ],
                         "RenderEnabled": true,
                         "Rotation": [
@@ -122,9 +122,9 @@
                             0.0
                         ],
                         "Scale": [
+                            70.0,
                             75.0,
-                            75.0,
-                            77.70999908447266
+                            70.0
                         ],
                         "ScaleEnd": [
                             1.0,
@@ -180,7 +180,7 @@
                     1.0
                 ],
                 "HalfHeight": 100.0,
-                "Radius": 74.5,
+                "Radius": 70.0,
                 "Segments": 64,
                 "Shape": 0,
                 "ShowDebugShape": true,
@@ -201,7 +201,7 @@
                             0.0
                         ],
                         "BlendMode": 0,
-                        "BurstCount": 30000,
+                        "BurstCount": 3000,
                         "Color": [
                             1.0,
                             1.0,
@@ -236,15 +236,15 @@
                         "GradientTexturePath": "",
                         "Gravity": -9.800000190734863,
                         "LegacyRadius": [
-                            75.0,
-                            75.0
+                            69.5,
+                            70.0
                         ],
                         "Lifespan": [
                             1.0,
                             5.5
                         ],
                         "MaskTexturePath": "",
-                        "MaxCount": 100000,
+                        "MaxCount": 10000,
                         "MeshVertexSampleCount": 2048,
                         "Name": "Emitter_0",
                         "NoiseFrequency": 2.2300000190734863,
@@ -253,7 +253,7 @@
                         "OrbitVelocity": 0.0,
                         "PosOffset": [
                             0.0,
-                            -1.2999999523162842,
+                            -2.0,
                             0.0
                         ],
                         "RadialVelocity": 0.0,

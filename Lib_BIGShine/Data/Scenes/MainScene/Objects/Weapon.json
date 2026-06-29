@@ -281,7 +281,7 @@
                         "VertexNoiseVerticalStrength": 0.10000000149011612
                     }
                 ],
-                "TrailEmitting": true,
+                "TrailEmitting": false,
                 "TrailLifeTime": 0.3499999940395355,
                 "TrailMaxSampleCount": 64,
                 "TrailMinimumSampleDistance": 0.009999999776482582,

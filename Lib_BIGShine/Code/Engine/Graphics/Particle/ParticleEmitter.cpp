@@ -228,18 +228,9 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
     context->CSSetShader(updateShader.Get(), nullptr, 0);
     context->DispatchIndirect(indirectDataBuffer.Get(), UpdateDispatchIndirectOffset);
 
-    if (depthSortEnabled)
-    {
-        if ((depthSortFrame % depthSortInterval) == 0)
-        {
-            RunBitonicSort(context);
-        }
-        ++depthSortFrame;
-    }
-    else
-    {
-        depthSortFrame = 0;
-    }
+    // DrawInstancedIndirect draws only the leading live-count range.
+    // Sorting also compacts live headers into that range, so it cannot be skipped.
+    RunBitonicSort(context);
 
     context->CSSetShader(endFrameShader.Get(), nullptr, 0);
     context->Dispatch(1, 1, 1);

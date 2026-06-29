@@ -249,7 +249,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 2
+                            "value": 0
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -257,7 +257,7 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 1
+                            "value": 0
                         },
                         "AttackEnter": {
                             "type": "bool",
@@ -265,15 +265,15 @@
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 1
+                            "value": 0
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -286,13 +286,13 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                1.0
+                                1.0,
+                                0.0
                             ]
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -304,11 +304,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsMove": {
                             "type": "bool",
@@ -339,7 +339,7 @@
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 2
+                            "value": 0
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -347,19 +347,19 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 1
+                            "value": 0
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 1
+                            "value": 0
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -372,13 +372,13 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                1.0
+                                1.0,
+                                0.0
                             ]
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -390,11 +390,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsMove": {
                             "type": "bool",
@@ -420,7 +420,7 @@
         {
             "Data": {
                 "AnimationData": {
-                    "DefaultState": "SS_Attack1",
+                    "DefaultState": "SS_Idle",
                     "States": [
                         {
                             "animIndexA": -1,
@@ -4243,7 +4243,7 @@
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_End_end",
                         "TipStiffnessScale": 1.0,
-                        "Type": 0
+                        "Type": 2
                     },
                     {
                         "BendStiffness": 0.019999999552965164,
@@ -4267,7 +4267,7 @@
                         "Stiffness": 0.004999999888241291,
                         "TipNode": "Bone_hair_B_R_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 0
+                        "Type": 2
                     },
                     {
                         "BendStiffness": 0.014000000432133675,
@@ -4291,7 +4291,7 @@
                         "Stiffness": 0.008999999612569809,
                         "TipNode": "Bone_hair_B_L_End_end",
                         "TipStiffnessScale": 0.20000000298023224,
-                        "Type": 0
+                        "Type": 2
                     }
                 ],
                 "ShowBodyCollisionShapes": true
@@ -4979,13 +4979,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            62.96574401855469,
-            -1.476834774017334,
-            -1.7828478813171387
+            19.175086975097656,
+            -1.4768257141113281,
+            25.471397399902344
         ],
         "Rot": [
             3.000000238418579,
-            117.69032287597656,
+            352.9437561035156,
             1.1004080988641363e-05
         ],
         "Scale": [
