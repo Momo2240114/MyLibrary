@@ -62,6 +62,7 @@ public:
     void Clear();
     uint32_t CreateAttackInstance();
     void ClearAttackInstance(uint32_t attackInstanceId_);
+    void ClearAttackHitGroup(uint32_t attackInstanceId_, uint32_t hitGroupId_);
     void HandleHit(HitBox& hitBox_, HurtBox& hurtBox_);
     void HandleHit(
         HitBox& hitBox_,

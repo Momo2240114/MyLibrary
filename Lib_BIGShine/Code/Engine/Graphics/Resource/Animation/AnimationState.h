@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstdint>
 #include <memory>
 #include <vector>
 #include <DirectXMath.h>
@@ -14,6 +15,15 @@ enum class ANIM_BLACKBOARD_VALUE_TYPE
     INT,
     BOOL,
     STRING
+};
+
+enum class ANIMATION_EVENT_TEMPLATE_TYPE
+{
+    NONE,
+    ATTACK_TEMPLATE,
+    TRAIL_TEMPLATE,
+    VFX_TEMPLATE,
+    SOUND_TEMPLATE
 };
 
 struct AnimBlackboardWrite
@@ -56,6 +66,12 @@ struct AnimEvent
     bool isEndFired = false; // End action fired in this loop.
     bool callEndOnStateExit = false;
     std::vector<AnimBlackboardWrite> blackboardWrites;
+    ANIMATION_EVENT_TEMPLATE_TYPE eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::NONE;
+    std::string attackTemplateId;
+    std::string ownerTarget = "Self";
+    bool attackTemplateRuntimeActive = false;
+    uint32_t attackTemplateInstanceId = 0u;
+    std::vector<bool> spawnedAttackEffects;
 
 };
 

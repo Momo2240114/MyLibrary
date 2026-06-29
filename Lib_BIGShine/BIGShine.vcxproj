@@ -401,6 +401,9 @@
     <ClCompile Include="Code\Engine\Physics\ColliderComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\CollisionStepSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\AttackSystem.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp" />
@@ -601,6 +604,9 @@
     <ClInclude Include="Code\Engine\Physics\Collision.h" />
     <ClInclude Include="Code\Engine\Physics\CollisionStepSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\AttackSystem.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXEventCallback.h" />

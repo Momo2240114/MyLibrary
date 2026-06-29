@@ -673,6 +673,15 @@
     <ClCompile Include="Code\Engine\GamePlay\System\AttackSystem.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
@@ -1244,6 +1253,15 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\AttackSystem.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h">
+      <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h">
       <Filter>Code\Engine\GamePlay</Filter>

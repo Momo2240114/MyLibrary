@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <directxmath.h>
 #include <cstdint>
@@ -25,6 +25,18 @@ enum class PARTICLE_SPAWN_DIRECTION_MODE : uint32_t
     CONE = 0,       // Cone Angleで決めた方向へ飛ばす。
     OUTWARD = 1,    // エミッター中心から外側へ飛ばす。
     INWARD = 2,     // 発生位置からエミッター中心へ向けて飛ばす。
+};
+
+enum PARTICLE_GRADIENT_SAMPLE_MODE
+{
+    PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL = 0,
+    PARTICLE_GRADIENT_SAMPLE_MODE_VERTICAL = 1,
+};
+
+enum PARTICLE_GRADIENT_DIRECTION
+{
+    PARTICLE_GRADIENT_DIRECTION_FORWARD = 0,
+    PARTICLE_GRADIENT_DIRECTION_REVERSE = 1,
 };
 
 // GPU上で生存しているParticle 1個分の状態。
@@ -138,12 +150,29 @@ struct ParticleSystemConstants
     uint32_t spawnDirectionMode = 0;       // PARTICLE_SPAWN_DIRECTION_MODE
     uint32_t cpuSpawnPadding0 = 0;
     uint32_t cpuSpawnPadding1 = 0;
+
+    uint32_t gradientSampleMode = PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL;
+    uint32_t gradientDirection = PARTICLE_GRADIENT_DIRECTION_FORWARD;
+    uint32_t useShadeGradientTexture = 0;
+    uint32_t gradientPadding0 = 0;
+
+    float gradientFixedUv = 0.5f;
+    float gradientStartUv = 0.0f;
+    float gradientEndUv = 1.0f;
+    float shadeGradientFixedUv = 0.5f;
+
+    float shadeGradientStartUv = 0.0f;
+    float shadeGradientEndUv = 1.0f;
+    uint32_t shadeGradientSampleMode = PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL;
+    uint32_t shadeGradientDirection = PARTICLE_GRADIENT_DIRECTION_FORWARD;
 };
 static_assert(sizeof(ParticleSystemConstants) % 16 == 0);
 
 struct particle_system_settings
 {
     ParticleSystemConstants data;
-    std::string texture_path;
-    std::string color_temper_path;
+    std::string texturePath;
+    std::string maskTexturePath;
+    std::string gradientTexturePath;
+    std::string shadeGradientTexturePath;
 };

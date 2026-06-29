@@ -11,6 +11,8 @@
 class GameObject;
 class GameObjectManager;
 class HitBox;
+struct AttackEffectSpawnTemplate;
+struct AttackTemplate;
 
 struct ParticleSpawnRequest
 {
@@ -40,6 +42,7 @@ struct SlashEffectSpawnSetting
     DirectX::XMFLOAT3 localRotation = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 localScale = { 1.0f, 1.0f, 1.0f };
     bool hasHitBox = false;
+    std::string hitBoxName = "EffectHitBox";
     float hitStartTime = 0.0f;
     float hitEndTime = 0.08f;
     float hitBoxRadius = 0.5f;
@@ -80,6 +83,11 @@ public:
         const AttackEffectSpawnRequest& request_);
     std::shared_ptr<GameObject> SpawnAttackEffect(
         const AttackEffectSpawnRequest& request_);
+    std::shared_ptr<GameObject> SpawnAttackEffect(
+        const AttackEffectSpawnTemplate& effectTemplate_,
+        const AttackTemplate& attackTemplate_,
+        GameObject* ownerObject_,
+        uint32_t attackInstanceId_);
     std::shared_ptr<GameObject> SpawnEffectWithHitBox(
         const AttackEffectSpawnRequest& request_);
     void SpawnForHit(const AttackHitEvent& event_);

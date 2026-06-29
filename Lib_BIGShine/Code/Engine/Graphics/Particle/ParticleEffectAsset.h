@@ -17,6 +17,8 @@ struct ParticleEmitterAsset
     std::string maskTextureFileName;
     std::string gradientTexturePath;
     std::string gradientTextureFileName;
+    std::string shadeGradientTexturePath;
+    std::string shadeGradientTextureFileName;
 
     float delay = 0.0f;
     uint32_t meshVertexSampleCount = 2048;

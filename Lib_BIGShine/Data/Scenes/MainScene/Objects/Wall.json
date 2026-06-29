@@ -324,7 +324,23 @@
                             0.0,
                             20.0,
                             0.0
-                        ]
+                        ],
+                        "gradientDirection": 0,
+                        "gradientEndUv": 1.0,
+                        "gradientFixedUv": 0.5,
+                        "gradientSampleMode": 0,
+                        "gradientStartUv": 0.0,
+                        "gradientTexturePath": "",
+                        "maskTexturePath": "",
+                        "shadeGradientDirection": 0,
+                        "shadeGradientEndUv": 1.0,
+                        "shadeGradientFixedUv": 0.5,
+                        "shadeGradientSampleMode": 0,
+                        "shadeGradientStartUv": 0.0,
+                        "shadeGradientTexturePath": "",
+                        "texturePath": "Data/Texture/Particle/Particles/Particles/Color/burst/color_burst_25.png",
+                        "useGradientTexture": 0,
+                        "useShadeGradientTexture": 0
                     }
                 ],
                 "IsPlaying": true

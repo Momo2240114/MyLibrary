@@ -684,7 +684,14 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"overridePlaybackSpeed", e.overridePlaybackSpeed},
             {"playbackSpeed", e.playbackSpeed},
             {"callEndOnStateExit", e.callEndOnStateExit},
-            {"blackboardWrites", e.blackboardWrites}
+            {"blackboardWrites", e.blackboardWrites},
+            {"eventTemplateType",
+                e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE ? "ATTACK_TEMPLATE" :
+                e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::TRAIL_TEMPLATE ? "TRAIL_TEMPLATE" :
+                e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE ? "VFX_TEMPLATE" :
+                e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE ? "SOUND_TEMPLATE" : "NONE"},
+            {"attackTemplateId", e.attackTemplateId},
+            {"ownerTarget", e.ownerTarget}
         };
     }
 
@@ -701,8 +708,30 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         e.blackboardWrites = j.value(
             "blackboardWrites",
             std::vector<AnimBlackboardWrite>{});
+        e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::NONE;
+        if (j.contains("eventTemplateType"))
+        {
+            if (j["eventTemplateType"].is_string())
+            {
+                const std::string eventTemplateType_ = j["eventTemplateType"].get<std::string>();
+                if (eventTemplateType_ == "ATTACK_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+                else if (eventTemplateType_ == "TRAIL_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::TRAIL_TEMPLATE;
+                else if (eventTemplateType_ == "VFX_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
+                else if (eventTemplateType_ == "SOUND_TEMPLATE") e.eventTemplateType = ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE;
+            }
+            else if (j["eventTemplateType"].is_number_integer())
+            {
+                const int eventTemplateType_ = (std::clamp)(j["eventTemplateType"].get<int>(), 0, 4);
+                e.eventTemplateType = static_cast<ANIMATION_EVENT_TEMPLATE_TYPE>(eventTemplateType_);
+            }
+        }
+        e.attackTemplateId = j.value("attackTemplateId", std::string{});
+        e.ownerTarget = j.value("ownerTarget", std::string("Self"));
         e.isFired = false;
         e.isEndFired = false;
+        e.attackTemplateRuntimeActive = false;
+        e.attackTemplateInstanceId = 0u;
+        e.spawnedAttackEffects.clear();
     }
 
 

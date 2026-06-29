@@ -2,6 +2,8 @@
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
+#include "Engine/GamePlay/Combat/AttackTemplateManager.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Physics/HitBox.h"
@@ -21,6 +23,7 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "rotation", { setting_.localRotation.x, setting_.localRotation.y, setting_.localRotation.z } },
         { "scale", { setting_.localScale.x, setting_.localScale.y, setting_.localScale.z } },
         { "hasHitBox", setting_.hasHitBox },
+        { "hitBoxName", setting_.hitBoxName },
         { "hitStartTime", setting_.hitStartTime },
         { "hitEndTime", setting_.hitEndTime },
         { "hitBoxRadius", setting_.hitBoxRadius },
@@ -52,6 +55,7 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.localRotation = readVector3_("rotation", { 0.0f, 0.0f, 0.0f });
     setting_.localScale = readVector3_("scale", { 1.0f, 1.0f, 1.0f });
     setting_.hasHitBox = json_.value("hasHitBox", false);
+    setting_.hitBoxName = json_.value("hitBoxName", std::string("EffectHitBox"));
     setting_.hitStartTime = json_.value("hitStartTime", 0.0f);
     setting_.hitEndTime = json_.value("hitEndTime", 0.08f);
     setting_.hitBoxRadius = json_.value("hitBoxRadius", 0.5f);
@@ -269,6 +273,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
         hitBox_ = object_->AddComponent<HitBox>();
         if (hitBox_)
         {
+            hitBox_->actionPrefix = request_.setting.hitBoxName;
             hitBox_->SetOwner(request_.ownerObject);
             hitBox_->SetAttackInstanceId(attackInstanceId_);
             hitBox_->SetHitGroupId(request_.setting.hitGroupId);
@@ -302,6 +307,79 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     const AttackEffectSpawnRequest& request_)
 {
     return SpawnSlashEffect(request_);
+}
+
+std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
+    const AttackEffectSpawnTemplate& effectTemplate_,
+    const AttackTemplate& attackTemplate_,
+    GameObject* ownerObject_,
+    uint32_t attackInstanceId_)
+{
+    if (!gameObjectManager || !effectTemplate_.enabled) return nullptr;
+    std::shared_ptr<GameObject> object_ = gameObjectManager->Create("RuntimeAttackEffect");
+    if (!object_) return nullptr;
+    object_->SetNoSaveObject();
+
+    using namespace DirectX;
+    const XMMATRIX localMatrix_ =
+        XMMatrixScaling(effectTemplate_.localScale.x, effectTemplate_.localScale.y, effectTemplate_.localScale.z) *
+        XMMatrixRotationRollPitchYaw(
+            XMConvertToRadians(effectTemplate_.localRotation.x),
+            XMConvertToRadians(effectTemplate_.localRotation.y),
+            XMConvertToRadians(effectTemplate_.localRotation.z)) *
+        XMMatrixTranslation(effectTemplate_.localOffset.x, effectTemplate_.localOffset.y, effectTemplate_.localOffset.z);
+    const XMMATRIX ownerMatrix_ = ownerObject_ && ownerObject_->transform
+        ? ownerObject_->transform->GetWorldMatrix() : XMMatrixIdentity();
+    if (effectTemplate_.followOwner && ownerObject_ && ownerObject_->transform)
+    {
+        object_->transform->SetParent(ownerObject_->transform);
+        object_->transform->localPosition = effectTemplate_.localOffset;
+        object_->transform->localRotation = effectTemplate_.localRotation;
+        object_->transform->localScale = effectTemplate_.localScale;
+        object_->transform->MarkDirty();
+    }
+    else
+    {
+        object_->transform->ApplyWorldMatrix(localMatrix_ * ownerMatrix_);
+    }
+    object_->UpdateTransform();
+
+    if (!effectTemplate_.particlePath.empty())
+    {
+        std::shared_ptr<ParticleComponent> particle_ = object_->AddComponent<ParticleComponent>();
+        if (particle_ && particle_->LoadAsset(effectTemplate_.particlePath)) particle_->Play();
+    }
+    if (!effectTemplate_.meshVfxPath.empty())
+    {
+        std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->AddComponent<MeshVFXComponent>();
+        if (meshVFX_ && meshVFX_->LoadAsset(effectTemplate_.meshVfxPath))
+        {
+            meshVFX_->Reset();
+            meshVFX_->Play();
+        }
+    }
+
+    std::shared_ptr<AttackEffectHitComponent> attackHit_ = object_->AddComponent<AttackEffectHitComponent>();
+    if (attackHit_)
+    {
+        attackHit_->SetOwner(ownerObject_);
+        attackHit_->SetAttackInstanceId(attackInstanceId_);
+        attackHit_->SetHitGroupId(attackTemplate_.hitGroupId);
+        attackHit_->SetDamage(attackTemplate_.damage);
+        attackHit_->SetHitStopDuration(attackTemplate_.hitStopDuration);
+        attackHit_->SetHitStopScale(attackTemplate_.hitStopScale);
+        attackHit_->SetKnockBackPower(attackTemplate_.knockBackPower);
+        attackHit_->SetHitParticleAssetPath(attackTemplate_.hitEffect.hitParticleAssetPath);
+        attackHit_->SetHitMeshVFXAssetPath(attackTemplate_.hitEffect.hitMeshVfxAssetPath);
+        attackHit_->SetAllowMultiHit(attackTemplate_.allowMultiHit);
+        attackHit_->SetCanHitOwner(attackTemplate_.canHitOwner);
+        attackHit_->SetEffectType(effectTemplate_.effectType);
+        attackHit_->SetLifeTime(effectTemplate_.lifeTime);
+        attackHit_->SetMovement(effectTemplate_.localDirection, effectTemplate_.speed);
+        attackHit_->SetHitShapes(effectTemplate_.hitShapes);
+        attackHit_->Play();
+    }
+    return object_;
 }
 
 std::shared_ptr<GameObject> EffectManager::SpawnEffectWithHitBox(
