@@ -586,6 +586,9 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.cpp">
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageTrailComponent.cpp">
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp">
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClCompile>
@@ -1177,6 +1180,9 @@
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.h">
+      <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFX\AfterimageTrailComponent.h">
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h">

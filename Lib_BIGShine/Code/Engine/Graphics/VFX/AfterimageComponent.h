@@ -39,22 +39,34 @@ private:
     struct Snapshot
     {
         std::vector<MeshVFXModelPose> poses;
+        DirectX::XMFLOAT3 samplePosition = { 0.0f, 0.0f, 0.0f };
         float age = 0.0f;
     };
 
     void RegisterActions();
-    void CaptureSnapshot();
+    bool CaptureSnapshot(Snapshot& snapshot_);
     void CaptureObject(const std::shared_ptr<GameObject>& object_, Snapshot& snapshot_);
+    void AddSnapshot(const Snapshot& snapshot_);
+    void AddSnapshotWithSpacing(const Snapshot& snapshot_);
+    Snapshot InterpolateSnapshot(
+        const Snapshot& firstSnapshot_,
+        const Snapshot& secondSnapshot_,
+        float ratio_) const;
+    float CalculateSnapshotDistance(
+        const Snapshot& firstSnapshot_,
+        const Snapshot& secondSnapshot_) const;
 
     std::vector<Snapshot> snapshots;
     float spawnInterval = 0.06f;
     float lifetime = 0.4f;
     float startAlpha = 0.8f;
+    float maximumSnapshotSpacing = 0.8f;
     float spawnTimer = 0.0f;
-    int maxSnapshots = 8;
-    int maxRenderSnapshots = 4;
+    int maxSnapshots = 16;
+    int maxRenderSnapshots = 8;
     int maxRenderParts = 1;
     int burstCount = 3;
+    int maxExtraSnapshotsPerFrame = 8;
     int pendingBurstCount = 0;
     bool includeChildren = true;
     bool isEmitting = false;

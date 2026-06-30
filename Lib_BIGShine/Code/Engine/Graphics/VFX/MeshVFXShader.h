@@ -144,7 +144,15 @@ private:
 
         uint32_t hasEmissiveTexture;   // Emissive Textureがあるか
 
-        DirectX::XMFLOAT3 padding;     // 16byteアライン調整
+        uint32_t useGradientTexture;   // Gradient Textureを使うか
+        uint32_t hasGradientTexture;   // Gradient Textureがあるか
+        uint32_t gradientSampleMode;   // 0:U方向 1:V方向
+        uint32_t gradientDirection;    // 0:順方向 1:逆方向
+
+        float gradientFixedUv;         // Gradient Textureの固定UV
+        float gradientStartUv;         // Gradientの開始UV
+        float gradientEndUv;           // Gradientの終了UV
+        float gradientPadding;         // 16byteアライン調整
     };
 
     static_assert(sizeof(CbMeshVFX) % 16 == 0, "CbMeshVFX size must be aligned to 16 bytes.");

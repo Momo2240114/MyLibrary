@@ -386,6 +386,7 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\TrailMeshComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageTrailComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp" />
@@ -530,6 +531,7 @@
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\TrailMeshComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\WeaponTrailComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFX\AfterimageTrailComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MaterialOverlayComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\AfterimageComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h" />

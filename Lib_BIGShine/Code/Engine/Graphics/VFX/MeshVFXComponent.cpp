@@ -447,6 +447,48 @@ void MeshVFXComponent::Gui()
                 ImGui::TreePop();
             }
 
+            if (ImGui::TreeNode("Gradient Texture"))
+            {
+                layeredTextureChanged_ |= AssetSlotGui::Draw(
+                    "Gradient Texture Asset",
+                    AssetSlotType::TEXTURE,
+                    part_.gradientTexturePath,
+                    runtimePart_ ? runtimePart_->gradientTexture.Get() : nullptr,
+                    "Data/Texture");
+                ImGui::Checkbox("Use Gradient Texture", &part_.useGradientTexture);
+                if (part_.useGradientTexture)
+                {
+                    ImGui::TextDisabled("Gradient enabled: Base RGB is ignored. Base Alpha is still used.");
+                    const char* sampleModeNames_[] = { "Horizontal", "Vertical" };
+                    int sampleMode_ = static_cast<int>(part_.gradientSampleMode);
+                    if (ImGui::Combo(
+                        "Gradient Sample Mode",
+                        &sampleMode_,
+                        sampleModeNames_,
+                        IM_ARRAYSIZE(sampleModeNames_)))
+                    {
+                        part_.gradientSampleMode =
+                            static_cast<MESH_VFX_GRADIENT_SAMPLE_MODE>(sampleMode_);
+                    }
+
+                    const char* directionNames_[] = { "Forward", "Reverse" };
+                    int direction_ = static_cast<int>(part_.gradientDirection);
+                    if (ImGui::Combo(
+                        "Gradient Direction",
+                        &direction_,
+                        directionNames_,
+                        IM_ARRAYSIZE(directionNames_)))
+                    {
+                        part_.gradientDirection =
+                            static_cast<MESH_VFX_GRADIENT_DIRECTION>(direction_);
+                    }
+                    ImGui::SliderFloat("Gradient Fixed UV", &part_.gradientFixedUv, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Gradient Start UV", &part_.gradientStartUv, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Gradient End UV", &part_.gradientEndUv, 0.0f, 1.0f);
+                }
+                ImGui::TreePop();
+            }
+
             if (baseTextureChanged_ || normalTextureChanged_ || layeredTextureChanged_)
             {
                 LoadPartResource(static_cast<size_t>(partIndex_));
@@ -719,6 +761,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["VertexNoiseTexturePath"] = part_.vertexNoiseTexturePath;
         partJson_["EdgePatternTexturePath"] = part_.edgePatternTexturePath;
         partJson_["EmissiveTexturePath"] = part_.emissiveTexturePath;
+        partJson_["GradientTexturePath"] = part_.gradientTexturePath;
         partJson_["MaskLayers"] = nlohmann::json::array();
         for (const MeshVFXMaskLayer& layer_ : part_.maskLayers)
         {
@@ -784,6 +827,9 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["FresnelPower"] = part_.fresnelPower;
         partJson_["FresnelStrength"] = part_.fresnelStrength;
         partJson_["DissolveThreshold"] = part_.dissolveThreshold;
+        partJson_["GradientFixedUv"] = part_.gradientFixedUv;
+        partJson_["GradientStartUv"] = part_.gradientStartUv;
+        partJson_["GradientEndUv"] = part_.gradientEndUv;
         partJson_["UseMask"] = part_.useMask;
         partJson_["UseNoise"] = part_.useNoise;
         partJson_["UseVertexNoise"] = part_.useVertexNoise;
@@ -791,6 +837,9 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["UseEdgeHighlight"] = part_.useEdgeHighlight;
         partJson_["UseNormal"] = part_.useNormal;
         partJson_["UseFresnel"] = part_.useFresnel;
+        partJson_["UseGradientTexture"] = part_.useGradientTexture;
+        partJson_["GradientSampleMode"] = static_cast<int>(part_.gradientSampleMode);
+        partJson_["GradientDirection"] = static_cast<int>(part_.gradientDirection);
         partJson_["BlendMode"] = static_cast<int>(part_.blendMode);
         json_["Parts"].push_back(partJson_);
     }
@@ -834,6 +883,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.vertexNoiseTexturePath = partJson_.value("VertexNoiseTexturePath", "");
         part_.edgePatternTexturePath = partJson_.value("EdgePatternTexturePath", "");
         part_.emissiveTexturePath = partJson_.value("EmissiveTexturePath", "");
+        part_.gradientTexturePath = partJson_.value("GradientTexturePath", "");
         if (partJson_.contains("MaskLayers") && partJson_["MaskLayers"].is_array())
         {
             for (const auto& layerJson_ : partJson_["MaskLayers"])
@@ -917,6 +967,9 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.fresnelPower = partJson_.value("FresnelPower", 2.0f);
         part_.fresnelStrength = partJson_.value("FresnelStrength", 1.0f);
         part_.dissolveThreshold = partJson_.value("DissolveThreshold", 0.0f);
+        part_.gradientFixedUv = std::clamp(partJson_.value("GradientFixedUv", 0.5f), 0.0f, 1.0f);
+        part_.gradientStartUv = std::clamp(partJson_.value("GradientStartUv", 0.0f), 0.0f, 1.0f);
+        part_.gradientEndUv = std::clamp(partJson_.value("GradientEndUv", 1.0f), 0.0f, 1.0f);
         part_.useMask = partJson_.value("UseMask", false);
         part_.useNoise = partJson_.value("UseNoise", false);
         part_.useVertexNoise = partJson_.value("UseVertexNoise", false);
@@ -924,6 +977,11 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.useEdgeHighlight = partJson_.value("UseEdgeHighlight", false);
         part_.useNormal = partJson_.value("UseNormal", false);
         part_.useFresnel = partJson_.value("UseFresnel", false);
+        part_.useGradientTexture = partJson_.value("UseGradientTexture", false);
+        part_.gradientSampleMode = static_cast<MESH_VFX_GRADIENT_SAMPLE_MODE>(
+            std::clamp(partJson_.value("GradientSampleMode", 0), 0, 1));
+        part_.gradientDirection = static_cast<MESH_VFX_GRADIENT_DIRECTION>(
+            std::clamp(partJson_.value("GradientDirection", 0), 0, 1));
         part_.blendMode = static_cast<MeshVFXBlendMode>(std::clamp(partJson_.value("BlendMode", 0), 0, 1));
         asset.parts.push_back(part_);
     }
@@ -1150,6 +1208,7 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
             0xFFFFFFFF,
             runtimePart_.emissiveTexture);
     }
+    LoadTexture(device_, part_.gradientTexturePath, 0xFFFFFFFF, runtimePart_.gradientTexture);
 }
 
 void MeshVFXComponent::LoadTexture(

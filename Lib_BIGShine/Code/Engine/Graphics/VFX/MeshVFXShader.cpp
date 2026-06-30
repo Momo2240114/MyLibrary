@@ -266,6 +266,13 @@ void MeshVFXShader::UpdatePart(
     constants_.emissivePulseAmount = part_.emissivePulseAmount;
     constants_.hasEdgePatternTexture = runtimePart_.edgePatternTexture ? 1u : 0u;
     constants_.hasEmissiveTexture = runtimePart_.emissiveTexture ? 1u : 0u;
+    constants_.useGradientTexture = part_.useGradientTexture ? 1u : 0u;
+    constants_.hasGradientTexture = runtimePart_.gradientTexture ? 1u : 0u;
+    constants_.gradientSampleMode = static_cast<uint32_t>(part_.gradientSampleMode);
+    constants_.gradientDirection = static_cast<uint32_t>(part_.gradientDirection);
+    constants_.gradientFixedUv = part_.gradientFixedUv;
+    constants_.gradientStartUv = part_.gradientStartUv;
+    constants_.gradientEndUv = part_.gradientEndUv;
 
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->UpdateSubresource(partConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
@@ -283,6 +290,8 @@ void MeshVFXShader::UpdatePart(
     deviceContext_->PSSetShaderResources(5, 1, &edgePatternTextureView_);
     ID3D11ShaderResourceView* emissiveTextureView_ = runtimePart_.emissiveTexture.Get();
     deviceContext_->PSSetShaderResources(6, 1, &emissiveTextureView_);
+    ID3D11ShaderResourceView* gradientTextureView_ = runtimePart_.gradientTexture.Get();
+    deviceContext_->PSSetShaderResources(9, 1, &gradientTextureView_);
     ID3D11ShaderResourceView* vertexNoiseTextureView_ = runtimePart_.vertexNoiseTexture.Get();
     deviceContext_->VSSetShaderResources(0, 1, &vertexNoiseTextureView_);
 }
@@ -291,7 +300,7 @@ void MeshVFXShader::End(const RenderContext& renderContext_)
 {
     // ŽŸ‚Ì•`‰æ‚ÖTexture/CB/Shaderó‘Ô‚ðŽ‚¿‰z‚³‚È‚¢‚æ‚¤AMeshVFX‚ÅŽg—p‚µ‚½Slot‚ð‰ðœ‚·‚éB
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
-    ID3D11ShaderResourceView* nullTextures_[9] = {};
+    ID3D11ShaderResourceView* nullTextures_[10] = {};
     ID3D11Buffer* nullBuffer_ = nullptr;
     deviceContext_->PSSetShaderResources(0, _countof(nullTextures_), nullTextures_);
     ID3D11ShaderResourceView* nullVertexTexture_ = nullptr;
