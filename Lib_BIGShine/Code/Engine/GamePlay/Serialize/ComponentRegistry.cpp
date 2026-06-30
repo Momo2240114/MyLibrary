@@ -42,6 +42,7 @@
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/Graphics/VFX/AfterimageComponent.h"
+#include "Engine/Graphics/VFX/AfterimageTrailComponent.h"
 #include "Engine/Audio/AudioComponent.h"
 
 
@@ -84,6 +85,7 @@ void RegisterAllComponents()
     registry.Register<MeshVFXComponent>("MeshVFXComponent");
     registry.Register<MaterialOverlayComponent>("MaterialOverlayComponent");
     registry.Register<AfterimageComponent>("AfterimageComponent");
+    registry.Register<AfterimageTrailComponent>("AfterimageTrailComponent");
     registry.Register<AudioComponent>("AudioComponent");
 
 

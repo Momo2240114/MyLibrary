@@ -61,7 +61,14 @@ cbuffer CbMeshVFX : register(b0)
     float emissivePulseAmount;
     uint hasEdgePatternTexture;
     uint hasEmissiveTexture;
-    float3 padding;
+    uint useGradientTexture;
+    uint hasGradientTexture;
+    uint gradientSampleMode;
+    uint gradientDirection;
+    float gradientFixedUv;
+    float gradientStartUv;
+    float gradientEndUv;
+    float gradientPadding;
 };
 
 // GltfModelの頂点入力。

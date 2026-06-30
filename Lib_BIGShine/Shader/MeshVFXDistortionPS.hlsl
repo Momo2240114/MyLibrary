@@ -4,9 +4,13 @@ Texture2D BaseTexture : register(t0);
 Texture2D MaskTexture : register(t1);
 Texture2D NoiseTexture : register(t2);
 Texture2D DistortionNoiseTexture : register(t4);
+Texture2D GradientTexture : register(t9);
 
 SamplerState LinearWrapSampler : register(s0);
 SamplerState LinearBorderSampler : register(s1);
+
+static const uint MESH_VFX_GRADIENT_SAMPLE_MODE_HORIZONTAL = 0;
+static const uint MESH_VFX_GRADIENT_DIRECTION_FORWARD = 0;
 
 float2 RotateUV(float2 uv, float angle)
 {
@@ -27,6 +31,24 @@ float2 ScaleUVFromCenter(float2 uv, float scale)
 float2 ApplyTextureScale(float2 uv, float2 scale)
 {
     return uv * max(scale, float2(0.001f, 0.001f));
+}
+
+float2 GetGradientUV(float2 sourceUV)
+{
+    float gradientT = gradientSampleMode == MESH_VFX_GRADIENT_SAMPLE_MODE_HORIZONTAL
+        ? sourceUV.x
+        : sourceUV.y;
+    gradientT = saturate(gradientT);
+    if (gradientDirection != MESH_VFX_GRADIENT_DIRECTION_FORWARD)
+    {
+        gradientT = 1.0f - gradientT;
+    }
+
+    gradientT = lerp(gradientStartUv, gradientEndUv, gradientT);
+    float fixedUv = saturate(gradientFixedUv);
+    return gradientSampleMode == MESH_VFX_GRADIENT_SAMPLE_MODE_HORIZONTAL
+        ? float2(gradientT, fixedUv)
+        : float2(fixedUv, gradientT);
 }
 
 float4 main(VS_OUT input) : SV_TARGET
@@ -55,6 +77,10 @@ float4 main(VS_OUT input) : SV_TARGET
     float4 baseSample = abs(baseUVRotation) > 0.0001f
         ? BaseTexture.Sample(LinearBorderSampler, baseUV)
         : BaseTexture.Sample(LinearWrapSampler, baseUV);
+    if (useGradientTexture != 0 && hasGradientTexture != 0)
+    {
+        baseSample.a *= GradientTexture.Sample(LinearWrapSampler, GetGradientUV(input.texcoord)).a;
+    }
 
     float mask = 1.0f;
     if (useMask != 0)

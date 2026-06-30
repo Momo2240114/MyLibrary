@@ -32,6 +32,18 @@ enum class MESH_VFX_EDGE_PATTERN_MODE
     MASK_TEXTURE,   // Mask Textureの値でEdgeに模様を入れる。
 };
 
+enum class MESH_VFX_GRADIENT_SAMPLE_MODE
+{
+    HORIZONTAL,
+    VERTICAL,
+};
+
+enum class MESH_VFX_GRADIENT_DIRECTION
+{
+    FORWARD,
+    REVERSE,
+};
+
 // Mask Texture 1枚分の情報。
 struct MeshVFXMaskLayer
 {
@@ -73,6 +85,7 @@ struct MeshVFXPart
     std::string vertexNoiseTexturePath;       // 頂点揺らしに使うNoise Textureパス。
     std::string edgePatternTexturePath;
     std::string emissiveTexturePath;
+    std::string gradientTexturePath;
     std::vector<MeshVFXMaskLayer> maskLayers; // 複数Maskの合成設定。
     std::vector<std::string> noiseTexturePaths;// 複数Noiseの平均合成用Textureパス。
 
@@ -119,6 +132,9 @@ struct MeshVFXPart
     float fresnelPower = 2.0f;           // Fresnelの鋭さ。
     float fresnelStrength = 1.0f;        // Fresnelの強さ。
     float dissolveThreshold = 0.0f;      // Mask/Alphaがこの値以下なら破棄する。
+    float gradientFixedUv = 0.5f;
+    float gradientStartUv = 0.0f;
+    float gradientEndUv = 1.0f;
 
     bool useMask = false;                // Mask Textureで表示範囲を制御するか。
     bool useNoise = false;               // Noise TextureでUVを歪ませるか。
@@ -127,7 +143,10 @@ struct MeshVFXPart
     bool useEdgeHighlight = false;       // Mesh表面内のシルエット/交差周辺を強調するか。
     bool useNormal = false;              // Normal Textureで法線を補正するか。
     bool useFresnel = false;             // 視線角によるFresnel発光を使うか。
+    bool useGradientTexture = false;
     MESH_VFX_EDGE_PATTERN_MODE edgePatternMode = MESH_VFX_EDGE_PATTERN_MODE::NONE; // Edge模様の参照元。
+    MESH_VFX_GRADIENT_SAMPLE_MODE gradientSampleMode = MESH_VFX_GRADIENT_SAMPLE_MODE::HORIZONTAL;
+    MESH_VFX_GRADIENT_DIRECTION gradientDirection = MESH_VFX_GRADIENT_DIRECTION::FORWARD;
     MeshVFXBlendMode blendMode = MeshVFXBlendMode::ALPHA; // 描画時の合成方法。
 };
 
@@ -143,6 +162,7 @@ struct MeshVFXRuntimePart
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> vertexNoiseTexture; // 頂点揺らし用Noise。
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> edgePatternTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> emissiveTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gradientTexture;
 };
 
 // Trailなどが実行時に作ったMeshをMeshVFXとして描くためのバッファ参照。

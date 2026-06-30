@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Resource/GLTFModel.h"
 
 #include <algorithm>
+#include <cmath>
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 #include <utility>
@@ -54,7 +55,11 @@ void AfterimageComponent::LateUpdate(float deltaTime_)
     while (spawnTimer >= safeInterval_ && (isEmitting || pendingBurstCount > 0))
     {
         spawnTimer -= safeInterval_;
-        CaptureSnapshot();
+        Snapshot snapshot_;
+        if (CaptureSnapshot(snapshot_))
+        {
+            AddSnapshotWithSpacing(snapshot_);
+        }
         if (pendingBurstCount > 0)
         {
             --pendingBurstCount;
@@ -68,10 +73,12 @@ void AfterimageComponent::Gui()
     ImGui::DragFloat("Spawn Interval", &spawnInterval, 0.005f, 0.001f, 1.0f);
     ImGui::DragFloat("Lifetime", &lifetime, 0.01f, 0.01f, 10.0f);
     ImGui::DragFloat("Start Alpha", &startAlpha, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Maximum Snapshot Spacing", &maximumSnapshotSpacing, 0.01f, 0.0f, 100.0f);
     ImGui::DragInt("Max Snapshots", &maxSnapshots, 1.0f, 1, 64);
     ImGui::DragInt("Max Render Snapshots", &maxRenderSnapshots, 1.0f, 1, 64);
     ImGui::DragInt("Max Render Parts", &maxRenderParts, 1.0f, 1, 16);
     ImGui::DragInt("Burst Count", &burstCount, 1.0f, 1, 32);
+    ImGui::DragInt("Max Extra Snapshots", &maxExtraSnapshotsPerFrame, 1.0f, 0, 32);
     ImGui::Checkbox("Include Children", &includeChildren);
     ImGui::Text("Active: %zu", snapshots.size());
 
@@ -93,10 +100,12 @@ void AfterimageComponent::Serialize(nlohmann::json& json_) const
     json_["SpawnInterval"] = spawnInterval;
     json_["Lifetime"] = lifetime;
     json_["StartAlpha"] = startAlpha;
+    json_["MaximumSnapshotSpacing"] = maximumSnapshotSpacing;
     json_["MaxSnapshots"] = maxSnapshots;
     json_["MaxRenderSnapshots"] = maxRenderSnapshots;
     json_["MaxRenderParts"] = maxRenderParts;
     json_["BurstCount"] = burstCount;
+    json_["MaxExtraSnapshotsPerFrame"] = maxExtraSnapshotsPerFrame;
     json_["IncludeChildren"] = includeChildren;
 }
 
@@ -106,10 +115,12 @@ void AfterimageComponent::Deserialize(const nlohmann::json& json_)
     spawnInterval = (std::max)(json_.value("SpawnInterval", 0.06f), 0.001f);
     lifetime = (std::max)(json_.value("Lifetime", 0.4f), 0.01f);
     startAlpha = std::clamp(json_.value("StartAlpha", 0.8f), 0.0f, 1.0f);
-    maxSnapshots = std::clamp(json_.value("MaxSnapshots", 8), 1, 64);
-    maxRenderSnapshots = std::clamp(json_.value("MaxRenderSnapshots", 4), 1, maxSnapshots);
+    maximumSnapshotSpacing = (std::max)(json_.value("MaximumSnapshotSpacing", 0.8f), 0.0f);
+    maxSnapshots = std::clamp(json_.value("MaxSnapshots", 16), 1, 64);
+    maxRenderSnapshots = std::clamp(json_.value("MaxRenderSnapshots", 8), 1, maxSnapshots);
     maxRenderParts = std::clamp(json_.value("MaxRenderParts", 1), 1, 16);
     burstCount = std::clamp(json_.value("BurstCount", 3), 1, 32);
+    maxExtraSnapshotsPerFrame = std::clamp(json_.value("MaxExtraSnapshotsPerFrame", 8), 0, 32);
     includeChildren = json_.value("IncludeChildren", true);
     Clear();
 }
@@ -190,21 +201,107 @@ void AfterimageComponent::RegisterActions()
     registry_.RegisterAction("VFX", "AfterimageClear", [this]() { Clear(); });
 }
 
-void AfterimageComponent::CaptureSnapshot()
+bool AfterimageComponent::CaptureSnapshot(Snapshot& snapshot_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_ || !owner_->transform) return false;
 
-    Snapshot snapshot_;
     snapshot_.poses.reserve(includeChildren ? 4 : 1);
+    DirectX::XMFLOAT4X4 worldTransform_{};
+    DirectX::XMStoreFloat4x4(&worldTransform_, owner_->transform->GetWorldMatrix());
+    snapshot_.samplePosition =
+    {
+        worldTransform_._41,
+        worldTransform_._42,
+        worldTransform_._43
+    };
     CaptureObject(owner_, snapshot_);
-    if (snapshot_.poses.empty()) return;
+    return !snapshot_.poses.empty();
+}
 
-    snapshots.push_back(std::move(snapshot_));
+void AfterimageComponent::AddSnapshot(const Snapshot& snapshot_)
+{
+    snapshots.push_back(snapshot_);
     while (static_cast<int>(snapshots.size()) > maxSnapshots)
     {
         snapshots.erase(snapshots.begin());
     }
+}
+
+void AfterimageComponent::AddSnapshotWithSpacing(const Snapshot& snapshot_)
+{
+    if (!snapshots.empty() && maximumSnapshotSpacing > 0.0f && maxExtraSnapshotsPerFrame > 0)
+    {
+        const Snapshot previousSnapshot_ = snapshots.back();
+        const float distance_ = CalculateSnapshotDistance(previousSnapshot_, snapshot_);
+        const int extraSnapshotCount_ = (std::min)(
+            (std::max)(static_cast<int>(std::ceil(distance_ / maximumSnapshotSpacing)) - 1, 0),
+            maxExtraSnapshotsPerFrame);
+        for (int extraIndex_ = 1; extraIndex_ <= extraSnapshotCount_; ++extraIndex_)
+        {
+            const float ratio_ =
+                static_cast<float>(extraIndex_) / static_cast<float>(extraSnapshotCount_ + 1);
+            AddSnapshot(InterpolateSnapshot(previousSnapshot_, snapshot_, ratio_));
+        }
+    }
+
+    AddSnapshot(snapshot_);
+}
+
+AfterimageComponent::Snapshot AfterimageComponent::InterpolateSnapshot(
+    const Snapshot& firstSnapshot_,
+    const Snapshot& secondSnapshot_,
+    float ratio_) const
+{
+    Snapshot snapshot_;
+    const float inverseRatio_ = 1.0f - ratio_;
+    snapshot_.samplePosition =
+    {
+        firstSnapshot_.samplePosition.x * inverseRatio_ + secondSnapshot_.samplePosition.x * ratio_,
+        firstSnapshot_.samplePosition.y * inverseRatio_ + secondSnapshot_.samplePosition.y * ratio_,
+        firstSnapshot_.samplePosition.z * inverseRatio_ + secondSnapshot_.samplePosition.z * ratio_
+    };
+    snapshot_.poses = firstSnapshot_.poses;
+
+    const size_t poseCount_ = (std::min)(snapshot_.poses.size(), secondSnapshot_.poses.size());
+    for (size_t poseIndex_ = 0; poseIndex_ < poseCount_; ++poseIndex_)
+    {
+        MeshVFXModelPose& pose_ = snapshot_.poses[poseIndex_];
+        const MeshVFXModelPose& secondPose_ = secondSnapshot_.poses[poseIndex_];
+        const size_t meshCount_ = (std::min)(
+            pose_.meshTransforms.size(),
+            secondPose_.meshTransforms.size());
+        for (size_t meshIndex_ = 0; meshIndex_ < meshCount_; ++meshIndex_)
+        {
+            std::vector<DirectX::XMFLOAT4X4>& transforms_ = pose_.meshTransforms[meshIndex_];
+            const std::vector<DirectX::XMFLOAT4X4>& secondTransforms_ =
+                secondPose_.meshTransforms[meshIndex_];
+            const size_t transformCount_ = (std::min)(transforms_.size(), secondTransforms_.size());
+            for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
+            {
+                float* firstValues_ = reinterpret_cast<float*>(&transforms_[transformIndex_]);
+                const float* secondValues_ =
+                    reinterpret_cast<const float*>(&secondTransforms_[transformIndex_]);
+                for (int valueIndex_ = 0; valueIndex_ < 16; ++valueIndex_)
+                {
+                    firstValues_[valueIndex_] =
+                        firstValues_[valueIndex_] * inverseRatio_ +
+                        secondValues_[valueIndex_] * ratio_;
+                }
+            }
+        }
+    }
+    return snapshot_;
+}
+
+float AfterimageComponent::CalculateSnapshotDistance(
+    const Snapshot& firstSnapshot_,
+    const Snapshot& secondSnapshot_) const
+{
+    const float x_ = secondSnapshot_.samplePosition.x - firstSnapshot_.samplePosition.x;
+    const float y_ = secondSnapshot_.samplePosition.y - firstSnapshot_.samplePosition.y;
+    const float z_ = secondSnapshot_.samplePosition.z - firstSnapshot_.samplePosition.z;
+    return std::sqrt(x_ * x_ + y_ * y_ + z_ * z_);
 }
 
 void AfterimageComponent::CaptureObject(
