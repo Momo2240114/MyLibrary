@@ -967,14 +967,31 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         if ((isParticleAsset_ || isMeshVFXAsset_) && owner_)
                         {
                             const std::vector<std::string>& assets_ = isParticleAsset_
-                                ? owner_->GetManager().GetEffectManager().GetParticleAssetPaths()
-                                : owner_->GetManager().GetEffectManager().GetMeshVFXAssetPaths();
-                            if (ImGui::BeginCombo("Value", write_.stringValue.empty() ? "(None)" : write_.stringValue.c_str()))
+                                ? owner_->GetManager().GetEffectManager().GetParticleAssetKeys()
+                                : owner_->GetManager().GetEffectManager().GetMeshVFXAssetKeys();
+                            std::string previewValue_ = write_.stringValue;
+                            const std::string resolvedValue_ = isParticleAsset_
+                                ? owner_->GetManager().GetEffectManager().ResolveParticlePath(write_.stringValue)
+                                : owner_->GetManager().GetEffectManager().ResolveMeshVFXPath(write_.stringValue);
+                            for (const std::string& assetKey_ : assets_)
+                            {
+                                const std::string resolvedKey_ = isParticleAsset_
+                                    ? owner_->GetManager().GetEffectManager().ResolveParticlePath(assetKey_)
+                                    : owner_->GetManager().GetEffectManager().ResolveMeshVFXPath(assetKey_);
+                                if (!resolvedValue_.empty() && resolvedValue_ == resolvedKey_)
+                                {
+                                    previewValue_ = assetKey_;
+                                    break;
+                                }
+                            }
+                            if (ImGui::BeginCombo("Value", previewValue_.empty() ? "(None)" : previewValue_.c_str()))
                             {
                                 if (ImGui::Selectable("(None)", write_.stringValue.empty())) write_.stringValue.clear();
-                                for (const std::string& assetPath_ : assets_)
+                                for (const std::string& assetKey_ : assets_)
                                 {
-                                    if (ImGui::Selectable(assetPath_.c_str(), write_.stringValue == assetPath_)) write_.stringValue = assetPath_;
+                                    const bool selected_ = previewValue_ == assetKey_;
+                                    if (ImGui::Selectable(assetKey_.c_str(), selected_)) write_.stringValue = assetKey_;
+                                    if (selected_) ImGui::SetItemDefaultFocus();
                                 }
                                 ImGui::EndCombo();
                             }

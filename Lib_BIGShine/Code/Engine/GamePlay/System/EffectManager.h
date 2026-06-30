@@ -1,11 +1,14 @@
 #pragma once
 
 #include "AttackSystem.h"
+#include "Engine/Graphics/Particle/ParticleEffectAsset.h"
+#include "Engine/Graphics/VFX/MeshVFXResource.h"
 
 #include <DirectXMath.h>
 #include <nlohmann/json.hpp>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class GameObject;
@@ -67,6 +70,13 @@ struct AttackEffectSpawnRequest
     uint32_t attackInstanceId = 0u;
 };
 
+struct EffectAssetEntry
+{
+    std::string key;
+    std::string fileName;
+    std::string fullPath;
+};
+
 void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_);
 void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_);
 
@@ -77,6 +87,10 @@ public:
     void Update(float deltaTime_);
     void Clear();
     void RefreshAssetCache();
+    void BuildAssetNameMap();
+    void PreloadAllEffects();
+    std::string ResolveParticlePath(const std::string& assetNameOrPath_) const;
+    std::string ResolveMeshVFXPath(const std::string& assetNameOrPath_) const;
 
     std::shared_ptr<GameObject> SpawnParticle(
         const ParticleSpawnRequest& request_);
@@ -103,6 +117,26 @@ public:
     const std::vector<std::string>& GetMeshVFXAssetPaths() const
     {
         return meshVFXAssetPaths;
+    }
+
+    const std::vector<std::string>& GetParticleAssetKeys() const
+    {
+        return particleAssetKeys;
+    }
+
+    const std::vector<std::string>& GetMeshVFXAssetKeys() const
+    {
+        return meshVFXAssetKeys;
+    }
+
+    const std::vector<EffectAssetEntry>& GetParticleAssets() const
+    {
+        return particleAssets;
+    }
+
+    const std::vector<EffectAssetEntry>& GetMeshVFXAssets() const
+    {
+        return meshVFXAssets;
     }
 
 private:
@@ -136,6 +170,25 @@ private:
     void CollectJsonAssets(
         const std::string& rootPath_,
         std::vector<std::string>& paths_) const;
+    void BuildAssetNameMap(
+        const std::vector<std::string>& paths_,
+        const std::string& rootPath_,
+        std::vector<EffectAssetEntry>& entries_,
+        std::vector<std::string>& keys_,
+        std::unordered_map<std::string, std::string>& pathByKey_) const;
+    void RegisterAssetKey(
+        const std::string& key_,
+        const std::string& fullPath_,
+        std::unordered_map<std::string, std::string>& pathByKey_) const;
+    void PreloadParticleAsset(const std::string& path_);
+    void PreloadMeshVFXAsset(const std::string& path_);
+    std::string BuildAssetNameFromPath(
+        const std::string& path_,
+        const std::string& rootPath_) const;
+    const ParticleEffectAsset* FindParticleAssetFromRequest(
+        const std::string& assetPath_) const;
+    const MeshVFXAsset* FindMeshVFXAssetFromRequest(
+        const std::string& assetPath_) const;
 
 private:
     GameObjectManager* gameObjectManager = nullptr;
@@ -143,4 +196,12 @@ private:
     std::vector<ScheduledAttackEffect> scheduledAttackEffects;
     std::vector<std::string> particleAssetPaths;
     std::vector<std::string> meshVFXAssetPaths;
+    std::vector<EffectAssetEntry> particleAssets;
+    std::vector<EffectAssetEntry> meshVFXAssets;
+    std::vector<std::string> particleAssetKeys;
+    std::vector<std::string> meshVFXAssetKeys;
+    std::unordered_map<std::string, std::string> particlePathByKey;
+    std::unordered_map<std::string, std::string> meshVFXPathByKey;
+    std::unordered_map<std::string, ParticleEffectAsset> particleAssetCache;
+    std::unordered_map<std::string, MeshVFXAsset> meshVFXAssetCache;
 };

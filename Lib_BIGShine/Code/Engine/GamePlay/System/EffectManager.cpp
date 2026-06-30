@@ -13,6 +13,8 @@
 
 #include <DirectXMath.h>
 #include <algorithm>
+#include <cctype>
+#include <cstdio>
 #include <filesystem>
 
 void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
@@ -82,6 +84,8 @@ void EffectManager::Initialize(GameObjectManager* gameObjectManager_)
 {
     gameObjectManager = gameObjectManager_;
     RefreshAssetCache();
+    BuildAssetNameMap();
+    PreloadAllEffects();
 }
 
 void EffectManager::Update(float deltaTime_)
@@ -161,13 +165,93 @@ void EffectManager::RefreshAssetCache()
     CollectJsonAssets("Data/VFX", meshVFXAssetPaths);
 }
 
+void EffectManager::BuildAssetNameMap()
+{
+    BuildAssetNameMap(
+        particleAssetPaths,
+        "Data/Particle",
+        particleAssets,
+        particleAssetKeys,
+        particlePathByKey);
+    BuildAssetNameMap(
+        meshVFXAssetPaths,
+        "Data/VFX",
+        meshVFXAssets,
+        meshVFXAssetKeys,
+        meshVFXPathByKey);
+}
+
+void EffectManager::PreloadAllEffects()
+{
+    particleAssetCache.clear();
+    meshVFXAssetCache.clear();
+
+    for (const EffectAssetEntry& entry_ : particleAssets)
+    {
+        PreloadParticleAsset(entry_.fullPath);
+    }
+
+    for (const EffectAssetEntry& entry_ : meshVFXAssets)
+    {
+        PreloadMeshVFXAsset(entry_.fullPath);
+    }
+}
+
+std::string EffectManager::ResolveParticlePath(const std::string& assetNameOrPath_) const
+{
+    if (assetNameOrPath_.empty()) return {};
+
+    const auto directIterator_ = particlePathByKey.find(assetNameOrPath_);
+    if (directIterator_ != particlePathByKey.end()) return directIterator_->second;
+
+    const std::string assetKey_ = BuildAssetNameFromPath(assetNameOrPath_, "Data/Particle");
+    const auto keyIterator_ = particlePathByKey.find(assetKey_);
+    if (keyIterator_ != particlePathByKey.end()) return keyIterator_->second;
+
+    const std::filesystem::path path_ =
+        WindowsDialogHelper::Utf8ToPath(assetNameOrPath_);
+    std::error_code error_;
+    if (std::filesystem::is_regular_file(path_, error_))
+    {
+        return WindowsDialogHelper::PathToUtf8(path_.lexically_normal());
+    }
+
+    return assetNameOrPath_;
+}
+
+std::string EffectManager::ResolveMeshVFXPath(const std::string& assetNameOrPath_) const
+{
+    if (assetNameOrPath_.empty()) return {};
+
+    const auto directIterator_ = meshVFXPathByKey.find(assetNameOrPath_);
+    if (directIterator_ != meshVFXPathByKey.end()) return directIterator_->second;
+
+    const std::string assetKey_ = BuildAssetNameFromPath(assetNameOrPath_, "Data/VFX");
+    const auto keyIterator_ = meshVFXPathByKey.find(assetKey_);
+    if (keyIterator_ != meshVFXPathByKey.end()) return keyIterator_->second;
+
+    const std::filesystem::path path_ =
+        WindowsDialogHelper::Utf8ToPath(assetNameOrPath_);
+    std::error_code error_;
+    if (std::filesystem::is_regular_file(path_, error_))
+    {
+        return WindowsDialogHelper::PathToUtf8(path_.lexically_normal());
+    }
+
+    return assetNameOrPath_;
+}
+
 std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     const ParticleSpawnRequest& request_)
 {
     if (!gameObjectManager || request_.assetPath.empty()) return nullptr;
 
+    const std::string resolvedAssetPath_ =
+        ResolveParticlePath(request_.assetPath);
+
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeParticle");
+
     if (!object_) return nullptr;
 
     object_->SetNoSaveObject();
@@ -176,21 +260,24 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
         request_.position,
         request_.normal,
         request_.normalOffset);
+
     Vector3 position_(spawnPosition_.x, spawnPosition_.y, spawnPosition_.z);
     object_->transform->SetLocalPosition(position_);
     object_->UpdateTransform();
 
     std::shared_ptr<ParticleComponent> particle_ =
         object_->AddComponent<ParticleComponent>();
+
     if (!particle_) return object_;
 
-    if (!particle_->LoadAsset(request_.assetPath))
+    if (!particle_->LoadAsset(resolvedAssetPath_))
     {
         gameObjectManager->Destroy(object_);
         return nullptr;
     }
 
     std::string emitterName_ = request_.emitterName;
+
     if (emitterName_.empty() && !particle_->GetTracks().empty())
     {
         emitterName_ = particle_->GetTracks().front().name;
@@ -378,16 +465,42 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
 
     if (!effectTemplate_.particlePath.empty())
     {
+        const std::string resolvedParticlePath_ =
+            ResolveParticlePath(effectTemplate_.particlePath);
         std::shared_ptr<ParticleComponent> particle_ = object_->AddComponent<ParticleComponent>();
-        if (particle_ && particle_->LoadAsset(effectTemplate_.particlePath)) particle_->Play();
+        if (particle_)
+        {
+            if (const ParticleEffectAsset* asset_ =
+                FindParticleAssetFromRequest(resolvedParticlePath_))
+            {
+                particle_->SetAsset(*asset_);
+                particle_->Play();
+            }
+            else if (particle_->LoadAsset(resolvedParticlePath_))
+            {
+                particle_->Play();
+            }
+        }
     }
     if (!effectTemplate_.meshVfxPath.empty())
     {
+        const std::string resolvedMeshVFXPath_ =
+            ResolveMeshVFXPath(effectTemplate_.meshVfxPath);
         std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->AddComponent<MeshVFXComponent>();
-        if (meshVFX_ && meshVFX_->LoadAsset(effectTemplate_.meshVfxPath))
+        if (meshVFX_)
         {
-            meshVFX_->Reset();
-            meshVFX_->Play();
+            if (const MeshVFXAsset* asset_ =
+                FindMeshVFXAssetFromRequest(resolvedMeshVFXPath_))
+            {
+                meshVFX_->SetAsset(*asset_);
+                meshVFX_->Reset();
+                meshVFX_->Play();
+            }
+            else if (meshVFX_->LoadAsset(resolvedMeshVFXPath_))
+            {
+                meshVFX_->Reset();
+                meshVFX_->Play();
+            }
         }
     }
 
@@ -426,6 +539,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
     const MeshVFXSpawnRequest& request_)
 {
     if (!gameObjectManager || request_.assetPath.empty()) return nullptr;
+    const std::string resolvedAssetPath_ = ResolveMeshVFXPath(request_.assetPath);
 
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeMeshVFX");
@@ -445,7 +559,11 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
         object_->AddComponent<MeshVFXComponent>();
     if (!meshVFX_) return object_;
 
-    if (!meshVFX_->LoadAsset(request_.assetPath))
+    if (const MeshVFXAsset* asset_ = FindMeshVFXAssetFromRequest(resolvedAssetPath_))
+    {
+        meshVFX_->SetAsset(*asset_);
+    }
+    else if (!meshVFX_->LoadAsset(resolvedAssetPath_))
     {
         gameObjectManager->Destroy(object_);
         return nullptr;
@@ -554,4 +672,210 @@ void EffectManager::CollectJsonAssets(
     }
 
     std::sort(paths_.begin(), paths_.end());
+}
+
+void EffectManager::BuildAssetNameMap(
+    const std::vector<std::string>& paths_,
+    const std::string& rootPath_,
+    std::vector<EffectAssetEntry>& entries_,
+    std::vector<std::string>& keys_,
+    std::unordered_map<std::string, std::string>& pathByKey_) const
+{
+    entries_.clear();
+    keys_.clear();
+    pathByKey_.clear();
+
+    for (const std::string& fullPath_ : paths_)
+    {
+        const std::filesystem::path filePath_ =
+            WindowsDialogHelper::Utf8ToPath(fullPath_);
+        const std::string fileName_ =
+            WindowsDialogHelper::PathToUtf8(filePath_.filename());
+        const std::string fileKey_ =
+            WindowsDialogHelper::PathToUtf8(filePath_.stem());
+        const std::string relativeKey_ = BuildAssetNameFromPath(
+            fullPath_,
+            rootPath_);
+
+        std::string key_ = fileKey_;
+        const auto duplicateIterator_ = pathByKey_.find(key_);
+        if (duplicateIterator_ != pathByKey_.end() &&
+            duplicateIterator_->second != fullPath_)
+        {
+            std::printf(
+                "[EffectManager] Duplicate effect key '%s': %s / %s\n",
+                key_.c_str(),
+                duplicateIterator_->second.c_str(),
+                fullPath_.c_str());
+            key_ = relativeKey_;
+        }
+
+        EffectAssetEntry entry_{};
+        entry_.key = key_;
+        entry_.fileName = fileName_;
+        entry_.fullPath = fullPath_;
+        entries_.push_back(entry_);
+        keys_.push_back(key_);
+
+        RegisterAssetKey(key_, fullPath_, pathByKey_);
+        RegisterAssetKey(relativeKey_, fullPath_, pathByKey_);
+        RegisterAssetKey(fileName_, fullPath_, pathByKey_);
+        RegisterAssetKey(fullPath_, fullPath_, pathByKey_);
+    }
+}
+
+void EffectManager::RegisterAssetKey(
+    const std::string& key_,
+    const std::string& fullPath_,
+    std::unordered_map<std::string, std::string>& pathByKey_) const
+{
+    if (key_.empty() || fullPath_.empty()) return;
+
+    const auto iterator_ = pathByKey_.find(key_);
+    if (iterator_ == pathByKey_.end())
+    {
+        pathByKey_[key_] = fullPath_;
+        return;
+    }
+
+    if (iterator_->second != fullPath_)
+    {
+        std::printf(
+            "[EffectManager] Effect key alias '%s' already points to %s, ignored %s\n",
+            key_.c_str(),
+            iterator_->second.c_str(),
+            fullPath_.c_str());
+    }
+}
+
+void EffectManager::PreloadParticleAsset(const std::string& path_)
+{
+    ParticleEffectAsset asset_{};
+    if (!ParticleComponent::LoadAssetDataOnly(path_, asset_))
+    {
+        std::printf("[EffectManager] Failed to preload particle asset: %s\n", path_.c_str());
+        return;
+    }
+
+    const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/Particle");
+    if (assetName_.empty()) return;
+
+    particleAssetCache[assetName_] = asset_;
+}
+
+void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
+{
+    MeshVFXComponent component_;
+    if (!component_.LoadAsset(path_))
+    {
+        std::printf("[EffectManager] Failed to preload mesh vfx asset: %s\n", path_.c_str());
+        return;
+    }
+
+    const std::string assetName_ = BuildAssetNameFromPath(path_, "Data/VFX");
+    if (assetName_.empty()) return;
+
+    meshVFXAssetCache[assetName_] = component_.GetAsset();
+}
+
+std::string EffectManager::BuildAssetNameFromPath(
+    const std::string& path_,
+    const std::string& rootPath_) const
+{
+    if (path_.empty()) return {};
+
+    std::string normalizedPath_ = path_;
+    std::replace(
+        normalizedPath_.begin(),
+        normalizedPath_.end(),
+        '\\',
+        '/');
+
+    while (!normalizedPath_.empty() && normalizedPath_.front() == '/')
+    {
+        normalizedPath_.erase(normalizedPath_.begin());
+    }
+
+    std::string normalizedRootPath_ = rootPath_;
+    std::replace(
+        normalizedRootPath_.begin(),
+        normalizedRootPath_.end(),
+        '\\',
+        '/');
+    while (!normalizedRootPath_.empty() && normalizedRootPath_.front() == '/')
+    {
+        normalizedRootPath_.erase(normalizedRootPath_.begin());
+    }
+
+    const std::string rootPrefix_ = normalizedRootPath_ + "/";
+    if (normalizedPath_.rfind(rootPrefix_, 0) == 0)
+    {
+        normalizedPath_.erase(0, rootPrefix_.size());
+    }
+    else
+    {
+        const std::string rootMarker_ = "/" + rootPrefix_;
+        const size_t rootPosition_ = normalizedPath_.find(rootMarker_);
+        if (rootPosition_ != std::string::npos)
+        {
+            normalizedPath_.erase(0, rootPosition_ + rootMarker_.size());
+        }
+
+        const std::string dataPrefix_ = "Data/";
+        if (normalizedPath_.rfind(dataPrefix_, 0) == 0)
+        {
+            const size_t slashPosition_ = normalizedPath_.find('/', dataPrefix_.size());
+            if (slashPosition_ != std::string::npos)
+            {
+                normalizedPath_.erase(0, slashPosition_ + 1);
+            }
+        }
+    }
+
+    const std::string extension_ = ".json";
+    if (normalizedPath_.size() >= extension_.size())
+    {
+        std::string tail_ = normalizedPath_.substr(normalizedPath_.size() - extension_.size());
+        std::transform(
+            tail_.begin(),
+            tail_.end(),
+            tail_.begin(),
+            [](unsigned char character_)
+            {
+                return static_cast<char>(std::tolower(character_));
+            });
+
+        if (tail_ == extension_)
+        {
+            normalizedPath_.erase(normalizedPath_.size() - extension_.size());
+        }
+    }
+
+    return normalizedPath_;
+}
+
+const ParticleEffectAsset* EffectManager::FindParticleAssetFromRequest(
+    const std::string& assetPath_) const
+{
+    const auto directIterator_ = particleAssetCache.find(assetPath_);
+    if (directIterator_ != particleAssetCache.end()) return &directIterator_->second;
+
+    const std::string assetName_ = BuildAssetNameFromPath(assetPath_, "Data/Particle");
+    const auto iterator_ = particleAssetCache.find(assetName_);
+    if (iterator_ == particleAssetCache.end()) return nullptr;
+
+    return &iterator_->second;
+}
+
+const MeshVFXAsset* EffectManager::FindMeshVFXAssetFromRequest(
+    const std::string& assetPath_) const
+{
+    const auto directIterator_ = meshVFXAssetCache.find(assetPath_);
+    if (directIterator_ != meshVFXAssetCache.end()) return &directIterator_->second;
+
+    const std::string assetName_ = BuildAssetNameFromPath(assetPath_, "Data/VFX");
+    const auto iterator_ = meshVFXAssetCache.find(assetName_);
+    if (iterator_ == meshVFXAssetCache.end()) return nullptr;
+
+    return &iterator_->second;
 }

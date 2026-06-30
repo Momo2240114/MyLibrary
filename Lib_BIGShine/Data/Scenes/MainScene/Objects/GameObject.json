@@ -84,6 +84,7 @@
                         "GradientSampleMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
                         "IntersectionEdgeStrength": 0.33000001311302185,
                         "IntersectionEdgeWidth": 0.001500000013038516,
                         "Loop": true,
@@ -162,7 +163,6 @@
                             1.0,
                             1.0
                         ],
-                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 2.700000047683716,
                         "SilhouetteEdgeStrength": 3.359999895095825,
                         "UVRadialScale": 1.0,
@@ -276,6 +276,7 @@
                         "GradientSampleMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -354,7 +355,6 @@
                             1.0,
                             1.0
                         ],
-                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.5,
                         "SilhouetteEdgeStrength": 2.200000047683716,
                         "UVRadialScale": 1.0,
@@ -389,7 +389,8 @@
                         "VertexNoiseVerticalScale": 1.0,
                         "VertexNoiseVerticalStrength": 0.10000000149011612
                     }
-                ]
+                ],
+                "PlaybackSpeed": 1.0
             },
             "Enabled": true,
             "TypeName": "MeshVFXComponent"

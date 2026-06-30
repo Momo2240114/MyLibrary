@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 52,
+                "AttackInstanceId": 15,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -205,6 +205,7 @@
                         "GradientSampleMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": false,
@@ -283,7 +284,6 @@
                             1.0,
                             1.0
                         ],
-                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 11.350000381469727,
                         "SilhouetteEdgeStrength": 16.0,
                         "UVRadialScale": 1.0,
@@ -319,6 +319,7 @@
                         "VertexNoiseVerticalStrength": 0.10000000149011612
                     }
                 ],
+                "PlaybackSpeed": 1.0,
                 "TrailEmitting": true,
                 "TrailLifeTime": 0.3499999940395355,
                 "TrailMaxSampleCount": 64,
@@ -430,6 +431,7 @@
                         "GradientSampleMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -506,7 +508,6 @@
                             1.0,
                             1.0
                         ],
-                        "ShapeCylinderRadius": 1.0,
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.9800000190734863,
                         "UVRadialScale": 1.0,
@@ -541,7 +542,8 @@
                         "VertexNoiseVerticalScale": 1.0,
                         "VertexNoiseVerticalStrength": 0.10000000149011612
                     }
-                ]
+                ],
+                "PlaybackSpeed": 1.0
             },
             "Enabled": true,
             "TypeName": "MaterialOverlayComponent"

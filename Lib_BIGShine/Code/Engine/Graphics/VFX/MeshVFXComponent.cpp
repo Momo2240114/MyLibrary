@@ -22,10 +22,776 @@
 
 namespace
 {
-    constexpr const char* SHAPE_CYLINDER_MODEL_PATH = "__ShapeCylinder__";
-    constexpr int SHAPE_CYLINDER_SEGMENTS = 256;
+    constexpr const char* LEGACY_SHAPE_CYLINDER_MODEL_PATH = "__ShapeCylinder__";
+    constexpr const char* LEGACY_SLASH_CRESCENT_MODEL_PATH = "__SlashCrescent__";
+    constexpr const char* LEGACY_SLASH_FAN_MODEL_PATH = "__SlashFan__";
+    constexpr const char* LEGACY_SLASH_ARC_RIBBON_MODEL_PATH = "__SlashArcRibbon__";
+    constexpr const char* LEGACY_SLASH_CROSS_MODEL_PATH = "__SlashCross__";
+    constexpr const char* LEGACY_SLASH_GROUND_MODEL_PATH = "__SlashGround__";
+    constexpr const char* LEGACY_SLASH_CROSS_CRESCENT_MODEL_PATH = "__SlashCrossCrescent__";
+    constexpr const char* LEGACY_SLASH_VERTICAL_CRESCENT_MODEL_PATH = "__SlashVerticalCrescent__";
+    constexpr const char* LEGACY_SLASH_RAISED_CRESCENT_MODEL_PATH = "__SlashRaisedCrescent__";
 
-    std::shared_ptr<ModelResource> CreateShapeCylinderModelResource(
+    constexpr const char* INTERNAL_MESH__MODEL_PATH = "__InternalMesh__";
+    constexpr const char* INTERNAL_MESH_CYLINDER_MODEL_PATH = "__InternalMeshCylinder__";
+    constexpr const char* INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH = "__InternalMeshSlashCrescent__";
+    constexpr const char* INTERNAL_MESH_SLASH_FAN_MODEL_PATH = "__InternalMeshSlashFan__";
+    constexpr const char* INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH = "__InternalMeshSlashArcRibbon__";
+    constexpr const char* INTERNAL_MESH_SLASH_CROSS_MODEL_PATH = "__InternalMeshSlashCross__";
+    constexpr const char* INTERNAL_MESH_SLASH_GROUND_MODEL_PATH = "__InternalMeshSlashGround__";
+    constexpr const char* INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH = "__InternalMeshSlashCrossCrescent__";
+    constexpr const char* INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH = "__InternalMeshSlashVerticalCrescent__";
+    constexpr const char* INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH = "__InternalMeshSlashRaisedCrescent__";
+
+    constexpr int INTERNAL_MESH_CYLINDER_SEGMENTS = 256;
+    constexpr int INTERNAL_MESH_SLASH_SEGMENTS = 96;
+
+    bool CreateStaticMeshBuffers(
+        ID3D11Device* device_,
+        GltfModelCommponennt::Mesh& mesh_)
+    {
+        if (!device_ || mesh_.vertices.empty() || mesh_.indices.empty()) return false;
+
+        D3D11_BUFFER_DESC vertexDesc_{};
+        vertexDesc_.ByteWidth = static_cast<UINT>(
+            sizeof(GltfModelCommponennt::Vertex) * mesh_.vertices.size());
+        vertexDesc_.Usage = D3D11_USAGE_IMMUTABLE;
+        vertexDesc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+        D3D11_SUBRESOURCE_DATA vertexData_{};
+        vertexData_.pSysMem = mesh_.vertices.data();
+        if (FAILED(device_->CreateBuffer(
+            &vertexDesc_,
+            &vertexData_,
+            mesh_.vertexBuffer.GetAddressOf())))
+        {
+            return false;
+        }
+
+        D3D11_BUFFER_DESC indexDesc_{};
+        indexDesc_.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh_.indices.size());
+        indexDesc_.Usage = D3D11_USAGE_IMMUTABLE;
+        indexDesc_.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+        D3D11_SUBRESOURCE_DATA indexData_{};
+        indexData_.pSysMem = mesh_.indices.data();
+        if (FAILED(device_->CreateBuffer(
+            &indexDesc_,
+            &indexData_,
+            mesh_.indexBuffer.GetAddressOf())))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    std::shared_ptr<ModelResource> CreateGeneratedModelResource(
+        const char* modelName_)
+    {
+        auto resource_ = std::make_shared<ModelResource>();
+        resource_->modelName = modelName_;
+
+        auto& node_ = resource_->nodes.emplace_back();
+        node_.name = modelName_;
+
+        auto& material_ = resource_->materials.emplace_back();
+        material_.id = 0;
+        material_.name = modelName_;
+
+        auto& mesh_ = resource_->meshes.emplace_back();
+        mesh_.nodeIndex = 0;
+        mesh_.materialIndex = 0;
+        mesh_.node = &resource_->nodes[0];
+        mesh_.material = &resource_->materials[0];
+
+        return resource_;
+    }
+
+    void NormalizeInternalMeshModelPath(std::string& modelPath_)
+    {
+        if (modelPath_ == LEGACY_SHAPE_CYLINDER_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_CYLINDER_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_CRESCENT_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_FAN_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_FAN_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_ARC_RIBBON_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_CROSS_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_CROSS_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_GROUND_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_GROUND_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_CROSS_CRESCENT_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_VERTICAL_CRESCENT_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_SLASH_RAISED_CRESCENT_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH;
+        }
+    }
+
+    GltfModelCommponennt::Vertex CreateInternalMeshSlashVertex(
+        const DirectX::XMFLOAT3& position_,
+        float u_,
+        float v_)
+    {
+        GltfModelCommponennt::Vertex vertex_{};
+        vertex_.position = position_;
+        vertex_.normal = { 0.0f, 1.0f, 0.0f };
+        vertex_.tangent = { 1.0f, 0.0f, 0.0f, 1.0f };
+        vertex_.texcoord = { u_, v_ };
+        return vertex_;
+    }
+
+    void AddQuadIndices(
+        std::vector<uint32_t>& indices_,
+        uint32_t leftBottom_,
+        uint32_t leftTop_,
+        uint32_t rightBottom_,
+        uint32_t rightTop_)
+    {
+        indices_.push_back(leftBottom_);
+        indices_.push_back(leftTop_);
+        indices_.push_back(rightBottom_);
+        indices_.push_back(rightBottom_);
+        indices_.push_back(leftTop_);
+        indices_.push_back(rightTop_);
+    }
+
+    void AddRibbonStrip(
+        GltfModelCommponennt::Mesh& mesh_,
+        const std::vector<DirectX::XMFLOAT3>& innerPoints_,
+        const std::vector<DirectX::XMFLOAT3>& outerPoints_)
+    {
+        const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
+        if (pointCount_ < 2) return;
+
+        const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+        for (size_t index_ = 0; index_ < pointCount_; ++index_)
+        {
+            const float u_ = static_cast<float>(index_) /
+                static_cast<float>(pointCount_ - 1);
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertex(innerPoints_[index_], u_, 1.0f));
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertex(outerPoints_[index_], u_, 0.0f));
+        }
+
+        for (size_t index_ = 0; index_ + 1 < pointCount_; ++index_)
+        {
+            const uint32_t current_ = baseIndex_ + static_cast<uint32_t>(index_ * 2);
+            const uint32_t next_ = current_ + 2;
+            AddQuadIndices(
+                mesh_.indices,
+                current_,
+                current_ + 1,
+                next_,
+                next_ + 1);
+        }
+    }
+
+    void AddStraightRibbon(
+        GltfModelCommponennt::Mesh& mesh_,
+        float length_,
+        float width_,
+        float angleDegrees_,
+        const DirectX::XMFLOAT3& offset_)
+    {
+        const float angle_ = DirectX::XMConvertToRadians(angleDegrees_);
+        const float cos_ = std::cos(angle_);
+        const float sin_ = std::sin(angle_);
+        const DirectX::XMFLOAT2 axis_ = { cos_, sin_ };
+        const DirectX::XMFLOAT2 normal_ = { -sin_, cos_ };
+        const float halfLength_ = length_ * 0.5f;
+        const float halfWidth_ = width_ * 0.5f;
+
+        const DirectX::XMFLOAT3 leftBottom_ = {
+            offset_.x - axis_.x * halfLength_ - normal_.x * halfWidth_,
+            offset_.y,
+            offset_.z - axis_.y * halfLength_ - normal_.y * halfWidth_ };
+        const DirectX::XMFLOAT3 leftTop_ = {
+            offset_.x - axis_.x * halfLength_ + normal_.x * halfWidth_,
+            offset_.y,
+            offset_.z - axis_.y * halfLength_ + normal_.y * halfWidth_ };
+        const DirectX::XMFLOAT3 rightBottom_ = {
+            offset_.x + axis_.x * halfLength_ - normal_.x * halfWidth_,
+            offset_.y,
+            offset_.z + axis_.y * halfLength_ - normal_.y * halfWidth_ };
+        const DirectX::XMFLOAT3 rightTop_ = {
+            offset_.x + axis_.x * halfLength_ + normal_.x * halfWidth_,
+            offset_.y,
+            offset_.z + axis_.y * halfLength_ + normal_.y * halfWidth_ };
+
+        const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(leftBottom_, 0.0f, 1.0f));
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(leftTop_, 0.0f, 0.0f));
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(rightBottom_, 1.0f, 1.0f));
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(rightTop_, 1.0f, 0.0f));
+        AddQuadIndices(
+            mesh_.indices,
+            baseIndex_,
+            baseIndex_ + 1,
+            baseIndex_ + 2,
+            baseIndex_ + 3);
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashArcModelResource(
+        ID3D11Device* device_,
+        const char* modelPath_,
+        float startAngleDegrees_,
+        float endAngleDegrees_,
+        float innerRadius_,
+        float outerRadius_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(modelPath_);
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve((INTERNAL_MESH_SLASH_SEGMENTS + 1) * 2);
+        mesh_.indices.reserve(INTERNAL_MESH_SLASH_SEGMENTS * 6);
+
+        std::vector<DirectX::XMFLOAT3> innerPoints_;
+        std::vector<DirectX::XMFLOAT3> outerPoints_;
+        innerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
+        outerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
+
+        for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) /
+                static_cast<float>(INTERNAL_MESH_SLASH_SEGMENTS);
+            const float angle_ = DirectX::XMConvertToRadians(
+                startAngleDegrees_ + (endAngleDegrees_ - startAngleDegrees_) * rate_);
+            const float sin_ = std::sin(angle_);
+            const float cos_ = std::cos(angle_);
+            innerPoints_.push_back({ sin_ * innerRadius_, 0.0f, cos_ * innerRadius_ });
+            outerPoints_.push_back({ sin_ * outerRadius_, 0.0f, cos_ * outerRadius_ });
+        }
+
+        AddRibbonStrip(mesh_, innerPoints_, outerPoints_);
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    void BuildSharpCrescentPoints(
+        std::vector<DirectX::XMFLOAT3>& innerPoints_,
+        std::vector<DirectX::XMFLOAT3>& outerPoints_,
+        float startAngleDegrees_,
+        float endAngleDegrees_,
+        float centerRadius_,
+        float maxWidth_,
+        float tipWidth_)
+    {
+        innerPoints_.clear();
+        outerPoints_.clear();
+        innerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
+        outerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
+
+        for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) /
+                static_cast<float>(INTERNAL_MESH_SLASH_SEGMENTS);
+
+            const float angle_ = DirectX::XMConvertToRadians(
+                startAngleDegrees_ + (endAngleDegrees_ - startAngleDegrees_) * rate_);
+
+            const float sin_ = std::sin(angle_);
+            const float cos_ = std::cos(angle_);
+
+            // 0 -> 1 -> 0。中央だけ太く、両端を尖らせる。
+            const float taper_ = std::sin(rate_ * DirectX::XM_PI);
+            const float sharpTaper_ = taper_ * taper_;
+
+            const float width_ = tipWidth_ + maxWidth_ * sharpTaper_;
+
+            // 中心線も少しだけ中央で外へ出して、弓なり感を強める。
+            const float currentCenterRadius_ = centerRadius_ + 0.05f * taper_;
+
+            // 内側は浅く、外側は大きく膨らませる。
+            const float innerRadius_ = currentCenterRadius_ - width_ * 0.35f;
+            const float outerRadius_ = currentCenterRadius_ + width_ * 1.25f;
+
+            innerPoints_.push_back(
+                {
+                    sin_ * innerRadius_,
+                    0.0f,
+                    cos_ * innerRadius_
+                });
+
+            outerPoints_.push_back(
+                {
+                    sin_ * outerRadius_,
+                    0.0f,
+                    cos_ * outerRadius_
+                });
+        }
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashCrescentModelResource(ID3D11Device* device_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+
+        mesh_.vertices.reserve((INTERNAL_MESH_SLASH_SEGMENTS + 1) * 2);
+        mesh_.indices.reserve(INTERNAL_MESH_SLASH_SEGMENTS * 6);
+
+        std::vector<DirectX::XMFLOAT3> innerPoints_;
+        std::vector<DirectX::XMFLOAT3> outerPoints_;
+
+        BuildSharpCrescentPoints(
+            innerPoints_,
+            outerPoints_,
+            -78.0f,
+            78.0f,
+            1.22f,
+            0.56f,
+            0.01f);
+
+        AddRibbonStrip(mesh_, innerPoints_, outerPoints_);
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    GltfModelCommponennt::Vertex CreateInternalMeshSlashVertexFull(
+        const DirectX::XMFLOAT3& position_,
+        const DirectX::XMFLOAT3& normal_,
+        const DirectX::XMFLOAT4& tangent_,
+        float u_,
+        float v_)
+    {
+        GltfModelCommponennt::Vertex vertex_{};
+        vertex_.position = position_;
+        vertex_.normal = normal_;
+        vertex_.tangent = tangent_;
+        vertex_.texcoord = { u_, v_ };
+        return vertex_;
+    }
+
+    void AddQuadIndicesDoubleSided(
+        std::vector<uint32_t>& indices_,
+        uint32_t leftBottom_,
+        uint32_t leftTop_,
+        uint32_t rightBottom_,
+        uint32_t rightTop_)
+    {
+        indices_.push_back(leftBottom_);
+        indices_.push_back(leftTop_);
+        indices_.push_back(rightBottom_);
+
+        indices_.push_back(rightBottom_);
+        indices_.push_back(leftTop_);
+        indices_.push_back(rightTop_);
+
+        indices_.push_back(rightBottom_);
+        indices_.push_back(leftTop_);
+        indices_.push_back(leftBottom_);
+
+        indices_.push_back(rightTop_);
+        indices_.push_back(leftTop_);
+        indices_.push_back(rightBottom_);
+    }
+
+    void AddVerticalCrescentWall(
+        GltfModelCommponennt::Mesh& mesh_,
+        float radius_,
+        float height_,
+        float depth_,
+        float startAngleDegrees_,
+        float endAngleDegrees_)
+    {
+        const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+
+        for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) /
+                static_cast<float>(INTERNAL_MESH_SLASH_SEGMENTS);
+
+            const float angleDegrees_ =
+                startAngleDegrees_ + (endAngleDegrees_ - startAngleDegrees_) * rate_;
+
+            const float angle_ = DirectX::XMConvertToRadians(angleDegrees_);
+            const float sin_ = std::sin(angle_);
+            const float cos_ = std::cos(angle_);
+
+            // 中央を高く、両端は細くする。
+            const float taper_ = std::sin(rate_ * DirectX::XM_PI);
+
+            const float currentHeight_ = height_ * (0.18f + 0.82f * taper_);
+            const float currentDepth_ = depth_ * (0.18f + 0.82f * taper_);
+
+            const DirectX::XMFLOAT3 bottomPosition_ =
+            {
+                sin_ * radius_,
+                -currentDepth_,
+                cos_ * radius_
+            };
+
+            const DirectX::XMFLOAT3 topPosition_ =
+            {
+                sin_ * radius_,
+                currentHeight_,
+                cos_ * radius_
+            };
+
+            const DirectX::XMFLOAT3 normal_ =
+            {
+                sin_,
+                0.0f,
+                cos_
+            };
+
+            const DirectX::XMFLOAT4 tangent_ =
+            {
+                cos_,
+                0.0f,
+                -sin_,
+                1.0f
+            };
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
+                bottomPosition_,
+                normal_,
+                tangent_,
+                rate_,
+                1.0f));
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
+                topPosition_,
+                normal_,
+                tangent_,
+                rate_,
+                0.0f));
+        }
+
+        for (int index_ = 0; index_ < INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const uint32_t current_ = baseIndex_ + static_cast<uint32_t>(index_ * 2);
+            const uint32_t next_ = current_ + 2;
+
+            AddQuadIndicesDoubleSided(
+                mesh_.indices,
+                current_,
+                current_ + 1,
+                next_,
+                next_ + 1);
+        }
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashVerticalCrescentModelResource(ID3D11Device* device_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+
+        mesh_.vertices.reserve((INTERNAL_MESH_SLASH_SEGMENTS + 1) * 4);
+        mesh_.indices.reserve(INTERNAL_MESH_SLASH_SEGMENTS * 18);
+
+        std::vector<DirectX::XMFLOAT3> innerPoints_;
+        std::vector<DirectX::XMFLOAT3> outerPoints_;
+
+        BuildSharpCrescentPoints(
+            innerPoints_,
+            outerPoints_,
+            -78.0f,
+            78.0f,
+            1.22f,
+            0.56f,
+            0.01f);
+
+        AddRibbonStrip(mesh_, innerPoints_, outerPoints_);
+
+        AddVerticalCrescentWall(
+            mesh_,
+            1.12f,
+            1.0f,
+            0.5f,
+            -78.0f,
+            78.0f);
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashRaisedCrescentModelResource(ID3D11Device* device_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+
+        constexpr int CROSS_SECTION_VERTEX_COUNT = 4;
+
+        mesh_.vertices.reserve(
+            static_cast<size_t>(INTERNAL_MESH_SLASH_SEGMENTS + 1) *
+            static_cast<size_t>(CROSS_SECTION_VERTEX_COUNT));
+
+        // 3面分:
+        // outer -> wallCenter
+        // wallCenter -> wallTop
+        // wallBottom -> wallCenter
+        // double sided なので 1Quad = 12 indices
+        mesh_.indices.reserve(
+            static_cast<size_t>(INTERNAL_MESH_SLASH_SEGMENTS) *
+            3u *
+            12u);
+
+        for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) /
+                static_cast<float>(INTERNAL_MESH_SLASH_SEGMENTS);
+
+            const float angleDegrees_ = -78.0f + 156.0f * rate_;
+            const float angle_ = DirectX::XMConvertToRadians(angleDegrees_);
+            const float sin_ = std::sin(angle_);
+            const float cos_ = std::cos(angle_);
+
+            // 両端を細く、中央を太く・高くする。
+            const float taper_ = std::sin(rate_ * DirectX::XM_PI);
+            const float sharpTaper_ = taper_ * taper_;
+
+            const float tipRate_ = 0.02f;
+            const float tipFade_ = tipRate_ + (1.0f - tipRate_) * sharpTaper_;
+
+            const float baseRadius_ = 1.12f + 0.05f * taper_;
+            const float width_ = 0.01f + 0.56f * sharpTaper_;
+
+            const float innerRadius_ = baseRadius_ - width_ * 0.35f;
+            const float outerRadius_ = baseRadius_ + width_ * 1.25f;
+
+            // 垂直壁の位置。0.45～0.60くらいが使いやすい。
+            const float wallPositionRate_ = 0.50f;
+
+            const float wallRadius_ =
+                innerRadius_ * (1.0f - wallPositionRate_) +
+                outerRadius_ * wallPositionRate_;
+
+            // 端では壁の上下も中央へ集める。
+            const float tipGather_ = 1.0f - sharpTaper_;
+            const float tipRadius_ =
+                innerRadius_ * 0.5f +
+                outerRadius_ * 0.5f;
+
+            const float gatheredWallRadius_ =
+                wallRadius_ * (1.0f - tipGather_) +
+                tipRadius_ * tipGather_;
+
+            const float wallHeight_ = 1.10f * tipFade_;
+            const float wallDepth_ = 0.50f * tipFade_;
+
+            const DirectX::XMFLOAT3 outerEdge_ =
+            {
+                sin_ * outerRadius_,
+                0.0f,
+                cos_ * outerRadius_
+            };
+
+            const DirectX::XMFLOAT3 wallCenter_ =
+            {
+                sin_ * wallRadius_,
+                0.0f,
+                cos_ * wallRadius_
+            };
+
+            const DirectX::XMFLOAT3 wallTop_ =
+            {
+                sin_ * wallRadius_,
+                wallHeight_,
+                cos_ * wallRadius_
+            };
+
+            const DirectX::XMFLOAT3 wallBottom_ =
+            {
+                sin_ * wallRadius_,
+                -wallDepth_,
+                cos_ * wallRadius_
+            };
+
+            // 円弧方向の接線。
+            const DirectX::XMFLOAT4 arcTangent_ =
+            {
+                cos_,
+                0.0f,
+                -sin_,
+                1.0f
+            };
+
+            // 床面用。MeshVFXなら上向きで十分。
+            const DirectX::XMFLOAT3 floorNormal_ =
+            {
+                0.0f,
+                1.0f,
+                0.0f
+            };
+
+            // 壁面用。円の外側方向。
+            const DirectX::XMFLOAT3 wallNormal_ =
+            {
+                sin_,
+                0.0f,
+                cos_
+            };
+
+            // UV:
+            // U = 円弧方向
+            // V = 断面方向
+            // 0.0: 壁上端
+            // 0.5: 中央
+            // 1.0: 外側・下端
+            const float u_ = rate_;
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
+                outerEdge_,
+                floorNormal_,
+                arcTangent_,
+                u_,
+                1.0f));
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
+                wallCenter_,
+                floorNormal_,
+                arcTangent_,
+                u_,
+                0.5f));
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
+                wallTop_,
+                wallNormal_,
+                arcTangent_,
+                u_,
+                0.0f));
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
+                wallBottom_,
+                wallNormal_,
+                arcTangent_,
+                u_,
+                1.0f));
+        }
+
+        for (int index_ = 0; index_ < INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const uint32_t current_ =
+                static_cast<uint32_t>(index_ * CROSS_SECTION_VERTEX_COUNT);
+            const uint32_t next_ = current_ + CROSS_SECTION_VERTEX_COUNT;
+
+            const uint32_t currentOuter_ = current_ + 0;
+            const uint32_t currentWallCenter_ = current_ + 1;
+            const uint32_t currentWallTop_ = current_ + 2;
+            const uint32_t currentWallBottom_ = current_ + 3;
+
+            const uint32_t nextOuter_ = next_ + 0;
+            const uint32_t nextWallCenter_ = next_ + 1;
+            const uint32_t nextWallTop_ = next_ + 2;
+            const uint32_t nextWallBottom_ = next_ + 3;
+
+            // 下の半月板部分。
+            AddQuadIndicesDoubleSided(
+                mesh_.indices,
+                currentOuter_,
+                currentWallCenter_,
+                nextOuter_,
+                nextWallCenter_);
+
+            // 上に立ち上がる壁部分。
+            AddQuadIndicesDoubleSided(
+                mesh_.indices,
+                currentWallCenter_,
+                currentWallTop_,
+                nextWallCenter_,
+                nextWallTop_);
+
+            // 下に貫通する壁部分。
+            AddQuadIndicesDoubleSided(
+                mesh_.indices,
+                currentWallBottom_,
+                currentWallCenter_,
+                nextWallBottom_,
+                nextWallCenter_);
+        }
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashFanModelResource(ID3D11Device* device_)
+    {
+        return CreateInternalMeshSlashArcModelResource(
+            device_,
+            INTERNAL_MESH_SLASH_FAN_MODEL_PATH,
+            -55.0f,
+            55.0f,
+            0.0f,
+            1.55f);
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashArcRibbonModelResource(ID3D11Device* device_)
+    {
+        return CreateInternalMeshSlashArcModelResource(
+            device_,
+            INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH,
+            -82.0f,
+            82.0f,
+            1.0f,
+            1.3f);
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashCrossModelResource(ID3D11Device* device_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CROSS_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve(8);
+        mesh_.indices.reserve(12);
+        AddStraightRibbon(mesh_, 2.4f, 0.32f, 42.0f, { 0.0f, 0.0f, 0.0f });
+        AddStraightRibbon(mesh_, 2.4f, 0.32f, -42.0f, { 0.0f, 0.0f, 0.0f });
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashGroundModelResource(ID3D11Device* device_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_GROUND_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve((INTERNAL_MESH_SLASH_SEGMENTS + 1) * 2);
+        mesh_.indices.reserve(INTERNAL_MESH_SLASH_SEGMENTS * 6);
+
+        std::vector<DirectX::XMFLOAT3> innerPoints_;
+        std::vector<DirectX::XMFLOAT3> outerPoints_;
+        innerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
+        outerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
+
+        for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) /
+                static_cast<float>(INTERNAL_MESH_SLASH_SEGMENTS);
+            const float x_ = -1.7f + 3.4f * rate_;
+            const float centerZ_ = 0.12f * std::sin(rate_ * DirectX::XM_2PI);
+            const float width_ = 0.08f + 0.28f * std::sin(rate_ * DirectX::XM_PI);
+            innerPoints_.push_back({ x_, 0.0f, centerZ_ - width_ });
+            outerPoints_.push_back({ x_, 0.0f, centerZ_ + width_ });
+        }
+
+        AddRibbonStrip(mesh_, innerPoints_, outerPoints_);
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshCylinderModelResource(
         ID3D11Device* device_,
         float radius_)
     {
@@ -33,31 +799,31 @@ namespace
         const float safeRadius_ = (std::max)(radius_, 0.0001f);
 
         auto resource_ = std::make_shared<ModelResource>();
-        resource_->modelName = SHAPE_CYLINDER_MODEL_PATH;
+        resource_->modelName = INTERNAL_MESH_CYLINDER_MODEL_PATH;
 
         auto& node_ = resource_->nodes.emplace_back();
-        node_.name = "ShapeCylinder";
+        node_.name = "InternalMeshCylinder";
 
         auto& material_ = resource_->materials.emplace_back();
         material_.id = 0;
-        material_.name = "ShapeCylinder";
+        material_.name = "InternalMeshCylinder";
 
         auto& mesh_ = resource_->meshes.emplace_back();
         mesh_.nodeIndex = 0;
         mesh_.materialIndex = 0;
         mesh_.node = &resource_->nodes[0];
         mesh_.material = &resource_->materials[0];
-        mesh_.vertices.reserve(static_cast<size_t>(SHAPE_CYLINDER_SEGMENTS) * 2);
-        mesh_.indices.reserve(static_cast<size_t>(SHAPE_CYLINDER_SEGMENTS) * 6);
+        mesh_.vertices.reserve(static_cast<size_t>(INTERNAL_MESH_CYLINDER_SEGMENTS) * 2);
+        mesh_.indices.reserve(static_cast<size_t>(INTERNAL_MESH_CYLINDER_SEGMENTS) * 6);
 
-        for (int index_ = 0; index_ < SHAPE_CYLINDER_SEGMENTS; ++index_)
+        for (int index_ = 0; index_ < INTERNAL_MESH_CYLINDER_SEGMENTS; ++index_)
         {
             const float angle_ = DirectX::XM_2PI * static_cast<float>(index_)
-                / static_cast<float>(SHAPE_CYLINDER_SEGMENTS);
+                / static_cast<float>(INTERNAL_MESH_CYLINDER_SEGMENTS);
             const float x_ = std::sin(angle_) * safeRadius_;
             const float z_ = std::cos(angle_) * safeRadius_;
             const float u_ = static_cast<float>(index_)
-                / static_cast<float>(SHAPE_CYLINDER_SEGMENTS);
+                / static_cast<float>(INTERNAL_MESH_CYLINDER_SEGMENTS);
 
             for (int heightIndex_ = 0; heightIndex_ < 2; ++heightIndex_)
             {
@@ -71,12 +837,12 @@ namespace
             }
         }
 
-        for (int index_ = 0; index_ < SHAPE_CYLINDER_SEGMENTS; ++index_)
+        for (int index_ = 0; index_ < INTERNAL_MESH_CYLINDER_SEGMENTS; ++index_)
         {
             const uint32_t bottomCurrent_ = static_cast<uint32_t>(index_ * 2);
             const uint32_t topCurrent_ = bottomCurrent_ + 1;
             const uint32_t bottomNext_ = static_cast<uint32_t>(
-                ((index_ + 1) % SHAPE_CYLINDER_SEGMENTS) * 2);
+                ((index_ + 1) % INTERNAL_MESH_CYLINDER_SEGMENTS) * 2);
             const uint32_t topNext_ = bottomNext_ + 1;
 
             mesh_.indices.push_back(bottomCurrent_);
@@ -87,30 +853,117 @@ namespace
             mesh_.indices.push_back(topNext_);
         }
 
-        D3D11_BUFFER_DESC vertexDesc_{};
-        vertexDesc_.ByteWidth = static_cast<UINT>(sizeof(GltfModelCommponennt::Vertex) * mesh_.vertices.size());
-        vertexDesc_.Usage = D3D11_USAGE_IMMUTABLE;
-        vertexDesc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        D3D11_SUBRESOURCE_DATA vertexData_{};
-        vertexData_.pSysMem = mesh_.vertices.data();
-        if (FAILED(device_->CreateBuffer(&vertexDesc_, &vertexData_, mesh_.vertexBuffer.GetAddressOf())))
-        {
-            return nullptr;
-        }
-
-        D3D11_BUFFER_DESC indexDesc_{};
-        indexDesc_.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh_.indices.size());
-        indexDesc_.Usage = D3D11_USAGE_IMMUTABLE;
-        indexDesc_.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        D3D11_SUBRESOURCE_DATA indexData_{};
-        indexData_.pSysMem = mesh_.indices.data();
-        if (FAILED(device_->CreateBuffer(&indexDesc_, &indexData_, mesh_.indexBuffer.GetAddressOf())))
-        {
-            return nullptr;
-        }
-
-        return resource_;
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
     }
+
+    GltfModelCommponennt::Vertex CreateInternalMeshSlashVertexTransformed(
+        const DirectX::XMFLOAT3& position_,
+        float u_,
+        float v_,
+        const DirectX::XMMATRIX& transform_)
+    {
+        using namespace DirectX;
+
+        const XMVECTOR positionVector_ = XMLoadFloat3(&position_);
+        const XMVECTOR normalVector_ = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        const XMVECTOR tangentVector_ = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+
+        XMFLOAT3 transformedPosition_{};
+        XMFLOAT3 transformedNormal_{};
+        XMFLOAT3 transformedTangent_{};
+
+        XMStoreFloat3(
+            &transformedPosition_,
+            XMVector3TransformCoord(positionVector_, transform_));
+
+        XMStoreFloat3(
+            &transformedNormal_,
+            XMVector3Normalize(XMVector3TransformNormal(normalVector_, transform_)));
+
+        XMStoreFloat3(
+            &transformedTangent_,
+            XMVector3Normalize(XMVector3TransformNormal(tangentVector_, transform_)));
+
+        GltfModelCommponennt::Vertex vertex_{};
+        vertex_.position = transformedPosition_;
+        vertex_.normal = transformedNormal_;
+        vertex_.tangent = { transformedTangent_.x, transformedTangent_.y, transformedTangent_.z, 1.0f };
+        vertex_.texcoord = { u_, v_ };
+        return vertex_;
+    }
+
+ void AddCrossCrescentRibbon(
+    GltfModelCommponennt::Mesh& mesh_,
+    const DirectX::XMMATRIX& transform_)
+{
+    std::vector<DirectX::XMFLOAT3> innerPoints_;
+    std::vector<DirectX::XMFLOAT3> outerPoints_;
+
+    BuildSharpCrescentPoints(
+        innerPoints_,
+        outerPoints_,
+        -78.0f,
+        78.0f,
+        1.22f,
+        0.56f,
+        0.01f);
+
+    const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
+    if (pointCount_ < 2) return;
+
+    const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+
+    for (size_t index_ = 0; index_ < pointCount_; ++index_)
+    {
+        const float u_ = static_cast<float>(index_) /
+            static_cast<float>(pointCount_ - 1);
+
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertexTransformed(
+            innerPoints_[index_],
+            u_,
+            1.0f,
+            transform_));
+
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertexTransformed(
+            outerPoints_[index_],
+            u_,
+            0.0f,
+            transform_));
+    }
+
+    for (size_t index_ = 0; index_ + 1 < pointCount_; ++index_)
+    {
+        const uint32_t current_ = baseIndex_ + static_cast<uint32_t>(index_ * 2);
+        const uint32_t next_ = current_ + 2;
+
+        AddQuadIndicesDoubleSided(
+            mesh_.indices,
+            current_,
+            current_ + 1,
+            next_,
+            next_ + 1);
+    }
+}
+
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashCrossCrescentModelResource(ID3D11Device* device_)
+    {
+        if (!device_) return nullptr;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+
+        mesh_.vertices.reserve((INTERNAL_MESH_SLASH_SEGMENTS + 1) * 4);
+        mesh_.indices.reserve(INTERNAL_MESH_SLASH_SEGMENTS * 24);
+
+
+        const DirectX::XMMATRIX verticalMatrix_ =
+            DirectX::XMMatrixRotationZ(DirectX::XM_PIDIV2);
+
+        AddCrossCrescentRibbon(mesh_, verticalMatrix_);
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
 
     bool HasExtension(const std::filesystem::path& path_, const std::vector<std::string>& extensions_)
     {
@@ -168,6 +1021,8 @@ namespace
         }
         return changed_;
     }
+
+
 }
 
 void MeshVFXComponent::Start()
@@ -315,12 +1170,61 @@ void MeshVFXComponent::Gui()
                     ? 0
                     : -1;
             }
-            if (ImGui::Button("Use Shape Cylinder"))
+            if (ImGui::Button("Use Internal Mesh"))
             {
-                part_.modelPath = SHAPE_CYLINDER_MODEL_PATH;
+                part_.modelPath = INTERNAL_MESH_CYLINDER_MODEL_PATH;
                 part_.meshIndex = 0;
                 part_.shapeCylinderRadius = (std::max)(part_.shapeCylinderRadius, 0.0001f);
                 LoadPartResource(static_cast<size_t>(partIndex_));
+            }
+
+            const char* slashPresetPreview_ = "Select Slash Preset";
+            if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Crescent";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Cross Crescent";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Vertical Crescent";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Raised Crescent";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_FAN_MODEL_PATH) slashPresetPreview_ = "Fan";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH) slashPresetPreview_ = "Arc Ribbon";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_MODEL_PATH) slashPresetPreview_ = "Cross Slash";
+            else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH) slashPresetPreview_ = "Ground Slash";
+
+            if (ImGui::BeginCombo("Internal Slash Mesh", slashPresetPreview_))
+            {
+                struct SlashPresetEntry
+                {
+                    const char* label;
+                    const char* modelPath;
+                };
+
+                const SlashPresetEntry presets_[] =
+                {
+                    { "Crescent", INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH },
+                    { "Cross Crescent", INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH },
+                    { "Vertical Crescent", INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH },
+                    { "Raised Crescent", INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH },
+                    { "Fan", INTERNAL_MESH_SLASH_FAN_MODEL_PATH },
+                    { "Arc Ribbon", INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH },
+                    { "Cross Slash", INTERNAL_MESH_SLASH_CROSS_MODEL_PATH },
+                    { "Ground Slash", INTERNAL_MESH_SLASH_GROUND_MODEL_PATH },
+                };
+
+                for (const SlashPresetEntry& preset_ : presets_)
+                {
+                    const bool selected_ = part_.modelPath == preset_.modelPath;
+                    if (ImGui::Selectable(preset_.label, selected_))
+                    {
+                        part_.modelPath = preset_.modelPath;
+                        part_.meshIndex = 0;
+                        LoadPartResource(static_cast<size_t>(partIndex_));
+                    }
+
+                    if (selected_)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui::EndCombo();
             }
 
 
@@ -566,9 +1470,9 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat3("Position", &part_.position.x, 0.01f);
             ImGui::DragFloat3("Rotation", &part_.rotation.x, 0.5f);
             ImGui::DragFloat3("Scale", &part_.scale.x, 0.01f);
-            if (part_.modelPath == SHAPE_CYLINDER_MODEL_PATH)
+            if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH)
             {
-                if (ImGui::DragFloat("Shape Cylinder Radius", &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
+                if (ImGui::DragFloat("Internal Cylinder Radius", &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
                 {
                     LoadPartResource(static_cast<size_t>(partIndex_));
                 }
@@ -853,7 +1757,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["Position"] = { part_.position.x, part_.position.y, part_.position.z };
         partJson_["Rotation"] = { part_.rotation.x, part_.rotation.y, part_.rotation.z };
         partJson_["Scale"] = { part_.scale.x, part_.scale.y, part_.scale.z };
-        partJson_["ShapeCylinderRadius"] = part_.shapeCylinderRadius;
+        partJson_["InternalMeshCylinderRadius"] = part_.shapeCylinderRadius;
         partJson_["MeshRotationSpeed"] =
         {
             part_.meshRotationSpeed.x,
@@ -1001,6 +1905,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
     {
         MeshVFXPart part_;
         part_.modelPath = partJson_.value("ModelPath", "");
+        NormalizeInternalMeshModelPath(part_.modelPath);
         part_.meshIndex = partJson_.value("MeshIndex", -1);
         part_.renderEnabled = partJson_.value("RenderEnabled", false);
         part_.useMaterialBaseTexture = partJson_.value("UseMaterialBaseTexture", true);
@@ -1008,7 +1913,10 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         ReadFloatArray(partJson_, "Position", part_.position, 3);
         ReadFloatArray(partJson_, "Rotation", part_.rotation, 3);
         ReadFloatArray(partJson_, "Scale", part_.scale, 3);
-        part_.shapeCylinderRadius = (std::max)(partJson_.value("ShapeCylinderRadius", 1.0f), 0.0001f);
+        const float internalMeshCylinderRadius_ = partJson_.value(
+            "InternalMeshCylinderRadius",
+            partJson_.value("ShapeCylinderRadius", 1.0f));
+        part_.shapeCylinderRadius = (std::max)(internalMeshCylinderRadius_, 0.0001f);
         ReadFloatArray(partJson_, "MeshRotationSpeed", part_.meshRotationSpeed, 3);
         part_.duration = (std::max)(partJson_.value("Duration", 0.0f), 0.0f);
         part_.loop = partJson_.value("Loop", true);
@@ -1293,9 +2201,42 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     MeshVFXPart& part_ = asset.parts[partIndex_];
     MeshVFXRuntimePart& runtimePart_ = runtimeParts[partIndex_];
     runtimePart_.modelResource.reset();
-    if (part_.modelPath == SHAPE_CYLINDER_MODEL_PATH)
+    NormalizeInternalMeshModelPath(part_.modelPath);
+    if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH)
     {
-        runtimePart_.modelResource = CreateShapeCylinderModelResource(device_, part_.shapeCylinderRadius);
+        runtimePart_.modelResource = CreateInternalMeshCylinderModelResource(device_, part_.shapeCylinderRadius);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashCrescentModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashCrossCrescentModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashVerticalCrescentModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_FAN_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashFanModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashArcRibbonModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashCrossModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashGroundModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshSlashRaisedCrescentModelResource(device_);
     }
     else if (!part_.modelPath.empty())
     {

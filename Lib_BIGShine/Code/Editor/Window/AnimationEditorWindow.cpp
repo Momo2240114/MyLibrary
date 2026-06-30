@@ -2064,7 +2064,7 @@ void AnimationEditorWindow::DrawEventSequencer(
         if (gameObjectManager)
         {
             const std::vector<std::string>& assets_ =
-                gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+                gameObjectManager->GetEffectManager().GetMeshVFXAssetKeys();
 
             if (!assets_.empty())
             {
@@ -2358,14 +2358,28 @@ void AnimationEditorWindow::DrawEventSequencer(
         if (gameObjectManager)
         {
             const std::vector<std::string>& assets_ =
-                gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+                gameObjectManager->GetEffectManager().GetMeshVFXAssetKeys();
+            std::string previewValue_ = ev_.meshVFXAssetPath;
+            const std::string resolvedValue_ =
+                gameObjectManager->GetEffectManager().ResolveMeshVFXPath(
+                    ev_.meshVFXAssetPath);
+            for (const std::string& assetKey_ : assets_)
+            {
+                if (!resolvedValue_.empty() &&
+                    resolvedValue_ ==
+                    gameObjectManager->GetEffectManager().ResolveMeshVFXPath(assetKey_))
+                {
+                    previewValue_ = assetKey_;
+                    break;
+                }
+            }
 
             ImGui::SetNextItemWidth(360.0f);
             if (ImGui::BeginCombo(
                 "Mesh VFX Asset",
-                ev_.meshVFXAssetPath.empty()
+                previewValue_.empty()
                 ? "(None)"
-                : ev_.meshVFXAssetPath.c_str()))
+                : previewValue_.c_str()))
             {
                 if (ImGui::Selectable(
                     "(None)",
@@ -2374,14 +2388,16 @@ void AnimationEditorWindow::DrawEventSequencer(
                     ev_.meshVFXAssetPath.clear();
                 }
 
-                for (const std::string& assetPath_ : assets_)
+                for (const std::string& assetKey_ : assets_)
                 {
+                    const bool selected_ = previewValue_ == assetKey_;
                     if (ImGui::Selectable(
-                        assetPath_.c_str(),
-                        ev_.meshVFXAssetPath == assetPath_))
+                        assetKey_.c_str(),
+                        selected_))
                     {
-                        ev_.meshVFXAssetPath = assetPath_;
+                        ev_.meshVFXAssetPath = assetKey_;
                     }
+                    if (selected_) ImGui::SetItemDefaultFocus();
                 }
 
                 ImGui::EndCombo();
@@ -2671,14 +2687,29 @@ void AnimationEditorWindow::DrawEventSequencer(
                 {
                     const std::vector<std::string>& assets_ =
                         isParticleAsset_
-                        ? gameObjectManager->GetEffectManager().GetParticleAssetPaths()
-                        : gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+                        ? gameObjectManager->GetEffectManager().GetParticleAssetKeys()
+                        : gameObjectManager->GetEffectManager().GetMeshVFXAssetKeys();
+                    std::string previewValue_ = write_.stringValue;
+                    const std::string resolvedValue_ = isParticleAsset_
+                        ? gameObjectManager->GetEffectManager().ResolveParticlePath(write_.stringValue)
+                        : gameObjectManager->GetEffectManager().ResolveMeshVFXPath(write_.stringValue);
+                    for (const std::string& assetKey_ : assets_)
+                    {
+                        const std::string resolvedKey_ = isParticleAsset_
+                            ? gameObjectManager->GetEffectManager().ResolveParticlePath(assetKey_)
+                            : gameObjectManager->GetEffectManager().ResolveMeshVFXPath(assetKey_);
+                        if (!resolvedValue_.empty() && resolvedValue_ == resolvedKey_)
+                        {
+                            previewValue_ = assetKey_;
+                            break;
+                        }
+                    }
 
                     if (ImGui::BeginCombo(
                         "Value",
-                        write_.stringValue.empty()
+                        previewValue_.empty()
                         ? "(None)"
-                        : write_.stringValue.c_str()))
+                        : previewValue_.c_str()))
                     {
                         if (ImGui::Selectable(
                             "(None)",
@@ -2687,14 +2718,16 @@ void AnimationEditorWindow::DrawEventSequencer(
                             write_.stringValue.clear();
                         }
 
-                        for (const std::string& assetPath_ : assets_)
+                        for (const std::string& assetKey_ : assets_)
                         {
+                            const bool selected_ = previewValue_ == assetKey_;
                             if (ImGui::Selectable(
-                                assetPath_.c_str(),
-                                write_.stringValue == assetPath_))
+                                assetKey_.c_str(),
+                                selected_))
                             {
-                                write_.stringValue = assetPath_;
+                                write_.stringValue = assetKey_;
                             }
+                            if (selected_) ImGui::SetItemDefaultFocus();
                         }
 
                         ImGui::EndCombo();

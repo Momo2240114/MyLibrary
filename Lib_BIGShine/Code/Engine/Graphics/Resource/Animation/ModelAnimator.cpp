@@ -3,6 +3,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Combat/AttackTemplateRuntime.h"
 #include "Engine/GamePlay/System/EffectManager.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include <algorithm>
 #include <cmath>
 

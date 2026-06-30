@@ -136,6 +136,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     modelRenderSystem.Initialize(graphics_.GetDevice());
     particleRenderSystem.Initialize(graphics_.GetDevice());
     meshVFXRenderSystem.Initialize(graphics_.GetDevice());
+    editorPrimitiveRenderer.Initialize(graphics_.GetDevice());
 
     previewObject = std::make_shared<GameObject>("VFXPreviewObject");
     previewObject->SetManager(gameObjectManager);
@@ -154,7 +155,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
         previewMeshVFX->Stop();
     }
 
-    previewCamera.SetLookAt({ 0.0f, 1.5f, -6.0f }, { 0.0f, 0.4f, 0.0f }, { 0.0f, 1.0f, 0.0f });
+    editorCamera.ResetPreviewCamera(previewCamera);
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 100.0f);
 
     RefreshParticleAssets();
@@ -193,6 +194,13 @@ void ParticleEditorWindow::DrawToolbar()
         inspectorWidth = 360.0f;
         timelineHeight = 190.0f;
     }
+
+    ImGui::MenuItem("Free Camera", nullptr, &editorCamera.enablePreviewFreeCamera);
+
+    if (ImGui::MenuItem("Reset Camera"))
+    {
+        editorCamera.ResetPreviewCamera(previewCamera);
+    }
 }
 
 void ParticleEditorWindow::DrawPreviewPanel()
@@ -204,6 +212,14 @@ void ParticleEditorWindow::DrawPreviewPanel()
     previewSize_.x = (std::max)(1.0f, previewSize_.x);
     previewSize_.y = (std::max)(1.0f, previewSize_.y);
 
+    const bool previewHovered_ =
+        ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+    editorCamera.UpdatePreviewFreeCamera(
+        previewCamera,
+        ImGui::GetIO().DeltaTime,
+        previewHovered_);
+
     RenderPreview(previewSize_);
 
     if (previewTarget.GetShaderResourceView())
@@ -214,7 +230,13 @@ void ParticleEditorWindow::DrawPreviewPanel()
     {
         ImGui::Dummy(previewSize_);
     }
+
+    if (previewHovered_)
+    {
+        ImGui::TextDisabled("RMB + Mouse: Look / WASD: Move / Q,E: Up Down / Wheel: Speed");
+    }
 }
+
 
 void ParticleEditorWindow::DrawAssetBrowserPanel()
 {
@@ -531,6 +553,18 @@ void ParticleEditorWindow::DrawInspectorPanel()
             if (previewModel) previewModel->Gui();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Camera"))
+        {
+            editorCamera.Gui();
+
+            if (ImGui::Button("Reset Camera"))
+            {
+                editorCamera.ResetPreviewCamera(previewCamera);
+            }
+
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
     ImGui::EndChild();
@@ -592,6 +626,24 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     renderContext_.baseColorSRV = previewTarget.GetShaderResourceView();
     renderContext_.screenWidth = static_cast<float>(width_);
     renderContext_.screenHeight = static_cast<float>(height_);
+
+    if (showGrid)
+    {
+        editorPrimitiveRenderer.DrawGrid(
+            20,
+            1.0f,
+            { 0.25f, 0.25f, 0.25f, 1.0f },
+            true);
+
+        editorPrimitiveRenderer.Render(
+            context_,
+            previewCamera.GetView(),
+            previewCamera.GetProjection());
+
+        previewTarget.ResetRenderTarget(context_);
+    }
+
+
 
     if (previewModel && !previewModel->GetMeshes().empty())
     {

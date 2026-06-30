@@ -13,6 +13,9 @@
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXRenderSystem.h"
 
+#include "Editor/EditorCameraData.h"
+#include "Editor/Utility/EditorPrimitiveRenderer.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -60,13 +63,16 @@ private:
     bool SaveSequence(const std::string& path_);
     bool LoadSequence(const std::string& path_);
 
+
 private:
+    EditorPrimitiveRenderer editorPrimitiveRenderer; // Preview Grid / Axis描画用。
     EditorRenderTarget previewTarget;       // Preview描画先のRenderTarget。
     ModelRenderSystem modelRenderSystem;    // Previewモデル描画用。
     ParticleRenderSystem particleRenderSystem; // Preview Particle描画用。
     MeshVFXRenderSystem meshVFXRenderSystem;   // Preview MeshVFX描画用。
     AssetBrowserWindow assetBrowser;        // Asset選択用ブラウザー。
     CameraComponent previewCamera;          // Preview専用カメラ。
+    EditorCameraData editorCamera;         // Preview共通FreeCamera制御。
     std::shared_ptr<GameObject> previewObject; // Preview上のVFX親Object。
     std::shared_ptr<GltfModelCommponennt> previewModel; // 参照モデル。
     std::shared_ptr<ParticleComponent> previewParticle; // 編集対象Particle。
@@ -90,4 +96,6 @@ private:
     bool sequenceLoop = true;          // Sequence末尾でループするか。
     bool timelineExpanded = true;      // Timeline表示を展開しているか。
     bool showGrid = true;              // PreviewにGridを表示するか。
+
+
 };
