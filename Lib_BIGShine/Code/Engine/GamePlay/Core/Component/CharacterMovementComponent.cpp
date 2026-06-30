@@ -32,6 +32,13 @@ void CharacterMovementComponent::Update(float deltaTime_)
         : deltaTime_;
     const float safePhysicsDeltaTime_ =
         (std::max)(physicsDeltaTime_, 0.000001f);
+    const float timeScale_ = safeDeltaTime_ / safePhysicsDeltaTime_;
+    const DirectX::XMFLOAT3 scaledHorizontalVelocity_
+    {
+        desiredHorizontalVelocity.x * timeScale_,
+        desiredHorizontalVelocity.y * timeScale_,
+        desiredHorizontalVelocity.z * timeScale_
+    };
     const DirectX::XMFLOAT3 rootMotionVelocity_
     {
         rootMotionDelta.x / safePhysicsDeltaTime_,
@@ -43,9 +50,9 @@ void CharacterMovementComponent::Update(float deltaTime_)
     if (usePhysicsVelocity && collider_)
     {
         collider_->velocity.x =
-            desiredHorizontalVelocity.x + rootMotionVelocity_.x + pendingImpulse.x;
+            scaledHorizontalVelocity_.x + rootMotionVelocity_.x + pendingImpulse.x;
         collider_->velocity.z =
-            desiredHorizontalVelocity.z + rootMotionVelocity_.z + pendingImpulse.z;
+            scaledHorizontalVelocity_.z + rootMotionVelocity_.z + pendingImpulse.z;
         if (std::dynamic_pointer_cast<CharacterCollider>(collider_))
         {
             if (collider_->useGravity)

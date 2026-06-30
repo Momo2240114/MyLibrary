@@ -119,6 +119,24 @@
                         "key": "Damage",
                         "stringValue": "",
                         "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.05000000074505806,
+                        "intValue": 0,
+                        "key": "HitStopDuration",
+                        "stringValue": "",
+                        "type": 0
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
+                        "floatValue": 0.800000011920929,
+                        "intValue": 0,
+                        "key": "HitStopScale",
+                        "stringValue": "",
+                        "type": 0
                     }
                 ],
                 "callEndOnStateExit": true,

@@ -19,9 +19,47 @@ void TimeManagerWindow::Draw()
             return;
         }
 
-        const float currentScale_ = timeManager_->GetCachedScale(
-            static_cast<uint32_t>(TarGetLayerType::Player));
-        ImGui::Text("Current Scale: %.3f", currentScale_);
+        struct LayerScaleView
+        {
+            const char* name;
+            TarGetLayerType layer;
+        };
+
+        static const LayerScaleView layerScaleViews_[] =
+        {
+            { "Default", TarGetLayerType::Default },
+            { "Player", TarGetLayerType::Player },
+            { "Enemy", TarGetLayerType::Enemy },
+            { "PlayerBullet", TarGetLayerType::PlayerBullet },
+            { "EnemyBullet", TarGetLayerType::EnemyBullet },
+            { "UI", TarGetLayerType::UI },
+            { "Environment", TarGetLayerType::Environment },
+            { "SneakObject", TarGetLayerType::SneakObject },
+            { "Terrain", TarGetLayerType::Terrain },
+            { "Wall", TarGetLayerType::Wall },
+            { "Item", TarGetLayerType::Item },
+        };
+
+        if (ImGui::BeginTable("CurrentTimeScales", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg))
+        {
+            ImGui::TableSetupColumn("Layer");
+            ImGui::TableSetupColumn("Scale");
+            ImGui::TableHeadersRow();
+
+            for (const LayerScaleView& layerScaleView_ : layerScaleViews_)
+            {
+                const float currentScale_ = timeManager_->GetCachedScale(
+                    static_cast<uint32_t>(layerScaleView_.layer));
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(layerScaleView_.name);
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("%.3f", currentScale_);
+            }
+
+            ImGui::EndTable();
+        }
 
         bool changed_ = ImGui::SliderFloat(
             "Target Scale",

@@ -123,20 +123,29 @@
                     {
                         "boolValue": false,
                         "category": "Attack",
+                        "floatValue": 0.0,
+                        "intValue": 0,
+                        "key": "HitParticleAssetPath",
+                        "stringValue": "Data/Particle/HitParticle.json",
+                        "type": 3
+                    },
+                    {
+                        "boolValue": false,
+                        "category": "Attack",
                         "floatValue": 0.05000000074505806,
                         "intValue": 0,
-                        "key": "HitStopTime",
+                        "key": "HitStopDuration",
                         "stringValue": "",
                         "type": 0
                     },
                     {
                         "boolValue": false,
                         "category": "Attack",
-                        "floatValue": 0.0,
+                        "floatValue": 0.8500000238418579,
                         "intValue": 0,
-                        "key": "HitParticleAssetPath",
-                        "stringValue": "Data/Particle/HitParticle.json",
-                        "type": 3
+                        "key": "HitStopScale",
+                        "stringValue": "",
+                        "type": 0
                     }
                 ],
                 "callEndOnStateExit": true,

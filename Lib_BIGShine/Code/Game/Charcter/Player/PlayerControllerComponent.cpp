@@ -166,6 +166,7 @@ void PlayerControllerComponent::Start()
 void PlayerControllerComponent::Update(float dt_)
 {
     stateMachine.Update(dt_);
+    ApplyPendingMovement();
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
@@ -229,32 +230,51 @@ void PlayerControllerComponent::SetHorizontalVelocity(
         dir_.x * dir_.x +
         dir_.z * dir_.z;
 
+    hasPendingHorizontalVelocity = true;
+
+    if (inputLengthSq_ < 0.0001f)
+    {
+        pendingHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
+        hasPendingFacingDirection = false;
+        return;
+    }
+
+    pendingHorizontalVelocity = { dir_.x * speed_, 0.0f, dir_.z * speed_ };
+    pendingFacingDirection = { dir_.x, 0.0f, dir_.z };
+    hasPendingFacingDirection = true;
+}
+
+void PlayerControllerComponent::ApplyPendingMovement()
+{
+    if (!hasPendingHorizontalVelocity) return;
+
     if (movement)
     {
-        if (inputLengthSq_ < 0.0001f)
+        const float velocityLengthSq_ =
+            pendingHorizontalVelocity.x * pendingHorizontalVelocity.x +
+            pendingHorizontalVelocity.z * pendingHorizontalVelocity.z;
+
+        if (velocityLengthSq_ < 0.0001f)
         {
             movement->StopHorizontalMovement();
         }
         else
         {
-            movement->SetHorizontalVelocity(
-                { dir_.x * speed_, 0.0f, dir_.z * speed_ });
-            movement->SetFacingDirection(dir_, false);
+            movement->SetHorizontalVelocity(pendingHorizontalVelocity);
+            if (hasPendingFacingDirection)
+            {
+                movement->SetFacingDirection(pendingFacingDirection, false);
+            }
         }
-        return;
     }
-
-    if (!collider) return;
-
-    if (inputLengthSq_ < 0.0001f)
+    else if (collider)
     {
-        collider->velocity.x = 0.0f;
-        collider->velocity.z = 0.0f;
-        return;
+        collider->velocity.x = pendingHorizontalVelocity.x;
+        collider->velocity.z = pendingHorizontalVelocity.z;
     }
 
-    collider->velocity.x = dir_.x * speed_;
-    collider->velocity.z = dir_.z * speed_;
+    hasPendingHorizontalVelocity = false;
+    hasPendingFacingDirection = false;
 }
 
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
