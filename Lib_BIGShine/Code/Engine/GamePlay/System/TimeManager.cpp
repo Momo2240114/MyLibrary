@@ -14,6 +14,8 @@ TimeManager::TimeManager()
 
 void TimeManager::Update(float rawDt_)
 {
+    defaultState.Update(rawDt_);
+
     for (auto& [type, state] : states)
     {
         state.Update(rawDt_);
@@ -22,7 +24,12 @@ void TimeManager::Update(float rawDt_)
 
 void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_)
 {
-    if (layerMask_ == 0u) return;
+    if (layerMask_ == 0u || layerMask_ == static_cast<uint32_t>(TarGetLayerType::All))
+    {
+        defaultState.targetScale = scale_;
+        defaultState.lerpSpeed = speed_;
+        if (layerMask_ == 0u) return;
+    }
 
     for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
@@ -39,7 +46,12 @@ void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_
 
 void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_, float scale_)
 {
-    if (layerMask_ == 0u) return;
+    if (layerMask_ == 0u || layerMask_ == static_cast<uint32_t>(TarGetLayerType::All))
+    {
+        defaultState.hitStopTimer = duration_;
+        defaultState.hitStopScale = (std::clamp)(scale_, 0.0f, 1.0f);
+        if (layerMask_ == 0u) return;
+    }
 
     for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
@@ -56,6 +68,8 @@ void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_, float sca
 
 void TimeManager::PrepareCache()
 {
+    cachedDefaultScale = defaultState.currentScale;
+
     for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
         uint32_t bit_ = 1u << i_;
@@ -78,7 +92,7 @@ float TimeManager::GetCachedScale(uint32_t layerMask_) const
     // Default = 0 ‘Îô
     if (layerMask_ == 0u)
     {
-        return 1.0f;
+        return cachedDefaultScale;
     }
 
     float result_ = 1.0f;

@@ -76,6 +76,7 @@ private:
     int GetRequestedComboIndex(PLAYER_ACTION nextAction_) const;
     void RegisterPlayerAnimationActions();
     void SendActionToBlackboard(PLAYER_ACTION action_);
+    void ApplyPendingMovement();
 
     bool ForceChangeAction(PLAYER_ACTION action_);
 
@@ -90,6 +91,10 @@ private:
     };
     int comboIndex = 0;
     int pendingComboIndex = 0;
+    DirectX::XMFLOAT3 pendingHorizontalVelocity{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 pendingFacingDirection{ 0.0f, 0.0f, 1.0f };
+    bool hasPendingHorizontalVelocity = false;
+    bool hasPendingFacingDirection = false;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE;
 };

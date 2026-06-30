@@ -52,7 +52,9 @@ struct TimeState
 class TimeManager
 {
 private:
+    TimeState defaultState;
     std::unordered_map<TarGetLayerType, TimeState> states;
+    float cachedDefaultScale = 1.0f;
     float cachedLayerScales[32]{};
 
 public:

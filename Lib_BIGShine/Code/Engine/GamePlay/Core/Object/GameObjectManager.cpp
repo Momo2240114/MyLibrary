@@ -125,6 +125,10 @@ void GameObjectManager::Update(float elapsedTime_)
         timeManager->PrepareCache();
     }
 
+    const float defaultTimeScale_ = timeManager->GetCachedScale(
+        static_cast<uint32_t>(TarGetLayerType::Default));
+    const float defaultScaledElapsedTime_ = elapsedTime_ * defaultTimeScale_;
+
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::SyncFromPhysics");
         collisionStepSystem->SyncFromPhysics(elapsedTime_);
@@ -183,7 +187,9 @@ void GameObjectManager::Update(float elapsedTime_)
         for (auto& object_ : objects)
         {
             if (!object_) continue;
-            object_->LateUpdate(elapsedTime_);
+
+            const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
+            object_->LateUpdate(elapsedTime_ * scale_);
         }
     }
 
@@ -199,7 +205,7 @@ void GameObjectManager::Update(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("EffectManager::Update");
-        effectManager->Update(elapsedTime_);
+        effectManager->Update(defaultScaledElapsedTime_);
     }
 
     if (!pendingDestroys.empty())
