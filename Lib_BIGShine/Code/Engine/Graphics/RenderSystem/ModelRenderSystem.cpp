@@ -12,8 +12,8 @@
 #include <nlohmann/json.hpp>
 
 //---
-// @brief モデル描画に必要なバッファとシェーダーを初期化する
-// @param device Direct3D11 デバイス
+//  モデル描画に必要なバッファとシェーダーを初期化する
+//  Direct3D11 デバイス
 //---
 void ModelRenderSystem::Initialize(ID3D11Device* device)
 {
@@ -343,9 +343,9 @@ void ModelRenderSystem::OutLineSettingGui()
 
 //描画登録
 //---
-// @brief 描画予定のモデルを描画キューに登録する
-// @param shaderId 使用するシェーダーID
-// @param model 描画対象のモデルコンポーネント
+// 描画予定のモデルを描画キューに登録する
+// shaderId 使用するシェーダーID
+// model 描画対象のモデルコンポーネント
 //---
 void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model)
 {
@@ -358,8 +358,8 @@ void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfM
 
 // 描画実行
 //---
-// @brief 登録されたモデルを全て描画する（不透明 → 半透明の順に描画）
-// @param rc 描画コンテキスト（カメラ, ライト, ステートを含む）
+// 登録されたモデルを全て描画する（不透明 → 半透明の順に描画）
+// rc 描画コンテキスト（カメラ, ライト, ステートを含む）
 //---
 void ModelRenderSystem::RenderAll(const RenderContext& rc)
 {
@@ -376,7 +376,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		DirectX::XMMATRIX VP = V * P;
 
 		DirectX::XMStoreFloat4x4(&cbScene.viewProjection, VP);
-		// ★デカール座標復元用の逆行列を計算
+		// デカール座標復元用の逆行列を計算
 		DirectX::XMStoreFloat4x4(&cbScene.invViewProjection, DirectX::XMMatrixInverse(nullptr, VP));
 
 		const auto& directionalLights = lightManager->GetAllDirectionalLights(); // 複数保持していると仮定

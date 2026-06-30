@@ -90,17 +90,37 @@ namespace
     void DrawAssetPathCombo(
         const char* label_,
         std::string& value_,
-        const std::vector<std::string>& assets_)
+        const std::vector<std::string>& assets_,
+        EffectManager* effectManager_,
+        bool isParticleAsset_)
     {
         ImGui::SetNextItemWidth(320.0f);
-        const char* preview_ = value_.empty() ? "(None)" : value_.c_str();
+        std::string previewValue_ = value_;
+        if (effectManager_)
+        {
+            const std::string resolvedValue_ = isParticleAsset_
+                ? effectManager_->ResolveParticlePath(value_)
+                : effectManager_->ResolveMeshVFXPath(value_);
+            for (const std::string& assetKey_ : assets_)
+            {
+                const std::string resolvedKey_ = isParticleAsset_
+                    ? effectManager_->ResolveParticlePath(assetKey_)
+                    : effectManager_->ResolveMeshVFXPath(assetKey_);
+                if (!resolvedValue_.empty() && resolvedValue_ == resolvedKey_)
+                {
+                    previewValue_ = assetKey_;
+                    break;
+                }
+            }
+        }
+        const char* preview_ = previewValue_.empty() ? "(None)" : previewValue_.c_str();
         if (ImGui::BeginCombo(label_, preview_))
         {
             if (ImGui::Selectable("(None)", value_.empty())) value_.clear();
-            for (const std::string& assetPath_ : assets_)
+            for (const std::string& assetKey_ : assets_)
             {
-                const bool selected_ = value_ == assetPath_;
-                if (ImGui::Selectable(assetPath_.c_str(), selected_)) value_ = assetPath_;
+                const bool selected_ = previewValue_ == assetKey_;
+                if (ImGui::Selectable(assetKey_.c_str(), selected_)) value_ = assetKey_;
                 if (selected_) ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
@@ -531,11 +551,14 @@ bool AttackTemplateManager::DrawEditorContent(
 
     bool saved_ = false;
     const std::vector<std::string> emptyAssets_{};
+    EffectManager* effectManager_ = gameObjectManager_
+        ? &gameObjectManager_->GetEffectManager()
+        : nullptr;
     const std::vector<std::string>& particleAssets_ = gameObjectManager_
-        ? gameObjectManager_->GetEffectManager().GetParticleAssetPaths()
+        ? gameObjectManager_->GetEffectManager().GetParticleAssetKeys()
         : emptyAssets_;
     const std::vector<std::string>& meshVfxAssets_ = gameObjectManager_
-        ? gameObjectManager_->GetEffectManager().GetMeshVFXAssetPaths()
+        ? gameObjectManager_->GetEffectManager().GetMeshVFXAssetKeys()
         : emptyAssets_;
     const std::vector<std::string> hitBoxActionPrefixes_ =
         CollectHitBoxActionPrefixes(gameObjectManager_);
@@ -695,12 +718,16 @@ bool AttackTemplateManager::DrawEditorContent(
         DrawAssetPathCombo(
             "Particle Asset",
             attackTemplate_->hitEffect.hitParticleAssetPath,
-            particleAssets_);
+            particleAssets_,
+            effectManager_,
+            true);
 
         DrawAssetPathCombo(
             "Mesh VFX Asset",
             attackTemplate_->hitEffect.hitMeshVfxAssetPath,
-            meshVfxAssets_);
+            meshVfxAssets_,
+            effectManager_,
+            false);
     }
 
     // =========================================================
@@ -736,7 +763,7 @@ bool AttackTemplateManager::DrawEditorContent(
             {
                 ImGui::Checkbox("Enabled", &slash_.enabled);
 
-                DrawAssetPathCombo("VFX Path", slash_.vfxPath, meshVfxAssets_);
+                DrawAssetPathCombo("VFX Path", slash_.vfxPath, meshVfxAssets_, effectManager_, false);
 
                 ImGui::DragFloat(
                     "Spawn Offset",
@@ -899,8 +926,8 @@ bool AttackTemplateManager::DrawEditorContent(
                 const char* effectNames_[] = { "Instant Area", "Projectile", "Area Over Time", "Beam", "Breath" };
                 if (ImGui::Combo("Effect Type", &effectType_, effectNames_, IM_ARRAYSIZE(effectNames_)))
                     effect_.effectType = static_cast<ATTACK_EFFECT_TYPE>(effectType_);
-                DrawAssetPathCombo("Particle Path", effect_.particlePath, particleAssets_);
-                DrawAssetPathCombo("Mesh VFX Path", effect_.meshVfxPath, meshVfxAssets_);
+                DrawAssetPathCombo("Particle Path", effect_.particlePath, particleAssets_, effectManager_, true);
+                DrawAssetPathCombo("Mesh VFX Path", effect_.meshVfxPath, meshVfxAssets_, effectManager_, false);
                 ImGui::DragFloat("Spawn Time Offset", &effect_.spawnTimeOffset, 0.01f, 0.0f);
                 ImGui::DragFloat("Life Time", &effect_.lifeTime, 0.01f, 0.0f);
                 DrawVector3("Local Offset", effect_.localOffset);

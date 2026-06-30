@@ -390,6 +390,15 @@ void PlayerControllerComponent::SetCanCancel(bool enabled_)
 
     if (enabled_)
     {
+        if (actionRuntime.bufferedAction != PLAYER_ACTION::NONE &&
+            actionRuntime.bufferedAction != GetCurrentAction() &&
+            IsPlayerActionTimelineDriven(GetCurrentAction()) &&
+            !actionRuntime.actionEnded)
+        {
+            NotifyActionEnd();
+            return;
+        }
+
         ConsumeBufferedAction();
     }
 }

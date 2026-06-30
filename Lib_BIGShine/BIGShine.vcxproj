@@ -273,7 +273,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Editor\EditorCameraData.cpp" />
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Utility\EditorPrimitiveRenderer.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
@@ -281,6 +283,7 @@
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\TimeManagerWindow.cpp" />
@@ -444,7 +447,9 @@
     <ClCompile Include="External\imnodes-master\imnodes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Editor\EditorCameraData.h" />
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Utility\EditorPrimitiveRenderer.h" />
     <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />
     <ClInclude Include="Code\Editor\Workspace\AudioWorkspaceWindow.h" />
@@ -453,6 +458,7 @@
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h" />
@@ -651,6 +657,7 @@
     <None Include="Shader\ParticleBitonicSort.hlsli" />
     <None Include="Shader\ParticleCommon.hlsli" />
     <None Include="Shader\ModelCommon.hlsli" />
+    <None Include="Shader\PrimitiveRenderer.hlsli" />
     <None Include="Shader\Scene.hlsli" />
     <None Include="Shader\ShapeRenderer.hlsli" />
     <None Include="Shader\Skinning.hlsli" />
@@ -774,6 +781,26 @@
     <FxCompile Include="Shader\PostDistortionPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\PrimitiveRendererPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PrimitiveRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='checked|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='checked|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\VignettePS.hlsl">
       <ShaderType>Pixel</ShaderType>
