@@ -39,6 +39,17 @@ std::vector<std::string> CurveComponent::GetTrackNames() const
     return names_;
 }
 
+bool CurveComponent::HasTrack(const std::string& name_) const
+{
+    return std::any_of(
+        tracks.begin(),
+        tracks.end(),
+        [&name_](const CurveTrack& track_)
+        {
+            return track_.name == name_;
+        });
+}
+
 std::string CurveComponent::CreateTrack(const std::string& preferredName_, float defaultValue_)
 {
     const std::string baseName_ = preferredName_.empty() ? "Curve" : preferredName_;

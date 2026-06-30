@@ -69,6 +69,21 @@ cbuffer CbMeshVFX : register(b0)
     float gradientStartUv;
     float gradientEndUv;
     float gradientPadding;
+    float3 gradientRegisterPadding;
+    
+    float4 dissolveEdgeColor;
+    float4 backFaceColor;
+    
+    float dissolveEdgeWidth;
+    float dissolveEdgeStrength;
+    float fresnelNoiseStrength;
+    float backFaceEmissiveStrength;
+    
+    uint useDissolveEdge;
+    uint useFresnelNoise;
+    uint useBackFaceBoost;
+    
+    uint meshVFXPadding;
 };
 
 // GltfModelの頂点入力。

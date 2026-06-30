@@ -152,7 +152,21 @@ private:
         float gradientFixedUv;         // Gradient Textureの固定UV
         float gradientStartUv;         // Gradientの開始UV
         float gradientEndUv;           // Gradientの終了UV
-        float gradientPadding;         // 16byteアライン調整
+        float gradientPadding;         // HLSL cbuffer境界合わせ用
+        DirectX::XMFLOAT3 gradientRegisterPadding{}; // gradientPadding後の12byte埋め
+
+        DirectX::XMFLOAT4 dissolveEdgeColor; // Dissolve境界発光色
+        DirectX::XMFLOAT4 backFaceColor;     // 背面Boost色
+
+        float dissolveEdgeWidth;       // Dissolve境界幅
+        float dissolveEdgeStrength;    // Dissolve境界発光強度
+        float fresnelNoiseStrength;    // FresnelにNoiseを混ぜる強さ
+        float backFaceEmissiveStrength;// 背面Boost強度
+
+        uint32_t useDissolveEdge;      // Dissolve境界発光を使うか
+        uint32_t useFresnelNoise;      // Fresnel Noiseを使うか
+        uint32_t useBackFaceBoost;     // 背面Boostを使うか
+        uint32_t meshVFXPadding;       // 16byteアライン調整
     };
 
     static_assert(sizeof(CbMeshVFX) % 16 == 0, "CbMeshVFX size must be aligned to 16 bytes.");

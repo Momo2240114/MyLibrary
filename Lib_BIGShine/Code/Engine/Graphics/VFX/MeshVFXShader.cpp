@@ -273,7 +273,15 @@ void MeshVFXShader::UpdatePart(
     constants_.gradientFixedUv = part_.gradientFixedUv;
     constants_.gradientStartUv = part_.gradientStartUv;
     constants_.gradientEndUv = part_.gradientEndUv;
-
+    constants_.dissolveEdgeColor = part_.dissolveEdgeColor;
+    constants_.backFaceColor = part_.backFaceColor;
+    constants_.dissolveEdgeWidth = part_.dissolveEdgeWidth;
+    constants_.dissolveEdgeStrength = part_.dissolveEdgeStrength;
+    constants_.fresnelNoiseStrength = part_.fresnelNoiseStrength;
+    constants_.backFaceEmissiveStrength = part_.backFaceEmissiveStrength;
+    constants_.useDissolveEdge = part_.useDissolveEdge ? 1u : 0u;
+    constants_.useFresnelNoise = part_.useFresnelNoise ? 1u : 0u;
+    constants_.useBackFaceBoost = part_.useBackFaceBoost ? 1u : 0u;
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->UpdateSubresource(partConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
     ID3D11ShaderResourceView* baseTextureView_ =

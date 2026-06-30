@@ -178,7 +178,7 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 				//const float oldFeather_ = toonJson_["shadeFeather"].get<float>();
 				//shadeFeathers_ = { oldFeather_, oldFeather_, oldFeather_, oldFeather_ };
 			}
-			toonShader_->SetShadeSettings(shadeSteps_,shadeFeathers_);
+			toonShader_->SetShadeSettings(shadeSteps_, shadeFeathers_);
 		}
 	}
 
@@ -821,10 +821,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 		for (DrawInfo& drawInfo : drawInfos)
 		{
-		const auto& meshes_ = drawInfo.model->GetMeshes();
-		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
-		{
-			const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
+			const auto& meshes_ = drawInfo.model->GetMeshes();
+			for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
+			{
+				const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
 				if (mesh.material->alphaMode != GltfModelCommponennt::AlphaMode::Blend &&
 					isOutlineTarget(mesh.material->shaderId))
 				{

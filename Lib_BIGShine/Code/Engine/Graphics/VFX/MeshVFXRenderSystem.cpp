@@ -19,6 +19,7 @@ namespace
         DirectX::XMFLOAT3 rotation;
         DirectX::XMFLOAT3 scale;
         float time = 0.0f;
+        float normalizedTime = 0.0f;
         float alpha = 1.0f;
         bool active = true;
     };
@@ -41,7 +42,10 @@ namespace
         };
     }
 
-    PartAnimationState CalculatePartAnimation(const MeshVFXPart& part_, float componentTime_)
+    PartAnimationState CalculatePartAnimation(
+        const MeshVFXPart& part_,
+        const MeshVFXComponent& component_,
+        float componentTime_)
     {
         PartAnimationState state_{};
         state_.rotation = part_.rotation;
@@ -60,6 +64,7 @@ namespace
                 ? std::fmod((std::max)(componentTime_, 0.0f), part_.duration)
                 : std::clamp(componentTime_, 0.0f, part_.duration);
             normalizedTime_ = state_.time / part_.duration;
+            state_.normalizedTime = normalizedTime_;
         }
         else
         {
@@ -71,7 +76,48 @@ namespace
         state_.rotation.z += part_.meshRotationSpeed.z * state_.time;
         if (part_.animateScale) state_.scale = Lerp(part_.scaleStart, part_.scaleEnd, normalizedTime_);
         if (part_.animateAlpha) state_.alpha *= Lerp(part_.alphaStart, part_.alphaEnd, normalizedTime_);
+        const float scaleCurveValue_ = component_.EvaluateCurveValue(part_.scaleCurveName, normalizedTime_, 1.0f);
+        state_.scale.x *= scaleCurveValue_;
+        state_.scale.y *= scaleCurveValue_;
+        state_.scale.z *= scaleCurveValue_;
+        state_.alpha *= component_.EvaluateCurveValue(part_.alphaCurveName, normalizedTime_, 1.0f);
         return state_;
+    }
+
+    MeshVFXPart ApplyPartTimeCurves(
+        const MeshVFXPart& part_,
+        const MeshVFXComponent& component_,
+        float normalizedTime_)
+    {
+        MeshVFXPart result_ = part_;
+        result_.dissolveThreshold = component_.EvaluateCurveValue(
+            part_.dissolveCurveName,
+            normalizedTime_,
+            part_.dissolveThreshold);
+        result_.emissiveStrength *= component_.EvaluateCurveValue(
+            part_.emissiveCurveName,
+            normalizedTime_,
+            1.0f);
+
+        const float uvScrollCurveValue_ = component_.EvaluateCurveValue(
+            part_.uvScrollCurveName,
+            normalizedTime_,
+            1.0f);
+        result_.baseUVSpeed.x *= uvScrollCurveValue_;
+        result_.baseUVSpeed.y *= uvScrollCurveValue_;
+        result_.maskUVSpeed.x *= uvScrollCurveValue_;
+        result_.maskUVSpeed.y *= uvScrollCurveValue_;
+        result_.noiseUVSpeed.x *= uvScrollCurveValue_;
+        result_.noiseUVSpeed.y *= uvScrollCurveValue_;
+
+        const float uvRotationCurveValue_ = component_.EvaluateCurveValue(
+            part_.uvRotationCurveName,
+            normalizedTime_,
+            1.0f);
+        result_.baseUVRotationSpeed *= uvRotationCurveValue_;
+        result_.maskUVRotationSpeed *= uvRotationCurveValue_;
+        result_.noiseUVRotationSpeed *= uvRotationCurveValue_;
+        return result_;
     }
 
     DirectX::XMMATRIX CreatePartTransform(
@@ -600,12 +646,16 @@ void MeshVFXRenderSystem::RenderAll(
                     (!useDynamicMesh_ && !runtimePart_.modelResource))) continue;
 
             const PartAnimationState animation_ =
-                CalculatePartAnimation(part_, component_->GetTime());
+                CalculatePartAnimation(part_, *component_, component_->GetTime());
             if (!animation_.active) continue;
+            const MeshVFXPart evaluatedPart_ = ApplyPartTimeCurves(
+                part_,
+                *component_,
+                animation_.normalizedTime);
 
             const bool partUsesDistortion_ =
                 !isEditorWindow_ &&
-                part_.useMaskDistortion &&
+                evaluatedPart_.useMaskDistortion &&
                 runtimePart_.distortionNoiseTexture;
             restoreMeshTarget_(false);
 
@@ -667,11 +717,11 @@ void MeshVFXRenderSystem::RenderAll(
                 ID3D11ShaderResourceView* noiseTexture_ = noiseTextureMixer.Mix(
                     renderContext_, noiseTextures_, nullptr, nullptr, true);
 
-                const MeshVFXPart* shaderPart_ = &part_;
+                const MeshVFXPart* shaderPart_ = &evaluatedPart_;
                 MeshVFXPart depthSafePart_;
-                if (!sceneSamplingReady_ && part_.intersectionEdgeStrength > 0.0f)
+                if (!sceneSamplingReady_ && evaluatedPart_.intersectionEdgeStrength > 0.0f)
                 {
-                    depthSafePart_ = part_;
+                    depthSafePart_ = evaluatedPart_;
                     depthSafePart_.intersectionEdgeStrength = 0.0f;
                     shaderPart_ = &depthSafePart_;
                 }

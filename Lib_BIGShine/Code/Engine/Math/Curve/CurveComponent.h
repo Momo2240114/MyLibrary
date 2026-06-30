@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <memory>
 
-class CurveComponent : public Component, public ImCurveEdit::Delegate 
+class CurveComponent : public Component, public ImCurveEdit::Delegate
 {
 public:
     const std::string& GetName() const override { static std::string name = "CurveComponent"; return name; }
@@ -35,6 +35,7 @@ public:
     }
 
     std::vector<std::string> GetTrackNames() const;
+    bool HasTrack(const std::string& name_) const;
     std::string CreateTrack(const std::string& preferredName_, float defaultValue_ = 1.0f);
     bool SaveTrackAsset(size_t trackIndex_, const std::string& assetPath_ = "");
     bool LoadTrackAsset(const std::string& assetPath_);
@@ -46,7 +47,7 @@ public:
     void EndEdit() override {}
 
     // --- コンポーネント用 ---
-    void Gui() override; 
+    void Gui() override;
     // セーブ・ロードの実装
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;
