@@ -341,15 +341,15 @@
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.125
+                            "value": 0.05000000074505806
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.15000000596046448
+                            "value": 0.8500000238418579
                         },
                         "HitStopTime": {
                             "type": "float",
-                            "value": 0.05000000074505806
+                            "value": 0.25
                         },
                         "KnockBackPower": {
                             "type": "float",
@@ -493,54 +493,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 22,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "SS_Hit_R",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 0,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -569,6 +521,54 @@
                             "events": [],
                             "loop": true,
                             "name": "SS_Quickshift_B",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 22,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SS_Hit_R",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -699,7 +699,7 @@
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
-                                            "floatValue": 12.0,
+                                            "floatValue": 30.0,
                                             "intValue": 0,
                                             "key": "Damage",
                                             "stringValue": "",
@@ -874,6 +874,24 @@
                                             "key": "HitParticleAssetPath",
                                             "stringValue": "Data/Particle/HitParticle.json",
                                             "type": 3
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.054999999701976776,
+                                            "intValue": 0,
+                                            "key": "HitStopDuration",
+                                            "stringValue": "",
+                                            "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.8500000238418579,
+                                            "intValue": 0,
+                                            "key": "HitStopScale",
+                                            "stringValue": "",
+                                            "type": 0
                                         }
                                     ],
                                     "callEndOnStateExit": false,
@@ -1595,6 +1613,24 @@
                                             "key": "Damage",
                                             "stringValue": "",
                                             "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.05000000074505806,
+                                            "intValue": 0,
+                                            "key": "HitStopDuration",
+                                            "stringValue": "",
+                                            "type": 0
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.800000011920929,
+                                            "intValue": 0,
+                                            "key": "HitStopScale",
+                                            "stringValue": "",
+                                            "type": 0
                                         }
                                     ],
                                     "callEndOnStateExit": true,
@@ -2036,20 +2072,29 @@
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
-                                            "floatValue": 0.05000000074505806,
+                                            "floatValue": 0.0,
                                             "intValue": 0,
-                                            "key": "HitStopTime",
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
+                                            "floatValue": 0.8500000238418579,
+                                            "intValue": 0,
+                                            "key": "HitStopScale",
                                             "stringValue": "",
                                             "type": 0
                                         },
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
-                                            "floatValue": 0.0,
+                                            "floatValue": 0.05000000074505806,
                                             "intValue": 0,
-                                            "key": "HitParticleAssetPath",
-                                            "stringValue": "Data/Particle/HitParticle.json",
-                                            "type": 3
+                                            "key": "HitStopDuration",
+                                            "stringValue": "",
+                                            "type": 0
                                         }
                                     ],
                                     "callEndOnStateExit": true,
@@ -2203,20 +2248,29 @@
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
+                                            "floatValue": 0.0,
+                                            "intValue": 0,
+                                            "key": "HitParticleAssetPath",
+                                            "stringValue": "Data/Particle/HitParticle.json",
+                                            "type": 3
+                                        },
+                                        {
+                                            "boolValue": false,
+                                            "category": "Attack",
                                             "floatValue": 0.05000000074505806,
                                             "intValue": 0,
-                                            "key": "HitStopTime",
+                                            "key": "HitStopDuration",
                                             "stringValue": "",
                                             "type": 0
                                         },
                                         {
                                             "boolValue": false,
                                             "category": "Attack",
-                                            "floatValue": 0.0,
+                                            "floatValue": 0.8500000238418579,
                                             "intValue": 0,
-                                            "key": "HitParticleAssetPath",
-                                            "stringValue": "Data/Particle/HitParticle.json",
-                                            "type": 3
+                                            "key": "HitStopScale",
+                                            "stringValue": "",
+                                            "type": 0
                                         }
                                     ],
                                     "callEndOnStateExit": true,
@@ -2635,54 +2689,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 62,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Run_Attack_02_Seq_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 39,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -2711,6 +2717,54 @@
                             "events": [],
                             "loop": true,
                             "name": "Combo_Attack_03_All_Seq_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 62,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Run_Attack_02_Seq_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3979,54 +4033,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 56,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Jump_Combat_Loop_0_Seq_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 65,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -4055,6 +4061,54 @@
                             "events": [],
                             "loop": true,
                             "name": "Run_Combat_Stop_F_0_RM_Seq_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 56,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Jump_Combat_Loop_0_Seq_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -4553,20 +4607,30 @@
         },
         {
             "Data": {
-                "BurstCount": 3,
+                "BurstCount": 4,
                 "IncludeChildren": true,
                 "IsPlaying": true,
                 "Lifetime": 0.4000000059604645,
-                "MaxRenderParts": 1,
-                "MaxRenderSnapshots": 4,
-                "MaxSnapshots": 8,
+                "MaxExtraSnapshotsPerFrame": 8,
+                "MaxRenderParts": 2,
+                "MaxRenderSnapshots": 12,
+                "MaxSnapshots": 12,
+                "MaximumSnapshotSpacing": 1.600000023841858,
                 "Parts": [
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -4585,6 +4649,15 @@
                             1.0,
                             1.0
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
                         "DistortionNoiseUVScale": [
@@ -4605,6 +4678,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -4613,8 +4687,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -4674,6 +4755,7 @@
                             1.0,
                             1.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -4693,8 +4775,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": false,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": false,
                         "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": false,
@@ -4715,10 +4803,18 @@
                     },
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -4737,6 +4833,15 @@
                             1.0,
                             1.0
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
                         "DistortionNoiseUVScale": [
@@ -4757,6 +4862,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -4765,8 +4871,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -4826,6 +4939,7 @@
                             1.0,
                             1.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -4845,8 +4959,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": false,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": false,
                         "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": false,
@@ -4867,10 +4987,18 @@
                     },
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -4889,6 +5017,15 @@
                             1.0,
                             1.0
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
                         "DistortionNoiseUVScale": [
@@ -4909,6 +5046,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -4917,8 +5055,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -4978,6 +5123,7 @@
                             1.0,
                             1.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -4997,8 +5143,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": false,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": false,
                         "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": false,
@@ -5019,10 +5171,18 @@
                     },
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -5041,6 +5201,15 @@
                             0.7058823704719543,
                             1.0
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
                         "DistortionNoiseUVScale": [
@@ -5061,6 +5230,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -5069,8 +5239,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.9800000190734863,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -5130,6 +5307,7 @@
                             1.0,
                             1.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -5149,8 +5327,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": true,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": false,
                         "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": false,
@@ -5170,7 +5354,7 @@
                         "VertexNoiseVerticalStrength": 1.0
                     }
                 ],
-                "SpawnInterval": 0.03999999910593033,
+                "SpawnInterval": 0.10000000149011612,
                 "StartAlpha": 0.800000011920929
             },
             "Enabled": true,
@@ -5210,13 +5394,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -13.098653793334961,
-            -1.4768353700637817,
-            -61.48816680908203
+            -14.694612503051758,
+            -1.4768354892730713,
+            -42.24560546875
         ],
         "Rot": [
             3.000000238418579,
-            315.6551208496094,
+            91.71409606933594,
             1.1004080988641363e-05
         ],
         "Scale": [

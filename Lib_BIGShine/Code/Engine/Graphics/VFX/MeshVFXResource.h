@@ -132,9 +132,24 @@ struct MeshVFXPart
     float fresnelPower = 2.0f;           // Fresnelの鋭さ。
     float fresnelStrength = 1.0f;        // Fresnelの強さ。
     float dissolveThreshold = 0.0f;      // Mask/Alphaがこの値以下なら破棄する。
-    float gradientFixedUv = 0.5f;
-    float gradientStartUv = 0.0f;
-    float gradientEndUv = 1.0f;
+    float gradientFixedUv = 0.5f;         // Gradient Textureの固定UV
+    float gradientStartUv = 0.0f;         // Gradientの開始UV
+    float gradientEndUv = 1.0f;           // Gradientの終了UV
+    float gradientPadding;         // 16byteアライン調整
+    DirectX::XMFLOAT3 gradientRegisterPadding{}; // HLSL cbuffer境界合わせ
+
+    DirectX::XMFLOAT4 dissolveEdgeColor; // Dissolve境界発光色
+    DirectX::XMFLOAT4 backFaceColor;     // 背面Boost色
+    float dissolveEdgeWidth = 0.05f;
+    float dissolveEdgeStrength = 3.0f;
+    float fresnelNoiseStrength = 0.0f;
+    float backFaceEmissiveStrength = 0.0f;
+    std::string alphaCurveName;
+    std::string scaleCurveName;
+    std::string dissolveCurveName;
+    std::string emissiveCurveName;
+    std::string uvScrollCurveName;
+    std::string uvRotationCurveName;
 
     bool useMask = false;                // Mask Textureで表示範囲を制御するか。
     bool useNoise = false;               // Noise TextureでUVを歪ませるか。
@@ -144,6 +159,9 @@ struct MeshVFXPart
     bool useNormal = false;              // Normal Textureで法線を補正するか。
     bool useFresnel = false;             // 視線角によるFresnel発光を使うか。
     bool useGradientTexture = false;
+    bool useDissolveEdge = false;
+    bool useFresnelNoise = false;
+    bool useBackFaceBoost = false;
     MESH_VFX_EDGE_PATTERN_MODE edgePatternMode = MESH_VFX_EDGE_PATTERN_MODE::NONE; // Edge模様の参照元。
     MESH_VFX_GRADIENT_SAMPLE_MODE gradientSampleMode = MESH_VFX_GRADIENT_SAMPLE_MODE::HORIZONTAL;
     MESH_VFX_GRADIENT_DIRECTION gradientDirection = MESH_VFX_GRADIENT_DIRECTION::FORWARD;

@@ -58,7 +58,7 @@ float2 GetGradientUV(float2 sourceUV)
         : float2(fixedUv, gradientT);
 }
 
-float4 main(VS_OUT input) : SV_TARGET
+float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 {
     // Component時間とAfterimageなどのインスタンス時間を足して、このPixelの演出時間を作る。
     float effectTime = time + input.instanceTime;
@@ -141,6 +141,13 @@ float4 main(VS_OUT input) : SV_TARGET
         // 視線と法線が直交するほど強くなるため、Meshの外周に光が乗る。
         float f = 1.0f - saturate(abs(dot(viewDir, normal)));
         fresnelFactor = pow(f, fresnelPower) * fresnelStrength;
+        if (useFresnelNoise != 0)
+        {
+            float fresnelNoiseSample_ = (abs(noiseUVRotation) > 0.0001f
+                ? NoiseTexture.Sample(LinearBorderSampler, noiseUV)
+                : NoiseTexture.Sample(LinearWrapSampler, noiseUV)).r;
+            fresnelFactor *= lerp(1.0f, saturate(fresnelNoiseSample_ * 2.0f), saturate(fresnelNoiseStrength));
+        }
     }
 
     float3 finalColor = baseColor.rgb + vfxColor.rgb * fresnelFactor;
@@ -152,6 +159,17 @@ float4 main(VS_OUT input) : SV_TARGET
         finalAlpha = saturate(finalAlpha + fresnelFactor * mask * alpha * input.instanceAlpha);
     }
 
+    if (useDissolveEdge != 0 && dissolveEdgeStrength > 0.0f && dissolveEdgeWidth > 0.0f)
+    {
+        float dissolveSource_ = min(mask, baseColor.a);
+        float dissolveDistance_ = dissolveSource_ - dissolveThreshold;
+        float dissolveEdgeAmount_ =
+            (1.0f - smoothstep(0.0f, dissolveEdgeWidth, dissolveDistance_)) *
+            step(0.0f, dissolveDistance_);
+        float dissolveEdgeAlpha_ = dissolveEdgeColor.a * dissolveEdgeAmount_ * alpha * input.instanceAlpha;
+        finalColor += dissolveEdgeColor.rgb * dissolveEdgeStrength * dissolveEdgeAmount_;
+        finalAlpha = saturate(max(finalAlpha, dissolveEdgeAlpha_));
+    }
 
     if (emissiveStrength > 0.0f)
     {
@@ -162,6 +180,13 @@ float4 main(VS_OUT input) : SV_TARGET
             : baseSample;
         float emissivePulse = 1.0f + sin(effectTime * emissivePulseSpeed) * emissivePulseAmount;
         finalColor += emissiveSample.rgb * vfxColor.rgb * max(emissiveStrength, 0.0f) * max(emissivePulse, 0.0f) * saturate(emissiveSample.a * finalAlpha);
+    }
+
+    if (useBackFaceBoost != 0 && !isFrontFace && backFaceEmissiveStrength > 0.0f)
+    {
+        float backFaceAmount_ = saturate(backFaceColor.a);
+        finalColor += backFaceColor.rgb * backFaceEmissiveStrength * backFaceAmount_;
+        finalAlpha = saturate(max(finalAlpha, baseColor.a * mask * alpha * input.instanceAlpha * backFaceAmount_));
     }
 
     if (edgeEnabled)

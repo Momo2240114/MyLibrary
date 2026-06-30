@@ -6,6 +6,8 @@
 #include "Engine/Graphics/Resource/ModelResource.h"
 #include "Engine/Graphics/Resource/ModelResourceManager.h"
 #include "Engine/Graphics/Resource/TextureResourceManager.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <algorithm>
@@ -135,6 +137,37 @@ namespace
             values_[index_] = array_[index_].get<float>();
         }
     }
+
+    bool DrawCurveTrackCombo(
+        const char* label_,
+        std::string& curveName_,
+        const std::vector<std::string>& curveNames_)
+    {
+        bool changed_ = ImGui::InputText(label_, &curveName_);
+        if (curveNames_.empty()) return changed_;
+
+        ImGui::SameLine();
+        const std::string comboLabel_ = std::string("##") + label_ + "CurveSelect";
+        const char* preview_ = curveName_.empty() ? "None" : curveName_.c_str();
+        if (ImGui::BeginCombo(comboLabel_.c_str(), preview_))
+        {
+            if (ImGui::Selectable("None", curveName_.empty()))
+            {
+                curveName_.clear();
+                changed_ = true;
+            }
+            for (const std::string& name_ : curveNames_)
+            {
+                if (ImGui::Selectable(name_.c_str(), curveName_ == name_))
+                {
+                    curveName_ = name_;
+                    changed_ = true;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        return changed_;
+    }
 }
 
 void MeshVFXComponent::Start()
@@ -151,6 +184,40 @@ void MeshVFXComponent::Update(float deltaTime_)
 }
 
 
+std::vector<std::string> MeshVFXComponent::GetCurveTrackNames() const
+{
+    const std::shared_ptr<GameObject> owner_ =
+        const_cast<MeshVFXComponent*>(this)->GetGameObject();
+    if (!owner_) return {};
+
+    const std::shared_ptr<CurveComponent> curveComponent_ = owner_->GetComponent<CurveComponent>();
+    return curveComponent_ ? curveComponent_->GetTrackNames() : std::vector<std::string>{};
+}
+
+float MeshVFXComponent::EvaluateCurveValue(
+    const std::string& curveName_,
+    float normalizedTime_,
+    float fallbackValue_) const
+{
+    if (curveName_.empty()) return fallbackValue_;
+
+    const std::shared_ptr<GameObject> owner_ =
+        const_cast<MeshVFXComponent*>(this)->GetGameObject();
+    if (!owner_) return fallbackValue_;
+
+    const std::shared_ptr<CurveComponent> curveComponent_ = owner_->GetComponent<CurveComponent>();
+    if (!curveComponent_) return fallbackValue_;
+
+    if (!curveComponent_->HasTrack(curveName_))
+    {
+        return fallbackValue_;
+    }
+
+    const float clampedTime_ = std::clamp(normalizedTime_, 0.0f, 1.0f);
+    const float value_ = curveComponent_->GetValue(curveName_, clampedTime_);
+    return std::isfinite(value_) ? value_ : fallbackValue_;
+}
+
 void MeshVFXComponent::Gui()
 {
     // MeshVFX Asset、Part、Texture、UV、Noise、Edgeなどの編集UIをまとめる。
@@ -161,6 +228,7 @@ void MeshVFXComponent::Gui()
     ImGui::SameLine();
     if (ImGui::Button("Refresh Assets")) RefreshAssetLists();
     ImGui::Text("Time: %.2f", time);
+    const std::vector<std::string> curveNames_ = GetCurveTrackNames();
 
     std::string selectedAssetPath_ = assetPath;
     if (AssetSlotGui::Draw(
@@ -541,6 +609,24 @@ void MeshVFXComponent::Gui()
                 ImGui::TreePop();
             }
 
+            if (ImGui::TreeNode("Time Curves"))
+            {
+                ImGui::TextDisabled("Uses CurveComponent tracks on this GameObject.");
+                ImGui::TextDisabled("X is normalized part time. Duration 0 keeps curve time at 0.");
+                ImGui::TextDisabled("UV curves multiply speed. They are not absolute UV offsets.");
+                if (curveNames_.empty())
+                {
+                    ImGui::TextDisabled("No CurveComponent tracks found. Typed names will work after adding matching tracks.");
+                }
+                DrawCurveTrackCombo("Alpha Curve", part_.alphaCurveName, curveNames_);
+                DrawCurveTrackCombo("Scale Curve", part_.scaleCurveName, curveNames_);
+                DrawCurveTrackCombo("Dissolve Curve", part_.dissolveCurveName, curveNames_);
+                DrawCurveTrackCombo("Emissive Curve", part_.emissiveCurveName, curveNames_);
+                DrawCurveTrackCombo("UV Scroll Speed Curve", part_.uvScrollCurveName, curveNames_);
+                DrawCurveTrackCombo("UV Rotation Speed Curve", part_.uvRotationCurveName, curveNames_);
+                ImGui::TreePop();
+            }
+
             ImGui::ColorEdit4("Color", &part_.color.x);
             ImGui::DragFloat("Emissive Strength", &part_.emissiveStrength, 0.05f, 0.0f, 50.0f);
             ImGui::DragFloat("Emissive Pulse Speed", &part_.emissivePulseSpeed, 0.05f, 0.0f, 30.0f);
@@ -592,6 +678,33 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat("Fresnel Power", &part_.fresnelPower, 0.01f, 0.1f, 10.0f);
             ImGui::DragFloat("Fresnel Strength", &part_.fresnelStrength, 0.01f, 0.0f, 20.0f);
             ImGui::DragFloat("Dissolve Threshold", &part_.dissolveThreshold, 0.01f, 0.0f, 1.0f);
+            if (ImGui::TreeNode("Dissolve Edge"))
+            {
+                ImGui::Checkbox("Use Dissolve Edge", &part_.useDissolveEdge);
+                ImGui::ColorEdit4("Dissolve Edge Color", &part_.dissolveEdgeColor.x);
+                ImGui::DragFloat("Dissolve Edge Width", &part_.dissolveEdgeWidth, 0.001f, 0.0f, 1.0f);
+                ImGui::DragFloat("Dissolve Edge Strength", &part_.dissolveEdgeStrength, 0.05f, 0.0f, 50.0f);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Fresnel Noise"))
+            {
+                ImGui::Checkbox("Use Fresnel Noise", &part_.useFresnelNoise);
+                ImGui::TextDisabled("Uses the Noise Texture and Noise UV settings.");
+                ImGui::DragFloat("Fresnel Noise Strength", &part_.fresnelNoiseStrength, 0.01f, 0.0f, 1.0f);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Back Face Boost"))
+            {
+                ImGui::Checkbox("Use Back Face Boost", &part_.useBackFaceBoost);
+                ImGui::ColorEdit4("Back Face Color", &part_.backFaceColor.x);
+                ImGui::DragFloat(
+                    "Back Face Emissive Strength",
+                    &part_.backFaceEmissiveStrength,
+                    0.05f,
+                    0.0f,
+                    50.0f);
+                ImGui::TreePop();
+            }
             ImGui::Checkbox("Use Mask", &part_.useMask);
             ImGui::Checkbox("Use Noise", &part_.useNoise);
             ImGui::Checkbox("Use Normal", &part_.useNormal);
@@ -827,9 +940,33 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["FresnelPower"] = part_.fresnelPower;
         partJson_["FresnelStrength"] = part_.fresnelStrength;
         partJson_["DissolveThreshold"] = part_.dissolveThreshold;
+        partJson_["DissolveEdgeColor"] =
+        {
+            part_.dissolveEdgeColor.x,
+            part_.dissolveEdgeColor.y,
+            part_.dissolveEdgeColor.z,
+            part_.dissolveEdgeColor.w,
+        };
+        partJson_["BackFaceColor"] =
+        {
+            part_.backFaceColor.x,
+            part_.backFaceColor.y,
+            part_.backFaceColor.z,
+            part_.backFaceColor.w,
+        };
+        partJson_["DissolveEdgeWidth"] = part_.dissolveEdgeWidth;
+        partJson_["DissolveEdgeStrength"] = part_.dissolveEdgeStrength;
+        partJson_["FresnelNoiseStrength"] = part_.fresnelNoiseStrength;
+        partJson_["BackFaceEmissiveStrength"] = part_.backFaceEmissiveStrength;
         partJson_["GradientFixedUv"] = part_.gradientFixedUv;
         partJson_["GradientStartUv"] = part_.gradientStartUv;
         partJson_["GradientEndUv"] = part_.gradientEndUv;
+        partJson_["AlphaCurveName"] = part_.alphaCurveName;
+        partJson_["ScaleCurveName"] = part_.scaleCurveName;
+        partJson_["DissolveCurveName"] = part_.dissolveCurveName;
+        partJson_["EmissiveCurveName"] = part_.emissiveCurveName;
+        partJson_["UVScrollCurveName"] = part_.uvScrollCurveName;
+        partJson_["UVRotationCurveName"] = part_.uvRotationCurveName;
         partJson_["UseMask"] = part_.useMask;
         partJson_["UseNoise"] = part_.useNoise;
         partJson_["UseVertexNoise"] = part_.useVertexNoise;
@@ -838,6 +975,9 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["UseNormal"] = part_.useNormal;
         partJson_["UseFresnel"] = part_.useFresnel;
         partJson_["UseGradientTexture"] = part_.useGradientTexture;
+        partJson_["UseDissolveEdge"] = part_.useDissolveEdge;
+        partJson_["UseFresnelNoise"] = part_.useFresnelNoise;
+        partJson_["UseBackFaceBoost"] = part_.useBackFaceBoost;
         partJson_["GradientSampleMode"] = static_cast<int>(part_.gradientSampleMode);
         partJson_["GradientDirection"] = static_cast<int>(part_.gradientDirection);
         partJson_["BlendMode"] = static_cast<int>(part_.blendMode);
@@ -967,9 +1107,21 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.fresnelPower = partJson_.value("FresnelPower", 2.0f);
         part_.fresnelStrength = partJson_.value("FresnelStrength", 1.0f);
         part_.dissolveThreshold = partJson_.value("DissolveThreshold", 0.0f);
+        ReadFloatArray(partJson_, "DissolveEdgeColor", part_.dissolveEdgeColor, 4);
+        ReadFloatArray(partJson_, "BackFaceColor", part_.backFaceColor, 4);
+        part_.dissolveEdgeWidth = std::clamp(partJson_.value("DissolveEdgeWidth", 0.05f), 0.0f, 1.0f);
+        part_.dissolveEdgeStrength = (std::max)(partJson_.value("DissolveEdgeStrength", 3.0f), 0.0f);
+        part_.fresnelNoiseStrength = std::clamp(partJson_.value("FresnelNoiseStrength", 0.0f), 0.0f, 1.0f);
+        part_.backFaceEmissiveStrength = (std::max)(partJson_.value("BackFaceEmissiveStrength", 0.0f), 0.0f);
         part_.gradientFixedUv = std::clamp(partJson_.value("GradientFixedUv", 0.5f), 0.0f, 1.0f);
         part_.gradientStartUv = std::clamp(partJson_.value("GradientStartUv", 0.0f), 0.0f, 1.0f);
         part_.gradientEndUv = std::clamp(partJson_.value("GradientEndUv", 1.0f), 0.0f, 1.0f);
+        part_.alphaCurveName = partJson_.value("AlphaCurveName", std::string{});
+        part_.scaleCurveName = partJson_.value("ScaleCurveName", std::string{});
+        part_.dissolveCurveName = partJson_.value("DissolveCurveName", std::string{});
+        part_.emissiveCurveName = partJson_.value("EmissiveCurveName", std::string{});
+        part_.uvScrollCurveName = partJson_.value("UVScrollCurveName", std::string{});
+        part_.uvRotationCurveName = partJson_.value("UVRotationCurveName", std::string{});
         part_.useMask = partJson_.value("UseMask", false);
         part_.useNoise = partJson_.value("UseNoise", false);
         part_.useVertexNoise = partJson_.value("UseVertexNoise", false);
@@ -978,6 +1130,9 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.useNormal = partJson_.value("UseNormal", false);
         part_.useFresnel = partJson_.value("UseFresnel", false);
         part_.useGradientTexture = partJson_.value("UseGradientTexture", false);
+        part_.useDissolveEdge = partJson_.value("UseDissolveEdge", false);
+        part_.useFresnelNoise = partJson_.value("UseFresnelNoise", false);
+        part_.useBackFaceBoost = partJson_.value("UseBackFaceBoost", false);
         part_.gradientSampleMode = static_cast<MESH_VFX_GRADIENT_SAMPLE_MODE>(
             std::clamp(partJson_.value("GradientSampleMode", 0), 0, 1));
         part_.gradientDirection = static_cast<MESH_VFX_GRADIENT_DIRECTION>(

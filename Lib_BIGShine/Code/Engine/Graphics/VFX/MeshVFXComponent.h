@@ -42,6 +42,9 @@ public:
     const std::vector<MeshVFXRuntimePart>& GetRuntimeParts() const { return runtimeParts; }
     virtual size_t GetMaxRenderParts() const { return static_cast<size_t>(-1); }
 
+    std::vector<std::string> GetCurveTrackNames() const;
+    float EvaluateCurveValue(const std::string& curveName_, float normalizedTime_, float fallbackValue_) const;
+
     float GetTime() const { return time; }
     bool IsPlaying() const { return isPlaying; }
     virtual bool UsesOwnerModel() const { return false; }

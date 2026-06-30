@@ -7,10 +7,18 @@
                 "Parts": [
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -29,6 +37,15 @@
                             0.9686274528503418,
                             0.29411765933036804
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
                         "DistortionNoiseUVScale": [
@@ -49,6 +66,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 1.0,
                         "EmissiveStrength": 0.0,
@@ -57,8 +75,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 1.0,
                         "FresnelStrength": 0.18000000715255737,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.23000000417232513,
                         "IntersectionEdgeWidth": 0.00011999999696854502,
                         "Loop": true,
@@ -126,6 +151,7 @@
                             75.0,
                             70.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -145,8 +171,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": false,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": true,
                         "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": true,

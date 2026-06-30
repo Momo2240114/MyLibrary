@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 109,
+                "AttackInstanceId": 52,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -37,10 +37,10 @@
                 "HitSoundPath": "",
                 "HitSoundPathKey": "HitSoundPath",
                 "HitSoundVolume": 1.0,
-                "HitStopDuration": 0.125,
+                "HitStopDuration": 0.05000000074505806,
                 "HitStopDurationKey": "HitStopDuration",
                 "HitStopLayerMask": 3,
-                "HitStopScale": 0.15000000596046448,
+                "HitStopScale": 0.8500000238418579,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "KnockBackPower": 5.0,
@@ -63,7 +63,7 @@
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
             },
-            "Enabled": true,
+            "Enabled": false,
             "TypeName": "HitBox"
         }
     ],
@@ -128,10 +128,18 @@
                 "Parts": [
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -150,6 +158,15 @@
                             1.0,
                             1.0
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
                         "DistortionNoiseUVScale": [
@@ -170,6 +187,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
                         "EmissiveStrength": 3.0,
@@ -178,8 +196,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 0.10000000149011612,
                         "FresnelStrength": 0.019999999552965164,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": false,
@@ -247,6 +272,7 @@
                             1.0,
                             1.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -266,8 +292,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": false,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": true,
                         "UseMaskDistortion": true,
                         "UseMaterialBaseTexture": true,
@@ -321,10 +353,18 @@
                 "Parts": [
                     {
                         "Alpha": 1.0,
+                        "AlphaCurveName": "",
                         "AlphaEnd": 1.0,
                         "AlphaStart": 1.0,
                         "AnimateAlpha": false,
                         "AnimateScale": false,
+                        "BackFaceColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -343,6 +383,15 @@
                             0.007843137718737125,
                             1.0
                         ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0,
+                            -107374176.0
+                        ],
+                        "DissolveEdgeStrength": 3.0,
+                        "DissolveEdgeWidth": 0.05000000074505806,
                         "DissolveThreshold": 0.0,
                         "DistortionNoiseTexturePath": "",
                         "DistortionNoiseUVScale": [
@@ -363,6 +412,7 @@
                             1.0,
                             1.0
                         ],
+                        "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.75,
                         "EmissivePulseSpeed": 4.0,
                         "EmissiveStrength": 0.44999998807907104,
@@ -371,8 +421,15 @@
                             1.0,
                             1.0
                         ],
+                        "FresnelNoiseStrength": 0.0,
                         "FresnelPower": 2.0,
                         "FresnelStrength": 0.800000011920929,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -438,6 +495,7 @@
                             1.0,
                             1.0
                         ],
+                        "ScaleCurveName": "",
                         "ScaleEnd": [
                             1.0,
                             1.0,
@@ -457,8 +515,14 @@
                             0.5,
                             0.5
                         ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
                         "UseEdgeHighlight": true,
                         "UseFresnel": true,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
                         "UseMask": true,
                         "UseMaskDistortion": false,
                         "UseMaterialBaseTexture": true,
