@@ -180,7 +180,7 @@ void MeshVFXComponent::Start()
 void MeshVFXComponent::Update(float deltaTime_)
 {
     // 再生中だけComponent全体の時間を進める。Part個別の時間はRenderSystem側で計算する。
-    if (isPlaying) time += deltaTime_;
+    if (isPlaying) time += deltaTime_ * playbackSpeed;
 }
 
 
@@ -228,6 +228,7 @@ void MeshVFXComponent::Gui()
     ImGui::SameLine();
     if (ImGui::Button("Refresh Assets")) RefreshAssetLists();
     ImGui::Text("Time: %.2f", time);
+    ImGui::DragFloat("Playback Speed", &playbackSpeed, 0.01f, 0.0f, 10.0f);
     const std::vector<std::string> curveNames_ = GetCurveTrackNames();
 
     std::string selectedAssetPath_ = assetPath;
@@ -839,6 +840,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 {
     // MeshVFX全体をJSONへ保存する。Part単体保存でもこの形式から該当Partだけ抜き出す。
     json_["IsPlaying"] = isPlaying;
+    json_["PlaybackSpeed"] = playbackSpeed;
     json_["Parts"] = nlohmann::json::array();
     for (const MeshVFXPart& part_ : asset.parts)
     {
@@ -991,6 +993,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
     asset.parts.clear();
     runtimeParts.clear();
     isPlaying = json_.value("IsPlaying", true);
+    playbackSpeed = (std::max)(json_.value("PlaybackSpeed", 1.0f), 0.0f);
     time = 0.0f;
     if (!json_.contains("Parts") || !json_["Parts"].is_array()) return;
 
