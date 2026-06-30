@@ -4,7 +4,9 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
 #include "Engine/GamePlay/Combat/AttackTemplateManager.h"
+#include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
+#include "Engine/Graphics/Resource/GLTFModel.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -22,6 +24,8 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "offset", { setting_.localOffset.x, setting_.localOffset.y, setting_.localOffset.z } },
         { "rotation", { setting_.localRotation.x, setting_.localRotation.y, setting_.localRotation.z } },
         { "scale", { setting_.localScale.x, setting_.localScale.y, setting_.localScale.z } },
+        { "attachNodeName", setting_.attachNodeName },
+        { "playbackSpeed", setting_.playbackSpeed },
         { "hasHitBox", setting_.hasHitBox },
         { "hitBoxName", setting_.hitBoxName },
         { "hitStartTime", setting_.hitStartTime },
@@ -36,6 +40,7 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "hitGroupId", setting_.hitGroupId },
         { "allowMultiHit", setting_.allowMultiHit },
         { "followOwner", setting_.followOwner },
+        { "mirror", setting_.mirror },
     };
 }
 
@@ -54,6 +59,8 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.localOffset = readVector3_("offset", { 0.0f, 1.0f, 1.2f });
     setting_.localRotation = readVector3_("rotation", { 0.0f, 0.0f, 0.0f });
     setting_.localScale = readVector3_("scale", { 1.0f, 1.0f, 1.0f });
+    setting_.attachNodeName = json_.value("attachNodeName", std::string{});
+    setting_.playbackSpeed = (std::max)(json_.value("playbackSpeed", 1.0f), 0.0f);
     setting_.hasHitBox = json_.value("hasHitBox", false);
     setting_.hitBoxName = json_.value("hitBoxName", std::string("EffectHitBox"));
     setting_.hitStartTime = json_.value("hitStartTime", 0.0f);
@@ -68,6 +75,7 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.hitGroupId = json_.value("hitGroupId", 0u);
     setting_.allowMultiHit = json_.value("allowMultiHit", false);
     setting_.followOwner = json_.value("followOwner", false);
+    setting_.mirror = json_.value("mirror", false);
 }
 
 void EffectManager::Initialize(GameObjectManager* gameObjectManager_)
@@ -219,13 +227,22 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     vfxRequest_.lifeTime = request_.setting.lifeTime;
     std::shared_ptr<GameObject> object_ = SpawnMeshVFX(vfxRequest_);
     if (!object_) return nullptr;
+    if (std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->GetComponent<MeshVFXComponent>())
+    {
+        meshVFX_->SetPlaybackSpeed(request_.setting.playbackSpeed);
+    }
 
     using namespace DirectX;
+    DirectX::XMFLOAT3 localScale_ = request_.setting.localScale;
+    if (request_.setting.mirror)
+    {
+        localScale_.x *= -1.0f;
+    }
     const XMMATRIX localMatrix_ =
         XMMatrixScaling(
-            request_.setting.localScale.x,
-            request_.setting.localScale.y,
-            request_.setting.localScale.z) *
+            localScale_.x,
+            localScale_.y,
+            localScale_.z) *
         XMMatrixRotationRollPitchYaw(
             XMConvertToRadians(request_.setting.localRotation.x),
             XMConvertToRadians(request_.setting.localRotation.y),
@@ -242,8 +259,23 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
         object_->transform->SetParent(request_.ownerObject->transform);
         object_->transform->localPosition = request_.setting.localOffset;
         object_->transform->localRotation = request_.setting.localRotation;
-        object_->transform->localScale = request_.setting.localScale;
+        object_->transform->localScale = localScale_;
         object_->transform->MarkDirty();
+        if (!request_.setting.attachNodeName.empty())
+        {
+            std::shared_ptr<GltfModelCommponennt> model_ =
+                request_.ownerObject->GetComponent<GltfModelCommponennt>();
+            if (model_)
+            {
+                std::shared_ptr<ModelAttachmentComponent> attachment_ =
+                    object_->GetOrAddComponent<ModelAttachmentComponent>();
+                if (attachment_)
+                {
+                    attachment_->SetTargetNode(model_, request_.setting.attachNodeName);
+                    attachment_->SyncAttachment();
+                }
+            }
+        }
     }
     else
     {

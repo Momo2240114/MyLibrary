@@ -2,6 +2,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Combat/AttackTemplateRuntime.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -62,6 +63,25 @@ static bool CallChildAnimationAction(const std::shared_ptr<GameObject>& owner_, 
     return false;
 }
 
+static void SpawnAnimationMeshVFXEvent(
+    const std::shared_ptr<GameObject>& owner_,
+    const AnimEvent& event_)
+{
+    if (!owner_ || event_.meshVFXAssetPath.empty()) return;
+
+    AttackEffectSpawnRequest request_{};
+    request_.ownerObject = owner_.get();
+    request_.setting.vfxPath = event_.meshVFXAssetPath;
+    request_.setting.lifeTime = event_.meshVFXLifeTime;
+    request_.setting.localOffset = event_.localPosition;
+    request_.setting.localRotation = event_.localRotation;
+    request_.setting.localScale = event_.localScale;
+    request_.setting.playbackSpeed = event_.meshVFXPlaybackSpeed;
+    request_.setting.followOwner = event_.attachToOwner || !event_.attachNodeName.empty();
+    request_.setting.attachNodeName = event_.attachNodeName;
+    request_.setting.mirror = event_.mirrorMeshVFX;
+    owner_->GetManager().GetEffectManager().SpawnSlashEffect(request_);
+}
 static void CallAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
     if (actionName_.empty()) return;
@@ -990,6 +1010,11 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
             if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
             {
                 AttackTemplateRuntime::Start(owner, ev);
+            }
+            if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE ||
+                !ev.meshVFXAssetPath.empty())
+            {
+                SpawnAnimationMeshVFXEvent(owner, ev);
             }
             ApplyAnimationBlackboardWrites(owner, ev.blackboardWrites);
             if (!ev.startAction.empty()) {

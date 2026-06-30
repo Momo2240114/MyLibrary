@@ -2045,6 +2045,41 @@ void AnimationEditorWindow::DrawEventSequencer(
 
     ImGui::SameLine();
 
+    if (ImGui::Button("Add Mesh VFX Event"))
+    {
+        AnimEvent vfxEvent_{};
+        vfxEvent_.eventLabel = "MeshVFX";
+        vfxEvent_.eventTemplateType =
+            ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
+        vfxEvent_.startTime = animController->GetAnimatorTime();
+        vfxEvent_.endTime =
+            (std::min)(vfxEvent_.startTime + 0.2f, adapter_.duration);
+        vfxEvent_.frameStart = adapter_.ToFrame(vfxEvent_.startTime);
+        vfxEvent_.frameEnd = adapter_.ToFrame(vfxEvent_.endTime);
+        vfxEvent_.meshVFXLifeTime =
+            (std::max)(vfxEvent_.endTime - vfxEvent_.startTime, 0.01f);
+        vfxEvent_.meshVFXPlaybackSpeed = 1.0f;
+        vfxEvent_.localScale = { 1.0f, 1.0f, 1.0f };
+
+        if (gameObjectManager)
+        {
+            const std::vector<std::string>& assets_ =
+                gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+
+            if (!assets_.empty())
+            {
+                vfxEvent_.meshVFXAssetPath = assets_.front();
+            }
+        }
+
+        targetState_->events.push_back(vfxEvent_);
+        selectedEvent = static_cast<int>(targetState_->events.size()) - 1;
+
+        adapter_.SyncFrames();
+    }
+
+    ImGui::SameLine();
+
     if (ImGui::Button("Reload Attack Templates"))
     {
         attackTemplateManager_.LoadAll();
@@ -2152,6 +2187,9 @@ void AnimationEditorWindow::DrawEventSequencer(
     const bool isAttackTemplateEvent_ =
         ev_.eventTemplateType ==
         ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
+    const bool isVFXEvent_ =
+        ev_.eventTemplateType ==
+        ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE;
 
     if (isAttackTemplateEvent_)
     {
@@ -2313,6 +2351,100 @@ void AnimationEditorWindow::DrawEventSequencer(
         }
     }
 
+    if (isVFXEvent_)
+    {
+        ImGui::SeparatorText("Mesh VFX Event");
+
+        if (gameObjectManager)
+        {
+            const std::vector<std::string>& assets_ =
+                gameObjectManager->GetEffectManager().GetMeshVFXAssetPaths();
+
+            ImGui::SetNextItemWidth(360.0f);
+            if (ImGui::BeginCombo(
+                "Mesh VFX Asset",
+                ev_.meshVFXAssetPath.empty()
+                ? "(None)"
+                : ev_.meshVFXAssetPath.c_str()))
+            {
+                if (ImGui::Selectable(
+                    "(None)",
+                    ev_.meshVFXAssetPath.empty()))
+                {
+                    ev_.meshVFXAssetPath.clear();
+                }
+
+                for (const std::string& assetPath_ : assets_)
+                {
+                    if (ImGui::Selectable(
+                        assetPath_.c_str(),
+                        ev_.meshVFXAssetPath == assetPath_))
+                    {
+                        ev_.meshVFXAssetPath = assetPath_;
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+        }
+
+        ImGui::SetNextItemWidth(360.0f);
+        ImGui::InputText("Mesh VFX Asset Path", &ev_.meshVFXAssetPath);
+
+        ImGui::SetNextItemWidth(260.0f);
+        if (ImGui::BeginCombo(
+            "Attach Node",
+            ev_.attachNodeName.empty()
+            ? "(Owner Root)"
+            : ev_.attachNodeName.c_str()))
+        {
+            if (ImGui::Selectable(
+                "(Owner Root)",
+                ev_.attachNodeName.empty()))
+            {
+                ev_.attachNodeName.clear();
+            }
+
+            if (modelComp)
+            {
+                for (const auto& node_ : modelComp->GetNodes())
+                {
+                    if (node_.name.empty())
+                    {
+                        continue;
+                    }
+
+                    if (ImGui::Selectable(
+                        node_.name.c_str(),
+                        ev_.attachNodeName == node_.name))
+                    {
+                        ev_.attachNodeName = node_.name;
+                    }
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+
+        ImGui::SameLine();
+        ImGui::Checkbox("Attach To Owner", &ev_.attachToOwner);
+
+        ImGui::SameLine();
+        ImGui::Checkbox("Mirror", &ev_.mirrorMeshVFX);
+
+        ImGui::DragFloat3("Local Position", &ev_.localPosition.x, 0.01f);
+        ImGui::DragFloat3("Local Rotation", &ev_.localRotation.x, 0.5f);
+        ImGui::DragFloat3("Local Scale", &ev_.localScale.x, 0.01f, 0.001f, 100.0f);
+        ImGui::DragFloat("Life Time", &ev_.meshVFXLifeTime, 0.01f, 0.01f, 60.0f);
+        ImGui::DragFloat(
+            "Playback Speed",
+            &ev_.meshVFXPlaybackSpeed,
+            0.01f,
+            0.0f,
+            10.0f,
+            "%.2fx");
+    }
+
     ImGui::Separator();
 
     auto selectedObject_ =
@@ -2462,7 +2594,7 @@ void AnimationEditorWindow::DrawEventSequencer(
             }
         };
 
-    if (!isAttackTemplateEvent_)
+    if (!isAttackTemplateEvent_ && !isVFXEvent_)
     {
         ImGui::SeparatorText("Actions");
 
@@ -2472,7 +2604,7 @@ void AnimationEditorWindow::DrawEventSequencer(
     }
 
     const bool showBlackboardWrites_ =
-        !isAttackTemplateEvent_ ||
+        (!isAttackTemplateEvent_ && !isVFXEvent_) ||
         ImGui::CollapsingHeader("Advanced Blackboard Writes");
 
     if (showBlackboardWrites_)
@@ -2604,7 +2736,7 @@ void AnimationEditorWindow::DrawEventSequencer(
                 ev_.blackboardWrites.push_back(write_);
             };
 
-        if (!isAttackTemplateEvent_)
+        if (!isAttackTemplateEvent_ && !isVFXEvent_)
         {
             if (ImGui::Button("+ Damage"))
             {

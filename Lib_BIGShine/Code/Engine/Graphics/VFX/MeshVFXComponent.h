@@ -36,6 +36,8 @@ public:
     void Play();
     void Stop();
     void Reset();
+    void SetPlaybackSpeed(float playbackSpeed_) { playbackSpeed = playbackSpeed_; }
+    float GetPlaybackSpeed() const { return playbackSpeed; }
 
     MeshVFXAsset& GetAsset() { return asset; }
     const MeshVFXAsset& GetAsset() const { return asset; }
@@ -83,5 +85,6 @@ private:
     std::vector<std::string> textureAssetPaths;  // GUI候補として列挙したTexture Assetパス。
     std::string assetPath;                       // 現在読み書きしているMeshVFX JSONパス。
     float time = 0.0f;                           // Component全体の再生時間。
+    float playbackSpeed = 1.0f;                  // Component全体の再生速度。
     bool isPlaying = true;                       // trueならUpdateでtimeを進める。
 };

@@ -691,7 +691,16 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
                 e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::VFX_TEMPLATE ? "VFX_TEMPLATE" :
                 e.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::SOUND_TEMPLATE ? "SOUND_TEMPLATE" : "NONE"},
             {"attackTemplateId", e.attackTemplateId},
-            {"ownerTarget", e.ownerTarget}
+            {"ownerTarget", e.ownerTarget},
+            {"meshVFXAssetPath", e.meshVFXAssetPath},
+            {"attachNodeName", e.attachNodeName},
+            {"localPosition", { e.localPosition.x, e.localPosition.y, e.localPosition.z }},
+            {"localRotation", { e.localRotation.x, e.localRotation.y, e.localRotation.z }},
+            {"localScale", { e.localScale.x, e.localScale.y, e.localScale.z }},
+            {"meshVFXLifeTime", e.meshVFXLifeTime},
+            {"meshVFXPlaybackSpeed", e.meshVFXPlaybackSpeed},
+            {"attachToOwner", e.attachToOwner},
+            {"mirrorMeshVFX", e.mirrorMeshVFX}
         };
     }
 
@@ -727,6 +736,24 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         }
         e.attackTemplateId = j.value("attackTemplateId", std::string{});
         e.ownerTarget = j.value("ownerTarget", std::string("Self"));
+        auto readVector3_ = [&j](const char* key_, const DirectX::XMFLOAT3& fallback_)
+            {
+                const nlohmann::json value_ = j.value(key_, nlohmann::json::array());
+                if (!value_.is_array() || value_.size() < 3u) return fallback_;
+                return DirectX::XMFLOAT3{
+                    value_[0].get<float>(),
+                    value_[1].get<float>(),
+                    value_[2].get<float>() };
+            };
+        e.meshVFXAssetPath = j.value("meshVFXAssetPath", std::string{});
+        e.attachNodeName = j.value("attachNodeName", std::string{});
+        e.localPosition = readVector3_("localPosition", { 0.0f, 0.0f, 0.0f });
+        e.localRotation = readVector3_("localRotation", { 0.0f, 0.0f, 0.0f });
+        e.localScale = readVector3_("localScale", { 1.0f, 1.0f, 1.0f });
+        e.meshVFXLifeTime = j.value("meshVFXLifeTime", 1.0f);
+        e.meshVFXPlaybackSpeed = j.value("meshVFXPlaybackSpeed", 1.0f);
+        e.attachToOwner = j.value("attachToOwner", false);
+        e.mirrorMeshVFX = j.value("mirrorMeshVFX", false);
         e.isFired = false;
         e.isEndFired = false;
         e.attackTemplateRuntimeActive = false;

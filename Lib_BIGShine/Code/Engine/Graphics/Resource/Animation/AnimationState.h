@@ -72,7 +72,15 @@ struct AnimEvent
     bool attackTemplateRuntimeActive = false;
     uint32_t attackTemplateInstanceId = 0u;
     std::vector<bool> spawnedAttackEffects;
-
+    std::string meshVFXAssetPath;
+    std::string attachNodeName;
+    DirectX::XMFLOAT3 localPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 localRotation = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 localScale = { 1.0f, 1.0f, 1.0f };
+    float meshVFXLifeTime = 1.0f;
+    float meshVFXPlaybackSpeed = 1.0f;
+    bool attachToOwner = false;
+    bool mirrorMeshVFX = false;
 };
 
 // アニメーションの状態種別

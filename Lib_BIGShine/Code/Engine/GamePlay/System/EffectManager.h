@@ -41,6 +41,8 @@ struct SlashEffectSpawnSetting
     DirectX::XMFLOAT3 localOffset = { 0.0f, 1.0f, 1.2f };
     DirectX::XMFLOAT3 localRotation = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 localScale = { 1.0f, 1.0f, 1.0f };
+    std::string attachNodeName;
+    float playbackSpeed = 1.0f;
     bool hasHitBox = false;
     std::string hitBoxName = "EffectHitBox";
     float hitStartTime = 0.0f;
@@ -55,6 +57,7 @@ struct SlashEffectSpawnSetting
     uint32_t hitGroupId = 0u;
     bool allowMultiHit = false;
     bool followOwner = false;
+    bool mirror = false;
 };
 
 struct AttackEffectSpawnRequest
