@@ -327,29 +327,61 @@ void GameObjectManager::Gui()
 void GameObjectManager::DrawHierarchyGui()
 {
     static char createName_[64] = "GameObject";
-    ImGui::Text("Create GameObject");
-    ImGui::InputText("##CreateName", createName_, IM_ARRAYSIZE(createName_));
-    if (ImGui::Button("Create")) selectedObject = Create(createName_);
+
+    ImGui::Text(IM_U8("ゲームオブジェクト作成"));
+    ImGui::InputText("##GameObjectManager_CreateNameInput", createName_, IM_ARRAYSIZE(createName_));
+
+    if (ImGui::Button(IM_U8("作成##GameObjectManager_CreateObjectButton")))
+    {
+        selectedObject = Create(createName_);
+    }
 
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader("Prefabs", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::Button("Refresh")) RefreshPrefabList();
+    if (ImGui::CollapsingHeader(IM_U8("プレハブ##GameObjectManager_PrefabsHeader"), ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        if (ImGui::Button(IM_U8("更新##GameObjectManager_RefreshPrefabListButton")))
+        {
+            RefreshPrefabList();
+        }
+
         static char newPrefabName_[64] = "";
-        if (!prefabFiles.empty()) {
+
+        if (!prefabFiles.empty())
+        {
             const char* currentItem_ = prefabFiles[selectedPrefabIndex].c_str();
-            if (ImGui::BeginCombo("Select Prefab", currentItem_)) {
-                for (int index_ = 0; index_ < prefabFiles.size(); index_++) {
-                    if (ImGui::Selectable(prefabFiles[index_].c_str(), selectedPrefabIndex == index_)) selectedPrefabIndex = index_;
+
+            if (ImGui::BeginCombo(IM_U8("プレハブ選択##GameObjectManager_SelectPrefabCombo"), currentItem_))
+            {
+                for (int index_ = 0; index_ < prefabFiles.size(); index_++)
+                {
+                    if (ImGui::Selectable(prefabFiles[index_].c_str(), selectedPrefabIndex == index_))
+                    {
+                        selectedPrefabIndex = index_;
+                    }
                 }
+
                 ImGui::EndCombo();
             }
-            if (ImGui::Button("Instantiate (Create from Prefab)")) selectedObject = Instantiate(prefabFiles[selectedPrefabIndex]);
+
+            if (ImGui::Button(IM_U8("プレハブから作成##GameObjectManager_InstantiatePrefabButton")))
+            {
+                selectedObject = Instantiate(prefabFiles[selectedPrefabIndex]);
+            }
         }
-        if (selectedObject) {
-            ImGui::InputText("New Prefab Name", newPrefabName_, IM_ARRAYSIZE(newPrefabName_));
-            if (ImGui::Button("Save Selected as Prefab")) {
-                if (strlen(newPrefabName_) > 0) { SaveAsPrefab(selectedObject, newPrefabName_); RefreshPrefabList(); memset(newPrefabName_, 0, sizeof(newPrefabName_)); }
+
+        if (selectedObject)
+        {
+            ImGui::InputText(IM_U8("新規プレハブ名##GameObjectManager_NewPrefabNameInput"), newPrefabName_, IM_ARRAYSIZE(newPrefabName_));
+
+            if (ImGui::Button(IM_U8("選択中のオブジェクトをプレハブとして保存##GameObjectManager_SaveSelectedAsPrefabButton")))
+            {
+                if (strlen(newPrefabName_) > 0)
+                {
+                    SaveAsPrefab(selectedObject, newPrefabName_);
+                    RefreshPrefabList();
+                    memset(newPrefabName_, 0, sizeof(newPrefabName_));
+                }
             }
         }
     }
@@ -357,30 +389,63 @@ void GameObjectManager::DrawHierarchyGui()
     ImGui::Separator();
 
     GameObject* objectToDelete_ = nullptr;
+
+    // 内部IDなので英語のまま
     ImGui::BeginChild("HierarchyRegion", ImVec2(0, 0), true);
 
-    for (auto& object_ : objects) {
-        if (object_->transform->parent.expired()) DrawHierarchyNode(object_, &objectToDelete_);
+    for (auto& object_ : objects)
+    {
+        if (object_->transform->parent.expired())
+        {
+            DrawHierarchyNode(object_, &objectToDelete_);
+        }
     }
 
-    if (ImGui::BeginDragDropTarget()) {
-        if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload("DND_GAMEOBJECT")) {
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload("DND_GAMEOBJECT"))
+        {
             std::shared_ptr<GameObject> draggedObject_ = *(std::shared_ptr<GameObject>*)payload_->Data;
             draggedObject_->SetParent(nullptr);
         }
+
         ImGui::EndDragDropTarget();
     }
+
     ImGui::EndChild();
 
-    if (objectToDelete_) {
-        if (selectedObject && selectedObject.get() == objectToDelete_) selectedObject = nullptr;
-        auto iterator_ = std::find_if(objects.begin(), objects.end(), [&](const std::shared_ptr<GameObject>& object_) { return object_.get() == objectToDelete_; });
-        if (iterator_ != objects.end()) {
+    if (objectToDelete_)
+    {
+        if (selectedObject && selectedObject.get() == objectToDelete_)
+        {
+            selectedObject = nullptr;
+        }
+
+        auto iterator_ = std::find_if(
+            objects.begin(),
+            objects.end(),
+            [&](const std::shared_ptr<GameObject>& object_)
+            {
+                return object_.get() == objectToDelete_;
+            });
+
+        if (iterator_ != objects.end())
+        {
             auto targetObject_ = *iterator_;
-            for (auto& childTransform_ : targetObject_->transform->children) {
-                if (auto childObject_ = childTransform_->gameObject.lock()) childObject_->SetParent(nullptr);
+
+            for (auto& childTransform_ : targetObject_->transform->children)
+            {
+                if (auto childObject_ = childTransform_->gameObject.lock())
+                {
+                    childObject_->SetParent(nullptr);
+                }
             }
-            if (selectedObject == targetObject_) selectedObject = nullptr;
+
+            if (selectedObject == targetObject_)
+            {
+                selectedObject = nullptr;
+            }
+
             objects.erase(iterator_);
         }
     }
@@ -401,135 +466,207 @@ void GameObjectManager::DrawInspectorGui()
         selectedObject->DrawGizmo(&view_._11, &projection_._11);
     }
 }
-
 void GameObjectManager::DrawSceneModals()
 {
-    if (sceneState.showSavePopup) {
+    if (sceneState.showSavePopup)
+    {
         GetSceneDirectories();
+
+        // Popup IDなので内部IDとして英語のまま維持
         ImGui::OpenPopup("SaveScenePopup");
+
         sceneState.showSavePopup = false;
     }
 
-    if (ImGui::BeginPopupModal("SaveScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (ImGui::BeginCombo("Select/Input Scene", sceneState.name)) {
-            for (const auto& file_ : sceneState.sceneFiles) {
+    if (ImGui::BeginPopupModal("SaveScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (ImGui::BeginCombo(IM_U8("シーン選択 / 入力##SceneModal_SelectInputSceneCombo"), sceneState.name))
+        {
+            for (const auto& file_ : sceneState.sceneFiles)
+            {
                 bool isSelected_ = (strcmp(sceneState.name, file_.c_str()) == 0);
-                if (ImGui::Selectable(file_.c_str(), isSelected_)) {
+
+                if (ImGui::Selectable(file_.c_str(), isSelected_))
+                {
                     strcpy_s(sceneState.name, file_.c_str());
                 }
             }
+
             ImGui::EndCombo();
         }
 
-        ImGui::InputText("Filename", sceneState.name, IM_ARRAYSIZE(sceneState.name));
+        ImGui::InputText(IM_U8("ファイル名##SceneModal_FilenameInput"), sceneState.name, IM_ARRAYSIZE(sceneState.name));
 
-        if (ImGui::Button("Save", ImVec2(120, 0))) {
+        if (ImGui::Button(IM_U8("保存##SceneModal_SaveSceneButton"), ImVec2(120, 0)))
+        {
             SaveScene(sceneState.name);
             GetSceneDirectories();
             ImGui::CloseCurrentPopup();
         }
+
         ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
+
+        if (ImGui::Button(IM_U8("キャンセル##SceneModal_SaveCancelButton"), ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
 
         ImGui::EndPopup();
     }
 
-    if (sceneState.showLoadPopup) {
+    if (sceneState.showLoadPopup)
+    {
         GetSceneDirectories();
+
+        // Popup IDなので内部IDとして英語のまま維持
         ImGui::OpenPopup("LoadScenePopup");
+
         sceneState.showLoadPopup = false;
     }
 
-    if (ImGui::BeginPopupModal("LoadScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (ImGui::BeginCombo("Select Scene", sceneState.name)) {
-            for (const auto& file_ : sceneState.sceneFiles) {
+    if (ImGui::BeginPopupModal("LoadScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (ImGui::BeginCombo(IM_U8("シーン選択##SceneModal_SelectSceneCombo"), sceneState.name))
+        {
+            for (const auto& file_ : sceneState.sceneFiles)
+            {
                 bool isSelected_ = (strcmp(sceneState.name, file_.c_str()) == 0);
-                if (ImGui::Selectable(file_.c_str(), isSelected_)) {
+
+                if (ImGui::Selectable(file_.c_str(), isSelected_))
+                {
                     strcpy_s(sceneState.name, file_.c_str());
                 }
             }
+
             ImGui::EndCombo();
         }
 
-        if (ImGui::Button("Load", ImVec2(120, 0))) {
-            if (strlen(sceneState.name) > 0) {
+        if (ImGui::Button(IM_U8("読み込み##SceneModal_LoadSceneButton"), ImVec2(120, 0)))
+        {
+            if (strlen(sceneState.name) > 0)
+            {
                 LoadScene(sceneState.name);
             }
+
             ImGui::CloseCurrentPopup();
         }
+
         ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
+
+        if (ImGui::Button(IM_U8("キャンセル##SceneModal_LoadCancelButton"), ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
 
         ImGui::EndPopup();
     }
 }
-
 void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, GameObject** objectToDelete_)
 {
-    ImGuiTreeNodeFlags flags_ = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-    if (object_ == selectedObject) flags_ |= ImGuiTreeNodeFlags_Selected;
-    if (object_->transform->children.empty()) flags_ |= ImGuiTreeNodeFlags_Leaf;
+    ImGuiTreeNodeFlags flags_ =
+        ImGuiTreeNodeFlags_OpenOnArrow |
+        ImGuiTreeNodeFlags_OpenOnDoubleClick |
+        ImGuiTreeNodeFlags_SpanAvailWidth;
 
-    bool opened_ = ImGui::TreeNodeEx((void*)(uintptr_t)object_.get(), flags_, "%s", object_->GetName().c_str());
+    if (object_ == selectedObject)
+    {
+        flags_ |= ImGuiTreeNodeFlags_Selected;
+    }
+
+    if (object_->transform->children.empty())
+    {
+        flags_ |= ImGuiTreeNodeFlags_Leaf;
+    }
+
+    bool opened_ = ImGui::TreeNodeEx(
+        (void*)(uintptr_t)object_.get(),
+        flags_,
+        "%s",
+        object_->GetName().c_str());
 
     static std::weak_ptr<GameObject> pressedObject_;
     static ImVec2 pressedMousePos_ = ImVec2(0.0f, 0.0f);
     static double pressedTime_ = 0.0;
 
-    if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+    {
         pressedObject_ = object_;
         pressedMousePos_ = ImGui::GetIO().MousePos;
         pressedTime_ = ImGui::GetTime();
     }
 
-    if (ImGui::BeginDragDropSource()) {
+    if (ImGui::BeginDragDropSource())
+    {
         ImGui::SetDragDropPayload("DND_GAMEOBJECT", &object_, sizeof(std::shared_ptr<GameObject>));
-        ImGui::Text("Move %s", object_->GetName().c_str());
+
+        ImGui::Text(IM_U8("移動中: %s"), object_->GetName().c_str());
+
         ImGui::EndDragDropSource();
     }
 
-    if (ImGui::BeginDragDropTarget()) {
-        if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload("DND_GAMEOBJECT")) {
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload("DND_GAMEOBJECT"))
+        {
             std::shared_ptr<GameObject> draggedObject_ = *(std::shared_ptr<GameObject>*)payload_->Data;
-            if (draggedObject_ != object_) {
+
+            if (draggedObject_ != object_)
+            {
                 draggedObject_->SetParent(object_);
             }
         }
+
         ImGui::EndDragDropTarget();
     }
 
-    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    {
         auto pressedObjectLock_ = pressedObject_.lock();
+
         ImVec2 releaseMousePos_ = ImGui::GetIO().MousePos;
         float deltaX_ = releaseMousePos_.x - pressedMousePos_.x;
         float deltaY_ = releaseMousePos_.y - pressedMousePos_.y;
+
         float dragThreshold_ = 6.0f;
+
         bool isSameObject_ = pressedObjectLock_ == object_;
         bool isShortPress_ = (ImGui::GetTime() - pressedTime_) < 0.25;
         bool isNotDragged_ = (deltaX_ * deltaX_ + deltaY_ * deltaY_) < (dragThreshold_ * dragThreshold_);
-        if (isSameObject_ && isShortPress_ && isNotDragged_) {
+
+        if (isSameObject_ && isShortPress_ && isNotDragged_)
+        {
             selectedObject = object_;
         }
+
         pressedObject_.reset();
     }
 
-    if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::BeginPopupContextItem())
+    {
         selectedObject = object_;
-        if (ImGui::MenuItem("Delete GameObject")) {
+
+        if (ImGui::MenuItem(IM_U8("ゲームオブジェクトを削除##GameObjectManager_DeleteGameObjectMenuItem")))
+        {
             Destroy(object_->GetName());
         }
+
         ImGui::EndPopup();
     }
 
-    if (opened_) {
-        for (auto& childTransform_ : object_->transform->children) {
-            if (auto childObject_ = childTransform_->gameObject.lock()) {
+    if (opened_)
+    {
+        for (auto& childTransform_ : object_->transform->children)
+        {
+            if (auto childObject_ = childTransform_->gameObject.lock())
+            {
                 DrawHierarchyNode(childObject_, objectToDelete_);
             }
         }
+
         ImGui::TreePop();
     }
 }
+
 void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_)
 {
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();

@@ -892,58 +892,58 @@ namespace
         return vertex_;
     }
 
- void AddCrossCrescentRibbon(
-    GltfModelCommponennt::Mesh& mesh_,
-    const DirectX::XMMATRIX& transform_)
-{
-    std::vector<DirectX::XMFLOAT3> innerPoints_;
-    std::vector<DirectX::XMFLOAT3> outerPoints_;
-
-    BuildSharpCrescentPoints(
-        innerPoints_,
-        outerPoints_,
-        -78.0f,
-        78.0f,
-        1.22f,
-        0.56f,
-        0.01f);
-
-    const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
-    if (pointCount_ < 2) return;
-
-    const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
-
-    for (size_t index_ = 0; index_ < pointCount_; ++index_)
+    void AddCrossCrescentRibbon(
+        GltfModelCommponennt::Mesh& mesh_,
+        const DirectX::XMMATRIX& transform_)
     {
-        const float u_ = static_cast<float>(index_) /
-            static_cast<float>(pointCount_ - 1);
+        std::vector<DirectX::XMFLOAT3> innerPoints_;
+        std::vector<DirectX::XMFLOAT3> outerPoints_;
 
-        mesh_.vertices.push_back(CreateInternalMeshSlashVertexTransformed(
-            innerPoints_[index_],
-            u_,
-            1.0f,
-            transform_));
+        BuildSharpCrescentPoints(
+            innerPoints_,
+            outerPoints_,
+            -78.0f,
+            78.0f,
+            1.22f,
+            0.56f,
+            0.01f);
 
-        mesh_.vertices.push_back(CreateInternalMeshSlashVertexTransformed(
-            outerPoints_[index_],
-            u_,
-            0.0f,
-            transform_));
+        const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
+        if (pointCount_ < 2) return;
+
+        const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+
+        for (size_t index_ = 0; index_ < pointCount_; ++index_)
+        {
+            const float u_ = static_cast<float>(index_) /
+                static_cast<float>(pointCount_ - 1);
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexTransformed(
+                innerPoints_[index_],
+                u_,
+                1.0f,
+                transform_));
+
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertexTransformed(
+                outerPoints_[index_],
+                u_,
+                0.0f,
+                transform_));
+        }
+
+        for (size_t index_ = 0; index_ + 1 < pointCount_; ++index_)
+        {
+            const uint32_t current_ = baseIndex_ + static_cast<uint32_t>(index_ * 2);
+            const uint32_t next_ = current_ + 2;
+
+            AddQuadIndicesDoubleSided(
+                mesh_.indices,
+                current_,
+                current_ + 1,
+                next_,
+                next_ + 1);
+        }
     }
-
-    for (size_t index_ = 0; index_ + 1 < pointCount_; ++index_)
-    {
-        const uint32_t current_ = baseIndex_ + static_cast<uint32_t>(index_ * 2);
-        const uint32_t next_ = current_ + 2;
-
-        AddQuadIndicesDoubleSided(
-            mesh_.indices,
-            current_,
-            current_ + 1,
-            next_,
-            next_ + 1);
-    }
-}
 
     std::shared_ptr<ModelResource> CreateInternalMeshSlashCrossCrescentModelResource(ID3D11Device* device_)
     {
@@ -1710,7 +1710,6 @@ void MeshVFXComponent::Gui()
 
     if (ImGui::Button("Reload All Resources")) LoadPartResources();
 }
-
 void MeshVFXComponent::Play() { isPlaying = true; }
 void MeshVFXComponent::Stop() { isPlaying = false; }
 void MeshVFXComponent::Reset() { time = 0.0f; }

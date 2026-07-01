@@ -133,7 +133,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const GltfModelCommponennt::Mesh& mesh_)
 {
-    // 通常モデル描画用に、現在MeshのBone行列をSkinning用CBへ転送する。
+    // 通常モデル描画用に、現在Meshのボーン行列をSkinning用CBへ転送する。
     DirectX::XMFLOAT4X4 transforms_[256]{};
     if (!mesh_.bones.empty())
     {
@@ -150,7 +150,7 @@ void MeshVFXShader::UpdateSkeleton(
     }
     else if (mesh_.node)
     {
-        // Boneを持たないMeshはNodeのWorldTransformだけを0番へ入れる。
+        // ボーンを持たないMeshはNodeのWorldTransformだけを0番へ入れる。
         transforms_[0] = mesh_.node->worldTransform;
     }
     renderContext_.deviceContext->UpdateSubresource(
@@ -204,7 +204,7 @@ void MeshVFXShader::UpdatePart(
     float partTime_,
     float alpha_)
 {
-    // 1Part分の編集値とRuntime TextureをShaderへ送る。ここがC++設定とHLSL表現の接続点。
+    // 1Part分の編集値と実行時 TextureをShaderへ送る。ここがC++設定とHLSL表現の接続点。
     CbMeshVFX constants_{};
     DirectX::XMStoreFloat4x4(&constants_.world, world_);
     constants_.color = part_.color;
@@ -236,36 +236,49 @@ void MeshVFXShader::UpdatePart(
     constants_.baseUVRotation = calculateRotation_(part_.baseUVRotation, part_.baseUVRotationSpeed);
     constants_.maskUVRotation = calculateRotation_(part_.maskUVRotation, part_.maskUVRotationSpeed);
     constants_.noiseUVRotation = calculateRotation_(part_.noiseUVRotation, part_.noiseUVRotationSpeed);
+
     constants_.uvRadialScale = part_.uvRadialScale;
     constants_.uvRadialScaleSpeed = part_.uvRadialScaleSpeed;
+
     constants_.vertexNoiseHorizontalStrength = part_.vertexNoiseHorizontalStrength;
     constants_.vertexNoiseVerticalStrength = part_.vertexNoiseVerticalStrength;
     constants_.vertexNoiseHorizontalScale = part_.vertexNoiseHorizontalScale;
     constants_.vertexNoiseVerticalScale = part_.vertexNoiseVerticalScale;
     constants_.vertexNoiseSpeed = part_.vertexNoiseSpeed;
+
     constants_.useVertexNoise = part_.useVertexNoise ? 1u : 0u;
     constants_.useMask = part_.useMask ? 1u : 0u;
     constants_.useNoise = part_.useNoise ? 1u : 0u;
     constants_.useNormal = part_.useNormal ? 1u : 0u;
     constants_.useFresnel = part_.useFresnel ? 1u : 0u;
     constants_.edgeColor = part_.edgeColor;
+
     constants_.maskDistortionStrength = part_.maskDistortionStrength;
     constants_.maskDistortionOpacity = part_.maskDistortionOpacity;
+
     constants_.silhouetteEdgeStrength = part_.silhouetteEdgeStrength;
     constants_.silhouetteEdgePower = part_.silhouetteEdgePower;
+
     constants_.intersectionEdgeStrength = part_.intersectionEdgeStrength;
     constants_.intersectionEdgeWidth = part_.intersectionEdgeWidth;
+
     constants_.useMaskDistortion = part_.useMaskDistortion ? 1u : 0u;
     constants_.useEdgeHighlight = part_.useEdgeHighlight ? 1u : 0u;
+
     constants_.hasDistortionNoiseTexture = runtimePart_.distortionNoiseTexture ? 1u : 0u;
     constants_.hasVertexNoiseTexture = runtimePart_.vertexNoiseTexture ? 1u : 0u;
+
     constants_.edgePatternMode = static_cast<uint32_t>(part_.edgePatternMode);
     constants_.edgePatternStrength = part_.edgePatternStrength;
+
     constants_.emissiveStrength = part_.emissiveStrength;
     constants_.emissivePulseSpeed = part_.emissivePulseSpeed;
     constants_.emissivePulseAmount = part_.emissivePulseAmount;
+
     constants_.hasEdgePatternTexture = runtimePart_.edgePatternTexture ? 1u : 0u;
+
     constants_.hasEmissiveTexture = runtimePart_.emissiveTexture ? 1u : 0u;
+
     constants_.useGradientTexture = part_.useGradientTexture ? 1u : 0u;
     constants_.hasGradientTexture = runtimePart_.gradientTexture ? 1u : 0u;
     constants_.gradientSampleMode = static_cast<uint32_t>(part_.gradientSampleMode);
@@ -273,33 +286,46 @@ void MeshVFXShader::UpdatePart(
     constants_.gradientFixedUv = part_.gradientFixedUv;
     constants_.gradientStartUv = part_.gradientStartUv;
     constants_.gradientEndUv = part_.gradientEndUv;
+
     constants_.dissolveEdgeColor = part_.dissolveEdgeColor;
     constants_.backFaceColor = part_.backFaceColor;
     constants_.dissolveEdgeWidth = part_.dissolveEdgeWidth;
     constants_.dissolveEdgeStrength = part_.dissolveEdgeStrength;
+
     constants_.fresnelNoiseStrength = part_.fresnelNoiseStrength;
     constants_.backFaceEmissiveStrength = part_.backFaceEmissiveStrength;
+
     constants_.useDissolveEdge = part_.useDissolveEdge ? 1u : 0u;
     constants_.useFresnelNoise = part_.useFresnelNoise ? 1u : 0u;
     constants_.useBackFaceBoost = part_.useBackFaceBoost ? 1u : 0u;
+
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->UpdateSubresource(partConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);
+
     ID3D11ShaderResourceView* baseTextureView_ =
         baseTexture_ ? baseTexture_ : runtimePart_.baseTexture.Get();
+
     ID3D11ShaderResourceView* normalTextureView_ =
         normalTexture_ ? normalTexture_ : runtimePart_.normalTexture.Get();
+
     deviceContext_->PSSetShaderResources(0, 1, &baseTextureView_);
     deviceContext_->PSSetShaderResources(1, 1, &maskTexture_);
     deviceContext_->PSSetShaderResources(2, 1, &noiseTexture_);
+
     deviceContext_->PSSetShaderResources(3, 1, &normalTextureView_);
+
     ID3D11ShaderResourceView* distortionNoiseTextureView_ = runtimePart_.distortionNoiseTexture.Get();
     deviceContext_->PSSetShaderResources(4, 1, &distortionNoiseTextureView_);
+
     ID3D11ShaderResourceView* edgePatternTextureView_ = runtimePart_.edgePatternTexture.Get();
     deviceContext_->PSSetShaderResources(5, 1, &edgePatternTextureView_);
+
     ID3D11ShaderResourceView* emissiveTextureView_ = runtimePart_.emissiveTexture.Get();
     deviceContext_->PSSetShaderResources(6, 1, &emissiveTextureView_);
+
     ID3D11ShaderResourceView* gradientTextureView_ = runtimePart_.gradientTexture.Get();
     deviceContext_->PSSetShaderResources(9, 1, &gradientTextureView_);
+
     ID3D11ShaderResourceView* vertexNoiseTextureView_ = runtimePart_.vertexNoiseTexture.Get();
     deviceContext_->VSSetShaderResources(0, 1, &vertexNoiseTextureView_);
 }

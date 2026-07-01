@@ -39,7 +39,7 @@ void AIActionComponent::Gui()
 {
     EnsureBlackboard();
 
-    if (ImGui::Button("Add AI Action"))
+    if (ImGui::Button(IM_U8("AIアクション追加##AIActionComponent_AddAiActionButton")))
     {
         AIActionDefinition definition_;
         definition_.aiActionName = "AI.Action" + std::to_string(actions.size());
@@ -49,7 +49,7 @@ void AIActionComponent::Gui()
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Register Actions"))
+    if (ImGui::Button(IM_U8("アクション登録##AIActionComponent_RegisterActionsButton")))
     {
         RegisterActions();
         statusText = "Registered";
@@ -87,33 +87,33 @@ void AIActionComponent::Gui()
     if (selectedActionIndex < 0 || selectedActionIndex >= static_cast<int>(actions.size())) return;
 
     AIActionDefinition& definition_ = actions[selectedActionIndex];
-    ImGui::SeparatorText("AI Action");
-    ImGui::InputText("AI Action Name", &definition_.aiActionName);
-    ImGui::InputText("Execute Action Name", &definition_.executeActionName);
+    ImGui::SeparatorText(IM_U8("AIアクション##AIActionComponent_AiActionHeader"));
+    ImGui::InputText(IM_U8("AIアクション名##AIActionComponent_AiActionNameInput"), &definition_.aiActionName);
+    ImGui::InputText(IM_U8("実行アクション名##AIActionComponent_ExecuteActionNameInput"), &definition_.executeActionName);
 
     const char* targetNames_[] = { "Owner", "Global" };
     int target_ = static_cast<int>(definition_.executeTarget);
-    if (ImGui::Combo("Execute Target", &target_, targetNames_, IM_ARRAYSIZE(targetNames_)))
+    if (ImGui::Combo(IM_U8("実行対象##AIActionComponent_ExecuteTargetCombo"), &target_, targetNames_, IM_ARRAYSIZE(targetNames_)))
     {
         definition_.executeTarget = static_cast<AI_ACTION_EXECUTE_TARGET>(target_);
     }
 
-    ImGui::Checkbox("Wait For ActionEnd", &definition_.waitForActionEnd);
-    ImGui::Checkbox("Clear ActionEnded On Start", &definition_.clearActionEndedOnStart);
-    ImGui::Checkbox("Set IsActing", &definition_.setIsActing);
+    ImGui::Checkbox(IM_U8("アクション終了を待つ##AIActionComponent_WaitForActionEndCheckbox"), &definition_.waitForActionEnd);
+    ImGui::Checkbox(IM_U8("開始時にActionEndedをクリア##AIActionComponent_ClearActionEndedOnStartCheckbox"), &definition_.clearActionEndedOnStart);
+    ImGui::Checkbox(IM_U8("IsActingを設定##AIActionComponent_SetIsActingCheckbox"), &definition_.setIsActing);
 
-    ImGui::SeparatorText("Blackboard");
-    ImGui::InputText("Category", &definition_.blackboardCategory);
-    ImGui::InputText("CurrentAction Key", &definition_.currentActionKey);
-    ImGui::InputText("ActionEnded Key", &definition_.actionEndedKey);
-    ImGui::InputText("IsActing Key", &definition_.isActingKey);
+    ImGui::SeparatorText(IM_U8("ブラックボード##AIActionComponent_BlackboardHeader"));
+    ImGui::InputText(IM_U8("カテゴリ##AIActionComponent_BlackboardCategoryInput"), &definition_.blackboardCategory);
+    ImGui::InputText(IM_U8("CurrentActionキー##AIActionComponent_CurrentActionKeyInput"), &definition_.currentActionKey);
+    ImGui::InputText(IM_U8("ActionEndedキー##AIActionComponent_ActionEndedKeyInput"), &definition_.actionEndedKey);
+    ImGui::InputText(IM_U8("IsActingキー##AIActionComponent_IsActingKeyInput"), &definition_.isActingKey);
 
-    if (ImGui::Button("Test Execute"))
+    if (ImGui::Button(IM_U8("実行テスト##AIActionComponent_TestExecuteButton")))
     {
         statusText = ExecuteAIAction(definition_.aiActionName) ? "Executed" : "Execute failed";
     }
     ImGui::SameLine();
-    if (ImGui::Button("Notify End"))
+    if (ImGui::Button(IM_U8("終了通知##AIActionComponent_NotifyEndButton")))
     {
         NotifyActionEnd(definition_.blackboardCategory);
         statusText = "ActionEnd notified";

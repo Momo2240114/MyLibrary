@@ -348,7 +348,7 @@ void GameObject::Gui()
         char nameBuf[128];
         strncpy_s(nameBuf, nameComponent->name.c_str(), sizeof(nameBuf));
 
-        if (ImGui::InputText(IM_U8("名前"), nameBuf, sizeof(nameBuf)))
+        if (ImGui::InputText(IM_U8("名前##GameObject_NameInput"), nameBuf, sizeof(nameBuf)))
         {
             // 名前が変更されたらNameComponentに反映
             nameComponent->name = std::string(nameBuf);
@@ -359,7 +359,7 @@ void GameObject::Gui()
     // -----------------------------
     // Add Component
     // -----------------------------
-    if (ImGui::Button("Add Component", ImVec2(-1, 0))) // 横幅いっぱいのボタン
+    if (ImGui::Button(IM_U8("コンポーネント追加##GameObject_AddComponentButton"), ImVec2(-1, 0))) // 横幅いっぱいのボタン
         ImGui::OpenPopup("AddComponentPopup");
 
     if (ImGui::BeginPopup("AddComponentPopup"))
@@ -373,7 +373,7 @@ void GameObject::Gui()
             memset(searchFilter, 0, sizeof(searchFilter)); // 開くたびにリセット
         }
 
-        ImGui::InputText("##Search", searchFilter, IM_ARRAYSIZE(searchFilter));
+        ImGui::InputText("##GameObject_AddComponentSearchInput", searchFilter, IM_ARRAYSIZE(searchFilter));
         ImGui::Separator();
 
         // 検索文字列を小文字に変換して比較するとより使いやすくなりますが、
@@ -407,8 +407,8 @@ void GameObject::Gui()
 
     // 表示用ラベル
     const char* layerNames[] = {
-        "Default", "Player", "Enemy", "PlayerBullet",
-        "EnemyBullet", "UI", "Environment", "SneakObject", "Terrain", "Wall","Item"
+        IM_U8("デフォルト"), IM_U8("プレイヤー"), IM_U8("敵"), IM_U8("プレイヤー弾"),
+        IM_U8("敵弾"), IM_U8("UI"), IM_U8("環境"), IM_U8("スニーク対象"), IM_U8("地形"), IM_U8("壁"), IM_U8("アイテム")
     };
 
     // 対応するEnum値を配列化しておく
@@ -427,7 +427,7 @@ void GameObject::Gui()
     }
 
     // コンボボックスを表示
-    if (ImGui::Combo("Layer", &currentItem, layerNames, IM_ARRAYSIZE(layerNames)))
+    if (ImGui::Combo(IM_U8("レイヤー##GameObject_LayerCombo"), &currentItem, layerNames, IM_ARRAYSIZE(layerNames)))
     {
         // 選択されたインデックスに対応するEnum値を代入
         layer = layerValues[currentItem];
@@ -435,13 +435,13 @@ void GameObject::Gui()
 
     ImGui::Separator();
 
-    ImGui::SeparatorText("Transform");
+    ImGui::SeparatorText(IM_U8("トランスフォーム##GameObject_TransformHeader"));
     transform->Gui();
-    ImGui::TextDisabled("Game-controlled colliders follow these values. Enable Physics Controls Transform only for simulated objects.");
+    ImGui::TextDisabled(IM_U8("ゲーム制御のコライダーはこの値に追従します。物理シミュレーション対象だけ Physics Controls Transform を有効にしてください。"));
 
     // --- 親子付け UI の追加 ---
     ImGui::Separator();
-    ImGui::Text("Hierarchy");
+    ImGui::Text(IM_U8("階層"));
 
     // 現在の親の名前を取得
     std::string currentParentName = "None (Root)";
@@ -451,10 +451,10 @@ void GameObject::Gui()
         }
     }
 
-    if (ImGui::BeginCombo("Parent", currentParentName.c_str()))
+    if (ImGui::BeginCombo(IM_U8("親##GameObject_ParentCombo"), currentParentName.c_str()))
     {
         // 親を解除するオプション
-        if (ImGui::Selectable("None (Root)", currentParentName == "None (Root)")) {
+        if (ImGui::Selectable(IM_U8("なし（ルート）##GameObject_NoneRootSelectable"), currentParentName == "None (Root)")) {
             // 親を解除する処理（Transformに解除関数を作ると良い）
             transform->SetParent(nullptr);
         }
@@ -494,7 +494,7 @@ void GameObject::Gui()
 
         // ON / OFF チェックボックス
         bool enabled = comp->IsEnabled();
-        if (ImGui::Checkbox("##Enabled", &enabled)) comp->SetEnabled(enabled);
+        if (ImGui::Checkbox("##GameObject_ComponentEnabledCheckbox", &enabled)) comp->SetEnabled(enabled);
 
         ImGui::SameLine();
 
@@ -506,7 +506,7 @@ void GameObject::Gui()
         // ★ コンテキストメニュー（ヘッダーを右クリック）
         if (ImGui::BeginPopupContextItem("ComponentContextMenu"))
         {
-            if (ImGui::MenuItem("Remove Component"))
+            if (ImGui::MenuItem(IM_U8("コンポーネントを削除##GameObject_RemoveComponentMenuItem")))
             {
                 componentToRemove = comp.get();
             }
@@ -528,7 +528,7 @@ void GameObject::Gui()
         ImGui::PushID(collider_.get());
 
         bool enabled = collider_->IsEnabled();
-        if (ImGui::Checkbox("##Enabled", &enabled)) collider_->SetEnabled(enabled);
+        if (ImGui::Checkbox("##GameObject_ColliderEnabledCheckbox", &enabled)) collider_->SetEnabled(enabled);
 
         ImGui::SameLine();
 
@@ -539,7 +539,7 @@ void GameObject::Gui()
         // ★ コンテキストメニュー
         if (ImGui::BeginPopupContextItem("ColliderContextMenu"))
         {
-            if (ImGui::MenuItem("Remove Component"))
+            if (ImGui::MenuItem(IM_U8("コライダーコンポーネントを削除##GameObject_RemoveColliderComponentMenuItem")))
             {
                 colliderToRemove = collider_.get();
             }

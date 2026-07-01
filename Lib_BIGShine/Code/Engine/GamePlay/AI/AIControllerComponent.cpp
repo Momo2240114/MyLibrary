@@ -30,22 +30,22 @@ void AIControllerComponent::Gui()
 {
     EnsureBlackboard();
 
-    ImGui::Checkbox("Run AI", &isRunning);
+    ImGui::Checkbox(IM_U8("AI実行##AIControllerComponent_RunAiCheckbox"), &isRunning);
     ImGui::SameLine();
-    if (ImGui::Button("Reset Tree")) ResetTree();
+    if (ImGui::Button(IM_U8("ツリーをリセット##AIControllerComponent_ResetTreeButton"))) ResetTree();
 
-    ImGui::InputText("Graph Asset", &graphAssetPath);
-    if (ImGui::Button("Save Graph"))
+    ImGui::InputText(IM_U8("グラフアセット##AIControllerComponent_GraphAssetInput"), &graphAssetPath);
+    if (ImGui::Button(IM_U8("グラフ保存##AIControllerComponent_SaveGraphButton")))
     {
         statusText = SaveGraphAsset(graphAssetPath) ? "Saved" : "Save failed";
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load Graph"))
+    if (ImGui::Button(IM_U8("グラフ読み込み##AIControllerComponent_LoadGraphButton")))
     {
         statusText = LoadGraphAsset(graphAssetPath) ? "Loaded" : "Load failed";
     }
     if (!statusText.empty()) ImGui::Text("%s", statusText.c_str());
-    ImGui::TextDisabled("Graph editing is in the AI Behavior Graph workspace.");
+    ImGui::TextDisabled(IM_U8("グラフ編集はAI Behavior Graphワークスペースで行います。"));
 }
 
 void AIControllerComponent::Serialize(nlohmann::json& json_) const

@@ -120,35 +120,35 @@ std::string AudioComponent::ResolveActionName(const std::string& actionName_) co
 
 void AudioComponent::Gui()
 {
-    ImGui::Checkbox("Use Workspace Preset", &useWorkspacePreset);
+    ImGui::Checkbox(IM_U8("ワークスペースプリセットを使用##AudioComponent_UseWorkspacePresetCheckbox"), &useWorkspacePreset);
 
     if (useWorkspacePreset)
     {
         char workspacePathBuffer_[256];
         strncpy_s(workspacePathBuffer_, workspacePath.c_str(), sizeof(workspacePathBuffer_));
-        if (ImGui::InputText("Workspace JSON", workspacePathBuffer_, sizeof(workspacePathBuffer_)))
+        if (ImGui::InputText(IM_U8("ワークスペースJSON##AudioComponent_WorkspaceJsonInput"), workspacePathBuffer_, sizeof(workspacePathBuffer_)))
         {
             workspacePath = workspacePathBuffer_;
         }
 
         char presetNameBuffer_[128];
         strncpy_s(presetNameBuffer_, workspacePresetName.c_str(), sizeof(presetNameBuffer_));
-        if (ImGui::InputText("Preset / Action Name", presetNameBuffer_, sizeof(presetNameBuffer_)))
+        if (ImGui::InputText(IM_U8("プリセット / アクション名##AudioComponent_PresetActionNameInput"), presetNameBuffer_, sizeof(presetNameBuffer_)))
         {
             workspacePresetName = presetNameBuffer_;
         }
 
-        if (ImGui::Button("Load Workspace Presets"))
+        if (ImGui::Button(IM_U8("ワークスペースプリセット読み込み##AudioComponent_LoadWorkspacePresetsButton")))
         {
             AudioManager::Instance().LoadAudioWorkspace(workspacePath);
             AudioManager::Instance().RegisterAudioWorkspaceActions(workspacePath);
         }
 
         ImGui::SameLine();
-        ImGui::Checkbox("Allow Overlap", &allowOverlap);
+        ImGui::Checkbox(IM_U8("重複再生を許可##AudioComponent_AllowOverlapCheckbox"), &allowOverlap);
 
         const std::vector<std::string> presetNames_ = AudioManager::Instance().GetWorkspacePresetNames();
-        if (ImGui::BeginCombo("Workspace Preset", workspacePresetName.empty() ? "Select Preset" : workspacePresetName.c_str()))
+        if (ImGui::BeginCombo(IM_U8("ワークスペースプリセット##AudioComponent_WorkspacePresetCombo"), workspacePresetName.empty() ? IM_U8("プリセットを選択") : workspacePresetName.c_str()))
         {
             for (const std::string& presetName_ : presetNames_)
             {
@@ -160,105 +160,105 @@ void AudioComponent::Gui()
             ImGui::EndCombo();
         }
 
-        if (ImGui::Button("Play")) Play();
+        if (ImGui::Button(IM_U8("再生##AudioComponent_PlayButton"))) Play();
         ImGui::SameLine();
-        if (ImGui::Button("Stop")) Stop();
+        if (ImGui::Button(IM_U8("停止##AudioComponent_StopButton"))) Stop();
 
-        ImGui::SeparatorText("Actions");
+        ImGui::SeparatorText(IM_U8("アクション##AudioComponent_ActionsHeader"));
         char prefixBuffer_[64];
         strncpy_s(prefixBuffer_, actionPrefix.c_str(), sizeof(prefixBuffer_));
-        if (ImGui::InputText("Action Prefix", prefixBuffer_, sizeof(prefixBuffer_)))
+        if (ImGui::InputText(IM_U8("アクション接頭辞##AudioComponent_ActionPrefixInput"), prefixBuffer_, sizeof(prefixBuffer_)))
         {
             actionPrefix = prefixBuffer_;
         }
 
         char playBuffer_[64];
         strncpy_s(playBuffer_, playActionName.c_str(), sizeof(playBuffer_));
-        if (ImGui::InputText("Play Action", playBuffer_, sizeof(playBuffer_))) playActionName = playBuffer_;
+        if (ImGui::InputText(IM_U8("再生アクション##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_))) playActionName = playBuffer_;
 
         char stopBuffer_[64];
         strncpy_s(stopBuffer_, stopActionName.c_str(), sizeof(stopBuffer_));
-        if (ImGui::InputText("Stop Action", stopBuffer_, sizeof(stopBuffer_))) stopActionName = stopBuffer_;
+        if (ImGui::InputText(IM_U8("停止アクション##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_))) stopActionName = stopBuffer_;
 
-        ImGui::Text("Play: %s", GetPlayActionName().c_str());
-        ImGui::Text("Stop: %s", GetStopActionName().c_str());
-        if (ImGui::Button("Register Audio Actions")) RegisterActions();
+        ImGui::Text(IM_U8("再生: %s"), GetPlayActionName().c_str());
+        ImGui::Text(IM_U8("停止: %s"), GetStopActionName().c_str());
+        if (ImGui::Button(IM_U8("オーディオアクション登録##AudioComponent_RegisterAudioActionsButton"))) RegisterActions();
         return;
     }
 
     char pathBuffer_[256];
     strncpy_s(pathBuffer_, audioPath.c_str(), sizeof(pathBuffer_));
-    if (ImGui::InputText("Audio Path", pathBuffer_, sizeof(pathBuffer_)))
+    if (ImGui::InputText(IM_U8("オーディオパス##AudioComponent_AudioPathInput"), pathBuffer_, sizeof(pathBuffer_)))
     {
         audioPath = pathBuffer_;
         AudioManager::Instance().AddAudioFromFile(audioPath, isBGM);
     }
 
-    ImGui::Checkbox("Is BGM", &isBGM);
-    ImGui::Checkbox("Loop", &loop);
-    ImGui::Checkbox("Play On Start", &playOnStart);
-    if (ImGui::DragFloat("Volume", &volume, 0.01f, 0.0f, 1.0f))
+    ImGui::Checkbox(IM_U8("BGM##AudioComponent_IsBgmCheckbox"), &isBGM);
+    ImGui::Checkbox(IM_U8("ループ##AudioComponent_LoopCheckbox"), &loop);
+    ImGui::Checkbox(IM_U8("開始時に再生##AudioComponent_PlayOnStartCheckbox"), &playOnStart);
+    if (ImGui::DragFloat(IM_U8("音量##AudioComponent_VolumeDrag"), &volume, 0.01f, 0.0f, 1.0f))
     {
         volume = std::clamp(volume, 0.0f, 1.0f);
         AudioManager::Instance().SetVolumeByPath(audioPath, volume);
     }
 
-    ImGui::SeparatorText("Muffle");
-    if (ImGui::Checkbox("Muffled", &muffled))
+    ImGui::SeparatorText(IM_U8("こもり##AudioComponent_MuffleHeader"));
+    if (ImGui::Checkbox(IM_U8("こもり有効##AudioComponent_MuffledCheckbox"), &muffled))
     {
         SetMuffled(muffled);
     }
-    if (ImGui::DragFloat("Low Pass Cutoff", &muffledCutoff, 10.0f, 10.0f, 22000.0f))
+    if (ImGui::DragFloat(IM_U8("ローパスカットオフ##AudioComponent_LowPassCutoffDrag"), &muffledCutoff, 10.0f, 10.0f, 22000.0f))
     {
         muffledCutoff = std::clamp(muffledCutoff, 10.0f, 22000.0f);
         AudioManager::Instance().SetMuffledByPath(audioPath, muffled, muffledCutoff);
     }
 
-    if (ImGui::Button("Play")) Play();
+    if (ImGui::Button(IM_U8("再生##AudioComponent_PlayButton_Manual"))) Play();
     ImGui::SameLine();
-    if (ImGui::Button("Stop")) Stop();
+    if (ImGui::Button(IM_U8("停止##AudioComponent_StopButton_Manual"))) Stop();
 
-    ImGui::SeparatorText("Actions");
+    ImGui::SeparatorText(IM_U8("アクション##AudioComponent_ActionsHeader_Manual"));
     char prefixBuffer_[64];
     strncpy_s(prefixBuffer_, actionPrefix.c_str(), sizeof(prefixBuffer_));
-    if (ImGui::InputText("Action Prefix", prefixBuffer_, sizeof(prefixBuffer_)))
+    if (ImGui::InputText(IM_U8("アクション接頭辞##AudioComponent_ActionPrefixInput"), prefixBuffer_, sizeof(prefixBuffer_)))
     {
         actionPrefix = prefixBuffer_;
     }
 
     char playBuffer_[64];
     strncpy_s(playBuffer_, playActionName.c_str(), sizeof(playBuffer_));
-    if (ImGui::InputText("Play Action", playBuffer_, sizeof(playBuffer_)))
+    if (ImGui::InputText(IM_U8("再生アクション##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_)))
     {
         playActionName = playBuffer_;
     }
 
     char stopBuffer_[64];
     strncpy_s(stopBuffer_, stopActionName.c_str(), sizeof(stopBuffer_));
-    if (ImGui::InputText("Stop Action", stopBuffer_, sizeof(stopBuffer_)))
+    if (ImGui::InputText(IM_U8("停止アクション##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_)))
     {
         stopActionName = stopBuffer_;
     }
 
     char muffleBuffer_[64];
     strncpy_s(muffleBuffer_, muffleActionName.c_str(), sizeof(muffleBuffer_));
-    if (ImGui::InputText("Muffle Action", muffleBuffer_, sizeof(muffleBuffer_)))
+    if (ImGui::InputText(IM_U8("こもりアクション##AudioComponent_MuffleActionInput"), muffleBuffer_, sizeof(muffleBuffer_)))
     {
         muffleActionName = muffleBuffer_;
     }
 
     char clearBuffer_[64];
     strncpy_s(clearBuffer_, clearMuffleActionName.c_str(), sizeof(clearBuffer_));
-    if (ImGui::InputText("Clear Muffle Action", clearBuffer_, sizeof(clearBuffer_)))
+    if (ImGui::InputText(IM_U8("こもり解除アクション##AudioComponent_ClearMuffleActionInput"), clearBuffer_, sizeof(clearBuffer_)))
     {
         clearMuffleActionName = clearBuffer_;
     }
 
-    ImGui::Text("Play  : %s", GetPlayActionName().c_str());
-    ImGui::Text("Stop  : %s", GetStopActionName().c_str());
-    ImGui::Text("Muffle: %s", GetMuffleActionName().c_str());
-    ImGui::Text("Clear : %s", GetClearMuffleActionName().c_str());
-    if (ImGui::Button("Register Audio Actions"))
+    ImGui::Text(IM_U8("再生  : %s"), GetPlayActionName().c_str());
+    ImGui::Text(IM_U8("停止  : %s"), GetStopActionName().c_str());
+    ImGui::Text(IM_U8("こもり: %s"), GetMuffleActionName().c_str());
+    ImGui::Text(IM_U8("解除  : %s"), GetClearMuffleActionName().c_str());
+    if (ImGui::Button(IM_U8("オーディオアクション登録##AudioComponent_RegisterAudioActionsButton_Manual")))
     {
         RegisterActions();
     }
