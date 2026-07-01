@@ -408,6 +408,8 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\TextureResourceManager.cpp" />
     <ClCompile Include="Code\Editor\Window\AssetBrowserWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\CurveAssetEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\EasingPresetEditorWindow.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp" />
@@ -516,6 +518,8 @@
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEffectAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\TextureResourceManager.h" />
     <ClInclude Include="Code\Editor\Window\AssetBrowserWindow.h" />
+    <ClInclude Include="Code\Editor\Window\CurveAssetEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\EasingPresetEditorWindow.h" />
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h" />
     <ClInclude Include="Code\Editor\AssetSlotGui.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />

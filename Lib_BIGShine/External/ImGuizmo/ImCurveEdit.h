@@ -37,7 +37,10 @@ namespace ImCurveEdit
         bool focused = false;
         virtual size_t GetCurveCount() = 0;
         virtual bool IsVisible(size_t curveIndex) { return true; }
+        virtual bool IsEditable(size_t curveIndex_) const { return true; }
         virtual CurveType GetCurveType(size_t curveIndex) const { return CurveLinear; }
+        virtual float Interpolate(size_t curveIndex_, size_t pointIndex_, float rate_) const;
+        virtual float EvaluateSegment(size_t curveIndex_, size_t pointIndex_, float rate_);
         virtual ImVec2& GetMin() = 0;
         virtual ImVec2& GetMax() = 0;
         virtual size_t GetPointCount(size_t curveIndex) = 0;
@@ -51,5 +54,18 @@ namespace ImCurveEdit
         virtual void EndEdit() {}
     };
 
-    int Edit(Delegate &delegate, const ImVec2& size, unsigned int id, const ImRect *clippingRect = NULL, ImVector<EditPoint> *selectedPoints = NULL);
+    struct CurveEditOptions
+    {
+        bool allowCurveMove = true;
+        bool allowPointMove = true;
+        bool allowPointAdd = true;
+    };
+
+    int Edit(
+        Delegate& delegate,
+        const ImVec2& size,
+        unsigned int id,
+        const ImRect* clippingRect = NULL,
+        ImVector<EditPoint>* selectedPoints = NULL,
+        const CurveEditOptions* options = NULL);
 }

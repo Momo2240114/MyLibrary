@@ -13,6 +13,8 @@
 #include "Editor/Window/ShaderWindow.h"
 #include "Editor/Window/AnimationEditorWindow.h"
 #include "Editor/Window/AssetBrowserWindow.h"
+#include "Editor/Window/CurveAssetEditorWindow.h"
+#include "Editor/Window/EasingPresetEditorWindow.h"
 #include "Editor/Window/ActionSequenceEditorWindow.h"
 #include "Editor/Window/EffectAssetListWindow.h"
 #include "Editor/Window/ShadowWindow.h"
@@ -67,6 +69,8 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AIBehaviorEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<CurveAssetEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<EasingPresetEditorWindow>(_GameObjectManager.get()));
 
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
