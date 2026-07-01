@@ -1,0 +1,196 @@
+{
+    "AssetType": "MeshVFXPart",
+    "AssetVersion": 1,
+    "Part": {
+        "Alpha": 1.0,
+        "AlphaCurveName": "",
+        "AlphaEnd": 1.0,
+        "AlphaStart": 1.0,
+        "AnimateAlpha": false,
+        "AnimateScale": false,
+        "BackFaceColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "BackFaceEmissiveStrength": 0.0,
+        "BaseTexturePath": "",
+        "BaseUVRotation": 0.0,
+        "BaseUVRotationSpeed": 0.0,
+        "BaseUVScale": [
+            1.0,
+            1.0
+        ],
+        "BaseUVSpeed": [
+            0.0,
+            0.0
+        ],
+        "BlendMode": 0,
+        "Color": [
+            0.43529412150382996,
+            0.32549020648002625,
+            1.0,
+            1.0
+        ],
+        "DissolveCurveName": "",
+        "DissolveEdgeColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "DissolveEdgeStrength": 3.0,
+        "DissolveEdgeWidth": 0.05000000074505806,
+        "DissolveThreshold": 0.0,
+        "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+        "DistortionNoiseUVScale": [
+            1.0,
+            1.0
+        ],
+        "Duration": 0.0,
+        "EdgeColor": [
+            1.0,
+            0.0,
+            1.0,
+            1.0
+        ],
+        "EdgePatternMode": 1,
+        "EdgePatternStrength": 0.0,
+        "EdgePatternTexturePath": "",
+        "EdgePatternUVScale": [
+            10.0,
+            10.0
+        ],
+        "EmissiveCurveName": "",
+        "EmissivePulseAmount": 5.0,
+        "EmissivePulseSpeed": 0.0,
+        "EmissiveStrength": 10.300000190734863,
+        "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
+        "EmissiveUVScale": [
+            1.0,
+            1.0
+        ],
+        "FresnelNoiseStrength": 0.0,
+        "FresnelPower": 7.0,
+        "FresnelStrength": 0.0,
+        "GradientDirection": 0,
+        "GradientEndUv": 1.0,
+        "GradientFixedUv": 0.15299999713897705,
+        "GradientSampleMode": 1,
+        "GradientStartUv": 0.0,
+        "GradientTexturePath": "Data/Texture/Particle/Sunset.jpg",
+        "InternalMeshCylinderRadius": 1.0,
+        "IntersectionEdgeStrength": 1.9600000381469727,
+        "IntersectionEdgeWidth": 0.0020000000949949026,
+        "Loop": true,
+        "MaskDistortionOpacity": 1.0,
+        "MaskDistortionStrength": 8.0,
+        "MaskLayers": [
+            {
+                "BlendMode": 0,
+                "Invert": false,
+                "Path": "Data/Texture/Trail/T_TrailMask_22.PNG"
+            }
+        ],
+        "MaskTexturePath": "",
+        "MaskUVRotation": 0.0,
+        "MaskUVRotationSpeed": 0.0,
+        "MaskUVScale": [
+            1.0,
+            1.0
+        ],
+        "MaskUVSpeed": [
+            0.0,
+            0.0
+        ],
+        "MeshIndex": 0,
+        "MeshRotationSpeed": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "ModelPath": "__InternalMeshSlashRaisedCrescent__",
+        "NoiseStrength": 0.019999999552965164,
+        "NoiseTexturePath": "",
+        "NoiseTexturePaths": [
+            "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+        ],
+        "NoiseUVRotation": 0.0,
+        "NoiseUVRotationSpeed": 0.0,
+        "NoiseUVScale": [
+            1.0,
+            2.0
+        ],
+        "NoiseUVSpeed": [
+            8.0,
+            0.0
+        ],
+        "NormalStrength": 2.0,
+        "NormalTexturePath": "",
+        "NormalUVScale": [
+            1.0,
+            1.0
+        ],
+        "Position": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "RenderEnabled": true,
+        "Rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "ScaleCurveName": "",
+        "ScaleEnd": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "ScaleStart": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "SilhouetteEdgePower": 4.349999904632568,
+        "SilhouetteEdgeStrength": 0.4300000071525574,
+        "UVRadialScale": 1.0,
+        "UVRadialScaleSpeed": 0.0,
+        "UVRotationCenter": [
+            0.5,
+            0.5
+        ],
+        "UVRotationCurveName": "",
+        "UVScrollCurveName": "",
+        "UseBackFaceBoost": false,
+        "UseDissolveEdge": false,
+        "UseEdgeHighlight": false,
+        "UseFresnel": true,
+        "UseFresnelNoise": false,
+        "UseGradientTexture": false,
+        "UseMask": true,
+        "UseMaskDistortion": true,
+        "UseMaterialBaseTexture": true,
+        "UseMaterialNormalTexture": true,
+        "UseNoise": true,
+        "UseNormal": true,
+        "UseVertexNoise": false,
+        "VertexNoiseHorizontalScale": 1.0,
+        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+        "VertexNoiseSpeed": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "VertexNoiseTexturePath": "",
+        "VertexNoiseVerticalScale": 1.0,
+        "VertexNoiseVerticalStrength": 0.10000000149011612
+    }
+}

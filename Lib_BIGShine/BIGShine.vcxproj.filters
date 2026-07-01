@@ -224,6 +224,9 @@
     <Filter Include="Code\Engine\Graphics\Effect\Particle">
       <UniqueIdentifier>{e58e76f1-0e8a-4fb5-97ae-b0b84c0ba30c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Editor\Utility">
+      <UniqueIdentifier>{02f79af8-8b70-4f66-81d9-f0143e09bb40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -735,6 +738,13 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp" />
+    <ClCompile Include="Code\Editor\EditorCameraData.cpp">
+      <Filter>Code\Editor\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Utility\EditorPrimitiveRenderer.cpp">
+      <Filter>Code\Editor\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1314,6 +1324,13 @@
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEffectAsset.h">
       <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
+    <ClInclude Include="Code\Editor\EditorCameraData.h">
+      <Filter>Code\Editor\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Utility\EditorPrimitiveRenderer.h">
+      <Filter>Code\Editor\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
@@ -1364,6 +1381,9 @@
     </None>
     <None Include="Shader\MotionBlurCommon.hlsli">
       <Filter>Shaders\PostEffect</Filter>
+    </None>
+    <None Include="Shader\PrimitiveRenderer.hlsli">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1519,6 +1539,12 @@
     </FxCompile>
     <FxCompile Include="Shader\AfterimageInstancedVS.hlsl">
       <Filter>Shaders\VFX</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PrimitiveRendererPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PrimitiveRendererVS.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

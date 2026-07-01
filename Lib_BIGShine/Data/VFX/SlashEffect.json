@@ -2,7 +2,7 @@
     "AssetType": "MeshVFX",
     "AssetVersion": 1,
     "MeshVFX": {
-        "IsPlaying": false,
+        "IsPlaying": true,
         "Parts": [
             {
                 "Alpha": 1.0,
@@ -27,7 +27,7 @@
                 ],
                 "BaseUVSpeed": [
                     0.0,
-                    -0.5
+                    0.0
                 ],
                 "BlendMode": 0,
                 "Color": [
@@ -46,7 +46,7 @@
                 "DissolveEdgeStrength": 3.0,
                 "DissolveEdgeWidth": 0.05000000074505806,
                 "DissolveThreshold": 0.0,
-                "DistortionNoiseTexturePath": "",
+                "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
                 "DistortionNoiseUVScale": [
                     1.0,
                     1.0
@@ -66,9 +66,9 @@
                     10.0
                 ],
                 "EmissiveCurveName": "",
-                "EmissivePulseAmount": 1.090000033378601,
-                "EmissivePulseSpeed": 2.0,
-                "EmissiveStrength": 1.899999976158142,
+                "EmissivePulseAmount": 5.0,
+                "EmissivePulseSpeed": 0.0,
+                "EmissiveStrength": 10.300000190734863,
                 "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
                 "EmissiveUVScale": [
                     1.0,
@@ -87,7 +87,7 @@
                 "IntersectionEdgeStrength": 1.9600000381469727,
                 "IntersectionEdgeWidth": 0.0020000000949949026,
                 "Loop": true,
-                "MaskDistortionOpacity": 0.5,
+                "MaskDistortionOpacity": 1.0,
                 "MaskDistortionStrength": 8.0,
                 "MaskLayers": [
                     {
@@ -122,11 +122,11 @@
                 "NoiseUVRotation": 0.0,
                 "NoiseUVRotationSpeed": 0.0,
                 "NoiseUVScale": [
-                    5.0,
+                    1.0,
                     2.0
                 ],
                 "NoiseUVSpeed": [
-                    1.0,
+                    8.0,
                     0.0
                 ],
                 "NormalStrength": 2.0,
@@ -179,7 +179,7 @@
                 "UseFresnelNoise": false,
                 "UseGradientTexture": false,
                 "UseMask": true,
-                "UseMaskDistortion": false,
+                "UseMaskDistortion": true,
                 "UseMaterialBaseTexture": true,
                 "UseMaterialNormalTexture": true,
                 "UseNoise": true,

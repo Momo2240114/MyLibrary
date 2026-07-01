@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 15,
+                "AttackInstanceId": 105,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -321,10 +321,10 @@
                 ],
                 "PlaybackSpeed": 1.0,
                 "TrailEmitting": true,
-                "TrailLifeTime": 0.3499999940395355,
+                "TrailLifeTime": 0.20000000298023224,
                 "TrailMaxSampleCount": 64,
                 "TrailMinimumSampleDistance": 0.009999999776482582,
-                "WeaponBladeGuideRadius": 0.029999999329447746,
+                "WeaponBladeGuideRadius": 0.0949999988079071,
                 "WeaponBladeLength": 80.0,
                 "WeaponRootOffset": [
                     1.090000033378601,
@@ -336,11 +336,11 @@
                     2.7090001106262207,
                     0.0
                 ],
-                "WeaponShowBladeGuide": false,
-                "WeaponTargetEndNodeName": "",
+                "WeaponShowBladeGuide": true,
+                "WeaponTargetEndNodeName": "TrailEnd",
                 "WeaponTargetGameObjectName": "Weapon",
-                "WeaponTargetNodeName": "",
-                "WeaponTargetStartNodeName": ""
+                "WeaponTargetNodeName": "TrailStart",
+                "WeaponTargetStartNodeName": "TrailStart"
             },
             "Enabled": true,
             "TypeName": "WeaponTrailComponent"
