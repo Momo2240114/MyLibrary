@@ -15,6 +15,20 @@
 
 namespace ImCurveEdit
 {
+   float Delegate::Interpolate(size_t curveIndex_, size_t pointIndex_, float rate_) const
+   {
+      if (GetCurveType(curveIndex_) != CurveSmooth) return rate_;
+      return rate_ * rate_ * (3.0f - 2.0f * rate_);
+   }
+
+   float Delegate::EvaluateSegment(size_t curveIndex_, size_t pointIndex_, float rate_)
+   {
+      const ImVec2* points_ = GetPoints(curveIndex_);
+      const float interpolationRate_ = Interpolate(curveIndex_, pointIndex_, rate_);
+      return points_[pointIndex_].y +
+         (points_[pointIndex_ + 1].y - points_[pointIndex_].y) * interpolationRate_;
+   }
+
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
    static ImVec2 operator+(const ImVec2 &a, const ImVec2 &b) {
@@ -108,8 +122,10 @@ namespace ImCurveEdit
       return ret;
    }
 
-   int Edit(Delegate &delegate, const ImVec2& size, unsigned int id, const ImRect *clippingRect, ImVector<EditPoint> *selectedPoints)
+   int Edit(Delegate& delegate, const ImVec2& size, unsigned int id, const ImRect* clippingRect, ImVector<EditPoint>* selectedPoints, const CurveEditOptions* options)
    {
+      const CurveEditOptions defaultOptions;
+      const CurveEditOptions& editOptions = options ? *options : defaultOptions;
       static bool selectingQuad = false;
       static ImVec2 quadSelection;
       static int overCurve = -1;
@@ -131,7 +147,7 @@ namespace ImCurveEdit
       ImGuiIO& io = ImGui::GetIO();
       ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
       ImGui::PushStyleColor(ImGuiCol_Border, 0);
-      // 固定サイズ(300, 300) を止めて、(0, 0) もしくは (avail.x, avail.y) に変更します
+      // Use the available region instead of a fixed editor size.
       ImGui::BeginChild(ImGui::GetID("my_frame"), ImVec2(0, 0), ImGuiChildFlags_FrameStyle);
       delegate.focused = ImGui::IsWindowFocused();
       ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -270,7 +286,7 @@ namespace ImCurveEdit
 
             if (curveType == CurveSmooth || curveType == CurveLinear)
             {
-                size_t subStepCount = (curveType == CurveSmooth)?20:2;
+                const size_t subStepCount = 20;
                 float step = 1.f / float(subStepCount - 1);
                 for (size_t substep = 0; substep < subStepCount - 1; substep++)
                 {
@@ -279,11 +295,11 @@ namespace ImCurveEdit
                     const ImVec2 sp1 = ImLerp(p1, p2, t);
                     const ImVec2 sp2 = ImLerp(p1, p2, t + step);
 
-                    const float rt1 = smoothstep(p1.x, p2.x, sp1.x);
-                    const float rt2 = smoothstep(p1.x, p2.x, sp2.x);
+                    const float value1 = delegate.EvaluateSegment(c, p, t);
+                    const float value2 = delegate.EvaluateSegment(c, p, t + step);
 
-                    const ImVec2 pos1 = ImVec2(sp1.x, ImLerp(p1.y, p2.y, rt1)) * viewSize + offset;
-                    const ImVec2 pos2 = ImVec2(sp2.x, ImLerp(p1.y, p2.y, rt2)) * viewSize + offset;
+                    const ImVec2 pos1 = ImVec2(sp1.x, pointToRange(ImVec2(0.0f, value1)).y) * viewSize + offset;
+                    const ImVec2 pos2 = ImVec2(sp2.x, pointToRange(ImVec2(0.0f, value2)).y) * viewSize + offset;
 
                     if (distance(io.MousePos.x, io.MousePos.y, pos1.x, pos1.y, pos2.x, pos2.y) < 8.f && !scrollingV)
                     {
@@ -317,7 +333,7 @@ namespace ImCurveEdit
          for (size_t p = 0; p < ptCount; p++)
          {
             const int drawState = DrawPoint(draw_list, pointToRange(pts[p]), viewSize, offset, (selection.find({int(c), int(p)}) != selection.end() && movingCurve == -1 && !scrollingV));
-            if (drawState && movingCurve == -1 && !selectingQuad)
+            if (drawState && delegate.IsEditable(c) && editOptions.allowPointMove && movingCurve == -1 && !selectingQuad)
             {
                overCurveOrPoint = true;
                overSelectedPoint = true;
@@ -385,7 +401,7 @@ namespace ImCurveEdit
       }
 
       // add point
-      if (overCurve != -1 && io.MouseDoubleClicked[0])
+       if (editOptions.allowPointAdd && overCurve != -1 && io.MouseDoubleClicked[0])
       {
          const ImVec2 np = rangeToPoint((io.MousePos - offset) / viewSize);
          delegate.BeginEdit(overCurve);
@@ -396,7 +412,7 @@ namespace ImCurveEdit
 
       // move curve
 
-      if (movingCurve != -1)
+       if (editOptions.allowCurveMove && movingCurve != -1)
       {
          const size_t ptCount = delegate.GetPointCount(movingCurve);
          const ImVec2* pts = delegate.GetPoints(movingCurve);
@@ -425,7 +441,7 @@ namespace ImCurveEdit
              delegate.EndEdit();
          }
       }
-      if (movingCurve == -1 && overCurve != -1 && ImGui::IsMouseClicked(0) && selection.empty() && !selectingQuad)
+       if (editOptions.allowCurveMove && movingCurve == -1 && overCurve != -1 && ImGui::IsMouseClicked(0) && selection.empty() && !selectingQuad)
       {
          movingCurve = overCurve;
          delegate.BeginEdit(overCurve);

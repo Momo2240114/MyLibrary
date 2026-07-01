@@ -7,7 +7,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <fstream>
 #include <imgui_internal.h>
+#include <nlohmann/json.hpp>
 
 AssetBrowserWindow::AssetBrowserWindow(GameObjectManager* manager_)
     : EditorWindow("Asset Browser", manager_)
@@ -166,7 +168,8 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
         const char* icon_ = node_.isDirectory ? "[Folder]" :
             (node_.type == AssetType::TEXTURE ? "[Texture]" :
                 (node_.type == AssetType::MODEL ? "[Model]" :
-                    (node_.type == AssetType::JSON ? "[JSON]" : "[File]")));
+                    (node_.type == AssetType::CURVE ? "[Curve]" :
+                        (node_.type == AssetType::JSON ? "[JSON]" : "[File]"))));
         ImGui::Button(icon_, ImVec2(iconSize, iconSize));
     }
 
@@ -207,6 +210,10 @@ void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
     else if (node_.type == AssetType::JSON)
     {
         payloadType_ = AssetBrowserPayload::JSON;
+    }
+    else if (node_.type == AssetType::CURVE)
+    {
+        payloadType_ = AssetBrowserPayload::CURVE;
     }
     ImGui::SetDragDropPayload(payloadType_, node_.path.c_str(), node_.path.size() + 1);
     ImGui::TextUnformatted(node_.name.c_str());
@@ -249,6 +256,22 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
     {
         return AssetType::MODEL;
     }
-    if (extension_ == ".json") return AssetType::JSON;
+    if (extension_ == ".json")
+    {
+        std::ifstream file_(path_);
+        if (file_.is_open())
+        {
+            try
+            {
+                nlohmann::json json_;
+                file_ >> json_;
+                if (json_.value("AssetType", "") == "CurveTrack") return AssetType::CURVE;
+            }
+            catch (const nlohmann::json::exception&)
+            {
+            }
+        }
+        return AssetType::JSON;
+    }
     return AssetType::FILE;
 }

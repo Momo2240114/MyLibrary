@@ -1,0 +1,85 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 2,
+    "Curve": {
+        "Color": 4278255615,
+        "Name": "TestCurve",
+        "PointOptions": [
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 6,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            }
+        ],
+        "Points": [
+            [
+                0.0,
+                1.0
+            ],
+            [
+                0.13249212503433228,
+                1.0
+            ],
+            [
+                0.14721345901489258,
+                0.004795234650373459
+            ],
+            [
+                0.24605678021907806,
+                0.002463962882757187
+            ],
+            [
+                0.3017875850200653,
+                1.2833447456359863
+            ],
+            [
+                0.6319663524627686,
+                1.2433171272277832
+            ],
+            [
+                1.0,
+                1.0
+            ]
+        ],
+        "Type": 3,
+        "Visible": true
+    },
+    "MaxBounds": [
+        1.0,
+        1.9428789615631104
+    ],
+    "MinBounds": [
+        0.0,
+        0.5005191564559937
+    ]
+}
