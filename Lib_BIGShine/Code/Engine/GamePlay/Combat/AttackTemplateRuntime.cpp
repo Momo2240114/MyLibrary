@@ -74,7 +74,12 @@ namespace
         hitBox_->hitStopScale = attackTemplate_.hitStopScale;
         hitBox_->SetKnockBackPower(attackTemplate_.knockBackPower);
         hitBox_->hitParticleAssetPath = attackTemplate_.hitEffect.hitParticleAssetPath;
+        hitBox_->hitParticleEmitterName = attackTemplate_.hitEffect.hitParticleEmitterName;
+        hitBox_->hitParticleLifeTime = attackTemplate_.hitEffect.hitParticleLifeTime;
+        hitBox_->hitParticleNormalOffset = attackTemplate_.hitEffect.hitParticleNormalOffset;
         hitBox_->hitMeshVFXAssetPath = attackTemplate_.hitEffect.hitMeshVfxAssetPath;
+        hitBox_->hitMeshVFXLifeTime = attackTemplate_.hitEffect.hitMeshVfxLifeTime;
+        hitBox_->hitMeshVFXNormalOffset = attackTemplate_.hitEffect.hitMeshVfxNormalOffset;
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
         hitBox_->allowMultiHit = attackTemplate_.allowMultiHit;
         hitBox_->startNodeName = attackTemplate_.weaponHitBox.startNodeName;

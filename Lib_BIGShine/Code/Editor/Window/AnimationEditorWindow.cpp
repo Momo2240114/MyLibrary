@@ -6,6 +6,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
+#include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/Core/LightManager.h"
 #include "Engine/Graphics/Decal/DecalManager.h"
 #include "Engine/Graphics/RenderSystem/ShapeRenderer.h"
@@ -273,7 +274,46 @@ GameObjectManager* AnimationEditorWindow::GetPreviewManager() const
 {
     return previewGameObjectManager.get();
 }
+void AnimationEditorWindow::PlaySelectedEffectPreview(const AnimEvent& event_)
+{
+    StopSelectedEffectPreview();
+    if (!previewGameObjectManager || event_.meshVFXAssetPath.empty()) return;
 
+    const std::shared_ptr<GameObject> owner_ =
+        previewGameObjectManager->GetSelectedObject();
+    if (!owner_) return;
+
+    AttackEffectSpawnRequest request_{};
+    request_.ownerObject = owner_.get();
+    request_.setting.vfxPath = event_.meshVFXAssetPath;
+    request_.setting.lifeTime = (std::max)(event_.meshVFXLifeTime, 0.01f);
+    request_.setting.localOffset = event_.localPosition;
+    request_.setting.localRotation = event_.localRotation;
+    request_.setting.localScale = event_.localScale;
+    request_.setting.playbackSpeed = event_.meshVFXPlaybackSpeed;
+    request_.setting.followOwner =
+        event_.attachToOwner || !event_.attachNodeName.empty();
+    request_.setting.attachNodeName = event_.attachNodeName;
+    request_.setting.mirror = event_.mirrorMeshVFX;
+
+    selectedEffectPreviewObject =
+        previewGameObjectManager->GetEffectManager().SpawnSlashEffect(request_);
+    selectedEffectPreviewTimer = 0.0f;
+}
+
+void AnimationEditorWindow::StopSelectedEffectPreview()
+{
+    if (previewGameObjectManager)
+    {
+        if (const std::shared_ptr<GameObject> object_ =
+            selectedEffectPreviewObject.lock())
+        {
+            previewGameObjectManager->GetEffectManager().StopEffect(object_);
+        }
+    }
+    selectedEffectPreviewObject.reset();
+    selectedEffectPreviewTimer = 0.0f;
+}
 bool AnimationEditorWindow::CopySceneObjectToPreview(
     const std::shared_ptr<GameObject>& sourceObject_)
 {
@@ -356,6 +396,7 @@ void AnimationEditorWindow::EnsurePreviewScene()
 
     previewModelRenderSystem.Initialize(graphics_.GetDevice());
     previewParticleRenderSystem.Initialize(graphics_.GetDevice());
+    previewMeshVFXRenderSystem.Initialize(graphics_.GetDevice());
 
     auto previewObject_ = previewGameObjectManager->Create("AnimationPreviewModel");
     previewObject_->AddComponent<GltfModelCommponennt>();
@@ -797,9 +838,24 @@ void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
         {
             previewParticleRenderSystem.PushSubmit(particle_.get());
         }
+
+        for (const std::shared_ptr<MeshVFXComponent>& meshVFX_ :
+            object_->GetComponents<MeshVFXComponent>())
+        {
+            if (meshVFX_ && meshVFX_->IsEnabled())
+            {
+                previewMeshVFXRenderSystem.PushSubmit(meshVFX_.get());
+            }
+        }
     }
 
     previewModelRenderSystem.RenderAll(renderContext_);
+    previewTarget.ResetRenderTarget(context_);
+    previewMeshVFXRenderSystem.RenderAll(
+        renderContext_,
+        true,
+        previewTarget.GetRenderTargetView(),
+        previewTarget.GetDepthStencilView());
     previewTarget.ResetRenderTarget(context_);
     context_->OMSetDepthStencilState(
         renderContext_.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
@@ -818,6 +874,11 @@ void AnimationEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
 void AnimationEditorWindow::OnVisibilityChanged(bool visible)
 {
+    if (!visible)
+    {
+        loopSelectedEffectPreview = false;
+        StopSelectedEffectPreview();
+    }
     if (visible || (!poseEditEnabled && !customPreviewEnabled)) return;
 
     GltfModelCommponennt* modelComp = nullptr;
@@ -2020,9 +2081,6 @@ void AnimationEditorWindow::DrawEventSequencer(
 
         AnimEvent attackEvent_{};
         attackEvent_.eventLabel = "AttackTemplate";
-        attackEvent_.startAction = "AttackTemplate_Start";
-        attackEvent_.updateAction = "AttackTemplate_Update";
-        attackEvent_.endAction = "AttackTemplate_End";
         attackEvent_.eventTemplateType =
             ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE;
         attackEvent_.ownerTarget = "Self";
@@ -2195,26 +2253,6 @@ void AnimationEditorWindow::DrawEventSequencer(
     {
         ImGui::SeparatorText("Attack Template Event");
 
-        ImGui::BeginDisabled(true);
-
-        ImGui::SetNextItemWidth(240.0f);
-        ImGui::InputText("Start Action", &ev_.startAction);
-
-        ImGui::SetNextItemWidth(240.0f);
-        ImGui::InputText("Update Action", &ev_.updateAction);
-
-        ImGui::SetNextItemWidth(240.0f);
-        ImGui::InputText("End Action", &ev_.endAction);
-
-        ImGui::EndDisabled();
-
-        if (ImGui::Button("Fix Attack Template Actions"))
-        {
-            ev_.startAction = "AttackTemplate_Start";
-            ev_.updateAction = "AttackTemplate_Update";
-            ev_.endAction = "AttackTemplate_End";
-        }
-
         if (attackTemplateManager_.GetTemplates().empty())
         {
             attackTemplateManager_.LoadAll();
@@ -2355,6 +2393,44 @@ void AnimationEditorWindow::DrawEventSequencer(
     {
         ImGui::SeparatorText("Mesh VFX Event");
 
+        if (ImGui::Button("Play Effect"))
+        {
+            PlaySelectedEffectPreview(ev_);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop Effect"))
+        {
+            loopSelectedEffectPreview = false;
+            StopSelectedEffectPreview();
+        }
+        ImGui::SameLine();
+        if (ImGui::Checkbox("Loop Preview", &loopSelectedEffectPreview))
+        {
+            if (loopSelectedEffectPreview) PlaySelectedEffectPreview(ev_);
+            else StopSelectedEffectPreview();
+        }
+
+        if (loopSelectedEffectPreview)
+        {
+            selectedEffectPreviewTimer += ImGui::GetIO().DeltaTime;
+            const float previewDuration_ =
+                (std::max)(ev_.meshVFXLifeTime, 0.01f);
+            const std::shared_ptr<GameObject> previewObject_ =
+                selectedEffectPreviewObject.lock();
+            const std::shared_ptr<MeshVFXComponent> previewMeshVFX_ =
+                previewObject_
+                ? previewObject_->GetComponent<MeshVFXComponent>()
+                : nullptr;
+            if (!previewMeshVFX_ ||
+                !previewMeshVFX_->IsEnabled() ||
+                selectedEffectPreviewTimer >= previewDuration_)
+            {
+                PlaySelectedEffectPreview(ev_);
+            }
+        }
+
+        bool effectPreviewChanged_ = false;
+
         if (gameObjectManager)
         {
             const std::vector<std::string>& assets_ =
@@ -2386,6 +2462,7 @@ void AnimationEditorWindow::DrawEventSequencer(
                     ev_.meshVFXAssetPath.empty()))
                 {
                     ev_.meshVFXAssetPath.clear();
+                    effectPreviewChanged_ = true;
                 }
 
                 for (const std::string& assetKey_ : assets_)
@@ -2396,6 +2473,7 @@ void AnimationEditorWindow::DrawEventSequencer(
                         selected_))
                     {
                         ev_.meshVFXAssetPath = assetKey_;
+                        effectPreviewChanged_ = true;
                     }
                     if (selected_) ImGui::SetItemDefaultFocus();
                 }
@@ -2405,7 +2483,7 @@ void AnimationEditorWindow::DrawEventSequencer(
         }
 
         ImGui::SetNextItemWidth(360.0f);
-        ImGui::InputText("Mesh VFX Asset Path", &ev_.meshVFXAssetPath);
+        effectPreviewChanged_ |= ImGui::InputText("Mesh VFX Asset Path", &ev_.meshVFXAssetPath);
 
         ImGui::SetNextItemWidth(260.0f);
         if (ImGui::BeginCombo(
@@ -2419,6 +2497,7 @@ void AnimationEditorWindow::DrawEventSequencer(
                 ev_.attachNodeName.empty()))
             {
                 ev_.attachNodeName.clear();
+                effectPreviewChanged_ = true;
             }
 
             if (modelComp)
@@ -2435,6 +2514,7 @@ void AnimationEditorWindow::DrawEventSequencer(
                         ev_.attachNodeName == node_.name))
                     {
                         ev_.attachNodeName = node_.name;
+                        effectPreviewChanged_ = true;
                     }
                 }
             }
@@ -2443,22 +2523,27 @@ void AnimationEditorWindow::DrawEventSequencer(
         }
 
         ImGui::SameLine();
-        ImGui::Checkbox("Attach To Owner", &ev_.attachToOwner);
+        effectPreviewChanged_ |= ImGui::Checkbox("Attach To Owner", &ev_.attachToOwner);
 
         ImGui::SameLine();
-        ImGui::Checkbox("Mirror", &ev_.mirrorMeshVFX);
+        effectPreviewChanged_ |= ImGui::Checkbox("Mirror", &ev_.mirrorMeshVFX);
 
-        ImGui::DragFloat3("Local Position", &ev_.localPosition.x, 0.01f);
-        ImGui::DragFloat3("Local Rotation", &ev_.localRotation.x, 0.5f);
-        ImGui::DragFloat3("Local Scale", &ev_.localScale.x, 0.01f, 0.001f, 100.0f);
-        ImGui::DragFloat("Life Time", &ev_.meshVFXLifeTime, 0.01f, 0.01f, 60.0f);
-        ImGui::DragFloat(
+        effectPreviewChanged_ |= ImGui::DragFloat3("Local Position", &ev_.localPosition.x, 0.01f);
+        effectPreviewChanged_ |= ImGui::DragFloat3("Local Rotation", &ev_.localRotation.x, 0.5f);
+        effectPreviewChanged_ |= ImGui::DragFloat3("Local Scale", &ev_.localScale.x, 0.01f, 0.001f, 100.0f);
+        effectPreviewChanged_ |= ImGui::DragFloat("Life Time", &ev_.meshVFXLifeTime, 0.01f, 0.01f, 60.0f);
+        effectPreviewChanged_ |= ImGui::DragFloat(
             "Playback Speed",
             &ev_.meshVFXPlaybackSpeed,
             0.01f,
             0.0f,
             10.0f,
             "%.2fx");
+        if (loopSelectedEffectPreview && effectPreviewChanged_)
+        {
+            PlaySelectedEffectPreview(ev_);
+        }
+
     }
 
     ImGui::Separator();
@@ -2610,7 +2695,7 @@ void AnimationEditorWindow::DrawEventSequencer(
             }
         };
 
-    if (!isAttackTemplateEvent_ && !isVFXEvent_)
+    if (!isVFXEvent_)
     {
         ImGui::SeparatorText("Actions");
 

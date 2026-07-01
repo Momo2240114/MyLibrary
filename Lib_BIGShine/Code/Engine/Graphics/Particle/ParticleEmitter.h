@@ -23,6 +23,8 @@ public:
     void PrepareRender(ID3D11DeviceContext* context);
 
     void ApplySettings(const ParticleSystemConstants& nextSettings);
+    void ResetRuntime();
+    bool HasGPUResources() const;
     void SetEmissionEnabled(bool enabled_) { emissionEnabled = enabled_; }
     void SetDepthSortEnabled(bool enabled_) { depthSortEnabled = enabled_; }
     void SetDepthSortInterval(UINT interval_) { depthSortInterval = interval_ > 0 ? interval_ : 1; }

@@ -77,7 +77,12 @@ public:
     void SetHitStopScale(float hitStopScale_);
     void SetKnockBackPower(float knockBackPower_);
     void SetHitParticleAssetPath(const std::string& path_);
+    void SetHitParticleEmitterName(const std::string& emitterName_);
+    void SetHitParticleLifeTime(float lifeTime_);
+    void SetHitParticleNormalOffset(float normalOffset_);
     void SetHitMeshVFXAssetPath(const std::string& path_);
+    void SetHitMeshVFXLifeTime(float lifeTime_);
+    void SetHitMeshVFXNormalOffset(float normalOffset_);
     void SetAllowMultiHit(bool allowMultiHit_);
     void SetCanHitOwner(bool canHitOwner_);
     void SetEffectType(ATTACK_EFFECT_TYPE effectType_);
@@ -114,7 +119,12 @@ private:
     float hitStopScale = 0.0f;
     float knockBackPower = 0.0f;
     std::string hitParticleAssetPath;
+    std::string hitParticleEmitterName;
+    float hitParticleLifeTime = 1.0f;
+    float hitParticleNormalOffset = 0.0f;
     std::string hitMeshVFXAssetPath;
+    float hitMeshVFXLifeTime = 1.0f;
+    float hitMeshVFXNormalOffset = 0.0f;
     float lifeTime = 1.0f;
     float elapsedTime = 0.0f;
     float hitIntervalTimer = 0.0f;

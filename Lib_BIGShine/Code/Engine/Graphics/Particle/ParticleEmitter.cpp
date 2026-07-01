@@ -247,6 +247,31 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
     context->CSSetShader(nullptr, nullptr, 0);
 }
 
+void ParticleEmitter::ResetRuntime()
+{
+    initialized = false;
+    continuousAccumulator = 0.0f;
+    depthSortFrame = 0u;
+    settings.time = 0.0f;
+    settings.deltaTime = 0.0f;
+    settings.burstTrigger = 0.0f;
+    emitParticles.clear();
+}
+
+bool ParticleEmitter::HasGPUResources() const
+{
+    return emitterConstantBuffer &&
+        commonConstantBuffer &&
+        particleDataBuffer &&
+        particleDataSRV &&
+        particleDataUAV &&
+        particleHeaderBuffer &&
+        particleHeaderSRV &&
+        particleHeaderUAV &&
+        indirectDataBuffer &&
+        indirectDataUAV;
+}
+
 void ParticleEmitter::Render(ID3D11DeviceContext* context)
 {
     if (!context) return;

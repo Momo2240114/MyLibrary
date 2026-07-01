@@ -7,9 +7,9 @@
             {
                 "Alpha": 1.0,
                 "AlphaCurveName": "",
-                "AlphaEnd": 1.0,
+                "AlphaEnd": 0.0,
                 "AlphaStart": 1.0,
-                "AnimateAlpha": false,
+                "AnimateAlpha": true,
                 "AnimateScale": false,
                 "BackFaceColor": [
                     0.0,
@@ -32,7 +32,7 @@
                 "BlendMode": 0,
                 "Color": [
                     0.43529412150382996,
-                    0.32549020648002625,
+                    1.0,
                     1.0,
                     1.0
                 ],
@@ -45,13 +45,13 @@
                 ],
                 "DissolveEdgeStrength": 3.0,
                 "DissolveEdgeWidth": 0.05000000074505806,
-                "DissolveThreshold": 0.0,
+                "DissolveThreshold": 1.0,
                 "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
                 "DistortionNoiseUVScale": [
                     1.0,
                     1.0
                 ],
-                "Duration": 0.0,
+                "Duration": 0.5,
                 "EdgeColor": [
                     1.0,
                     0.0,
@@ -66,7 +66,7 @@
                     10.0
                 ],
                 "EmissiveCurveName": "",
-                "EmissivePulseAmount": 5.0,
+                "EmissivePulseAmount": 2.0,
                 "EmissivePulseSpeed": 0.0,
                 "EmissiveStrength": 10.300000190734863,
                 "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
@@ -74,9 +74,9 @@
                     1.0,
                     1.0
                 ],
-                "FresnelNoiseStrength": 0.0,
-                "FresnelPower": 7.0,
-                "FresnelStrength": 0.0,
+                "FresnelNoiseStrength": 1.0,
+                "FresnelPower": 1.7000000476837158,
+                "FresnelStrength": 0.75,
                 "GradientDirection": 0,
                 "GradientEndUv": 1.0,
                 "GradientFixedUv": 0.15299999713897705,
@@ -86,7 +86,7 @@
                 "InternalMeshCylinderRadius": 1.0,
                 "IntersectionEdgeStrength": 1.9600000381469727,
                 "IntersectionEdgeWidth": 0.0020000000949949026,
-                "Loop": true,
+                "Loop": false,
                 "MaskDistortionOpacity": 1.0,
                 "MaskDistortionStrength": 8.0,
                 "MaskLayers": [
@@ -104,7 +104,7 @@
                     1.0
                 ],
                 "MaskUVSpeed": [
-                    0.0,
+                    2.0,
                     0.0
                 ],
                 "MeshIndex": 0,
@@ -147,7 +147,7 @@
                     0.0
                 ],
                 "Scale": [
-                    1.0,
+                    2.619999885559082,
                     1.0,
                     1.0
                 ],
@@ -164,7 +164,7 @@
                 ],
                 "SilhouetteEdgePower": 4.349999904632568,
                 "SilhouetteEdgeStrength": 0.4300000071525574,
-                "UVRadialScale": 1.0,
+                "UVRadialScale": 1.0299999713897705,
                 "UVRadialScaleSpeed": 0.0,
                 "UVRotationCenter": [
                     0.5,
@@ -176,7 +176,7 @@
                 "UseDissolveEdge": false,
                 "UseEdgeHighlight": false,
                 "UseFresnel": true,
-                "UseFresnelNoise": false,
+                "UseFresnelNoise": true,
                 "UseGradientTexture": false,
                 "UseMask": true,
                 "UseMaskDistortion": true,

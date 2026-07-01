@@ -80,7 +80,12 @@ struct AttackHitEffectTemplate
 {
     bool spawnOnHit = true;
     std::string hitParticleAssetPath;
+    std::string hitParticleEmitterName;
+    float hitParticleLifeTime = 1.0f;
+    float hitParticleNormalOffset = 0.0f;
     std::string hitMeshVfxAssetPath;
+    float hitMeshVfxLifeTime = 1.0f;
+    float hitMeshVfxNormalOffset = 0.0f;
 };
 
 struct AttackEffectSpawnTemplate

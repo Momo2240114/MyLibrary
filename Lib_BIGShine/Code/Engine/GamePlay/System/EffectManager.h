@@ -89,6 +89,7 @@ public:
     void RefreshAssetCache();
     void BuildAssetNameMap();
     void PreloadAllEffects();
+    void RebuildRuntimePools();
     std::string ResolveParticlePath(const std::string& assetNameOrPath_) const;
     std::string ResolveMeshVFXPath(const std::string& assetNameOrPath_) const;
 
@@ -108,6 +109,7 @@ public:
     std::shared_ptr<GameObject> SpawnEffectWithHitBox(
         const AttackEffectSpawnRequest& request_);
     void SpawnForHit(const AttackHitEvent& event_);
+    void StopEffect(const std::shared_ptr<GameObject>& object_);
 
     const std::vector<std::string>& GetParticleAssetPaths() const
     {
@@ -140,10 +142,19 @@ public:
     }
 
 private:
+    enum class EFFECT_POOL_TYPE
+    {
+        NONE,
+        PARTICLE,
+        MESH_VFX,
+    };
+
     struct ManagedEffect
     {
         std::weak_ptr<GameObject> object;
         std::weak_ptr<HitBox> hitBox;
+        std::string assetPath;
+        EFFECT_POOL_TYPE poolType = EFFECT_POOL_TYPE::NONE;
         float lifeTimer = 0.0f;
         float elapsedTime = 0.0f;
         float hitStartTime = 0.0f;
@@ -166,7 +177,20 @@ private:
         float lifeTime_,
         const std::shared_ptr<HitBox>& hitBox_ = nullptr,
         float hitStartTime_ = 0.0f,
-        float hitEndTime_ = 0.0f);
+        float hitEndTime_ = 0.0f,
+        EFFECT_POOL_TYPE poolType_ = EFFECT_POOL_TYPE::NONE,
+        const std::string& assetPath_ = {});
+    std::shared_ptr<GameObject> AcquireParticleObject(
+        const std::string& resolvedAssetPath_);
+    std::shared_ptr<GameObject> AcquireMeshVFXObject(
+        const std::string& resolvedAssetPath_);
+    std::shared_ptr<GameObject> CreateParticlePoolObject(
+        const std::string& resolvedAssetPath_,
+        const ParticleEffectAsset& asset_);
+    std::shared_ptr<GameObject> CreateMeshVFXPoolObject(
+        const std::string& resolvedAssetPath_,
+        const MeshVFXAsset& asset_);
+    void ReleasePooledEffect(ManagedEffect& effect_);
     void CollectJsonAssets(
         const std::string& rootPath_,
         std::vector<std::string>& paths_) const;
@@ -204,4 +228,6 @@ private:
     std::unordered_map<std::string, std::string> meshVFXPathByKey;
     std::unordered_map<std::string, ParticleEffectAsset> particleAssetCache;
     std::unordered_map<std::string, MeshVFXAsset> meshVFXAssetCache;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<GameObject>>> particleObjectPool;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<GameObject>>> meshVFXObjectPool;
 };

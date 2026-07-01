@@ -183,7 +183,7 @@
                 "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
-                "endTime": 0.44999998807907104,
+                "endTime": 0.5166666507720947,
                 "eventTemplateType": "NONE",
                 "label": "Weapon_Trail",
                 "localPosition": [
@@ -208,7 +208,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 0.0
+                "startTime": 0.25
             },
             {
                 "actionEnd": "Sword_DisableHitBox",
@@ -282,6 +282,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.25
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": true,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.4333333373069763,
+                "eventTemplateType": "VFX_TEMPLATE",
+                "label": "MeshVFX",
+                "localPosition": [
+                    0.0,
+                    1.5,
+                    0.5
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    -31.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                "meshVFXLifeTime": 0.20000000298023224,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": true,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.23333333432674408
             }
         ],
         "loop": false,

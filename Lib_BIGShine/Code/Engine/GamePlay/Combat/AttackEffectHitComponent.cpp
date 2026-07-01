@@ -6,6 +6,7 @@
 #include "Engine/Physics/HitBox.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
@@ -73,8 +74,46 @@ void AttackEffectHitComponent::SetDamage(float damage_) { damage = damage_; }
 void AttackEffectHitComponent::SetHitStopDuration(float hitStopDuration_) { hitStopDuration = hitStopDuration_; }
 void AttackEffectHitComponent::SetHitStopScale(float hitStopScale_) { hitStopScale = hitStopScale_; }
 void AttackEffectHitComponent::SetKnockBackPower(float knockBackPower_) { knockBackPower = knockBackPower_; }
-void AttackEffectHitComponent::SetHitParticleAssetPath(const std::string& path_) { hitParticleAssetPath = path_; }
-void AttackEffectHitComponent::SetHitMeshVFXAssetPath(const std::string& path_) { hitMeshVFXAssetPath = path_; }
+void AttackEffectHitComponent::SetHitParticleAssetPath(const std::string& path_)
+{
+    hitParticleAssetPath = path_;
+    std::printf(
+        "[AttackEffectHitComponent::SetHitParticleAssetPath] path='%s'\n",
+        hitParticleAssetPath.c_str());
+}
+
+void AttackEffectHitComponent::SetHitParticleEmitterName(const std::string& emitterName_)
+{
+    hitParticleEmitterName = emitterName_;
+}
+
+void AttackEffectHitComponent::SetHitParticleLifeTime(float lifeTime_)
+{
+    hitParticleLifeTime = (std::max)(lifeTime_, 0.0f);
+}
+
+void AttackEffectHitComponent::SetHitParticleNormalOffset(float normalOffset_)
+{
+    hitParticleNormalOffset = normalOffset_;
+}
+
+void AttackEffectHitComponent::SetHitMeshVFXAssetPath(const std::string& path_)
+{
+    hitMeshVFXAssetPath = path_;
+    std::printf(
+        "[AttackEffectHitComponent::SetHitMeshVFXAssetPath] path='%s'\n",
+        hitMeshVFXAssetPath.c_str());
+}
+
+void AttackEffectHitComponent::SetHitMeshVFXLifeTime(float lifeTime_)
+{
+    hitMeshVFXLifeTime = (std::max)(lifeTime_, 0.0f);
+}
+
+void AttackEffectHitComponent::SetHitMeshVFXNormalOffset(float normalOffset_)
+{
+    hitMeshVFXNormalOffset = normalOffset_;
+}
 void AttackEffectHitComponent::SetAllowMultiHit(bool allowMultiHit_) { allowMultiHit = allowMultiHit_; }
 void AttackEffectHitComponent::SetCanHitOwner(bool canHitOwner_) { canHitOwner = canHitOwner_; }
 void AttackEffectHitComponent::SetEffectType(ATTACK_EFFECT_TYPE effectType_) { effectType = effectType_; }
@@ -136,7 +175,16 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitStopScale = hitStopScale;
     hitBox_->SetKnockBackPower(knockBackPower);
     hitBox_->hitParticleAssetPath = hitParticleAssetPath;
+    hitBox_->hitParticleEmitterName = hitParticleEmitterName;
+    hitBox_->hitParticleLifeTime = hitParticleLifeTime;
+    hitBox_->hitParticleNormalOffset = hitParticleNormalOffset;
     hitBox_->hitMeshVFXAssetPath = hitMeshVFXAssetPath;
+    hitBox_->hitMeshVFXLifeTime = hitMeshVFXLifeTime;
+    hitBox_->hitMeshVFXNormalOffset = hitMeshVFXNormalOffset;
+    std::printf(
+        "[AttackEffectHitComponent::ConfigureHitBox] event particle='%s' meshVFX='%s'\n",
+        hitBox_->hitParticleAssetPath.c_str(),
+        hitBox_->hitMeshVFXAssetPath.c_str());
     hitBox_->allowMultiHit = allowMultiHit || shape_.allowMultiHit;
     hitBox_->canHitOwner = canHitOwner;
     hitBox_->radius = (std::max)(shape_.radius, 0.01f);
@@ -287,7 +335,12 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["HitStopScale"] = hitStopScale;
     json_["KnockBackPower"] = knockBackPower;
     json_["HitParticleAssetPath"] = hitParticleAssetPath;
+    json_["HitParticleEmitterName"] = hitParticleEmitterName;
+    json_["HitParticleLifeTime"] = hitParticleLifeTime;
+    json_["HitParticleNormalOffset"] = hitParticleNormalOffset;
     json_["HitMeshVFXAssetPath"] = hitMeshVFXAssetPath;
+    json_["HitMeshVFXLifeTime"] = hitMeshVFXLifeTime;
+    json_["HitMeshVFXNormalOffset"] = hitMeshVFXNormalOffset;
     json_["DestroyOnLifeEnd"] = destroyOnLifeEnd;
     json_["CanHitOwner"] = canHitOwner;
     json_["AllowMultiHit"] = allowMultiHit;
@@ -325,7 +378,12 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     hitStopScale = json_.value("HitStopScale", 0.0f);
     knockBackPower = json_.value("KnockBackPower", 0.0f);
     hitParticleAssetPath = json_.value("HitParticleAssetPath", std::string{});
+    hitParticleEmitterName = json_.value("HitParticleEmitterName", std::string{});
+    hitParticleLifeTime = (std::max)(json_.value("HitParticleLifeTime", 1.0f), 0.0f);
+    hitParticleNormalOffset = json_.value("HitParticleNormalOffset", 0.0f);
     hitMeshVFXAssetPath = json_.value("HitMeshVFXAssetPath", std::string{});
+    hitMeshVFXLifeTime = (std::max)(json_.value("HitMeshVFXLifeTime", 1.0f), 0.0f);
+    hitMeshVFXNormalOffset = json_.value("HitMeshVFXNormalOffset", 0.0f);
     destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", true);
     canHitOwner = json_.value("CanHitOwner", false);
     allowMultiHit = json_.value("AllowMultiHit", false);

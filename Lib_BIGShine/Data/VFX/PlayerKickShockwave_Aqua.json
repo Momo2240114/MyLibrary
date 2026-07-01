@@ -1,0 +1,119 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": true,
+        "PlaybackSpeed": 1.0,
+        "Parts": [
+            {
+                "RenderEnabled": true,
+                "ModelPath": "__InternalMeshCone__",
+                "MeshIndex": 0,
+                "Position": [0.0, 0.0, 0.0],
+                "Rotation": [0.0, 0.0, 0.0],
+                "Scale": [0.62, 0.62, 2.0],
+                "InternalMeshCylinderRadius": 1.0,
+                "InternalMeshSettings": {
+                    "Segments": 72,
+                    "ConeTipRadiusRate": 0.018,
+                    "ConeLength": 1.1
+                },
+                "Duration": 0.18,
+                "Loop": false,
+                "AnimateAlpha": true,
+                "AlphaStart": 0.72,
+                "AlphaEnd": 0.0,
+                "Alpha": 0.72,
+                "BlendMode": 1,
+                "Color": [0.68, 0.94, 1.0, 1.0],
+                "EmissiveStrength": 4.0,
+                "EmissivePulseSpeed": 0.0,
+                "EmissivePulseAmount": 0.0,
+                "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_22.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [1.0, 1.0],
+                "MaskUVSpeed": [1.4, 0.0],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/Trail/T_TrailMask_06.PNG"
+                ],
+                "NoiseUVScale": [1.2, 1.5],
+                "NoiseUVSpeed": [2.0, 0.0],
+                "NoiseStrength": 0.012,
+                "UseMaskDistortion": true,
+                "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                "DistortionNoiseUVScale": [1.2, 1.2],
+                "MaskDistortionStrength": 1.8,
+                "MaskDistortionOpacity": 0.18,
+                "UseFresnel": true,
+                "FresnelPower": 2.5,
+                "FresnelStrength": 0.35,
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "BaseSamplerMode": 1,
+                "NormalSamplerMode": 1,
+                "MaskSamplerMode": 1,
+                "NoiseSamplerMode": 0,
+                "DistortionSamplerMode": 0,
+                "EdgePatternSamplerMode": 1,
+                "EmissiveSamplerMode": 1,
+                "GradientSamplerMode": 1
+            },
+            {
+                "RenderEnabled": true,
+                "ModelPath": "__InternalMeshCone__",
+                "MeshIndex": 0,
+                "Position": [0.0, 0.01, 0.0],
+                "Rotation": [0.0, 0.0, 0.0],
+                "Scale": [0.88, 0.88, 2.35],
+                "InternalMeshCylinderRadius": 1.0,
+                "InternalMeshSettings": {
+                    "Segments": 72,
+                    "ConeTipRadiusRate": 0.04,
+                    "ConeLength": 1.0
+                },
+                "Duration": 0.28,
+                "Loop": false,
+                "AnimateAlpha": true,
+                "AlphaStart": 0.24,
+                "AlphaEnd": 0.0,
+                "Alpha": 0.24,
+                "BlendMode": 0,
+                "Color": [0.08, 0.62, 0.78, 1.0],
+                "EmissiveStrength": 1.6,
+                "EmissivePulseSpeed": 0.0,
+                "EmissivePulseAmount": 0.0,
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/Trail/T_TrailMask_09.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [0.85, 1.0],
+                "MaskUVSpeed": [0.6, 0.0],
+                "UseNoise": false,
+                "UseMaskDistortion": false,
+                "UseFresnel": false,
+                "UseMaterialBaseTexture": false,
+                "UseMaterialNormalTexture": false,
+                "BaseSamplerMode": 1,
+                "NormalSamplerMode": 1,
+                "MaskSamplerMode": 1,
+                "NoiseSamplerMode": 0,
+                "DistortionSamplerMode": 0,
+                "EdgePatternSamplerMode": 1,
+                "EmissiveSamplerMode": 1,
+                "GradientSamplerMode": 1
+            }
+        ]
+    }
+}

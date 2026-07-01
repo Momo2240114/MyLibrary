@@ -183,7 +183,7 @@
                 "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
-                "endTime": 0.550000011920929,
+                "endTime": 0.6166666746139526,
                 "eventTemplateType": "NONE",
                 "label": "Weapon_Trail_Start",
                 "localPosition": [
@@ -208,7 +208,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 0.11666666716337204
+                "startTime": 0.30000001192092896
             },
             {
                 "actionEnd": "Sword_DisableHitBox",
@@ -233,7 +233,7 @@
                         "floatValue": 0.0,
                         "intValue": 0,
                         "key": "HitParticleAssetPath",
-                        "stringValue": "Data/Particle/HitParticle.json",
+                        "stringValue": "SwordHit_Aqua",
                         "type": 3
                     },
                     {
@@ -282,6 +282,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.38333332538604736
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": true,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.5666666626930237,
+                "eventTemplateType": "VFX_TEMPLATE",
+                "label": "MeshVFX",
+                "localPosition": [
+                    0.0,
+                    1.5,
+                    0.5
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    26.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                "meshVFXLifeTime": 0.6000000238418579,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.3333333432674408
             }
         ],
         "loop": false,

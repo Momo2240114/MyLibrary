@@ -84,6 +84,19 @@ cbuffer CbMeshVFX : register(b0)
     uint useBackFaceBoost;
     
     uint meshVFXPadding;
+
+    uint baseSamplerMode;
+    uint maskSamplerMode;
+    uint noiseSamplerMode;
+    uint samplerPadding;
+
+    uint normalSamplerMode;
+    uint distortionSamplerMode;
+    uint edgePatternSamplerMode;
+    uint emissiveSamplerMode;
+
+    uint gradientSamplerMode;
+    uint3 samplerRegisterPadding;
 };
 
 // GltfModelの頂点入力。

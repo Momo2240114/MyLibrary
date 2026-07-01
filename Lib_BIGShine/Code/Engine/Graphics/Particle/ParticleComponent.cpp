@@ -603,6 +603,34 @@ void ParticleComponent::Stop()
         if (track_.emitter) track_.emitter->SetEmissionEnabled(false);
     }
 }
+
+void ParticleComponent::ResetRuntime()
+{
+    Stop();
+    timer = 0.0f;
+    ID3D11DeviceContext* context_ =
+        GraphicsDeviceManager::Instance().GetContext();
+    for (EmitterTrack& track_ : tracks)
+    {
+        track_.isStarted = false;
+        if (!track_.emitter) continue;
+        track_.emitter->ResetRuntime();
+        track_.emitter->SetEmissionEnabled(false);
+        if (context_) track_.emitter->Update(context_, 0.0f);
+    }
+}
+
+bool ParticleComponent::HasRuntimeResources() const
+{
+    if (tracks.empty()) return false;
+    return std::all_of(
+        tracks.begin(),
+        tracks.end(),
+        [](const EmitterTrack& track_)
+        {
+            return track_.emitter && track_.emitter->HasGPUResources();
+        });
+}
 void ParticleComponent::RefreshTextureList()
 {
     textureFiles.clear();

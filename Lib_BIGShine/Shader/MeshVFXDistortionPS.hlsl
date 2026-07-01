@@ -8,6 +8,14 @@ Texture2D GradientTexture : register(t9);
 
 SamplerState LinearWrapSampler : register(s0);
 SamplerState LinearBorderSampler : register(s1);
+SamplerState LinearClampSampler : register(s2);
+
+float4 SampleVFXTexture(Texture2D texture_, float2 uv_, uint samplerMode_)
+{
+    if (samplerMode_ == 1) return texture_.Sample(LinearClampSampler, uv_);
+    if (samplerMode_ == 2) return texture_.Sample(LinearBorderSampler, uv_);
+    return texture_.Sample(LinearWrapSampler, uv_);
+}
 
 static const uint MESH_VFX_GRADIENT_SAMPLE_MODE_HORIZONTAL = 0;
 static const uint MESH_VFX_GRADIENT_DIRECTION_FORWARD = 0;
@@ -67,27 +75,27 @@ float4 main(VS_OUT input) : SV_TARGET
 
     if (useNoise != 0)
     {
-        float2 sampledNoise = (abs(noiseUVRotation) > 0.0001f
-            ? NoiseTexture.Sample(LinearBorderSampler, noiseUV)
-            : NoiseTexture.Sample(LinearWrapSampler, noiseUV)).rg * 2.0f - 1.0f;
+        float2 sampledNoise = SampleVFXTexture(
+            NoiseTexture,
+            noiseUV,
+            noiseSamplerMode).rg * 2.0f - 1.0f;
         baseUV += sampledNoise * noiseStrength;
         maskUV += sampledNoise * noiseStrength;
     }
 
-    float4 baseSample = abs(baseUVRotation) > 0.0001f
-        ? BaseTexture.Sample(LinearBorderSampler, baseUV)
-        : BaseTexture.Sample(LinearWrapSampler, baseUV);
+    float4 baseSample = SampleVFXTexture(BaseTexture, baseUV, baseSamplerMode);
     if (useGradientTexture != 0 && hasGradientTexture != 0)
     {
-        baseSample.a *= GradientTexture.Sample(LinearWrapSampler, GetGradientUV(input.texcoord)).a;
+        baseSample.a *= SampleVFXTexture(
+            GradientTexture,
+            GetGradientUV(input.texcoord),
+            gradientSamplerMode).a;
     }
 
     float mask = 1.0f;
     if (useMask != 0)
     {
-        mask = abs(maskUVRotation) > 0.0001f
-            ? MaskTexture.Sample(LinearBorderSampler, maskUV).r
-            : MaskTexture.Sample(LinearWrapSampler, maskUV).r;
+        mask = SampleVFXTexture(MaskTexture, maskUV, maskSamplerMode).r;
     }
 
     float hiddenMask = saturate(max(
@@ -99,9 +107,10 @@ float4 main(VS_OUT input) : SV_TARGET
         discard;
     }
 
-    float2 distortionNoise = (abs(noiseUVRotation) > 0.0001f
-        ? DistortionNoiseTexture.Sample(LinearBorderSampler, distortionUV)
-        : DistortionNoiseTexture.Sample(LinearWrapSampler, distortionUV)).rg * 2.0f - 1.0f;
+    float2 distortionNoise = SampleVFXTexture(
+        DistortionNoiseTexture,
+        distortionUV,
+        distortionSamplerMode).rg * 2.0f - 1.0f;
 
     float opacity = saturate(maskDistortionOpacity * input.instanceAlpha * hiddenMask);
     return float4(distortionNoise * maskDistortionStrength, 0.0f, opacity);
