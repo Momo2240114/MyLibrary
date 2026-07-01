@@ -574,6 +574,7 @@ void MeshVFXRenderSystem::RenderAll(
     {
         renderContext_.renderState->GetSamplerState(SamplerState::LinearWrap),
         renderContext_.renderState->GetSamplerState(SamplerState::LinearBorder),
+        renderContext_.renderState->GetSamplerState(SamplerState::LinearClamp),
     };
     deviceContext_->PSSetSamplers(0, _countof(samplers_), samplers_);
 

@@ -167,6 +167,19 @@ private:
         uint32_t useFresnelNoise;      // Fresnel Noiseを使うか
         uint32_t useBackFaceBoost;     // 背面Boostを使うか
         uint32_t meshVFXPadding;       // 16byteアライン調整
+
+        uint32_t baseSamplerMode;
+        uint32_t maskSamplerMode;
+        uint32_t noiseSamplerMode;
+        uint32_t samplerPadding;
+
+        uint32_t normalSamplerMode;
+        uint32_t distortionSamplerMode;
+        uint32_t edgePatternSamplerMode;
+        uint32_t emissiveSamplerMode;
+
+        uint32_t gradientSamplerMode;
+        DirectX::XMUINT3 samplerRegisterPadding;
     };
 
     static_assert(sizeof(CbMeshVFX) % 16 == 0, "CbMeshVFX size must be aligned to 16 bytes.");

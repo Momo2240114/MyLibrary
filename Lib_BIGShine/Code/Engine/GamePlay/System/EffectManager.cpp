@@ -17,6 +17,11 @@
 #include <cstdio>
 #include <filesystem>
 
+namespace
+{
+    constexpr size_t EFFECT_PREWARM_COUNT = 4u;
+}
+
 void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
 {
     json_ = {
@@ -137,14 +142,18 @@ void EffectManager::Update(float deltaTime_)
         std::remove_if(
             managedEffects.begin(),
             managedEffects.end(),
-            [this](const ManagedEffect& effect_)
+            [this](ManagedEffect& effect_)
             {
                 const std::shared_ptr<GameObject> object_ = effect_.object.lock();
                 if (!object_) return true;
 
                 if (effect_.lifeTimer > 0.0f) return false;
 
-                if (gameObjectManager)
+                if (effect_.poolType != EFFECT_POOL_TYPE::NONE)
+                {
+                    ReleasePooledEffect(effect_);
+                }
+                else if (gameObjectManager)
                 {
                     gameObjectManager->Destroy(object_);
                 }
@@ -155,6 +164,13 @@ void EffectManager::Update(float deltaTime_)
 
 void EffectManager::Clear()
 {
+    for (ManagedEffect& effect_ : managedEffects)
+    {
+        if (effect_.poolType != EFFECT_POOL_TYPE::NONE)
+        {
+            ReleasePooledEffect(effect_);
+        }
+    }
     managedEffects.clear();
     scheduledAttackEffects.clear();
 }
@@ -183,8 +199,11 @@ void EffectManager::BuildAssetNameMap()
 
 void EffectManager::PreloadAllEffects()
 {
+    Clear();
     particleAssetCache.clear();
     meshVFXAssetCache.clear();
+    particleObjectPool.clear();
+    meshVFXObjectPool.clear();
 
     for (const EffectAssetEntry& entry_ : particleAssets)
     {
@@ -195,6 +214,55 @@ void EffectManager::PreloadAllEffects()
     {
         PreloadMeshVFXAsset(entry_.fullPath);
     }
+}
+
+void EffectManager::RebuildRuntimePools()
+{
+    particleObjectPool.clear();
+    meshVFXObjectPool.clear();
+
+    for (const EffectAssetEntry& entry_ : particleAssets)
+    {
+        const std::string assetName_ = BuildAssetNameFromPath(
+            entry_.fullPath,
+            "Data/Particle");
+        const auto assetIterator_ = particleAssetCache.find(assetName_);
+        if (assetIterator_ == particleAssetCache.end()) continue;
+
+        std::vector<std::shared_ptr<GameObject>>& objects_ =
+            particleObjectPool[assetName_];
+        for (size_t index_ = 0; index_ < EFFECT_PREWARM_COUNT; ++index_)
+        {
+            std::shared_ptr<GameObject> object_ = CreateParticlePoolObject(
+                entry_.fullPath,
+                assetIterator_->second);
+            if (object_) objects_.push_back(object_);
+        }
+    }
+
+    for (const EffectAssetEntry& entry_ : meshVFXAssets)
+    {
+        const std::string assetName_ = BuildAssetNameFromPath(
+            entry_.fullPath,
+            "Data/VFX");
+        const auto assetIterator_ = meshVFXAssetCache.find(assetName_);
+        if (assetIterator_ == meshVFXAssetCache.end()) continue;
+
+        std::vector<std::shared_ptr<GameObject>>& objects_ =
+            meshVFXObjectPool[assetName_];
+        for (size_t index_ = 0; index_ < EFFECT_PREWARM_COUNT; ++index_)
+        {
+            std::shared_ptr<GameObject> object_ = CreateMeshVFXPoolObject(
+                entry_.fullPath,
+                assetIterator_->second);
+            if (object_) objects_.push_back(object_);
+        }
+    }
+
+    std::printf(
+        "[EffectManager] Runtime pools rebuilt: particle=%zu meshVFX=%zu\n",
+        particleObjectPool.size(),
+        meshVFXObjectPool.size());
 }
 
 std::string EffectManager::ResolveParticlePath(const std::string& assetNameOrPath_) const
@@ -248,13 +316,16 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
 
     const std::string resolvedAssetPath_ =
         ResolveParticlePath(request_.assetPath);
+    std::printf(
+        "[EffectManager::SpawnParticle] request='%s' resolved='%s' emitter='%s'\n",
+        request_.assetPath.c_str(),
+        resolvedAssetPath_.c_str(),
+        request_.emitterName.c_str());
 
     std::shared_ptr<GameObject> object_ =
-        gameObjectManager->Create("RuntimeParticle");
+        AcquireParticleObject(resolvedAssetPath_);
 
     if (!object_) return nullptr;
-
-    object_->SetNoSaveObject();
 
     const DirectX::XMFLOAT3 spawnPosition_ = ApplyNormalOffset(
         request_.position,
@@ -266,15 +337,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     object_->UpdateTransform();
 
     std::shared_ptr<ParticleComponent> particle_ =
-        object_->AddComponent<ParticleComponent>();
+        object_->GetComponent<ParticleComponent>();
 
     if (!particle_) return object_;
-
-    if (!particle_->LoadAsset(resolvedAssetPath_))
-    {
-        gameObjectManager->Destroy(object_);
-        return nullptr;
-    }
+    particle_->SetEnabled(true);
 
     std::string emitterName_ = request_.emitterName;
 
@@ -292,7 +358,14 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
         particle_->Play();
     }
 
-    RegisterManagedEffect(object_, request_.lifeTime);
+    RegisterManagedEffect(
+        object_,
+        request_.lifeTime,
+        nullptr,
+        0.0f,
+        0.0f,
+        EFFECT_POOL_TYPE::PARTICLE,
+        resolvedAssetPath_);
     return object_;
 }
 
@@ -358,6 +431,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
                     object_->GetOrAddComponent<ModelAttachmentComponent>();
                 if (attachment_)
                 {
+                    attachment_->SetEnabled(true);
                     attachment_->SetTargetNode(model_, request_.setting.attachNodeName);
                     attachment_->SyncAttachment();
                 }
@@ -389,9 +463,10 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             if (sourceHitBox_) sourceHitBox_->SetAttackInstanceId(attackInstanceId_);
         }
 
-        hitBox_ = object_->AddComponent<HitBox>();
+        hitBox_ = object_->GetOrAddComponent<HitBox>();
         if (hitBox_)
         {
+            hitBox_->SetEnabled(true);
             hitBox_->actionPrefix = request_.setting.hitBoxName;
             hitBox_->SetOwner(request_.ownerObject);
             hitBox_->SetAttackInstanceId(attackInstanceId_);
@@ -467,40 +542,42 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     {
         const std::string resolvedParticlePath_ =
             ResolveParticlePath(effectTemplate_.particlePath);
-        std::shared_ptr<ParticleComponent> particle_ = object_->AddComponent<ParticleComponent>();
-        if (particle_)
+        const ParticleEffectAsset* particleAsset_ =
+            FindParticleAssetFromRequest(resolvedParticlePath_);
+        std::shared_ptr<ParticleComponent> particle_ =
+            object_->AddComponent<ParticleComponent>();
+        if (particle_ && particleAsset_)
         {
-            if (const ParticleEffectAsset* asset_ =
-                FindParticleAssetFromRequest(resolvedParticlePath_))
-            {
-                particle_->SetAsset(*asset_);
-                particle_->Play();
-            }
-            else if (particle_->LoadAsset(resolvedParticlePath_))
-            {
-                particle_->Play();
-            }
+            particle_->SetAsset(*particleAsset_);
+            particle_->ResetRuntime();
+            particle_->Play();
+        }
+        else if (!particleAsset_)
+        {
+            std::printf(
+                "[EffectManager::SpawnAttackEffect] Particle cache miss: %s\n",
+                resolvedParticlePath_.c_str());
         }
     }
     if (!effectTemplate_.meshVfxPath.empty())
     {
         const std::string resolvedMeshVFXPath_ =
             ResolveMeshVFXPath(effectTemplate_.meshVfxPath);
-        std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->AddComponent<MeshVFXComponent>();
-        if (meshVFX_)
+        const MeshVFXAsset* meshVFXAsset_ =
+            FindMeshVFXAssetFromRequest(resolvedMeshVFXPath_);
+        std::shared_ptr<MeshVFXComponent> meshVFX_ =
+            object_->AddComponent<MeshVFXComponent>();
+        if (meshVFX_ && meshVFXAsset_)
         {
-            if (const MeshVFXAsset* asset_ =
-                FindMeshVFXAssetFromRequest(resolvedMeshVFXPath_))
-            {
-                meshVFX_->SetAsset(*asset_);
-                meshVFX_->Reset();
-                meshVFX_->Play();
-            }
-            else if (meshVFX_->LoadAsset(resolvedMeshVFXPath_))
-            {
-                meshVFX_->Reset();
-                meshVFX_->Play();
-            }
+            meshVFX_->SetAsset(*meshVFXAsset_);
+            meshVFX_->Reset();
+            meshVFX_->Play();
+        }
+        else if (!meshVFXAsset_)
+        {
+            std::printf(
+                "[EffectManager::SpawnAttackEffect] MeshVFX cache miss: %s\n",
+                resolvedMeshVFXPath_.c_str());
         }
     }
 
@@ -515,7 +592,12 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
         attackHit_->SetHitStopScale(attackTemplate_.hitStopScale);
         attackHit_->SetKnockBackPower(attackTemplate_.knockBackPower);
         attackHit_->SetHitParticleAssetPath(attackTemplate_.hitEffect.hitParticleAssetPath);
+        attackHit_->SetHitParticleEmitterName(attackTemplate_.hitEffect.hitParticleEmitterName);
+        attackHit_->SetHitParticleLifeTime(attackTemplate_.hitEffect.hitParticleLifeTime);
+        attackHit_->SetHitParticleNormalOffset(attackTemplate_.hitEffect.hitParticleNormalOffset);
         attackHit_->SetHitMeshVFXAssetPath(attackTemplate_.hitEffect.hitMeshVfxAssetPath);
+        attackHit_->SetHitMeshVFXLifeTime(attackTemplate_.hitEffect.hitMeshVfxLifeTime);
+        attackHit_->SetHitMeshVFXNormalOffset(attackTemplate_.hitEffect.hitMeshVfxNormalOffset);
         attackHit_->SetAllowMultiHit(attackTemplate_.allowMultiHit);
         attackHit_->SetCanHitOwner(attackTemplate_.canHitOwner);
         attackHit_->SetEffectType(effectTemplate_.effectType);
@@ -542,10 +624,8 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
     const std::string resolvedAssetPath_ = ResolveMeshVFXPath(request_.assetPath);
 
     std::shared_ptr<GameObject> object_ =
-        gameObjectManager->Create("RuntimeMeshVFX");
+        AcquireMeshVFXObject(resolvedAssetPath_);
     if (!object_) return nullptr;
-
-    object_->SetNoSaveObject();
 
     const DirectX::XMFLOAT3 spawnPosition_ = ApplyNormalOffset(
         request_.position,
@@ -556,29 +636,44 @@ std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
     object_->UpdateTransform();
 
     std::shared_ptr<MeshVFXComponent> meshVFX_ =
-        object_->AddComponent<MeshVFXComponent>();
+        object_->GetComponent<MeshVFXComponent>();
     if (!meshVFX_) return object_;
 
-    if (const MeshVFXAsset* asset_ = FindMeshVFXAssetFromRequest(resolvedAssetPath_))
-    {
-        meshVFX_->SetAsset(*asset_);
-    }
-    else if (!meshVFX_->LoadAsset(resolvedAssetPath_))
-    {
-        gameObjectManager->Destroy(object_);
-        return nullptr;
-    }
-
+    std::printf(
+        "[EffectManager::SpawnMeshVFX] request='%s' resolved='%s'\n",
+        request_.assetPath.c_str(),
+        resolvedAssetPath_.c_str());
+    meshVFX_->SetEnabled(true);
     meshVFX_->Reset();
     meshVFX_->Play();
 
-    RegisterManagedEffect(object_, request_.lifeTime);
+    RegisterManagedEffect(
+        object_,
+        request_.lifeTime,
+        nullptr,
+        0.0f,
+        0.0f,
+        EFFECT_POOL_TYPE::MESH_VFX,
+        resolvedAssetPath_);
     return object_;
 }
 
 void EffectManager::SpawnForHit(const AttackHitEvent& event_)
 {
     if (!event_.hasHitContact) return;
+
+    std::printf(
+        "[EffectManager::SpawnForHit] particle='%s' emitter='%s' meshVFX='%s' "
+        "position=(%.3f, %.3f, %.3f) normal=(%.3f, %.3f, %.3f)\n",
+        event_.hitParticleAssetPath.c_str(),
+        event_.hitParticleEmitterName.c_str(),
+        event_.hitMeshVFXAssetPath.c_str(),
+        event_.hitPosition.x,
+        event_.hitPosition.y,
+        event_.hitPosition.z,
+        event_.hitNormal.x,
+        event_.hitNormal.y,
+        event_.hitNormal.z);
 
     if (!event_.hitParticleAssetPath.empty())
     {
@@ -602,6 +697,30 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
         request_.normalOffset = event_.hitMeshVFXNormalOffset;
         SpawnMeshVFX(request_);
     }
+}
+
+void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_)
+{
+    if (!object_) return;
+
+    const auto iterator_ = std::find_if(
+        managedEffects.begin(),
+        managedEffects.end(),
+        [&object_](const ManagedEffect& effect_)
+        {
+            return effect_.object.lock() == object_;
+        });
+    if (iterator_ == managedEffects.end()) return;
+
+    if (iterator_->poolType != EFFECT_POOL_TYPE::NONE)
+    {
+        ReleasePooledEffect(*iterator_);
+    }
+    else if (gameObjectManager)
+    {
+        gameObjectManager->Destroy(object_);
+    }
+    managedEffects.erase(iterator_);
 }
 
 DirectX::XMFLOAT3 EffectManager::ApplyNormalOffset(
@@ -632,13 +751,17 @@ void EffectManager::RegisterManagedEffect(
     float lifeTime_,
     const std::shared_ptr<HitBox>& hitBox_,
     float hitStartTime_,
-    float hitEndTime_)
+    float hitEndTime_,
+    EFFECT_POOL_TYPE poolType_,
+    const std::string& assetPath_)
 {
     if (!object_) return;
 
     ManagedEffect managedEffect_{};
     managedEffect_.object = object_;
     managedEffect_.hitBox = hitBox_;
+    managedEffect_.assetPath = assetPath_;
+    managedEffect_.poolType = poolType_;
     managedEffect_.lifeTimer = (std::max)(lifeTime_, 0.0f);
     if (managedEffect_.lifeTimer <= 0.0f)
     {
@@ -647,6 +770,157 @@ void EffectManager::RegisterManagedEffect(
     managedEffect_.hitStartTime = (std::max)(hitStartTime_, 0.0f);
     managedEffect_.hitEndTime = (std::max)(hitEndTime_, managedEffect_.hitStartTime);
     managedEffects.push_back(managedEffect_);
+}
+
+std::shared_ptr<GameObject> EffectManager::AcquireParticleObject(
+    const std::string& resolvedAssetPath_)
+{
+    const std::string assetName_ = BuildAssetNameFromPath(
+        resolvedAssetPath_,
+        "Data/Particle");
+    std::vector<std::shared_ptr<GameObject>>& objects_ =
+        particleObjectPool[assetName_];
+    for (const std::shared_ptr<GameObject>& object_ : objects_)
+    {
+        const std::shared_ptr<ParticleComponent> particle_ =
+            object_ ? object_->GetComponent<ParticleComponent>() : nullptr;
+        if (particle_ && !particle_->IsEnabled())
+        {
+            gameObjectManager->AddObject(object_);
+            return object_;
+        }
+    }
+
+    std::printf(
+        "[EffectManager] Particle pool exhausted: %s size=%zu\n",
+        resolvedAssetPath_.c_str(),
+        objects_.size());
+    return nullptr;
+}
+
+std::shared_ptr<GameObject> EffectManager::AcquireMeshVFXObject(
+    const std::string& resolvedAssetPath_)
+{
+    const std::string assetName_ = BuildAssetNameFromPath(
+        resolvedAssetPath_,
+        "Data/VFX");
+    std::vector<std::shared_ptr<GameObject>>& objects_ =
+        meshVFXObjectPool[assetName_];
+    for (const std::shared_ptr<GameObject>& object_ : objects_)
+    {
+        const std::shared_ptr<MeshVFXComponent> meshVFX_ =
+            object_ ? object_->GetComponent<MeshVFXComponent>() : nullptr;
+        if (meshVFX_ && !meshVFX_->IsEnabled())
+        {
+            gameObjectManager->AddObject(object_);
+            return object_;
+        }
+    }
+
+    std::printf(
+        "[EffectManager] MeshVFX pool exhausted: %s size=%zu\n",
+        resolvedAssetPath_.c_str(),
+        objects_.size());
+    return nullptr;
+}
+
+std::shared_ptr<GameObject> EffectManager::CreateParticlePoolObject(
+    const std::string& resolvedAssetPath_,
+    const ParticleEffectAsset& asset_)
+{
+    (void)resolvedAssetPath_;
+    if (!gameObjectManager) return nullptr;
+    std::shared_ptr<GameObject> object_ =
+        gameObjectManager->Create("PooledParticle");
+    if (!object_) return nullptr;
+    object_->SetNoSaveObject();
+
+    std::shared_ptr<ParticleComponent> particle_ =
+        object_->AddComponent<ParticleComponent>();
+    if (!particle_) return nullptr;
+    particle_->SetAsset(asset_);
+    particle_->ResetRuntime();
+    if (!particle_->HasRuntimeResources())
+    {
+        std::printf(
+            "[EffectManager] Particle pool resource build failed: %s\n",
+            resolvedAssetPath_.c_str());
+        gameObjectManager->Destroy(object_);
+        return nullptr;
+    }
+    particle_->SetEnabled(false);
+    gameObjectManager->DetachObject(object_);
+    return object_;
+}
+
+std::shared_ptr<GameObject> EffectManager::CreateMeshVFXPoolObject(
+    const std::string& resolvedAssetPath_,
+    const MeshVFXAsset& asset_)
+{
+    (void)resolvedAssetPath_;
+    if (!gameObjectManager) return nullptr;
+    std::shared_ptr<GameObject> object_ =
+        gameObjectManager->Create("PooledMeshVFX");
+    if (!object_) return nullptr;
+    object_->SetNoSaveObject();
+
+    std::shared_ptr<MeshVFXComponent> meshVFX_ =
+        object_->AddComponent<MeshVFXComponent>();
+    if (!meshVFX_) return nullptr;
+    meshVFX_->SetAsset(asset_);
+    if (!meshVFX_->HasRuntimeResources())
+    {
+        std::printf(
+            "[EffectManager] MeshVFX pool resource build failed: %s\n",
+            resolvedAssetPath_.c_str());
+        gameObjectManager->Destroy(object_);
+        return nullptr;
+    }
+    meshVFX_->Stop();
+    meshVFX_->Reset();
+    meshVFX_->SetEnabled(false);
+    gameObjectManager->DetachObject(object_);
+    return object_;
+}
+
+void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
+{
+    const std::shared_ptr<GameObject> object_ = effect_.object.lock();
+    if (!object_) return;
+
+    if (const std::shared_ptr<ParticleComponent> particle_ =
+        object_->GetComponent<ParticleComponent>())
+    {
+        particle_->Stop();
+        particle_->ResetRuntime();
+        particle_->SetEnabled(false);
+    }
+    if (const std::shared_ptr<MeshVFXComponent> meshVFX_ =
+        object_->GetComponent<MeshVFXComponent>())
+    {
+        meshVFX_->Stop();
+        meshVFX_->Reset();
+        meshVFX_->SetEnabled(false);
+    }
+    if (const std::shared_ptr<HitBox> hitBox_ = object_->GetComponent<HitBox>())
+    {
+        hitBox_->Deactivate();
+        hitBox_->SetEnabled(false);
+    }
+    if (const std::shared_ptr<ModelAttachmentComponent> attachment_ =
+        object_->GetComponent<ModelAttachmentComponent>())
+    {
+        attachment_->SetEnabled(false);
+    }
+    if (object_->transform)
+    {
+        object_->transform->SetParent(nullptr);
+        object_->transform->localPosition = { 0.0f, 0.0f, 0.0f };
+        object_->transform->localRotation = { 0.0f, 0.0f, 0.0f };
+        object_->transform->localScale = { 1.0f, 1.0f, 1.0f };
+        object_->transform->MarkDirty();
+    }
+    if (gameObjectManager) gameObjectManager->DetachObject(object_);
 }
 
 void EffectManager::CollectJsonAssets(
@@ -761,6 +1035,14 @@ void EffectManager::PreloadParticleAsset(const std::string& path_)
     if (assetName_.empty()) return;
 
     particleAssetCache[assetName_] = asset_;
+    std::vector<std::shared_ptr<GameObject>>& objects_ =
+        particleObjectPool[assetName_];
+    for (size_t index_ = 0; index_ < EFFECT_PREWARM_COUNT; ++index_)
+    {
+        std::shared_ptr<GameObject> object_ =
+            CreateParticlePoolObject(path_, asset_);
+        if (object_) objects_.push_back(object_);
+    }
 }
 
 void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
@@ -776,6 +1058,15 @@ void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
     if (assetName_.empty()) return;
 
     meshVFXAssetCache[assetName_] = component_.GetAsset();
+    const MeshVFXAsset& asset_ = meshVFXAssetCache[assetName_];
+    std::vector<std::shared_ptr<GameObject>>& objects_ =
+        meshVFXObjectPool[assetName_];
+    for (size_t index_ = 0; index_ < EFFECT_PREWARM_COUNT; ++index_)
+    {
+        std::shared_ptr<GameObject> object_ =
+            CreateMeshVFXPoolObject(path_, asset_);
+        if (object_) objects_.push_back(object_);
+    }
 }
 
 std::string EffectManager::BuildAssetNameFromPath(

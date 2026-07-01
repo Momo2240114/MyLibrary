@@ -29,7 +29,7 @@
         "BlendMode": 0,
         "Color": [
             0.43529412150382996,
-            0.32549020648002625,
+            1.0,
             1.0,
             1.0
         ],
@@ -48,7 +48,7 @@
             1.0,
             1.0
         ],
-        "Duration": 0.0,
+        "Duration": 1.0,
         "EdgeColor": [
             1.0,
             0.0,
@@ -72,8 +72,8 @@
             1.0
         ],
         "FresnelNoiseStrength": 0.0,
-        "FresnelPower": 7.0,
-        "FresnelStrength": 0.0,
+        "FresnelPower": 2.690000057220459,
+        "FresnelStrength": 5.449999809265137,
         "GradientDirection": 0,
         "GradientEndUv": 1.0,
         "GradientFixedUv": 0.15299999713897705,
@@ -144,7 +144,7 @@
             0.0
         ],
         "Scale": [
-            1.0,
+            2.619999885559082,
             1.0,
             1.0
         ],

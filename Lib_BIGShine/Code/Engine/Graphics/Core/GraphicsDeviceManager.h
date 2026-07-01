@@ -158,6 +158,7 @@ private:
     int width = 0;
     int height = 0;
     bool fullscreen = false;
+    bool isChangingFullscreen = false;
     WINDOWPLACEMENT windowedPlacement{ sizeof(WINDOWPLACEMENT) };
     DWORD windowedStyle = WS_OVERLAPPEDWINDOW;
     bool vsyncEnabled = false;

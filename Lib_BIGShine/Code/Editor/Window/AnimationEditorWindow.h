@@ -8,12 +8,14 @@
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
+#include "Engine/Graphics/VFX/MeshVFXRenderSystem.h"
 #include <vector>
 
 class AnimationControllerComponent;
 class GltfModelCommponennt;
 class PoseLibraryResource;
 struct CustomAnimation;
+struct AnimEvent;
 
 /// アニメーション制作に必要なプレビュー、ポーズ編集、イベント編集を統合したワークスペース。
 /// 編集対象とは独立したプレビューシーンを所有し、ゲーム本編の状態を変更せずに結果を確認できる。
@@ -45,6 +47,8 @@ private:
     void DrawPoseKeyframeSequencer(CustomAnimation& anim, PoseLibraryResource& poseLibrary, GltfModelCommponennt* modelComp);
     void DrawEventSequencer(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
     void DrawCurveEditor(AnimationControllerComponent* animController_);
+    void PlaySelectedEffectPreview(const AnimEvent& event_);
+    void StopSelectedEffectPreview();
 
     // モデルのノード姿勢を直接編集し、ポーズデータへ反映する。
     void DrawPoseEditMode(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
@@ -105,6 +109,7 @@ private:
     EditorRenderTarget previewTarget;
     ModelRenderSystem previewModelRenderSystem;
     ParticleRenderSystem previewParticleRenderSystem;
+    MeshVFXRenderSystem previewMeshVFXRenderSystem;
     AssetBrowserWindow assetBrowser;
     CameraComponent previewCamera;
     float timelineHeight = 300.0f;
@@ -113,6 +118,9 @@ private:
     bool isPreviewSceneInitialized = false;
     bool autoUpdatePreview = true;
     bool showPreviewGrid = true;
+    std::weak_ptr<GameObject> selectedEffectPreviewObject;
+    bool loopSelectedEffectPreview = false;
+    float selectedEffectPreviewTimer = 0.0f;
     bool keepSceneTransformOnCopy = false;
     int selectedSceneObjectIndex = -1;
     std::string sceneObjectCopyStatus;

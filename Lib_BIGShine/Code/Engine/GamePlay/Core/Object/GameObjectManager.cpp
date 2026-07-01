@@ -125,10 +125,6 @@ void GameObjectManager::Update(float elapsedTime_)
         timeManager->PrepareCache();
     }
 
-    const float defaultTimeScale_ = timeManager->GetCachedScale(
-        static_cast<uint32_t>(TarGetLayerType::Default));
-    const float defaultScaledElapsedTime_ = elapsedTime_ * defaultTimeScale_;
-
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::SyncFromPhysics");
         collisionStepSystem->SyncFromPhysics(elapsedTime_);
@@ -137,7 +133,10 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsUpdate");
 
-        for (auto& object_ : objects)
+        // Animation events can spawn effects while components are updating.
+        // Keep this frame's iteration stable when Create() grows objects.
+        const std::vector<std::shared_ptr<GameObject>> updateObjects_ = objects;
+        for (const std::shared_ptr<GameObject>& object_ : updateObjects_)
         {
             if (!object_) continue;
 
@@ -184,7 +183,10 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
 
-        for (auto& object_ : objects)
+        // Animation events can spawn effects while components are updating.
+        // Keep this frame's iteration stable when Create() grows objects.
+        const std::vector<std::shared_ptr<GameObject>> updateObjects_ = objects;
+        for (const std::shared_ptr<GameObject>& object_ : updateObjects_)
         {
             if (!object_) continue;
 
@@ -205,7 +207,7 @@ void GameObjectManager::Update(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("EffectManager::Update");
-        effectManager->Update(defaultScaledElapsedTime_);
+        effectManager->Update(elapsedTime_);
     }
 
     if (!pendingDestroys.empty())
@@ -263,23 +265,69 @@ void GameObjectManager::Clear()
     pendingStarts.clear();
     pendingDestroys.clear();
     particleComponents.clear();
+
+    // Scene objects were removed, so cached effect pool objects must be
+    // recreated and registered with this manager before the next scene runs.
+    effectManager->RebuildRuntimePools();
 }
 
 void GameObjectManager::AddObject(std::shared_ptr<GameObject> object_)
 {
     if (!object_) return;
 
-    for (const auto& existing_ : objects) {
-        if (existing_->GetName() == object_->GetName()) {
+    for (const std::shared_ptr<GameObject>& existing_ : objects)
+    {
+        if (existing_ == object_) return;
+        if (existing_ && existing_->saveFlg && object_->saveFlg &&
+            existing_->GetName() == object_->GetName())
+        {
             return;
         }
     }
 
     object_->SetManager(this);
+    for (const std::shared_ptr<ColliderComponent>& collider_ :
+        object_->GetComponents<ColliderComponent>())
+    {
+        if (collider_) collisionStepSystem->RegisterCollider(collider_);
+    }
     objects.push_back(object_);
     pendingStarts.push_back(object_);
 }
 
+void GameObjectManager::DetachObject(const std::shared_ptr<GameObject>& object_)
+{
+    if (!object_) return;
+
+    for (const std::shared_ptr<ColliderComponent>& collider_ :
+        object_->GetComponents<ColliderComponent>())
+    {
+        if (collider_) collisionStepSystem->UnregisterCollider(collider_.get());
+    }
+
+    if (selectedObject == object_) selectedObject = nullptr;
+    objects.erase(
+        std::remove(objects.begin(), objects.end(), object_),
+        objects.end());
+    pendingStarts.erase(
+        std::remove(pendingStarts.begin(), pendingStarts.end(), object_),
+        pendingStarts.end());
+    pendingDestroys.erase(
+        std::remove(pendingDestroys.begin(), pendingDestroys.end(), object_),
+        pendingDestroys.end());
+
+    const std::shared_ptr<ParticleComponent> particle_ =
+        object_->GetComponent<ParticleComponent>();
+    particleComponents.erase(
+        std::remove_if(
+            particleComponents.begin(),
+            particleComponents.end(),
+            [&particle_](const std::weak_ptr<ParticleComponent>& component_)
+            {
+                return component_.expired() || component_.lock() == particle_;
+            }),
+        particleComponents.end());
+}
 void GameObjectManager::RemoveObject(const std::string& name_)
 {
     for (const std::shared_ptr<GameObject>& object_ : objects)
@@ -395,6 +443,7 @@ void GameObjectManager::DrawHierarchyGui()
 
     for (auto& object_ : objects)
     {
+        if (!object_ || !object_->saveFlg) continue;
         if (object_->transform->parent.expired())
         {
             DrawHierarchyNode(object_, &objectToDelete_);
@@ -659,6 +708,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
         {
             if (auto childObject_ = childTransform_->gameObject.lock())
             {
+                if (!childObject_->saveFlg) continue;
                 DrawHierarchyNode(childObject_, objectToDelete_);
             }
         }

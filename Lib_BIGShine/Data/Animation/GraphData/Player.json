@@ -726,7 +726,7 @@
                                 "floatValue": 0.0,
                                 "intValue": 0,
                                 "key": "HitParticleAssetPath",
-                                "stringValue": "Data/Particle/HitParticle.json",
+                                "stringValue": "KickImpact_Aqua",
                                 "type": 3
                             },
                             {
@@ -775,6 +775,78 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.6833333373069763
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": true,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.4166666567325592,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.0,
+                            1.5,
+                            0.5
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            58.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                        "meshVFXLifeTime": 0.5,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": true,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.2666666805744171
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.9166666865348816,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "KickShockwave",
+                        "localPosition": [
+                            0.0,
+                            0.6000000238418579,
+                            1.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerKickShockwave_Aqua",
+                        "meshVFXLifeTime": 0.3499999940395355,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.7166666388511658
                     }
                 ],
                 "loop": false,
@@ -1531,7 +1603,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.5166666507720947,
+                        "endTime": 0.46666666865348816,
                         "eventTemplateType": "NONE",
                         "label": "Weapon_Trail",
                         "localPosition": [
@@ -1556,7 +1628,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.21666666865348816
+                        "startTime": 0.28333333134651184
                     },
                     {
                         "actionEnd": "Sword_DisableHitBox",
@@ -1621,6 +1693,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.28333333134651184
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": true,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.46666666865348816,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.4399999976158142,
+                            1.5,
+                            0.5
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            -70.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                        "meshVFXLifeTime": 0.5,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.3166666626930237
                     }
                 ],
                 "loop": false,
@@ -2112,7 +2220,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.550000011920929,
+                        "endTime": 0.6166666746139526,
                         "eventTemplateType": "NONE",
                         "label": "Weapon_Trail_Start",
                         "localPosition": [
@@ -2137,7 +2245,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.11666666716337204
+                        "startTime": 0.30000001192092896
                     },
                     {
                         "actionEnd": "Sword_DisableHitBox",
@@ -2162,7 +2270,7 @@
                                 "floatValue": 0.0,
                                 "intValue": 0,
                                 "key": "HitParticleAssetPath",
-                                "stringValue": "Data/Particle/HitParticle.json",
+                                "stringValue": "SwordHit_Aqua",
                                 "type": 3
                             },
                             {
@@ -2211,6 +2319,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.38333332538604736
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": true,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.5666666626930237,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.0,
+                            1.5,
+                            0.5
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            26.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                        "meshVFXLifeTime": 0.6000000238418579,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.3333333432674408
                     }
                 ],
                 "loop": false,
@@ -2414,7 +2558,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.44999998807907104,
+                        "endTime": 0.5166666507720947,
                         "eventTemplateType": "NONE",
                         "label": "Weapon_Trail",
                         "localPosition": [
@@ -2439,7 +2583,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.0
+                        "startTime": 0.25
                     },
                     {
                         "actionEnd": "Sword_DisableHitBox",
@@ -2513,6 +2657,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.25
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": true,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.4333333373069763,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.0,
+                            1.5,
+                            0.5
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            -31.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                        "meshVFXLifeTime": 0.20000000298023224,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": true,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.23333333432674408
                     }
                 ],
                 "loop": false,

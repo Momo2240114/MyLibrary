@@ -34,6 +34,7 @@ namespace
 
     constexpr const char* INTERNAL_MESH__MODEL_PATH = "__InternalMesh__";
     constexpr const char* INTERNAL_MESH_CYLINDER_MODEL_PATH = "__InternalMeshCylinder__";
+    constexpr const char* INTERNAL_MESH_CONE_MODEL_PATH = "__InternalMeshCone__";
     constexpr const char* INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH = "__InternalMeshSlashCrescent__";
     constexpr const char* INTERNAL_MESH_SLASH_FAN_MODEL_PATH = "__InternalMeshSlashFan__";
     constexpr const char* INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH = "__InternalMeshSlashArcRibbon__";
@@ -527,7 +528,9 @@ namespace
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
     }
 
-    std::shared_ptr<ModelResource> CreateInternalMeshSlashRaisedCrescentModelResource(ID3D11Device* device_)
+    std::shared_ptr<ModelResource> CreateInternalMeshSlashRaisedCrescentModelResource(
+        ID3D11Device* device_,
+        const MeshVFXInternalMeshSettings& settings_)
     {
         if (!device_) return nullptr;
 
@@ -535,9 +538,10 @@ namespace
         auto& mesh_ = resource_->meshes[0];
 
         constexpr int CROSS_SECTION_VERTEX_COUNT = 4;
+        const int segmentCount_ = std::clamp(settings_.segments, 3, 512);
 
         mesh_.vertices.reserve(
-            static_cast<size_t>(INTERNAL_MESH_SLASH_SEGMENTS + 1) *
+            static_cast<size_t>(segmentCount_ + 1) *
             static_cast<size_t>(CROSS_SECTION_VERTEX_COUNT));
 
         // 3面分:
@@ -546,35 +550,40 @@ namespace
         // wallBottom -> wallCenter
         // double sided なので 1Quad = 12 indices
         mesh_.indices.reserve(
-            static_cast<size_t>(INTERNAL_MESH_SLASH_SEGMENTS) *
+            static_cast<size_t>(segmentCount_) *
             3u *
             12u);
 
-        for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        for (int index_ = 0; index_ <= segmentCount_; ++index_)
         {
             const float rate_ = static_cast<float>(index_) /
-                static_cast<float>(INTERNAL_MESH_SLASH_SEGMENTS);
+                static_cast<float>(segmentCount_);
 
-            const float angleDegrees_ = -78.0f + 156.0f * rate_;
+            const float angleDegrees_ = settings_.startAngleDegrees +
+                (settings_.endAngleDegrees - settings_.startAngleDegrees) * rate_;
             const float angle_ = DirectX::XMConvertToRadians(angleDegrees_);
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
             // 両端を細く、中央を太く・高くする。
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
-            const float sharpTaper_ = taper_ * taper_;
+            const float sharpTaper_ = std::pow(
+                (std::max)(taper_, 0.0f),
+                (std::max)(settings_.taperPower, 0.01f));
 
-            const float tipRate_ = 0.02f;
+            const float tipRate_ = std::clamp(settings_.tipRate, 0.0f, 1.0f);
             const float tipFade_ = tipRate_ + (1.0f - tipRate_) * sharpTaper_;
 
-            const float baseRadius_ = 1.12f + 0.05f * taper_;
-            const float width_ = 0.01f + 0.56f * sharpTaper_;
+            const float baseRadius_ = (std::max)(settings_.baseRadius, 0.0001f) +
+                settings_.radiusTaperAmount * taper_;
+            const float width_ = (std::max)(settings_.tipWidth, 0.0f) +
+                (std::max)(settings_.centerWidth, 0.0f) * sharpTaper_;
 
-            const float innerRadius_ = baseRadius_ - width_ * 0.35f;
-            const float outerRadius_ = baseRadius_ + width_ * 1.25f;
+            const float innerRadius_ = baseRadius_ - width_ * settings_.innerWidthScale;
+            const float outerRadius_ = baseRadius_ + width_ * settings_.outerWidthScale;
 
             // 垂直壁の位置。0.45～0.60くらいが使いやすい。
-            const float wallPositionRate_ = 0.50f;
+            const float wallPositionRate_ = std::clamp(settings_.wallPositionRate, 0.0f, 1.0f);
 
             const float wallRadius_ =
                 innerRadius_ * (1.0f - wallPositionRate_) +
@@ -590,8 +599,8 @@ namespace
                 wallRadius_ * (1.0f - tipGather_) +
                 tipRadius_ * tipGather_;
 
-            const float wallHeight_ = 1.10f * tipFade_;
-            const float wallDepth_ = 0.50f * tipFade_;
+            const float wallHeight_ = (std::max)(settings_.wallHeight, 0.0f) * tipFade_;
+            const float wallDepth_ = (std::max)(settings_.wallDepth, 0.0f) * tipFade_;
 
             const DirectX::XMFLOAT3 outerEdge_ =
             {
@@ -602,23 +611,23 @@ namespace
 
             const DirectX::XMFLOAT3 wallCenter_ =
             {
-                sin_ * wallRadius_,
+                sin_ * gatheredWallRadius_,
                 0.0f,
-                cos_ * wallRadius_
+                cos_ * gatheredWallRadius_
             };
 
             const DirectX::XMFLOAT3 wallTop_ =
             {
-                sin_ * wallRadius_,
+                sin_ * gatheredWallRadius_,
                 wallHeight_,
-                cos_ * wallRadius_
+                cos_ * gatheredWallRadius_
             };
 
             const DirectX::XMFLOAT3 wallBottom_ =
             {
-                sin_ * wallRadius_,
+                sin_ * gatheredWallRadius_,
                 -wallDepth_,
-                cos_ * wallRadius_
+                cos_ * gatheredWallRadius_
             };
 
             // 円弧方向の接線。
@@ -683,7 +692,7 @@ namespace
                 1.0f));
         }
 
-        for (int index_ = 0; index_ < INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
+        for (int index_ = 0; index_ < segmentCount_; ++index_)
         {
             const uint32_t current_ =
                 static_cast<uint32_t>(index_ * CROSS_SECTION_VERTEX_COUNT);
@@ -851,6 +860,64 @@ namespace
             mesh_.indices.push_back(bottomNext_);
             mesh_.indices.push_back(topCurrent_);
             mesh_.indices.push_back(topNext_);
+        }
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshConeModelResource(
+        ID3D11Device* device_,
+        float radius_,
+        const MeshVFXInternalMeshSettings& settings_)
+    {
+        if (!device_) return nullptr;
+
+        const float baseRadius_ = (std::max)(radius_, 0.0001f);
+        const float tipRadius_ = baseRadius_ *
+            std::clamp(settings_.coneTipRadiusRate, 0.0f, 1.0f);
+        const float coneLength_ = (std::max)(settings_.coneLength, 0.0001f);
+        const float radiusSlope_ = (baseRadius_ - tipRadius_) / coneLength_;
+        const int segmentCount_ = std::clamp(settings_.segments, 3, 512);
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_CONE_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve(static_cast<size_t>(segmentCount_) * 2);
+        mesh_.indices.reserve(static_cast<size_t>(segmentCount_) * 6);
+
+        for (int index_ = 0; index_ < segmentCount_; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) /
+                static_cast<float>(segmentCount_);
+            const float angle_ = DirectX::XM_2PI * rate_;
+            const float sin_ = std::sin(angle_);
+            const float cos_ = std::cos(angle_);
+            const DirectX::XMVECTOR normalVector_ = DirectX::XMVector3Normalize(
+                DirectX::XMVectorSet(sin_, cos_, -radiusSlope_, 0.0f));
+            DirectX::XMFLOAT3 normal_{};
+            DirectX::XMStoreFloat3(&normal_, normalVector_);
+
+            GltfModelCommponennt::Vertex tipVertex_{};
+            tipVertex_.position = { sin_ * tipRadius_, cos_ * tipRadius_, 0.0f };
+            tipVertex_.normal = normal_;
+            tipVertex_.tangent = { cos_, -sin_, 0.0f, 1.0f };
+            tipVertex_.texcoord = { rate_, 1.0f };
+            mesh_.vertices.push_back(tipVertex_);
+
+            GltfModelCommponennt::Vertex baseVertex_ = tipVertex_;
+            baseVertex_.position = { sin_ * baseRadius_, cos_ * baseRadius_, coneLength_ };
+            baseVertex_.texcoord = { rate_, 0.0f };
+            mesh_.vertices.push_back(baseVertex_);
+        }
+
+        for (int index_ = 0; index_ < segmentCount_; ++index_)
+        {
+            const uint32_t tipCurrent_ = static_cast<uint32_t>(index_ * 2);
+            const uint32_t baseCurrent_ = tipCurrent_ + 1;
+            const uint32_t tipNext_ = static_cast<uint32_t>(
+                ((index_ + 1) % segmentCount_) * 2);
+            const uint32_t baseNext_ = tipNext_ + 1;
+            mesh_.indices.insert(
+                mesh_.indices.end(),
+                { tipCurrent_, baseCurrent_, tipNext_, tipNext_, baseCurrent_, baseNext_ });
         }
 
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
@@ -1177,6 +1244,14 @@ void MeshVFXComponent::Gui()
                 part_.shapeCylinderRadius = (std::max)(part_.shapeCylinderRadius, 0.0001f);
                 LoadPartResource(static_cast<size_t>(partIndex_));
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Use Internal Cone"))
+            {
+                part_.modelPath = INTERNAL_MESH_CONE_MODEL_PATH;
+                part_.meshIndex = 0;
+                part_.shapeCylinderRadius = (std::max)(part_.shapeCylinderRadius, 0.0001f);
+                LoadPartResource(static_cast<size_t>(partIndex_));
+            }
 
             const char* slashPresetPreview_ = "Select Slash Preset";
             if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH) slashPresetPreview_ = "Crescent";
@@ -1470,12 +1545,133 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat3("Position", &part_.position.x, 0.01f);
             ImGui::DragFloat3("Rotation", &part_.rotation.x, 0.5f);
             ImGui::DragFloat3("Scale", &part_.scale.x, 0.01f);
-            if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH)
+            if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
             {
-                if (ImGui::DragFloat("Internal Cylinder Radius", &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
+                const char* radiusLabel_ = part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH
+                    ? "Internal Cone Base Radius"
+                    : "Internal Cylinder Radius";
+                if (ImGui::DragFloat(radiusLabel_, &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
                 {
                     LoadPartResource(static_cast<size_t>(partIndex_));
                 }
+            }
+
+            const bool isEditableInternalMesh_ =
+                part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH;
+            if (isEditableInternalMesh_ && ImGui::TreeNode("Internal Mesh Shape"))
+            {
+                MeshVFXInternalMeshSettings& settings_ = part_.internalMeshSettings;
+                bool shapeChanged_ = false;
+                shapeChanged_ |= ImGui::SliderInt("Segments", &settings_.segments, 3, 256);
+
+                if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
+                {
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Tip Radius Rate",
+                        &settings_.coneTipRadiusRate,
+                        0.005f,
+                        0.0f,
+                        1.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Length",
+                        &settings_.coneLength,
+                        0.01f,
+                        0.001f,
+                        100.0f);
+                }
+                else
+                {
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Start Angle",
+                        &settings_.startAngleDegrees,
+                        0.5f,
+                        -360.0f,
+                        360.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "End Angle",
+                        &settings_.endAngleDegrees,
+                        0.5f,
+                        -360.0f,
+                        360.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Taper Power",
+                        &settings_.taperPower,
+                        0.05f,
+                        0.01f,
+                        16.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Tip Fade Rate",
+                        &settings_.tipRate,
+                        0.005f,
+                        0.0f,
+                        1.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Base Radius",
+                        &settings_.baseRadius,
+                        0.01f,
+                        0.001f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Radius Bulge",
+                        &settings_.radiusTaperAmount,
+                        0.005f,
+                        -100.0f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Tip Width",
+                        &settings_.tipWidth,
+                        0.005f,
+                        0.0f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Center Width",
+                        &settings_.centerWidth,
+                        0.01f,
+                        0.0f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Inner Width Scale",
+                        &settings_.innerWidthScale,
+                        0.01f,
+                        -10.0f,
+                        10.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Outer Width Scale",
+                        &settings_.outerWidthScale,
+                        0.01f,
+                        -10.0f,
+                        10.0f);
+                    shapeChanged_ |= ImGui::SliderFloat(
+                        "Wall Position",
+                        &settings_.wallPositionRate,
+                        0.0f,
+                        1.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Wall Height",
+                        &settings_.wallHeight,
+                        0.01f,
+                        0.0f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Wall Depth",
+                        &settings_.wallDepth,
+                        0.01f,
+                        0.0f,
+                        100.0f);
+                }
+
+                if (ImGui::Button("Reset Shape Defaults"))
+                {
+                    settings_ = MeshVFXInternalMeshSettings{};
+                    shapeChanged_ = true;
+                }
+                if (shapeChanged_)
+                {
+                    LoadPartResource(static_cast<size_t>(partIndex_));
+                }
+                ImGui::TreePop();
             }
 
             if (ImGui::TreeNode("Animation"))
@@ -1539,6 +1735,47 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat2("Base UV Speed", &part_.baseUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Mask UV Speed", &part_.maskUVSpeed.x, 0.01f);
             ImGui::DragFloat2("Noise UV Speed", &part_.noiseUVSpeed.x, 0.01f);
+            const char* samplerModes_[] = { "Wrap", "Clamp", "Border" };
+            int baseSamplerMode_ = static_cast<int>(part_.baseSamplerMode);
+            int normalSamplerMode_ = static_cast<int>(part_.normalSamplerMode);
+            int maskSamplerMode_ = static_cast<int>(part_.maskSamplerMode);
+            int noiseSamplerMode_ = static_cast<int>(part_.noiseSamplerMode);
+            int distortionSamplerMode_ = static_cast<int>(part_.distortionSamplerMode);
+            int edgePatternSamplerMode_ = static_cast<int>(part_.edgePatternSamplerMode);
+            int emissiveSamplerMode_ = static_cast<int>(part_.emissiveSamplerMode);
+            int gradientSamplerMode_ = static_cast<int>(part_.gradientSamplerMode);
+            if (ImGui::Combo("Base Sampler", &baseSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.baseSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(baseSamplerMode_);
+            }
+            if (ImGui::Combo("Normal Sampler", &normalSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.normalSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(normalSamplerMode_);
+            }
+            if (ImGui::Combo("Mask Sampler", &maskSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.maskSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(maskSamplerMode_);
+            }
+            if (ImGui::Combo("Noise Sampler", &noiseSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.noiseSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(noiseSamplerMode_);
+            }
+            if (ImGui::Combo("Distortion Sampler", &distortionSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.distortionSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(distortionSamplerMode_);
+            }
+            if (ImGui::Combo("Edge Pattern Sampler", &edgePatternSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.edgePatternSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(edgePatternSamplerMode_);
+            }
+            if (ImGui::Combo("Emissive Sampler", &emissiveSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.emissiveSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(emissiveSamplerMode_);
+            }
+            if (ImGui::Combo("Gradient Sampler", &gradientSamplerMode_, samplerModes_, IM_ARRAYSIZE(samplerModes_)))
+            {
+                part_.gradientSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(gradientSamplerMode_);
+            }
             ImGui::DragFloat2("Base UV Scale", &part_.baseUVScale.x, 0.01f, 0.001f, 100.0f);
             ImGui::DragFloat2("Mask UV Scale", &part_.maskUVScale.x, 0.01f, 0.001f, 100.0f);
             ImGui::DragFloat2("Noise UV Scale", &part_.noiseUVScale.x, 0.01f, 0.001f, 100.0f);
@@ -1757,6 +1994,26 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["Rotation"] = { part_.rotation.x, part_.rotation.y, part_.rotation.z };
         partJson_["Scale"] = { part_.scale.x, part_.scale.y, part_.scale.z };
         partJson_["InternalMeshCylinderRadius"] = part_.shapeCylinderRadius;
+        const MeshVFXInternalMeshSettings& internalMesh_ = part_.internalMeshSettings;
+        partJson_["InternalMeshSettings"] =
+        {
+            { "Segments", internalMesh_.segments },
+            { "StartAngleDegrees", internalMesh_.startAngleDegrees },
+            { "EndAngleDegrees", internalMesh_.endAngleDegrees },
+            { "TaperPower", internalMesh_.taperPower },
+            { "TipRate", internalMesh_.tipRate },
+            { "BaseRadius", internalMesh_.baseRadius },
+            { "RadiusTaperAmount", internalMesh_.radiusTaperAmount },
+            { "TipWidth", internalMesh_.tipWidth },
+            { "CenterWidth", internalMesh_.centerWidth },
+            { "InnerWidthScale", internalMesh_.innerWidthScale },
+            { "OuterWidthScale", internalMesh_.outerWidthScale },
+            { "WallPositionRate", internalMesh_.wallPositionRate },
+            { "WallHeight", internalMesh_.wallHeight },
+            { "WallDepth", internalMesh_.wallDepth },
+            { "ConeTipRadiusRate", internalMesh_.coneTipRadiusRate },
+            { "ConeLength", internalMesh_.coneLength },
+        };
         partJson_["MeshRotationSpeed"] =
         {
             part_.meshRotationSpeed.x,
@@ -1795,6 +2052,14 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["BaseUVSpeed"] = { part_.baseUVSpeed.x, part_.baseUVSpeed.y };
         partJson_["MaskUVSpeed"] = { part_.maskUVSpeed.x, part_.maskUVSpeed.y };
         partJson_["NoiseUVSpeed"] = { part_.noiseUVSpeed.x, part_.noiseUVSpeed.y };
+        partJson_["BaseSamplerMode"] = static_cast<int>(part_.baseSamplerMode);
+        partJson_["NormalSamplerMode"] = static_cast<int>(part_.normalSamplerMode);
+        partJson_["MaskSamplerMode"] = static_cast<int>(part_.maskSamplerMode);
+        partJson_["NoiseSamplerMode"] = static_cast<int>(part_.noiseSamplerMode);
+        partJson_["DistortionSamplerMode"] = static_cast<int>(part_.distortionSamplerMode);
+        partJson_["EdgePatternSamplerMode"] = static_cast<int>(part_.edgePatternSamplerMode);
+        partJson_["EmissiveSamplerMode"] = static_cast<int>(part_.emissiveSamplerMode);
+        partJson_["GradientSamplerMode"] = static_cast<int>(part_.gradientSamplerMode);
         partJson_["BaseUVScale"] = { part_.baseUVScale.x, part_.baseUVScale.y };
         partJson_["MaskUVScale"] = { part_.maskUVScale.x, part_.maskUVScale.y };
         partJson_["NoiseUVScale"] = { part_.noiseUVScale.x, part_.noiseUVScale.y };
@@ -1916,6 +2181,66 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
             "InternalMeshCylinderRadius",
             partJson_.value("ShapeCylinderRadius", 1.0f));
         part_.shapeCylinderRadius = (std::max)(internalMeshCylinderRadius_, 0.0001f);
+        if (partJson_.contains("InternalMeshSettings") &&
+            partJson_["InternalMeshSettings"].is_object())
+        {
+            const nlohmann::json& internalMeshJson_ = partJson_["InternalMeshSettings"];
+            MeshVFXInternalMeshSettings& internalMesh_ = part_.internalMeshSettings;
+            internalMesh_.segments = std::clamp(
+                internalMeshJson_.value("Segments", internalMesh_.segments),
+                3,
+                512);
+            internalMesh_.startAngleDegrees = internalMeshJson_.value(
+                "StartAngleDegrees",
+                internalMesh_.startAngleDegrees);
+            internalMesh_.endAngleDegrees = internalMeshJson_.value(
+                "EndAngleDegrees",
+                internalMesh_.endAngleDegrees);
+            internalMesh_.taperPower = (std::max)(
+                internalMeshJson_.value("TaperPower", internalMesh_.taperPower),
+                0.01f);
+            internalMesh_.tipRate = std::clamp(
+                internalMeshJson_.value("TipRate", internalMesh_.tipRate),
+                0.0f,
+                1.0f);
+            internalMesh_.baseRadius = (std::max)(
+                internalMeshJson_.value("BaseRadius", internalMesh_.baseRadius),
+                0.0001f);
+            internalMesh_.radiusTaperAmount = internalMeshJson_.value(
+                "RadiusTaperAmount",
+                internalMesh_.radiusTaperAmount);
+            internalMesh_.tipWidth = (std::max)(
+                internalMeshJson_.value("TipWidth", internalMesh_.tipWidth),
+                0.0f);
+            internalMesh_.centerWidth = (std::max)(
+                internalMeshJson_.value("CenterWidth", internalMesh_.centerWidth),
+                0.0f);
+            internalMesh_.innerWidthScale = internalMeshJson_.value(
+                "InnerWidthScale",
+                internalMesh_.innerWidthScale);
+            internalMesh_.outerWidthScale = internalMeshJson_.value(
+                "OuterWidthScale",
+                internalMesh_.outerWidthScale);
+            internalMesh_.wallPositionRate = std::clamp(
+                internalMeshJson_.value("WallPositionRate", internalMesh_.wallPositionRate),
+                0.0f,
+                1.0f);
+            internalMesh_.wallHeight = (std::max)(
+                internalMeshJson_.value("WallHeight", internalMesh_.wallHeight),
+                0.0f);
+            internalMesh_.wallDepth = (std::max)(
+                internalMeshJson_.value("WallDepth", internalMesh_.wallDepth),
+                0.0f);
+            internalMesh_.coneTipRadiusRate = std::clamp(
+                internalMeshJson_.value(
+                    "ConeTipRadiusRate",
+                    internalMesh_.coneTipRadiusRate),
+                0.0f,
+                1.0f);
+            internalMesh_.coneLength = (std::max)(
+                internalMeshJson_.value("ConeLength", internalMesh_.coneLength),
+                0.0001f);
+        }
         ReadFloatArray(partJson_, "MeshRotationSpeed", part_.meshRotationSpeed, 3);
         part_.duration = (std::max)(partJson_.value("Duration", 0.0f), 0.0f);
         part_.loop = partJson_.value("Loop", true);
@@ -1965,6 +2290,22 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         ReadFloatArray(partJson_, "BaseUVSpeed", part_.baseUVSpeed, 2);
         ReadFloatArray(partJson_, "MaskUVSpeed", part_.maskUVSpeed, 2);
         ReadFloatArray(partJson_, "NoiseUVSpeed", part_.noiseUVSpeed, 2);
+        part_.baseSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("BaseSamplerMode", 0), 0, 2));
+        part_.normalSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("NormalSamplerMode", 0), 0, 2));
+        part_.maskSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("MaskSamplerMode", 0), 0, 2));
+        part_.noiseSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("NoiseSamplerMode", 0), 0, 2));
+        part_.distortionSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("DistortionSamplerMode", 0), 0, 2));
+        part_.edgePatternSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("EdgePatternSamplerMode", 0), 0, 2));
+        part_.emissiveSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("EmissiveSamplerMode", 0), 0, 2));
+        part_.gradientSamplerMode = static_cast<MESH_VFX_SAMPLER_MODE>(
+            std::clamp(partJson_.value("GradientSamplerMode", 0), 0, 2));
         ReadFloatArray(partJson_, "BaseUVScale", part_.baseUVScale, 2);
         ReadFloatArray(partJson_, "MaskUVScale", part_.maskUVScale, 2);
         ReadFloatArray(partJson_, "NoiseUVScale", part_.noiseUVScale, 2);
@@ -2178,6 +2519,22 @@ void MeshVFXComponent::RebuildRuntimeResources()
     LoadPartResources();
 }
 
+bool MeshVFXComponent::HasRuntimeResources() const
+{
+    if (asset.parts.empty() || runtimeParts.size() != asset.parts.size())
+    {
+        return false;
+    }
+
+    for (size_t partIndex_ = 0; partIndex_ < asset.parts.size(); ++partIndex_)
+    {
+        const MeshVFXPart& part_ = asset.parts[partIndex_];
+        if (!part_.renderEnabled) continue;
+        if (runtimeParts[partIndex_].modelResource) return true;
+    }
+    return false;
+}
+
 void MeshVFXComponent::LoadPartResources()
 {
     // 全PartのRuntimeリソースを再読み込みする。
@@ -2204,6 +2561,13 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH)
     {
         runtimePart_.modelResource = CreateInternalMeshCylinderModelResource(device_, part_.shapeCylinderRadius);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshConeModelResource(
+            device_,
+            part_.shapeCylinderRadius,
+            part_.internalMeshSettings);
     }
     else if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH)
     {
@@ -2235,7 +2599,9 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     }
     else if (part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH)
     {
-        runtimePart_.modelResource = CreateInternalMeshSlashRaisedCrescentModelResource(device_);
+        runtimePart_.modelResource = CreateInternalMeshSlashRaisedCrescentModelResource(
+            device_,
+            part_.internalMeshSettings);
     }
     else if (!part_.modelPath.empty())
     {

@@ -44,6 +44,13 @@ enum class MESH_VFX_GRADIENT_DIRECTION
     REVERSE,
 };
 
+enum class MESH_VFX_SAMPLER_MODE
+{
+    WRAP,
+    CLAMP,
+    BORDER,
+};
+
 // Mask Texture 1枚分の情報。
 struct MeshVFXMaskLayer
 {
@@ -53,6 +60,28 @@ struct MeshVFXMaskLayer
 };
 
 // MeshVFXの1パーツ分の編集データ。モデル、Texture、UV、発光、歪み、Edgeなどをまとめる。
+struct MeshVFXInternalMeshSettings
+{
+    int segments = 96;
+
+    float startAngleDegrees = -78.0f;
+    float endAngleDegrees = 78.0f;
+    float taperPower = 2.0f;
+    float tipRate = 0.02f;
+    float baseRadius = 1.12f;
+    float radiusTaperAmount = 0.05f;
+    float tipWidth = 0.01f;
+    float centerWidth = 0.56f;
+    float innerWidthScale = 0.35f;
+    float outerWidthScale = 1.25f;
+    float wallPositionRate = 0.50f;
+    float wallHeight = 1.10f;
+    float wallDepth = 0.50f;
+
+    float coneTipRadiusRate = 0.035f;
+    float coneLength = 1.0f;
+};
+
 struct MeshVFXPart
 {
     std::string partAssetPath; // 単体Part Assetとして保存したJSONパス。
@@ -66,6 +95,7 @@ struct MeshVFXPart
     DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };          // Partのローカル回転。度数法。
     DirectX::XMFLOAT3 scale = { 1.0f, 1.0f, 1.0f };             // Partのローカル拡縮。
     float shapeCylinderRadius = 1.0f;
+    MeshVFXInternalMeshSettings internalMeshSettings;
     DirectX::XMFLOAT3 meshRotationSpeed = { 0.0f, 0.0f, 0.0f }; // 時間で加算する回転速度。度/秒。
 
     float duration = 0.0f;            // 0なら時間制限なし。正の値ならPartの再生長。
@@ -93,6 +123,14 @@ struct MeshVFXPart
     DirectX::XMFLOAT2 baseUVSpeed = { 0.0f, -0.5f };      // BaseTextureのUVスクロール速度。
     DirectX::XMFLOAT2 maskUVSpeed = { 0.0f, -0.2f };      // MaskTextureのUVスクロール速度。
     DirectX::XMFLOAT2 noiseUVSpeed = { 0.2f, -0.8f };     // NoiseTextureのUVスクロール速度。
+    MESH_VFX_SAMPLER_MODE baseSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE normalSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE maskSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE noiseSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE distortionSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE edgePatternSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE emissiveSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
+    MESH_VFX_SAMPLER_MODE gradientSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
     DirectX::XMFLOAT2 baseUVScale = { 1.0f, 1.0f };
     DirectX::XMFLOAT2 maskUVScale = { 1.0f, 1.0f };
     DirectX::XMFLOAT2 noiseUVScale = { 1.0f, 1.0f };

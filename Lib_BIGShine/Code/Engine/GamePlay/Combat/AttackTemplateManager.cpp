@@ -5,6 +5,7 @@
 #include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <imgui.h>
@@ -120,7 +121,14 @@ namespace
             for (const std::string& assetKey_ : assets_)
             {
                 const bool selected_ = previewValue_ == assetKey_;
-                if (ImGui::Selectable(assetKey_.c_str(), selected_)) value_ = assetKey_;
+                if (ImGui::Selectable(assetKey_.c_str(), selected_))
+                {
+                    value_ = assetKey_;
+                    std::printf(
+                        "[AttackTemplateManager::GUI] %s selected='%s'\n",
+                        label_,
+                        value_.c_str());
+                }
                 if (selected_) ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
@@ -294,8 +302,29 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.weaponHitBox.activeEndTime = weapon_.value("activeEndTime", 0.18f);
     const Json_ hitEffect_ = json_.value("hitEffect", Json_::object());
     result_.hitEffect.spawnOnHit = hitEffect_.value("spawnOnHit", true);
-    result_.hitEffect.hitParticleAssetPath = hitEffect_.value("hitParticleAssetPath", std::string{});
-    result_.hitEffect.hitMeshVfxAssetPath = hitEffect_.value("hitMeshVfxAssetPath", std::string{});
+    result_.hitEffect.hitParticleAssetPath = hitEffect_.value(
+        "hitParticleAssetPath",
+        hitEffect_.value(
+            "hitParticlePath",
+            hitEffect_.value(
+                "particlePath",
+                hitEffect_.value("hitEffectPath", std::string{}))));
+    result_.hitEffect.hitMeshVfxAssetPath = hitEffect_.value(
+        "hitMeshVfxAssetPath",
+        hitEffect_.value(
+            "hitMeshVFXAssetPath",
+            hitEffect_.value("meshVfxPath", std::string{})));
+    result_.hitEffect.hitParticleEmitterName = hitEffect_.value("hitParticleEmitterName", std::string{});
+    result_.hitEffect.hitParticleLifeTime = (std::max)(hitEffect_.value("hitParticleLifeTime", 1.0f), 0.0f);
+    result_.hitEffect.hitParticleNormalOffset = hitEffect_.value("hitParticleNormalOffset", 0.0f);
+    result_.hitEffect.hitMeshVfxLifeTime = (std::max)(hitEffect_.value("hitMeshVfxLifeTime", 1.0f), 0.0f);
+    result_.hitEffect.hitMeshVfxNormalOffset = hitEffect_.value("hitMeshVfxNormalOffset", 0.0f);
+    std::printf(
+        "[AttackTemplateManager::LoadTemplate] id='%s' hitParticleAssetPath='%s' "
+        "hitMeshVfxAssetPath='%s'\n",
+        result_.id.c_str(),
+        result_.hitEffect.hitParticleAssetPath.c_str(),
+        result_.hitEffect.hitMeshVfxAssetPath.c_str());
 
     for (const Json_& slashJson_ : json_.value("slashEffects", Json_::array()))
     {
@@ -353,6 +382,12 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
 bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
 {
     if (attackTemplate_.id.empty()) return false;
+    std::printf(
+        "[AttackTemplateManager::SaveTemplate] id='%s' hitParticleAssetPath='%s' "
+        "hitMeshVfxAssetPath='%s'\n",
+        attackTemplate_.id.c_str(),
+        attackTemplate_.hitEffect.hitParticleAssetPath.c_str(),
+        attackTemplate_.hitEffect.hitMeshVfxAssetPath.c_str());
     Json_ slashEffects_ = Json_::array();
     for (const SlashEffectTemplate& slash_ : attackTemplate_.slashEffects)
     {
@@ -414,7 +449,12 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
             { "activeEndTime", attackTemplate_.weaponHitBox.activeEndTime } } },
         { "hitEffect", { { "spawnOnHit", attackTemplate_.hitEffect.spawnOnHit },
             { "hitParticleAssetPath", attackTemplate_.hitEffect.hitParticleAssetPath },
-            { "hitMeshVfxAssetPath", attackTemplate_.hitEffect.hitMeshVfxAssetPath } } },
+            { "hitParticleEmitterName", attackTemplate_.hitEffect.hitParticleEmitterName },
+            { "hitParticleLifeTime", attackTemplate_.hitEffect.hitParticleLifeTime },
+            { "hitParticleNormalOffset", attackTemplate_.hitEffect.hitParticleNormalOffset },
+            { "hitMeshVfxAssetPath", attackTemplate_.hitEffect.hitMeshVfxAssetPath },
+            { "hitMeshVfxLifeTime", attackTemplate_.hitEffect.hitMeshVfxLifeTime },
+            { "hitMeshVfxNormalOffset", attackTemplate_.hitEffect.hitMeshVfxNormalOffset } } },
         { "slashEffects", slashEffects_ },
         { "attackEffects", attackEffects_ }
     };
@@ -722,12 +762,34 @@ bool AttackTemplateManager::DrawEditorContent(
             effectManager_,
             true);
 
+        ImGui::InputText(
+            "Particle Emitter",
+            &attackTemplate_->hitEffect.hitParticleEmitterName);
+        ImGui::DragFloat(
+            "Particle Life Time",
+            &attackTemplate_->hitEffect.hitParticleLifeTime,
+            0.01f,
+            0.0f);
+        ImGui::DragFloat(
+            "Particle Normal Offset",
+            &attackTemplate_->hitEffect.hitParticleNormalOffset,
+            0.01f);
+
         DrawAssetPathCombo(
             "Mesh VFX Asset",
             attackTemplate_->hitEffect.hitMeshVfxAssetPath,
             meshVfxAssets_,
             effectManager_,
             false);
+        ImGui::DragFloat(
+            "Mesh VFX Life Time",
+            &attackTemplate_->hitEffect.hitMeshVfxLifeTime,
+            0.01f,
+            0.0f);
+        ImGui::DragFloat(
+            "Mesh VFX Normal Offset",
+            &attackTemplate_->hitEffect.hitMeshVfxNormalOffset,
+            0.01f);
     }
 
     // =========================================================

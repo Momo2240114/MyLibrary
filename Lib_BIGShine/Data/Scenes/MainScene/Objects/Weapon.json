@@ -151,12 +151,12 @@
                             0.0,
                             0.0
                         ],
-                        "BlendMode": 0,
+                        "BlendMode": 1,
                         "Color": [
+                            0.2800000011920929,
+                            0.6800000071525574,
                             1.0,
-                            1.0,
-                            1.0,
-                            1.0
+                            0.5799999833106995
                         ],
                         "DissolveCurveName": "",
                         "DissolveEdgeColor": [
@@ -175,9 +175,9 @@
                         ],
                         "Duration": 0.0,
                         "EdgeColor": [
+                            0.7800000309944153,
+                            0.949999988079071,
                             1.0,
-                            0.7490196228027344,
-                            0.0,
                             1.0
                         ],
                         "EdgePatternMode": 0,
@@ -188,17 +188,17 @@
                             1.0
                         ],
                         "EmissiveCurveName": "",
-                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseAmount": 0.05000000074505806,
                         "EmissivePulseSpeed": 2.0,
-                        "EmissiveStrength": 3.0,
+                        "EmissiveStrength": 2.200000047683716,
                         "EmissiveTexturePath": "",
                         "EmissiveUVScale": [
                             1.0,
                             1.0
                         ],
                         "FresnelNoiseStrength": 0.0,
-                        "FresnelPower": 0.10000000149011612,
-                        "FresnelStrength": 0.019999999552965164,
+                        "FresnelPower": 2.5,
+                        "FresnelStrength": 0.18000000715255737,
                         "GradientDirection": 0,
                         "GradientEndUv": 1.0,
                         "GradientFixedUv": 0.5,
@@ -209,8 +209,8 @@
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": false,
-                        "MaskDistortionOpacity": 0.6100000143051147,
-                        "MaskDistortionStrength": 16.0,
+                        "MaskDistortionOpacity": 0.2199999988079071,
+                        "MaskDistortionStrength": 2.5,
                         "MaskLayers": [
                             {
                                 "BlendMode": 0,
@@ -219,6 +219,7 @@
                             }
                         ],
                         "MaskTexturePath": "",
+                        "MaskSamplerMode": 1,
                         "MaskUVRotation": -90.0,
                         "MaskUVRotationSpeed": 0.0,
                         "MaskUVScale": [
@@ -236,7 +237,8 @@
                             0.0
                         ],
                         "ModelPath": "Data/Model/VFX/SM_Free_Magic_Plane1.glb",
-                        "NoiseStrength": 0.05000000074505806,
+                        "NoiseStrength": 0.02500000037252903,
+                        "NoiseSamplerMode": 0,
                         "NoiseTexturePath": "",
                         "NoiseTexturePaths": [
                             "Data/Texture/Trail/T_TrailMask_06.PNG"
@@ -252,6 +254,7 @@
                             -0.20000000298023224
                         ],
                         "NormalStrength": 1.0,
+                        "NormalSamplerMode": 1,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
                         "NormalUVScale": [
                             1.0,
@@ -284,8 +287,8 @@
                             1.0,
                             1.0
                         ],
-                        "SilhouetteEdgePower": 11.350000381469727,
-                        "SilhouetteEdgeStrength": 16.0,
+                        "SilhouetteEdgePower": 4.0,
+                        "SilhouetteEdgeStrength": 0.699999988079071,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0010000000474974513,
                         "UVRotationCenter": [
@@ -296,7 +299,7 @@
                         "UVScrollCurveName": "",
                         "UseBackFaceBoost": false,
                         "UseDissolveEdge": false,
-                        "UseEdgeHighlight": false,
+                        "UseEdgeHighlight": true,
                         "UseFresnel": true,
                         "UseFresnelNoise": false,
                         "UseGradientTexture": false,
@@ -321,9 +324,9 @@
                 ],
                 "PlaybackSpeed": 1.0,
                 "TrailEmitting": true,
-                "TrailLifeTime": 0.20000000298023224,
-                "TrailMaxSampleCount": 64,
-                "TrailMinimumSampleDistance": 0.009999999776482582,
+                "TrailLifeTime": 0.23000000417232513,
+                "TrailMaxSampleCount": 96,
+                "TrailMinimumSampleDistance": 0.006000000052154064,
                 "WeaponBladeGuideRadius": 0.0949999988079071,
                 "WeaponBladeLength": 80.0,
                 "WeaponRootOffset": [

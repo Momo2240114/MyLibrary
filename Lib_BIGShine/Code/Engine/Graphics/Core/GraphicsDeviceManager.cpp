@@ -262,6 +262,11 @@ void GraphicsDeviceManager::Shutdown()
  */
 void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
 {
+    if (isChangingFullscreen || (width == newWidth_ && height == newHeight_))
+    {
+        return;
+    }
+
     if (!device || !immediateContext || !swapChain || newWidth_ <= 0 || newHeight_ <= 0)
     {
         return;
@@ -324,6 +329,9 @@ void GraphicsDeviceManager::SetFullscreen(bool enabled_)
         return;
     }
 
+    isChangingFullscreen = true;
+    fullscreen = enabled_;
+
     if (enabled_)
     {
         windowedStyle = static_cast<DWORD>(GetWindowLongPtrW(windowHandle, GWL_STYLE));
@@ -334,6 +342,8 @@ void GraphicsDeviceManager::SetFullscreen(bool enabled_)
         MONITORINFO monitorInfo_{ sizeof(MONITORINFO) };
         if (!GetMonitorInfoW(monitor_, &monitorInfo_))
         {
+            isChangingFullscreen = false;
+            fullscreen = false;
             return;
         }
 
@@ -348,14 +358,21 @@ void GraphicsDeviceManager::SetFullscreen(bool enabled_)
     }
     else
     {
-        SetWindowLongPtrW(windowHandle, GWL_STYLE, static_cast<LONG_PTR>(windowedStyle));
+        SetWindowLongPtrW(windowHandle, GWL_STYLE,
+            static_cast<LONG_PTR>(windowedStyle | WS_OVERLAPPEDWINDOW));
         SetWindowPlacement(windowHandle, &windowedPlacement);
         SetWindowPos(windowHandle, nullptr, 0, 0, 0, 0,
             SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE |
             SWP_NOZORDER | SWP_NOOWNERZORDER);
     }
 
-    fullscreen = enabled_;
+    isChangingFullscreen = false;
+
+    RECT clientRect_{};
+    if (GetClientRect(windowHandle, &clientRect_))
+    {
+        OnResize(clientRect_.right - clientRect_.left, clientRect_.bottom - clientRect_.top);
+    }
 }
 
 /**

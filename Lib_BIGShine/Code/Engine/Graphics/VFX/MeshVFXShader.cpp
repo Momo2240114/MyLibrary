@@ -298,6 +298,14 @@ void MeshVFXShader::UpdatePart(
     constants_.useDissolveEdge = part_.useDissolveEdge ? 1u : 0u;
     constants_.useFresnelNoise = part_.useFresnelNoise ? 1u : 0u;
     constants_.useBackFaceBoost = part_.useBackFaceBoost ? 1u : 0u;
+    constants_.baseSamplerMode = static_cast<uint32_t>(part_.baseSamplerMode);
+    constants_.maskSamplerMode = static_cast<uint32_t>(part_.maskSamplerMode);
+    constants_.noiseSamplerMode = static_cast<uint32_t>(part_.noiseSamplerMode);
+    constants_.normalSamplerMode = static_cast<uint32_t>(part_.normalSamplerMode);
+    constants_.distortionSamplerMode = static_cast<uint32_t>(part_.distortionSamplerMode);
+    constants_.edgePatternSamplerMode = static_cast<uint32_t>(part_.edgePatternSamplerMode);
+    constants_.emissiveSamplerMode = static_cast<uint32_t>(part_.emissiveSamplerMode);
+    constants_.gradientSamplerMode = static_cast<uint32_t>(part_.gradientSamplerMode);
 
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->UpdateSubresource(partConstantBuffer.Get(), 0, nullptr, &constants_, 0, 0);

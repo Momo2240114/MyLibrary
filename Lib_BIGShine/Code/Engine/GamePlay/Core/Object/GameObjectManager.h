@@ -119,6 +119,7 @@ public:
     std::shared_ptr<GameObject> GetSelectedObject() { return selectedObject; }
 
     void AddObject(std::shared_ptr<GameObject> object_);
+    void DetachObject(const std::shared_ptr<GameObject>& object_);
     void RemoveObject(const std::string& name_);
 
     // ó‘Ô‚ğq‚Ë‚é‘‹Œû

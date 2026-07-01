@@ -67,6 +67,8 @@ public:
 
     void Play();
     void Stop();
+    void ResetRuntime();
+    bool HasRuntimeResources() const;
     bool PlayEmitter(const std::string& emitterName_);
     bool StopEmitter(const std::string& emitterName_);
     bool TriggerEmitter(const std::string& emitterName_);
