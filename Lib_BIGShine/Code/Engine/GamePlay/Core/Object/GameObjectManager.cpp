@@ -2,6 +2,7 @@
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/PhysXSystem.h"
 #include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/Physics/Collision.h"
@@ -49,6 +50,7 @@ void GameObjectManager::Initialize()
 void GameObjectManager::Update(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("GameObjectManager::Update");
+    float worldDeltaTime_ = elapsedTime_;
 
     {
         BS_PROFILE_SCOPE("AttackSystem::BeginFrame");
@@ -123,11 +125,14 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("TimeManager::PrepareCache");
         timeManager->PrepareCache();
+        const float worldScale_ = timeManager->GetCachedScale(0u);
+        worldDeltaTime_ = elapsedTime_ * worldScale_;
+        PhysXSystem::SetTimeScale(worldScale_);
     }
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::SyncFromPhysics");
-        collisionStepSystem->SyncFromPhysics(elapsedTime_);
+        collisionStepSystem->SyncFromPhysics(worldDeltaTime_);
     }
 
     {
@@ -177,7 +182,7 @@ void GameObjectManager::Update(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::Step");
-        collisionStepSystem->Step(elapsedTime_);
+        collisionStepSystem->Step(worldDeltaTime_);
     }
 
     {
@@ -207,7 +212,7 @@ void GameObjectManager::Update(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("EffectManager::Update");
-        effectManager->Update(elapsedTime_);
+        effectManager->Update(worldDeltaTime_);
     }
 
     if (!pendingDestroys.empty())
@@ -1225,12 +1230,13 @@ void GameObjectManager::RegisterAttackCallbacks()
     attackSystem->AddHitCallback(
         [this](const AttackHitEvent& event_)
         {
-            if (timeManager && event_.hitStopDuration > 0.0f && event_.hitStopLayerMask != 0u)
+            if (timeManager && event_.hitStopDuration > 0.0f)
             {
                 timeManager->TriggerHitStop(
-                    event_.hitStopLayerMask,
+                    static_cast<uint32_t>(TarGetLayerType::All),
                     event_.hitStopDuration,
                     event_.hitStopScale);
+                PhysXSystem::SetTimeScale(event_.hitStopScale);
             }
 
             if (effectManager && event_.hasHitContact)

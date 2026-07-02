@@ -1,0 +1,38 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "damage": 4.0,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.06,
+        "hitStopScale": 0.0,
+        "knockBackPower": 1.0,
+        "knockBackType": 0
+    },
+    "attackEffects": [],
+    "displayName": "WeakAttack_04_Sword",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.4,
+        "hitParticleNormalOffset": 0.05,
+        "spawnOnHit": true
+    },
+    "id": "WeakAttack04Sword",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.1,
+        "activeStartTime": 0.0,
+        "enabled": true,
+        "endNodeName": "TrailEnd",
+        "hitBoxName": "Sword",
+        "radius": 26.0,
+        "startNodeName": "TrailStart"
+    }
+}

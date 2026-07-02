@@ -11,7 +11,8 @@ public:
     {
         SPRING_BONE,
         FOOT,
-        CLOTH_BONE
+        CLOTH_BONE,
+        LOOK_AT
     };
 
     struct IKChain
@@ -36,6 +37,27 @@ public:
         int clothOrder = 0;
         bool collideWithBodyColliders = true;
         bool enabled = true;
+
+        // FootIKComponent settings (used only when type is FOOT).
+        std::string footPoleNodeName;
+        float footMaxStepUp = 0.45f;
+        float footMaxStepDown = 0.75f;
+        float footHeightOffset = 0.03f;
+        float footPositionSpeed = 18.0f;
+        float footRotationSpeed = 14.0f;
+        float footBendWeight = 0.8f;
+        int footSolverIterations = 8;
+        bool footIncludeDynamicColliders = false;
+        bool footAlignToGround = true;
+
+        // HumanLookAtIKComponent settings (used only when type is LOOK_AT).
+        DirectX::XMFLOAT3 lookForwardAxis = { 0.0f, 0.0f, 1.0f };
+        float lookMaxYawDegrees = 70.0f;
+        float lookMaxPitchDegrees = 35.0f;
+        float lookRootWeight = 0.18f;
+        float lookTipWeight = 1.0f;
+        float lookShieldShoulderYawDegrees = 18.0f;
+        float lookBlendSpeed = 8.0f;
 
         float startLift = 0.08f;          // èâä˙ÇæÇØè„Ç…ì¶Ç™Ç∑ó 
         int startCollisionWarmup = 4;     // èâä˙âüÇµèoÇµâÒêî
@@ -83,6 +105,8 @@ public:
     void Deserialize(const nlohmann::json& j_) override;
 
     IKChain& AddSpringChain(const std::string& name_, const std::string& rootNodeName_, const std::string& tipNodeName_);
+    IKChain& AddFootChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
+    IKChain& AddLookAtChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     std::vector<IKChain>& GetChains() { return chains; }
     const std::vector<IKChain>& GetChains() const { return chains; }
     std::vector<BodyCollisionSphere>& GetBodyCollisionSpheres() { return bodyCollisionSpheres; }

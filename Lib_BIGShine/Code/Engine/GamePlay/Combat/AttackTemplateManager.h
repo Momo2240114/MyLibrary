@@ -5,6 +5,7 @@
 #include <DirectXMath.h>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class GameObjectManager;
@@ -150,11 +151,14 @@ public:
     bool DrawEditorContent(const std::string& id_);
 
 private:
+    std::string ResolveRenamedTemplateId(const std::string& id_) const;
+
     std::vector<AttackTemplate> templates;
     std::string editingTemplateId;
     std::string duplicateTemplateId;
     std::string editingIdBuffer;
     std::string renamedTemplateId;
+    std::unordered_map<std::string, std::string> renamedTemplateIds;
     bool editorOpen = false;
     bool loaded = false;
 };

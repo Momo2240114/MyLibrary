@@ -588,10 +588,25 @@ void IKMapComponent::Gui()
         ImGui::TextDisabled("Requires GltfModel on the same GameObject.");
         return;
     }
-    ImGui::TextDisabled("IKMap stores IK chain definitions. SpringBoneSimulationComponent runs simulation.");
+    ImGui::TextDisabled("IKMap stores Spring, Cloth and Foot IK chain definitions.");
     if (ImGui::Button("Add Hair Chain"))
     {
         chains.emplace_back();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Add Foot L"))
+    {
+        AddFootChain("FootL");
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Add Foot R"))
+    {
+        AddFootChain("FootR");
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Add Look Chain"))
+    {
+        AddLookAtChain("LookAt");
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset Simulation"))
@@ -648,13 +663,16 @@ void IKMapComponent::Gui()
         bodyCollisionSpheres.erase(bodyCollisionSpheres.begin() + removeSphereIndex_);
     }
 
-    ImGui::SeparatorText("Spring / Cloth Bone Chains");
+    ImGui::SeparatorText("IK Chains");
     int removeIndex_ = -1;
     for (size_t chainIndex_ = 0; chainIndex_ < chains.size(); ++chainIndex_)
     {
         auto& chain_ = chains[chainIndex_];
         ImGui::PushID(static_cast<int>(chainIndex_));
-        const char* chainTreeLabel_ = chain_.type == IK_TYPE::CLOTH_BONE ? "Cloth Bone Chain" : "Spring Bone Chain";
+        const char* chainTreeLabel_ = "Spring Bone Chain";
+        if (chain_.type == IK_TYPE::CLOTH_BONE) chainTreeLabel_ = "Cloth Bone Chain";
+        if (chain_.type == IK_TYPE::FOOT) chainTreeLabel_ = "Foot IK Chain";
+        if (chain_.type == IK_TYPE::LOOK_AT) chainTreeLabel_ = "Look At IK Chain";
         if (ImGui::TreeNode(chainTreeLabel_))
         {
             ImGui::Checkbox("Enabled", &chain_.enabled);
@@ -662,11 +680,18 @@ void IKMapComponent::Gui()
             strncpy_s(nameBuffer_, chain_.name.c_str(), sizeof(nameBuffer_));
             if (ImGui::InputText("Name", nameBuffer_, sizeof(nameBuffer_))) chain_.name = nameBuffer_;
 
-            int typeIndex_ = chain_.type == IK_TYPE::CLOTH_BONE ? 1 : 0;
-            const char* typeNames_[] = { "Spring Bone", "Cloth Bone" };
-            if (ImGui::Combo("Simulation Type", &typeIndex_, typeNames_, IM_ARRAYSIZE(typeNames_)))
+            int typeIndex_ = 0;
+            if (chain_.type == IK_TYPE::FOOT) typeIndex_ = 1;
+            if (chain_.type == IK_TYPE::CLOTH_BONE) typeIndex_ = 2;
+            if (chain_.type == IK_TYPE::LOOK_AT) typeIndex_ = 3;
+            const char* typeNames_[] = { "Spring Bone", "Foot IK", "Cloth Bone", "Look At IK" };
+            if (ImGui::Combo("IK Type", &typeIndex_, typeNames_, IM_ARRAYSIZE(typeNames_)))
             {
-                chain_.type = typeIndex_ == 1 ? IK_TYPE::CLOTH_BONE : IK_TYPE::SPRING_BONE;
+                chain_.type = typeIndex_ == 1
+                    ? IK_TYPE::FOOT
+                    : (typeIndex_ == 2
+                        ? IK_TYPE::CLOTH_BONE
+                        : (typeIndex_ == 3 ? IK_TYPE::LOOK_AT : IK_TYPE::SPRING_BONE));
                 ResetSimulation();
             }
             if (chain_.type == IK_TYPE::CLOTH_BONE)
@@ -714,36 +739,87 @@ void IKMapComponent::Gui()
                 ImGui::EndCombo();
             }
 
-            ImGui::DragFloat("Gravity", &chain_.gravity, 0.1f, 0.0f, 100.0f);
-            if (ImGui::Button("Apply Rope Preset"))
+            if (chain_.type == IK_TYPE::SPRING_BONE || chain_.type == IK_TYPE::CLOTH_BONE)
             {
-                chain_.damping = 0.96f;
-                chain_.stiffness = 0.01f;
-                chain_.bendStiffness = 0.02f;
-                chain_.solverSubsteps = 2;
-                chain_.solverIterations = 6;
-                chain_.initialized = false;
-            }
+                ImGui::DragFloat("Gravity", &chain_.gravity, 0.1f, 0.0f, 100.0f);
+                if (ImGui::Button("Apply Rope Preset"))
+                {
+                    chain_.damping = 0.96f;
+                    chain_.stiffness = 0.01f;
+                    chain_.bendStiffness = 0.02f;
+                    chain_.solverSubsteps = 2;
+                    chain_.solverIterations = 6;
+                    chain_.initialized = false;
+                }
 
-            ImGui::DragFloat("Start Lift", &chain_.startLift, 0.001f, -1.0f, 1.0f);
-            ImGui::DragInt("Start Collision Warmup", &chain_.startCollisionWarmup, 0.1f, 0, 16);
-            ImGui::SliderFloat("Damping", &chain_.damping, 0.0f, 0.999f);
-            ImGui::SliderFloat("Animation Stiffness", &chain_.stiffness, 0.0f, 1.0f);
-            ImGui::SliderFloat("Bend Stiffness", &chain_.bendStiffness, 0.0f, 1.0f);
-            ImGui::SliderFloat("Tip Stiffness Scale", &chain_.tipStiffnessScale, 0.0f, 1.0f);
-            ImGui::TextDisabled("Root uses full stiffness; the tip uses this stiffness scale.");
-            ImGui::SliderFloat("Root Rotation Follow", &chain_.rootRotationFollow, 0.0f, 1.0f);
-            ImGui::TextDisabled("Lower values preserve more turning inertia.");
-            ImGui::DragInt("Solver Substeps", &chain_.solverSubsteps, 0.1f, 1, 8);
-            ImGui::DragInt("Solver Iterations", &chain_.solverIterations, 0.1f, 1, 16);
-            ImGui::TextDisabled("More iterations make the chain behave like a tighter rope.");
-            ImGui::SliderFloat("Influence", &chain_.influence, 0.0f, 1.0f);
-            ImGui::Checkbox("Collide With Body Spheres", &chain_.collideWithBodyColliders);
-            if (chain_.collideWithBodyColliders)
-            {
-                ImGui::DragFloat("Collision Radius", &chain_.collisionRadius, 0.001f, 0.0f, 1.0f);
-                ImGui::TextDisabled("Keeps spring points outside registered body spheres.");
+                ImGui::DragFloat("Start Lift", &chain_.startLift, 0.001f, -1.0f, 1.0f);
+                ImGui::DragInt("Start Collision Warmup", &chain_.startCollisionWarmup, 0.1f, 0, 16);
+                ImGui::SliderFloat("Damping", &chain_.damping, 0.0f, 0.999f);
+                ImGui::SliderFloat("Animation Stiffness", &chain_.stiffness, 0.0f, 1.0f);
+                ImGui::SliderFloat("Bend Stiffness", &chain_.bendStiffness, 0.0f, 1.0f);
+                ImGui::SliderFloat("Tip Stiffness Scale", &chain_.tipStiffnessScale, 0.0f, 1.0f);
+                ImGui::TextDisabled("Root uses full stiffness; the tip uses this stiffness scale.");
+                ImGui::SliderFloat("Root Rotation Follow", &chain_.rootRotationFollow, 0.0f, 1.0f);
+                ImGui::TextDisabled("Lower values preserve more turning inertia.");
+                ImGui::DragInt("Solver Substeps", &chain_.solverSubsteps, 0.1f, 1, 8);
+                ImGui::DragInt("Solver Iterations", &chain_.solverIterations, 0.1f, 1, 16);
+                ImGui::TextDisabled("More iterations make the chain behave like a tighter rope.");
+                ImGui::Checkbox("Collide With Body Spheres", &chain_.collideWithBodyColliders);
+                if (chain_.collideWithBodyColliders)
+                {
+                    ImGui::DragFloat("Collision Radius", &chain_.collisionRadius, 0.001f, 0.0f, 1.0f);
+                    ImGui::TextDisabled("Keeps spring points outside registered body spheres.");
+                }
             }
+            else if (chain_.type == IK_TYPE::FOOT)
+            {
+                ImGui::TextDisabled("Solved by FootIKComponent after the animation pose is applied.");
+                const char* polePreview_ = chain_.footPoleNodeName.empty()
+                    ? "Animation Bend Direction"
+                    : chain_.footPoleNodeName.c_str();
+                if (ImGui::BeginCombo("Pole Node", polePreview_))
+                {
+                    const bool useAnimationDirection_ = chain_.footPoleNodeName.empty();
+                    if (ImGui::Selectable("Animation Bend Direction", useAnimationDirection_))
+                    {
+                        chain_.footPoleNodeName.clear();
+                    }
+                    for (const auto& node_ : nodes_)
+                    {
+                        if (ImGui::Selectable(node_.name.c_str(), chain_.footPoleNodeName == node_.name))
+                        {
+                            chain_.footPoleNodeName = node_.name;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::SliderFloat("Bend Direction Weight", &chain_.footBendWeight, 0.0f, 1.0f);
+                ImGui::DragFloat("Max Step Up", &chain_.footMaxStepUp, 0.01f, 0.0f, 5.0f);
+                ImGui::DragFloat("Max Step Down", &chain_.footMaxStepDown, 0.01f, 0.0f, 5.0f);
+                ImGui::DragFloat("Foot Height Offset", &chain_.footHeightOffset, 0.001f, -1.0f, 1.0f);
+                ImGui::DragFloat("Position Speed", &chain_.footPositionSpeed, 0.1f, 0.0f, 100.0f);
+                ImGui::DragFloat("Rotation Speed", &chain_.footRotationSpeed, 0.1f, 0.0f, 100.0f);
+                ImGui::DragInt("Foot Solver Iterations", &chain_.footSolverIterations, 0.1f, 1, 32);
+                ImGui::Checkbox("Include Dynamic Ground", &chain_.footIncludeDynamicColliders);
+                ImGui::Checkbox("Align Foot To Ground", &chain_.footAlignToGround);
+            }
+            else if (chain_.type == IK_TYPE::LOOK_AT)
+            {
+                ImGui::TextDisabled("Solved by HumanLookAtIKComponent after the animation pose is applied.");
+                ImGui::DragFloat3("Local Forward Axis", &chain_.lookForwardAxis.x, 0.01f, -1.0f, 1.0f);
+                ImGui::DragFloat("Max Yaw Degrees", &chain_.lookMaxYawDegrees, 1.0f, 0.0f, 180.0f);
+                ImGui::DragFloat("Max Pitch Degrees", &chain_.lookMaxPitchDegrees, 1.0f, 0.0f, 89.0f);
+                ImGui::SliderFloat("Root Rotation Weight", &chain_.lookRootWeight, 0.0f, 1.0f);
+                ImGui::SliderFloat("Tip Rotation Weight", &chain_.lookTipWeight, 0.0f, 1.0f);
+                ImGui::DragFloat(
+                    "Shield Shoulder Yaw",
+                    &chain_.lookShieldShoulderYawDegrees,
+                    1.0f,
+                    -90.0f,
+                    90.0f);
+                ImGui::DragFloat("Look Blend Speed", &chain_.lookBlendSpeed, 0.1f, 0.0f, 50.0f);
+            }
+            ImGui::SliderFloat("Influence", &chain_.influence, 0.0f, 1.0f);
             ImGui::Text("Resolved Bones: %d", static_cast<int>(chain_.nodeIndices.size()));
             if (ImGui::Button("Remove Chain")) removeIndex_ = static_cast<int>(chainIndex_);
             ImGui::TreePop();
@@ -802,6 +878,23 @@ void IKMapComponent::Serialize(nlohmann::json& j_) const
             { "Influence", chain_.influence },
             { "CollisionRadius", chain_.collisionRadius },
             { "CollideWithBodyColliders", chain_.collideWithBodyColliders },
+            { "FootPoleNode", chain_.footPoleNodeName },
+            { "FootMaxStepUp", chain_.footMaxStepUp },
+            { "FootMaxStepDown", chain_.footMaxStepDown },
+            { "FootHeightOffset", chain_.footHeightOffset },
+            { "FootPositionSpeed", chain_.footPositionSpeed },
+            { "FootRotationSpeed", chain_.footRotationSpeed },
+            { "FootBendWeight", chain_.footBendWeight },
+            { "FootSolverIterations", chain_.footSolverIterations },
+            { "FootIncludeDynamicColliders", chain_.footIncludeDynamicColliders },
+            { "FootAlignToGround", chain_.footAlignToGround },
+            { "LookForwardAxis", { chain_.lookForwardAxis.x, chain_.lookForwardAxis.y, chain_.lookForwardAxis.z } },
+            { "LookMaxYawDegrees", chain_.lookMaxYawDegrees },
+            { "LookMaxPitchDegrees", chain_.lookMaxPitchDegrees },
+            { "LookRootWeight", chain_.lookRootWeight },
+            { "LookTipWeight", chain_.lookTipWeight },
+            { "LookShieldShoulderYawDegrees", chain_.lookShieldShoulderYawDegrees },
+            { "LookBlendSpeed", chain_.lookBlendSpeed },
             { "Enabled", chain_.enabled }
         });
     }
@@ -866,6 +959,31 @@ void IKMapComponent::Deserialize(const nlohmann::json& j_)
         chain_.collisionRadius = chainJson_.value("CollisionRadius", 0.02f);
         chain_.collideWithBodyColliders = chainJson_.value(
             "CollideWithBodyColliders", chainJson_.value("CollideWithOwnMesh", true));
+        chain_.footPoleNodeName = chainJson_.value("FootPoleNode", std::string());
+        chain_.footMaxStepUp = chainJson_.value("FootMaxStepUp", 0.45f);
+        chain_.footMaxStepDown = chainJson_.value("FootMaxStepDown", 0.75f);
+        chain_.footHeightOffset = chainJson_.value("FootHeightOffset", 0.03f);
+        chain_.footPositionSpeed = chainJson_.value("FootPositionSpeed", 18.0f);
+        chain_.footRotationSpeed = chainJson_.value("FootRotationSpeed", 14.0f);
+        chain_.footBendWeight = chainJson_.value("FootBendWeight", 0.8f);
+        chain_.footSolverIterations = chainJson_.value("FootSolverIterations", 8);
+        chain_.footIncludeDynamicColliders = chainJson_.value("FootIncludeDynamicColliders", false);
+        chain_.footAlignToGround = chainJson_.value("FootAlignToGround", true);
+        if (chainJson_.contains("LookForwardAxis"))
+        {
+            chain_.lookForwardAxis = {
+                chainJson_["LookForwardAxis"][0],
+                chainJson_["LookForwardAxis"][1],
+                chainJson_["LookForwardAxis"][2]
+            };
+        }
+        chain_.lookMaxYawDegrees = chainJson_.value("LookMaxYawDegrees", 70.0f);
+        chain_.lookMaxPitchDegrees = chainJson_.value("LookMaxPitchDegrees", 35.0f);
+        chain_.lookRootWeight = chainJson_.value("LookRootWeight", 0.18f);
+        chain_.lookTipWeight = chainJson_.value("LookTipWeight", 1.0f);
+        chain_.lookShieldShoulderYawDegrees = chainJson_.value(
+            "LookShieldShoulderYawDegrees", 18.0f);
+        chain_.lookBlendSpeed = chainJson_.value("LookBlendSpeed", 8.0f);
         chain_.enabled = chainJson_.value("Enabled", true);
         chain_.startLift = chainJson_.value("StartLift", 0.08f);
         chain_.startCollisionWarmup = chainJson_.value("StartCollisionWarmup", 4);
@@ -881,6 +999,54 @@ IKMapComponent::IKChain& IKMapComponent::AddSpringChain(
     chain_.type = IK_TYPE::SPRING_BONE;
     chain_.rootNodeName = rootNodeName_;
     chain_.tipNodeName = tipNodeName_;
+    chains.push_back(chain_);
+    return chains.back();
+}
+
+IKMapComponent::IKChain& IKMapComponent::AddFootChain(
+    const std::string& name_,
+    const std::string& rootNodeName_,
+    const std::string& tipNodeName_)
+{
+    const auto existingChain_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.type == IK_TYPE::FOOT && chain_.name == name_;
+        });
+    if (existingChain_ != chains.end()) return *existingChain_;
+
+    IKChain chain_;
+    chain_.name = name_;
+    chain_.type = IK_TYPE::FOOT;
+    chain_.rootNodeName = rootNodeName_;
+    chain_.tipNodeName = tipNodeName_;
+    chain_.collideWithBodyColliders = false;
+    chains.push_back(chain_);
+    return chains.back();
+}
+
+IKMapComponent::IKChain& IKMapComponent::AddLookAtChain(
+    const std::string& name_,
+    const std::string& rootNodeName_,
+    const std::string& tipNodeName_)
+{
+    const auto existingChain_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.type == IK_TYPE::LOOK_AT && chain_.name == name_;
+        });
+    if (existingChain_ != chains.end()) return *existingChain_;
+
+    IKChain chain_;
+    chain_.name = name_;
+    chain_.type = IK_TYPE::LOOK_AT;
+    chain_.rootNodeName = rootNodeName_;
+    chain_.tipNodeName = tipNodeName_;
+    chain_.collideWithBodyColliders = false;
     chains.push_back(chain_);
     return chains.back();
 }

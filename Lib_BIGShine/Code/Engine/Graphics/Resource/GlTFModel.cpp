@@ -995,6 +995,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	{"uvScale", {mat.uvScale.x, mat.uvScale.y}},
 	{"uvOffset", {mat.uvOffset.x, mat.uvOffset.y}},
 	{"uvRotation", mat.uvRotation},
+	{"uvAddressMode", static_cast<int>(mat.uvAddressMode)},
 
 	{"alphaMode", static_cast<int>(mat.alphaMode)},
 
@@ -1116,6 +1117,11 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 						mat.uvRotation = item["uvRotation"].get<float>();
 					}
 
+					if (item.contains("uvAddressMode"))
+					{
+						mat.uvAddressMode = static_cast<UV_ADDRESS_MODE>(item["uvAddressMode"].get<int>());
+					}
+
 					if (item.contains("alphaMode"))
 					{
 						mat.alphaMode = static_cast<AlphaMode>(item["alphaMode"].get<int>());
@@ -1161,6 +1167,10 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 		_RootRotationOffset.z = rot.value("z", 0.0f);
 		_RootRotationOffset.w = rot.value("w", 1.0f); // wはデフォルトで1（単位クォータニオン）にするのが無難だ
 	}
+
+	// LocalScaleを含む全項目の復元後にノード行列を確定する。
+	// MeshColliderなど、Start時にglobalTransformを参照するコンポーネントへ正しい形状を渡すために必要。
+	UpdateTransform();
 
 }
 void GltfModelCommponennt::ShowMeshDetailsUI()
@@ -1209,6 +1219,13 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 			ImGui::DragFloat2("UV Scale", &material.uvScale.x, 0.01f);
 			ImGui::DragFloat2("UV Offset", &material.uvOffset.x, 0.01f);
 			ImGui::DragFloat("UV Rotation", &material.uvRotation, 0.01f);
+
+			const char* uvAddressModeItems_[] = { "Wrap", "Clamp" };
+			int currentUvAddressMode_ = static_cast<int>(material.uvAddressMode);
+			if (ImGui::Combo("UV Address Mode", &currentUvAddressMode_, uvAddressModeItems_, IM_ARRAYSIZE(uvAddressModeItems_)))
+			{
+				material.uvAddressMode = static_cast<UV_ADDRESS_MODE>(currentUvAddressMode_);
+			}
 
 			ImGui::SeparatorText("PBR");
 

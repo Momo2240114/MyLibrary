@@ -74,6 +74,12 @@ public:
 		Blend
 	};
 
+	enum class UV_ADDRESS_MODE
+	{
+		WRAP,
+		CLAMP
+	};
+
 	struct Material
 	{
 		int id; //ƒ}ƒeƒŠƒAƒ‹‚ðˆêˆÓ‚ÉŽ¯•Ê‚·‚é‚½‚ß‚ÌID
@@ -94,6 +100,7 @@ public:
 		DirectX::XMFLOAT2	uvScale = { 1.0f, 1.0f };
 		DirectX::XMFLOAT2	uvOffset = { 0.0f, 0.0f };
 		float				uvRotation = 0.0f;
+		UV_ADDRESS_MODE		uvAddressMode = UV_ADDRESS_MODE::WRAP;
 
 		AlphaMode			alphaMode = AlphaMode::Opaque;
 		ModelShaderID shaderId = ModelShaderID::ToonPBR;

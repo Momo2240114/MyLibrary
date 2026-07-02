@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
@@ -240,6 +241,67 @@ namespace
             { "allowMultiHit", shape_.allowMultiHit }, { "spheres", spheres_ }
         };
     }
+
+    void ReplaceAll(
+        std::string& value_,
+        const std::string& oldValue_,
+        const std::string& newValue_)
+    {
+        size_t position_ = 0u;
+        while ((position_ = value_.find(oldValue_, position_)) != std::string::npos)
+        {
+            value_.replace(position_, oldValue_.size(), newValue_);
+            position_ += newValue_.size();
+        }
+    }
+
+    void ReplaceAttackTemplateReferences(
+        const std::string& oldId_,
+        const std::string& newId_)
+    {
+        const std::filesystem::path roots_[] =
+        {
+            "Data/Animation/StateData",
+            "Data/Animation/GraphData",
+            "Data/Scenes",
+        };
+        const std::string oldPretty_ =
+            "\"attackTemplateId\": \"" + oldId_ + "\"";
+        const std::string newPretty_ =
+            "\"attackTemplateId\": \"" + newId_ + "\"";
+        const std::string oldCompact_ =
+            "\"attackTemplateId\":\"" + oldId_ + "\"";
+        const std::string newCompact_ =
+            "\"attackTemplateId\":\"" + newId_ + "\"";
+
+        for (const std::filesystem::path& root_ : roots_)
+        {
+            std::error_code error_;
+            if (!std::filesystem::exists(root_, error_)) continue;
+            for (const std::filesystem::directory_entry& entry_ :
+                std::filesystem::recursive_directory_iterator(root_, error_))
+            {
+                if (error_) break;
+                if (!entry_.is_regular_file() || entry_.path().extension() != ".json") continue;
+
+                std::ifstream input_(entry_.path(), std::ios::binary);
+                if (!input_) continue;
+                std::string contents_(
+                    (std::istreambuf_iterator<char>(input_)),
+                    std::istreambuf_iterator<char>());
+                input_.close();
+                if (contents_.find(oldPretty_) == std::string::npos &&
+                    contents_.find(oldCompact_) == std::string::npos)
+                {
+                    continue;
+                }
+                ReplaceAll(contents_, oldPretty_, newPretty_);
+                ReplaceAll(contents_, oldCompact_, newCompact_);
+                std::ofstream output_(entry_.path(), std::ios::binary | std::ios::trunc);
+                if (output_) output_.write(contents_.data(), contents_.size());
+            }
+        }
+    }
 }
 
 AttackTemplateManager& AttackTemplateManager::Instance()
@@ -266,6 +328,18 @@ void AttackTemplateManager::LoadAll()
     std::sort(templates.begin(), templates.end(), [](const AttackTemplate& left_, const AttackTemplate& right_)
         {
             return left_.id < right_.id;
+        });
+    std::erase_if(
+        renamedTemplateIds,
+        [this](const auto& pair_)
+        {
+            return std::none_of(
+                templates.begin(),
+                templates.end(),
+                [&pair_](const AttackTemplate& value_)
+                {
+                    return value_.id == pair_.second;
+                });
         });
     loaded = true;
 }
@@ -480,20 +554,36 @@ bool AttackTemplateManager::DuplicateTemplate(const AttackTemplate& source_, con
 
 AttackTemplate* AttackTemplateManager::FindTemplate(const std::string& id_)
 {
-    const auto iterator_ = std::find_if(templates.begin(), templates.end(), [&id_](const AttackTemplate& value_)
+    const std::string resolvedId_ = ResolveRenamedTemplateId(id_);
+    const auto iterator_ = std::find_if(templates.begin(), templates.end(), [&resolvedId_](const AttackTemplate& value_)
         {
-            return value_.id == id_;
+            return value_.id == resolvedId_;
         });
     return iterator_ == templates.end() ? nullptr : &*iterator_;
 }
 
 const AttackTemplate* AttackTemplateManager::FindTemplate(const std::string& id_) const
 {
-    const auto iterator_ = std::find_if(templates.begin(), templates.end(), [&id_](const AttackTemplate& value_)
+    const std::string resolvedId_ = ResolveRenamedTemplateId(id_);
+    const auto iterator_ = std::find_if(templates.begin(), templates.end(), [&resolvedId_](const AttackTemplate& value_)
         {
-            return value_.id == id_;
+            return value_.id == resolvedId_;
         });
     return iterator_ == templates.end() ? nullptr : &*iterator_;
+}
+
+std::string AttackTemplateManager::ResolveRenamedTemplateId(
+    const std::string& id_) const
+{
+    std::string resolvedId_ = id_;
+    for (size_t depth_ = 0; depth_ < renamedTemplateIds.size(); ++depth_)
+    {
+        const auto iterator_ = renamedTemplateIds.find(resolvedId_);
+        if (iterator_ == renamedTemplateIds.end() || iterator_->second == resolvedId_) break;
+        resolvedId_ = iterator_->second;
+    }
+
+    return resolvedId_;
 }
 
 std::string AttackTemplateManager::NormalizeAttackTemplatePath(const std::string& pathOrId_) const
@@ -527,6 +617,12 @@ void AttackTemplateManager::DrawEditorGui()
     }
 
     DrawEditorContent(editingTemplateId);
+    if (!renamedTemplateId.empty())
+    {
+        editingTemplateId = renamedTemplateId;
+        editingIdBuffer = renamedTemplateId;
+        renamedTemplateId.clear();
+    }
 
     ImGui::End();
 }
@@ -583,9 +679,10 @@ bool AttackTemplateManager::DrawEditorContent(
         return false;
     }
 
-    if (editingTemplateId != id_ || editingIdBuffer.empty())
+    const std::string resolvedId_ = ResolveRenamedTemplateId(id_);
+    if (editingTemplateId != resolvedId_ || editingIdBuffer.empty())
     {
-        editingTemplateId = id_;
+        editingTemplateId = resolvedId_;
         editingIdBuffer = attackTemplate_->id;
     }
 
@@ -720,20 +817,6 @@ bool AttackTemplateManager::DrawEditorContent(
             "HitBox Action Prefix##WeaponHitBox",
             attackTemplate_->weaponHitBox.hitBoxName,
             hitBoxActionPrefixes_);
-
-        ImGui::InputText(
-            "Start Node",
-            &attackTemplate_->weaponHitBox.startNodeName);
-
-        ImGui::InputText(
-            "End Node",
-            &attackTemplate_->weaponHitBox.endNodeName);
-
-        ImGui::DragFloat(
-            "Radius##WeaponHitBox",
-            &attackTemplate_->weaponHitBox.radius,
-            0.01f,
-            0.0f);
 
         ImGui::DragFloat(
             "Active Start##WeaponHitBox",
@@ -1094,10 +1177,23 @@ bool AttackTemplateManager::DrawEditorContent(
             {
                 if (requestedId_ != oldId_)
                 {
-                    std::error_code error_;
-                    std::filesystem::remove(
-                        WindowsDialogHelper::Utf8ToPath(NormalizeAttackTemplatePath(oldId_)),
-                        error_);
+                    ReplaceAttackTemplateReferences(oldId_, requestedId_);
+                    std::string oldPath_ = NormalizeAttackTemplatePath(oldId_);
+                    std::string newPath_ = NormalizeAttackTemplatePath(requestedId_);
+                    std::transform(
+                        oldPath_.begin(), oldPath_.end(), oldPath_.begin(),
+                        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+                    std::transform(
+                        newPath_.begin(), newPath_.end(), newPath_.begin(),
+                        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+                    if (oldPath_ != newPath_)
+                    {
+                        std::error_code error_;
+                        std::filesystem::remove(
+                            WindowsDialogHelper::Utf8ToPath(NormalizeAttackTemplatePath(oldId_)),
+                            error_);
+                    }
+                    renamedTemplateIds[oldId_] = requestedId_;
                     renamedTemplateId = requestedId_;
                 }
                 editingTemplateId = requestedId_;

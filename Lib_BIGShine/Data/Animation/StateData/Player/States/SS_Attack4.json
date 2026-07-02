@@ -175,88 +175,6 @@
                 "startTime": 0.0833333358168602
             },
             {
-                "actionEnd": "Kick_DisableHitBox",
-                "actionStart": "Kick_EnableHitBox",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 6.0,
-                        "intValue": 0,
-                        "key": "Damage",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 5.0,
-                        "intValue": 0,
-                        "key": "KnockBackPower",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.0,
-                        "intValue": 0,
-                        "key": "HitParticleAssetPath",
-                        "stringValue": "KickImpact_Aqua",
-                        "type": 3
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.25,
-                        "intValue": 0,
-                        "key": "HitStopTime",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.25,
-                        "intValue": 0,
-                        "key": "HitStopDir",
-                        "stringValue": "",
-                        "type": 0
-                    }
-                ],
-                "callEndOnStateExit": false,
-                "endTime": 1.0333333015441895,
-                "eventTemplateType": "NONE",
-                "label": "Foot_Attack",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.6833333373069763
-            },
-            {
                 "actionEnd": "",
                 "actionStart": "",
                 "actionUpdate": "",
@@ -334,7 +252,7 @@
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
-                "attackTemplateId": "WeakAttack01",
+                "attackTemplateId": "WeakAttack04Sword",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
                 "endTime": 0.4000000059604645,
@@ -363,6 +281,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.30000001192092896
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "WeakAttack04Kick",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.8999999761581421,
+                "eventTemplateType": "ATTACK_TEMPLATE",
+                "label": "WeakAttack_04_Foot",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.7166666388511658
             }
         ],
         "loop": false,

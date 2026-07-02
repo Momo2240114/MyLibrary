@@ -62,7 +62,10 @@ void HitReactionComponent::HandleHit()
             owner_->GetManager().GetTimeManager();
         if (timeManager_)
         {
-            timeManager_->TriggerHitStop(hitStopLayerMask, hitStopDuration_, hitStopScale_);
+            timeManager_->TriggerHitStop(
+                static_cast<uint32_t>(TarGetLayerType::All),
+                hitStopDuration_,
+                hitStopScale_);
         }
     }
 

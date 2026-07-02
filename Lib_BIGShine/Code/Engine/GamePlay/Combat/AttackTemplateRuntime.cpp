@@ -89,11 +89,7 @@ namespace
         hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
         hitBox_->allowMultiHit = attackTemplate_.allowMultiHit;
-        hitBox_->startNodeName = attackTemplate_.weaponHitBox.startNodeName;
-        hitBox_->endNodeName = attackTemplate_.weaponHitBox.endNodeName;
-        hitBox_->radius = attackTemplate_.weaponHitBox.radius;
         hitBox_->Deactivate();
-        hitBox_->RecreatePhysXActor();
     }
 }
 

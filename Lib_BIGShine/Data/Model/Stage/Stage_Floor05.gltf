@@ -1,0 +1,537 @@
+{
+    "asset":  {
+                  "version":  "2.0",
+                  "generator":  "BIGShine Stage Floor05 Parts Generator"
+              },
+    "scene":  0,
+    "scenes":  [
+                   {
+                       "name":  "Stage_Floor05",
+                       "nodes":  [
+                                     0
+                                 ]
+                   }
+               ],
+    "nodes":  [
+                  {
+                      "name":  "Stage_Floor05",
+                      "mesh":  0
+                  }
+              ],
+    "meshes":  [
+                   {
+                       "name":  "Stage_Floor05_Parts",
+                       "primitives":  [
+                                          {
+                                              "attributes":  {
+                                                                 "POSITION":  0,
+                                                                 "NORMAL":  1,
+                                                                 "TANGENT":  2,
+                                                                 "TEXCOORD_0":  3
+                                                             },
+                                              "indices":  4,
+                                              "material":  0,
+                                              "mode":  4
+                                          },
+                                          {
+                                              "attributes":  {
+                                                                 "POSITION":  5,
+                                                                 "NORMAL":  6,
+                                                                 "TANGENT":  7,
+                                                                 "TEXCOORD_0":  8
+                                                             },
+                                              "indices":  9,
+                                              "material":  1,
+                                              "mode":  4
+                                          },
+                                          {
+                                              "attributes":  {
+                                                                 "POSITION":  10,
+                                                                 "NORMAL":  11,
+                                                                 "TANGENT":  12,
+                                                                 "TEXCOORD_0":  13
+                                                             },
+                                              "indices":  14,
+                                              "material":  2,
+                                              "mode":  4
+                                          },
+                                          {
+                                              "attributes":  {
+                                                                 "POSITION":  15,
+                                                                 "NORMAL":  16,
+                                                                 "TANGENT":  17,
+                                                                 "TEXCOORD_0":  18
+                                                             },
+                                              "indices":  19,
+                                              "material":  3,
+                                              "mode":  4
+                                          }
+                                      ]
+                   }
+               ],
+    "materials":  [
+                      {
+                          "name":  "Stage_Center_Circle",
+                          "pbrMetallicRoughness":  {
+                                                       "baseColorTexture":  {
+                                                                                "index":  0
+                                                                            },
+                                                       "metallicFactor":  0,
+                                                       "roughnessFactor":  0.5
+                                                   },
+                          "normalTexture":  {
+                                                "index":  1
+                                            },
+                          "occlusionTexture":  {
+                                                   "index":  2
+                                               }
+                      },
+                      {
+                          "name":  "Stage_Border_Ring",
+                          "pbrMetallicRoughness":  {
+                                                       "baseColorTexture":  {
+                                                                                "index":  0
+                                                                            },
+                                                       "metallicFactor":  0,
+                                                       "roughnessFactor":  0.72,
+                                                       "baseColorFactor":  [
+                                                                               0.58,
+                                                                               0.54,
+                                                                               0.5,
+                                                                               1
+                                                                           ]
+                                                   },
+                          "normalTexture":  {
+                                                "index":  1,
+                                                "scale":  0.85
+                                            },
+                          "occlusionTexture":  {
+                                                   "index":  2,
+                                                   "strength":  1
+                                               }
+                      },
+                      {
+                          "name":  "Stage_Outer_Tile_Floor",
+                          "pbrMetallicRoughness":  {
+                                                       "baseColorTexture":  {
+                                                                                "index":  3
+                                                                            },
+                                                       "metallicRoughnessTexture":  {
+                                                                                        "index":  5
+                                                                                    },
+                                                       "metallicFactor":  0,
+                                                       "roughnessFactor":  0.85,
+                                                       "baseColorFactor":  [
+                                                                               0.42,
+                                                                               0.36,
+                                                                               0.32,
+                                                                               1
+                                                                           ]
+                                                   },
+                          "normalTexture":  {
+                                                "index":  4,
+                                                "scale":  0.7
+                                            },
+                          "occlusionTexture":  {
+                                                   "index":  5,
+                                                   "strength":  1
+                                               }
+                      },
+                      {
+                          "name":  "Stage_Outer_Trim",
+                          "pbrMetallicRoughness":  {
+                                                       "baseColorTexture":  {
+                                                                                "index":  0
+                                                                            },
+                                                       "metallicFactor":  0,
+                                                       "roughnessFactor":  0.65,
+                                                       "baseColorFactor":  [
+                                                                               0.72,
+                                                                               0.68,
+                                                                               0.64,
+                                                                               1
+                                                                           ]
+                                                   },
+                          "normalTexture":  {
+                                                "index":  1
+                                            },
+                          "occlusionTexture":  {
+                                                   "index":  2
+                                               }
+                      }
+                  ],
+    "samplers":  [
+                     {
+                         "magFilter":  9729,
+                         "minFilter":  9987,
+                         "wrapS":  33071,
+                         "wrapT":  33071
+                     },
+                     {
+                         "magFilter":  9729,
+                         "minFilter":  9987,
+                         "wrapS":  10497,
+                         "wrapT":  10497
+                     }
+                 ],
+    "images":  [
+                   {
+                       "uri":  "FloorBase04.png"
+                   },
+                   {
+                       "uri":  "Floor_Normal.png"
+                   },
+                   {
+                       "uri":  "Floor_AO.png"
+                   },
+                   {
+                       "uri":  "PavingStones111_4K-PNG_Color.png"
+                   },
+                   {
+                       "uri":  "PavingStones111_4K-PNG_NormalGL.png.png"
+                   },
+                   {
+                       "uri":  "PavingStones111_4K-PNG_Roughness.png.png"
+                   }
+               ],
+    "textures":  [
+                     {
+                         "sampler":  0,
+                         "source":  0
+                     },
+                     {
+                         "sampler":  0,
+                         "source":  1
+                     },
+                     {
+                         "sampler":  0,
+                         "source":  2
+                     },
+                     {
+                         "sampler":  1,
+                         "source":  3
+                     },
+                     {
+                         "sampler":  1,
+                         "source":  4
+                     },
+                     {
+                         "sampler":  1,
+                         "source":  5
+                     }
+                 ],
+    "buffers":  [
+                    {
+                        "uri":  "Stage_Floor05.bin",
+                        "byteLength":  58368
+                    }
+                ],
+    "bufferViews":  [
+                        {
+                            "buffer":  0,
+                            "byteOffset":  0,
+                            "byteLength":  792,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  792,
+                            "byteLength":  792,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  1584,
+                            "byteLength":  1056,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  2640,
+                            "byteLength":  528,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  3168,
+                            "byteLength":  768,
+                            "target":  34963
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  3936,
+                            "byteLength":  4680,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  8616,
+                            "byteLength":  4680,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  13296,
+                            "byteLength":  6240,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  19536,
+                            "byteLength":  3120,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  22656,
+                            "byteLength":  4608,
+                            "target":  34963
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  27264,
+                            "byteLength":  1560,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  28824,
+                            "byteLength":  1560,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  30384,
+                            "byteLength":  2080,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  32464,
+                            "byteLength":  1040,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  33504,
+                            "byteLength":  1536,
+                            "target":  34963
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  35040,
+                            "byteLength":  4680,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  39720,
+                            "byteLength":  4680,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  44400,
+                            "byteLength":  6240,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  50640,
+                            "byteLength":  3120,
+                            "target":  34962
+                        },
+                        {
+                            "buffer":  0,
+                            "byteOffset":  53760,
+                            "byteLength":  4608,
+                            "target":  34963
+                        }
+                    ],
+    "accessors":  [
+                      {
+                          "bufferView":  0,
+                          "componentType":  5126,
+                          "count":  66,
+                          "type":  "VEC3",
+                          "min":  [
+                                      -0.53,
+                                      -0.0159488618,
+                                      -0.53
+                                  ],
+                          "max":  [
+                                      0.53,
+                                      -0.0159488618,
+                                      0.53
+                                  ]
+                      },
+                      {
+                          "bufferView":  1,
+                          "componentType":  5126,
+                          "count":  66,
+                          "type":  "VEC3"
+                      },
+                      {
+                          "bufferView":  2,
+                          "componentType":  5126,
+                          "count":  66,
+                          "type":  "VEC4"
+                      },
+                      {
+                          "bufferView":  3,
+                          "componentType":  5126,
+                          "count":  66,
+                          "type":  "VEC2"
+                      },
+                      {
+                          "bufferView":  4,
+                          "componentType":  5125,
+                          "count":  192,
+                          "type":  "SCALAR",
+                          "min":  [
+                                      0
+                                  ],
+                          "max":  [
+                                      65
+                                  ]
+                      },
+                      {
+                          "bufferView":  5,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC3",
+                          "min":  [
+                                      -0.59,
+                                      -0.017,
+                                      -0.59
+                                  ],
+                          "max":  [
+                                      0.59,
+                                      -0.008,
+                                      0.59
+                                  ]
+                      },
+                      {
+                          "bufferView":  6,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC3"
+                      },
+                      {
+                          "bufferView":  7,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC4"
+                      },
+                      {
+                          "bufferView":  8,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC2"
+                      },
+                      {
+                          "bufferView":  9,
+                          "componentType":  5125,
+                          "count":  1152,
+                          "type":  "SCALAR",
+                          "min":  [
+                                      0
+                                  ],
+                          "max":  [
+                                      389
+                                  ]
+                      },
+                      {
+                          "bufferView":  10,
+                          "componentType":  5126,
+                          "count":  130,
+                          "type":  "VEC3",
+                          "min":  [
+                                      -0.9,
+                                      -0.017,
+                                      -0.9
+                                  ],
+                          "max":  [
+                                      0.9,
+                                      -0.017,
+                                      0.9
+                                  ]
+                      },
+                      {
+                          "bufferView":  11,
+                          "componentType":  5126,
+                          "count":  130,
+                          "type":  "VEC3"
+                      },
+                      {
+                          "bufferView":  12,
+                          "componentType":  5126,
+                          "count":  130,
+                          "type":  "VEC4"
+                      },
+                      {
+                          "bufferView":  13,
+                          "componentType":  5126,
+                          "count":  130,
+                          "type":  "VEC2"
+                      },
+                      {
+                          "bufferView":  14,
+                          "componentType":  5125,
+                          "count":  384,
+                          "type":  "SCALAR",
+                          "min":  [
+                                      0
+                                  ],
+                          "max":  [
+                                      129
+                                  ]
+                      },
+                      {
+                          "bufferView":  15,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC3",
+                          "min":  [
+                                      -1,
+                                      -0.06,
+                                      -1
+                                  ],
+                          "max":  [
+                                      1,
+                                      -0.006,
+                                      1
+                                  ]
+                      },
+                      {
+                          "bufferView":  16,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC3"
+                      },
+                      {
+                          "bufferView":  17,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC4"
+                      },
+                      {
+                          "bufferView":  18,
+                          "componentType":  5126,
+                          "count":  390,
+                          "type":  "VEC2"
+                      },
+                      {
+                          "bufferView":  19,
+                          "componentType":  5125,
+                          "count":  1152,
+                          "type":  "SCALAR",
+                          "min":  [
+                                      0
+                                  ],
+                          "max":  [
+                                      389
+                                  ]
+                      }
+                  ]
+}

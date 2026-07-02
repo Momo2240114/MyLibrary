@@ -252,7 +252,7 @@
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
-                "attackTemplateId": "WeakAttack01",
+                "attackTemplateId": "WeakAttack03",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
                 "endTime": 0.46666666865348816,

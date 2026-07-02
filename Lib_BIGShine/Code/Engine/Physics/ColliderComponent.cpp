@@ -5,6 +5,7 @@
 #include "CapsuleCollider.h"
 #include "CylinderCollider.h"
 #include "MeshCollider.h"
+#include "CharacterCollider.h"
 #include "PhysXSystem.h"
 #include "PhysXMath.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
@@ -100,9 +101,11 @@ void ColliderComponent::CreateCharacterController()
     desc_.height = std::max<float>(capsule_->halfHeight * 2.0f * scale_.y, 0.001f);
 
     desc_.upDirection = physx::PxVec3(0.0f, 1.0f, 0.0f);
+    const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this);
     desc_.slopeLimit = 0.707f;      // 約45度
-    desc_.stepOffset = 0.3f;
-    desc_.contactOffset = 0.05f;
+    desc_.stepOffset = characterCollider_ ? characterCollider_->GetStepOffset() : 0.3f;
+    desc_.contactOffset = characterCollider_ ? characterCollider_->GetContactOffset() : 0.05f;
+    desc_.climbingMode = physx::PxCapsuleClimbingMode::eCONSTRAINED;
     desc_.density = std::max<float>(mass, 1.0f);
     desc_.scaleCoeff = 0.8f;
     desc_.volumeGrowth = 1.5f;
@@ -311,13 +314,8 @@ void ColliderComponent::UpdatePhysXShape()
             auto model_ = owner_->GetComponent<GltfModelCommponennt>();
             if (!model_) break;
 
-            const DirectX::XMMATRIX ownerWorld_ = owner_->transform->GetWorldMatrix();
-            DirectX::XMVECTOR ownerWorldDeterminant_;
-            const DirectX::XMMATRIX actorLocalFromWorld_ =
-                DirectX::XMMatrixInverse(&ownerWorldDeterminant_, ownerWorld_);
-
-            std::vector<DirectX::XMFLOAT3> vertices_;
-            std::vector<uint32_t> indices_;
+			std::vector<DirectX::XMFLOAT3> vertices_;
+			std::vector<uint32_t> indices_;
             for (const auto& modelMesh_ : model_->GetMeshes())
             {
                 const uint32_t vertexOffset_ = static_cast<uint32_t>(vertices_.size());
@@ -327,18 +325,19 @@ void ColliderComponent::UpdatePhysXShape()
                     meshTransform_ = DirectX::XMLoadFloat4x4(&modelMesh_.node->globalTransform);
                 }
                 for (const auto& vertex_ : modelMesh_.vertices)
-                {
-                    DirectX::XMVECTOR position_ = DirectX::XMLoadFloat3(&vertex_.position);
-                    position_ = DirectX::XMVector3TransformCoord(position_, meshTransform_);
-                    position_ = DirectX::XMVector3TransformCoord(position_, actorLocalFromWorld_);
-                    DirectX::XMFLOAT3 transformedPosition_;
+				{
+					DirectX::XMVECTOR position_ = DirectX::XMLoadFloat3(&vertex_.position);
+					position_ = DirectX::XMVector3TransformCoord(position_, meshTransform_);
+					DirectX::XMFLOAT3 transformedPosition_;
                     DirectX::XMStoreFloat3(&transformedPosition_, position_);
                     vertices_.push_back(transformedPosition_);
                 }
                 for (const auto index_ : modelMesh_.indices) indices_.push_back(vertexOffset_ + index_);
             }
 
-            const PxMeshScale meshScale_(PxVec3(1.0f, 1.0f, 1.0f));
+			// node.globalTransformにはModelのLocalScaleが含まれる。
+			// GameObject側のワールドスケールとCollider固有倍率はPhysXのMeshScaleで適用する。
+			const PxMeshScale meshScale_(PxVec3(scale_.x, scale_.y, scale_.z));
             if (meshCollider_->convex)
             {
                 auto mesh_ = PhysXSystem::CreateConvexMesh(vertices_);
@@ -609,9 +608,19 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.y = 0.0f;
         }
 
+        float verticalDisplacement_ = velocity.y * safeDeltaTime_;
+        if (characterGroundedForStep && velocity.y <= 0.0f)
+        {
+            if (const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this))
+            {
+                // 接地中は小さな下り段差へ追従させ、重力加速待ちによる浮遊感を防ぐ。
+                verticalDisplacement_ -= characterCollider_->GetGroundSnapDistance();
+            }
+        }
+
         const PxVec3 displacement_(
             velocity.x * safeDeltaTime_,
-            velocity.y * safeDeltaTime_,
+            verticalDisplacement_,
             velocity.z * safeDeltaTime_);
         PxControllerFilters filters_;
         const PxControllerCollisionFlags collisionFlags_ =
