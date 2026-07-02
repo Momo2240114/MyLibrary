@@ -49,6 +49,8 @@ private:
     void DrawCurveEditor(AnimationControllerComponent* animController_);
     void PlaySelectedEffectPreview(const AnimEvent& event_);
     void StopSelectedEffectPreview();
+    void PlayAttackTemplateEffectPreview(const std::string& templateId_);
+    void StopAttackTemplateEffectPreview();
 
     // モデルのノード姿勢を直接編集し、ポーズデータへ反映する。
     void DrawPoseEditMode(GltfModelCommponennt* modelComp, AnimationControllerComponent* animController);
@@ -119,8 +121,12 @@ private:
     bool autoUpdatePreview = true;
     bool showPreviewGrid = true;
     std::weak_ptr<GameObject> selectedEffectPreviewObject;
+    std::vector<std::weak_ptr<GameObject>> attackTemplateEffectPreviewObjects;
     bool loopSelectedEffectPreview = false;
+    bool loopAttackTemplateEffectPreview = false;
     float selectedEffectPreviewTimer = 0.0f;
+    float attackTemplateEffectPreviewTimer = 0.0f;
+    float attackTemplateEffectPreviewDuration = 1.0f;
     bool keepSceneTransformOnCopy = false;
     int selectedSceneObjectIndex = -1;
     std::string sceneObjectCopyStatus;

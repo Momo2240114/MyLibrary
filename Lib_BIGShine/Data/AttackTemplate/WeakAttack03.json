@@ -5,8 +5,8 @@
         "allowMultiHit": false,
         "damage": 6.0,
         "hitGroupId": 0,
-        "hitStopDuration": 0.075,
-        "hitStopScale": 0.0,
+        "hitStopDuration": 0.035,
+        "hitStopScale": 0.75,
         "knockBackPower": 2.0,
         "knockBackType": 0
     },

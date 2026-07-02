@@ -367,7 +367,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                1.0
+                                -1.0
                             ]
                         },
                         "IsAttack": {
@@ -473,7 +473,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                1.0
+                                -1.0
                             ]
                         },
                         "IsAttack": {
@@ -5346,9 +5346,30 @@
                         "Damping": 0.8619999885559082,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.029999999329447746,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
                         "Gravity": 9.800000190734863,
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
                         "Name": "Hair",
                         "RootNode": "Bone_hair_B01",
                         "RootRotationFollow": 1.0,
@@ -5370,9 +5391,30 @@
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.029999999329447746,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
                         "Gravity": 9.800000190734863,
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
                         "Name": "Hair",
                         "RootNode": "Bone_hair_B_R_01",
                         "RootRotationFollow": 0.6259999871253967,
@@ -5394,9 +5436,30 @@
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.029999999329447746,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
                         "Gravity": 9.800000190734863,
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
                         "Name": "Hair",
                         "RootNode": "Bone_hair_B_L_01",
                         "RootRotationFollow": 0.7910000085830688,
@@ -5418,9 +5481,30 @@
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.0010000000474974513,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
                         "Gravity": 9.800000190734863,
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
                         "Name": "FootL",
                         "RootNode": "calf_l",
                         "RootRotationFollow": 0.699999988079071,
@@ -5442,9 +5526,30 @@
                         "Damping": 0.8799999952316284,
                         "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.0010000000474974513,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
                         "Gravity": 9.800000190734863,
                         "Influence": 1.0,
                         "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
                         "Name": "FootR",
                         "RootNode": "calf_r",
                         "RootRotationFollow": 0.699999988079071,
@@ -5458,9 +5563,27 @@
                         "Type": 1
                     },
                     {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 0,
                         "CollideWithBodyColliders": false,
+                        "CollisionRadius": 0.019999999552965164,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
                         "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.029999999329447746,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
+                        "Gravity": 9.800000190734863,
                         "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
                         "LookBlendSpeed": 8.0,
                         "LookForwardAxis": [
                             0.0,
@@ -5474,7 +5597,14 @@
                         "LookTipWeight": 1.0,
                         "Name": "LookAt",
                         "RootNode": "spine_01",
+                        "RootRotationFollow": 0.699999988079071,
+                        "SolverIterations": 4,
+                        "SolverSubsteps": 2,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
+                        "Stiffness": 0.019999999552965164,
                         "TipNode": "head",
+                        "TipStiffnessScale": 0.20000000298023224,
                         "Type": 3
                     }
                 ],
@@ -6419,6 +6549,33 @@
             },
             "Enabled": true,
             "TypeName": "SpringBoneSimulationComponent"
+        },
+        {
+            "Data": {
+                "DebugChainColor": [
+                    0.20000000298023224,
+                    0.800000011920929,
+                    1.0,
+                    0.8999999761581421
+                ],
+                "DebugGroundColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    0.8999999761581421
+                ],
+                "DebugNormalLength": 0.20000000298023224,
+                "DebugRayColor": [
+                    1.0,
+                    0.800000011920929,
+                    0.10000000149011612,
+                    0.800000011920929
+                ],
+                "Enabled": true,
+                "ShowDebugShapes": true
+            },
+            "Enabled": true,
+            "TypeName": "FootIKComponent"
         }
     ],
     "Layer": 1,
@@ -6426,13 +6583,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -54.29364776611328,
-            -1.5068352222442627,
-            -43.28885269165039
+            32.102500915527344,
+            -1.4422391653060913,
+            34.8625602722168
         ],
         "Rot": [
             3.000000238418579,
-            233.8119354248047,
+            336.82220458984375,
             1.1004080988641363e-05
         ],
         "Scale": [
