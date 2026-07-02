@@ -21,7 +21,12 @@ public:
     std::vector<CollisionManifold> m_CollisionMainFolds;
 
     using CollisionCallback = std::function<void(std::shared_ptr<GameObject>)>;
+    using CollisionContactCallback = std::function<void(
+        std::shared_ptr<GameObject>,
+        const CollisionContact&)>;
     std::vector<CollisionCallback> onCollisionEnterCallbacks;
+    std::vector<CollisionCallback> onTriggerEnterCallbacks;
+    std::vector<CollisionContactCallback> onCollisionContactCallbacks;
 
     // 共通プロパティ
     DirectX::XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f }; // モデル中心からのズレ

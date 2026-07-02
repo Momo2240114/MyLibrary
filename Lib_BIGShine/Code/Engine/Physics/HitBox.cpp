@@ -370,15 +370,18 @@ void HitBox::ApplyBlackboardValues()
     }
 
     std::string stringValue_;
-    if (blackboard_->GetString(blackboardCategory, "HitParticleAssetPath", stringValue_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetString(blackboardCategory, "HitParticleAssetPath", stringValue_))
     {
         hitParticleAssetPath = stringValue_;
     }
-    if (blackboard_->GetString(blackboardCategory, "HitParticleEmitterName", stringValue_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetString(blackboardCategory, "HitParticleEmitterName", stringValue_))
     {
         hitParticleEmitterName = stringValue_;
     }
-    if (blackboard_->GetString(blackboardCategory, "HitMeshVFXAssetPath", stringValue_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetString(blackboardCategory, "HitMeshVFXAssetPath", stringValue_))
     {
         hitMeshVFXAssetPath = stringValue_;
     }

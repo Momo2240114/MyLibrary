@@ -563,6 +563,9 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			material_.occlusionStrength = mesh.material->occlusionStrength;
 			material_.toonPbrBlend = mesh.material->toonPbrBlend;
 			material_.shadingModel = static_cast<int>(shaderId_);
+			material_.uvScale = mesh.material->uvScale;
+			material_.uvOffset = mesh.material->uvOffset;
+			material_.uvRotation = mesh.material->uvRotation;
 			dc->UpdateSubresource(gBufferMaterialConstantBuffer.Get(), 0, nullptr, &material_, 0, 0);
 
 			ID3D11ShaderResourceView* materialSrvs_[] =

@@ -966,9 +966,18 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         std::shared_ptr<GameObject> owner_ = GetGameObject();
                         if ((isParticleAsset_ || isMeshVFXAsset_) && owner_)
                         {
-                            const std::vector<std::string>& assets_ = isParticleAsset_
-                                ? owner_->GetManager().GetEffectManager().GetParticleAssetKeys()
-                                : owner_->GetManager().GetEffectManager().GetMeshVFXAssetKeys();
+                            std::vector<std::string> assets_ = isParticleAsset_
+                        ? owner_->GetManager().GetEffectManager().GetParticleAssetKeys()
+                        : owner_->GetManager().GetEffectManager().GetMeshVFXAssetKeys();
+                    if (isMeshVFXAsset_)
+                    {
+                        const std::vector<std::string>& sequenceAssets_ =
+                            owner_->GetManager().GetEffectManager().GetVFXSequenceAssetKeys();
+                        assets_.insert(
+                            assets_.end(),
+                            sequenceAssets_.begin(),
+                            sequenceAssets_.end());
+                    }
                             std::string previewValue_ = write_.stringValue;
                             const std::string resolvedValue_ = isParticleAsset_
                                 ? owner_->GetManager().GetEffectManager().ResolveParticlePath(write_.stringValue)

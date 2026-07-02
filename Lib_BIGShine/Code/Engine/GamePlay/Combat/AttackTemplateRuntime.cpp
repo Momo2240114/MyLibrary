@@ -73,13 +73,20 @@ namespace
         hitBox_->hitStopDuration = attackTemplate_.hitStopDuration;
         hitBox_->hitStopScale = attackTemplate_.hitStopScale;
         hitBox_->SetKnockBackPower(attackTemplate_.knockBackPower);
-        hitBox_->hitParticleAssetPath = attackTemplate_.hitEffect.hitParticleAssetPath;
-        hitBox_->hitParticleEmitterName = attackTemplate_.hitEffect.hitParticleEmitterName;
+        hitBox_->hitParticleAssetPath = attackTemplate_.hitEffect.spawnOnHit
+            ? attackTemplate_.hitEffect.hitParticleAssetPath
+            : std::string{};
+        hitBox_->hitParticleEmitterName = attackTemplate_.hitEffect.spawnOnHit
+            ? attackTemplate_.hitEffect.hitParticleEmitterName
+            : std::string{};
         hitBox_->hitParticleLifeTime = attackTemplate_.hitEffect.hitParticleLifeTime;
         hitBox_->hitParticleNormalOffset = attackTemplate_.hitEffect.hitParticleNormalOffset;
-        hitBox_->hitMeshVFXAssetPath = attackTemplate_.hitEffect.hitMeshVfxAssetPath;
+        hitBox_->hitMeshVFXAssetPath = attackTemplate_.hitEffect.spawnOnHit
+            ? attackTemplate_.hitEffect.hitMeshVfxAssetPath
+            : std::string{};
         hitBox_->hitMeshVFXLifeTime = attackTemplate_.hitEffect.hitMeshVfxLifeTime;
         hitBox_->hitMeshVFXNormalOffset = attackTemplate_.hitEffect.hitMeshVfxNormalOffset;
+        hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
         hitBox_->allowMultiHit = attackTemplate_.allowMultiHit;
         hitBox_->startNodeName = attackTemplate_.weaponHitBox.startNodeName;
@@ -175,7 +182,11 @@ void AttackTemplateRuntime::End(
     if (attackTemplate_ && attackTemplate_->weaponHitBox.enabled)
     {
         if (const std::shared_ptr<HitBox> hitBox_ = FindHitBox(
-            GetRoot(owner_), attackTemplate_->weaponHitBox.hitBoxName)) hitBox_->Deactivate();
+            GetRoot(owner_), attackTemplate_->weaponHitBox.hitBoxName))
+        {
+            hitBox_->Deactivate();
+            hitBox_->SetHitEffectBlackboardOverrideEnabled(true);
+        }
     }
     event_.attackTemplateRuntimeActive = false;
     event_.spawnedAttackEffects.clear();

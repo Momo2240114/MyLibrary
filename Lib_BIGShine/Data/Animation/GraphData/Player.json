@@ -1,6 +1,6 @@
 {
     "AnimationData": {
-        "DefaultState": "SS_Attack1",
+        "DefaultState": "SS_Attack4",
         "States": [
             {
                 "animIndexA": -1,
@@ -53,54 +53,6 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 0,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": true,
-                "name": "SS_Quickshift_B",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": true,
-                    "applyRotationY": true,
-                    "applyRotationZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
                 "animationIndex": 22,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardPhaseOffset": 0.0,
@@ -129,6 +81,54 @@
                 "events": [],
                 "loop": true,
                 "name": "SS_Hit_R",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": true,
+                    "applyRotationY": true,
+                    "applyRotationZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 0,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": true,
+                "name": "SS_Quickshift_B",
                 "rootMotion": {
                     "applyPositionX": true,
                     "applyPositionY": true,
@@ -622,79 +622,6 @@
                         "startTime": 0.0833333358168602
                     },
                     {
-                        "actionEnd": "Sword_DisableHitBox",
-                        "actionStart": "Sword_EnableHitBox",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 5.0,
-                                "intValue": 0,
-                                "key": "Damage",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.0,
-                                "intValue": 0,
-                                "key": "HitParticleAssetPath",
-                                "stringValue": "Data/Particle/HitParticle.json",
-                                "type": 3
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.054999999701976776,
-                                "intValue": 0,
-                                "key": "HitStopDuration",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.8500000238418579,
-                                "intValue": 0,
-                                "key": "HitStopScale",
-                                "stringValue": "",
-                                "type": 0
-                            }
-                        ],
-                        "callEndOnStateExit": false,
-                        "endTime": 0.44999998807907104,
-                        "eventTemplateType": "NONE",
-                        "label": "Sword_Attack",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.2666666805744171
-                    },
-                    {
                         "actionEnd": "Kick_DisableHitBox",
                         "actionStart": "Kick_EnableHitBox",
                         "actionUpdate": "",
@@ -781,7 +708,7 @@
                         "actionStart": "",
                         "actionUpdate": "",
                         "attachNodeName": "",
-                        "attachToOwner": true,
+                        "attachToOwner": false,
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
@@ -791,7 +718,7 @@
                         "localPosition": [
                             0.0,
                             1.5,
-                            0.5
+                            0.25
                         ],
                         "localRotation": [
                             0.0,
@@ -826,8 +753,44 @@
                         "label": "KickShockwave",
                         "localPosition": [
                             0.0,
-                            0.6000000238418579,
+                            1.5,
+                            2.75
+                        ],
+                        "localRotation": [
+                            0.0,
+                            180.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
                             1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerKickShockwave_Aqua",
+                        "meshVFXLifeTime": 0.5,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.8166666626930237
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "WeakAttack01",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.4000000059604645,
+                        "eventTemplateType": "ATTACK_TEMPLATE",
+                        "label": "WeakAttack_04_Sword",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
                         ],
                         "localRotation": [
                             0.0,
@@ -839,14 +802,14 @@
                             1.0,
                             1.0
                         ],
-                        "meshVFXAssetPath": "PlayerKickShockwave_Aqua",
-                        "meshVFXLifeTime": 0.3499999940395355,
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
                         "meshVFXPlaybackSpeed": 1.0,
                         "mirrorMeshVFX": false,
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.7166666388511658
+                        "startTime": 0.30000001192092896
                     }
                 ],
                 "loop": false,
@@ -1631,70 +1594,6 @@
                         "startTime": 0.28333333134651184
                     },
                     {
-                        "actionEnd": "Sword_DisableHitBox",
-                        "actionStart": "Sword_EnableHitBox",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 5.0,
-                                "intValue": 0,
-                                "key": "Damage",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.05000000074505806,
-                                "intValue": 0,
-                                "key": "HitStopDuration",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.800000011920929,
-                                "intValue": 0,
-                                "key": "HitStopScale",
-                                "stringValue": "",
-                                "type": 0
-                            }
-                        ],
-                        "callEndOnStateExit": true,
-                        "endTime": 0.46666666865348816,
-                        "eventTemplateType": "NONE",
-                        "label": "Attack",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.28333333134651184
-                    },
-                    {
                         "actionEnd": "",
                         "actionStart": "",
                         "actionUpdate": "",
@@ -1729,6 +1628,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.3166666626930237
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "WeakAttack01",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.46666666865348816,
+                        "eventTemplateType": "ATTACK_TEMPLATE",
+                        "label": "WeakAttack_03",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.3333333432674408
                     }
                 ],
                 "loop": false,
@@ -2248,79 +2183,6 @@
                         "startTime": 0.30000001192092896
                     },
                     {
-                        "actionEnd": "Sword_DisableHitBox",
-                        "actionStart": "Sword_EnableHitBox",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 5.0,
-                                "intValue": 0,
-                                "key": "Damage",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.0,
-                                "intValue": 0,
-                                "key": "HitParticleAssetPath",
-                                "stringValue": "SwordHit_Aqua",
-                                "type": 3
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.8500000238418579,
-                                "intValue": 0,
-                                "key": "HitStopScale",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.05000000074505806,
-                                "intValue": 0,
-                                "key": "HitStopDuration",
-                                "stringValue": "",
-                                "type": 0
-                            }
-                        ],
-                        "callEndOnStateExit": true,
-                        "endTime": 0.5666666626930237,
-                        "eventTemplateType": "NONE",
-                        "label": "Attack",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.38333332538604736
-                    },
-                    {
                         "actionEnd": "",
                         "actionStart": "",
                         "actionUpdate": "",
@@ -2349,6 +2211,42 @@
                         ],
                         "meshVFXAssetPath": "PlayerSwordArc_Aqua",
                         "meshVFXLifeTime": 0.6000000238418579,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.3333333432674408
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "WeakAttack01",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.5333333611488342,
+                        "eventTemplateType": "ATTACK_TEMPLATE",
+                        "label": "WeakAttack_01",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
                         "meshVFXPlaybackSpeed": 1.0,
                         "mirrorMeshVFX": false,
                         "overridePlaybackSpeed": false,
@@ -2586,79 +2484,6 @@
                         "startTime": 0.25
                     },
                     {
-                        "actionEnd": "Sword_DisableHitBox",
-                        "actionStart": "Sword_EnableHitBox",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 5.0,
-                                "intValue": 0,
-                                "key": "Damage",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.0,
-                                "intValue": 0,
-                                "key": "HitParticleAssetPath",
-                                "stringValue": "Data/Particle/HitParticle.json",
-                                "type": 3
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.05000000074505806,
-                                "intValue": 0,
-                                "key": "HitStopDuration",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.8500000238418579,
-                                "intValue": 0,
-                                "key": "HitStopScale",
-                                "stringValue": "",
-                                "type": 0
-                            }
-                        ],
-                        "callEndOnStateExit": true,
-                        "endTime": 0.44999998807907104,
-                        "eventTemplateType": "NONE",
-                        "label": "Attack",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.25
-                    },
-                    {
                         "actionEnd": "",
                         "actionStart": "",
                         "actionUpdate": "",
@@ -2693,6 +2518,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.23333333432674408
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "WeakAttack01",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.4000000059604645,
+                        "eventTemplateType": "ATTACK_TEMPLATE",
+                        "label": "WeakAttack_02",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.25
                     }
                 ],
                 "loop": false,
@@ -3101,54 +2962,6 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 39,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": true,
-                "name": "Combo_Attack_03_All_Seq_0",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": true,
-                    "applyRotationY": true,
-                    "applyRotationZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
                 "animationIndex": 62,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardPhaseOffset": 0.0,
@@ -3177,6 +2990,54 @@
                 "events": [],
                 "loop": true,
                 "name": "Run_Attack_02_Seq_0",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": true,
+                    "applyRotationY": true,
+                    "applyRotationZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 39,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": true,
+                "name": "Combo_Attack_03_All_Seq_0",
                 "rootMotion": {
                     "applyPositionX": true,
                     "applyPositionY": true,
@@ -4445,54 +4306,6 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 65,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": true,
-                "name": "Run_Combat_Stop_F_0_RM_Seq_0",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": true,
-                    "applyRotationY": true,
-                    "applyRotationZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
                 "animationIndex": 56,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardPhaseOffset": 0.0,
@@ -4521,6 +4334,54 @@
                 "events": [],
                 "loop": true,
                 "name": "Jump_Combat_Loop_0_Seq_0",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": true,
+                    "applyRotationY": true,
+                    "applyRotationZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 65,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": true,
+                "name": "Run_Combat_Stop_F_0_RM_Seq_0",
                 "rootMotion": {
                     "applyPositionX": true,
                     "applyPositionY": true,

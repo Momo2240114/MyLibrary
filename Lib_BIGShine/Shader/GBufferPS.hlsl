@@ -9,6 +9,10 @@ cbuffer CbGBufferMaterial : register(b0)
     float occlusionStrength;
     float toonPbrBlend;
     int shadingModel;
+    float2 uvScale;
+    float2 uvOffset;
+    float uvRotation;
+    float3 materialPadding;
 };
 
 cbuffer CbMaterialOverlay : register(b1)
@@ -71,6 +75,13 @@ GBUFFER_OUT main(VS_OUT pin)
         overlayAmount_ = saturate(visibleMask_ * overlayAlpha);
         materialUV_ = lerp(pin.texcoord, distortedUV_, overlayAmount_);
     }
+
+    const float rotationSin_ = sin(uvRotation);
+    const float rotationCos_ = cos(uvRotation);
+    const float2 centeredUV_ = (materialUV_ - 0.5f) * uvScale;
+    materialUV_ = float2(
+        centeredUV_.x * rotationCos_ - centeredUV_.y * rotationSin_,
+        centeredUV_.x * rotationSin_ + centeredUV_.y * rotationCos_) + 0.5f + uvOffset;
 
     float4 sampledBase_ = BaseMap.Sample(LinearSampler, materialUV_) * baseColor;
     sampledBase_.rgb = lerp(

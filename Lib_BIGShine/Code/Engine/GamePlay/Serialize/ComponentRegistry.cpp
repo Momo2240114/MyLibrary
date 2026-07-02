@@ -39,6 +39,7 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
+#include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/Graphics/VFX/AfterimageComponent.h"
@@ -87,6 +88,7 @@ void RegisterAllComponents()
     registry.Register<AfterimageComponent>("AfterimageComponent");
     registry.Register<AfterimageTrailComponent>("AfterimageTrailComponent");
     registry.Register<AudioComponent>("AudioComponent");
+    registry.Register<ImpactEffectComponent>("ImpactEffectComponent");
 
 
     // •¨—EƒRƒŠƒWƒ‡ƒ“Œn

@@ -175,79 +175,6 @@
                 "startTime": 0.0833333358168602
             },
             {
-                "actionEnd": "Sword_DisableHitBox",
-                "actionStart": "Sword_EnableHitBox",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 5.0,
-                        "intValue": 0,
-                        "key": "Damage",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.0,
-                        "intValue": 0,
-                        "key": "HitParticleAssetPath",
-                        "stringValue": "Data/Particle/HitParticle.json",
-                        "type": 3
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.054999999701976776,
-                        "intValue": 0,
-                        "key": "HitStopDuration",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.8500000238418579,
-                        "intValue": 0,
-                        "key": "HitStopScale",
-                        "stringValue": "",
-                        "type": 0
-                    }
-                ],
-                "callEndOnStateExit": false,
-                "endTime": 0.44999998807907104,
-                "eventTemplateType": "NONE",
-                "label": "Sword_Attack",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.2666666805744171
-            },
-            {
                 "actionEnd": "Kick_DisableHitBox",
                 "actionStart": "Kick_EnableHitBox",
                 "actionUpdate": "",
@@ -379,8 +306,44 @@
                 "label": "KickShockwave",
                 "localPosition": [
                     0.0,
-                    0.6000000238418579,
+                    1.5,
+                    2.75
+                ],
+                "localRotation": [
+                    0.0,
+                    180.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
                     1.0
+                ],
+                "meshVFXAssetPath": "PlayerKickShockwave_Aqua",
+                "meshVFXLifeTime": 0.5,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.8166666626930237
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "WeakAttack01",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.4000000059604645,
+                "eventTemplateType": "ATTACK_TEMPLATE",
+                "label": "WeakAttack_04_Sword",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "localRotation": [
                     0.0,
@@ -392,14 +355,14 @@
                     1.0,
                     1.0
                 ],
-                "meshVFXAssetPath": "PlayerKickShockwave_Aqua",
-                "meshVFXLifeTime": 0.3499999940395355,
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
                 "meshVFXPlaybackSpeed": 1.0,
                 "mirrorMeshVFX": false,
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 0.7166666388511658
+                "startTime": 0.30000001192092896
             }
         ],
         "loop": false,

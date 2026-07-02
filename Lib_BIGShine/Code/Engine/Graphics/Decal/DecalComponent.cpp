@@ -1,168 +1,189 @@
 #include "DecalComponent.h"
+
+#include "Editor/AssetSlotGui.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
-#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Graphics/Resource/TextureResourceManager.h"
+#include "Engine/Platform/WindowsDialogHelper.h"
 
-void DecalComponent::SetTexture(const std::string& path)
+#include <cstdio>
+#include <algorithm>
+#include <filesystem>
+
+void DecalComponent::Start()
 {
-    auto device = GraphicsDeviceManager::Instance().GetDevice();
-
-    // std::string を wchar_t* (std::wstring) に変換
-    std::wstring wpath = std::wstring(path.begin(), path.end());
-
-    // CPUResourceLoader を使ってロード
-    // キャッシュ機能があるので、既に読み込み済みなら一瞬で終わります
-    HRESULT hr = CPUResourceLoader::LoadTextureFromFile(
-        device,
-        wpath.c_str(),
-        texture.ReleaseAndGetAddressOf()
-    );
-
-    if (FAILED(hr)) {
-        // ロード失敗時はダミー（白いテクスチャなど）を入れると安全
-        CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, texture.ReleaseAndGetAddressOf());
-    }
+    if (!texturePath.empty() && !texture) SetTexture(texturePath);
+    ResetLifeTime();
 }
 
-void DecalComponent::SubmitDecal(DecalManager& manager)
+void DecalComponent::SetLifeTime(float lifeTime_, float fadeOutDuration_)
+{
+    lifeTime = (std::max)(lifeTime_, 0.0f);
+    fadeOutDuration = (std::clamp)(fadeOutDuration_, 0.0f, lifeTime);
+    ResetLifeTime();
+}
+
+void DecalComponent::ResetLifeTime()
+{
+    elapsedTime = 0.0f;
+    initialAlpha = color.w;
+}
+
+void DecalComponent::SetTexture(const std::string& path_)
+{
+    texturePath = path_;
+    texture.Reset();
+    if (texturePath.empty()) return;
+
+    ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
+    if (!device_) return;
+
+    ID3D11ShaderResourceView* loadedTexture_ =
+        TextureResourceManager::Instance().LoadTexture(device_, texturePath);
+    if (loadedTexture_)
+    {
+        texture = loadedTexture_;
+        return;
+    }
+
+    CPUResourceLoader::CreateDummyTexture(
+        device_,
+        0xFFFFFFFF,
+        texture.ReleaseAndGetAddressOf());
+    std::printf(
+        "[DecalComponent] Failed to load texture: %s\n",
+        texturePath.c_str());
+}
+
+void DecalComponent::SubmitDecal(DecalManager& manager_)
 {
     if (!IsEnabled()) return;
 
-    auto owner = GetGameObject();
-    if (!owner) return;
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
 
-    DecalData data;
-    // Transformから最新のワールド行列を取得（Dirtyフラグ制御込み）
-    DirectX::XMStoreFloat4x4(&data.worldMatrix, owner->transform->GetWorldMatrix());
-    data.color = this->color;
-    data.texture = this->texture.Get();
-
-    manager.AddDecal(data);
+    DecalData data_{};
+    DirectX::XMStoreFloat4x4(
+        &data_.worldMatrix,
+        owner_->transform->GetWorldMatrix());
+    data_.color = color;
+    data_.texture = texture.Get();
+    manager_.AddDecal(data_);
 }
 
-void DecalComponent::Update(float et)
+void DecalComponent::Update(float elapsedTime_)
 {
-    // 開発時のみ、投影範囲をワイヤーフレームで表示する
-    if (showDebugBounds) {
-        auto transform = GetGameObject()->transform;
-
-        // 現在「度」で返ってくる回転を取得
-        DirectX::XMFLOAT3 rotDeg = transform->GetWorldRotation();
-
-        // 描画用にラジアンへ変換
-        DirectX::XMFLOAT3 rotRad = {
-            DirectX::XMConvertToRadians(rotDeg.x),
-            DirectX::XMConvertToRadians(rotDeg.y),
-            DirectX::XMConvertToRadians(rotDeg.z)
-        };
-
-        GraphicsDeviceManager::Instance().GetShapeRendererSystem().DrawBox(
-            transform->GetWorldPosition(),
-            rotRad, // ラジアンに直したものを渡す
-            transform->GetWorldScale(),
-            DirectX::XMFLOAT4(1, 1, 0, 0.5f)
-        );
+    if (lifeTime > 0.0f)
+    {
+        elapsedTime += (std::max)(elapsedTime_, 0.0f);
+        if (fadeOutDuration > 0.0f && elapsedTime > lifeTime - fadeOutDuration)
+        {
+            const float remainingTime_ = (std::max)(lifeTime - elapsedTime, 0.0f);
+            color.w = initialAlpha * (remainingTime_ / fadeOutDuration);
+        }
+        if (elapsedTime >= lifeTime)
+        {
+            color.w = 0.0f;
+            SetEnabled(false);
+            if (destroyOnLifeEnd)
+            {
+                const std::shared_ptr<GameObject> owner_ = GetGameObject();
+                if (owner_) GetManager().Destroy(owner_);
+            }
+            return;
+        }
     }
+    if (!showDebugBounds) return;
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const std::shared_ptr<Transform> transform_ = owner_->transform;
+    const DirectX::XMFLOAT3 rotationDegrees_ = transform_->GetWorldRotation();
+    const DirectX::XMFLOAT3 rotationRadians_ =
+    {
+        DirectX::XMConvertToRadians(rotationDegrees_.x),
+        DirectX::XMConvertToRadians(rotationDegrees_.y),
+        DirectX::XMConvertToRadians(rotationDegrees_.z),
+    };
+
+    GraphicsDeviceManager::Instance().GetShapeRendererSystem().DrawBox(
+        transform_->GetWorldPosition(),
+        rotationRadians_,
+        transform_->GetWorldScale(),
+        DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 0.5f));
 }
 
 void DecalComponent::Gui()
 {
     ImGui::ColorEdit4("Decal Color", &color.x);
+    ImGui::Checkbox("Show Debug Bounds", &showDebugBounds);
+    ImGui::DragFloat("Life Time", &lifeTime, 0.05f, 0.0f, 120.0f);
+    ImGui::DragFloat("Fade Out Duration", &fadeOutDuration, 0.05f, 0.0f, lifeTime);
+    ImGui::Checkbox("Destroy On Life End", &destroyOnLifeEnd);
 
-    // --- ファイル選択コンボボックス ---
-    const char* previewValue = (selectedFileIndex >= 0) ? decalFiles[selectedFileIndex].c_str() : "Select a decal...";
-
-    if (ImGui::BeginCombo("Decal Texture", previewValue)) {
-        for (int i = 0; i < (int)decalFiles.size(); i++) {
-            const bool isSelected = (selectedFileIndex == i);
-            if (ImGui::Selectable(decalFiles[i].c_str(), isSelected)) {
-                selectedFileIndex = i;
-
-                // ファイルが選ばれたら即座にロード
-                std::string fullPath = "Data/Decal/" + decalFiles[i];
-                SetTexture(fullPath); // 前に作ったロード関数を呼び出す
-            }
-
-            if (isSelected) {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
-        ImGui::EndCombo();
-    }
-
-    // 更新ボタン（フォルダに新しい画像を入れた時用）
-    if (ImGui::Button("Refresh Folder")) {
-        RefreshDecalFileList();
-    }
-
-    if (texture) {
-        ImGui::Separator();
-        ImGui::Text("Preview:");
-        ImGui::Image((void*)texture.Get(), ImVec2(100, 100));
+    std::string selectedPath_ = texturePath;
+    if (AssetSlotGui::Draw(
+        "Decal Texture",
+        AssetSlotType::TEXTURE,
+        selectedPath_,
+        texture.Get(),
+        "Data"))
+    {
+        SetTexture(selectedPath_);
     }
 }
 
-void DecalComponent::Serialize(nlohmann::json& j) const
+void DecalComponent::Serialize(nlohmann::json& json_) const
 {
-    // コンポーネント名をキーにしてデータを格納
-    j["ComponentName"] = componentName;
-
-    // 現在選択されているファイル名（パス）を保存
-    if (selectedFileIndex >= 0 && selectedFileIndex < (int)decalFiles.size()) {
-        j["TextureFile"] = decalFiles[selectedFileIndex];
-    }
-    else {
-        j["TextureFile"] = "";
-    }
-
-    // 色情報も保存
-    j["Color"] = { color.x, color.y, color.z, color.w };
+    json_["ComponentName"] = componentName;
+    json_["TexturePath"] = texturePath;
+    json_["TextureFile"] = texturePath.empty()
+        ? std::string{}
+        : WindowsDialogHelper::PathToUtf8(
+            WindowsDialogHelper::Utf8ToPath(texturePath).filename());
+    json_["Color"] = { color.x, color.y, color.z, color.w };
+    json_["ShowDebugBounds"] = showDebugBounds;
+    json_["LifeTime"] = lifeTime;
+    json_["FadeOutDuration"] = fadeOutDuration;
+    json_["DestroyOnLifeEnd"] = destroyOnLifeEnd;
 }
 
-void DecalComponent::Deserialize(const nlohmann::json& j)
+void DecalComponent::Deserialize(const nlohmann::json& json_)
 {
-    // 色の復元
-    if (j.contains("Color")) {
-        color.x = j["Color"][0];
-        color.y = j["Color"][1];
-        color.z = j["Color"][2];
-        color.w = j["Color"][3];
+    if (json_.contains("Color") &&
+        json_["Color"].is_array() &&
+        json_["Color"].size() >= 4u)
+    {
+        color.x = json_["Color"][0].get<float>();
+        color.y = json_["Color"][1].get<float>();
+        color.z = json_["Color"][2].get<float>();
+        color.w = json_["Color"][3].get<float>();
     }
+    showDebugBounds = json_.value("ShowDebugBounds", true);
+    lifeTime = (std::max)(json_.value("LifeTime", 0.0f), 0.0f);
+    fadeOutDuration = (std::clamp)(
+        json_.value("FadeOutDuration", 0.0f),
+        0.0f,
+        lifeTime);
+    destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", false);
 
-    // テクスチャの復元
-    if (j.contains("TextureFile")) {
-        std::string fileName = j["TextureFile"];
-        if (!fileName.empty()) {
-            // リスト内から一致するファイルを探してインデックスを更新
-            RefreshDecalFileList(); // ロード前に最新のリストを確保
-
-            auto it = std::find(decalFiles.begin(), decalFiles.end(), fileName);
-            if (it != decalFiles.end()) {
-                selectedFileIndex = static_cast<int>(std::distance(decalFiles.begin(), it));
-
-                // 実際のテクスチャをロード
-                std::string fullPath = "Data/Decal/" + fileName;
-                SetTexture(fullPath);
-            }
+    std::string loadedPath_ = json_.value("TexturePath", std::string{});
+    if (loadedPath_.empty())
+    {
+        const std::string legacyFile_ =
+            json_.value("TextureFile", std::string{});
+        if (!legacyFile_.empty())
+        {
+            const std::filesystem::path legacyPath_ =
+                WindowsDialogHelper::Utf8ToPath(legacyFile_);
+            loadedPath_ = legacyPath_.has_parent_path()
+                ? legacyFile_
+                : "Data/Decal/" + legacyFile_;
         }
     }
-}
-
-
-void DecalComponent::RefreshDecalFileList()
-{
-    decalFiles.clear();
-    std::string path = "Data/Decal";
-
-    if (!std::filesystem::exists(path)) return;
-
-    for (const auto& entry : std::filesystem::directory_iterator(path)) {
-        if (entry.is_regular_file()) {
-            std::string ext = entry.path().extension().string();
-            // 画像ファイルだけをリストに入れる
-            if (ext == ".png" || ext == ".jpg" || ext == ".dds" || ext == ".tga" || ext == ".PNG") {
-                decalFiles.push_back(entry.path().filename().string());
-            }
-        }
-    }
+    SetTexture(loadedPath_);
+    ResetLifeTime();
 }

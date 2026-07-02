@@ -1,11 +1,11 @@
-// PBRPS.hlsl  ---- IBL ????? ----
+// PBRPS.hlsl  ---- IBL対応版 ----
 #include "ModelCommon.hlsli"
 #include "bidirectional_reflectance_distribution_function.hlsli"
 
 static const float PI = 3.14159265f;
 
 // -----------------------------------------------
-// ???b?V?????o?b?t?@ (b0)
+// メッシュ用定数バッファ（b0）
 // -----------------------------------------------
 cbuffer CbMesh : register(b0)
 {
@@ -18,7 +18,7 @@ cbuffer CbMesh : register(b0)
 };
 
 // -----------------------------------------------
-// ACES ?g?[???}?b?s???O???
+// ACESトーンマッピング関数
 // -----------------------------------------------
 float3 ACESFilm(float3 x)
 {
@@ -31,7 +31,7 @@ float3 ACESFilm(float3 x)
 }
 
 // -----------------------------------------------
-// ?e?N?X?`?? (t0t4 : ?????At10t12 : IBL ???)
+// テクスチャ（t0～t4：マテリアル、t10～t12：IBL用）
 // -----------------------------------------------
 Texture2D BaseMap : register(t0);
 Texture2D NormalMap : register(t1);
@@ -39,30 +39,30 @@ Texture2D EmissiveMap : register(t2);
 Texture2D AOMap : register(t3);
 Texture2D MetalRoughMap : register(t4);
 
-// IBL ?e?N?X?`??
-// ?? register ????? GraphicsDeviceManager ????K???????邱??
-TextureCube diffuse_iem : register(t10); // ?g?U????p IrradianceMap
-TextureCube specular_pmrem : register(t11); // ???????p RadianceMap
-Texture2D lut_ggx : register(t12); // GGX BRDF ?Q??e?[?u??
+// IBLテクスチャ
+// register番号はGraphicsDeviceManager側の設定と一致させること
+TextureCube diffuse_iem : register(t10); // 拡散反射用Irradiance Map
+TextureCube specular_pmrem : register(t11); // 鏡面反射用Radiance Map
+Texture2D lut_ggx : register(t12); // GGX BRDF参照テーブル
 
 // -----------------------------------------------
-// ?T???v???[
+// サンプラー
 // -----------------------------------------------
 SamplerState LinearSampler : register(s0);
 
 
 // -----------------------------------------------
-// IBL ?w???p?[???
+// IBLヘルパー関数
 // -----------------------------------------------
 
-// ?e????l???????t???l?????
+// 粗さを考慮したフレネル反射率を計算する
 float3 CalcFresnelRoughness(float3 f0, float NdotV, float roughness)
 {
     return f0 + (max((float3) (1.0f - roughness), f0) - f0)
                * pow(saturate(1.0f - NdotV), 5.0f);
 }
 
-// ?g?U???? IBL
+// 拡散反射IBL
 float3 DiffuseIBL(float3 N, float3 V, float roughness,
                   float3 diffuse_reflectance, float3 f0)
 {
@@ -72,19 +72,19 @@ float3 DiffuseIBL(float3 N, float3 V, float roughness,
     return diffuse_reflectance * irrad * kD;
 }
 
-// ??????? IBL (Split Sum Approximation)
+// 鏡面反射IBL（Split Sum近似）
 float3 SpecularIBL(float3 N, float3 V, float roughness, float3 f0)
 {
     float NdotV = max(0.0001f, dot(N, V));
     float3 R = normalize(reflect(-V, N));
 
-    // roughness ??~?b?v???x??????????T???v?????O
+    // roughnessに応じたミップレベルでサンプリングする
     uint width, height, mipMaps;
     specular_pmrem.GetDimensions(0, width, height, mipMaps);
     float lod = roughness * float(mipMaps - 1);
     float3 specLight = specular_pmrem.SampleLevel(LinearSampler, R, lod).rgb;
 
-    // BRDF LUT ???? F_scale / F_bias ??擾
+    // BRDF LUTからF_scaleとF_biasを取得する
     float2 brdfUV = saturate(float2(NdotV, roughness));
     float2 envBRDF = lut_ggx.Sample(LinearSampler, brdfUV).rg;
 
@@ -92,11 +92,11 @@ float3 SpecularIBL(float3 N, float3 V, float roughness, float3 f0)
 }
 
 // -----------------------------------------------
-// ???C??
+// メイン処理
 // -----------------------------------------------
 PS_OUT main(VS_OUT pin)
 {
-    // --- 1. ?e?N?X?`???T???v?????O ---
+    // --- 1. テクスチャのサンプリング ---
     float4 base = BaseMap.Sample(LinearSampler, pin.texcoord) * baseColor * 0.8f;
     if (base.a < 0.1f)
         discard;
@@ -110,7 +110,7 @@ PS_OUT main(VS_OUT pin)
 
     float3 V = normalize(cameraPosition.xyz - pin.position);
 
-    // --- 2. PBR ?p?????[?^ ---
+    // --- 2. PBRパラメーター ---
     float2 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord).gr;
     float metalness = metalRoughSample.r * metalnessParam;
     float roughness = metalRoughSample.g * roughnessParam;
@@ -119,13 +119,13 @@ PS_OUT main(VS_OUT pin)
     float3 f0 = lerp(float3(0.04f, 0.04f, 0.04f), base.rgb, metalness);
     float3 f90 = float3(1.0f, 1.0f, 1.0f);
 
-    // ?g?U??????i????? 0?j
+    // 拡散反射率（金属の場合は0）
     float3 diffuse_reflectance = base.rgb * (1.0f - metalness);
 
-    // --- 3. ????????C?e?B???O ---
+    // --- 3. 直接ライティング ---
     float3 totalDirectLighting = 0;
 
-    // A. ???s????
+    // A. 平行光源
     {
         float3 L = normalize(-lightDirection.xyz);
         float3 H = normalize(L + V);
@@ -142,7 +142,7 @@ PS_OUT main(VS_OUT pin)
         totalDirectLighting += (diff + spec) * (lightColor.rgb * directionalIntensity) * NdotL * shadow;
     }
 
-    // B. ?_????
+    // B. 点光源
     [loop]
     for (int i = 0; i < numPointLights; i++)
     {
@@ -168,7 +168,7 @@ PS_OUT main(VS_OUT pin)
         totalDirectLighting += (diff + spec) * (pl.color * pl.intensity) * NdotL * att;
     }
 
-    // C. ?X?|?b?g???C?g
+    // C. スポットライト
     [loop]
     for (int j = 0; j < numSpotLights; j++)
     {
@@ -202,7 +202,7 @@ PS_OUT main(VS_OUT pin)
         totalDirectLighting += (diff + spec) * (sl.color * sl.intensity) * NdotL * att;
     }
 
-  // IBL??v?Z
+    // IBLの計算
     float3 iblDiffuse = DiffuseIBL(N, V, roughness, diffuse_reflectance, f0);
     float3 iblSpecular = SpecularIBL(N, V, roughness, f0);
 
@@ -210,19 +210,19 @@ PS_OUT main(VS_OUT pin)
     float ao = AOMap.Sample(LinearSampler, pin.texcoord).r * occlusionStrength;
     float3 emissive = EmissiveMap.Sample(LinearSampler, pin.texcoord).rgb * emissiveColor.rgb;
 
-    // --- AO??g?U????IBL????K?p ---
+    // --- AOを拡散反射IBLへ適用 ---
     float3 finalColor = (totalDirectLighting + (iblDiffuse * ao) + iblSpecular) + emissive;
 
-    // --- ?g?[???}?b?s???O??K?p ---
+    // --- トーンマッピングを適用 ---
     finalColor = ACESFilm(finalColor);
 
-    // ?K???}??
+    // ガンマ補正
     finalColor = pow(max(finalColor, 0.0f), 1.0f / 2.2f);
 
     PS_OUT output; 
-    // ?J???[??o??
+    // カラーを出力
     output.color = float4(finalColor, base.a);   
-    // ?@????o??i?@???}?b?v?K?p???x?N?g???? [0, 1] ????K???j
+    // 法線を出力（法線マップ適用後のベクトルを［0, 1］へ変換）
     output.normal = float4(N * 0.5f + 0.5f, 1.0f);
     return output;
 }

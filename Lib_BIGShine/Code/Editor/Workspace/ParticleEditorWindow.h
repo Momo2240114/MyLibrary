@@ -6,6 +6,8 @@
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
+#include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
+#include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
@@ -58,10 +60,14 @@ private:
     void RenderPreview(const ImVec2& previewSize_);
     void RefreshParticleAssets();
     void RefreshSequenceAssets();
+    void RefreshImpactEffectAssets();
     void UpdateSequence(float deltaTime_);
     void ResetSequence();
     bool SaveSequence(const std::string& path_);
     bool LoadSequence(const std::string& path_);
+    void StartImpactPreview();
+    void UpdateImpactPreview(float deltaTime_);
+    void PlayImpactPreviewAtContact();
 
 
 private:
@@ -78,14 +84,21 @@ private:
     std::shared_ptr<ParticleComponent> previewParticle; // 編集対象Particle。
     std::shared_ptr<MeshVFXComponent> previewMeshVFX;   // 編集対象MeshVFX。
     std::shared_ptr<AttackEffectHitComponent> previewAttackHit; // VFX同期攻撃判定。
+    std::shared_ptr<ImpactEffectComponent> previewImpactEffect;
+    std::shared_ptr<GameObject> previewImpactGroundObject;
+    std::shared_ptr<GltfModelCommponennt> previewImpactGroundModel;
+    std::shared_ptr<GameObject> previewDecalObject;
+    std::shared_ptr<DecalComponent> previewDecal;
     std::vector<std::string> particleAssetPaths;        // Particle Asset候補。
     std::vector<std::string> sequenceAssetPaths;        // Sequence Asset候補。
+    std::vector<std::string> impactEffectAssetPaths;
     std::vector<TimelineTrack> timelineTracks;          // Timeline上の再生トラック一覧。
     int selectedAssetIndex = -1;       // 選択中Particle Asset。
     int selectedSequenceIndex = -1;    // 選択中Sequence Asset。
     int selectedTimelineTrack = -1;    // 選択中Timeline Track。
     int firstTimelineFrame = 0;        // Timeline表示の左端フレーム。
     char sequenceNameBuffer[128] = "NewVFXSequence"; // Sequence保存名入力。
+    char impactEffectNameBuffer[128] = "NewImpactEffect";
     float sequenceTime = 0.0f;         // 現在のSequence再生時間。
     float sequenceDuration = 5.0f;     // Sequence全体の長さ。
     float inspectorWidth = 360.0f;     // Inspectorペイン幅。
@@ -96,6 +109,11 @@ private:
     bool sequenceLoop = true;          // Sequence末尾でループするか。
     bool timelineExpanded = true;      // Timeline表示を展開しているか。
     bool showGrid = true;              // PreviewにGridを表示するか。
+    bool impactPreviewMode = false;
+    bool impactPreviewPlaying = false;
+    float impactPreviewHeight = 3.0f;
+    float impactPreviewFallSpeed = 5.0f;
+    float impactPreviewPositionY = 3.0f;
 
 
 };
