@@ -34,7 +34,7 @@ private:
     int hitCount = 0;
 
     bool useHitStop = true;
-    uint32_t hitStopLayerMask = 3u;
+    uint32_t hitStopLayerMask = 0;
     bool useKnockBack = true;
 
     std::string reactionActionName;

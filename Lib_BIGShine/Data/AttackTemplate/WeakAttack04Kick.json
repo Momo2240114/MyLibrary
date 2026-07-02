@@ -1,0 +1,38 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "damage": 9.0,
+        "hitGroupId": 1,
+        "hitStopDuration": 0.11,
+        "hitStopScale": 0.0,
+        "knockBackPower": 5.5,
+        "knockBackType": 0
+    },
+    "attackEffects": [],
+    "displayName": "WeakAttack_04_Kick",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitParticleAssetPath": "KickImpact_Aqua",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.65,
+        "hitParticleNormalOffset": 0.08,
+        "spawnOnHit": true
+    },
+    "id": "WeakAttack04Kick",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.18,
+        "activeStartTime": 0.0,
+        "enabled": true,
+        "endNodeName": "",
+        "hitBoxName": "Kick",
+        "radius": 4.42,
+        "startNodeName": ""
+    }
+}

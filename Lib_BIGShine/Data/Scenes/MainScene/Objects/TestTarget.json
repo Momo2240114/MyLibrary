@@ -112,7 +112,17 @@
                         "outlineThicknessOffset": 0.125,
                         "roughness": 0.996999979019165,
                         "shaderId": 3,
-                        "toonPbrBlend": 1.0
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
                     }
                 ],
                 "ModelName": "./Data/Model/Plains Dragon/PoseTest/PoseTest.gltf",
@@ -343,7 +353,7 @@
     "Transform": {
         "Pos": [
             54.03639602661133,
-            -0.7953553199768066,
+            -0.7953567504882813,
             -36.10603332519531
         ],
         "Rot": [

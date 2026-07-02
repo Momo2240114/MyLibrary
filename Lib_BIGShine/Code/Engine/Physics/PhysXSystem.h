@@ -9,6 +9,7 @@ public:
     static void Initialize();
     static void Finalize();
     static void Step(float dt);
+    static void SetTimeScale(float scale_);
 
     static physx::PxPhysics* GetPhysics();
     static physx::PxScene* GetScene();

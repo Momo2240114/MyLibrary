@@ -383,6 +383,8 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Gui.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.NodeEditor.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
@@ -605,6 +607,8 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationState.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />

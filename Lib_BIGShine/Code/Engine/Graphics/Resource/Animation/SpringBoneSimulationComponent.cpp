@@ -53,6 +53,43 @@ namespace
         return Scale(value_, 1.0f / length_);
     }
 
+    void DrawBoneBetween(
+        ShapeRenderSystem& renderer_,
+        const XMFLOAT3& startPosition_,
+        const XMFLOAT3& endPosition_,
+        const XMFLOAT4& color_)
+    {
+        const XMFLOAT3 difference_ = Subtract(endPosition_, startPosition_);
+        const float length_ = Length(difference_);
+        if (length_ <= 0.00001f) return;
+
+        const XMVECTOR forward_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+        const XMVECTOR direction_ = XMVector3Normalize(XMLoadFloat3(&difference_));
+        const float dot_ = std::clamp(
+            XMVectorGetX(XMVector3Dot(forward_, direction_)),
+            -1.0f,
+            1.0f);
+        XMMATRIX transform_ = XMMatrixIdentity();
+        if (dot_ < 0.99999f)
+        {
+            XMVECTOR axis_ = XMVector3Cross(forward_, direction_);
+            if (XMVectorGetX(XMVector3LengthSq(axis_)) <= 0.00001f)
+            {
+                axis_ = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+            }
+            transform_ = XMMatrixRotationAxis(XMVector3Normalize(axis_), std::acos(dot_));
+        }
+        transform_.r[3] = XMVectorSet(
+            startPosition_.x,
+            startPosition_.y,
+            startPosition_.z,
+            1.0f);
+
+        XMFLOAT4X4 transformStorage_;
+        XMStoreFloat4x4(&transformStorage_, transform_);
+        renderer_.DrawBone(transformStorage_, length_, color_);
+    }
+
 
     float GetStiffnessScale(const IKMapComponent::IKChain& chain_, size_t pointIndex_)
     {
@@ -739,13 +776,12 @@ void SpringBoneSimulationComponent::DrawHairCollisionShapes()
         if (!chain_.initialized) continue;
         if (chain_.simulatedPositions.empty()) continue;
 
-        const float radius_ = (std::max)(chain_.collisionRadius, 0.005f);
-
         for (size_t pointIndex_ = 1; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
         {
-            renderer_.DrawSphere(
+            DrawBoneBetween(
+                renderer_,
+                chain_.simulatedPositions[pointIndex_ - 1],
                 chain_.simulatedPositions[pointIndex_],
-                radius_,
                 hairCollisionShapeColor);
         }
     }

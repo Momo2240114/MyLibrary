@@ -520,6 +520,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			// XV
 			shader->Update(rc, mesh);
 
+			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
+				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
+				? SamplerState::LinearClamp
+				: SamplerState::LinearWrap);
+			dc->PSSetSamplers(0, 1, &materialSampler_);
+
 			// •`‰æ
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 		};
@@ -577,6 +583,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				mesh.material->metalnessRoughnessMap.Get(),
 			};
 			dc->PSSetShaderResources(0, _countof(materialSrvs_), materialSrvs_);
+
+			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
+				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
+				? SamplerState::LinearClamp
+				: SamplerState::LinearWrap);
+			dc->PSSetSamplers(0, 1, &materialSampler_);
 
 			CbMaterialOverlay overlayConstants_{};
 			ID3D11ShaderResourceView* overlaySrvs_[] =

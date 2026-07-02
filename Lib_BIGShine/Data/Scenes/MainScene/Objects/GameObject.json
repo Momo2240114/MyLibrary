@@ -19,6 +19,7 @@
                             -107374176.0
                         ],
                         "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -52,6 +53,7 @@
                             1.0,
                             1.0
                         ],
+                        "DistortionSamplerMode": 0,
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.25,
@@ -60,6 +62,7 @@
                             1.0
                         ],
                         "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
                         "EdgePatternStrength": 0.0,
                         "EdgePatternTexturePath": "",
                         "EdgePatternUVScale": [
@@ -69,6 +72,7 @@
                         "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
                         "EmissiveStrength": 3.0,
                         "EmissiveTexturePath": "",
                         "EmissiveUVScale": [
@@ -82,9 +86,28 @@
                         "GradientEndUv": 1.0,
                         "GradientFixedUv": 0.5,
                         "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
                         "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
                         "IntersectionEdgeStrength": 0.33000001311302185,
                         "IntersectionEdgeWidth": 0.001500000013038516,
                         "Loop": true,
@@ -97,6 +120,7 @@
                                 "Path": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG"
                             }
                         ],
+                        "MaskSamplerMode": 0,
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
@@ -115,6 +139,7 @@
                             0.0
                         ],
                         "ModelPath": "Data/Model/VFX/Sphere.glb",
+                        "NoiseSamplerMode": 0,
                         "NoiseStrength": 0.05000000074505806,
                         "NoiseTexturePath": "",
                         "NoiseTexturePaths": [
@@ -130,6 +155,7 @@
                             0.20000000298023224,
                             -0.800000011920929
                         ],
+                        "NormalSamplerMode": 0,
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2_normal.PNG",
                         "NormalUVScale": [
@@ -211,6 +237,7 @@
                             -107374176.0
                         ],
                         "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -244,6 +271,7 @@
                             1.0,
                             1.0
                         ],
+                        "DistortionSamplerMode": 0,
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.25,
@@ -252,6 +280,7 @@
                             1.0
                         ],
                         "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
                         "EdgePatternStrength": 0.0,
                         "EdgePatternTexturePath": "",
                         "EdgePatternUVScale": [
@@ -261,6 +290,7 @@
                         "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.3499999940395355,
                         "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
                         "EmissiveStrength": 3.0,
                         "EmissiveTexturePath": "",
                         "EmissiveUVScale": [
@@ -274,9 +304,28 @@
                         "GradientEndUv": 1.0,
                         "GradientFixedUv": 0.5,
                         "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
                         "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -289,6 +338,7 @@
                                 "Path": "Data/Texture/VFX/T_Free_Magic_Trail.PNG"
                             }
                         ],
+                        "MaskSamplerMode": 0,
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
@@ -307,6 +357,7 @@
                             0.0
                         ],
                         "ModelPath": "Data/Model/VFX/Sphere.glb",
+                        "NoiseSamplerMode": 0,
                         "NoiseStrength": 0.05000000074505806,
                         "NoiseTexturePath": "",
                         "NoiseTexturePaths": [
@@ -322,6 +373,7 @@
                             2.9000000953674316,
                             1.0
                         ],
+                        "NormalSamplerMode": 0,
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "",
                         "NormalUVScale": [
@@ -403,6 +455,7 @@
                             0.0
                         ],
                         "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -436,6 +489,7 @@
                             1.0,
                             1.0
                         ],
+                        "DistortionSamplerMode": 0,
                         "Duration": 1.0,
                         "EdgeColor": [
                             1.0,
@@ -444,6 +498,7 @@
                             1.0
                         ],
                         "EdgePatternMode": 1,
+                        "EdgePatternSamplerMode": 0,
                         "EdgePatternStrength": 0.0,
                         "EdgePatternTexturePath": "",
                         "EdgePatternUVScale": [
@@ -453,6 +508,7 @@
                         "EmissiveCurveName": "",
                         "EmissivePulseAmount": 5.0,
                         "EmissivePulseSpeed": 0.0,
+                        "EmissiveSamplerMode": 0,
                         "EmissiveStrength": 10.300000190734863,
                         "EmissiveTexturePath": "Data/Texture/Trail/T_TrailMask_21.PNG",
                         "EmissiveUVScale": [
@@ -466,9 +522,28 @@
                         "GradientEndUv": 1.0,
                         "GradientFixedUv": 0.15299999713897705,
                         "GradientSampleMode": 1,
+                        "GradientSamplerMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "Data/Texture/Particle/Sunset.jpg",
                         "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
                         "IntersectionEdgeStrength": 1.9600000381469727,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -481,6 +556,7 @@
                                 "Path": "Data/Texture/Trail/T_TrailMask_22.PNG"
                             }
                         ],
+                        "MaskSamplerMode": 0,
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
@@ -499,6 +575,7 @@
                             0.0
                         ],
                         "ModelPath": "__InternalMeshSlashRaisedCrescent__",
+                        "NoiseSamplerMode": 0,
                         "NoiseStrength": 0.019999999552965164,
                         "NoiseTexturePath": "",
                         "NoiseTexturePaths": [
@@ -514,6 +591,7 @@
                             8.0,
                             0.0
                         ],
+                        "NormalSamplerMode": 0,
                         "NormalStrength": 2.0,
                         "NormalTexturePath": "",
                         "NormalUVScale": [
@@ -525,7 +603,7 @@
                             0.0,
                             0.0
                         ],
-                        "RenderEnabled": true,
+                        "RenderEnabled": false,
                         "Rotation": [
                             0.0,
                             0.0,

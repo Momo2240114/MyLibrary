@@ -5,13 +5,13 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 105,
+                "AttackInstanceId": 79,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
-                "Damage": 5.0,
+                "Damage": 30.0,
                 "DamageKey": "Damage",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
@@ -37,10 +37,10 @@
                 "HitSoundPath": "",
                 "HitSoundPathKey": "HitSoundPath",
                 "HitSoundVolume": 1.0,
-                "HitStopDuration": 0.05000000074505806,
+                "HitStopDuration": 0.125,
                 "HitStopDurationKey": "HitStopDuration",
                 "HitStopLayerMask": 3,
-                "HitStopScale": 0.8500000238418579,
+                "HitStopScale": 0.15000000596046448,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "KnockBackPower": 5.0,
@@ -96,7 +96,17 @@
                         "outlineThicknessOffset": 0.0024999999441206455,
                         "roughness": 1.0,
                         "shaderId": 3,
-                        "toonPbrBlend": 1.0
+                        "toonPbrBlend": 1.0,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Blender/Sword.gltf",
@@ -140,6 +150,7 @@
                             -107374176.0
                         ],
                         "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -173,6 +184,7 @@
                             1.0,
                             1.0
                         ],
+                        "DistortionSamplerMode": 0,
                         "Duration": 0.0,
                         "EdgeColor": [
                             0.7800000309944153,
@@ -181,6 +193,7 @@
                             1.0
                         ],
                         "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
                         "EdgePatternStrength": 0.0,
                         "EdgePatternTexturePath": "",
                         "EdgePatternUVScale": [
@@ -190,6 +203,7 @@
                         "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.05000000074505806,
                         "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
                         "EmissiveStrength": 2.200000047683716,
                         "EmissiveTexturePath": "",
                         "EmissiveUVScale": [
@@ -203,9 +217,28 @@
                         "GradientEndUv": 1.0,
                         "GradientFixedUv": 0.5,
                         "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
                         "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": false,
@@ -218,8 +251,8 @@
                                 "Path": "Data/Texture/Trail/T_TrailMask_09.PNG"
                             }
                         ],
-                        "MaskTexturePath": "",
                         "MaskSamplerMode": 1,
+                        "MaskTexturePath": "",
                         "MaskUVRotation": -90.0,
                         "MaskUVRotationSpeed": 0.0,
                         "MaskUVScale": [
@@ -237,8 +270,8 @@
                             0.0
                         ],
                         "ModelPath": "Data/Model/VFX/SM_Free_Magic_Plane1.glb",
-                        "NoiseStrength": 0.02500000037252903,
                         "NoiseSamplerMode": 0,
+                        "NoiseStrength": 0.02500000037252903,
                         "NoiseTexturePath": "",
                         "NoiseTexturePaths": [
                             "Data/Texture/Trail/T_TrailMask_06.PNG"
@@ -253,8 +286,8 @@
                             0.20000000298023224,
                             -0.20000000298023224
                         ],
-                        "NormalStrength": 1.0,
                         "NormalSamplerMode": 1,
+                        "NormalStrength": 1.0,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
                         "NormalUVScale": [
                             1.0,
@@ -323,7 +356,7 @@
                     }
                 ],
                 "PlaybackSpeed": 1.0,
-                "TrailEmitting": true,
+                "TrailEmitting": false,
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,
@@ -369,6 +402,7 @@
                             -107374176.0
                         ],
                         "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
                         "BaseTexturePath": "",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
@@ -402,6 +436,7 @@
                             1.0,
                             1.0
                         ],
+                        "DistortionSamplerMode": 0,
                         "Duration": 0.0,
                         "EdgeColor": [
                             1.0,
@@ -410,6 +445,7 @@
                             1.0
                         ],
                         "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
                         "EdgePatternStrength": 0.0,
                         "EdgePatternTexturePath": "",
                         "EdgePatternUVScale": [
@@ -419,6 +455,7 @@
                         "EmissiveCurveName": "",
                         "EmissivePulseAmount": 0.75,
                         "EmissivePulseSpeed": 4.0,
+                        "EmissiveSamplerMode": 0,
                         "EmissiveStrength": 0.44999998807907104,
                         "EmissiveTexturePath": "",
                         "EmissiveUVScale": [
@@ -432,9 +469,28 @@
                         "GradientEndUv": 1.0,
                         "GradientFixedUv": 0.5,
                         "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
                         "GradientStartUv": 0.0,
                         "GradientTexturePath": "",
                         "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
                         "IntersectionEdgeStrength": 0.0,
                         "IntersectionEdgeWidth": 0.0020000000949949026,
                         "Loop": true,
@@ -447,6 +503,7 @@
                                 "Path": "Data/Texture/Weapon/sword_Mask.png"
                             }
                         ],
+                        "MaskSamplerMode": 0,
                         "MaskTexturePath": "",
                         "MaskUVRotation": 0.0,
                         "MaskUVRotationSpeed": 0.0,
@@ -465,6 +522,7 @@
                             0.0
                         ],
                         "ModelPath": "",
+                        "NoiseSamplerMode": 0,
                         "NoiseStrength": 0.05000000074505806,
                         "NoiseTexturePath": "",
                         "NoiseTexturePaths": [],
@@ -478,6 +536,7 @@
                             0.20000000298023224,
                             -0.800000011920929
                         ],
+                        "NormalSamplerMode": 0,
                         "NormalStrength": 1.0,
                         "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG",
                         "NormalUVScale": [

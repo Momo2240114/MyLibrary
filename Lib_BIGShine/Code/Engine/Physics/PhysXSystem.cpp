@@ -1,6 +1,8 @@
 #include "PhysXSystem.h"
 #include "PhysXEventCallback.h"
 
+#include <algorithm>
+
 using namespace physx;
 
 static PxFoundation* gFoundation = nullptr;
@@ -13,6 +15,7 @@ static PxPvd* gPvd = nullptr;
 static PxPvdTransport* gPvdTransport = nullptr;
 static PxMaterial* gDefaultMaterial = nullptr;
 static CollisionCallback gCollisionCallback;
+static float gTimeScale = 1.0f;
 
 static PxControllerManager* gControllerManager = nullptr;
 
@@ -162,9 +165,15 @@ void PhysXSystem::Finalize()
 
 void PhysXSystem::Step(float dt)
 {
-    if (!gScene || dt <= 0.0f) return;
-    gScene->simulate(dt);
+    const float scaledDt_ = dt * gTimeScale;
+    if (!gScene || scaledDt_ <= 0.0f) return;
+    gScene->simulate(scaledDt_);
     gScene->fetchResults(true);
+}
+
+void PhysXSystem::SetTimeScale(float scale_)
+{
+    gTimeScale = (std::max)(0.0f, (std::min)(scale_, 1.0f));
 }
 
 PxRigidDynamic* PhysXSystem::CreateBox(const PxVec3& pos, const PxVec3& halfSize)

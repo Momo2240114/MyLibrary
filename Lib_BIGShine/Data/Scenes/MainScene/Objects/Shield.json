@@ -28,7 +28,17 @@
                         "outlineThicknessOffset": 0.004999999888241291,
                         "roughness": 0.75,
                         "shaderId": 3,
-                        "toonPbrBlend": 0.800000011920929
+                        "toonPbrBlend": 0.800000011920929,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
                     }
                 ],
                 "ModelName": "./Data/Model/SwordPlayer/Weapon/Sword_ShiledModel.gltf",

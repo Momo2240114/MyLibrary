@@ -3,18 +3,21 @@
     "AssetVersion": 1,
     "attack": {
         "allowMultiHit": false,
-        "damage": 5.0,
+        "damage": 4.0,
         "hitGroupId": 0,
-        "hitStopDuration": 0.05000000074505806,
+        "hitStopDuration": 0.055,
         "hitStopScale": 0.0,
-        "knockBackPower": 3.0,
+        "knockBackPower": 1.2,
         "knockBackType": 0
     },
     "attackEffects": [],
-    "displayName": "Strong_Attack",
+    "displayName": "WeakAttack_01",
     "hitEffect": {
         "hitMeshVfxAssetPath": "",
-        "hitParticleAssetPath": "",
+        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.45,
+        "hitParticleNormalOffset": 0.05,
         "spawnOnHit": true
     },
     "id": "WeakAttack01",
@@ -22,64 +25,14 @@
         "canHitOwner": false,
         "ownerTarget": 0
     },
-    "slashEffects": [
-        {
-            "alpha": 1.0,
-            "baseNodeName": "",
-            "enabled": true,
-            "followNode": false,
-            "followOwner": false,
-            "hitBox": {
-                "activeEndTime": 0.07999999821186066,
-                "activeStartTime": 0.0,
-                "enabled": true,
-                "halfHeight": 1.0,
-                "hitBoxName": "SlashHitBox",
-                "localOffset": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "radius": 0.5,
-                "shape": 2
-            },
-            "lifeTime": 0.1599999964237213,
-            "localOffset": [
-                0.0,
-                1.100000023841858,
-                1.25
-            ],
-            "localRotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "localScale": [
-                1.149999976158142,
-                1.149999976158142,
-                1.149999976158142
-            ],
-            "spawnTimeOffset": 0.029999999329447746,
-            "vfxPath": "Data/VFX/SlashArc.json"
-        }
-    ],
+    "slashEffects": [],
     "weaponHitBox": {
         "activeEndTime": 0.18000000715255737,
-        "activeStartTime": 0.0,
+        "activeStartTime": 0.02,
         "enabled": true,
-        "endNodeName": "WeaponTip",
-        "hitBoxName": "WeaponHitBox",
-        "radius": 0.18000000715255737,
-        "startNodeName": "WeaponRoot"
+        "endNodeName": "TrailEnd",
+        "hitBoxName": "Sword",
+        "radius": 26.0,
+        "startNodeName": "TrailStart"
     }
 }
