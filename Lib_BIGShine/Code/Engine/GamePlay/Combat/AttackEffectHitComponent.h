@@ -94,6 +94,7 @@ public:
     void Play();
     void Stop();
     void ResetRuntime();
+    void SubmitDebugShapes();
 
 private:
     struct RuntimeHitShape

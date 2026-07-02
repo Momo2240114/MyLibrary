@@ -156,18 +156,16 @@ std::shared_ptr<GameObject> VFXManager::SpawnParticle(
     }
 
     particle_->SetAsset(*asset_);
+    particle_->ResetRuntime();
 
-    std::string emitterName_ = request_.emitterName;
-    if (emitterName_.empty() && !particle_->GetTracks().empty())
+    bool played_ = false;
+    if (!request_.emitterName.empty())
     {
-        emitterName_ = particle_->GetTracks().front().name;
+        played_ = particle_->TriggerEmitterAtPosition(
+            request_.emitterName,
+            spawnPosition_);
     }
-
-    if (!emitterName_.empty())
-    {
-        particle_->TriggerEmitterAtPosition(emitterName_, spawnPosition_);
-    }
-    else
+    if (!played_)
     {
         particle_->Play();
     }

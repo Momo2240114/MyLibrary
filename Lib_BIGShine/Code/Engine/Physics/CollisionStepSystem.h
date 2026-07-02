@@ -6,6 +6,7 @@
 class ColliderComponent;
 class AttackSystem;
 struct AttackHitContact;
+struct CollisionContact;
 
 class CollisionStepSystem
 {
@@ -27,7 +28,9 @@ public:
         bool hit_);
     void HandlePhysXContact(
         ColliderComponent* colliderA_,
-        ColliderComponent* colliderB_);
+        ColliderComponent* colliderB_,
+        const CollisionContact& contactA_,
+        const CollisionContact& contactB_);
 
 private:
     void RemoveExpiredColliders();

@@ -1226,6 +1226,13 @@ void MeshVFXComponent::Gui()
             }
 
             ImGui::Spacing();
+            const MeshVFXRuntimePart* runtimePart_ =
+                partIndex_ < static_cast<int>(runtimeParts.size()) ? &runtimeParts[partIndex_] : nullptr;
+
+            if (ImGui::BeginTabBar("MeshVFXPartTabs"))
+            {
+                if (ImGui::BeginTabItem("Model"))
+                {
             const bool modelChanged_ = AssetSlotGui::Draw(
                 "Model Asset", AssetSlotType::MODEL, part_.modelPath, nullptr, "Data/Model");
 
@@ -1301,10 +1308,6 @@ void MeshVFXComponent::Gui()
 
                 ImGui::EndCombo();
             }
-
-
-            const MeshVFXRuntimePart* runtimePart_ =
-                partIndex_ < static_cast<int>(runtimeParts.size()) ? &runtimeParts[partIndex_] : nullptr;
             const std::shared_ptr<ModelResource> modelResource_ =
                 runtimePart_ ? runtimePart_->modelResource : nullptr;
 
@@ -1360,6 +1363,12 @@ void MeshVFXComponent::Gui()
             {
                 ImGui::TextColored(ImVec4(1.0f, 0.55f, 0.2f, 1.0f), "Model resource is not loaded.");
             }
+
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("Textures"))
+                {
 
             ImGui::SeparatorText("Textures");
             // Base texture selection
@@ -1542,6 +1551,12 @@ void MeshVFXComponent::Gui()
                 LoadPartResource(static_cast<size_t>(partIndex_));
             }
 
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("Shape"))
+                {
+
             ImGui::DragFloat3("Position", &part_.position.x, 0.01f);
             ImGui::DragFloat3("Rotation", &part_.rotation.x, 0.5f);
             ImGui::DragFloat3("Scale", &part_.scale.x, 0.01f);
@@ -1674,6 +1689,12 @@ void MeshVFXComponent::Gui()
                 ImGui::TreePop();
             }
 
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("Animation"))
+                {
+
             if (ImGui::TreeNode("Animation"))
             {
                 ImGui::DragFloat("Duration", &part_.duration, 0.05f, 0.0f, 600.0f);
@@ -1727,6 +1748,12 @@ void MeshVFXComponent::Gui()
                 DrawCurveTrackCombo("UV Rotation Speed Curve", part_.uvRotationCurveName, curveNames_);
                 ImGui::TreePop();
             }
+
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("Material"))
+                {
 
             ImGui::ColorEdit4("Color", &part_.color.x);
             ImGui::DragFloat("Emissive Strength", &part_.emissiveStrength, 0.05f, 0.0f, 50.0f);
@@ -1925,6 +1952,11 @@ void MeshVFXComponent::Gui()
             if (ImGui::Combo("Blend Mode", &blendMode_, blendItems_, IM_ARRAYSIZE(blendItems_)))
             {
                 part_.blendMode = static_cast<MeshVFXBlendMode>(blendMode_);
+            }
+
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
             }
 
             if (ImGui::Button("Reload Part Resource"))

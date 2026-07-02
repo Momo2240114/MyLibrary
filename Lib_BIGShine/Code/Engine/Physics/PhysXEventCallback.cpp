@@ -72,10 +72,29 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
 
         colA_->SetHitFlag(true);
         colB_->SetHitFlag(true);
-        colA_->GetManager().GetCollisionStepSystem().HandlePhysXContact(colA_, colB_);
 
         PxContactPairPoint contacts_[8];
         const PxU32 contactCount_ = pair_.extractContacts(contacts_, 8);
+        CollisionContact contactA_{};
+        CollisionContact contactB_{};
+        if (contactCount_ > 0)
+        {
+            const PxContactPairPoint& point_ = contacts_[0];
+            contactA_.position = { point_.position.x, point_.position.y, point_.position.z };
+            contactA_.normal = { point_.normal.x, point_.normal.y, point_.normal.z };
+            contactA_.isValid = true;
+            contactB_.position = contactA_.position;
+            contactB_.normal = {
+                -contactA_.normal.x,
+                -contactA_.normal.y,
+                -contactA_.normal.z };
+            contactB_.isValid = true;
+        }
+        colA_->GetManager().GetCollisionStepSystem().HandlePhysXContact(
+            colA_,
+            colB_,
+            contactA_,
+            contactB_);
         for (PxU32 contactIndex_ = 0; contactIndex_ < contactCount_; ++contactIndex_)
         {
             const float normalY_ = contacts_[contactIndex_].normal.y;

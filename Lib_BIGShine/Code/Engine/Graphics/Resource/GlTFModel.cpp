@@ -992,6 +992,9 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	{"occlusionStrength", mat.occlusionStrength},
 	{"alphaCutoff", mat.alphaCutoff},
 	{"normalScale", mat.normalScale},
+	{"uvScale", {mat.uvScale.x, mat.uvScale.y}},
+	{"uvOffset", {mat.uvOffset.x, mat.uvOffset.y}},
+	{"uvRotation", mat.uvRotation},
 
 	{"alphaMode", static_cast<int>(mat.alphaMode)},
 
@@ -1094,6 +1097,25 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 						mat.normalScale = item["normalScale"].get<float>();
 					}
 
+					if (item.contains("uvScale"))
+					{
+						const auto& uvScale_ = item["uvScale"];
+						mat.uvScale.x = uvScale_.at(0).get<float>();
+						mat.uvScale.y = uvScale_.at(1).get<float>();
+					}
+
+					if (item.contains("uvOffset"))
+					{
+						const auto& uvOffset_ = item["uvOffset"];
+						mat.uvOffset.x = uvOffset_.at(0).get<float>();
+						mat.uvOffset.y = uvOffset_.at(1).get<float>();
+					}
+
+					if (item.contains("uvRotation"))
+					{
+						mat.uvRotation = item["uvRotation"].get<float>();
+					}
+
 					if (item.contains("alphaMode"))
 					{
 						mat.alphaMode = static_cast<AlphaMode>(item["alphaMode"].get<int>());
@@ -1181,6 +1203,12 @@ void GltfModelCommponennt::ShowMeshDetailsUI()
 
 			ImGui::ColorEdit4("Base Color", &material.baseColor.x);
 			ImGui::ColorEdit3("Emissive Color", &material.emissiveColor.x);
+
+			ImGui::SeparatorText("UV Transform");
+
+			ImGui::DragFloat2("UV Scale", &material.uvScale.x, 0.01f);
+			ImGui::DragFloat2("UV Offset", &material.uvOffset.x, 0.01f);
+			ImGui::DragFloat("UV Rotation", &material.uvRotation, 0.01f);
 
 			ImGui::SeparatorText("PBR");
 

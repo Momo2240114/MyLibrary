@@ -211,70 +211,6 @@
                 "startTime": 0.28333333134651184
             },
             {
-                "actionEnd": "Sword_DisableHitBox",
-                "actionStart": "Sword_EnableHitBox",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 5.0,
-                        "intValue": 0,
-                        "key": "Damage",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.05000000074505806,
-                        "intValue": 0,
-                        "key": "HitStopDuration",
-                        "stringValue": "",
-                        "type": 0
-                    },
-                    {
-                        "boolValue": false,
-                        "category": "Attack",
-                        "floatValue": 0.800000011920929,
-                        "intValue": 0,
-                        "key": "HitStopScale",
-                        "stringValue": "",
-                        "type": 0
-                    }
-                ],
-                "callEndOnStateExit": true,
-                "endTime": 0.46666666865348816,
-                "eventTemplateType": "NONE",
-                "label": "Attack",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.28333333134651184
-            },
-            {
                 "actionEnd": "",
                 "actionStart": "",
                 "actionUpdate": "",
@@ -309,6 +245,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.3166666626930237
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "WeakAttack01",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.46666666865348816,
+                "eventTemplateType": "ATTACK_TEMPLATE",
+                "label": "WeakAttack_03",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.3333333432674408
             }
         ],
         "loop": false,

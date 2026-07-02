@@ -237,6 +237,11 @@ void CollisionStepSystem::HandleTriggerPair(
         {
             colliderA_->currentTriggers.insert(objectB_);
             colliderA_->OnTriggerEnter(objectB_);
+            for (const ColliderComponent::CollisionCallback& callback_ :
+                colliderA_->onTriggerEnterCallbacks)
+            {
+                if (callback_) callback_(objectB_);
+            }
         }
         else
         {
@@ -247,6 +252,11 @@ void CollisionStepSystem::HandleTriggerPair(
         {
             colliderB_->currentTriggers.insert(objectA_);
             colliderB_->OnTriggerEnter(objectA_);
+            for (const ColliderComponent::CollisionCallback& callback_ :
+                colliderB_->onTriggerEnterCallbacks)
+            {
+                if (callback_) callback_(objectA_);
+            }
         }
         else
         {
@@ -289,7 +299,9 @@ void CollisionStepSystem::HandleTriggerPair(
 
 void CollisionStepSystem::HandlePhysXContact(
     ColliderComponent* colliderA_,
-    ColliderComponent* colliderB_)
+    ColliderComponent* colliderB_,
+    const CollisionContact& contactA_,
+    const CollisionContact& contactB_)
 {
     if (!colliderA_ || !colliderB_) return;
 
@@ -299,6 +311,16 @@ void CollisionStepSystem::HandlePhysXContact(
 
     colliderA_->OnCollisionEnter(objectB_);
     colliderB_->OnCollisionEnter(objectA_);
+    for (const ColliderComponent::CollisionContactCallback& callback_ :
+        colliderA_->onCollisionContactCallbacks)
+    {
+        if (callback_) callback_(objectB_, contactA_);
+    }
+    for (const ColliderComponent::CollisionContactCallback& callback_ :
+        colliderB_->onCollisionContactCallbacks)
+    {
+        if (callback_) callback_(objectA_, contactB_);
+    }
 }
 
 void CollisionStepSystem::RemoveExpiredColliders()

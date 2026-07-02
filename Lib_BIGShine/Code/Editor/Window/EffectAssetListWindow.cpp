@@ -41,13 +41,25 @@ void EffectAssetListWindow::Draw()
     {
         if (ImGui::BeginTabItem("Particle"))
         {
-            DrawAssetTable(true);
+            DrawAssetTable(EFFECT_ASSET_LIST_TYPE::PARTICLE);
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Mesh VFX"))
         {
-            DrawAssetTable(false);
+            DrawAssetTable(EFFECT_ASSET_LIST_TYPE::MESH_VFX);
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("VFX Sequence"))
+        {
+            DrawAssetTable(EFFECT_ASSET_LIST_TYPE::VFX_SEQUENCE);
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Impact Effect"))
+        {
+            DrawAssetTable(EFFECT_ASSET_LIST_TYPE::IMPACT_EFFECT);
             ImGui::EndTabItem();
         }
 
@@ -57,18 +69,37 @@ void EffectAssetListWindow::Draw()
     EndEditorWindow();
 }
 
-void EffectAssetListWindow::DrawAssetTable(bool isParticle_)
+void EffectAssetListWindow::DrawAssetTable(EFFECT_ASSET_LIST_TYPE type_)
 {
     if (!gameObjectManager) return;
 
     const EffectManager& effectManager_ = gameObjectManager->GetEffectManager();
-    const std::vector<EffectAssetEntry>& assets_ = isParticle_
-        ? effectManager_.GetParticleAssets()
-        : effectManager_.GetMeshVFXAssets();
+    const std::vector<EffectAssetEntry>* assets_ = nullptr;
+    const char* tableId_ = nullptr;
+    switch (type_)
+    {
+    case EFFECT_ASSET_LIST_TYPE::PARTICLE:
+        assets_ = &effectManager_.GetParticleAssets();
+        tableId_ = "ParticleEffectAssetTable";
+        break;
+    case EFFECT_ASSET_LIST_TYPE::MESH_VFX:
+        assets_ = &effectManager_.GetMeshVFXAssets();
+        tableId_ = "MeshVFXEffectAssetTable";
+        break;
+    case EFFECT_ASSET_LIST_TYPE::VFX_SEQUENCE:
+        assets_ = &effectManager_.GetVFXSequenceAssets();
+        tableId_ = "VFXSequenceEffectAssetTable";
+        break;
+    case EFFECT_ASSET_LIST_TYPE::IMPACT_EFFECT:
+        assets_ = &effectManager_.GetImpactEffectAssets();
+        tableId_ = "ImpactEffectAssetTable";
+        break;
+    }
+    if (!assets_ || !tableId_) return;
 
-    ImGui::Text("Count: %d", static_cast<int>(assets_.size()));
+    ImGui::Text("Count: %d", static_cast<int>(assets_->size()));
     if (ImGui::BeginTable(
-        isParticle_ ? "ParticleEffectAssetTable" : "MeshVFXEffectAssetTable",
+        tableId_,
         3,
         ImGuiTableFlags_Borders |
         ImGuiTableFlags_RowBg |
@@ -80,7 +111,7 @@ void EffectAssetListWindow::DrawAssetTable(bool isParticle_)
         ImGui::TableSetupColumn("Full Path", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        for (const EffectAssetEntry& asset_ : assets_)
+        for (const EffectAssetEntry& asset_ : *assets_)
         {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);

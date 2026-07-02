@@ -61,6 +61,10 @@ public:
     void SetDamage(float damage_);
     void SetKnockBackPower(float knockBackPower_);
     void SetHitEffectPath(const std::string& path_);
+    void SetHitEffectBlackboardOverrideEnabled(bool enabled_)
+    {
+        hitEffectBlackboardOverrideEnabled = enabled_;
+    }
     void ClearHitTargets();
     bool CanHit(GameObject* target_) const;
     void RegisterHit(GameObject* target_);
@@ -78,6 +82,7 @@ private:
 
 private:
     uint64_t activationId = 0;
+    bool hitEffectBlackboardOverrideEnabled = true;
     std::unordered_set<GameObject*> alreadyHitTargets;
 };
 

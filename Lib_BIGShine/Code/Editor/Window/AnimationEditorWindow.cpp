@@ -2121,8 +2121,14 @@ void AnimationEditorWindow::DrawEventSequencer(
 
         if (gameObjectManager)
         {
-            const std::vector<std::string>& assets_ =
+            std::vector<std::string> assets_ =
                 gameObjectManager->GetEffectManager().GetMeshVFXAssetKeys();
+            const std::vector<std::string>& sequenceAssets_ =
+                gameObjectManager->GetEffectManager().GetVFXSequenceAssetKeys();
+            assets_.insert(
+                assets_.end(),
+                sequenceAssets_.begin(),
+                sequenceAssets_.end());
 
             if (!assets_.empty())
             {
@@ -2433,8 +2439,14 @@ void AnimationEditorWindow::DrawEventSequencer(
 
         if (gameObjectManager)
         {
-            const std::vector<std::string>& assets_ =
+            std::vector<std::string> assets_ =
                 gameObjectManager->GetEffectManager().GetMeshVFXAssetKeys();
+            const std::vector<std::string>& sequenceAssets_ =
+                gameObjectManager->GetEffectManager().GetVFXSequenceAssetKeys();
+            assets_.insert(
+                assets_.end(),
+                sequenceAssets_.begin(),
+                sequenceAssets_.end());
             std::string previewValue_ = ev_.meshVFXAssetPath;
             const std::string resolvedValue_ =
                 gameObjectManager->GetEffectManager().ResolveMeshVFXPath(
@@ -2452,7 +2464,7 @@ void AnimationEditorWindow::DrawEventSequencer(
 
             ImGui::SetNextItemWidth(360.0f);
             if (ImGui::BeginCombo(
-                "Mesh VFX Asset",
+                "Mesh VFX / Sequence Asset",
                 previewValue_.empty()
                 ? "(None)"
                 : previewValue_.c_str()))
@@ -2770,10 +2782,18 @@ void AnimationEditorWindow::DrawEventSequencer(
                 if ((isParticleAsset_ || isMeshVFXAsset_) &&
                     gameObjectManager)
                 {
-                    const std::vector<std::string>& assets_ =
-                        isParticleAsset_
+                    std::vector<std::string> assets_ = isParticleAsset_
                         ? gameObjectManager->GetEffectManager().GetParticleAssetKeys()
                         : gameObjectManager->GetEffectManager().GetMeshVFXAssetKeys();
+                    if (isMeshVFXAsset_)
+                    {
+                        const std::vector<std::string>& sequenceAssets_ =
+                            gameObjectManager->GetEffectManager().GetVFXSequenceAssetKeys();
+                        assets_.insert(
+                            assets_.end(),
+                            sequenceAssets_.begin(),
+                            sequenceAssets_.end());
+                    }
                     std::string previewValue_ = write_.stringValue;
                     const std::string resolvedValue_ = isParticleAsset_
                         ? gameObjectManager->GetEffectManager().ResolveParticlePath(write_.stringValue)

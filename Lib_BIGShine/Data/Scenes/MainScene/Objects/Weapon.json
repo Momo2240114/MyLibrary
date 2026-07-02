@@ -29,7 +29,7 @@
                 "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
                 "HitParticleAssetPath": "Data/Particle/HitParticle.json",
-                "HitParticleEmitterName": "HitParticle",
+                "HitParticleEmitterName": "",
                 "HitParticleLifeTime": 0.4000000059604645,
                 "HitParticleNormalOffset": 0.0,
                 "HitSoundMuffled": false,

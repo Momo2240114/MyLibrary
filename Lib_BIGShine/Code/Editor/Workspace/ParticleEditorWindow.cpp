@@ -145,6 +145,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     previewParticle = previewObject->AddComponent<ParticleComponent>();
     previewMeshVFX = previewObject->AddComponent<MeshVFXComponent>();
     previewAttackHit = previewObject->AddComponent<AttackEffectHitComponent>();
+    previewImpactEffect = previewObject->AddComponent<ImpactEffectComponent>();
     if (previewAttackHit) previewAttackHit->SetDestroyOnLifeEnd(false);
     if (previewParticle)
     {
@@ -155,11 +156,33 @@ void ParticleEditorWindow::EnsurePreviewObjects()
         previewMeshVFX->Stop();
     }
 
+    previewImpactGroundObject = std::make_shared<GameObject>("ImpactGroundPreviewObject");
+    previewImpactGroundObject->SetManager(gameObjectManager);
+    previewImpactGroundObject->transform->gameObject = previewImpactGroundObject;
+    previewImpactGroundObject->transform->localPosition = { 0.0f, -0.05f, 0.0f };
+    previewImpactGroundObject->transform->localScale = { 4.0f, 0.05f, 4.0f };
+    previewImpactGroundObject->transform->MarkDirty();
+    previewImpactGroundModel =
+        previewImpactGroundObject->AddComponent<GltfModelCommponennt>();
+    if (previewImpactGroundModel)
+    {
+        previewImpactGroundModel->LoadModel(
+            graphics_.GetDevice(),
+            "Data/Model/VFX/Cube.gltf");
+    }
+
+    previewDecalObject = std::make_shared<GameObject>("ImpactDecalPreviewObject");
+    previewDecalObject->SetManager(gameObjectManager);
+    previewDecalObject->transform->gameObject = previewDecalObject;
+    previewDecal = previewDecalObject->AddComponent<DecalComponent>();
+    if (previewDecal) previewDecal->SetDestroyOnLifeEnd(false);
+
     editorCamera.ResetPreviewCamera(previewCamera);
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 100.0f);
 
     RefreshParticleAssets();
     RefreshSequenceAssets();
+    RefreshImpactEffectAssets();
     isInitialized = true;
 }
 
@@ -169,6 +192,7 @@ void ParticleEditorWindow::DrawToolbar()
     {
         RefreshParticleAssets();
         RefreshSequenceAssets();
+        RefreshImpactEffectAssets();
     }
 
     ImGui::Separator();
@@ -189,6 +213,8 @@ void ParticleEditorWindow::DrawToolbar()
     }
     ImGui::MenuItem("Loop", nullptr, &sequenceLoop);
     ImGui::MenuItem("Grid", nullptr, &showGrid);
+    ImGui::MenuItem("Impact Preview", nullptr, &impactPreviewMode);
+    if (impactPreviewMode && ImGui::MenuItem("Drop Impact")) StartImpactPreview();
     if (ImGui::MenuItem("Reset Layout"))
     {
         inspectorWidth = 360.0f;
@@ -240,6 +266,46 @@ void ParticleEditorWindow::DrawPreviewPanel()
 
 void ParticleEditorWindow::DrawAssetBrowserPanel()
 {
+    ImGui::SeparatorText("Impact Effects");
+    ImGui::InputText("Impact Name", impactEffectNameBuffer, IM_ARRAYSIZE(impactEffectNameBuffer));
+    if (ImGui::Button("Save Impact") && previewImpactEffect)
+    {
+        if (previewImpactEffect->SaveAsset(
+            "Data/ImpactEffect/" + std::string(impactEffectNameBuffer) + ".json"))
+        {
+            RefreshImpactEffectAssets();
+            if (gameObjectManager)
+            {
+                EffectManager& effectManager_ = gameObjectManager->GetEffectManager();
+                effectManager_.RefreshAssetCache();
+                effectManager_.BuildAssetNameMap();
+                effectManager_.PreloadAllEffects();
+            }
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Drop Preview"))
+    {
+        impactPreviewMode = true;
+        StartImpactPreview();
+    }
+    for (int impactIndex_ = 0;
+        impactIndex_ < static_cast<int>(impactEffectAssetPaths.size());
+        ++impactIndex_)
+    {
+        const std::filesystem::path path_(impactEffectAssetPaths[impactIndex_]);
+        if (ImGui::Selectable(path_.filename().string().c_str()))
+        {
+            if (previewImpactEffect && previewImpactEffect->LoadAsset(impactEffectAssetPaths[impactIndex_]))
+            {
+                const std::string name_ = path_.stem().string();
+                strncpy_s(impactEffectNameBuffer, name_.c_str(), sizeof(impactEffectNameBuffer) - 1);
+                impactEffectNameBuffer[sizeof(impactEffectNameBuffer) - 1] = '\0';
+                impactPreviewMode = true;
+            }
+        }
+    }
+
     ImGui::TextUnformatted("VFX Sequences");
     ImGui::Separator();
 
@@ -546,6 +612,16 @@ void ParticleEditorWindow::DrawInspectorPanel()
             if (previewAttackHit) previewAttackHit->Gui();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Impact Effect"))
+        {
+            impactPreviewMode = true;
+            if (ImGui::Button("Drop Preview")) StartImpactPreview();
+            ImGui::SameLine();
+            ImGui::DragFloat("Height", &impactPreviewHeight, 0.1f, 0.1f, 20.0f);
+            ImGui::DragFloat("Fall Speed", &impactPreviewFallSpeed, 0.1f, 0.1f, 50.0f);
+            if (previewImpactEffect) previewImpactEffect->Gui();
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("Source Model"))
         {
             if (previewObject->transform) previewObject->transform->Gui();
@@ -612,11 +688,19 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     {
         previewModel->Update(deltaTime_);
     }
+    if (impactPreviewMode && previewImpactGroundObject && previewImpactGroundModel)
+    {
+        previewImpactGroundObject->UpdateTransform();
+        previewImpactGroundModel->Update(deltaTime_);
+    }
     UpdateSequence(deltaTime_);
+    UpdateImpactPreview(deltaTime_);
     previewParticle->Update(deltaTime_);
     previewMeshVFX->Update(deltaTime_);
+    if (previewDecal) previewDecal->Update(deltaTime_);
 
     RenderContext renderContext_{};
+    DecalManager decalManager_;
     renderContext_.device = device_;
     renderContext_.deviceContext = context_;
     renderContext_.renderState = graphics_.GetRenderState();
@@ -624,6 +708,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     renderContext_.backBufferRTV = nullptr;
     renderContext_.depthSRV = previewTarget.GetDepthShaderResourceView();
     renderContext_.baseColorSRV = previewTarget.GetShaderResourceView();
+    renderContext_.decal = &decalManager_;
     renderContext_.screenWidth = static_cast<float>(width_);
     renderContext_.screenHeight = static_cast<float>(height_);
 
@@ -643,11 +728,42 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
         previewTarget.ResetRenderTarget(context_);
     }
 
+    auto& shapeRenderer_ = graphics_.GetShapeRendererSystem();
+    if (previewAttackHit) previewAttackHit->SubmitDebugShapes();
+    if (impactPreviewMode)
+    {
+        if (impactPreviewPlaying)
+        {
+            shapeRenderer_.DrawSphere(
+                { 0.0f, impactPreviewPositionY, 0.0f },
+                0.15f,
+                { 1.0f, 0.75f, 0.2f, 1.0f });
+        }
+    }
 
+
+
+    if (previewDecal && previewDecal->IsEnabled())
+    {
+        previewDecal->SubmitDecal(decalManager_);
+    }
 
     if (previewModel && !previewModel->GetMeshes().empty())
     {
         modelRenderSystem.PushSubmit(previewModel->GetShaderID(), previewModel);
+    }
+    if (impactPreviewMode &&
+        previewImpactGroundModel &&
+        !previewImpactGroundModel->GetMeshes().empty())
+    {
+        modelRenderSystem.PushSubmit(
+            previewImpactGroundModel->GetShaderID(),
+            previewImpactGroundModel);
+    }
+    if ((previewModel && !previewModel->GetMeshes().empty()) ||
+        (impactPreviewMode && previewImpactGroundModel &&
+            !previewImpactGroundModel->GetMeshes().empty()))
+    {
         modelRenderSystem.RenderAll(renderContext_);
         previewTarget.ResetRenderTarget(context_);
     }
@@ -666,6 +782,15 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
         true,
         previewTarget.GetRenderTargetView(),
         previewTarget.GetDepthStencilView());
+    previewTarget.ResetRenderTarget(context_);
+    context_->OMSetDepthStencilState(
+        renderContext_.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    shapeRenderer_.Render(
+        context_,
+        previewCamera.GetView(),
+        previewCamera.GetProjection());
+    context_->OMSetDepthStencilState(
+        renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 
     previewTarget.End(context_);
 }
@@ -862,5 +987,102 @@ void ParticleEditorWindow::RefreshSequenceAssets()
     {
         if (!entry_.is_regular_file() || entry_.path().extension() != ".json") continue;
         sequenceAssetPaths.push_back(entry_.path().generic_string());
+    }
+}
+
+void ParticleEditorWindow::RefreshImpactEffectAssets()
+{
+    impactEffectAssetPaths.clear();
+    const std::filesystem::path directory_("Data/ImpactEffect");
+    if (!std::filesystem::exists(directory_)) return;
+    for (const auto& entry_ : std::filesystem::recursive_directory_iterator(directory_))
+    {
+        if (entry_.is_regular_file() && entry_.path().extension() == ".json")
+        {
+            impactEffectAssetPaths.push_back(entry_.path().generic_string());
+        }
+    }
+    std::sort(impactEffectAssetPaths.begin(), impactEffectAssetPaths.end());
+}
+
+void ParticleEditorWindow::StartImpactPreview()
+{
+    impactPreviewPositionY = (std::max)(impactPreviewHeight, 0.1f);
+    impactPreviewPlaying = true;
+    if (previewParticle) previewParticle->Stop();
+    if (previewMeshVFX)
+    {
+        previewMeshVFX->Stop();
+        previewMeshVFX->Reset();
+    }
+    if (previewDecal) previewDecal->SetEnabled(false);
+}
+
+void ParticleEditorWindow::UpdateImpactPreview(float deltaTime_)
+{
+    if (!impactPreviewMode || !impactPreviewPlaying) return;
+    impactPreviewPositionY -= (std::max)(impactPreviewFallSpeed, 0.1f) *
+        (std::max)(deltaTime_, 0.0f);
+    if (impactPreviewPositionY > 0.0f) return;
+    impactPreviewPositionY = 0.0f;
+    impactPreviewPlaying = false;
+    PlayImpactPreviewAtContact();
+}
+
+void ParticleEditorWindow::PlayImpactPreviewAtContact()
+{
+    if (!previewImpactEffect) return;
+    const ImpactEffectAsset& asset_ = previewImpactEffect->GetAsset();
+    for (const ImpactEffectEntry& entry_ : asset_.entries)
+    {
+        if (!entry_.enabled || entry_.assetPath.empty()) continue;
+        if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::PARTICLE && previewParticle)
+        {
+            if (previewParticle->LoadAsset(entry_.assetPath))
+            {
+                if (entry_.emitterName.empty()) previewParticle->Play();
+                else previewParticle->TriggerEmitter(entry_.emitterName);
+            }
+        }
+        else if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::MESH_VFX && previewMeshVFX)
+        {
+            std::ifstream assetFile_(entry_.assetPath);
+            if (assetFile_.is_open())
+            {
+                nlohmann::json assetJson_;
+                try
+                {
+                    assetFile_ >> assetJson_;
+                    if (assetJson_.value("AssetType", std::string{}) == "VFXSequence" &&
+                        LoadSequence(entry_.assetPath))
+                    {
+                        sequencePlaying = true;
+                        continue;
+                    }
+                }
+                catch (const nlohmann::json::exception&)
+                {
+                }
+            }
+            if (previewMeshVFX->LoadAsset(entry_.assetPath))
+            {
+                previewMeshVFX->Reset();
+                previewMeshVFX->Play();
+            }
+        }
+        else if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::DECAL && previewDecal)
+        {
+            previewDecal->color = entry_.color;
+            previewDecal->SetTexture(entry_.assetPath);
+            previewDecal->SetLifeTime(entry_.lifeTime, entry_.fadeOutDuration);
+            previewDecal->SetEnabled(true);
+            if (previewDecalObject && previewDecalObject->transform)
+            {
+                previewDecalObject->transform->localPosition = { 0.0f, entry_.normalOffset, 0.0f };
+                previewDecalObject->transform->localScale = entry_.scale;
+                previewDecalObject->transform->localRotation = { -90.0f, 0.0f, 0.0f };
+                previewDecalObject->transform->MarkDirty();
+            }
+        }
     }
 }

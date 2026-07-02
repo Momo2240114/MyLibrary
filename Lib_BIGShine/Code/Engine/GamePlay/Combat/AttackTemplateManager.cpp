@@ -597,9 +597,18 @@ bool AttackTemplateManager::DrawEditorContent(
     const std::vector<std::string>& particleAssets_ = gameObjectManager_
         ? gameObjectManager_->GetEffectManager().GetParticleAssetKeys()
         : emptyAssets_;
-    const std::vector<std::string>& meshVfxAssets_ = gameObjectManager_
+    std::vector<std::string> meshVfxAssets_ = gameObjectManager_
         ? gameObjectManager_->GetEffectManager().GetMeshVFXAssetKeys()
         : emptyAssets_;
+    if (gameObjectManager_)
+    {
+        const std::vector<std::string>& sequenceAssets_ =
+            gameObjectManager_->GetEffectManager().GetVFXSequenceAssetKeys();
+        meshVfxAssets_.insert(
+            meshVfxAssets_.end(),
+            sequenceAssets_.begin(),
+            sequenceAssets_.end());
+    }
     const std::vector<std::string> hitBoxActionPrefixes_ =
         CollectHitBoxActionPrefixes(gameObjectManager_);
 
@@ -776,7 +785,7 @@ bool AttackTemplateManager::DrawEditorContent(
             0.01f);
 
         DrawAssetPathCombo(
-            "Mesh VFX Asset",
+            "Mesh VFX / Sequence Asset",
             attackTemplate_->hitEffect.hitMeshVfxAssetPath,
             meshVfxAssets_,
             effectManager_,

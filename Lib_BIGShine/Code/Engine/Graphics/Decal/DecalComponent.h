@@ -3,53 +3,45 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "DecalManager.h"
 
+#include <string>
+
 class DecalComponent : public Component
 {
 public:
-    // シェーダーの b10 と一致させる構造体
-    struct DecalConstantBuffer {
+    struct DecalConstantBuffer
+    {
         DirectX::XMMATRIX decal_inverse_transform;
-        DirectX::XMFLOAT4 decal_direction; // 必要に応じて使用（法線減衰など）
+        DirectX::XMFLOAT4 decal_direction;
     };
+
     const std::string& GetName() const override { return componentName; }
 
-    // シーンの decal_textures に相当する SRV
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
-
-    // 投影する色（アルファは透明度）
     DirectX::XMFLOAT4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
-
-    // 投影計算に使用する行列（RenderSystemに渡す用）
     DirectX::XMFLOAT4X4 invWorldMatrix;
 
-    void Start() override
+    void Start() override;
+    void SetTexture(const std::string& path_);
+    const std::string& GetTexturePath() const { return texturePath; }
+    void SetLifeTime(float lifeTime_, float fadeOutDuration_ = 0.0f);
+    void SetDestroyOnLifeEnd(bool destroyOnLifeEnd_)
     {
-        // リストが空なら初期スキャンを行う
-        if (decalFiles.empty()) {
-            RefreshDecalFileList();
-        }
+        destroyOnLifeEnd = destroyOnLifeEnd_;
     }
-
-    void SetTexture(const std::string& path);
-
-    // LightComponentのように専用の登録関数を作成
-    void SubmitDecal(DecalManager& manager);
-
-    void Update(float et) override;
-
+    void ResetLifeTime();
+    void SubmitDecal(DecalManager& manager_);
+    void Update(float elapsedTime_) override;
     void Gui() override;
-
-    void Serialize(nlohmann::json& j) const;
-    // ロード用：引数の json オブジェクトから自分の変数を読み出す
-    void Deserialize(const nlohmann::json& j);
+    void Serialize(nlohmann::json& json_) const override;
+    void Deserialize(const nlohmann::json& json_) override;
 
 private:
     bool showDebugBounds = true;
-    // コンポーネント名の定義
+    bool destroyOnLifeEnd = false;
+    float lifeTime = 0.0f;
+    float fadeOutDuration = 0.0f;
+    float elapsedTime = 0.0f;
+    float initialAlpha = 1.0f;
     static inline const std::string componentName = "DecalComponent";
-    std::vector<std::string> decalFiles;
-    int selectedFileIndex = -1;
-
-    // 起動時やボタンが押された時にフォルダをスキャンする関数
-    void RefreshDecalFileList();
+    std::string texturePath;
 };

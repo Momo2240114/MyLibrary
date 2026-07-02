@@ -152,6 +152,16 @@ void AttackEffectHitComponent::ResetRuntime()
     ClearHitHistory();
 }
 
+void AttackEffectHitComponent::SubmitDebugShapes()
+{
+    for (RuntimeHitShape& runtime_ : runtimeHitShapes)
+    {
+        if (!runtime_.object || !runtime_.hitBox) continue;
+        runtime_.object->UpdateTransform();
+        runtime_.hitBox->Update(0.0f);
+    }
+}
+
 void AttackEffectHitComponent::ClearHitHistory()
 {
     const std::shared_ptr<GameObject> object_ = GetGameObject();
@@ -181,6 +191,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitMeshVFXAssetPath = hitMeshVFXAssetPath;
     hitBox_->hitMeshVFXLifeTime = hitMeshVFXLifeTime;
     hitBox_->hitMeshVFXNormalOffset = hitMeshVFXNormalOffset;
+    hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
     std::printf(
         "[AttackEffectHitComponent::ConfigureHitBox] event particle='%s' meshVFX='%s'\n",
         hitBox_->hitParticleAssetPath.c_str(),
