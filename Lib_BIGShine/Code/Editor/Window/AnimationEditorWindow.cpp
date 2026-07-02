@@ -314,6 +314,76 @@ void AnimationEditorWindow::StopSelectedEffectPreview()
     selectedEffectPreviewObject.reset();
     selectedEffectPreviewTimer = 0.0f;
 }
+void AnimationEditorWindow::PlayAttackTemplateEffectPreview(
+    const std::string& templateId_)
+{
+    StopAttackTemplateEffectPreview();
+    if (!previewGameObjectManager || templateId_.empty()) return;
+    const AttackTemplate* attackTemplate_ =
+        AttackTemplateManager::Instance().FindTemplate(templateId_);
+    if (!attackTemplate_ || !attackTemplate_->hitEffect.spawnOnHit) return;
+
+    const std::shared_ptr<GameObject> owner_ =
+        previewGameObjectManager->GetSelectedObject();
+    const DirectX::XMFLOAT3 position_ = owner_ && owner_->transform
+        ? owner_->transform->GetWorldPosition()
+        : DirectX::XMFLOAT3{ 0.0f, 1.0f, 0.0f };
+    const DirectX::XMFLOAT3 normal_ = { 0.0f, 1.0f, 0.0f };
+    EffectManager& effectManager_ = previewGameObjectManager->GetEffectManager();
+
+    attackTemplateEffectPreviewDuration = 0.01f;
+    if (!attackTemplate_->hitEffect.hitParticleAssetPath.empty())
+    {
+        ParticleSpawnRequest request_{};
+        request_.assetPath = attackTemplate_->hitEffect.hitParticleAssetPath;
+        request_.emitterName = attackTemplate_->hitEffect.hitParticleEmitterName;
+        request_.position = position_;
+        request_.normal = normal_;
+        request_.lifeTime = (std::max)(attackTemplate_->hitEffect.hitParticleLifeTime, 0.01f);
+        request_.normalOffset = attackTemplate_->hitEffect.hitParticleNormalOffset;
+        if (const std::shared_ptr<GameObject> object_ = effectManager_.SpawnParticle(request_))
+        {
+            attackTemplateEffectPreviewObjects.push_back(object_);
+        }
+        attackTemplateEffectPreviewDuration = (std::max)(
+            attackTemplateEffectPreviewDuration,
+            request_.lifeTime);
+    }
+    if (!attackTemplate_->hitEffect.hitMeshVfxAssetPath.empty())
+    {
+        MeshVFXSpawnRequest request_{};
+        request_.assetPath = attackTemplate_->hitEffect.hitMeshVfxAssetPath;
+        request_.position = position_;
+        request_.normal = normal_;
+        request_.lifeTime = (std::max)(attackTemplate_->hitEffect.hitMeshVfxLifeTime, 0.01f);
+        request_.normalOffset = attackTemplate_->hitEffect.hitMeshVfxNormalOffset;
+        if (const std::shared_ptr<GameObject> object_ = effectManager_.SpawnMeshVFX(request_))
+        {
+            attackTemplateEffectPreviewObjects.push_back(object_);
+        }
+        attackTemplateEffectPreviewDuration = (std::max)(
+            attackTemplateEffectPreviewDuration,
+            request_.lifeTime);
+    }
+    attackTemplateEffectPreviewTimer = 0.0f;
+}
+
+void AnimationEditorWindow::StopAttackTemplateEffectPreview()
+{
+    if (previewGameObjectManager)
+    {
+        EffectManager& effectManager_ = previewGameObjectManager->GetEffectManager();
+        for (const std::weak_ptr<GameObject>& weakObject_ : attackTemplateEffectPreviewObjects)
+        {
+            if (const std::shared_ptr<GameObject> object_ = weakObject_.lock())
+            {
+                effectManager_.StopEffect(object_);
+            }
+        }
+    }
+    attackTemplateEffectPreviewObjects.clear();
+    attackTemplateEffectPreviewTimer = 0.0f;
+}
 bool AnimationEditorWindow::CopySceneObjectToPreview(
     const std::shared_ptr<GameObject>& sourceObject_)
 {
@@ -878,6 +948,8 @@ void AnimationEditorWindow::OnVisibilityChanged(bool visible)
     {
         loopSelectedEffectPreview = false;
         StopSelectedEffectPreview();
+        loopAttackTemplateEffectPreview = false;
+        StopAttackTemplateEffectPreview();
     }
     if (visible || (!poseEditEnabled && !customPreviewEnabled)) return;
 
@@ -2377,6 +2449,37 @@ void AnimationEditorWindow::DrawEventSequencer(
         }
         else
         {
+            ImGui::SeparatorText("Hit Effect Preview");
+            if (ImGui::Button("Play Hit Effect"))
+            {
+                PlayAttackTemplateEffectPreview(ev_.attackTemplateId);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Stop Hit Effect"))
+            {
+                loopAttackTemplateEffectPreview = false;
+                StopAttackTemplateEffectPreview();
+            }
+            ImGui::SameLine();
+            if (ImGui::Checkbox("Loop Hit Effect", &loopAttackTemplateEffectPreview))
+            {
+                if (loopAttackTemplateEffectPreview)
+                {
+                    PlayAttackTemplateEffectPreview(ev_.attackTemplateId);
+                }
+                else
+                {
+                    StopAttackTemplateEffectPreview();
+                }
+            }
+            if (loopAttackTemplateEffectPreview)
+            {
+                attackTemplateEffectPreviewTimer += ImGui::GetIO().DeltaTime;
+                if (attackTemplateEffectPreviewTimer >= attackTemplateEffectPreviewDuration)
+                {
+                    PlayAttackTemplateEffectPreview(ev_.attackTemplateId);
+                }
+            }
             if (ImGui::CollapsingHeader(
                 "Inline Attack Template Editor",
                 ImGuiTreeNodeFlags_DefaultOpen))
