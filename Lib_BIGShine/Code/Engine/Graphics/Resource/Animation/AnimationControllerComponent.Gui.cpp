@@ -44,6 +44,31 @@ void AnimationControllerComponent::Gui()
     ImGui::Text("Model: %s", modelComponent->GetModelName().c_str());
     ImGui::TextDisabled("Animation editors are opened from the main Window menu.");
 
+    ImGui::SeparatorText("Runtime Playback");
+    const AnimState* runtimeState_ = animator.GetCurrentState();
+    if (runtimeState_)
+    {
+        ImGui::Text("State: %s", runtimeState_->name.c_str());
+
+        const float duration_ = (std::max)(animator.GetCurrentSampleDuration(), 0.001f);
+        float playbackTime_ = std::clamp(animator.GetCurrentFadeTime(), 0.0f, duration_);
+        if (ImGui::SliderFloat(
+            "Playback Time",
+            &playbackTime_,
+            0.0f,
+            duration_,
+            "%.3f sec"))
+        {
+            animator.SetCurrentTime(playbackTime_);
+        }
+
+        ImGui::Text("%.3f / %.3f sec", animator.GetCurrentFadeTime(), duration_);
+    }
+    else
+    {
+        ImGui::TextDisabled("No animation is currently playing.");
+    }
+
 
     ImGui::Text(
         "RootMotion %.3f %.3f %.3f",

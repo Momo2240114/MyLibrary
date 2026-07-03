@@ -9,6 +9,8 @@ class ColliderComponent;
 class BlackboardComponent;
 class CharacterMovementComponent;
 class HurtBox;
+class HitBox;
+class JustDodgeCollider;
 
 struct PlayerActionRuntime
 {
@@ -26,6 +28,15 @@ struct PlayerCancelTransition
     PLAYER_ACTION to = PLAYER_ACTION::DODGE;
 };
 
+struct PlayerAttackAssistSettings
+{
+    bool enabled = true;
+    float strength = 0.75f;
+    float turnSpeed = 10.0f;
+    float searchDistance = 12.0f;
+    float cameraCenterAngle = 30.0f;
+};
+
 class PlayerControllerComponent : public Component
 {
 public:
@@ -38,6 +49,8 @@ public:
     void Start() override;
     void Update(float dt_) override;
     void Gui() override;
+
+    void InitializeBlackboardValues();
 
     void Serialize(nlohmann::json& j_) const override;
     void Deserialize(const nlohmann::json& j_) override;
@@ -53,6 +66,7 @@ public:
     PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); }
     int GetComboIndex() const { return comboIndex; }
     const std::vector<PlayerCancelTransition>& GetCancelTransitions() const { return cancelTransitions; }
+    const PlayerAttackAssistSettings& GetAttackAssistSettings() const { return attackAssistSettings; }
 
     bool RequestAction(PLAYER_ACTION nextAction_);
     bool HasCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_) const;
@@ -70,6 +84,8 @@ public:
     void ProcessActionInput();
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
 
+    void NotifyJustDodge();
+
     float moveSpeed = 6.0f;
 
 private:
@@ -84,9 +100,12 @@ private:
     std::shared_ptr<ColliderComponent> collider;
     std::shared_ptr<CharacterMovementComponent> movement;
     std::shared_ptr<HurtBox> hurtBox;
+    std::shared_ptr<JustDodgeCollider> justDodgeCollider;
+
     std::shared_ptr<BlackboardComponent> blackboard;
     PlayerStateMachine stateMachine;
     PlayerActionRuntime actionRuntime;
+    PlayerAttackAssistSettings attackAssistSettings;
     std::vector<PlayerCancelTransition> cancelTransitions
     {
         { PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::DODGE }

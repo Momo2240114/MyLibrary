@@ -25,6 +25,7 @@ public:
 
     void SetHorizontalVelocity(const DirectX::XMFLOAT3& velocity_);
     void StopHorizontalMovement();
+    void StopHorizontalMovementImmediately();
     void SetUnscaledDeltaTime(float deltaTime_);
     void AddRootMotionDelta(const DirectX::XMFLOAT3& delta_);
     void AddImpulse(const DirectX::XMFLOAT3& impulse_);
@@ -44,10 +45,11 @@ private:
     std::weak_ptr<ColliderComponent> collider;
     DirectX::XMFLOAT3 desiredHorizontalVelocity{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 rootMotionDelta{ 0.0f, 0.0f, 0.0f };
-    DirectX::XMFLOAT3 pendingImpulse{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 impulseVelocity{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 facingDirection{ 0.0f, 0.0f, 1.0f };
     DirectX::XMFLOAT3 lastAppliedVelocity{ 0.0f, 0.0f, 0.0f };
     float facingTurnSpeed = 10.0f;
+    float impulseDamping = 6.0f;
     float unscaledDeltaTime = 0.0f;
     bool hasFacingRequest = false;
     bool facingImmediate = true;

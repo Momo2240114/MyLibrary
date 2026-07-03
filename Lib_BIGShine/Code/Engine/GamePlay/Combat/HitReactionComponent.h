@@ -22,6 +22,10 @@ public:
 
     void HandleHit();
     void ResetHealth();
+    void SetReactionActionName(const std::string& actionName_)
+    {
+        reactionActionName = actionName_;
+    }
 
 private:
     void RegisterActions();

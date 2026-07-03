@@ -6,6 +6,7 @@
 
 #include <algorithm>
 
+
 HitBox::HitBox()
 {
     enabled = false;

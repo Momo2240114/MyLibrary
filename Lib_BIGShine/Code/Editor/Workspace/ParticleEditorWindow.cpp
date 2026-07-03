@@ -494,8 +494,21 @@ void ParticleEditorWindow::DrawTimelinePanel()
             track_.duration = std::clamp(
                 track_.duration,
                 1.0f / TIMELINE_FPS,
-                sequenceDuration - track_.startTime);
+            sequenceDuration - track_.startTime);
         }
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Sort by Start Time"))
+    {
+        std::stable_sort(
+            timelineTracks.begin(),
+            timelineTracks.end(),
+            [](const TimelineTrack& left_, const TimelineTrack& right_)
+            {
+                return left_.startTime < right_.startTime;
+            });
+        selectedTimelineTrack = -1;
     }
 
     TimelineSequenceAdapter adapter_;

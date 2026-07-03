@@ -349,6 +349,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ActionRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ComponentRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\RegisterAllComponents.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\JustDodgeSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\EffectManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.cpp" />
@@ -426,11 +427,14 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\DamageBoxComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\HitBox.cpp" />
     <ClCompile Include="Code\Engine\Physics\HurtBox.cpp" />
+    <ClCompile Include="Code\Engine\Physics\JustDodgeCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\MeshCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysicsCollisionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysXEventCallback.cpp" />
@@ -511,6 +515,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTitle.h" />
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTutorial.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\JustDodgeSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\EffectManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.h" />
@@ -633,6 +638,7 @@
     <ClInclude Include="Code\Engine\Physics\CylinderCollider.h" />
     <ClInclude Include="Code\Engine\Physics\HitBox.h" />
     <ClInclude Include="Code\Engine\Physics\HurtBox.h" />
+    <ClInclude Include="Code\Engine\Physics\JustDodgeCollider.h" />
     <ClInclude Include="Code\Engine\Physics\MeshCollider.h" />
     <ClInclude Include="Code\Engine\Physics\Collision.h" />
     <ClInclude Include="Code\Engine\Physics\CollisionStepSystem.h" />
@@ -640,6 +646,8 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\DamageBoxComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysXEventCallback.h" />

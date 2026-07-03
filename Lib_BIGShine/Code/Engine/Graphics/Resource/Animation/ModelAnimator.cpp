@@ -391,8 +391,8 @@ void ModelAnimator::SetCurrentTime(float time_)
     // シークは連続再生ではないため、直前のRoot Motionとの差分を適用しない。
     currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
     currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
-    _isFirstFrame = true;
-    _prevTime = current.time;
+    isFirstFrame = true;
+    prevTime = current.time;
     _prevRootMotionState = nullptr;
     previousRootMotionNodeIndex = -1;
     hasPrevPose = false;
@@ -677,18 +677,18 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
         const Vector3 rawPos_ = tempPoseA[currentRootNodeIndex_].position;
         const auto& bindRootPose_ = model->GetBindNodePose(currentRootNodeIndex_);
-        const bool looped_ = (current.time < _prevTime);
+        const bool looped_ = (current.time < prevTime);
         const bool stateChanged_ = (_prevRootMotionState != current.state);
         const bool sourceNodeChanged_ = (previousRootMotionNodeIndex != currentRootNodeIndex_);
 
-        if (_isFirstFrame || stateChanged_ || sourceNodeChanged_)
+        if (isFirstFrame || stateChanged_ || sourceNodeChanged_)
         {
-            _prevRootPos = rawPos_;
+            prevRootPos = rawPos_;
             rootMotionBasePosition = bindRootPose_.position;
-            _prevTime = current.time;
+            prevTime = current.time;
             _prevRootMotionState = current.state;
             previousRootMotionNodeIndex = currentRootNodeIndex_;
-            _isFirstFrame = false;
+            isFirstFrame = false;
         }
         else
         {
@@ -701,11 +701,11 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
                 const Vector3 loopStartPos_ = rootMotionLoopStartPose[currentRootNodeIndex_].position;
                 const Vector3 loopEndPos_ = rootMotionLoopEndPose[currentRootNodeIndex_].position;
-                deltaPos_ = (loopEndPos_ - _prevRootPos) + (rawPos_ - loopStartPos_);
+                deltaPos_ = (loopEndPos_ - prevRootPos) + (rawPos_ - loopStartPos_);
             }
             else
             {
-                deltaPos_ = rawPos_ - _prevRootPos;
+                deltaPos_ = rawPos_ - prevRootPos;
             }
 
             if (!current.state->rootMotion.applyPositionX) deltaPos_.x = 0.0f;
@@ -722,16 +722,16 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
             currentRootMotionDelta.deltaPosition = deltaPos_ * rootMotionScale_;
 
-            _prevRootPos = rawPos_;
-            _prevTime = current.time;
+            prevRootPos = rawPos_;
+            prevTime = current.time;
             _prevRootMotionState = current.state;
             previousRootMotionNodeIndex = currentRootNodeIndex_;
         }
     }
     else
     {
-        _isFirstFrame = true;
-        _prevTime = 0.0f;
+        isFirstFrame = true;
+        prevTime = 0.0f;
         _prevRootMotionState = nullptr;
         previousRootMotionNodeIndex = -1;
         currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;

@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 class HitBox;
+class CharacterCollider;
 
 class HurtBox : public CapsuleCollider
 {
@@ -32,10 +33,14 @@ public:
 private:
     void EnforceHurtBoxSettings();
     void RegisterActions();
+    void ResolveCharacterCollider();
+    void SyncCharacterColliderShape();
 
 private:
     float invincibilityDuration = 0.08f;
     float invincibilityTimer = 0.0f;
     bool invincible = false;
+    bool syncCharacterColliderShape = true;
+    std::weak_ptr<CharacterCollider> characterCollider;
     std::unordered_map<const HitBox*, uint64_t> receivedActivationIds;
 };

@@ -5,6 +5,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Resource/ModelResource.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "MeshVFXComponent.h"
 
 #include <algorithm>
@@ -557,6 +558,7 @@ void MeshVFXRenderSystem::RenderAll(
     ID3D11RenderTargetView* activeRenderTarget_,
     ID3D11DepthStencilView* activeDepthStencil_)
 {
+    BS_PROFILE_SCOPE("Render::VFX");
     // PushSubmitされた�EMeshVFXを、E��常Mesh・動的Mesh・Afterimage Poseの3系統に刁E��て描画する、E
     if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())

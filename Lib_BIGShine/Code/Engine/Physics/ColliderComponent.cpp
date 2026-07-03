@@ -181,7 +181,8 @@ void ColliderComponent::CreatePhysXActor()
     }
 
     if (collisionRole == CollisionRole::HIT_BOX ||
-        collisionRole == CollisionRole::HURT_BOX)
+        collisionRole == CollisionRole::HURT_BOX ||
+        collisionRole == CollisionRole::JUST_DODGE_BOX)
     {
         return;
     }
@@ -566,7 +567,8 @@ void ColliderComponent::SyncFromPhysics(float dt_)
 void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 {
     if (collisionRole == CollisionRole::HIT_BOX ||
-        collisionRole == CollisionRole::HURT_BOX)
+        collisionRole == CollisionRole::HURT_BOX ||
+        collisionRole == CollisionRole::JUST_DODGE_BOX)
     {
         return;
     }
@@ -801,6 +803,7 @@ void ColliderComponent::ApplyRoleDefaults()
         break;
     case CollisionRole::HIT_BOX:
     case CollisionRole::HURT_BOX:
+    case CollisionRole::JUST_DODGE_BOX:
         usePhysicsResponse = false;
         isTrigger = false;
         break;
@@ -817,7 +820,15 @@ void ColliderComponent::Gui()
     const bool previousTrigger_ = isTrigger;
     const bool previousPhysicsControlsTransform_ = physicsControlsTransform;
 
-    const char* roleNames_[] = { "Physical", "Character", "HitBox", "HurtBox", "Sensor" };
+    const char* roleNames_[] =
+    {
+        "Physical",
+        "Character",
+        "HitBox",
+        "HurtBox",
+        "Sensor",
+        "JustDodgeBox"
+    };
     int roleIndex_ = static_cast<int>(collisionRole);
     if (HasFixedCollisionRole())
     {
@@ -829,7 +840,8 @@ void ColliderComponent::Gui()
         ApplyRoleDefaults();
         RecreatePhysXActor();
     }
-    ImGui::TextDisabled("Physical/Character: body collision. HitBox/HurtBox/Sensor: detection only.");
+    ImGui::TextDisabled(
+        "Physical/Character: body collision. HitBox/HurtBox/Sensor/JustDodgeBox: detection only.");
 
 
     ImGui::Separator();

@@ -35,8 +35,17 @@ public:
 		return modelName;
 	};
 
-	void Update(float ETime)
+	void Update(float elapsedTime_) override
 	{
+		(void)elapsedTime_;
+		if (transformUpdateDrivenExternally) return;
+
+		if (isStaticModel)
+		{
+			UpdateTransformIfDirty();
+			return;
+		}
+
 		UpdateTransform();
 	}
 
@@ -314,9 +323,22 @@ public:
 
 	bool GetUsedNaviMeshSystemFlg() { return usedNaviMeshSystemFlg; }
 
-	void SetLocalScale(float scale)
+	void SetLocalScale(float scale_)
 	{
-		localScale = scale;
+		if (localScale == scale_) return;
+		localScale = scale_;
+		MarkTransformDirty();
+	}
+	bool IsStaticModel() const { return isStaticModel; }
+	void SetStaticModel(bool isStaticModel_)
+	{
+		if (isStaticModel == isStaticModel_) return;
+		isStaticModel = isStaticModel_;
+		MarkTransformDirty();
+	}
+	void SetTransformUpdateDrivenExternally(bool drivenExternally_)
+	{
+		transformUpdateDrivenExternally = drivenExternally_;
 	}
 
 	void ShowMeshDetailsUI();
@@ -343,6 +365,10 @@ private:
 
 	bool poseDirty = true;
 	bool transformDirty = true;
+	bool isStaticModel = false;
+	bool transformUpdateDrivenExternally = false;
+	bool hasCachedOwnerWorldTransform = false;
+	DirectX::XMFLOAT4X4 cachedOwnerWorldTransform{};
 
 	float localScale = 1.0;
 	DirectX::SimpleMath::Quaternion _RootRotationOffset;

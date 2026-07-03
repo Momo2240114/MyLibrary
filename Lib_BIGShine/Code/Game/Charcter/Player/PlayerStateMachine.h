@@ -27,6 +27,12 @@ public:
         states[action_] = std::move(state_);
     }
 
+    template<class T>
+    T* GetCurrentStateAs() const
+    {
+        return dynamic_cast<T*>(currentState);
+    }
+
     void Initialize(PlayerControllerComponent& playerController_);
     void ChangeState(PLAYER_ACTION nextAction_);
 

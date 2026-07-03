@@ -64,13 +64,13 @@ private:
     ActiveSlot previous; // フェードアウト用
 
     // 前フレームの座標を保持する変数
-    DirectX::SimpleMath::Vector3 _prevRootPos = { 0, 0, 0 };
+    DirectX::SimpleMath::Vector3 prevRootPos = { 0, 0, 0 };
     DirectX::SimpleMath::Vector3 rootMotionBasePosition = { 0, 0, 0 };
     int previousRootMotionNodeIndex = -1;
     // アニメーションが切り替わったことを検知するフラグ
-    bool _isFirstFrame = true;
+    bool isFirstFrame = true;
 
-    float _prevTime = 0.0f;
+    float prevTime = 0.0f;
     float fadeTimer = 0.0f;
     float fadeDuration = 0.0f;
     bool isMixing = false;

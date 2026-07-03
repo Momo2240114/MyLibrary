@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
 #include <nlohmann/json.hpp>
 
@@ -363,6 +364,7 @@ void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfM
 //---
 void ModelRenderSystem::RenderAll(const RenderContext& rc)
 {
+	BS_PROFILE_SCOPE("Render::Model");
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シーン用定数バッファ更新

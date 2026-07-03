@@ -2,6 +2,9 @@
 
 #include "PlayerState.h"
 
+class CameraComponent;
+class CameraLockOnComponent;
+
 class PlayerAttackState : public PlayerState
 {
 public:
@@ -16,5 +19,10 @@ public:
     void Exit() override;
 
 private:
+    std::shared_ptr<GameObject> FindAssistTarget();
+    void ApplyAttackFacingAssist(float elapsedTime_);
+    std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent();
+
     PLAYER_ACTION action = PLAYER_ACTION::NONE;
+    std::weak_ptr<CameraLockOnComponent> cameraLockOnComponent;
 };

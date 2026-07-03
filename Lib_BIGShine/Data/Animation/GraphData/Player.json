@@ -1,6 +1,6 @@
 {
     "AnimationData": {
-        "DefaultState": "SS_Idle",
+        "DefaultState": "SS_Dodge",
         "States": [
             {
                 "animIndexA": -1,
@@ -4617,7 +4617,7 @@
                         "attachToOwner": false,
                         "attackTemplateId": "",
                         "blackboardWrites": [],
-                        "callEndOnStateExit": false,
+                        "callEndOnStateExit": true,
                         "endTime": 0.28333333134651184,
                         "eventTemplateType": "NONE",
                         "label": "AfterimageEvent",
@@ -4752,6 +4752,78 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.4833333194255829
+                    },
+                    {
+                        "actionEnd": "HurtBoxInvincibleOff",
+                        "actionStart": "HurtBoxInvincibleOn",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.3166666626930237,
+                        "eventTemplateType": "NONE",
+                        "label": "Invincible",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.03333333507180214
+                    },
+                    {
+                        "actionEnd": "JustDodge_FrameEnd",
+                        "actionStart": "JustDodge_FrameStart",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.15000000596046448,
+                        "eventTemplateType": "NONE",
+                        "label": "JustDodge",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.05000000074505806
                     }
                 ],
                 "loop": false,
@@ -4767,6 +4839,91 @@
                     "sourceNodeName": ""
                 },
                 "rootMotionScale": 0.05000000074505806,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 3
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 51,
+                "blend2DBackwardAnimationIndex": 49,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": 51,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DLeftAnimationIndex": 52,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "HitDirection",
+                "blend2DRightAnimationIndex": 53,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [
+                    {
+                        "actionEnd": "ActionEnd",
+                        "actionStart": "ActionEnd",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.8333333134651184,
+                        "eventTemplateType": "NONE",
+                        "label": "Action",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.7166666388511658
+                    }
+                ],
+                "loop": false,
+                "name": "SS_HitReaction",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": true,
+                    "applyRotationY": true,
+                    "applyRotationZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
                 "rootMotionScaleCurveName": "",
                 "sequencer": "",
                 "speed": 1.0,
@@ -4807,7 +4964,7 @@
             "nodeType": 0,
             "outputPin": 39,
             "posX": 384.0,
-            "posY": 11.0,
+            "posY": -69.0,
             "scopeId": "Root",
             "stateName": "SS_Idle"
         },
@@ -4818,7 +4975,7 @@
             "nodeType": 0,
             "outputPin": 44,
             "posX": 368.0,
-            "posY": 203.0,
+            "posY": 123.0,
             "scopeId": "Root",
             "stateName": "SS_Sprint"
         },
@@ -4829,7 +4986,7 @@
             "nodeType": 3,
             "outputPin": 51,
             "posX": 372.0,
-            "posY": -213.0,
+            "posY": -293.0,
             "scopeId": "Root",
             "stateName": "Attack"
         },
@@ -4928,7 +5085,7 @@
             "nodeType": 0,
             "outputPin": 111,
             "posX": 368.0,
-            "posY": 395.0,
+            "posY": 315.0,
             "scopeId": "Root",
             "stateName": "SS_Dodge"
         },
@@ -4942,6 +5099,17 @@
             "posY": 219.0,
             "scopeId": "SubGraph_1",
             "stateName": "SS_Sp_Skill1"
+        },
+        {
+            "childScopeId": "",
+            "id": 119,
+            "inputPin": 120,
+            "nodeType": 0,
+            "outputPin": 121,
+            "posX": 356.0,
+            "posY": 491.0,
+            "scopeId": "Root",
+            "stateName": "SS_HitReaction"
         }
     ],
     "GraphTransitions": [
@@ -5183,6 +5351,22 @@
             "logic": 0,
             "scopeId": "SubGraph_1",
             "to": "__Exit__:SubGraph_1"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "HitTrigger",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 122,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "SS_HitReaction"
         }
     ],
     "StateAssets": {
@@ -5191,6 +5375,7 @@
         "SS_Attack3": "Data\\Animation\\StateData\\Player\\States\\SS_Attack3.json",
         "SS_Attack4": "Data\\Animation\\StateData\\Player\\States\\SS_Attack4.json",
         "SS_Dodge": "Data\\Animation\\StateData\\Player\\States\\SS_Dodge.json",
+        "SS_HitReaction": "Data\\Animation\\StateData\\Player\\States\\SS_HitReaction.json",
         "SS_Quickshift_F": "Data\\Animation\\StateData\\Player\\States\\SS_Quickshift_F.json",
         "SS_Run": "Data\\Animation\\StateData\\Player\\States\\SS_Run.json",
         "SS_Sp_Skill1": "Data\\Animation\\StateData\\Player\\States\\SS_Sp_Skill1.json",

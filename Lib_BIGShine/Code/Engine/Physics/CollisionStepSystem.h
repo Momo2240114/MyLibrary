@@ -3,7 +3,9 @@
 #include <memory>
 #include <vector>
 
+
 class ColliderComponent;
+class JustDodgeSystem;
 class AttackSystem;
 struct AttackHitContact;
 struct CollisionContact;
@@ -14,6 +16,10 @@ public:
     void SetAttackSystem(AttackSystem* attackSystem_)
     {
         attackSystem = attackSystem_;
+    }
+    void SetJustDodgeSystem(JustDodgeSystem* justDodgeSystem_)
+    {
+        justDodgeSystem = justDodgeSystem_;
     }
     void RegisterCollider(const std::shared_ptr<ColliderComponent>& collider_);
     void UnregisterCollider(ColliderComponent* collider_);
@@ -44,4 +50,6 @@ private:
 private:
     std::vector<std::weak_ptr<ColliderComponent>> colliders;
     AttackSystem* attackSystem = nullptr;
+    JustDodgeSystem* justDodgeSystem = nullptr;
+
 };
