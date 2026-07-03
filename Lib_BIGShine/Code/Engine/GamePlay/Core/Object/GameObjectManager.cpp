@@ -31,6 +31,7 @@
 void GameObjectManager::Initialize()
 {
     collisionStepSystem->SetAttackSystem(attackSystem.get());
+    collisionStepSystem->SetJustDodgeSystem(justDodgeSystem.get());
 
     particleRenderSystem = std::make_unique<ParticleRenderSystem>();
     particleRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
@@ -725,6 +726,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
 
 void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_)
 {
+    BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
 

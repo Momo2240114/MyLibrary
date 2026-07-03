@@ -34,11 +34,35 @@
                 "actionEnd": "AfterimageStop",
                 "actionStart": "AfterimageStart",
                 "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
                 "blackboardWrites": [],
-                "callEndOnStateExit": false,
+                "callEndOnStateExit": true,
                 "endTime": 0.28333333134651184,
+                "eventTemplateType": "NONE",
                 "label": "AfterimageEvent",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
                 "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.0
             },
@@ -46,11 +70,35 @@
                 "actionEnd": "",
                 "actionStart": "ActionEnd",
                 "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": false,
                 "endTime": 0.9833333492279053,
+                "eventTemplateType": "NONE",
                 "label": "ActionEnd",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
                 "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.75
             },
@@ -58,11 +106,35 @@
                 "actionEnd": "",
                 "actionStart": "InputBufferOn",
                 "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": false,
                 "endTime": 0.6499999761581421,
+                "eventTemplateType": "NONE",
                 "label": "InputBufferOn",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
                 "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.0
             },
@@ -70,13 +142,109 @@
                 "actionEnd": "",
                 "actionStart": "CanCancelOn",
                 "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": false,
                 "endTime": 0.7333333492279053,
+                "eventTemplateType": "NONE",
                 "label": "CanCancelOn",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
                 "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.4833333194255829
+            },
+            {
+                "actionEnd": "HurtBoxInvincibleOff",
+                "actionStart": "HurtBoxInvincibleOn",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.3166666626930237,
+                "eventTemplateType": "NONE",
+                "label": "Invincible",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.03333333507180214
+            },
+            {
+                "actionEnd": "JustDodge_FrameEnd",
+                "actionStart": "JustDodge_FrameStart",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.15000000596046448,
+                "eventTemplateType": "NONE",
+                "label": "JustDodge",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.05000000074505806
             }
         ],
         "loop": false,

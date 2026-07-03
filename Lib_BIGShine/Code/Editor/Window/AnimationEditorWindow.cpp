@@ -2137,6 +2137,26 @@ void AnimationEditorWindow::DrawEventSequencer(
     adapter_.fps = 60.0f;
     adapter_.SyncFrames();
 
+    if (ImGui::Button("Add Action Event"))
+    {
+        AnimEvent actionEvent_{};
+        actionEvent_.eventLabel = "Action";
+        actionEvent_.eventTemplateType =
+            ANIMATION_EVENT_TEMPLATE_TYPE::NONE;
+        actionEvent_.startTime = animController->GetAnimatorTime();
+        actionEvent_.endTime =
+            (std::min)(actionEvent_.startTime + 0.2f, adapter_.duration);
+        actionEvent_.frameStart = adapter_.ToFrame(actionEvent_.startTime);
+        actionEvent_.frameEnd = adapter_.ToFrame(actionEvent_.endTime);
+        actionEvent_.callEndOnStateExit = true;
+
+        targetState_->events.push_back(actionEvent_);
+        selectedEvent = static_cast<int>(targetState_->events.size()) - 1;
+        adapter_.SyncFrames();
+    }
+
+    ImGui::SameLine();
+
     if (ImGui::Button("Add Attack Template Event"))
     {
         attackTemplateManager_.LoadAll();
@@ -2227,6 +2247,19 @@ void AnimationEditorWindow::DrawEventSequencer(
     if (ImGui::Button("Reload Attack Templates"))
     {
         attackTemplateManager_.LoadAll();
+    }
+
+    if (ImGui::Button("Sort by Start Time"))
+    {
+        std::stable_sort(
+            targetState_->events.begin(),
+            targetState_->events.end(),
+            [](const AnimEvent& left_, const AnimEvent& right_)
+            {
+                return left_.startTime < right_.startTime;
+            });
+        selectedEvent = -1;
+        adapter_.SyncFrames();
     }
 
     int currentFrame_ =

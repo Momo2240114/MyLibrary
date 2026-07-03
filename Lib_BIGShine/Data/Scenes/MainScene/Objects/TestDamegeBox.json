@@ -1,0 +1,105 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "ActivateActionName": "EnableHitBox",
+                "AllowMultiHit": false,
+                "AttackInstanceId": 270,
+                "AttackTag": "DamageBox",
+                "BlackboardCategory": "Attack",
+                "CanHitOwner": false,
+                "CollisionRole": 2,
+                "ContainmentMode": 0,
+                "Damage": 5.0,
+                "DamageKey": "Damage",
+                "DeactivateActionName": "DisableHitBox",
+                "DebugPrimitiveColor": [
+                    1.0,
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 2.5,
+                "HitGroupId": 0,
+                "HitMeshVFXAssetPath": "",
+                "HitMeshVFXLifeTime": 1.0,
+                "HitMeshVFXNormalOffset": 0.0,
+                "HitOncePerActivation": true,
+                "HitParticleAssetPath": "",
+                "HitParticleEmitterName": "",
+                "HitParticleLifeTime": 1.0,
+                "HitParticleNormalOffset": 0.0,
+                "HitSoundMuffled": false,
+                "HitSoundMuffledCutoff": 1200.0,
+                "HitSoundPath": "",
+                "HitSoundPathKey": "HitSoundPath",
+                "HitSoundVolume": 1.0,
+                "HitStopDuration": 0.05000000074505806,
+                "HitStopDurationKey": "HitStopDuration",
+                "HitStopLayerMask": 3,
+                "HitStopScale": 1.0,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "KnockBackPower": 20.0,
+                "KnockBackPowerKey": "KnockBackPower",
+                "Mass": 0.0,
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 2.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "SourceAction": "",
+                "StartNodeName": "",
+                "TeamId": 0,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "TypeName": "HitBox"
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "AutoActivate": true,
+                "Damage": 5.0,
+                "HitStopDuration": 0.05000000074505806,
+                "HitStopScale": 1.0,
+                "KnockBackPower": 20.0,
+                "RearmInterval": 0.800000011920929
+            },
+            "Enabled": true,
+            "TypeName": "DamageBoxComponent"
+        }
+    ],
+    "Layer": 0,
+    "Name": "TestDamegeBox",
+    "ParentName": "",
+    "Transform": {
+        "Pos": [
+            30.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

@@ -6,6 +6,7 @@
 #include "Engine/GamePlay/Scene/IScene.h"
 #include "Engine/Physics/CollisionStepSystem.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
+#include "Engine/GamePlay/System/JustDodgeSystem.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 
 class ColliderComponent;
@@ -176,6 +177,7 @@ public:
     std::shared_ptr<TimeManager> GetTimeManager() { return timeManager; }
     CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
     AttackSystem& GetAttackSystem() { return *attackSystem; }
+    JustDodgeSystem& GetJustDodgeSystem() { return *justDodgeSystem; }
     EffectManager& GetEffectManager() { return *effectManager; }
 private:
     // unique name helper
@@ -220,6 +222,8 @@ private:
     std::shared_ptr<TimeManager> timeManager;
     std::unique_ptr<AttackSystem> attackSystem =
         std::make_unique<AttackSystem>();
+    std::unique_ptr<JustDodgeSystem > justDodgeSystem =
+        std::make_unique<JustDodgeSystem >();
     std::unique_ptr<CollisionStepSystem> collisionStepSystem =
         std::make_unique<CollisionStepSystem>();
     std::unique_ptr<EffectManager> effectManager =

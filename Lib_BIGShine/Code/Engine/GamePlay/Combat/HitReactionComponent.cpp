@@ -29,6 +29,7 @@ void HitReactionComponent::Update(float deltaTime_)
 
 void HitReactionComponent::HandleHit()
 {
+
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 

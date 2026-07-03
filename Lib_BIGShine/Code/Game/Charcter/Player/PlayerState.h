@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <string>
+#include <typeindex>
+#include <unordered_map>
 
 class PlayerControllerComponent;
 
@@ -71,6 +73,15 @@ namespace PlayerBlackboardKey
     inline constexpr const char* CAN_COMBO = "CanCombo";
     inline constexpr const char* ACTION_ENDED = "ActionEnded";
     inline constexpr const char* ATTACK_ENTER = "AttackEnter";
+
+    inline constexpr const char* HIT_TRIGGER = "HitTrigger";
+    inline constexpr const char* HIT_DIRECTION = "HitDirection";
+    //ジャスト回避関係
+    inline constexpr const char* JUST_DODGE_SUCCEEDED = "JustDodgeSucceeded";
+    inline constexpr const char* JUST_DODGE_TRIGGER = "JustDodgeTrigger";
+    //カウンター関係
+    inline constexpr const char* CAN_COUNTER = "CanCounter";
+    inline constexpr const char* DODGED_COUNTER_TAG = "DodgedCounterag";
 }
 
 inline const char* GetPlayerActionName(PLAYER_ACTION action_)
@@ -181,10 +192,34 @@ protected:
     template<class T>
     std::shared_ptr<T> GetComponent() const
     {
+        const std::type_index type_ = std::type_index(typeid(T));
+        const auto cachedIterator_ = componentCache.find(type_);
+        if (cachedIterator_ != componentCache.end())
+        {
+            const std::shared_ptr<Component> cachedComponent_ =
+                cachedIterator_->second.lock();
+            if (cachedComponent_)
+            {
+                return std::dynamic_pointer_cast<T>(cachedComponent_);
+            }
+        }
+
         const std::shared_ptr<GameObject> owner_ = GetOwner();
-        return owner_ ? owner_->GetComponent<T>() : nullptr;
+        if (!owner_) return nullptr;
+
+        const std::shared_ptr<T> component_ = owner_->GetComponent<T>();
+        if (component_)
+        {
+            componentCache[type_] = component_;
+        }
+        else
+        {
+            componentCache.erase(type_);
+        }
+        return component_;
     }
 
     std::weak_ptr<GameObject> owner;
     PlayerControllerComponent* playerController = nullptr;
+    mutable std::unordered_map<std::type_index, std::weak_ptr<Component>> componentCache;
 };

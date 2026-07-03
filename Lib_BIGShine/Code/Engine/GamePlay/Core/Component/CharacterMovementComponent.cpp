@@ -50,23 +50,23 @@ void CharacterMovementComponent::Update(float deltaTime_)
     if (usePhysicsVelocity && collider_)
     {
         collider_->velocity.x =
-            scaledHorizontalVelocity_.x + rootMotionVelocity_.x + pendingImpulse.x;
+            scaledHorizontalVelocity_.x + rootMotionVelocity_.x + impulseVelocity.x;
         collider_->velocity.z =
-            scaledHorizontalVelocity_.z + rootMotionVelocity_.z + pendingImpulse.z;
+            scaledHorizontalVelocity_.z + rootMotionVelocity_.z + impulseVelocity.z;
         if (std::dynamic_pointer_cast<CharacterCollider>(collider_))
         {
             if (collider_->useGravity)
             {
-                collider_->velocity.y += rootMotionVelocity_.y + pendingImpulse.y;
+                collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
             }
             else
             {
-                collider_->velocity.y = rootMotionVelocity_.y + pendingImpulse.y;
+                collider_->velocity.y = rootMotionVelocity_.y + impulseVelocity.y;
             }
         }
         else
         {
-            collider_->velocity.y += rootMotionVelocity_.y + pendingImpulse.y;
+            collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
         }
         lastAppliedVelocity = collider_->velocity;
     }
@@ -74,9 +74,9 @@ void CharacterMovementComponent::Update(float deltaTime_)
     {
         const DirectX::XMFLOAT3 movementDelta_
         {
-            desiredHorizontalVelocity.x * deltaTime_ + rootMotionDelta.x + pendingImpulse.x * deltaTime_,
-            desiredHorizontalVelocity.y * deltaTime_ + rootMotionDelta.y + pendingImpulse.y * deltaTime_,
-            desiredHorizontalVelocity.z * deltaTime_ + rootMotionDelta.z + pendingImpulse.z * deltaTime_
+            desiredHorizontalVelocity.x * deltaTime_ + rootMotionDelta.x + impulseVelocity.x * deltaTime_,
+            desiredHorizontalVelocity.y * deltaTime_ + rootMotionDelta.y + impulseVelocity.y * deltaTime_,
+            desiredHorizontalVelocity.z * deltaTime_ + rootMotionDelta.z + impulseVelocity.z * deltaTime_
         };
         owner_->transform->AddMoveOffset(movementDelta_);
         lastAppliedVelocity =
@@ -85,6 +85,21 @@ void CharacterMovementComponent::Update(float deltaTime_)
             movementDelta_.y / safeDeltaTime_,
             movementDelta_.z / safeDeltaTime_
         };
+    }
+
+    const float impulseDecay_ = (std::max)(
+        0.0f,
+        1.0f - impulseDamping * safePhysicsDeltaTime_);
+    impulseVelocity.x *= impulseDecay_;
+    impulseVelocity.y *= impulseDecay_;
+    impulseVelocity.z *= impulseDecay_;
+    const float impulseLengthSquared_ =
+        impulseVelocity.x * impulseVelocity.x +
+        impulseVelocity.y * impulseVelocity.y +
+        impulseVelocity.z * impulseVelocity.z;
+    if (impulseLengthSquared_ < 0.0001f)
+    {
+        impulseVelocity = { 0.0f, 0.0f, 0.0f };
     }
 
     ClearFrameRequests();
@@ -99,6 +114,16 @@ void CharacterMovementComponent::SetHorizontalVelocity(
 void CharacterMovementComponent::StopHorizontalMovement()
 {
     desiredHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
+}
+
+void CharacterMovementComponent::StopHorizontalMovementImmediately()
+{
+    StopHorizontalMovement();
+    const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
+    if (!collider_) return;
+
+    collider_->velocity.x = 0.0f;
+    collider_->velocity.z = 0.0f;
 }
 
 void CharacterMovementComponent::SetUnscaledDeltaTime(float deltaTime_)
@@ -116,9 +141,9 @@ void CharacterMovementComponent::AddRootMotionDelta(
 
 void CharacterMovementComponent::AddImpulse(const DirectX::XMFLOAT3& impulse_)
 {
-    pendingImpulse.x += impulse_.x;
-    pendingImpulse.y += impulse_.y;
-    pendingImpulse.z += impulse_.z;
+    impulseVelocity.x += impulse_.x;
+    impulseVelocity.y += impulse_.y;
+    impulseVelocity.z += impulse_.z;
 }
 
 void CharacterMovementComponent::SetFacingDirection(
@@ -181,7 +206,6 @@ void CharacterMovementComponent::ApplyFacing(float deltaTime_)
 void CharacterMovementComponent::ClearFrameRequests()
 {
     rootMotionDelta = { 0.0f, 0.0f, 0.0f };
-    pendingImpulse = { 0.0f, 0.0f, 0.0f };
     unscaledDeltaTime = 0.0f;
 }
 
@@ -189,6 +213,7 @@ void CharacterMovementComponent::Gui()
 {
     ImGui::Checkbox("Use Physics Velocity", &usePhysicsVelocity);
     ImGui::DragFloat("Facing Turn Speed", &facingTurnSpeed, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Impulse Damping", &impulseDamping, 0.1f, 0.0f, 100.0f);
     ImGui::Text(
         "Desired Horizontal: %.3f, %.3f",
         desiredHorizontalVelocity.x,
@@ -204,12 +229,14 @@ void CharacterMovementComponent::Serialize(nlohmann::json& json_) const
 {
     json_["UsePhysicsVelocity"] = usePhysicsVelocity;
     json_["FacingTurnSpeed"] = facingTurnSpeed;
+    json_["ImpulseDamping"] = impulseDamping;
 }
 
 void CharacterMovementComponent::Deserialize(const nlohmann::json& json_)
 {
     usePhysicsVelocity = json_.value("UsePhysicsVelocity", true);
     facingTurnSpeed = (std::max)(json_.value("FacingTurnSpeed", 10.0f), 0.0f);
+    impulseDamping = (std::max)(json_.value("ImpulseDamping", 6.0f), 0.0f);
 }
 
 REGISTER_COMPONENT(CharacterMovementComponent, "CharacterMovementComponent")

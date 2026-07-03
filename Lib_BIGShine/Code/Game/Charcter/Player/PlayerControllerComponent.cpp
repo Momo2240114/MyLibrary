@@ -8,10 +8,15 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/GamePlay/Combat/HitReactionComponent.h"
+#include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Engine/Physics/JustDodgeCollider.h"
+
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "PlayerActionState.h"
 #include "PlayerAttackState.h"
@@ -141,13 +146,43 @@ void PlayerControllerComponent::Start()
     collider = owner_->GetOrAddComponent<CharacterCollider>();
     movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
     hurtBox = owner_->GetOrAddComponent<HurtBox>();
+    justDodgeCollider = owner_->GetOrAddComponent<JustDodgeCollider>();
+
     if (collider)
     {
         collider->mass = (std::max)(collider->mass, 1.0f);
         collider->RecreatePhysXActor();
     }
+
     blackboard = owner_->GetOrAddComponent<BlackboardComponent>();
+    InitializeBlackboardValues();
+
+    owner_->GetOrAddComponent<HealthComponent>();
     RegisterPlayerAnimationActions();
+
+    const std::shared_ptr<HitReactionComponent> hitReaction_ =
+        owner_->GetOrAddComponent<HitReactionComponent>();
+    if (hitReaction_)
+    {
+        hitReaction_->SetReactionActionName("Hit_Player");
+    }
+
+    const std::shared_ptr<ActionSequence> hitSequence_ =
+        owner_->GetOrAddComponent<ActionSequence>();
+
+    if (hitSequence_)
+    {
+        hitSequence_->SetRegisterGlobal(false);
+        ActionReference healthAction_{};
+        healthAction_.category = "Health";
+        healthAction_.actionName = "Health_Hit";
+        ActionReference playerAction_{};
+        playerAction_.category = "Player";
+        playerAction_.actionName = "Player_Hit";
+        hitSequence_->EnsureImmediateSequence(
+            "Hit_Player",
+            { healthAction_, playerAction_ });
+    }
 
     stateMachine.Initialize(*this);
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
@@ -490,6 +525,9 @@ void PlayerControllerComponent::HandleHitReaction()
     actionRuntime.bufferedComboIndex = 0;
     pendingComboIndex = 0;
     comboIndex = 0;
+    hasPendingHorizontalVelocity = false;
+    hasPendingFacingDirection = false;
+    pendingHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
     stateMachine.ChangeState(PLAYER_ACTION::HIT);
 }
 
@@ -584,10 +622,15 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     if (!owner_) return;
 
     auto& registry_ = owner_->GetLocalRegistry();
-    registry_.RegisterAction("Player", "OnHit", [this]()
+    registry_.RegisterAction("Player", "Player_Hit", [this]()
     {
         HandleHitReaction();
     });
+    registry_.RegisterAction("Player", "OnJustDodge", [this]()
+    {
+            NotifyJustDodge();
+    });
+
     registry_.RegisterAction("Player", "CanCancelOn", [this]()
         {
             SetCanCancel(true);
@@ -624,6 +667,7 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
         {
             NotifyActionEnd();
         });
+
 }
 
 void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
@@ -704,6 +748,20 @@ void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT
 
     blackboard->SetVector2(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::MOVE_INPUT, { input_.x, input_.z });
     blackboard->SetVector2(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::MOVE_INPUT, { input_.x, input_.z });
+}
+
+void PlayerControllerComponent::NotifyJustDodge()
+{
+    if (GetCurrentAction() != PLAYER_ACTION::DODGE)
+    {
+        return;
+    }
+
+    PlayerDodgeState* dodgeState_ =
+        stateMachine.GetCurrentStateAs<PlayerDodgeState>();
+    if (!dodgeState_) return;
+
+    dodgeState_->NotifyJustDodgeSucceeded();
 }
 
 
@@ -790,11 +848,77 @@ void PlayerControllerComponent::Gui()
 
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
+
+    ImGui::SeparatorText("Attack Facing Assist");
+    ImGui::Checkbox("Enabled##AttackFacingAssist", &attackAssistSettings.enabled);
+    ImGui::SliderFloat("Assist Strength", &attackAssistSettings.strength, 0.0f, 1.0f, "%.2f");
+    ImGui::DragFloat("Assist Turn Speed", &attackAssistSettings.turnSpeed, 0.1f, 0.0f, 60.0f, "%.2f");
+    ImGui::DragFloat("Assist Search Distance", &attackAssistSettings.searchDistance, 0.1f, 0.0f, 100.0f, "%.2f");
+    ImGui::SliderFloat("Camera Center Angle", &attackAssistSettings.cameraCenterAngle, 0.0f, 180.0f, "%.1f deg");
+    ImGui::TextDisabled("Priority: Camera Lock-On > Camera Center > Nearest Enemy");
+}
+
+//blackboard‚É’l‚âƒJƒeƒSƒŠ[‚ðÅ‰‚É“o˜^‚·‚é‹@\
+void PlayerControllerComponent::InitializeBlackboardValues()
+{
+    if (!blackboard)
+    {
+        auto owner_ = GetGameObject();
+        blackboard = owner_ ? owner_->GetOrAddComponent<BlackboardComponent>() : nullptr;
+    }
+
+    if (!blackboard) return;
+
+    constexpr const char* categories_[] =
+    {
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardCategory::ANIM
+    };
+
+    for (const char* category_ : categories_)
+    {
+        blackboard->SetInt(category_, PlayerBlackboardKey::ACTION, static_cast<int>(PLAYER_ACTION::NONE));
+        blackboard->SetInt(category_, PlayerBlackboardKey::ACTION_GROUP, static_cast<int>(PLAYER_ACTION_GROUP::NONE));
+        blackboard->SetInt(category_, PlayerBlackboardKey::ATTACK_TYPE, static_cast<int>(PLAYER_ATTACK_TYPE::NONE));
+        blackboard->SetInt(category_, PlayerBlackboardKey::COMBO_INDEX, 0);
+
+        blackboard->SetVector2(category_, PlayerBlackboardKey::MOVE_INPUT, { 0.0f, 0.0f });
+        blackboard->SetVector2(category_, PlayerBlackboardKey::DODGE_INPUT, { 0.0f, 0.0f });
+        blackboard->SetVector2(category_, PlayerBlackboardKey::HIT_DIRECTION, { 0.0f, 0.0f });
+
+        blackboard->SetBool(category_, PlayerBlackboardKey::HIT_TRIGGER, false);
+
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_IDLE, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_MOVE, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_LOCOMOTION, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_ATTACK, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_GUARD, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_DODGE, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL, false);
+
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_BUFFER_INPUT, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_COMBO, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::ACTION_ENDED, false);
+    }
+
+    blackboard->SetBool(
+        PlayerBlackboardCategory::ANIM,
+        PlayerBlackboardKey::ATTACK_ENTER,
+        false);
 }
 
 void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
+    j_["AttackAssist"] =
+    {
+        { "Enabled", attackAssistSettings.enabled },
+        { "Strength", attackAssistSettings.strength },
+        { "TurnSpeed", attackAssistSettings.turnSpeed },
+        { "SearchDistance", attackAssistSettings.searchDistance },
+        { "CameraCenterAngle", attackAssistSettings.cameraCenterAngle }
+    };
     j_["CancelTransitions"] = nlohmann::json::array();
     for (const PlayerCancelTransition& transition_ : cancelTransitions)
     {
@@ -809,6 +933,25 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     moveSpeed = j_.value("MoveSpeed", moveSpeed);
+    if (j_.contains("AttackAssist") && j_["AttackAssist"].is_object())
+    {
+        const auto& attackAssistJson_ = j_["AttackAssist"];
+        attackAssistSettings.enabled = attackAssistJson_.value("Enabled", attackAssistSettings.enabled);
+        attackAssistSettings.strength = std::clamp(
+            attackAssistJson_.value("Strength", attackAssistSettings.strength),
+            0.0f,
+            1.0f);
+        attackAssistSettings.turnSpeed = (std::max)(
+            attackAssistJson_.value("TurnSpeed", attackAssistSettings.turnSpeed),
+            0.0f);
+        attackAssistSettings.searchDistance = (std::max)(
+            attackAssistJson_.value("SearchDistance", attackAssistSettings.searchDistance),
+            0.0f);
+        attackAssistSettings.cameraCenterAngle = std::clamp(
+            attackAssistJson_.value("CameraCenterAngle", attackAssistSettings.cameraCenterAngle),
+            0.0f,
+            180.0f);
+    }
     if (j_.contains("CancelTransitions") && j_["CancelTransitions"].is_array())
     {
         cancelTransitions.clear();

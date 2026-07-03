@@ -403,9 +403,9 @@ void AudioWorkspaceWindow::DrawSequencer()
         selectedSequenceEventIndex = static_cast<int>(sequenceEvents.size()) - 1;
     }
     ImGui::SameLine();
-    if (ImGui::Button("Sort", ImVec2(70.0f, 0.0f)))
+    if (ImGui::Button("Sort by Start Time"))
     {
-        std::sort(
+        std::stable_sort(
             sequenceEvents.begin(),
             sequenceEvents.end(),
             [](const SequenceEvent& left_, const SequenceEvent& right_)

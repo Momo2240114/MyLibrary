@@ -82,7 +82,8 @@
         "RockWall_07",
         "Wall",
         "TestTarget",
-        "GameObject"
+        "GameObject",
+        "TestDamegeBox"
     ],
     "SceneName": "MainScene"
 }

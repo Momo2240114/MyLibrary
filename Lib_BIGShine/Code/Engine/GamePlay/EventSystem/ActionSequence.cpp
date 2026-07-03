@@ -152,23 +152,68 @@ void ActionSequence::StartSequence(int index_)
     }
 }
 
+void ActionSequence::EnsureImmediateSequence(
+    const std::string& sequenceName_,
+    const std::vector<ActionReference>& actions_)
+{
+    if (sequenceName_.empty()) return;
+
+    const auto sequenceIterator_ = std::find_if(
+        sequences.begin(),
+        sequences.end(),
+        [&sequenceName_](const SequenceData& sequence_)
+        {
+            return sequence_.name == sequenceName_;
+        });
+    if (sequenceIterator_ == sequences.end())
+    {
+        SequenceData sequence_{};
+        sequence_.name = sequenceName_;
+        sequence_.duration = 0.1f;
+        sequence_.actions = actions_;
+        for (ActionReference& action_ : sequence_.actions)
+        {
+            action_.executionTime = 0.0f;
+        }
+        sequences.push_back(sequence_);
+    }
+
+    RegisterSequence(sequenceName_);
+}
+
 void ActionSequence::RegisterSequence(const std::string& sequenceName_)
 {
-    auto& reg = ActionRegistry::Instance();
+    (void)sequenceName_;
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
+    if (!owner_) return;
+    ActionRegistry& localRegistry_ = owner_->GetLocalRegistry();
 
+    for (int index_ = 0; index_ < static_cast<int>(sequences.size()); ++index_) {
+        if (sequences[index_].name.empty()) continue;
 
-    for (int i = 0; i < (int)sequences.size(); ++i) {
-        if (sequences[i].name.empty()) continue;
-
-        int seqIndex = i;
-        reg.RegisterAction("Sequence", sequences[i].name, [this, seqIndex]() {
-            this->StartSequence(seqIndex);
-            });
+        const int sequenceIndex_ = index_;
+        const std::string sequenceName_ = sequences[index_].name;
+        const auto startSequence_ = [this, sequenceIndex_]() {
+            StartSequence(sequenceIndex_);
+            };
+        localRegistry_.RegisterAction(
+            "Sequence",
+            sequenceName_,
+            startSequence_);
+        if (registerGlobal)
+        {
+            ActionRegistry::Instance().RegisterAction(
+                "Sequence",
+                sequenceName_,
+                startSequence_);
+        }
     }
 }
 
 void ActionSequence::Gui()
 {
+    ImGui::Checkbox("Register Global", &registerGlobal);
+    ImGui::TextDisabled("Sequences are always registered to the owner locally.");
     ImGui::TextDisabled("Edit sequences from Window > Action Sequence Editor.");
 }
 
@@ -212,6 +257,10 @@ void ActionSequence::DrawEditorGui()
     auto& globalReg = ActionRegistry::Instance();
     auto owner = gameObject.lock();
 
+    ImGui::Checkbox("Register Global", &registerGlobal);
+    ImGui::TextDisabled("OFF: Local only / ON: Local and global");
+    ImGui::Separator();
+
     struct CategoryEntry { std::string name; bool isLocal; };
     std::vector<CategoryEntry> allCategories;
 
@@ -248,6 +297,18 @@ void ActionSequence::DrawEditorGui()
             ImGui::SetNextItemWidth(180.0f);
             if (ImGui::DragFloat("Timeline Length", &sequence_.duration, 0.1f, 0.1f, 600.0f, "%.2f sec")) {
                 sequence_.duration = (std::max)(0.1f, sequence_.duration);
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Sort by Start Time")) {
+                std::stable_sort(
+                    sequence_.actions.begin(),
+                    sequence_.actions.end(),
+                    [](const ActionReference& left_, const ActionReference& right_)
+                    {
+                        return left_.executionTime < right_.executionTime;
+                    });
+                sequence_.selectedAction = -1;
             }
 
             ActionSequenceAdapter adapter_;
@@ -425,10 +486,12 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
         seqArray.push_back(seqItem);
     }
     j["Sequences"] = seqArray;
+    j["RegisterGlobal"] = registerGlobal;
 }
 
 void ActionSequence::Deserialize(const nlohmann::json& j)
 {
+    registerGlobal = j.value("RegisterGlobal", false);
     if (!j.contains("Sequences") || !j["Sequences"].is_array()) return;
     sequences.clear();
 

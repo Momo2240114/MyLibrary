@@ -53,6 +53,10 @@ public:
     void Start();
     void Update(float elapsedTime_) override;
     void StartSequence(int index_);
+    void SetRegisterGlobal(bool registerGlobal_) { registerGlobal = registerGlobal_; }
+    void EnsureImmediateSequence(
+        const std::string& sequenceName_,
+        const std::vector<ActionReference>& actions_);
 
     // Register actions that start each configured sequence.
     void RegisterSequence(const std::string& sequenceName_);
@@ -69,4 +73,5 @@ private:
 
     std::vector<SequenceData> sequences;
     std::vector<PendingAction> pendingActions;
+    bool registerGlobal = false;
 };

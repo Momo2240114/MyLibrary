@@ -26,6 +26,8 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     void SetLockOnEnabled(bool enabled_);
+    bool IsLockOnEnabled() const { return lockOnEnabled; }
+    std::shared_ptr<GameObject> GetLockOnTarget() const { return lockOnTarget.lock(); }
 
 private:
     void ResolveReferences();

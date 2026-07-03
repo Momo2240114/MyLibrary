@@ -59,6 +59,7 @@ void ParticleRenderSystem::ApplySceneConstants(const RenderContext& rc)
 
 void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindow_ )
 {
+    BS_PROFILE_SCOPE("Render::Particle");
     ID3D11DeviceContext* dc = rc.deviceContext;
     if (!dc || !rc.camera || drawInfos.empty()) return;
 

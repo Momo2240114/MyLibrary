@@ -1,7 +1,15 @@
 #include "PlayerAttackState.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 #include "PlayerControllerComponent.h"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 PlayerAttackState::PlayerAttackState(
     const std::shared_ptr<GameObject>& owner_,
@@ -25,7 +33,7 @@ void PlayerAttackState::Execute(float elapsedTime_)
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
-    (void)elapsedTime_;
+    ApplyAttackFacingAssist(elapsedTime_);
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());
     player_->ProcessActionInput();
 }
@@ -37,4 +45,186 @@ void PlayerAttackState::Exit()
         player_->SetCanBufferInput(false);
         player_->SetCanCombo(false);
     }
+}
+
+std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
+{
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    PlayerControllerComponent* player_ = GetPlayerController();
+    if (!owner_ || !owner_->transform || !player_) return nullptr;
+
+    const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
+    const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
+    const float maximumDistanceSquared_ = settings_.searchDistance * settings_.searchDistance;
+
+    const auto isValidTarget_ = [&](const std::shared_ptr<GameObject>& target_)
+    {
+        if (!target_ || target_.get() == owner_.get() || !target_->transform) return false;
+        if (target_->layer != GameObject::LayerType::Enemy) return false;
+
+        const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
+        const float differenceX_ = targetPosition_.x - ownerPosition_.x;
+        const float differenceZ_ = targetPosition_.z - ownerPosition_.z;
+        return differenceX_ * differenceX_ + differenceZ_ * differenceZ_ <= maximumDistanceSquared_;
+    };
+
+    const std::shared_ptr<CameraLockOnComponent> lockOn_ = ResolveCameraLockOnComponent();
+    if (lockOn_ && lockOn_->IsLockOnEnabled())
+    {
+        const std::shared_ptr<GameObject> lockOnTarget_ = lockOn_->GetLockOnTarget();
+        if (isValidTarget_(lockOnTarget_)) return lockOnTarget_;
+    }
+
+    std::shared_ptr<CameraComponent> camera_;
+    if (CameraManager* cameraManager_ = owner_->GetManager().GetCameraManager())
+    {
+        camera_ = cameraManager_->GetActiveCamera();
+    }
+
+    DirectX::XMFLOAT3 cameraForward_{ 0.0f, 0.0f, 0.0f };
+    bool hasCameraForward_ = false;
+    if (camera_)
+    {
+        cameraForward_ = camera_->GetFront();
+        cameraForward_.y = 0.0f;
+        const float cameraLengthSquared_ =
+            cameraForward_.x * cameraForward_.x + cameraForward_.z * cameraForward_.z;
+        if (cameraLengthSquared_ > 0.000001f)
+        {
+            const float inverseLength_ = 1.0f / std::sqrt(cameraLengthSquared_);
+            cameraForward_.x *= inverseLength_;
+            cameraForward_.z *= inverseLength_;
+            hasCameraForward_ = true;
+        }
+    }
+
+    const float centerThreshold_ = std::cos(
+        std::clamp(settings_.cameraCenterAngle, 0.0f, 180.0f) *
+        DirectX::XM_PI / 180.0f);
+    std::shared_ptr<GameObject> centerTarget_;
+    std::shared_ptr<GameObject> nearestTarget_;
+    float bestCenterDot_ = -1.0f;
+    float nearestDistanceSquared_ = (std::numeric_limits<float>::max)();
+
+    for (const std::shared_ptr<GameObject>& candidate_ : owner_->GetManager().GetObjects())
+    {
+        if (!isValidTarget_(candidate_)) continue;
+
+        const DirectX::XMFLOAT3 candidatePosition_ = candidate_->transform->GetWorldPosition();
+        const float differenceX_ = candidatePosition_.x - ownerPosition_.x;
+        const float differenceZ_ = candidatePosition_.z - ownerPosition_.z;
+        const float distanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
+
+        if (distanceSquared_ < nearestDistanceSquared_)
+        {
+            nearestDistanceSquared_ = distanceSquared_;
+            nearestTarget_ = candidate_;
+        }
+
+        if (!hasCameraForward_ || distanceSquared_ <= 0.000001f) continue;
+
+        const float inverseDistance_ = 1.0f / std::sqrt(distanceSquared_);
+        const float centerDot_ =
+            differenceX_ * inverseDistance_ * cameraForward_.x +
+            differenceZ_ * inverseDistance_ * cameraForward_.z;
+        if (centerDot_ >= centerThreshold_ && centerDot_ > bestCenterDot_)
+        {
+            bestCenterDot_ = centerDot_;
+            centerTarget_ = candidate_;
+        }
+    }
+
+    return centerTarget_ ? centerTarget_ : nearestTarget_;
+}
+
+void PlayerAttackState::ApplyAttackFacingAssist(float elapsedTime_)
+{
+    PlayerControllerComponent* player_ = GetPlayerController();
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    if (!player_ || !owner_ || !owner_->transform) return;
+
+    const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
+    if (!settings_.enabled || settings_.strength <= 0.0f || settings_.searchDistance <= 0.0f) return;
+
+    const std::shared_ptr<GameObject> target_ = FindAssistTarget();
+    if (!target_ || !target_->transform) return;
+
+    const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
+    const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
+    DirectX::XMFLOAT3 desiredDirection_
+    {
+        targetPosition_.x - ownerPosition_.x,
+        0.0f,
+        targetPosition_.z - ownerPosition_.z
+    };
+    const float desiredLengthSquared_ =
+        desiredDirection_.x * desiredDirection_.x + desiredDirection_.z * desiredDirection_.z;
+    if (desiredLengthSquared_ <= 0.000001f) return;
+
+    const float desiredInverseLength_ = 1.0f / std::sqrt(desiredLengthSquared_);
+    desiredDirection_.x *= desiredInverseLength_;
+    desiredDirection_.z *= desiredInverseLength_;
+
+    const Vector3 currentForwardVector_ = owner_->transform->GetFront();
+    DirectX::XMFLOAT3 currentDirection_
+    {
+        currentForwardVector_.x,
+        0.0f,
+        currentForwardVector_.z
+    };
+    const float currentLengthSquared_ =
+        currentDirection_.x * currentDirection_.x + currentDirection_.z * currentDirection_.z;
+    if (currentLengthSquared_ > 0.000001f)
+    {
+        const float currentInverseLength_ = 1.0f / std::sqrt(currentLengthSquared_);
+        currentDirection_.x *= currentInverseLength_;
+        currentDirection_.z *= currentInverseLength_;
+    }
+    else
+    {
+        currentDirection_ = desiredDirection_;
+    }
+
+    const float blend_ = std::clamp(
+        settings_.turnSpeed * (std::max)(elapsedTime_, 0.0f) * settings_.strength,
+        0.0f,
+        1.0f);
+    DirectX::XMFLOAT3 correctedDirection_
+    {
+        currentDirection_.x + (desiredDirection_.x - currentDirection_.x) * blend_,
+        0.0f,
+        currentDirection_.z + (desiredDirection_.z - currentDirection_.z) * blend_
+    };
+    const float correctedLengthSquared_ =
+        correctedDirection_.x * correctedDirection_.x + correctedDirection_.z * correctedDirection_.z;
+    if (correctedLengthSquared_ <= 0.000001f) return;
+
+    const float correctedInverseLength_ = 1.0f / std::sqrt(correctedLengthSquared_);
+    correctedDirection_.x *= correctedInverseLength_;
+    correctedDirection_.z *= correctedInverseLength_;
+    player_->SetFacingDirection(correctedDirection_);
+}
+
+std::shared_ptr<CameraLockOnComponent> PlayerAttackState::ResolveCameraLockOnComponent()
+{
+    if (const std::shared_ptr<CameraLockOnComponent> cached_ = cameraLockOnComponent.lock())
+    {
+        return cached_;
+    }
+
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    if (!owner_) return nullptr;
+
+    for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
+    {
+        if (!object_) continue;
+        const std::shared_ptr<CameraLockOnComponent> component_ =
+            object_->GetComponent<CameraLockOnComponent>();
+        if (!component_) continue;
+
+        cameraLockOnComponent = component_;
+        return component_;
+    }
+
+    return nullptr;
 }

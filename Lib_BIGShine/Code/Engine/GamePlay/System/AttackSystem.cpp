@@ -191,18 +191,50 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     blackboard_->SetFloat("Hit", "KnockBackPower", event_.knockBackPower);
     blackboard_->SetVector3("Hit", "Position", event_.hitPosition);
     blackboard_->SetVector3("Hit", "Normal", event_.hitNormal);
-    const std::shared_ptr<GameObject> attacker_ = event_.attacker.lock();
-    const std::shared_ptr<GameObject> attackerRoot_ = GetHierarchyRoot(attacker_);
-    const std::shared_ptr<GameObject> targetRoot_ = GetHierarchyRoot(target_);
-    if (attackerRoot_ && targetRoot_ &&
-        attackerRoot_->transform && targetRoot_->transform)
+    const std::shared_ptr<GameObject> hitBoxObject_ =
+        event_.hitBox ? event_.hitBox->GetGameObject() : nullptr;
+    const std::shared_ptr<GameObject> hurtBoxObject_ =
+        event_.hurtBox ? event_.hurtBox->GetGameObject() : target_;
+    if (hitBoxObject_ && hurtBoxObject_ && event_.hitBox && event_.hurtBox)
     {
-        const DirectX::XMFLOAT3 attackerPosition_ =
-            attackerRoot_->transform->GetWorldPosition();
-        const DirectX::XMFLOAT3 targetPosition_ =
-            targetRoot_->transform->GetWorldPosition();
-        const float directionX_ = targetPosition_.x - attackerPosition_.x;
-        const float directionZ_ = targetPosition_.z - attackerPosition_.z;
+        const Capsule hitCapsule_ = event_.hitBox->GetCapsuleData();
+        const Capsule hurtCapsule_ = event_.hurtBox->GetCapsuleData();
+        DirectX::XMFLOAT3 hitBoxPosition_{};
+        DirectX::XMFLOAT3 hurtBoxPosition_{};
+        DirectX::XMStoreFloat3(
+            &hitBoxPosition_,
+            DirectX::XMVectorScale(
+                DirectX::XMVectorAdd(hitCapsule_.p0, hitCapsule_.p1),
+                0.5f));
+        DirectX::XMStoreFloat3(
+            &hurtBoxPosition_,
+            DirectX::XMVectorScale(
+                DirectX::XMVectorAdd(hurtCapsule_.p0, hurtCapsule_.p1),
+                0.5f));
+        const float centerDirectionX_ =
+            hurtBoxPosition_.x - hitBoxPosition_.x;
+        const float centerDirectionZ_ =
+            hurtBoxPosition_.z - hitBoxPosition_.z;
+        float directionX_ = centerDirectionX_;
+        float directionZ_ = centerDirectionZ_;
+
+        const float contactHorizontalLength_ = std::sqrt(
+            event_.hitNormal.x * event_.hitNormal.x +
+            event_.hitNormal.z * event_.hitNormal.z);
+        if (event_.hasHitContact && contactHorizontalLength_ > 0.0001f)
+        {
+            directionX_ = event_.hitNormal.x / contactHorizontalLength_;
+            directionZ_ = event_.hitNormal.z / contactHorizontalLength_;
+            const float alignment_ =
+                directionX_ * centerDirectionX_ +
+                directionZ_ * centerDirectionZ_;
+            if (alignment_ < 0.0f)
+            {
+                directionX_ = -directionX_;
+                directionZ_ = -directionZ_;
+            }
+        }
+
         const float length_ = std::sqrt(
             directionX_ * directionX_ + directionZ_ * directionZ_);
         if (length_ > 0.0001f)

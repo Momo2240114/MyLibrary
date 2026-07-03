@@ -3,9 +3,14 @@
 #include "ColliderComponent.h"
 #include "HitBox.h"
 #include "HurtBox.h"
+#include "Engine/GamePlay/System/JustDodgeSystem.h"
+#include "Engine/Physics/JustDodgeCollider.h"
+
+
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
 #include "Engine/Math/CollisionMath.h"
+
 
 #include <algorithm>
 #include <cmath>
@@ -342,6 +347,7 @@ void CollisionStepSystem::StepCombatPairs()
     // PhysX contact-report availability for kinematic attachment actors.
     std::vector<std::shared_ptr<HitBox>> hitBoxes_;
     std::vector<std::shared_ptr<HurtBox>> hurtBoxes_;
+    std::vector<std::shared_ptr<JustDodgeCollider>> justDodgeColliders_;
 
     for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
     {
@@ -360,10 +366,18 @@ void CollisionStepSystem::StepCombatPairs()
         {
             hurtBoxes_.push_back(hurtBox_);
         }
+        if (const std::shared_ptr<JustDodgeCollider> justDodgeCollider_ =
+            std::dynamic_pointer_cast<JustDodgeCollider>(collider_))
+        {
+            justDodgeColliders_.push_back(justDodgeCollider_);
+            continue;
+        }
     }
 
     std::vector<Capsule> hitCapsules_(hitBoxes_.size());
     std::vector<Capsule> hurtCapsules_(hurtBoxes_.size());
+    std::vector<Capsule> justDodgeCapsules_(justDodgeColliders_.size());
+
     for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
     {
         if (hitBoxes_[hitIndex_]->IsEnabled())
@@ -376,6 +390,15 @@ void CollisionStepSystem::StepCombatPairs()
         if (hurtBoxes_[hurtIndex_]->IsEnabled())
         {
             hurtCapsules_[hurtIndex_] = hurtBoxes_[hurtIndex_]->GetCapsuleData();
+        }
+    }
+
+    for (size_t dodgeIndex_ = 0; dodgeIndex_ < justDodgeColliders_.size(); ++dodgeIndex_)
+    {
+        if (justDodgeColliders_[dodgeIndex_]->IsEnabled())
+        {
+            justDodgeCapsules_[dodgeIndex_] =
+                justDodgeColliders_[dodgeIndex_]->GetCapsuleData();
         }
     }
 
@@ -409,4 +432,38 @@ void CollisionStepSystem::StepCombatPairs()
                 contact_.isValid ? &contact_ : nullptr);
         }
     }
+
+    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
+    {
+        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
+        if (!hitBox_->IsEnabled()) continue;
+
+        for (size_t dodgeIndex_ = 0; dodgeIndex_ < justDodgeColliders_.size(); ++dodgeIndex_)
+        {
+            const std::shared_ptr<JustDodgeCollider>& justDodgeCollider_ =
+                justDodgeColliders_[dodgeIndex_];
+
+            if (!justDodgeCollider_->IsEnabled()) continue;
+
+            const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
+                hitCapsules_[hitIndex_],
+                justDodgeCapsules_[dodgeIndex_]);
+
+            if (!manifold_.isHit) continue;
+
+            if (justDodgeSystem)
+            {
+                JustDodgeContact contact_{};
+                contact_.normal = { 0.0f, 1.0f, 0.0f };
+                contact_.position = { 0.0f, 0.0f, 0.0f };
+                contact_.isValid = false;
+
+                justDodgeSystem->HandleJustDodge(
+                    *hitBox_,
+                    *justDodgeCollider_,
+                    contact_);
+            }
+        }
+    }
+
 }

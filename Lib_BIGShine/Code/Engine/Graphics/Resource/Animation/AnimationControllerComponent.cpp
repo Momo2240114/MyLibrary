@@ -214,6 +214,8 @@ void AnimationControllerComponent::Start()
     EnsureNodeEditorContext();
     if (!modelComponent) return;
 
+    modelComponent->SetTransformUpdateDrivenExternally(true);
+
     std::string modelName_ = modelComponent->GetModelName();
     if (!modelName_.empty()) {
         poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelName_);
@@ -283,6 +285,8 @@ void AnimationControllerComponent::Update(float deltaTime_)
         {
             return;
         }
+
+        modelComponent->SetTransformUpdateDrivenExternally(true);
     }
 
     {
@@ -405,7 +409,6 @@ void AnimationControllerComponent::Update(float deltaTime_)
     {
         BS_PROFILE_SCOPE("GltfModel::SetNodePoses");
         modelComponent->SetNodePoses(animator.GetCurrentPose());
-        modelComponent->MarkPoseDirty();
     }
 
     {

@@ -18,6 +18,8 @@
 
 #include "Engine/Debug/TracyProfiler.h"
 
+#include <cstring>
+
 
 const std::vector<D3D11_INPUT_ELEMENT_DESC> GltfModelCommponennt::InputElementDescs =
 {
@@ -295,7 +297,16 @@ void GltfModelCommponennt::RebindInternalPointers()
 
 void GltfModelCommponennt::Gui()
 {
-	ImGui::DragFloat("localScale", &localScale, 0.01f,0.0f,100.0f);
+	if (ImGui::Checkbox("Static Model", &isStaticModel))
+	{
+		MarkTransformDirty();
+	}
+	ImGui::TextDisabled("Static models update nodes only when their transform or pose changes.");
+
+	if (ImGui::DragFloat("localScale", &localScale, 0.01f,0.0f,100.0f))
+	{
+		MarkTransformDirty();
+	}
 	ImGui::Checkbox("usedNaviMeshSystemFlg", &usedNaviMeshSystemFlg);
 
 	ImGui::Separator();
@@ -313,6 +324,7 @@ void GltfModelCommponennt::Gui()
 		_RootRotationOffset.w = rot[3];
 		// 念のため正規化しておく
 		_RootRotationOffset.Normalize();
+		MarkTransformDirty();
 	}
 
 
@@ -596,6 +608,24 @@ void GltfModelCommponennt::MarkTransformDirty()
 
 void GltfModelCommponennt::UpdateTransformIfDirty()
 {
+	const std::shared_ptr<GameObject> owner_ = GetGameObject();
+	if (owner_ && owner_->transform)
+	{
+		DirectX::XMFLOAT4X4 currentOwnerWorldTransform_{};
+		DirectX::XMStoreFloat4x4(
+			&currentOwnerWorldTransform_,
+			owner_->transform->GetWorldMatrix());
+
+		if (!hasCachedOwnerWorldTransform ||
+			std::memcmp(
+				&cachedOwnerWorldTransform,
+				&currentOwnerWorldTransform_,
+				sizeof(DirectX::XMFLOAT4X4)) != 0)
+		{
+			transformDirty = true;
+		}
+	}
+
 	if (!poseDirty && !transformDirty)
 	{
 		return;
@@ -668,6 +698,11 @@ void GltfModelCommponennt::UpdateTransform()
 			UpdateNodeRecursive(node_, rootParentGlobal_, parentWorldTransform_, modelScaleMat_, true);
 		}
 	}
+
+	DirectX::XMStoreFloat4x4(&cachedOwnerWorldTransform, parentWorldTransform_);
+	hasCachedOwnerWorldTransform = true;
+	poseDirty = false;
+	transformDirty = false;
 }
 
 void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
@@ -828,6 +863,7 @@ void GltfModelCommponennt::SetNodePoses(const std::vector<NodePose>& nodePoses)
 		node.rotation = pose.rotation;
 		node.scale = pose.scale;
 	}
+	MarkPoseDirty();
 }
 
 // ノードポーズ取得
@@ -1009,6 +1045,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	j["ModelName"] = pathForSave;
 	j["ShaderID"] = static_cast<int>(shaderId);
 	j["LocalScale"] = localScale;
+	j["StaticModel"] = isStaticModel;
 	j["UsedNaviMeshSystemFlg"] = usedNaviMeshSystemFlg;
 	j["RootMotionName"] = m_RootMotionName;
 	// クォータニオンをx, y, z, wの成分に分解して保存する
@@ -1023,6 +1060,10 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 
 void GltfModelCommponennt::Deserialize(const nlohmann::json& j) 
 {
+	isStaticModel = j.value("StaticModel", false);
+	hasCachedOwnerWorldTransform = false;
+	MarkTransformDirty();
+
 	if (j.contains("ShaderID")) {
 		shaderId = static_cast<ModelShaderID>(j["ShaderID"].get<int>());
 	}

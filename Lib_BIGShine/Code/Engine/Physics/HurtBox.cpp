@@ -1,6 +1,7 @@
 #include "HurtBox.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "CharacterCollider.h"
 #include "HitBox.h"
 
 #include <algorithm>
@@ -20,11 +21,15 @@ const std::string& HurtBox::GetName() const
 void HurtBox::Start()
 {
     CapsuleCollider::Start();
+    ResolveCharacterCollider();
+    SyncCharacterColliderShape();
     RegisterActions();
 }
 
 void HurtBox::Update(float deltaTime_)
 {
+    ResolveCharacterCollider();
+    SyncCharacterColliderShape();
     CapsuleCollider::Update(deltaTime_);
     invincibilityTimer = (std::max)(
         invincibilityTimer - (std::max)(deltaTime_, 0.0f),
@@ -67,6 +72,9 @@ void HurtBox::Gui()
 {
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Damage Reception");
+    ImGui::Checkbox(
+        "Sync Character Collider Shape",
+        &syncCharacterColliderShape);
     ImGui::DragFloat("Damage Multiplier", &damageMultiplier, 0.05f, 0.0f, 10.0f);
     ImGui::DragFloat(
         "Invincibility Duration",
@@ -93,6 +101,7 @@ void HurtBox::Serialize(nlohmann::json& j_) const
     j_["DamageMultiplier"] = damageMultiplier;
     j_["HurtTag"] = hurtTag;
     j_["InvincibilityDuration"] = invincibilityDuration;
+    j_["SyncCharacterColliderShape"] = syncCharacterColliderShape;
 }
 
 void HurtBox::Deserialize(const nlohmann::json& j_)
@@ -103,6 +112,8 @@ void HurtBox::Deserialize(const nlohmann::json& j_)
     invincibilityDuration = (std::max)(
         j_.value("InvincibilityDuration", 0.08f),
         0.0f);
+    syncCharacterColliderShape =
+        j_.value("SyncCharacterColliderShape", true);
     ResetHitHistory();
     EnforceHurtBoxSettings();
 }
@@ -147,4 +158,29 @@ void HurtBox::RegisterActions()
             hurtBox_->SetInvincible(false);
         }
     });
+}
+
+void HurtBox::ResolveCharacterCollider()
+{
+    if (!characterCollider.expired()) return;
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (owner_)
+    {
+        characterCollider = owner_->GetComponent<CharacterCollider>();
+    }
+}
+
+void HurtBox::SyncCharacterColliderShape()
+{
+    if (!syncCharacterColliderShape) return;
+
+    const std::shared_ptr<CharacterCollider> characterCollider_ =
+        characterCollider.lock();
+    if (!characterCollider_) return;
+
+    radius = characterCollider_->radius;
+    halfHeight = characterCollider_->halfHeight;
+    startNodeName = characterCollider_->startNodeName;
+    endNodeName = characterCollider_->endNodeName;
 }
