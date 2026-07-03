@@ -65,6 +65,10 @@ public:
     {
         hitEffectBlackboardOverrideEnabled = enabled_;
     }
+    void SetAttackDataBlackboardOverrideEnabled(bool enabled_)
+    {
+        attackDataBlackboardOverrideEnabled = enabled_;
+    }
     void ClearHitTargets();
     bool CanHit(GameObject* target_) const;
     void RegisterHit(GameObject* target_);
@@ -83,6 +87,7 @@ private:
 private:
     uint64_t activationId = 0;
     bool hitEffectBlackboardOverrideEnabled = true;
+    bool attackDataBlackboardOverrideEnabled = true;
     std::unordered_set<GameObject*> alreadyHitTargets;
 };
 

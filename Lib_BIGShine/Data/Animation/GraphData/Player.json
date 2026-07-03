@@ -356,54 +356,89 @@
                         "startTime": 0.01666666753590107
                     },
                     {
-                        "actionEnd": "Sword_DisableHitBox",
-                        "actionStart": "Sword_EnableHitBox",
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": true,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.9166666865348816,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            -44.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Strong",
+                        "meshVFXLifeTime": 0.19999998807907104,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": true,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.6499999761581421
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": true,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.7833333611488342,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            -50.0
+                        ],
+                        "localScale": [
+                            2.0,
+                            1.0,
+                            2.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Strong",
+                        "meshVFXLifeTime": 0.07500000298023224,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": true,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.6499999761581421
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 30.0,
-                                "intValue": 0,
-                                "key": "Damage",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.0,
-                                "intValue": 0,
-                                "key": "HitParticleAssetPath",
-                                "stringValue": "Data/Particle/HitParticle.json",
-                                "type": 3
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.125,
-                                "intValue": 0,
-                                "key": "HitStopDuration",
-                                "stringValue": "",
-                                "type": 0
-                            },
-                            {
-                                "boolValue": false,
-                                "category": "Attack",
-                                "floatValue": 0.15000000596046448,
-                                "intValue": 0,
-                                "key": "HitStopScale",
-                                "stringValue": "",
-                                "type": 0
-                            }
-                        ],
+                        "attackTemplateId": "StrongAttack",
+                        "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.9333333373069763,
-                        "eventTemplateType": "NONE",
-                        "label": "Attack",
+                        "endTime": 0.8833333253860474,
+                        "eventTemplateType": "ATTACK_TEMPLATE",
+                        "label": "AttackTemplate",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -426,7 +461,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.6499999761581421
+                        "startTime": 0.7166666388511658
                     }
                 ],
                 "loop": false,

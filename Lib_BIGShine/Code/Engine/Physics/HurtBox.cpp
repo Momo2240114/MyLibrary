@@ -1,5 +1,6 @@
 #include "HurtBox.h"
 
+#include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "HitBox.h"
 
 #include <algorithm>
@@ -16,6 +17,12 @@ const std::string& HurtBox::GetName() const
     return name;
 }
 
+void HurtBox::Start()
+{
+    CapsuleCollider::Start();
+    RegisterActions();
+}
+
 void HurtBox::Update(float deltaTime_)
 {
     CapsuleCollider::Update(deltaTime_);
@@ -26,6 +33,8 @@ void HurtBox::Update(float deltaTime_)
 
 bool HurtBox::CanReceiveHit(const HitBox& hitBox_) const
 {
+    if (invincible) return false;
+
     const auto receivedIterator_ = receivedActivationIds.find(&hitBox_);
     if (hitBox_.hitOncePerActivation &&
         receivedIterator_ != receivedActivationIds.end() &&
@@ -34,6 +43,12 @@ bool HurtBox::CanReceiveHit(const HitBox& hitBox_) const
         return false;
     }
     return invincibilityTimer <= 0.0f;
+}
+
+void HurtBox::SetInvincible(bool invincible_)
+{
+    invincible = invincible_;
+    if (invincible) invincibilityTimer = 0.0f;
 }
 
 void HurtBox::RecordHit(const HitBox& hitBox_)
@@ -99,4 +114,37 @@ void HurtBox::EnforceHurtBoxSettings()
     physicsControlsTransform = false;
     useGravity = false;
     isTrigger = false;
+}
+
+void HurtBox::RegisterActions()
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    std::weak_ptr<HurtBox> weakHurtBox_;
+    for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)
+    {
+        const std::shared_ptr<HurtBox> hurtBox_ =
+            std::dynamic_pointer_cast<HurtBox>(component_);
+        if (hurtBox_.get() == this)
+        {
+            weakHurtBox_ = hurtBox_;
+            break;
+        }
+    }
+
+    owner_->RegisterAction("Player", "HurtBoxInvincibleOn", [weakHurtBox_]()
+    {
+        if (const std::shared_ptr<HurtBox> hurtBox_ = weakHurtBox_.lock())
+        {
+            hurtBox_->SetInvincible(true);
+        }
+    });
+    owner_->RegisterAction("Player", "HurtBoxInvincibleOff", [weakHurtBox_]()
+    {
+        if (const std::shared_ptr<HurtBox> hurtBox_ = weakHurtBox_.lock())
+        {
+            hurtBox_->SetInvincible(false);
+        }
+    });
 }

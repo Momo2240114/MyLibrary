@@ -1,8 +1,9 @@
 #pragma once
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+
 #include <memory>
 #include <string>
 
-class GameObject;
 class PlayerControllerComponent;
 
 // PlayerAction は、プレイヤーの入力とミラーAIで共有されされる予定。このフロー定義からは、
@@ -19,6 +20,7 @@ enum class PLAYER_ACTION
     SKILL_A,
     SKILL_B,
     COUNTER_ATTACK,
+    HIT,
 
     NONE
 };
@@ -85,6 +87,7 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A: return "SkillA";
     case PLAYER_ACTION::SKILL_B: return "SkillB";
     case PLAYER_ACTION::COUNTER_ATTACK: return "CounterAttack";
+    case PLAYER_ACTION::HIT: return "Hit";
     default: return "None";
     }
 }
@@ -102,6 +105,8 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
         return PLAYER_ACTION_GROUP::ATTACK;
+    case PLAYER_ACTION::HIT:
+        return PLAYER_ACTION_GROUP::NONE;
     case PLAYER_ACTION::GUARD:
     case PLAYER_ACTION::JUST_GUARD:
         return PLAYER_ACTION_GROUP::GUARD;
@@ -142,6 +147,7 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::COUNTER_ATTACK:
+    case PLAYER_ACTION::HIT:
         return true;
     default:
         return false;
@@ -151,11 +157,17 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
 class PlayerState
 {
 public:
+    PlayerState(
+        const std::shared_ptr<GameObject>& owner_,
+        PlayerControllerComponent& playerController_)
+        : owner(owner_),
+        playerController(&playerController_)
+    {
+    }
+
     virtual ~PlayerState() = default;
 
     virtual const char* GetName() const = 0;
-
-    void Bind(PlayerControllerComponent& player_);
 
     virtual void Enter() = 0;
     virtual void Execute(float elapsedTime_) = 0;
@@ -165,6 +177,13 @@ public:
 protected:
     std::shared_ptr<GameObject> GetOwner() const { return owner.lock(); }
     PlayerControllerComponent* GetPlayerController() const { return playerController; }
+
+    template<class T>
+    std::shared_ptr<T> GetComponent() const
+    {
+        const std::shared_ptr<GameObject> owner_ = GetOwner();
+        return owner_ ? owner_->GetComponent<T>() : nullptr;
+    }
 
     std::weak_ptr<GameObject> owner;
     PlayerControllerComponent* playerController = nullptr;

@@ -192,6 +192,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitMeshVFXLifeTime = hitMeshVFXLifeTime;
     hitBox_->hitMeshVFXNormalOffset = hitMeshVFXNormalOffset;
     hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
+    hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
     std::printf(
         "[AttackEffectHitComponent::ConfigureHitBox] event particle='%s' meshVFX='%s'\n",
         hitBox_->hitParticleAssetPath.c_str(),

@@ -2141,13 +2141,22 @@ void AnimationEditorWindow::DrawEventSequencer(
     {
         attackTemplateManager_.LoadAll();
 
-        if (attackTemplateManager_.GetTemplates().empty())
+        std::string newTemplateId_ = "NewAttackTemplate";
+        int templateIndex_ = 2;
+        while (attackTemplateManager_.FindTemplate(newTemplateId_))
         {
-            AttackTemplate defaultTemplate_{};
-            defaultTemplate_.id = "NewAttackTemplate";
-            defaultTemplate_.displayName = "New Attack Template";
+            newTemplateId_ =
+                "NewAttackTemplate" + std::to_string(templateIndex_++);
+        }
 
-            attackTemplateManager_.SaveTemplate(defaultTemplate_);
+        AttackTemplate newTemplate_{};
+        newTemplate_.id = newTemplateId_;
+        newTemplate_.displayName = "New Attack Template";
+        const bool templateCreated_ =
+            attackTemplateManager_.SaveTemplate(newTemplate_);
+
+        if (templateCreated_)
+        {
             attackTemplateManager_.LoadAll();
         }
 
@@ -2161,10 +2170,9 @@ void AnimationEditorWindow::DrawEventSequencer(
             (std::min)(attackEvent_.startTime + 0.2f, adapter_.duration);
         attackEvent_.callEndOnStateExit = true;
 
-        if (!attackTemplateManager_.GetTemplates().empty())
+        if (templateCreated_)
         {
-            attackEvent_.attackTemplateId =
-                attackTemplateManager_.GetTemplates().front().id;
+            attackEvent_.attackTemplateId = newTemplateId_;
         }
 
         targetState_->events.push_back(attackEvent_);

@@ -405,7 +405,7 @@ void HumanLookAtIKComponent::Deserialize(const nlohmann::json& json_)
             json_["TargetOffset"][2]
         };
     }
-    showDebugShapes = json_.value("ShowDebugShapes", true);
+    showDebugShapes = json_.value("ShowDebugShapes", false);
     if (json_.contains("DebugChainColor"))
     {
         debugChainColor = {

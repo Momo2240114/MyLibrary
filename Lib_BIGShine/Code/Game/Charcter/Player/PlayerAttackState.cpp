@@ -3,20 +3,18 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "PlayerControllerComponent.h"
 
-PlayerAttackState::PlayerAttackState(PLAYER_ACTION action_) :
+PlayerAttackState::PlayerAttackState(
+    const std::shared_ptr<GameObject>& owner_,
+    PlayerControllerComponent& playerController_,
+    PLAYER_ACTION action_)
+    : PlayerState(owner_, playerController_),
     action(action_)
 {
 }
 
 void PlayerAttackState::Enter()
 {
-    const std::shared_ptr<GameObject> owner_ = GetOwner();
-    if (!owner_) return;
-
-    const std::shared_ptr<PlayerControllerComponent> player_ =
-        owner_->GetComponent<PlayerControllerComponent>();
-    playerComponent = player_;
-
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
     player_->EnterAction(action);
     player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
@@ -24,7 +22,7 @@ void PlayerAttackState::Enter()
 
 void PlayerAttackState::Execute(float elapsedTime_)
 {
-    const std::shared_ptr<PlayerControllerComponent> player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     (void)elapsedTime_;
@@ -34,7 +32,7 @@ void PlayerAttackState::Execute(float elapsedTime_)
 
 void PlayerAttackState::Exit()
 {
-    if (const std::shared_ptr<PlayerControllerComponent> player_ = playerComponent.lock())
+    if (PlayerControllerComponent* player_ = GetPlayerController())
     {
         player_->SetCanBufferInput(false);
         player_->SetCanCombo(false);

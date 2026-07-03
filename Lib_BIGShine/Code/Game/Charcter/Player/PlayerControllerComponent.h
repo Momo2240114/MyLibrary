@@ -8,6 +8,7 @@
 class ColliderComponent;
 class BlackboardComponent;
 class CharacterMovementComponent;
+class HurtBox;
 
 struct PlayerActionRuntime
 {
@@ -63,11 +64,11 @@ public:
     void SetCanCombo(bool enabled_);
     void NotifyComboTransition();
     void NotifyActionEnd();
+    void HandleHitReaction();
     bool ConsumeBufferedAction();
     void EnterAction(PLAYER_ACTION action_);
     void ProcessActionInput();
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
-    void SendDodgeInputToBlackboard(const DirectX::XMFLOAT3& input_);
 
     float moveSpeed = 6.0f;
 
@@ -82,6 +83,7 @@ private:
 
     std::shared_ptr<ColliderComponent> collider;
     std::shared_ptr<CharacterMovementComponent> movement;
+    std::shared_ptr<HurtBox> hurtBox;
     std::shared_ptr<BlackboardComponent> blackboard;
     PlayerStateMachine stateMachine;
     PlayerActionRuntime actionRuntime;

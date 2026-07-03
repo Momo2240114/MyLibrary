@@ -138,11 +138,12 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsUpdate");
 
-        // Animation events can spawn effects while components are updating.
-        // Keep this frame's iteration stable when Create() grows objects.
-        const std::vector<std::shared_ptr<GameObject>> updateObjects_ = objects;
-        for (const std::shared_ptr<GameObject>& object_ : updateObjects_)
+        // Animation events can append effects while components are updating.
+        // Capture only the count so every shared_ptr is not copied each frame.
+        const size_t updateObjectCount_ = objects.size();
+        for (size_t index_ = 0; index_ < updateObjectCount_; ++index_)
         {
+            const std::shared_ptr<GameObject> object_ = objects[index_];
             if (!object_) continue;
 
             const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
@@ -188,11 +189,11 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
 
-        // Animation events can spawn effects while components are updating.
-        // Keep this frame's iteration stable when Create() grows objects.
-        const std::vector<std::shared_ptr<GameObject>> updateObjects_ = objects;
-        for (const std::shared_ptr<GameObject>& object_ : updateObjects_)
+        // Objects spawned during Update start updating on the next frame.
+        const size_t lateUpdateObjectCount_ = objects.size();
+        for (size_t index_ = 0; index_ < lateUpdateObjectCount_; ++index_)
         {
+            const std::shared_ptr<GameObject> object_ = objects[index_];
             if (!object_) continue;
 
             const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());

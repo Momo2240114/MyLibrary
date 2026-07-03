@@ -6,7 +6,7 @@
         "damage": 9.0,
         "hitGroupId": 1,
         "hitStopDuration": 0.055,
-        "hitStopScale": 0.75,
+        "hitStopScale": 0.6,
         "knockBackPower": 5.5,
         "knockBackType": 0
     },

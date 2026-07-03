@@ -443,6 +443,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerHitState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
@@ -651,6 +652,7 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerAttackState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerHitState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerMoveState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h" />

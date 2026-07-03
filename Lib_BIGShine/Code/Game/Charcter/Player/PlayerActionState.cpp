@@ -3,17 +3,18 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "PlayerControllerComponent.h"
 
-PlayerActionState::PlayerActionState(PLAYER_ACTION action_) :
+PlayerActionState::PlayerActionState(
+    const std::shared_ptr<GameObject>& owner_,
+    PlayerControllerComponent& playerController_,
+    PLAYER_ACTION action_)
+    : PlayerState(owner_, playerController_),
     action(action_)
 {
 }
 
 void PlayerActionState::Enter()
 {
-    auto owner_ = GetOwner();
-    playerComponent = owner_ ? owner_->GetComponent<PlayerControllerComponent>() : nullptr;
-
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->EnterAction(action);
@@ -27,7 +28,7 @@ void PlayerActionState::Enter()
 
 void PlayerActionState::Execute(float)
 {
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());

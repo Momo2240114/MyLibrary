@@ -1,15 +1,13 @@
 #include "PlayerDodgeState.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "PlayerControllerComponent.h"
 
 void PlayerDodgeState::Enter()
 {
-    auto owner_ = GetOwner();
-    playerComponent = owner_ ? owner_->GetComponent<PlayerControllerComponent>() : nullptr;
-
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->EnterAction(PLAYER_ACTION::DODGE);
@@ -33,7 +31,7 @@ void PlayerDodgeState::Enter()
         // Back Dodgeアニメを選ばせる
         dodgeBlendInput = { 0.0f, 0.0f, -1.0f };
     }
-    player_->SendDodgeInputToBlackboard(dodgeBlendInput);
+    SendDodgeInputToBlackboard(dodgeBlendInput);
 
     // Dodge開始時に縦速度を殺す
     if (ColliderComponent* collider_ = player_->GetCollider())
@@ -44,18 +42,35 @@ void PlayerDodgeState::Enter()
 
 void PlayerDodgeState::Execute(float)
 {
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->SendMoveInputToBlackboard(dodgeDirection);
-    player_->SendDodgeInputToBlackboard(dodgeBlendInput);
+    SendDodgeInputToBlackboard(dodgeBlendInput);
     player_->ProcessActionInput();
 }
 
 void PlayerDodgeState::Exit()
 {
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
+}
+
+void PlayerDodgeState::SendDodgeInputToBlackboard(
+    const DirectX::XMFLOAT3& input_)
+{
+    const std::shared_ptr<BlackboardComponent> blackboard_ =
+        GetComponent<BlackboardComponent>();
+    if (!blackboard_) return;
+
+    blackboard_->SetVector2(
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardKey::DODGE_INPUT,
+        { input_.x, input_.z });
+    blackboard_->SetVector2(
+        PlayerBlackboardCategory::ANIM,
+        PlayerBlackboardKey::DODGE_INPUT,
+        { input_.x, input_.z });
 }

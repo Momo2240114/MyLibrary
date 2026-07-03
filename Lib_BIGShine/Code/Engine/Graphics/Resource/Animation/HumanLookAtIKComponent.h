@@ -55,5 +55,5 @@ private:
     DirectX::XMFLOAT4 debugTargetColor = { 1.0f, 0.25f, 0.15f, 0.9f };
     bool lookEnabled = true;
     bool idleOnly = true;
-    bool showDebugShapes = true;
+    bool showDebugShapes = false;
 };

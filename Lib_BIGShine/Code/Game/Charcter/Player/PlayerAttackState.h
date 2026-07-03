@@ -5,7 +5,10 @@
 class PlayerAttackState : public PlayerState
 {
 public:
-    explicit PlayerAttackState(PLAYER_ACTION action_);
+    PlayerAttackState(
+        const std::shared_ptr<GameObject>& owner_,
+        PlayerControllerComponent& playerController_,
+        PLAYER_ACTION action_);
 
     const char* GetName() const override { return GetPlayerActionName(action); }
     void Enter() override;
@@ -13,6 +16,5 @@ public:
     void Exit() override;
 
 private:
-    std::weak_ptr<PlayerControllerComponent> playerComponent;
     PLAYER_ACTION action = PLAYER_ACTION::NONE;
 };

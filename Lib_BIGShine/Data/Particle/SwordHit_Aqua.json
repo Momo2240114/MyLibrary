@@ -87,8 +87,8 @@
                 0.0
             ],
             "Size": [
-                3.0,
-                10.0
+                2.0,
+                3.0
             ],
             "SizeRandomEnd": [
                 1.0,
@@ -158,7 +158,7 @@
                 0.0
             ],
             "BlendMode": 1,
-            "BurstCount": 32,
+            "BurstCount": 30,
             "Color": [
                 0.25,
                 1.0,
@@ -198,7 +198,7 @@
             ],
             "Lifespan": [
                 0.18000000715255737,
-                0.3400000035762787
+                0.2800000011920929
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
             "MaxCount": 64,
@@ -236,7 +236,7 @@
             ],
             "Size": [
                 0.5,
-                1.5
+                0.6000000238418579
             ],
             "SizeRandomEnd": [
                 1.0,

@@ -577,6 +577,9 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerHitState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
@@ -1193,6 +1196,9 @@
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerHitState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h">
