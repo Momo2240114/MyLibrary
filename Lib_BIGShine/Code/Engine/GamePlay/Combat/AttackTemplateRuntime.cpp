@@ -87,6 +87,7 @@ namespace
         hitBox_->hitMeshVFXLifeTime = attackTemplate_.hitEffect.hitMeshVfxLifeTime;
         hitBox_->hitMeshVFXNormalOffset = attackTemplate_.hitEffect.hitMeshVfxNormalOffset;
         hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
+        hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
         hitBox_->allowMultiHit = attackTemplate_.allowMultiHit;
         hitBox_->Deactivate();
@@ -182,6 +183,7 @@ void AttackTemplateRuntime::End(
         {
             hitBox_->Deactivate();
             hitBox_->SetHitEffectBlackboardOverrideEnabled(true);
+            hitBox_->SetAttackDataBlackboardOverrideEnabled(true);
         }
     }
     event_.attackTemplateRuntimeActive = false;

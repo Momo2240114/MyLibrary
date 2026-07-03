@@ -5,13 +5,13 @@
                 "ActionPrefix": "Kick",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 29,
+                "AttackInstanceId": 79,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
-                "Damage": 30.0,
+                "Damage": 9.0,
                 "DamageKey": "Damage",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
@@ -22,7 +22,7 @@
                 ],
                 "EndNodeName": "",
                 "GravityScale": 1.0,
-                "HalfHeight": 10.0,
+                "HalfHeight": 15.0,
                 "HitGroupId": 1,
                 "HitMeshVFXAssetPath": "",
                 "HitMeshVFXLifeTime": 1.0,
@@ -37,13 +37,13 @@
                 "HitSoundPath": "",
                 "HitSoundPathKey": "HitSoundPath",
                 "HitSoundVolume": 1.0,
-                "HitStopDuration": 0.125,
+                "HitStopDuration": 0.054999999701976776,
                 "HitStopDurationKey": "HitStopDuration",
                 "HitStopLayerMask": 3,
-                "HitStopScale": 0.15000000596046448,
+                "HitStopScale": 0.6000000238418579,
                 "IsStatic": false,
                 "IsTrigger": false,
-                "KnockBackPower": 5.0,
+                "KnockBackPower": 5.5,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
                 "Offset": [
@@ -52,7 +52,7 @@
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 4.420000076293945,
+                "Radius": 10.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "SourceAction": "",
@@ -91,7 +91,7 @@
         "Rot": [
             0.0,
             180.0,
-            180.0
+            89.5
         ],
         "Scale": [
             1.0,

@@ -1,13 +1,14 @@
 #include "PlayerStateMachine.h"
 #include "PlayerControllerComponent.h"
 
-void PlayerState::Bind(PlayerControllerComponent& player_)
+void PlayerStateMachine::Initialize(
+    PlayerControllerComponent& playerController_)
 {
-    playerController = &player_;
-    owner = player_.GetGameObject();
+    playerController = &playerController_;
+    owner = playerController_.GetGameObject();
 }
 
-void PlayerStateMachine::ChangeState(PlayerControllerComponent& player_, PLAYER_ACTION nextAction_)
+void PlayerStateMachine::ChangeState(PLAYER_ACTION nextAction_)
 {
     auto it_ = states.find(nextAction_);
     if (it_ == states.end())
@@ -22,7 +23,6 @@ void PlayerStateMachine::ChangeState(PlayerControllerComponent& player_, PLAYER_
 
     currentState = it_->second.get();
     currentAction = nextAction_;
-    currentState->Bind(player_);
     currentState->Enter();
 }
 

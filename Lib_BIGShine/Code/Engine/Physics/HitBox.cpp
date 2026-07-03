@@ -334,39 +334,42 @@ void HitBox::ApplyBlackboardValues()
     if (!blackboard_) return;
 
     float value_ = 0.0f;
-    if (!damageKey.empty() && blackboard_->GetFloat(blackboardCategory, damageKey, value_))
-    {
-        damage = value_;
-    }
-    if (!hitStopDurationKey.empty() && blackboard_->GetFloat(blackboardCategory, hitStopDurationKey, value_))
-    {
-        hitStopDuration = value_;
-    }
-    else if (blackboard_->GetFloat(blackboardCategory, "HitStopTime", value_))
-    {
-        hitStopDuration = value_;
-    }
-    if (blackboard_->GetFloat(blackboardCategory, "HitStopScale", value_) ||
-        blackboard_->GetFloat(blackboardCategory, "HitStopDir", value_))
-    {
-        hitStopScale = (std::clamp)(value_, 0.0f, 1.0f);
-    }
     int intValue_ = 0;
-    if (blackboard_->GetInt(blackboardCategory, "HitStopLayerMask", intValue_))
+    if (attackDataBlackboardOverrideEnabled)
     {
-        hitStopLayerMask = static_cast<uint32_t>((std::max)(intValue_, 0));
-    }
-    if (blackboard_->GetInt(blackboardCategory, "AttackInstanceId", intValue_))
-    {
-        attackInstanceId = static_cast<uint32_t>((std::max)(intValue_, 0));
-    }
-    if (blackboard_->GetInt(blackboardCategory, "HitGroupId", intValue_))
-    {
-        hitGroupId = static_cast<uint32_t>((std::max)(intValue_, 0));
-    }
-    if (!knockBackPowerKey.empty() && blackboard_->GetFloat(blackboardCategory, knockBackPowerKey, value_))
-    {
-        knockBackPower = value_;
+        if (!damageKey.empty() && blackboard_->GetFloat(blackboardCategory, damageKey, value_))
+        {
+            damage = value_;
+        }
+        if (!hitStopDurationKey.empty() && blackboard_->GetFloat(blackboardCategory, hitStopDurationKey, value_))
+        {
+            hitStopDuration = value_;
+        }
+        else if (blackboard_->GetFloat(blackboardCategory, "HitStopTime", value_))
+        {
+            hitStopDuration = value_;
+        }
+        if (blackboard_->GetFloat(blackboardCategory, "HitStopScale", value_) ||
+            blackboard_->GetFloat(blackboardCategory, "HitStopDir", value_))
+        {
+            hitStopScale = (std::clamp)(value_, 0.0f, 1.0f);
+        }
+        if (blackboard_->GetInt(blackboardCategory, "HitStopLayerMask", intValue_))
+        {
+            hitStopLayerMask = static_cast<uint32_t>((std::max)(intValue_, 0));
+        }
+        if (blackboard_->GetInt(blackboardCategory, "AttackInstanceId", intValue_))
+        {
+            attackInstanceId = static_cast<uint32_t>((std::max)(intValue_, 0));
+        }
+        if (blackboard_->GetInt(blackboardCategory, "HitGroupId", intValue_))
+        {
+            hitGroupId = static_cast<uint32_t>((std::max)(intValue_, 0));
+        }
+        if (!knockBackPowerKey.empty() && blackboard_->GetFloat(blackboardCategory, knockBackPowerKey, value_))
+        {
+            knockBackPower = value_;
+        }
     }
 
     std::string stringValue_;
@@ -389,19 +392,23 @@ void HitBox::ApplyBlackboardValues()
     {
         hitSoundPath = stringValue_;
     }
-    if (blackboard_->GetFloat(blackboardCategory, "HitParticleLifeTime", value_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitParticleLifeTime", value_))
     {
         hitParticleLifeTime = (std::max)(value_, 0.0f);
     }
-    if (blackboard_->GetFloat(blackboardCategory, "HitParticleNormalOffset", value_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitParticleNormalOffset", value_))
     {
         hitParticleNormalOffset = value_;
     }
-    if (blackboard_->GetFloat(blackboardCategory, "HitMeshVFXLifeTime", value_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitMeshVFXLifeTime", value_))
     {
         hitMeshVFXLifeTime = (std::max)(value_, 0.0f);
     }
-    if (blackboard_->GetFloat(blackboardCategory, "HitMeshVFXNormalOffset", value_))
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitMeshVFXNormalOffset", value_))
     {
         hitMeshVFXNormalOffset = value_;
     }

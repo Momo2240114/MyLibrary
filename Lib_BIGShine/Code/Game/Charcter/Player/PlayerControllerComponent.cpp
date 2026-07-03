@@ -11,10 +11,12 @@
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/HurtBox.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "PlayerActionState.h"
 #include "PlayerAttackState.h"
 #include "PlayerDodgeState.h"
+#include "PlayerHitState.h"
 #include "PlayerIdleState.h"
 #include "PlayerMoveState.h"
 
@@ -138,18 +140,20 @@ void PlayerControllerComponent::Start()
     owner_->SetLayer(GameObject::LayerType::Player);
     collider = owner_->GetOrAddComponent<CharacterCollider>();
     movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
+    hurtBox = owner_->GetOrAddComponent<HurtBox>();
     if (collider)
     {
         collider->mass = (std::max)(collider->mass, 1.0f);
         collider->RecreatePhysXActor();
     }
     blackboard = owner_->GetOrAddComponent<BlackboardComponent>();
-    SendDodgeInputToBlackboard({ 0.0f, 0.0f, 1.0f });
     RegisterPlayerAnimationActions();
 
+    stateMachine.Initialize(*this);
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
     stateMachine.AddState<PlayerMoveState>(PLAYER_ACTION::MOVE);
     stateMachine.AddState<PlayerDodgeState>(PLAYER_ACTION::DODGE);
+    stateMachine.AddState<PlayerHitState>(PLAYER_ACTION::HIT);
     stateMachine.AddState<PlayerAttackState>(
         PLAYER_ACTION::WEAK_ATTACK,
         PLAYER_ACTION::WEAK_ATTACK);
@@ -160,7 +164,7 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
 
-    stateMachine.ChangeState(*this, PLAYER_ACTION::IDLE);
+    stateMachine.ChangeState(PLAYER_ACTION::IDLE);
 }
 
 void PlayerControllerComponent::Update(float dt_)
@@ -320,7 +324,7 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     }
 
     pendingComboIndex = requestedComboIndex_;
-    stateMachine.ChangeState(*this, nextAction_);
+    stateMachine.ChangeState(nextAction_);
     return true;
 }
 
@@ -436,7 +440,7 @@ void PlayerControllerComponent::NotifyComboTransition()
     pendingComboIndex = actionRuntime.bufferedComboIndex;
     actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
     actionRuntime.bufferedComboIndex = 0;
-    stateMachine.ChangeState(*this, PLAYER_ACTION::WEAK_ATTACK);
+    stateMachine.ChangeState(PLAYER_ACTION::WEAK_ATTACK);
 }
 
 void PlayerControllerComponent::NotifyActionEnd()
@@ -473,7 +477,20 @@ void PlayerControllerComponent::NotifyActionEnd()
         (input_.x != 0.0f || input_.z != 0.0f)
         ? PLAYER_ACTION::MOVE
         : PLAYER_ACTION::IDLE;
-    stateMachine.ChangeState(*this, locomotionAction_);
+    stateMachine.ChangeState(locomotionAction_);
+}
+
+void PlayerControllerComponent::HandleHitReaction()
+{
+    actionRuntime.canCancel = false;
+    actionRuntime.canBufferInput = false;
+    actionRuntime.canCombo = false;
+    actionRuntime.actionEnded = false;
+    actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+    actionRuntime.bufferedComboIndex = 0;
+    pendingComboIndex = 0;
+    comboIndex = 0;
+    stateMachine.ChangeState(PLAYER_ACTION::HIT);
 }
 
 bool PlayerControllerComponent::ConsumeBufferedAction()
@@ -488,7 +505,7 @@ bool PlayerControllerComponent::ConsumeBufferedAction()
     actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
     actionRuntime.bufferedComboIndex = 0;
 
-    stateMachine.ChangeState(*this, nextAction_);
+    stateMachine.ChangeState(nextAction_);
 
     return true;
 }
@@ -567,6 +584,10 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     if (!owner_) return;
 
     auto& registry_ = owner_->GetLocalRegistry();
+    registry_.RegisterAction("Player", "OnHit", [this]()
+    {
+        HandleHitReaction();
+    });
     registry_.RegisterAction("Player", "CanCancelOn", [this]()
         {
             SetCanCancel(true);
@@ -673,7 +694,7 @@ bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
     comboIndex = 0;
 
     // ChangeState 内で現在ステートの Exit() が呼ばれる
-    stateMachine.ChangeState(*this, action_);
+    stateMachine.ChangeState(action_);
     return true;
 }
 
@@ -685,19 +706,6 @@ void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT
     blackboard->SetVector2(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::MOVE_INPUT, { input_.x, input_.z });
 }
 
-void PlayerControllerComponent::SendDodgeInputToBlackboard(const DirectX::XMFLOAT3& input_)
-{
-    if (!blackboard) return;
-
-    blackboard->SetVector2(
-        PlayerBlackboardCategory::PLAYER,
-        PlayerBlackboardKey::DODGE_INPUT,
-        { input_.x, input_.z });
-    blackboard->SetVector2(
-        PlayerBlackboardCategory::ANIM,
-        PlayerBlackboardKey::DODGE_INPUT,
-        { input_.x, input_.z });
-}
 
 void PlayerControllerComponent::Gui()
 {

@@ -6,10 +6,7 @@
 
 void PlayerMoveState::Enter()
 {
-    auto owner_ = GetOwner();
-    playerComponent = owner_ ? owner_->GetComponent<PlayerControllerComponent>() : nullptr;
-
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->EnterAction(PLAYER_ACTION::MOVE);
@@ -17,7 +14,7 @@ void PlayerMoveState::Enter()
 
 void PlayerMoveState::Execute(float)
 {
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();

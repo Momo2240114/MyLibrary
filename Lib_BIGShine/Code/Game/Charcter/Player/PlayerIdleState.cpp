@@ -5,10 +5,7 @@
 
 void PlayerIdleState::Enter()
 {
-    auto owner_ = GetOwner();
-    playerComponent = owner_ ? owner_->GetComponent<PlayerControllerComponent>() : nullptr;
-
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->EnterAction(PLAYER_ACTION::IDLE);
@@ -17,7 +14,7 @@ void PlayerIdleState::Enter()
 
 void PlayerIdleState::Execute(float)
 {
-    auto player_ = playerComponent.lock();
+    PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());
