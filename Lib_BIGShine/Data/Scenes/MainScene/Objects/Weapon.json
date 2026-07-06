@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 24,
+                "AttackInstanceId": 268,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,

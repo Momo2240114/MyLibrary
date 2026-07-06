@@ -151,10 +151,10 @@ void AIActionComponent::Deserialize(const nlohmann::json& json_)
             AIActionDefinition definition_;
             definition_.aiActionName = actionJson_.value("AIActionName", std::string("AI.Action"));
             definition_.executeActionName = actionJson_.value("ExecuteActionName", std::string{});
-            definition_.blackboardCategory = actionJson_.value("BlackboardCategory", std::string("AI"));
-            definition_.currentActionKey = actionJson_.value("CurrentActionKey", std::string("CurrentAction"));
-            definition_.actionEndedKey = actionJson_.value("ActionEndedKey", std::string("ActionEnded"));
-            definition_.isActingKey = actionJson_.value("IsActingKey", std::string("IsActing"));
+            definition_.blackboardCategory = actionJson_.value("BlackboardCategory", std::string(AIBlackboardKeys::CATEGORY_AI));
+            definition_.currentActionKey = actionJson_.value("CurrentActionKey", std::string(AIBlackboardKeys::CURRENT_ACTION));
+            definition_.actionEndedKey = actionJson_.value("ActionEndedKey", std::string(AIBlackboardKeys::ACTION_ENDED));
+            definition_.isActingKey = actionJson_.value("IsActingKey", std::string(AIBlackboardKeys::IS_ACTING));
             definition_.waitForActionEnd = actionJson_.value("WaitForActionEnd", true);
             definition_.clearActionEndedOnStart = actionJson_.value("ClearActionEndedOnStart", true);
             definition_.setIsActing = actionJson_.value("SetIsActing", true);
@@ -229,8 +229,8 @@ void AIActionComponent::NotifyActionEnd(const std::string& category_)
     EnsureBlackboard();
     if (!blackboardComponent) return;
 
-    blackboardComponent->SetBool(category_, "ActionEnded", true);
-    blackboardComponent->SetBool(category_, "IsActing", false);
+    blackboardComponent->SetBool(category_, AIBlackboardKeys::ACTION_ENDED, true);
+    blackboardComponent->SetBool(category_, AIBlackboardKeys::IS_ACTING, false);
 
     for (const AIActionDefinition& definition_ : actions)
     {
@@ -245,7 +245,7 @@ bool AIActionComponent::IsActionEnded(const std::string& category_) const
     if (!blackboardComponent) return false;
 
     bool ended_ = false;
-    return blackboardComponent->GetBool(category_, "ActionEnded", ended_) && ended_;
+    return blackboardComponent->GetBool(category_, AIBlackboardKeys::ACTION_ENDED, ended_) && ended_;
 }
 
 void AIActionComponent::EnsureBlackboard()
@@ -268,7 +268,7 @@ void AIActionComponent::RegisterActions()
 
     for (const std::string& actionName_ : registeredActionNames)
     {
-        owner_->GetLocalRegistry().RemoveAction("AI", actionName_);
+        owner_->GetLocalRegistry().RemoveAction(AIBlackboardKeys::CATEGORY_AI, actionName_);
     }
     registeredActionNames.clear();
 
@@ -277,13 +277,13 @@ void AIActionComponent::RegisterActions()
         RegisterBridgeAction(definition_);
     }
 
-    owner_->GetLocalRegistry().RegisterAction("AI", "AIActionEnd", [this]()
+    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, "AIActionEnd", [this]()
         {
-            NotifyActionEnd("AI");
+            NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
         });
-    owner_->GetLocalRegistry().RegisterAction("AI", "NotifyAIActionEnd", [this]()
+    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, "NotifyAIActionEnd", [this]()
         {
-            NotifyActionEnd("AI");
+            NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
         });
     registeredActionNames.push_back("AIActionEnd");
     registeredActionNames.push_back("NotifyAIActionEnd");
@@ -295,7 +295,7 @@ void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definitio
     if (!owner_ || definition_.aiActionName.empty()) return;
 
     const std::string actionName_ = definition_.aiActionName;
-    owner_->GetLocalRegistry().RegisterAction("AI", actionName_, [this, actionName_]()
+    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, [this, actionName_]()
         {
             ExecuteAIAction(actionName_);
         });

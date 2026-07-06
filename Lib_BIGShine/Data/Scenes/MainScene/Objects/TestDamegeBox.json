@@ -5,7 +5,7 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 65,
+                "AttackInstanceId": 273,
                 "AttackTag": "DamageBox",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -79,7 +79,7 @@
                 "RearmInterval": 0.800000011920929
             },
             "Enabled": true,
-            "TypeName": "DamageBoxComponent"
+            "TypeName": "DebugHitHistoryResetComponent"
         }
     ],
     "Layer": 0,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AIBlackboardKeys.h"
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
 #include <string>
@@ -17,10 +18,10 @@ struct AIActionDefinition
 {
     std::string aiActionName = "AI.Action";
     std::string executeActionName;
-    std::string blackboardCategory = "AI";
-    std::string currentActionKey = "CurrentAction";
-    std::string actionEndedKey = "ActionEnded";
-    std::string isActingKey = "IsActing";
+    std::string blackboardCategory = AIBlackboardKeys::CATEGORY_AI;
+    std::string currentActionKey = AIBlackboardKeys::CURRENT_ACTION;
+    std::string actionEndedKey = AIBlackboardKeys::ACTION_ENDED;
+    std::string isActingKey = AIBlackboardKeys::IS_ACTING;
     bool waitForActionEnd = true;
     bool clearActionEndedOnStart = true;
     bool setIsActing = true;
@@ -44,8 +45,8 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     bool ExecuteAIAction(const std::string& aiActionName_);
-    void NotifyActionEnd(const std::string& category_ = "AI");
-    bool IsActionEnded(const std::string& category_ = "AI") const;
+    void NotifyActionEnd(const std::string& category_ = AIBlackboardKeys::CATEGORY_AI);
+    bool IsActionEnded(const std::string& category_ = AIBlackboardKeys::CATEGORY_AI) const;
 
 private:
     void EnsureBlackboard();

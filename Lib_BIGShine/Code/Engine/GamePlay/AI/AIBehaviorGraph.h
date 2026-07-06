@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AIBlackboardKeys.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
 #include <DirectXMath.h>
@@ -69,7 +70,7 @@ struct AIBehaviorNode
     std::string scopeId = "Root";
     DirectX::XMFLOAT2 position = { 0.0f, 0.0f };
 
-    std::string blackboardCategory = "AI";
+    std::string blackboardCategory = AIBlackboardKeys::CATEGORY_AI;
     std::string blackboardKey;
     AI_BLACKBOARD_COMPARE_TYPE compareType = AI_BLACKBOARD_COMPARE_TYPE::EQUAL;
     AI_BLACKBOARD_VALUE_TYPE valueType = AI_BLACKBOARD_VALUE_TYPE::BOOL;
@@ -82,8 +83,8 @@ struct AIBehaviorNode
 
     std::string actionName;
     bool waitForActionEnd = true;
-    std::string actionEndCategory = "AI";
-    std::string actionEndKey = "ActionEnded";
+    std::string actionEndCategory = AIBlackboardKeys::CATEGORY_AI;
+    std::string actionEndKey = AIBlackboardKeys::ACTION_ENDED;
 
     float waitSeconds = 0.0f;
     std::string subGraphName;
@@ -110,8 +111,17 @@ struct AIBehaviorRuntimeState
 struct AIBehaviorContext
 {
     GameObject* owner = nullptr;
+    GameObject* target = nullptr;
     BlackboardComponent* blackboard = nullptr;
+    DirectX::XMFLOAT3 ownerPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 targetPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 spawnPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 toTargetDirection = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 toSpawnDirection = { 0.0f, 0.0f, 0.0f };
+    float targetDistance = 0.0f;
+    float spawnDistance = 0.0f;
     float deltaTime = 0.0f;
+    bool hasTarget = false;
 };
 
 class AIBehaviorGraph
