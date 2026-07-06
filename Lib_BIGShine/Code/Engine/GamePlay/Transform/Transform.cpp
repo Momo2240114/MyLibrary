@@ -7,7 +7,7 @@ DirectX::XMFLOAT3 Transform::GetWorldRotation()
 {
     using namespace DirectX;
 
-    //ƒZƒbƒg‚³‚ê‚Ä‚¢‚ê‚Î
+    //ã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚Œã°
     if (isDirty)
     {
         UpdateWorldMatrix();
@@ -16,30 +16,30 @@ DirectX::XMFLOAT3 Transform::GetWorldRotation()
     XMVECTOR s, r, t;
     XMMatrixDecompose(&s, &r, &t, worldMatrix);
 
-    // ƒNƒH[ƒ^ƒjƒIƒ“‚ğƒIƒCƒ‰[Šp‚É•ÏŠ·
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’ã‚ªã‚¤ãƒ©ãƒ¼è§’ã«å¤‰æ›
     DirectX::XMFLOAT4 q;
     XMStoreFloat4(&q, r);
 
-    //YXZ‡˜
+    //YXZé †åº
     float xsqr = q.x * q.x;
 
-    // Pitch (Y²ü‚è) - Å‰‚Ì‰ñ“]
+    // Pitch (Yè»¸å‘¨ã‚Š) - æœ€åˆã®å›è»¢
     float t0 = 2.0f * (q.w * q.y + q.x * q.z);
     float t1 = 1.0f - 2.0f * (q.y * q.y + xsqr);
     float pitch = atan2f(t0, t1);
 
-    // Roll (X²ü‚è) - 2”Ô–Ú‚Ì‰ñ“]
+    // Roll (Xè»¸å‘¨ã‚Š) - 2ç•ªç›®ã®å›è»¢
     float t2 = 2.0f * (q.w * q.x - q.y * q.z);
     t2 = t2 > 1.0f ? 1.0f : (t2 < -1.0f ? -1.0f : t2);
     float roll = asinf(t2);
 
-    // Yaw (Z²ü‚è) - ÅŒã‚Ì‰ñ“]
+    // Yaw (Zè»¸å‘¨ã‚Š) - æœ€å¾Œã®å›è»¢
     float t3 = 2.0f * (q.w * q.z + q.x * q.y);
     float t4 = 1.0f - 2.0f * (q.z * q.z + xsqr);
     float yaw = atan2f(t3, t4);
 
 
-    // ƒ‰ƒWƒAƒ“¨“x”–@‚É•ÏŠ·i•K—v‚È‚çj
+    // ãƒ©ã‚¸ã‚¢ãƒ³â†’åº¦æ•°æ³•ã«å¤‰æ›ï¼ˆå¿…è¦ãªã‚‰ï¼‰
     DirectX::XMFLOAT3 euler = {
         DirectX::XMConvertToDegrees(roll),
         DirectX::XMConvertToDegrees(pitch),
@@ -54,7 +54,7 @@ void Transform::ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat)
 
     XMMATRIX finalLocalMat;
 
-    // 1. e‚ª‚¢‚éê‡‚ÍA(e‚Ìƒ[ƒ‹ƒh‹ts—ñ * V‚µ‚¢ƒ[ƒ‹ƒhs—ñ) ‚Åƒ[ƒJƒ‹s—ñ‚ğ‹‚ß‚é
+    // 1. è¦ªãŒã„ã‚‹å ´åˆã¯ã€(è¦ªã®ãƒ¯ãƒ¼ãƒ«ãƒ‰é€†è¡Œåˆ— * æ–°ã—ã„ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—) ã§ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—ã‚’æ±‚ã‚ã‚‹
     if (auto p = parent.lock()) {
         XMVECTOR det;
         XMMATRIX invParent = XMMatrixInverse(&det, p->GetWorldMatrix());
@@ -64,7 +64,7 @@ void Transform::ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat)
         finalLocalMat = newWorldMat;
     }
 
-    // 2. s—ñ‚ğ•ª‰ğ
+    // 2. è¡Œåˆ—ã‚’åˆ†è§£
     XMVECTOR s, r, t;
     if (XMMatrixDecompose(&s, &r, &t, finalLocalMat)) {
         // Position
@@ -73,12 +73,12 @@ void Transform::ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat)
         // Scale
         XMStoreFloat3(&localScale, s);
 
-        // Rotation (ƒNƒH[ƒ^ƒjƒIƒ“‚ğƒIƒCƒ‰[Šp‚Ö)
-        // Šù‘¶‚Ì GetWorldRotation ‚ÌƒƒWƒbƒN‚ğ—¬—p‚µ‚Ä localRotation ‚ğXV
+        // Rotation (ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’ã‚ªã‚¤ãƒ©ãƒ¼è§’ã¸)
+        // æ—¢å­˜ã® GetWorldRotation ã®ãƒ­ã‚¸ãƒƒã‚¯ã‚’æµç”¨ã—ã¦ localRotation ã‚’æ›´æ–°
         XMFLOAT4 q;
         XMStoreFloat4(&q, r);
 
-        // YXZ‡˜‚Å‚ÌŒvZiTransform“à‚ÌƒƒWƒbƒN‚Æ‡‚í‚¹‚éj
+        // YXZé †åºã§ã®è¨ˆç®—ï¼ˆTransformå†…ã®ãƒ­ã‚¸ãƒƒã‚¯ã¨åˆã‚ã›ã‚‹ï¼‰
         float xsqr = q.x * q.x;
         float t0 = 2.0f * (q.w * q.y + q.x * q.z);
         float t1 = 1.0f - 2.0f * (q.y * q.y + xsqr);
@@ -217,7 +217,7 @@ void Transform::SetParentOverride(bool enable, DirectX::XMMATRIX matrix)
 
 Vector3 Transform::GetFront()
 {
-    //isDirtyƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚½‚çƒ[ƒ‹ƒhs—ñ‚ğXV‚·‚é
+    //isDirtyãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãŸã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’æ›´æ–°ã™ã‚‹
     if (isDirty)
     {
         UpdateWorldMatrix();
@@ -232,7 +232,7 @@ Vector3 Transform::GetFront()
 
 Vector3 Transform::GetRight()
 {
-    //isDirtyƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚½‚çƒ[ƒ‹ƒhs—ñ‚ğXV‚·‚é
+    //isDirtyãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãŸã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’æ›´æ–°ã™ã‚‹
     if (isDirty)
     {
         UpdateWorldMatrix();
@@ -245,7 +245,7 @@ Vector3 Transform::GetRight()
 
 Vector3 Transform::GetUp()
 {
-    //isDirtyƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚½‚çƒ[ƒ‹ƒhs—ñ‚ğXV‚·‚é
+    //isDirtyãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãŸã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’æ›´æ–°ã™ã‚‹
     if (isDirty)
     {
         UpdateWorldMatrix();
@@ -258,21 +258,21 @@ Vector3 Transform::GetUp()
 
 void Transform::SetParent(std::shared_ptr<Transform> p, std::string nodeName)
 {
-    // 1. ŒÃ‚¢e‚ª‚¢‚ê‚ÎA‚»‚Ìq‹ŸƒŠƒXƒg‚©‚ç©•ª‚ğíœ
+    // 1. å¤ã„è¦ªãŒã„ã‚Œã°ã€ãã®å­ä¾›ãƒªã‚¹ãƒˆã‹ã‚‰è‡ªåˆ†ã‚’å‰Šé™¤
     if (auto currentParent = parent.lock()) {
         auto& c = currentParent->children;
         c.erase(std::remove(c.begin(), c.end(), shared_from_this()), c.end());
     }
 
-    // 2. V‚µ‚¢e‚ğƒZƒbƒg
+    // 2. æ–°ã—ã„è¦ªã‚’ã‚»ãƒƒãƒˆ
     parent = p;
 
-    // 3. V‚µ‚¢e‚Ìq‹ŸƒŠƒXƒg‚É©•ª‚ğ’Ç‰Á
+    // 3. æ–°ã—ã„è¦ªã®å­ä¾›ãƒªã‚¹ãƒˆã«è‡ªåˆ†ã‚’è¿½åŠ 
     if (p) {
         p->children.push_back(shared_from_this());
     }
 
-    //ƒAƒ^ƒbƒ`ƒƒ“ƒg‚ğİ’u‚·‚ée‚ÌƒOƒ[ƒoƒ‹s—ñ‚ª“ü‚Á‚Ä‚¢‚éƒm[ƒh–¼‚ğ“ü‚ê‚é
+    //ã‚¢ã‚¿ãƒƒãƒãƒ¡ãƒ³ãƒˆã‚’è¨­ç½®ã™ã‚‹è¦ªã®ã‚°ãƒ­ãƒ¼ãƒãƒ«è¡Œåˆ—ãŒå…¥ã£ã¦ã„ã‚‹ãƒãƒ¼ãƒ‰åã‚’å…¥ã‚Œã‚‹
     m_ParentNodeName = nodeName;
 
     MarkDirty();
@@ -280,17 +280,17 @@ void Transform::SetParent(std::shared_ptr<Transform> p, std::string nodeName)
 
 void Transform::UpdateWorldMatrix()
 {
-    // ˆÊ’u‚ÌXV
+    // ä½ç½®ã®æ›´æ–°
     localPosition.x += moveOffset.x;
     localPosition.y += moveOffset.y;
     localPosition.z += moveOffset.z;
 
-    // ‰ñ“]‚ÌXV
+    // å›è»¢ã®æ›´æ–°
     localRotation.x += rotateOffset.x;
     localRotation.y += rotateOffset.y;
     localRotation.z += rotateOffset.z;
 
-    // --- Šp“x‚Ì³‹K‰» (0 ~ 360“x‚Éû‚ß‚é) ---
+    // --- è§’åº¦ã®æ­£è¦åŒ– (0 ~ 360åº¦ã«åã‚ã‚‹) ---
     auto NormalizeAngle = [](float& angle) {
         angle = fmodf(angle, 360.0f);
         if (angle < 0.0f) angle += 360.0f;
@@ -299,15 +299,15 @@ void Transform::UpdateWorldMatrix()
     NormalizeAngle(localRotation.y);
     NormalizeAngle(localRotation.z);
 
-    // ƒIƒtƒZƒbƒg‚ğg‚¢Ø‚Á‚½‚Ì‚ÅƒŠƒZƒbƒg
+    // ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’ä½¿ã„åˆ‡ã£ãŸã®ã§ãƒªã‚»ãƒƒãƒˆ
     moveOffset = { 0, 0, 0 };
     rotateOffset = { 0, 0, 0 };
 
 
-    // •Ï‰»‚ª‚È‚¢ê‡‚ÍAˆÈ~‚Ìd‚¢s—ñŒvZ‚ğƒXƒLƒbƒv
+    // å¤‰åŒ–ãŒãªã„å ´åˆã¯ã€ä»¥é™ã®é‡ã„è¡Œåˆ—è¨ˆç®—ã‚’ã‚¹ã‚­ãƒƒãƒ—
     if (!isDirty) return;
 
-    // 2. ƒNƒH[ƒ^ƒjƒIƒ“‚Æs—ñ‚Ìì¬
+    // 2. ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã¨è¡Œåˆ—ã®ä½œæˆ
     DirectX::XMVECTOR q = DirectX::XMQuaternionRotationRollPitchYaw(
         DirectX::XMConvertToRadians(localRotation.x),
         DirectX::XMConvertToRadians(localRotation.y),
@@ -319,8 +319,8 @@ void Transform::UpdateWorldMatrix()
         DirectX::XMMatrixRotationQuaternion(q) *
         DirectX::XMMatrixTranslation(localPosition.x, localPosition.y, localPosition.z);
 
-    // 2. es—ñ‚Ì“K—p
-    // ‚à‚µe‚ªİ’è‚³‚ê‚Ä‚¨‚èA‚©‚Âe‚Ìƒm[ƒh‚ªw’è‚³‚ê‚Ä‚¢‚ê‚ÎA‚»‚Ìs—ñ‚ğe‚Æ‚·‚é
+    // 2. è¦ªè¡Œåˆ—ã®é©ç”¨
+    // ã‚‚ã—è¦ªãŒè¨­å®šã•ã‚Œã¦ãŠã‚Šã€ã‹ã¤è¦ªã®ãƒãƒ¼ãƒ‰ãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚Œã°ã€ãã®è¡Œåˆ—ã‚’è¦ªã¨ã™ã‚‹
     if (m_IsOverriding) {
         worldMatrix = localMat * m_OverrideParentMatrix;
     }
@@ -334,10 +334,10 @@ void Transform::UpdateWorldMatrix()
 calculated:
     isDirty = false;
 
-    // 4. q‚Ée‚Ì•Ï‰»‚ğ“`”d‚³‚¹‚ÄÄŒvZ‚³‚¹‚é
+    // 4. å­ã«è¦ªã®å¤‰åŒ–ã‚’ä¼æ’­ã•ã›ã¦å†è¨ˆç®—ã•ã›ã‚‹
     for (auto& c : children)
     {
-        c->isDirty = true; // e‚ª•Ï‚í‚Á‚½‚Ì‚Å‹­§“I‚ÉÄŒvZ‚³‚¹‚é
+        c->isDirty = true; // è¦ªãŒå¤‰ã‚ã£ãŸã®ã§å¼·åˆ¶çš„ã«å†è¨ˆç®—ã•ã›ã‚‹
         c->UpdateWorldMatrix();
     }
 }

@@ -42,7 +42,7 @@ public:
 
 	void AddAngle(const Vector3& angle);
 
-	//ˆÚ“®‘¬“x‚ğ‘ã“ü‚·‚é
+	//ç§»å‹•é€Ÿåº¦ã‚’ä»£å…¥ã™ã‚‹
 	void SetMoveSpeed(float moveSpeed)
 	{
 		m_MoveSpeed = moveSpeed;
@@ -75,7 +75,7 @@ private:
 	Vector3 offsetRotation{ 0,0,0};
 	Vector3 angle = { 0,0,0 };
 
-	bool m_IsPitchLimit = true;            // §ŒÀ‚ğ‚©‚¯‚é‚©
-	float m_MinPitch = -45.0f;             // ‰º•ûŒü‚ÌŒÀŠEi“x”–@j
-	float m_MaxPitch = 45.0f;              // ã•ûŒü‚ÌŒÀŠEi“x”–@j
+	bool m_IsPitchLimit = true;            // åˆ¶é™ã‚’ã‹ã‘ã‚‹ã‹
+	float m_MinPitch = -45.0f;             // ä¸‹æ–¹å‘ã®é™ç•Œï¼ˆåº¦æ•°æ³•ï¼‰
+	float m_MaxPitch = 45.0f;              // ä¸Šæ–¹å‘ã®é™ç•Œï¼ˆåº¦æ•°æ³•ï¼‰
 };

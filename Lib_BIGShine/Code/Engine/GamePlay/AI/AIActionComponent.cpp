@@ -39,7 +39,7 @@ void AIActionComponent::Gui()
 {
     EnsureBlackboard();
 
-    if (ImGui::Button(IM_U8("AIƒAƒNƒVƒ‡ƒ“’Ç‰Á##AIActionComponent_AddAiActionButton")))
+    if (ImGui::Button(IM_U8("AIã‚¢ã‚¯ã‚·ãƒ§ãƒ³è¿½åŠ ##AIActionComponent_AddAiActionButton")))
     {
         AIActionDefinition definition_;
         definition_.aiActionName = "AI.Action" + std::to_string(actions.size());
@@ -49,7 +49,7 @@ void AIActionComponent::Gui()
     }
 
     ImGui::SameLine();
-    if (ImGui::Button(IM_U8("ƒAƒNƒVƒ‡ƒ““o˜^##AIActionComponent_RegisterActionsButton")))
+    if (ImGui::Button(IM_U8("ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ç™»éŒ²##AIActionComponent_RegisterActionsButton")))
     {
         RegisterActions();
         statusText = "Registered";
@@ -87,33 +87,33 @@ void AIActionComponent::Gui()
     if (selectedActionIndex < 0 || selectedActionIndex >= static_cast<int>(actions.size())) return;
 
     AIActionDefinition& definition_ = actions[selectedActionIndex];
-    ImGui::SeparatorText(IM_U8("AIƒAƒNƒVƒ‡ƒ“##AIActionComponent_AiActionHeader"));
-    ImGui::InputText(IM_U8("AIƒAƒNƒVƒ‡ƒ“–¼##AIActionComponent_AiActionNameInput"), &definition_.aiActionName);
-    ImGui::InputText(IM_U8("ÀsƒAƒNƒVƒ‡ƒ“–¼##AIActionComponent_ExecuteActionNameInput"), &definition_.executeActionName);
+    ImGui::SeparatorText(IM_U8("AIã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AIActionComponent_AiActionHeader"));
+    ImGui::InputText(IM_U8("AIã‚¢ã‚¯ã‚·ãƒ§ãƒ³å##AIActionComponent_AiActionNameInput"), &definition_.aiActionName);
+    ImGui::InputText(IM_U8("å®Ÿè¡Œã‚¢ã‚¯ã‚·ãƒ§ãƒ³å##AIActionComponent_ExecuteActionNameInput"), &definition_.executeActionName);
 
     const char* targetNames_[] = { "Owner", "Global" };
     int target_ = static_cast<int>(definition_.executeTarget);
-    if (ImGui::Combo(IM_U8("Às‘ÎÛ##AIActionComponent_ExecuteTargetCombo"), &target_, targetNames_, IM_ARRAYSIZE(targetNames_)))
+    if (ImGui::Combo(IM_U8("å®Ÿè¡Œå¯¾è±¡##AIActionComponent_ExecuteTargetCombo"), &target_, targetNames_, IM_ARRAYSIZE(targetNames_)))
     {
         definition_.executeTarget = static_cast<AI_ACTION_EXECUTE_TARGET>(target_);
     }
 
-    ImGui::Checkbox(IM_U8("ƒAƒNƒVƒ‡ƒ“I—¹‚ğ‘Ò‚Â##AIActionComponent_WaitForActionEndCheckbox"), &definition_.waitForActionEnd);
-    ImGui::Checkbox(IM_U8("ŠJn‚ÉActionEnded‚ğƒNƒŠƒA##AIActionComponent_ClearActionEndedOnStartCheckbox"), &definition_.clearActionEndedOnStart);
-    ImGui::Checkbox(IM_U8("IsActing‚ğİ’è##AIActionComponent_SetIsActingCheckbox"), &definition_.setIsActing);
+    ImGui::Checkbox(IM_U8("ã‚¢ã‚¯ã‚·ãƒ§ãƒ³çµ‚äº†ã‚’å¾…ã¤##AIActionComponent_WaitForActionEndCheckbox"), &definition_.waitForActionEnd);
+    ImGui::Checkbox(IM_U8("é–‹å§‹æ™‚ã«ActionEndedã‚’ã‚¯ãƒªã‚¢##AIActionComponent_ClearActionEndedOnStartCheckbox"), &definition_.clearActionEndedOnStart);
+    ImGui::Checkbox(IM_U8("IsActingã‚’è¨­å®š##AIActionComponent_SetIsActingCheckbox"), &definition_.setIsActing);
 
-    ImGui::SeparatorText(IM_U8("ƒuƒ‰ƒbƒNƒ{[ƒh##AIActionComponent_BlackboardHeader"));
-    ImGui::InputText(IM_U8("ƒJƒeƒSƒŠ##AIActionComponent_BlackboardCategoryInput"), &definition_.blackboardCategory);
-    ImGui::InputText(IM_U8("CurrentActionƒL[##AIActionComponent_CurrentActionKeyInput"), &definition_.currentActionKey);
-    ImGui::InputText(IM_U8("ActionEndedƒL[##AIActionComponent_ActionEndedKeyInput"), &definition_.actionEndedKey);
-    ImGui::InputText(IM_U8("IsActingƒL[##AIActionComponent_IsActingKeyInput"), &definition_.isActingKey);
+    ImGui::SeparatorText(IM_U8("ãƒ–ãƒ©ãƒƒã‚¯ãƒœãƒ¼ãƒ‰##AIActionComponent_BlackboardHeader"));
+    ImGui::InputText(IM_U8("ã‚«ãƒ†ã‚´ãƒª##AIActionComponent_BlackboardCategoryInput"), &definition_.blackboardCategory);
+    ImGui::InputText(IM_U8("CurrentActionã‚­ãƒ¼##AIActionComponent_CurrentActionKeyInput"), &definition_.currentActionKey);
+    ImGui::InputText(IM_U8("ActionEndedã‚­ãƒ¼##AIActionComponent_ActionEndedKeyInput"), &definition_.actionEndedKey);
+    ImGui::InputText(IM_U8("IsActingã‚­ãƒ¼##AIActionComponent_IsActingKeyInput"), &definition_.isActingKey);
 
-    if (ImGui::Button(IM_U8("ÀsƒeƒXƒg##AIActionComponent_TestExecuteButton")))
+    if (ImGui::Button(IM_U8("å®Ÿè¡Œãƒ†ã‚¹ãƒˆ##AIActionComponent_TestExecuteButton")))
     {
         statusText = ExecuteAIAction(definition_.aiActionName) ? "Executed" : "Execute failed";
     }
     ImGui::SameLine();
-    if (ImGui::Button(IM_U8("I—¹’Ê’m##AIActionComponent_NotifyEndButton")))
+    if (ImGui::Button(IM_U8("çµ‚äº†é€šçŸ¥##AIActionComponent_NotifyEndButton")))
     {
         NotifyActionEnd(definition_.blackboardCategory);
         statusText = "ActionEnd notified";

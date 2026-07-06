@@ -25,6 +25,6 @@ public:
 	}
 private:
 
-	//•¡”’è‹`ˆµ‚¢‚É‚È‚ç‚È‚¢‚æ‚¤‚·‚é‚½‚ß‚Éinline‚ğİ’è‚·‚é
+	//è¤‡æ•°å®šç¾©æ‰±ã„ã«ãªã‚‰ãªã„ã‚ˆã†ã™ã‚‹ãŸã‚ã«inlineã‚’è¨­å®šã™ã‚‹
 	inline static std::unordered_map<std::string, std::vector<std::function<void()>>> m_Events;
 };

@@ -3,7 +3,7 @@
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
-//ƒC[ƒWƒ“ƒO‚Ìí—Ş
+//ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã®ç¨®é¡
 enum class EasingType
 {
 	None,
@@ -103,9 +103,11 @@ public:
 	}
 
 	void Gui();
+	void SetUseUnscaledTime(bool enabled_) { useUnscaledTime = enabled_; }
 
 private:
 	std::vector<Easing> m_Easings;
+	bool useUnscaledTime = false;
 };
 
 

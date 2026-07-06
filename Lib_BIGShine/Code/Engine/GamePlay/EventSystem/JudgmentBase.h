@@ -3,7 +3,7 @@
 class GameObject;
 #include<memory>
 
-//Às”»’è
+//å®Ÿè¡Œåˆ¤å®š
 class JudgmentBase
 {
 public:

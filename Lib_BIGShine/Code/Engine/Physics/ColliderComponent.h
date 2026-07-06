@@ -16,7 +16,7 @@ public:
     enum class CollisionContainmentMode { NONE, KEEP_INSIDE };
 public:
 
-    //Œ»İƒqƒbƒg‚µ‚Ä‚¢‚éƒRƒŠƒWƒ‡ƒ“
+    //ç¾åœ¨ãƒ’ãƒƒãƒˆã—ã¦ã„ã‚‹ã‚³ãƒªã‚¸ãƒ§ãƒ³
     std::unordered_set<std::shared_ptr<GameObject>> currentTriggers;
     std::vector<CollisionManifold> m_CollisionMainFolds;
 
@@ -28,25 +28,25 @@ public:
     std::vector<CollisionCallback> onTriggerEnterCallbacks;
     std::vector<CollisionContactCallback> onCollisionContactCallbacks;
 
-    // ‹¤’ÊƒvƒƒpƒeƒB
-    DirectX::XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f }; // ƒ‚ƒfƒ‹’†S‚©‚ç‚ÌƒYƒŒ
-    bool isTrigger = false;                          // ‚·‚è”²‚¯‚é‚©
-    bool isStatic = false;                           // ’n–Ê‚â•Ç‚È‚Ç“®‚©‚È‚¢‚à‚Ì‚©
-    bool usePhysicsResponse = true;                  // •¨—“I‚È‰Ÿ‚µ–ß‚µ‚ÆÚG”»’è‚ğ—LŒø‚É‚·‚é
-    bool physicsControlsTransform = false;           // ON‚É‚·‚é‚ÆPhysX‚ªˆÊ’uî•ñ‚ğTransform‚É‘‚«–ß‚·
-    bool enabled = true;                               // —LŒøƒtƒ‰ƒO
+    // å…±é€šãƒ—ãƒ­ãƒ‘ãƒ†ã‚£
+    DirectX::XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f }; // ãƒ¢ãƒ‡ãƒ«ä¸­å¿ƒã‹ã‚‰ã®ã‚ºãƒ¬
+    bool isTrigger = false;                          // ã™ã‚ŠæŠœã‘ã‚‹ã‹
+    bool isStatic = false;                           // åœ°é¢ã‚„å£ãªã©å‹•ã‹ãªã„ã‚‚ã®ã‹
+    bool usePhysicsResponse = true;                  // ç‰©ç†çš„ãªæŠ¼ã—æˆ»ã—ã¨æ¥è§¦åˆ¤å®šã‚’æœ‰åŠ¹ã«ã™ã‚‹
+    bool physicsControlsTransform = false;           // ONã«ã™ã‚‹ã¨PhysXãŒä½ç½®æƒ…å ±ã‚’Transformã«æ›¸ãæˆ»ã™
+    bool enabled = true;                               // æœ‰åŠ¹ãƒ•ãƒ©ã‚°
     bool isGrounded = false;
     bool shapeRenderEnabled = true;
     float mass = 0.0f;
 
     Vector4 debugPrimitiveColor = { 0,0,0,1 };
-    bool useGravity = false;            // d—Íƒtƒ‰ƒO
-    float gravityScale = 1.0f;          // d—Í‚Ì‹­‚³”{—¦
-    DirectX::XMFLOAT3 velocity = { 0, 0, 0 }; // Œ»İ‚ÌˆÚ“®‘¬“xi—‰º‘¬“x—pj
+    bool useGravity = false;            // é‡åŠ›ãƒ•ãƒ©ã‚°
+    float gravityScale = 1.0f;          // é‡åŠ›ã®å¼·ã•å€ç‡
+    DirectX::XMFLOAT3 velocity = { 0, 0, 0 }; // ç¾åœ¨ã®ç§»å‹•é€Ÿåº¦ï¼ˆè½ä¸‹é€Ÿåº¦ç”¨ï¼‰
     CollisionRole collisionRole = CollisionRole::PHYSICAL;
     float shapeSizeScale = 1.0f;
 
-    // ColliderComponent.h “à
+    // ColliderComponent.h å†…
     void Serialize(nlohmann::json& j) const override;
 
     void Deserialize(const nlohmann::json& j) override;
@@ -63,7 +63,7 @@ public:
     virtual bool HasFixedPhysicsBehavior() const { return false; }
     void ApplyRoleDefaults();
 
-    // GUI‚Ì‹¤’Ê•”•ª
+    // GUIã®å…±é€šéƒ¨åˆ†
     virtual void Gui();
 
     virtual void OnTriggerEnter(std::shared_ptr<GameObject> other) {}
@@ -86,7 +86,7 @@ public:
         return m_IsHitFlag;
     }
 
-    //’Ç‰Áˆ—
+    //è¿½åŠ å‡¦ç†
     virtual void AddCollisionMainFolds(const CollisionManifold& manifold)
     {
         m_CollisionMainFolds.push_back(manifold);

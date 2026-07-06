@@ -245,7 +245,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     shape_->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
 
     PxFilterData filterData_;
-    filterData_.word0 = static_cast<PxU32>(GameObject::LayerType::Wall);
+    filterData_.word0 = static_cast<PxU32>(LayerType::Wall);
     filterData_.word1 = 0;
     filterData_.word2 = PHYSICAL_ROLE;
     const PxU32 ownerId_ = static_cast<PxU32>(reinterpret_cast<uintptr_t>(this) & 0x7FFFFFFF);

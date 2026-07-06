@@ -3,7 +3,7 @@
 
 DecalShader::DecalShader(ID3D11Device* device)
 {
-    // 1. ’¸“_ƒVƒF[ƒ_[ & “ü—ÍƒŒƒCƒAƒEƒg
+    // 1. é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ & å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
@@ -16,20 +16,20 @@ DecalShader::DecalShader(ID3D11Device* device)
         inputLayout.GetAddressOf(),
         vertexShader.GetAddressOf());
 
-    // 2. ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+    // 2. ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
     CPUResourceLoader::LoadPixelShader(
         device,
         "Shader/Decal_PS.cso",
         pixelShader.GetAddressOf());
 
-    // 3. [“xƒTƒ“ƒvƒŠƒ“ƒO—p (Point)
+    // 3. æ·±åº¦ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ç”¨ (Point)
     D3D11_SAMPLER_DESC pDesc = {};
     pDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     pDesc.AddressU = pDesc.AddressV = pDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     device->CreateSamplerState(&pDesc, pointSampler.GetAddressOf());
 
-    // 4. ƒfƒJ[ƒ‹“Š‰e—p (Linear + Border Black)
-    // “Š‰eƒ{ƒbƒNƒX‚ÌŠO‘¤‚ª•i“§–¾j‚É‚È‚é‚æ‚¤‚É Border ‚ðŽg—p
+    // 4. ãƒ‡ã‚«ãƒ¼ãƒ«æŠ•å½±ç”¨ (Linear + Border Black)
+    // æŠ•å½±ãƒœãƒƒã‚¯ã‚¹ã®å¤–å´ãŒé»’ï¼ˆé€æ˜Žï¼‰ã«ãªã‚‹ã‚ˆã†ã« Border ã‚’ä½¿ç”¨
     D3D11_SAMPLER_DESC lDesc = {};
     lDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     lDesc.AddressU = lDesc.AddressV = lDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -47,15 +47,15 @@ void DecalShader::Begin(const RenderContext& rc)
     dc->VSSetShader(vertexShader.Get(), nullptr, 0);
     dc->PSSetShader(usePixelShader ? pixelShader.Get() : nullptr, nullptr, 0);
 
-    // ƒTƒ“ƒvƒ‰[Ý’è (s0: Point, s1: LinearBorder)
+    // ã‚µãƒ³ãƒ—ãƒ©ãƒ¼è¨­å®š (s0: Point, s1: LinearBorder)
     ID3D11SamplerState* samplers[] = { pointSampler.Get(), linearBorderSampler.Get() };
     dc->PSSetSamplers(0, _countof(samplers), samplers);
 }
 
 void DecalShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh)
 {
-    // ‚±‚ÌƒNƒ‰ƒX‚Å‚Í ModelRenderSystem ‘¤‚Å’¼Ú’è”ƒoƒbƒtƒ@‚ð Update ‚·‚é‚½‚ßA
-    // mesh ’PˆÊ‚Ì Update ˆ—‚Í‹ó‚Å–â‘è‚ ‚è‚Ü‚¹‚ñB
+    // ã“ã®ã‚¯ãƒ©ã‚¹ã§ã¯ ModelRenderSystem å´ã§ç›´æŽ¥å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’ Update ã™ã‚‹ãŸã‚ã€
+    // mesh å˜ä½ã® Update å‡¦ç†ã¯ç©ºã§å•é¡Œã‚ã‚Šã¾ã›ã‚“ã€‚
 }
 
 void DecalShader::End(const RenderContext& rc)
@@ -66,7 +66,7 @@ void DecalShader::End(const RenderContext& rc)
     dc->PSSetShader(nullptr, nullptr, 0);
     dc->IASetInputLayout(nullptr);
 
-    // SRV‰ðœ (t4: Depth, t10: DecalTexture)
+    // SRVè§£é™¤ (t4: Depth, t10: DecalTexture)
     ID3D11ShaderResourceView* nullSRVs[11] = { nullptr };
     dc->PSSetShaderResources(0, 11, nullSRVs);
 }

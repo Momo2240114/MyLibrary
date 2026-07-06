@@ -6,8 +6,8 @@
 
 namespace NodeSystem
 {
-    /// �m�[�h�̓��o�͒[�q�B
-    /// ID����ă����N����Q�Ƃ���Avalue�ɕ]�����ʂ܂��͓��͒l��ێ�����B
+    /// ノードの入出力端子。
+    /// IDを介してリンクから参照され、valueに評価結果または入力値を保持する。
     struct Pin
     {
         uintptr_t id;
@@ -22,8 +22,8 @@ namespace NodeSystem
         }
     };
 
-    /// ���s�O���t���\������m�[�h�̒��ۊ��N���X�B
-    /// �h���N���X��Evaluate�œ��͂���o�͂��v�Z����Ӗ������B
+    /// 実行グラフを構成するノードの抽象基底クラス。
+    /// 派生クラスはEvaluateで入力から出力を計算する責務を持つ。
     class Node
     {
     public:

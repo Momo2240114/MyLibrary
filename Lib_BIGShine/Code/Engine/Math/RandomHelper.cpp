@@ -5,7 +5,7 @@
 
 float RandomRangeCreate(float min_, float max_)
 {
-    // rand‚ÌŒ‹‰Ê‚ğ0.0`1.0‚Ö³‹K‰»‚µAw’è‚³‚ê‚½”ÍˆÍ‚ÖüŒ`•ÏŠ·‚·‚éB
+    // randã®çµæœã‚’0.0ï½1.0ã¸æ­£è¦åŒ–ã—ã€æŒ‡å®šã•ã‚ŒãŸç¯„å›²ã¸ç·šå½¢å¤‰æ›ã™ã‚‹ã€‚
     float normalizedValue_ = static_cast<float>(rand()) / RAND_MAX;
     return min_ + (max_ - min_) * normalizedValue_;
 }
@@ -17,11 +17,11 @@ DirectX::XMFLOAT3 QuaternionToEuler(DirectX::XMVECTOR quaternion_)
 
     DirectX::XMFLOAT3 eulerAngles_;
 
-    // Y-X-Z‰ñ“]‡‚Ì’†‰›²‚Æ‚È‚éX‰ñ“]‚ğZo‚·‚éB
+    // Y-X-Zå›è»¢é †ã®ä¸­å¤®è»¸ã¨ãªã‚‹Xå›è»¢ã‚’ç®—å‡ºã™ã‚‹ã€‚
     double sinPitch_ = 2.0 * (quaternionElements_.w * quaternionElements_.x
         - quaternionElements_.z * quaternionElements_.y);
 
-    // Œë·‚Åasin‚Ì’è‹`ˆæ‚ğ’´‚¦‚éê‡‚ÍAƒWƒ“ƒoƒ‹ƒƒbƒNˆÊ’u‚Ì}90“x‚ÖŒÅ’è‚·‚éB
+    // èª¤å·®ã§asinã®å®šç¾©åŸŸã‚’è¶…ãˆã‚‹å ´åˆã¯ã€ã‚¸ãƒ³ãƒãƒ«ãƒ­ãƒƒã‚¯ä½ç½®ã®Â±90åº¦ã¸å›ºå®šã™ã‚‹ã€‚
     if (std::abs(sinPitch_) >= 1.0)
     {
         eulerAngles_.x = static_cast<float>(std::copysign(DirectX::XM_PIDIV2, sinPitch_));
@@ -31,7 +31,7 @@ DirectX::XMFLOAT3 QuaternionToEuler(DirectX::XMVECTOR quaternion_)
         eulerAngles_.x = static_cast<float>(std::asin(sinPitch_));
     }
 
-    // Å‰‚ÌY‰ñ“]‚ÆÅŒã‚ÌZ‰ñ“]‚Íatan2‚ÅÛŒÀ‚ğˆÛ‚µ‚½‚Ü‚ÜZo‚·‚éB
+    // æœ€åˆã®Yå›è»¢ã¨æœ€å¾Œã®Zå›è»¢ã¯atan2ã§è±¡é™ã‚’ç¶­æŒã—ãŸã¾ã¾ç®—å‡ºã™ã‚‹ã€‚
     double sinYawCosPitch_ = 2.0 * (quaternionElements_.w * quaternionElements_.y
         + quaternionElements_.x * quaternionElements_.z);
     double cosYawCosPitch_ = 1.0 - 2.0 * (quaternionElements_.x * quaternionElements_.x

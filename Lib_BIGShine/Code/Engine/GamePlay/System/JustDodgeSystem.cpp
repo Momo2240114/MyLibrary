@@ -66,7 +66,7 @@ void JustDodgeSystem::HandleJustDodge(
     if (!attacker_ || !dodger_) return;
     if (!hitBox_.IsEnabled() || !justDodgeCollider_.IsEnabled()) return;
 
-    // ”O‚Ì‚½‚ßSystem‘¤‚Å‚à“¯ŠK‘w‚ğœŠO
+    // å¿µã®ãŸã‚Systemå´ã§ã‚‚åŒéšå±¤ã‚’é™¤å¤–
     if (IsSameHierarchy(attacker_, dodger_)) return;
 
     if (!justDodgeCollider_.CanReactToAttack(hitBox_)) return;

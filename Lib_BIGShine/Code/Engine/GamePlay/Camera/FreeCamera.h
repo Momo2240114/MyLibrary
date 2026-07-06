@@ -8,37 +8,37 @@ public:
     CameraFreeController() = default;
     ~CameraFreeController() override = default;
 
-    // ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì–¼‘O‚ğ•Ô‚·‹V®
+    // ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®åå‰ã‚’è¿”ã™å„€å¼
     const std::string& GetName() const override
     {
         static std::string name = "CameraFreeController";
         return name;
     }
 
-    //‰Šú‰»
+    //åˆæœŸåŒ–
     void Start() override;
 
-    // XVˆ—
+    // æ›´æ–°å‡¦ç†
     void Update(float deltaTime) override;
 
-    // ƒfƒoƒbƒO‚Ì”`‚«‘‹
+    // ãƒ‡ãƒãƒƒã‚°ã®è¦—ãçª“
     void Gui() override;
 
 private:
-    // ƒ}ƒEƒX‚Ì‘Š‘Î“I‚ÈˆÚ“®—Ê‚ğZo‚·‚éŠÖ”
+    // ãƒã‚¦ã‚¹ã®ç›¸å¯¾çš„ãªç§»å‹•é‡ã‚’ç®—å‡ºã™ã‚‹é–¢æ•°
     void UpdateRotation(float deltaTime);
 
-    // ƒL[ƒ{[ƒh‚Ì“ü—Í‚ğ‚©‚çAOŸŒ³‚ÌÀ•W‚ğˆÚ“®‚·‚éˆ—
+    // ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã®å…¥åŠ›ã‚’ã‹ã‚‰ã€ä¸‰æ¬¡å…ƒã®åº§æ¨™ã‚’ç§»å‹•ã™ã‚‹å‡¦ç†
     void UpdateMovement(float deltaTime);
 
 private:
-    float moveSpeed = 10.0f;  // ƒJƒƒ‰‚ª•—‚ğ‹ì‚¯‚éŠî–{‘¬“x
-    float lookSpeed = 0.001f;  // ‹ü‚ğ“®‚©‚·Û‚ÌŠ´“x (Degree)
-    float speedMultiplier = 1.0f; // ƒzƒC[ƒ‹‚Ì–‚p‚É‚æ‚Á‚Ä•Ï“®‚·‚é‘¬“x”{—¦
+    float moveSpeed = 10.0f;  // ã‚«ãƒ¡ãƒ©ãŒé¢¨ã‚’é§†ã‘ã‚‹åŸºæœ¬é€Ÿåº¦
+    float lookSpeed = 0.001f;  // è¦–ç·šã‚’å‹•ã‹ã™éš›ã®æ„Ÿåº¦ (Degree)
+    float speedMultiplier = 1.0f; // ãƒ›ã‚¤ãƒ¼ãƒ«ã®é­”è¡“ã«ã‚ˆã£ã¦å¤‰å‹•ã™ã‚‹é€Ÿåº¦å€ç‡
 
-    float currentYaw = 0.0f;   // Y²‚Ìü‚è‚ğ„‚é•ûˆÊŠp (“x”–@)
-    float currentPitch = 0.0f;   // X²‚Ìã‰º‚ğáÉ‚Ş‹Â˜ëŠp (“x”–@)
+    float currentYaw = 0.0f;   // Yè»¸ã®å‘¨ã‚Šã‚’å·¡ã‚‹æ–¹ä½è§’ (åº¦æ•°æ³•)
+    float currentPitch = 0.0f;   // Xè»¸ã®ä¸Šä¸‹ã‚’ç¨ã‚€ä»°ä¿¯è§’ (åº¦æ•°æ³•)
 
-    // ‘OƒtƒŒ[ƒ€‚Ìƒ}ƒEƒXˆÊ’u‚ğ‹L‰¯‚·‚é‚½‚ß‚Ì•Ï”
+    // å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒã‚¦ã‚¹ä½ç½®ã‚’è¨˜æ†¶ã™ã‚‹ãŸã‚ã®å¤‰æ•°
     DirectX::XMFLOAT2 lastMousePos{ 0.0f, 0.0f };
 };

@@ -5,16 +5,16 @@
 
 
 namespace NodeSystem {
-    /// ƒm[ƒhŠÔ‚Åó‚¯“n‚µ‰Â”\‚È’l‚ÌW‡B
-    /// variant‚ğ—p‚¢‚é‚±‚Æ‚ÅAŒ^‚²‚Æ‚Ìƒm[ƒhŠî’êƒNƒ‰ƒX‚ğ‘‚â‚³‚¸‚É’l‚ğ•Û‚·‚éB
+    /// ãƒãƒ¼ãƒ‰é–“ã§å—ã‘æ¸¡ã—å¯èƒ½ãªå€¤ã®é›†åˆã€‚
+    /// variantã‚’ç”¨ã„ã‚‹ã“ã¨ã§ã€å‹ã”ã¨ã®ãƒãƒ¼ãƒ‰åŸºåº•ã‚¯ãƒ©ã‚¹ã‚’å¢—ã‚„ã•ãšã«å€¤ã‚’ä¿æŒã™ã‚‹ã€‚
     using NodeValue = std::variant<float, int, bool, DirectX::SimpleMath::Vector2>;
 
     enum class PinType { FLOAT, INT, BOOL, VECTOR2 };
 
-    /// ƒGƒfƒBƒ^ƒ‰ƒCƒuƒ‰ƒŠ‚ÖˆË‘¶‚¹‚¸AÀsƒOƒ‰ƒt’P‘Ì‚ÅÚ‘±•ûŒü‚ğ”»’è‚·‚é‚½‚ß‚Ì—ñ‹“Œ^B
+    /// ã‚¨ãƒ‡ã‚£ã‚¿ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã¸ä¾å­˜ã›ãšã€å®Ÿè¡Œã‚°ãƒ©ãƒ•å˜ä½“ã§æ¥ç¶šæ–¹å‘ã‚’åˆ¤å®šã™ã‚‹ãŸã‚ã®åˆ—æŒ™å‹ã€‚
     enum class PinDirection { INPUT, OUTPUT };
 
-    /// ”’l‰‰Zƒm[ƒh‚Åˆµ‚¦‚é‚æ‚¤AŒİŠ·«‚Ì‚ ‚é’l‚ğfloat‚Ö•ÏŠ·‚·‚éB
+    /// æ•°å€¤æ¼”ç®—ãƒãƒ¼ãƒ‰ã§æ‰±ãˆã‚‹ã‚ˆã†ã€äº’æ›æ€§ã®ã‚ã‚‹å€¤ã‚’floatã¸å¤‰æ›ã™ã‚‹ã€‚
     inline float AsFloat(const NodeValue& value_) {
         if (auto floatValue_ = std::get_if<float>(&value_)) return *floatValue_;
         if (auto intValue_ = std::get_if<int>(&value_)) return static_cast<float>(*intValue_);

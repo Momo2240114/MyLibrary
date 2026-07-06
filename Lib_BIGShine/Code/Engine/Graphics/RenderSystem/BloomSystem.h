@@ -15,15 +15,15 @@ class BloomSystem
 public:
     struct Parameters {
         bool enabled = true;
-        float threshold = 1.0f;    // ‚Ç‚Ì–¾‚é‚³‚©‚çŒõ‚ç‚¹‚é‚©
-        float intensity = 1.0f;    // Œõ‚Ì‹­‚³
-        float kawaseScale = 1.0f;  // ‚Ú‚©‚µ‚ÌL‚ª‚è‹ï‡
-        int blurPasses = 4;        // ‚Ú‚©‚µ‚Ì‰ñ”
+        float threshold = 1.0f;    // ã©ã®æ˜ã‚‹ã•ã‹ã‚‰å…‰ã‚‰ã›ã‚‹ã‹
+        float intensity = 1.0f;    // å…‰ã®å¼·ã•
+        float kawaseScale = 1.0f;  // ã¼ã‹ã—ã®åºƒãŒã‚Šå…·åˆ
+        int blurPasses = 4;        // ã¼ã‹ã—ã®å›æ•°
         bool toneMappingEnabled = true;
         float exposure = 1.0f;
     };
 
-    // yV‹KzƒJƒ‰[ƒtƒBƒ‹ƒ^[—piSlot 1‘z’èj
+    // ã€æ–°è¦ã€‘ã‚«ãƒ©ãƒ¼ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ç”¨ï¼ˆSlot 1æƒ³å®šï¼‰
     struct CbColorFilter {
         float hueShift;
         float saturation;
@@ -58,17 +58,17 @@ private:
 
     void CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT);
     void UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters& params, float offset, float w, float h);
-    // ƒŠƒ\[ƒX
-    RenderTarget brightTarget;           // ‚‹P“x’Šo—p (1/2ƒTƒCƒY)
-    std::vector<RenderTarget> blurTargets; // ì£®—pƒsƒ“ƒ|ƒ“ƒoƒbƒtƒ@
+    // ãƒªã‚½ãƒ¼ã‚¹
+    RenderTarget brightTarget;           // é«˜è¼åº¦æŠ½å‡ºç”¨ (1/2ã‚µã‚¤ã‚º)
+    std::vector<RenderTarget> blurTargets; // å·ç€¬å¼ç”¨ãƒ”ãƒ³ãƒãƒ³ãƒãƒƒãƒ•ã‚¡
     Vector2 ScreenSize;
 
-    // ’è”ƒoƒbƒtƒ@iGUIƒpƒ‰ƒ[ƒ^—pj
+    // å®šæ•°ãƒãƒƒãƒ•ã‚¡ï¼ˆGUIãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç”¨ï¼‰
     struct CbBloom {
         float threshold;
         float intensity;
         float kawaseScale;
-        float offset; // ì£®‚ÌƒpƒX‚²‚Æ‚ÌƒIƒtƒZƒbƒg
+        float offset; // å·ç€¬å¼ã®ãƒ‘ã‚¹ã”ã¨ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
         DirectX::XMFLOAT2 texSize;
         float exposure;
         float toneMappingEnabled;
@@ -76,11 +76,11 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> filterBuffer;
 
-    // ƒGƒ‰[‰ğÁ‚Ì‚½‚ß‚Ì’Ç‰Á
+    // ã‚¨ãƒ©ãƒ¼è§£æ¶ˆã®ãŸã‚ã®è¿½åŠ 
     void DrawFullScreenQuad(ID3D11DeviceContext* dc);
 
     Microsoft::WRL::ComPtr<ID3D11PixelShader>  brightPS;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>  kawasePS;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  compositePS; // ÅŒã‚É‡¬‚·‚é—p
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> fullScreenVS; // ‘S‰æ–Ê—pVS
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>  compositePS; // æœ€å¾Œã«åˆæˆã™ã‚‹ç”¨
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> fullScreenVS; // å…¨ç”»é¢ç”¨VS
 };

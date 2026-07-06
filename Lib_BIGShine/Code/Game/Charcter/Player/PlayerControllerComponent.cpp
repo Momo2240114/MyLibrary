@@ -10,6 +10,7 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
+#include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Physics/CharacterCollider.h"
@@ -142,11 +143,12 @@ void PlayerControllerComponent::Start()
 
     EnsurePlayerInputBindings();
 
-    owner_->SetLayer(GameObject::LayerType::Player);
+    owner_->SetLayer(LayerType::Player);
     collider = owner_->GetOrAddComponent<CharacterCollider>();
     movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
     hurtBox = owner_->GetOrAddComponent<HurtBox>();
     justDodgeCollider = owner_->GetOrAddComponent<JustDodgeCollider>();
+    owner_->GetOrAddComponent<JustDodgeReactionComponent>();
 
     if (collider)
     {
@@ -281,6 +283,48 @@ void PlayerControllerComponent::SetHorizontalVelocity(
     pendingHorizontalVelocity = { dir_.x * speed_, 0.0f, dir_.z * speed_ };
     pendingFacingDirection = { dir_.x, 0.0f, dir_.z };
     hasPendingFacingDirection = true;
+}
+
+void PlayerControllerComponent::AddHorizontalVelocityAssist(
+    const DirectX::XMFLOAT3& dir_,
+    float speed_)
+{
+    if (speed_ <= 0.0f) return;
+
+    const float inputLengthSq_ =
+        dir_.x * dir_.x +
+        dir_.z * dir_.z;
+
+    if (inputLengthSq_ < 0.0001f)
+    {
+        return;
+    }
+
+    const float inverseLength_ = 1.0f / std::sqrt(inputLengthSq_);
+
+    const DirectX::XMFLOAT3 normalizedDirection_
+    {
+        dir_.x * inverseLength_,
+        0.0f,
+        dir_.z * inverseLength_
+    };
+
+    const DirectX::XMFLOAT3 assistVelocity_
+    {
+        normalizedDirection_.x * speed_,
+        0.0f,
+        normalizedDirection_.z * speed_
+    };
+
+    if (!hasPendingHorizontalVelocity)
+    {
+        pendingHorizontalVelocity = assistVelocity_;
+        hasPendingHorizontalVelocity = true;
+        return;
+    }
+
+    pendingHorizontalVelocity.x += assistVelocity_.x;
+    pendingHorizontalVelocity.z += assistVelocity_.z;
 }
 
 void PlayerControllerComponent::ApplyPendingMovement()
@@ -628,9 +672,8 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     });
     registry_.RegisterAction("Player", "OnJustDodge", [this]()
     {
-            NotifyJustDodge();
+        NotifyJustDodge();
     });
-
     registry_.RegisterAction("Player", "CanCancelOn", [this]()
         {
             SetCanCancel(true);
@@ -726,7 +769,7 @@ bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
         return false;
     }
 
-    // ÉfÉoÉbÉOêÿÇËë÷Ç¶Ç»ÇÃÇ≈ÅAì¸óÕÉoÉbÉtÉ@Ç‚ÉRÉìÉ{ë“ÇøÇëSïîÉäÉZÉbÉg
+    // „Éá„Éê„ÉÉ„Ç∞Âàá„ÇäÊõø„Åà„Å™„ÅÆ„Åß„ÄÅÂÖ•Âäõ„Éê„ÉÉ„Éï„Ç°„ÇÑ„Ç≥„É≥„ÉúÂæÖ„Å°„ÇíÂÖ®ÈÉ®„É™„Çª„ÉÉ„Éà
     actionRuntime.canCancel = true;
     actionRuntime.canBufferInput = false;
     actionRuntime.canCombo = false;
@@ -737,7 +780,7 @@ bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
     pendingComboIndex = 0;
     comboIndex = 0;
 
-    // ChangeState ì‡Ç≈åªç›ÉXÉeÅ[ÉgÇÃ Exit() Ç™åƒÇŒÇÍÇÈ
+    // ChangeState ÂÜÖ„ÅßÁèæÂú®„Çπ„ÉÜ„Éº„Éà„ÅÆ Exit() „ÅåÂëº„Å∞„Çå„Çã
     stateMachine.ChangeState(action_);
     return true;
 }
@@ -855,10 +898,17 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Assist Turn Speed", &attackAssistSettings.turnSpeed, 0.1f, 0.0f, 60.0f, "%.2f");
     ImGui::DragFloat("Assist Search Distance", &attackAssistSettings.searchDistance, 0.1f, 0.0f, 100.0f, "%.2f");
     ImGui::SliderFloat("Camera Center Angle", &attackAssistSettings.cameraCenterAngle, 0.0f, 180.0f, "%.1f deg");
+
+    ImGui::SeparatorText("Attack Position Assist");
+    ImGui::SliderFloat("Position Strength", &attackAssistSettings.positionStrength, 0.0f, 1.0f, "%.2f");
+    ImGui::DragFloat("Position Speed", &attackAssistSettings.positionSpeed, 0.1f, 0.0f, 60.0f, "%.2f");
+    ImGui::DragFloat("Max Position Correction", &attackAssistSettings.maxPositionCorrection, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Target Stop Distance", &attackAssistSettings.targetStopDistance, 0.01f, 0.0f, 10.0f, "%.2f");
+
     ImGui::TextDisabled("Priority: Camera Lock-On > Camera Center > Nearest Enemy");
 }
 
-//blackboardÇ…ílÇ‚ÉJÉeÉSÉäÅ[Çç≈èâÇ…ìoò^Ç∑ÇÈã@ç\
+//blackboard„Å´ÂÄ§„ÇÑ„Ç´„ÉÜ„Ç¥„É™„Éº„ÇíÊúÄÂàù„Å´ÁôªÈå≤„Åô„ÇãÊ©üÊßã
 void PlayerControllerComponent::InitializeBlackboardValues()
 {
     if (!blackboard)
@@ -917,7 +967,11 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
         { "Strength", attackAssistSettings.strength },
         { "TurnSpeed", attackAssistSettings.turnSpeed },
         { "SearchDistance", attackAssistSettings.searchDistance },
-        { "CameraCenterAngle", attackAssistSettings.cameraCenterAngle }
+        { "CameraCenterAngle", attackAssistSettings.cameraCenterAngle },
+        { "PositionStrength", attackAssistSettings.positionStrength },
+        { "PositionSpeed", attackAssistSettings.positionSpeed },
+        { "MaxPositionCorrection", attackAssistSettings.maxPositionCorrection },
+        { "TargetStopDistance", attackAssistSettings.targetStopDistance }
     };
     j_["CancelTransitions"] = nlohmann::json::array();
     for (const PlayerCancelTransition& transition_ : cancelTransitions)
@@ -951,6 +1005,23 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
             attackAssistJson_.value("CameraCenterAngle", attackAssistSettings.cameraCenterAngle),
             0.0f,
             180.0f);
+
+        attackAssistSettings.positionStrength = std::clamp(
+            attackAssistJson_.value("PositionStrength", attackAssistSettings.positionStrength),
+            0.0f,
+            1.0f);
+
+        attackAssistSettings.positionSpeed = (std::max)(
+            attackAssistJson_.value("PositionSpeed", attackAssistSettings.positionSpeed),
+            0.0f);
+
+        attackAssistSettings.maxPositionCorrection = (std::max)(
+            attackAssistJson_.value("MaxPositionCorrection", attackAssistSettings.maxPositionCorrection),
+            0.0f);
+
+        attackAssistSettings.targetStopDistance = (std::max)(
+            attackAssistJson_.value("TargetStopDistance", attackAssistSettings.targetStopDistance),
+            0.0f);
     }
     if (j_.contains("CancelTransitions") && j_["CancelTransitions"].is_array())
     {

@@ -2,7 +2,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <DirectXMath.h>
-#include "Engine/Graphics/Core/RenderContext.h" // Šù‘¶‚Ì‚à‚Ì‚ğg—p
+#include "Engine/Graphics/Core/RenderContext.h" // æ—¢å­˜ã®ã‚‚ã®ã‚’ä½¿ç”¨
 
 class RadialBlurSystem
 {

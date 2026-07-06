@@ -1,126 +1,415 @@
 #include "FovDirector.h"
+
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/System/TimeManager.h"
+
+#include <algorithm>
+#include <imgui.h>
 
 void FovDirector::Start()
 {
-    auto easingComp = GetGameObject()->GetOrAddComponent<EasingComponent>();
-    easingIndex = easingComp->AddEasingAndGetIndex();
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const std::shared_ptr<CameraComponent> camera_ =
+        owner_->GetComponent<CameraComponent>();
+
+    if (camera_)
+    {
+        defaultFov = camera_->GetFovY();
+    }
+
+    const std::shared_ptr<EasingComponent> easing_ =
+        owner_->GetOrAddComponent<EasingComponent>();
+
+    if (!easing_) return;
+
+    easing_->SetUseUnscaledTime(true);
+    easingIndex = easing_->AddEasingAndGetIndex();
+
+    ResetToDefault();
 }
 
-void FovDirector::Update(float et)
+void FovDirector::Update(float elapsedTime_)
 {
-    auto cam = GetGameObject()->GetComponent<CameraComponent>();
-    auto easingComp = GetGameObject()->GetComponent<EasingComponent>();
-    if (!isMoving || !cam || !easingComp) return;
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<EasingComponent> easing_ = owner_
+        ? owner_->GetComponent<EasingComponent>()
+        : nullptr;
 
-    float ratio = easingComp->GetRatio(easingIndex);
-    float easedT = easingComp->GetValue(easingIndex);
-    float currentFov = (targetData.peakRate > 0.0f) ?
-        (ratio < targetData.peakRate ?
-            Lerp(startFov, targetData.peakValue, ratio / targetData.peakRate) :
-            Lerp(targetData.peakValue, targetData.fov, (ratio - targetData.peakRate) / (1.0f - targetData.peakRate)))
-        : Lerp(startFov, targetData.fov, easedT);
+    if (!easing_ || phase == PHASE::IDLE) return;
 
-    cam->SetFov(currentFov);
-    if (easingComp->GetEndFlag(easingIndex)) isMoving = false;
+    if (phase == PHASE::HOLD)
+    {
+        const std::shared_ptr<TimeManager> timeManager_ =
+            owner_->GetManager().GetTimeManager();
+
+        holdElapsed += timeManager_
+            ? timeManager_->GetLastRawDeltaTime()
+            : elapsedTime_;
+
+        if (holdElapsed >= holdDuration)
+        {
+            BeginTransitionToDefault();
+        }
+
+        return;
+    }
+
+    ApplyInterpolated(
+        easing_->GetRatio(easingIndex),
+        easing_->GetValue(easingIndex));
+
+    if (!easing_->GetEndFlag(easingIndex)) return;
+
+    if (phase == PHASE::TO_TARGET)
+    {
+        phase = PHASE::HOLD;
+        holdElapsed = 0.0f;
+
+        // Hold„Åå0„Å™„ÇâÂç≥Êàª„Åô
+        if (holdDuration <= 0.0f)
+        {
+            BeginTransitionToDefault();
+        }
+    }
+    else if (phase == PHASE::TO_DEFAULT)
+    {
+        ResetToDefault();
+    }
 }
 
-void FovDirector::PlayFov(const FovWayPoint& wp, EasingType type)
+void FovDirector::PlayFov(const FovWayPoint& wayPoint_)
 {
-    auto cam = GetGameObject()->GetComponent<CameraComponent>();
-    auto easingComp = GetGameObject()->GetOrAddComponent<EasingComponent>();
-    startFov = cam->GetFovY();
-    targetData = wp;
-    // 2. ÉCÅ[ÉWÉìÉOêiíªÇÃÉäÉZÉbÉg
-    easingComp->SetStartValue(easingIndex, 0.0f);
-    // 3. çƒê∂
-    easingComp->PlayEasing(easingIndex, type, 1.0f / wp.duration, 1.0f);
-    isMoving = true;
+    PlayFov(wayPoint_, wayPoint_.easing);
+}
+
+void FovDirector::PlayFov(
+    const FovWayPoint& wayPoint_,
+    EasingType type_)
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const std::shared_ptr<CameraComponent> camera_ =
+        owner_->GetComponent<CameraComponent>();
+
+    const std::shared_ptr<EasingComponent> easing_ =
+        owner_->GetOrAddComponent<EasingComponent>();
+
+    if (!camera_ || !easing_) return;
+
+    startFov = camera_->GetFovY();
+    targetFov = wayPoint_.fov;
+
+    holdDuration = (std::max)(wayPoint_.holdDuration, 0.0f);
+    returnDuration = (std::max)(wayPoint_.returnDuration, 0.0f);
+
+    peakRate = std::clamp(wayPoint_.peakRate, 0.0f, 1.0f);
+    peakValue = wayPoint_.peakValue;
+
+    activeEasing = type_ == EasingType::None
+        ? EasingType::Lerp
+        : type_;
+
+    easing_->SetStartValue(easingIndex, 0.0f);
+    easing_->PlayEasing(
+        easingIndex,
+        activeEasing,
+        1.0f / (std::max)(wayPoint_.duration, 0.0001f),
+        1.0f);
+
+    phase = PHASE::TO_TARGET;
+    holdElapsed = 0.0f;
+}
+
+void FovDirector::ApplyInterpolated(
+    float ratio_,
+    float easedRatio_)
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<CameraComponent> camera_ = owner_
+        ? owner_->GetComponent<CameraComponent>()
+        : nullptr;
+
+    if (!camera_) return;
+
+    const float ratioClamped_ = std::clamp(ratio_, 0.0f, 1.0f);
+    const float easedRatioClamped_ = std::clamp(easedRatio_, 0.0f, 1.0f);
+
+    float currentFov_ = targetFov;
+
+    // PeakË£úÈñì„ÅØTO_TARGETÊôÇ„Å†„Åë‰Ωø„ÅÜ
+    if (phase == PHASE::TO_TARGET && peakRate > 0.0f && peakRate < 1.0f)
+    {
+        if (ratioClamped_ < peakRate)
+        {
+            currentFov_ = Lerp(
+                startFov,
+                peakValue,
+                ratioClamped_ / peakRate);
+        }
+        else
+        {
+            currentFov_ = Lerp(
+                peakValue,
+                targetFov,
+                (ratioClamped_ - peakRate) / (1.0f - peakRate));
+        }
+    }
+    else
+    {
+        currentFov_ = Lerp(startFov, targetFov, easedRatioClamped_);
+    }
+
+    camera_->SetFov(currentFov_);
+}
+
+void FovDirector::BeginTransitionToDefault()
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const std::shared_ptr<CameraComponent> camera_ =
+        owner_->GetComponent<CameraComponent>();
+
+    const std::shared_ptr<EasingComponent> easing_ =
+        owner_->GetComponent<EasingComponent>();
+
+    if (!camera_ || !easing_)
+    {
+        ResetToDefault();
+        return;
+    }
+
+    startFov = camera_->GetFovY();
+    targetFov = defaultFov;
+
+    // Êàª„Çä„Åß„ÅØPeakË£úÈñì„Çí‰Ωø„Çè„Å™„ÅÑ
+    peakRate = 0.0f;
+    peakValue = 0.0f;
+
+    if (returnDuration <= 0.0f)
+    {
+        ResetToDefault();
+        return;
+    }
+
+    easing_->SetStartValue(easingIndex, 0.0f);
+    easing_->PlayEasing(
+        easingIndex,
+        activeEasing,
+        1.0f / (std::max)(returnDuration, 0.0001f),
+        1.0f);
+
+    phase = PHASE::TO_DEFAULT;
+}
+
+void FovDirector::ResetToDefault()
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<CameraComponent> camera_ = owner_
+        ? owner_->GetComponent<CameraComponent>()
+        : nullptr;
+
+    if (camera_)
+    {
+        camera_->SetFov(defaultFov);
+    }
+
+    phase = PHASE::IDLE;
+    holdElapsed = 0.0f;
+}
+
+float FovDirector::Lerp(
+    float from_,
+    float to_,
+    float ratio_)
+{
+    const float ratioClamped_ = std::clamp(ratio_, 0.0f, 1.0f);
+    return from_ + (to_ - from_) * ratioClamped_;
 }
 
 void FovDirector::Gui()
 {
-    auto cam = GetGameObject()->GetComponent<CameraComponent>();
-    if (!cam) { ImGui::Text("CameraComponent not found!"); return; }
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<CameraComponent> camera_ = owner_
+        ? owner_->GetComponent<CameraComponent>()
+        : nullptr;
 
-    if (ImGui::Button("Capture Current FOV")) {
+    if (!camera_)
+    {
+        ImGui::Text("CameraComponent not found!");
+        return;
+    }
+
+    ImGui::DragFloat("Default FOV", &defaultFov, 0.5f, 1.0f, 170.0f);
+
+    if (ImGui::Button("Capture Current FOV"))
+    {
         CaptureCurrentState();
+        RegisterActions();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Reset FOV"))
+    {
+        ResetToDefault();
     }
 
     ImGui::Separator();
 
-    for (int i = 0; i < (int)EditorWaypoints.size(); ++i) {
-        ImGui::PushID(i);
-        // ÉCÉìÉfÉbÉNÉXÇï\é¶ÇµÇƒêe(CameraDirector)ÇÃéwíËî‘çÜÇ∆àÍívÇ∑ÇÈÇÊÇ§Ç…Ç∑ÇÈ
-        std::string label = "[" + std::to_string(i) + "] FOV Waypoint";
-        if (ImGui::TreeNode(label.c_str())) {
-            auto& wp = EditorWaypoints[i];
+    for (int index_ = 0; index_ < static_cast<int>(editorWaypoints.size()); ++index_)
+    {
+        ImGui::PushID(index_);
 
-            ImGui::DragFloat("Target FOV", &wp.fov, 0.5f, 1.0f, 170.0f);
-            ImGui::DragFloat("Duration", &wp.duration, 0.1f, 0.0f, 10.0f);
+        FovWayPoint& wayPoint_ = editorWaypoints[index_];
 
-            if (ImGui::TreeNode("Special Peak Settings")) {
-                ImGui::SliderFloat("Peak Rate", &wp.peakRate, 0.0f, 1.0f);
-                ImGui::DragFloat("Peak Value", &wp.peakValue, 0.5f);
+        const std::string label_ =
+            "[" + std::to_string(index_) + "] FOV Waypoint";
+
+        if (ImGui::TreeNode(label_.c_str()))
+        {
+            ImGui::DragFloat("Target FOV", &wayPoint_.fov, 0.5f, 1.0f, 170.0f);
+            ImGui::DragFloat("Time To Target", &wayPoint_.duration, 0.01f, 0.0f, 60.0f);
+            ImGui::DragFloat("Hold", &wayPoint_.holdDuration, 0.01f, 0.0f, 60.0f);
+            ImGui::DragFloat("Time To Default", &wayPoint_.returnDuration, 0.01f, 0.0f, 60.0f);
+
+            if (ImGui::TreeNode("Special Peak Settings"))
+            {
+                ImGui::SliderFloat("Peak Rate", &wayPoint_.peakRate, 0.0f, 1.0f);
+                ImGui::DragFloat("Peak Value", &wayPoint_.peakValue, 0.5f, 1.0f, 170.0f);
                 ImGui::TreePop();
             }
 
-            if (ImGui::Button("Play This")) {
-                PlayFov(wp, EasingType::OutExpo);
+            if (ImGui::Button("Play"))
+            {
+                PlayFov(wayPoint_);
             }
+
             ImGui::SameLine();
-            if (ImGui::Button("Remove")) {
-                EditorWaypoints.erase(EditorWaypoints.begin() + i);
-                i--;
+
+            if (ImGui::Button("Remove"))
+            {
+                editorWaypoints.erase(editorWaypoints.begin() + index_--);
+                RegisterActions();
+                ImGui::TreePop();
+                ImGui::PopID();
+                continue;
             }
+
             ImGui::TreePop();
         }
+
         ImGui::PopID();
     }
 }
 
-void FovDirector::Serialize(nlohmann::json& j) const
+void FovDirector::RegisterActions()
 {
-    nlohmann::json arr = nlohmann::json::array();
-    for (const auto& wp : EditorWaypoints) {
-        arr.push_back({ {"fov", wp.fov}, {"dur", wp.duration}, {"pr", wp.peakRate}, {"pv", wp.peakValue} });
-    }
-    j["FovWaypoints"] = arr;
-}
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
 
-void FovDirector::Deserialize(const nlohmann::json& j)
-{
-    if (!j.contains("FovWaypoints") || !j["FovWaypoints"].is_array()) return;
-
-    EditorWaypoints.clear();
-    for (const auto& wj : j["FovWaypoints"]) {
-        FovWayPoint wp;
-        // .value("key", default) ÇégÇ§Ç±Ç∆Ç≈ÅAÉLÅ[Ç™ñúÇ™àÍñ≥Ç≠ÇƒÇ‡ÉNÉâÉbÉVÉÖÇñhÇÆ
-        wp.fov = wj.value("fov", 60.0f);
-        wp.duration = wj.value("dur", 1.0f);
-        wp.peakRate = wj.value("pr", 0.0f);
-        wp.peakValue = wj.value("pv", 0.0f);
-
-        EditorWaypoints.push_back(wp);
+    for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
+    {
+        owner_->RegisterGlobalAction(
+            "Camera",
+            "Fov_" + std::to_string(index_),
+            [this, index_]()
+            {
+                if (index_ < editorWaypoints.size())
+                {
+                    PlayFov(editorWaypoints[index_]);
+                }
+            });
     }
 }
+
+void FovDirector::Serialize(nlohmann::json& json_) const
+{
+    json_["DefaultFov"] = defaultFov;
+    json_["FovWaypoints"] = nlohmann::json::array();
+
+    for (const FovWayPoint& wayPoint_ : editorWaypoints)
+    {
+        json_["FovWaypoints"].push_back(
+            {
+                { "fov", wayPoint_.fov },
+                { "dur", wayPoint_.duration },
+                { "holdDur", wayPoint_.holdDuration },
+                { "returnDur", wayPoint_.returnDuration },
+                { "pr", wayPoint_.peakRate },
+                { "pv", wayPoint_.peakValue },
+                { "ease", static_cast<int>(wayPoint_.easing) }
+            });
+    }
+}
+
+void FovDirector::Deserialize(const nlohmann::json& json_)
+{
+    defaultFov = json_.value("DefaultFov", defaultFov);
+
+    editorWaypoints.clear();
+
+    if (json_.contains("FovWaypoints") && json_["FovWaypoints"].is_array())
+    {
+        for (const nlohmann::json& item_ : json_["FovWaypoints"])
+        {
+            FovWayPoint wayPoint_;
+
+            wayPoint_.fov = item_.value("fov", 60.0f);
+
+            // Êó¢Â≠ò„Éá„Éº„Çø„Å®„ÅÆ‰∫íÊèõÁî®„Å´dur/pr/pv„ÅØ„Åù„ÅÆ„Åæ„ÅæË™≠„ÇÄ
+            wayPoint_.duration = item_.value("dur", 1.0f);
+            wayPoint_.holdDuration = item_.value("holdDur", 0.0f);
+            wayPoint_.returnDuration = item_.value("returnDur", 1.0f);
+            wayPoint_.peakRate = item_.value("pr", 0.0f);
+            wayPoint_.peakValue = item_.value("pv", 0.0f);
+
+            wayPoint_.easing = static_cast<EasingType>(
+                item_.value("ease", static_cast<int>(EasingType::Lerp)));
+
+            editorWaypoints.push_back(wayPoint_);
+        }
+    }
+
+    ResetToDefault();
+    RegisterActions();
+}
+
 void FovDirector::CaptureCurrentState()
 {
-        auto cam = GetGameObject()->GetComponent<CameraComponent>();
-        if (!cam) return;
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<CameraComponent> camera_ = owner_
+        ? owner_->GetComponent<CameraComponent>()
+        : nullptr;
 
-        FovWayPoint wp;
-        wp.fov = cam->GetFovY();
-        wp.duration = 1.0f; // ÉfÉtÉHÉãÉg
-        wp.peakRate = 0.0f;
-        wp.peakValue = 0.0f;
-        EditorWaypoints.push_back(wp);
+    if (!camera_) return;
+
+    FovWayPoint wayPoint_;
+    wayPoint_.fov = camera_->GetFovY();
+    wayPoint_.duration = 1.0f;
+    wayPoint_.holdDuration = 0.0f;
+    wayPoint_.returnDuration = 1.0f;
+    wayPoint_.peakRate = 0.0f;
+    wayPoint_.peakValue = 0.0f;
+    wayPoint_.easing = EasingType::Lerp;
+
+    editorWaypoints.push_back(wayPoint_);
 }
 
-void FovDirector::PlayFovByIndex(int idx, EasingType type)
+void FovDirector::PlayFovByIndex(
+    int index_,
+    EasingType type_)
 {
-    if (idx >= 0 && idx < (int)EditorWaypoints.size()) {
-        PlayFov(EditorWaypoints[idx], type);
+    if (index_ < 0 ||
+        index_ >= static_cast<int>(editorWaypoints.size()))
+    {
+        return;
     }
+
+    PlayFov(editorWaypoints[index_], type_);
 }

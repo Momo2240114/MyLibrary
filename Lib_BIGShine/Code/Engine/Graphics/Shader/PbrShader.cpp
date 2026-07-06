@@ -1,32 +1,32 @@
 #include "PbrShader.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 
-#include "Engine/Graphics/Core/GraphicsDeviceManager.h"  // IBL SRV æ“¾—p
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"  // IBL SRV å–å¾—ç”¨
 
 PbrShader::PbrShader(ID3D11Device* device)
 {
-    // ’¸“_ƒVƒF[ƒ_[iPBR—p‚ÌVS‚ª‚ ‚ê‚Î‚»‚¿‚ç‚ğ“Ç‚İ‚Şj
+    // é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ï¼ˆPBRç”¨ã®VSãŒã‚ã‚Œã°ãã¡ã‚‰ã‚’èª­ã¿è¾¼ã‚€ï¼‰
     CPUResourceLoader::LoadVertexShader(
         device,
-        "Shader/PBRVS.cso", // ‚Ü‚½‚Í‹¤’Ê‚ÌVS‚ª‚ ‚ê‚Î‚»‚ê‚ğw’è
+        "Shader/PBRVS.cso", // ã¾ãŸã¯å…±é€šã®VSãŒã‚ã‚Œã°ãã‚Œã‚’æŒ‡å®š
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
         inputLayout.GetAddressOf(),
         vertexShader.GetAddressOf());
 
-    // ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+    // ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
     CPUResourceLoader::LoadPixelShader(
         device,
-        "Shader/PBRPS.cso", // æ‚Ù‚Çì¬‚µ‚½PBR—pHLSL‚ğƒRƒ“ƒpƒCƒ‹‚µ‚½‚à‚Ì
+        "Shader/PBRPS.cso", // å…ˆã»ã©ä½œæˆã—ãŸPBRç”¨HLSLã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã—ãŸã‚‚ã®
         pixelShader.GetAddressOf());
 
-    // ƒƒbƒVƒ…—p’è”ƒoƒbƒtƒ@ (PBR—p‚Ì\‘¢‘ÌƒTƒCƒY‚Åì¬)
+    // ãƒ¡ãƒƒã‚·ãƒ¥ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡ (PBRç”¨ã®æ§‹é€ ä½“ã‚µã‚¤ã‚ºã§ä½œæˆ)
     CPUResourceLoader::CreateConstantBuffer(
         device,
         sizeof(CbMesh),
         meshConstantBuffer.GetAddressOf());
 
-    // ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚Ìì¬ (üŒ`•âŠÔ)
+    // ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®ä½œæˆ (ç·šå½¢è£œé–“)
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -46,16 +46,16 @@ void PbrShader::Begin(const RenderContext& rc)
     dc->VSSetShader(vertexShader.Get(), nullptr, 0);
     dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 
-    // ’è”ƒoƒbƒtƒ@ (b0) ‚ÆƒTƒ“ƒvƒ‰[ (s0) ‚Ìİ’è
+    // å®šæ•°ãƒãƒƒãƒ•ã‚¡ (b0) ã¨ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ (s0) ã®è¨­å®š
     dc->PSSetConstantBuffers(0, 1, meshConstantBuffer.GetAddressOf());
     dc->PSSetSamplers(0, 1, linearSampler.GetAddressOf());
 
     // -------------------------------------------------------
-    // IBL ƒeƒNƒXƒ`ƒƒ‚ğ t10‚©‚çt12 ‚ÉƒoƒCƒ“ƒh
-    //   t10 : diffuse_iem    (ŠgU”½Ë IrradianceMap)
-    //   t11 : specular_pmrem (‹¾–Ê”½Ë RadianceMap)
+    // IBL ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ t10ã‹ã‚‰t12 ã«ãƒã‚¤ãƒ³ãƒ‰
+    //   t10 : diffuse_iem    (æ‹¡æ•£åå°„ IrradianceMap)
+    //   t11 : specular_pmrem (é¡é¢åå°„ RadianceMap)
     //   t12 : lut_ggx        (GGX BRDF LUT)
-    // PBRPS.hlsl ‚Ì register ”Ô†‚Æ•K‚¸‡‚í‚¹‚é‚±‚Æ
+    // PBRPS.hlsl ã® register ç•ªå·ã¨å¿…ãšåˆã‚ã›ã‚‹ã“ã¨
     // -------------------------------------------------------
     auto& gdm = GraphicsDeviceManager::Instance();
     ID3D11ShaderResourceView* iblSRVs[] =
@@ -71,7 +71,7 @@ void PbrShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
-    // ’è”ƒoƒbƒtƒ@‚ÌXV
+    // å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®æ›´æ–°
     CbMesh cb{};
     cb.baseColor = mesh.material->baseColor;
     cb.emissiveColor = mesh.material->emissiveColor;
@@ -81,7 +81,7 @@ void PbrShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh
 
     dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cb, 0, 0);
 
-    // ƒeƒNƒXƒ`ƒƒ‚ğ HLSL ‚Ì register(t0)`(t4) ‚É‡‚í‚¹‚ÄƒZƒbƒg
+    // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ HLSL ã® register(t0)ï½(t4) ã«åˆã‚ã›ã¦ã‚»ãƒƒãƒˆ
     ID3D11ShaderResourceView* srvs[] =
     {
         mesh.material->baseMap.Get(),       // t0
@@ -101,11 +101,11 @@ void PbrShader::End(const RenderContext& rc)
     dc->PSSetShader(nullptr, nullptr, 0);
     dc->IASetInputLayout(nullptr);
 
-    // ƒ}ƒeƒŠƒAƒ‹ƒeƒNƒXƒ`ƒƒ (t0‚©‚çt4) ‚ÌƒNƒŠƒA
+    // ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ†ã‚¯ã‚¹ãƒãƒ£ (t0ã‹ã‚‰t4) ã®ã‚¯ãƒªã‚¢
     ID3D11ShaderResourceView* nullSRVs[5] = { nullptr };
     dc->PSSetShaderResources(0, 5, nullSRVs);
 
-    // IBL ƒeƒNƒXƒ`ƒƒ (t10‚©‚çt12) ‚ÌƒNƒŠƒA
+    // IBL ãƒ†ã‚¯ã‚¹ãƒãƒ£ (t10ã‹ã‚‰t12) ã®ã‚¯ãƒªã‚¢
     ID3D11ShaderResourceView* nullIBL[3] = { nullptr };
     dc->PSSetShaderResources(10, 3, nullIBL);
 }

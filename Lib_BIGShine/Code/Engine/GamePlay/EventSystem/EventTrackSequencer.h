@@ -55,7 +55,7 @@ public:
     }
 
     // -----------------------------
-    // CustomDraw ‚ÅŒ»İŠÔ‚É‰‚¶‚ÄƒCƒxƒ“ƒgÀs
+    // CustomDraw ã§ç¾åœ¨æ™‚é–“ã«å¿œã˜ã¦ã‚¤ãƒ™ãƒ³ãƒˆå®Ÿè¡Œ
     // -----------------------------
     void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc,
         const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
@@ -69,7 +69,7 @@ public:
         float yTop = origin.y;
         float yBottom = rc.Max.y;
 
-        // ƒo[•`‰æ
+        // ãƒãƒ¼æç”»
         float x0 = origin.x + ev.startTime * pixelsPerSecond;
         float x1 = origin.x + ev.endTime * pixelsPerSecond;
         ImVec2 pMin = { x0, yTop };
@@ -77,7 +77,7 @@ public:
         draw_list->AddRectFilled(pMin, pMax, ev.color);
         draw_list->AddRect(pMin, pMax, IM_COL32(0, 0, 0, 255));
 
-        // ƒhƒ‰ƒbƒO—p InvisibleButtoniŠJn’[j
+        // ãƒ‰ãƒ©ãƒƒã‚°ç”¨ InvisibleButtonï¼ˆé–‹å§‹ç«¯ï¼‰
         ImGui::SetCursorScreenPos({ x0 - 5, yTop });
         ImGui::InvisibleButton(("ev_start_" + std::to_string(index)).c_str(), { 10, yBottom - yTop });
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -86,7 +86,7 @@ public:
             ev.startTime = std::max(0.0f, std::min(mx / pixelsPerSecond, ev.endTime));
         }
 
-        // ƒhƒ‰ƒbƒO—p InvisibleButtoniI—¹’[j
+        // ãƒ‰ãƒ©ãƒƒã‚°ç”¨ InvisibleButtonï¼ˆçµ‚äº†ç«¯ï¼‰
         ImGui::SetCursorScreenPos({ x1 - 5, yTop });
         ImGui::InvisibleButton(("ev_end_" + std::to_string(index)).c_str(), { 10, yBottom - yTop });
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -95,12 +95,12 @@ public:
             ev.endTime = std::max(ev.startTime, mx / pixelsPerSecond);
         }
 
-        // ƒo[‘S‘ÌƒNƒŠƒbƒN‚Å‘I‘ğ
+        // ãƒãƒ¼å…¨ä½“ã‚¯ãƒªãƒƒã‚¯ã§é¸æŠ
         ImGui::SetCursorScreenPos({ x0 + 5, yTop });
         ImGui::InvisibleButton(("ev_full_" + std::to_string(index)).c_str(), { (x1 - x0) - 10, yBottom - yTop });
         if (ImGui::IsItemClicked())
         {
-            // ‘I‘ğˆ—
+            // é¸æŠå‡¦ç†
         }
     }
 
@@ -109,5 +109,5 @@ public:
 private:
     EventTrack* eventTrack;
     float framesPerSecond = 30.0f;
-    float* currentTimePtr = nullptr; // Ä¶’†‚ÌŒ»İŠÔ‚ğ Sequencer ‚©‚çó‚¯æ‚é
+    float* currentTimePtr = nullptr; // å†ç”Ÿä¸­ã®ç¾åœ¨æ™‚é–“ã‚’ Sequencer ã‹ã‚‰å—ã‘å–ã‚‹
 };

@@ -1,7 +1,7 @@
 // Node Editor GUI
-// AnimationControllerComponent ‚ÌÀ‘•‚ğ–ğŠ„‚²‚Æ‚É•ª‚¯‚½ƒtƒ@ƒCƒ‹‚Å‚·B
-// ƒNƒ‰ƒX©‘Ì‚Í•ª—£‚¹‚¸A“¯‚¶ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”’è‹`‚¾‚¯‚ğ•Ê cpp ‚É’u‚¢‚Ä‚¢‚Ü‚·B
-// ‚»‚Ì‚½‚ßŠù‘¶‚ÌQÆŠÖŒW‚â public/private ‚Ìˆµ‚¢‚Í‚»‚Ì‚Ü‚Ü‚Å‚·B
+// AnimationControllerComponent ã®å®Ÿè£…ã‚’å½¹å‰²ã”ã¨ã«åˆ†ã‘ãŸãƒ•ã‚¡ã‚¤ãƒ«ã§ã™ã€‚
+// ã‚¯ãƒ©ã‚¹è‡ªä½“ã¯åˆ†é›¢ã›ãšã€åŒã˜ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°å®šç¾©ã ã‘ã‚’åˆ¥ cpp ã«ç½®ã„ã¦ã„ã¾ã™ã€‚
+// ãã®ãŸã‚æ—¢å­˜ã®å‚ç…§é–¢ä¿‚ã‚„ public/private ã®æ‰±ã„ã¯ãã®ã¾ã¾ã§ã™ã€‚
 
 #include "AnimationControllerComponent.h"
 #include "Editor/AssetBrowserPayload.h"
@@ -113,24 +113,24 @@ static ImU32 GetGraphNodeTitleColor(const AnimGraphNode& node_)
     }
 }
 
-// ƒxƒWƒF‹Èü‚Ì’†“_‚ÉOŠpŒ`‚Ì–îˆó‚ğ•`‰æ‚·‚éƒwƒ‹ƒp[
+// ãƒ™ã‚¸ã‚§æ›²ç·šã®ä¸­ç‚¹ã«ä¸‰è§’å½¢ã®çŸ¢å°ã‚’æç”»ã™ã‚‹ãƒ˜ãƒ«ãƒ‘ãƒ¼
 static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
 {
     if (p0.x == 0.0f && p0.y == 0.0f) return;
     if (p3.x == 0.0f && p3.y == 0.0f) return;
 
-    // n“_‚ÆI“_‚Ì’¼ü‹——£‚ğ‘ª‚é
+    // å§‹ç‚¹ã¨çµ‚ç‚¹ã®ç›´ç·šè·é›¢ã‚’æ¸¬ã‚‹
     float distance = std::sqrt((p3.x - p0.x) * (p3.x - p0.x) + (p3.y - p0.y) * (p3.y - p0.y));
 
-    // ‚ ‚Ü‚è‚É‚àƒm[ƒh‚ª‹ß‚·‚¬‚éê‡‚ÍA‚ß‚è‚İ‚ğ–h‚®‚½‚ß–îˆó‚ğ•`‰æ‚µ‚È‚¢
+    // ã‚ã¾ã‚Šã«ã‚‚ãƒãƒ¼ãƒ‰ãŒè¿‘ã™ãã‚‹å ´åˆã¯ã€ã‚ã‚Šè¾¼ã¿ã‚’é˜²ããŸã‚çŸ¢å°ã‚’æç”»ã—ãªã„
     if (distance < 50.0f) return;
 
-    // imgui_node_editor‚ÌƒfƒtƒHƒ‹ƒg‚É‹ß‚¢ƒxƒWƒF‚Ì§Œä“_‚ğŒvZ
+    // imgui_node_editorã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã«è¿‘ã„ãƒ™ã‚¸ã‚§ã®åˆ¶å¾¡ç‚¹ã‚’è¨ˆç®—
     float strength = std::fmax(std::abs(p3.x - p0.x) * 0.5f, 50.0f);
     ImVec2 p1 = { p0.x + strength, p0.y };
     ImVec2 p2 = { p3.x - strength, p3.y };
 
-    // ƒxƒWƒF‹Èüã‚Ì“_‚ğ•]‰¿‚·‚éƒ‰ƒ€ƒ_®
+    // ãƒ™ã‚¸ã‚§æ›²ç·šä¸Šã®ç‚¹ã‚’è©•ä¾¡ã™ã‚‹ãƒ©ãƒ ãƒ€å¼
     auto evalBezier = [&](float t) -> ImVec2
         {
             float u = 1.0f - t;
@@ -145,8 +145,8 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
             );
         };
 
-    // --- yV‹KzŒÊ’·ƒTƒ“ƒvƒŠƒ“ƒO‚É‚æ‚éu^‚Ì’†‰›v‚Ì’T‹ ---
-    // ‹Èü‚Ìã‚ğ“™ŠÔŠu‚É•à‚İAÀÛ‚Ì’·‚³‚ğŒv‘ª‚·‚é
+    // --- ã€æ–°è¦ã€‘å¼§é•·ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã«ã‚ˆã‚‹ã€ŒçœŸã®ä¸­å¤®ã€ã®æ¢æ±‚ ---
+    // æ›²ç·šã®ä¸Šã‚’ç­‰é–“éš”ã«æ­©ã¿ã€å®Ÿéš›ã®é•·ã•ã‚’è¨ˆæ¸¬ã™ã‚‹
     const int SAMPLE_COUNT = 8;
     float lengths[SAMPLE_COUNT + 1];
     lengths[0] = 0.0f;
@@ -165,17 +165,17 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
         prevPoint = currPoint;
     }
 
-    // –Ú•W‚Æ‚·‚é‚Ì‚ÍA‘S‘Ì‚Ì’·‚³‚Ì‚¿‚å‚¤‚Ç”¼•ª
+    // ç›®æ¨™ã¨ã™ã‚‹ã®ã¯ã€å…¨ä½“ã®é•·ã•ã®ã¡ã‚‡ã†ã©åŠåˆ†
     float targetLength = totalLength * 0.5f;
-    float targetT = 0.5f; // ƒtƒH[ƒ‹ƒoƒbƒN—p
+    float targetT = 0.5f; // ãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯ç”¨
 
-    // –Ú•W‚Ì’·‚³‚É“’B‚·‚é parameter 't' ‚ğüŒ`•âŠÔ‚ÅŒ©‚Â‚¯o‚·
+    // ç›®æ¨™ã®é•·ã•ã«åˆ°é”ã™ã‚‹ parameter 't' ã‚’ç·šå½¢è£œé–“ã§è¦‹ã¤ã‘å‡ºã™
     for (int i = 0; i < SAMPLE_COUNT; ++i)
     {
         if (targetLength >= lengths[i] && targetLength <= lengths[i + 1])
         {
             float tMin = (float)i / (float)SAMPLE_COUNT;
-            float tMax = (float)i + 1 / (float)SAMPLE_COUNT; // ÀÛ‚É‚Í (float)(i+1)/SAMPLE_COUNT
+            float tMax = (float)i + 1 / (float)SAMPLE_COUNT; // å®Ÿéš›ã«ã¯ (float)(i+1)/SAMPLE_COUNT
             tMax = (float)(i + 1) / (float)SAMPLE_COUNT;
 
             float segmentLength = lengths[i + 1] - lengths[i];
@@ -188,21 +188,21 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
         }
     }
 
-    // yˆÀ‘S•Ùzƒm[ƒh‚Ìƒsƒ“i”¼Œa14.0f‚È‚Çj‚É–îˆó‚ª‚ß‚è‚Ü‚È‚¢‚æ‚¤At‚Ì”ÍˆÍ‚ğ§ŒÀ‚·‚é
-    // ‹——£‚ª’Z‚¢‚Æ‚«‚ÍA‚æ‚èŒµ‚µ‚­’†‰›•t‹ß‚É—¯‚Ü‚ç‚¹‚é
-    float minT = 40.0f / totalLength; // n“_‚©‚çÅ’á25ƒhƒbƒg—£‚·
-    float maxT = 1.0f - (40.0f / totalLength); // I“_‚©‚çÅ’á25ƒhƒbƒg—£‚·
+    // ã€å®‰å…¨å¼ã€‘ãƒãƒ¼ãƒ‰ã®ãƒ”ãƒ³ï¼ˆåŠå¾„14.0fãªã©ï¼‰ã«çŸ¢å°ãŒã‚ã‚Šè¾¼ã¾ãªã„ã‚ˆã†ã€tã®ç¯„å›²ã‚’åˆ¶é™ã™ã‚‹
+    // è·é›¢ãŒçŸ­ã„ã¨ãã¯ã€ã‚ˆã‚Šå³ã—ãä¸­å¤®ä»˜è¿‘ã«ç•™ã¾ã‚‰ã›ã‚‹
+    float minT = 40.0f / totalLength; // å§‹ç‚¹ã‹ã‚‰æœ€ä½25ãƒ‰ãƒƒãƒˆé›¢ã™
+    float maxT = 1.0f - (40.0f / totalLength); // çµ‚ç‚¹ã‹ã‚‰æœ€ä½25ãƒ‰ãƒƒãƒˆé›¢ã™
     if (minT < maxT)
     {
         targetT = std::fmax(minT, std::fmin(targetT, maxT));
     }
     else
     {
-        targetT = 0.5f; // ‹t“]‚·‚é‚Ù‚Ç‹ß‚¢‚È‚ç’†‰›ŒÅ’è
+        targetT = 0.5f; // é€†è»¢ã™ã‚‹ã»ã©è¿‘ã„ãªã‚‰ä¸­å¤®å›ºå®š
     }
     // ----------------------------------------------------
 
-    // ÚüiŒü‚«j‚ğ•]‰¿‚·‚éƒ‰ƒ€ƒ_®
+    // æ¥ç·šï¼ˆå‘ãï¼‰ã‚’è©•ä¾¡ã™ã‚‹ãƒ©ãƒ ãƒ€å¼
     auto evalTangent = [&](float t) -> ImVec2
         {
             float u = 1.0f - t;
@@ -239,7 +239,7 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
 
             const float size = 14.0f;
 
-            // –îˆó‚Ìæ’[‚ÆŒã•û‚Ì‰H‚ğ\’z
+            // çŸ¢å°ã®å…ˆç«¯ã¨å¾Œæ–¹ã®ç¾½ã‚’æ§‹ç¯‰
             ImVec2 tip = ImVec2(center.x + tan.x * size, center.y + tan.y * size);
             ImVec2 backA = ImVec2(
                 center.x - tan.x * size + perp.x * size * 0.75f,
@@ -254,7 +254,7 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
             drawList->AddTriangle(tip, backA, backB, IM_COL32(70, 45, 0, 255), 2.0f);
         };
 
-    // “±‚«o‚³‚ê‚½”ä—¦‚Å•`‰æ
+    // å°ãå‡ºã•ã‚ŒãŸæ¯”ç‡ã§æç”»
     drawArrowAt(targetT);
 }
 const std::string ASSET_DIR = "Data/Animation/StateData/";
@@ -560,7 +560,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                 drawList_->AddCircle(outputCenter_, pinRadius_, outputColor_, 24, 3.0f);
             }
 
-            // â‘ÎˆÊ’u‚Å”z’u‚µ‚½ƒ^ƒCƒgƒ‹‚Æƒsƒ“‚ÌŒã‚Å‚àANodeEditor‚Ö³‚µ‚¢‹éŒ`‚ğ“n‚·B
+            // çµ¶å¯¾ä½ç½®ã§é…ç½®ã—ãŸã‚¿ã‚¤ãƒˆãƒ«ã¨ãƒ”ãƒ³ã®å¾Œã§ã‚‚ã€NodeEditorã¸æ­£ã—ã„çŸ©å½¢ã‚’æ¸¡ã™ã€‚
             ImGui::SetCursorScreenPos(nodeMaximum_);
             ImGui::PopID();
             ed::EndNode();
@@ -785,8 +785,8 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     ed::EndDelete();
 
     // ------------------------------------------------------------
-    // ’Ç‰ÁF‘I‘ğ’†‚ÌƒŠƒ“ƒN‚ğ Delete / Backspace ‚Å’¼Úíœ
-    // BeginDelete ‘¤‚Ì”»’è‚ªE‚¢‚É‚­‚¢ê‡‚Ì•ÛŒ¯
+    // è¿½åŠ ï¼šé¸æŠä¸­ã®ãƒªãƒ³ã‚¯ã‚’ Delete / Backspace ã§ç›´æ¥å‰Šé™¤
+    // BeginDelete å´ã®åˆ¤å®šãŒæ‹¾ã„ã«ãã„å ´åˆã®ä¿é™º
     // ------------------------------------------------------------
     ed::LinkId selectedLinkId_;
     if (ed::GetSelectedLinks(&selectedLinkId_, 1) > 0)
@@ -967,7 +967,7 @@ void AnimationControllerComponent::DrawNodeEditorContent()
                                 useTransitionGraph = true;
                             }
                             ImGui::SameLine();
-                            ImGui::TextDisabled("(Blackboard‚Éƒpƒ‰ƒ[ƒ^‚ğ’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢)");
+                            ImGui::TextDisabled("(Blackboardã«ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¿½åŠ ã—ã¦ãã ã•ã„)");
                         }
                     }
 

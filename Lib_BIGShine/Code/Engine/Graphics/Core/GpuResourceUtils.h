@@ -3,11 +3,11 @@
 
 #include <d3d11.h>
 
-// GPU���\�[�X���[�e�B���e�B
+// GPUリソースユーティリティ
 class GpuResourceUtils
 {
 public:
-	// ���_�V�F�[�_�[�ǂݍ���
+	// 頂点シェーダー読み込み
 	static HRESULT LoadVertexShader(
 		ID3D11Device* device,
 		const char* filename,
@@ -16,20 +16,20 @@ public:
 		ID3D11InputLayout** inputLayout,
 		ID3D11VertexShader** vertexShader);
 
-	// �s�N�Z���V�F�[�_�[�ǂݍ���
+	// ピクセルシェーダー読み込み
 	static HRESULT LoadPixelShader(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11PixelShader** pixelShader);
 
-	// �e�N�X�`���ǂݍ���
+	// テクスチャ読み込み
 	static HRESULT LoadTexture(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc = nullptr);
 
-	// �e�N�X�`���ǂݍ���
+	// テクスチャ読み込み
 	static HRESULT LoadTexture(
 		ID3D11Device* device,
 		const void* data,
@@ -37,14 +37,14 @@ public:
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc = nullptr);
 
-	// �_�~�[�e�N�X�`���쐬
+	// ダミーテクスチャ作成
 	static HRESULT CreateDummyTexture(
 		ID3D11Device* device,
 		UINT color,
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc = nullptr);
 
-	// �萔�o�b�t�@�쐬
+	// 定数バッファ作成
 	static HRESULT CreateConstantBuffer(
 		ID3D11Device* device,
 		UINT bufferSize,

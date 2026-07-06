@@ -8,7 +8,7 @@ struct DecalData {
     DirectX::XMFLOAT4X4 worldMatrix;
     DirectX::XMFLOAT4 color;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
-    // �K�v�ɉ����ėD��x�������ǉ�
+    // 必要に応じて優先度や寿命を追加
 };
 
 class DecalManager {

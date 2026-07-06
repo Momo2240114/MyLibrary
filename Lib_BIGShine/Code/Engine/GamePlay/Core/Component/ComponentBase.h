@@ -15,12 +15,12 @@
 #include <nlohmann/json.hpp>
 
 
-class GameObject; // ‘O•ûéŒ¾
-class GameObjectManager; // ‘O•ûéŒ¾
-class GlTFModel; // ‘O•ûéŒ¾
+class GameObject; // å‰æ–¹å®£è¨€
+class GameObjectManager; // å‰æ–¹å®£è¨€
+class GlTFModel; // å‰æ–¹å®£è¨€
 
-/// GameObject‚Ö’Ç‰Á‚³‚ê‚é‹@”\’PˆÊ‚ÌŠî’êƒNƒ‰ƒXB
-/// Š—LŒ³‚Íweak_ptr‚ÅQÆ‚µAGameObject‚Æ‚ÌzŠÂQÆ‚ğ–h‚®B
+/// GameObjectã¸è¿½åŠ ã•ã‚Œã‚‹æ©Ÿèƒ½å˜ä½ã®åŸºåº•ã‚¯ãƒ©ã‚¹ã€‚
+/// æ‰€æœ‰å…ƒã¯weak_ptrã§å‚ç…§ã—ã€GameObjectã¨ã®å¾ªç’°å‚ç…§ã‚’é˜²ãã€‚
 class Component
 {
 public:
@@ -34,13 +34,13 @@ public:
     virtual void Submit(ID3D11DeviceContext* context_) {}
     virtual void Gui() {}
 
-    // ƒZ[ƒu—pFˆø”‚Ì json ƒIƒuƒWƒFƒNƒg‚É©•ª‚Ì•Ï”‚ğ‘‚«‚Ş
+    // ã‚»ãƒ¼ãƒ–ç”¨ï¼šå¼•æ•°ã® json ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«è‡ªåˆ†ã®å¤‰æ•°ã‚’æ›¸ãè¾¼ã‚€
     virtual void Serialize(nlohmann::json& json_) const {}
-    // ƒ[ƒh—pFˆø”‚Ì json ƒIƒuƒWƒFƒNƒg‚©‚ç©•ª‚Ì•Ï”‚ğ“Ç‚İo‚·
+    // ãƒ­ãƒ¼ãƒ‰ç”¨ï¼šå¼•æ•°ã® json ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã‚‰è‡ªåˆ†ã®å¤‰æ•°ã‚’èª­ã¿å‡ºã™
     virtual void Deserialize(const nlohmann::json& json_) {}
 
     //=========================================
-    // Š—LÒ(GameObject)‚Ìİ’è
+    // æ‰€æœ‰è€…(GameObject)ã®è¨­å®š
     //=========================================
     void SetGameObject(std::shared_ptr<GameObject> owner_)
     {
@@ -48,24 +48,24 @@ public:
     }
 
     //=========================================
-    // Š—LÒ(GameObject)‚Ìæ“¾
+    // æ‰€æœ‰è€…(GameObject)ã®å–å¾—
     //=========================================
     std::shared_ptr<GameObject> GetGameObject()
     {
         return gameObject.lock();
     }
 
-    //‚ ‚½‚©‚à©g‚Ìƒƒ“ƒo‚Å‚ ‚é‚©‚Ì‚æ‚¤‚Éƒ}ƒl[ƒWƒƒ[‚ğ•Ô‚·
+    //ã‚ãŸã‹ã‚‚è‡ªèº«ã®ãƒ¡ãƒ³ãƒã§ã‚ã‚‹ã‹ã®ã‚ˆã†ã«ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’è¿”ã™
     GameObjectManager& GetManager();
 
 
     bool IsEnabled() const { return enabled; }
     void SetEnabled(bool enabled_) { enabled = enabled_; }
 
-    // Start‚ªŠù‚ÉŒÄ‚Î‚ê‚½‚©‚Ç‚¤‚©
+    // StartãŒæ—¢ã«å‘¼ã°ã‚ŒãŸã‹ã©ã†ã‹
     bool IsStarted() const { return isStarted; }
 
-    // ƒtƒ‰ƒO‚ğè“®‚Å—§‚Ä‚éiGameObject‘¤‚©‚çStart‚ğŒÄ‚ÔÛ‚ÉƒZƒbƒg‚·‚éj
+    // ãƒ•ãƒ©ã‚°ã‚’æ‰‹å‹•ã§ç«‹ã¦ã‚‹ï¼ˆGameObjectå´ã‹ã‚‰Startã‚’å‘¼ã¶éš›ã«ã‚»ãƒƒãƒˆã™ã‚‹ï¼‰
     void SetStarted(bool started_) { isStarted = started_; }
 
 protected:

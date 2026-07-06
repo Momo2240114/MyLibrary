@@ -9,7 +9,7 @@ namespace NodeSystem
     {
         if (needsRebuild) Rebuild();
 
-        // ƒm[ƒh•]‰¿‘O‚ÉƒŠƒ“ƒNæ‚Ö’l‚ğ“]‘—‚µAŠeƒm[ƒh‚ªÅV‚Ì“ü—Í‚ğQÆ‚Å‚«‚é‚æ‚¤‚É‚·‚éB
+        // ãƒãƒ¼ãƒ‰è©•ä¾¡å‰ã«ãƒªãƒ³ã‚¯å…ˆã¸å€¤ã‚’è»¢é€ã—ã€å„ãƒãƒ¼ãƒ‰ãŒæœ€æ–°ã®å…¥åŠ›ã‚’å‚ç…§ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
         for (const auto& link_ : links) {
             Pin* start_ = FindPin(link_.startPinId);
             Pin* end_ = FindPin(link_.endPinId);
@@ -18,7 +18,7 @@ namespace NodeSystem
             }
         }
 
-        // Ú‘±ŠÖŒW‚©‚ç\’z‚µ‚½‡˜‚É]‚Á‚Äƒm[ƒh‚ğ•]‰¿‚·‚éB
+        // æ¥ç¶šé–¢ä¿‚ã‹ã‚‰æ§‹ç¯‰ã—ãŸé †åºã«å¾“ã£ã¦ãƒãƒ¼ãƒ‰ã‚’è©•ä¾¡ã™ã‚‹ã€‚
         for (Node* node_ : evaluationOrder)
         {
             node_->Evaluate();
@@ -39,13 +39,13 @@ namespace NodeSystem
             links.end()
         );
 
-        // Ú‘±ŠÖŒW‚Ì•ÏX‚ğŸ‰ñUpdate‚Ì•]‰¿‡˜‚Ö”½‰f‚·‚éB
+        // æ¥ç¶šé–¢ä¿‚ã®å¤‰æ›´ã‚’æ¬¡å›Updateæ™‚ã®è©•ä¾¡é †åºã¸åæ˜ ã™ã‚‹ã€‚
         needsRebuild = true;
     }
 
     void NodeGraph::Rebuild()
     {
-        // Œ»’iŠK‚Å‚Í“o˜^‡‚É•]‰¿‚·‚éBzŠÂŒŸo‚ğŠÜ‚Şƒgƒ|ƒƒWƒJƒ‹ƒ\[ƒg‚Í¡Œã‚ÌŠg’£“_B
+        // ç¾æ®µéšã§ã¯ç™»éŒ²é †ã«è©•ä¾¡ã™ã‚‹ã€‚å¾ªç’°æ¤œå‡ºã‚’å«ã‚€ãƒˆãƒãƒ­ã‚¸ã‚«ãƒ«ã‚½ãƒ¼ãƒˆã¯ä»Šå¾Œã®æ‹¡å¼µç‚¹ã€‚
         evaluationOrder.clear();
         for (auto& node_ : nodes) {
             evaluationOrder.push_back(node_.get());

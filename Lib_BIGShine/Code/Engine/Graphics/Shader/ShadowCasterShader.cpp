@@ -1,10 +1,10 @@
 #include "ShadowCasterShader.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Åu‰e‘‚«‚İ—pv‚Ì’¸“_ƒVƒF[ƒ_[‚ğ“Ç‚İ‚Ş
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§ã€Œå½±æ›¸ãè¾¼ã¿ç”¨ã€ã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’èª­ã¿è¾¼ã‚€
 ShadowCasterShader::ShadowCasterShader(ID3D11Device* device)
 {
-    // VS‚¾‚¯“Ç‚İ‚ŞBPS‚Í•s—v‚È‚Ì‚Ånullptr‚Å‚æ‚¢
+    // VSã ã‘èª­ã¿è¾¼ã‚€ã€‚PSã¯ä¸è¦ãªã®ã§nullptrã§ã‚ˆã„
     CPUResourceLoader::LoadVertexShader(device, "Shader/ShadowCasterVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
@@ -16,7 +16,7 @@ void ShadowCasterShader::Begin(const RenderContext& rc)
     ID3D11DeviceContext* dc = rc.deviceContext;
     dc->IASetInputLayout(inputLayout.Get());
     dc->VSSetShader(vertexShader.Get(), nullptr, 0);
-    dc->PSSetShader(nullptr, nullptr, 0); // [“x‚Ì‚İ‚È‚Ì‚ÅƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚Í•s—v
+    dc->PSSetShader(nullptr, nullptr, 0); // æ·±åº¦ã®ã¿ãªã®ã§ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¯ä¸è¦
 }
 
 void ShadowCasterShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh)
@@ -26,6 +26,6 @@ void ShadowCasterShader::Update(const RenderContext& rc, const GltfModelCommpone
 
 void ShadowCasterShader::End(const RenderContext& rc)
 {
-    // “Á‚É‰½‚à‚¹‚¸‚Æ‚àƒVƒF[ƒ_[Ø‚è‘Ö‚¦‚Åã‘‚«‚³‚ê‚é‚ªA–¾¦“I‚É‰ğœ‚·‚é‚È‚ç
+    // ç‰¹ã«ä½•ã‚‚ã›ãšã¨ã‚‚ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼åˆ‡ã‚Šæ›¿ãˆã§ä¸Šæ›¸ãã•ã‚Œã‚‹ãŒã€æ˜ç¤ºçš„ã«è§£é™¤ã™ã‚‹ãªã‚‰
     rc.deviceContext->VSSetShader(nullptr, nullptr, 0);
 }

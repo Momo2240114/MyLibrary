@@ -33,7 +33,7 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     CONTAINMENT_SHAPE shape = CONTAINMENT_SHAPE::CYLINDER;
-    uint32_t targetMask = static_cast<uint32_t>(GameObject::LayerType::Player);
+    uint32_t targetMask = static_cast<uint32_t>(LayerType::Player);
     float radius = 5.0f;
     float halfHeight = 2.0f;
     float targetRadius = 0.35f;

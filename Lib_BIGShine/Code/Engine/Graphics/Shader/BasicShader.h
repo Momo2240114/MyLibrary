@@ -10,19 +10,19 @@ public:
 	BasicShader(ID3D11Device* device);
 	~BasicShader() override = default;
 
-	// –¼‘O‚ð•ÛŽ‚·‚éƒƒ“ƒo•Ï”
+	// åå‰ã‚’ä¿æŒã™ã‚‹ãƒ¡ãƒ³ãƒå¤‰æ•°
 	const std::string& GetName() const override {
 		static const std::string name = "Basic";
 		return name;
 	}
 
-	// ŠJŽnˆ—
+	// é–‹å§‹å‡¦ç†
 	void Begin(const RenderContext& rc) override;
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override;
 
-	// I—¹ˆ—
+	// çµ‚äº†å‡¦ç†
 	void End(const RenderContext& rc) override;
 
 private:

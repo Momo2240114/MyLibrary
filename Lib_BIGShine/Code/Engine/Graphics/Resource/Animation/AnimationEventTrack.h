@@ -17,7 +17,7 @@ class AnimationEventTrack
 {
 public:
 	AnimationEventTrack();
-	// ƒCƒxƒ“ƒg‘€ì
+	// ã‚¤ãƒ™ãƒ³ãƒˆæ“ä½œ
 	void AddEvent(const std::string& label_, float start_, float end_, unsigned int color_);
 	void DeleteEvent(int index_);
 	void DuplicateEvent(int index_);
@@ -27,16 +27,16 @@ public:
 	void Copy();
 	void Paste();
 
-	// ImGui •`‰æ
+	// ImGui æç”»
 	bool DrawSequencer(
-		float* currentTime_,             // Œ»İ‚Ì•b”
+		float* currentTime_,             // ç¾åœ¨ã®ç§’æ•°
 		bool* expanded_,
 		int* selectedEntry_,
-		float* firstVisibleTime_,        // ƒXƒNƒ[ƒ‹ˆÊ’ui•bj
+		float* firstVisibleTime_,        // ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ä½ç½®ï¼ˆç§’ï¼‰
 		float animationLengthSeconds_
 	);
 
-	// ƒf[ƒ^ƒAƒNƒZƒX
+	// ãƒ‡ãƒ¼ã‚¿ã‚¢ã‚¯ã‚»ã‚¹
 	int GetItemCount() const { return static_cast<int>(events.size()); }
 	const AnimationEvent& GetEvent(int index) const { return events[index]; }
 	AnimationEvent& GetEvent(int index) { return events[index]; }
@@ -44,11 +44,11 @@ public:
 private:
 	std::vector<AnimationEvent> events;
 	float itemHeight = 20;
-	// •ÒWó‘Ô
+	// ç·¨é›†çŠ¶æ…‹
 	int editingEntry;
 	int editingPart;
-	// ƒRƒs[—p
+	// ã‚³ãƒ”ãƒ¼ç”¨
 	AnimationEvent clipboard;
-	// “à•”ƒ†[ƒeƒBƒŠƒeƒB
-	int GetCustomHeight(int index) const { return 0; } // Šg’£—p
+	// å†…éƒ¨ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£
+	int GetCustomHeight(int index) const { return 0; } // æ‹¡å¼µç”¨
 };

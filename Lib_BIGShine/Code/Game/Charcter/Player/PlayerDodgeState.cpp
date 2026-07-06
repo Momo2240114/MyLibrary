@@ -2,8 +2,8 @@
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
-#include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "PlayerControllerComponent.h"
 
@@ -153,45 +153,13 @@ void PlayerDodgeState::HandleJustDodgeSuccess()
 {
     justDodgeSucceeded = true;
     SetCounterAvailable(true);
-    ApplyJustDodgeSlowMotion();
 
     const std::shared_ptr<GameObject> owner_ = GetOwner();
     if (owner_)
     {
-        owner_->ExecuteAction("JustDodge_Success");
-    }
-}
-
-void PlayerDodgeState::ApplyJustDodgeSlowMotion()
-{
-    if (!useSlowMotion) return;
-    if (slowMotionDuration <= 0.0f) return;
-
-    const std::shared_ptr<GameObject> owner_ = GetOwner();
-    if (!owner_) return;
-
-    const std::shared_ptr<TimeManager> timeManager_ =
-        owner_->GetManager().GetTimeManager();
-    if (!timeManager_) return;
-
-    const uint32_t selfLayerMask_ =
-        static_cast<uint32_t>(owner_->GetLayer());
-    const uint32_t otherLayerMask_ =
-        slowMotionLayerMask & ~selfLayerMask_;
-    if (otherLayerMask_ != 0u)
-    {
-        timeManager_->TriggerHitStop(
-            otherLayerMask_,
-            slowMotionDuration,
-            slowMotionScale);
-    }
-
-    if (selfLayerMask_ != 0u)
-    {
-        timeManager_->TriggerHitStop(
-            selfLayerMask_,
-            slowMotionDuration * selfSlowMotionDurationRatio,
-            slowMotionScale);
+        const std::shared_ptr<JustDodgeReactionComponent> reaction_ =
+            owner_->GetComponent<JustDodgeReactionComponent>();
+        if (reaction_) reaction_->ExecuteReaction();
     }
 }
 

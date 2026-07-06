@@ -11,7 +11,7 @@
 class AnimationControllerComponent;
 
 
-// �X�e�[�g�}�V�������f���������߂̃C���^�[�t�F�[�X
+// ステートマシンが判断を下すためのインターフェース
 class AnimationStateMachineComponent : public Component
 {
 public:
@@ -23,12 +23,12 @@ public:
     void Start() override;
     void Update(float deltaTime) override;
 
-    // AI���u����̃X�e�[�g�֑J�ڂ���v�Ɩ��߂��邽�߂̑���
+    // AIが「特定のステートへ遷移せよ」と命令するための窓口
     void RequestStateChange(const std::string& stateName, float duration = 0.2f);
 
 private:
     AnimationControllerComponent* m_targetController = nullptr;
 
-    // ���胍�W�b�N
+    // 判定ロジック
     void EvaluateTransitions();
 };

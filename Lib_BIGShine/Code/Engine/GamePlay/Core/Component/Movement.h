@@ -6,7 +6,7 @@
 
 enum class RotationType {
     None,
-    LookAtVelocity, // ˆÚ“®•ûŒü‚ğŒü‚­
+    LookAtVelocity, // ç§»å‹•æ–¹å‘ã‚’å‘ã
 };
 
 class Movement : public Component
@@ -15,7 +15,7 @@ public:
     const std::string& GetName() const override { static std::string name = "Movement"; return name; }
 
     float moveSpeed = 5.0f;
-    float rotateSpeed = 10.0f; // •âŠÔ‘¬“x
+    float rotateSpeed = 10.0f; // è£œé–“é€Ÿåº¦
 
     void Start() override;
     void Update(float deltaTime) override;

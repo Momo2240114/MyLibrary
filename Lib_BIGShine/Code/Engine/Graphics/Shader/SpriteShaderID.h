@@ -4,5 +4,5 @@ enum class SpriteShaderID
 {
     Default,
     Dissolve,
-    // ‘¼‚ÌŠg’£—pƒVƒF[ƒ_
+    // ä»–ã®æ‹¡å¼µç”¨ã‚·ã‚§ãƒ¼ãƒ€
 };

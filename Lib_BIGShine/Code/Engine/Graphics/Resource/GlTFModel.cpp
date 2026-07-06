@@ -113,7 +113,7 @@ void GltfModelCommponennt::Node::serialize(Archive& archive)
 template<class Archive>
 void GltfModelCommponennt::Material::serialize(Archive& archive)
 {
-	// enum‚ğ–¾¦“I‚Éint‚ÉƒLƒƒƒXƒg‚µ‚Äˆµ‚¤‚Ì‚ªÅ‚àˆÀ‘S‚Å‚·
+	// enumã‚’æ˜ç¤ºçš„ã«intã«ã‚­ãƒ£ã‚¹ãƒˆã—ã¦æ‰±ã†ã®ãŒæœ€ã‚‚å®‰å…¨ã§ã™
 	int tempAlphaMode = static_cast<int>(alphaMode);
 	int tempShaderId = static_cast<int>(shaderId);
 	archive(
@@ -132,7 +132,7 @@ void GltfModelCommponennt::Material::serialize(Archive& archive)
 		cereal::make_nvp("emissiveColor.x", emissiveColor.x),
 		cereal::make_nvp("emissiveColor.y", emissiveColor.y),
 		cereal::make_nvp("emissiveColor.z", emissiveColor.z),
-		// ˆÈ~‚Ìfloat
+		// ä»¥é™ã®float
 		CEREAL_NVP(metalness),
 		CEREAL_NVP(roughness),
 		CEREAL_NVP(occlusionStrength),
@@ -232,16 +232,16 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 {
 	Clear();
 
-	// 1. –¼‘O‚Ì‹L‰¯
+	// 1. åå‰ã®è¨˜æ†¶
 	std::filesystem::path filePath(filename);
 	modelFullPass = filename;
 	modelName = filePath.stem().string();
 
-	// 2. _“a‚©‚ç‚·‚Å‚ÉGPUƒoƒbƒtƒ@“™‚à\’zÏ‚İ‚ÌƒŠƒ\[ƒX‚ğ“¾‚é
+	// 2. ç¥æ®¿ã‹ã‚‰ã™ã§ã«GPUãƒãƒƒãƒ•ã‚¡ç­‰ã‚‚æ§‹ç¯‰æ¸ˆã¿ã®ãƒªã‚½ãƒ¼ã‚¹ã‚’å¾—ã‚‹
 	auto resource = ModelResourceManager::Instance().GetOrCreateResource(device, filename);
 	if (!resource) return;
 
-	// 3. ƒf[ƒ^‚ğˆø‚«Ê‚·iƒAƒjƒ[ƒVƒ‡ƒ“Ä¶‚È‚Ç‚ÅŒÂ•Ê‚É‘‚«Š·‚¦‚é‚½‚ßƒRƒs[‚·‚éj
+	// 3. ãƒ‡ãƒ¼ã‚¿ã‚’å¼•ãå†™ã™ï¼ˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿãªã©ã§å€‹åˆ¥ã«æ›¸ãæ›ãˆã‚‹ãŸã‚ã‚³ãƒ”ãƒ¼ã™ã‚‹ï¼‰
 	this->materials = resource->materials;
 	this->nodes = resource->nodes;
 	this->meshes = resource->meshes;
@@ -253,8 +253,8 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 	}
 
 
-	// 4. ƒRƒs[‚µ‚½‚±‚Æ‚É‚æ‚Á‚Äƒ|ƒCƒ“ƒ^‚ªŒÃ‚¢êŠ‚ğw‚µ‚Ä‚¢‚é‚Ì‚ÅA
-	// u©•ª©g‚Ì vectorv‚ğw‚·‚æ‚¤‚ÉÄŒ‹ü‚·‚é
+	// 4. ã‚³ãƒ”ãƒ¼ã—ãŸã“ã¨ã«ã‚ˆã£ã¦ãƒã‚¤ãƒ³ã‚¿ãŒå¤ã„å ´æ‰€ã‚’æŒ‡ã—ã¦ã„ã‚‹ã®ã§ã€
+	// ã€Œè‡ªåˆ†è‡ªèº«ã® vectorã€ã‚’æŒ‡ã™ã‚ˆã†ã«å†çµç·šã™ã‚‹
 	RebindInternalPointers();
 
     bindNodePoses.resize(nodes.size());
@@ -265,13 +265,13 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
         bindNodePoses[nodeIndex_].scale = nodes[nodeIndex_].scale;
     }
 
-	// 5. s—ñ‚ÌŠm’è
+	// 5. è¡Œåˆ—ã®ç¢ºå®š
 	UpdateTransform();
 }
 
 void GltfModelCommponennt::RebindInternalPointers()
 {
-	// ƒm[ƒh‚ÌeqŠÖŒW‚ğÄŒ‹ü
+	// ãƒãƒ¼ãƒ‰ã®è¦ªå­é–¢ä¿‚ã‚’å†çµç·š
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
 	{
 		Node& node = nodes.at(nodeIndex);
@@ -282,7 +282,7 @@ void GltfModelCommponennt::RebindInternalPointers()
 		}
 	}
 
-	// ƒƒbƒVƒ…‚Æƒ}ƒeƒŠƒAƒ‹Eƒm[ƒhEƒ{[ƒ“‚ÌÄŒ‹ü
+	// ãƒ¡ãƒƒã‚·ãƒ¥ã¨ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ»ãƒãƒ¼ãƒ‰ãƒ»ãƒœãƒ¼ãƒ³ã®å†çµç·š
 	for (Mesh& mesh : meshes)
 	{
 		mesh.material = &materials.at(mesh.materialIndex);
@@ -312,8 +312,8 @@ void GltfModelCommponennt::Gui()
 	ImGui::Separator();
 	ImGui::Text("Root Rotation Offset");
 
-	// lŒ³”‚ğ float 4‚Â‚Æ‚µ‚Ä•ÒW‚·‚é
-	// Quaternion ‚Í {x, y, z, w} ‚Ì‡‚Å•À‚ñ‚Å‚¨‚é‚½‚ßA‚»‚Ì‚æ‚¤‚Éˆµ‚¤
+	// å››å…ƒæ•°ã‚’ float 4ã¤ã¨ã—ã¦ç·¨é›†ã™ã‚‹
+	// Quaternion ã¯ {x, y, z, w} ã®é †ã§ä¸¦ã‚“ã§ãŠã‚‹ãŸã‚ã€ãã®ã‚ˆã†ã«æ‰±ã†
 	float rot[4] = { _RootRotationOffset.x, _RootRotationOffset.y, _RootRotationOffset.z, _RootRotationOffset.w };
 
 	if (ImGui::DragFloat4("##RootOffset", rot, 0.01f))
@@ -322,36 +322,36 @@ void GltfModelCommponennt::Gui()
 		_RootRotationOffset.y = rot[1];
 		_RootRotationOffset.z = rot[2];
 		_RootRotationOffset.w = rot[3];
-		// ”O‚Ì‚½‚ß³‹K‰»‚µ‚Ä‚¨‚­
+		// å¿µã®ãŸã‚æ­£è¦åŒ–ã—ã¦ãŠã
 		_RootRotationOffset.Normalize();
 		MarkTransformDirty();
 	}
 
 
 
-	// •\¦—p‚Ì–¼‘OƒŠƒXƒg
+	// è¡¨ç¤ºç”¨ã®åå‰ãƒªã‚¹ãƒˆ
 	static const char* shaderNames[] = { "Basic" ,"PBR","Toon","ToonPBR"};
 
-	// Œ»İ‚ÌID‚ğintŒ^‚Æ‚µ‚Äˆµ‚¤
+	// ç¾åœ¨ã®IDã‚’intå‹ã¨ã—ã¦æ‰±ã†
 	int currentIdx = static_cast<int>(shaderId);
 
-	// ƒRƒ“ƒ{ƒ{ƒbƒNƒX‚Ìì¬
+	// ã‚³ãƒ³ãƒœãƒœãƒƒã‚¯ã‚¹ã®ä½œæˆ
 	if (ImGui::Combo("Shader ID", &currentIdx, shaderNames, IM_ARRAYSIZE(shaderNames)))
 	{
-		// ‘I‘ğ‚ª•ÏX‚³‚ê‚½‚ç—ñ‹“Œ^‚É–ß‚µ‚Ä‘ã“ü
+		// é¸æŠãŒå¤‰æ›´ã•ã‚ŒãŸã‚‰åˆ—æŒ™å‹ã«æˆ»ã—ã¦ä»£å…¥
 		shaderId = static_cast<ModelShaderID>(currentIdx);
 	}
 	ImGui::Separator();
 	ImGui::Text("Model Selector");
 
-	// --- ƒ‚ƒfƒ‹‘I‘ğUI ---
+	// --- ãƒ¢ãƒ‡ãƒ«é¸æŠUI ---
 	const std::string rootPath = "Data/Model";
 
-	// static•Ï”‚Å‘I‘ğó‘Ô‚ğ•Û
+	// staticå¤‰æ•°ã§é¸æŠçŠ¶æ…‹ã‚’ä¿æŒ
 	static std::string selectedDir = "";
 	static std::string selectedFile = "";
 
-	// 1. Data/Model “à‚ÌƒtƒHƒ‹ƒ_‚ğˆê——•\¦
+	// 1. Data/Model å†…ã®ãƒ•ã‚©ãƒ«ãƒ€ã‚’ä¸€è¦§è¡¨ç¤º
 	if (ImGui::BeginCombo("Select Folder", selectedDir.empty() ? "Choose a folder..." : selectedDir.c_str()))
 	{
 		if (std::filesystem::exists(rootPath) && std::filesystem::is_directory(rootPath)) {
@@ -360,7 +360,7 @@ void GltfModelCommponennt::Gui()
 					std::string dirName = entry.path().filename().string();
 					if (ImGui::Selectable(dirName.c_str(), selectedDir == dirName)) {
 						selectedDir = dirName;
-						selectedFile = ""; // ƒtƒHƒ‹ƒ_‚ğ•Ï‚¦‚½‚çƒtƒ@ƒCƒ‹‘I‘ğ‚ğƒŠƒZƒbƒg
+						selectedFile = ""; // ãƒ•ã‚©ãƒ«ãƒ€ã‚’å¤‰ãˆãŸã‚‰ãƒ•ã‚¡ã‚¤ãƒ«é¸æŠã‚’ãƒªã‚»ãƒƒãƒˆ
 					}
 				}
 			}
@@ -368,7 +368,7 @@ void GltfModelCommponennt::Gui()
 		ImGui::EndCombo();
 	}
 
-	// 2. ‘I‘ğ‚³‚ê‚½ƒtƒHƒ‹ƒ_“à‚Ì .gltf / .glb ‚ğ•\¦
+	// 2. é¸æŠã•ã‚ŒãŸãƒ•ã‚©ãƒ«ãƒ€å†…ã® .gltf / .glb ã‚’è¡¨ç¤º
 	if (!selectedDir.empty()) {
 		std::string targetDirPath = rootPath + "/" + selectedDir;
 
@@ -377,7 +377,7 @@ void GltfModelCommponennt::Gui()
 				for (const auto& entry : std::filesystem::recursive_directory_iterator(targetDirPath)) {
 					std::string ext = entry.path().extension().string();
 					if (ext == ".gltf" || ext == ".glb") {
-						// ƒtƒHƒ‹ƒ_“à‚©‚ç‚Ì‘Š‘ÎƒpƒX‚ğ•\¦
+						// ãƒ•ã‚©ãƒ«ãƒ€å†…ã‹ã‚‰ã®ç›¸å¯¾ãƒ‘ã‚¹ã‚’è¡¨ç¤º
 						std::string relPath = std::filesystem::relative(entry.path(), targetDirPath).string();
 						if (ImGui::Selectable(relPath.c_str(), selectedFile == relPath)) {
 							selectedFile = relPath;
@@ -389,61 +389,61 @@ void GltfModelCommponennt::Gui()
 		}
 	}
 
-	// 3. ƒ[ƒhƒ{ƒ^ƒ“
+	// 3. ãƒ­ãƒ¼ãƒ‰ãƒœã‚¿ãƒ³
 	if (!selectedFile.empty()) {
 		if (ImGui::Button("Load Selected Model", ImVec2(-1, 0))) {
 			std::string fullPath = rootPath + "/" + selectedDir + "/" + selectedFile;
 
-			// ƒ[ƒh‘O‚ÉŠù‘¶ƒf[ƒ^‚ğƒNƒŠƒA
+			// ãƒ­ãƒ¼ãƒ‰å‰ã«æ—¢å­˜ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¯ãƒªã‚¢
 			this->Clear();
 
-			// ƒ[ƒhÀs (device‚Í‚Ç‚±‚©‚ç‚©æ“¾‚·‚é•K—v‚ª‚ ‚è‚Ü‚·B—á: Graphics::GetDevice())
-			// ‚±‚±‚Å‚Í‰¼‚É extern ‚âƒOƒ[ƒoƒ‹‚©‚çæ“¾‚·‚é‘z’è‚Å‚·
+			// ãƒ­ãƒ¼ãƒ‰å®Ÿè¡Œ (deviceã¯ã©ã“ã‹ã‚‰ã‹å–å¾—ã™ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚ä¾‹: Graphics::GetDevice())
+			// ã“ã“ã§ã¯ä»®ã« extern ã‚„ã‚°ãƒ­ãƒ¼ãƒãƒ«ã‹ã‚‰å–å¾—ã™ã‚‹æƒ³å®šã§ã™
 			auto device = GraphicsDeviceManager::Instance().GetDevice();
 			LoadModel(device, fullPath.c_str());
 		}
 	}
 
-	// --- ’Ç‰ÁFƒ_ƒCƒAƒƒO‚Å‚Ìƒtƒ@ƒCƒ‹‘I‘ğ ---
+	// --- è¿½åŠ ï¼šãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã§ã®ãƒ•ã‚¡ã‚¤ãƒ«é¸æŠ ---
 	ImGui::Spacing();
 	ImGui::Separator();
 	ImGui::Spacing();
 
-	// ƒGƒNƒXƒvƒ[ƒ‰[‚©‚ç’¼Úƒ‚ƒfƒ‹‚ğ“Ç‚İ‚±‚Şƒ{ƒ^ƒ“
+	// ã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ãƒ¼ã‹ã‚‰ç›´æ¥ãƒ¢ãƒ‡ãƒ«ã‚’èª­ã¿ã“ã‚€ãƒœã‚¿ãƒ³
 	if (ImGui::Button("Browse via Dialog...", ImVec2(-1, 0)))
 	{
-		// Windows‚Ìƒ_ƒCƒAƒƒO‚ğŠJ‚«AglTF/glbƒtƒ@ƒCƒ‹‚ğ‘I‘ğ‚³‚¹‚é
-		// ‰ŠúƒfƒBƒŒƒNƒgƒŠ‚Í "Data/Model" ‚ğ‹N“_‚Æ‚·‚é
-		std::string filePath = WindowsDialogHelper::OpenGltfDialog(L"ƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢", rootPath);
+		// Windowsã®ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’é–‹ãã€glTF/glbãƒ•ã‚¡ã‚¤ãƒ«ã‚’é¸æŠã•ã›ã‚‹
+		// åˆæœŸãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¯ "Data/Model" ã‚’èµ·ç‚¹ã¨ã™ã‚‹
+		std::string filePath = WindowsDialogHelper::OpenGltfDialog(L"ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é¸æŠã—ã¦ãã ã•ã„", rootPath);
 
 		if (!filePath.empty())
 		{
-			// —á: "Data/Model/Hero/Knight/knight.gltf" ‚Æ‚¢‚¤ƒpƒX‚ª•Ô‚Á‚Ä‚«‚½ê‡‚Ìˆ—
+			// ä¾‹: "Data/Model/Hero/Knight/knight.gltf" ã¨ã„ã†ãƒ‘ã‚¹ãŒè¿”ã£ã¦ããŸå ´åˆã®å‡¦ç†
 			std::filesystem::path selectedPath(filePath);
 			std::filesystem::path base(rootPath);
 
-			// rootPath ("Data/Model") ‚©‚ç‚Ì‘Š‘ÎƒpƒX‚ğŒvZ‚·‚é
-			// —á: "Hero/Knight/knight.gltf"
+			// rootPath ("Data/Model") ã‹ã‚‰ã®ç›¸å¯¾ãƒ‘ã‚¹ã‚’è¨ˆç®—ã™ã‚‹
+			// ä¾‹: "Hero/Knight/knight.gltf"
 			std::filesystem::path relativeToRoot = std::filesystem::relative(selectedPath, base);
 
 			if (!relativeToRoot.empty() && relativeToRoot.string().find("..") == std::string::npos)
 			{
-				// Å‰‚ÌŠK‘w‚ğ selectedDir ‚Æ‚·‚é (—á: "Hero")
+				// æœ€åˆã®éšå±¤ã‚’ selectedDir ã¨ã™ã‚‹ (ä¾‹: "Hero")
 				auto it = relativeToRoot.begin();
 				selectedDir = it->string();
 
-				// c‚è‚Ì•”•ªiƒTƒuƒtƒHƒ‹ƒ_‚ğŠÜ‚Şƒtƒ@ƒCƒ‹ƒpƒXj‚ğ selectedFile ‚Æ‚·‚é (—á: "Knight/knight.gltf")
+				// æ®‹ã‚Šã®éƒ¨åˆ†ï¼ˆã‚µãƒ–ãƒ•ã‚©ãƒ«ãƒ€ã‚’å«ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ï¼‰ã‚’ selectedFile ã¨ã™ã‚‹ (ä¾‹: "Knight/knight.gltf")
 				std::filesystem::path remainingPath;
 				for (++it; it != relativeToRoot.end(); ++it)
 				{
 					remainingPath /= *it;
 				}
-				// ImGui‚ÌŠù‘¶ƒƒWƒbƒN‚É‡‚í‚¹‚ÄA‹æØ‚è•¶š‚ğ”Ä—p“I‚ÈƒtƒH[ƒ}ƒbƒg‚É“ˆê
+				// ImGuiã®æ—¢å­˜ãƒ­ã‚¸ãƒƒã‚¯ã«åˆã‚ã›ã¦ã€åŒºåˆ‡ã‚Šæ–‡å­—ã‚’æ±ç”¨çš„ãªãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã«çµ±ä¸€
 				selectedFile = remainingPath.generic_string();
 			}
 			else
 			{
-				// –œ‚ªˆê Data/Model ŠO‚Ìƒtƒ@ƒCƒ‹‚ª‘I‚Î‚ê‚½ê‡‚ÌˆÀ‘S•Ù
+				// ä¸‡ãŒä¸€ Data/Model å¤–ã®ãƒ•ã‚¡ã‚¤ãƒ«ãŒé¸ã°ã‚ŒãŸå ´åˆã®å®‰å…¨å¼
 				selectedDir = "";
 				selectedFile = "";
 			}
@@ -455,7 +455,7 @@ void GltfModelCommponennt::Gui()
 
 	ImGui::Text("RootMotion Selector");
 
-	// Œ»İ‚ÌRootMotion–¼‚ğ•Û‚·‚éƒCƒ“ƒfƒbƒNƒX‚ğ“Á’è
+	// ç¾åœ¨ã®RootMotionåã‚’ä¿æŒã™ã‚‹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ç‰¹å®š
 	int currentRootMotionIdx = -1;
 	for (int i = 0; i < nodes.size(); ++i) {
 		if (nodes[i].name == m_RootMotionName) {
@@ -464,17 +464,17 @@ void GltfModelCommponennt::Gui()
 		}
 	}
 
-	// ‘I‘ğ—p‚ÌƒRƒ“ƒ{ƒ{ƒbƒNƒX‚ğì¬
+	// é¸æŠç”¨ã®ã‚³ãƒ³ãƒœãƒœãƒƒã‚¯ã‚¹ã‚’ä½œæˆ
 	const char* previewValue = (currentRootMotionIdx != -1) ? nodes[currentRootMotionIdx].name.c_str() : "None";
 
 	if (ImGui::BeginCombo("RootMotion Node", previewValue))
 	{
-		// None‚ğ‘I‘ğ‚Å‚«‚é‚æ‚¤‚É‚·‚é
+		// Noneã‚’é¸æŠã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 		if (ImGui::Selectable("None", currentRootMotionIdx == -1)) {
 			m_RootMotionName = "";
 		}
 
-		// ‚·‚×‚Ä‚Ìƒm[ƒh‚ğƒŠƒXƒg‰»
+		// ã™ã¹ã¦ã®ãƒãƒ¼ãƒ‰ã‚’ãƒªã‚¹ãƒˆåŒ–
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			bool isSelected = (i == currentRootMotionIdx);
@@ -483,7 +483,7 @@ void GltfModelCommponennt::Gui()
 				m_RootMotionName = nodes[i].name;
 			}
 
-			// ‘I‘ğ‚³‚ê‚½‚ç©“®“I‚ÉƒXƒNƒ[ƒ‹‚·‚é‹@”\‚ğ•t—^
+			// é¸æŠã•ã‚ŒãŸã‚‰è‡ªå‹•çš„ã«ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹æ©Ÿèƒ½ã‚’ä»˜ä¸
 			if (isSelected) {
 				ImGui::SetItemDefaultFocus();
 			}
@@ -494,7 +494,7 @@ void GltfModelCommponennt::Gui()
 	ShowMeshDetailsUI();
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“’Ç‰Á“Ç‚İ‚İ
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¿½åŠ èª­ã¿è¾¼ã¿
 void GltfModelCommponennt::AppendAnimations(const char* filename)
 {
 	std::filesystem::path filepath(filename);
@@ -503,10 +503,10 @@ void GltfModelCommponennt::AppendAnimations(const char* filename)
 	if (filepath.extension() == ".gltf" ||
 		filepath.extension() == ".glb")
 	{
-		// ”Ä—pƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+		// æ±ç”¨ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
 		GLTFImporter importer(filename);
 
-		// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^“Ç‚İæ‚è
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
 		importer.LoadAnimations(animations, nodes);
 	}
 	else
@@ -515,7 +515,7 @@ void GltfModelCommponennt::AppendAnimations(const char* filename)
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ƒCƒ“ƒfƒbƒNƒXæ“¾
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 int GltfModelCommponennt::GetAnimationIndex(const char* name) const
 {
 	for (size_t animationIndex = 0; animationIndex < animations.size(); ++animationIndex)
@@ -528,7 +528,7 @@ int GltfModelCommponennt::GetAnimationIndex(const char* name) const
 	return -1;
 }
 
-// ƒm[ƒhƒCƒ“ƒfƒbƒNƒXæ“¾
+// ãƒãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 int GltfModelCommponennt::GetNodeIndex(const char* name) const
 {
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
@@ -550,7 +550,7 @@ GltfModelCommponennt::Node& GltfModelCommponennt::GetNodes(std::string nodeName)
 			return nodes.at(nodeIndex);
 		}
 	}
-	assert(L"ƒm[ƒh‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ");
+	assert(L"ãƒãƒ¼ãƒ‰ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“");
 }
 
 void GltfModelCommponennt::UpdateNodeRecursive(
@@ -558,7 +558,8 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 	const DirectX::XMMATRIX& parentGlobalTransform_,
 	const DirectX::XMMATRIX& parentWorldTransform_,
 	const DirectX::XMMATRIX& modelScaleMat_,
-	bool isRoot_)
+	bool isRoot_,
+	bool updateChildren_)
 {
 	const DirectX::XMMATRIX scaleTransform_ =
 		DirectX::XMMatrixScaling(node_.scale.x, node_.scale.y, node_.scale.z);
@@ -583,6 +584,8 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 	DirectX::XMStoreFloat4x4(&node_.globalTransform, globalTransform_);
 	DirectX::XMStoreFloat4x4(&node_.worldTransform, worldTransform_);
 
+	if (!updateChildren_) return;
+
 	for (Node* child_ : node_.children)
 	{
 		if (!child_) continue;
@@ -594,6 +597,31 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 			modelScaleMat_,
 			false);
 	}
+}
+
+void GltfModelCommponennt::UpdateNodeTransformOnly(int nodeIndex_)
+{
+	if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes.size())) return;
+
+	const std::shared_ptr<GameObject> owner_ = GetGameObject();
+	if (!owner_ || !owner_->transform) return;
+
+	Node& node_ = nodes[nodeIndex_];
+	const bool isRoot_ = node_.parent == nullptr;
+	const DirectX::XMMATRIX parentGlobalTransform_ = isRoot_
+		? DirectX::XMMatrixIdentity()
+		: DirectX::XMLoadFloat4x4(&node_.parent->globalTransform);
+	const DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
+	const DirectX::XMMATRIX modelScaleMat_ =
+		DirectX::XMMatrixScaling(localScale, localScale, localScale);
+
+	UpdateNodeRecursive(
+		node_,
+		parentGlobalTransform_,
+		parentWorldTransform_,
+		modelScaleMat_,
+		isRoot_,
+		false);
 }
 
 void GltfModelCommponennt::MarkPoseDirty()
@@ -642,7 +670,7 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 	const DirectX::XMMATRIX& ParentWorldTransform, 
 	const DirectX::XMMATRIX& ModelScaleMat)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ““K—pŒã‚ÌSRT‚©‚çƒ[ƒJƒ‹s—ñ‚ğì¬
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é©ç”¨å¾Œã®SRTã‹ã‚‰ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—ã‚’ä½œæˆ
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&node.rotation));
 	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(node.position.x, node.position.y, node.position.z);
@@ -651,32 +679,32 @@ void GltfModelCommponennt::UpdateNodeRecursive(
 	DirectX::XMMATRIX GlobalTransform;
 	if (node.parent != nullptr)
 	{
-		// qƒm[ƒhFe‚Ìu¡ƒtƒŒ[ƒ€‚ÌÅV‚ÌvƒOƒ[ƒoƒ‹s—ñ‚ğŒp³
+		// å­ãƒãƒ¼ãƒ‰ï¼šè¦ªã®ã€Œä»Šãƒ•ãƒ¬ãƒ¼ãƒ ã®æœ€æ–°ã®ã€ã‚°ãƒ­ãƒ¼ãƒãƒ«è¡Œåˆ—ã‚’ç¶™æ‰¿
 		DirectX::XMMATRIX ParentGlobal = DirectX::XMLoadFloat4x4(&node.parent->globalTransform);
 		GlobalTransform = LocalTransform * ParentGlobal;
 	}
 	else
 	{
-		// ƒ‹[ƒgƒm[ƒhF‚±‚±‚Åƒ‚ƒfƒ‹‘S‘Ì‚ÌƒXƒP[ƒ‹‚ğˆê“x‚¾‚¯“K—p
+		// ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰ï¼šã“ã“ã§ãƒ¢ãƒ‡ãƒ«å…¨ä½“ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’ä¸€åº¦ã ã‘é©ç”¨
 		GlobalTransform = LocalTransform * ModelScaleMat;
 	}
 
-	// ÅI“I‚Èƒ[ƒ‹ƒhs—ñ
+	// æœ€çµ‚çš„ãªãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—
 	DirectX::XMMATRIX WorldTransform = GlobalTransform * ParentWorldTransform;
 
-	// s—ñ‚ğ•Û‘¶i‚±‚ê‚Åq‚ªÅV‚Ìe‚ğQÆ‚Å‚«‚éj
+	// è¡Œåˆ—ã‚’ä¿å­˜ï¼ˆã“ã‚Œã§å­ãŒæœ€æ–°ã®è¦ªã‚’å‚ç…§ã§ãã‚‹ï¼‰
 	DirectX::XMStoreFloat4x4(&node.localTransform, LocalTransform);
 	DirectX::XMStoreFloat4x4(&node.globalTransform, GlobalTransform);
 	DirectX::XMStoreFloat4x4(&node.worldTransform, WorldTransform);
 
-	// qƒm[ƒh‚ğÄ‹A“I‚ÉXV
+	// å­ãƒãƒ¼ãƒ‰ã‚’å†å¸°çš„ã«æ›´æ–°
 	for (Node* child : node.children)
 	{
 		UpdateNodeRecursive(*child, ParentWorldTransform, ModelScaleMat);
 	}
 }
 
-// ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€XVˆ—
+// ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ æ›´æ–°å‡¦ç†
 void GltfModelCommponennt::UpdateTransform()
 {
 	BS_PROFILE_SCOPE("GltfModelCommponennt::UpdateTransform");
@@ -740,12 +768,12 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_, const DirectX
 //{
 //	DirectX::XMMATRIX ParentWorldTransform = this->GetGameObject()->transform->worldMatrix;
 //
-//	// float‚ÌlocalScale‚©‚çƒXƒP[ƒŠƒ“ƒOs—ñ‚ğì¬
+//	// floatã®localScaleã‹ã‚‰ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°è¡Œåˆ—ã‚’ä½œæˆ
 //	DirectX::XMMATRIX ModelScaleMat = DirectX::XMMatrixScaling(localScale, localScale, localScale);
 //
 //	for (Node& node : nodes)
 //	{
-//		// ƒm[ƒh©g‚Ìƒ[ƒJƒ‹s—ñ
+//		// ãƒãƒ¼ãƒ‰è‡ªèº«ã®ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—
 //		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
 //		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&node.rotation));
 //		DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(node.position.x, node.position.y, node.position.z);
@@ -754,20 +782,20 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_, const DirectX
 //		DirectX::XMMATRIX GlobalTransform;
 //		if (node.parent != nullptr)
 //		{
-//			// qƒm[ƒhFe‚ÌƒOƒ[ƒoƒ‹s—ñ‚ğŒp³
+//			// å­ãƒãƒ¼ãƒ‰ï¼šè¦ªã®ã‚°ãƒ­ãƒ¼ãƒãƒ«è¡Œåˆ—ã‚’ç¶™æ‰¿
 //			DirectX::XMMATRIX ParentGlobal = DirectX::XMLoadFloat4x4(&node.parent->globalTransform);
 //			GlobalTransform = LocalTransform * ParentGlobal;
 //		}
 //		else
 //		{
-//			// ƒ‹[ƒgƒm[ƒhF©g‚Ìƒ[ƒJƒ‹s—ñ‚Éuƒ‚ƒfƒ‹‘S‘Ì‚Ì•â³ƒXƒP[ƒ‹v‚ğ“K—p
+//			// ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰ï¼šè‡ªèº«ã®ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—ã«ã€Œãƒ¢ãƒ‡ãƒ«å…¨ä½“ã®è£œæ­£ã‚¹ã‚±ãƒ¼ãƒ«ã€ã‚’é©ç”¨
 //			GlobalTransform = LocalTransform * ModelScaleMat;
 //		}
 //
-//		// ƒ[ƒ‹ƒhs—ñZoiƒQ[ƒ€¢ŠE‚ÌÀ•W‚Öj
+//		// ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ç®—å‡ºï¼ˆã‚²ãƒ¼ãƒ ä¸–ç•Œã®åº§æ¨™ã¸ï¼‰
 //		DirectX::XMMATRIX WorldTransform = GlobalTransform * ParentWorldTransform;
 //
-//		// Ši”[
+//		// æ ¼ç´
 //		DirectX::XMStoreFloat4x4(&node.localTransform, LocalTransform);
 //		DirectX::XMStoreFloat4x4(&node.globalTransform, GlobalTransform);
 //		DirectX::XMStoreFloat4x4(&node.worldTransform, WorldTransform);
@@ -779,66 +807,66 @@ void GltfModelCommponennt::ComputeAnimation(int animationIndex, int nodeIndex, f
 	const Animation& animation = animations.at(animationIndex);
 	const NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
 
-	// ˆÊ’u
+	// ä½ç½®
 	for (size_t index = 0; index < nodeAnim.positionKeyframes.size() - 1; ++index)
 	{
-		// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+		// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 		const VectorKeyframe& keyframe0 = nodeAnim.positionKeyframes.at(index);
 		const VectorKeyframe& keyframe1 = nodeAnim.positionKeyframes.at(index + 1);
 		if (time >= keyframe0.seconds && time <= keyframe1.seconds)
 		{
-			// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+			// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 			float rate = (time - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-			// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+			// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 			DirectX::XMVECTOR V0 = DirectX::XMLoadFloat3(&keyframe0.value);
 			DirectX::XMVECTOR V1 = DirectX::XMLoadFloat3(&keyframe1.value);
 			DirectX::XMVECTOR V = DirectX::XMVectorLerp(V0, V1, rate);
-			// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+			// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 			DirectX::XMStoreFloat3(&nodePose.position, V);
 		}
 	}
-	// ‰ñ“]
+	// å›è»¢
 	for (size_t index = 0; index < nodeAnim.rotationKeyframes.size() - 1; ++index)
 	{
-		// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+		// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 		const QuaternionKeyframe& keyframe0 = nodeAnim.rotationKeyframes.at(index);
 		const QuaternionKeyframe& keyframe1 = nodeAnim.rotationKeyframes.at(index + 1);
 		if (time >= keyframe0.seconds && time <= keyframe1.seconds)
 		{
-			// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+			// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 			float rate = (time - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-			// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+			// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 			DirectX::XMVECTOR Q0 = DirectX::XMLoadFloat4(&keyframe0.value);
 			DirectX::XMVECTOR Q1 = DirectX::XMLoadFloat4(&keyframe1.value);
 			DirectX::XMVECTOR Q = DirectX::XMQuaternionSlerp(Q0, Q1, rate);
-			// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+			// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 			DirectX::XMStoreFloat4(&nodePose.rotation, Q);
 		}
 	}
-	// ƒXƒP[ƒ‹
+	// ã‚¹ã‚±ãƒ¼ãƒ«
 	for (size_t index = 0; index < nodeAnim.scaleKeyframes.size() - 1; ++index)
 	{
-		// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+		// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 		const VectorKeyframe& keyframe0 = nodeAnim.scaleKeyframes.at(index);
 		const VectorKeyframe& keyframe1 = nodeAnim.scaleKeyframes.at(index + 1);
 		if (time >= keyframe0.seconds && time <= keyframe1.seconds)
 		{
-			// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+			// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 			float rate = (time - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-			// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+			// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 			DirectX::XMVECTOR V0 = DirectX::XMLoadFloat3(&keyframe0.value);
 			DirectX::XMVECTOR V1 = DirectX::XMLoadFloat3(&keyframe1.value);
 			DirectX::XMVECTOR V = DirectX::XMVectorLerp(V0, V1, rate);
-			// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+			// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 			DirectX::XMStoreFloat3(&nodePose.scale, V);
 		}
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ŒvZ
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—
 void GltfModelCommponennt::ComputeAnimation(int animationIndex, float time, std::vector<NodePose>& nodePoses) const
 {
 	if (nodePoses.size() != nodes.size())
@@ -851,7 +879,7 @@ void GltfModelCommponennt::ComputeAnimation(int animationIndex, float time, std:
 	}
 }
 
-// ƒm[ƒhƒ|[ƒYİ’è
+// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºè¨­å®š
 void GltfModelCommponennt::SetNodePoses(const std::vector<NodePose>& nodePoses)
 {
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
@@ -866,7 +894,7 @@ void GltfModelCommponennt::SetNodePoses(const std::vector<NodePose>& nodePoses)
 	MarkPoseDirty();
 }
 
-// ƒm[ƒhƒ|[ƒYæ“¾
+// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºå–å¾—
 void GltfModelCommponennt::GetNodePoses(std::vector<NodePose>& nodePoses) const
 {
 	if (nodePoses.size() != nodes.size())
@@ -951,7 +979,7 @@ void GltfModelCommponennt::ShowNodeDetailsUI(const Node* node)
 	{
 		ImGui::Indent();
 
-		// eƒm[ƒh–¼•\¦i‚ ‚ê‚Îj
+		// è¦ªãƒãƒ¼ãƒ‰åè¡¨ç¤ºï¼ˆã‚ã‚Œã°ï¼‰
 		if (node->parent)
 		{
 			ImGui::Text("Parent: %s", node->parent->name.c_str());
@@ -961,7 +989,7 @@ void GltfModelCommponennt::ShowNodeDetailsUI(const Node* node)
 			ImGui::Text("Parent: (none)");
 		}
 
-		// Šî–{î•ñ
+		// åŸºæœ¬æƒ…å ±
 		ImGui::Text("Position: X: %.3f, Y: %.3f, Z: %.3f",
 			node->position.x, node->position.y, node->position.z);
 
@@ -971,7 +999,7 @@ void GltfModelCommponennt::ShowNodeDetailsUI(const Node* node)
 		ImGui::Text("Scale: X: %.3f, Y: %.3f, Z: %.3f",
 			node->scale.x, node->scale.y, node->scale.z);
 
-		// s—ñ‚ğ4x4‚Å•\¦
+		// è¡Œåˆ—ã‚’4x4ã§è¡¨ç¤º
 		auto ShowMatrix4x4 = [](const DirectX::XMFLOAT4X4& mat)
 			{
 				for (int i = 0; i < 4; ++i)
@@ -999,15 +1027,15 @@ void GltfModelCommponennt::ShowNodeDetailsUI(const Node* node)
 
 void GltfModelCommponennt::Serialize(nlohmann::json& j) const 
 {
-	// 1. ƒpƒX‚ğ‘Š‘ÎŒ`®‚É®‚¦‚é
+	// 1. ãƒ‘ã‚¹ã‚’ç›¸å¯¾å½¢å¼ã«æ•´ãˆã‚‹
 	std::string pathForSave = modelFullPass;
 
-	// ‚à‚µƒpƒX‚ª‹ó‚Å‚È‚­A‚©‚Â "./" ‚Ån‚Ü‚Á‚Ä‚¢‚È‚¢ê‡
+	// ã‚‚ã—ãƒ‘ã‚¹ãŒç©ºã§ãªãã€ã‹ã¤ "./" ã§å§‹ã¾ã£ã¦ã„ãªã„å ´åˆ
 	if (!pathForSave.empty()) {
-		// ƒoƒbƒNƒXƒ‰ƒbƒVƒ… '\' ‚ğ '/' ‚É“ˆê (JSON‚âƒNƒƒXƒvƒ‰ƒbƒgƒtƒH[ƒ€‚ÅˆÀ‘S)
+		// ãƒãƒƒã‚¯ã‚¹ãƒ©ãƒƒã‚·ãƒ¥ '\' ã‚’ '/' ã«çµ±ä¸€ (JSONã‚„ã‚¯ãƒ­ã‚¹ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã§å®‰å…¨)
 		std::replace(pathForSave.begin(), pathForSave.end(), '\\', '/');
 
-		// ‚·‚Å‚É "./" ‚â "../" ‚Ån‚Ü‚Á‚Ä‚¢‚È‚¢‚È‚ç "./" ‚ğ•t—^
+		// ã™ã§ã« "./" ã‚„ "../" ã§å§‹ã¾ã£ã¦ã„ãªã„ãªã‚‰ "./" ã‚’ä»˜ä¸
 		if (pathForSave.find("./") != 0 && pathForSave.find("../") != 0) {
 			pathForSave = "./" + pathForSave;
 		}
@@ -1048,7 +1076,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	j["StaticModel"] = isStaticModel;
 	j["UsedNaviMeshSystemFlg"] = usedNaviMeshSystemFlg;
 	j["RootMotionName"] = m_RootMotionName;
-	// ƒNƒH[ƒ^ƒjƒIƒ“‚ğx, y, z, w‚Ì¬•ª‚É•ª‰ğ‚µ‚Ä•Û‘¶‚·‚é
+	// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’x, y, z, wã®æˆåˆ†ã«åˆ†è§£ã—ã¦ä¿å­˜ã™ã‚‹
 	j["_RootRotationOffset"] = {
 		{ "x", _RootRotationOffset.x },
 		{ "y", _RootRotationOffset.y },
@@ -1071,17 +1099,17 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 	if (j.contains("ModelName")) {
 		std::string name = j["ModelName"];
 		if (!name.empty()) {
-			// ƒpƒX³‹K‰»id—vj
+			// ãƒ‘ã‚¹æ­£è¦åŒ–ï¼ˆé‡è¦ï¼‰
 			if (name.substr(0, 2) == "./") name = name.substr(2);
 			std::replace(name.begin(), name.end(), '/', '\\');
 
 			auto device = GraphicsDeviceManager::Instance().GetDevice();
 
-			// 1. ƒ‚ƒfƒ‹‚ğƒ[ƒh
+			// 1. ãƒ¢ãƒ‡ãƒ«ã‚’ãƒ­ãƒ¼ãƒ‰
 			LoadModel(device, name.c_str());
 
-			// 2. ‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ª‚Á‚Ä‚¢‚éƒ‚ƒfƒ‹ƒf[ƒ^‚ğ 
-			//    Œ»İ‚Ì TransformiLoad‚Å•œŒ³Ï‚İj‚É‹­§“¯Šú‚³‚¹‚é
+			// 2. ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒæŒã£ã¦ã„ã‚‹ãƒ¢ãƒ‡ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’ 
+			//    ç¾åœ¨ã® Transformï¼ˆLoadã§å¾©å…ƒæ¸ˆã¿ï¼‰ã«å¼·åˆ¶åŒæœŸã•ã›ã‚‹
 			UpdateTransform();
 		}
 	}
@@ -1089,7 +1117,7 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 	if (j.contains("MaterialOverrides")) {
 		for (const auto& item : j["MaterialOverrides"]) {
 			int id = item["id"];
-			// ID‚ğƒL[‚É‚µ‚ÄAŒ»İ‚Ìmaterials”z—ñ‚©‚çŠY“–‚·‚é‚à‚Ì‚ğ’T‚µ‚Äã‘‚«‚·‚é
+			// IDã‚’ã‚­ãƒ¼ã«ã—ã¦ã€ç¾åœ¨ã®materialsé…åˆ—ã‹ã‚‰è©²å½“ã™ã‚‹ã‚‚ã®ã‚’æ¢ã—ã¦ä¸Šæ›¸ãã™ã‚‹
 			for (auto& mat : materials) {
 				if (mat.id == id) {
 					if (item.contains("shaderId"))
@@ -1199,18 +1227,18 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 		m_RootMotionName = j["RootMotionName"];
 	}
 
-	// •Û‘¶‚³‚ê‚½¬•ª‚©‚çƒNƒH[ƒ^ƒjƒIƒ“‚ğÄ\’z‚·‚é
+	// ä¿å­˜ã•ã‚ŒãŸæˆåˆ†ã‹ã‚‰ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’å†æ§‹ç¯‰ã™ã‚‹
 	if (j.contains("_RootRotationOffset"))
 	{
 		auto& rot = j["_RootRotationOffset"];
 		_RootRotationOffset.x = rot.value("x", 0.0f);
 		_RootRotationOffset.y = rot.value("y", 0.0f);
 		_RootRotationOffset.z = rot.value("z", 0.0f);
-		_RootRotationOffset.w = rot.value("w", 1.0f); // w‚ÍƒfƒtƒHƒ‹ƒg‚Å1i’PˆÊƒNƒH[ƒ^ƒjƒIƒ“j‚É‚·‚é‚Ì‚ª–³“ï‚¾
+		_RootRotationOffset.w = rot.value("w", 1.0f); // wã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§1ï¼ˆå˜ä½ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ï¼‰ã«ã™ã‚‹ã®ãŒç„¡é›£ã 
 	}
 
-	// LocalScale‚ğŠÜ‚Ş‘S€–Ú‚Ì•œŒ³Œã‚Éƒm[ƒhs—ñ‚ğŠm’è‚·‚éB
-	// MeshCollider‚È‚ÇAStart‚ÉglobalTransform‚ğQÆ‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg‚Ö³‚µ‚¢Œ`ó‚ğ“n‚·‚½‚ß‚É•K—vB
+	// LocalScaleã‚’å«ã‚€å…¨é …ç›®ã®å¾©å…ƒå¾Œã«ãƒãƒ¼ãƒ‰è¡Œåˆ—ã‚’ç¢ºå®šã™ã‚‹ã€‚
+	// MeshColliderãªã©ã€Startæ™‚ã«globalTransformã‚’å‚ç…§ã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã¸æ­£ã—ã„å½¢çŠ¶ã‚’æ¸¡ã™ãŸã‚ã«å¿…è¦ã€‚
 	UpdateTransform();
 
 }
@@ -1347,7 +1375,7 @@ void GltfModelCommponennt::ShowNodeTransformEditor()
 		{
 			if (ImGui::TreeNode(node.name.c_str()))
 			{
-				// ƒm[ƒh‚ÌƒXƒP[ƒ‹‚ğ’¼Ú‚¢‚¶‚éiŠZ‚ÌƒƒbƒVƒ…‚ª‘®‚·‚éƒm[ƒh‚ğ’T‚¹j
+				// ãƒãƒ¼ãƒ‰ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’ç›´æ¥ã„ã˜ã‚‹ï¼ˆé§ã®ãƒ¡ãƒƒã‚·ãƒ¥ãŒå±ã™ã‚‹ãƒãƒ¼ãƒ‰ã‚’æ¢ã›ï¼‰
 				ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&node.scale), 0.01f, 0.1f, 2.0f);
 				ImGui::DragFloat3("Position", reinterpret_cast<float*>(&node.position), 0.01f);
 
@@ -1357,7 +1385,7 @@ void GltfModelCommponennt::ShowNodeTransformEditor()
 	}
 	ImGui::End();
 }
-// ƒVƒŠƒAƒ‰ƒCƒY
+// ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 void GltfModelCommponennt::Serialize(const char* filename)
 {
 	std::ofstream ostream(filename, std::ios::binary);
@@ -1381,7 +1409,7 @@ void GltfModelCommponennt::Serialize(const char* filename)
 	}
 }
 
-// ƒfƒVƒŠƒAƒ‰ƒCƒY
+// ãƒ‡ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 void GltfModelCommponennt::Deserialize(const char* filename)
 {
 	std::ifstream istream(filename, std::ios::binary);

@@ -2,13 +2,13 @@
 
 std::unordered_map<int, bool> KeyInput::oldState;
 
-//キーが押されているかを検知
+//繧ｭ繝ｼ縺梧款縺輔ｌ縺ｦ縺�繧九°繧呈､懃衍
 bool KeyInput::KeyPressed(int key)
 {
     return (GetAsyncKeyState(key) & 0x8000) != 0;
 }
 
-// 押した瞬間を検知
+// 謚ｼ縺励◆迸ｬ髢薙ｒ讀懃衍
 bool KeyInput::KeyPressedIn(int key) {
     bool current = KeyPressed(key);
     bool prev = oldState[key];
@@ -16,7 +16,7 @@ bool KeyInput::KeyPressedIn(int key) {
     return (!prev && current);
 }
 
-// 離した瞬間を検知
+// 髮｢縺励◆迸ｬ髢薙ｒ讀懃衍
 bool KeyInput::KeyPressedOut(int key) {
     bool current = KeyPressed(key);
     bool prev = oldState[key];

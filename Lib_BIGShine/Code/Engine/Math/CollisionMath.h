@@ -6,7 +6,7 @@
 
 class CollisionMath {
 public:
-    // --- •â•ŠÖ” ---
+    // --- è£œåŠ©é–¢æ•° ---
     static float Clamp(float n, float min, float max) { return (std::max)(min, (std::min)(n, max)); }
 
     static DirectX::XMVECTOR ClosestPointOnSegment(DirectX::XMVECTOR P, DirectX::XMVECTOR A, DirectX::XMVECTOR B)
@@ -17,7 +17,7 @@ public:
         return DirectX::XMVectorAdd(A, DirectX::XMVectorScale(AB, Clamp(t, 0.0f, 1.0f)));
     }
 
-    // --- 1. ‹… vs ‹… ---
+    // --- 1. çƒ vs çƒ ---
     static CollisionManifold SphereVsSphere(const Sphere& a, const Sphere& b) {
         CollisionManifold m;
         DirectX::XMVECTOR diff = DirectX::XMVectorSubtract(b.center, a.center);
@@ -31,10 +31,10 @@ public:
         return m;
     }
 
-    // --- 2. OBB vs ‹… ---
+    // --- 2. OBB vs çƒ ---
     static CollisionManifold OBBVsSphere(const OBB& a, const Sphere& b) {
         CollisionManifold m;
-        // ” ‚Ìƒ[ƒJƒ‹‹óŠÔ‚É‹…‚Ì’†S‚ğ•ÏŠ·
+        // ç®±ã®ãƒ­ãƒ¼ã‚«ãƒ«ç©ºé–“ã«çƒã®ä¸­å¿ƒã‚’å¤‰æ›
         DirectX::XMVECTOR d = DirectX::XMVectorSubtract(b.center, a.center);
         DirectX::XMVECTOR closest = a.center;
         for (int i = 0; i < 3; ++i) {
@@ -53,13 +53,13 @@ public:
         return m;
     }
 
-    // --- 3. OBB vs OBB (•ª—£²’è— SAT) ---
+    // --- 3. OBB vs OBB (åˆ†é›¢è»¸å®šç† SAT) ---
     static CollisionManifold OBBVsOBB(const OBB& a, const OBB& b) {
         CollisionManifold m;
         m.depth = FLT_MAX;
         DirectX::XMVECTOR toCenter = DirectX::XMVectorSubtract(b.center, a.center);
 
-        // ”»’è‚·‚×‚«15²‚ÌƒŠƒXƒg‚ğì¬
+        // åˆ¤å®šã™ã¹ã15è»¸ã®ãƒªã‚¹ãƒˆã‚’ä½œæˆ
         std::vector<DirectX::XMVECTOR> testAxes;
         for (int i = 0; i < 3; ++i) { testAxes.push_back(a.axes[i]); testAxes.push_back(b.axes[i]); }
         for (int i = 0; i < 3; ++i) {
@@ -73,7 +73,7 @@ public:
             if (lenSq < 0.001f) continue;
             DirectX::XMVECTOR L = DirectX::XMVector3Normalize(axis);
 
-            // “Š‰e”ÍˆÍ‚ÌŒvZ
+            // æŠ•å½±ç¯„å›²ã®è¨ˆç®—
             auto GetProjectedRadius = [](const OBB& obb, DirectX::XMVECTOR L) {
                 float r = 0;
                 for (int i = 0; i < 3; ++i)
@@ -86,7 +86,7 @@ public:
             float d = fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(toCenter, L)));
 
             float overlap = ra + rb - d;
-            if (overlap <= 0) return { false }; // Œ„ŠÔ‚ª‚ ‚ê‚Î‘¦I—¹
+            if (overlap <= 0) return { false }; // éš™é–“ãŒã‚ã‚Œã°å³çµ‚äº†
 
             if (overlap < m.depth) {
                 m.depth = overlap;
@@ -99,18 +99,18 @@ public:
         return m;
     }
 
-    // --- 4. ƒJƒvƒZƒ‹ vs ‹… ---
+    // --- 4. ã‚«ãƒ—ã‚»ãƒ« vs çƒ ---
     static CollisionManifold CapsuleVsSphere(const Capsule& a, const Sphere& b) {
         Sphere tempSphere = { ClosestPointOnSegment(b.center, a.p0, a.p1), a.radius };
         return SphereVsSphere(tempSphere, b);
     }
 
-    // --- 5. ƒJƒvƒZƒ‹ vs ƒJƒvƒZƒ‹ ---
+    // --- 5. ã‚«ãƒ—ã‚»ãƒ« vs ã‚«ãƒ—ã‚»ãƒ« ---
     static CollisionManifold CapsuleVsCapsule(const Capsule& a, const Capsule& b) {
         using namespace DirectX;
 
-        XMVECTOR u = XMVectorSubtract(a.p1, a.p0); // ü•ªA‚Ì•ûŒü
-        XMVECTOR v = XMVectorSubtract(b.p1, b.p0); // ü•ªB‚Ì•ûŒü
+        XMVECTOR u = XMVectorSubtract(a.p1, a.p0); // ç·šåˆ†Aã®æ–¹å‘
+        XMVECTOR v = XMVectorSubtract(b.p1, b.p0); // ç·šåˆ†Bã®æ–¹å‘
         XMVECTOR w = XMVectorSubtract(a.p0, b.p0);
 
         float sc, tc;
@@ -121,8 +121,8 @@ public:
         float e_val = XMVectorGetX(XMVector3Dot(v, w));
         float D = a_val * c_val - b_val * b_val;
 
-        // ƒpƒ‰ƒ[ƒ^ sc, tc ‚ğŒvZiü•ªã‚ÌˆÊ’u 0.0~1.0j
-        if (D < 0.0001f) { // •½s‚Èê‡
+        // ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ sc, tc ã‚’è¨ˆç®—ï¼ˆç·šåˆ†ä¸Šã®ä½ç½® 0.0~1.0ï¼‰
+        if (D < 0.0001f) { // å¹³è¡Œãªå ´åˆ
             sc = 0.0f;
             tc = (b_val > c_val ? d_val / b_val : e_val / c_val);
         }
@@ -134,19 +134,19 @@ public:
         sc = Clamp(sc, 0.0f, 1.0f);
         tc = Clamp(tc, 0.0f, 1.0f);
 
-        // Å’Z“_ P_a, P_b ‚ğŠm’è
+        // æœ€çŸ­ç‚¹ P_a, P_b ã‚’ç¢ºå®š
         XMVECTOR Pa = XMVectorAdd(a.p0, XMVectorScale(u, sc));
         XMVECTOR Pb = XMVectorAdd(b.p0, XMVectorScale(v, tc));
 
-        // ‹… vs ‹…‚Æ‚µ‚Ä”»’è
+        // çƒ vs çƒã¨ã—ã¦åˆ¤å®š
         return SphereVsSphere({ Pa, a.radius }, { Pb, b.radius });
     }
 
-    // --- 6. OBB vs ƒJƒvƒZƒ‹ ---
+    // --- 6. OBB vs ã‚«ãƒ—ã‚»ãƒ« ---
     static CollisionManifold OBBVsCapsule(const OBB& a, const Capsule& b) {
         using namespace DirectX;
 
-        // 1. ƒJƒvƒZƒ‹‚Ìü•ª‚ğOBB‚Ìƒ[ƒJƒ‹‹óŠÔ‚É•ÏŠ·
+        // 1. ã‚«ãƒ—ã‚»ãƒ«ã®ç·šåˆ†ã‚’OBBã®ãƒ­ãƒ¼ã‚«ãƒ«ç©ºé–“ã«å¤‰æ›
         auto TransformToLocal = [&](XMVECTOR worldPos) {
             XMVECTOR rel = XMVectorSubtract(worldPos, a.center);
             return XMVectorSet(
@@ -158,17 +158,17 @@ public:
         XMVECTOR localP0 = TransformToLocal(b.p0);
         XMVECTOR localP1 = TransformToLocal(b.p1);
 
-        // 2. ƒ[ƒJƒ‹‹óŠÔ(AABB)‚É‚¨‚¯‚éü•ªã‚ÌÅ‹ß–T“_Q‚ğ‹‚ß‚é
-        // ü•ª‚ğ×‚©‚­•ªŠ„‚µ‚Ä”»’è‚·‚é‚©AŒµ–§‚ÈÅ’Z‹——£ŒvZ‚ğs‚¢‚Ü‚·B
-        // ‚±‚±‚Å‚ÍÀ—p“I‚È¸“x‚ğo‚·‚½‚ßAü•ªã‚ÌÅ‹ß–T“_‚ğ’TõB
+        // 2. ãƒ­ãƒ¼ã‚«ãƒ«ç©ºé–“(AABB)ã«ãŠã‘ã‚‹ç·šåˆ†ä¸Šã®æœ€è¿‘å‚ç‚¹Qã‚’æ±‚ã‚ã‚‹
+        // ç·šåˆ†ã‚’ç´°ã‹ãåˆ†å‰²ã—ã¦åˆ¤å®šã™ã‚‹ã‹ã€å³å¯†ãªæœ€çŸ­è·é›¢è¨ˆç®—ã‚’è¡Œã„ã¾ã™ã€‚
+        // ã“ã“ã§ã¯å®Ÿç”¨çš„ãªç²¾åº¦ã‚’å‡ºã™ãŸã‚ã€ç·šåˆ†ä¸Šã®æœ€è¿‘å‚ç‚¹ã‚’æ¢ç´¢ã€‚
         XMVECTOR bestQ = localP0;
         float minDistSq = FLT_MAX;
 
-        // ü•ª‚ğ•ªŠ„‚µ‚ÄAABB‚ÉÅ‚à‹ß‚¢“_‚ğ’T‚·iŠÈˆÕÀ‘•FƒXƒeƒbƒv”‚ğ‘‚â‚·‚Æ¸“xUPj
+        // ç·šåˆ†ã‚’åˆ†å‰²ã—ã¦AABBã«æœ€ã‚‚è¿‘ã„ç‚¹ã‚’æ¢ã™ï¼ˆç°¡æ˜“å®Ÿè£…ï¼šã‚¹ãƒ†ãƒƒãƒ—æ•°ã‚’å¢—ã‚„ã™ã¨ç²¾åº¦UPï¼‰
         const int SAMPLES = 4;
         for (int i = 0; i <= SAMPLES; ++i) {
             XMVECTOR P = XMVectorLerp(localP0, localP1, (float)i / SAMPLES);
-            // AABB(’†S0, halfSize)‚Ö‚ÌƒNƒ‰ƒ“ƒv
+            // AABB(ä¸­å¿ƒ0, halfSize)ã¸ã®ã‚¯ãƒ©ãƒ³ãƒ—
             XMVECTOR Q = XMVectorSet(
                 Clamp(XMVectorGetX(P), -a.halfSize[0], a.halfSize[0]),
                 Clamp(XMVectorGetY(P), -a.halfSize[1], a.halfSize[1]),
@@ -178,18 +178,18 @@ public:
             if (dSq < minDistSq) { minDistSq = dSq; bestQ = Q; }
         }
 
-        // 3. ƒ[ƒJƒ‹‚ÌÅ’Z“_Q‚ğƒ[ƒ‹ƒh‚É–ß‚·
+        // 3. ãƒ­ãƒ¼ã‚«ãƒ«ã®æœ€çŸ­ç‚¹Qã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰ã«æˆ»ã™
         XMVECTOR worldQ = a.center;
         for (int i = 0; i < 3; ++i) worldQ = XMVectorAdd(worldQ, XMVectorScale(a.axes[i], XMVectorGetByIndex(bestQ, i)));
 
-        // 4. ƒJƒvƒZƒ‹‚Ìü•ªã‚ÅworldQ‚ÉÅ‚à‹ß‚¢“_Pa‚ğ‹‚ßA‹…”»’è
+        // 4. ã‚«ãƒ—ã‚»ãƒ«ã®ç·šåˆ†ä¸Šã§worldQã«æœ€ã‚‚è¿‘ã„ç‚¹Paã‚’æ±‚ã‚ã€çƒåˆ¤å®š
         XMVECTOR Pa = ClosestPointOnSegment(worldQ, b.p0, b.p1);
 
         CollisionManifold m = SphereVsSphere({ worldQ, 0.0f }, { Pa, b.radius });
 
 
-        // OBB‘¤‚ÌŒú‚İ‚Í‚È‚¢‚Ì‚ÅAÅŒã‚ÉƒJƒvƒZƒ‹”¼Œa•ª‚¾‚¯depth‚ğ’²®
-        // (¦Œµ–§‚É‚ÍOBB“à‚ÌÅ‹ß–T“_Q‚ğ‹…‚Æ‚·‚é”»’è)
+        // OBBå´ã®åšã¿ã¯ãªã„ã®ã§ã€æœ€å¾Œã«ã‚«ãƒ—ã‚»ãƒ«åŠå¾„åˆ†ã ã‘depthã‚’èª¿æ•´
+        // (â€»å³å¯†ã«ã¯OBBå†…ã®æœ€è¿‘å‚ç‚¹Qã‚’çƒã¨ã™ã‚‹åˆ¤å®š)
         return m;
     }
 };

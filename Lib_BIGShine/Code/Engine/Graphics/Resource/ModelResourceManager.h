@@ -10,17 +10,17 @@
 class ModelResourceManager
 {
 public:
-    // 悽奅偵偨偩堦偮偺側偺偱傾僋僙僗偡傞偨傔偺娭悢
+    // 涓栫晫銇仧銇犱竴銇ゃ伄銇伄銇с偄銈偦銈广仚銈嬨仧銈併伄闁㈡暟
     static ModelResourceManager& Instance()
     {
         static ModelResourceManager instance;
         return instance;
     }
 
-    // 儕僜乕僗傪妉摼丄偁傞偄偼怴偨偵嶌惢偡傞娭悢
+    // 銉偨銉笺偣銈掔嵅寰椼�併亗銈嬨亜銇柊銇熴伀浣滆＝銇欍倠闁㈡暟
     std::shared_ptr<ModelResource> GetOrCreateResource(ID3D11Device* device, const std::string& filename, float sampleRate = 60.0f);
 
-    // 偡傋偰偺婰壇傪儕僙僢僩偟偰儕僜乕僗傪clear
+    // 銇欍伖銇︺伄瑷樻喍銈掋儶銈汇儍銉堛仐銇︺儶銈姐兗銈广倰clear
     void Clear()
     {
         for (auto& pair : m_resources) {
@@ -35,11 +35,11 @@ private:
     ModelResourceManager(const ModelResourceManager&) = delete;
     ModelResourceManager& operator=(const ModelResourceManager&) = delete;
 
-    // 僔儕傾儔僀僘丒僨僔儕傾儔僀僘
+    // 銈枫儶銈€儵銈ゃ偤銉汇儑銈枫儶銈€儵銈ゃ偤
     bool SaveToCereal(const std::string& cerealPath, const std::shared_ptr<ModelResource>& resource);
     bool LoadFromCereal(const std::string& cerealPath, std::shared_ptr<ModelResource>& resource);
 
 private:
-    // Model柤傪尞偲偟偰丄儕僜乕僗偺傪曐娗偡傞扞
+    // Model鍚嶃倰閸点仺銇椼仸銆併儶銈姐兗銈广伄銈掍繚绠°仚銈嬫
     std::map<std::string, std::shared_ptr<ModelResource>> m_resources;
 };

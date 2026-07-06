@@ -44,6 +44,7 @@
                 "ModelName": "./Data/Model/Stage/Rock/Rock01.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
+                "StaticModel": false,
                 "UsedNaviMeshSystemFlg": false,
                 "_RootRotationOffset": {
                     "w": 1.0,

@@ -4,7 +4,7 @@
 
 class CameraComponent;
 
-//Editor‚Ìƒ[ƒNƒXƒy[ƒX‚Å‚Ì‚İg—p‚·‚éƒtƒŠ[ƒJƒƒ‰‚Ìƒf[ƒ^‚Å‚·
+//Editorã®ãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹ã§ã®ã¿ä½¿ç”¨ã™ã‚‹ãƒ•ãƒªãƒ¼ã‚«ãƒ¡ãƒ©ã®ãƒ‡ãƒ¼ã‚¿ã§ã™
 struct EditorCameraData
 {
     void UpdatePreviewFreeCamera(CameraComponent& camera_, float deltaTime_, bool previewHovered_);

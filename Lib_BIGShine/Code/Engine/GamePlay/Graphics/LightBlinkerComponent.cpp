@@ -11,11 +11,11 @@ void LightBlinkerComponent::Start()
     }
 
     if (easingComp) {
-        // Intensity—p‚ÆRange—p‚ÌƒC[ƒWƒ“ƒOƒXƒƒbƒg‚ğŠm•Û
+        // Intensityç”¨ã¨Rangeç”¨ã®ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚¹ãƒ­ãƒƒãƒˆã‚’ç¢ºä¿
         intensityIdx = easingComp->AddEasingAndGetIndex();
         rangeIdx = easingComp->AddEasingAndGetIndex();
 
-        // Å‰‚ÌƒC[ƒWƒ“ƒO‚ğŠJn
+        // æœ€åˆã®ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚’é–‹å§‹
         RestartIntensityEasing();
     }
 }
@@ -24,14 +24,14 @@ void LightBlinkerComponent::Update(float et)
 {
     if (!active || !light || !easingComp) return;
 
-    // ƒC[ƒWƒ“ƒO’l‚ğƒ‰ƒCƒg‚É“K—p
+    // ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°å€¤ã‚’ãƒ©ã‚¤ãƒˆã«é©ç”¨
     light->intensity = easingComp->GetValue(intensityIdx);
 
     if (useRangeBlink) {
         light->range = easingComp->GetValue(rangeIdx);
     }
 
-    // Š®—¹‚µ‚½‚ç”½“]‚µ‚ÄÄŠJ
+    // å®Œäº†ã—ãŸã‚‰åè»¢ã—ã¦å†é–‹
     if (easingComp->GetEndFlag(intensityIdx)) {
         isTargetState = !isTargetState;
         RestartIntensityEasing();
@@ -42,17 +42,17 @@ void LightBlinkerComponent::RestartIntensityEasing()
 {
     if (!easingComp) return;
 
-    // Intensity‚ÌŒvZ
-    // Ÿ‚Ì“_–Å‘¬“x‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŒˆ’è
+    // Intensityã®è¨ˆç®—
+    // æ¬¡ã®ç‚¹æ»…é€Ÿåº¦ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«æ±ºå®š
     float currentSpeed = minSpeed + (static_cast<float>(rand()) / RAND_MAX) * (maxSpeed - minSpeed);
 
     float targetI = isTargetState ? (baseIntensity * intensityMultiplier) : baseIntensity;
 
-    // speed ‚Ì‘ã‚í‚è‚É currentSpeed ‚ğg‚¤
+    // speed ã®ä»£ã‚ã‚Šã« currentSpeed ã‚’ä½¿ã†
     easingComp->SetStartValue(intensityIdx, light->intensity);
     easingComp->PlayEasing(intensityIdx, type, currentSpeed, targetI);
 
-    // Range‚ÌŒvZ (—LŒø‚Èê‡‚Ì‚İ)
+    // Rangeã®è¨ˆç®— (æœ‰åŠ¹ãªå ´åˆã®ã¿)
     if (useRangeBlink) {
         float targetR = isTargetState ? (baseRange * rangeMultiplier) : baseRange;
         easingComp->SetStartValue(rangeIdx, light->range);
@@ -66,7 +66,7 @@ void LightBlinkerComponent::Gui()
 
     if (ImGui::TreeNode("Intensity Settings")) {
         if (ImGui::DragFloat("Base Intensity", &baseIntensity, 0.1f)) {
-            if (!active) light->intensity = baseIntensity; // ”ñÀs‚Í‘¦”½‰f
+            if (!active) light->intensity = baseIntensity; // éå®Ÿè¡Œæ™‚ã¯å³åæ˜ 
         }
         ImGui::DragFloat("Multiplier", &intensityMultiplier, 0.05f, 0.0f, 5.0f);
         ImGui::TreePop();
@@ -83,13 +83,13 @@ void LightBlinkerComponent::Gui()
 
     ImGui::Separator();
 
-    // Å¬EÅ‘å‘¬“x‚ğ‚Ü‚Æ‚ß‚Äİ’è‚Å‚«‚é‚æ‚¤‚É‚·‚é
+    // æœ€å°ãƒ»æœ€å¤§é€Ÿåº¦ã‚’ã¾ã¨ã‚ã¦è¨­å®šã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
     float speeds[2] = { minSpeed, maxSpeed };
     if (ImGui::DragFloat2("Speed Range (Min/Max)", speeds, 0.01f, 0.01f, 10.0f)) {
         minSpeed = speeds[0];
         maxSpeed = speeds[1];
 
-        // Å¬’l‚ªÅ‘å’l‚ğã‰ñ‚ç‚È‚¢‚æ‚¤‚É’²®
+        // æœ€å°å€¤ãŒæœ€å¤§å€¤ã‚’ä¸Šå›ã‚‰ãªã„ã‚ˆã†ã«èª¿æ•´
         if (minSpeed > maxSpeed) maxSpeed = minSpeed;
     }
 
@@ -102,12 +102,12 @@ void LightBlinkerComponent::Gui()
     }
 }
 
-    // --- ƒVƒŠƒAƒ‰ƒCƒY ---
+    // --- ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º ---
 void LightBlinkerComponent::Serialize(nlohmann::json& j) const 
 {
     j["Active"] = active;
-    j["MinSpeed"] = minSpeed;  // ’Ç‰Á
-    j["MaxSpeed"] = maxSpeed;  // ’Ç‰Á
+    j["MinSpeed"] = minSpeed;  // è¿½åŠ 
+    j["MaxSpeed"] = maxSpeed;  // è¿½åŠ 
     j["EasingType"] = static_cast<int>(type);
     j["BaseIntensity"] = baseIntensity;
     j["IntensityMultiplier"] = intensityMultiplier;

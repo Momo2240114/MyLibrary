@@ -14,35 +14,35 @@ public:
         return name;
     }
 
-    // ’Ç]‘ÎÛiƒvƒŒƒCƒ„[j
+    // è¿½å¾“å¯¾è±¡ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼‰
     std::weak_ptr<GameObject> target;
 
-    // Š—LƒJƒƒ‰iãQÆj
+    // æ‰€æœ‰ã‚«ãƒ¡ãƒ©ï¼ˆå¼±å‚ç…§ï¼‰
     std::weak_ptr<CameraComponent> camera;
 
-    // ƒJƒƒ‰ˆÊ’uƒIƒtƒZƒbƒgiƒvƒŒƒCƒ„[Œã•ûEãj
+    // ã‚«ãƒ¡ãƒ©ä½ç½®ã‚ªãƒ•ã‚»ãƒƒãƒˆï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å¾Œæ–¹ãƒ»ä¸Šï¼‰
     DirectX::XMFLOAT3 offset{ 0.0f, 5.0f, -10.0f };
 
-    // •âŠÔ‘¬“x
+    // è£œé–“é€Ÿåº¦
     float followSpeed = 5.0f;
 
     void Update(float deltaTime) override;
     void Gui() override;
 
-    // ƒJƒƒ‰‚Ì‰ñ“]Šp“xiPitchAYawj
-    DirectX::XMFLOAT3 cameraAngle = { 0.0f, 0.0f, 0.0f };  // ‰ŠúŠp“xix = Pitch, y = Yaw, z = Rollj
+    // ã‚«ãƒ¡ãƒ©ã®å›è»¢è§’åº¦ï¼ˆPitchã€Yawï¼‰
+    DirectX::XMFLOAT3 cameraAngle = { 0.0f, 0.0f, 0.0f };  // åˆæœŸè§’åº¦ï¼ˆx = Pitch, y = Yaw, z = Rollï¼‰
 
 
-    // ƒJƒƒ‰‚Ì‰ñ“]‘¬“x
-    float cameraPitchSpeed = 0.005f;   // ƒsƒbƒ`iã‰º‰ñ“]j‚ÌŠ´“x
-    float cameraYawSpeed = 0.005f;     // ƒˆ[i¶‰E‰ñ“]j‚ÌŠ´“x
+    // ã‚«ãƒ¡ãƒ©ã®å›è»¢é€Ÿåº¦
+    float cameraPitchSpeed = 0.005f;   // ãƒ”ãƒƒãƒï¼ˆä¸Šä¸‹å›è»¢ï¼‰ã®æ„Ÿåº¦
+    float cameraYawSpeed = 0.005f;     // ãƒ¨ãƒ¼ï¼ˆå·¦å³å›è»¢ï¼‰ã®æ„Ÿåº¦
 
-    // ƒJƒƒ‰‚Ì‹——£i’‹“_‚©‚ç‚Ì‹——£j
-    float cameraDistance = 5.0f;       // ‰Šú‹——£
-    float cameraMinDistance = 2.0f;    // Å¬‹——£
-    float cameraMaxDistance = 10.0f;   // Å‘å‹——£
+    // ã‚«ãƒ¡ãƒ©ã®è·é›¢ï¼ˆæ³¨è¦–ç‚¹ã‹ã‚‰ã®è·é›¢ï¼‰
+    float cameraDistance = 5.0f;       // åˆæœŸè·é›¢
+    float cameraMinDistance = 2.0f;    // æœ€å°è·é›¢
+    float cameraMaxDistance = 10.0f;   // æœ€å¤§è·é›¢
 
-    // ƒsƒbƒ`‚ÌÅ¬EÅ‘å§ŒÀiã‰º‰ñ“]‚Ì§ŒÀj
-    float cameraMinPitch = -DirectX::XM_PIDIV2 + 0.1f;  // Å¬ƒsƒbƒ`i-90“x - ­‚µ‚Ì—]—Tj
-    float cameraMaxPitch = DirectX::XM_PIDIV2 - 0.1f;   // Å‘åƒsƒbƒ`i90“x - ­‚µ‚Ì—]—Tj
+    // ãƒ”ãƒƒãƒã®æœ€å°ãƒ»æœ€å¤§åˆ¶é™ï¼ˆä¸Šä¸‹å›è»¢ã®åˆ¶é™ï¼‰
+    float cameraMinPitch = -DirectX::XM_PIDIV2 + 0.1f;  // æœ€å°ãƒ”ãƒƒãƒï¼ˆ-90åº¦ - å°‘ã—ã®ä½™è£•ï¼‰
+    float cameraMaxPitch = DirectX::XM_PIDIV2 - 0.1f;   // æœ€å¤§ãƒ”ãƒƒãƒï¼ˆ90åº¦ - å°‘ã—ã®ä½™è£•ï¼‰
 };

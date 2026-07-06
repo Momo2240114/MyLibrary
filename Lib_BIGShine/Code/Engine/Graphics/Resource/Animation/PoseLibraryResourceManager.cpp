@@ -6,28 +6,28 @@ const std::string POSE_ASSET_DIR = "Data/AnimeJson/";
 
 std::shared_ptr<PoseLibraryResource> PoseLibraryResourceManager::GetOrCreateResource(const std::string& modelName)
 {
-    // 1. ‚·‚Å‚É‚»‚Ìƒ‚ƒfƒ‹‚Ìƒ|[ƒYW‚ª‹L‰¯‚É‚Ü‚ê‚Ä‚¢‚é‚©Šm”F
+    // 1. ã™ã§ã«ãã®ãƒ¢ãƒ‡ãƒ«ã®ãƒãƒ¼ã‚ºé›†ãŒè¨˜æ†¶ã«åˆ»ã¾ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
     auto it = m_resources.find(modelName);
     if (it != m_resources.end()) {
         return it->second;
     }
 
-    // 2. ‹L‰¯‚É‚È‚¯‚ê‚ÎAV‚½‚ÈƒŠƒ\[ƒX‚ÌŠí‚ğ˜B¬‚·‚é
+    // 2. è¨˜æ†¶ã«ãªã‘ã‚Œã°ã€æ–°ãŸãªãƒªã‚½ãƒ¼ã‚¹ã®å™¨ã‚’éŒ¬æˆã™ã‚‹
     auto newResource = std::make_shared<PoseLibraryResource>();
     newResource->modelName = modelName;
 
-    // 3. “`³‚Ì’niƒtƒ@ƒCƒ‹j‚É‹Œ‚«‹L˜^‚ªc‚³‚ê‚Ä‚¢‚é‚©’T‚é
+    // 3. ä¼æ‰¿ã®åœ°ï¼ˆãƒ•ã‚¡ã‚¤ãƒ«ï¼‰ã«æ—§ãè¨˜éŒ²ãŒæ®‹ã•ã‚Œã¦ã„ã‚‹ã‹æ¢ã‚‹
     std::string filePath = POSE_ASSET_DIR + modelName + "/" + modelName + "_PoseLib.json";
     if (std::filesystem::exists(filePath)) {
         if (LoadFromJson(filePath, newResource)) {
-            printf("‹L˜^‚©‚çƒ|[ƒYƒ‰ƒCƒuƒ‰ƒŠ‚ğ‰ğ“Ç: %s\n", modelName.c_str());
+            printf("è¨˜éŒ²ã‹ã‚‰ãƒãƒ¼ã‚ºãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’è§£èª­: %s\n", modelName.c_str());
         }
     }
     else {
-        printf("ƒ|[ƒYƒ‰ƒCƒuƒ‰ƒŠ‚ÌŠí‚ª’è‹`‚³‚ê‚Ü‚µ‚½: %s\n", modelName.c_str());
+        printf("ãƒãƒ¼ã‚ºãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®å™¨ãŒå®šç¾©ã•ã‚Œã¾ã—ãŸ: %s\n", modelName.c_str());
     }
 
-    // 4. Š®¬‚µ‚½Œ‹»‚ğƒŠƒ\[ƒXƒ}ƒbƒv‚É‘‚«—¯‚ß‚é
+    // 4. å®Œæˆã—ãŸçµæ™¶ã‚’ãƒªã‚½ãƒ¼ã‚¹ãƒãƒƒãƒ—ã«æ›¸ãç•™ã‚ã‚‹
     m_resources[modelName] = newResource;
     return newResource;
 }
@@ -37,7 +37,7 @@ bool PoseLibraryResourceManager::SaveToJson(const std::string& filename, const s
     if (!resource) return false;
 
     std::filesystem::path path(filename);
-    std::filesystem::create_directories(path.parent_path()); // “r’†‚Ì˜HiƒfƒBƒŒƒNƒgƒŠj‚ğ‘ñ‚­
+    std::filesystem::create_directories(path.parent_path()); // é€”ä¸­ã®è·¯ï¼ˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼‰ã‚’æ‹“ã
 
     std::ofstream ostream(filename);
     if (!ostream.is_open()) return false;
@@ -47,7 +47,7 @@ bool PoseLibraryResourceManager::SaveToJson(const std::string& filename, const s
     j["poseLibrary"] = resource->poseLibrary;
     j["customAnims"] = resource->customAnims;
 
-    ostream << j.dump(4); // 4ƒ}ƒX‚ÌƒCƒ“ƒfƒ“ƒg‚Å‹L‚·
+    ostream << j.dump(4); // 4ãƒã‚¹ã®ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã§è¨˜ã™
     return true;
 }
 

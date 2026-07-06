@@ -27,21 +27,21 @@ public:
 	}
 
 private:
-	//ƒvƒŒƒCƒ„[ƒRƒ“ƒ|[ƒlƒ“ƒg
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 	std::weak_ptr<PlayerComponent> m_pPlayerComponent;
 
-	//ƒ{ƒbƒNƒXƒRƒ‰ƒCƒ_[
+	//ãƒœãƒƒã‚¯ã‚¹ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼
 	std::shared_ptr<BoxCollider> m_pBoxColliderComponent;
 
-	// --- ’Ç‰Á: ”’l§Œä—p ---
-	std::weak_ptr<NumberSwitcher> m_pDigit10; // 10‚ÌˆÊ (NumberUI)
-	std::weak_ptr<NumberSwitcher> m_pDigit01; // 1‚ÌˆÊ (NumberUI_01)
+	// --- è¿½åŠ : æ•°å€¤åˆ¶å¾¡ç”¨ ---
+	std::weak_ptr<NumberSwitcher> m_pDigit10; // 10ã®ä½ (NumberUI)
+	std::weak_ptr<NumberSwitcher> m_pDigit01; // 1ã®ä½ (NumberUI_01)
 
-	// –Ú•W”(Max)•\¦—p
+	// ç›®æ¨™æ•°(Max)è¡¨ç¤ºç”¨
 	std::weak_ptr<NumberSwitcher> m_pDigitMax10; // NumberUI_02
 	std::weak_ptr<NumberSwitcher> m_pDigitMax01; // NumberUI_03
 
-	//ƒS[ƒ‹ğŒ‚É•K—v‚ÈƒAƒCƒeƒ€”
+	//ã‚´ãƒ¼ãƒ«æ¡ä»¶ã«å¿…è¦ãªã‚¢ã‚¤ãƒ†ãƒ æ•°
 	int m_GoalConditions = 1;
 	float GoalTime = 0.0f;
 	bool m_GoalFlag = false;

@@ -19,7 +19,7 @@ enum class PosOfsset
 };
 
 //=========================================
-// SpriteRenderer (‰æ‘œ•`‰æ—pƒRƒ“ƒ|[ƒlƒ“ƒg)
+// SpriteRenderer (ç”»åƒæç”»ç”¨ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ)
 //=========================================
 class SpriteRenderer : public Component
 {
@@ -44,7 +44,7 @@ public:
 
     bool LoadTexture(ID3D11Device* device_, const std::string& filename_);
 
-    // ===== ƒZƒbƒ^[  =====
+    // ===== ã‚»ãƒƒã‚¿ãƒ¼  =====
     void SetTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex) { texture = tex; }
     void SetColor(const DirectX::XMFLOAT4& c) { color = c; }
     void SetVisible(bool v) { visible = v; }
@@ -62,27 +62,27 @@ public:
         SetUVRect(cellSize_.x * column_, cellSize_.y * row_, cellSize_.x, cellSize_.y);
     }
 
-    // ===== ƒQƒbƒ^[  =====
+    // ===== ã‚²ãƒƒã‚¿ãƒ¼  =====
     std::shared_ptr<Transform> GetTransform() const { return transform.lock(); }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture() const { return texture; }
     D3D11_TEXTURE2D_DESC GetTexture2dDesc() { return texture2dDesc; }
     bool IsVisible() { return visible; };
     DirectX::XMFLOAT4 GetColor() const { return color; }
     PosOfsset GetPivot() const { return pivotType; }
-    // ÀÛ‚Ì•`‰æˆÊ’uiƒ[ƒ‹ƒhÀ•Wj
+    // å®Ÿéš›ã®æç”»ä½ç½®ï¼ˆãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ï¼‰
     DirectX::XMFLOAT3 GetPosition() const;
-    // ÀÛ‚Ì•`‰æƒXƒP[ƒ‹iTransform ~ Sprite‚ÌƒTƒCƒYj
+    // å®Ÿéš›ã®æç”»ã‚¹ã‚±ãƒ¼ãƒ«ï¼ˆTransform Ã— Spriteã®ã‚µã‚¤ã‚ºï¼‰
     DirectX::XMFLOAT2 GetScale() const;
     DirectX::XMFLOAT2 GetSize();
 
     DirectX::XMFLOAT2 GetTextureSize() { return textureSize; };
     DirectX::XMFLOAT2 GetCatSize() { return catSize; };
     DirectX::XMFLOAT2 GetCatPos() { return catPos; };
-    // ÀÛ‚Ì•`‰æ‰ñ“]iTransform ~ Sprite‚Ìƒ[ƒJƒ‹‰ñ“]j
+    // å®Ÿéš›ã®æç”»å›è»¢ï¼ˆTransform Ã— Spriteã®ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢ï¼‰
     float GetRotationZ() const;
 
 
-    // RenderSystem‚É“n‚·•`‰æƒf[ƒ^‚ğ¶¬
+    // RenderSystemã«æ¸¡ã™æç”»ãƒ‡ãƒ¼ã‚¿ã‚’ç”Ÿæˆ
     bool GetRenderData(RenderData& outData_) const;
 
     void SetSpriteShaderID(SpriteShaderID id_) { spriteShaderID = id_; }
@@ -94,15 +94,15 @@ public:
     void Deserialize(const nlohmann::json& j);
  
 private:
-    // Sprite “Æ©İ’è
-    DirectX::XMFLOAT2 localSize{ 1280,710 };//•`‰æ‚ÌƒXƒNƒŠ[ƒ“À•W‚Ì‘å‚«‚³
-    DirectX::XMFLOAT2 catSize{ 350,350 };//•`‰æ‚ÌƒXƒNƒŠ[ƒ“À•W‚Ì‘å‚«‚³
-    DirectX::XMFLOAT2 catPos{ 0,0 };//•`‰æ‚ÌƒXƒNƒŠ[ƒ“À•W‚Ì‘å‚«‚³
+    // Sprite ç‹¬è‡ªè¨­å®š
+    DirectX::XMFLOAT2 localSize{ 1280,710 };//æç”»æ™‚ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã®å¤§ãã•
+    DirectX::XMFLOAT2 catSize{ 350,350 };//æç”»æ™‚ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã®å¤§ãã•
+    DirectX::XMFLOAT2 catPos{ 0,0 };//æç”»æ™‚ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã®å¤§ãã•
     DirectX::XMFLOAT2 textureSize;
     float localRotation = 0;   
 
     DirectX::XMFLOAT4 color{ 1,1,1,1 };
-    DirectX::XMFLOAT2 size = { 1, 1 };      // ƒsƒNƒZƒ‹’PˆÊ‚ÌƒTƒCƒY
+    DirectX::XMFLOAT2 size = { 1, 1 };      // ãƒ”ã‚¯ã‚»ãƒ«å˜ä½ã®ã‚µã‚¤ã‚º
     SpriteShaderID spriteShaderID = SpriteShaderID::Default;
     bool visible = true;
 
@@ -110,7 +110,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
     D3D11_TEXTURE2D_DESC texture2dDesc;
 
-    PosOfsset pivotType = PosOfsset::TOP_L; // ƒfƒtƒHƒ‹ƒg¶ãs
+    PosOfsset pivotType = PosOfsset::TOP_L; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå·¦ä¸Šs
 
     std::string texturePath;
     std::vector<std::string> spriteFiles;

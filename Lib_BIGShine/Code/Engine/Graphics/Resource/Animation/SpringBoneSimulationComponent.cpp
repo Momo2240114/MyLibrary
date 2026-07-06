@@ -14,7 +14,7 @@
 
 using namespace DirectX;
 
-//--- ƒeƒXƒg—p Static •—ƒpƒ‰ƒ[ƒ^-- -
+//--- ãƒ†ã‚¹ãƒˆç”¨ Static é¢¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿-- -
 DirectX::XMFLOAT3 SpringBoneSimulationComponent::windDirection = { 1.0f, 0.0f, 0.0f };
 float             SpringBoneSimulationComponent::windStrength = 0.0f;
 bool              SpringBoneSimulationComponent::windEnabled = false;
@@ -801,11 +801,11 @@ void SpringBoneSimulationComponent::ConstrainHairBehindBody(IKMapComponent::IKCh
 
     const XMFLOAT3 rootPosition_ = chain_.simulatedPositions.front();
 
-    // ‘O‘¤‚É‚Ç‚ê‚­‚ç‚¢o‚é‚±‚Æ‚ğ‹–‰Â‚·‚é‚©
+    // å‰å´ã«ã©ã‚Œãã‚‰ã„å‡ºã‚‹ã“ã¨ã‚’è¨±å¯ã™ã‚‹ã‹
     const float allowedForwardDistance_ = 0.02f;
     const float correctionRate_ = 1.0f;
 
-    // ªŒ³•t‹ß‚ÍƒAƒjƒ[ƒVƒ‡ƒ“’Ç]‚È‚Ì‚Å§ŒÀ‚µ‚·‚¬‚È‚¢
+    // æ ¹å…ƒä»˜è¿‘ã¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¿½å¾“ãªã®ã§åˆ¶é™ã—ã™ããªã„
     for (size_t pointIndex_ = 2; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
     {
         const float normalizedPoint_ = GetNormalizedPointPosition(chain_, pointIndex_);
@@ -842,8 +842,11 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
             chain_.simulatedPositions[pointIndex_])));
     }
 
+    bool chainChanged_ = false;
     for (size_t nodeIndex_ = 0; nodeIndex_ + 1 < chain_.nodeIndices.size(); ++nodeIndex_)
     {
+        model->UpdateNodeTransformOnly(chain_.nodeIndices[nodeIndex_]);
+        model->UpdateNodeTransformOnly(chain_.nodeIndices[nodeIndex_ + 1]);
         auto& node_ = nodes_.at(chain_.nodeIndices[nodeIndex_]);
         const auto& child_ = nodes_.at(chain_.nodeIndices[nodeIndex_ + 1]);
 
@@ -897,9 +900,16 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
             XMStoreFloat4(&node_.rotation, XMQuaternionNormalize(rotation_));
             {
                 BS_PROFILE_SCOPE("SpringBone::UpdateNodeTransformFrom");
-                model->UpdateNodeTransformFrom(chain_.nodeIndices[nodeIndex_]);
+                model->UpdateNodeTransformOnly(chain_.nodeIndices[nodeIndex_]);
             }
+            chainChanged_ = true;
         }
+    }
+
+    if (chainChanged_)
+    {
+        BS_PROFILE_SCOPE("SpringBone::FinalizeChainTransform");
+        model->UpdateNodeTransformFrom(chain_.nodeIndices.front());
     }
 }
 

@@ -9,7 +9,7 @@ class PbrShader : public ModelShader
 public:
     PbrShader(ID3D11Device* device);
     ~PbrShader() override = default;
-    // –¼‘O‚ğ•Û‚·‚éƒƒ“ƒo•Ï”
+    // åå‰ã‚’ä¿æŒã™ã‚‹ãƒ¡ãƒ³ãƒå¤‰æ•°
     const std::string& GetName() const override {
         static const std::string name = "PBR";
         return name;
@@ -20,7 +20,7 @@ public:
     void End(const RenderContext& rc) override;
 
 private:
-    // HLSL‚Ì cbuffer CbMesh : register(b0) ‚ÆŠ®‘S‚Éˆê’v‚³‚¹‚é
+    // HLSLã® cbuffer CbMesh : register(b0) ã¨å®Œå…¨ã«ä¸€è‡´ã•ã›ã‚‹
     struct CbMesh
     {
         DirectX::XMFLOAT4 baseColor;
@@ -28,7 +28,7 @@ private:
         float             metalness;
         float             roughness;
         float             occlusionStrength;
-        float             padding[2];        //  8ƒoƒCƒg (40`47) -> ‘S‘Ì‚ğ16‚Ì”{”‚É‚·‚é
+        float             padding[2];        //  8ãƒã‚¤ãƒˆ (40ï½47) -> å…¨ä½“ã‚’16ã®å€æ•°ã«ã™ã‚‹
     };
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>  vertexShader;

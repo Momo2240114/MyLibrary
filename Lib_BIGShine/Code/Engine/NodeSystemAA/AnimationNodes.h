@@ -9,7 +9,7 @@
 
 namespace NodeSystem {
 
-    /// Blackboard����w�肳�ꂽ�p�����[�^��ǂݏo���A�㑱�m�[�h�֏o�͂���B
+    /// Blackboardから指定されたパラメータを読み出し、後続ノードへ出力する。
     class GetParamNode : public NodeSystem::Node {
     public:
         std::string paramName;
@@ -31,7 +31,7 @@ namespace NodeSystem {
         }
     };
 
-    /// �A�j���[�V�����O���t�̍ŏI���ʂ��O���R���|�[�l���g�֌��J����I�[�m�[�h�B
+    /// アニメーショングラフの最終結果を外部コンポーネントへ公開する終端ノード。
     class AnimOutputNode : public NodeSystem::Node {
     public:
         AnimOutputNode(uintptr_t id_) : NodeSystem::Node(id_, "Anim Output") {
@@ -40,7 +40,7 @@ namespace NodeSystem {
         }
 
         void Evaluate() override {
-            // �I�[�m�[�h�̓��͒l�͊O���R���|�[�l���g���Q�Ƃ��邽�߁A�ǉ��̕]�������͕s�v�B
+            // 終端ノードの入力値は外部コンポーネントが参照するため、追加の評価処理は不要。
         }
     };
 

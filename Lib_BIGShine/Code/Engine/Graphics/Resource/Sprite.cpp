@@ -9,7 +9,7 @@
 
 void SpriteRenderer::Start()
 {
-    // “¯‚¶GameObject‚©‚çSpriteRenderer‚ğ’T‚µ‚Ä•Û‚µ‚Ä‚¨‚­
+    // åŒã˜GameObjectã‹ã‚‰SpriteRendererã‚’æ¢ã—ã¦ä¿æŒã—ã¦ãŠã
     if (auto obj = GetGameObject()) {
         transform = obj->transform;
     }
@@ -18,7 +18,7 @@ void SpriteRenderer::Start()
 
 void SpriteRenderer::Update(float deltaTime)
 {
-    // “¯‚¶GameObject‚©‚çSpriteRenderer‚ğ’T‚µ‚Ä•Û‚µ‚Ä‚¨‚­
+    // åŒã˜GameObjectã‹ã‚‰SpriteRendererã‚’æ¢ã—ã¦ä¿æŒã—ã¦ãŠã
     if (!transform.lock()) {
         auto obj = GetGameObject();
         transform = obj->transform;
@@ -39,7 +39,7 @@ void SpriteRenderer::Gui()
     h = catPos;
     if (ImGui::DragFloat2("catPosLeftTop", &h.x, 0.01f)) catPos = h;
 
-    // --- Pivotİ’è‚Ì’Ç‰Á ---
+    // --- Pivotè¨­å®šã®è¿½åŠ  ---
     const char* pivotNames[] = { "Top-Left", "Center", "Bottom-Center" };
     int currentPivot = (int)pivotType;
     if (ImGui::Combo("Pivot", &currentPivot, pivotNames, IM_ARRAYSIZE(pivotNames)))
@@ -50,7 +50,7 @@ void SpriteRenderer::Gui()
     ImGui::Separator();
 
 
-    // --- ƒtƒ@ƒCƒ‹‘I‘ğƒRƒ“ƒ{ƒ{ƒbƒNƒX ---
+    // --- ãƒ•ã‚¡ã‚¤ãƒ«é¸æŠã‚³ãƒ³ãƒœãƒœãƒƒã‚¯ã‚¹ ---
     const char* previewValue = (selectedFileIndex >= 0) ? spriteFiles[selectedFileIndex].c_str() : "Select a sprite...";
 
     if (ImGui::BeginCombo("Sprite Texture", previewValue)) {
@@ -59,9 +59,9 @@ void SpriteRenderer::Gui()
             if (ImGui::Selectable(spriteFiles[i].c_str(), isSelected)) {
                 selectedFileIndex = i;
 
-                // ƒtƒ@ƒCƒ‹‚ª‘I‚Î‚ê‚½‚ç‘¦À‚Éƒ[ƒh
+                // ãƒ•ã‚¡ã‚¤ãƒ«ãŒé¸ã°ã‚ŒãŸã‚‰å³åº§ã«ãƒ­ãƒ¼ãƒ‰
                 std::string fullPath = "Data/Sprite/" + spriteFiles[i];
-                LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), fullPath.c_str()); // ‘O‚Éì‚Á‚½ƒ[ƒhŠÖ”‚ğŒÄ‚Ño‚·
+                LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), fullPath.c_str()); // å‰ã«ä½œã£ãŸãƒ­ãƒ¼ãƒ‰é–¢æ•°ã‚’å‘¼ã³å‡ºã™
             }
             ;
 
@@ -72,7 +72,7 @@ void SpriteRenderer::Gui()
         ImGui::EndCombo();
     }
 
-    // XVƒ{ƒ^ƒ“iƒtƒHƒ‹ƒ_‚ÉV‚µ‚¢‰æ‘œ‚ğ“ü‚ê‚½—pj
+    // æ›´æ–°ãƒœã‚¿ãƒ³ï¼ˆãƒ•ã‚©ãƒ«ãƒ€ã«æ–°ã—ã„ç”»åƒã‚’å…¥ã‚ŒãŸæ™‚ç”¨ï¼‰
     if (ImGui::Button("Refresh Folder")) {
         RefreshSpriteFileList();
     }
@@ -89,7 +89,7 @@ bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filen
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv_;
     //D3D11_TEXTURE2D_DESC desc_ = {};
 
-        // std::string ‚ğ wchar_t* (std::wstring) ‚É•ÏŠ·
+        // std::string ã‚’ wchar_t* (std::wstring) ã«å¤‰æ›
     std::wstring wpath = std::wstring(filename_.begin(), filename_.end());
 
     HRESULT hr = CPUResourceLoader::LoadTextureFromFile(
@@ -101,7 +101,7 @@ bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filen
 
     if (FAILED(hr))
     {
-        // ƒ[ƒh¸”s
+        // ãƒ­ãƒ¼ãƒ‰å¤±æ•—
         return false;
     }
 
@@ -111,7 +111,7 @@ bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filen
     textureSize.x= static_cast<float>(texture2dDesc.Width);
     textureSize.y = static_cast<float>(texture2dDesc.Height);
 
-    // ComPtr‚Éˆø‚«Œp‚¬
+    // ComPtrã«å¼•ãç¶™ã
     texture = srv_;
 
     return true;
@@ -132,11 +132,11 @@ DirectX::XMFLOAT2 SpriteRenderer::GetScale() const
 {
     if (auto t = transform.lock())
     {
-        // Transform‚ÌƒXƒP[ƒ‹‚ğæ“¾
+        // Transformã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’å–å¾—
         XMFLOAT3 ws = t->GetWorldScale();
 
-        // SpriteRenderer‚Ìƒ[ƒJƒ‹ƒXƒP[ƒ‹•â³‚ğŠ|‚¯‡‚í‚¹‚é
-        // localSize ‚ÍƒsƒNƒZƒ‹’PˆÊAsize ‚Í”{—¦‚Æl‚¦‚é
+        // SpriteRendererã®ãƒ­ãƒ¼ã‚«ãƒ«ã‚¹ã‚±ãƒ¼ãƒ«è£œæ­£ã‚’æ›ã‘åˆã‚ã›ã‚‹
+        // localSize ã¯ãƒ”ã‚¯ã‚»ãƒ«å˜ä½ã€size ã¯å€ç‡ã¨è€ƒãˆã‚‹
         return {
             ws.x * localSize.x,
             ws.y * localSize.y
@@ -163,25 +163,25 @@ float SpriteRenderer::GetRotationZ() const
     if (auto t = transform.lock())
     {
         XMFLOAT3 wr = t->GetWorldRotation();
-        return wr.z + localRotation; // Z²‰ñ“]‚ğ‰ÁZ
+        return wr.z + localRotation; // Zè»¸å›è»¢ã‚’åŠ ç®—
     }
     return localRotation;
 }
 bool SpriteRenderer::GetRenderData(RenderData& outData_) const
 {
-    // ”ñ•\¦‚È‚çƒXƒLƒbƒv
+    // éè¡¨ç¤ºãªã‚‰ã‚¹ã‚­ãƒƒãƒ—
     if (!visible)
         return false;
 
-    // Transform‚ª‘¶İ‚µ‚È‚¢ê‡‚àƒXƒLƒbƒv
+    // TransformãŒå­˜åœ¨ã—ãªã„å ´åˆã‚‚ã‚¹ã‚­ãƒƒãƒ—
     auto t_ = transform.lock();
     if (!t_)
         return false;
 
-    // •`‰æƒf[ƒ^‚ğİ’è
+    // æç”»ãƒ‡ãƒ¼ã‚¿ã‚’è¨­å®š
     outData_.texture = texture;
     outData_.color = color;
-    outData_.worldMatrix = t_->GetWorldMatrix(); // Transform‚ªs—ñ‚ğ•Ô‚·‘O’ñ
+    outData_.worldMatrix = t_->GetWorldMatrix(); // TransformãŒè¡Œåˆ—ã‚’è¿”ã™å‰æ
     return true;
 }
 
@@ -195,7 +195,7 @@ void SpriteRenderer::RefreshSpriteFileList()
     for (const auto& entry : std::filesystem::directory_iterator(path)) {
         if (entry.is_regular_file()) {
             std::string ext = entry.path().extension().string();
-            // ‰æ‘œƒtƒ@ƒCƒ‹‚¾‚¯‚ğƒŠƒXƒg‚É“ü‚ê‚é
+            // ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã ã‘ã‚’ãƒªã‚¹ãƒˆã«å…¥ã‚Œã‚‹
             if (ext == ".png" || ext == ".jpg" || ext == ".dds" || ext == ".tga" || ext == ".PNG") {
                 spriteFiles.push_back(entry.path().filename().string());
             }
@@ -206,8 +206,8 @@ void SpriteRenderer::RefreshSpriteFileList()
 
 void SpriteRenderer::Serialize(nlohmann::json& j) const
 {
-    // ƒpƒX³‹K‰»ƒƒWƒbƒN‚Ì“¥P
-    std::string pathForSave = texturePath; // “Ç‚İ‚İ‚ÌƒpƒX‚ğ•Û‚µ‚Ä‚¨‚­•Ï”‚ª•K—v
+    // ãƒ‘ã‚¹æ­£è¦åŒ–ãƒ­ã‚¸ãƒƒã‚¯ã®è¸è¥²
+    std::string pathForSave = texturePath; // èª­ã¿è¾¼ã¿æ™‚ã®ãƒ‘ã‚¹ã‚’ä¿æŒã—ã¦ãŠãå¤‰æ•°ãŒå¿…è¦
     if (!pathForSave.empty()) {
         std::replace(pathForSave.begin(), pathForSave.end(), '\\', '/');
         if (pathForSave.find("./") != 0 && pathForSave.find("../") != 0) {
@@ -222,7 +222,7 @@ void SpriteRenderer::Serialize(nlohmann::json& j) const
     j["CatPos"] = { catPos.x, catPos.y };
     j["Visible"] = visible;
     j["ShaderID"] = static_cast<int>(spriteShaderID);
-    j["pivotType"] = (int)pivotType; // ’Ç‰Á
+    j["pivotType"] = (int)pivotType; // è¿½åŠ 
 }
 
 
@@ -236,7 +236,7 @@ void SpriteRenderer::Deserialize(const nlohmann::json& j)
 
             auto device = GraphicsDeviceManager::Instance().GetDevice();
             LoadTexture(device,name);
-            texturePath = name; // Ä•Û‘¶—p‚É•Û
+            texturePath = name; // å†ä¿å­˜ç”¨ã«ä¿æŒ
         }
     }
 
@@ -270,7 +270,7 @@ void SpriteRenderer::Deserialize(const nlohmann::json& j)
         spriteShaderID = static_cast<SpriteShaderID>(j["ShaderID"].get<int>());
     }
 
-    // Pivot‚Ì•œŒ³
+    // Pivotã®å¾©å…ƒ
     if (j.contains("pivotType")) {
         pivotType = (PosOfsset)j["pivotType"].get<int>();
     }

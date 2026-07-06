@@ -7,16 +7,16 @@
 #include <string>
 #include "DirectXMath.h"
 
-// ƒfƒoƒCƒXí•ÊiKBM: Keyboard & Mousej
+// ãƒ‡ãƒã‚¤ã‚¹ç¨®åˆ¥ï¼ˆKBM: Keyboard & Mouseï¼‰
 enum class DeviceType {
     KBM = 0,
     Gamepad = 1
 };
 
-// ’Pˆê“ü—Íƒ†ƒjƒbƒg
+// å˜ä¸€å…¥åŠ›ãƒ¦ãƒ‹ãƒƒãƒˆ
 struct InputUnit {
     DeviceType device;
-    int code; // VK_ƒR[ƒhAMouseCodeA‚Ü‚½‚Í PadCode
+    int code; // VK_ã‚³ãƒ¼ãƒ‰ã€MouseCodeã€ã¾ãŸã¯ PadCode
 };
 
 enum class AxisSourceType
@@ -49,7 +49,7 @@ struct AxisUnit
 
 using AxisBind = std::vector<AxisUnit>;
 
-// “¯‰Ÿ‚µiANDj‚ÌW‡
+// åŒæ™‚æŠ¼ã—ï¼ˆANDï¼‰ã®é›†åˆ
 using InputCombo = std::vector<InputUnit>;
 
 class KeyConfig {
@@ -59,12 +59,12 @@ public:
         return instance;
     }
 
-    // •Û‘¶ƒtƒ@ƒCƒ‹ƒpƒXİ’è
+    // ä¿å­˜ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹è¨­å®š
     void SetConfigFile(const std::string& filename) { configFile = filename; }
     const std::string& GetConfigFile() const { return configFile; }
 
-    // ---- ƒoƒCƒ“ƒh‘€ì ----
-    // “¯‰Ÿ‚µƒZƒbƒg(combo)‚ğƒAƒNƒVƒ‡ƒ“‚É“o˜^iŒÄ‚Ô‚½‚Ñ‚ÉORğŒ‚Æ‚µ‚Ä’Ç‰Áj
+    // ---- ãƒã‚¤ãƒ³ãƒ‰æ“ä½œ ----
+    // åŒæ™‚æŠ¼ã—ã‚»ãƒƒãƒˆ(combo)ã‚’ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã«ç™»éŒ²ï¼ˆå‘¼ã¶ãŸã³ã«ORæ¡ä»¶ã¨ã—ã¦è¿½åŠ ï¼‰
     void BindAction(const std::string& action, const InputCombo& combo);
     void SetBinds(const std::string& action, const std::vector<InputCombo>& combos);
     void RemoveAction(const std::string& action);
@@ -72,18 +72,18 @@ public:
     void ClearBinds(const std::string& action);
     const std::unordered_map<std::string, std::vector<InputCombo>>& GetActionMap() const { return actionMap; }
 
-    // ---- “ü—Í”»’è ----
-    bool ActionPressed(const std::string& action) const;   // ‰Ÿ‚µ‚Á‚Ï‚È‚µ
-    bool ActionPressedIn(const std::string& action) const; // ‰Ÿ‚µ‚½uŠÔ
-    bool ActionPressedOut(const std::string& action) const;// —£‚µ‚½uŠÔ
+    // ---- å…¥åŠ›åˆ¤å®š ----
+    bool ActionPressed(const std::string& action) const;   // æŠ¼ã—ã£ã±ãªã—
+    bool ActionPressedIn(const std::string& action) const; // æŠ¼ã—ãŸç¬é–“
+    bool ActionPressedOut(const std::string& action) const;// é›¢ã—ãŸç¬é–“
 
-    // ---- •Û‘¶/“Ç‚İ‚İ (JSON) ----
+    // ---- ä¿å­˜/èª­ã¿è¾¼ã¿ (JSON) ----
     bool Save();
     bool Load();
     bool Save(const std::string& filename);
     bool Load(const std::string& filename);
 
-    //-----AxisŠÖŒW------
+    //-----Axisé–¢ä¿‚------
     void BindAxis(const std::string& axisName_, const AxisUnit& unit_);
     void SetAxisBinds(const std::string& axisName_, const AxisBind& binds_);
     void RemoveAxis(const std::string& axisName_);
@@ -94,15 +94,15 @@ public:
 private:
     KeyConfig() = default;
 
-    // “à•””»’è—p
+    // å†…éƒ¨åˆ¤å®šç”¨
     bool CheckUnit(const InputUnit& unit, int type) const; // type 0:Hold, 1:In, 2:Out
     bool CheckCombo(const InputCombo& combo, int type) const;
 
-    // Map\‘¢: Action–¼ -> [Combo1(AND) OR Combo2(AND) ...]
+    // Mapæ§‹é€ : Actionå -> [Combo1(AND) OR Combo2(AND) ...]
     std::unordered_map<std::string, std::vector<InputCombo>> actionMap;
     std::string configFile;
 
-    //-----AxisŠÖŒW------
+    //-----Axisé–¢ä¿‚------
     float GetAxisUnitValue(const AxisUnit& unit_) const;
 
     std::unordered_map<std::string, AxisBind> axisMap;

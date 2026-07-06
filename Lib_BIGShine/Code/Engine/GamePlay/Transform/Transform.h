@@ -14,7 +14,7 @@
 #include "Engine/Math/Vector.h"
 #include <nlohmann/json.hpp>
 
-class GameObject; // ‘O•ûéŒ¾
+class GameObject; // å‰æ–¹å®£è¨€
 
 // =========================================
 // Transform
@@ -22,45 +22,45 @@ class GameObject; // ‘O•ûéŒ¾
 class Transform : public std::enable_shared_from_this<Transform>
 {
 public:
-    // --- ƒ[ƒJƒ‹î•ñ ---
-    DirectX::XMFLOAT3 localPosition{ 0, 0, 0 };   // ƒ[ƒJƒ‹ˆÊ’u
-    DirectX::XMFLOAT3 localRotation{ 0, 0, 0 };   // ƒ[ƒJƒ‹‰ñ“]
-    //Quaternion localRotation = Quaternion::Identity;//ƒNƒH[ƒ^ƒjƒIƒ“
-    DirectX::XMFLOAT3 localScale{ 1, 1, 1 };      // ƒXƒP[ƒ‹
+    // --- ãƒ­ãƒ¼ã‚«ãƒ«æƒ…å ± ---
+    DirectX::XMFLOAT3 localPosition{ 0, 0, 0 };   // ãƒ­ãƒ¼ã‚«ãƒ«ä½ç½®
+    DirectX::XMFLOAT3 localRotation{ 0, 0, 0 };   // ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢
+    //Quaternion localRotation = Quaternion::Identity;//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³
+    DirectX::XMFLOAT3 localScale{ 1, 1, 1 };      // ã‚¹ã‚±ãƒ¼ãƒ«
 
-    //ƒAƒ^ƒbƒ`ƒƒ“ƒg‚ğİ’è‚·‚ée‚Ìƒm[ƒh–¼
+    //ã‚¢ã‚¿ãƒƒãƒãƒ¡ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹è¦ªã®ãƒãƒ¼ãƒ‰å
     std::string m_ParentNodeName;
 
     DirectX::XMMATRIX m_OverrideParentMatrix = DirectX::XMMatrixIdentity();
     bool m_IsOverriding = false;
 
 
-    // --- ŠK‘wŠÖŒW ---
-    std::weak_ptr<GameObject> gameObject; // ƒ|ƒCƒ“ƒ^‚È‚Ì‚Å‘O•ûéŒ¾‚¾‚¯‚ÅOK
-    std::string parentNameDuringLoad;    // ƒ[ƒh‚Ée‚Ì–¼‘O‚ğˆê•Û‘¶
+    // --- éšå±¤é–¢ä¿‚ ---
+    std::weak_ptr<GameObject> gameObject; // ãƒã‚¤ãƒ³ã‚¿ãªã®ã§å‰æ–¹å®£è¨€ã ã‘ã§OK
+    std::string parentNameDuringLoad;    // ãƒ­ãƒ¼ãƒ‰æ™‚ã«è¦ªã®åå‰ã‚’ä¸€æ™‚ä¿å­˜
 
     std::weak_ptr<Transform> parent;
     std::vector<std::shared_ptr<Transform>> children;
 
-    // --- ƒ[ƒ‹ƒhƒLƒƒƒbƒVƒ… ---
+    // --- ãƒ¯ãƒ¼ãƒ«ãƒ‰ã‚­ãƒ£ãƒƒã‚·ãƒ¥ ---
     DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
     bool isDirty = true;
 
-    //ƒOƒ[ƒoƒ‹s—ñ
+    //ã‚°ãƒ­ãƒ¼ãƒãƒ«è¡Œåˆ—
     Matrix m_GlobalMatrix = DirectX::XMMatrixIdentity();
 
-    // --- ’Ç‰Á --- ˆÚ“®‚Æ‰ñ“]‚ÌƒIƒtƒZƒbƒg
-    DirectX::XMFLOAT3 moveOffset{ 0, 0, 0 };      // ˆÚ“®‚ÌƒIƒtƒZƒbƒg
-    DirectX::XMFLOAT3 rotateOffset{ 0, 0, 0 };    // ‰ñ“]‚ÌƒIƒtƒZƒbƒgiƒIƒCƒ‰[Špj
+    // --- è¿½åŠ  --- ç§»å‹•ã¨å›è»¢ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+    DirectX::XMFLOAT3 moveOffset{ 0, 0, 0 };      // ç§»å‹•ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+    DirectX::XMFLOAT3 rotateOffset{ 0, 0, 0 };    // å›è»¢ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆï¼ˆã‚ªã‚¤ãƒ©ãƒ¼è§’ï¼‰
 
     //Quaternion rotationOffset = Quaternion::Identity;
     struct TransformDynamics
     {
-        // ƒAƒjƒ[ƒVƒ‡ƒ“‚©‚ç“K—p‚³‚ê‚é‚×‚«ˆÚ“®E‰ñ“]
+        // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‹ã‚‰é©ç”¨ã•ã‚Œã‚‹ã¹ãç§»å‹•ãƒ»å›è»¢
         DirectX::XMFLOAT3 MotionTranslation{ 0, 0, 0 };
         DirectX::XMFLOAT3 MotionRotation{ 0, 0, 0 };
 
-        // ƒ†[ƒU[‚âƒXƒNƒŠƒvƒg‚©‚ç‚Ìˆê“I‚È—ÍiƒmƒbƒNƒoƒbƒN‚âŠO—Í‚È‚Çj
+        // ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚„ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰ã®ä¸€æ™‚çš„ãªåŠ›ï¼ˆãƒãƒƒã‚¯ãƒãƒƒã‚¯ã‚„å¤–åŠ›ãªã©ï¼‰
         DirectX::XMFLOAT3 externalForce{ 0, 0, 0 };
 
         void Clear()
@@ -75,28 +75,28 @@ public:
 
     void Gui()
     {
-        // ’l‚ª•Ï‚í‚Á‚½‚çƒo[ƒWƒ‡ƒ“‚ğã‚°‚é
+        // å€¤ãŒå¤‰ã‚ã£ãŸã‚‰ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚’ä¸Šã’ã‚‹
         if (ImGui::DragFloat3("Position", &localPosition.x, 0.1f)) { MarkDirty(); }
         if (ImGui::DragFloat3("Rotation", &localRotation.x, 0.5f)) { MarkDirty(); }
         if (ImGui::DragFloat3("Scale", &localScale.x, 0.01f)) { MarkDirty(); }
     }
 
-    //‘O•ûŒüƒxƒNƒgƒ‹‚ğæ“¾‚·‚é
+    //å‰æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—ã™ã‚‹
     Vector3 GetFront();
 
-    //‰¡•ûŒüƒxƒNƒgƒ‹‚ğæ“¾‚·‚é
+    //æ¨ªæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—ã™ã‚‹
     Vector3 GetRight();
 
-    //ã•ûŒüƒxƒNƒgƒ‹‚ğæ“¾‚·‚é
+    //ä¸Šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—ã™ã‚‹
     Vector3 GetUp();
 
     // ======================
-    // eqİ’è
+    // è¦ªå­è¨­å®š
     // ======================
     void SetParent(std::shared_ptr<Transform> p, std::string nodeName = "");
 
     // ======================
-    // Dirtyƒtƒ‰ƒO
+    // Dirtyãƒ•ãƒ©ã‚°
     // ======================
     void MarkDirty()
     {
@@ -106,13 +106,13 @@ public:
     }
 
     // ======================
-    // s—ñXV
+    // è¡Œåˆ—æ›´æ–°
     // ======================
     void UpdateWorldMatrix();
 
 
     // ======================
-    // ˆÚ“®’l‚Ì’Ç‰Á
+    // ç§»å‹•å€¤ã®è¿½åŠ 
     // ======================
     void AddMoveOffset(const DirectX::XMFLOAT3& offset)
     {
@@ -123,7 +123,7 @@ public:
     }
 
     // ======================
-    // ‰ñ“]’l‚Ì’Ç‰Á
+    // å›è»¢å€¤ã®è¿½åŠ 
     // ======================
     void AddRotateOffset(const DirectX::XMFLOAT3& offset)
     {
@@ -148,11 +148,11 @@ public:
     }
 
     // ======================
-    // ƒ[ƒ‹ƒhs—ñæ“¾
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—å–å¾—
     // ======================
     DirectX::XMMATRIX GetWorldMatrix()
     {
-        //ƒZƒbƒg‚³‚ê‚Ä‚¢‚ê‚Î
+        //ã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚Œã°
         if (isDirty)
         {
             UpdateWorldMatrix();
@@ -163,7 +163,7 @@ public:
 
     DirectX::XMFLOAT4X4 GetWorld()
     {
-        //ƒZƒbƒg‚³‚ê‚Ä‚¢‚ê‚Î
+        //ã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚Œã°
         if (isDirty)
         {
             UpdateWorldMatrix();
@@ -175,13 +175,13 @@ public:
     }
 
     // ======================
-    // ƒ[ƒ‹ƒhÀ•Wæ“¾
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™å–å¾—
     // ======================
     DirectX::XMFLOAT3 GetWorldPosition()
     {
         using namespace DirectX;
 
-        //ƒZƒbƒg‚³‚ê‚Ä‚¢‚ê‚Î
+        //ã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚Œã°
         if (isDirty)
         {
             UpdateWorldMatrix();
@@ -193,13 +193,13 @@ public:
     }
 
     // ======================
-    // ƒ[ƒ‹ƒhƒXƒP[ƒ‹æ“¾
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰ã‚¹ã‚±ãƒ¼ãƒ«å–å¾—
     // ======================
     DirectX::XMFLOAT3 GetWorldScale()
     {
         using namespace DirectX;
 
-        //ƒZƒbƒg‚³‚ê‚Ä‚¢‚ê‚Î
+        //ã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚Œã°
         if (isDirty)
         {
             UpdateWorldMatrix();
@@ -216,7 +216,7 @@ public:
     }
 
     // ======================
-    // ƒ[ƒ‹ƒh‰ñ“]æ“¾iƒIƒCƒ‰[Špj
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰å›è»¢å–å¾—ï¼ˆã‚ªã‚¤ãƒ©ãƒ¼è§’ï¼‰
     // ======================
     DirectX::XMFLOAT3 GetWorldRotation();
   
@@ -239,7 +239,7 @@ public:
         MarkDirty();
     }
 
-    // Transform.h “à‚É’Ç‰Á
+    // Transform.h å†…ã«è¿½åŠ 
     void ApplyWorldMatrix(const DirectX::XMMATRIX& newWorldMat);
    
     void SetForwardYawOnly(

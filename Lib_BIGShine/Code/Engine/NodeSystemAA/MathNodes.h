@@ -5,7 +5,7 @@
 namespace NodeSystem
 {
 
-    /// 2�̓��͒l�����Z���鉉�Z�m�[�h�B
+    /// 2つの入力値を加算する演算ノード。
     class AddNode : public Node {
     public:
         AddNode(uintptr_t id_) : Node(id_, "Add") {
@@ -21,7 +21,7 @@ namespace NodeSystem
         }
     };
 
-    /// 2�̓��͒l����Z���鉉�Z�m�[�h�B
+    /// 2つの入力値を乗算する演算ノード。
     class MultiplyNode : public Node {
     public:
         MultiplyNode(uintptr_t id_) : Node(id_, "Multiply") {
@@ -37,7 +37,7 @@ namespace NodeSystem
         }
     };
 
-    /// ���͒l���w�肳�ꂽ�ŏ��l�ƍő�l�͈̔͂֐������鉉�Z�m�[�h�B
+    /// 入力値を指定された最小値と最大値の範囲へ制限する演算ノード。
     class ClampNode : public Node {
     public:
         ClampNode(uintptr_t id_) : Node(id_, "Clamp") {

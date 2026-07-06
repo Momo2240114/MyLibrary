@@ -4,7 +4,7 @@
 #include <wrl.h>
 
 //=========================================
-// SpriteShader (スプライト用シェーダー)
+// SpriteShader (繧ｹ繝励Λ繧､繝育畑繧ｷ繧ｧ繝ｼ繝繝ｼ)
 //=========================================
 class SpriteShader : public Component
 {

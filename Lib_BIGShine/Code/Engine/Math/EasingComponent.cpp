@@ -1,13 +1,27 @@
 #include "EasingComponent.h"
 
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/System/TimeManager.h"
+
 #include <algorithm>
 
-void EasingComponent::Update(float et)
+void EasingComponent::Update(float et_)
 {
-	//ƒC[ƒWƒ“ƒO‚ÌXVˆ—
-	for (int i = 0;i < m_Easings.size();i++)
+	//ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã®æ›´æ–°å‡¦ç†
+	float updateTime_ = et_;
+	if (useUnscaledTime)
 	{
-		m_Easings[i].Update(et);
+		const std::shared_ptr<GameObject> owner_ = GetGameObject();
+		if (owner_)
+		{
+			const std::shared_ptr<TimeManager> timeManager_ = owner_->GetManager().GetTimeManager();
+			if (timeManager_) updateTime_ = timeManager_->GetLastRawDeltaTime();
+		}
+	}
+	for (size_t index_ = 0; index_ < m_Easings.size(); ++index_)
+	{
+		m_Easings[index_].Update(updateTime_);
 	}
 }
 
@@ -26,10 +40,10 @@ void EasingComponent::RemoveEasing(int index)
 {
 	if (m_Easings.size() < index)
 	{
-		assert(L"”ÍˆÍŠOƒAƒNƒZƒX");
+		assert(L"ç¯„å›²å¤–ã‚¢ã‚¯ã‚»ã‚¹");
 	}
 
-	//“Á’è‚ÌƒCƒ“ƒfƒbƒNƒX‚ğíœ‚·‚é
+	//ç‰¹å®šã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å‰Šé™¤ã™ã‚‹
 	m_Easings.erase(m_Easings.begin()+index);
 }
 
@@ -37,7 +51,7 @@ void EasingComponent::PlayEasing(int index,EasingType easingType,float timeSpeed
 {
 	if (m_Easings.size() < index)
 	{
-		assert(L"”ÍˆÍŠOƒAƒNƒZƒX");
+		assert(L"ç¯„å›²å¤–ã‚¢ã‚¯ã‚»ã‚¹");
 	}
 	m_Easings[index].StartEasing(easingType, timeSpeed, target);
 }
@@ -46,7 +60,7 @@ void EasingComponent::SetStartValue(int index,float value)
 {
 	if (m_Easings.size() < index)
 	{
-		assert(L"”ÍˆÍŠOƒAƒNƒZƒX");
+		assert(L"ç¯„å›²å¤–ã‚¢ã‚¯ã‚»ã‚¹");
 	}
 	return m_Easings[index].SetValue(value);
 }
@@ -55,7 +69,7 @@ float EasingComponent::GetValue(int index)
 {
 	if (m_Easings.size() < index)
 	{
-		assert(L"”ÍˆÍŠOƒAƒNƒZƒX");
+		assert(L"ç¯„å›²å¤–ã‚¢ã‚¯ã‚»ã‚¹");
 	}
 	return m_Easings[index].GetValue();
 }
@@ -64,7 +78,7 @@ float EasingComponent::GetRatio(int index)
 {
 	if (m_Easings.size() < index)
 	{
-		assert(L"”ÍˆÍŠOƒAƒNƒZƒX");
+		assert(L"ç¯„å›²å¤–ã‚¢ã‚¯ã‚»ã‚¹");
 	}
 	return m_Easings[index].GetRatio();
 }
@@ -82,7 +96,7 @@ void EasingComponent::Gui()
 
 void Easing::Update(float et)
 {
-	//ƒC[ƒWƒ“ƒO‚ªI—¹‚µ‚½‚Ì‚È‚ç‚Î
+	//ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ãŒçµ‚äº†ã—ãŸã®ãªã‚‰ã°
 	if (m_EasingEndFlag)return;
 
 	switch (m_EasingType)
@@ -115,11 +129,11 @@ void Easing::Update(float et)
 		//m_Time = 0.0f;
 		break;
 	}
-	//·•ª
+	//å·®åˆ†
 	m_Value = std::lerp(m_StartValue, m_Target, m_Ratio);
 
 
-	//ƒC[ƒWƒ“ƒOˆ—‚ğI—¹‚·‚é
+	//ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°å‡¦ç†ã‚’çµ‚äº†ã™ã‚‹
 	if (m_Time >= 1.0f)
 	{
 		m_EasingEndFlag = true;
@@ -150,11 +164,11 @@ void Easing::GetLerpTime()
 
 void Easing::EaseOutQuint(float t)
 {
-	// t ‚ğ 0.0 ` 1.0 ‚Ì”ÍˆÍ‚ÉƒNƒ‰ƒ“ƒviˆÀ‘S‚Ì‚½‚ßj
+	// t ã‚’ 0.0 ï½ 1.0 ã®ç¯„å›²ã«ã‚¯ãƒ©ãƒ³ãƒ—ï¼ˆå®‰å…¨ã®ãŸã‚ï¼‰
 	if (t < 0.0f) t = 0.0f;
 	if (t > 1.0f) t = 1.0f;
 
-	// ”®: 1 - (1 - t)^5
+	// æ•°å¼: 1 - (1 - t)^5
 	float invT = 1.0f - t;
 	m_Ratio = 1.0f - (invT * invT * invT * invT * invT);
 
@@ -162,33 +176,33 @@ void Easing::EaseOutQuint(float t)
 
 void Easing::GetOutQuintTime()
 {
-	// ”®: t = 1 - (1 - ratio)^(1/5)
-	// std::pow(x, 0.2f) ‚Í 5æª‚ğˆÓ–¡‚µ‚Ü‚·
+	// æ•°å¼: t = 1 - (1 - ratio)^(1/5)
+	// std::pow(x, 0.2f) ã¯ 5ä¹—æ ¹ã‚’æ„å‘³ã—ã¾ã™
 	m_Time = 1.0f - std::pow(1.0f - m_Ratio, 0.2f);
 }
 
 void Easing::EaseInExpo(float t)
 {
-	// ”ÍˆÍŠO‚ğƒNƒ‰ƒ“ƒv
+	// ç¯„å›²å¤–ã‚’ã‚¯ãƒ©ãƒ³ãƒ—
 	t = std::clamp(t, 0.0f, 1.0f);
 
-	// t‚ª0‚Ì‚Æ‚«‚Í2‚Ìƒ}ƒCƒiƒX10æi–ñ0.00097j‚Æ‚¢‚¤”÷¬‚È’l‚ªo‚é‚Ì‚ğ–h‚®‚½‚ß0‚ğ•Ô‚·
+	// tãŒ0ã®ã¨ãã¯2ã®ãƒã‚¤ãƒŠã‚¹10ä¹—ï¼ˆç´„0.00097ï¼‰ã¨ã„ã†å¾®å°ãªå€¤ãŒå‡ºã‚‹ã®ã‚’é˜²ããŸã‚0ã‚’è¿”ã™
 	if (t == 0.0f)
 	{
 		m_Ratio = 0.0f;
 		return;
 	}
 
-	// ”®: 2^(10 * (t - 1))
+	// æ•°å¼: 2^(10 * (t - 1))
 	m_Ratio = std::pow(2.0f, 10.0f * (t - 1.0f));
 }
 
 void Easing::GetInExpoTime()
 {
-	// ”ÍˆÍŠO‚ğƒNƒ‰ƒ“ƒv
+	// ç¯„å›²å¤–ã‚’ã‚¯ãƒ©ãƒ³ãƒ—
 	float ratio = std::clamp(m_Ratio, 0.0f, 1.0f);
 
-	// ratio‚ª0‚Ì‚Æ‚«‚Í“Á•Êˆ—
+	// ratioãŒ0ã®ã¨ãã¯ç‰¹åˆ¥å‡¦ç†
 	if (ratio == 0.0f)
 	{
 		m_Time = 0.0f;
@@ -201,23 +215,23 @@ void Easing::GetInExpoTime()
 
 void Easing::EaseOutExpo(float t)
 {
-	// ”ÍˆÍŠO‚ğƒNƒ‰ƒ“ƒv
+	// ç¯„å›²å¤–ã‚’ã‚¯ãƒ©ãƒ³ãƒ—
 	t = std::clamp(t, 0.0f, 1.0f);
 
-	// t‚ª1‚Ì‚Æ‚«‚Í1 - 2^(-10)i–ñ0.999j‚Æ‚¢‚¤’l‚É‚È‚é‚Ì‚ğ–h‚®‚½‚ßA‚«‚Á‚¿‚è1‚ğ•Ô‚·
+	// tãŒ1ã®ã¨ãã¯1 - 2^(-10)ï¼ˆç´„0.999ï¼‰ã¨ã„ã†å€¤ã«ãªã‚‹ã®ã‚’é˜²ããŸã‚ã€ãã£ã¡ã‚Š1ã‚’è¿”ã™
 	if (t == 1.0f)
 	{
 		m_Ratio = 1.0f;
 		return;
 	}
 
-	// ”®: 1 - 2^(-10 * t)
+	// æ•°å¼: 1 - 2^(-10 * t)
 	m_Ratio = 1.0f - std::pow(2.0f, -10.0f * t);
 }
 
 void Easing::GetOutExpoTime()
 {
-	// ratio‚ª1‚Ì‚Æ‚«‚Í“Á•Êˆ—
+	// ratioãŒ1ã®ã¨ãã¯ç‰¹åˆ¥å‡¦ç†
 	if (m_Ratio == 1.0f)
 	{
 		m_Time = 1.0f;
@@ -254,19 +268,19 @@ void Easing::StartEasing(EasingType easingType, float timeSpeed, float target)
 	m_Time = 0.0f;
 	m_EasingEndFlag = false;
 
-	//–Ú•W‚Ì’l‚ğİ’è‚·‚é
+	//ç›®æ¨™ã®å€¤ã‚’è¨­å®šã™ã‚‹
 	m_Target = target;
 
-	//”ä—¦‚ğ‰Šú‰»
+	//æ¯”ç‡ã‚’åˆæœŸåŒ–
 	m_Ratio = 0.0f;
 
-	//ƒC[ƒWƒ“ƒO‚Ìí—Ş‚ğİ’è‚·‚é
+	//ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã®ç¨®é¡ã‚’è¨­å®šã™ã‚‹
 	m_EasingType = easingType;
 
-	//ƒC[ƒWƒ“ƒO‚Ì‘¬“x‚ğİ’è
+	//ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã®é€Ÿåº¦ã‚’è¨­å®š
 	m_TimeSpeed = timeSpeed;
 
-	//ŠJn‚ÌÅ¬’l‚ğİ’è‚·‚é
+	//é–‹å§‹æ™‚ã®æœ€å°å€¤ã‚’è¨­å®šã™ã‚‹
 	m_StartValue = m_Value;
 
 

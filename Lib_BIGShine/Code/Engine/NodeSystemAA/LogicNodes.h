@@ -3,7 +3,7 @@
 
 namespace NodeSystem {
 
-    /// ����A������B���傫�����𔻒肷���r�m�[�h�B
+    /// 入力Aが入力Bより大きいかを判定する比較ノード。
     class GreaterNode : public Node {
     public:
         GreaterNode(uintptr_t id_) : Node(id_, "Greater Than") {
@@ -19,7 +19,7 @@ namespace NodeSystem {
         }
     };
 
-    /// 2�̐^�U�l�̘_���ς��o�͂���m�[�h�B
+    /// 2つの真偽値の論理積を出力するノード。
     class AndNode : public Node {
     public:
         AndNode(uintptr_t id_) : Node(id_, "Logical AND") {
@@ -39,7 +39,7 @@ namespace NodeSystem {
         }
     };
 
-    /// �����ɉ�����2�̓��͒l��������I������m�[�h�B
+    /// 条件に応じて2つの入力値から一方を選択するノード。
     class SelectNode : public Node {
     public:
         SelectNode(uintptr_t id_) : Node(id_, "Select (Float)") {

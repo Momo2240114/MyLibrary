@@ -7,23 +7,23 @@
 using namespace physx;
 
 //--- 
-//@brief Õ“ËŒ`ó‚ğƒ{ƒbƒNƒX‚Æ‚µ‚Äİ’è‚·‚é 
-//@param half ƒ{ƒbƒNƒX‚Ì”¼ƒTƒCƒYi•C‚‚³C‰œsj 
+//@brief è¡çªå½¢çŠ¶ã‚’ãƒœãƒƒã‚¯ã‚¹ã¨ã—ã¦è¨­å®šã™ã‚‹ 
+//@param half ãƒœãƒƒã‚¯ã‚¹ã®åŠã‚µã‚¤ã‚ºï¼ˆå¹…ï¼Œé«˜ã•ï¼Œå¥¥è¡Œï¼‰ 
 //--- 
 void PhysicsCollisionComponent::SetBox(const DirectX::XMFLOAT3& half) 
 { shapeType = ShapeType::Box; boxHalfSize = half; } 
 //---
-// @brief Õ“ËŒ`ó‚ğ‹…‚Æ‚µ‚Äİ’è‚·‚é 
-// @param r ‹…‚Ì”¼Œa 
+// @brief è¡çªå½¢çŠ¶ã‚’çƒã¨ã—ã¦è¨­å®šã™ã‚‹ 
+// @param r çƒã®åŠå¾„ 
 //--- 
 void PhysicsCollisionComponent::SetSphere(float r)
 { 
     shapeType = ShapeType::Sphere; sphereRadius = r;
 } 
 //--- 
-// @brief Õ“ËŒ`ó‚ğƒJƒvƒZƒ‹‚Æ‚µ‚Äİ’è‚·‚é 
-// @param r ƒJƒvƒZƒ‹‚Ì”¼Œa
-// @param h ƒJƒvƒZƒ‹‚Ì‚‚³i’†S²•ûŒü‚Ì’·‚³j 
+// @brief è¡çªå½¢çŠ¶ã‚’ã‚«ãƒ—ã‚»ãƒ«ã¨ã—ã¦è¨­å®šã™ã‚‹ 
+// @param r ã‚«ãƒ—ã‚»ãƒ«ã®åŠå¾„
+// @param h ã‚«ãƒ—ã‚»ãƒ«ã®é«˜ã•ï¼ˆä¸­å¿ƒè»¸æ–¹å‘ã®é•·ã•ï¼‰ 
 //--- 
 
 void PhysicsCollisionComponent::SetCapsule(float r, float h) 
@@ -60,8 +60,8 @@ void PhysicsCollisionComponent::CreateActor()
 
     auto t = GetGameObject()->transform;
 
-    // --- yC³z‰ŠúˆÊ’u‚ÉƒIƒtƒZƒbƒg‚ğ“K—p ---
-    // Actor‚ÌÀ•W = Transform‚ÌÀ•W + collisionOffset
+    // --- ã€ä¿®æ­£ã€‘åˆæœŸä½ç½®ã«ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’é©ç”¨ ---
+    // Actorã®åº§æ¨™ = Transformã®åº§æ¨™ + collisionOffset
     PxTransform pose(
         PxVec3(t->localPosition.x + collisionOffset.x,
             t->localPosition.y + collisionOffset.y,
@@ -97,15 +97,15 @@ void PhysicsCollisionComponent::CreateActor()
 
     case ShapeType::Capsule:
     {
-        // PhysX‚ÌƒJƒvƒZƒ‹‚Í‰Šúó‘Ô‚ÅX²‚ğŒü‚¢‚Ä‚¢‚é‚½‚ßA’¼—§‚³‚¹‚é‚É‚Í‰ñ“]‚ª•K—v‚Èê‡‚ª‚ ‚è‚Ü‚·
-        // ‚±‚±‚Å‚ÍƒWƒIƒƒgƒŠ‚Ìì¬‚Ì‚İ
+        // PhysXã®ã‚«ãƒ—ã‚»ãƒ«ã¯åˆæœŸçŠ¶æ…‹ã§Xè»¸ã‚’å‘ã„ã¦ã„ã‚‹ãŸã‚ã€ç›´ç«‹ã•ã›ã‚‹ã«ã¯å›è»¢ãŒå¿…è¦ãªå ´åˆãŒã‚ã‚Šã¾ã™
+        // ã“ã“ã§ã¯ã‚¸ã‚ªãƒ¡ãƒˆãƒªã®ä½œæˆã®ã¿
         float r = capsuleRadius * ((scale.x + scale.y + scale.z) / 3.f);
         float h = capsuleHalfHeight * scale.y;
         shape = PxRigidActorExt::createExclusiveShape(*actor, PxCapsuleGeometry(r, h), *mat);
 
-        // ƒJƒvƒZƒ‹‚ğciY²ãj‚ÉŒü‚¯‚é‚½‚ß‚Ìƒ[ƒJƒ‹‰ñ“]İ’è
+        // ã‚«ãƒ—ã‚»ãƒ«ã‚’ç¸¦ï¼ˆYè»¸ä¸Šï¼‰ã«å‘ã‘ã‚‹ãŸã‚ã®ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢è¨­å®š
         if (shape) {
-            PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0, 0, 1))); // 90“x‰ñ“]‚µ‚Äc‚É‚·‚é
+            PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0, 0, 1))); // 90åº¦å›è»¢ã—ã¦ç¸¦ã«ã™ã‚‹
             shape->setLocalPose(relativePose);
         }
         break;
@@ -120,11 +120,11 @@ void PhysicsCollisionComponent::CreateActor()
         shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, isTrigger);
     }
 
-    // --- İ’è‚Ì”½‰f ---
+    // --- è¨­å®šã®åæ˜  ---
     actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, !useGravity);
     actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
 
-    // y’Ç‰ÁzŠp“xŒÅ’è‚Ì“K—p
+    // ã€è¿½åŠ ã€‘è§’åº¦å›ºå®šã®é©ç”¨
     ApplyLockRotation();
 
     PhysXSystem::GetScene()->addActor(*actor);
@@ -133,7 +133,7 @@ void PhysicsCollisionComponent::CreateActor()
 void PhysicsCollisionComponent::Gui()
 {
 
-    // --- Šî–{İ’è (•ÏX‚È‚µ) ---
+    // --- åŸºæœ¬è¨­å®š (å¤‰æ›´ãªã—) ---
     if (ImGui::Checkbox("Is Kinematic", &isKinematic))
     {
         if (actor) actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, isKinematic);
@@ -156,7 +156,7 @@ void PhysicsCollisionComponent::Gui()
 
     ImGui::Separator();
 
-    // --- ƒIƒtƒZƒbƒg‚Æ‰ñ“]ŒÅ’è ---
+    // --- ã‚ªãƒ•ã‚»ãƒƒãƒˆã¨å›è»¢å›ºå®š ---
     ImGui::DragFloat3("Offset", &collisionOffset.x, 0.05f);
 
     ImGui::Text("Lock Rotation:");
@@ -169,7 +169,7 @@ void PhysicsCollisionComponent::Gui()
 
     ImGui::Separator();
 
-    // --- Œ`ó‚²‚Æ‚Ìƒpƒ‰ƒ[ƒ^i•ÏX‚ÉGeometry‚ğXV‚·‚éj ---
+    // --- å½¢çŠ¶ã”ã¨ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ï¼ˆå¤‰æ›´æ™‚ã«Geometryã‚’æ›´æ–°ã™ã‚‹ï¼‰ ---
     bool sizeChanged = false;
     auto scale = GetGameObject()->transform->GetWorldScale();
 
@@ -205,7 +205,7 @@ void PhysicsCollisionComponent::Gui()
         }
     }
 
-    // Šî–{‚Í©“®XV‚³‚ê‚é‚ªA”O‚Ì‚½‚ß‚ÌÄ¶¬ƒ{ƒ^ƒ“
+    // åŸºæœ¬ã¯è‡ªå‹•æ›´æ–°ã•ã‚Œã‚‹ãŒã€å¿µã®ãŸã‚ã®å†ç”Ÿæˆãƒœã‚¿ãƒ³
     if (ImGui::Button("Force Recreate Actor"))
     {
         if (actor) {
@@ -224,12 +224,12 @@ void PhysicsCollisionComponent::Update(float dt)
     if (isKinematic)
     {
         // --- Kinematic: Transform -> PhysX ---
-        // GameObject‚Ìƒ[ƒ‹ƒhˆÊ’u‚ÉA‰ñ“]‚ğl—¶‚µ‚½ƒIƒtƒZƒbƒg‚ğ‰Á‚¦‚é
+        // GameObjectã®ãƒ¯ãƒ¼ãƒ«ãƒ‰ä½ç½®ã«ã€å›è»¢ã‚’è€ƒæ…®ã—ãŸã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’åŠ ãˆã‚‹
         DirectX::XMVECTOR basePos = DirectX::XMLoadFloat3(&t->localPosition);
         DirectX::XMVECTOR off = DirectX::XMLoadFloat3(&collisionOffset);
 
-        // ƒIƒtƒZƒbƒg‚É‚à‰ñ“]‚ğ“K—p‚µ‚½‚¢ê‡‚Í‚±‚±‚Ås‚¢‚Ü‚·‚ªA
-        // ’Êí‚Í’Pƒ‚È‰ÁZi²ŒÅ’èƒIƒtƒZƒbƒgj‚Å\•ª‚È‚±‚Æ‚ª‘½‚¢‚Å‚·
+        // ã‚ªãƒ•ã‚»ãƒƒãƒˆã«ã‚‚å›è»¢ã‚’é©ç”¨ã—ãŸã„å ´åˆã¯ã“ã“ã§è¡Œã„ã¾ã™ãŒã€
+        // é€šå¸¸ã¯å˜ç´”ãªåŠ ç®—ï¼ˆè»¸å›ºå®šã‚ªãƒ•ã‚»ãƒƒãƒˆï¼‰ã§ååˆ†ãªã“ã¨ãŒå¤šã„ã§ã™
         DirectX::XMVECTOR targetPos = DirectX::XMVectorAdd(basePos, off);
 
         PxTransform target(
@@ -240,17 +240,17 @@ void PhysicsCollisionComponent::Update(float dt)
     }
     else
     {
-        // --- Dynamicƒ‚[ƒh ---
+        // --- Dynamicãƒ¢ãƒ¼ãƒ‰ ---
 
-        // 1. ‘¼‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ª—^‚¦‚½‰ñ“]‚âˆÚ“®‚ğ•¨—ƒAƒNƒ^[‚É”½‰f
+        // 1. ä»–ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒä¸ãˆãŸå›è»¢ã‚„ç§»å‹•ã‚’ç‰©ç†ã‚¢ã‚¯ã‚¿ãƒ¼ã«åæ˜ 
         PxTransform pose = actor->getGlobalPose();
 
-        // y‰ñ“]‚Ì“¯Šúz
-        // ‘¼‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ªŒˆ’è‚µ‚½ Transform ‚Ì‰ñ“]‚ğ•¨—‚ÉƒZƒbƒgB
-        // ‚±‚ê‚É‚æ‚èu‘¼‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‰ñ“]‚ª–³Œø‰»‚³‚ê‚év‚Ì‚ğ–h‚¬‚Ü‚·B
+        // ã€å›è»¢ã®åŒæœŸã€‘
+        // ä»–ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒæ±ºå®šã—ãŸ Transform ã®å›è»¢ã‚’ç‰©ç†ã«ã‚»ãƒƒãƒˆã€‚
+        // ã“ã‚Œã«ã‚ˆã‚Šã€Œä»–ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å›è»¢ãŒç„¡åŠ¹åŒ–ã•ã‚Œã‚‹ã€ã®ã‚’é˜²ãã¾ã™ã€‚
         pose.q = EulerToPxQuat(t->localRotation);
 
-        // yè“®ˆÚ“®‚Ì”½‰fz
+        // ã€æ‰‹å‹•ç§»å‹•ã®åæ˜ ã€‘
         if (t->moveOffset.x != 0 || t->moveOffset.y != 0 || t->moveOffset.z != 0)
         {
             pose.p.x += t->moveOffset.x;
@@ -259,25 +259,25 @@ void PhysicsCollisionComponent::Update(float dt)
             t->moveOffset = { 0, 0, 0 };
         }
 
-        // •¨—ƒAƒNƒ^[‚Ìp¨‚ğXV
+        // ç‰©ç†ã‚¢ã‚¯ã‚¿ãƒ¼ã®å§¿å‹¢ã‚’æ›´æ–°
         actor->setGlobalPose(pose);
 
-        // 2. •¨—ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ÌŒ‹‰Ê‚ğ Transform ‚É–ß‚·
-        // ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“iÕ“Ë‰“šjŒã‚ÌÅV‚ÌÀ•W‚ğæ“¾
+        // 2. ç‰©ç†ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã®çµæœã‚’ Transform ã«æˆ»ã™
+        // ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ï¼ˆè¡çªå¿œç­”ï¼‰å¾Œã®æœ€æ–°ã®åº§æ¨™ã‚’å–å¾—
         PxTransform currentPose = actor->getGlobalPose();
 
-        // yˆÊ’uz‚Í•¨—iÕ“Ë‚É‚æ‚é‰Ÿ‚µ–ß‚µj‚ğ”½‰f
+        // ã€ä½ç½®ã€‘ã¯ç‰©ç†ï¼ˆè¡çªã«ã‚ˆã‚‹æŠ¼ã—æˆ»ã—ï¼‰ã‚’åæ˜ 
         t->localPosition.x = currentPose.p.x - collisionOffset.x;
         t->localPosition.y = currentPose.p.y - collisionOffset.y;
         t->localPosition.z = currentPose.p.z - collisionOffset.z;
 
-        // y‰ñ“]zƒƒbƒN‹@”\‚ÌƒƒWƒbƒN
-        // •¨—‰‰Z‚ÌŒ‹‰Ê (currentPose.q) ‚ÍˆêØ Transform ‚É–ß‚µ‚Ü‚¹‚ñB
-        // ‘ã‚í‚è‚ÉAƒƒbƒN‚ª—LŒø‚È²‚É‚Â‚¢‚Ä‚ÍAUpdateŠJn‚Ì‰ñ“]‚ğu‰Šúó‘Ôv‚Æ‚µ‚ÄˆÛ‚µ‚Ü‚·B
-        // ƒƒbƒN‚³‚ê‚Ä‚¢‚È‚¢²‚Ì‚İA•¨—‚ÌŒvZŒ‹‰Ê‚ğ”½‰f‚³‚¹‚½‚¢ê‡‚Í‚±‚±‚Ås‚¢‚Ü‚·‚ªA
-        // u‘¼‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‰ñ“]‚ğ—Dæ‚µ‚½‚¢vê‡‚ÍAŠî–{‚±‚Ì‚Ü‚Ü‚ÅOK‚Å‚·B
+        // ã€å›è»¢ã€‘ãƒ­ãƒƒã‚¯æ©Ÿèƒ½ã®ãƒ­ã‚¸ãƒƒã‚¯
+        // ç‰©ç†æ¼”ç®—ã®çµæœ (currentPose.q) ã¯ä¸€åˆ‡ Transform ã«æˆ»ã—ã¾ã›ã‚“ã€‚
+        // ä»£ã‚ã‚Šã«ã€ãƒ­ãƒƒã‚¯ãŒæœ‰åŠ¹ãªè»¸ã«ã¤ã„ã¦ã¯ã€Updateé–‹å§‹æ™‚ã®å›è»¢ã‚’ã€ŒåˆæœŸçŠ¶æ…‹ã€ã¨ã—ã¦ç¶­æŒã—ã¾ã™ã€‚
+        // ãƒ­ãƒƒã‚¯ã•ã‚Œã¦ã„ãªã„è»¸ã®ã¿ã€ç‰©ç†ã®è¨ˆç®—çµæœã‚’åæ˜ ã•ã›ãŸã„å ´åˆã¯ã“ã“ã§è¡Œã„ã¾ã™ãŒã€
+        // ã€Œä»–ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å›è»¢ã‚’å„ªå…ˆã—ãŸã„ã€å ´åˆã¯ã€åŸºæœ¬ã“ã®ã¾ã¾ã§OKã§ã™ã€‚
 
-        // ‚à‚µu•¨—‚Å‰ñ“]‚³‚¹‚½‚¢²v‚ª‚ ‚éê‡‚Ì‚İAˆÈ‰º‚Ì‚æ‚¤‚É‘‚«‚Ü‚·
+        // ã‚‚ã—ã€Œç‰©ç†ã§å›è»¢ã•ã›ãŸã„è»¸ã€ãŒã‚ã‚‹å ´åˆã®ã¿ã€ä»¥ä¸‹ã®ã‚ˆã†ã«æ›¸ãã¾ã™
         if (!lockRotationX || !lockRotationY || !lockRotationZ)
         {
             //DirectX::XMFLOAT3 physRot = QuaternionToEuler(currentPose.q);
@@ -289,15 +289,15 @@ void PhysicsCollisionComponent::Update(float dt)
         t->MarkDirty();
     }
 
-    // š ƒfƒoƒbƒO—pƒRƒŠƒWƒ‡ƒ“•`‰æ
+    // â˜… ãƒ‡ãƒãƒƒã‚°ç”¨ã‚³ãƒªã‚¸ãƒ§ãƒ³æç”»
     auto& renderer = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
 
-    // 1. GameObject‚Ìƒx[ƒX‚Æ‚È‚éî•ñ
+    // 1. GameObjectã®ãƒ™ãƒ¼ã‚¹ã¨ãªã‚‹æƒ…å ±
     DirectX::XMFLOAT3 basePos = t->GetWorldPosition();
     DirectX::XMFLOAT3 angle = t->GetWorldRotation();
     DirectX::XMFLOAT3 scale = t->GetWorldScale();
 
-    // 2. ƒIƒtƒZƒbƒg‚ğ“K—p‚µ‚½u•`‰æˆÊ’uv‚ğŒvZ
+    // 2. ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’é©ç”¨ã—ãŸã€Œæç”»ä½ç½®ã€ã‚’è¨ˆç®—
     DirectX::XMFLOAT3 drawPos = {
         basePos.x + collisionOffset.x,
         basePos.y + collisionOffset.y,
@@ -315,24 +315,24 @@ void PhysicsCollisionComponent::Update(float dt)
         DirectX::XMFLOAT3 size = { boxHalfSize.x * 2.f * scale.x,
                                    boxHalfSize.y * 2.f * scale.y,
                                    boxHalfSize.z * 2.f * scale.z };
-        // drawPos ‚ğg—p
+        // drawPos ã‚’ä½¿ç”¨
         renderer.DrawBox(drawPos, angle, size, colorRed);
         break;
     }
     case ShapeType::Sphere:
     {
         float r = sphereRadius * ((scale.x + scale.y + scale.z) / 3.f);
-        // drawPos ‚ğg—p
+        // drawPos ã‚’ä½¿ç”¨
         renderer.DrawSphere(drawPos, r, colorGreen);
         break;
     }
     case ShapeType::Capsule:
     {
-        // ƒJƒvƒZƒ‹‚Ìê‡AGetWorld()‚És—ñ‚Æ‚µ‚ÄƒIƒtƒZƒbƒg‚ğæZ‚·‚é
+        // ã‚«ãƒ—ã‚»ãƒ«ã®å ´åˆã€GetWorld()ã«è¡Œåˆ—ã¨ã—ã¦ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’ä¹—ç®—ã™ã‚‹
         using namespace DirectX;
-        // –ß‚è’l‚ğ•Ï”‚ÉƒRƒs[‚µ‚ÄÀ‘Ì‰»‚³‚¹‚é
+        // æˆ»ã‚Šå€¤ã‚’å¤‰æ•°ã«ã‚³ãƒ”ãƒ¼ã—ã¦å®Ÿä½“åŒ–ã•ã›ã‚‹
         DirectX::XMFLOAT4X4 world4x4 = t->GetWorld();
-        // •Ï”‚È‚Ì‚ÅƒAƒhƒŒƒX (&) ‚ªæ‚ê‚é‚æ‚¤‚É‚È‚é
+        // å¤‰æ•°ãªã®ã§ã‚¢ãƒ‰ãƒ¬ã‚¹ (&) ãŒå–ã‚Œã‚‹ã‚ˆã†ã«ãªã‚‹
         DirectX::XMMATRIX worldMat = DirectX::XMLoadFloat4x4(&world4x4);
 
         DirectX::XMMATRIX offsetMat = DirectX::XMMatrixTranslation(collisionOffset.x, collisionOffset.y, collisionOffset.z);
@@ -344,7 +344,7 @@ void PhysicsCollisionComponent::Update(float dt)
         float r = capsuleRadius * ((scale.x + scale.y + scale.z) / 3.f);
         float h = capsuleHalfHeight * 2.f * scale.y;
 
-        // ‡¬‚µ‚½s—ñ‚ğg—p‚µ‚Ä•`‰æ
+        // åˆæˆã—ãŸè¡Œåˆ—ã‚’ä½¿ç”¨ã—ã¦æç”»
         renderer.DrawCapsule(drawWorld, r, h, colorP);
         break;
     }
@@ -365,7 +365,7 @@ void PhysicsCollisionComponent::ApplyLockRotation()
 }
 
 
-// ƒCƒxƒ“ƒg“]‘—
+// ã‚¤ãƒ™ãƒ³ãƒˆè»¢é€
 void PhysicsCollisionComponent::OnCollisionEnter(std::shared_ptr<GameObject> other)
 {
     if (auto obj = GetGameObject())
@@ -375,6 +375,6 @@ void PhysicsCollisionComponent::OnCollisionEnter(std::shared_ptr<GameObject> oth
     }
 }
 
-void PhysicsCollisionComponent::OnTriggerEnter(std::shared_ptr<GameObject> other) { /* “¯ã */ }
-void PhysicsCollisionComponent::OnTriggerStay(std::shared_ptr<GameObject> other) { /* “¯ã */ }
-void PhysicsCollisionComponent::OnTriggerExit(std::shared_ptr<GameObject> other) { /* “¯ã */ }
+void PhysicsCollisionComponent::OnTriggerEnter(std::shared_ptr<GameObject> other) { /* åŒä¸Š */ }
+void PhysicsCollisionComponent::OnTriggerStay(std::shared_ptr<GameObject> other) { /* åŒä¸Š */ }
+void PhysicsCollisionComponent::OnTriggerExit(std::shared_ptr<GameObject> other) { /* åŒä¸Š */ }

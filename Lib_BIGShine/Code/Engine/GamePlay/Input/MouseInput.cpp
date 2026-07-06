@@ -8,13 +8,13 @@
 
 void MouseInput::Update(HWND hwnd_)
 {
-    // ƒfƒoƒbƒOØ‚è‘Ö‚¦
+    // ãƒ‡ãƒãƒƒã‚°åˆ‡ã‚Šæ›¿ãˆ
     if (KeyInput::KeyPressedIn(KeyInput::Key::K_Enter))
     {
         m_DebugFlag = !m_DebugFlag;
     }
 
-    // ƒEƒBƒ“ƒhƒEƒTƒCƒYæ“¾
+    // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºå–å¾—
     RECT rc_;
     GetClientRect(hwnd_, &rc_);
 
@@ -26,8 +26,8 @@ void MouseInput::Update(HWND hwnd_)
         (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0 ||
         (GetAsyncKeyState(VK_RWIN) & 0x8000) != 0;
 
-    // ƒQ[ƒ€‘€ì’†‚Æ‚µ‚Äˆµ‚¤‚©
-    // Debug’†A”ñƒAƒNƒeƒBƒu’†AWindowsƒL[’†‚ÍŒÅ’è‚µ‚È‚¢
+    // ã‚²ãƒ¼ãƒ æ“ä½œä¸­ã¨ã—ã¦æ‰±ã†ã‹
+    // Debugä¸­ã€éã‚¢ã‚¯ãƒ†ã‚£ãƒ–ä¸­ã€Windowsã‚­ãƒ¼ä¸­ã¯å›ºå®šã—ãªã„
     const bool shouldLockCursor_ =
         m_IsCursorLockEnabled &&
         !m_DebugFlag &&
@@ -41,7 +41,7 @@ void MouseInput::Update(HWND hwnd_)
     POINT screenCenter_ = clientCenter_;
     ClientToScreen(hwnd_, &screenCenter_);
 
-    // ƒ}ƒEƒXÀ•Wæ“¾
+    // ãƒã‚¦ã‚¹åº§æ¨™å–å¾—
     POINT p_;
     GetCursorPos(&p_);
 
@@ -58,7 +58,7 @@ void MouseInput::Update(HWND hwnd_)
 
     if (shouldLockCursor_)
     {
-        // ŒÅ’èŠJnƒtƒŒ[ƒ€‚Í·•ª‚ğÌ‚Ä‚é
+        // å›ºå®šé–‹å§‹ãƒ•ãƒ¬ãƒ¼ãƒ ã¯å·®åˆ†ã‚’æ¨ã¦ã‚‹
         if (!m_IsCursorLocked || m_IsFirstMouseUpdate)
         {
             m_SubMousePos = Vector2(0.0f, 0.0f);
@@ -67,14 +67,14 @@ void MouseInput::Update(HWND hwnd_)
         }
         else
         {
-            // ŒÅ’è’†‚Íu’†‰›‚©‚ç‚Ç‚ê‚¾‚¯“®‚¢‚½‚©v‚ğ·•ª‚É‚·‚é
+            // å›ºå®šä¸­ã¯ã€Œä¸­å¤®ã‹ã‚‰ã©ã‚Œã ã‘å‹•ã„ãŸã‹ã€ã‚’å·®åˆ†ã«ã™ã‚‹
             m_SubMousePos = Vector2(
                 static_cast<float>(clientPos_.x - clientCenter_.x),
                 static_cast<float>(clientPos_.y - clientCenter_.y)
             );
         }
 
-        // ŸƒtƒŒ[ƒ€‚à’†‰›Šî€‚É‚·‚é
+        // æ¬¡ãƒ•ãƒ¬ãƒ¼ãƒ ã‚‚ä¸­å¤®åŸºæº–ã«ã™ã‚‹
         m_CurrentMousePos = Vector2(
             static_cast<float>(clientCenter_.x),
             static_cast<float>(clientCenter_.y)
@@ -82,10 +82,10 @@ void MouseInput::Update(HWND hwnd_)
 
         m_PrevMousePos = m_CurrentMousePos;
 
-        // ƒJ[ƒ\ƒ‹‚ğ’†‰›‚É–ß‚·
+        // ã‚«ãƒ¼ã‚½ãƒ«ã‚’ä¸­å¤®ã«æˆ»ã™
         SetCursorPos(screenCenter_.x, screenCenter_.y);
 
-        // ƒJ[ƒ\ƒ‹”ñ•\¦
+        // ã‚«ãƒ¼ã‚½ãƒ«éè¡¨ç¤º
         if (m_IsCursorVisible)
         {
             while (ShowCursor(FALSE) >= 0) {}
@@ -94,7 +94,7 @@ void MouseInput::Update(HWND hwnd_)
     }
     else
     {
-        // ŒÅ’è‰ğœ‚³‚ê‚½uŠÔ
+        // å›ºå®šè§£é™¤ã•ã‚ŒãŸç¬é–“
         if (m_IsCursorLocked)
         {
             m_IsCursorLocked = false;
@@ -108,13 +108,13 @@ void MouseInput::Update(HWND hwnd_)
         }
         else
         {
-            // ’Êí‚Í‘OƒtƒŒ[ƒ€‚Æ‚Ì·•ª
+            // é€šå¸¸æ™‚ã¯å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã¨ã®å·®åˆ†
             m_SubMousePos = m_CurrentMousePos - m_PrevMousePos;
         }
 
         m_PrevMousePos = m_CurrentMousePos;
 
-        // ƒJ[ƒ\ƒ‹•\¦
+        // ã‚«ãƒ¼ã‚½ãƒ«è¡¨ç¤º
         if (!m_IsCursorVisible)
         {
             while (ShowCursor(TRUE) < 0) {}
@@ -122,28 +122,28 @@ void MouseInput::Update(HWND hwnd_)
         }
     }
 
-    // ƒ}ƒEƒXƒ{ƒ^ƒ“ó‘Ô
+    // ãƒã‚¦ã‚¹ãƒœã‚¿ãƒ³çŠ¶æ…‹
     SHORT leftState_ = GetAsyncKeyState(VK_LBUTTON);
     SHORT rightState_ = GetAsyncKeyState(VK_RBUTTON);
 
     bool leftNow_ = (leftState_ & 0x8000) != 0;
     bool rightNow_ = (rightState_ & 0x8000) != 0;
 
-    // ¶ƒNƒŠƒbƒN
+    // å·¦ã‚¯ãƒªãƒƒã‚¯
     m_leftPressed = leftNow_ && !m_prevLeft;
     m_leftDown = leftNow_;
     m_leftReleased = !leftNow_ && m_prevLeft;
 
-    // ‰EƒNƒŠƒbƒN
+    // å³ã‚¯ãƒªãƒƒã‚¯
     m_rightPressed = rightNow_ && !m_prevRight;
     m_rightDown = rightNow_;
     m_rightReleased = !rightNow_ && m_prevRight;
 
-    // ó‘Ô•Û‘¶
+    // çŠ¶æ…‹ä¿å­˜
     m_prevLeft = leftNow_;
     m_prevRight = rightNow_;
 
-    // ƒzƒC[ƒ‹’l
+    // ãƒ›ã‚¤ãƒ¼ãƒ«å€¤
     m_wheelDeltaThisFrame = m_wheelDelta;
 }
 
@@ -159,7 +159,7 @@ bool MouseInput::GetButtonState(int buttonCode, int type) const
         if (type == 0) return RightDown();
         if (type == 1) return RightPressed();
         return RightReleased();
-        // •K—v‚É‰‚¶‚Ä’†ƒNƒŠƒbƒN(VK_MBUTTON)‚È‚Ç‚à’Ç‰Á
+        // å¿…è¦ã«å¿œã˜ã¦ä¸­ã‚¯ãƒªãƒƒã‚¯(VK_MBUTTON)ãªã©ã‚‚è¿½åŠ 
     }
     return false;
 }
@@ -215,39 +215,39 @@ void MouseInput::SetCursorLockEnabled(bool enabled_)
 //{
 //    auto* cam = CameraController::GetInstance().GetCamera();
 //    if (!cam)return;
-//    // ƒ}ƒEƒXƒJ[ƒ\ƒ‹ˆÊ’u‚Ìæ“¾
+//    // ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã®å–å¾—
 //    POINT cursor;
 //    ::GetCursorPos(&cursor);
 //    ::ScreenToClient(hwnd, &cursor);
 //
-//    // Šes—ñ‚ğæ“¾
+//    // å„è¡Œåˆ—ã‚’å–å¾—
 //    DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&CameraController::GetInstance().GetCamera()->GetView());
 //    DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&CameraController::GetInstance().GetCamera()->GetProjection());
 //    DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
 //
-//    // ƒXƒNƒŠ[ƒ“À•W‚Ìİ’è
+//    // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã®è¨­å®š
 //    m_screenPos.x = static_cast<float>(cursor.x);
 //    m_screenPos.y = static_cast<float>(cursor.y);
 //
-//    // ƒ}ƒEƒX‚ÌƒXƒNƒŠ[ƒ“À•W (Z=0.0f ‚ÍƒjƒA•½–ÊAZ=1.0f ‚Íƒtƒ@[ƒtƒ‰ƒXƒg)
+//    // ãƒã‚¦ã‚¹ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ (Z=0.0f ã¯ãƒ‹ã‚¢å¹³é¢ã€Z=1.0f ã¯ãƒ•ã‚¡ãƒ¼ãƒ•ãƒ©ã‚¹ãƒˆ)
 //    DirectX::XMVECTOR ScreenPositionNear = DirectX::XMVectorSet(m_screenPos .x, m_screenPos .y, 0.0f, 1.0f);
 //    DirectX::XMVECTOR ScreenPositionFar  = DirectX::XMVectorSet(m_screenPos .x, m_screenPos .y, 1.0f, 1.0f);
 //
-//    // ƒXƒNƒŠ[ƒ“‹óŠÔ‚©‚çƒ[ƒ‹ƒh‹óŠÔ‚Ö‚Ì•ÏŠ· (ƒjƒA•½–Ê‚Ì“_)
+//    // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ç©ºé–“ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã¸ã®å¤‰æ› (ãƒ‹ã‚¢å¹³é¢ã®ç‚¹)
 //    DirectX::XMVECTOR WorldPositionNear = DirectX::XMVector3Unproject(
 //        ScreenPositionNear,
 //        0.0f, 0.0f, width, height, 0.0f, 1.0f,
 //        Projection, View, World
 //    );
 //
-//    // ƒXƒNƒŠ[ƒ“‹óŠÔ‚©‚çƒ[ƒ‹ƒh‹óŠÔ‚Ö‚Ì•ÏŠ· (ƒtƒ@[ƒtƒ‰ƒXƒg‚Ì“_)
+//    // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ç©ºé–“ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã¸ã®å¤‰æ› (ãƒ•ã‚¡ãƒ¼ãƒ•ãƒ©ã‚¹ãƒˆã®ç‚¹)
 //    DirectX::XMVECTOR WorldPositionFar = DirectX::XMVector3Unproject(
 //        ScreenPositionFar,
 //        0.0f, 0.0f, width, height, 0.0f, 1.0f,
 //        Projection, View, World
 //    );
 //
-//    // ƒŒƒC‚Ìn“_‚ÆI“_‚ğŠi”[
+//    // ãƒ¬ã‚¤ã®å§‹ç‚¹ã¨çµ‚ç‚¹ã‚’æ ¼ç´
 //    DirectX::XMStoreFloat3(&RayStart, WorldPositionNear);
 //    DirectX::XMStoreFloat3(&RayEnd, WorldPositionFar);
 //}

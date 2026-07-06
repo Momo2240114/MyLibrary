@@ -16,14 +16,14 @@ class SpriteRenderSystem
 public:
     struct DrawInfo
     {
-        std::shared_ptr<SpriteRenderer> sprite; // SpriteRenderer Ž©g‚ð•ÛŽ
+        std::shared_ptr<SpriteRenderer> sprite; // SpriteRenderer è‡ªèº«ã‚’ä¿æŒ
         SpriteShaderID shaderID;
     };
 
     struct ConstantBuffer
     {
-        DirectX::XMMATRIX world;  // ƒ[ƒ‹ƒhs—ñ
-        DirectX::XMFLOAT4 color;  // ƒXƒvƒ‰ƒCƒgF
+        DirectX::XMMATRIX world;  // ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—
+        DirectX::XMFLOAT4 color;  // ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆè‰²
     };
 public:
     void Finalize();
@@ -40,7 +40,7 @@ private:
         D3D11_INPUT_ELEMENT_DESC* inputElementDesc_,
         UINT numElements_);
 private:
-    // •`‰æ—p‚ÌƒXƒvƒ‰ƒCƒg’¸“_ƒoƒbƒtƒ@‚ÆƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ðŽ–‘O‚Éì¬‚µ‚Ä‚¨‚­
+    // æç”»ç”¨ã®ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆé ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã¨ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’äº‹å‰ã«ä½œæˆã—ã¦ãŠã
     struct SpriteVertex
     {
         DirectX::XMFLOAT3 pos;

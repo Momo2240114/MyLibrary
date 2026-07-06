@@ -19,7 +19,7 @@ public:
     }
     virtual ~EditorWindow() = default;
 
-    virtual void Draw() = 0; // ŠeƒEƒBƒ“ƒhƒEŒÅ—L‚Ì•`‰æ
+    virtual void Draw() = 0; // å„ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å›ºæœ‰ã®æç”»
     virtual void Update(float deltaTime_) {}
     virtual void DrawMenuBar() {}
     virtual void OnVisibilityChanged(bool visible) {}
@@ -27,7 +27,7 @@ public:
     virtual bool ShouldPauseScene() const { return false; }
     virtual bool ShouldRenderSceneWhenPaused() const { return false; }
 
-    // ‚±‚Ì‘‹‚ª•\¦‚³‚ê‚Ä‚¢‚é‚©‚ğŠm”F‚µAİ’è‚·‚é
+    // ã“ã®çª“ãŒè¡¨ç¤ºã•ã‚Œã¦ã„ã‚‹ã‹ã‚’ç¢ºèªã—ã€è¨­å®šã™ã‚‹
     bool IsVisible() const { return isVisible; }
     void SetVisible(bool visible) { if (isVisible != visible) { isVisible = visible; OnVisibilityChanged(visible); } }
     bool IsKeepOnTop() const { return keepOnTop; }
@@ -60,7 +60,7 @@ protected:
     }
 
     WindowStyle style;
-    // ‹¤’Ê‚ÌƒXƒ^ƒCƒ‹•ÒWUI‚ğ•`‰æ‚·‚éŠÖ”
+    // å…±é€šã®ã‚¹ã‚¿ã‚¤ãƒ«ç·¨é›†UIã‚’æç”»ã™ã‚‹é–¢æ•°
     void DrawStylePopup() {
         if (ImGui::BeginPopupContextWindow("WindowSettings", ImGuiPopupFlags_MouseButtonRight)) {
             ImGui::Text("Style Settings");
@@ -143,8 +143,8 @@ protected:
 
     ImVec2 defaultWindowSize = ImVec2(400.0f, 600.0f);
     std::string windowName;
-    GameObjectManager* gameObjectManager; // ƒf[ƒ^‚ğˆµ‚¤‚½‚ß‚Ì‘‹Œû
-    bool isVisible; // Œ°Œ»‚Ìƒtƒ‰ƒO
+    GameObjectManager* gameObjectManager; // ãƒ‡ãƒ¼ã‚¿ã‚’æ‰±ã†ãŸã‚ã®çª“å£
+    bool isVisible; // é¡•ç¾ã®ãƒ•ãƒ©ã‚°
     bool keepOnTop = true;
     bool lockToMainViewport = true;
     bool hasLayoutRect = false;

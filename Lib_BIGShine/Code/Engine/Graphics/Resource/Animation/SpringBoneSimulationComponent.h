@@ -5,19 +5,19 @@
 
 class GltfModelCommponennt;
 
-// IKMapComponent‚É“o˜^‚³‚ê‚½”¯E•zƒ`ƒF[ƒ“‚ğ•¨—ŒvZ‚·‚éComponent
+// IKMapComponentã«ç™»éŒ²ã•ã‚ŒãŸé«ªãƒ»å¸ƒãƒã‚§ãƒ¼ãƒ³ã‚’ç‰©ç†è¨ˆç®—ã™ã‚‹Component
 class SpringBoneSimulationComponent : public Component
 {
 public:
-    // •zƒ`ƒF[ƒ““¯m‚ğ‚Â‚È‚®‹——£§–ñ
+    // å¸ƒãƒã‚§ãƒ¼ãƒ³åŒå£«ã‚’ã¤ãªãè·é›¢åˆ¶ç´„
     struct ClothConstraint
     {
-        size_t chainIndexA = 0;     // §–ñŒ³ƒ`ƒF[ƒ“‚Ì”Ô†
-        size_t pointIndexA = 0;     // §–ñŒ³ƒ`ƒF[ƒ““à‚Ì“_”Ô†
-        size_t chainIndexB = 0;     // §–ñæƒ`ƒF[ƒ“‚Ì”Ô†
-        size_t pointIndexB = 0;     // §–ñæƒ`ƒF[ƒ““à‚Ì“_”Ô†
-        float targetLength = 0.0f;  // ‰Šúp¨‚©‚ç‹‚ß‚½–Ú•W‹——£
-        bool diagonal = false;      // Î‚ß•ûŒü‚Ì§–ñ‚©
+        size_t chainIndexA = 0;     // åˆ¶ç´„å…ƒãƒã‚§ãƒ¼ãƒ³ã®ç•ªå·
+        size_t pointIndexA = 0;     // åˆ¶ç´„å…ƒãƒã‚§ãƒ¼ãƒ³å†…ã®ç‚¹ç•ªå·
+        size_t chainIndexB = 0;     // åˆ¶ç´„å…ˆãƒã‚§ãƒ¼ãƒ³ã®ç•ªå·
+        size_t pointIndexB = 0;     // åˆ¶ç´„å…ˆãƒã‚§ãƒ¼ãƒ³å†…ã®ç‚¹ç•ªå·
+        float targetLength = 0.0f;  // åˆæœŸå§¿å‹¢ã‹ã‚‰æ±‚ã‚ãŸç›®æ¨™è·é›¢
+        bool diagonal = false;      // æ–œã‚æ–¹å‘ã®åˆ¶ç´„ã‹
     };
 
     const std::string& GetName() const override;
@@ -27,76 +27,76 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
-    // ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“ó‘Ô‚ğ‰Šúp¨‚©‚çì‚è’¼‚·
+    // ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³çŠ¶æ…‹ã‚’åˆæœŸå§¿å‹¢ã‹ã‚‰ä½œã‚Šç›´ã™
     void ResetSimulation();
 
-    // ‘S‘Ì‹¤’Ê‚Ì•—•ûŒü
+    // å…¨ä½“å…±é€šã®é¢¨æ–¹å‘
     static DirectX::XMFLOAT3 windDirection;
 
-    // ‘S‘Ì‹¤’Ê‚Ì•—‚Ì‹­‚³
+    // å…¨ä½“å…±é€šã®é¢¨ã®å¼·ã•
     static float windStrength;
 
-    // •—‚ğ—LŒø‚É‚·‚é‚©
+    // é¢¨ã‚’æœ‰åŠ¹ã«ã™ã‚‹ã‹
     static bool windEnabled;
 
 private:
-    // IKMapComponent‚Æƒ‚ƒfƒ‹Component‚ğæ“¾‚·‚é
+    // IKMapComponentã¨ãƒ¢ãƒ‡ãƒ«Componentã‚’å–å¾—ã™ã‚‹
     bool ResolveDependencies();
 
-    // rootNodeName‚©‚çtipNodeName‚Ü‚Å‚Ìƒ{[ƒ“—ñ‚ğ‰ğŒˆ‚·‚é
+    // rootNodeNameã‹ã‚‰tipNodeNameã¾ã§ã®ãƒœãƒ¼ãƒ³åˆ—ã‚’è§£æ±ºã™ã‚‹
     bool ResolveChain(IKMapComponent::IKChain& chain_);
 
-    // 1–{‚Ì”¯E•zƒ`ƒF[ƒ“‚ğ•¨—ŒvZ‚·‚é
+    // 1æœ¬ã®é«ªãƒ»å¸ƒãƒã‚§ãƒ¼ãƒ³ã‚’ç‰©ç†è¨ˆç®—ã™ã‚‹
     void SimulateSpringChain(IKMapComponent::IKChain& chain_, float deltaTime_);
 
-    // •zƒ`ƒF[ƒ““¯m‚Ì§–ñ‚ğì¬‚·‚é
+    // å¸ƒãƒã‚§ãƒ¼ãƒ³åŒå£«ã®åˆ¶ç´„ã‚’ä½œæˆã™ã‚‹
     void BuildClothConstraints();
 
-    // ‚·‚×‚Ä‚Ì•z§–ñ‚ğ‰ğŒˆ‚·‚é
+    // ã™ã¹ã¦ã®å¸ƒåˆ¶ç´„ã‚’è§£æ±ºã™ã‚‹
     void SolveClothConstraints();
 
-    // 1‚Â‚Ì•z§–ñ‚ğ‰ğŒˆ‚·‚é
+    // 1ã¤ã®å¸ƒåˆ¶ç´„ã‚’è§£æ±ºã™ã‚‹
     void SolveClothConstraint(const ClothConstraint& constraint_);
 
-    // ”¯E•z‚Ì“_‚ğ‘ÌƒRƒŠƒWƒ‡ƒ“‚©‚ç‰Ÿ‚µo‚·
+    // é«ªãƒ»å¸ƒã®ç‚¹ã‚’ä½“ã‚³ãƒªã‚¸ãƒ§ãƒ³ã‹ã‚‰æŠ¼ã—å‡ºã™
     void ResolveBodyCollision(IKMapComponent::IKChain& chain_, size_t pointIndex_);
 
-    // ‘ÌƒRƒŠƒWƒ‡ƒ“Sphere‚Ìƒ[ƒ‹ƒhÀ•W’†S‚ğæ“¾‚·‚é
+    // ä½“ã‚³ãƒªã‚¸ãƒ§ãƒ³Sphereã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ä¸­å¿ƒã‚’å–å¾—ã™ã‚‹
     bool GetBodyCollisionSphereCenter(IKMapComponent::BodyCollisionSphere& sphere_, DirectX::XMFLOAT3& center_);
 
-    // ŒvZŒ‹‰Ê‚ğƒ‚ƒfƒ‹‚Ìƒ{[ƒ“‰ñ“]‚Ö”½‰f‚·‚é
+    // è¨ˆç®—çµæœã‚’ãƒ¢ãƒ‡ãƒ«ã®ãƒœãƒ¼ãƒ³å›è»¢ã¸åæ˜ ã™ã‚‹
     void ApplySpringChain(IKMapComponent::IKChain& chain_);
 
-    // ‘ÌƒRƒŠƒWƒ‡ƒ“Œ`ó‚ğƒfƒoƒbƒO•`‰æ‚·‚é
+    // ä½“ã‚³ãƒªã‚¸ãƒ§ãƒ³å½¢çŠ¶ã‚’ãƒ‡ãƒãƒƒã‚°æç”»ã™ã‚‹
     void DrawBodyCollisionShapes();
 
-    // ”¯E•z‘¤‚ÌƒRƒŠƒWƒ‡ƒ“Œ`ó‚ğƒfƒoƒbƒO•`‰æ‚·‚é
+    // é«ªãƒ»å¸ƒå´ã®ã‚³ãƒªã‚¸ãƒ§ãƒ³å½¢çŠ¶ã‚’ãƒ‡ãƒãƒƒã‚°æç”»ã™ã‚‹
     void DrawHairCollisionShapes();
 
-    // ”¯E•z‚Ì“_‚ª‘Ì‚Ì‘O‘¤‚Ö‰ñ‚è‚Ü‚È‚¢‚æ‚¤‚É§ŒÀ‚·‚é
+    // é«ªãƒ»å¸ƒã®ç‚¹ãŒä½“ã®å‰å´ã¸å›ã‚Šè¾¼ã¾ãªã„ã‚ˆã†ã«åˆ¶é™ã™ã‚‹
     void ConstrainHairBehindBody(IKMapComponent::IKChain& chain_);
 private:
-    // ”¯E•zƒ`ƒF[ƒ“İ’è‚ğ‚ÂComponent
+    // é«ªãƒ»å¸ƒãƒã‚§ãƒ¼ãƒ³è¨­å®šã‚’æŒã¤Component
     IKMapComponent* ikMap = nullptr;
 
-    // —h‚ê‚ğ”½‰f‚·‚é‘ÎÛƒ‚ƒfƒ‹
+    // æºã‚Œã‚’åæ˜ ã™ã‚‹å¯¾è±¡ãƒ¢ãƒ‡ãƒ«
     GltfModelCommponennt* model = nullptr;
 
-    // •zƒ`ƒF[ƒ““¯m‚ğ‚Â‚È‚®§–ñƒŠƒXƒg
+    // å¸ƒãƒã‚§ãƒ¼ãƒ³åŒå£«ã‚’ã¤ãªãåˆ¶ç´„ãƒªã‚¹ãƒˆ
     std::vector<ClothConstraint> clothConstraints;
 
-    // •z§–ñ‚ğì¬Ï‚İ‚©
+    // å¸ƒåˆ¶ç´„ã‚’ä½œæˆæ¸ˆã¿ã‹
     bool clothConstraintsInitialized = false;
 
-    // ‘ÌƒRƒŠƒWƒ‡ƒ“‚ğ•\¦‚·‚é‚©
+    // ä½“ã‚³ãƒªã‚¸ãƒ§ãƒ³ã‚’è¡¨ç¤ºã™ã‚‹ã‹
     bool showBodyCollisionShapes = true;
 
-    // ‘ÌƒRƒŠƒWƒ‡ƒ“‚Ì•\¦F
+    // ä½“ã‚³ãƒªã‚¸ãƒ§ãƒ³ã®è¡¨ç¤ºè‰²
     DirectX::XMFLOAT4 bodyCollisionShapeColor = { 1.0f, 0.45f, 0.1f, 1.0f };
 
-    // ”¯E•zƒRƒŠƒWƒ‡ƒ“‚ğ•\¦‚·‚é‚©
+    // é«ªãƒ»å¸ƒã‚³ãƒªã‚¸ãƒ§ãƒ³ã‚’è¡¨ç¤ºã™ã‚‹ã‹
     bool showHairCollisionShapes = false;
 
-    // ”¯E•zƒRƒŠƒWƒ‡ƒ“‚Ì•\¦F
+    // é«ªãƒ»å¸ƒã‚³ãƒªã‚¸ãƒ§ãƒ³ã®è¡¨ç¤ºè‰²
     DirectX::XMFLOAT4 hairCollisionShapeColor = { 0.2f, 0.8f, 1.0f, 0.6f };
 };

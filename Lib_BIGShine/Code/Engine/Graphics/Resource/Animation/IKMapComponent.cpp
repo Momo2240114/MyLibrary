@@ -11,7 +11,7 @@
 
 using namespace DirectX;
 
-//--- ƒeƒXƒg—p Static •—ƒpƒ‰ƒ[ƒ^-- -
+//--- ãƒ†ã‚¹ãƒˆç”¨ Static é¢¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿-- -
 DirectX::XMFLOAT3 IKMapComponent::windDirection = { 1.0f, 0.0f, 0.0f };
 float             IKMapComponent::windStrength = 0.0f;
 bool              IKMapComponent::windEnabled = false;
@@ -271,7 +271,7 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
                 0.0f, -chain_.gravity * substepDeltaTime_ * substepDeltaTime_, 0.0f
             };
 
-            // ƒeƒXƒg—p•——Íiroot ‚ÍŒÅ’è‚È‚Ì‚ÅƒXƒLƒbƒvj
+            // ãƒ†ã‚¹ãƒˆç”¨é¢¨åŠ›ï¼ˆroot ã¯å›ºå®šãªã®ã§ã‚¹ã‚­ãƒƒãƒ—ï¼‰
             XMFLOAT3 wind_ = { 0.0f, 0.0f, 0.0f };
             if (windEnabled && windStrength > 0.0f)
             {
@@ -522,8 +522,11 @@ bool IKMapComponent::GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, 
 void IKMapComponent::ApplySpringChain(IKChain& chain_)
 {
     auto& nodes_ = model->GetNodes();
+    bool chainChanged_ = false;
     for (size_t nodeIndex_ = 0; nodeIndex_ + 1 < chain_.nodeIndices.size(); ++nodeIndex_)
     {
+        model->UpdateNodeTransformOnly(chain_.nodeIndices[nodeIndex_]);
+        model->UpdateNodeTransformOnly(chain_.nodeIndices[nodeIndex_ + 1]);
         auto& node_ = nodes_.at(chain_.nodeIndices[nodeIndex_]);
         const auto& child_ = nodes_.at(chain_.nodeIndices[nodeIndex_ + 1]);
 
@@ -568,12 +571,15 @@ void IKMapComponent::ApplySpringChain(IKChain& chain_)
         if (XMMatrixDecompose(&scale_, &rotation_, &translation_, desiredLocalRotation_))
         {
             XMStoreFloat4(&node_.rotation, XMQuaternionNormalize(rotation_));
-
-            model->UpdateNodeTransformFrom(chain_.nodeIndices.front());
+            model->UpdateNodeTransformOnly(chain_.nodeIndices[nodeIndex_]);
+            chainChanged_ = true;
         }
     }
 
-
+    if (chainChanged_)
+    {
+        model->UpdateNodeTransformFrom(chain_.nodeIndices.front());
+    }
 }
 
 void IKMapComponent::Gui()

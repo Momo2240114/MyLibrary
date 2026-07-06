@@ -10,7 +10,7 @@
 
 bool MeshVFXShader::Initialize(ID3D11Device* device_)
 {
-    // MeshVFX‚Åg—p‚·‚éShader‚ÆConstantBuffer‚ğ‚Ü‚Æ‚ß‚Äì¬‚·‚éB
+    // MeshVFXã§ä½¿ç”¨ã™ã‚‹Shaderã¨ConstantBufferã‚’ã¾ã¨ã‚ã¦ä½œæˆã™ã‚‹ã€‚
     if (!device_) return false;
 
     HRESULT result_ = CPUResourceLoader::LoadVertexShader(
@@ -66,7 +66,7 @@ void MeshVFXShader::Begin(
     bool useMaterialOverlay_,
     bool useInstancedPose_)
 {
-    // •`‰æƒ‚[ƒh‚É‰‚¶‚ÄVertexShader‚ğ‘I‚ÑASceneî•ñ‚Æ”wŒiTexture‚ğPixelShader‚Ö“n‚·B
+    // æç”»ãƒ¢ãƒ¼ãƒ‰ã«å¿œã˜ã¦VertexShaderã‚’é¸ã³ã€Sceneæƒ…å ±ã¨èƒŒæ™¯Textureã‚’PixelShaderã¸æ¸¡ã™ã€‚
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     deviceContext_->IASetInputLayout(inputLayout.Get());
     ID3D11VertexShader* selectedVertexShader_ = vertexShader.Get();
@@ -133,7 +133,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const GltfModelCommponennt::Mesh& mesh_)
 {
-    // ’Êíƒ‚ƒfƒ‹•`‰æ—p‚ÉAŒ»İMesh‚Ìƒ{[ƒ“s—ñ‚ğSkinning—pCB‚Ö“]‘—‚·‚éB
+    // é€šå¸¸ãƒ¢ãƒ‡ãƒ«æç”»ç”¨ã«ã€ç¾åœ¨Meshã®ãƒœãƒ¼ãƒ³è¡Œåˆ—ã‚’Skinningç”¨CBã¸è»¢é€ã™ã‚‹ã€‚
     DirectX::XMFLOAT4X4 transforms_[256]{};
     if (!mesh_.bones.empty())
     {
@@ -150,7 +150,7 @@ void MeshVFXShader::UpdateSkeleton(
     }
     else if (mesh_.node)
     {
-        // ƒ{[ƒ“‚ğ‚½‚È‚¢Mesh‚ÍNode‚ÌWorldTransform‚¾‚¯‚ğ0”Ô‚Ö“ü‚ê‚éB
+        // ãƒœãƒ¼ãƒ³ã‚’æŒãŸãªã„Meshã¯Nodeã®WorldTransformã ã‘ã‚’0ç•ªã¸å…¥ã‚Œã‚‹ã€‚
         transforms_[0] = mesh_.node->worldTransform;
     }
     renderContext_.deviceContext->UpdateSubresource(
@@ -161,7 +161,7 @@ void MeshVFXShader::UpdateSkeleton(
     const RenderContext& renderContext_,
     const std::vector<DirectX::XMFLOAT4X4>& transforms_)
 {
-    // Afterimage‚È‚ÇAŠO•”‚Å•Û‘¶‚µ‚½Poses—ñ‚ğ‚»‚Ì‚Ü‚ÜSkinning—pCB‚Ö“]‘—‚·‚éB
+    // Afterimageãªã©ã€å¤–éƒ¨ã§ä¿å­˜ã—ãŸPoseè¡Œåˆ—ã‚’ãã®ã¾ã¾Skinningç”¨CBã¸è»¢é€ã™ã‚‹ã€‚
     DirectX::XMFLOAT4X4 bufferTransforms_[256]{};
     const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
     for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
@@ -174,7 +174,7 @@ void MeshVFXShader::UpdateSkeleton(
 
 void MeshVFXShader::UpdateScene(const RenderContext& renderContext_)
 {
-    // Camera‚ÆDepth•œŒ³—p‚Ìî•ñ‚ğHLSL‚ÌScene’è”‚Ö‡‚í‚¹‚ÄXV‚·‚éB
+    // Cameraã¨Depthå¾©å…ƒç”¨ã®æƒ…å ±ã‚’HLSLã®Sceneå®šæ•°ã¸åˆã‚ã›ã¦æ›´æ–°ã™ã‚‹ã€‚
     if (!renderContext_.camera) return;
 
     const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&renderContext_.camera->GetView());
@@ -204,7 +204,7 @@ void MeshVFXShader::UpdatePart(
     float partTime_,
     float alpha_)
 {
-    // 1Part•ª‚Ì•ÒW’l‚ÆÀs Texture‚ğShader‚Ö‘—‚éB‚±‚±‚ªC++İ’è‚ÆHLSL•\Œ»‚ÌÚ‘±“_B
+    // 1Partåˆ†ã®ç·¨é›†å€¤ã¨å®Ÿè¡Œæ™‚ Textureã‚’Shaderã¸é€ã‚‹ã€‚ã“ã“ãŒC++è¨­å®šã¨HLSLè¡¨ç¾ã®æ¥ç¶šç‚¹ã€‚
     CbMeshVFX constants_{};
     DirectX::XMStoreFloat4x4(&constants_.world, world_);
     constants_.color = part_.color;
@@ -228,7 +228,7 @@ void MeshVFXShader::UpdatePart(
     constants_.dissolveThreshold = part_.dissolveThreshold;
     const auto calculateRotation_ = [partTime_](float initialRotation_, float rotationSpeed_)
         {
-            // GUI‚Í“x”–@‚Åˆµ‚¢AShader‚Ö‚Íƒ‰ƒWƒAƒ“‚Å“n‚·B
+            // GUIã¯åº¦æ•°æ³•ã§æ‰±ã„ã€Shaderã¸ã¯ãƒ©ã‚¸ã‚¢ãƒ³ã§æ¸¡ã™ã€‚
             const float rotation_ = DirectX::XMConvertToRadians(
                 initialRotation_ + rotationSpeed_ * partTime_);
             return std::fmod(rotation_, 2.0f * std::numbers::pi_v<float>);
@@ -340,7 +340,7 @@ void MeshVFXShader::UpdatePart(
 
 void MeshVFXShader::End(const RenderContext& renderContext_)
 {
-    // Ÿ‚Ì•`‰æ‚ÖTexture/CB/Shaderó‘Ô‚ğ‚¿‰z‚³‚È‚¢‚æ‚¤AMeshVFX‚Åg—p‚µ‚½Slot‚ğ‰ğœ‚·‚éB
+    // æ¬¡ã®æç”»ã¸Texture/CB/ShaderçŠ¶æ…‹ã‚’æŒã¡è¶Šã•ãªã„ã‚ˆã†ã€MeshVFXã§ä½¿ç”¨ã—ãŸSlotã‚’è§£é™¤ã™ã‚‹ã€‚
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
     ID3D11ShaderResourceView* nullTextures_[10] = {};
     ID3D11Buffer* nullBuffer_ = nullptr;

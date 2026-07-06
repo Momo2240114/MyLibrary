@@ -21,20 +21,20 @@ public:
         return *instance;
     }
 
-    // ƒV[ƒ“‘JˆÚ‚É‚±‚ê‚ğŒÄ‚ñ‚ÅÀ‘Ì‚ğØ‚è‘Ö‚¦‚é
+    // ã‚·ãƒ¼ãƒ³é·ç§»æ™‚ã«ã“ã‚Œã‚’å‘¼ã‚“ã§å®Ÿä½“ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
     static void SetInstance(std::shared_ptr<ActionRegistry> newInstance) 
     {
         instance = newInstance;
     }
 
-    // ƒJƒeƒSƒŠ‚ğw’è‚µ‚Ä“o˜^‚·‚é
+    // ã‚«ãƒ†ã‚´ãƒªã‚’æŒ‡å®šã—ã¦ç™»éŒ²ã™ã‚‹
     void RegisterAction(const std::string& category, const std::string& name, ActionFunc func);
 
-    // ‚·‚×‚Ä‚ÌƒJƒeƒSƒŠ–¼‚ğæ“¾
+    // ã™ã¹ã¦ã®ã‚«ãƒ†ã‚´ãƒªåã‚’å–å¾—
     std::vector<std::string> GetCategories();
 
 
-    // “Á’èƒJƒeƒSƒŠ“à‚ÌƒAƒNƒVƒ‡ƒ“–¼ƒŠƒXƒg‚ğæ“¾
+    // ç‰¹å®šã‚«ãƒ†ã‚´ãƒªå†…ã®ã‚¢ã‚¯ã‚·ãƒ§ãƒ³åãƒªã‚¹ãƒˆã‚’å–å¾—
     std::vector<std::string> GetActionNames(const std::string& category) {
         std::vector<std::string> names;
         if (actions.count(category)) {
@@ -47,15 +47,15 @@ public:
 
     bool RemoveAction(const std::string& category, const std::string& actionName);
 
-    // Àsi‚·‚×‚Ä‚ÌƒJƒeƒSƒŠ‚©‚çŒŸõj
+    // å®Ÿè¡Œï¼ˆã™ã¹ã¦ã®ã‚«ãƒ†ã‚´ãƒªã‹ã‚‰æ¤œç´¢ï¼‰
     void Call(const std::string& name);
 
     bool HasAction(const std::string& name);
 
-    // ƒJƒeƒSƒŠ‚ª‘¶İ‚·‚é‚©ƒ`ƒFƒbƒN
+    // ã‚«ãƒ†ã‚´ãƒªãŒå­˜åœ¨ã™ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
     bool HasCategory(const std::string& category) const;
 
-    // “Á’è‚ÌƒJƒeƒSƒŠ“à‚ÉƒAƒNƒVƒ‡ƒ“‚ª‘¶İ‚·‚é‚©ƒ`ƒFƒbƒNi‚±‚ê‚à•Ö—˜‚Å‚·j
+    // ç‰¹å®šã®ã‚«ãƒ†ã‚´ãƒªå†…ã«ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ãŒå­˜åœ¨ã™ã‚‹ã‹ãƒã‚§ãƒƒã‚¯ï¼ˆã“ã‚Œã‚‚ä¾¿åˆ©ã§ã™ï¼‰
     bool HasActionInCategory(const std::string& category, const std::string& actionName) const;
 
     void Clear()
@@ -68,6 +68,6 @@ public:
 private:
     static std::shared_ptr<ActionRegistry> instance;
 
-    // actions[ƒJƒeƒSƒŠ][ƒAƒNƒVƒ‡ƒ“–¼]
+    // actions[ã‚«ãƒ†ã‚´ãƒª][ã‚¢ã‚¯ã‚·ãƒ§ãƒ³å]
     std::unordered_map<std::string, std::unordered_map<std::string, ActionFunc>> actions;
 };

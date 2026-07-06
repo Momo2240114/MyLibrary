@@ -8,14 +8,14 @@ public:
     LightingShader(ID3D11Device* device);
     ~LightingShader() = default;
 
-    // ‘S‰æ–Ê‚É‘Î‚µ‚ÄŒõ‚ğŒvZ‚µA•`‰æ‚·‚é
+    // å…¨ç”»é¢ã«å¯¾ã—ã¦å…‰ã‚’è¨ˆç®—ã—ã€æç”»ã™ã‚‹
     void Execute(const RenderContext& rc,
         ID3D11ShaderResourceView* color,
         ID3D11ShaderResourceView* normal,
         ID3D11ShaderResourceView* material,
         ID3D11ShaderResourceView* emissive,
         ID3D11ShaderResourceView* depth,
-        ID3D11ShaderResourceView* pointLightSRV,  // ’Ç‰Á
+        ID3D11ShaderResourceView* pointLightSRV,  // è¿½åŠ 
         ID3D11ShaderResourceView* spotLightSRV,
         ID3D11Buffer* sceneConstantBuffer,
         const DirectX::XMFLOAT4& toonShadeSteps_,

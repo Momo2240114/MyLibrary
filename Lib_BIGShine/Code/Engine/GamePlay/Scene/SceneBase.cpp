@@ -40,15 +40,15 @@ void SceneBase::Finalize()
 
 	if (_GameObjectManager) {
 		_GameObjectManager->Clear();
-		_GameObjectManager.reset(); // ¢ŠE‚Ì•ö‰óiƒƒ‚ƒŠ‰ğ•új
+		_GameObjectManager.reset(); // ä¸–ç•Œã®å´©å£Šï¼ˆãƒ¡ãƒ¢ãƒªè§£æ”¾ï¼‰
 	}
 }
 
 void SceneBase::Initialize()
 {
-	// ƒV[ƒ““Æ©‚Ìƒ}ƒl[ƒWƒƒ[‚ğ¶¬‚·‚é
+	// ã‚·ãƒ¼ãƒ³ç‹¬è‡ªã®ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’ç”Ÿæˆã™ã‚‹
 	_GameObjectManager = std::make_shared<GameObjectManager>();
-	_GameObjectManager->Initialize(); // ƒ}ƒl[ƒWƒƒ[‚Ì‰Šú‰»
+	_GameObjectManager->Initialize(); // ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®åˆæœŸåŒ–
 	_GameObjectManager->SetModelRenderSystem(&m_ModelRenderSystem);
 
 	editorWindowManager = std::make_unique<EditorWindowManager>(_GameObjectManager.get());
@@ -75,7 +75,7 @@ void SceneBase::Initialize()
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
 
-	//ƒ‚ƒfƒ‹‚ÌƒŒƒ“ƒ_ƒ‰[‚ğì¬
+	//ãƒ¢ãƒ‡ãƒ«ã®ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼ã‚’ä½œæˆ
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 	m_ShapeRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());

@@ -9,10 +9,10 @@
 
 bool WanderJudgment::Judgment()
 {
-	//–Ú“I’n“_‚Ü‚Å“ž’…‚µ‚Ä‚¢‚È‚©‚Á‚½‚Æ‚«
+	//ç›®çš„åœ°ç‚¹ã¾ã§åˆ°ç€ã—ã¦ã„ãªã‹ã£ãŸã¨ã
 	m_pAgentComponent = m_pOwner->GetComponent<AgentComponent>();
 
-	//–Ú“I’n‚É‚Â‚¢‚Ä‚¢‚È‚¯‚ê‚Î
+	//ç›®çš„åœ°ã«ã¤ã„ã¦ã„ãªã‘ã‚Œã°
 	if (!m_pAgentComponent.lock()->GetIsArrive() && m_pAgentComponent.lock()->TargetStateCheck(DT_CROWDAGENT_TARGET_VALID))
 	{
 		return true;
@@ -23,10 +23,10 @@ bool WanderJudgment::Judgment()
 
 bool ChaseJudgment::Judgment()
 {
-	//–Ú“I’n“_‚Ü‚Å“ž’…‚µ‚Ä‚¢‚È‚©‚Á‚½‚Æ‚«
+	//ç›®çš„åœ°ç‚¹ã¾ã§åˆ°ç€ã—ã¦ã„ãªã‹ã£ãŸã¨ã
 	m_pEnemyComponent = m_pOwner->GetComponent<EnemyComponent>();
 
-	//ƒvƒŒƒCƒ„[‚ðŽ‹”F‚Å‚«‚Ä‚©‚ÂƒvƒŒƒCƒ„[‚ª‚©‚­‚ê‚Ä‚¢‚È‚¯‚ê‚Î
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’è¦–èªã§ãã¦ã‹ã¤ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒã‹ãã‚Œã¦ã„ãªã‘ã‚Œã°
 	if (m_pEnemyComponent.lock()->Visibility() &&!m_pEnemyComponent.lock()->StateCheck(PlayerStateType::Hide))
 	{
 		return true;
@@ -37,10 +37,10 @@ bool ChaseJudgment::Judgment()
 
 bool AttackJudgment::Judgment()
 {
-	//–Ú“I’n“_‚Ü‚Å“ž’…‚µ‚Ä‚¢‚È‚©‚Á‚½‚Æ‚«
+	//ç›®çš„åœ°ç‚¹ã¾ã§åˆ°ç€ã—ã¦ã„ãªã‹ã£ãŸã¨ã
 	m_pEnemyComponent = m_pOwner->GetComponent<EnemyComponent>();
 
-	//UŒ‚‰Â”\ó‘Ô‚É‚ ‚ê‚Î
+	//æ”»æ’ƒå¯èƒ½çŠ¶æ…‹ã«ã‚ã‚Œã°
 	//if (m_pEnemyComponent.lock()->GetAttackFlag())
 	//{
 	//	return true;
@@ -69,7 +69,7 @@ bool CheckJudgment::Judgment()
 {
 	m_pEnemyComponent = m_pOwner->GetComponent<EnemyComponent>();
 
-	//•Ç‚Æ‰B‚ê‚éƒIƒuƒWƒFƒNƒg
+	//å£ã¨éš ã‚Œã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 	uint32_t layerMask = (uint32_t)GameObject::LayerType::Wall;
 
 	if (m_pEnemyComponent.lock()->GetPlayerSeeFlag())

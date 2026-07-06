@@ -8,17 +8,17 @@
 class PoseLibraryResourceManager
 {
 public:
-    // ¢ŠE‚É‚½‚¾ˆê‚Â‚Ì_“a‚ÖƒAƒNƒZƒX‚·‚é–å
+    // ä¸–ç•Œã«ãŸã ä¸€ã¤ã®ç¥æ®¿ã¸ã‚¢ã‚¯ã‚»ã‚¹ã™ã‚‹é–€
     static PoseLibraryResourceManager& Instance()
     {
         static PoseLibraryResourceManager instance;
         return instance;
     }
 
-    // ‹L‰¯‚Ì_“a‚©‚çƒ|[ƒYƒŠƒ\[ƒX‚ğŒî‚¤A‚ ‚é‚¢‚ÍV‚½‚É–a‚®ŠÖ”
+    // è¨˜æ†¶ã®ç¥æ®¿ã‹ã‚‰ãƒãƒ¼ã‚ºãƒªã‚½ãƒ¼ã‚¹ã‚’ä¹ã†ã€ã‚ã‚‹ã„ã¯æ–°ãŸã«ç´¡ãé–¢æ•°
     std::shared_ptr<PoseLibraryResource> GetOrCreateResource(const std::string& modelName);
 
-    // ‚·‚×‚Ä‚Ì‹L‰¯‚ğƒŠƒZƒbƒg‚µA_“a‚ğò‰»‚·‚é
+    // ã™ã¹ã¦ã®è¨˜æ†¶ã‚’ãƒªã‚»ãƒƒãƒˆã—ã€ç¥æ®¿ã‚’æµ„åŒ–ã™ã‚‹
     void Clear()
     {
         for (auto& pair : m_resources) {
@@ -27,7 +27,7 @@ public:
         m_resources.clear();
     }
 
-    // ¹‚È‚éjson‚Ì‘‹L‚Æ‰ğ“Ç
+    // è–ãªã‚‹jsonã®æ›¸è¨˜ã¨è§£èª­
     bool SaveToJson(const std::string& filename, const std::shared_ptr<PoseLibraryResource>& resource);
     bool LoadFromJson(const std::string& filename, std::shared_ptr<PoseLibraryResource>& resource);
 
@@ -37,6 +37,6 @@ private:
     PoseLibraryResourceManager(const PoseLibraryResourceManager&) = delete;
     PoseLibraryResourceManager& operator=(const PoseLibraryResourceManager&) = delete;
 
-    // ^–¼iModel–¼j‚É‚æ‚Á‚Ä•R‚Ã‚¯‚ç‚ê‚½ƒŠƒ\[ƒX‚Ì’n}
+    // çœŸåï¼ˆModelåï¼‰ã«ã‚ˆã£ã¦ç´ã¥ã‘ã‚‰ã‚ŒãŸãƒªã‚½ãƒ¼ã‚¹ã®åœ°å›³
     std::unordered_map<std::string, std::shared_ptr<PoseLibraryResource>> m_resources;
 };

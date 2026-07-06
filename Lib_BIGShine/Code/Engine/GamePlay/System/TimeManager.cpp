@@ -14,6 +14,7 @@ TimeManager::TimeManager()
 
 void TimeManager::Update(float rawDt_)
 {
+    lastRawDeltaTime = (std::max)(rawDt_, 0.0f);
     defaultState.Update(rawDt_);
 
     for (auto& [type, state] : states)
@@ -28,6 +29,7 @@ void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_
     {
         defaultState.targetScale = scale_;
         defaultState.lerpSpeed = speed_;
+        defaultState.phase = TimeState::PHASE::IDLE;
         if (layerMask_ == 0u) return;
     }
 
@@ -40,6 +42,7 @@ void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_
             auto& state = states[static_cast<TarGetLayerType>(bit_)];
             state.targetScale = scale_;
             state.lerpSpeed = speed_;
+            state.phase = TimeState::PHASE::IDLE;
         }
     }
 }
@@ -89,7 +92,7 @@ void TimeManager::PrepareCache()
 
 float TimeManager::GetCachedScale(uint32_t layerMask_) const
 {
-    // Default = 0 ëŒçÙ
+    // Default = 0 ÂØæÁ≠ñ
     if (layerMask_ == 0u)
     {
         return cachedDefaultScale;
@@ -120,4 +123,47 @@ float TimeManager::GetCachedScale(uint32_t layerMask_) const
     }
 
     return result_;
+}
+
+void TimeManager::PlayTimedScale(
+    uint32_t layerMask_,
+    float targetScale_,
+    float transitionDuration_,
+    float holdDuration_,
+    float returnDuration_,
+    float defaultScale_)
+{
+    if (layerMask_ == 0u || layerMask_ == static_cast<uint32_t>(TarGetLayerType::All))
+    {
+        defaultState.Play(targetScale_, transitionDuration_, holdDuration_, returnDuration_, defaultScale_);
+        if (layerMask_ == 0u) return;
+    }
+
+    for (uint32_t index_ = 0; index_ < 32; ++index_)
+    {
+        const uint32_t bit_ = 1u << index_;
+        if ((layerMask_ & bit_) != 0u)
+        {
+            states[static_cast<TarGetLayerType>(bit_)].Play(
+                targetScale_, transitionDuration_, holdDuration_, returnDuration_, defaultScale_);
+        }
+    }
+}
+
+void TimeManager::ResetToDefaults(uint32_t layerMask_, bool resetConfiguredDefaults_)
+{
+    if (layerMask_ == 0u || layerMask_ == static_cast<uint32_t>(TarGetLayerType::All))
+    {
+        defaultState.Reset(resetConfiguredDefaults_);
+        if (layerMask_ == 0u) return;
+    }
+
+    for (uint32_t index_ = 0; index_ < 32; ++index_)
+    {
+        const uint32_t bit_ = 1u << index_;
+        if ((layerMask_ & bit_) != 0u)
+        {
+            states[static_cast<TarGetLayerType>(bit_)].Reset(resetConfiguredDefaults_);
+        }
+    }
 }

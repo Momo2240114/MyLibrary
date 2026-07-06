@@ -414,8 +414,8 @@ bool AnimationEditorWindow::CopySceneObjectToPreview(
         };
     collectHierarchy_(collectHierarchy_, sourceObject_);
 
-    // WeaponTrail‚È‚Ç‚Ì–¼‘OQÆ‚ğˆÛ‚·‚é‚½‚ßAŒ³‚ÌObject–¼‚ğ•Ï‚¦‚¸‚É
-    // ƒvƒŒƒrƒ…[ê—pManager‚ÖeqŠK‘w‚²‚Æ•¡»‚·‚éB
+    // WeaponTrailãªã©ã®åå‰å‚ç…§ã‚’ç¶­æŒã™ã‚‹ãŸã‚ã€å…ƒã®Objectåã‚’å¤‰ãˆãšã«
+    // ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼å°‚ç”¨Managerã¸è¦ªå­éšå±¤ã”ã¨è¤‡è£½ã™ã‚‹ã€‚
     previewGameObjectManager->Clear();
     for (const auto& hierarchyObject_ : sourceObjects_)
     {
@@ -1785,7 +1785,7 @@ void AnimationEditorWindow::DrawPoseEditMode(GltfModelCommponennt* modelComp, An
     const float nodeAreaHeight = (std::max)(160.0f, (std::min)(260.0f, ImGui::GetContentRegionAvail().y - 86.0f));
 
     const float availableWidth = ImGui::GetContentRegionAvail().x;
-    const float nodeListWidth = availableWidth * 0.5f; // ¶‰E‚Å50%‚¸‚Â•ª‚¯‡‚¤‚Ì‚¾
+    const float nodeListWidth = availableWidth * 0.5f; // å·¦å³ã§50%ãšã¤åˆ†ã‘åˆã†ã®ã 
 
 
 

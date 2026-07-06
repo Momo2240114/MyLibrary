@@ -8,16 +8,16 @@ bool SceneManager::callInitOnChange;
 
 void SceneManager::Initialize(std::unique_ptr<SceneBase> firstScene)
 {
-    // Š—LŒ ‚ğ NowScene ‚É“n‚·
+    // æ‰€æœ‰æ¨©ã‚’ NowScene ã«æ¸¡ã™
     NowScene = std::move(firstScene);
 
-    // ‚à‚µ GameObjectManager::ChangeScene ‚ªuŒ»İ‚ÌƒV[ƒ“–¼v‚ğ‹L˜^‚·‚é‚¾‚¯‚Ì‚à‚Ì‚È‚çˆÈ‰º‚Ì‚æ‚¤‚ÉB
+    // ã‚‚ã— GameObjectManager::ChangeScene ãŒã€Œç¾åœ¨ã®ã‚·ãƒ¼ãƒ³åã€ã‚’è¨˜éŒ²ã™ã‚‹ã ã‘ã®ã‚‚ã®ãªã‚‰ä»¥ä¸‹ã®ã‚ˆã†ã«ã€‚
     if (NowScene)
     {
-        // æ‚É‰Šú‰»‚ğs‚¢AŒÅ—L‚Ì GameObjectManager ‚ğY‚İ—‚Æ‚·
+        // å…ˆã«åˆæœŸåŒ–ã‚’è¡Œã„ã€å›ºæœ‰ã® GameObjectManager ã‚’ç”£ã¿è½ã¨ã™
         NowScene->Initialize();
 
-        // ’a¶‚µ‚½ƒ}ƒl[ƒWƒƒ[‚É‘Î‚µAŒ»İ‚ÌƒV[ƒ“‚ğ”F¯‚³‚¹‚é
+        // èª•ç”Ÿã—ãŸãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã«å¯¾ã—ã€ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã‚’èªè­˜ã•ã›ã‚‹
         if (NowScene->GetGameObjectManager())
         {
             NowScene->GetGameObjectManager()->ChangeScene(NowScene.get());
@@ -28,26 +28,26 @@ void SceneManager::Initialize(std::unique_ptr<SceneBase> firstScene)
 
 void SceneManager::Update(float elapsedTime)
 {
-    // ƒV[ƒ“Ø‚è‘Ö‚¦—\–ñiNextScenej‚ª‚ ‚éê‡‚Ì’µ–ô‹V®
+    // ã‚·ãƒ¼ãƒ³åˆ‡ã‚Šæ›¿ãˆäºˆç´„ï¼ˆNextSceneï¼‰ãŒã‚ã‚‹å ´åˆã®è·³èºå„€å¼
     if (NextScene)
     {
         std::unique_ptr<SceneBase> nextScene_ = std::move(NextScene);
 
-        // 1. ‹Œ¢ŠE‚ÌIàiFinalize ‚Æ GameObjectManager ‚Ì”jŠüj
+        // 1. æ—§ä¸–ç•Œã®çµ‚ç„‰ï¼ˆFinalize ã¨ GameObjectManager ã®ç ´æ£„ï¼‰
         Clear();
 
-        // 2. V¢ŠE‚Ö‚ÌåŒ ˆÚ÷
+        // 2. æ–°ä¸–ç•Œã¸ã®ä¸»æ¨©ç§»è­²
         NowScene = std::move(nextScene_);
 
         if (NowScene)
         {
-            // •K—v‚È‚ç‰Šú‰»i’Êí‚Í‚±‚¿‚ç‚ª true ‚É‚È‚é‚Í‚¸‚Å‚·j
+            // å¿…è¦ãªã‚‰åˆæœŸåŒ–ï¼ˆé€šå¸¸ã¯ã“ã¡ã‚‰ãŒ true ã«ãªã‚‹ã¯ãšã§ã™ï¼‰
             if (callInitOnChange)
             {
                 NowScene->Initialize();
             }
 
-            // ƒLƒƒƒXƒg‚È‚µ‚ÅAV¢ŠE‚Ìƒ}ƒl[ƒWƒƒ[‚É’¼ÚƒV[ƒ“‚ğ’Ê’m‚Å‚«‚é”ü‚µ‚³I
+            // ã‚­ãƒ£ã‚¹ãƒˆãªã—ã§ã€æ–°ä¸–ç•Œã®ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã«ç›´æ¥ã‚·ãƒ¼ãƒ³ã‚’é€šçŸ¥ã§ãã‚‹ç¾ã—ã•ï¼
             if (NowScene->GetGameObjectManager())
             {
                 NowScene->GetGameObjectManager()->ChangeScene(NowScene.get());
@@ -55,7 +55,7 @@ void SceneManager::Update(float elapsedTime)
         }
     }
 
-    // Œ»İ‚Ì¢ŠE‚ÌŠÔ‚ği‚ß‚é
+    // ç¾åœ¨ã®ä¸–ç•Œã®æ™‚é–“ã‚’é€²ã‚ã‚‹
     if (NowScene)
     {
         NowScene->Update(elapsedTime);
@@ -80,7 +80,7 @@ void SceneManager::DrawGUI()
 
 void SceneManager::ChangeScene(std::unique_ptr<SceneBase> scene, bool callInitialize)
 {
-    // V‚µ‚¢ƒV[ƒ“‚ğ—\–ñiŠ—LŒ ‚ğ NextScene ‚ª‚Âj
+    // æ–°ã—ã„ã‚·ãƒ¼ãƒ³ã‚’äºˆç´„ï¼ˆæ‰€æœ‰æ¨©ã‚’ NextScene ãŒæŒã¤ï¼‰
     NextScene = std::move(scene);
     callInitOnChange = callInitialize;
 }
@@ -92,7 +92,7 @@ void SceneManager::Clear()
         NowScene->Finalize();
     }
 
-    // PhysX‚È‚Ç‚ÌŠî”Õ‚ªI—¹‚·‚é‘O‚ÉAScene‚ªŠ—L‚·‚éComponent‚ğ”jŠü‚·‚éB
+    // PhysXãªã©ã®åŸºç›¤ãŒçµ‚äº†ã™ã‚‹å‰ã«ã€SceneãŒæ‰€æœ‰ã™ã‚‹Componentã‚’ç ´æ£„ã™ã‚‹ã€‚
     NowScene.reset();
     NextScene.reset();
 }

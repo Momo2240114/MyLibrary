@@ -20,7 +20,7 @@ void SceneLoading::Initialize()
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 
-	//ƒXƒŒƒbƒhŠJŽn
+	//ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹
 	thread = std::make_unique<std::thread>(LoadingThread, this);
 }
 
@@ -30,7 +30,7 @@ void SceneLoading::Finalize()
 
 
 	if (thread && thread->joinable()) {
-		thread->join(); // ƒXƒŒƒbƒh‚ÌI—¹‚ð‘Ò‹@
+		thread->join(); // ã‚¹ãƒ¬ãƒƒãƒ‰ã®çµ‚äº†ã‚’å¾…æ©Ÿ
 	}
 }
 
@@ -38,7 +38,7 @@ void SceneLoading::Update(float elapsedTime)
 {
 	SceneBase::Update(elapsedTime);
 
-	// šŽ©g‚Ìƒ}ƒl[ƒWƒƒ[‚ðXV
+	// â˜…è‡ªèº«ã®ãƒžãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’æ›´æ–°
 	if (_GameObjectManager) {
 		_GameObjectManager->Update(elapsedTime);
 	}
@@ -63,15 +63,15 @@ void SceneLoading::DrawGUI()
 
 void SceneLoading::LoadingThread(SceneLoading* scene)
 {
-	//COMŠÖ˜A‚Ì‰Šú‰»‚ÅƒXƒŒƒbƒh–ˆ‚ÉŒÄ‚Ñ•K—v‚ª‚ ‚é
+	//COMé–¢é€£ã®åˆæœŸåŒ–ã§ã‚¹ãƒ¬ãƒƒãƒ‰æ¯Žã«å‘¼ã³å¿…è¦ãŒã‚ã‚‹
 	CoInitialize(nullptr);
 
-	//ŽŸ‚ÌƒV[ƒ“‚Ì‰Šú‰»‚ðs‚¤
+	//æ¬¡ã®ã‚·ãƒ¼ãƒ³ã®åˆæœŸåŒ–ã‚’è¡Œã†
 	scene->nextScene->Initialize();
 
-	//ƒXƒŒƒbƒh‚ªI‚í‚é‘O‚ÉCOMŠÖ˜A‚ÌI—¹‰»
+	//ã‚¹ãƒ¬ãƒƒãƒ‰ãŒçµ‚ã‚ã‚‹å‰ã«COMé–¢é€£ã®çµ‚äº†åŒ–
 	CoUninitialize();
 
-	//ŽŸ‚ÌƒV[ƒ“‚Ì€”õŠ®—¹Ý’è
+	//æ¬¡ã®ã‚·ãƒ¼ãƒ³ã®æº–å‚™å®Œäº†è¨­å®š
 	scene->nextScene->SetReady();
 }

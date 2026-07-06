@@ -1,7 +1,7 @@
-// Àsˆ— / Blackboard / State / Transition
-// AnimationControllerComponent ‚ÌÀ‘•‚ğ–ğŠ„‚²‚Æ‚É•ª‚¯‚½ƒtƒ@ƒCƒ‹‚Å‚·B
-// ƒNƒ‰ƒX©‘Ì‚Í•ª—£‚¹‚¸A“¯‚¶ƒNƒ‰ƒX‚Ìƒƒ“ƒoŠÖ”’è‹`‚¾‚¯‚ğ•Ê cpp ‚É’u‚¢‚Ä‚¢‚Ü‚·B
-// ‚»‚Ì‚½‚ßŠù‘¶‚ÌQÆŠÖŒW‚â public/private ‚Ìˆµ‚¢‚Í‚»‚Ì‚Ü‚Ü‚Å‚·B
+// å®Ÿè¡Œæ™‚å‡¦ç† / Blackboard / State / Transition
+// AnimationControllerComponent ã®å®Ÿè£…ã‚’å½¹å‰²ã”ã¨ã«åˆ†ã‘ãŸãƒ•ã‚¡ã‚¤ãƒ«ã§ã™ã€‚
+// ã‚¯ãƒ©ã‚¹è‡ªä½“ã¯åˆ†é›¢ã›ãšã€åŒã˜ã‚¯ãƒ©ã‚¹ã®ãƒ¡ãƒ³ãƒé–¢æ•°å®šç¾©ã ã‘ã‚’åˆ¥ cpp ã«ç½®ã„ã¦ã„ã¾ã™ã€‚
+// ãã®ãŸã‚æ—¢å­˜ã®å‚ç…§é–¢ä¿‚ã‚„ public/private ã®æ‰±ã„ã¯ãã®ã¾ã¾ã§ã™ã€‚
 
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"
@@ -26,12 +26,12 @@ namespace ed = ax::NodeEditor;
 
 namespace
 {
-    // ƒOƒ‰ƒtã‚Å‚¾‚¯g‚¤“à•”ƒm[ƒh–¼B•Û‘¶ƒf[ƒ^‚É‚à“ü‚é‚Ì‚Å•¶š—ñ‚Í•ÏX‚µ‚È‚¢B
+    // ã‚°ãƒ©ãƒ•ä¸Šã§ã ã‘ä½¿ã†å†…éƒ¨ãƒãƒ¼ãƒ‰åã€‚ä¿å­˜ãƒ‡ãƒ¼ã‚¿ã«ã‚‚å…¥ã‚‹ã®ã§æ–‡å­—åˆ—ã¯å¤‰æ›´ã—ãªã„ã€‚
     constexpr const char* START_NODE_NAME = "__Start__";
     constexpr const char* ANY_NODE_NAME = "__Any__";
     constexpr const char* ENTRY_NODE_PREFIX = "__Entry__:";
 
-    // ƒTƒuƒOƒ‰ƒt‚É“ü‚Á‚½AÅ‰‚ÉÀs‚·‚é“üŒûƒm[ƒh–¼‚ğì‚éB
+    // ã‚µãƒ–ã‚°ãƒ©ãƒ•ã«å…¥ã£ãŸæ™‚ã€æœ€åˆã«å®Ÿè¡Œã™ã‚‹å…¥å£ãƒãƒ¼ãƒ‰åã‚’ä½œã‚‹ã€‚
     std::string MakeEntryNodeName(const std::string& scopeId_)
     {
         return std::string(ENTRY_NODE_PREFIX) + scopeId_;
@@ -433,14 +433,14 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName_, fl
         }
     }
 
-    // AnimatorƒNƒ‰ƒX‚É‘JˆÚ‚ğ–½—ß
+    // Animatorã‚¯ãƒ©ã‚¹ã«é·ç§»ã‚’å‘½ä»¤
     animator.CrossFadeTo(nextState_, duration_, GetGameObject());
     currentState = nextState_;
 }
 
 void AnimationControllerComponent::AddState(const std::string& stateName_, int animationIndex_)
 {
-    if (states.count(stateName_)) return; // d•¡ƒ`ƒFƒbƒN
+    if (states.count(stateName_)) return; // é‡è¤‡ãƒã‚§ãƒƒã‚¯
 
     auto newState_ = std::make_unique<AnimState>();
     newState_->name = stateName_;
@@ -449,20 +449,20 @@ void AnimationControllerComponent::AddState(const std::string& stateName_, int a
     newState_->isLoop = true;
     states[stateName_] = std::move(newState_);
 
-    // ƒAƒNƒVƒ‡ƒ“‚à“o˜^
+    // ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚‚ç™»éŒ²
     std::string objectName_ = GetGameObject()->GetName();
     std::string fullActionName_ = objectName_ + "_" + stateName_;
     ActionRegistry::Instance().RegisterAction("Animation", fullActionName_, [this, stateName_]() {
         this->ChangeState(stateName_);
         });
 
-    // ƒOƒ‰ƒt—pƒm[ƒhƒf[ƒ^‚Ìì¬
+    // ã‚°ãƒ©ãƒ•ç”¨ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
     AnimGraphNode node_;
     node_.id = ed::NodeId(GetNextId());
     node_.stateName = stateName_;
     node_.inputPin = ed::PinId(GetNextId());
     node_.outputPin = ed::PinId(GetNextId());
-    node_.pos = ImVec2(0, 0); // ‰ŠúÀ•W
+    node_.pos = ImVec2(0, 0); // åˆæœŸåº§æ¨™
     node_.type = AnimGraphNodeType::State;
 
     graphNodes.push_back(node_);
@@ -606,11 +606,11 @@ void AnimationControllerComponent::RemoveState(const std::string& stateName_)
     auto iterator_ = states.find(stateName_);
     if (iterator_ == states.end()) return;
 
-    // --- ˆÀ‘Sô: Á‚»‚¤‚Æ‚µ‚Ä‚¢‚éƒXƒe[ƒg‚ªŒ»İÄ¶’†‚È‚çA‘¼‚ÌƒXƒe[ƒg‚Ö“¦‚ª‚· ---
+    // --- å®‰å…¨ç­–: æ¶ˆãã†ã¨ã—ã¦ã„ã‚‹ã‚¹ãƒ†ãƒ¼ãƒˆãŒç¾åœ¨å†ç”Ÿä¸­ãªã‚‰ã€ä»–ã®ã‚¹ãƒ†ãƒ¼ãƒˆã¸é€ƒãŒã™ ---
     if (currentState == iterator_->second.get())
     {
         currentState = nullptr;
-        // ‘¼‚ÉƒXƒe[ƒg‚ª‚ ‚ê‚ÎÅ‰‚Ì‚â‚Â‚ÉA‚È‚¯‚ê‚Î’â~
+        // ä»–ã«ã‚¹ãƒ†ãƒ¼ãƒˆãŒã‚ã‚Œã°æœ€åˆã®ã‚„ã¤ã«ã€ãªã‘ã‚Œã°åœæ­¢
         if (states.size() > 1) {
             for (auto& [name, statePointer_] : states) {
                 if (name != stateName_) {
@@ -621,12 +621,12 @@ void AnimationControllerComponent::RemoveState(const std::string& stateName_)
         }
     }
 
-    // AddState ‚Å“o˜^‚µ‚½‚Æ“¯‚¶Œ`®‚Ì–¼‘O‚ğ\’z
+    // AddState ã§ç™»éŒ²ã—ãŸæ™‚ã¨åŒã˜å½¢å¼ã®åå‰ã‚’æ§‹ç¯‰
     std::string objectName_ = GetGameObject()->GetName();
     std::string fullActionName_ = objectName_ + "_" + stateName_;
     ActionRegistry::Instance().RemoveAction("Animation", fullActionName_);
 
-    // íœÀs
+    // å‰Šé™¤å®Ÿè¡Œ
     states.erase(iterator_);
     stateAssetPaths.erase(stateName_);
 }
@@ -748,12 +748,12 @@ AnimGraphNode* AnimationControllerComponent::FindNodeByPin(ed::PinId pinId_)
 {
     for (auto& node_ : graphNodes)
     {
-        // ƒm[ƒh‚ª‚Â“ü—Íƒsƒ“‚Ü‚½‚Ío—Íƒsƒ“‚ÌID‚ªA’T‚µ‚Ä‚¢‚éID‚Æˆê’v‚·‚é‚©ƒ`ƒFƒbƒN
+        // ãƒãƒ¼ãƒ‰ãŒæŒã¤å…¥åŠ›ãƒ”ãƒ³ã¾ãŸã¯å‡ºåŠ›ãƒ”ãƒ³ã®IDãŒã€æ¢ã—ã¦ã„ã‚‹IDã¨ä¸€è‡´ã™ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
         if (node_.inputPin == pinId_ || node_.outputPin == pinId_) {
             return &node_;
         }
     }
-    return nullptr; // Œ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
+    return nullptr; // è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆ
 }
 
 AnimGraphNode* AnimationControllerComponent::FindNodeByName(const std::string& name_)
@@ -906,7 +906,7 @@ void AnimationControllerComponent::EvaluateGraphTransitions()
 }
 bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& condition_)
 {
-    // 1. ƒAƒjƒ[ƒVƒ‡ƒ“I—¹”»’è
+    // 1. ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†åˆ¤å®š
     if (condition_.type == ConditionType::AnimationEnd) {
         const auto* state_ = animator.GetCurrentState();
         if (!state_) return false;
@@ -919,7 +919,7 @@ bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& condit
         return animator.GetCurrentFadeTime() >= animationDuration_;
     }
 
-    // 2. •Ï”EƒgƒŠƒK[”»’è
+    // 2. å¤‰æ•°ãƒ»ãƒˆãƒªã‚¬ãƒ¼åˆ¤å®š
     if (GetEditableBlackboard().find(condition_.parameterName) == GetEditableBlackboard().end()) return false;
     const auto& blackboardValue_ = GetEditableBlackboard().at(condition_.parameterName);
 

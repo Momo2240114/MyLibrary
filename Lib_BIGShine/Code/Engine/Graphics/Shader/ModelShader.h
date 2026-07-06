@@ -4,7 +4,7 @@
 #include "Engine/Graphics/Resource/GLTFModel.h"
 
 // =========================================
-// ModelShader (Model—pƒVƒF[ƒ_‚ğ•Û‚·‚éComponent)
+// ModelShader (Modelç”¨ã‚·ã‚§ãƒ¼ãƒ€ã‚’ä¿æŒã™ã‚‹Component)
 // =========================================
 class ModelShader
 {
@@ -12,16 +12,16 @@ public:
 	ModelShader() {}
 	virtual ~ModelShader() {}
 
-	// ƒVƒF[ƒ_[‚Ì–¼‘O‚ğ•Ô‚·i”h¶ƒNƒ‰ƒX‚Å‚ÌÀ‘•‚ğ‹­§j
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®åå‰ã‚’è¿”ã™ï¼ˆæ´¾ç”Ÿã‚¯ãƒ©ã‚¹ã§ã®å®Ÿè£…ã‚’å¼·åˆ¶ï¼‰
 	virtual const std::string& GetName() const = 0;
 
-	// ŠJnˆ—
+	// é–‹å§‹å‡¦ç†
 	virtual void Begin(const RenderContext& rc) = 0;
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) = 0;
 
-	// I—¹ˆ—
+	// çµ‚äº†å‡¦ç†
 	virtual void End(const RenderContext& rc) = 0;
 	virtual void Gui() {};
 };
@@ -47,7 +47,7 @@ public:
 //        return name;
 //    }
 //
-//    // Begin / Update / End ƒpƒ^[ƒ“
+//    // Begin / Update / End ãƒ‘ã‚¿ãƒ¼ãƒ³
 //    virtual void Begin(ID3D11DeviceContext* context) {}
 //    virtual void Update(ID3D11DeviceContext* context, const struct ModelResource::Mesh& mesh) {}
 //    virtual void End(ID3D11DeviceContext* context) {}

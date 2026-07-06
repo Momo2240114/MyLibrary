@@ -13,18 +13,18 @@
 #include <nlohmann/json.hpp>
 
 //---
-//  ƒ‚ƒfƒ‹•`‰æ‚É•K—v‚Èƒoƒbƒtƒ@‚ÆƒVƒF[ƒ_[‚ğ‰Šú‰»‚·‚é
-//  Direct3D11 ƒfƒoƒCƒX
+//  ãƒ¢ãƒ‡ãƒ«æç”»ã«å¿…è¦ãªãƒãƒƒãƒ•ã‚¡ã¨ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’åˆæœŸåŒ–ã™ã‚‹
+//  Direct3D11 ãƒ‡ãƒã‚¤ã‚¹
 //---
 void ModelRenderSystem::Initialize(ID3D11Device* device)
 {
-	// ƒV[ƒ“—p’è”ƒoƒbƒtƒ@
+	// ã‚·ãƒ¼ãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbScene),
 		sceneConstantBuffer.GetAddressOf());
 
-	// ƒXƒPƒ‹ƒgƒ“—p’è”ƒoƒbƒtƒ@
+	// ã‚¹ã‚±ãƒ«ãƒˆãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbSkeleton),
@@ -81,23 +81,23 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 		sizeof(CbMaterialOverlay),
 		materialOverlayConstantBuffer.GetAddressOf());
 
-	// ƒVƒF[ƒ_[¶¬
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
 	shaders[static_cast<int>(ModelShaderID::Basic)] = std::make_shared<BasicShader>(device);
 	shaders[static_cast<int>(ModelShaderID::Toon)] = std::make_shared<ToonShader>(device);
 	shaders[static_cast<int>(ModelShaderID::PBR)] = std::make_shared<PbrShader>(device);
 	shaders[static_cast<int>(ModelShaderID::ToonPBR)] = std::make_shared<ToonPBRShader>(device);
 	shaders[static_cast<int>(ModelShaderID::ShadowCaster)] = std::make_shared<ShadowCasterShader>(device);
 
-	// ƒfƒJ[ƒ‹ƒVƒF[ƒ_[‚Ì¶¬
+	// ãƒ‡ã‚«ãƒ¼ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ç”Ÿæˆ
 	decalShader = std::make_shared<DecalShader>(device);
 	lightingShader = std::make_shared<LightingShader>(device);
 
 
-	// PS—p
+	// PSç”¨
 	D3D11_BUFFER_DESC desc = {};
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.ByteWidth = sizeof(GBufferDecalConstants); // decalInverseWorld‚ª“ü‚é\‘¢‘Ì
+	desc.ByteWidth = sizeof(GBufferDecalConstants); // decalInverseWorldãŒå…¥ã‚‹æ§‹é€ ä½“
 	device->CreateBuffer(&desc, nullptr, &decalConstantBuffer);
 
 	CreateDefaultTextures(device);
@@ -175,7 +175,7 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 			}
 			else if (toonJson_.contains("shadeFeather"))
 			{
-				// ‰ß‹‚ÌŒÃ‚¢ƒZ[ƒuƒf[ƒ^i’Pˆê‚Ì”’lj‚¾‚Á‚½ê‡‚ÍA‚·‚×‚Ä‚Ì’iŠK‚Éˆê—¥‚Å“K—p‚µ”j’]‚ğ–h‚®
+				// éå»ã®å¤ã„ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ï¼ˆå˜ä¸€ã®æ•°å€¤ï¼‰ã ã£ãŸå ´åˆã¯ã€ã™ã¹ã¦ã®æ®µéšã«ä¸€å¾‹ã§é©ç”¨ã—ç ´ç¶»ã‚’é˜²ã
 				//const float oldFeather_ = toonJson_["shadeFeather"].get<float>();
 				//shadeFeathers_ = { oldFeather_, oldFeather_, oldFeather_, oldFeather_ };
 			}
@@ -213,7 +213,7 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 			}
 			else if (toonPbrJson_.contains("shadeFeather"))
 			{
-				//// ‰ß‹‚ÌŒÃ‚¢ƒZ[ƒuƒf[ƒ^i’Pˆê‚Ì”’lj‚¾‚Á‚½ê‡‚ÍA‚·‚×‚Ä‚Ì’iŠK‚Éˆê—¥‚Å“K—p‚µ”j’]‚ğ–h‚®
+				//// éå»ã®å¤ã„ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ï¼ˆå˜ä¸€ã®æ•°å€¤ï¼‰ã ã£ãŸå ´åˆã¯ã€ã™ã¹ã¦ã®æ®µéšã«ä¸€å¾‹ã§é©ç”¨ã—ç ´ç¶»ã‚’é˜²ã
 				//const float oldFeather_ = toonPbrJson_["shadeFeather"].get<float>();
 				//shadeFeathers_ = { oldFeather_, oldFeather_, oldFeather_, oldFeather_ };
 			}
@@ -342,11 +342,11 @@ void ModelRenderSystem::OutLineSettingGui()
 	ImGui::ColorEdit4("OutLineColor", &outlineColor.x);
 }
 
-//•`‰æ“o˜^
+//æç”»ç™»éŒ²
 //---
-// •`‰æ—\’è‚Ìƒ‚ƒfƒ‹‚ğ•`‰æƒLƒ…[‚É“o˜^‚·‚é
-// shaderId g—p‚·‚éƒVƒF[ƒ_[ID
-// model •`‰æ‘ÎÛ‚Ìƒ‚ƒfƒ‹ƒRƒ“ƒ|[ƒlƒ“ƒg
+// æç”»äºˆå®šã®ãƒ¢ãƒ‡ãƒ«ã‚’æç”»ã‚­ãƒ¥ãƒ¼ã«ç™»éŒ²ã™ã‚‹
+// shaderId ä½¿ç”¨ã™ã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ID
+// model æç”»å¯¾è±¡ã®ãƒ¢ãƒ‡ãƒ«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
 //---
 void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model)
 {
@@ -357,17 +357,17 @@ void ModelRenderSystem::PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfM
 	drawInfo.materialOverlay = owner_ ? owner_->GetComponent<MaterialOverlayComponent>() : nullptr;
 }
 
-// •`‰æÀs
+// æç”»å®Ÿè¡Œ
 //---
-// “o˜^‚³‚ê‚½ƒ‚ƒfƒ‹‚ğ‘S‚Ä•`‰æ‚·‚éi•s“§–¾ ¨ ”¼“§–¾‚Ì‡‚É•`‰æj
-// rc •`‰æƒRƒ“ƒeƒLƒXƒgiƒJƒƒ‰, ƒ‰ƒCƒg, ƒXƒe[ƒg‚ğŠÜ‚Şj
+// ç™»éŒ²ã•ã‚ŒãŸãƒ¢ãƒ‡ãƒ«ã‚’å…¨ã¦æç”»ã™ã‚‹ï¼ˆä¸é€æ˜ â†’ åŠé€æ˜ã®é †ã«æç”»ï¼‰
+// rc æç”»ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆï¼ˆã‚«ãƒ¡ãƒ©, ãƒ©ã‚¤ãƒˆ, ã‚¹ãƒ†ãƒ¼ãƒˆã‚’å«ã‚€ï¼‰
 //---
 void ModelRenderSystem::RenderAll(const RenderContext& rc)
 {
 	BS_PROFILE_SCOPE("Render::Model");
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒV[ƒ“—p’è”ƒoƒbƒtƒ@XV
+	// ã‚·ãƒ¼ãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 	{
 		static LightManager defaultLightManager;
 		const LightManager* lightManager = rc.lights ? rc.lights : &defaultLightManager;
@@ -378,13 +378,13 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		DirectX::XMMATRIX VP = V * P;
 
 		DirectX::XMStoreFloat4x4(&cbScene.viewProjection, VP);
-		// ƒfƒJ[ƒ‹À•W•œŒ³—p‚Ì‹ts—ñ‚ğŒvZ
+		// ãƒ‡ã‚«ãƒ¼ãƒ«åº§æ¨™å¾©å…ƒç”¨ã®é€†è¡Œåˆ—ã‚’è¨ˆç®—
 		DirectX::XMStoreFloat4x4(&cbScene.invViewProjection, DirectX::XMMatrixInverse(nullptr, VP));
 
-		const auto& directionalLights = lightManager->GetAllDirectionalLights(); // •¡”•Û‚µ‚Ä‚¢‚é‚Æ‰¼’è
-		DirectionalLight strongestLight = lightManager->GetDirectionalLight();   // ƒfƒtƒHƒ‹ƒg‚Ì1‚Â
+		const auto& directionalLights = lightManager->GetAllDirectionalLights(); // è¤‡æ•°ä¿æŒã—ã¦ã„ã‚‹ã¨ä»®å®š
+		DirectionalLight strongestLight = lightManager->GetDirectionalLight();   // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®1ã¤
 
-		// •¡”‚ ‚éê‡‚ÍA‚»‚Ì’†‚Å‹­“x‚ªÅ‘å‚Ì‚à‚Ì‚ğ’T‚µo‚·
+		// è¤‡æ•°ã‚ã‚‹å ´åˆã¯ã€ãã®ä¸­ã§å¼·åº¦ãŒæœ€å¤§ã®ã‚‚ã®ã‚’æ¢ã—å‡ºã™
 		for (const auto& light : directionalLights)
 		{
 			if (light.intensity > strongestLight.intensity)
@@ -393,7 +393,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			}
 		}
 
-		// ‚±‚±‚Å‘I‚Î‚ê‚½Å‹­‚ÌŒõ‚ğƒoƒbƒtƒ@‚ÉƒZƒbƒg‚·‚é
+		// ã“ã“ã§é¸ã°ã‚ŒãŸæœ€å¼·ã®å…‰ã‚’ãƒãƒƒãƒ•ã‚¡ã«ã‚»ãƒƒãƒˆã™ã‚‹
 		cbScene.lightDirection = { strongestLight.direction.x, strongestLight.direction.y, strongestLight.direction.z, strongestLight.intensity };
 		cbScene.lightColor = { strongestLight.color.x, strongestLight.color.y, strongestLight.color.z, 0.0f };
 
@@ -407,11 +407,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		const auto& pointLights = lightManager->GetPointLights();
 		const auto& spotLights = lightManager->GetSpotLights();
 
-		// StructuredBuffer ‚ğXV
+		// StructuredBuffer ã‚’æ›´æ–°
 		UpdatePointLightBuffer(dc, pointLights);
 		UpdateSpotLightBuffer(dc, spotLights);
-		// “_ŒõŒ¹‚Ì”‚ğƒZƒbƒg (HLSL‚Ìƒ‹[ƒv‰ñ”‚Ég—p)
-		// CbScene\‘¢‘Ì‚É int numPointLights; ‚ğ’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢
+		// ç‚¹å…‰æºã®æ•°ã‚’ã‚»ãƒƒãƒˆ (HLSLã®ãƒ«ãƒ¼ãƒ—å›æ•°ã«ä½¿ç”¨)
+		// CbSceneæ§‹é€ ä½“ã« int numPointLights; ã‚’è¿½åŠ ã—ã¦ãã ã•ã„
 		cbScene.numPointLights = (int)pointLights.size();
 		cbScene.numSpotLights = (int)spotLights.size();
 
@@ -422,7 +422,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		float nearZ = rc.camera->GetNear();
 		float farZ = rc.camera->GetFar();
 
-		// ‚¨è–{‚Ì convert_projection_depth_to_linear_depth ‚É‘Î‰‚·‚éŒvZ
+		// ãŠæ‰‹æœ¬ã® convert_projection_depth_to_linear_depth ã«å¯¾å¿œã™ã‚‹è¨ˆç®—
 		cbScene.zBufferParameteres.x = (nearZ - farZ) / (farZ * nearZ);
 		cbScene.zBufferParameteres.y = 1.0f / nearZ;
 
@@ -430,19 +430,19 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	}
 
 
-	// šd—v: StructuredBuffer (“_ŒõŒ¹) ‚ğƒŒƒWƒXƒ^ t5 ‚ÉƒZƒbƒg
+	// â˜…é‡è¦: StructuredBuffer (ç‚¹å…‰æº) ã‚’ãƒ¬ã‚¸ã‚¹ã‚¿ t5 ã«ã‚»ãƒƒãƒˆ
 	if (lightSRV)
 	{
 		dc->PSSetShaderResources(5, 1, lightSRV.GetAddressOf());
 	}
-	// šd—v: StructuredBuffer (ƒXƒ|ƒbƒgŒõŒ¹) ‚ğƒŒƒWƒXƒ^ t6 ‚ÉƒZƒbƒg
+	// â˜…é‡è¦: StructuredBuffer (ã‚¹ãƒãƒƒãƒˆå…‰æº) ã‚’ãƒ¬ã‚¸ã‚¹ã‚¿ t6 ã«ã‚»ãƒƒãƒˆ
 	if (spotLightSRV)
 	{
 		dc->PSSetShaderResources(6, 1, spotLightSRV.GetAddressOf());
 	}
 
 
-	// ’è”ƒoƒbƒtƒ@İ’è
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®š
 	ID3D11Buffer* vsConstantBuffers[] =
 	{
 		skeletonConstantBuffer.Get(),
@@ -477,7 +477,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		dc->PSSetShaderResources(13, CascadeShadowMap::CascadeCount, shadowSRVs);
 	}
 
-	// ƒTƒ“ƒvƒ‰ƒXƒe[ƒgİ’è
+	// ã‚µãƒ³ãƒ—ãƒ©ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	ID3D11SamplerState* samplerStates[] =
 	{
 		rc.renderState->GetSamplerState(SamplerState::LinearWrap)
@@ -486,21 +486,21 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	ID3D11SamplerState* shadowSampler = rc.renderState->GetSamplerState(SamplerState::LinearBorder);
 	dc->PSSetSamplers(1, 1, &shadowSampler);
 
-	// ƒŒƒ“ƒ_[ƒXƒe[ƒgİ’è
+	// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
-	// ƒƒbƒVƒ…•`‰æŠÖ”
+	// ãƒ¡ãƒƒã‚·ãƒ¥æç”»é–¢æ•°
 	auto drawMesh = [&](const GltfModelCommponennt::Mesh& mesh, ModelShader* shader)
 		{
-			// ’¸“_ƒoƒbƒtƒ@İ’è
+			// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡è¨­å®š
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
 			UINT offset = 0;
 			dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
 			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			// ƒXƒPƒ‹ƒgƒ“—p’è”ƒoƒbƒtƒ@XV
+			// ã‚¹ã‚±ãƒ«ãƒˆãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 			CbSkeleton cbSkeleton{};
 			if (mesh.bones.size() > 0)
 			{
@@ -519,7 +519,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			}
 			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
-			// XV
+			// æ›´æ–°
 			shader->Update(rc, mesh);
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
@@ -528,7 +528,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				: SamplerState::LinearWrap);
 			dc->PSSetSamplers(0, 1, &materialSampler_);
 
-			// •`‰æ
+			// æç”»
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 		};
 
@@ -735,28 +735,28 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	}
 
 
-	// ƒuƒŒƒ“ƒhƒXƒe[ƒgİ’è
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
-	// •s“§–¾•`‰æˆ—
+	// ä¸é€æ˜æç”»å‡¦ç†
 	for (DrawInfo& drawInfo : drawInfos)
 	{
 		const auto& meshes_ = drawInfo.model->GetMeshes();
 		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 		{
 			const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
-			// ƒ}ƒeƒŠƒAƒ‹‚©‚çƒVƒF[ƒ_[ID‚ğæ“¾
+			// ãƒãƒ†ãƒªã‚¢ãƒ«ã‹ã‚‰ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼IDã‚’å–å¾—
 			ModelShaderID currentShaderId = mesh.material->shaderId;
 			ModelShader* shader = shaders[static_cast<int>(currentShaderId)].get();
 
-			// ”¼“§–¾ƒƒbƒVƒ…“o˜^
+			// åŠé€æ˜ãƒ¡ãƒƒã‚·ãƒ¥ç™»éŒ²
 			if (mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend ||
 				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f))
 			{
 				TransparencyDrawInfo& transparencyDrawInfo = transparencyDrawInfos.emplace_back();
 				transparencyDrawInfo.shaderId = currentShaderId;
 				transparencyDrawInfo.mesh = &mesh;
-				// ƒJƒƒ‰‚Æ‚Ì‹——£‚ğZo
+				// ã‚«ãƒ¡ãƒ©ã¨ã®è·é›¢ã‚’ç®—å‡º
 				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
 					mesh.node->worldTransform._41,
 					mesh.node->worldTransform._42,
@@ -853,18 +853,18 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	drawInfos.clear();
 
 
-	// š ƒfƒJ[ƒ‹•`‰æÀs
-	// RenderDecals “à‚Å‚Í copyDepthStencilSRV (ƒRƒs[‚³‚ê‚½•û) ‚ğg‚¤‚±‚ÆI
+	// â˜… ãƒ‡ã‚«ãƒ¼ãƒ«æç”»å®Ÿè¡Œ
+	// RenderDecals å†…ã§ã¯ copyDepthStencilSRV (ã‚³ãƒ”ãƒ¼ã•ã‚ŒãŸæ–¹) ã‚’ä½¿ã†ã“ã¨ï¼
 	RenderDecals(rc);
 
-	// ƒJƒƒ‰‚©‚ç‰“‚¢‡‚Éƒ\[ƒg
+	// ã‚«ãƒ¡ãƒ©ã‹ã‚‰é ã„é †ã«ã‚½ãƒ¼ãƒˆ
 	std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
 		[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
 		{
 			return lhs.distance > rhs.distance;
 		});
 
-	// ”¼“§–¾•`‰æˆ—
+	// åŠé€æ˜æç”»å‡¦ç†
 	for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
 	{
 		ModelShader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
@@ -877,7 +877,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	}
 	transparencyDrawInfos.clear();
 
-	// ’è”ƒoƒbƒtƒ@İ’è‰ğœ
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®šè§£é™¤
 	for (ID3D11Buffer*& vsConstantBuffer : vsConstantBuffers) { vsConstantBuffer = nullptr; }
 	for (ID3D11Buffer*& psConstantBuffer : psConstantBuffers) { psConstantBuffer = nullptr; }
 	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
@@ -886,7 +886,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 
 
-	// ƒTƒ“ƒvƒ‰ƒXƒe[ƒgİ’è‰ğœ
+	// ã‚µãƒ³ãƒ—ãƒ©ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®šè§£é™¤
 	for (ID3D11SamplerState*& samplerState : samplerStates) { samplerState = nullptr; }
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 	ID3D11SamplerState* nullSampler = nullptr;
@@ -905,7 +905,7 @@ void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const st
 	ID3D11Device* device = nullptr;
 	dc->GetDevice(&device);
 
-	// ƒoƒbƒtƒ@‚ª–¢ì¬A‚Ü‚½‚ÍƒTƒCƒY‚ª•s‘«‚µ‚Ä‚¢‚éê‡‚Éì‚è’¼‚·
+	// ãƒãƒƒãƒ•ã‚¡ãŒæœªä½œæˆã€ã¾ãŸã¯ã‚µã‚¤ã‚ºãŒä¸è¶³ã—ã¦ã„ã‚‹å ´åˆã«ä½œã‚Šç›´ã™
 	if (!lightStructuredBuffer || numLights > currentLightBufferSize)
 	{
 		lightStructuredBuffer.Reset();
@@ -921,7 +921,7 @@ void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const st
 		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		desc.StructureByteStride = sizeof(PointLightData);
 
-		//‚±‚±‚ÅDevice‚ª‚³‚µ‚Ä‚¢‚éƒƒ‚ƒŠ‚ÌêŠ‚ª‚¨‚©‚µ‚¢‚Æ‚¢‚¤ƒGƒ‰[‚ª”­¶‚µ‚½(¡‚Ì‚Æ‚±‚ë1‰ñ‚¾‚¯)
+		//ã“ã“ã§DeviceãŒã•ã—ã¦ã„ã‚‹ãƒ¡ãƒ¢ãƒªã®å ´æ‰€ãŒãŠã‹ã—ã„ã¨ã„ã†ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸ(ä»Šã®ã¨ã“ã‚1å›ã ã‘)
 		device->CreateBuffer(&desc, nullptr, lightStructuredBuffer.GetAddressOf());
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -932,7 +932,7 @@ void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const st
 		device->CreateShaderResourceView(lightStructuredBuffer.Get(), &srvDesc, lightSRV.GetAddressOf());
 	}
 
-	// ƒf[ƒ^‚Ì‘‚«‚İ
+	// ãƒ‡ãƒ¼ã‚¿ã®æ›¸ãè¾¼ã¿
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	if (SUCCEEDED(dc->Map(lightStructuredBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
 	{
@@ -948,9 +948,9 @@ void ModelRenderSystem::UpdatePointLightBuffer(ID3D11DeviceContext* dc, const st
 		dc->Unmap(lightStructuredBuffer.Get(), 0);
 	}
 
-	// --- ‚±‚±‚Å•K‚¸‰ğ•ú‚·‚é ---
+	// --- ã“ã“ã§å¿…ãšè§£æ”¾ã™ã‚‹ ---
 	if (device) {
-		device->Release(); // ƒJƒEƒ“ƒg -1
+		device->Release(); // ã‚«ã‚¦ãƒ³ãƒˆ -1
 	}
 }
 
@@ -970,7 +970,7 @@ void ModelRenderSystem::UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std
 		currentSpotLightBufferSize = numLights;
 
 		D3D11_BUFFER_DESC desc = {};
-		desc.ByteWidth = sizeof(SpotLight) * currentSpotLightBufferSize; // SpotLight\‘¢‘Ì‚ğg—p
+		desc.ByteWidth = sizeof(SpotLight) * currentSpotLightBufferSize; // SpotLightæ§‹é€ ä½“ã‚’ä½¿ç”¨
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -987,7 +987,7 @@ void ModelRenderSystem::UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std
 		device->CreateShaderResourceView(spotLightStructuredBuffer.Get(), &srvDesc, spotLightSRV.GetAddressOf());
 	}
 
-	// ƒf[ƒ^‚Ì‘‚«‚İ
+	// ãƒ‡ãƒ¼ã‚¿ã®æ›¸ãè¾¼ã¿
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	if (SUCCEEDED(dc->Map(spotLightStructuredBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
 	{
@@ -1001,28 +1001,28 @@ void ModelRenderSystem::UpdateSpotLightBuffer(ID3D11DeviceContext* dc, const std
 			dst->color = src.color;
 			dst->innerAngle = src.innerAngle;
 			dst->outerAngle = src.outerAngle;
-			// padding ‚ÍG‚ç‚È‚­‚ÄOKi‚ ‚é‚¢‚Íƒ[ƒ‰Šú‰»j
+			// padding ã¯è§¦ã‚‰ãªãã¦OKï¼ˆã‚ã‚‹ã„ã¯ã‚¼ãƒ­åˆæœŸåŒ–ï¼‰
 			dst++;
 		}
 		dc->Unmap(spotLightStructuredBuffer.Get(), 0);
 	}
 
-	// --- ‚±‚±‚Å•K‚¸‰ğ•ú‚·‚é ---
+	// --- ã“ã“ã§å¿…ãšè§£æ”¾ã™ã‚‹ ---
 	if (device) {
-		device->Release(); // ƒJƒEƒ“ƒg -1
+		device->Release(); // ã‚«ã‚¦ãƒ³ãƒˆ -1
 	}
 }
 
 void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 {
-	// •K—v‚ÈƒŠƒ\[ƒX‚ª‘µ‚Á‚Ä‚¢‚é‚©ƒ`ƒFƒbƒN
+	// å¿…è¦ãªãƒªã‚½ãƒ¼ã‚¹ãŒæƒã£ã¦ã„ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
 	if (!rc.decal || !rc.shapeSystem || !rc.depthSRV || !rc.deviceContext || !rc.renderState) return;
 	if (rc.decal->GetDecals().empty()) return;
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	auto& gdm = GraphicsDeviceManager::Instance();
 
-	// --- ‡@ [“xƒRƒs[‚Ì‹V® (ƒ^[ƒQƒbƒg‚ğˆê‰ğœ) ---
+	// --- â‘  æ·±åº¦ã‚³ãƒ”ãƒ¼ã®å„€å¼ (ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’ä¸€æ™‚è§£é™¤) ---
 	dc->OMSetRenderTargets(0, nullptr, nullptr);
 	dc->CopyResource(gdm.copyDepthStencilTexture.Get(), gdm.depthStencilTexture.Get());
 
@@ -1032,34 +1032,34 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 
 	if (gdm.copyNormalTexture) {
 		Microsoft::WRL::ComPtr<ID3D11Resource> resNormal;
-		gdm.GetNormalSRV()->GetResource(&resNormal); // GetNormalSRV() ‚Í sceneNormalSRV ‚ğ•Ô‚·‘z’è
+		gdm.GetNormalSRV()->GetResource(&resNormal); // GetNormalSRV() ã¯ sceneNormalSRV ã‚’è¿”ã™æƒ³å®š
 		dc->CopyResource(gdm.copyNormalTexture.Get(), resNormal.Get());
 	}
 
-	// --- ‡A yd—vzŒ³‚Ìƒ^[ƒQƒbƒgİ’è‚ğŒÄ‚Ñ’¼‚µ‚Ä•œŒ³‚·‚é ---
-	// ‚±‚ê‚Å sceneRTV ‚Æ depthStencilView ‚ª³‚µ‚­ƒoƒCƒ“ƒh‚³‚êAƒfƒvƒX‚ª•œŠˆ‚µ‚Ü‚·
+	// --- â‘¡ ã€é‡è¦ã€‘å…ƒã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆè¨­å®šã‚’å‘¼ã³ç›´ã—ã¦å¾©å…ƒã™ã‚‹ ---
+	// ã“ã‚Œã§ sceneRTV ã¨ depthStencilView ãŒæ­£ã—ããƒã‚¤ãƒ³ãƒ‰ã•ã‚Œã€ãƒ‡ãƒ—ã‚¹ãŒå¾©æ´»ã—ã¾ã™
 	gdm.SetSceneRenderTarget();
 
-	// t0 ‚Éu”wŒi‚ÌƒRƒs[v‚ğ“n‚·
+	// t0 ã«ã€ŒèƒŒæ™¯ã®ã‚³ãƒ”ãƒ¼ã€ã‚’æ¸¡ã™
 	ID3D11ShaderResourceView* sceneSRV = gdm.copySceneColorSRV.Get();
 	dc->PSSetShaderResources(0, 1, &sceneSRV);
 
-	// --- ‡B ƒfƒJ[ƒ‹“Š‰e‚Ìİ’è ---
-	// t2: š–@ü‚ğƒZƒbƒg
+	// --- â‘¢ ãƒ‡ã‚«ãƒ¼ãƒ«æŠ•å½±ã®è¨­å®š ---
+	// t2: â˜…æ³•ç·šã‚’ã‚»ãƒƒãƒˆ
 	ID3D11ShaderResourceView* normalSRV = gdm.copyNormalSRV.Get();
 	dc->PSSetShaderResources(2, 1, &normalSRV);
 
 
-	// ƒRƒs[‚µ‚½[“x(t4)‚ğƒZƒbƒg
+	// ã‚³ãƒ”ãƒ¼ã—ãŸæ·±åº¦(t4)ã‚’ã‚»ãƒƒãƒˆ
 	ID3D11ShaderResourceView* depthSRV = gdm.copyDepthStencilSRV.Get();
 	dc->PSSetShaderResources(4, 1, &depthSRV);
 
-	// ŠeíƒXƒe[ƒg (ƒfƒJ[ƒ‹’†‚Í[“xƒeƒXƒg‚ğ‚µ‚È‚¢)
+	// å„ç¨®ã‚¹ãƒ†ãƒ¼ãƒˆ (ãƒ‡ã‚«ãƒ¼ãƒ«ä¸­ã¯æ·±åº¦ãƒ†ã‚¹ãƒˆã‚’ã—ãªã„)
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 	ID3D11SamplerState* decalSampler = rc.renderState->GetSamplerState(SamplerState::LinearBorder);
 	dc->PSSetSamplers(10, 1, &decalSampler);
 
-	// --- ‡C •`‰æƒ‹[ƒv ---
+	// --- â‘£ æç”»ãƒ«ãƒ¼ãƒ— ---
 	for (const auto& decal : rc.decal->GetDecals())
 	{
 		DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&decal.worldMatrix);
@@ -1081,17 +1081,17 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 		dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
-		// --- 1‰ñ–ÚF— –Ê•`‰æ (ƒXƒeƒ“ƒVƒ‹ì¬) ---
-		// F‚ğ‘‚«‚Ü‚¸AƒXƒeƒ“ƒVƒ‹‚¾‚¯‚ğXV‚·‚é‚½‚ß‚É BlendState::None ‚ğg—p
+		// --- 1å›ç›®ï¼šè£é¢æç”» (ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ä½œæˆ) ---
+		// è‰²ã‚’æ›¸ãè¾¼ã¾ãšã€ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã ã‘ã‚’æ›´æ–°ã™ã‚‹ãŸã‚ã« BlendState::None ã‚’ä½¿ç”¨
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
 		decalShader->usePixelShader = false;
 		decalShader->Begin(rc);
 		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::Decal), 1); // QÆ’l1‚Å“h‚é
+		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::Decal), 1); // å‚ç…§å€¤1ã§å¡—ã‚‹
 		dc->Draw(rc.shapeSystem->GetBoxVertexCount(), 0);
 
-		// --- 2‰ñ–ÚF•\–Ê•`‰æ (ÀÛ‚ÌƒeƒNƒXƒ`ƒƒ•`‰æ) ---
-		// šƒeƒNƒXƒ`ƒƒ‚ÌƒAƒ‹ƒtƒ@‚ğ—LŒø‚É‚·‚é‚½‚ß Transparency (’Êí‡¬) ‚É•ÏX
+		// --- 2å›ç›®ï¼šè¡¨é¢æç”» (å®Ÿéš›ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£æç”») ---
+		// â˜…ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚¢ãƒ«ãƒ•ã‚¡ã‚’æœ‰åŠ¹ã«ã™ã‚‹ãŸã‚ Transparency (é€šå¸¸åˆæˆ) ã«å¤‰æ›´
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
 		decalShader->usePixelShader = true;
 		decalShader->Begin(rc);
@@ -1102,30 +1102,30 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 	}
 	decalShader->End(rc);
 
-	// --- ‡D yÅd—vzƒNƒŠ[ƒ“ƒAƒbƒv ---
-	// ‚±‚±‚Åt4([“xSRV)‚ğNULL‚É‚µ‚È‚¢‚ÆAŸ‚Ì•`‰æiƒVƒFƒCƒv“™j‚ÅDSV‚ªƒoƒCƒ“ƒhƒGƒ‰[‚ğ‹N‚±‚µ‚ÄÁ‚¦‚Ü‚·
+	// --- â‘¤ ã€æœ€é‡è¦ã€‘ã‚¯ãƒªãƒ¼ãƒ³ã‚¢ãƒƒãƒ— ---
+	// ã“ã“ã§t4(æ·±åº¦SRV)ã‚’NULLã«ã—ãªã„ã¨ã€æ¬¡ã®æç”»ï¼ˆã‚·ã‚§ã‚¤ãƒ—ç­‰ï¼‰ã§DSVãŒãƒã‚¤ãƒ³ãƒ‰ã‚¨ãƒ©ãƒ¼ã‚’èµ·ã“ã—ã¦æ¶ˆãˆã¾ã™
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	ID3D11SamplerState* nullSampler = nullptr;
-	dc->PSSetShaderResources(0, 1, &nullSRV); // š’Ç‰Á
-	dc->PSSetShaderResources(2, 1, &nullSRV); // š’Ç‰Á
+	dc->PSSetShaderResources(0, 1, &nullSRV); // â˜…è¿½åŠ 
+	dc->PSSetShaderResources(2, 1, &nullSRV); // â˜…è¿½åŠ 
 	dc->PSSetShaderResources(4, 1, &nullSRV);
 	dc->PSSetShaderResources(10, 1, &nullSRV);
-	dc->PSSetSamplers(10, 1, &nullSampler); // ƒTƒ“ƒvƒ‰[‚à‰ğœ
+	dc->PSSetSamplers(10, 1, &nullSampler); // ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚‚è§£é™¤
 
-	// ‡A ‚±‚ÌuƒXƒƒbƒg‚ª‹ó‚É‚È‚Á‚½uŠÔv‚ÉA‚à‚¤ˆê“xƒ^[ƒQƒbƒg‚ğƒZƒbƒg‚µ’¼‚·
-	// ‚±‚ê‚É‚æ‚èAGPU‚Íu‚à‚¤“Ç‚İæ‚è‹£‡‚Í‚È‚¢‚©‚çAƒfƒvƒXƒoƒbƒtƒ@‚ğ‘‚«‚İ—p‚Ég‚¦‚é‚¼Iv‚Æ”»’f‚µ‚Ü‚·
+	// â‘¡ ã“ã®ã€Œã‚¹ãƒ­ãƒƒãƒˆãŒç©ºã«ãªã£ãŸç¬é–“ã€ã«ã€ã‚‚ã†ä¸€åº¦ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’ã‚»ãƒƒãƒˆã—ç›´ã™
+	// ã“ã‚Œã«ã‚ˆã‚Šã€GPUã¯ã€Œã‚‚ã†èª­ã¿å–ã‚Šç«¶åˆã¯ãªã„ã‹ã‚‰ã€ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’æ›¸ãè¾¼ã¿ç”¨ã«ä½¿ãˆã‚‹ãï¼ã€ã¨åˆ¤æ–­ã—ã¾ã™
 	gdm.SetSceneRenderTarget();
 
-	// ‡B ƒXƒe[ƒg‚àƒVƒFƒCƒv—p‚Éˆê’U–ß‚µ‚Ä‚¨‚­
+	// â‘¢ ã‚¹ãƒ†ãƒ¼ãƒˆã‚‚ã‚·ã‚§ã‚¤ãƒ—ç”¨ã«ä¸€æ—¦æˆ»ã—ã¦ãŠã
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-	// ƒuƒŒƒ“ƒhƒXƒe[ƒgİ’è
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 }
 
 void ModelRenderSystem::CreateDefaultTextures(ID3D11Device* device)
 {
-	// 1x1‚Ì”’‚¢ƒsƒNƒZƒ‹ƒf[ƒ^
+	// 1x1ã®ç™½ã„ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿
 	uint32_t white = 0xFFFFFFFF;
 	D3D11_SUBRESOURCE_DATA data{};
 	data.pSysMem = &white;

@@ -16,7 +16,7 @@ void SpriteRenderSystem::Finalize()
 
 void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* context_)
 {
-    // --- ’¸“_ƒŒƒCƒAƒEƒg’è‹`iSpriteVertex \‘¢‚É‡‚í‚¹‚éj ---
+    // --- é ‚ç‚¹ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆå®šç¾©ï¼ˆSpriteVertex æ§‹é€ ã«åˆã‚ã›ã‚‹ï¼‰ ---
     D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
     {
         // SemanticName, SemanticIndex, Format, Slot, AlignedByteOffset, InputSlotClass, InstanceDataStepRate
@@ -24,17 +24,17 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
-    UINT numElements = _countof(inputElementDesc); // ‚Ü‚½‚Í ARRAYSIZE(inputElementDesc)
+    UINT numElements = _countof(inputElementDesc); // ã¾ãŸã¯ ARRAYSIZE(inputElementDesc)
 
-    // --- ƒVƒF[ƒ_ì¬iCreateVSFromCSO / CreatePSFromCSO ‚ğƒ‰ƒbƒp[‚Æ‚µ‚Äg—pj ---
-    // ‚±‚±‚Å‚Í shaders ƒ}ƒbƒv‚É SpriteShader ‚ğŠi”[‚·‚é‘z’è
+    // --- ã‚·ã‚§ãƒ¼ãƒ€ä½œæˆï¼ˆCreateVSFromCSO / CreatePSFromCSO ã‚’ãƒ©ãƒƒãƒ‘ãƒ¼ã¨ã—ã¦ä½¿ç”¨ï¼‰ ---
+    // ã“ã“ã§ã¯ shaders ãƒãƒƒãƒ—ã« SpriteShader ã‚’æ ¼ç´ã™ã‚‹æƒ³å®š
     CreateShader(device_, SpriteShaderID::Default, "Shader/sprite_VS.cso", "Shader/sprite_PS.cso", inputElementDesc, numElements);
     //CreateShader(device_, SpriteShaderID::Dissolve, "dissolve_VS.cso", "dissolve_PS.cso", inputElementDesc, numElements);
 
-    // --- ’è”ƒoƒbƒtƒ@‚âƒTƒ“ƒvƒ‰ì¬i—áj ---
+    // --- å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚„ã‚µãƒ³ãƒ—ãƒ©ä½œæˆï¼ˆä¾‹ï¼‰ ---
     D3D11_BUFFER_DESC cbd{};
     cbd.Usage = D3D11_USAGE_DEFAULT;
-    cbd.ByteWidth = sizeof(ConstantBuffer); // ’è‹`‚µ‚Ä‚¨‚­‚±‚Æ
+    cbd.ByteWidth = sizeof(ConstantBuffer); // å®šç¾©ã—ã¦ãŠãã“ã¨
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     device_->CreateBuffer(&cbd, nullptr, constantBuffer.GetAddressOf());
 
@@ -43,7 +43,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     device_->CreateSamplerState(&sd, samplerState.GetAddressOf());
 
-    // --- ’¸“_ƒoƒbƒtƒ@ì¬ ---
+    // --- é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ä½œæˆ ---
     SpriteVertex vertices[4] =
     {
         { {-0.5f, -0.5f, 0.f}, {1,1,1,1}, {0,1} },
@@ -53,10 +53,10 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     };
 
     D3D11_BUFFER_DESC bd{};
-    bd.Usage = D3D11_USAGE_DYNAMIC;             // © “®“I
+    bd.Usage = D3D11_USAGE_DYNAMIC;             // â† å‹•çš„
     bd.ByteWidth = sizeof(vertices);
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // © ‘‚«‚İ‰Â”\
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // â† æ›¸ãè¾¼ã¿å¯èƒ½
     bd.MiscFlags = 0;
     bd.StructureByteStride = sizeof(SpriteVertex);
 
@@ -65,7 +65,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
 
     device_->CreateBuffer(&bd, &initData, vertexBuffer.GetAddressOf());
 
-    // --- ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@ì¬ ---
+    // --- ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ä½œæˆ ---
     unsigned short indices[6] = { 0,1,2, 0,2,3 };
     bd.ByteWidth = sizeof(indices);
     bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -76,25 +76,25 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
 
 void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
 {
-    // ƒrƒ…[ƒ|[ƒgæ“¾
+    // ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆå–å¾—
     D3D11_VIEWPORT viewport_{};
     UINT num_viewports_{ 1 };
     context_->RSGetViewports(&num_viewports_, &viewport_);
     float screenWidth_ = viewport_.Width;
     float screenHeight_ = viewport_.Height;
 
-    // ’¸“_ƒoƒbƒtƒ@İ’è
+    // é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡è¨­å®š
     UINT stride_ = sizeof(SpriteVertex);
     UINT offset_ = 0;
     context_->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride_, &offset_);
     context_->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
     context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // ƒCƒ“ƒfƒbƒNƒXİ’è
+    // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹è¨­å®š
     context_->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
     context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // --- ŠeƒXƒvƒ‰ƒCƒg•`‰æƒ‹[ƒv ---
+    // --- å„ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆæç”»ãƒ«ãƒ¼ãƒ— ---
     for (auto& info_ : drawList)
     {
         auto sprite_ = info_.sprite;
@@ -106,40 +106,40 @@ void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
             continue;
 
         DirectX::XMFLOAT3 tPos_ = t_->GetWorldPosition();
-        DirectX::XMFLOAT2 dSize_ = sprite_->GetSize(); // •`‰æƒTƒCƒY
+        DirectX::XMFLOAT2 dSize_ = sprite_->GetSize(); // æç”»ã‚µã‚¤ã‚º
 
-        // --- ƒsƒ{ƒbƒg‚É‚æ‚éƒIƒtƒZƒbƒgŒvZ ---
-        // pivotOffset ‚ÍuTransformˆÊ’u‚©‚çŒ©‚½¶ã’¸“_‚Ì‘Š‘ÎˆÊ’uv
+        // --- ãƒ”ãƒœãƒƒãƒˆã«ã‚ˆã‚‹ã‚ªãƒ•ã‚»ãƒƒãƒˆè¨ˆç®— ---
+        // pivotOffset ã¯ã€ŒTransformä½ç½®ã‹ã‚‰è¦‹ãŸå·¦ä¸Šé ‚ç‚¹ã®ç›¸å¯¾ä½ç½®ã€
         DirectX::XMFLOAT2 pivotOffset = { 0.0f, 0.0f };
 
         switch (sprite_->GetPivot())
         {
-        case PosOfsset::TOP_L:   // ¶ãŠî€F‰æ‘œ‚Í‰E‰º‚ÉL‚ª‚é
+        case PosOfsset::TOP_L:   // å·¦ä¸ŠåŸºæº–ï¼šç”»åƒã¯å³ä¸‹ã«åºƒãŒã‚‹
             pivotOffset = { 0.0f, 0.0f };
             break;
-        case PosOfsset::MID:     // ’†‰›Šî€F‰æ‘œ‚Íã‰º¶‰E‹Ï“™‚ÉL‚ª‚é
+        case PosOfsset::MID:     // ä¸­å¤®åŸºæº–ï¼šç”»åƒã¯ä¸Šä¸‹å·¦å³å‡ç­‰ã«åºƒãŒã‚‹
             pivotOffset = { -dSize_.x * 0.5f, -dSize_.y * 0.5f };
             break;
-        case PosOfsset::UNDER_M: // ’†‰›‰ºŠî€F‰æ‘œ‚Íã‚ÉL‚ÑA¶‰E‹Ï“™
+        case PosOfsset::UNDER_M: // ä¸­å¤®ä¸‹åŸºæº–ï¼šç”»åƒã¯ä¸Šã«ä¼¸ã³ã€å·¦å³å‡ç­‰
             pivotOffset = { -dSize_.x * 0.5f, -dSize_.y };
             break;
         }
 
-        // ƒ[ƒJƒ‹À•W‚Å‚Ì4’¸“_iƒsƒ{ƒbƒg‚ğ 0,0 ‚Æ‚µ‚½ˆÊ’uj
-        // pivotOffset ‚ğ‹N“_‚ÉƒTƒCƒY•ªL‚°‚é
+        // ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ã§ã®4é ‚ç‚¹ï¼ˆãƒ”ãƒœãƒƒãƒˆã‚’ 0,0 ã¨ã—ãŸä½ç½®ï¼‰
+        // pivotOffset ã‚’èµ·ç‚¹ã«ã‚µã‚¤ã‚ºåˆ†åºƒã’ã‚‹
         DirectX::XMFLOAT2 positions_[4] =
         {
-            { pivotOffset.x,            pivotOffset.y + dSize_.y }, // ¶‰º
-            { pivotOffset.x,            pivotOffset.y },            // ¶ã
-            { pivotOffset.x + dSize_.x, pivotOffset.y },            // ‰Eã
-            { pivotOffset.x + dSize_.x, pivotOffset.y + dSize_.y }, // ‰E‰º
+            { pivotOffset.x,            pivotOffset.y + dSize_.y }, // å·¦ä¸‹
+            { pivotOffset.x,            pivotOffset.y },            // å·¦ä¸Š
+            { pivotOffset.x + dSize_.x, pivotOffset.y },            // å³ä¸Š
+            { pivotOffset.x + dSize_.x, pivotOffset.y + dSize_.y }, // å³ä¸‹
         };
 
-        // Z‰ñ“]Šp‚ğæ“¾i“x¨ƒ‰ƒWƒAƒ“j
+        // Zå›è»¢è§’ã‚’å–å¾—ï¼ˆåº¦â†’ãƒ©ã‚¸ã‚¢ãƒ³ï¼‰
         float theta_ = DirectX::XMConvertToRadians(t_->GetWorldRotation().z);
         DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationZ(theta_);
 
-        // 4’¸“_‚ğuƒsƒ{ƒbƒg(0,0)v‚ğ’†S‚É‰ñ“]‚³‚¹AÅŒã‚Éƒ[ƒ‹ƒhÀ•W(tPos_)‚ğ‘«‚·
+        // 4é ‚ç‚¹ã‚’ã€Œãƒ”ãƒœãƒƒãƒˆ(0,0)ã€ã‚’ä¸­å¿ƒã«å›è»¢ã•ã›ã€æœ€å¾Œã«ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™(tPos_)ã‚’è¶³ã™
         for (auto& p : positions_)
         {
             DirectX::XMVECTOR pos = DirectX::XMVectorSet(p.x, p.y, 0.0f, 1.0f);
@@ -148,44 +148,44 @@ void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
             DirectX::XMFLOAT3 result;
             DirectX::XMStoreFloat3(&result, pos);
 
-            // ‰ñ“]Œã‚ÌÀ•W + Transform‚Ìƒ[ƒ‹ƒhÀ•W
+            // å›è»¢å¾Œã®åº§æ¨™ + Transformã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™
             p.x = result.x + tPos_.x;
             p.y = result.y + tPos_.y;
         }
 
-        // ƒXƒNƒŠ[ƒ“¨NDC
+        // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³â†’NDC
         for (auto& p : positions_)
         {
             p.x = 2.0f * p.x / screenWidth_ - 1.0f;
             p.y = 1.0f - 2.0f * p.y / screenHeight_;
         }
 
-        // Ø‚è”²‚«”ÍˆÍiƒsƒNƒZƒ‹’PˆÊj
-        DirectX::XMFLOAT2 catPos_ = sprite_->GetCatPos();   // Ø‚è”²‚«ŠJnˆÊ’ui¶ãj
-        DirectX::XMFLOAT2 catSize_ = sprite_->GetCatSize();  // Ø‚è”²‚­”ÍˆÍƒTƒCƒY
+        // åˆ‡ã‚ŠæŠœãç¯„å›²ï¼ˆãƒ”ã‚¯ã‚»ãƒ«å˜ä½ï¼‰
+        DirectX::XMFLOAT2 catPos_ = sprite_->GetCatPos();   // åˆ‡ã‚ŠæŠœãé–‹å§‹ä½ç½®ï¼ˆå·¦ä¸Šï¼‰
+        DirectX::XMFLOAT2 catSize_ = sprite_->GetCatSize();  // åˆ‡ã‚ŠæŠœãç¯„å›²ã‚µã‚¤ã‚º
 
-        // ƒeƒNƒXƒ`ƒƒƒTƒCƒY
+        // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚µã‚¤ã‚º
         DirectX::XMFLOAT2 texSize_ = sprite_->GetTextureSize();
 
-        // --- ƒeƒNƒXƒ`ƒƒÀ•W‚ğZoi01‚É³‹K‰»j ---
-        float u0 = catPos_.x / texSize_.x;             // ¶
-        float v0 = catPos_.y / texSize_.y;             // ã
-        float u1 = (catPos_.x + catSize_.x) / texSize_.x; // ‰E
-        float v1 = (catPos_.y + catSize_.y) / texSize_.y; // ‰º
+        // --- ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚’ç®—å‡ºï¼ˆ01ã«æ­£è¦åŒ–ï¼‰ ---
+        float u0 = catPos_.x / texSize_.x;             // å·¦
+        float v0 = catPos_.y / texSize_.y;             // ä¸Š
+        float u1 = (catPos_.x + catSize_.x) / texSize_.x; // å³
+        float v1 = (catPos_.y + catSize_.y) / texSize_.y; // ä¸‹
 
-        // DirectX‚Í’ÊíƒeƒNƒXƒ`ƒƒ‚ÌŒ´“_‚ª¶ã‚È‚Ì‚ÅA
-        // ã‰º‚Ì”½“]‚ª•K—v‚Èê‡‚Ív0,v1‚ğ“ü‚ê‘Ö‚¦‚éig‚Á‚Ä‚éƒ[ƒ_[‚É‰‚¶‚Ä’²®j
+        // DirectXã¯é€šå¸¸ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®åŸç‚¹ãŒå·¦ä¸Šãªã®ã§ã€
+        // ä¸Šä¸‹ã®åè»¢ãŒå¿…è¦ãªå ´åˆã¯v0,v1ã‚’å…¥ã‚Œæ›¿ãˆã‚‹ï¼ˆä½¿ã£ã¦ã‚‹ãƒ­ãƒ¼ãƒ€ãƒ¼ã«å¿œã˜ã¦èª¿æ•´ï¼‰
 
-        // ’¸“_‚Éİ’è‚·‚éUVÀ•W
+        // é ‚ç‚¹ã«è¨­å®šã™ã‚‹UVåº§æ¨™
         DirectX::XMFLOAT2 texcoords_[4] =
         {
-            { u0, v1 }, // ¶‰º
-            { u0, v0 }, // ¶ã
-            { u1, v0 }, // ‰Eã
-            { u1, v1 }, // ‰E‰º
+            { u0, v1 }, // å·¦ä¸‹
+            { u0, v0 }, // å·¦ä¸Š
+            { u1, v0 }, // å³ä¸Š
+            { u1, v1 }, // å³ä¸‹
         };
 
-        // ’¸“_ƒoƒbƒtƒ@XV
+        // é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡æ›´æ–°
         D3D11_MAPPED_SUBRESOURCE mapped{};
         HRESULT hr = context_->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         if (SUCCEEDED(hr))
@@ -195,24 +195,24 @@ void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
             {
                 v[i].pos = { positions_[i].x, positions_[i].y, tPos_.z };
                 v[i].color = sprite_->GetColor();
-                // --- Ø‚è”²‚«UV“K—p ---
+                // --- åˆ‡ã‚ŠæŠœãUVé©ç”¨ ---
                 v[i].texcoord = texcoords_[i];
             }
             context_->Unmap(vertexBuffer.Get(), 0);
         }
 
-        // ƒeƒNƒXƒ`ƒƒ‚ÆƒTƒ“ƒvƒ‰İ’è
+        // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¨ã‚µãƒ³ãƒ—ãƒ©è¨­å®š
         context_->PSSetShaderResources(0, 1, sprite_->GetTexture().GetAddressOf());
         context_->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
 
-        // ƒVƒF[ƒ_İ’è
+        // ã‚·ã‚§ãƒ¼ãƒ€è¨­å®š
         auto& shader_ = shaders[info_.shaderID];
         context_->IASetInputLayout(shader_.inputLayout.Get());
         context_->VSSetShader(shader_.vertexShader.Get(), nullptr, 0);
         context_->PSSetShader(shader_.pixelShader.Get(), nullptr, 0);
 
-        // --- š2–‡‚ÌOŠpŒ`i6ƒCƒ“ƒfƒbƒNƒXj•`‰æ ---
+        // --- â˜…2æšã®ä¸‰è§’å½¢ï¼ˆ6ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ï¼‰æç”» ---
         context_->DrawIndexed(6, 0, 0);
     }
 
@@ -229,7 +229,7 @@ void SpriteRenderSystem::CreateShader(ID3D11Device* device_,
 {
     SpriteShader shader_;
 
-    // CPUResourceLoader::createVSFromCSO ‚ÌƒVƒOƒlƒ`ƒƒ‚É‡‚í‚¹‚é
+    // CPUResourceLoader::createVSFromCSO ã®ã‚·ã‚°ãƒãƒãƒ£ã«åˆã‚ã›ã‚‹
     HRESULT hr = CPUResourceLoader::CreateVSFromCSO(
         device_,
         vsFile_,
@@ -239,7 +239,7 @@ void SpriteRenderSystem::CreateShader(ID3D11Device* device_,
         numElements_);
     if (FAILED(hr))
     {
-        // ƒGƒ‰[ƒnƒ“ƒhƒŠƒ“ƒOiƒƒO“™j
+        // ã‚¨ãƒ©ãƒ¼ãƒãƒ³ãƒ‰ãƒªãƒ³ã‚°ï¼ˆãƒ­ã‚°ç­‰ï¼‰
         return;
     }
 
@@ -249,7 +249,7 @@ void SpriteRenderSystem::CreateShader(ID3D11Device* device_,
         shader_.pixelShader.GetAddressOf());
     if (FAILED(hr))
     {
-        // ƒGƒ‰[ƒnƒ“ƒhƒŠƒ“ƒOiƒƒO“™j
+        // ã‚¨ãƒ©ãƒ¼ãƒãƒ³ãƒ‰ãƒªãƒ³ã‚°ï¼ˆãƒ­ã‚°ç­‰ï¼‰
         return;
     }
 

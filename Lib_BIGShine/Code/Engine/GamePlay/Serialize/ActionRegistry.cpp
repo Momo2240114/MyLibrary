@@ -13,7 +13,7 @@ void RegisterAllActions()
 {
     auto& reg = ActionRegistry::Instance();
     auto& audio = AudioManager::Instance();
-    //•ª—Ş‚Ì“o˜^
+    //åˆ†é¡ã®ç™»éŒ²
     reg.RegisterAction("Transform", "---", nullptr);
     reg.RegisterAction("FOV", "---", nullptr);
     reg.RegisterAction("PostProcess", "---", nullptr);
@@ -23,33 +23,33 @@ void RegisterAllActions()
     reg.RegisterAction("Scene", "---", nullptr);
     audio.RegisterAudioWorkspaceActions();
 
-    //// ƒ^ƒCƒgƒ‹BGM
+    //// ã‚¿ã‚¤ãƒˆãƒ«BGM
     reg.RegisterAction("Audio", "PlayBGM_Title", [&]() {
         audio.StopBGM();
         audio.PlayBGM(BGM_TITLE);
         });
 
-    // ƒ`ƒ…[ƒgƒŠƒAƒ‹BGM
+    // ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«BGM
     reg.RegisterAction("Audio", "PlayBGM_Tutorial", [&]() {
         audio.StopBGM();
         audio.PlayBGM(BGM_TUTORIAL);
         });
 
-    // BGM‘S’â~
+    // BGMå…¨åœæ­¢
     reg.RegisterAction("Audio", "StopAllBGM", [&]() {
         audio.StopBGM();
         });
 
-    // --- SEÄ¶ƒAƒNƒVƒ‡ƒ“ ---
-    // ƒ^ƒCƒgƒ‹‚Å‚Ìƒ^ƒbƒv‰¹
+    // --- SEå†ç”Ÿã‚¢ã‚¯ã‚·ãƒ§ãƒ³ ---
+    // ã‚¿ã‚¤ãƒˆãƒ«ã§ã®ã‚¿ãƒƒãƒ—éŸ³
     reg.RegisterAction("Audio", "PlaySE_TapStart", [&]() {
         audio.PlaySE(SE_TITLESELECT);
         });
-    // ƒ^ƒCƒgƒ‹‚Å‚Ìƒ^ƒbƒv‰¹
+    // ã‚¿ã‚¤ãƒˆãƒ«ã§ã®ã‚¿ãƒƒãƒ—éŸ³
     reg.RegisterAction("Audio", "PlaySE_TapStartMOVE", [&]() {
         audio.PlaySE(SE_TTILEMOVE);
         });
-    // ƒ^ƒCƒgƒ‹‚Å‚Ìƒ^ƒbƒv‰¹
+    // ã‚¿ã‚¤ãƒˆãƒ«ã§ã®ã‚¿ãƒƒãƒ—éŸ³
     reg.RegisterAction("Audio", "PlaySE_GameOver", [&]() {
         audio.PlaySE(SE_GAMEOVER);
         });
@@ -61,7 +61,7 @@ void RegisterAllActions()
 
     reg.RegisterAction("Scene", "GoSceneGame", []() 
         {
-        // SceneGame ‚ğì‚Á‚ÄA‚»‚Ì‚Ü‚Ü SceneLoading ‚ÉŠ—LŒ ‚ğ“n‚·
+        // SceneGame ã‚’ä½œã£ã¦ã€ãã®ã¾ã¾ SceneLoading ã«æ‰€æœ‰æ¨©ã‚’æ¸¡ã™
         auto next = std::make_unique<SceneGame>();
         SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next)));
         });
@@ -80,10 +80,10 @@ void RegisterAllActions()
 
 void ActionRegistry::RegisterAction(const std::string& category, const std::string& name, ActionFunc func)
 {
-    // ƒJƒeƒSƒŠ‚ª‘¶İ‚µ‚È‚¯‚ê‚Îì‚é
+    // ã‚«ãƒ†ã‚´ãƒªãŒå­˜åœ¨ã—ãªã‘ã‚Œã°ä½œã‚‹
     auto& categoryMap = actions[category];
 
-    // Šù‚É name ‚ª‘¶İ‚·‚é‚È‚ç’Ç‰Á‚µ‚È‚¢
+    // æ—¢ã« name ãŒå­˜åœ¨ã™ã‚‹ãªã‚‰è¿½åŠ ã—ãªã„
     if (categoryMap.find(name) != categoryMap.end())
         return;
 
@@ -105,16 +105,16 @@ ActionRegistry::ActionFunc ActionRegistry::GetAction(const std::string& name)
             return it->second;
         }
     }
-    return nullptr; // Œ©‚Â‚©‚ç‚È‚¢ê‡
+    return nullptr; // è¦‹ã¤ã‹ã‚‰ãªã„å ´åˆ
 }
 
 bool ActionRegistry::RemoveAction(const std::string& category, const std::string& actionName)
 {
     auto catIt = actions.find(category);
     if (catIt != actions.end()) {
-        // ƒAƒNƒVƒ‡ƒ“–¼‚ğ’T‚µ‚Äíœ
+        // ã‚¢ã‚¯ã‚·ãƒ§ãƒ³åã‚’æ¢ã—ã¦å‰Šé™¤
         if (catIt->second.erase(actionName) > 0) {
-            // ƒJƒeƒSƒŠ‚ª‹ó‚É‚È‚Á‚½ê‡AƒJƒeƒSƒŠ©‘Ì‚ğíœ‚·‚é‚©‚ÍİŒvŸ‘æ
+            // ã‚«ãƒ†ã‚´ãƒªãŒç©ºã«ãªã£ãŸå ´åˆã€ã‚«ãƒ†ã‚´ãƒªè‡ªä½“ã‚’å‰Šé™¤ã™ã‚‹ã‹ã¯è¨­è¨ˆæ¬¡ç¬¬
             // if (catIt->second.empty()) actions.erase(catIt); 
             return true;
         }
@@ -128,9 +128,9 @@ void ActionRegistry::Call(const std::string& name)
 
     for (auto& [cat, actionMap] : actions)
     {
-        auto it = actionMap.find(name); // count ‚Æ [] ‚Å2‰ñŒŸõ‚·‚é‚æ‚è find ‚ª‘¬‚¢
+        auto it = actionMap.find(name); // count ã¨ [] ã§2å›æ¤œç´¢ã™ã‚‹ã‚ˆã‚Š find ãŒé€Ÿã„
         if (it != actionMap.end()) {
-            if (it->second) it->second(); // ŠÖ”‚Ì’†g‚ª‹óinullptrj‚Å‚È‚¢‚©ƒ`ƒFƒbƒN
+            if (it->second) it->second(); // é–¢æ•°ã®ä¸­èº«ãŒç©ºï¼ˆnullptrï¼‰ã§ãªã„ã‹ãƒã‚§ãƒƒã‚¯
             return;
         }
     }

@@ -5,7 +5,7 @@
 void Movement::Start()
 {
     auto obj = GetGameObject();
-    // ƒŒƒWƒXƒgƒŠ‚ÉˆÚ“®’âŽ~‚ð“o˜^
+    // ãƒ¬ã‚¸ã‚¹ãƒˆãƒªã«ç§»å‹•åœæ­¢ã‚’ç™»éŒ²
     obj->GetLocalRegistry().RegisterAction("Movement", "Stop", [this]() {
         this->velocity = { 0, 0, 0 };
         });
@@ -15,21 +15,21 @@ void Movement::Update(float deltaTime)
 {
     auto tf = GetGameObject()->transform;
 
-    // ˆÚ“®•ûŒü‚ÌƒxƒNƒgƒ‹ (Vector3Œ^‚Æ‚µ‚Äˆµ‚¤)
+    // ç§»å‹•æ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ« (Vector3åž‹ã¨ã—ã¦æ‰±ã†)
     Vector3 dir = velocity;
     float lengthSq = dir.LengthSquared();
 
     if (lengthSq > 0.001f) {
-        // 1. ˆÚ“®‚Ì“K—p
+        // 1. ç§»å‹•ã®é©ç”¨
         tf->AddMoveOffset(dir * moveSpeed * deltaTime);
 
-        // 2. ‰ñ“]‚Ì“K—p
+        // 2. å›žè»¢ã®é©ç”¨
         if (rotationType == RotationType::LookAtVelocity) {
             ApplyRotation(deltaTime);
         }
     }
 
-    // –ˆƒtƒŒ[ƒ€ƒŠƒZƒbƒg
+    // æ¯Žãƒ•ãƒ¬ãƒ¼ãƒ ãƒªã‚»ãƒƒãƒˆ
     velocity = { 0, 0, 0 };
 }
 
@@ -37,22 +37,22 @@ void Movement::ApplyRotation(float deltaTime)
 {
     auto tf = GetGameObject()->transform;
 
-    // –Ú•W•ûŒüiˆÚ“®•ûŒüj
+    // ç›®æ¨™æ–¹å‘ï¼ˆç§»å‹•æ–¹å‘ï¼‰
     Vector3 targetDir = velocity;
-    targetDir.y = 0; // ’n–Ê‚Æ•½s‚É‰ñ“]
+    targetDir.y = 0; // åœ°é¢ã¨å¹³è¡Œã«å›žè»¢
     targetDir.Normalize();
 
-    // Œ»Ý‚ÌŒü‚«iTransform‚Ì‘O•ûƒxƒNƒgƒ‹j
+    // ç¾åœ¨ã®å‘ãï¼ˆTransformã®å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ï¼‰
     Vector3 currentFront = tf->GetFront();
     currentFront.y = 0;
     currentFront.Normalize();
 
-    // ‚·‚Å‚É–Ú•W•ûŒü‚ðŒü‚¢‚Ä‚¢‚é‚È‚ç‰½‚à‚µ‚È‚¢
+    // ã™ã§ã«ç›®æ¨™æ–¹å‘ã‚’å‘ã„ã¦ã„ã‚‹ãªã‚‰ä½•ã‚‚ã—ãªã„
     if (currentFront.Dot(targetDir) > 0.999f) return;
 
-    // --- ƒNƒH[ƒ^ƒjƒIƒ“‚É‚æ‚é•âŠÔ ---
+    // --- ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã«ã‚ˆã‚‹è£œé–“ ---
 
-    // 1. Œ»Ý‚Ì‰ñ“]‚ðƒNƒH[ƒ^ƒjƒIƒ“‚ÅŽæ“¾
+    // 1. ç¾åœ¨ã®å›žè»¢ã‚’ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã§å–å¾—
     Vector3 curEulerRad = {
         DirectX::XMConvertToRadians(tf->localRotation.x),
         DirectX::XMConvertToRadians(tf->localRotation.y),
@@ -60,20 +60,20 @@ void Movement::ApplyRotation(float deltaTime)
     };
     DirectX::XMVECTOR curQuat = DirectX::XMQuaternionRotationRollPitchYawFromVector(curEulerRad);
 
-    // 2. –Ú•W‚Ì‰ñ“]‚ðƒNƒH[ƒ^ƒjƒIƒ“‚Åì¬ (LookAt)
-    // DirectXMath ‚É‚Í’¼Ú“I‚È LookRotation ‚ª‚È‚¢‚Ì‚ÅAs—ñ‚ðŒo—R
+    // 2. ç›®æ¨™ã®å›žè»¢ã‚’ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã§ä½œæˆ (LookAt)
+    // DirectXMath ã«ã¯ç›´æŽ¥çš„ãª LookRotation ãŒãªã„ã®ã§ã€è¡Œåˆ—ã‚’çµŒç”±
     DirectX::XMVECTOR up = { 0, 1, 0, 0 };
     DirectX::XMMATRIX lookAtMat = DirectX::XMMatrixLookToLH({ 0,0,0,0 }, targetDir, up);
-    // LookToLH‚ÍuƒJƒƒ‰‚ª‚»‚±‚ðŒ©‚évs—ñ‚È‚Ì‚ÅA‹ts—ñ‚É‚·‚é•K—v‚ª‚ ‚éê‡‚ª‘½‚¢
+    // LookToLHã¯ã€Œã‚«ãƒ¡ãƒ©ãŒãã“ã‚’è¦‹ã‚‹ã€è¡Œåˆ—ãªã®ã§ã€é€†è¡Œåˆ—ã«ã™ã‚‹å¿…è¦ãŒã‚ã‚‹å ´åˆãŒå¤šã„
     DirectX::XMVECTOR targetQuat = DirectX::XMQuaternionRotationMatrix(DirectX::XMMatrixInverse(nullptr, lookAtMat));
 
-    // 3. ‹…–ÊüŒ`•âŠÔ (Slerp)
-    // rotateSpeed * deltaTime ‚ª 1.0 ‚É‹ß‚Ã‚­‚Ù‚Ç‘¬‚­Œü‚­
+    // 3. çƒé¢ç·šå½¢è£œé–“ (Slerp)
+    // rotateSpeed * deltaTime ãŒ 1.0 ã«è¿‘ã¥ãã»ã©é€Ÿãå‘ã
     float t = (std::min)(rotateSpeed * deltaTime, 1.0f);
     DirectX::XMVECTOR slerpQuat = DirectX::XMQuaternionSlerp(curQuat, targetQuat, t);
 
-    // 4. ƒNƒH[ƒ^ƒjƒIƒ“‚ðƒIƒCƒ‰[Šp‚É–ß‚µ‚Ä”½‰f
-    // Vector3::ToEuler() ‚Ü‚½‚ÍŽ©‘O‚Ì•ÏŠ·ŠÖ”‚ðŽg—p
+    // 4. ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’ã‚ªã‚¤ãƒ©ãƒ¼è§’ã«æˆ»ã—ã¦åæ˜ 
+    // Vector3::ToEuler() ã¾ãŸã¯è‡ªå‰ã®å¤‰æ›é–¢æ•°ã‚’ä½¿ç”¨
     Vector3 nextEuler = Quaternion(slerpQuat).ToEuler();
 
     tf->SetRotation({

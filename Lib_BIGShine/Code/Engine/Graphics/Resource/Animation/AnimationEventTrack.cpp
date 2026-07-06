@@ -19,7 +19,7 @@ void AnimationEventTrack::AddEvent(const std::string& label_, float start_, floa
 
 void AnimationEventTrack::DeleteEvent(int index_)
 {
-    // UI‚©‚ç“n‚³‚ê‚½‘I‘ğ’l‚ª–³Œø‚Èê‡‚ÍAŠù‘¶ƒCƒxƒ“ƒg‚ğ•ÏX‚µ‚È‚¢B
+    // UIã‹ã‚‰æ¸¡ã•ã‚ŒãŸé¸æŠå€¤ãŒç„¡åŠ¹ãªå ´åˆã¯ã€æ—¢å­˜ã‚¤ãƒ™ãƒ³ãƒˆã‚’å¤‰æ›´ã—ãªã„ã€‚
     if (index_ >= 0 && index_ < static_cast<int>(events.size()))
         events.erase(events.begin() + index_);
 }
@@ -43,7 +43,7 @@ void AnimationEventTrack::EndEdit()
 
 void AnimationEventTrack::DoubleClick(int index_)
 {
-    // Ú×•ÒWƒ_ƒCƒAƒƒO‚È‚Ç‚ğ’Ç‰Á‚·‚éÛ‚ÌŠg’£ƒ|ƒCƒ“ƒg‚Æ‚µ‚Ä•Û‚·‚éB
+    // è©³ç´°ç·¨é›†ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãªã©ã‚’è¿½åŠ ã™ã‚‹éš›ã®æ‹¡å¼µãƒã‚¤ãƒ³ãƒˆã¨ã—ã¦ä¿æŒã™ã‚‹ã€‚
     (void)index_;
 }
 
@@ -69,18 +69,18 @@ bool AnimationEventTrack::DrawSequencer(
 {
     const float pixelsPerSecond_ = 100.0f;
     const float rowHeight_ = 24.0f;
-    (void)firstVisibleTime_; // ImGui‚ÌƒXƒNƒ[ƒ‹‹@”\‚ÖˆÚsÏ‚İBŒİŠ·«ˆÛ‚Ì‚½‚ßˆø”‚Íc‚·B
+    (void)firstVisibleTime_; // ImGuiã®ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«æ©Ÿèƒ½ã¸ç§»è¡Œæ¸ˆã¿ã€‚äº’æ›æ€§ç¶­æŒã®ãŸã‚å¼•æ•°ã¯æ®‹ã™ã€‚
 
     ImGui::BeginChild("SequencerRegion", ImVec2(0, 180), true, ImGuiWindowFlags_HorizontalScrollbar);
     float contentWidth_ = animationLengthSeconds_ * pixelsPerSecond_;
-    ImGui::Dummy(ImVec2(contentWidth_, 0)); // ƒAƒjƒ[ƒVƒ‡ƒ“Ú‚É‰‚¶‚½‰¡ƒXƒNƒ[ƒ‹—Ìˆæ‚ğŠm•Û‚·‚éB
+    ImGui::Dummy(ImVec2(contentWidth_, 0)); // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å°ºã«å¿œã˜ãŸæ¨ªã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é ˜åŸŸã‚’ç¢ºä¿ã™ã‚‹ã€‚
 
     ImDrawList* drawList_ = ImGui::GetWindowDrawList();
     ImVec2 origin_ = ImGui::GetCursorScreenPos();
 
     drawList_->AddRectFilled(origin_, origin_ + ImVec2(contentWidth_, 180), IM_COL32(30, 30, 30, 255));
 
-    // ’·‚¢ƒAƒjƒ[ƒVƒ‡ƒ“‚Å‚àŠÔˆÊ’u‚ğ”cˆ¬‚Å‚«‚é‚æ‚¤A5•bŠÔŠu‚Å–Ú·‚è‚ğ•`‰æ‚·‚éB
+    // é•·ã„ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã§ã‚‚æ™‚é–“ä½ç½®ã‚’æŠŠæ¡ã§ãã‚‹ã‚ˆã†ã€5ç§’é–“éš”ã§ç›®ç››ã‚Šã‚’æç”»ã™ã‚‹ã€‚
     for (float time_ = 0; time_ <= animationLengthSeconds_; time_ += 5.0f)
     {
         float x_ = origin_.x + time_ * pixelsPerSecond_;
@@ -99,7 +99,7 @@ bool AnimationEventTrack::DrawSequencer(
             float startX_ = origin_.x + event_.startTime * pixelsPerSecond_;
             float endX_ = origin_.x + event_.endTime * pixelsPerSecond_;
 
-            // ƒCƒxƒ“ƒg‚Ì—LŒøŠúŠÔ‚ğƒo[‚Æ‚µ‚Ä‰Â‹‰»‚·‚éB
+            // ã‚¤ãƒ™ãƒ³ãƒˆã®æœ‰åŠ¹æœŸé–“ã‚’ãƒãƒ¼ã¨ã—ã¦å¯è¦–åŒ–ã™ã‚‹ã€‚
             drawList_->AddRectFilled(ImVec2(startX_, origin_.y + rowHeight_ * index_),
                 ImVec2(endX_, origin_.y + rowHeight_ * (index_ + 1)), event_.color);
             drawList_->AddRect(ImVec2(startX_, origin_.y + rowHeight_ * index_),
@@ -107,7 +107,7 @@ bool AnimationEventTrack::DrawSequencer(
             drawList_->AddText(ImVec2(startX_ + 4, origin_.y + rowHeight_ * index_ + 4),
                 IM_COL32(0, 0, 0, 255), event_.label.c_str());
 
-            // ¶‰E‚Ìƒnƒ“ƒhƒ‹‚ğ•ÊX‚É”»’è‚µAƒCƒxƒ“ƒgŠúŠÔ‚ª‹t“]‚µ‚È‚¢”ÍˆÍ‚Å•ÒW‚·‚éB
+            // å·¦å³ã®ãƒãƒ³ãƒ‰ãƒ«ã‚’åˆ¥ã€…ã«åˆ¤å®šã—ã€ã‚¤ãƒ™ãƒ³ãƒˆæœŸé–“ãŒé€†è»¢ã—ãªã„ç¯„å›²ã§ç·¨é›†ã™ã‚‹ã€‚
             ImGui::SetCursorScreenPos(ImVec2(startX_ - 5, origin_.y + rowHeight_ * index_));
             ImGui::InvisibleButton(("ev_start_" + std::to_string(index_)).c_str(), ImVec2(10, rowHeight_));
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -125,7 +125,7 @@ bool AnimationEventTrack::DrawSequencer(
                     std::min(mouseX_ / pixelsPerSecond_, animationLengthSeconds_));
             }
 
-            // ƒnƒ“ƒhƒ‹‚ğ—Dæ‚µ‚Ä”»’è‚·‚é‚½‚ßAƒo[–{‘Ì‚ÌƒNƒŠƒbƒN—Ìˆæ‚ÍÅŒã‚É”z’u‚·‚éB
+            // ãƒãƒ³ãƒ‰ãƒ«ã‚’å„ªå…ˆã—ã¦åˆ¤å®šã™ã‚‹ãŸã‚ã€ãƒãƒ¼æœ¬ä½“ã®ã‚¯ãƒªãƒƒã‚¯é ˜åŸŸã¯æœ€å¾Œã«é…ç½®ã™ã‚‹ã€‚
             ImGui::SetCursorScreenPos(ImVec2(startX_ + 5, origin_.y + rowHeight_ * index_));
             ImGui::InvisibleButton(("ev_full_" + std::to_string(index_)).c_str(),
                 ImVec2((endX_ - startX_) - 10, rowHeight_));
@@ -134,7 +134,7 @@ bool AnimationEventTrack::DrawSequencer(
         }
     }
 
-    // Ä¶ˆÊ’u‚ğ¦‚·ƒJ[ƒ\ƒ‹‚ÍAƒhƒ‰ƒbƒO‘€ì‚É‚æ‚éƒV[ƒN‚É‚àg—p‚·‚éB
+    // å†ç”Ÿä½ç½®ã‚’ç¤ºã™ã‚«ãƒ¼ã‚½ãƒ«ã¯ã€ãƒ‰ãƒ©ãƒƒã‚°æ“ä½œã«ã‚ˆã‚‹ã‚·ãƒ¼ã‚¯ã«ã‚‚ä½¿ç”¨ã™ã‚‹ã€‚
     float cursorX_ = origin_.x + (*currentTime_) * pixelsPerSecond_;
     drawList_->AddLine(ImVec2(cursorX_, origin_.y), ImVec2(cursorX_, origin_.y + 180),
         IM_COL32(255, 0, 0, 255), 2.0f);

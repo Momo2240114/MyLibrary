@@ -5,7 +5,7 @@ using namespace DirectX;
 
 void CameraManager::Initialize()
 {
-    // ƒ}ƒl[ƒWƒƒ[¶¬‚ÉAƒŒƒ“ƒ_ƒŠƒ“ƒO—p‚Ìƒ_ƒ~[ƒIƒuƒWƒFƒNƒg‚ğì¬
+    // ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ç”Ÿæˆæ™‚ã«ã€ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ç”¨ã®ãƒ€ãƒŸãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
     m_proxyObject = std::make_shared<GameObject>("CameraProxy");
     m_proxyCamera = m_proxyObject->AddComponent<CameraComponent>();
 }
@@ -13,7 +13,7 @@ void CameraManager::Initialize()
 
 void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObject>>& objects_)
 {
-    // 1. —Dæ“x’Tõ
+    // 1. å„ªå…ˆåº¦æ¢ç´¢
     std::shared_ptr<CameraComponent> highestCam_ = nullptr;
     int highestPriority_ = -2147483648;
 
@@ -28,24 +28,24 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
         }
     }
 
-    // Ø‚è‘Ö‚¦”»’è
+    // åˆ‡ã‚Šæ›¿ãˆåˆ¤å®š
     if (highestCam_ != activeCameraComponent && highestCam_ != targetCamera) {
         StartTransition(highestCam_);
     }
 
-    // ‘JˆÚ’†‚Ì•âŠÔˆ—
+    // é·ç§»ä¸­ã®è£œé–“å‡¦ç†
     if (isTransitioning)
     {
         transitionTimer += et_;
         float t_ = transitionTimer / transitionDuration;
 
 
-        // 1. n“_‚ÆI“_‚ÌˆÊ’uE‰ñ“]‚ğæ“¾
+        // 1. å§‹ç‚¹ã¨çµ‚ç‚¹ã®ä½ç½®ãƒ»å›è»¢ã‚’å–å¾—
         XMMATRIX startView_ = XMLoadFloat4x4(&startViewMatrix);
         XMMATRIX endView_ = targetCamera->GetViewProjection();
 
-        // 2. ‹ŠE‚ğŠŠ‚ç‚©‚É•âŠÔ (Slerp“™‚ğ—p‚¢‚Äs—ñ‚ğƒuƒŒƒ“ƒh)
-        // À–±“I‚É‚ÍˆÊ’u(Vector)‚Æ‰ñ“](Quaternion)‚ğ•ª‚¯‚Ä•âŠÔ‚µAs—ñ‚ğÄ\’z‚·‚é‚Ì‚ªƒxƒXƒg‚¾
+        // 2. è¦–ç•Œã‚’æ»‘ã‚‰ã‹ã«è£œé–“ (Slerpç­‰ã‚’ç”¨ã„ã¦è¡Œåˆ—ã‚’ãƒ–ãƒ¬ãƒ³ãƒ‰)
+        // å®Ÿå‹™çš„ã«ã¯ä½ç½®(Vector)ã¨å›è»¢(Quaternion)ã‚’åˆ†ã‘ã¦è£œé–“ã—ã€è¡Œåˆ—ã‚’å†æ§‹ç¯‰ã™ã‚‹ã®ãŒãƒ™ã‚¹ãƒˆã 
         XMVECTOR startPos_, startRotQ_, startScale_;
         XMVECTOR endPos_, endRotQ_, endScale_;
         XMMatrixDecompose(&startScale_, &startRotQ_, &startPos_, startView_);
@@ -54,10 +54,10 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
         XMVECTOR currentPos_ = XMVectorLerp(startPos_, endPos_, t_);
         XMVECTOR currentRot_ = XMQuaternionSlerp(startRotQ_, endRotQ_, t_);
 
-        // 3. Œ»İ‚Ìƒrƒ…[s—ñ‚ğXV
+        // 3. ç¾åœ¨ã®ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã‚’æ›´æ–°
         XMMATRIX currentView_ = XMMatrixAffineTransformation(startScale_, XMVectorZero(), currentRot_, currentPos_);
         XMStoreFloat4x4(&currentView, currentView_);
-        // ƒvƒƒLƒV‚És—ñ‚ğƒZƒbƒgI
+        // ãƒ—ãƒ­ã‚­ã‚·ã«è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆï¼
         m_proxyCamera->SetViewMatrix(currentView);
 
         if (t_ >= 1.0f) {
@@ -67,10 +67,10 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
     }
     else
     {
-        // ’Êí
+        // é€šå¸¸æ™‚
         activeCameraComponent = highestCam_;
 
-        // š’Êí‚ÍƒvƒƒLƒV‚ğ–{•¨‚Æ“¯Šú‚³‚¹‚é
+        // â˜…é€šå¸¸æ™‚ã¯ãƒ—ãƒ­ã‚­ã‚·ã‚’æœ¬ç‰©ã¨åŒæœŸã•ã›ã‚‹
         if (activeCameraComponent) {
             m_proxyCamera->CopyFrom(activeCameraComponent.get());
         }
@@ -90,12 +90,12 @@ void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)
     transitionTimer = 0.0f;
     isTransitioning = true;
 
-    // Œ»İ‚Ì‹“_‚ğn“_‚Æ‚µ‚Ä•Û‘¶
+    // ç¾åœ¨ã®è¦–ç‚¹ã‚’å§‹ç‚¹ã¨ã—ã¦ä¿å­˜
     if (activeCameraComponent) {
         startViewMatrix = activeCameraComponent->GetView();
     }
     else {
-        // ‚à‚µÅ‰‚©‚çƒJƒƒ‰‚ª‚È‚©‚Á‚½ê‡‚È‚Ç‚ÍA¡‚ÌƒJƒƒ‰‚Ìs—ñ‚ğ‚»‚Ì‚Ü‚Ü“ü‚ê‚é
+        // ã‚‚ã—æœ€åˆã‹ã‚‰ã‚«ãƒ¡ãƒ©ãŒãªã‹ã£ãŸå ´åˆãªã©ã¯ã€ä»Šã®ã‚«ãƒ¡ãƒ©ã®è¡Œåˆ—ã‚’ãã®ã¾ã¾å…¥ã‚Œã‚‹
         startViewMatrix = nextCam->GetView();
     }
 }

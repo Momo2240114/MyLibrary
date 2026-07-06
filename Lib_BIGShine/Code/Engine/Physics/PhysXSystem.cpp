@@ -10,7 +10,7 @@ static PxPhysics* gPhysics = nullptr;
 static PxScene* gScene = nullptr;
 static PxDefaultCpuDispatcher* gDispatcher = nullptr;
 
-// PVD (PhysX Visual Debugger) ŠÖ˜Ai–¢Žg—pj
+// PVD (PhysX Visual Debugger) é–¢é€£ï¼ˆæœªä½¿ç”¨ï¼‰
 static PxPvd* gPvd = nullptr;
 static PxPvdTransport* gPvdTransport = nullptr;
 static PxMaterial* gDefaultMaterial = nullptr;
@@ -88,24 +88,24 @@ void PhysXSystem::Initialize()
     gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAlloc, gError);
 
     // =============================
-    // ‡@ PVD ƒCƒ“ƒXƒ^ƒ“ƒXì¬
+    // â‘  PVD ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ä½œæˆ
     // =============================
     gPvd = PxCreatePvd(*gFoundation);
 
-    // TCP transport ‚ðì¬i127.0.0.1:5425j
+    // TCP transport ã‚’ä½œæˆï¼ˆ127.0.0.1:5425ï¼‰
     gPvdTransport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
 
-    // PVD ‚ÖÚ‘±ŠJŽn
+    // PVD ã¸æŽ¥ç¶šé–‹å§‹
     gPvd->connect(*gPvdTransport, PxPvdInstrumentationFlag::eALL);
 
     // =============================
-    // ‡A Physics ‚ð PVD ‘Î‰ž‚Åì¬
+    // â‘¡ Physics ã‚’ PVD å¯¾å¿œã§ä½œæˆ
     // =============================
     PxTolerancesScale scale;
     gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, scale, true, gPvd);
 
     // =============================
-    // ‡B Scene ì¬
+    // â‘¢ Scene ä½œæˆ
     // =============================
     PxSceneDesc desc(gPhysics->getTolerancesScale());
     desc.gravity = PxVec3(0, -9.8f, 0);
@@ -121,23 +121,23 @@ void PhysXSystem::Initialize()
     // Character Controller Manager
     gControllerManager = PxCreateControllerManager(*gScene);
 
-    //// Scene ì¬Œã‚É PVD SceneClient ‚ðŽæ“¾
+    //// Scene ä½œæˆå¾Œã« PVD SceneClient ã‚’å–å¾—
     PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
     if (pvdClient)
     {
-        // PVD ‚É‘—M‚·‚éî•ñ‚ðŽw’è
+        // PVD ã«é€ä¿¡ã™ã‚‹æƒ…å ±ã‚’æŒ‡å®š
         pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
         pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
         pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
     }
 
-    // š ‹¤’ÊƒfƒtƒHƒ‹ƒgƒ}ƒeƒŠƒAƒ‹i–€ŽCE”½”­j
+    // â˜… å…±é€šãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒžãƒ†ãƒªã‚¢ãƒ«ï¼ˆæ‘©æ“¦ãƒ»åç™ºï¼‰
     gDefaultMaterial = gPhysics->createMaterial(0.775f, 0.5f, 0.1f);
 }
 
 void PhysXSystem::Finalize()
 {
-    // Scene‚æ‚èæ‚É‰ð•ú
+    // Sceneã‚ˆã‚Šå…ˆã«è§£æ”¾
     if (gControllerManager)
     {
         gControllerManager->release();
@@ -149,7 +149,7 @@ void PhysXSystem::Finalize()
     if (gDefaultMaterial) { gDefaultMaterial->release(); gDefaultMaterial = nullptr; }
     if (gPhysics) { gPhysics->release(); gPhysics = nullptr; }
 
-    // PVD ‚ÌŒãŽn––
+    // PVD ã®å¾Œå§‹æœ«
     if (gPvd) {
         gPvd->release();
         gPvd = nullptr;

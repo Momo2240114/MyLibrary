@@ -96,13 +96,13 @@ void ColliderComponent::CreateCharacterController()
 
     desc_.radius = std::max<float>(capsule_->radius * scale_.x, 0.001f);
 
-    // PxCapsuleControllerDesc::height ‚Íu‰~’Œ•”•ª‚Ì‚‚³vB
-    // Šù‘¶ CapsuleCollider ‚Ì halfHeight ‚ª PhysX PxCapsuleGeometry ‚Ì halfHeight ‚Æ“¯‚¶ˆÓ–¡‚È‚ç *2B
+    // PxCapsuleControllerDesc::height ã¯ã€Œå††æŸ±éƒ¨åˆ†ã®é«˜ã•ã€ã€‚
+    // æ—¢å­˜ CapsuleCollider ã® halfHeight ãŒ PhysX PxCapsuleGeometry ã® halfHeight ã¨åŒã˜æ„å‘³ãªã‚‰ *2ã€‚
     desc_.height = std::max<float>(capsule_->halfHeight * 2.0f * scale_.y, 0.001f);
 
     desc_.upDirection = physx::PxVec3(0.0f, 1.0f, 0.0f);
     const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this);
-    desc_.slopeLimit = 0.707f;      // –ñ45“x
+    desc_.slopeLimit = 0.707f;      // ç´„45åº¦
     desc_.stepOffset = characterCollider_ ? characterCollider_->GetStepOffset() : 0.3f;
     desc_.contactOffset = characterCollider_ ? characterCollider_->GetContactOffset() : 0.05f;
     desc_.climbingMode = physx::PxCapsuleClimbingMode::eCONSTRAINED;
@@ -336,8 +336,8 @@ void ColliderComponent::UpdatePhysXShape()
                 for (const auto index_ : modelMesh_.indices) indices_.push_back(vertexOffset_ + index_);
             }
 
-			// node.globalTransform‚É‚ÍModel‚ÌLocalScale‚ªŠÜ‚Ü‚ê‚éB
-			// GameObject‘¤‚Ìƒ[ƒ‹ƒhƒXƒP[ƒ‹‚ÆColliderŒÅ—L”{—¦‚ÍPhysX‚ÌMeshScale‚Å“K—p‚·‚éB
+			// node.globalTransformã«ã¯Modelã®LocalScaleãŒå«ã¾ã‚Œã‚‹ã€‚
+			// GameObjectå´ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰ã‚¹ã‚±ãƒ¼ãƒ«ã¨Colliderå›ºæœ‰å€ç‡ã¯PhysXã®MeshScaleã§é©ç”¨ã™ã‚‹ã€‚
 			const PxMeshScale meshScale_(PxVec3(scale_.x, scale_.y, scale_.z));
             if (meshCollider_->convex)
             {
@@ -615,7 +615,7 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         {
             if (const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this))
             {
-                // Ú’n’†‚Í¬‚³‚È‰º‚è’i·‚Ö’Ç]‚³‚¹Ad—Í‰Á‘¬‘Ò‚¿‚É‚æ‚é•‚—VŠ´‚ğ–h‚®B
+                // æ¥åœ°ä¸­ã¯å°ã•ãªä¸‹ã‚Šæ®µå·®ã¸è¿½å¾“ã•ã›ã€é‡åŠ›åŠ é€Ÿå¾…ã¡ã«ã‚ˆã‚‹æµ®éŠæ„Ÿã‚’é˜²ãã€‚
                 verticalDisplacement_ -= characterCollider_->GetGroundSnapDistance();
             }
         }
@@ -936,7 +936,7 @@ void ColliderComponent::Gui()
 }
 
 
-// ColliderComponent.h å†E
+// ColliderComponent.h èœ€ãƒ»
 void ColliderComponent::Serialize(nlohmann::json& j) const  {
     j["Offset"] = { offset.x, offset.y, offset.z };
     j["shapeSizeScale"] = shapeSizeScale;

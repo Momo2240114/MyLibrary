@@ -6,8 +6,8 @@ class GameObject;
 
 struct CollisionManifold {
     bool isHit = false;
-    DirectX::XMVECTOR normal; // ‰Ÿ‚µo‚µ•ûŒü (A‚©‚çŒ©‚½B‚Ö‚Ì•ûŒü)
-    float depth = 0.0f;       // d‚È‚è—Ê
+    DirectX::XMVECTOR normal; // æŠ¼ã—å‡ºã—æ–¹å‘ (Aã‹ã‚‰è¦‹ãŸBã¸ã®æ–¹å‘)
+    float depth = 0.0f;       // é‡ãªã‚Šé‡
 };
 
 struct CollisionContact
@@ -17,7 +17,7 @@ struct CollisionContact
     bool isValid = false;
 };
 
-// ”»’è—p‚ÌŠÈ—ª‰»ƒf[ƒ^\‘¢
+// åˆ¤å®šç”¨ã®ç°¡ç•¥åŒ–ãƒ‡ãƒ¼ã‚¿æ§‹é€ 
 struct Sphere { DirectX::XMVECTOR center; float radius; };
 struct OBB { DirectX::XMVECTOR center; DirectX::XMVECTOR axes[3]; float halfSize[3]; };
 struct Capsule { DirectX::XMVECTOR p0; DirectX::XMVECTOR p1; float radius; };

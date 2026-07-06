@@ -1,8 +1,8 @@
 #pragma once
 
-//Šî’êƒNƒ‰ƒX
+//åŸºåº•ã‚¯ãƒ©ã‚¹
 #include "SceneBase.h"
-//ƒŒƒ“ƒ_[—p‚ÌƒVƒXƒeƒ€
+//ãƒ¬ãƒ³ãƒ€ãƒ¼ç”¨ã®ã‚·ã‚¹ãƒ†ãƒ 
 #include"Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include"Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include"Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -12,41 +12,41 @@
 
 #include"Engine/GamePlay/Core/Object/GameObject.h"
 
-//ƒ[ƒfƒBƒ“ƒOƒV[ƒ“
+//ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚·ãƒ¼ãƒ³
 class SceneLoading : public SceneBase
 {
 public:
 	SceneLoading(std::unique_ptr<SceneBase> next) : nextScene(std::move(next)) {}
 	~SceneLoading()override {}
 
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	void Initialize() override;
 
-	//I—¹‰»
+	//çµ‚äº†åŒ–
 	void Finalize()override;
 
-	//XVˆ—
+	//æ›´æ–°å‡¦ç†
 	void Update(float elapsedTime)override;
 
-	//•`‰æˆ—
+	//æç”»å‡¦ç†
 	void Render(float elapsedTime) override;
-	//GUI•`‰æ
+	//GUIæç”»
 	void DrawGUI()override;
 
 private:
-	//ƒ[ƒfƒBƒ“ƒOƒXƒŒƒbƒh
+	//ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚¹ãƒ¬ãƒƒãƒ‰
 	static void LoadingThread(SceneLoading* scene);
 
-	// ƒ[ƒh‰æ–Êê—p‚ÌƒIƒuƒWƒFƒNƒgƒŠƒXƒg
+	// ãƒ­ãƒ¼ãƒ‰ç”»é¢å°‚ç”¨ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒªã‚¹ãƒˆ
 	std::vector<std::shared_ptr<GameObject>> m_LoadingObjects;
 
-	// ƒ[ƒh‰æ–Êê—p‚ÌƒJƒƒ‰iGameObject‚Æ‚µ‚Ä‚Á‚Ä‚¨‚­‚ÆŠÇ—‚ªŠy‚Å‚·j
+	// ãƒ­ãƒ¼ãƒ‰ç”»é¢å°‚ç”¨ã®ã‚«ãƒ¡ãƒ©ï¼ˆGameObjectã¨ã—ã¦æŒã£ã¦ãŠãã¨ç®¡ç†ãŒæ¥½ã§ã™ï¼‰
 	std::shared_ptr<GameObject> m_LoadingCamera;
 
 	ModelRenderSystem m_ModelRenderSystem;
 	SpriteRenderSystem m_SpriteRenderSystem;
 
-	// ¶ƒ|ƒCƒ“ƒ^‚Å‚Í‚È‚­ unique_ptr ‚Å•Û‚·‚é
+	// ç”Ÿãƒã‚¤ãƒ³ã‚¿ã§ã¯ãªã unique_ptr ã§ä¿æŒã™ã‚‹
 	std::unique_ptr<SceneBase> nextScene;
 	std::unique_ptr<std::thread> thread;
 };

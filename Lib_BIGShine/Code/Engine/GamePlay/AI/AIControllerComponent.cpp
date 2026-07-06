@@ -30,22 +30,22 @@ void AIControllerComponent::Gui()
 {
     EnsureBlackboard();
 
-    ImGui::Checkbox(IM_U8("AIÀs##AIControllerComponent_RunAiCheckbox"), &isRunning);
+    ImGui::Checkbox(IM_U8("AIå®Ÿè¡Œ##AIControllerComponent_RunAiCheckbox"), &isRunning);
     ImGui::SameLine();
-    if (ImGui::Button(IM_U8("ƒcƒŠ[‚ğƒŠƒZƒbƒg##AIControllerComponent_ResetTreeButton"))) ResetTree();
+    if (ImGui::Button(IM_U8("ãƒ„ãƒªãƒ¼ã‚’ãƒªã‚»ãƒƒãƒˆ##AIControllerComponent_ResetTreeButton"))) ResetTree();
 
-    ImGui::InputText(IM_U8("ƒOƒ‰ƒtƒAƒZƒbƒg##AIControllerComponent_GraphAssetInput"), &graphAssetPath);
-    if (ImGui::Button(IM_U8("ƒOƒ‰ƒt•Û‘¶##AIControllerComponent_SaveGraphButton")))
+    ImGui::InputText(IM_U8("ã‚°ãƒ©ãƒ•ã‚¢ã‚»ãƒƒãƒˆ##AIControllerComponent_GraphAssetInput"), &graphAssetPath);
+    if (ImGui::Button(IM_U8("ã‚°ãƒ©ãƒ•ä¿å­˜##AIControllerComponent_SaveGraphButton")))
     {
         statusText = SaveGraphAsset(graphAssetPath) ? "Saved" : "Save failed";
     }
     ImGui::SameLine();
-    if (ImGui::Button(IM_U8("ƒOƒ‰ƒt“Ç‚İ‚İ##AIControllerComponent_LoadGraphButton")))
+    if (ImGui::Button(IM_U8("ã‚°ãƒ©ãƒ•èª­ã¿è¾¼ã¿##AIControllerComponent_LoadGraphButton")))
     {
         statusText = LoadGraphAsset(graphAssetPath) ? "Loaded" : "Load failed";
     }
     if (!statusText.empty()) ImGui::Text("%s", statusText.c_str());
-    ImGui::TextDisabled(IM_U8("ƒOƒ‰ƒt•ÒW‚ÍAI Behavior Graphƒ[ƒNƒXƒy[ƒX‚Ås‚¢‚Ü‚·B"));
+    ImGui::TextDisabled(IM_U8("ã‚°ãƒ©ãƒ•ç·¨é›†ã¯AI Behavior Graphãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹ã§è¡Œã„ã¾ã™ã€‚"));
 }
 
 void AIControllerComponent::Serialize(nlohmann::json& json_) const

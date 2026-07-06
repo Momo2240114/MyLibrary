@@ -5,13 +5,13 @@
 
 void ShapeRenderSystem::Initialize(ID3D11Device* device)
 {
-	// “ü—ÍƒŒƒCƒAƒEƒg
+	// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	// ’¸“_ƒVƒF[ƒ_[
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	CPUResourceLoader::LoadVertexShader(
 		device,
 		"Shader/ShapeRendererVS.cso",
@@ -20,37 +20,37 @@ void ShapeRenderSystem::Initialize(ID3D11Device* device)
 		inputLayout.GetAddressOf(),
 		vertexShader.GetAddressOf());
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	CPUResourceLoader::LoadPixelShader(
 		device,
 		"Shader/ShapeRendererPS.cso",
 		pixelShader.GetAddressOf());
 
-	// ’è”ƒoƒbƒtƒ@
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbMesh),
 		constantBuffer.GetAddressOf());
 
-	// ” ƒƒbƒVƒ…¶¬
+	// ç®±ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateBoxMesh(device, 1.0f, 1.0f, 1.0f);
 	CreateUnitBoxMesh(device);
 
-	// ‹…ƒƒbƒVƒ…¶¬
+	// çƒãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateSphereMesh(device, 1.0f, 32);
 
-	// ”¼‹…ƒƒbƒVƒ…¶¬
+	// åŠçƒãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateHalfSphereMesh(device, 1.0f, 32);
 
-	// ‰~’ŒƒƒbƒVƒ…¶¬
+	// å††æŸ±ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateCylinderMesh(device, 1.0f, 1.0f, -0.5f, 1.0f, 64);
 
-	// œƒƒbƒVƒ…¶¬
+	// éª¨ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateBoneMesh(device, 1.0f);
 }
 
 
-// ” •`‰æ
+// ç®±æç”»
 void ShapeRenderSystem::DrawBox(
 	const DirectX::XMFLOAT3& position,
 	const DirectX::XMFLOAT3& angle,
@@ -67,7 +67,7 @@ void ShapeRenderSystem::DrawBox(
 	DirectX::XMStoreFloat4x4(&instance.worldTransform, S * R * T);
 }
 
-// ‹…•`‰æ
+// çƒæç”»
 void ShapeRenderSystem::DrawSphere(
 	const DirectX::XMFLOAT3& position,
 	float radius,
@@ -82,7 +82,7 @@ void ShapeRenderSystem::DrawSphere(
 	DirectX::XMStoreFloat4x4(&instance.worldTransform, S * T);
 }
 
-// ƒJƒvƒZƒ‹•`‰æ
+// ã‚«ãƒ—ã‚»ãƒ«æç”»
 void ShapeRenderSystem::DrawCapsule(
 	const DirectX::XMFLOAT4X4& transform,
 	float radius,
@@ -91,53 +91,53 @@ void ShapeRenderSystem::DrawCapsule(
 {
 	DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
 
-	// ã”¼‹…F‰ñ“]E•½sˆÚ“®‚ğŠÜ‚ß‚½ƒ[ƒ‹ƒhs—ñ‚ğì‚é
+	// ä¸ŠåŠçƒï¼šå›è»¢ãƒ»å¹³è¡Œç§»å‹•ã‚’å«ã‚ãŸãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ä½œã‚‹
 	{
 		Instance& instance = instances.emplace_back();
 		instance.mesh = &halfSphereMesh;
 		instance.color = color;
 
-		// ”¼‹…‚ÍƒXƒP[ƒ‹ * Transformi‰ñ“]ŠÜ‚Şj‚Å•ÏŠ·‚µA‚»‚Ìã‚Åã•ûŒü‚ÖƒIƒtƒZƒbƒg
+		// åŠçƒã¯ã‚¹ã‚±ãƒ¼ãƒ« * Transformï¼ˆå›è»¢å«ã‚€ï¼‰ã§å¤‰æ›ã—ã€ãã®ä¸Šã§ä¸Šæ–¹å‘ã¸ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(radius, radius, radius);
 
-		// ã”¼‹…‚Ì’†S‚ğƒ[ƒJƒ‹‹óŠÔ‚Å (0, +height/2, 0) ‚ÉˆÚ“®‚µ‚Ä‚©‚ç Transform ‚ğ“K—p
+		// ä¸ŠåŠçƒã®ä¸­å¿ƒã‚’ãƒ­ãƒ¼ã‚«ãƒ«ç©ºé–“ã§ (0, +height/2, 0) ã«ç§»å‹•ã—ã¦ã‹ã‚‰ Transform ã‚’é©ç”¨
 		DirectX::XMVECTOR localPos = DirectX::XMVectorSet(0.0f, height * 0.5f, 0.0f, 1.0f);
 		DirectX::XMVECTOR worldPos = DirectX::XMVector3Transform(localPos, Transform);
 
 		DirectX::XMMATRIX World = S * Transform;
-		// ã‘‚«‚Å³‚µ‚¢ƒ[ƒ‹ƒhˆÊ’uƒZƒbƒgiTransform ‚Ì‰ñ“]EƒXƒP[ƒ‹‚Í•Ûj
+		// ä¸Šæ›¸ãã§æ­£ã—ã„ãƒ¯ãƒ¼ãƒ«ãƒ‰ä½ç½®ã‚»ãƒƒãƒˆï¼ˆTransform ã®å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ã¯ä¿æŒï¼‰
 		World.r[3] = DirectX::XMVectorSetW(worldPos, 1.0f);
 
 		DirectX::XMStoreFloat4x4(&instance.worldTransform, World);
 	}
 
-	// ‰~’ŒFTransform ‚ÌŒü‚«‚É‰ˆ‚Á‚Ä‚‚³‚ğL‚Î‚·
+	// å††æŸ±ï¼šTransform ã®å‘ãã«æ²¿ã£ã¦é«˜ã•ã‚’ä¼¸ã°ã™
 	{
 		Instance& instance = instances.emplace_back();
 		instance.mesh = &cylinderMesh;
 		instance.color = color;
 
-		// ‰~’ŒƒƒbƒVƒ…‚Í Y ²•ûŒü‚É 1.0 ‚Ì’·‚³‚ğ‘z’è‚µ‚Äì‚Á‚Ä‚¢‚éiCreateCylinderMesh ‚Ì start/height ‚ÉˆË‘¶j
-		// ‚±‚±‚Å‚Í Transform ‚Ì X/Y/Z ²ƒxƒNƒgƒ‹‚ğ radius/height ƒXƒP[ƒ‹‚µ‚Ä World s—ñ‚ğì‚é
+		// å††æŸ±ãƒ¡ãƒƒã‚·ãƒ¥ã¯ Y è»¸æ–¹å‘ã« 1.0 ã®é•·ã•ã‚’æƒ³å®šã—ã¦ä½œã£ã¦ã„ã‚‹ï¼ˆCreateCylinderMesh ã® start/height ã«ä¾å­˜ï¼‰
+		// ã“ã“ã§ã¯ Transform ã® X/Y/Z è»¸ãƒ™ã‚¯ãƒˆãƒ«ã‚’ radius/height ã‚¹ã‚±ãƒ¼ãƒ«ã—ã¦ World è¡Œåˆ—ã‚’ä½œã‚‹
 		DirectX::XMMATRIX World;
 		World.r[0] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[0]), radius);
 		World.r[1] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[1]), height);
 		World.r[2] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[2]), radius);
-		World.r[3] = Transform.r[3]; // ˆÊ’u‚Í Transform ‚ÌŒ´“_i‰~’Œ‚ÍŒ´“_’†S‚©‚çL‚Ñ‚éd—lj
+		World.r[3] = Transform.r[3]; // ä½ç½®ã¯ Transform ã®åŸç‚¹ï¼ˆå††æŸ±ã¯åŸç‚¹ä¸­å¿ƒã‹ã‚‰ä¼¸ã³ã‚‹ä»•æ§˜ï¼‰
 		DirectX::XMStoreFloat4x4(&instance.worldTransform, World);
 	}
 
-	// ‰º”¼‹…
+	// ä¸‹åŠçƒ
 	{
 		Instance& instance = instances.emplace_back();
 		instance.mesh = &halfSphereMesh;
 		instance.color = color;
 
-		// ‰º”¼‹…‚Íã”¼‹…‚Æ“¯‚¶•û–@‚¾‚ª‰ñ“] 180degiX ²j‚ğ’Ç‰Á‚µ‚Äg‚¤
+		// ä¸‹åŠçƒã¯ä¸ŠåŠçƒã¨åŒã˜æ–¹æ³•ã ãŒå›è»¢ 180degï¼ˆX è»¸ï¼‰ã‚’è¿½åŠ ã—ã¦ä½¿ã†
 		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(radius, radius, radius);
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationX(DirectX::XM_PI);
 		DirectX::XMVECTOR localPos = DirectX::XMVectorSet(0.0f, -height * 0.5f, 0.0f, 1.0f);
-		// æ‚É‰ñ“]‚ğ‡¬AŸ‚É Transform ‚ğ“K—p
+		// å…ˆã«å›è»¢ã‚’åˆæˆã€æ¬¡ã« Transform ã‚’é©ç”¨
 		DirectX::XMMATRIX Combined = R * Transform;
 		DirectX::XMVECTOR worldPos = DirectX::XMVector3Transform(localPos, Transform);
 
@@ -160,18 +160,18 @@ void ShapeRenderSystem::DrawCylinder(
 	instance.mesh = &cylinderMesh;
 	instance.color = color;
 
-	// ‰~’ŒƒƒbƒVƒ…‚Í Y ²•ûŒü‚É 1.0 ‚Ì’·‚³‚ğ‘z’è‚µ‚Äì‚Á‚Ä‚¢‚éiCreateCylinderMesh ‚Ì start/height ‚ÉˆË‘¶j
-	// ‚±‚±‚Å‚Í Transform ‚Ì X/Y/Z ²ƒxƒNƒgƒ‹‚ğ radius/height ƒXƒP[ƒ‹‚µ‚Ä World s—ñ‚ğì‚é
+	// å††æŸ±ãƒ¡ãƒƒã‚·ãƒ¥ã¯ Y è»¸æ–¹å‘ã« 1.0 ã®é•·ã•ã‚’æƒ³å®šã—ã¦ä½œã£ã¦ã„ã‚‹ï¼ˆCreateCylinderMesh ã® start/height ã«ä¾å­˜ï¼‰
+	// ã“ã“ã§ã¯ Transform ã® X/Y/Z è»¸ãƒ™ã‚¯ãƒˆãƒ«ã‚’ radius/height ã‚¹ã‚±ãƒ¼ãƒ«ã—ã¦ World è¡Œåˆ—ã‚’ä½œã‚‹
 	DirectX::XMMATRIX World;
 	World.r[0] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[0]), radius);
 	World.r[1] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[1]), height);
 	World.r[2] = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Transform.r[2]), radius);
-	World.r[3] = Transform.r[3]; // ˆÊ’u‚Í Transform ‚ÌŒ´“_i‰~’Œ‚ÍŒ´“_’†S‚©‚çL‚Ñ‚éd—lj
+	World.r[3] = Transform.r[3]; // ä½ç½®ã¯ Transform ã®åŸç‚¹ï¼ˆå††æŸ±ã¯åŸç‚¹ä¸­å¿ƒã‹ã‚‰ä¼¸ã³ã‚‹ä»•æ§˜ï¼‰
 	DirectX::XMStoreFloat4x4(&instance.worldTransform, World);
 }
 
 
-// œ•`‰æ
+// éª¨æç”»
 void ShapeRenderSystem::DrawBone(
 	const DirectX::XMFLOAT4X4& transform,
 	float length,
@@ -188,7 +188,7 @@ void ShapeRenderSystem::DrawBone(
 	DirectX::XMStoreFloat4x4(&instance.worldTransform, W);
 }
 
-// ƒƒbƒVƒ…¶¬
+// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 void ShapeRenderSystem::CreateMesh(ID3D11Device* device, const std::vector<DirectX::XMFLOAT3>& vertices, Mesh& mesh)
 {
 	D3D11_BUFFER_DESC desc = {};
@@ -209,7 +209,7 @@ void ShapeRenderSystem::CreateMesh(ID3D11Device* device, const std::vector<Direc
 	mesh.vertexCount = static_cast<UINT>(vertices.size());
 }
 
-// ” ƒƒbƒVƒ…ì¬
+// ç®±ãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 void ShapeRenderSystem::CreateBoxMesh(ID3D11Device* device, float width, float height, float depth)
 {
 	DirectX::XMFLOAT3 positions[8] =
@@ -227,7 +227,7 @@ void ShapeRenderSystem::CreateBoxMesh(ID3D11Device* device, float width, float h
 	};
 
 	std::vector<DirectX::XMFLOAT3> vertices;
-	vertices.reserve(32); // © reserve ‚É•ÏXiresize ‚Íƒ_ƒj
+	vertices.reserve(32); // â† reserve ã«å¤‰æ›´ï¼ˆresize ã¯ãƒ€ãƒ¡ï¼‰
 
 	// top
 	vertices.emplace_back(positions[0]);
@@ -258,18 +258,18 @@ void ShapeRenderSystem::CreateBoxMesh(ID3D11Device* device, float width, float h
 	vertices.emplace_back(positions[7]);
 
 
-	// ƒƒbƒVƒ…¶¬
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateMesh(device, vertices, boxMesh);
 }
 
-// ‹…ƒƒbƒVƒ…ì¬
+// çƒãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 void ShapeRenderSystem::CreateSphereMesh(ID3D11Device* device, float radius, int subdivisions)
 {
 	float step = DirectX::XM_2PI / subdivisions;
 
 	std::vector<DirectX::XMFLOAT3> vertices;
 
-	// XZ•½–Ê
+	// XZå¹³é¢
 	for (int i = 0; i < subdivisions; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
@@ -282,7 +282,7 @@ void ShapeRenderSystem::CreateSphereMesh(ID3D11Device* device, float radius, int
 			p.z = cosf(theta) * radius;
 		}
 	}
-	// XY•½–Ê
+	// XYå¹³é¢
 	for (int i = 0; i < subdivisions; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
@@ -295,7 +295,7 @@ void ShapeRenderSystem::CreateSphereMesh(ID3D11Device* device, float radius, int
 			p.z = 0.0f;
 		}
 	}
-	// YZ•½–Ê
+	// YZå¹³é¢
 	for (int i = 0; i < subdivisions; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
@@ -309,18 +309,18 @@ void ShapeRenderSystem::CreateSphereMesh(ID3D11Device* device, float radius, int
 		}
 	}
 
-	// ƒƒbƒVƒ…¶¬
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateMesh(device, vertices, sphereMesh);
 }
 
-// ”¼‹…ƒƒbƒVƒ…ì¬
+// åŠçƒãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 void ShapeRenderSystem::CreateHalfSphereMesh(ID3D11Device* device, float radius, int subdivisions)
 {
 	std::vector<DirectX::XMFLOAT3> vertices;
 
 	float theta_step = DirectX::XM_2PI / subdivisions;
 
-	// XZ•½–Ê
+	// XZå¹³é¢
 	for (int i = 0; i < subdivisions; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
@@ -334,7 +334,7 @@ void ShapeRenderSystem::CreateHalfSphereMesh(ID3D11Device* device, float radius,
 			v.z = cosf(theta) * radius;
 		}
 	}
-	// XY•½–Ê
+	// XYå¹³é¢
 	for (int i = 0; i < subdivisions / 2; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
@@ -348,7 +348,7 @@ void ShapeRenderSystem::CreateHalfSphereMesh(ID3D11Device* device, float radius,
 			v.z = 0.0f;
 		}
 	}
-	// YZ•½–Ê
+	// YZå¹³é¢
 	for (int i = 0; i < subdivisions / 2; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
@@ -363,11 +363,11 @@ void ShapeRenderSystem::CreateHalfSphereMesh(ID3D11Device* device, float radius,
 		}
 	}
 
-	// ƒƒbƒVƒ…¶¬
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateMesh(device, vertices, halfSphereMesh);
 }
 
-// ‰~’Œ
+// å††æŸ±
 void ShapeRenderSystem::CreateCylinderMesh(ID3D11Device* device, float radius1, float radius2, float start, float height, int subdivisions)
 {
 	std::vector<DirectX::XMFLOAT3> vertices;
@@ -421,11 +421,11 @@ void ShapeRenderSystem::CreateCylinderMesh(ID3D11Device* device, float radius1, 
 			cosf(theta_) * radius2));
 	}
 
-	// ƒƒbƒVƒ…¶¬
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateMesh(device, vertices, cylinderMesh);
 }
 
-// œƒƒbƒVƒ…ì¬
+// éª¨ãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 void ShapeRenderSystem::CreateBoneMesh(ID3D11Device* device, float length)
 {
 	float width = length * 0.25f;
@@ -470,51 +470,51 @@ void ShapeRenderSystem::CreateBoneMesh(ID3D11Device* device, float length)
 	vertices.emplace_back(positions[5]);
 	vertices.emplace_back(positions[1]);
 
-	// ƒƒbƒVƒ…¶¬
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	CreateMesh(device, vertices, boneMesh);
 }
 
-// •`‰æÀs
+// æç”»å®Ÿè¡Œ
 void ShapeRenderSystem::Render(
 	ID3D11DeviceContext* dc,
 	const DirectX::XMFLOAT4X4& view,
 	const DirectX::XMFLOAT4X4& projection)
 {
-	// ƒVƒF[ƒ_[İ’è
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼è¨­å®š
 	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 	dc->IASetInputLayout(inputLayout.Get());
 
-	// ’è”ƒoƒbƒtƒ@İ’è
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®š
 	dc->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
 
-	// ƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñì¬
+	// ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ä½œæˆ
 	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
 	DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&projection);
 	DirectX::XMMATRIX VP = V * P;
 
-	// ƒvƒŠƒ~ƒeƒBƒuİ’è
+	// ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–è¨­å®š
 	UINT stride = sizeof(DirectX::XMFLOAT3);
 	UINT offset = 0;
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	for (const Instance& instance : instances)
 	{
-		// ’¸“_ƒoƒbƒtƒ@İ’è
+		// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡è¨­å®š
 		dc->IASetVertexBuffers(0, 1, instance.mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
 
-		// ƒ[ƒ‹ƒhƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñì¬
+		// ãƒ¯ãƒ¼ãƒ«ãƒ‰ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ä½œæˆ
 		DirectX::XMMATRIX W = DirectX::XMLoadFloat4x4(&instance.worldTransform);
 		DirectX::XMMATRIX WVP = W * VP;
 
-		// ’è”ƒoƒbƒtƒ@XV
+		// å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 		CbMesh cbMesh;
 		DirectX::XMStoreFloat4x4(&cbMesh.worldViewProjection, WVP);
 		cbMesh.color = instance.color;
 
 		dc->UpdateSubresource(constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
-		// •`‰æ
+		// æç”»
 		dc->Draw(instance.mesh->vertexCount, 0);
 	}
 	instances.clear();
@@ -522,23 +522,23 @@ void ShapeRenderSystem::Render(
 
 void ShapeRenderSystem::CreateUnitBoxMesh(ID3D11Device* device)
 {
-	// ˆê•Ó1.0 (’†S‚©‚ç}0.5) ‚Ì’¸“_À•W
+	// ä¸€è¾º1.0 (ä¸­å¿ƒã‹ã‚‰Â±0.5) ã®é ‚ç‚¹åº§æ¨™
 	float h = 0.5f;
 	DirectX::XMFLOAT3 p[8] = {
-		{-h,  h, -h}, { h,  h, -h}, { h,  h,  h}, {-h,  h,  h}, // ã–Ê (0-3)
-		{-h, -h, -h}, { h, -h, -h}, { h, -h,  h}, {-h, -h,  h}  // ‰º–Ê (4-7)
+		{-h,  h, -h}, { h,  h, -h}, { h,  h,  h}, {-h,  h,  h}, // ä¸Šé¢ (0-3)
+		{-h, -h, -h}, { h, -h, -h}, { h, -h,  h}, {-h, -h,  h}  // ä¸‹é¢ (4-7)
 	};
 
-	// 6–Ê ~ 2–‡‚ÌOŠpŒ` ~ 3’¸“_ = 36’¸“_ (TRIANGLELIST)
+	// 6é¢ Ã— 2æšã®ä¸‰è§’å½¢ Ã— 3é ‚ç‚¹ = 36é ‚ç‚¹ (TRIANGLELIST)
 	std::vector<DirectX::XMFLOAT3> v = {
-		p[0],p[1],p[2], p[0],p[2],p[3], // ã
-		p[7],p[6],p[5], p[7],p[5],p[4], // ‰º
-		p[0],p[4],p[5], p[0],p[5],p[1], // ‘O
-		p[2],p[6],p[7], p[2],p[7],p[3], // Œã
-		p[3],p[7],p[4], p[3],p[4],p[0], // ¶
-		p[1],p[5],p[6], p[1],p[6],p[2]  // ‰E
+		p[0],p[1],p[2], p[0],p[2],p[3], // ä¸Š
+		p[7],p[6],p[5], p[7],p[5],p[4], // ä¸‹
+		p[0],p[4],p[5], p[0],p[5],p[1], // å‰
+		p[2],p[6],p[7], p[2],p[7],p[3], // å¾Œ
+		p[3],p[7],p[4], p[3],p[4],p[0], // å·¦
+		p[1],p[5],p[6], p[1],p[6],p[2]  // å³
 	};
 
-	// Šù‘¶‚Ì CreateMesh ŠÖ”‚ğg‚Á‚Ä unitBoxMesh ‚É¶¬
+	// æ—¢å­˜ã® CreateMesh é–¢æ•°ã‚’ä½¿ã£ã¦ unitBoxMesh ã«ç”Ÿæˆ
 	CreateMesh(device, v, unitBoxMesh);
 }

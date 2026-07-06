@@ -1,12 +1,12 @@
 #include "UIButton.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
-#include "Engine/Graphics/Resource/Sprite.h" // SpriteRenderer‚Ì’è‹`
+#include "Engine/Graphics/Resource/Sprite.h" // SpriteRendererã®å®šç¾©
 #include "Engine/GamePlay/Input/MouseInput.h" 
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 
 void UIButton::Start() {
-    // “¯‚¶GameObject‚©‚çSpriteRenderer‚ð’T‚µ‚Ä•ÛŽ‚µ‚Ä‚¨‚­
+    // åŒã˜GameObjectã‹ã‚‰SpriteRendererã‚’æŽ¢ã—ã¦ä¿æŒã—ã¦ãŠã
     if (auto obj = GetGameObject()) {
         spriteRenderer = obj->GetComponent<SpriteRenderer>();
     }
@@ -20,9 +20,9 @@ void UIButton::Update(float deltaTime)
         sprite = spriteRenderer.lock();
     }
 
-    // 1. –¼‘O‚ÍŽ‚Á‚Ä‚¢‚é‚ªA‚Ü‚¾ŠÖ”‚ªƒZƒbƒg‚³‚ê‚Ä‚¢‚È‚¢i‚Ü‚½‚Í–¼‘O‚ª•Ï‚í‚Á‚½jê‡‚Ì•R•t‚¯
+    // 1. åå‰ã¯æŒã£ã¦ã„ã‚‹ãŒã€ã¾ã é–¢æ•°ãŒã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ãªã„ï¼ˆã¾ãŸã¯åå‰ãŒå¤‰ã‚ã£ãŸï¼‰å ´åˆã®ç´ä»˜ã‘
     if (!selectedActionName.empty() && !onClickCallback) {
-        // Registry‚©‚çŠÖ”‚ð’T‚µ‚ÄƒZƒbƒg‚·‚é
+        // Registryã‹ã‚‰é–¢æ•°ã‚’æŽ¢ã—ã¦ã‚»ãƒƒãƒˆã™ã‚‹
         onClickCallback = ActionRegistry::Instance().GetAction(selectedActionName);
     }
 
@@ -32,7 +32,7 @@ void UIButton::Update(float deltaTime)
 
     auto& mouse = MouseInput::Instance();
 
-    // ƒzƒo[ó‘Ô‚Ì•Ï‰»‚ÅF‚ð•Ï‚¦‚é‰‰oiSpriteRenderer‚Ì‹@”\‚ð—˜—pj
+    // ãƒ›ãƒãƒ¼çŠ¶æ…‹ã®å¤‰åŒ–ã§è‰²ã‚’å¤‰ãˆã‚‹æ¼”å‡ºï¼ˆSpriteRendererã®æ©Ÿèƒ½ã‚’åˆ©ç”¨ï¼‰
     if (currentlyHovered) 
     {
         if (!isPressed)
@@ -40,31 +40,31 @@ void UIButton::Update(float deltaTime)
             sprite->SetColor({ 1.2f, 1.2f, 1.2f, 1.0f });
         }
 
-        // 1. ‰Ÿ‚³‚ê‚½uŠÔ
+        // 1. æŠ¼ã•ã‚ŒãŸçž¬é–“
         if (mouse.LeftDown()) {
             isPressed = true;
             sprite->SetColor({ 0.6f, 0.6f, 0.6f, 1.0f });
         }
 
 
-        // 2. —£‚³‚ê‚½uŠÔ • ‚©‚ÂŽ©•ª‚ª‰Ÿ‚³‚ê‚Ä‚¢‚½‚È‚çuƒNƒŠƒbƒNv¬—§
+        // 2. é›¢ã•ã‚ŒãŸçž¬é–“ ï¼† ã‹ã¤è‡ªåˆ†ãŒæŠ¼ã•ã‚Œã¦ã„ãŸãªã‚‰ã€Œã‚¯ãƒªãƒƒã‚¯ã€æˆç«‹
         if (mouse.LeftReleased() && isPressed)
         {
             if (onClickCallback) {
-                onClickCallback(); // ‚±‚±‚ÅŽÀsI
+                onClickCallback(); // ã“ã“ã§å®Ÿè¡Œï¼
             }
             isPressed = false;
         }
     }
     else
     {
-        // ”ÍˆÍŠO‚Å—£‚³‚ê‚½‚çƒLƒƒƒ“ƒZƒ‹ˆµ‚¢‚É‚·‚é
+        // ç¯„å›²å¤–ã§é›¢ã•ã‚ŒãŸã‚‰ã‚­ãƒ£ãƒ³ã‚»ãƒ«æ‰±ã„ã«ã™ã‚‹
         if (mouse.LeftReleased()) {
             isPressed = false;
-            sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // ’Êí
+            sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // é€šå¸¸
         }
         else {
-            sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // ’Êí
+            sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f }); // é€šå¸¸
         }
     }
 }
@@ -73,19 +73,19 @@ void UIButton::Gui()
     auto& reg = ActionRegistry::Instance();
     auto categories = reg.GetCategories();
 
-    // 1. ƒJƒeƒSƒŠ‘I‘ð
+    // 1. ã‚«ãƒ†ã‚´ãƒªé¸æŠž
     if (ImGui::BeginCombo("Category", selectedCategory.empty() ? "Select Category" : selectedCategory.c_str())) {
         for (const auto& cat : categories) {
             if (ImGui::Selectable(cat.c_str(), selectedCategory == cat)) {
                 selectedCategory = cat;
-                selectedActionName = ""; // ƒJƒeƒSƒŠ‚ª•Ï‚í‚Á‚½‚çƒŠƒZƒbƒg
+                selectedActionName = ""; // ã‚«ãƒ†ã‚´ãƒªãŒå¤‰ã‚ã£ãŸã‚‰ãƒªã‚»ãƒƒãƒˆ
             }
         }
         ImGui::EndCombo();
     }
 
-    // 2. ƒAƒNƒVƒ‡ƒ“‘I‘ð
-    // ƒJƒeƒSƒŠ‚ª–¢‘I‘ð‚È‚çŽÀs•s‰Â‚ÌŒ©‚½–Ú‚É‚·‚é
+    // 2. ã‚¢ã‚¯ã‚·ãƒ§ãƒ³é¸æŠž
+    // ã‚«ãƒ†ã‚´ãƒªãŒæœªé¸æŠžãªã‚‰å®Ÿè¡Œä¸å¯ã®è¦‹ãŸç›®ã«ã™ã‚‹
     bool canSelectAction = !selectedCategory.empty();
     if (!canSelectAction) {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
@@ -106,11 +106,11 @@ void UIButton::Gui()
 
     if (!canSelectAction) ImGui::PopStyleColor();
 
-    // 3. ƒeƒXƒgŽÀsƒ{ƒ^ƒ“
+    // 3. ãƒ†ã‚¹ãƒˆå®Ÿè¡Œãƒœã‚¿ãƒ³
     bool isValid = reg.HasAction(selectedActionName);
 
     if (!isValid) {
-        // –³Œø‚Èê‡‚ÍƒOƒŒ[ƒAƒEƒg
+        // ç„¡åŠ¹ãªå ´åˆã¯ã‚°ãƒ¬ãƒ¼ã‚¢ã‚¦ãƒˆ
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -132,42 +132,42 @@ bool UIButton::IsMouseOver() {
     auto sprite = spriteRenderer.lock();
     if (!sprite) return false;
 
-    // ƒ}ƒEƒX‚ÌƒXƒNƒŠ[ƒ“À•W
+    // ãƒžã‚¦ã‚¹ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™
     DirectX::XMFLOAT2 mousePos = MouseInput::Instance().GetScreenPos();
 
-    // Sprite‚ÌŠî€ˆÊ’uiTransform‚ÌÀ•Wj
+    // Spriteã®åŸºæº–ä½ç½®ï¼ˆTransformã®åº§æ¨™ï¼‰
     DirectX::XMFLOAT3 pos = sprite->GetPosition();
-    // •`‰æƒTƒCƒYilocalSize * WorldScalej
+    // æç”»ã‚µã‚¤ã‚ºï¼ˆlocalSize * WorldScaleï¼‰
     DirectX::XMFLOAT2 size = sprite->GetSize();
 
-    // --- ƒsƒ{ƒbƒg‚É‚æ‚é”»’è”ÍˆÍ‚ÌƒIƒtƒZƒbƒgŒvŽZ ---
+    // --- ãƒ”ãƒœãƒƒãƒˆã«ã‚ˆã‚‹åˆ¤å®šç¯„å›²ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆè¨ˆç®— ---
     float left = pos.x;
     float top = pos.y;
 
     switch (sprite->GetPivot())
     {
     case PosOfsset::TOP_L:
-        // TransformÀ•W‚ª¶ã‚È‚Ì‚ÅAleft/top‚Í‚»‚Ì‚Ü‚Ü‚ÅOK
+        // Transformåº§æ¨™ãŒå·¦ä¸Šãªã®ã§ã€left/topã¯ãã®ã¾ã¾ã§OK
         break;
 
     case PosOfsset::MID:
-        // TransformÀ•W‚ª’†‰›‚È‚Ì‚ÅAƒTƒCƒY”¼•ª‚¾‚¯¶ã‚ÖƒY‚ç‚·
+        // Transformåº§æ¨™ãŒä¸­å¤®ãªã®ã§ã€ã‚µã‚¤ã‚ºåŠåˆ†ã ã‘å·¦ä¸Šã¸ã‚ºã‚‰ã™
         left -= size.x * 0.5f;
         top -= size.y * 0.5f;
         break;
 
     case PosOfsset::UNDER_M:
-        // TransformÀ•W‚ª’†‰›‰º‚È‚Ì‚ÅA¶‰E‚Í”¼•ªAã‰º‚ÍƒTƒCƒY•ªã‚ÉƒY‚ç‚·
+        // Transformåº§æ¨™ãŒä¸­å¤®ä¸‹ãªã®ã§ã€å·¦å³ã¯åŠåˆ†ã€ä¸Šä¸‹ã¯ã‚µã‚¤ã‚ºåˆ†ä¸Šã«ã‚ºã‚‰ã™
         left -= size.x * 0.5f;
         top -= size.y;
         break;
     }
 
-    // ‰E’[‚Æ‰º’[‚ðŽZo
+    // å³ç«¯ã¨ä¸‹ç«¯ã‚’ç®—å‡º
     float right = left + size.x;
     float bottom = top + size.y;
 
-    // AABB”»’è
+    // AABBåˆ¤å®š
     return (mousePos.x >= left && mousePos.x <= right &&
         mousePos.y >= top && mousePos.y <= bottom);
 }
@@ -175,7 +175,7 @@ bool UIButton::IsMouseOver() {
 
 void UIButton::Serialize(nlohmann::json& j) const
 {
-    // ‘I‘ð‚³‚ê‚Ä‚¢‚éƒAƒNƒVƒ‡ƒ“‚Ì–¼‘O‚ð•Û‘¶
+    // é¸æŠžã•ã‚Œã¦ã„ã‚‹ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã®åå‰ã‚’ä¿å­˜
     j["SelectedActionName"] = selectedActionName;
 }
 

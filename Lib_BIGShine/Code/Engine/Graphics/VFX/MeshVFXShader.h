@@ -11,8 +11,8 @@
 
 struct RenderContext;
 
-// MeshVFX—p‚ÌShader‚ÆConstantBufferXV‚ğ‚Ü‚Æ‚ß‚éƒNƒ‰ƒX
-// RenderSystem‚Í•`‰æ‚·‚éPart‚²‚Æ‚ÉUpdatePart‚ğŒÄ‚ÑA‚±‚ÌƒNƒ‰ƒX‚ªHLSL‚Ö’l‚ğ“n‚·
+// MeshVFXç”¨ã®Shaderã¨ConstantBufferæ›´æ–°ã‚’ã¾ã¨ã‚ã‚‹ã‚¯ãƒ©ã‚¹
+// RenderSystemã¯æç”»ã™ã‚‹Partã”ã¨ã«UpdatePartã‚’å‘¼ã³ã€ã“ã®ã‚¯ãƒ©ã‚¹ãŒHLSLã¸å€¤ã‚’æ¸¡ã™
 class MeshVFXShader
 {
 public:
@@ -55,118 +55,118 @@ public:
     void End(const RenderContext& renderContext_);
 
 private:
-    // Scene.hlsli‘¤‚Ö“n‚·ƒJƒƒ‰Eƒ‰ƒCƒg—pConstantBuffer
+    // Scene.hlsliå´ã¸æ¸¡ã™ã‚«ãƒ¡ãƒ©ãƒ»ãƒ©ã‚¤ãƒˆç”¨ConstantBuffer
     struct CbScene
     {
-        DirectX::XMFLOAT4X4 viewProjection;      // View * Projections—ñ
-        DirectX::XMFLOAT4 lightDirection{};      // •½sŒõŒ¹‚Ì•ûŒü
-        DirectX::XMFLOAT4 lightColor{};          // •½sŒõŒ¹‚ÌF
-        DirectX::XMFLOAT4 cameraPosition{};      // ƒJƒƒ‰‚Ìƒ[ƒ‹ƒhÀ•W
-        DirectX::XMFLOAT4 zBufferParameters{};   // [“x•œŒ³—pƒpƒ‰ƒ[ƒ^
+        DirectX::XMFLOAT4X4 viewProjection;      // View * Projectionè¡Œåˆ—
+        DirectX::XMFLOAT4 lightDirection{};      // å¹³è¡Œå…‰æºã®æ–¹å‘
+        DirectX::XMFLOAT4 lightColor{};          // å¹³è¡Œå…‰æºã®è‰²
+        DirectX::XMFLOAT4 cameraPosition{};      // ã‚«ãƒ¡ãƒ©ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™
+        DirectX::XMFLOAT4 zBufferParameters{};   // æ·±åº¦å¾©å…ƒç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 
-        int numPointLights = 0;                  // “_ŒõŒ¹”
-        int numSpotLights = 0;                   // ƒXƒ|ƒbƒgƒ‰ƒCƒg”
-        DirectX::XMFLOAT2 scenePadding{};        // 16byteƒAƒ‰ƒCƒ“’²®
+        int numPointLights = 0;                  // ç‚¹å…‰æºæ•°
+        int numSpotLights = 0;                   // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆæ•°
+        DirectX::XMFLOAT2 scenePadding{};        // 16byteã‚¢ãƒ©ã‚¤ãƒ³èª¿æ•´
 
-        DirectX::XMFLOAT4X4 invViewProjection;   // Screen/Depth‚©‚çWorld‚Ö–ß‚·‚½‚ß‚Ì‹ts—ñ
+        DirectX::XMFLOAT4X4 invViewProjection;   // Screen/Depthã‹ã‚‰Worldã¸æˆ»ã™ãŸã‚ã®é€†è¡Œåˆ—
     };
 
-    // MeshVFX.hlsli‚ÌCbMeshVFX‚Æ“¯‚¶‡”Ô‚Å•À‚×‚éPart—pConstantBuffer
+    // MeshVFX.hlsliã®CbMeshVFXã¨åŒã˜é †ç•ªã§ä¸¦ã¹ã‚‹Partç”¨ConstantBuffer
     struct CbMeshVFX
     {
-        DirectX::XMFLOAT4X4 world;       // Part‚Ìƒ[ƒ‹ƒhs—ñ
-        DirectX::XMFLOAT4 color;         // BaseTexture‚ÉŠ|‚¯‚éF
+        DirectX::XMFLOAT4X4 world;       // Partã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—
+        DirectX::XMFLOAT4 color;         // BaseTextureã«æ›ã‘ã‚‹è‰²
 
-        DirectX::XMFLOAT2 baseUVSpeed;   // Base UVƒXƒNƒ[ƒ‹‘¬“x
-        DirectX::XMFLOAT2 maskUVSpeed;   // Mask UVƒXƒNƒ[ƒ‹‘¬“x
-        DirectX::XMFLOAT2 noiseUVSpeed;  // Noise UVƒXƒNƒ[ƒ‹‘¬“x
+        DirectX::XMFLOAT2 baseUVSpeed;   // Base UVã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é€Ÿåº¦
+        DirectX::XMFLOAT2 maskUVSpeed;   // Mask UVã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é€Ÿåº¦
+        DirectX::XMFLOAT2 noiseUVSpeed;  // Noise UVã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é€Ÿåº¦
 
-        DirectX::XMFLOAT2 baseUVScale;   // Base UVƒXƒP[ƒ‹
-        DirectX::XMFLOAT2 maskUVScale;   // Mask UVƒXƒP[ƒ‹
-        DirectX::XMFLOAT2 noiseUVScale;  // Noise UVƒXƒP[ƒ‹
-        DirectX::XMFLOAT2 normalUVScale; // Normal UVƒXƒP[ƒ‹
+        DirectX::XMFLOAT2 baseUVScale;   // Base UVã‚¹ã‚±ãƒ¼ãƒ«
+        DirectX::XMFLOAT2 maskUVScale;   // Mask UVã‚¹ã‚±ãƒ¼ãƒ«
+        DirectX::XMFLOAT2 noiseUVScale;  // Noise UVã‚¹ã‚±ãƒ¼ãƒ«
+        DirectX::XMFLOAT2 normalUVScale; // Normal UVã‚¹ã‚±ãƒ¼ãƒ«
 
-        DirectX::XMFLOAT2 distortionNoiseUVScale; // ˜c‚İNoise UVƒXƒP[ƒ‹
-        DirectX::XMFLOAT2 edgePatternUVScale;     // Edge–Í—l UVƒXƒP[ƒ‹
-        DirectX::XMFLOAT2 emissiveUVScale;        // Emissive UVƒXƒP[ƒ‹
-        DirectX::XMFLOAT2 uvRotationCenter;       // UV‰ñ“]E•úËƒXƒP[ƒ‹‚Ì’†S
+        DirectX::XMFLOAT2 distortionNoiseUVScale; // æ­ªã¿Noise UVã‚¹ã‚±ãƒ¼ãƒ«
+        DirectX::XMFLOAT2 edgePatternUVScale;     // Edgeæ¨¡æ§˜ UVã‚¹ã‚±ãƒ¼ãƒ«
+        DirectX::XMFLOAT2 emissiveUVScale;        // Emissive UVã‚¹ã‚±ãƒ¼ãƒ«
+        DirectX::XMFLOAT2 uvRotationCenter;       // UVå›è»¢ãƒ»æ”¾å°„ã‚¹ã‚±ãƒ¼ãƒ«ã®ä¸­å¿ƒ
 
-        float time;                      // Part‚²‚Æ‚ÌÄ¶ŠÔ
-        float alpha;                     // Part‚²‚Æ‚ÌÅIAlpha
-        float normalStrength;            // Normal Texture‚Ì‹­“x
-        float noiseStrength;             // UV Noise‚Ì‹­“x
+        float time;                      // Partã”ã¨ã®å†ç”Ÿæ™‚é–“
+        float alpha;                     // Partã”ã¨ã®æœ€çµ‚Alpha
+        float normalStrength;            // Normal Textureã®å¼·åº¦
+        float noiseStrength;             // UV Noiseã®å¼·åº¦
 
-        float fresnelPower;              // Fresnel‚Ì‰s‚³
-        float fresnelStrength;           // Fresnel‚Ì‹­‚³
-        float dissolveThreshold;         // Mask/Alpha”jŠü‚µ‚«‚¢’l
-        float baseUVRotation;            // Base UV‰ñ“]Bƒ‰ƒWƒAƒ“
+        float fresnelPower;              // Fresnelã®é‹­ã•
+        float fresnelStrength;           // Fresnelã®å¼·ã•
+        float dissolveThreshold;         // Mask/Alphaç ´æ£„ã—ãã„å€¤
+        float baseUVRotation;            // Base UVå›è»¢ã€‚ãƒ©ã‚¸ã‚¢ãƒ³
 
-        float maskUVRotation;            // Mask UV‰ñ“]Bƒ‰ƒWƒAƒ“
-        float noiseUVRotation;           // Noise UV‰ñ“]Bƒ‰ƒWƒAƒ“
-        float uvRadialScale;             // UV•úËƒXƒP[ƒ‹”{—¦
-        float uvRadialScaleSpeed;        // UV•úËƒXƒP[ƒ‹‘¬“x
+        float maskUVRotation;            // Mask UVå›è»¢ã€‚ãƒ©ã‚¸ã‚¢ãƒ³
+        float noiseUVRotation;           // Noise UVå›è»¢ã€‚ãƒ©ã‚¸ã‚¢ãƒ³
+        float uvRadialScale;             // UVæ”¾å°„ã‚¹ã‚±ãƒ¼ãƒ«å€ç‡
+        float uvRadialScaleSpeed;        // UVæ”¾å°„ã‚¹ã‚±ãƒ¼ãƒ«é€Ÿåº¦
 
-        float vertexNoiseHorizontalStrength; // ’¸“_‰¡—h‚ê‹­“x
-        float vertexNoiseVerticalStrength;   // ’¸“_c—h‚ê‹­“x
-        float vertexNoiseHorizontalScale;    // ’¸“_‰¡Noise‚Ì×‚©‚³
-        float vertexNoiseVerticalScale;      // ’¸“_cNoise‚Ì×‚©‚³
+        float vertexNoiseHorizontalStrength; // é ‚ç‚¹æ¨ªæºã‚Œå¼·åº¦
+        float vertexNoiseVerticalStrength;   // é ‚ç‚¹ç¸¦æºã‚Œå¼·åº¦
+        float vertexNoiseHorizontalScale;    // é ‚ç‚¹æ¨ªNoiseã®ç´°ã‹ã•
+        float vertexNoiseVerticalScale;      // é ‚ç‚¹ç¸¦Noiseã®ç´°ã‹ã•
 
-        DirectX::XMFLOAT2 vertexNoisePadding; // 16byteƒAƒ‰ƒCƒ“’²®
-        DirectX::XMFLOAT3 vertexNoiseSpeed;   // ’¸“_NoiseƒXƒNƒ[ƒ‹‘¬“x
-        uint32_t useVertexNoise;              // ’¸“_Noise‚ğg‚¤‚©
+        DirectX::XMFLOAT2 vertexNoisePadding; // 16byteã‚¢ãƒ©ã‚¤ãƒ³èª¿æ•´
+        DirectX::XMFLOAT3 vertexNoiseSpeed;   // é ‚ç‚¹Noiseã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é€Ÿåº¦
+        uint32_t useVertexNoise;              // é ‚ç‚¹Noiseã‚’ä½¿ã†ã‹
 
-        uint32_t useMask;               // Mask‚ğg‚¤‚©
-        uint32_t useNoise;              // UV Noise‚ğg‚¤‚©
-        uint32_t useNormal;             // Normal Texture‚ğg‚¤‚©
-        uint32_t useFresnel;            // Fresnel‚ğg‚¤‚©
+        uint32_t useMask;               // Maskã‚’ä½¿ã†ã‹
+        uint32_t useNoise;              // UV Noiseã‚’ä½¿ã†ã‹
+        uint32_t useNormal;             // Normal Textureã‚’ä½¿ã†ã‹
+        uint32_t useFresnel;            // Fresnelã‚’ä½¿ã†ã‹
 
-        DirectX::XMFLOAT4 edgeColor;    // Edge HighlightF
+        DirectX::XMFLOAT4 edgeColor;    // Edge Highlightè‰²
 
-        float maskDistortionStrength;   // ”wŒi˜c‚İ‹­“x
-        float maskDistortionOpacity;    // ”wŒi˜c‚İAlpha
-        float silhouetteEdgeStrength;   // ƒVƒ‹ƒGƒbƒg‹­’²‹­“x
-        float silhouetteEdgePower;      // ƒVƒ‹ƒGƒbƒg‹­’²‚Ì×‚³
+        float maskDistortionStrength;   // èƒŒæ™¯æ­ªã¿å¼·åº¦
+        float maskDistortionOpacity;    // èƒŒæ™¯æ­ªã¿Alpha
+        float silhouetteEdgeStrength;   // ã‚·ãƒ«ã‚¨ãƒƒãƒˆå¼·èª¿å¼·åº¦
+        float silhouetteEdgePower;      // ã‚·ãƒ«ã‚¨ãƒƒãƒˆå¼·èª¿ã®ç´°ã•
 
-        float intersectionEdgeStrength; // [“xŒğ·Edge‹­“x
-        float intersectionEdgeWidth;    // [“xŒğ·Edge•
-        uint32_t useMaskDistortion;     // ”wŒi˜c‚İ‚ğg‚¤‚©
-        uint32_t useEdgeHighlight;      // Edge Highlight‚ğg‚¤‚©
+        float intersectionEdgeStrength; // æ·±åº¦äº¤å·®Edgeå¼·åº¦
+        float intersectionEdgeWidth;    // æ·±åº¦äº¤å·®Edgeå¹…
+        uint32_t useMaskDistortion;     // èƒŒæ™¯æ­ªã¿ã‚’ä½¿ã†ã‹
+        uint32_t useEdgeHighlight;      // Edge Highlightã‚’ä½¿ã†ã‹
 
-        uint32_t hasDistortionNoiseTexture; // ˜c‚İNoise Texture‚ª‚ ‚é‚©
-        uint32_t hasVertexNoiseTexture;     // ’¸“_Noise Texture‚ª‚ ‚é‚©
-        uint32_t edgePatternMode;           // Edge–Í—l‚ÌQÆ•û–@
-        float edgePatternStrength;          // Edge–Í—l‚Ì”½‰fŠ„‡
+        uint32_t hasDistortionNoiseTexture; // æ­ªã¿Noise TextureãŒã‚ã‚‹ã‹
+        uint32_t hasVertexNoiseTexture;     // é ‚ç‚¹Noise TextureãŒã‚ã‚‹ã‹
+        uint32_t edgePatternMode;           // Edgeæ¨¡æ§˜ã®å‚ç…§æ–¹æ³•
+        float edgePatternStrength;          // Edgeæ¨¡æ§˜ã®åæ˜ å‰²åˆ
 
-        float emissiveStrength;        // Emissive‚Ì‹­‚³
-        float emissivePulseSpeed;      // Emissive“_–Å‘¬“x
-        float emissivePulseAmount;     // Emissive“_–Å—Ê
-        uint32_t hasEdgePatternTexture; // Edge Pattern Texture‚ª‚ ‚é‚©
+        float emissiveStrength;        // Emissiveã®å¼·ã•
+        float emissivePulseSpeed;      // Emissiveç‚¹æ»…é€Ÿåº¦
+        float emissivePulseAmount;     // Emissiveç‚¹æ»…é‡
+        uint32_t hasEdgePatternTexture; // Edge Pattern TextureãŒã‚ã‚‹ã‹
 
-        uint32_t hasEmissiveTexture;   // Emissive Texture‚ª‚ ‚é‚©
+        uint32_t hasEmissiveTexture;   // Emissive TextureãŒã‚ã‚‹ã‹
 
-        uint32_t useGradientTexture;   // Gradient Texture‚ğg‚¤‚©
-        uint32_t hasGradientTexture;   // Gradient Texture‚ª‚ ‚é‚©
-        uint32_t gradientSampleMode;   // 0:U•ûŒü 1:V•ûŒü
-        uint32_t gradientDirection;    // 0:‡•ûŒü 1:‹t•ûŒü
+        uint32_t useGradientTexture;   // Gradient Textureã‚’ä½¿ã†ã‹
+        uint32_t hasGradientTexture;   // Gradient TextureãŒã‚ã‚‹ã‹
+        uint32_t gradientSampleMode;   // 0:Uæ–¹å‘ 1:Væ–¹å‘
+        uint32_t gradientDirection;    // 0:é †æ–¹å‘ 1:é€†æ–¹å‘
 
-        float gradientFixedUv;         // Gradient Texture‚ÌŒÅ’èUV
-        float gradientStartUv;         // Gradient‚ÌŠJnUV
-        float gradientEndUv;           // Gradient‚ÌI—¹UV
-        float gradientPadding;         // HLSL cbuffer‹«ŠE‡‚í‚¹—p
-        DirectX::XMFLOAT3 gradientRegisterPadding{}; // gradientPaddingŒã‚Ì12byte–„‚ß
+        float gradientFixedUv;         // Gradient Textureã®å›ºå®šUV
+        float gradientStartUv;         // Gradientã®é–‹å§‹UV
+        float gradientEndUv;           // Gradientã®çµ‚äº†UV
+        float gradientPadding;         // HLSL cbufferå¢ƒç•Œåˆã‚ã›ç”¨
+        DirectX::XMFLOAT3 gradientRegisterPadding{}; // gradientPaddingå¾Œã®12byteåŸ‹ã‚
 
-        DirectX::XMFLOAT4 dissolveEdgeColor; // Dissolve‹«ŠE”­ŒõF
-        DirectX::XMFLOAT4 backFaceColor;     // ”w–ÊBoostF
+        DirectX::XMFLOAT4 dissolveEdgeColor; // Dissolveå¢ƒç•Œç™ºå…‰è‰²
+        DirectX::XMFLOAT4 backFaceColor;     // èƒŒé¢Boostè‰²
 
-        float dissolveEdgeWidth;       // Dissolve‹«ŠE•
-        float dissolveEdgeStrength;    // Dissolve‹«ŠE”­Œõ‹­“x
-        float fresnelNoiseStrength;    // Fresnel‚ÉNoise‚ğ¬‚º‚é‹­‚³
-        float backFaceEmissiveStrength;// ”w–ÊBoost‹­“x
+        float dissolveEdgeWidth;       // Dissolveå¢ƒç•Œå¹…
+        float dissolveEdgeStrength;    // Dissolveå¢ƒç•Œç™ºå…‰å¼·åº¦
+        float fresnelNoiseStrength;    // Fresnelã«Noiseã‚’æ··ãœã‚‹å¼·ã•
+        float backFaceEmissiveStrength;// èƒŒé¢Boostå¼·åº¦
 
-        uint32_t useDissolveEdge;      // Dissolve‹«ŠE”­Œõ‚ğg‚¤‚©
-        uint32_t useFresnelNoise;      // Fresnel Noise‚ğg‚¤‚©
-        uint32_t useBackFaceBoost;     // ”w–ÊBoost‚ğg‚¤‚©
-        uint32_t meshVFXPadding;       // 16byteƒAƒ‰ƒCƒ“’²®
+        uint32_t useDissolveEdge;      // Dissolveå¢ƒç•Œç™ºå…‰ã‚’ä½¿ã†ã‹
+        uint32_t useFresnelNoise;      // Fresnel Noiseã‚’ä½¿ã†ã‹
+        uint32_t useBackFaceBoost;     // èƒŒé¢Boostã‚’ä½¿ã†ã‹
+        uint32_t meshVFXPadding;       // 16byteã‚¢ãƒ©ã‚¤ãƒ³èª¿æ•´
 
         uint32_t baseSamplerMode;
         uint32_t maskSamplerMode;
@@ -185,16 +185,16 @@ private:
     static_assert(sizeof(CbMeshVFX) % 16 == 0, "CbMeshVFX size must be aligned to 16 bytes.");
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;                  // ’ÊíMeshVFX—pVS
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> materialOverlayVertexShader;   // MaterialOverlay—pVS
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> afterimageInstancedVertexShader; // Afterimage Instancing—pVS
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;                  // é€šå¸¸MeshVFXç”¨VS
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> materialOverlayVertexShader;   // MaterialOverlayç”¨VS
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> afterimageInstancedVertexShader; // Afterimage Instancingç”¨VS
 
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;            // ’ÊíMeshVFX—pPS
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> distortionPixelShader;  // ”wŒi˜c‚İ—pPS
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;            // é€šå¸¸MeshVFXç”¨PS
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> distortionPixelShader;  // èƒŒæ™¯æ­ªã¿ç”¨PS
 
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout; // GltfModel’¸“_Œ`®—pInputLayout
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout; // GltfModelé ‚ç‚¹å½¢å¼ç”¨InputLayout
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;    // Scene—pCB
-    Microsoft::WRL::ComPtr<ID3D11Buffer> partConstantBuffer;     // Part—pCB
-    Microsoft::WRL::ComPtr<ID3D11Buffer> skeletonConstantBuffer; // Skinning—pBones—ñCB
+    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;    // Sceneç”¨CB
+    Microsoft::WRL::ComPtr<ID3D11Buffer> partConstantBuffer;     // Partç”¨CB
+    Microsoft::WRL::ComPtr<ID3D11Buffer> skeletonConstantBuffer; // Skinningç”¨Boneè¡Œåˆ—CB
 };

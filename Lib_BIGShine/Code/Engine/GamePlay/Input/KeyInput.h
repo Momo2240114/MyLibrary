@@ -6,15 +6,15 @@
 class KeyInput
 {
 public:
-    //ƒL[‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©‚ÌŒŸ’m
+    //ã‚­ãƒ¼ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹ã‹ã®æ¤œçŸ¥
     static bool KeyPressed(int key);
-    //ƒL[—£‚³‚ê‚½
+    //ã‚­ãƒ¼é›¢ã•ã‚ŒãŸæ™‚
     static bool KeyPressedOut(int key);
-    //ƒL[‰Ÿ‚³‚ê‚½
+    //ã‚­ãƒ¼æŠ¼ã•ã‚ŒãŸæ™‚
     static bool KeyPressedIn(int key);
 
-    //g‚¢‚©‚½@KeyPut::KeyPressed(KeyPut::Key::K_A)
-    //–¼‘O‚ÌÕ“Ë‚ğ”ğ‚¯‚é‚½‚ßK_‚ğg‚¤
+    //ä½¿ã„ã‹ãŸã€€KeyPut::KeyPressed(KeyPut::Key::K_A)
+    //åå‰ã®è¡çªã‚’é¿ã‘ã‚‹ãŸã‚K_ã‚’ä½¿ã†
     enum Key {
         K_A = 0x41, K_B, K_C, K_D, K_E, K_F, K_G, K_H, K_I,
         K_J, K_K, K_L, K_M, K_N, K_O, K_P, K_Q,
@@ -40,10 +40,10 @@ public:
         K_NumPad8, K_NumPad9,
         K_NumPadAdd = 0x6B, K_NumPadSubtract = 0x6D,
         K_NumPadMultiply = 0x6A, K_NumPadDivide = 0x6F,
-        K_NumPadEnter = 0x0D // ‹æ•Ê‚µ‚½‚¢‚È‚ç•Ê’l‚ğŠ„‚èU‚é
+        K_NumPadEnter = 0x0D // åŒºåˆ¥ã—ãŸã„ãªã‚‰åˆ¥å€¤ã‚’å‰²ã‚ŠæŒ¯ã‚‹
     };
 
-    // ‘SƒL[‚Ì‚¤‚¿A‚¢‚¸‚ê‚©‚ª‰Ÿ‚³‚ê‚Ä‚¢‚ê‚Îtrue
+    // å…¨ã‚­ãƒ¼ã®ã†ã¡ã€ã„ãšã‚Œã‹ãŒæŠ¼ã•ã‚Œã¦ã„ã‚Œã°true
     static bool AnyKeyPressed()
     {
         for (Key key : allKeys)
@@ -56,8 +56,8 @@ public:
 
 
 private:
-    static std::unordered_map<int, bool> oldState; // éŒ¾‚¾‚¯
-    // enum Key ‚É’è‹`‚³‚ê‚½‘SƒL[‚ğ—ñ‹“
+    static std::unordered_map<int, bool> oldState; // å®£è¨€ã ã‘
+    // enum Key ã«å®šç¾©ã•ã‚ŒãŸå…¨ã‚­ãƒ¼ã‚’åˆ—æŒ™
     static constexpr Key allKeys[] = {
         K_A,K_B,K_C,K_D,K_E,K_F,K_G,K_H,K_I,K_J,K_K,K_L,K_M,K_N,K_O,K_P,K_Q,
         K_R,K_S,K_T,K_U,K_V,K_W,K_X,K_Y,K_Z,

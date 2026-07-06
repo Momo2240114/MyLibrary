@@ -19,7 +19,7 @@ EventTrack::EventTrack(const std::string& name, EventType defaultType):
 
 void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
 {
-    // šd—vFÄ¶ƒwƒbƒh‚ªŠª‚«–ß‚Á‚½A‚ ‚é‚¢‚Íƒ‹[ƒv‚µ‚½”»’è
+    // â˜…é‡è¦ï¼šå†ç”Ÿãƒ˜ãƒƒãƒ‰ãŒå·»ãæˆ»ã£ãŸã€ã‚ã‚‹ã„ã¯ãƒ«ãƒ¼ãƒ—ã—ãŸåˆ¤å®š
     static float lastTime = 0;
     bool looped = (currentTime < lastTime);
     lastTime = currentTime;
@@ -28,25 +28,25 @@ void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
     {
         bool inRange = (currentTime >= ev.startTime && currentTime <= ev.endTime);
 
-        // --- A. ”ÍˆÍ“à‚É“ü‚Á‚½iStartj ---
+        // --- A. ç¯„å›²å†…ã«å…¥ã£ãŸï¼ˆStartï¼‰ ---
         if (inRange && !ev.started) {
             ev.started = true;
             ev.ended = false;
             if (!ev.actionStart.empty()) Execute(ev.actionStart, owner);
-            return; // š‚±‚ÌƒtƒŒ[ƒ€‚Í Start ‚¾‚¯‚µ‚Ä”²‚¯‚éiUpdate ‚ğ 1ƒtƒŒ[ƒ€’x‚ç‚¹‚éj
+            return; // â˜…ã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã¯ Start ã ã‘ã—ã¦æŠœã‘ã‚‹ï¼ˆUpdate ã‚’ 1ãƒ•ãƒ¬ãƒ¼ãƒ é…ã‚‰ã›ã‚‹ï¼‰
         }
 
-        // --- B. Œp‘±’†iUpdatej ---
+        // --- B. ç¶™ç¶šä¸­ï¼ˆUpdateï¼‰ ---
         if (inRange) {
             if (!ev.actionUpdate.empty()) Execute(ev.actionUpdate, owner);
             return;
         }
 
-        // --- C. ”ÍˆÍ‚©‚ço‚½A‚Ü‚½‚Íƒ‹[ƒv‚µ‚½iEndj ---
-        // uŠù‚ÉŠJn‚µ‚Ä‚¢‚é‚ªA¡‚Í”ÍˆÍŠOv‚©‚Âu‚Ü‚¾I—¹ˆ—‚ğ‚µ‚Ä‚¢‚È‚¢vê‡
+        // --- C. ç¯„å›²ã‹ã‚‰å‡ºãŸã€ã¾ãŸã¯ãƒ«ãƒ¼ãƒ—ã—ãŸï¼ˆEndï¼‰ ---
+        // ã€Œæ—¢ã«é–‹å§‹ã—ã¦ã„ã‚‹ãŒã€ä»Šã¯ç¯„å›²å¤–ã€ã‹ã¤ã€Œã¾ã çµ‚äº†å‡¦ç†ã‚’ã—ã¦ã„ãªã„ã€å ´åˆ
         if ((!inRange && ev.started && !ev.ended) || (looped && ev.started && !ev.ended)) {
             ev.ended = true;
-            // started ‚ğ false ‚É–ß‚·‚±‚Æ‚ÅŸ‰ñ‚ÌÄ¶‚É”õ‚¦‚é
+            // started ã‚’ false ã«æˆ»ã™ã“ã¨ã§æ¬¡å›ã®å†ç”Ÿã«å‚™ãˆã‚‹
             ev.started = false;
 
             if (!ev.actionEnd.empty()) {
@@ -59,11 +59,11 @@ void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
 
 void EventTrack::Execute(const std::string& name, std::shared_ptr<GameObject> owner)
 {
-    // 1. ‚Ü‚¸©•ª‚Ì LocalRegistry ‚ğ’T‚·
+    // 1. ã¾ãšè‡ªåˆ†ã® LocalRegistry ã‚’æ¢ã™
     if (owner && owner->localRegistry.HasAction(name)) {
         owner->localRegistry.Call(name);
     }
-    // 2. ‚È‚¯‚ê‚Î GlobalRegistry ‚ğ’T‚·
+    // 2. ãªã‘ã‚Œã° GlobalRegistry ã‚’æ¢ã™
     else if (ActionRegistry::Instance().HasAction(name)) {
         ActionRegistry::Instance().Call(name);
     }
@@ -71,7 +71,7 @@ void EventTrack::Execute(const std::string& name, std::shared_ptr<GameObject> ow
 
 
 // ----------------------------------------------------------
-// ƒCƒxƒ“ƒg‘€ì
+// ã‚¤ãƒ™ãƒ³ãƒˆæ“ä½œ
 // ----------------------------------------------------------
 
 void EventTrack::AddEvent(EventType type, const std::string& label, float start, float end, unsigned int color)
@@ -121,7 +121,7 @@ void EventTrack::Paste()
 
 
 // ----------------------------------------------------------
-// ImGui Timeline •`‰æ (”Ä—pƒCƒxƒ“ƒg)
+// ImGui Timeline æç”» (æ±ç”¨ã‚¤ãƒ™ãƒ³ãƒˆ)
 // ----------------------------------------------------------
 bool EventTrack::DrawSequencer(
     float* currentTime,
@@ -137,7 +137,7 @@ bool EventTrack::DrawSequencer(
     const float labelWidth = 120.0f;
     auto& globalReg = ActionRegistry::Instance();
 
-    // --- 1. ƒJƒeƒSƒŠƒŠƒXƒg‚Ì€”õ (Local/Global) ---
+    // --- 1. ã‚«ãƒ†ã‚´ãƒªãƒªã‚¹ãƒˆã®æº–å‚™ (Local/Global) ---
     struct CategoryEntry { std::string name; bool isLocal; };
     std::vector<CategoryEntry> allCategories;
     if (owner) {
@@ -145,7 +145,7 @@ bool EventTrack::DrawSequencer(
     }
     for (const auto& cat : globalReg.GetCategories()) allCategories.push_back({ cat, false });
 
-    // ƒY[ƒ€ƒRƒ“ƒgƒ[ƒ‹
+    // ã‚ºãƒ¼ãƒ ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«
     ImGui::SliderFloat("Zoom", &pixelsPerSecond, 20.0f, 1000.0f, "%.0f px/s");
 
     float itemAreaHeight = (std::max)(160.0f, (float)events.size() * rowHeight);
@@ -156,7 +156,7 @@ bool EventTrack::DrawSequencer(
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 origin = ImGui::GetCursorScreenPos();
 
-    // ”wŒi•`‰æ
+    // èƒŒæ™¯æç”»
     draw_list->AddRectFilled(origin, origin + ImVec2((std::max)(contentWidth, ImGui::GetWindowWidth()), itemAreaHeight), IM_COL32(30, 30, 30, 255));
 
     if (*expanded)
@@ -167,7 +167,7 @@ bool EventTrack::DrawSequencer(
             ImGui::PushID(i);
             float yTop = origin.y + rowHeight * i;
 
-            // --- ƒ^ƒCƒ€ƒ‰ƒCƒ“ã‚Ì•`‰æ‚Æƒhƒ‰ƒbƒO‘€ì (Šù‘¶‹@”\) ---
+            // --- ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ä¸Šã®æç”»ã¨ãƒ‰ãƒ©ãƒƒã‚°æ“ä½œ (æ—¢å­˜æ©Ÿèƒ½) ---
             float x0 = origin.x + labelWidth + ev.startTime * pixelsPerSecond;
             float x1 = origin.x + labelWidth + ev.endTime * pixelsPerSecond;
             float width = x1 - x0;
@@ -177,12 +177,12 @@ bool EventTrack::DrawSequencer(
                 draw_list->AddRect({ x0, yTop + 2 }, { x1, yTop + rowHeight - 2 }, IM_COL32_WHITE, 4.0f, 0, 2.0f);
             }
 
-            // ƒ‰ƒxƒ‹iƒAƒNƒVƒ‡ƒ“–¼j‚ğ•\¦
+            // ãƒ©ãƒ™ãƒ«ï¼ˆã‚¢ã‚¯ã‚·ãƒ§ãƒ³åï¼‰ã‚’è¡¨ç¤º
             draw_list->AddText({ x0 + 4, yTop + 4 }, IM_COL32_WHITE, ev.payload.empty() ? "(No Action)" : ev.payload.c_str());
 
-            // --- 3. ƒhƒ‰ƒbƒOˆÚ“®ƒƒWƒbƒN‚Ì’Ç‰Á ---
+            // --- 3. ãƒ‰ãƒ©ãƒƒã‚°ç§»å‹•ãƒ­ã‚¸ãƒƒã‚¯ã®è¿½åŠ  ---
             ImGui::SetCursorScreenPos({ x0, yTop });
-            // ƒo[‘S‘Ì‚ğ’Í‚Ş‚½‚ß‚Ìƒ{ƒ^ƒ“
+            // ãƒãƒ¼å…¨ä½“ã‚’æ´ã‚€ãŸã‚ã®ãƒœã‚¿ãƒ³
             ImGui::InvisibleButton("move_event", { width, rowHeight });
 
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
@@ -191,7 +191,7 @@ bool EventTrack::DrawSequencer(
                 ev.startTime += deltaTime;
                 ev.endTime += deltaTime;
 
-                // ”ÍˆÍŠOƒ`ƒFƒbƒN
+                // ç¯„å›²å¤–ãƒã‚§ãƒƒã‚¯
                 if (ev.startTime < 0) {
                     float d = -ev.startTime;
                     ev.startTime += d;
@@ -204,37 +204,37 @@ bool EventTrack::DrawSequencer(
                 }
             }
 
-            // ‘I‘ğ”»’è
+            // é¸æŠåˆ¤å®š
             ImGui::SetCursorScreenPos({ origin.x, yTop });
             if (ImGui::InvisibleButton("row_select", { labelWidth + (lengthSeconds * pixelsPerSecond), rowHeight })) {
                 *selectedEntry = i;
             }
 
-            // --- ‘I‘ğ‚³‚ê‚Ä‚¢‚éƒCƒxƒ“ƒg‚ÌÚ×İ’è (ƒAƒNƒVƒ‡ƒ“‘I‘ğ) ---
+            // --- é¸æŠã•ã‚Œã¦ã„ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆã®è©³ç´°è¨­å®š (ã‚¢ã‚¯ã‚·ãƒ§ãƒ³é¸æŠ) ---
             if (*selectedEntry == i) {
-                // ƒ‰ƒxƒ‹ƒGƒŠƒA‚ÉƒAƒNƒVƒ‡ƒ“‘I‘ğ GUI ‚ğ•\¦i‚Ü‚½‚Í•Ê‚ÌêŠ‚É•\¦j
+                // ãƒ©ãƒ™ãƒ«ã‚¨ãƒªã‚¢ã«ã‚¢ã‚¯ã‚·ãƒ§ãƒ³é¸æŠ GUI ã‚’è¡¨ç¤ºï¼ˆã¾ãŸã¯åˆ¥ã®å ´æ‰€ã«è¡¨ç¤ºï¼‰
                 ImGui::SetCursorScreenPos({ origin.x, yTop });
 
-                // –¼‘O“ü—Í—p‚Ìƒoƒbƒtƒ@istd::string ‚ğ’¼Ú•ÒWj
+                // åå‰å…¥åŠ›ç”¨ã®ãƒãƒƒãƒ•ã‚¡ï¼ˆstd::string ã‚’ç›´æ¥ç·¨é›†ï¼‰
                 char buf[128];
                 strncpy_s(buf, ev.label.c_str(), sizeof(buf));
 
-                ImGui::SetNextItemWidth(labelWidth - 5); // ­‚µ—]”’‚ğì‚é
+                ImGui::SetNextItemWidth(labelWidth - 5); // å°‘ã—ä½™ç™½ã‚’ä½œã‚‹
                 if (ImGui::InputText("##edit_labelName", buf, sizeof(buf))) {
-                    ev.label = buf; // “ü—Í‚ª‚ ‚é‚½‚Ñ‚É‘¦À‚É”½‰f
+                    ev.label = buf; // å…¥åŠ›ãŒã‚ã‚‹ãŸã³ã«å³åº§ã«åæ˜ 
                 }
 
-                // ƒyƒCƒ[ƒh‚ğˆê“I‚ÉƒJƒeƒSƒŠ‚ÆƒAƒNƒVƒ‡ƒ“‚É•ª‚¯‚é‚Ì‚ÍèŠÔ‚È‚Ì‚ÅA
-                // ¡‰ñ‚ÍuƒJƒeƒSƒŠ‘I‘ğv¨u‚»‚Ì’†‚ÌƒAƒNƒVƒ‡ƒ“‘I‘ğv‚Ì 2 Step GUI ‚ğ—pˆÓ‚µ‚Ü‚·B
+                // ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰ã‚’ä¸€æ™‚çš„ã«ã‚«ãƒ†ã‚´ãƒªã¨ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã«åˆ†ã‘ã‚‹ã®ã¯æ‰‹é–“ãªã®ã§ã€
+                // ä»Šå›ã¯ã€Œã‚«ãƒ†ã‚´ãƒªé¸æŠã€â†’ã€Œãã®ä¸­ã®ã‚¢ã‚¯ã‚·ãƒ§ãƒ³é¸æŠã€ã® 2 Step GUI ã‚’ç”¨æ„ã—ã¾ã™ã€‚
 
                 ImGui::SetNextItemWidth(labelWidth);
                 if (ImGui::BeginCombo("##ev_act_combo", ev.payload.empty() ? "Select..." : ev.payload.c_str(), ImGuiComboFlags_NoArrowButton)) {
                     for (const auto& catEntry : allCategories) {
                         if (ImGui::Selectable(((catEntry.isLocal ? "[L] " : "[G] ") + catEntry.name).c_str())) {
-                            // ƒJƒeƒSƒŠ‚ğ‘I‘ğ‚µ‚½‚çA‚»‚ÌƒJƒeƒSƒŠ‚ÌÅ‰‚ÌƒAƒNƒVƒ‡ƒ“‚ğ‰¼İ’è
+                            // ã‚«ãƒ†ã‚´ãƒªã‚’é¸æŠã—ãŸã‚‰ã€ãã®ã‚«ãƒ†ã‚´ãƒªã®æœ€åˆã®ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’ä»®è¨­å®š
                             auto names = catEntry.isLocal ? owner->localRegistry.GetActionNames(catEntry.name) : globalReg.GetActionNames(catEntry.name);
                             if (!names.empty()) ev.payload = names[0];
-                            ev.label = ev.payload; // ƒ‰ƒxƒ‹‚àXV
+                            ev.label = ev.payload; // ãƒ©ãƒ™ãƒ«ã‚‚æ›´æ–°
                         }
                     }
                     ImGui::EndCombo();
@@ -244,13 +244,13 @@ bool EventTrack::DrawSequencer(
                 draw_list->AddText({ origin.x + 4, yTop + 4 }, IM_COL32_WHITE, ev.label.c_str());
             }
 
-            // (ŠJnEI—¹ƒhƒ‰ƒbƒO‚Ì InvisibleButton ‚Í‚±‚±‚ÉˆÛ...)
+            // (é–‹å§‹ãƒ»çµ‚äº†ãƒ‰ãƒ©ãƒƒã‚°ã® InvisibleButton ã¯ã“ã“ã«ç¶­æŒ...)
 
             ImGui::PopID();
         }
     }
 
-    // Œ»İŠÔƒ‰ƒCƒ“
+    // ç¾åœ¨æ™‚é–“ãƒ©ã‚¤ãƒ³
     float cx = origin.x + labelWidth + (*currentTime) * pixelsPerSecond;
     draw_list->AddLine({ cx, origin.y }, { cx, origin.y + itemAreaHeight }, IM_COL32(255, 0, 0, 255), 2.0f);
 

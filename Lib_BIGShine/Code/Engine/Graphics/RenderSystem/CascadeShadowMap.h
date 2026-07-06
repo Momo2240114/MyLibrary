@@ -22,7 +22,7 @@ public:
 
     void SetViewport(ID3D11DeviceContext* dc) const;
 
-    //ÉQÉbÉ^Å[
+    //„Ç≤„ÉÉ„Çø„Éº
     bool IsUseCascadeShadow() const { return useCascadeShadow; }
     void SetUseCascadeShadow(bool enable) { useCascadeShadow = enable; }
 

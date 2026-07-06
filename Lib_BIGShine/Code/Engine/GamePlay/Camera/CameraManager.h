@@ -8,29 +8,29 @@ class CameraManager {
 public:
     CameraManager() = default;
     void Initialize();
-    // ‘SƒJƒƒ‰‚ğ’Tõ‚µAÅ‚à—Dæ“x‚Ì‚‚¢‚à‚Ì‚ğŒˆ’è
+    // å…¨ã‚«ãƒ¡ãƒ©ã‚’æ¢ç´¢ã—ã€æœ€ã‚‚å„ªå…ˆåº¦ã®é«˜ã„ã‚‚ã®ã‚’æ±ºå®š
     void Update(float et_, const std::vector<std::shared_ptr<GameObject>>& objects_);
 
-    // ƒŒƒ“ƒ_ƒŠƒ“ƒO‚ÅŒÄ‚Ño‚·u¡g‚¤‚×‚«ƒJƒƒ‰v
+    // ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã§å‘¼ã³å‡ºã™ã€Œä»Šä½¿ã†ã¹ãã‚«ãƒ¡ãƒ©ã€
     std::shared_ptr<CameraComponent> GetActiveCamera() const;
 
 private:
     void StartTransition(std::shared_ptr<CameraComponent> nextCam);
 
-    std::shared_ptr<CameraComponent> activeCameraComponent; // ÅI“I‚È‹“_
-    std::shared_ptr<CameraComponent> targetCamera;          // ‘JˆÚ‚Ì–Ú“I’n
+    std::shared_ptr<CameraComponent> activeCameraComponent; // æœ€çµ‚çš„ãªè¦–ç‚¹
+    std::shared_ptr<CameraComponent> targetCamera;          // é·ç§»ã®ç›®çš„åœ°
 
-    // ƒ}ƒl[ƒWƒƒ[‚ªŠ—L‚·‚éuƒvƒƒLƒVi‘ã—jƒIƒuƒWƒFƒNƒgv
+    // ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ãŒæ‰€æœ‰ã™ã‚‹ã€Œãƒ—ãƒ­ã‚­ã‚·ï¼ˆä»£ç†ï¼‰ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã€
     std::shared_ptr<GameObject> m_proxyObject;
-    // ‚»‚ÌƒIƒuƒWƒFƒNƒg‚É•R‚Ã‚­ƒRƒ“ƒ|[ƒlƒ“ƒgi‚±‚ê‚ç‚ğƒŒƒ“ƒ_ƒ‰[‚É“n‚·j
+    // ãã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«ç´ã¥ãã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆï¼ˆã“ã‚Œã‚‰ã‚’ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼ã«æ¸¡ã™ï¼‰
     std::shared_ptr<CameraComponent> m_proxyCamera;
 
-    // ‘JˆÚ—pƒpƒ‰ƒ[ƒ^
+    // é·ç§»ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
     bool isTransitioning = false;
     float transitionTimer = 0.0f;
     float transitionDuration = 1.0f;
 
-    // •âŠÔŒvZ—p‚Ìs—ñƒLƒƒƒbƒVƒ…
-    DirectX::XMFLOAT4X4 startViewMatrix;    // ‘JˆÚŠJn‚Ìƒrƒ…[s—ñin“_j
-    DirectX::XMFLOAT4X4 currentView;        // •âŠÔŒvZ’†‚ÌŒ»İ‚Ìƒrƒ…[s—ñ
+    // è£œé–“è¨ˆç®—ç”¨ã®è¡Œåˆ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥
+    DirectX::XMFLOAT4X4 startViewMatrix;    // é·ç§»é–‹å§‹æ™‚ã®ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ï¼ˆå§‹ç‚¹ï¼‰
+    DirectX::XMFLOAT4X4 currentView;        // è£œé–“è¨ˆç®—ä¸­ã®ç¾åœ¨ã®ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—
 };

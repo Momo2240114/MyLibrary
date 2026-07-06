@@ -1,10 +1,10 @@
 #include "Engine/Common/misc.h"
 #include "RenderState.h"
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 RenderState::RenderState(ID3D11Device* device)
 {
-	// ƒ|ƒCƒ“ƒgƒTƒ“ƒvƒŠƒ“ƒO•ƒeƒNƒXƒ`ƒƒŒJ‚è•Ô‚µ‚ ‚è
+	// ãƒã‚¤ãƒ³ãƒˆã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ï¼†ãƒ†ã‚¯ã‚¹ãƒãƒ£ç¹°ã‚Šè¿”ã—ã‚ã‚Š
 	{
 		D3D11_SAMPLER_DESC desc;
 		desc.MipLODBias = 0.0f;
@@ -23,7 +23,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateSamplerState(&desc,
 			samplerStates[static_cast<int>(SamplerState::PointWrap)].GetAddressOf());
 	}
-	// ƒ|ƒCƒ“ƒgƒTƒ“ƒvƒŠƒ“ƒO•ƒeƒNƒXƒ`ƒƒŒJ‚è•Ô‚µ‚È‚µ
+	// ãƒã‚¤ãƒ³ãƒˆã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ï¼†ãƒ†ã‚¯ã‚¹ãƒãƒ£ç¹°ã‚Šè¿”ã—ãªã—
 	{
 		D3D11_SAMPLER_DESC desc;
 		desc.MipLODBias = 0.0f;
@@ -42,7 +42,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateSamplerState(&desc,
 			samplerStates[static_cast<int>(SamplerState::PointClamp)].GetAddressOf());
 	}
-	// ƒŠƒjƒAƒTƒ“ƒvƒŠƒ“ƒO•ƒeƒNƒXƒ`ƒƒŒJ‚è•Ô‚µ‚ ‚è
+	// ãƒªãƒ‹ã‚¢ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ï¼†ãƒ†ã‚¯ã‚¹ãƒãƒ£ç¹°ã‚Šè¿”ã—ã‚ã‚Š
 	{
 		D3D11_SAMPLER_DESC desc;
 		desc.MipLODBias = 0.0f;
@@ -61,7 +61,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateSamplerState(&desc,
 			samplerStates[static_cast<int>(SamplerState::LinearWrap)].GetAddressOf());
 	}
-	// ƒŠƒjƒAƒTƒ“ƒvƒŠƒ“ƒO•ƒeƒNƒXƒ`ƒƒŒJ‚è•Ô‚µ‚È‚µ
+	// ãƒªãƒ‹ã‚¢ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ï¼†ãƒ†ã‚¯ã‚¹ãƒãƒ£ç¹°ã‚Šè¿”ã—ãªã—
 	{
 		D3D11_SAMPLER_DESC desc;
 		desc.MipLODBias = 0.0f;
@@ -80,7 +80,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateSamplerState(&desc,
 			samplerStates[static_cast<int>(SamplerState::LinearClamp)].GetAddressOf());
 	}
-	// ƒŠƒjƒAƒTƒ“ƒvƒŠƒ“ƒO•ƒeƒNƒXƒ`ƒƒ‹«ŠEŠO‚Í•
+	// ãƒªãƒ‹ã‚¢ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ï¼†ãƒ†ã‚¯ã‚¹ãƒãƒ£å¢ƒç•Œå¤–ã¯é»’
 	{
 		D3D11_SAMPLER_DESC desc;
 		desc.MipLODBias = 0.0f;
@@ -89,13 +89,13 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.MinLOD = -D3D11_FLOAT32_MAX;
 		desc.MaxLOD = D3D11_FLOAT32_MAX;
 
-		// š‹«ŠE‚ÌF‚ğ^‚Á•i“§–¾j‚Éİ’è
+		// â˜…å¢ƒç•Œã®è‰²ã‚’çœŸã£é»’ï¼ˆé€æ˜ï¼‰ã«è¨­å®š
 		desc.BorderColor[0] = 0.0f;
 		desc.BorderColor[1] = 0.0f;
 		desc.BorderColor[2] = 0.0f;
 		desc.BorderColor[3] = 0.0f;
 
-		// šAddressMode ‚ğ BORDER ‚Éİ’è
+		// â˜…AddressMode ã‚’ BORDER ã«è¨­å®š
 		desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 		desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 		desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -105,7 +105,7 @@ RenderState::RenderState(ID3D11Device* device)
 			samplerStates[static_cast<int>(SamplerState::LinearBorder)].GetAddressOf());
 	}
 
-	// [“xƒeƒXƒg‚ ‚è•[“x‘‚«‚İ‚ ‚è
+	// æ·±åº¦ãƒ†ã‚¹ãƒˆã‚ã‚Šï¼†æ·±åº¦æ›¸ãè¾¼ã¿ã‚ã‚Š
 	{
 		D3D11_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = true;
@@ -114,7 +114,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateDepthStencilState(&desc,
 			depthStencilStates[static_cast<int>(DepthState::TestAndWrite)].GetAddressOf());
 	}
-	// [“xƒeƒXƒg‚ ‚è•[“x‘‚«‚İ‚È‚µ
+	// æ·±åº¦ãƒ†ã‚¹ãƒˆã‚ã‚Šï¼†æ·±åº¦æ›¸ãè¾¼ã¿ãªã—
 	{
 		D3D11_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = true;
@@ -123,7 +123,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateDepthStencilState(&desc,
 			depthStencilStates[static_cast<int>(DepthState::TestOnly)].GetAddressOf());
 	}
-	// [“xƒeƒXƒg‚È‚µ•[“x‘‚«‚İ‚ ‚è
+	// æ·±åº¦ãƒ†ã‚¹ãƒˆãªã—ï¼†æ·±åº¦æ›¸ãè¾¼ã¿ã‚ã‚Š
 	{
 		D3D11_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = true;
@@ -132,7 +132,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateDepthStencilState(&desc,
 			depthStencilStates[static_cast<int>(DepthState::WriteOnly)].GetAddressOf());
 	}
-	// [“xƒeƒXƒg‚È‚µ•[“x‘‚«‚İ‚È‚µ
+	// æ·±åº¦ãƒ†ã‚¹ãƒˆãªã—ï¼†æ·±åº¦æ›¸ãè¾¼ã¿ãªã—
 	{
 		D3D11_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = false;
@@ -142,7 +142,7 @@ RenderState::RenderState(ID3D11Device* device)
 			depthStencilStates[static_cast<int>(DepthState::NoTestNoWrite)].GetAddressOf());
 	}
 
-	// ‡¬‚È‚µ
+	// åˆæˆãªã—
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -158,7 +158,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateBlendState(&desc,
 			blendStates[static_cast<int>(BlendState::Opaque)].GetAddressOf());
 	}
-	// ’Êí‡¬
+	// é€šå¸¸åˆæˆ
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -174,7 +174,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateBlendState(&desc,
 			blendStates[static_cast<int>(BlendState::Transparency)].GetAddressOf());;
 	}
-	// ‰ÁZ‡¬
+	// åŠ ç®—åˆæˆ
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -190,7 +190,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateBlendState(&desc,
 			blendStates[static_cast<int>(BlendState::Additive)].GetAddressOf());
 	}
-	// Œ¸Z‡¬
+	// æ¸›ç®—åˆæˆ
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -206,7 +206,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateBlendState(&desc,
 			blendStates[static_cast<int>(BlendState::Subtraction)].GetAddressOf());
 	}
-	// æZ‡¬
+	// ä¹—ç®—åˆæˆ
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -223,7 +223,7 @@ RenderState::RenderState(ID3D11Device* device)
 			blendStates[static_cast<int>(BlendState::Multiply)].GetAddressOf());
 	}
 
-	// ƒxƒ^“h‚è•ƒJƒŠƒ“ƒO‚È‚µ
+	// ãƒ™ã‚¿å¡—ã‚Šï¼†ã‚«ãƒªãƒ³ã‚°ãªã—
 	{
 		D3D11_RASTERIZER_DESC desc{};
 		desc.FrontCounterClockwise = false;
@@ -239,7 +239,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			rasterizerStates[static_cast<int>(RasterizerState::SolidCullNone)].GetAddressOf());
 	}
-	// ƒxƒ^“h‚è•— –ÊƒJƒŠƒ“ƒO
+	// ãƒ™ã‚¿å¡—ã‚Šï¼†è£é¢ã‚«ãƒªãƒ³ã‚°
 	{
 		D3D11_RASTERIZER_DESC desc{};
 		desc.FrontCounterClockwise = false;
@@ -255,7 +255,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			rasterizerStates[static_cast<int>(RasterizerState::SolidCullBack)].GetAddressOf());
 	}
-	// ƒƒCƒ„[ƒtƒŒ[ƒ€•ƒJƒŠƒ“ƒO‚È‚µ
+	// ãƒ¯ã‚¤ãƒ¤ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ï¼†ã‚«ãƒªãƒ³ã‚°ãªã—
 	{
 		D3D11_RASTERIZER_DESC desc{};
 		desc.FrontCounterClockwise = false;
@@ -271,7 +271,7 @@ RenderState::RenderState(ID3D11Device* device)
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			rasterizerStates[static_cast<int>(RasterizerState::WireCullNone)].GetAddressOf());
 	}
-	// ƒƒCƒ„[ƒtƒŒ[ƒ€•— –ÊƒJƒŠƒ“ƒO
+	// ãƒ¯ã‚¤ãƒ¤ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ï¼†è£é¢ã‚«ãƒªãƒ³ã‚°
 	{
 		D3D11_RASTERIZER_DESC desc{};
 		desc.FrontCounterClockwise = false;
@@ -288,7 +288,7 @@ RenderState::RenderState(ID3D11Device* device)
 			rasterizerStates[static_cast<int>(RasterizerState::WireCullBack)].GetAddressOf());
 	}
 
-	// --- RenderState.cpp ‚Ì––”ö‚È‚Ç‚É’Ç‰Á ---
+	// --- RenderState.cpp ã®æœ«å°¾ãªã©ã«è¿½åŠ  ---
 	{
 		D3D11_RASTERIZER_DESC desc{};
 		desc.FrontCounterClockwise = false;
@@ -299,14 +299,14 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.ScissorEnable = false;
 		desc.MultisampleEnable = true;
 		desc.FillMode = D3D11_FILL_SOLID;
-		desc.CullMode = D3D11_CULL_FRONT; // š•\–Ê‚ğƒJƒŠƒ“ƒO‚µ‚Ä— –Ê‚ğc‚·
+		desc.CullMode = D3D11_CULL_FRONT; // â˜…è¡¨é¢ã‚’ã‚«ãƒªãƒ³ã‚°ã—ã¦è£é¢ã‚’æ®‹ã™
 		desc.AntialiasedLineEnable = false;
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			rasterizerStates[static_cast<int>(RasterizerState::SolidCullFront)].GetAddressOf());
 	}
 
-	// --- [’Ç‰Á] ƒfƒJ[ƒ‹—pFF‚ğˆêØ‘‚«‚Ü‚È‚¢ƒuƒŒƒ“ƒhƒXƒe[ƒg ---
-	// — –Ê•`‰æƒpƒX‚ÅƒXƒeƒ“ƒVƒ‹‚¾‚¯‚ğ—§‚Ä‚é‚½‚ß‚Ég—p‚µ‚Ü‚·
+	// --- [è¿½åŠ ] ãƒ‡ã‚«ãƒ¼ãƒ«ç”¨ï¼šè‰²ã‚’ä¸€åˆ‡æ›¸ãè¾¼ã¾ãªã„ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆ ---
+	// è£é¢æç”»ãƒ‘ã‚¹ã§ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã ã‘ã‚’ç«‹ã¦ã‚‹ãŸã‚ã«ä½¿ç”¨ã—ã¾ã™
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -318,32 +318,32 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
 		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		desc.RenderTarget[0].RenderTargetWriteMask = 0; // šd—v: 0‚É‚·‚é‚ÆF‚Ío—Í‚³‚ê‚¸ƒXƒeƒ“ƒVƒ‹‚Ì‚İXV‚³‚ê‚é
+		desc.RenderTarget[0].RenderTargetWriteMask = 0; // â˜…é‡è¦: 0ã«ã™ã‚‹ã¨è‰²ã¯å‡ºåŠ›ã•ã‚Œãšã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã®ã¿æ›´æ–°ã•ã‚Œã‚‹
 		device->CreateBlendState(&desc, blendStates[static_cast<int>(BlendState::None)].GetAddressOf());
 	}
 
-	// --- [’Ç‰Á] ƒfƒJ[ƒ‹—pF[“xƒXƒeƒ“ƒVƒ‹ƒXƒe[ƒg (Shader3€‹’) ---
+	// --- [è¿½åŠ ] ãƒ‡ã‚«ãƒ¼ãƒ«ç”¨ï¼šæ·±åº¦ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚¹ãƒ†ãƒ¼ãƒˆ (Shader3æº–æ‹ ) ---
 	{
 		D3D11_DEPTH_STENCIL_DESC desc = {};
 		desc.DepthEnable = TRUE;
 		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-		desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL; // •W€“I‚Èuè‘O‡Šivİ’è
+		desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL; // æ¨™æº–çš„ãªã€Œæ‰‹å‰åˆæ ¼ã€è¨­å®š
 
 		desc.StencilEnable = TRUE;
 		desc.StencilReadMask = 0xFF;
 		desc.StencilWriteMask = 0xFF;
 
-		// --- yƒhƒ[1F— –Ê(BackFace)‚Ìİ’èz ---
-		// ”wŒii°j‚ğ“Ë‚«”²‚¯‚ÄuÔv‚­‚È‚Á‚Ä‚¢‚éêŠ‚ÉƒXƒeƒ“ƒVƒ‹‚ğ—§‚Ä‚é
+		// --- ã€ãƒ‰ãƒ­ãƒ¼1ï¼šè£é¢(BackFace)ã®è¨­å®šã€‘ ---
+		// èƒŒæ™¯ï¼ˆåºŠï¼‰ã‚’çªãæŠœã‘ã¦ã€Œèµ¤ã€ããªã£ã¦ã„ã‚‹å ´æ‰€ã«ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚’ç«‹ã¦ã‚‹
 		desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-		desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;      // ”wŒi‚æ‚èè‘O(—Î)‚È‚ç 0
+		desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;      // èƒŒæ™¯ã‚ˆã‚Šæ‰‹å‰(ç·‘)ãªã‚‰ 0
 	
 		desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_ZERO;
 		desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_ZERO;
 
-		// --- yƒhƒ[2F•\–Ê(FrontFace)‚Ìİ’èz ---
-		// ƒhƒ[1‚ª 1 ‚ğ“h‚ç‚È‚©‚Á‚½êŠi°‚É–„‚Ü‚Á‚Ä‚¢‚È‚¢AŒ©‚¦‚é‚×‚«êŠj‚¾‚¯•`‰æ‚·‚é
-		// ‚¨è–{‚Ì EQUAL ‚©‚ç NOT_EQUAL ‚É•ÏX‚µ‚Ü‚·
+		// --- ã€ãƒ‰ãƒ­ãƒ¼2ï¼šè¡¨é¢(FrontFace)ã®è¨­å®šã€‘ ---
+		// ãƒ‰ãƒ­ãƒ¼1ãŒ 1 ã‚’å¡—ã‚‰ãªã‹ã£ãŸå ´æ‰€ï¼ˆï¼åºŠã«åŸ‹ã¾ã£ã¦ã„ãªã„ã€è¦‹ãˆã‚‹ã¹ãå ´æ‰€ï¼‰ã ã‘æç”»ã™ã‚‹
+		// ãŠæ‰‹æœ¬ã® EQUAL ã‹ã‚‰ NOT_EQUAL ã«å¤‰æ›´ã—ã¾ã™
 		desc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
 		desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_ZERO;
 		desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_ZERO;
@@ -352,7 +352,7 @@ RenderState::RenderState(ID3D11Device* device)
 		device->CreateDepthStencilState(&desc, depthStencilStates[static_cast<int>(DepthState::Decal)].GetAddressOf());
 	}
 
-	// š [’Ç‰Á] ƒp[ƒeƒBƒNƒ‹ƒGƒfƒBƒ^—pFRGB‚ÍƒAƒ‹ƒtƒ@ƒuƒŒƒ“ƒhAƒAƒ‹ƒtƒ@ƒ`ƒƒƒ“ƒlƒ‹‚Í‘‚«‚Ü‚È‚¢
+	// â˜… [è¿½åŠ ] ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚¨ãƒ‡ã‚£ã‚¿ç”¨ï¼šRGBã¯ã‚¢ãƒ«ãƒ•ã‚¡ãƒ–ãƒ¬ãƒ³ãƒ‰ã€ã‚¢ãƒ«ãƒ•ã‚¡ãƒãƒ£ãƒ³ãƒãƒ«ã¯æ›¸ãè¾¼ã¾ãªã„
 	{
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
@@ -361,12 +361,12 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 		desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 		desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;   // ƒp[ƒeƒBƒNƒ‹‚Ìƒ¿‚Åã‘‚«‚µ‚È‚¢
-		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;    // RT‚Ìƒ¿‚ğ‚»‚Ì‚Ü‚Ü•Û
+		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;   // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®Î±ã§ä¸Šæ›¸ãã—ãªã„
+		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;    // RTã®Î±ã‚’ãã®ã¾ã¾ä¿æŒ
 		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_RED
 			| D3D11_COLOR_WRITE_ENABLE_GREEN
-			| D3D11_COLOR_WRITE_ENABLE_BLUE; // ƒ¿‚Ö‚Ì‘‚«‚İ‚ğƒ}ƒXƒN
+			| D3D11_COLOR_WRITE_ENABLE_BLUE; // Î±ã¸ã®æ›¸ãè¾¼ã¿ã‚’ãƒã‚¹ã‚¯
 		HRESULT hr = device->CreateBlendState(&desc,
 			blendStates[static_cast<int>(BlendState::TransparencyKeepAlpha)].GetAddressOf());
 	}

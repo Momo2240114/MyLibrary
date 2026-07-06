@@ -12,18 +12,18 @@ struct TransformWayPoint {
 
     EasingType easing;
 
-    //‰ÁZ—p
+    //åŠ ç®—ç”¨
     bool m_AddFlag = false;
 
-    bool m_autoReturn = false;  // ‚±‚ÌˆÚ“®‚Ì‚ ‚Æ‚É–ß‚é‚©
-    float m_waitTime = 0.0f;    // –ß‚é‚Ü‚Å‚Ì‘Ò‹@ŠÔ
+    bool m_autoReturn = false;  // ã“ã®ç§»å‹•ã®ã‚ã¨ã«æˆ»ã‚‹ã‹
+    float m_waitTime = 0.0f;    // æˆ»ã‚‹ã¾ã§ã®å¾…æ©Ÿæ™‚é–“
 };
 
 struct TransformPath {
     std::string name;
-    std::vector<TransformWayPoint> points; // Œo—R’n‚ÌƒŠƒXƒg
-    bool m_autoReturn = false;             // ‘Ss’öI—¹Œã‚É–ß‚é‚©
-    float m_waitTime = 0.0f;               // –ß‚é‘O‚Ì‘Ò‹@
+    std::vector<TransformWayPoint> points; // çµŒç”±åœ°ã®ãƒªã‚¹ãƒˆ
+    bool m_autoReturn = false;             // å…¨è¡Œç¨‹çµ‚äº†å¾Œã«æˆ»ã‚‹ã‹
+    float m_waitTime = 0.0f;               // æˆ»ã‚‹å‰ã®å¾…æ©Ÿ
 };
 
 class TransformDirector : public Component , public IActionProvider {
@@ -56,30 +56,30 @@ public:
     void PlayReturn(float duration = 1.0f, EasingType ease = EasingType::OutExpo);
 
 private:
-    // ’Ç‰Á‚·‚éŠÖ”
+    // è¿½åŠ ã™ã‚‹é–¢æ•°
     void StartNextWaypoint();
     void PlayPath(int pathIdx);
     void CaptureToPath(int pathIdx);
 private:
-    // –ß‚é‚½‚ß‚Ì’n“_i’¼‘O‚ÌÀ•Wj‚ğ•Û
-    bool shouldReturn = false;    // –ß‚é‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
-    float waitTime = 0.0f;        // ‘Ò‹@ŠÔiİ’è’lj
-    float waitTimer = 0.0f;       // ‘Ò‹@ƒJƒEƒ“ƒg—pƒ^ƒCƒ}[
-    bool isWaiting = false;       // ‘Ò‹@’†‚©‚Ç‚¤‚©‚Ìó‘Ô
-    TransformWayPoint prevWP;     // –ß‚èæiˆÚ“®ŠJn‚ÌÀ•Wj
+    // æˆ»ã‚‹ãŸã‚ã®åœ°ç‚¹ï¼ˆç›´å‰ã®åº§æ¨™ï¼‰ã‚’ä¿æŒ
+    bool shouldReturn = false;    // æˆ»ã‚‹ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
+    float waitTime = 0.0f;        // å¾…æ©Ÿæ™‚é–“ï¼ˆè¨­å®šå€¤ï¼‰
+    float waitTimer = 0.0f;       // å¾…æ©Ÿã‚«ã‚¦ãƒ³ãƒˆç”¨ã‚¿ã‚¤ãƒãƒ¼
+    bool isWaiting = false;       // å¾…æ©Ÿä¸­ã‹ã©ã†ã‹ã®çŠ¶æ…‹
+    TransformWayPoint prevWP;     // æˆ»ã‚Šå…ˆï¼ˆç§»å‹•é–‹å§‹æ™‚ã®åº§æ¨™ï¼‰
 
     int easingIndex = -1;
     bool isMoving = false;
     Vector3 startPos, targetPos, startAngle, targetAngle,startScale,targetScale;
     std::vector<TransformWayPoint> EditorWaypoints;
-    std::vector<TransformPath> m_paths;    // •Û‘¶‚³‚ê‚éƒpƒX‚ÌƒŠƒXƒg
+    std::vector<TransformPath> m_paths;    // ä¿å­˜ã•ã‚Œã‚‹ãƒ‘ã‚¹ã®ãƒªã‚¹ãƒˆ
     int m_currentPathIdx = -1;
-    int m_currentPointIdx = -1;            // Œ»İ‰½”Ô–Ú‚ÌŒo—R’n‚ÉˆÚ“®’†‚©
+    int m_currentPointIdx = -1;            // ç¾åœ¨ä½•ç•ªç›®ã®çµŒç”±åœ°ã«ç§»å‹•ä¸­ã‹
     Vector3 LerpVector(Vector3 a, Vector3 b, float t) { return { a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t }; }
 
-    //‰ÁZ—p
+    //åŠ ç®—ç”¨
     bool m_AddFlag = false;
 
-    //ƒC[ƒWƒ“ƒO‚ğŠJn‚·‚é’¼Œã‚Ìƒ[ƒ‹ƒhs—ñ‚ğ•Û‘¶‚·‚é
+    //ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚’é–‹å§‹ã™ã‚‹ç›´å¾Œã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ä¿å­˜ã™ã‚‹
     Matrix m_WorldMatrix;
 };

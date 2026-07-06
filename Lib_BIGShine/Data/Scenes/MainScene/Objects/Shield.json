@@ -44,6 +44,7 @@
                 "ModelName": "./Data/Model/SwordPlayer/Weapon/Sword_ShiledModel.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
+                "StaticModel": false,
                 "UsedNaviMeshSystemFlg": false,
                 "_RootRotationOffset": {
                     "w": 1.0,

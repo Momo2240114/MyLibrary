@@ -46,4 +46,5 @@ private:
     std::string overlayStopActionName = "MaterialOverlay_Stop";
     float overlayDuration = 0.12f;
     float overlayTimer = 0.0f;
+
 };
