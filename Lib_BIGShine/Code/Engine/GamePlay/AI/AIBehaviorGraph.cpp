@@ -351,7 +351,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
                 if (nodeJson_["Position"].size() > 0) node_.position.x = nodeJson_["Position"][0].get<float>();
                 if (nodeJson_["Position"].size() > 1) node_.position.y = nodeJson_["Position"][1].get<float>();
             }
-            node_.blackboardCategory = nodeJson_.value("BlackboardCategory", std::string("AI"));
+            node_.blackboardCategory = nodeJson_.value("BlackboardCategory", std::string(AIBlackboardKeys::CATEGORY_AI));
             node_.blackboardKey = nodeJson_.value("BlackboardKey", std::string{});
             node_.compareType = CompareTypeFromString(nodeJson_.value("CompareType", "Equal"));
             node_.valueType = ValueTypeFromString(nodeJson_.value("ValueType", "Bool"));
@@ -372,8 +372,8 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
             node_.stringValue = nodeJson_.value("StringValue", std::string{});
             node_.actionName = nodeJson_.value("ActionName", std::string{});
             node_.waitForActionEnd = nodeJson_.value("WaitForActionEnd", true);
-            node_.actionEndCategory = nodeJson_.value("ActionEndCategory", std::string("AI"));
-            node_.actionEndKey = nodeJson_.value("ActionEndKey", std::string("ActionEnded"));
+            node_.actionEndCategory = nodeJson_.value("ActionEndCategory", std::string(AIBlackboardKeys::CATEGORY_AI));
+            node_.actionEndKey = nodeJson_.value("ActionEndKey", std::string(AIBlackboardKeys::ACTION_ENDED));
             node_.waitSeconds = nodeJson_.value("WaitSeconds", 0.0f);
             node_.subGraphName = nodeJson_.value("SubGraphName", std::string{});
             node_.priority = nodeJson_.value("Priority", 0);

@@ -582,6 +582,14 @@ void AIBehaviorEditorWindow::DrawInspector(AIControllerComponent* aiController_)
     {
         ImGui::SeparatorText("Action");
         ImGui::InputText("Action Name", &node_->actionName);
+        if (ImGui::Button("AI.ChaseTarget")) node_->actionName = "AI.ChaseTarget";
+        ImGui::SameLine();
+        if (ImGui::Button("AI.ReturnToSpawn")) node_->actionName = "AI.ReturnToSpawn";
+        if (ImGui::Button("AI.StopMove")) node_->actionName = "AI.StopMove";
+        ImGui::SameLine();
+        if (ImGui::Button("AI.Attack")) node_->actionName = "AI.Attack";
+        ImGui::SameLine();
+        if (ImGui::Button("AI.NotifyActionEnd")) node_->actionName = "AI.NotifyActionEnd";
         ImGui::Checkbox("Wait For Action End", &node_->waitForActionEnd);
         ImGui::InputText("ActionEnd Category", &node_->actionEndCategory);
         ImGui::InputText("ActionEnd Key", &node_->actionEndKey);

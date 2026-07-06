@@ -45,7 +45,7 @@
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
-#include "Game/Logic/Combat/DebugTools/DebugHitHistoryResetComponent.h"
+#include "Game/Combat/DebugTools/DebugHitHistoryResetComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"

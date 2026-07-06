@@ -1,0 +1,676 @@
+{
+    "Links": [
+        {
+            "FromNodeId": 1,
+            "FromPinId": 2,
+            "Id": 36,
+            "ToNodeId": 3,
+            "ToPinId": 4
+        },
+        {
+            "FromNodeId": 3,
+            "FromPinId": 5,
+            "Id": 37,
+            "ToNodeId": 6,
+            "ToPinId": 7
+        },
+        {
+            "FromNodeId": 3,
+            "FromPinId": 5,
+            "Id": 38,
+            "ToNodeId": 17,
+            "ToPinId": 18
+        },
+        {
+            "FromNodeId": 3,
+            "FromPinId": 5,
+            "Id": 39,
+            "ToNodeId": 24,
+            "ToPinId": 25
+        },
+        {
+            "FromNodeId": 3,
+            "FromPinId": 5,
+            "Id": 40,
+            "ToNodeId": 31,
+            "ToPinId": 32
+        },
+        {
+            "FromNodeId": 6,
+            "FromPinId": 8,
+            "Id": 41,
+            "ToNodeId": 9,
+            "ToPinId": 10
+        },
+        {
+            "FromNodeId": 6,
+            "FromPinId": 8,
+            "Id": 42,
+            "ToNodeId": 11,
+            "ToPinId": 12
+        },
+        {
+            "FromNodeId": 6,
+            "FromPinId": 8,
+            "Id": 43,
+            "ToNodeId": 13,
+            "ToPinId": 14
+        },
+        {
+            "FromNodeId": 6,
+            "FromPinId": 8,
+            "Id": 44,
+            "ToNodeId": 15,
+            "ToPinId": 16
+        },
+        {
+            "FromNodeId": 17,
+            "FromPinId": 19,
+            "Id": 45,
+            "ToNodeId": 20,
+            "ToPinId": 21
+        },
+        {
+            "FromNodeId": 17,
+            "FromPinId": 19,
+            "Id": 46,
+            "ToNodeId": 22,
+            "ToPinId": 23
+        },
+        {
+            "FromNodeId": 24,
+            "FromPinId": 26,
+            "Id": 47,
+            "ToNodeId": 27,
+            "ToPinId": 28
+        },
+        {
+            "FromNodeId": 24,
+            "FromPinId": 26,
+            "Id": 48,
+            "ToNodeId": 29,
+            "ToPinId": 30
+        },
+        {
+            "FromNodeId": 31,
+            "FromPinId": 33,
+            "Id": 49,
+            "ToNodeId": 34,
+            "ToPinId": 35
+        }
+    ],
+    "NextId": 52,
+    "Nodes": [
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 1,
+            "InputPinId": 0,
+            "IntValue": 0,
+            "Name": "Root",
+            "OutputPinId": 2,
+            "Position": [
+                289.0,
+                -124.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Root",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 3,
+            "InputPinId": 4,
+            "IntValue": 0,
+            "Name": "Selector",
+            "OutputPinId": 5,
+            "Position": [
+                280.0,
+                40.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Selector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 6,
+            "InputPinId": 7,
+            "IntValue": 0,
+            "Name": "AttackFlow",
+            "OutputPinId": 8,
+            "Position": [
+                -975.0,
+                224.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "IsTargetInAttackRange",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 9,
+            "InputPinId": 10,
+            "IntValue": 0,
+            "Name": "InAttackRange",
+            "OutputPinId": 0,
+            "Position": [
+                -1327.0,
+                384.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "AI.StopMove",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 11,
+            "InputPinId": 12,
+            "IntValue": 0,
+            "Name": "StopMove",
+            "OutputPinId": 0,
+            "Position": [
+                -847.0,
+                416.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": false,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "AI.Attack",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 13,
+            "InputPinId": 14,
+            "IntValue": 0,
+            "Name": "Attack",
+            "OutputPinId": 0,
+            "Position": [
+                -1103.0,
+                400.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 15,
+            "InputPinId": 16,
+            "IntValue": 0,
+            "Name": "AttackCooldown",
+            "OutputPinId": 0,
+            "Position": [
+                -607.0,
+                416.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Wait",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 1.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 17,
+            "InputPinId": 18,
+            "IntValue": 0,
+            "Name": "ChaseFlow",
+            "OutputPinId": 19,
+            "Position": [
+                -63.0,
+                228.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "IsTargetInDetectRange",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 20,
+            "InputPinId": 21,
+            "IntValue": 0,
+            "Name": "InDetectRange",
+            "OutputPinId": 0,
+            "Position": [
+                -191.0,
+                416.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "AI.ChaseTarget",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 22,
+            "InputPinId": 23,
+            "IntValue": 0,
+            "Name": "ChaseTarget",
+            "OutputPinId": 0,
+            "Position": [
+                65.0,
+                416.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": false,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 24,
+            "InputPinId": 25,
+            "IntValue": 0,
+            "Name": "ReturnFlow",
+            "OutputPinId": 26,
+            "Position": [
+                593.0,
+                240.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "IsAtSpawn",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 27,
+            "InputPinId": 28,
+            "IntValue": 0,
+            "Name": "AwayFromSpawn",
+            "OutputPinId": 0,
+            "Position": [
+                433.0,
+                416.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "AI.ReturnToSpawn",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 29,
+            "InputPinId": 30,
+            "IntValue": 0,
+            "Name": "ReturnToSpawn",
+            "OutputPinId": 0,
+            "Position": [
+                689.0,
+                416.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": false,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 31,
+            "InputPinId": 32,
+            "IntValue": 0,
+            "Name": "IdleFlow",
+            "OutputPinId": 33,
+            "Position": [
+                1281.0,
+                212.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "AI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "AI.StopMove",
+            "BlackboardCategory": "AI",
+            "BlackboardKey": "",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 34,
+            "InputPinId": 35,
+            "IntValue": 0,
+            "Name": "IdleStopMove",
+            "OutputPinId": 0,
+            "Position": [
+                1281.0,
+                400.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": false,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        }
+    ],
+    "Version": 1
+}

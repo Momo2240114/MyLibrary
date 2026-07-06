@@ -410,7 +410,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -418,7 +418,7 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackEnter": {
                             "type": "bool",
@@ -426,7 +426,7 @@
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanBufferInput": {
                             "type": "bool",
@@ -434,7 +434,7 @@
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -452,7 +452,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                0.0
+                                -1.0
                             ]
                         },
                         "HitDirection": {
@@ -468,7 +468,7 @@
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -480,11 +480,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -612,8 +612,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.8379318118095398,
-                                0.5457750558853149
+                                0.5721832513809204,
+                                0.8201258778572083
                             ]
                         },
                         "HitStopDuration": {
@@ -631,17 +631,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.6425571441650391,
-                                -0.6418417692184448,
-                                0.4185205101966858
+                                0.4301359951496124,
+                                -0.6594536900520325,
+                                0.6165256500244141
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                31.284080505371094,
-                                0.4162289500236511,
-                                0.8363680839538574
+                                30.84524154663086,
+                                0.40301573276519775,
+                                1.2115086317062378
                             ]
                         },
                         "ReactionDirection": {
@@ -656,7 +656,7 @@
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -664,11 +664,11 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanBufferInput": {
                             "type": "bool",
@@ -676,7 +676,7 @@
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -694,7 +694,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                0.0
+                                -1.0
                             ]
                         },
                         "HitDirection": {
@@ -710,7 +710,7 @@
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -722,11 +722,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -756,7 +756,7 @@
         {
             "Data": {
                 "AnimationData": {
-                    "DefaultState": "SS_Idle",
+                    "DefaultState": "SS_Attack1",
                     "States": [
                         {
                             "animIndexA": -1,
@@ -6169,7 +6169,7 @@
                 ],
                 "MoveSpeed": 22.0
             },
-            "Enabled": false,
+            "Enabled": true,
             "TypeName": "PlayerControllerComponent"
         },
         {
@@ -7187,13 +7187,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            46.261146545410156,
-            -0.9574236869812012,
-            -13.982292175292969
+            17.972448348999023,
+            -1.5422390699386597,
+            13.786703109741211
         ],
         "Rot": [
             0.0,
-            22.30877113342285,
+            232.43804931640625,
             1.1004080988641363e-05
         ],
         "Scale": [

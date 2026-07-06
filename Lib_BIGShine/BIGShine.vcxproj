@@ -385,7 +385,7 @@
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\VignetteDirector.cpp" />
-      <ClCompile Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\BloomSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp" />
@@ -448,7 +448,6 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
-    <ClCompile Include="Code\Game\Logic\Combat\DebugTools\DebugHitHistoryResetComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
@@ -473,6 +472,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
+    <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
@@ -561,7 +561,7 @@
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\VignetteDirector.h" />
-      <ClInclude Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h" />
@@ -609,6 +609,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\AI\AIActionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\AI\AIBlackboardKeys.h" />
     <ClInclude Include="Code\Engine\GamePlay\AI\AIBehaviorGraph.h" />
     <ClInclude Include="Code\Engine\GamePlay\AI\AIControllerComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
@@ -671,7 +672,6 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
-    <ClInclude Include="Code\Game\Logic\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />
@@ -692,6 +692,7 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h" />
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
+    <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
     <ClInclude Include="Code\Wip.hpp" />
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
     <ClInclude Include="External\imgui-node-editor\crude_json.h" />
