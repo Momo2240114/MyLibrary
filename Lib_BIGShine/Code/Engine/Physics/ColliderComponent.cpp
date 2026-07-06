@@ -620,6 +620,7 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             }
         }
 
+        const PxExtendedVec3 previousPosition_ = characterController->getPosition();
         const PxVec3 displacement_(
             velocity.x * safeDeltaTime_,
             verticalDisplacement_,
@@ -636,7 +637,27 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.y = 0.0f;
         }
 
-        const PxExtendedVec3 position_ = characterController->getPosition();
+        PxExtendedVec3 position_ = characterController->getPosition();
+        const bool hasSideCollision_ =
+            collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_SIDES);
+        const bool hasHorizontalMove_ =
+            displacement_.x * displacement_.x + displacement_.z * displacement_.z > 0.000001f;
+        if (hasSideCollision_ && hasHorizontalMove_ && verticalDisplacement_ <= 0.0f)
+        {
+            if (const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this);
+                characterCollider_ && characterCollider_->ShouldLimitHorizontalLift())
+            {
+                const double maxY_ =
+                    previousPosition_.y + static_cast<double>(characterCollider_->GetMaxHorizontalLift());
+                if (position_.y > maxY_)
+                {
+                    position_.y = maxY_;
+                    characterController->setPosition(position_);
+                    velocity.y = (std::min)(velocity.y, 0.0f);
+                }
+            }
+        }
+
         owner_->transform->localPosition =
         {
             static_cast<float>(position_.x) - offset.x,

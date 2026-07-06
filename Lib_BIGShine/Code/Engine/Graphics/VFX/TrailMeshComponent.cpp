@@ -409,7 +409,7 @@ void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
     maxSampleCount = (std::max)(json_.value("TrailMaxSampleCount", static_cast<size_t>(64)),
         static_cast<size_t>(2));
     minimumSampleDistance = (std::max)(json_.value("TrailMinimumSampleDistance", 0.01f), 0.0f);
-    emitting = json_.value("TrailEmitting", true);
+    emitting = false;
     Clear();
     CreateBuffers();
 }

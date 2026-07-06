@@ -7,6 +7,7 @@
 #include "Engine/GamePlay/System/TimeManager.h"
 
 #include <algorithm>
+#include <cmath>
 #include <imgui.h>
 
 void HitReactionComponent::Start()
@@ -76,10 +77,19 @@ void HitReactionComponent::HandleHit()
             owner_->GetComponent<CharacterMovementComponent>();
         if (movement_)
         {
-            movement_->AddImpulse({
-                hitDirection_.x * knockBackPower_,
-                0.0f,
-                hitDirection_.y * knockBackPower_ });
+            const float horizontalLength_ = std::sqrt(
+                hitDirection_.x * hitDirection_.x +
+                hitDirection_.y * hitDirection_.y);
+            if (horizontalLength_ > 0.0001f)
+            {
+                const DirectX::XMFLOAT3 knockBackImpulse_
+                {
+                    hitDirection_.x / horizontalLength_ * knockBackPower_,
+                    0.0f,
+                    hitDirection_.y / horizontalLength_ * knockBackPower_
+                };
+                movement_->AddImpulse(knockBackImpulse_);
+            }
         }
     }
 
