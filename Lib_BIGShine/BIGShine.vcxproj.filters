@@ -182,6 +182,15 @@
     <Filter Include="Code\Game\Logics\Charcter\Player\State">
       <UniqueIdentifier>{48e898f8-9714-42da-9fac-e02f4cedadd4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Game\Logic">
+      <UniqueIdentifier>{7248c9ab-6d69-4c2e-8fb9-b4eb728221a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logic\Combat">
+      <UniqueIdentifier>{4988596c-28b3-4a52-bce9-caa1e18c2512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logic\Combat\DebugTools">
+      <UniqueIdentifier>{e998eae8-11ea-4969-b9f7-e7873f934245}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders\PBR">
       <UniqueIdentifier>{849f576a-6126-4e25-ab1d-37e30901e8bf}</UniqueIdentifier>
     </Filter>
@@ -721,8 +730,8 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\GamePlay\Combat\DamageBoxComponent.cpp">
-      <Filter>Code\Engine\GamePlay</Filter>
+    <ClCompile Include="Code\Game\Logic\Combat\DebugTools\DebugHitHistoryResetComponent.cpp">
+      <Filter>Code\Game\Logic\Combat\DebugTools</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
@@ -1357,8 +1366,8 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\GamePlay\Combat\DamageBoxComponent.h">
-      <Filter>Code\Engine\GamePlay</Filter>
+    <ClInclude Include="Code\Game\Logic\Combat\DebugTools\DebugHitHistoryResetComponent.h">
+      <Filter>Code\Game\Logic\Combat\DebugTools</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h">
       <Filter>Code\Engine\GamePlay</Filter>

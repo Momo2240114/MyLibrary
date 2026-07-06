@@ -6,12 +6,12 @@
 
 class HitBox;
 
-class DamageBoxComponent : public Component
+class DebugHitHistoryResetComponent : public Component
 {
 public:
     const std::string& GetName() const override
     {
-        static std::string name_ = "DamageBoxComponent";
+        static std::string name_ = "DebugHitHistoryResetComponent";
         return name_;
     }
 
