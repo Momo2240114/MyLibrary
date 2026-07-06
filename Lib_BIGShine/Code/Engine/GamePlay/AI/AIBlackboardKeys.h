@@ -3,6 +3,7 @@
 namespace AIBlackboardKeys
 {
     constexpr const char* CATEGORY_AI = "AI";
+    constexpr const char* CATEGORY_ANIM = "Anim";
     constexpr const char* HAS_TARGET = "HasTarget";
     constexpr const char* TARGET_DISTANCE = "TargetDistance";
     constexpr const char* SPAWN_DISTANCE = "SpawnDistance";
@@ -18,4 +19,6 @@ namespace AIBlackboardKeys
     constexpr const char* CURRENT_ACTION = "CurrentAction";
     constexpr const char* ACTION_ENDED = "ActionEnded";
     constexpr const char* IS_ACTING = "IsActing";
+    constexpr const char* ANIMATION_ACTION_TRIGGER = "ActionTrigger";
+    constexpr const char* ANIMATION_ACTION_END_TRIGGER = "ActionEndTrigger";
 }

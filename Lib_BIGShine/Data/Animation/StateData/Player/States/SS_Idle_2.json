@@ -1,0 +1,52 @@
+{
+    "AssetType": "AnimationState",
+    "AssetVersion": 2,
+    "State": {
+        "animIndexA": -1,
+        "animIndexB": -1,
+        "animationIndex": 23,
+        "blend2DBackwardAnimationIndex": -1,
+        "blend2DBackwardPhaseOffset": 0.0,
+        "blend2DDefaultInput": [
+            0.0,
+            1.0
+        ],
+        "blend2DForwardAnimationIndex": -1,
+        "blend2DForwardPhaseOffset": 0.0,
+        "blend2DLeftAnimationIndex": -1,
+        "blend2DLeftPhaseOffset": 0.0,
+        "blend2DParamName": "MoveInput",
+        "blend2DRightAnimationIndex": -1,
+        "blend2DRightPhaseOffset": 0.0,
+        "blend2DSyncNormalizedTime": true,
+        "blendDefaultWeight": 0.5,
+        "blendMaskRootNodes": [],
+        "blendParamName": "BlendAlpha",
+        "blendParameterMax": 1.0,
+        "blendParameterMin": 0.0,
+        "blendPhaseOffsetA": 0.0,
+        "blendPhaseOffsetB": 0.0,
+        "blendSyncNormalizedTime": true,
+        "blendUseMask": false,
+        "customAnimIndex": -1,
+        "events": [],
+        "loop": true,
+        "name": "SS_Guard",
+        "rootMotion": {
+            "applyPositionX": true,
+            "applyPositionY": true,
+            "applyPositionZ": true,
+            "applyRotationX": true,
+            "applyRotationY": true,
+            "applyRotationZ": true,
+            "enable": false,
+            "sourceNodeName": ""
+        },
+        "rootMotionScale": 1.0,
+        "rootMotionScaleCurveName": "",
+        "sequencer": "",
+        "speed": 1.0,
+        "speedCurveName": "",
+        "type": 0
+    }
+}

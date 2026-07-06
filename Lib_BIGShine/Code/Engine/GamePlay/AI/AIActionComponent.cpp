@@ -4,6 +4,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -108,6 +109,16 @@ void AIActionComponent::Gui()
     ImGui::InputText(IM_U8("ActionEndedキー##AIActionComponent_ActionEndedKeyInput"), &definition_.actionEndedKey);
     ImGui::InputText(IM_U8("IsActingキー##AIActionComponent_IsActingKeyInput"), &definition_.isActingKey);
 
+    ImGui::SeparatorText("Animation Graph");
+    ImGui::InputText("Trigger", &definition_.animationTriggerName);
+    ImGui::InputText("State", &definition_.animationStateName);
+    ImGui::InputText("Anim Category", &definition_.animationBlackboardCategory);
+    ImGui::InputText("Anim CurrentAction Key", &definition_.animationCurrentActionKey);
+    ImGui::InputText("Anim ActionEnded Key", &definition_.animationActionEndedKey);
+    ImGui::InputText("Anim IsActing Key", &definition_.animationIsActingKey);
+    ImGui::InputText("Anim End Trigger", &definition_.animationActionEndTriggerName);
+    ImGui::Checkbox("Write Anim Blackboard", &definition_.writeAnimationBlackboard);
+
     if (ImGui::Button(IM_U8("実行テスト##AIActionComponent_TestExecuteButton")))
     {
         statusText = ExecuteAIAction(definition_.aiActionName) ? "Executed" : "Execute failed";
@@ -132,9 +143,17 @@ void AIActionComponent::Serialize(nlohmann::json& json_) const
             { "CurrentActionKey", definition_.currentActionKey },
             { "ActionEndedKey", definition_.actionEndedKey },
             { "IsActingKey", definition_.isActingKey },
+            { "AnimationTriggerName", definition_.animationTriggerName },
+            { "AnimationStateName", definition_.animationStateName },
+            { "AnimationBlackboardCategory", definition_.animationBlackboardCategory },
+            { "AnimationCurrentActionKey", definition_.animationCurrentActionKey },
+            { "AnimationActionEndedKey", definition_.animationActionEndedKey },
+            { "AnimationIsActingKey", definition_.animationIsActingKey },
+            { "AnimationActionEndTriggerName", definition_.animationActionEndTriggerName },
             { "WaitForActionEnd", definition_.waitForActionEnd },
             { "ClearActionEndedOnStart", definition_.clearActionEndedOnStart },
             { "SetIsActing", definition_.setIsActing },
+            { "WriteAnimationBlackboard", definition_.writeAnimationBlackboard },
             { "ExecuteTarget", ToString(definition_.executeTarget) },
             });
     }
@@ -155,9 +174,17 @@ void AIActionComponent::Deserialize(const nlohmann::json& json_)
             definition_.currentActionKey = actionJson_.value("CurrentActionKey", std::string(AIBlackboardKeys::CURRENT_ACTION));
             definition_.actionEndedKey = actionJson_.value("ActionEndedKey", std::string(AIBlackboardKeys::ACTION_ENDED));
             definition_.isActingKey = actionJson_.value("IsActingKey", std::string(AIBlackboardKeys::IS_ACTING));
+            definition_.animationTriggerName = actionJson_.value("AnimationTriggerName", std::string{});
+            definition_.animationStateName = actionJson_.value("AnimationStateName", std::string{});
+            definition_.animationBlackboardCategory = actionJson_.value("AnimationBlackboardCategory", std::string(AIBlackboardKeys::CATEGORY_ANIM));
+            definition_.animationCurrentActionKey = actionJson_.value("AnimationCurrentActionKey", std::string(AIBlackboardKeys::CURRENT_ACTION));
+            definition_.animationActionEndedKey = actionJson_.value("AnimationActionEndedKey", std::string(AIBlackboardKeys::ACTION_ENDED));
+            definition_.animationIsActingKey = actionJson_.value("AnimationIsActingKey", std::string(AIBlackboardKeys::IS_ACTING));
+            definition_.animationActionEndTriggerName = actionJson_.value("AnimationActionEndTriggerName", std::string{});
             definition_.waitForActionEnd = actionJson_.value("WaitForActionEnd", true);
             definition_.clearActionEndedOnStart = actionJson_.value("ClearActionEndedOnStart", true);
             definition_.setIsActing = actionJson_.value("SetIsActing", true);
+            definition_.writeAnimationBlackboard = actionJson_.value("WriteAnimationBlackboard", true);
             definition_.executeTarget = ExecuteTargetFromString(actionJson_.value("ExecuteTarget", std::string("Owner")));
             actions.push_back(definition_);
         }
@@ -201,6 +228,8 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
         }
     }
 
+    ApplyAnimationActionStart(*definition_);
+
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return false;
 
@@ -228,6 +257,23 @@ void AIActionComponent::NotifyActionEnd(const std::string& category_)
 {
     EnsureBlackboard();
     if (!blackboardComponent) return;
+
+    AIActionDefinition* currentDefinition_ = nullptr;
+    for (AIActionDefinition& definition_ : actions)
+    {
+        if (definition_.blackboardCategory != category_) continue;
+
+        std::string currentAction_;
+        if (!blackboardComponent->GetString(category_, definition_.currentActionKey, currentAction_)) continue;
+        if (currentAction_ != definition_.aiActionName) continue;
+
+        currentDefinition_ = &definition_;
+        break;
+    }
+    if (currentDefinition_)
+    {
+        ApplyAnimationActionEnd(*currentDefinition_);
+    }
 
     blackboardComponent->SetBool(category_, AIBlackboardKeys::ACTION_ENDED, true);
     blackboardComponent->SetBool(category_, AIBlackboardKeys::IS_ACTING, false);
@@ -285,8 +331,13 @@ void AIActionComponent::RegisterActions()
         {
             NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
         });
+    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, "AI.NotifyActionEnd", [this]()
+        {
+            NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
+        });
     registeredActionNames.push_back("AIActionEnd");
     registeredActionNames.push_back("NotifyAIActionEnd");
+    registeredActionNames.push_back("AI.NotifyActionEnd");
 }
 
 void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definition_)
@@ -300,6 +351,59 @@ void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definitio
             ExecuteAIAction(actionName_);
         });
     registeredActionNames.push_back(actionName_);
+}
+
+void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& definition_)
+{
+    std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    std::shared_ptr<AnimationControllerComponent> animation_ = owner_->GetComponent<AnimationControllerComponent>();
+    if (!animation_) return;
+
+    const std::string previousCategory_ = animation_->GetBlackboardCategory();
+    animation_->SetBlackboardCategory(definition_.animationBlackboardCategory);
+
+    if (definition_.writeAnimationBlackboard)
+    {
+        animation_->SetParam(definition_.animationCurrentActionKey, definition_.aiActionName);
+        animation_->SetParam(definition_.animationActionEndedKey, false);
+        animation_->SetParam(definition_.animationIsActingKey, true);
+    }
+    if (!definition_.animationTriggerName.empty())
+    {
+        animation_->SetTrigger(definition_.animationTriggerName);
+    }
+    if (!definition_.animationStateName.empty())
+    {
+        animation_->ChangeState(definition_.animationStateName);
+    }
+
+    animation_->SetBlackboardCategory(previousCategory_);
+}
+
+void AIActionComponent::ApplyAnimationActionEnd(const AIActionDefinition& definition_)
+{
+    std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    std::shared_ptr<AnimationControllerComponent> animation_ = owner_->GetComponent<AnimationControllerComponent>();
+    if (!animation_) return;
+
+    const std::string previousCategory_ = animation_->GetBlackboardCategory();
+    animation_->SetBlackboardCategory(definition_.animationBlackboardCategory);
+
+    if (definition_.writeAnimationBlackboard)
+    {
+        animation_->SetParam(definition_.animationActionEndedKey, true);
+        animation_->SetParam(definition_.animationIsActingKey, false);
+    }
+    if (!definition_.animationActionEndTriggerName.empty())
+    {
+        animation_->SetTrigger(definition_.animationActionEndTriggerName);
+    }
+
+    animation_->SetBlackboardCategory(previousCategory_);
 }
 
 AIActionDefinition* AIActionComponent::FindDefinition(const std::string& aiActionName_)
