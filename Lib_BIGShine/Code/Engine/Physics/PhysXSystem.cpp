@@ -19,6 +19,81 @@ static float gTimeScale = 1.0f;
 
 static PxControllerManager* gControllerManager = nullptr;
 
+namespace
+{
+    constexpr PxU32 ROLE_PHYSICAL = 0;
+    constexpr PxU32 ROLE_CHARACTER = 1;
+    constexpr PxU32 ROLE_HIT_BOX = 2;
+    constexpr PxU32 ROLE_HURT_BOX = 3;
+    constexpr PxU32 ROLE_SENSOR = 4;
+    constexpr PxU32 ROLE_JUST_DODGE_BOX = 5;
+
+    bool IsCctMoveIgnoredRole(PxU32 role_)
+    {
+        return role_ == ROLE_HIT_BOX ||
+            role_ == ROLE_HURT_BOX ||
+            role_ == ROLE_SENSOR ||
+            role_ == ROLE_JUST_DODGE_BOX;
+    }
+
+    class CharacterControllerQueryFilterCallback : public PxQueryFilterCallback
+    {
+    public:
+        PxQueryHitType::Enum preFilter(
+            const PxFilterData&,
+            const PxShape* shape_,
+            const PxRigidActor*,
+            PxHitFlags&) override
+        {
+            if (!shape_) return PxQueryHitType::eNONE;
+
+            const PxFilterData filterData_ = shape_->getSimulationFilterData();
+            if (IsCctMoveIgnoredRole(filterData_.word2))
+            {
+                return PxQueryHitType::eNONE;
+            }
+
+            return PxQueryHitType::eBLOCK;
+        }
+
+        PxQueryHitType::Enum postFilter(
+            const PxFilterData&,
+            const PxQueryHit&,
+            const PxShape*,
+            const PxRigidActor*) override
+        {
+            return PxQueryHitType::eBLOCK;
+        }
+    };
+
+    class CharacterControllerBehaviorCallback : public PxControllerBehaviorCallback
+    {
+    public:
+        PxControllerBehaviorFlags getBehaviorFlags(const PxShape& shape_, const PxActor&) override
+        {
+            const PxFilterData filterData_ = shape_.getSimulationFilterData();
+            if (filterData_.word2 == ROLE_CHARACTER)
+            {
+                return PxControllerBehaviorFlag::eCCT_SLIDE;
+            }
+            return PxControllerBehaviorFlags();
+        }
+
+        PxControllerBehaviorFlags getBehaviorFlags(const PxController&) override
+        {
+            return PxControllerBehaviorFlag::eCCT_SLIDE;
+        }
+
+        PxControllerBehaviorFlags getBehaviorFlags(const PxObstacle&) override
+        {
+            return PxControllerBehaviorFlags();
+        }
+    };
+
+    CharacterControllerQueryFilterCallback gCharacterControllerQueryFilterCallback;
+    CharacterControllerBehaviorCallback gCharacterControllerBehaviorCallback;
+}
+
 static PxFilterFlags PhysXFilterShader(
     PxFilterObjectAttributes attributes0_,
     PxFilterData filterData0_,
@@ -249,6 +324,16 @@ PxRigidStatic* PhysXSystem::CreateGround(const physx::PxVec3& pos)
 physx::PxMaterial* PhysXSystem::GetDefaultMaterial()
 {
     return gDefaultMaterial;
+}
+
+physx::PxQueryFilterCallback* PhysXSystem::GetCharacterControllerQueryFilterCallback()
+{
+    return &gCharacterControllerQueryFilterCallback;
+}
+
+physx::PxControllerBehaviorCallback* PhysXSystem::GetCharacterControllerBehaviorCallback()
+{
+    return &gCharacterControllerBehaviorCallback;
 }
 
 PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }

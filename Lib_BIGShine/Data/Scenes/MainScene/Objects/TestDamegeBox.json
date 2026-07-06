@@ -5,7 +5,7 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 273,
+                "AttackInstanceId": 277,
                 "AttackTag": "DamageBox",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,

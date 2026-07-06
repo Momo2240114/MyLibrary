@@ -106,6 +106,7 @@ void ColliderComponent::CreateCharacterController()
     desc_.stepOffset = characterCollider_ ? characterCollider_->GetStepOffset() : 0.3f;
     desc_.contactOffset = characterCollider_ ? characterCollider_->GetContactOffset() : 0.05f;
     desc_.climbingMode = physx::PxCapsuleClimbingMode::eCONSTRAINED;
+    desc_.behaviorCallback = PhysXSystem::GetCharacterControllerBehaviorCallback();
     desc_.density = std::max<float>(mass, 1.0f);
     desc_.scaleCoeff = 0.8f;
     desc_.volumeGrowth = 1.5f;
@@ -625,7 +626,17 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.x * safeDeltaTime_,
             verticalDisplacement_,
             velocity.z * safeDeltaTime_);
-        PxControllerFilters filters_;
+        PxFilterData filterData_;
+        filterData_.word0 = static_cast<PxU32>(owner_->layer);
+        filterData_.word1 = owner_->mask;
+        filterData_.word2 = static_cast<PxU32>(collisionRole);
+        filterData_.word3 = static_cast<PxU32>(
+            reinterpret_cast<uintptr_t>(owner_.get()) & 0x7FFFFFFF);
+
+        PxControllerFilters filters_(
+            &filterData_,
+            PhysXSystem::GetCharacterControllerQueryFilterCallback(),
+            nullptr);
         const PxControllerCollisionFlags collisionFlags_ =
             characterController->move(displacement_, 0.001f, safeDeltaTime_, filters_);
 

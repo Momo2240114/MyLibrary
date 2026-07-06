@@ -22,9 +22,17 @@ struct AIActionDefinition
     std::string currentActionKey = AIBlackboardKeys::CURRENT_ACTION;
     std::string actionEndedKey = AIBlackboardKeys::ACTION_ENDED;
     std::string isActingKey = AIBlackboardKeys::IS_ACTING;
+    std::string animationTriggerName;
+    std::string animationStateName;
+    std::string animationBlackboardCategory = AIBlackboardKeys::CATEGORY_ANIM;
+    std::string animationCurrentActionKey = AIBlackboardKeys::CURRENT_ACTION;
+    std::string animationActionEndedKey = AIBlackboardKeys::ACTION_ENDED;
+    std::string animationIsActingKey = AIBlackboardKeys::IS_ACTING;
+    std::string animationActionEndTriggerName;
     bool waitForActionEnd = true;
     bool clearActionEndedOnStart = true;
     bool setIsActing = true;
+    bool writeAnimationBlackboard = true;
     AI_ACTION_EXECUTE_TARGET executeTarget = AI_ACTION_EXECUTE_TARGET::OWNER;
 };
 
@@ -52,6 +60,8 @@ private:
     void EnsureBlackboard();
     void RegisterActions();
     void RegisterBridgeAction(const AIActionDefinition& definition_);
+    void ApplyAnimationActionStart(const AIActionDefinition& definition_);
+    void ApplyAnimationActionEnd(const AIActionDefinition& definition_);
     AIActionDefinition* FindDefinition(const std::string& aiActionName_);
     const AIActionDefinition* FindDefinition(const std::string& aiActionName_) const;
 
