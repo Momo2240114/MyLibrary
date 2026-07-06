@@ -202,10 +202,7 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName_)
             startSequence_);
         if (registerGlobal)
         {
-            ActionRegistry::Instance().RegisterAction(
-                "Sequence",
-                sequenceName_,
-                startSequence_);
+            owner_->RegisterGlobalAction("Sequence", sequenceName_, startSequence_);
         }
     }
 }

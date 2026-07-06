@@ -83,7 +83,8 @@
         "Wall",
         "TestTarget",
         "GameObject",
-        "TestDamegeBox"
+        "TestDamegeBox",
+        "JustDodgeEventPool"
     ],
     "SceneName": "MainScene"
 }

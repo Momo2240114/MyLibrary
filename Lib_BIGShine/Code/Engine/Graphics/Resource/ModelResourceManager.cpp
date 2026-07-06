@@ -8,70 +8,70 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
 
-// ‹L‰¯‚Ì_“a‚©‚çƒŠƒ\[ƒX‚ğŒî‚¤A‚ ‚é‚¢‚ÍV‚½‚É–a‚®ŠÖ”
+// è¨˜æ†¶ã®ç¥æ®¿ã‹ã‚‰ãƒªã‚½ãƒ¼ã‚¹ã‚’ä¹ã†ã€ã‚ã‚‹ã„ã¯æ–°ãŸã«ç´¡ãé–¢æ•°
 std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11Device* device, const std::string& filename, float sampleRate)
 {
-    // 1. ƒpƒX‚Ì[•£‚©‚çAƒˆ‚È‚éu^–¼iModel–¼jv‚ğ’Šo‚·‚é
+    // 1. ãƒ‘ã‚¹ã®æ·±æ·µã‹ã‚‰ã€ç´”ç²‹ãªã‚‹ã€ŒçœŸåï¼ˆModelåï¼‰ã€ã‚’æŠ½å‡ºã™ã‚‹
     std::filesystem::path filePath(filename);
     std::string pureModelName = filePath.stem().string();
     const std::string resourceKey = filePath.lexically_normal().generic_string();
 
-    // 2. ‚·‚Å‚É‚»‚Ì–¼‚ª‹L‰¯‚É‚Ü‚ê‚Ä‚¢‚é‚©Šm”F
+    // 2. ã™ã§ã«ãã®åãŒè¨˜æ†¶ã«åˆ»ã¾ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
     auto it = m_resources.find(resourceKey);
     if (it != m_resources.end()) {
-        // u‚¨‚¨A‚»‚È‚½‚Ì’T‚·‹L‰¯iGPUƒoƒbƒtƒ@“™‚à\’zÏ‚İj‚Í‚±‚±‚É‚ ‚éIv
+        // ã€ŒãŠãŠã€ããªãŸã®æ¢ã™è¨˜æ†¶ï¼ˆGPUãƒãƒƒãƒ•ã‚¡ç­‰ã‚‚æ§‹ç¯‰æ¸ˆã¿ï¼‰ã¯ã“ã“ã«ã‚ã‚‹ï¼ã€
         return it->second;
     }
 
-    // 3. ‹L‰¯‚É‚È‚¯‚ê‚ÎAV‚½‚ÈƒŠƒ\[ƒX‚ÌŠí‚ğ˜B¬‚·‚é
+    // 3. è¨˜æ†¶ã«ãªã‘ã‚Œã°ã€æ–°ãŸãªãƒªã‚½ãƒ¼ã‚¹ã®å™¨ã‚’éŒ¬æˆã™ã‚‹
     auto newResource = std::make_shared<ModelResource>();
     newResource->modelName = pureModelName;
 
     std::filesystem::path dirpath(filePath.parent_path());
     std::filesystem::path extension = filePath.extension();
 
-    // “Æ©Œ`® (.cereal) ‚ÌƒpƒX‚ğ¶¬
+    // ç‹¬è‡ªå½¢å¼ (.cereal) ã®ãƒ‘ã‚¹ã‚’ç”Ÿæˆ
     std::filesystem::path cerealPath = filePath;
     cerealPath.replace_extension(".cereal");
 
     bool isLoaded = false;
 
-    // 4. “Æ©Œ`®‚Ìƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚Ì‘¶İŠm”F‚Æ“Ç‚İ‚İ
+    // 4. ç‹¬è‡ªå½¢å¼ã®ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã®å­˜åœ¨ç¢ºèªã¨èª­ã¿è¾¼ã¿
     if (std::filesystem::exists(cerealPath))
     {
         isLoaded = LoadFromCereal(cerealPath.string(), newResource);
     }
 
-    // “Æ©Œ`®‚ª‚È‚¢A‚Ü‚½‚Í“Ç‚İ‚İ‚É¸”s‚µ‚½ê‡‚ÍGLTF‚©‚ç–a‚¬o‚·
+    // ç‹¬è‡ªå½¢å¼ãŒãªã„ã€ã¾ãŸã¯èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ãŸå ´åˆã¯GLTFã‹ã‚‰ç´¡ãå‡ºã™
     if (!isLoaded && (extension == ".gltf" || extension == ".glb"))
     {
         GLTFImporter importer(filename.c_str());
 
-        // ”Ä—pƒf[ƒ^“Ç‚İæ‚è
+        // æ±ç”¨ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
         importer.LoadMaterials(newResource->materials, device);
         importer.LoadNodes(newResource->nodes);
         importer.LoadMeshes(newResource->meshes, newResource->nodes);
         importer.LoadAnimations(newResource->animations, newResource->nodes, sampleRate);
 
-        // “Æ©Œ`®‚Ìƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚ğ•Û‘¶‚µ‚Ä–¢—ˆ‚É”õ‚¦‚é
+        // ç‹¬è‡ªå½¢å¼ã®ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜ã—ã¦æœªæ¥ã«å‚™ãˆã‚‹
         SaveToCereal(cerealPath.string(), newResource);
         isLoaded = true;
     }
 
     if (!isLoaded)
     {
-        _ASSERT_EXPR_A(false, "‘Î‰‚·‚éƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½B");
+        _ASSERT_EXPR_A(false, "å¯¾å¿œã™ã‚‹ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚");
         return nullptr;
     }
 
     // ========================================================
-    // š ‚±‚±‚©‚çƒRƒ“ƒ|[ƒlƒ“ƒg‚©‚çˆÚĞ‚¹‚µu¹‚È‚é\’z‹V®v
+    // â˜… ã“ã“ã‹ã‚‰ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‹ã‚‰ç§»ç±ã›ã—ã€Œè–ãªã‚‹æ§‹ç¯‰å„€å¼ã€
     // ========================================================
 
-    // --- [A] ƒ}ƒeƒŠƒAƒ‹\’ziƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒhEƒ_ƒ~[¶¬j ---
+    // --- [A] ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹ç¯‰ï¼ˆãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ãƒ»ãƒ€ãƒŸãƒ¼ç”Ÿæˆï¼‰ ---
     for (GltfModelCommponennt::Material& material : newResource->materials)
     {
-        // ƒx[ƒXƒ}ƒbƒv
+        // ãƒ™ãƒ¼ã‚¹ãƒãƒƒãƒ—
         if (material.baseMap == nullptr) {
             if (material.baseTextureFileName.empty()) {
                 HRESULT hr = CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, material.baseMap.GetAddressOf());
@@ -83,7 +83,7 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
                 _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
             }
         }
-        // –@üƒ}ƒbƒvFŒõ‚ğ‘€‚éuƒf[ƒ^v‚Å‚ ‚é
+        // æ³•ç·šãƒãƒƒãƒ—ï¼šå…‰ã‚’æ“ã‚‹ã€Œãƒ‡ãƒ¼ã‚¿ã€ã§ã‚ã‚‹
         if (material.normalMap == nullptr) {
             if (material.normalTextureFileName.empty()) {
                 CPUResourceLoader::CreateDummyTexture(device, 0xFFFF7F7F, material.normalMap.GetAddressOf());
@@ -92,11 +92,11 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
                 std::filesystem::path texturePath(dirpath / material.normalTextureFileName);
                 CPUResourceLoader::LoadTextureFromFile(device, texturePath.wstring().c_str(),
                     material.normalMap.GetAddressOf(), nullptr,
-                    TextureType::Data); // ƒf[ƒ^‚Ì—
+                    TextureType::Data); // ãƒ‡ãƒ¼ã‚¿ã®ç†
             }
         }
 
-        // ƒGƒ~ƒbƒVƒuƒ}ƒbƒvF”­Œõ‚ÌuFv‚Å‚ ‚é
+        // ã‚¨ãƒŸãƒƒã‚·ãƒ–ãƒãƒƒãƒ—ï¼šç™ºå…‰ã®ã€Œè‰²ã€ã§ã‚ã‚‹
         if (material.emissiveMap == nullptr) {
             if (material.emissiveTextureFileName.empty()) {
                 CPUResourceLoader::CreateDummyTexture(device, 0x00000000, material.emissiveMap.GetAddressOf());
@@ -105,11 +105,11 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
                 std::filesystem::path path = dirpath / material.emissiveTextureFileName;
                 CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(),
                     material.emissiveMap.GetAddressOf(), nullptr,
-                    TextureType::Color); // F‚Ì—
+                    TextureType::Color); // è‰²ã®ç†
             }
         }
 
-        // ƒIƒNƒ‹[ƒWƒ‡ƒ“ƒ}ƒbƒvFÕ•Á‚Ìuƒf[ƒ^v‚Å‚ ‚é
+        // ã‚ªã‚¯ãƒ«ãƒ¼ã‚¸ãƒ§ãƒ³ãƒãƒƒãƒ—ï¼šé®è”½ã®ã€Œãƒ‡ãƒ¼ã‚¿ã€ã§ã‚ã‚‹
         if (material.occlusionMap == nullptr) {
             if (material.occlusionTextureFileName.empty()) {
                 CPUResourceLoader::CreateDummyTexture(device, 0xFFFFFFFF, material.occlusionMap.GetAddressOf());
@@ -118,11 +118,11 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
                 std::filesystem::path path = dirpath / material.occlusionTextureFileName;
                 CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(),
                     material.occlusionMap.GetAddressOf(), nullptr,
-                    TextureType::Data); // ƒf[ƒ^‚Ì—
+                    TextureType::Data); // ãƒ‡ãƒ¼ã‚¿ã®ç†
             }
         }
 
-        // MetalnessRoughnessƒ}ƒbƒvFŞ¿‚Ì“Á«‚ğŒˆ‚ß‚é‹É‚ß‚Äd—v‚Èuƒf[ƒ^v‚Å‚ ‚é
+        // MetalnessRoughnessãƒãƒƒãƒ—ï¼šæè³ªã®ç‰¹æ€§ã‚’æ±ºã‚ã‚‹æ¥µã‚ã¦é‡è¦ãªã€Œãƒ‡ãƒ¼ã‚¿ã€ã§ã‚ã‚‹
         if (material.metalnessRoughnessMap == nullptr) {
             if (material.metalnessRoughnessTextureFileName.empty()) {
                 CPUResourceLoader::CreateDummyTexture(device, 0x008080FF, material.metalnessRoughnessMap.GetAddressOf());
@@ -131,12 +131,12 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
                 std::filesystem::path path = dirpath / material.metalnessRoughnessTextureFileName;
                 CPUResourceLoader::LoadTextureFromFile(device, path.wstring().c_str(),
                     material.metalnessRoughnessMap.GetAddressOf(), nullptr,
-                    TextureType::Data); // ƒf[ƒ^‚Ì—
+                    TextureType::Data); // ãƒ‡ãƒ¼ã‚¿ã®ç†
             }
         }
     }
 
-    // --- [B] ƒm[ƒh\’zi_“a“à‚Å‚Ìeqƒ|ƒCƒ“ƒ^Œ‹üj ---
+    // --- [B] ãƒãƒ¼ãƒ‰æ§‹ç¯‰ï¼ˆç¥æ®¿å†…ã§ã®è¦ªå­ãƒã‚¤ãƒ³ã‚¿çµç·šï¼‰ ---
     for (size_t nodeIndex = 0; nodeIndex < newResource->nodes.size(); ++nodeIndex)
     {
         GltfModelCommponennt::Node& node = newResource->nodes.at(nodeIndex);
@@ -146,13 +146,13 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
         }
     }
 
-    // --- [C] ƒƒbƒVƒ…\’zj ---
+    // --- [C] ãƒ¡ãƒƒã‚·ãƒ¥æ§‹ç¯‰ï¼‰ ---
     for (GltfModelCommponennt::Mesh& mesh : newResource->meshes)
     {
         mesh.material = &newResource->materials.at(mesh.materialIndex);
         mesh.node = &newResource->nodes.at(mesh.nodeIndex);
 
-        // ’¸“_ƒoƒbƒtƒ@‚Ì\’z
+        // é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®æ§‹ç¯‰
         {
             D3D11_BUFFER_DESC bufferDesc = {};
             D3D11_SUBRESOURCE_DATA subresourceData = {};
@@ -169,7 +169,7 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
 
-        // ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚Ì\’z
+        // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã®æ§‹ç¯‰
         {
             D3D11_BUFFER_DESC bufferDesc = {};
             D3D11_SUBRESOURCE_DATA subresourceData = {};
@@ -186,20 +186,20 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
 
-        // ƒ{[ƒ“\’z
+        // ãƒœãƒ¼ãƒ³æ§‹ç¯‰
         for (GltfModelCommponennt::Bone& bone : mesh.bones) {
             bone.node = &newResource->nodes.at(bone.nodeIndex);
         }
     }
 
-    // 5. Š®¬‚µ‚½Œ‹»‚ğ_“aƒŠƒ\[ƒX‚ğ‘‚«—¯‚ß‚é
+    // 5. å®Œæˆã—ãŸçµæ™¶ã‚’ç¥æ®¿ãƒªã‚½ãƒ¼ã‚¹ã‚’æ›¸ãç•™ã‚ã‚‹
     m_resources[resourceKey] = newResource;
 
-    printf("V‚½‚Éƒ‚ƒfƒ‹ƒŠƒ\[ƒX‚ğ_“a‚É•ò”[‚¹‚è: %s\n", pureModelName.c_str());
+    printf("æ–°ãŸã«ãƒ¢ãƒ‡ãƒ«ãƒªã‚½ãƒ¼ã‚¹ã‚’ç¥æ®¿ã«å¥‰ç´ã›ã‚Š: %s\n", pureModelName.c_str());
     return newResource;
 }
 
-// ƒVƒŠƒAƒ‰ƒCƒYicereal‚Ì‘‹Lj
+// ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚ºï¼ˆcerealã®æ›¸è¨˜ï¼‰
 bool ModelResourceManager::SaveToCereal(const std::string& cerealPath, const std::shared_ptr<ModelResource>& resource)
 {
     std::ofstream ostream(cerealPath, std::ios::binary);
@@ -216,12 +216,12 @@ bool ModelResourceManager::SaveToCereal(const std::string& cerealPath, const std
         return true;
     }
     catch (...) {
-        _ASSERT_EXPR_A(false, "cereal‚É‚æ‚é•Û‘¶‚ÌÅ’†—áŠO‚ª”­¶‚µ‚Ü‚µ‚½");
+        _ASSERT_EXPR_A(false, "cerealã«ã‚ˆã‚‹ä¿å­˜ã®æœ€ä¸­ä¾‹å¤–ãŒç™ºç”Ÿã—ã¾ã—ãŸ");
         return false;
     }
 }
 
-// ƒfƒVƒŠƒAƒ‰ƒCƒYicereal‚Ì‰ğ“Çj
+// ãƒ‡ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚ºï¼ˆcerealã®è§£èª­ï¼‰
 bool ModelResourceManager::LoadFromCereal(const std::string& cerealPath, std::shared_ptr<ModelResource>& resource)
 {
     std::ifstream istream(cerealPath, std::ios::binary);
@@ -238,7 +238,7 @@ bool ModelResourceManager::LoadFromCereal(const std::string& cerealPath, std::sh
         return true;
     }
     catch (...) {
-        _ASSERT_EXPR_A(false, "cereal‚É‚æ‚é‰ğ“Ç‚ÌÅ’†‚É—áŠO‚ª”­¶‚µ‚Ü‚µ‚½");
+        _ASSERT_EXPR_A(false, "cerealã«ã‚ˆã‚‹è§£èª­ã®æœ€ä¸­ã«ä¾‹å¤–ãŒç™ºç”Ÿã—ã¾ã—ãŸ");
         return false;
     }
 }

@@ -51,38 +51,61 @@ void GameObject::RegisterAction(
     localRegistry.RegisterAction(category_, name_, func_);
 }
 
+std::string GameObject::BuildActionName(const std::string& actionName_) const
+{
+    if (actionName_.empty()) return {};
+    const std::string& objectName_ = GetName();
+    if (objectName_.empty()) return actionName_;
+    const std::string prefix_ = objectName_ + "_";
+    if (actionName_.starts_with(prefix_)) return actionName_;
+    return prefix_ + actionName_;
+}
+
+std::string GameObject::RegisterGlobalAction(
+    const std::string& category_,
+    const std::string& actionName_,
+    const ActionRegistry::ActionFunc& function_)
+{
+    const std::string resolvedName_ = BuildActionName(actionName_);
+    if (!resolvedName_.empty())
+    {
+        ActionRegistry::Instance().RegisterAction(category_, resolvedName_, function_);
+    }
+    return resolvedName_;
+}
+
 void GameObject::DrawGizmo(const float* view, const float* projection)
 {
     ImGuiIO& io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-    // ‘€ìƒ‚[ƒh‚ÌØ‚è‘Ö‚¦i”CˆÓ‚ÅUI‚©‚ç•ÏX‚Å‚«‚é‚æ‚¤‚É‚·‚é‚Æ•Ö—˜‚Å‚·j
+    // æ“ä½œãƒ¢ãƒ¼ãƒ‰ã®åˆ‡ã‚Šæ›¿ãˆï¼ˆä»»æ„ã§UIã‹ã‚‰å¤‰æ›´ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã¨ä¾¿åˆ©ã§ã™ï¼‰
     static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE;
-    // MODE ‚ğ WORLD ‚É‚·‚é‚±‚Æ‚ÅAƒMƒYƒ‚‚Ì–îˆó‚Íí‚É¢ŠE²‚ğŒü‚«‚Ü‚·
+    // MODE ã‚’ WORLD ã«ã™ã‚‹ã“ã¨ã§ã€ã‚®ã‚ºãƒ¢ã®çŸ¢å°ã¯å¸¸ã«ä¸–ç•Œè»¸ã‚’å‘ãã¾ã™
     static ImGuizmo::MODE currentMode = ImGuizmo::WORLD;
 
-    // 1. –{•¨‚Ìƒ[ƒ‹ƒhs—ñ‚ğæ“¾iŒ»İ‚ÌˆÊ’uE‰ñ“]EƒXƒP[ƒ‹‚ª‚·‚×‚Ä“ü‚Á‚Ä‚¢‚éj
+    // 1. æœ¬ç‰©ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’å–å¾—ï¼ˆç¾åœ¨ã®ä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ãŒã™ã¹ã¦å…¥ã£ã¦ã„ã‚‹ï¼‰
     DirectX::XMMATRIX worldMat = transform->GetWorldMatrix();
 
-    // ImGuizmo‚ªˆµ‚¦‚é‚æ‚¤‚É float[16] Œ`®‚É‚·‚é
+    // ImGuizmoãŒæ‰±ãˆã‚‹ã‚ˆã†ã« float[16] å½¢å¼ã«ã™ã‚‹
     DirectX::XMFLOAT4X4 gizmoMatrix;
     DirectX::XMStoreFloat4x4(&gizmoMatrix, worldMat);
 
-    // 2. ƒMƒYƒ‚‚Ì•`‰æ‚Æ‘€ì
-    // gizmoMatrix ‚ğ’¼Ú“n‚·B“à•”‚ÅuŒ»İ‚Ìó‘Ôv‚©‚çuƒhƒ‰ƒbƒOŒã‚Ìó‘Ôv‚ÖXV‚³‚ê‚éB
+    // 2. ã‚®ã‚ºãƒ¢ã®æç”»ã¨æ“ä½œ
+    // gizmoMatrix ã‚’ç›´æ¥æ¸¡ã™ã€‚å†…éƒ¨ã§ã€Œç¾åœ¨ã®çŠ¶æ…‹ã€ã‹ã‚‰ã€Œãƒ‰ãƒ©ãƒƒã‚°å¾Œã®çŠ¶æ…‹ã€ã¸æ›´æ–°ã•ã‚Œã‚‹ã€‚
     if (ImGuizmo::Manipulate(
         view,
         projection,
         currentOperation,
-        currentMode, // ‚±‚±‚ª WORLD ‚È‚çAŒ©‚½–Ú‚Ì²‚Í‰ñ“]‚µ‚Ü‚¹‚ñ
+        currentMode, // ã“ã“ãŒ WORLD ãªã‚‰ã€è¦‹ãŸç›®ã®è»¸ã¯å›è»¢ã—ã¾ã›ã‚“
         &gizmoMatrix._11))
     {
-        // ‘€ì’†‚Ìê‡‚Ì‚İ”½‰f
+        // æ“ä½œä¸­ã®å ´åˆã®ã¿åæ˜ 
         if (ImGuizmo::IsUsing()) {
-            // 3. ‘€ìŒã‚ÌuˆÊ’uE‰ñ“]EƒXƒP[ƒ‹‚ª‚·‚×‚ÄˆÛ‚³‚ê‚½vs—ñ‚ğ“Ç‚İ‚Ş
+            // 3. æ“ä½œå¾Œã®ã€Œä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ãŒã™ã¹ã¦ç¶­æŒã•ã‚ŒãŸã€è¡Œåˆ—ã‚’èª­ã¿è¾¼ã‚€
             DirectX::XMMATRIX newWorldMat = DirectX::XMLoadFloat4x4(&gizmoMatrix);
 
-            // ‚±‚ê‚ğ‚»‚Ì‚Ü‚Ü Apply ‚·‚ê‚ÎA‰ñ“]‚ğˆÛ‚µ‚½‚Ü‚ÜˆÚ“®‚¾‚¯i‚ ‚é‚¢‚Í‰ñ“]‚¾‚¯j‚ªXV‚³‚ê‚Ü‚·
+            // ã“ã‚Œã‚’ãã®ã¾ã¾ Apply ã™ã‚Œã°ã€å›è»¢ã‚’ç¶­æŒã—ãŸã¾ã¾ç§»å‹•ã ã‘ï¼ˆã‚ã‚‹ã„ã¯å›è»¢ã ã‘ï¼‰ãŒæ›´æ–°ã•ã‚Œã¾ã™
             transform->ApplyWorldMatrix(newWorldMat);
         }
     }
@@ -116,17 +139,17 @@ void GameObject::CallAllComponentStart()
         }
     }
 
-    // ƒ‹[ƒv’†‚Ì AddComponent ‚É‚æ‚é”j‰ó‚ğ–h‚®‚½‚ßAƒRƒs[‚ğì¬‚µ‚Ä‰ñ‚·
+    // ãƒ«ãƒ¼ãƒ—ä¸­ã® AddComponent ã«ã‚ˆã‚‹ç ´å£Šã‚’é˜²ããŸã‚ã€ã‚³ãƒ”ãƒ¼ã‚’ä½œæˆã—ã¦å›ã™
     auto tempComponents = components;
 
     for (auto& comp : tempComponents)
     {
-        // 1. ‚Ü‚¸ NULL ƒ`ƒFƒbƒN
+        // 1. ã¾ãš NULL ãƒã‚§ãƒƒã‚¯
         if (!comp) continue;
 
-        // 2. ƒƒ‚ƒŠ‚ª—LŒø‚©‚Ç‚¤‚©‚ÌŠÈˆÕƒ`ƒFƒbƒN (MSVCƒfƒoƒbƒO)
-        // –{—ˆ‚Í shared_ptr ‚È‚Ì‚Å‹N‚«‚É‚­‚¢‚Í‚¸‚Å‚·‚ªA
-        // 0xdddd... ‚ğ’Í‚ñ‚Å‚¢‚éê‡‚ÍA’†g‚Ì shared_count ‚ª‰ó‚ê‚Ä‚¢‚Ü‚·B
+        // 2. ãƒ¡ãƒ¢ãƒªãŒæœ‰åŠ¹ã‹ã©ã†ã‹ã®ç°¡æ˜“ãƒã‚§ãƒƒã‚¯ (MSVCãƒ‡ãƒãƒƒã‚°æ™‚)
+        // æœ¬æ¥ã¯ shared_ptr ãªã®ã§èµ·ãã«ãã„ã¯ãšã§ã™ãŒã€
+        // 0xdddd... ã‚’æ´ã‚“ã§ã„ã‚‹å ´åˆã¯ã€ä¸­èº«ã® shared_count ãŒå£Šã‚Œã¦ã„ã¾ã™ã€‚
         try {
             if (!comp->IsStarted())
             {
@@ -135,7 +158,7 @@ void GameObject::CallAllComponentStart()
             }
         }
         catch (...) {
-            // ‚±‚±‚Å~‚Ü‚é‚È‚çAcomp ‚Ìw‚·æ‚ªŠù‚É‰ó‚ê‚Ä‚¢‚Ü‚·
+            // ã“ã“ã§æ­¢ã¾ã‚‹ãªã‚‰ã€comp ã®æŒ‡ã™å…ˆãŒæ—¢ã«å£Šã‚Œã¦ã„ã¾ã™
             assert(false && "Component memory is corrupted!");
         }
     }
@@ -149,7 +172,7 @@ std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& com
         if (comp->GetName() == compName_)
             return comp;
     }
-    //ƒRƒŠƒWƒ‡ƒ“‚Í•¡”‚Ì‚à‚Ì‚ğ‚à‚Ä‚é‚æ‚¤‚É‚µ‚½‚Ì‚Å‚ ‚í‚¹‚Ä–³Œø‰»
+    //ã‚³ãƒªã‚¸ãƒ§ãƒ³ã¯è¤‡æ•°ã®ã‚‚ã®ã‚’ã‚‚ã¦ã‚‹ã‚ˆã†ã«ã—ãŸã®ã§ã‚ã‚ã›ã¦ç„¡åŠ¹åŒ–
     //for (auto& collider_ : colliderComponents)
     //{
     //    if (collider_->GetName() == compName_) return collider_;
@@ -165,7 +188,7 @@ void GameObject::SetParent(std::shared_ptr<GameObject> parentGO)
 
     if (parentGO) {
         parentGO->transform->gameObject = parentGO;
-        // Transform‚Ìeq•t‚¯
+        // Transformã®è¦ªå­ä»˜ã‘
         transform->SetParent(parentGO->transform);
     }
     else {
@@ -315,18 +338,18 @@ void GameObject::ExecuteAction(
 void GameObject::Clear()
 {
     UnregisterAllColliderComponents();
-    // 1. ŠeƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌQÆ‚ğŠO‚·‘O‚ÉA•K—v‚È‚çI—¹ˆ—‚ğŒÄ‚Ô
-    // (ƒRƒ“ƒ|[ƒlƒ“ƒg‘¤‚ÉI—¹—pŠÖ”‚ª‚ ‚ê‚Î‚±‚±‚ÅŒÄ‚Ô)
+    // 1. å„ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å‚ç…§ã‚’å¤–ã™å‰ã«ã€å¿…è¦ãªã‚‰çµ‚äº†å‡¦ç†ã‚’å‘¼ã¶
+    // (ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆå´ã«çµ‚äº†ç”¨é–¢æ•°ãŒã‚ã‚Œã°ã“ã“ã§å‘¼ã¶)
 
-    // 2. ”Ä—pƒRƒ“ƒ|[ƒlƒ“ƒgƒŠƒXƒg‚ğƒNƒŠƒA
-    // shared_ptr ‚È‚Ì‚ÅA‘¼‚ÅQÆ‚³‚ê‚Ä‚¢‚È‚¯‚ê‚ÎŠeƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌƒfƒXƒgƒ‰ƒNƒ^‚ª‘–‚è‚Ü‚·
+    // 2. æ±ç”¨ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãƒªã‚¹ãƒˆã‚’ã‚¯ãƒªã‚¢
+    // shared_ptr ãªã®ã§ã€ä»–ã§å‚ç…§ã•ã‚Œã¦ã„ãªã‘ã‚Œã°å„ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ãŒèµ°ã‚Šã¾ã™
     components.clear();
 
-    // 3. “Á•Êˆµ‚¢‚µ‚Ä‚¢‚éƒRƒ‰ƒCƒ_[ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğƒNƒŠƒA
+    // 3. ç‰¹åˆ¥æ‰±ã„ã—ã¦ã„ã‚‹ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’ã‚¯ãƒªã‚¢
     colliderComponents.clear();
 
-    // 4. Transform ‚ÌƒŠƒZƒbƒgi•K—v‚É‰‚¶‚Äj
-    // ’Êí‚ÍŸ‚Ì Load ‚Åã‘‚«‚³‚ê‚Ü‚·‚ªA‰Šúó‘Ô‚É–ß‚·‚ÆˆÀ‘S‚Å‚·
+    // 4. Transform ã®ãƒªã‚»ãƒƒãƒˆï¼ˆå¿…è¦ã«å¿œã˜ã¦ï¼‰
+    // é€šå¸¸ã¯æ¬¡ã® Load ã§ä¸Šæ›¸ãã•ã‚Œã¾ã™ãŒã€åˆæœŸçŠ¶æ…‹ã«æˆ»ã™ã¨å®‰å…¨ã§ã™
     if (transform) {
         transform->localPosition = { 0, 0, 0 };
         transform->localRotation = { 0, 0, 0 };
@@ -341,16 +364,16 @@ void GameObject::TransformGui()
 
 void GameObject::Gui()
 {
-    // --- –¼‘O•ÒW UI ---
+    // --- åå‰ç·¨é›† UI ---
     if (nameComponent)
     {
-        // •ÒW—p‚Éˆê“I‚Èƒoƒbƒtƒ@‚ğ—pˆÓ
+        // ç·¨é›†ç”¨ã«ä¸€æ™‚çš„ãªãƒãƒƒãƒ•ã‚¡ã‚’ç”¨æ„
         char nameBuf[128];
         strncpy_s(nameBuf, nameComponent->name.c_str(), sizeof(nameBuf));
 
-        if (ImGui::InputText(IM_U8("–¼‘O##GameObject_NameInput"), nameBuf, sizeof(nameBuf)))
+        if (ImGui::InputText(IM_U8("åå‰##GameObject_NameInput"), nameBuf, sizeof(nameBuf)))
         {
-            // –¼‘O‚ª•ÏX‚³‚ê‚½‚çNameComponent‚É”½‰f
+            // åå‰ãŒå¤‰æ›´ã•ã‚ŒãŸã‚‰NameComponentã«åæ˜ 
             nameComponent->name = std::string(nameBuf);
         }
         ImGui::Separator();
@@ -359,33 +382,33 @@ void GameObject::Gui()
     // -----------------------------
     // Add Component
     // -----------------------------
-    if (ImGui::Button(IM_U8("ƒRƒ“ƒ|[ƒlƒ“ƒg’Ç‰Á##GameObject_AddComponentButton"), ImVec2(-1, 0))) // ‰¡•‚¢‚Á‚Ï‚¢‚Ìƒ{ƒ^ƒ“
+    if (ImGui::Button(IM_U8("ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆè¿½åŠ ##GameObject_AddComponentButton"), ImVec2(-1, 0))) // æ¨ªå¹…ã„ã£ã±ã„ã®ãƒœã‚¿ãƒ³
         ImGui::OpenPopup("AddComponentPopup");
 
     if (ImGui::BeginPopup("AddComponentPopup"))
     {
-        // ŒŸõ‘‹—p‚Ìƒoƒbƒtƒ@
+        // æ¤œç´¢çª“ç”¨ã®ãƒãƒƒãƒ•ã‚¡
         static char searchFilter[64] = "";
 
-        // ƒ|ƒbƒvƒAƒbƒv‚ªŠJ‚¢‚½‰‰ñ‚Ì‚İŒŸõ‘‹‚ÉƒtƒH[ƒJƒX‚ğ“–‚Ä‚é
+        // ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—ãŒé–‹ã„ãŸåˆå›ã®ã¿æ¤œç´¢çª“ã«ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã‚’å½“ã¦ã‚‹
         if (ImGui::IsWindowAppearing()) {
             ImGui::SetKeyboardFocusHere();
-            memset(searchFilter, 0, sizeof(searchFilter)); // ŠJ‚­‚½‚Ñ‚ÉƒŠƒZƒbƒg
+            memset(searchFilter, 0, sizeof(searchFilter)); // é–‹ããŸã³ã«ãƒªã‚»ãƒƒãƒˆ
         }
 
         ImGui::InputText("##GameObject_AddComponentSearchInput", searchFilter, IM_ARRAYSIZE(searchFilter));
         ImGui::Separator();
 
-        // ŒŸõ•¶š—ñ‚ğ¬•¶š‚É•ÏŠ·‚µ‚Ä”äŠr‚·‚é‚Æ‚æ‚èg‚¢‚â‚·‚­‚È‚è‚Ü‚·‚ªA
-        // ‚±‚±‚Å‚ÍƒVƒ“ƒvƒ‹‚É•”•ªˆê’v(strstr)‚ÅÀ‘•‚µ‚Ü‚·B
+        // æ¤œç´¢æ–‡å­—åˆ—ã‚’å°æ–‡å­—ã«å¤‰æ›ã—ã¦æ¯”è¼ƒã™ã‚‹ã¨ã‚ˆã‚Šä½¿ã„ã‚„ã™ããªã‚Šã¾ã™ãŒã€
+        // ã“ã“ã§ã¯ã‚·ãƒ³ãƒ—ãƒ«ã«éƒ¨åˆ†ä¸€è‡´(strstr)ã§å®Ÿè£…ã—ã¾ã™ã€‚
         std::string filter(searchFilter);
 
         for (auto& [name, _] : ComponentRegistry::Instance().GetAll())
         {
-            // ŒŸõƒtƒBƒ‹ƒ^‚É‚æ‚éi‚è‚İi‹ó•¶š‚Ìê‡‚Íí‚Étruej
+            // æ¤œç´¢ãƒ•ã‚£ãƒ«ã‚¿ã«ã‚ˆã‚‹çµã‚Šè¾¼ã¿ï¼ˆç©ºæ–‡å­—ã®å ´åˆã¯å¸¸ã«trueï¼‰
             if (!filter.empty()) {
-                // –¼‘O‚Ì’†‚ÉŒŸõŒê‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚©i‘å•¶š¬•¶š‚ğ‹æ•Ê‚·‚éŠÈˆÕ”Åj
-                // ‚æ‚è‚“x‚É‚·‚é‚È‚ç std::search ‚Æ‚©‚ÅŒ©‚â‚·‚­•ÏŠ·‚µ‚Ä‚­‚¾‚³‚¢
+                // åå‰ã®ä¸­ã«æ¤œç´¢èªãŒå«ã¾ã‚Œã¦ã„ã‚‹ã‹ï¼ˆå¤§æ–‡å­—å°æ–‡å­—ã‚’åŒºåˆ¥ã™ã‚‹ç°¡æ˜“ç‰ˆï¼‰
+                // ã‚ˆã‚Šé«˜åº¦ã«ã™ã‚‹ãªã‚‰ std::search ã¨ã‹ã§è¦‹ã‚„ã™ãå¤‰æ›ã—ã¦ãã ã•ã„
                 if (name.find(filter) == std::string::npos) {
                     continue;
                 }
@@ -405,19 +428,19 @@ void GameObject::Gui()
 
     ImGui::Separator();
 
-    // •\¦—pƒ‰ƒxƒ‹
+    // è¡¨ç¤ºç”¨ãƒ©ãƒ™ãƒ«
     const char* layerNames[] = {
-        IM_U8("ƒfƒtƒHƒ‹ƒg"), IM_U8("ƒvƒŒƒCƒ„["), IM_U8("“G"), IM_U8("ƒvƒŒƒCƒ„[’e"),
-        IM_U8("“G’e"), IM_U8("UI"), IM_U8("ŠÂ‹«"), IM_U8("ƒXƒj[ƒN‘ÎÛ"), IM_U8("’nŒ`"), IM_U8("•Ç"), IM_U8("ƒAƒCƒeƒ€")
+        IM_U8("ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ"), IM_U8("ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼"), IM_U8("æ•µ"), IM_U8("ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å¼¾"),
+        IM_U8("æ•µå¼¾"), IM_U8("UI"), IM_U8("ç’°å¢ƒ"), IM_U8("ã‚¹ãƒ‹ãƒ¼ã‚¯å¯¾è±¡"), IM_U8("åœ°å½¢"), IM_U8("å£"), IM_U8("ã‚¢ã‚¤ãƒ†ãƒ ")
     };
 
-    // ‘Î‰‚·‚éEnum’l‚ğ”z—ñ‰»‚µ‚Ä‚¨‚­
+    // å¯¾å¿œã™ã‚‹Enumå€¤ã‚’é…åˆ—åŒ–ã—ã¦ãŠã
     const LayerType layerValues[] = {
         LayerType::Default, LayerType::Player, LayerType::Enemy, LayerType::PlayerBullet,
         LayerType::EnemyBullet, LayerType::UI, LayerType::Environment, LayerType::SneakObject, LayerType::Terrain, LayerType::Wall,LayerType::Item,
     };
 
-    // Œ»İ‚Ì’l‚ª‚Ç‚ÌƒCƒ“ƒfƒbƒNƒX‚ÉŠY“–‚·‚é‚©’T‚·
+    // ç¾åœ¨ã®å€¤ãŒã©ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã«è©²å½“ã™ã‚‹ã‹æ¢ã™
     int currentItem = 0;
     for (int i = 0; i < IM_ARRAYSIZE(layerValues); i++) {
         if (layer == layerValues[i]) {
@@ -426,24 +449,24 @@ void GameObject::Gui()
         }
     }
 
-    // ƒRƒ“ƒ{ƒ{ƒbƒNƒX‚ğ•\¦
-    if (ImGui::Combo(IM_U8("ƒŒƒCƒ„[##GameObject_LayerCombo"), &currentItem, layerNames, IM_ARRAYSIZE(layerNames)))
+    // ã‚³ãƒ³ãƒœãƒœãƒƒã‚¯ã‚¹ã‚’è¡¨ç¤º
+    if (ImGui::Combo(IM_U8("ãƒ¬ã‚¤ãƒ¤ãƒ¼##GameObject_LayerCombo"), &currentItem, layerNames, IM_ARRAYSIZE(layerNames)))
     {
-        // ‘I‘ğ‚³‚ê‚½ƒCƒ“ƒfƒbƒNƒX‚É‘Î‰‚·‚éEnum’l‚ğ‘ã“ü
+        // é¸æŠã•ã‚ŒãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã«å¯¾å¿œã™ã‚‹Enumå€¤ã‚’ä»£å…¥
         layer = layerValues[currentItem];
     }
 
     ImGui::Separator();
 
-    ImGui::SeparatorText(IM_U8("ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€##GameObject_TransformHeader"));
+    ImGui::SeparatorText(IM_U8("ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ##GameObject_TransformHeader"));
     transform->Gui();
-    ImGui::TextDisabled(IM_U8("ƒQ[ƒ€§Œä‚ÌƒRƒ‰ƒCƒ_[‚Í‚±‚Ì’l‚É’Ç]‚µ‚Ü‚·B•¨—ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‘ÎÛ‚¾‚¯ Physics Controls Transform ‚ğ—LŒø‚É‚µ‚Ä‚­‚¾‚³‚¢B"));
+    ImGui::TextDisabled(IM_U8("ã‚²ãƒ¼ãƒ åˆ¶å¾¡ã®ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã¯ã“ã®å€¤ã«è¿½å¾“ã—ã¾ã™ã€‚ç‰©ç†ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³å¯¾è±¡ã ã‘ Physics Controls Transform ã‚’æœ‰åŠ¹ã«ã—ã¦ãã ã•ã„ã€‚"));
 
-    // --- eq•t‚¯ UI ‚Ì’Ç‰Á ---
+    // --- è¦ªå­ä»˜ã‘ UI ã®è¿½åŠ  ---
     ImGui::Separator();
-    ImGui::Text(IM_U8("ŠK‘w"));
+    ImGui::Text(IM_U8("éšå±¤"));
 
-    // Œ»İ‚Ìe‚Ì–¼‘O‚ğæ“¾
+    // ç¾åœ¨ã®è¦ªã®åå‰ã‚’å–å¾—
     std::string currentParentName = "None (Root)";
     if (auto pTrans = transform->parent.lock()) {
         if (auto pGO = pTrans->gameObject.lock()) {
@@ -451,26 +474,26 @@ void GameObject::Gui()
         }
     }
 
-    if (ImGui::BeginCombo(IM_U8("e##GameObject_ParentCombo"), currentParentName.c_str()))
+    if (ImGui::BeginCombo(IM_U8("è¦ª##GameObject_ParentCombo"), currentParentName.c_str()))
     {
-        // e‚ğ‰ğœ‚·‚éƒIƒvƒVƒ‡ƒ“
-        if (ImGui::Selectable(IM_U8("‚È‚µiƒ‹[ƒgj##GameObject_NoneRootSelectable"), currentParentName == "None (Root)")) {
-            // e‚ğ‰ğœ‚·‚éˆ—iTransform‚É‰ğœŠÖ”‚ğì‚é‚Æ—Ç‚¢j
+        // è¦ªã‚’è§£é™¤ã™ã‚‹ã‚ªãƒ—ã‚·ãƒ§ãƒ³
+        if (ImGui::Selectable(IM_U8("ãªã—ï¼ˆãƒ«ãƒ¼ãƒˆï¼‰##GameObject_NoneRootSelectable"), currentParentName == "None (Root)")) {
+            // è¦ªã‚’è§£é™¤ã™ã‚‹å‡¦ç†ï¼ˆTransformã«è§£é™¤é–¢æ•°ã‚’ä½œã‚‹ã¨è‰¯ã„ï¼‰
             transform->SetParent(nullptr);
         }
 
-        // ƒV[ƒ“ã‚Ì‘SƒIƒuƒWƒFƒNƒg‚ğƒŠƒXƒgƒAƒbƒvi©•ª©g‚Æ©•ª‚Ìq‚ÍœŠO‚·‚×‚«j
-        // GameObjectManagerŒo—R‚Å‘SƒIƒuƒWƒFƒNƒg‚ÉƒAƒNƒZƒX
+        // ã‚·ãƒ¼ãƒ³ä¸Šã®å…¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ãƒªã‚¹ãƒˆã‚¢ãƒƒãƒ—ï¼ˆè‡ªåˆ†è‡ªèº«ã¨è‡ªåˆ†ã®å­ã¯é™¤å¤–ã™ã¹ãï¼‰
+        // GameObjectManagerçµŒç”±ã§å…¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«ã‚¢ã‚¯ã‚»ã‚¹
         auto& allObjects = manager->GetObjects();
         for (auto& obj : allObjects)
         {
-            // ©•ª©g‚É‚Íeq•t‚¯‚Å‚«‚È‚¢
+            // è‡ªåˆ†è‡ªèº«ã«ã¯è¦ªå­ä»˜ã‘ã§ããªã„
             if (obj->shared_from_this() == shared_from_this()) continue;
 
             bool isSelected = (currentParentName == obj->GetName());
             if (ImGui::Selectable(obj->GetName().c_str(), isSelected))
             {
-                SetParent(obj); // GameObject::SetParent ‚ğŒÄ‚Ño‚·
+                SetParent(obj); // GameObject::SetParent ã‚’å‘¼ã³å‡ºã™
 
                 manager->ResolveHierarchy();
             }
@@ -481,18 +504,18 @@ void GameObject::Gui()
 
 
 
-    // íœ—\–ñ—p‚Ìƒ|ƒCƒ“ƒ^
+    // å‰Šé™¤äºˆç´„ç”¨ã®ãƒã‚¤ãƒ³ã‚¿
     Component* componentToRemove = nullptr;
     Component* colliderToRemove = nullptr;
 
     // -----------------------------
-    // Components (‰Â•ÏƒŠƒXƒg)
+    // Components (å¯å¤‰ãƒªã‚¹ãƒˆ)
     // -----------------------------
     for (auto& comp : components)
     {
         ImGui::PushID(comp.get());
 
-        // ON / OFF ƒ`ƒFƒbƒNƒ{ƒbƒNƒX
+        // ON / OFF ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹
         bool enabled = comp->IsEnabled();
         if (ImGui::Checkbox("##GameObject_ComponentEnabledCheckbox", &enabled)) comp->SetEnabled(enabled);
 
@@ -500,13 +523,13 @@ void GameObject::Gui()
 
         if (!enabled) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
 
-        // ƒwƒbƒ_[•\¦
+        // ãƒ˜ãƒƒãƒ€ãƒ¼è¡¨ç¤º
         bool open = ImGui::CollapsingHeader(comp->GetName().c_str());
 
-        // š ƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[iƒwƒbƒ_[‚ğ‰EƒNƒŠƒbƒNj
+        // â˜… ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ï¼ˆãƒ˜ãƒƒãƒ€ãƒ¼ã‚’å³ã‚¯ãƒªãƒƒã‚¯ï¼‰
         if (ImGui::BeginPopupContextItem("ComponentContextMenu"))
         {
-            if (ImGui::MenuItem(IM_U8("ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğíœ##GameObject_RemoveComponentMenuItem")))
+            if (ImGui::MenuItem(IM_U8("ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å‰Šé™¤##GameObject_RemoveComponentMenuItem")))
             {
                 componentToRemove = comp.get();
             }
@@ -521,7 +544,7 @@ void GameObject::Gui()
     }
 
     // -----------------------------
-    // Collider Component (ŒÂ•Êƒƒ“ƒo)
+    // Collider Component (å€‹åˆ¥ãƒ¡ãƒ³ãƒ)
     // -----------------------------
     for (auto& collider_ : colliderComponents)
     {
@@ -536,10 +559,10 @@ void GameObject::Gui()
 
         bool open = ImGui::CollapsingHeader(collider_->GetName().c_str());
 
-        // š ƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[
+        // â˜… ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼
         if (ImGui::BeginPopupContextItem("ColliderContextMenu"))
         {
-            if (ImGui::MenuItem(IM_U8("ƒRƒ‰ƒCƒ_[ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğíœ##GameObject_RemoveColliderComponentMenuItem")))
+            if (ImGui::MenuItem(IM_U8("ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å‰Šé™¤##GameObject_RemoveColliderComponentMenuItem")))
             {
                 colliderToRemove = collider_.get();
             }
@@ -553,9 +576,9 @@ void GameObject::Gui()
         ImGui::PopID();
     }
 
-    // === ÀÛ‚Ìíœˆ—iƒ‹[ƒv‚ÌŠO‚Ås‚¤j ===
+    // === å®Ÿéš›ã®å‰Šé™¤å‡¦ç†ï¼ˆãƒ«ãƒ¼ãƒ—ã®å¤–ã§è¡Œã†ï¼‰ ===
 
-    // 1. ƒŠƒXƒg‚©‚ç‚Ìíœ
+    // 1. ãƒªã‚¹ãƒˆã‹ã‚‰ã®å‰Šé™¤
     if (componentToRemove)
     {
         components.erase(std::remove_if(components.begin(), components.end(),
@@ -563,7 +586,7 @@ void GameObject::Gui()
             components.end());
     }
 
-    // 2. ŒÂ•Êƒƒ“ƒo‚Ìíœ
+    // 2. å€‹åˆ¥ãƒ¡ãƒ³ãƒã®å‰Šé™¤
     if (colliderToRemove)
     {
         UnregisterColliderComponent(
@@ -579,12 +602,12 @@ nlohmann::json GameObject::Save() const
 {
     nlohmann::json j;
 
-    // 1. Šî–{î•ñ‚Ì•Û‘¶
+    // 1. åŸºæœ¬æƒ…å ±ã®ä¿å­˜
     j["Name"] = nameComponent->name;
     j["Layer"] = static_cast<uint32_t>(layer);
     j["CollisionMask"] = mask;
 
-    // e‚ÌTransform‚ª‚ ‚éê‡A‚»‚Ìe‚ª‘®‚·‚éGameObject‚Ì–¼‘O‚ğ•Û‘¶
+    // è¦ªã®TransformãŒã‚ã‚‹å ´åˆã€ãã®è¦ªãŒå±ã™ã‚‹GameObjectã®åå‰ã‚’ä¿å­˜
     if (auto pTrans = transform->parent.lock()) {
         if (auto pGO = pTrans->gameObject.lock()) {
             j["ParentName"] = pGO->GetName();
@@ -594,19 +617,19 @@ nlohmann::json GameObject::Save() const
         j["ParentName"] = "";
     }
 
-    // 2. Transform‚Ì•Û‘¶iSerializerƒNƒ‰ƒX‚Ìƒwƒ‹ƒp[‚ğg‚¤‚ÆãY—í‚Å‚·j
+    // 2. Transformã®ä¿å­˜ï¼ˆSerializerã‚¯ãƒ©ã‚¹ã®ãƒ˜ãƒ«ãƒ‘ãƒ¼ã‚’ä½¿ã†ã¨ç¶ºéº—ã§ã™ï¼‰
     j["Transform"]["Pos"] = { transform->localPosition.x, transform->localPosition.y, transform->localPosition.z };
     j["Transform"]["Rot"] = { transform->localRotation.x, transform->localRotation.y, transform->localRotation.z };
     j["Transform"]["Scale"] = { transform->localScale.x, transform->localScale.y, transform->localScale.z };
 
-    // 3. ‘SƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ•Û‘¶
+    // 3. å…¨ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’ä¿å­˜
     for (auto it = components.begin(); it != components.end(); ++it) {
         auto& comp = *it;
         nlohmann::json cj;
         cj["TypeName"] = comp->GetName();
         cj["Enabled"] = comp->IsEnabled();
 
-        // ŠeƒRƒ“ƒ|[ƒlƒ“ƒgŒÅ—L‚Ì•Ï”‚ğ•Û‘¶
+        // å„ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆå›ºæœ‰ã®å¤‰æ•°ã‚’ä¿å­˜
         nlohmann::json data;
         comp->Serialize(data);
         cj["Data"] = data;
@@ -614,7 +637,7 @@ nlohmann::json GameObject::Save() const
         j["Components"].push_back(cj);
     }
 
-    // 4. “Á•Êˆµ‚¢‚µ‚Ä‚¢‚éƒRƒ‰ƒCƒ_[‚Ì•Û‘¶
+    // 4. ç‰¹åˆ¥æ‰±ã„ã—ã¦ã„ã‚‹ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã®ä¿å­˜
     for (const auto& collider_ : colliderComponents) {
         nlohmann::json cj;
         cj["TypeName"] = collider_->GetName();
@@ -633,46 +656,46 @@ nlohmann::json GameObject::Save() const
 
 void GameObject::Load(const nlohmann::json& j)
 {
-    // 1. Šî–{î•ñ‚Ì•œŒ³
+    // 1. åŸºæœ¬æƒ…å ±ã®å¾©å…ƒ
     nameComponent->name = j.value("Name", "GameObject");
     layer = static_cast<LayerType>(j.value("Layer", 0));
     mask = j.value("CollisionMask", static_cast<uint32_t>(LayerType::Default));
 
-    // Š—LÒ‚Ìİ’è‚ğ–Y‚ê‚È‚¢‚æ‚¤‚É
+    // æ‰€æœ‰è€…ã®è¨­å®šã‚’å¿˜ã‚Œãªã„ã‚ˆã†ã«
     transform->gameObject = shared_from_this();
 
-    // e‚Ì–¼‘O‚ğˆê•Û‘¶
+    // è¦ªã®åå‰ã‚’ä¸€æ™‚ä¿å­˜
     if (j.contains("Transform"))
     {
         transform->parentNameDuringLoad = j.value("ParentName", "");
     }
-    // 2. Transform‚Ì•œŒ³
+    // 2. Transformã®å¾©å…ƒ
     if (j.contains("Transform")) {
         auto& t = j["Transform"];
         transform->localPosition = { t["Pos"][0], t["Pos"][1], t["Pos"][2] };
         transform->localRotation = { t["Rot"][0], t["Rot"][1], t["Rot"][2] };
         transform->localScale = { t["Scale"][0], t["Scale"][1], t["Scale"][2] };
     }
-    transform->UpdateWorldMatrix(); // æ‚És—ñ‚ğŠm’è‚³‚¹‚é
+    transform->UpdateWorldMatrix(); // å…ˆã«è¡Œåˆ—ã‚’ç¢ºå®šã•ã›ã‚‹
 
-    // 3. ƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌŒ`¬i•œŒ³j
-// ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì•œŒ³ (’Êí‚ÌComponents‚àColliderComponent‚à‹¤’Ê‚Ìˆ—‚Ö)
+    // 3. ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å½¢æˆï¼ˆå¾©å…ƒï¼‰
+// ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å¾©å…ƒ (é€šå¸¸ã®Componentsã‚‚ColliderComponentã‚‚å…±é€šã®å‡¦ç†ã¸)
     auto loadComponent = [&](const nlohmann::json& cJson) {
         std::string typeName = cJson["TypeName"];
-        // 1. ƒCƒ“ƒXƒ^ƒ“ƒX¶¬
+        // 1. ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ç”Ÿæˆ
         auto comp = ComponentRegistry::Instance().Create(typeName, shared_from_this(), false);
 
         printf("Loading component: %s\n", typeName.c_str());
         if (comp) printf("Instance created successfully.\n");
 
         if (comp) {
-            // 2. Šî–{İ’è‚Æƒf[ƒ^‚Ì•œŒ³
+            // 2. åŸºæœ¬è¨­å®šã¨ãƒ‡ãƒ¼ã‚¿ã®å¾©å…ƒ
             comp->SetEnabled(cJson.value("Enabled", true));
             comp->Deserialize(cJson["Data"]);
 
-            // 3. Œ^‚ğ”»•Ê‚µ‚Ä“KØ‚ÈêŠ‚ÉŠi”[ (AddComponent‚ÌƒƒWƒbƒN‚Æ‡‚í‚¹‚é)
-            // RegisterŒo—R‚¾‚ÆŒ^T‚ª•s–¾‚È‚½‚ßAdynamic_pointer_cast ‚Å”»’è‚µ‚Ü‚·
-            // <ColliderComponent> ‚ğw’è‚µ‚ÄƒLƒƒƒXƒg
+            // 3. å‹ã‚’åˆ¤åˆ¥ã—ã¦é©åˆ‡ãªå ´æ‰€ã«æ ¼ç´ (AddComponentã®ãƒ­ã‚¸ãƒƒã‚¯ã¨åˆã‚ã›ã‚‹)
+            // RegisterçµŒç”±ã ã¨å‹TãŒä¸æ˜ãªãŸã‚ã€dynamic_pointer_cast ã§åˆ¤å®šã—ã¾ã™
+            // <ColliderComponent> ã‚’æŒ‡å®šã—ã¦ã‚­ãƒ£ã‚¹ãƒˆ
             auto col = std::dynamic_pointer_cast<ColliderComponent>(comp);
             if (col) {
                 const auto exists_ = std::find(colliderComponents.begin(), colliderComponents.end(), comp);
@@ -681,14 +704,14 @@ void GameObject::Load(const nlohmann::json& j)
         }
         };
 
-    // ’Êí‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg”z—ñ‚Ìˆ—
+    // é€šå¸¸ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆé…åˆ—ã®å‡¦ç†
     if (j.contains("Components")) {
         for (const auto& cJson : j["Components"]) {
             loadComponent(cJson);
         }
     }
 
-    // “Á•Ê‚ÈƒRƒ‰ƒCƒ_[˜gi‚à‚µJSON‚É•ª‚©‚ê‚Äc‚Á‚Ä‚¢‚é‚È‚çj‚Ìˆ—
+    // ç‰¹åˆ¥ãªã‚³ãƒ©ã‚¤ãƒ€ãƒ¼æ ï¼ˆã‚‚ã—JSONã«åˆ†ã‹ã‚Œã¦æ®‹ã£ã¦ã„ã‚‹ãªã‚‰ï¼‰ã®å‡¦ç†
     if (j.contains("ColliderComponent")) {
         loadComponent(j["ColliderComponent"]);
     }

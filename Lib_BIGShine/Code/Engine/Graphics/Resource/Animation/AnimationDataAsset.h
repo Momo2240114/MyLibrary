@@ -18,12 +18,12 @@ struct AnimationDataAsset
     std::vector<AnimState> states;
     std::string defaultStateName;
 
-    // JSON •ÏŠ·—p
+    // JSON å¤‰æ›ç”¨
     void Serialize(nlohmann::json& j) const {
         j["DefaultState"] = defaultStateName;
         nlohmann::json statesArray = nlohmann::json::array();
         for (const auto& s : states) {
-            statesArray.push_back(s); // AnimState ‚Ì to_json ‚ªŒÄ‚Î‚ê‚é
+            statesArray.push_back(s); // AnimState ã® to_json ãŒå‘¼ã°ã‚Œã‚‹
         }
         j["States"] = statesArray;
     }

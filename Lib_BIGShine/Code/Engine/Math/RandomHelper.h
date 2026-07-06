@@ -3,8 +3,8 @@
 #include<stdlib.h>
 #include"DirectXMath.h"
 
-/// w’è”ÍˆÍ“à‚Ì‹^——”‚ğ¶¬‚·‚éB
+/// æŒ‡å®šç¯„å›²å†…ã®ç–‘ä¼¼ä¹±æ•°ã‚’ç”Ÿæˆã™ã‚‹ã€‚
 float RandomRangeCreate(float min_, float max_);
 
-/// ƒNƒH[ƒ^ƒjƒIƒ“‚ğY-X-Z‰ñ“]‡‚ÌƒIƒCƒ‰[Šp‚Ö•ÏŠ·‚·‚éB
+/// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’Y-X-Zå›è»¢é †ã®ã‚ªã‚¤ãƒ©ãƒ¼è§’ã¸å¤‰æ›ã™ã‚‹ã€‚
 DirectX::XMFLOAT3 QuaternionToEuler(DirectX::XMVECTOR quaternion_);

@@ -61,13 +61,13 @@ void TimeManagerWindow::Draw()
             ImGui::EndTable();
         }
 
-        bool changed_ = ImGui::SliderFloat(
+        ImGui::SliderFloat(
             "Target Scale",
             &targetScale,
             0.0f,
             2.0f,
             "%.2fx");
-        changed_ |= ImGui::DragFloat(
+        ImGui::DragFloat(
             "Transition Speed",
             &transitionSpeed,
             0.1f,
@@ -75,9 +75,30 @@ void TimeManagerWindow::Draw()
             100.0f,
             "%.2f");
 
-        if (changed_)
+        if (ImGui::Button("Apply Persistent Scale"))
         {
             ApplyTimeScale();
+        }
+
+        ImGui::SeparatorText("Timed Scale");
+        ImGui::SliderFloat("Default Scale", &defaultScale, 0.0f, 2.0f, "%.2fx");
+        ImGui::DragFloat("Time To Target", &transitionDuration, 0.01f, 0.0f, 60.0f, "%.2f sec");
+        ImGui::DragFloat("Target Hold Time", &holdDuration, 0.01f, 0.0f, 60.0f, "%.2f sec");
+        ImGui::DragFloat("Time To Default", &returnDuration, 0.01f, 0.0f, 60.0f, "%.2f sec");
+        if (ImGui::Button("Play Timed Scale"))
+        {
+            timeManager_->PlayTimedScale(
+                static_cast<uint32_t>(TarGetLayerType::All),
+                targetScale,
+                transitionDuration,
+                holdDuration,
+                returnDuration,
+                defaultScale);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Reset To Default"))
+        {
+            timeManager_->ResetToDefaults();
         }
 
         if (ImGui::Button("Pause"))

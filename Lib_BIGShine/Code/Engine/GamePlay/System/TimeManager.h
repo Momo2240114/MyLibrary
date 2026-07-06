@@ -24,28 +24,104 @@ enum class TarGetLayerType : uint32_t
 
 struct TimeState
 {
+    enum class PHASE
+    {
+        IDLE,
+        TO_TARGET,
+        HOLD,
+        TO_DEFAULT
+    };
+
     float currentScale = 1.0f;
+    float defaultScale = 1.0f;
     float targetScale = 1.0f;
     float lerpSpeed = 10.0f;
     float hitStopTimer = 0.0f;
     float hitStopScale = 0.0f;
+    float startScale = 1.0f;
+    float transitionDuration = 0.0f;
+    float holdDuration = 0.0f;
+    float returnDuration = 0.0f;
+    float phaseElapsed = 0.0f;
+    PHASE phase = PHASE::IDLE;
 
-    void Update(float rawDt)
+    void Update(float rawDt_)
     {
         if (hitStopTimer > 0.0f)
         {
-            hitStopTimer -= rawDt;
+            hitStopTimer -= rawDt_;
             currentScale = hitStopScale;
             if (hitStopTimer <= 0.0f) hitStopTimer = 0.0f;
         }
+        else if (phase != PHASE::IDLE)
+        {
+            phaseElapsed += rawDt_;
+            if (phase == PHASE::TO_TARGET)
+            {
+                const float ratio_ = transitionDuration > 0.0f
+                    ? (std::min)(phaseElapsed / transitionDuration, 1.0f)
+                    : 1.0f;
+                currentScale = startScale + (targetScale - startScale) * ratio_;
+                if (ratio_ >= 1.0f)
+                {
+                    phase = PHASE::HOLD;
+                    phaseElapsed = 0.0f;
+                }
+            }
+            else if (phase == PHASE::HOLD)
+            {
+                currentScale = targetScale;
+                if (phaseElapsed >= holdDuration)
+                {
+                    phase = PHASE::TO_DEFAULT;
+                    phaseElapsed = 0.0f;
+                    startScale = currentScale;
+                }
+            }
+            else if (phase == PHASE::TO_DEFAULT)
+            {
+                const float ratio_ = returnDuration > 0.0f
+                    ? (std::min)(phaseElapsed / returnDuration, 1.0f)
+                    : 1.0f;
+                currentScale = startScale + (defaultScale - startScale) * ratio_;
+                if (ratio_ >= 1.0f)
+                {
+                    currentScale = defaultScale;
+                    targetScale = defaultScale;
+                    phase = PHASE::IDLE;
+                }
+            }
+        }
         else
         {
-            currentScale += (targetScale - currentScale) * (lerpSpeed * rawDt);
+            currentScale += (targetScale - currentScale) * (lerpSpeed * rawDt_);
             if (std::abs(targetScale - currentScale) < 0.001f)
             {
                 currentScale = targetScale;
             }
         }
+    }
+
+    void Play(float targetScale_, float transitionDuration_, float holdDuration_, float returnDuration_, float defaultScale_)
+    {
+        defaultScale = (std::max)(defaultScale_, 0.0f);
+        targetScale = (std::max)(targetScale_, 0.0f);
+        startScale = currentScale;
+        transitionDuration = (std::max)(transitionDuration_, 0.0f);
+        holdDuration = (std::max)(holdDuration_, 0.0f);
+        returnDuration = (std::max)(returnDuration_, 0.0f);
+        phaseElapsed = 0.0f;
+        phase = PHASE::TO_TARGET;
+    }
+
+    void Reset(bool resetConfiguredDefault_ = false)
+    {
+        if (resetConfiguredDefault_) defaultScale = 1.0f;
+        currentScale = defaultScale;
+        targetScale = defaultScale;
+        hitStopTimer = 0.0f;
+        phaseElapsed = 0.0f;
+        phase = PHASE::IDLE;
     }
 };
 
@@ -56,13 +132,20 @@ private:
     std::unordered_map<TarGetLayerType, TimeState> states;
     float cachedDefaultScale = 1.0f;
     float cachedLayerScales[32]{};
+    float lastRawDeltaTime = 0.0f;
 
 public:
     TimeManager();
 
     void Update(float rawDt_);
     void SetTargetScale(uint32_t layerMask, float scale, float speed = 10.0f);
+    void PlayTimedScale(uint32_t layerMask_, float targetScale_, float transitionDuration_,
+        float holdDuration_, float returnDuration_, float defaultScale_ = 1.0f);
+    void ResetToDefaults(
+        uint32_t layerMask_ = static_cast<uint32_t>(TarGetLayerType::All),
+        bool resetConfiguredDefaults_ = false);
     void TriggerHitStop(uint32_t layerMask_, float duration_, float scale_ = 0.0f);
     void PrepareCache();
     float GetCachedScale(uint32_t layerMask) const;
+    float GetLastRawDeltaTime() const { return lastRawDeltaTime; }
 };

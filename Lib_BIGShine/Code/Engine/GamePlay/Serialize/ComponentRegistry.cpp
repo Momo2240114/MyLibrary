@@ -28,6 +28,9 @@
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/GamePlay/Transform/BoneSegmentAttachmentComponent.h"
 #include "Engine/Graphics/PostEffect/ColorFilterDirector.h"
+#include "Engine/Graphics/PostEffect/RadialBlurDirector.h"
+#include "Engine/Graphics/PostEffect/VignetteDirector.h"
+#include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 #include "Engine/UI/NumberSwitcher.h"
 //#include "CurvePlayerComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
@@ -40,6 +43,7 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
+#include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Combat/DamageBoxComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
@@ -50,7 +54,7 @@
 #include "Engine/Audio/AudioComponent.h"
 
 
-// Register‚ÌÀ‘•BGameObject.h ‚Ì’è‹`‚ğ’m‚Á‚Ä‚¢‚é•K—v‚ª‚ ‚éB
+// Registerã®å®Ÿè£…ã€‚GameObject.h ã®å®šç¾©ã‚’çŸ¥ã£ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
 template<typename T>
 void ComponentRegistry::Register(const std::string& name_, bool callStart_) {
     auto createFunc_ = [=](std::shared_ptr<GameObject> go_, bool overrideStart_) -> std::shared_ptr<Component> {
@@ -72,7 +76,7 @@ void RegisterAllComponents()
 {
     auto& registry = ComponentRegistry::Instance();
 
-    // ƒVƒXƒeƒ€EƒŒƒ“ƒ_ƒŠƒ“ƒOŒn
+    // ã‚·ã‚¹ãƒ†ãƒ ãƒ»ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ç³»
     registry.Register<CameraComponent>("CameraComponent");
     registry.Register<GltfModelCommponennt>("GltfModel");
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
@@ -82,7 +86,7 @@ void RegisterAllComponents()
     registry.Register<SpringBoneSimulationComponent>("SpringBoneSimulationComponent");
     registry.Register<SpriteRenderer>("SpriteRenderer");
 
-    // ƒ‰ƒCƒgEƒGƒtƒFƒNƒgŒn
+    // ãƒ©ã‚¤ãƒˆãƒ»ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç³»
     registry.Register<LightComponent>("LightComponent");
     registry.Register<DecalComponent>("DecalComponent");
     registry.Register<ParticleComponent>("ParticleComponent");
@@ -94,7 +98,7 @@ void RegisterAllComponents()
     registry.Register<ImpactEffectComponent>("ImpactEffectComponent");
 
 
-    // •¨—EƒRƒŠƒWƒ‡ƒ“Œn
+    // ç‰©ç†ãƒ»ã‚³ãƒªã‚¸ãƒ§ãƒ³ç³»
     registry.Register<BoxCollider>("BoxCollider");
     registry.Register<CapsuleCollider>("CapsuleCollider");
     registry.Register<SphereCollider>("SphereCollider");
@@ -106,13 +110,16 @@ void RegisterAllComponents()
     registry.Register<JustDodgeCollider>("JustDodgeCollider");
     registry.Register<ContainmentVolumeComponent>("ContainmentVolumeComponent");
 
-    //ƒQ[ƒ€ƒVƒXƒeƒ€
+    //ã‚²ãƒ¼ãƒ ã‚·ã‚¹ãƒ†ãƒ 
     registry.Register<UIButton>("UIButton");
     registry.Register<CameraDirector>("CameraDirector");
     registry.Register<ActionSequence>("ActionSequence");
     registry.Register<FovDirector>("FovDirector");
     registry.Register<TransformDirector>("TransformDirector");
     registry.Register<ColorFilterDirector>("ColorFilterDirector");
+    registry.Register<RadialBlurDirector>("RadialBlurDirector");
+    registry.Register<VignetteDirector>("VignetteDirector");
+    registry.Register<TimeScaleDirector>("TimeScaleDirector");
     registry.Register<LightBlinkerComponent>("LightBlinker");
     registry.Register<EasingComponent>("Easing");
     registry.Register<CurveComponent>("CurveComponent");
@@ -121,6 +128,7 @@ void RegisterAllComponents()
     registry.Register<CharacterMovementComponent>("CharacterMovementComponent");
     registry.Register<BlackboardComponent>("BlackboardComponent");
     registry.Register<HitReactionComponent>("HitReactionComponent");
+    registry.Register<JustDodgeReactionComponent>("JustDodgeReactionComponent");
     registry.Register<HealthComponent>("HealthComponent");
     registry.Register<DamageBoxComponent>("DamageBoxComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");

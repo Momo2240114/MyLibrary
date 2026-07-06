@@ -17,6 +17,9 @@
 #include"Engine/GamePlay/EventSystem/ActionSequence.h"
 
 #include"Engine/Graphics/PostEffect/ColorFilterDirector.h"
+#include "Engine/Graphics/PostEffect/RadialBlurDirector.h"
+#include "Engine/Graphics/PostEffect/VignetteDirector.h"
+#include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 
 #include <fstream>
 #include"Engine/GamePlay/EventSystem/EventManager.h"
@@ -43,6 +46,7 @@ void GameObjectManager::Initialize()
     timeManager = std::make_shared<TimeManager>();
     effectManager->Initialize(this);
     RegisterAttackCallbacks();
+    EnsureGlobalActionObjects();
 
     cameraManager = std::make_shared<CameraManager>();
     cameraManager->Initialize();
@@ -96,6 +100,21 @@ void GameObjectManager::Update(float elapsedTime_)
                     }
 
                     if (auto director_ = object_->GetComponent<ColorFilterDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+
+                    if (auto director_ = object_->GetComponent<RadialBlurDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+
+                    if (auto director_ = object_->GetComponent<VignetteDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+
+                    if (auto director_ = object_->GetComponent<TimeScaleDirector>())
                     {
                         director_->RegisterActions();
                     }
@@ -260,7 +279,14 @@ void GameObjectManager::Update(float elapsedTime_)
 
 void GameObjectManager::Clear()
 {
-    GraphicsDeviceManager::Instance().ResetFilter();
+    GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
+    graphics_.ResetFilter();
+    graphics_.GetRadialBlurParams() = RadialBlurSystem::Parameters{};
+    graphics_.GetVignetteParams() = VignetteSystem::Parameters{};
+    if (timeManager)
+    {
+        timeManager->ResetToDefaults(static_cast<uint32_t>(TarGetLayerType::All), true);
+    }
 
     selectedObject = nullptr;
 
@@ -383,19 +409,19 @@ void GameObjectManager::DrawHierarchyGui()
 {
     static char createName_[64] = "GameObject";
 
-    ImGui::Text(IM_U8("ƒQ[ƒ€ƒIƒuƒWƒFƒNƒgì¬"));
+    ImGui::Text(IM_U8("ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ"));
     ImGui::InputText("##GameObjectManager_CreateNameInput", createName_, IM_ARRAYSIZE(createName_));
 
-    if (ImGui::Button(IM_U8("ì¬##GameObjectManager_CreateObjectButton")))
+    if (ImGui::Button(IM_U8("ä½œæˆ##GameObjectManager_CreateObjectButton")))
     {
         selectedObject = Create(createName_);
     }
 
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader(IM_U8("ƒvƒŒƒnƒu##GameObjectManager_PrefabsHeader"), ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader(IM_U8("ãƒ—ãƒ¬ãƒãƒ–##GameObjectManager_PrefabsHeader"), ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::Button(IM_U8("XV##GameObjectManager_RefreshPrefabListButton")))
+        if (ImGui::Button(IM_U8("æ›´æ–°##GameObjectManager_RefreshPrefabListButton")))
         {
             RefreshPrefabList();
         }
@@ -406,7 +432,7 @@ void GameObjectManager::DrawHierarchyGui()
         {
             const char* currentItem_ = prefabFiles[selectedPrefabIndex].c_str();
 
-            if (ImGui::BeginCombo(IM_U8("ƒvƒŒƒnƒu‘I‘ğ##GameObjectManager_SelectPrefabCombo"), currentItem_))
+            if (ImGui::BeginCombo(IM_U8("ãƒ—ãƒ¬ãƒãƒ–é¸æŠ##GameObjectManager_SelectPrefabCombo"), currentItem_))
             {
                 for (int index_ = 0; index_ < prefabFiles.size(); index_++)
                 {
@@ -419,7 +445,7 @@ void GameObjectManager::DrawHierarchyGui()
                 ImGui::EndCombo();
             }
 
-            if (ImGui::Button(IM_U8("ƒvƒŒƒnƒu‚©‚çì¬##GameObjectManager_InstantiatePrefabButton")))
+            if (ImGui::Button(IM_U8("ãƒ—ãƒ¬ãƒãƒ–ã‹ã‚‰ä½œæˆ##GameObjectManager_InstantiatePrefabButton")))
             {
                 selectedObject = Instantiate(prefabFiles[selectedPrefabIndex]);
             }
@@ -427,9 +453,9 @@ void GameObjectManager::DrawHierarchyGui()
 
         if (selectedObject)
         {
-            ImGui::InputText(IM_U8("V‹KƒvƒŒƒnƒu–¼##GameObjectManager_NewPrefabNameInput"), newPrefabName_, IM_ARRAYSIZE(newPrefabName_));
+            ImGui::InputText(IM_U8("æ–°è¦ãƒ—ãƒ¬ãƒãƒ–å##GameObjectManager_NewPrefabNameInput"), newPrefabName_, IM_ARRAYSIZE(newPrefabName_));
 
-            if (ImGui::Button(IM_U8("‘I‘ğ’†‚ÌƒIƒuƒWƒFƒNƒg‚ğƒvƒŒƒnƒu‚Æ‚µ‚Ä•Û‘¶##GameObjectManager_SaveSelectedAsPrefabButton")))
+            if (ImGui::Button(IM_U8("é¸æŠä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ãƒ—ãƒ¬ãƒãƒ–ã¨ã—ã¦ä¿å­˜##GameObjectManager_SaveSelectedAsPrefabButton")))
             {
                 if (strlen(newPrefabName_) > 0)
                 {
@@ -445,7 +471,7 @@ void GameObjectManager::DrawHierarchyGui()
 
     GameObject* objectToDelete_ = nullptr;
 
-    // “à•”ID‚È‚Ì‚Å‰pŒê‚Ì‚Ü‚Ü
+    // å†…éƒ¨IDãªã®ã§è‹±èªã®ã¾ã¾
     ImGui::BeginChild("HierarchyRegion", ImVec2(0, 0), true);
 
     for (auto& object_ : objects)
@@ -528,7 +554,7 @@ void GameObjectManager::DrawSceneModals()
     {
         GetSceneDirectories();
 
-        // Popup ID‚È‚Ì‚Å“à•”ID‚Æ‚µ‚Ä‰pŒê‚Ì‚Ü‚ÜˆÛ
+        // Popup IDãªã®ã§å†…éƒ¨IDã¨ã—ã¦è‹±èªã®ã¾ã¾ç¶­æŒ
         ImGui::OpenPopup("SaveScenePopup");
 
         sceneState.showSavePopup = false;
@@ -536,7 +562,7 @@ void GameObjectManager::DrawSceneModals()
 
     if (ImGui::BeginPopupModal("SaveScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        if (ImGui::BeginCombo(IM_U8("ƒV[ƒ“‘I‘ğ / “ü—Í##SceneModal_SelectInputSceneCombo"), sceneState.name))
+        if (ImGui::BeginCombo(IM_U8("ã‚·ãƒ¼ãƒ³é¸æŠ / å…¥åŠ›##SceneModal_SelectInputSceneCombo"), sceneState.name))
         {
             for (const auto& file_ : sceneState.sceneFiles)
             {
@@ -551,9 +577,9 @@ void GameObjectManager::DrawSceneModals()
             ImGui::EndCombo();
         }
 
-        ImGui::InputText(IM_U8("ƒtƒ@ƒCƒ‹–¼##SceneModal_FilenameInput"), sceneState.name, IM_ARRAYSIZE(sceneState.name));
+        ImGui::InputText(IM_U8("ãƒ•ã‚¡ã‚¤ãƒ«å##SceneModal_FilenameInput"), sceneState.name, IM_ARRAYSIZE(sceneState.name));
 
-        if (ImGui::Button(IM_U8("•Û‘¶##SceneModal_SaveSceneButton"), ImVec2(120, 0)))
+        if (ImGui::Button(IM_U8("ä¿å­˜##SceneModal_SaveSceneButton"), ImVec2(120, 0)))
         {
             SaveScene(sceneState.name);
             GetSceneDirectories();
@@ -562,7 +588,7 @@ void GameObjectManager::DrawSceneModals()
 
         ImGui::SameLine();
 
-        if (ImGui::Button(IM_U8("ƒLƒƒƒ“ƒZƒ‹##SceneModal_SaveCancelButton"), ImVec2(120, 0)))
+        if (ImGui::Button(IM_U8("ã‚­ãƒ£ãƒ³ã‚»ãƒ«##SceneModal_SaveCancelButton"), ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -574,7 +600,7 @@ void GameObjectManager::DrawSceneModals()
     {
         GetSceneDirectories();
 
-        // Popup ID‚È‚Ì‚Å“à•”ID‚Æ‚µ‚Ä‰pŒê‚Ì‚Ü‚ÜˆÛ
+        // Popup IDãªã®ã§å†…éƒ¨IDã¨ã—ã¦è‹±èªã®ã¾ã¾ç¶­æŒ
         ImGui::OpenPopup("LoadScenePopup");
 
         sceneState.showLoadPopup = false;
@@ -582,7 +608,7 @@ void GameObjectManager::DrawSceneModals()
 
     if (ImGui::BeginPopupModal("LoadScenePopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        if (ImGui::BeginCombo(IM_U8("ƒV[ƒ“‘I‘ğ##SceneModal_SelectSceneCombo"), sceneState.name))
+        if (ImGui::BeginCombo(IM_U8("ã‚·ãƒ¼ãƒ³é¸æŠ##SceneModal_SelectSceneCombo"), sceneState.name))
         {
             for (const auto& file_ : sceneState.sceneFiles)
             {
@@ -597,7 +623,7 @@ void GameObjectManager::DrawSceneModals()
             ImGui::EndCombo();
         }
 
-        if (ImGui::Button(IM_U8("“Ç‚İ‚İ##SceneModal_LoadSceneButton"), ImVec2(120, 0)))
+        if (ImGui::Button(IM_U8("èª­ã¿è¾¼ã¿##SceneModal_LoadSceneButton"), ImVec2(120, 0)))
         {
             if (strlen(sceneState.name) > 0)
             {
@@ -609,7 +635,7 @@ void GameObjectManager::DrawSceneModals()
 
         ImGui::SameLine();
 
-        if (ImGui::Button(IM_U8("ƒLƒƒƒ“ƒZƒ‹##SceneModal_LoadCancelButton"), ImVec2(120, 0)))
+        if (ImGui::Button(IM_U8("ã‚­ãƒ£ãƒ³ã‚»ãƒ«##SceneModal_LoadCancelButton"), ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -655,7 +681,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
     {
         ImGui::SetDragDropPayload("DND_GAMEOBJECT", &object_, sizeof(std::shared_ptr<GameObject>));
 
-        ImGui::Text(IM_U8("ˆÚ“®’†: %s"), object_->GetName().c_str());
+        ImGui::Text(IM_U8("ç§»å‹•ä¸­: %s"), object_->GetName().c_str());
 
         ImGui::EndDragDropSource();
     }
@@ -701,7 +727,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
     {
         selectedObject = object_;
 
-        if (ImGui::MenuItem(IM_U8("ƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚ğíœ##GameObjectManager_DeleteGameObjectMenuItem")))
+        if (ImGui::MenuItem(IM_U8("ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å‰Šé™¤##GameObjectManager_DeleteGameObjectMenuItem")))
         {
             Destroy(object_->GetName());
         }
@@ -730,21 +756,21 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
 
-    // --- ’Ç‰Á: ƒ‰ƒCƒgî•ñ‚ÌûW ---
+    // --- è¿½åŠ : ãƒ©ã‚¤ãƒˆæƒ…å ±ã®åé›† ---
     LightManager lightManager_;
-    // ƒfƒtƒHƒ‹ƒg‚Ì•½sŒõŒ¹İ’èi•K—v‚É‰‚¶‚Äj
+    // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å¹³è¡Œå…‰æºè¨­å®šï¼ˆå¿…è¦ã«å¿œã˜ã¦ï¼‰
     DirectionalLight directionalLight_;
     directionalLight_.direction = {1, 1, 1 };
     lightManager_.SetDirectionalLight(directionalLight_);
 
-    DecalManager decalManager_; // ƒfƒJ[ƒ‹—pƒ}ƒl[ƒWƒƒ[
+    DecalManager decalManager_; // ãƒ‡ã‚«ãƒ¼ãƒ«ç”¨ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼
 
     for (auto& object_ : objects)
     {
         auto lightComponent_ = object_->GetComponent<LightComponent>();
         if (lightComponent_ && lightComponent_->IsEnabled())
         {
-            // A. •½sŒõŒ¹
+            // A. å¹³è¡Œå…‰æº
             if (lightComponent_->type == LightComponent::Type::Directional)
             {
                 DirectionalLight directionalLight_;
@@ -753,7 +779,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
                 directionalLight_.intensity = lightComponent_->intensity;
                 lightManager_.AddDirectionalLight(directionalLight_);
             }
-            // B. “_ŒõŒ¹
+            // B. ç‚¹å…‰æº
             else if (lightComponent_->type == LightComponent::Type::Point)
             {
                 PointLight pointLight_;
@@ -763,7 +789,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
                 pointLight_.range = lightComponent_->range;
                 lightManager_.AddPointLight(pointLight_);
             }
-            // C. ƒXƒ|ƒbƒgƒ‰ƒCƒg
+            // C. ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆ
             else if (lightComponent_->type == LightComponent::Type::Spot)
             {
                 SpotLight spotLight_;
@@ -780,7 +806,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 
         auto decalComponent_ = object_->GetComponent<DecalComponent>();
 
-        // ƒfƒJ[ƒ‹‚ÌûW
+        // ãƒ‡ã‚«ãƒ¼ãƒ«ã®åé›†
         if (decalComponent_ && decalComponent_->IsEnabled())
         {
             decalComponent_->SubmitDecal(decalManager_);
@@ -809,14 +835,14 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     renderContext_.shapeSystem = &GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     renderContext_.cascadeShadowMap = &GraphicsDeviceManager::Instance().GetCascadeShadowMap();
 
-    // ‚±‚±‚ÅƒŒƒ“ƒ_[ó‘Ô‚ğƒŠƒZƒbƒg
+    // ã“ã“ã§ãƒ¬ãƒ³ãƒ€ãƒ¼çŠ¶æ…‹ã‚’ãƒªã‚»ãƒƒãƒˆ
     deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
     deviceContext_->OMSetDepthStencilState(renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     deviceContext_->RSSetState(renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
     ID3D11SamplerState* samplers_[] = { renderContext_.renderState->GetSamplerState(SamplerState::LinearWrap) };
     deviceContext_->PSSetSamplers(0, 1, samplers_);
 
-    // 1. ƒV[ƒ“ƒoƒbƒtƒ@iHDRj‚Ö•`‰æŠJn
+    // 1. ã‚·ãƒ¼ãƒ³ãƒãƒƒãƒ•ã‚¡ï¼ˆHDRï¼‰ã¸æç”»é–‹å§‹
     graphicsDeviceManager_.SetSceneRenderTarget();
 
     modelSystem_.RenderAll(renderContext_);
@@ -863,11 +889,11 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 
     auto* finalRTV = graphicsDeviceManager_.GetRenderTargetView();
 
-    // 2. ƒ|ƒXƒgƒŒƒ“ƒ_[ƒVƒXƒeƒ€‚ğÀs
+    // 2. ãƒã‚¹ãƒˆãƒ¬ãƒ³ãƒ€ãƒ¼ã‚·ã‚¹ãƒ†ãƒ ã‚’å®Ÿè¡Œ
     graphicsDeviceManager_.GetPostRenderSystem().Execute(
         renderContext_,
-        graphicsDeviceManager_.GetSceneSRV(), // •`‰æŒ‹‰Ê‚ÌSRV
-        finalRTV           // ÅIo—Íæ
+        graphicsDeviceManager_.GetSceneSRV(), // æç”»çµæœã®SRV
+        finalRTV           // æœ€çµ‚å‡ºåŠ›å…ˆ
     );
 
 
@@ -889,7 +915,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 void GameObjectManager::Destroy(std::shared_ptr<GameObject> object_)
 {
     if (!object_) return;
-    // ‘¦À‚ÉÁ‚³‚¸A—\–ñƒŠƒXƒg‚É“ü‚ê‚é
+    // å³åº§ã«æ¶ˆã•ãšã€äºˆç´„ãƒªã‚¹ãƒˆã«å…¥ã‚Œã‚‹
     pendingDestroys.push_back(object_);
 }
 
@@ -899,21 +925,21 @@ void GameObjectManager::Destroy(std::string objectName_)
     {
         if (object_ && object_->GetName() == objectName_)
         {
-            Destroy(object_); // ã‚ÌDestroy‚ğŒÄ‚Ô
-            return; // 1‚ÂŒ©‚Â‚¯‚½‚çI—¹i‘S•”Á‚·‚È‚çreturn‚µ‚È‚¢j
+            Destroy(object_); // ä¸Šã®Destroyã‚’å‘¼ã¶
+            return; // 1ã¤è¦‹ã¤ã‘ãŸã‚‰çµ‚äº†ï¼ˆå…¨éƒ¨æ¶ˆã™ãªã‚‰returnã—ãªã„ï¼‰
         }
     }
 }
 
 
-// ƒwƒ‹ƒp[ŠÖ”Fe¨q‚Ì‡”Ô‚Å–¼‘O‚ğƒŠƒXƒg‚É’Ç‰Á‚·‚é
+// ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°ï¼šè¦ªâ†’å­ã®é †ç•ªã§åå‰ã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ ã™ã‚‹
 void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& listJson) {
     if (!obj || !obj->saveFlg) return;
 
-    // ©•ª‚Ì–¼‘O‚ğ“o˜^
+    // è‡ªåˆ†ã®åå‰ã‚’ç™»éŒ²
     listJson["ObjectList"].push_back(obj->nameComponent->name);
 
-    // q‹Ÿ‚½‚¿‚Ì–¼‘O‚ğÄ‹A“I‚É“o˜^
+    // å­ä¾›ãŸã¡ã®åå‰ã‚’å†å¸°çš„ã«ç™»éŒ²
     for (auto& child : obj->transform->children) {
         CollectObjectNames(child ? child->gameObject.lock() : nullptr, listJson);
     }
@@ -927,9 +953,9 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 
     nlohmann::json listJson;
     listJson["SceneName"] = sceneName_;
-    listJson["ObjectList"] = nlohmann::json::array(); // ”z—ñ‚ğ‰Šú‰»
+    listJson["ObjectList"] = nlohmann::json::array(); // é…åˆ—ã‚’åˆæœŸåŒ–
 
-    // --- ƒOƒ‰ƒtƒBƒbƒNƒXİ’èi‚»‚Ì‚Ü‚Üj ---
+    // --- ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹è¨­å®šï¼ˆãã®ã¾ã¾ï¼‰ ---
     auto& params = GraphicsDeviceManager::Instance().GetBloomParams();
     listJson["GraphicsSettings"]["Bloom"] = {
         {"enabled", params.enabled},
@@ -946,8 +972,8 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
         modelRenderSystem->SerializeGraphicsSettings(listJson["GraphicsSettings"]);
     }
 
-    // 1. ŠeƒIƒuƒWƒFƒNƒg‚ÌŒÂ•Êƒtƒ@ƒCƒ‹‚ğ•Û‘¶
-    // (‚±‚±‚Í‡•s“¯‚ÅOK‚È‚Ì‚ÅA‚Ü‚¸‚Í‘Sƒtƒ@ƒCƒ‹‚ğ‘‚«o‚·)
+    // 1. å„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å€‹åˆ¥ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
+    // (ã“ã“ã¯é †ä¸åŒã§OKãªã®ã§ã€ã¾ãšã¯å…¨ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ›¸ãå‡ºã™)
     for (auto& obj : objects) {
         if (!obj->saveFlg) continue;
 
@@ -959,15 +985,15 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
         }
     }
 
-    // 2. ƒŠƒXƒg JSON ‚Éue ¨ qv‚Ì‡‚Å–¼‘O‚ğ‹L˜^
-    // e‚ª‚¢‚È‚¢iƒ‹[ƒgjƒIƒuƒWƒFƒNƒg‚ğ’T‚µ‚ÄA‚»‚±‚©‚çÄ‹A‚ğŠJn‚·‚é
+    // 2. ãƒªã‚¹ãƒˆ JSON ã«ã€Œè¦ª â†’ å­ã€ã®é †ã§åå‰ã‚’è¨˜éŒ²
+    // è¦ªãŒã„ãªã„ï¼ˆãƒ«ãƒ¼ãƒˆï¼‰ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ¢ã—ã¦ã€ãã“ã‹ã‚‰å†å¸°ã‚’é–‹å§‹ã™ã‚‹
     for (auto& obj : objects) {
         if (obj->saveFlg && obj->transform->parent.lock() == nullptr) {
             CollectObjectNames(obj, listJson);
         }
     }
 
-    // 3. ŠÇ——pƒŠƒXƒgƒtƒ@ƒCƒ‹‚ğ•Û‘¶
+    // 3. ç®¡ç†ç”¨ãƒªã‚¹ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
     std::ofstream listFile(basePath + "SceneList.json");
     if (listFile.is_open()) {
         listFile << listJson.dump(4);
@@ -979,7 +1005,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 void GameObjectManager::LoadScene(const std::string& sceneName_)
 {
 
-    Clear(); // Œ»İ‚ÌƒV[ƒ“‚ğƒNƒŠƒA
+    Clear(); // ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã‚’ã‚¯ãƒªã‚¢
     std::string basePath = "Data/Scenes/" + sceneName_ + "/";
     std::string listFilePath = basePath + "SceneList.json";
 
@@ -997,7 +1023,7 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
     EventManager::Clear();
 
 
-    // --- š ƒOƒ‰ƒtƒBƒbƒNƒXİ’èiƒuƒ‹[ƒ€j‚Ì“Ç‚İ‚İ‚ğ’Ç‰Á ---
+    // --- â˜… ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹è¨­å®šï¼ˆãƒ–ãƒ«ãƒ¼ãƒ ï¼‰ã®èª­ã¿è¾¼ã¿ã‚’è¿½åŠ  ---
     if (listJson.contains("GraphicsSettings")) {
         auto& graphicsJson = listJson["GraphicsSettings"];
 
@@ -1022,7 +1048,7 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
 
 
 
-    // SceneList‚É‹LÚ‚³‚ê‚Ä‚¢‚é–¼‘O‚Ì‡‚Éƒ[ƒh
+    // SceneListã«è¨˜è¼‰ã•ã‚Œã¦ã„ã‚‹åå‰ã®é †ã«ãƒ­ãƒ¼ãƒ‰
     for (const auto& name : listJson["ObjectList"]) {
         std::string objName = name.get<std::string>();
         std::string filePath = basePath + "Objects/" + objName + ".json";
@@ -1032,18 +1058,19 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
             nlohmann::json objJson;
             file >> objJson;
 
-            // ƒIƒuƒWƒFƒNƒg¶¬
+            // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”Ÿæˆ
             auto obj = Create(objName);
 
             obj->SetManager(this);
 
-            // ƒIƒuƒWƒFƒNƒg©g‚ÉƒRƒ“ƒ|[ƒlƒ“ƒg‚ğŠÜ‚ß‚Ä•œŒ³‚³‚¹‚é
+            // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆè‡ªèº«ã«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å«ã‚ã¦å¾©å…ƒã•ã›ã‚‹
             obj->Load(objJson);
         }
     }
 
-    // š‚±‚±‚ÅeqŠÖŒW‚ğ•œŒ³‚·‚é
+    // â˜…ã“ã“ã§è¦ªå­é–¢ä¿‚ã‚’å¾©å…ƒã™ã‚‹
     ResolveHierarchy();
+    EnsureGlobalActionObjects();
 
     printf("Scene '%s' loaded from SceneList.json\n", sceneName_.c_str());
 }
@@ -1054,25 +1081,25 @@ void GameObjectManager::ResolveHierarchy()
     {
         if (!obj) continue;
 
-        // ƒ[ƒh‚Éˆê•Û‘¶‚µ‚½ue‚Ì–¼‘Ov‚ğæ“¾
+        // ãƒ­ãƒ¼ãƒ‰æ™‚ã«ä¸€æ™‚ä¿å­˜ã—ãŸã€Œè¦ªã®åå‰ã€ã‚’å–å¾—
         std::string pName = obj->transform->parentNameDuringLoad;
 
         if (!pName.empty())
         {
-            // –¼‘O‚Åƒ}ƒl[ƒWƒƒ[“à‚ÌƒIƒuƒWƒFƒNƒg‚ğŒŸõ
+            // åå‰ã§ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼å†…ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ¤œç´¢
             auto parentObj = Find(pName);
             if (parentObj && parentObj != obj)
             {
-                // e‚ªŒ©‚Â‚©‚Á‚½‚çATransform‚Ìeq•t‚¯‚ğÀs
+                // è¦ªãŒè¦‹ã¤ã‹ã£ãŸã‚‰ã€Transformã®è¦ªå­ä»˜ã‘ã‚’å®Ÿè¡Œ
                 obj->SetParent(parentObj);
             }
         }
 
-        // ƒ[ƒh—p‚Ìˆêî•ñ‚ğc‚·‚ÆAŒã‚ÅResolveHierarchy‚ğŒÄ‚ñ‚¾‚ÉŒÃ‚¢e‚Ö–ß‚Á‚Ä‚µ‚Ü‚¤
+        // ãƒ­ãƒ¼ãƒ‰ç”¨ã®ä¸€æ™‚æƒ…å ±ã‚’æ®‹ã™ã¨ã€å¾Œã§ResolveHierarchyã‚’å‘¼ã‚“ã æ™‚ã«å¤ã„è¦ªã¸æˆ»ã£ã¦ã—ã¾ã†
         obj->transform->parentNameDuringLoad.clear();
     }
 
-    // ‘S‘Ì‚Ìeq‚ªŠm’è‚µ‚½‚Ì‚ÅAˆê“xs—ñ‚ğ³‚µ‚­ŒvZ‚³‚¹‚é
+    // å…¨ä½“ã®è¦ªå­ãŒç¢ºå®šã—ãŸã®ã§ã€ä¸€åº¦è¡Œåˆ—ã‚’æ­£ã—ãè¨ˆç®—ã•ã›ã‚‹
     for (auto& obj : objects)
     {
         if (obj) obj->UpdateTransform();
@@ -1089,7 +1116,7 @@ std::vector<std::string> GameObjectManager::GetSceneDirectories()
             if (entry.is_directory()) {
                 std::string sceneName = entry.path().filename().string();
 
-                // ƒV[ƒ“ƒtƒHƒ‹ƒ_‚Ì’†‚ÉuSceneList.jsonv‚ª‘¶İ‚·‚é‚©‚ğŠm”F‚·‚é
+                // ã‚·ãƒ¼ãƒ³ãƒ•ã‚©ãƒ«ãƒ€ã®ä¸­ã«ã€ŒSceneList.jsonã€ãŒå­˜åœ¨ã™ã‚‹ã‹ã‚’ç¢ºèªã™ã‚‹
                 std::filesystem::path jsonPath = entry.path() / "SceneList.json";
 
                 if (std::filesystem::exists(jsonPath)) {
@@ -1102,7 +1129,7 @@ std::vector<std::string> GameObjectManager::GetSceneDirectories()
 }
 
 
-// ƒtƒHƒ‹ƒ_“à‚ÌJSONƒtƒ@ƒCƒ‹‚ğƒXƒLƒƒƒ“‚·‚é
+// ãƒ•ã‚©ãƒ«ãƒ€å†…ã®JSONãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¹ã‚­ãƒ£ãƒ³ã™ã‚‹
 void GameObjectManager::RefreshPrefabList()
 {
     prefabFiles.clear();
@@ -1112,7 +1139,7 @@ void GameObjectManager::RefreshPrefabList()
 
     for (const auto& entry : std::filesystem::directory_iterator(prefabDirectory)) {
         if (entry.path().extension() == ".json") {
-            // ƒtƒ@ƒCƒ‹–¼iŠg’£q‚È‚µj‚ğƒŠƒXƒg‚É’Ç‰Á
+            // ãƒ•ã‚¡ã‚¤ãƒ«åï¼ˆæ‹¡å¼µå­ãªã—ï¼‰ã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ 
             prefabFiles.push_back(entry.path().stem().string());
         }
     }
@@ -1127,7 +1154,7 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
         collisionStepSystem->UnregisterCollider(collider_.get());
     }
 
-    // 1. q‹Ÿ‚ğæ‚É‘S‚Äíœ‚·‚éiÄ‹Aj
+    // 1. å­ä¾›ã‚’å…ˆã«å…¨ã¦å‰Šé™¤ã™ã‚‹ï¼ˆå†å¸°ï¼‰
     auto childrenCopy = object_->transform->children;
     for (auto& childTrans : childrenCopy)
     {
@@ -1137,17 +1164,17 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
         }
     }
 
-    // 2. “Áê‚ÈQÆ‚ğŠO‚·
+    // 2. ç‰¹æ®Šãªå‚ç…§ã‚’å¤–ã™
     if (selectedObject == object_) selectedObject = nullptr;
 
-    // 3. ƒ}ƒl[ƒWƒƒ[‚ÌƒƒCƒ“ƒŠƒXƒg‚©‚ç©•ª‚ğíœ
+    // 3. ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®ãƒ¡ã‚¤ãƒ³ãƒªã‚¹ãƒˆã‹ã‚‰è‡ªåˆ†ã‚’å‰Šé™¤
     auto it = std::remove(objects.begin(), objects.end(), object_);
     if (it != objects.end()) {
         objects.erase(it, objects.end());
     }
 }
 
-// ƒvƒŒƒnƒu•Û‘¶
+// ãƒ—ãƒ¬ãƒãƒ–ä¿å­˜
 void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> object_, const std::string& prefabName_)
 {
     if (!object_) return;
@@ -1159,29 +1186,29 @@ void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> object_, const 
     std::ofstream file(filePath);
     if (file.is_open()) {
         file << j.dump(4);
-        RefreshPrefabList(); // ƒŠƒXƒg‚ğXV
+        RefreshPrefabList(); // ãƒªã‚¹ãƒˆã‚’æ›´æ–°
     }
 }
 
 
 void GameObjectManager::InitializeAllComponents()
 {
-    //// š Œ»İ‘¶İ‚µ‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg‚ğƒXƒiƒbƒvƒVƒ‡ƒbƒg
+    //// â˜… ç¾åœ¨å­˜åœ¨ã—ã¦ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ã‚¹ãƒŠãƒƒãƒ—ã‚·ãƒ§ãƒƒãƒˆ
     //auto objectsSnapshot = objects;
 
     for (auto& obj : objects)
     {
         if (!obj) continue;
 
-        // ActionSequence ˆÈŠO‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì Start ‚ğŒÄ‚Ô
-        // (‚ ‚é‚¢‚ÍAActionSequence ‚ğ‚Á‚Ä‚¢‚È‚¢ƒIƒuƒWƒFƒNƒg‚ğæ‚Éˆ—)
+        // ActionSequence ä»¥å¤–ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã® Start ã‚’å‘¼ã¶
+        // (ã‚ã‚‹ã„ã¯ã€ActionSequence ã‚’æŒã£ã¦ã„ãªã„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å…ˆã«å‡¦ç†)
         if (!obj->GetComponent<ActionSequence>()) {
             obj->CallAllComponentStart();
         }
     }
 
-    // 2. Ÿ‚ÉuƒAƒNƒVƒ‡ƒ“‚ğ—˜—p‚·‚é‘¤v‚Ì Start ‚ğŒÄ‚Ô
-    // ‚±‚±‚Å ActionSequence ‚ª RegisterSequence ‚ğÀs‚·‚é
+    // 2. æ¬¡ã«ã€Œã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’åˆ©ç”¨ã™ã‚‹å´ã€ã® Start ã‚’å‘¼ã¶
+    // ã“ã“ã§ ActionSequence ãŒ RegisterSequence ã‚’å®Ÿè¡Œã™ã‚‹
     for (auto& obj : objects)
     {
         if (!obj) continue;
@@ -1194,7 +1221,7 @@ void GameObjectManager::InitializeAllComponents()
 
 CameraManager* GameObjectManager::GetCameraManager(){ return cameraManager.get(); }
 
-// ƒvƒŒƒnƒu‚©‚ç¶¬
+// ãƒ—ãƒ¬ãƒãƒ–ã‹ã‚‰ç”Ÿæˆ
 std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName_)
 {
     std::string filePath = prefabDirectory + prefabName_ + ".json";
@@ -1207,19 +1234,19 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
     nlohmann::json prefabJson;
     file >> prefabJson;
 
-    // 1. d•¡‚µ‚È‚¢ƒ†ƒj[ƒN‚È–¼‘O‚ğ¶¬‚·‚é
+    // 1. é‡è¤‡ã—ãªã„ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªåå‰ã‚’ç”Ÿæˆã™ã‚‹
     std::string uniqueName = MakeUniqueName(prefabName_);
 
-    // 2. ‚»‚Ì–¼‘O‚ÅƒIƒuƒWƒFƒNƒg‚ğì¬
-    // ¦Create“à•”‚Å‚àd•¡ƒ`ƒFƒbƒN‚ª‚ ‚é‚©‚à‚µ‚ê‚Ü‚¹‚ñ‚ªA
-    //   ‚±‚±‚ÅŠm’è‚³‚¹‚½–¼‘O‚ğ“n‚·‚Ì‚ªˆê”ÔŠmÀ‚Å‚·B
+    // 2. ãã®åå‰ã§ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
+    // â€»Createå†…éƒ¨ã§ã‚‚é‡è¤‡ãƒã‚§ãƒƒã‚¯ãŒã‚ã‚‹ã‹ã‚‚ã—ã‚Œã¾ã›ã‚“ãŒã€
+    //   ã“ã“ã§ç¢ºå®šã•ã›ãŸåå‰ã‚’æ¸¡ã™ã®ãŒä¸€ç•ªç¢ºå®Ÿã§ã™ã€‚
     auto newObj = Create(uniqueName);
 
-    // 3. Json‚©‚çƒf[ƒ^‚ğƒ[ƒh
+    // 3. Jsonã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
     newObj->Load(prefabJson);
 
-    // 4. Load‚·‚é‚ÆJson“à‚Ì"Name"‚Åã‘‚«‚³‚ê‚Ä‚µ‚Ü‚¤‚½‚ßA
-    //    Šm’è‚µ‚½ƒ†ƒj[ƒN–¼‚ÉÄ“xİ’è‚µ’¼‚·
+    // 4. Loadã™ã‚‹ã¨Jsonå†…ã®"Name"ã§ä¸Šæ›¸ãã•ã‚Œã¦ã—ã¾ã†ãŸã‚ã€
+    //    ç¢ºå®šã—ãŸãƒ¦ãƒ‹ãƒ¼ã‚¯åã«å†åº¦è¨­å®šã—ç›´ã™
     newObj->SetName(uniqueName.c_str());
     Vector3 p(0, 0, 0);
     newObj->transform->SetLocalPosition(p);
@@ -1259,6 +1286,25 @@ void GameObjectManager::RegisterAttackCallbacks()
                 audioManager_.PlaySEByPath(event_.hitSoundPath);
             }
         });
+}
+
+void GameObjectManager::EnsureGlobalActionObjects()
+{
+    constexpr const char* JUST_DODGE_EVENT_POOL_NAME_ = "JustDodgeEventPool";
+    std::shared_ptr<GameObject> eventPool_ = Find(JUST_DODGE_EVENT_POOL_NAME_);
+    if (!eventPool_)
+    {
+        eventPool_ = Create(JUST_DODGE_EVENT_POOL_NAME_);
+    }
+    if (!eventPool_) return;
+
+    eventPool_->GetOrAddComponent<ColorFilterDirector>(false);
+    eventPool_->GetOrAddComponent<RadialBlurDirector>(false);
+    eventPool_->GetOrAddComponent<VignetteDirector>(false);
+    eventPool_->GetOrAddComponent<TimeScaleDirector>(false);
+    const std::shared_ptr<ActionSequence> sequence_ =
+        eventPool_->GetOrAddComponent<ActionSequence>(false);
+    if (sequence_) sequence_->SetRegisterGlobal(true);
 }
 
 

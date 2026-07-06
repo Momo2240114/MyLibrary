@@ -31,11 +31,11 @@ void EditorRenderTarget::Begin(ID3D11DeviceContext* context_, const float clearC
     context_->PSSetShaderResources(0, 1, &nullSrv_);
 
     context_->ClearRenderTargetView(renderTargetView.Get(), clearColor_);
-    context_->ClearRenderTargetView(normalRenderTargetView.Get(), clearColor_); // šƒm[ƒ}ƒ‹‚àƒNƒŠƒA
+    context_->ClearRenderTargetView(normalRenderTargetView.Get(), clearColor_); // â˜…ãƒãƒ¼ãƒãƒ«ã‚‚ã‚¯ãƒªã‚¢
 
     context_->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // š MRT‚Å2–‡ƒZƒbƒg
+    // â˜… MRTã§2æšã‚»ãƒƒãƒˆ
     ID3D11RenderTargetView* rtvs_[] = {
         renderTargetView.Get(),
         normalRenderTargetView.Get()
@@ -66,7 +66,7 @@ bool EditorRenderTarget::CreateNormalTarget(ID3D11Device* device_)
     desc_.Height = static_cast<UINT>(height);
     desc_.MipLevels = 1;
     desc_.ArraySize = 1;
-    desc_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // ƒJƒ‰[‚Æ“¯‚¶ƒtƒH[ƒ}ƒbƒg
+    desc_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // ã‚«ãƒ©ãƒ¼ã¨åŒã˜ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
     desc_.SampleDesc.Count = 1;
     desc_.Usage = D3D11_USAGE_DEFAULT;
     desc_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;

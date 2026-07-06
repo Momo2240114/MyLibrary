@@ -154,7 +154,7 @@ namespace
 
 bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 {
-    // 褁E��TextureをGPU上で合�Eするための全画面Shaderと一時RTを準備する、E
+    // 隍・焚Texture繧竪PU荳翫〒蜷域・縺吶ｋ縺溘ａ縺ｮ蜈ｨ逕ｻ髱｢Shader縺ｨ荳譎３T繧呈ｺ門ｙ縺吶ｋ縲・
     if (!device_) return false;
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
@@ -176,7 +176,7 @@ bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 
 bool MeshVFXTextureMixer::CreateTarget(ID3D11Device* device_, Target& target_)
 {
-    // Mask/Noise合�E結果を保持する1024x1024の一時Textureを作る、E
+    // Mask/Noise蜷域・邨先棡繧剃ｿ晄戟縺吶ｋ1024x1024縺ｮ荳譎５exture繧剃ｽ懊ｋ縲・
     D3D11_TEXTURE2D_DESC description_{};
     description_.Width = 1024;
     description_.Height = 1024;
@@ -204,7 +204,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     const std::vector<bool>* invertLayers_,
     bool average_)
 {
-    // TextureぁE枚だけなら合成せずそのまま返し、褁E��枚�E場合だけPing-Pong合�Eする、E
+    // Texture縺・譫壹□縺代↑繧牙粋謌舌○縺壹◎縺ｮ縺ｾ縺ｾ霑斐＠縲∬､・焚譫壹・蝣ｴ蜷医□縺善ing-Pong蜷域・縺吶ｋ縲・
     if (textures_.empty() || !renderContext_.deviceContext || !renderContext_.renderState) return nullptr;
     if (textures_.size() == 1 && (!invertLayers_ || invertLayers_->empty() || !(*invertLayers_)[0]))
     {
@@ -243,7 +243,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     ID3D11ShaderResourceView* currentTexture_ = textures_[0];
     for (size_t layerIndex_ = 0; layerIndex_ < textures_.size(); ++layerIndex_)
     {
-        // 1Layerずつ現在結果と次Textureを合成し、�E力�Eを交互に刁E��替える、E
+        // 1Layer縺壹▽迴ｾ蝨ｨ邨先棡縺ｨ谺｡Texture繧貞粋謌舌＠縲∝・蜉帛・繧剃ｺ､莠偵↓蛻・ｊ譖ｿ縺医ｋ縲・
         MixConstants constants_{};
         constants_.blendMode = layerIndex_ == 0
             ? 2u
@@ -272,7 +272,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
 
 bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
 {
-    // Shader本体と、Mask/Noise用TextureMixerをまとめて初期化する、E
+    // Shader譛ｬ菴薙→縲｀ask/Noise逕ｨTextureMixer繧偵∪縺ｨ繧√※蛻晄悄蛹悶☆繧九・
     shader = std::make_unique<MeshVFXShader>();
     isInitialized =
         shader->Initialize(device_) &&
@@ -289,7 +289,7 @@ bool MeshVFXRenderSystem::EnsureAfterimageBuffers(
     ID3D11Device* device_,
     UINT instanceCapacity_)
 {
-    // Afterimageの数が増えたときだけ、忁E��数以上�EStructuredBufferへ拡張する、E
+    // Afterimage縺ｮ謨ｰ縺悟｢励∴縺溘→縺阪□縺代∝ｿ・ｦ∵焚莉･荳翫・StructuredBuffer縺ｸ諡｡蠑ｵ縺吶ｋ縲・
     if (!device_ || instanceCapacity_ == 0) return false;
     if (afterimageInstanceCapacity >= instanceCapacity_ &&
         afterimageBoneBuffer && afterimageInstanceBuffer)
@@ -352,7 +352,7 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
     const std::vector<const MeshVFXModelPoseView*>& poses_,
     size_t meshIndex_)
 {
-    // 褁E��Poseのボ�Eン行�EとAlpha/TimeをInstancing用Bufferへ詰める、E
+    // 隍・焚Pose縺ｮ繝懊・繝ｳ陦悟・縺ｨAlpha/Time繧棚nstancing逕ｨBuffer縺ｸ隧ｰ繧√ｋ縲・
     if (poses_.empty() || !renderContext_.deviceContext)
     {
         return 0;
@@ -418,7 +418,7 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
 
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
-    // 描画可能なComponentだけを今フレームのRenderAll対象へ積�E、E
+    // 謠冗判蜿ｯ閭ｽ縺ｪComponent縺縺代ｒ莉翫ヵ繝ｬ繝ｼ繝縺ｮRenderAll蟇ｾ雎｡縺ｸ遨阪・縲・
     if (!isInitialized || !component_ || !component_->IsEnabled()) return;
 
     if (component_->UsesOwnerModel())
@@ -462,7 +462,7 @@ bool MeshVFXRenderSystem::EnsureCopyTexture(
     Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_)
 {
-    // Scene Color/DepthをShaderからSampleするため、サイズと形式が合うコピ�ETextureを確保する、E
+    // Scene Color/Depth繧担hader縺九ｉSample縺吶ｋ縺溘ａ縲√し繧､繧ｺ縺ｨ蠖｢蠑上′蜷医≧繧ｳ繝斐・Texture繧堤｢ｺ菫昴☆繧九・
     if (!device_ || !source_) return false;
 
     Microsoft::WRL::ComPtr<ID3D11Resource> sourceResource_;
@@ -521,7 +521,7 @@ bool MeshVFXRenderSystem::PrepareSceneSampling(
     ID3D11RenderTargetView* activeRenderTarget_,
     ID3D11DepthStencilView* activeDepthStencil_)
 {
-    // 背景歪みめE��度交差Edgeで使ぁE��め、現在のScene Color/Depthを描画前に退避する、E
+    // 閭梧勹豁ｪ縺ｿ繧・ｷｱ蠎ｦ莠､蟾ｮEdge縺ｧ菴ｿ縺・◆繧√∫樟蝨ｨ縺ｮScene Color/Depth繧呈緒逕ｻ蜑阪↓騾驕ｿ縺吶ｋ縲・
     ID3D11Device* device_ = renderContext_.device
         ? renderContext_.device
         : GraphicsDeviceManager::Instance().GetDevice();
@@ -559,7 +559,7 @@ void MeshVFXRenderSystem::RenderAll(
     ID3D11DepthStencilView* activeDepthStencil_)
 {
     BS_PROFILE_SCOPE("Render::VFX");
-    // PushSubmitされた�EMeshVFXを、E��常Mesh・動的Mesh・Afterimage Poseの3系統に刁E��て描画する、E
+    // PushSubmit縺輔ｌ縺溷・MeshVFX繧偵・壼ｸｸMesh繝ｻ蜍慕噪Mesh繝ｻAfterimage Pose縺ｮ3邉ｻ邨ｱ縺ｫ蛻・￠縺ｦ謠冗判縺吶ｋ縲・
     if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())
     {
@@ -597,7 +597,7 @@ void MeshVFXRenderSystem::RenderAll(
                         part_.intersectionEdgeStrength > 0.0f;
                 });
         });
-    // 忁E��なPartがある場合だけScene Color/Depthをコピ�Eし、不要なフレームのコストを避ける、E
+    // 蠢・ｦ√↑Part縺後≠繧句ｴ蜷医□縺全cene Color/Depth繧偵さ繝斐・縺励∽ｸ崎ｦ√↑繝輔Ξ繝ｼ繝縺ｮ繧ｳ繧ｹ繝医ｒ驕ｿ縺代ｋ縲・
     const bool sceneSamplingReady_ = needsSceneSampling_ && PrepareSceneSampling(
         renderContext_,
         isEditorWindow_,
@@ -675,7 +675,7 @@ void MeshVFXRenderSystem::RenderAll(
                 float poseTime_, float poseAlpha_,
                 UINT instanceCount_, bool useInstancedPose_)
             {
-                // Mesh1つ刁E�ETexture解決、Shader更新、Vertex/Index設定、Draw呼び出しを共通化する、E
+                // Mesh1縺､蛻・・Texture隗｣豎ｺ縲ヾhader譖ｴ譁ｰ縲〃ertex/Index險ｭ螳壹．raw蜻ｼ縺ｳ蜃ｺ縺励ｒ蜈ｱ騾壼喧縺吶ｋ縲・
                 if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0) return;
 
                 ID3D11ShaderResourceView* baseTexture_ = runtimePart_.baseTexture.Get();
@@ -812,7 +812,7 @@ void MeshVFXRenderSystem::RenderAll(
 
             if (useDynamicMesh_)
             {
-                // Trailなどの実行時生�EMeshは、Component側が持つBufferをそのまま描画する、E
+                // Trail縺ｪ縺ｩ縺ｮ螳溯｡梧凾逕滓・Mesh縺ｯ縲，omponent蛛ｴ縺梧戟縺､Buffer繧偵◎縺ｮ縺ｾ縺ｾ謠冗判縺吶ｋ縲・
                 renderMesh_(dynamicMesh_.vertexBuffer, dynamicMesh_.indexBuffer,
                     dynamicMesh_.indexCount, dynamicMesh_.vertexStride,
                     DirectX::XMMatrixIdentity(), nullptr, nullptr,
@@ -822,7 +822,7 @@ void MeshVFXRenderSystem::RenderAll(
 
             if (hasModelPoses_)
             {
-                // Afterimageは同じMeshを褁E��PoseでInstancing描画し、DrawCallを抑える、E
+                // Afterimage縺ｯ蜷後§Mesh繧定､・焚Pose縺ｧInstancing謠冗判縺励．rawCall繧呈椛縺医ｋ縲・
                 std::unordered_map<
                     GltfModelCommponennt*,
                     std::vector<const MeshVFXModelPoseView*>> poseGroups_;
@@ -856,7 +856,7 @@ void MeshVFXRenderSystem::RenderAll(
             const auto& meshes_ = useOwnerModel_ ? ownerModel_->GetMeshes() : runtimePart_.modelResource->meshes;
             for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
             {
-                // 通常MeshVFXはPartTransformとOwnerTransformを合成して描画する、E
+                // 騾壼ｸｸMeshVFX縺ｯPartTransform縺ｨOwnerTransform繧貞粋謌舌＠縺ｦ謠冗判縺吶ｋ縲・
                 if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
 
                 const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];

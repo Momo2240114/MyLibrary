@@ -1,7 +1,7 @@
-// Serialize / Asset Save Load / JSON ïœä∑
-// AnimationControllerComponent ÇÃé¿ëïÇñäÑÇ≤Ç∆Ç…ï™ÇØÇΩÉtÉ@ÉCÉãÇ≈Ç∑ÅB
-// ÉNÉâÉXé©ëÃÇÕï™ó£ÇπÇ∏ÅAìØÇ∂ÉNÉâÉXÇÃÉÅÉìÉoä÷êîíËã`ÇæÇØÇï  cpp Ç…íuÇ¢ÇƒÇ¢Ç‹Ç∑ÅB
-// ÇªÇÃÇΩÇﬂä˘ë∂ÇÃéQè∆ä÷åWÇ‚ public/private ÇÃàµÇ¢ÇÕÇªÇÃÇ‹Ç‹Ç≈Ç∑ÅB
+// Serialize / Asset Save Load / JSON Â§âÊèõ
+// AnimationControllerComponent „ÅÆÂÆüË£Ö„ÇíÂΩπÂâ≤„Åî„Å®„Å´ÂàÜ„Åë„Åü„Éï„Ç°„Ç§„É´„Åß„Åô„ÄÇ
+// „ÇØ„É©„ÇπËá™‰Ωì„ÅØÂàÜÈõ¢„Åõ„Åö„ÄÅÂêå„Åò„ÇØ„É©„Çπ„ÅÆ„É°„É≥„ÉêÈñ¢Êï∞ÂÆöÁæ©„Å†„Åë„ÇíÂà• cpp „Å´ÁΩÆ„ÅÑ„Å¶„ÅÑ„Åæ„Åô„ÄÇ
+// „Åù„ÅÆ„Åü„ÇÅÊó¢Â≠ò„ÅÆÂèÇÁÖßÈñ¢‰øÇ„ÇÑ public/private „ÅÆÊâ±„ÅÑ„ÅØ„Åù„ÅÆ„Åæ„Åæ„Åß„Åô„ÄÇ
 
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"
@@ -292,7 +292,7 @@ bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
     auto stateIterator_ = states.find(state_.name);
     if (stateIterator_ != states.end() && stateIterator_->second)
     {
-        // AnimatorÇ™ï€éùÇµÇƒÇ¢ÇÈStateÉ|ÉCÉìÉ^Çñ≥å¯âªÇµÇ»Ç¢ÇÊÇ§ÅAé¿ëÃÇà€éùÇµÇƒì‡óeÇæÇØçXêVÇ∑ÇÈÅB
+        // Animator„Åå‰øùÊåÅ„Åó„Å¶„ÅÑ„ÇãState„Éù„Ç§„É≥„Çø„ÇíÁÑ°ÂäπÂåñ„Åó„Å™„ÅÑ„Çà„ÅÜ„ÄÅÂÆü‰Ωì„ÇíÁ∂≠ÊåÅ„Åó„Å¶ÂÜÖÂÆπ„Å†„ÅëÊõ¥Êñ∞„Åô„Çã„ÄÇ
         *stateIterator_->second = state_;
     }
     else
@@ -767,7 +767,7 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         {
             {"sequencer", s.sequencerDataName},
             {"name", s.name},
-            {"type", (int)s.type}, // enumÇintÇ∆ÇµÇƒï€ë∂
+            {"type", (int)s.type}, // enum„Çíint„Å®„Åó„Å¶‰øùÂ≠ò
             {"speed", s.playbackSpeed},
             {"loop", s.isLoop},
             {"rootMotion", s.rootMotion},
@@ -775,9 +775,9 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"rootMotionScaleCurveName", s.rootMotionScaleCurveName},
             {"speedCurveName", s.speedCurveName},
             {"events", s.events},
-            // Singleóp
+            // SingleÁî®
             {"animationIndex", s.animationIndex},
-            // Blend1Dóp
+            // Blend1DÁî®
             {"animIndexA", s.animIndexA},
             {"animIndexB", s.animIndexB},
             {"blendParamName", s.blendParamName},
@@ -789,7 +789,7 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"blendSyncNormalizedTime", s.blendSyncNormalizedTime},
             {"blendUseMask", s.blendUseMask},
             {"blendMaskRootNodes", s.blendMaskRootNodes},
-            // Blend2Dóp
+            // Blend2DÁî®
             {"blend2DForwardAnimationIndex", s.blend2DForwardAnimationIndex},
             {"blend2DBackwardAnimationIndex", s.blend2DBackwardAnimationIndex},
             {"blend2DLeftAnimationIndex", s.blend2DLeftAnimationIndex},
@@ -801,7 +801,7 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"blend2DBackwardPhaseOffset", s.blend2DBackwardPhaseOffset},
             {"blend2DLeftPhaseOffset", s.blend2DLeftPhaseOffset},
             {"blend2DRightPhaseOffset", s.blend2DRightPhaseOffset},
-            // Customóp Åyí«â¡Åz
+            // CustomÁî® „ÄêËøΩÂä†„Äë
             {"customAnimIndex", s.customAnimIndex},
         };
     }
@@ -817,10 +817,10 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.rootMotionScaleCurveName = j.value("rootMotionScaleCurveName", "");
     s.speedCurveName = j.value("speedCurveName", "");
 
-    // Singleópïúå≥
+    // SingleÁî®Âæ©ÂÖÉ
     s.animationIndex = j.value("animationIndex", -1);
 
-    // Blend1Dópïúå≥
+    // Blend1DÁî®Âæ©ÂÖÉ
     s.animIndexA = j.value("animIndexA", -1);
     s.animIndexB = j.value("animIndexB", -1);
     s.blendParamName = j.value("blendParamName", "BlendAlpha");
@@ -835,7 +835,7 @@ void from_json(const nlohmann::json& j, AnimState& s)
         "blendMaskRootNodes",
         std::vector<std::string>{});
 
-    // Blend2Dópïúå≥
+    // Blend2DÁî®Âæ©ÂÖÉ
     s.blend2DForwardAnimationIndex = j.value("blend2DForwardAnimationIndex", -1);
     s.blend2DBackwardAnimationIndex = j.value("blend2DBackwardAnimationIndex", -1);
     s.blend2DLeftAnimationIndex = j.value("blend2DLeftAnimationIndex", -1);
@@ -857,7 +857,7 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.blend2DLeftPhaseOffset = j.value("blend2DLeftPhaseOffset", 0.0f);
     s.blend2DRightPhaseOffset = j.value("blend2DRightPhaseOffset", 0.0f);
 
-    // Customóp Åyí«â¡Åz
+    // CustomÁî® „ÄêËøΩÂä†„Äë
     s.customAnimIndex = j.value("customAnimIndex", -1);
     if (j.contains("rootMotion") && j["rootMotion"].is_object())
     {

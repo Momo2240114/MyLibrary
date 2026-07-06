@@ -3,20 +3,20 @@
 #include "SpriteShader.h"
 
 //=========================================
-// SpriteDissolveShader (ƒfƒBƒ]ƒ‹ƒu—pƒXƒvƒ‰ƒCƒgƒVƒF[ƒ_)
+// SpriteDissolveShader (ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–ç”¨ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚·ã‚§ãƒ¼ãƒ€)
 //=========================================
 class SpriteDissolveShader : public SpriteShader
 {
 public:
-    // ƒfƒBƒ]ƒ‹ƒu—pƒ}ƒXƒNƒeƒNƒXƒ`ƒƒ
+    // ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–ç”¨ãƒã‚¹ã‚¯ãƒ†ã‚¯ã‚¹ãƒãƒ£
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> maskTexture;
 
-    // ƒfƒBƒ]ƒ‹ƒuis“x 0.0~1.0
+    // ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–é€²è¡Œåº¦ 0.0~1.0
     float dissolveAmount = 0.0f;
 
     SpriteDissolveShader() = default;
 
-    // ’è”ƒoƒbƒtƒ@‚É’l‚ğİ’è‚·‚éƒwƒ‹ƒp[ŠÖ”
+    // å®šæ•°ãƒãƒƒãƒ•ã‚¡ã«å€¤ã‚’è¨­å®šã™ã‚‹ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
     void SetDissolveParameters(ID3D11DeviceContext* context_, ID3D11Buffer* dissolveCB_)
     {
         struct DissolveCB

@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
-class SpriteRenderer; // ‘O•ûéŒ¾
+class SpriteRenderer; // å‰æ–¹å®£è¨€
 
 class NumberSwitcher : public Component {
 public:
@@ -12,7 +12,7 @@ public:
 
     void Start() override;
 
-    // ŠO•”‚©‚ç•\¦‚µ‚½‚¢ƒOƒŠƒbƒh”Ô†‚ğƒZƒbƒg‚·‚é
+    // å¤–éƒ¨ã‹ã‚‰è¡¨ç¤ºã—ãŸã„ã‚°ãƒªãƒƒãƒ‰ç•ªå·ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
     void SetDigit(int num_);
 
     void Gui() override;
@@ -20,11 +20,11 @@ public:
     void Deserialize(const nlohmann::json& j) override;
 
 private:
-    // --- ’Ç‰ÁFİ’è—pƒƒ“ƒo ---
-    int maxColumns = 10;          // ‰¡‚É‰½”š•À‚ñ‚Å‚¢‚é‚©i’Êí10j
-    int maxRows = 1;              // c‚É‰½s•À‚ñ‚Å‚¢‚é‚©
-    DirectX::XMFLOAT2 digitSize = { 150.0f, 300.0f }; // 1•¶š‚Ì•\¦ƒTƒCƒY
+    // --- è¿½åŠ ï¼šè¨­å®šç”¨ãƒ¡ãƒ³ãƒ ---
+    int maxColumns = 10;          // æ¨ªã«ä½•æ•°å­—ä¸¦ã‚“ã§ã„ã‚‹ã‹ï¼ˆé€šå¸¸10ï¼‰
+    int maxRows = 1;              // ç¸¦ã«ä½•è¡Œä¸¦ã‚“ã§ã„ã‚‹ã‹
+    DirectX::XMFLOAT2 digitSize = { 150.0f, 300.0f }; // 1æ–‡å­—ã®è¡¨ç¤ºã‚µã‚¤ã‚º
 
     int currentDigit = 0;
-    std::weak_ptr<SpriteRenderer> spriteRenderer; // ‘€ì‘ÎÛ
+    std::weak_ptr<SpriteRenderer> spriteRenderer; // æ“ä½œå¯¾è±¡
 };    

@@ -8,18 +8,18 @@
 class ImGuiRenderer
 {
 public:
-	// ‰Šú‰»
+	// åˆæœŸåŒ–
 	static void Initialize(HWND hWnd_, ID3D11Device* device_, ID3D11DeviceContext* dc_);
 
-	// I—¹‰»
+	// çµ‚äº†åŒ–
 	static void Finalize();
 
-	// ƒtƒŒ[ƒ€ŠJnˆ—
+	// ãƒ•ãƒ¬ãƒ¼ãƒ é–‹å§‹å‡¦ç†
 	static void NewFrame();
 
-	// •`‰æÀs
+	// æç”»å®Ÿè¡Œ
 	static void RenderAll(ID3D11DeviceContext* context_);
 
-	// WIN32ƒƒbƒZ[ƒWƒnƒ“ƒhƒ‰[
+	// WIN32ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒãƒ³ãƒ‰ãƒ©ãƒ¼
 	static LRESULT HandleMessage(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM lParam_);
 };

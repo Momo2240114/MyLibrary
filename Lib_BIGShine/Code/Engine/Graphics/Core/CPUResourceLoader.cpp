@@ -34,20 +34,20 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
     auto it = textureResources.find(filename_);
     if (it != textureResources.end())
     {
-        // ƒLƒƒƒbƒVƒ…ƒqƒbƒg
+        // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãƒ’ãƒƒãƒˆ
         srv_ = it->second;
         srv_->GetResource(resource_.GetAddressOf());
     }
     else
     {
-        // ƒLƒƒƒbƒVƒ…ƒ~ƒX ¨ ƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚İ
+        // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãƒŸã‚¹ â†’ ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã¿
         std::filesystem::path dds_filename(filename_);
         dds_filename.replace_extension("dds");
 
         if (std::filesystem::exists(dds_filename.c_str()))
         {
             hr = CreateDDSTextureFromFile(device_, dds_filename.c_str(),
-                resource_.GetAddressOf(), srv_.GetAddressOf()); // © srv_ ‚Éó‚¯‚é
+                resource_.GetAddressOf(), srv_.GetAddressOf()); // â† srv_ ã«å—ã‘ã‚‹
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
         else
@@ -60,11 +60,11 @@ HRESULT CPUResourceLoader::LoadTextureFromFile(ID3D11Device* device_,
             _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
         }
 
-        //textureResourcesimapj‚É“o˜^
+        //textureResourcesï¼ˆmapï¼‰ã«ç™»éŒ²
         textureResources.insert(make_pair(filename_, srv_));
     }
 
-    // texture2d_desc_ ‚ª nullptr ‚Å‚È‚¯‚ê‚Îæ“¾
+    // texture2d_desc_ ãŒ nullptr ã§ãªã‘ã‚Œã°å–å¾—
     if (texture2d_desc_)
     {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d_;
@@ -88,9 +88,9 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
     Microsoft::WRL::ComPtr<ID3D11Resource> resource;
 
 
-    //DDSŒ`®‚ÌƒeƒNƒXƒ`ƒƒƒf[ƒ^‚ğ‚µ‚Ä“Ç‚İ‚Ş
+    //DDSå½¢å¼ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‚’ã—ã¦èª­ã¿è¾¼ã‚€
     if (hr != S_OK)
-    // DDS‚Å‚·
+    // DDSã§è©¦ã™
     hr = CreateDDSTextureFromMemory(device_,
         reinterpret_cast<const uint8_t*>(data),
         size,
@@ -99,7 +99,7 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
 
     if (FAILED(hr))
     {
-        // ƒf[ƒ^‚Ì«¿iColor‚©Data‚©j‚ÉŠî‚Ã‚«AF‹óŠÔ‚Ìƒtƒ‰ƒO‚ğŒˆ’è‚·‚é
+        // ãƒ‡ãƒ¼ã‚¿ã®æ€§è³ªï¼ˆColorã‹Dataã‹ï¼‰ã«åŸºã¥ãã€è‰²ç©ºé–“ã®ãƒ•ãƒ©ã‚°ã‚’æ±ºå®šã™ã‚‹
         WIC_LOADER_FLAGS flags = (type == TextureType::Color) ? WIC_LOADER_FORCE_SRGB : WIC_LOADER_FORCE_RGBA32;
 
         hr = CreateWICTextureFromMemoryEx(device_,
@@ -110,20 +110,20 @@ HRESULT CPUResourceLoader::LoadTextureFromMemory(
             D3D11_BIND_SHADER_RESOURCE,
             0, // CPUAccessFlags
             0, // MiscFlags
-            flags, // ‚±‚±‚ÅŒˆ‚ß‚½‰^–½‚ğ“n‚·
+            flags, // ã“ã“ã§æ±ºã‚ãŸé‹å‘½ã‚’æ¸¡ã™
             resource.GetAddressOf(),
             shader_resource_view_ ? shader_resource_view_ : nullptr);
     }
 
-    // SRV‚ª nullptr ‚Ìê‡A©‘O‚Åì‚é
+    // SRVãŒ nullptr ã®å ´åˆã€è‡ªå‰ã§ä½œã‚‹
     if (shader_resource_view_ == nullptr && SUCCEEDED(hr))
     {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2D;
         hr = resource->QueryInterface(texture2D.GetAddressOf());
         if (FAILED(hr)) return hr;
 
-        // ƒfƒoƒbƒO—p‚É SRV ‚È‚µ‚Å‚àOK
-        // •K—v‚É‰‚¶‚Ä‚±‚±‚Å‘¼‚Ìˆ—‚à‰Â”\
+        // ãƒ‡ãƒãƒƒã‚°ç”¨ã« SRV ãªã—ã§ã‚‚OK
+        // å¿…è¦ã«å¿œã˜ã¦ã“ã“ã§ä»–ã®å‡¦ç†ã‚‚å¯èƒ½
     }
 
     return hr;
@@ -173,14 +173,14 @@ HRESULT CPUResourceLoader::CreateVSFromCSO(
     UINT numElements_)
 {
     FILE* fp_{ nullptr };
-    fopen_s(&fp_, csoName_, "rb");    // ƒtƒ@ƒCƒ‹‚ğƒoƒCƒiƒŠ‚ÅŠJ‚­
+    fopen_s(&fp_, csoName_, "rb");    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ãƒã‚¤ãƒŠãƒªã§é–‹ã
     if (!fp_) {
         return E_FAIL;
     }
 
-    fseek(fp_, 0, SEEK_END);			// ƒtƒ@ƒCƒ‹‚ÌI’[‚ÖˆÚ“®
-    long csoSz_ = ftell(fp_);		// ƒtƒ@ƒCƒ‹ƒTƒCƒYæ“¾
-    fseek(fp_, 0, SEEK_SET);			// ƒtƒ@ƒCƒ‹æ“ª‚Ö–ß‚é
+    fseek(fp_, 0, SEEK_END);			// ãƒ•ã‚¡ã‚¤ãƒ«ã®çµ‚ç«¯ã¸ç§»å‹•
+    long csoSz_ = ftell(fp_);		// ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºå–å¾—
+    fseek(fp_, 0, SEEK_SET);			// ãƒ•ã‚¡ã‚¤ãƒ«å…ˆé ­ã¸æˆ»ã‚‹
 
     std::unique_ptr<unsigned char[]> csoData_ = std::make_unique<unsigned char[]>(csoSz_);
     fread(csoData_.get(), csoSz_, 1, fp_);
@@ -225,26 +225,26 @@ HRESULT CPUResourceLoader::CreatePSFromCSO(ID3D11Device* device_, const char* cs
 
 HRESULT CPUResourceLoader::LoadVertexShader(ID3D11Device* device, const char* filename, const D3D11_INPUT_ELEMENT_DESC inputElementDescs[], UINT inputElementCount, ID3D11InputLayout** inputLayout, ID3D11VertexShader** vertexShader)
 {
-    // ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
     _ASSERT_EXPR_A(fp, "Vertex Shader File not found");
 
-    // ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    // ƒƒ‚ƒŠã‚É’¸“_ƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+    // ãƒ¡ãƒ¢ãƒªä¸Šã«é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
     std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
     fread(data.get(), size, 1, fp);
     fclose(fp);
 
-    // ’¸“_ƒVƒF[ƒ_[¶¬
+    // é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
     HRESULT hr = device->CreateVertexShader(data.get(), size, nullptr, vertexShader);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-    // “ü—ÍƒŒƒCƒAƒEƒg
+    // å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
     if (inputLayout != nullptr)
     {
         hr = device->CreateInputLayout(inputElementDescs, inputElementCount, data.get(), size, inputLayout);
@@ -256,22 +256,22 @@ HRESULT CPUResourceLoader::LoadVertexShader(ID3D11Device* device, const char* fi
 
 HRESULT CPUResourceLoader::LoadPixelShader(ID3D11Device* device, const char* filename, ID3D11PixelShader** pixelShader)
 {
-    // ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
     _ASSERT_EXPR_A(fp, "Pixel Shader File not found");
 
-    // ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    // ƒƒ‚ƒŠã‚É’¸“_ƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+    // ãƒ¡ãƒ¢ãƒªä¸Šã«é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
     std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
     fread(data.get(), size, 1, fp);
     fclose(fp);
 
-    // ƒsƒNƒZƒ‹ƒVƒF[ƒ_[¶¬
+    // ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
     HRESULT hr = device->CreatePixelShader(data.get(), size, nullptr, pixelShader);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
@@ -296,22 +296,22 @@ HRESULT CPUResourceLoader::CreateConstantBuffer(ID3D11Device* device, UINT buffe
 
 HRESULT CPUResourceLoader::LoadGeometryShader(ID3D11Device* device, const char* filename, ID3D11GeometryShader** geometryShader)
 {
-    // ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
     _ASSERT_EXPR_A(fp, "Geometry Shader File not found");
 
-    // ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    // ƒƒ‚ƒŠã‚ÉƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+    // ãƒ¡ãƒ¢ãƒªä¸Šã«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
     std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(size);
     fread(data.get(), size, 1, fp);
     fclose(fp);
 
-    // ƒWƒIƒƒgƒŠƒVƒF[ƒ_[¶¬
+    // ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
     HRESULT hr = device->CreateGeometryShader(data.get(), size, nullptr, geometryShader);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
@@ -320,22 +320,22 @@ HRESULT CPUResourceLoader::LoadGeometryShader(ID3D11Device* device, const char* 
 
 HRESULT CPUResourceLoader::LoadComputeShader(ID3D11Device* device, const char* filename, ID3D11ComputeShader** computeShader)
 {
-    // ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "rb");
     _ASSERT_EXPR_A(fp, "Compute Shader File not found");
 
-    // ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    // ƒƒ‚ƒŠã‚ÉƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+    // ãƒ¡ãƒ¢ãƒªä¸Šã«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
     std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(size);
     fread(data.get(), size, 1, fp);
     fclose(fp);
 
-    // ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[¶¬
+    // ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
     HRESULT hr = device->CreateComputeShader(data.get(), size, nullptr, computeShader);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 

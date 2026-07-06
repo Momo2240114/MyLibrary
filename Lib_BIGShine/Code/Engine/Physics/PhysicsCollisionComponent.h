@@ -40,20 +40,20 @@ public:
     void SetCollisionOffset(const DirectX::XMFLOAT3& off) { collisionOffset = off; }
     void SetLockRotation(bool x, bool y, bool z) {
         lockRotationX = x; lockRotationY = y; lockRotationZ = z;
-        if (actor) ApplyLockRotation(); // ���łɐ����ς݂Ȃ�K�p
+        if (actor) ApplyLockRotation(); // すでに生成済みなら適用
     }
 
 private:
-    void ApplyLockRotation(); // ���ۂ�PhysX�ɓK�p����֐�
+    void ApplyLockRotation(); // 実際にPhysXに適用する関数
     void CreateActor();
 
 private:
     ShapeType shapeType = ShapeType::None;
 
-    // �R���W�����̒��S�ʒu�����炷���߂̃I�t�Z�b�g
+    // コリジョンの中心位置をずらすためのオフセット
     DirectX::XMFLOAT3 collisionOffset{ 0.0f, 0.0f, 0.0f };
 
-    // �����ɂ���]���Œ肷��t���O
+    // 物理による回転を固定するフラグ
     bool lockRotationX = false;
     bool lockRotationY = false;
     bool lockRotationZ = false;
@@ -63,7 +63,7 @@ private:
     float capsuleRadius = 0.5f;
     float capsuleHalfHeight = 1.0f;
 
-    // Trigger �p�t���O
+    // Trigger 用フラグ
     bool isTrigger = false;
 
     bool isKinematic = false;

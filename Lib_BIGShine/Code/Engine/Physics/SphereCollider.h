@@ -18,7 +18,7 @@ public:
     void Gui()  override;
     void Update(float dt) override;
 
-    // SphereCollider.h “à
+    // SphereCollider.h å†…
     void Serialize(nlohmann::json& j) const override {
         ColliderComponent::Serialize(j);
         j["Radius"] = radius;
@@ -32,7 +32,7 @@ public:
     Sphere GetSphereData() {
         auto t = GetGameObject()->transform;
 
-        // ˆê“x•Ï”‚ÉŽó‚¯‚é
+        // ä¸€åº¦å¤‰æ•°ã«å—ã‘ã‚‹
         DirectX::XMFLOAT3 Float3 = t->GetWorldPosition();
         DirectX::XMVECTOR position = DirectX::XMLoadFloat3(&Float3);
 

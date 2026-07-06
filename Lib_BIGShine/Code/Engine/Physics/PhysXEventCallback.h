@@ -14,7 +14,7 @@ public:
     void onTrigger(physx::PxTriggerPair* pairs,
         physx::PxU32 count) override;
 
-    // égÇÌÇ»Ç¢ÉCÉxÉìÉg
+    // ‰Ωø„Çè„Å™„ÅÑ„Ç§„Éô„É≥„Éà
     void onConstraintBreak(physx::PxConstraintInfo*, physx::PxU32) override {}
     void onWake(physx::PxActor**, physx::PxU32) override {}
     void onSleep(physx::PxActor**, physx::PxU32) override {}

@@ -2,7 +2,7 @@
 
 #include "ColliderComponent.h"
 
-// BoxCollider.h (AABB‘O’ñ)
+// BoxCollider.h (AABBå‰æ)
 class BoxCollider : public ColliderComponent {
 private:
     bool usedNaviMeshSystemFlg = false;
@@ -24,7 +24,7 @@ public:
     void Gui()  override;
     void Update(float dt) override;
 
-    // BoxCollider.h “à
+    // BoxCollider.h å†…
     void Serialize(nlohmann::json& j) const override {
         ColliderComponent::Serialize(j);
         j["HalfSize"] = { halfSize.x, halfSize.y, halfSize.z };
@@ -50,16 +50,16 @@ public:
     OBB CreateOBB() {
         auto t = GetGameObject()->transform;
 
-        // ˆê“x•Ï”‚Éó‚¯‚é
+        // ä¸€åº¦å¤‰æ•°ã«å—ã‘ã‚‹
         DirectX::XMFLOAT4X4 worldFloat = t->GetWorld();
         DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&worldFloat);
 
         OBB obb;
-        // world.r[3] ‚ÍÀ•W (Translation)
+        // world.r[3] ã¯åº§æ¨™ (Translation)
         obb.center = DirectX::XMVectorAdd(world.r[3],
             DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&offset), world));
 
-        // Še²‚ğ³‹K‰»‚µ‚Ä’Šo
+        // å„è»¸ã‚’æ­£è¦åŒ–ã—ã¦æŠ½å‡º
         obb.axes[0] = DirectX::XMVector3Normalize(world.r[0]);
         obb.axes[1] = DirectX::XMVector3Normalize(world.r[1]);
         obb.axes[2] = DirectX::XMVector3Normalize(world.r[2]);

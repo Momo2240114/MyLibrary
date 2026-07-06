@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-// --- ƒoƒCƒ“ƒh ---
+// --- ãƒã‚¤ãƒ³ãƒ‰ ---
 void KeyConfig::BindAction(const std::string& action_, const InputCombo& combo_) {
     if (combo_.empty()) return;
     actionMap[action_].push_back(combo_);
@@ -40,15 +40,15 @@ void KeyConfig::ClearBinds(const std::string& action_) {
     actionMap.erase(action_);
 }
 
-// --- “à•””»’èƒƒWƒbƒN ---
+// --- å†…éƒ¨åˆ¤å®šãƒ­ã‚¸ãƒƒã‚¯ ---
 bool KeyConfig::CheckUnit(const InputUnit& unit_, int type_) const
 {
     if (unit_.device == DeviceType::KBM) {
-        // ƒ}ƒEƒXƒR[ƒh”»’è (VK_LBUTTON:0x01, VK_RBUTTON:0x02“™)
+        // ãƒžã‚¦ã‚¹ã‚³ãƒ¼ãƒ‰åˆ¤å®š (VK_LBUTTON:0x01, VK_RBUTTON:0x02ç­‰)
         if (unit_.code >= 0x01 && unit_.code <= 0x06) {
             return MouseInput::Instance().GetButtonState(unit_.code, type_);
         }
-        // ƒL[ƒ{[ƒh”»’è
+        // ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰åˆ¤å®š
         if (type_ == 0) return KeyInput::KeyPressed(unit_.code);
         if (type_ == 1) return KeyInput::KeyPressedIn(unit_.code);
         return KeyInput::KeyPressedOut(unit_.code);
@@ -64,8 +64,8 @@ bool KeyConfig::CheckUnit(const InputUnit& unit_, int type_) const
 bool KeyConfig::CheckCombo(const InputCombo& combo_, int type_) const {
     if (combo_.empty()) return false;
 
-    // uŠÔ“ü—Í(In/Out)”»’èF
-    // u‚Ç‚ê‚©ˆê‚Â‚ªƒgƒŠƒK[(type)‚ðˆø‚«A‚©‚Â‘Sˆõ‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é(Hold)vê‡‚É¬—§
+    // çž¬é–“å…¥åŠ›(In/Out)åˆ¤å®šï¼š
+    // ã€Œã©ã‚Œã‹ä¸€ã¤ãŒãƒˆãƒªã‚¬ãƒ¼(type)ã‚’å¼•ãã€ã‹ã¤å…¨å“¡ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹(Hold)ã€å ´åˆã«æˆç«‹
     if (type_ != 0) {
         bool triggered_ = false;
         for (const auto& unit : combo_) {
@@ -78,14 +78,14 @@ bool KeyConfig::CheckCombo(const InputCombo& combo_, int type_) const {
         return true;
     }
 
-    // Œp‘±“ü—Í(Hold)”»’è
+    // ç¶™ç¶šå…¥åŠ›(Hold)åˆ¤å®š
     for (const auto& unit : combo_) {
         if (!CheckUnit(unit, 0)) return false;
     }
     return true;
 }
 
-// --- ŒöŠJ”»’èŠÖ” ---
+// --- å…¬é–‹åˆ¤å®šé–¢æ•° ---
 bool KeyConfig::ActionPressed(const std::string& action_) const {
     auto it = actionMap.find(action_);
     if (it == actionMap.end()) return false;
@@ -107,7 +107,7 @@ bool KeyConfig::ActionPressedOut(const std::string& action_) const {
     return false;
 }
 
-// --- JSON•Û‘¶ ---
+// --- JSONä¿å­˜ ---
 bool KeyConfig::Save(const std::string& filename)
 {
     if (filename.empty()) return false;
@@ -163,7 +163,7 @@ bool KeyConfig::Save(const std::string& filename)
     return true;
 }
 
-// --- JSON“Ç‚Ýž‚Ý ---
+// --- JSONèª­ã¿è¾¼ã¿ ---
 bool KeyConfig::Load(const std::string& filename)
 {
     if (filename.empty()) return false;
@@ -274,7 +274,7 @@ float KeyConfig::GetAxisUnitValue(const AxisUnit& unit_) const
 
     if (unit_.sourceType == AxisSourceType::MouseMove)
     {
-        // MouseInput‘¤‚É GetDeltaX / GetDeltaY ‚ð—pˆÓ‚µ‚ÄŽg‚¤
+        // MouseInputå´ã« GetDeltaX / GetDeltaY ã‚’ç”¨æ„ã—ã¦ä½¿ã†
         float value_ = 0.0f;
 
         if (unit_.code == static_cast<int>(AxisCode::MouseX))

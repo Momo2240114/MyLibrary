@@ -34,9 +34,9 @@ public:
     bool hitSoundMuffled = false;
     float hitSoundMuffledCutoff = 1200.0f;
 
-    // ‹ó‚È‚ç GameObject –¼‚ğg‚¤
+    // ç©ºãªã‚‰ GameObject åã‚’ä½¿ã†
     std::string actionPrefix = "";
-    // Actioní•Ê–¼‚È‚Ì‚ÅŒÅ’èˆµ‚¢
+    // Actionç¨®åˆ¥åãªã®ã§å›ºå®šæ‰±ã„
     std::string activateActionName = "EnableHitBox";
     std::string deactivateActionName = "DisableHitBox";
 

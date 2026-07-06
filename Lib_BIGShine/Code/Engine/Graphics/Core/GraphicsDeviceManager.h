@@ -19,7 +19,7 @@
 
 // ============================================================================
 // GraphicsDeviceManager
-// Direct3D11ƒfƒoƒCƒXA•`‰æƒ^[ƒQƒbƒgAƒ|ƒXƒgƒGƒtƒFƒNƒg‚Ì¶‘¶ŠúŠÔ‚ğˆêŒ³ŠÇ—‚·‚éB
+// Direct3D11ãƒ‡ãƒã‚¤ã‚¹ã€æç”»ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã€ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ç”Ÿå­˜æœŸé–“ã‚’ä¸€å…ƒç®¡ç†ã™ã‚‹ã€‚
 // ============================================================================
 class GraphicsDeviceManager
 {
@@ -28,7 +28,7 @@ public:
     ~GraphicsDeviceManager() = default;
 
     //====================================================
-    // ‰Šú‰»‚Æ”jŠü
+    // åˆæœŸåŒ–ã¨ç ´æ£„
     //====================================================
     bool Initialize(HWND windowHandle_, int width_, int height_, bool fullscreen_);
 
@@ -38,13 +38,13 @@ public:
     bool IsFullscreen() const { return fullscreen; }
     void Finalize();
     //====================================================
-    // ƒtƒŒ[ƒ€§Œä
+    // ãƒ•ãƒ¬ãƒ¼ãƒ åˆ¶å¾¡
     //====================================================
     void BeginFrame(const float clearColor_[4]);
     void EndFrame();
 
     //====================================================
-    // ƒAƒNƒZƒbƒT
+    // ã‚¢ã‚¯ã‚»ãƒƒã‚µ
     //====================================================
     ID3D11Device* GetDevice() const { return device.Get(); }
     ID3D11DeviceContext* GetContext() const { return immediateContext.Get(); }
@@ -54,9 +54,9 @@ public:
     ID3D11ShaderResourceView* GetMainDepthSRV() const { return depthStencilSRV.Get(); }
     HWND GetWindowHandle() { return windowHandle; }
     ShapeRenderSystem& GetShapeRendererSystem() { return shapeRendererSystem; }
-    // ƒŒƒ“ƒ_[ƒXƒe[ƒgæ“¾
+    // ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆå–å¾—
     RenderState* GetRenderState() { return renderState.get(); }
-    // ƒAƒNƒZƒbƒT—“‚É’Ç‰Á
+    // ã‚¢ã‚¯ã‚»ãƒƒã‚µæ¬„ã«è¿½åŠ 
     ID3D11ShaderResourceView* GetSceneSRV(){ return sceneSRV.Get(); }
     ID3D11ShaderResourceView* GetNormalSRV() { return gBufferNormalSRV.Get(); }
     ID3D11ShaderResourceView* GetSceneNormalSRV() { return sceneNormalSRV.Get(); }
@@ -74,14 +74,14 @@ public:
     CascadeShadowMap& GetCascadeShadowMap() { return cascadeShadowMap; }
     PostRenderSystem& GetPostRenderSystem() { return postRenderSystem; }
     //====================================================
-    // InstanceƒAƒNƒZƒbƒT
+    // Instanceã‚¢ã‚¯ã‚»ãƒƒã‚µ
     //====================================================
     static GraphicsDeviceManager& Instance() {
         static GraphicsDeviceManager instance;
         return instance;
     }
 
-    // ƒuƒ‹[ƒ€İ’è‚Ìæ“¾E‘€ì—p
+    // ãƒ–ãƒ«ãƒ¼ãƒ è¨­å®šã®å–å¾—ãƒ»æ“ä½œç”¨
     BloomSystem::Parameters& GetBloomParams() { return bloomParams; }
     RadialBlurSystem::Parameters& GetRadialBlurParams() { return radialBlurParams; }
     XeGtaoSystem::Parameters& GetXeGtaoParams() { return xeGtaoParams; }
@@ -89,20 +89,20 @@ public:
     VignetteSystem::Parameters& GetVignetteParams() { return vignetteParams; }
     BloomSystem::CbColorFilter& GetFilterParams() { return filterParams; }
 
-    // ƒp[ƒeƒBƒNƒ‹‚ÍƒJƒ‰[ƒoƒbƒtƒ@‚É‚¾‚¯‰e‹¿‚ğ—^‚¦‚½‚¢
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã¯ã‚«ãƒ©ãƒ¼ãƒãƒƒãƒ•ã‚¡ã«ã ã‘å½±éŸ¿ã‚’ä¸ãˆãŸã„
     void SetParticleRenderTarget();
     void SetParticleRenderTargetWithDistortion();
 
-    // ƒoƒbƒNƒoƒbƒtƒ@‚Å‚Í‚È‚­uƒV[ƒ“—pƒeƒNƒXƒ`ƒƒv‚ğƒZƒbƒg‚·‚éŠÖ”
+    // ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã§ã¯ãªãã€Œã‚·ãƒ¼ãƒ³ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã€ã‚’ã‚»ãƒƒãƒˆã™ã‚‹é–¢æ•°
     void SetSceneRenderTarget();
     void SetSceneColorRenderTarget();
     void SetSceneDistortionRenderTarget();
     void SetGBufferRenderTargets();
     void SetBackBufferRenderTarget();
-    // ƒV[ƒ“—pƒeƒNƒXƒ`ƒƒ‚©‚çƒoƒbƒNƒoƒbƒtƒ@‚Öƒuƒ‹[ƒ€‚ğ“K—p‚µ‚Ä•`‰æ
+    // ã‚·ãƒ¼ãƒ³ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‹ã‚‰ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã¸ãƒ–ãƒ«ãƒ¼ãƒ ã‚’é©ç”¨ã—ã¦æç”»
     void ResolveBloom(const RenderContext& rc);
     void RenderSkyBox(const RenderContext& rc);
-    // ƒuƒ‹[ƒ€’²®—pGUI
+    // ãƒ–ãƒ«ãƒ¼ãƒ èª¿æ•´ç”¨GUI
     void ResetFilter();
     void DrawPostEffectGuiContent();
     void ShowPostEffectGui();
@@ -111,7 +111,7 @@ private:
     PostRenderSystem postRenderSystem;
 
     //====================================================
-    // DirectX11‚Ì’†ŠjƒŠƒ\[ƒXB”jŠü‡˜‚ğ§Œä‚·‚é‚½‚ßA‚±‚ÌƒNƒ‰ƒX‚ªŠ—L‚·‚éB
+    // DirectX11ã®ä¸­æ ¸ãƒªã‚½ãƒ¼ã‚¹ã€‚ç ´æ£„é †åºã‚’åˆ¶å¾¡ã™ã‚‹ãŸã‚ã€ã“ã®ã‚¯ãƒ©ã‚¹ãŒæ‰€æœ‰ã™ã‚‹ã€‚
     //====================================================
     Microsoft::WRL::ComPtr<ID3D11Device> device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
@@ -121,7 +121,7 @@ private:
 
 
 public:
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> copyDepthStencilTexture; // [“xƒoƒbƒtƒ@–{‘Ì
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> copyDepthStencilTexture; // æ·±åº¦ãƒãƒƒãƒ•ã‚¡æœ¬ä½“
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyDepthStencilSRV;
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D>          copySceneColorTexture;
@@ -132,9 +132,9 @@ public:
 
     std::unique_ptr<RenderState>					renderState;
 
-    // --- [“xƒŠƒ\[ƒX–{‘Ì‚ÆSRV ---
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilTexture; // [“xƒoƒbƒtƒ@–{‘Ì
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthStencilSRV; // “Ç‚İæ‚è—p
+    // --- æ·±åº¦ãƒªã‚½ãƒ¼ã‚¹æœ¬ä½“ã¨SRV ---
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilTexture; // æ·±åº¦ãƒãƒƒãƒ•ã‚¡æœ¬ä½“
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthStencilSRV; // èª­ã¿å–ã‚Šç”¨
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneNormalRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneNormalSRV;
@@ -145,7 +145,7 @@ private:
     HWND											windowHandle = nullptr;
 
     //====================================================
-    // ƒEƒBƒ“ƒhƒEƒTƒCƒY‚Æ•`‰æ—Ìˆæ‚ÉˆË‘¶‚·‚éÀsó‘ÔB
+    // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã¨æç”»é ˜åŸŸã«ä¾å­˜ã™ã‚‹å®Ÿè¡Œæ™‚çŠ¶æ…‹ã€‚
     //====================================================
     D3D11_VIEWPORT viewport;
     D3D_FEATURE_LEVEL featureLevels[2] =
@@ -164,7 +164,7 @@ private:
     bool vsyncEnabled = false;
 
     //====================================================
-    // “à•”ƒwƒ‹ƒpŠÖ”
+    // å†…éƒ¨ãƒ˜ãƒ«ãƒ‘é–¢æ•°
     //====================================================
     bool CreateDeviceAndSwapChain(HWND hwnd_);
     bool CreateRenderTarget();
@@ -172,7 +172,7 @@ private:
     void ReleaseResources();
     void SetRenderTargets();
 private:
-    // --- ƒuƒ‹[ƒ€ŠÖ˜AƒŠƒ\[ƒX ---
+    // --- ãƒ–ãƒ«ãƒ¼ãƒ é–¢é€£ãƒªã‚½ãƒ¼ã‚¹ ---
     BloomSystem bloomSystem;
     BloomSystem::Parameters bloomParams;
     BloomSystem::CbColorFilter filterParams;
@@ -183,7 +183,7 @@ private:
 
     CascadeShadowMap cascadeShadowMap;
 
-    // ƒ|ƒXƒgƒvƒƒZƒX—p‚Ìƒ\[ƒXƒeƒNƒXƒ`ƒƒ (HDR‘Î‰)
+    // ãƒã‚¹ãƒˆãƒ—ãƒ­ã‚»ã‚¹ç”¨ã®ã‚½ãƒ¼ã‚¹ãƒ†ã‚¯ã‚¹ãƒãƒ£ (HDRå¯¾å¿œ)
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneSRV;
     bool sceneDistortionUsed = false;
@@ -198,7 +198,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> gBufferEmissiveSRV;
 
     // -------------------------------------------------------
-    // IBL ƒeƒNƒXƒ`ƒƒ
+    // IBL ãƒ†ã‚¯ã‚¹ãƒãƒ£
     // register(t10) diffuse_iem
     // register(t11) specular_pmrem
     // register(t12) lut_ggx
@@ -210,12 +210,12 @@ private:
     bool LoadIBLTextures();
 
     // -------------------------------------------------------
-    // ƒXƒJƒCƒ{ƒbƒNƒX
+    // ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹
     // -------------------------------------------------------
     Microsoft::WRL::ComPtr<ID3D11VertexShader> skyBoxVertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>  skyBoxPixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>  skyBoxInputLayout;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> skyBoxVertexBuffer; // NDC ƒtƒ‹ƒXƒNƒŠ[ƒ“ƒNƒƒbƒh
+    Microsoft::WRL::ComPtr<ID3D11Buffer> skyBoxVertexBuffer; // NDC ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚¯ãƒ¯ãƒƒãƒ‰
     Microsoft::WRL::ComPtr<ID3D11Buffer> skyBoxIndexBuffer;
 
 
@@ -223,7 +223,7 @@ private:
 
     bool InitializeSkyBox();
 
-    // “à•”ƒwƒ‹ƒp[
+    // å†…éƒ¨ãƒ˜ãƒ«ãƒ‘ãƒ¼
     bool CreateSceneRenderTarget(int width_, int height_);
     bool CreateGBufferTargets(int width_, int height_);
 };

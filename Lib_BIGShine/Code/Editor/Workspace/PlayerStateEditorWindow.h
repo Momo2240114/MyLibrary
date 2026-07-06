@@ -13,8 +13,8 @@ namespace ax::NodeEditor
     struct EditorContext;
     struct Config;
 }
-//‚í‚½‚µ‚ÌƒvƒƒWƒFƒNƒg‚É‡‚í‚¹‚½ƒXƒe[ƒgƒOƒ‰ƒt‚Å‚·
-//s“®‚ÌƒLƒƒƒ“ƒZƒ‹‚ğİ’è‚·‚é‚½‚ß‚ÌWindow‚Å‚·
+//ã‚ãŸã—ã®ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã«åˆã‚ã›ãŸã‚¹ãƒ†ãƒ¼ãƒˆã‚°ãƒ©ãƒ•ã§ã™
+//è¡Œå‹•ã®ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã‚’è¨­å®šã™ã‚‹ãŸã‚ã®Windowã§ã™
 class PlayerStateEditorWindow : public EditorWorkspaceWindow
 {
 public:

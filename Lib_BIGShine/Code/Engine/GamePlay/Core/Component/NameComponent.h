@@ -8,13 +8,13 @@ class NameComponent : public Component
 public:
     std::string name;
 
-    // ƒRƒ“ƒ|[ƒlƒ“ƒg‚Æ‚µ‚Ä‚Ì–¼‚ğ—^‚¦‚Ü‚·
+    // ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã¨ã—ã¦ã®åã‚’ä¸ãˆã¾ã™
     const std::string& GetName() const override {
         static const std::string componentName = "NameComponent";
         return componentName;
     }
 
-    // ƒVƒŠƒAƒ‰ƒCƒY‚É‚Ä–¼‘O‚ğ•Û‘¶E•œŒ³‰Â”\‚É‚µ‚Ü‚·
+    // ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚ºã«ã¦åå‰ã‚’ä¿å­˜ãƒ»å¾©å…ƒå¯èƒ½ã«ã—ã¾ã™
     void Serialize(nlohmann::json& j) const override { j["Name"] = name; }
     void Deserialize(const nlohmann::json& j) override { name = j.value("Name", "NewObject"); }
 };

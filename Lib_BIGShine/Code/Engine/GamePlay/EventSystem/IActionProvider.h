@@ -1,10 +1,10 @@
 #pragma once
 
-// �A�N�V������񋟂���R���|�[�l���g�p�̊��N���X
+// アクションを提供するコンポーネント用の基底クラス
 class IActionProvider {
 public:
     virtual ~IActionProvider() = default;
 
-    // �A�N�V�����̓o�^����������֐��iStart�Ƃ͕ʂɌĂׂ�悤�ɂ���j
+    // アクションの登録を強制する関数（Startとは別に呼べるようにする）
     virtual void RegisterActions() = 0;
 };

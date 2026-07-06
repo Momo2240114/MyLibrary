@@ -541,6 +541,15 @@
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.cpp">
+      <Filter>Code\Engine\GamePlay\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\VignetteDirector.cpp">
+      <Filter>Code\Engine\GamePlay\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.cpp">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -570,6 +579,9 @@
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Combat</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
@@ -1162,6 +1174,15 @@
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.h">
+      <Filter>Code\Engine\GamePlay\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\VignetteDirector.h">
+      <Filter>Code\Engine\GamePlay\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.h">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -1206,6 +1227,9 @@
     </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h">
       <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h">
+      <Filter>Code\Engine\GamePlay\Combat</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerActionState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>

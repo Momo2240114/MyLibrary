@@ -9,37 +9,37 @@ void FollowCameraComponent::Update(float deltaTime)
     auto tgtGO = target.lock();
     if (!tgtGO) return;
 
-    // --- 1. ƒ}ƒEƒX‚ÌˆÚ“®—ÊiDeltaj‚ğæ“¾ ---
-    // m_SubMousePos ‚ª’†‰›‚©‚ç‚ÌƒYƒŒ‚È‚Ì‚ÅA‚±‚ê‚ğ‰ñ“]—Ê‚Æ‚µ‚Ä‰ÁZ‚·‚é
+    // --- 1. ãƒã‚¦ã‚¹ã®ç§»å‹•é‡ï¼ˆDeltaï¼‰ã‚’å–å¾— ---
+    // m_SubMousePos ãŒä¸­å¤®ã‹ã‚‰ã®ã‚ºãƒ¬ãªã®ã§ã€ã“ã‚Œã‚’å›è»¢é‡ã¨ã—ã¦åŠ ç®—ã™ã‚‹
     Vector2 mouseDelta = MouseInput::Instance().GetSubMousePos();
 
-    // Yaw(‰¡‰ñ“])‚ÍX‚Ì“®‚«APitch(c‰ñ“])‚ÍY‚Ì“®‚«
+    // Yaw(æ¨ªå›è»¢)ã¯Xã®å‹•ãã€Pitch(ç¸¦å›è»¢)ã¯Yã®å‹•ã
     cameraAngle.y += mouseDelta.x * cameraYawSpeed;
     cameraAngle.x += mouseDelta.y * cameraPitchSpeed;
 
-    // ƒsƒbƒ`§ŒÀi‚Ğ‚Á‚­‚è•Ô‚ç‚È‚¢‚æ‚¤‚Éj
+    // ãƒ”ãƒƒãƒåˆ¶é™ï¼ˆã²ã£ãã‚Šè¿”ã‚‰ãªã„ã‚ˆã†ã«ï¼‰
     cameraAngle.x = std::clamp(cameraAngle.x, cameraMinPitch, cameraMaxPitch);
 
-    // --- 2. À•WŒvZ ---
-    // –ß‚è’l‚ğˆê“x•Ï”‚ÉŠi”[‚·‚é
+    // --- 2. åº§æ¨™è¨ˆç®— ---
+    // æˆ»ã‚Šå€¤ã‚’ä¸€åº¦å¤‰æ•°ã«æ ¼ç´ã™ã‚‹
     DirectX::XMFLOAT3 worldPos = tgtGO->transform->GetWorldPosition();
 
-    // •Ï”‚È‚Ì‚ÅƒAƒhƒŒƒX (&) ‚ªæ‚ê‚é‚æ‚¤‚É‚È‚é
+    // å¤‰æ•°ãªã®ã§ã‚¢ãƒ‰ãƒ¬ã‚¹ (&) ãŒå–ã‚Œã‚‹ã‚ˆã†ã«ãªã‚‹
     DirectX::XMVECTOR targetPos = DirectX::XMLoadFloat3(&worldPos);
 
-    // ’‹“_‚ğ­‚µã‚°‚éi˜‚Å‚Í‚È‚­“ª‚Ì‚ ‚½‚è‚ğ‘_‚¤j
+    // æ³¨è¦–ç‚¹ã‚’å°‘ã—ä¸Šã’ã‚‹ï¼ˆè…°ã§ã¯ãªãé ­ã®ã‚ãŸã‚Šã‚’ç‹™ã†ï¼‰
     DirectX::XMVECTOR lookAtPos = DirectX::XMVectorAdd(targetPos, DirectX::XMVectorSet(0, offset.y, 0, 0));
 
-    // ‰ñ“]s—ñiRoll‚Í0j
+    // å›è»¢è¡Œåˆ—ï¼ˆRollã¯0ï¼‰
     DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationRollPitchYaw(cameraAngle.x, cameraAngle.y, 0.0f);
 
-    // Œã•û‚É Distance •ª—£‚ê‚½ƒxƒNƒgƒ‹‚ğŒvZ
+    // å¾Œæ–¹ã« Distance åˆ†é›¢ã‚ŒãŸãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®—
     DirectX::XMVECTOR camOffset = DirectX::XMVectorSet(0, 0, -cameraDistance, 0);
     camOffset = DirectX::XMVector3TransformNormal(camOffset, rotation);
     
     DirectX::XMVECTOR newCamPos = DirectX::XMVectorAdd(lookAtPos, camOffset);
 
-    // --- 3. ”½‰f ---
+    // --- 3. åæ˜  ---
     DirectX::XMStoreFloat3(&GetGameObject()->transform->localPosition, newCamPos);
 
     if (auto c = camera.lock()) {
@@ -58,24 +58,24 @@ void FollowCameraComponent::Gui()
     // === Camera Settings ===
     ImGui::Text("Camera Settings");
 
-    // ƒsƒbƒ`‚Ì§ŒÀİ’èiã‰º‰ñ“]j
+    // ãƒ”ãƒƒãƒã®åˆ¶é™è¨­å®šï¼ˆä¸Šä¸‹å›è»¢ï¼‰
     changed |= ImGui::SliderFloat("Pitch (Up/Down)", &cameraAngle.x, cameraMinPitch, cameraMaxPitch, "%.2f");
-    // ƒˆ[‚Ì§ŒÀİ’èi¶‰E‰ñ“]j
+    // ãƒ¨ãƒ¼ã®åˆ¶é™è¨­å®šï¼ˆå·¦å³å›è»¢ï¼‰
     changed |= ImGui::SliderFloat("Yaw (Left/Right)", &cameraAngle.y, -DirectX::XM_PI, DirectX::XM_PI, "%.2f");
 
-    // ƒJƒƒ‰‚Ì‹——£İ’èiƒ^[ƒQƒbƒg‚©‚ç‚Ì‹——£j
+    // ã‚«ãƒ¡ãƒ©ã®è·é›¢è¨­å®šï¼ˆã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‹ã‚‰ã®è·é›¢ï¼‰
     changed |= ImGui::SliderFloat("Camera Distance", &cameraDistance, 1.0f, 50.0f, "%.2f");
 
-    // ƒsƒbƒ`‘¬“xAƒˆ[‘¬“xiƒJƒƒ‰‚Ì‰ñ“]‘¬“xj
+    // ãƒ”ãƒƒãƒé€Ÿåº¦ã€ãƒ¨ãƒ¼é€Ÿåº¦ï¼ˆã‚«ãƒ¡ãƒ©ã®å›è»¢é€Ÿåº¦ï¼‰
     changed |= ImGui::SliderFloat("Pitch Speed", &cameraPitchSpeed, 0.001f, 0.05f, "%.4f");
     changed |= ImGui::SliderFloat("Yaw Speed", &cameraYawSpeed, 0.001f, 0.05f, "%.4f");
 
-    // ƒJƒƒ‰ƒIƒtƒZƒbƒgİ’èiƒ^[ƒQƒbƒg‚©‚ç‚ÌˆÊ’uj
+    // ã‚«ãƒ¡ãƒ©ã‚ªãƒ•ã‚»ãƒƒãƒˆè¨­å®šï¼ˆã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‹ã‚‰ã®ä½ç½®ï¼‰
     changed |= ImGui::SliderFloat("Camera Height Offset", &offset.y, 0.0f, 10.0f, "%.2f");
 
     if (changed)
     {
-        // •K—v‚Å‚ ‚ê‚ÎAƒJƒƒ‰‚Ìİ’è‚ğXV‚·‚éˆ—
+        // å¿…è¦ã§ã‚ã‚Œã°ã€ã‚«ãƒ¡ãƒ©ã®è¨­å®šã‚’æ›´æ–°ã™ã‚‹å‡¦ç†
     }
 
     ImGui::Separator();
@@ -99,7 +99,7 @@ void FollowCameraComponent::Gui()
         }
     }
 
-    // ƒJƒƒ‰‚Ì‰ñ“]ó‘Ô
+    // ã‚«ãƒ¡ãƒ©ã®å›è»¢çŠ¶æ…‹
     ImGui::Text("Camera Angle (Pitch, Yaw): (%.2f, %.2f)", cameraAngle.x, cameraAngle.y);
     ImGui::Text("Camera Distance: %.2f", cameraDistance);
 }

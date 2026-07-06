@@ -10,7 +10,7 @@
 #include "Engine/Graphics/Shader/ModelShaderID.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 
-// ‘O•ûéŒ¾‚¾‚¯‚Å‚æ‚¢‚à‚Ì
+// å‰æ–¹å®£è¨€ã ã‘ã§ã‚ˆã„ã‚‚ã®
 //class ModelResource;
 
 class GltfModelCommponennt : public Component
@@ -91,7 +91,7 @@ public:
 
 	struct Material
 	{
-		int id; //ƒ}ƒeƒŠƒAƒ‹‚ğˆêˆÓ‚É¯•Ê‚·‚é‚½‚ß‚ÌID
+		int id; //ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’ä¸€æ„ã«è­˜åˆ¥ã™ã‚‹ãŸã‚ã®ID
 		std::string			name;
 		std::string			baseTextureFileName;
 		std::string			normalTextureFileName;
@@ -121,9 +121,9 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	occlusionMap;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	metalnessRoughnessMap;
 
-		// š’Ç‰Á‚·‚éƒgƒD[ƒ“EƒAƒEƒgƒ‰ƒCƒ“—pƒpƒ‰ƒ[ƒ^
-		bool disableOutline = false;    // –Ú‚È‚Ç‚ÅƒAƒEƒgƒ‰ƒCƒ“‚ğÁ‚·‚½‚ß‚Ìƒtƒ‰ƒO
-		float outlineThicknessOffset = 1.0f; // ƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚Ì‘¾‚³”{—¦
+		// â˜…è¿½åŠ ã™ã‚‹ãƒˆã‚¥ãƒ¼ãƒ³ãƒ»ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+		bool disableOutline = false;    // ç›®ãªã©ã§ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³ã‚’æ¶ˆã™ãŸã‚ã®ãƒ•ãƒ©ã‚°
+		float outlineThicknessOffset = 1.0f; // ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã®å¤ªã•å€ç‡
 
 		template<class Archive>
 		void serialize(Archive& archive);
@@ -213,22 +213,22 @@ public:
 		DirectX::XMFLOAT3	scale = { 1, 1, 1 };
 	};
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“’Ç‰Á“Ç‚İ‚İ
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¿½åŠ èª­ã¿è¾¼ã¿
 	void AppendAnimations(const char* filename);
 
-	// ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^æ“¾
+	// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ‡ãƒ¼ã‚¿å–å¾—
 	const std::vector<Material>& GetMaterials() const { return materials; }
 
-	// ƒƒbƒVƒ…ƒf[ƒ^æ“¾
+	// ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿å–å¾—
 	const std::vector<Mesh>& GetMeshes() const { return meshes; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^æ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿å–å¾—
 	const std::vector<Animation>& GetAnimations() const { return animations; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒCƒ“ƒfƒbƒNƒXæ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 	int GetAnimationIndex(const char* name) const;
 
-	// ƒm[ƒhƒf[ƒ^æ“¾
+	// ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿å–å¾—
 	const std::vector<Node>& GetNodes() const { return nodes; }
 
 
@@ -236,10 +236,10 @@ public:
 
 	Node& GetNodes(std::string nodeName);
 
-	// ƒ‹[ƒgƒm[ƒhæ“¾
+	// ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰å–å¾—
 	Node* GetRootNode() { return nodes.data(); }
 
-	// ƒm[ƒhƒCƒ“ƒfƒbƒNƒXæ“¾
+	// ãƒãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 	int GetNodeIndex(const char* name) const;
 
 	void UpdateNodeRecursive(Node& node, const DirectX::XMMATRIX& ParentWorldTransform, const DirectX::XMMATRIX& ModelScaleMat);
@@ -248,30 +248,32 @@ public:
 		const DirectX::XMMATRIX& parentGlobalTransform_,
 		const DirectX::XMMATRIX& parentWorldTransform_,
 		const DirectX::XMMATRIX& modelScaleMat_,
-		bool isRoot_);
+		bool isRoot_,
+		bool updateChildren_ = true);
 
 	void MarkPoseDirty();
 	void MarkTransformDirty();
 	void UpdateTransformIfDirty();
 
 
-	// ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€XVˆ—
+	// ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ æ›´æ–°å‡¦ç†
 	void UpdateTransform();
 
 	void UpdateNodeTransformFrom(int nodeIndex_);
+	void UpdateNodeTransformOnly(int nodeIndex_);
 	void UpdateNodeTransformFrom(
 		int nodeIndex_,
 		const DirectX::XMMATRIX& parentWorldTransform_,
 		const DirectX::XMMATRIX& modelScaleMat_);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ŒvZ
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, NodePose& nodePose) const;
 	void ComputeAnimation(int animationIndex, float time, std::vector<NodePose>& nodePoses) const;
 
-	// ƒm[ƒhƒ|[ƒYİ’è
+	// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºè¨­å®š
 	void SetNodePoses(const std::vector<NodePose>& nodePoses);
 
-	// ƒm[ƒhƒ|[ƒYæ“¾
+	// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºå–å¾—
 	void GetNodePoses(std::vector<NodePose>& nodePoses) const;
         const NodePose& GetBindNodePose(int nodeIndex_) const;
 
@@ -288,7 +290,7 @@ public:
 			* XMMatrixRotationQuaternion(rotation)
 			* XMMatrixTranslationFromVector(translation);
 	}
-	// Šù‘¶‚Ìƒ‚ƒfƒ‹ƒf[ƒ^‚ğ‚·‚×‚Ä‰ğ•ú‚·‚é
+	// æ—¢å­˜ã®ãƒ¢ãƒ‡ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’ã™ã¹ã¦è§£æ”¾ã™ã‚‹
 	void Clear() {
 		materials.clear();
 		meshes.clear();
@@ -346,10 +348,10 @@ public:
 	float GetLocalScale() {return localScale;}
 	DirectX::SimpleMath::Quaternion GetRootRotationOffset() { return _RootRotationOffset; }
 private:
-	// ƒVƒŠƒAƒ‰ƒCƒY
+	// ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 	void Serialize(const char* filename);
 
-	// ƒfƒVƒŠƒAƒ‰ƒCƒY
+	// ãƒ‡ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 	void Deserialize(const char* filename);
 
 private:

@@ -11,52 +11,52 @@ struct DirectionalLight
 {
     DirectX::XMFLOAT3	direction = { 0, -1, 0 };
     DirectX::XMFLOAT3	color = { 1, 1, 1 };
-    float intensity;            // ‹­“x
+    float intensity;            // å¼·åº¦
 };
 
 struct PointLight
 {
-    DirectX::XMFLOAT3 position; // ˆÊ’u
-    float range;                // ‰e‹¿”ÍˆÍi”¼Œaj
-    DirectX::XMFLOAT3 color;    // F
-    float intensity;            // ‹­“x
+    DirectX::XMFLOAT3 position; // ä½ç½®
+    float range;                // å½±éŸ¿ç¯„å›²ï¼ˆåŠå¾„ï¼‰
+    DirectX::XMFLOAT3 color;    // è‰²
+    float intensity;            // å¼·åº¦
 };
 
 struct SpotLight
 {
-    DirectX::XMFLOAT3 position;  // ˆÊ’u
-    float range;                 // ”ÍˆÍ
-    DirectX::XMFLOAT3 direction; // Œü‚«
-    float intensity;             // ‹­“x
-    DirectX::XMFLOAT3 color;     // F
-    float innerAngle;            // “à‘¤‚ÌŠp“xi100%Æ‚ç‚·”ÍˆÍj
-    float outerAngle;            // ŠO‘¤‚ÌŠp“xiŒ¸Š‚µ‚«‚é”ÍˆÍj
-    float padding;               //i•K—v‚É‰‚¶‚ÄƒAƒ‰ƒCƒƒ“ƒg’²®—pj
+    DirectX::XMFLOAT3 position;  // ä½ç½®
+    float range;                 // ç¯„å›²
+    DirectX::XMFLOAT3 direction; // å‘ã
+    float intensity;             // å¼·åº¦
+    DirectX::XMFLOAT3 color;     // è‰²
+    float innerAngle;            // å†…å´ã®è§’åº¦ï¼ˆ100%ç…§ã‚‰ã™ç¯„å›²ï¼‰
+    float outerAngle;            // å¤–å´ã®è§’åº¦ï¼ˆæ¸›è¡°ã—ãã‚‹ç¯„å›²ï¼‰
+    float padding;               //ï¼ˆå¿…è¦ã«å¿œã˜ã¦ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆèª¿æ•´ç”¨ï¼‰
 };
 
 class LightManager
 {
 public:
-    // ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒgİ’è
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆè¨­å®š
     void SetDirectionalLight(DirectionalLight& light) { directionalLight = light; }
-    // ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒgæ“¾
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆå–å¾—
     const DirectionalLight& GetDirectionalLight() const { return directionalLight; }
-    // “_ŒõŒ¹‚ÌŠÇ—i‚Æ‚è‚ ‚¦‚¸1‚ÂA‚ ‚é‚¢‚ÍŒÅ’è”‚ÅÀ‘•‚·‚éê‡j
+    // ç‚¹å…‰æºã®ç®¡ç†ï¼ˆã¨ã‚Šã‚ãˆãš1ã¤ã€ã‚ã‚‹ã„ã¯å›ºå®šæ•°ã§å®Ÿè£…ã™ã‚‹å ´åˆï¼‰
     void AddPointLight(const PointLight& light) { pointLights.push_back(light); }
     const std::vector<PointLight>& GetPointLights() const { return pointLights; }
 
-    // ƒXƒ|ƒbƒgƒ‰ƒCƒg—p‚ÌŠÇ—‚ğ’Ç‰Á
+    // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆç”¨ã®ç®¡ç†ã‚’è¿½åŠ 
     void AddSpotLight(const SpotLight& light) { spotLights.push_back(light); }
     const std::vector<SpotLight>& GetSpotLights() const { return spotLights; }
 
-    // •½sŒõŒ¹‚ğ’Ç‰ÁEƒNƒŠƒA‚·‚éƒƒ\ƒbƒh‚ğ’Ç‰Á
+    // å¹³è¡Œå…‰æºã‚’è¿½åŠ ãƒ»ã‚¯ãƒªã‚¢ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’è¿½åŠ 
     void AddDirectionalLight(const DirectionalLight& light) { directionalLights.push_back(light); }
 
     std::vector<DirectionalLight> GetAllDirectionalLights() const { return directionalLights; }
 
-    // Å‹­‚Ìƒ‰ƒCƒg‚ğ•Ô‚·
+    // æœ€å¼·ã®ãƒ©ã‚¤ãƒˆã‚’è¿”ã™
     DirectionalLight GetStrongestDirectionalLight() const {
-        if (directionalLights.empty()) return DirectionalLight(); // ‚È‚¯‚ê‚ÎƒfƒtƒHƒ‹ƒg‚ğ•Ô‚·
+        if (directionalLights.empty()) return DirectionalLight(); // ãªã‘ã‚Œã°ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚’è¿”ã™
 
         const DirectionalLight* strongest = &directionalLights[0];
         for (const auto& light : directionalLights) {
@@ -68,7 +68,7 @@ public:
     }
 
     void ClearLights() {
-        directionalLights.clear(); // ƒNƒŠƒAƒŠƒXƒg‚É’Ç‰Á
+        directionalLights.clear(); // ã‚¯ãƒªã‚¢ãƒªã‚¹ãƒˆã«è¿½åŠ 
         pointLights.clear();
         spotLights.clear();
     }
@@ -96,15 +96,15 @@ public:
 
     bool showDebugBounds = false;
 
-    // --- ’Ç‰ÁFƒIƒtƒZƒbƒg‚Æƒ[ƒJƒ‹‰ñ“] ---
+    // --- è¿½åŠ ï¼šã‚ªãƒ•ã‚»ãƒƒãƒˆã¨ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢ ---
     DirectX::XMFLOAT3 offsetPosition{ 0, 0, 0 };
-    DirectX::XMFLOAT3 localRotation{ 0, 0, 0 }; // ƒIƒCƒ‰[Špi“x”–@j
+    DirectX::XMFLOAT3 localRotation{ 0, 0, 0 }; // ã‚ªã‚¤ãƒ©ãƒ¼è§’ï¼ˆåº¦æ•°æ³•ï¼‰
 
-    // ƒXƒ|ƒbƒgƒ‰ƒCƒg—p
+    // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆç”¨
     float innerAngle = 20.0f;
     float outerAngle = 30.0f;
 
-    // Manager‚É“n‚·‚½‚ß‚ÌÅI“I‚ÈŒvZŒ‹‰Ê
+    // Managerã«æ¸¡ã™ãŸã‚ã®æœ€çµ‚çš„ãªè¨ˆç®—çµæœ
     DirectX::XMFLOAT3 finalWorldPosition{ 0, 0, 0 };
     DirectX::XMFLOAT3 finalWorldDirection{ 0, -1, 0 };
 
@@ -128,13 +128,13 @@ public:
 
         ImGui::Separator();
 
-        // ƒIƒtƒZƒbƒgˆÊ’u‚Ì•ÒW
-        if (type != Type::Directional) // Directional‚ÍˆÊ’uŠÖŒW‚È‚µ
+        // ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã®ç·¨é›†
+        if (type != Type::Directional) // Directionalã¯ä½ç½®é–¢ä¿‚ãªã—
         {
             ImGui::DragFloat3("Offset Position", &offsetPosition.x, 0.1f);
         }
 
-        // ƒ[ƒJƒ‹‰ñ“]‚Ì•ÒW
+        // ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢ã®ç·¨é›†
         if (type == Type::Directional || type == Type::Spot)
         {
             ImGui::DragFloat3("Local Rotation", &localRotation.x, 0.5f);
@@ -167,28 +167,28 @@ public:
     }
 
     void Serialize(nlohmann::json& j) const override {
-        // ‹¤’Ê
+        // å…±é€š
         j["Type"] = static_cast<int>(type);
         j["Color"] = { color.x, color.y, color.z };
         j["Intensity"] = intensity;
         j["Range"] = range;
 
-        // ƒIƒtƒZƒbƒgE‰ñ“]
+        // ã‚ªãƒ•ã‚»ãƒƒãƒˆãƒ»å›è»¢
         j["OffsetPosition"] = { offsetPosition.x, offsetPosition.y, offsetPosition.z };
         j["LocalRotation"] = { localRotation.x, localRotation.y, localRotation.z };
 
-        // ƒXƒ|ƒbƒgƒ‰ƒCƒgŒÅ—L
+        // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆå›ºæœ‰
         j["InnerAngle"] = innerAngle;
         j["OuterAngle"] = outerAngle;
     }
 
     void Deserialize(const nlohmann::json& j) override {
-        // ƒ‰ƒCƒg‚Ìí—Ş
+        // ãƒ©ã‚¤ãƒˆã®ç¨®é¡
         if (j.contains("Type")) {
             type = static_cast<Type>(j["Type"].get<int>());
         }
 
-        // F‚ÆŠî–{ƒpƒ‰ƒ[ƒ^
+        // è‰²ã¨åŸºæœ¬ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
         if (j.contains("Color")) {
             color.x = j["Color"][0];
             color.y = j["Color"][1];
@@ -197,21 +197,21 @@ public:
         intensity = j.value("Intensity", 1.0f);
         range = j.value("Range", 10.0f);
 
-        // ƒIƒtƒZƒbƒgˆÊ’u
+        // ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®
         if (j.contains("OffsetPosition")) {
             offsetPosition.x = j["OffsetPosition"][0];
             offsetPosition.y = j["OffsetPosition"][1];
             offsetPosition.z = j["OffsetPosition"][2];
         }
 
-        // ƒ[ƒJƒ‹‰ñ“]
+        // ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢
         if (j.contains("LocalRotation")) {
             localRotation.x = j["LocalRotation"][0];
             localRotation.y = j["LocalRotation"][1];
             localRotation.z = j["LocalRotation"][2];
         }
 
-        // ƒXƒ|ƒbƒgƒ‰ƒCƒgŠp“x
+        // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆè§’åº¦
         innerAngle = j.value("InnerAngle", 20.0f);
         outerAngle = j.value("OuterAngle", 30.0f);
     }

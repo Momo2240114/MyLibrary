@@ -16,27 +16,27 @@ void BoxCollider::Gui() {
     ImGui::DragFloat3("halfSize", &halfSize.x, 0.01f);
 }
 
-// BoxCollider::Update ‚Ì—á
+// BoxCollider::Update ã®ä¾‹
 void BoxCollider::Update(float dt) {
 
     auto& renderer = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     auto t = GetGameObject()->transform;
 
     using namespace DirectX;
-    // ˆê“x•Ï”‚Éó‚¯‚é
+    // ä¸€åº¦å¤‰æ•°ã«å—ã‘ã‚‹
     DirectX::XMFLOAT4X4 worldFloat = t->GetWorld();
     DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&worldFloat);
 
-    // offset ‚ğƒ[ƒ‹ƒhÀ•WŒn‚É•ÏŠ·‚µ‚Ä‰ÁZ
+    // offset ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ç³»ã«å¤‰æ›ã—ã¦åŠ ç®—
     DirectX::XMVECTOR worldOffset = DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&offset), world);
     DirectX::XMVECTOR finalPosVec = DirectX::XMVectorAdd(world.r[3], worldOffset);
 
     DirectX::XMFLOAT3 pos;
     DirectX::XMStoreFloat3(&pos, finalPosVec);
-    // Œ»İu“xv‚Å•Ô‚Á‚Ä‚­‚é‰ñ“]‚ğæ“¾
+    // ç¾åœ¨ã€Œåº¦ã€ã§è¿”ã£ã¦ãã‚‹å›è»¢ã‚’å–å¾—
     DirectX::XMFLOAT3 rotDeg = t->GetWorldRotation();
 
-    // •`‰æ—p‚Éƒ‰ƒWƒAƒ“‚Ö•ÏŠ·
+    // æç”»ç”¨ã«ãƒ©ã‚¸ã‚¢ãƒ³ã¸å¤‰æ›
     DirectX::XMFLOAT3 rotRad = {
         DirectX::XMConvertToRadians(rotDeg.x),
         DirectX::XMConvertToRadians(rotDeg.y),

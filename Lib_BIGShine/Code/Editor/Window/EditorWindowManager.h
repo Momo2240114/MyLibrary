@@ -9,7 +9,7 @@ class GameObjectManager;
 class EditorWindowManager
 {
 public:
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^‚ÅObjectManager‚ğ“ü‚ê‚é
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§ObjectManagerã‚’å…¥ã‚Œã‚‹
     EditorWindowManager(GameObjectManager* manager) : gameObjectManager(manager) {}
 
     void AddWindow(std::unique_ptr<EditorWindow> window) {
@@ -38,7 +38,7 @@ private:
     float bottomPanelHeight = 300.0f;
     int selectedBottomTool = 0;
     int activeWorkspaceIndex = -1;
-    GameObjectManager* gameObjectManager; // ‚±‚±‚ªŒq‚ª‚éI
+    GameObjectManager* gameObjectManager; // ã“ã“ãŒç¹‹ãŒã‚‹ï¼
     std::vector<std::unique_ptr<EditorWindow>> windows;
 };
 

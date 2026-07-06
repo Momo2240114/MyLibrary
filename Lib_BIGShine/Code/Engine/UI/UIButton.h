@@ -13,7 +13,7 @@ public:
     void Gui() override;
     void Update(float deltaTime) override;
 
-    // ƒNƒŠƒbƒN‚³‚ê‚½‚ÉÀs‚µ‚½‚¢ŠÖ”‚ğƒZƒbƒg‚·‚é
+    // ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸæ™‚ã«å®Ÿè¡Œã—ãŸã„é–¢æ•°ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
     void SetOnClick(ClickEvent callback) { onClickCallback = callback; }
 
     const std::string& GetName() const override { static std::string name = "UIButton"; return name; }
@@ -21,15 +21,15 @@ public:
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;
 private:
-    bool IsMouseOver(); // ƒ}ƒEƒX‚ªƒ{ƒ^ƒ“‚Ìã‚É‚ ‚é‚©”»’è
+    bool IsMouseOver(); // ãƒã‚¦ã‚¹ãŒãƒœã‚¿ãƒ³ã®ä¸Šã«ã‚ã‚‹ã‹åˆ¤å®š
 
-    // ‚±‚ê‚ç‚ğ•Û‘¶E“Ç‚İ‚İ‚Ì‘ÎÛ‚É‚·‚é
-    std::string selectedCategory;//event‚Ì•ª—Ş
-    std::string selectedActionName;//event‚Ì–¼‘O
+    // ã“ã‚Œã‚‰ã‚’ä¿å­˜ãƒ»èª­ã¿è¾¼ã¿ã®å¯¾è±¡ã«ã™ã‚‹
+    std::string selectedCategory;//eventã®åˆ†é¡
+    std::string selectedActionName;//eventã®åå‰
 
 
     std::weak_ptr<SpriteRenderer> spriteRenderer;
     ClickEvent onClickCallback;
-    bool isPressed = false;   // ‰Ÿ‚µ‚Á‚Ï‚È‚µó‘Ô‚ÌŠÇ—
-    bool isHovered = false;   // ƒ}ƒEƒX‚ªæ‚Á‚Ä‚¢‚é‚©‚ÌŠÇ—
+    bool isPressed = false;   // æŠ¼ã—ã£ã±ãªã—çŠ¶æ…‹ã®ç®¡ç†
+    bool isHovered = false;   // ãƒã‚¦ã‚¹ãŒä¹—ã£ã¦ã„ã‚‹ã‹ã®ç®¡ç†
 };

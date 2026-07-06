@@ -20,8 +20,8 @@
 class DecalComponent;
 class MaterialOverlayComponent;
 
-/// 1ƒtƒŒ[ƒ€•ª‚Ìƒ‚ƒfƒ‹•`‰æ—v‹‚ğûW‚µA•`‰æƒpƒX‚²‚Æ‚ÉGPU‚Ö”­s‚·‚éƒVƒXƒeƒ€B
-/// ’Êíƒ‚ƒfƒ‹A“§‰ßƒ‚ƒfƒ‹AƒfƒJ[ƒ‹AƒAƒEƒgƒ‰ƒCƒ“AƒJƒXƒP[ƒhƒVƒƒƒhƒE‚ğ‚Ü‚Æ‚ß‚ÄŠÇ—‚·‚éB
+/// 1ãƒ•ãƒ¬ãƒ¼ãƒ åˆ†ã®ãƒ¢ãƒ‡ãƒ«æç”»è¦æ±‚ã‚’åé›†ã—ã€æç”»ãƒ‘ã‚¹ã”ã¨ã«GPUã¸ç™ºè¡Œã™ã‚‹ã‚·ã‚¹ãƒ†ãƒ ã€‚
+/// é€šå¸¸ãƒ¢ãƒ‡ãƒ«ã€é€éãƒ¢ãƒ‡ãƒ«ã€ãƒ‡ã‚«ãƒ¼ãƒ«ã€ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³ã€ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ã‚·ãƒ£ãƒ‰ã‚¦ã‚’ã¾ã¨ã‚ã¦ç®¡ç†ã™ã‚‹ã€‚
 class ModelRenderSystem
 {
 public:
@@ -29,10 +29,10 @@ public:
 	~ModelRenderSystem() {}
 
 	void Initialize(ID3D11Device* device);
-	/// ƒ‚ƒfƒ‹‚ğ“–ŠYƒtƒŒ[ƒ€‚Ì•`‰æƒLƒ…[‚Ö“o˜^‚·‚éB
+	/// ãƒ¢ãƒ‡ãƒ«ã‚’å½“è©²ãƒ•ãƒ¬ãƒ¼ãƒ ã®æç”»ã‚­ãƒ¥ãƒ¼ã¸ç™»éŒ²ã™ã‚‹ã€‚
 	void PushSubmit(ModelShaderID shaderId, std::shared_ptr<GltfModelCommponennt> model);
 
-	/// “o˜^Ï‚İƒ‚ƒfƒ‹‚ğ•`‰æƒpƒX‚²‚Æ‚Éˆ—‚µAŠ®—¹Œã‚É•`‰æƒLƒ…[‚ğ”jŠü‚·‚éB
+	/// ç™»éŒ²æ¸ˆã¿ãƒ¢ãƒ‡ãƒ«ã‚’æç”»ãƒ‘ã‚¹ã”ã¨ã«å‡¦ç†ã—ã€å®Œäº†å¾Œã«æç”»ã‚­ãƒ¥ãƒ¼ã‚’ç ´æ£„ã™ã‚‹ã€‚
 	void RenderAll(const RenderContext& rc);
 	void RenderDecals(const RenderContext& rc);
 	const auto& GetShaders() const { return shaders; }
@@ -42,7 +42,7 @@ public:
 	void SerializeGraphicsSettings(nlohmann::json& j_) const;
 	void DeserializeGraphicsSettings(const nlohmann::json& j_);
 private:
-	// CPU‚ÆHLSLŠÔ‚Å‹¤—L‚·‚é’è”ƒoƒbƒtƒ@\‘¢‘ÌB16ƒoƒCƒg‹«ŠE‚ğˆÛ‚·‚é‚±‚ÆB
+	// CPUã¨HLSLé–“ã§å…±æœ‰ã™ã‚‹å®šæ•°ãƒãƒƒãƒ•ã‚¡æ§‹é€ ä½“ã€‚16ãƒã‚¤ãƒˆå¢ƒç•Œã‚’ç¶­æŒã™ã‚‹ã“ã¨ã€‚
 	struct CbScene
 	{
 		DirectX::XMFLOAT4X4		viewProjection;
@@ -52,15 +52,15 @@ private:
 
 		DirectX::XMFLOAT4 zBufferParameteres;
 
-		int numPointLights;   // —LŒø‚Èƒ|ƒCƒ“ƒgƒ‰ƒCƒg‚Ì”
-		int numSpotLights;   // —LŒø‚ÈƒXƒ|ƒbƒgƒ‰ƒCƒg‚Ì”
-		float padding[2];     // 16ƒoƒCƒg‹«ŠE‡‚í‚¹
+		int numPointLights;   // æœ‰åŠ¹ãªãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã®æ•°
+		int numSpotLights;   // æœ‰åŠ¹ãªã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®æ•°
+		float padding[2];     // 16ãƒã‚¤ãƒˆå¢ƒç•Œåˆã‚ã›
 
-		// ƒfƒJ[ƒ‹•`‰æ‚ÉƒXƒNƒŠ[ƒ“À•W‚©‚çƒ[ƒ‹ƒhÀ•W‚ğ•œŒ³‚·‚é‚½‚ß‚Ì‹ts—ñB
+		// ãƒ‡ã‚«ãƒ¼ãƒ«æç”»æ™‚ã«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã‚’å¾©å…ƒã™ã‚‹ãŸã‚ã®é€†è¡Œåˆ—ã€‚
 		DirectX::XMFLOAT4X4 invViewProjection;
 	};
 
-	// GPU‘¤‚ÌStructuredBuffer‚Æ“¯ˆêƒŒƒCƒAƒEƒg‚ğˆÛ‚·‚é‚±‚ÆB
+	// GPUå´ã®StructuredBufferã¨åŒä¸€ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ç¶­æŒã™ã‚‹ã“ã¨ã€‚
 	struct PointLightData
 	{
 		DirectX::XMFLOAT3 position;
@@ -78,14 +78,14 @@ private:
 		DirectX::XMFLOAT3 color;
 		float innerAngle;
 		float outerAngle;
-		float padding[3]; // HLSL‘¤‚Ì16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg‚É‡‚í‚¹‚é
+		float padding[3]; // HLSLå´ã®16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆã«åˆã‚ã›ã‚‹
 	};
 
 	struct GBufferDecalConstants {
-		DirectX::XMFLOAT4X4 decal_world_matrix;      // VS—pF” ‚ğ’u‚­
-		DirectX::XMFLOAT4X4 decal_inverse_transform; // PS—pF°À•W‚ğ” ‹óŠÔ‚É–ß‚·
-		DirectX::XMFLOAT4   decal_direction;         // —\”õE•ûŒü§Œä—p
-		DirectX::XMFLOAT4   decalBaseColor;          // FEƒAƒ‹ƒtƒ@
+		DirectX::XMFLOAT4X4 decal_world_matrix;      // VSç”¨ï¼šç®±ã‚’ç½®ã
+		DirectX::XMFLOAT4X4 decal_inverse_transform; // PSç”¨ï¼šåºŠåº§æ¨™ã‚’ç®±ç©ºé–“ã«æˆ»ã™
+		DirectX::XMFLOAT4   decal_direction;         // äºˆå‚™ãƒ»æ–¹å‘åˆ¶å¾¡ç”¨
+		DirectX::XMFLOAT4   decalBaseColor;          // è‰²ãƒ»ã‚¢ãƒ«ãƒ•ã‚¡
 	};
 
 	struct CbSkeleton
@@ -142,7 +142,7 @@ private:
 		std::shared_ptr<MaterialOverlayComponent> materialOverlay;
 	};
 
-	// ”¼“§–¾ƒƒbƒVƒ…‚ÍƒJƒƒ‰‚©‚ç‰“‚¢‡‚É•`‰æ‚·‚é‚½‚ßA‹——£‚ğ•¹‚¹‚Ä•Û‚·‚éB
+	// åŠé€æ˜ãƒ¡ãƒƒã‚·ãƒ¥ã¯ã‚«ãƒ¡ãƒ©ã‹ã‚‰é ã„é †ã«æç”»ã™ã‚‹ãŸã‚ã€è·é›¢ã‚’ä½µã›ã¦ä¿æŒã™ã‚‹ã€‚
 	struct TransparencyDrawInfo
 	{
 		ModelShaderID				shaderId;
@@ -179,7 +179,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> materialOverlayConstantBuffer;
 	std::shared_ptr<LightingShader> lightingShader;
 
-	// ƒ‰ƒCƒg”‚É‰‚¶‚Ä—e—Ê‚ğŠg’£‚·‚éGPUƒoƒbƒtƒ@B–ˆƒtƒŒ[ƒ€‚ÌÄ¶¬‚ğ”ğ‚¯‚éB
+	// ãƒ©ã‚¤ãƒˆæ•°ã«å¿œã˜ã¦å®¹é‡ã‚’æ‹¡å¼µã™ã‚‹GPUãƒãƒƒãƒ•ã‚¡ã€‚æ¯ãƒ•ãƒ¬ãƒ¼ãƒ ã®å†ç”Ÿæˆã‚’é¿ã‘ã‚‹ã€‚
 	Microsoft::WRL::ComPtr<ID3D11Buffer> lightStructuredBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> lightSRV;
 	UINT currentLightBufferSize = 0;
@@ -194,7 +194,7 @@ private:
 
 
 private:
-	// ƒfƒJ[ƒ‹•`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[A’è”ƒoƒbƒtƒ@A“–ŠYƒtƒŒ[ƒ€‚Ì•`‰æ—v‹B
+	// ãƒ‡ã‚«ãƒ¼ãƒ«æç”»ã«å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã€å®šæ•°ãƒãƒƒãƒ•ã‚¡ã€å½“è©²ãƒ•ãƒ¬ãƒ¼ãƒ ã®æç”»è¦æ±‚ã€‚
 	std::shared_ptr<DecalShader> decalShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> decalConstantBuffer;
 	struct DecalDrawInfo {
@@ -224,7 +224,7 @@ private:
 	bool useCascadeShadow;
 	float shadowAttenuation = 0.35f;
 
-	// ƒJƒXƒP[ƒh‚²‚Æ‚Ì[“xƒ}ƒbƒv‚ğ¶¬‚µAŒã’i‚Ìƒ‰ƒCƒeƒBƒ“ƒOƒpƒX‚ÅQÆ‚Å‚«‚éó‘Ô‚É‚·‚éB
+	// ã‚«ã‚¹ã‚±ãƒ¼ãƒ‰ã”ã¨ã®æ·±åº¦ãƒãƒƒãƒ—ã‚’ç”Ÿæˆã—ã€å¾Œæ®µã®ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ãƒ‘ã‚¹ã§å‚ç…§ã§ãã‚‹çŠ¶æ…‹ã«ã™ã‚‹ã€‚
 	void RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection);
 	void RenderShadowCasters(const RenderContext& rc, int cascadeIndex);
 public:

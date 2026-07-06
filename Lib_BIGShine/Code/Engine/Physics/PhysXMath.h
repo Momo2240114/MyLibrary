@@ -38,14 +38,14 @@ inline DirectX::XMFLOAT4X4 PxTransformToMatrix(const PxTransform& t)
 {
 	using namespace DirectX;
 
-	// PhysX ‚ÌƒNƒH[ƒ^ƒjƒIƒ“ ¨ XMMatrix
+	// PhysX ã®ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ â†’ XMMatrix
 	XMVECTOR rot = XMVectorSet(t.q.x, t.q.y, t.q.z, t.q.w);
 	XMVECTOR pos = XMVectorSet(t.p.x, t.p.y, t.p.z, 1.0f);
 
-	// ‰ñ“]s—ñ
+	// å›è»¢è¡Œåˆ—
 	XMMATRIX mRot = XMMatrixRotationQuaternion(rot);
 
-	// •½sˆÚ“®
+	// å¹³è¡Œç§»å‹•
 	XMMATRIX mTrans = XMMatrixTranslationFromVector(pos);
 
 	// rot * trans
@@ -68,13 +68,13 @@ inline physx::PxQuat EulerToPxQuat(const DirectX::XMFLOAT3& eulerDeg)
 		0
 	);
 
-	// X,Y,Z‰ñ“]s—ñ
+	// X,Y,Zå›è»¢è¡Œåˆ—
 	XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(eulerRad);
 
-	// quaternion ‚É•ÏŠ·
+	// quaternion ã«å¤‰æ›
 	XMVECTOR q = XMQuaternionRotationMatrix(rot);
 
-	// PxQuat ‚É•ÏŠ·
+	// PxQuat ã«å¤‰æ›
 	DirectX::XMFLOAT4 qf;
 	XMStoreFloat4(&qf, q);
 	return physx::PxQuat(qf.x, qf.y, qf.z, qf.w);

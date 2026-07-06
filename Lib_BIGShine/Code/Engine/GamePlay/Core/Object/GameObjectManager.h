@@ -21,8 +21,8 @@ class CameraManager;
 #include"Engine/GamePlay/Core/Resource/ResourceManager.h"
 
 
-/// GameObject‚Ì¶¬AXVA•`‰æ“o˜^A’x‰„íœ‚ğ“Š‡‚·‚éŠÇ—ƒNƒ‰ƒXB
-/// ƒtƒŒ[ƒ€XV’†‚ÌƒRƒ“ƒeƒi•ÏX‚ğ”ğ‚¯‚é‚½‚ßA‰Šú‰»‚Æíœ‚Í‘Ò‹@ƒŠƒXƒg‚ğ‰î‚µ‚Äˆ—‚·‚éB
+/// GameObjectã®ç”Ÿæˆã€æ›´æ–°ã€æç”»ç™»éŒ²ã€é…å»¶å‰Šé™¤ã‚’çµ±æ‹¬ã™ã‚‹ç®¡ç†ã‚¯ãƒ©ã‚¹ã€‚
+/// ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–°ä¸­ã®ã‚³ãƒ³ãƒ†ãƒŠå¤‰æ›´ã‚’é¿ã‘ã‚‹ãŸã‚ã€åˆæœŸåŒ–ã¨å‰Šé™¤ã¯å¾…æ©Ÿãƒªã‚¹ãƒˆã‚’ä»‹ã—ã¦å‡¦ç†ã™ã‚‹ã€‚
 class GameObjectManager
 {
 public:
@@ -31,9 +31,9 @@ public:
     template<typename... Args>
     std::shared_ptr<GameObject> Create(const std::string& name_, Args&&... args_)
     {
-        const std::string& baseName_ = name_; // © ‚±‚ê’Ç‰Á
+        const std::string& baseName_ = name_; // â† ã“ã‚Œè¿½åŠ 
 
-        // d•¡–¼”‚¦‚é
+        // é‡è¤‡åæ•°ãˆã‚‹
         int count_ = 0;
         for (auto& o : objects)
         {
@@ -42,30 +42,30 @@ public:
                 count_++;
         }
 
-        // final name Œˆ’è
+        // final name æ±ºå®š
         std::string finalName_ = baseName_;
         if (count_ > 0)
         {
             char buf_[32];
-            sprintf_s(buf_, sizeof(buf_), "_%02d", count_);   // © ‚±‚Á‚¿
+            sprintf_s(buf_, sizeof(buf_), "_%02d", count_);   // â† ã“ã£ã¡
             finalName_ += buf_;
         }
 
-        // ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+        // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
         auto newObject_ = std::make_shared<GameObject>();
         newObject_->nameComponent->name = finalName_;
         newObject_->transform->gameObject = newObject_;
 
-        //‚±‚±‚Åu©gv‚ğƒIƒuƒWƒFƒNƒg‚É
+        //ã“ã“ã§ã€Œè‡ªèº«ã€ã‚’ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«
         newObject_->SetManager(this);
-        objects.emplace_back(newObject_);       // ‘S‘ÌƒŠƒXƒg‚É’Ç‰Á
-        // --- Šù‘¶‚Ì pendingStarts ‚Ö‚Ì’Ç‰Á‚â‰Šú‰»ˆ— ---
+        objects.emplace_back(newObject_);       // å…¨ä½“ãƒªã‚¹ãƒˆã«è¿½åŠ 
+        // --- æ—¢å­˜ã® pendingStarts ã¸ã®è¿½åŠ ã‚„åˆæœŸåŒ–å‡¦ç† ---
         pendingStarts.push_back(newObject_);
         return newObject_;
     }
 
 
-    // nameŒŸõ
+    // nameæ¤œç´¢
     std::shared_ptr<GameObject> Find(const std::string& name_)
     {
         for (auto& o : objects)
@@ -81,13 +81,13 @@ public:
     {
         std::vector<std::shared_ptr<T>> results_;
 
-        // ‘SƒIƒuƒWƒFƒNƒg‚ğ‘–¸
+        // å…¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’èµ°æŸ»
         for (auto& object_ : objects)
         {
             if (!object_) continue;
 
-            // ŠeƒIƒuƒWƒFƒNƒg‚ÌƒRƒ“ƒ|[ƒlƒ“ƒgƒŠƒXƒg‚ğ‘–¸
-            // ¦GameObject‘¤‚ÉƒRƒ“ƒ|[ƒlƒ“ƒg‚ğæ“¾‚·‚é GetComponent<T> ‚ª‚ ‚é‘O’ñ‚Å‚·
+            // å„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãƒªã‚¹ãƒˆã‚’èµ°æŸ»
+            // â€»GameObjectå´ã«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å–å¾—ã™ã‚‹ GetComponent<T> ãŒã‚ã‚‹å‰æã§ã™
             auto component_ = object_->GetComponent<T>();
             if (component_)
             {
@@ -108,14 +108,14 @@ public:
             object_->Submit(context_);
     }
 
-    // 1. w’è‚µ‚½ƒIƒuƒWƒFƒNƒg‚ğíœ‚·‚é
+    // 1. æŒ‡å®šã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å‰Šé™¤ã™ã‚‹
     void Destroy(std::shared_ptr<GameObject> object_);
     void Destroy(std::string objectName_);
 
-    // 2. ‘S‚Ä‚ÌƒIƒuƒWƒFƒNƒg‚ğ‰ğ•ú‚·‚éiLive Object‘Îôj
+    // 2. å…¨ã¦ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è§£æ”¾ã™ã‚‹ï¼ˆLive Objectå¯¾ç­–ï¼‰
     void Clear();
 
-    // ‘I‘ğ’†ƒIƒuƒWƒFƒNƒg
+    // é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     void SelectObject(std::shared_ptr<GameObject> object_) { selectedObject = object_; }
     std::shared_ptr<GameObject> GetSelectedObject() { return selectedObject; }
 
@@ -123,10 +123,10 @@ public:
     void DetachObject(const std::shared_ptr<GameObject>& object_);
     void RemoveObject(const std::string& name_);
 
-    // ó‘Ô‚ğq‚Ë‚é‘‹Œû
+    // çŠ¶æ…‹ã‚’å°‹ã­ã‚‹çª“å£
     const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
 
-    // GUI ‚Í‘I‘ğ’†ƒIƒuƒWƒFƒNƒg‚¾‚¯•\¦
+    // GUI ã¯é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã‘è¡¨ç¤º
     void Gui();
     void DrawHierarchyNode(std::shared_ptr<GameObject> object_, GameObject** objectToDelete_);
 
@@ -145,7 +145,7 @@ public:
 
     std::vector<std::string> GetSceneDirectories();
 
-    // w’è‚µ‚½ƒIƒuƒWƒFƒNƒg‚ğƒvƒŒƒnƒu‚Æ‚µ‚Ä•Û‘¶
+    // æŒ‡å®šã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ãƒ—ãƒ¬ãƒãƒ–ã¨ã—ã¦ä¿å­˜
     void SaveAsPrefab(std::shared_ptr<GameObject> object_, const std::string& prefabName_);
 
 
@@ -158,21 +158,21 @@ public:
 
     CameraManager* GetCameraManager();
 
-    // ƒvƒŒƒnƒu‚©‚çƒIƒuƒWƒFƒNƒg‚ğ¶¬
+    // ãƒ—ãƒ¬ãƒãƒ–ã‹ã‚‰ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
     std::shared_ptr<GameObject> Instantiate(const std::string& prefabName_);
-    // PrefabsƒtƒHƒ‹ƒ_“à‚Ìƒtƒ@ƒCƒ‹ˆê——‚ğXV
+    // Prefabsãƒ•ã‚©ãƒ«ãƒ€å†…ã®ãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§ã‚’æ›´æ–°
     void RefreshPrefabList();
 
     void ApplyDestroys(std::shared_ptr<GameObject> object_);
 
     void SetShapeRenderEnabled(bool enabled_) { shapeRenderEnabled = enabled_; }
 
-    //‚·‚×‚Ä‚ÌƒIƒuƒWƒFƒNƒg‚âƒRƒ“ƒ|[ƒlƒ“ƒg‚ª•½“™‚ÉƒAƒNƒZƒX‚·‚é‚½‚ß‚Ì‘‹Œû
+    //ã™ã¹ã¦ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚„ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒå¹³ç­‰ã«ã‚¢ã‚¯ã‚»ã‚¹ã™ã‚‹ãŸã‚ã®çª“å£
     ResourceManager* GetResourceManager() { return resourceManager.get(); }
 
-    void DrawHierarchyGui();   // ƒqƒXƒgƒŠ[(ŠK‘w)GUI
-    void DrawInspectorGui();   // ƒCƒ“ƒXƒyƒNƒ^[GUI
-    void DrawSceneModals(); // ƒ‚[ƒ_ƒ‹‚ğ•`‰æ‚·‚éê—p‚Ì‹V®
+    void DrawHierarchyGui();   // ãƒ’ã‚¹ãƒˆãƒªãƒ¼(éšå±¤)GUI
+    void DrawInspectorGui();   // ã‚¤ãƒ³ã‚¹ãƒšã‚¯ã‚¿ãƒ¼GUI
+    void DrawSceneModals(); // ãƒ¢ãƒ¼ãƒ€ãƒ«ã‚’æç”»ã™ã‚‹å°‚ç”¨ã®å„€å¼
     void RefreshSceneList() { sceneState.list = GetSceneDirectories(); }
     std::shared_ptr<TimeManager> GetTimeManager() { return timeManager; }
     CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
@@ -186,12 +186,12 @@ private:
         std::string name_ = baseName_;
         int index_ = 1;
 
-        // –¼‘O‚ªŠù‘¶‚ÌƒIƒuƒWƒFƒNƒg‚Æd•¡‚µ‚Ä‚¢‚éŠÔA‚¸‚Á‚Æƒ‹[ƒv‚·‚é
+        // åå‰ãŒæ—¢å­˜ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨é‡è¤‡ã—ã¦ã„ã‚‹é–“ã€ãšã£ã¨ãƒ«ãƒ¼ãƒ—ã™ã‚‹
         while (Find(name_))
         {
             char buffer_[32];
             sprintf_s(buffer_, sizeof(buffer_), "_%02d", index_);
-            name_ = baseName_ + buffer_; // —á: Enemy -> Enemy_01 -> Enemy_02 ...
+            name_ = baseName_ + buffer_; // ä¾‹: Enemy -> Enemy_01 -> Enemy_02 ...
             index_++;
         }
         return name_;
@@ -199,12 +199,12 @@ private:
 
 
 private:
-    // GUI‚Ìó‘Ô‚ğ•Û‚·‚éê—p‚Ì\‘¢‘Ì
+    // GUIã®çŠ¶æ…‹ã‚’ä¿æŒã™ã‚‹å°‚ç”¨ã®æ§‹é€ ä½“
     struct SceneState {
         char name[64] = "MainScene";
         std::vector<std::string> list;
         int selectedIndex = -1;
-        std::vector<std::string> sceneFiles; // “Ç‚İ‚Ü‚ê‚½JSONƒtƒ@ƒCƒ‹–¼‚ÌƒŠƒXƒg
+        std::vector<std::string> sceneFiles; // èª­ã¿è¾¼ã¾ã‚ŒãŸJSONãƒ•ã‚¡ã‚¤ãƒ«åã®ãƒªã‚¹ãƒˆ
         bool showSavePopup = false;
         bool showLoadPopup = false;
     }    sceneState;
@@ -212,7 +212,7 @@ private:
 
     std::unique_ptr<ResourceManager> resourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
-    // XVƒ‹[ƒv’†‚Ì’Ç‰ÁEíœ‚ğˆÀ‘S‚É”½‰f‚·‚é‚½‚ß‚Ì‘Ò‹@ƒŠƒXƒgB
+    // æ›´æ–°ãƒ«ãƒ¼ãƒ—ä¸­ã®è¿½åŠ ãƒ»å‰Šé™¤ã‚’å®‰å…¨ã«åæ˜ ã™ã‚‹ãŸã‚ã®å¾…æ©Ÿãƒªã‚¹ãƒˆã€‚
     std::vector<std::shared_ptr<GameObject>> pendingStarts;
     std::vector<std::shared_ptr<GameObject>> pendingDestroys;
     std::shared_ptr<GameObject> selectedObject = nullptr;
@@ -229,20 +229,21 @@ private:
     std::unique_ptr<EffectManager> effectManager =
         std::make_unique<EffectManager>();
 
-    // •`‰æƒVƒXƒeƒ€‚ÌŠ—LŒ ‚Íƒ}ƒl[ƒWƒƒ‚ª•Û‚µAƒV[ƒ“‘S‘Ì‚Å‹¤—L‚·‚éB
+    // æç”»ã‚·ã‚¹ãƒ†ãƒ ã®æ‰€æœ‰æ¨©ã¯ãƒãƒãƒ¼ã‚¸ãƒ£ãŒä¿æŒã—ã€ã‚·ãƒ¼ãƒ³å…¨ä½“ã§å…±æœ‰ã™ã‚‹ã€‚
     std::unique_ptr<ParticleRenderSystem> particleRenderSystem;
     std::unique_ptr<MeshVFXRenderSystem> meshVFXRenderSystem;
-    // ƒp[ƒeƒBƒNƒ‹ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‚İ‚ğ•Û‚·‚éƒŠƒXƒg
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®ã¿ã‚’ä¿æŒã™ã‚‹ãƒªã‚¹ãƒˆ
     std::vector<std::weak_ptr<ParticleComponent>> particleComponents;
-    //Œ»İ‚ÌƒV[ƒ“
+    //ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³
     Scene* currentScene = nullptr;
-    std::vector<std::string> prefabFiles; // ƒvƒŒƒnƒu–¼‚ÌƒŠƒXƒg
-    int selectedPrefabIndex = 0;          // GUI‚Å‚Ì‘I‘ğˆÊ’u
+    std::vector<std::string> prefabFiles; // ãƒ—ãƒ¬ãƒãƒ–åã®ãƒªã‚¹ãƒˆ
+    int selectedPrefabIndex = 0;          // GUIã§ã®é¸æŠä½ç½®
     const std::string prefabDirectory = "Data/Prefabs/";
     bool shapeRenderEnabled = true;
     bool navMeshRenderEnabled = false;
     ModelRenderSystem* modelRenderSystem = nullptr;
     void RegisterAttackCallbacks();
+    void EnsureGlobalActionObjects();
 public:
         SceneState& GetSceneState() { return sceneState; }
 };

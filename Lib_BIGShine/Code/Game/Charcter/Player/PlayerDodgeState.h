@@ -31,7 +31,6 @@ private:
     void EndJustDodgeFrame();
 
     void HandleJustDodgeSuccess();
-    void ApplyJustDodgeSlowMotion();
     void ClearJustDodgeBlackboard();
     void SetCounterAvailable(bool enabled_);
     void ExecuteOwnerAction(const std::string& actionName_);
@@ -49,13 +48,6 @@ private:
 
     float justDodgeFrameDuration = 0.18f;
     float justDodgeFrameTimer = 0.0f;
-
-    bool useSlowMotion = true;
-    float slowMotionDuration = 10.0f;
-    float slowMotionScale = 0.3f;
-    float selfSlowMotionDurationRatio = 0.15f;
-
-    uint32_t slowMotionLayerMask = 0xffffffffu;
 
     std::string justDodgeColliderActivateActionName =
         "JustDodge_EnableJustDodgeCollider";

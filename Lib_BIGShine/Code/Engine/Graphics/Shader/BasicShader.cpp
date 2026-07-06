@@ -4,7 +4,7 @@
 
 BasicShader::BasicShader(ID3D11Device* device)
 {
-	// ’¸“_ƒVƒF[ƒ_[
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	CPUResourceLoader::LoadVertexShader(
 		device,
 		"Shader/BasicVS.cso",
@@ -13,30 +13,30 @@ BasicShader::BasicShader(ID3D11Device* device)
 		inputLayout.GetAddressOf(),
 		vertexShader.GetAddressOf());
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	CPUResourceLoader::LoadPixelShader(
 		device,
 		"Shader/BasicPS.cso",
 		pixelShader.GetAddressOf());
 
-	// ƒƒbƒVƒ…—p’è”ƒoƒbƒtƒ@
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
 		sizeof(CbMesh),
 		meshConstantBuffer.GetAddressOf());
 }
 
-// ŠJŽnˆ—
+// é–‹å§‹å‡¦ç†
 void BasicShader::Begin(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒVƒF[ƒ_[Ý’è
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼è¨­å®š
 	dc->IASetInputLayout(inputLayout.Get());
 	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 
-	// ’è”ƒoƒbƒtƒ@Ý’è
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®š
 	ID3D11Buffer* cbs[] =
 	{
 		meshConstantBuffer.Get(),
@@ -44,17 +44,17 @@ void BasicShader::Begin(const RenderContext& rc)
 	dc->PSSetConstantBuffers(0, _countof(cbs), cbs);
 }
 
-// XVˆ—
+// æ›´æ–°å‡¦ç†
 void BasicShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒƒbƒVƒ…—p’è”ƒoƒbƒtƒ@XV
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 	CbMesh cbMesh{};
 	cbMesh.materialColor = mesh.material->baseColor;
 	dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
-	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[Ý’è
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼è¨­å®š
 	ID3D11ShaderResourceView* srvs[] =
 	{
 		mesh.material->baseMap.Get(),
@@ -62,21 +62,21 @@ void BasicShader::Update(const RenderContext& rc, const GltfModelCommponennt::Me
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
-// •`‰æI—¹
+// æç”»çµ‚äº†
 void BasicShader::End(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒVƒF[ƒ_[Ý’è‰ðœ
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼è¨­å®šè§£é™¤
 	dc->VSSetShader(nullptr, nullptr, 0);
 	dc->PSSetShader(nullptr, nullptr, 0);
 	dc->IASetInputLayout(nullptr);
 
-	// ’è”ƒoƒbƒtƒ@Ý’è‰ðœ
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®šè§£é™¤
 	ID3D11Buffer* cbs[] = { nullptr };
 	dc->PSSetConstantBuffers(1, _countof(cbs), cbs);
 
-	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[Ý’è‰ðœ
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼è¨­å®šè§£é™¤
 	ID3D11ShaderResourceView* srvs[] = { nullptr };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }

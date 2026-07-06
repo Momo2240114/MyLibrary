@@ -388,7 +388,7 @@ void ModelAnimator::SetCurrentTime(float time_)
     isMixing = false;
     fadeTimer = 0.0f;
 
-    // ƒV[ƒN‚Í˜A‘±Ä¶‚Å‚Í‚È‚¢‚½‚ßA’¼‘O‚ÌRoot Motion‚Æ‚Ì·•ª‚ğ“K—p‚µ‚È‚¢B
+    // ã‚·ãƒ¼ã‚¯ã¯é€£ç¶šå†ç”Ÿã§ã¯ãªã„ãŸã‚ã€ç›´å‰ã®Root Motionã¨ã®å·®åˆ†ã‚’é©ç”¨ã—ãªã„ã€‚
     currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
     currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
     isFirstFrame = true;
@@ -411,7 +411,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     if (rootMotionLoopEndPose.size() != nodeCount) rootMotionLoopEndPose.resize(nodeCount);
 
     // ------------------------------------------------------------
-    // •â•: ó‘Ô‚©‚ç pose ‚ğƒTƒ“ƒvƒ‹‚·‚é
+    // è£œåŠ©: çŠ¶æ…‹ã‹ã‚‰ pose ã‚’ã‚µãƒ³ãƒ—ãƒ«ã™ã‚‹
     // ------------------------------------------------------------
     auto SamplePose = [&](const AnimState* state, float time, float sampleDuration_, std::vector<GltfModelCommponennt::NodePose>& outPose)
         {
@@ -564,7 +564,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         };
 
     // ------------------------------------------------------------
-    // 1. Duration æ“¾
+    // 1. Duration å–å¾—
     // ------------------------------------------------------------
     float baseDuration = 1.0f;
 
@@ -589,7 +589,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     }
 
     // ------------------------------------------------------------
-    // 2. ŠÔXV
+    // 2. æ™‚é–“æ›´æ–°
     // ------------------------------------------------------------
     if (current.state->type == AnimStateType::Blend1D ||
         current.state->type == AnimStateType::BLEND_2D)
@@ -613,12 +613,12 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     current.Update(et, baseDuration, curvecomp, owner);
 
     // ------------------------------------------------------------
-    // 3. Œ»İƒ|[ƒYŒvZ
+    // 3. ç¾åœ¨ãƒãƒ¼ã‚ºè¨ˆç®—
     // ------------------------------------------------------------
     SamplePose(current.state, current.time, current.sampleDuration, tempPoseA);
 
     // ------------------------------------------------------------
-    // 4. ƒNƒƒXƒtƒF[ƒh
+    // 4. ã‚¯ãƒ­ã‚¹ãƒ•ã‚§ãƒ¼ãƒ‰
     // ------------------------------------------------------------
     if (isTransitioning)
     {
@@ -762,25 +762,25 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
 {
     if (!model) return;
 
-    // 1. ŠeƒAƒjƒ[ƒVƒ‡ƒ“‚ÌŠÔ‚ği‚ß‚é (ŠÈˆÕ‰»‚Ì‚½‚ß‹¤’Ê‚ÌŠÔŠÇ—)
+    // 1. å„ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ™‚é–“ã‚’é€²ã‚ã‚‹ (ç°¡æ˜“åŒ–ã®ãŸã‚å…±é€šã®æ™‚é–“ç®¡ç†)
 
     float durationA = model->GetAnimationDuration(indexA);
     manualBlendTime += et * speed;
     if (loop && durationA > 0.0f) manualBlendTime = fmod(manualBlendTime, durationA);
 
-    // 2. A‚ÆB‚Ìƒ|[ƒY‚ğ‚»‚ê‚¼‚êŒvZ
+    // 2. Aã¨Bã®ãƒãƒ¼ã‚ºã‚’ãã‚Œãã‚Œè¨ˆç®—
     model->ComputeAnimation(indexA, manualBlendTime, tempPoseA);
-    // B‚ÍA‚ÌŠÔ‚É‡‚í‚¹‚é‚©AB©g‚ÌDuration‚Å³‹K‰»‚µ’¼‚·
+    // Bã¯Aã®æ™‚é–“ã«åˆã‚ã›ã‚‹ã‹ã€Bè‡ªèº«ã®Durationã§æ­£è¦åŒ–ã—ç›´ã™
     float durationB = model->GetAnimationDuration(indexB);
     float timeB = (durationA > 0.0f) ? (manualBlendTime / durationA) * durationB : 0.0f;
     model->ComputeAnimation(indexB, timeB, tempPoseB);
 
-    // 3. alpha ‚ğ—p‚¢‚ÄüŒ`•âŠÔ
+    // 3. alpha ã‚’ç”¨ã„ã¦ç·šå½¢è£œé–“
     if (finalPose.size() != tempPoseA.size()) finalPose.resize(tempPoseA.size());
 
     for (size_t i = 0; i < tempPoseA.size(); ++i)
     {
-        // Position / Scale ‚Í Lerp, Rotation ‚Í Slerp
+        // Position / Scale ã¯ Lerp, Rotation ã¯ Slerp
         DirectX::XMVECTOR pA = DirectX::XMLoadFloat3(&tempPoseA[i].position);
         DirectX::XMVECTOR pB = DirectX::XMLoadFloat3(&tempPoseB[i].position);
         DirectX::XMStoreFloat3(&finalPose[i].position, DirectX::XMVectorLerp(pA, pB, alpha));
@@ -808,7 +808,7 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
     current.weight = 1.0f;
     current.sampleDuration = 0.0f;
 
-    // V‚µ‚¢ƒXƒe[ƒg‚ÉØ‚è‘Ö‚í‚éÛAƒCƒxƒ“ƒgƒtƒ‰ƒO‚ğƒŠƒZƒbƒg‚µ‚Ä‚¨‚­
+    // æ–°ã—ã„ã‚¹ãƒ†ãƒ¼ãƒˆã«åˆ‡ã‚Šæ›¿ã‚ã‚‹éš›ã€ã‚¤ãƒ™ãƒ³ãƒˆãƒ•ãƒ©ã‚°ã‚’ãƒªã‚»ãƒƒãƒˆã—ã¦ãŠã
     for (auto& ev : const_cast<AnimState*>(current.state)->events) {
         ev.isFired = false;
         ev.isEndFired = false;
@@ -978,13 +978,13 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
 
     float currentSpeed = state->playbackSpeed;
 
-    // šƒJ[ƒu‚Ìw’è‚ª‚ ‚èAƒRƒ“ƒ|[ƒlƒ“ƒg‚ª‘¶İ‚·‚éê‡
+    // â˜…ã‚«ãƒ¼ãƒ–ã®æŒ‡å®šãŒã‚ã‚Šã€ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒå­˜åœ¨ã™ã‚‹å ´åˆ
     if (curveComp && !state->speedCurveName.empty())
     {
-        // ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì³‹K‰»ŠÔ (0.0 - 1.0) ‚ğŒvZ
+        // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ­£è¦åŒ–æ™‚é–“ (0.0 - 1.0) ã‚’è¨ˆç®—
         float normalizedTime = (duration > 0.0f) ? (time / duration) : 0.0f;
 
-        // w’è‚³‚ê‚½–¼‘O‚ÌƒJ[ƒu‚©‚ç‘¬“x‚ğæ“¾
+        // æŒ‡å®šã•ã‚ŒãŸåå‰ã®ã‚«ãƒ¼ãƒ–ã‹ã‚‰é€Ÿåº¦ã‚’å–å¾—
         currentSpeed = curveComp->GetValue(state->speedCurveName, normalizedTime);
     }
 
@@ -1002,10 +1002,10 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
     time += et * currentSpeed;
     if (et == 0.0f) return;
 
-    // ƒCƒxƒ“ƒg‚Ì”­‰Î”»’è
+    // ã‚¤ãƒ™ãƒ³ãƒˆã®ç™ºç«åˆ¤å®š
     for (auto& ev : const_cast<AnimState*>(state)->events)
     {
-        // 1. ŠJnƒCƒxƒ“ƒg (startTime ‚ğŒ×‚¢‚¾uŠÔ)
+        // 1. é–‹å§‹ã‚¤ãƒ™ãƒ³ãƒˆ (startTime ã‚’è·¨ã„ã ç¬é–“)
         if (!ev.isFired && time >= ev.startTime)
         {
             if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
@@ -1025,7 +1025,7 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
             ev.isFired = true;
         }
 
-        // 2. XVƒCƒxƒ“ƒg (”ÍˆÍ“à‚É‚¢‚éŠÔ‚¸‚Á‚Æ)
+        // 2. æ›´æ–°ã‚¤ãƒ™ãƒ³ãƒˆ (ç¯„å›²å†…ã«ã„ã‚‹é–“ãšã£ã¨)
         if (time >= ev.startTime && time <= ev.endTime)
         {
             if (ev.eventTemplateType == ANIMATION_EVENT_TEMPLATE_TYPE::ATTACK_TEMPLATE)
@@ -1053,12 +1053,12 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         }
     }
 
-    // ƒ‹[ƒvˆ—‚Æƒtƒ‰ƒO‚ÌƒŠƒZƒbƒg
+    // ãƒ«ãƒ¼ãƒ—å‡¦ç†ã¨ãƒ•ãƒ©ã‚°ã®ãƒªã‚»ãƒƒãƒˆ
     if (time >= duration)
     {
         if (state->isLoop) {
             time = fmod(time, duration);
-            // ƒ‹[ƒv‚µ‚½‚Ì‚Å”­‰Îƒtƒ‰ƒO‚ğƒŠƒZƒbƒg
+            // ãƒ«ãƒ¼ãƒ—ã—ãŸã®ã§ç™ºç«ãƒ•ãƒ©ã‚°ã‚’ãƒªã‚»ãƒƒãƒˆ
             for (auto& ev : const_cast<AnimState*>(state)->events) {
                 ev.isFired = false;
                 ev.isEndFired = false;

@@ -28,7 +28,7 @@ public:
     void ResetRenderTarget(ID3D11DeviceContext* context_) const
     {
         if (!context_ || !IsValid()) return;
-        // パーティクル用は1枚でOK
+        // 繝代�ｼ繝�繧｣繧ｯ繝ｫ逕ｨ縺ｯ1譫壹〒OK
         ID3D11RenderTargetView* rtv_ = renderTargetView.Get();
         context_->OMSetRenderTargets(1, &rtv_, depthStencilView.Get());
     }

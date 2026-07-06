@@ -31,7 +31,7 @@ public:
         bool callStart = true
     );
 
-    // --- ’¼ÚŠÖ”‚ğ“o˜^‚·‚é ---
+    // --- ç›´æ¥é–¢æ•°ã‚’ç™»éŒ²ã™ã‚‹ ---
     void AddCreator(const std::string& name, CreateFunc func)
     {
         creators[name] = func;
@@ -65,7 +65,7 @@ private:
 };
 
 
-// component“o˜^—pƒ}ƒNƒ
+// componentç™»éŒ²ç”¨ãƒã‚¯ãƒ­
 #define REGISTER_COMPONENT(Type, Name) \
 static ComponentRegistry::AutoRegister g_Register##Type( \
     Name, \

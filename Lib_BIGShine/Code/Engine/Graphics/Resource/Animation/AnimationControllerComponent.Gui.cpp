@@ -1,4 +1,4 @@
-// ’Êí Inspector GUI / Sequencer GUI
+// é€šå¸¸ Inspector GUI / Sequencer GUI
 
 #include "AnimationControllerComponent.h"
 #include "AnimSequenceAdapter.h"

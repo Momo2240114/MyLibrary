@@ -14,27 +14,27 @@ public:
         return name;
     }
 
-    // ƒAƒ^ƒbƒ`æ‚Ìƒm[ƒh–¼‚ğİ’è
+    // ã‚¢ã‚¿ãƒƒãƒå…ˆã®ãƒãƒ¼ãƒ‰åã‚’è¨­å®š
     void SetTargetNode(std::shared_ptr<GltfModelCommponennt> modelComp, const std::string& nodeName);
     void Update(float deltaTime_) override;
     void LateUpdate(float deltaTime) override;
     void Gui() override;
     void SyncAttachment();
 
-    // ƒZ[ƒu—pFˆø”‚Ì json ƒIƒuƒWƒFƒNƒg‚É©•ª‚Ì•Ï”‚ğ‘‚«‚Ş
+    // ã‚»ãƒ¼ãƒ–ç”¨ï¼šå¼•æ•°ã® json ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«è‡ªåˆ†ã®å¤‰æ•°ã‚’æ›¸ãè¾¼ã‚€
     void Serialize(nlohmann::json& j) const;
-    // ƒ[ƒh—pFˆø”‚Ì json ƒIƒuƒWƒFƒNƒg‚©‚ç©•ª‚Ì•Ï”‚ğ“Ç‚İo‚·
+    // ãƒ­ãƒ¼ãƒ‰ç”¨ï¼šå¼•æ•°ã® json ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã‚‰è‡ªåˆ†ã®å¤‰æ•°ã‚’èª­ã¿å‡ºã™
     void Deserialize(const nlohmann::json& j);
 private:
     std::shared_ptr<GltfModelCommponennt> ResolveTargetModel();
     bool ResolveTargetNodeIndex(const std::shared_ptr<GltfModelCommponennt>& model);
 
     std::weak_ptr<GltfModelCommponennt> targetModel;
-    std::string targetGameObjectName; // ƒAƒ^ƒbƒ`æGameObject‚Ì–¼‘Oi•Û‘¶—pj
+    std::string targetGameObjectName; // ã‚¢ã‚¿ãƒƒãƒå…ˆGameObjectã®åå‰ï¼ˆä¿å­˜ç”¨ï¼‰
     std::string targetStartNodeName;
 
-    // --- ƒ|ƒbƒvƒAƒbƒv‚Å‚Ìˆê‘I‘ğ—p (temp) ---
-    std::shared_ptr<GltfModelCommponennt> tempTargetModel; // ƒ‚ƒfƒ‹‚Ì‰¼’u‚«
+    // --- ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—ã§ã®ä¸€æ™‚é¸æŠç”¨ (temp) ---
+    std::shared_ptr<GltfModelCommponennt> tempTargetModel; // ãƒ¢ãƒ‡ãƒ«ã®ä»®ç½®ã
 
     int targetNodeIndex = -1;
     int tempSelectedIdx = -1;

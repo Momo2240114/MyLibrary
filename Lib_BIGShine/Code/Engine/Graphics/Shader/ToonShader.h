@@ -9,7 +9,7 @@ public:
     ToonShader(ID3D11Device* device);
     ~ToonShader() override = default;
 
-    // –¼‘O‚ğ•Û‚·‚éƒƒ“ƒo•Ï”
+    // åå‰ã‚’ä¿æŒã™ã‚‹ãƒ¡ãƒ³ãƒå¤‰æ•°
     const std::string& GetName() const override {
         static const std::string name = "Toon";
         return name;
@@ -24,22 +24,22 @@ public:
     void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_) { shadeFeathers = shadeFeather_; }
     void SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, DirectX::XMFLOAT4 shadeFeather_);
 private:
-    // PBR‚Æ“¯—lAƒƒbƒVƒ…ŒÅ—L‚Ìƒpƒ‰ƒ[ƒ^‚ğb0‚ÉW–ñ‚·‚é
+    // PBRã¨åŒæ§˜ã€ãƒ¡ãƒƒã‚·ãƒ¥å›ºæœ‰ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’b0ã«é›†ç´„ã™ã‚‹
     struct CbMesh
     {
         DirectX::XMFLOAT4 baseColor;
         DirectX::XMFLOAT3 emissiveColor;
-        float             metalness;      // Toon‚Å‚Íg‚í‚Ê‚ªƒpƒfƒBƒ“ƒO‚Æ‚µ‚Ä•Û
-        float             roughness;      // Toon‚Å‚Íg‚í‚Ê‚ªƒpƒfƒBƒ“ƒO‚Æ‚µ‚Ä•Û
+        float             metalness;      // Toonã§ã¯ä½¿ã‚ã¬ãŒãƒ‘ãƒ‡ã‚£ãƒ³ã‚°ã¨ã—ã¦ä¿æŒ
+        float             roughness;      // Toonã§ã¯ä½¿ã‚ã¬ãŒãƒ‘ãƒ‡ã‚£ãƒ³ã‚°ã¨ã—ã¦ä¿æŒ
         
         float  occlusionStrength;
 
         DirectX::XMFLOAT4 shadeSteps;
-        DirectX::XMFLOAT4  shadeFeather;   // ‰e‚Ì‹«ŠE‚Ú‚©‚µ
+        DirectX::XMFLOAT4  shadeFeather;   // å½±ã®å¢ƒç•Œã¼ã‹ã—
         float  padding[2];
     };
 
-    // ƒgƒD[ƒ“—pƒpƒ‰ƒ[ƒ^‚ğ’Ç‰Á
+    // ãƒˆã‚¥ãƒ¼ãƒ³ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¿½åŠ 
     DirectX::XMFLOAT4 shadeSteps{ 0.05f, 0.05f, 0.05f, 0.05f };
     DirectX::XMFLOAT4 shadeFeathers = { 0.05f, 0.05f, 0.05f, 0.05f };
 

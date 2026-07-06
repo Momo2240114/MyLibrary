@@ -16,7 +16,7 @@ struct SkyBoxVertex
 
 bool GraphicsDeviceManager::LoadIBLTextures()
 {
-    // ---- ƒvƒƒWƒFƒNƒg‚É‡‚í‚¹‚Ä‘‚«Š·‚¦‚é ----
+    // ---- ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã«åˆã‚ã›ã¦æ›¸ãæ›ãˆã‚‹ ----
     const wchar_t* diffusePath_ = L"Data/Texture/IBL/diffuse_iem.dds";
     const wchar_t* specularPath_ = L"Data/Texture/IBL/skybox_highres.dds";
     const wchar_t* lutPath_ = L"Data/Texture/IBL/lut_ggx.dds";
@@ -24,7 +24,7 @@ bool GraphicsDeviceManager::LoadIBLTextures()
 
     D3D11_TEXTURE2D_DESC textureDescription_{};
 
-    // ŠgU”½Ë IEMiIrradianceMapj
+    // æ‹¡æ•£åå°„ IEMï¼ˆIrradianceMapï¼‰
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
         device.Get(), diffusePath_,
         iblDiffuseIemSRV.GetAddressOf(), &textureDescription_)))
@@ -33,7 +33,7 @@ bool GraphicsDeviceManager::LoadIBLTextures()
         return false;
     }
 
-    // ‹¾–Ê”½Ë PMREMiRadianceMapj
+    // é¡é¢åå°„ PMREMï¼ˆRadianceMapï¼‰
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
         device.Get(), specularPath_,
         iblSpecularPmremSRV.GetAddressOf(), &textureDescription_)))
@@ -55,11 +55,11 @@ bool GraphicsDeviceManager::LoadIBLTextures()
 }
 
 // ----------------------------------------------------------------
-// ƒXƒJƒCƒ{ƒbƒNƒX—pƒVƒF[ƒ_[‚ÆƒXƒvƒ‰ƒCƒg‚Ì‰Šú‰»
+// ã‚¹ã‚«ã‚¤ãƒœãƒƒã‚¯ã‚¹ç”¨ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¨ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã®åˆæœŸåŒ–
 // ----------------------------------------------------------------
 bool GraphicsDeviceManager::InitializeSkyBox()
 {
-    // ƒXƒvƒ‰ƒCƒg‚Æ“¯‚¶“ü—ÍƒŒƒCƒAƒEƒgiPosition / Color / TexCoordj
+    // ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã¨åŒã˜å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆï¼ˆPosition / Color / TexCoordï¼‰
     D3D11_INPUT_ELEMENT_DESC inputElementDescription_[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -67,7 +67,7 @@ bool GraphicsDeviceManager::InitializeSkyBox()
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-    // ---- CSO ƒpƒX‚ğƒvƒƒWƒFƒNƒg‚É‡‚í‚¹‚Ä•ÏX‚µ‚Ä‚­‚¾‚³‚¢ ----
+    // ---- CSO ãƒ‘ã‚¹ã‚’ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã«åˆã‚ã›ã¦å¤‰æ›´ã—ã¦ãã ã•ã„ ----
     CPUResourceLoader::CreateVSFromCSO(device.Get(), "Shader/SkyBoxVS.cso",
         skyBoxVertexShader.GetAddressOf(),
         skyBoxInputLayout.GetAddressOf(),
@@ -80,11 +80,11 @@ bool GraphicsDeviceManager::InitializeSkyBox()
 
     SkyBoxVertex vertices_[4] =
     {
-        // position (NDC)         color (”’E•s“§–¾)              texcoord
-        { { -1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 0.0f } }, // ¶ã
-        { {  1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 0.0f } }, // ‰Eã
-        { { -1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 1.0f } }, // ¶‰º
-        { {  1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 1.0f } }, // ‰E‰º
+        // position (NDC)         color (ç™½ãƒ»ä¸é€æ˜)              texcoord
+        { { -1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 0.0f } }, // å·¦ä¸Š
+        { {  1.0f,  1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 0.0f } }, // å³ä¸Š
+        { { -1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 0.0f, 1.0f } }, // å·¦ä¸‹
+        { {  1.0f, -1.0f, 1.0f }, { 1,1,1,1 }, { 1.0f, 1.0f } }, // å³ä¸‹
     };
 
     D3D11_BUFFER_DESC vertexBufferDescription_ = {};
@@ -102,7 +102,7 @@ bool GraphicsDeviceManager::InitializeSkyBox()
         return false;
     }
 
-    // ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@iOŠpŒ` 2 –‡ = 6 ƒCƒ“ƒfƒbƒNƒXj
+    // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ï¼ˆä¸‰è§’å½¢ 2 æš = 6 ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ï¼‰
     UINT indices_[6] = { 0, 1, 2, 1, 3, 2 };
 
     D3D11_BUFFER_DESC indexBufferDescription_ = {};
@@ -131,12 +131,12 @@ bool GraphicsDeviceManager::InitializeSkyBox()
 }
 
 //---
-//@brief Direct3D 11 ƒfƒoƒCƒX‚ÆƒXƒƒbƒvƒ`ƒF[ƒ“‚ğ‰Šú‰»‚·‚é
-//@param hwnd_ ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹
-//@param width_ •`‰æ—Ìˆæ‚Ì•
-//@param height_ •`‰æ—Ìˆæ‚Ì‚‚³
-//@param fullscreen_ ƒtƒ‹ƒXƒNƒŠ[ƒ“ƒ‚[ƒh‚©‚Ç‚¤‚©
-//@return ‰Šú‰»¬Œ÷‚Å trueA¸”s‚Å false
+//@brief Direct3D 11 ãƒ‡ãƒã‚¤ã‚¹ã¨ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ã‚’åˆæœŸåŒ–ã™ã‚‹
+//@param hwnd_ ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«
+//@param width_ æç”»é ˜åŸŸã®å¹…
+//@param height_ æç”»é ˜åŸŸã®é«˜ã•
+//@param fullscreen_ ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ãƒ¢ãƒ¼ãƒ‰ã‹ã©ã†ã‹
+//@return åˆæœŸåŒ–æˆåŠŸã§ trueã€å¤±æ•—ã§ false
 //---
 bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int height_, bool fullscreen_)
 {
@@ -145,7 +145,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
 #if defined(DEBUG) || defined(_DEBUG)
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-    // ÀÛ‚ÌƒNƒ‰ƒCƒAƒ“ƒg—Ìˆæ‚É‡‚í‚¹‚Ä•`‰æƒŠƒ\[ƒX‚ğì¬‚·‚éB
+    // å®Ÿéš›ã®ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆé ˜åŸŸã«åˆã‚ã›ã¦æç”»ãƒªã‚½ãƒ¼ã‚¹ã‚’ä½œæˆã™ã‚‹ã€‚
     RECT clientRect_{};
     if (GetClientRect(windowHandle_, &clientRect_))
     {
@@ -161,21 +161,21 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     fullscreen = false;
     windowHandle = windowHandle_;
 
-    // ƒfƒoƒCƒX‚ÆƒXƒƒbƒvƒ`ƒF[ƒ“‚ğì¬
+    // ãƒ‡ãƒã‚¤ã‚¹ã¨ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ã‚’ä½œæˆ
     if (!CreateDeviceAndSwapChain(windowHandle_))
     {
         _ASSERT_EXPR(false, L"Failed: CreateDeviceAndSwapChain");
         return false;
     }
 
-    // ƒoƒbƒNƒoƒbƒtƒ@RTV‚ğì¬
+    // ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡RTVã‚’ä½œæˆ
     if (!CreateRenderTarget())
     {
         _ASSERT_EXPR(false, L"Failed: CreateRenderTarget");
         return false;
     }
 
-    // [“xƒXƒeƒ“ƒVƒ‹ì¬
+    // æ·±åº¦ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ä½œæˆ
     if (!CreateDepthStencil())
     {
         _ASSERT_EXPR(false, L"Failed: CreateDepthStencil");
@@ -183,7 +183,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     }
 
 
-    // ƒrƒ…[ƒ|[ƒgİ’è
+    // ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆè¨­å®š
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
     viewport.Width = width;
@@ -191,7 +191,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     viewport.MaxDepth = 1.0f;
     viewport.MinDepth = 0.0f;
 
-    //OMSetRenderTargets ‚ÅRTV‚ÆDSV‚ğƒZƒbƒg
+    //OMSetRenderTargets ã§RTVã¨DSVã‚’ã‚»ãƒƒãƒˆ
     immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
@@ -199,7 +199,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     if (!LoadIBLTextures())  return false;
     if (!InitializeSkyBox()) return false;
 
-    // --- ’Ç‰ÁFƒV[ƒ“ƒoƒbƒtƒ@‚Ìì¬ ---
+    // --- è¿½åŠ ï¼šã‚·ãƒ¼ãƒ³ãƒãƒƒãƒ•ã‚¡ã®ä½œæˆ ---
     if (!CreateSceneRenderTarget(width, height)) return false;
     if (!CreateGBufferTargets(width, height)) return false;
 
@@ -210,7 +210,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     //modelRenderSystem.Init(device, immediateContext);
     shapeRendererSystem.Initialize(device.Get());
 
-    // ƒŒƒ“ƒ_[ƒXƒe[ƒg¶¬
+    // ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆç”Ÿæˆ
     renderState = std::make_unique<RenderState>(device.Get());
 
     if (requestedFullscreen_)
@@ -220,18 +220,18 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
 
 
 
-    //¬Œ÷‚µ‚½‚ç true ‚ğ•Ô‚·
+    //æˆåŠŸã—ãŸã‚‰ true ã‚’è¿”ã™
 
     return true;
 }
 
 /**
- * @brief Direct3DƒfƒoƒCƒX‚ÆŠÖ˜AƒŠƒ\[ƒX‚ğ‰ğ•ú‚·‚é
- * @details ƒAƒvƒŠƒP[ƒVƒ‡ƒ“I—¹‚ÉŒÄ‚Ño‚·B
+ * @brief Direct3Dãƒ‡ãƒã‚¤ã‚¹ã¨é–¢é€£ãƒªã‚½ãƒ¼ã‚¹ã‚’è§£æ”¾ã™ã‚‹
+ * @details ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†æ™‚ã«å‘¼ã³å‡ºã™ã€‚
  */
 void GraphicsDeviceManager::Shutdown()
 {
-    // GPU‘Ò‹@icontext->ClearState / Flushj
+    // GPUå¾…æ©Ÿï¼ˆcontext->ClearState / Flushï¼‰
     if (immediateContext)
     {
         immediateContext->ClearState();
@@ -239,7 +239,7 @@ void GraphicsDeviceManager::Shutdown()
     }
 
 
-    // ƒfƒoƒCƒXƒŠƒ\[ƒX‚Ì‰ğ•ú
+    // ãƒ‡ãƒã‚¤ã‚¹ãƒªã‚½ãƒ¼ã‚¹ã®è§£æ”¾
     renderTargetView.Reset();
     depthStencilView.Reset();
     sceneRTV.Reset();
@@ -252,13 +252,13 @@ void GraphicsDeviceManager::Shutdown()
     skyBoxVertexBuffer.Reset();
     skyBoxIndexBuffer.Reset();
 
-    // ÅŒã‚ÉƒfƒoƒCƒX‚ğÁ‚·
+    // æœ€å¾Œã«ãƒ‡ãƒã‚¤ã‚¹ã‚’æ¶ˆã™
     device.Reset();
 }
 /**
- * @brief ƒEƒBƒ“ƒhƒEƒTƒCƒY•ÏX‚ÉŒÄ‚Ño‚³‚ê‚é
- * @param newWidth_ V‚µ‚¢•
- * @param newHeight_ V‚µ‚¢‚‚³
+ * @brief ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºå¤‰æ›´æ™‚ã«å‘¼ã³å‡ºã•ã‚Œã‚‹
+ * @param newWidth_ æ–°ã—ã„å¹…
+ * @param newHeight_ æ–°ã—ã„é«˜ã•
  */
 void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
 {
@@ -272,20 +272,20 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
         return;
     }
 
-    // ’Ç‰ÁFƒŠƒTƒCƒY’†‚Í•`‰æ‚ğ~‚ß‚é or ƒRƒ“ƒeƒLƒXƒg‚ğƒNƒŠƒA
+    // è¿½åŠ ï¼šãƒªã‚µã‚¤ã‚ºä¸­ã¯æç”»ã‚’æ­¢ã‚ã‚‹ or ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’ã‚¯ãƒªã‚¢
     immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
-    immediateContext->ClearState(); // ”O‚Ì‚½‚ßˆê“x‚·‚×‚Ä‰ğœ
+    immediateContext->ClearState(); // å¿µã®ãŸã‚ä¸€åº¦ã™ã¹ã¦è§£é™¤
 
-    // ƒƒ“ƒo•Ï”‚ÌXV‚ğ–Y‚ê‚È‚¢‚æ‚¤‚É
+    // ãƒ¡ãƒ³ãƒå¤‰æ•°ã®æ›´æ–°ã‚’å¿˜ã‚Œãªã„ã‚ˆã†ã«
     width = newWidth_;
     height = newHeight_;
 
-    // RTVEDSV‚ğ‰ğ•ú
+    // RTVãƒ»DSVã‚’è§£æ”¾
     renderTargetView.Reset();
     depthStencilView.Reset();
-    depthStencilTexture.Reset(); // [“xƒeƒNƒXƒ`ƒƒ©‘Ì‚àƒŠƒZƒbƒg‚ª•K—v
+    depthStencilTexture.Reset(); // æ·±åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£è‡ªä½“ã‚‚ãƒªã‚»ãƒƒãƒˆãŒå¿…è¦
 
-    // --- yC³zƒV[ƒ“—pƒoƒbƒtƒ@‚Æƒuƒ‹[ƒ€‚àƒŠƒZƒbƒg ---
+    // --- ã€ä¿®æ­£ã€‘ã‚·ãƒ¼ãƒ³ç”¨ãƒãƒƒãƒ•ã‚¡ã¨ãƒ–ãƒ«ãƒ¼ãƒ ã‚‚ãƒªã‚»ãƒƒãƒˆ ---
     sceneRTV.Reset();
     sceneSRV.Reset();
     sceneDistortionRTV.Reset();
@@ -301,7 +301,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     gBufferEmissiveRTV.Reset();
     gBufferEmissiveSRV.Reset();
 
-    // swapChain->ResizeBuffers() ‚ğŒÄ‚Ño‚µ
+    // swapChain->ResizeBuffers() ã‚’å‘¼ã³å‡ºã—
     HRESULT result_ = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
     _ASSERT_EXPR(SUCCEEDED(result_), L"ResizeBuffers Failed");
     if (FAILED(result_))
@@ -309,14 +309,14 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
         return;
     }
 
-    // ƒŠƒ\[ƒX‚ÌÄì¬
+    // ãƒªã‚½ãƒ¼ã‚¹ã®å†ä½œæˆ
     CreateRenderTarget();
     CreateDepthStencil();
-    CreateSceneRenderTarget(width, height); // ƒV[ƒ“ƒoƒbƒtƒ@‚ğV‚µ‚¢ƒTƒCƒY‚Åì‚é
+    CreateSceneRenderTarget(width, height); // ã‚·ãƒ¼ãƒ³ãƒãƒƒãƒ•ã‚¡ã‚’æ–°ã—ã„ã‚µã‚¤ã‚ºã§ä½œã‚‹
     CreateGBufferTargets(width, height);
-    postRenderSystem.Initialize(device.Get(), width, height); // ƒ|ƒXƒgƒvƒƒZƒX‚àÄ‰Šú‰»
+    postRenderSystem.Initialize(device.Get(), width, height); // ãƒã‚¹ãƒˆãƒ—ãƒ­ã‚»ã‚¹ã‚‚å†åˆæœŸåŒ–
 
-    // ƒrƒ…[ƒ|[ƒg‚Ìİ’è
+    // ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã®è¨­å®š
     viewport.Width = static_cast<float>(width);
     viewport.Height = static_cast<float>(height);
     immediateContext->RSSetViewports(1, &viewport);
@@ -376,15 +376,15 @@ void GraphicsDeviceManager::SetFullscreen(bool enabled_)
 }
 
 /**
- * @brief ƒtƒŒ[ƒ€‚Ì•`‰æ‚ğŠJn‚·‚é
- * @param clearColor_ RGBAŒ`®‚ÌƒNƒŠƒAƒJƒ‰[”z—ñ
+ * @brief ãƒ•ãƒ¬ãƒ¼ãƒ ã®æç”»ã‚’é–‹å§‹ã™ã‚‹
+ * @param clearColor_ RGBAå½¢å¼ã®ã‚¯ãƒªã‚¢ã‚«ãƒ©ãƒ¼é…åˆ—
  */
 void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
 {
-    // --- •ÏX“_FƒoƒbƒNƒoƒbƒtƒ@‚Å‚Í‚È‚­AƒV[ƒ“—pHDRƒoƒbƒtƒ@‚ğƒNƒŠƒA‚·‚é ---
+    // --- å¤‰æ›´ç‚¹ï¼šãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã§ã¯ãªãã€ã‚·ãƒ¼ãƒ³ç”¨HDRãƒãƒƒãƒ•ã‚¡ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹ ---
     sceneDistortionUsed = false;
     immediateContext->ClearRenderTargetView(sceneRTV.Get(), clearColor_);
-    const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; // C³F{} ‚ğg‚¢A•Ï”–¼‚ğ black ‚É
+    const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; // ä¿®æ­£ï¼š{} ã‚’ä½¿ã„ã€å¤‰æ•°åã‚’ black ã«
     immediateContext->ClearRenderTargetView(sceneNormalRTV.Get(), black);
     if (sceneDistortionRTV)
     {
@@ -395,32 +395,32 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
     immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
     immediateContext->ClearRenderTargetView(gBufferEmissiveRTV.Get(), black);
 
-    // [“xƒoƒbƒtƒ@‚ğƒNƒŠƒAi‚±‚ê‚Í‹¤’Êj
+    // æ·±åº¦ãƒãƒƒãƒ•ã‚¡ã‚’ã‚¯ãƒªã‚¢ï¼ˆã“ã‚Œã¯å…±é€šï¼‰
     immediateContext->ClearDepthStencilView(depthStencilView.Get(),
         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // --- •ÏX“_F•`‰ææ‚ğuƒV[ƒ“ƒoƒbƒtƒ@v‚ÉŒÅ’è‚·‚é ---
-    // ‚±‚ê‚É‚æ‚èAGameObjectManager‚Ì’Êí‚Ì•`‰æ‚ª‚·‚×‚ÄHDRƒeƒNƒXƒ`ƒƒ‚É•`‚«‚Ü‚ê‚Ü‚·
+    // --- å¤‰æ›´ç‚¹ï¼šæç”»å…ˆã‚’ã€Œã‚·ãƒ¼ãƒ³ãƒãƒƒãƒ•ã‚¡ã€ã«å›ºå®šã™ã‚‹ ---
+    // ã“ã‚Œã«ã‚ˆã‚Šã€GameObjectManagerã®é€šå¸¸ã®æç”»ãŒã™ã¹ã¦HDRãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æãè¾¼ã¾ã‚Œã¾ã™
     ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneNormalRTV.Get() };
     immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
 
-    // ƒrƒ…[ƒ|[ƒg‚Ìİ’è
+    // ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã®è¨­å®š
     immediateContext->RSSetViewports(1, &viewport);
 }
 
 /**
- * @brief ƒtƒŒ[ƒ€‚Ì•`‰æ‚ğI—¹‚µ‚Ä‰æ–Ê‚É”½‰f‚·‚é
+ * @brief ãƒ•ãƒ¬ãƒ¼ãƒ ã®æç”»ã‚’çµ‚äº†ã—ã¦ç”»é¢ã«åæ˜ ã™ã‚‹
  */
 void GraphicsDeviceManager::EndFrame()
 {
-    // swapChain->Present() ‚ğŒÄ‚Ño‚µ
+    // swapChain->Present() ã‚’å‘¼ã³å‡ºã—
     swapChain->Present(vsyncEnabled ? 1 : 0, 0);
 }
 
 void GraphicsDeviceManager::SetParticleRenderTarget()
 {
     ID3D11RenderTargetView* renderTarget_ = sceneRTV.Get();
-    // ƒ^[ƒQƒbƒg‚ğ1–‡isceneRTV‚Ì‚İj‚Æ‚µ‚ÄƒZƒbƒg
+    // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’1æšï¼ˆsceneRTVã®ã¿ï¼‰ã¨ã—ã¦ã‚»ãƒƒãƒˆ
     immediateContext->OMSetRenderTargets(1, &renderTarget_, depthStencilView.Get());
 }
 
@@ -438,13 +438,13 @@ void GraphicsDeviceManager::SetBackBufferRenderTarget()
 
 void GraphicsDeviceManager::SetSceneRenderTarget()
 {
-    // •`‰ææ‚ğuƒV[ƒ“ƒJƒ‰[v‚ÆuƒV[ƒ“–@üv‚Ì2–‡‚ÉØ‚è‘Ö‚¦‚é
+    // æç”»å…ˆã‚’ã€Œã‚·ãƒ¼ãƒ³ã‚«ãƒ©ãƒ¼ã€ã¨ã€Œã‚·ãƒ¼ãƒ³æ³•ç·šã€ã®2æšã«åˆ‡ã‚Šæ›¿ãˆã‚‹
     ID3D11RenderTargetView* renderTargets_[] = {
         sceneRTV.Get(),
         sceneNormalRTV.Get()
     };
 
-    // ‘æˆêˆø”‚ğ 2 ‚É•ÏX
+    // ç¬¬ä¸€å¼•æ•°ã‚’ 2 ã«å¤‰æ›´
     immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
 
     immediateContext->RSSetViewports(1, &viewport);
@@ -490,26 +490,26 @@ void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
 {
     ID3D11DeviceContext* deviceContext_ = immediateContext.Get();
 
-    // IBL specular_pmrem ‚ğ t10 ‚ÉƒoƒCƒ“ƒh
+    // IBL specular_pmrem ã‚’ t10 ã«ãƒã‚¤ãƒ³ãƒ‰
     ID3D11ShaderResourceView* shaderResources_[] = { iblSpecularPmremSRV.Get() };
     deviceContext_->PSSetShaderResources(10, 1, shaderResources_);
 
-    // [“xƒeƒXƒg LESS_EQUALE‘‚«‚İOFF
+    // æ·±åº¦ãƒ†ã‚¹ãƒˆ LESS_EQUALãƒ»æ›¸ãè¾¼ã¿OFF
     deviceContext_->OMSetDepthStencilState(skyBoxDepthStencilState.Get(), 0);
 
-    // ƒJƒŠƒ“ƒO OFF
+    // ã‚«ãƒªãƒ³ã‚° OFF
     deviceContext_->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
-    // ƒAƒ‹ƒtƒ@ƒuƒŒƒ“ƒh OFF
+    // ã‚¢ãƒ«ãƒ•ã‚¡ãƒ–ãƒ¬ãƒ³ãƒ‰ OFF
     deviceContext_->OMSetBlendState(renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
-    // ƒVƒF[ƒ_[E“ü—ÍƒŒƒCƒAƒEƒg
+    // ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ»å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
     deviceContext_->VSSetShader(skyBoxVertexShader.Get(), nullptr, 0);
     deviceContext_->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
     deviceContext_->IASetInputLayout(skyBoxInputLayout.Get());
     deviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // ’¸“_EƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
+    // é ‚ç‚¹ãƒ»ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡
     UINT vertexStride_ = sizeof(SkyBoxVertex);
     UINT vertexOffset_ = 0;
     deviceContext_->IASetVertexBuffers(0, 1, skyBoxVertexBuffer.GetAddressOf(), &vertexStride_, &vertexOffset_);
@@ -517,7 +517,7 @@ void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
 
     deviceContext_->DrawIndexed(6, 0, 0);
 
-    // ---- Œãn–– ----
+    // ---- å¾Œå§‹æœ« ----
     deviceContext_->VSSetShader(nullptr, nullptr, 0);
     deviceContext_->PSSetShader(nullptr, nullptr, 0);
     deviceContext_->IASetInputLayout(nullptr);
@@ -548,25 +548,25 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
     if (ImGui::CollapsingHeader("Bloom (Kawase Blur)", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Checkbox("Bloom Enabled", &bloomParams.enabled);
-        // 1. è‡’l (Threshold): ‚Ç‚Ì–¾‚é‚³‚©‚çŒõ‚ç‚¹‚é‚©
+        // 1. é–¾å€¤ (Threshold): ã©ã®æ˜ã‚‹ã•ã‹ã‚‰å…‰ã‚‰ã›ã‚‹ã‹
         ImGui::DragFloat("Threshold", &bloomParams.threshold, 0.01f, 0.0f, 5.0f, "%.2f");
-        //ImGui::SetItemTooltip("‚±‚Ì’l‚æ‚è–¾‚é‚¢ƒsƒNƒZƒ‹‚ª’Šo‚³‚ê‚Ü‚·B’á‚¢‚Ù‚Ç‰æ–Ê‘S‘Ì‚ªŒõ‚è‚Ü‚·B");
+        //ImGui::SetItemTooltip("ã“ã®å€¤ã‚ˆã‚Šæ˜ã‚‹ã„ãƒ”ã‚¯ã‚»ãƒ«ãŒæŠ½å‡ºã•ã‚Œã¾ã™ã€‚ä½ã„ã»ã©ç”»é¢å…¨ä½“ãŒå…‰ã‚Šã¾ã™ã€‚");
 
-        // 2. ‹­“x (Intensity): ÅI“I‚ÈŒõ‚Ì‹­‚³
+        // 2. å¼·åº¦ (Intensity): æœ€çµ‚çš„ãªå…‰ã®å¼·ã•
         ImGui::DragFloat("Intensity", &bloomParams.intensity, 0.01f, 0.0f, 10.0f, "%.2f");
-        //ImGui::SetItemTooltip("‡¬‚ÌŒõ‚Ì‹­‚³‚Å‚·B");
+        //ImGui::SetItemTooltip("åˆæˆæ™‚ã®å…‰ã®å¼·ã•ã§ã™ã€‚");
 
-        // 3. ƒXƒP[ƒ‹ (Kawase Scale): ‚Ú‚©‚µ‚ÌL‚ª‚è‹ï‡
+        // 3. ã‚¹ã‚±ãƒ¼ãƒ« (Kawase Scale): ã¼ã‹ã—ã®åºƒãŒã‚Šå…·åˆ
         ImGui::DragFloat("Kawase Scale", &bloomParams.kawaseScale, 0.01f, 0.0f, 2.0f, "%.2f");
-        //ImGui::SetItemTooltip("Œõ‚ğŠgU‚³‚¹‚é‹——£‚Å‚·Bã‚°‚é‚Æu‚Ô‚ê‚évŠ´‚¶‚ª‹­‚­‚È‚è‚Ü‚·B");
+        //ImGui::SetItemTooltip("å…‰ã‚’æ‹¡æ•£ã•ã›ã‚‹è·é›¢ã§ã™ã€‚ä¸Šã’ã‚‹ã¨ã€Œã¶ã‚Œã‚‹ã€æ„Ÿã˜ãŒå¼·ããªã‚Šã¾ã™ã€‚");
 
-        // 4. ƒpƒX‰ñ” (Blur Passes): ‚Ú‚©‚µ‚Ì¿
+        // 4. ãƒ‘ã‚¹å›æ•° (Blur Passes): ã¼ã‹ã—ã®è³ª
         ImGui::SliderInt("Blur Passes", &bloomParams.blurPasses, 0, 8);
-        //ImGui::SetItemTooltip("‚Ú‚©‚µ‚ğŒJ‚è•Ô‚·‰ñ”‚Å‚·B‘½‚¢‚Ù‚ÇŠŠ‚ç‚©‚É‰“‚­‚Ü‚ÅŒõ‚ª“Í‚«‚Ü‚·B");
+        //ImGui::SetItemTooltip("ã¼ã‹ã—ã‚’ç¹°ã‚Šè¿”ã™å›æ•°ã§ã™ã€‚å¤šã„ã»ã©æ»‘ã‚‰ã‹ã«é ãã¾ã§å…‰ãŒå±Šãã¾ã™ã€‚");
 
         ImGui::Separator();
 
-        // 5. ƒg[ƒ“ƒ}ƒbƒsƒ“ƒO
+        // 5. ãƒˆãƒ¼ãƒ³ãƒãƒƒãƒ”ãƒ³ã‚°
         ImGui::Checkbox("Tone Mapping", &bloomParams.toneMappingEnabled);
         if (bloomParams.toneMappingEnabled)
         {
@@ -575,7 +575,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
         ImGui::Separator();
 
-        // 6. ƒŠƒZƒbƒgƒ{ƒ^ƒ“
+        // 6. ãƒªã‚»ãƒƒãƒˆãƒœã‚¿ãƒ³
         if (ImGui::Button("Reset Parameters")) {
             bloomParams.enabled = true;
             bloomParams.threshold = 1.0f;
@@ -587,10 +587,10 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
         }
     }
 
-    // --- y’Ç‰ÁzƒJƒ‰[ƒtƒBƒ‹ƒ^[İ’è ---
+    // --- ã€è¿½åŠ ã€‘ã‚«ãƒ©ãƒ¼ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼è¨­å®š ---
     if (ImGui::CollapsingHeader("Color Filter", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        // Šî–{’²®
+        // åŸºæœ¬èª¿æ•´
         ImGui::DragFloat("Hue Shift", &filterParams.hueShift, 0.005f, -1.0f, 1.0f, "%.2f");
         ImGui::DragFloat("Saturation", &filterParams.saturation, 0.01f, 0.0f, 2.0f, "%.2f");
         ImGui::DragFloat("Brightness", &filterParams.brightness, 0.01f, 0.0f, 2.0f, "%.2f");
@@ -598,10 +598,10 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
 
         ImGui::Separator();
 
-        // ƒJƒ‰[ƒoƒ‰ƒ“ƒX (RGB‚ÌæZ)
+        // ã‚«ãƒ©ãƒ¼ãƒãƒ©ãƒ³ã‚¹ (RGBã®ä¹—ç®—)
         ImGui::ColorEdit3("Color Balance", &filterParams.colorBalance.x);
 
-        // “K—p‹­“x
+        // é©ç”¨å¼·åº¦
         ImGui::SliderFloat("Filter Intensity", &filterParams.filterIntensity, 0.0f, 1.0f);
 
         if (ImGui::Button("Reset Filter"))
@@ -644,24 +644,24 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
             xeGtaoParams = XeGtaoSystem::Parameters{};
         }
     }
-    // --- y’Ç‰Ázƒ‰ƒWƒAƒ‹ƒuƒ‰[İ’è ---
+    // --- ã€è¿½åŠ ã€‘ãƒ©ã‚¸ã‚¢ãƒ«ãƒ–ãƒ©ãƒ¼è¨­å®š ---
     if (ImGui::CollapsingHeader("Radial Blur", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        // 1. ƒuƒ‰[”¼Œa (Blur Radius)
+        // 1. ãƒ–ãƒ©ãƒ¼åŠå¾„ (Blur Radius)
         ImGui::DragFloat("Blur Radius", &radialBlurParams.blurRadius, 0.001f, 0.0f, 0.5f, "%.3f");
 
-        // 2. ƒTƒ“ƒvƒŠƒ“ƒO” (Sampling Count)
+        // 2. ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°æ•° (Sampling Count)
         ImGui::SliderInt("Sampling Count", &radialBlurParams.blurSamplingCount, 4, 32);
 
-        // 3. ƒuƒ‰[‚Ì’†S“_ (Center)
+        // 3. ãƒ–ãƒ©ãƒ¼ã®ä¸­å¿ƒç‚¹ (Center)
         ImGui::DragFloat2("Blur Center", &radialBlurParams.blurCenter.x, 0.01f, 0.0f, 1.0f, "%.2f");
 
-        // 4. ƒ}ƒXƒN”¼Œa (Mask Radius)
+        // 4. ãƒã‚¹ã‚¯åŠå¾„ (Mask Radius)
         ImGui::DragFloat("Mask Radius", &radialBlurParams.blurMaskRadius, 0.01f, 0.0f, 2.0f, "%.2f");
 
         ImGui::Separator();
 
-        // 5. ƒŠƒZƒbƒgƒ{ƒ^ƒ“
+        // 5. ãƒªã‚»ãƒƒãƒˆãƒœã‚¿ãƒ³
         if (ImGui::Button("Reset Radial Blur")) {
             radialBlurParams.blurRadius = 0.05f;
             radialBlurParams.blurSamplingCount = 16;
@@ -679,9 +679,9 @@ void GraphicsDeviceManager::ShowPostEffectGui()
 }
 
 /**
- * @brief Direct3D11ƒfƒoƒCƒX‚ÆƒXƒƒbƒvƒ`ƒF[ƒ“‚ğ¶¬
- * @param hwnd_ ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹
- * @return ¬Œ÷ trueA¸”s false
+ * @brief Direct3D11ãƒ‡ãƒã‚¤ã‚¹ã¨ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ã‚’ç”Ÿæˆ
+ * @param hwnd_ ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«
+ * @return æˆåŠŸæ™‚ trueã€å¤±æ•—æ™‚ false
  */
 
 bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
@@ -694,7 +694,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
 #endif
 
     // =========================
-    // ˆê”ÔVRAM‚ª‘å‚«‚¢GPU‚ğ’T‚·
+    // ä¸€ç•ªVRAMãŒå¤§ãã„GPUã‚’æ¢ã™
     // =========================
     Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory_;
     result_ = CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(dxgiFactory_.GetAddressOf()));
@@ -714,7 +714,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
         DXGI_ADAPTER_DESC adapterDesc_{};
         adapter_->GetDesc(&adapterDesc_);
 
-        // Microsoft Basic Render Driver ‚ÍœŠO
+        // Microsoft Basic Render Driver ã¯é™¤å¤–
         if (adapterDesc_.VendorId == 0x1414)
         {
             continue;
@@ -733,7 +733,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     }
 
     // =========================
-    // ƒXƒƒbƒvƒ`ƒF[ƒ“İ’è
+    // ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³è¨­å®š
     // =========================
     swapChainDesc = {};
     swapChainDesc.BufferCount = 2;
@@ -746,7 +746,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     swapChainDesc.OutputWindow = hwnd_;
     swapChainDesc.SampleDesc.Count = 1;
     swapChainDesc.SampleDesc.Quality = 0;
-    // Flip model‚Å‚Í”r‘¼ƒ‚[ƒh‚ÖØ‚è‘Ö‚¦‚¸AƒEƒBƒ“ƒhƒE‘¤‚ğƒ{[ƒ_[ƒŒƒX‰»‚·‚éB
+    // Flip modelã§ã¯æ’ä»–ãƒ¢ãƒ¼ãƒ‰ã¸åˆ‡ã‚Šæ›¿ãˆãšã€ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å´ã‚’ãƒœãƒ¼ãƒ€ãƒ¼ãƒ¬ã‚¹åŒ–ã™ã‚‹ã€‚
     swapChainDesc.Windowed = TRUE;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.Flags = 0;
@@ -762,8 +762,8 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     D3D_FEATURE_LEVEL createdFeatureLevel_{};
 
     // =========================
-    // ‘I‚ñ‚¾GPU‚ÅDeviceì¬
-    // ’ˆÓ: adapterw’è‚Í DRIVER_TYPE_UNKNOWN
+    // é¸ã‚“ã GPUã§Deviceä½œæˆ
+    // æ³¨æ„: adapteræŒ‡å®šæ™‚ã¯ DRIVER_TYPE_UNKNOWN
     // =========================
     result_ = D3D11CreateDeviceAndSwapChain(
         bestAdapter_.Get(),
@@ -783,7 +783,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     _ASSERT_EXPR(SUCCEEDED(result_), L"D3D11CreateDeviceAndSwapChain");
     if (FAILED(result_)) return false;
 
-    // “Æ©‚Ìƒ{[ƒ_[ƒŒƒXØ‘Ö‚ÆDXGI•W€‚ÌAlt+Enter‚ª“ñd‚É“®‚©‚È‚¢‚æ‚¤‚É‚·‚éB
+    // ç‹¬è‡ªã®ãƒœãƒ¼ãƒ€ãƒ¼ãƒ¬ã‚¹åˆ‡æ›¿ã¨DXGIæ¨™æº–ã®Alt+EnterãŒäºŒé‡ã«å‹•ã‹ãªã„ã‚ˆã†ã«ã™ã‚‹ã€‚
     dxgiFactory_->MakeWindowAssociation(hwnd_, DXGI_MWA_NO_ALT_ENTER);
 
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice_;
@@ -811,58 +811,58 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
 }
 
 /**
- * @brief ƒoƒbƒNƒoƒbƒtƒ@‚©‚çRenderTargetView‚ğì¬
- * @return ¬Œ÷ trueA¸”s false
+ * @brief ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã‹ã‚‰RenderTargetViewã‚’ä½œæˆ
+ * @return æˆåŠŸæ™‚ trueã€å¤±æ•—æ™‚ false
  */
 bool GraphicsDeviceManager::CreateRenderTarget()
 {
     HRESULT hr_ = S_OK;
 
-    // swapChain_->GetBuffer() ‚ÅƒoƒbƒNƒoƒbƒtƒ@æ“¾
+    // swapChain_->GetBuffer() ã§ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡å–å¾—
     Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer_;
 
     hr_ = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer_.GetAddressOf()));
     _ASSERT_EXPR(SUCCEEDED(hr_), (L"miss GetBuffer"));
-    //device_->CreateRenderTargetView() ‚ÅRTVì¬
+    //device_->CreateRenderTargetView() ã§RTVä½œæˆ
     hr_ = device->CreateRenderTargetView(backBuffer_.Get(), NULL, renderTargetView.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr_), L"miss CreateRenderTargetView");
 
 
-    //¬Œ÷ true ‚ğ•Ô‚·
+    //æˆåŠŸæ™‚ true ã‚’è¿”ã™
     return SUCCEEDED(hr_);
 }
 
 /**
- * @brief [“xƒXƒeƒ“ƒVƒ‹ƒoƒbƒtƒ@‚ÆView‚ğì¬
- * @return ¬Œ÷ trueA¸”s false
+ * @brief æ·±åº¦ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒãƒƒãƒ•ã‚¡ã¨Viewã‚’ä½œæˆ
+ * @return æˆåŠŸæ™‚ trueã€å¤±æ•—æ™‚ false
  */
 bool GraphicsDeviceManager::CreateDepthStencil()
 {
     HRESULT hr_ = S_OK;
 
-    // --- 1. Texture2D ‚Ìì¬ ---
-    // ƒfƒJ[ƒ‹‚Å[“x‚ğ“Ç‚İæ‚é‚½‚ßADSV‚ÆSRV—¼•û‚Åg‚¦‚é TYPELESS ƒtƒH[ƒ}ƒbƒg‚É‚·‚é
+    // --- 1. Texture2D ã®ä½œæˆ ---
+    // ãƒ‡ã‚«ãƒ¼ãƒ«ã§æ·±åº¦ã‚’èª­ã¿å–ã‚‹ãŸã‚ã€DSVã¨SRVä¸¡æ–¹ã§ä½¿ãˆã‚‹ TYPELESS ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã«ã™ã‚‹
     D3D11_TEXTURE2D_DESC texture2dDesc_{};
     texture2dDesc_.Width = width;
     texture2dDesc_.Height = height;
     texture2dDesc_.MipLevels = 1;
     texture2dDesc_.ArraySize = 1;
-    texture2dDesc_.Format = DXGI_FORMAT_R24G8_TYPELESS; // •ÏXF”Ä—p“I‚ÈŒ^
+    texture2dDesc_.Format = DXGI_FORMAT_R24G8_TYPELESS; // å¤‰æ›´ï¼šæ±ç”¨çš„ãªå‹
     texture2dDesc_.SampleDesc.Count = 1;
     texture2dDesc_.SampleDesc.Quality = 0;
     texture2dDesc_.Usage = D3D11_USAGE_DEFAULT;
-    // d—vF[“x‘‚«‚İ—p(DS)‚ÆAƒVƒF[ƒ_[“Ç‚İ‚İ—p(SR)‚Ì—¼•û‚ğw’è
+    // é‡è¦ï¼šæ·±åº¦æ›¸ãè¾¼ã¿ç”¨(DS)ã¨ã€ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿ç”¨(SR)ã®ä¸¡æ–¹ã‚’æŒ‡å®š
     texture2dDesc_.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
     texture2dDesc_.CPUAccessFlags = 0;
     texture2dDesc_.MiscFlags = 0;
 
-    // ƒƒ“ƒo•Ï”‚Ì depthStencilTexture ‚É•Û‘¶iSRVì¬‚É•K—vj
+    // ãƒ¡ãƒ³ãƒå¤‰æ•°ã® depthStencilTexture ã«ä¿å­˜ï¼ˆSRVä½œæˆã«å¿…è¦ï¼‰
     hr_ = device->CreateTexture2D(&texture2dDesc_, NULL, depthStencilTexture.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr_), L"Failed to CreateTexture2D for DepthStencil");
 
-    // --- 2. DepthStencilView (‘‚«‚İ—p) ‚Ìì¬ ---
+    // --- 2. DepthStencilView (æ›¸ãè¾¼ã¿ç”¨) ã®ä½œæˆ ---
     D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc_{};
-    depthStencilViewDesc_.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // [“x{ƒXƒeƒ“ƒVƒ‹‚Æ‚µ‚Ä‰ğß
+    depthStencilViewDesc_.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // æ·±åº¦ï¼‹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã¨ã—ã¦è§£é‡ˆ
     depthStencilViewDesc_.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     depthStencilViewDesc_.Flags = 0;
     depthStencilViewDesc_.Texture2D.MipSlice = 0;
@@ -871,9 +871,9 @@ bool GraphicsDeviceManager::CreateDepthStencil()
         depthStencilView.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr_), L"Failed to CreateDepthStencilView");
 
-    // --- 3. ShaderResourceView (ƒfƒJ[ƒ‹“Ç‚İæ‚è—p) ‚Ìì¬ ---
+    // --- 3. ShaderResourceView (ãƒ‡ã‚«ãƒ¼ãƒ«èª­ã¿å–ã‚Šç”¨) ã®ä½œæˆ ---
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-    srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS; // 24bit‚Ì[“x¬•ª‚Ì‚İ‚ğ“Ç‚İæ‚é
+    srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS; // 24bitã®æ·±åº¦æˆåˆ†ã®ã¿ã‚’èª­ã¿å–ã‚‹
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MostDetailedMip = 0;
     srvDesc.Texture2D.MipLevels = 1;
@@ -882,11 +882,11 @@ bool GraphicsDeviceManager::CreateDepthStencil()
         depthStencilSRV.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr_), L"Failed to CreateShaderResourceView for Depth");
 
-    // --- ƒŒƒ“ƒ_ƒŠƒ“ƒOƒ^[ƒQƒbƒg‚Ö‚ÌƒoƒCƒ“ƒh ---
+    // --- ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¸ã®ãƒã‚¤ãƒ³ãƒ‰ ---
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
     {
-        // ƒƒ“ƒo•Ï”‚Ì depthStencilTexture ‚É•Û‘¶iSRVì¬‚É•K—vj
+        // ãƒ¡ãƒ³ãƒå¤‰æ•°ã® depthStencilTexture ã«ä¿å­˜ï¼ˆSRVä½œæˆã«å¿…è¦ï¼‰
         hr_ = device->CreateTexture2D(&texture2dDesc_, NULL, copyDepthStencilTexture.ReleaseAndGetAddressOf());
         hr_ = device->CreateShaderResourceView(copyDepthStencilTexture.Get(), &srvDesc,
             copyDepthStencilSRV.ReleaseAndGetAddressOf());
@@ -895,22 +895,22 @@ bool GraphicsDeviceManager::CreateDepthStencil()
     return SUCCEEDED(hr_);
 }
 /**
- * @brief ‘S‚Ä‚ÌDirect3DƒŠƒ\[ƒX‚ğ‰ğ•ú‚·‚é
+ * @brief å…¨ã¦ã®Direct3Dãƒªã‚½ãƒ¼ã‚¹ã‚’è§£æ”¾ã™ã‚‹
  */
 void GraphicsDeviceManager::ReleaseResources()
 {
-    // 1. ƒŒƒ“ƒ_ƒŠƒ“ƒOƒ^[ƒQƒbƒg‚Ì‰ğœi“Ç‚İæ‚è‚Æ‘‚«‚İ‚ªÕ“Ë‚µ‚È‚¢‚æ‚¤‚É‚·‚éj
+    // 1. ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®è§£é™¤ï¼ˆèª­ã¿å–ã‚Šã¨æ›¸ãè¾¼ã¿ãŒè¡çªã—ãªã„ã‚ˆã†ã«ã™ã‚‹ï¼‰
     ID3D11RenderTargetView* nullRTV = nullptr;
     immediateContext->OMSetRenderTargets(1, &nullRTV, nullptr);
 
-    // 2. RenderContext ‚Ìì¬iGameObjectManager ‚Å‚â‚Á‚Ä‚¢‚½‚Ì‚Æ“¯—lj
+    // 2. RenderContext ã®ä½œæˆï¼ˆGameObjectManager ã§ã‚„ã£ã¦ã„ãŸã®ã¨åŒæ§˜ï¼‰
     RenderContext rc;
     rc.deviceContext = immediateContext.Get();
-    rc.renderState = renderState.get(); // GraphicsDeviceManager‚ª‚Á‚Ä‚¢‚éRenderState
-    // ¦Camera‚âLight‚Íƒ|ƒXƒgƒvƒƒZƒX‚É‚Í’¼Ú•s—v‚Èê‡‚ª‘½‚¢‚Ì‚Å nullptr ‚Ì‚Ü‚Ü‚Å‚àOK
+    rc.renderState = renderState.get(); // GraphicsDeviceManagerãŒæŒã£ã¦ã„ã‚‹RenderState
+    // â€»Cameraã‚„Lightã¯ãƒã‚¹ãƒˆãƒ—ãƒ­ã‚»ã‚¹ã«ã¯ç›´æ¥ä¸è¦ãªå ´åˆãŒå¤šã„ã®ã§ nullptr ã®ã¾ã¾ã§ã‚‚OK
 
-    // 3. ƒuƒ‹[ƒ€Às
-    // ˆø”1‚É rc ‚ğ“n‚·iƒ|ƒCƒ“ƒ^‚Å‚Í‚È‚­À‘Ì‚È‚Ì‚Å•ÏŠ·ƒGƒ‰[‚ªÁ‚¦‚Ü‚·j
+    // 3. ãƒ–ãƒ«ãƒ¼ãƒ å®Ÿè¡Œ
+    // å¼•æ•°1ã« rc ã‚’æ¸¡ã™ï¼ˆãƒã‚¤ãƒ³ã‚¿ã§ã¯ãªãå®Ÿä½“ãªã®ã§å¤‰æ›ã‚¨ãƒ©ãƒ¼ãŒæ¶ˆãˆã¾ã™ï¼‰
     postRenderSystem.GetBloomSystem().Execute(
         rc,
         sceneSRV.Get(),
@@ -931,7 +931,7 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     desc.Height = height_;
     desc.MipLevels = 1;
     desc.ArraySize = 1;
-    desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // HDR—p
+    desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // HDRç”¨
     desc.SampleDesc.Count = 1;
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -943,9 +943,9 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     device->CreateRenderTargetView(texture.Get(), nullptr, sceneRTV.ReleaseAndGetAddressOf());
     device->CreateShaderResourceView(texture.Get(), nullptr, sceneSRV.ReleaseAndGetAddressOf());
 
-    // --- ‡A y’Ç‰ÁzƒV[ƒ“–@üƒoƒbƒtƒ@ ---
-    D3D11_TEXTURE2D_DESC nDesc = desc; // ƒJƒ‰[‚Ìİ’è‚ğ—¬—p
-    nDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // –@ü—p
+    // --- â‘¡ ã€è¿½åŠ ã€‘ã‚·ãƒ¼ãƒ³æ³•ç·šãƒãƒƒãƒ•ã‚¡ ---
+    D3D11_TEXTURE2D_DESC nDesc = desc; // ã‚«ãƒ©ãƒ¼ã®è¨­å®šã‚’æµç”¨
+    nDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // æ³•ç·šç”¨
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> nTexture;
     device->CreateTexture2D(&nDesc, nullptr, nTexture.GetAddressOf());
@@ -970,7 +970,7 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     result_ = device->CreateShaderResourceView(copySceneColorTexture.Get(), nullptr, copySceneColorSRV.ReleaseAndGetAddressOf());
     if (FAILED(result_)) return false;
 
-    // --- –@ü‚ÌƒRƒs[—p ---
+    // --- æ³•ç·šã®ã‚³ãƒ”ãƒ¼ç”¨ ---
     result_ = device->CreateTexture2D(&desc, nullptr, copyNormalTexture.ReleaseAndGetAddressOf());
     if (FAILED(result_)) return false;
 
@@ -1027,5 +1027,5 @@ bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
 }
 void GraphicsDeviceManager::Finalize()
 {
-    // ƒXƒƒbƒvƒ`ƒF[ƒ“‚Íí‚ÉƒEƒBƒ“ƒhƒEƒ‚[ƒh‚È‚Ì‚ÅADXGI‚Ì”r‘¼‰ğœ‚Í•s—vB
+    // ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ã¯å¸¸ã«ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ¢ãƒ¼ãƒ‰ãªã®ã§ã€DXGIã®æ’ä»–è§£é™¤ã¯ä¸è¦ã€‚
 }

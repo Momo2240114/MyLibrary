@@ -18,23 +18,23 @@ class ShapeRenderSystem;
 // ===========================
 struct RenderContext
 {
-    ID3D11Device* device = nullptr; // y’Ç‰ÁzƒŠƒ\[ƒX¶¬‚Ì–‚—Í
+    ID3D11Device* device = nullptr; // ã€è¿½åŠ ã€‘ãƒªã‚½ãƒ¼ã‚¹ç”Ÿæˆã®é­”åŠ›
     ID3D11DeviceContext* deviceContext;
 
     const RenderState* renderState;
-    const CameraComponent* camera = nullptr;       // ƒV[ƒ“ƒJƒƒ‰
-    const LightManager* lights = nullptr; // ƒV[ƒ“ƒ‰ƒCƒg
+    const CameraComponent* camera = nullptr;       // ã‚·ãƒ¼ãƒ³ã‚«ãƒ¡ãƒ©
+    const LightManager* lights = nullptr; // ã‚·ãƒ¼ãƒ³ãƒ©ã‚¤ãƒˆ
 
-    const DecalManager* decal = nullptr; //ƒV[ƒ“ƒfƒJ[ƒ‹
+    const DecalManager* decal = nullptr; //ã‚·ãƒ¼ãƒ³ãƒ‡ã‚«ãƒ¼ãƒ«
 
     ID3D11RenderTargetView* backBufferRTV = nullptr;
-    ID3D11ShaderResourceView* depthSRV = nullptr;    // Œ»İ‚Ì[“xƒoƒbƒtƒ@‚ÌSRV
+    ID3D11ShaderResourceView* depthSRV = nullptr;    // ç¾åœ¨ã®æ·±åº¦ãƒãƒƒãƒ•ã‚¡ã®SRV
     ID3D11ShaderResourceView* baseColorSRV = nullptr;
-    ShapeRenderSystem* shapeSystem = nullptr;        // BoxƒƒbƒVƒ…‚Ì‹Ÿ‹‹Œ¹
+    ShapeRenderSystem* shapeSystem = nullptr;        // Boxãƒ¡ãƒƒã‚·ãƒ¥ã®ä¾›çµ¦æº
 
     CascadeShadowMap* cascadeShadowMap = nullptr;
 
-    // •K—v‚Å‚ ‚ê‚ÎAƒ|ƒXƒgƒvƒƒZƒX“™‚Åd•ó‚·‚é‰æ–ÊƒTƒCƒY
+    // å¿…è¦ã§ã‚ã‚Œã°ã€ãƒã‚¹ãƒˆãƒ—ãƒ­ã‚»ã‚¹ç­‰ã§é‡å®ã™ã‚‹ç”»é¢ã‚µã‚¤ã‚º
     float screenWidth = 0.0f;
     float screenHeight = 0.0f;
 };

@@ -23,19 +23,19 @@ struct EventItem
     float startTime = 0;
     float endTime = 0;
     unsigned int color = 0xFFFFFFFF;
-    std::string label;                 // •\¦–¼i”CˆÓj
+    std::string label;                 // è¡¨ç¤ºåï¼ˆä»»æ„ï¼‰
   
-    // ƒ^ƒCƒ~ƒ“ƒO‚²‚Æ‚Éˆá‚¤–¼‘O‚ğ•Û‘¶‚Å‚«‚é‚æ‚¤‚É‚·‚é
+    // ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã”ã¨ã«é•ã†åå‰ã‚’ä¿å­˜ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
     std::string actionStart;
     std::string actionUpdate;
     std::string actionEnd;
 
-    // ƒCƒxƒ“ƒg‚Ìó‘ÔŠÇ——p
+    // ã‚¤ãƒ™ãƒ³ãƒˆã®çŠ¶æ…‹ç®¡ç†ç”¨
     bool started = false;
     bool ended = false;
 
-    std::string payload;               // JSON ‚â Script –¼‚È‚Ç•Û‘¶‰Â”\
-    // Start / Update / End ƒR[ƒ‹ƒoƒbƒN
+    std::string payload;               // JSON ã‚„ Script åãªã©ä¿å­˜å¯èƒ½
+    // Start / Update / End ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
     std::function<void(EventItem&)> onStart;
     std::function<void(EventItem&, float currentTime)> onUpdate;
     std::function<void(EventItem&)> onEnd;
@@ -49,10 +49,10 @@ public:
     EventTrack(const std::string& name = "", EventType defaultType = EventType::Generic);
 
     void Update(float currentTime, std::shared_ptr<GameObject> owner);
-    // ‹¤’Ê‚ÌÀsƒwƒ‹ƒp[
+    // å…±é€šã®å®Ÿè¡Œãƒ˜ãƒ«ãƒ‘ãƒ¼
     void Execute(const std::string& name, std::shared_ptr<GameObject> owner);
 
-    // ƒCƒxƒ“ƒg‘€ì
+    // ã‚¤ãƒ™ãƒ³ãƒˆæ“ä½œ
     void AddEvent(EventType type, const std::string& label, float start, float end, unsigned int color);
     void DeleteEvent(int index);
     void DuplicateEvent(int index);
@@ -81,7 +81,7 @@ public:
         return maxTime;
     }
 
-    // ƒAƒNƒZƒX
+    // ã‚¢ã‚¯ã‚»ã‚¹
     int GetItemCount() const { return (int)events.size(); }
     const EventItem& GetEvent(int index) const { return events[index]; }
     EventItem& GetEvent(int index) { return events[index]; }
@@ -91,12 +91,12 @@ private:
     std::string trackName;
     EventType defaultEventType;
 
-    // •ÒW
+    // ç·¨é›†
     int editingEntry = -1;
     int editingPart = 0;
 
-    float zoomScale = 100.0f; // 1•b‚ ‚½‚è‚ÌƒsƒNƒZƒ‹” (pixelsPerSecond)
-    float labelWidth = 120.0f; // ¶‘¤‚Ìƒ‰ƒxƒ‹•‚à‰Â•Ï‚É‚·‚é‚Æ•Ö—˜
+    float zoomScale = 100.0f; // 1ç§’ã‚ãŸã‚Šã®ãƒ”ã‚¯ã‚»ãƒ«æ•° (pixelsPerSecond)
+    float labelWidth = 120.0f; // å·¦å´ã®ãƒ©ãƒ™ãƒ«å¹…ã‚‚å¯å¤‰ã«ã™ã‚‹ã¨ä¾¿åˆ©
 
     EventItem clipboard;
 };

@@ -5,7 +5,7 @@
                 "ActionPrefix": "Kick",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 334,
+                "AttackInstanceId": 38,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,

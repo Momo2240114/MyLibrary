@@ -9,20 +9,20 @@
 
 void ExitComponent::Start()
 {
-	//ƒvƒŒƒCƒ„[ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğæ“¾‚·‚é
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å–å¾—ã™ã‚‹
 	m_pPlayerComponent = GameObjectManager::Instance().Find("MainCamera")->GetComponent<PlayerComponent>();
 
-	//ƒ{ƒbƒNƒXƒRƒ‰ƒCƒ_[ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ’Ç‰Á‚·‚é
+	//ãƒœãƒƒã‚¯ã‚¹ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’è¿½åŠ ã™ã‚‹
 	m_pBoxColliderComponent = GetGameObject()->GetOrAddComponent<BoxCollider>();
 
-	//// ƒV[ƒ““à‚Éˆê‚Â‚¾‚¯‚ ‚é‘z’è
-	auto itemManagerObj = GameObjectManager::Instance().Find("ItemManager"); // ƒIƒuƒWƒFƒNƒg–¼‚ÍŠÂ‹«‚É‡‚í‚¹‚Ä‚­‚¾‚³‚¢
+	//// ã‚·ãƒ¼ãƒ³å†…ã«ä¸€ã¤ã ã‘ã‚ã‚‹æƒ³å®š
+	auto itemManagerObj = GameObjectManager::Instance().Find("ItemManager"); // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆåã¯ç’°å¢ƒã«åˆã‚ã›ã¦ãã ã•ã„
 	if (itemManagerObj)
 	{
 		auto itemMgr = itemManagerObj->GetComponent<ItemManagerComponent>();
 		if (itemMgr)
 		{
-			// ¶¬‚³‚ê‚½”ƒNƒŠƒAğŒ‚É‚·‚é
+			// ç”Ÿæˆã•ã‚ŒãŸæ•°ï¼ã‚¯ãƒªã‚¢æ¡ä»¶ã«ã™ã‚‹
 			m_GoalConditions = itemMgr->GetActualSpawnedCount();
 		}
 	}
@@ -32,17 +32,17 @@ void ExitComponent::Update(float et)
 {
 	if (!m_pDigit10.lock())
 	{
-		// 10‚ÌˆÊ
+		// 10ã®ä½
 		auto obj10 = GameObjectManager::Instance().Find("NumberUI");
 		if (obj10) m_pDigit10 = obj10->GetComponent<NumberSwitcher>();
 	}
 	if (!m_pDigit01.lock())
 	{
-		// 1‚ÌˆÊ
+		// 1ã®ä½
 		auto obj01 = GameObjectManager::Instance().Find("NumberUI_01");
 		if (obj01) m_pDigit01 = obj01->GetComponent<NumberSwitcher>();
 	}
-	// Max•\¦—p
+	// Maxè¡¨ç¤ºç”¨
 	if (!m_pDigitMax10.lock()) {
 		auto obj = GameObjectManager::Instance().Find("NumberUI_02");
 		if (obj) m_pDigitMax10 = obj->GetComponent<NumberSwitcher>();
@@ -51,7 +51,7 @@ void ExitComponent::Update(float et)
 		auto obj = GameObjectManager::Instance().Find("NumberUI_03");
 		if (obj) m_pDigitMax01 = obj->GetComponent<NumberSwitcher>();
 	}
-	// –Ú•W”(Max)‚Ì•\¦‚ğXV
+	// ç›®æ¨™æ•°(Max)ã®è¡¨ç¤ºã‚’æ›´æ–°
 	int maxD10 = (m_GoalConditions / 10) % 10;
 	int maxD01 = m_GoalConditions % 10;
 	if (auto sM10 = m_pDigitMax10.lock()) sM10->SetDigit(maxD10);
@@ -60,20 +60,20 @@ void ExitComponent::Update(float et)
 	auto player = m_pPlayerComponent.lock();
 	if (player)
 	{
-		// 1. Œ»İ‚ÌŠ”‚ğæ“¾
+		// 1. ç¾åœ¨ã®æ‰€æŒæ•°ã‚’å–å¾—
 		int currentItemCount = player->GetHasItem();
 
-		// 2. 2Œ…‚Ì•\¦‚ğXVi0`99‚Ì”ÍˆÍ‚ÅŒvZj
-		int d10 = (currentItemCount / 10) % 10; // 10‚ÌˆÊ
-		int d01 = currentItemCount % 10;        // 1‚ÌˆÊ
+		// 2. 2æ¡ã®è¡¨ç¤ºã‚’æ›´æ–°ï¼ˆ0ï½99ã®ç¯„å›²ã§è¨ˆç®—ï¼‰
+		int d10 = (currentItemCount / 10) % 10; // 10ã®ä½
+		int d01 = currentItemCount % 10;        // 1ã®ä½
 
 		if (auto s10 = m_pDigit10.lock()) s10->SetDigit(d10);
 		if (auto s01 = m_pDigit01.lock()) s01->SetDigit(d01);
 
-		// ƒvƒŒƒCƒ„[‚ª–Ú•WŒÂ”’B¬‚µ‚½‚Æ‚«
+		// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒç›®æ¨™å€‹æ•°é”æˆã—ãŸã¨ã
 		if (currentItemCount >= m_GoalConditions)
 		{
-			// ƒvƒŒƒCƒ„[‚ªƒS[ƒ‹‚Ü‚Å—ˆ‚½‚çƒS[ƒ‹ƒtƒ‰ƒO‚ğ—§‚Ä‚é
+			// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒã‚´ãƒ¼ãƒ«ã¾ã§æ¥ãŸã‚‰ã‚´ãƒ¼ãƒ«ãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹
 			for (std::shared_ptr<GameObject> gameObject : m_pBoxColliderComponent->currentTriggers)
 			{
 				if (gameObject->GetLayer() == GameObject::LayerType::Player)

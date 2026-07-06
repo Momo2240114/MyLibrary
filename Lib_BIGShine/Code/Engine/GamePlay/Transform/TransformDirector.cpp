@@ -10,7 +10,7 @@ void TransformDirector::Start()
     auto easingComp = go->GetOrAddComponent<EasingComponent>();
     easingIndex = easingComp->AddEasingAndGetIndex();
 
-    // ‰Šú‰»Žž‚ÉƒAƒNƒVƒ‡ƒ“‚ð“o˜^
+    // åˆæœŸåŒ–æ™‚ã«ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’ç™»éŒ²
     RegisterActions();
 }
 
@@ -22,7 +22,7 @@ void TransformDirector::Update(float et)
 
     float easedT = easingComp->GetValue(easingIndex);
 
-    // •âŠÔ“K—p
+    // è£œé–“é©ç”¨
     if (!m_AddFlag)
     {
         go->transform->localPosition = LerpVector(startPos, targetPos, easedT);
@@ -37,15 +37,15 @@ void TransformDirector::Update(float et)
          Vector3  resultAngle = LerpVector(Vector3::Zero, targetAngle, easedT);
 
 
-         //“x”‚ðƒ‰ƒWƒAƒ“‚É•ÏŠ·
+         //åº¦æ•°ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã«å¤‰æ›
          resultAngle.x = DirectX::XMConvertToRadians(resultAngle.x);
          resultAngle.y = DirectX::XMConvertToRadians(resultAngle.y);
          resultAngle.z = DirectX::XMConvertToRadians(resultAngle.z);
 
-         //ƒ[ƒJƒ‹‹óŠÔ‚Å‚ÌÀ•W
+         //ãƒ­ãƒ¼ã‚«ãƒ«ç©ºé–“ã§ã®åº§æ¨™
          Matrix transition = DirectX::XMMatrixTranslation(resultPositon.x, resultPositon.y, resultPositon.z);
 
-         //Œ»Ý‚ÌŠp“x
+         //ç¾åœ¨ã®è§’åº¦
          DirectX::XMVECTOR currentPosition, currentQuaternion, currentScale;
          DirectX::XMMatrixDecompose(&currentScale, &currentQuaternion, &currentPosition, m_WorldMatrix);
          Vector3 currentAngle = QuaternionToEuler(currentQuaternion);
@@ -59,17 +59,17 @@ void TransformDirector::Update(float et)
 
          Matrix mat = scaleMatrix * rotationMatrix * translationMatrix;
 
-         //V‚µ‚¢ƒ[ƒ‹ƒhs—ñ‚ð‹‚ß‚é
+         //æ–°ã—ã„ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’æ±‚ã‚ã‚‹
          Matrix worldMatrix = mat * transition;
 
          DirectX::XMVECTOR position, quaternion, scale;
          DirectX::XMMatrixDecompose(&scale, &quaternion, &position, worldMatrix);
 
-         //V‚µ‚¢ƒ[ƒ‹ƒhs—ñ‚Ìƒ[ƒJƒ‹‚ð‹‚ß‚é
+         //æ–°ã—ã„ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã®ãƒ­ãƒ¼ã‚«ãƒ«ã‚’æ±‚ã‚ã‚‹
          DirectX::XMStoreFloat3(&go->transform->localPosition, position);
          Vector3 angle = QuaternionToEuler(quaternion);
 
-         //ƒ‰ƒWƒAƒ“‚ð“x”‚É•ÏŠ·
+         //ãƒ©ã‚¸ã‚¢ãƒ³ã‚’åº¦æ•°ã«å¤‰æ›
          go->transform->localRotation.x = DirectX::XMConvertToDegrees(angle.x);
          go->transform->localRotation.y = DirectX::XMConvertToDegrees(angle.y);
          go->transform->localRotation.z = DirectX::XMConvertToDegrees(angle.z);
@@ -86,18 +86,18 @@ void TransformDirector::PlayMove(const TransformWayPoint& wp, EasingType type)
 
     startPos = go->transform->localPosition;
     startAngle = go->transform->localRotation;
-    startScale = go->transform->localScale; // ’Ç‰Á
+    startScale = go->transform->localScale; // è¿½åŠ 
 
     targetPos = wp.pos;
     targetAngle = wp.angle;
-    targetScale = wp.scale; // ’Ç‰Á
+    targetScale = wp.scale; // è¿½åŠ 
 
     easingComp->SetStartValue(easingIndex, 0.0f);
-    // ˆø”‚Ì type ‚Å‚Í‚È‚­Awp.easing ‚ðŽg—p‚·‚é‚æ‚¤‚É•ÏX
+    // å¼•æ•°ã® type ã§ã¯ãªãã€wp.easing ã‚’ä½¿ç”¨ã™ã‚‹ã‚ˆã†ã«å¤‰æ›´
     easingComp->PlayEasing(easingIndex, wp.easing, 1.0f / wp.duration, 1.0f);
     isMoving = true;
 
-    //ƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚Ìƒ[ƒ‹ƒhs—ñ‚ð•Û‘¶‚·‚é
+    //ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ä¿å­˜ã™ã‚‹
     m_WorldMatrix = go->transform->GetWorldMatrix();
     m_AddFlag = wp.m_AddFlag;
 }
@@ -106,7 +106,7 @@ void TransformDirector::Gui()
 {
     auto go = GetGameObject();
     if (ImGui::Button("Capture Transform")) {
-        // ‰Šú’l‚Æ‚µ‚ÄŒ»Ý‚Ìó‘Ô‚ÆƒfƒtƒHƒ‹ƒgƒC[ƒWƒ“ƒOiLinear“™j‚ðÝ’è
+        // åˆæœŸå€¤ã¨ã—ã¦ç¾åœ¨ã®çŠ¶æ…‹ã¨ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ï¼ˆLinearç­‰ï¼‰ã‚’è¨­å®š
         EditorWaypoints.push_back({ go->transform->localPosition, go->transform->localRotation,go->transform->localScale, 1.0f, EasingType::OutExpo ,false});
     }
 
@@ -116,10 +116,10 @@ void TransformDirector::Gui()
             auto& wp = EditorWaypoints[i];
             ImGui::DragFloat3("Pos", &wp.pos.x, 0.1f);
             ImGui::DragFloat3("Rot", &wp.angle.x, 0.1f);
-            ImGui::DragFloat3("Scale", &wp.scale.x, 0.01f); // ’Ç‰Á
+            ImGui::DragFloat3("Scale", &wp.scale.x, 0.01f); // è¿½åŠ 
             ImGui::DragFloat("Time", &wp.duration, 0.1f);
 
-            // ƒC[ƒWƒ“ƒOƒ^ƒCƒv‚Ì‘I‘ðiintƒLƒƒƒXƒg‚ÅƒRƒ“ƒ{ƒ{ƒbƒNƒX‰»j
+            // ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚¿ã‚¤ãƒ—ã®é¸æŠžï¼ˆintã‚­ãƒ£ã‚¹ãƒˆã§ã‚³ãƒ³ãƒœãƒœãƒƒã‚¯ã‚¹åŒ–ï¼‰
             int currentEasing = (int)wp.easing;
             if (ImGui::Combo("Easing", &currentEasing, "Linear\0InQuad\0OutQuad\0InOutQuad\0InExpo\0OutExpo\0InOutExpo\0OutBounds\0")) {
                 wp.easing = (EasingType)currentEasing;
@@ -128,7 +128,7 @@ void TransformDirector::Gui()
             if (ImGui::Button("Play")) PlayMove(wp, wp.easing);
             if (ImGui::Button("Remove")) { EditorWaypoints.erase(EditorWaypoints.begin() + i); i--; }
 
-            //Œ»Ý‚ÌÀ•W‚©‚ç‰ÁŽZ‚·‚éƒ‚[ƒVƒ‡ƒ“‚ðì‚é
+            //ç¾åœ¨ã®åº§æ¨™ã‹ã‚‰åŠ ç®—ã™ã‚‹ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ä½œã‚‹
             ImGui::Checkbox("AddWorldMatrix",&wp.m_AddFlag);
 
             ImGui::TreePop();
@@ -139,7 +139,7 @@ void TransformDirector::Gui()
 
 DirectX::XMFLOAT3 TransformDirector::QuaternionToEuler(DirectX::XMVECTOR q)
 {
-    // 1. ˆê’UA‰ñ“]s—ñ‚É•ÏŠ·‚·‚é
+    // 1. ä¸€æ—¦ã€å›žè»¢è¡Œåˆ—ã«å¤‰æ›ã™ã‚‹
     DirectX::XMMATRIX m = DirectX::XMMatrixRotationQuaternion(q);
 
     DirectX::XMFLOAT4X4 mat;
@@ -147,8 +147,8 @@ DirectX::XMFLOAT3 TransformDirector::QuaternionToEuler(DirectX::XMVECTOR q)
 
     float pitch, yaw, roll;
 
-    // 2. s—ñ‚Ì—v‘f‚©‚çŠp“x‚ð’ŠoiYXZ‚Ì‡˜‚È‚Ç‚Ì‰ñ“]‡˜‚ÉˆË‘¶‚µ‚Ü‚·j
-    // ˆê”Ê“I‚Èƒsƒbƒ`Eƒˆ[Eƒ[ƒ‹‚Ì’Šo—á
+    // 2. è¡Œåˆ—ã®è¦ç´ ã‹ã‚‰è§’åº¦ã‚’æŠ½å‡ºï¼ˆYXZã®é †åºãªã©ã®å›žè»¢é †åºã«ä¾å­˜ã—ã¾ã™ï¼‰
+    // ä¸€èˆ¬çš„ãªãƒ”ãƒƒãƒãƒ»ãƒ¨ãƒ¼ãƒ»ãƒ­ãƒ¼ãƒ«ã®æŠ½å‡ºä¾‹
     yaw = asin(-mat._13);
 
     if (cos(yaw) > 0.0001) {
@@ -156,7 +156,7 @@ DirectX::XMFLOAT3 TransformDirector::QuaternionToEuler(DirectX::XMVECTOR q)
         roll = atan2(mat._12, mat._11);
     }
     else {
-        // ƒWƒ“ƒoƒ‹ƒƒbƒNŽž‚Ìˆ—
+        // ã‚¸ãƒ³ãƒãƒ«ãƒ­ãƒƒã‚¯æ™‚ã®å‡¦ç†
         pitch = atan2(-mat._32, mat._22);
         roll = 0.0f;
     }
@@ -171,7 +171,7 @@ void TransformDirector::Serialize(nlohmann::json& j) const
         arr.push_back({
             {"px", wp.pos.x}, {"py", wp.pos.y}, {"pz", wp.pos.z},
             {"ax", wp.angle.x}, {"ay", wp.angle.y}, {"az", wp.angle.z},
-            {"sx", wp.scale.x}, {"sy", wp.scale.y}, {"sz", wp.scale.z}, // ’Ç‰Á
+            {"sx", wp.scale.x}, {"sy", wp.scale.y}, {"sz", wp.scale.z}, // è¿½åŠ 
             {"dur", wp.duration},
             {"ease", (int)wp.easing},
             {"addflag", wp.m_AddFlag}
@@ -197,10 +197,10 @@ void TransformDirector::Deserialize(const nlohmann::json& j)
         wp.scale.y = wj.value("sy", 1.0f);
         wp.scale.z = wj.value("sz", 1.0f);
         wp.duration = wj.value("dur", 1.0f);
-        // •Û‘¶‚³‚ê‚½ƒC[ƒWƒ“ƒO‚ð•œŒ³i‚È‚¯‚ê‚ÎLinearj
+        // ä¿å­˜ã•ã‚ŒãŸã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚’å¾©å…ƒï¼ˆãªã‘ã‚Œã°Linearï¼‰
         wp.easing = (EasingType)wj.value("ease", (int)EasingType::OutExpo);
 
-        //‰ÁŽZ‚ð‚·‚é‚©‚Ìƒtƒ‰ƒO
+        //åŠ ç®—ã‚’ã™ã‚‹ã‹ã®ãƒ•ãƒ©ã‚°
         wp.m_AddFlag = wj.value("addflag",false);
         EditorWaypoints.push_back(wp);
     }
@@ -211,7 +211,7 @@ void TransformDirector::CaptureCurrentState()
     auto trans = GetGameObject()->transform;
     wp.pos = trans->localPosition;
     wp.angle = trans->localRotation;
-    wp.scale = trans->localScale; // ’Ç‰Á
+    wp.scale = trans->localScale; // è¿½åŠ 
     wp.duration = 1.0f;
     wp.m_AddFlag = false;
     wp.easing = EasingType::OutExpo;
@@ -227,14 +227,14 @@ void TransformDirector::PlayMoveByIndex(int idx)
 
 void TransformDirector::RegisterActions()
 {
-    auto& reg = ActionRegistry::Instance();
-    std::string objName = GetGameObject()->GetName();
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
 
     for (int i = 0; i < (int)EditorWaypoints.size(); ++i) {
-        std::string actionName = objName + "_Trans_" + std::to_string(i);
+        const std::string actionName_ = "Trans_" + std::to_string(i);
 
-        reg.RegisterAction("Transform", actionName, [this, i]() {
-            // ŒÂ•ÊÝ’è‚³‚ê‚½ƒC[ƒWƒ“ƒO‚ÅÄ¶
+        owner_->RegisterGlobalAction("Transform", actionName_, [this, i]() {
+            // å€‹åˆ¥è¨­å®šã•ã‚ŒãŸã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã§å†ç”Ÿ
             this->PlayMoveByIndex(i);
             });
     }

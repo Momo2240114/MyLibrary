@@ -15,7 +15,7 @@ void SphereCollider::Update(float dt) {
     auto& renderer = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
     auto t = GetGameObject()->transform;
 
-    // ƒ[ƒ‹ƒhÀ•W + ƒIƒtƒZƒbƒg
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ + ã‚ªãƒ•ã‚»ãƒƒãƒˆ
     DirectX::XMFLOAT3 pos = t->GetWorldPosition();
     pos.x += offset.x; pos.y += offset.y; pos.z += offset.z;
 
@@ -34,7 +34,7 @@ CollisionManifold SphereCollider::CheckCollision(std::shared_ptr<ColliderCompone
         return CollisionMath::SphereVsSphere(self, ((SphereCollider*)other.get())->GetSphereData());
     case ColliderType::Box: {
         auto m = CollisionMath::OBBVsSphere(((BoxCollider*)other.get())->CreateOBB(), self);
-        m.normal = DirectX::XMVectorNegate(m.normal); // OBB->Sphere ‚ğ Sphere->OBB ‚É”½“]
+        m.normal = DirectX::XMVectorNegate(m.normal); // OBB->Sphere ã‚’ Sphere->OBB ã«åè»¢
         return m;
     }
     case ColliderType::Capsule: {

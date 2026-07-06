@@ -52,7 +52,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
     auto colA_ = reinterpret_cast<ColliderComponent*>(header.actors[0] ? header.actors[0]->userData : nullptr);
     auto colB_ = reinterpret_cast<ColliderComponent*>(header.actors[1] ? header.actors[1]->userData : nullptr);
     if (!colA_ || !colB_) return;
-// header.actors[] ‚Í actor ƒ|ƒCƒ“ƒ^i’ˆÓFíœÏ‚İ‚Ì‰Â”\«‚à‚ ‚é‚ªŠÈˆÕÀ‘•j
+// header.actors[] ã¯ actor ãƒã‚¤ãƒ³ã‚¿ï¼ˆæ³¨æ„ï¼šå‰Šé™¤æ¸ˆã¿ã®å¯èƒ½æ€§ã‚‚ã‚ã‚‹ãŒç°¡æ˜“å®Ÿè£…ï¼‰
     for (PxU32 i_ = 0; i_ < nbPairs; ++i_)
     {
         const PxContactPair& pair_ = pairs[i_];

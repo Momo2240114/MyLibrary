@@ -5,7 +5,7 @@
 
 class GltfModelCommponennt;
 
-// IKMapComponentのFOOTチェーンを地面へ追従させる多関節IK Component
+// IKMapComponentのFOOTチェーンを地面へ追従させる多関節IKコンポーネント。
 class FootIKComponent : public Component
 {
 public:
@@ -52,11 +52,25 @@ private:
         const DirectX::XMFLOAT3& animatedFootPosition_,
         const FootRuntimeState& state_,
         const std::vector<DirectX::XMFLOAT3>& solvedPositions_) const;
+    void ApplyPelvisAdjustment(
+        const std::vector<IKMapComponent::IKChain*>& footChains_,
+        float deltaTime_);
+    int FindCommonAncestor(
+        const std::vector<IKMapComponent::IKChain*>& footChains_) const;
+    void ApplyPelvisOffset(int pelvisNodeIndex_, float worldDrop_);
 
-private:
-    IKMapComponent* ikMap = nullptr;
-    GltfModelCommponennt* model = nullptr;
+    std::weak_ptr<IKMapComponent> ikMap;
+    std::weak_ptr<GltfModelCommponennt> model;
     std::vector<FootRuntimeState> footStates;
+    int adjustedPelvisNodeIndex = -1;
+    DirectX::XMFLOAT3 pelvisBasePosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 pelvisAppliedPosition = { 0.0f, 0.0f, 0.0f };
+    float currentPelvisDrop = 0.0f;
+    bool pelvisPositionApplied = false;
+    bool adjustPelvisHeight = true;
+    float maxPelvisDrop = 0.5f;
+    float pelvisPositionSpeed = 12.0f;
+    float footReachTolerance = 0.01f;
     bool showDebugShapes = true;
     float debugNormalLength = 0.2f;
     DirectX::XMFLOAT4 debugChainColor = { 0.2f, 0.8f, 1.0f, 0.9f };

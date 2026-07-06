@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 269,
+                "AttackInstanceId": 163,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -112,6 +112,7 @@
                 "ModelName": "./Data/Model/SwordPlayer/Blender/Sword.gltf",
                 "RootMotionName": "",
                 "ShaderID": 1,
+                "StaticModel": false,
                 "UsedNaviMeshSystemFlg": false,
                 "_RootRotationOffset": {
                     "w": 1.0,
@@ -356,7 +357,7 @@
                     }
                 ],
                 "PlaybackSpeed": 1.0,
-                "TrailEmitting": false,
+                "TrailEmitting": true,
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,

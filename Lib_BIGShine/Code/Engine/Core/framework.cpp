@@ -38,25 +38,25 @@ bool framework::initialize()
 		GraphicsDeviceManager::Instance().GetDevice(),
 		GraphicsDeviceManager::Instance().GetContext());
 
-	// 2. imnodes‚Ì‰Šú‰»
+	// 2. imnodesã®åˆæœŸåŒ–
 	ImNodes::CreateContext();
-	// 3. ƒXƒ^ƒCƒ‹‚Ìİ’è (Dark/Classic/Light‚©‚ç‘I‘ğ‰Â”\)
+	// 3. ã‚¹ã‚¿ã‚¤ãƒ«ã®è¨­å®š (Dark/Classic/Lightã‹ã‚‰é¸æŠå¯èƒ½)
 	ImNodes::StyleColorsDark();
-	// (”CˆÓ) IOİ’è: Alt+¶ƒhƒ‰ƒbƒO‚Å‰æ–Ê‚ğƒpƒ“iˆÚ“®j‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	// (ä»»æ„) IOè¨­å®š: Alt+å·¦ãƒ‰ãƒ©ãƒƒã‚°ã§ç”»é¢ã‚’ãƒ‘ãƒ³ï¼ˆç§»å‹•ï¼‰ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 	ImNodes::GetIO().EmulateThreeButtonMouse.Modifier = &ImGui::GetIO().KeyAlt;
 
-//ƒfƒoƒbƒOƒŒƒCƒ„[•\¦
+//ãƒ‡ãƒãƒƒã‚°ãƒ¬ã‚¤ãƒ¤ãƒ¼è¡¨ç¤º
 #if defined(DEBUG) || defined(_DEBUG)
-	// ƒfƒoƒbƒO—p‚ÌƒCƒ“ƒ^[ƒtƒF[ƒX‚ğæ“¾‚·‚é
+	// ãƒ‡ãƒãƒƒã‚°ç”¨ã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã‚’å–å¾—ã™ã‚‹
 	ID3D11InfoQueue* infoQueue = nullptr;
 	HRESULT hr = GraphicsDeviceManager::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&infoQueue);
 
 	if (SUCCEEDED(hr)) {
-		// ƒGƒ‰[‚ÉƒuƒŒ[ƒN‚³‚¹‚éİ’è
+		// ã‚¨ãƒ©ãƒ¼æ™‚ã«ãƒ–ãƒ¬ãƒ¼ã‚¯ã•ã›ã‚‹è¨­å®š
 		infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
 		infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
 
-		// g‚¢I‚í‚Á‚½‚ç Release ‚·‚éi¶ƒ|ƒCƒ“ƒ^‚Ìê‡j
+		// ä½¿ã„çµ‚ã‚ã£ãŸã‚‰ Release ã™ã‚‹ï¼ˆç”Ÿãƒã‚¤ãƒ³ã‚¿ã®å ´åˆï¼‰
 		infoQueue->Release();
 	}
 #endif
@@ -65,10 +65,10 @@ bool framework::initialize()
 
 	PhysXSystem::Initialize();
 
-	//Gui‚ÅƒRƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ’Ç‰Á‚Å‚«‚é‚æ‚¤‚ÉƒŒƒWƒXƒ^[‚ÉƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ“o˜^‚·‚éŠÖ”
+	//Guiã§ã‚³ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’è¿½åŠ ã§ãã‚‹ã‚ˆã†ã«ãƒ¬ã‚¸ã‚¹ã‚¿ãƒ¼ã«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’ç™»éŒ²ã™ã‚‹é–¢æ•°
 	RegisterAllComponents();
 
-	//ƒV[ƒ“ì¬
+	//ã‚·ãƒ¼ãƒ³ä½œæˆ
 	m_pSceneTitle = std::make_unique<SceneTitle>();
 
 	SceneManager::Initialize(std::move(m_pSceneTitle));
@@ -121,7 +121,7 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 //	MouseInput::Instance().Update(hwnd);
 //	ControllerInput::Instance().Update();
 //
-//	//ƒV[ƒ“XV
+//	//ã‚·ãƒ¼ãƒ³æ›´æ–°
 //	//m_pSceneGame->Update(elapsedTime_);
 //	SceneManager::Update(elapsedTime_);
 //	AudioManager::Instance().Update();
@@ -135,7 +135,7 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 //	GraphicsDeviceManager::Instance().BeginFrame(color);
 //
 //	SceneManager::Render(elapsedTime_);
-//	// IMGUI•`‰æ
+//	// IMGUIæç”»
 //	ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
 //
 //	GraphicsDeviceManager::Instance().EndFrame();
@@ -245,7 +245,7 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
     {
     case WM_SIZE:
     {
-        // Å¬‰»’†ˆÈŠOA‚©‚ÂƒfƒoƒCƒX‰Šú‰»Ï‚İ‚È‚çƒŠƒTƒCƒYÀs
+        // æœ€å°åŒ–ä¸­ä»¥å¤–ã€ã‹ã¤ãƒ‡ãƒã‚¤ã‚¹åˆæœŸåŒ–æ¸ˆã¿ãªã‚‰ãƒªã‚µã‚¤ã‚ºå®Ÿè¡Œ
         if (wParam_ != SIZE_MINIMIZED && GraphicsDeviceManager::Instance().GetDevice())
         {
             int w_ = LOWORD(lParam_);
@@ -264,14 +264,14 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     case WM_KILLFOCUS:
     {
-        // Alt+TabAWindowsƒL[A•ÊƒEƒBƒ“ƒhƒE‘I‘ğ‚È‚Ç‚Åˆê‰ğœ
+        // Alt+Tabã€Windowsã‚­ãƒ¼ã€åˆ¥ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦é¸æŠãªã©ã§ä¸€æ™‚è§£é™¤
         MouseInput::Instance().ReleaseCursorLock();
         return 0;
     }
 
     case WM_ACTIVATEAPP:
     {
-        // wParam_ == FALSE ‚Ì‚Æ‚«ƒAƒvƒŠ‚ª”ñƒAƒNƒeƒBƒu
+        // wParam_ == FALSE ã®ã¨ãã‚¢ãƒ—ãƒªãŒéã‚¢ã‚¯ãƒ†ã‚£ãƒ–
         if (wParam_ == FALSE)
         {
             MouseInput::Instance().ReleaseCursorLock();
@@ -281,7 +281,7 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
     case WM_SETCURSOR:
     {
-        // ƒQ[ƒ€’†ƒJ[ƒ\ƒ‹ŒÅ’è‚ª—LŒø‚È‚çƒJ[ƒ\ƒ‹•\¦‚ğ—}‚¦‚é
+        // ã‚²ãƒ¼ãƒ ä¸­ã‚«ãƒ¼ã‚½ãƒ«å›ºå®šãŒæœ‰åŠ¹ãªã‚‰ã‚«ãƒ¼ã‚½ãƒ«è¡¨ç¤ºã‚’æŠ‘ãˆã‚‹
         if (MouseInput::Instance().IsCursorLockEnabled())
         {
             SetCursor(nullptr);
@@ -354,7 +354,7 @@ bool framework::uninitialize()
 
 
 	ImNodes::DestroyContext();
-	// IMGUII—¹‰»
+	// IMGUIçµ‚äº†åŒ–
 	ImGuiRenderer::Finalize();
 
 	return true;
@@ -364,7 +364,7 @@ void framework::GuiDraw()
 {
 	//#if defined(DEBUG) || defined(_DEBUG)
 	SceneManager::DrawGUI();
-	//GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ‚±‚±‚ÅŒÄ‚Ño‚·
+	//GraphicsDeviceManager::Instance().ShowPostEffectGui(); // ã“ã“ã§å‘¼ã³å‡ºã™
 	//#endif // DEBUG
 }
 

@@ -59,8 +59,8 @@ public:
         float lookShieldShoulderYawDegrees = 18.0f;
         float lookBlendSpeed = 8.0f;
 
-        float startLift = 0.08f;          // ‰Šú‚¾‚¯ã‚É“¦‚ª‚·—Ê
-        int startCollisionWarmup = 4;     // ‰Šú‰Ÿ‚µo‚µ‰ñ”
+        float startLift = 0.08f;          // åˆæœŸã ã‘ä¸Šã«é€ƒãŒã™é‡
+        int startCollisionWarmup = 4;     // åˆæœŸæŠ¼ã—å‡ºã—å›æ•°
 
         std::vector<int> nodeIndices;
         std::vector<float> segmentLengths;
@@ -119,9 +119,9 @@ public:
     }
     bool ConsumeSimulationWarmupRequest();
 
-    // ƒeƒXƒg—pƒOƒ[ƒoƒ‹•—ƒpƒ‰ƒ[ƒ^i‘SƒCƒ“ƒXƒ^ƒ“ƒX‹¤’Êj
-    static DirectX::XMFLOAT3 windDirection;   // ³‹K‰»Ï‚İ•—Œü‚«
-    static float              windStrength;    // •—‚Ì‹­‚³ (m/s^2 ƒXƒP[ƒ‹)
+    // ãƒ†ã‚¹ãƒˆç”¨ã‚°ãƒ­ãƒ¼ãƒãƒ«é¢¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ï¼ˆå…¨ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å…±é€šï¼‰
+    static DirectX::XMFLOAT3 windDirection;   // æ­£è¦åŒ–æ¸ˆã¿é¢¨å‘ã
+    static float              windStrength;    // é¢¨ã®å¼·ã• (m/s^2 ã‚¹ã‚±ãƒ¼ãƒ«)
     static bool               windEnabled;
 private:
     bool simulationWarmupRequested = false;

@@ -8,7 +8,7 @@ class LightComponent;
 class LightBlinkerComponent : public Component
 {
 public:
-    // “_–Åƒ‚[ƒh
+    // ç‚¹æ»…ãƒ¢ãƒ¼ãƒ‰
     enum class Mode { Loop, PingPong, Once };
 
     void Start() override;
@@ -19,9 +19,9 @@ public:
 
     void Gui() override;
 
-    // ƒZ[ƒu—pFˆø”‚Ì json ƒIƒuƒWƒFƒNƒg‚É©•ª‚Ì•Ï”‚ğ‘‚«‚Ş
+    // ã‚»ãƒ¼ãƒ–ç”¨ï¼šå¼•æ•°ã® json ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«è‡ªåˆ†ã®å¤‰æ•°ã‚’æ›¸ãè¾¼ã‚€
     void Serialize(nlohmann::json& j) const;
-        // ƒ[ƒh—pFˆø”‚Ì json ƒIƒuƒWƒFƒNƒg‚©‚ç©•ª‚Ì•Ï”‚ğ“Ç‚İo‚·
+        // ãƒ­ãƒ¼ãƒ‰ç”¨ï¼šå¼•æ•°ã® json ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã‚‰è‡ªåˆ†ã®å¤‰æ•°ã‚’èª­ã¿å‡ºã™
         void Deserialize(const nlohmann::json& j);
 
     const std::string& GetName() const override {
@@ -36,21 +36,21 @@ private:
     bool active = true;
     bool isTargetState = false;
 
-    // İ’è’l
+    // è¨­å®šå€¤
     EasingType type = EasingType::Lerp;
     float speed = 1.0f;
 
     float minSpeed = 0.5f;
     float maxSpeed = 2.0f;
-    float intensityMultiplier = 0.0f; // 0‚É‚·‚é‚ÆÁ“”Ì“_“”‚Ì“_–Å‚É‚È‚é
+    float intensityMultiplier = 0.0f; // 0ã«ã™ã‚‹ã¨æ¶ˆç¯â‡”ç‚¹ç¯ã®ç‚¹æ»…ã«ãªã‚‹
     float rangeMultiplier = 0.0f;
     bool useRangeBlink = false;
 
-    // •Û‘¶—pŠî€’l
+    // ä¿å­˜ç”¨åŸºæº–å€¤
     float baseIntensity = 0.0f;
     float baseRange = 0.0f;
 
-    // EasingŠÇ——pƒCƒ“ƒfƒbƒNƒX
+    // Easingç®¡ç†ç”¨ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
     int intensityIdx = -1;
     int rangeIdx = -1;
 };

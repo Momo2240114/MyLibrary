@@ -1,18 +1,18 @@
 #include "LightingShader.h"
-#include "Engine/Graphics/Core/CPUResourceLoader.h" // ŒN‚ªŽg‚Á‚Ä‚¢‚éƒ[ƒ_[‚É‡‚í‚¹‚Ä‚­‚ê
+#include "Engine/Graphics/Core/CPUResourceLoader.h" // å›ãŒä½¿ã£ã¦ã„ã‚‹ãƒ­ãƒ¼ãƒ€ãƒ¼ã«åˆã‚ã›ã¦ãã‚Œ
 
 LightingShader::LightingShader(ID3D11Device* device)
 {
-    // 1. ’¸“_ƒVƒF[ƒ_[‚Ì“Ç‚Ýž‚Ý (‘S‰æ–ÊŽlŠpŒ`—p)
-    // ¦ ’¸“_ƒŒƒCƒAƒEƒg(InputLayout)‚Í•s—viVS“à•”‚ÅID‚©‚ç’¸“_‚ð¶¬‚·‚é‚½‚ßj
+    // 1. é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®èª­ã¿è¾¼ã¿ (å…¨ç”»é¢å››è§’å½¢ç”¨)
+    // â€» é ‚ç‚¹ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ(InputLayout)ã¯ä¸è¦ï¼ˆVSå†…éƒ¨ã§IDã‹ã‚‰é ‚ç‚¹ã‚’ç”Ÿæˆã™ã‚‹ãŸã‚ï¼‰
     CPUResourceLoader::LoadVertexShader(
         device,
         "Shader/FullScreenVS.cso",
-        nullptr, 0, // InputLayout‚Ínullptr‚Å‚æ‚¢
+        nullptr, 0, // InputLayoutã¯nullptrã§ã‚ˆã„
         nullptr,
         vertexShader.GetAddressOf());
 
-    // 2. ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚Ì“Ç‚Ýž‚Ý (ŒvŽZƒƒWƒbƒN‚ª“ü‚Á‚½‚à‚Ì)
+    // 2. ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®èª­ã¿è¾¼ã¿ (è¨ˆç®—ãƒ­ã‚¸ãƒƒã‚¯ãŒå…¥ã£ãŸã‚‚ã®)
     CPUResourceLoader::LoadPixelShader(
         device,
         "Shader/LightingPS.cso",
@@ -23,10 +23,10 @@ LightingShader::LightingShader(ID3D11Device* device)
         sizeof(CbDeferredSettings),
         deferredSettingsConstantBuffer.GetAddressOf());
 
-    // 4. ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚Ìì¬
+    // 4. ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®ä½œæˆ
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP; // ‰æ–Ê’[‚ÍCLAMP‚ª—Ç‚¢
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP; // ç”»é¢ç«¯ã¯CLAMPãŒè‰¯ã„
     samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
@@ -38,7 +38,7 @@ void LightingShader::Execute(const RenderContext& rc,
     ID3D11ShaderResourceView* material,
     ID3D11ShaderResourceView* emissive,
     ID3D11ShaderResourceView* depth,
-    ID3D11ShaderResourceView* pointLightSRV,  // ’Ç‰Á
+    ID3D11ShaderResourceView* pointLightSRV,  // è¿½åŠ 
     ID3D11ShaderResourceView* spotLightSRV,
     ID3D11Buffer* sceneConstantBuffer,
     const DirectX::XMFLOAT4& toonShadeSteps_,
@@ -56,7 +56,7 @@ void LightingShader::Execute(const RenderContext& rc,
     _ASSERT_EXPR(depth != nullptr, L"Depth SRV is null!");
     _ASSERT_EXPR(sceneConstantBuffer != nullptr, L"Constant Buffer is null!");
 
-    // 1. ƒVƒF[ƒ_[‚ÆƒTƒ“ƒvƒ‰[ƒZƒbƒg
+    // 1. ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¨ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚»ãƒƒãƒˆ
     dc->VSSetShader(vertexShader.Get(), nullptr, 0);
     dc->PSSetShader(pixelShader.Get(), nullptr, 0);
     dc->PSSetSamplers(0, 1, samplerState.GetAddressOf());
@@ -65,8 +65,8 @@ void LightingShader::Execute(const RenderContext& rc,
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
 
-    // 3. ƒ‰ƒCƒeƒBƒ“ƒO‚É•K—v‚Èƒ‰ƒCƒgî•ñ‚ð’è”ƒoƒbƒtƒ@‚ÖXV
-    // rc.lights ‚ðŽg‚Á‚Ä lightConstantBuffer ‚ðXV‚¹‚æ
+    // 3. ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã«å¿…è¦ãªãƒ©ã‚¤ãƒˆæƒ…å ±ã‚’å®šæ•°ãƒãƒƒãƒ•ã‚¡ã¸æ›´æ–°
+    // rc.lights ã‚’ä½¿ã£ã¦ lightConstantBuffer ã‚’æ›´æ–°ã›ã‚ˆ
     dc->PSSetConstantBuffers(7, 1, &sceneConstantBuffer); // b7 (CbScene)
 
     CbDeferredSettings settings_{};
@@ -81,12 +81,12 @@ void LightingShader::Execute(const RenderContext& rc,
     dc->PSSetShaderResources(5, 2, lights); // t5, t6 (StructuredBuffers)
 
 
-    // 4. ŽlŠpŒ`•`‰æ (ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚È‚µ‚Å•`‰æ‚·‚éŽè–@)
+    // 4. å››è§’å½¢æç”» (ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ãªã—ã§æç”»ã™ã‚‹æ‰‹æ³•)
     dc->IASetInputLayout(nullptr);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     dc->Draw(3, 0);
 
-    // 5. ‰ðœ (ƒoƒCƒ“ƒh‚µ‚½‚à‚Ì‚ð‚·‚×‚Änullptr‚É‚·‚é)
+    // 5. è§£é™¤ (ãƒã‚¤ãƒ³ãƒ‰ã—ãŸã‚‚ã®ã‚’ã™ã¹ã¦nullptrã«ã™ã‚‹)
     ID3D11ShaderResourceView* nullGBufferSRVs[5] = {};
     dc->PSSetShaderResources(0, _countof(nullGBufferSRVs), nullGBufferSRVs);
     ID3D11ShaderResourceView* nullIblSRVs[3] = {};

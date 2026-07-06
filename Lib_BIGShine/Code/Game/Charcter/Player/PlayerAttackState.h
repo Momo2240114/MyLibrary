@@ -4,6 +4,7 @@
 
 class CameraComponent;
 class CameraLockOnComponent;
+class GameObject;
 
 class PlayerAttackState : public PlayerState
 {
@@ -20,7 +21,9 @@ public:
 
 private:
     std::shared_ptr<GameObject> FindAssistTarget();
-    void ApplyAttackFacingAssist(float elapsedTime_);
+    void ApplyAttackAssist(float elapsedTime_);
+    void ApplyAttackFacingAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);
+    void ApplyAttackPositionAssist(const std::shared_ptr<GameObject>& target_, float elapsedTime_);
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent();
 
     PLAYER_ACTION action = PLAYER_ACTION::NONE;

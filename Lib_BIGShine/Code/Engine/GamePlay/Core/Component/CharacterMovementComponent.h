@@ -7,7 +7,7 @@
 
 class ColliderComponent;
 
-// ƒLƒƒƒ‰ƒNƒ^[‚ÌˆÚ“®ƒŠƒNƒGƒXƒg‚ğûW‚µAPhysX ŒİŠ·‚Ì‘¬“x‚ğ “K—p‚³‚¹‚éƒNƒ‰ƒX
+// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®ç§»å‹•ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’åé›†ã—ã€PhysX äº’æ›ã®é€Ÿåº¦ã‚’ é©ç”¨ã•ã›ã‚‹ã‚¯ãƒ©ã‚¹
 class CharacterMovementComponent : public Component
 {
 public:

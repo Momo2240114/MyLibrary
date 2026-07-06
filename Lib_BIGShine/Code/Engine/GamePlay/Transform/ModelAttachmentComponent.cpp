@@ -10,7 +10,7 @@ DirectX::XMFLOAT3 QuaternionToEuler(const DirectX::XMFLOAT4& q_in)
 {
     DirectX::XMFLOAT3 euler;
 
-    // ”®‚ÅŒvZ‚·‚é‚½‚ß‚ÉŠe¬•ª‚ğæ‚èo‚·
+    // æ•°å¼ã§è¨ˆç®—ã™ã‚‹ãŸã‚ã«å„æˆåˆ†ã‚’å–ã‚Šå‡ºã™
     float x = q_in.x;
     float y = q_in.y;
     float z = q_in.z;
@@ -19,7 +19,7 @@ DirectX::XMFLOAT3 QuaternionToEuler(const DirectX::XMFLOAT4& q_in)
     // Pitch (x-axis rotation)
     float sinp = 2.0f * (w * x - y * z);
     if (std::abs(sinp) >= 1.0f)
-        euler.x = std::copysign(DirectX::XM_PIDIV2, sinp); // 90“x‚ÅƒƒbƒNiƒWƒ“ƒoƒ‹ƒƒbƒN‘Îôj
+        euler.x = std::copysign(DirectX::XM_PIDIV2, sinp); // 90åº¦ã§ãƒ­ãƒƒã‚¯ï¼ˆã‚¸ãƒ³ãƒãƒ«ãƒ­ãƒƒã‚¯å¯¾ç­–ï¼‰
     else
         euler.x = std::asin(sinp);
 
@@ -33,7 +33,7 @@ DirectX::XMFLOAT3 QuaternionToEuler(const DirectX::XMFLOAT4& q_in)
     float cosr_cosp = 1.0f - 2.0f * (z * z + x * x);
     euler.z = std::atan2(sinr_cosp, cosr_cosp);
 
-    // ƒ‰ƒWƒAƒ“‚©‚ç“x”–@(Degrees)‚Ö•ÏŠ·
+    // ãƒ©ã‚¸ã‚¢ãƒ³ã‹ã‚‰åº¦æ•°æ³•(Degrees)ã¸å¤‰æ›
     euler.x = DirectX::XMConvertToDegrees(euler.x);
     euler.y = DirectX::XMConvertToDegrees(euler.y);
     euler.z = DirectX::XMConvertToDegrees(euler.z);
@@ -45,7 +45,7 @@ void ModelAttachmentComponent::SetTargetNode(std::shared_ptr<GltfModelCommponenn
 {
     targetModel = modelComp;
     targetStartNodeName = nodeName;
-    targetNodeIndex = -1; // ƒCƒ“ƒfƒbƒNƒX‚ğƒŠƒZƒbƒg‚µ‚ÄÄŒŸõ‚ğ‘£‚·
+    targetNodeIndex = -1; // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ãƒªã‚»ãƒƒãƒˆã—ã¦å†æ¤œç´¢ã‚’ä¿ƒã™
 
     if (modelComp) {
         if (auto targetGO = modelComp->GetGameObject()) {
@@ -151,7 +151,7 @@ void ModelAttachmentComponent::SyncAttachment()
         return;
     }
 
-    // ƒ{[ƒ“‚ğ“Ç‚Ş’¼‘O‚ÉA•K—v‚È‚çÅV‰»‚·‚é
+    // ãƒœãƒ¼ãƒ³ã‚’èª­ã‚€ç›´å‰ã«ã€å¿…è¦ãªã‚‰æœ€æ–°åŒ–ã™ã‚‹
     model_->UpdateTransformIfDirty();
 
     if (ResolveTargetNodeIndex(model_))
@@ -164,7 +164,7 @@ void ModelAttachmentComponent::SyncAttachment()
 
         if (auto attachedModel_ = myGo_->GetComponent<GltfModelCommponennt>())
         {
-            // eTransform‚ª•Ï‚í‚Á‚½‚Ì‚ÅAƒAƒ^ƒbƒ`‚³‚ê‚½‘¤‚Ìƒ‚ƒfƒ‹s—ñ‚àXV‚ª•K—v
+            // è¦ªTransformãŒå¤‰ã‚ã£ãŸã®ã§ã€ã‚¢ã‚¿ãƒƒãƒã•ã‚ŒãŸå´ã®ãƒ¢ãƒ‡ãƒ«è¡Œåˆ—ã‚‚æ›´æ–°ãŒå¿…è¦
             attachedModel_->MarkTransformDirty();
             attachedModel_->UpdateTransformIfDirty();
         }
@@ -182,7 +182,7 @@ void ModelAttachmentComponent::SyncAttachment()
     }
 }
 
-// --- Ä‹A“I‚ÈƒcƒŠ[•\¦ŠÖ” (ˆø”‚É const Cü‚È‚Ç‚ğ’Ç‰Á) ---
+// --- å†å¸°çš„ãªãƒ„ãƒªãƒ¼è¡¨ç¤ºé–¢æ•° (å¼•æ•°ã« const ä¿®é£¾ãªã©ã‚’è¿½åŠ ) ---
 void ShowNodeTree(const GltfModelCommponennt::Node* node,
     const std::vector<GltfModelCommponennt::Node>& allNodes,
     int& tempSelectedIdx) {
@@ -216,17 +216,17 @@ void ShowNodeTree(const GltfModelCommponennt::Node* node,
     std::shared_ptr<GltfModelCommponennt>& tempTargetModel,
     const std::shared_ptr<GltfModelCommponennt>& currentProcessingModel)
 {
-    // 1. ƒ|ƒCƒ“ƒ^‚Ì‘Ã“–«Šm”F
+    // 1. ãƒã‚¤ãƒ³ã‚¿ã®å¦¥å½“æ€§ç¢ºèª
     if (!node) return;
 
-    // 2. ƒCƒ“ƒfƒbƒNƒX‚ğˆÀ‘S‚É“Á’è (allNodes ‚Ì”ÍˆÍ“à‚É‚ ‚é‚©Šm”F)
+    // 2. ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å®‰å…¨ã«ç‰¹å®š (allNodes ã®ç¯„å›²å†…ã«ã‚ã‚‹ã‹ç¢ºèª)
     auto it = std::find_if(allNodes.begin(), allNodes.end(),
         [node](const GltfModelCommponennt::Node& n) { return &n == node; });
 
-    if (it == allNodes.end()) return; // ”ÍˆÍŠO‚È‚ç‰½‚à‚µ‚È‚¢
+    if (it == allNodes.end()) return; // ç¯„å›²å¤–ãªã‚‰ä½•ã‚‚ã—ãªã„
     int nodeIdx = static_cast<int>(std::distance(allNodes.begin(), it));
 
-    //// node ‚©‚çƒCƒ“ƒfƒbƒNƒX‚ğ‹tZ‚·‚éÛAƒ|ƒCƒ“ƒ^‚ÌŒvZ‚ª³‚µ‚¢‚©Šm”F
+    //// node ã‹ã‚‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’é€†ç®—ã™ã‚‹éš›ã€ãƒã‚¤ãƒ³ã‚¿ã®è¨ˆç®—ãŒæ­£ã—ã„ã‹ç¢ºèª
     //int nodeIdx = static_cast<int>(node - allNodes.data());
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -234,21 +234,21 @@ void ShowNodeTree(const GltfModelCommponennt::Node* node,
         flags |= ImGuiTreeNodeFlags_Selected;
     }
 
-    // q‚ª‚¢‚È‚¯‚ê‚Î Leaf
+    // å­ãŒã„ãªã‘ã‚Œã° Leaf
     if (node->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
 
     std::string label = (node->name.empty() ? "Node_" + std::to_string(nodeIdx) : node->name);
 
-    // ƒcƒŠ[‚Ìƒm[ƒh•`‰æ
+    // ãƒ„ãƒªãƒ¼ã®ãƒãƒ¼ãƒ‰æç”»
     bool isOpen = ImGui::TreeNodeEx((void*)(intptr_t)nodeIdx, flags, "%s", label.c_str());
 
-    // ƒNƒŠƒbƒN”»’è (ID‚ğH•v‚µ‚ÄŒë“®ì‚ğ–h‚®)
+    // ã‚¯ãƒªãƒƒã‚¯åˆ¤å®š (IDã‚’å·¥å¤«ã—ã¦èª¤å‹•ä½œã‚’é˜²ã)
     if (ImGui::IsItemClicked()) {
         tempSelectedIdx = nodeIdx;
         tempTargetModel = currentProcessingModel;
     }
 
-    // q‚ÌÄ‹Aˆ—
+    // å­ã®å†å¸°å‡¦ç†
     if (isOpen) {
         if (!node->children.empty()) {
             for (auto* child : node->children) {
@@ -261,7 +261,7 @@ void ShowNodeTree(const GltfModelCommponennt::Node* node,
 
 void ModelAttachmentComponent::Gui()
 {
-    // --- Œ»İ‚Ìó‘Ô•\¦ ---
+    // --- ç¾åœ¨ã®çŠ¶æ…‹è¡¨ç¤º ---
     auto currentModel = targetModel.lock();
     const auto* currentNodes = currentModel ? &currentModel->GetNodes() : nullptr;
     bool hasCurrentNode = currentNodes && targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(currentNodes->size());
@@ -275,14 +275,14 @@ void ModelAttachmentComponent::Gui()
         ImGui::OpenPopup("GlobalNodeSelectorPopup");
     }
 
-    // --- ƒ|ƒbƒvƒAƒbƒvƒEƒBƒ“ƒhƒE ---
+    // --- ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ ---
     if (ImGui::BeginPopupModal("GlobalNodeSelectorPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Select a Node from Parent Models:");
         ImGui::Separator();
 
         ImGui::BeginChild("SelectorScroll", ImVec2(500, 400), true);
 
-        // --- C³F©g‚ÌeŠK‘w‚ğ‘k‚èAƒ‚ƒfƒ‹ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ’T‚· ---
+        // --- ä¿®æ­£ï¼šè‡ªèº«ã®è¦ªéšå±¤ã‚’é¡ã‚Šã€ãƒ¢ãƒ‡ãƒ«ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’æ¢ã™ ---
         auto ownerGO = GetGameObject();
         std::shared_ptr<Transform> currentParent = ownerGO->transform->parent.lock();
 
@@ -293,7 +293,7 @@ void ModelAttachmentComponent::Gui()
                 auto modelComp = parentGO->GetComponent<GltfModelCommponennt>();
                 if (modelComp) {
                     foundAny = true;
-                    // eƒ‚ƒfƒ‹‚Ìƒm[ƒhƒcƒŠ[‚ğ•\¦
+                    // è¦ªãƒ¢ãƒ‡ãƒ«ã®ãƒãƒ¼ãƒ‰ãƒ„ãƒªãƒ¼ã‚’è¡¨ç¤º
                     ImGui::PushID(parentGO.get());
                     if (ImGui::TreeNode(parentGO->GetName().c_str())) {
                         const auto& nodes = modelComp->GetNodes();
@@ -307,7 +307,7 @@ void ModelAttachmentComponent::Gui()
                     ImGui::PopID();
                 }
             }
-            // ‚³‚ç‚É‚»‚Ìe‚Ö‘k‚é
+            // ã•ã‚‰ã«ãã®è¦ªã¸é¡ã‚‹
             currentParent = currentParent->parent.lock();
         }
 
@@ -318,11 +318,11 @@ void ModelAttachmentComponent::Gui()
         ImGui::EndChild();
         ImGui::Separator();
 
-        // --- Šm’èEƒLƒƒƒ“ƒZƒ‹ ---
+        // --- ç¢ºå®šãƒ»ã‚­ãƒ£ãƒ³ã‚»ãƒ« ---
         if (ImGui::Button("OK", ImVec2(120, 0))) {
             targetModel = tempTargetModel;
             targetNodeIndex = tempSelectedIdx;
-            // Œˆ’è‚É–¼‘O‚ğƒLƒƒƒbƒVƒ…‚µ‚Ä‚¨‚­iƒm[ƒhŒŸõ—pj
+            // æ±ºå®šæ™‚ã«åå‰ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã—ã¦ãŠãï¼ˆãƒãƒ¼ãƒ‰æ¤œç´¢ç”¨ï¼‰
             if (auto m = targetModel.lock()) {
                 const auto& nodes = m->GetNodes();
                 if (targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size())) {
@@ -358,7 +358,7 @@ void ModelAttachmentComponent::Gui()
 
 void ModelAttachmentComponent::Serialize(nlohmann::json& j) const
 {
-    // –¼‘O‚ÆƒCƒ“ƒfƒbƒNƒX‚ğ•Û‘¶
+    // åå‰ã¨ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ä¿å­˜
     j["targetStartNodeName"] = targetStartNodeName;
     j["targetGameObjectName"] = targetGameObjectName;
     j["targetNodeIndex"] = targetNodeIndex;
@@ -366,17 +366,17 @@ void ModelAttachmentComponent::Serialize(nlohmann::json& j) const
 
 void ModelAttachmentComponent::Deserialize(const nlohmann::json& j)
 {
-    // –¼‘O‚ğ—Dæ“I‚É•œŒ³
+    // åå‰ã‚’å„ªå…ˆçš„ã«å¾©å…ƒ
     if (j.contains("targetStartNodeName")) {
         targetStartNodeName = j.at("targetStartNodeName").get<std::string>();
     }
 
-    // –¼‘O‚ğ—Dæ“I‚É•œŒ³
+    // åå‰ã‚’å„ªå…ˆçš„ã«å¾©å…ƒ
     if (j.contains("targetGameObjectName")) {
         targetGameObjectName = j.at("targetGameObjectName").get<std::string>();
     }
 
-    // ƒCƒ“ƒfƒbƒNƒX‚à“Ç‚İo‚·‚ªAƒ‚ƒfƒ‹ƒ[ƒhŒã‚É–¼‘O‚©‚çÄŒŸõ‚·‚é‚±‚Æ‚ğ„§
+    // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚‚èª­ã¿å‡ºã™ãŒã€ãƒ¢ãƒ‡ãƒ«ãƒ­ãƒ¼ãƒ‰å¾Œã«åå‰ã‹ã‚‰å†æ¤œç´¢ã™ã‚‹ã“ã¨ã‚’æ¨å¥¨
     if (j.contains("targetNodeIndex")) {
         targetNodeIndex = j.at("targetNodeIndex").get<int>();
     }

@@ -3,11 +3,11 @@
 
 void CameraComponent::ScreenToWorld(const Vector2& screen, Vector3& world)
 {
-    //ƒXƒNƒŠ[ƒ“À•W‚ğƒ[ƒ‹ƒhÀ•W‚É•ÏŠ·
+    //ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã«å¤‰æ›
     float viewportX = 0.0f;
     float viewportY = 0.0f;
 
-    //‰æ–Ê‚Ì•,‚‚³‚ğŒÅ’è‚É‚·‚é
+    //ç”»é¢ã®å¹…,é«˜ã•ã‚’å›ºå®šã«ã™ã‚‹
     float viewportW = 1920;
     float viewportH = 1080;
 
@@ -17,11 +17,11 @@ void CameraComponent::ScreenToWorld(const Vector2& screen, Vector3& world)
     Matrix W = DirectX::XMMatrixIdentity();
     Matrix V = view;
     Matrix P = projection;
-    //NDCÀ•W‚©‚çƒ[ƒ‹ƒhÀ•W‚Ö•ÏŠ·
+    //NDCåº§æ¨™ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã¸å¤‰æ›
     Matrix WVP = W * V * P;
     Matrix IWVP = WVP.Invert();
 
-    //ƒXƒNƒŠ[ƒ“À•W‚ğNDCÀ•W‚É•ÏŠ·‚·‚é
+    //ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã‚’NDCåº§æ¨™ã«å¤‰æ›ã™ã‚‹
     Vector4 ndcPosition =
     {
         2.0f * (screen.x - viewportX) / viewportW - 1.0f,
@@ -30,34 +30,34 @@ void CameraComponent::ScreenToWorld(const Vector2& screen, Vector3& world)
         1.0f,
     };
 
-    //NDCÀ•W‚ğƒ[ƒ‹ƒhÀ•W‚É•ÏŠ·‚·‚é
+    //NDCåº§æ¨™ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã«å¤‰æ›ã™ã‚‹
     world = DirectX::XMVector3TransformCoord(ndcPosition,IWVP);
 }
 
 void CameraComponent::WorldToScreen(Vector2& screen, const Vector3& world)
 {
-    //ƒXƒNƒŠ[ƒ“À•W‚ğƒ[ƒ‹ƒhÀ•W‚É•ÏŠ·
+    //ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã«å¤‰æ›
     float viewportX = 0.0f;
     float viewportY = 0.0f;
 
-    //‰æ–Ê‚Ì•,‚‚³‚ğŒÅ’è‚É‚·‚é
+    //ç”»é¢ã®å¹…,é«˜ã•ã‚’å›ºå®šã«ã™ã‚‹
     float viewportW = 1920;
     float viewportH = 1080;
 
     float viewportMinZ = 0.0f;
     float viewportMaxZ = 1.0f;
 
-    //ƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ğ‹‚ß‚é
+    //ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’æ±‚ã‚ã‚‹
     Matrix W = DirectX::XMMatrixIdentity();
     Matrix V = view;
     Matrix P = projection;
 
     Matrix WVP = W * V * P;
 
-    //NDCÀ•W‚É•ÏŠ·‚·‚é
+    //NDCåº§æ¨™ã«å¤‰æ›ã™ã‚‹
     Vector3 ndcPosition = DirectX::XMVector3TransformCoord(world, WVP);
 
-    //ƒXƒNƒŠ[ƒ“À•W‚É•ÏŠ·‚·‚é
+    //ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã«å¤‰æ›ã™ã‚‹
     Vector3 screenPosition;
     screenPosition.x = viewportX + (1.0f + ndcPosition.x) * viewportW * 0.5f;
     screenPosition.y = viewportY + (1.0f - ndcPosition.y) * viewportH * 0.5f;
@@ -74,7 +74,7 @@ void CameraComponent::Serialize(nlohmann::json& j) const
     j["nearZ"] = nearZ;
     j["farZ"] = farZ;
     j["priority"] = priority;
-    // ’‹“_ƒ‚[ƒh‚ğg‚Á‚Ä‚¢‚éê‡‚Ì‚½‚ß‚É eye, focus, up ‚à•Û‘¶
+    // æ³¨è¦–ç‚¹ãƒ¢ãƒ¼ãƒ‰ã‚’ä½¿ã£ã¦ã„ã‚‹å ´åˆã®ãŸã‚ã« eye, focus, up ã‚‚ä¿å­˜
     j["eye"] = { eye.x, eye.y, eye.z };
     j["focus"] = { focus.x, focus.y, focus.z };
     j["up"] = { up.x, up.y, up.z };
@@ -96,7 +96,7 @@ void CameraComponent::Deserialize(const nlohmann::json& j)
         up = { j["up"][0], j["up"][1], j["up"][2] };
     }
 
-    // ƒ[ƒh‚µ‚½’l‚ÉŠî‚Ã‚¢‚Äs—ñ‚ğÄŒvZ
+    // ãƒ­ãƒ¼ãƒ‰ã—ãŸå€¤ã«åŸºã¥ã„ã¦è¡Œåˆ—ã‚’å†è¨ˆç®—
     UpdateProjection();
     UpdateView();
 }

@@ -10,7 +10,7 @@ class CameraComponent : public Component
 {
 public:
     // =====================
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
     // =====================
     CameraComponent() = default;
 
@@ -26,7 +26,7 @@ public:
     }
 
     // =====================
-    // LookAt İ’è
+    // LookAt è¨­å®š
     // ============================
     void SetLookAt(const DirectX::XMFLOAT3& eye_, const DirectX::XMFLOAT3& focus_, const DirectX::XMFLOAT3& up_)
     {
@@ -37,7 +37,7 @@ public:
     }
 
     // ==============
-    // ƒp[ƒXƒyƒNƒeƒBƒuİ’è
+    // ãƒ‘ãƒ¼ã‚¹ãƒšã‚¯ãƒ†ã‚£ãƒ–è¨­å®š
     // =====================
     void SetPerspectiveFov(float fovY_, float aspect_, float nearZ_, float farZ_)
     {
@@ -49,35 +49,35 @@ public:
     }
 
     // =====================
-    // XV
+    // æ›´æ–°
     // =====================
     void LateUpdate(float deltaTime) override
     {
-        // ƒJƒƒ‰‚Ìu“®‚«v‚ğŠm’è‚³‚¹‚é
+        // ã‚«ãƒ¡ãƒ©ã®ã€Œå‹•ãã€ã‚’ç¢ºå®šã•ã›ã‚‹
         UpdateViewProjection(deltaTime);
     }
 
-    //ƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“‚ğXV‚·‚éˆ—
+    //ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ã‚’æ›´æ–°ã™ã‚‹å‡¦ç†
     void UpdateViewProjection(float deltaTime)
     {
         if (auto t = gameObject.lock()->transform)
         {
-            // Transform ‚ª‚ ‚éê‡Aeye ‚Æ focus ‚ğ Transform ‚©‚çŒvZ
+            // Transform ãŒã‚ã‚‹å ´åˆã€eye ã¨ focus ã‚’ Transform ã‹ã‚‰è¨ˆç®—
             DirectX::XMFLOAT3 pos = t->GetWorldPosition();
             eye = pos;
 
-            // ƒfƒtƒHƒ‹ƒg‘O•ûŒü
+            // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå‰æ–¹å‘
             DirectX::XMFLOAT3 defaultFront{ 0,0,1 };
             DirectX::XMMATRIX rot = t->GetWorldMatrix();
             DirectX::XMVECTOR f = DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&defaultFront), rot);
             DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(f));
 
-            // ‰E•ûŒü
+            // å³æ–¹å‘
             DirectX::XMFLOAT3 defaultRight{ 1,0,0 };
             DirectX::XMVECTOR r = DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&defaultRight), rot);
             DirectX::XMStoreFloat3(&right, DirectX::XMVector3Normalize(r));
 
-            // ’‹“_ = eye + front
+            // æ³¨è¦–ç‚¹ = eye + front
             focus = { eye.x + front.x, eye.y + front.y, eye.z + front.z };
 
             up = GetGameObject()->transform->GetUp();
@@ -113,7 +113,7 @@ public:
    
 
     // =====================
-    // ƒrƒ…[^ƒvƒƒWƒFƒNƒVƒ‡ƒ“æ“¾
+    // ãƒ“ãƒ¥ãƒ¼ï¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³å–å¾—
     // =====================
     const DirectX::XMFLOAT4X4& GetView() const { return view; }
     const DirectX::XMFLOAT4X4& GetProjection() const { return projection; }
@@ -128,17 +128,17 @@ public:
     float GetFar()  const { return farZ; }
     float GetFovY() const { return fovY; }
     float GetAspect() const { return aspect; }
-    // ƒrƒ…[s—ñ‚ÆƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ğŠ|‚¯‡‚í‚¹‚½s—ñ‚ğæ“¾
+    // ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã¨ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’æ›ã‘åˆã‚ã›ãŸè¡Œåˆ—ã‚’å–å¾—
     DirectX::XMMATRIX GetViewProjection() const
     {
         return DirectX::XMLoadFloat4x4(&view) * DirectX::XMLoadFloat4x4(&projection);
     }
     int GetPriority() { return priority; }
-    // Œ»İ‚Ìó‘Ô
+    // ç¾åœ¨ã®çŠ¶æ…‹
     bool IsTransitioning() const { return _isMoving; }
 
-    // --- s—ñ‚ğ’¼Úã‘‚«‚·‚éƒZƒbƒ^[ ---
-    // ‚±‚ê‚É‚æ‚èAManager‚ªŒvZ‚µ‚½u•âŠÔ’†‚Ìs—ñv‚ğƒŒƒ“ƒ_ƒ‰[‚Ö“n‚¹‚é
+    // --- è¡Œåˆ—ã‚’ç›´æ¥ä¸Šæ›¸ãã™ã‚‹ã‚»ãƒƒã‚¿ãƒ¼ ---
+    // ã“ã‚Œã«ã‚ˆã‚Šã€ManagerãŒè¨ˆç®—ã—ãŸã€Œè£œé–“ä¸­ã®è¡Œåˆ—ã€ã‚’ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼ã¸æ¸¡ã›ã‚‹
     void SetViewMatrix(const DirectX::XMFLOAT4X4& view_) {
         view = view_;
     }
@@ -147,8 +147,8 @@ public:
         projection = proj_;
     }
 
-    // --- ‘¼‚ÌƒJƒƒ‰‚Ì‘Só‘Ô‚ğƒRƒs[‚·‚é‹@”\ ---
-    // ’Êí‚ÉuÅ‚—Dæ“x‚ÌƒJƒƒ‰v‚Ì’l‚ğ‚Ü‚é‚²‚ÆƒNƒ[ƒ“‚·‚éÛ‚É•Ö—˜
+    // --- ä»–ã®ã‚«ãƒ¡ãƒ©ã®å…¨çŠ¶æ…‹ã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹æ©Ÿèƒ½ ---
+    // é€šå¸¸æ™‚ã«ã€Œæœ€é«˜å„ªå…ˆåº¦ã®ã‚«ãƒ¡ãƒ©ã€ã®å€¤ã‚’ã¾ã‚‹ã”ã¨ã‚¯ãƒ­ãƒ¼ãƒ³ã™ã‚‹éš›ã«ä¾¿åˆ©
     void CopyFrom(const CameraComponent* other) {
         if (!other) return;
         eye = other->eye;
@@ -182,26 +182,26 @@ private:
         DirectX::XMStoreFloat4x4(&projection, mat);
     }
 private:
-    // ƒrƒ…[^ƒvƒƒWƒFƒNƒVƒ‡ƒ“
+    // ãƒ“ãƒ¥ãƒ¼ï¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³
     DirectX::XMFLOAT4X4 view{};
     DirectX::XMFLOAT4X4 projection{};
 
-    // ƒJƒƒ‰ˆÊ’u‚Æ•ûŒü
+    // ã‚«ãƒ¡ãƒ©ä½ç½®ã¨æ–¹å‘
     DirectX::XMFLOAT3 eye{ 0,0,-5 };
     DirectX::XMFLOAT3 focus{ 0,0,0 };
     DirectX::XMFLOAT3 up{ 0,1,0 };
 
-    // ‘O^‰E•ûŒü
+    // å‰ï¼å³æ–¹å‘
     DirectX::XMFLOAT3 front{ 0,0,1 };
     DirectX::XMFLOAT3 right{ 1,0,0 };
 
-    // ƒp[ƒXİ’è
+    // ãƒ‘ãƒ¼ã‚¹è¨­å®š
     float fovY = 60.0f;
     float aspect = 16.0f / 9.0f;
     float nearZ = 0.1f;
     float farZ = 1000.0f;
-    float transitionSpeed = 2.0f; // ‘¬“x
-    int transitionType = 0;       // 0: üŒ`, 1: ŠÉ‹}‚ ‚è(EaseIn/Out) ‚È‚Ç
+    float transitionSpeed = 2.0f; // é€Ÿåº¦
+    int transitionType = 0;       // 0: ç·šå½¢, 1: ç·©æ€¥ã‚ã‚Š(EaseIn/Out) ãªã©
     bool _isMoving;
 
     int priority = 0;

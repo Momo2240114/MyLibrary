@@ -7,39 +7,39 @@ void  LightComponent::Update(float et)
     auto t = gameObject.lock()->transform;
     if (!t) return;
 
-    // 1. ÅV‚Ìƒ[ƒ‹ƒhs—ñ‚ğæ“¾ (isDirty‚È‚ç“à•”‚ÅÄŒvZ‚³‚ê‚é)
+    // 1. æœ€æ–°ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’å–å¾— (isDirtyãªã‚‰å†…éƒ¨ã§å†è¨ˆç®—ã•ã‚Œã‚‹)
     DirectX::XMMATRIX worldMat = t->GetWorldMatrix();
 
-    // 2. ƒIƒtƒZƒbƒgˆÊ’u‚ğƒ[ƒ‹ƒh‹óŠÔ‚Ö•ÏŠ·
-    // TransformCoord‚Í w=1 ‚Æ‚µ‚Äˆµ‚¤‚½‚ßAˆÚ“®iTranslationj‚à“K—p‚³‚ê‚é
+    // 2. ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã¸å¤‰æ›
+    // TransformCoordã¯ w=1 ã¨ã—ã¦æ‰±ã†ãŸã‚ã€ç§»å‹•ï¼ˆTranslationï¼‰ã‚‚é©ç”¨ã•ã‚Œã‚‹
     DirectX::XMVECTOR localPos = DirectX::XMLoadFloat3(&offsetPosition);
     DirectX::XMVECTOR worldPos = DirectX::XMVector3TransformCoord(localPos, worldMat);
     DirectX::XMStoreFloat3(&finalWorldPosition, worldPos);
 
-    // 3. •ûŒü‚ÌŒvZ (Directional ‚Ü‚½‚Í Spot)
+    // 3. æ–¹å‘ã®è¨ˆç®— (Directional ã¾ãŸã¯ Spot)
     if (type == Type::Directional || type == Type::Spot)
     {
-        // ƒ‰ƒCƒg‚Ìƒ[ƒJƒ‹‰ñ“]‚ğƒNƒH[ƒ^ƒjƒIƒ“‚É•ÏŠ·
+        // ãƒ©ã‚¤ãƒˆã®ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢ã‚’ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã«å¤‰æ›
         DirectX::XMVECTOR qLocal = DirectX::XMQuaternionRotationRollPitchYaw(
             DirectX::XMConvertToRadians(localRotation.x),
             DirectX::XMConvertToRadians(localRotation.y),
             DirectX::XMConvertToRadians(localRotation.z)
         );
 
-        // ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€‚©‚çuƒ[ƒ‹ƒh‰ñ“]v¬•ª‚¾‚¯‚ğ’Šo
+        // ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ã‹ã‚‰ã€Œãƒ¯ãƒ¼ãƒ«ãƒ‰å›è»¢ã€æˆåˆ†ã ã‘ã‚’æŠ½å‡º
         DirectX::XMVECTOR s, r, pos;
         DirectX::XMMatrixDecompose(&s, &r, &pos, worldMat);
 
-        // e‚Ì‰ñ“]‚Æƒ‰ƒCƒg‚Ìƒ[ƒJƒ‹‰ñ“]‚ğ‡¬
+        // è¦ªã®å›è»¢ã¨ãƒ©ã‚¤ãƒˆã®ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢ã‚’åˆæˆ
         DirectX::XMVECTOR qFinal = DirectX::XMQuaternionMultiply(qLocal, r);
 
-        // Šî–{‚Æ‚È‚éŒü‚«i‘O•ûF0, 0, 1j‚ğ‰ñ“]‚³‚¹‚é
+        // åŸºæœ¬ã¨ãªã‚‹å‘ãï¼ˆå‰æ–¹ï¼š0, 0, 1ï¼‰ã‚’å›è»¢ã•ã›ã‚‹
         DirectX::XMVECTOR forward = DirectX::XMVectorSet(0, 0, 1, 0);
         DirectX::XMVECTOR worldDir = DirectX::XMVector3Rotate(forward, qFinal);
         DirectX::XMStoreFloat3(&finalWorldDirection, worldDir);
     }
 
-    // ŠJ”­‚Ì‚İA“Š‰e”ÍˆÍ‚ğƒƒCƒ„[ƒtƒŒ[ƒ€‚Å•\¦‚·‚é
+    // é–‹ç™ºæ™‚ã®ã¿ã€æŠ•å½±ç¯„å›²ã‚’ãƒ¯ã‚¤ãƒ¤ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã§è¡¨ç¤ºã™ã‚‹
     if (type == Type::Point)
     {
         if (showDebugBounds)
@@ -47,7 +47,7 @@ void  LightComponent::Update(float et)
             GraphicsDeviceManager::Instance().GetShapeRendererSystem().DrawSphere(
                 finalWorldPosition,
                 range,
-                DirectX::XMFLOAT4(1, 1, 0, 0.5f) // ”¼“§–¾‚Ì‰©F‚¢˜g
+                DirectX::XMFLOAT4(1, 1, 0, 0.5f) // åŠé€æ˜ã®é»„è‰²ã„æ 
             );
         }
     }

@@ -100,21 +100,27 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">
     <LibraryPath>.\PhysX\win.x86_64.vc143.mt\checked;$(LibraryPath)</LibraryPath>
+    <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='checked|x64'">
     <LibraryPath>.\PhysX\win.x86_64.vc143.mt\checked;$(LibraryPath)</LibraryPath>
+    <MultiProcFXC>true</MultiProcFXC>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -261,6 +267,9 @@
         /utf-8 %(AdditionalOptions)
       </AdditionalOptions>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ProgramDatabase</DebugInformationFormat>
+      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='checked|x64'">true</EnableParallelCodeGeneration>
+      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableParallelCodeGeneration>
+      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -282,6 +291,9 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
         /utf-8 %(AdditionalOptions)
       </AdditionalOptions>
+      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='checked|Win32'">true</EnableParallelCodeGeneration>
+      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</EnableParallelCodeGeneration>
+      <EnableParallelCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -371,6 +383,9 @@
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\VignetteDirector.cpp" />
+      <ClCompile Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\BloomSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp" />
@@ -452,6 +467,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerHitState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
@@ -543,6 +559,9 @@
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.h" />
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\VignetteDirector.h" />
+      <ClInclude Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h" />
@@ -665,6 +684,7 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerActionState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerAttackState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerHitState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h" />

@@ -14,9 +14,9 @@ public:
 	void Initialize();
 	void Finalize();
 	void DrawGUI()override;
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	void Update(float elapsedTime);
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	void Render(float elapsedTime);
 };

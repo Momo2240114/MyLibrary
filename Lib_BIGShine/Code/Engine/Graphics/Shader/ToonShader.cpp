@@ -38,7 +38,7 @@ void ToonShader::Begin(const RenderContext& rc)
     dc->VSSetShader(vertexShader.Get(), nullptr, 0);
     dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 
-    // ’è”ƒoƒbƒtƒ@ (b0) ‚ÆƒTƒ“ƒvƒ‰[ (s0) ‚ÌÝ’è
+    // å®šæ•°ãƒãƒƒãƒ•ã‚¡ (b0) ã¨ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ (s0) ã®è¨­å®š
     dc->PSSetConstantBuffers(0, 1, meshConstantBuffer.GetAddressOf());
     dc->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
@@ -62,12 +62,12 @@ void ToonShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mes
     cb.metalness = mesh.material->metalness; 
     cb.roughness = mesh.material->roughness; 
     cb.shadeSteps = shadeSteps;
-    cb.shadeFeather = this->shadeFeathers; // ƒNƒ‰ƒX•ÛŽ‚Ì’l‚ðŽg—p
+    cb.shadeFeather = this->shadeFeathers; // ã‚¯ãƒ©ã‚¹ä¿æŒã®å€¤ã‚’ä½¿ç”¨
     cb.occlusionStrength = mesh.material->occlusionStrength;
 
     dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cb, 0, 0);
 
-    // PBR‚Æ“¯‚¶ƒXƒƒbƒg‚ÉƒeƒNƒXƒ`ƒƒ‚ð—¬‚µž‚Þ
+    // PBRã¨åŒã˜ã‚¹ãƒ­ãƒƒãƒˆã«ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’æµã—è¾¼ã‚€
     ID3D11ShaderResourceView* srvs[] = {
         mesh.material->baseMap.Get(),
         mesh.material->normalMap.Get(),

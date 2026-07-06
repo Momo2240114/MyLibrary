@@ -16,46 +16,46 @@
 class ColliderComponent;
 class GameObjectManager;
 
+enum class LayerType : uint32_t
+{
+    Default = 0,
+    Player = 1 << 0,
+    Enemy = 1 << 1,
+    PlayerBullet = 1 << 2,
+    EnemyBullet = 1 << 3,
+    UI = 1 << 4,
+    Environment = 1 << 5,
+    SneakObject = 1 << 6,
+    Terrain = 1 << 7,
+    MaxLayers = 1 << 8,
+    Wall = 1 << 9,
+    Item = 1 << 10,
+};
 
 class GameObject : public std::enable_shared_from_this<GameObject>
 {
-public:
-    enum class LayerType : uint32_t
-    {
-        Default = 0,
-        Player = 1 << 0,
-        Enemy = 1 << 1,
-        PlayerBullet = 1 << 2,
-        EnemyBullet = 1 << 3,
-        UI = 1 << 4,
-        Environment = 1 << 5,
-        SneakObject = 1 << 6,
-        Terrain = 1 << 7,
-        MaxLayers = 1 << 8,
-        Wall = 1 << 9,
-        Item = 1 << 10,
-    };
+public: 
 
-    LayerType layer = LayerType::Default;   // š’Ç‰Á
-    uint32_t mask = (uint32_t)LayerType::Default;//ƒRƒŠƒWƒ‡ƒ“ƒ}ƒXƒN
+    LayerType layer = LayerType::Default;   // â˜…è¿½åŠ 
+    uint32_t mask = (uint32_t)LayerType::Default;//ã‚³ãƒªã‚¸ãƒ§ãƒ³ãƒã‚¹ã‚¯
 
     bool saveFlg = true;
     std::shared_ptr<NameComponent> nameComponent;
     std::shared_ptr<Transform> transform;
     std::vector<std::shared_ptr<Component>> components;
 
-    //ƒRƒŠƒWƒ‡ƒ“—p‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg
+    //ã‚³ãƒªã‚¸ãƒ§ãƒ³ç”¨ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
     std::vector<std::shared_ptr<Component>> colliderComponents;
-    // --- ’Ç‰ÁF©•ªê—p‚ÌƒŒƒWƒXƒ^ ---
+    // --- è¿½åŠ ï¼šè‡ªåˆ†å°‚ç”¨ã®ãƒ¬ã‚¸ã‚¹ã‚¿ ---
     ActionRegistry localRegistry;
 
-    //©g‚ª‘®‚·‚é‰F’ˆiƒ}ƒl[ƒWƒƒ[j‚Ö‚Ìƒ|ƒCƒ“ƒ^
+    //è‡ªèº«ãŒå±ã™ã‚‹å®‡å®™ï¼ˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ï¼‰ã¸ã®ãƒã‚¤ãƒ³ã‚¿
     GameObjectManager* manager = nullptr;
 public:
-    //‚±‚ÌƒIƒuƒWƒFƒNƒg‚ğ“‚×‚éƒ}ƒl[ƒWƒƒ[‚Ö‚ÌƒAƒNƒZƒX
+    //ã“ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’çµ±ã¹ã‚‹ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã¸ã®ã‚¢ã‚¯ã‚»ã‚¹
     GameObjectManager& GetManager() const { return *manager; }
 
-    // ƒ}ƒl[ƒWƒƒ[‚ğİ’è‚·‚éi¶¬‚ÉŒÄ‚Î‚ê‚éj
+    // ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’è¨­å®šã™ã‚‹ï¼ˆç”Ÿæˆæ™‚ã«å‘¼ã°ã‚Œã‚‹ï¼‰
     void SetManager(GameObjectManager* manager_);
 
     void RegisterAction(
@@ -63,16 +63,21 @@ public:
         const std::string& name_,
         const ActionRegistry::ActionFunc& func_
     );
+    std::string BuildActionName(const std::string& actionName_) const;
+    std::string RegisterGlobalAction(
+        const std::string& category_,
+        const std::string& actionName_,
+        const ActionRegistry::ActionFunc& function_);
 
 
-    // ƒQƒbƒ^[
+    // ã‚²ãƒƒã‚¿ãƒ¼
     ActionRegistry& GetLocalRegistry() { return localRegistry; };
 
     GameObject(const std::string& name_ = "GameObject")
     {
         transform = std::make_shared<Transform>();
 
-        // ƒRƒ“ƒ|[ƒlƒ“ƒg‚Æ‚µ‚Ä–¼‘O‚ğ•t—^
+        // ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã¨ã—ã¦åå‰ã‚’ä»˜ä¸
         nameComponent = std::make_shared<NameComponent>();
         nameComponent->name = name_;
     }
@@ -82,17 +87,17 @@ public:
     template<typename T>
     std::shared_ptr<T> GetOrAddComponent(bool collStartFlg = true)
     {
-        // 1. ‚Ü‚¸Œ»İ‚ÌƒŠƒXƒg‚©‚çŒŸõ
+        // 1. ã¾ãšç¾åœ¨ã®ãƒªã‚¹ãƒˆã‹ã‚‰æ¤œç´¢
         auto comp = GetComponent<T>();
 
-        // 2. Œ©‚Â‚©‚Á‚½‚ç‚»‚ê‚ğ•Ô‚·i“ñd¶¬‚µ‚È‚¢j
+        // 2. è¦‹ã¤ã‹ã£ãŸã‚‰ãã‚Œã‚’è¿”ã™ï¼ˆäºŒé‡ç”Ÿæˆã—ãªã„ï¼‰
         if (comp) return comp;
 
-        // 3. ‚È‚¯‚ê‚ÎV‚µ‚­ì‚Á‚Ä’Ç‰Á
+        // 3. ãªã‘ã‚Œã°æ–°ã—ãä½œã£ã¦è¿½åŠ 
         return AddComponent<T>(collStartFlg);
     }
 
-    // –¼‘O‚Ö‚ÌƒAƒNƒZƒX‚ğŠÈŒ‰‚É
+    // åå‰ã¸ã®ã‚¢ã‚¯ã‚»ã‚¹ã‚’ç°¡æ½”ã«
     const std::string& GetName() const { return nameComponent->name; }
     void SetName(const std::string& newName) { nameComponent->name = newName; }
 
@@ -103,11 +108,11 @@ public:
         static_assert(std::is_base_of<Component, T>::value, "T must inherit from Component");
 
         auto comp = std::make_shared<T>(std::forward<Args>(args_)...);
-        if (!comp) return nullptr; // ¶¬¸”s
+        if (!comp) return nullptr; // ç”Ÿæˆå¤±æ•—
 
         comp->SetGameObject(shared_from_this());
 
-        //ƒRƒ‰ƒCƒ_[ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ—ˆ‚ÄƒNƒ‰ƒX‚·‚éƒNƒ‰ƒX‚ªT‚È‚Ì‚Å‚ ‚ê‚Î
+        //ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’æ¥ã¦ã‚¯ãƒ©ã‚¹ã™ã‚‹ã‚¯ãƒ©ã‚¹ãŒTãªã®ã§ã‚ã‚Œã°
         if constexpr (std::is_base_of<ColliderComponent, T>::value)
         {
             colliderComponents.push_back(comp);
@@ -174,12 +179,12 @@ public:
     void CallAllComponentStart();
     
     // ========================================
-    // –¼‘O‚ÅƒRƒ“ƒ|[ƒlƒ“ƒg‚ğæ“¾
+    // åå‰ã§ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å–å¾—
     // ========================================
     std::shared_ptr<Component> GetComponentByName(const std::string& compName_) const;
   
 
-    // Œ^•t‚«‚Åæ“¾i–¼‘O¨T‚ÉƒLƒƒƒXƒgj
+    // å‹ä»˜ãã§å–å¾—ï¼ˆåå‰â†’Tã«ã‚­ãƒ£ã‚¹ãƒˆï¼‰
     template<typename T>
     std::shared_ptr<T> GetComponentByNameAs(const std::string& compName) const
     {
@@ -192,7 +197,7 @@ public:
 
     void Update(float deltaTime_);
    
-    //’x‰„XV
+    //é…å»¶æ›´æ–°
     void LateUpdate(float et);
 
     void UpdateTransform()
@@ -210,11 +215,11 @@ public:
     void TransformGui();
     void Gui();
 
-    // ‘I‘ğ’†ƒIƒuƒWƒFƒNƒg—pƒEƒBƒ“ƒhƒE
+    // é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”¨ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦
     void GuiWindow()
     {
         ImGui::Begin(nameComponent->name.c_str());
-        Gui(); // Œ³‚Ì GUI ŒÄ‚Ño‚µ
+        Gui(); // å…ƒã® GUI å‘¼ã³å‡ºã—
         ImGui::End();
     }
 

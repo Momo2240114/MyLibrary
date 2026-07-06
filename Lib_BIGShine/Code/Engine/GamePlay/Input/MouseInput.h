@@ -8,18 +8,18 @@
 class MouseInput
 {
 public:
-    // ƒVƒ“ƒOƒ‹ƒgƒ“æ“¾
+    // ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³å–å¾—
     static MouseInput& Instance()
     {
         static MouseInput instance;
         return instance;
     }
 
-    // –ˆƒtƒŒ[ƒ€XV (WndProc ‚Ü‚½‚ÍƒtƒŒ[ƒ€ƒ‹[ƒv‚ÅŒÄ‚Ô)
+    // æ¯ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–° (WndProc ã¾ãŸã¯ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—ã§å‘¼ã¶)
     void Update(HWND hwnd);
 
     // ==========================
-    // ƒNƒŠƒbƒNî•ñ
+    // ã‚¯ãƒªãƒƒã‚¯æƒ…å ±
     // ==========================
     bool LeftPressed()   const { return m_leftPressed; }
     bool LeftDown()      const { return m_leftDown; }
@@ -32,32 +32,32 @@ public:
     bool GetButtonState(int buttonCode, int type) const;
 
     // ==========================
-    // ƒ}ƒEƒXÀ•Wæ“¾
+    // ãƒã‚¦ã‚¹åº§æ¨™å–å¾—
     // ==========================
-    // Windows API ƒNƒ‰ƒCƒAƒ“ƒgÀ•W (¶ã 0,0)
+    // Windows API ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆåº§æ¨™ (å·¦ä¸Š 0,0)
     POINT GetClientPos() const { return m_clientPos; }
 
-    // DirectX ƒXƒNƒŠ[ƒ“À•W (¶ã 0,0, ‰E‰º width,height)
+    // DirectX ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ (å·¦ä¸Š 0,0, å³ä¸‹ width,height)
     DirectX::XMFLOAT2 GetScreenPos() const { return m_screenPos; }
 
     // ==========================
-    //@ƒzƒC[ƒ‹ˆ—
+    //ã€€ãƒ›ã‚¤ãƒ¼ãƒ«å‡¦ç†
     // ==========================
 
-    // ƒtƒŒ[ƒ€ŠJn‚ÅXV‚³‚ê‚é
+    // ãƒ•ãƒ¬ãƒ¼ãƒ é–‹å§‹ã§æ›´æ–°ã•ã‚Œã‚‹
     int GetWheelDelta() const { return m_wheelDelta; }
-    // ŒöŠJŠÖ”‚ÅƒtƒŒ[ƒ€“àƒzƒC[ƒ‹æ“¾
+    // å…¬é–‹é–¢æ•°ã§ãƒ•ãƒ¬ãƒ¼ãƒ å†…ãƒ›ã‚¤ãƒ¼ãƒ«å–å¾—
     int GetWheelDeltaThisFrame() const { return m_wheelDeltaThisFrame; }
 
     void OnMouseWheel(int delta)
     {
-        m_wheelDelta = delta; // WM_MOUSEWHEEL ‚ÅŒÄ‚Ô
+        m_wheelDelta = delta; // WM_MOUSEWHEEL ã§å‘¼ã¶
     }
 
     float ConsumeWheelDelta()
     {
         int temp = m_wheelDelta;
-        m_wheelDelta = 0; // ƒtƒŒ[ƒ€‚²‚Æ‚ÉƒŠƒZƒbƒg
+        m_wheelDelta = 0; // ãƒ•ãƒ¬ãƒ¼ãƒ ã”ã¨ã«ãƒªã‚»ãƒƒãƒˆ
         return static_cast<float>(temp);
     }
 
@@ -81,7 +81,7 @@ public:
     DirectX::XMFLOAT3 GetRayStart() { return RayStart; }
     DirectX::XMFLOAT3 GetRayEnd() { return RayEnd; }
 
-    //mouse‚ÌˆÊ’u‚ğŒÅ’è‚·‚é‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+    //mouseã®ä½ç½®ã‚’å›ºå®šã™ã‚‹ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
     void SetDebugFlag(bool flg) { m_DebugFlag = flg; }
 
 private:
@@ -89,7 +89,7 @@ private:
     MouseInput() = default;
     ~MouseInput() = default;
 
-    // ó‘Ô
+    // çŠ¶æ…‹
     bool m_leftPressed = false;
     bool m_leftDown = false;
     bool m_leftReleased = false;
@@ -104,14 +104,14 @@ private:
     Vector2 m_PrevMousePos = {};
     bool m_IsFirstMouseUpdate = true;
 
-    // À•W
+    // åº§æ¨™
     POINT m_clientPos = { 0, 0 };
     DirectX::XMFLOAT2 m_screenPos = { 0.0f, 0.0f };
 
     DirectX::XMFLOAT3 RayStart;
     DirectX::XMFLOAT3 RayEnd;
 
-    // ‘OƒtƒŒ[ƒ€ó‘Ô
+    // å‰ãƒ•ãƒ¬ãƒ¼ãƒ çŠ¶æ…‹
     bool m_prevLeft = false;
     bool m_prevRight = false;
 

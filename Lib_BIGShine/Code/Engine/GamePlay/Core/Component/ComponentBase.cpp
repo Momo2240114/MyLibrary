@@ -4,6 +4,6 @@
 
 GameObjectManager& Component::GetManager()
 {
-    // e‚Å‚ ‚éGameObject‚ğŒo—R‚µ‚ÄAƒ}ƒl[ƒWƒƒ[‚ğŒÄ‚Ño‚·
+    // è¦ªã§ã‚ã‚‹GameObjectã‚’çµŒç”±ã—ã¦ã€ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’å‘¼ã³å‡ºã™
     return GetGameObject()->GetManager();
 }

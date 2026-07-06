@@ -9,30 +9,30 @@ class StateMachine
 {
 public:
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	StateMachine(){}
 
-	//ƒfƒXƒgƒ‰ƒNƒ^
+	//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~StateMachine();
 
 	void Update(float et);
 	
 	void LateUpdate(float et);
 
-	//ƒXƒe[ƒg•ÏX
+	//ã‚¹ãƒ†ãƒ¼ãƒˆå¤‰æ›´
 	void ChangeState(const std::string name);
 
 	void RegisterState(State* state);
 
-	//ƒXƒe[ƒg–¼æ“¾
+	//ã‚¹ãƒ†ãƒ¼ãƒˆåå–å¾—
 	const char* GetStateName()const { return currentState->GetName(); }
 	State* GetState()const { return currentState; }
 
 
 private:
-	//Œ»İ‚ÌƒXƒe[ƒg
+	//ç¾åœ¨ã®ã‚¹ãƒ†ãƒ¼ãƒˆ
 	State* currentState = nullptr;
 
-	//ŠeƒXƒe[ƒg•Û‚·‚é”z—ñ
+	//å„ã‚¹ãƒ†ãƒ¼ãƒˆä¿æŒã™ã‚‹é…åˆ—
 	std::unordered_map<std::string, State*> statePool;
 };

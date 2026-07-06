@@ -11,40 +11,40 @@ public:
     ResourceManager() = default;
     ~ResourceManager() { Clear(); }
 
-    //‚ ‚ç‚ä‚éƒŠƒ\[ƒX‚ğ’Ç‰Á‚·‚é
+    //ã‚ã‚‰ã‚†ã‚‹ãƒªã‚½ãƒ¼ã‚¹ã‚’è¿½åŠ ã™ã‚‹
     template<typename T>
     void Add(const std::string& name, std::shared_ptr<T> resource)
     {
         if (!resource) return;
-        // Œ^‚ğÁ‹‚µ‚Ä voidƒ|ƒCƒ“ƒ^‚ÌŒ`‚Å•ÛŠÇŒÉ‚Ö‚ÆŠi”[‚·‚é
+        // å‹ã‚’æ¶ˆå»ã—ã¦ voidãƒã‚¤ãƒ³ã‚¿ã®å½¢ã§ä¿ç®¡åº«ã¸ã¨æ ¼ç´ã™ã‚‹
         resourceMap[name] = std::static_pointer_cast<void>(resource);
-        std::cout << "[Resource] “o˜^Š®—¹: " << name << " (Œ^: " << typeid(T).name() << ")" << std::endl;
+        std::cout << "[Resource] ç™»éŒ²å®Œäº†: " << name << " (å‹: " << typeid(T).name() << ")" << std::endl;
     }
 
-    // ‚»‚Ì–¼‘O‚ğ‚ÂƒŠƒ\[ƒX‚ª‘¶İ‚·‚é‚©Šm‚©‚ß‚é
+    // ãã®åå‰ã‚’æŒã¤ãƒªã‚½ãƒ¼ã‚¹ãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºã‹ã‚ã‚‹
     bool Has(const std::string& name) const
     {
         return resourceMap.find(name) != resourceMap.end();
     }
 
-    // Œ³‚ÌŒ^‚ğw’è‚µ‚ÄƒŠƒ\[ƒX‚ğ‰ğ‚«•ú‚Â
+    // å…ƒã®å‹ã‚’æŒ‡å®šã—ã¦ãƒªã‚½ãƒ¼ã‚¹ã‚’è§£ãæ”¾ã¤
     template<typename T>
     std::shared_ptr<T> Get(const std::string& name)
     {
         auto it = resourceMap.find(name);
         if (it == resourceMap.end()) return nullptr;
 
-        // ‹•–³‚Ìƒ|ƒCƒ“ƒ^ivoid*j‚©‚çAŒ³‚ÌŒõ‹P‚­Œ^‚Ö‚ÆˆÀ‘S‚ÉƒLƒƒƒXƒg‚µ‚Ä•Ô‚·
+        // è™šç„¡ã®ãƒã‚¤ãƒ³ã‚¿ï¼ˆvoid*ï¼‰ã‹ã‚‰ã€å…ƒã®å…‰è¼ãå‹ã¸ã¨å®‰å…¨ã«ã‚­ãƒ£ã‚¹ãƒˆã—ã¦è¿”ã™
         return std::static_pointer_cast<T>(it->second);
     }
 
-    // ‘ŒÉ‚Ì‘SƒŠƒ\[ƒX‚ğ‰ğ•ú‚·‚é
+    // æ›¸åº«ã®å…¨ãƒªã‚½ãƒ¼ã‚¹ã‚’è§£æ”¾ã™ã‚‹
     void Clear()
     {
         resourceMap.clear();
     }
 
 private:
-    // •¶š—ñ‚ğŒ®‚Æ‚µA‚ ‚ç‚ä‚éŒ^‚ğ“Û‚İ‚Ş•ÛŠÇŒÉ
+    // æ–‡å­—åˆ—ã‚’éµã¨ã—ã€ã‚ã‚‰ã‚†ã‚‹å‹ã‚’å‘‘ã¿è¾¼ã‚€ä¿ç®¡åº«
     std::unordered_map<std::string, std::shared_ptr<void>> resourceMap;
 };

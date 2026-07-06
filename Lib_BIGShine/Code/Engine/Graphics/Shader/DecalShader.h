@@ -8,14 +8,14 @@ public:
     DecalShader(ID3D11Device* device);
     ~DecalShader() override = default;
 
-	// –¼‘O‚ğ•Û‚·‚éƒƒ“ƒo•Ï”
+	// åå‰ã‚’ä¿æŒã™ã‚‹ãƒ¡ãƒ³ãƒå¤‰æ•°
 	const std::string& GetName() const override {
 		static const std::string name = "Decal";
 		return name;
 	}
 
     void Begin(const RenderContext& rc) override;
-    void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override; // Šî–{g—p‚µ‚È‚¢
+    void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override; // åŸºæœ¬ä½¿ç”¨ã—ãªã„
     void End(const RenderContext& rc) override;
 
 	bool usePixelShader;
@@ -28,11 +28,11 @@ public:
 
 		DirectX::XMFLOAT4 zBufferParameteres;
 
-		int numPointLights;   // —LŒø‚Èƒ|ƒCƒ“ƒgƒ‰ƒCƒg‚Ì”
-		int numSpotLights;   // —LŒø‚ÈƒXƒ|ƒbƒgƒ‰ƒCƒg‚Ì”
-		float padding[2];     // 16ƒoƒCƒg‹«ŠE‡‚í‚¹
+		int numPointLights;   // æœ‰åŠ¹ãªãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã®æ•°
+		int numSpotLights;   // æœ‰åŠ¹ãªã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®æ•°
+		float padding[2];     // 16ãƒã‚¤ãƒˆå¢ƒç•Œåˆã‚ã›
 
-		//‹ts—ñ
+		//é€†è¡Œåˆ—
 		DirectX::XMFLOAT4X4 invViewProjection;
 	};
 private:
@@ -40,7 +40,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader>   pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>   inputLayout;
 
-    // ƒTƒ“ƒvƒ‰[ (s0: Point for Depth, s1: Linear for Decal)
+    // ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ (s0: Point for Depth, s1: Linear for Decal)
     Microsoft::WRL::ComPtr<ID3D11SamplerState>  pointSampler;
     Microsoft::WRL::ComPtr<ID3D11SamplerState>  linearBorderSampler;
 };

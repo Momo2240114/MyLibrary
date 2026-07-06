@@ -9,8 +9,8 @@ using namespace DirectX;
 #include <d3dcompiler.h>
 
 enum class TextureType {
-	Color, // sRGB‚Æ‚µ‚Ä‰ğß‚µAF‚ğ³‚µ‚­•\¦‚·‚é
-	Data   // Linear‚Æ‚µ‚Ä‰ğß‚µAŒvZ—p‚Ì”’l‚Æ‚µ‚Äˆµ‚¤i–@üAƒ‰ƒtƒlƒX“™j
+	Color, // sRGBã¨ã—ã¦è§£é‡ˆã—ã€è‰²ã‚’æ­£ã—ãè¡¨ç¤ºã™ã‚‹
+	Data   // Linearã¨ã—ã¦è§£é‡ˆã—ã€è¨ˆç®—ç”¨ã®æ•°å€¤ã¨ã—ã¦æ‰±ã†ï¼ˆæ³•ç·šã€ãƒ©ãƒ•ãƒã‚¹ç­‰ï¼‰
 };
 
 class CPUResourceLoader
@@ -19,7 +19,7 @@ private:
 	static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureResources;
 
 public:
-	//ƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh‚ğƒ‚ƒWƒ…[ƒ‹‰»
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ã‚’ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åŒ–
 	static HRESULT LoadTextureFromFile(
 		ID3D11Device* device_,
 		const wchar_t* filename_,
@@ -48,7 +48,7 @@ public:
 	static HRESULT CreatePSFromCSO(ID3D11Device* device_,
 		const char* csoName_, ID3D11PixelShader** pixelShader_);
 
-	// ’¸“_ƒVƒF[ƒ_[“Ç‚İ‚İ
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadVertexShader(
 		ID3D11Device* device,
 		const char* filename,
@@ -58,25 +58,25 @@ public:
 		ID3D11VertexShader** vertexShader);
 	
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[“Ç‚İ‚İ
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadPixelShader(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11PixelShader** pixelShader);
 
-	// ’è”ƒoƒbƒtƒ@ì¬
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡ä½œæˆ
 	static HRESULT CreateConstantBuffer(
 		ID3D11Device* device,
 		UINT bufferSize,
 		ID3D11Buffer** constantBuffer);
 
-	// ƒWƒIƒƒgƒŠƒVƒF[ƒ_[“Ç‚İ‚İ
+	// ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadGeometryShader(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11GeometryShader** geometryShader);
 
-	// ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[“Ç‚İ‚İ
+	// ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadComputeShader(
 		ID3D11Device* device,
 		const char* filename,

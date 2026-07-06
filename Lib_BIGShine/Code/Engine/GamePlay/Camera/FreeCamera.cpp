@@ -17,59 +17,59 @@ void CameraFreeController::Start()
 
 void CameraFreeController::Update(float deltaTime)
 {
-    // ƒ}ƒEƒX“ü—ÍŠÖŒW‚ÌQÆ‚ğæ“¾
+    // ãƒã‚¦ã‚¹å…¥åŠ›é–¢ä¿‚ã®å‚ç…§ã‚’å–å¾—
     auto& mouse = MouseInput::Instance();
 
-    // 1. ƒ}ƒEƒX‚É‚æ‚é‹“_ˆÚ“®id—lF‚¢‚Â‚Å‚àƒ}ƒEƒX‚Å‹“_‚ğˆÚ“®A‚ ‚é‚¢‚Í‰EƒNƒŠƒbƒN’†‚Ì‚İ“™A‚¨D‚İ‚É‡‚í‚¹‚Ä’²®‰Â”\j
-    // ‚±‚±‚Å‚ÍA‚¨å‚Ì’ñ¦‚µ‚½d—lumouse‚Å‹“_‚ğˆÚ“®v‚ÉŠî‚Ã‚«Aí‚É‰ñ“]“ü—Í‚ğó‚¯•t‚¯‚Ü‚·
+    // 1. ãƒã‚¦ã‚¹ã«ã‚ˆã‚‹è¦–ç‚¹ç§»å‹•ï¼ˆä»•æ§˜ï¼šã„ã¤ã§ã‚‚ãƒã‚¦ã‚¹ã§è¦–ç‚¹ã‚’ç§»å‹•ã€ã‚ã‚‹ã„ã¯å³ã‚¯ãƒªãƒƒã‚¯ä¸­ã®ã¿ç­‰ã€ãŠå¥½ã¿ã«åˆã‚ã›ã¦èª¿æ•´å¯èƒ½ï¼‰
+    // ã“ã“ã§ã¯ã€ãŠä¸»ã®æç¤ºã—ãŸä»•æ§˜ã€Œmouseã§è¦–ç‚¹ã‚’ç§»å‹•ã€ã«åŸºã¥ãã€å¸¸ã«å›è»¢å…¥åŠ›ã‚’å—ã‘ä»˜ã‘ã¾ã™
     UpdateRotation(deltaTime);
 
-    // 2. ‰EƒNƒŠƒbƒN’†‚Ìˆ—id—lF‰EƒNƒŠƒbƒN’†‚ÉWASD‚ÅˆÚ“®AƒzƒC[ƒ‹‚Å‘¬“x•ÏXj
+    // 2. å³ã‚¯ãƒªãƒƒã‚¯ä¸­ã®å‡¦ç†ï¼ˆä»•æ§˜ï¼šå³ã‚¯ãƒªãƒƒã‚¯ä¸­ã«WASDã§ç§»å‹•ã€ãƒ›ã‚¤ãƒ¼ãƒ«ã§é€Ÿåº¦å¤‰æ›´ï¼‰
     if (mouse.RightDown())
     {
-        // ƒzƒC[ƒ‹‚Ì‰ñ“]—Êiƒfƒ‹ƒ^j‚ğÁ”ï‚µ‚Äæ“¾
+        // ãƒ›ã‚¤ãƒ¼ãƒ«ã®å›è»¢é‡ï¼ˆãƒ‡ãƒ«ã‚¿ï¼‰ã‚’æ¶ˆè²»ã—ã¦å–å¾—
         float wheelDelta = mouse.ConsumeWheelDelta();
         if (wheelDelta != 0.0f)
         {
-            // ƒzƒC[ƒ‹‚ª‰œ‚É‰ñ‚Á‚½‚ç‰Á‘¬Aè‘O‚É‰ñ‚Á‚½‚çŒ¸‘¬i1ƒNƒŠƒbƒN‚ ‚½‚è’Êí+120‚ª“ü‚é‚½‚ßA¬‚³‚ÈŒW”‚ğŠ|‚¯‚éj
+            // ãƒ›ã‚¤ãƒ¼ãƒ«ãŒå¥¥ã«å›ã£ãŸã‚‰åŠ é€Ÿã€æ‰‹å‰ã«å›ã£ãŸã‚‰æ¸›é€Ÿï¼ˆ1ã‚¯ãƒªãƒƒã‚¯ã‚ãŸã‚Šé€šå¸¸+120ãŒå…¥ã‚‹ãŸã‚ã€å°ã•ãªä¿‚æ•°ã‚’æ›ã‘ã‚‹ï¼‰
             speedMultiplier += (wheelDelta > 0.0f) ? 0.1f : -0.1f;
 
-            // ‘¬“x”{—¦‚ªƒ}ƒCƒiƒX‚É‚È‚Á‚½‚èA–³ŒÀ‚É‘¬‚­‚È‚ç‚È‚¢‚æ‚¤‚É§ŒÀi0.1”{‚©‚ç10.0”{j
+            // é€Ÿåº¦å€ç‡ãŒãƒã‚¤ãƒŠã‚¹ã«ãªã£ãŸã‚Šã€ç„¡é™ã«é€Ÿããªã‚‰ãªã„ã‚ˆã†ã«åˆ¶é™ï¼ˆ0.1å€ã‹ã‚‰10.0å€ï¼‰
             speedMultiplier = (std::max)(0.1f, (std::min)(10.0f, speedMultiplier));
         }
 
-        // WASD‚É‚æ‚éˆÚ“®ˆ—
+        // WASDã«ã‚ˆã‚‹ç§»å‹•å‡¦ç†
         UpdateMovement(deltaTime);
     }
     else
     {
-        // ‰EƒNƒŠƒbƒN‚µ‚Ä‚¢‚È‚¢ŠÔ‚àAƒzƒC[ƒ‹‚Ì‰ñ“]‚É‚æ‚éƒoƒbƒtƒ@‚ª—­‚Ü‚è‘±‚¯‚È‚¢‚æ‚¤‚É”O‚Ì‚½‚ßÁ”ï‚µ‚Ä‚¨‚­
+        // å³ã‚¯ãƒªãƒƒã‚¯ã—ã¦ã„ãªã„é–“ã‚‚ã€ãƒ›ã‚¤ãƒ¼ãƒ«ã®å›è»¢ã«ã‚ˆã‚‹ãƒãƒƒãƒ•ã‚¡ãŒæºœã¾ã‚Šç¶šã‘ãªã„ã‚ˆã†ã«å¿µã®ãŸã‚æ¶ˆè²»ã—ã¦ãŠã
         mouse.ConsumeWheelDelta();
     }
 }
 
 void CameraFreeController::UpdateRotation(float deltaTime)
 {
-    // ƒVƒ“ƒOƒ‹ƒgƒ“‚©‚çƒ}ƒEƒX“ü—Í‚ğæ“¾
+    // ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‹ã‚‰ãƒã‚¦ã‚¹å…¥åŠ›ã‚’å–å¾—
     auto& mouse = MouseInput::Instance();
 
-    // MouseInput“à‚ÅŒvZ‚³‚ê‚Ä‚¢‚éƒ}ƒEƒX‚ÌˆÚ“®—Êi·•ªj‚ğæ“¾
+    // MouseInputå†…ã§è¨ˆç®—ã•ã‚Œã¦ã„ã‚‹ãƒã‚¦ã‚¹ã®ç§»å‹•é‡ï¼ˆå·®åˆ†ï¼‰ã‚’å–å¾—
     Vector2 mouseDelta = mouse.GetSubMousePos();
 
-    // y–hŒ‚¢C³1z‰EƒNƒŠƒbƒN‚ğ‰Ÿ‚µ‚Ä‚¢‚éŠÔ‚¾‚¯‹“_‚ğ“®‚©‚·‚æ‚¤‚É‚·‚é
-    // ¦‚à‚µí‚É“®‚©‚µ‚½‚¢ê‡‚ÍA‚±‚Ìif•¶‚ÌğŒ‚ğŠO‚·‚©’²®‚·‚é‚ª—Ç‚¢
+    // ã€é˜²é…”ã„ä¿®æ­£1ã€‘å³ã‚¯ãƒªãƒƒã‚¯ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“ã ã‘è¦–ç‚¹ã‚’å‹•ã‹ã™ã‚ˆã†ã«ã™ã‚‹
+    // â€»ã‚‚ã—å¸¸ã«å‹•ã‹ã—ãŸã„å ´åˆã¯ã€ã“ã®ifæ–‡ã®æ¡ä»¶ã‚’å¤–ã™ã‹èª¿æ•´ã™ã‚‹ãŒè‰¯ã„
     if (mouse.RightDown())
     {
-        // y–hŒ‚¢C³2zdeltaTime‚ğæZ‚µAPC‚Ì«”\iFPSj‚É‚æ‚é‰ñ“]‘¬“x‚Ì”š”­‚ğ–h‚®
-        // ¦ƒ}ƒEƒX‚Ì¶ƒf[ƒ^ideltaj‚Ìd—l‚É‚æ‚Á‚Ä‚ÍAlookSpeed‚Ì’²®i0.2f‚©‚ç10.0f’ö“xj‚ª•K—v‚É‚È‚é‚¼
+        // ã€é˜²é…”ã„ä¿®æ­£2ã€‘deltaTimeã‚’ä¹—ç®—ã—ã€PCã®æ€§èƒ½ï¼ˆFPSï¼‰ã«ã‚ˆã‚‹å›è»¢é€Ÿåº¦ã®çˆ†ç™ºã‚’é˜²ã
+        // â€»ãƒã‚¦ã‚¹ã®ç”Ÿãƒ‡ãƒ¼ã‚¿ï¼ˆdeltaï¼‰ã®ä»•æ§˜ã«ã‚ˆã£ã¦ã¯ã€lookSpeedã®èª¿æ•´ï¼ˆ0.2fã‹ã‚‰10.0fç¨‹åº¦ï¼‰ãŒå¿…è¦ã«ãªã‚‹ã
         currentYaw += mouseDelta.x * lookSpeed;
-        currentPitch += mouseDelta.y * lookSpeed; // ã‰º”½“]iFPS‹““®j‚É‚·‚éê‡‚Íƒ}ƒCƒiƒX‚É‚·‚é
+        currentPitch += mouseDelta.y * lookSpeed; // ä¸Šä¸‹åè»¢ï¼ˆFPSæŒ™å‹•ï¼‰ã«ã™ã‚‹å ´åˆã¯ãƒã‚¤ãƒŠã‚¹ã«ã™ã‚‹
 
-        // ñ‚ª”½“]‚µ‚Ä“V•Ï’nˆÙ‚ª‹N‚«‚Ê‚æ‚¤Aã‰º‚Ìƒsƒbƒ`‰ñ“]‚ğ -89.9“x ‚©‚ç 89.9“x‚Ì”ÍˆÍ‚É§ŒÀ
+        // é¦–ãŒåè»¢ã—ã¦å¤©å¤‰åœ°ç•°ãŒèµ·ãã¬ã‚ˆã†ã€ä¸Šä¸‹ã®ãƒ”ãƒƒãƒå›è»¢ã‚’ -89.9åº¦ ã‹ã‚‰ 89.9åº¦ã®ç¯„å›²ã«åˆ¶é™
         currentPitch = std::clamp(currentPitch, -2090.0f, 2090.0f);
     }
 
-    // ŒvZ‚µ‚½Šp“x‚©‚çu‹ü•ûŒüv‚ğŠ„‚èo‚µATransform ‚É“K—p‚·‚é
+    // è¨ˆç®—ã—ãŸè§’åº¦ã‹ã‚‰ã€Œè¦–ç·šæ–¹å‘ã€ã‚’å‰²ã‚Šå‡ºã—ã€Transform ã«é©ç”¨ã™ã‚‹
     if (auto t = GetGameObject()->transform)
     {
         float toRadians_ = 3.14159265f / 180.0f;
@@ -92,36 +92,36 @@ void CameraFreeController::UpdateMovement(float deltaTime)
     auto t = GetGameObject()->transform;
     if (!t) return;
 
-    // Transform‚©‚çŒ»İ‚ÌƒJƒƒ‰‚Ìu‘O•ûŒüv‚Æu‰E•ûŒüv‚ÌƒxƒNƒgƒ‹‚ğæ“¾
+    // Transformã‹ã‚‰ç¾åœ¨ã®ã‚«ãƒ¡ãƒ©ã®ã€Œå‰æ–¹å‘ã€ã¨ã€Œå³æ–¹å‘ã€ã®ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
     Vector3 front = t->GetFront();
     Vector3 right = t->GetRight();
 
-    // ˆÚ“®•ûŒü‚ğ‹L˜^‚·‚éƒxƒNƒgƒ‹
+    // ç§»å‹•æ–¹å‘ã‚’è¨˜éŒ²ã™ã‚‹ãƒ™ã‚¯ãƒˆãƒ«
     DirectX::XMFLOAT3 moveDir{ 0.0f, 0.0f, 0.0f };
 
-    // KeyInput‚Ì—ñ‹“Œ^‚ğ—˜—p‚µ‚ÄWASD‚Ì“ü—Í‚ğŒŸ’m
-    // WƒL[F‘Oi
+    // KeyInputã®åˆ—æŒ™å‹ã‚’åˆ©ç”¨ã—ã¦WASDã®å…¥åŠ›ã‚’æ¤œçŸ¥
+    // Wã‚­ãƒ¼ï¼šå‰é€²
     if (KeyInput::KeyPressed(KeyInput::Key::K_W))
     {
         moveDir.x += front.x;
         moveDir.y += front.y;
         moveDir.z += front.z;
     }
-    // SƒL[FŒã‘Ş
+    // Sã‚­ãƒ¼ï¼šå¾Œé€€
     if (KeyInput::KeyPressed(KeyInput::Key::K_S))
     {
         moveDir.x -= front.x;
         moveDir.y -= front.y;
         moveDir.z -= front.z;
     }
-    // DƒL[F‰EƒXƒ‰ƒCƒhˆÚ“®
+    // Dã‚­ãƒ¼ï¼šå³ã‚¹ãƒ©ã‚¤ãƒ‰ç§»å‹•
     if (KeyInput::KeyPressed(KeyInput::Key::K_D))
     {
         moveDir.x += right.x;
         moveDir.y += right.y;
         moveDir.z += right.z;
     }
-    // AƒL[F¶ƒXƒ‰ƒCƒhˆÚ“®
+    // Aã‚­ãƒ¼ï¼šå·¦ã‚¹ãƒ©ã‚¤ãƒ‰ç§»å‹•
     if (KeyInput::KeyPressed(KeyInput::Key::K_A))
     {
         moveDir.x -= right.x;
@@ -138,17 +138,17 @@ void CameraFreeController::UpdateMovement(float deltaTime)
         moveDir.y -= t->GetUp().y;
     }
 
-    // DirectXMath‚ğg—p‚µ‚ÄˆÚ“®ƒxƒNƒgƒ‹‚Ì’·‚³‚ğ³‹K‰»iÎ‚ßˆÚ“®‚Ì‘¬“x‚ğˆê’è‚É‚·‚éj
+    // DirectXMathã‚’ä½¿ç”¨ã—ã¦ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã‚’æ­£è¦åŒ–ï¼ˆæ–œã‚ç§»å‹•ã®é€Ÿåº¦ã‚’ä¸€å®šã«ã™ã‚‹ï¼‰
     DirectX::XMVECTOR vec = DirectX::XMLoadFloat3(&moveDir);
     if (DirectX::XMVector3LengthSq(vec).m128_f32[0] > 0.0f)
     {
         vec = DirectX::XMVector3Normalize(vec);
 
-        // ÅI“I‚ÈˆÚ“®—Ê‚ğŒvZiŠî–{‘¬“x ~ ƒzƒC[ƒ‹”{—¦ ~ ƒfƒ‹ƒ^ƒ^ƒCƒ€j
+        // æœ€çµ‚çš„ãªç§»å‹•é‡ã‚’è¨ˆç®—ï¼ˆåŸºæœ¬é€Ÿåº¦ Ã— ãƒ›ã‚¤ãƒ¼ãƒ«å€ç‡ Ã— ãƒ‡ãƒ«ã‚¿ã‚¿ã‚¤ãƒ ï¼‰
         float finalSpeed = moveSpeed * speedMultiplier * deltaTime;
         vec = DirectX::XMVectorScale(vec, finalSpeed);
 
-        // Transform‚ÌˆÚ“®ƒIƒtƒZƒbƒg‚Æ‚µ‚Ä‰ÁZ
+        // Transformã®ç§»å‹•ã‚ªãƒ•ã‚»ãƒƒãƒˆã¨ã—ã¦åŠ ç®—
         DirectX::XMFLOAT3 offset;
         DirectX::XMStoreFloat3(&offset, vec);
         t->AddMoveOffset(offset);
@@ -157,7 +157,7 @@ void CameraFreeController::UpdateMovement(float deltaTime)
 
 void CameraFreeController::Gui()
 {
-    // ImGui‚Ì‹@”\‚ğ—p‚¢‚ÄŒ»İ‚ÌƒXƒe[ƒg‚ğ•\¦E•ÏX‰Â”\‚É‚·‚é
+    // ImGuiã®æ©Ÿèƒ½ã‚’ç”¨ã„ã¦ç¾åœ¨ã®ã‚¹ãƒ†ãƒ¼ãƒˆã‚’è¡¨ç¤ºãƒ»å¤‰æ›´å¯èƒ½ã«ã™ã‚‹
     ImGui::Text("Camera Body Free Settings");
     ImGui::DragFloat("Base Speed", &moveSpeed, 0.5f, 0.1f, 100.0f, "%.1f");
     ImGui::DragFloat("Look Sensitivity", &lookSpeed, 0.01f, 0.01f, 2.0f, "%.2f");

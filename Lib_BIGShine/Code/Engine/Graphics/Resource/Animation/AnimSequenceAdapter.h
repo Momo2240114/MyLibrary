@@ -1,11 +1,11 @@
 #include "ImSequencer.h"
 #include "AnimationState.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
-#include "imgui_internal.h" // ImRect “™‚Ìg—p‚É•K—v
+#include "imgui_internal.h" // ImRect ç­‰ã®ä½¿ç”¨ã«å¿…è¦
 
 
 // =============================================================
-// AnimationControllerComponent —p‚ÌƒV[ƒPƒ“ƒT[ƒAƒ_ƒvƒ^[
+// AnimationControllerComponent ç”¨ã®ã‚·ãƒ¼ã‚±ãƒ³ã‚µãƒ¼ã‚¢ãƒ€ãƒ—ã‚¿ãƒ¼
 // =============================================================
 struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
 {
@@ -34,59 +34,59 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
         }
     }
 
-    // ƒhƒ‰ƒbƒOŠJn‚ÉŒÄ‚Î‚ê‚éi•K—v‚É‰‚¶‚Ä‰Šúó‘Ô‚Ì•Û‘¶‚È‚Ç‚ª‰Â”\j
+    // ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹æ™‚ã«å‘¼ã°ã‚Œã‚‹ï¼ˆå¿…è¦ã«å¿œã˜ã¦åˆæœŸçŠ¶æ…‹ã®ä¿å­˜ãªã©ãŒå¯èƒ½ï¼‰
     void BeginEdit(int index) override {
-        // “Á‚É‚È‚¯‚ê‚Î‹ó‚Å‚àOK‚Å‚·‚ªAƒCƒ“ƒ^[ƒtƒF[ƒX‚Æ‚µ‚Ä‘¶İ‚ğŠm”F
+        // ç‰¹ã«ãªã‘ã‚Œã°ç©ºã§ã‚‚OKã§ã™ãŒã€ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã¨ã—ã¦å­˜åœ¨ã‚’ç¢ºèª
     }
 
-    // ƒhƒ‰ƒbƒO’†‚âI—¹‚ÉŒÄ‚Î‚êAƒtƒŒ[ƒ€‚©‚ç•b‚Ö•ÏŠ·‚µ‚Ä\‘¢‘Ì‚É‘‚«–ß‚·
+    // ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã‚„çµ‚äº†æ™‚ã«å‘¼ã°ã‚Œã€ãƒ•ãƒ¬ãƒ¼ãƒ ã‹ã‚‰ç§’ã¸å¤‰æ›ã—ã¦æ§‹é€ ä½“ã«æ›¸ãæˆ»ã™
     void EndEdit() override
     {
         if (!targetState) return;
         for (auto& ev : targetState->events)
         {
-            // ‚±‚±‚ªd—vFƒhƒ‰ƒbƒO‚Å‘‚«Š·‚í‚Á‚½ frameStart/End ‚ğ float ‚É–ß‚·
+            // ã“ã“ãŒé‡è¦ï¼šãƒ‰ãƒ©ãƒƒã‚°ã§æ›¸ãæ›ã‚ã£ãŸ frameStart/End ã‚’ float ã«æˆ»ã™
             ev.startTime = ToTime(ev.frameStart);
             ev.endTime = ToTime(ev.frameEnd);
         }
     }
 
-    // Get ƒƒ\ƒbƒh‚ÅŠmÀ‚Éƒ|ƒCƒ“ƒ^‚ğ“n‚µ‚Ä‚¢‚é‚©ÄŠm”F
+    // Get ãƒ¡ã‚½ãƒƒãƒ‰ã§ç¢ºå®Ÿã«ãƒã‚¤ãƒ³ã‚¿ã‚’æ¸¡ã—ã¦ã„ã‚‹ã‹å†ç¢ºèª
     void Get(int index, int** start, int** end, int* type, unsigned int* color) override
     {
         if (!targetState || index >= (int)targetState->events.size()) return;
 
         auto& ev = targetState->events[index];
 
-        if (start) *start = &ev.frameStart; // int* ‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğ“n‚·
+        if (start) *start = &ev.frameStart; // int* ã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’æ¸¡ã™
         if (end) *end = &ev.frameEnd;
         if (type) *type = 0;
         if (color) *color = 0xFFAA9900;
     }
-    // ¶‘¤‚Ì€–Ú–¼ƒŠƒXƒg
+    // å·¦å´ã®é …ç›®åãƒªã‚¹ãƒˆ
     const char* GetItemLabel(int index) const override {
         if (!targetState || index >= (int)targetState->events.size()) return "";
         auto& ev = targetState->events[index];
 
-        // 1. ƒ‰ƒxƒ‹‚ª‚ ‚ê‚Î—Dæ
+        // 1. ãƒ©ãƒ™ãƒ«ãŒã‚ã‚Œã°å„ªå…ˆ
         if (!ev.eventLabel.empty()) return ev.eventLabel.c_str();
 
         return "Untitled Event";
     }
 
-    // ƒ^ƒCƒ€ƒ‰ƒCƒ“ã‚Ìƒo[‚Ì’†‚É•`‰æ‚³‚ê‚éƒeƒLƒXƒg
+    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ä¸Šã®ãƒãƒ¼ã®ä¸­ã«æç”»ã•ã‚Œã‚‹ãƒ†ã‚­ã‚¹ãƒˆ
     void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect) override
     {
         if (!targetState || index >= (int)targetState->events.size()) return;
         auto& ev = targetState->events[index];
 
-        // •\¦—p•¶š—ñ‚Ì\’zFƒ‰ƒxƒ‹—Dæ
+        // è¡¨ç¤ºç”¨æ–‡å­—åˆ—ã®æ§‹ç¯‰ï¼šãƒ©ãƒ™ãƒ«å„ªå…ˆ
         std::string info = ev.eventLabel;
         if (info.empty()) {
             info = ev.startAction.empty() ? "New Event" : ev.startAction;
         }
 
-        // •K—v‚É‰‚¶‚ÄƒAƒNƒVƒ‡ƒ“î•ñ‚à¬‚³‚­’Ç‹L‚µ‚½‚¢ê‡‚ÍˆÈ‰º‚ğ—LŒø‚É
+        // å¿…è¦ã«å¿œã˜ã¦ã‚¢ã‚¯ã‚·ãƒ§ãƒ³æƒ…å ±ã‚‚å°ã•ãè¿½è¨˜ã—ãŸã„å ´åˆã¯ä»¥ä¸‹ã‚’æœ‰åŠ¹ã«
         // if (!ev.updateAction.empty()) info += " (" + ev.updateAction + ")";
 
         draw_list->PushClipRect(rc.Min, rc.Max, true);
@@ -99,12 +99,12 @@ struct AnimSequenceAdapter : public ImSequencer::SequenceInterface
         AnimEvent ev;
         ev.startTime = 0.0f;
         ev.endTime = duration * 0.2f;
-        ev.eventLabel = "New Event"; // ‰Šúƒ‰ƒxƒ‹
-        ev.startAction = "";        // ƒAƒNƒVƒ‡ƒ“‚Í‹ó‚É‚·‚éiGUI‚Å‘I‘ğ‚³‚¹‚éj
+        ev.eventLabel = "New Event"; // åˆæœŸãƒ©ãƒ™ãƒ«
+        ev.startAction = "";        // ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã¯ç©ºã«ã™ã‚‹ï¼ˆGUIã§é¸æŠã•ã›ã‚‹ï¼‰
         targetState->events.push_back(ev);
     }
 
-    // w’è‚µ‚½ƒCƒ“ƒfƒbƒNƒX‚ÌƒCƒxƒ“ƒg‚ğíœ‚·‚é
+    // æŒ‡å®šã—ãŸã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®ã‚¤ãƒ™ãƒ³ãƒˆã‚’å‰Šé™¤ã™ã‚‹
     void Del(int index) override {
         if (!targetState || index < 0 || index >= (int)targetState->events.size()) return;
         targetState->events.erase(targetState->events.begin() + index);

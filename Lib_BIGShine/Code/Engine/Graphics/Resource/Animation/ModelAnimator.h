@@ -13,12 +13,12 @@ class GameObject;
 class ModelAnimator
 {
 public:
-    // Œ»İŒvZ’†‚Ìƒ|[ƒYƒf[ƒ^
+    // ç¾åœ¨è¨ˆç®—ä¸­ã®ãƒãƒ¼ã‚ºãƒ‡ãƒ¼ã‚¿
     struct ActiveSlot 
     {
         const AnimState* state = nullptr;
         float time = 0.0f;
-        float weight = 1.0f; // ƒuƒŒƒ“ƒhd‚İ
+        float weight = 1.0f; // ãƒ–ãƒ¬ãƒ³ãƒ‰é‡ã¿
         float sampleDuration = 0.0f;
 
 
@@ -42,7 +42,7 @@ public:
     // ModelAnimator.h
     void UpdateBlend(float et, GltfModelCommponennt* model, int indexA, int indexB, float alpha, bool loop, float speed);
 
-    // ƒm[ƒhƒGƒfƒBƒ^‘¤‚©‚çŒÄ‚Î‚ê‚é–½—ß
+    // ãƒãƒ¼ãƒ‰ã‚¨ãƒ‡ã‚£ã‚¿å´ã‹ã‚‰å‘¼ã°ã‚Œã‚‹å‘½ä»¤
     void CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner = nullptr);
 
     const std::vector<GltfModelCommponennt::NodePose>& GetCurrentPose() const { return finalPose; }
@@ -51,7 +51,7 @@ public:
     void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
 private:
-    // y’Ç‰ÁzƒJƒXƒ^ƒ€ƒAƒjƒ[ƒVƒ‡ƒ“iƒ|[ƒY‚ÌŒn•ˆj‚©‚çˆê–{‚Ìƒ|[ƒY‚ğ•Ò‚İo‚·”ép
+    // ã€è¿½åŠ ã€‘ã‚«ã‚¹ã‚¿ãƒ ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ï¼ˆãƒãƒ¼ã‚ºã®ç³»è­œï¼‰ã‹ã‚‰ä¸€æœ¬ã®ãƒãƒ¼ã‚ºã‚’ç·¨ã¿å‡ºã™ç§˜è¡“
     void ComputeCustomAnimationPose(
         const CustomAnimation& customAnim,
         float time,
@@ -61,13 +61,13 @@ private:
     );
     RootMotionDelta currentRootMotionDelta;
     ActiveSlot current;
-    ActiveSlot previous; // ƒtƒF[ƒhƒAƒEƒg—p
+    ActiveSlot previous; // ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆç”¨
 
-    // ‘OƒtƒŒ[ƒ€‚ÌÀ•W‚ğ•Û‚·‚é•Ï”
+    // å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®åº§æ¨™ã‚’ä¿æŒã™ã‚‹å¤‰æ•°
     DirectX::SimpleMath::Vector3 prevRootPos = { 0, 0, 0 };
     DirectX::SimpleMath::Vector3 rootMotionBasePosition = { 0, 0, 0 };
     int previousRootMotionNodeIndex = -1;
-    // ƒAƒjƒ[ƒVƒ‡ƒ“‚ªØ‚è‘Ö‚í‚Á‚½‚±‚Æ‚ğŒŸ’m‚·‚éƒtƒ‰ƒO
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒåˆ‡ã‚Šæ›¿ã‚ã£ãŸã“ã¨ã‚’æ¤œçŸ¥ã™ã‚‹ãƒ•ãƒ©ã‚°
     bool isFirstFrame = true;
 
     float prevTime = 0.0f;

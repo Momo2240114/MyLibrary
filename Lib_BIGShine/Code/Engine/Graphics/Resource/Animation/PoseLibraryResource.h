@@ -3,9 +3,9 @@
 #include <vector>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include "Engine/Graphics/Resource/GlTFModel.h" // GltfModelCommponennt‚ÌŒ^’è‹`‚Ì‚½‚ß
+#include "Engine/Graphics/Resource/GlTFModel.h" // GltfModelCommponenntã®å‹å®šç¾©ã®ãŸã‚
 
-// ƒ|[ƒY‚ğ\¬‚·‚éƒL[ƒtƒŒ[ƒ€‚Ì‹L‰¯
+// ãƒãƒ¼ã‚ºã‚’æ§‹æˆã™ã‚‹ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®è¨˜æ†¶
 struct PoseKeyframe 
 {
     float time = 0.0f;
@@ -17,7 +17,7 @@ struct PoseKeyframe
     // 0: Linear, 1: SmoothStep, 2: EaseIn, 3: EaseOut, 4: EaseInOut, 5: Hold
     int interpolation = 1;
 
-    //cereal‚âjson‚Ö‚Ì‘‹L‚Æ‰ğ“Ç
+    //cerealã‚„jsonã¸ã®æ›¸è¨˜ã¨è§£èª­
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(PoseKeyframe, time, poseIndex, sourceAnimIdx, sourceTime, interpolation)
 };
 
@@ -34,7 +34,7 @@ struct NaturalMotionSettings
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(NaturalMotionSettings, enabled, nodeFilter, rotationAmplitudeDeg, positionAmplitude, frequency, phase, blend)
 };
 
-// ƒ|[ƒY‚ğŒq‚¬‡‚í‚¹‚Ä‘n‚èo‚·AV‚½‚ÈƒAƒjƒ[ƒVƒ‡ƒ“
+// ãƒãƒ¼ã‚ºã‚’ç¹‹ãåˆã‚ã›ã¦å‰µã‚Šå‡ºã™ã€æ–°ãŸãªã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 struct CustomAnimation {
     std::string name;
     float duration = 1.0f;
@@ -48,7 +48,7 @@ struct CustomAnimation {
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(CustomAnimation, name, duration, baseAnimationIndex, baseAnimationStartTime, baseAnimationSpeed, poseBlend, keyframes, naturalMotion)
 };
 
-// Ø‚è‚Æ‚ç‚ê‚½ˆêu‚Ìƒ|[ƒYip¨j‚Ì‹L‰¯
+// åˆ‡ã‚Šã¨ã‚‰ã‚ŒãŸä¸€ç¬ã®ãƒãƒ¼ã‚ºï¼ˆå§¿å‹¢ï¼‰ã®è¨˜æ†¶
 struct SavedPose {
     std::string name;
     std::vector<GltfModelCommponennt::NodePose> nodePoses;
@@ -56,14 +56,14 @@ struct SavedPose {
     float sourceTime = 0.0f;
 };
 
-// JSONŒğM‚Ì‚½‚ß‚Ì•ÏŠ·iNodePose‚ÍDirectX‚ÌŒ^“™‚ğŠÜ‚Ş‚½‚ßAè“®“WŠJA‚ ‚é‚¢‚Íƒ}ƒNƒ‚ğ“K—pj
+// JSONäº¤ä¿¡ã®ãŸã‚ã®å¤‰æ›ï¼ˆNodePoseã¯DirectXã®å‹ç­‰ã‚’å«ã‚€ãŸã‚ã€æ‰‹å‹•å±•é–‹ã€ã‚ã‚‹ã„ã¯ãƒã‚¯ãƒ­ã‚’é©ç”¨ï¼‰
 inline void to_json(nlohmann::json& j, const SavedPose& p) {
     j = nlohmann::json{
         {"name", p.name},
         {"sourceAnimIndex", p.sourceAnimIndex},
         {"sourceTime", p.sourceTime}
     };
-    // nodePoses ‚ÌƒVƒŠƒAƒ‰ƒCƒYi•K—v‚É‰‚¶‚Ä position/rotation/scale ‚ğ“WŠJ‚µ‚Ä‹L˜^j
+    // nodePoses ã®ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚ºï¼ˆå¿…è¦ã«å¿œã˜ã¦ position/rotation/scale ã‚’å±•é–‹ã—ã¦è¨˜éŒ²ï¼‰
     for (const auto& np : p.nodePoses) {
         j["nodePoses"].push_back({
             {"pos", {np.position.x, np.position.y, np.position.z}},
@@ -92,14 +92,14 @@ inline void from_json(const nlohmann::json& j, SavedPose& p) {
     }
 }
 
-// ƒ‚ƒfƒ‹‚²‚Æ‚Éuƒ|[ƒY‚Ì”épv‚ğ’~‚¦‚é_“a‚ÌƒŠƒ\[ƒX
+// ãƒ¢ãƒ‡ãƒ«ã”ã¨ã«ã€Œãƒãƒ¼ã‚ºã®ç§˜è¡“ã€ã‚’è“„ãˆã‚‹ç¥æ®¿ã®ãƒªã‚½ãƒ¼ã‚¹
 class PoseLibraryResource
 {
 public:
-    std::string modelName; // Œ‹‚Ñ‚Â‚­ƒ‚ƒfƒ‹‚Ì^–¼
+    std::string modelName; // çµã³ã¤ããƒ¢ãƒ‡ãƒ«ã®çœŸå
 
-    std::vector<SavedPose> poseLibrary;       // ûW‚³‚ê‚½ƒ|[ƒY‚Ì‘ŒÉ
-    std::vector<CustomAnimation> customAnims; //@ƒIƒŠƒWƒiƒ‹ƒAƒjƒ[ƒVƒ‡ƒ“
+    std::vector<SavedPose> poseLibrary;       // åé›†ã•ã‚ŒãŸãƒãƒ¼ã‚ºã®æ›¸åº«
+    std::vector<CustomAnimation> customAnims; //ã€€ã‚ªãƒªã‚¸ãƒŠãƒ«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 
     void Clear() {
         poseLibrary.clear();

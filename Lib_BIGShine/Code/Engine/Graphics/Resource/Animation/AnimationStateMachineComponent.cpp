@@ -4,7 +4,7 @@
 #include "AnimationState.h"
 
 void AnimationStateMachineComponent::Start() {
-    // “¯‚¶ƒIƒuƒWƒFƒNƒg‚É‚ ‚éƒRƒ“ƒgƒ[ƒ‰[‚ğ©“®“I‚É’Í‚Ş
+    // åŒã˜ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«ã‚ã‚‹ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã‚’è‡ªå‹•çš„ã«æ´ã‚€
     m_targetController = GetGameObject()->GetComponent<AnimationControllerComponent>().get();
 }
 
@@ -12,7 +12,7 @@ void AnimationStateMachineComponent::Update(float deltaTime)
 {
     if (!m_targetController) return;
 
-    // ‘JˆÚğŒ‚Ì•]‰¿
+    // é·ç§»æ¡ä»¶ã®è©•ä¾¡
     EvaluateTransitions();
 }
 
@@ -20,22 +20,22 @@ void AnimationStateMachineComponent::EvaluateTransitions()
 {
     if (!m_targetController) return;
 
-    // 1. ‘JˆÚ‚ÌƒŠƒXƒg‚ğ”qØ
+    // 1. é·ç§»ã®ãƒªã‚¹ãƒˆã‚’æ‹å€Ÿ
     const auto& transitions = m_targetController->GetTransitions();
  
    const AnimState* currentState = m_targetController->GetCurrentState();
     if (!currentState) return;
 
-    // 2. ‘JˆÚ‚Ì”»’è
+    // 2. é·ç§»ã®åˆ¤å®š
     for (const auto& transition : transitions) 
     {
-        // Œ»İ‚ÌƒXƒe[ƒg‚©‚ço‚Ä‚¢‚éƒŠƒ“ƒN‚©”»’è
-        // ¦pinId‚©‚çƒm[ƒh‚ğˆø‚­ˆ—‚ÍƒRƒ“ƒgƒ[ƒ‰[‘¤‚ÉˆÚ÷‚·‚é‚©Aƒwƒ‹ƒp[‚ğì‚é•K—v‚ª‚ ‚é
+        // ç¾åœ¨ã®ã‚¹ãƒ†ãƒ¼ãƒˆã‹ã‚‰å‡ºã¦ã„ã‚‹ãƒªãƒ³ã‚¯ã‹åˆ¤å®š
+        // â€»pinIdã‹ã‚‰ãƒãƒ¼ãƒ‰ã‚’å¼•ãå‡¦ç†ã¯ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼å´ã«ç§»è­²ã™ã‚‹ã‹ã€ãƒ˜ãƒ«ãƒ‘ãƒ¼ã‚’ä½œã‚‹å¿…è¦ãŒã‚ã‚‹
         auto* startNode = m_targetController->FindNodeByName(transition.fromStateName);
 
         if (startNode && startNode->stateName == currentState->name) {
 
-            // ‘SğŒƒ`ƒFƒbƒN
+            // å…¨æ¡ä»¶ãƒã‚§ãƒƒã‚¯
             bool allMet = true;
             for (const auto& cond : transition.conditions) {
                 if (!m_targetController->EvaluateCondition(cond)) {
@@ -44,12 +44,12 @@ void AnimationStateMachineComponent::EvaluateTransitions()
                 }
             }
 
-            // 3. ğŒ‚ğ–‚½‚¹‚Î‘JˆÚ
+            // 3. æ¡ä»¶ã‚’æº€ãŸã›ã°é·ç§»
             if (allMet) {
                 auto* endNode = m_targetController->FindNodeByName(transition.toStateName);
                 if (endNode) {
                     RequestStateChange(endNode->stateName, transition.duration);
-                    return; // ‘JˆÚ‚µ‚½‚ç•]‰¿‚ğI—¹
+                    return; // é·ç§»ã—ãŸã‚‰è©•ä¾¡ã‚’çµ‚äº†
                 }
             }
         }

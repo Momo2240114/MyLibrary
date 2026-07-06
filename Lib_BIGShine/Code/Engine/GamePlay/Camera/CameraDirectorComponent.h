@@ -25,20 +25,20 @@ public:
     void Update(float et)override;
     void Gui() override;
 
-    // —¼•û‚ÌDirector‚É“¯‚É–½—ß‚ğo‚·
+    // ä¸¡æ–¹ã®Directorã«åŒæ™‚ã«å‘½ä»¤ã‚’å‡ºã™
     void PlayCombined(int index, EasingType transEase = EasingType::OutExpo, EasingType fovEase = EasingType::Lerp);
 
-    // ƒVƒŠƒAƒ‰ƒCƒY‹@”\
+    // ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚ºæ©Ÿèƒ½
     void Serialize(nlohmann::json & j) const;
     void Deserialize(const nlohmann::json & j);
 
     void RegisterActions();
 private:
     struct CombinedWaypoint {
-        int transformIdx; // TransformDirector“à‚Ì‰½”Ô–Ú‚©
-        int fovIdx;       // FovDirector“à‚Ì‰½”Ô–Ú‚©
+        int transformIdx; // TransformDirectorå†…ã®ä½•ç•ªç›®ã‹
+        int fovIdx;       // FovDirectorå†…ã®ä½•ç•ªç›®ã‹
 
-        // --- ’Ç‰ÁFƒAƒNƒVƒ‡ƒ“‚²‚Æ‚Ì–ß‚èİ’è ---
+        // --- è¿½åŠ ï¼šã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã”ã¨ã®æˆ»ã‚Šè¨­å®š ---
         bool m_autoReturn = false;
         float m_waitTime = 0.0f;
     };

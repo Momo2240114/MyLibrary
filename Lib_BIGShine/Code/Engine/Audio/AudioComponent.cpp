@@ -120,35 +120,35 @@ std::string AudioComponent::ResolveActionName(const std::string& actionName_) co
 
 void AudioComponent::Gui()
 {
-    ImGui::Checkbox(IM_U8("ƒ[ƒNƒXƒy[ƒXƒvƒŠƒZƒbƒg‚ğg—p##AudioComponent_UseWorkspacePresetCheckbox"), &useWorkspacePreset);
+    ImGui::Checkbox(IM_U8("ãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹ãƒ—ãƒªã‚»ãƒƒãƒˆã‚’ä½¿ç”¨##AudioComponent_UseWorkspacePresetCheckbox"), &useWorkspacePreset);
 
     if (useWorkspacePreset)
     {
         char workspacePathBuffer_[256];
         strncpy_s(workspacePathBuffer_, workspacePath.c_str(), sizeof(workspacePathBuffer_));
-        if (ImGui::InputText(IM_U8("ƒ[ƒNƒXƒy[ƒXJSON##AudioComponent_WorkspaceJsonInput"), workspacePathBuffer_, sizeof(workspacePathBuffer_)))
+        if (ImGui::InputText(IM_U8("ãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹JSON##AudioComponent_WorkspaceJsonInput"), workspacePathBuffer_, sizeof(workspacePathBuffer_)))
         {
             workspacePath = workspacePathBuffer_;
         }
 
         char presetNameBuffer_[128];
         strncpy_s(presetNameBuffer_, workspacePresetName.c_str(), sizeof(presetNameBuffer_));
-        if (ImGui::InputText(IM_U8("ƒvƒŠƒZƒbƒg / ƒAƒNƒVƒ‡ƒ“–¼##AudioComponent_PresetActionNameInput"), presetNameBuffer_, sizeof(presetNameBuffer_)))
+        if (ImGui::InputText(IM_U8("ãƒ—ãƒªã‚»ãƒƒãƒˆ / ã‚¢ã‚¯ã‚·ãƒ§ãƒ³å##AudioComponent_PresetActionNameInput"), presetNameBuffer_, sizeof(presetNameBuffer_)))
         {
             workspacePresetName = presetNameBuffer_;
         }
 
-        if (ImGui::Button(IM_U8("ƒ[ƒNƒXƒy[ƒXƒvƒŠƒZƒbƒg“Ç‚İ‚İ##AudioComponent_LoadWorkspacePresetsButton")))
+        if (ImGui::Button(IM_U8("ãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹ãƒ—ãƒªã‚»ãƒƒãƒˆèª­ã¿è¾¼ã¿##AudioComponent_LoadWorkspacePresetsButton")))
         {
             AudioManager::Instance().LoadAudioWorkspace(workspacePath);
             AudioManager::Instance().RegisterAudioWorkspaceActions(workspacePath);
         }
 
         ImGui::SameLine();
-        ImGui::Checkbox(IM_U8("d•¡Ä¶‚ğ‹–‰Â##AudioComponent_AllowOverlapCheckbox"), &allowOverlap);
+        ImGui::Checkbox(IM_U8("é‡è¤‡å†ç”Ÿã‚’è¨±å¯##AudioComponent_AllowOverlapCheckbox"), &allowOverlap);
 
         const std::vector<std::string> presetNames_ = AudioManager::Instance().GetWorkspacePresetNames();
-        if (ImGui::BeginCombo(IM_U8("ƒ[ƒNƒXƒy[ƒXƒvƒŠƒZƒbƒg##AudioComponent_WorkspacePresetCombo"), workspacePresetName.empty() ? IM_U8("ƒvƒŠƒZƒbƒg‚ğ‘I‘ğ") : workspacePresetName.c_str()))
+        if (ImGui::BeginCombo(IM_U8("ãƒ¯ãƒ¼ã‚¯ã‚¹ãƒšãƒ¼ã‚¹ãƒ—ãƒªã‚»ãƒƒãƒˆ##AudioComponent_WorkspacePresetCombo"), workspacePresetName.empty() ? IM_U8("ãƒ—ãƒªã‚»ãƒƒãƒˆã‚’é¸æŠ") : workspacePresetName.c_str()))
         {
             for (const std::string& presetName_ : presetNames_)
             {
@@ -160,105 +160,105 @@ void AudioComponent::Gui()
             ImGui::EndCombo();
         }
 
-        if (ImGui::Button(IM_U8("Ä¶##AudioComponent_PlayButton"))) Play();
+        if (ImGui::Button(IM_U8("å†ç”Ÿ##AudioComponent_PlayButton"))) Play();
         ImGui::SameLine();
-        if (ImGui::Button(IM_U8("’â~##AudioComponent_StopButton"))) Stop();
+        if (ImGui::Button(IM_U8("åœæ­¢##AudioComponent_StopButton"))) Stop();
 
-        ImGui::SeparatorText(IM_U8("ƒAƒNƒVƒ‡ƒ“##AudioComponent_ActionsHeader"));
+        ImGui::SeparatorText(IM_U8("ã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_ActionsHeader"));
         char prefixBuffer_[64];
         strncpy_s(prefixBuffer_, actionPrefix.c_str(), sizeof(prefixBuffer_));
-        if (ImGui::InputText(IM_U8("ƒAƒNƒVƒ‡ƒ“Ú“ª«##AudioComponent_ActionPrefixInput"), prefixBuffer_, sizeof(prefixBuffer_)))
+        if (ImGui::InputText(IM_U8("ã‚¢ã‚¯ã‚·ãƒ§ãƒ³æ¥é ­è¾##AudioComponent_ActionPrefixInput"), prefixBuffer_, sizeof(prefixBuffer_)))
         {
             actionPrefix = prefixBuffer_;
         }
 
         char playBuffer_[64];
         strncpy_s(playBuffer_, playActionName.c_str(), sizeof(playBuffer_));
-        if (ImGui::InputText(IM_U8("Ä¶ƒAƒNƒVƒ‡ƒ“##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_))) playActionName = playBuffer_;
+        if (ImGui::InputText(IM_U8("å†ç”Ÿã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_))) playActionName = playBuffer_;
 
         char stopBuffer_[64];
         strncpy_s(stopBuffer_, stopActionName.c_str(), sizeof(stopBuffer_));
-        if (ImGui::InputText(IM_U8("’â~ƒAƒNƒVƒ‡ƒ“##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_))) stopActionName = stopBuffer_;
+        if (ImGui::InputText(IM_U8("åœæ­¢ã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_))) stopActionName = stopBuffer_;
 
-        ImGui::Text(IM_U8("Ä¶: %s"), GetPlayActionName().c_str());
-        ImGui::Text(IM_U8("’â~: %s"), GetStopActionName().c_str());
-        if (ImGui::Button(IM_U8("ƒI[ƒfƒBƒIƒAƒNƒVƒ‡ƒ““o˜^##AudioComponent_RegisterAudioActionsButton"))) RegisterActions();
+        ImGui::Text(IM_U8("å†ç”Ÿ: %s"), GetPlayActionName().c_str());
+        ImGui::Text(IM_U8("åœæ­¢: %s"), GetStopActionName().c_str());
+        if (ImGui::Button(IM_U8("ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚¢ã‚¯ã‚·ãƒ§ãƒ³ç™»éŒ²##AudioComponent_RegisterAudioActionsButton"))) RegisterActions();
         return;
     }
 
     char pathBuffer_[256];
     strncpy_s(pathBuffer_, audioPath.c_str(), sizeof(pathBuffer_));
-    if (ImGui::InputText(IM_U8("ƒI[ƒfƒBƒIƒpƒX##AudioComponent_AudioPathInput"), pathBuffer_, sizeof(pathBuffer_)))
+    if (ImGui::InputText(IM_U8("ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªãƒ‘ã‚¹##AudioComponent_AudioPathInput"), pathBuffer_, sizeof(pathBuffer_)))
     {
         audioPath = pathBuffer_;
         AudioManager::Instance().AddAudioFromFile(audioPath, isBGM);
     }
 
     ImGui::Checkbox(IM_U8("BGM##AudioComponent_IsBgmCheckbox"), &isBGM);
-    ImGui::Checkbox(IM_U8("ƒ‹[ƒv##AudioComponent_LoopCheckbox"), &loop);
-    ImGui::Checkbox(IM_U8("ŠJn‚ÉÄ¶##AudioComponent_PlayOnStartCheckbox"), &playOnStart);
-    if (ImGui::DragFloat(IM_U8("‰¹—Ê##AudioComponent_VolumeDrag"), &volume, 0.01f, 0.0f, 1.0f))
+    ImGui::Checkbox(IM_U8("ãƒ«ãƒ¼ãƒ—##AudioComponent_LoopCheckbox"), &loop);
+    ImGui::Checkbox(IM_U8("é–‹å§‹æ™‚ã«å†ç”Ÿ##AudioComponent_PlayOnStartCheckbox"), &playOnStart);
+    if (ImGui::DragFloat(IM_U8("éŸ³é‡##AudioComponent_VolumeDrag"), &volume, 0.01f, 0.0f, 1.0f))
     {
         volume = std::clamp(volume, 0.0f, 1.0f);
         AudioManager::Instance().SetVolumeByPath(audioPath, volume);
     }
 
-    ImGui::SeparatorText(IM_U8("‚±‚à‚è##AudioComponent_MuffleHeader"));
-    if (ImGui::Checkbox(IM_U8("‚±‚à‚è—LŒø##AudioComponent_MuffledCheckbox"), &muffled))
+    ImGui::SeparatorText(IM_U8("ã“ã‚‚ã‚Š##AudioComponent_MuffleHeader"));
+    if (ImGui::Checkbox(IM_U8("ã“ã‚‚ã‚Šæœ‰åŠ¹##AudioComponent_MuffledCheckbox"), &muffled))
     {
         SetMuffled(muffled);
     }
-    if (ImGui::DragFloat(IM_U8("ƒ[ƒpƒXƒJƒbƒgƒIƒt##AudioComponent_LowPassCutoffDrag"), &muffledCutoff, 10.0f, 10.0f, 22000.0f))
+    if (ImGui::DragFloat(IM_U8("ãƒ­ãƒ¼ãƒ‘ã‚¹ã‚«ãƒƒãƒˆã‚ªãƒ•##AudioComponent_LowPassCutoffDrag"), &muffledCutoff, 10.0f, 10.0f, 22000.0f))
     {
         muffledCutoff = std::clamp(muffledCutoff, 10.0f, 22000.0f);
         AudioManager::Instance().SetMuffledByPath(audioPath, muffled, muffledCutoff);
     }
 
-    if (ImGui::Button(IM_U8("Ä¶##AudioComponent_PlayButton_Manual"))) Play();
+    if (ImGui::Button(IM_U8("å†ç”Ÿ##AudioComponent_PlayButton_Manual"))) Play();
     ImGui::SameLine();
-    if (ImGui::Button(IM_U8("’â~##AudioComponent_StopButton_Manual"))) Stop();
+    if (ImGui::Button(IM_U8("åœæ­¢##AudioComponent_StopButton_Manual"))) Stop();
 
-    ImGui::SeparatorText(IM_U8("ƒAƒNƒVƒ‡ƒ“##AudioComponent_ActionsHeader_Manual"));
+    ImGui::SeparatorText(IM_U8("ã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_ActionsHeader_Manual"));
     char prefixBuffer_[64];
     strncpy_s(prefixBuffer_, actionPrefix.c_str(), sizeof(prefixBuffer_));
-    if (ImGui::InputText(IM_U8("ƒAƒNƒVƒ‡ƒ“Ú“ª«##AudioComponent_ActionPrefixInput"), prefixBuffer_, sizeof(prefixBuffer_)))
+    if (ImGui::InputText(IM_U8("ã‚¢ã‚¯ã‚·ãƒ§ãƒ³æ¥é ­è¾##AudioComponent_ActionPrefixInput"), prefixBuffer_, sizeof(prefixBuffer_)))
     {
         actionPrefix = prefixBuffer_;
     }
 
     char playBuffer_[64];
     strncpy_s(playBuffer_, playActionName.c_str(), sizeof(playBuffer_));
-    if (ImGui::InputText(IM_U8("Ä¶ƒAƒNƒVƒ‡ƒ“##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_)))
+    if (ImGui::InputText(IM_U8("å†ç”Ÿã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_PlayActionInput"), playBuffer_, sizeof(playBuffer_)))
     {
         playActionName = playBuffer_;
     }
 
     char stopBuffer_[64];
     strncpy_s(stopBuffer_, stopActionName.c_str(), sizeof(stopBuffer_));
-    if (ImGui::InputText(IM_U8("’â~ƒAƒNƒVƒ‡ƒ“##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_)))
+    if (ImGui::InputText(IM_U8("åœæ­¢ã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_StopActionInput"), stopBuffer_, sizeof(stopBuffer_)))
     {
         stopActionName = stopBuffer_;
     }
 
     char muffleBuffer_[64];
     strncpy_s(muffleBuffer_, muffleActionName.c_str(), sizeof(muffleBuffer_));
-    if (ImGui::InputText(IM_U8("‚±‚à‚èƒAƒNƒVƒ‡ƒ“##AudioComponent_MuffleActionInput"), muffleBuffer_, sizeof(muffleBuffer_)))
+    if (ImGui::InputText(IM_U8("ã“ã‚‚ã‚Šã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_MuffleActionInput"), muffleBuffer_, sizeof(muffleBuffer_)))
     {
         muffleActionName = muffleBuffer_;
     }
 
     char clearBuffer_[64];
     strncpy_s(clearBuffer_, clearMuffleActionName.c_str(), sizeof(clearBuffer_));
-    if (ImGui::InputText(IM_U8("‚±‚à‚è‰ğœƒAƒNƒVƒ‡ƒ“##AudioComponent_ClearMuffleActionInput"), clearBuffer_, sizeof(clearBuffer_)))
+    if (ImGui::InputText(IM_U8("ã“ã‚‚ã‚Šè§£é™¤ã‚¢ã‚¯ã‚·ãƒ§ãƒ³##AudioComponent_ClearMuffleActionInput"), clearBuffer_, sizeof(clearBuffer_)))
     {
         clearMuffleActionName = clearBuffer_;
     }
 
-    ImGui::Text(IM_U8("Ä¶  : %s"), GetPlayActionName().c_str());
-    ImGui::Text(IM_U8("’â~  : %s"), GetStopActionName().c_str());
-    ImGui::Text(IM_U8("‚±‚à‚è: %s"), GetMuffleActionName().c_str());
-    ImGui::Text(IM_U8("‰ğœ  : %s"), GetClearMuffleActionName().c_str());
-    if (ImGui::Button(IM_U8("ƒI[ƒfƒBƒIƒAƒNƒVƒ‡ƒ““o˜^##AudioComponent_RegisterAudioActionsButton_Manual")))
+    ImGui::Text(IM_U8("å†ç”Ÿ  : %s"), GetPlayActionName().c_str());
+    ImGui::Text(IM_U8("åœæ­¢  : %s"), GetStopActionName().c_str());
+    ImGui::Text(IM_U8("ã“ã‚‚ã‚Š: %s"), GetMuffleActionName().c_str());
+    ImGui::Text(IM_U8("è§£é™¤  : %s"), GetClearMuffleActionName().c_str());
+    if (ImGui::Button(IM_U8("ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚¢ã‚¯ã‚·ãƒ§ãƒ³ç™»éŒ²##AudioComponent_RegisterAudioActionsButton_Manual")))
     {
         RegisterActions();
     }

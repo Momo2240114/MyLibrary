@@ -7,14 +7,14 @@ bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
 {
     blurTargets.clear();
 
-    // 1. ‚‹P“x’Šo—pƒeƒNƒXƒ`ƒƒ (1/2ƒTƒCƒY)
+    // 1. é«˜è¼åº¦æŠ½å‡ºç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ (1/2ã‚µã‚¤ã‚º)
     CreateRenderTarget(device, width / 2, height / 2, brightTarget);
     
     ScreenSize = {
         static_cast<float>(width),static_cast<float>(height)
     };
 
-    // 2. ì£®—pƒsƒ“ƒ|ƒ“ƒoƒbƒtƒ@ (‚³‚ç‚É‰ğ‘œ“x‚ğ—‚Æ‚·‚ÆŒø‰Ê“I)
+    // 2. å·ç€¬å¼ç”¨ãƒ”ãƒ³ãƒãƒ³ãƒãƒƒãƒ•ã‚¡ (ã•ã‚‰ã«è§£åƒåº¦ã‚’è½ã¨ã™ã¨åŠ¹æœçš„)
     for (int i = 0; i < 2; ++i) {
         RenderTarget rt;
         CreateRenderTarget(device, width / 2, height / 2, rt);
@@ -25,15 +25,15 @@ bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
         device,
         "Shader/FullScreenVS.cso",
         nullptr, 0,
-        nullptr, // InputLayout‚à•s—v
+        nullptr, // InputLayoutã‚‚ä¸è¦
         fullScreenVS.GetAddressOf());
 
-    // ŠeƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+    // å„ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
     CPUResourceLoader::LoadPixelShader(device, "Shader/BrightPassPS.cso", brightPS.GetAddressOf());
     CPUResourceLoader::LoadPixelShader(device, "Shader/KawaseBlurPS.cso", kawasePS.GetAddressOf());
     CPUResourceLoader::LoadPixelShader(device, "Shader/CompositePS.cso", compositePS.GetAddressOf());
     
-    // 3. ’è”ƒoƒbƒtƒ@‚Ìì¬
+    // 3. å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®ä½œæˆ
     D3D11_BUFFER_DESC cbDesc = {};
     cbDesc.Usage = D3D11_USAGE_DYNAMIC;
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -60,20 +60,20 @@ void BloomSystem::Execute(
     auto dc = rc.deviceContext;
     auto rs = rc.renderState;
 
-    // ‹¤’ÊƒXƒe[ƒgİ’è
+    // å…±é€šã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
     dc->RSSetState(rs->GetRasterizerState(RasterizerState::SolidCullNone));
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
 
-    // ƒTƒ“ƒvƒ‰[‚ğ Clamp ‚ÉŒÅ’èI
+    // ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚’ Clamp ã«å›ºå®šï¼
     ID3D11SamplerState* sampler = rs->GetSamplerState(SamplerState::LinearClamp);
     dc->PSSetSamplers(0, 1, &sampler);
 
     float clearCol[4] = { 0, 0, 0, 1 };
 
     // 1. Bright Pass
-    dc->ClearRenderTargetView(brightTarget.rtv.Get(), clearCol); // ’Ç‰Á
+    dc->ClearRenderTargetView(brightTarget.rtv.Get(), clearCol); // è¿½åŠ 
 
-    // ƒwƒ‹ƒp[Fƒrƒ…[ƒ|[ƒg‚ğƒZƒbƒg‚·‚é
+    // ãƒ˜ãƒ«ãƒ‘ãƒ¼ï¼šãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆã™ã‚‹
     auto SetVP = [&](float w, float h) {
         D3D11_VIEWPORT vp = { 0.0f, 0.0f, w, h, 0.0f, 1.0f };
         dc->RSSetViewports(1, &vp);
@@ -88,11 +88,11 @@ void BloomSystem::Execute(
     UpdateConstantBuffer(dc, params, 0, brightTarget.width, brightTarget.height);
 
     dc->PSSetShader(brightPS.Get(), nullptr, 0);
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // š‚±‚ê‚ğ’Ç‰Áib0ƒXƒƒbƒgj
+    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // â˜…ã“ã‚Œã‚’è¿½åŠ ï¼ˆb0ã‚¹ãƒ­ãƒƒãƒˆï¼‰
     dc->PSSetShaderResources(0, 1, &sceneSRV);
     DrawFullScreenQuad(dc);
 
-    // Ÿ‚ÌƒpƒX‚Ì‚½‚ß‚É t0 ‚ğ‰ğœ
+    // æ¬¡ã®ãƒ‘ã‚¹ã®ãŸã‚ã« t0 ã‚’è§£é™¤
     dc->PSSetShaderResources(0, 1, nullSRVs);
 
     // --- 2. Kawase Blur Pass ---
@@ -101,48 +101,48 @@ void BloomSystem::Execute(
     for (int i = 0; i < params.blurPasses; ++i) {
         int destIdx = i % 2;
 
-        // šd—vF•`‚«‚İæ‚ÌƒTƒCƒY‚ğ³Šm‚É”½‰f‚³‚¹‚é
+        // â˜…é‡è¦ï¼šæãè¾¼ã¿å…ˆã®ã‚µã‚¤ã‚ºã‚’æ­£ç¢ºã«åæ˜ ã•ã›ã‚‹
         float targetW = blurTargets[destIdx].width;
         float targetH = blurTargets[destIdx].height;
 
-        SetVP(targetW, targetH); // ‚±‚±‚ªƒYƒŒ‚Ä‚¢‚é‚Æƒ`ƒJƒ`ƒJ‚µ‚Ü‚·
+        SetVP(targetW, targetH); // ã“ã“ãŒã‚ºãƒ¬ã¦ã„ã‚‹ã¨ãƒã‚«ãƒã‚«ã—ã¾ã™
         dc->OMSetRenderTargets(1, blurTargets[destIdx].rtv.GetAddressOf(), nullptr);
 
-        // ’è”ƒoƒbƒtƒ@‚É‚à“¯‚¶ƒTƒCƒY‚ğ“n‚·ig_texSize ‚ÌŒvZ‚Ì‚½‚ßj
+        // å®šæ•°ãƒãƒƒãƒ•ã‚¡ã«ã‚‚åŒã˜ã‚µã‚¤ã‚ºã‚’æ¸¡ã™ï¼ˆg_texSize ã®è¨ˆç®—ã®ãŸã‚ï¼‰
         UpdateConstantBuffer(dc, params, (float)i, targetW, targetH);
 
         dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
 
         dc->PSSetShader(kawasePS.Get(), nullptr, 0);
-        dc->PSSetShaderResources(0, 1, &currentSRV); // 1‰ñ‘O‚ÌŒ‹‰Ê‚ğ“ü—Í
+        dc->PSSetShaderResources(0, 1, &currentSRV); // 1å›å‰ã®çµæœã‚’å…¥åŠ›
         DrawFullScreenQuad(dc);
 
-        // “ü—Í‚ğ‰ğœ
+        // å…¥åŠ›ã‚’è§£é™¤
         dc->PSSetShaderResources(0, 1, nullSRVs);
 
-        // šd—vF¡•`‚¢‚½Œ‹‰Ê‚ğuŸ‚Ì‰ñ‚Ì“ü—Ív‚ÉXV‚·‚é
+        // â˜…é‡è¦ï¼šä»Šæã„ãŸçµæœã‚’ã€Œæ¬¡ã®å›ã®å…¥åŠ›ã€ã«æ›´æ–°ã™ã‚‹
         currentSRV = blurTargets[destIdx].srv.Get();
     }
 
     // --- 3. Composite (sceneSRV + currentSRV -> finalRTV) ---
-    // ‚±‚±‚ÅŒ³‚Ì‰æ–ÊƒTƒCƒY(width, height)‚É–ß‚·
-    SetVP(ScreenSize.x, ScreenSize.y); // š‚±‚±‚ğÀÛ‚Ì‰æ–Ê‰ğ‘œ“x‚Ì•Ï”‚ÉI
+    // ã“ã“ã§å…ƒã®ç”»é¢ã‚µã‚¤ã‚º(width, height)ã«æˆ»ã™
+    SetVP(ScreenSize.x, ScreenSize.y); // â˜…ã“ã“ã‚’å®Ÿéš›ã®ç”»é¢è§£åƒåº¦ã®å¤‰æ•°ã«ï¼
     dc->OMSetRenderTargets(1, &finalRTV, nullptr);
 
     dc->PSSetShader(compositePS.Get(), nullptr, 0);
     ID3D11ShaderResourceView* inputs[] = { sceneSRV, currentSRV };
-    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // š‚±‚ê‚ğ’Ç‰Áib0ƒXƒƒbƒgj
+    dc->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf()); // â˜…ã“ã‚Œã‚’è¿½åŠ ï¼ˆb0ã‚¹ãƒ­ãƒƒãƒˆï¼‰
     dc->PSSetShaderResources(0, 2, inputs);
     DrawFullScreenQuad(dc);
 
-    // ‘S‚Ä‰ğœ
+    // å…¨ã¦è§£é™¤
     dc->PSSetShaderResources(0, 2, nullSRVs);
 
-    // š ‚±‚±‚ÅƒfƒvƒXƒXƒe[ƒg‚ğuƒeƒXƒg‚ ‚èE‘‚«‚İ‚È‚µv“™A
-    // Ÿ‚Ì•`‰æiƒiƒrƒƒbƒVƒ…j‚ªŠú‘Ò‚·‚éó‘Ô‚É–ß‚µ‚Ä‚¨‚­‚Æ‚æ‚èˆÀ‘S‚Å‚·
+    // â˜… ã“ã“ã§ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã€Œãƒ†ã‚¹ãƒˆã‚ã‚Šãƒ»æ›¸ãè¾¼ã¿ãªã—ã€ç­‰ã€
+    // æ¬¡ã®æç”»ï¼ˆãƒŠãƒ“ãƒ¡ãƒƒã‚·ãƒ¥ï¼‰ãŒæœŸå¾…ã™ã‚‹çŠ¶æ…‹ã«æˆ»ã—ã¦ãŠãã¨ã‚ˆã‚Šå®‰å…¨ã§ã™
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::TestOnly), 0);
 
-    // ‘S‚Ä‰ğœ
+    // å…¨ã¦è§£é™¤
     dc->PSSetShaderResources(0, 2, nullSRVs);
 
 }
@@ -152,12 +152,12 @@ void BloomSystem::Execute(
     ID3D11ShaderResourceView* sceneSRV,
     ID3D11RenderTargetView* finalRTV,
     const Parameters& params,
-const CbColorFilter& colorFilterParams) // ˆø”–¼‚ğC³
+const CbColorFilter& colorFilterParams) // å¼•æ•°åã‚’ä¿®æ­£
 {
     auto dc = rc.deviceContext;
     auto rs = rc.renderState;
 
-    // --- 0. ‹¤’ÊƒXƒe[ƒgİ’è ---
+    // --- 0. å…±é€šã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š ---
     dc->RSSetState(rs->GetRasterizerState(RasterizerState::SolidCullNone));
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
     ID3D11SamplerState* sampler = rs->GetSamplerState(SamplerState::LinearClamp);
@@ -215,15 +215,15 @@ const CbColorFilter& colorFilterParams) // ˆø”–¼‚ğC³
     }
 
     // --- 3. Composite & Color Filter (sceneSRV + Bloom -> finalRTV) ---
-    // ‰ğ‘œ“x‚ğƒƒ“ƒo•Ï” ScreenSize ‚©‚ç³‚µ‚­æ“¾
+    // è§£åƒåº¦ã‚’ãƒ¡ãƒ³ãƒå¤‰æ•° ScreenSize ã‹ã‚‰æ­£ã—ãå–å¾—
     SetVP(ScreenSize.x, ScreenSize.y);
 
-    // ƒfƒvƒXƒoƒbƒtƒ@‚ğ–ß‚µ‚ÄAŒã‚Ì•`‰æiUI‚âƒfƒoƒbƒOŒ`ój‚ª³‚µ‚­Õ•Á‚³‚ê‚é‚æ‚¤‚É‚·‚é
+    // ãƒ‡ãƒ—ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’æˆ»ã—ã¦ã€å¾Œã®æç”»ï¼ˆUIã‚„ãƒ‡ãƒãƒƒã‚°å½¢çŠ¶ï¼‰ãŒæ­£ã—ãé®è”½ã•ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹
     ID3D11DepthStencilView* dsv = nullptr;
     rc.deviceContext->OMGetRenderTargets(0, nullptr, &dsv);
     dc->OMSetRenderTargets(1, &finalRTV, dsv);
 
-    // ColorFilter —p’è”ƒoƒbƒtƒ@‚ÌXV
+    // ColorFilter ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®æ›´æ–°
     D3D11_MAPPED_SUBRESOURCE mapped;
     if (SUCCEEDED(dc->Map(filterBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
         memcpy(mapped.pData, &colorFilterParams, sizeof(CbColorFilter));
@@ -237,15 +237,15 @@ const CbColorFilter& colorFilterParams) // ˆø”–¼‚ğC³
     ID3D11Buffer* cbs[] = { constantBuffer.Get(), filterBuffer.Get() };
     dc->PSSetConstantBuffers(0, 2, cbs);
 
-    // t0: Œ´‰æ, t1: ƒuƒ‹[ƒ€Œ‹‰Ê
+    // t0: åŸç”», t1: ãƒ–ãƒ«ãƒ¼ãƒ çµæœ
     ID3D11ShaderResourceView* inputs[] = { sceneSRV, currentSRV };
     dc->PSSetShaderResources(0, 2, inputs);
 
     DrawFullScreenQuad(dc);
 
-    // --- 4. ƒNƒŠ[ƒ“ƒAƒbƒv ---
+    // --- 4. ã‚¯ãƒªãƒ¼ãƒ³ã‚¢ãƒƒãƒ— ---
     dc->PSSetShaderResources(0, 2, nullSRVs);
-    // [“xƒeƒXƒg‚ğ—LŒø‚É–ß‚·iƒXƒvƒ‰ƒCƒg‚âƒiƒrƒƒbƒVƒ…•`‰æ—pj
+    // æ·±åº¦ãƒ†ã‚¹ãƒˆã‚’æœ‰åŠ¹ã«æˆ»ã™ï¼ˆã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚„ãƒŠãƒ“ãƒ¡ãƒƒã‚·ãƒ¥æç”»ç”¨ï¼‰
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::TestOnly), 0);
 }
 
@@ -256,7 +256,7 @@ void BloomSystem::CreateRenderTarget(ID3D11Device* device, int w, int h, RenderT
     desc.Height = h;
     desc.MipLevels = 1;
     desc.ArraySize = 1;
-    desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // HDR‘Î‰•K{
+    desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // HDRå¯¾å¿œå¿…é ˆ
     desc.SampleDesc.Count = 1;
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -287,7 +287,7 @@ void BloomSystem::UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters
 
 void BloomSystem::DrawFullScreenQuad(ID3D11DeviceContext* dc)
 {
-    // ’¸“_ƒoƒbƒtƒ@‚È‚µ‚Å3’¸“_•`‰æiƒVƒF[ƒ_[‘¤‚ÅÀ•WŒvZj
+    // é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ãªã—ã§3é ‚ç‚¹æç”»ï¼ˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å´ã§åº§æ¨™è¨ˆç®—ï¼‰
     dc->IASetInputLayout(nullptr);
     dc->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -39,22 +39,22 @@ struct AnimBlackboardWrite
 
 
 struct RootMotionSettings {
-    bool enable = false;        // ‚±‚Ìˆ—‚ğ‹N“®‚·‚é‚©”Û‚©
-    std::string sourceNodeName; // ‹ó‚Ìê‡‚Íƒ‚ƒfƒ‹‘¤‚ÌRootMotionName‚ğg—p
-    bool applyPositionX = true; // X²‚ÌˆÚ“®‚ğ‹–‚·‚©
-    bool applyPositionY = true; // Y²‚ÌˆÚ“®‚ğ‹–‚·‚©
-    bool applyPositionZ = true; // Z²‚ÌˆÚ“®‚ğ‹–‚·‚©
-    bool applyRotationX = true; // X²‚ÌŒX‚«‚ğ‹–‚·‚©
-    bool applyRotationY = true; // Y²‚ÌU‚èŒü‚­—Í‚ğ‹–‚·‚©
-    bool applyRotationZ = true; // Z²‚ÌŒX‚°‚ğ‹–‚·‚©
+    bool enable = false;        // ã“ã®å‡¦ç†ã‚’èµ·å‹•ã™ã‚‹ã‹å¦ã‹
+    std::string sourceNodeName; // ç©ºã®å ´åˆã¯ãƒ¢ãƒ‡ãƒ«å´ã®RootMotionNameã‚’ä½¿ç”¨
+    bool applyPositionX = true; // Xè»¸ã®ç§»å‹•ã‚’è¨±ã™ã‹
+    bool applyPositionY = true; // Yè»¸ã®ç§»å‹•ã‚’è¨±ã™ã‹
+    bool applyPositionZ = true; // Zè»¸ã®ç§»å‹•ã‚’è¨±ã™ã‹
+    bool applyRotationX = true; // Xè»¸ã®å‚¾ãã‚’è¨±ã™ã‹
+    bool applyRotationY = true; // Yè»¸ã®æŒ¯ã‚Šå‘ãåŠ›ã‚’è¨±ã™ã‹
+    bool applyRotationZ = true; // Zè»¸ã®å‚¾ã’ã‚’è¨±ã™ã‹
 };
 
 struct AnimEvent 
 {
-    std::string eventLabel; // ŠJn‚ÉŒÄ‚ÔƒAƒNƒVƒ‡ƒ“–¼
-    std::string startAction; // ŠJn‚ÉŒÄ‚ÔƒAƒNƒVƒ‡ƒ“–¼ (—á: "EnableHitBox")
-    std::string updateAction; // ŠJn‚©‚çI—¹‚ÌŠÔA–ˆƒtƒŒ[ƒ€Às
-    std::string endAction;   // I—¹‚ÉŒÄ‚ÔƒAƒNƒVƒ‡ƒ“–¼ (—á: "DisableHitBox")
+    std::string eventLabel; // é–‹å§‹æ™‚ã«å‘¼ã¶ã‚¢ã‚¯ã‚·ãƒ§ãƒ³å
+    std::string startAction; // é–‹å§‹æ™‚ã«å‘¼ã¶ã‚¢ã‚¯ã‚·ãƒ§ãƒ³å (ä¾‹: "EnableHitBox")
+    std::string updateAction; // é–‹å§‹ã‹ã‚‰çµ‚äº†ã®é–“ã€æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å®Ÿè¡Œ
+    std::string endAction;   // çµ‚äº†æ™‚ã«å‘¼ã¶ã‚¢ã‚¯ã‚·ãƒ§ãƒ³å (ä¾‹: "DisableHitBox")
     float startTime = 0.0f;
     float endTime = 0.0f;
     bool overridePlaybackSpeed = false;
@@ -62,7 +62,7 @@ struct AnimEvent
 
     int frameStart = 0;
     int frameEnd = 0;
-    bool isFired = false;    // ‚»‚Ìƒ‹[ƒv“à‚ÅÀsÏ‚İ‚©
+    bool isFired = false;    // ãã®ãƒ«ãƒ¼ãƒ—å†…ã§å®Ÿè¡Œæ¸ˆã¿ã‹
     bool isEndFired = false; // End action fired in this loop.
     bool callEndOnStateExit = false;
     std::vector<AnimBlackboardWrite> blackboardWrites;
@@ -83,27 +83,27 @@ struct AnimEvent
     bool mirrorMeshVFX = false;
 };
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìó‘Ôí•Ê
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®çŠ¶æ…‹ç¨®åˆ¥
 enum class AnimStateType 
 {
-    Single,   // ’Êí‚Ì’PˆêÄ¶
-    Blend1D,  // 2‚Â‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ğƒpƒ‰ƒ[ƒ^‚ÅƒuƒŒƒ“ƒh
+    Single,   // é€šå¸¸ã®å˜ä¸€å†ç”Ÿ
+    Blend1D,  // 2ã¤ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã§ãƒ–ãƒ¬ãƒ³ãƒ‰
     Custom,
-    BLEND_2D   // Vector2“ü—Í‚©‚ç‘OŒã¶‰E‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ğƒuƒŒƒ“ƒh
+    BLEND_2D   // Vector2å…¥åŠ›ã‹ã‚‰å‰å¾Œå·¦å³ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ãƒ–ãƒ¬ãƒ³ãƒ‰
 };
 
-// ƒm[ƒhƒGƒfƒBƒ^ã‚ÌŠeuó‘Ôv‚ğ•\Œ»‚·‚éƒx[ƒX
+// ãƒãƒ¼ãƒ‰ã‚¨ãƒ‡ã‚£ã‚¿ä¸Šã®å„ã€ŒçŠ¶æ…‹ã€ã‚’è¡¨ç¾ã™ã‚‹ãƒ™ãƒ¼ã‚¹
 struct AnimState 
 {
-    AnimStateType type = AnimStateType::Single; // ƒfƒtƒHƒ‹ƒg‚Í’PˆêÄ¶
+    AnimStateType type = AnimStateType::Single; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯å˜ä¸€å†ç”Ÿ
     RootMotionSettings rootMotion;
 
-    std::string sequencerDataName; // ‚±‚ê‚ªƒV[ƒPƒ“ƒT[‚Ìƒtƒ@ƒCƒ‹ƒpƒX
+    std::string sequencerDataName; // ã“ã‚ŒãŒã‚·ãƒ¼ã‚±ãƒ³ã‚µãƒ¼ã®ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
 
-    // --- Single —pƒf[ƒ^ ---
+    // --- Single ç”¨ãƒ‡ãƒ¼ã‚¿ ---
     int animationIndex = -1;
 
-    // --- Blend1D —pƒf[ƒ^ ---
+    // --- Blend1D ç”¨ãƒ‡ãƒ¼ã‚¿ ---
     int animIndexA = -1;
     int animIndexB = -1;
     std::string blendParamName = "BlendAlpha";
@@ -116,7 +116,7 @@ struct AnimState
     bool blendUseMask = false;
     std::vector<std::string> blendMaskRootNodes;
 
-    // --- Blend2D —pƒf[ƒ^ ---
+    // --- Blend2D ç”¨ãƒ‡ãƒ¼ã‚¿ ---
     int blend2DForwardAnimationIndex = -1;
     int blend2DBackwardAnimationIndex = -1;
     int blend2DLeftAnimationIndex = -1;
@@ -129,10 +129,10 @@ struct AnimState
     float blend2DLeftPhaseOffset = 0.0f;
     float blend2DRightPhaseOffset = 0.0f;
 
-    // --- Custom (ƒ|[ƒYƒ‰ƒCƒuƒ‰ƒŠ) —pƒf[ƒ^ y’Ç‰Áz ---
-    int customAnimIndex = -1; // PoseLibraryResource“à‚Ì customAnims ‚ÌƒCƒ“ƒfƒbƒNƒX
+    // --- Custom (ãƒãƒ¼ã‚ºãƒ©ã‚¤ãƒ–ãƒ©ãƒª) ç”¨ãƒ‡ãƒ¼ã‚¿ ã€è¿½åŠ ã€‘ ---
+    int customAnimIndex = -1; // PoseLibraryResourceå†…ã® customAnims ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 
-    //animation‚²‚Æ‚ÉRootMotion‚ÌˆÚ“®’l‚ªˆá‚¤‰Â”\«‚ª‚ ‚é‚Ì‚Å‚»‚ê—p‚Éİ’è‚Å‚«‚é‚æ‚¤‚É
+    //animationã”ã¨ã«RootMotionã®ç§»å‹•å€¤ãŒé•ã†å¯èƒ½æ€§ãŒã‚ã‚‹ã®ã§ãã‚Œç”¨ã«è¨­å®šã§ãã‚‹ã‚ˆã†ã«
     float rootMotionScale = 1.0f;
     std::string rootMotionScaleCurveName = "";
 
@@ -140,20 +140,20 @@ struct AnimState
     std::string name;
     float playbackSpeed = 1.0f;
     bool isLoop = true;
-    // g—p‚·‚éƒJ[ƒu‚Ì–¼‘Oi‹ó‚È‚ç]—ˆ‚Ì playbackSpeed ‚ğg—pj
+    // ä½¿ç”¨ã™ã‚‹ã‚«ãƒ¼ãƒ–ã®åå‰ï¼ˆç©ºãªã‚‰å¾“æ¥ã® playbackSpeed ã‚’ä½¿ç”¨ï¼‰
     std::string speedCurveName = "";
-    // «—ˆ“I‚É‚Í‚±‚±‚Éuƒm[ƒh‚ÌÀ•Wv‚È‚Ç‚ÌƒGƒfƒBƒ^—pƒf[ƒ^‚ª“ü‚é
-    // ƒCƒxƒ“ƒgƒŠƒXƒg
+    // å°†æ¥çš„ã«ã¯ã“ã“ã«ã€Œãƒãƒ¼ãƒ‰ã®åº§æ¨™ã€ãªã©ã®ã‚¨ãƒ‡ã‚£ã‚¿ç”¨ãƒ‡ãƒ¼ã‚¿ãŒå…¥ã‚‹
+    // ã‚¤ãƒ™ãƒ³ãƒˆãƒªã‚¹ãƒˆ
     std::vector<AnimEvent> events;
 };
 
 enum class ConditionType 
 {
-    Variable,      // ’Êí‚Ì•Ï””äŠr (Speed > 1.0 ‚È‚Ç)
-    AnimationEnd,  // ƒAƒjƒ[ƒVƒ‡ƒ“‚ªÅŒã‚Ü‚ÅÄ¶‚³‚ê‚½‚©
-    Trigger        // 1‰ñ‚¾‚¯”½‰‚·‚éƒtƒ‰ƒO
+    Variable,      // é€šå¸¸ã®å¤‰æ•°æ¯”è¼ƒ (Speed > 1.0 ãªã©)
+    AnimationEnd,  // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒæœ€å¾Œã¾ã§å†ç”Ÿã•ã‚ŒãŸã‹
+    Trigger        // 1å›ã ã‘åå¿œã™ã‚‹ãƒ•ãƒ©ã‚°
 };
-// ”»’è‰‰Zq
+// åˆ¤å®šæ¼”ç®—å­
 enum class ConditionOp { Equal, NotEqual, Greater, Less };
 
 enum class TransitionLogic { And, Or };
@@ -168,19 +168,19 @@ enum class AnimGraphNodeType
     Exit
 };
 
-// ‘JˆÚğŒ
+// é·ç§»æ¡ä»¶
 struct AnimCondition {
     ConditionType type = ConditionType::Variable;
-    std::string parameterName; // Blackboard‚ÌƒL[
+    std::string parameterName; // Blackboardã®ã‚­ãƒ¼
     ConditionOp op;
-    float threshold;           // Vector2“™‚Ìê‡‚Í’·‚³‚â“Á’è‚Ì¬•ª‚Æ”äŠr‚·‚éƒƒWƒbƒN‚ª•K—v
+    float threshold;           // Vector2ç­‰ã®å ´åˆã¯é•·ã•ã‚„ç‰¹å®šã®æˆåˆ†ã¨æ¯”è¼ƒã™ã‚‹ãƒ­ã‚¸ãƒƒã‚¯ãŒå¿…è¦
 };
 
-// ‘JˆÚiƒŠƒ“ƒNj
+// é·ç§»ï¼ˆãƒªãƒ³ã‚¯ï¼‰
 struct AnimTransition 
 {
-    std::string fromStateName; // n‚Ü‚è‚ÌƒXƒe[ƒg–¼
-    std::string toStateName;   // s‚«æ‚ÌƒXƒe[ƒg–¼
+    std::string fromStateName; // å§‹ã¾ã‚Šã®ã‚¹ãƒ†ãƒ¼ãƒˆå
+    std::string toStateName;   // è¡Œãå…ˆã®ã‚¹ãƒ†ãƒ¼ãƒˆå
     float duration = 0.2f;
     TransitionLogic logic = TransitionLogic::And;
     std::vector<AnimCondition> conditions;
@@ -188,10 +188,10 @@ struct AnimTransition
     std::string scopeId = "Root";
 };
 
-// ƒm[ƒhiƒXƒe[ƒgj
+// ãƒãƒ¼ãƒ‰ï¼ˆã‚¹ãƒ†ãƒ¼ãƒˆï¼‰
 struct AnimGraphNode {
     ed::NodeId id;
-    std::string stateName;     // AnimationControllerComponent::states“à‚Æˆê’v
+    std::string stateName;     // AnimationControllerComponent::stateså†…ã¨ä¸€è‡´
     ed::PinId inputPin;
     ed::PinId outputPin;
     ImVec2 pos;
@@ -200,7 +200,7 @@ struct AnimGraphNode {
     std::string childScopeId;
 };
 
-// éŒ¾‚¾‚¯‚ğ‹Lq
+// å®£è¨€ã ã‘ã‚’è¨˜è¿°
 void to_json(nlohmann::json& json_, const AnimBlackboardWrite& write_);
 void from_json(const nlohmann::json& json_, AnimBlackboardWrite& write_);
 void to_json(nlohmann::json& j, const AnimEvent& e);
@@ -208,7 +208,7 @@ void from_json(const nlohmann::json& j, AnimEvent& e);
 void to_json(nlohmann::json& j, const AnimState& s);
 void from_json(const nlohmann::json& j, AnimState& s);
 
-//RootMotionSettings ‚É‰Á‚¦‚ÄAŒÂX‚ÌƒXƒe[ƒg‚ÌƒVƒŠƒAƒ‰ƒCƒY‚É“‡‚·‚é
+//RootMotionSettings ã«åŠ ãˆã¦ã€å€‹ã€…ã®ã‚¹ãƒ†ãƒ¼ãƒˆã®ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚ºã«çµ±åˆã™ã‚‹
 inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
     j = nlohmann::json{
         {"enable", r.enable},

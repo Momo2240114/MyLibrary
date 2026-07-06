@@ -1,46 +1,63 @@
 #pragma once
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/GamePlay/EventSystem/IActionProvider.h"
 #include "Engine/Graphics/RenderSystem/BloomSystem.h"
 #include "Engine/Math/EasingComponent.h"
-#include "Engine/GamePlay/EventSystem/IActionProvider.h"
 
-struct ColorFilterWayPoint {
-    BloomSystem::CbColorFilter filter;
-    float duration;
-    EasingType easing;
+struct ColorFilterWayPoint
+{
+    BloomSystem::CbColorFilter filter = {
+        0.0f, 1.0f, 1.0f, 1.0f, { 1.0f, 1.0f, 1.0f }, 1.0f };
+    float duration = 1.0f;
+    float holdDuration = 0.0f;
+    float returnDuration = 1.0f;
+    EasingType easing = EasingType::Lerp;
 };
 
 class ColorFilterDirector : public Component, public IActionProvider
 {
 public:
-    const std::string& GetName() const override { 
-        static std::string n = "ColorFilterDirector";
-        return n; 
+    const std::string& GetName() const override
+    {
+        static const std::string name_ = "ColorFilterDirector";
+        return name_;
     }
 
     void Start() override;
-    void Update(float et) override;
-    void PlayFilter(const ColorFilterWayPoint& wp);
+    void Update(float elapsedTime_) override;
     void Gui() override;
-    void Serialize(nlohmann::json& j) const;
-    void Deserialize(const nlohmann::json& j);
-
-    void RegisterActions();
+    void Serialize(nlohmann::json& json_) const override;
+    void Deserialize(const nlohmann::json& json_) override;
+    void RegisterActions() override;
+    void PlayFilter(const ColorFilterWayPoint& wayPoint_);
 
 private:
+    enum class PHASE
+    {
+        IDLE,
+        TO_TARGET,
+        HOLD,
+        TO_DEFAULT
+    };
+
+    void ApplyInterpolated(float ratio_);
+    void BeginTransitionToDefault();
+    void ResetToDefault();
+    static BloomSystem::CbColorFilter LerpFilter(
+        const BloomSystem::CbColorFilter& from_,
+        const BloomSystem::CbColorFilter& to_,
+        float ratio_);
+
     int easingIndex = -1;
-    bool isChanging = false;
-
-    // アニメーション用変数
-    BloomSystem::CbColorFilter startParams;
-    BloomSystem::CbColorFilter targetParams;
-
-    std::vector<ColorFilterWayPoint> EditorWaypoints;
-
-    // floatおよびDirectX::XMFLOAT3の補完ヘルパー
-    float Lerp(float a, float b, float t) { return a + (b - a) * t; }
-    DirectX::XMFLOAT3 LerpVec3(const DirectX::XMFLOAT3& a, const DirectX::XMFLOAT3& b, float t) {
-        return { a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t };
-    }
+    PHASE phase = PHASE::IDLE;
+    float holdElapsed = 0.0f;
+    float holdDuration = 0.0f;
+    float returnDuration = 0.0f;
+    EasingType activeEasing = EasingType::Lerp;
+    BloomSystem::CbColorFilter startParams{};
+    BloomSystem::CbColorFilter targetParams{};
+    BloomSystem::CbColorFilter defaultParams = {
+        0.0f, 1.0f, 1.0f, 1.0f, { 1.0f, 1.0f, 1.0f }, 1.0f };
+    std::vector<ColorFilterWayPoint> editorWaypoints;
 };

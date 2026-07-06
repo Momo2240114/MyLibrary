@@ -20,10 +20,10 @@ public:
 
 	virtual void Initialize();
 	virtual void Finalize();
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(float elapsedTime);
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	void Render(float elapsedTime);
 
 	void DrawGUI();
@@ -41,7 +41,7 @@ protected:
 	std::shared_ptr<ActionRegistry> actionRegistry;
 	std::string sceneName;
 	bool isFirstUpdate = true;
-	// ‘‹‚Ì•\¦ó‘Ô‚ğŠÇ—‚·‚é•Ï”iƒNƒ‰ƒXƒƒ“ƒo‚Æ‚µ‚Ä•Û‚·‚é‚±‚Æj
+	// çª“ã®è¡¨ç¤ºçŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹å¤‰æ•°ï¼ˆã‚¯ãƒ©ã‚¹ãƒ¡ãƒ³ãƒã¨ã—ã¦ä¿æŒã™ã‚‹ã“ã¨ï¼‰
 	bool isEditorVisible = true;
 	ModelRenderSystem m_ModelRenderSystem;
 	SpriteRenderSystem m_SpriteRenderSystem;

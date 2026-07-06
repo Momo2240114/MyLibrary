@@ -12,13 +12,13 @@ void MovementComponent::Start()
 
 void MovementComponent::Update(float et)
 {
-	//ˆÚ“®ˆ—
+	//ç§»å‹•å‡¦ç†
 	Move(et);
 
 	switch (m_RotationType)
 	{
 	case RotationType::Turn:
-		//ù‰ñˆ—
+		//æ—‹å›å‡¦ç†
 		Turn(et);
 		break;
 	case RotationType::LookAtVelocity:
@@ -29,7 +29,7 @@ void MovementComponent::Update(float et)
 	m_Direction = { 0,0,0 };
 }
 
-//ˆÚ“®ˆ—
+//ç§»å‹•å‡¦ç†
 void MovementComponent::Move(float et)
 {
 	float speed = m_MoveSpeed * et;
@@ -42,34 +42,34 @@ void MovementComponent::ZeroDirection()
 	m_Direction = { 0,0,0 };
 }
 
-//ù‰ñˆ—
+//æ—‹å›å‡¦ç†
 void MovementComponent::Turn(float et)
 {
-	// 1. Œ»İ‚Ì‰ñ“]‚ğæ“¾
+	// 1. ç¾åœ¨ã®å›è»¢ã‚’å–å¾—
 	Vector3 currentRot = GetGameObject()->transform->localRotation;
 
-	// 2. ‰ÁZ‚·‚é—ÊiƒIƒtƒZƒbƒgj‚ğŒvZ
+	// 2. åŠ ç®—ã™ã‚‹é‡ï¼ˆã‚ªãƒ•ã‚»ãƒƒãƒˆï¼‰ã‚’è¨ˆç®—
 	Vector3 deltaRot = m_Angle * m_TurnSpeed * et;
 
-	// 3. ‡ŒvŠp“x‚ğŒvZ
+	// 3. åˆè¨ˆè§’åº¦ã‚’è¨ˆç®—
 	Vector3 nextRot = currentRot;
 	nextRot.x += deltaRot.x;
 	nextRot.y += deltaRot.y;
 	nextRot.z += deltaRot.z;
 
-	// 4. X²iƒsƒbƒ`j‚Ì‰ñ“]§ŒÀ
+	// 4. Xè»¸ï¼ˆãƒ”ãƒƒãƒï¼‰ã®å›è»¢åˆ¶é™
 	if (m_IsPitchLimit)
 	{
-		// 0~360“x‚ğ -180~180“x‚É•ÏŠ·‚µ‚ÄŒvZ‚µ‚â‚·‚­‚·‚é
+		// 0~360åº¦ã‚’ -180~180åº¦ã«å¤‰æ›ã—ã¦è¨ˆç®—ã—ã‚„ã™ãã™ã‚‹
 		float normalizedX = nextRot.x;
 		if (normalizedX > 180.0f) normalizedX -= 360.0f;
 
-		// ƒNƒ‰ƒ“ƒvˆ— (m_MinPitch: ãŒÀ, m_MaxPitch: ‰ºŒÀ)
-		// —á: -80“x ` 80“x
+		// ã‚¯ãƒ©ãƒ³ãƒ—å‡¦ç† (m_MinPitch: ä¸Šé™, m_MaxPitch: ä¸‹é™)
+		// ä¾‹: -80åº¦ ï½ 80åº¦
 		if (normalizedX < m_MinPitch) normalizedX = m_MinPitch;
 		if (normalizedX > m_MaxPitch) normalizedX = m_MaxPitch;
 
-		// 0~360“x‚Ìd—l‚É–ß‚·
+		// 0~360åº¦ã®ä»•æ§˜ã«æˆ»ã™
 		if (normalizedX < 0.0f) {
 			nextRot.x = normalizedX + 360.0f;
 		}
@@ -78,11 +78,11 @@ void MovementComponent::Turn(float et)
 		}
 	}
 
-	// 5. ÅI“I‚ÈŠp“x‚ğ Transform ‚É”½‰f
-	// AddRotateOffset ‚Å‚Í‚È‚­ SetRotation ‚ğg‚¤‚±‚Æ‚ÅA§ŒÀŒã‚Ì’l‚ğ’¼Úã‘‚«‚·‚é
+	// 5. æœ€çµ‚çš„ãªè§’åº¦ã‚’ Transform ã«åæ˜ 
+	// AddRotateOffset ã§ã¯ãªã SetRotation ã‚’ä½¿ã†ã“ã¨ã§ã€åˆ¶é™å¾Œã®å€¤ã‚’ç›´æ¥ä¸Šæ›¸ãã™ã‚‹
 	GetGameObject()->transform->SetRotation(nextRot);
 
-	// 6. ƒf[ƒ^‚ğƒŠƒZƒbƒg
+	// 6. ãƒ‡ãƒ¼ã‚¿ã‚’ãƒªã‚»ãƒƒãƒˆ
 	m_Angle = { 0, 0, 0 };
 }
 
@@ -107,18 +107,18 @@ void MovementComponent::LookAtVelocity(float et)
 	std::shared_ptr<GameObject> gameObject = GetGameObject();
 	float speed = m_TurnSpeed * et;
 
-	//Œ»İ‚Ì‰ñ“]s—ñ‚©‚çƒNƒH[ƒ^ƒjƒIƒ“‚ğ‹‚ß‚é
+	//ç¾åœ¨ã®å›è»¢è¡Œåˆ—ã‹ã‚‰ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’æ±‚ã‚ã‚‹
 	 angle = gameObject->transform->GetWorldRotation();
 	 
 
-	 //ƒfƒBƒOƒŠ[‚ğƒ‰ƒWƒAƒ“‚É•ÏŠ·
+	 //ãƒ‡ã‚£ã‚°ãƒªãƒ¼ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã«å¤‰æ›
 	 angle.x = DirectX::XMConvertToRadians(angle.x);
 	 angle.y = DirectX::XMConvertToRadians(angle.y);
 	 angle.z = DirectX::XMConvertToRadians(angle.z);
 
 	 Quaternion quaternion = DirectX::XMQuaternionRotationRollPitchYaw(angle.x,angle.y,angle.z);
 
-	 //‘O•ûŒüƒxƒNƒgƒ‹‚ğ‹‚ß‚é
+	 //å‰æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ±‚ã‚ã‚‹
 	 Matrix  transform = DirectX::XMMatrixRotationQuaternion(quaternion);
 	 Vector4 oneZ = { 0,0,1,0 };
 	 Vector3 front = DirectX::XMVector3TransformNormal(oneZ,transform);
@@ -128,7 +128,7 @@ void MovementComponent::LookAtVelocity(float et)
 	 m_Direction.y = 0;
 	 m_Direction.Normalize();
 
-	 //‰ñ“]²‚ğ‹‚ß‚é
+	 //å›è»¢è»¸ã‚’æ±‚ã‚ã‚‹
 	 Vector3 axis = front.Cross(m_Direction);
 	 axis.Normalize();
 
@@ -144,23 +144,23 @@ void MovementComponent::LookAtVelocity(float et)
 
 	 axis.Normalize();
 
-	 //Speed•ª‚¾‚¯‰ñ“]‚·‚éƒNƒH[ƒ^ƒjƒIƒ“‚ğì¬
+	 //Speedåˆ†ã ã‘å›è»¢ã™ã‚‹ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’ä½œæˆ
 	 Quaternion turn = DirectX::XMQuaternionRotationAxis(axis,speed);
 
-	 //Œ»İ‚Ì‰ñ“]‚É‡¬‚·‚é
+	 //ç¾åœ¨ã®å›è»¢ã«åˆæˆã™ã‚‹
 	 Quaternion q = quaternion * turn;
 
-	 //// Roll (X²ü‚è)
+	 //// Roll (Xè»¸å‘¨ã‚Š)
 	 //float sinRoll = 2.0f * (q.y * q.z + q.w * q.x);
 	 //sinRoll = (sinRoll > 1.0f) ? 1.0f : ((sinRoll < -1.0f) ? -1.0f : sinRoll);
 	 //float roll = asinf(sinRoll);
 
-	 //// Pitch (Y²ü‚è)
+	 //// Pitch (Yè»¸å‘¨ã‚Š)
 	 //float t0 = -2.0f * (q.x * q.z - q.w * q.y);
 	 //float t1 = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
 	 //float pitch = atan2f(t0, t1);
 
-	 //// Yaw (Z²ü‚è)
+	 //// Yaw (Zè»¸å‘¨ã‚Š)
 	 //float t2 = -2.0f * (q.x * q.y - q.w * q.z);
 	 //float t3 = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
 	 //float yaw = atan2f(t2, t3);
@@ -171,24 +171,24 @@ void MovementComponent::LookAtVelocity(float et)
 	 Vector3 euler = q.ToEuler();
 	 //Vector3 euler = QuaternionToEuler(q);
 
-	 // ƒfƒBƒOƒŠ[‚É•ÏŠ·
+	 // ãƒ‡ã‚£ã‚°ãƒªãƒ¼ã«å¤‰æ›
 	 offsetRotation.x = DirectX::XMConvertToDegrees(euler.x);
 	 offsetRotation.y = DirectX::XMConvertToDegrees(euler.y);
 	 offsetRotation.z = DirectX::XMConvertToDegrees(euler.z);
 
-	 //// š X²iPitchj‚Ì‰ñ“]§ŒÀ
+	 //// â˜… Xè»¸ï¼ˆPitchï¼‰ã®å›è»¢åˆ¶é™
 	 //if (m_IsPitchLimit)
 	 //{
-		// // Šp“x‚ª180“x‚ğ’´‚¦‚Ä 270~360“x‘¤iƒ}ƒCƒiƒX•ûŒüj‚É‚È‚Á‚Ä‚¢‚éê‡‚Ì•â³
+		// // è§’åº¦ãŒ180åº¦ã‚’è¶…ãˆã¦ 270~360åº¦å´ï¼ˆãƒã‚¤ãƒŠã‚¹æ–¹å‘ï¼‰ã«ãªã£ã¦ã„ã‚‹å ´åˆã®è£œæ­£
 		// if (offsetRotation.x > 180.0f) offsetRotation.x -= 360.0f;
 
-		// // ƒNƒ‰ƒ“ƒvˆ—
+		// // ã‚¯ãƒ©ãƒ³ãƒ—å‡¦ç†
 		// if (offsetRotation.x < m_MinPitch) offsetRotation.x = m_MinPitch;
 		// if (offsetRotation.x > m_MaxPitch) offsetRotation.x = m_MaxPitch;
 	 //}
 
 
-	 ////ƒfƒBƒOƒŠ[‚É•ÏŠ·
+	 ////ãƒ‡ã‚£ã‚°ãƒªãƒ¼ã«å¤‰æ›
 	 //offsetRotation.x = DirectX::XMConvertToDegrees(euler.x);
 	 //offsetRotation.y = DirectX::XMConvertToDegrees(euler.y);
 	 //offsetRotation.z = DirectX::XMConvertToDegrees(euler.z);
@@ -212,14 +212,14 @@ void MovementComponent::SetDirection(const Vector3& direction)
 
 void MovementComponent::AddAngle(const Vector3& angle)
 {
-	//ƒfƒBƒOƒŠ[‚É•ÏŠ·‚·‚é
+	//ãƒ‡ã‚£ã‚°ãƒªãƒ¼ã«å¤‰æ›ã™ã‚‹
 	m_Angle.x = DirectX::XMConvertToDegrees(m_Angle.x);
 	m_Angle.y = DirectX::XMConvertToDegrees(m_Angle.y);
 	m_Angle.z = DirectX::XMConvertToDegrees(m_Angle.z);
 
 	m_Angle += angle ;
 
-	//ƒ‰ƒWƒAƒ“‘‚­‚É•ÏŠ·‚·‚é
+	//ãƒ©ã‚¸ã‚¢ãƒ³æ›¸ãã«å¤‰æ›ã™ã‚‹
 	m_Angle.x = DirectX::XMConvertToRadians(m_Angle.x);
 	m_Angle.y = DirectX::XMConvertToRadians(m_Angle.y);
 	m_Angle.z = DirectX::XMConvertToRadians(m_Angle.z);

@@ -8,21 +8,21 @@ class SceneBase;
 class SceneManager
 {
 public:
-    // ‰Šú‰»
+    // åˆæœŸåŒ–
     static void Initialize(std::unique_ptr<SceneBase> firstScene);
 
-    // XVE•`‰æ
+    // æ›´æ–°ãƒ»æç”»
     static void Update(float elapsedTime);
     static void Render(float elapsedTime);
     static void DrawGUI();
 
-    // ƒV[ƒ“Ø‚è‘Ö‚¦—\–ñ
+    // ã‚·ãƒ¼ãƒ³åˆ‡ã‚Šæ›¿ãˆäºˆç´„
     static void ChangeScene(std::unique_ptr<SceneBase> scene, bool callInitialize = true);
 
-    // Œ»İ‚ÌƒV[ƒ“æ“¾
+    // ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³å–å¾—
     static SceneBase* GetCurrentScene();
 
-    // Œ»İ‚ÌƒV[ƒ“ƒNƒŠƒA
+    // ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã‚¯ãƒªã‚¢
     static void Clear();
 
 private:

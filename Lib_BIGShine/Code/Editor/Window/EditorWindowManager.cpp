@@ -169,7 +169,7 @@ void EditorWindowManager::DrawMenuBar()
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Scene")) {
-            // ó‘Ô‚ð’¼Ú‘‚«Š·‚¦‚é
+            // çŠ¶æ…‹ã‚’ç›´æŽ¥æ›¸ãæ›ãˆã‚‹
             if (ImGui::MenuItem("Save Scene")) { gameObjectManager->GetSceneState().showSavePopup = true; }
             if (ImGui::MenuItem("Load Scene")) { gameObjectManager->GetSceneState().showLoadPopup = true; }
             ImGui::EndMenu();
@@ -196,7 +196,7 @@ void EditorWindowManager::DrawMenuBar()
             }
             ImGui::Separator();
 
-            // Še‘‹‚Ìó‘Ô‚ðØ‚è‘Ö‚¦‚éƒƒjƒ…[‚ð¶¬
+            // å„çª“ã®çŠ¶æ…‹ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’ç”Ÿæˆ
             for (auto& window : windows) {
                 bool visible = window->IsVisible();
                 if (ImGui::MenuItem(window->GetName().c_str(), nullptr, &visible)) {

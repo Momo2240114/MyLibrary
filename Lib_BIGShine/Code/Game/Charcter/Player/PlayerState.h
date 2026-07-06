@@ -8,8 +8,8 @@
 
 class PlayerControllerComponent;
 
-// PlayerAction ‚ÍAƒvƒŒƒCƒ„[‚Ì“ü—Í‚Æƒ~ƒ‰[AI‚Å‹¤—L‚³‚ê‚³‚ê‚é—\’èB‚±‚Ìƒtƒ[’è‹`‚©‚ç‚ÍA
-// “ü—ÍƒoƒCƒ“ƒfƒBƒ“ƒO‚ğQÆ‚µ‚Ü‚¹‚ñ
+// PlayerAction ã¯ã€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å…¥åŠ›ã¨ãƒŸãƒ©ãƒ¼AIã§å…±æœ‰ã•ã‚Œã•ã‚Œã‚‹äºˆå®šã€‚ã“ã®ãƒ•ãƒ­ãƒ¼å®šç¾©ã‹ã‚‰ã¯ã€
+// å…¥åŠ›ãƒã‚¤ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ã‚’å‚ç…§ã—ã¾ã›ã‚“
 enum class PLAYER_ACTION
 {
     IDLE,
@@ -76,10 +76,10 @@ namespace PlayerBlackboardKey
 
     inline constexpr const char* HIT_TRIGGER = "HitTrigger";
     inline constexpr const char* HIT_DIRECTION = "HitDirection";
-    //ƒWƒƒƒXƒg‰ñ”ğŠÖŒW
+    //ã‚¸ãƒ£ã‚¹ãƒˆå›é¿é–¢ä¿‚
     inline constexpr const char* JUST_DODGE_SUCCEEDED = "JustDodgeSucceeded";
     inline constexpr const char* JUST_DODGE_TRIGGER = "JustDodgeTrigger";
-    //ƒJƒEƒ“ƒ^[ŠÖŒW
+    //ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼é–¢ä¿‚
     inline constexpr const char* CAN_COUNTER = "CanCounter";
     inline constexpr const char* DODGED_COUNTER_TAG = "DodgedCounterag";
 }

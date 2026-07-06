@@ -2,21 +2,21 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "GlTFModel.h" // Šù‘¶‚ÌNode‚âMesh‚Ì’è‹`‚ğQÆ‚·‚é‚½‚ß
+#include "GlTFModel.h" // æ—¢å­˜ã®Nodeã‚„Meshã®å®šç¾©ã‚’å‚ç…§ã™ã‚‹ãŸã‚
 
-// ƒ‚ƒfƒ‹‚ÌuÃ“I‚Èî•ñiœ‘g‚İ‚â“÷‘Ìjv‚Ì‚İ‚ğ‹L‰¯‚·‚é” 
+// ãƒ¢ãƒ‡ãƒ«ã®ã€Œé™çš„ãªæƒ…å ±ï¼ˆéª¨çµ„ã¿ã‚„è‚‰ä½“ï¼‰ã€ã®ã¿ã‚’è¨˜æ†¶ã™ã‚‹ç®±
 class ModelResource
 {
 public:
     std::string modelName;
 
-    // GltfModelCommponennt “à‚Å’è‹`‚³‚ê‚Ä‚¢‚é\‘¢‘Ì‚ÌƒŠƒXƒg‚ğ‚±‚±‚É•Û‚·‚é
+    // GltfModelCommponennt å†…ã§å®šç¾©ã•ã‚Œã¦ã„ã‚‹æ§‹é€ ä½“ã®ãƒªã‚¹ãƒˆã‚’ã“ã“ã«ä¿æŒã™ã‚‹
     std::vector<GltfModelCommponennt::Node> nodes;
     std::vector<GltfModelCommponennt::Mesh> meshes;
     std::vector<GltfModelCommponennt::Material> materials;
     std::vector<GltfModelCommponennt::Animation> animations;
 
-    // ƒAƒ^ƒbƒ`ƒƒ“ƒg‚È‚Ç‚ªu“Á’è‚Ì•”ˆÊiƒ\ƒPƒbƒgjv‚ÌˆÊ’u‚ğ’T‚é‚½‚ß‚ÌA•Ö—˜‚È’Tõ
+    // ã‚¢ã‚¿ãƒƒãƒãƒ¡ãƒ³ãƒˆãªã©ãŒã€Œç‰¹å®šã®éƒ¨ä½ï¼ˆã‚½ã‚±ãƒƒãƒˆï¼‰ã€ã®ä½ç½®ã‚’æ¢ã‚‹ãŸã‚ã®ã€ä¾¿åˆ©ãªæ¢ç´¢
     int FindNodeIndex(const std::string& name) const {
         for (size_t i = 0; i < nodes.size(); ++i) {
             if (nodes[i].name == name) return static_cast<int>(i);
@@ -24,7 +24,7 @@ public:
         return -1;
     }
 
-    // Šù‘¶‚Ìƒf[ƒ^‚ğ‚·‚×‚Ä‰ğ•ú‚·‚é
+    // æ—¢å­˜ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã™ã¹ã¦è§£æ”¾ã™ã‚‹
     void Clear() {
         materials.clear();
         meshes.clear();

@@ -4,7 +4,7 @@
 #include "Engine/GamePlay/Scene/SceneManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
-// ƒCƒ“ƒ^[ƒtƒFƒCƒXƒV[ƒ“
+// ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã‚·ãƒ¼ãƒ³
 class Scene
 {
 public:
@@ -14,19 +14,19 @@ public:
 	virtual void Initialize() {};
 	virtual void  Finalize() {};
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(float elapsedTime) {}
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	virtual void Render(float elapsedTime) {}
 
-	// GUI•`‰æˆ—
+	// GUIæç”»å‡¦ç†
 	virtual void DrawGUI() {}
 
-	//€”õŠ®—¹‚µ‚Ä‚¢‚é‚©
+	//æº–å‚™å®Œäº†ã—ã¦ã„ã‚‹ã‹
 	bool IsReady()const { return ready; }
 
-	//€”õŠ®—¹İ’è
+	//æº–å‚™å®Œäº†è¨­å®š
 	void SetReady() { ready = true; }
 
 	std::string GetSceneName() {return sceneName;}

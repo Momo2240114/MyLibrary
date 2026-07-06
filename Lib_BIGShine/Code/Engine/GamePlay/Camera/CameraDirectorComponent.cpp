@@ -6,7 +6,7 @@
 void CameraDirector::Start()
 {
     auto go = GetGameObject();
-    // ˆË‘¶ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ©“®‚Å’Ç‰ÁEæ“¾
+    // ä¾å­˜ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’è‡ªå‹•ã§è¿½åŠ ãƒ»å–å¾—
     transformDirector = go->GetOrAddComponent<TransformDirector>();
     fovDirector = go->GetOrAddComponent<FovDirector>();
 
@@ -40,7 +40,7 @@ void CameraDirector::Gui()
         auto& cp = combinedWaypoints[i];
 
         if (ImGui::TreeNode(("Combined WP " + std::to_string(i)).c_str())) {
-            // ƒCƒ“ƒfƒbƒNƒX‚Ì•ÏX‚à‰Â”\‚É‚·‚éiq‚ÌÅ‘å”‚ğ’´‚¦‚È‚¢‚æ‚¤‚ÉSlider‚Å§ŒÀj
+            // ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®å¤‰æ›´ã‚‚å¯èƒ½ã«ã™ã‚‹ï¼ˆå­ã®æœ€å¤§æ•°ã‚’è¶…ãˆãªã„ã‚ˆã†ã«Sliderã§åˆ¶é™ï¼‰
             ImGui::SliderInt("T-Idx", &cp.transformIdx, 0, transformDirector->GetCount() - 1);
             ImGui::SliderInt("F-Idx", &cp.fovIdx, 0, fovDirector->GetCount() - 1);
 
@@ -69,7 +69,7 @@ void CameraDirector::PlayCombined(int index, EasingType transEase, EasingType fo
 
     auto& cp = combinedWaypoints[index];
 
-    // q Director ‚ÉƒCƒ“ƒfƒbƒNƒX‚ğ“n‚µ‚ÄÄ¶iPlayByIndex ‚Æ‚¢‚¤ŠÖ”‚ğq‚É—pˆÓ‚·‚éj
+    // å­ Director ã«ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æ¸¡ã—ã¦å†ç”Ÿï¼ˆPlayByIndex ã¨ã„ã†é–¢æ•°ã‚’å­ã«ç”¨æ„ã™ã‚‹ï¼‰
     if (transformDirector) {
         transformDirector->PlayMoveByIndex(cp.transformIdx);
     }
@@ -78,15 +78,15 @@ void CameraDirector::PlayCombined(int index, EasingType transEase, EasingType fo
     }
 }
 
-// --- Capture: ¡‚ÌŒ©‚½–Ú‚ğ‚»‚ê‚¼‚ê‚ÌƒŠƒXƒg‚É’Ç‰Á‚µ‚ÄƒyƒAƒŠƒ“ƒO ---
+// --- Capture: ä»Šã®è¦‹ãŸç›®ã‚’ãã‚Œãã‚Œã®ãƒªã‚¹ãƒˆã«è¿½åŠ ã—ã¦ãƒšã‚¢ãƒªãƒ³ã‚° ---
 void CameraDirector::CaptureCombinedWaypoint() {
     if (!transformDirector || !fovDirector) return;
 
-    // 1. q‚Éu¡‚Ìó‘Ô‚ğ©•ª‚ÌƒŠƒXƒg‚É•Û‘¶‚µ‚ëv‚Æ–½—ß
+    // 1. å­ã«ã€Œä»Šã®çŠ¶æ…‹ã‚’è‡ªåˆ†ã®ãƒªã‚¹ãƒˆã«ä¿å­˜ã—ã‚ã€ã¨å‘½ä»¤
     transformDirector->CaptureCurrentState();
     fovDirector->CaptureCurrentState();
 
-    // 2. e‚Íu––”ö‚ÌƒCƒ“ƒfƒbƒNƒX“¯mv‚ğƒyƒA‚Æ‚µ‚Ä‹L˜^
+    // 2. è¦ªã¯ã€Œæœ«å°¾ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹åŒå£«ã€ã‚’ãƒšã‚¢ã¨ã—ã¦è¨˜éŒ²
     CombinedWaypoint cp;
     cp.transformIdx = transformDirector->GetCount() - 1;
     cp.fovIdx = fovDirector->GetCount() - 1;
@@ -95,15 +95,15 @@ void CameraDirector::CaptureCombinedWaypoint() {
 
 void CameraDirector::RegisterActions()
 {
-    auto& reg = ActionRegistry::Instance();
-    std::string objName = GetGameObject()->GetName();
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
 
     for (int i = 0; i < (int)combinedWaypoints.size(); ++i) {
-        // –¼‘O‚ğ "ObjName_WP_0" ‚É‚·‚é
-        std::string actionName = objName + "_WP_" + std::to_string(i);
+        // åå‰ã‚’ "ObjName_WP_0" ã«ã™ã‚‹
+        const std::string actionName_ = "WP_" + std::to_string(i);
 
-        // ‘æ1ˆø”‚ÉƒJƒeƒSƒŠ "Camera" ‚ğw’è
-        reg.RegisterAction("Camera", actionName, [this, i]() {
+        // ç¬¬1å¼•æ•°ã«ã‚«ãƒ†ã‚´ãƒª "Camera" ã‚’æŒ‡å®š
+        owner_->RegisterGlobalAction("Camera", actionName_, [this, i]() {
             this->PlayCombined(i);
             });
     }
@@ -116,8 +116,8 @@ void CameraDirector::Serialize(nlohmann::json& j) const
         nlohmann::json item;
         item["t_idx"] = cp.transformIdx;
         item["f_idx"] = cp.fovIdx;
-        item["autoReturn"] = cp.m_autoReturn; // ’Ç‰Á
-        item["waitTime"] = cp.m_waitTime;     // ’Ç‰Á
+        item["autoReturn"] = cp.m_autoReturn; // è¿½åŠ 
+        item["waitTime"] = cp.m_waitTime;     // è¿½åŠ 
         arr.push_back(item);
     }
     j["CombinedWaypoints"] = arr;
@@ -129,11 +129,11 @@ void CameraDirector::Deserialize(const nlohmann::json& j)
     combinedWaypoints.clear();
     for (const auto& item : j["CombinedWaypoints"]) {
         CombinedWaypoint cp;
-        // JSON‚É‚ ‚éƒL[ "t_idx", "f_idx" ‚ğ“Ç‚İ‚Ş
+        // JSONã«ã‚ã‚‹ã‚­ãƒ¼ "t_idx", "f_idx" ã‚’èª­ã¿è¾¼ã‚€
         cp.transformIdx = item.value("t_idx", 0);
         cp.fovIdx = item.value("f_idx", 0);
-        cp.m_autoReturn = item.value("autoReturn", false); // ’Ç‰Á
-        cp.m_waitTime = item.value("waitTime", 0.0f);      // ’Ç‰Á
+        cp.m_autoReturn = item.value("autoReturn", false); // è¿½åŠ 
+        cp.m_waitTime = item.value("waitTime", 0.0f);      // è¿½åŠ 
         combinedWaypoints.push_back(cp);
     }
 }
