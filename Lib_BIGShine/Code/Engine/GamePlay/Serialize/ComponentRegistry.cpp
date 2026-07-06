@@ -45,7 +45,7 @@
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
-#include "Engine/GamePlay/Combat/DamageBoxComponent.h"
+#include "Game/Logic/Combat/DebugTools/DebugHitHistoryResetComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
@@ -130,7 +130,7 @@ void RegisterAllComponents()
     registry.Register<HitReactionComponent>("HitReactionComponent");
     registry.Register<JustDodgeReactionComponent>("JustDodgeReactionComponent");
     registry.Register<HealthComponent>("HealthComponent");
-    registry.Register<DamageBoxComponent>("DamageBoxComponent");
+    registry.Register<DebugHitHistoryResetComponent>("DamageBoxComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");
     registry.Register<ThirdPersonCameraComponent>("ThirdPersonCameraComponent");
     registry.Register<CameraLockOnComponent>("CameraLockOnComponent");

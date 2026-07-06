@@ -1,4 +1,4 @@
-#include "DamageBoxComponent.h"
+#include "DebugHitHistoryResetComponent.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Physics/HitBox.h"
@@ -6,14 +6,14 @@
 #include <algorithm>
 #include <imgui.h>
 
-void DamageBoxComponent::Start()
+void DebugHitHistoryResetComponent::Start()
 {
     ResolveHitBox();
     ApplySettings();
     if (autoActivate) Rearm();
 }
 
-void DamageBoxComponent::Update(float elapsedTime_)
+void DebugHitHistoryResetComponent::Update(float elapsedTime_)
 {
     ResolveHitBox();
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
@@ -31,14 +31,14 @@ void DamageBoxComponent::Update(float elapsedTime_)
     if (rearmTimer >= (std::max)(rearmInterval, 0.01f)) Rearm();
 }
 
-void DamageBoxComponent::ResolveHitBox()
+void DebugHitHistoryResetComponent::ResolveHitBox()
 {
     if (!hitBox.expired()) return;
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (owner_) hitBox = owner_->GetOrAddComponent<HitBox>();
 }
 
-void DamageBoxComponent::ApplySettings()
+void DebugHitHistoryResetComponent::ApplySettings()
 {
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
     if (!hitBox_) return;
@@ -53,7 +53,7 @@ void DamageBoxComponent::ApplySettings()
     hitBox_->attackTag = "DamageBox";
 }
 
-void DamageBoxComponent::Rearm()
+void DebugHitHistoryResetComponent::Rearm()
 {
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
     if (!hitBox_) return;
@@ -62,7 +62,7 @@ void DamageBoxComponent::Rearm()
     rearmTimer = 0.0f;
 }
 
-void DamageBoxComponent::Gui()
+void DebugHitHistoryResetComponent::Gui()
 {
     ImGui::Checkbox("Auto Activate", &autoActivate);
     ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f, 99999.0f);
@@ -73,7 +73,7 @@ void DamageBoxComponent::Gui()
     if (ImGui::Button("Rearm Now")) Rearm();
 }
 
-void DamageBoxComponent::Serialize(nlohmann::json& json_) const
+void DebugHitHistoryResetComponent::Serialize(nlohmann::json& json_) const
 {
     json_["Damage"] = damage;
     json_["HitStopDuration"] = hitStopDuration;
@@ -83,7 +83,7 @@ void DamageBoxComponent::Serialize(nlohmann::json& json_) const
     json_["AutoActivate"] = autoActivate;
 }
 
-void DamageBoxComponent::Deserialize(const nlohmann::json& json_)
+void DebugHitHistoryResetComponent::Deserialize(const nlohmann::json& json_)
 {
     damage = (std::max)(json_.value("Damage", 5.0f), 0.0f);
     hitStopDuration = (std::max)(json_.value("HitStopDuration", 0.05f), 0.0f);

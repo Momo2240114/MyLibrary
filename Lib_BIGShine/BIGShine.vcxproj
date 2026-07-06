@@ -448,7 +448,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
-    <ClCompile Include="Code\Engine\GamePlay\Combat\DamageBoxComponent.cpp" />
+    <ClCompile Include="Code\Game\Logic\Combat\DebugTools\DebugHitHistoryResetComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
@@ -671,7 +671,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
-    <ClInclude Include="Code\Engine\GamePlay\Combat\DamageBoxComponent.h" />
+    <ClInclude Include="Code\Game\Logic\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />

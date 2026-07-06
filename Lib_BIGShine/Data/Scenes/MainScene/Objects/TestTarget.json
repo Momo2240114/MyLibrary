@@ -55,7 +55,9 @@
                 "HalfHeight": 1.649999976158142,
                 "IsStatic": false,
                 "IsTrigger": false,
+                "LimitHorizontalLift": true,
                 "Mass": 100.0,
+                "MaxHorizontalLift": 0.05000000074505806,
                 "Offset": [
                     0.0,
                     6.0,
