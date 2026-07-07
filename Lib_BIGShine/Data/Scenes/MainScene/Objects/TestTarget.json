@@ -17,7 +17,7 @@
                 "HurtTag": "Body",
                 "InvincibilityDuration": 0.07999999821186066,
                 "IsStatic": false,
-                "IsTrigger": false,
+                "IsTrigger": true,
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
@@ -25,7 +25,7 @@
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 5.0,
+                "Radius": 3.2799999713897705,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "StartNodeName": "",
@@ -60,11 +60,11 @@
                 "MaxHorizontalLift": 0.05000000074505806,
                 "Offset": [
                     0.0,
-                    6.0,
+                    5.5,
                     0.0
                 ],
                 "PhysicsControlsTransform": true,
-                "Radius": 5.0,
+                "Radius": 3.2799999713897705,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "StartNodeName": "",
@@ -250,7 +250,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 6.0
+                            "value": 9.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -259,17 +259,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.8051000833511353,
-                                0.5931390523910522
+                                -0.06499455124139786,
+                                -0.9978856444358826
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.03500000014901161
+                            "value": 0.054999999701976776
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.8500000238418579
+                            "value": 0.6000000238418579
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -277,22 +277,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 2.0
+                            "value": 5.5
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.03461264818906784,
-                                0.9990754723548889,
-                                0.02550007589161396
+                                -0.05762592703104019,
+                                0.4624849557876587,
+                                -0.8847524523735046
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                -21.22174072265625,
-                                2.130784034729004,
-                                -3.200756788253784
+                                0.36940062046051025,
+                                0.6984345316886902,
+                                -8.20615005493164
                             ]
                         },
                         "Received": {
@@ -447,6 +447,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -485,6 +486,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -523,6 +525,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -561,6 +564,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "IsTargetInAttackRange",
+                            "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -599,6 +603,7 @@
                             "ActionName": "AI.StopMove",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -637,6 +642,7 @@
                             "ActionName": "AI.Attack",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -675,6 +681,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -713,6 +720,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -751,6 +759,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "IsTargetInDetectRange",
+                            "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -789,6 +798,7 @@
                             "ActionName": "AI.ChaseTarget",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -827,6 +837,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -865,6 +876,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "IsAtSpawn",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -903,6 +915,7 @@
                             "ActionName": "AI.ReturnToSpawn",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -941,6 +954,7 @@
                             "ActionName": "",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -979,6 +993,7 @@
                             "ActionName": "AI.StopMove",
                             "BlackboardCategory": "AI",
                             "BlackboardKey": "",
+                            "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
                             "CompareType": "Equal",
@@ -2491,9 +2506,9 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -20.364925384521484,
-            -0.7817702293395996,
-            -2.9300103187561035
+            -0.11594835668802261,
+            -2.0024466514587402,
+            -11.872492790222168
         ],
         "Rot": [
             0.0,

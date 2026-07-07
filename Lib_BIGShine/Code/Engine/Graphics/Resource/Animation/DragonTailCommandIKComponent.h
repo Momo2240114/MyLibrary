@@ -4,6 +4,7 @@
 
 #include <DirectXMath.h>
 #include <string>
+#include <vector>
 
 class GltfModelCommponennt;
 class IKMapComponent;
@@ -49,6 +50,8 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
+    void RegisterActions();
+
     void SetFollowBody();
     void ClearCommand();
 
@@ -74,10 +77,21 @@ private:
     std::string chainName = "DragonTail";
     DirectX::XMFLOAT3 localForwardAxis = { 0.0f, 0.0f, 1.0f };
 
+    std::string actionCategory = "DragonIK";
+    std::string registeredActionCategory;
+    std::string registeredGlobalActionCategory;
+    std::vector<std::string> registeredActionNames;
+    std::vector<std::string> registeredGlobalActionNames;
+    bool registerGlobalActions = false;
+
+    float actionDuration = 0.8f;
+    float spinActionDuration = 1.6f;
+
     DragonTailIKCommand currentCommand;
     float commandTimer = 0.0f;
     bool attackActive = false;
 
+    void UnregisterActions();
     float CalculateBlendRate() const;
     float CalculateCommandRate() const;
     bool ApplyTailIK(float deltaTime_);

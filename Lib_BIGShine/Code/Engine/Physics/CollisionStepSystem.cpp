@@ -380,8 +380,8 @@ void CollisionStepSystem::RemoveExpiredColliders()
 
 void CollisionStepSystem::StepCombatPairs()
 {
-    // Combat volumes are also checked here so gameplay hits do not depend on
-    // PhysX contact-report availability for kinematic attachment actors.
+    // HitBox, HurtBox and JustDodgeBox are manual gameplay volumes.
+    // They intentionally do not participate in PhysX actor/query events.
     std::vector<std::shared_ptr<HitBox>> hitBoxes_;
     std::vector<std::shared_ptr<HurtBox>> hurtBoxes_;
     std::vector<std::shared_ptr<JustDodgeCollider>> justDodgeColliders_;

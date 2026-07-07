@@ -63,9 +63,6 @@ public:
     virtual bool HasFixedCollisionRole() const { return false; }
     virtual bool HasFixedPhysicsBehavior() const { return false; }
     void ApplyRoleDefaults();
-    void NotifyMassBlockedCharacterHit();
-    bool ConsumeMassBlockedCharacterHit();
-
     // GUIの共通部分
     virtual void Gui();
 
@@ -127,8 +124,6 @@ private:
     bool stopCharacterSlideWhenNoInput = true;
     float characterSlideStopThreshold = 0.2f;
     bool characterGroundedForStep = false;
-    bool massBlockedCharacterHit = false;
-
     CollisionContainmentMode containmentMode = CollisionContainmentMode::NONE;
 };
 

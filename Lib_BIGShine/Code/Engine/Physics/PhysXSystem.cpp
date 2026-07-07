@@ -91,34 +91,27 @@ namespace
         }
     };
 
-    class CharacterControllerHitReport : public PxUserControllerHitReport
+    class CharacterControllerFilterCallback : public PxControllerFilterCallback
     {
     public:
-        void onShapeHit(const PxControllerShapeHit&) override
+        bool filter(const PxController& controllerA_, const PxController& controllerB_) override
         {
-        }
+            const ColliderComponent* colliderA_ =
+                static_cast<const ColliderComponent*>(controllerA_.getUserData());
+            const ColliderComponent* colliderB_ =
+                static_cast<const ColliderComponent*>(controllerB_.getUserData());
+            if (!colliderA_ || !colliderB_) return true;
 
-        void onControllerHit(const PxControllersHit& hit_) override
-        {
-            ColliderComponent* self_ =
-                static_cast<ColliderComponent*>(hit_.controller->getUserData());
-            ColliderComponent* other_ =
-                static_cast<ColliderComponent*>(hit_.other->getUserData());
-            if (!self_ || !other_) return;
-            if (self_->GetMass() <= other_->GetMass())
-            {
-                self_->NotifyMassBlockedCharacterHit();
-            }
-        }
-
-        void onObstacleHit(const PxControllerObstacleHit&) override
-        {
+            const bool bothCharacters_ =
+                colliderA_->GetCollisionRole() == ColliderComponent::CollisionRole::CHARACTER &&
+                colliderB_->GetCollisionRole() == ColliderComponent::CollisionRole::CHARACTER;
+            return !bothCharacters_;
         }
     };
 
     CharacterControllerQueryFilterCallback gCharacterControllerQueryFilterCallback;
+    CharacterControllerFilterCallback gCharacterControllerFilterCallback;
     CharacterControllerBehaviorCallback gCharacterControllerBehaviorCallback;
-    CharacterControllerHitReport gCharacterControllerHitReport;
 }
 
 static PxFilterFlags PhysXFilterShader(
@@ -143,18 +136,12 @@ static PxFilterFlags PhysXFilterShader(
         return PxFilterFlag::eSUPPRESS;
     }
 
-    const bool hitHurtPair_ =
-        (filterData0_.word2 == roleHitBox_ && filterData1_.word2 == roleHurtBox_)
-        || (filterData1_.word2 == roleHitBox_ && filterData0_.word2 == roleHurtBox_);
-    const bool hitJustDodgePair_ =
-        (filterData0_.word2 == roleHitBox_ && filterData1_.word2 == roleJustDodgeBox_)
-        || (filterData1_.word2 == roleHitBox_ && filterData0_.word2 == roleJustDodgeBox_);
     const bool combatOnlyRole_ =
         filterData0_.word2 == roleHitBox_ || filterData0_.word2 == roleHurtBox_
         || filterData0_.word2 == roleJustDodgeBox_
         || filterData1_.word2 == roleHitBox_ || filterData1_.word2 == roleHurtBox_
         || filterData1_.word2 == roleJustDodgeBox_;
-    if (combatOnlyRole_ && !hitHurtPair_ && !hitJustDodgePair_)
+    if (combatOnlyRole_)
     {
         return PxFilterFlag::eSUPPRESS;
     }
@@ -177,10 +164,13 @@ static PxFilterFlags PhysXFilterShader(
     const bool bothRespond_ =
         (filterData0_.word3 & responseMask_) != 0
         && (filterData1_.word3 & responseMask_) != 0;
+    const bool characterPair_ =
+        filterData0_.word2 == roleCharacter_ &&
+        filterData1_.word2 == roleCharacter_;
     const bool physicalPair_ =
         (filterData0_.word2 == rolePhysical_ || filterData0_.word2 == roleCharacter_)
         && (filterData1_.word2 == rolePhysical_ || filterData1_.word2 == roleCharacter_);
-    if (maskOnly_ || !bothRespond_ || !physicalPair_)
+    if (maskOnly_ || !bothRespond_ || !physicalPair_ || characterPair_)
     {
         pairFlags_.clear(PxPairFlag::eSOLVE_CONTACT);
     }
@@ -291,7 +281,9 @@ void PhysXSystem::SetTimeScale(float scale_)
 void PhysXSystem::ComputeCharacterControllerInteractions(float deltaTime_)
 {
     if (!gControllerManager || deltaTime_ <= 0.0f) return;
-    gControllerManager->computeInteractions(deltaTime_, nullptr);
+    gControllerManager->computeInteractions(
+        deltaTime_,
+        &gCharacterControllerFilterCallback);
 }
 
 PxRigidDynamic* PhysXSystem::CreateBox(const PxVec3& pos, const PxVec3& halfSize)
@@ -374,14 +366,14 @@ physx::PxQueryFilterCallback* PhysXSystem::GetCharacterControllerQueryFilterCall
     return &gCharacterControllerQueryFilterCallback;
 }
 
+physx::PxControllerFilterCallback* PhysXSystem::GetCharacterControllerFilterCallback()
+{
+    return &gCharacterControllerFilterCallback;
+}
+
 physx::PxControllerBehaviorCallback* PhysXSystem::GetCharacterControllerBehaviorCallback()
 {
     return &gCharacterControllerBehaviorCallback;
-}
-
-physx::PxUserControllerHitReport* PhysXSystem::GetCharacterControllerHitReport()
-{
-    return &gCharacterControllerHitReport;
 }
 
 PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }

@@ -56,7 +56,7 @@
                 "HurtTag": "Body",
                 "InvincibilityDuration": 0.07999999821186066,
                 "IsStatic": false,
-                "IsTrigger": false,
+                "IsTrigger": true,
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
@@ -95,7 +95,7 @@
                 "GravityScale": 1.0,
                 "HalfHeight": 1.0,
                 "IsStatic": false,
-                "IsTrigger": false,
+                "IsTrigger": true,
                 "Mass": 0.0,
                 "Offset": [
                     0.0,
@@ -410,7 +410,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -418,7 +418,7 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackEnter": {
                             "type": "bool",
@@ -426,15 +426,15 @@
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -452,7 +452,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                0.0
                             ]
                         },
                         "HitDirection": {
@@ -468,7 +468,7 @@
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -480,11 +480,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -612,8 +612,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.5721832513809204,
-                                0.8201258778572083
+                                0.8070356249809265,
+                                0.5905028581619263
                             ]
                         },
                         "HitStopDuration": {
@@ -631,17 +631,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.4301359951496124,
-                                -0.6594536900520325,
-                                0.6165256500244141
+                                0.6044808626174927,
+                                -0.6625543236732483,
+                                0.44229480624198914
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                30.84524154663086,
-                                0.40301573276519775,
-                                1.2115086317062378
+                                31.184402465820313,
+                                0.4006895422935486,
+                                0.8666203618049622
                             ]
                         },
                         "ReactionDirection": {
@@ -656,7 +656,7 @@
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -664,19 +664,19 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -694,7 +694,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                0.0
                             ]
                         },
                         "HitDirection": {
@@ -710,7 +710,7 @@
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -722,11 +722,11 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -756,7 +756,7 @@
         {
             "Data": {
                 "AnimationData": {
-                    "DefaultState": "SS_Idle",
+                    "DefaultState": "SS_Attack1",
                     "States": [
                         {
                             "animIndexA": -1,
@@ -7479,13 +7479,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -6.53756046295166,
+            -5.236693382263184,
             -1.5422391891479492,
-            26.555667877197266
+            8.6555757522583
         ],
         "Rot": [
             0.0,
-            76.1996078491211,
+            357.1842956542969,
             1.1004080988641363e-05
         ],
         "Scale": [

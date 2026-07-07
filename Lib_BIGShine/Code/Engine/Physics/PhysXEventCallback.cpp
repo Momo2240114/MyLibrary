@@ -16,17 +16,21 @@ bool IsMaskOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
         || (objB_->mask & static_cast<uint32_t>(objA_->layer)) != 0;
 }
 
+bool IsManualCombatRole(ColliderComponent* collider_)
+{
+    if (!collider_) return false;
+
+    const ColliderComponent::CollisionRole role_ = collider_->GetCollisionRole();
+    return role_ == ColliderComponent::CollisionRole::HIT_BOX ||
+        role_ == ColliderComponent::CollisionRole::HURT_BOX ||
+        role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX;
+}
+
 bool IsDetectionOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
 {
     return !colA_->UsesPhysicsResponse() || !colB_->UsesPhysicsResponse()
-        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::HIT_BOX
-        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::HURT_BOX
         || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR
-        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::JUST_DODGE_BOX
-        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::HIT_BOX
-        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::HURT_BOX
-        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR
-        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::JUST_DODGE_BOX;
+        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR;
 }
 }
 
@@ -43,6 +47,7 @@ void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
         auto colA_ = reinterpret_cast<ColliderComponent*>(pair_.triggerActor ? pair_.triggerActor->userData : nullptr);
         auto colB_ = reinterpret_cast<ColliderComponent*>(pair_.otherActor ? pair_.otherActor->userData : nullptr);
         if (!colA_ || !colB_) continue;
+        if (IsManualCombatRole(colA_) || IsManualCombatRole(colB_)) continue;
 
         const bool hit_ = pair_.status != PxPairFlag::eNOTIFY_TOUCH_LOST;
         colA_->GetManager().GetCollisionStepSystem().HandlePhysXTrigger(colA_, colB_, hit_);
@@ -54,7 +59,8 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
     auto colA_ = reinterpret_cast<ColliderComponent*>(header.actors[0] ? header.actors[0]->userData : nullptr);
     auto colB_ = reinterpret_cast<ColliderComponent*>(header.actors[1] ? header.actors[1]->userData : nullptr);
     if (!colA_ || !colB_) return;
-// header.actors[] は actor ポインタ（注意：削除済みの可能性もあるが簡易実装）
+    if (IsManualCombatRole(colA_) || IsManualCombatRole(colB_)) return;
+    // header.actors[] can point to actors that were removed from the scene.
     for (PxU32 i_ = 0; i_ < nbPairs; ++i_)
     {
         const PxContactPair& pair_ = pairs[i_];

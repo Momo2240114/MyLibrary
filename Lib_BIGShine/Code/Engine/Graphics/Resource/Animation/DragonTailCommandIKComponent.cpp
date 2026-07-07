@@ -2,6 +2,7 @@
 
 #include "IKMapComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
@@ -13,6 +14,11 @@ using namespace DirectX;
 namespace
 {
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
+    constexpr const char* ACTION_FOLLOW_BODY = "DragonTail_FollowBody";
+    constexpr const char* ACTION_CLEAR = "DragonTail_Clear";
+    constexpr const char* ACTION_SWEEP_LEFT = "DragonTail_SweepLeft";
+    constexpr const char* ACTION_SWEEP_RIGHT = "DragonTail_SweepRight";
+    constexpr const char* ACTION_SPIN_SWEEP = "DragonTail_SpinSweep";
 
     DirectX::XMFLOAT3 GetTranslation(const DirectX::XMFLOAT4X4& matrix_)
     {
@@ -42,6 +48,8 @@ void DragonTailCommandIKComponent::Start()
     {
         ikMap->ResolveChainByName(chainName);
     }
+
+    RegisterActions();
 }
 
 void DragonTailCommandIKComponent::LateUpdate(float deltaTime_)
@@ -81,6 +89,74 @@ void DragonTailCommandIKComponent::SetFollowBody()
     currentCommand.mode = DRAGON_TAIL_IK_MODE::FOLLOW_BODY;
     commandTimer = 0.0f;
     attackActive = false;
+}
+
+void DragonTailCommandIKComponent::UnregisterActions()
+{
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const std::string localCategory_ =
+        registeredActionCategory.empty() ? actionCategory : registeredActionCategory;
+    for (const std::string& actionName_ : registeredActionNames)
+    {
+        owner_->GetLocalRegistry().RemoveAction(localCategory_, actionName_);
+    }
+    registeredActionNames.clear();
+    registeredActionCategory.clear();
+
+    const std::string globalCategory_ =
+        registeredGlobalActionCategory.empty() ? actionCategory : registeredGlobalActionCategory;
+    for (const std::string& actionName_ : registeredGlobalActionNames)
+    {
+        ActionRegistry::Instance().RemoveAction(globalCategory_, actionName_);
+    }
+    registeredGlobalActionNames.clear();
+    registeredGlobalActionCategory.clear();
+}
+
+void DragonTailCommandIKComponent::RegisterActions()
+{
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    UnregisterActions();
+    registeredActionCategory = actionCategory;
+    registeredGlobalActionCategory = actionCategory;
+
+    auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& action_)
+        {
+            owner_->GetLocalRegistry().RegisterAction(actionCategory, actionName_, action_);
+            registeredActionNames.push_back(actionName_);
+
+            if (registerGlobalActions)
+            {
+                const std::string globalActionName_ =
+                    owner_->RegisterGlobalAction(actionCategory, actionName_, action_);
+                if (!globalActionName_.empty()) registeredGlobalActionNames.push_back(globalActionName_);
+            }
+        };
+
+    registerAction_(ACTION_FOLLOW_BODY, [this]()
+        {
+            SetFollowBody();
+        });
+    registerAction_(ACTION_CLEAR, [this]()
+        {
+            ClearCommand();
+        });
+    registerAction_(ACTION_SWEEP_LEFT, [this]()
+        {
+            StartSweepLeft(actionDuration);
+        });
+    registerAction_(ACTION_SWEEP_RIGHT, [this]()
+        {
+            StartSweepRight(actionDuration);
+        });
+    registerAction_(ACTION_SPIN_SWEEP, [this]()
+        {
+            StartSpinSweep(spinActionDuration);
+        });
 }
 
 void DragonTailCommandIKComponent::ClearCommand()
@@ -320,23 +396,45 @@ void DragonTailCommandIKComponent::Gui()
 
     ImGui::DragFloat3("Local Forward Axis", &localForwardAxis.x, 0.01f, -1.0f, 1.0f);
 
+    ImGui::SeparatorText("Action");
+    char actionCategoryBuffer_[64];
+    strncpy_s(actionCategoryBuffer_, actionCategory.c_str(), sizeof(actionCategoryBuffer_));
+    if (ImGui::InputText("Action Category", actionCategoryBuffer_, sizeof(actionCategoryBuffer_)))
+    {
+        actionCategory = actionCategoryBuffer_;
+        RegisterActions();
+    }
+
+    if (ImGui::Checkbox("Register Global Actions", &registerGlobalActions))
+    {
+        RegisterActions();
+    }
+
+    ImGui::DragFloat("Sweep Action Duration", &actionDuration, 0.01f, 0.0f, 30.0f);
+    ImGui::DragFloat("Spin Action Duration", &spinActionDuration, 0.01f, 0.0f, 30.0f);
+
+    if (ImGui::Button("Register Actions"))
+    {
+        RegisterActions();
+    }
+
     if (ImGui::Button("Sweep Left"))
     {
-        StartSweepLeft(0.8f);
+        StartSweepLeft(actionDuration);
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Sweep Right"))
     {
-        StartSweepRight(0.8f);
+        StartSweepRight(actionDuration);
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Spin Sweep"))
     {
-        StartSpinSweep(1.6f);
+        StartSpinSweep(spinActionDuration);
     }
 
     ImGui::Text("Attack Active: %s", attackActive ? "true" : "false");
@@ -350,6 +448,10 @@ void DragonTailCommandIKComponent::Serialize(nlohmann::json& json_) const
         localForwardAxis.y,
         localForwardAxis.z
     };
+    json_["ActionCategory"] = actionCategory;
+    json_["RegisterGlobalActions"] = registerGlobalActions;
+    json_["ActionDuration"] = actionDuration;
+    json_["SpinActionDuration"] = spinActionDuration;
 }
 
 void DragonTailCommandIKComponent::Deserialize(const nlohmann::json& json_)
@@ -364,6 +466,13 @@ void DragonTailCommandIKComponent::Deserialize(const nlohmann::json& json_)
             json_["LocalForwardAxis"][2]
         };
     }
+
+    actionCategory = json_.value("ActionCategory", std::string("DragonIK"));
+    registerGlobalActions = json_.value("RegisterGlobalActions", false);
+    actionDuration = json_.value("ActionDuration", 0.8f);
+    spinActionDuration = json_.value("SpinActionDuration", 1.6f);
+
+    RegisterActions();
 }
 
 REGISTER_COMPONENT(DragonTailCommandIKComponent, "DragonTailCommandIKComponent")
