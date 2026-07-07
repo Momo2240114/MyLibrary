@@ -22,9 +22,11 @@ bool IsDetectionOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
         || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::HIT_BOX
         || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::HURT_BOX
         || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR
+        || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::JUST_DODGE_BOX
         || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::HIT_BOX
         || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::HURT_BOX
-        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR;
+        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR
+        || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::JUST_DODGE_BOX;
 }
 }
 
