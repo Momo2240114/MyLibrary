@@ -126,7 +126,7 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
 {
     assetFilePath = json_.value("AssetPath", "");
     graphAssetFilePath = json_.value("GraphAssetPath", "");
-    useTransitionGraph = json_.value("UseTransitionGraph", useTransitionGraph);
+    useTransitionGraph = true;
     stateAssetPaths.clear();
     pendingStateAssetPaths.clear();
     std::string defaultStateName_;
@@ -470,7 +470,7 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
         LoadAsset(assetFilePath);
     }
 
-    useTransitionGraph = j.value("UseTransitionGraph", useTransitionGraph);
+    useTransitionGraph = true;
 
     graphNodes.clear();
     graphTransitions.clear();

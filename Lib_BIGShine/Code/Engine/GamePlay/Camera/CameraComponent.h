@@ -103,10 +103,11 @@ public:
         ImGui::Text("Front: (%.2f, %.2f, %.2f)", front.x, front.y, front.z);
         ImGui::Text("Right: (%.2f, %.2f, %.2f)", right.x, right.y, right.z);
 
+        if (projChanged)UpdateProjection();
 
     }
 
-    void SetFov(float fov) { fovY = fov; }
+    void SetFov(float fov) { fovY = fov; UpdateProjection(); }
 
     void Serialize(nlohmann::json& j) const override;
     void Deserialize(const nlohmann::json& j) override;

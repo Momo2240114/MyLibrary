@@ -30,6 +30,9 @@ private:
     float transitionTimer = 0.0f;
     float transitionDuration = 1.0f;
 
+    float startFov = 0.0f;
+    float endFov = 0.0f;
+
     // 補間計算用の行列キャッシュ
     DirectX::XMFLOAT4X4 startViewMatrix;    // 遷移開始時のビュー行列（始点）
     DirectX::XMFLOAT4X4 currentView;        // 補間計算中の現在のビュー行列
