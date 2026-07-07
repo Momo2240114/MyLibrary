@@ -33,6 +33,8 @@ enum class ATTACK_HIT_SHAPE
     RAY
 };
 
+ATTACK_HIT_SHAPE NormalizeAttackHitShape(ATTACK_HIT_SHAPE shape_);
+
 struct AttackEffectSphereTemplate
 {
     DirectX::XMFLOAT3 localOffset = { 0.0f, 0.0f, 0.0f };

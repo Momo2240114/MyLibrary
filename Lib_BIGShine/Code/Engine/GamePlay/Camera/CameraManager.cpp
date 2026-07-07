@@ -60,6 +60,11 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
         // プロキシに行列をセット！
         m_proxyCamera->SetViewMatrix(currentView);
 
+
+        // ★FOVも補間してプロキシに反映
+        float currentFov_ = startFov + (endFov - startFov) * t_;
+        m_proxyCamera->SetFov(currentFov_);
+
         if (t_ >= 1.0f) {
             activeCameraComponent = targetCamera;
             isTransitioning = false;
@@ -85,7 +90,6 @@ std::shared_ptr<CameraComponent> CameraManager::GetActiveCamera() const
 void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)
 {
     if (!nextCam) return;
-
     targetCamera = nextCam;
     transitionTimer = 0.0f;
     isTransitioning = true;
@@ -93,10 +97,13 @@ void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)
     // 現在の視点を始点として保存
     if (activeCameraComponent) {
         startViewMatrix = activeCameraComponent->GetView();
+        startFov = activeCameraComponent->GetFovY();
     }
     else {
         // もし最初からカメラがなかった場合などは、今のカメラの行列をそのまま入れる
         startViewMatrix = nextCam->GetView();
+        startFov = nextCam->GetFovY();
     }
-}
 
+    endFov = nextCam->GetFovY();
+}

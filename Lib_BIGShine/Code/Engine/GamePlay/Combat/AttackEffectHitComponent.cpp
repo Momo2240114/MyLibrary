@@ -11,6 +11,24 @@
 #include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
 
+ATTACK_HIT_SHAPE NormalizeAttackHitShape(ATTACK_HIT_SHAPE shape_)
+{
+    switch (shape_)
+    {
+    case ATTACK_HIT_SHAPE::NONE:
+    case ATTACK_HIT_SHAPE::SPHERE:
+    case ATTACK_HIT_SHAPE::CAPSULE:
+    case ATTACK_HIT_SHAPE::SPHERE_GROUP:
+        return shape_;
+    case ATTACK_HIT_SHAPE::BOX:
+    case ATTACK_HIT_SHAPE::FAN:
+    case ATTACK_HIT_SHAPE::CONE:
+    case ATTACK_HIT_SHAPE::RAY:
+    default:
+        return ATTACK_HIT_SHAPE::CAPSULE;
+    }
+}
+
 const std::string& AttackEffectHitComponent::GetName() const
 {
     static const std::string name_ = "AttackEffectHitComponent";
@@ -129,6 +147,8 @@ void AttackEffectHitComponent::SetHitShapes(
     const std::vector<AttackEffectHitShapeTemplate>& hitShapes_)
 {
     hitShapes = hitShapes_;
+    for (AttackEffectHitShapeTemplate& shape_ : hitShapes)
+        shape_.shape = NormalizeAttackHitShape(shape_.shape);
     RebuildHitShapes();
 }
 
@@ -200,7 +220,8 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->allowMultiHit = allowMultiHit || shape_.allowMultiHit;
     hitBox_->canHitOwner = canHitOwner;
     hitBox_->radius = (std::max)(shape_.radius, 0.01f);
-    hitBox_->halfHeight = shape_.shape == ATTACK_HIT_SHAPE::SPHERE ? 0.0f : (std::max)(shape_.halfHeight, 0.0f);
+    const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
+    hitBox_->halfHeight = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE ? 0.0f : (std::max)(shape_.halfHeight, 0.0f);
     hitBox_->Deactivate();
     hitBox_->RecreatePhysXActor();
 }
@@ -216,7 +237,9 @@ void AttackEffectHitComponent::RebuildHitShapes()
     for (size_t shapeIndex_ = 0; shapeIndex_ < hitShapes.size(); ++shapeIndex_)
     {
         const AttackEffectHitShapeTemplate& shape_ = hitShapes[shapeIndex_];
-        const size_t sphereCount_ = shape_.shape == ATTACK_HIT_SHAPE::SPHERE_GROUP
+        const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
+        if (!shape_.enabled || normalizedShape_ == ATTACK_HIT_SHAPE::NONE) continue;
+        const size_t sphereCount_ = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP
             ? shape_.spheres.size() : 1u;
         for (size_t sphereIndex_ = 0; sphereIndex_ < sphereCount_; ++sphereIndex_)
         {
@@ -226,7 +249,7 @@ void AttackEffectHitComponent::RebuildHitShapes()
             hitObject_->transform->SetParent(effectObject_->transform);
             DirectX::XMFLOAT3 offset_ = shape_.localOffset;
             float radius_ = shape_.radius;
-            if (shape_.shape == ATTACK_HIT_SHAPE::SPHERE_GROUP && sphereIndex_ < shape_.spheres.size())
+            if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP && sphereIndex_ < shape_.spheres.size())
             {
                 offset_ = shape_.spheres[sphereIndex_].localOffset;
                 radius_ = shape_.spheres[sphereIndex_].radius;
@@ -237,7 +260,13 @@ void AttackEffectHitComponent::RebuildHitShapes()
             hitObject_->transform->MarkDirty();
             std::shared_ptr<HitBox> hitBox_ = hitObject_->AddComponent<HitBox>();
             AttackEffectHitShapeTemplate runtimeShape_ = shape_;
+            runtimeShape_.shape = normalizedShape_;
             runtimeShape_.radius = radius_;
+            if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP)
+            {
+                runtimeShape_.shape = ATTACK_HIT_SHAPE::SPHERE;
+                runtimeShape_.halfHeight = 0.0f;
+            }
             ConfigureHitBox(hitBox_, runtimeShape_, shape_.hitBoxName + std::to_string(sphereIndex_));
             runtimeHitShapes.push_back({ hitObject_, hitBox_, shapeIndex_ });
         }
@@ -278,22 +307,36 @@ void AttackEffectHitComponent::Gui()
         ImGui::PushID(shapeIndex_);
         if (ImGui::TreeNode("HitShape", "Hit Shape %d", shapeIndex_ + 1))
         {
+            shape_.shape = NormalizeAttackHitShape(shape_.shape);
             rebuild_ |= ImGui::Checkbox("Enabled", &shape_.enabled);
             rebuild_ |= ImGui::InputText("HitBox Name", &shape_.hitBoxName);
-            int shapeType_ = static_cast<int>(shape_.shape);
-            const char* shapeNames_[] = { "None", "Sphere", "Box", "Capsule", "Sphere Group", "Fan", "Cone", "Ray" };
+            ATTACK_HIT_SHAPE supportedShapes_[] = {
+                ATTACK_HIT_SHAPE::NONE,
+                ATTACK_HIT_SHAPE::SPHERE,
+                ATTACK_HIT_SHAPE::CAPSULE,
+                ATTACK_HIT_SHAPE::SPHERE_GROUP
+            };
+            const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group" };
+            int shapeType_ = 0;
+            for (int index_ = 0; index_ < IM_ARRAYSIZE(supportedShapes_); ++index_)
+            {
+                if (supportedShapes_[index_] == shape_.shape)
+                {
+                    shapeType_ = index_;
+                    break;
+                }
+            }
             if (ImGui::Combo("Shape", &shapeType_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
             {
-                shape_.shape = static_cast<ATTACK_HIT_SHAPE>(shapeType_);
+                shape_.shape = supportedShapes_[shapeType_];
                 rebuild_ = true;
             }
             rebuild_ |= ImGui::DragFloat3("Local Offset", &shape_.localOffset.x, 0.01f);
             rebuild_ |= ImGui::DragFloat3("Local Rotation", &shape_.localRotation.x, 0.1f);
             rebuild_ |= ImGui::DragFloat3("Local Scale", &shape_.localScale.x, 0.01f);
             rebuild_ |= ImGui::DragFloat("Radius", &shape_.radius, 0.01f, 0.01f);
-            rebuild_ |= ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
-            ImGui::DragFloat("Range", &shape_.range, 0.01f, 0.0f);
-            ImGui::DragFloat("Angle", &shape_.angle, 0.1f, 0.0f, 360.0f);
+            if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
+                rebuild_ |= ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
             ImGui::DragFloat("Active Start", &shape_.activeStartTime, 0.01f, 0.0f);
             ImGui::DragFloat("Active End", &shape_.activeEndTime, 0.01f, shape_.activeStartTime);
             ImGui::DragFloat("Hit Interval", &shape_.hitInterval, 0.01f, 0.0f);
@@ -366,7 +409,7 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
             spheres_.push_back({ { "LocalOffset", { sphere_.localOffset.x, sphere_.localOffset.y, sphere_.localOffset.z } }, { "Radius", sphere_.radius } });
         json_["HitShapes"].push_back({
             { "Enabled", shape_.enabled }, { "HitBoxName", shape_.hitBoxName },
-            { "Shape", static_cast<int>(shape_.shape) },
+            { "Shape", static_cast<int>(NormalizeAttackHitShape(shape_.shape)) },
             { "LocalOffset", { shape_.localOffset.x, shape_.localOffset.y, shape_.localOffset.z } },
             { "LocalRotation", { shape_.localRotation.x, shape_.localRotation.y, shape_.localRotation.z } },
             { "LocalScale", { shape_.localScale.x, shape_.localScale.y, shape_.localScale.z } },
@@ -412,7 +455,8 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
         AttackEffectHitShapeTemplate shape_{};
         shape_.enabled = shapeJson_.value("Enabled", true);
         shape_.hitBoxName = shapeJson_.value("HitBoxName", std::string("AttackEffectHitBox"));
-        shape_.shape = static_cast<ATTACK_HIT_SHAPE>((std::clamp)(shapeJson_.value("Shape", 1), 0, 7));
+        shape_.shape = NormalizeAttackHitShape(
+            static_cast<ATTACK_HIT_SHAPE>((std::clamp)(shapeJson_.value("Shape", 1), 0, 7)));
         auto readVector_ = [&shapeJson_](const char* key_, const DirectX::XMFLOAT3& fallback_)
             {
                 const nlohmann::json value_ = shapeJson_.value(key_, nlohmann::json::array());

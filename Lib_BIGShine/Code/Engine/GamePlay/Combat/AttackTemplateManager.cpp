@@ -200,7 +200,7 @@ namespace
         AttackEffectHitShapeTemplate shape_{};
         shape_.enabled = json_.value("enabled", true);
         shape_.hitBoxName = json_.value("hitBoxName", std::string("AttackEffectHitBox"));
-        shape_.shape = ReadEnum(json_, "shape", ATTACK_HIT_SHAPE::SPHERE);
+        shape_.shape = NormalizeAttackHitShape(ReadEnum(json_, "shape", ATTACK_HIT_SHAPE::SPHERE));
         shape_.localOffset = ReadVector3(json_, "localOffset", shape_.localOffset);
         shape_.localRotation = ReadVector3(json_, "localRotation", shape_.localRotation);
         shape_.localScale = ReadVector3(json_, "localScale", shape_.localScale);
@@ -230,7 +230,7 @@ namespace
             spheres_.push_back({ { "localOffset", ToVectorJson(sphere_.localOffset) }, { "radius", sphere_.radius } });
         return {
             { "enabled", shape_.enabled }, { "hitBoxName", shape_.hitBoxName },
-            { "shape", static_cast<int>(shape_.shape) },
+            { "shape", static_cast<int>(NormalizeAttackHitShape(shape_.shape)) },
             { "localOffset", ToVectorJson(shape_.localOffset) },
             { "localRotation", ToVectorJson(shape_.localRotation) },
             { "localScale", ToVectorJson(shape_.localScale) },
@@ -1100,22 +1100,36 @@ bool AttackTemplateManager::DrawEditorContent(
                     ImGui::PushID(shapeIndex_);
                     if (ImGui::TreeNode("HitShape", "Hit Shape %d", shapeIndex_ + 1))
                     {
+                        shape_.shape = NormalizeAttackHitShape(shape_.shape);
                         ImGui::Checkbox("Enabled", &shape_.enabled);
                         DrawHitBoxActionPrefixCombo(
                             "HitBox Action Prefix",
                             shape_.hitBoxName,
                             hitBoxActionPrefixes_);
-                        int shapeType_ = static_cast<int>(shape_.shape);
-                        const char* shapeNames_[] = { "None", "Sphere", "Box", "Capsule", "Sphere Group", "Fan", "Cone", "Ray" };
+                        ATTACK_HIT_SHAPE supportedShapes_[] = {
+                            ATTACK_HIT_SHAPE::NONE,
+                            ATTACK_HIT_SHAPE::SPHERE,
+                            ATTACK_HIT_SHAPE::CAPSULE,
+                            ATTACK_HIT_SHAPE::SPHERE_GROUP
+                        };
+                        const char* shapeNames_[] = { "None", "Sphere", "Capsule", "Sphere Group" };
+                        int shapeType_ = 0;
+                        for (int index_ = 0; index_ < IM_ARRAYSIZE(supportedShapes_); ++index_)
+                        {
+                            if (supportedShapes_[index_] == shape_.shape)
+                            {
+                                shapeType_ = index_;
+                                break;
+                            }
+                        }
                         if (ImGui::Combo("Shape", &shapeType_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
-                            shape_.shape = static_cast<ATTACK_HIT_SHAPE>(shapeType_);
+                            shape_.shape = supportedShapes_[shapeType_];
                         DrawVector3("Hit Offset", shape_.localOffset);
                         DrawVector3("Hit Rotation", shape_.localRotation);
                         DrawVector3("Hit Scale", shape_.localScale);
                         ImGui::DragFloat("Radius", &shape_.radius, 0.01f, 0.01f);
-                        ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
-                        ImGui::DragFloat("Range", &shape_.range, 0.01f, 0.0f);
-                        ImGui::DragFloat("Angle", &shape_.angle, 0.1f, 0.0f, 360.0f);
+                        if (shape_.shape == ATTACK_HIT_SHAPE::CAPSULE)
+                            ImGui::DragFloat("Half Height", &shape_.halfHeight, 0.01f, 0.0f);
                         ImGui::DragFloat("Active Start", &shape_.activeStartTime, 0.01f, 0.0f);
                         ImGui::DragFloat("Active End", &shape_.activeEndTime, 0.01f, shape_.activeStartTime);
                         ImGui::DragFloat("Hit Interval", &shape_.hitInterval, 0.01f, 0.0f);

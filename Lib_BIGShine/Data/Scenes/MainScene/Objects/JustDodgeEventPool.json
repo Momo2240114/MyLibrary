@@ -48,7 +48,22 @@
                     "radius": 0.0,
                     "samples": 16
                 },
-                "Waypoints": []
+                "Waypoints": [
+                    {
+                        "hold": 0.20000000298023224,
+                        "target": {
+                            "center": [
+                                0.5,
+                                0.5
+                            ],
+                            "maskRadius": 0.5,
+                            "radius": 0.5,
+                            "samples": 16
+                        },
+                        "toDefault": 1.0,
+                        "toTarget": 0.10000000149011612
+                    }
+                ]
             },
             "Enabled": true,
             "TypeName": "RadialBlurDirector"

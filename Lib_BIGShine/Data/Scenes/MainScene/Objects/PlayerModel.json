@@ -442,7 +442,7 @@
                         },
                         "CanCounter": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "ComboIndex": {
                             "type": "int",
@@ -451,15 +451,15 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.386942058801651,
+                                0.922104001045227
                             ]
                         },
                         "HitDirection": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.9806836247444153,
+                                -0.1956007033586502
                             ]
                         },
                         "HitTrigger": {
@@ -539,15 +539,15 @@
                     "Dodge": {
                         "AttackInstanceId": {
                             "type": "int",
-                            "value": 158
+                            "value": 1138
                         },
                         "CanCounter": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "DodgedAttackTag": {
                             "type": "string",
-                            "value": ""
+                            "value": "DamageBox"
                         },
                         "DodgedSourceAction": {
                             "type": "string",
@@ -559,7 +559,7 @@
                         },
                         "JustDodgeSucceeded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "JustDodgeTrigger": {
                             "type": "bool",
@@ -612,8 +612,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.8070356249809265,
-                                0.5905028581619263
+                                -0.9806836247444153,
+                                -0.1956007033586502
                             ]
                         },
                         "HitStopDuration": {
@@ -631,17 +631,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.6044808626174927,
-                                -0.6625543236732483,
-                                0.44229480624198914
+                                -0.6710355877876282,
+                                -0.7292448282241821,
+                                -0.13384033739566803
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                31.184402465820313,
-                                0.4006895422935486,
-                                0.8666203618049622
+                                28.75939178466797,
+                                0.35065627098083496,
+                                -0.24744336307048798
                             ]
                         },
                         "ReactionDirection": {
@@ -684,7 +684,7 @@
                         },
                         "CanCounter": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "ComboIndex": {
                             "type": "int",
@@ -693,15 +693,15 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.386942058801651,
+                                0.922104001045227
                             ]
                         },
                         "HitDirection": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.9806836247444153,
+                                -0.1956007033586502
                             ]
                         },
                         "HitTrigger": {
@@ -3698,10 +3698,10 @@
                                 "sourceNodeName": ""
                             },
                             "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
+                            "rootMotionScaleCurveName": "Track 0",
                             "sequencer": "",
                             "speed": 1.0,
-                            "speedCurveName": "",
+                            "speedCurveName": "Track 0",
                             "type": 0
                         },
                         {
@@ -5580,6 +5580,42 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.05000000074505806
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "MainCamera_Fov_1",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.23333333432674408,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Fov_UP",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.03333333507180214
                                 }
                             ],
                             "loop": false,
@@ -7454,6 +7490,18 @@
                                 "cat": "TimeScale",
                                 "name": "JustDodgeEventPool_TimeScale_1",
                                 "time": 0.0
+                            },
+                            {
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "JustDodgeEventPool_RadialBlur_0",
+                                "time": 0.0
+                            },
+                            {
+                                "blackboardWrites": [],
+                                "cat": "Camera",
+                                "name": "MainCamera_Fov_0",
+                                "time": 0.0
                             }
                         ],
                         "duration": 10.0,
@@ -7479,13 +7527,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -5.236693382263184,
+            5.421440601348877,
             -1.5422391891479492,
-            8.6555757522583
+            24.147621154785156
         ],
         "Rot": [
             0.0,
-            357.1842956542969,
+            321.7422180175781,
             1.1004080988641363e-05
         ],
         "Scale": [

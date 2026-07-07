@@ -48,6 +48,7 @@
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Game/Combat/DebugTools/DebugHitHistoryResetComponent.h"
+#include "Game/AI/Dragon/DragonAIComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
@@ -135,6 +136,7 @@ void RegisterAllComponents()
     registry.Register<JustDodgeReactionComponent>("JustDodgeReactionComponent");
     registry.Register<HealthComponent>("HealthComponent");
     registry.Register<DebugHitHistoryResetComponent>("DamageBoxComponent");
+    registry.Register<DragonAIComponent>("DragonAIComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");
     registry.Register<ThirdPersonCameraComponent>("ThirdPersonCameraComponent");
     registry.Register<CameraLockOnComponent>("CameraLockOnComponent");
