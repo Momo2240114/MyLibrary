@@ -123,8 +123,7 @@ void HurtBox::EnforceHurtBoxSettings()
     collisionRole = CollisionRole::HURT_BOX;
     usePhysicsResponse = false;
     physicsControlsTransform = false;
-    useGravity = false;
-    isTrigger = false;
+    useGravity = true;
 }
 
 void HurtBox::RegisterActions()

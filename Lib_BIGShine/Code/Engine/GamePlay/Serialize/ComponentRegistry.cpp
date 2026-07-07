@@ -17,6 +17,8 @@
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Graphics/Resource/Animation/IKMapComponent.h"
 #include "Engine/Graphics/Resource/Animation/SpringBoneSimulationComponent.h"
+#include "Engine/Graphics/Resource/Animation/DragonNeckCommandIKComponent.h"
+#include "Engine/Graphics/Resource/Animation/DragonTailCommandIKComponent.h"
 #include "Engine/GamePlay/Camera/CameraDirectorComponent.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Camera/FovDirector.h"
@@ -84,6 +86,8 @@ void RegisterAllComponents()
     registry.Register<AnimationControllerComponent>("AnimationControllerComponent");
     registry.Register<IKMapComponent>("IKMapComponent");
     registry.Register<SpringBoneSimulationComponent>("SpringBoneSimulationComponent");
+    registry.Register<DragonNeckCommandIKComponent>("DragonNeckCommandIKComponent");
+    registry.Register<DragonTailCommandIKComponent>("DragonTailCommandIKComponent");
     registry.Register<SpriteRenderer>("SpriteRenderer");
 
     // ライト・エフェクト系

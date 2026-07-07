@@ -8,8 +8,8 @@
 
 class GameModeManager;
 
-// 戦闘全体の傾向を軽く観測し、GameModeManagerのGlobalBlackboardへAI方針値を流すComponent。
-// 実際の移動、攻撃、Effect、Camera制御は行わない。
+// 戦闘全体の傾向を軽く観測し、GameModeManagerのGlobalBlackboardへAI方針値を流すComponent
+// 実際の移動や攻撃,EffectCameraなどの制御は行わない
 class AIDirectorComponent : public Component
 {
 public:

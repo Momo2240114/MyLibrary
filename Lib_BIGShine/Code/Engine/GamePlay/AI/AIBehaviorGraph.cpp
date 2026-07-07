@@ -99,6 +99,22 @@ namespace
         return AI_BLACKBOARD_VALUE_TYPE::BOOL;
     }
 
+    std::string ToString(AI_BLACKBOARD_SCOPE scope_)
+    {
+        switch (scope_)
+        {
+        case AI_BLACKBOARD_SCOPE::LOCAL: return "Local";
+        case AI_BLACKBOARD_SCOPE::GLOBAL: return "Global";
+        default: return "Local";
+        }
+    }
+
+    AI_BLACKBOARD_SCOPE BlackboardScopeFromString(const std::string& value_)
+    {
+        if (value_ == "Global") return AI_BLACKBOARD_SCOPE::GLOBAL;
+        return AI_BLACKBOARD_SCOPE::LOCAL;
+    }
+
     bool IsComposite(AI_BEHAVIOR_NODE_TYPE type_)
     {
         return type_ == AI_BEHAVIOR_NODE_TYPE::ROOT ||
@@ -298,6 +314,7 @@ void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
         nodeJson_["Position"] = { node_.position.x, node_.position.y };
         nodeJson_["BlackboardCategory"] = node_.blackboardCategory;
         nodeJson_["BlackboardKey"] = node_.blackboardKey;
+        nodeJson_["BlackboardScope"] = ToString(node_.blackboardScope);
         nodeJson_["CompareType"] = ToString(node_.compareType);
         nodeJson_["ValueType"] = ToString(node_.valueType);
         nodeJson_["FloatValue"] = node_.floatValue;
@@ -353,6 +370,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
             }
             node_.blackboardCategory = nodeJson_.value("BlackboardCategory", std::string(AIBlackboardKeys::CATEGORY_AI));
             node_.blackboardKey = nodeJson_.value("BlackboardKey", std::string{});
+            node_.blackboardScope = BlackboardScopeFromString(nodeJson_.value("BlackboardScope", "Local"));
             node_.compareType = CompareTypeFromString(nodeJson_.value("CompareType", "Equal"));
             node_.valueType = ValueTypeFromString(nodeJson_.value("ValueType", "Bool"));
             node_.floatValue = nodeJson_.value("FloatValue", 0.0f);
@@ -517,12 +535,12 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
     switch (node_.type)
     {
     case AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION:
-        return EvaluateBlackboardCondition(node_, blackboard_)
+        return EvaluateBlackboardCondition(node_, context_)
             ? AI_BEHAVIOR_STATUS::SUCCESS
             : AI_BEHAVIOR_STATUS::FAILURE;
 
     case AI_BEHAVIOR_NODE_TYPE::SET_BLACKBOARD:
-        SetBlackboardValue(node_, blackboard_);
+        SetBlackboardValue(node_, context_);
         return AI_BEHAVIOR_STATUS::SUCCESS;
 
     case AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION:
@@ -562,8 +580,11 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
 
     case AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL:
     {
+        BlackboardComponent* targetBlackboard_ = ResolveBlackboard(node_, context_);
+        if (!targetBlackboard_) return AI_BEHAVIOR_STATUS::RUNNING;
+
         bool value_ = false;
-        if (blackboard_.GetBool(node_.blackboardCategory, node_.blackboardKey, value_) && value_ == node_.boolValue)
+        if (targetBlackboard_->GetBool(node_.blackboardCategory, node_.blackboardKey, value_) && value_ == node_.boolValue)
         {
             state_ = {};
             return AI_BEHAVIOR_STATUS::SUCCESS;
@@ -595,9 +616,25 @@ std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& 
     return children_;
 }
 
-bool AIBehaviorGraph::EvaluateBlackboardCondition(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const
+BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
+    const AIBehaviorNode& node_,
+    AIBehaviorContext& context_) const
 {
-    const BlackBoardValue* value_ = blackboard_.GetValue(node_.blackboardCategory, node_.blackboardKey);
+    if (node_.blackboardScope == AI_BLACKBOARD_SCOPE::GLOBAL)
+    {
+        return context_.globalBlackboard;
+    }
+    return context_.blackboard;
+}
+
+bool AIBehaviorGraph::EvaluateBlackboardCondition(
+    const AIBehaviorNode& node_,
+    AIBehaviorContext& context_) const
+{
+    BlackboardComponent* blackboard_ = ResolveBlackboard(node_, context_);
+    if (!blackboard_) return false;
+
+    const BlackBoardValue* value_ = blackboard_->GetValue(node_.blackboardCategory, node_.blackboardKey);
 
     if (node_.compareType == AI_BLACKBOARD_COMPARE_TYPE::EXISTS) return value_ != nullptr;
     if (node_.compareType == AI_BLACKBOARD_COMPARE_TYPE::NOT_EXISTS) return value_ == nullptr;
@@ -606,7 +643,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(const AIBehaviorNode& node_, B
     if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::STRING)
     {
         std::string stringValue_;
-        if (!blackboard_.GetString(node_.blackboardCategory, node_.blackboardKey, stringValue_)) return false;
+        if (!blackboard_->GetString(node_.blackboardCategory, node_.blackboardKey, stringValue_)) return false;
         const bool equal_ = stringValue_ == node_.stringValue;
         return node_.compareType == AI_BLACKBOARD_COMPARE_TYPE::NOT_EQUAL ? !equal_ : equal_;
     }
@@ -628,30 +665,35 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(const AIBehaviorNode& node_, B
     }
 }
 
-void AIBehaviorGraph::SetBlackboardValue(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const
+void AIBehaviorGraph::SetBlackboardValue(
+    const AIBehaviorNode& node_,
+    AIBehaviorContext& context_) const
 {
+    BlackboardComponent* blackboard_ = ResolveBlackboard(node_, context_);
+    if (!blackboard_) return;
+
     switch (node_.valueType)
     {
     case AI_BLACKBOARD_VALUE_TYPE::FLOAT:
-        blackboard_.SetFloat(node_.blackboardCategory, node_.blackboardKey, node_.floatValue);
+        blackboard_->SetFloat(node_.blackboardCategory, node_.blackboardKey, node_.floatValue);
         break;
     case AI_BLACKBOARD_VALUE_TYPE::INT:
-        blackboard_.SetInt(node_.blackboardCategory, node_.blackboardKey, node_.intValue);
+        blackboard_->SetInt(node_.blackboardCategory, node_.blackboardKey, node_.intValue);
         break;
     case AI_BLACKBOARD_VALUE_TYPE::BOOL:
-        blackboard_.SetBool(node_.blackboardCategory, node_.blackboardKey, node_.boolValue);
+        blackboard_->SetBool(node_.blackboardCategory, node_.blackboardKey, node_.boolValue);
         break;
     case AI_BLACKBOARD_VALUE_TYPE::VECTOR2:
-        blackboard_.SetVector2(node_.blackboardCategory, node_.blackboardKey, { node_.vector2Value.x, node_.vector2Value.y });
+        blackboard_->SetVector2(node_.blackboardCategory, node_.blackboardKey, { node_.vector2Value.x, node_.vector2Value.y });
         break;
     case AI_BLACKBOARD_VALUE_TYPE::VECTOR3:
-        blackboard_.SetVector3(node_.blackboardCategory, node_.blackboardKey, { node_.vector3Value.x, node_.vector3Value.y, node_.vector3Value.z });
+        blackboard_->SetVector3(node_.blackboardCategory, node_.blackboardKey, { node_.vector3Value.x, node_.vector3Value.y, node_.vector3Value.z });
         break;
     case AI_BLACKBOARD_VALUE_TYPE::STRING:
-        blackboard_.SetString(node_.blackboardCategory, node_.blackboardKey, node_.stringValue);
+        blackboard_->SetString(node_.blackboardCategory, node_.blackboardKey, node_.stringValue);
         break;
     case AI_BLACKBOARD_VALUE_TYPE::TRIGGER:
-        blackboard_.SetTrigger(node_.blackboardCategory, node_.blackboardKey);
+        blackboard_->SetTrigger(node_.blackboardCategory, node_.blackboardKey);
         break;
     default:
         break;

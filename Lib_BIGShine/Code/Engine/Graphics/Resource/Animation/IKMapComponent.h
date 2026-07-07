@@ -12,7 +12,10 @@ public:
         SPRING_BONE,
         FOOT,
         CLOTH_BONE,
-        LOOK_AT
+        LOOK_AT,
+
+        DRAGON_NECK,
+        DRAGON_TAIL
     };
 
     struct IKChain
@@ -107,6 +110,21 @@ public:
     IKChain& AddSpringChain(const std::string& name_, const std::string& rootNodeName_, const std::string& tipNodeName_);
     IKChain& AddFootChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     IKChain& AddLookAtChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
+    IKChain& AddDragonNeckChain(
+        const std::string& name_,
+        const std::string& rootNodeName_ = {},
+        const std::string& tipNodeName_ = {});
+
+    IKChain& AddDragonTailChain(
+        const std::string& name_,
+        const std::string& rootNodeName_ = {},
+        const std::string& tipNodeName_ = {});
+
+    IKChain* FindChain(const std::string& name_);
+    const IKChain* FindChain(const std::string& name_) const;
+
+    bool ResolveChainByName(const std::string& name_);
+
     std::vector<IKChain>& GetChains() { return chains; }
     const std::vector<IKChain>& GetChains() const { return chains; }
     std::vector<BodyCollisionSphere>& GetBodyCollisionSpheres() { return bodyCollisionSpheres; }

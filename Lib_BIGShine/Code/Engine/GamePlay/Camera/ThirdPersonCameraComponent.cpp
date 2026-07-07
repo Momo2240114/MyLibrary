@@ -38,6 +38,12 @@ namespace
     {
         return 1.0f - std::exp(-speed_ * deltaTime_);
     }
+
+    float SmoothStep(float value_)
+    {
+        const float clamped_ = std::clamp(value_, 0.0f, 1.0f);
+        return clamped_ * clamped_ * (3.0f - 2.0f * clamped_);
+    }
 }
 
 void ThirdPersonCameraComponent::Start()
@@ -60,16 +66,19 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
         return;
     }
 
-    const Vector2 mouseDelta_ = MouseInput::Instance().GetSubMousePos();
-    DirectX::XMFLOAT2 stickDelta_{ 0.0f, 0.0f };
-    ControllerInput& controller_ = ControllerInput::Instance();
-    if (controller_.IsConnected()) stickDelta_ = controller_.GetRightStick();
+    if (!returnBlendActive)
+    {
+        const Vector2 mouseDelta_ = MouseInput::Instance().GetSubMousePos();
+        DirectX::XMFLOAT2 stickDelta_{ 0.0f, 0.0f };
+        ControllerInput& controller_ = ControllerInput::Instance();
+        if (controller_.IsConnected()) stickDelta_ = controller_.GetRightStick();
 
-    const float lookX_ = stickDelta_.x + mouseDelta_.x * mouseSensitivity;
-    const float lookY_ = -stickDelta_.y + mouseDelta_.y * mouseSensitivity;
-    currentYaw += -lookX_ * lookSpeedX * deltaTime_;
-    currentPitch += -lookY_ * lookSpeedY * deltaTime_;
-    currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
+        const float lookX_ = stickDelta_.x + mouseDelta_.x * mouseSensitivity;
+        const float lookY_ = -stickDelta_.y + mouseDelta_.y * mouseSensitivity;
+        currentYaw += -lookX_ * lookSpeedX * deltaTime_;
+        currentPitch += -lookY_ * lookSpeedY * deltaTime_;
+        currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
+    }
 
     const float yawRadian_ = DirectX::XMConvertToRadians(currentYaw);
     const float pitchRadian_ = DirectX::XMConvertToRadians(currentPitch);
@@ -102,10 +111,29 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
         DirectX::XMVectorScale(DirectX::XMLoadFloat3(&front_), distance));
     DirectX::XMFLOAT3 cameraPosition_{};
     DirectX::XMStoreFloat3(&cameraPosition_, cameraPositionVector_);
+    DirectX::XMFLOAT3 lookAtPosition_ = followPosition_;
+    if (returnBlendActive)
+    {
+        returnBlendTimer += deltaTime_;
+        const float blendRate_ = CalculateReturnBlendRate();
+        cameraPosition_ = LerpFloat3(
+            returnBlendStartPosition,
+            cameraPosition_,
+            blendRate_);
+        lookAtPosition_ = LerpFloat3(
+            returnBlendStartLookAt,
+            followPosition_,
+            blendRate_);
+        if (returnBlendTimer >= returnBlendDuration)
+        {
+            returnBlendActive = false;
+            returnBlendTimer = 0.0f;
+        }
+    }
 
     const DirectX::XMMATRIX viewMatrix_ = DirectX::XMMatrixLookAtLH(
         DirectX::XMLoadFloat3(&cameraPosition_),
-        DirectX::XMLoadFloat3(&followPosition_),
+        DirectX::XMLoadFloat3(&lookAtPosition_),
         DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
     DirectX::XMVECTOR determinant_;
     owner_->transform->ApplyWorldMatrix(
@@ -115,7 +143,7 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
     {
         camera_->SetLookAt(
             cameraPosition_,
-            followPosition_,
+            lookAtPosition_,
             { 0.0f, 1.0f, 0.0f });
     }
 }
@@ -141,6 +169,48 @@ void ThirdPersonCameraComponent::SynchronizeViewAngles(
     currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
     currentYaw = DirectX::XMConvertToDegrees(
         std::atan2(direction_.z, direction_.x));
+}
+
+void ThirdPersonCameraComponent::BeginReturnBlendFromCurrentCamera()
+{
+    ResolveCamera();
+    const std::shared_ptr<CameraComponent> camera_ = camera.lock();
+    const std::shared_ptr<GameObject> targetObject_ = target.lock();
+    if (!camera_ || !targetObject_ || !targetObject_->transform)
+    {
+        ResetFollowTracking();
+        return;
+    }
+
+    returnBlendStartPosition = camera_->GetEye();
+    returnBlendStartLookAt = camera_->GetFocus();
+
+    const DirectX::XMFLOAT3 targetPosition_ =
+        targetObject_->transform->GetWorldPosition();
+    const DirectX::XMFLOAT3 followPosition_ =
+        AddFloat3(targetPosition_, targetOffset);
+    SynchronizeViewAngles(returnBlendStartPosition, followPosition_);
+
+    const DirectX::XMVECTOR distanceVector_ = DirectX::XMVectorSubtract(
+        DirectX::XMLoadFloat3(&followPosition_),
+        DirectX::XMLoadFloat3(&returnBlendStartPosition));
+    const float currentDistance_ =
+        DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVector_));
+    if (currentDistance_ > 0.001f)
+    {
+        distance = currentDistance_;
+    }
+
+    smoothedCameraCenter = followPosition_;
+    hasCameraCenter = true;
+    returnBlendTimer = 0.0f;
+    returnBlendActive = returnBlendDuration > 0.0001f;
+}
+
+float ThirdPersonCameraComponent::CalculateReturnBlendRate() const
+{
+    if (returnBlendDuration <= 0.0001f) return 1.0f;
+    return SmoothStep(returnBlendTimer / returnBlendDuration);
 }
 
 void ThirdPersonCameraComponent::Gui()
@@ -184,6 +254,8 @@ void ThirdPersonCameraComponent::Gui()
     {
         ResetFollowTracking();
     }
+    ImGui::DragFloat("Return Blend Duration", &returnBlendDuration, 0.01f, 0.0f, 2.0f);
+    ImGui::TextDisabled(returnBlendActive ? "Return blending active." : "Return blending idle.");
 }
 
 void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
@@ -198,6 +270,7 @@ void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
     json_["lookSpeedY"] = lookSpeedY;
     json_["mouseSensitivity"] = mouseSensitivity;
     json_["objectFollowSpeed"] = objectFollowSpeed;
+    json_["returnBlendDuration"] = returnBlendDuration;
     json_["targetOffset"] = { targetOffset.x, targetOffset.y, targetOffset.z };
 }
 
@@ -213,6 +286,7 @@ void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
     lookSpeedY = json_.value("lookSpeedY", 200.0f);
     mouseSensitivity = json_.value("mouseSensitivity", 0.1f);
     objectFollowSpeed = json_.value("objectFollowSpeed", 5.0f);
+    returnBlendDuration = json_.value("returnBlendDuration", 0.35f);
     if (json_.contains("targetOffset") &&
         json_["targetOffset"].is_array() &&
         json_["targetOffset"].size() >= 3)

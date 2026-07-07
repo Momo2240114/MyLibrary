@@ -84,4 +84,5 @@ private:
     DirectX::XMFLOAT3 interpolatedLookAt{ 0.0f, 0.0f, 0.0f };
     std::weak_ptr<GameObject> previousLockOnTarget;
     bool hasTrackingPose = false;
+    bool ownsThirdPersonControl = false;
 };

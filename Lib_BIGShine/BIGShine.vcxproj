@@ -316,6 +316,7 @@
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
+    <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\TimeManagerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp" />
@@ -407,6 +408,8 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationEventTrack.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.cpp" />
@@ -508,6 +511,7 @@
     <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
+    <ClInclude Include="Code\Editor\Window\GameModeWindow.h" />
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\TimeManagerWindow.h" />
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h" />
@@ -643,6 +647,8 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimSequenceAdapter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />
