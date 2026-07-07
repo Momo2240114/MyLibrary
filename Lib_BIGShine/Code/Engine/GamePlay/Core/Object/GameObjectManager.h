@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/System/AttackSystem.h"
 #include "Engine/GamePlay/System/JustDodgeSystem.h"
 #include "Engine/GamePlay/System/EffectManager.h"
+#include "Game/GameMode/GameModeManager.h"
 
 class ColliderComponent;
 class BoxCollider;
@@ -175,6 +176,7 @@ public:
     void DrawSceneModals(); // モーダルを描画する専用の儀式
     void RefreshSceneList() { sceneState.list = GetSceneDirectories(); }
     std::shared_ptr<TimeManager> GetTimeManager() { return timeManager; }
+    std::shared_ptr<GameModeManager> GetGameModeManager() { return gameModeManager; }
     CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
     AttackSystem& GetAttackSystem() { return *attackSystem; }
     JustDodgeSystem& GetJustDodgeSystem() { return *justDodgeSystem; }
@@ -210,7 +212,8 @@ private:
     }    sceneState;
 
 
-    std::unique_ptr<ResourceManager> resourceManager;
+    std::unique_ptr<GameModeManager> gameModeManager;
+    std::shared_ptr<ResourceManager> resourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
     // 更新ループ中の追加・削除を安全に反映するための待機リスト。
     std::vector<std::shared_ptr<GameObject>> pendingStarts;

@@ -43,6 +43,10 @@ void GameObjectManager::Initialize()
     meshVFXRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
 
     resourceManager = std::make_unique<ResourceManager>();
+
+    gameModeManager = std::make_shared<GameModeManager>();
+    gameModeManager->Start();
+
     timeManager = std::make_shared<TimeManager>();
     effectManager->Initialize(this);
     RegisterAttackCallbacks();
@@ -65,6 +69,10 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("TimeManager::Update");
         timeManager->Update(elapsedTime_);
+    }
+    {
+        BS_PROFILE_SCOPE("gameModeManager::Update");
+        gameModeManager->Update(elapsedTime_);
     }
 
     if (!pendingStarts.empty())
