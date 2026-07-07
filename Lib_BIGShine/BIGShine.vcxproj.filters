@@ -778,6 +778,12 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -806,6 +812,9 @@
     </ClCompile>
     <ClCompile Include="Code\Game\GameMode\GameModeManager.cpp">
       <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp">
       <Filter>Code\Game\Logics\AI\Director</Filter>
@@ -1409,6 +1418,12 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -1446,6 +1461,9 @@
     </ClInclude>
     <ClInclude Include="Code\Game\GameMode\GameModeManager.h">
       <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\GameModeWindow.h">
+      <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Director\AIDirectorBlackboardKeys.h">
       <Filter>Code\Game\Logics\AI\Director</Filter>

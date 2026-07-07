@@ -63,6 +63,18 @@ void ColliderComponent::RecreatePhysXActor()
     CreatePhysXActor();
 }
 
+void ColliderComponent::NotifyMassBlockedCharacterHit()
+{
+    massBlockedCharacterHit = true;
+}
+
+bool ColliderComponent::ConsumeMassBlockedCharacterHit()
+{
+    const bool hit_ = massBlockedCharacterHit;
+    massBlockedCharacterHit = false;
+    return hit_;
+}
+
 void ColliderComponent::CreateCharacterController()
 {
     auto owner_ = GetGameObject();
@@ -107,6 +119,7 @@ void ColliderComponent::CreateCharacterController()
     desc_.contactOffset = characterCollider_ ? characterCollider_->GetContactOffset() : 0.05f;
     desc_.climbingMode = physx::PxCapsuleClimbingMode::eCONSTRAINED;
     desc_.behaviorCallback = PhysXSystem::GetCharacterControllerBehaviorCallback();
+    desc_.reportCallback = PhysXSystem::GetCharacterControllerHitReport();
     desc_.density = std::max<float>(mass, 1.0f);
     desc_.scaleCoeff = 0.8f;
     desc_.volumeGrowth = 1.5f;
@@ -115,6 +128,7 @@ void ColliderComponent::CreateCharacterController()
 
     characterController = controllerManager_->createController(desc_);
     if (!characterController) return;
+    characterController->setUserData(this);
 
     if (auto controllerActor_ = characterController->getActor())
     {
@@ -626,19 +640,13 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.x * safeDeltaTime_,
             verticalDisplacement_,
             velocity.z * safeDeltaTime_);
-        PxFilterData filterData_;
-        filterData_.word0 = static_cast<PxU32>(owner_->layer);
-        filterData_.word1 = owner_->mask;
-        filterData_.word2 = static_cast<PxU32>(collisionRole);
-        filterData_.word3 = static_cast<PxU32>(
-            reinterpret_cast<uintptr_t>(owner_.get()) & 0x7FFFFFFF);
-
         PxControllerFilters filters_(
-            &filterData_,
+            nullptr,
             PhysXSystem::GetCharacterControllerQueryFilterCallback(),
             nullptr);
         const PxControllerCollisionFlags collisionFlags_ =
             characterController->move(displacement_, 0.001f, safeDeltaTime_, filters_);
+        const bool massBlockedCharacterHit_ = ConsumeMassBlockedCharacterHit();
 
         isGrounded = collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_DOWN);
         characterGroundedForStep = isGrounded;
@@ -649,6 +657,15 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         }
 
         PxExtendedVec3 position_ = characterController->getPosition();
+        if (massBlockedCharacterHit_)
+        {
+            position_.x = previousPosition_.x;
+            position_.z = previousPosition_.z;
+            characterController->setPosition(position_);
+            velocity.x = 0.0f;
+            velocity.z = 0.0f;
+        }
+
         const bool hasSideCollision_ =
             collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_SIDES);
         const bool hasHorizontalMove_ =
@@ -837,7 +854,7 @@ void ColliderComponent::ApplyRoleDefaults()
     case CollisionRole::HURT_BOX:
     case CollisionRole::JUST_DODGE_BOX:
         usePhysicsResponse = false;
-        isTrigger = false;
+        isTrigger = true;
         break;
     case CollisionRole::SENSOR:
         usePhysicsResponse = false;

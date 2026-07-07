@@ -1,13 +1,11 @@
 #pragma once
-#pragma once
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
 #include <algorithm>
 
-// Game全体で共有する状態とGlobalBlackboardを管理する軽量Manager。
-// Player / Enemy / AI / Camera / Effect から共通参照されることを想定。
-// 実際の移動、攻撃、演出再生はここでは行わない。
+// Lightweight manager for shared game state and GlobalBlackboard.
+// Movement, attacks, and presentation playback are owned by gameplay systems.
 class GameModeManager
 {
 public:

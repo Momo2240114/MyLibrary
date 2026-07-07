@@ -1057,6 +1057,102 @@ IKMapComponent::IKChain& IKMapComponent::AddLookAtChain(
     return chains.back();
 }
 
+
+IKMapComponent::IKChain& IKMapComponent::AddDragonNeckChain(
+    const std::string& name_,
+    const std::string& rootNodeName_,
+    const std::string& tipNodeName_)
+{
+    const auto existingChain_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.type == IK_TYPE::DRAGON_NECK && chain_.name == name_;
+        });
+
+    if (existingChain_ != chains.end()) return *existingChain_;
+
+    IKChain chain_;
+    chain_.name = name_;
+    chain_.type = IK_TYPE::DRAGON_NECK;
+    chain_.rootNodeName = rootNodeName_;
+    chain_.tipNodeName = tipNodeName_;
+    chain_.collideWithBodyColliders = false;
+    chain_.lookForwardAxis = { 0.0f, 0.0f, 1.0f };
+    chain_.lookMaxYawDegrees = 55.0f;
+    chain_.lookMaxPitchDegrees = 30.0f;
+    chain_.lookRootWeight = 0.2f;
+    chain_.lookTipWeight = 1.0f;
+
+    chains.push_back(chain_);
+    return chains.back();
+}
+
+
+IKMapComponent::IKChain& IKMapComponent::AddDragonTailChain(
+    const std::string& name_,
+    const std::string& rootNodeName_,
+    const std::string& tipNodeName_)
+{
+    const auto existingChain_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.type == IK_TYPE::DRAGON_TAIL && chain_.name == name_;
+        });
+
+    if (existingChain_ != chains.end()) return *existingChain_;
+
+    IKChain chain_;
+    chain_.name = name_;
+    chain_.type = IK_TYPE::DRAGON_TAIL;
+    chain_.rootNodeName = rootNodeName_;
+    chain_.tipNodeName = tipNodeName_;
+    chain_.collideWithBodyColliders = false;
+    chain_.influence = 1.0f;
+
+    chains.push_back(chain_);
+    return chains.back();
+}
+
+IKMapComponent::IKChain* IKMapComponent::FindChain(const std::string& name_)
+{
+    const auto chainIterator_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.name == name_;
+        });
+
+    if (chainIterator_ == chains.end()) return nullptr;
+    return &(*chainIterator_);
+}
+
+const IKMapComponent::IKChain* IKMapComponent::FindChain(const std::string& name_) const
+{
+    const auto chainIterator_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.name == name_;
+        });
+
+    if (chainIterator_ == chains.end()) return nullptr;
+    return &(*chainIterator_);
+}
+
+bool IKMapComponent::ResolveChainByName(const std::string& name_)
+{
+    IKChain* chain_ = FindChain(name_);
+    if (!chain_) return false;
+
+    return ResolveChain(*chain_);
+}
+
 void IKMapComponent::ResetSimulation()
 {
     clothConstraints.clear();

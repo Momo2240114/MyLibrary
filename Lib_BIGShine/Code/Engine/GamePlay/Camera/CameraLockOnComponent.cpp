@@ -68,7 +68,11 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         return;
     }
 
-    if (thirdPerson_) thirdPerson_->SetControlSuppressed(true);
+    if (thirdPerson_)
+    {
+        thirdPerson_->SetControlSuppressed(true);
+        ownsThirdPersonControl = true;
+    }
 
     const LockOnDistanceInfo distanceInfo_ = CalculateLockOnDistanceInfo();
 
@@ -240,8 +244,13 @@ void CameraLockOnComponent::ReleaseThirdPersonCamera()
     if (const std::shared_ptr<ThirdPersonCameraComponent> thirdPerson_ =
         thirdPersonCamera.lock())
     {
+        if (!ownsThirdPersonControl) return;
         thirdPerson_->SetControlSuppressed(false);
+        thirdPerson_->BeginReturnBlendFromCurrentCamera();
+        ownsThirdPersonControl = false;
+        return;
     }
+    ownsThirdPersonControl = false;
 }
 
 void CameraLockOnComponent::ApplyCameraPose(

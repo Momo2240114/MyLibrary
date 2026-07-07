@@ -6,6 +6,7 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Game/GameMode/GameModeManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 
@@ -228,9 +229,18 @@ void AIControllerComponent::UpdateAIContext(float deltaTime_)
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     context.owner = owner_.get();
     context.blackboard = blackboardComponent;
+    context.globalBlackboard = nullptr;
     context.spawnPosition = spawnPosition;
     context.deltaTime = deltaTime_;
     context.hasTarget = context.target != nullptr;
+
+    if (owner_)
+    {
+        if (GameModeManager* gameModeManager_ = owner_->GetManager().GetGameModeManager())
+        {
+            context.globalBlackboard = &gameModeManager_->GetGlobalBlackboard();
+        }
+    }
 
     if (owner_ && owner_->transform)
     {

@@ -550,6 +550,12 @@ void AIBehaviorEditorWindow::DrawInspector(AIControllerComponent* aiController_)
         node_->type == AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL)
     {
         ImGui::SeparatorText("Blackboard");
+        const char* scopeNames_[] = { "Local", "Global" };
+        int blackboardScope_ = static_cast<int>(node_->blackboardScope);
+        if (ImGui::Combo("Scope", &blackboardScope_, scopeNames_, IM_ARRAYSIZE(scopeNames_)))
+        {
+            node_->blackboardScope = static_cast<AI_BLACKBOARD_SCOPE>(blackboardScope_);
+        }
         ImGui::InputText("Category", &node_->blackboardCategory);
         ImGui::InputText("Key", &node_->blackboardKey);
 

@@ -3,6 +3,7 @@
 #include "ColliderComponent.h"
 #include "HitBox.h"
 #include "HurtBox.h"
+#include "PhysXSystem.h"
 #include "Engine/GamePlay/System/JustDodgeSystem.h"
 #include "Engine/Physics/JustDodgeCollider.h"
 
@@ -201,6 +202,7 @@ void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
 void CollisionStepSystem::Step(float deltaTime_)
 {
     RemoveExpiredColliders();
+    PhysXSystem::ComputeCharacterControllerInteractions(deltaTime_);
     for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
     {
         const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock();

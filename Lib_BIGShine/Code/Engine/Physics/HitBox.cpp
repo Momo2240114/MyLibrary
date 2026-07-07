@@ -501,7 +501,7 @@ void HitBox::EnforceHitBoxSettings()
     usePhysicsResponse = false;
     physicsControlsTransform = false;
     useGravity = false;
-    isTrigger = false;
+    isTrigger = true;
 }
 
 

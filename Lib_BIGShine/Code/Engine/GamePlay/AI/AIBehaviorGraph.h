@@ -52,6 +52,12 @@ enum class AI_BLACKBOARD_VALUE_TYPE
     TRIGGER,
 };
 
+enum class AI_BLACKBOARD_SCOPE
+{
+    LOCAL,
+    GLOBAL,
+};
+
 enum class AI_BEHAVIOR_STATUS
 {
     SUCCESS,
@@ -72,6 +78,7 @@ struct AIBehaviorNode
 
     std::string blackboardCategory = AIBlackboardKeys::CATEGORY_AI;
     std::string blackboardKey;
+    AI_BLACKBOARD_SCOPE blackboardScope = AI_BLACKBOARD_SCOPE::LOCAL;
     AI_BLACKBOARD_COMPARE_TYPE compareType = AI_BLACKBOARD_COMPARE_TYPE::EQUAL;
     AI_BLACKBOARD_VALUE_TYPE valueType = AI_BLACKBOARD_VALUE_TYPE::BOOL;
     float floatValue = 0.0f;
@@ -113,6 +120,7 @@ struct AIBehaviorContext
     GameObject* owner = nullptr;
     GameObject* target = nullptr;
     BlackboardComponent* blackboard = nullptr;
+    BlackboardComponent* globalBlackboard = nullptr;
     DirectX::XMFLOAT3 ownerPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 targetPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 spawnPosition = { 0.0f, 0.0f, 0.0f };
@@ -161,8 +169,9 @@ private:
     AI_BEHAVIOR_STATUS TickComposite(AIBehaviorNode& node_, AIBehaviorContext& context_);
     AI_BEHAVIOR_STATUS TickTask(AIBehaviorNode& node_, AIBehaviorContext& context_);
     std::vector<AIBehaviorNode*> GetChildren(const AIBehaviorNode& node_);
-    bool EvaluateBlackboardCondition(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const;
-    void SetBlackboardValue(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const;
+    BlackboardComponent* ResolveBlackboard(const AIBehaviorNode& node_, AIBehaviorContext& context_) const;
+    bool EvaluateBlackboardCondition(const AIBehaviorNode& node_, AIBehaviorContext& context_) const;
+    void SetBlackboardValue(const AIBehaviorNode& node_, AIBehaviorContext& context_) const;
     bool IsActionEndReached(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const;
     AIBehaviorNode* FindRootNode();
 

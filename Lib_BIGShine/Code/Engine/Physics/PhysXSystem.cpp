@@ -1,4 +1,5 @@
 #include "PhysXSystem.h"
+#include "ColliderComponent.h"
 #include "PhysXEventCallback.h"
 
 #include <algorithm>
@@ -90,8 +91,34 @@ namespace
         }
     };
 
+    class CharacterControllerHitReport : public PxUserControllerHitReport
+    {
+    public:
+        void onShapeHit(const PxControllerShapeHit&) override
+        {
+        }
+
+        void onControllerHit(const PxControllersHit& hit_) override
+        {
+            ColliderComponent* self_ =
+                static_cast<ColliderComponent*>(hit_.controller->getUserData());
+            ColliderComponent* other_ =
+                static_cast<ColliderComponent*>(hit_.other->getUserData());
+            if (!self_ || !other_) return;
+            if (self_->GetMass() <= other_->GetMass())
+            {
+                self_->NotifyMassBlockedCharacterHit();
+            }
+        }
+
+        void onObstacleHit(const PxControllerObstacleHit&) override
+        {
+        }
+    };
+
     CharacterControllerQueryFilterCallback gCharacterControllerQueryFilterCallback;
     CharacterControllerBehaviorCallback gCharacterControllerBehaviorCallback;
+    CharacterControllerHitReport gCharacterControllerHitReport;
 }
 
 static PxFilterFlags PhysXFilterShader(
@@ -195,6 +222,10 @@ void PhysXSystem::Initialize()
 
     // Character Controller Manager
     gControllerManager = PxCreateControllerManager(*gScene);
+    if (gControllerManager)
+    {
+        gControllerManager->setOverlapRecoveryModule(true);
+    }
 
     //// Scene 作成後に PVD SceneClient を取得
     PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
@@ -249,6 +280,12 @@ void PhysXSystem::Step(float dt)
 void PhysXSystem::SetTimeScale(float scale_)
 {
     gTimeScale = (std::max)(0.0f, (std::min)(scale_, 1.0f));
+}
+
+void PhysXSystem::ComputeCharacterControllerInteractions(float deltaTime_)
+{
+    if (!gControllerManager || deltaTime_ <= 0.0f) return;
+    gControllerManager->computeInteractions(deltaTime_, nullptr);
 }
 
 PxRigidDynamic* PhysXSystem::CreateBox(const PxVec3& pos, const PxVec3& halfSize)
@@ -334,6 +371,11 @@ physx::PxQueryFilterCallback* PhysXSystem::GetCharacterControllerQueryFilterCall
 physx::PxControllerBehaviorCallback* PhysXSystem::GetCharacterControllerBehaviorCallback()
 {
     return &gCharacterControllerBehaviorCallback;
+}
+
+physx::PxUserControllerHitReport* PhysXSystem::GetCharacterControllerHitReport()
+{
+    return &gCharacterControllerHitReport;
 }
 
 PxPhysics* PhysXSystem::GetPhysics() { return gPhysics; }

@@ -28,6 +28,8 @@ public:
     void SynchronizeViewAngles(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_);
+    void BeginReturnBlendFromCurrentCamera();
+    float CalculateReturnBlendRate() const;
 
 private:
     void ResolveTarget();
@@ -54,4 +56,9 @@ private:
     DirectX::XMFLOAT3 smoothedCameraCenter{ 0.0f, 0.0f, 0.0f };
     bool hasCameraCenter = false;
     bool controlSuppressed = false;
+    bool returnBlendActive = false;
+    float returnBlendTimer = 0.0f;
+    float returnBlendDuration = 0.35f;
+    DirectX::XMFLOAT3 returnBlendStartPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 returnBlendStartLookAt{ 0.0f, 0.0f, 0.0f };
 };

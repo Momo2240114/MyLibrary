@@ -184,7 +184,7 @@ void JustDodgeCollider::EnforceJustDodgeSettings()
     usePhysicsResponse = false;
     physicsControlsTransform = false;
     useGravity = false;
-    isTrigger = false;
+    isTrigger = true;
 }
 
 void JustDodgeCollider::RegisterActions()
