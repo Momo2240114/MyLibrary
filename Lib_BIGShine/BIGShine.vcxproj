@@ -463,6 +463,7 @@
     <ClCompile Include="Code\Engine\Platform\WindowsDialogHelper.cpp" />
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
+    <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
@@ -473,6 +474,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp" />
+    <ClCompile Include="Code\Game\GameMode\GameModeManager.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
@@ -681,6 +683,9 @@
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
+    <ClInclude Include="Code\Game\AI\Director\AIDirectorBlackboardKeys.h" />
+    <ClInclude Include="Code\Game\AI\Director\AIDirectorComponent.h" />
+    <ClInclude Include="Code\Game\AI\Director\AIDirectorTypes.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerActionState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerAttackState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h" />
@@ -693,6 +698,8 @@
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
+    <ClInclude Include="Code\Game\GameMode\GameModeBlackboardKeys.h" />
+    <ClInclude Include="Code\Game\GameMode\GameModeManager.h" />
     <ClInclude Include="Code\Wip.hpp" />
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
     <ClInclude Include="External\imgui-node-editor\crude_json.h" />

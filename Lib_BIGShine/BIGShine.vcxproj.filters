@@ -236,6 +236,15 @@
     <Filter Include="Code\Game\Logics\Combat\DebugTools">
       <UniqueIdentifier>{e998eae8-11ea-4969-b9f7-e7873f934245}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Game\Logics\GameMode">
+      <UniqueIdentifier>{ca2b85f1-ec4c-464b-b2ec-b1f63d32bc6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics\AI">
+      <UniqueIdentifier>{51135f37-f818-42a3-8261-c932c0922e0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Game\Logics\AI\Director">
+      <UniqueIdentifier>{21f7008f-5649-4b10-b9b8-5d47967c6ff8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -794,6 +803,12 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp" />
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp">
       <Filter>Code\Game\Logics\Combat</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\GameMode\GameModeManager.cpp">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Director</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1425,6 +1440,21 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h" />
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h">
       <Filter>Code\Game\Logics\Combat</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\GameMode\GameModeBlackboardKeys.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\GameMode\GameModeManager.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Director\AIDirectorBlackboardKeys.h">
+      <Filter>Code\Game\Logics\AI\Director</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Director\AIDirectorTypes.h">
+      <Filter>Code\Game\Logics\AI\Director</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Director\AIDirectorComponent.h">
+      <Filter>Code\Game\Logics\AI\Director</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
