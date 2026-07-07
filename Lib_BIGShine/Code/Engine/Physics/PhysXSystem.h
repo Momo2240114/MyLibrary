@@ -23,8 +23,8 @@ public:
 
     static physx::PxMaterial* GetDefaultMaterial();
     static physx::PxQueryFilterCallback* GetCharacterControllerQueryFilterCallback();
+    static physx::PxControllerFilterCallback* GetCharacterControllerFilterCallback();
     static physx::PxControllerBehaviorCallback* GetCharacterControllerBehaviorCallback();
-    static physx::PxUserControllerHitReport* GetCharacterControllerHitReport();
     static physx::PxConvexMesh* CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_);
     static physx::PxTriangleMesh* CreateTriangleMesh(
         const std::vector<DirectX::XMFLOAT3>& vertices_,

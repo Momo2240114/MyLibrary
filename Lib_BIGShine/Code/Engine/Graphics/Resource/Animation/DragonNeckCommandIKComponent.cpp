@@ -2,6 +2,7 @@
 
 #include "IKMapComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
@@ -14,6 +15,12 @@ namespace
 {
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
+    constexpr const char* ACTION_CLEAR = "DragonNeck_Clear";
+    constexpr const char* ACTION_LOOK_LEFT = "DragonNeck_LookLeft";
+    constexpr const char* ACTION_LOOK_RIGHT = "DragonNeck_LookRight";
+    constexpr const char* ACTION_LOOK_CENTER = "DragonNeck_LookCenter";
+    constexpr const char* ACTION_SWEEP_YAW = "DragonNeck_SweepYaw";
+    constexpr const char* ACTION_LOOK_WORLD_POSITION = "DragonNeck_LookWorldPosition";
 
     DirectX::XMFLOAT3 GetTranslation(const DirectX::XMFLOAT4X4& matrix_)
     {
@@ -69,6 +76,8 @@ void DragonNeckCommandIKComponent::Start()
     {
         mouthNodeIndex = model->GetNodeIndex(mouthNodeName.c_str());
     }
+
+    RegisterActions();
 }
 
 void DragonNeckCommandIKComponent::LateUpdate(float deltaTime_)
@@ -95,6 +104,99 @@ void DragonNeckCommandIKComponent::ClearCommand()
 {
     currentCommand = {};
     commandTimer = 0.0f;
+}
+
+void DragonNeckCommandIKComponent::UnregisterActions()
+{
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const std::string localCategory_ =
+        registeredActionCategory.empty() ? actionCategory : registeredActionCategory;
+    for (const std::string& actionName_ : registeredActionNames)
+    {
+        owner_->GetLocalRegistry().RemoveAction(localCategory_, actionName_);
+    }
+    registeredActionNames.clear();
+    registeredActionCategory.clear();
+
+    const std::string globalCategory_ =
+        registeredGlobalActionCategory.empty() ? actionCategory : registeredGlobalActionCategory;
+    for (const std::string& actionName_ : registeredGlobalActionNames)
+    {
+        ActionRegistry::Instance().RemoveAction(globalCategory_, actionName_);
+    }
+    registeredGlobalActionNames.clear();
+    registeredGlobalActionCategory.clear();
+}
+
+void DragonNeckCommandIKComponent::RegisterActions()
+{
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+
+    UnregisterActions();
+    registeredActionCategory = actionCategory;
+    registeredGlobalActionCategory = actionCategory;
+
+    auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& action_)
+        {
+            owner_->GetLocalRegistry().RegisterAction(actionCategory, actionName_, action_);
+            registeredActionNames.push_back(actionName_);
+
+            if (registerGlobalActions)
+            {
+                const std::string globalActionName_ =
+                    owner_->RegisterGlobalAction(actionCategory, actionName_, action_);
+                if (!globalActionName_.empty()) registeredGlobalActionNames.push_back(globalActionName_);
+            }
+        };
+
+    registerAction_(ACTION_CLEAR, [this]()
+        {
+            ClearCommand();
+        });
+    registerAction_(ACTION_LOOK_LEFT, [this]()
+        {
+            LookAtYawOffset(
+                -actionYawDegrees,
+                actionDuration,
+                actionBlendInTime,
+                actionBlendOutTime);
+        });
+    registerAction_(ACTION_LOOK_RIGHT, [this]()
+        {
+            LookAtYawOffset(
+                actionYawDegrees,
+                actionDuration,
+                actionBlendInTime,
+                actionBlendOutTime);
+        });
+    registerAction_(ACTION_LOOK_CENTER, [this]()
+        {
+            LookAtYawOffset(
+                0.0f,
+                actionDuration,
+                actionBlendInTime,
+                actionBlendOutTime);
+        });
+    registerAction_(ACTION_SWEEP_YAW, [this]()
+        {
+            SweepYaw(
+                actionSweepStartYawDegrees,
+                actionSweepEndYawDegrees,
+                actionDuration,
+                actionBlendInTime,
+                actionBlendOutTime);
+        });
+    registerAction_(ACTION_LOOK_WORLD_POSITION, [this]()
+        {
+            LookAtWorldPosition(
+                actionWorldTargetPosition,
+                actionDuration,
+                actionBlendInTime,
+                actionBlendOutTime);
+        });
 }
 
 void DragonNeckCommandIKComponent::LookAtTarget(
@@ -351,9 +453,41 @@ void DragonNeckCommandIKComponent::Gui()
 
     ImGui::DragFloat3("Local Forward Axis", &localForwardAxis.x, 0.01f, -1.0f, 1.0f);
 
+    ImGui::SeparatorText("Action");
+    char actionCategoryBuffer_[64];
+    strncpy_s(actionCategoryBuffer_, actionCategory.c_str(), sizeof(actionCategoryBuffer_));
+    if (ImGui::InputText("Action Category", actionCategoryBuffer_, sizeof(actionCategoryBuffer_)))
+    {
+        actionCategory = actionCategoryBuffer_;
+        RegisterActions();
+    }
+
+    if (ImGui::Checkbox("Register Global Actions", &registerGlobalActions))
+    {
+        RegisterActions();
+    }
+
+    ImGui::DragFloat("Action Duration", &actionDuration, 0.01f, 0.0f, 30.0f);
+    ImGui::DragFloat("Action Blend In", &actionBlendInTime, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Action Blend Out", &actionBlendOutTime, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Action Yaw", &actionYawDegrees, 0.5f, 0.0f, 180.0f);
+    ImGui::DragFloat("Sweep Start Yaw", &actionSweepStartYawDegrees, 0.5f, -180.0f, 180.0f);
+    ImGui::DragFloat("Sweep End Yaw", &actionSweepEndYawDegrees, 0.5f, -180.0f, 180.0f);
+    ImGui::DragFloat3("World Target", &actionWorldTargetPosition.x, 0.1f);
+
+    if (ImGui::Button("Register Actions"))
+    {
+        RegisterActions();
+    }
+
     if (ImGui::Button("Test Sweep -30 to 30"))
     {
-        SweepYaw(-30.0f, 30.0f, 1.2f);
+        SweepYaw(
+            actionSweepStartYawDegrees,
+            actionSweepEndYawDegrees,
+            actionDuration,
+            actionBlendInTime,
+            actionBlendOutTime);
     }
 
     ImGui::SameLine();
@@ -373,6 +507,19 @@ void DragonNeckCommandIKComponent::Serialize(nlohmann::json& json_) const
         localForwardAxis.y,
         localForwardAxis.z
     };
+    json_["ActionCategory"] = actionCategory;
+    json_["RegisterGlobalActions"] = registerGlobalActions;
+    json_["ActionDuration"] = actionDuration;
+    json_["ActionBlendInTime"] = actionBlendInTime;
+    json_["ActionBlendOutTime"] = actionBlendOutTime;
+    json_["ActionYawDegrees"] = actionYawDegrees;
+    json_["ActionSweepStartYawDegrees"] = actionSweepStartYawDegrees;
+    json_["ActionSweepEndYawDegrees"] = actionSweepEndYawDegrees;
+    json_["ActionWorldTargetPosition"] = {
+        actionWorldTargetPosition.x,
+        actionWorldTargetPosition.y,
+        actionWorldTargetPosition.z
+    };
 }
 
 void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
@@ -388,6 +535,26 @@ void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
             json_["LocalForwardAxis"][2]
         };
     }
+
+    actionCategory = json_.value("ActionCategory", std::string("DragonIK"));
+    registerGlobalActions = json_.value("RegisterGlobalActions", false);
+    actionDuration = json_.value("ActionDuration", 1.0f);
+    actionBlendInTime = json_.value("ActionBlendInTime", 0.15f);
+    actionBlendOutTime = json_.value("ActionBlendOutTime", 0.2f);
+    actionYawDegrees = json_.value("ActionYawDegrees", 30.0f);
+    actionSweepStartYawDegrees = json_.value("ActionSweepStartYawDegrees", -30.0f);
+    actionSweepEndYawDegrees = json_.value("ActionSweepEndYawDegrees", 30.0f);
+
+    if (json_.contains("ActionWorldTargetPosition"))
+    {
+        actionWorldTargetPosition = {
+            json_["ActionWorldTargetPosition"][0],
+            json_["ActionWorldTargetPosition"][1],
+            json_["ActionWorldTargetPosition"][2]
+        };
+    }
+
+    RegisterActions();
 }
 
 REGISTER_COMPONENT(DragonNeckCommandIKComponent, "DragonNeckCommandIKComponent")

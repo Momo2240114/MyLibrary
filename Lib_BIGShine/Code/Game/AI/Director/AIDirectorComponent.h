@@ -8,8 +8,8 @@
 
 class GameModeManager;
 
-// í“¬‘S‘Ì‚ÌŒXŒü‚ğŒy‚­ŠÏ‘ª‚µAGameModeManager‚ÌGlobalBlackboard‚ÖAI•ûj’l‚ğ—¬‚·Component
-// ÀÛ‚ÌˆÚ“®‚âUŒ‚,EffectCamera‚È‚Ç‚Ì§Œä‚Ís‚í‚È‚¢
+// æˆ¦é—˜å…¨ä½“ã®å‚¾å‘ã‚’è»½ãè¦³æ¸¬ã—ã€GameModeManagerã®GlobalBlackboardã¸AIæ–¹é‡å€¤ã‚’æµã™Component
+// å®Ÿéš›ã®ç§»å‹•ã‚„æ”»æ’ƒ,EffectCameraãªã©ã®åˆ¶å¾¡ã¯è¡Œã‚ãªã„
 class AIDirectorComponent : public Component
 {
 public:

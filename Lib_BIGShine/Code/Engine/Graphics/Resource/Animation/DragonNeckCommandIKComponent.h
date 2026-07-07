@@ -4,6 +4,7 @@
 
 #include <DirectXMath.h>
 #include <string>
+#include <vector>
 
 class GltfModelCommponennt;
 class IKMapComponent;
@@ -51,6 +52,8 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
+    void RegisterActions();
+
     void ClearCommand();
 
     void LookAtTarget(
@@ -92,10 +95,26 @@ private:
     int mouthNodeIndex = -1;
 
     DirectX::XMFLOAT3 localForwardAxis = { 0.0f, 0.0f, 1.0f };
+    DirectX::XMFLOAT3 actionWorldTargetPosition = { 0.0f, 2.0f, 6.0f };
+
+    std::string actionCategory = "DragonIK";
+    std::string registeredActionCategory;
+    std::string registeredGlobalActionCategory;
+    std::vector<std::string> registeredActionNames;
+    std::vector<std::string> registeredGlobalActionNames;
+    bool registerGlobalActions = false;
+
+    float actionDuration = 1.0f;
+    float actionBlendInTime = 0.15f;
+    float actionBlendOutTime = 0.2f;
+    float actionYawDegrees = 30.0f;
+    float actionSweepStartYawDegrees = -30.0f;
+    float actionSweepEndYawDegrees = 30.0f;
 
     DragonNeckIKCommand currentCommand;
     float commandTimer = 0.0f;
 
+    void UnregisterActions();
     float CalculateBlendRate() const;
     bool ResolveTargetPosition(DirectX::XMFLOAT3& targetPosition_);
     bool ApplyNeckIK(float deltaTime_);

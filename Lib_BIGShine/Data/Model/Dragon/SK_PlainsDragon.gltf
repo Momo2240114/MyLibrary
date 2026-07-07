@@ -255057,7 +255057,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_BiteAttack_0",
+      "name": "BiteAttack",
       "samplers": [
         {
           "input": 8,
@@ -258592,7 +258592,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_BiteAttack_RM_0",
+      "name": "BiteAttack_RM",
       "samplers": [
         {
           "input": 596,
@@ -262127,7 +262127,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Death_0",
+      "name": "Death",
       "samplers": [
         {
           "input": 1184,
@@ -265662,7 +265662,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_DeathHitTheGround_0",
+      "name": "DeathHitTheGround",
       "samplers": [
         {
           "input": 1772,
@@ -269197,7 +269197,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Falling_0",
+      "name": "Falling",
       "samplers": [
         {
           "input": 2360,
@@ -272732,7 +272732,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Fly_0",
+      "name": "Fly",
       "samplers": [
         {
           "input": 2948,
@@ -276267,7 +276267,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_FlyStationary_0",
+      "name": "FlyStationary",
       "samplers": [
         {
           "input": 3536,
@@ -279802,7 +279802,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_FlyStationaryGetHit_0",
+      "name": "FlyStationaryGetHit",
       "samplers": [
         {
           "input": 4124,
@@ -283337,7 +283337,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_FlyStationaryGetHitToFalling_0",
+      "name": "FlyStationaryGetHitToFalling",
       "samplers": [
         {
           "input": 4712,
@@ -286872,7 +286872,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_FlyStationarySpitFireBall_0",
+      "name": "FlyStationarySpitFireBall",
       "samplers": [
         {
           "input": 5300,
@@ -290407,7 +290407,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_FlyStationarySpreadFire_0",
+      "name": "FlyStationarySpreadFire",
       "samplers": [
         {
           "input": 5888,
@@ -293942,7 +293942,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_FlyStationaryToLanding_0",
+      "name": "FlyStationaryToLanding",
       "samplers": [
         {
           "input": 6476,
@@ -297477,7 +297477,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_GetHit1_0",
+      "name": "GetHit1",
       "samplers": [
         {
           "input": 7064,
@@ -301012,7 +301012,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_GetHit2_0",
+      "name": "GetHit2",
       "samplers": [
         {
           "input": 7652,
@@ -304547,7 +304547,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Glide_0",
+      "name": "Glide",
       "samplers": [
         {
           "input": 8240,
@@ -308082,7 +308082,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_GlideGetHit_0",
+      "name": "GlideGetHit",
       "samplers": [
         {
           "input": 8828,
@@ -311617,7 +311617,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_GlideGetHitToFalling_0",
+      "name": "GlideGetHitToFalling",
       "samplers": [
         {
           "input": 9416,
@@ -315152,7 +315152,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_GlideToLanding_0",
+      "name": "GlideToLanding",
       "samplers": [
         {
           "input": 10004,
@@ -318687,7 +318687,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_IdleBreathe_0",
+      "name": "IdleBreathe",
       "samplers": [
         {
           "input": 10592,
@@ -322222,7 +322222,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Run_0",
+      "name": "Run",
       "samplers": [
         {
           "input": 11180,
@@ -325757,7 +325757,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Run_RM_0",
+      "name": "Run_RM",
       "samplers": [
         {
           "input": 11768,
@@ -329292,7 +329292,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_SpitFireBall_0",
+      "name": "SpitFireBall",
       "samplers": [
         {
           "input": 12356,
@@ -332827,7 +332827,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_SpreadFire_0",
+      "name": "SpreadFire",
       "samplers": [
         {
           "input": 12944,
@@ -336362,7 +336362,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_TakeOff_0",
+      "name": "TakeOff",
       "samplers": [
         {
           "input": 13532,
@@ -339897,7 +339897,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Turn90L_0",
+      "name": "Turn90L",
       "samplers": [
         {
           "input": 14120,
@@ -343432,7 +343432,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Turn90L_RM_0",
+      "name": "Turn90L_RM",
       "samplers": [
         {
           "input": 14708,
@@ -346967,7 +346967,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Turn90R_0",
+      "name": "Turn90R",
       "samplers": [
         {
           "input": 15296,
@@ -350502,7 +350502,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Turn90R_RM_0",
+      "name": "Turn90R_RM",
       "samplers": [
         {
           "input": 15884,
@@ -354037,7 +354037,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Walk_0",
+      "name": "Walk",
       "samplers": [
         {
           "input": 16472,
@@ -357572,7 +357572,7 @@
           }
         }
       ],
-      "name": "SK_PlainsDragonPlainsDragon_Walk_RM_0",
+      "name": "Walk_RM",
       "samplers": [
         {
           "input": 17060,

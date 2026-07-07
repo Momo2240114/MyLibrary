@@ -35,16 +35,16 @@ void AIDirectorComponent::Update(float deltaTime_)
 
 void AIDirectorComponent::Gui()
 {
-    ImGui::Checkbox(IM_U8("Às##AIDirectorComponent_IsRunning"), &isRunning);
+    ImGui::Checkbox(IM_U8("å®Ÿè¡Œ##AIDirectorComponent_IsRunning"), &isRunning);
     ImGui::SameLine();
-    ImGui::Checkbox(IM_U8("GameMode‚Ö”½‰f##AIDirectorComponent_ApplyToGameMode"), &applyToGameMode);
+    ImGui::Checkbox(IM_U8("GameModeã¸åæ˜ ##AIDirectorComponent_ApplyToGameMode"), &applyToGameMode);
 
-    if (ImGui::Button(IM_U8("“ŒvƒŠƒZƒbƒg##AIDirectorComponent_ResetStats")))
+    if (ImGui::Button(IM_U8("çµ±è¨ˆãƒªã‚»ãƒƒãƒˆ##AIDirectorComponent_ResetStats")))
     {
         ResetStats();
     }
 
-    ImGui::SeparatorText(IM_U8("“Œv##AIDirectorComponent_Stats"));
+    ImGui::SeparatorText(IM_U8("çµ±è¨ˆ##AIDirectorComponent_Stats"));
 
     ImGui::Text("Attack Used      : %d", stats.totalEnemyAttackUsed);
     ImGui::Text("Attack Hit       : %d", stats.totalEnemyAttackHit);
@@ -63,7 +63,7 @@ void AIDirectorComponent::Gui()
     ImGui::Text("Guard Rate       : %.2f", rates.guardRate);
     ImGui::Text("Just Guard Rate  : %.2f", rates.justGuardRate);
 
-    ImGui::SeparatorText(IM_U8("•ûj##AIDirectorComponent_Policy"));
+    ImGui::SeparatorText(IM_U8("æ–¹é‡##AIDirectorComponent_Policy"));
 
     ImGui::Text("Prefer Delayed Attack : %s", policy.preferDelayedAttack ? "true" : "false");
     ImGui::Text("Prefer Feint Attack   : %s", policy.preferFeintAttack ? "true" : "false");
@@ -75,56 +75,56 @@ void AIDirectorComponent::Gui()
     ImGui::Text("Guard Break Rate  : %.2f", policy.guardBreakRate);
     ImGui::Text("Aggression Rate   : %.2f", policy.aggressionRate);
 
-    ImGui::SeparatorText(IM_U8("‚µ‚«‚¢’l##AIDirectorComponent_Thresholds"));
+    ImGui::SeparatorText(IM_U8("ã—ãã„å€¤##AIDirectorComponent_Thresholds"));
 
     ImGui::DragFloat(
-        IM_U8("‚JustDodge—¦##AIDirectorComponent_HighJustDodgeRateThreshold"),
+        IM_U8("é«˜JustDodgeç‡##AIDirectorComponent_HighJustDodgeRateThreshold"),
         &highJustDodgeRateThreshold,
         0.01f,
         0.0f,
         1.0f);
 
     ImGui::DragFloat(
-        IM_U8("‚Guard—¦##AIDirectorComponent_HighGuardRateThreshold"),
+        IM_U8("é«˜Guardç‡##AIDirectorComponent_HighGuardRateThreshold"),
         &highGuardRateThreshold,
         0.01f,
         0.0f,
         1.0f);
 
     ImGui::DragFloat(
-        IM_U8("’áHit—¦##AIDirectorComponent_LowHitRateThreshold"),
+        IM_U8("ä½Hitç‡##AIDirectorComponent_LowHitRateThreshold"),
         &lowHitRateThreshold,
         0.01f,
         0.0f,
         1.0f);
 
     ImGui::InputInt(
-        IM_U8("”í’e‰ñ”‚µ‚«‚¢’l##AIDirectorComponent_PlayerDamagedCountThreshold"),
+        IM_U8("è¢«å¼¾å›æ•°ã—ãã„å€¤##AIDirectorComponent_PlayerDamagedCountThreshold"),
         &playerDamagedCountThreshold);
 
     ImGui::DragFloat(
-        IM_U8("Å‘åAttackDelayRate##AIDirectorComponent_MaxAttackDelayRate"),
+        IM_U8("æœ€å¤§AttackDelayRate##AIDirectorComponent_MaxAttackDelayRate"),
         &maxAttackDelayRate,
         0.01f,
         1.0f,
         3.0f);
 
     ImGui::DragFloat(
-        IM_U8("Å‘åFeintRate##AIDirectorComponent_MaxFeintRate"),
+        IM_U8("æœ€å¤§FeintRate##AIDirectorComponent_MaxFeintRate"),
         &maxFeintRate,
         0.01f,
         0.0f,
         1.0f);
 
     ImGui::DragFloat(
-        IM_U8("Å‘åGuardBreakRate##AIDirectorComponent_MaxGuardBreakRate"),
+        IM_U8("æœ€å¤§GuardBreakRate##AIDirectorComponent_MaxGuardBreakRate"),
         &maxGuardBreakRate,
         0.01f,
         0.0f,
         1.0f);
 
     ImGui::DragFloat(
-        IM_U8("Å¬Aggression##AIDirectorComponent_AggressionMin"),
+        IM_U8("æœ€å°Aggression##AIDirectorComponent_AggressionMin"),
         &aggressionMin,
         0.01f,
         0.0f,
