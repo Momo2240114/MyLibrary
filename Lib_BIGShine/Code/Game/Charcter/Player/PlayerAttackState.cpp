@@ -5,11 +5,29 @@
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
+#include "Engine/Physics/CapsuleCollider.h"
 #include "PlayerControllerComponent.h"
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
+
+namespace
+{
+    float GetWorldCapsuleRadius(const std::shared_ptr<GameObject>& object_)
+    {
+        if (!object_ || !object_->transform) return 0.0f;
+
+        const std::shared_ptr<CapsuleCollider> capsule_ =
+            object_->GetComponent<CapsuleCollider>();
+        if (!capsule_) return 0.0f;
+
+        const DirectX::XMFLOAT3 scale_ = object_->transform->GetWorldScale();
+        const float horizontalScale_ =
+            (std::max)(std::abs(scale_.x), std::abs(scale_.z));
+        return capsule_->radius * capsule_->shapeSizeScale * horizontalScale_;
+    }
+}
 
 PlayerAttackState::PlayerAttackState(
     const std::shared_ptr<GameObject>& owner_,
@@ -267,7 +285,10 @@ void PlayerAttackState::ApplyAttackPositionAssist(
     if (distanceSquared_ <= 0.000001f) return;
 
     const float distance_ = std::sqrt(distanceSquared_);
-    const float stopDistance_ = (std::max)(settings_.targetStopDistance, 0.0f);
+    const float colliderStopDistance_ =
+        GetWorldCapsuleRadius(owner_) + GetWorldCapsuleRadius(target_) + 0.05f;
+    const float stopDistance_ =
+        (std::max)((std::max)(settings_.targetStopDistance, 0.0f), colliderStopDistance_);
 
     if (distance_ <= stopDistance_)
     {
@@ -281,10 +302,14 @@ void PlayerAttackState::ApplyAttackPositionAssist(
     const float availableDistance_ = distance_ - stopDistance_;
     const float maxCorrectionSpeed_ = (std::max)(settings_.maxPositionCorrection, 0.0f);
 
-    const float assistSpeed_ =
+    float assistSpeed_ =
         (std::min)(availableDistance_, maxCorrectionSpeed_) *
         settings_.positionSpeed *
         settings_.positionStrength;
+    if (elapsedTime_ > 0.000001f)
+    {
+        assistSpeed_ = (std::min)(assistSpeed_, availableDistance_ / elapsedTime_);
+    }
 
     player_->AddHorizontalVelocityAssist(toTarget_, assistSpeed_);
 }

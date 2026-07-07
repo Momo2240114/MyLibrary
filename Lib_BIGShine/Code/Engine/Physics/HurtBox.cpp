@@ -124,6 +124,7 @@ void HurtBox::EnforceHurtBoxSettings()
     usePhysicsResponse = false;
     physicsControlsTransform = false;
     useGravity = true;
+    isTrigger = true;
 }
 
 void HurtBox::RegisterActions()

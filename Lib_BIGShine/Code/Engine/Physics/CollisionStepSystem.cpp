@@ -130,6 +130,35 @@ namespace
         contact_.isValid = true;
         return contact_;
     }
+
+    bool IsCombatOnlyRole(ColliderComponent::CollisionRole role_)
+    {
+        return role_ == ColliderComponent::CollisionRole::HIT_BOX ||
+            role_ == ColliderComponent::CollisionRole::HURT_BOX ||
+            role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX;
+    }
+
+    bool IsAllowedCombatTriggerPair(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
+    {
+        if (!colliderA_ || !colliderB_) return false;
+
+        const ColliderComponent::CollisionRole roleA_ = colliderA_->GetCollisionRole();
+        const ColliderComponent::CollisionRole roleB_ = colliderB_->GetCollisionRole();
+        if (!IsCombatOnlyRole(roleA_) && !IsCombatOnlyRole(roleB_)) return true;
+
+        const bool hitHurtPair_ =
+            (roleA_ == ColliderComponent::CollisionRole::HIT_BOX &&
+                roleB_ == ColliderComponent::CollisionRole::HURT_BOX) ||
+            (roleB_ == ColliderComponent::CollisionRole::HIT_BOX &&
+                roleA_ == ColliderComponent::CollisionRole::HURT_BOX);
+        const bool hitJustDodgePair_ =
+            (roleA_ == ColliderComponent::CollisionRole::HIT_BOX &&
+                roleB_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX) ||
+            (roleB_ == ColliderComponent::CollisionRole::HIT_BOX &&
+                roleA_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX);
+
+        return hitHurtPair_ || hitJustDodgePair_;
+    }
 }
 
 void CollisionStepSystem::RegisterCollider(
@@ -238,6 +267,12 @@ void CollisionStepSystem::HandleTriggerPair(
 
     const bool existsA_ = colliderA_->currentTriggers.count(objectB_) != 0;
     const bool existsB_ = colliderB_->currentTriggers.count(objectA_) != 0;
+    if (!IsAllowedCombatTriggerPair(colliderA_, colliderB_))
+    {
+        hit_ = false;
+        contact_ = nullptr;
+    }
+
     if (hit_)
     {
         if (!existsA_)

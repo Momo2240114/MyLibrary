@@ -134,6 +134,7 @@ static PxFilterFlags PhysXFilterShader(
     const PxU32 roleCharacter_ = 1;
     const PxU32 roleHitBox_ = 2;
     const PxU32 roleHurtBox_ = 3;
+    const PxU32 roleJustDodgeBox_ = 5;
     const PxU32 ownerMask_ = 0x7FFFFFFFu;
     const PxU32 responseMask_ = 0x80000000u;
 
@@ -145,10 +146,15 @@ static PxFilterFlags PhysXFilterShader(
     const bool hitHurtPair_ =
         (filterData0_.word2 == roleHitBox_ && filterData1_.word2 == roleHurtBox_)
         || (filterData1_.word2 == roleHitBox_ && filterData0_.word2 == roleHurtBox_);
+    const bool hitJustDodgePair_ =
+        (filterData0_.word2 == roleHitBox_ && filterData1_.word2 == roleJustDodgeBox_)
+        || (filterData1_.word2 == roleHitBox_ && filterData0_.word2 == roleJustDodgeBox_);
     const bool combatOnlyRole_ =
         filterData0_.word2 == roleHitBox_ || filterData0_.word2 == roleHurtBox_
-        || filterData1_.word2 == roleHitBox_ || filterData1_.word2 == roleHurtBox_;
-    if (combatOnlyRole_ && !hitHurtPair_)
+        || filterData0_.word2 == roleJustDodgeBox_
+        || filterData1_.word2 == roleHitBox_ || filterData1_.word2 == roleHurtBox_
+        || filterData1_.word2 == roleJustDodgeBox_;
+    if (combatOnlyRole_ && !hitHurtPair_ && !hitJustDodgePair_)
     {
         return PxFilterFlag::eSUPPRESS;
     }
