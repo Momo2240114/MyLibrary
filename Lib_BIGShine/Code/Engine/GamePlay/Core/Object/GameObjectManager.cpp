@@ -17,6 +17,7 @@
 #include"Engine/GamePlay/EventSystem/ActionSequence.h"
 
 #include"Engine/Graphics/PostEffect/ColorFilterDirector.h"
+#include "Engine/Graphics/PostEffect/MotionBlurDirector.h"
 #include "Engine/Graphics/PostEffect/RadialBlurDirector.h"
 #include "Engine/Graphics/PostEffect/VignetteDirector.h"
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
@@ -28,6 +29,7 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
+#include "Engine/GamePlay/Graphics/MotionVelocityComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"
 
@@ -41,6 +43,17 @@ void GameObjectManager::Initialize()
 
     meshVFXRenderSystem = std::make_unique<MeshVFXRenderSystem>();
     meshVFXRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
+
+    motionVelocityRenderSystem = std::make_unique<MotionVelocityRenderSystem>();
+    const bool motionVelocityInitialized_ =
+        motionVelocityRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
+    if (motionVelocityInitialized_)
+    {
+        GraphicsDeviceManager::Instance()
+            .GetPostRenderSystem()
+            .GetMotionBlurSystem()
+            .SetObjectVelocityRenderer(motionVelocityRenderSystem.get());
+    }
 
     resourceManager = std::make_unique<ResourceManager>();
 
@@ -108,6 +121,11 @@ void GameObjectManager::Update(float elapsedTime_)
                     }
 
                     if (auto director_ = object_->GetComponent<ColorFilterDirector>())
+                    {
+                        director_->RegisterActions();
+                    }
+
+                    if (auto director_ = object_->GetComponent<MotionBlurDirector>())
                     {
                         director_->RegisterActions();
                     }
@@ -918,6 +936,19 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     spriteSystem_.RenderAll(deviceContext_);
 }
 
+void GameObjectManager::RegisterMotionVelocityComponent(
+    const std::shared_ptr<MotionVelocityComponent>& component_)
+{
+    if (!motionVelocityRenderSystem || !component_) return;
+    motionVelocityRenderSystem->Register(component_);
+}
+
+void GameObjectManager::UnregisterMotionVelocityComponent(MotionVelocityComponent* component_)
+{
+    if (!motionVelocityRenderSystem || component_ == nullptr) return;
+    motionVelocityRenderSystem->Unregister(component_);
+}
+
 
 
 void GameObjectManager::Destroy(std::shared_ptr<GameObject> object_)
@@ -1307,6 +1338,7 @@ void GameObjectManager::EnsureGlobalActionObjects()
     if (!eventPool_) return;
 
     eventPool_->GetOrAddComponent<ColorFilterDirector>(false);
+    eventPool_->GetOrAddComponent<MotionBlurDirector>(false);
     eventPool_->GetOrAddComponent<RadialBlurDirector>(false);
     eventPool_->GetOrAddComponent<VignetteDirector>(false);
     eventPool_->GetOrAddComponent<TimeScaleDirector>(false);

@@ -1,5 +1,6 @@
 #include "PlayerStateMachine.h"
 #include "PlayerControllerComponent.h"
+#include "Engine/Common/DebugLog.h"
 
 void PlayerStateMachine::Initialize(
     PlayerControllerComponent& playerController_)
@@ -15,6 +16,14 @@ void PlayerStateMachine::ChangeState(PLAYER_ACTION nextAction_)
     {
         return;
     }
+
+    const char* previousStateName_ = currentState ? currentState->GetName() : "None";
+    const char* nextStateName_ = it_->second ? it_->second->GetName() : "None";
+    const std::shared_ptr<GameObject> owner_ = this->owner.lock();
+    const std::string ownerName_ = owner_ ? owner_->GetName() : "None";
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        "Player state change: " + ownerName_ + " " + previousStateName_ + " -> " + nextStateName_);
 
     if (currentState)
     {

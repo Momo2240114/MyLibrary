@@ -9,9 +9,24 @@
 class MotionBlurSystem
 {
 public:
+    class ObjectVelocityRenderer
+    {
+    public:
+        virtual ~ObjectVelocityRenderer() = default;
+        virtual void DrawObjectVelocity(
+            const RenderContext& rc_,
+            ID3D11RenderTargetView* velocityRTV_,
+            int width_,
+            int height_,
+            const DirectX::XMFLOAT4X4& currentViewProjection_,
+            const DirectX::XMFLOAT4X4& previousViewProjection_) = 0;
+        virtual void CommitHistory() {}
+    };
+
     struct Parameters
     {
         bool enabled = false;
+        bool useCameraVelocity = false;
         int sampleCount = 6;
         float strength = 0.6f;
         float maxVelocity = 0.035f;
@@ -19,6 +34,20 @@ public:
 
     bool Initialize(ID3D11Device* device_, int width_, int height_);
     void SynchronizeCameraHistory(const RenderContext& rc_);
+    void ResetCameraHistory();
+    void SetObjectVelocityRenderer(ObjectVelocityRenderer* objectVelocityRenderer_);
+    void ClearVelocityBuffer(ID3D11DeviceContext* dc_);
+    void ExecuteBlurFromCurrentVelocity(
+        const RenderContext& rc_,
+        ID3D11ShaderResourceView* sceneSRV_,
+        ID3D11ShaderResourceView* depthSRV_,
+        ID3D11RenderTargetView* outputRTV_,
+        const Parameters& parameters_);
+
+    ID3D11RenderTargetView* GetVelocityRTV() const { return velocityBuffer.rtv.Get(); }
+    ID3D11ShaderResourceView* GetVelocitySRV() const { return velocityBuffer.srv.Get(); }
+    int GetVelocityWidth() const { return width; }
+    int GetVelocityHeight() const { return height; }
 
     void Execute(
         const RenderContext& rc_,
@@ -57,6 +86,7 @@ private:
         RenderTarget& target_);
     void UpdateConstantBuffer(const RenderContext& rc_, const Parameters& parameters_);
     void UpdatePreviousViewProjection(const RenderContext& rc_);
+    DirectX::XMFLOAT4X4 BuildViewProjection(const RenderContext& rc_) const;
     void DrawPass(
         ID3D11DeviceContext* dc_,
         ID3D11RenderTargetView* outputRTV_,
@@ -73,6 +103,7 @@ private:
     int tileHeight = 0;
     bool hasPreviousViewProjection = false;
     DirectX::XMFLOAT4X4 previousViewProjection{};
+    ObjectVelocityRenderer* objectVelocityRenderer = nullptr;
 
     RenderTarget velocityBuffer;
     RenderTarget tileMaxBuffer;

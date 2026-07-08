@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -24,6 +25,7 @@
 #include "PlayerDodgeState.h"
 #include "PlayerHitState.h"
 #include "PlayerIdleState.h"
+#include "PlayerJumpState.h"
 #include "PlayerMoveState.h"
 
 namespace
@@ -36,6 +38,8 @@ namespace
         inline constexpr const char* MOVE_Z = "Player.MoveZ";
         inline constexpr const char* WEAK_ATTACK = "Player.WeakAttack";
         inline constexpr const char* STRONG_ATTACK = "Player.StrongAttack";
+        inline constexpr const char* JUMP = "Player.Jump";
+        inline constexpr const char* LOCK_ON = "Player.LockOn";
         inline constexpr const char* GUARD = "Player.Guard";
         inline constexpr const char* DODGE = "Player.Dodge";
         inline constexpr const char* SKILL_A = "Player.SkillA";
@@ -133,7 +137,25 @@ namespace
 
 void PlayerControllerComponent::EnsurePlayerInputBindings()
 {
-
+    KeyConfig& keyConfig_ = KeyConfig::Instance();
+    if (keyConfig_.GetActionMap().count(PlayerInputAction::JUMP) == 0)
+    {
+        keyConfig_.SetBinds(
+            PlayerInputAction::JUMP,
+            {
+                { { DeviceType::KBM, KeyInput::K_Space } },
+                { { DeviceType::Gamepad, static_cast<int>(PadCode::A) } }
+            });
+    }
+    if (keyConfig_.GetActionMap().count(PlayerInputAction::LOCK_ON) == 0)
+    {
+        keyConfig_.SetBinds(
+            PlayerInputAction::LOCK_ON,
+            {
+                { { DeviceType::KBM, KeyInput::K_Q } },
+                { { DeviceType::Gamepad, static_cast<int>(PadCode::R3) } }
+            });
+    }
 }
 
 void PlayerControllerComponent::Start()
@@ -190,23 +212,28 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
     stateMachine.AddState<PlayerMoveState>(PLAYER_ACTION::MOVE);
     stateMachine.AddState<PlayerDodgeState>(PLAYER_ACTION::DODGE);
+    stateMachine.AddState<PlayerJumpState>(PLAYER_ACTION::JUMP);
     stateMachine.AddState<PlayerHitState>(PLAYER_ACTION::HIT);
     stateMachine.AddState<PlayerAttackState>(
         PLAYER_ACTION::WEAK_ATTACK,
         PLAYER_ACTION::WEAK_ATTACK);
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::STRONG_CHARGE_ATTACK, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::GUARD, PLAYER_ACTION::GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::JUST_GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
+    EnsureDefaultCancelTransitions();
 
     stateMachine.ChangeState(PLAYER_ACTION::IDLE);
 }
 
 void PlayerControllerComponent::Update(float dt_)
 {
+    lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
     stateMachine.Update(dt_);
+    UpdateLocomotionAnimationPhase(dt_);
     ApplyPendingMovement();
 }
 
@@ -454,6 +481,75 @@ bool PlayerControllerComponent::RemoveCancelTransition(
     return true;
 }
 
+void PlayerControllerComponent::EnsureDefaultCancelTransitions()
+{
+    constexpr PLAYER_ACTION jumpFromActions_[] =
+    {
+        PLAYER_ACTION::IDLE,
+        PLAYER_ACTION::MOVE,
+        PLAYER_ACTION::WEAK_ATTACK,
+        PLAYER_ACTION::STRONG_ATTACK,
+        PLAYER_ACTION::STRONG_CHARGE_ATTACK,
+        PLAYER_ACTION::GUARD,
+        PLAYER_ACTION::JUST_GUARD,
+        PLAYER_ACTION::DODGE,
+        PLAYER_ACTION::SKILL_A,
+        PLAYER_ACTION::SKILL_B,
+        PLAYER_ACTION::COUNTER_ATTACK
+    };
+
+    for (const PLAYER_ACTION action_ : jumpFromActions_)
+    {
+        AddCancelTransition(action_, PLAYER_ACTION::JUMP);
+    }
+
+    constexpr PLAYER_ACTION jumpToActions_[] =
+    {
+        PLAYER_ACTION::IDLE,
+        PLAYER_ACTION::MOVE,
+        PLAYER_ACTION::WEAK_ATTACK,
+        PLAYER_ACTION::STRONG_ATTACK,
+        PLAYER_ACTION::STRONG_CHARGE_ATTACK,
+        PLAYER_ACTION::DODGE,
+        PLAYER_ACTION::SKILL_A,
+        PLAYER_ACTION::SKILL_B,
+        PLAYER_ACTION::COUNTER_ATTACK
+    };
+
+    for (const PLAYER_ACTION action_ : jumpToActions_)
+    {
+        AddCancelTransition(PLAYER_ACTION::JUMP, action_);
+    }
+}
+
+std::shared_ptr<CameraLockOnComponent>
+PlayerControllerComponent::ResolveCameraLockOnComponent() const
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return nullptr;
+
+    for (const std::shared_ptr<GameObject>& object_ : owner_->manager->GetObjects())
+    {
+        if (!object_) continue;
+        if (const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+            object_->GetComponent<CameraLockOnComponent>())
+        {
+            return lockOn_;
+        }
+    }
+
+    return nullptr;
+}
+
+void PlayerControllerComponent::ToggleLockOn()
+{
+    const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+        ResolveCameraLockOnComponent();
+    if (!lockOn_) return;
+
+    lockOn_->ToggleLockOnForPlayer(GetGameObject());
+}
+
 void PlayerControllerComponent::NotifyGuardedAttack()
 {
     if (GetCurrentAction() == PLAYER_ACTION::GUARD)
@@ -594,6 +690,25 @@ bool PlayerControllerComponent::ConsumeBufferedAction()
 
 void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 {
+    const PLAYER_ACTION previousAction_ = previousAction;
+    previousAction = action_;
+    if (locomotionPhaseAction != action_)
+    {
+        locomotionPhaseAction = action_;
+        locomotionPhaseTimer = 0.0f;
+    }
+    runEndActive = action_ == PLAYER_ACTION::IDLE && previousAction_ == PLAYER_ACTION::MOVE;
+    if (runEndActive)
+    {
+        runEndTimer = 0.0f;
+    }
+
+    if (action_ != PLAYER_ACTION::STRONG_ATTACK &&
+        action_ != PLAYER_ACTION::STRONG_CHARGE_ATTACK)
+    {
+        ResetStrongAttackInput();
+    }
+
     comboIndex = GetPlayerAttackType(action_) == PLAYER_ATTACK_TYPE::WEAK ? pendingComboIndex : 0;
     pendingComboIndex = 0;
     actionRuntime.canCancel = !IsPlayerActionTimelineDriven(action_);
@@ -622,9 +737,50 @@ int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_)
     return 0;
 }
 
+bool PlayerControllerComponent::UpdateStrongAttackInput()
+{
+    KeyConfig& keyConfig_ = KeyConfig::Instance();
+
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK))
+    {
+        strongAttackHolding = true;
+        strongAttackHoldTimer = 0.0f;
+    }
+
+    if (!strongAttackHolding)
+    {
+        return false;
+    }
+
+    if (keyConfig_.ActionPressed(PlayerInputAction::STRONG_ATTACK))
+    {
+        strongAttackHoldTimer += lastUpdateDeltaTime;
+        if (strongAttackHoldTimer >= strongAttackHoldThreshold)
+        {
+            ResetStrongAttackInput();
+            return RequestAction(PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+        }
+        return false;
+    }
+
+    ResetStrongAttackInput();
+    return RequestAction(PLAYER_ACTION::STRONG_ATTACK);
+}
+
+void PlayerControllerComponent::ResetStrongAttackInput()
+{
+    strongAttackHolding = false;
+    strongAttackHoldTimer = 0.0f;
+}
+
 void PlayerControllerComponent::ProcessActionInput()
 {
     auto& keyConfig_ = KeyConfig::Instance();
+
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::LOCK_ON))
+    {
+        ToggleLockOn();
+    }
 
     if (keyConfig_.ActionPressedIn(PlayerInputAction::DEBUG_GUARD_HIT) &&
         GetCurrentAction() == PLAYER_ACTION::GUARD)
@@ -634,10 +790,11 @@ void PlayerControllerComponent::ProcessActionInput()
     }
 
     if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) && RequestAction(PLAYER_ACTION::DODGE)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) && RequestAction(PLAYER_ACTION::WEAK_ATTACK)) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) && RequestAction(PLAYER_ACTION::STRONG_ATTACK)) return;
+    if (UpdateStrongAttackInput()) return;
 
     if (keyConfig_.ActionPressed(PlayerInputAction::GUARD))
     {
@@ -743,6 +900,7 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_ATTACK, group_ == PLAYER_ACTION_GROUP::ATTACK);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_GUARD, group_ == PLAYER_ACTION_GROUP::GUARD);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_DODGE, group_ == PLAYER_ACTION_GROUP::DODGE);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP, group_ == PLAYER_ACTION_GROUP::JUMP);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL,
             attackType_ == PLAYER_ATTACK_TYPE::SKILL_A || attackType_ == PLAYER_ATTACK_TYPE::SKILL_B);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
@@ -760,6 +918,71 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         shouldEnterAttack_);
 
     SendMoveInputToBlackboard(GetMoveInput());
+}
+
+void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float deltaTime_)
+{
+    locomotionPhaseTimer += (std::max)(deltaTime_, 0.0f);
+
+    PLAYER_LOCOMOTION_PHASE phase_ = PLAYER_LOCOMOTION_PHASE::IDLE;
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (currentAction_ == PLAYER_ACTION::JUMP)
+    {
+        phase_ = PLAYER_LOCOMOTION_PHASE::JUMP;
+    }
+    else if (currentAction_ == PLAYER_ACTION::MOVE)
+    {
+        phase_ = locomotionPhaseTimer <= runStartDuration
+            ? PLAYER_LOCOMOTION_PHASE::RUN_START
+            : PLAYER_LOCOMOTION_PHASE::RUN_LOOP;
+        runEndActive = false;
+    }
+    else if (currentAction_ == PLAYER_ACTION::IDLE && runEndActive)
+    {
+        runEndTimer += (std::max)(deltaTime_, 0.0f);
+        phase_ = PLAYER_LOCOMOTION_PHASE::RUN_END;
+        if (runEndTimer >= runEndDuration)
+        {
+            runEndActive = false;
+        }
+    }
+
+    SendLocomotionPhaseToBlackboard(phase_);
+}
+
+void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_)
+{
+    if (!blackboard) return;
+
+    constexpr const char* categories_[] =
+    {
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardCategory::ANIM
+    };
+
+    for (const char* category_ : categories_)
+    {
+        blackboard->SetInt(
+            category_,
+            PlayerBlackboardKey::LOCOMOTION_PHASE,
+            static_cast<int>(phase_));
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_RUN_START,
+            phase_ == PLAYER_LOCOMOTION_PHASE::RUN_START);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_RUN_LOOP,
+            phase_ == PLAYER_LOCOMOTION_PHASE::RUN_LOOP);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_RUN_END,
+            phase_ == PLAYER_LOCOMOTION_PHASE::RUN_END);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_JUMP,
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP);
+    }
 }
 
 bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
@@ -836,9 +1059,11 @@ void PlayerControllerComponent::Gui()
             PLAYER_ACTION::MOVE,
             PLAYER_ACTION::WEAK_ATTACK,
             PLAYER_ACTION::STRONG_ATTACK,
+            PLAYER_ACTION::STRONG_CHARGE_ATTACK,
             PLAYER_ACTION::GUARD,
             PLAYER_ACTION::JUST_GUARD,
             PLAYER_ACTION::DODGE,
+            PLAYER_ACTION::JUMP,
             PLAYER_ACTION::SKILL_A,
             PLAYER_ACTION::SKILL_B,
             PLAYER_ACTION::COUNTER_ATTACK
@@ -891,6 +1116,11 @@ void PlayerControllerComponent::Gui()
 
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Strong Hold Threshold", &strongAttackHoldThreshold, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Strong Charge Speed", &strongChargeAttackSpeed, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Run End Duration", &runEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
 
     ImGui::SeparatorText("Attack Facing Assist");
     ImGui::Checkbox("Enabled##AttackFacingAssist", &attackAssistSettings.enabled);
@@ -935,6 +1165,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetVector2(category_, PlayerBlackboardKey::MOVE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::DODGE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::HIT_DIRECTION, { 0.0f, 0.0f });
+        blackboard->SetInt(category_, PlayerBlackboardKey::LOCOMOTION_PHASE, static_cast<int>(PLAYER_LOCOMOTION_PHASE::IDLE));
 
         blackboard->SetBool(category_, PlayerBlackboardKey::HIT_TRIGGER, false);
 
@@ -944,6 +1175,10 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_ATTACK, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_GUARD, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_DODGE, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_START, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_LOOP, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_END, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL, false);
 
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, false);
@@ -961,6 +1196,11 @@ void PlayerControllerComponent::InitializeBlackboardValues()
 void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
+    j_["JumpImpulse"] = jumpImpulse;
+    j_["StrongAttackHoldThreshold"] = strongAttackHoldThreshold;
+    j_["StrongChargeAttackSpeed"] = strongChargeAttackSpeed;
+    j_["RunStartDuration"] = runStartDuration;
+    j_["RunEndDuration"] = runEndDuration;
     j_["AttackAssist"] =
     {
         { "Enabled", attackAssistSettings.enabled },
@@ -986,7 +1226,12 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
-    moveSpeed = j_.value("MoveSpeed", moveSpeed);
+    moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
+    jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
+    strongAttackHoldThreshold = (std::max)(j_.value("StrongAttackHoldThreshold", strongAttackHoldThreshold), 0.0f);
+    strongChargeAttackSpeed = (std::max)(j_.value("StrongChargeAttackSpeed", strongChargeAttackSpeed), 0.0f);
+    runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);
+    runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.0f);
     if (j_.contains("AttackAssist") && j_["AttackAssist"].is_object())
     {
         const auto& attackAssistJson_ = j_["AttackAssist"];
@@ -1042,6 +1287,8 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
                 });
         }
     }
+
+    EnsureDefaultCancelTransitions();
 }
 
 REGISTER_COMPONENT(PlayerControllerComponent, "PlayerController")

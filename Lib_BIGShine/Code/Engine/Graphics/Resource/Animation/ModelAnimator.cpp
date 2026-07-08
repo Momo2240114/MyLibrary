@@ -274,11 +274,59 @@ static Blend2DSelection ResolveBlend2DSelection(
     input_.y = (std::clamp)(input_.y, -1.0f, 1.0f);
     float absoluteX_ = std::abs(input_.x);
     float absoluteY_ = std::abs(input_.y);
+    const float inputLength_ = std::sqrt(input_.x * input_.x + input_.y * input_.y);
+    if (state_->blend2DUseEightDirections &&
+        inputLength_ <= state_->blend2DIdleThreshold &&
+        state_->blend2DIdleAnimationIndex >= 0)
+    {
+        selection_.animationIndexA = state_->blend2DIdleAnimationIndex;
+        selection_.phaseOffsetA = state_->blend2DIdlePhaseOffset;
+        selection_.weightB = 0.0f;
+        return selection_;
+    }
+
     if (absoluteX_ + absoluteY_ <= 0.000001f)
     {
         input_ = { state_->blend2DDefaultInput.x, state_->blend2DDefaultInput.y };
         absoluteX_ = std::abs(input_.x);
         absoluteY_ = std::abs(input_.y);
+    }
+
+    if (state_->blend2DUseEightDirections)
+    {
+        struct DirectionClip
+        {
+            int animationIndex = -1;
+            float phaseOffset = 0.0f;
+        };
+
+        const DirectionClip clips_[] =
+        {
+            { state_->blend2DForwardAnimationIndex, state_->blend2DForwardPhaseOffset },
+            { state_->blend2DForwardRightAnimationIndex, state_->blend2DForwardRightPhaseOffset },
+            { state_->blend2DRightAnimationIndex, state_->blend2DRightPhaseOffset },
+            { state_->blend2DBackwardRightAnimationIndex, state_->blend2DBackwardRightPhaseOffset },
+            { state_->blend2DBackwardAnimationIndex, state_->blend2DBackwardPhaseOffset },
+            { state_->blend2DBackwardLeftAnimationIndex, state_->blend2DBackwardLeftPhaseOffset },
+            { state_->blend2DLeftAnimationIndex, state_->blend2DLeftPhaseOffset },
+            { state_->blend2DForwardLeftAnimationIndex, state_->blend2DForwardLeftPhaseOffset }
+        };
+
+        constexpr float TWO_PI_ = 6.28318530718f;
+        constexpr float SEGMENT_ANGLE_ = TWO_PI_ / 8.0f;
+        float angle_ = std::atan2(input_.x, input_.y);
+        if (angle_ < 0.0f) angle_ += TWO_PI_;
+
+        const float segment_ = angle_ / SEGMENT_ANGLE_;
+        const int indexA_ = static_cast<int>(std::floor(segment_)) % 8;
+        const int indexB_ = (indexA_ + 1) % 8;
+
+        selection_.animationIndexA = clips_[indexA_].animationIndex;
+        selection_.phaseOffsetA = clips_[indexA_].phaseOffset;
+        selection_.animationIndexB = clips_[indexB_].animationIndex;
+        selection_.phaseOffsetB = clips_[indexB_].phaseOffset;
+        selection_.weightB = segment_ - std::floor(segment_);
+        return selection_;
     }
 
     if (absoluteX_ > 0.000001f)

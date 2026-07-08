@@ -121,13 +121,25 @@ struct AnimState
     int blend2DBackwardAnimationIndex = -1;
     int blend2DLeftAnimationIndex = -1;
     int blend2DRightAnimationIndex = -1;
+    int blend2DForwardLeftAnimationIndex = -1;
+    int blend2DForwardRightAnimationIndex = -1;
+    int blend2DBackwardLeftAnimationIndex = -1;
+    int blend2DBackwardRightAnimationIndex = -1;
+    int blend2DIdleAnimationIndex = -1;
     std::string blend2DParamName = "MoveInput";
     DirectX::XMFLOAT2 blend2DDefaultInput = { 0.0f, 1.0f };
+    bool blend2DUseEightDirections = false;
+    float blend2DIdleThreshold = 0.05f;
     bool blend2DSyncNormalizedTime = true;
     float blend2DForwardPhaseOffset = 0.0f;
     float blend2DBackwardPhaseOffset = 0.0f;
     float blend2DLeftPhaseOffset = 0.0f;
     float blend2DRightPhaseOffset = 0.0f;
+    float blend2DForwardLeftPhaseOffset = 0.0f;
+    float blend2DForwardRightPhaseOffset = 0.0f;
+    float blend2DBackwardLeftPhaseOffset = 0.0f;
+    float blend2DBackwardRightPhaseOffset = 0.0f;
+    float blend2DIdlePhaseOffset = 0.0f;
 
     // --- Custom (ポーズライブラリ) 用データ 【追加】 ---
     int customAnimIndex = -1; // PoseLibraryResource内の customAnims のインデックス

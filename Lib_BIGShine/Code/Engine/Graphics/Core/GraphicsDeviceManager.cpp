@@ -612,6 +612,7 @@ void GraphicsDeviceManager::DrawPostEffectGuiContent()
     if (ImGui::CollapsingHeader("Motion Blur", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Checkbox("Motion Blur Enabled", &motionBlurParams.enabled);
+        ImGui::Checkbox("Motion Blur Camera Velocity", &motionBlurParams.useCameraVelocity);
         ImGui::SliderInt("Motion Blur Samples", &motionBlurParams.sampleCount, 2, 16);
         ImGui::DragFloat("Motion Blur Strength", &motionBlurParams.strength, 0.01f, 0.0f, 2.0f, "%.2f");
         ImGui::DragFloat("Motion Blur Max Velocity", &motionBlurParams.maxVelocity, 0.001f, 0.001f, 0.2f, "%.3f");

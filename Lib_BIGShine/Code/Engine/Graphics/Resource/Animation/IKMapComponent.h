@@ -15,7 +15,8 @@ public:
         LOOK_AT,
 
         DRAGON_NECK,
-        DRAGON_TAIL
+        DRAGON_TAIL,
+        UPPER_BODY_LEAN
     };
 
     struct IKChain
@@ -110,6 +111,7 @@ public:
     IKChain& AddSpringChain(const std::string& name_, const std::string& rootNodeName_, const std::string& tipNodeName_);
     IKChain& AddFootChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     IKChain& AddLookAtChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
+    IKChain& AddUpperBodyLeanChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     IKChain& AddDragonNeckChain(
         const std::string& name_,
         const std::string& rootNodeName_ = {},

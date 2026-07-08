@@ -43,7 +43,20 @@ void PlayerAttackState::Enter()
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
     player_->EnterAction(action);
-    player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
+    if (action == PLAYER_ACTION::STRONG_CHARGE_ATTACK)
+    {
+        DirectX::XMFLOAT3 direction_ = player_->GetMoveInput();
+        if (direction_.x == 0.0f && direction_.z == 0.0f)
+        {
+            direction_ = player_->GetCameraForwardDirection();
+        }
+        player_->SetFacingDirection(direction_);
+        player_->SetHorizontalVelocity(direction_, player_->strongChargeAttackSpeed);
+    }
+    else
+    {
+        player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
+    }
 }
 
 void PlayerAttackState::Execute(float elapsedTime_)

@@ -259,8 +259,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.9081060886383057,
-                                -0.41874027252197266
+                                -0.362056702375412,
+                                0.9321560859680176
                             ]
                         },
                         "HitStopDuration": {
@@ -282,17 +282,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.8152536153793335,
-                                0.44050225615501404,
-                                -0.3759247064590454
+                                -0.27610304951667786,
+                                0.6468748450279236,
+                                0.7108586430549622
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                -3.1244521141052246,
-                                1.2780113220214844,
-                                -16.913101196289063
+                                -4.561165809631348,
+                                0.819484531879425,
+                                -19.935138702392578
                             ]
                         },
                         "Received": {
@@ -1341,54 +1341,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 14,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "SK_PlainsDragonPlainsDragon_Glide_0",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 3,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -1417,6 +1369,54 @@
                             "events": [],
                             "loop": true,
                             "name": "SK_PlainsDragonPlainsDragon_DeathHitTheGround_0",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 14,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SK_PlainsDragonPlainsDragon_Glide_0",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -1485,54 +1485,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 2,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
-                            "name": "Death",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 7,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardPhaseOffset": 0.0,
@@ -1561,6 +1513,54 @@
                             "events": [],
                             "loop": true,
                             "name": "FlyStationaryGetHit",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 2,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "Death",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3946,9 +3946,9 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -5.909773826599121,
-            -2.001770257949829,
-            -18.198806762695313
+            -5.850817680358887,
+            -2.00177001953125,
+            -17.62451171875
         ],
         "Rot": [
             0.0,

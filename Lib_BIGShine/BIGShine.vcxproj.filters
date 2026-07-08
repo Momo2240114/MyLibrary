@@ -319,6 +319,9 @@
     <ClCompile Include="Code\Engine\Core\main.cpp">
       <Filter>Code\Engine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Common\DebugLog.cpp">
+      <Filter>Code\Engine\Common</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
@@ -329,6 +332,9 @@
       <Filter>Code\Engine\GamePlay\Core\Object</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Graphics\MotionVelocityComponent.cpp">
       <Filter>Code\Engine\GamePlay\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Input\ControllerInput.cpp">
@@ -434,6 +440,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\DebugLogWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp">
@@ -559,6 +568,9 @@
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\MotionBlurDirector.cpp">
+      <Filter>Code\Engine\GamePlay\PostEffect</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.cpp">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClCompile>
@@ -611,6 +623,9 @@
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerJumpState.cpp">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp">
@@ -674,6 +689,9 @@
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.cpp">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionVelocityRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.cpp">
@@ -781,6 +799,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -882,6 +903,9 @@
       <Filter>Code\Engine\GamePlay\Core\Object</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.h">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Graphics\MotionVelocityComponent.h">
       <Filter>Code\Engine\GamePlay\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Input\ControllerInput.h">
@@ -1014,6 +1038,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\DebugLogWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h">
@@ -1208,6 +1235,9 @@
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\MotionBlurDirector.h">
+      <Filter>Code\Engine\GamePlay\PostEffect</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.h">
       <Filter>Code\Engine\GamePlay\PostEffect</Filter>
     </ClInclude>
@@ -1283,6 +1313,9 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerJumpState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Game\Charcter\Player\PlayerMoveState.h">
       <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
     </ClInclude>
@@ -1335,6 +1368,9 @@
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.h">
+      <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionVelocityRenderSystem.h">
       <Filter>Code\Engine\Graphics\RenderSystem\PostEffect</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h">
@@ -1424,6 +1460,9 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -1444,6 +1483,9 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEffectAsset.h">
       <Filter>Code\Engine\Graphics\Effect\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Common\DebugLog.h">
+      <Filter>Code\Engine\Common</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
     <ClInclude Include="Code\Editor\EditorCameraData.h">
@@ -1663,6 +1705,12 @@
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MotionVelocityPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionObjectVelocityPS.hlsl">
+      <Filter>Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionObjectVelocityVS.hlsl">
       <Filter>Shaders\PostEffect</Filter>
     </FxCompile>
     <FxCompile Include="Shader\MotionVelocityTileMaxPS.hlsl">

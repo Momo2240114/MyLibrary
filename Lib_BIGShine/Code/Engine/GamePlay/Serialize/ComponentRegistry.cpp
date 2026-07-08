@@ -24,12 +24,14 @@
 #include "Engine/GamePlay/Camera/FovDirector.h"
 #include "Engine/GamePlay/Transform/TransformDirector.h"
 #include "Engine/GamePlay/Graphics/LightBlinkerComponent.h"
+#include "Engine/GamePlay/Graphics/MotionVelocityComponent.h"
 
 #include "Engine/Math/EasingComponent.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
 #include "Engine/GamePlay/Transform/BoneSegmentAttachmentComponent.h"
 #include "Engine/Graphics/PostEffect/ColorFilterDirector.h"
+#include "Engine/Graphics/PostEffect/MotionBlurDirector.h"
 #include "Engine/Graphics/PostEffect/RadialBlurDirector.h"
 #include "Engine/Graphics/PostEffect/VignetteDirector.h"
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
@@ -93,6 +95,7 @@ void RegisterAllComponents()
 
     // ライト・エフェクト系
     registry.Register<LightComponent>("LightComponent");
+    registry.Register<MotionVelocityComponent>("MotionVelocityComponent");
     registry.Register<DecalComponent>("DecalComponent");
     registry.Register<ParticleComponent>("ParticleComponent");
     registry.Register<MeshVFXComponent>("MeshVFXComponent");
@@ -122,6 +125,7 @@ void RegisterAllComponents()
     registry.Register<FovDirector>("FovDirector");
     registry.Register<TransformDirector>("TransformDirector");
     registry.Register<ColorFilterDirector>("ColorFilterDirector");
+    registry.Register<MotionBlurDirector>("MotionBlurDirector");
     registry.Register<RadialBlurDirector>("RadialBlurDirector");
     registry.Register<VignetteDirector>("VignetteDirector");
     registry.Register<TimeScaleDirector>("TimeScaleDirector");

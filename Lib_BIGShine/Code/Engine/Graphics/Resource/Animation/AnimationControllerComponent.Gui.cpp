@@ -480,6 +480,37 @@ void AnimationControllerComponent::Gui()
         else if (editingState->type == AnimStateType::BLEND_2D)
         {
             ImGui::SeparatorText("Directional Animations");
+            if (ImGui::Button("Apply 8 Direction Template"))
+            {
+                editingState->blend2DUseEightDirections = true;
+                editingState->blend2DParamName = "MoveInput";
+                editingState->blend2DDefaultInput = { 0.0f, 1.0f };
+                editingState->blend2DSyncNormalizedTime = true;
+                editingState->blend2DIdleThreshold = 0.05f;
+            }
+            ImGui::Checkbox(
+                "Use 8 Direction Clips",
+                &editingState->blend2DUseEightDirections);
+            if (editingState->blend2DUseEightDirections)
+            {
+                if (ImGui::TreeNode("Idle / Stop (0, 0)"))
+                {
+                    DrawAnimationIndex_(
+                        "Idle Animation", editingState->blend2DIdleAnimationIndex);
+                    ImGui::SliderFloat(
+                        "Idle Phase",
+                        &editingState->blend2DIdlePhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::DragFloat(
+                        "Idle Threshold",
+                        &editingState->blend2DIdleThreshold,
+                        0.01f,
+                        0.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+            }
             if (ImGui::TreeNode("Forward (0, +1)"))
             {
                 DrawAnimationIndex_(
@@ -523,6 +554,57 @@ void AnimationControllerComponent::Gui()
                     -1.0f,
                     1.0f);
                 ImGui::TreePop();
+            }
+            if (editingState->blend2DUseEightDirections)
+            {
+                if (ImGui::TreeNode("Forward Left (-1, +1)"))
+                {
+                    DrawAnimationIndex_(
+                        "Forward Left Animation",
+                        editingState->blend2DForwardLeftAnimationIndex);
+                    ImGui::SliderFloat(
+                        "Forward Left Phase",
+                        &editingState->blend2DForwardLeftPhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Forward Right (+1, +1)"))
+                {
+                    DrawAnimationIndex_(
+                        "Forward Right Animation",
+                        editingState->blend2DForwardRightAnimationIndex);
+                    ImGui::SliderFloat(
+                        "Forward Right Phase",
+                        &editingState->blend2DForwardRightPhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Backward Left (-1, -1)"))
+                {
+                    DrawAnimationIndex_(
+                        "Backward Left Animation",
+                        editingState->blend2DBackwardLeftAnimationIndex);
+                    ImGui::SliderFloat(
+                        "Backward Left Phase",
+                        &editingState->blend2DBackwardLeftPhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("Backward Right (+1, -1)"))
+                {
+                    DrawAnimationIndex_(
+                        "Backward Right Animation",
+                        editingState->blend2DBackwardRightAnimationIndex);
+                    ImGui::SliderFloat(
+                        "Backward Right Phase",
+                        &editingState->blend2DBackwardRightPhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
             }
 
             ImGui::SeparatorText("Blend Input");

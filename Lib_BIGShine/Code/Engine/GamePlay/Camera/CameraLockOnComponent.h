@@ -28,6 +28,11 @@ public:
     void SetLockOnEnabled(bool enabled_);
     bool IsLockOnEnabled() const { return lockOnEnabled; }
     std::shared_ptr<GameObject> GetLockOnTarget() const { return lockOnTarget.lock(); }
+    void SetPlayerTarget(const std::shared_ptr<GameObject>& playerTarget_);
+    void SetLockOnTarget(const std::shared_ptr<GameObject>& lockOnTarget_);
+    std::shared_ptr<GameObject> FindBestLockOnTarget(
+        const std::shared_ptr<GameObject>& playerTarget_) const;
+    bool ToggleLockOnForPlayer(const std::shared_ptr<GameObject>& playerTarget_);
 
 private:
     void ResolveReferences();

@@ -7,6 +7,7 @@
 #include "AnimSequenceAdapter.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/Common/DebugLog.h"
 #include "AnimationDataAsset.h"
 #include "PoseLibraryResourceManager.h"
 #include "IKMapComponent.h"
@@ -106,42 +107,16 @@ void AnimationControllerComponent::EnsureNodeEditorContext()
 
 void AnimationControllerComponent::EnsureStatesFromModel()
 {
-    if (!modelComponent || !GetGameObject()) return;
+    if (!modelComponent) return;
 
     const auto& animations_ = modelComponent->GetAnimations();
-    if (animations_.empty()) return;
-
-    bool addedState_ = false;
     for (int animIndex_ = 0; animIndex_ < static_cast<int>(animations_.size()); ++animIndex_)
     {
         const std::string& animName_ = animations_[animIndex_].name;
         if (animName_.empty()) continue;
 
         auto stateIt_ = states.find(animName_);
-        if (stateIt_ == states.end())
-        {
-            const bool animationAlreadyUsed_ = std::any_of(
-                states.begin(),
-                states.end(),
-                [animIndex_](const auto& stateEntry_)
-                {
-                    return stateEntry_.second &&
-                        stateEntry_.second->type != AnimStateType::Custom &&
-                        stateEntry_.second->animationIndex == animIndex_;
-                });
-            if (animationAlreadyUsed_) continue;
-
-            auto state_ = std::make_unique<AnimState>();
-            state_->name = animName_;
-            state_->playbackSpeed = 1.0f;
-            state_->isLoop = true;
-            state_->animationIndex = animIndex_;
-            states[animName_] = std::move(state_);
-            RegisterStateAction(animName_);
-            EnsureGraphNodeForState(animName_);
-            addedState_ = true;
-        }
-        else if (stateIt_->second)
+        if (stateIt_ != states.end() && stateIt_->second)
         {
             stateIt_->second->animationIndex = animIndex_;
         }
@@ -152,38 +127,9 @@ void AnimationControllerComponent::EnsureStatesFromModel()
         poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelComponent->GetModelName());
     }
 
-    if (poseLibrary)
+    for (const auto& [stateName_, state_] : states)
     {
-        for (int customAnimationIndex_ = 0; customAnimationIndex_ < static_cast<int>(poseLibrary->customAnims.size()); ++customAnimationIndex_)
-        {
-            const CustomAnimation& customAnimation_ = poseLibrary->customAnims[customAnimationIndex_];
-            auto stateIt_ = states.find(customAnimation_.name);
-            const bool customAnimationAlreadyUsed_ = std::any_of(
-                states.begin(),
-                states.end(),
-                [customAnimationIndex_](const auto& stateEntry_)
-                {
-                    return stateEntry_.second &&
-                        stateEntry_.second->type == AnimStateType::Custom &&
-                        stateEntry_.second->customAnimIndex == customAnimationIndex_;
-                });
-            if (stateIt_ == states.end() && customAnimationAlreadyUsed_) continue;
-            if (stateIt_ == states.end() || !stateIt_->second ||
-                stateIt_->second->type != AnimStateType::Custom ||
-                stateIt_->second->customAnimIndex != customAnimationIndex_)
-            {
-                AddOrUpdateCustomState(customAnimationIndex_);
-            }
-        }
-    }
-
-    if (!currentState && !states.empty())
-    {
-        ChangeState(animations_[0].name, 0.0f);
-    }
-    if (addedState_)
-    {
-        EnsureSpecialGraphNodes();
+        if (state_) RegisterStateAction(stateName_);
     }
 }
 AnimationControllerComponent::~AnimationControllerComponent()
@@ -221,34 +167,7 @@ void AnimationControllerComponent::Start()
         poseLibrary = PoseLibraryResourceManager::Instance().GetOrCreateResource(modelName_);
     }
 
-    const auto& animations_ = modelComponent->GetAnimations();
-    std::string objectName_ = object_->GetName();
-
-    for (int index_ = 0; index_ < (int)animations_.size(); ++index_)
-    {
-        const std::string& animationName_ = animations_[index_].name;
-
-        auto iterator_ = states.find(animationName_);
-
-        if (iterator_ == states.end()) {
-            auto newState_ = std::make_unique<AnimState>();
-            newState_->name = animationName_;
-            newState_->playbackSpeed = 1.0f;
-            newState_->isLoop = true;
-            states[animationName_] = std::move(newState_);
-            iterator_ = states.find(animationName_);
-        }
-
-        auto& state_ = iterator_->second;
-        state_->animationIndex = index_;
-
-        std::string fullActionName_ = objectName_ + "_" + animationName_;
-        ActionRegistry::Instance().RegisterAction("Animation", fullActionName_, [this, animationName_]() {
-            this->ChangeState(animationName_);
-            });
-
-        registeredActionNames.push_back(fullActionName_);
-    }
+    EnsureStatesFromModel();
 
     EnsureSpecialGraphNodes();
 
@@ -259,8 +178,8 @@ void AnimationControllerComponent::Start()
     }
     else {
         TryEnterStartState();
-        if (!currentState && !states.empty() && !animations_.empty()) {
-            ChangeState(animations_[0].name, 0.0f);
+        if (!currentState && !states.empty()) {
+            ChangeState(states.begin()->first, 0.0f);
         }
     }
 
@@ -289,10 +208,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         modelComponent->SetTransformUpdateDrivenExternally(true);
     }
 
-    {
-        BS_PROFILE_SCOPE("Animation::EnsureStatesFromModel");
-        EnsureStatesFromModel();
-    }
+    EnsureStatesFromModel();
 
     if (!curveComponent)
     {
@@ -424,6 +340,12 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName_, fl
 
     const AnimState* nextState_ = iterator_->second.get();
     if (currentState == nextState_) return;
+
+    const std::string previousStateName_ = currentState ? currentState->name : "None";
+    const std::string ownerName_ = GetGameObject() ? GetGameObject()->GetName() : "None";
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        "Animation transition: " + ownerName_ + " " + previousStateName_ + " -> " + nextState_->name);
 
     if (auto owner_ = GetGameObject())
     {

@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Scene/SceneLoading.h"
 #include "Engine/GamePlay/Scene/SceneTutorial.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Engine/Common/DebugLog.h"
 
 
 std::shared_ptr<ActionRegistry> ActionRegistry::instance = nullptr;
@@ -125,11 +126,18 @@ bool ActionRegistry::RemoveAction(const std::string& category, const std::string
 
 void ActionRegistry::Call(const std::string& name)
 {
+    auto logAction_ = [&name](const std::string& category_)
+        {
+            BS_LOG_INFO(
+                LOG_CATEGORY::GAME,
+                "Action fired: [" + category_ + "] " + name);
+        };
 
     for (auto& [cat, actionMap] : actions)
     {
-        auto it = actionMap.find(name); // count と [] で2回検索するより find が速い
+        auto it = actionMap.find(name);
         if (it != actionMap.end()) {
+            if (it->second) logAction_(cat);
             if (it->second) it->second(); // 関数の中身が空（nullptr）でないかチェック
             return;
         }

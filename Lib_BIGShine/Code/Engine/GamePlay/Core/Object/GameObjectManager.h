@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
+#include "Engine/Graphics/RenderSystem/MotionVelocityRenderSystem.h"
 #include "Engine/GamePlay/Scene/IScene.h"
 #include "Engine/Physics/CollisionStepSystem.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
@@ -15,6 +16,7 @@ class BoxCollider;
 class GltfModelCommponennt;
 class TimeManager;
 class CameraManager;
+class MotionVelocityComponent;
 
 
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
@@ -100,6 +102,8 @@ public:
 
     void RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem);
     void SetModelRenderSystem(ModelRenderSystem* modelRenderSystem_) { modelRenderSystem = modelRenderSystem_; }
+    void RegisterMotionVelocityComponent(const std::shared_ptr<MotionVelocityComponent>& component_);
+    void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);
 
     void Update(float elapsedTime_);
 
@@ -238,6 +242,7 @@ private:
     // 描画システムの所有権はマネージャが保持し、シーン全体で共有する。
     std::unique_ptr<ParticleRenderSystem> particleRenderSystem;
     std::unique_ptr<MeshVFXRenderSystem> meshVFXRenderSystem;
+    std::unique_ptr<MotionVelocityRenderSystem> motionVelocityRenderSystem;
     // パーティクルコンポーネントのみを保持するリスト
     std::vector<std::weak_ptr<ParticleComponent>> particleComponents;
     //現在のシーン
