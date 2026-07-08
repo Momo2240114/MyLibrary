@@ -480,18 +480,31 @@ void AnimationControllerComponent::Gui()
         else if (editingState->type == AnimStateType::BLEND_2D)
         {
             ImGui::SeparatorText("Directional Animations");
-            if (ImGui::Button("Apply 8 Direction Template"))
+            if (ImGui::Button("Apply F/B Lateral Template"))
             {
-                editingState->blend2DUseEightDirections = true;
+                editingState->blend2DUseEightDirections = false;
+                editingState->blend2DUseForwardBackwardLateral = true;
                 editingState->blend2DParamName = "MoveInput";
                 editingState->blend2DDefaultInput = { 0.0f, 1.0f };
                 editingState->blend2DSyncNormalizedTime = true;
                 editingState->blend2DIdleThreshold = 0.05f;
             }
-            ImGui::Checkbox(
+            if (ImGui::Checkbox(
+                "Use F/B Lateral Clips",
+                &editingState->blend2DUseForwardBackwardLateral) &&
+                editingState->blend2DUseForwardBackwardLateral)
+            {
+                editingState->blend2DUseEightDirections = false;
+            }
+            if (ImGui::Checkbox(
                 "Use 8 Direction Clips",
-                &editingState->blend2DUseEightDirections);
-            if (editingState->blend2DUseEightDirections)
+                &editingState->blend2DUseEightDirections) &&
+                editingState->blend2DUseEightDirections)
+            {
+                editingState->blend2DUseForwardBackwardLateral = false;
+            }
+            if (editingState->blend2DUseEightDirections ||
+                editingState->blend2DUseForwardBackwardLateral)
             {
                 if (ImGui::TreeNode("Idle / Stop (0, 0)"))
                 {
@@ -533,7 +546,8 @@ void AnimationControllerComponent::Gui()
                     1.0f);
                 ImGui::TreePop();
             }
-            if (ImGui::TreeNode("Left (-1, 0)"))
+            if (!editingState->blend2DUseForwardBackwardLateral &&
+                ImGui::TreeNode("Left (-1, 0)"))
             {
                 DrawAnimationIndex_(
                     "Left Animation", editingState->blend2DLeftAnimationIndex);
@@ -544,7 +558,8 @@ void AnimationControllerComponent::Gui()
                     1.0f);
                 ImGui::TreePop();
             }
-            if (ImGui::TreeNode("Right (+1, 0)"))
+            if (!editingState->blend2DUseForwardBackwardLateral &&
+                ImGui::TreeNode("Right (+1, 0)"))
             {
                 DrawAnimationIndex_(
                     "Right Animation", editingState->blend2DRightAnimationIndex);
@@ -555,7 +570,8 @@ void AnimationControllerComponent::Gui()
                     1.0f);
                 ImGui::TreePop();
             }
-            if (editingState->blend2DUseEightDirections)
+            if (editingState->blend2DUseEightDirections ||
+                editingState->blend2DUseForwardBackwardLateral)
             {
                 if (ImGui::TreeNode("Forward Left (-1, +1)"))
                 {
@@ -581,6 +597,32 @@ void AnimationControllerComponent::Gui()
                         1.0f);
                     ImGui::TreePop();
                 }
+                if (editingState->blend2DUseForwardBackwardLateral &&
+                    ImGui::TreeNode("Forward Left 90 (-1, +0)"))
+                {
+                    DrawAnimationIndex_(
+                        "Forward Left 90 Animation",
+                        editingState->blend2DForwardLeft90AnimationIndex);
+                    ImGui::SliderFloat(
+                        "Forward Left 90 Phase",
+                        &editingState->blend2DForwardLeft90PhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+                if (editingState->blend2DUseForwardBackwardLateral &&
+                    ImGui::TreeNode("Forward Right 90 (+1, +0)"))
+                {
+                    DrawAnimationIndex_(
+                        "Forward Right 90 Animation",
+                        editingState->blend2DForwardRight90AnimationIndex);
+                    ImGui::SliderFloat(
+                        "Forward Right 90 Phase",
+                        &editingState->blend2DForwardRight90PhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
                 if (ImGui::TreeNode("Backward Left (-1, -1)"))
                 {
                     DrawAnimationIndex_(
@@ -601,6 +643,32 @@ void AnimationControllerComponent::Gui()
                     ImGui::SliderFloat(
                         "Backward Right Phase",
                         &editingState->blend2DBackwardRightPhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+                if (editingState->blend2DUseForwardBackwardLateral &&
+                    ImGui::TreeNode("Backward Left 90 (-1, 0)"))
+                {
+                    DrawAnimationIndex_(
+                        "Backward Left 90 Animation",
+                        editingState->blend2DBackwardLeft90AnimationIndex);
+                    ImGui::SliderFloat(
+                        "Backward Left 90 Phase",
+                        &editingState->blend2DBackwardLeft90PhaseOffset,
+                        -1.0f,
+                        1.0f);
+                    ImGui::TreePop();
+                }
+                if (editingState->blend2DUseForwardBackwardLateral &&
+                    ImGui::TreeNode("Backward Right 90 (+1, 0)"))
+                {
+                    DrawAnimationIndex_(
+                        "Backward Right 90 Animation",
+                        editingState->blend2DBackwardRight90AnimationIndex);
+                    ImGui::SliderFloat(
+                        "Backward Right 90 Phase",
+                        &editingState->blend2DBackwardRight90PhaseOffset,
                         -1.0f,
                         1.0f);
                     ImGui::TreePop();
@@ -638,10 +706,18 @@ void AnimationControllerComponent::Gui()
             ImGui::Checkbox(
                 "Synchronize Normalized Time##Blend2D",
                 &editingState->blend2DSyncNormalizedTime);
-            ImGui::TextDisabled(
-                "X blends Left/Right. Y blends Backward/Forward.");
-            ImGui::TextDisabled(
-                "Diagonal input automatically blends the two matching directions.");
+            if (editingState->blend2DUseForwardBackwardLateral)
+            {
+                ImGui::TextDisabled(
+                    "Y selects Forward/Backward. X blends 0 -> 45 -> 90 lateral clips.");
+            }
+            else
+            {
+                ImGui::TextDisabled(
+                    "X blends Left/Right. Y blends Backward/Forward.");
+                ImGui::TextDisabled(
+                    "Diagonal input automatically blends the two matching directions.");
+            }
         }
         else if (editingState->type == AnimStateType::Custom)
         {

@@ -219,7 +219,7 @@ void CameraLockOnComponent::SetLockOnTarget(
 std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
     const std::shared_ptr<GameObject>& playerTarget_) const
 {
-    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager || !playerTarget_ || !playerTarget_->transform)
     {
         return nullptr;
@@ -249,7 +249,7 @@ std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
     cameraForward_.z /= forwardLength_;
 
     std::shared_ptr<GameObject> bestTarget_;
-    float bestScore_ = std::numeric_limits<float>::max();
+    float bestScore_ = (std::numeric_limits<float>::max)();
     for (const std::shared_ptr<GameObject>& candidate_ : owner_->manager->GetObjects())
     {
         if (!candidate_ || candidate_ == playerTarget_ || !candidate_->transform ||

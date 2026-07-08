@@ -206,6 +206,10 @@ std::vector<std::string> UpperBodyLeanIKComponent::GetCurrentAnimationNames() co
     addClipName_(currentState_->blend2DForwardRightAnimationIndex);
     addClipName_(currentState_->blend2DBackwardLeftAnimationIndex);
     addClipName_(currentState_->blend2DBackwardRightAnimationIndex);
+    addClipName_(currentState_->blend2DForwardLeft90AnimationIndex);
+    addClipName_(currentState_->blend2DForwardRight90AnimationIndex);
+    addClipName_(currentState_->blend2DBackwardLeft90AnimationIndex);
+    addClipName_(currentState_->blend2DBackwardRight90AnimationIndex);
     addClipName_(currentState_->blend2DIdleAnimationIndex);
 
     return names_;
