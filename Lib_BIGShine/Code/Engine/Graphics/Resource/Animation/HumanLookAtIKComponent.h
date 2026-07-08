@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 class AnimationControllerComponent;
+class CameraLockOnComponent;
 class GameObject;
 class GltfModelCommponennt;
 
@@ -29,6 +30,7 @@ public:
 
     void SetLookEnabled(bool enabled_) { lookEnabled = enabled_; }
     bool IsLookEnabled() const { return lookEnabled; }
+    void SetUseLockOnTarget(bool enabled_) { useLockOnTarget = enabled_; }
     void SetTargetName(const std::string& targetName_);
 
 private:
@@ -41,6 +43,7 @@ private:
 
     bool ResolveDependencies(); // 必要なComponent参照を取得する。
     bool ResolveChain(IKMapComponent::IKChain& chain_); // RootからTipまでのNodeIndex列を解決する。
+    std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent();
     std::shared_ptr<GameObject> ResolveTarget(); // targetNameから注視対象Objectを取得する。
     bool IsAllowedAnimationState() const; // 現在のStateで注視を許可するか判定する。
     LOOK_MODE GetCurrentLookMode() const; // 現在のStateに対応する注視モードを取得する。
@@ -62,6 +65,7 @@ private:
     std::weak_ptr<IKMapComponent> ikMap; // LOOK_ATチェーン設定を持つIKMapComponent。
     std::weak_ptr<GltfModelCommponennt> model; // ボーンNodeの取得・更新に使うモデルComponent。
     std::weak_ptr<AnimationControllerComponent> animationController; // 現在のAnimationState取得に使うComponent。
+    std::weak_ptr<CameraLockOnComponent> cameraLockOn;
     std::weak_ptr<GameObject> target; // 解決済みの注視対象Object。
     std::vector<LookRuntimeState> lookStates; // 各LOOK_ATチェーンに対応する実行時状態。
     std::unordered_map<std::string, LOOK_MODE> stateLookModes; // State名ごとの注視モード設定。
@@ -77,6 +81,7 @@ private:
     float headOnlyMaxPitchDegrees = 35.0f; // HEAD_ONLY時の上下注視角度制限
 
     bool lookEnabled = true; // LookAt IKを有効にするか。
+    bool useLockOnTarget = true;
     bool idleOnly = true; // Idle状態の時だけ注視するか。
     bool showDebugShapes = false; // デバッグ形状を描画するか。
 };

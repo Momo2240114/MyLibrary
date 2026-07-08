@@ -2,6 +2,7 @@
 
 #include "AnimationControllerComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
@@ -151,8 +152,48 @@ bool HumanLookAtIKComponent::ResolveDependencies()
 }
 
 // targetNameから注視対象Objectを検索する。
+std::shared_ptr<CameraLockOnComponent>
+HumanLookAtIKComponent::ResolveCameraLockOnComponent()
+{
+    if (const std::shared_ptr<CameraLockOnComponent> currentLockOn_ =
+        cameraLockOn.lock())
+    {
+        return currentLockOn_;
+    }
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return nullptr;
+
+    for (const std::shared_ptr<GameObject>& object_ : owner_->manager->GetObjects())
+    {
+        if (!object_) continue;
+        if (const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+            object_->GetComponent<CameraLockOnComponent>())
+        {
+            cameraLockOn = lockOn_;
+            return lockOn_;
+        }
+    }
+
+    return nullptr;
+}
+
 std::shared_ptr<GameObject> HumanLookAtIKComponent::ResolveTarget()
 {
+    if (useLockOnTarget)
+    {
+        const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+            ResolveCameraLockOnComponent();
+        if (lockOn_ && lockOn_->IsLockOnEnabled())
+        {
+            if (const std::shared_ptr<GameObject> lockOnTarget_ =
+                lockOn_->GetLockOnTarget())
+            {
+                return lockOnTarget_;
+            }
+        }
+    }
+
     if (const std::shared_ptr<GameObject> currentTarget_ = target.lock()) return currentTarget_;
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -519,6 +560,7 @@ void HumanLookAtIKComponent::Gui()
     ResolveDependencies();
 
     ImGui::Checkbox("Look Enabled", &lookEnabled);
+    ImGui::Checkbox("Use LockOn Target", &useLockOnTarget);
     ImGui::Checkbox("Idle Only", &idleOnly);
     ImGui::Checkbox("Show Debug Shapes", &showDebugShapes);
 
@@ -588,6 +630,7 @@ void HumanLookAtIKComponent::Gui()
 void HumanLookAtIKComponent::Serialize(nlohmann::json& json_) const
 {
     json_["LookEnabled"] = lookEnabled;
+    json_["UseLockOnTarget"] = useLockOnTarget;
     json_["IdleOnly"] = idleOnly;
     json_["IdleStateName"] = idleStateName;
     json_["TargetName"] = targetName;
@@ -611,6 +654,7 @@ void HumanLookAtIKComponent::Serialize(nlohmann::json& json_) const
 void HumanLookAtIKComponent::Deserialize(const nlohmann::json& json_)
 {
     lookEnabled = json_.value("LookEnabled", true);
+    useLockOnTarget = json_.value("UseLockOnTarget", true);
     idleOnly = json_.value("IdleOnly", true);
     idleStateName = json_.value("IdleStateName", std::string("SS_Idle"));
     targetName = json_.value("TargetName", std::string("TestTarget"));
@@ -661,6 +705,7 @@ void HumanLookAtIKComponent::Deserialize(const nlohmann::json& json_)
     }
 
     // 復元後は実行時参照と補間状態を作り直す。
+    cameraLockOn.reset();
     target.reset();
     lookStates.clear();
 }

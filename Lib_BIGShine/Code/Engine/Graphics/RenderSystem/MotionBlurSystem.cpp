@@ -61,7 +61,91 @@ void MotionBlurSystem::SynchronizeCameraHistory(const RenderContext& rc_)
     UpdatePreviousViewProjection(rc_);
 }
 
+void MotionBlurSystem::ResetCameraHistory()
+{
+    DirectX::XMStoreFloat4x4(&previousViewProjection, DirectX::XMMatrixIdentity());
+    hasPreviousViewProjection = false;
+}
+
+void MotionBlurSystem::SetObjectVelocityRenderer(ObjectVelocityRenderer* objectVelocityRenderer_)
+{
+    objectVelocityRenderer = objectVelocityRenderer_;
+}
+
+void MotionBlurSystem::ClearVelocityBuffer(ID3D11DeviceContext* dc_)
+{
+    if (dc_ == nullptr || velocityBuffer.rtv == nullptr) return;
+    const float clearVelocity_[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    dc_->ClearRenderTargetView(velocityBuffer.rtv.Get(), clearVelocity_);
+}
+
 void MotionBlurSystem::Execute(
+    const RenderContext& rc_,
+    ID3D11ShaderResourceView* sceneSRV_,
+    ID3D11ShaderResourceView* depthSRV_,
+    ID3D11RenderTargetView* outputRTV_,
+    const Parameters& parameters_)
+{
+    ID3D11DeviceContext* dc_ = rc_.deviceContext;
+    const RenderState* rs_ = rc_.renderState;
+    if (dc_ == nullptr || rs_ == nullptr)
+    {
+        return;
+    }
+
+    Parameters safeParameters_ = parameters_;
+    if (depthSRV_ == nullptr || rc_.camera == nullptr)
+    {
+        safeParameters_.enabled = false;
+    }
+
+    ClearVelocityBuffer(dc_);
+
+    ID3D11SamplerState* sampler_ = rs_->GetSamplerState(SamplerState::LinearClamp);
+    dc_->RSSetState(rs_->GetRasterizerState(RasterizerState::SolidCullNone));
+    dc_->OMSetDepthStencilState(rs_->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    dc_->VSSetShader(fullScreenVs.Get(), nullptr, 0);
+    dc_->PSSetSamplers(0, 1, &sampler_);
+    dc_->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+
+    const bool useCameraVelocityPass_ = safeParameters_.useCameraVelocity || objectVelocityRenderer == nullptr;
+    if (safeParameters_.enabled &&
+        useCameraVelocityPass_ &&
+        depthSRV_ != nullptr &&
+        hasPreviousViewProjection)
+    {
+        UpdateConstantBuffer(rc_, safeParameters_);
+        ID3D11ShaderResourceView* velocityResources_[] = { depthSRV_ };
+        DrawPass(dc_, velocityBuffer.rtv.Get(), velocityPixelShader.Get(), velocityResources_, 1, width, height);
+    }
+
+    if (safeParameters_.enabled && objectVelocityRenderer != nullptr)
+    {
+        const DirectX::XMFLOAT4X4 currentViewProjection_ = BuildViewProjection(rc_);
+        objectVelocityRenderer->DrawObjectVelocity(
+            rc_,
+            velocityBuffer.rtv.Get(),
+            width,
+            height,
+            currentViewProjection_,
+            previousViewProjection);
+
+        dc_->RSSetState(rs_->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc_->OMSetDepthStencilState(rs_->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+        dc_->VSSetShader(fullScreenVs.Get(), nullptr, 0);
+        dc_->PSSetSamplers(0, 1, &sampler_);
+        dc_->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+    }
+
+    ExecuteBlurFromCurrentVelocity(rc_, sceneSRV_, depthSRV_, outputRTV_, safeParameters_);
+    if (safeParameters_.enabled && objectVelocityRenderer != nullptr)
+    {
+        objectVelocityRenderer->CommitHistory();
+    }
+    UpdatePreviousViewProjection(rc_);
+}
+
+void MotionBlurSystem::ExecuteBlurFromCurrentVelocity(
     const RenderContext& rc_,
     ID3D11ShaderResourceView* sceneSRV_,
     ID3D11ShaderResourceView* depthSRV_,
@@ -76,7 +160,7 @@ void MotionBlurSystem::Execute(
     }
 
     Parameters safeParameters_ = parameters_;
-    if (depthSRV_ == nullptr || rc_.camera == nullptr || !hasPreviousViewProjection)
+    if (rc_.camera == nullptr)
     {
         safeParameters_.enabled = false;
     }
@@ -88,9 +172,6 @@ void MotionBlurSystem::Execute(
     dc_->VSSetShader(fullScreenVs.Get(), nullptr, 0);
     dc_->PSSetSamplers(0, 1, &sampler_);
     dc_->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-
-    ID3D11ShaderResourceView* velocityResources_[] = { depthSRV_ };
-    DrawPass(dc_, velocityBuffer.rtv.Get(), velocityPixelShader.Get(), velocityResources_, 1, width, height);
 
     ID3D11ShaderResourceView* tileResources_[] = { velocityBuffer.srv.Get() };
     DrawPass(dc_, tileMaxBuffer.rtv.Get(), tileMaxPixelShader.Get(), tileResources_, 1, tileWidth, tileHeight);
@@ -107,7 +188,6 @@ void MotionBlurSystem::Execute(
     ID3D11ShaderResourceView* nullSRVs_[4] = {};
     dc_->PSSetShaderResources(0, _countof(nullSRVs_), nullSRVs_);
     dc_->OMSetDepthStencilState(rs_->GetDepthStencilState(DepthState::TestOnly), 0);
-    UpdatePreviousViewProjection(rc_);
 }
 
 bool MotionBlurSystem::CreateRenderTarget(
@@ -163,6 +243,21 @@ void MotionBlurSystem::UpdatePreviousViewProjection(const RenderContext& rc_)
     const DirectX::XMMATRIX projection_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetProjection());
     DirectX::XMStoreFloat4x4(&previousViewProjection, view_ * projection_);
     hasPreviousViewProjection = true;
+}
+
+DirectX::XMFLOAT4X4 MotionBlurSystem::BuildViewProjection(const RenderContext& rc_) const
+{
+    DirectX::XMFLOAT4X4 viewProjection_{};
+    DirectX::XMStoreFloat4x4(&viewProjection_, DirectX::XMMatrixIdentity());
+    if (rc_.camera == nullptr)
+    {
+        return viewProjection_;
+    }
+
+    const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetView());
+    const DirectX::XMMATRIX projection_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetProjection());
+    DirectX::XMStoreFloat4x4(&viewProjection_, view_ * projection_);
+    return viewProjection_;
 }
 
 void MotionBlurSystem::DrawPass(

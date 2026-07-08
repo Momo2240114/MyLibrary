@@ -1,6 +1,7 @@
 #include "CameraLockOnComponent.h"
 
 #include "CameraComponent.h"
+#include "CameraManager.h"
 #include "LockOnTargetComponent.h"
 #include "ThirdPersonCameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
@@ -12,6 +13,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <limits>
 
 namespace
 {
@@ -187,6 +189,118 @@ void CameraLockOnComponent::SetLockOnEnabled(bool enabled_)
     lockOnEnabled = enabled_ && !lockOnTarget.expired();
     ResetTracking();
     if (!lockOnEnabled) ReleaseThirdPersonCamera();
+}
+
+void CameraLockOnComponent::SetPlayerTarget(
+    const std::shared_ptr<GameObject>& playerTarget_)
+{
+    playerTarget = playerTarget_;
+    playerTargetName = playerTarget_ && playerTarget_->nameComponent
+        ? playerTarget_->nameComponent->name
+        : std::string{};
+    ResetTracking();
+}
+
+void CameraLockOnComponent::SetLockOnTarget(
+    const std::shared_ptr<GameObject>& lockOnTarget_)
+{
+    lockOnTarget = lockOnTarget_;
+    lockOnTargetName = lockOnTarget_ && lockOnTarget_->nameComponent
+        ? lockOnTarget_->nameComponent->name
+        : std::string{};
+    if (!lockOnTarget_)
+    {
+        SetLockOnEnabled(false);
+        return;
+    }
+    ResetTracking();
+}
+
+std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
+    const std::shared_ptr<GameObject>& playerTarget_) const
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager || !playerTarget_ || !playerTarget_->transform)
+    {
+        return nullptr;
+    }
+
+    const DirectX::XMFLOAT3 playerPosition_ =
+        GetFocusPosition(playerTarget_, playerOffset);
+    DirectX::XMFLOAT3 cameraForward_{ 0.0f, 0.0f, 1.0f };
+    if (CameraManager* cameraManager_ = owner_->manager->GetCameraManager())
+    {
+        if (const std::shared_ptr<CameraComponent> activeCamera_ =
+            cameraManager_->GetActiveCamera())
+        {
+            cameraForward_ = activeCamera_->GetFront();
+        }
+    }
+
+    float forwardLength_ = std::sqrt(
+        cameraForward_.x * cameraForward_.x +
+        cameraForward_.z * cameraForward_.z);
+    if (forwardLength_ <= 0.0001f)
+    {
+        cameraForward_ = { 0.0f, 0.0f, 1.0f };
+        forwardLength_ = 1.0f;
+    }
+    cameraForward_.x /= forwardLength_;
+    cameraForward_.z /= forwardLength_;
+
+    std::shared_ptr<GameObject> bestTarget_;
+    float bestScore_ = std::numeric_limits<float>::max();
+    for (const std::shared_ptr<GameObject>& candidate_ : owner_->manager->GetObjects())
+    {
+        if (!candidate_ || candidate_ == playerTarget_ || !candidate_->transform ||
+            !candidate_->GetComponent<LockOnTargetComponent>())
+        {
+            continue;
+        }
+
+        const DirectX::XMFLOAT3 targetPosition_ =
+            GetFocusPosition(candidate_, targetOffset);
+        const float differenceX_ = targetPosition_.x - playerPosition_.x;
+        const float differenceZ_ = targetPosition_.z - playerPosition_.z;
+        const float horizontalDistance_ = std::sqrt(
+            differenceX_ * differenceX_ + differenceZ_ * differenceZ_);
+        if (horizontalDistance_ <= 0.0001f || horizontalDistance_ > maxDistance)
+        {
+            continue;
+        }
+
+        const float directionX_ = differenceX_ / horizontalDistance_;
+        const float directionZ_ = differenceZ_ / horizontalDistance_;
+        const float centerDot_ = std::clamp(
+            cameraForward_.x * directionX_ + cameraForward_.z * directionZ_,
+            -1.0f,
+            1.0f);
+        const float centerPenalty_ = (1.0f - centerDot_) * maxDistance;
+        const float score_ = horizontalDistance_ + centerPenalty_;
+        if (score_ < bestScore_)
+        {
+            bestScore_ = score_;
+            bestTarget_ = candidate_;
+        }
+    }
+
+    return bestTarget_;
+}
+
+bool CameraLockOnComponent::ToggleLockOnForPlayer(
+    const std::shared_ptr<GameObject>& playerTarget_)
+{
+    if (lockOnEnabled)
+    {
+        SetLockOnEnabled(false);
+        return false;
+    }
+
+    SetPlayerTarget(playerTarget_);
+    const std::shared_ptr<GameObject> target_ = FindBestLockOnTarget(playerTarget_);
+    SetLockOnTarget(target_);
+    SetLockOnEnabled(target_ != nullptr);
+    return lockOnEnabled;
 }
 
 void CameraLockOnComponent::ResolveReferences()

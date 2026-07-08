@@ -615,6 +615,11 @@ void IKMapComponent::Gui()
         AddLookAtChain("LookAt");
     }
     ImGui::SameLine();
+    if (ImGui::Button("Add Upper Body Lean"))
+    {
+        AddUpperBodyLeanChain("UpperBodyLean");
+    }
+    ImGui::SameLine();
     if (ImGui::Button("Reset Simulation"))
     {
         ResetSimulation();
@@ -679,6 +684,7 @@ void IKMapComponent::Gui()
         if (chain_.type == IK_TYPE::CLOTH_BONE) chainTreeLabel_ = "Cloth Bone Chain";
         if (chain_.type == IK_TYPE::FOOT) chainTreeLabel_ = "Foot IK Chain";
         if (chain_.type == IK_TYPE::LOOK_AT) chainTreeLabel_ = "Look At IK Chain";
+        if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) chainTreeLabel_ = "Upper Body Lean IK Chain";
         if (ImGui::TreeNode(chainTreeLabel_))
         {
             ImGui::Checkbox("Enabled", &chain_.enabled);
@@ -690,14 +696,44 @@ void IKMapComponent::Gui()
             if (chain_.type == IK_TYPE::FOOT) typeIndex_ = 1;
             if (chain_.type == IK_TYPE::CLOTH_BONE) typeIndex_ = 2;
             if (chain_.type == IK_TYPE::LOOK_AT) typeIndex_ = 3;
-            const char* typeNames_[] = { "Spring Bone", "Foot IK", "Cloth Bone", "Look At IK" };
+            if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) typeIndex_ = 4;
+            if (chain_.type == IK_TYPE::DRAGON_NECK) typeIndex_ = 5;
+            if (chain_.type == IK_TYPE::DRAGON_TAIL) typeIndex_ = 6;
+            const char* typeNames_[] = {
+                "Spring Bone",
+                "Foot IK",
+                "Cloth Bone",
+                "Look At IK",
+                "Upper Body Lean IK",
+                "Dragon Neck IK",
+                "Dragon Tail IK"
+            };
             if (ImGui::Combo("IK Type", &typeIndex_, typeNames_, IM_ARRAYSIZE(typeNames_)))
             {
-                chain_.type = typeIndex_ == 1
-                    ? IK_TYPE::FOOT
-                    : (typeIndex_ == 2
-                        ? IK_TYPE::CLOTH_BONE
-                        : (typeIndex_ == 3 ? IK_TYPE::LOOK_AT : IK_TYPE::SPRING_BONE));
+                switch (typeIndex_)
+                {
+                case 1:
+                    chain_.type = IK_TYPE::FOOT;
+                    break;
+                case 2:
+                    chain_.type = IK_TYPE::CLOTH_BONE;
+                    break;
+                case 3:
+                    chain_.type = IK_TYPE::LOOK_AT;
+                    break;
+                case 4:
+                    chain_.type = IK_TYPE::UPPER_BODY_LEAN;
+                    break;
+                case 5:
+                    chain_.type = IK_TYPE::DRAGON_NECK;
+                    break;
+                case 6:
+                    chain_.type = IK_TYPE::DRAGON_TAIL;
+                    break;
+                default:
+                    chain_.type = IK_TYPE::SPRING_BONE;
+                    break;
+                }
                 ResetSimulation();
             }
             if (chain_.type == IK_TYPE::CLOTH_BONE)
@@ -824,6 +860,10 @@ void IKMapComponent::Gui()
                     -90.0f,
                     90.0f);
                 ImGui::DragFloat("Look Blend Speed", &chain_.lookBlendSpeed, 0.1f, 0.0f, 50.0f);
+            }
+            else if (chain_.type == IK_TYPE::UPPER_BODY_LEAN)
+            {
+                ImGui::TextDisabled("Solved by UpperBodyLeanIKComponent after the animation pose is applied.");
             }
             ImGui::SliderFloat("Influence", &chain_.influence, 0.0f, 1.0f);
             ImGui::Text("Resolved Bones: %d", static_cast<int>(chain_.nodeIndices.size()));
@@ -1050,6 +1090,30 @@ IKMapComponent::IKChain& IKMapComponent::AddLookAtChain(
     IKChain chain_;
     chain_.name = name_;
     chain_.type = IK_TYPE::LOOK_AT;
+    chain_.rootNodeName = rootNodeName_;
+    chain_.tipNodeName = tipNodeName_;
+    chain_.collideWithBodyColliders = false;
+    chains.push_back(chain_);
+    return chains.back();
+}
+
+IKMapComponent::IKChain& IKMapComponent::AddUpperBodyLeanChain(
+    const std::string& name_,
+    const std::string& rootNodeName_,
+    const std::string& tipNodeName_)
+{
+    const auto existingChain_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.type == IK_TYPE::UPPER_BODY_LEAN && chain_.name == name_;
+        });
+    if (existingChain_ != chains.end()) return *existingChain_;
+
+    IKChain chain_;
+    chain_.name = name_;
+    chain_.type = IK_TYPE::UPPER_BODY_LEAN;
     chain_.rootNodeName = rootNodeName_;
     chain_.tipNodeName = tipNodeName_;
     chain_.collideWithBodyColliders = false;

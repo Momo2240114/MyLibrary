@@ -7,6 +7,7 @@
 
 class ColliderComponent;
 class BlackboardComponent;
+class CameraLockOnComponent;
 class CharacterMovementComponent;
 class HurtBox;
 class HitBox;
@@ -98,12 +99,24 @@ public:
     void NotifyJustDodge(); // ジャスト回避成功を現在のDodgeStateへ通知する
 
     float moveSpeed = 6.0f; // 通常移動速度
+    float jumpImpulse = 8.5f;
+    float strongAttackHoldThreshold = 0.35f;
+    float strongChargeAttackSpeed = 14.0f;
+    float runStartDuration = 0.18f;
+    float runEndDuration = 0.18f;
 
 private:
     void EnsurePlayerInputBindings(); // Player用InputActionの登録を保証する
     int GetRequestedComboIndex(PLAYER_ACTION nextAction_) const; // 次に要求するコンボ番号を計算する
     void RegisterPlayerAnimationActions(); // Animation/Sequenceから呼ぶPlayer Actionを登録する
     void SendActionToBlackboard(PLAYER_ACTION action_); // 現在Action情報をBlackboardへ送る
+    void UpdateLocomotionAnimationPhase(float deltaTime_);
+    void SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
+    bool UpdateStrongAttackInput();
+    void ResetStrongAttackInput();
+    void EnsureDefaultCancelTransitions();
+    std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent() const;
+    void ToggleLockOn();
     void ApplyPendingMovement(); // 予約された水平速度と向きをMovementへ反映する
 
     bool ForceChangeAction(PLAYER_ACTION action_); // Debug用に強制Action遷移する
@@ -125,12 +138,20 @@ private:
 
     int comboIndex = 0; // 現在再生中のコンボ番号
     int pendingComboIndex = 0; // 次に開始するActionへ渡すコンボ番号
+    PLAYER_ACTION previousAction = PLAYER_ACTION::NONE;
+    PLAYER_ACTION locomotionPhaseAction = PLAYER_ACTION::NONE;
 
     DirectX::XMFLOAT3 pendingHorizontalVelocity{ 0.0f, 0.0f, 0.0f }; // 次回反映する水平速度
     DirectX::XMFLOAT3 pendingFacingDirection{ 0.0f, 0.0f, 1.0f }; // 次回反映する向き
 
     bool hasPendingHorizontalVelocity = false; // 水平速度の反映予約があるか
     bool hasPendingFacingDirection = false; // 向きの反映予約があるか
+    bool strongAttackHolding = false;
+    bool runEndActive = false;
+    float lastUpdateDeltaTime = 0.0f;
+    float strongAttackHoldTimer = 0.0f;
+    float locomotionPhaseTimer = 0.0f;
+    float runEndTimer = 0.0f;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE; // Debug UIで選択中のAction
 };

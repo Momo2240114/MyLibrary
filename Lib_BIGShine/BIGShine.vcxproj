@@ -314,6 +314,7 @@
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\DebugLogWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp" />
@@ -331,6 +332,7 @@
     <ClCompile Include="Code\Engine\Audio\AudioSource.cpp" />
     <ClCompile Include="Code\Engine\Core\framework.cpp" />
     <ClCompile Include="Code\Engine\Core\main.cpp" />
+    <ClCompile Include="Code\Engine\Common\DebugLog.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraManager.cpp" />
@@ -355,6 +357,7 @@
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActionSequence.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\EventTrack.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Graphics\MotionVelocityComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\ControllerInput.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\KeyConfig.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Input\KeyInput.cpp" />
@@ -384,6 +387,7 @@
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\PostEffect\MotionBlurDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\VignetteDirector.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.cpp" />
@@ -392,6 +396,7 @@
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ImGuiRenderer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\RenderSystem\MotionVelocityRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.cpp" />
@@ -408,6 +413,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.cpp" />
@@ -475,6 +481,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerHitState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerJumpState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp" />
@@ -509,6 +516,7 @@
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\DebugLogWindow.h" />
     <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
@@ -521,6 +529,7 @@
     <ClInclude Include="Code\Editor\Window\ShadowWindow.h" />
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h" />
     <ClInclude Include="Code\Engine\Common\misc.h" />
+    <ClInclude Include="Code\Engine\Common\DebugLog.h" />
     <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraManager.h" />
@@ -566,11 +575,13 @@
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
+    <ClInclude Include="Code\Engine\Graphics\PostEffect\MotionBlurDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\RadialBlurDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\VignetteDirector.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\TimeScaleDirector.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\CascadeShadowMap.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionBlurSystem.h" />
+    <ClInclude Include="Code\Engine\Graphics\RenderSystem\MotionVelocityRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\PostDistortionSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\VignetteSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\RenderSystem\OutlineSystem.h" />
@@ -625,6 +636,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Graphics\MotionVelocityComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\ControllerInput.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\KeyConfig.h" />
     <ClInclude Include="Code\Engine\GamePlay\Input\KeyInput.h" />
@@ -648,6 +660,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\SpringBoneSimulationComponent.h" />
@@ -701,6 +714,7 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerHitState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h" />
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerJumpState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerMoveState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h" />
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
@@ -844,6 +858,14 @@
     </FxCompile>
     <FxCompile Include="Shader\MotionVelocityPS.hlsl">
       <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionObjectVelocityPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\MotionObjectVelocityVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\MotionVelocityTileMaxPS.hlsl">
