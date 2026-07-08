@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 66,
+                "AttackInstanceId": 175,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -386,8 +386,8 @@
             "Data": {
                 "FadeInDuration": 0.44999998807907104,
                 "FadeOutDuration": 0.5,
-                "IsPlaying": false,
-                "OverlayActive": false,
+                "IsPlaying": true,
+                "OverlayActive": true,
                 "Parts": [
                     {
                         "Alpha": 1.0,

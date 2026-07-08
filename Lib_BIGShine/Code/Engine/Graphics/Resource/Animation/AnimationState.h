@@ -125,10 +125,15 @@ struct AnimState
     int blend2DForwardRightAnimationIndex = -1;
     int blend2DBackwardLeftAnimationIndex = -1;
     int blend2DBackwardRightAnimationIndex = -1;
+    int blend2DForwardLeft90AnimationIndex = -1;
+    int blend2DForwardRight90AnimationIndex = -1;
+    int blend2DBackwardLeft90AnimationIndex = -1;
+    int blend2DBackwardRight90AnimationIndex = -1;
     int blend2DIdleAnimationIndex = -1;
     std::string blend2DParamName = "MoveInput";
     DirectX::XMFLOAT2 blend2DDefaultInput = { 0.0f, 1.0f };
     bool blend2DUseEightDirections = false;
+    bool blend2DUseForwardBackwardLateral = false;
     float blend2DIdleThreshold = 0.05f;
     bool blend2DSyncNormalizedTime = true;
     float blend2DForwardPhaseOffset = 0.0f;
@@ -139,6 +144,10 @@ struct AnimState
     float blend2DForwardRightPhaseOffset = 0.0f;
     float blend2DBackwardLeftPhaseOffset = 0.0f;
     float blend2DBackwardRightPhaseOffset = 0.0f;
+    float blend2DForwardLeft90PhaseOffset = 0.0f;
+    float blend2DForwardRight90PhaseOffset = 0.0f;
+    float blend2DBackwardLeft90PhaseOffset = 0.0f;
+    float blend2DBackwardRight90PhaseOffset = 0.0f;
     float blend2DIdlePhaseOffset = 0.0f;
 
     // --- Custom (ポーズライブラリ) 用データ 【追加】 ---

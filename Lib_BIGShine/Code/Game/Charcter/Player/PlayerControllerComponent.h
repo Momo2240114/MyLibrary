@@ -75,6 +75,7 @@ public:
 
     ColliderComponent* GetCollider() const { return collider.get(); } // PlayerのColliderを返す
     CharacterMovementComponent* GetMovement() const { return movement.get(); } // Playerの移動Componentを返す
+    bool IsGrounded() const;
     PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); } // 現在Actionを返す
     int GetComboIndex() const { return comboIndex; } // 現在のコンボ番号を返す
     const std::vector<PlayerCancelTransition>& GetCancelTransitions() const { return cancelTransitions; } // キャンセルルート一覧を返す
@@ -95,11 +96,14 @@ public:
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する
     void ProcessActionInput(); // 入力からAction要求を発行する
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る
+    void SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
 
     void NotifyJustDodge(); // ジャスト回避成功を現在のDodgeStateへ通知する
 
     float moveSpeed = 6.0f; // 通常移動速度
     float jumpImpulse = 8.5f;
+    float jumpStartMinDuration = 0.12f;
+    float jumpEndDuration = 0.16f;
     float strongAttackHoldThreshold = 0.35f;
     float strongChargeAttackSpeed = 14.0f;
     float runStartDuration = 0.18f;
@@ -112,6 +116,7 @@ private:
     void SendActionToBlackboard(PLAYER_ACTION action_); // 現在Action情報をBlackboardへ送る
     void UpdateLocomotionAnimationPhase(float deltaTime_);
     void SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
+    void SendGroundedToBlackboard();
     bool UpdateStrongAttackInput();
     void ResetStrongAttackInput();
     void EnsureDefaultCancelTransitions();

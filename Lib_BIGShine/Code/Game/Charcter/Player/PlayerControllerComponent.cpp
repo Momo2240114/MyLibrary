@@ -233,8 +233,14 @@ void PlayerControllerComponent::Update(float dt_)
 {
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
     stateMachine.Update(dt_);
+    SendGroundedToBlackboard();
     UpdateLocomotionAnimationPhase(dt_);
     ApplyPendingMovement();
+}
+
+bool PlayerControllerComponent::IsGrounded() const
+{
+    return collider && collider->isGrounded;
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
@@ -393,6 +399,10 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     {
         return false;
     }
+    if (nextAction_ == PLAYER_ACTION::JUMP && !IsGrounded())
+    {
+        return false;
+    }
 
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (currentAction_ == nextAction_)
@@ -525,7 +535,7 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
 std::shared_ptr<CameraLockOnComponent>
 PlayerControllerComponent::ResolveCameraLockOnComponent() const
 {
-    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager) return nullptr;
 
     for (const std::shared_ptr<GameObject>& object_ : owner_->manager->GetObjects())
@@ -928,7 +938,7 @@ void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float deltaTime_)
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (currentAction_ == PLAYER_ACTION::JUMP)
     {
-        phase_ = PLAYER_LOCOMOTION_PHASE::JUMP;
+        return;
     }
     else if (currentAction_ == PLAYER_ACTION::MOVE)
     {
@@ -981,7 +991,42 @@ void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTIO
         blackboard->SetBool(
             category_,
             PlayerBlackboardKey::IS_JUMP,
-            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP);
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP ||
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_START ||
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_LOOP ||
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_END);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_JUMP_START,
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_START);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_JUMP_LOOP,
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_LOOP);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_JUMP_END,
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_END);
+    }
+}
+
+void PlayerControllerComponent::SendGroundedToBlackboard()
+{
+    if (!blackboard) return;
+
+    constexpr const char* categories_[] =
+    {
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardCategory::ANIM
+    };
+
+    const bool isGrounded_ = IsGrounded();
+    for (const char* category_ : categories_)
+    {
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_GROUNDED,
+            isGrounded_);
     }
 }
 
@@ -1016,6 +1061,19 @@ void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT
     blackboard->SetVector2(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::MOVE_INPUT, { input_.x, input_.z });
 }
 
+void PlayerControllerComponent::SendJumpPhaseToBlackboard(
+    PLAYER_LOCOMOTION_PHASE phase_)
+{
+    if (phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_START &&
+        phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_LOOP &&
+        phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_END)
+    {
+        phase_ = PLAYER_LOCOMOTION_PHASE::JUMP;
+    }
+
+    SendLocomotionPhaseToBlackboard(phase_);
+}
+
 void PlayerControllerComponent::NotifyJustDodge()
 {
     if (GetCurrentAction() != PLAYER_ACTION::DODGE)
@@ -1042,6 +1100,7 @@ void PlayerControllerComponent::Gui()
     ImGui::Text("Can Buffer Input: %s", actionRuntime.canBufferInput ? "true" : "false");
     ImGui::Text("Can Combo: %s", actionRuntime.canCombo ? "true" : "false");
     ImGui::Text("Action Ended: %s", actionRuntime.actionEnded ? "true" : "false");
+    ImGui::Text("Is Grounded: %s", IsGrounded() ? "true" : "false");
     ImGui::Text("Combo Index: %d", comboIndex);
     ImGui::Text("Buffered Action: %s", GetPlayerActionName(actionRuntime.bufferedAction));
 
@@ -1117,6 +1176,8 @@ void PlayerControllerComponent::Gui()
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Jump Start Min Duration", &jumpStartMinDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Strong Hold Threshold", &strongAttackHoldThreshold, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Strong Charge Speed", &strongChargeAttackSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
@@ -1176,6 +1237,10 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_GUARD, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_DODGE, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_START, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_LOOP, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_END, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_GROUNDED, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_START, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_LOOP, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_END, false);
@@ -1197,6 +1262,8 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
     j_["JumpImpulse"] = jumpImpulse;
+    j_["JumpStartMinDuration"] = jumpStartMinDuration;
+    j_["JumpEndDuration"] = jumpEndDuration;
     j_["StrongAttackHoldThreshold"] = strongAttackHoldThreshold;
     j_["StrongChargeAttackSpeed"] = strongChargeAttackSpeed;
     j_["RunStartDuration"] = runStartDuration;
@@ -1228,6 +1295,8 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
+    jumpStartMinDuration = (std::max)(j_.value("JumpStartMinDuration", jumpStartMinDuration), 0.0f);
+    jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
     strongAttackHoldThreshold = (std::max)(j_.value("StrongAttackHoldThreshold", strongAttackHoldThreshold), 0.0f);
     strongChargeAttackSpeed = (std::max)(j_.value("StrongChargeAttackSpeed", strongChargeAttackSpeed), 0.0f);
     runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);

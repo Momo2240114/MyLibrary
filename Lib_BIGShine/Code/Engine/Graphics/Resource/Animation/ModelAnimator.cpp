@@ -292,6 +292,57 @@ static Blend2DSelection ResolveBlend2DSelection(
         absoluteY_ = std::abs(input_.y);
     }
 
+    if (state_->blend2DUseForwardBackwardLateral)
+    {
+        struct DirectionClip
+        {
+            int animationIndex = -1;
+            float phaseOffset = 0.0f;
+        };
+
+        const bool useBackward_ = input_.y < 0.0f;
+        const bool useLeft_ = input_.x < 0.0f;
+        const DirectionClip centerClip_ = useBackward_
+            ? DirectionClip{ state_->blend2DBackwardAnimationIndex, state_->blend2DBackwardPhaseOffset }
+            : DirectionClip{ state_->blend2DForwardAnimationIndex, state_->blend2DForwardPhaseOffset };
+        const DirectionClip lateral45Clip_ = useBackward_
+            ? (useLeft_
+                ? DirectionClip{ state_->blend2DBackwardLeftAnimationIndex, state_->blend2DBackwardLeftPhaseOffset }
+                : DirectionClip{ state_->blend2DBackwardRightAnimationIndex, state_->blend2DBackwardRightPhaseOffset })
+            : (useLeft_
+                ? DirectionClip{ state_->blend2DForwardLeftAnimationIndex, state_->blend2DForwardLeftPhaseOffset }
+                : DirectionClip{ state_->blend2DForwardRightAnimationIndex, state_->blend2DForwardRightPhaseOffset });
+        const DirectionClip lateral90Clip_ = useBackward_
+            ? (useLeft_
+                ? DirectionClip{ state_->blend2DBackwardLeft90AnimationIndex, state_->blend2DBackwardLeft90PhaseOffset }
+                : DirectionClip{ state_->blend2DBackwardRight90AnimationIndex, state_->blend2DBackwardRight90PhaseOffset })
+            : (useLeft_
+                ? DirectionClip{ state_->blend2DForwardLeft90AnimationIndex, state_->blend2DForwardLeft90PhaseOffset }
+                : DirectionClip{ state_->blend2DForwardRight90AnimationIndex, state_->blend2DForwardRight90PhaseOffset });
+
+        constexpr float HALF_PI_ = 1.57079632679f;
+        const float lateralRate_ = std::clamp(
+            std::atan2(absoluteX_, (std::max)(absoluteY_, 0.000001f)) / HALF_PI_,
+            0.0f,
+            1.0f);
+        if (lateralRate_ <= 0.5f)
+        {
+            selection_.animationIndexA = centerClip_.animationIndex;
+            selection_.phaseOffsetA = centerClip_.phaseOffset;
+            selection_.animationIndexB = lateral45Clip_.animationIndex;
+            selection_.phaseOffsetB = lateral45Clip_.phaseOffset;
+            selection_.weightB = lateralRate_ * 2.0f;
+            return selection_;
+        }
+
+        selection_.animationIndexA = lateral45Clip_.animationIndex;
+        selection_.phaseOffsetA = lateral45Clip_.phaseOffset;
+        selection_.animationIndexB = lateral90Clip_.animationIndex;
+        selection_.phaseOffsetB = lateral90Clip_.phaseOffset;
+        selection_.weightB = (lateralRate_ - 0.5f) * 2.0f;
+        return selection_;
+    }
+
     if (state_->blend2DUseEightDirections)
     {
         struct DirectionClip

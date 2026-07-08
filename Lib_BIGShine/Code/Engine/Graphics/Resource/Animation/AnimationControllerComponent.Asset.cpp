@@ -798,10 +798,15 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"blend2DForwardRightAnimationIndex", s.blend2DForwardRightAnimationIndex},
             {"blend2DBackwardLeftAnimationIndex", s.blend2DBackwardLeftAnimationIndex},
             {"blend2DBackwardRightAnimationIndex", s.blend2DBackwardRightAnimationIndex},
+            {"blend2DForwardLeft90AnimationIndex", s.blend2DForwardLeft90AnimationIndex},
+            {"blend2DForwardRight90AnimationIndex", s.blend2DForwardRight90AnimationIndex},
+            {"blend2DBackwardLeft90AnimationIndex", s.blend2DBackwardLeft90AnimationIndex},
+            {"blend2DBackwardRight90AnimationIndex", s.blend2DBackwardRight90AnimationIndex},
             {"blend2DIdleAnimationIndex", s.blend2DIdleAnimationIndex},
             {"blend2DParamName", s.blend2DParamName},
             {"blend2DDefaultInput", {s.blend2DDefaultInput.x, s.blend2DDefaultInput.y}},
             {"blend2DUseEightDirections", s.blend2DUseEightDirections},
+            {"blend2DUseForwardBackwardLateral", s.blend2DUseForwardBackwardLateral},
             {"blend2DIdleThreshold", s.blend2DIdleThreshold},
             {"blend2DSyncNormalizedTime", s.blend2DSyncNormalizedTime},
             {"blend2DForwardPhaseOffset", s.blend2DForwardPhaseOffset},
@@ -812,6 +817,10 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"blend2DForwardRightPhaseOffset", s.blend2DForwardRightPhaseOffset},
             {"blend2DBackwardLeftPhaseOffset", s.blend2DBackwardLeftPhaseOffset},
             {"blend2DBackwardRightPhaseOffset", s.blend2DBackwardRightPhaseOffset},
+            {"blend2DForwardLeft90PhaseOffset", s.blend2DForwardLeft90PhaseOffset},
+            {"blend2DForwardRight90PhaseOffset", s.blend2DForwardRight90PhaseOffset},
+            {"blend2DBackwardLeft90PhaseOffset", s.blend2DBackwardLeft90PhaseOffset},
+            {"blend2DBackwardRight90PhaseOffset", s.blend2DBackwardRight90PhaseOffset},
             {"blend2DIdlePhaseOffset", s.blend2DIdlePhaseOffset},
             // Custom用 【追加】
             {"customAnimIndex", s.customAnimIndex},
@@ -856,6 +865,10 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.blend2DForwardRightAnimationIndex = j.value("blend2DForwardRightAnimationIndex", -1);
     s.blend2DBackwardLeftAnimationIndex = j.value("blend2DBackwardLeftAnimationIndex", -1);
     s.blend2DBackwardRightAnimationIndex = j.value("blend2DBackwardRightAnimationIndex", -1);
+    s.blend2DForwardLeft90AnimationIndex = j.value("blend2DForwardLeft90AnimationIndex", -1);
+    s.blend2DForwardRight90AnimationIndex = j.value("blend2DForwardRight90AnimationIndex", -1);
+    s.blend2DBackwardLeft90AnimationIndex = j.value("blend2DBackwardLeft90AnimationIndex", -1);
+    s.blend2DBackwardRight90AnimationIndex = j.value("blend2DBackwardRight90AnimationIndex", -1);
     s.blend2DIdleAnimationIndex = j.value("blend2DIdleAnimationIndex", -1);
     s.blend2DParamName = j.value("blend2DParamName", "MoveInput");
     if (j.contains("blend2DDefaultInput") &&
@@ -869,6 +882,7 @@ void from_json(const nlohmann::json& j, AnimState& s)
         };
     }
     s.blend2DUseEightDirections = j.value("blend2DUseEightDirections", false);
+    s.blend2DUseForwardBackwardLateral = j.value("blend2DUseForwardBackwardLateral", false);
     s.blend2DIdleThreshold = (std::max)(j.value("blend2DIdleThreshold", 0.05f), 0.0f);
     s.blend2DSyncNormalizedTime = j.value("blend2DSyncNormalizedTime", true);
     s.blend2DForwardPhaseOffset = j.value("blend2DForwardPhaseOffset", 0.0f);
@@ -879,6 +893,10 @@ void from_json(const nlohmann::json& j, AnimState& s)
     s.blend2DForwardRightPhaseOffset = j.value("blend2DForwardRightPhaseOffset", 0.0f);
     s.blend2DBackwardLeftPhaseOffset = j.value("blend2DBackwardLeftPhaseOffset", 0.0f);
     s.blend2DBackwardRightPhaseOffset = j.value("blend2DBackwardRightPhaseOffset", 0.0f);
+    s.blend2DForwardLeft90PhaseOffset = j.value("blend2DForwardLeft90PhaseOffset", 0.0f);
+    s.blend2DForwardRight90PhaseOffset = j.value("blend2DForwardRight90PhaseOffset", 0.0f);
+    s.blend2DBackwardLeft90PhaseOffset = j.value("blend2DBackwardLeft90PhaseOffset", 0.0f);
+    s.blend2DBackwardRight90PhaseOffset = j.value("blend2DBackwardRight90PhaseOffset", 0.0f);
     s.blend2DIdlePhaseOffset = j.value("blend2DIdlePhaseOffset", 0.0f);
 
     // Custom用 【追加】
