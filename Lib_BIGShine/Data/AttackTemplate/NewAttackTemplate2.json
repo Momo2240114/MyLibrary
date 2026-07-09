@@ -1,0 +1,40 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "damage": 5.0,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.05000000074505806,
+        "hitStopScale": 0.0,
+        "knockBackPower": 3.0,
+        "knockBackType": 0
+    },
+    "attackEffects": [],
+    "displayName": "New Attack Template",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 1.0,
+        "hitParticleNormalOffset": 0.0,
+        "spawnOnHit": true
+    },
+    "id": "NewAttackTemplate2",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.18000000715255737,
+        "activeStartTime": 0.0,
+        "enabled": false,
+        "endNodeName": "WeaponTip",
+        "hitBoxName": "HitBox",
+        "radius": 0.18000000715255737,
+        "startNodeName": "WeaponRoot"
+    }
+}

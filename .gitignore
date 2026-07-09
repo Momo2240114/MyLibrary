@@ -419,3 +419,4 @@ FodyWeavers.xsd
 
 # Specific large glTF asset
 /Lib_BIGShine/Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf
+/Lib_BIGShine/Data/Model/Enemy/CombatGirls_Sword_Shield.gltf

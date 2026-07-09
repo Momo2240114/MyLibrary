@@ -23,5 +23,6 @@ private:
     void ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_);
 
     PLAYER_JUMP_RUNTIME_PHASE phase = PLAYER_JUMP_RUNTIME_PHASE::START;
+    float phaseTimer = 0.0f;
     bool hasLeftGround = false;
 };

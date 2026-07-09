@@ -112,6 +112,7 @@ public:
     float strongChargeAttackSpeed = 14.0f;
     float runStartDuration = 0.18f;
     float runEndDuration = 0.18f;
+    float jumpEndDuration = 0.18f;
 
 private:
     void EnsurePlayerInputBindings(); // Player用InputActionの登録を保証する
