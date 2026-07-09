@@ -11,16 +11,40 @@ void PlayerJumpState::Enter()
     if (!player_) return;
 
     const bool resumeLoop_ = player_->ConsumeJumpLoopResumeRequest();
+    const bool resumeLanding_ = resumeLoop_ && player_->IsGrounded();
+    phaseTimer = 0.0f;
     hasLeftGround = resumeLoop_;
-    phase = resumeLoop_
-        ? PLAYER_JUMP_RUNTIME_PHASE::LOOP
-        : PLAYER_JUMP_RUNTIME_PHASE::START;
-    player_->BeginAirborneActionContext();
+    if (resumeLanding_)
+    {
+        phase = PLAYER_JUMP_RUNTIME_PHASE::END;
+    }
+    else if (resumeLoop_)
+    {
+        phase = PLAYER_JUMP_RUNTIME_PHASE::LOOP;
+    }
+    else
+    {
+        phase = PLAYER_JUMP_RUNTIME_PHASE::START;
+    }
+    if (resumeLanding_)
+    {
+        player_->EndAirborneActionContext();
+    }
+    else
+    {
+        player_->BeginAirborneActionContext();
+    }
     player_->EnterAction(PLAYER_ACTION::JUMP);
-    player_->SendJumpPhaseToBlackboard(
-        resumeLoop_
-        ? PLAYER_LOCOMOTION_PHASE::JUMP_LOOP
-        : PLAYER_LOCOMOTION_PHASE::JUMP_START);
+    PLAYER_LOCOMOTION_PHASE locomotionPhase_ = PLAYER_LOCOMOTION_PHASE::JUMP_START;
+    if (resumeLanding_)
+    {
+        locomotionPhase_ = PLAYER_LOCOMOTION_PHASE::JUMP_END;
+    }
+    else if (resumeLoop_)
+    {
+        locomotionPhase_ = PLAYER_LOCOMOTION_PHASE::JUMP_LOOP;
+    }
+    player_->SendJumpPhaseToBlackboard(locomotionPhase_);
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);
@@ -43,6 +67,8 @@ void PlayerJumpState::Execute(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
+
+    phaseTimer += (std::max)(elapsedTime_, 0.0f);
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);
@@ -100,9 +126,12 @@ void PlayerJumpState::Execute(float elapsedTime_)
     if (hasLeftGround)
     {
         ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::END);
-        if (input_.x != 0.0f || input_.z != 0.0f)
+        const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
+        if (hasMoveInput_ ||
+            (phase == PLAYER_JUMP_RUNTIME_PHASE::END &&
+                phaseTimer >= player_->jumpEndDuration))
         {
-            player_->RequestAction(PLAYER_ACTION::MOVE);
+            player_->NotifyActionEnd();
         }
     }
 }
@@ -111,7 +140,7 @@ void PlayerJumpState::Exit()
 {
     if (PlayerControllerComponent* player_ = GetPlayerController())
     {
-        if (!hasLeftGround && player_->IsGrounded())
+        if (player_->IsGrounded())
         {
             player_->EndAirborneActionContext();
         }
@@ -125,6 +154,7 @@ void PlayerJumpState::ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_)
     if (phase == phase_) return;
 
     phase = phase_;
+    phaseTimer = 0.0f;
 
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;

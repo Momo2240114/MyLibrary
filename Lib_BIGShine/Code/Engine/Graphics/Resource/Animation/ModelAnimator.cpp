@@ -770,41 +770,25 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 * Matrix::CreateTranslation(pose_.position);
         };
 
-    auto computeGlobalMatrices_ = [&](const std::vector<GltfModelCommponennt::NodePose>& pose_, std::vector<DirectX::SimpleMath::Matrix>& matrices_)
-        {
-            const size_t nodeCount_ = (std::min)(pose_.size(), nodes_.size());
-            matrices_.assign(nodeCount_, DirectX::SimpleMath::Matrix::Identity);
-            for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
-            {
-                const DirectX::SimpleMath::Matrix localMatrix_ = makeNodeLocalMatrix_(pose_[nodeIndex_]);
-                const int parentIndex_ = nodes_[nodeIndex_].parentIndex;
-                if (parentIndex_ >= 0 && parentIndex_ < static_cast<int>(nodeIndex_))
-                {
-                    matrices_[nodeIndex_] = localMatrix_ * matrices_[parentIndex_];
-                }
-                else
-                {
-                    matrices_[nodeIndex_] = localMatrix_;
-                }
-            }
-        };
-
-    std::vector<DirectX::SimpleMath::Matrix> rootMotionGlobalMatrices_;
     auto getParentGlobalMatrix_ = [&](const std::vector<GltfModelCommponennt::NodePose>& pose_, int nodeIndex_)
         {
-            computeGlobalMatrices_(pose_, rootMotionGlobalMatrices_);
             if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size()))
             {
                 return DirectX::SimpleMath::Matrix::Identity;
             }
 
             const int parentIndex_ = nodes_[nodeIndex_].parentIndex;
-            if (parentIndex_ < 0 || parentIndex_ >= static_cast<int>(rootMotionGlobalMatrices_.size()))
+            DirectX::SimpleMath::Matrix parentGlobalMatrix_ = DirectX::SimpleMath::Matrix::Identity;
+            int currentIndex_ = parentIndex_;
+            while (currentIndex_ >= 0 &&
+                currentIndex_ < static_cast<int>(nodes_.size()) &&
+                currentIndex_ < static_cast<int>(pose_.size()))
             {
-                return DirectX::SimpleMath::Matrix::Identity;
+                parentGlobalMatrix_ = parentGlobalMatrix_ * makeNodeLocalMatrix_(pose_[currentIndex_]);
+                currentIndex_ = nodes_[currentIndex_].parentIndex;
             }
 
-            return rootMotionGlobalMatrices_[parentIndex_];
+            return parentGlobalMatrix_;
         };
 
     if (currentRootNodeIndex_ != -1 && tempPoseA.size() > currentRootNodeIndex_)

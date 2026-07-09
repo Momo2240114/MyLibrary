@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 495,
+                "AttackInstanceId": 56,
                 "AttackTag": "Attack",
                 "BlackboardCategory": "Attack",
                 "CanHitOwner": false,
@@ -357,7 +357,7 @@
                     }
                 ],
                 "PlaybackSpeed": 1.0,
-                "TrailEmitting": true,
+                "TrailEmitting": false,
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,
@@ -386,8 +386,8 @@
             "Data": {
                 "FadeInDuration": 0.44999998807907104,
                 "FadeOutDuration": 0.5,
-                "IsPlaying": true,
-                "OverlayActive": true,
+                "IsPlaying": false,
+                "OverlayActive": false,
                 "Parts": [
                     {
                         "Alpha": 1.0,

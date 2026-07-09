@@ -701,10 +701,19 @@ void PlayerControllerComponent::NotifyActionEnd()
         return;
     }
 
-    if (IsAirAction(currentAction_) && IsAirborneForAction())
+    if (IsAirAction(currentAction_))
     {
-        jumpLoopResumeRequested = true;
-        stateMachine.ChangeState(PLAYER_ACTION::JUMP);
+        const DirectX::XMFLOAT3 input_ = GetMoveInput();
+        const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
+        if (IsGrounded() && hasMoveInput_)
+        {
+            stateMachine.ChangeState(PLAYER_ACTION::MOVE);
+        }
+        else
+        {
+            jumpLoopResumeRequested = true;
+            stateMachine.ChangeState(PLAYER_ACTION::JUMP);
+        }
         return;
     }
 
@@ -1337,6 +1346,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Strong Charge Speed", &strongChargeAttackSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Run End Duration", &runEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
 
     ImGui::SeparatorText("Attack Facing Assist");
     ImGui::Checkbox("Enabled##AttackFacingAssist", &attackAssistSettings.enabled);
@@ -1430,6 +1440,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["StrongChargeAttackSpeed"] = strongChargeAttackSpeed;
     j_["RunStartDuration"] = runStartDuration;
     j_["RunEndDuration"] = runEndDuration;
+    j_["JumpEndDuration"] = jumpEndDuration;
     j_["AttackAssist"] =
     {
         { "Enabled", attackAssistSettings.enabled },
@@ -1464,6 +1475,7 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     strongChargeAttackSpeed = (std::max)(j_.value("StrongChargeAttackSpeed", strongChargeAttackSpeed), 0.0f);
     runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);
     runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.0f);
+    jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
     if (j_.contains("AttackAssist") && j_["AttackAssist"].is_object())
     {
         const auto& attackAssistJson_ = j_["AttackAssist"];
