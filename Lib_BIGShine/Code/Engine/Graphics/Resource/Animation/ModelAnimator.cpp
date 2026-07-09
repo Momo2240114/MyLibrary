@@ -719,13 +719,14 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ------------------------------------------------------------
     // 4. クロスフェード
     // ------------------------------------------------------------
+    float transitionAlpha_ = 1.0f;
     if (isTransitioning)
     {
         fadeTimer += et;
-        float alpha = fadeDuration > 0.0f ? (fadeTimer / fadeDuration) : 1.0f;
-        if (alpha >= 1.0f)
+        transitionAlpha_ = fadeDuration > 0.0f ? (fadeTimer / fadeDuration) : 1.0f;
+        if (transitionAlpha_ >= 1.0f)
         {
-            alpha = 1.0f;
+            transitionAlpha_ = 1.0f;
             isTransitioning = false;
         }
 
@@ -733,18 +734,6 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         {
             SamplePose(previous.state, previous.time, previous.sampleDuration, tempPoseB);
         }
-
-        for (size_t i = 0; i < nodeCount; ++i)
-        {
-            finalPose[i].position = DirectX::SimpleMath::Vector3::Lerp(tempPoseB[i].position, tempPoseA[i].position, alpha);
-            finalPose[i].rotation = DirectX::SimpleMath::Quaternion::Slerp(tempPoseB[i].rotation, tempPoseA[i].rotation, alpha);
-            finalPose[i].rotation.Normalize();
-            finalPose[i].scale = DirectX::SimpleMath::Vector3::Lerp(tempPoseB[i].scale, tempPoseA[i].scale, alpha);
-        }
-    }
-    else
-    {
-        finalPose = tempPoseA;
     }
 
 
@@ -768,22 +757,80 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
     const int currentRootNodeIndex_ = resolveRootNodeIndex_(current.state);
     const int previousRootNodeIndex_ = isTransitioning ? resolveRootNodeIndex_(previous.state) : -1;
-    const int defaultRootNodeIndex_ = model->GetRootMotionName().empty() ? -1 : model->GetNodeIndex(model->GetRootMotionName().c_str());
+    const int defaultRootNodeIndex_ = model->GetRootMotionName().empty()
+        ? -1
+        : model->GetNodeIndex(model->GetRootMotionName().c_str());
+    const auto& nodes_ = model->GetNodes();
+
+    auto makeNodeLocalMatrix_ = [](const GltfModelCommponennt::NodePose& pose_)
+        {
+            using namespace DirectX::SimpleMath;
+            return Matrix::CreateScale(pose_.scale)
+                * Matrix::CreateFromQuaternion(pose_.rotation)
+                * Matrix::CreateTranslation(pose_.position);
+        };
+
+    auto computeGlobalMatrices_ = [&](const std::vector<GltfModelCommponennt::NodePose>& pose_, std::vector<DirectX::SimpleMath::Matrix>& matrices_)
+        {
+            const size_t nodeCount_ = (std::min)(pose_.size(), nodes_.size());
+            matrices_.assign(nodeCount_, DirectX::SimpleMath::Matrix::Identity);
+            for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount_; ++nodeIndex_)
+            {
+                const DirectX::SimpleMath::Matrix localMatrix_ = makeNodeLocalMatrix_(pose_[nodeIndex_]);
+                const int parentIndex_ = nodes_[nodeIndex_].parentIndex;
+                if (parentIndex_ >= 0 && parentIndex_ < static_cast<int>(nodeIndex_))
+                {
+                    matrices_[nodeIndex_] = localMatrix_ * matrices_[parentIndex_];
+                }
+                else
+                {
+                    matrices_[nodeIndex_] = localMatrix_;
+                }
+            }
+        };
+
+    std::vector<DirectX::SimpleMath::Matrix> rootMotionGlobalMatrices_;
+    auto getParentGlobalMatrix_ = [&](const std::vector<GltfModelCommponennt::NodePose>& pose_, int nodeIndex_)
+        {
+            computeGlobalMatrices_(pose_, rootMotionGlobalMatrices_);
+            if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size()))
+            {
+                return DirectX::SimpleMath::Matrix::Identity;
+            }
+
+            const int parentIndex_ = nodes_[nodeIndex_].parentIndex;
+            if (parentIndex_ < 0 || parentIndex_ >= static_cast<int>(rootMotionGlobalMatrices_.size()))
+            {
+                return DirectX::SimpleMath::Matrix::Identity;
+            }
+
+            return rootMotionGlobalMatrices_[parentIndex_];
+        };
 
     if (currentRootNodeIndex_ != -1 && tempPoseA.size() > currentRootNodeIndex_)
     {
         using namespace DirectX::SimpleMath;
 
         const Vector3 rawPos_ = tempPoseA[currentRootNodeIndex_].position;
-        const auto& bindRootPose_ = model->GetBindNodePose(currentRootNodeIndex_);
         const bool looped_ = (current.time < prevTime);
         const bool stateChanged_ = (_prevRootMotionState != current.state);
         const bool sourceNodeChanged_ = (previousRootMotionNodeIndex != currentRootNodeIndex_);
+        const bool resetBasePosition_ = isFirstFrame || sourceNodeChanged_;
+        float rootMotionScale_ = current.state->rootMotionScale;
+        if (curvecomp && !current.state->rootMotionScaleCurveName.empty())
+        {
+            float normalizedTime_ = (baseDuration > 0.0f) ? (current.time / baseDuration) : 0.0f;
+            normalizedTime_ = (std::max)(0.0f, (std::min)(1.0f, normalizedTime_));
+            rootMotionScale_ *= curvecomp->GetValue(current.state->rootMotionScaleCurveName, normalizedTime_);
+        }
 
         if (isFirstFrame || stateChanged_ || sourceNodeChanged_)
         {
             prevRootPos = rawPos_;
-            rootMotionBasePosition = bindRootPose_.position;
+            if (resetBasePosition_)
+            {
+                rootMotionBasePosition = rawPos_;
+            }
             prevTime = current.time;
             _prevRootMotionState = current.state;
             previousRootMotionNodeIndex = currentRootNodeIndex_;
@@ -811,15 +858,9 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             if (!current.state->rootMotion.applyPositionY) deltaPos_.y = 0.0f;
             if (!current.state->rootMotion.applyPositionZ) deltaPos_.z = 0.0f;
 
-            float rootMotionScale_ = current.state->rootMotionScale;
-            if (curvecomp && !current.state->rootMotionScaleCurveName.empty())
-            {
-                float normalizedTime_ = (baseDuration > 0.0f) ? (current.time / baseDuration) : 0.0f;
-                normalizedTime_ = (std::max)(0.0f, (std::min)(1.0f, normalizedTime_));
-                rootMotionScale_ *= curvecomp->GetValue(current.state->rootMotionScaleCurveName, normalizedTime_);
-            }
-
-            currentRootMotionDelta.deltaPosition = deltaPos_ * rootMotionScale_;
+            const Matrix parentGlobalMatrix_ = getParentGlobalMatrix_(tempPoseA, currentRootNodeIndex_);
+            currentRootMotionDelta.deltaPosition =
+                Vector3::TransformNormal(deltaPos_, parentGlobalMatrix_) * rootMotionScale_;
 
             prevRootPos = rawPos_;
             prevTime = current.time;
@@ -837,22 +878,73 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
     }
 
-    auto resetVisualRootPosition_ = [&](int nodeIndex_)
+    auto resetVisualRootPosition_ = [&](
+        std::vector<GltfModelCommponennt::NodePose>& pose_,
+        const AnimState* state_,
+        int nodeIndex_,
+        const DirectX::SimpleMath::Vector3& basePosition_)
         {
-            if (nodeIndex_ < 0 || finalPose.size() <= nodeIndex_) return;
+            if (nodeIndex_ < 0 || pose_.size() <= nodeIndex_) return;
 
-            const auto& bindRootPose_ = model->GetBindNodePose(nodeIndex_);
-            finalPose[nodeIndex_].position = bindRootPose_.position;
+            const bool resetX_ = !state_ || state_->rootMotion.applyPositionX || state_->rootMotion.cutVisualPositionX;
+            const bool resetY_ = !state_ || state_->rootMotion.applyPositionY || state_->rootMotion.cutVisualPositionY;
+            const bool resetZ_ = !state_ || state_->rootMotion.applyPositionZ || state_->rootMotion.cutVisualPositionZ;
+            if (resetX_) pose_[nodeIndex_].position.x = basePosition_.x;
+            if (resetY_) pose_[nodeIndex_].position.y = basePosition_.y;
+            if (resetZ_) pose_[nodeIndex_].position.z = basePosition_.z;
         };
 
-    resetVisualRootPosition_(currentRootNodeIndex_);
-    if (previousRootNodeIndex_ != currentRootNodeIndex_)
+    auto applyVisualRootMotionCut_ = [&](
+        std::vector<GltfModelCommponennt::NodePose>& pose_,
+        const AnimState* state_,
+        int sourceNodeIndex_,
+        const DirectX::SimpleMath::Vector3& basePosition_)
+        {
+            if (!state_ || sourceNodeIndex_ < 0 || pose_.size() <= sourceNodeIndex_) return;
+
+            if (sourceNodeIndex_ == defaultRootNodeIndex_)
+            {
+                resetVisualRootPosition_(pose_, state_, sourceNodeIndex_, basePosition_);
+                return;
+            }
+
+            using namespace DirectX::SimpleMath;
+            Matrix parentGlobalMatrix_ = getParentGlobalMatrix_(pose_, sourceNodeIndex_);
+            Matrix inverseParentGlobalMatrix_ = parentGlobalMatrix_.Invert();
+            Vector3 currentGlobalPosition_ = Vector3::Transform(pose_[sourceNodeIndex_].position, parentGlobalMatrix_);
+            const Vector3 baseGlobalPosition_ = Vector3::Transform(basePosition_, parentGlobalMatrix_);
+
+            if (state_->rootMotion.applyPositionX || state_->rootMotion.cutVisualPositionX) currentGlobalPosition_.x = baseGlobalPosition_.x;
+            if (state_->rootMotion.applyPositionY || state_->rootMotion.cutVisualPositionY) currentGlobalPosition_.y = baseGlobalPosition_.y;
+            if (state_->rootMotion.applyPositionZ || state_->rootMotion.cutVisualPositionZ) currentGlobalPosition_.z = baseGlobalPosition_.z;
+
+            pose_[sourceNodeIndex_].position = Vector3::Transform(currentGlobalPosition_, inverseParentGlobalMatrix_);
+        };
+
+    applyVisualRootMotionCut_(tempPoseA, current.state, currentRootNodeIndex_, rootMotionBasePosition);
+    if (isTransitioning && previous.state)
     {
-        resetVisualRootPosition_(previousRootNodeIndex_);
+        applyVisualRootMotionCut_(tempPoseB, previous.state, previousRootNodeIndex_, previousRootMotionBasePosition);
+        for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
+        {
+            finalPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
+                tempPoseB[nodeIndex_].position,
+                tempPoseA[nodeIndex_].position,
+                transitionAlpha_);
+            finalPose[nodeIndex_].rotation = DirectX::SimpleMath::Quaternion::Slerp(
+                tempPoseB[nodeIndex_].rotation,
+                tempPoseA[nodeIndex_].rotation,
+                transitionAlpha_);
+            finalPose[nodeIndex_].rotation.Normalize();
+            finalPose[nodeIndex_].scale = DirectX::SimpleMath::Vector3::Lerp(
+                tempPoseB[nodeIndex_].scale,
+                tempPoseA[nodeIndex_].scale,
+                transitionAlpha_);
+        }
     }
-    if (isTransitioning && defaultRootNodeIndex_ != currentRootNodeIndex_ && defaultRootNodeIndex_ != previousRootNodeIndex_)
+    else
     {
-        resetVisualRootPosition_(defaultRootNodeIndex_);
+        finalPose = tempPoseA;
     }
 }
 
@@ -900,6 +992,7 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
     if (current.state == newState) return;
 
     CallStateExitEndActions(current, owner);
+    previousRootMotionBasePosition = rootMotionBasePosition;
     previous = current;
 
     current.state = newState;

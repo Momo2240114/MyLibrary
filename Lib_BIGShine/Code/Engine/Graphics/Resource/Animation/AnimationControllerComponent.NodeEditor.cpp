@@ -325,8 +325,9 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
     ensureScopedEntryExitNodes();
 
+    const std::string currentScopeName_ = currentScopeName();
     auto isNodeInCurrentScope = [&](const AnimGraphNode& node) {
-        return node.scopeId.empty() ? currentScopeName() == "Root" : node.scopeId == currentScopeName();
+        return node.scopeId.empty() ? currentScopeName_ == "Root" : node.scopeId == currentScopeName_;
         };
 
     ImGui::SetNextItemWidth(220.0f);
@@ -574,6 +575,16 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             drawGraphNode_(node);
     }
 
+    std::unordered_map<std::string, AnimGraphNode*> scopedNodeByName_;
+    scopedNodeByName_.reserve(graphNodes.size());
+    for (AnimGraphNode& node_ : graphNodes)
+    {
+        if (isNodeInCurrentScope(node_))
+        {
+            scopedNodeByName_[node_.stateName] = &node_;
+        }
+    }
+
     if (nodeToPlaceId != 0)
     {
         for (auto& n : graphNodes) {
@@ -588,9 +599,11 @@ void AnimationControllerComponent::DrawNodeEditorContent()
 
     for (auto& link : graphTransitions)
     {
-        auto* startNode = FindNodeByName(link.fromStateName);
-        auto* endNode = FindNodeByName(link.toStateName);
-        if (link.scopeId != currentScopeName()) continue;
+        if (link.scopeId != currentScopeName_) continue;
+        const auto startNodeIterator_ = scopedNodeByName_.find(link.fromStateName);
+        const auto endNodeIterator_ = scopedNodeByName_.find(link.toStateName);
+        AnimGraphNode* startNode = startNodeIterator_ != scopedNodeByName_.end() ? startNodeIterator_->second : nullptr;
+        AnimGraphNode* endNode = endNodeIterator_ != scopedNodeByName_.end() ? endNodeIterator_->second : nullptr;
         if (startNode && endNode && isNodeInCurrentScope(*startNode) && isNodeInCurrentScope(*endNode) && (uintptr_t)startNode->outputPin.Get() != 0 && (uintptr_t)endNode->inputPin.Get() != 0)
         {
             ImVec4 color = (link.fromStateName == runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
@@ -603,10 +616,12 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     ImDrawList* arrowDrawList_ = ImGui::GetWindowDrawList();
     for (auto& link_ : graphTransitions)
     {
-        if (link_.scopeId != currentScopeName()) continue;
+        if (link_.scopeId != currentScopeName_) continue;
 
-        const AnimGraphNode* startNode_ = FindNodeByName(link_.fromStateName);
-        const AnimGraphNode* endNode_ = FindNodeByName(link_.toStateName);
+        const auto startNodeIterator_ = scopedNodeByName_.find(link_.fromStateName);
+        const auto endNodeIterator_ = scopedNodeByName_.find(link_.toStateName);
+        const AnimGraphNode* startNode_ = startNodeIterator_ != scopedNodeByName_.end() ? startNodeIterator_->second : nullptr;
+        const AnimGraphNode* endNode_ = endNodeIterator_ != scopedNodeByName_.end() ? endNodeIterator_->second : nullptr;
         if (!startNode_ || !endNode_ ||
             !isNodeInCurrentScope(*startNode_) ||
             !isNodeInCurrentScope(*endNode_))

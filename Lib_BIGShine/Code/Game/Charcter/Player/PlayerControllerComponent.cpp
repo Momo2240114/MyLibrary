@@ -258,6 +258,14 @@ void PlayerControllerComponent::EndAirborneActionContext()
 {
     airborneActionContextActive = false;
     airborneActionContextLeftGround = false;
+    jumpLoopResumeRequested = false;
+}
+
+bool PlayerControllerComponent::ConsumeJumpLoopResumeRequest()
+{
+    const bool requested_ = jumpLoopResumeRequested;
+    jumpLoopResumeRequested = false;
+    return requested_;
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
@@ -649,8 +657,9 @@ void PlayerControllerComponent::NotifyComboTransition()
 {
     SetCanBufferInput(false);
     SetCanCombo(false);
-    if (GetCurrentAction() != PLAYER_ACTION::WEAK_ATTACK ||
-        actionRuntime.bufferedAction != PLAYER_ACTION::WEAK_ATTACK)
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (GetPlayerAttackType(currentAction_) != PLAYER_ATTACK_TYPE::WEAK ||
+        actionRuntime.bufferedAction != currentAction_)
     {
         return;
     }
@@ -658,13 +667,14 @@ void PlayerControllerComponent::NotifyComboTransition()
     pendingComboIndex = actionRuntime.bufferedComboIndex;
     actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
     actionRuntime.bufferedComboIndex = 0;
-    stateMachine.ChangeState(PLAYER_ACTION::WEAK_ATTACK);
+    stateMachine.ChangeState(currentAction_);
 }
 
 void PlayerControllerComponent::NotifyActionEnd()
 {
-    if (!IsPlayerActionTimelineDriven(GetCurrentAction()) &&
-        GetCurrentAction() != PLAYER_ACTION::JUMP)
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (!IsPlayerActionTimelineDriven(currentAction_) &&
+        currentAction_ != PLAYER_ACTION::JUMP)
     {
         return;
     }
@@ -679,8 +689,8 @@ void PlayerControllerComponent::NotifyActionEnd()
         blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
     }
 
-    if (GetCurrentAction() == PLAYER_ACTION::WEAK_ATTACK &&
-        actionRuntime.bufferedAction == PLAYER_ACTION::WEAK_ATTACK)
+    if (GetPlayerAttackType(currentAction_) == PLAYER_ATTACK_TYPE::WEAK &&
+        actionRuntime.bufferedAction == currentAction_)
     {
         actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
         actionRuntime.bufferedComboIndex = 0;
@@ -688,6 +698,13 @@ void PlayerControllerComponent::NotifyActionEnd()
 
     if (ConsumeBufferedAction())
     {
+        return;
+    }
+
+    if (IsAirAction(currentAction_) && IsAirborneForAction())
+    {
+        jumpLoopResumeRequested = true;
+        stateMachine.ChangeState(PLAYER_ACTION::JUMP);
         return;
     }
 

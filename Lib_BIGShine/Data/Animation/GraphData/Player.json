@@ -61,6 +61,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -130,6 +133,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -199,6 +205,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -557,6 +566,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -915,6 +927,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -1057,6 +1072,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -1374,13 +1392,16 @@
                 "name": "Combo_Attack_Air_02_Seq",
                 "rootMotion": {
                     "applyPositionX": true,
-                    "applyPositionY": true,
+                    "applyPositionY": false,
                     "applyPositionZ": true,
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
-                    "sourceNodeName": ""
+                    "sourceNodeName": "pelvis"
                 },
                 "rootMotionScale": 0.009999999776482582,
                 "rootMotionScaleCurveName": "",
@@ -1448,6 +1469,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1517,6 +1541,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1586,6 +1613,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1655,6 +1685,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1724,6 +1757,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1793,6 +1829,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1862,6 +1901,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -1931,6 +1973,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2000,6 +2045,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2069,6 +2117,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2138,6 +2189,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2207,6 +2261,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2276,6 +2333,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2345,6 +2405,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2414,6 +2477,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2736,6 +2802,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -2805,6 +2874,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2874,6 +2946,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -2943,6 +3018,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3012,6 +3090,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3081,6 +3162,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3150,6 +3234,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3219,6 +3306,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3288,6 +3378,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3357,6 +3450,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3426,6 +3522,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3495,6 +3594,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -3817,6 +3919,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -4139,6 +4244,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -4208,6 +4316,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4277,6 +4388,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4346,6 +4460,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4415,6 +4532,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4484,6 +4604,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4553,6 +4676,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4622,6 +4748,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4691,6 +4820,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4760,6 +4892,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4829,6 +4964,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4898,6 +5036,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -4967,6 +5108,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5036,6 +5180,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5105,6 +5252,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5174,6 +5324,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5243,6 +5396,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5312,6 +5468,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5381,6 +5540,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -5450,6 +5612,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5519,6 +5684,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5588,6 +5756,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5657,6 +5828,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5726,6 +5900,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5795,6 +5972,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5864,6 +6044,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -5933,6 +6116,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6002,6 +6188,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6071,6 +6260,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6140,6 +6332,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6209,6 +6404,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6278,6 +6476,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6347,6 +6548,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6416,6 +6620,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6485,6 +6692,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6554,6 +6764,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6623,6 +6836,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6692,6 +6908,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6761,6 +6980,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6830,6 +7052,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6899,6 +7124,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -6968,6 +7196,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7037,6 +7268,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7106,6 +7340,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7175,6 +7412,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7244,6 +7484,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7313,6 +7556,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7382,6 +7628,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7451,6 +7700,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7520,6 +7772,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7589,6 +7844,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7658,6 +7916,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7727,6 +7988,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7796,6 +8060,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7865,6 +8132,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -7934,6 +8204,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8003,6 +8276,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8072,6 +8348,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8141,6 +8420,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8210,6 +8492,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8279,6 +8564,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8348,6 +8636,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8417,6 +8708,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8486,6 +8780,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8555,6 +8852,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8624,6 +8924,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -8946,6 +9249,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -9015,6 +9321,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9121,6 +9430,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9190,6 +9502,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9259,6 +9574,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9328,6 +9646,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9397,6 +9718,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9466,6 +9790,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9535,6 +9862,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9604,6 +9934,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9673,6 +10006,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9742,6 +10078,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9811,6 +10150,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9880,6 +10222,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -9949,6 +10294,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10018,6 +10366,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10087,6 +10438,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10156,6 +10510,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10225,6 +10582,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10294,6 +10654,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10363,6 +10726,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10432,6 +10798,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10501,6 +10870,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10570,6 +10942,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10639,6 +11014,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10708,6 +11086,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10777,6 +11158,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10846,6 +11230,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10915,6 +11302,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -10984,6 +11374,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11053,6 +11446,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11122,6 +11518,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11191,6 +11590,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11260,6 +11662,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11329,6 +11734,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11398,6 +11806,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11467,6 +11878,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11536,6 +11950,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11605,6 +12022,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11674,6 +12094,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11743,6 +12166,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11812,6 +12238,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11881,6 +12310,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -11950,6 +12382,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12019,6 +12454,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12088,6 +12526,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12157,6 +12598,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12226,6 +12670,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12439,7 +12886,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.75,
+                        "endTime": 0.6166666746139526,
                         "eventTemplateType": "NONE",
                         "label": "CanCancel",
                         "localPosition": [
@@ -12475,7 +12922,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.699999988079071,
+                        "endTime": 0.6833333373069763,
                         "eventTemplateType": "NONE",
                         "label": "ComboTransition",
                         "localPosition": [
@@ -12536,20 +12983,23 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.6666666865348816
+                        "startTime": 0.7166666388511658
                     }
                 ],
                 "loop": false,
                 "name": "Combo_Attack_Air_01_Seq",
                 "rootMotion": {
                     "applyPositionX": true,
-                    "applyPositionY": true,
+                    "applyPositionY": false,
                     "applyPositionZ": true,
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
-                    "sourceNodeName": ""
+                    "sourceNodeName": "pelvis"
                 },
                 "rootMotionScale": 0.029999999329447746,
                 "rootMotionScaleCurveName": "",
@@ -12617,6 +13067,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12686,6 +13139,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12755,6 +13211,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12824,6 +13283,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12893,6 +13355,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -12962,6 +13427,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13031,6 +13499,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13100,6 +13571,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13169,6 +13643,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13238,6 +13715,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13307,6 +13787,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13376,6 +13859,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13445,6 +13931,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13514,6 +14003,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13583,6 +14075,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13652,6 +14147,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13721,6 +14219,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13790,6 +14291,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13859,6 +14363,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13928,6 +14435,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -13997,6 +14507,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14066,6 +14579,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14135,6 +14651,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14204,6 +14723,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14273,6 +14795,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14342,6 +14867,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14411,6 +14939,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14480,6 +15011,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14549,6 +15083,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14618,6 +15155,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14687,6 +15227,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14756,6 +15299,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14825,6 +15371,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14894,6 +15443,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -14963,6 +15515,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15032,6 +15587,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15101,6 +15659,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15170,6 +15731,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15239,6 +15803,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15308,6 +15875,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15377,6 +15947,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15446,6 +16019,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15515,6 +16091,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15584,6 +16163,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15653,6 +16235,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15722,6 +16307,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15791,6 +16379,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15860,6 +16451,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15929,6 +16523,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -15998,6 +16595,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16067,6 +16667,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16136,6 +16739,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16458,6 +17064,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": true,
                     "sourceNodeName": ""
                 },
@@ -16527,6 +17136,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16596,6 +17208,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16665,6 +17280,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16734,6 +17352,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16803,6 +17424,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16872,6 +17496,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -16941,6 +17568,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17010,6 +17640,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17079,6 +17712,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17148,6 +17784,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17217,6 +17856,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17286,6 +17928,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17355,6 +18000,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17424,6 +18072,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17493,6 +18144,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17562,6 +18216,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17631,6 +18288,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17700,6 +18360,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17769,6 +18432,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17838,6 +18504,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17907,6 +18576,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -17976,6 +18648,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18045,6 +18720,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18114,6 +18792,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18183,6 +18864,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18252,6 +18936,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18321,6 +19008,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18390,6 +19080,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18459,6 +19152,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18528,6 +19224,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18597,6 +19296,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18666,6 +19368,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18735,6 +19440,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18804,6 +19512,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18873,6 +19584,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -18942,6 +19656,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19011,6 +19728,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19080,6 +19800,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19149,6 +19872,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19218,6 +19944,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19287,6 +20016,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19356,6 +20088,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19425,6 +20160,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19494,6 +20232,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19563,6 +20304,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19632,6 +20376,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19701,6 +20448,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19770,6 +20520,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19839,6 +20592,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19908,6 +20664,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -19977,6 +20736,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20046,6 +20808,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20115,6 +20880,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20184,6 +20952,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20253,6 +21024,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20322,6 +21096,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20391,6 +21168,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20460,6 +21240,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20529,6 +21312,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20598,6 +21384,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20667,6 +21456,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20736,6 +21528,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20805,6 +21600,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20874,6 +21672,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -20943,6 +21744,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21012,6 +21816,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21081,6 +21888,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21150,6 +21960,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21219,6 +22032,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21288,6 +22104,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21357,6 +22176,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21426,6 +22248,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21495,6 +22320,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21564,6 +22392,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21633,6 +22464,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21702,6 +22536,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21771,6 +22608,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21840,6 +22680,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21909,6 +22752,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -21978,6 +22824,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22047,6 +22896,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22116,6 +22968,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22185,6 +23040,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22254,6 +23112,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22323,6 +23184,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22392,6 +23256,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22461,6 +23328,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22530,6 +23400,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22599,6 +23472,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22668,6 +23544,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22737,6 +23616,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22806,6 +23688,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22875,6 +23760,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -22944,6 +23832,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23013,6 +23904,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23082,6 +23976,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23151,6 +24048,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23220,6 +24120,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23289,6 +24192,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23358,6 +24264,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23427,6 +24336,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23496,6 +24408,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23565,6 +24480,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23634,6 +24552,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23703,6 +24624,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23772,6 +24696,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23841,6 +24768,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23910,6 +24840,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -23979,6 +24912,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24048,6 +24984,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24117,6 +25056,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24186,6 +25128,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24255,6 +25200,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24324,6 +25272,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24393,6 +25344,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24462,6 +25416,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24531,6 +25488,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24600,6 +25560,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24669,6 +25632,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24738,6 +25704,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24807,6 +25776,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24876,6 +25848,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -24945,6 +25920,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25014,6 +25992,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25083,6 +26064,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25152,6 +26136,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25221,6 +26208,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25290,6 +26280,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25359,6 +26352,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25428,6 +26424,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25497,6 +26496,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25566,6 +26568,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25635,6 +26640,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25704,6 +26712,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25773,6 +26784,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25842,6 +26856,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25911,6 +26928,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -25980,6 +27000,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26049,6 +27072,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26118,6 +27144,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26187,6 +27216,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26256,6 +27288,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26325,6 +27360,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26394,6 +27432,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26463,6 +27504,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26532,6 +27576,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26601,6 +27648,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26670,6 +27720,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26739,6 +27792,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26808,6 +27864,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26877,6 +27936,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -26946,6 +28008,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27015,6 +28080,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27084,6 +28152,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27153,6 +28224,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27222,6 +28296,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27291,6 +28368,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27360,6 +28440,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27429,6 +28512,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27498,6 +28584,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27567,6 +28656,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27636,6 +28728,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27705,6 +28800,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27774,6 +28872,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27843,6 +28944,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27912,6 +29016,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -27981,6 +29088,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28050,6 +29160,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28119,6 +29232,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28188,6 +29304,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28257,6 +29376,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28326,6 +29448,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28395,6 +29520,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28464,6 +29592,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28533,6 +29664,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28602,6 +29736,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28671,6 +29808,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28740,6 +29880,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28809,6 +29952,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28878,6 +30024,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -28947,6 +30096,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29016,6 +30168,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29085,6 +30240,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29154,6 +30312,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29223,6 +30384,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29292,6 +30456,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29361,6 +30528,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29430,6 +30600,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29499,6 +30672,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29568,6 +30744,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29637,6 +30816,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29706,6 +30888,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29775,6 +30960,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29844,6 +31032,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29913,6 +31104,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -29982,6 +31176,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30051,6 +31248,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30120,6 +31320,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30189,6 +31392,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30258,6 +31464,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30327,6 +31536,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30396,6 +31608,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30465,6 +31680,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30534,6 +31752,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30603,6 +31824,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30672,6 +31896,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30741,6 +31968,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30810,6 +32040,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30879,6 +32112,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -30948,6 +32184,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31017,6 +32256,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31086,6 +32328,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31155,6 +32400,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31224,6 +32472,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31293,6 +32544,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31362,6 +32616,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31431,6 +32688,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31500,6 +32760,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31569,6 +32832,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31638,6 +32904,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31707,6 +32976,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },
@@ -31776,6 +33048,9 @@
                     "applyRotationX": true,
                     "applyRotationY": true,
                     "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
                     "enable": false,
                     "sourceNodeName": ""
                 },

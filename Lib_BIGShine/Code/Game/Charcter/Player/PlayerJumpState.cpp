@@ -10,23 +10,32 @@ void PlayerJumpState::Enter()
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
-    hasLeftGround = false;
-    phase = PLAYER_JUMP_RUNTIME_PHASE::START;
+    const bool resumeLoop_ = player_->ConsumeJumpLoopResumeRequest();
+    hasLeftGround = resumeLoop_;
+    phase = resumeLoop_
+        ? PLAYER_JUMP_RUNTIME_PHASE::LOOP
+        : PLAYER_JUMP_RUNTIME_PHASE::START;
     player_->BeginAirborneActionContext();
     player_->EnterAction(PLAYER_ACTION::JUMP);
-    player_->SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE::JUMP_START);
+    player_->SendJumpPhaseToBlackboard(
+        resumeLoop_
+        ? PLAYER_LOCOMOTION_PHASE::JUMP_LOOP
+        : PLAYER_LOCOMOTION_PHASE::JUMP_START);
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);
-    if (input_.x != 0.0f || input_.z != 0.0f)
+    if (!resumeLoop_ && (input_.x != 0.0f || input_.z != 0.0f))
     {
         player_->SetFacingDirection(input_);
         player_->SetHorizontalVelocity(input_, player_->moveSpeed * player_->airControlRate);
     }
 
-    if (CharacterMovementComponent* movement_ = player_->GetMovement())
+    if (!resumeLoop_)
     {
-        movement_->AddImpulse({ 0.0f, player_->jumpImpulse, 0.0f });
+        if (CharacterMovementComponent* movement_ = player_->GetMovement())
+        {
+            movement_->AddImpulse({ 0.0f, player_->jumpImpulse, 0.0f });
+        }
     }
 }
 
