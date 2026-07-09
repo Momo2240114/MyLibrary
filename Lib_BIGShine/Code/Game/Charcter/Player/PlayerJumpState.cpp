@@ -1,18 +1,18 @@
 #include "PlayerJumpState.h"
 
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
-#include "Engine/Physics/ColliderComponent.h"
 #include "PlayerControllerComponent.h"
+
+#include <algorithm>
 
 void PlayerJumpState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
-    timer = 0.0f;
-    phaseTimer = 0.0f;
     hasLeftGround = false;
     phase = PLAYER_JUMP_RUNTIME_PHASE::START;
+    player_->BeginAirborneActionContext();
     player_->EnterAction(PLAYER_ACTION::JUMP);
     player_->SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE::JUMP_START);
 
@@ -21,7 +21,7 @@ void PlayerJumpState::Enter()
     if (input_.x != 0.0f || input_.z != 0.0f)
     {
         player_->SetFacingDirection(input_);
-        player_->SetHorizontalVelocity(input_, player_->moveSpeed * airControlRate);
+        player_->SetHorizontalVelocity(input_, player_->moveSpeed * player_->airControlRate);
     }
 
     if (CharacterMovementComponent* movement_ = player_->GetMovement())
@@ -35,49 +35,66 @@ void PlayerJumpState::Execute(float elapsedTime_)
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
-    timer += elapsedTime_;
-    phaseTimer += elapsedTime_;
-
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);
-    if (input_.x != 0.0f || input_.z != 0.0f)
+    if (CharacterMovementComponent* movement_ = player_->GetMovement())
     {
-        player_->SetHorizontalVelocity(input_, player_->moveSpeed * airControlRate);
+        const DirectX::XMFLOAT3 currentVelocity_ = movement_->GetDesiredHorizontalVelocity();
+        DirectX::XMFLOAT3 targetVelocity_{ 0.0f, 0.0f, 0.0f };
+        const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
+        if (hasMoveInput_)
+        {
+            targetVelocity_ =
+            {
+                input_.x * player_->moveSpeed * player_->airControlRate,
+                0.0f,
+                input_.z * player_->moveSpeed * player_->airControlRate
+            };
+            movement_->SetFacingDirection(input_, false);
+        }
+
+        const float blendRate_ = hasMoveInput_
+            ? player_->airControlAcceleration
+            : player_->airDeceleration;
+        const float blend_ = std::clamp(blendRate_ * elapsedTime_, 0.0f, 1.0f);
+        DirectX::XMFLOAT3 nextVelocity_
+        {
+            currentVelocity_.x + (targetVelocity_.x - currentVelocity_.x) * blend_,
+            0.0f,
+            currentVelocity_.z + (targetVelocity_.z - currentVelocity_.z) * blend_
+        };
+
+        const float speedSquared_ =
+            nextVelocity_.x * nextVelocity_.x +
+            nextVelocity_.z * nextVelocity_.z;
+        if (speedSquared_ < 0.0001f)
+        {
+            nextVelocity_ = { 0.0f, 0.0f, 0.0f };
+        }
+
+        movement_->SetHorizontalVelocity(nextVelocity_);
     }
 
     player_->ProcessActionInput();
 
-    ColliderComponent* collider_ = player_->GetCollider();
     const bool isGrounded_ = player_->IsGrounded();
     if (!isGrounded_)
     {
         hasLeftGround = true;
-    }
-
-    if (phase == PLAYER_JUMP_RUNTIME_PHASE::END)
-    {
-        if (phaseTimer >= player_->jumpEndDuration)
+        if (phase == PLAYER_JUMP_RUNTIME_PHASE::START)
         {
-            const PLAYER_ACTION nextAction_ =
-                (input_.x != 0.0f || input_.z != 0.0f)
-                ? PLAYER_ACTION::MOVE
-                : PLAYER_ACTION::IDLE;
-            player_->RequestAction(nextAction_);
+            ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::LOOP);
         }
         return;
     }
 
-    const float verticalVelocity_ = collider_ ? collider_->velocity.y : 0.0f;
-    if (phase == PLAYER_JUMP_RUNTIME_PHASE::START &&
-        phaseTimer >= player_->jumpStartMinDuration &&
-        verticalVelocity_ <= 0.0f)
-    {
-        ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::LOOP);
-    }
-
-    if (hasLeftGround && isGrounded_)
+    if (hasLeftGround)
     {
         ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::END);
+        if (input_.x != 0.0f || input_.z != 0.0f)
+        {
+            player_->RequestAction(PLAYER_ACTION::MOVE);
+        }
     }
 }
 
@@ -85,6 +102,10 @@ void PlayerJumpState::Exit()
 {
     if (PlayerControllerComponent* player_ = GetPlayerController())
     {
+        if (!hasLeftGround && player_->IsGrounded())
+        {
+            player_->EndAirborneActionContext();
+        }
         player_->SetCanBufferInput(false);
         player_->SetCanCombo(false);
     }
@@ -95,7 +116,6 @@ void PlayerJumpState::ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_)
     if (phase == phase_) return;
 
     phase = phase_;
-    phaseTimer = 0.0f;
 
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;

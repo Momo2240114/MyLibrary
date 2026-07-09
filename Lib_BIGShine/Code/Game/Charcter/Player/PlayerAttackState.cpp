@@ -43,7 +43,14 @@ void PlayerAttackState::Enter()
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
     player_->EnterAction(action);
-    if (action == PLAYER_ACTION::STRONG_CHARGE_ATTACK)
+    const bool isStrongCharge_ =
+        action == PLAYER_ACTION::STRONG_CHARGE_ATTACK ||
+        action == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK;
+    const bool isAirAttack_ =
+        action == PLAYER_ACTION::AIR_WEAK_ATTACK ||
+        action == PLAYER_ACTION::AIR_STRONG_ATTACK ||
+        action == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK;
+    if (isStrongCharge_)
     {
         DirectX::XMFLOAT3 direction_ = player_->GetMoveInput();
         if (direction_.x == 0.0f && direction_.z == 0.0f)
@@ -53,7 +60,7 @@ void PlayerAttackState::Enter()
         player_->SetFacingDirection(direction_);
         player_->SetHorizontalVelocity(direction_, player_->strongChargeAttackSpeed);
     }
-    else
+    else if (!isAirAttack_)
     {
         player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
     }

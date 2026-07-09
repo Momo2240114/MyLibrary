@@ -76,6 +76,8 @@ public:
     ColliderComponent* GetCollider() const { return collider.get(); } // PlayerのColliderを返す
     CharacterMovementComponent* GetMovement() const { return movement.get(); } // Playerの移動Componentを返す
     bool IsGrounded() const;
+    void BeginAirborneActionContext();
+    void EndAirborneActionContext();
     PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); } // 現在Actionを返す
     int GetComboIndex() const { return comboIndex; } // 現在のコンボ番号を返す
     const std::vector<PlayerCancelTransition>& GetCancelTransitions() const { return cancelTransitions; } // キャンセルルート一覧を返す
@@ -102,8 +104,9 @@ public:
 
     float moveSpeed = 6.0f; // 通常移動速度
     float jumpImpulse = 8.5f;
-    float jumpStartMinDuration = 0.12f;
-    float jumpEndDuration = 0.16f;
+    float airControlRate = 0.72f;
+    float airControlAcceleration = 8.0f;
+    float airDeceleration = 4.5f;
     float strongAttackHoldThreshold = 0.35f;
     float strongChargeAttackSpeed = 14.0f;
     float runStartDuration = 0.18f;
@@ -119,6 +122,10 @@ private:
     void SendGroundedToBlackboard();
     bool UpdateStrongAttackInput();
     void ResetStrongAttackInput();
+    bool IsGroundOnlyAction(PLAYER_ACTION action_) const;
+    bool IsAirAction(PLAYER_ACTION action_) const;
+    bool IsAirborneForAction() const;
+    void UpdateAirborneActionContext();
     void EnsureDefaultCancelTransitions();
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent() const;
     void ToggleLockOn();
@@ -152,11 +159,18 @@ private:
     bool hasPendingHorizontalVelocity = false; // 水平速度の反映予約があるか
     bool hasPendingFacingDirection = false; // 向きの反映予約があるか
     bool strongAttackHolding = false;
+    bool strongAttackStartedAirborne = false;
+    bool airborneActionContextActive = false;
+    bool airborneActionContextLeftGround = false;
     bool runEndActive = false;
+    bool hasSentGrounded = false;
+    bool lastSentGrounded = false;
+    bool hasSentLocomotionPhase = false;
     float lastUpdateDeltaTime = 0.0f;
     float strongAttackHoldTimer = 0.0f;
     float locomotionPhaseTimer = 0.0f;
     float runEndTimer = 0.0f;
+    PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE; // Debug UIで選択中のAction
 };

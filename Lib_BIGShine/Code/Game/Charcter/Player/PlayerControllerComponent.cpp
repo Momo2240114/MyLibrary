@@ -212,6 +212,7 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
     stateMachine.AddState<PlayerMoveState>(PLAYER_ACTION::MOVE);
     stateMachine.AddState<PlayerDodgeState>(PLAYER_ACTION::DODGE);
+    stateMachine.AddState<PlayerDodgeState>(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_DODGE);
     stateMachine.AddState<PlayerJumpState>(PLAYER_ACTION::JUMP);
     stateMachine.AddState<PlayerHitState>(PLAYER_ACTION::HIT);
     stateMachine.AddState<PlayerAttackState>(
@@ -219,6 +220,9 @@ void PlayerControllerComponent::Start()
         PLAYER_ACTION::WEAK_ATTACK);
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::STRONG_CHARGE_ATTACK, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_WEAK_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::AIR_STRONG_ATTACK, PLAYER_ACTION::AIR_STRONG_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::GUARD, PLAYER_ACTION::GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::JUST_GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
@@ -233,6 +237,7 @@ void PlayerControllerComponent::Update(float dt_)
 {
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
     stateMachine.Update(dt_);
+    UpdateAirborneActionContext();
     SendGroundedToBlackboard();
     UpdateLocomotionAnimationPhase(dt_);
     ApplyPendingMovement();
@@ -241,6 +246,18 @@ void PlayerControllerComponent::Update(float dt_)
 bool PlayerControllerComponent::IsGrounded() const
 {
     return collider && collider->isGrounded;
+}
+
+void PlayerControllerComponent::BeginAirborneActionContext()
+{
+    airborneActionContextActive = true;
+    airborneActionContextLeftGround = !IsGrounded();
+}
+
+void PlayerControllerComponent::EndAirborneActionContext()
+{
+    airborneActionContextActive = false;
+    airborneActionContextLeftGround = false;
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
@@ -403,12 +420,22 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     {
         return false;
     }
+    if (IsAirAction(nextAction_) && !IsAirborneForAction())
+    {
+        return false;
+    }
 
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (IsAirborneForAction() && IsGroundOnlyAction(nextAction_))
+    {
+        return false;
+    }
+
     if (currentAction_ == nextAction_)
     {
         const bool canQueueCombo_ =
-            currentAction_ == PLAYER_ACTION::WEAK_ATTACK &&
+            (currentAction_ == PLAYER_ACTION::WEAK_ATTACK ||
+                currentAction_ == PLAYER_ACTION::AIR_WEAK_ATTACK) &&
             (actionRuntime.canBufferInput || actionRuntime.canCombo);
         if (canQueueCombo_)
         {
@@ -513,23 +540,29 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
         AddCancelTransition(action_, PLAYER_ACTION::JUMP);
     }
 
-    constexpr PLAYER_ACTION jumpToActions_[] =
+    constexpr PLAYER_ACTION jumpAirActions_[] =
     {
-        PLAYER_ACTION::IDLE,
-        PLAYER_ACTION::MOVE,
-        PLAYER_ACTION::WEAK_ATTACK,
-        PLAYER_ACTION::STRONG_ATTACK,
-        PLAYER_ACTION::STRONG_CHARGE_ATTACK,
-        PLAYER_ACTION::DODGE,
-        PLAYER_ACTION::SKILL_A,
-        PLAYER_ACTION::SKILL_B,
-        PLAYER_ACTION::COUNTER_ATTACK
+        PLAYER_ACTION::AIR_WEAK_ATTACK,
+        PLAYER_ACTION::AIR_STRONG_ATTACK,
+        PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK,
+        PLAYER_ACTION::AIR_DODGE
     };
 
-    for (const PLAYER_ACTION action_ : jumpToActions_)
+    for (const PLAYER_ACTION action_ : jumpAirActions_)
     {
         AddCancelTransition(PLAYER_ACTION::JUMP, action_);
     }
+
+    AddCancelTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_WEAK_ATTACK);
+    AddCancelTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_DODGE);
+    AddCancelTransition(PLAYER_ACTION::AIR_STRONG_ATTACK, PLAYER_ACTION::AIR_DODGE);
+    AddCancelTransition(PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK, PLAYER_ACTION::AIR_DODGE);
+    AddCancelTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_WEAK_ATTACK);
+    AddCancelTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_ATTACK);
+    AddCancelTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
+
+    AddCancelTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::IDLE);
+    AddCancelTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::MOVE);
 }
 
 std::shared_ptr<CameraLockOnComponent>
@@ -630,7 +663,8 @@ void PlayerControllerComponent::NotifyComboTransition()
 
 void PlayerControllerComponent::NotifyActionEnd()
 {
-    if (!IsPlayerActionTimelineDriven(GetCurrentAction()))
+    if (!IsPlayerActionTimelineDriven(GetCurrentAction()) &&
+        GetCurrentAction() != PLAYER_ACTION::JUMP)
     {
         return;
     }
@@ -702,6 +736,7 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 {
     const PLAYER_ACTION previousAction_ = previousAction;
     previousAction = action_;
+    hasSentLocomotionPhase = false;
     if (locomotionPhaseAction != action_)
     {
         locomotionPhaseAction = action_;
@@ -714,7 +749,9 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     }
 
     if (action_ != PLAYER_ACTION::STRONG_ATTACK &&
-        action_ != PLAYER_ACTION::STRONG_CHARGE_ATTACK)
+        action_ != PLAYER_ACTION::STRONG_CHARGE_ATTACK &&
+        action_ != PLAYER_ACTION::AIR_STRONG_ATTACK &&
+        action_ != PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK)
     {
         ResetStrongAttackInput();
     }
@@ -733,12 +770,13 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 
 int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_) const
 {
-    if (nextAction_ != PLAYER_ACTION::WEAK_ATTACK)
+    if (nextAction_ != PLAYER_ACTION::WEAK_ATTACK &&
+        nextAction_ != PLAYER_ACTION::AIR_WEAK_ATTACK)
     {
         return 0;
     }
 
-    if (GetCurrentAction() == PLAYER_ACTION::WEAK_ATTACK &&
+    if (GetCurrentAction() == nextAction_ &&
         (actionRuntime.canBufferInput || actionRuntime.canCombo))
     {
         return (comboIndex + 1) % WEAK_ATTACK_COMBO_COUNT;
@@ -754,6 +792,7 @@ bool PlayerControllerComponent::UpdateStrongAttackInput()
     if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK))
     {
         strongAttackHolding = true;
+        strongAttackStartedAirborne = IsAirborneForAction();
         strongAttackHoldTimer = 0.0f;
     }
 
@@ -762,25 +801,91 @@ bool PlayerControllerComponent::UpdateStrongAttackInput()
         return false;
     }
 
-    if (keyConfig_.ActionPressed(PlayerInputAction::STRONG_ATTACK))
+    if (!keyConfig_.ActionPressed(PlayerInputAction::STRONG_ATTACK))
     {
-        strongAttackHoldTimer += lastUpdateDeltaTime;
-        if (strongAttackHoldTimer >= strongAttackHoldThreshold)
-        {
-            ResetStrongAttackInput();
-            return RequestAction(PLAYER_ACTION::STRONG_CHARGE_ATTACK);
-        }
-        return false;
+        const PLAYER_ACTION attackAction_ =
+            strongAttackHoldTimer >= strongAttackHoldThreshold
+            ? (strongAttackStartedAirborne ? PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK : PLAYER_ACTION::STRONG_CHARGE_ATTACK)
+            : (strongAttackStartedAirborne ? PLAYER_ACTION::AIR_STRONG_ATTACK : PLAYER_ACTION::STRONG_ATTACK);
+        ResetStrongAttackInput();
+        return RequestAction(attackAction_);
     }
 
-    ResetStrongAttackInput();
-    return RequestAction(PLAYER_ACTION::STRONG_ATTACK);
+    strongAttackHoldTimer += lastUpdateDeltaTime;
+    if (strongAttackHoldTimer >= strongAttackHoldThreshold)
+    {
+        const bool startedAirborne_ = strongAttackStartedAirborne;
+        ResetStrongAttackInput();
+        return RequestAction(startedAirborne_
+            ? PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK
+            : PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+    }
+
+    return false;
 }
 
 void PlayerControllerComponent::ResetStrongAttackInput()
 {
     strongAttackHolding = false;
+    strongAttackStartedAirborne = false;
     strongAttackHoldTimer = 0.0f;
+}
+
+bool PlayerControllerComponent::IsGroundOnlyAction(PLAYER_ACTION action_) const
+{
+    switch (action_)
+    {
+    case PLAYER_ACTION::WEAK_ATTACK:
+    case PLAYER_ACTION::STRONG_ATTACK:
+    case PLAYER_ACTION::STRONG_CHARGE_ATTACK:
+    case PLAYER_ACTION::GUARD:
+    case PLAYER_ACTION::JUST_GUARD:
+    case PLAYER_ACTION::DODGE:
+    case PLAYER_ACTION::SKILL_A:
+    case PLAYER_ACTION::SKILL_B:
+    case PLAYER_ACTION::COUNTER_ATTACK:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool PlayerControllerComponent::IsAirAction(PLAYER_ACTION action_) const
+{
+    switch (action_)
+    {
+    case PLAYER_ACTION::AIR_WEAK_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK:
+    case PLAYER_ACTION::AIR_DODGE:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool PlayerControllerComponent::IsAirborneForAction() const
+{
+    return airborneActionContextActive && !IsGrounded();
+}
+
+void PlayerControllerComponent::UpdateAirborneActionContext()
+{
+    if (!airborneActionContextActive)
+    {
+        return;
+    }
+
+    if (!IsGrounded())
+    {
+        airborneActionContextLeftGround = true;
+        return;
+    }
+
+    if (airborneActionContextLeftGround)
+    {
+        EndAirborneActionContext();
+    }
 }
 
 void PlayerControllerComponent::ProcessActionInput()
@@ -799,11 +904,14 @@ void PlayerControllerComponent::ProcessActionInput()
         return;
     }
 
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) && RequestAction(PLAYER_ACTION::DODGE)) return;
+    const bool isAirborne_ = IsAirborneForAction();
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) &&
+        RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_DODGE : PLAYER_ACTION::DODGE)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) && RequestAction(PLAYER_ACTION::WEAK_ATTACK)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) &&
+        RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_WEAK_ATTACK : PLAYER_ACTION::WEAK_ATTACK)) return;
     if (UpdateStrongAttackInput()) return;
 
     if (keyConfig_.ActionPressed(PlayerInputAction::GUARD))
@@ -892,6 +1000,11 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
 
     const PLAYER_ACTION_GROUP group_ = GetPlayerActionGroup(action_);
     const PLAYER_ATTACK_TYPE attackType_ = GetPlayerAttackType(action_);
+    const bool isAirAction_ = IsAirAction(action_);
+    const bool isAirAttack_ =
+        action_ == PLAYER_ACTION::AIR_WEAK_ATTACK ||
+        action_ == PLAYER_ACTION::AIR_STRONG_ATTACK ||
+        action_ == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK;
     constexpr const char* categories_[] =
     {
         PlayerBlackboardCategory::PLAYER,
@@ -911,6 +1024,12 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_GUARD, group_ == PLAYER_ACTION_GROUP::GUARD);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_DODGE, group_ == PLAYER_ACTION_GROUP::DODGE);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP, group_ == PLAYER_ACTION_GROUP::JUMP);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_ACTION, isAirAction_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_ATTACK, isAirAttack_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_WEAK_ATTACK, action_ == PLAYER_ACTION::AIR_WEAK_ATTACK);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_STRONG_ATTACK, action_ == PLAYER_ACTION::AIR_STRONG_ATTACK);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_STRONG_CHARGE_ATTACK, action_ == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_DODGE, action_ == PLAYER_ACTION::AIR_DODGE);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL,
             attackType_ == PLAYER_ATTACK_TYPE::SKILL_A || attackType_ == PLAYER_ATTACK_TYPE::SKILL_B);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
@@ -963,6 +1082,13 @@ void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float deltaTime_)
 void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_)
 {
     if (!blackboard) return;
+    if (hasSentLocomotionPhase && lastSentLocomotionPhase == phase_)
+    {
+        return;
+    }
+
+    hasSentLocomotionPhase = true;
+    lastSentLocomotionPhase = phase_;
 
     constexpr const char* categories_[] =
     {
@@ -1014,13 +1140,21 @@ void PlayerControllerComponent::SendGroundedToBlackboard()
 {
     if (!blackboard) return;
 
+    const bool isGrounded_ = IsGrounded();
+    if (hasSentGrounded && lastSentGrounded == isGrounded_)
+    {
+        return;
+    }
+
+    hasSentGrounded = true;
+    lastSentGrounded = isGrounded_;
+
     constexpr const char* categories_[] =
     {
         PlayerBlackboardCategory::PLAYER,
         PlayerBlackboardCategory::ANIM
     };
 
-    const bool isGrounded_ = IsGrounded();
     for (const char* category_ : categories_)
     {
         blackboard->SetBool(
@@ -1100,7 +1234,6 @@ void PlayerControllerComponent::Gui()
     ImGui::Text("Can Buffer Input: %s", actionRuntime.canBufferInput ? "true" : "false");
     ImGui::Text("Can Combo: %s", actionRuntime.canCombo ? "true" : "false");
     ImGui::Text("Action Ended: %s", actionRuntime.actionEnded ? "true" : "false");
-    ImGui::Text("Is Grounded: %s", IsGrounded() ? "true" : "false");
     ImGui::Text("Combo Index: %d", comboIndex);
     ImGui::Text("Buffered Action: %s", GetPlayerActionName(actionRuntime.bufferedAction));
 
@@ -1123,6 +1256,10 @@ void PlayerControllerComponent::Gui()
             PLAYER_ACTION::JUST_GUARD,
             PLAYER_ACTION::DODGE,
             PLAYER_ACTION::JUMP,
+            PLAYER_ACTION::AIR_WEAK_ATTACK,
+            PLAYER_ACTION::AIR_STRONG_ATTACK,
+            PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK,
+            PLAYER_ACTION::AIR_DODGE,
             PLAYER_ACTION::SKILL_A,
             PLAYER_ACTION::SKILL_B,
             PLAYER_ACTION::COUNTER_ATTACK
@@ -1176,8 +1313,9 @@ void PlayerControllerComponent::Gui()
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat("Jump Start Min Duration", &jumpStartMinDuration, 0.01f, 0.0f, 5.0f, "%.2f");
-    ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Air Control Rate", &airControlRate, 0.01f, 0.0f, 2.0f, "%.2f");
+    ImGui::DragFloat("Air Control Accel", &airControlAcceleration, 0.1f, 0.0f, 60.0f, "%.2f");
+    ImGui::DragFloat("Air Deceleration", &airDeceleration, 0.1f, 0.0f, 60.0f, "%.2f");
     ImGui::DragFloat("Strong Hold Threshold", &strongAttackHoldThreshold, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Strong Charge Speed", &strongChargeAttackSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
@@ -1236,6 +1374,12 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_ATTACK, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_GUARD, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_DODGE, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_ACTION, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_ATTACK, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_WEAK_ATTACK, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_STRONG_ATTACK, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_STRONG_CHARGE_ATTACK, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_DODGE, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_START, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_LOOP, false);
@@ -1262,8 +1406,9 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
     j_["JumpImpulse"] = jumpImpulse;
-    j_["JumpStartMinDuration"] = jumpStartMinDuration;
-    j_["JumpEndDuration"] = jumpEndDuration;
+    j_["AirControlRate"] = airControlRate;
+    j_["AirControlAcceleration"] = airControlAcceleration;
+    j_["AirDeceleration"] = airDeceleration;
     j_["StrongAttackHoldThreshold"] = strongAttackHoldThreshold;
     j_["StrongChargeAttackSpeed"] = strongChargeAttackSpeed;
     j_["RunStartDuration"] = runStartDuration;
@@ -1295,8 +1440,9 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
-    jumpStartMinDuration = (std::max)(j_.value("JumpStartMinDuration", jumpStartMinDuration), 0.0f);
-    jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
+    airControlRate = std::clamp(j_.value("AirControlRate", airControlRate), 0.0f, 2.0f);
+    airControlAcceleration = (std::max)(j_.value("AirControlAcceleration", airControlAcceleration), 0.0f);
+    airDeceleration = (std::max)(j_.value("AirDeceleration", airDeceleration), 0.0f);
     strongAttackHoldThreshold = (std::max)(j_.value("StrongAttackHoldThreshold", strongAttackHoldThreshold), 0.0f);
     strongChargeAttackSpeed = (std::max)(j_.value("StrongChargeAttackSpeed", strongChargeAttackSpeed), 0.0f);
     runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);

@@ -794,36 +794,48 @@ void AnimationControllerComponent::EvaluateGraphTransitions()
             return false;
         };
 
-    for (auto& transition_ : graphTransitions)
+    auto tryTransition_ = [&](AnimTransition& transition_) -> bool
     {
-        const bool fromCurrent_ = (transition_.fromStateName == activeState_->name);
-        const bool fromAny_ = (transition_.fromStateName == ANY_NODE_NAME);
-
-        if (!fromCurrent_ && !fromAny_)
-            continue;
         if (transition_.toStateName == activeState_->name)
-            continue;
+            return false;
 
         auto* toNode_ = FindNodeByName(transition_.toStateName);
         const bool toExit_ = toNode_ && toNode_->type == AnimGraphNodeType::Exit;
         const bool toSubGraph_ = toNode_ && toNode_->type == AnimGraphNodeType::SubGraph;
         if (!toExit_ && !toSubGraph_ && states.count(transition_.toStateName) == 0)
-            continue;
+            return false;
 
         if (!areConditionsMet_(transition_))
-            continue;
+            return false;
 
         resetTriggerConditions_(transition_);
 
         if (toExit_)
         {
             if (exitSubGraph_(transition_))
-                break;
-            continue;
+                return true;
+            return false;
         }
 
-        if (enterTransitionTarget_(transition_))
-            break;
+        return enterTransitionTarget_(transition_);
+    };
+
+    for (auto& transition_ : graphTransitions)
+    {
+        if (transition_.fromStateName != activeState_->name)
+            continue;
+
+        if (tryTransition_(transition_))
+            return;
+    }
+
+    for (auto& transition_ : graphTransitions)
+    {
+        if (transition_.fromStateName != ANY_NODE_NAME)
+            continue;
+
+        if (tryTransition_(transition_))
+            return;
     }
 }
 bool AnimationControllerComponent::EvaluateCondition(const AnimCondition& condition_)

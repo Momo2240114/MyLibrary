@@ -25,6 +25,10 @@ enum class PLAYER_ACTION
     HIT,
     JUMP,
     STRONG_CHARGE_ATTACK,
+    AIR_WEAK_ATTACK,
+    AIR_STRONG_ATTACK,
+    AIR_STRONG_CHARGE_ATTACK,
+    AIR_DODGE,
 
     NONE
 };
@@ -92,6 +96,12 @@ namespace PlayerBlackboardKey
     inline constexpr const char* IS_ATTACK = "IsAttack";
     inline constexpr const char* IS_GUARD = "IsGuard";
     inline constexpr const char* IS_DODGE = "IsDodge";
+    inline constexpr const char* IS_AIR_ACTION = "IsAirAction";
+    inline constexpr const char* IS_AIR_ATTACK = "IsAirAttack";
+    inline constexpr const char* IS_AIR_WEAK_ATTACK = "IsAirWeakAttack";
+    inline constexpr const char* IS_AIR_STRONG_ATTACK = "IsAirStrongAttack";
+    inline constexpr const char* IS_AIR_STRONG_CHARGE_ATTACK = "IsAirStrongChargeAttack";
+    inline constexpr const char* IS_AIR_DODGE = "IsAirDodge";
     inline constexpr const char* IS_SKILL = "IsSkill";
     inline constexpr const char* CAN_CANCEL = "CanCancel";
     inline constexpr const char* CAN_BUFFER_INPUT = "CanBufferInput";
@@ -124,6 +134,10 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     case PLAYER_ACTION::SKILL_A: return "SkillA";
     case PLAYER_ACTION::SKILL_B: return "SkillB";
     case PLAYER_ACTION::STRONG_CHARGE_ATTACK: return "StrongChargeAttack";
+    case PLAYER_ACTION::AIR_WEAK_ATTACK: return "AirWeakAttack";
+    case PLAYER_ACTION::AIR_STRONG_ATTACK: return "AirStrongAttack";
+    case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK: return "AirStrongChargeAttack";
+    case PLAYER_ACTION::AIR_DODGE: return "AirDodge";
     case PLAYER_ACTION::COUNTER_ATTACK: return "CounterAttack";
     case PLAYER_ACTION::HIT: return "Hit";
     default: return "None";
@@ -139,6 +153,9 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
         return PLAYER_ACTION_GROUP::LOCOMOTION;
     case PLAYER_ACTION::WEAK_ATTACK:
     case PLAYER_ACTION::STRONG_ATTACK:
+    case PLAYER_ACTION::AIR_WEAK_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK:
     case PLAYER_ACTION::COUNTER_ATTACK:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
@@ -149,6 +166,7 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
     case PLAYER_ACTION::JUST_GUARD:
         return PLAYER_ACTION_GROUP::GUARD;
     case PLAYER_ACTION::DODGE:
+    case PLAYER_ACTION::AIR_DODGE:
         return PLAYER_ACTION_GROUP::DODGE;
     case PLAYER_ACTION::JUMP:
         return PLAYER_ACTION_GROUP::JUMP;
@@ -162,10 +180,13 @@ inline PLAYER_ATTACK_TYPE GetPlayerAttackType(PLAYER_ACTION action_)
     switch (action_)
     {
     case PLAYER_ACTION::WEAK_ATTACK:
+    case PLAYER_ACTION::AIR_WEAK_ATTACK:
         return PLAYER_ATTACK_TYPE::WEAK;
     case PLAYER_ACTION::STRONG_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_ATTACK:
         return PLAYER_ATTACK_TYPE::STRONG;
     case PLAYER_ACTION::STRONG_CHARGE_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK:
         return PLAYER_ATTACK_TYPE::STRONG_CHARGE;
     case PLAYER_ACTION::COUNTER_ATTACK:
         return PLAYER_ATTACK_TYPE::COUNTER;
@@ -185,8 +206,12 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     case PLAYER_ACTION::WEAK_ATTACK:
     case PLAYER_ACTION::STRONG_ATTACK:
     case PLAYER_ACTION::STRONG_CHARGE_ATTACK:
+    case PLAYER_ACTION::AIR_WEAK_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_ATTACK:
+    case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK:
     case PLAYER_ACTION::JUST_GUARD:
     case PLAYER_ACTION::DODGE:
+    case PLAYER_ACTION::AIR_DODGE:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
     case PLAYER_ACTION::COUNTER_ATTACK:

@@ -23,8 +23,5 @@ private:
     void ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_);
 
     PLAYER_JUMP_RUNTIME_PHASE phase = PLAYER_JUMP_RUNTIME_PHASE::START;
-    float timer = 0.0f;
-    float phaseTimer = 0.0f;
-    float airControlRate = 0.72f;
     bool hasLeftGround = false;
 };
