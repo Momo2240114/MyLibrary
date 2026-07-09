@@ -18,6 +18,7 @@
 #include <cmath>
 #include <cctype>
 #include <unordered_map>
+#include <iterator>
 
 namespace ed = ax::NodeEditor;
 
@@ -114,13 +115,18 @@ void AnimationControllerComponent::Gui()
         const auto& animations_ = modelComponent->GetAnimations();
 
         ImGui::BeginChild("ModelAnimationClips", ImVec2(0.0f, 140.0f), true);
-        for (int index_ = 0; index_ < static_cast<int>(animations_.size()); ++index_)
+        ImGuiListClipper clipper_;
+        clipper_.Begin(static_cast<int>(animations_.size()));
+        while (clipper_.Step())
         {
-            if (ImGui::Selectable(
-                animations_[index_].name.c_str(),
-                selectedAnimIndex_ == index_))
+            for (int index_ = clipper_.DisplayStart; index_ < clipper_.DisplayEnd; ++index_)
             {
-                selectedAnimIndex_ = index_;
+                if (ImGui::Selectable(
+                    animations_[index_].name.c_str(),
+                    selectedAnimIndex_ == index_))
+                {
+                    selectedAnimIndex_ = index_;
+                }
             }
         }
         ImGui::EndChild();
@@ -156,52 +162,75 @@ void AnimationControllerComponent::Gui()
         ImGui::InputTextWithHint("##StateSearch", "Search states...", &stateSearchText);
         ImGui::Separator();
 
-        for (auto& [name, statePtr] : states)
+        auto DrawStateRow_ = [&](const std::string& name_, std::unique_ptr<AnimState>& statePtr_)
         {
-            if (!ContainsCaseInsensitive(name, stateSearchText)) continue;
+            ImGui::PushID(name_.c_str());
 
-            ImGui::PushID(name.c_str());
-
-            bool isCurrent = (animator.GetCurrentState() == statePtr.get());
-            bool isEditing = (editingState == statePtr.get());
+            bool isCurrent_ = (animator.GetCurrentState() == statePtr_.get());
+            bool isEditing_ = (editingState == statePtr_.get());
 
 
-            if (isCurrent) {
+            if (isCurrent_) {
                 ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.2f, 1.0f));
             }
 
 
 
-            if (ImGui::Selectable(name.c_str(), isEditing, ImGuiSelectableFlags_AllowOverlap)) {
-                editingState = statePtr.get();
+            if (ImGui::Selectable(name_.c_str(), isEditing_, ImGuiSelectableFlags_AllowOverlap)) {
+                editingState = statePtr_.get();
             }
 
-            if (isCurrent) ImGui::PopStyleColor();
+            if (isCurrent_) ImGui::PopStyleColor();
 
 
             ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 150.0f);
             if (ImGui::SmallButton("Save"))
             {
-                const auto pathIt_ = stateAssetPaths.find(name);
+                const auto pathIt_ = stateAssetPaths.find(name_);
                 const std::string path_ = pathIt_ != stateAssetPaths.end()
                     ? pathIt_->second
                     : std::string();
-                stateAssetStatus = SaveStateAsset(name, path_)
-                    ? "Saved state: " + name
-                    : "Failed to save state: " + name;
+                stateAssetStatus = SaveStateAsset(name_, path_)
+                    ? "Saved state: " + name_
+                    : "Failed to save state: " + name_;
             }
             ImGui::SameLine();
             if (ImGui::SmallButton("Play")) {
-                ChangeState(name, 0.2f);
+                ChangeState(name_, 0.2f);
 
                 useTransitionGraph = false;
             }
             ImGui::SameLine();
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
-            if (ImGui::SmallButton("X")) { targetToDelete = name; }
+            if (ImGui::SmallButton("X")) { targetToDelete = name_; }
             ImGui::PopStyleColor();
 
             ImGui::PopID();
+        };
+
+        if (stateSearchText.empty())
+        {
+            ImGuiListClipper clipper_;
+            clipper_.Begin(static_cast<int>(states.size()));
+            while (clipper_.Step())
+            {
+                auto iterator_ = states.begin();
+                std::advance(iterator_, clipper_.DisplayStart);
+                for (int index_ = clipper_.DisplayStart;
+                    index_ < clipper_.DisplayEnd && iterator_ != states.end();
+                    ++index_, ++iterator_)
+                {
+                    DrawStateRow_(iterator_->first, iterator_->second);
+                }
+            }
+        }
+        else
+        {
+            for (auto& [name_, statePtr_] : states)
+            {
+                if (!ContainsCaseInsensitive(name_, stateSearchText)) continue;
+                DrawStateRow_(name_, statePtr_);
+            }
         }
 
         if (!targetToDelete.empty()) {
@@ -314,30 +343,55 @@ void AnimationControllerComponent::Gui()
         auto DrawAnimationIndex_ = [&](const char* label_, int& targetIndex_)
             {
                 ImGui::PushID(label_);
-                ImGui::TextUnformatted(label_);
                 const char* selectedName_ =
                     targetIndex_ >= 0 && targetIndex_ < static_cast<int>(animations_.size())
                     ? animations_[targetIndex_].name.c_str()
                     : "None";
-                ImGui::TextDisabled("%s", selectedName_);
                 ImGui::SetNextItemWidth(-1.0f);
-                ImGui::InputTextWithHint(
-                    "##AnimationClipSearch",
-                    "Search animation clips...",
-                    &animationClipSearchText);
-                ImGui::BeginChild("AnimationClipList", ImVec2(0.0f, 110.0f), true);
-                for (int index_ = 0; index_ < static_cast<int>(animations_.size()); ++index_)
+                if (ImGui::BeginCombo(label_, selectedName_))
                 {
-                    if (!ContainsCaseInsensitive(animations_[index_].name, animationClipSearchText)) continue;
+                    ImGui::SetNextItemWidth(-1.0f);
+                    ImGui::InputTextWithHint(
+                        "##AnimationClipSearch",
+                        "Search animation clips...",
+                        &animationClipSearchText);
+                    ImGui::Separator();
 
-                    if (ImGui::Selectable(
-                        animations_[index_].name.c_str(),
-                        targetIndex_ == index_))
+                    if (animationClipSearchText.empty())
                     {
-                        targetIndex_ = index_;
+                        ImGuiListClipper clipper_;
+                        clipper_.Begin(static_cast<int>(animations_.size()));
+                        while (clipper_.Step())
+                        {
+                            for (int index_ = clipper_.DisplayStart; index_ < clipper_.DisplayEnd; ++index_)
+                            {
+                                if (ImGui::Selectable(
+                                    animations_[index_].name.c_str(),
+                                    targetIndex_ == index_))
+                                {
+                                    targetIndex_ = index_;
+                                    ImGui::CloseCurrentPopup();
+                                }
+                            }
+                        }
                     }
+                    else
+                    {
+                        for (int index_ = 0; index_ < static_cast<int>(animations_.size()); ++index_)
+                        {
+                            if (!ContainsCaseInsensitive(animations_[index_].name, animationClipSearchText)) continue;
+
+                            if (ImGui::Selectable(
+                                animations_[index_].name.c_str(),
+                                targetIndex_ == index_))
+                            {
+                                targetIndex_ = index_;
+                                ImGui::CloseCurrentPopup();
+                            }
+                        }
+                    }
+                    ImGui::EndCombo();
                 }
-                ImGui::EndChild();
                 ImGui::PopID();
             };
 
@@ -415,64 +469,69 @@ void AnimationControllerComponent::Gui()
 
                 const auto& nodes_ = modelComponent->GetNodes();
                 ImGui::BeginChild("AnimationMaskNodeList", ImVec2(0.0f, 190.0f), true);
-                for (int nodeIndex_ = 0;
-                    nodeIndex_ < static_cast<int>(nodes_.size());
-                    ++nodeIndex_)
+                ImGuiListClipper maskClipper_;
+                maskClipper_.Begin(static_cast<int>(nodes_.size()));
+                while (maskClipper_.Step())
                 {
-                    const auto& node_ = nodes_[nodeIndex_];
-                    int depth_ = 0;
-                    int parentIndex_ = node_.parentIndex;
-                    bool inherited_ = false;
-                    while (parentIndex_ >= 0 &&
-                        parentIndex_ < static_cast<int>(nodes_.size()))
+                    for (int nodeIndex_ = maskClipper_.DisplayStart;
+                        nodeIndex_ < maskClipper_.DisplayEnd;
+                        ++nodeIndex_)
                     {
-                        ++depth_;
-                        const std::string& parentName_ = nodes_[parentIndex_].name;
-                        if (std::find(
+                        const auto& node_ = nodes_[nodeIndex_];
+                        int depth_ = 0;
+                        int parentIndex_ = node_.parentIndex;
+                        bool inherited_ = false;
+                        while (parentIndex_ >= 0 &&
+                            parentIndex_ < static_cast<int>(nodes_.size()))
+                        {
+                            ++depth_;
+                            const std::string& parentName_ = nodes_[parentIndex_].name;
+                            if (std::find(
+                                editingState->blendMaskRootNodes.begin(),
+                                editingState->blendMaskRootNodes.end(),
+                                parentName_) != editingState->blendMaskRootNodes.end())
+                            {
+                                inherited_ = true;
+                            }
+                            parentIndex_ = nodes_[parentIndex_].parentIndex;
+                        }
+
+                        auto selectedIt_ = std::find(
                             editingState->blendMaskRootNodes.begin(),
                             editingState->blendMaskRootNodes.end(),
-                            parentName_) != editingState->blendMaskRootNodes.end())
+                            node_.name);
+                        bool selected_ = selectedIt_ != editingState->blendMaskRootNodes.end();
+
+                        ImGui::PushID(nodeIndex_);
+                        ImGui::Indent(static_cast<float>(depth_) * 12.0f);
+                        if (ImGui::Checkbox("##MaskNode", &selected_))
                         {
-                            inherited_ = true;
+                            if (selected_)
+                            {
+                                editingState->blendMaskRootNodes.push_back(node_.name);
+                            }
+                            else
+                            {
+                                editingState->blendMaskRootNodes.erase(
+                                    std::remove(
+                                        editingState->blendMaskRootNodes.begin(),
+                                        editingState->blendMaskRootNodes.end(),
+                                        node_.name),
+                                    editingState->blendMaskRootNodes.end());
+                            }
                         }
-                        parentIndex_ = nodes_[parentIndex_].parentIndex;
-                    }
-
-                    auto selectedIt_ = std::find(
-                        editingState->blendMaskRootNodes.begin(),
-                        editingState->blendMaskRootNodes.end(),
-                        node_.name);
-                    bool selected_ = selectedIt_ != editingState->blendMaskRootNodes.end();
-
-                    ImGui::PushID(nodeIndex_);
-                    ImGui::Indent(static_cast<float>(depth_) * 12.0f);
-                    if (ImGui::Checkbox("##MaskNode", &selected_))
-                    {
-                        if (selected_)
+                        ImGui::SameLine();
+                        if (inherited_ && !selected_)
                         {
-                            editingState->blendMaskRootNodes.push_back(node_.name);
+                            ImGui::TextDisabled("%s (Inherited)", node_.name.c_str());
                         }
                         else
                         {
-                            editingState->blendMaskRootNodes.erase(
-                                std::remove(
-                                    editingState->blendMaskRootNodes.begin(),
-                                    editingState->blendMaskRootNodes.end(),
-                                    node_.name),
-                                editingState->blendMaskRootNodes.end());
+                            ImGui::TextUnformatted(node_.name.c_str());
                         }
+                        ImGui::Unindent(static_cast<float>(depth_) * 12.0f);
+                        ImGui::PopID();
                     }
-                    ImGui::SameLine();
-                    if (inherited_ && !selected_)
-                    {
-                        ImGui::TextDisabled("%s (Inherited)", node_.name.c_str());
-                    }
-                    else
-                    {
-                        ImGui::TextUnformatted(node_.name.c_str());
-                    }
-                    ImGui::Unindent(static_cast<float>(depth_) * 12.0f);
-                    ImGui::PopID();
                 }
                 ImGui::EndChild();
             }
@@ -725,13 +784,20 @@ void AnimationControllerComponent::Gui()
             {
                 ImGui::TextUnformatted("Custom Animation");
                 ImGui::BeginChild("CustomAnimationList", ImVec2(0.0f, 110.0f), true);
-                for (int index_ = 0; index_ < static_cast<int>(poseLibrary->customAnims.size()); ++index_)
+                ImGuiListClipper customClipper_;
+                customClipper_.Begin(static_cast<int>(poseLibrary->customAnims.size()));
+                while (customClipper_.Step())
                 {
-                    if (ImGui::Selectable(
-                        poseLibrary->customAnims[index_].name.c_str(),
-                        editingState->customAnimIndex == index_))
+                    for (int index_ = customClipper_.DisplayStart;
+                        index_ < customClipper_.DisplayEnd;
+                        ++index_)
                     {
-                        editingState->customAnimIndex = index_;
+                        if (ImGui::Selectable(
+                            poseLibrary->customAnims[index_].name.c_str(),
+                            editingState->customAnimIndex == index_))
+                        {
+                            editingState->customAnimIndex = index_;
+                        }
                     }
                 }
                 ImGui::EndChild();
@@ -815,6 +881,10 @@ void AnimationControllerComponent::Gui()
                 ImGui::Checkbox("Y##Pos", &editingState->rootMotion.applyPositionY); ImGui::SameLine();
                 ImGui::Checkbox("Z##Pos", &editingState->rootMotion.applyPositionZ);
 
+                ImGui::Text("Extra Cut Visual Position from Source Node:");
+                ImGui::Checkbox("X##CutVisualPos", &editingState->rootMotion.cutVisualPositionX); ImGui::SameLine();
+                ImGui::Checkbox("Y##CutVisualPos", &editingState->rootMotion.cutVisualPositionY); ImGui::SameLine();
+                ImGui::Checkbox("Z##CutVisualPos", &editingState->rootMotion.cutVisualPositionZ);
 
 
                 ImGui::Unindent();
@@ -871,39 +941,54 @@ void AnimationControllerComponent::Gui()
         else
         {
             std::string toDelete;
-            for (auto& [key, val] : GetEditableBlackboard())
+            BlackboardCategory& editableBlackboard_ = GetEditableBlackboard();
+            auto DrawBlackboardRow_ = [&](const std::string& key_, BlackBoardValue& val_)
             {
-                ImGui::PushID(key.c_str());
+                ImGui::PushID(key_.c_str());
 
 
-                ImGui::Text("%-20s", key.c_str());
+                ImGui::Text("%-20s", key_.c_str());
                 ImGui::SameLine();
 
 
-                if (auto* f = std::get_if<float>(&val)) {
+                if (auto* f = std::get_if<float>(&val_)) {
                     ImGui::SetNextItemWidth(100.0f);
                     ImGui::DragFloat("##v", f, 0.01f);
                 }
-                else if (auto* i = std::get_if<int>(&val)) {
+                else if (auto* i = std::get_if<int>(&val_)) {
                     ImGui::SetNextItemWidth(100.0f);
                     ImGui::DragInt("##v", i);
                 }
-                else if (auto* b = std::get_if<bool>(&val)) {
+                else if (auto* b = std::get_if<bool>(&val_)) {
                     ImGui::Checkbox("##v", b);
                 }
-                else if (auto* v = std::get_if<DirectX::SimpleMath::Vector2>(&val)) {
+                else if (auto* v = std::get_if<DirectX::SimpleMath::Vector2>(&val_)) {
                     ImGui::SetNextItemWidth(180.0f);
                     ImGui::DragFloat2("##v", &v->x, 0.01f);
                 }
 
                 ImGui::SameLine();
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
-                if (ImGui::Button("X##del")) { toDelete = key; }
+                if (ImGui::Button("X##del")) { toDelete = key_; }
                 ImGui::PopStyleColor();
 
                 ImGui::PopID();
+            };
+
+            ImGuiListClipper clipper_;
+            clipper_.Begin(static_cast<int>(editableBlackboard_.size()));
+            while (clipper_.Step())
+            {
+                auto iterator_ = editableBlackboard_.begin();
+                std::advance(iterator_, clipper_.DisplayStart);
+                for (int index_ = clipper_.DisplayStart;
+                    index_ < clipper_.DisplayEnd && iterator_ != editableBlackboard_.end();
+                    ++index_, ++iterator_)
+                {
+                    DrawBlackboardRow_(iterator_->first, iterator_->second);
+                }
             }
-            if (!toDelete.empty()) { GetEditableBlackboard().erase(toDelete); }
+            if (!toDelete.empty()) { editableBlackboard_.erase(toDelete); }
         }
     }
 

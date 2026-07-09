@@ -308,13 +308,16 @@
         "name": "Combo_Attack_Air_02_Seq",
         "rootMotion": {
             "applyPositionX": true,
-            "applyPositionY": true,
+            "applyPositionY": false,
             "applyPositionZ": true,
             "applyRotationX": true,
             "applyRotationY": true,
             "applyRotationZ": true,
+            "cutVisualPositionX": true,
+            "cutVisualPositionY": true,
+            "cutVisualPositionZ": true,
             "enable": true,
-            "sourceNodeName": ""
+            "sourceNodeName": "pelvis"
         },
         "rootMotionScale": 0.009999999776482582,
         "rootMotionScaleCurveName": "",

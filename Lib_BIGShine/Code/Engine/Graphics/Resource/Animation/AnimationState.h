@@ -44,6 +44,9 @@ struct RootMotionSettings {
     bool applyPositionX = true; // X軸の移動を許すか
     bool applyPositionY = true; // Y軸の移動を許すか
     bool applyPositionZ = true; // Z軸の移動を許すか
+    bool cutVisualPositionX = true;
+    bool cutVisualPositionY = true;
+    bool cutVisualPositionZ = true;
     bool applyRotationX = true; // X軸の傾きを許すか
     bool applyRotationY = true; // Y軸の振り向く力を許すか
     bool applyRotationZ = true; // Z軸の傾げを許すか
@@ -237,6 +240,9 @@ inline void to_json(nlohmann::json& j, const RootMotionSettings& r) {
         {"applyPositionX", r.applyPositionX},
         {"applyPositionY", r.applyPositionY},
         {"applyPositionZ", r.applyPositionZ},
+        {"cutVisualPositionX", r.cutVisualPositionX},
+        {"cutVisualPositionY", r.cutVisualPositionY},
+        {"cutVisualPositionZ", r.cutVisualPositionZ},
         {"applyRotationX", r.applyRotationX},
         {"applyRotationY", r.applyRotationY},
         {"applyRotationZ", r.applyRotationZ}
@@ -249,6 +255,9 @@ inline void from_json(const nlohmann::json& j, RootMotionSettings& r) {
     r.applyPositionX = j.value("applyPositionX", true);
     r.applyPositionY = j.value("applyPositionY", true);
     r.applyPositionZ = j.value("applyPositionZ", true);
+    r.cutVisualPositionX = j.value("cutVisualPositionX", true);
+    r.cutVisualPositionY = j.value("cutVisualPositionY", true);
+    r.cutVisualPositionZ = j.value("cutVisualPositionZ", true);
     r.applyRotationX = j.value("applyRotationX", true);
     r.applyRotationY = j.value("applyRotationY", true);
     r.applyRotationZ = j.value("applyRotationZ", true);

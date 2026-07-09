@@ -66,6 +66,7 @@ private:
     // 前フレームの座標を保持する変数
     DirectX::SimpleMath::Vector3 prevRootPos = { 0, 0, 0 };
     DirectX::SimpleMath::Vector3 rootMotionBasePosition = { 0, 0, 0 };
+    DirectX::SimpleMath::Vector3 previousRootMotionBasePosition = { 0, 0, 0 };
     int previousRootMotionNodeIndex = -1;
     // アニメーションが切り替わったことを検知するフラグ
     bool isFirstFrame = true;

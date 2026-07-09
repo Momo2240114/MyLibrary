@@ -78,6 +78,7 @@ public:
     bool IsGrounded() const;
     void BeginAirborneActionContext();
     void EndAirborneActionContext();
+    bool ConsumeJumpLoopResumeRequest();
     PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); } // 現在Actionを返す
     int GetComboIndex() const { return comboIndex; } // 現在のコンボ番号を返す
     const std::vector<PlayerCancelTransition>& GetCancelTransitions() const { return cancelTransitions; } // キャンセルルート一覧を返す
@@ -162,6 +163,7 @@ private:
     bool strongAttackStartedAirborne = false;
     bool airborneActionContextActive = false;
     bool airborneActionContextLeftGround = false;
+    bool jumpLoopResumeRequested = false;
     bool runEndActive = false;
     bool hasSentGrounded = false;
     bool lastSentGrounded = false;
