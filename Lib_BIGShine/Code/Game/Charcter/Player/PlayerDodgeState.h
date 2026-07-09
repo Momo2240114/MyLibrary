@@ -11,9 +11,12 @@ class PlayerControllerComponent;
 class PlayerDodgeState : public PlayerState
 {
 public:
-    using PlayerState::PlayerState;
+    PlayerDodgeState(
+        const std::shared_ptr<GameObject>& owner_,
+        PlayerControllerComponent& playerController_,
+        PLAYER_ACTION action_ = PLAYER_ACTION::DODGE);
 
-    const char* GetName() const override { return GetPlayerActionName(PLAYER_ACTION::DODGE); }
+    const char* GetName() const override { return GetPlayerActionName(action); }
     void Enter() override;
     void Execute(float elapsedTime_) override;
     void Exit() override;
@@ -36,6 +39,7 @@ private:
     void ExecuteOwnerAction(const std::string& actionName_);
 
 private:
+    PLAYER_ACTION action = PLAYER_ACTION::DODGE;
     DirectX::XMFLOAT3 dodgeDirection{ 0.0f, 0.0f, 1.0f };
     DirectX::XMFLOAT3 dodgeBlendInput{ 0.0f, 0.0f, 1.0f };
 

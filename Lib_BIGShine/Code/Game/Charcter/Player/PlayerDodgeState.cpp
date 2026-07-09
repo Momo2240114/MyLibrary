@@ -9,6 +9,15 @@
 
 #include <algorithm>
 
+PlayerDodgeState::PlayerDodgeState(
+    const std::shared_ptr<GameObject>& owner_,
+    PlayerControllerComponent& playerController_,
+    PLAYER_ACTION action_)
+    : PlayerState(owner_, playerController_),
+    action(action_)
+{
+}
+
 void PlayerDodgeState::Enter()
 {
     RegisterJustDodgeActions();
@@ -16,7 +25,7 @@ void PlayerDodgeState::Enter()
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
-    player_->EnterAction(PLAYER_ACTION::DODGE);
+    player_->EnterAction(action);
     player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
 
     const DirectX::XMFLOAT3 cameraForward_ = player_->GetCameraForwardDirection();
@@ -38,9 +47,12 @@ void PlayerDodgeState::Enter()
 
     SendDodgeInputToBlackboard(dodgeBlendInput);
 
-    if (ColliderComponent* collider_ = player_->GetCollider())
+    if (action != PLAYER_ACTION::AIR_DODGE)
     {
-        collider_->velocity.y = 0.0f;
+        if (ColliderComponent* collider_ = player_->GetCollider())
+        {
+            collider_->velocity.y = 0.0f;
+        }
     }
 
     dodgeActive = true;
