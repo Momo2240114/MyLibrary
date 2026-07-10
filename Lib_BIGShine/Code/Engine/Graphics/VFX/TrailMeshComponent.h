@@ -38,6 +38,7 @@ public:
     void SetLifeTime(float lifeTime_);
     void SetMaxSampleCount(size_t maxSampleCount_);
     void SetMinimumSampleDistance(float distance_);
+    void SetSmoothStep(int smoothStep_);
 
     void StartTrail();
     void StopTrail();
@@ -68,6 +69,7 @@ private:
     size_t maxSampleCount = 64;
     float lifeTime = 0.35f;
     float minimumSampleDistance = 0.01f;
+    int smoothStep = 2;
     bool emitting = false;
     bool meshDirty = true;
 };

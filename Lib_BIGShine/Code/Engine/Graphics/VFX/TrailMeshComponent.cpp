@@ -35,6 +35,31 @@ namespace
         const float z_ = firstPosition_.z - secondPosition_.z;
         return x_ * x_ + y_ * y_ + z_ * z_;
     }
+
+    DirectX::XMFLOAT3 CatmullRom(
+        const DirectX::XMFLOAT3& point0_,
+        const DirectX::XMFLOAT3& point1_,
+        const DirectX::XMFLOAT3& point2_,
+        const DirectX::XMFLOAT3& point3_,
+        float amount_)
+    {
+        DirectX::XMFLOAT3 result_{};
+        DirectX::XMStoreFloat3(
+            &result_,
+            DirectX::XMVectorCatmullRom(
+                DirectX::XMLoadFloat3(&point0_),
+                DirectX::XMLoadFloat3(&point1_),
+                DirectX::XMLoadFloat3(&point2_),
+                DirectX::XMLoadFloat3(&point3_),
+                amount_));
+        return result_;
+    }
+
+    size_t CalculateRenderSampleCount(size_t sampleCount_, int smoothStep_)
+    {
+        if (sampleCount_ < 2) return sampleCount_;
+        return (sampleCount_ - 1) * static_cast<size_t>((std::max)(smoothStep_, 1)) + 1;
+    }
 }
 
 TrailMeshComponent::TrailMeshComponent()
@@ -222,6 +247,13 @@ void TrailMeshComponent::SetMinimumSampleDistance(float distance_)
     minimumSampleDistance = (std::max)(distance_, 0.0f);
 }
 
+void TrailMeshComponent::SetSmoothStep(int smoothStep_)
+{
+    smoothStep = (std::clamp)(smoothStep_, 1, 8);
+    CreateBuffers();
+    meshDirty = true;
+}
+
 void TrailMeshComponent::StartTrail()
 {
     SetEmitting(true);
@@ -242,16 +274,18 @@ bool TrailMeshComponent::CreateBuffers()
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
     if (!device_) return false;
 
+    const size_t renderSampleCount_ = CalculateRenderSampleCount(maxSampleCount, smoothStep);
+
     D3D11_BUFFER_DESC vertexDescription_{};
     vertexDescription_.ByteWidth = static_cast<UINT>(
-        sizeof(GltfModelCommponennt::Vertex) * maxSampleCount * 2);
+        sizeof(GltfModelCommponennt::Vertex) * renderSampleCount_ * 2);
     vertexDescription_.Usage = D3D11_USAGE_DYNAMIC;
     vertexDescription_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexDescription_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     D3D11_BUFFER_DESC indexDescription_{};
     indexDescription_.ByteWidth = static_cast<UINT>(
-        sizeof(uint32_t) * (maxSampleCount - 1) * 6);
+        sizeof(uint32_t) * (renderSampleCount_ - 1) * 6);
     indexDescription_.Usage = D3D11_USAGE_DYNAMIC;
     indexDescription_.BindFlags = D3D11_BIND_INDEX_BUFFER;
     indexDescription_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -275,18 +309,59 @@ void TrailMeshComponent::RebuildMesh()
     indices.clear();
     if (samples.size() < 2) return;
 
-    vertices.reserve(samples.size() * 2);
-    indices.reserve((samples.size() - 1) * 6);
-    for (size_t sampleIndex_ = 0; sampleIndex_ < samples.size(); ++sampleIndex_)
+    std::vector<TrailSample> renderSamples_;
+    const int clampedSmoothStep_ = (std::max)(smoothStep, 1);
+    renderSamples_.reserve(CalculateRenderSampleCount(samples.size(), clampedSmoothStep_));
+
+    for (size_t sampleIndex_ = 0; sampleIndex_ + 1 < samples.size(); ++sampleIndex_)
+    {
+        const size_t point0Index_ = sampleIndex_ > 0 ? sampleIndex_ - 1 : sampleIndex_;
+        const size_t point1Index_ = sampleIndex_;
+        const size_t point2Index_ = sampleIndex_ + 1;
+        const size_t point3Index_ = sampleIndex_ + 2 < samples.size()
+            ? sampleIndex_ + 2
+            : sampleIndex_ + 1;
+
+        for (int stepIndex_ = 0; stepIndex_ < clampedSmoothStep_; ++stepIndex_)
+        {
+            const float amount_ = static_cast<float>(stepIndex_) /
+                static_cast<float>(clampedSmoothStep_);
+            TrailSample sample_{};
+            sample_.leftPosition = CatmullRom(
+                samples[point0Index_].leftPosition,
+                samples[point1Index_].leftPosition,
+                samples[point2Index_].leftPosition,
+                samples[point3Index_].leftPosition,
+                amount_);
+            sample_.rightPosition = CatmullRom(
+                samples[point0Index_].rightPosition,
+                samples[point1Index_].rightPosition,
+                samples[point2Index_].rightPosition,
+                samples[point3Index_].rightPosition,
+                amount_);
+            sample_.age = samples[point1Index_].age +
+                (samples[point2Index_].age - samples[point1Index_].age) * amount_;
+            renderSamples_.push_back(sample_);
+        }
+    }
+    renderSamples_.push_back(samples.back());
+
+    vertices.reserve(renderSamples_.size() * 2);
+    indices.reserve((renderSamples_.size() - 1) * 6);
+    for (size_t sampleIndex_ = 0; sampleIndex_ < renderSamples_.size(); ++sampleIndex_)
     {
         const size_t previousIndex_ = sampleIndex_ > 0 ? sampleIndex_ - 1 : sampleIndex_;
-        const size_t nextIndex_ = sampleIndex_ + 1 < samples.size() ? sampleIndex_ + 1 : sampleIndex_;
+        const size_t nextIndex_ = sampleIndex_ + 1 < renderSamples_.size()
+            ? sampleIndex_ + 1
+            : sampleIndex_;
 
         const DirectX::XMFLOAT3 previousCenter_ = CalculateCenter(
-            samples[previousIndex_].leftPosition, samples[previousIndex_].rightPosition);
+            renderSamples_[previousIndex_].leftPosition,
+            renderSamples_[previousIndex_].rightPosition);
 
         const DirectX::XMFLOAT3 nextCenter_ = CalculateCenter(
-            samples[nextIndex_].leftPosition, samples[nextIndex_].rightPosition);
+            renderSamples_[nextIndex_].leftPosition,
+            renderSamples_[nextIndex_].rightPosition);
 
         const DirectX::XMVECTOR direction_ = DirectX::XMVector3Normalize(
             DirectX::XMVectorSubtract(
@@ -295,8 +370,8 @@ void TrailMeshComponent::RebuildMesh()
 
         const DirectX::XMVECTOR width_ = DirectX::XMVector3Normalize(
             DirectX::XMVectorSubtract(
-                DirectX::XMLoadFloat3(&samples[sampleIndex_].rightPosition),
-            DirectX::XMLoadFloat3(&samples[sampleIndex_].leftPosition)));
+                DirectX::XMLoadFloat3(&renderSamples_[sampleIndex_].rightPosition),
+            DirectX::XMLoadFloat3(&renderSamples_[sampleIndex_].leftPosition)));
 
         DirectX::XMVECTOR normal_ = DirectX::XMVector3Cross(width_, direction_);
         if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(normal_)) < 0.000001f)
@@ -313,22 +388,22 @@ void TrailMeshComponent::RebuildMesh()
         DirectX::XMStoreFloat3(&normalValue_, normal_);
         DirectX::XMStoreFloat3(&tangentValue_, direction_);
         const float v_ = static_cast<float>(sampleIndex_) /
-            static_cast<float>(samples.size() - 1);
+            static_cast<float>(renderSamples_.size() - 1);
 
         GltfModelCommponennt::Vertex leftVertex_{};
-        leftVertex_.position = samples[sampleIndex_].leftPosition;
+        leftVertex_.position = renderSamples_[sampleIndex_].leftPosition;
         leftVertex_.normal = normalValue_;
         leftVertex_.tangent = { tangentValue_.x, tangentValue_.y, tangentValue_.z, 1.0f };
         leftVertex_.texcoord = { 0.0f, v_ };
         GltfModelCommponennt::Vertex rightVertex_ = leftVertex_;
-        rightVertex_.position = samples[sampleIndex_].rightPosition;
+        rightVertex_.position = renderSamples_[sampleIndex_].rightPosition;
         rightVertex_.texcoord = { 1.0f, v_ };
         vertices.push_back(leftVertex_);
         vertices.push_back(rightVertex_);
     }
 
     for (uint32_t sampleIndex_ = 0;
-        sampleIndex_ + 1 < static_cast<uint32_t>(samples.size()); ++sampleIndex_)
+        sampleIndex_ + 1 < static_cast<uint32_t>(renderSamples_.size()); ++sampleIndex_)
     {
         const uint32_t currentLeft_ = sampleIndex_ * 2;
         const uint32_t currentRight_ = currentLeft_ + 1;
@@ -384,6 +459,11 @@ void TrailMeshComponent::Gui()
     {
         SetMaxSampleCount(static_cast<size_t>(maxSampleCount_));
     }
+    int smoothStep_ = smoothStep;
+    if (ImGui::DragInt("Smooth Step", &smoothStep_, 1.0f, 1, 8))
+    {
+        SetSmoothStep(smoothStep_);
+    }
     ImGui::Text("Current Samples: %zu", samples.size());
     if (ImGui::Button("Clear Trail")) Clear();
 
@@ -399,6 +479,7 @@ void TrailMeshComponent::Serialize(nlohmann::json& json_) const
     json_["TrailLifeTime"] = lifeTime;
     json_["TrailMaxSampleCount"] = maxSampleCount;
     json_["TrailMinimumSampleDistance"] = minimumSampleDistance;
+    json_["TrailSmoothStep"] = smoothStep;
     json_["TrailEmitting"] = emitting;
 }
 
@@ -409,6 +490,7 @@ void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
     maxSampleCount = (std::max)(json_.value("TrailMaxSampleCount", static_cast<size_t>(64)),
         static_cast<size_t>(2));
     minimumSampleDistance = (std::max)(json_.value("TrailMinimumSampleDistance", 0.01f), 0.0f);
+    smoothStep = (std::clamp)(json_.value("TrailSmoothStep", 2), 1, 8);
     emitting = false;
     Clear();
     CreateBuffers();

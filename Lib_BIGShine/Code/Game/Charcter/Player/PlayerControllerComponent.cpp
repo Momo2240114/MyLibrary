@@ -1320,6 +1320,11 @@ void PlayerControllerComponent::NotifyJustDodge()
     dodgeState_->NotifyJustDodgeSucceeded();
 }
 
+bool PlayerControllerComponent::IsJustDodgeColliderActive() const
+{
+    return justDodgeCollider && justDodgeCollider->IsEnabled();
+}
+
 
 void PlayerControllerComponent::Gui()
 {
