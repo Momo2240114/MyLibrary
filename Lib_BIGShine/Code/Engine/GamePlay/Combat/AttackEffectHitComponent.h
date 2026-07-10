@@ -78,6 +78,7 @@ public:
     void SetHitStopDuration(float hitStopDuration_);
     void SetHitStopScale(float hitStopScale_);
     void SetKnockBackPower(float knockBackPower_);
+    void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
     void SetHitParticleAssetPath(const std::string& path_);
     void SetHitParticleEmitterName(const std::string& emitterName_);
     void SetHitParticleLifeTime(float lifeTime_);
@@ -121,6 +122,8 @@ private:
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;
     float knockBackPower = 0.0f;
+    float targetAirLiftPower = 0.0f;
+    float attackerAirLiftPower = 0.0f;
     std::string hitParticleAssetPath;
     std::string hitParticleEmitterName;
     float hitParticleLifeTime = 1.0f;

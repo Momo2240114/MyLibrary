@@ -92,6 +92,11 @@ void AttackEffectHitComponent::SetDamage(float damage_) { damage = damage_; }
 void AttackEffectHitComponent::SetHitStopDuration(float hitStopDuration_) { hitStopDuration = hitStopDuration_; }
 void AttackEffectHitComponent::SetHitStopScale(float hitStopScale_) { hitStopScale = hitStopScale_; }
 void AttackEffectHitComponent::SetKnockBackPower(float knockBackPower_) { knockBackPower = knockBackPower_; }
+void AttackEffectHitComponent::SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_)
+{
+    targetAirLiftPower = (std::max)(targetAirLiftPower_, 0.0f);
+    attackerAirLiftPower = (std::max)(attackerAirLiftPower_, 0.0f);
+}
 void AttackEffectHitComponent::SetHitParticleAssetPath(const std::string& path_)
 {
     hitParticleAssetPath = path_;
@@ -186,7 +191,10 @@ void AttackEffectHitComponent::ClearHitHistory()
 {
     const std::shared_ptr<GameObject> object_ = GetGameObject();
     if (object_ && attackInstanceId != 0u)
+    {
         object_->GetManager().GetAttackSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
+        object_->GetManager().GetJustDodgeSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
+    }
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
         if (runtime_.hitBox) runtime_.hitBox->ClearHitTargets();
 }
@@ -204,6 +212,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitStopDuration = hitStopDuration;
     hitBox_->hitStopScale = hitStopScale;
     hitBox_->SetKnockBackPower(knockBackPower);
+    hitBox_->SetAirLiftPower(targetAirLiftPower, attackerAirLiftPower);
     hitBox_->hitParticleAssetPath = hitParticleAssetPath;
     hitBox_->hitParticleEmitterName = hitParticleEmitterName;
     hitBox_->hitParticleLifeTime = hitParticleLifeTime;
@@ -389,6 +398,8 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["HitStopDuration"] = hitStopDuration;
     json_["HitStopScale"] = hitStopScale;
     json_["KnockBackPower"] = knockBackPower;
+    json_["TargetAirLiftPower"] = targetAirLiftPower;
+    json_["AttackerAirLiftPower"] = attackerAirLiftPower;
     json_["HitParticleAssetPath"] = hitParticleAssetPath;
     json_["HitParticleEmitterName"] = hitParticleEmitterName;
     json_["HitParticleLifeTime"] = hitParticleLifeTime;
@@ -432,6 +443,8 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     hitStopDuration = json_.value("HitStopDuration", 0.0f);
     hitStopScale = json_.value("HitStopScale", 0.0f);
     knockBackPower = json_.value("KnockBackPower", 0.0f);
+    targetAirLiftPower = (std::max)(json_.value("TargetAirLiftPower", 0.0f), 0.0f);
+    attackerAirLiftPower = (std::max)(json_.value("AttackerAirLiftPower", 0.0f), 0.0f);
     hitParticleAssetPath = json_.value("HitParticleAssetPath", std::string{});
     hitParticleEmitterName = json_.value("HitParticleEmitterName", std::string{});
     hitParticleLifeTime = (std::max)(json_.value("HitParticleLifeTime", 1.0f), 0.0f);

@@ -1,10 +1,13 @@
 #include "AttackSystem.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/HurtBox.h"
 
+#include <algorithm>
 #include <cmath>
 
 void AttackSystem::BeginFrame()
@@ -88,6 +91,8 @@ void AttackSystem::HandleHit(
     event_.hitStopScale = hitBox_.hitStopScale;
     event_.hitStopLayerMask = hitBox_.hitStopLayerMask;
     event_.knockBackPower = hitBox_.knockBackPower;
+    event_.targetAirLiftPower = hitBox_.targetAirLiftPower;
+    event_.attackerAirLiftPower = hitBox_.attackerAirLiftPower;
     event_.hitPosition = contact_.position;
     event_.hitNormal = contact_.normal;
     event_.hasHitContact = contact_.isValid;
@@ -111,6 +116,28 @@ void AttackSystem::HandleHit(
 
     frameHitEvents.push_back(event_);
     PublishHitToBlackboard(event_);
+
+    if (event_.attackerAirLiftPower > 0.0f)
+    {
+        float attackerMassScale_ = 1.0f;
+        if (const std::shared_ptr<ColliderComponent> collider_ =
+            attacker_->GetComponent<ColliderComponent>())
+        {
+            attackerMassScale_ = 1.0f / (std::max)(collider_->GetMass(), 1.0f);
+        }
+
+        const float airLiftImpulse_ = event_.attackerAirLiftPower * attackerMassScale_;
+        if (const std::shared_ptr<CharacterMovementComponent> movement_ =
+            attacker_->GetComponent<CharacterMovementComponent>())
+        {
+            movement_->AddImpulse({ 0.0f, airLiftImpulse_, 0.0f });
+        }
+        else if (const std::shared_ptr<ColliderComponent> collider_ =
+            attacker_->GetComponent<ColliderComponent>())
+        {
+            collider_->velocity.y = (std::max)(collider_->velocity.y, airLiftImpulse_);
+        }
+    }
 
     for (const HitCallback& callback_ : hitCallbacks)
     {
@@ -189,6 +216,8 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     blackboard_->SetFloat("Hit", "HitStopDuration", event_.hitStopDuration);
     blackboard_->SetFloat("Hit", "HitStopScale", event_.hitStopScale);
     blackboard_->SetFloat("Hit", "KnockBackPower", event_.knockBackPower);
+    blackboard_->SetFloat("Hit", "TargetAirLiftPower", event_.targetAirLiftPower);
+    blackboard_->SetFloat("Hit", "AttackerAirLiftPower", event_.attackerAirLiftPower);
     blackboard_->SetVector3("Hit", "Position", event_.hitPosition);
     blackboard_->SetVector3("Hit", "Normal", event_.hitNormal);
     const std::shared_ptr<GameObject> hitBoxObject_ =

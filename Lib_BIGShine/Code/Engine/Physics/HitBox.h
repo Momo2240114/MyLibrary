@@ -20,6 +20,8 @@ public:
     bool canHitOwner = false;
     int teamId = 0;
     float knockBackPower = 0.0f;
+    float targetAirLiftPower = 0.0f;
+    float attackerAirLiftPower = 0.0f;
     bool hitOncePerActivation = true;
     std::string attackTag = "Attack";
     std::string hitParticleAssetPath;
@@ -60,6 +62,7 @@ public:
     void SetHitGroupId(uint32_t hitGroupId_);
     void SetDamage(float damage_);
     void SetKnockBackPower(float knockBackPower_);
+    void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
     void SetHitEffectPath(const std::string& path_);
     void SetHitEffectBlackboardOverrideEnabled(bool enabled_)
     {

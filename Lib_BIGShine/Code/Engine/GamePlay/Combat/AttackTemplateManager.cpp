@@ -363,6 +363,8 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.hitStopDuration = attack_.value("hitStopDuration", attack_.value("hitStopTime", 0.05f));
     result_.hitStopScale = attack_.value("hitStopScale", 0.0f);
     result_.knockBackPower = attack_.value("knockBackPower", 3.0f);
+    result_.targetAirLiftPower = (std::max)(attack_.value("targetAirLiftPower", 0.0f), 0.0f);
+    result_.attackerAirLiftPower = (std::max)(attack_.value("attackerAirLiftPower", 0.0f), 0.0f);
     result_.knockBackType = ReadEnum(attack_, "knockBackType", KNOCK_BACK_TYPE::OWNER_FORWARD);
     result_.hitGroupId = attack_.value("hitGroupId", 0u);
     result_.allowMultiHit = attack_.value("allowMultiHit", false);
@@ -511,6 +513,8 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
             { "hitStopDuration", attackTemplate_.hitStopDuration },
             { "hitStopScale", attackTemplate_.hitStopScale },
             { "knockBackPower", attackTemplate_.knockBackPower },
+            { "targetAirLiftPower", attackTemplate_.targetAirLiftPower },
+            { "attackerAirLiftPower", attackTemplate_.attackerAirLiftPower },
             { "knockBackType", static_cast<int>(attackTemplate_.knockBackType) },
             { "hitGroupId", attackTemplate_.hitGroupId },
             { "allowMultiHit", attackTemplate_.allowMultiHit } } },
@@ -770,6 +774,18 @@ bool AttackTemplateManager::DrawEditorContent(
         ImGui::DragFloat(
             "Knock Back Power",
             &attackTemplate_->knockBackPower,
+            0.1f,
+            0.0f);
+
+        ImGui::DragFloat(
+            "Target Air Lift Power",
+            &attackTemplate_->targetAirLiftPower,
+            0.1f,
+            0.0f);
+
+        ImGui::DragFloat(
+            "Attacker Air Lift Power",
+            &attackTemplate_->attackerAirLiftPower,
             0.1f,
             0.0f);
 

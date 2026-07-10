@@ -117,6 +117,8 @@ struct AttackTemplate
     float hitStopDuration = 0.05f;
     float hitStopScale = 0.0f;
     float knockBackPower = 3.0f;
+    float targetAirLiftPower = 0.0f;
+    float attackerAirLiftPower = 0.0f;
     KNOCK_BACK_TYPE knockBackType = KNOCK_BACK_TYPE::OWNER_FORWARD;
     uint32_t hitGroupId = 0u;
     bool allowMultiHit = false;

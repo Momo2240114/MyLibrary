@@ -2,8 +2,11 @@
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Common/DebugLog.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/JustDodgeCollider.h"
+
+#include <string>
 
 void JustDodgeSystem::BeginFrame()
 {
@@ -63,13 +66,36 @@ void JustDodgeSystem::HandleJustDodge(
     const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
     const std::shared_ptr<GameObject> dodger_ = justDodgeCollider_.GetGameObject();
 
-    if (!attacker_ || !dodger_) return;
-    if (!hitBox_.IsEnabled() || !justDodgeCollider_.IsEnabled()) return;
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        "[JustDodge] HandleJustDodge entered. attackInstance="
+        + std::to_string(hitBox_.attackInstanceId)
+        + " hitGroup="
+        + std::to_string(hitBox_.hitGroupId));
+
+    if (!attacker_ || !dodger_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: attacker or dodger missing.");
+        return;
+    }
+    if (!hitBox_.IsEnabled() || !justDodgeCollider_.IsEnabled())
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: HitBox or JustDodgeCollider disabled.");
+        return;
+    }
 
     // 念のためSystem側でも同階層を除外
-    if (IsSameHierarchy(attacker_, dodger_)) return;
+    if (IsSameHierarchy(attacker_, dodger_))
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: same hierarchy.");
+        return;
+    }
 
-    if (!justDodgeCollider_.CanReactToAttack(hitBox_)) return;
+    if (!justDodgeCollider_.CanReactToAttack(hitBox_))
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: collider cannot react to this attack.");
+        return;
+    }
 
     if (!RegisterJustDodge(
         hitBox_.attackInstanceId,
@@ -77,6 +103,7 @@ void JustDodgeSystem::HandleJustDodge(
         dodger_.get(),
         false))
     {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Rejected: already registered for this attack.");
         return;
     }
 
@@ -97,7 +124,13 @@ void JustDodgeSystem::HandleJustDodge(
     event_.attackTag = hitBox_.attackTag;
 
     frameJustDodgeEvents.push_back(event_);
+    BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] Event accepted. Publishing blackboard/action.");
     PublishJustDodgeToBlackboard(event_);
+
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        "[JustDodge] Invoking registered callbacks. count="
+        + std::to_string(justDodgeCallbacks.size()));
 
     for (const JustDodgeCallback& callback_ : justDodgeCallbacks)
     {
@@ -197,8 +230,33 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
     blackboard_->SetVector3("Dodge", "Position", event_.dodgePosition);
     blackboard_->SetVector3("Dodge", "Normal", event_.attackNormal);
 
-    if (receiver_->localRegistry.HasAction("OnJustDodge"))
+    std::shared_ptr<GameObject> actionReceiver_ = dodger_;
+    bool onJustDodgeCalled_ = false;
+    while (actionReceiver_)
     {
-        receiver_->localRegistry.Call("OnJustDodge");
+        if (actionReceiver_->localRegistry.HasAction("OnJustDodge"))
+        {
+            BS_LOG_SUCCESS(
+                LOG_CATEGORY::GAME,
+                "[JustDodge] Calling OnJustDodge on "
+                + actionReceiver_->GetName());
+            actionReceiver_->localRegistry.Call("OnJustDodge");
+            onJustDodgeCalled_ = true;
+            break;
+        }
+
+        if (!actionReceiver_->transform) break;
+
+        const std::shared_ptr<Transform> parentTransform_ =
+            actionReceiver_->transform->parent.lock();
+
+        if (!parentTransform_) break;
+
+        actionReceiver_ = parentTransform_->gameObject.lock();
+    }
+
+    if (!onJustDodgeCalled_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] OnJustDodge action receiver not found.");
     }
 }

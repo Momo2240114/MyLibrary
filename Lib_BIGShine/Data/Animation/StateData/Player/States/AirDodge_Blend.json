@@ -160,8 +160,8 @@
                 "startTime": 0.11666666716337204
             },
             {
-                "actionEnd": "JustDodge_FrameEnd",
-                "actionStart": "JustDodge_FrameStart",
+                "actionEnd": "JustDodge_DisableJustDodgeCollider",
+                "actionStart": "JustDodge_EnableJustDodgeCollider",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,

@@ -31,6 +31,8 @@ struct AttackHitEvent
     float hitStopScale = 0.0f;
     uint32_t hitStopLayerMask = 0u;
     float knockBackPower = 0.0f;
+    float targetAirLiftPower = 0.0f;
+    float attackerAirLiftPower = 0.0f;
     DirectX::XMFLOAT3 hitPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 hitNormal = { 0.0f, 1.0f, 0.0f };
     bool hasHitContact = false;

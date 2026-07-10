@@ -2,8 +2,10 @@
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/Common/DebugLog.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "PlayerControllerComponent.h"
 
@@ -24,6 +26,14 @@ void PlayerDodgeState::Enter()
 
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
+
+    dodgeActive = true;
+    justDodgeFrameActive = false;
+    justDodgeSucceeded = false;
+    counterAvailable = false;
+    justDodgeFrameTimer = 0.0f;
+
+    ClearJustDodgeBlackboard();
 
     player_->EnterAction(action);
     player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
@@ -47,22 +57,17 @@ void PlayerDodgeState::Enter()
 
     SendDodgeInputToBlackboard(dodgeBlendInput);
 
-    if (action != PLAYER_ACTION::AIR_DODGE)
+    if (action == PLAYER_ACTION::AIR_DODGE)
+    {
+        SuspendAirDodgeVerticalMovement();
+    }
+    else
     {
         if (ColliderComponent* collider_ = player_->GetCollider())
         {
             collider_->velocity.y = 0.0f;
         }
     }
-
-    dodgeActive = true;
-    justDodgeFrameActive = false;
-    justDodgeSucceeded = false;
-    counterAvailable = false;
-    justDodgeFrameTimer = 0.0f;
-
-    ClearJustDodgeBlackboard();
-
 }
 
 void PlayerDodgeState::Execute(float elapsedTime_)
@@ -84,6 +89,10 @@ void PlayerDodgeState::Execute(float elapsedTime_)
 
     player_->SendMoveInputToBlackboard(dodgeDirection);
     SendDodgeInputToBlackboard(dodgeBlendInput);
+    if (action == PLAYER_ACTION::AIR_DODGE)
+    {
+        SuspendAirDodgeVerticalMovement();
+    }
     player_->ProcessActionInput();
 }
 
@@ -96,14 +105,28 @@ void PlayerDodgeState::Exit()
 
     dodgeActive = false;
 
+    RestoreAirDodgeVerticalMovement();
     player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
 }
 
 void PlayerDodgeState::NotifyJustDodgeSucceeded()
 {
-    if (!dodgeActive) return;
-    if (!justDodgeFrameActive) return;
-    if (justDodgeSucceeded) return;
+    BS_LOG_INFO(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState NotifyJustDodgeSucceeded entered.");
+    if (!dodgeActive)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState rejected: dodgeActive is false.");
+        return;
+    }
+    if (!justDodgeFrameActive)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState rejected: justDodgeFrameActive is false.");
+        return;
+    }
+    if (justDodgeSucceeded)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState rejected: already succeeded.");
+        return;
+    }
 
     HandleJustDodgeSuccess();
 }
@@ -145,17 +168,70 @@ void PlayerDodgeState::DeactivateDodgeCollision()
     ExecuteOwnerAction("HurtBoxInvincibleOff");
 }
 
+void PlayerDodgeState::SuspendAirDodgeVerticalMovement()
+{
+    PlayerControllerComponent* player_ = GetPlayerController();
+    if (!player_) return;
+
+    ColliderComponent* collider_ = player_->GetCollider();
+    if (!collider_) return;
+
+    if (CharacterMovementComponent* movement_ = player_->GetMovement())
+    {
+        movement_->SetVerticalMovementLocked(true);
+    }
+
+    if (!airDodgeGravityOverridden)
+    {
+        previousAirDodgeUseGravity = collider_->useGravity;
+        airDodgeGravityOverridden = true;
+    }
+
+    collider_->useGravity = false;
+    collider_->velocity.y = 0.0f;
+}
+
+void PlayerDodgeState::RestoreAirDodgeVerticalMovement()
+{
+    if (!airDodgeGravityOverridden) return;
+
+    PlayerControllerComponent* player_ = GetPlayerController();
+    ColliderComponent* collider_ = player_ ? player_->GetCollider() : nullptr;
+    if (player_)
+    {
+        if (CharacterMovementComponent* movement_ = player_->GetMovement())
+        {
+            movement_->SetVerticalMovementLocked(false);
+        }
+    }
+
+    if (collider_)
+    {
+        collider_->useGravity = previousAirDodgeUseGravity;
+        collider_->velocity.y = 0.0f;
+    }
+
+    airDodgeGravityOverridden = false;
+}
+
 void PlayerDodgeState::StartJustDodgeFrame()
 {
-    if (!dodgeActive) return;
+    BS_LOG_INFO(LOG_CATEGORY::GAME, "[JustDodge] FrameStart action received.");
+    if (!dodgeActive)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] FrameStart rejected: dodgeActive is false.");
+        return;
+    }
 
     justDodgeFrameActive = true;
     justDodgeFrameTimer = (std::max)(justDodgeFrameDuration, 0.0f);
+    BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] Frame active. Activating JustDodgeCollider.");
     ActivateDodgeCollision();
 }
 
 void PlayerDodgeState::EndJustDodgeFrame()
 {
+    BS_LOG_INFO(LOG_CATEGORY::GAME, "[JustDodge] FrameEnd action received.");
     justDodgeFrameActive = false;
     justDodgeFrameTimer = 0.0f;
     DeactivateDodgeCollision();
@@ -163,8 +239,28 @@ void PlayerDodgeState::EndJustDodgeFrame()
 
 void PlayerDodgeState::HandleJustDodgeSuccess()
 {
+    BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState success. Applying blackboard/reaction.");
     justDodgeSucceeded = true;
     SetCounterAvailable(true);
+
+    const std::shared_ptr<BlackboardComponent> blackboard_ =
+        GetComponent<BlackboardComponent>();
+    if (blackboard_)
+    {
+        blackboard_->SetBool("Dodge", "JustDodgeSucceeded", true);
+
+        constexpr const char* categories_[] =
+        {
+            PlayerBlackboardCategory::PLAYER,
+            PlayerBlackboardCategory::ANIM
+        };
+
+        for (const char* category_ : categories_)
+        {
+            blackboard_->SetBool(category_, "JustDodgeSucceeded", true);
+            blackboard_->SetTrigger(category_, PlayerBlackboardKey::JUST_DODGE_TRIGGER);
+        }
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetOwner();
     if (owner_)

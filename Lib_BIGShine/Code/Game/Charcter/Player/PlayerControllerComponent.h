@@ -113,6 +113,7 @@ public:
     float runStartDuration = 0.18f;
     float runEndDuration = 0.18f;
     float jumpEndDuration = 0.18f;
+    float groundDodgeCooldownDuration = 0.5f;
 
 private:
     void EnsurePlayerInputBindings(); // Player用InputActionの登録を保証する
@@ -127,6 +128,10 @@ private:
     bool IsGroundOnlyAction(PLAYER_ACTION action_) const;
     bool IsAirAction(PLAYER_ACTION action_) const;
     bool IsAirborneForAction() const;
+    bool IsDodgeAction(PLAYER_ACTION action_) const;
+    bool CanStartDodgeAction(PLAYER_ACTION action_) const;
+    void UpdateDodgeRestrictions(float deltaTime_);
+    void StartGroundDodgeCooldown();
     void UpdateAirborneActionContext();
     void EnsureDefaultCancelTransitions();
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent() const;
@@ -165,6 +170,7 @@ private:
     bool airborneActionContextActive = false;
     bool airborneActionContextLeftGround = false;
     bool jumpLoopResumeRequested = false;
+    bool airDodgeConsumed = false;
     bool runEndActive = false;
     bool hasSentGrounded = false;
     bool lastSentGrounded = false;
@@ -173,6 +179,7 @@ private:
     float strongAttackHoldTimer = 0.0f;
     float locomotionPhaseTimer = 0.0f;
     float runEndTimer = 0.0f;
+    float groundDodgeCooldownTimer = 0.0f;
     PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE; // Debug UIで選択中のAction
