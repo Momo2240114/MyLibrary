@@ -1,0 +1,1356 @@
+{
+  "Logs": [
+    {
+      "Time": "2026-07-10 11:48:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel None -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel None -> AirDodge_Blend"
+    },
+    {
+      "Time": "2026-07-10 11:48:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: TestTarget None -> SK_PlainsDragonPlainsDragon_IdleBreathe_0"
+    },
+    {
+      "Time": "2026-07-10 11:48:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel None -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel None -> SS_Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Dodge -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStart"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Camera] MainCamera_Fov_1"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_EnableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStop"
+    },
+    {
+      "Time": "2026-07-10 11:48:19",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Dodge -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 234,
+      "Text": "[JustDodge] FrameEnd action received."
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Dodge -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStart"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Camera] MainCamera_Fov_1"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_EnableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Physics",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Physics\\CollisionStepSystem.cpp",
+      "Line": 474,
+      "Text": "[JustDodge] CollisionStepSystem overlap. HitBox=HitBox JustDodgeCollider=JustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 74,
+      "Text": "[JustDodge] HandleJustDodge entered. attackInstance=11 hitGroup=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Success",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 127,
+      "Text": "[JustDodge] Event accepted. Publishing blackboard/action."
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Success",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 242,
+      "Text": "[JustDodge] Calling OnJustDodge on PlayerModel"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] OnJustDodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerControllerComponent.cpp",
+      "Line": 1303,
+      "Text": "[JustDodge] PlayerController NotifyJustDodge currentAction=Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 114,
+      "Text": "[JustDodge] PlayerDodgeState NotifyJustDodgeSucceeded entered."
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Warning",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 122,
+      "Text": "[JustDodge] PlayerDodgeState rejected: justDodgeFrameActive is false."
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 133,
+      "Text": "[JustDodge] Invoking registered callbacks. count=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Physics",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Physics\\CollisionStepSystem.cpp",
+      "Line": 474,
+      "Text": "[JustDodge] CollisionStepSystem overlap. HitBox=HitBox JustDodgeCollider=JustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 74,
+      "Text": "[JustDodge] HandleJustDodge entered. attackInstance=11 hitGroup=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Warning",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 96,
+      "Text": "[JustDodge] Rejected: collider cannot react to this attack."
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Physics",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Physics\\CollisionStepSystem.cpp",
+      "Line": 474,
+      "Text": "[JustDodge] CollisionStepSystem overlap. HitBox=HitBox JustDodgeCollider=JustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 74,
+      "Text": "[JustDodge] HandleJustDodge entered. attackInstance=11 hitGroup=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:22",
+      "Category": "Game",
+      "Level": "Warning",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 96,
+      "Text": "[JustDodge] Rejected: collider cannot react to this attack."
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStop"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Dodge -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 234,
+      "Text": "[JustDodge] FrameEnd action received."
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Dodge -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:23",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStart"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Camera] MainCamera_Fov_1"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_EnableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Physics",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Physics\\CollisionStepSystem.cpp",
+      "Line": 474,
+      "Text": "[JustDodge] CollisionStepSystem overlap. HitBox=HitBox JustDodgeCollider=JustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 74,
+      "Text": "[JustDodge] HandleJustDodge entered. attackInstance=14 hitGroup=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Success",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 127,
+      "Text": "[JustDodge] Event accepted. Publishing blackboard/action."
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Success",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 242,
+      "Text": "[JustDodge] Calling OnJustDodge on PlayerModel"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] OnJustDodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerControllerComponent.cpp",
+      "Line": 1303,
+      "Text": "[JustDodge] PlayerController NotifyJustDodge currentAction=Dodge"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 114,
+      "Text": "[JustDodge] PlayerDodgeState NotifyJustDodgeSucceeded entered."
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Warning",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 122,
+      "Text": "[JustDodge] PlayerDodgeState rejected: justDodgeFrameActive is false."
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 133,
+      "Text": "[JustDodge] Invoking registered callbacks. count=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Physics",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Physics\\CollisionStepSystem.cpp",
+      "Line": 474,
+      "Text": "[JustDodge] CollisionStepSystem overlap. HitBox=HitBox JustDodgeCollider=JustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 74,
+      "Text": "[JustDodge] HandleJustDodge entered. attackInstance=14 hitGroup=0"
+    },
+    {
+      "Time": "2026-07-10 11:48:24",
+      "Category": "Game",
+      "Level": "Warning",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\System\\JustDodgeSystem.cpp",
+      "Line": 96,
+      "Text": "[JustDodge] Rejected: collider cannot react to this attack."
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStop"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Dodge -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 234,
+      "Text": "[JustDodge] FrameEnd action received."
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Dodge -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Start"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Stop"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 11:48:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel WeakAttack -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanComboOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Attack1 -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Start"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Stop"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanComboOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel WeakAttack -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Attack1 -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 11:48:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Combat] OnHit"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Sequence] Hit_Player"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Health] Health_Hit"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] Player_Hit"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel WeakAttack -> Hit"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [MaterialOverlay] MaterialOverlay_Start"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Attack1 -> SS_HitReaction"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [MaterialOverlay] MaterialOverlay_Stop"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Hit -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:33",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_HitReaction -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:34",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 11:48:34",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 11:48:34",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:34",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Start"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Stop"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanComboOff"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel WeakAttack -> Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:37",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Attack1 -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 11:48:38",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 11:48:38",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 348,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 11:48:38",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 11:48:38",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Start"
+    },
+    {
+      "Time": "2026-07-10 11:48:38",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Stop"
+    }
+  ]
+}

@@ -117,10 +117,18 @@ void PlayerDodgeState::NotifyJustDodgeSucceeded()
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState rejected: dodgeActive is false.");
         return;
     }
-    if (!justDodgeFrameActive)
+    PlayerControllerComponent* player_ = GetPlayerController();
+    const bool colliderFrameActive_ =
+        player_ && player_->IsJustDodgeColliderActive();
+    if (!justDodgeFrameActive && !colliderFrameActive_)
     {
-        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState rejected: justDodgeFrameActive is false.");
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState rejected: frame flag and collider are inactive.");
         return;
+    }
+    if (!justDodgeFrameActive && colliderFrameActive_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState recovered: frame flag was false but collider is active.");
+        justDodgeFrameActive = true;
     }
     if (justDodgeSucceeded)
     {

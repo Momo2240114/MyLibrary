@@ -75,6 +75,7 @@ public:
 
     ColliderComponent* GetCollider() const { return collider.get(); } // PlayerのColliderを返す
     CharacterMovementComponent* GetMovement() const { return movement.get(); } // Playerの移動Componentを返す
+    bool IsJustDodgeColliderActive() const;
     bool IsGrounded() const;
     void BeginAirborneActionContext();
     void EndAirborneActionContext();
