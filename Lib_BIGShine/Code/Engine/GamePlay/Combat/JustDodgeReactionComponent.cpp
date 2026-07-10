@@ -1,6 +1,7 @@
 #include "JustDodgeReactionComponent.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 
 #include <algorithm>
@@ -43,11 +44,24 @@ const ActionRegistry* JustDodgeReactionComponent::GetSelectedRegistry() const
 
 void JustDodgeReactionComponent::ExecuteReaction()
 {
-    if (selectedActionName.empty() || selectedActionName == "---") return;
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        "[JustDodge] Reaction ExecuteReaction entered. Action="
+        + selectedActionName);
+    if (selectedActionName.empty() || selectedActionName == "---")
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Reaction skipped: action is empty.");
+        return;
+    }
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    if (!owner_) return;
+    if (!owner_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] Reaction skipped: owner missing.");
+        return;
+    }
 
+    BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] Reaction executing action.");
     owner_->ExecuteAction(selectedActionName);
 }
 

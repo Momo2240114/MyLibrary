@@ -1,6 +1,7 @@
 #include "HumanLookAtIKComponent.h"
 
 #include "AnimationControllerComponent.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
@@ -180,7 +181,8 @@ HumanLookAtIKComponent::ResolveCameraLockOnComponent()
 
 std::shared_ptr<GameObject> HumanLookAtIKComponent::ResolveTarget()
 {
-    if (useLockOnTarget)
+    if (lookTargetMode == LOOK_TARGET_MODE::LOCK_ON_TARGET
+        || lookTargetMode == LOOK_TARGET_MODE::LOCK_ON_OR_CAMERA_FORWARD)
     {
         const std::shared_ptr<CameraLockOnComponent> lockOn_ =
             ResolveCameraLockOnComponent();
@@ -202,6 +204,69 @@ std::shared_ptr<GameObject> HumanLookAtIKComponent::ResolveTarget()
     const std::shared_ptr<GameObject> resolvedTarget_ = owner_->manager->Find(targetName);
     target = resolvedTarget_;
     return resolvedTarget_;
+}
+
+bool HumanLookAtIKComponent::ResolveLookTargetPosition(XMFLOAT3& targetPosition_)
+{
+    switch (lookTargetMode)
+    {
+    case LOOK_TARGET_MODE::TARGET_OBJECT:
+        return TryResolveObjectTargetPosition(targetPosition_);
+    case LOOK_TARGET_MODE::LOCK_ON_TARGET:
+        return TryResolveLockOnTargetPosition(targetPosition_);
+    case LOOK_TARGET_MODE::CAMERA_FORWARD:
+        return TryResolveCameraForwardTargetPosition(targetPosition_);
+    case LOOK_TARGET_MODE::LOCK_ON_OR_CAMERA_FORWARD:
+        return TryResolveLockOnTargetPosition(targetPosition_)
+            || TryResolveCameraForwardTargetPosition(targetPosition_);
+    default:
+        return TryResolveObjectTargetPosition(targetPosition_);
+    }
+}
+
+bool HumanLookAtIKComponent::TryResolveLockOnTargetPosition(XMFLOAT3& targetPosition_)
+{
+    const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+        ResolveCameraLockOnComponent();
+    if (!lockOn_ || !lockOn_->IsLockOnEnabled()) return false;
+
+    const std::shared_ptr<GameObject> lockOnTarget_ = lockOn_->GetLockOnTarget();
+    if (!lockOnTarget_ || !lockOnTarget_->transform) return false;
+
+    XMFLOAT4X4 targetWorld_;
+    XMStoreFloat4x4(&targetWorld_, lockOnTarget_->transform->GetWorldMatrix());
+    targetPosition_ = Add(GetTranslation(targetWorld_), targetOffset);
+    return true;
+}
+
+bool HumanLookAtIKComponent::TryResolveObjectTargetPosition(XMFLOAT3& targetPosition_)
+{
+    const std::shared_ptr<GameObject> target_ = ResolveTarget();
+    if (!target_ || !target_->transform) return false;
+
+    XMFLOAT4X4 targetWorld_;
+    XMStoreFloat4x4(&targetWorld_, target_->transform->GetWorldMatrix());
+    targetPosition_ = Add(GetTranslation(targetWorld_), targetOffset);
+    return true;
+}
+
+bool HumanLookAtIKComponent::TryResolveCameraForwardTargetPosition(XMFLOAT3& targetPosition_)
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return false;
+
+    CameraManager* cameraManager_ = owner_->manager->GetCameraManager();
+    if (!cameraManager_) return false;
+
+    const std::shared_ptr<CameraComponent> camera_ = cameraManager_->GetActiveCamera();
+    if (!camera_) return false;
+
+    const XMFLOAT3 eye_ = camera_->GetEye();
+    const XMFLOAT3 front_ = Normalize(camera_->GetFront());
+    if (Length(front_) <= EPSILON) return false;
+
+    targetPosition_ = Add(eye_, Scale(front_, (std::max)(cameraForwardLookDistance, 0.0f)));
+    return true;
 }
 
 // 現在のAnimationStateでLookAtを許可するか判定する。
@@ -242,19 +307,11 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
     std::vector<IKMapComponent::IKChain>& chains_ = ikMap_->GetChains();
     if (lookStates.size() != chains_.size()) lookStates.resize(chains_.size());
 
-    const std::shared_ptr<GameObject> target_ = ResolveTarget();
-
     XMFLOAT3 targetPosition_{};
 
-    // ターゲットObjectのWorld座標に注視オフセットを加算する。
-    if (target_ && target_->transform)
-    {
-        XMFLOAT4X4 targetWorld_;
-        XMStoreFloat4x4(&targetWorld_, target_->transform->GetWorldMatrix());
-        targetPosition_ = Add(GetTranslation(targetWorld_), targetOffset);
-    }
-
-    const bool shouldLook_ = lookEnabled && target_ && IsAllowedAnimationState();
+    // Resolve the final world-space point to look at.
+    const bool hasTargetPosition_ = ResolveLookTargetPosition(targetPosition_);
+    const bool shouldLook_ = lookEnabled && hasTargetPosition_ && IsAllowedAnimationState();
     const LOOK_MODE lookMode_ = GetCurrentLookMode();
 
     for (size_t chainIndex_ = 0; chainIndex_ < chains_.size(); ++chainIndex_)
@@ -277,7 +334,7 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
         const float desiredWeight_ = shouldLook_ ? 1.0f : 0.0f;
         state_.activeWeight += (desiredWeight_ - state_.activeWeight) * blend_;
 
-        if (state_.activeWeight <= EPSILON || !target_) continue;
+        if (state_.activeWeight <= EPSILON || !hasTargetPosition_) continue;
 
         ApplyLookChain(chain_, state_, targetPosition_, safeDeltaTime_, lookMode_);
         DrawDebugShapes(chain_, targetPosition_);
@@ -560,7 +617,18 @@ void HumanLookAtIKComponent::Gui()
     ResolveDependencies();
 
     ImGui::Checkbox("Look Enabled", &lookEnabled);
-    ImGui::Checkbox("Use LockOn Target", &useLockOnTarget);
+    const char* targetModeNames_[] =
+    {
+        "Target Object",
+        "LockOn Target",
+        "Camera Forward",
+        "LockOn Or Camera Forward"
+    };
+    int selectedTargetMode_ = static_cast<int>(lookTargetMode);
+    if (ImGui::Combo("Look Target Mode", &selectedTargetMode_, targetModeNames_, IM_ARRAYSIZE(targetModeNames_)))
+    {
+        lookTargetMode = static_cast<LOOK_TARGET_MODE>(selectedTargetMode_);
+    }
     ImGui::Checkbox("Idle Only", &idleOnly);
     ImGui::Checkbox("Show Debug Shapes", &showDebugShapes);
 
@@ -579,6 +647,7 @@ void HumanLookAtIKComponent::Gui()
     }
 
     ImGui::DragFloat3("Target Offset", &targetOffset.x, 0.01f);
+    ImGui::DragFloat("Camera Forward Distance", &cameraForwardLookDistance, 0.1f, 0.1f, 1000.0f);
 
     const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
 
@@ -630,11 +699,14 @@ void HumanLookAtIKComponent::Gui()
 void HumanLookAtIKComponent::Serialize(nlohmann::json& json_) const
 {
     json_["LookEnabled"] = lookEnabled;
-    json_["UseLockOnTarget"] = useLockOnTarget;
+    json_["UseLockOnTarget"] = lookTargetMode == LOOK_TARGET_MODE::LOCK_ON_TARGET
+        || lookTargetMode == LOOK_TARGET_MODE::LOCK_ON_OR_CAMERA_FORWARD;
+    json_["LookTargetMode"] = static_cast<int>(lookTargetMode);
     json_["IdleOnly"] = idleOnly;
     json_["IdleStateName"] = idleStateName;
     json_["TargetName"] = targetName;
     json_["TargetOffset"] = { targetOffset.x, targetOffset.y, targetOffset.z };
+    json_["CameraForwardLookDistance"] = cameraForwardLookDistance;
 
     nlohmann::json stateLookModesJson_ = nlohmann::json::object();
 
@@ -654,10 +726,20 @@ void HumanLookAtIKComponent::Serialize(nlohmann::json& json_) const
 void HumanLookAtIKComponent::Deserialize(const nlohmann::json& json_)
 {
     lookEnabled = json_.value("LookEnabled", true);
-    useLockOnTarget = json_.value("UseLockOnTarget", true);
+    const bool useLockOnTarget_ = json_.value("UseLockOnTarget", true);
+    const int lookTargetModeValue_ = json_.value(
+        "LookTargetMode",
+        useLockOnTarget_
+            ? static_cast<int>(LOOK_TARGET_MODE::LOCK_ON_TARGET)
+            : static_cast<int>(LOOK_TARGET_MODE::TARGET_OBJECT));
+    lookTargetMode = lookTargetModeValue_ >= static_cast<int>(LOOK_TARGET_MODE::TARGET_OBJECT)
+        && lookTargetModeValue_ <= static_cast<int>(LOOK_TARGET_MODE::LOCK_ON_OR_CAMERA_FORWARD)
+        ? static_cast<LOOK_TARGET_MODE>(lookTargetModeValue_)
+        : LOOK_TARGET_MODE::LOCK_ON_TARGET;
     idleOnly = json_.value("IdleOnly", true);
     idleStateName = json_.value("IdleStateName", std::string("SS_Idle"));
     targetName = json_.value("TargetName", std::string("TestTarget"));
+    cameraForwardLookDistance = json_.value("CameraForwardLookDistance", 20.0f);
 
     if (json_.contains("TargetOffset"))
     {

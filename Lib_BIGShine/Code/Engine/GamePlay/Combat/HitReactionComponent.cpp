@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/System/TimeManager.h"
+#include "Engine/Physics/ColliderComponent.h"
 
 #include <algorithm>
 #include <cmath>
@@ -42,6 +43,7 @@ void HitReactionComponent::HandleHit()
     float hitStopDuration_ = 0.0f;
     float hitStopScale_ = 0.0f;
     float knockBackPower_ = 0.0f;
+    float targetAirLiftPower_ = 0.0f;
     DirectX::SimpleMath::Vector2 hitDirection_{ 0.0f, 0.0f };
     blackboard_->GetFloat("Hit", "Damage", damage_);
     if (!blackboard_->GetFloat("Hit", "HitStopDuration", hitStopDuration_))
@@ -50,6 +52,7 @@ void HitReactionComponent::HandleHit()
     }
     blackboard_->GetFloat("Hit", "HitStopScale", hitStopScale_);
     blackboard_->GetFloat("Hit", "KnockBackPower", knockBackPower_);
+    blackboard_->GetFloat("Hit", "TargetAirLiftPower", targetAirLiftPower_);
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
 
     lastDamage = (std::max)(damage_, 0.0f);
@@ -71,6 +74,13 @@ void HitReactionComponent::HandleHit()
         }
     }
 
+    float massScale_ = 1.0f;
+    if (const std::shared_ptr<ColliderComponent> collider_ =
+        owner_->GetComponent<ColliderComponent>())
+    {
+        massScale_ = 1.0f / (std::max)(collider_->GetMass(), 1.0f);
+    }
+
     if (useKnockBack && knockBackPower_ > 0.0f)
     {
         const std::shared_ptr<CharacterMovementComponent> movement_ =
@@ -84,12 +94,27 @@ void HitReactionComponent::HandleHit()
             {
                 const DirectX::XMFLOAT3 knockBackImpulse_
                 {
-                    hitDirection_.x / horizontalLength_ * knockBackPower_,
+                    hitDirection_.x / horizontalLength_ * knockBackPower_ * massScale_,
                     0.0f,
-                    hitDirection_.y / horizontalLength_ * knockBackPower_
+                    hitDirection_.y / horizontalLength_ * knockBackPower_ * massScale_
                 };
                 movement_->AddImpulse(knockBackImpulse_);
             }
+        }
+    }
+
+    if (targetAirLiftPower_ > 0.0f)
+    {
+        const float airLiftImpulse_ = targetAirLiftPower_ * massScale_;
+        if (const std::shared_ptr<CharacterMovementComponent> movement_ =
+            owner_->GetComponent<CharacterMovementComponent>())
+        {
+            movement_->AddImpulse({ 0.0f, airLiftImpulse_, 0.0f });
+        }
+        else if (const std::shared_ptr<ColliderComponent> collider_ =
+            owner_->GetComponent<ColliderComponent>())
+        {
+            collider_->velocity.y = (std::max)(collider_->velocity.y, airLiftImpulse_);
         }
     }
 

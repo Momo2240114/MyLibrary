@@ -29,6 +29,8 @@ private:
 
     void ActivateDodgeCollision();
     void DeactivateDodgeCollision();
+    void SuspendAirDodgeVerticalMovement();
+    void RestoreAirDodgeVerticalMovement();
 
     void StartJustDodgeFrame();
     void EndJustDodgeFrame();
@@ -49,6 +51,8 @@ private:
     bool justDodgeFrameActive = false;
     bool justDodgeSucceeded = false;
     bool counterAvailable = false;
+    bool airDodgeGravityOverridden = false;
+    bool previousAirDodgeUseGravity = false;
 
     float justDodgeFrameDuration = 0.18f;
     float justDodgeFrameTimer = 0.0f;

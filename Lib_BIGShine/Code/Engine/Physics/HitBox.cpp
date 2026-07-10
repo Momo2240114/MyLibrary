@@ -46,6 +46,12 @@ void HitBox::SetKnockBackPower(float knockBackPower_)
     knockBackPower = knockBackPower_;
 }
 
+void HitBox::SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_)
+{
+    targetAirLiftPower = (std::max)(targetAirLiftPower_, 0.0f);
+    attackerAirLiftPower = (std::max)(attackerAirLiftPower_, 0.0f);
+}
+
 void HitBox::SetHitEffectPath(const std::string& path_)
 {
     hitMeshVFXAssetPath = path_;
@@ -125,6 +131,8 @@ void HitBox::Gui()
     ImGui::Text("Hit Targets: %zu", alreadyHitTargets.size());
     ImGui::Text("Owner: %s", ownerObject ? ownerObject->GetName().c_str() : "(Self)");
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Target Air Lift Power", &targetAirLiftPower, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Attacker Air Lift Power", &attackerAirLiftPower, 0.1f, 0.0f, 99999.0f);
     ImGui::Checkbox("Hit Once Per Activation", &hitOncePerActivation);
     ImGui::TextColored(
         enabled ? ImVec4(0.2f, 1.0f, 0.3f, 1.0f) : ImVec4(1.0f, 0.3f, 0.2f, 1.0f),
@@ -211,6 +219,8 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["TeamId"] = teamId;
     j_["SourceAction"] = sourceAction;
     j_["KnockBackPower"] = knockBackPower;
+    j_["TargetAirLiftPower"] = targetAirLiftPower;
+    j_["AttackerAirLiftPower"] = attackerAirLiftPower;
     j_["HitOncePerActivation"] = hitOncePerActivation;
     j_["AttackTag"] = attackTag;
     j_["HitParticleAssetPath"] = hitParticleAssetPath;
@@ -248,6 +258,8 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     teamId = j_.value("TeamId", 0);
     sourceAction = j_.value("SourceAction", std::string{});
     knockBackPower = j_.value("KnockBackPower", 0.0f);
+    targetAirLiftPower = (std::max)(j_.value("TargetAirLiftPower", 0.0f), 0.0f);
+    attackerAirLiftPower = (std::max)(j_.value("AttackerAirLiftPower", 0.0f), 0.0f);
     hitOncePerActivation = j_.value("HitOncePerActivation", true);
     attackTag = j_.value("AttackTag", std::string("Attack"));
     hitParticleAssetPath = j_.value("HitParticleAssetPath", std::string{});
@@ -371,6 +383,14 @@ void HitBox::ApplyBlackboardValues()
         {
             knockBackPower = value_;
         }
+        if (blackboard_->GetFloat(blackboardCategory, "TargetAirLiftPower", value_))
+        {
+            targetAirLiftPower = (std::max)(value_, 0.0f);
+        }
+        if (blackboard_->GetFloat(blackboardCategory, "AttackerAirLiftPower", value_))
+        {
+            attackerAirLiftPower = (std::max)(value_, 0.0f);
+        }
     }
 
     std::string stringValue_;
@@ -489,6 +509,8 @@ void HitBox::RegisterActions()
                 if (object_)
                 {
                     object_->GetManager().GetAttackSystem().ClearAttackInstance(
+                        hitBox_->attackInstanceId);
+                    object_->GetManager().GetJustDodgeSystem().ClearAttackInstance(
                         hitBox_->attackInstanceId);
                 }
             }

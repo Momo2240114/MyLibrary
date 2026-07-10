@@ -78,6 +78,10 @@ void GameObjectManager::Update(float elapsedTime_)
         BS_PROFILE_SCOPE("AttackSystem::BeginFrame");
         attackSystem->BeginFrame();
     }
+    {
+        BS_PROFILE_SCOPE("JustDodgeSystem::BeginFrame");
+        justDodgeSystem->BeginFrame();
+    }
 
     {
         BS_PROFILE_SCOPE("TimeManager::Update");

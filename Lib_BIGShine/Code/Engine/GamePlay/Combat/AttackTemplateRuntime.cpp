@@ -73,6 +73,9 @@ namespace
         hitBox_->hitStopDuration = attackTemplate_.hitStopDuration;
         hitBox_->hitStopScale = attackTemplate_.hitStopScale;
         hitBox_->SetKnockBackPower(attackTemplate_.knockBackPower);
+        hitBox_->SetAirLiftPower(
+            attackTemplate_.targetAirLiftPower,
+            attackTemplate_.attackerAirLiftPower);
         hitBox_->hitParticleAssetPath = attackTemplate_.hitEffect.spawnOnHit
             ? attackTemplate_.hitEffect.hitParticleAssetPath
             : std::string{};
@@ -127,6 +130,8 @@ void AttackTemplateRuntime::Start(
         request_.setting.hitBoxHalfHeight = slash_.hitBox.halfHeight;
         request_.setting.damage = attackTemplate_->damage;
         request_.setting.knockBackPower = attackTemplate_->knockBackPower;
+        request_.setting.targetAirLiftPower = attackTemplate_->targetAirLiftPower;
+        request_.setting.attackerAirLiftPower = attackTemplate_->attackerAirLiftPower;
         request_.setting.hitStopDuration = attackTemplate_->hitStopDuration;
         request_.setting.hitStopScale = attackTemplate_->hitStopScale;
         request_.setting.hitEffectPath = attackTemplate_->hitEffect.hitMeshVfxAssetPath;

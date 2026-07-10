@@ -42,7 +42,7 @@ void CharacterMovementComponent::Update(float deltaTime_)
     const DirectX::XMFLOAT3 rootMotionVelocity_
     {
         rootMotionDelta.x / safePhysicsDeltaTime_,
-        rootMotionDelta.y / safePhysicsDeltaTime_,
+        verticalMovementLocked ? 0.0f : rootMotionDelta.y / safePhysicsDeltaTime_,
         rootMotionDelta.z / safePhysicsDeltaTime_
     };
 
@@ -55,7 +55,12 @@ void CharacterMovementComponent::Update(float deltaTime_)
             scaledHorizontalVelocity_.z + rootMotionVelocity_.z + impulseVelocity.z;
         if (std::dynamic_pointer_cast<CharacterCollider>(collider_))
         {
-            if (collider_->useGravity)
+            if (verticalMovementLocked)
+            {
+                collider_->velocity.y = 0.0f;
+                impulseVelocity.y = 0.0f;
+            }
+            else if (collider_->useGravity)
             {
                 collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
             }
@@ -66,7 +71,15 @@ void CharacterMovementComponent::Update(float deltaTime_)
         }
         else
         {
-            collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
+            if (verticalMovementLocked)
+            {
+                collider_->velocity.y = 0.0f;
+                impulseVelocity.y = 0.0f;
+            }
+            else
+            {
+                collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
+            }
         }
         lastAppliedVelocity = collider_->velocity;
     }
@@ -75,7 +88,7 @@ void CharacterMovementComponent::Update(float deltaTime_)
         const DirectX::XMFLOAT3 movementDelta_
         {
             desiredHorizontalVelocity.x * deltaTime_ + rootMotionDelta.x + impulseVelocity.x * deltaTime_,
-            desiredHorizontalVelocity.y * deltaTime_ + rootMotionDelta.y + impulseVelocity.y * deltaTime_,
+            verticalMovementLocked ? 0.0f : desiredHorizontalVelocity.y * deltaTime_ + rootMotionDelta.y + impulseVelocity.y * deltaTime_,
             desiredHorizontalVelocity.z * deltaTime_ + rootMotionDelta.z + impulseVelocity.z * deltaTime_
         };
         owner_->transform->AddMoveOffset(movementDelta_);
@@ -159,6 +172,21 @@ void CharacterMovementComponent::SetFacingDirection(
     hasFacingRequest = true;
 }
 
+void CharacterMovementComponent::SetVerticalMovementLocked(bool locked_)
+{
+    verticalMovementLocked = locked_;
+    if (!verticalMovementLocked) return;
+
+    rootMotionDelta.y = 0.0f;
+    impulseVelocity.y = 0.0f;
+
+    const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
+    if (collider_)
+    {
+        collider_->velocity.y = 0.0f;
+    }
+}
+
 std::shared_ptr<ColliderComponent> CharacterMovementComponent::ResolveCollider()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -212,6 +240,7 @@ void CharacterMovementComponent::ClearFrameRequests()
 void CharacterMovementComponent::Gui()
 {
     ImGui::Checkbox("Use Physics Velocity", &usePhysicsVelocity);
+    ImGui::Checkbox("Vertical Movement Locked", &verticalMovementLocked);
     ImGui::DragFloat("Facing Turn Speed", &facingTurnSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Impulse Damping", &impulseDamping, 0.1f, 0.0f, 100.0f);
     ImGui::Text(

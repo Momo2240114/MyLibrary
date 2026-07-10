@@ -79,6 +79,8 @@ struct SlashEffectSpawnSetting
     float hitBoxHalfHeight = 1.0f;
     float damage = 10.0f;
     float knockBackPower = 3.0f;
+    float targetAirLiftPower = 0.0f;
+    float attackerAirLiftPower = 0.0f;
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;
     std::string hitEffectPath;

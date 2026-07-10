@@ -10,11 +10,13 @@
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
+#include "Engine/Common/DebugLog.h"
 #include "Engine/Math/CollisionMath.h"
 
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 namespace
 {
@@ -442,6 +444,51 @@ void CollisionStepSystem::StepCombatPairs()
     for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
     {
         const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
+        for (size_t dodgeIndex_ = 0; dodgeIndex_ < justDodgeColliders_.size(); ++dodgeIndex_)
+        {
+            const std::shared_ptr<JustDodgeCollider>& justDodgeCollider_ =
+                justDodgeColliders_[dodgeIndex_];
+
+            bool isOverlapping_ = false;
+            if (hitBox_->IsEnabled() && justDodgeCollider_->IsEnabled())
+            {
+                const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
+                    hitCapsules_[hitIndex_],
+                    justDodgeCapsules_[dodgeIndex_]);
+                isOverlapping_ = manifold_.isHit;
+            }
+
+            HandleTriggerPair(
+                hitBox_.get(),
+                justDodgeCollider_.get(),
+                isOverlapping_,
+                nullptr);
+
+            if (isOverlapping_ && justDodgeSystem)
+            {
+                BS_LOG_INFO(
+                    LOG_CATEGORY::PHYSICS,
+                    std::string("[JustDodge] CollisionStepSystem overlap. HitBox=")
+                    + hitBox_->GetName()
+                    + " JustDodgeCollider="
+                    + justDodgeCollider_->GetName());
+
+                JustDodgeContact contact_{};
+                contact_.normal = { 0.0f, 1.0f, 0.0f };
+                contact_.position = { 0.0f, 0.0f, 0.0f };
+                contact_.isValid = false;
+
+                justDodgeSystem->HandleJustDodge(
+                    *hitBox_,
+                    *justDodgeCollider_,
+                    contact_);
+            }
+        }
+    }
+
+    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
+    {
+        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
         for (size_t hurtIndex_ = 0; hurtIndex_ < hurtBoxes_.size(); ++hurtIndex_)
         {
             const std::shared_ptr<HurtBox>& hurtBox_ = hurtBoxes_[hurtIndex_];
@@ -467,39 +514,6 @@ void CollisionStepSystem::StepCombatPairs()
                 hurtBox_.get(),
                 isOverlapping_,
                 contact_.isValid ? &contact_ : nullptr);
-        }
-    }
-
-    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
-    {
-        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
-        if (!hitBox_->IsEnabled()) continue;
-
-        for (size_t dodgeIndex_ = 0; dodgeIndex_ < justDodgeColliders_.size(); ++dodgeIndex_)
-        {
-            const std::shared_ptr<JustDodgeCollider>& justDodgeCollider_ =
-                justDodgeColliders_[dodgeIndex_];
-
-            if (!justDodgeCollider_->IsEnabled()) continue;
-
-            const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                hitCapsules_[hitIndex_],
-                justDodgeCapsules_[dodgeIndex_]);
-
-            if (!manifold_.isHit) continue;
-
-            if (justDodgeSystem)
-            {
-                JustDodgeContact contact_{};
-                contact_.normal = { 0.0f, 1.0f, 0.0f };
-                contact_.position = { 0.0f, 0.0f, 0.0f };
-                contact_.isValid = false;
-
-                justDodgeSystem->HandleJustDodge(
-                    *hitBox_,
-                    *justDodgeCollider_,
-                    contact_);
-            }
         }
     }
 

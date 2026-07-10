@@ -12,6 +12,7 @@
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
+#include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Physics/CharacterCollider.h"
@@ -238,6 +239,7 @@ void PlayerControllerComponent::Update(float dt_)
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
     stateMachine.Update(dt_);
     UpdateAirborneActionContext();
+    UpdateDodgeRestrictions(dt_);
     SendGroundedToBlackboard();
     UpdateLocomotionAnimationPhase(dt_);
     ApplyPendingMovement();
@@ -429,6 +431,10 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
         return false;
     }
     if (IsAirAction(nextAction_) && !IsAirborneForAction())
+    {
+        return false;
+    }
+    if (IsDodgeAction(nextAction_) && !CanStartDodgeAction(nextAction_))
     {
         return false;
     }
@@ -749,6 +755,13 @@ bool PlayerControllerComponent::ConsumeBufferedAction()
     }
 
     const PLAYER_ACTION nextAction_ = actionRuntime.bufferedAction;
+    if (IsDodgeAction(nextAction_) && !CanStartDodgeAction(nextAction_))
+    {
+        actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+        actionRuntime.bufferedComboIndex = 0;
+        return false;
+    }
+
     pendingComboIndex = actionRuntime.bufferedComboIndex;
     actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
     actionRuntime.bufferedComboIndex = 0;
@@ -762,6 +775,15 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 {
     const PLAYER_ACTION previousAction_ = previousAction;
     previousAction = action_;
+    if (previousAction_ == PLAYER_ACTION::DODGE &&
+        action_ != PLAYER_ACTION::DODGE)
+    {
+        StartGroundDodgeCooldown();
+    }
+    if (action_ == PLAYER_ACTION::AIR_DODGE)
+    {
+        airDodgeConsumed = true;
+    }
     hasSentLocomotionPhase = false;
     if (locomotionPhaseAction != action_)
     {
@@ -893,6 +915,44 @@ bool PlayerControllerComponent::IsAirAction(PLAYER_ACTION action_) const
 bool PlayerControllerComponent::IsAirborneForAction() const
 {
     return airborneActionContextActive && !IsGrounded();
+}
+
+bool PlayerControllerComponent::IsDodgeAction(PLAYER_ACTION action_) const
+{
+    return action_ == PLAYER_ACTION::DODGE ||
+        action_ == PLAYER_ACTION::AIR_DODGE;
+}
+
+bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
+{
+    if (action_ == PLAYER_ACTION::DODGE)
+    {
+        return groundDodgeCooldownTimer <= 0.0f;
+    }
+
+    if (action_ == PLAYER_ACTION::AIR_DODGE)
+    {
+        return !airDodgeConsumed;
+    }
+
+    return true;
+}
+
+void PlayerControllerComponent::UpdateDodgeRestrictions(float deltaTime_)
+{
+    groundDodgeCooldownTimer = (std::max)(
+        groundDodgeCooldownTimer - (std::max)(deltaTime_, 0.0f),
+        0.0f);
+
+    if (IsGrounded())
+    {
+        airDodgeConsumed = false;
+    }
+}
+
+void PlayerControllerComponent::StartGroundDodgeCooldown()
+{
+    groundDodgeCooldownTimer = (std::max)(groundDodgeCooldownDuration, 0.0f);
 }
 
 void PlayerControllerComponent::UpdateAirborneActionContext()
@@ -1236,14 +1296,26 @@ void PlayerControllerComponent::SendJumpPhaseToBlackboard(
 
 void PlayerControllerComponent::NotifyJustDodge()
 {
-    if (GetCurrentAction() != PLAYER_ACTION::DODGE)
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        std::string("[JustDodge] PlayerController NotifyJustDodge currentAction=")
+        + GetPlayerActionName(currentAction_));
+
+    if (currentAction_ != PLAYER_ACTION::DODGE &&
+        currentAction_ != PLAYER_ACTION::AIR_DODGE)
     {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerController rejected: current action is not Dodge.");
         return;
     }
 
     PlayerDodgeState* dodgeState_ =
         stateMachine.GetCurrentStateAs<PlayerDodgeState>();
-    if (!dodgeState_) return;
+    if (!dodgeState_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[JustDodge] PlayerController rejected: current state is not PlayerDodgeState.");
+        return;
+    }
 
     dodgeState_->NotifyJustDodgeSucceeded();
 }
@@ -1262,6 +1334,8 @@ void PlayerControllerComponent::Gui()
     ImGui::Text("Action Ended: %s", actionRuntime.actionEnded ? "true" : "false");
     ImGui::Text("Combo Index: %d", comboIndex);
     ImGui::Text("Buffered Action: %s", GetPlayerActionName(actionRuntime.bufferedAction));
+    ImGui::Text("Ground Dodge Cooldown: %.2f", groundDodgeCooldownTimer);
+    ImGui::Text("Air Dodge Consumed: %s", airDodgeConsumed ? "true" : "false");
 
     ImGui::SeparatorText("Cancel Transitions");
     ImGui::Text("Routes: %zu", cancelTransitions.size());
@@ -1347,6 +1421,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Run End Duration", &runEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
 
     ImGui::SeparatorText("Attack Facing Assist");
     ImGui::Checkbox("Enabled##AttackFacingAssist", &attackAssistSettings.enabled);
@@ -1441,6 +1516,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["RunStartDuration"] = runStartDuration;
     j_["RunEndDuration"] = runEndDuration;
     j_["JumpEndDuration"] = jumpEndDuration;
+    j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
     j_["AttackAssist"] =
     {
         { "Enabled", attackAssistSettings.enabled },
@@ -1476,6 +1552,9 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);
     runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.0f);
     jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
+    groundDodgeCooldownDuration = (std::max)(
+        j_.value("GroundDodgeCooldownDuration", groundDodgeCooldownDuration),
+        0.0f);
     if (j_.contains("AttackAssist") && j_["AttackAssist"].is_object())
     {
         const auto& attackAssistJson_ = j_["AttackAssist"];

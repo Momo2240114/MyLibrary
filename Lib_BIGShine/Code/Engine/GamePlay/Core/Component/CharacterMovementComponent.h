@@ -30,6 +30,7 @@ public:
     void AddRootMotionDelta(const DirectX::XMFLOAT3& delta_);
     void AddImpulse(const DirectX::XMFLOAT3& impulse_);
     void SetFacingDirection(const DirectX::XMFLOAT3& direction_, bool immediate_ = true);
+    void SetVerticalMovementLocked(bool locked_);
 
     const DirectX::XMFLOAT3& GetDesiredHorizontalVelocity() const
     {
@@ -54,5 +55,6 @@ private:
     bool hasFacingRequest = false;
     bool facingImmediate = true;
     bool usePhysicsVelocity = true;
+    bool verticalMovementLocked = false;
 
 };
