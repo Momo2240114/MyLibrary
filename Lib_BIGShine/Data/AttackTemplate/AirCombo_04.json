@@ -1,0 +1,42 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "attackerAirLiftPower": 0.699999988079071,
+        "damage": 10.0,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.15000000596046448,
+        "hitStopScale": 0.4000000059604645,
+        "knockBackPower": 3.0,
+        "knockBackType": 0,
+        "targetAirLiftPower": 0.20000000298023224
+    },
+    "attackEffects": [],
+    "displayName": "AirCombo_04",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 1.0,
+        "hitParticleNormalOffset": 0.0,
+        "spawnOnHit": true
+    },
+    "id": "AirCombo_04",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.18000000715255737,
+        "activeStartTime": 0.0,
+        "enabled": false,
+        "endNodeName": "WeaponTip",
+        "hitBoxName": "Sword",
+        "radius": 0.18000000715255737,
+        "startNodeName": "WeaponRoot"
+    }
+}

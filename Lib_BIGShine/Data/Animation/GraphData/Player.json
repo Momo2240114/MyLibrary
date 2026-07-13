@@ -1,6 +1,6 @@
 {
     "AnimationData": {
-        "DefaultState": "SS_Dodge",
+        "DefaultState": "SS_Attack2",
         "States": [
             {
                 "animIndexA": -1,
@@ -1406,7 +1406,7 @@
                 "rootMotionScale": 0.009999999776482582,
                 "rootMotionScaleCurveName": "",
                 "sequencer": "",
-                "speed": 1.0,
+                "speed": 1.100000023841858,
                 "speedCurveName": "",
                 "type": 0
             },
@@ -7428,7 +7428,7 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 47,
+                "animationIndex": 412,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
                 "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -7475,7 +7475,7 @@
                 "blendUseMask": false,
                 "customAnimIndex": -1,
                 "events": [],
-                "loop": true,
+                "loop": false,
                 "name": "Double_Jump_Combat_0_Seq_0",
                 "rootMotion": {
                     "applyPositionX": true,
@@ -13004,7 +13004,7 @@
                 "rootMotionScale": 0.029999999329447746,
                 "rootMotionScaleCurveName": "",
                 "sequencer": "",
-                "speed": 1.0,
+                "speed": 1.100000023841858,
                 "speedCurveName": "",
                 "type": 0
             },
@@ -13321,7 +13321,7 @@
                         "callEndOnStateExit": true,
                         "endTime": 2.0166666507720947,
                         "eventTemplateType": "NONE",
-                        "label": "Action",
+                        "label": "ActionEnd",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -13344,7 +13344,79 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 1.4666666984558105
+                        "startTime": 1.25
+                    },
+                    {
+                        "actionEnd": "Trail_Stop",
+                        "actionStart": "Trail_Start",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.2666666805744171,
+                        "eventTemplateType": "NONE",
+                        "label": "Tril",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.06666667014360428
+                    },
+                    {
+                        "actionEnd": "Trail_Stop",
+                        "actionStart": "Trail_Start",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.6666666865348816,
+                        "eventTemplateType": "NONE",
+                        "label": "Trail_02",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.46666666865348816
                     }
                 ],
                 "loop": false,
@@ -13365,7 +13437,7 @@
                 "rootMotionScale": 0.009999999776482582,
                 "rootMotionScaleCurveName": "",
                 "sequencer": "",
-                "speed": 1.0,
+                "speed": 1.100000023841858,
                 "speedCurveName": "",
                 "type": 0
             },
@@ -13418,12 +13490,229 @@
                 "blendSyncNormalizedTime": true,
                 "blendUseMask": false,
                 "customAnimIndex": -1,
-                "events": [],
+                "events": [
+                    {
+                        "actionEnd": "Trail_Stop",
+                        "actionStart": "Trail_Start",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.4833333194255829,
+                        "eventTemplateType": "NONE",
+                        "label": "Tril",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.10000000149011612
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "AirCombo_04",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.30000001192092896,
+                        "eventTemplateType": "ATTACK_TEMPLATE",
+                        "label": "AirCombo_04",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.10000000149011612
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "ActionEnd",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 1.0166666507720947,
+                        "eventTemplateType": "NONE",
+                        "label": "ActionEnd",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.8333333134651184
+                    },
+                    {
+                        "actionEnd": "InputBufferOff",
+                        "actionStart": "InputBufferOn",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.6499999761581421,
+                        "eventTemplateType": "NONE",
+                        "label": "InputBufferOn",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.01666666753590107
+                    },
+                    {
+                        "actionEnd": "CanCancelOff",
+                        "actionStart": "CanCancelOn",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.8333333134651184,
+                        "eventTemplateType": "NONE",
+                        "label": "CanCancelOn",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.75
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.30000001192092896,
+                        "eventTemplateType": "VFX_TEMPLATE",
+                        "label": "MeshVFX",
+                        "localPosition": [
+                            0.25,
+                            2.4800000190734863,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            -84.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            0.75,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "PlayerSwordArc_Strong",
+                        "meshVFXLifeTime": 0.4000000059604645,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": true,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.18333333730697632
+                    }
+                ],
                 "loop": false,
                 "name": "Combo_Attack_Air_04_Seq",
                 "rootMotion": {
                     "applyPositionX": true,
-                    "applyPositionY": true,
+                    "applyPositionY": false,
                     "applyPositionZ": true,
                     "applyRotationX": true,
                     "applyRotationY": true,
@@ -13431,13 +13720,13 @@
                     "cutVisualPositionX": true,
                     "cutVisualPositionY": true,
                     "cutVisualPositionZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
+                    "enable": true,
+                    "sourceNodeName": "pelvis"
                 },
-                "rootMotionScale": 1.0,
+                "rootMotionScale": 0.009999999776482582,
                 "rootMotionScaleCurveName": "",
                 "sequencer": "",
-                "speed": 1.0,
+                "speed": 1.100000023841858,
                 "speedCurveName": "",
                 "type": 0
             },
@@ -17342,42 +17631,6 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.15000000596046448
-                    },
-                    {
-                        "actionEnd": "",
-                        "actionStart": "",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [],
-                        "callEndOnStateExit": false,
-                        "endTime": 0.20000000298023224,
-                        "eventTemplateType": "VFX_TEMPLATE",
-                        "label": "MeshVFX",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "MeshVFX",
-                        "meshVFXLifeTime": 0.20000000298023224,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.0
                     }
                 ],
                 "loop": false,
@@ -33579,6 +33832,17 @@
             "stateName": "Air_State"
         },
         {
+            "childScopeId": "SubGraph_3",
+            "id": 191,
+            "inputPin": 192,
+            "nodeType": 3,
+            "outputPin": 193,
+            "posX": 340.0,
+            "posY": 859.0,
+            "scopeId": "Root",
+            "stateName": "Air_Attack_State"
+        },
+        {
             "childScopeId": "",
             "id": 140,
             "inputPin": 141,
@@ -33607,7 +33871,7 @@
             "nodeType": 0,
             "outputPin": 150,
             "posX": -412.0,
-            "posY": 27.0,
+            "posY": -69.0,
             "scopeId": "SubGraph_2",
             "stateName": "Jump_Combat_Loop_0_Seq_0"
         },
@@ -33617,9 +33881,9 @@
             "inputPin": 158,
             "nodeType": 0,
             "outputPin": 159,
-            "posX": 340.0,
-            "posY": 859.0,
-            "scopeId": "Root",
+            "posX": -480.0,
+            "posY": -64.0,
+            "scopeId": "SubGraph_3",
             "stateName": "Combo_Attack_Air_01_Seq"
         },
         {
@@ -33628,9 +33892,9 @@
             "inputPin": 161,
             "nodeType": 0,
             "outputPin": 162,
-            "posX": 564.0,
-            "posY": 859.0,
-            "scopeId": "Root",
+            "posX": -256.0,
+            "posY": -64.0,
+            "scopeId": "SubGraph_3",
             "stateName": "Combo_Attack_Air_02_Seq"
         },
         {
@@ -33639,9 +33903,9 @@
             "inputPin": 164,
             "nodeType": 0,
             "outputPin": 165,
-            "posX": 788.0,
-            "posY": 859.0,
-            "scopeId": "Root",
+            "posX": -32.0,
+            "posY": -64.0,
+            "scopeId": "SubGraph_3",
             "stateName": "Combo_Attack_Air_03_Seq"
         },
         {
@@ -33650,9 +33914,9 @@
             "inputPin": 167,
             "nodeType": 0,
             "outputPin": 168,
-            "posX": 1012.0,
-            "posY": 859.0,
-            "scopeId": "Root",
+            "posX": 192.0,
+            "posY": -64.0,
+            "scopeId": "SubGraph_3",
             "stateName": "Combo_Attack_Air_04_Seq"
         },
         {
@@ -33661,9 +33925,9 @@
             "inputPin": 170,
             "nodeType": 0,
             "outputPin": 171,
-            "posX": 340.0,
-            "posY": 1067.0,
-            "scopeId": "Root",
+            "posX": -480.0,
+            "posY": 160.0,
+            "scopeId": "SubGraph_3",
             "stateName": "Dash_Air_Attack_Seq"
         },
         {
@@ -33672,9 +33936,9 @@
             "inputPin": 173,
             "nodeType": 0,
             "outputPin": 174,
-            "posX": 340.0,
-            "posY": 1275.0,
-            "scopeId": "Root",
+            "posX": -480.0,
+            "posY": 384.0,
+            "scopeId": "SubGraph_3",
             "stateName": "Attack_Air_To_Floor_Start_01_Seq_0"
         },
         {
@@ -33683,10 +33947,43 @@
             "inputPin": 176,
             "nodeType": 0,
             "outputPin": 177,
-            "posX": 340.0,
-            "posY": 1483.0,
-            "scopeId": "Root",
+            "posX": -480.0,
+            "posY": 608.0,
+            "scopeId": "SubGraph_3",
             "stateName": "AirDodge_Blend"
+        },
+        {
+            "childScopeId": "",
+            "id": 194,
+            "inputPin": 0,
+            "nodeType": 4,
+            "outputPin": 195,
+            "posX": -800.0,
+            "posY": -64.0,
+            "scopeId": "SubGraph_3",
+            "stateName": "__Entry__:SubGraph_3"
+        },
+        {
+            "childScopeId": "",
+            "id": 196,
+            "inputPin": 197,
+            "nodeType": 5,
+            "outputPin": 0,
+            "posX": 512.0,
+            "posY": -64.0,
+            "scopeId": "SubGraph_3",
+            "stateName": "__Exit__:SubGraph_3"
+        },
+        {
+            "childScopeId": "",
+            "id": 185,
+            "inputPin": 186,
+            "nodeType": 0,
+            "outputPin": 187,
+            "posX": -412.0,
+            "posY": -325.0,
+            "scopeId": "SubGraph_2",
+            "stateName": "Double_Jump_Combat_0_Seq_0"
         }
     ],
     "GraphTransitions": [
@@ -33980,6 +34277,30 @@
                     "param": "MoveInput",
                     "threshold": 0.10000000149011612,
                     "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsAirWeakAttack",
+                    "threshold": 0.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsAirStrongAttack",
+                    "threshold": 0.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsAirStrongChargeAttack",
+                    "threshold": 0.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsAirDodge",
+                    "threshold": 0.0,
+                    "type": 0
                 }
             ],
             "duration": 0.20000000298023224,
@@ -33988,6 +34309,38 @@
             "logic": 0,
             "scopeId": "Root",
             "to": "SS_Sprint"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsJumpEnd",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Entry__:SubGraph_2",
+            "id": 227,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "Jump_Combat_End_0_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsJumpLoop",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Entry__:SubGraph_2",
+            "id": 226,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "Jump_Combat_Loop_0_Seq_0"
         },
         {
             "conditions": [],
@@ -34013,6 +34366,22 @@
             "logic": 0,
             "scopeId": "SubGraph_2",
             "to": "Jump_Combat_Loop_0_Seq_0"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsJumpDouble",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Start_0_Seq",
+            "id": 190,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "Double_Jump_Combat_0_Seq_0"
         },
         {
             "conditions": [
@@ -34130,11 +34499,11 @@
                 }
             ],
             "duration": 0.20000000298023224,
-            "from": "__Any__",
+            "from": "Air_State",
             "id": 178,
             "logic": 0,
             "scopeId": "Root",
-            "to": "Combo_Attack_Air_01_Seq"
+            "to": "Air_Attack_State"
         },
         {
             "conditions": [
@@ -34149,7 +34518,7 @@
             "from": "Combo_Attack_Air_01_Seq",
             "id": 179,
             "logic": 0,
-            "scopeId": "Root",
+            "scopeId": "SubGraph_3",
             "to": "Combo_Attack_Air_02_Seq"
         },
         {
@@ -34165,7 +34534,7 @@
             "from": "Combo_Attack_Air_02_Seq",
             "id": 180,
             "logic": 0,
-            "scopeId": "Root",
+            "scopeId": "SubGraph_3",
             "to": "Combo_Attack_Air_03_Seq"
         },
         {
@@ -34181,7 +34550,7 @@
             "from": "Combo_Attack_Air_03_Seq",
             "id": 181,
             "logic": 0,
-            "scopeId": "Root",
+            "scopeId": "SubGraph_3",
             "to": "Combo_Attack_Air_04_Seq"
         },
         {
@@ -34194,10 +34563,80 @@
                 }
             ],
             "duration": 0.20000000298023224,
-            "from": "__Any__",
+            "from": "Air_State",
             "id": 182,
             "logic": 0,
             "scopeId": "Root",
+            "to": "Air_Attack_State"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongChargeAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Air_State",
+            "id": 183,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Air_Attack_State"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirDodge",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Air_State",
+            "id": 184,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Air_Attack_State"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirWeakAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "ComboIndex",
+                    "threshold": 0.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Entry__:SubGraph_3",
+            "id": 198,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "Combo_Attack_Air_01_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Entry__:SubGraph_3",
+            "id": 199,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
             "to": "Dash_Air_Attack_Seq"
         },
         {
@@ -34210,10 +34649,10 @@
                 }
             ],
             "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 183,
+            "from": "__Entry__:SubGraph_3",
+            "id": 200,
             "logic": 0,
-            "scopeId": "Root",
+            "scopeId": "SubGraph_3",
             "to": "Attack_Air_To_Floor_Start_01_Seq_0"
         },
         {
@@ -34226,19 +34665,416 @@
                 }
             ],
             "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 184,
+            "from": "__Entry__:SubGraph_3",
+            "id": 201,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "AirDodge_Blend"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsJumpEnd",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 3,
+                    "param": "MoveInput",
+                    "threshold": 0.10000000149011612,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 228,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "Jump_Combat_End_0_Seq"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsJumpEnd",
+                    "threshold": 1.0,
+                    "type": 0
+                },
+                {
+                    "op": 2,
+                    "param": "MoveInput",
+                    "threshold": 0.10000000149011612,
+                    "type": 0
+                },
+                {
+                    "op": 0,
+                    "param": "IsGrounded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 229,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [],
+            "duration": 0.20000000298023224,
+            "from": "Air_Attack_State",
+            "id": 202,
             "logic": 0,
             "scopeId": "Root",
-            "to": "AirDodge_Blend"
+            "to": "Air_State"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Combo_Attack_Air_01_Seq",
+            "id": 203,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Combo_Attack_Air_02_Seq",
+            "id": 204,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Combo_Attack_Air_03_Seq",
+            "id": 205,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Combo_Attack_Air_04_Seq",
+            "id": 206,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Dash_Air_Attack_Seq",
+            "id": 207,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Attack_Air_To_Floor_Start_01_Seq_0",
+            "id": 208,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "AirDodge_Blend",
+            "id": 209,
+            "logic": 0,
+            "scopeId": "SubGraph_3",
+            "to": "__Exit__:SubGraph_3"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 188,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "Jump_Combat_Loop_0_Seq_0"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsJumpDouble",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Loop_0_Seq_0",
+            "id": 189,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "Double_Jump_Combat_0_Seq_0"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirWeakAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Start_0_Seq",
+            "id": 210,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Start_0_Seq",
+            "id": 211,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongChargeAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Start_0_Seq",
+            "id": 212,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirDodge",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Start_0_Seq",
+            "id": 213,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirWeakAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Loop_0_Seq_0",
+            "id": 214,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Loop_0_Seq_0",
+            "id": 215,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongChargeAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Loop_0_Seq_0",
+            "id": 216,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirDodge",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Jump_Combat_Loop_0_Seq_0",
+            "id": 217,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirWeakAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 218,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 219,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirStrongChargeAttack",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 220,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "IsAirDodge",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "Double_Jump_Combat_0_Seq_0",
+            "id": 221,
+            "logic": 0,
+            "scopeId": "SubGraph_2",
+            "to": "__Exit__:SubGraph_2"
         }
     ],
     "StateAssets": {
         "AirDodge_Blend": "Data\\Animation\\StateData\\Player\\States\\AirDodge_Blend.json",
+        "Combo_Attack_01_03_Seq": "Data\\Animation\\StateData\\Player\\States\\Combo_Attack_01_03_Seq.json",
         "Combo_Attack_Air_01_Seq": "Data\\Animation\\StateData\\Player\\States\\Combo_Attack_Air_01_Seq.json",
         "Combo_Attack_Air_02_Seq": "Data\\Animation\\StateData\\Player\\States\\Combo_Attack_Air_02_Seq.json",
         "Combo_Attack_Air_03_Seq": "Data\\Animation\\StateData\\Player\\States\\Combo_Attack_Air_03_Seq.json",
         "Combo_Attack_Air_04_Seq": "Data\\Animation\\StateData\\Player\\States\\Combo_Attack_Air_04_Seq.json",
+        "Double_Jump_Combat_0_Seq_0": "Data\\Animation\\StateData\\Player\\States\\Double_Jump_Combat_0_Seq_0.json",
         "Jump_Combat_End_0_Seq": "Data\\Animation\\StateData\\Player\\States\\Jump_Combat_End_0_Seq.json",
         "Jump_Combat_End_0_Seq_0": "Data\\Animation\\StateData\\Player\\States\\Jump_Combat_End_0_Seq_0.json",
         "Jump_Combat_End_L_90_Seq": "Data\\Animation\\StateData\\Player\\States\\Jump_Combat_End_L_90_Seq.json",

@@ -5,9 +5,11 @@
 #include "Engine/GamePlay/AI/AIBehaviorGraph.h"
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 class AIControllerComponent;
+class DragonAIComponent;
 class GameObject;
 
 namespace ax::NodeEditor
@@ -26,20 +28,34 @@ public:
     bool ShouldRenderSceneWhenPaused() const override { return true; }
 
 private:
-    AIControllerComponent* ResolveTarget();
-    void DrawToolbar(AIControllerComponent* aiController_);
+    struct BehaviorGraphTarget
+    {
+        AIControllerComponent* aiController = nullptr;
+        DragonAIComponent* dragonAI = nullptr;
+        GameObject* owner = nullptr;
+
+        bool IsValid() const { return aiController != nullptr || dragonAI != nullptr; }
+    };
+
+    BehaviorGraphTarget ResolveTarget();
+    void DrawToolbar(const BehaviorGraphTarget& target_);
     void DrawTargetList();
     void DrawAssetBrowserPanel();
-    void DrawGraph(AIControllerComponent* aiController_);
-    void DrawGraphAssetBar(AIControllerComponent* aiController_);
-    void DrawInspector(AIControllerComponent* aiController_);
+    void DrawGraph(const BehaviorGraphTarget& target_);
+    void DrawGraphAssetBar(const BehaviorGraphTarget& target_);
+    void DrawInspector(const BehaviorGraphTarget& target_);
     void DrawNode(AIBehaviorNode& node_);
-    void AddNode(AIControllerComponent* aiController_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
-    void DrawCreateNodePopup(AIControllerComponent* aiController_);
-    void RequestAddNode(AIControllerComponent* aiController_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
+    void AddNode(const BehaviorGraphTarget& target_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
+    void DrawCreateNodePopup(const BehaviorGraphTarget& target_);
+    void RequestAddNode(const BehaviorGraphTarget& target_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
     void UpdatePriorityFromNodePositions(AIBehaviorGraph& graph_);
     bool GetPinInfo(const AIBehaviorGraph& graph_, uintptr_t pinId_, bool& isInput_, uintptr_t& nodeId_) const;
     const char* GetNodeTypeName(AI_BEHAVIOR_NODE_TYPE type_) const;
+    AIBehaviorGraph* GetGraph(const BehaviorGraphTarget& target_) const;
+    std::string* GetGraphAssetPath(const BehaviorGraphTarget& target_) const;
+    void ResetGraphRuntime(const BehaviorGraphTarget& target_) const;
+    bool SaveGraphAsset(const BehaviorGraphTarget& target_, const std::string& path_) const;
+    bool LoadGraphAsset(const BehaviorGraphTarget& target_, const std::string& path_) const;
 
 private:
     std::weak_ptr<GameObject> targetObject;

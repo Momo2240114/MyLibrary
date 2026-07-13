@@ -149,6 +149,10 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
         {
             states[state_.name] = std::make_unique<AnimState>(state_);
         }
+        MarkStateGuiCacheDirty();
+        MarkActionCategoryCacheDirty();
+        MarkSequenceAdapterDirty();
+        MarkAnimationMaskCacheDirty();
 
         defaultStateName_ = asset_.defaultStateName;
     }
@@ -456,6 +460,10 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
         for (auto& s : asset.states) {
             states[s.name] = std::make_unique<AnimState>(s);
         }
+        MarkStateGuiCacheDirty();
+        MarkActionCategoryCacheDirty();
+        MarkSequenceAdapterDirty();
+        MarkAnimationMaskCacheDirty();
 
         assetFilePath = stateAssetPath;
 
@@ -619,6 +627,10 @@ void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
     for (auto& s : asset.states) {
         states[s.name] = std::make_unique<AnimState>(s);
     }
+    MarkStateGuiCacheDirty();
+    MarkActionCategoryCacheDirty();
+    MarkSequenceAdapterDirty();
+    MarkAnimationMaskCacheDirty();
 
     assetFilePath = assetName_;
 

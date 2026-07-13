@@ -9,6 +9,7 @@
 #include "IKMapComponent.h"
 #include "Editor/AssetSlotGui.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -38,79 +39,339 @@ namespace
     }
 }
 
+void AnimationControllerComponent::MarkSequenceAdapterDirty()
+{
+    sequenceAdapterDirty = true;
+}
+
+void AnimationControllerComponent::RefreshSequenceAdapter()
+{
+    BS_PROFILE_SCOPE("RefreshSequenceAdapter");
+
+    if (sequenceAdapterState != editingState)
+    {
+        sequenceAdapterState = editingState;
+        sequenceAdapterDirty = true;
+    }
+
+    sequenceAdapter.targetState = editingState;
+    sequenceAdapter.duration = 0.0f;
+    sequenceAdapter.fps = 60.0f;
+
+    if (editingState && modelComponent)
+    {
+        sequenceAdapter.duration = modelComponent->GetAnimationDuration(editingState->animationIndex);
+    }
+
+    if (sequenceAdapterDirty)
+    {
+        sequenceAdapter.SyncFrames();
+        sequenceAdapterDirty = false;
+    }
+}
+
+void AnimationControllerComponent::MarkActionCategoryCacheDirty()
+{
+    actionCategoryCacheDirty = true;
+}
+
+void AnimationControllerComponent::RefreshActionCategoryCache()
+{
+    BS_PROFILE_SCOPE("RefreshActionCategoryCache");
+
+    std::shared_ptr<GameObject> ownerShared_ = GetGameObject();
+    GameObject* owner_ = ownerShared_.get();
+    if (cachedActionOwner != owner_)
+    {
+        cachedActionOwner = owner_;
+        actionCategoryCacheDirty = true;
+    }
+    if (!actionCategoryCacheDirty) return;
+
+    cachedActionCategories.clear();
+
+    auto addRegistryCategories_ = [&](ActionRegistry& registry_, const std::string& sourceLabel_)
+    {
+        std::vector<std::string> categories_ = registry_.GetCategories();
+        std::sort(categories_.begin(), categories_.end());
+        for (const std::string& category_ : categories_)
+        {
+            CachedActionCategory entry_;
+            entry_.category = category_;
+            entry_.menuLabel = sourceLabel_ + " " + category_;
+            entry_.actionNames = registry_.GetActionNames(category_);
+            std::sort(entry_.actionNames.begin(), entry_.actionNames.end());
+            cachedActionCategories.push_back(std::move(entry_));
+        }
+    };
+
+    if (ownerShared_)
+    {
+        addRegistryCategories_(ownerShared_->localRegistry, "[Self]");
+
+        auto parentTransform_ = ownerShared_->transform ? ownerShared_->transform->parent.lock() : nullptr;
+        while (parentTransform_)
+        {
+            auto parentObject_ = parentTransform_->gameObject.lock();
+            if (!parentObject_) break;
+
+            addRegistryCategories_(parentObject_->localRegistry, "[Parent:" + parentObject_->GetName() + "]");
+            parentTransform_ = parentObject_->transform ? parentObject_->transform->parent.lock() : nullptr;
+        }
+
+        auto collectChildActions_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
+        {
+            if (!object_ || !object_->transform) return;
+
+            for (const auto& childTransform_ : object_->transform->children)
+            {
+                if (!childTransform_) continue;
+
+                auto childObject_ = childTransform_->gameObject.lock();
+                if (!childObject_) continue;
+
+                addRegistryCategories_(childObject_->localRegistry, "[Child:" + childObject_->GetName() + "]");
+                self_(self_, childObject_);
+            }
+        };
+        collectChildActions_(collectChildActions_, ownerShared_);
+    }
+
+    addRegistryCategories_(ActionRegistry::Instance(), "[Global]");
+    actionCategoryCacheDirty = false;
+}
+
+void AnimationControllerComponent::MarkStateGuiCacheDirty()
+{
+    stateGuiCacheDirty = true;
+}
+
+void AnimationControllerComponent::RefreshStateGuiCache()
+{
+    if (!stateGuiCacheDirty) return;
+
+    cachedStateGuiEntries.clear();
+    cachedStateGuiEntries.reserve(states.size());
+    for (auto& [name_, statePtr_] : states)
+    {
+        cachedStateGuiEntries.push_back({ name_, statePtr_.get() });
+    }
+    std::sort(
+        cachedStateGuiEntries.begin(),
+        cachedStateGuiEntries.end(),
+        [](const StateGuiEntry& left_, const StateGuiEntry& right_)
+        {
+            return left_.name < right_.name;
+        });
+    stateGuiCacheDirty = false;
+}
+
+void AnimationControllerComponent::MarkBlackboardGuiCacheDirty()
+{
+    blackboardGuiCacheDirty = true;
+}
+
+void AnimationControllerComponent::RefreshBlackboardGuiCache()
+{
+    if (!blackboardGuiCacheDirty) return;
+
+    const BlackboardCategory& blackboard_ = GetEditableBlackboard();
+    cachedBlackboardKeys.clear();
+    cachedBlackboardKeys.reserve(blackboard_.size());
+    for (const auto& [key_, value_] : blackboard_)
+    {
+        cachedBlackboardKeys.push_back(key_);
+    }
+    std::sort(cachedBlackboardKeys.begin(), cachedBlackboardKeys.end());
+    blackboardGuiCacheDirty = false;
+}
+
+void AnimationControllerComponent::MarkAnimationMaskCacheDirty()
+{
+    animationMaskCacheDirty = true;
+}
+
+void AnimationControllerComponent::RefreshAnimationMaskCache()
+{
+    BS_PROFILE_SCOPE("RefreshAnimationMaskCache");
+
+    if (animationMaskCacheState != editingState)
+    {
+        animationMaskCacheState = editingState;
+        animationMaskCacheDirty = true;
+    }
+    if (!animationMaskCacheDirty) return;
+
+    cachedNodeDepths.clear();
+    cachedMaskInheritedFlags.clear();
+    cachedMaskRootNodeSet.clear();
+    if (!editingState || !modelComponent)
+    {
+        animationMaskCacheDirty = false;
+        return;
+    }
+
+    const auto& nodes_ = modelComponent->GetNodes();
+    cachedNodeDepths.assign(nodes_.size(), 0);
+    cachedMaskInheritedFlags.assign(nodes_.size(), false);
+    cachedMaskRootNodeSet.insert(
+        editingState->blendMaskRootNodes.begin(),
+        editingState->blendMaskRootNodes.end());
+
+    for (int nodeIndex_ = 0; nodeIndex_ < static_cast<int>(nodes_.size()); ++nodeIndex_)
+    {
+        int depth_ = 0;
+        int parentIndex_ = nodes_[nodeIndex_].parentIndex;
+        bool inherited_ = false;
+        while (parentIndex_ >= 0 && parentIndex_ < static_cast<int>(nodes_.size()))
+        {
+            ++depth_;
+            if (cachedMaskRootNodeSet.find(nodes_[parentIndex_].name) != cachedMaskRootNodeSet.end())
+            {
+                inherited_ = true;
+            }
+            parentIndex_ = nodes_[parentIndex_].parentIndex;
+        }
+        cachedNodeDepths[nodeIndex_] = depth_;
+        cachedMaskInheritedFlags[nodeIndex_] = inherited_;
+    }
+
+    animationMaskCacheDirty = false;
+}
+
+void AnimationControllerComponent::MarkEffectAssetCacheDirty()
+{
+    effectAssetCacheDirty = true;
+}
+
+void AnimationControllerComponent::RefreshEffectAssetCache()
+{
+    BS_PROFILE_SCOPE("RefreshEffectAssetCache");
+
+    std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (cachedEffectAssetOwner != owner_.get())
+    {
+        cachedEffectAssetOwner = owner_.get();
+        effectAssetCacheDirty = true;
+    }
+    if (!effectAssetCacheDirty) return;
+
+    cachedParticleAssetKeys.clear();
+    cachedMeshEffectAssetKeys.clear();
+
+    if (owner_)
+    {
+        const auto& effectManager_ = owner_->GetManager().GetEffectManager();
+        cachedParticleAssetKeys = effectManager_.GetParticleAssetKeys();
+        cachedMeshEffectAssetKeys = effectManager_.GetMeshVFXAssetKeys();
+
+        const std::vector<std::string>& sequenceAssetKeys_ = effectManager_.GetVFXSequenceAssetKeys();
+        cachedMeshEffectAssetKeys.insert(
+            cachedMeshEffectAssetKeys.end(),
+            sequenceAssetKeys_.begin(),
+            sequenceAssetKeys_.end());
+
+        std::sort(cachedParticleAssetKeys.begin(), cachedParticleAssetKeys.end());
+        std::sort(cachedMeshEffectAssetKeys.begin(), cachedMeshEffectAssetKeys.end());
+        cachedMeshEffectAssetKeys.erase(
+            std::unique(cachedMeshEffectAssetKeys.begin(), cachedMeshEffectAssetKeys.end()),
+            cachedMeshEffectAssetKeys.end());
+    }
+
+    effectAssetCacheDirty = false;
+}
+
+void AnimationControllerComponent::PreviewStateAtTime(AnimState* state_, float time_)
+{
+    BS_PROFILE_SCOPE("ScrubAnimationPreview");
+
+    if (!state_) return;
+    if (animator.GetCurrentState() != state_)
+    {
+        ChangeState(state_->name, 0.0f);
+    }
+    SetAnimatorTime(time_);
+}
+
 void AnimationControllerComponent::Gui()
 {
+    BS_PROFILE_SCOPE("AnimationControllerComponent::Gui");
+
     if (!modelComponent) return;
 
-    ImGui::Text("Model: %s", modelComponent->GetModelName().c_str());
-    ImGui::TextDisabled("Animation editors are opened from the main Window menu.");
-
-    ImGui::SeparatorText("Runtime Playback");
-    const AnimState* runtimeState_ = animator.GetCurrentState();
-    if (runtimeState_)
     {
-        ImGui::Text("State: %s", runtimeState_->name.c_str());
+        BS_PROFILE_SCOPE("Animation GUI::Runtime Playback");
 
-        const float duration_ = (std::max)(animator.GetCurrentSampleDuration(), 0.001f);
-        float playbackTime_ = std::clamp(animator.GetCurrentFadeTime(), 0.0f, duration_);
-        if (ImGui::SliderFloat(
-            "Playback Time",
-            &playbackTime_,
-            0.0f,
-            duration_,
-            "%.3f sec"))
+        ImGui::Text("Model: %s", modelComponent->GetModelName().c_str());
+        ImGui::TextDisabled("Animation editors are opened from the main Window menu.");
+
+        ImGui::SeparatorText("Runtime Playback");
+        const AnimState* runtimeState_ = animator.GetCurrentState();
+        if (runtimeState_)
         {
-            animator.SetCurrentTime(playbackTime_);
+            ImGui::Text("State: %s", runtimeState_->name.c_str());
+
+            const float duration_ = (std::max)(animator.GetCurrentSampleDuration(), 0.001f);
+            float playbackTime_ = std::clamp(animator.GetCurrentFadeTime(), 0.0f, duration_);
+            if (ImGui::SliderFloat(
+                "Playback Time",
+                &playbackTime_,
+                0.0f,
+                duration_,
+                "%.3f sec"))
+            {
+                animator.SetCurrentTime(playbackTime_);
+            }
+
+            ImGui::Text("%.3f / %.3f sec", animator.GetCurrentFadeTime(), duration_);
+        }
+        else
+        {
+            ImGui::TextDisabled("No animation is currently playing.");
         }
 
-        ImGui::Text("%.3f / %.3f sec", animator.GetCurrentFadeTime(), duration_);
+
+        ImGui::Text(
+            "RootMotion %.3f %.3f %.3f",
+            rootMotionDelta.x,
+            rootMotionDelta.y,
+            rootMotionDelta.z);
     }
-    else
+
     {
-        ImGui::TextDisabled("No animation is currently playing.");
-    }
+        BS_PROFILE_SCOPE("Animation GUI::State Assets");
 
-
-    ImGui::Text(
-        "RootMotion %.3f %.3f %.3f",
-        rootMotionDelta.x,
-        rootMotionDelta.y,
-        rootMotionDelta.z);
-
-    ImGui::SeparatorText("State Assets");
-    if (AssetSlotGui::Draw(
-        "Import State",
-        AssetSlotType::JSON,
-        stateAssetImportPath,
-        nullptr,
-        "Data/Animation/StateData"))
-    {
-        if (!stateAssetImportPath.empty())
+        ImGui::SeparatorText("State Assets");
+        if (AssetSlotGui::Draw(
+            "Import State",
+            AssetSlotType::JSON,
+            stateAssetImportPath,
+            nullptr,
+            "Data/Animation/StateData"))
         {
-            const bool loaded_ = LoadStateAsset(stateAssetImportPath);
-            stateAssetStatus = loaded_
-                ? "Loaded: " + stateAssetImportPath
-                : "Not an AnimationState asset: " + stateAssetImportPath;
+            if (!stateAssetImportPath.empty())
+            {
+                const bool loaded_ = LoadStateAsset(stateAssetImportPath);
+                stateAssetStatus = loaded_
+                    ? "Loaded: " + stateAssetImportPath
+                    : "Not an AnimationState asset: " + stateAssetImportPath;
+            }
         }
-    }
-    if (!stateAssetStatus.empty())
-    {
-        ImGui::TextWrapped("%s", stateAssetStatus.c_str());
-    }
+        if (!stateAssetStatus.empty())
+        {
+            ImGui::TextWrapped("%s", stateAssetStatus.c_str());
+        }
 
-    ImGui::Checkbox("useTransitionGraph", &useTransitionGraph);
+        ImGui::Checkbox("useTransitionGraph", &useTransitionGraph);
+    }
 
     ImGui::Separator();
 
 
-    std::vector<std::string> curveNames;
-    if (curveComponent) {
-        curveNames = curveComponent->GetTrackNames();
-    }
-
-
     if (ImGui::CollapsingHeader("Add State From Model Clip", ImGuiTreeNodeFlags_None))
     {
+        BS_PROFILE_SCOPE("Animation GUI::Add State From Model Clip");
+
         static int selectedAnimIndex_ = -1;
         const auto& animations_ = modelComponent->GetAnimations();
 
@@ -156,18 +417,25 @@ void AnimationControllerComponent::Gui()
 
     if (ImGui::BeginChild("StatesRegion", ImVec2(0, 200), true))
     {
+        BS_PROFILE_SCOPE("Animation GUI::State List");
+
         std::string targetToDelete = "";
 
         ImGui::SetNextItemWidth(-1.0f);
         ImGui::InputTextWithHint("##StateSearch", "Search states...", &stateSearchText);
         ImGui::Separator();
 
-        auto DrawStateRow_ = [&](const std::string& name_, std::unique_ptr<AnimState>& statePtr_)
+        RefreshStateGuiCache();
+        auto DrawStateRow_ = [&](const StateGuiEntry& entry_)
         {
+            const std::string& name_ = entry_.name;
+            AnimState* state_ = entry_.state;
+            if (!state_) return;
+
             ImGui::PushID(name_.c_str());
 
-            bool isCurrent_ = (animator.GetCurrentState() == statePtr_.get());
-            bool isEditing_ = (editingState == statePtr_.get());
+            bool isCurrent_ = (animator.GetCurrentState() == state_);
+            bool isEditing_ = (editingState == state_);
 
 
             if (isCurrent_) {
@@ -177,7 +445,9 @@ void AnimationControllerComponent::Gui()
 
 
             if (ImGui::Selectable(name_.c_str(), isEditing_, ImGuiSelectableFlags_AllowOverlap)) {
-                editingState = statePtr_.get();
+                editingState = state_;
+                MarkSequenceAdapterDirty();
+                MarkAnimationMaskCacheDirty();
             }
 
             if (isCurrent_) ImGui::PopStyleColor();
@@ -211,25 +481,23 @@ void AnimationControllerComponent::Gui()
         if (stateSearchText.empty())
         {
             ImGuiListClipper clipper_;
-            clipper_.Begin(static_cast<int>(states.size()));
+            clipper_.Begin(static_cast<int>(cachedStateGuiEntries.size()));
             while (clipper_.Step())
             {
-                auto iterator_ = states.begin();
-                std::advance(iterator_, clipper_.DisplayStart);
                 for (int index_ = clipper_.DisplayStart;
-                    index_ < clipper_.DisplayEnd && iterator_ != states.end();
-                    ++index_, ++iterator_)
+                    index_ < clipper_.DisplayEnd && index_ < static_cast<int>(cachedStateGuiEntries.size());
+                    ++index_)
                 {
-                    DrawStateRow_(iterator_->first, iterator_->second);
+                    DrawStateRow_(cachedStateGuiEntries[index_]);
                 }
             }
         }
         else
         {
-            for (auto& [name_, statePtr_] : states)
+            for (const StateGuiEntry& entry_ : cachedStateGuiEntries)
             {
-                if (!ContainsCaseInsensitive(name_, stateSearchText)) continue;
-                DrawStateRow_(name_, statePtr_);
+                if (!ContainsCaseInsensitive(entry_.name, stateSearchText)) continue;
+                DrawStateRow_(entry_);
             }
         }
 
@@ -245,6 +513,7 @@ void AnimationControllerComponent::Gui()
     ImGui::SeparatorText("State Properties");
     if (editingState)
     {
+        BS_PROFILE_SCOPE("Animation GUI::State Properties");
 
         ImGui::Text("Editing: %s", editingState->name.c_str());
 
@@ -322,21 +591,26 @@ void AnimationControllerComponent::Gui()
         if (ImGui::RadioButton("Single", currentType_ == static_cast<int>(AnimStateType::Single)))
         {
             editingState->type = AnimStateType::Single;
+            MarkSequenceAdapterDirty();
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("Blend 1D", currentType_ == static_cast<int>(AnimStateType::Blend1D)))
         {
             editingState->type = AnimStateType::Blend1D;
+            MarkSequenceAdapterDirty();
+            MarkAnimationMaskCacheDirty();
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("Blend 2D", currentType_ == static_cast<int>(AnimStateType::BLEND_2D)))
         {
             editingState->type = AnimStateType::BLEND_2D;
+            MarkSequenceAdapterDirty();
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("Custom", currentType_ == static_cast<int>(AnimStateType::Custom)))
         {
             editingState->type = AnimStateType::Custom;
+            MarkSequenceAdapterDirty();
         }
 
         const auto& animations_ = modelComponent->GetAnimations();
@@ -370,6 +644,7 @@ void AnimationControllerComponent::Gui()
                                     targetIndex_ == index_))
                                 {
                                     targetIndex_ = index_;
+                                    MarkSequenceAdapterDirty();
                                     ImGui::CloseCurrentPopup();
                                 }
                             }
@@ -386,6 +661,7 @@ void AnimationControllerComponent::Gui()
                                 targetIndex_ == index_))
                             {
                                 targetIndex_ = index_;
+                                MarkSequenceAdapterDirty();
                                 ImGui::CloseCurrentPopup();
                             }
                         }
@@ -415,9 +691,13 @@ void AnimationControllerComponent::Gui()
             }
             if (ImGui::BeginPopup("BlendParameterPopup"))
             {
-                for (const auto& [parameterName_, value_] : GetEditableBlackboard())
+                RefreshBlackboardGuiCache();
+                BlackboardCategory& editableBlackboard_ = GetEditableBlackboard();
+                for (const std::string& parameterName_ : cachedBlackboardKeys)
                 {
-                    if (std::holds_alternative<float>(value_) &&
+                    auto iterator_ = editableBlackboard_.find(parameterName_);
+                    if (iterator_ != editableBlackboard_.end() &&
+                        std::holds_alternative<float>(iterator_->second) &&
                         ImGui::MenuItem(parameterName_.c_str()))
                     {
                         editingState->blendParamName = parameterName_;
@@ -457,7 +737,10 @@ void AnimationControllerComponent::Gui()
                 "Phase uses normalized cycles. 0.5 shifts an animation by half a cycle.");
 
             ImGui::SeparatorText("Animation Mask");
-            ImGui::Checkbox("Use Animation Mask", &editingState->blendUseMask);
+            if (ImGui::Checkbox("Use Animation Mask", &editingState->blendUseMask))
+            {
+                MarkAnimationMaskCacheDirty();
+            }
             if (editingState->blendUseMask)
             {
                 ImGui::TextDisabled(
@@ -465,9 +748,11 @@ void AnimationControllerComponent::Gui()
                 if (ImGui::SmallButton("Clear Mask"))
                 {
                     editingState->blendMaskRootNodes.clear();
+                    MarkAnimationMaskCacheDirty();
                 }
 
                 const auto& nodes_ = modelComponent->GetNodes();
+                RefreshAnimationMaskCache();
                 ImGui::BeginChild("AnimationMaskNodeList", ImVec2(0.0f, 190.0f), true);
                 ImGuiListClipper maskClipper_;
                 maskClipper_.Begin(static_cast<int>(nodes_.size()));
@@ -478,29 +763,13 @@ void AnimationControllerComponent::Gui()
                         ++nodeIndex_)
                     {
                         const auto& node_ = nodes_[nodeIndex_];
-                        int depth_ = 0;
-                        int parentIndex_ = node_.parentIndex;
-                        bool inherited_ = false;
-                        while (parentIndex_ >= 0 &&
-                            parentIndex_ < static_cast<int>(nodes_.size()))
-                        {
-                            ++depth_;
-                            const std::string& parentName_ = nodes_[parentIndex_].name;
-                            if (std::find(
-                                editingState->blendMaskRootNodes.begin(),
-                                editingState->blendMaskRootNodes.end(),
-                                parentName_) != editingState->blendMaskRootNodes.end())
-                            {
-                                inherited_ = true;
-                            }
-                            parentIndex_ = nodes_[parentIndex_].parentIndex;
-                        }
-
-                        auto selectedIt_ = std::find(
-                            editingState->blendMaskRootNodes.begin(),
-                            editingState->blendMaskRootNodes.end(),
-                            node_.name);
-                        bool selected_ = selectedIt_ != editingState->blendMaskRootNodes.end();
+                        const int depth_ = nodeIndex_ < static_cast<int>(cachedNodeDepths.size())
+                            ? cachedNodeDepths[nodeIndex_]
+                            : 0;
+                        const bool inherited_ = nodeIndex_ < static_cast<int>(cachedMaskInheritedFlags.size())
+                            ? cachedMaskInheritedFlags[nodeIndex_]
+                            : false;
+                        bool selected_ = cachedMaskRootNodeSet.find(node_.name) != cachedMaskRootNodeSet.end();
 
                         ImGui::PushID(nodeIndex_);
                         ImGui::Indent(static_cast<float>(depth_) * 12.0f);
@@ -519,6 +788,7 @@ void AnimationControllerComponent::Gui()
                                         node_.name),
                                     editingState->blendMaskRootNodes.end());
                             }
+                            MarkAnimationMaskCacheDirty();
                         }
                         ImGui::SameLine();
                         if (inherited_ && !selected_)
@@ -745,9 +1015,13 @@ void AnimationControllerComponent::Gui()
             }
             if (ImGui::BeginPopup("Blend2DParameterPopup"))
             {
-                for (const auto& [parameterName_, value_] : GetEditableBlackboard())
+                RefreshBlackboardGuiCache();
+                BlackboardCategory& editableBlackboard_ = GetEditableBlackboard();
+                for (const std::string& parameterName_ : cachedBlackboardKeys)
                 {
-                    if (std::holds_alternative<DirectX::SimpleMath::Vector2>(value_) &&
+                    auto iterator_ = editableBlackboard_.find(parameterName_);
+                    if (iterator_ != editableBlackboard_.end() &&
+                        std::holds_alternative<DirectX::SimpleMath::Vector2>(iterator_->second) &&
                         ImGui::MenuItem(parameterName_.c_str()))
                     {
                         editingState->blend2DParamName = parameterName_;
@@ -838,7 +1112,10 @@ void AnimationControllerComponent::Gui()
                     {
                         editingState->rootMotionScaleCurveName.clear();
                     }
-                    for (const std::string& curveName_ : curveNames)
+                    const std::vector<std::string> curveNames_ = curveComponent
+                        ? curveComponent->GetTrackNames()
+                        : std::vector<std::string>();
+                    for (const std::string& curveName_ : curveNames_)
                     {
                         if (ImGui::MenuItem(curveName_.c_str()))
                         {
@@ -903,6 +1180,8 @@ void AnimationControllerComponent::Gui()
 
     if (ImGui::CollapsingHeader("Blackboard (Params)", ImGuiTreeNodeFlags_DefaultOpen))
     {
+        BS_PROFILE_SCOPE("Animation GUI::Blackboard Params");
+
         static char newVarName[64] = "";
         static int selectedType = 0; // 0:Float, 1:Int, 2:Bool, 3:Vector2
         const char* typeNames[] = { "Float", "Int", "Bool", "Vector2" };
@@ -927,6 +1206,7 @@ void AnimationControllerComponent::Gui()
                 case 2: GetEditableBlackboard()[name] = false;                                  break;
                 case 3: GetEditableBlackboard()[name] = DirectX::SimpleMath::Vector2(0.0f, 0.0f); break;
                 }
+                MarkBlackboardGuiCacheDirty();
                 newVarName[0] = '\0';
             }
         }
@@ -942,6 +1222,7 @@ void AnimationControllerComponent::Gui()
         {
             std::string toDelete;
             BlackboardCategory& editableBlackboard_ = GetEditableBlackboard();
+            RefreshBlackboardGuiCache();
             auto DrawBlackboardRow_ = [&](const std::string& key_, BlackBoardValue& val_)
             {
                 ImGui::PushID(key_.c_str());
@@ -976,19 +1257,24 @@ void AnimationControllerComponent::Gui()
             };
 
             ImGuiListClipper clipper_;
-            clipper_.Begin(static_cast<int>(editableBlackboard_.size()));
+            clipper_.Begin(static_cast<int>(cachedBlackboardKeys.size()));
             while (clipper_.Step())
             {
-                auto iterator_ = editableBlackboard_.begin();
-                std::advance(iterator_, clipper_.DisplayStart);
                 for (int index_ = clipper_.DisplayStart;
-                    index_ < clipper_.DisplayEnd && iterator_ != editableBlackboard_.end();
-                    ++index_, ++iterator_)
+                    index_ < clipper_.DisplayEnd && index_ < static_cast<int>(cachedBlackboardKeys.size());
+                    ++index_)
                 {
+                    const std::string& key_ = cachedBlackboardKeys[index_];
+                    auto iterator_ = editableBlackboard_.find(key_);
+                    if (iterator_ == editableBlackboard_.end()) continue;
                     DrawBlackboardRow_(iterator_->first, iterator_->second);
                 }
             }
-            if (!toDelete.empty()) { editableBlackboard_.erase(toDelete); }
+            if (!toDelete.empty())
+            {
+                editableBlackboard_.erase(toDelete);
+                MarkBlackboardGuiCacheDirty();
+            }
         }
     }
 
@@ -996,6 +1282,7 @@ void AnimationControllerComponent::Gui()
 
 void AnimationControllerComponent::ShowSequencerEditor()
 {
+    BS_PROFILE_SCOPE("AnimationControllerComponent::ShowSequencerEditor");
 
     ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_FirstUseEver);
 
@@ -1016,18 +1303,14 @@ void AnimationControllerComponent::ShowSequencerEditor()
     else
     {
 
-        AnimSequenceAdapter adapter;
-        adapter.targetState = const_cast<AnimState*>(editingState);
-        adapter.duration = modelComponent->GetAnimationDuration(editingState->animationIndex);
-        adapter.fps = 60.0f;
-        adapter.SyncFrames();
-
-        static int selectedEntry = -1;
-        static int firstFrame = 0;
-        static bool expanded = true;
+        RefreshSequenceAdapter();
+        if (sequencerSelectedEntry >= sequenceAdapter.GetItemCount())
+        {
+            sequencerSelectedEntry = -1;
+        }
 
 
-        int currentFrame = (int)(animator.GetCurrentFadeTime() * adapter.fps);
+        int currentFrame = (int)(animator.GetCurrentFadeTime() * sequenceAdapter.fps);
         const int previousFrame_ = currentFrame;
 
 
@@ -1038,20 +1321,21 @@ void AnimationControllerComponent::ShowSequencerEditor()
 
         if (ImGui::BeginChild("SequencerRegion", ImVec2(0, 300), true))
         {
-            if (ImSequencer::Sequencer(&adapter, &currentFrame, &expanded, &selectedEntry, &firstFrame,
+            if (ImSequencer::Sequencer(&sequenceAdapter, &currentFrame, &sequencerExpanded, &sequencerSelectedEntry, &sequencerFirstFrame,
                 ImSequencer::SEQUENCER_EDIT_ALL | ImSequencer::SEQUENCER_ADD |
                 ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_CHANGE_FRAME))
             {
 
 
-                if (selectedEntry >= 0 && selectedEntry < (int)adapter.targetState->events.size())
+                if (sequencerSelectedEntry >= 0 && sequencerSelectedEntry < (int)sequenceAdapter.targetState->events.size())
                 {
                     int* pStart, * pEnd;
-                    adapter.Get(selectedEntry, &pStart, &pEnd, nullptr, nullptr);
-                    auto& ev = adapter.targetState->events[selectedEntry];
-                    ev.startTime = adapter.ToTime(*pStart);
-                    ev.endTime = adapter.ToTime(*pEnd);
+                    sequenceAdapter.Get(sequencerSelectedEntry, &pStart, &pEnd, nullptr, nullptr);
+                    auto& ev = sequenceAdapter.targetState->events[sequencerSelectedEntry];
+                    ev.startTime = sequenceAdapter.ToTime(*pStart);
+                    ev.endTime = sequenceAdapter.ToTime(*pEnd);
                 }
+                MarkSequenceAdapterDirty();
             }
             ImGui::EndChild();
         }
@@ -1059,25 +1343,24 @@ void AnimationControllerComponent::ShowSequencerEditor()
         if (currentFrame != previousFrame_)
         {
             const int clampedFrame_ = (std::max)(
-                adapter.GetFrameMin(),
-                (std::min)(adapter.GetFrameMax(), currentFrame));
-            ChangeState(editingState->name, 0.0f);
-            SetAnimatorTime(adapter.ToTime(clampedFrame_));
+                sequenceAdapter.GetFrameMin(),
+                (std::min)(sequenceAdapter.GetFrameMax(), currentFrame));
+            PreviewStateAtTime(editingState, sequenceAdapter.ToTime(clampedFrame_));
         }
 
 
         ImGui::PopItemWidth();
 
 
-        if (selectedEntry >= 0 && selectedEntry < (int)adapter.targetState->events.size())
+        if (sequencerSelectedEntry >= 0 && sequencerSelectedEntry < (int)sequenceAdapter.targetState->events.size())
         {
 
             if (ImGui::BeginChild("EventDetails", ImVec2(0, 0), true))
             {
-                auto& ev = adapter.targetState->events[selectedEntry];
+                auto& ev = sequenceAdapter.targetState->events[sequencerSelectedEntry];
 
 
-                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Editing Event #%d", selectedEntry);
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Editing Event #%d", sequencerSelectedEntry);
                 ImGui::SameLine();
 
 
@@ -1086,8 +1369,9 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 if (ImGui::Button("Delete Event"))
                 {
 
-                    adapter.Del(selectedEntry);
-                    selectedEntry = -1;
+                    sequenceAdapter.Del(sequencerSelectedEntry);
+                    MarkSequenceAdapterDirty();
+                    sequencerSelectedEntry = -1;
                     ImGui::PopStyleColor(2);
                     ImGui::EndChild();
                     ImGui::End();
@@ -1096,7 +1380,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 ImGui::PopStyleColor(2);
 
                 ImGui::SameLine(ImGui::GetWindowWidth() - 100);
-                if (ImGui::Button("Deselect")) { selectedEntry = -1; }
+                if (ImGui::Button("Deselect")) { sequencerSelectedEntry = -1; }
 
 
                 ImGui::SetNextItemWidth(200.0f);
@@ -1107,58 +1391,12 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 ImGui::TextDisabled("(Name on timeline)");
 
                 ImGui::Separator();
-                auto& globalReg = ActionRegistry::Instance();
-                auto owner = GetGameObject();
-
-                struct CategoryEntry
+                RefreshActionCategoryCache();
+                if (ImGui::SmallButton("Refresh Actions"))
                 {
-                    std::string category;
-                    std::string menuLabel;
-                    ActionRegistry* registry = nullptr;
-                };
-                std::vector<CategoryEntry> allCategories;
-
-                auto addRegistryCategories_ = [&](ActionRegistry& registry_, const std::string& sourceLabel_)
-                    {
-                        for (const auto& category_ : registry_.GetCategories())
-                        {
-                            allCategories.push_back({ category_, sourceLabel_ + " " + category_, &registry_ });
-                        }
-                    };
-
-                if (owner)
-                {
-                    addRegistryCategories_(owner->localRegistry, "[Self]");
-
-                    auto parentTransform_ = owner->transform ? owner->transform->parent.lock() : nullptr;
-                    while (parentTransform_)
-                    {
-                        auto parentObject_ = parentTransform_->gameObject.lock();
-                        if (!parentObject_) break;
-
-                        addRegistryCategories_(parentObject_->localRegistry, "[Parent:" + parentObject_->GetName() + "]");
-                        parentTransform_ = parentObject_->transform ? parentObject_->transform->parent.lock() : nullptr;
-                    }
-
-                    auto collectChildActions_ = [&](auto&& self_, const std::shared_ptr<GameObject>& object_) -> void
-                        {
-                            if (!object_ || !object_->transform) return;
-
-                            for (const auto& childTransform_ : object_->transform->children)
-                            {
-                                if (!childTransform_) continue;
-
-                                auto childObject_ = childTransform_->gameObject.lock();
-                                if (!childObject_) continue;
-
-                                addRegistryCategories_(childObject_->localRegistry, "[Child:" + childObject_->GetName() + "]");
-                                self_(self_, childObject_);
-                            }
-                        };
-                    collectChildActions_(collectChildActions_, owner);
+                    MarkActionCategoryCacheDirty();
+                    RefreshActionCategoryCache();
                 }
-
-                addRegistryCategories_(globalReg, "[Global]");
 
                 auto ActionField = [&](const char* label, std::string& targetStr) {
                     ImGui::SetNextItemWidth(250.0f);
@@ -1176,14 +1414,9 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         }
                         ImGui::Separator();
 
-                        for (const auto& entry : allCategories) {
+                        for (const CachedActionCategory& entry : cachedActionCategories) {
                             if (ImGui::BeginMenu(entry.menuLabel.c_str())) {
-                                std::vector<std::string> actionNames;
-                                if (entry.registry) {
-                                    actionNames = entry.registry->GetActionNames(entry.category);
-                                }
-
-                                for (const auto& actionName : actionNames) {
+                                for (const std::string& actionName : entry.actionNames) {
                                     if (ImGui::MenuItem(actionName.c_str())) {
                                         targetStr = actionName;
                                     }
@@ -1234,35 +1467,13 @@ void AnimationControllerComponent::ShowSequencerEditor()
                         std::shared_ptr<GameObject> owner_ = GetGameObject();
                         if ((isParticleAsset_ || isMeshVFXAsset_) && owner_)
                         {
-                            std::vector<std::string> assets_ = isParticleAsset_
-                        ? owner_->GetManager().GetEffectManager().GetParticleAssetKeys()
-                        : owner_->GetManager().GetEffectManager().GetMeshVFXAssetKeys();
-                    if (isMeshVFXAsset_)
-                    {
-                        const std::vector<std::string>& sequenceAssets_ =
-                            owner_->GetManager().GetEffectManager().GetVFXSequenceAssetKeys();
-                        assets_.insert(
-                            assets_.end(),
-                            sequenceAssets_.begin(),
-                            sequenceAssets_.end());
-                    }
                             std::string previewValue_ = write_.stringValue;
-                            const std::string resolvedValue_ = isParticleAsset_
-                                ? owner_->GetManager().GetEffectManager().ResolveParticlePath(write_.stringValue)
-                                : owner_->GetManager().GetEffectManager().ResolveMeshVFXPath(write_.stringValue);
-                            for (const std::string& assetKey_ : assets_)
-                            {
-                                const std::string resolvedKey_ = isParticleAsset_
-                                    ? owner_->GetManager().GetEffectManager().ResolveParticlePath(assetKey_)
-                                    : owner_->GetManager().GetEffectManager().ResolveMeshVFXPath(assetKey_);
-                                if (!resolvedValue_.empty() && resolvedValue_ == resolvedKey_)
-                                {
-                                    previewValue_ = assetKey_;
-                                    break;
-                                }
-                            }
                             if (ImGui::BeginCombo("Value", previewValue_.empty() ? "(None)" : previewValue_.c_str()))
                             {
+                                RefreshEffectAssetCache();
+                                const std::vector<std::string>& assets_ = isParticleAsset_
+                                    ? cachedParticleAssetKeys
+                                    : cachedMeshEffectAssetKeys;
                                 if (ImGui::Selectable("(None)", write_.stringValue.empty())) write_.stringValue.clear();
                                 for (const std::string& assetKey_ : assets_)
                                 {
@@ -1327,11 +1538,13 @@ void AnimationControllerComponent::ShowSequencerEditor()
 
                 ImGui::PushItemWidth(120.0f);
                 if (ImGui::DragFloat("Start (s)", &ev.startTime, 0.01f, 0.0f, ev.endTime)) {
-                    ev.frameStart = adapter.ToFrame(ev.startTime);
+                    ev.frameStart = sequenceAdapter.ToFrame(ev.startTime);
+                    MarkSequenceAdapterDirty();
                 }
                 ImGui::SameLine();
-                if (ImGui::DragFloat("End (s)", &ev.endTime, 0.01f, ev.startTime, adapter.duration)) {
-                    ev.frameEnd = adapter.ToFrame(ev.endTime);
+                if (ImGui::DragFloat("End (s)", &ev.endTime, 0.01f, ev.startTime, sequenceAdapter.duration)) {
+                    ev.frameEnd = sequenceAdapter.ToFrame(ev.endTime);
+                    MarkSequenceAdapterDirty();
                 }
                 ImGui::PopItemWidth();
 

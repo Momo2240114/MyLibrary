@@ -1,0 +1,1516 @@
+{
+  "Logs": [
+    {
+      "Time": "2026-07-10 16:40:56",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel None -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:40:56",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel None -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 16:41:00",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: TestTarget None -> SK_PlainsDragonPlainsDragon_IdleBreathe_0"
+    },
+    {
+      "Time": "2026-07-10 16:41:02",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel None -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:02",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel None -> Combo_Attack_Air_03_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:03",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Combo_Attack_Air_03_Seq -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=false resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 80,
+      "Text": "[Jump] First jump impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> Jump_Combat_Start_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 139,
+      "Text": "[Jump] Left ground. Start -> Loop."
+    },
+    {
+      "Time": "2026-07-10 16:41:04",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Start -> Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:05",
+      "Category": "Game",
+      "Level": "Success",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 199,
+      "Text": "[Jump] Double jump requested. Sending JumpDouble phase."
+    },
+    {
+      "Time": "2026-07-10 16:41:05",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Loop -> DoubleJump"
+    },
+    {
+      "Time": "2026-07-10 16:41:05",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 206,
+      "Text": "[Jump] Double jump vertical velocity reset before impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:05",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_Start_0_Seq -> Double_Jump_Combat_0_Seq_0"
+    },
+    {
+      "Time": "2026-07-10 16:41:05",
+      "Category": "Game",
+      "Level": "Success",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 148,
+      "Text": "[Jump] Double jump animation state entered."
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 169,
+      "Text": "[Jump] Grounded after airborne. Enter End."
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase DoubleJump -> End"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=End"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Double_Jump_Combat_0_Seq_0 -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=false resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 80,
+      "Text": "[Jump] First jump impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> Jump_Combat_Start_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 139,
+      "Text": "[Jump] Left ground. Start -> Loop."
+    },
+    {
+      "Time": "2026-07-10 16:41:07",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Start -> Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:08",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 169,
+      "Text": "[Jump] Grounded after airborne. Enter End."
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Loop -> End"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> Move"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=End"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_Start_0_Seq -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=false resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 80,
+      "Text": "[Jump] First jump impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> Jump_Combat_Start_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 139,
+      "Text": "[Jump] Left ground. Start -> Loop."
+    },
+    {
+      "Time": "2026-07-10 16:41:09",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Start -> Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:10",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 169,
+      "Text": "[Jump] Grounded after airborne. Enter End."
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Loop -> End"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_Start_0_Seq -> Jump_Combat_End_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=End"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_End_0_Seq -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=false resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 80,
+      "Text": "[Jump] First jump impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> Jump_Combat_Start_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 139,
+      "Text": "[Jump] Left ground. Start -> Loop."
+    },
+    {
+      "Time": "2026-07-10 16:41:11",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Start -> Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:12",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 169,
+      "Text": "[Jump] Grounded after airborne. Enter End."
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Loop -> End"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_Start_0_Seq -> Jump_Combat_End_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=End"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_End_0_Seq -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=false resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 80,
+      "Text": "[Jump] First jump impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> Jump_Combat_Start_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 139,
+      "Text": "[Jump] Left ground. Start -> Loop."
+    },
+    {
+      "Time": "2026-07-10 16:41:13",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Start -> Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:14",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 169,
+      "Text": "[Jump] Grounded after airborne. Enter End."
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Loop -> End"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_Start_0_Seq -> Jump_Combat_End_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=End"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_End_0_Seq -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=false resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 80,
+      "Text": "[Jump] First jump impulse."
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> Jump_Combat_Start_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 139,
+      "Text": "[Jump] Left ground. Start -> Loop."
+    },
+    {
+      "Time": "2026-07-10 16:41:15",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Start -> Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> AirWeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=Loop"
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel AirWeakAttack -> Jump"
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 24,
+      "Text": "[Jump] Enter resumeLoop=true resumeLanding=false"
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 169,
+      "Text": "[Jump] Grounded after airborne. Enter End."
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 262,
+      "Text": "[Jump] Phase Loop -> End"
+    },
+    {
+      "Time": "2026-07-10 16:41:16",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_Start_0_Seq -> Jump_Combat_End_0_Seq"
+    },
+    {
+      "Time": "2026-07-10 16:41:17",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Jump -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:17",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerJumpState.cpp",
+      "Line": 223,
+      "Text": "[Jump] Exit phase=End"
+    },
+    {
+      "Time": "2026-07-10 16:41:17",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel Jump_Combat_End_0_Seq -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 16:41:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:20",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Start"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Stop"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanComboOff"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel WeakAttack -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:21",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Attack1 -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Start"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Trail] Trail_Stop"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ComboTransition"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel WeakAttack -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanComboOff"
+    },
+    {
+      "Time": "2026-07-10 16:41:25",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Attack1 -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Dodge"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Dodge"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStart"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Camera] MainCamera_Fov_1"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_EnableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [VFX] AfterimageStop"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 16:41:28",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] CanCancelOn"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] ActionEnd"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Dodge -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerDodgeState.cpp",
+      "Line": 242,
+      "Text": "[JustDodge] FrameEnd action received."
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] JustDodge_DisableJustDodgeCollider"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] HurtBoxInvincibleOff"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Dodge -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> Move"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Sprint"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Move -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Sprint -> SS_Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:29",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> SkillB"
+    },
+    {
+      "Time": "2026-07-10 16:41:31",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel SkillB -> Idle"
+    },
+    {
+      "Time": "2026-07-10 16:41:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Game\\Charcter\\Player\\PlayerStateMachine.cpp",
+      "Line": 26,
+      "Text": "Player state change: PlayerModel Idle -> WeakAttack"
+    },
+    {
+      "Time": "2026-07-10 16:41:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\Graphics\\Resource\\Animation\\AnimationControllerComponent.cpp",
+      "Line": 351,
+      "Text": "Animation transition: PlayerModel SS_Idle -> SS_Attack1"
+    },
+    {
+      "Time": "2026-07-10 16:41:32",
+      "Category": "Game",
+      "Level": "Info",
+      "File": "C:\\Users\\2240114\\Desktop\\BigShineLibrary\\MyLib_BS\\CareerPortfolioDevelopment\\MyLibrary\\Lib_BIGShine\\Code\\Engine\\GamePlay\\Serialize\\ActionRegistry.cpp",
+      "Line": 133,
+      "Text": "Action fired: [Player] InputBufferOn"
+    }
+  ]
+}

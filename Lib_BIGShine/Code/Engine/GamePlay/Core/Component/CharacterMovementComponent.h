@@ -29,6 +29,7 @@ public:
     void SetUnscaledDeltaTime(float deltaTime_);
     void AddRootMotionDelta(const DirectX::XMFLOAT3& delta_);
     void AddImpulse(const DirectX::XMFLOAT3& impulse_);
+    void ResetVerticalVelocity();
     void SetFacingDirection(const DirectX::XMFLOAT3& direction_, bool immediate_ = true);
     void SetVerticalMovementLocked(bool locked_);
 

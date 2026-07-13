@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
+#include "Game/AI/Dragon/DragonAIComponent.h"
 #include "imgui_node_editor.h"
 
 #include <algorithm>
@@ -128,7 +129,7 @@ AIBehaviorEditorWindow::~AIBehaviorEditorWindow()
 
 void AIBehaviorEditorWindow::Draw()
 {
-    AIControllerComponent* aiController_ = ResolveTarget();
+    BehaviorGraphTarget target_ = ResolveTarget();
 
     if (!BeginWorkspaceWindow(ImGuiWindowFlags_MenuBar))
     {
@@ -138,7 +139,7 @@ void AIBehaviorEditorWindow::Draw()
 
     if (ImGui::BeginMenuBar())
     {
-        DrawToolbar(aiController_);
+        DrawToolbar(target_);
         ImGui::EndMenuBar();
     }
 
@@ -170,7 +171,7 @@ void AIBehaviorEditorWindow::Draw()
 
     ImGui::BeginChild("AIBehaviorGraphPanel", ImVec2(graphWidth_, topHeight_), true,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    DrawGraph(aiController_);
+    DrawGraph(target_);
     ImGui::EndChild();
 
     ImGui::SameLine(0.0f, 0.0f);
@@ -178,7 +179,7 @@ void AIBehaviorEditorWindow::Draw()
     ImGui::SameLine(0.0f, 0.0f);
 
     ImGui::BeginChild("AIBehaviorInspector", ImVec2(inspectorWidth, topHeight_), true);
-    DrawInspector(aiController_);
+    DrawInspector(target_);
     ImGui::EndChild();
 
     ImGui::EndChild();
@@ -200,9 +201,10 @@ void AIBehaviorEditorWindow::Draw()
     EndEditorWindow();
 }
 
-AIControllerComponent* AIBehaviorEditorWindow::ResolveTarget()
+AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarget()
 {
-    if (!gameObjectManager) return nullptr;
+    BehaviorGraphTarget target_;
+    if (!gameObjectManager) return target_;
 
     const std::shared_ptr<GameObject> selectedObject_ = gameObjectManager->GetSelectedObject();
     if (selectedObject_)
@@ -212,7 +214,19 @@ AIControllerComponent* AIBehaviorEditorWindow::ResolveTarget()
         if (selectedAI_)
         {
             targetObject = selectedObject_;
-            return selectedAI_.get();
+            target_.aiController = selectedAI_.get();
+            target_.owner = selectedObject_.get();
+            return target_;
+        }
+
+        const std::shared_ptr<DragonAIComponent> selectedDragonAI_ =
+            selectedObject_->GetComponent<DragonAIComponent>();
+        if (selectedDragonAI_)
+        {
+            targetObject = selectedObject_;
+            target_.dragonAI = selectedDragonAI_.get();
+            target_.owner = selectedObject_.get();
+            return target_;
         }
     }
 
@@ -221,7 +235,21 @@ AIControllerComponent* AIBehaviorEditorWindow::ResolveTarget()
     {
         const std::shared_ptr<AIControllerComponent> currentAI_ =
             currentTarget_->GetComponent<AIControllerComponent>();
-        if (currentAI_) return currentAI_.get();
+        if (currentAI_)
+        {
+            target_.aiController = currentAI_.get();
+            target_.owner = currentTarget_.get();
+            return target_;
+        }
+
+        const std::shared_ptr<DragonAIComponent> currentDragonAI_ =
+            currentTarget_->GetComponent<DragonAIComponent>();
+        if (currentDragonAI_)
+        {
+            target_.dragonAI = currentDragonAI_.get();
+            target_.owner = currentTarget_.get();
+            return target_;
+        }
     }
 
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
@@ -229,25 +257,39 @@ AIControllerComponent* AIBehaviorEditorWindow::ResolveTarget()
         if (!object_) continue;
         const std::shared_ptr<AIControllerComponent> aiController_ =
             object_->GetComponent<AIControllerComponent>();
-        if (!aiController_) continue;
-        targetObject = object_;
-        return aiController_.get();
+        if (aiController_)
+        {
+            targetObject = object_;
+            target_.aiController = aiController_.get();
+            target_.owner = object_.get();
+            return target_;
+        }
+
+        const std::shared_ptr<DragonAIComponent> dragonAI_ =
+            object_->GetComponent<DragonAIComponent>();
+        if (dragonAI_)
+        {
+            targetObject = object_;
+            target_.dragonAI = dragonAI_.get();
+            target_.owner = object_.get();
+            return target_;
+        }
     }
 
-    return nullptr;
+    return target_;
 }
 
-void AIBehaviorEditorWindow::DrawToolbar(AIControllerComponent* aiController_)
+void AIBehaviorEditorWindow::DrawToolbar(const BehaviorGraphTarget& target_)
 {
-    const std::shared_ptr<GameObject> target_ = targetObject.lock();
+    const std::shared_ptr<GameObject> targetObject_ = targetObject.lock();
     ImGui::TextUnformatted("Target");
     ImGui::SameLine();
-    ImGui::TextDisabled("%s", target_ ? target_->GetName().c_str() : "None");
+    ImGui::TextDisabled("%s", targetObject_ ? targetObject_->GetName().c_str() : "None");
     ImGui::SameLine();
 
-    if (aiController_)
+    if (target_.IsValid())
     {
-        if (ImGui::Button("Reset Tree")) aiController_->ResetTree();
+        if (ImGui::Button("Reset Tree")) ResetGraphRuntime(target_);
         ImGui::SameLine();
         if (ImGui::Button("Focus")) restoreNodePositions = true;
     }
@@ -255,7 +297,7 @@ void AIBehaviorEditorWindow::DrawToolbar(AIControllerComponent* aiController_)
 
 void AIBehaviorEditorWindow::DrawTargetList()
 {
-    ImGui::TextUnformatted("AI Controllers");
+    ImGui::TextUnformatted("AI Behavior Graph Targets");
     ImGui::Separator();
 
     if (!gameObjectManager) return;
@@ -264,10 +306,13 @@ void AIBehaviorEditorWindow::DrawTargetList()
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
         if (!object_) continue;
-        if (!object_->GetComponent<AIControllerComponent>()) continue;
+        const bool hasAIController_ = object_->GetComponent<AIControllerComponent>() != nullptr;
+        const bool hasDragonAI_ = object_->GetComponent<DragonAIComponent>() != nullptr;
+        if (!hasAIController_ && !hasDragonAI_) continue;
 
         const bool selected_ = currentTarget_ == object_;
-        if (ImGui::Selectable(object_->GetName().c_str(), selected_))
+        const std::string label_ = object_->GetName() + (hasDragonAI_ ? " [Dragon]" : " [AI]");
+        if (ImGui::Selectable(label_.c_str(), selected_))
         {
             targetObject = object_;
             selectedNodeId = 0;
@@ -286,18 +331,19 @@ void AIBehaviorEditorWindow::DrawAssetBrowserPanel()
     assetBrowser.DrawContent();
 }
 
-void AIBehaviorEditorWindow::DrawGraph(AIControllerComponent* aiController_)
+void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 {
-    if (!aiController_)
+    AIBehaviorGraph* graphPointer_ = GetGraph(target_);
+    if (!graphPointer_)
     {
-        ImGui::TextDisabled("Select GameObject with AIControllerComponent.");
+        ImGui::TextDisabled("Select GameObject with AIControllerComponent or DragonAIComponent.");
         return;
     }
 
-    AIBehaviorGraph& graph_ = aiController_->GetGraph();
+    AIBehaviorGraph& graph_ = *graphPointer_;
     graph_.EnsureDefaultGraph();
 
-    DrawGraphAssetBar(aiController_);
+    DrawGraphAssetBar(target_);
     ImGui::TextDisabled("Right-click the graph background to create nodes.");
 
     ed::SetCurrentEditor(nodeEditorContext);
@@ -423,7 +469,7 @@ void AIBehaviorEditorWindow::DrawGraph(AIControllerComponent* aiController_)
     ed::Resume();
 
     ed::Suspend();
-    DrawCreateNodePopup(aiController_);
+    DrawCreateNodePopup(target_);
     ed::Resume();
 
     ed::NodeId selectedNodes_[1];
@@ -444,11 +490,12 @@ void AIBehaviorEditorWindow::DrawGraph(AIControllerComponent* aiController_)
     ed::SetCurrentEditor(nullptr);
 }
 
-void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiController_)
+void AIBehaviorEditorWindow::DrawGraphAssetBar(const BehaviorGraphTarget& target_)
 {
-    if (!aiController_) return;
+    std::string* graphAssetPathPointer_ = GetGraphAssetPath(target_);
+    if (!graphAssetPathPointer_) return;
 
-    std::string& graphAssetPath_ = aiController_->GetGraphAssetPath();
+    std::string& graphAssetPath_ = *graphAssetPathPointer_;
     ImGui::SetNextItemWidth(340.0f);
     ImGui::InputText("Graph Asset", &graphAssetPath_);
     if (ImGui::BeginDragDropTarget())
@@ -458,7 +505,7 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiControll
             const char* path_ = static_cast<const char*>(payload_->Data);
             if (path_ && path_[0] != '\0')
             {
-                graphAssetStatus = aiController_->LoadGraphAsset(path_)
+                graphAssetStatus = LoadGraphAsset(target_, path_)
                     ? "Loaded Graph: " + std::string(path_)
                     : "Failed to load Graph: " + std::string(path_);
                 restoreNodePositions = true;
@@ -476,7 +523,7 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiControll
             "Data/AI/BehaviorGraph");
         if (!selectedPath_.empty())
         {
-            graphAssetStatus = aiController_->LoadGraphAsset(selectedPath_)
+            graphAssetStatus = LoadGraphAsset(target_, selectedPath_)
                 ? "Loaded Graph: " + selectedPath_
                 : "Failed to load Graph: " + selectedPath_;
             restoreNodePositions = true;
@@ -487,7 +534,7 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiControll
     ImGui::SameLine();
     if (ImGui::Button("Load"))
     {
-        graphAssetStatus = aiController_->LoadGraphAsset(graphAssetPath_)
+        graphAssetStatus = LoadGraphAsset(target_, graphAssetPath_)
             ? "Loaded Graph: " + graphAssetPath_
             : "Failed to load Graph: " + graphAssetPath_;
         restoreNodePositions = true;
@@ -497,7 +544,7 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiControll
     ImGui::SameLine();
     if (ImGui::Button("Save"))
     {
-        graphAssetStatus = aiController_->SaveGraphAsset(graphAssetPath_)
+        graphAssetStatus = SaveGraphAsset(target_, graphAssetPath_)
             ? "Saved Graph: " + graphAssetPath_
             : "Failed to save Graph: " + graphAssetPath_;
     }
@@ -510,8 +557,8 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiControll
             graphAssetPath_.empty() ? "Data/AI/BehaviorGraph/AIBehaviorGraph.json" : graphAssetPath_);
         if (!selectedPath_.empty())
         {
-            aiController_->SetGraphAssetPath(selectedPath_);
-            graphAssetStatus = aiController_->SaveGraphAsset(selectedPath_)
+            graphAssetPath_ = selectedPath_;
+            graphAssetStatus = SaveGraphAsset(target_, selectedPath_)
                 ? "Saved Graph: " + selectedPath_
                 : "Failed to save Graph: " + selectedPath_;
         }
@@ -523,15 +570,16 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(AIControllerComponent* aiControll
     }
 }
 
-void AIBehaviorEditorWindow::DrawInspector(AIControllerComponent* aiController_)
+void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
 {
-    if (!aiController_)
+    AIBehaviorGraph* graphPointer_ = GetGraph(target_);
+    if (!graphPointer_)
     {
-        ImGui::TextDisabled("No AIControllerComponent.");
+        ImGui::TextDisabled("No AI behavior graph target.");
         return;
     }
 
-    AIBehaviorNode* node_ = aiController_->GetGraph().FindNode(selectedNodeId);
+    AIBehaviorNode* node_ = graphPointer_->FindNode(selectedNodeId);
     if (!node_)
     {
         ImGui::TextDisabled("Select node.");
@@ -588,14 +636,29 @@ void AIBehaviorEditorWindow::DrawInspector(AIControllerComponent* aiController_)
     {
         ImGui::SeparatorText("Action");
         ImGui::InputText("Action Name", &node_->actionName);
-        if (ImGui::Button("AI.ChaseTarget")) node_->actionName = "AI.ChaseTarget";
-        ImGui::SameLine();
-        if (ImGui::Button("AI.ReturnToSpawn")) node_->actionName = "AI.ReturnToSpawn";
-        if (ImGui::Button("AI.StopMove")) node_->actionName = "AI.StopMove";
-        ImGui::SameLine();
-        if (ImGui::Button("AI.Attack")) node_->actionName = "AI.Attack";
-        ImGui::SameLine();
-        if (ImGui::Button("AI.NotifyActionEnd")) node_->actionName = "AI.NotifyActionEnd";
+        if (target_.dragonAI)
+        {
+            if (ImGui::Button("DragonAI_Bite")) node_->actionName = "DragonAI_Bite";
+            ImGui::SameLine();
+            if (ImGui::Button("DragonAI_FireBall")) node_->actionName = "DragonAI_FireBall";
+            if (ImGui::Button("DragonAI_SpreadBreath")) node_->actionName = "DragonAI_SpreadBreath";
+            ImGui::SameLine();
+            if (ImGui::Button("DragonAI_TailSweep")) node_->actionName = "DragonAI_TurnTailSweep";
+            if (ImGui::Button("DragonAI_TakeOff")) node_->actionName = "DragonAI_TakeOff";
+            ImGui::SameLine();
+            if (ImGui::Button("DragonAI_Walk")) node_->actionName = "DragonAI_WalkApproach";
+        }
+        else
+        {
+            if (ImGui::Button("AI.ChaseTarget")) node_->actionName = "AI.ChaseTarget";
+            ImGui::SameLine();
+            if (ImGui::Button("AI.ReturnToSpawn")) node_->actionName = "AI.ReturnToSpawn";
+            if (ImGui::Button("AI.StopMove")) node_->actionName = "AI.StopMove";
+            ImGui::SameLine();
+            if (ImGui::Button("AI.Attack")) node_->actionName = "AI.Attack";
+            ImGui::SameLine();
+            if (ImGui::Button("AI.NotifyActionEnd")) node_->actionName = "AI.NotifyActionEnd";
+        }
         ImGui::Checkbox("Wait For Action End", &node_->waitForActionEnd);
         ImGui::InputText("ActionEnd Category", &node_->actionEndCategory);
         ImGui::InputText("ActionEnd Key", &node_->actionEndKey);
@@ -715,13 +778,14 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 }
 
 void AIBehaviorEditorWindow::AddNode(
-    AIControllerComponent* aiController_,
+    const BehaviorGraphTarget& target_,
     AI_BEHAVIOR_NODE_TYPE type_,
     const char* name_)
 {
-    if (!aiController_) return;
+    AIBehaviorGraph* graphPointer_ = GetGraph(target_);
+    if (!graphPointer_) return;
 
-    AIBehaviorNode* node_ = aiController_->GetGraph().AddNode(type_, name_, nextNodePosition);
+    AIBehaviorNode* node_ = graphPointer_->AddNode(type_, name_, nextNodePosition);
     if (!node_) return;
 
     nodeToPlaceId = node_->id;
@@ -730,34 +794,34 @@ void AIBehaviorEditorWindow::AddNode(
     nextNodePosition.y += 40.0f;
 }
 
-void AIBehaviorEditorWindow::DrawCreateNodePopup(AIControllerComponent* aiController_)
+void AIBehaviorEditorWindow::DrawCreateNodePopup(const BehaviorGraphTarget& target_)
 {
     if (!ImGui::BeginPopup("Create AI Node")) return;
 
     ImGui::TextUnformatted("Create AI Node");
     ImGui::Separator();
 
-    if (ImGui::MenuItem("Selector")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::SELECTOR, "Selector");
-    if (ImGui::MenuItem("Sequence")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::SEQUENCE, "Sequence");
-    if (ImGui::MenuItem("Random Selector")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::RANDOM_SELECTOR, "Random");
+    if (ImGui::MenuItem("Selector")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::SELECTOR, "Selector");
+    if (ImGui::MenuItem("Sequence")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::SEQUENCE, "Sequence");
+    if (ImGui::MenuItem("Random Selector")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::RANDOM_SELECTOR, "Random");
     ImGui::Separator();
-    if (ImGui::MenuItem("Blackboard Condition")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION, "Condition");
-    if (ImGui::MenuItem("Set Blackboard")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::SET_BLACKBOARD, "Set Blackboard");
-    if (ImGui::MenuItem("Wait Blackboard Bool")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL, "Wait Bool");
+    if (ImGui::MenuItem("Blackboard Condition")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION, "Condition");
+    if (ImGui::MenuItem("Set Blackboard")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::SET_BLACKBOARD, "Set Blackboard");
+    if (ImGui::MenuItem("Wait Blackboard Bool")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL, "Wait Bool");
     ImGui::Separator();
-    if (ImGui::MenuItem("Play Action")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION, "Action");
-    if (ImGui::MenuItem("Wait")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::WAIT, "Wait");
-    if (ImGui::MenuItem("SubGraph")) RequestAddNode(aiController_, AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH, "SubGraph");
+    if (ImGui::MenuItem("Play Action")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION, "Action");
+    if (ImGui::MenuItem("Wait")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::WAIT, "Wait");
+    if (ImGui::MenuItem("SubGraph")) RequestAddNode(target_, AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH, "SubGraph");
 
     ImGui::EndPopup();
 }
 
 void AIBehaviorEditorWindow::RequestAddNode(
-    AIControllerComponent* aiController_,
+    const BehaviorGraphTarget& target_,
     AI_BEHAVIOR_NODE_TYPE type_,
     const char* name_)
 {
-    AddNode(aiController_, type_, name_);
+    AddNode(target_, type_, name_);
     ImGui::CloseCurrentPopup();
 }
 
@@ -813,6 +877,51 @@ bool AIBehaviorEditorWindow::GetPinInfo(
             return true;
         }
     }
+    return false;
+}
+
+AIBehaviorGraph* AIBehaviorEditorWindow::GetGraph(const BehaviorGraphTarget& target_) const
+{
+    if (target_.aiController) return &target_.aiController->GetGraph();
+    if (target_.dragonAI) return &target_.dragonAI->GetBehaviorGraph();
+    return nullptr;
+}
+
+std::string* AIBehaviorEditorWindow::GetGraphAssetPath(const BehaviorGraphTarget& target_) const
+{
+    if (target_.aiController) return &target_.aiController->GetGraphAssetPath();
+    if (target_.dragonAI) return &target_.dragonAI->GetBehaviorGraphAssetPath();
+    return nullptr;
+}
+
+void AIBehaviorEditorWindow::ResetGraphRuntime(const BehaviorGraphTarget& target_) const
+{
+    if (target_.aiController)
+    {
+        target_.aiController->ResetTree();
+        return;
+    }
+    if (target_.dragonAI)
+    {
+        target_.dragonAI->ResetBehaviorGraphRuntime();
+    }
+}
+
+bool AIBehaviorEditorWindow::SaveGraphAsset(
+    const BehaviorGraphTarget& target_,
+    const std::string& path_) const
+{
+    if (target_.aiController) return target_.aiController->SaveGraphAsset(path_);
+    if (target_.dragonAI) return target_.dragonAI->SaveBehaviorGraphAsset(path_);
+    return false;
+}
+
+bool AIBehaviorEditorWindow::LoadGraphAsset(
+    const BehaviorGraphTarget& target_,
+    const std::string& path_) const
+{
+    if (target_.aiController) return target_.aiController->LoadGraphAsset(path_);
+    if (target_.dragonAI) return target_.dragonAI->LoadBehaviorGraphAsset(path_);
     return false;
 }
 

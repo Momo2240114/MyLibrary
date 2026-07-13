@@ -159,6 +159,18 @@ void CharacterMovementComponent::AddImpulse(const DirectX::XMFLOAT3& impulse_)
     impulseVelocity.z += impulse_.z;
 }
 
+void CharacterMovementComponent::ResetVerticalVelocity()
+{
+    impulseVelocity.y = 0.0f;
+    rootMotionDelta.y = 0.0f;
+
+    const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
+    if (collider_)
+    {
+        collider_->velocity.y = 0.0f;
+    }
+}
+
 void CharacterMovementComponent::SetFacingDirection(
     const DirectX::XMFLOAT3& direction_,
     bool immediate_)

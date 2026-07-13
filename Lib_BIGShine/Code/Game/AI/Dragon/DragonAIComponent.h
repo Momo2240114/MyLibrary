@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
+#include "Engine/GamePlay/AI/AIBehaviorGraph.h"
 
 #include <DirectXMath.h>
 #include <random>
@@ -8,6 +9,10 @@
 #include <vector>
 
 class BlackboardComponent;
+class CharacterMovementComponent;
+class AnimationControllerComponent;
+class DragonNeckCommandIKComponent;
+class DragonTailCommandIKComponent;
 class GameObject;
 class HealthComponent;
 
@@ -53,6 +58,9 @@ enum class DRAGON_DAMAGE_PHASE
 struct DragonAIContext
 {
     float hpRate = 1.0f;
+    DirectX::XMFLOAT3 ownerPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 playerPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 toPlayer = { 0.0f, 0.0f, 0.0f };
     float playerDistance = 0.0f;
     float playerHorizontalDistance = 0.0f;
     float playerAngleDegrees = 0.0f;
@@ -94,6 +102,7 @@ struct DragonActionDefinition
     DRAGON_ACTION_TYPE action = DRAGON_ACTION_TYPE::IDLE;
     std::string actionName = "Idle";
     std::string actionSequenceName;
+    std::string animationStateName;
     std::string animationActionName;
     std::string ikActionName;
     std::string hitBoxActionName;
@@ -101,8 +110,12 @@ struct DragonActionDefinition
     float duration = 1.0f;
     float recoveryTime = 0.35f;
     float cooldownTime = 1.0f;
+    float selectionWeight = 1.0f;
+    bool enabled = true;
     bool waitForActionEnd = true;
     bool allowBuffer = true;
+    bool useActionTimeout = true;
+    float actionTimeout = 5.0f;
 };
 
 class DragonAIComponent : public Component
@@ -121,6 +134,14 @@ public:
     void NotifyActionEnd();
     bool ConsumeBufferedAction();
     void RegisterActions();
+    void ResetBehaviorGraphRuntime();
+    bool SaveBehaviorGraphAsset(const std::string& path_) const;
+    bool LoadBehaviorGraphAsset(const std::string& path_);
+    AIBehaviorGraph& GetBehaviorGraph() { return behaviorGraph; }
+    const AIBehaviorGraph& GetBehaviorGraph() const { return behaviorGraph; }
+    std::string& GetBehaviorGraphAssetPath() { return behaviorGraphAssetPath; }
+    const std::string& GetBehaviorGraphAssetPath() const { return behaviorGraphAssetPath; }
+    void SetBehaviorGraphAssetPath(const std::string& path_) { behaviorGraphAssetPath = path_; }
 
     DRAGON_ACTION_TYPE SelectNextAction(const DragonAIContext& context_);
     void AddActionCandidates(
@@ -133,21 +154,49 @@ private:
     void UpdateContext();
     void UpdateCooldowns(float deltaTime_);
     void UpdateDecision(float deltaTime_);
+    void UpdateBehaviorGraph(float deltaTime_);
+    void UpdateActionMotion(float deltaTime_);
+    void UpdateActionTimeout();
+    void TurnTowardPlayer(float deltaTime_);
+    void MoveForward(float speed_, float deltaTime_);
+    void StopMovement();
     void StartAction(DRAGON_ACTION_TYPE action_);
     void EnterRecovery();
     void FinishRecovery();
     void ExecuteActionDefinition(const DragonActionDefinition& definition_);
+    void PlayAnimationState(const std::string& stateName_);
+    void ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float duration_);
     void ExecuteOwnerAction(const std::string& actionName_);
     void SendRuntimeToBlackboard();
+    void EnsureDefaultBehaviorGraph();
+    AIBehaviorNode* AddDragonGraphCondition(
+        AIBehaviorNode* parentNode_,
+        const std::string& name_,
+        const std::string& key_,
+        AI_BLACKBOARD_COMPARE_TYPE compareType_,
+        AI_BLACKBOARD_VALUE_TYPE valueType_,
+        float floatValue_,
+        bool boolValue_,
+        int priority_,
+        const DirectX::XMFLOAT2& position_);
+    AIBehaviorNode* AddDragonGraphAction(
+        AIBehaviorNode* parentNode_,
+        const std::string& name_,
+        const std::string& actionName_,
+        int priority_,
+        const DirectX::XMFLOAT2& position_);
+    const char* GetBehaviorStatusName(AI_BEHAVIOR_STATUS status_) const;
     void RegisterRuntimeActions();
     DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_);
     const DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_) const;
     float GetCooldown(DRAGON_ACTION_TYPE action_) const;
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);
     bool IsActionAvailable(DRAGON_ACTION_TYPE action_) const;
+    float GetSelectionWeight(DRAGON_ACTION_TYPE action_) const;
+    bool HasBehaviorGraph() const;
 
     std::string playerObjectName = "Player";
-    std::string actionCategory = "DragonAI";
+    std::string actionCategory = "AI";
     std::string registeredActionCategory;
     std::string blackboardCategory = "DragonAI";
 
@@ -157,16 +206,27 @@ private:
 
     DragonAIContext context;
     DragonActionRuntime runtime;
+    AIBehaviorGraph behaviorGraph;
+    AIBehaviorContext behaviorContext;
     DRAGON_AI_STATE aiState = DRAGON_AI_STATE::IDLE;
     DRAGON_DAMAGE_PHASE damagePhase = DRAGON_DAMAGE_PHASE::NORMAL;
 
     BlackboardComponent* blackboard = nullptr;
     HealthComponent* health = nullptr;
     std::weak_ptr<GameObject> playerObject;
+    std::weak_ptr<AnimationControllerComponent> animationController;
+    std::weak_ptr<CharacterMovementComponent> movement;
+    std::weak_ptr<DragonNeckCommandIKComponent> neckIK;
+    std::weak_ptr<DragonTailCommandIKComponent> tailIK;
 
     bool autoDecisionEnabled = true;
+    bool behaviorGraphEnabled = true;
+    bool useDebugHpRate = false;
     float decisionInterval = 0.25f;
     float decisionTimer = 0.0f;
+    float behaviorGraphTickInterval = 0.20f;
+    float behaviorGraphTickTimer = 0.0f;
+    float debugHpRate = 1.0f;
     float frontAngleDegrees = 45.0f;
     float sideAngleDegrees = 135.0f;
     float underBodyDistance = 3.0f;
@@ -174,6 +234,22 @@ private:
     float mediumDistance = 10.0f;
     float farDistance = 12.0f;
     float turnSpeed = 6.0f;
+    float walkSpeed = 2.0f;
+    float runSpeed = 6.0f;
+    float animationBlendDuration = 0.2f;
+    std::string behaviorGraphAssetPath = "Data/AI/BehaviorGraph/DragonFirstForm.json";
+    std::string behaviorGraphStatus;
+    std::string statusText;
+    AI_BEHAVIOR_STATUS lastBehaviorStatus = AI_BEHAVIOR_STATUS::FAILURE;
+    DRAGON_ACTION_TYPE lastStartedAction = DRAGON_ACTION_TYPE::IDLE;
+    DRAGON_ACTION_TYPE lastRejectedAction = DRAGON_ACTION_TYPE::IDLE;
+    int behaviorGraphTickCount = 0;
+    int actionStartCount = 0;
+    bool hasPlayerTarget = false;
+    bool hasAnimationController = false;
+    bool hasMovementComponent = false;
+    bool hasNeckIK = false;
+    bool hasTailIK = false;
 
     DRAGON_ACTION_TYPE debugAction = DRAGON_ACTION_TYPE::BITE;
     std::mt19937 randomEngine;
