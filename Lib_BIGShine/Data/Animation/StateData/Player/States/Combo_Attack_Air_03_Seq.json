@@ -314,7 +314,7 @@
                 "callEndOnStateExit": true,
                 "endTime": 2.0166666507720947,
                 "eventTemplateType": "NONE",
-                "label": "Action",
+                "label": "ActionEnd",
                 "localPosition": [
                     0.0,
                     0.0,
@@ -337,7 +337,79 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 1.4666666984558105
+                "startTime": 1.25
+            },
+            {
+                "actionEnd": "Trail_Stop",
+                "actionStart": "Trail_Start",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.2666666805744171,
+                "eventTemplateType": "NONE",
+                "label": "Tril",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.06666667014360428
+            },
+            {
+                "actionEnd": "Trail_Stop",
+                "actionStart": "Trail_Start",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.6666666865348816,
+                "eventTemplateType": "NONE",
+                "label": "Trail_02",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.46666666865348816
             }
         ],
         "loop": false,
@@ -358,7 +430,7 @@
         "rootMotionScale": 0.009999999776482582,
         "rootMotionScaleCurveName": "",
         "sequencer": "",
-        "speed": 1.0,
+        "speed": 1.100000023841858,
         "speedCurveName": "",
         "type": 0
     }

@@ -109,12 +109,13 @@ void HitReactionComponent::HandleHit()
         if (const std::shared_ptr<CharacterMovementComponent> movement_ =
             owner_->GetComponent<CharacterMovementComponent>())
         {
+            movement_->ResetVerticalVelocity();
             movement_->AddImpulse({ 0.0f, airLiftImpulse_, 0.0f });
         }
         else if (const std::shared_ptr<ColliderComponent> collider_ =
             owner_->GetComponent<ColliderComponent>())
         {
-            collider_->velocity.y = (std::max)(collider_->velocity.y, airLiftImpulse_);
+            collider_->velocity.y = airLiftImpulse_;
         }
     }
 

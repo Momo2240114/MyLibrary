@@ -42,6 +42,7 @@ namespace
 void AnimationControllerComponent::SetTrigger(const std::string& name_)
 {
     GetEditableBlackboard()[name_] = true;
+    MarkBlackboardGuiCacheDirty();
 }
 
 void AnimationControllerComponent::ResetTrigger(const std::string& name_)
@@ -49,6 +50,7 @@ void AnimationControllerComponent::ResetTrigger(const std::string& name_)
     if (GetEditableBlackboard().count(name_))
     {
         GetEditableBlackboard()[name_] = false;
+        MarkBlackboardGuiCacheDirty();
     }
 }
 
@@ -60,6 +62,7 @@ const BlackboardCategory& AnimationControllerComponent::GetBlackboard() const
 void AnimationControllerComponent::SetParam(const std::string& name_, BlackBoardValue value_)
 {
     GetEditableBlackboard()[name_] = value_;
+    MarkBlackboardGuiCacheDirty();
 }
 
 BlackboardCategory& AnimationControllerComponent::GetEditableBlackboard()
@@ -388,6 +391,9 @@ void AnimationControllerComponent::AddState(const std::string& stateName_, int a
     node_.type = AnimGraphNodeType::State;
 
     graphNodes.push_back(node_);
+    MarkStateGuiCacheDirty();
+    MarkActionCategoryCacheDirty();
+    MarkSequenceAdapterDirty();
 }
 
 bool AnimationControllerComponent::AddOrUpdateCustomState(int customAnimIndex_)
@@ -417,6 +423,10 @@ bool AnimationControllerComponent::AddOrUpdateCustomState(int customAnimIndex_)
 
     RegisterStateAction(customAnimation_.name);
     EnsureGraphNodeForState(customAnimation_.name);
+    MarkStateGuiCacheDirty();
+    MarkActionCategoryCacheDirty();
+    MarkSequenceAdapterDirty();
+    MarkAnimationMaskCacheDirty();
     return true;
 }
 
@@ -454,6 +464,8 @@ bool AnimationControllerComponent::SelectStateForEditing(const std::string& stat
     if (stateIt_ == states.end() || !stateIt_->second) return false;
 
     editingState = stateIt_->second.get();
+    MarkSequenceAdapterDirty();
+    MarkAnimationMaskCacheDirty();
     return true;
 }
 
@@ -520,6 +532,10 @@ bool AnimationControllerComponent::RenameState(
         ActionRegistry::Instance().RemoveAction("Animation", oldActionName_);
     }
     RegisterStateAction(newName_);
+    MarkStateGuiCacheDirty();
+    MarkActionCategoryCacheDirty();
+    MarkSequenceAdapterDirty();
+    MarkAnimationMaskCacheDirty();
     return true;
 }
 
@@ -551,6 +567,10 @@ void AnimationControllerComponent::RemoveState(const std::string& stateName_)
     // 削除実行
     states.erase(iterator_);
     stateAssetPaths.erase(stateName_);
+    MarkStateGuiCacheDirty();
+    MarkActionCategoryCacheDirty();
+    MarkSequenceAdapterDirty();
+    MarkAnimationMaskCacheDirty();
 }
 
 

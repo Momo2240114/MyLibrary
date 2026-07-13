@@ -15,6 +15,7 @@
 #include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
+#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Physics/CharacterCollider.h"
 #include "Engine/Physics/ColliderComponent.h"
 #include "Engine/Physics/HurtBox.h"
@@ -242,12 +243,115 @@ void PlayerControllerComponent::Update(float dt_)
     UpdateDodgeRestrictions(dt_);
     SendGroundedToBlackboard();
     UpdateLocomotionAnimationPhase(dt_);
+    UpdateTimelineActionSafety(dt_);
     ApplyPendingMovement();
 }
 
 bool PlayerControllerComponent::IsGrounded() const
 {
     return collider && collider->isGrounded;
+}
+
+bool PlayerControllerComponent::IsJumpInputPressed() const
+{
+    return KeyConfig::Instance().ActionPressedIn(PlayerInputAction::JUMP);
+}
+
+bool PlayerControllerComponent::IsCurrentAnimationState(const std::string& stateName_)
+{
+    const auto owner_ = GetGameObject();
+    if (!owner_) return false;
+
+    const auto animationController_ = owner_->GetComponent<AnimationControllerComponent>();
+    if (!animationController_) return false;
+
+    const AnimState* currentState_ = animationController_->GetCurrentState();
+    return currentState_ && currentState_->name == stateName_;
+}
+
+bool PlayerControllerComponent::IsAnimationStateForAction(
+    PLAYER_ACTION action_,
+    const std::string& stateName_) const
+{
+    switch (action_)
+    {
+    case PLAYER_ACTION::AIR_WEAK_ATTACK:
+        return
+            stateName_ == "Combo_Attack_Air_01_Seq" ||
+            stateName_ == "Combo_Attack_Air_02_Seq" ||
+            stateName_ == "Combo_Attack_Air_03_Seq" ||
+            stateName_ == "Combo_Attack_Air_04_Seq";
+    case PLAYER_ACTION::AIR_STRONG_ATTACK:
+        return stateName_ == "Dash_Air_Attack_Seq";
+    case PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK:
+        return stateName_ == "Attack_Air_To_Floor_Start_01_Seq_0";
+    case PLAYER_ACTION::AIR_DODGE:
+        return stateName_ == "AirDodge_Blend";
+    default:
+        return true;
+    }
+}
+
+void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
+{
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (!IsPlayerActionTimelineDriven(currentAction_) || actionRuntime.actionEnded)
+    {
+        timelineActionSafetyTimer = 0.0f;
+        return;
+    }
+
+    timelineActionSafetyTimer += (std::max)(deltaTime_, 0.0f);
+
+    const auto owner_ = GetGameObject();
+    const auto animationController_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    if (!animationController_)
+    {
+        if (timelineActionFallbackDuration > 0.0f &&
+            timelineActionSafetyTimer >= timelineActionFallbackDuration)
+        {
+            NotifyActionEnd();
+        }
+        return;
+    }
+
+    const AnimState* currentState_ = animationController_->GetCurrentState();
+    if (!currentState_)
+    {
+        if (timelineActionFallbackDuration > 0.0f &&
+            timelineActionSafetyTimer >= timelineActionFallbackDuration)
+        {
+            NotifyActionEnd();
+        }
+        return;
+    }
+
+    if (!IsAnimationStateForAction(currentAction_, currentState_->name))
+    {
+        if (timelineActionFallbackDuration > 0.0f &&
+            timelineActionSafetyTimer >= timelineActionFallbackDuration)
+        {
+            NotifyActionEnd();
+        }
+        return;
+    }
+
+    if (currentState_->isLoop)
+    {
+        if (timelineActionFallbackDuration > 0.0f &&
+            timelineActionSafetyTimer >= timelineActionFallbackDuration)
+        {
+            NotifyActionEnd();
+        }
+        return;
+    }
+
+    const float sampleDuration_ = animationController_->GetCurrentSampleDuration();
+    if (sampleDuration_ > 0.0001f &&
+        animationController_->GetAnimatorTime() >= sampleDuration_)
+    {
+        NotifyActionEnd();
+    }
 }
 
 void PlayerControllerComponent::BeginAirborneActionContext()
@@ -685,6 +789,22 @@ void PlayerControllerComponent::NotifyActionEnd()
         return;
     }
 
+    if (IsPlayerActionTimelineDriven(currentAction_))
+    {
+        const auto owner_ = GetGameObject();
+        const auto animationController_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+        const AnimState* currentState_ = animationController_ ? animationController_->GetCurrentState() : nullptr;
+        const bool canUseFallback_ =
+            timelineActionFallbackDuration > 0.0f &&
+            timelineActionSafetyTimer >= timelineActionFallbackDuration;
+        if (currentState_ &&
+            !IsAnimationStateForAction(currentAction_, currentState_->name) &&
+            !canUseFallback_)
+        {
+            return;
+        }
+    }
+
     actionRuntime.actionEnded = true;
     actionRuntime.canCancel = true;
     if (blackboard)
@@ -729,6 +849,22 @@ void PlayerControllerComponent::NotifyActionEnd()
         ? PLAYER_ACTION::MOVE
         : PLAYER_ACTION::IDLE;
     stateMachine.ChangeState(locomotionAction_);
+}
+
+void PlayerControllerComponent::NotifyJumpLoop()
+{
+    if (GetCurrentAction() != PLAYER_ACTION::JUMP)
+    {
+        return;
+    }
+
+    PlayerJumpState* jumpState_ = stateMachine.GetCurrentStateAs<PlayerJumpState>();
+    if (!jumpState_)
+    {
+        return;
+    }
+
+    jumpState_->NotifyJumpLoopRequested();
 }
 
 void PlayerControllerComponent::HandleHitReaction()
@@ -812,6 +948,7 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     actionRuntime.actionEnded = false;
     actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
     actionRuntime.bufferedComboIndex = 0;
+    timelineActionSafetyTimer = 0.0f;
 
     SendActionToBlackboard(action_);
 }
@@ -1071,6 +1208,14 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
         {
             NotifyActionEnd();
         });
+    registry_.RegisterAction("Player", "JumpLoop", [this]()
+        {
+            NotifyJumpLoop();
+        });
+    registry_.RegisterAction("Player", "NotifyJumpLoop", [this]()
+        {
+            NotifyJumpLoop();
+        });
 
 }
 
@@ -1205,12 +1350,17 @@ void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTIO
             PlayerBlackboardKey::IS_JUMP,
             phase_ == PLAYER_LOCOMOTION_PHASE::JUMP ||
             phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_START ||
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_DOUBLE ||
             phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_LOOP ||
             phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_END);
         blackboard->SetBool(
             category_,
             PlayerBlackboardKey::IS_JUMP_START,
             phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_START);
+        blackboard->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_JUMP_DOUBLE,
+            phase_ == PLAYER_LOCOMOTION_PHASE::JUMP_DOUBLE);
         blackboard->SetBool(
             category_,
             PlayerBlackboardKey::IS_JUMP_LOOP,
@@ -1285,6 +1435,7 @@ void PlayerControllerComponent::SendJumpPhaseToBlackboard(
     PLAYER_LOCOMOTION_PHASE phase_)
 {
     if (phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_START &&
+        phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_DOUBLE &&
         phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_LOOP &&
         phase_ != PLAYER_LOCOMOTION_PHASE::JUMP_END)
     {
@@ -1418,6 +1569,7 @@ void PlayerControllerComponent::Gui()
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Double Jump Impulse", &doubleJumpImpulse, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Air Control Rate", &airControlRate, 0.01f, 0.0f, 2.0f, "%.2f");
     ImGui::DragFloat("Air Control Accel", &airControlAcceleration, 0.1f, 0.0f, 60.0f, "%.2f");
     ImGui::DragFloat("Air Deceleration", &airDeceleration, 0.1f, 0.0f, 60.0f, "%.2f");
@@ -1426,6 +1578,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Run End Duration", &runEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
 
     ImGui::SeparatorText("Attack Facing Assist");
@@ -1489,6 +1642,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_DODGE, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_START, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_DOUBLE, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_LOOP, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_JUMP_END, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_GROUNDED, false);
@@ -1513,6 +1667,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
     j_["JumpImpulse"] = jumpImpulse;
+    j_["DoubleJumpImpulse"] = doubleJumpImpulse;
     j_["AirControlRate"] = airControlRate;
     j_["AirControlAcceleration"] = airControlAcceleration;
     j_["AirDeceleration"] = airDeceleration;
@@ -1521,6 +1676,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["RunStartDuration"] = runStartDuration;
     j_["RunEndDuration"] = runEndDuration;
     j_["JumpEndDuration"] = jumpEndDuration;
+    j_["TimelineActionFallbackDuration"] = timelineActionFallbackDuration;
     j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
     j_["AttackAssist"] =
     {
@@ -1549,6 +1705,7 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
+    doubleJumpImpulse = (std::max)(j_.value("DoubleJumpImpulse", doubleJumpImpulse), 0.0f);
     airControlRate = std::clamp(j_.value("AirControlRate", airControlRate), 0.0f, 2.0f);
     airControlAcceleration = (std::max)(j_.value("AirControlAcceleration", airControlAcceleration), 0.0f);
     airDeceleration = (std::max)(j_.value("AirDeceleration", airDeceleration), 0.0f);
@@ -1557,6 +1714,9 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);
     runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.0f);
     jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
+    timelineActionFallbackDuration = (std::max)(
+        j_.value("TimelineActionFallbackDuration", timelineActionFallbackDuration),
+        0.0f);
     groundDodgeCooldownDuration = (std::max)(
         j_.value("GroundDodgeCooldownDuration", groundDodgeCooldownDuration),
         0.0f);

@@ -64,7 +64,8 @@ enum class PLAYER_LOCOMOTION_PHASE
     JUMP,
     JUMP_START,
     JUMP_LOOP,
-    JUMP_END
+    JUMP_END,
+    JUMP_DOUBLE
 };
 
 namespace PlayerBlackboardCategory
@@ -87,6 +88,7 @@ namespace PlayerBlackboardKey
     inline constexpr const char* IS_RUN_END = "IsRunEnd";
     inline constexpr const char* IS_JUMP = "IsJump";
     inline constexpr const char* IS_JUMP_START = "IsJumpStart";
+    inline constexpr const char* IS_JUMP_DOUBLE = "IsJumpDouble";
     inline constexpr const char* IS_JUMP_LOOP = "IsJumpLoop";
     inline constexpr const char* IS_JUMP_END = "IsJumpEnd";
     inline constexpr const char* IS_GROUNDED = "IsGrounded";

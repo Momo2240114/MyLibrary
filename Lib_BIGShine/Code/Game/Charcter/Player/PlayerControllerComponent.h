@@ -77,6 +77,8 @@ public:
     CharacterMovementComponent* GetMovement() const { return movement.get(); } // Playerの移動Componentを返す
     bool IsJustDodgeColliderActive() const;
     bool IsGrounded() const;
+    bool IsJumpInputPressed() const;
+    bool IsCurrentAnimationState(const std::string& stateName_);
     void BeginAirborneActionContext();
     void EndAirborneActionContext();
     bool ConsumeJumpLoopResumeRequest();
@@ -95,6 +97,7 @@ public:
     void SetCanCombo(bool enabled_); // コンボ受付状態を設定する
     void NotifyComboTransition(); // 保存済みコンボ入力へ遷移する
     void NotifyActionEnd(); // Timeline駆動Actionの終了を通知する
+    void NotifyJumpLoop(); // Jump系AnimationからJumpLoopへ戻す通知を受ける
     void HandleHitReaction(); // 被弾時の状態リセットとHit遷移を行う
     bool ConsumeBufferedAction(); // 保存中の先行入力Actionを消費する
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する
@@ -106,6 +109,7 @@ public:
 
     float moveSpeed = 6.0f; // 通常移動速度
     float jumpImpulse = 8.5f;
+    float doubleJumpImpulse = 8.0f;
     float airControlRate = 0.72f;
     float airControlAcceleration = 8.0f;
     float airDeceleration = 4.5f;
@@ -114,6 +118,7 @@ public:
     float runStartDuration = 0.18f;
     float runEndDuration = 0.18f;
     float jumpEndDuration = 0.18f;
+    float timelineActionFallbackDuration = 1.5f;
     float groundDodgeCooldownDuration = 0.5f;
 
 private:
@@ -129,11 +134,13 @@ private:
     bool IsGroundOnlyAction(PLAYER_ACTION action_) const;
     bool IsAirAction(PLAYER_ACTION action_) const;
     bool IsAirborneForAction() const;
+    bool IsAnimationStateForAction(PLAYER_ACTION action_, const std::string& stateName_) const;
     bool IsDodgeAction(PLAYER_ACTION action_) const;
     bool CanStartDodgeAction(PLAYER_ACTION action_) const;
     void UpdateDodgeRestrictions(float deltaTime_);
     void StartGroundDodgeCooldown();
     void UpdateAirborneActionContext();
+    void UpdateTimelineActionSafety(float deltaTime_);
     void EnsureDefaultCancelTransitions();
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent() const;
     void ToggleLockOn();
@@ -180,6 +187,7 @@ private:
     float strongAttackHoldTimer = 0.0f;
     float locomotionPhaseTimer = 0.0f;
     float runEndTimer = 0.0f;
+    float timelineActionSafetyTimer = 0.0f;
     float groundDodgeCooldownTimer = 0.0f;
     PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
 

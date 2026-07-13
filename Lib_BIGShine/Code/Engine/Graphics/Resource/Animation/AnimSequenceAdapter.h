@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ImSequencer.h"
 #include "AnimationState.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"

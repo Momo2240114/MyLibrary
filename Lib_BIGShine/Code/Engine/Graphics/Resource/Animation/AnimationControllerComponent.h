@@ -1,11 +1,13 @@
 #pragma once
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "ModelAnimator.h"
+#include "AnimSequenceAdapter.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
 
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <vector>
 
@@ -56,6 +58,7 @@ public:
     const BlackboardCategory& GetBlackboard() const;
     const AnimState* GetCurrentState() { return currentState; }
     float GetAnimatorTime() const { return animator.GetCurrentFadeTime(); }
+    float GetCurrentSampleDuration() const { return animator.GetCurrentSampleDuration(); }
     void SetAnimatorTime(float time_) { animator.SetCurrentTime(time_); }
     void SetAnimationPaused(bool paused_) { animationPaused = paused_; }
     bool IsAnimationPaused() const { return animationPaused; }
@@ -118,6 +121,47 @@ private:
 
     std::string assetFilePath; // 保存するパス
 
+    struct StateGuiEntry
+    {
+        std::string name;
+        AnimState* state = nullptr;
+    };
+
+    struct CachedActionCategory
+    {
+        std::string category;
+        std::string menuLabel;
+        std::vector<std::string> actionNames;
+    };
+
+    AnimSequenceAdapter sequenceAdapter;
+    AnimState* sequenceAdapterState = nullptr;
+    bool sequenceAdapterDirty = true;
+    int sequencerSelectedEntry = -1;
+    int sequencerFirstFrame = 0;
+    bool sequencerExpanded = true;
+
+    std::vector<CachedActionCategory> cachedActionCategories;
+    GameObject* cachedActionOwner = nullptr;
+    bool actionCategoryCacheDirty = true;
+
+    std::vector<StateGuiEntry> cachedStateGuiEntries;
+    bool stateGuiCacheDirty = true;
+
+    std::vector<std::string> cachedBlackboardKeys;
+    bool blackboardGuiCacheDirty = true;
+
+    std::vector<int> cachedNodeDepths;
+    std::vector<bool> cachedMaskInheritedFlags;
+    std::unordered_set<std::string> cachedMaskRootNodeSet;
+    AnimState* animationMaskCacheState = nullptr;
+    bool animationMaskCacheDirty = true;
+
+    std::vector<std::string> cachedParticleAssetKeys;
+    std::vector<std::string> cachedMeshEffectAssetKeys;
+    GameObject* cachedEffectAssetOwner = nullptr;
+    bool effectAssetCacheDirty = true;
+
     BlackboardComponent* blackboardComponent = nullptr;
     std::string animationBlackboardCategory = "Anim";
     // グラフデータ
@@ -142,6 +186,19 @@ private:
 
     BlackboardCategory& GetEditableBlackboard();
     const BlackboardCategory& GetCurrentBlackboard() const;
+    void RefreshSequenceAdapter();
+    void MarkSequenceAdapterDirty();
+    void RefreshActionCategoryCache();
+    void MarkActionCategoryCacheDirty();
+    void RefreshStateGuiCache();
+    void MarkStateGuiCacheDirty();
+    void RefreshBlackboardGuiCache();
+    void MarkBlackboardGuiCacheDirty();
+    void RefreshAnimationMaskCache();
+    void MarkAnimationMaskCacheDirty();
+    void RefreshEffectAssetCache();
+    void MarkEffectAssetCacheDirty();
+    void PreviewStateAtTime(AnimState* state_, float time_);
 
     bool pendingGraphAssetLoad = false;
     std::string pendingGraphAssetPath;

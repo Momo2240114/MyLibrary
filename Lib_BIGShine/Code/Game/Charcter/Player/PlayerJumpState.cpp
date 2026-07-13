@@ -1,9 +1,15 @@
 #include "PlayerJumpState.h"
 
+#include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "PlayerControllerComponent.h"
 
 #include <algorithm>
+
+namespace
+{
+    inline constexpr const char* DOUBLE_JUMP_STATE_NAME = "Double_Jump_Combat_0_Seq_0";
+}
 
 void PlayerJumpState::Enter()
 {
@@ -12,8 +18,21 @@ void PlayerJumpState::Enter()
 
     const bool resumeLoop_ = player_->ConsumeJumpLoopResumeRequest();
     const bool resumeLanding_ = resumeLoop_ && player_->IsGrounded();
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        std::string("[Jump] Enter resumeLoop=") + (resumeLoop_ ? "true" : "false") +
+        " resumeLanding=" + (resumeLanding_ ? "true" : "false"));
     phaseTimer = 0.0f;
     hasLeftGround = resumeLoop_;
+    hasEnteredDoubleJumpAnimation = false;
+    if (!resumeLoop_)
+    {
+        jumpCount = 1;
+    }
+    else if (jumpCount <= 0)
+    {
+        jumpCount = 1;
+    }
     if (resumeLanding_)
     {
         phase = PLAYER_JUMP_RUNTIME_PHASE::END;
@@ -58,6 +77,7 @@ void PlayerJumpState::Enter()
     {
         if (CharacterMovementComponent* movement_ = player_->GetMovement())
         {
+            BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] First jump impulse.");
             movement_->AddImpulse({ 0.0f, player_->jumpImpulse, 0.0f });
         }
     }
@@ -110,21 +130,44 @@ void PlayerJumpState::Execute(float elapsedTime_)
         movement_->SetHorizontalVelocity(nextVelocity_);
     }
 
-    player_->ProcessActionInput();
-
     const bool isGrounded_ = player_->IsGrounded();
     if (!isGrounded_)
     {
         hasLeftGround = true;
         if (phase == PLAYER_JUMP_RUNTIME_PHASE::START)
         {
+            BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] Left ground. Start -> Loop.");
             ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::LOOP);
         }
+        else if (phase == PLAYER_JUMP_RUNTIME_PHASE::DOUBLE_JUMP)
+        {
+            if (player_->IsCurrentAnimationState(DOUBLE_JUMP_STATE_NAME))
+            {
+                if (!hasEnteredDoubleJumpAnimation)
+                {
+                    BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[Jump] Double jump animation state entered.");
+                }
+                hasEnteredDoubleJumpAnimation = true;
+            }
+            else if (hasEnteredDoubleJumpAnimation)
+            {
+                BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] Double jump animation state exited. Returning to Loop.");
+                ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::LOOP);
+            }
+        }
+        TryStartDoubleJump(*player_, input_);
+        player_->ProcessActionInput();
         return;
     }
 
+    player_->ProcessActionInput();
+
     if (hasLeftGround)
     {
+        if (phase != PLAYER_JUMP_RUNTIME_PHASE::END)
+        {
+            BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] Grounded after airborne. Enter End.");
+        }
         ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::END);
         const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
         if (hasMoveInput_ ||
@@ -136,10 +179,48 @@ void PlayerJumpState::Execute(float elapsedTime_)
     }
 }
 
+void PlayerJumpState::TryStartDoubleJump(
+    PlayerControllerComponent& player_,
+    const DirectX::XMFLOAT3& input_)
+{
+    if (phase != PLAYER_JUMP_RUNTIME_PHASE::LOOP) return;
+    if (jumpCount >= 2)
+    {
+        if (player_.IsJumpInputPressed())
+        {
+            BS_LOG_WARNING(LOG_CATEGORY::GAME, "[Jump] Double jump rejected: jumpCount limit.");
+        }
+        return;
+    }
+    if (!player_.IsJumpInputPressed()) return;
+
+    ++jumpCount;
+    hasEnteredDoubleJumpAnimation = false;
+    BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[Jump] Double jump requested. Sending JumpDouble phase.");
+    ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::DOUBLE_JUMP);
+    player_.BeginAirborneActionContext();
+
+    if (CharacterMovementComponent* movement_ = player_.GetMovement())
+    {
+        movement_->ResetVerticalVelocity();
+        BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] Double jump vertical velocity reset before impulse.");
+        movement_->AddImpulse({ 0.0f, player_.doubleJumpImpulse, 0.0f });
+    }
+
+    if (input_.x != 0.0f || input_.z != 0.0f)
+    {
+        player_.SetFacingDirection(input_);
+        player_.SetHorizontalVelocity(input_, player_.moveSpeed * player_.airControlRate);
+    }
+}
+
 void PlayerJumpState::Exit()
 {
     if (PlayerControllerComponent* player_ = GetPlayerController())
     {
+        BS_LOG_INFO(
+            LOG_CATEGORY::GAME,
+            std::string("[Jump] Exit phase=") + GetJumpRuntimePhaseName(phase));
         if (player_->IsGrounded())
         {
             player_->EndAirborneActionContext();
@@ -149,20 +230,44 @@ void PlayerJumpState::Exit()
     }
 }
 
+void PlayerJumpState::NotifyJumpLoopRequested()
+{
+    if (phase != PLAYER_JUMP_RUNTIME_PHASE::DOUBLE_JUMP)
+    {
+        BS_LOG_WARNING(
+            LOG_CATEGORY::GAME,
+            std::string("[Jump] NotifyJumpLoop ignored. phase=") + GetJumpRuntimePhaseName(phase));
+        return;
+    }
+
+    BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] NotifyJumpLoop received from sequencer.");
+    hasEnteredDoubleJumpAnimation = true;
+    ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::LOOP);
+}
+
 void PlayerJumpState::ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_)
 {
     if (phase == phase_) return;
 
+    const PLAYER_JUMP_RUNTIME_PHASE previousPhase_ = phase;
     phase = phase_;
     phaseTimer = 0.0f;
 
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
+    BS_LOG_INFO(
+        LOG_CATEGORY::GAME,
+        std::string("[Jump] Phase ") + GetJumpRuntimePhaseName(previousPhase_) +
+        " -> " + GetJumpRuntimePhaseName(phase));
+
     switch (phase)
     {
     case PLAYER_JUMP_RUNTIME_PHASE::START:
         player_->SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE::JUMP_START);
+        break;
+    case PLAYER_JUMP_RUNTIME_PHASE::DOUBLE_JUMP:
+        player_->SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE::JUMP_DOUBLE);
         break;
     case PLAYER_JUMP_RUNTIME_PHASE::LOOP:
         player_->SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE::JUMP_LOOP);
@@ -172,5 +277,22 @@ void PlayerJumpState::ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_)
         break;
     default:
         break;
+    }
+}
+
+const char* PlayerJumpState::GetJumpRuntimePhaseName(PLAYER_JUMP_RUNTIME_PHASE phase_)
+{
+    switch (phase_)
+    {
+    case PLAYER_JUMP_RUNTIME_PHASE::START:
+        return "Start";
+    case PLAYER_JUMP_RUNTIME_PHASE::DOUBLE_JUMP:
+        return "DoubleJump";
+    case PLAYER_JUMP_RUNTIME_PHASE::LOOP:
+        return "Loop";
+    case PLAYER_JUMP_RUNTIME_PHASE::END:
+        return "End";
+    default:
+        return "Unknown";
     }
 }
