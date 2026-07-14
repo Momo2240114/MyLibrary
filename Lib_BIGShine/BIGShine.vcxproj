@@ -371,6 +371,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ActionRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\ComponentRegistry.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Serialize\RegisterAllComponents.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\GuardSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\JustDodgeSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\EffectManager.cpp" />
@@ -463,6 +464,7 @@
     <ClCompile Include="Code\Engine\Physics\CylinderCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\HitBox.cpp" />
     <ClCompile Include="Code\Engine\Physics\HurtBox.cpp" />
+    <ClCompile Include="Code\Engine\Physics\GuardCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\JustDodgeCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\MeshCollider.cpp" />
     <ClCompile Include="Code\Engine\Physics\PhysicsCollisionComponent.cpp" />
@@ -553,6 +555,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTitle.h" />
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTutorial.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\GuardSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\JustDodgeSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\EffectManager.h" />
@@ -686,6 +689,7 @@
     <ClInclude Include="Code\Engine\Physics\CylinderCollider.h" />
     <ClInclude Include="Code\Engine\Physics\HitBox.h" />
     <ClInclude Include="Code\Engine\Physics\HurtBox.h" />
+    <ClInclude Include="Code\Engine\Physics\GuardCollider.h" />
     <ClInclude Include="Code\Engine\Physics\JustDodgeCollider.h" />
     <ClInclude Include="Code\Engine\Physics\MeshCollider.h" />
     <ClInclude Include="Code\Engine\Physics\Collision.h" />

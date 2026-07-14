@@ -736,6 +736,9 @@
     <ClCompile Include="Code\Engine\Physics\JustDodgeCollider.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Physics\GuardCollider.cpp">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Physics\CollisionStepSystem.cpp">
       <Filter>Code\Engine\Physics</Filter>
     </ClCompile>
@@ -743,6 +746,9 @@
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\System\JustDodgeSystem.cpp">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\System\GuardSystem.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp">
@@ -1406,6 +1412,9 @@
     <ClInclude Include="Code\Engine\Physics\JustDodgeCollider.h">
       <Filter>Code\Engine\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Physics\GuardCollider.h">
+      <Filter>Code\Engine\Physics</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Physics\CollisionStepSystem.h">
       <Filter>Code\Engine\Physics</Filter>
     </ClInclude>
@@ -1413,6 +1422,9 @@
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\JustDodgeSystem.h">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\System\GuardSystem.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h">

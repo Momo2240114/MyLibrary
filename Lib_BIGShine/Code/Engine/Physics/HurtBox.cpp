@@ -144,14 +144,14 @@ void HurtBox::RegisterActions()
         }
     }
 
-    owner_->RegisterAction("Player", "HurtBoxInvincibleOn", [weakHurtBox_]()
+    owner_->RegisterAction("Combat", "HurtBoxInvincibleOn", [weakHurtBox_]()
     {
         if (const std::shared_ptr<HurtBox> hurtBox_ = weakHurtBox_.lock())
         {
             hurtBox_->SetInvincible(true);
         }
     });
-    owner_->RegisterAction("Player", "HurtBoxInvincibleOff", [weakHurtBox_]()
+    owner_->RegisterAction("Combat", "HurtBoxInvincibleOff", [weakHurtBox_]()
     {
         if (const std::shared_ptr<HurtBox> hurtBox_ = weakHurtBox_.lock())
         {

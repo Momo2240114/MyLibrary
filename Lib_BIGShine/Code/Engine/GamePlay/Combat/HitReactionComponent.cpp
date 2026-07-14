@@ -11,6 +11,53 @@
 #include <cmath>
 #include <imgui.h>
 
+namespace
+{
+    const char* GetHitReactionKindName(HIT_REACTION_KIND kind_)
+    {
+        switch (kind_)
+        {
+        case HIT_REACTION_KIND::GROUND_LIGHT: return "Ground Light";
+        case HIT_REACTION_KIND::GROUND_MEDIUM: return "Ground Medium";
+        case HIT_REACTION_KIND::GROUND_HEAVY: return "Ground Heavy";
+        case HIT_REACTION_KIND::AIR_MEDIUM: return "Air Medium";
+        case HIT_REACTION_KIND::AIR_HEAVY: return "Air Heavy";
+        default: return "Unknown";
+        }
+    }
+
+    void DrawActionNameList(const char* label_, std::vector<std::string>& actionNames_)
+    {
+        if (!ImGui::TreeNode(label_)) return;
+
+        for (size_t index_ = 0; index_ < actionNames_.size(); ++index_)
+        {
+            ImGui::PushID(static_cast<int>(index_));
+            char actionNameBuffer_[128]{};
+            strncpy_s(actionNameBuffer_, actionNames_[index_].c_str(), sizeof(actionNameBuffer_));
+            if (ImGui::InputText("Action", actionNameBuffer_, sizeof(actionNameBuffer_)))
+            {
+                actionNames_[index_] = actionNameBuffer_;
+            }
+            ImGui::SameLine();
+            if (ImGui::SmallButton("Remove"))
+            {
+                actionNames_.erase(actionNames_.begin() + index_);
+                ImGui::PopID();
+                break;
+            }
+            ImGui::PopID();
+        }
+
+        if (ImGui::SmallButton("Add Action"))
+        {
+            actionNames_.push_back({});
+        }
+
+        ImGui::TreePop();
+    }
+}
+
 void HitReactionComponent::Start()
 {
     RegisterActions();
@@ -65,9 +112,10 @@ void HitReactionComponent::HandleHit()
     blackboard_->SetBool("Hit", "Dead", currentHealth <= 0.0f);
     blackboard_->SetFloat("Hit", "Armor", armor);
 
-    const bool canReact_ = lastImpactPower > 0.0f && lastImpactPower >= armor;
+    const bool canReact_ = lastImpactPower > 0.0f && lastImpactPower > armor;
     blackboard_->SetBool("Hit", "ImpactReacted", canReact_);
     CallOwnerAction(damageActionName);
+    CallOwnerActions(commonReactionActionNames);
 
     if (useHitStop && hitStopDuration_ > 0.0f)
     {
@@ -75,8 +123,11 @@ void HitReactionComponent::HandleHit()
             owner_->GetManager().GetTimeManager();
         if (timeManager_)
         {
+            const uint32_t layerMask_ = hitStopLayerMask == 0u
+                ? static_cast<uint32_t>(TarGetLayerType::All)
+                : hitStopLayerMask;
             timeManager_->TriggerHitStop(
-                static_cast<uint32_t>(TarGetLayerType::All),
+                layerMask_,
                 hitStopDuration_,
                 hitStopScale_);
         }
@@ -129,7 +180,7 @@ void HitReactionComponent::HandleHit()
 
     if (canReact_)
     {
-        CallOwnerAction(reactionActionName);
+        CallOwnerActions(GetReactionActions(DecideReactionKind(*blackboard_, canReact_)));
     }
     CallOwnerAction(overlayStartActionName);
     overlayTimer = (std::max)(overlayDuration, 0.0f);
@@ -178,6 +229,109 @@ void HitReactionComponent::CallOwnerAction(const std::string& actionName_)
     if (owner_) owner_->ExecuteAction(actionName_);
 }
 
+void HitReactionComponent::CallOwnerActions(const std::vector<std::string>& actionNames_)
+{
+    for (const std::string& actionName_ : actionNames_)
+    {
+        CallOwnerAction(actionName_);
+    }
+}
+
+HIT_REACTION_KIND HitReactionComponent::DecideReactionKind(
+    const BlackboardComponent& blackboard_,
+    bool canReact_) const
+{
+    if (!canReact_)
+    {
+        return HIT_REACTION_KIND::GROUND_LIGHT;
+    }
+
+    bool isGrounded_ = true;
+    if (!blackboard_.GetBool("Player", "IsGrounded", isGrounded_))
+    {
+        blackboard_.GetBool("Anim", "IsGrounded", isGrounded_);
+    }
+
+    if (!isGrounded_)
+    {
+        return lastImpactPower >= airHeavyImpactThreshold
+            ? HIT_REACTION_KIND::AIR_HEAVY
+            : HIT_REACTION_KIND::AIR_MEDIUM;
+    }
+
+    if (lastImpactPower < mediumImpactThreshold)
+    {
+        return HIT_REACTION_KIND::GROUND_LIGHT;
+    }
+
+    return lastImpactPower >= heavyImpactThreshold
+        ? HIT_REACTION_KIND::GROUND_HEAVY
+        : HIT_REACTION_KIND::GROUND_MEDIUM;
+}
+
+std::vector<std::string>& HitReactionComponent::GetReactionActions(HIT_REACTION_KIND kind_)
+{
+    return reactionActionNamesByKind[static_cast<size_t>(kind_)];
+}
+
+const std::vector<std::string>& HitReactionComponent::GetReactionActions(HIT_REACTION_KIND kind_) const
+{
+    return reactionActionNamesByKind[static_cast<size_t>(kind_)];
+}
+
+void HitReactionComponent::SetDefaultReactionActionName(const std::string& actionName_)
+{
+    GetReactionActions(HIT_REACTION_KIND::GROUND_LIGHT).clear();
+
+    const HIT_REACTION_KIND reactionKinds_[] =
+    {
+        HIT_REACTION_KIND::GROUND_MEDIUM,
+        HIT_REACTION_KIND::GROUND_HEAVY,
+        HIT_REACTION_KIND::AIR_MEDIUM,
+        HIT_REACTION_KIND::AIR_HEAVY
+    };
+
+    for (const HIT_REACTION_KIND kind_ : reactionKinds_)
+    {
+        std::vector<std::string>& actionNames_ = GetReactionActions(kind_);
+        actionNames_.clear();
+        if (!actionName_.empty())
+        {
+            actionNames_.push_back(actionName_);
+        }
+    }
+}
+
+void HitReactionComponent::SetReactionImpactThresholds(
+    float mediumImpactThreshold_,
+    float heavyImpactThreshold_,
+    float airHeavyImpactThreshold_)
+{
+    mediumImpactThreshold = (std::max)(mediumImpactThreshold_, 0.0f);
+    heavyImpactThreshold = (std::max)(heavyImpactThreshold_, mediumImpactThreshold);
+    airHeavyImpactThreshold = (std::max)(airHeavyImpactThreshold_, 0.0f);
+}
+
+void HitReactionComponent::AddCommonReactionAction(const std::string& actionName_)
+{
+    if (actionName_.empty()) return;
+    if (std::find(commonReactionActionNames.begin(), commonReactionActionNames.end(), actionName_) ==
+        commonReactionActionNames.end())
+    {
+        commonReactionActionNames.push_back(actionName_);
+    }
+}
+
+void HitReactionComponent::AddReactionAction(HIT_REACTION_KIND kind_, const std::string& actionName_)
+{
+    if (actionName_.empty()) return;
+    std::vector<std::string>& actionNames_ = GetReactionActions(kind_);
+    if (std::find(actionNames_.begin(), actionNames_.end(), actionName_) == actionNames_.end())
+    {
+        actionNames_.push_back(actionName_);
+    }
+}
+
 void HitReactionComponent::Gui()
 {
     ImGui::Text("Health: %.1f / %.1f", currentHealth, maxHealth);
@@ -192,6 +346,9 @@ void HitReactionComponent::Gui()
 
     ImGui::SeparatorText("Hit Reaction");
     ImGui::DragFloat("Armor", &armor, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Ground Medium Impact", &mediumImpactThreshold, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Ground Heavy Impact", &heavyImpactThreshold, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Air Heavy Impact", &airHeavyImpactThreshold, 0.1f, 0.0f, 99999.0f);
     ImGui::Checkbox("Use Hit Stop", &useHitStop);
     ImGui::InputScalar("Hit Stop Layer Mask", ImGuiDataType_U32, &hitStopLayerMask);
     ImGui::Checkbox("Use Knock Back", &useKnockBack);
@@ -201,12 +358,19 @@ void HitReactionComponent::Gui()
     if (ImGui::InputText("Reaction Action", reactionActionBuffer_, sizeof(reactionActionBuffer_)))
     {
         reactionActionName = reactionActionBuffer_;
+        SetDefaultReactionActionName(reactionActionName);
     }
     char damageActionBuffer_[128];
     strncpy_s(damageActionBuffer_, damageActionName.c_str(), sizeof(damageActionBuffer_));
     if (ImGui::InputText("Damage Action", damageActionBuffer_, sizeof(damageActionBuffer_)))
     {
         damageActionName = damageActionBuffer_;
+    }
+    DrawActionNameList("Common Reaction Actions", commonReactionActionNames);
+    for (int kindIndex_ = 0; kindIndex_ < static_cast<int>(HIT_REACTION_KIND::COUNT); ++kindIndex_)
+    {
+        const HIT_REACTION_KIND kind_ = static_cast<HIT_REACTION_KIND>(kindIndex_);
+        DrawActionNameList(GetHitReactionKindName(kind_), GetReactionActions(kind_));
     }
     char overlayStartBuffer_[128];
     strncpy_s(overlayStartBuffer_, overlayStartActionName.c_str(), sizeof(overlayStartBuffer_));
@@ -229,11 +393,23 @@ void HitReactionComponent::Serialize(nlohmann::json& json_) const
     json_["MaxHealth"] = maxHealth;
     json_["CurrentHealth"] = currentHealth;
     json_["Armor"] = armor;
+    json_["MediumImpactThreshold"] = mediumImpactThreshold;
+    json_["HeavyImpactThreshold"] = heavyImpactThreshold;
+    json_["AirHeavyImpactThreshold"] = airHeavyImpactThreshold;
     json_["UseHitStop"] = useHitStop;
     json_["HitStopLayerMask"] = hitStopLayerMask;
     json_["UseKnockBack"] = useKnockBack;
     json_["DamageActionName"] = damageActionName;
     json_["ReactionActionName"] = reactionActionName;
+    json_["CommonReactionActionNames"] = commonReactionActionNames;
+    json_["ReactionActionNamesByKind"] =
+    {
+        { "GroundLight", GetReactionActions(HIT_REACTION_KIND::GROUND_LIGHT) },
+        { "GroundMedium", GetReactionActions(HIT_REACTION_KIND::GROUND_MEDIUM) },
+        { "GroundHeavy", GetReactionActions(HIT_REACTION_KIND::GROUND_HEAVY) },
+        { "AirMedium", GetReactionActions(HIT_REACTION_KIND::AIR_MEDIUM) },
+        { "AirHeavy", GetReactionActions(HIT_REACTION_KIND::AIR_HEAVY) }
+    };
     json_["OverlayStartActionName"] = overlayStartActionName;
     json_["OverlayStopActionName"] = overlayStopActionName;
     json_["OverlayDuration"] = overlayDuration;
@@ -248,10 +424,32 @@ void HitReactionComponent::Deserialize(const nlohmann::json& json_)
         maxHealth);
     useHitStop = json_.value("UseHitStop", true);
     armor = (std::max)(json_.value("Armor", 0.0f), 0.0f);
+    mediumImpactThreshold = (std::max)(json_.value("MediumImpactThreshold", mediumImpactThreshold), 0.0f);
+    heavyImpactThreshold = (std::max)(json_.value("HeavyImpactThreshold", heavyImpactThreshold), mediumImpactThreshold);
+    airHeavyImpactThreshold = (std::max)(json_.value("AirHeavyImpactThreshold", airHeavyImpactThreshold), 0.0f);
     hitStopLayerMask = json_.value("HitStopLayerMask", 3u);
     useKnockBack = json_.value("UseKnockBack", true);
     damageActionName = json_.value("DamageActionName", std::string{});
     reactionActionName = json_.value("ReactionActionName", std::string{});
+    commonReactionActionNames = json_.value("CommonReactionActionNames", std::vector<std::string>{});
+    if (json_.contains("ReactionActionNamesByKind") && json_["ReactionActionNamesByKind"].is_object())
+    {
+        const auto& reactionJson_ = json_["ReactionActionNamesByKind"];
+        GetReactionActions(HIT_REACTION_KIND::GROUND_LIGHT) =
+            reactionJson_.value("GroundLight", std::vector<std::string>{});
+        GetReactionActions(HIT_REACTION_KIND::GROUND_MEDIUM) =
+            reactionJson_.value("GroundMedium", std::vector<std::string>{});
+        GetReactionActions(HIT_REACTION_KIND::GROUND_HEAVY) =
+            reactionJson_.value("GroundHeavy", std::vector<std::string>{});
+        GetReactionActions(HIT_REACTION_KIND::AIR_MEDIUM) =
+            reactionJson_.value("AirMedium", std::vector<std::string>{});
+        GetReactionActions(HIT_REACTION_KIND::AIR_HEAVY) =
+            reactionJson_.value("AirHeavy", std::vector<std::string>{});
+    }
+    else if (!reactionActionName.empty())
+    {
+        SetDefaultReactionActionName(reactionActionName);
+    }
     overlayStartActionName = json_.value(
         "OverlayStartActionName",
         std::string("MaterialOverlay_Start"));

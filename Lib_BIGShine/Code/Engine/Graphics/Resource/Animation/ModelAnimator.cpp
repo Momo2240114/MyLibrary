@@ -13,6 +13,12 @@ static bool CallLocalAnimationAction(const std::shared_ptr<GameObject>& owner_, 
 {
     if (!owner_ || actionName_.empty()) return false;
 
+    const std::string resolvedActionName_ = owner_->BuildActionName(actionName_);
+    if (owner_->localRegistry.HasAction(resolvedActionName_)) {
+        owner_->localRegistry.Call(resolvedActionName_);
+        return true;
+    }
+
     if (owner_->localRegistry.HasAction(actionName_)) {
         owner_->localRegistry.Call(actionName_);
         return true;

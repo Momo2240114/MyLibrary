@@ -60,7 +60,10 @@ void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
 void EventTrack::Execute(const std::string& name, std::shared_ptr<GameObject> owner)
 {
     // 1. まず自分の LocalRegistry を探す
-    if (owner && owner->localRegistry.HasAction(name)) {
+    if (owner && owner->localRegistry.HasAction(owner->BuildActionName(name))) {
+        owner->localRegistry.Call(owner->BuildActionName(name));
+    }
+    else if (owner && owner->localRegistry.HasAction(name)) {
         owner->localRegistry.Call(name);
     }
     // 2. なければ GlobalRegistry を探す

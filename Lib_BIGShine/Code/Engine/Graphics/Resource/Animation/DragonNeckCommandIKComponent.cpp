@@ -160,8 +160,8 @@ void DragonNeckCommandIKComponent::RegisterActions()
 
     auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& action_)
         {
-            owner_->GetLocalRegistry().RegisterAction(actionCategory, actionName_, action_);
-            registeredActionNames.push_back(actionName_);
+            owner_->RegisterAction(actionCategory, actionName_, action_);
+            registeredActionNames.push_back(owner_->BuildActionName(actionName_));
 
             if (registerGlobalActions)
             {

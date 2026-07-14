@@ -48,7 +48,7 @@ void GameObject::RegisterAction(
     const std::string& name_,
     const ActionRegistry::ActionFunc& func_)
 {
-    localRegistry.RegisterAction(category_, name_, func_);
+    localRegistry.RegisterAction(category_, BuildActionName(name_), func_);
 }
 
 std::string GameObject::BuildActionName(const std::string& actionName_) const
@@ -297,7 +297,15 @@ void GameObject::ExecuteAction(
 
     auto callLocal_ = [&actionName_](const std::shared_ptr<GameObject>& object_)
     {
-        if (!object_ || !object_->localRegistry.HasAction(actionName_)) return false;
+        if (!object_) return false;
+
+        const std::string resolvedActionName_ = object_->BuildActionName(actionName_);
+        if (object_->localRegistry.HasAction(resolvedActionName_))
+        {
+            object_->localRegistry.Call(resolvedActionName_);
+            return true;
+        }
+        if (!object_->localRegistry.HasAction(actionName_)) return false;
         object_->localRegistry.Call(actionName_);
         return true;
     };
@@ -538,7 +546,7 @@ void GameObject::Gui()
 
         if (!enabled) ImGui::PopStyleVar();
 
-        if (open) comp->Gui();
+        if (open) comp->DrawGuiProfiled();
 
         ImGui::PopID();
     }
@@ -571,7 +579,7 @@ void GameObject::Gui()
 
         if (!enabled) ImGui::PopStyleVar();
 
-        if (open) collider_->Gui();
+        if (open) collider_->DrawGuiProfiled();
 
         ImGui::PopID();
     }
@@ -656,6 +664,8 @@ nlohmann::json GameObject::Save() const
 
 void GameObject::Load(const nlohmann::json& j)
 {
+    BS_PROFILE_SCOPE("GameObject::Load");
+
     // 1. 基本情報の復元
     nameComponent->name = j.value("Name", "GameObject");
     layer = static_cast<LayerType>(j.value("Layer", 0));
@@ -691,7 +701,7 @@ void GameObject::Load(const nlohmann::json& j)
         if (comp) {
             // 2. 基本設定とデータの復元
             comp->SetEnabled(cJson.value("Enabled", true));
-            comp->Deserialize(cJson["Data"]);
+            comp->DeserializeProfiled(cJson["Data"]);
 
             // 3. 型を判別して適切な場所に格納 (AddComponentのロジックと合わせる)
             // Register経由だと型Tが不明なため、dynamic_pointer_cast で判定します

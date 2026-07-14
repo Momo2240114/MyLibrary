@@ -3,7 +3,9 @@
 #include "ColliderComponent.h"
 #include "HitBox.h"
 #include "HurtBox.h"
+#include "GuardCollider.h"
 #include "PhysXSystem.h"
+#include "Engine/GamePlay/System/GuardSystem.h"
 #include "Engine/GamePlay/System/JustDodgeSystem.h"
 #include "Engine/Physics/JustDodgeCollider.h"
 
@@ -133,11 +135,57 @@ namespace
         return contact_;
     }
 
+    GuardContact MakeGuardContact(
+        const Capsule& hitCapsule_,
+        const Capsule& guardCapsule_,
+        const CollisionManifold& manifold_)
+    {
+        using namespace DirectX;
+
+        XMVECTOR closestHit_{};
+        XMVECTOR closestGuard_{};
+        ClosestPointsOnSegments(
+            hitCapsule_.p0,
+            hitCapsule_.p1,
+            guardCapsule_.p0,
+            guardCapsule_.p1,
+            closestHit_,
+            closestGuard_);
+
+        XMVECTOR normal_ = manifold_.normal;
+        if (XMVectorGetX(XMVector3LengthSq(normal_)) <= 0.000001f)
+        {
+            normal_ = XMVectorSubtract(closestGuard_, closestHit_);
+        }
+        if (XMVectorGetX(XMVector3LengthSq(normal_)) <= 0.000001f)
+        {
+            normal_ = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        }
+        normal_ = XMVector3Normalize(normal_);
+
+        const XMVECTOR hitSurface_ = XMVectorAdd(
+            closestHit_,
+            XMVectorScale(normal_, hitCapsule_.radius));
+        const XMVECTOR guardSurface_ = XMVectorSubtract(
+            closestGuard_,
+            XMVectorScale(normal_, guardCapsule_.radius));
+        const XMVECTOR position_ = XMVectorScale(
+            XMVectorAdd(hitSurface_, guardSurface_),
+            0.5f);
+
+        GuardContact contact_{};
+        XMStoreFloat3(&contact_.position, position_);
+        XMStoreFloat3(&contact_.normal, normal_);
+        contact_.isValid = true;
+        return contact_;
+    }
+
     bool IsCombatOnlyRole(ColliderComponent::CollisionRole role_)
     {
         return role_ == ColliderComponent::CollisionRole::HIT_BOX ||
             role_ == ColliderComponent::CollisionRole::HURT_BOX ||
-            role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX;
+            role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX ||
+            role_ == ColliderComponent::CollisionRole::GUARD_BOX;
     }
 
     bool IsAllowedCombatTriggerPair(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
@@ -158,8 +206,13 @@ namespace
                 roleB_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX) ||
             (roleB_ == ColliderComponent::CollisionRole::HIT_BOX &&
                 roleA_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX);
+        const bool hitGuardPair_ =
+            (roleA_ == ColliderComponent::CollisionRole::HIT_BOX &&
+                roleB_ == ColliderComponent::CollisionRole::GUARD_BOX) ||
+            (roleB_ == ColliderComponent::CollisionRole::HIT_BOX &&
+                roleA_ == ColliderComponent::CollisionRole::GUARD_BOX);
 
-        return hitHurtPair_ || hitJustDodgePair_;
+        return hitHurtPair_ || hitJustDodgePair_ || hitGuardPair_;
     }
 }
 
@@ -382,11 +435,12 @@ void CollisionStepSystem::RemoveExpiredColliders()
 
 void CollisionStepSystem::StepCombatPairs()
 {
-    // HitBox, HurtBox and JustDodgeBox are manual gameplay volumes.
+    // HitBox, HurtBox, JustDodgeBox and GuardBox are manual gameplay volumes.
     // They intentionally do not participate in PhysX actor/query events.
     std::vector<std::shared_ptr<HitBox>> hitBoxes_;
     std::vector<std::shared_ptr<HurtBox>> hurtBoxes_;
     std::vector<std::shared_ptr<JustDodgeCollider>> justDodgeColliders_;
+    std::vector<std::shared_ptr<GuardCollider>> guardColliders_;
 
     for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
     {
@@ -411,11 +465,18 @@ void CollisionStepSystem::StepCombatPairs()
             justDodgeColliders_.push_back(justDodgeCollider_);
             continue;
         }
+        if (const std::shared_ptr<GuardCollider> guardCollider_ =
+            std::dynamic_pointer_cast<GuardCollider>(collider_))
+        {
+            guardColliders_.push_back(guardCollider_);
+            continue;
+        }
     }
 
     std::vector<Capsule> hitCapsules_(hitBoxes_.size());
     std::vector<Capsule> hurtCapsules_(hurtBoxes_.size());
     std::vector<Capsule> justDodgeCapsules_(justDodgeColliders_.size());
+    std::vector<Capsule> guardCapsules_(guardColliders_.size());
 
     for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
     {
@@ -438,6 +499,15 @@ void CollisionStepSystem::StepCombatPairs()
         {
             justDodgeCapsules_[dodgeIndex_] =
                 justDodgeColliders_[dodgeIndex_]->GetCapsuleData();
+        }
+    }
+
+    for (size_t guardIndex_ = 0; guardIndex_ < guardColliders_.size(); ++guardIndex_)
+    {
+        if (guardColliders_[guardIndex_]->IsEnabled())
+        {
+            guardCapsules_[guardIndex_] =
+                guardColliders_[guardIndex_]->GetCapsuleData();
         }
     }
 
@@ -482,6 +552,48 @@ void CollisionStepSystem::StepCombatPairs()
                     *hitBox_,
                     *justDodgeCollider_,
                     contact_);
+            }
+        }
+    }
+
+    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
+    {
+        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
+        for (size_t guardIndex_ = 0; guardIndex_ < guardColliders_.size(); ++guardIndex_)
+        {
+            const std::shared_ptr<GuardCollider>& guardCollider_ =
+                guardColliders_[guardIndex_];
+
+            bool isOverlapping_ = false;
+            GuardContact contact_{};
+            if (hitBox_->IsEnabled() && guardCollider_->IsEnabled())
+            {
+                const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
+                    hitCapsules_[hitIndex_],
+                    guardCapsules_[guardIndex_]);
+                isOverlapping_ = manifold_.isHit;
+                if (isOverlapping_)
+                {
+                    contact_ = MakeGuardContact(
+                        hitCapsules_[hitIndex_],
+                        guardCapsules_[guardIndex_],
+                        manifold_);
+                }
+            }
+
+            HandleTriggerPair(
+                hitBox_.get(),
+                guardCollider_.get(),
+                isOverlapping_,
+                nullptr);
+
+            if (isOverlapping_ && guardSystem)
+            {
+                const bool guarded_ = guardSystem->HandleGuard(
+                    *hitBox_,
+                    *guardCollider_,
+                    contact_);
+                if (guarded_) break;
             }
         }
     }

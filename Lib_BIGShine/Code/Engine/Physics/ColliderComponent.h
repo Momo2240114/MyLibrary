@@ -11,7 +11,7 @@ class ColliderComponent : public Component
 {
 public:
     enum class ColliderType { Box, Sphere, Capsule, Cylinder, Mesh };
-    enum class CollisionRole { PHYSICAL, CHARACTER, HIT_BOX, HURT_BOX, SENSOR, JUST_DODGE_BOX,};
+    enum class CollisionRole { PHYSICAL, CHARACTER, HIT_BOX, HURT_BOX, SENSOR, JUST_DODGE_BOX, GUARD_BOX, };
     enum class VelocityRotationMode { NONE, YAW_ONLY, FULL_3D };
     enum class CollisionContainmentMode { NONE, KEEP_INSIDE };
 public:

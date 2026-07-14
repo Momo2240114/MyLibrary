@@ -232,6 +232,7 @@ void GltfModelCommponennt::Animation::serialize(Archive& archive)
 
 void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename, float sampleRate)
 {
+	BS_PROFILE_SCOPE("GltfModelCommponennt::LoadModel");
 	Clear();
 
 	// 1. 名前の記憶
@@ -240,7 +241,11 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 	modelName = filePath.stem().string();
 
 	// 2. 神殿からすでにGPUバッファ等も構築済みのリソースを得る
-	auto resource = ModelResourceManager::Instance().GetOrCreateResource(device, filename);
+	std::shared_ptr<ModelResource> resource;
+	{
+		BS_PROFILE_SCOPE("GltfModel::GetOrCreateResource");
+		resource = ModelResourceManager::Instance().GetOrCreateResource(device, filename);
+	}
 	if (!resource) return;
 
 	// 3. データを引き写す（アニメーション再生などで個別に書き換えるためコピーする）
@@ -257,7 +262,10 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 
 	// 4. コピーしたことによってポインタが古い場所を指しているので、
 	// 「自分自身の vector」を指すように再結線する
-	RebindInternalPointers();
+	{
+		BS_PROFILE_SCOPE("GltfModel::RebindInternalPointers");
+		RebindInternalPointers();
+	}
 
     bindNodePoses.resize(nodes.size());
     for (size_t nodeIndex_ = 0; nodeIndex_ < nodes.size(); ++nodeIndex_)
@@ -268,7 +276,10 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
     }
 
 	// 5. 行列の確定
-	UpdateTransform();
+	{
+		BS_PROFILE_SCOPE("GltfModel::InitialUpdateTransform");
+		UpdateTransform();
+	}
 }
 
 void GltfModelCommponennt::RebindInternalPointers()
@@ -499,6 +510,7 @@ void GltfModelCommponennt::Gui()
 // アニメーション追加読み込み
 void GltfModelCommponennt::AppendAnimations(const char* filename)
 {
+	BS_PROFILE_SCOPE("GltfModelCommponennt::AppendAnimations");
 	std::filesystem::path filepath(filename);
 	std::filesystem::path dirpath(filepath.parent_path());
 
@@ -1171,6 +1183,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 
 void GltfModelCommponennt::Deserialize(const nlohmann::json& j) 
 {
+	BS_PROFILE_SCOPE("GltfModelCommponennt::DeserializeJson");
 	isStaticModel = j.value("StaticModel", false);
 	hasCachedOwnerWorldTransform = false;
 	MarkTransformDirty();
@@ -1495,6 +1508,7 @@ void GltfModelCommponennt::Serialize(const char* filename)
 // デシリアライズ
 void GltfModelCommponennt::Deserialize(const char* filename)
 {
+	BS_PROFILE_SCOPE("GltfModelCommponennt::DeserializeCerealFile");
 	std::ifstream istream(filename, std::ios::binary);
 	if (istream.is_open())
 	{

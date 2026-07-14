@@ -234,13 +234,15 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
     bool onJustDodgeCalled_ = false;
     while (actionReceiver_)
     {
-        if (actionReceiver_->localRegistry.HasAction("OnJustDodge"))
+        const std::string actionName_ = actionReceiver_->BuildActionName("OnJustDodge");
+        if (actionReceiver_->localRegistry.HasAction(actionName_) ||
+            actionReceiver_->localRegistry.HasAction("OnJustDodge"))
         {
             BS_LOG_SUCCESS(
                 LOG_CATEGORY::GAME,
                 "[JustDodge] Calling OnJustDodge on "
                 + actionReceiver_->GetName());
-            actionReceiver_->localRegistry.Call("OnJustDodge");
+            actionReceiver_->ExecuteAction("OnJustDodge");
             onJustDodgeCalled_ = true;
             break;
         }

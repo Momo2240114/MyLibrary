@@ -323,21 +323,21 @@ void AIActionComponent::RegisterActions()
         RegisterBridgeAction(definition_);
     }
 
-    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, "AIActionEnd", [this]()
+    owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, "AIActionEnd", [this]()
         {
             NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
         });
-    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, "NotifyAIActionEnd", [this]()
+    owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, "NotifyAIActionEnd", [this]()
         {
             NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
         });
-    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, "AI.NotifyActionEnd", [this]()
+    owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, "AI.NotifyActionEnd", [this]()
         {
             NotifyActionEnd(AIBlackboardKeys::CATEGORY_AI);
         });
-    registeredActionNames.push_back("AIActionEnd");
-    registeredActionNames.push_back("NotifyAIActionEnd");
-    registeredActionNames.push_back("AI.NotifyActionEnd");
+    registeredActionNames.push_back(owner_->BuildActionName("AIActionEnd"));
+    registeredActionNames.push_back(owner_->BuildActionName("NotifyAIActionEnd"));
+    registeredActionNames.push_back(owner_->BuildActionName("AI.NotifyActionEnd"));
 }
 
 void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definition_)
@@ -346,11 +346,11 @@ void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definitio
     if (!owner_ || definition_.aiActionName.empty()) return;
 
     const std::string actionName_ = definition_.aiActionName;
-    owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, [this, actionName_]()
+    owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, [this, actionName_]()
         {
             ExecuteAIAction(actionName_);
         });
-    registeredActionNames.push_back(actionName_);
+    registeredActionNames.push_back(owner_->BuildActionName(actionName_));
 }
 
 void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& definition_)

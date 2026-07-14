@@ -190,7 +190,11 @@ void PlayerControllerComponent::Start()
         owner_->GetOrAddComponent<HitReactionComponent>();
     if (hitReaction_)
     {
-        hitReaction_->SetArmor(armor);
+        hitReaction_->SetArmor(GetCurrentArmor());
+        hitReaction_->SetReactionImpactThresholds(
+            hitMediumImpactThreshold,
+            hitHeavyImpactThreshold,
+            airHitKnockdownImpactThreshold);
         hitReaction_->SetDamageActionName("Health_Hit");
         hitReaction_->SetReactionActionName("Player_Hit");
     }
@@ -326,6 +330,12 @@ void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
         {
             NotifyActionEnd();
         }
+        return;
+    }
+
+    if (currentAction_ == PLAYER_ACTION::HIT &&
+        currentState_->name == "SS_HitAir_Large_Loop")
+    {
         return;
     }
 
@@ -1052,6 +1062,36 @@ void PlayerControllerComponent::HandleHitReaction()
     stateMachine.ChangeState(PLAYER_ACTION::HIT);
 }
 
+void PlayerControllerComponent::SetRuntimeArmor(float armor_)
+{
+    runtimeArmor = (std::max)(armor_, 0.0f);
+    runtimeArmorOverrideActive = true;
+
+    if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+    {
+        if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
+            owner_->GetComponent<HitReactionComponent>())
+        {
+            hitReaction_->SetArmor(GetCurrentArmor());
+        }
+    }
+}
+
+void PlayerControllerComponent::ResetRuntimeArmor()
+{
+    runtimeArmor = armor;
+    runtimeArmorOverrideActive = false;
+
+    if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+    {
+        if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
+            owner_->GetComponent<HitReactionComponent>())
+        {
+            hitReaction_->SetArmor(GetCurrentArmor());
+        }
+    }
+}
+
 bool PlayerControllerComponent::ConsumeBufferedAction()
 {
     if (actionRuntime.bufferedAction == PLAYER_ACTION::NONE)
@@ -1334,92 +1374,107 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
-    auto& registry_ = owner_->GetLocalRegistry();
-    registry_.RegisterAction("Player", "Player_Hit", [this]()
+    owner_->RegisterAction("PlayerReaction", "Player_Hit", [this]()
     {
         HandleHitReaction();
     });
-    registry_.RegisterAction("Player", "OnJustDodge", [this]()
+    owner_->RegisterAction("PlayerArmor", "ArmorBase", [this]()
+    {
+        ResetRuntimeArmor();
+    });
+    owner_->RegisterAction("PlayerArmor", "ResetArmor", [this]()
+    {
+        ResetRuntimeArmor();
+    });
+    owner_->RegisterAction("PlayerArmor", "Armor10", [this]()
+    {
+        SetRuntimeArmor(10.0f);
+    });
+    owner_->RegisterAction("PlayerArmor", "Armor20", [this]()
+    {
+        SetRuntimeArmor(20.0f);
+    });
+    owner_->RegisterAction("PlayerReaction", "OnJustDodge", [this]()
     {
         NotifyJustDodge();
     });
-    registry_.RegisterAction("Player", "CanCancelOn", [this]()
+    owner_->RegisterAction("PlayerCancel", "CanCancelOn", [this]()
         {
             SetCanCancel(true);
         });
-    registry_.RegisterAction("Player", "CanCancelOff", [this]()
+    owner_->RegisterAction("PlayerCancel", "CanCancelOff", [this]()
         {
             SetCanCancel(false);
         });
-    registry_.RegisterAction("Player", "EnableDodgeCancel", [this]()
+    owner_->RegisterAction("PlayerCancel", "EnableDodgeCancel", [this]()
         {
             SetCanDodgeCancel(true);
         });
-    registry_.RegisterAction("Player", "CanDodgeOn", [this]()
+    owner_->RegisterAction("PlayerCancel", "CanDodgeOn", [this]()
         {
             SetCanDodgeCancel(true);
         });
-    registry_.RegisterAction("Player", "DisableDodgeCancel", [this]()
+    owner_->RegisterAction("PlayerCancel", "DisableDodgeCancel", [this]()
         {
             SetCanDodgeCancel(false);
         });
-    registry_.RegisterAction("Player", "CanDodgeOff", [this]()
+    owner_->RegisterAction("PlayerCancel", "CanDodgeOff", [this]()
         {
             SetCanDodgeCancel(false);
         });
-    registry_.RegisterAction("Player", "EnableActionBranch", [this]()
+    owner_->RegisterAction("PlayerCancel", "EnableActionBranch", [this]()
         {
             SetCanActionBranch(true);
         });
-    registry_.RegisterAction("Player", "DisableActionBranch", [this]()
+    owner_->RegisterAction("PlayerCancel", "DisableActionBranch", [this]()
         {
             SetCanActionBranch(false);
         });
-    registry_.RegisterAction("Player", "InputBufferOn", [this]()
+    owner_->RegisterAction("PlayerBuffer", "InputBufferOn", [this]()
         {
             SetCanBufferInput(true);
         });
-    registry_.RegisterAction("Player", "InputBufferOff", [this]()
+    owner_->RegisterAction("PlayerBuffer", "InputBufferOff", [this]()
         {
             SetCanBufferInput(false);
         });
-    registry_.RegisterAction("Player", "CanComboOn", [this]()
+    owner_->RegisterAction("PlayerCombo", "CanComboOn", [this]()
         {
             SetCanCombo(true);
         });
-    registry_.RegisterAction("Player", "EnableComboInput", [this]()
+    owner_->RegisterAction("PlayerCombo", "EnableComboInput", [this]()
         {
             SetCanCombo(true);
         });
-    registry_.RegisterAction("Player", "CanComboOff", [this]()
+    owner_->RegisterAction("PlayerCombo", "CanComboOff", [this]()
         {
             SetCanCombo(false);
         });
-    registry_.RegisterAction("Player", "DisableComboInput", [this]()
+    owner_->RegisterAction("PlayerCombo", "DisableComboInput", [this]()
         {
             SetCanCombo(false);
         });
-    registry_.RegisterAction("Player", "ComboTransition", [this]()
+    owner_->RegisterAction("PlayerCombo", "ComboTransition", [this]()
         {
             NotifyComboTransition();
         });
-    registry_.RegisterAction("Player", "CommitBufferedCombo", [this]()
+    owner_->RegisterAction("PlayerCombo", "CommitBufferedCombo", [this]()
         {
             NotifyComboTransition();
         });
-    registry_.RegisterAction("Player", "ActionEnd", [this]()
+    owner_->RegisterAction("PlayerState", "ActionEnd", [this]()
         {
             NotifyActionEnd();
         });
-    registry_.RegisterAction("Player", "NotifyActionEnd", [this]()
+    owner_->RegisterAction("PlayerState", "NotifyActionEnd", [this]()
         {
             NotifyActionEnd();
         });
-    registry_.RegisterAction("Player", "JumpLoop", [this]()
+    owner_->RegisterAction("PlayerJump", "JumpLoop", [this]()
         {
             NotifyJumpLoop();
         });
-    registry_.RegisterAction("Player", "NotifyJumpLoop", [this]()
+    owner_->RegisterAction("PlayerJump", "NotifyJumpLoop", [this]()
         {
             NotifyJumpLoop();
         });
@@ -1824,20 +1879,51 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
-    if (ImGui::DragFloat("Armor", &armor, 0.1f, 0.0f, 99999.0f))
+    if (ImGui::DragFloat("Base Armor", &armor, 0.1f, 0.0f, 99999.0f))
+    {
+        if (!runtimeArmorOverrideActive)
+        {
+            runtimeArmor = armor;
+        }
+        if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+        {
+            if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
+                owner_->GetComponent<HitReactionComponent>())
+            {
+                hitReaction_->SetArmor(GetCurrentArmor());
+                hitReaction_->SetReactionImpactThresholds(
+                    hitMediumImpactThreshold,
+                    hitHeavyImpactThreshold,
+                    airHitKnockdownImpactThreshold);
+            }
+        }
+    }
+    ImGui::Text("Current Armor: %.1f%s", GetCurrentArmor(), runtimeArmorOverrideActive ? " (Runtime)" : " (Base)");
+    if (ImGui::Button("Armor 10"))
+    {
+        SetRuntimeArmor(10.0f);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset Armor"))
+    {
+        ResetRuntimeArmor();
+    }
+    if (ImGui::DragFloat("Hit Medium Impact", &hitMediumImpactThreshold, 0.1f, 0.0f, 99999.0f) ||
+        ImGui::DragFloat("Hit Heavy Impact", &hitHeavyImpactThreshold, 0.1f, 0.0f, 99999.0f) ||
+        ImGui::DragFloat("Air Hit Knockdown Impact", &airHitKnockdownImpactThreshold, 0.1f, 0.0f, 99999.0f))
     {
         if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
         {
             if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
                 owner_->GetComponent<HitReactionComponent>())
             {
-                hitReaction_->SetArmor(armor);
+                hitReaction_->SetReactionImpactThresholds(
+                    hitMediumImpactThreshold,
+                    hitHeavyImpactThreshold,
+                    airHitKnockdownImpactThreshold);
             }
         }
     }
-    ImGui::DragFloat("Hit Medium Impact", &hitMediumImpactThreshold, 0.1f, 0.0f, 99999.0f);
-    ImGui::DragFloat("Hit Heavy Impact", &hitHeavyImpactThreshold, 0.1f, 0.0f, 99999.0f);
-    ImGui::DragFloat("Air Hit Knockdown Impact", &airHitKnockdownImpactThreshold, 0.1f, 0.0f, 99999.0f);
 
     ImGui::SeparatorText("Attack Facing Assist");
     ImGui::Checkbox("Enabled##AttackFacingAssist", &attackAssistSettings.enabled);
@@ -1883,7 +1969,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetVector2(category_, PlayerBlackboardKey::DODGE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::HIT_DIRECTION, { 0.0f, 0.0f });
         blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_IMPACT_POWER, 0.0f);
-        blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_ARMOR, armor);
+        blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_ARMOR, GetCurrentArmor());
         blackboard->SetInt(category_, PlayerBlackboardKey::HIT_REACTION_LEVEL, 0);
         blackboard->SetInt(category_, PlayerBlackboardKey::LOCOMOTION_PHASE, static_cast<int>(PLAYER_LOCOMOTION_PHASE::IDLE));
 
@@ -2001,6 +2087,10 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         j_.value("GroundDodgeCooldownDuration", groundDodgeCooldownDuration),
         0.0f);
     armor = (std::max)(j_.value("Armor", armor), 0.0f);
+    if (!runtimeArmorOverrideActive)
+    {
+        runtimeArmor = armor;
+    }
     hitMediumImpactThreshold = (std::max)(
         j_.value("HitMediumImpactThreshold", hitMediumImpactThreshold),
         0.0f);
@@ -2085,7 +2175,11 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
             owner_->GetComponent<HitReactionComponent>())
         {
-            hitReaction_->SetArmor(armor);
+            hitReaction_->SetArmor(GetCurrentArmor());
+            hitReaction_->SetReactionImpactThresholds(
+                hitMediumImpactThreshold,
+                hitHeavyImpactThreshold,
+                airHitKnockdownImpactThreshold);
         }
     }
 

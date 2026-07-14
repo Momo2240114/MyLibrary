@@ -11,6 +11,7 @@
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/HurtBox.h"
 #include "Engine/Physics/JustDodgeCollider.h"
+#include "Engine/Physics/GuardCollider.h"
 #include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/UI/UIButton.h"
@@ -116,6 +117,7 @@ void RegisterAllComponents()
     registry.Register<HitBox>("HitBox");
     registry.Register<HurtBox>("HurtBox");
     registry.Register<JustDodgeCollider>("JustDodgeCollider");
+    registry.Register<GuardCollider>("GuardCollider");
     registry.Register<ContainmentVolumeComponent>("ContainmentVolumeComponent");
 
     //ゲームシステム

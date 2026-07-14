@@ -1,6 +1,7 @@
 #include "EditorWindowManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 #include <string>
@@ -332,7 +333,11 @@ void EditorWindowManager::DrawAll()
             continue;
         }
 
-        window->Draw();
+        {
+            const std::string profileName_ = "EditorWindow::" + window->GetName();
+            BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+            window->Draw();
+        }
     }
 
     if (!hasActiveWorkspace)

@@ -31,13 +31,15 @@ void PlayerHitState::Enter()
 
     DirectX::SimpleMath::Vector2 hitDirection_{ 0.0f, 0.0f };
     float impactPower_ = 0.0f;
-    float armor_ = player_->armor;
+    float armor_ = player_->GetCurrentArmor();
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
     blackboard_->GetFloat("Hit", "ImpactPower", impactPower_);
     blackboard_->GetFloat("Hit", "Armor", armor_);
 
     impactPower_ = (std::max)(impactPower_, 0.0f);
     armor_ = (std::max)(armor_, 0.0f);
+
+    airHitReaction = !player_->IsGrounded();
 
     int hitReactionLevel_ = 0;
     if (impactPower_ >= player_->hitHeavyImpactThreshold)
@@ -48,12 +50,15 @@ void PlayerHitState::Enter()
     {
         hitReactionLevel_ = 1;
     }
+    else if (airHitReaction)
+    {
+        hitReactionLevel_ = 1;
+    }
 
     const bool isHitLight_ = hitReactionLevel_ == 0;
     const bool isHitMedium_ = hitReactionLevel_ == 1;
     const bool isHitHeavy_ = hitReactionLevel_ >= 2;
 
-    airHitReaction = !player_->IsGrounded();
     airHitKnockdown =
         airHitReaction &&
         impactPower_ >= player_->airHitKnockdownImpactThreshold;
@@ -132,6 +137,11 @@ void PlayerHitState::Execute(float elapsedTime_)
     if (!player_) return;
 
     if (airHitKnockdown && !player_->IsGrounded())
+    {
+        return;
+    }
+
+    if (airHitKnockdown)
     {
         return;
     }

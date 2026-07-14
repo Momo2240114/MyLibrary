@@ -28,13 +28,15 @@ namespace
     constexpr PxU32 ROLE_HURT_BOX = 3;
     constexpr PxU32 ROLE_SENSOR = 4;
     constexpr PxU32 ROLE_JUST_DODGE_BOX = 5;
+    constexpr PxU32 ROLE_GUARD_BOX = 6;
 
     bool IsCctMoveIgnoredRole(PxU32 role_)
     {
         return role_ == ROLE_HIT_BOX ||
             role_ == ROLE_HURT_BOX ||
             role_ == ROLE_SENSOR ||
-            role_ == ROLE_JUST_DODGE_BOX;
+            role_ == ROLE_JUST_DODGE_BOX ||
+            role_ == ROLE_GUARD_BOX;
     }
 
     class CharacterControllerQueryFilterCallback : public PxQueryFilterCallback
@@ -128,6 +130,7 @@ static PxFilterFlags PhysXFilterShader(
     const PxU32 roleHitBox_ = 2;
     const PxU32 roleHurtBox_ = 3;
     const PxU32 roleJustDodgeBox_ = 5;
+    const PxU32 roleGuardBox_ = 6;
     const PxU32 ownerMask_ = 0x7FFFFFFFu;
     const PxU32 responseMask_ = 0x80000000u;
 
@@ -139,8 +142,10 @@ static PxFilterFlags PhysXFilterShader(
     const bool combatOnlyRole_ =
         filterData0_.word2 == roleHitBox_ || filterData0_.word2 == roleHurtBox_
         || filterData0_.word2 == roleJustDodgeBox_
+        || filterData0_.word2 == roleGuardBox_
         || filterData1_.word2 == roleHitBox_ || filterData1_.word2 == roleHurtBox_
-        || filterData1_.word2 == roleJustDodgeBox_;
+        || filterData1_.word2 == roleJustDodgeBox_
+        || filterData1_.word2 == roleGuardBox_;
     if (combatOnlyRole_)
     {
         return PxFilterFlag::eSUPPRESS;

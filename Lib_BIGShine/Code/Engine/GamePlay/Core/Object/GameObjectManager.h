@@ -8,6 +8,7 @@
 #include "Engine/Physics/CollisionStepSystem.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
 #include "Engine/GamePlay/System/JustDodgeSystem.h"
+#include "Engine/GamePlay/System/GuardSystem.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Game/GameMode/GameModeManager.h"
 
@@ -187,6 +188,7 @@ public:
     CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
     AttackSystem& GetAttackSystem() { return *attackSystem; }
     JustDodgeSystem& GetJustDodgeSystem() { return *justDodgeSystem; }
+    GuardSystem& GetGuardSystem() { return *guardSystem; }
     EffectManager& GetEffectManager() { return *effectManager; }
 private:
     // unique name helper
@@ -234,6 +236,8 @@ private:
         std::make_unique<AttackSystem>();
     std::unique_ptr<JustDodgeSystem > justDodgeSystem =
         std::make_unique<JustDodgeSystem >();
+    std::unique_ptr<GuardSystem> guardSystem =
+        std::make_unique<GuardSystem>();
     std::unique_ptr<CollisionStepSystem> collisionStepSystem =
         std::make_unique<CollisionStepSystem>();
     std::unique_ptr<EffectManager> effectManager =
