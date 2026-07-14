@@ -2,6 +2,7 @@
 #include "GLTFImporter.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Common/Misc.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include <fstream>
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
@@ -11,6 +12,8 @@
 // 記憶の神殿からリソースを乞う、あるいは新たに紡ぐ関数
 std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11Device* device, const std::string& filename, float sampleRate)
 {
+    BS_PROFILE_SCOPE("ModelResourceManager::GetOrCreateResource");
+
     // 1. パスの深淵から、純粋なる「真名（Model名）」を抽出する
     std::filesystem::path filePath(filename);
     std::string pureModelName = filePath.stem().string();
@@ -39,22 +42,39 @@ std::shared_ptr<ModelResource> ModelResourceManager::GetOrCreateResource(ID3D11D
     // 4. 独自形式のモデルファイルの存在確認と読み込み
     if (std::filesystem::exists(cerealPath))
     {
+        BS_PROFILE_SCOPE("ModelResource::LoadCereal");
         isLoaded = LoadFromCereal(cerealPath.string(), newResource);
     }
 
     // 独自形式がない、または読み込みに失敗した場合はGLTFから紡ぎ出す
     if (!isLoaded && (extension == ".gltf" || extension == ".glb"))
     {
+        BS_PROFILE_SCOPE("ModelResource::ImportGltf");
         GLTFImporter importer(filename.c_str());
 
         // 汎用データ読み取り
-        importer.LoadMaterials(newResource->materials, device);
-        importer.LoadNodes(newResource->nodes);
-        importer.LoadMeshes(newResource->meshes, newResource->nodes);
-        importer.LoadAnimations(newResource->animations, newResource->nodes, sampleRate);
+        {
+            BS_PROFILE_SCOPE("ModelResource::LoadMaterials");
+            importer.LoadMaterials(newResource->materials, device);
+        }
+        {
+            BS_PROFILE_SCOPE("ModelResource::LoadNodes");
+            importer.LoadNodes(newResource->nodes);
+        }
+        {
+            BS_PROFILE_SCOPE("ModelResource::LoadMeshes");
+            importer.LoadMeshes(newResource->meshes, newResource->nodes);
+        }
+        {
+            BS_PROFILE_SCOPE("ModelResource::LoadAnimations");
+            importer.LoadAnimations(newResource->animations, newResource->nodes, sampleRate);
+        }
 
         // 独自形式のモデルファイルを保存して未来に備える
-        SaveToCereal(cerealPath.string(), newResource);
+        {
+            BS_PROFILE_SCOPE("ModelResource::SaveCereal");
+            SaveToCereal(cerealPath.string(), newResource);
+        }
         isLoaded = true;
     }
 
@@ -224,6 +244,8 @@ bool ModelResourceManager::SaveToCereal(const std::string& cerealPath, const std
 // デシリアライズ（cerealの解読）
 bool ModelResourceManager::LoadFromCereal(const std::string& cerealPath, std::shared_ptr<ModelResource>& resource)
 {
+    BS_PROFILE_SCOPE("ModelResourceManager::LoadFromCereal");
+
     std::ifstream istream(cerealPath, std::ios::binary);
     if (!istream.is_open()) return false;
 

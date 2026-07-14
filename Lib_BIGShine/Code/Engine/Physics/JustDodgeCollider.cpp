@@ -205,7 +205,7 @@ void JustDodgeCollider::RegisterActions()
         }
     }
 
-    owner_->RegisterAction("Player", GetActivateActionName(), [weakCollider_]()
+    owner_->RegisterAction("Combat", GetActivateActionName(), [weakCollider_]()
         {
             if (const std::shared_ptr<JustDodgeCollider> collider_ = weakCollider_.lock())
             {
@@ -213,7 +213,7 @@ void JustDodgeCollider::RegisterActions()
             }
         });
 
-    owner_->RegisterAction("Player", GetDeactivateActionName(), [weakCollider_]()
+    owner_->RegisterAction("Combat", GetDeactivateActionName(), [weakCollider_]()
         {
             if (const std::shared_ptr<JustDodgeCollider> collider_ = weakCollider_.lock())
             {

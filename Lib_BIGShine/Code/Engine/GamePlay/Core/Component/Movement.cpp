@@ -6,7 +6,7 @@ void Movement::Start()
 {
     auto obj = GetGameObject();
     // レジストリに移動停止を登録
-    obj->GetLocalRegistry().RegisterAction("Movement", "Stop", [this]() {
+    obj->RegisterAction("Movement", "Stop", [this]() {
         this->velocity = { 0, 0, 0 };
         });
 }

@@ -184,7 +184,8 @@ void ColliderComponent::CreatePhysXActor()
 
     if (collisionRole == CollisionRole::HIT_BOX ||
         collisionRole == CollisionRole::HURT_BOX ||
-        collisionRole == CollisionRole::JUST_DODGE_BOX)
+        collisionRole == CollisionRole::JUST_DODGE_BOX ||
+        collisionRole == CollisionRole::GUARD_BOX)
     {
         return;
     }
@@ -570,7 +571,8 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 {
     if (collisionRole == CollisionRole::HIT_BOX ||
         collisionRole == CollisionRole::HURT_BOX ||
-        collisionRole == CollisionRole::JUST_DODGE_BOX)
+        collisionRole == CollisionRole::JUST_DODGE_BOX ||
+        collisionRole == CollisionRole::GUARD_BOX)
     {
         return;
     }
@@ -830,6 +832,7 @@ void ColliderComponent::ApplyRoleDefaults()
     case CollisionRole::HIT_BOX:
     case CollisionRole::HURT_BOX:
     case CollisionRole::JUST_DODGE_BOX:
+    case CollisionRole::GUARD_BOX:
         usePhysicsResponse = false;
         isTrigger = true;
         break;
@@ -853,7 +856,8 @@ void ColliderComponent::Gui()
         "HitBox",
         "HurtBox",
         "Sensor",
-        "JustDodgeBox"
+        "JustDodgeBox",
+        "GuardBox"
     };
     int roleIndex_ = static_cast<int>(collisionRole);
     if (HasFixedCollisionRole())

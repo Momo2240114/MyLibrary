@@ -109,6 +109,9 @@ public:
     void NotifyActionEnd(); // Timeline駆動Actionの終了を通知する
     void NotifyJumpLoop(); // Jump系AnimationからJumpLoopへ戻す通知を受ける
     void HandleHitReaction(); // 被弾時の状態リセットとHit遷移を行う
+    void SetRuntimeArmor(float armor_);
+    void ResetRuntimeArmor();
+    float GetCurrentArmor() const { return runtimeArmorOverrideActive ? runtimeArmor : armor; }
     bool ConsumeBufferedAction(); // 保存中の先行入力Actionを消費する
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する
     void ProcessActionInput(); // 入力からAction要求を発行する
@@ -131,10 +134,10 @@ public:
     float jumpEndDuration = 0.18f;
     float timelineActionFallbackDuration = 1.5f;
     float groundDodgeCooldownDuration = 0.5f;
-    float armor = 0.0f;
-    float hitMediumImpactThreshold = 20.0f;
-    float hitHeavyImpactThreshold = 50.0f;
-    float airHitKnockdownImpactThreshold = 50.0f;
+    float armor = 5.0f;
+    float hitMediumImpactThreshold = 5.0f;
+    float hitHeavyImpactThreshold = 100.0f;
+    float airHitKnockdownImpactThreshold = 100.0f;
 
 private:
     void EnsurePlayerInputBindings(); // Player用InputActionの登録を保証する
@@ -198,6 +201,7 @@ private:
     bool jumpLoopResumeRequested = false;
     bool airDodgeConsumed = false;
     bool runEndActive = false;
+    bool runtimeArmorOverrideActive = false;
     bool hasSentGrounded = false;
     bool lastSentGrounded = false;
     bool hasSentLocomotionPhase = false;
@@ -207,6 +211,7 @@ private:
     float runEndTimer = 0.0f;
     float timelineActionSafetyTimer = 0.0f;
     float groundDodgeCooldownTimer = 0.0f;
+    float runtimeArmor = 5.0f;
     PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE; // Debug UIで選択中のAction

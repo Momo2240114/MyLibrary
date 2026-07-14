@@ -195,6 +195,7 @@ void AttackEffectHitComponent::ClearHitHistory()
     {
         object_->GetManager().GetAttackSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
         object_->GetManager().GetJustDodgeSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
+        object_->GetManager().GetGuardSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
     }
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
         if (runtime_.hitBox) runtime_.hitBox->ClearHitTargets();

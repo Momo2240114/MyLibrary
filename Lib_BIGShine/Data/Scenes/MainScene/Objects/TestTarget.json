@@ -260,7 +260,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 469.46038818359375
+                            "value": 68.5321273803711
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -3080,6 +3080,18 @@
                     0.0,
                     1.0
                 ],
+                "LookTargetBlendInTime": 0.15000000596046448,
+                "LookTargetMaxPitchDegrees": 35.0,
+                "LookTargetMaxYawDegrees": 65.0,
+                "LookTargetObjectMode": false,
+                "LookTargetObjectName": "PlayerModel",
+                "LookTargetObjectOffset": [
+                    0.0,
+                    1.2000000476837158,
+                    0.0
+                ],
+                "LookTargetPitchOffsetDegrees": 0.0,
+                "LookTargetYawOffsetDegrees": 0.0,
                 "MouthNodeName": "Mouth",
                 "RegisterGlobalActions": false
             },
@@ -5034,7 +5046,7 @@
     "Transform": {
         "Pos": [
             -0.14507551491260529,
-            -2.00177001953125,
+            -2.0020434856414795,
             -14.084815979003906
         ],
         "Rot": [

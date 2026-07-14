@@ -428,13 +428,17 @@
                             "type": "int",
                             "value": 1
                         },
+                        "CanActionBranch": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "CanBufferInput": {
                             "type": "bool",
                             "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -444,15 +448,19 @@
                             "type": "bool",
                             "value": false
                         },
+                        "CanDodgeCancel": {
+                            "type": "bool",
+                            "value": true
+                        },
                         "ComboIndex": {
                             "type": "int",
-                            "value": 1
+                            "value": 0
                         },
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                0.0
                             ]
                         },
                         "HitArmor": {
@@ -524,7 +532,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -770,13 +778,17 @@
                             "type": "int",
                             "value": 1
                         },
+                        "CanActionBranch": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "CanBufferInput": {
                             "type": "bool",
                             "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -786,15 +798,19 @@
                             "type": "bool",
                             "value": false
                         },
+                        "CanDodgeCancel": {
+                            "type": "bool",
+                            "value": true
+                        },
                         "ComboIndex": {
                             "type": "int",
-                            "value": 1
+                            "value": 0
                         },
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                0.0
                             ]
                         },
                         "HitArmor": {
@@ -866,7 +882,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -956,7 +972,7 @@
         {
             "Data": {
                 "AnimationData": {
-                    "DefaultState": "SS_Attack2",
+                    "DefaultState": "SS_Attack1",
                     "States": [
                         {
                             "animIndexA": -1,
@@ -1413,7 +1429,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 0.9166666865348816,
+                                    "endTime": 1.0,
                                     "eventTemplateType": "VFX_TEMPLATE",
                                     "label": "MeshVFX",
                                     "localPosition": [
@@ -1438,7 +1454,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.6499999761581421
+                                    "startTime": 0.7333333492279053
                                 },
                                 {
                                     "actionEnd": "",
@@ -1449,7 +1465,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 0.7833333611488342,
+                                    "endTime": 0.8833333253860474,
                                     "eventTemplateType": "VFX_TEMPLATE",
                                     "label": "MeshVFX",
                                     "localPosition": [
@@ -1474,7 +1490,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.6499999761581421
+                                    "startTime": 0.75
                                 },
                                 {
                                     "actionEnd": "",
@@ -1839,7 +1855,7 @@
                                 },
                                 {
                                     "actionEnd": "",
-                                    "actionStart": "",
+                                    "actionStart": "EnableDodgeCancel",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -1872,6 +1888,42 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.7166666388511658
+                                },
+                                {
+                                    "actionEnd": "DisableDodgeCancel",
+                                    "actionStart": "EnableDodgeCancel",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.6833332777023315,
+                                    "eventTemplateType": "NONE",
+                                    "label": "DodgeCancel",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.0833333358168602
                                 }
                             ],
                             "loop": false,
@@ -2091,8 +2143,8 @@
                                     "startTime": 0.0833333358168602
                                 },
                                 {
-                                    "actionEnd": "CanCancelOff",
-                                    "actionStart": "CanCancelOn",
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableActionBranch",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -2101,7 +2153,7 @@
                                     "callEndOnStateExit": true,
                                     "endTime": 0.6166666746139526,
                                     "eventTemplateType": "NONE",
-                                    "label": "CanCancelOn",
+                                    "label": "ActionBranch",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -2197,6 +2249,42 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.6166666746139526
+                                },
+                                {
+                                    "actionEnd": "DisableDodgeCancel",
+                                    "actionStart": "EnableDodgeCancel",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.2666666805744171,
+                                    "eventTemplateType": "NONE",
+                                    "label": "DodgeCancel",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.06666667014360428
                                 }
                             ],
                             "loop": false,
@@ -3605,17 +3693,17 @@
                                     "startTime": 0.06666667014360428
                                 },
                                 {
-                                    "actionEnd": "",
-                                    "actionStart": "ActionEnd",
+                                    "actionEnd": "DisableDodgeCancel",
+                                    "actionStart": "EnableDodgeCancel",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
-                                    "callEndOnStateExit": false,
-                                    "endTime": 1.4500000476837158,
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.3166667222976685,
                                     "eventTemplateType": "NONE",
-                                    "label": "ActionEnd",
+                                    "label": "DodgeCancel",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -3638,79 +3726,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 1.2166666984558105
-                                },
-                                {
-                                    "actionEnd": "",
-                                    "actionStart": "ComboTransition",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": false,
-                                    "endTime": 1.2000000476837158,
-                                    "eventTemplateType": "NONE",
-                                    "label": "ComboTransition",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 0.7333333492279053
-                                },
-                                {
-                                    "actionEnd": "",
-                                    "actionStart": "CanCancelOn",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": false,
-                                    "endTime": 1.2000000476837158,
-                                    "eventTemplateType": "NONE",
-                                    "label": "CanCancelOn",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 0.4833333194255829
+                                    "startTime": 0.0833333358168602
                                 },
                                 {
                                     "actionEnd": "Weapon_Trail_Stop",
@@ -3819,6 +3835,114 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.3333333432674408
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "CanCancelOn",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.2000000476837158,
+                                    "eventTemplateType": "NONE",
+                                    "label": "CanCancelOn",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.4833333194255829
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "ComboTransition",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.2000000476837158,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ComboTransition",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.7333333492279053
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.4500000476837158,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ActionEnd",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 1.2166666984558105
                                 }
                             ],
                             "loop": false,
@@ -4647,92 +4771,20 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.10000000149011612
+                                    "startTime": 0.03333333507180214
                                 },
                                 {
-                                    "actionEnd": "",
-                                    "actionStart": "ActionEnd",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": false,
-                                    "endTime": 1.6333333253860474,
-                                    "eventTemplateType": "NONE",
-                                    "label": "ActionEnd",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 1.3333333730697632
-                                },
-                                {
-                                    "actionEnd": "CanComboOff",
-                                    "actionStart": "ComboTransition",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": false,
-                                    "endTime": 1.3166667222976685,
-                                    "eventTemplateType": "NONE",
-                                    "label": "ComboTransition",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 0.7166666388511658
-                                },
-                                {
-                                    "actionEnd": "",
-                                    "actionStart": "CanCancelOn",
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableDodgeCancel",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
-                                    "endTime": 1.6333333253860474,
+                                    "endTime": 1.3166667222976685,
                                     "eventTemplateType": "NONE",
-                                    "label": "CanCancelOn",
+                                    "label": "DodgeCancel",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -4755,7 +4807,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.800000011920929
+                                    "startTime": 0.13333334028720856
                                 },
                                 {
                                     "actionEnd": "Trail_Stop",
@@ -4864,6 +4916,114 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.3333333432674408
+                                },
+                                {
+                                    "actionEnd": "CanComboOff",
+                                    "actionStart": "ComboTransition",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.3166667222976685,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ComboTransition",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.7166666388511658
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "CanCancelOn",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.6333333253860474,
+                                    "eventTemplateType": "NONE",
+                                    "label": "CanCancelOn",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.800000011920929
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.6333333253860474,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ActionEnd",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 1.3333333730697632
                                 }
                             ],
                             "loop": false,
@@ -4983,7 +5143,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 1.5166666507720947,
+                                    "endTime": 1.5499999523162842,
                                     "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "localPosition": [
@@ -5008,7 +5168,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 1.1166666746139526
+                                    "startTime": 1.149999976158142
                                 },
                                 {
                                     "actionEnd": "",
@@ -5189,6 +5349,42 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.21666666865348816
+                                },
+                                {
+                                    "actionEnd": "DisableDodgeCancel",
+                                    "actionStart": "EnableDodgeCancel",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.149999976158142,
+                                    "eventTemplateType": "NONE",
+                                    "label": "DodgeCancel",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.10000000149011612
                                 }
                             ],
                             "loop": false,
@@ -10293,115 +10489,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 51,
-                            "blend2DBackwardAnimationIndex": 146,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": 148,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": 149,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "HitDirection",
-                            "blend2DRightAnimationIndex": 155,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [
-                                {
-                                    "actionEnd": "ActionEnd",
-                                    "actionStart": "ActionEnd",
-                                    "actionUpdate": "",
-                                    "attachNodeName": "",
-                                    "attachToOwner": false,
-                                    "attackTemplateId": "",
-                                    "blackboardWrites": [],
-                                    "callEndOnStateExit": true,
-                                    "endTime": 0.8333333134651184,
-                                    "eventTemplateType": "NONE",
-                                    "label": "Action",
-                                    "localPosition": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localRotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "localScale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "meshVFXAssetPath": "",
-                                    "meshVFXLifeTime": 1.0,
-                                    "meshVFXPlaybackSpeed": 1.0,
-                                    "mirrorMeshVFX": false,
-                                    "overridePlaybackSpeed": false,
-                                    "ownerTarget": "Self",
-                                    "playbackSpeed": 1.0,
-                                    "startTime": 0.7166666388511658
-                                }
-                            ],
-                            "loop": false,
-                            "name": "SS_HitReaction",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": true,
-                                "cutVisualPositionZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 3
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 341,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
@@ -13834,8 +13921,8 @@
                                     "startTime": 0.18333333730697632
                                 },
                                 {
-                                    "actionEnd": "CanCancelOff",
-                                    "actionStart": "CanCancelOn",
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableActionBranch",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -13844,7 +13931,7 @@
                                     "callEndOnStateExit": true,
                                     "endTime": 0.6166666746139526,
                                     "eventTemplateType": "NONE",
-                                    "label": "CanCancel",
+                                    "label": "ActionBranch",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -13940,6 +14027,42 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.7166666388511658
+                                },
+                                {
+                                    "actionEnd": "DisableDodgeCancel",
+                                    "actionStart": "EnableDodgeCancel",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.6166666746139526,
+                                    "eventTemplateType": "NONE",
+                                    "label": "DodgeCancel",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.11666666716337204
                                 }
                             ],
                             "loop": false,
@@ -14205,7 +14328,7 @@
                                     "callEndOnStateExit": true,
                                     "endTime": 2.066666603088379,
                                     "eventTemplateType": "NONE",
-                                    "label": "CanCancelOn",
+                                    "label": "ActionBranch",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -14228,7 +14351,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.699999988079071
+                                    "startTime": 0.6833333373069763
                                 },
                                 {
                                     "actionEnd": "",
@@ -14264,7 +14387,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 1.0166666507720947
+                                    "startTime": 0.7333333492279053
                                 },
                                 {
                                     "actionEnd": "",
@@ -14373,6 +14496,78 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.46666666865348816
+                                },
+                                {
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableActionBranch",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.399999976158142,
+                                    "eventTemplateType": "NONE",
+                                    "label": "DodgeCancel",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.06666667014360428
+                                },
+                                {
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableActionBranch",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.46666666865348816,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ActionBranch",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.2666666805744171
                                 }
                             ],
                             "loop": false,
@@ -14564,7 +14759,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
-                                    "endTime": 0.6499999761581421,
+                                    "endTime": 0.8166666626930237,
                                     "eventTemplateType": "NONE",
                                     "label": "InputBufferOn",
                                     "localPosition": [
@@ -14592,8 +14787,8 @@
                                     "startTime": 0.01666666753590107
                                 },
                                 {
-                                    "actionEnd": "CanCancelOff",
-                                    "actionStart": "CanCancelOn",
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableActionBranch",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -14602,7 +14797,7 @@
                                     "callEndOnStateExit": true,
                                     "endTime": 0.8333333134651184,
                                     "eventTemplateType": "NONE",
-                                    "label": "CanCancelOn",
+                                    "label": "ActionBranch",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -14625,7 +14820,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.75
+                                    "startTime": 0.5833333134651184
                                 },
                                 {
                                     "actionEnd": "",
@@ -14662,6 +14857,42 @@
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
                                     "startTime": 0.18333333730697632
+                                },
+                                {
+                                    "actionEnd": "DisableDodgeCancel",
+                                    "actionStart": "EnableDodgeCancel",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.8166666626930237,
+                                    "eventTemplateType": "NONE",
+                                    "label": "DodgeCancel",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.0833333358168602
                                 }
                             ],
                             "loop": false,
@@ -34594,6 +34825,586 @@
                             "speed": 1.0,
                             "speedCurveName": "",
                             "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 51,
+                            "blend2DBackwardAnimationIndex": 146,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": 148,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": 149,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "HitDirection",
+                            "blend2DRightAnimationIndex": 155,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "ActionEnd",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.8333333134651184,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Action",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.7166666388511658
+                                }
+                            ],
+                            "loop": false,
+                            "name": "SS_HitGround_Medium",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 3
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 152,
+                            "blend2DBackwardAnimationIndex": 150,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": 152,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": 153,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "HitDirection",
+                            "blend2DRightAnimationIndex": 154,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "ActionEnd",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.8333333134651184,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Action",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.7166666388511658
+                                }
+                            ],
+                            "loop": false,
+                            "name": "SS_HitGround_Large",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 3
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 140,
+                            "blend2DBackwardAnimationIndex": 139,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": 140,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": 141,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "HitDirection",
+                            "blend2DRightAnimationIndex": 145,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "ActionEnd",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.8333333134651184,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Action",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.7166666388511658
+                                }
+                            ],
+                            "loop": false,
+                            "name": "SS_HitAir_Medium",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 3
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 144,
+                            "blend2DBackwardAnimationIndex": 146,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": 148,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": 149,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "HitDirection",
+                            "blend2DRightAnimationIndex": 155,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": false,
+                            "name": "SS_HitAir_Large_Start",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 143,
+                            "blend2DBackwardAnimationIndex": 146,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": 148,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": 149,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "HitDirection",
+                            "blend2DRightAnimationIndex": 155,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "SS_HitAir_Large_Loop",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 142,
+                            "blend2DBackwardAnimationIndex": 146,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": 148,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": 149,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "HitDirection",
+                            "blend2DRightAnimationIndex": 155,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "ActionEnd",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.8333333134651184,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Action",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.7166666388511658
+                                }
+                            ],
+                            "loop": false,
+                            "name": "SS_HitAir_Large_End",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
                         }
                     ]
                 },
@@ -34618,11 +35429,16 @@
                     "SS_Attack4": "Data\\Animation\\StateData\\Player\\States\\SS_Attack4.json",
                     "SS_Dodge": "Data\\Animation\\StateData\\Player\\States\\SS_Dodge.json",
                     "SS_Guard": "Data\\Animation\\StateData\\Player\\States\\SS_Idle_2.json",
-                    "SS_HitReaction": "Data\\Animation\\StateData\\Player\\States\\SS_HitReaction.json",
                     "SS_Quickshift_F": "Data\\Animation\\StateData\\Player\\States\\SS_Quickshift_F.json",
                     "SS_Run": "Data\\Animation\\StateData\\Player\\States\\SS_Run.json",
                     "SS_Sp_Skill1": "Data\\Animation\\StateData\\Player\\States\\SS_Sp_Skill1.json",
-                    "SS_Sprint": "Data\\Animation\\StateData\\Player\\States\\SS_Sprint.json"
+                    "SS_Sprint": "Data\\Animation\\StateData\\Player\\States\\SS_Sprint.json",
+                    "SS_HitGround_Medium": "Data\\Animation\\StateData\\Player\\States\\SS_HitGround_Medium.json",
+                    "SS_HitGround_Large": "Data\\Animation\\StateData\\Player\\States\\SS_HitGround_Large.json",
+                    "SS_HitAir_Medium": "Data\\Animation\\StateData\\Player\\States\\SS_HitAir_Medium.json",
+                    "SS_HitAir_Large_Start": "Data\\Animation\\StateData\\Player\\States\\SS_HitAir_Large_Start.json",
+                    "SS_HitAir_Large_Loop": "Data\\Animation\\StateData\\Player\\States\\SS_HitAir_Large_Loop.json",
+                    "SS_HitAir_Large_End": "Data\\Animation\\StateData\\Player\\States\\SS_HitAir_Large_End.json"
                 },
                 "UseTransitionGraph": true
             },
@@ -35264,14 +36080,18 @@
                     {
                         "From": 8,
                         "To": 6
+                    },
+                    {
+                        "From": 9,
+                        "To": 6
                     }
                 ],
-                "DoubleJumpImpulse": 1.0,
+                "DoubleJumpImpulse": 9.0,
                 "GroundDodgeCooldownDuration": 0.5,
                 "HitHeavyImpactThreshold": 50.0,
                 "HitMediumImpactThreshold": 20.0,
                 "JumpEndDuration": 0.18000000715255737,
-                "JumpImpulse": 1.2999999523162842,
+                "JumpImpulse": 13.0,
                 "MoveSpeed": 22.0,
                 "RunEndDuration": 0.18000000715255737,
                 "RunStartDuration": 0.18000000715255737,
@@ -36311,13 +37131,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            24.24338150024414,
+            36.044315338134766,
             -1.5422391891479492,
-            -20.045032501220703
+            5.298871994018555
         ],
         "Rot": [
             0.0,
-            173.37196350097656,
+            110.87305450439453,
             1.1004080988641363e-05
         ],
         "Scale": [

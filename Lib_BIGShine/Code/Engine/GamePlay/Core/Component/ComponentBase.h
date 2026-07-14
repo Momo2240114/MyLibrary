@@ -12,6 +12,7 @@
 #include <map>
 
 #include "Engine/Math/Vector.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include <nlohmann/json.hpp>
 
 
@@ -33,11 +34,23 @@ public:
     virtual void LateUpdate(float elapsedTime_) {}
     virtual void Submit(ID3D11DeviceContext* context_) {}
     virtual void Gui() {}
+    void DrawGuiProfiled()
+    {
+        const std::string profileName_ = "Component GUI::" + GetName();
+        BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+        Gui();
+    }
 
     // セーブ用：引数の json オブジェクトに自分の変数を書き込む
     virtual void Serialize(nlohmann::json& json_) const {}
     // ロード用：引数の json オブジェクトから自分の変数を読み出す
     virtual void Deserialize(const nlohmann::json& json_) {}
+    void DeserializeProfiled(const nlohmann::json& json_)
+    {
+        const std::string profileName_ = "Component Deserialize::" + GetName();
+        BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+        Deserialize(json_);
+    }
 
     //=========================================
     // 所有者(GameObject)の設定

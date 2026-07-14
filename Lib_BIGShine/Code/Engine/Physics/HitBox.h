@@ -5,6 +5,13 @@
 #include <cstdint>
 #include <unordered_set>
 
+enum class ATTACK_SOURCE_TYPE
+{
+    MELEE,
+    PROJECTILE,
+    REMOTE
+};
+
 class HitBox : public CapsuleCollider
 {
 public:
@@ -21,6 +28,7 @@ public:
     int teamId = 0;
     float impactPower = 1.0f;
     float knockBackPower = 0.0f;
+    ATTACK_SOURCE_TYPE attackSourceType = ATTACK_SOURCE_TYPE::MELEE;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;
     bool hitOncePerActivation = true;
@@ -64,6 +72,7 @@ public:
     void SetDamage(float damage_);
     void SetImpactPower(float impactPower_);
     void SetKnockBackPower(float knockBackPower_);
+    bool ShouldNotifyAttackerOnGuard() const;
     void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
     void SetHitEffectPath(const std::string& path_);
     void SetHitEffectBlackboardOverrideEnabled(bool enabled_)

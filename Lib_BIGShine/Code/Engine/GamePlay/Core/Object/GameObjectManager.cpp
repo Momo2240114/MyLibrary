@@ -38,6 +38,7 @@ void GameObjectManager::Initialize()
 {
     collisionStepSystem->SetAttackSystem(attackSystem.get());
     collisionStepSystem->SetJustDodgeSystem(justDodgeSystem.get());
+    collisionStepSystem->SetGuardSystem(guardSystem.get());
 
     particleRenderSystem = std::make_unique<ParticleRenderSystem>();
     particleRenderSystem->Initialize(GraphicsDeviceManager::Instance().GetDevice());
@@ -82,6 +83,10 @@ void GameObjectManager::Update(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("JustDodgeSystem::BeginFrame");
         justDodgeSystem->BeginFrame();
+    }
+    {
+        BS_PROFILE_SCOPE("GuardSystem::BeginFrame");
+        guardSystem->BeginFrame();
     }
 
     {
@@ -336,6 +341,7 @@ void GameObjectManager::Clear()
 
     collisionStepSystem->Clear();
     attackSystem->Clear();
+    guardSystem->Clear();
     effectManager->Clear();
 
     objects.clear();
@@ -1061,6 +1067,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 
 void GameObjectManager::LoadScene(const std::string& sceneName_)
 {
+    BS_PROFILE_SCOPE("GameObjectManager::LoadScene");
 
     Clear(); // 現在のシーンをクリア
     std::string basePath = "Data/Scenes/" + sceneName_ + "/";
@@ -1072,7 +1079,10 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
         return;
     }
     nlohmann::json listJson;
-    listFile >> listJson;
+    {
+        BS_PROFILE_SCOPE("LoadScene::ReadSceneListJson");
+        listFile >> listJson;
+    }
 
     ActionRegistry::Instance().Clear();
     RegisterAllActions();
@@ -1107,13 +1117,17 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
 
     // SceneListに記載されている名前の順にロード
     for (const auto& name : listJson["ObjectList"]) {
+        BS_PROFILE_SCOPE("LoadScene::LoadObject");
         std::string objName = name.get<std::string>();
         std::string filePath = basePath + "Objects/" + objName + ".json";
 
         std::ifstream file(filePath);
         if (file.is_open()) {
             nlohmann::json objJson;
-            file >> objJson;
+            {
+                BS_PROFILE_SCOPE("LoadScene::ReadObjectJson");
+                file >> objJson;
+            }
 
             // オブジェクト生成
             auto obj = Create(objName);
@@ -1121,13 +1135,22 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
             obj->SetManager(this);
 
             // オブジェクト自身にコンポーネントを含めて復元させる
-            obj->Load(objJson);
+            {
+                BS_PROFILE_SCOPE("LoadScene::GameObjectLoad");
+                obj->Load(objJson);
+            }
         }
     }
 
     // ★ここで親子関係を復元する
-    ResolveHierarchy();
-    EnsureGlobalActionObjects();
+    {
+        BS_PROFILE_SCOPE("LoadScene::ResolveHierarchy");
+        ResolveHierarchy();
+    }
+    {
+        BS_PROFILE_SCOPE("LoadScene::EnsureGlobalActionObjects");
+        EnsureGlobalActionObjects();
+    }
 
     printf("Scene '%s' loaded from SceneList.json\n", sceneName_.c_str());
 }

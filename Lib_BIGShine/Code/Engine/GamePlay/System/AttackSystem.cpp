@@ -281,9 +281,6 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     }
     blackboard_->SetTrigger("Hit", "Received");
 
-    if (receiver_->localRegistry.HasAction("OnHit"))
-    {
-        receiver_->localRegistry.Call("OnHit");
-    }
+    receiver_->ExecuteAction("OnHit");
 }
 

@@ -9,6 +9,7 @@
 #include "Game/GameMode/GameModeManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -147,6 +148,8 @@ void AIControllerComponent::Serialize(nlohmann::json& json_) const
 
 void AIControllerComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("AIControllerComponent::Deserialize");
+
     isRunning = json_.value("IsRunning", true);
     graphAssetPath = json_.value("GraphAssetPath", std::string("Data/AI/BehaviorGraph/DefaultAI.json"));
     targetName = json_.value("TargetName", std::string("Player"));
@@ -172,10 +175,12 @@ void AIControllerComponent::Deserialize(const nlohmann::json& json_)
 
     if (json_.contains("Graph"))
     {
+        BS_PROFILE_SCOPE("AIController::DeserializeInlineGraph");
         graph.Deserialize(json_["Graph"]);
     }
     else if (!graphAssetPath.empty())
     {
+        BS_PROFILE_SCOPE("AIController::LoadGraphAssetOnDeserialize");
         graph.LoadFromFile(graphAssetPath);
     }
 }
@@ -202,6 +207,8 @@ bool AIControllerComponent::SaveGraphAsset(const std::string& path_) const
 
 bool AIControllerComponent::LoadGraphAsset(const std::string& path_)
 {
+    BS_PROFILE_SCOPE("AIControllerComponent::LoadGraphAsset");
+
     const bool result_ = graph.LoadFromFile(path_);
     if (result_)
     {
@@ -322,8 +329,8 @@ void AIControllerComponent::RegisterDefaultAIActions()
 
     auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& function_)
     {
-        owner_->GetLocalRegistry().RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, function_);
-        registeredDefaultActionNames.push_back(actionName_);
+        owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, function_);
+        registeredDefaultActionNames.push_back(owner_->BuildActionName(actionName_));
     };
 
     registerAction_("AI.ChaseTarget", [this]() { ActionChaseTarget(); });

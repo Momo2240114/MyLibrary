@@ -9,6 +9,7 @@
 #include "AnimationDataAsset.h"
 #include "PoseLibraryResourceManager.h"
 #include "IKMapComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -124,6 +125,8 @@ void AnimationControllerComponent::Serialize(nlohmann::json& json_) const
 
 void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("AnimationControllerComponent::Deserialize");
+
     assetFilePath = json_.value("AssetPath", "");
     graphAssetFilePath = json_.value("GraphAssetPath", "");
     useTransitionGraph = true;
@@ -133,13 +136,17 @@ void AnimationControllerComponent::Deserialize(const nlohmann::json& json_)
 
     if (!assetFilePath.empty())
     {
+        BS_PROFILE_SCOPE("Animation Deserialize::LoadAsset");
         LoadAsset(assetFilePath);
     }
 
     if (json_.contains("AnimationData") && json_["AnimationData"].is_object())
     {
         AnimationDataAsset asset_;
-        asset_.Deserialize(json_["AnimationData"]);
+        {
+            BS_PROFILE_SCOPE("Animation Deserialize::AnimationDataAsset");
+            asset_.Deserialize(json_["AnimationData"]);
+        }
 
         animator = ModelAnimator{};
         currentState = nullptr;
@@ -253,6 +260,8 @@ std::string AnimationControllerComponent::BuildDefaultStateAssetPath(
 
 bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 {
+    BS_PROFILE_SCOPE("AnimationControllerComponent::LoadStateAsset");
+
     if (assetName_.empty()) return false;
 
     const std::string path_ = GetFullStateAssetPath(assetName_);
@@ -263,7 +272,10 @@ bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
     try
     {
         nlohmann::json json_;
-        file_ >> json_;
+        {
+            BS_PROFILE_SCOPE("AnimationStateAsset::ReadJson");
+            file_ >> json_;
+        }
 
         if (json_.contains("AssetType") &&
             json_.value("AssetType", "") != "AnimationState")
@@ -273,6 +285,7 @@ bool AnimationControllerComponent::LoadStateAsset(const std::string& assetName_)
 
         if (json_.contains("State"))
         {
+            BS_PROFILE_SCOPE("AnimationStateAsset::DeserializeState");
             state_ = json_["State"].get<AnimState>();
         }
         else
@@ -421,6 +434,8 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
 }
 bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
 {
+    BS_PROFILE_SCOPE("AnimationControllerComponent::LoadGraphAsset");
+
     if (assetName_.empty()) return false;
 
     std::ifstream file(GetFullGraphAssetPath(assetName_));
@@ -429,7 +444,10 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
     nlohmann::json j;
     try
     {
-        file >> j;
+        {
+            BS_PROFILE_SCOPE("AnimationGraphAsset::ReadJson");
+            file >> j;
+        }
     }
     catch (const nlohmann::json::exception&)
     {
@@ -451,7 +469,10 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
     if (j.contains("AnimationData") && j["AnimationData"].is_object())
     {
         AnimationDataAsset asset;
-        asset.Deserialize(j["AnimationData"]);
+        {
+            BS_PROFILE_SCOPE("AnimationGraphAsset::AnimationDataAsset");
+            asset.Deserialize(j["AnimationData"]);
+        }
 
         animator = ModelAnimator{};
         currentState = nullptr;
@@ -609,16 +630,24 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
 
 void AnimationControllerComponent::LoadAsset(const std::string& assetName_)
 {
+    BS_PROFILE_SCOPE("AnimationControllerComponent::LoadAsset");
+
     std::string fullPath = GetFullAssetPath(assetName_);
 
     std::ifstream file(fullPath);
     if (!file.is_open()) return;
 
     nlohmann::json j;
-    file >> j;
+    {
+        BS_PROFILE_SCOPE("AnimationAsset::ReadJson");
+        file >> j;
+    }
 
     AnimationDataAsset asset;
-    asset.Deserialize(j);
+    {
+        BS_PROFILE_SCOPE("AnimationAsset::DeserializeData");
+        asset.Deserialize(j);
+    }
 
     animator = ModelAnimator{};
     currentState = nullptr;

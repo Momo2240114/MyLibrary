@@ -2,6 +2,7 @@
 
 #include "AIActionComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -348,6 +349,8 @@ void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
 
 void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("AIBehaviorGraph::Deserialize");
+
     Clear();
     nextId = json_.value("NextId", static_cast<uintptr_t>(1));
 
@@ -443,11 +446,16 @@ bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
 
 bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
 {
+    BS_PROFILE_SCOPE("AIBehaviorGraph::LoadFromFile");
+
     std::ifstream file_(path_);
     if (!file_.is_open()) return false;
 
     nlohmann::json json_;
-    file_ >> json_;
+    {
+        BS_PROFILE_SCOPE("AIBehaviorGraph::ReadJson");
+        file_ >> json_;
+    }
     Deserialize(json_);
     return true;
 }

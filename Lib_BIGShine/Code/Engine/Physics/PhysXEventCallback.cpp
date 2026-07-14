@@ -23,7 +23,8 @@ bool IsManualCombatRole(ColliderComponent* collider_)
     const ColliderComponent::CollisionRole role_ = collider_->GetCollisionRole();
     return role_ == ColliderComponent::CollisionRole::HIT_BOX ||
         role_ == ColliderComponent::CollisionRole::HURT_BOX ||
-        role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX;
+        role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX ||
+        role_ == ColliderComponent::CollisionRole::GUARD_BOX;
 }
 
 bool IsDetectionOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)

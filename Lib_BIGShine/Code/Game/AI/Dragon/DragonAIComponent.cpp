@@ -407,6 +407,8 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
 
 void DragonAIComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::Deserialize");
+
     playerObjectName = json_.value("PlayerObjectName", std::string("Player"));
     actionCategory = json_.value("ActionCategory", std::string("AI"));
     blackboardCategory = json_.value("BlackboardCategory", std::string("DragonAI"));
@@ -459,10 +461,12 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
 
     if (json_.contains("BehaviorGraph"))
     {
+        BS_PROFILE_SCOPE("DragonAI::DeserializeInlineBehaviorGraph");
         behaviorGraph.Deserialize(json_["BehaviorGraph"]);
     }
     else if (!behaviorGraphAssetPath.empty())
     {
+        BS_PROFILE_SCOPE("DragonAI::LoadBehaviorGraphOnDeserialize");
         behaviorGraph.LoadFromFile(behaviorGraphAssetPath);
     }
     EnsureDefaultBehaviorGraph();
@@ -602,11 +606,11 @@ void DragonAIComponent::RegisterActions()
     {
         const std::string actionName_ = "DragonAI_" + definition_.actionName;
         const DRAGON_ACTION_TYPE action_ = definition_.action;
-        owner_->GetLocalRegistry().RegisterAction(actionCategory, actionName_, [this, action_]()
+        owner_->RegisterAction(actionCategory, actionName_, [this, action_]()
             {
                 RequestAction(action_);
             });
-        registeredActionNames.push_back(actionName_);
+        registeredActionNames.push_back(owner_->BuildActionName(actionName_));
     }
 }
 
@@ -1302,6 +1306,8 @@ bool DragonAIComponent::SaveBehaviorGraphAsset(const std::string& path_) const
 
 bool DragonAIComponent::LoadBehaviorGraphAsset(const std::string& path_)
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::LoadBehaviorGraphAsset");
+
     const bool result_ = behaviorGraph.LoadFromFile(path_);
     if (result_)
     {
@@ -1334,8 +1340,8 @@ void DragonAIComponent::RegisterRuntimeActions()
 
     auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& function_)
         {
-            owner_->GetLocalRegistry().RegisterAction(actionCategory, actionName_, function_);
-            registeredActionNames.push_back(actionName_);
+            owner_->RegisterAction(actionCategory, actionName_, function_);
+            registeredActionNames.push_back(owner_->BuildActionName(actionName_));
         };
 
     registerAction_("DragonAI_CanCancelOn", [this]() { SetCanCancel(true); });

@@ -51,6 +51,11 @@ void HitBox::SetKnockBackPower(float knockBackPower_)
     knockBackPower = knockBackPower_;
 }
 
+bool HitBox::ShouldNotifyAttackerOnGuard() const
+{
+    return attackSourceType == ATTACK_SOURCE_TYPE::MELEE;
+}
+
 void HitBox::SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_)
 {
     targetAirLiftPower = (std::max)(targetAirLiftPower_, 0.0f);
@@ -137,6 +142,17 @@ void HitBox::Gui()
     ImGui::Text("Owner: %s", ownerObject ? ownerObject->GetName().c_str() : "(Self)");
     ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
+    const char* attackSourceTypeNames_[] = { "Melee", "Projectile", "Remote" };
+    int attackSourceTypeIndex_ = static_cast<int>(attackSourceType);
+    if (ImGui::Combo(
+        "Attack Source Type",
+        &attackSourceTypeIndex_,
+        attackSourceTypeNames_,
+        IM_ARRAYSIZE(attackSourceTypeNames_)))
+    {
+        attackSourceType = static_cast<ATTACK_SOURCE_TYPE>(
+            (std::clamp)(attackSourceTypeIndex_, 0, 2));
+    }
     ImGui::DragFloat("Target Air Lift Power", &targetAirLiftPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Attacker Air Lift Power", &attackerAirLiftPower, 0.1f, 0.0f, 99999.0f);
     ImGui::Checkbox("Hit Once Per Activation", &hitOncePerActivation);
@@ -226,6 +242,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["SourceAction"] = sourceAction;
     j_["ImpactPower"] = impactPower;
     j_["KnockBackPower"] = knockBackPower;
+    j_["AttackSourceType"] = static_cast<int>(attackSourceType);
     j_["TargetAirLiftPower"] = targetAirLiftPower;
     j_["AttackerAirLiftPower"] = attackerAirLiftPower;
     j_["HitOncePerActivation"] = hitOncePerActivation;
@@ -266,6 +283,8 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     sourceAction = j_.value("SourceAction", std::string{});
     impactPower = (std::max)(j_.value("ImpactPower", damage), 0.0f);
     knockBackPower = j_.value("KnockBackPower", 0.0f);
+    attackSourceType = static_cast<ATTACK_SOURCE_TYPE>(
+        (std::clamp)(j_.value("AttackSourceType", 0), 0, 2));
     targetAirLiftPower = (std::max)(j_.value("TargetAirLiftPower", 0.0f), 0.0f);
     attackerAirLiftPower = (std::max)(j_.value("AttackerAirLiftPower", 0.0f), 0.0f);
     hitOncePerActivation = j_.value("HitOncePerActivation", true);
@@ -523,6 +542,8 @@ void HitBox::RegisterActions()
                     object_->GetManager().GetAttackSystem().ClearAttackInstance(
                         hitBox_->attackInstanceId);
                     object_->GetManager().GetJustDodgeSystem().ClearAttackInstance(
+                        hitBox_->attackInstanceId);
+                    object_->GetManager().GetGuardSystem().ClearAttackInstance(
                         hitBox_->attackInstanceId);
                 }
             }
