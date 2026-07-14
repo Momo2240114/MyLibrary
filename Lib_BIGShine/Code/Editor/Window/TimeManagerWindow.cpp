@@ -67,6 +67,7 @@ void TimeManagerWindow::Draw()
             timeManager_->IsFrameStepActive() ? " (Step)" : "");
 
         if (ImGui::Button(timeManager_->IsPaused() ? "Resume" : "Pause"))
+        {
             timeManager_->TogglePaused();
         }
         ImGui::SameLine();
