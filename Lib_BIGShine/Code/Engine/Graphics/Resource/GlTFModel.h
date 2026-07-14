@@ -163,6 +163,8 @@ public:
 		Node* node = nullptr;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
+		std::vector<DirectX::XMFLOAT4X4> cachedSkinningTransforms;
+		bool skinningTransformDirty = true;
 
 		template<class Archive>
 		void serialize(Archive& archive);
@@ -254,6 +256,7 @@ public:
 	void MarkPoseDirty();
 	void MarkTransformDirty();
 	void UpdateTransformIfDirty();
+	const std::vector<DirectX::XMFLOAT4X4>& GetSkinningTransforms(int meshIndex_);
 
 
 	// トランスフォーム更新処理
@@ -375,4 +378,7 @@ private:
 	float localScale = 1.0;
 	DirectX::SimpleMath::Quaternion _RootRotationOffset;
 	std::string m_RootMotionName;
+
+	void MarkSkinningTransformsDirty();
+	void UpdateSkinningTransforms(int meshIndex_);
 };

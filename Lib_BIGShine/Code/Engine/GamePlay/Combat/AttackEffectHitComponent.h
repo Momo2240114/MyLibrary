@@ -75,6 +75,7 @@ public:
     void SetAttackInstanceId(uint32_t attackInstanceId_);
     void SetHitGroupId(uint32_t hitGroupId_);
     void SetDamage(float damage_);
+    void SetImpactPower(float impactPower_);
     void SetHitStopDuration(float hitStopDuration_);
     void SetHitStopScale(float hitStopScale_);
     void SetKnockBackPower(float knockBackPower_);
@@ -119,6 +120,7 @@ private:
     uint32_t attackInstanceId = 0u;
     uint32_t hitGroupId = 0u;
     float damage = 1.0f;
+    float impactPower = 1.0f;
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;
     float knockBackPower = 0.0f;

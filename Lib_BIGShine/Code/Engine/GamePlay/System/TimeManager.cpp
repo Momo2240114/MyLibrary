@@ -15,12 +15,38 @@ TimeManager::TimeManager()
 void TimeManager::Update(float rawDt_)
 {
     lastRawDeltaTime = (std::max)(rawDt_, 0.0f);
-    defaultState.Update(rawDt_);
+    frameStepActive = paused && frameStepRequested;
+    frameStepRequested = false;
+
+    const float simulationRawDt_ = (paused && !frameStepActive) ? 0.0f : lastRawDeltaTime;
+
+    defaultState.Update(simulationRawDt_);
 
     for (auto& [type, state] : states)
     {
-        state.Update(rawDt_);
+        state.Update(simulationRawDt_);
     }
+}
+
+void TimeManager::SetPaused(bool paused_)
+{
+    paused = paused_;
+    if (!paused)
+    {
+        frameStepRequested = false;
+        frameStepActive = false;
+    }
+}
+
+void TimeManager::TogglePaused()
+{
+    SetPaused(!paused);
+}
+
+void TimeManager::RequestFrameStep()
+{
+    paused = true;
+    frameStepRequested = true;
 }
 
 void TimeManager::SetTargetScale(uint32_t layerMask_, float scale_, float speed_)
@@ -71,7 +97,8 @@ void TimeManager::TriggerHitStop(uint32_t layerMask_, float duration_, float sca
 
 void TimeManager::PrepareCache()
 {
-    cachedDefaultScale = defaultState.currentScale;
+    const float pauseScale_ = (paused && !frameStepActive) ? 0.0f : 1.0f;
+    cachedDefaultScale = defaultState.currentScale * pauseScale_;
 
     for (uint32_t i_ = 0; i_ < 32; ++i_)
     {
@@ -81,11 +108,11 @@ void TimeManager::PrepareCache()
         auto it = states.find(type_);
         if (it != states.end())
         {
-            cachedLayerScales[i_] = it->second.currentScale;
+            cachedLayerScales[i_] = it->second.currentScale * pauseScale_;
         }
         else
         {
-            cachedLayerScales[i_] = 1.0f;
+            cachedLayerScales[i_] = pauseScale_;
         }
     }
 }

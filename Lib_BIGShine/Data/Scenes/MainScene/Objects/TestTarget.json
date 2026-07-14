@@ -27,7 +27,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 3.2799999713897705,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
                 "SyncCharacterColliderShape": true,
                 "UseGravity": false,
@@ -66,7 +66,7 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 3.2799999713897705,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
                 "StepOffset": 0.38999998569488525,
                 "UseGravity": true,
@@ -157,7 +157,9 @@
         },
         {
             "Data": {
+                "Armor": 0.0,
                 "CurrentHealth": 0.0,
+                "DamageActionName": "",
                 "HitStopLayerMask": 3,
                 "MaxHealth": 100.0,
                 "OverlayDuration": 0.11999999731779099,
@@ -258,7 +260,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 12.050050735473633
+                            "value": 469.46038818359375
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -300,13 +302,41 @@
                             "type": "bool",
                             "value": true
                         },
+                        "CurrentAction": {
+                            "type": "int",
+                            "value": 0
+                        },
                         "DamagePhase": {
                             "type": "int",
                             "value": 0
                         },
+                        "HasTarget": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "HpRate": {
                             "type": "float",
                             "value": 1.0
+                        },
+                        "IsActing": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsTargetBehind": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsTargetInFront": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsTargetInSide": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsTargetUnderBody": {
+                            "type": "bool",
+                            "value": false
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
@@ -343,9 +373,25 @@
                         "State": {
                             "type": "int",
                             "value": 0
+                        },
+                        "TargetAngle": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "TargetDistance": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "TargetHorizontalDistance": {
+                            "type": "float",
+                            "value": 0.0
                         }
                     },
                     "Hit": {
+                        "Armor": {
+                            "type": "float",
+                            "value": 0.0
+                        },
                         "AttackerAirLiftPower": {
                             "type": "float",
                             "value": 0.0
@@ -365,8 +411,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.39659595489501953,
-                                0.9179933071136475
+                                -0.9062337279319763,
+                                0.42277711629867554
                             ]
                         },
                         "HitStopDuration": {
@@ -381,6 +427,14 @@
                             "type": "float",
                             "value": 0.10000000149011612
                         },
+                        "ImpactPower": {
+                            "type": "float",
+                            "value": 4.0
+                        },
+                        "ImpactReacted": {
+                            "type": "bool",
+                            "value": true
+                        },
                         "KnockBackPower": {
                             "type": "float",
                             "value": 1.2000000476837158
@@ -388,17 +442,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.30539703369140625,
-                                0.6379886865615845,
-                                0.7068968415260315
+                                -0.7143983244895935,
+                                0.6152709722518921,
+                                0.33328187465667725
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                -4.802501678466797,
-                                0.8541196584701538,
-                                -15.441368103027344
+                                2.2550628185272217,
+                                0.830429196357727,
+                                -14.90799331665039
                             ]
                         },
                         "Received": {
@@ -3016,7 +3070,7 @@
                 "ActionSweepStartYawDegrees": -30.0,
                 "ActionWorldTargetPosition": [
                     0.0,
-                    2.0,
+                    0.0,
                     6.0
                 ],
                 "ActionYawDegrees": 30.0,
@@ -3053,9 +3107,29 @@
                 "ActionCategory": "AI",
                 "ActionDefinitions": [
                     {
+                        "Action": 0,
+                        "ActionName": "Idle",
+                        "ActionSequenceName": "Idle",
+                        "ActionTimeout": 1.0,
+                        "AllowBuffer": true,
+                        "AnimationActionName": "",
+                        "AnimationStateName": "PlainsDragon_IdleBreathe",
+                        "CooldownTime": 0.0,
+                        "Duration": 0.10000000149011612,
+                        "Enabled": true,
+                        "HitBoxActionName": "",
+                        "IKActionName": "",
+                        "RecoveryTime": 0.0,
+                        "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
+                        "VFXActionName": "",
+                        "WaitForActionEnd": true
+                    },
+                    {
                         "Action": 1,
                         "ActionName": "WalkApproach",
                         "ActionSequenceName": "WalkApproach",
+                        "ActionTimeout": 1.2000000476837158,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Walk",
@@ -3066,6 +3140,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.10000000149011612,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -3073,6 +3148,7 @@
                         "Action": 2,
                         "ActionName": "RunCharge",
                         "ActionSequenceName": "RunCharge",
+                        "ActionTimeout": 2.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Run",
@@ -3083,6 +3159,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.4000000059604645,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -3090,6 +3167,7 @@
                         "Action": 3,
                         "ActionName": "TurnToPlayer",
                         "ActionSequenceName": "TurnToPlayer",
+                        "ActionTimeout": 1.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Turn90L_RM",
@@ -3100,6 +3178,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.10000000149011612,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -3107,6 +3186,7 @@
                         "Action": 4,
                         "ActionName": "Bite",
                         "ActionSequenceName": "Bite",
+                        "ActionTimeout": 2.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_BiteAttack",
@@ -3117,6 +3197,7 @@
                         "IKActionName": "DragonNeck_LookCenter",
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3124,6 +3205,7 @@
                         "Action": 5,
                         "ActionName": "FireBall",
                         "ActionSequenceName": "FireBall",
+                        "ActionTimeout": 2.5,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_SpitFireBall",
@@ -3134,6 +3216,7 @@
                         "IKActionName": "DragonNeck_LookWorldPosition",
                         "RecoveryTime": 0.5,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3141,6 +3224,7 @@
                         "Action": 6,
                         "ActionName": "SpreadBreath",
                         "ActionSequenceName": "SpreadBreath",
+                        "ActionTimeout": 3.5,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_SpreadFire",
@@ -3151,6 +3235,7 @@
                         "IKActionName": "DragonNeck_SweepYaw",
                         "RecoveryTime": 0.6000000238418579,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3158,6 +3243,7 @@
                         "Action": 7,
                         "ActionName": "TurnTailSweep",
                         "ActionSequenceName": "TurnTailSweep",
+                        "ActionTimeout": 2.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Turn90L_RM",
@@ -3168,6 +3254,7 @@
                         "IKActionName": "DragonTail_SweepLeft",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3175,6 +3262,7 @@
                         "Action": 8,
                         "ActionName": "SpinTailSweep",
                         "ActionSequenceName": "SpinTailSweep",
+                        "ActionTimeout": 3.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Turn90L_RM",
@@ -3185,6 +3273,7 @@
                         "IKActionName": "DragonTail_SpinSweep",
                         "RecoveryTime": 0.6499999761581421,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3192,6 +3281,7 @@
                         "Action": 9,
                         "ActionName": "TakeOff",
                         "ActionSequenceName": "TakeOff",
+                        "ActionTimeout": 2.5,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_TakeOff",
@@ -3202,6 +3292,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3209,6 +3300,7 @@
                         "Action": 10,
                         "ActionName": "AirHold",
                         "ActionSequenceName": "AirHold",
+                        "ActionTimeout": 2.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_FlyStationary",
@@ -3219,6 +3311,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -3226,6 +3319,7 @@
                         "Action": 11,
                         "ActionName": "AirFireBall",
                         "ActionSequenceName": "AirFireBall",
+                        "ActionTimeout": 2.5,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_FlyStationarySpitFireBall",
@@ -3236,6 +3330,7 @@
                         "IKActionName": "DragonNeck_LookWorldPosition",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3243,6 +3338,7 @@
                         "Action": 12,
                         "ActionName": "AirSpreadBreath",
                         "ActionSequenceName": "AirSpreadBreath",
+                        "ActionTimeout": 3.5,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_FlyStationarySpreadFire",
@@ -3253,6 +3349,7 @@
                         "IKActionName": "DragonNeck_SweepYaw",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3260,6 +3357,7 @@
                         "Action": 13,
                         "ActionName": "LandingAttack",
                         "ActionSequenceName": "LandingAttack",
+                        "ActionTimeout": 2.5,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_FlyStationaryToLanding",
@@ -3270,6 +3368,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.6000000238418579,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3277,6 +3376,7 @@
                         "Action": 14,
                         "ActionName": "GetHit",
                         "ActionSequenceName": "GetHit",
+                        "ActionTimeout": 1.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_GetHit1",
@@ -3287,6 +3387,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.20000000298023224,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -3294,6 +3395,7 @@
                         "Action": 15,
                         "ActionName": "Death",
                         "ActionSequenceName": "Death",
+                        "ActionTimeout": 5.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Death",
@@ -3304,6 +3406,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     }
@@ -4852,7 +4955,53 @@
                     1.0
                 ],
                 "BodyCollisionSpheres": [],
-                "Chains": [],
+                "Chains": [
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 0,
+                        "CollideWithBodyColliders": false,
+                        "CollisionRadius": 0.019999999552965164,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.029999999329447746,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
+                        "Name": "DragonNeck",
+                        "RootNode": "PlainsDragon_-Neck",
+                        "RootRotationFollow": 0.699999988079071,
+                        "SolverIterations": 6,
+                        "SolverSubsteps": 4,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
+                        "Stiffness": 0.019999999552965164,
+                        "TipNode": "PlainsDragon_Tongue_4",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 4
+                    }
+                ],
                 "ShowBodyCollisionShapes": true
             },
             "Enabled": true,
@@ -4884,9 +5033,9 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -4.070976734161377,
-            -2.001769781112671,
-            -12.848039627075195
+            -0.14507551491260529,
+            -2.00177001953125,
+            -14.084815979003906
         ],
         "Rot": [
             0.0,

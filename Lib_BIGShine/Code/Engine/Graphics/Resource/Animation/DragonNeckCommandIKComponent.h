@@ -24,9 +24,11 @@ struct DragonNeckIKCommand
 
     std::string targetName;
     DirectX::XMFLOAT3 worldTargetPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 targetOffset = { 0.0f, 0.0f, 0.0f };
 
     float startYawDegrees = 0.0f;
     float endYawDegrees = 0.0f;
+    float yawOffsetDegrees = 0.0f;
     float pitchOffsetDegrees = 0.0f;
 
     float maxYawDegrees = 55.0f;
@@ -81,6 +83,9 @@ public:
         float blendInTime_ = 0.15f,
         float blendOutTime_ = 0.2f);
 
+    void SetTargetObjectLookMode(bool enabled_);
+    void SetTargetObjectName(const std::string& targetName_) { lookTargetObjectName = targetName_; }
+
     bool IsCommandActive() const { return currentCommand.mode != DRAGON_NECK_IK_MODE::DISABLED; }
 
     bool GetMouthWorldPosition(DirectX::XMFLOAT3& position_) const;
@@ -111,10 +116,20 @@ private:
     float actionSweepStartYawDegrees = -30.0f;
     float actionSweepEndYawDegrees = 30.0f;
 
+    bool lookTargetObjectMode = false;
+    std::string lookTargetObjectName = "PlayerModel";
+    DirectX::XMFLOAT3 lookTargetObjectOffset = { 0.0f, 1.2f, 0.0f };
+    float lookTargetBlendInTime = 0.15f;
+    float lookTargetYawOffsetDegrees = 0.0f;
+    float lookTargetPitchOffsetDegrees = 0.0f;
+    float lookTargetMaxYawDegrees = 65.0f;
+    float lookTargetMaxPitchDegrees = 35.0f;
+
     DragonNeckIKCommand currentCommand;
     float commandTimer = 0.0f;
 
     void UnregisterActions();
+    void ApplyTargetObjectLookMode();
     float CalculateBlendRate() const;
     bool ResolveTargetPosition(DirectX::XMFLOAT3& targetPosition_);
     bool ApplyNeckIK(float deltaTime_);

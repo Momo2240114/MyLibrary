@@ -16,7 +16,8 @@ class JustDodgeCollider;
 // プレイヤーアクション中のキャンセル・入力受付状態
 struct PlayerActionRuntime
 {
-    bool canCancel = true; // 現在のActionをキャンセルできるか
+    bool canDodgeCancel = true; // 回避Actionへ派生できるか
+    bool canActionBranch = true; // 強攻撃やSkillなどのAction派生ができるか
     bool canBufferInput = false; // 次の入力を先行入力として保存できるか
     bool canCombo = false; // コンボ遷移を受け付けるか
     bool actionEnded = false; // Timeline駆動Actionが終了したか
@@ -84,15 +85,24 @@ public:
     bool ConsumeJumpLoopResumeRequest();
     PLAYER_ACTION GetCurrentAction() const { return stateMachine.GetCurrentAction(); } // 現在Actionを返す
     int GetComboIndex() const { return comboIndex; } // 現在のコンボ番号を返す
-    const std::vector<PlayerCancelTransition>& GetCancelTransitions() const { return cancelTransitions; } // キャンセルルート一覧を返す
+    const std::vector<PlayerCancelTransition>& GetDodgeCancelTransitions() const { return dodgeCancelTransitions; }
+    const std::vector<PlayerCancelTransition>& GetActionBranchTransitions() const { return actionBranchTransitions; } // キャンセルルート一覧を返す
     const PlayerAttackAssistSettings& GetAttackAssistSettings() const { return attackAssistSettings; } // 攻撃補正設定を返す
 
     bool RequestAction(PLAYER_ACTION nextAction_); // 指定Actionへの遷移を要求する
     bool HasCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_) const; // 指定キャンセルルートが存在するか確認する
     bool AddCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_); // キャンセルルートを追加する
-    bool RemoveCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_); // キャンセルルートを削除する
+    bool RemoveCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_);
+    bool HasDodgeCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_) const;
+    bool AddDodgeCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_);
+    bool RemoveDodgeCancelTransition(PLAYER_ACTION from_, PLAYER_ACTION to_);
+    bool HasActionBranchTransition(PLAYER_ACTION from_, PLAYER_ACTION to_) const;
+    bool AddActionBranchTransition(PLAYER_ACTION from_, PLAYER_ACTION to_);
+    bool RemoveActionBranchTransition(PLAYER_ACTION from_, PLAYER_ACTION to_); // キャンセルルートを削除する
     void NotifyGuardedAttack(); // ガード成功時にジャストガードへ遷移させる
-    void SetCanCancel(bool enabled_); // キャンセル可能状態を設定する
+    void SetCanCancel(bool enabled_); // 互換用。Dodge以外のActionBranch受付を設定する
+    void SetCanDodgeCancel(bool enabled_); // 回避キャンセル受付状態を設定する
+    void SetCanActionBranch(bool enabled_); // 攻撃/Skill派生受付状態を設定する
     void SetCanBufferInput(bool enabled_); // 先行入力受付状態を設定する
     void SetCanCombo(bool enabled_); // コンボ受付状態を設定する
     void NotifyComboTransition(); // 保存済みコンボ入力へ遷移する
@@ -104,6 +114,7 @@ public:
     void ProcessActionInput(); // 入力からAction要求を発行する
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る
     void SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
+    bool TryDodgeCancelInput();
 
     void NotifyJustDodge(); // ジャスト回避成功を現在のDodgeStateへ通知する
 
@@ -120,6 +131,10 @@ public:
     float jumpEndDuration = 0.18f;
     float timelineActionFallbackDuration = 1.5f;
     float groundDodgeCooldownDuration = 0.5f;
+    float armor = 0.0f;
+    float hitMediumImpactThreshold = 20.0f;
+    float hitHeavyImpactThreshold = 50.0f;
+    float airHitKnockdownImpactThreshold = 50.0f;
 
 private:
     void EnsurePlayerInputBindings(); // Player用InputActionの登録を保証する
@@ -137,6 +152,8 @@ private:
     bool IsAnimationStateForAction(PLAYER_ACTION action_, const std::string& stateName_) const;
     bool IsDodgeAction(PLAYER_ACTION action_) const;
     bool CanStartDodgeAction(PLAYER_ACTION action_) const;
+    void SyncCancelGateBlackboard();
+    void TryConsumeBufferedActionForCancelGate(bool dodgeGate_);
     void UpdateDodgeRestrictions(float deltaTime_);
     void StartGroundDodgeCooldown();
     void UpdateAirborneActionContext();
@@ -158,10 +175,11 @@ private:
     PlayerActionRuntime actionRuntime; // 現在Action中の入力受付・キャンセル状態
     PlayerAttackAssistSettings attackAssistSettings; // 攻撃時の向き・位置補正設定
 
-    std::vector<PlayerCancelTransition> cancelTransitions
+    std::vector<PlayerCancelTransition> dodgeCancelTransitions
     {
         { PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::DODGE }
-    }; // Action間のキャンセル可能ルート一覧
+    };
+    std::vector<PlayerCancelTransition> actionBranchTransitions; // Action間のキャンセル可能ルート一覧
 
     int comboIndex = 0; // 現在再生中のコンボ番号
     int pendingComboIndex = 0; // 次に開始するActionへ渡すコンボ番号

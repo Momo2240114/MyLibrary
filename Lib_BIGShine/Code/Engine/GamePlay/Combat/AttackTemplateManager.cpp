@@ -360,6 +360,7 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.canHitOwner = owner_.value("canHitOwner", false);
     const Json_ attack_ = json_.value("attack", Json_::object());
     result_.damage = attack_.value("damage", 5.0f);
+    result_.impactPower = (std::max)(attack_.value("impactPower", result_.damage), 0.0f);
     result_.hitStopDuration = attack_.value("hitStopDuration", attack_.value("hitStopTime", 0.05f));
     result_.hitStopScale = attack_.value("hitStopScale", 0.0f);
     result_.knockBackPower = attack_.value("knockBackPower", 3.0f);
@@ -510,6 +511,7 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
         { "owner", { { "ownerTarget", static_cast<int>(attackTemplate_.ownerTarget) },
             { "canHitOwner", attackTemplate_.canHitOwner } } },
         { "attack", { { "damage", attackTemplate_.damage },
+            { "impactPower", attackTemplate_.impactPower },
             { "hitStopDuration", attackTemplate_.hitStopDuration },
             { "hitStopScale", attackTemplate_.hitStopScale },
             { "knockBackPower", attackTemplate_.knockBackPower },
@@ -679,7 +681,17 @@ bool AttackTemplateManager::DrawEditorContent(
     AttackTemplate* attackTemplate_ = FindTemplate(id_);
     if (!attackTemplate_)
     {
-        ImGui::TextDisabled("Select or create an AttackTemplate.");
+        ImGui::TextDisabled("AttackTemplate not found: %s", id_.c_str());
+        if (ImGui::Button("Create Missing AttackTemplate"))
+        {
+            AttackTemplate newTemplate_{};
+            newTemplate_.id = id_;
+            newTemplate_.displayName = id_;
+            if (SaveTemplate(newTemplate_))
+            {
+                LoadAll();
+            }
+        }
         return false;
     }
 
@@ -752,6 +764,12 @@ bool AttackTemplateManager::DrawEditorContent(
         ImGui::DragFloat(
             "Damage",
             &attackTemplate_->damage,
+            0.1f,
+            0.0f);
+
+        ImGui::DragFloat(
+            "Impact Power",
+            &attackTemplate_->impactPower,
             0.1f,
             0.0f);
 

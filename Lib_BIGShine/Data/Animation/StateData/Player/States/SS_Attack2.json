@@ -6,19 +6,40 @@
         "animIndexB": -1,
         "animationIndex": 13,
         "blend2DBackwardAnimationIndex": -1,
+        "blend2DBackwardLeft90AnimationIndex": -1,
+        "blend2DBackwardLeft90PhaseOffset": 0.0,
+        "blend2DBackwardLeftAnimationIndex": -1,
+        "blend2DBackwardLeftPhaseOffset": 0.0,
         "blend2DBackwardPhaseOffset": 0.0,
+        "blend2DBackwardRight90AnimationIndex": -1,
+        "blend2DBackwardRight90PhaseOffset": 0.0,
+        "blend2DBackwardRightAnimationIndex": -1,
+        "blend2DBackwardRightPhaseOffset": 0.0,
         "blend2DDefaultInput": [
             0.0,
             1.0
         ],
         "blend2DForwardAnimationIndex": -1,
+        "blend2DForwardLeft90AnimationIndex": -1,
+        "blend2DForwardLeft90PhaseOffset": 0.0,
+        "blend2DForwardLeftAnimationIndex": -1,
+        "blend2DForwardLeftPhaseOffset": 0.0,
         "blend2DForwardPhaseOffset": 0.0,
+        "blend2DForwardRight90AnimationIndex": -1,
+        "blend2DForwardRight90PhaseOffset": 0.0,
+        "blend2DForwardRightAnimationIndex": -1,
+        "blend2DForwardRightPhaseOffset": 0.0,
+        "blend2DIdleAnimationIndex": -1,
+        "blend2DIdlePhaseOffset": 0.0,
+        "blend2DIdleThreshold": 0.05000000074505806,
         "blend2DLeftAnimationIndex": -1,
         "blend2DLeftPhaseOffset": 0.0,
         "blend2DParamName": "MoveInput",
         "blend2DRightAnimationIndex": -1,
         "blend2DRightPhaseOffset": 0.0,
         "blend2DSyncNormalizedTime": true,
+        "blend2DUseEightDirections": false,
+        "blend2DUseForwardBackwardLateral": false,
         "blendDefaultWeight": 0.5,
         "blendMaskRootNodes": [],
         "blendParamName": "BlendAlpha",
@@ -75,7 +96,7 @@
                 "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": false,
-                "endTime": 1.5166666507720947,
+                "endTime": 1.5499999523162842,
                 "eventTemplateType": "NONE",
                 "label": "ActionEnd",
                 "localPosition": [
@@ -100,7 +121,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 1.1166666746139526
+                "startTime": 1.149999976158142
             },
             {
                 "actionEnd": "",
@@ -281,6 +302,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.21666666865348816
+            },
+            {
+                "actionEnd": "DisableDodgeCancel",
+                "actionStart": "EnableDodgeCancel",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 1.149999976158142,
+                "eventTemplateType": "NONE",
+                "label": "DodgeCancel",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.10000000149011612
             }
         ],
         "loop": false,
@@ -292,6 +349,9 @@
             "applyRotationX": true,
             "applyRotationY": true,
             "applyRotationZ": true,
+            "cutVisualPositionX": true,
+            "cutVisualPositionY": true,
+            "cutVisualPositionZ": true,
             "enable": true,
             "sourceNodeName": ""
         },

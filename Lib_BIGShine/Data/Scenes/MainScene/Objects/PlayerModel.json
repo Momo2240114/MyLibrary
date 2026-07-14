@@ -28,7 +28,7 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 0.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
                 "StepOffset": 0.5,
                 "UseGravity": true,
@@ -66,7 +66,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 0.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
                 "SyncCharacterColliderShape": true,
                 "UseGravity": false,
@@ -434,7 +434,7 @@
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -446,7 +446,7 @@
                         },
                         "ComboIndex": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "DodgeInput": {
                             "type": "vector2",
@@ -455,12 +455,24 @@
                                 -1.0
                             ]
                         },
+                        "HitArmor": {
+                            "type": "float",
+                            "value": 0.0
+                        },
                         "HitDirection": {
                             "type": "vector2",
                             "value": [
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "HitImpactPower": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "HitReactionLevel": {
+                            "type": "int",
+                            "value": 0
                         },
                         "HitTrigger": {
                             "type": "bool",
@@ -475,6 +487,18 @@
                             "value": false
                         },
                         "IsAirDodge": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsAirHitKnockdown": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsAirHitReaction": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsAirHitRecoverable": {
                             "type": "bool",
                             "value": false
                         },
@@ -500,9 +524,21 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsGuard": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsHitHeavy": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsHitLight": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsHitMedium": {
                             "type": "bool",
                             "value": false
                         },
@@ -740,7 +776,7 @@
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -752,7 +788,7 @@
                         },
                         "ComboIndex": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "DodgeInput": {
                             "type": "vector2",
@@ -761,12 +797,24 @@
                                 -1.0
                             ]
                         },
+                        "HitArmor": {
+                            "type": "float",
+                            "value": 0.0
+                        },
                         "HitDirection": {
                             "type": "vector2",
                             "value": [
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "HitImpactPower": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "HitReactionLevel": {
+                            "type": "int",
+                            "value": 0
                         },
                         "HitTrigger": {
                             "type": "bool",
@@ -781,6 +829,18 @@
                             "value": false
                         },
                         "IsAirDodge": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsAirHitKnockdown": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsAirHitReaction": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsAirHitRecoverable": {
                             "type": "bool",
                             "value": false
                         },
@@ -806,9 +866,21 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsGuard": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsHitHeavy": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsHitLight": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "IsHitMedium": {
                             "type": "bool",
                             "value": false
                         },
@@ -884,7 +956,7 @@
         {
             "Data": {
                 "AnimationData": {
-                    "DefaultState": "SS_Attack1",
+                    "DefaultState": "SS_Attack2",
                     "States": [
                         {
                             "animIndexA": -1,
@@ -14056,12 +14128,12 @@
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
-                                    "attackTemplateId": "AriCombo_03_02",
+                                    "attackTemplateId": "AirCombo_03_02",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
                                     "endTime": 0.6333333253860474,
                                     "eventTemplateType": "ATTACK_TEMPLATE",
-                                    "label": "AriCombo_03_02",
+                                    "label": "AirCombo_03_02",
                                     "localPosition": [
                                         0.0,
                                         0.0,
@@ -34998,32 +35070,10 @@
         },
         {
             "Data": {
-                "AirControlAcceleration": 8.0,
-                "AirControlRate": 0.7200000286102295,
-                "AirDeceleration": 4.5,
-                "AttackAssist": {
-                    "CameraCenterAngle": 30.0,
-                    "Enabled": true,
-                    "MaxPositionCorrection": 0.6000000238418579,
-                    "PositionSpeed": 4.0,
-                    "PositionStrength": 0.3499999940395355,
-                    "SearchDistance": 12.0,
-                    "Strength": 1.0,
-                    "TargetStopDistance": 1.2000000476837158,
-                    "TurnSpeed": 60.0
-                },
-                "CancelTransitions": [
-                    {
-                        "From": 2,
-                        "To": 6
-                    },
+                "ActionBranchTransitions": [
                     {
                         "From": 6,
                         "To": 2
-                    },
-                    {
-                        "From": 3,
-                        "To": 6
                     },
                     {
                         "From": 0,
@@ -35091,10 +35141,6 @@
                     },
                     {
                         "From": 11,
-                        "To": 6
-                    },
-                    {
-                        "From": 11,
                         "To": 7
                     },
                     {
@@ -35118,6 +35164,80 @@
                         "To": 15
                     },
                     {
+                        "From": 16,
+                        "To": 13
+                    },
+                    {
+                        "From": 16,
+                        "To": 14
+                    },
+                    {
+                        "From": 16,
+                        "To": 15
+                    },
+                    {
+                        "From": 2,
+                        "To": 3
+                    },
+                    {
+                        "From": 2,
+                        "To": 12
+                    },
+                    {
+                        "From": 2,
+                        "To": 7
+                    },
+                    {
+                        "From": 2,
+                        "To": 8
+                    },
+                    {
+                        "From": 3,
+                        "To": 7
+                    },
+                    {
+                        "From": 3,
+                        "To": 8
+                    },
+                    {
+                        "From": 13,
+                        "To": 14
+                    },
+                    {
+                        "From": 13,
+                        "To": 15
+                    }
+                ],
+                "AirControlAcceleration": 8.0,
+                "AirControlRate": 0.7200000286102295,
+                "AirDeceleration": 4.5,
+                "AirHitKnockdownImpactThreshold": 50.0,
+                "Armor": 0.0,
+                "AttackAssist": {
+                    "CameraCenterAngle": 30.0,
+                    "Enabled": true,
+                    "MaxPositionCorrection": 0.6000000238418579,
+                    "PositionSpeed": 4.0,
+                    "PositionStrength": 0.3499999940395355,
+                    "SearchDistance": 12.0,
+                    "Strength": 1.0,
+                    "TargetStopDistance": 1.2000000476837158,
+                    "TurnSpeed": 60.0
+                },
+                "DodgeCancelTransitions": [
+                    {
+                        "From": 2,
+                        "To": 6
+                    },
+                    {
+                        "From": 3,
+                        "To": 6
+                    },
+                    {
+                        "From": 11,
+                        "To": 6
+                    },
+                    {
                         "From": 11,
                         "To": 16
                     },
@@ -35134,22 +35254,24 @@
                         "To": 16
                     },
                     {
-                        "From": 16,
-                        "To": 13
+                        "From": 12,
+                        "To": 6
                     },
                     {
-                        "From": 16,
-                        "To": 14
+                        "From": 7,
+                        "To": 6
                     },
                     {
-                        "From": 16,
-                        "To": 15
+                        "From": 8,
+                        "To": 6
                     }
                 ],
-                "DoubleJumpImpulse": 1.5,
+                "DoubleJumpImpulse": 1.0,
                 "GroundDodgeCooldownDuration": 0.5,
+                "HitHeavyImpactThreshold": 50.0,
+                "HitMediumImpactThreshold": 20.0,
                 "JumpEndDuration": 0.18000000715255737,
-                "JumpImpulse": 1.7000000476837158,
+                "JumpImpulse": 1.2999999523162842,
                 "MoveSpeed": 22.0,
                 "RunEndDuration": 0.18000000715255737,
                 "RunStartDuration": 0.18000000715255737,
@@ -36043,7 +36165,7 @@
                     1.0,
                     0.6000000238418579
                 ],
-                "ShowBodyCollisionShapes": true,
+                "ShowBodyCollisionShapes": false,
                 "ShowHairCollisionShapes": false
             },
             "Enabled": true,
@@ -36090,13 +36212,15 @@
         },
         {
             "Data": {
+                "Armor": 0.0,
                 "CurrentHealth": 0.0,
+                "DamageActionName": "Health_Hit",
                 "HitStopLayerMask": 0,
                 "MaxHealth": 100.0,
                 "OverlayDuration": 0.11999999731779099,
                 "OverlayStartActionName": "MaterialOverlay_Start",
                 "OverlayStopActionName": "MaterialOverlay_Stop",
-                "ReactionActionName": "Hit_Player",
+                "ReactionActionName": "Player_Hit",
                 "UseHitStop": true,
                 "UseKnockBack": true
             },
@@ -36187,13 +36311,13 @@
     "ParentName": "",
     "Transform": {
         "Pos": [
-            -5.839418888092041,
-            -1.6068353652954102,
-            -53.44550323486328
+            24.24338150024414,
+            -1.5422391891479492,
+            -20.045032501220703
         ],
         "Rot": [
             0.0,
-            5.522900104522705,
+            173.37196350097656,
             1.1004080988641363e-05
         ],
         "Scale": [

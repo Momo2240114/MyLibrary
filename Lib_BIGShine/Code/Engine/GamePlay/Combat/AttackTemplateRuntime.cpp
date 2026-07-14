@@ -70,6 +70,7 @@ namespace
         hitBox_->SetAttackInstanceId(attackInstanceId_);
         hitBox_->SetHitGroupId(attackTemplate_.hitGroupId);
         hitBox_->SetDamage(attackTemplate_.damage);
+        hitBox_->SetImpactPower(attackTemplate_.impactPower);
         hitBox_->hitStopDuration = attackTemplate_.hitStopDuration;
         hitBox_->hitStopScale = attackTemplate_.hitStopScale;
         hitBox_->SetKnockBackPower(attackTemplate_.knockBackPower);
@@ -129,6 +130,7 @@ void AttackTemplateRuntime::Start(
         request_.setting.hitBoxRadius = slash_.hitBox.radius;
         request_.setting.hitBoxHalfHeight = slash_.hitBox.halfHeight;
         request_.setting.damage = attackTemplate_->damage;
+        request_.setting.impactPower = attackTemplate_->impactPower;
         request_.setting.knockBackPower = attackTemplate_->knockBackPower;
         request_.setting.targetAirLiftPower = attackTemplate_->targetAirLiftPower;
         request_.setting.attackerAirLiftPower = attackTemplate_->attackerAirLiftPower;

@@ -1,6 +1,6 @@
 {
     "AnimationData": {
-        "DefaultState": "SS_Attack2",
+        "DefaultState": "Combo_Attack_Air_04_Seq",
         "States": [
             {
                 "animIndexA": -1,
@@ -457,7 +457,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 0.9166666865348816,
+                        "endTime": 1.0,
                         "eventTemplateType": "VFX_TEMPLATE",
                         "label": "MeshVFX",
                         "localPosition": [
@@ -482,7 +482,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.6499999761581421
+                        "startTime": 0.7333333492279053
                     },
                     {
                         "actionEnd": "",
@@ -493,7 +493,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 0.7833333611488342,
+                        "endTime": 0.8833333253860474,
                         "eventTemplateType": "VFX_TEMPLATE",
                         "label": "MeshVFX",
                         "localPosition": [
@@ -518,7 +518,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.6499999761581421
+                        "startTime": 0.75
                     },
                     {
                         "actionEnd": "",
@@ -883,7 +883,7 @@
                     },
                     {
                         "actionEnd": "",
-                        "actionStart": "",
+                        "actionStart": "EnableDodgeCancel",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
@@ -916,6 +916,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.7166666388511658
+                    },
+                    {
+                        "actionEnd": "DisableDodgeCancel",
+                        "actionStart": "EnableDodgeCancel",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 1.6833332777023315,
+                        "eventTemplateType": "NONE",
+                        "label": "DodgeCancel",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.0833333358168602
                     }
                 ],
                 "loop": false,
@@ -1280,8 +1316,8 @@
                         "startTime": 0.0833333358168602
                     },
                     {
-                        "actionEnd": "CanCancelOff",
-                        "actionStart": "CanCancelOn",
+                        "actionEnd": "DisableActionBranch",
+                        "actionStart": "EnableActionBranch",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
@@ -1290,7 +1326,7 @@
                         "callEndOnStateExit": true,
                         "endTime": 0.6166666746139526,
                         "eventTemplateType": "NONE",
-                        "label": "CanCancelOn",
+                        "label": "ActionBranch",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -1386,6 +1422,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.6166666746139526
+                    },
+                    {
+                        "actionEnd": "DisableDodgeCancel",
+                        "actionStart": "EnableDodgeCancel",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.2666666805744171,
+                        "eventTemplateType": "NONE",
+                        "label": "DodgeCancel",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.06666667014360428
                     }
                 ],
                 "loop": false,
@@ -2577,17 +2649,17 @@
                         "startTime": 0.06666667014360428
                     },
                     {
-                        "actionEnd": "",
-                        "actionStart": "ActionEnd",
+                        "actionEnd": "DisableDodgeCancel",
+                        "actionStart": "EnableDodgeCancel",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
                         "attackTemplateId": "",
                         "blackboardWrites": [],
-                        "callEndOnStateExit": false,
-                        "endTime": 1.4500000476837158,
+                        "callEndOnStateExit": true,
+                        "endTime": 1.3166667222976685,
                         "eventTemplateType": "NONE",
-                        "label": "ActionEnd",
+                        "label": "DodgeCancel",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -2610,79 +2682,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 1.2166666984558105
-                    },
-                    {
-                        "actionEnd": "",
-                        "actionStart": "ComboTransition",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [],
-                        "callEndOnStateExit": false,
-                        "endTime": 1.2000000476837158,
-                        "eventTemplateType": "NONE",
-                        "label": "ComboTransition",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.7333333492279053
-                    },
-                    {
-                        "actionEnd": "",
-                        "actionStart": "CanCancelOn",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [],
-                        "callEndOnStateExit": false,
-                        "endTime": 1.2000000476837158,
-                        "eventTemplateType": "NONE",
-                        "label": "CanCancelOn",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.4833333194255829
+                        "startTime": 0.0833333358168602
                     },
                     {
                         "actionEnd": "Weapon_Trail_Stop",
@@ -2791,6 +2791,114 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.3333333432674408
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "CanCancelOn",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 1.2000000476837158,
+                        "eventTemplateType": "NONE",
+                        "label": "CanCancelOn",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.4833333194255829
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "ComboTransition",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 1.2000000476837158,
+                        "eventTemplateType": "NONE",
+                        "label": "ComboTransition",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.7333333492279053
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "ActionEnd",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 1.4500000476837158,
+                        "eventTemplateType": "NONE",
+                        "label": "ActionEnd",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 1.2166666984558105
                     }
                 ],
                 "loop": false,
@@ -3691,92 +3799,20 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.10000000149011612
+                        "startTime": 0.03333333507180214
                     },
                     {
-                        "actionEnd": "",
-                        "actionStart": "ActionEnd",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [],
-                        "callEndOnStateExit": false,
-                        "endTime": 1.6333333253860474,
-                        "eventTemplateType": "NONE",
-                        "label": "ActionEnd",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 1.3333333730697632
-                    },
-                    {
-                        "actionEnd": "CanComboOff",
-                        "actionStart": "ComboTransition",
-                        "actionUpdate": "",
-                        "attachNodeName": "",
-                        "attachToOwner": false,
-                        "attackTemplateId": "",
-                        "blackboardWrites": [],
-                        "callEndOnStateExit": false,
-                        "endTime": 1.3166667222976685,
-                        "eventTemplateType": "NONE",
-                        "label": "ComboTransition",
-                        "localPosition": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localRotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "localScale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "meshVFXAssetPath": "",
-                        "meshVFXLifeTime": 1.0,
-                        "meshVFXPlaybackSpeed": 1.0,
-                        "mirrorMeshVFX": false,
-                        "overridePlaybackSpeed": false,
-                        "ownerTarget": "Self",
-                        "playbackSpeed": 1.0,
-                        "startTime": 0.7166666388511658
-                    },
-                    {
-                        "actionEnd": "",
-                        "actionStart": "CanCancelOn",
+                        "actionEnd": "DisableActionBranch",
+                        "actionStart": "EnableDodgeCancel",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 1.6333333253860474,
+                        "endTime": 1.3166667222976685,
                         "eventTemplateType": "NONE",
-                        "label": "CanCancelOn",
+                        "label": "DodgeCancel",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -3799,7 +3835,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.800000011920929
+                        "startTime": 0.13333334028720856
                     },
                     {
                         "actionEnd": "Trail_Stop",
@@ -3908,6 +3944,114 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.3333333432674408
+                    },
+                    {
+                        "actionEnd": "CanComboOff",
+                        "actionStart": "ComboTransition",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 1.3166667222976685,
+                        "eventTemplateType": "NONE",
+                        "label": "ComboTransition",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.7166666388511658
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "CanCancelOn",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 1.6333333253860474,
+                        "eventTemplateType": "NONE",
+                        "label": "CanCancelOn",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.800000011920929
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "ActionEnd",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 1.6333333253860474,
+                        "eventTemplateType": "NONE",
+                        "label": "ActionEnd",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 1.3333333730697632
                     }
                 ],
                 "loop": false,
@@ -4027,7 +4171,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 1.5166666507720947,
+                        "endTime": 1.5499999523162842,
                         "eventTemplateType": "NONE",
                         "label": "ActionEnd",
                         "localPosition": [
@@ -4052,7 +4196,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 1.1166666746139526
+                        "startTime": 1.149999976158142
                     },
                     {
                         "actionEnd": "",
@@ -4233,6 +4377,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.21666666865348816
+                    },
+                    {
+                        "actionEnd": "DisableDodgeCancel",
+                        "actionStart": "EnableDodgeCancel",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 1.149999976158142,
+                        "eventTemplateType": "NONE",
+                        "label": "DodgeCancel",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.10000000149011612
                     }
                 ],
                 "loop": false,
@@ -12878,8 +13058,8 @@
                         "startTime": 0.18333333730697632
                     },
                     {
-                        "actionEnd": "CanCancelOff",
-                        "actionStart": "CanCancelOn",
+                        "actionEnd": "DisableActionBranch",
+                        "actionStart": "EnableActionBranch",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
@@ -12888,7 +13068,7 @@
                         "callEndOnStateExit": true,
                         "endTime": 0.6166666746139526,
                         "eventTemplateType": "NONE",
-                        "label": "CanCancel",
+                        "label": "ActionBranch",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -12984,6 +13164,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.7166666388511658
+                    },
+                    {
+                        "actionEnd": "DisableDodgeCancel",
+                        "actionStart": "EnableDodgeCancel",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.6166666746139526,
+                        "eventTemplateType": "NONE",
+                        "label": "DodgeCancel",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.11666666716337204
                     }
                 ],
                 "loop": false,
@@ -13172,12 +13388,12 @@
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
-                        "attackTemplateId": "AriCombo_03_02",
+                        "attackTemplateId": "AirCombo_03_02",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
                         "endTime": 0.6333333253860474,
                         "eventTemplateType": "ATTACK_TEMPLATE",
-                        "label": "AriCombo_03_02",
+                        "label": "AirCombo_03_02",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -13249,7 +13465,7 @@
                         "callEndOnStateExit": true,
                         "endTime": 2.066666603088379,
                         "eventTemplateType": "NONE",
-                        "label": "CanCancelOn",
+                        "label": "ActionBranch",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -13272,7 +13488,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.699999988079071
+                        "startTime": 0.6833333373069763
                     },
                     {
                         "actionEnd": "",
@@ -13308,7 +13524,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 1.0166666507720947
+                        "startTime": 0.7333333492279053
                     },
                     {
                         "actionEnd": "",
@@ -13417,6 +13633,78 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.46666666865348816
+                    },
+                    {
+                        "actionEnd": "DisableActionBranch",
+                        "actionStart": "EnableActionBranch",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 1.399999976158142,
+                        "eventTemplateType": "NONE",
+                        "label": "DodgeCancel",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.06666667014360428
+                    },
+                    {
+                        "actionEnd": "DisableActionBranch",
+                        "actionStart": "EnableActionBranch",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.46666666865348816,
+                        "eventTemplateType": "NONE",
+                        "label": "ActionBranch",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.2666666805744171
                     }
                 ],
                 "loop": false,
@@ -13608,7 +13896,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 0.6499999761581421,
+                        "endTime": 0.8166666626930237,
                         "eventTemplateType": "NONE",
                         "label": "InputBufferOn",
                         "localPosition": [
@@ -13636,8 +13924,8 @@
                         "startTime": 0.01666666753590107
                     },
                     {
-                        "actionEnd": "CanCancelOff",
-                        "actionStart": "CanCancelOn",
+                        "actionEnd": "DisableActionBranch",
+                        "actionStart": "EnableActionBranch",
                         "actionUpdate": "",
                         "attachNodeName": "",
                         "attachToOwner": false,
@@ -13646,7 +13934,7 @@
                         "callEndOnStateExit": true,
                         "endTime": 0.8333333134651184,
                         "eventTemplateType": "NONE",
-                        "label": "CanCancelOn",
+                        "label": "ActionBranch",
                         "localPosition": [
                             0.0,
                             0.0,
@@ -13669,7 +13957,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.75
+                        "startTime": 0.5833333134651184
                     },
                     {
                         "actionEnd": "",
@@ -13706,6 +13994,42 @@
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
                         "startTime": 0.18333333730697632
+                    },
+                    {
+                        "actionEnd": "DisableDodgeCancel",
+                        "actionStart": "EnableDodgeCancel",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.8166666626930237,
+                        "eventTemplateType": "NONE",
+                        "label": "DodgeCancel",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.0833333358168602
                     }
                 ],
                 "loop": false,
@@ -33650,8 +33974,8 @@
             "inputPin": 0,
             "nodeType": 1,
             "outputPin": 6,
-            "posX": 22.0,
-            "posY": -72.0,
+            "posX": -90.0,
+            "posY": -232.0,
             "scopeId": "Root",
             "stateName": "__Start__"
         },
@@ -33672,8 +33996,8 @@
             "inputPin": 38,
             "nodeType": 0,
             "outputPin": 39,
-            "posX": 352.0,
-            "posY": -85.0,
+            "posX": 336.0,
+            "posY": -229.0,
             "scopeId": "Root",
             "stateName": "SS_Idle"
         },
@@ -33694,8 +34018,8 @@
             "inputPin": 50,
             "nodeType": 3,
             "outputPin": 51,
-            "posX": 372.0,
-            "posY": -293.0,
+            "posX": 340.0,
+            "posY": -37.0,
             "scopeId": "Root",
             "stateName": "Attack"
         },
@@ -33815,8 +34139,8 @@
             "inputPin": 120,
             "nodeType": 0,
             "outputPin": 121,
-            "posX": 356.0,
-            "posY": 491.0,
+            "posX": 352.0,
+            "posY": 475.0,
             "scopeId": "Root",
             "stateName": "SS_HitReaction"
         },
@@ -33826,7 +34150,7 @@
             "inputPin": 124,
             "nodeType": 3,
             "outputPin": 125,
-            "posX": 340.0,
+            "posX": 352.0,
             "posY": 651.0,
             "scopeId": "Root",
             "stateName": "Air_State"

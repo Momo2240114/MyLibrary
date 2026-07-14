@@ -8,9 +8,10 @@
         "hitGroupId": 0,
         "hitStopDuration": 0.15000000596046448,
         "hitStopScale": 0.4000000059604645,
+        "impactPower": 10.0,
         "knockBackPower": 3.0,
         "knockBackType": 0,
-        "targetAirLiftPower": 0.20000000298023224
+        "targetAirLiftPower": 0.0
     },
     "attackEffects": [],
     "displayName": "AirCombo_04",

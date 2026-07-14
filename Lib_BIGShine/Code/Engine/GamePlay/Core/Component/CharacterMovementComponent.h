@@ -53,6 +53,7 @@ private:
     float facingTurnSpeed = 10.0f;
     float impulseDamping = 6.0f;
     float unscaledDeltaTime = 0.0f;
+    float pendingVerticalImpulse = 0.0f;
     bool hasFacingRequest = false;
     bool facingImmediate = true;
     bool usePhysicsVelocity = true;

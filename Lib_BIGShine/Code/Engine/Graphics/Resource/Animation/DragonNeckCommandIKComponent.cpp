@@ -2,8 +2,10 @@
 
 #include "IKMapComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
 #include <algorithm>
@@ -21,6 +23,8 @@ namespace
     constexpr const char* ACTION_LOOK_CENTER = "DragonNeck_LookCenter";
     constexpr const char* ACTION_SWEEP_YAW = "DragonNeck_SweepYaw";
     constexpr const char* ACTION_LOOK_WORLD_POSITION = "DragonNeck_LookWorldPosition";
+    constexpr const char* ACTION_LOOK_TARGET_OBJECT_ON = "DragonNeck_TargetObjectLookOn";
+    constexpr const char* ACTION_LOOK_TARGET_OBJECT_OFF = "DragonNeck_TargetObjectLookOff";
 
     DirectX::XMFLOAT3 GetTranslation(const DirectX::XMFLOAT4X4& matrix_)
     {
@@ -43,15 +47,29 @@ namespace
         };
     }
 
-    DirectX::XMFLOAT3 Subtract(const DirectX::XMFLOAT3& a_, const DirectX::XMFLOAT3& b_)
-    {
-        return { a_.x - b_.x, a_.y - b_.y, a_.z - b_.z };
-    }
-
     float SmoothStep(float value_)
     {
         const float clampedValue_ = std::clamp(value_, 0.0f, 1.0f);
         return clampedValue_ * clampedValue_ * (3.0f - 2.0f * clampedValue_);
+    }
+
+    float NormalizeAngleDegrees(float degrees_)
+    {
+        while (degrees_ > 180.0f) degrees_ -= 360.0f;
+        while (degrees_ < -180.0f) degrees_ += 360.0f;
+        return degrees_;
+    }
+
+    float CalculateYawDegrees(const DirectX::XMFLOAT3& direction_)
+    {
+        return std::atan2(direction_.x, direction_.z) * RAD_TO_DEG;
+    }
+
+    float CalculatePitchDegrees(const DirectX::XMFLOAT3& direction_)
+    {
+        const float horizontalLength_ =
+            std::sqrt(direction_.x * direction_.x + direction_.z * direction_.z);
+        return std::atan2(direction_.y, horizontalLength_) * RAD_TO_DEG;
     }
 }
 
@@ -85,6 +103,7 @@ void DragonNeckCommandIKComponent::LateUpdate(float deltaTime_)
     if (!model || !ikMap) return;
 
     commandTimer += deltaTime_;
+    ApplyTargetObjectLookMode();
     ApplyNeckIK(deltaTime_);
 
     const float totalTime_ =
@@ -197,6 +216,14 @@ void DragonNeckCommandIKComponent::RegisterActions()
                 actionBlendInTime,
                 actionBlendOutTime);
         });
+    registerAction_(ACTION_LOOK_TARGET_OBJECT_ON, [this]()
+        {
+            SetTargetObjectLookMode(true);
+        });
+    registerAction_(ACTION_LOOK_TARGET_OBJECT_OFF, [this]()
+        {
+            SetTargetObjectLookMode(false);
+        });
 }
 
 void DragonNeckCommandIKComponent::LookAtTarget(
@@ -262,6 +289,49 @@ void DragonNeckCommandIKComponent::SweepYaw(
     commandTimer = 0.0f;
 }
 
+void DragonNeckCommandIKComponent::SetTargetObjectLookMode(bool enabled_)
+{
+    lookTargetObjectMode = enabled_;
+    if (!lookTargetObjectMode)
+    {
+        ClearCommand();
+        return;
+    }
+
+    currentCommand = {};
+    currentCommand.mode = DRAGON_NECK_IK_MODE::LOOK_AT_TARGET;
+    currentCommand.targetName = lookTargetObjectName;
+    currentCommand.targetOffset = lookTargetObjectOffset;
+    currentCommand.yawOffsetDegrees = lookTargetYawOffsetDegrees;
+    currentCommand.pitchOffsetDegrees = lookTargetPitchOffsetDegrees;
+    currentCommand.duration = 999999.0f;
+    currentCommand.blendInTime = lookTargetBlendInTime;
+    currentCommand.blendOutTime = 0.0f;
+    currentCommand.maxYawDegrees = lookTargetMaxYawDegrees;
+    currentCommand.maxPitchDegrees = lookTargetMaxPitchDegrees;
+    currentCommand.keepLastDirection = true;
+    commandTimer = 0.0f;
+}
+
+void DragonNeckCommandIKComponent::ApplyTargetObjectLookMode()
+{
+    if (!lookTargetObjectMode) return;
+
+    if (currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_TARGET &&
+        currentCommand.targetName == lookTargetObjectName &&
+        currentCommand.keepLastDirection)
+    {
+        currentCommand.targetOffset = lookTargetObjectOffset;
+        currentCommand.yawOffsetDegrees = lookTargetYawOffsetDegrees;
+        currentCommand.pitchOffsetDegrees = lookTargetPitchOffsetDegrees;
+        currentCommand.maxYawDegrees = lookTargetMaxYawDegrees;
+        currentCommand.maxPitchDegrees = lookTargetMaxPitchDegrees;
+        return;
+    }
+
+    SetTargetObjectLookMode(true);
+}
+
 float DragonNeckCommandIKComponent::CalculateBlendRate() const
 {
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::DISABLED) return 0.0f;
@@ -291,12 +361,20 @@ bool DragonNeckCommandIKComponent::ResolveTargetPosition(DirectX::XMFLOAT3& targ
 
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_TARGET)
     {
-        // TODO: Resolve by name through GameObjectManager.
-        // auto target_ = GetGameObject()->GetManager().Find(currentCommand.targetName);
-        // if (!target_ || !target_->transform) return false;
-        // targetPosition_ = target_->transform->GetWorldPosition();
+        const auto owner_ = GetGameObject();
+        if (!owner_ || currentCommand.targetName.empty()) return false;
 
-        return false;
+        const std::shared_ptr<GameObject> targetObject_ =
+            owner_->GetManager().Find(currentCommand.targetName);
+        if (!targetObject_ || !targetObject_->transform) return false;
+
+        const DirectX::XMFLOAT3 objectPosition_ = targetObject_->transform->GetWorldPosition();
+        targetPosition_ = {
+            objectPosition_.x + currentCommand.targetOffset.x,
+            objectPosition_.y + currentCommand.targetOffset.y,
+            objectPosition_.z + currentCommand.targetOffset.z
+        };
+        return true;
     }
 
     return false;
@@ -340,17 +418,30 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 
         const int rootNodeIndex_ = chain_->nodeIndices.front();
         const auto& rootNode_ = nodes_.at(rootNodeIndex_);
-        const DirectX::XMFLOAT3 rootPosition_ = GetTranslation(rootNode_.worldTransform);
-        const DirectX::XMFLOAT3 toTarget_ = Normalize(Subtract(targetPosition_, rootPosition_));
+        const DirectX::XMMATRIX rootWorldMatrix_ =
+            DirectX::XMLoadFloat4x4(&rootNode_.worldTransform);
+        const DirectX::XMMATRIX inverseRootWorldMatrix_ =
+            DirectX::XMMatrixInverse(nullptr, rootWorldMatrix_);
+        DirectX::XMFLOAT3 localTargetPosition_;
+        DirectX::XMStoreFloat3(
+            &localTargetPosition_,
+            DirectX::XMVector3TransformCoord(
+                DirectX::XMLoadFloat3(&targetPosition_),
+                inverseRootWorldMatrix_));
+        const DirectX::XMFLOAT3 toTarget_ = Normalize(localTargetPosition_);
 
         if (toTarget_.x == 0.0f && toTarget_.y == 0.0f && toTarget_.z == 0.0f) return false;
 
-        const float yawRadians_ = std::atan2(toTarget_.x, toTarget_.z);
-        const float horizontalLength_ = std::sqrt(toTarget_.x * toTarget_.x + toTarget_.z * toTarget_.z);
-        const float pitchRadians_ = std::atan2(toTarget_.y, horizontalLength_);
+        const DirectX::XMFLOAT3 forwardAxis_ = Normalize(localForwardAxis);
+        const float baseYawDegrees_ = CalculateYawDegrees(forwardAxis_);
+        const float basePitchDegrees_ = CalculatePitchDegrees(forwardAxis_);
 
-        targetYawDegrees_ = yawRadians_ * RAD_TO_DEG;
-        targetPitchDegrees_ = pitchRadians_ * RAD_TO_DEG;
+        targetYawDegrees_ =
+            NormalizeAngleDegrees(CalculateYawDegrees(toTarget_) - baseYawDegrees_) +
+            currentCommand.yawOffsetDegrees;
+        targetPitchDegrees_ =
+            NormalizeAngleDegrees(CalculatePitchDegrees(toTarget_) - basePitchDegrees_) +
+            currentCommand.pitchOffsetDegrees;
     }
 
     targetYawDegrees_ = std::clamp(
@@ -475,6 +566,32 @@ void DragonNeckCommandIKComponent::Gui()
     ImGui::DragFloat("Sweep End Yaw", &actionSweepEndYawDegrees, 0.5f, -180.0f, 180.0f);
     ImGui::DragFloat3("World Target", &actionWorldTargetPosition.x, 0.1f);
 
+    ImGui::SeparatorText("Target Object Look");
+    char lookTargetObjectNameBuffer_[64];
+    strncpy_s(lookTargetObjectNameBuffer_, lookTargetObjectName.c_str(), sizeof(lookTargetObjectNameBuffer_));
+    if (ImGui::InputText("Look Target Object", lookTargetObjectNameBuffer_, sizeof(lookTargetObjectNameBuffer_)))
+    {
+        lookTargetObjectName = lookTargetObjectNameBuffer_;
+        if (lookTargetObjectMode)
+        {
+            SetTargetObjectLookMode(true);
+        }
+    }
+    if (ImGui::Checkbox("Look Target Object Mode", &lookTargetObjectMode))
+    {
+        SetTargetObjectLookMode(lookTargetObjectMode);
+    }
+    ImGui::DragFloat("Look Blend In", &lookTargetBlendInTime, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat3("Look Target Offset", &lookTargetObjectOffset.x, 0.05f);
+    ImGui::DragFloat("Look Base Yaw", &lookTargetYawOffsetDegrees, 0.5f, -180.0f, 180.0f);
+    ImGui::DragFloat("Look Base Pitch", &lookTargetPitchOffsetDegrees, 0.5f, -90.0f, 90.0f);
+    ImGui::DragFloat("Look Max Yaw", &lookTargetMaxYawDegrees, 0.5f, 0.0f, 180.0f);
+    ImGui::DragFloat("Look Max Pitch", &lookTargetMaxPitchDegrees, 0.5f, 0.0f, 90.0f);
+    if (ImGui::Button("Look Target Now"))
+    {
+        SetTargetObjectLookMode(true);
+    }
+
     if (ImGui::Button("Register Actions"))
     {
         RegisterActions();
@@ -520,6 +637,18 @@ void DragonNeckCommandIKComponent::Serialize(nlohmann::json& json_) const
         actionWorldTargetPosition.y,
         actionWorldTargetPosition.z
     };
+    json_["LookTargetObjectMode"] = lookTargetObjectMode;
+    json_["LookTargetObjectName"] = lookTargetObjectName;
+    json_["LookTargetObjectOffset"] = {
+        lookTargetObjectOffset.x,
+        lookTargetObjectOffset.y,
+        lookTargetObjectOffset.z
+    };
+    json_["LookTargetBlendInTime"] = lookTargetBlendInTime;
+    json_["LookTargetYawOffsetDegrees"] = lookTargetYawOffsetDegrees;
+    json_["LookTargetPitchOffsetDegrees"] = lookTargetPitchOffsetDegrees;
+    json_["LookTargetMaxYawDegrees"] = lookTargetMaxYawDegrees;
+    json_["LookTargetMaxPitchDegrees"] = lookTargetMaxPitchDegrees;
 }
 
 void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
@@ -553,8 +682,27 @@ void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
             json_["ActionWorldTargetPosition"][2]
         };
     }
+    lookTargetObjectMode = json_.value("LookTargetObjectMode", false);
+    lookTargetObjectName = json_.value("LookTargetObjectName", std::string("PlayerModel"));
+    if (json_.contains("LookTargetObjectOffset"))
+    {
+        lookTargetObjectOffset = {
+            json_["LookTargetObjectOffset"][0],
+            json_["LookTargetObjectOffset"][1],
+            json_["LookTargetObjectOffset"][2]
+        };
+    }
+    lookTargetBlendInTime = json_.value("LookTargetBlendInTime", 0.15f);
+    lookTargetYawOffsetDegrees = json_.value("LookTargetYawOffsetDegrees", 0.0f);
+    lookTargetPitchOffsetDegrees = json_.value("LookTargetPitchOffsetDegrees", 0.0f);
+    lookTargetMaxYawDegrees = json_.value("LookTargetMaxYawDegrees", 65.0f);
+    lookTargetMaxPitchDegrees = json_.value("LookTargetMaxPitchDegrees", 35.0f);
 
     RegisterActions();
+    if (lookTargetObjectMode)
+    {
+        SetTargetObjectLookMode(true);
+    }
 }
 
 REGISTER_COMPONENT(DragonNeckCommandIKComponent, "DragonNeckCommandIKComponent")

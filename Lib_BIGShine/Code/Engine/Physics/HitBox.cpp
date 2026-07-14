@@ -41,6 +41,11 @@ void HitBox::SetDamage(float damage_)
     damage = damage_;
 }
 
+void HitBox::SetImpactPower(float impactPower_)
+{
+    impactPower = (std::max)(impactPower_, 0.0f);
+}
+
 void HitBox::SetKnockBackPower(float knockBackPower_)
 {
     knockBackPower = knockBackPower_;
@@ -130,6 +135,7 @@ void HitBox::Gui()
     ImGui::Checkbox("Can Hit Owner", &canHitOwner);
     ImGui::Text("Hit Targets: %zu", alreadyHitTargets.size());
     ImGui::Text("Owner: %s", ownerObject ? ownerObject->GetName().c_str() : "(Self)");
+    ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Target Air Lift Power", &targetAirLiftPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Attacker Air Lift Power", &attackerAirLiftPower, 0.1f, 0.0f, 99999.0f);
@@ -218,6 +224,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["CanHitOwner"] = canHitOwner;
     j_["TeamId"] = teamId;
     j_["SourceAction"] = sourceAction;
+    j_["ImpactPower"] = impactPower;
     j_["KnockBackPower"] = knockBackPower;
     j_["TargetAirLiftPower"] = targetAirLiftPower;
     j_["AttackerAirLiftPower"] = attackerAirLiftPower;
@@ -257,6 +264,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     canHitOwner = j_.value("CanHitOwner", false);
     teamId = j_.value("TeamId", 0);
     sourceAction = j_.value("SourceAction", std::string{});
+    impactPower = (std::max)(j_.value("ImpactPower", damage), 0.0f);
     knockBackPower = j_.value("KnockBackPower", 0.0f);
     targetAirLiftPower = (std::max)(j_.value("TargetAirLiftPower", 0.0f), 0.0f);
     attackerAirLiftPower = (std::max)(j_.value("AttackerAirLiftPower", 0.0f), 0.0f);
@@ -382,6 +390,10 @@ void HitBox::ApplyBlackboardValues()
         if (!knockBackPowerKey.empty() && blackboard_->GetFloat(blackboardCategory, knockBackPowerKey, value_))
         {
             knockBackPower = value_;
+        }
+        if (blackboard_->GetFloat(blackboardCategory, "ImpactPower", value_))
+        {
+            impactPower = (std::max)(value_, 0.0f);
         }
         if (blackboard_->GetFloat(blackboardCategory, "TargetAirLiftPower", value_))
         {

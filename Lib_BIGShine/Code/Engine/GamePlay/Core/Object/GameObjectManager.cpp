@@ -28,6 +28,7 @@
 #include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/GamePlay/Graphics/MotionVelocityComponent.h"
 
@@ -187,6 +188,7 @@ void GameObjectManager::Update(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsUpdate");
+        const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
 
         // Animation events can append effects while components are updating.
         // Capture only the count so every shared_ptr is not copied each frame.
@@ -197,13 +199,18 @@ void GameObjectManager::Update(float elapsedTime_)
             if (!object_) continue;
 
             const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
+            float objectDeltaTime_ = elapsedTime_ * scale_;
+            if (useUnscaledCameraDelta_ && object_->GetComponent<CameraComponent>())
+            {
+                objectDeltaTime_ = elapsedTime_;
+            }
 
             if (auto movement_ = object_->GetComponent<CharacterMovementComponent>())
             {
                 movement_->SetUnscaledDeltaTime(elapsedTime_);
             }
 
-            object_->Update(elapsedTime_ * scale_);
+            object_->Update(objectDeltaTime_);
         }
     }
 
@@ -238,6 +245,7 @@ void GameObjectManager::Update(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
+        const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
 
         // Objects spawned during Update start updating on the next frame.
         const size_t lateUpdateObjectCount_ = objects.size();
@@ -247,7 +255,13 @@ void GameObjectManager::Update(float elapsedTime_)
             if (!object_) continue;
 
             const float scale_ = timeManager->GetCachedScale(object_->GetLayerBit());
-            object_->LateUpdate(elapsedTime_ * scale_);
+            float objectDeltaTime_ = elapsedTime_ * scale_;
+            if (useUnscaledCameraDelta_ && object_->GetComponent<CameraComponent>())
+            {
+                objectDeltaTime_ = elapsedTime_;
+            }
+
+            object_->LateUpdate(objectDeltaTime_);
         }
     }
 

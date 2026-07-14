@@ -146,7 +146,9 @@ private:
 	struct TransparencyDrawInfo
 	{
 		ModelShaderID				shaderId;
+		std::shared_ptr<GltfModelCommponennt> model;
 		const GltfModelCommponennt::Mesh* mesh;
+		int						meshIndex;
 		float					distance;
 	};
 

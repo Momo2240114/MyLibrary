@@ -43,4 +43,5 @@ private:
     float stateListWidth = 230.0f;
     float inspectorWidth = 320.0f;
     bool needsNodeLayout = true;
+    bool editDodgeCancelRoutes = true;
 };

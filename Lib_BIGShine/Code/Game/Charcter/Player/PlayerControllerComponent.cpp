@@ -190,7 +190,9 @@ void PlayerControllerComponent::Start()
         owner_->GetOrAddComponent<HitReactionComponent>();
     if (hitReaction_)
     {
-        hitReaction_->SetReactionActionName("Hit_Player");
+        hitReaction_->SetArmor(armor);
+        hitReaction_->SetDamageActionName("Health_Hit");
+        hitReaction_->SetReactionActionName("Player_Hit");
     }
 
     const std::shared_ptr<ActionSequence> hitSequence_ =
@@ -239,6 +241,7 @@ void PlayerControllerComponent::Update(float dt_)
 {
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
     stateMachine.Update(dt_);
+    TryDodgeCancelInput();
     UpdateAirborneActionContext();
     UpdateDodgeRestrictions(dt_);
     SendGroundedToBlackboard();
@@ -566,9 +569,10 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     const int requestedComboIndex_ = GetRequestedComboIndex(nextAction_);
     const bool isLocomotion_ =
         GetPlayerActionGroup(currentAction_) == PLAYER_ACTION_GROUP::LOCOMOTION;
-    const bool canUseCancelTransition_ =
-        actionRuntime.canCancel &&
-        HasCancelTransition(currentAction_, nextAction_);
+    const bool nextIsDodge_ = IsDodgeAction(nextAction_);
+    const bool canUseCancelTransition_ = nextIsDodge_
+        ? (actionRuntime.canDodgeCancel && HasDodgeCancelTransition(currentAction_, nextAction_))
+        : (actionRuntime.canActionBranch && HasActionBranchTransition(currentAction_, nextAction_));
     const bool canChangeImmediately_ =
         currentAction_ == PLAYER_ACTION::NONE ||
         isLocomotion_ ||
@@ -593,46 +597,127 @@ bool PlayerControllerComponent::HasCancelTransition(
     PLAYER_ACTION from_,
     PLAYER_ACTION to_) const
 {
-    return std::any_of(
-        cancelTransitions.begin(),
-        cancelTransitions.end(),
-        [from_, to_](const PlayerCancelTransition& transition_)
-        {
-            return transition_.from == from_ && transition_.to == to_;
-        });
+    return HasDodgeCancelTransition(from_, to_) ||
+        HasActionBranchTransition(from_, to_);
 }
 
 bool PlayerControllerComponent::AddCancelTransition(
     PLAYER_ACTION from_,
     PLAYER_ACTION to_)
 {
-    if (from_ == PLAYER_ACTION::NONE || to_ == PLAYER_ACTION::NONE ||
-        from_ == to_ || HasCancelTransition(from_, to_))
-    {
-        return false;
-    }
-
-    cancelTransitions.push_back({ from_, to_ });
-    return true;
+    return IsDodgeAction(to_)
+        ? AddDodgeCancelTransition(from_, to_)
+        : AddActionBranchTransition(from_, to_);
 }
 
 bool PlayerControllerComponent::RemoveCancelTransition(
     PLAYER_ACTION from_,
     PLAYER_ACTION to_)
 {
-    const auto removeBegin_ = std::remove_if(
-        cancelTransitions.begin(),
-        cancelTransitions.end(),
+    return IsDodgeAction(to_)
+        ? RemoveDodgeCancelTransition(from_, to_)
+        : RemoveActionBranchTransition(from_, to_);
+}
+
+bool PlayerControllerComponent::HasDodgeCancelTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_) const
+{
+    return std::any_of(
+        dodgeCancelTransitions.begin(),
+        dodgeCancelTransitions.end(),
         [from_, to_](const PlayerCancelTransition& transition_)
         {
             return transition_.from == from_ && transition_.to == to_;
         });
-    if (removeBegin_ == cancelTransitions.end())
+}
+
+bool PlayerControllerComponent::AddDodgeCancelTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_)
+{
+    if (!IsDodgeAction(to_))
+    {
+        return false;
+    }
+    if (from_ == PLAYER_ACTION::NONE || to_ == PLAYER_ACTION::NONE ||
+        from_ == to_ || HasDodgeCancelTransition(from_, to_))
     {
         return false;
     }
 
-    cancelTransitions.erase(removeBegin_, cancelTransitions.end());
+    dodgeCancelTransitions.push_back({ from_, to_ });
+    return true;
+}
+
+bool PlayerControllerComponent::RemoveDodgeCancelTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_)
+{
+    const auto removeBegin_ = std::remove_if(
+        dodgeCancelTransitions.begin(),
+        dodgeCancelTransitions.end(),
+        [from_, to_](const PlayerCancelTransition& transition_)
+        {
+            return transition_.from == from_ && transition_.to == to_;
+        });
+    if (removeBegin_ == dodgeCancelTransitions.end())
+    {
+        return false;
+    }
+
+    dodgeCancelTransitions.erase(removeBegin_, dodgeCancelTransitions.end());
+    return true;
+}
+
+bool PlayerControllerComponent::HasActionBranchTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_) const
+{
+    return std::any_of(
+        actionBranchTransitions.begin(),
+        actionBranchTransitions.end(),
+        [from_, to_](const PlayerCancelTransition& transition_)
+        {
+            return transition_.from == from_ && transition_.to == to_;
+        });
+}
+
+bool PlayerControllerComponent::AddActionBranchTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_)
+{
+    if (IsDodgeAction(to_))
+    {
+        return false;
+    }
+    if (from_ == PLAYER_ACTION::NONE || to_ == PLAYER_ACTION::NONE ||
+        from_ == to_ || HasActionBranchTransition(from_, to_))
+    {
+        return false;
+    }
+
+    actionBranchTransitions.push_back({ from_, to_ });
+    return true;
+}
+
+bool PlayerControllerComponent::RemoveActionBranchTransition(
+    PLAYER_ACTION from_,
+    PLAYER_ACTION to_)
+{
+    const auto removeBegin_ = std::remove_if(
+        actionBranchTransitions.begin(),
+        actionBranchTransitions.end(),
+        [from_, to_](const PlayerCancelTransition& transition_)
+        {
+            return transition_.from == from_ && transition_.to == to_;
+        });
+    if (removeBegin_ == actionBranchTransitions.end())
+    {
+        return false;
+    }
+
+    actionBranchTransitions.erase(removeBegin_, actionBranchTransitions.end());
     return true;
 }
 
@@ -655,7 +740,7 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
 
     for (const PLAYER_ACTION action_ : jumpFromActions_)
     {
-        AddCancelTransition(action_, PLAYER_ACTION::JUMP);
+        AddActionBranchTransition(action_, PLAYER_ACTION::JUMP);
     }
 
     constexpr PLAYER_ACTION jumpAirActions_[] =
@@ -668,19 +753,35 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
 
     for (const PLAYER_ACTION action_ : jumpAirActions_)
     {
-        AddCancelTransition(PLAYER_ACTION::JUMP, action_);
+        AddActionBranchTransition(PLAYER_ACTION::JUMP, action_);
     }
 
-    AddCancelTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_WEAK_ATTACK);
-    AddCancelTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_DODGE);
-    AddCancelTransition(PLAYER_ACTION::AIR_STRONG_ATTACK, PLAYER_ACTION::AIR_DODGE);
-    AddCancelTransition(PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK, PLAYER_ACTION::AIR_DODGE);
-    AddCancelTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_WEAK_ATTACK);
-    AddCancelTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_ATTACK);
-    AddCancelTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
+    AddDodgeCancelTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::STRONG_CHARGE_ATTACK, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::AIR_DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::AIR_STRONG_ATTACK, PLAYER_ACTION::AIR_DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK, PLAYER_ACTION::AIR_DODGE);
 
-    AddCancelTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::IDLE);
-    AddCancelTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::MOVE);
+    AddActionBranchTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::SKILL_A);
+    AddActionBranchTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::SKILL_B);
+    AddActionBranchTransition(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::SKILL_A);
+    AddActionBranchTransition(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::SKILL_B);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_WEAK_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_STRONG_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_WEAK_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
+
+    AddActionBranchTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::IDLE);
+    AddActionBranchTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::MOVE);
 }
 
 std::shared_ptr<CameraLockOnComponent>
@@ -721,25 +822,31 @@ void PlayerControllerComponent::NotifyGuardedAttack()
 
 void PlayerControllerComponent::SetCanCancel(bool enabled_)
 {
-    actionRuntime.canCancel = enabled_;
-    if (blackboard)
-    {
-        blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
-        blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
-    }
-
+    actionRuntime.canActionBranch = enabled_;
+    SyncCancelGateBlackboard();
     if (enabled_)
     {
-        if (actionRuntime.bufferedAction != PLAYER_ACTION::NONE &&
-            actionRuntime.bufferedAction != GetCurrentAction() &&
-            IsPlayerActionTimelineDriven(GetCurrentAction()) &&
-            !actionRuntime.actionEnded)
-        {
-            NotifyActionEnd();
-            return;
-        }
+        TryConsumeBufferedActionForCancelGate(false);
+    }
+}
 
-        ConsumeBufferedAction();
+void PlayerControllerComponent::SetCanDodgeCancel(bool enabled_)
+{
+    actionRuntime.canDodgeCancel = enabled_;
+    SyncCancelGateBlackboard();
+    if (enabled_)
+    {
+        TryConsumeBufferedActionForCancelGate(true);
+    }
+}
+
+void PlayerControllerComponent::SetCanActionBranch(bool enabled_)
+{
+    actionRuntime.canActionBranch = enabled_;
+    SyncCancelGateBlackboard();
+    if (enabled_)
+    {
+        TryConsumeBufferedActionForCancelGate(false);
     }
 }
 
@@ -761,6 +868,67 @@ void PlayerControllerComponent::SetCanCombo(bool enabled_)
         blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CAN_COMBO, actionRuntime.canCombo);
         blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::CAN_COMBO, actionRuntime.canCombo);
     }
+}
+
+void PlayerControllerComponent::SyncCancelGateBlackboard()
+{
+    if (!blackboard) return;
+
+    const bool legacyCanCancel_ = actionRuntime.canActionBranch;
+    constexpr const char* categories_[] =
+    {
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardCategory::ANIM
+    };
+
+    for (const char* category_ : categories_)
+    {
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, legacyCanCancel_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_DODGE_CANCEL, actionRuntime.canDodgeCancel);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_ACTION_BRANCH, actionRuntime.canActionBranch);
+    }
+}
+
+void PlayerControllerComponent::TryConsumeBufferedActionForCancelGate(bool dodgeGate_)
+{
+    if (actionRuntime.bufferedAction == PLAYER_ACTION::NONE)
+    {
+        return;
+    }
+
+    if (IsDodgeAction(actionRuntime.bufferedAction) != dodgeGate_)
+    {
+        return;
+    }
+
+    const PLAYER_ACTION nextAction_ = actionRuntime.bufferedAction;
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+
+    if (dodgeGate_)
+    {
+        if (!actionRuntime.canDodgeCancel ||
+            !HasDodgeCancelTransition(currentAction_, nextAction_) ||
+            !CanStartDodgeAction(nextAction_))
+        {
+            return;
+        }
+
+        actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+        actionRuntime.bufferedComboIndex = 0;
+        pendingComboIndex = 0;
+        stateMachine.ChangeState(nextAction_);
+        return;
+    }
+
+    if (actionRuntime.bufferedAction != GetCurrentAction() &&
+        IsPlayerActionTimelineDriven(GetCurrentAction()) &&
+        !actionRuntime.actionEnded)
+    {
+        NotifyActionEnd();
+        return;
+    }
+
+    ConsumeBufferedAction();
 }
 
 void PlayerControllerComponent::NotifyComboTransition()
@@ -806,14 +974,14 @@ void PlayerControllerComponent::NotifyActionEnd()
     }
 
     actionRuntime.actionEnded = true;
-    actionRuntime.canCancel = true;
+    actionRuntime.canDodgeCancel = true;
+    actionRuntime.canActionBranch = true;
     if (blackboard)
     {
         blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::ACTION_ENDED, actionRuntime.actionEnded);
-        blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
         blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::ACTION_ENDED, actionRuntime.actionEnded);
-        blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
     }
+    SyncCancelGateBlackboard();
 
     if (GetPlayerAttackType(currentAction_) == PLAYER_ATTACK_TYPE::WEAK &&
         actionRuntime.bufferedAction == currentAction_)
@@ -869,7 +1037,8 @@ void PlayerControllerComponent::NotifyJumpLoop()
 
 void PlayerControllerComponent::HandleHitReaction()
 {
-    actionRuntime.canCancel = false;
+    actionRuntime.canDodgeCancel = false;
+    actionRuntime.canActionBranch = false;
     actionRuntime.canBufferInput = false;
     actionRuntime.canCombo = false;
     actionRuntime.actionEnded = false;
@@ -942,7 +1111,8 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 
     comboIndex = GetPlayerAttackType(action_) == PLAYER_ATTACK_TYPE::WEAK ? pendingComboIndex : 0;
     pendingComboIndex = 0;
-    actionRuntime.canCancel = !IsPlayerActionTimelineDriven(action_);
+    actionRuntime.canDodgeCancel = !IsPlayerActionTimelineDriven(action_);
+    actionRuntime.canActionBranch = !IsPlayerActionTimelineDriven(action_);
     actionRuntime.canBufferInput = false;
     actionRuntime.canCombo = false;
     actionRuntime.actionEnded = false;
@@ -1128,6 +1298,7 @@ void PlayerControllerComponent::ProcessActionInput()
     }
 
     const bool isAirborne_ = IsAirborneForAction();
+    if (TryDodgeCancelInput()) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_DODGE : PLAYER_ACTION::DODGE)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
@@ -1180,6 +1351,30 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
         {
             SetCanCancel(false);
         });
+    registry_.RegisterAction("Player", "EnableDodgeCancel", [this]()
+        {
+            SetCanDodgeCancel(true);
+        });
+    registry_.RegisterAction("Player", "CanDodgeOn", [this]()
+        {
+            SetCanDodgeCancel(true);
+        });
+    registry_.RegisterAction("Player", "DisableDodgeCancel", [this]()
+        {
+            SetCanDodgeCancel(false);
+        });
+    registry_.RegisterAction("Player", "CanDodgeOff", [this]()
+        {
+            SetCanDodgeCancel(false);
+        });
+    registry_.RegisterAction("Player", "EnableActionBranch", [this]()
+        {
+            SetCanActionBranch(true);
+        });
+    registry_.RegisterAction("Player", "DisableActionBranch", [this]()
+        {
+            SetCanActionBranch(false);
+        });
     registry_.RegisterAction("Player", "InputBufferOn", [this]()
         {
             SetCanBufferInput(true);
@@ -1192,11 +1387,23 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
         {
             SetCanCombo(true);
         });
+    registry_.RegisterAction("Player", "EnableComboInput", [this]()
+        {
+            SetCanCombo(true);
+        });
     registry_.RegisterAction("Player", "CanComboOff", [this]()
         {
             SetCanCombo(false);
         });
+    registry_.RegisterAction("Player", "DisableComboInput", [this]()
+        {
+            SetCanCombo(false);
+        });
     registry_.RegisterAction("Player", "ComboTransition", [this]()
+        {
+            NotifyComboTransition();
+        });
+    registry_.RegisterAction("Player", "CommitBufferedCombo", [this]()
         {
             NotifyComboTransition();
         });
@@ -1263,7 +1470,10 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_DODGE, action_ == PLAYER_ACTION::AIR_DODGE);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL,
             attackType_ == PLAYER_ATTACK_TYPE::SKILL_A || attackType_ == PLAYER_ATTACK_TYPE::SKILL_B);
-        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, actionRuntime.canCancel);
+        const bool legacyCanCancel_ = actionRuntime.canActionBranch;
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, legacyCanCancel_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_DODGE_CANCEL, actionRuntime.canDodgeCancel);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_ACTION_BRANCH, actionRuntime.canActionBranch);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_BUFFER_INPUT, actionRuntime.canBufferInput);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_COMBO, actionRuntime.canCombo);
         blackboard->SetBool(category_, PlayerBlackboardKey::ACTION_ENDED, actionRuntime.actionEnded);
@@ -1408,7 +1618,8 @@ bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
     }
 
     // デバッグ切り替えなので、入力バッファやコンボ待ちを全部リセット
-    actionRuntime.canCancel = true;
+    actionRuntime.canDodgeCancel = true;
+    actionRuntime.canActionBranch = true;
     actionRuntime.canBufferInput = false;
     actionRuntime.canCombo = false;
     actionRuntime.actionEnded = false;
@@ -1443,6 +1654,37 @@ void PlayerControllerComponent::SendJumpPhaseToBlackboard(
     }
 
     SendLocomotionPhaseToBlackboard(phase_);
+}
+
+bool PlayerControllerComponent::TryDodgeCancelInput()
+{
+    if (!actionRuntime.canDodgeCancel)
+    {
+        return false;
+    }
+
+    const bool isAirborne_ = IsAirborneForAction();
+    const PLAYER_ACTION dodgeAction_ = isAirborne_
+        ? PLAYER_ACTION::AIR_DODGE
+        : PLAYER_ACTION::DODGE;
+    if (!HasDodgeCancelTransition(GetCurrentAction(), dodgeAction_) ||
+        !CanStartDodgeAction(dodgeAction_))
+    {
+        return false;
+    }
+
+    if (IsDodgeAction(actionRuntime.bufferedAction))
+    {
+        TryConsumeBufferedActionForCancelGate(true);
+        return GetCurrentAction() == dodgeAction_;
+    }
+
+    if (!KeyConfig::Instance().ActionPressed(PlayerInputAction::DODGE))
+    {
+        return false;
+    }
+
+    return RequestAction(dodgeAction_);
 }
 
 void PlayerControllerComponent::NotifyJustDodge()
@@ -1484,7 +1726,8 @@ void PlayerControllerComponent::Gui()
 
     ImGui::SeparatorText("Runtime");
 
-    ImGui::Text("Can Cancel: %s", actionRuntime.canCancel ? "true" : "false");
+    ImGui::Text("Dodge Cancel Gate: %s", actionRuntime.canDodgeCancel ? "true" : "false");
+    ImGui::Text("Action Branch Gate: %s", actionRuntime.canActionBranch ? "true" : "false");
     ImGui::Text("Can Buffer Input: %s", actionRuntime.canBufferInput ? "true" : "false");
     ImGui::Text("Can Combo: %s", actionRuntime.canCombo ? "true" : "false");
     ImGui::Text("Action Ended: %s", actionRuntime.actionEnded ? "true" : "false");
@@ -1494,7 +1737,8 @@ void PlayerControllerComponent::Gui()
     ImGui::Text("Air Dodge Consumed: %s", airDodgeConsumed ? "true" : "false");
 
     ImGui::SeparatorText("Cancel Transitions");
-    ImGui::Text("Routes: %zu", cancelTransitions.size());
+    ImGui::Text("Dodge Cancel Routes: %zu", dodgeCancelTransitions.size());
+    ImGui::Text("Action Branch Routes: %zu", actionBranchTransitions.size());
     ImGui::TextWrapped("Edit routes in the Player State Graph workspace.");
 
     ImGui::SeparatorText("Debug Change Action");
@@ -1580,6 +1824,20 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    if (ImGui::DragFloat("Armor", &armor, 0.1f, 0.0f, 99999.0f))
+    {
+        if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+        {
+            if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
+                owner_->GetComponent<HitReactionComponent>())
+            {
+                hitReaction_->SetArmor(armor);
+            }
+        }
+    }
+    ImGui::DragFloat("Hit Medium Impact", &hitMediumImpactThreshold, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Hit Heavy Impact", &hitHeavyImpactThreshold, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Air Hit Knockdown Impact", &airHitKnockdownImpactThreshold, 0.1f, 0.0f, 99999.0f);
 
     ImGui::SeparatorText("Attack Facing Assist");
     ImGui::Checkbox("Enabled##AttackFacingAssist", &attackAssistSettings.enabled);
@@ -1624,9 +1882,18 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetVector2(category_, PlayerBlackboardKey::MOVE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::DODGE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::HIT_DIRECTION, { 0.0f, 0.0f });
+        blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_IMPACT_POWER, 0.0f);
+        blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_ARMOR, armor);
+        blackboard->SetInt(category_, PlayerBlackboardKey::HIT_REACTION_LEVEL, 0);
         blackboard->SetInt(category_, PlayerBlackboardKey::LOCOMOTION_PHASE, static_cast<int>(PLAYER_LOCOMOTION_PHASE::IDLE));
 
         blackboard->SetBool(category_, PlayerBlackboardKey::HIT_TRIGGER, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_HIT_LIGHT, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_HIT_MEDIUM, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_HIT_HEAVY, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_HIT_REACTION, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_HIT_RECOVERABLE, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_HIT_KNOCKDOWN, false);
 
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_IDLE, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_MOVE, false);
@@ -1652,6 +1919,8 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL, false);
 
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_DODGE_CANCEL, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_ACTION_BRANCH, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_BUFFER_INPUT, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_COMBO, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::ACTION_ENDED, false);
@@ -1678,6 +1947,10 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["JumpEndDuration"] = jumpEndDuration;
     j_["TimelineActionFallbackDuration"] = timelineActionFallbackDuration;
     j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
+    j_["Armor"] = armor;
+    j_["HitMediumImpactThreshold"] = hitMediumImpactThreshold;
+    j_["HitHeavyImpactThreshold"] = hitHeavyImpactThreshold;
+    j_["AirHitKnockdownImpactThreshold"] = airHitKnockdownImpactThreshold;
     j_["AttackAssist"] =
     {
         { "Enabled", attackAssistSettings.enabled },
@@ -1690,15 +1963,22 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
         { "MaxPositionCorrection", attackAssistSettings.maxPositionCorrection },
         { "TargetStopDistance", attackAssistSettings.targetStopDistance }
     };
-    j_["CancelTransitions"] = nlohmann::json::array();
-    for (const PlayerCancelTransition& transition_ : cancelTransitions)
+    auto writeTransitions_ = [](const std::vector<PlayerCancelTransition>& transitions_)
     {
-        j_["CancelTransitions"].push_back(
-            {
-                { "From", static_cast<int>(transition_.from) },
-                { "To", static_cast<int>(transition_.to) }
-            });
-    }
+        nlohmann::json transitionsJson_ = nlohmann::json::array();
+        for (const PlayerCancelTransition& transition_ : transitions_)
+        {
+            transitionsJson_.push_back(
+                {
+                    { "From", static_cast<int>(transition_.from) },
+                    { "To", static_cast<int>(transition_.to) }
+                });
+        }
+        return transitionsJson_;
+    };
+
+    j_["DodgeCancelTransitions"] = writeTransitions_(dodgeCancelTransitions);
+    j_["ActionBranchTransitions"] = writeTransitions_(actionBranchTransitions);
 }
 
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
@@ -1719,6 +1999,16 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         0.0f);
     groundDodgeCooldownDuration = (std::max)(
         j_.value("GroundDodgeCooldownDuration", groundDodgeCooldownDuration),
+        0.0f);
+    armor = (std::max)(j_.value("Armor", armor), 0.0f);
+    hitMediumImpactThreshold = (std::max)(
+        j_.value("HitMediumImpactThreshold", hitMediumImpactThreshold),
+        0.0f);
+    hitHeavyImpactThreshold = (std::max)(
+        j_.value("HitHeavyImpactThreshold", hitHeavyImpactThreshold),
+        0.0f);
+    airHitKnockdownImpactThreshold = (std::max)(
+        j_.value("AirHitKnockdownImpactThreshold", airHitKnockdownImpactThreshold),
         0.0f);
     if (j_.contains("AttackAssist") && j_["AttackAssist"].is_object())
     {
@@ -1756,10 +2046,9 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
             attackAssistJson_.value("TargetStopDistance", attackAssistSettings.targetStopDistance),
             0.0f);
     }
-    if (j_.contains("CancelTransitions") && j_["CancelTransitions"].is_array())
+    auto readTransitions_ = [this](const nlohmann::json& transitionsJson_)
     {
-        cancelTransitions.clear();
-        for (const auto& transitionJson_ : j_["CancelTransitions"])
+        for (const auto& transitionJson_ : transitionsJson_)
         {
             const int from_ = transitionJson_.value("From", static_cast<int>(PLAYER_ACTION::NONE));
             const int to_ = transitionJson_.value("To", static_cast<int>(PLAYER_ACTION::NONE));
@@ -1768,11 +2057,35 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
             {
                 continue;
             }
-            cancelTransitions.push_back(
-                {
-                    static_cast<PLAYER_ACTION>(from_),
-                    static_cast<PLAYER_ACTION>(to_)
-                });
+            AddCancelTransition(
+                static_cast<PLAYER_ACTION>(from_),
+                static_cast<PLAYER_ACTION>(to_));
+        }
+    };
+
+    if (j_.contains("DodgeCancelTransitions") && j_["DodgeCancelTransitions"].is_array())
+    {
+        dodgeCancelTransitions.clear();
+        readTransitions_(j_["DodgeCancelTransitions"]);
+    }
+
+    if (j_.contains("ActionBranchTransitions") && j_["ActionBranchTransitions"].is_array())
+    {
+        actionBranchTransitions.clear();
+        readTransitions_(j_["ActionBranchTransitions"]);
+    }
+
+    if (j_.contains("CancelTransitions") && j_["CancelTransitions"].is_array())
+    {
+        readTransitions_(j_["CancelTransitions"]);
+    }
+
+    if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+    {
+        if (const std::shared_ptr<HitReactionComponent> hitReaction_ =
+            owner_->GetComponent<HitReactionComponent>())
+        {
+            hitReaction_->SetArmor(armor);
         }
     }
 

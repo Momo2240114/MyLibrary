@@ -89,6 +89,7 @@ void AttackEffectHitComponent::SetOwner(GameObject* owner_) { ownerObject = owne
 void AttackEffectHitComponent::SetAttackInstanceId(uint32_t attackInstanceId_) { attackInstanceId = attackInstanceId_; }
 void AttackEffectHitComponent::SetHitGroupId(uint32_t hitGroupId_) { hitGroupId = hitGroupId_; }
 void AttackEffectHitComponent::SetDamage(float damage_) { damage = damage_; }
+void AttackEffectHitComponent::SetImpactPower(float impactPower_) { impactPower = (std::max)(impactPower_, 0.0f); }
 void AttackEffectHitComponent::SetHitStopDuration(float hitStopDuration_) { hitStopDuration = hitStopDuration_; }
 void AttackEffectHitComponent::SetHitStopScale(float hitStopScale_) { hitStopScale = hitStopScale_; }
 void AttackEffectHitComponent::SetKnockBackPower(float knockBackPower_) { knockBackPower = knockBackPower_; }
@@ -209,6 +210,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->SetAttackInstanceId(attackInstanceId);
     hitBox_->SetHitGroupId(hitGroupId);
     hitBox_->SetDamage(damage);
+    hitBox_->SetImpactPower(impactPower);
     hitBox_->hitStopDuration = hitStopDuration;
     hitBox_->hitStopScale = hitStopScale;
     hitBox_->SetKnockBackPower(knockBackPower);
@@ -292,6 +294,7 @@ void AttackEffectHitComponent::Gui()
     ImGui::Text("Elapsed: %.3f", elapsedTime);
     ImGui::Checkbox("Playing", &playing);
     ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f);
+    ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f);
     ImGui::DragFloat("Hit Stop Duration", &hitStopDuration, 0.001f, 0.0f);
     ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f);
@@ -393,6 +396,7 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["EffectType"] = static_cast<int>(effectType);
     json_["LifeTime"] = lifeTime;
     json_["Damage"] = damage;
+    json_["ImpactPower"] = impactPower;
     json_["AttackInstanceId"] = attackInstanceId;
     json_["HitGroupId"] = hitGroupId;
     json_["HitStopDuration"] = hitStopDuration;
@@ -438,6 +442,7 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     effectType = static_cast<ATTACK_EFFECT_TYPE>((std::clamp)(json_.value("EffectType", 0), 0, 4));
     lifeTime = json_.value("LifeTime", 1.0f);
     damage = json_.value("Damage", 1.0f);
+    impactPower = (std::max)(json_.value("ImpactPower", damage), 0.0f);
     attackInstanceId = json_.value("AttackInstanceId", 0u);
     hitGroupId = json_.value("HitGroupId", 0u);
     hitStopDuration = json_.value("HitStopDuration", 0.0f);

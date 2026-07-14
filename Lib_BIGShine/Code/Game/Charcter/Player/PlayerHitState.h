@@ -15,4 +15,7 @@ public:
 private:
     float elapsedTime = 0.0f;
     float fallbackDuration = 0.6f;
+    bool airHitReaction = false;
+    bool airHitRecoverable = false;
+    bool airHitKnockdown = false;
 };

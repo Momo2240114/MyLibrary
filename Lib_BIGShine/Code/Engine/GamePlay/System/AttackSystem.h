@@ -30,6 +30,7 @@ struct AttackHitEvent
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;
     uint32_t hitStopLayerMask = 0u;
+    float impactPower = 0.0f;
     float knockBackPower = 0.0f;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;

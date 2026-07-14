@@ -142,6 +142,7 @@ public:
     std::string& GetBehaviorGraphAssetPath() { return behaviorGraphAssetPath; }
     const std::string& GetBehaviorGraphAssetPath() const { return behaviorGraphAssetPath; }
     void SetBehaviorGraphAssetPath(const std::string& path_) { behaviorGraphAssetPath = path_; }
+    DRAGON_ACTION_TYPE GetCurrentAction() const { return runtime.currentAction; }
 
     DRAGON_ACTION_TYPE SelectNextAction(const DragonAIContext& context_);
     void AddActionCandidates(
