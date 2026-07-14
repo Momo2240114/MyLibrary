@@ -9,9 +9,10 @@
 #include "Engine/Math/Vector.h"
 #include "Engine/Graphics/Shader/ModelShaderID.h"
 #include "Engine/Graphics/Core/RenderContext.h"
+#include "Engine/Graphics/Resource/ModelLoadTypes.h"
 
 // 前方宣言だけでよいもの
-//class ModelResource;
+class ModelResource;
 
 class GltfModelCommponennt : public Component
 {
@@ -25,6 +26,13 @@ public:
 	}
 
 	void LoadModel(ID3D11Device* device, const char* filename, float sampleRate = 60);
+	void RequestLoadModelAsync(const char* filename_, int priority_ = static_cast<int>(PRELOAD_PRIORITY::NORMAL));
+	void UpdateLoadState() override;
+	bool IsLoadReady() const override;
+	bool IsRuntimeReady() const override;
+	bool HasRuntimeFailure() const override;
+	bool IsModelReady() const;
+	bool IsModelLoading() const;
 
 	void Gui()override;
 
@@ -38,6 +46,8 @@ public:
 	void Update(float elapsedTime_) override
 	{
 		(void)elapsedTime_;
+		UpdateLoadState();
+		if (!IsLoadReady()) return;
 		if (transformUpdateDrivenExternally) return;
 
 		if (isStaticModel)
@@ -55,6 +65,7 @@ public:
 	}
 
 	void RebindInternalPointers();
+	void ApplyLoadedResource(const std::shared_ptr<ModelResource>& resource_);
 
 	struct Node
 	{
@@ -361,6 +372,10 @@ private:
 	ModelShaderID shaderId = ModelShaderID::PBR;
 	std::string modelName = "";
 	std::string modelFullPass = "";
+	ModelLoadHandle modelLoadHandle;
+	std::vector<nlohmann::json> pendingMaterialOverrides;
+	bool asyncLoadRequested = false;
+	bool asyncLoadApplied = false;
 	bool usedNaviMeshSystemFlg = false;
 	std::vector<Material>	materials;
 	std::vector<Mesh>		meshes;

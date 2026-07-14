@@ -112,6 +112,8 @@ bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
     const std::shared_ptr<GltfModelCommponennt>& model_)
 {
     if (!model_ || startNodeName.empty() || endNodeName.empty()) return false;
+    model_->UpdateLoadState();
+    if (!model_->IsModelReady()) return false;
 
     const auto& nodes_ = model_->GetNodes();
     const bool validStart_ = startNodeIndex >= 0 &&
@@ -126,12 +128,23 @@ bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
     return startNodeIndex >= 0 && endNodeIndex >= 0;
 }
 
+bool BoneSegmentAttachmentComponent::IsLoadReady() const
+{
+    auto model_ = const_cast<BoneSegmentAttachmentComponent*>(this)->ResolveTargetModel();
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 bool BoneSegmentAttachmentComponent::GetSegment(
     XMFLOAT3& startPosition_,
     XMFLOAT3& endPosition_) const
 {
     auto model_ = targetModel.lock();
     if (!model_) return false;
+    model_->UpdateLoadState();
+    if (!model_->IsModelReady()) return false;
 
     const auto& nodes_ = model_->GetNodes();
     if (startNodeIndex < 0 || endNodeIndex < 0 ||

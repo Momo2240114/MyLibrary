@@ -165,6 +165,76 @@ void GameObject::CallAllComponentStart()
 
 }
 
+bool GameObject::IsReadyToStart()
+{
+    for (const std::shared_ptr<Component>& collider_ : colliderComponents)
+    {
+        if (!collider_ || !collider_->IsEnabled()) continue;
+        collider_->UpdateLoadState();
+        if (!collider_->IsLoadReady()) return false;
+    }
+
+    for (const std::shared_ptr<Component>& comp_ : components)
+    {
+        if (!comp_ || !comp_->IsEnabled()) continue;
+        comp_->UpdateLoadState();
+        if (!comp_->IsLoadReady()) return false;
+    }
+
+    return true;
+}
+
+bool GameObject::IsRuntimeReady() const
+{
+    for (const std::shared_ptr<Component>& collider_ : colliderComponents)
+    {
+        if (!collider_ || !collider_->IsEnabled()) continue;
+        collider_->UpdateLoadState();
+        if (!collider_->IsLoadReady() || !collider_->IsRuntimeReady()) return false;
+    }
+
+    for (const std::shared_ptr<Component>& comp_ : components)
+    {
+        if (!comp_ || !comp_->IsEnabled()) continue;
+        comp_->UpdateLoadState();
+        if (!comp_->IsLoadReady() || !comp_->IsRuntimeReady()) return false;
+    }
+
+    return true;
+}
+
+bool GameObject::HasRuntimeFailure() const
+{
+    for (const std::shared_ptr<Component>& collider_ : colliderComponents)
+    {
+        if (collider_ && collider_->IsEnabled() && collider_->HasRuntimeFailure()) return true;
+    }
+
+    for (const std::shared_ptr<Component>& comp_ : components)
+    {
+        if (comp_ && comp_->IsEnabled() && comp_->HasRuntimeFailure()) return true;
+    }
+
+    return false;
+}
+
+bool GameObject::IsRequiredForSceneStart() const
+{
+    if (requiredForSceneStart) return true;
+
+    for (const std::shared_ptr<Component>& collider_ : colliderComponents)
+    {
+        if (collider_ && collider_->IsEnabled() && collider_->IsRequiredForSceneStart()) return true;
+    }
+
+    for (const std::shared_ptr<Component>& comp_ : components)
+    {
+        if (comp_ && comp_->IsEnabled() && comp_->IsRequiredForSceneStart()) return true;
+    }
+
+    return false;
+}
+
 std::shared_ptr<Component> GameObject::GetComponentByName(const std::string& compName_) const
 {
     for (auto& comp : components)
@@ -205,7 +275,7 @@ void GameObject::Update(float et)
 
         for (auto& comp_ : components)
         {
-            if (!comp_ || !comp_->IsEnabled()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
 
             const std::string& name_ = comp_->GetName();
 
@@ -223,7 +293,7 @@ void GameObject::Update(float et)
 
         for (auto& comp_ : components)
         {
-            if (!comp_ || !comp_->IsEnabled()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
 
             const std::string& name_ = comp_->GetName();
 
@@ -240,7 +310,7 @@ void GameObject::Update(float et)
 
         for (auto& collider_ : colliderComponents)
         {
-            if (!collider_ || !collider_->IsEnabled()) continue;
+            if (!collider_ || !collider_->IsEnabled() || !collider_->IsStarted()) continue;
 
             BS_PROFILE_SCOPE("ColliderComponent::Update");
             collider_->Update(et);
@@ -257,7 +327,7 @@ void GameObject::LateUpdate(float et)
 
         for (auto& comp_ : components)
         {
-            if (!comp_ || !comp_->IsEnabled()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
 
             const std::string& name_ = comp_->GetName();
 
@@ -274,7 +344,7 @@ void GameObject::LateUpdate(float et)
 
         for (auto& comp_ : components)
         {
-            if (!comp_ || !comp_->IsEnabled()) continue;
+            if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
 
             const std::string& name_ = comp_->GetName();
 
@@ -614,6 +684,7 @@ nlohmann::json GameObject::Save() const
     j["Name"] = nameComponent->name;
     j["Layer"] = static_cast<uint32_t>(layer);
     j["CollisionMask"] = mask;
+    j["RequiredForSceneStart"] = requiredForSceneStart;
 
     // 親のTransformがある場合、その親が属するGameObjectの名前を保存
     if (auto pTrans = transform->parent.lock()) {
@@ -636,6 +707,7 @@ nlohmann::json GameObject::Save() const
         nlohmann::json cj;
         cj["TypeName"] = comp->GetName();
         cj["Enabled"] = comp->IsEnabled();
+        cj["RequiredForSceneStart"] = comp->IsRequiredForSceneStart();
 
         // 各コンポーネント固有の変数を保存
         nlohmann::json data;
@@ -650,6 +722,7 @@ nlohmann::json GameObject::Save() const
         nlohmann::json cj;
         cj["TypeName"] = collider_->GetName();
         cj["Enabled"] = collider_->IsEnabled();
+        cj["RequiredForSceneStart"] = collider_->IsRequiredForSceneStart();
 
         nlohmann::json data;
         collider_->Serialize(data);
@@ -670,6 +743,7 @@ void GameObject::Load(const nlohmann::json& j)
     nameComponent->name = j.value("Name", "GameObject");
     layer = static_cast<LayerType>(j.value("Layer", 0));
     mask = j.value("CollisionMask", static_cast<uint32_t>(LayerType::Default));
+    requiredForSceneStart = j.value("RequiredForSceneStart", false);
 
     // 所有者の設定を忘れないように
     transform->gameObject = shared_from_this();
@@ -701,6 +775,8 @@ void GameObject::Load(const nlohmann::json& j)
         if (comp) {
             // 2. 基本設定とデータの復元
             comp->SetEnabled(cJson.value("Enabled", true));
+            comp->SetRequiredForSceneStart(
+                cJson.value("RequiredForSceneStart", comp->IsRequiredForSceneStart()));
             comp->DeserializeProfiled(cJson["Data"]);
 
             // 3. 型を判別して適切な場所に格納 (AddComponentのロジックと合わせる)

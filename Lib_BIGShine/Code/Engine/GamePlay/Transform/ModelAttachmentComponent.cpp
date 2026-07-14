@@ -95,6 +95,11 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
         targetNodeIndex = -1;
         return false;
     }
+    model->UpdateLoadState();
+    if (!model->IsModelReady()) {
+        targetNodeIndex = -1;
+        return false;
+    }
 
     const auto& nodes = model->GetNodes();
     const bool hasValidIndex = targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size());
@@ -123,6 +128,15 @@ bool ModelAttachmentComponent::ResolveTargetNodeIndex(const std::shared_ptr<Gltf
     return false;
 }
 
+bool ModelAttachmentComponent::IsLoadReady() const
+{
+    auto model_ = const_cast<ModelAttachmentComponent*>(this)->ResolveTargetModel();
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 void ModelAttachmentComponent::Update(float deltaTime_)
 {
     (void)deltaTime_;
@@ -148,6 +162,11 @@ void ModelAttachmentComponent::SyncAttachment()
     {
         myTransform_->SetParentOverride(false, DirectX::XMMatrixIdentity());
         myTransform_->UpdateWorldMatrix();
+        return;
+    }
+    model_->UpdateLoadState();
+    if (!model_->IsModelReady())
+    {
         return;
     }
 
@@ -263,7 +282,9 @@ void ModelAttachmentComponent::Gui()
 {
     // --- 現在の状態表示 ---
     auto currentModel = targetModel.lock();
-    const auto* currentNodes = currentModel ? &currentModel->GetNodes() : nullptr;
+    if (currentModel) currentModel->UpdateLoadState();
+    const auto* currentNodes =
+        currentModel && currentModel->IsModelReady() ? &currentModel->GetNodes() : nullptr;
     bool hasCurrentNode = currentNodes && targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(currentNodes->size());
     std::string currentLabel = hasCurrentNode
         ? (*currentNodes)[targetNodeIndex].name
@@ -292,6 +313,12 @@ void ModelAttachmentComponent::Gui()
             if (parentGO) {
                 auto modelComp = parentGO->GetComponent<GltfModelCommponennt>();
                 if (modelComp) {
+                    modelComp->UpdateLoadState();
+                    if (!modelComp->IsModelReady())
+                    {
+                        currentParent = currentParent->parent.lock();
+                        continue;
+                    }
                     foundAny = true;
                     // 親モデルのノードツリーを表示
                     ImGui::PushID(parentGO.get());
@@ -324,6 +351,12 @@ void ModelAttachmentComponent::Gui()
             targetNodeIndex = tempSelectedIdx;
             // 決定時に名前をキャッシュしておく（ノード検索用）
             if (auto m = targetModel.lock()) {
+                m->UpdateLoadState();
+                if (!m->IsModelReady())
+                {
+                    ImGui::CloseCurrentPopup();
+                    return;
+                }
                 const auto& nodes = m->GetNodes();
                 if (targetNodeIndex >= 0 && targetNodeIndex < static_cast<int>(nodes.size())) {
                     targetStartNodeName = nodes[targetNodeIndex].name;

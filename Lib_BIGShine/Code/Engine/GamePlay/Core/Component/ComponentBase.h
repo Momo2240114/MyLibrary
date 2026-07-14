@@ -34,6 +34,10 @@ public:
     virtual void LateUpdate(float elapsedTime_) {}
     virtual void Submit(ID3D11DeviceContext* context_) {}
     virtual void Gui() {}
+    virtual void UpdateLoadState() {}
+    virtual bool IsLoadReady() const { return true; }
+    virtual bool IsRuntimeReady() const { return true; }
+    virtual bool HasRuntimeFailure() const { return false; }
     void DrawGuiProfiled()
     {
         const std::string profileName_ = "Component GUI::" + GetName();
@@ -80,8 +84,11 @@ public:
 
     // フラグを手動で立てる（GameObject側からStartを呼ぶ際にセットする）
     void SetStarted(bool started_) { isStarted = started_; }
+    bool IsRequiredForSceneStart() const { return requiredForSceneStart; }
+    void SetRequiredForSceneStart(bool required_) { requiredForSceneStart = required_; }
 
 protected:
     bool isStarted = false;
+    bool requiredForSceneStart = false;
     std::weak_ptr<GameObject> gameObject;
 };

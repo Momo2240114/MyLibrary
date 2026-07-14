@@ -234,6 +234,9 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 {
 	BS_PROFILE_SCOPE("GltfModelCommponennt::LoadModel");
 	Clear();
+	asyncLoadRequested = false;
+	asyncLoadApplied = false;
+	modelLoadHandle = ModelLoadHandle();
 
 	// 1. 名前の記憶
 	std::filesystem::path filePath(filename);
@@ -280,6 +283,133 @@ void GltfModelCommponennt::LoadModel(ID3D11Device* device, const char* filename,
 		BS_PROFILE_SCOPE("GltfModel::InitialUpdateTransform");
 		UpdateTransform();
 	}
+}
+
+void GltfModelCommponennt::RequestLoadModelAsync(const char* filename_, int priority_)
+{
+	BS_PROFILE_SCOPE("GltfModelCommponennt::RequestLoadModelAsync");
+	Clear();
+
+	std::filesystem::path filePath_(filename_);
+	modelFullPass = filename_;
+	modelName = filePath_.stem().string();
+	asyncLoadRequested = true;
+	asyncLoadApplied = false;
+	modelLoadHandle = ModelResourceManager::Instance().RequestResourceAsync(filename_, priority_);
+}
+
+void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResource>& resource_)
+{
+	BS_PROFILE_SCOPE("GltfModelCommponennt::ApplyLoadedResource");
+	if (!resource_) return;
+
+	materials = resource_->materials;
+	nodes = resource_->nodes;
+	meshes = resource_->meshes;
+	animations = resource_->animations;
+
+	int materialIdCounter_ = 0;
+	for (auto& material_ : materials)
+	{
+		material_.id = materialIdCounter_++;
+	}
+
+	RebindInternalPointers();
+
+	bindNodePoses.resize(nodes.size());
+	for (size_t nodeIndex_ = 0; nodeIndex_ < nodes.size(); ++nodeIndex_)
+	{
+		bindNodePoses[nodeIndex_].position = nodes[nodeIndex_].position;
+		bindNodePoses[nodeIndex_].rotation = nodes[nodeIndex_].rotation;
+		bindNodePoses[nodeIndex_].scale = nodes[nodeIndex_].scale;
+	}
+
+	for (const nlohmann::json& item_ : pendingMaterialOverrides)
+	{
+		const int id_ = item_.value("id", -1);
+		for (auto& mat_ : materials)
+		{
+			if (mat_.id != id_) continue;
+
+			if (item_.contains("shaderId")) mat_.shaderId = static_cast<ModelShaderID>(item_["shaderId"].get<int>());
+			if (item_.contains("baseColor"))
+			{
+				const auto& color_ = item_["baseColor"];
+				mat_.baseColor.x = color_.at(0).get<float>();
+				mat_.baseColor.y = color_.at(1).get<float>();
+				mat_.baseColor.z = color_.at(2).get<float>();
+				mat_.baseColor.w = color_.at(3).get<float>();
+			}
+			if (item_.contains("emissiveColor"))
+			{
+				const auto& color_ = item_["emissiveColor"];
+				mat_.emissiveColor.x = color_.at(0).get<float>();
+				mat_.emissiveColor.y = color_.at(1).get<float>();
+				mat_.emissiveColor.z = color_.at(2).get<float>();
+			}
+			if (item_.contains("metalness")) mat_.metalness = item_["metalness"].get<float>();
+			if (item_.contains("roughness")) mat_.roughness = item_["roughness"].get<float>();
+			if (item_.contains("occlusionStrength")) mat_.occlusionStrength = item_["occlusionStrength"].get<float>();
+			if (item_.contains("alphaCutoff")) mat_.alphaCutoff = item_["alphaCutoff"].get<float>();
+			if (item_.contains("normalScale")) mat_.normalScale = item_["normalScale"].get<float>();
+			if (item_.contains("uvScale"))
+			{
+				const auto& uvScale_ = item_["uvScale"];
+				mat_.uvScale.x = uvScale_.at(0).get<float>();
+				mat_.uvScale.y = uvScale_.at(1).get<float>();
+			}
+			if (item_.contains("uvOffset"))
+			{
+				const auto& uvOffset_ = item_["uvOffset"];
+				mat_.uvOffset.x = uvOffset_.at(0).get<float>();
+				mat_.uvOffset.y = uvOffset_.at(1).get<float>();
+			}
+			if (item_.contains("uvRotation")) mat_.uvRotation = item_["uvRotation"].get<float>();
+			if (item_.contains("uvAddressMode")) mat_.uvAddressMode = static_cast<UV_ADDRESS_MODE>(item_["uvAddressMode"].get<int>());
+			if (item_.contains("alphaMode")) mat_.alphaMode = static_cast<AlphaMode>(item_["alphaMode"].get<int>());
+			if (item_.contains("toonPbrBlend")) mat_.toonPbrBlend = item_["toonPbrBlend"].get<float>();
+			if (item_.contains("disableOutline")) mat_.disableOutline = item_["disableOutline"].get<bool>();
+			if (item_.contains("outlineThicknessOffset")) mat_.outlineThicknessOffset = item_["outlineThicknessOffset"].get<float>();
+		}
+	}
+
+	UpdateTransform();
+	asyncLoadApplied = true;
+}
+
+void GltfModelCommponennt::UpdateLoadState()
+{
+	if (!asyncLoadRequested || asyncLoadApplied) return;
+	if (!modelLoadHandle.IsReady()) return;
+	ApplyLoadedResource(modelLoadHandle.GetResource());
+}
+
+bool GltfModelCommponennt::IsLoadReady() const
+{
+	if (!asyncLoadRequested) return true;
+	return asyncLoadApplied || modelLoadHandle.IsFailed();
+}
+
+bool GltfModelCommponennt::IsRuntimeReady() const
+{
+	if (modelFullPass.empty()) return true;
+	if (!asyncLoadRequested) return !nodes.empty() && !meshes.empty();
+	return asyncLoadApplied && !nodes.empty() && !meshes.empty();
+}
+
+bool GltfModelCommponennt::HasRuntimeFailure() const
+{
+	return asyncLoadRequested && modelLoadHandle.IsFailed();
+}
+
+bool GltfModelCommponennt::IsModelReady() const
+{
+	return !modelName.empty() && !nodes.empty() && IsLoadReady();
+}
+
+bool GltfModelCommponennt::IsModelLoading() const
+{
+	return asyncLoadRequested && !asyncLoadApplied && !modelLoadHandle.IsFailed();
 }
 
 void GltfModelCommponennt::RebindInternalPointers()
@@ -1186,6 +1316,7 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 	BS_PROFILE_SCOPE("GltfModelCommponennt::DeserializeJson");
 	isStaticModel = j.value("StaticModel", false);
 	hasCachedOwnerWorldTransform = false;
+	pendingMaterialOverrides.clear();
 	MarkTransformDirty();
 
 	if (j.contains("ShaderID")) {
@@ -1199,18 +1330,21 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 			if (name.substr(0, 2) == "./") name = name.substr(2);
 			std::replace(name.begin(), name.end(), '/', '\\');
 
-			auto device = GraphicsDeviceManager::Instance().GetDevice();
 
 			// 1. モデルをロード
-			LoadModel(device, name.c_str());
+			RequestLoadModelAsync(name.c_str(), static_cast<int>(PRELOAD_PRIORITY::NORMAL));
 
 			// 2. このコンポーネントが持っているモデルデータを 
 			//    現在の Transform（Loadで復元済み）に強制同期させる
-			UpdateTransform();
+			UpdateLoadState();
 		}
 	}
 
 	if (j.contains("MaterialOverrides")) {
+		for (const auto& item_ : j["MaterialOverrides"])
+		{
+			pendingMaterialOverrides.push_back(item_);
+		}
 		for (const auto& item : j["MaterialOverrides"]) {
 			int id = item["id"];
 			// IDをキーにして、現在のmaterials配列から該当するものを探して上書きする

@@ -5,7 +5,14 @@
 #include <d3d11.h>
 #include "ModelResource.h"
 #include "GLTFImporter.h"
+#include "ModelLoadTypes.h"
 #include <filesystem>
+#include <map>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 class ModelResourceManager
 {
@@ -20,13 +27,31 @@ public:
     // リソースを獲得、あるいは新たに作製する関数
     std::shared_ptr<ModelResource> GetOrCreateResource(ID3D11Device* device, const std::string& filename, float sampleRate = 60.0f);
 
+    ModelLoadHandle RequestResourceAsync(const std::string& filename_, int priority_);
+    void UpdateAsyncLoads(ID3D11Device* device_, float gpuUploadBudgetMs_ = 2.0f);
+    bool HasPendingLoads() const;
+    float GetLoadProgress() const;
+    void PromotePriority(const std::string& filename_, int priority_);
+    void StartAsyncLoader();
+    void ShutdownAsyncLoader();
+    PreloadHandle RequestPreloadGroup(const std::string& groupName_, PRELOAD_PRIORITY priority_);
+    void PromotePreloadGroup(const std::string& groupName_, PRELOAD_PRIORITY priority_);
+    bool IsPreloadGroupReady(const std::string& groupName_) const;
+    float GetPreloadGroupProgress(const std::string& groupName_) const;
+    void LoadPreloadSettings(const std::string& filename_ = "Data/Settings/AssetPreload.json");
+
     // すべての記憶をリセットしてリソースをclear
     void Clear()
     {
+        ShutdownAsyncLoader();
         for (auto& pair : m_resources) {
             if (pair.second) pair.second->Clear();
         }
         m_resources.clear();
+        loadEntries.clear();
+        preloadGroups.clear();
+        preloadSettings.clear();
+        preloadSettingsLoaded = false;
     }
 
 private:
@@ -38,8 +63,47 @@ private:
     // シリアライズ・デシリアライズ
     bool SaveToCereal(const std::string& cerealPath, const std::shared_ptr<ModelResource>& resource);
     bool LoadFromCereal(const std::string& cerealPath, std::shared_ptr<ModelResource>& resource);
+    std::string NormalizePath(const std::string& filename_) const;
+    std::shared_ptr<ModelResource> LoadOrBuildCpuResource(const std::string& filename_, float sampleRate_);
+    bool CreateGpuResource(ID3D11Device* device_, const std::string& filename_, const std::shared_ptr<ModelResource>& resource_);
+    void QueueGpuUpload(const std::shared_ptr<ModelLoadEntry>& entry_);
+    void WorkerLoop();
+    std::shared_ptr<ModelLoadEntry> FindOrCreateEntry(const std::string& filename_, int priority_);
 
 private:
     // Model名を鍵として、リソースのを保管する棚
     std::map<std::string, std::shared_ptr<ModelResource>> m_resources;
+
+    struct ModelLoadJob
+    {
+        int priority = 0;
+        uint64_t requestOrder = 0;
+        std::shared_ptr<ModelLoadEntry> entry;
+    };
+
+    struct PreloadAsset
+    {
+        std::string type;
+        std::string path;
+        int priority = static_cast<int>(PRELOAD_PRIORITY::NORMAL);
+    };
+
+    struct PreloadGroupSetting
+    {
+        std::string name;
+        std::vector<PreloadAsset> assets;
+    };
+
+    mutable std::mutex asyncMutex;
+    std::condition_variable asyncCondition;
+    std::vector<ModelLoadJob> pendingJobs;
+    std::deque<std::shared_ptr<ModelLoadEntry>> pendingGpuUploads;
+    std::map<std::string, std::shared_ptr<ModelLoadEntry>> loadEntries;
+    std::map<std::string, std::shared_ptr<PreloadGroupState>> preloadGroups;
+    std::map<std::string, PreloadGroupSetting> preloadSettings;
+    std::thread workerThread;
+    bool workerRunning = false;
+    bool workerStopRequested = false;
+    uint64_t nextRequestOrder = 1;
+    bool preloadSettingsLoaded = false;
 };

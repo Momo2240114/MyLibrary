@@ -40,6 +40,7 @@ public:
     uint32_t mask = (uint32_t)LayerType::Default;//コリジョンマスク
 
     bool saveFlg = true;
+    bool requiredForSceneStart = false;
     std::shared_ptr<NameComponent> nameComponent;
     std::shared_ptr<Transform> transform;
     std::vector<std::shared_ptr<Component>> components;
@@ -177,6 +178,11 @@ public:
     std::vector<std::string> GetComponentNames() const;
 
     void CallAllComponentStart();
+    bool IsReadyToStart();
+    bool IsRuntimeReady() const;
+    bool HasRuntimeFailure() const;
+    bool IsRequiredForSceneStart() const;
+    void SetRequiredForSceneStart(bool required_) { requiredForSceneStart = required_; }
     
     // ========================================
     // 名前でコンポーネントを取得
@@ -208,7 +214,7 @@ public:
     void Submit(ID3D11DeviceContext* context_)
     {
         for (auto& comp : components)
-            if (comp->IsEnabled())
+            if (comp->IsEnabled() && comp->IsStarted())
                 comp->Submit(context_);
     }
 

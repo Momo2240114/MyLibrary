@@ -163,6 +163,16 @@ void SpringBoneSimulationComponent::Start()
     ResetSimulation();
 }
 
+bool SpringBoneSimulationComponent::IsLoadReady() const
+{
+    const auto owner_ = const_cast<SpringBoneSimulationComponent*>(this)->GetGameObject();
+    const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 bool SpringBoneSimulationComponent::ResolveDependencies()
 {
     auto owner_ = GetGameObject();
@@ -185,6 +195,8 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("SpringBoneSimulationComponent::LateUpdate");
 
     if (!ResolveDependencies()) return;
+    if (model) model->UpdateLoadState();
+    if (!model || !model->IsModelReady()) return;
 
     const float safeDeltaTime_ = std::clamp(deltaTime_, 0.0f, 1.0f / 20.0f);
 

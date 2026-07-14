@@ -2,6 +2,7 @@
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/MeshCollider.h"
 #include "Engine/Physics/PhysXSystem.h"
 #include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
@@ -31,6 +32,8 @@
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/GamePlay/Graphics/MotionVelocityComponent.h"
+#include "Engine/Graphics/Resource/ModelResourceManager.h"
+#include "Engine/Common/DebugLog.h"
 
 #include "Engine/Debug/TracyProfiler.h"
 
@@ -66,6 +69,8 @@ void GameObjectManager::Initialize()
     effectManager->Initialize(this);
     RegisterAttackCallbacks();
     EnsureGlobalActionObjects();
+    ModelResourceManager::Instance().LoadPreloadSettings();
+    ModelResourceManager::Instance().StartAsyncLoader();
 
     cameraManager = std::make_shared<CameraManager>();
     cameraManager->Initialize();
@@ -73,7 +78,26 @@ void GameObjectManager::Initialize()
 
 void GameObjectManager::Update(float elapsedTime_)
 {
-    BS_PROFILE_SCOPE("GameObjectManager::Update");
+    switch (sceneRuntimeState)
+    {
+    case SCENE_RUNTIME_STATE::LOADING:
+        UpdateLoadingRuntime(elapsedTime_);
+        return;
+    case SCENE_RUNTIME_STATE::INITIALIZING:
+        FinalizeSceneInitialization();
+        return;
+    case SCENE_RUNTIME_STATE::FAILED:
+        return;
+    case SCENE_RUNTIME_STATE::RUNNING:
+    default:
+        UpdateRunningRuntime(elapsedTime_);
+        return;
+    }
+}
+
+void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
+{
+    BS_PROFILE_SCOPE("SceneRuntime::Running");
     float worldDeltaTime_ = elapsedTime_;
 
     {
@@ -98,11 +122,19 @@ void GameObjectManager::Update(float elapsedTime_)
         gameModeManager->Update(elapsedTime_);
     }
 
+    {
+        BS_PROFILE_SCOPE("ModelResourceManager::UpdateAsyncLoads");
+        ModelResourceManager::Instance().UpdateAsyncLoads(
+            GraphicsDeviceManager::Instance().GetDevice(),
+            2.0f);
+    }
+
     if (!pendingStarts.empty())
     {
         BS_PROFILE_SCOPE("GameObjectManager::PendingStarts");
 
         std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
+        std::vector<std::shared_ptr<GameObject>> readyStartList_;
         pendingStarts.clear();
 
         {
@@ -111,6 +143,11 @@ void GameObjectManager::Update(float elapsedTime_)
             for (auto& object_ : startList_)
             {
                 if (!object_) continue;
+                if (!object_->IsReadyToStart())
+                {
+                    pendingStarts.push_back(object_);
+                    continue;
+                }
 
                 if (auto particleComponent_ = object_->GetComponent<ParticleComponent>())
                 {
@@ -121,6 +158,7 @@ void GameObjectManager::Update(float elapsedTime_)
                     BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
                     object_->CallAllComponentStart();
                 }
+                readyStartList_.push_back(object_);
 
                 {
                     BS_PROFILE_SCOPE("Director::RegisterActions");
@@ -166,7 +204,7 @@ void GameObjectManager::Update(float elapsedTime_)
         {
             BS_PROFILE_SCOPE("PendingStarts::RegisterSequence");
 
-            for (auto& object_ : startList_)
+            for (auto& object_ : readyStartList_)
             {
                 if (!object_) continue;
 
@@ -326,8 +364,210 @@ void GameObjectManager::Update(float elapsedTime_)
     }
 }
 
+void GameObjectManager::UpdateLoadingRuntime(float elapsedTime_)
+{
+    (void)elapsedTime_;
+    BS_PROFILE_SCOPE("SceneLoading::Update");
+
+    {
+        BS_PROFILE_SCOPE("ModelResourceManager::UpdateAsyncLoads");
+        ModelResourceManager::Instance().UpdateAsyncLoads(
+            GraphicsDeviceManager::Instance().GetDevice(),
+            2.0f);
+    }
+
+    ProcessPendingStarts();
+
+    sceneLoadProgress = ModelResourceManager::Instance().GetLoadProgress();
+
+    if (HasRequiredRuntimeFailure())
+    {
+        FailSceneRuntime("Required scene asset failed to load.");
+        return;
+    }
+
+    if (!WaitRequiredAssets()) return;
+    if (!WaitRuntimeReady()) return;
+
+    sceneRuntimeState = SCENE_RUNTIME_STATE::INITIALIZING;
+}
+
+void GameObjectManager::ProcessPendingStarts()
+{
+    if (pendingStarts.empty()) return;
+
+    BS_PROFILE_SCOPE("GameObjectManager::PendingStarts");
+
+    std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
+    std::vector<std::shared_ptr<GameObject>> readyStartList_;
+    pendingStarts.clear();
+
+    {
+        BS_PROFILE_SCOPE("PendingStarts::StartComponents");
+
+        for (auto& object_ : startList_)
+        {
+            if (!object_) continue;
+            if (!object_->IsReadyToStart())
+            {
+                pendingStarts.push_back(object_);
+                continue;
+            }
+
+            if (auto particleComponent_ = object_->GetComponent<ParticleComponent>())
+            {
+                particleComponents.push_back(particleComponent_);
+            }
+
+            {
+                BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
+                object_->CallAllComponentStart();
+            }
+            readyStartList_.push_back(object_);
+
+            {
+                BS_PROFILE_SCOPE("Director::RegisterActions");
+
+                if (auto director_ = object_->GetComponent<TransformDirector>())
+                {
+                    director_->RegisterActions();
+                }
+
+                if (auto director_ = object_->GetComponent<ColorFilterDirector>())
+                {
+                    director_->RegisterActions();
+                }
+
+                if (auto director_ = object_->GetComponent<MotionBlurDirector>())
+                {
+                    director_->RegisterActions();
+                }
+
+                if (auto director_ = object_->GetComponent<RadialBlurDirector>())
+                {
+                    director_->RegisterActions();
+                }
+
+                if (auto director_ = object_->GetComponent<VignetteDirector>())
+                {
+                    director_->RegisterActions();
+                }
+
+                if (auto director_ = object_->GetComponent<TimeScaleDirector>())
+                {
+                    director_->RegisterActions();
+                }
+
+                if (auto director_ = object_->GetComponent<CameraDirector>())
+                {
+                    director_->RegisterActions();
+                }
+            }
+        }
+    }
+
+    {
+        BS_PROFILE_SCOPE("PendingStarts::RegisterSequence");
+
+        for (auto& object_ : readyStartList_)
+        {
+            if (!object_) continue;
+
+            if (auto sequence_ = object_->GetComponent<ActionSequence>())
+            {
+                sequence_->RegisterSequence("");
+            }
+        }
+    }
+}
+
+bool GameObjectManager::WaitRequiredAssets()
+{
+    BS_PROFILE_SCOPE("SceneLoading::WaitRequiredAssets");
+
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_ || !object_->IsRequiredForSceneStart()) continue;
+        if (!object_->IsReadyToStart()) return false;
+    }
+
+    return true;
+}
+
+bool GameObjectManager::WaitRuntimeReady()
+{
+    BS_PROFILE_SCOPE("SceneLoading::WaitRuntimeReady");
+
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_ || !object_->IsRequiredForSceneStart()) continue;
+        if (!object_->IsRuntimeReady()) return false;
+    }
+
+    return true;
+}
+
+bool GameObjectManager::HasRequiredRuntimeFailure()
+{
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_ || !object_->IsRequiredForSceneStart()) continue;
+        if (object_->HasRuntimeFailure()) return true;
+    }
+
+    return false;
+}
+
+void GameObjectManager::FinalizeSceneInitialization()
+{
+    BS_PROFILE_SCOPE("SceneLoading::FinalizeInitialization");
+
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_) continue;
+        object_->UpdateTransform();
+    }
+
+    for (const std::shared_ptr<MeshCollider>& meshCollider_ : FindComponents<MeshCollider>())
+    {
+        if (meshCollider_ && meshCollider_->IsEnabled())
+        {
+            meshCollider_->Update(0.0f);
+        }
+    }
+
+    for (auto& attachment_ : FindComponents<ModelAttachmentComponent>())
+    {
+        if (attachment_ && attachment_->IsEnabled())
+        {
+            attachment_->SyncAttachment();
+        }
+    }
+
+    collisionStepSystem->PrepareInitialPhysicsState(0.0f);
+
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_) continue;
+        object_->UpdateTransform();
+    }
+
+    sceneLoadProgress = 1.0f;
+    sceneRuntimeState = SCENE_RUNTIME_STATE::RUNNING;
+}
+
+void GameObjectManager::FailSceneRuntime(const std::string& message_)
+{
+    sceneRuntimeError = message_;
+    sceneRuntimeState = SCENE_RUNTIME_STATE::FAILED;
+    BS_LOG_ERROR(LOG_CATEGORY::GAME, "[SceneRuntime] " + sceneRuntimeError);
+}
+
 void GameObjectManager::Clear()
 {
+    sceneLoadProgress = 0.0f;
+    sceneRuntimeError.clear();
+
     GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
     graphics_.ResetFilter();
     graphics_.GetRadialBlurParams() = RadialBlurSystem::Parameters{};
@@ -1072,10 +1312,14 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
     Clear(); // 現在のシーンをクリア
     std::string basePath = "Data/Scenes/" + sceneName_ + "/";
     std::string listFilePath = basePath + "SceneList.json";
+    sceneRuntimeState = SCENE_RUNTIME_STATE::LOADING;
+    sceneLoadProgress = 0.0f;
+    sceneRuntimeError.clear();
 
     std::ifstream listFile(listFilePath);
     if (!listFile.is_open()) {
         printf("Error: SceneList.json not found!\n");
+        FailSceneRuntime("SceneList.json not found: " + listFilePath);
         return;
     }
     nlohmann::json listJson;

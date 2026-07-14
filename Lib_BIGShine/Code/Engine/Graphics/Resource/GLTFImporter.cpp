@@ -5,6 +5,7 @@
 #define STBI_MSC_SECURE_CRT
 
 #include "Engine/Common/Misc.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "GLTFImporter.h"
 #include <DDSTextureLoader.h>
@@ -24,6 +25,8 @@ bool LoadImageData(tinygltf::Image*, const int, std::string*,
 GLTFImporter::GLTFImporter(const char* filename)
 	: filepath(filename)
 {
+	const std::string profileFilepath_ = filepath.string();
+	BS_PROFILE_SCOPE_DYNAMIC(profileFilepath_.c_str());
 	// 拡張子取得
 	std::string extension = filepath.extension().string();
 	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);	// 小文字化
@@ -36,10 +39,12 @@ GLTFImporter::GLTFImporter(const char* filename)
 	bool result = false;
 	if (extension == ".glb")
 	{
+		BS_PROFILE_SCOPE("GLTFImporter::ParseGLB");
 		result = gltf.LoadBinaryFromFile(&gltfModel, &error, &warning, filepath.string());
 	}
 	else if (extension == ".gltf")
 	{
+		BS_PROFILE_SCOPE("GLTFImporter::ParseGLTF");
 		result = gltf.LoadASCIIFromFile(&gltfModel, &error, &warning, filepath.string());
 	}
 	if (!warning.empty())
@@ -58,6 +63,8 @@ GLTFImporter::GLTFImporter(const char* filename)
 // ノードデータを読み込み
 void GLTFImporter::LoadNodes(NodeList& nodes)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::LoadNodes");
+	BS_PROFILE_PLOT("GLTFImporter.NodeCount", static_cast<double>(gltfModel.nodes.size()));
 	GltfModelCommponennt::Node& node = nodes.emplace_back();
 	node.name = filepath.filename().stem().string();
 
@@ -109,6 +116,12 @@ void GLTFImporter::LoadNodes(NodeList& nodes)
 // メッシュデータを読み込み
 void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::LoadMeshes");
+	size_t profilePrimitiveCount_ = 0;
+	size_t profileVertexCount_ = 0;
+	size_t profileIndexCount_ = 0;
+	size_t profileBoneCount_ = 0;
+	size_t profileTangentVertexCount_ = 0;
 	for (int gltfNodeIndex = 0; gltfNodeIndex < gltfModel.nodes.size(); ++gltfNodeIndex)
 	{
 		const tinygltf::Node& gltfNode = gltfModel.nodes.at(gltfNodeIndex);
@@ -118,6 +131,8 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 
 		for (const tinygltf::Primitive& gltfPrimitive : gltfMesh.primitives)
 		{
+			BS_PROFILE_SCOPE("GLTFImporter::Mesh.Primitive");
+			++profilePrimitiveCount_;
 			GltfModelCommponennt::Mesh& mesh = meshes.emplace_back();
 			mesh.nodeIndex = gltfNodeIndex;
 			mesh.materialIndex = gltfPrimitive.material;
@@ -125,10 +140,12 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 			// ボーン
 			if (gltfNode.skin >= 0)
 			{
+				BS_PROFILE_SCOPE("GLTFImporter::Mesh.Bones");
 				const tinygltf::Skin& gltfSkin = gltfModel.skins.at(gltfNode.skin);
 				const tinygltf::Accessor& gltfAccessor = gltfModel.accessors.at(gltfSkin.inverseBindMatrices);
 				const tinygltf::BufferView& gltfBufferView = gltfModel.bufferViews.at(gltfAccessor.bufferView);
 
+				profileBoneCount_ += gltfAccessor.count;
 				for (int i = 0; i < gltfAccessor.count; ++i)
 				{
 					GltfModelCommponennt::Bone& bone = mesh.bones.emplace_back();
@@ -140,10 +157,12 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 
 			// インデックスバッファ
 			{
+				BS_PROFILE_SCOPE("GLTFImporter::Mesh.Indices");
 				const tinygltf::Accessor& gltfAccessor = gltfModel.accessors.at(gltfPrimitive.indices);
 				const tinygltf::BufferView& gltfBufferView = gltfModel.bufferViews.at(gltfAccessor.bufferView);
 				const void* indices = gltfModel.buffers.at(gltfBufferView.buffer).data.data() + gltfBufferView.byteOffset + gltfAccessor.byteOffset;
 				mesh.indices.resize(gltfAccessor.count);
+				profileIndexCount_ += gltfAccessor.count;
 				if (gltfAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
 				{
 					const uint32_t* indicesU32 = static_cast<const uint32_t*>(indices);
@@ -168,10 +187,12 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 
 			// 頂点バッファ領域確保
 			{
+				BS_PROFILE_SCOPE("GLTFImporter::Mesh.AllocateVertices");
 				std::map<std::string, int>::const_iterator gltfAttribute = gltfPrimitive.attributes.find("POSITION");
 				_ASSERT_EXPR(gltfAttribute != gltfPrimitive.attributes.end(), "");
 				const tinygltf::Accessor& gltfAccessor = gltfModel.accessors.at(gltfAttribute->second);
 				mesh.vertices.resize(gltfAccessor.count);
+				profileVertexCount_ += gltfAccessor.count;
 			}
 
 			// 頂点バッファ
@@ -182,6 +203,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				void* vertexBuffer = gltfModel.buffers.at(gltfBufferView.buffer).data.data() + gltfBufferView.byteOffset + gltfAccessor.byteOffset;
 				if (gltfAttribute.first == "POSITION")
 				{
+					BS_PROFILE_SCOPE("GLTFImporter::Mesh.Attribute.POSITION");
 					const float* p = static_cast<const float*>(vertexBuffer);
 					for (size_t i = 0; i < gltfAccessor.count; ++i)
 					{
@@ -194,6 +216,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 				else if (gltfAttribute.first == "NORMAL")
 				{
+					BS_PROFILE_SCOPE("GLTFImporter::Mesh.Attribute.NORMAL");
 					const float* p = static_cast<const float*>(vertexBuffer);
 					for (size_t i = 0; i < gltfAccessor.count; ++i)
 					{
@@ -206,6 +229,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 				else if (gltfAttribute.first == "TANGENT")
 				{
+					BS_PROFILE_SCOPE("GLTFImporter::Mesh.Attribute.TANGENT");
 					const float* p = static_cast<const float*>(vertexBuffer);
 					for (size_t i = 0; i < gltfAccessor.count; ++i)
 					{
@@ -219,6 +243,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 				else if (gltfAttribute.first == "TEXCOORD_0")
 				{
+					BS_PROFILE_SCOPE("GLTFImporter::Mesh.Attribute.TEXCOORD_0");
 					switch (gltfAccessor.componentType)
 					{
 					case TINYGLTF_COMPONENT_TYPE_FLOAT:
@@ -266,6 +291,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 				else if (gltfAttribute.first == "JOINTS_0")
 				{
+					BS_PROFILE_SCOPE("GLTFImporter::Mesh.Attribute.JOINTS_0");
 					switch (gltfAccessor.componentType)
 					{
 					case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
@@ -305,6 +331,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 				else if (gltfAttribute.first == "WEIGHTS_0")
 				{
+					BS_PROFILE_SCOPE("GLTFImporter::Mesh.Attribute.WEIGHTS_0");
 					switch (gltfAccessor.componentType)
 					{
 					case TINYGLTF_COMPONENT_TYPE_FLOAT:
@@ -363,6 +390,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				gltfPrimitive.attributes.find("POSITION") != gltfPrimitive.attributes.end() &&
 				gltfPrimitive.attributes.find("TEXCOORD_0") != gltfPrimitive.attributes.end())
 			{
+				profileTangentVertexCount_ += mesh.vertices.size();
 				ComputeTangents(mesh.vertices, mesh.indices);
 			}
 
@@ -371,16 +399,28 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 		}
 	}
 
+	BS_PROFILE_PLOT("GLTFImporter.PrimitiveCount", static_cast<double>(profilePrimitiveCount_));
+	BS_PROFILE_PLOT("GLTFImporter.VertexCount", static_cast<double>(profileVertexCount_));
+	BS_PROFILE_PLOT("GLTFImporter.IndexCount", static_cast<double>(profileIndexCount_));
+	BS_PROFILE_PLOT("GLTFImporter.BoneCount", static_cast<double>(profileBoneCount_));
+	BS_PROFILE_PLOT("GLTFImporter.TangentVertexCount", static_cast<double>(profileTangentVertexCount_));
 }
 
 // マテリアルデータを読み込み
 void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::LoadMaterials");
+	BS_PROFILE_PLOT("GLTFImporter.MaterialCount", static_cast<double>(gltfModel.materials.size()));
+	size_t profileTextureRequestCount_ = 0;
+	size_t profileEmbeddedTextureCount_ = 0;
+	size_t profileExternalTextureCount_ = 0;
+	size_t profileGpuTextureCreateCount_ = 0;
 	// ディレクトリパス取得
 	std::filesystem::path dirpath(filepath.parent_path());
 
 	for (const tinygltf::Material& gltfMaterial : gltfModel.materials)
 	{
+		BS_PROFILE_SCOPE("GLTFImporter::Material");
 		GltfModelCommponennt::Material& material = materials.emplace_back();
 		material.name = gltfMaterial.name;
 		material.baseColor.x = static_cast<float>(gltfMaterial.pbrMetallicRoughness.baseColorFactor.at(0));
@@ -410,6 +450,8 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 		auto loadTexture = [&](int gltfTextureIndex, const char* textureType, std::string& textureFilename, ID3D11ShaderResourceView** srv)
 			{
 				if (gltfTextureIndex < 0) return;
+				BS_PROFILE_SCOPE_DYNAMIC(textureType);
+				++profileTextureRequestCount_;
 
 				const tinygltf::Texture& gltfTexture = gltfModel.textures.at(gltfTextureIndex);
 				const tinygltf::Image& gltfImage = gltfModel.images.at(gltfTexture.source);
@@ -432,6 +474,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 
 				if (gltfImage.bufferView >= 0 || !gltfImage.image.empty())
 				{
+					++profileEmbeddedTextureCount_;
 					if (device != nullptr)
 					{
 						if (gltfImage.bufferView >= 0)
@@ -442,7 +485,11 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 							//CPUResourceLoader::LoadTextureFromMemory(device, data, gltfBufferView.byteLength, srv);
 							if (!gltfImage.mimeType.empty()) {
 								// PNG/JPEG データの場合
-								CPUResourceLoader::LoadTextureFromMemory(device, gltfImage.image.data(), gltfImage.image.size(), srv);
+								{
+									BS_PROFILE_SCOPE("GLTFImporter::Texture.LoadFromMemory");
+									++profileGpuTextureCreateCount_;
+									CPUResourceLoader::LoadTextureFromMemory(device, gltfImage.image.data(), gltfImage.image.size(), srv);
+								}
 							}
 							else {
 								// raw imageの場合
@@ -462,15 +509,22 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 								initData.SysMemPitch = gltfImage.width * 4; // RGBA8
 
 								Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+								BS_PROFILE_SCOPE("GLTFImporter::Texture.CreateTexture2D");
+								++profileGpuTextureCreateCount_;
 								HRESULT hr = device->CreateTexture2D(&desc, &initData, texture.GetAddressOf());
 								_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-								hr = device->CreateShaderResourceView(texture.Get(), nullptr, srv);
+								{
+									BS_PROFILE_SCOPE("GLTFImporter::Texture.CreateShaderResourceView");
+									hr = device->CreateShaderResourceView(texture.Get(), nullptr, srv);
+								}
 								_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 							}
 						}
 						else
 						{
+							BS_PROFILE_SCOPE("GLTFImporter::Texture.LoadFromMemory");
+							++profileGpuTextureCreateCount_;
 							HRESULT hr = CPUResourceLoader::LoadTextureFromMemory(device, gltfImage.image.data(), gltfImage.image.size(), srv);
 							if (FAILED(hr))
 							{
@@ -529,6 +583,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 								const tinygltf::Buffer& gltfBuffer = gltfModel.buffers.at(gltfBufferView.buffer);
 								const byte* data = gltfBuffer.data.data() + gltfBufferView.byteOffset;
 
+								BS_PROFILE_SCOPE("GLTFImporter::Texture.ExportEmbedded");
 								std::ofstream os(outputFilePath.string().c_str(), std::ios::binary);
 								os.write(reinterpret_cast<const char*>(data), gltfBufferView.byteLength);
 							}
@@ -536,6 +591,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 							{
 								// リニアな画像データは.pngで出力
 								textureFilePath = textureFilePath.replace_extension(".png");
+								BS_PROFILE_SCOPE("GLTFImporter::Texture.ExportEmbedded");
 								stbi_write_png(
 									outputFilePath.string().c_str(),
 									static_cast<int>(gltfImage.width),
@@ -550,6 +606,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 				}
 				else
 				{
+					++profileExternalTextureCount_;
 					textureFilename = gltfImage.uri;
 				}
 			};
@@ -559,15 +616,27 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 		loadTexture(gltfMaterial.occlusionTexture.index, "Occlusion", material.occlusionTextureFileName, material.occlusionMap.GetAddressOf());
 		loadTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index, "MetallicRoughness", material.metalnessRoughnessTextureFileName, material.metalnessRoughnessMap.GetAddressOf());
 	}
+	BS_PROFILE_PLOT("GLTFImporter.TextureRequestCount", static_cast<double>(profileTextureRequestCount_));
+	BS_PROFILE_PLOT("GLTFImporter.EmbeddedTextureCount", static_cast<double>(profileEmbeddedTextureCount_));
+	BS_PROFILE_PLOT("GLTFImporter.ExternalTextureCount", static_cast<double>(profileExternalTextureCount_));
+	BS_PROFILE_PLOT("GLTFImporter.GPUTextureCreateCount", static_cast<double>(profileGpuTextureCreateCount_));
 }
 
 // アニメーションデータを読み込み
 void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nodes, float sampleRate)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::LoadAnimations");
+	BS_PROFILE_PLOT("GLTFImporter.AnimationCount", static_cast<double>(gltfModel.animations.size()));
+	size_t profileAnimationChannelCount_ = 0;
+	size_t profilePositionKeyCount_ = 0;
+	size_t profileRotationKeyCount_ = 0;
+	size_t profileScaleKeyCount_ = 0;
+	size_t profileSkippedRotationKeyCount_ = 0;
 	DirectX::XMVECTOR Epsilon = DirectX::XMVectorReplicate(0.00001f);
 
 	for (const tinygltf::Animation& gltfAnimation : gltfModel.animations)
 	{
+		BS_PROFILE_SCOPE("GLTFImporter::Animation");
 		GltfModelCommponennt::Animation& animation = animations.emplace_back();
 		animation.name = gltfAnimation.name;
 		animation.nodeAnims.resize(nodes.size());
@@ -577,6 +646,8 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 		float maxTime = 0;
 		for (const tinygltf::AnimationChannel& gltfAnimationChannel : gltfAnimation.channels)
 		{
+			++profileAnimationChannelCount_;
+			BS_PROFILE_SCOPE("GLTFImporter::Animation.Channel");
 			// ノードアニメーションデータを読み取り開始
 			GltfModelCommponennt::NodeAnim& nodeAnim = animation.nodeAnims.at(gltfAnimationChannel.target_node);
 			const tinygltf::AnimationSampler& gltfAnimationSampler = gltfAnimation.samplers.at(gltfAnimationChannel.sampler);
@@ -596,6 +667,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 				for (int i = 0; i < gltfInputAccessor.count; ++i)
 				{
 					GltfModelCommponennt::VectorKeyframe& keyframe = nodeAnim.scaleKeyframes.emplace_back();
+					++profileScaleKeyCount_;
 					keyframe.seconds = gltfKeyframeTimes[i];
 					keyframe.value = gltfKeyframeValues[i];
 				}
@@ -625,9 +697,14 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 					// なぜかUnityで出力したアニメーションデータにはゴミと思われるキーフレームが存在している場合がある。
 					// 小数点が存在するフレーム（時間）がゴミデータっぽいので除外する。
 					float frame = gltfKeyframeTimes[i] * sampleRate;
-					if (fabs(std::round(frame) - frame) > 0.001) continue;
+					if (fabs(std::round(frame) - frame) > 0.001)
+					{
+						++profileSkippedRotationKeyCount_;
+						continue;
+					}
 
 					GltfModelCommponennt::QuaternionKeyframe& keyframe = nodeAnim.rotationKeyframes.emplace_back();
+					++profileRotationKeyCount_;
 					keyframe.seconds = gltfKeyframeTimes[i];
 					keyframe.value = gltfKeyframeValues[i];
 				}
@@ -656,6 +733,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 				for (int i = 0; i < gltfInputAccessor.count; ++i)
 				{
 					GltfModelCommponennt::VectorKeyframe& keyframe = nodeAnim.positionKeyframes.emplace_back();
+					++profilePositionKeyCount_;
 					keyframe.seconds = gltfKeyframeTimes[i];
 					keyframe.value = gltfKeyframeValues[i];
 				}
@@ -747,6 +825,11 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 			}
 		}
 	}
+	BS_PROFILE_PLOT("GLTFImporter.AnimationChannelCount", static_cast<double>(profileAnimationChannelCount_));
+	BS_PROFILE_PLOT("GLTFImporter.PositionKeyCount", static_cast<double>(profilePositionKeyCount_));
+	BS_PROFILE_PLOT("GLTFImporter.RotationKeyCount", static_cast<double>(profileRotationKeyCount_));
+	BS_PROFILE_PLOT("GLTFImporter.ScaleKeyCount", static_cast<double>(profileScaleKeyCount_));
+	BS_PROFILE_PLOT("GLTFImporter.SkippedRotationKeyCount", static_cast<double>(profileSkippedRotationKeyCount_));
 }
 
 // gltfVector3 → XMFLOAT3
@@ -827,6 +910,7 @@ void GLTFImporter::ConvertNodeAxisSystem(GltfModelCommponennt::Node& node)
 
 void GLTFImporter::ConvertMeshAxisSystem(GltfModelCommponennt::Mesh& mesh)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::ConvertMeshAxisSystem");
 	for (GltfModelCommponennt::Vertex& v : mesh.vertices)
 	{
 		ConvertPositionAxisSystem(v.position);
@@ -850,6 +934,7 @@ void GLTFImporter::ConvertMeshAxisSystem(GltfModelCommponennt::Mesh& mesh)
 
 void GLTFImporter::ConvertAnimationAxisSystem(GltfModelCommponennt::Animation& animation)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::ConvertAnimationAxisSystem");
 	for (GltfModelCommponennt::NodeAnim& nodeAnim : animation.nodeAnims)
 	{
 		for (GltfModelCommponennt::VectorKeyframe& keyframe : nodeAnim.positionKeyframes)
@@ -866,55 +951,64 @@ void GLTFImporter::ConvertAnimationAxisSystem(GltfModelCommponennt::Animation& a
 // タンジェント計算
 void GLTFImporter::ComputeTangents(std::vector<GltfModelCommponennt::Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
+	BS_PROFILE_SCOPE("GLTFImporter::ComputeTangents");
+	BS_PROFILE_PLOT("GLTFImporter.TangentVertexCount", static_cast<double>(vertices.size()));
+	BS_PROFILE_PLOT("GLTFImporter.TangentTriangleCount", static_cast<double>(indices.size() / 3));
 	size_t vertexCount = vertices.size();
 	std::unique_ptr<DirectX::XMFLOAT3[]> tan1 = std::make_unique<DirectX::XMFLOAT3[]>(vertexCount);
 	std::unique_ptr<DirectX::XMFLOAT3[]> tan2 = std::make_unique<DirectX::XMFLOAT3[]>(vertexCount);
 	std::unique_ptr<DirectX::XMFLOAT4[]> tangent = std::make_unique<DirectX::XMFLOAT4[]>(vertexCount);
 
-	for (size_t i = 0; i < indices.size(); i += 3)
 	{
-		const uint32_t i1 = indices[i + 0];
-		const uint32_t i2 = indices[i + 1];
-		const uint32_t i3 = indices[i + 2];
+		BS_PROFILE_SCOPE("GLTFImporter::ComputeTangents.AccumulateTriangles");
+		for (size_t i = 0; i < indices.size(); i += 3)
+		{
+			const uint32_t i1 = indices[i + 0];
+			const uint32_t i2 = indices[i + 1];
+			const uint32_t i3 = indices[i + 2];
 
-		const GltfModelCommponennt::Vertex& v1 = vertices[i1];
-		const GltfModelCommponennt::Vertex& v2 = vertices[i2];
-		const GltfModelCommponennt::Vertex& v3 = vertices[i3];
+			const GltfModelCommponennt::Vertex& v1 = vertices[i1];
+			const GltfModelCommponennt::Vertex& v2 = vertices[i2];
+			const GltfModelCommponennt::Vertex& v3 = vertices[i3];
 
-		const float x1 = v2.position.x - v1.position.x;
-		const float x2 = v3.position.x - v1.position.x;
-		const float y1 = v2.position.y - v1.position.y;
-		const float y2 = v3.position.y - v1.position.y;
-		const float z1 = v2.position.z - v1.position.z;
-		const float z2 = v3.position.z - v1.position.z;
-		const float s1 = v2.texcoord.x - v1.texcoord.x;
-		const float s2 = v3.texcoord.x - v1.texcoord.x;
-		const float t1 = v2.texcoord.y - v1.texcoord.y;
-		const float t2 = v3.texcoord.y - v1.texcoord.y;
-		const float r = 1.0f / (s1 * t2 - s2 * t1);
-		const DirectX::XMFLOAT3 sdir = { (t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r };
-		const DirectX::XMFLOAT3 tdir = { (s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r };
-		tan1[i1] = { tan1[i1].x + sdir.x, tan1[i1].y + sdir.y, tan1[i1].z + sdir.z };
-		tan1[i2] = { tan1[i2].x + sdir.x, tan1[i2].y + sdir.y, tan1[i2].z + sdir.z };
-		tan1[i3] = { tan1[i3].x + sdir.x, tan1[i3].y + sdir.y, tan1[i3].z + sdir.z };
-		tan2[i1] = { tan2[i1].x + sdir.x, tan2[i1].y + sdir.y, tan2[i1].z + sdir.z };
-		tan2[i2] = { tan2[i2].x + sdir.x, tan2[i2].y + sdir.y, tan2[i2].z + sdir.z };
-		tan2[i3] = { tan2[i3].x + sdir.x, tan2[i3].y + sdir.y, tan2[i3].z + sdir.z };
+			const float x1 = v2.position.x - v1.position.x;
+			const float x2 = v3.position.x - v1.position.x;
+			const float y1 = v2.position.y - v1.position.y;
+			const float y2 = v3.position.y - v1.position.y;
+			const float z1 = v2.position.z - v1.position.z;
+			const float z2 = v3.position.z - v1.position.z;
+			const float s1 = v2.texcoord.x - v1.texcoord.x;
+			const float s2 = v3.texcoord.x - v1.texcoord.x;
+			const float t1 = v2.texcoord.y - v1.texcoord.y;
+			const float t2 = v3.texcoord.y - v1.texcoord.y;
+			const float r = 1.0f / (s1 * t2 - s2 * t1);
+			const DirectX::XMFLOAT3 sdir = { (t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r };
+			const DirectX::XMFLOAT3 tdir = { (s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r };
+			tan1[i1] = { tan1[i1].x + sdir.x, tan1[i1].y + sdir.y, tan1[i1].z + sdir.z };
+			tan1[i2] = { tan1[i2].x + sdir.x, tan1[i2].y + sdir.y, tan1[i2].z + sdir.z };
+			tan1[i3] = { tan1[i3].x + sdir.x, tan1[i3].y + sdir.y, tan1[i3].z + sdir.z };
+			tan2[i1] = { tan2[i1].x + sdir.x, tan2[i1].y + sdir.y, tan2[i1].z + sdir.z };
+			tan2[i2] = { tan2[i2].x + sdir.x, tan2[i2].y + sdir.y, tan2[i2].z + sdir.z };
+			tan2[i3] = { tan2[i3].x + sdir.x, tan2[i3].y + sdir.y, tan2[i3].z + sdir.z };
+		}
 	}
 
-	for (size_t i = 0; i < vertexCount; ++i)
 	{
-		GltfModelCommponennt::Vertex& v = vertices[i];
+		BS_PROFILE_SCOPE("GLTFImporter::ComputeTangents.OrthogonalizeVertices");
+		for (size_t i = 0; i < vertexCount; ++i)
+		{
+			GltfModelCommponennt::Vertex& v = vertices[i];
 
-		DirectX::XMVECTOR N = DirectX::XMLoadFloat3(&v.normal);
-		DirectX::XMVECTOR T1 = DirectX::XMLoadFloat3(&tan1[i]);
+			DirectX::XMVECTOR N = DirectX::XMLoadFloat3(&v.normal);
+			DirectX::XMVECTOR T1 = DirectX::XMLoadFloat3(&tan1[i]);
 
-		// Gram-Schmidt orthogonalize        
-		DirectX::XMVECTOR T = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(T1, DirectX::XMVectorScale(N, DirectX::XMVectorGetX(DirectX::XMVector3Dot(N, T1)))));
+			// Gram-Schmidt orthogonalize        
+			DirectX::XMVECTOR T = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(T1, DirectX::XMVectorScale(N, DirectX::XMVectorGetX(DirectX::XMVector3Dot(N, T1)))));
 
-		// Calculate handedness        
-		DirectX::XMVECTOR T2 = DirectX::XMLoadFloat3(&tan2[i]);
-		float handedness = (DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Cross(N, T1), T2)) < 0.0f) ? -1.0f : 1.0f;
-		DirectX::XMStoreFloat4(&v.tangent, DirectX::XMVectorSetW(T, handedness));
+			// Calculate handedness        
+			DirectX::XMVECTOR T2 = DirectX::XMLoadFloat3(&tan2[i]);
+			float handedness = (DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Cross(N, T1), T2)) < 0.0f) ? -1.0f : 1.0f;
+			DirectX::XMStoreFloat4(&v.tangent, DirectX::XMVectorSetW(T, handedness));
+		}
 	}
 }
