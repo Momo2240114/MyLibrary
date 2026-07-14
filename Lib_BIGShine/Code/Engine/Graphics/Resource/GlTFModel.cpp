@@ -18,6 +18,8 @@
 
 #include "Engine/Debug/TracyProfiler.h"
 
+#include <algorithm>
+#include <cstdint>
 #include <cstring>
 
 
@@ -622,16 +624,33 @@ void GltfModelCommponennt::UpdateNodeTransformOnly(int nodeIndex_)
 		modelScaleMat_,
 		isRoot_,
 		false);
+
+	if (node_.parent == nullptr)
+	{
+		DirectX::XMStoreFloat4x4(&cachedOwnerWorldTransform, parentWorldTransform_);
+		hasCachedOwnerWorldTransform = true;
+	}
+	MarkSkinningTransformsDirty();
 }
 
 void GltfModelCommponennt::MarkPoseDirty()
 {
 	poseDirty = true;
+	MarkSkinningTransformsDirty();
 }
 
 void GltfModelCommponennt::MarkTransformDirty()
 {
 	transformDirty = true;
+	MarkSkinningTransformsDirty();
+}
+
+void GltfModelCommponennt::MarkSkinningTransformsDirty()
+{
+	for (Mesh& mesh_ : meshes)
+	{
+		mesh_.skinningTransformDirty = true;
+	}
 }
 
 void GltfModelCommponennt::UpdateTransformIfDirty()
@@ -717,6 +736,7 @@ void GltfModelCommponennt::UpdateTransform()
 
 	DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
 	DirectX::XMMATRIX modelScaleMat_ = DirectX::XMMatrixScaling(localScale, localScale, localScale);
+	BS_PROFILE_PLOT("GltfModel.Nodes", static_cast<int64_t>(nodes.size()));
 
 	for (Node& node_ : nodes)
 	{
@@ -731,6 +751,67 @@ void GltfModelCommponennt::UpdateTransform()
 	hasCachedOwnerWorldTransform = true;
 	poseDirty = false;
 	transformDirty = false;
+	MarkSkinningTransformsDirty();
+}
+
+const std::vector<DirectX::XMFLOAT4X4>& GltfModelCommponennt::GetSkinningTransforms(int meshIndex_)
+{
+	if (meshIndex_ < 0 || meshIndex_ >= static_cast<int>(meshes.size()))
+	{
+		static const std::vector<DirectX::XMFLOAT4X4> emptyTransforms_;
+		return emptyTransforms_;
+	}
+
+	UpdateTransformIfDirty();
+	UpdateSkinningTransforms(meshIndex_);
+	return meshes[meshIndex_].cachedSkinningTransforms;
+}
+
+void GltfModelCommponennt::UpdateSkinningTransforms(int meshIndex_)
+{
+	Mesh& mesh_ = meshes[meshIndex_];
+	if (!mesh_.skinningTransformDirty && !mesh_.cachedSkinningTransforms.empty())
+	{
+		return;
+	}
+
+	BS_PROFILE_SCOPE("GltfModelCommponennt::UpdateSkinningTransforms");
+	//BS_PROFILE_PLOT("GltfModel.SkinningCacheRebuild", 1);
+
+	const size_t transformCount_ = mesh_.bones.empty()
+		? 1
+		: (std::min)(mesh_.bones.size(), static_cast<size_t>(256));
+	BS_PROFILE_PLOT("GltfModel.SkinningTransformCount", static_cast<int64_t>(transformCount_));
+	mesh_.cachedSkinningTransforms.resize(transformCount_);
+
+	if (!mesh_.bones.empty())
+	{
+		for (size_t boneIndex_ = 0; boneIndex_ < transformCount_; ++boneIndex_)
+		{
+			const Bone& bone_ = mesh_.bones[boneIndex_];
+			if (!bone_.node) continue;
+
+			const DirectX::XMMATRIX worldTransform_ =
+				DirectX::XMLoadFloat4x4(&bone_.node->worldTransform);
+			const DirectX::XMMATRIX offsetTransform_ =
+				DirectX::XMLoadFloat4x4(&bone_.offsetTransform);
+			DirectX::XMStoreFloat4x4(
+				&mesh_.cachedSkinningTransforms[boneIndex_],
+				offsetTransform_ * worldTransform_);
+		}
+	}
+	else if (mesh_.node)
+	{
+		mesh_.cachedSkinningTransforms[0] = mesh_.node->worldTransform;
+	}
+	else
+	{
+		DirectX::XMStoreFloat4x4(
+			&mesh_.cachedSkinningTransforms[0],
+			DirectX::XMMatrixIdentity());
+	}
+
+	mesh_.skinningTransformDirty = false;
 }
 
 void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
@@ -753,6 +834,7 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
 		DirectX::XMMatrixScaling(localScale, localScale, localScale);
 
 	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
+	MarkSkinningTransformsDirty();
 }
 
 void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_, const DirectX::XMMATRIX& parentWorldTransform_, const DirectX::XMMATRIX& modelScaleMat_)
@@ -763,6 +845,7 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_, const DirectX
 	}
 
 	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
+	MarkSkinningTransformsDirty();
 }
 
 //{

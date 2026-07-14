@@ -42,6 +42,7 @@ void HitReactionComponent::HandleHit()
     float damage_ = 0.0f;
     float hitStopDuration_ = 0.0f;
     float hitStopScale_ = 0.0f;
+    float impactPower_ = 0.0f;
     float knockBackPower_ = 0.0f;
     float targetAirLiftPower_ = 0.0f;
     DirectX::SimpleMath::Vector2 hitDirection_{ 0.0f, 0.0f };
@@ -51,15 +52,22 @@ void HitReactionComponent::HandleHit()
         blackboard_->GetFloat("Hit", "HitStopTime", hitStopDuration_);
     }
     blackboard_->GetFloat("Hit", "HitStopScale", hitStopScale_);
+    blackboard_->GetFloat("Hit", "ImpactPower", impactPower_);
     blackboard_->GetFloat("Hit", "KnockBackPower", knockBackPower_);
     blackboard_->GetFloat("Hit", "TargetAirLiftPower", targetAirLiftPower_);
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
 
     lastDamage = (std::max)(damage_, 0.0f);
+    lastImpactPower = (std::max)(impactPower_, 0.0f);
     currentHealth = (std::max)(currentHealth - lastDamage, 0.0f);
     ++hitCount;
     blackboard_->SetFloat("Hit", "CurrentHealth", currentHealth);
     blackboard_->SetBool("Hit", "Dead", currentHealth <= 0.0f);
+    blackboard_->SetFloat("Hit", "Armor", armor);
+
+    const bool canReact_ = lastImpactPower > 0.0f && lastImpactPower >= armor;
+    blackboard_->SetBool("Hit", "ImpactReacted", canReact_);
+    CallOwnerAction(damageActionName);
 
     if (useHitStop && hitStopDuration_ > 0.0f)
     {
@@ -81,7 +89,7 @@ void HitReactionComponent::HandleHit()
         massScale_ = 1.0f / (std::max)(collider_->GetMass(), 1.0f);
     }
 
-    if (useKnockBack && knockBackPower_ > 0.0f)
+    if (canReact_ && useKnockBack && knockBackPower_ > 0.0f)
     {
         const std::shared_ptr<CharacterMovementComponent> movement_ =
             owner_->GetComponent<CharacterMovementComponent>();
@@ -103,7 +111,7 @@ void HitReactionComponent::HandleHit()
         }
     }
 
-    if (targetAirLiftPower_ > 0.0f)
+    if (canReact_ && targetAirLiftPower_ > 0.0f)
     {
         const float airLiftImpulse_ = targetAirLiftPower_ * massScale_;
         if (const std::shared_ptr<CharacterMovementComponent> movement_ =
@@ -119,7 +127,10 @@ void HitReactionComponent::HandleHit()
         }
     }
 
-    CallOwnerAction(reactionActionName);
+    if (canReact_)
+    {
+        CallOwnerAction(reactionActionName);
+    }
     CallOwnerAction(overlayStartActionName);
     overlayTimer = (std::max)(overlayDuration, 0.0f);
     if (overlayTimer <= 0.0f) CallOwnerAction(overlayStopActionName);
@@ -129,6 +140,7 @@ void HitReactionComponent::ResetHealth()
 {
     currentHealth = maxHealth;
     lastDamage = 0.0f;
+    lastImpactPower = 0.0f;
     hitCount = 0;
 }
 
@@ -169,7 +181,7 @@ void HitReactionComponent::CallOwnerAction(const std::string& actionName_)
 void HitReactionComponent::Gui()
 {
     ImGui::Text("Health: %.1f / %.1f", currentHealth, maxHealth);
-    ImGui::Text("Last Damage: %.1f  Hit Count: %d", lastDamage, hitCount);
+    ImGui::Text("Last Damage: %.1f  Last Impact: %.1f  Hit Count: %d", lastDamage, lastImpactPower, hitCount);
     if (ImGui::DragFloat("Max Health", &maxHealth, 1.0f, 1.0f, 999999.0f))
     {
         currentHealth = (std::min)(currentHealth, maxHealth);
@@ -179,6 +191,7 @@ void HitReactionComponent::Gui()
     if (ImGui::Button("Reset Health")) ResetHealth();
 
     ImGui::SeparatorText("Hit Reaction");
+    ImGui::DragFloat("Armor", &armor, 0.1f, 0.0f, 99999.0f);
     ImGui::Checkbox("Use Hit Stop", &useHitStop);
     ImGui::InputScalar("Hit Stop Layer Mask", ImGuiDataType_U32, &hitStopLayerMask);
     ImGui::Checkbox("Use Knock Back", &useKnockBack);
@@ -188,6 +201,12 @@ void HitReactionComponent::Gui()
     if (ImGui::InputText("Reaction Action", reactionActionBuffer_, sizeof(reactionActionBuffer_)))
     {
         reactionActionName = reactionActionBuffer_;
+    }
+    char damageActionBuffer_[128];
+    strncpy_s(damageActionBuffer_, damageActionName.c_str(), sizeof(damageActionBuffer_));
+    if (ImGui::InputText("Damage Action", damageActionBuffer_, sizeof(damageActionBuffer_)))
+    {
+        damageActionName = damageActionBuffer_;
     }
     char overlayStartBuffer_[128];
     strncpy_s(overlayStartBuffer_, overlayStartActionName.c_str(), sizeof(overlayStartBuffer_));
@@ -209,9 +228,11 @@ void HitReactionComponent::Serialize(nlohmann::json& json_) const
 {
     json_["MaxHealth"] = maxHealth;
     json_["CurrentHealth"] = currentHealth;
+    json_["Armor"] = armor;
     json_["UseHitStop"] = useHitStop;
     json_["HitStopLayerMask"] = hitStopLayerMask;
     json_["UseKnockBack"] = useKnockBack;
+    json_["DamageActionName"] = damageActionName;
     json_["ReactionActionName"] = reactionActionName;
     json_["OverlayStartActionName"] = overlayStartActionName;
     json_["OverlayStopActionName"] = overlayStopActionName;
@@ -226,8 +247,10 @@ void HitReactionComponent::Deserialize(const nlohmann::json& json_)
         0.0f,
         maxHealth);
     useHitStop = json_.value("UseHitStop", true);
+    armor = (std::max)(json_.value("Armor", 0.0f), 0.0f);
     hitStopLayerMask = json_.value("HitStopLayerMask", 3u);
     useKnockBack = json_.value("UseKnockBack", true);
+    damageActionName = json_.value("DamageActionName", std::string{});
     reactionActionName = json_.value("ReactionActionName", std::string{});
     overlayStartActionName = json_.value(
         "OverlayStartActionName",

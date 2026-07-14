@@ -133,11 +133,23 @@ private:
     float cachedDefaultScale = 1.0f;
     float cachedLayerScales[32]{};
     float lastRawDeltaTime = 0.0f;
+    bool paused = false;
+    bool frameStepRequested = false;
+    bool frameStepActive = false;
+    bool cameraUnscaledWhilePaused = true;
 
 public:
     TimeManager();
 
     void Update(float rawDt_);
+    void SetPaused(bool paused_);
+    void TogglePaused();
+    void RequestFrameStep();
+    bool IsPaused() const { return paused; }
+    bool IsFrameStepActive() const { return frameStepActive; }
+    void SetCameraUnscaledWhilePaused(bool enabled_) { cameraUnscaledWhilePaused = enabled_; }
+    bool IsCameraUnscaledWhilePaused() const { return cameraUnscaledWhilePaused; }
+    bool ShouldUseUnscaledCameraDelta() const { return paused && cameraUnscaledWhilePaused && !frameStepActive; }
     void SetTargetScale(uint32_t layerMask, float scale, float speed = 10.0f);
     void PlayTimedScale(uint32_t layerMask_, float targetScale_, float transitionDuration_,
         float holdDuration_, float returnDuration_, float defaultScale_ = 1.0f);

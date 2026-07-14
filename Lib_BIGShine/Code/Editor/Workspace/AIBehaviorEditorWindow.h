@@ -45,6 +45,7 @@ private:
     void DrawGraphAssetBar(const BehaviorGraphTarget& target_);
     void DrawInspector(const BehaviorGraphTarget& target_);
     void DrawNode(AIBehaviorNode& node_);
+    bool IsRuntimeActiveNode(const AIBehaviorNode& node_) const;
     void AddNode(const BehaviorGraphTarget& target_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
     void DrawCreateNodePopup(const BehaviorGraphTarget& target_);
     void RequestAddNode(const BehaviorGraphTarget& target_, AI_BEHAVIOR_NODE_TYPE type_, const char* name_);
@@ -62,6 +63,7 @@ private:
     ax::NodeEditor::EditorContext* nodeEditorContext = nullptr;
     AssetBrowserWindow assetBrowser;
     std::unordered_map<uintptr_t, ImVec2> pinPositions;
+    std::string activeActionName;
     uintptr_t selectedNodeId = 0;
     uintptr_t nodeToPlaceId = 0;
     DirectX::XMFLOAT2 nextNodePosition = { 220.0f, 180.0f };

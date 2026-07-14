@@ -61,6 +61,27 @@ void TimeManagerWindow::Draw()
             ImGui::EndTable();
         }
 
+        ImGui::SeparatorText("Debug Playback");
+        ImGui::Text("State: %s%s",
+            timeManager_->IsPaused() ? "Paused" : "Running",
+            timeManager_->IsFrameStepActive() ? " (Step)" : "");
+
+        if (ImGui::Button(timeManager_->IsPaused() ? "Resume" : "Pause"))
+            timeManager_->TogglePaused();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Step 1 Frame"))
+        {
+            timeManager_->RequestFrameStep();
+        }
+
+        bool cameraUnscaledWhilePaused_ = timeManager_->IsCameraUnscaledWhilePaused();
+        if (ImGui::Checkbox("Camera Moves While Paused", &cameraUnscaledWhilePaused_))
+        {
+            timeManager_->SetCameraUnscaledWhilePaused(cameraUnscaledWhilePaused_);
+        }
+
+        ImGui::SeparatorText("Scale");
         ImGui::SliderFloat(
             "Target Scale",
             &targetScale,
@@ -101,12 +122,6 @@ void TimeManagerWindow::Draw()
             timeManager_->ResetToDefaults();
         }
 
-        if (ImGui::Button("Pause"))
-        {
-            targetScale = 0.0f;
-            ApplyTimeScale();
-        }
-        ImGui::SameLine();
         if (ImGui::Button("0.25x"))
         {
             targetScale = 0.25f;

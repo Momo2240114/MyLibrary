@@ -45,6 +45,8 @@ void CharacterMovementComponent::Update(float deltaTime_)
         verticalMovementLocked ? 0.0f : rootMotionDelta.y / safePhysicsDeltaTime_,
         rootMotionDelta.z / safePhysicsDeltaTime_
     };
+    const float verticalImpulse_ =
+        verticalMovementLocked ? 0.0f : pendingVerticalImpulse;
 
     const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
     if (usePhysicsVelocity && collider_)
@@ -58,15 +60,15 @@ void CharacterMovementComponent::Update(float deltaTime_)
             if (verticalMovementLocked)
             {
                 collider_->velocity.y = 0.0f;
-                impulseVelocity.y = 0.0f;
+                pendingVerticalImpulse = 0.0f;
             }
             else if (collider_->useGravity)
             {
-                collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
+                collider_->velocity.y += rootMotionVelocity_.y + verticalImpulse_;
             }
             else
             {
-                collider_->velocity.y = rootMotionVelocity_.y + impulseVelocity.y;
+                collider_->velocity.y = rootMotionVelocity_.y + verticalImpulse_;
             }
         }
         else
@@ -74,11 +76,11 @@ void CharacterMovementComponent::Update(float deltaTime_)
             if (verticalMovementLocked)
             {
                 collider_->velocity.y = 0.0f;
-                impulseVelocity.y = 0.0f;
+                pendingVerticalImpulse = 0.0f;
             }
             else
             {
-                collider_->velocity.y += rootMotionVelocity_.y + impulseVelocity.y;
+                collider_->velocity.y += rootMotionVelocity_.y + verticalImpulse_;
             }
         }
         lastAppliedVelocity = collider_->velocity;
@@ -88,7 +90,7 @@ void CharacterMovementComponent::Update(float deltaTime_)
         const DirectX::XMFLOAT3 movementDelta_
         {
             desiredHorizontalVelocity.x * deltaTime_ + rootMotionDelta.x + impulseVelocity.x * deltaTime_,
-            verticalMovementLocked ? 0.0f : desiredHorizontalVelocity.y * deltaTime_ + rootMotionDelta.y + impulseVelocity.y * deltaTime_,
+            verticalMovementLocked ? 0.0f : desiredHorizontalVelocity.y * deltaTime_ + rootMotionDelta.y + verticalImpulse_ * deltaTime_,
             desiredHorizontalVelocity.z * deltaTime_ + rootMotionDelta.z + impulseVelocity.z * deltaTime_
         };
         owner_->transform->AddMoveOffset(movementDelta_);
@@ -104,11 +106,9 @@ void CharacterMovementComponent::Update(float deltaTime_)
         0.0f,
         1.0f - impulseDamping * safePhysicsDeltaTime_);
     impulseVelocity.x *= impulseDecay_;
-    impulseVelocity.y *= impulseDecay_;
     impulseVelocity.z *= impulseDecay_;
     const float impulseLengthSquared_ =
         impulseVelocity.x * impulseVelocity.x +
-        impulseVelocity.y * impulseVelocity.y +
         impulseVelocity.z * impulseVelocity.z;
     if (impulseLengthSquared_ < 0.0001f)
     {
@@ -155,13 +155,13 @@ void CharacterMovementComponent::AddRootMotionDelta(
 void CharacterMovementComponent::AddImpulse(const DirectX::XMFLOAT3& impulse_)
 {
     impulseVelocity.x += impulse_.x;
-    impulseVelocity.y += impulse_.y;
+    pendingVerticalImpulse += impulse_.y;
     impulseVelocity.z += impulse_.z;
 }
 
 void CharacterMovementComponent::ResetVerticalVelocity()
 {
-    impulseVelocity.y = 0.0f;
+    pendingVerticalImpulse = 0.0f;
     rootMotionDelta.y = 0.0f;
 
     const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
@@ -190,7 +190,7 @@ void CharacterMovementComponent::SetVerticalMovementLocked(bool locked_)
     if (!verticalMovementLocked) return;
 
     rootMotionDelta.y = 0.0f;
-    impulseVelocity.y = 0.0f;
+    pendingVerticalImpulse = 0.0f;
 
     const std::shared_ptr<ColliderComponent> collider_ = ResolveCollider();
     if (collider_)
@@ -247,6 +247,7 @@ void CharacterMovementComponent::ClearFrameRequests()
 {
     rootMotionDelta = { 0.0f, 0.0f, 0.0f };
     unscaledDeltaTime = 0.0f;
+    pendingVerticalImpulse = 0.0f;
 }
 
 void CharacterMovementComponent::Gui()

@@ -106,6 +106,8 @@ namespace PlayerBlackboardKey
     inline constexpr const char* IS_AIR_DODGE = "IsAirDodge";
     inline constexpr const char* IS_SKILL = "IsSkill";
     inline constexpr const char* CAN_CANCEL = "CanCancel";
+    inline constexpr const char* CAN_DODGE_CANCEL = "CanDodgeCancel";
+    inline constexpr const char* CAN_ACTION_BRANCH = "CanActionBranch";
     inline constexpr const char* CAN_BUFFER_INPUT = "CanBufferInput";
     inline constexpr const char* CAN_COMBO = "CanCombo";
     inline constexpr const char* ACTION_ENDED = "ActionEnded";
@@ -113,6 +115,15 @@ namespace PlayerBlackboardKey
 
     inline constexpr const char* HIT_TRIGGER = "HitTrigger";
     inline constexpr const char* HIT_DIRECTION = "HitDirection";
+    inline constexpr const char* HIT_IMPACT_POWER = "HitImpactPower";
+    inline constexpr const char* HIT_ARMOR = "HitArmor";
+    inline constexpr const char* HIT_REACTION_LEVEL = "HitReactionLevel";
+    inline constexpr const char* IS_HIT_LIGHT = "IsHitLight";
+    inline constexpr const char* IS_HIT_MEDIUM = "IsHitMedium";
+    inline constexpr const char* IS_HIT_HEAVY = "IsHitHeavy";
+    inline constexpr const char* IS_AIR_HIT_REACTION = "IsAirHitReaction";
+    inline constexpr const char* IS_AIR_HIT_RECOVERABLE = "IsAirHitRecoverable";
+    inline constexpr const char* IS_AIR_HIT_KNOCKDOWN = "IsAirHitKnockdown";
     //ジャスト回避関係
     inline constexpr const char* JUST_DODGE_SUCCEEDED = "JustDodgeSucceeded";
     inline constexpr const char* JUST_DODGE_TRIGGER = "JustDodgeTrigger";

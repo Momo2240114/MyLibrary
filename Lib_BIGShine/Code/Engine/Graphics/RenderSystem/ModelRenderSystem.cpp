@@ -10,6 +10,7 @@
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
+#include <cstring>
 #include <nlohmann/json.hpp>
 
 //---
@@ -491,7 +492,42 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
 	// メッシュ描画関数
-	auto drawMesh = [&](const GltfModelCommponennt::Mesh& mesh, ModelShader* shader)
+	size_t modelSubmitCount_ = drawInfos.size();
+	size_t meshSubmitCount_ = 0;
+	for (const DrawInfo& drawInfo_ : drawInfos)
+	{
+		if (!drawInfo_.model) continue;
+		meshSubmitCount_ += drawInfo_.model->GetMeshes().size();
+	}
+	size_t skeletonUploadCount_ = 0;
+
+	auto uploadSkeletonConstants_ = [&](GltfModelCommponennt& model_, int meshIndex_)
+		{
+			BS_PROFILE_SCOPE("Render::UploadSkeletonConstants");
+			++skeletonUploadCount_;
+
+			CbSkeleton cbSkeleton_{};
+			const std::vector<DirectX::XMFLOAT4X4>& transforms_ =
+				model_.GetSkinningTransforms(meshIndex_);
+			const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
+			if (transformCount_ > 0)
+			{
+				std::memcpy(
+					cbSkeleton_.boneTransforms,
+					transforms_.data(),
+					sizeof(DirectX::XMFLOAT4X4) * transformCount_);
+			}
+			else
+			{
+				DirectX::XMStoreFloat4x4(
+					&cbSkeleton_.boneTransforms[0],
+					DirectX::XMMatrixIdentity());
+			}
+
+			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+		};
+
+	auto drawMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_, ModelShader* shader)
 		{
 			// 頂点バッファ設定
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
@@ -501,23 +537,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			// スケルトン用定数バッファ更新
-			CbSkeleton cbSkeleton{};
-			if (mesh.bones.size() > 0)
-			{
-				for (size_t i = 0; i < mesh.bones.size(); ++i)
-				{
-					const GltfModelCommponennt::Bone& bone = mesh.bones.at(i);
-					DirectX::XMMATRIX WorldTransform = DirectX::XMLoadFloat4x4(&bone.node->worldTransform);
-					DirectX::XMMATRIX OffsetTransform = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
-					DirectX::XMMATRIX BoneTransform = OffsetTransform * WorldTransform;
-					DirectX::XMStoreFloat4x4(&cbSkeleton.boneTransforms[i], BoneTransform);
-				}
-			}
-			else
-			{
-				cbSkeleton.boneTransforms[0] = mesh.node->worldTransform;
-			}
-			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
+			uploadSkeletonConstants_(model_, meshIndex_);
 
 			// 更新
 			shader->Update(rc, mesh);
@@ -532,7 +552,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 		};
 
-	auto drawGBufferMesh = [&](const GltfModelCommponennt::Mesh& mesh, int meshIndex_,
+	auto drawGBufferMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_,
 		ModelShaderID shaderId_, const MaterialOverlayComponent* materialOverlay_)
 		{
 			UINT stride_ = sizeof(GltfModelCommponennt::Vertex);
@@ -546,22 +566,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->PSSetConstantBuffers(0, 1, gBufferMaterialConstantBuffer.GetAddressOf());
 			dc->PSSetConstantBuffers(1, 1, materialOverlayConstantBuffer.GetAddressOf());
 
-			CbSkeleton cbSkeleton_{};
-			if (!mesh.bones.empty())
-			{
-				for (size_t boneIndex_ = 0; boneIndex_ < mesh.bones.size(); ++boneIndex_)
-				{
-					const GltfModelCommponennt::Bone& bone_ = mesh.bones.at(boneIndex_);
-					DirectX::XMMATRIX worldTransform_ = DirectX::XMLoadFloat4x4(&bone_.node->worldTransform);
-					DirectX::XMMATRIX offsetTransform_ = DirectX::XMLoadFloat4x4(&bone_.offsetTransform);
-					DirectX::XMStoreFloat4x4(&cbSkeleton_.boneTransforms[boneIndex_], offsetTransform_ * worldTransform_);
-				}
-			}
-			else
-			{
-				cbSkeleton_.boneTransforms[0] = mesh.node->worldTransform;
-			}
-			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+			uploadSkeletonConstants_(model_, meshIndex_);
 
 			CbGBufferMaterial material_{};
 			material_.baseColor = mesh.material->baseColor;
@@ -669,7 +674,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			return shaderId == ModelShaderID::Toon || shaderId == ModelShaderID::ToonPBR;
 		};
 
-	auto drawOutlineMesh = [&](const GltfModelCommponennt::Mesh& mesh)
+	auto drawOutlineMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_)
 		{
 			if (!mesh.material->disableOutline || mesh.material->outlineThicknessOffset < 0)
 			{
@@ -681,22 +686,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			cbOutline.outlineThickness = mesh.material->outlineThicknessOffset;
 			dc->UpdateSubresource(outlineConstantBuffer.Get(), 0, nullptr, &cbOutline, 0, 0);
 
-			CbSkeleton cbSkeleton_{};
-			if (!mesh.bones.empty())
-			{
-				for (size_t boneIndex_ = 0; boneIndex_ < mesh.bones.size(); ++boneIndex_)
-				{
-					const GltfModelCommponennt::Bone& bone_ = mesh.bones.at(boneIndex_);
-					DirectX::XMMATRIX worldTransform_ = DirectX::XMLoadFloat4x4(&bone_.node->worldTransform);
-					DirectX::XMMATRIX offsetTransform_ = DirectX::XMLoadFloat4x4(&bone_.offsetTransform);
-					DirectX::XMStoreFloat4x4(&cbSkeleton_.boneTransforms[boneIndex_], offsetTransform_ * worldTransform_);
-				}
-			}
-			else
-			{
-				cbSkeleton_.boneTransforms[0] = mesh.node->worldTransform;
-			}
-			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+			uploadSkeletonConstants_(model_, meshIndex_);
 
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
 			UINT offset = 0;
@@ -741,6 +731,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	// 不透明描画処理
 	for (DrawInfo& drawInfo : drawInfos)
 	{
+		if (!drawInfo.model) continue;
+
 		const auto& meshes_ = drawInfo.model->GetMeshes();
 		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 		{
@@ -755,7 +747,9 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			{
 				TransparencyDrawInfo& transparencyDrawInfo = transparencyDrawInfos.emplace_back();
 				transparencyDrawInfo.shaderId = currentShaderId;
+				transparencyDrawInfo.model = drawInfo.model;
 				transparencyDrawInfo.mesh = &mesh;
+				transparencyDrawInfo.meshIndex = meshIndex_;
 				// カメラとの距離を算出
 				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
 					mesh.node->worldTransform._41,
@@ -770,15 +764,15 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			if (useDeferredRendering_)
 			{
-				drawGBufferMesh(mesh, meshIndex_, currentShaderId, drawInfo.materialOverlay.get());
+				drawGBufferMesh(*drawInfo.model, mesh, meshIndex_, currentShaderId, drawInfo.materialOverlay.get());
 			}
 			else
 			{
 				shader->Begin(rc);
-				drawMesh(mesh, shader);
+				drawMesh(*drawInfo.model, mesh, meshIndex_, shader);
 				if (isOutlineTarget(currentShaderId))
 				{
-					drawOutlineMesh(mesh);
+					drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
 				}
 				shader->End(rc);
 			}
@@ -838,6 +832,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 		for (DrawInfo& drawInfo : drawInfos)
 		{
+			if (!drawInfo.model) continue;
+
 			const auto& meshes_ = drawInfo.model->GetMeshes();
 			for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 			{
@@ -845,7 +841,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				if (mesh.material->alphaMode != GltfModelCommponennt::AlphaMode::Blend &&
 					isOutlineTarget(mesh.material->shaderId))
 				{
-					drawOutlineMesh(mesh);
+					drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
 				}
 			}
 		}
@@ -871,10 +867,21 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 		shader->Begin(rc);
 
-		drawMesh(*transparencyDrawInfo.mesh, shader);
+		if (transparencyDrawInfo.model && transparencyDrawInfo.mesh)
+		{
+			drawMesh(
+				*transparencyDrawInfo.model,
+				*transparencyDrawInfo.mesh,
+				transparencyDrawInfo.meshIndex,
+				shader);
+		}
 
 		shader->End(rc);
 	}
+	BS_PROFILE_PLOT("Render.ModelSubmitCount", static_cast<int64_t>(modelSubmitCount_));
+	BS_PROFILE_PLOT("Render.MeshSubmitCount", static_cast<int64_t>(meshSubmitCount_));
+	BS_PROFILE_PLOT("Render.SkeletonUploadCount", static_cast<int64_t>(skeletonUploadCount_));
+	BS_PROFILE_PLOT("Render.TransparentMeshCount", static_cast<int64_t>(transparencyDrawInfos.size()));
 	transparencyDrawInfos.clear();
 
 	// 定数バッファ設定解除
@@ -1186,9 +1193,36 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 	ID3D11Buffer* vsConstantBuffers[] = { skeletonConstantBuffer.Get() };
 	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
 
+	auto uploadSkeletonConstants_ = [&](GltfModelCommponennt& model_, int meshIndex_)
+		{
+			BS_PROFILE_SCOPE("RenderShadow::UploadSkeletonConstants");
+
+			CbSkeleton cbSkeleton_{};
+			const std::vector<DirectX::XMFLOAT4X4>& transforms_ =
+				model_.GetSkinningTransforms(meshIndex_);
+			const size_t transformCount_ = (std::min)(transforms_.size(), static_cast<size_t>(256));
+			if (transformCount_ > 0)
+			{
+				std::memcpy(
+					cbSkeleton_.boneTransforms,
+					transforms_.data(),
+					sizeof(DirectX::XMFLOAT4X4) * transformCount_);
+			}
+			else
+			{
+				DirectX::XMStoreFloat4x4(
+					&cbSkeleton_.boneTransforms[0],
+					DirectX::XMMatrixIdentity());
+			}
+
+			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+		};
+
 	shader->Begin(rc);
 	for (const DrawInfo& drawInfo : drawInfos)
 	{
+		if (!drawInfo.model) continue;
+
 		const auto& meshes_ = drawInfo.model->GetMeshes();
 		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 		{
@@ -1204,22 +1238,7 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			CbSkeleton cbSkeleton{};
-			if (!mesh.bones.empty())
-			{
-				for (size_t i = 0; i < mesh.bones.size(); ++i)
-				{
-					const GltfModelCommponennt::Bone& bone = mesh.bones.at(i);
-					DirectX::XMMATRIX worldTransform = DirectX::XMLoadFloat4x4(&bone.node->worldTransform);
-					DirectX::XMMATRIX offsetTransform = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
-					DirectX::XMStoreFloat4x4(&cbSkeleton.boneTransforms[i], offsetTransform * worldTransform);
-				}
-			}
-			else
-			{
-				cbSkeleton.boneTransforms[0] = mesh.node->worldTransform;
-			}
-			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton, 0, 0);
+			uploadSkeletonConstants_(*drawInfo.model, meshIndex_);
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 		}
 	}

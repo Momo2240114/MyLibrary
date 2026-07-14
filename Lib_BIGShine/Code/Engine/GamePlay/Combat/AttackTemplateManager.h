@@ -114,6 +114,7 @@ struct AttackTemplate
     std::string displayName;
     ATTACK_TEMPLATE_OWNER_TARGET ownerTarget = ATTACK_TEMPLATE_OWNER_TARGET::SELF;
     float damage = 5.0f;
+    float impactPower = 5.0f;
     float hitStopDuration = 0.05f;
     float hitStopScale = 0.0f;
     float knockBackPower = 3.0f;

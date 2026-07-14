@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
+#include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/Physics/CapsuleCollider.h"
 #include "PlayerControllerComponent.h"
 
@@ -50,6 +51,17 @@ void PlayerAttackState::Enter()
         action == PLAYER_ACTION::AIR_WEAK_ATTACK ||
         action == PLAYER_ACTION::AIR_STRONG_ATTACK ||
         action == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK;
+
+    if (action == PLAYER_ACTION::AIR_WEAK_ATTACK &&
+        player_->GetComboIndex() == 0)
+    {
+        if (std::shared_ptr<CharacterMovementComponent> movement_ =
+            GetComponent<CharacterMovementComponent>())
+        {
+            movement_->StopHorizontalMovementImmediately();
+        }
+    }
+
     if (isStrongCharge_)
     {
         DirectX::XMFLOAT3 direction_ = player_->GetMoveInput();

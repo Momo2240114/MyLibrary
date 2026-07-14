@@ -1,4 +1,4 @@
-﻿#include "PlayerStateEditorWindow.h"
+#include "PlayerStateEditorWindow.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -14,18 +14,24 @@ namespace ed = ax::NodeEditor;
 
 namespace
 {
-    constexpr std::array<PLAYER_ACTION, 10> PLAYER_ACTIONS =
+    constexpr std::array<PLAYER_ACTION, 16> PLAYER_ACTIONS =
     {
         PLAYER_ACTION::IDLE,
         PLAYER_ACTION::MOVE,
         PLAYER_ACTION::WEAK_ATTACK,
         PLAYER_ACTION::STRONG_ATTACK,
+        PLAYER_ACTION::STRONG_CHARGE_ATTACK,
         PLAYER_ACTION::GUARD,
         PLAYER_ACTION::JUST_GUARD,
         PLAYER_ACTION::DODGE,
         PLAYER_ACTION::SKILL_A,
         PLAYER_ACTION::SKILL_B,
         PLAYER_ACTION::COUNTER_ATTACK,
+        PLAYER_ACTION::JUMP,
+        PLAYER_ACTION::AIR_WEAK_ATTACK,
+        PLAYER_ACTION::AIR_STRONG_ATTACK,
+        PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK,
+        PLAYER_ACTION::AIR_DODGE,
     };
 
     constexpr float PI = 3.14159265358979323846f;
@@ -236,13 +242,26 @@ void PlayerStateEditorWindow::DrawStateList(PlayerControllerComponent* player_)
 
 void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_)
 {
-    ImGui::Text("%s Cancel Routes", GetPlayerActionName(editingAction));
+    ImGui::Text("%s Routes", GetPlayerActionName(editingAction));
+    if (ImGui::RadioButton("Dodge Cancel", editDodgeCancelRoutes))
+    {
+        editDodgeCancelRoutes = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Action Branch (Non-Dodge)", !editDodgeCancelRoutes))
+    {
+        editDodgeCancelRoutes = false;
+    }
     ImGui::Separator();
     if (!player_ || !nodeEditorContext)
     {
         ImGui::TextUnformatted("PlayerControllerComponent is not available.");
         return;
     }
+
+    const std::vector<PlayerCancelTransition>& activeTransitions_ = editDodgeCancelRoutes
+        ? player_->GetDodgeCancelTransitions()
+        : player_->GetActionBranchTransitions();
 
     ed::SetCurrentEditor(nodeEditorContext);
     ed::Begin("PlayerCancelNodeEditor");
@@ -337,14 +356,16 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
         ed::PopStyleVar(3);
     }
 
-    for (const PlayerCancelTransition& transition_ : player_->GetCancelTransitions())
+    for (const PlayerCancelTransition& transition_ : activeTransitions_)
     {
         if (transition_.from != editingAction || transition_.to == editingAction) continue;
         ed::Link(
             GetLinkId(transition_.from, transition_.to),
             GetOutputPinId(transition_.from),
             GetInputPinId(transition_.to),
-            ImVec4(0.94f, 0.30f, 0.32f, 1.0f),
+            editDodgeCancelRoutes
+                ? ImVec4(0.94f, 0.30f, 0.32f, 1.0f)
+                : ImVec4(0.32f, 0.82f, 0.48f, 1.0f),
             3.0f);
     }
 
@@ -377,13 +398,28 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
 
             const bool valid_ = targetAction_ != PLAYER_ACTION::NONE &&
                 (startPinValue_ == sourcePin_ || endPinValue_ == sourcePin_);
-            if (!valid_ || player_->HasCancelTransition(editingAction, targetAction_))
+            const bool targetIsDodge_ =
+                GetPlayerActionGroup(targetAction_) == PLAYER_ACTION_GROUP::DODGE;
+            const bool routeTypeValid_ = editDodgeCancelRoutes
+                ? targetIsDodge_
+                : !targetIsDodge_;
+            const bool duplicate_ = editDodgeCancelRoutes
+                ? player_->HasDodgeCancelTransition(editingAction, targetAction_)
+                : player_->HasActionBranchTransition(editingAction, targetAction_);
+            if (!valid_ || !routeTypeValid_ || duplicate_)
             {
                 ed::RejectNewItem(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), 2.0f);
             }
             else if (ed::AcceptNewItem(ImVec4(0.2f, 0.9f, 0.45f, 1.0f), 2.0f))
             {
-                player_->AddCancelTransition(editingAction, targetAction_);
+                if (editDodgeCancelRoutes)
+                {
+                    player_->AddDodgeCancelTransition(editingAction, targetAction_);
+                }
+                else
+                {
+                    player_->AddActionBranchTransition(editingAction, targetAction_);
+                }
             }
         }
     }
@@ -410,7 +446,14 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
             }
             else if (ed::AcceptDeletedItem())
             {
-                player_->RemoveCancelTransition(editingAction, targetAction_);
+                if (editDodgeCancelRoutes)
+                {
+                    player_->RemoveDodgeCancelTransition(editingAction, targetAction_);
+                }
+                else
+                {
+                    player_->RemoveActionBranchTransition(editingAction, targetAction_);
+                }
             }
         }
     }
@@ -430,9 +473,22 @@ void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
     if (!player_) return;
 
     ImGui::Spacing();
-    ImGui::SeparatorText("Cancel Destinations");
+    ImGui::SeparatorText(editDodgeCancelRoutes ? "Dodge Cancel Destinations" : "Action Branch Destinations");
+    if (ImGui::RadioButton("Dodge Cancel##Inspector", editDodgeCancelRoutes))
+    {
+        editDodgeCancelRoutes = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Action Branch##Inspector", !editDodgeCancelRoutes))
+    {
+        editDodgeCancelRoutes = false;
+    }
+
+    const std::vector<PlayerCancelTransition>& activeTransitions_ = editDodgeCancelRoutes
+        ? player_->GetDodgeCancelTransitions()
+        : player_->GetActionBranchTransitions();
     int routeCount_ = 0;
-    for (const PlayerCancelTransition& transition_ : player_->GetCancelTransitions())
+    for (const PlayerCancelTransition& transition_ : activeTransitions_)
     {
         if (transition_.from != editingAction) continue;
         ++routeCount_;
@@ -441,7 +497,14 @@ void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
         ImGui::SameLine();
         if (ImGui::SmallButton("Remove"))
         {
-            player_->RemoveCancelTransition(editingAction, transition_.to);
+            if (editDodgeCancelRoutes)
+            {
+                player_->RemoveDodgeCancelTransition(editingAction, transition_.to);
+            }
+            else
+            {
+                player_->RemoveActionBranchTransition(editingAction, transition_.to);
+            }
             ImGui::PopID();
             break;
         }
@@ -454,7 +517,7 @@ void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
 
     ImGui::Spacing();
     ImGui::SeparatorText("Runtime Gate");
-    ImGui::TextWrapped("Routes are available only while CanCancel is enabled by the animation sequencer.");
+    ImGui::TextWrapped("Dodge routes use EnableDodgeCancel. Non-Dodge action branches use EnableActionBranch or legacy CanCancelOn.");
 }
 
 void PlayerStateEditorWindow::ArrangeNodes()

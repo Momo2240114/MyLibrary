@@ -168,7 +168,7 @@
                 "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
-                "endTime": 0.6499999761581421,
+                "endTime": 0.8166666626930237,
                 "eventTemplateType": "NONE",
                 "label": "InputBufferOn",
                 "localPosition": [
@@ -196,8 +196,8 @@
                 "startTime": 0.01666666753590107
             },
             {
-                "actionEnd": "CanCancelOff",
-                "actionStart": "CanCancelOn",
+                "actionEnd": "DisableActionBranch",
+                "actionStart": "EnableActionBranch",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
@@ -206,7 +206,7 @@
                 "callEndOnStateExit": true,
                 "endTime": 0.8333333134651184,
                 "eventTemplateType": "NONE",
-                "label": "CanCancelOn",
+                "label": "ActionBranch",
                 "localPosition": [
                     0.0,
                     0.0,
@@ -229,7 +229,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 0.75
+                "startTime": 0.5833333134651184
             },
             {
                 "actionEnd": "",
@@ -266,6 +266,42 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.18333333730697632
+            },
+            {
+                "actionEnd": "DisableDodgeCancel",
+                "actionStart": "EnableDodgeCancel",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.8166666626930237,
+                "eventTemplateType": "NONE",
+                "label": "DodgeCancel",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.0833333358168602
             }
         ],
         "loop": false,

@@ -5,7 +5,7 @@
         "IsPlaying": false,
         "Parts": [
             {
-                "Alpha": 0.949999988079071,
+                "Alpha": 1.0,
                 "AlphaCurveName": "",
                 "AlphaEnd": 0.0,
                 "AlphaStart": 1.0,
@@ -79,8 +79,8 @@
                     1.0
                 ],
                 "FresnelNoiseStrength": 0.0,
-                "FresnelPower": 2.200000047683716,
-                "FresnelStrength": 1.600000023841858,
+                "FresnelPower": 0.3100000023841858,
+                "FresnelStrength": 5.0,
                 "GradientDirection": 0,
                 "GradientEndUv": 1.0,
                 "GradientFixedUv": 0.5,

@@ -165,12 +165,12 @@
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
-                "attackTemplateId": "AriCombo_03_02",
+                "attackTemplateId": "AirCombo_03_02",
                 "blackboardWrites": [],
                 "callEndOnStateExit": true,
                 "endTime": 0.6333333253860474,
                 "eventTemplateType": "ATTACK_TEMPLATE",
-                "label": "AriCombo_03_02",
+                "label": "AirCombo_03_02",
                 "localPosition": [
                     0.0,
                     0.0,
@@ -242,7 +242,7 @@
                 "callEndOnStateExit": true,
                 "endTime": 2.066666603088379,
                 "eventTemplateType": "NONE",
-                "label": "CanCancelOn",
+                "label": "ActionBranch",
                 "localPosition": [
                     0.0,
                     0.0,
@@ -265,7 +265,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 0.699999988079071
+                "startTime": 0.6833333373069763
             },
             {
                 "actionEnd": "",
@@ -301,7 +301,7 @@
                 "overridePlaybackSpeed": false,
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
-                "startTime": 1.0166666507720947
+                "startTime": 0.7333333492279053
             },
             {
                 "actionEnd": "",
@@ -410,6 +410,78 @@
                 "ownerTarget": "Self",
                 "playbackSpeed": 1.0,
                 "startTime": 0.46666666865348816
+            },
+            {
+                "actionEnd": "DisableActionBranch",
+                "actionStart": "EnableActionBranch",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 1.399999976158142,
+                "eventTemplateType": "NONE",
+                "label": "DodgeCancel",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.06666667014360428
+            },
+            {
+                "actionEnd": "DisableActionBranch",
+                "actionStart": "EnableActionBranch",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.46666666865348816,
+                "eventTemplateType": "NONE",
+                "label": "ActionBranch",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.2666666805744171
             }
         ],
         "loop": false,

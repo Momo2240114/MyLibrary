@@ -2,6 +2,7 @@
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 
@@ -26,6 +27,15 @@ public:
     {
         reactionActionName = actionName_;
     }
+    void SetDamageActionName(const std::string& actionName_)
+    {
+        damageActionName = actionName_;
+    }
+    void SetArmor(float armor_)
+    {
+        armor = (std::max)(armor_, 0.0f);
+    }
+    float GetArmor() const { return armor; }
 
 private:
     void RegisterActions();
@@ -35,12 +45,15 @@ private:
     float maxHealth = 100.0f;
     float currentHealth = 100.0f;
     float lastDamage = 0.0f;
+    float lastImpactPower = 0.0f;
     int hitCount = 0;
 
+    float armor = 0.0f;
     bool useHitStop = true;
     uint32_t hitStopLayerMask = 0;
     bool useKnockBack = true;
 
+    std::string damageActionName;
     std::string reactionActionName;
     std::string overlayStartActionName = "MaterialOverlay_Start";
     std::string overlayStopActionName = "MaterialOverlay_Stop";

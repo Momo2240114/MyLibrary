@@ -5,11 +5,13 @@
 #include "PlayerControllerComponent.h"
 
 #include <algorithm>
-#include <cmath>
 
 void PlayerHitState::Enter()
 {
     elapsedTime = 0.0f;
+    airHitReaction = false;
+    airHitRecoverable = false;
+    airHitKnockdown = false;
 
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
@@ -28,38 +30,115 @@ void PlayerHitState::Enter()
     if (!blackboard_) return;
 
     DirectX::SimpleMath::Vector2 hitDirection_{ 0.0f, 0.0f };
+    float impactPower_ = 0.0f;
+    float armor_ = player_->armor;
     blackboard_->GetVector2("Hit", "Direction", hitDirection_);
+    blackboard_->GetFloat("Hit", "ImpactPower", impactPower_);
+    blackboard_->GetFloat("Hit", "Armor", armor_);
 
-    blackboard_->SetBool(
+    impactPower_ = (std::max)(impactPower_, 0.0f);
+    armor_ = (std::max)(armor_, 0.0f);
+
+    int hitReactionLevel_ = 0;
+    if (impactPower_ >= player_->hitHeavyImpactThreshold)
+    {
+        hitReactionLevel_ = 2;
+    }
+    else if (impactPower_ >= player_->hitMediumImpactThreshold)
+    {
+        hitReactionLevel_ = 1;
+    }
+
+    const bool isHitLight_ = hitReactionLevel_ == 0;
+    const bool isHitMedium_ = hitReactionLevel_ == 1;
+    const bool isHitHeavy_ = hitReactionLevel_ >= 2;
+
+    airHitReaction = !player_->IsGrounded();
+    airHitKnockdown =
+        airHitReaction &&
+        impactPower_ >= player_->airHitKnockdownImpactThreshold;
+    airHitRecoverable = airHitReaction && !airHitKnockdown;
+
+    constexpr const char* categories_[] =
+    {
         PlayerBlackboardCategory::PLAYER,
-        PlayerBlackboardKey::HIT_TRIGGER,
-        true);
+        PlayerBlackboardCategory::ANIM
+    };
 
-    blackboard_->SetBool(
-        PlayerBlackboardCategory::ANIM,
-        PlayerBlackboardKey::HIT_TRIGGER,
-        true);
+    for (const char* category_ : categories_)
+    {
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::HIT_TRIGGER,
+            true);
 
-    blackboard_->SetVector2(
-        PlayerBlackboardCategory::PLAYER,
-        PlayerBlackboardKey::HIT_DIRECTION,
-        hitDirection_);
+        blackboard_->SetVector2(
+            category_,
+            PlayerBlackboardKey::HIT_DIRECTION,
+            hitDirection_);
 
-    blackboard_->SetVector2(
-        PlayerBlackboardCategory::ANIM,
-        PlayerBlackboardKey::HIT_DIRECTION,
-        hitDirection_);
+        blackboard_->SetFloat(
+            category_,
+            PlayerBlackboardKey::HIT_IMPACT_POWER,
+            impactPower_);
+
+        blackboard_->SetFloat(
+            category_,
+            PlayerBlackboardKey::HIT_ARMOR,
+            armor_);
+
+        blackboard_->SetInt(
+            category_,
+            PlayerBlackboardKey::HIT_REACTION_LEVEL,
+            hitReactionLevel_);
+
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_HIT_LIGHT,
+            isHitLight_);
+
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_HIT_MEDIUM,
+            isHitMedium_);
+
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_HIT_HEAVY,
+            isHitHeavy_);
+
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_AIR_HIT_REACTION,
+            airHitReaction);
+
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_AIR_HIT_RECOVERABLE,
+            airHitRecoverable);
+
+        blackboard_->SetBool(
+            category_,
+            PlayerBlackboardKey::IS_AIR_HIT_KNOCKDOWN,
+            airHitKnockdown);
+    }
 }
 
 void PlayerHitState::Execute(float elapsedTime_)
 {
     elapsedTime += (std::max)(elapsedTime_, 0.0f);
+
+    PlayerControllerComponent* player_ = GetPlayerController();
+    if (!player_) return;
+
+    if (airHitKnockdown && !player_->IsGrounded())
+    {
+        return;
+    }
+
     if (elapsedTime < fallbackDuration) return;
 
-    if (PlayerControllerComponent* player_ = GetPlayerController())
-    {
-        player_->NotifyActionEnd();
-    }
+    player_->NotifyActionEnd();
 }
 
 void PlayerHitState::Exit()
@@ -77,7 +156,28 @@ void PlayerHitState::Exit()
             PlayerBlackboardCategory::ANIM,
             PlayerBlackboardKey::HIT_TRIGGER,
             false);
+
+        constexpr const char* categories_[] =
+        {
+            PlayerBlackboardCategory::PLAYER,
+            PlayerBlackboardCategory::ANIM
+        };
+
+        for (const char* category_ : categories_)
+        {
+            blackboard_->SetFloat(category_, PlayerBlackboardKey::HIT_IMPACT_POWER, 0.0f);
+            blackboard_->SetInt(category_, PlayerBlackboardKey::HIT_REACTION_LEVEL, 0);
+            blackboard_->SetBool(category_, PlayerBlackboardKey::IS_HIT_LIGHT, false);
+            blackboard_->SetBool(category_, PlayerBlackboardKey::IS_HIT_MEDIUM, false);
+            blackboard_->SetBool(category_, PlayerBlackboardKey::IS_HIT_HEAVY, false);
+            blackboard_->SetBool(category_, PlayerBlackboardKey::IS_AIR_HIT_REACTION, false);
+            blackboard_->SetBool(category_, PlayerBlackboardKey::IS_AIR_HIT_RECOVERABLE, false);
+            blackboard_->SetBool(category_, PlayerBlackboardKey::IS_AIR_HIT_KNOCKDOWN, false);
+        }
     }
 
     elapsedTime = 0.0f;
+    airHitReaction = false;
+    airHitRecoverable = false;
+    airHitKnockdown = false;
 }

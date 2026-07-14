@@ -63,9 +63,10 @@ namespace
         ImDrawList* drawList_,
         const ImVec2& startPosition_,
         const ImVec2& endPosition_,
-        ImU32 color_)
+        ImU32 color_,
+        float thickness_ = 3.0f)
     {
-        drawList_->AddLine(startPosition_, endPosition_, color_, 3.0f);
+        drawList_->AddLine(startPosition_, endPosition_, color_, thickness_);
 
         ImVec2 direction_(
             endPosition_.x - startPosition_.x,
@@ -342,6 +343,11 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     AIBehaviorGraph& graph_ = *graphPointer_;
     graph_.EnsureDefaultGraph();
+    activeActionName.clear();
+    if (target_.dragonAI)
+    {
+        activeActionName = "DragonAI_" + std::string(GetDragonActionName(target_.dragonAI->GetCurrentAction()));
+    }
 
     DrawGraphAssetBar(target_);
     ImGui::TextDisabled("Right-click the graph background to create nodes.");
@@ -361,6 +367,16 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     for (const AIBehaviorLink& link_ : graph_.GetLinks())
     {
+        const AIBehaviorNode* fromNode_ = graph_.FindNode(link_.fromNodeId);
+        const AIBehaviorNode* toNode_ = graph_.FindNode(link_.toNodeId);
+        const bool activeLink_ =
+            (fromNode_ && IsRuntimeActiveNode(*fromNode_)) ||
+            (toNode_ && IsRuntimeActiveNode(*toNode_));
+        const ImU32 linkColor_ = activeLink_
+            ? IM_COL32(80, 255, 150, 255)
+            : IM_COL32(230, 230, 230, 255);
+        const float linkThickness_ = activeLink_ ? 5.0f : 3.0f;
+
         ed::Link(
             ed::LinkId(link_.id),
             ed::PinId(link_.fromPinId),
@@ -375,7 +391,8 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
                 ImGui::GetWindowDrawList(),
                 fromPosition_->second,
                 toPosition_->second,
-                IM_COL32(230, 230, 230, 255));
+                linkColor_,
+                linkThickness_);
         }
     }
 
@@ -678,8 +695,11 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
 void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 {
     const bool selected_ = selectedNodeId == node_.id;
-    const ImU32 nodeColor_ = GetNodeColor(node_.type);
-    const ImU32 borderColor_ = selected_ ? IM_COL32(255, 245, 120, 255) : IM_COL32(35, 35, 35, 255);
+    const bool runtimeActive_ = IsRuntimeActiveNode(node_);
+    const ImU32 nodeColor_ = runtimeActive_ ? IM_COL32(28, 96, 62, 255) : GetNodeColor(node_.type);
+    const ImU32 borderColor_ = runtimeActive_
+        ? IM_COL32(80, 255, 150, 255)
+        : (selected_ ? IM_COL32(255, 245, 120, 255) : IM_COL32(35, 35, 35, 255));
     constexpr float nodeWidth_ = 190.0f;
     constexpr float nodeHeight_ = 92.0f;
     constexpr float portWidth_ = 86.0f;
@@ -700,7 +720,7 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
     ImDrawList* drawList_ = ImGui::GetWindowDrawList();
 
     drawList_->AddRectFilled(nodeMin_, nodeMax_, nodeColor_, 10.0f);
-    drawList_->AddRect(nodeMin_, nodeMax_, borderColor_, 10.0f, 0, selected_ ? 3.0f : 2.0f);
+    drawList_->AddRect(nodeMin_, nodeMax_, borderColor_, 10.0f, 0, runtimeActive_ ? 4.0f : (selected_ ? 3.0f : 2.0f));
     drawList_->AddLine(
         ImVec2(nodeMin_.x, nodeMin_.y + 28.0f),
         ImVec2(nodeMax_.x, nodeMin_.y + 28.0f),
@@ -775,6 +795,13 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
     ed::EndNode();
     ed::PopStyleColor(2);
     ed::PopStyleVar(2);
+}
+
+bool AIBehaviorEditorWindow::IsRuntimeActiveNode(const AIBehaviorNode& node_) const
+{
+    return !activeActionName.empty() &&
+        node_.type == AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION &&
+        node_.actionName == activeActionName;
 }
 
 void AIBehaviorEditorWindow::AddNode(

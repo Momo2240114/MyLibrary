@@ -90,6 +90,7 @@ void AttackSystem::HandleHit(
     event_.hitStopDuration = hitBox_.hitStopDuration;
     event_.hitStopScale = hitBox_.hitStopScale;
     event_.hitStopLayerMask = hitBox_.hitStopLayerMask;
+    event_.impactPower = hitBox_.impactPower;
     event_.knockBackPower = hitBox_.knockBackPower;
     event_.targetAirLiftPower = hitBox_.targetAirLiftPower;
     event_.attackerAirLiftPower = hitBox_.attackerAirLiftPower;
@@ -216,6 +217,7 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     blackboard_->SetFloat("Hit", "Damage", event_.damage);
     blackboard_->SetFloat("Hit", "HitStopDuration", event_.hitStopDuration);
     blackboard_->SetFloat("Hit", "HitStopScale", event_.hitStopScale);
+    blackboard_->SetFloat("Hit", "ImpactPower", event_.impactPower);
     blackboard_->SetFloat("Hit", "KnockBackPower", event_.knockBackPower);
     blackboard_->SetFloat("Hit", "TargetAirLiftPower", event_.targetAirLiftPower);
     blackboard_->SetFloat("Hit", "AttackerAirLiftPower", event_.attackerAirLiftPower);

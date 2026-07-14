@@ -43,6 +43,7 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "hitBoxRadius", setting_.hitBoxRadius },
         { "hitBoxHalfHeight", setting_.hitBoxHalfHeight },
         { "damage", setting_.damage },
+        { "impactPower", setting_.impactPower },
         { "knockBackPower", setting_.knockBackPower },
         { "targetAirLiftPower", setting_.targetAirLiftPower },
         { "attackerAirLiftPower", setting_.attackerAirLiftPower },
@@ -80,6 +81,7 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.hitBoxRadius = json_.value("hitBoxRadius", 0.5f);
     setting_.hitBoxHalfHeight = json_.value("hitBoxHalfHeight", 1.0f);
     setting_.damage = json_.value("damage", 10.0f);
+    setting_.impactPower = (std::max)(json_.value("impactPower", setting_.damage), 0.0f);
     setting_.knockBackPower = json_.value("knockBackPower", 3.0f);
     setting_.targetAirLiftPower = (std::max)(json_.value("targetAirLiftPower", 0.0f), 0.0f);
     setting_.attackerAirLiftPower = (std::max)(json_.value("attackerAirLiftPower", 0.0f), 0.0f);
@@ -582,6 +584,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             hitBox_->SetAttackInstanceId(attackInstanceId_);
             hitBox_->SetHitGroupId(request_.setting.hitGroupId);
             hitBox_->SetDamage(request_.setting.damage);
+            hitBox_->SetImpactPower(request_.setting.impactPower);
             hitBox_->SetKnockBackPower(request_.setting.knockBackPower);
             hitBox_->SetAirLiftPower(
                 request_.setting.targetAirLiftPower,
@@ -702,6 +705,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
         attackHit_->SetAttackInstanceId(attackInstanceId_);
         attackHit_->SetHitGroupId(attackTemplate_.hitGroupId);
         attackHit_->SetDamage(attackTemplate_.damage);
+        attackHit_->SetImpactPower(attackTemplate_.impactPower);
         attackHit_->SetHitStopDuration(attackTemplate_.hitStopDuration);
         attackHit_->SetHitStopScale(attackTemplate_.hitStopScale);
         attackHit_->SetKnockBackPower(attackTemplate_.knockBackPower);

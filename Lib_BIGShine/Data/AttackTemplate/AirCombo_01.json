@@ -3,12 +3,15 @@
     "AssetVersion": 1,
     "attack": {
         "allowMultiHit": false,
+        "attackerAirLiftPower": 1.0,
         "damage": 5.0,
         "hitGroupId": 0,
         "hitStopDuration": 0.10000000149011612,
         "hitStopScale": 0.8500000238418579,
+        "impactPower": 5.0,
         "knockBackPower": 1.0,
-        "knockBackType": 0
+        "knockBackType": 0,
+        "targetAirLiftPower": 0.0
     },
     "attackEffects": [],
     "displayName": "AirCombo_01",

@@ -78,6 +78,7 @@ struct SlashEffectSpawnSetting
     float hitBoxRadius = 0.5f;
     float hitBoxHalfHeight = 1.0f;
     float damage = 10.0f;
+    float impactPower = 10.0f;
     float knockBackPower = 3.0f;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;

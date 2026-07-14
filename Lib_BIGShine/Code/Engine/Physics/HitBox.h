@@ -19,6 +19,7 @@ public:
     bool allowMultiHit = false;
     bool canHitOwner = false;
     int teamId = 0;
+    float impactPower = 1.0f;
     float knockBackPower = 0.0f;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;
@@ -61,6 +62,7 @@ public:
     void SetAttackInstanceId(uint32_t attackInstanceId_);
     void SetHitGroupId(uint32_t hitGroupId_);
     void SetDamage(float damage_);
+    void SetImpactPower(float impactPower_);
     void SetKnockBackPower(float knockBackPower_);
     void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
     void SetHitEffectPath(const std::string& path_);
