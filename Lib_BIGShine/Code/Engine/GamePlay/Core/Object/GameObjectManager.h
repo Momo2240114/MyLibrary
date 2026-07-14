@@ -19,6 +19,14 @@ class TimeManager;
 class CameraManager;
 class MotionVelocityComponent;
 
+enum class SCENE_RUNTIME_STATE
+{
+    LOADING,
+    INITIALIZING,
+    RUNNING,
+    FAILED
+};
+
 
 #include"Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
 #include"Engine/Graphics/VFX/MeshVFXRenderSystem.h"
@@ -107,6 +115,9 @@ public:
     void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);
 
     void Update(float elapsedTime_);
+    SCENE_RUNTIME_STATE GetSceneRuntimeState() const { return sceneRuntimeState; }
+    float GetSceneLoadProgress() const { return sceneLoadProgress; }
+    const std::string& GetSceneRuntimeError() const { return sceneRuntimeError; }
 
     void Submit(ID3D11DeviceContext* context_)
     {
@@ -257,6 +268,17 @@ private:
     bool shapeRenderEnabled = true;
     bool navMeshRenderEnabled = false;
     ModelRenderSystem* modelRenderSystem = nullptr;
+    SCENE_RUNTIME_STATE sceneRuntimeState = SCENE_RUNTIME_STATE::RUNNING;
+    float sceneLoadProgress = 1.0f;
+    std::string sceneRuntimeError;
+    void UpdateLoadingRuntime(float elapsedTime_);
+    void UpdateRunningRuntime(float elapsedTime_);
+    void ProcessPendingStarts();
+    bool WaitRequiredAssets();
+    bool WaitRuntimeReady();
+    bool HasRequiredRuntimeFailure();
+    void FinalizeSceneInitialization();
+    void FailSceneRuntime(const std::string& message_);
     void RegisterAttackCallbacks();
     void EnsureGlobalActionObjects();
 public:

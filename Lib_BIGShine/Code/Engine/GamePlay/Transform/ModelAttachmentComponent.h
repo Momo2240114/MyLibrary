@@ -18,6 +18,7 @@ public:
     void SetTargetNode(std::shared_ptr<GltfModelCommponennt> modelComp, const std::string& nodeName);
     void Update(float deltaTime_) override;
     void LateUpdate(float deltaTime) override;
+    bool IsLoadReady() const override;
     void Gui() override;
     void SyncAttachment();
 

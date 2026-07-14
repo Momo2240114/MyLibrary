@@ -125,6 +125,17 @@ void WeaponTrailComponent::LateUpdate(float deltaTime_)
     TrailMeshComponent::LateUpdate(deltaTime_);
 }
 
+bool WeaponTrailComponent::IsLoadReady() const
+{
+    WeaponTrailComponent* self_ = const_cast<WeaponTrailComponent*>(this);
+    const std::shared_ptr<GameObject> targetObject_ = self_->ResolveTargetObject();
+    const std::shared_ptr<GltfModelCommponennt> model_ = self_->ResolveTargetModel(targetObject_);
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 void WeaponTrailComponent::SetTarget(
     const std::string& gameObjectName_,
     const std::string& nodeName_)
@@ -251,6 +262,9 @@ bool WeaponTrailComponent::ResolveTargetNodeIndex(
     }
     if (!model_) return false;
 
+    model_->UpdateLoadState();
+    if (!model_->IsModelReady()) return false;
+
     const auto& nodes_ = model_->GetNodes();
     const bool validIndex_ = nodeIndex_ >= 0 &&
         nodeIndex_ < static_cast<int>(nodes_.size()) &&
@@ -267,6 +281,12 @@ bool WeaponTrailComponent::GetBladeSegment(
     if (!targetObject_ || !targetObject_->transform) return false;
 
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
+    if (model_)
+    {
+        model_->UpdateLoadState();
+        if (!model_->IsModelReady()) return false;
+    }
+
     const bool hasStartNode_ = ResolveTargetNodeIndex(
         model_, targetStartNodeName, targetStartNodeIndex);
     const bool hasEndNode_ = ResolveTargetNodeIndex(
@@ -390,6 +410,7 @@ void WeaponTrailComponent::Gui()
 
     const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveTargetModel(targetObject_);
+    if (model_) model_->UpdateLoadState();
     auto drawNodeCombo_ = [this, &model_](
         const char* label_,
         std::string& nodeName_,
@@ -407,7 +428,7 @@ void WeaponTrailComponent::Gui()
             nodeName_.clear();
             nodeIndex_ = -1;
         }
-        if (model_)
+        if (model_ && model_->IsModelReady())
         {
             const auto& nodes_ = model_->GetNodes();
             for (int index_ = 0; index_ < static_cast<int>(nodes_.size()); ++index_)
@@ -421,6 +442,10 @@ void WeaponTrailComponent::Gui()
                     nodeIndex_ = index_;
                 }
             }
+        }
+        else if (model_)
+        {
+            ImGui::TextDisabled("Target model is loading.");
         }
         else
         {

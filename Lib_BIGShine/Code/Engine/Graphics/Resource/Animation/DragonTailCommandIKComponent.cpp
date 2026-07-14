@@ -52,9 +52,21 @@ void DragonTailCommandIKComponent::Start()
     RegisterActions();
 }
 
+bool DragonTailCommandIKComponent::IsLoadReady() const
+{
+    const auto owner_ = const_cast<DragonTailCommandIKComponent*>(this)->GetGameObject();
+    const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 void DragonTailCommandIKComponent::LateUpdate(float deltaTime_)
 {
     if (!model || !ikMap) return;
+    model->UpdateLoadState();
+    if (!model->IsModelReady()) return;
 
     commandTimer += deltaTime_;
     ApplyTailIK(deltaTime_);

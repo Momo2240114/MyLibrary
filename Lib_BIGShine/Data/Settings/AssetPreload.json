@@ -1,0 +1,24 @@
+{
+    "Groups": [
+        {
+            "Name": "GAME_CORE",
+            "Assets": [
+                {
+                    "Type": "MODEL",
+                    "Path": "Data/Model/SwordPlayer/SwordWuman.gltf",
+                    "Priority": 300
+                },
+                {
+                    "Type": "MODEL",
+                    "Path": "Data/Model/Enemy/BookHeadMonster.gltf",
+                    "Priority": 300
+                },
+                {
+                    "Type": "MODEL",
+                    "Path": "Data/Model/Stage/Tutorial/SM_Room_TwoEntrance.gltf",
+                    "Priority": 300
+                }
+            ]
+        }
+    ]
+}

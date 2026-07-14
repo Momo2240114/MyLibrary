@@ -31,6 +31,7 @@ public:
     void Clear();
 
     void SyncFromPhysics(float deltaTime_);
+    void PrepareInitialPhysicsState(float deltaTime_);
     void Step(float deltaTime_);
 
     void HandlePhysXTrigger(

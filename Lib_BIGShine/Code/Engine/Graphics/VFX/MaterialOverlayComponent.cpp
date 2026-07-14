@@ -52,6 +52,8 @@ void MaterialOverlayComponent::ResetOverlay()
 
 void MaterialOverlayComponent::Update(float deltaTime_)
 {
+    if (!IsLoadReady()) return;
+
     MeshVFXComponent::Update(deltaTime_);
 
     const float targetWeight_ = overlayActive ? 1.0f : 0.0f;
@@ -77,6 +79,18 @@ void MaterialOverlayComponent::Update(float deltaTime_)
     {
         Stop();
     }
+}
+
+bool MaterialOverlayComponent::IsLoadReady() const
+{
+    const std::shared_ptr<GameObject> owner_ =
+        const_cast<MaterialOverlayComponent*>(this)->GetGameObject();
+    const std::shared_ptr<GltfModelCommponennt> model_ =
+        owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
 }
 
 float MaterialOverlayComponent::GetOverlayWeight() const
@@ -126,6 +140,12 @@ void MaterialOverlayComponent::Gui()
     if (!model_)
     {
         ImGui::TextDisabled("Owner model is not available.");
+        return;
+    }
+    model_->UpdateLoadState();
+    if (!model_->IsModelReady())
+    {
+        ImGui::TextDisabled("Owner model is loading.");
         return;
     }
 

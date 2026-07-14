@@ -15,6 +15,7 @@ public:
 
     void Update(float deltaTime_) override;
     void LateUpdate(float deltaTime_) override;
+    bool IsLoadReady() const override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;

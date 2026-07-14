@@ -189,6 +189,16 @@ void FootIKComponent::Start()
     ikMap_->AddFootChain("FootR");
 }
 
+bool FootIKComponent::IsLoadReady() const
+{
+    const auto owner_ = const_cast<FootIKComponent*>(this)->GetGameObject();
+    const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 // OwnerからIKMapComponentとモデルComponentを取得する。
 bool FootIKComponent::ResolveDependencies()
 {
@@ -207,6 +217,9 @@ void FootIKComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("FootIKComponent::LateUpdate");
 
     if (!enabled || !ResolveDependencies()) return;
+    const std::shared_ptr<GltfModelCommponennt> modelReady_ = model.lock();
+    if (modelReady_) modelReady_->UpdateLoadState();
+    if (!modelReady_ || !modelReady_->IsModelReady()) return;
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
     if (!ikMap_) return;

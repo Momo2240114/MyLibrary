@@ -956,6 +956,9 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadTypes.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResource.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>

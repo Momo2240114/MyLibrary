@@ -117,6 +117,16 @@ void UpperBodyLeanIKComponent::Start()
     }
 }
 
+bool UpperBodyLeanIKComponent::IsLoadReady() const
+{
+    const auto owner_ = const_cast<UpperBodyLeanIKComponent*>(this)->GetGameObject();
+    const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 bool UpperBodyLeanIKComponent::ResolveDependencies()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -342,6 +352,13 @@ void UpperBodyLeanIKComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("UpperBodyLeanIKComponent::LateUpdate");
 
     if (!ResolveDependencies())
+    {
+        ResetLean();
+        return;
+    }
+    const std::shared_ptr<GltfModelCommponennt> modelReady_ = model.lock();
+    if (modelReady_) modelReady_->UpdateLoadState();
+    if (!modelReady_ || !modelReady_->IsModelReady())
     {
         ResetLean();
         return;

@@ -131,6 +131,16 @@ void IKMapComponent::Start()
     ResetSimulation();
 }
 
+bool IKMapComponent::IsLoadReady() const
+{
+    const auto owner_ = const_cast<IKMapComponent*>(this)->GetGameObject();
+    const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 void IKMapComponent::LateUpdate(float deltaTime_)
 {
     (void)deltaTime_;

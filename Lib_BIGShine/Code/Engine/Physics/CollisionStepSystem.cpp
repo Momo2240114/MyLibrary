@@ -283,6 +283,18 @@ void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
     }
 }
 
+void CollisionStepSystem::PrepareInitialPhysicsState(float deltaTime_)
+{
+    RemoveExpiredColliders();
+    for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
+    {
+        if (const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock())
+        {
+            collider_->PreparePhysicsStep(deltaTime_);
+        }
+    }
+}
+
 void CollisionStepSystem::Step(float deltaTime_)
 {
     RemoveExpiredColliders();

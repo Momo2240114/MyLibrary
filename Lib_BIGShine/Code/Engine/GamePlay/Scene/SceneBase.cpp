@@ -28,6 +28,7 @@
 #include "Editor/Workspace/PlayerStateEditorWindow.h"
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
 #include "Editor/Workspace/AIBehaviorEditorWindow.h"
+#include <imgui.h>
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 { 
@@ -42,7 +43,7 @@ void SceneBase::Finalize()
 
 	if (_GameObjectManager) {
 		_GameObjectManager->Clear();
-		_GameObjectManager.reset(); // 世界の崩壊（メモリ解放）
+		_GameObjectManager.reset(); //メモリ解放
 	}
 }
 
@@ -122,6 +123,39 @@ void SceneBase::Render(float elapsedTime)
 
 void SceneBase::DrawGUI()
 {
+	if (_GameObjectManager)
+	{
+		const SCENE_RUNTIME_STATE sceneRuntimeState_ = _GameObjectManager->GetSceneRuntimeState();
+		if (sceneRuntimeState_ == SCENE_RUNTIME_STATE::LOADING ||
+			sceneRuntimeState_ == SCENE_RUNTIME_STATE::INITIALIZING ||
+			sceneRuntimeState_ == SCENE_RUNTIME_STATE::FAILED)
+		{
+			ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(360.0f, 0.0f), ImGuiCond_Always);
+			const ImGuiWindowFlags windowFlags_ =
+				ImGuiWindowFlags_NoDecoration |
+				ImGuiWindowFlags_AlwaysAutoResize |
+				ImGuiWindowFlags_NoSavedSettings |
+				ImGuiWindowFlags_NoFocusOnAppearing |
+				ImGuiWindowFlags_NoNav;
+
+			if (ImGui::Begin("Scene Runtime Status", nullptr, windowFlags_))
+			{
+				if (sceneRuntimeState_ == SCENE_RUNTIME_STATE::FAILED)
+				{
+					ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.2f, 1.0f), "Scene load failed");
+					ImGui::TextWrapped("%s", _GameObjectManager->GetSceneRuntimeError().c_str());
+				}
+				else
+				{
+					const float progress_ = _GameObjectManager->GetSceneLoadProgress() * 100.0f;
+					ImGui::Text("Scene loading %.0f%%", progress_);
+				}
+			}
+			ImGui::End();
+		}
+	}
+
 	if(isEditorVisible)
 	{
 		editorWindowManager->DrawAll();

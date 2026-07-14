@@ -12,6 +12,7 @@ public:
         isStatic = true;
         useGravity = false;
         physicsControlsTransform = false;
+        requiredForSceneStart = true;
     }
 
     const std::string& GetName() const override
@@ -24,6 +25,9 @@ public:
     void Start() override;
     void Gui() override;
     void Update(float dt_) override;
+    bool IsLoadReady() const override;
+    bool IsRuntimeReady() const override;
+    bool HasRuntimeFailure() const override;
 
     void Serialize(nlohmann::json& j_) const override
     {
@@ -41,5 +45,6 @@ public:
 
 private:
     bool CanBuildMesh() const;
+    bool IsCollisionBuilt() const;
     bool waitingForModel = true;
 };

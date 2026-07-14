@@ -14,6 +14,7 @@ class UpperBodyLeanIKComponent : public Component
 public:
     const std::string& GetName() const override;
     void Start() override;
+    bool IsLoadReady() const override;
     void LateUpdate(float deltaTime_) override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;

@@ -128,6 +128,16 @@ void HumanLookAtIKComponent::Start()
     ResolveTarget();
 }
 
+bool HumanLookAtIKComponent::IsLoadReady() const
+{
+    const auto owner_ = const_cast<HumanLookAtIKComponent*>(this)->GetGameObject();
+    const auto model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!model_) return true;
+
+    model_->UpdateLoadState();
+    return !model_->IsModelLoading();
+}
+
 // 注視対象名を変更し、既存ターゲット参照をリセットする。
 void HumanLookAtIKComponent::SetTargetName(const std::string& targetName_)
 {
@@ -300,6 +310,9 @@ void HumanLookAtIKComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("HumanLookAtIKComponent::LateUpdate");
 
     if (!ResolveDependencies()) return;
+    const std::shared_ptr<GltfModelCommponennt> modelReady_ = model.lock();
+    if (modelReady_) modelReady_->UpdateLoadState();
+    if (!modelReady_ || !modelReady_->IsModelReady()) return;
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
     if (!ikMap_) return;

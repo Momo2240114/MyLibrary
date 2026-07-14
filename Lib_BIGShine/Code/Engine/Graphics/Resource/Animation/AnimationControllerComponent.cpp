@@ -111,6 +111,8 @@ void AnimationControllerComponent::EnsureNodeEditorContext()
 void AnimationControllerComponent::EnsureStatesFromModel()
 {
     if (!modelComponent) return;
+    modelComponent->UpdateLoadState();
+    if (!modelComponent->IsModelReady()) return;
 
     const auto& animations_ = modelComponent->GetAnimations();
     for (int animIndex_ = 0; animIndex_ < static_cast<int>(animations_.size()); ++animIndex_)
@@ -162,6 +164,8 @@ void AnimationControllerComponent::Start()
 
     EnsureNodeEditorContext();
     if (!modelComponent) return;
+    modelComponent->UpdateLoadState();
+    if (!modelComponent->IsModelReady()) return;
 
     modelComponent->SetTransformUpdateDrivenExternally(true);
 
@@ -207,8 +211,21 @@ void AnimationControllerComponent::Update(float deltaTime_)
         {
             return;
         }
+        modelComponent->UpdateLoadState();
+        if (!modelComponent->IsModelReady())
+        {
+            return;
+        }
 
         modelComponent->SetTransformUpdateDrivenExternally(true);
+    }
+    else
+    {
+        modelComponent->UpdateLoadState();
+        if (!modelComponent->IsModelReady())
+        {
+            return;
+        }
     }
 
     EnsureStatesFromModel();
@@ -440,6 +457,8 @@ bool AnimationControllerComponent::PreviewCustomAnimation(int customAnimIndex_, 
         modelComponent = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
     }
     if (!modelComponent) return false;
+    modelComponent->UpdateLoadState();
+    if (!modelComponent->IsModelReady()) return false;
 
     if (!curveComponent)
     {

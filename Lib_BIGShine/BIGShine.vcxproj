@@ -672,6 +672,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFModel.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadTypes.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResource.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Sprite.h" />
