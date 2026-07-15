@@ -16,7 +16,8 @@ public:
 
         DRAGON_NECK,
         DRAGON_TAIL,
-        UPPER_BODY_LEAN
+        UPPER_BODY_LEAN,
+        SHIELD_BLOCK
     };
 
     struct IKChain
@@ -62,6 +63,14 @@ public:
         float lookTipWeight = 1.0f;
         float lookShieldShoulderYawDegrees = 18.0f;
         float lookBlendSpeed = 8.0f;
+
+        // ShieldBlockIKComponent settings (used only when type is SHIELD_BLOCK).
+        float shieldElbowWristRatio = 0.7f;
+        float shieldSearchRadius = 3.0f;
+        float shieldMaxYawDegrees = 80.0f;
+        float shieldMaxPitchDegrees = 55.0f;
+        std::string shieldPoleNodeName;
+        float shieldBlendSpeed = 10.0f;
 
         float startLift = 0.08f;          // 初期だけ上に逃がす量
         int startCollisionWarmup = 4;     // 初期押し出し回数
@@ -112,6 +121,7 @@ public:
     IKChain& AddSpringChain(const std::string& name_, const std::string& rootNodeName_, const std::string& tipNodeName_);
     IKChain& AddFootChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     IKChain& AddLookAtChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
+    IKChain& AddShieldBlockChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     IKChain& AddUpperBodyLeanChain(const std::string& name_, const std::string& rootNodeName_ = {}, const std::string& tipNodeName_ = {});
     IKChain& AddDragonNeckChain(
         const std::string& name_,

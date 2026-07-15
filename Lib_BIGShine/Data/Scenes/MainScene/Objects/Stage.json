@@ -31,6 +31,7 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "CylinderCollider"
         },
         {
@@ -62,6 +63,7 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": true,
             "TypeName": "MeshCollider"
         }
     ],
@@ -225,6 +227,7 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "GltfModel"
         },
         {
@@ -383,12 +386,14 @@
                 "IsPlaying": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ParticleComponent"
         }
     ],
     "Layer": 0,
     "Name": "Stage",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             1.9705034901562613e-06,

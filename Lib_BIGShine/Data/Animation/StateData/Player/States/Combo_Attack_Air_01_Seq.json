@@ -196,8 +196,8 @@
                 "startTime": 0.18333333730697632
             },
             {
-                "actionEnd": "DisableActionBranch",
-                "actionStart": "EnableActionBranch",
+                "actionEnd": "PlayerModel_DisableActionBranch",
+                "actionStart": "PlayerModel_EnableActionBranch",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
@@ -233,7 +233,7 @@
             },
             {
                 "actionEnd": "",
-                "actionStart": "ComboTransition",
+                "actionStart": "PlayerModel_ComboTransition",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
@@ -269,7 +269,7 @@
             },
             {
                 "actionEnd": "",
-                "actionStart": "ActionEnd",
+                "actionStart": "PlayerModel_ActionEnd",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
@@ -304,8 +304,8 @@
                 "startTime": 0.7166666388511658
             },
             {
-                "actionEnd": "DisableDodgeCancel",
-                "actionStart": "EnableDodgeCancel",
+                "actionEnd": "PlayerModel_EnableDodgeCancel",
+                "actionStart": "PlayerModel_EnableDodgeCancel",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,

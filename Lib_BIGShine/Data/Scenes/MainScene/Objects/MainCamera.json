@@ -29,6 +29,7 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "SphereCollider"
         }
     ],
@@ -38,15 +39,15 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    47.618404388427734,
-                    3.9262263774871826,
-                    12.296165466308594
+                    30.533010482788086,
+                    4.035526275634766,
+                    32.923770904541016
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    17.658248901367188,
-                    -0.32214120030403137,
-                    -4.297424793243408
+                    11.57253646850586,
+                    -0.322004497051239,
+                    3.099519968032837
                 ],
                 "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
@@ -58,12 +59,13 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "CameraComponent"
         },
         {
             "Data": {
-                "currentPitch": -7.071159362792969,
-                "currentYaw": -151.01988220214844,
+                "currentPitch": -7.0290703773498535,
+                "currentYaw": -122.44574737548828,
                 "distance": 14.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -80,6 +82,7 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ThirdPersonCameraComponent"
         },
         {
@@ -88,16 +91,31 @@
                 "cameraHeight": 1.0,
                 "closeDistance": 8.0,
                 "closeFocusBias": 0.2800000011920929,
+                "collisionFovInterpolationSpeed": 10.0,
+                "collisionFovMaxAddition": 18.0,
+                "collisionLookAtInterpolationSpeed": 18.0,
+                "collisionLookAtLowerHeight": 1.100000023841858,
+                "collisionLookAtSearchRadius": 1.7999999523162842,
                 "currentSide": 1.0,
                 "distanceScale": 0.44999998807907104,
                 "farFocusBias": 0.5,
+                "framingSmoothSpeed": 16.0,
                 "heightDifferenceScale": 1.0,
+                "horizontalSafeMax": 0.8999999761581421,
+                "horizontalSafeMin": 0.10000000149011612,
                 "lockOnEnabled": true,
                 "lockOnTargetName": "TestTarget",
                 "lookAtInterpolationSpeed": 12.5,
                 "maxCameraDistance": 14.0,
                 "maxDistance": 255.0,
                 "minCameraDistance": 6.0,
+                "playerBottomLimit": 0.699999988079071,
+                "playerBottomOffset": [
+                    0.0,
+                    0.05000000074505806,
+                    0.0
+                ],
+                "playerFocusWeight": 0.6200000047683716,
                 "playerOffset": [
                     0.0,
                     0.0,
@@ -107,30 +125,43 @@
                 "positionInterpolationSpeed": 7.0,
                 "separationHeightScale": 0.05000000074505806,
                 "sideOffset": 0.0,
+                "targetFocusWeight": 0.3799999952316284,
                 "targetOffset": [
                     0.0,
                     1.7999999523162842,
                     0.0
-                ]
+                ],
+                "verticalDistanceCorrectionStrength": 2.5,
+                "verticalFocusCorrectionStrength": 1.399999976158142,
+                "verticalSafeMax": 0.7799999713897705,
+                "verticalSafeMin": 0.2199999988079071
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "CameraLockOnComponent"
         },
         {
             "Data": {
+                "collisionLiftDownSpeed": 5.0,
+                "collisionLiftStartRate": 0.25,
+                "collisionLiftUpSpeed": 14.0,
                 "collisionOffset": 0.20000000298023224,
+                "enableLockOnCollisionLift": true,
                 "ignoreLockOnTargetName": "TestTarget",
                 "ignoreTargetName": "PlayerModel",
                 "includeDynamicColliders": true,
+                "maxCollisionLiftHeight": 3.0,
                 "minimumCameraDistance": 0.05000000074505806,
                 "probeRadius": 0.30000001192092896
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "CameraCollisionComponent"
         },
         {
             "Data": null,
             "Enabled": false,
+            "RequiredForSceneStart": false,
             "TypeName": "CameraFreeController"
         },
         {
@@ -158,32 +189,35 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "FovDirector"
         },
         {
             "Data": null,
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "Easing"
         }
     ],
     "Layer": 1,
     "Name": "MainCamera",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            47.618408203125,
-            3.9262266159057617,
-            12.296163558959961
+            30.53301239013672,
+            4.035526275634766,
+            32.923770904541016
         ],
         "Rot": [
-            7.071160316467285,
-            241.0198974609375,
+            7.0290703773498535,
+            212.44577026367188,
             0.0
         ],
         "Scale": [
-            1.0000001192092896,
-            1.0000001192092896,
-            1.0000001192092896
+            1.0,
+            1.0,
+            1.0
         ]
     }
 }

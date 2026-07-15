@@ -6,6 +6,7 @@
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
                 "AttackInstanceId": 683,
+                "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
@@ -67,6 +68,7 @@
                 "shapeSizeScale": 2.5799999237060547
             },
             "Enabled": false,
+            "RequiredForSceneStart": false,
             "TypeName": "HitBox"
         }
     ],
@@ -79,12 +81,14 @@
                 "targetStartNodeName": "calf_twist_01_l"
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ModelAttachment"
         }
     ],
     "Layer": 0,
     "Name": "KickHit",
     "ParentName": "PlayerModel",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             -0.2633476257324219,

@@ -1,5 +1,6 @@
 #include "DebugLog.h"
 
+#include <algorithm>
 #include <chrono>
 #include <ctime>
 #include <filesystem>
@@ -16,6 +17,7 @@ DebugLog& DebugLog::Instance()
 
 void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file_, int line_, const std::string& text_)
 {
+    const std::chrono::steady_clock::time_point now_ = std::chrono::steady_clock::now();
     LogMessage message_;
     message_.category = category_;
     message_.level = level_;
@@ -25,6 +27,8 @@ void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file
     message_.time = MakeTimeString();
 
     std::lock_guard<std::mutex> lock_(mutex);
+    message_.sequence = nextSequence++;
+    message_.elapsedSeconds = std::chrono::duration<double>(now_ - startTime).count();
     messages.emplace_back(std::move(message_));
 }
 
@@ -32,6 +36,8 @@ void DebugLog::Clear()
 {
     std::lock_guard<std::mutex> lock_(mutex);
     messages.clear();
+    nextSequence = 0u;
+    startTime = std::chrono::steady_clock::now();
 }
 
 std::vector<LogMessage> DebugLog::GetMessages() const
@@ -40,10 +46,47 @@ std::vector<LogMessage> DebugLog::GetMessages() const
     return messages;
 }
 
+std::vector<LogMessage> DebugLog::GetMessagesRange(size_t startIndex_, size_t count_) const
+{
+    std::lock_guard<std::mutex> lock_(mutex);
+    if (startIndex_ >= messages.size() || count_ == 0u) return {};
+
+    const size_t endIndex_ = (std::min)(messages.size(), startIndex_ + count_);
+    return std::vector<LogMessage>(messages.begin() + startIndex_, messages.begin() + endIndex_);
+}
+
+std::vector<LogMessage> DebugLog::GetMessagesSince(double minElapsedSeconds_, size_t maxCount_) const
+{
+    std::lock_guard<std::mutex> lock_(mutex);
+    if (messages.empty() || maxCount_ == 0u) return {};
+
+    size_t firstIndex_ = messages.size();
+    size_t collectedCount_ = 0u;
+    for (size_t index_ = messages.size(); index_ > 0u; --index_)
+    {
+        const LogMessage& message_ = messages[index_ - 1u];
+        if (message_.elapsedSeconds < minElapsedSeconds_) break;
+        firstIndex_ = index_ - 1u;
+        ++collectedCount_;
+        if (collectedCount_ >= maxCount_) break;
+    }
+
+    if (firstIndex_ >= messages.size()) return {};
+
+    return std::vector<LogMessage>(messages.begin() + firstIndex_, messages.end());
+}
+
 size_t DebugLog::GetMessageCount() const
 {
     std::lock_guard<std::mutex> lock_(mutex);
     return messages.size();
+}
+
+double DebugLog::GetElapsedSeconds() const
+{
+    std::lock_guard<std::mutex> lock_(mutex);
+    const std::chrono::steady_clock::time_point now_ = std::chrono::steady_clock::now();
+    return std::chrono::duration<double>(now_ - startTime).count();
 }
 
 bool DebugLog::SaveText(const std::string& path_) const
@@ -90,6 +133,8 @@ bool DebugLog::SaveJson(const std::string& path_) const
         const LogMessage& message_ = copy_[index_];
         file_ << "    {\n";
         file_ << "      \"Time\": \"" << EscapeJsonString(message_.time) << "\",\n";
+        file_ << "      \"Sequence\": " << message_.sequence << ",\n";
+        file_ << "      \"ElapsedSeconds\": " << message_.elapsedSeconds << ",\n";
         file_ << "      \"Category\": \"" << GetCategoryName(message_.category) << "\",\n";
         file_ << "      \"Level\": \"" << GetLevelName(message_.level) << "\",\n";
         file_ << "      \"File\": \"" << EscapeJsonString(message_.file) << "\",\n";

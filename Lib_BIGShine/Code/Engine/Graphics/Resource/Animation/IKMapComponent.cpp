@@ -625,6 +625,11 @@ void IKMapComponent::Gui()
         AddLookAtChain("LookAt");
     }
     ImGui::SameLine();
+    if (ImGui::Button("Add Shield Block"))
+    {
+        AddShieldBlockChain("ShieldBlock");
+    }
+    ImGui::SameLine();
     if (ImGui::Button("Add Upper Body Lean"))
     {
         AddUpperBodyLeanChain("UpperBodyLean");
@@ -694,6 +699,7 @@ void IKMapComponent::Gui()
         if (chain_.type == IK_TYPE::CLOTH_BONE) chainTreeLabel_ = "Cloth Bone Chain";
         if (chain_.type == IK_TYPE::FOOT) chainTreeLabel_ = "Foot IK Chain";
         if (chain_.type == IK_TYPE::LOOK_AT) chainTreeLabel_ = "Look At IK Chain";
+        if (chain_.type == IK_TYPE::SHIELD_BLOCK) chainTreeLabel_ = "Shield Block IK Chain";
         if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) chainTreeLabel_ = "Upper Body Lean IK Chain";
         if (ImGui::TreeNode(chainTreeLabel_))
         {
@@ -709,6 +715,7 @@ void IKMapComponent::Gui()
             if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) typeIndex_ = 4;
             if (chain_.type == IK_TYPE::DRAGON_NECK) typeIndex_ = 5;
             if (chain_.type == IK_TYPE::DRAGON_TAIL) typeIndex_ = 6;
+            if (chain_.type == IK_TYPE::SHIELD_BLOCK) typeIndex_ = 7;
             const char* typeNames_[] = {
                 "Spring Bone",
                 "Foot IK",
@@ -716,7 +723,8 @@ void IKMapComponent::Gui()
                 "Look At IK",
                 "Upper Body Lean IK",
                 "Dragon Neck IK",
-                "Dragon Tail IK"
+                "Dragon Tail IK",
+                "Shield Block IK"
             };
             if (ImGui::Combo("IK Type", &typeIndex_, typeNames_, IM_ARRAYSIZE(typeNames_)))
             {
@@ -739,6 +747,9 @@ void IKMapComponent::Gui()
                     break;
                 case 6:
                     chain_.type = IK_TYPE::DRAGON_TAIL;
+                    break;
+                case 7:
+                    chain_.type = IK_TYPE::SHIELD_BLOCK;
                     break;
                 default:
                     chain_.type = IK_TYPE::SPRING_BONE;
@@ -871,6 +882,34 @@ void IKMapComponent::Gui()
                     90.0f);
                 ImGui::DragFloat("Look Blend Speed", &chain_.lookBlendSpeed, 0.1f, 0.0f, 50.0f);
             }
+            else if (chain_.type == IK_TYPE::SHIELD_BLOCK)
+            {
+                ImGui::TextDisabled("Solved by ShieldBlockIKComponent after the animation pose is applied.");
+                ImGui::SliderFloat("Elbow Wrist Ratio", &chain_.shieldElbowWristRatio, 0.0f, 1.0f);
+                ImGui::DragFloat("Search Radius", &chain_.shieldSearchRadius, 0.01f, 0.0f, 100.0f);
+                ImGui::DragFloat("Max Yaw Degrees", &chain_.shieldMaxYawDegrees, 1.0f, 0.0f, 180.0f);
+                ImGui::DragFloat("Max Pitch Degrees", &chain_.shieldMaxPitchDegrees, 1.0f, 0.0f, 89.0f);
+                const char* polePreview_ = chain_.shieldPoleNodeName.empty()
+                    ? "Animation Bend Direction"
+                    : chain_.shieldPoleNodeName.c_str();
+                if (ImGui::BeginCombo("Pole Node", polePreview_))
+                {
+                    const bool useAnimationDirection_ = chain_.shieldPoleNodeName.empty();
+                    if (ImGui::Selectable("Animation Bend Direction", useAnimationDirection_))
+                    {
+                        chain_.shieldPoleNodeName.clear();
+                    }
+                    for (const auto& node_ : nodes_)
+                    {
+                        if (ImGui::Selectable(node_.name.c_str(), chain_.shieldPoleNodeName == node_.name))
+                        {
+                            chain_.shieldPoleNodeName = node_.name;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::DragFloat("Shield Blend Speed", &chain_.shieldBlendSpeed, 0.1f, 0.0f, 50.0f);
+            }
             else if (chain_.type == IK_TYPE::UPPER_BODY_LEAN)
             {
                 ImGui::TextDisabled("Solved by UpperBodyLeanIKComponent after the animation pose is applied.");
@@ -951,6 +990,12 @@ void IKMapComponent::Serialize(nlohmann::json& j_) const
             { "LookTipWeight", chain_.lookTipWeight },
             { "LookShieldShoulderYawDegrees", chain_.lookShieldShoulderYawDegrees },
             { "LookBlendSpeed", chain_.lookBlendSpeed },
+            { "ShieldElbowWristRatio", chain_.shieldElbowWristRatio },
+            { "ShieldSearchRadius", chain_.shieldSearchRadius },
+            { "ShieldMaxYawDegrees", chain_.shieldMaxYawDegrees },
+            { "ShieldMaxPitchDegrees", chain_.shieldMaxPitchDegrees },
+            { "ShieldPoleNode", chain_.shieldPoleNodeName },
+            { "ShieldBlendSpeed", chain_.shieldBlendSpeed },
             { "Enabled", chain_.enabled }
         });
     }
@@ -1040,6 +1085,12 @@ void IKMapComponent::Deserialize(const nlohmann::json& j_)
         chain_.lookShieldShoulderYawDegrees = chainJson_.value(
             "LookShieldShoulderYawDegrees", 18.0f);
         chain_.lookBlendSpeed = chainJson_.value("LookBlendSpeed", 8.0f);
+        chain_.shieldElbowWristRatio = chainJson_.value("ShieldElbowWristRatio", 0.7f);
+        chain_.shieldSearchRadius = chainJson_.value("ShieldSearchRadius", 3.0f);
+        chain_.shieldMaxYawDegrees = chainJson_.value("ShieldMaxYawDegrees", 80.0f);
+        chain_.shieldMaxPitchDegrees = chainJson_.value("ShieldMaxPitchDegrees", 55.0f);
+        chain_.shieldPoleNodeName = chainJson_.value("ShieldPoleNode", std::string());
+        chain_.shieldBlendSpeed = chainJson_.value("ShieldBlendSpeed", 10.0f);
         chain_.enabled = chainJson_.value("Enabled", true);
         chain_.startLift = chainJson_.value("StartLift", 0.08f);
         chain_.startCollisionWarmup = chainJson_.value("StartCollisionWarmup", 4);
@@ -1103,6 +1154,35 @@ IKMapComponent::IKChain& IKMapComponent::AddLookAtChain(
     chain_.rootNodeName = rootNodeName_;
     chain_.tipNodeName = tipNodeName_;
     chain_.collideWithBodyColliders = false;
+    chains.push_back(chain_);
+    return chains.back();
+}
+
+IKMapComponent::IKChain& IKMapComponent::AddShieldBlockChain(
+    const std::string& name_,
+    const std::string& rootNodeName_,
+    const std::string& tipNodeName_)
+{
+    const auto existingChain_ = std::find_if(
+        chains.begin(),
+        chains.end(),
+        [&name_](const IKChain& chain_)
+        {
+            return chain_.type == IK_TYPE::SHIELD_BLOCK && chain_.name == name_;
+        });
+    if (existingChain_ != chains.end()) return *existingChain_;
+
+    IKChain chain_;
+    chain_.name = name_;
+    chain_.type = IK_TYPE::SHIELD_BLOCK;
+    chain_.rootNodeName = rootNodeName_;
+    chain_.tipNodeName = tipNodeName_;
+    chain_.collideWithBodyColliders = false;
+    chain_.shieldElbowWristRatio = 0.7f;
+    chain_.shieldSearchRadius = 3.0f;
+    chain_.shieldMaxYawDegrees = 80.0f;
+    chain_.shieldMaxPitchDegrees = 55.0f;
+    chain_.shieldBlendSpeed = 10.0f;
     chains.push_back(chain_);
     return chains.back();
 }

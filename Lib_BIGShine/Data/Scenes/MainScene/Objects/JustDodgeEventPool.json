@@ -35,6 +35,7 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ColorFilterDirector"
         },
         {
@@ -66,6 +67,7 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "RadialBlurDirector"
         },
         {
@@ -115,6 +117,7 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "VignetteDirector"
         },
         {
@@ -139,6 +142,7 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "TimeScaleDirector"
         },
         {
@@ -147,11 +151,13 @@
                 "Sequences": []
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ActionSequence"
         },
         {
             "Data": null,
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "Easing"
         },
         {
@@ -166,12 +172,14 @@
                 "Waypoints": []
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "MotionBlurDirector"
         }
     ],
     "Layer": 0,
     "Name": "JustDodgeEventPool",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             0.0,

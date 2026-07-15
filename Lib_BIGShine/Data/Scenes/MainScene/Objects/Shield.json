@@ -54,6 +54,7 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "GltfModel"
         },
         {
@@ -63,12 +64,14 @@
                 "targetStartNodeName": "lowerarm_l"
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ModelAttachment"
         }
     ],
     "Layer": 0,
     "Name": "Shield",
     "ParentName": "PlayerModel",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             -12.5,

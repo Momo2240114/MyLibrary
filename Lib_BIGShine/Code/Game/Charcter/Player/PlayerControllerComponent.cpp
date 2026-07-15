@@ -1718,11 +1718,17 @@ bool PlayerControllerComponent::TryDodgeCancelInput()
         return false;
     }
 
-    const bool isAirborne_ = IsAirborneForAction();
-    const PLAYER_ACTION dodgeAction_ = isAirborne_
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    const bool currentAirAction_ =
+        IsAirAction(currentAction_) ||
+        currentAction_ == PLAYER_ACTION::JUMP;
+    const bool shouldUseAirDodge_ =
+        !IsGrounded() &&
+        (IsAirborneForAction() || currentAirAction_);
+    const PLAYER_ACTION dodgeAction_ = shouldUseAirDodge_
         ? PLAYER_ACTION::AIR_DODGE
         : PLAYER_ACTION::DODGE;
-    if (!HasDodgeCancelTransition(GetCurrentAction(), dodgeAction_) ||
+    if (!HasDodgeCancelTransition(currentAction_, dodgeAction_) ||
         !CanStartDodgeAction(dodgeAction_))
     {
         return false;
@@ -1734,7 +1740,7 @@ bool PlayerControllerComponent::TryDodgeCancelInput()
         return GetCurrentAction() == dodgeAction_;
     }
 
-    if (!KeyConfig::Instance().ActionPressed(PlayerInputAction::DODGE))
+    if (!KeyConfig::Instance().ActionPressedIn(PlayerInputAction::DODGE))
     {
         return false;
     }

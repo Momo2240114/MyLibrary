@@ -25,12 +25,14 @@
                 "Type": 0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "LightComponent"
         }
     ],
     "Layer": 0,
     "Name": "DirLight",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             0.0,

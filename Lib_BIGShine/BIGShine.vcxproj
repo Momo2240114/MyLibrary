@@ -414,6 +414,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ShieldBlockIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.cpp" />
@@ -663,6 +664,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\FootIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ShieldBlockIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonNeckCommandIKComponent.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\DragonTailCommandIKComponent.h" />

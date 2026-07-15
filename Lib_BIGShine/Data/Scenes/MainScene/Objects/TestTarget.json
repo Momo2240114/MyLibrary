@@ -36,6 +36,7 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "HurtBox"
         },
         {
@@ -75,6 +76,7 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "CharacterCollider"
         }
     ],
@@ -89,6 +91,7 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "LockOnTargetComponent"
         },
         {
@@ -115,7 +118,7 @@
                         "name": "M_PlainsDragon_002_SK_PlainsDragon",
                         "normalScale": 1.0,
                         "occlusionStrength": 1.0,
-                        "outlineThicknessOffset": 0.15000000596046448,
+                        "outlineThicknessOffset": 0.20000000298023224,
                         "roughness": 1.0,
                         "shaderId": 3,
                         "toonPbrBlend": 1.0,
@@ -144,6 +147,7 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "GltfModel"
         },
         {
@@ -153,23 +157,36 @@
                 "UsePhysicsVelocity": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "CharacterMovementComponent"
         },
         {
             "Data": {
+                "AirHeavyImpactThreshold": 50.0,
                 "Armor": 0.0,
+                "CommonReactionActionNames": [],
                 "CurrentHealth": 0.0,
                 "DamageActionName": "",
+                "HeavyImpactThreshold": 50.0,
                 "HitStopLayerMask": 3,
                 "MaxHealth": 100.0,
+                "MediumImpactThreshold": 20.0,
                 "OverlayDuration": 0.11999999731779099,
                 "OverlayStartActionName": "MaterialOverlay_Start",
                 "OverlayStopActionName": "MaterialOverlay_Stop",
                 "ReactionActionName": "",
+                "ReactionActionNamesByKind": {
+                    "AirHeavy": [],
+                    "AirMedium": [],
+                    "GroundHeavy": [],
+                    "GroundLight": [],
+                    "GroundMedium": []
+                },
                 "UseHitStop": true,
                 "UseKnockBack": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "HitReactionComponent"
         },
         {
@@ -260,7 +277,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 68.5321273803711
+                            "value": 127.17414855957031
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -394,7 +411,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 0.6000000238418579
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -402,7 +419,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 4.0
+                            "value": 5.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -411,17 +428,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.9062337279319763,
-                                0.42277711629867554
+                                0.8297595977783203,
+                                -0.5581210255622864
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.02500000037252903
+                            "value": 0.75
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.75
+                            "value": 0.6000000238418579
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -429,7 +446,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 4.0
+                            "value": 5.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -437,22 +454,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 1.2000000476837158
+                            "value": 0.0
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.7143983244895935,
-                                0.6152709722518921,
-                                0.33328187465667725
+                                0.7292492985725403,
+                                0.47706466913223267,
+                                -0.4905147850513458
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                2.2550628185272217,
-                                0.830429196357727,
-                                -14.90799331665039
+                                -2.290511131286621,
+                                0.9546828269958496,
+                                -13.22475814819336
                             ]
                         },
                         "Received": {
@@ -467,6 +484,7 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "BlackboardComponent"
         },
         {
@@ -495,6 +513,7 @@
                 ]
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "AIActionComponent"
         },
         {
@@ -2035,6 +2054,7 @@
                 "WriteDebugBlackboard": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "AIControllerComponent"
         },
         {
@@ -3058,6 +3078,7 @@
                 "UseTransitionGraph": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "AnimationControllerComponent"
         },
         {
@@ -3081,6 +3102,7 @@
                     1.0
                 ],
                 "LookTargetBlendInTime": 0.15000000596046448,
+                "LookTargetMaxAngleDegrees": 90.0,
                 "LookTargetMaxPitchDegrees": 35.0,
                 "LookTargetMaxYawDegrees": 65.0,
                 "LookTargetObjectMode": false,
@@ -3096,6 +3118,7 @@
                 "RegisterGlobalActions": false
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "DragonNeckCommandIKComponent"
         },
         {
@@ -3112,6 +3135,7 @@
                 "SpinActionDuration": 1.600000023841858
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "DragonTailCommandIKComponent"
         },
         {
@@ -4956,6 +4980,7 @@
                 "WalkSpeed": 2.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "DragonAIComponent"
         },
         {
@@ -5004,6 +5029,12 @@
                         "Name": "DragonNeck",
                         "RootNode": "PlainsDragon_-Neck",
                         "RootRotationFollow": 0.699999988079071,
+                        "ShieldBlendSpeed": 10.0,
+                        "ShieldElbowWristRatio": 0.699999988079071,
+                        "ShieldMaxPitchDegrees": 55.0,
+                        "ShieldMaxYawDegrees": 80.0,
+                        "ShieldPoleNode": "",
+                        "ShieldSearchRadius": 3.0,
                         "SolverIterations": 6,
                         "SolverSubsteps": 4,
                         "StartCollisionWarmup": 4,
@@ -5017,6 +5048,7 @@
                 "ShowBodyCollisionShapes": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "IKMapComponent"
         },
         {
@@ -5037,17 +5069,19 @@
                 "ShowHairCollisionShapes": false
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "SpringBoneSimulationComponent"
         }
     ],
     "Layer": 2,
     "Name": "TestTarget",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -0.14507551491260529,
-            -2.0020434856414795,
-            -14.084815979003906
+            0.05013791471719742,
+            -2.00177001953125,
+            -14.938933372497559
         ],
         "Rot": [
             0.0,

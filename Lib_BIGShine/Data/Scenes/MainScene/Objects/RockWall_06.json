@@ -54,12 +54,14 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "GltfModel"
         }
     ],
     "Layer": 0,
     "Name": "RockWall_06",
     "ParentName": "Stage",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             0.0,

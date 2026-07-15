@@ -271,6 +271,26 @@ void CollisionStepSystem::Clear()
     colliders.clear();
 }
 
+std::vector<std::shared_ptr<HitBox>> CollisionStepSystem::CollectActiveHitBoxes()
+{
+    RemoveExpiredColliders();
+
+    std::vector<std::shared_ptr<HitBox>> hitBoxes_;
+    for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
+    {
+        const std::shared_ptr<ColliderComponent> collider_ =
+            registeredCollider_.lock();
+        if (!collider_ || !collider_->IsEnabled()) continue;
+
+        if (const std::shared_ptr<HitBox> hitBox_ =
+            std::dynamic_pointer_cast<HitBox>(collider_))
+        {
+            hitBoxes_.push_back(hitBox_);
+        }
+    }
+    return hitBoxes_;
+}
+
 void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
 {
     RemoveExpiredColliders();

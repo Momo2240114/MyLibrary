@@ -663,12 +663,14 @@
                 "PlaybackSpeed": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "MeshVFXComponent"
         }
     ],
     "Layer": 0,
     "Name": "GameObject",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             0.0,

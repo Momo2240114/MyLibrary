@@ -227,6 +227,7 @@
                 "PlaybackSpeed": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "MeshVFXComponent"
         },
         {
@@ -247,6 +248,7 @@
                 "TargetRadius": 0.3499999940395355
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ContainmentVolumeComponent"
         },
         {
@@ -405,12 +407,14 @@
                 "IsPlaying": true
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "ParticleComponent"
         }
     ],
     "Layer": 0,
     "Name": "Wall",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             0.0,
