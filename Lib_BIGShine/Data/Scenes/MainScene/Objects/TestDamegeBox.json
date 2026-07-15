@@ -5,7 +5,8 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 57,
+                "AttackInstanceId": 202,
+                "AttackSourceType": 0,
                 "AttackTag": "DamageBox",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
@@ -67,6 +68,7 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "HitBox"
         }
     ],
@@ -82,12 +84,14 @@
                 "RearmInterval": 0.800000011920929
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "DebugHitHistoryResetComponent"
         }
     ],
     "Layer": 0,
     "Name": "TestDamegeBox",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             30.0,

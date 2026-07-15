@@ -4,8 +4,10 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 class CameraComponent;
+class CameraLockOnComponent;
 class GameObject;
 
 class CameraCollisionComponent : public Component
@@ -25,12 +27,18 @@ public:
 
 private:
     void ResolveReferences();
+    bool SweepCameraSegment(
+        const DirectX::XMFLOAT3& startPosition_,
+        const DirectX::XMFLOAT3& endPosition_,
+        const std::vector<const void*>& ignoredUserData_,
+        float& hitDistance_) const;
     void ApplyCameraPose(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_);
 
 private:
     std::weak_ptr<CameraComponent> camera;
+    std::weak_ptr<CameraLockOnComponent> lockOnCamera;
     std::weak_ptr<GameObject> ignoreTarget;
     std::weak_ptr<GameObject> ignoreLockOnTarget;
     std::string ignoreTargetName;
@@ -40,4 +48,13 @@ private:
     float minimumCameraDistance = 0.05f;
     float probeRadius = 0.3f;
     bool includeDynamicColliders = true;
+    bool enableLockOnCollisionLift = true;
+    float maxCollisionLiftHeight = 3.0f;
+    float collisionLiftStartRate = 0.25f;
+    float collisionLiftUpSpeed = 14.0f;
+    float collisionLiftDownSpeed = 5.0f;
+    float currentCollisionLift = 0.0f;
+    float debugDesiredDistance = 0.0f;
+    float debugCorrectedDistance = 0.0f;
+    float debugCompressionRate = 0.0f;
 };

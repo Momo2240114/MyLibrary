@@ -805,6 +805,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\Animation\ShieldBlockIKComponent.cpp">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -1473,6 +1476,9 @@
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\HumanLookAtIKComponent.h">
+      <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ShieldBlockIKComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\UpperBodyLeanIKComponent.h">

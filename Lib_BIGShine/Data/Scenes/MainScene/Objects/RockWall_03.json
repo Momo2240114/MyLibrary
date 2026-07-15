@@ -54,12 +54,14 @@
                 }
             },
             "Enabled": true,
+            "RequiredForSceneStart": false,
             "TypeName": "GltfModel"
         }
     ],
     "Layer": 0,
     "Name": "RockWall_03",
     "ParentName": "Stage",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
             47.70650863647461,

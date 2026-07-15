@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <chrono>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -28,12 +30,14 @@ enum class LOG_LEVEL
 
 struct LogMessage
 {
+    uint64_t sequence = 0u;
     LOG_CATEGORY category = LOG_CATEGORY::CORE;
     LOG_LEVEL level = LOG_LEVEL::INFO;
     std::string file;
     int line = 0;
     std::string text;
     std::string time;
+    double elapsedSeconds = 0.0;
 };
 
 class DebugLog
@@ -45,7 +49,10 @@ public:
     void Clear();
 
     std::vector<LogMessage> GetMessages() const;
+    std::vector<LogMessage> GetMessagesRange(size_t startIndex_, size_t count_) const;
+    std::vector<LogMessage> GetMessagesSince(double minElapsedSeconds_, size_t maxCount_) const;
     size_t GetMessageCount() const;
+    double GetElapsedSeconds() const;
 
     bool SaveText(const std::string& path_) const;
     bool SaveJson(const std::string& path_) const;
@@ -61,6 +68,8 @@ private:
 
     mutable std::mutex mutex;
     std::vector<LogMessage> messages;
+    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+    uint64_t nextSequence = 0u;
 };
 
 #define BS_LOG(category_, level_, text_) \

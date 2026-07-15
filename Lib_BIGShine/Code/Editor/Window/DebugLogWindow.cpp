@@ -47,13 +47,17 @@ void DebugLogWindow::Draw()
 void DebugLogWindow::DrawToolbar()
 {
     DebugLog& log_ = DebugLog::Instance();
+    const size_t messageCount_ = log_.GetMessageCount();
 
-    ImGui::Text("Count: %zu", log_.GetMessageCount());
+    ImGui::Text("Count: %zu", messageCount_);
+    ImGui::SameLine();
+    ImGui::TextDisabled("Showing: %d / Source: %d", lastVisibleCount, lastSourceCount);
     ImGui::SameLine();
 
     if (ImGui::Button("Clear"))
     {
         log_.Clear();
+        browseStartIndex = 0;
         statusText = "Cleared.";
     }
 
@@ -65,6 +69,8 @@ void DebugLogWindow::DrawToolbar()
         ImGui::SameLine();
         ImGui::TextDisabled("%s", statusText.c_str());
     }
+
+    DrawDisplayControls(messageCount_);
 }
 
 void DebugLogWindow::DrawFilters()
@@ -121,9 +127,59 @@ void DebugLogWindow::DrawLogSettings()
     ImGui::Separator();
     DrawFilters();
 }
+
+void DebugLogWindow::DrawDisplayControls(size_t messageCount_)
+{
+    ImGui::SeparatorText("Display");
+
+    ImGui::Checkbox("Live Tail", &liveTailMode);
+    ImGui::SameLine();
+    ImGui::Checkbox("Limit By Seconds", &limitBySeconds);
+
+    ImGui::DragFloat("Display Seconds", &displaySeconds, 1.0f, 1.0f, 3600.0f, "%.0f s");
+    ImGui::DragInt("Max Source Messages", &maxSourceMessages, 10.0f, 100, 100000);
+    ImGui::DragInt("Max Draw Rows", &maxDrawRows, 10.0f, 50, 10000);
+
+    if (!liveTailMode)
+    {
+        const int maxStartIndex_ = static_cast<int>(messageCount_ > 0u ? messageCount_ - 1u : 0u);
+        browseStartIndex = std::clamp(browseStartIndex, 0, maxStartIndex_);
+        ImGui::SliderInt("Browse Start", &browseStartIndex, 0, maxStartIndex_);
+        ImGui::TextDisabled("Browse keeps old logs available without drawing every stored message.");
+    }
+}
+
 void DebugLogWindow::DrawLogTable()
 {
-    const std::vector<LogMessage> messages_ = DebugLog::Instance().GetMessages();
+    DebugLog& log_ = DebugLog::Instance();
+    const size_t messageCount_ = log_.GetMessageCount();
+    const size_t safeMaxSource_ = static_cast<size_t>(std::clamp(maxSourceMessages, 100, 100000));
+    const size_t safeMaxRows_ = static_cast<size_t>(std::clamp(maxDrawRows, 50, 10000));
+
+    std::vector<LogMessage> messages_;
+    if (liveTailMode)
+    {
+        if (limitBySeconds)
+        {
+            const double minElapsedSeconds_ =
+                log_.GetElapsedSeconds() - static_cast<double>((std::max)(displaySeconds, 1.0f));
+            messages_ = log_.GetMessagesSince(minElapsedSeconds_, safeMaxSource_);
+        }
+        else
+        {
+            const size_t startIndex_ = messageCount_ > safeMaxSource_ ? messageCount_ - safeMaxSource_ : 0u;
+            messages_ = log_.GetMessagesRange(startIndex_, safeMaxSource_);
+        }
+    }
+    else
+    {
+        const size_t startIndex_ = static_cast<size_t>((std::max)(browseStartIndex, 0));
+        messages_ = log_.GetMessagesRange(startIndex_, safeMaxSource_);
+    }
+
+    lastSourceCount = static_cast<int>(messages_.size());
+    lastVisibleCount = 0;
+
     const ImGuiTableFlags flags_ =
         ImGuiTableFlags_BordersInnerV |
         ImGuiTableFlags_RowBg |
@@ -147,6 +203,7 @@ void DebugLogWindow::DrawLogTable()
     for (const LogMessage& message_ : messages_)
     {
         if (!PassesFilter(message_)) continue;
+        if (static_cast<size_t>(lastVisibleCount) >= safeMaxRows_) break;
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -161,6 +218,7 @@ void DebugLogWindow::DrawLogTable()
         ImGui::TextUnformatted(message_.file.c_str());
         ImGui::TableSetColumnIndex(5);
         ImGui::Text("%d", message_.line);
+        ++lastVisibleCount;
     }
 
     if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())

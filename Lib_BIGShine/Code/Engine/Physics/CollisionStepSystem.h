@@ -5,6 +5,7 @@
 
 
 class ColliderComponent;
+class HitBox;
 class JustDodgeSystem;
 class GuardSystem;
 class AttackSystem;
@@ -29,6 +30,7 @@ public:
     void RegisterCollider(const std::shared_ptr<ColliderComponent>& collider_);
     void UnregisterCollider(ColliderComponent* collider_);
     void Clear();
+    std::vector<std::shared_ptr<HitBox>> CollectActiveHitBoxes();
 
     void SyncFromPhysics(float deltaTime_);
     void PrepareInitialPhysicsState(float deltaTime_);

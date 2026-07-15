@@ -3,7 +3,7 @@
     "AssetVersion": 1,
     "attack": {
         "allowMultiHit": false,
-        "attackerAirLiftPower": 0.5,
+        "attackerAirLiftPower": 5.0,
         "damage": 5.0,
         "hitGroupId": 0,
         "hitStopDuration": 0.10000000149011612,

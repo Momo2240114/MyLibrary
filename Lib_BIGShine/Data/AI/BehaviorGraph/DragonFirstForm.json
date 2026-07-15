@@ -244,8 +244,8 @@
             "Name": "Dragon Root",
             "OutputPinId": 3,
             "Position": [
-                609.0,
-                -300.0
+                385.0,
+                -540.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -283,8 +283,8 @@
             "Name": "First Form Decision",
             "OutputPinId": 6,
             "Position": [
-                609.0,
-                -156.0
+                385.0,
+                -396.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -322,8 +322,8 @@
             "Name": "Under Body Sequence",
             "OutputPinId": 10,
             "Position": [
-                -2223.0,
-                64.0
+                -2735.0,
+                -284.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -361,10 +361,10 @@
             "Name": "Under Body",
             "OutputPinId": 0,
             "Position": [
-                -2431.0,
-                224.0
+                -3279.0,
+                -64.0
             ],
-            "Priority": 1,
+            "Priority": 0,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -400,10 +400,10 @@
             "Name": "Can Under Body",
             "OutputPinId": 0,
             "Position": [
-                -2687.0,
-                224.0
+                -2735.0,
+                -48.0
             ],
-            "Priority": 0,
+            "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -439,8 +439,8 @@
             "Name": "Under Body Action",
             "OutputPinId": 0,
             "Position": [
-                -2095.0,
-                224.0
+                -2367.0,
+                -64.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -478,8 +478,8 @@
             "Name": "Behind Sequence",
             "OutputPinId": 26,
             "Position": [
-                -1263.0,
-                96.0
+                -1647.0,
+                -208.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -517,8 +517,8 @@
             "Name": "Behind",
             "OutputPinId": 0,
             "Position": [
-                -1663.0,
-                272.0
+                -1983.0,
+                -32.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -556,10 +556,10 @@
             "Name": "Can Behind",
             "OutputPinId": 0,
             "Position": [
-                -911.0,
-                304.0
+                -1647.0,
+                -16.0
             ],
-            "Priority": 2,
+            "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -595,10 +595,10 @@
             "Name": "Behind Action",
             "OutputPinId": 0,
             "Position": [
-                -1263.0,
-                288.0
+                -1295.0,
+                -32.0
             ],
-            "Priority": 1,
+            "Priority": 2,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -634,8 +634,8 @@
             "Name": "Low HP Spin Sequence",
             "OutputPinId": 42,
             "Position": [
-                -175.0,
-                64.0
+                -671.0,
+                -192.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -673,8 +673,8 @@
             "Name": "Low HP Spin",
             "OutputPinId": 0,
             "Position": [
-                -543.0,
-                288.0
+                -959.0,
+                -32.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -712,8 +712,8 @@
             "Name": "Can Low HP Spin",
             "OutputPinId": 0,
             "Position": [
-                -175.0,
-                288.0
+                -671.0,
+                16.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -751,8 +751,8 @@
             "Name": "Low HP Spin Action",
             "OutputPinId": 0,
             "Position": [
-                145.0,
-                288.0
+                -351.0,
+                -16.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -790,8 +790,8 @@
             "Name": "Close Bite Sequence",
             "OutputPinId": 58,
             "Position": [
-                773.0,
-                48.0
+                385.0,
+                -188.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -829,8 +829,8 @@
             "Name": "Close Bite",
             "OutputPinId": 0,
             "Position": [
-                529.0,
-                272.0
+                1.0,
+                0.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -868,8 +868,8 @@
             "Name": "Front For Close Bite",
             "OutputPinId": 0,
             "Position": [
-                769.0,
-                272.0
+                241.0,
+                0.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -907,8 +907,8 @@
             "Name": "Can Close Bite",
             "OutputPinId": 0,
             "Position": [
-                993.0,
-                272.0
+                497.0,
+                0.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -946,8 +946,8 @@
             "Name": "Close Bite Action",
             "OutputPinId": 0,
             "Position": [
-                1217.0,
-                272.0
+                737.0,
+                0.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -985,8 +985,8 @@
             "Name": "Far Breath Sequence",
             "OutputPinId": 78,
             "Position": [
-                1953.0,
-                64.0
+                1365.0,
+                -176.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -1024,8 +1024,8 @@
             "Name": "Far Breath",
             "OutputPinId": 0,
             "Position": [
-                1697.0,
-                256.0
+                1057.0,
+                0.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1063,8 +1063,8 @@
             "Name": "Front For Far Breath",
             "OutputPinId": 0,
             "Position": [
-                1921.0,
-                256.0
+                1297.0,
+                0.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1102,8 +1102,8 @@
             "Name": "Can Far Breath",
             "OutputPinId": 0,
             "Position": [
-                2145.0,
-                256.0
+                1537.0,
+                0.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1141,8 +1141,8 @@
             "Name": "Far Breath Action",
             "OutputPinId": 0,
             "Position": [
-                2385.0,
-                272.0
+                1777.0,
+                0.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1180,8 +1180,8 @@
             "Name": "Mid Fire Ball Sequence",
             "OutputPinId": 98,
             "Position": [
-                3201.0,
-                68.0
+                2289.0,
+                -192.0
             ],
             "Priority": 5,
             "ScopeId": "Root",
@@ -1219,10 +1219,10 @@
             "Name": "Mid Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                3025.0,
-                272.0
+                2049.0,
+                0.0
             ],
-            "Priority": 1,
+            "Priority": 0,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1258,10 +1258,10 @@
             "Name": "Front For Mid Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                3249.0,
-                272.0
+                2257.0,
+                0.0
             ],
-            "Priority": 2,
+            "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1297,10 +1297,10 @@
             "Name": "Can Mid Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                2817.0,
-                272.0
+                2481.0,
+                0.0
             ],
-            "Priority": 0,
+            "Priority": 2,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1336,8 +1336,8 @@
             "Name": "Mid Fire Ball Action",
             "OutputPinId": 0,
             "Position": [
-                3473.0,
-                272.0
+                2689.0,
+                0.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1375,8 +1375,8 @@
             "Name": "Side Turn Sequence",
             "OutputPinId": 118,
             "Position": [
-                4113.0,
-                64.0
+                3233.0,
+                -160.0
             ],
             "Priority": 6,
             "ScopeId": "Root",
@@ -1414,8 +1414,8 @@
             "Name": "Side Turn",
             "OutputPinId": 0,
             "Position": [
-                3889.0,
-                256.0
+                3073.0,
+                0.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1453,8 +1453,8 @@
             "Name": "Side Turn Action",
             "OutputPinId": 0,
             "Position": [
-                4321.0,
-                272.0
+                3409.0,
+                0.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1492,8 +1492,8 @@
             "Name": "Walk Approach",
             "OutputPinId": 0,
             "Position": [
-                5041.0,
-                64.0
+                3953.0,
+                -192.0
             ],
             "Priority": 7,
             "ScopeId": "Root",
