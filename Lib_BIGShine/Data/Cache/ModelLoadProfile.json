@@ -1,0 +1,65 @@
+{
+    "models": {
+        "data/model/dragon/sk_plainsdragon.gltf": {
+            "averageLoadMilliseconds": 4668.442,
+            "fileLastWriteTime": 13427883870,
+            "fileSize": 8834652,
+            "lastLoadMilliseconds": 4668.442,
+            "lastLoadedAt": "2026-07-16T09:45:07",
+            "maximumLoadMilliseconds": 4668.442,
+            "minimumLoadMilliseconds": 4668.442,
+            "sampleCount": 1
+        },
+        "data/model/stage/rock/rock01.gltf": {
+            "averageLoadMilliseconds": 3699.8458,
+            "fileLastWriteTime": 13425642938,
+            "fileSize": 6837,
+            "lastLoadMilliseconds": 3699.8458,
+            "lastLoadedAt": "2026-07-16T09:45:06",
+            "maximumLoadMilliseconds": 3699.8458,
+            "minimumLoadMilliseconds": 3699.8458,
+            "sampleCount": 1
+        },
+        "data/model/stage/stage_floor05.gltf": {
+            "averageLoadMilliseconds": 3540.2463,
+            "fileLastWriteTime": 13427437645,
+            "fileSize": 24003,
+            "lastLoadMilliseconds": 3540.2463,
+            "lastLoadedAt": "2026-07-16T09:45:05",
+            "maximumLoadMilliseconds": 3540.2463,
+            "minimumLoadMilliseconds": 3540.2463,
+            "sampleCount": 1
+        },
+        "data/model/swordplayer/blender/sword.gltf": {
+            "averageLoadMilliseconds": 1078.6443,
+            "fileLastWriteTime": 13426303246,
+            "fileSize": 2895,
+            "lastLoadMilliseconds": 1078.6443,
+            "lastLoadedAt": "2026-07-16T09:45:03",
+            "maximumLoadMilliseconds": 1078.6443,
+            "minimumLoadMilliseconds": 1078.6443,
+            "sampleCount": 1
+        },
+        "data/model/swordplayer/combatgirls_sword_shield.gltf": {
+            "averageLoadMilliseconds": 5426.2179,
+            "fileLastWriteTime": 13428137754,
+            "fileSize": 165508804,
+            "lastLoadMilliseconds": 5426.2179,
+            "lastLoadedAt": "2026-07-16T09:45:07",
+            "maximumLoadMilliseconds": 5426.2179,
+            "minimumLoadMilliseconds": 5426.2179,
+            "sampleCount": 1
+        },
+        "data/model/swordplayer/weapon/sword_shiledmodel.gltf": {
+            "averageLoadMilliseconds": 1414.5563,
+            "fileLastWriteTime": 13426666599,
+            "fileSize": 2879,
+            "lastLoadMilliseconds": 1414.5563,
+            "lastLoadedAt": "2026-07-16T09:45:03",
+            "maximumLoadMilliseconds": 1414.5563,
+            "minimumLoadMilliseconds": 1414.5563,
+            "sampleCount": 1
+        }
+    },
+    "version": 1
+}

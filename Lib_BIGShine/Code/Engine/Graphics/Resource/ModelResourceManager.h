@@ -6,6 +6,7 @@
 #include "ModelResource.h"
 #include "GLTFImporter.h"
 #include "ModelLoadTypes.h"
+#include "ModelLoadProfileManager.h"
 #include <filesystem>
 #include <map>
 #include <condition_variable>
@@ -13,6 +14,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 class ModelResourceManager
 {
@@ -34,6 +36,7 @@ public:
     void PromotePriority(const std::string& filename_, int priority_);
     void StartAsyncLoader();
     void ShutdownAsyncLoader();
+    void FlushLoadProfile();
     PreloadHandle RequestPreloadGroup(const std::string& groupName_, PRELOAD_PRIORITY priority_);
     void PromotePreloadGroup(const std::string& groupName_, PRELOAD_PRIORITY priority_);
     bool IsPreloadGroupReady(const std::string& groupName_) const;
@@ -52,6 +55,13 @@ public:
         preloadGroups.clear();
         preloadSettings.clear();
         preloadSettingsLoaded = false;
+        loadProfileManager.Clear();
+        loadProfileLoaded = false;
+        loadProfileDirty = false;
+        enqueuedTaskCount = 0;
+        completedCpuTaskCount = 0;
+        waitingWorkerCount = 0;
+        executingWorkerCount = 0;
     }
 
 private:
@@ -67,8 +77,10 @@ private:
     std::shared_ptr<ModelResource> LoadOrBuildCpuResource(const std::string& filename_, float sampleRate_);
     bool CreateGpuResource(ID3D11Device* device_, const std::string& filename_, const std::shared_ptr<ModelResource>& resource_);
     void QueueGpuUpload(const std::shared_ptr<ModelLoadEntry>& entry_);
-    void WorkerLoop();
+    void WorkerLoop(unsigned int workerIndex_);
     std::shared_ptr<ModelLoadEntry> FindOrCreateEntry(const std::string& filename_, int priority_);
+    void EnsureLoadProfileLoaded();
+    unsigned int GetWorkerCount(size_t loadTaskCount_) const;
 
 private:
     // Model名を鍵として、リソースのを保管する棚
@@ -77,6 +89,8 @@ private:
     struct ModelLoadJob
     {
         int priority = 0;
+        double estimatedLoadMilliseconds = 1000.0;
+        double relativeLoadWeight = 1.0;
         uint64_t requestOrder = 0;
         std::shared_ptr<ModelLoadEntry> entry;
     };
@@ -101,9 +115,21 @@ private:
     std::map<std::string, std::shared_ptr<ModelLoadEntry>> loadEntries;
     std::map<std::string, std::shared_ptr<PreloadGroupState>> preloadGroups;
     std::map<std::string, PreloadGroupSetting> preloadSettings;
-    std::thread workerThread;
+    std::vector<std::thread> workerThreads;
+    ModelLoadProfileManager loadProfileManager;
+    std::filesystem::path loadHistoryPath = "Data/Cache/ModelLoadHistory.json";
+    std::filesystem::path loadProfilePath = "Data/Config/ModelLoadProfile.json";
     bool workerRunning = false;
     bool workerStopRequested = false;
     uint64_t nextRequestOrder = 1;
     bool preloadSettingsLoaded = false;
+    bool loadProfileLoaded = false;
+    bool loadProfileDirty = false;
+    unsigned int minimumModelLoadWorkerCount = 1;
+    unsigned int maximumModelLoadWorkerCount = 8;
+    unsigned int activeModelLoadWorkerCount = 0;
+    std::atomic<uint64_t> enqueuedTaskCount = 0;
+    std::atomic<uint64_t> completedCpuTaskCount = 0;
+    std::atomic<uint32_t> waitingWorkerCount = 0;
+    std::atomic<uint32_t> executingWorkerCount = 0;
 };

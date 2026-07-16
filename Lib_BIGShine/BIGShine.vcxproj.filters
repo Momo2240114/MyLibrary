@@ -382,6 +382,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFModel.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
@@ -957,6 +960,9 @@
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadTypes.h">

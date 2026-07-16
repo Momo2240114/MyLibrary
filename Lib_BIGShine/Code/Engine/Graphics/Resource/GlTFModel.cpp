@@ -300,81 +300,99 @@ void GltfModelCommponennt::RequestLoadModelAsync(const char* filename_, int prio
 
 void GltfModelCommponennt::ApplyLoadedResource(const std::shared_ptr<ModelResource>& resource_)
 {
-	BS_PROFILE_SCOPE("GltfModelCommponennt::ApplyLoadedResource");
-	if (!resource_) return;
+    BS_PROFILE_SCOPE("GltfModelCommponennt::ApplyLoadedResource");
+    if (!resource_) return;
 
-	materials = resource_->materials;
-	nodes = resource_->nodes;
-	meshes = resource_->meshes;
-	animations = resource_->animations;
+    {
+        BS_PROFILE_SCOPE("GltfModel::CopyLoadedResource");
+        materials = resource_->materials;
+        nodes = resource_->nodes;
+        meshes = resource_->meshes;
+        animations = resource_->animations;
+    }
 
-	int materialIdCounter_ = 0;
-	for (auto& material_ : materials)
-	{
-		material_.id = materialIdCounter_++;
-	}
+    {
+        BS_PROFILE_SCOPE("GltfModel::AssignMaterialIds");
+        int materialIdCounter_ = 0;
+        for (auto& material_ : materials)
+        {
+            material_.id = materialIdCounter_++;
+        }
+    }
 
-	RebindInternalPointers();
+    {
+        BS_PROFILE_SCOPE("GltfModel::RebindLoadedPointers");
+        RebindInternalPointers();
+    }
 
-	bindNodePoses.resize(nodes.size());
-	for (size_t nodeIndex_ = 0; nodeIndex_ < nodes.size(); ++nodeIndex_)
-	{
-		bindNodePoses[nodeIndex_].position = nodes[nodeIndex_].position;
-		bindNodePoses[nodeIndex_].rotation = nodes[nodeIndex_].rotation;
-		bindNodePoses[nodeIndex_].scale = nodes[nodeIndex_].scale;
-	}
+    {
+        BS_PROFILE_SCOPE("GltfModel::BuildBindNodePoses");
+        bindNodePoses.resize(nodes.size());
+        for (size_t nodeIndex_ = 0; nodeIndex_ < nodes.size(); ++nodeIndex_)
+        {
+            bindNodePoses[nodeIndex_].position = nodes[nodeIndex_].position;
+            bindNodePoses[nodeIndex_].rotation = nodes[nodeIndex_].rotation;
+            bindNodePoses[nodeIndex_].scale = nodes[nodeIndex_].scale;
+        }
+    }
 
-	for (const nlohmann::json& item_ : pendingMaterialOverrides)
-	{
-		const int id_ = item_.value("id", -1);
-		for (auto& mat_ : materials)
-		{
-			if (mat_.id != id_) continue;
+    {
+        BS_PROFILE_SCOPE("GltfModel::ApplyPendingMaterialOverrides");
+        for (const nlohmann::json& item_ : pendingMaterialOverrides)
+        {
+            const int id_ = item_.value("id", -1);
+            for (auto& mat_ : materials)
+            {
+                if (mat_.id != id_) continue;
 
-			if (item_.contains("shaderId")) mat_.shaderId = static_cast<ModelShaderID>(item_["shaderId"].get<int>());
-			if (item_.contains("baseColor"))
-			{
-				const auto& color_ = item_["baseColor"];
-				mat_.baseColor.x = color_.at(0).get<float>();
-				mat_.baseColor.y = color_.at(1).get<float>();
-				mat_.baseColor.z = color_.at(2).get<float>();
-				mat_.baseColor.w = color_.at(3).get<float>();
-			}
-			if (item_.contains("emissiveColor"))
-			{
-				const auto& color_ = item_["emissiveColor"];
-				mat_.emissiveColor.x = color_.at(0).get<float>();
-				mat_.emissiveColor.y = color_.at(1).get<float>();
-				mat_.emissiveColor.z = color_.at(2).get<float>();
-			}
-			if (item_.contains("metalness")) mat_.metalness = item_["metalness"].get<float>();
-			if (item_.contains("roughness")) mat_.roughness = item_["roughness"].get<float>();
-			if (item_.contains("occlusionStrength")) mat_.occlusionStrength = item_["occlusionStrength"].get<float>();
-			if (item_.contains("alphaCutoff")) mat_.alphaCutoff = item_["alphaCutoff"].get<float>();
-			if (item_.contains("normalScale")) mat_.normalScale = item_["normalScale"].get<float>();
-			if (item_.contains("uvScale"))
-			{
-				const auto& uvScale_ = item_["uvScale"];
-				mat_.uvScale.x = uvScale_.at(0).get<float>();
-				mat_.uvScale.y = uvScale_.at(1).get<float>();
-			}
-			if (item_.contains("uvOffset"))
-			{
-				const auto& uvOffset_ = item_["uvOffset"];
-				mat_.uvOffset.x = uvOffset_.at(0).get<float>();
-				mat_.uvOffset.y = uvOffset_.at(1).get<float>();
-			}
-			if (item_.contains("uvRotation")) mat_.uvRotation = item_["uvRotation"].get<float>();
-			if (item_.contains("uvAddressMode")) mat_.uvAddressMode = static_cast<UV_ADDRESS_MODE>(item_["uvAddressMode"].get<int>());
-			if (item_.contains("alphaMode")) mat_.alphaMode = static_cast<AlphaMode>(item_["alphaMode"].get<int>());
-			if (item_.contains("toonPbrBlend")) mat_.toonPbrBlend = item_["toonPbrBlend"].get<float>();
-			if (item_.contains("disableOutline")) mat_.disableOutline = item_["disableOutline"].get<bool>();
-			if (item_.contains("outlineThicknessOffset")) mat_.outlineThicknessOffset = item_["outlineThicknessOffset"].get<float>();
-		}
-	}
+                if (item_.contains("shaderId")) mat_.shaderId = static_cast<ModelShaderID>(item_["shaderId"].get<int>());
+                if (item_.contains("baseColor"))
+                {
+                    const auto& color_ = item_["baseColor"];
+                    mat_.baseColor.x = color_.at(0).get<float>();
+                    mat_.baseColor.y = color_.at(1).get<float>();
+                    mat_.baseColor.z = color_.at(2).get<float>();
+                    mat_.baseColor.w = color_.at(3).get<float>();
+                }
+                if (item_.contains("emissiveColor"))
+                {
+                    const auto& color_ = item_["emissiveColor"];
+                    mat_.emissiveColor.x = color_.at(0).get<float>();
+                    mat_.emissiveColor.y = color_.at(1).get<float>();
+                    mat_.emissiveColor.z = color_.at(2).get<float>();
+                }
+                if (item_.contains("metalness")) mat_.metalness = item_["metalness"].get<float>();
+                if (item_.contains("roughness")) mat_.roughness = item_["roughness"].get<float>();
+                if (item_.contains("occlusionStrength")) mat_.occlusionStrength = item_["occlusionStrength"].get<float>();
+                if (item_.contains("alphaCutoff")) mat_.alphaCutoff = item_["alphaCutoff"].get<float>();
+                if (item_.contains("normalScale")) mat_.normalScale = item_["normalScale"].get<float>();
+                if (item_.contains("uvScale"))
+                {
+                    const auto& uvScale_ = item_["uvScale"];
+                    mat_.uvScale.x = uvScale_.at(0).get<float>();
+                    mat_.uvScale.y = uvScale_.at(1).get<float>();
+                }
+                if (item_.contains("uvOffset"))
+                {
+                    const auto& uvOffset_ = item_["uvOffset"];
+                    mat_.uvOffset.x = uvOffset_.at(0).get<float>();
+                    mat_.uvOffset.y = uvOffset_.at(1).get<float>();
+                }
+                if (item_.contains("uvRotation")) mat_.uvRotation = item_["uvRotation"].get<float>();
+                if (item_.contains("uvAddressMode")) mat_.uvAddressMode = static_cast<UV_ADDRESS_MODE>(item_["uvAddressMode"].get<int>());
+                if (item_.contains("alphaMode")) mat_.alphaMode = static_cast<AlphaMode>(item_["alphaMode"].get<int>());
+                if (item_.contains("toonPbrBlend")) mat_.toonPbrBlend = item_["toonPbrBlend"].get<float>();
+                if (item_.contains("disableOutline")) mat_.disableOutline = item_["disableOutline"].get<bool>();
+                if (item_.contains("outlineThicknessOffset")) mat_.outlineThicknessOffset = item_["outlineThicknessOffset"].get<float>();
+            }
+        }
+    }
 
-	UpdateTransform();
-	asyncLoadApplied = true;
+    {
+        BS_PROFILE_SCOPE("GltfModel::InitialUpdateTransform");
+        UpdateTransform();
+    }
+    asyncLoadApplied = true;
 }
 
 void GltfModelCommponennt::UpdateLoadState()

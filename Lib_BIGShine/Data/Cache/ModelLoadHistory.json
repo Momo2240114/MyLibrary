@@ -1,0 +1,461 @@
+{
+    "models": {
+        "data/model/dragon/sk_plainsdragon.gltf": {
+            "fileLastWriteTime": 13427883870,
+            "fileSize": 8834652,
+            "samples": [
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5090.8298,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:14:56",
+                    "totalLoadMilliseconds": 5090.8298,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6406.679,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:17:48",
+                    "totalLoadMilliseconds": 6406.679,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6804.7028,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:29:52",
+                    "totalLoadMilliseconds": 6804.7028,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5733.0703,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:41:26",
+                    "totalLoadMilliseconds": 5733.0703,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5442.7069,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:42:47",
+                    "totalLoadMilliseconds": 5442.7069,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6099.9314,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:45:27",
+                    "totalLoadMilliseconds": 6099.9314,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5376.1644,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:50:31",
+                    "totalLoadMilliseconds": 5376.1644,
+                    "workerCount": 8
+                }
+            ]
+        },
+        "data/model/stage/rock/rock01.gltf": {
+            "fileLastWriteTime": 13425642938,
+            "fileSize": 6837,
+            "samples": [
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 3761.1628,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:14:54",
+                    "totalLoadMilliseconds": 3761.1628,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4926.7214,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:17:46",
+                    "totalLoadMilliseconds": 4926.7214,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5477.9546,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:29:50",
+                    "totalLoadMilliseconds": 5477.9546,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4466.748,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:41:24",
+                    "totalLoadMilliseconds": 4466.748,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 3968.241,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:42:45",
+                    "totalLoadMilliseconds": 3968.241,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4743.1547,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:45:25",
+                    "totalLoadMilliseconds": 4743.1547,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4112.342,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:50:29",
+                    "totalLoadMilliseconds": 4112.342,
+                    "workerCount": 8
+                }
+            ]
+        },
+        "data/model/stage/stage_floor05.gltf": {
+            "fileLastWriteTime": 13427437645,
+            "fileSize": 24003,
+            "samples": [
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 3601.3284,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:14:54",
+                    "totalLoadMilliseconds": 3601.3284,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4769.7314,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:17:46",
+                    "totalLoadMilliseconds": 4769.7314,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5314.0541,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:29:50",
+                    "totalLoadMilliseconds": 5314.0541,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4306.7996,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:41:24",
+                    "totalLoadMilliseconds": 4306.7996,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 3839.1202,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:42:45",
+                    "totalLoadMilliseconds": 3839.1202,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4561.7338,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:45:25",
+                    "totalLoadMilliseconds": 4561.7338,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 3967.5426,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:50:29",
+                    "totalLoadMilliseconds": 3967.5426,
+                    "workerCount": 8
+                }
+            ]
+        },
+        "data/model/swordplayer/blender/sword.gltf": {
+            "fileLastWriteTime": 13426303246,
+            "fileSize": 2895,
+            "samples": [
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1127.129,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:14:52",
+                    "totalLoadMilliseconds": 1127.129,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1252.584,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:17:42",
+                    "totalLoadMilliseconds": 1252.584,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1510.5304,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:29:46",
+                    "totalLoadMilliseconds": 1510.5304,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1066.6393,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:41:21",
+                    "totalLoadMilliseconds": 1066.6393,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1356.7079,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:42:42",
+                    "totalLoadMilliseconds": 1356.7079,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1426.9727,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:45:21",
+                    "totalLoadMilliseconds": 1426.9727,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1079.6878,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:50:26",
+                    "totalLoadMilliseconds": 1079.6878,
+                    "workerCount": 8
+                }
+            ]
+        },
+        "data/model/swordplayer/combatgirls_sword_shield.gltf": {
+            "fileLastWriteTime": 13428137754,
+            "fileSize": 165508804,
+            "samples": [
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5856.1867,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:14:56",
+                    "totalLoadMilliseconds": 5856.1867,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 7437.5812,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:17:48",
+                    "totalLoadMilliseconds": 7437.5812,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 8214.9025,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:29:52",
+                    "totalLoadMilliseconds": 8214.9025,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6431.7608,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:41:26",
+                    "totalLoadMilliseconds": 6431.7608,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6409.9248,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:42:47",
+                    "totalLoadMilliseconds": 6409.9248,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 7218.0963,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:45:27",
+                    "totalLoadMilliseconds": 7218.0963,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6260.5466,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:50:31",
+                    "totalLoadMilliseconds": 6260.5466,
+                    "workerCount": 8
+                }
+            ]
+        },
+        "data/model/swordplayer/weapon/sword_shiledmodel.gltf": {
+            "fileLastWriteTime": 13426666599,
+            "fileSize": 2879,
+            "samples": [
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1380.0903,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:14:52",
+                    "totalLoadMilliseconds": 1380.0903,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1569.1087,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:17:42",
+                    "totalLoadMilliseconds": 1569.1087,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2050.8094,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:29:46",
+                    "totalLoadMilliseconds": 2050.8094,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1480.331,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:41:21",
+                    "totalLoadMilliseconds": 1480.331,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1918.8429,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:42:43",
+                    "totalLoadMilliseconds": 1918.8429,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1740.6405,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:45:22",
+                    "totalLoadMilliseconds": 1740.6405,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1341.5339,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T10:50:26",
+                    "totalLoadMilliseconds": 1341.5339,
+                    "workerCount": 8
+                }
+            ]
+        }
+    },
+    "version": 1
+}

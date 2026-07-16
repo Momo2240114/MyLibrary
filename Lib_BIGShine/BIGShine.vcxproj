@@ -426,6 +426,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFImporter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFModel.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Shader\BasicShader.cpp" />
@@ -674,6 +675,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFModel.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadTypes.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResource.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h" />
