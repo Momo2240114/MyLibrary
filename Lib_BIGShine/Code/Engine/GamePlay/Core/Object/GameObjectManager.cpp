@@ -109,6 +109,7 @@ void GameObjectManager::Update(float elapsedTime_)
 void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("SceneRuntime::Running");
+    BS_PROFILE_PLOT("GameObject.ActiveCount", static_cast<int64_t>(objects.size()));
     float worldDeltaTime_ = elapsedTime_;
 
     {
@@ -142,7 +143,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     if (!pendingStarts.empty())
     {
-        BS_PROFILE_SCOPE("GameObjectManager::PendingStarts");
+        BS_PROFILE_SCOPE("GameObjectManager::ProcessPendingStarts");
 
         std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
         std::vector<std::shared_ptr<GameObject>> readyStartList_;
@@ -249,6 +250,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsUpdate");
         const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
+        int updatedObjectCount_ = 0;
 
         // Animation events can append effects while components are updating.
         // Capture only the count so every shared_ptr is not copied each frame.
@@ -271,6 +273,10 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
             }
 
             object_->Update(objectDeltaTime_);
+            ++updatedObjectCount_;
+        }
+        {
+            BS_PROFILE_PLOT("GameObject.UpdatedCount", updatedObjectCount_);
         }
     }
 
@@ -306,6 +312,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::ObjectsLateUpdate");
         const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
+        int lateUpdatedObjectCount_ = 0;
 
         // Objects spawned during Update start updating on the next frame.
         const size_t lateUpdateObjectCount_ = objects.size();
@@ -322,7 +329,10 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
             }
 
             object_->LateUpdate(objectDeltaTime_);
+            ++lateUpdatedObjectCount_;
         }
+
+        BS_PROFILE_PLOT("GameObject.LateUpdatedCount", lateUpdatedObjectCount_);
     }
 
     {
@@ -342,7 +352,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     if (!pendingDestroys.empty())
     {
-        BS_PROFILE_SCOPE("GameObjectManager::PendingDestroys");
+        BS_PROFILE_SCOPE("GameObjectManager::ProcessDestroyedObjects");
 
         std::vector<std::shared_ptr<GameObject>> currentDestroys_ = std::move(pendingDestroys);
         pendingDestroys.clear();
@@ -413,7 +423,7 @@ void GameObjectManager::ProcessPendingStarts()
 {
     if (pendingStarts.empty()) return;
 
-    BS_PROFILE_SCOPE("GameObjectManager::PendingStarts");
+    BS_PROFILE_SCOPE("GameObjectManager::ProcessPendingStarts");
 
     std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
     std::vector<std::shared_ptr<GameObject>> readyStartList_;

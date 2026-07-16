@@ -4,8 +4,10 @@
 #include "Engine/GamePlay/Combat/AttackTemplateRuntime.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 
 
 
@@ -505,9 +507,31 @@ void ModelAnimator::SetCurrentTime(float time_)
 
 void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner, const BlackboardCategory* blackboard_)
 {
+    BS_PROFILE_SCOPE("ModelAnimator::Update");
     if (!current.state || !model) return;
 
     const size_t nodeCount = model->GetNodes().size();
+    BS_PROFILE_PLOT("Animation.UpdatedNodeCount", static_cast<int64_t>(nodeCount));
+#if BS_PROFILE_DETAILED_ENABLED
+    {
+        char profileText_[256]{};
+        const int textLength_ = std::snprintf(
+            profileText_,
+            sizeof(profileText_),
+            "State: %s\nNodeCount: %zu\nTransitioning: %s\nMixing: %s",
+            current.state ? current.state->name.c_str() : "None",
+            nodeCount,
+            isTransitioning ? "true" : "false",
+            isMixing ? "true" : "false");
+        if (textLength_ > 0)
+        {
+            BS_PROFILE_TEXT(
+                profileText_,
+                static_cast<size_t>((std::min)(textLength_, static_cast<int>(sizeof(profileText_) - 1))));
+        }
+    }
+#endif
+
     if (tempPoseA.size() != nodeCount) tempPoseA.resize(nodeCount);
     if (tempPoseB.size() != nodeCount) tempPoseB.resize(nodeCount);
     if (blendPoseScratch.size() != nodeCount) blendPoseScratch.resize(nodeCount);
@@ -520,7 +544,9 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ------------------------------------------------------------
     auto SamplePose = [&](const AnimState* state, float time, float sampleDuration_, std::vector<GltfModelCommponennt::NodePose>& outPose)
         {
+            BS_PROFILE_SCOPE("ModelAnimator::SampleAnimation");
             if (!state) return;
+            BS_PROFILE_TEXT(state->name.c_str(), state->name.size());
 
             switch (state->type)
             {
@@ -545,6 +571,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
             case AnimStateType::Blend1D:
             {
+                BS_PROFILE_SCOPE("ModelAnimator::BlendAnimation");
                 const bool validA_ = IsValidAnimationIndex(model, state->animIndexA);
                 const bool validB_ = IsValidAnimationIndex(model, state->animIndexB);
                 if (!validA_ && !validB_) break;
@@ -607,6 +634,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
             case AnimStateType::BLEND_2D:
             {
+                BS_PROFILE_SCOPE("ModelAnimator::BlendAnimation");
                 const Blend2DSelection selection_ = ResolveBlend2DSelection(state, blackboard_);
                 const bool validA_ = IsValidAnimationIndex(model, selection_.animationIndexA);
                 const bool validB_ = IsValidAnimationIndex(model, selection_.animationIndexB);
@@ -696,49 +724,58 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ------------------------------------------------------------
     // 2. 時間更新
     // ------------------------------------------------------------
-    if (current.state->type == AnimStateType::Blend1D ||
-        current.state->type == AnimStateType::BLEND_2D)
     {
-        if (current.sampleDuration > 0.0001f &&
-            std::abs(current.sampleDuration - baseDuration) > 0.0001f)
+        BS_PROFILE_SCOPE("ModelAnimator::AdvanceAnimationTime");
+        if (current.state->type == AnimStateType::Blend1D ||
+            current.state->type == AnimStateType::BLEND_2D)
         {
-            float normalizedPhase_ = current.time / current.sampleDuration;
-            if (current.state->isLoop)
+            if (current.sampleDuration > 0.0001f &&
+                std::abs(current.sampleDuration - baseDuration) > 0.0001f)
             {
-                normalizedPhase_ -= std::floor(normalizedPhase_);
+                float normalizedPhase_ = current.time / current.sampleDuration;
+                if (current.state->isLoop)
+                {
+                    normalizedPhase_ -= std::floor(normalizedPhase_);
+                }
+                else
+                {
+                    normalizedPhase_ = (std::clamp)(normalizedPhase_, 0.0f, 1.0f);
+                }
+                current.time = normalizedPhase_ * baseDuration;
             }
-            else
-            {
-                normalizedPhase_ = (std::clamp)(normalizedPhase_, 0.0f, 1.0f);
-            }
-            current.time = normalizedPhase_ * baseDuration;
         }
+        current.sampleDuration = baseDuration;
+        current.Update(et, baseDuration, curvecomp, owner);
     }
-    current.sampleDuration = baseDuration;
-    current.Update(et, baseDuration, curvecomp, owner);
 
     // ------------------------------------------------------------
     // 3. 現在ポーズ計算
     // ------------------------------------------------------------
-    SamplePose(current.state, current.time, current.sampleDuration, tempPoseA);
+    {
+        BS_PROFILE_SCOPE("ModelAnimator::EvaluateCurrentAnimation");
+        SamplePose(current.state, current.time, current.sampleDuration, tempPoseA);
+    }
 
     // ------------------------------------------------------------
     // 4. クロスフェード
     // ------------------------------------------------------------
     float transitionAlpha_ = 1.0f;
-    if (isTransitioning)
     {
-        fadeTimer += et;
-        transitionAlpha_ = fadeDuration > 0.0f ? (fadeTimer / fadeDuration) : 1.0f;
-        if (transitionAlpha_ >= 1.0f)
+        BS_PROFILE_SCOPE("ModelAnimator::EvaluateBlendAnimation");
+        if (isTransitioning)
         {
-            transitionAlpha_ = 1.0f;
-            isTransitioning = false;
-        }
+            fadeTimer += et;
+            transitionAlpha_ = fadeDuration > 0.0f ? (fadeTimer / fadeDuration) : 1.0f;
+            if (transitionAlpha_ >= 1.0f)
+            {
+                transitionAlpha_ = 1.0f;
+                isTransitioning = false;
+            }
 
-        if (previous.state)
-        {
-            SamplePose(previous.state, previous.time, previous.sampleDuration, tempPoseB);
+            if (previous.state)
+            {
+                SamplePose(previous.state, previous.time, previous.sampleDuration, tempPoseB);
+            }
         }
     }
 
@@ -911,30 +948,33 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             pose_[sourceNodeIndex_].position = Vector3::Transform(currentGlobalPosition_, inverseParentGlobalMatrix_);
         };
 
-    applyVisualRootMotionCut_(tempPoseA, current.state, currentRootNodeIndex_, rootMotionBasePosition);
-    if (isTransitioning && previous.state)
     {
-        applyVisualRootMotionCut_(tempPoseB, previous.state, previousRootNodeIndex_, previousRootMotionBasePosition);
-        for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
+        BS_PROFILE_SCOPE("ModelAnimator::ApplyPose");
+        applyVisualRootMotionCut_(tempPoseA, current.state, currentRootNodeIndex_, rootMotionBasePosition);
+        if (isTransitioning && previous.state)
         {
-            finalPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
-                tempPoseB[nodeIndex_].position,
-                tempPoseA[nodeIndex_].position,
-                transitionAlpha_);
-            finalPose[nodeIndex_].rotation = DirectX::SimpleMath::Quaternion::Slerp(
-                tempPoseB[nodeIndex_].rotation,
-                tempPoseA[nodeIndex_].rotation,
-                transitionAlpha_);
-            finalPose[nodeIndex_].rotation.Normalize();
-            finalPose[nodeIndex_].scale = DirectX::SimpleMath::Vector3::Lerp(
-                tempPoseB[nodeIndex_].scale,
-                tempPoseA[nodeIndex_].scale,
-                transitionAlpha_);
+            applyVisualRootMotionCut_(tempPoseB, previous.state, previousRootNodeIndex_, previousRootMotionBasePosition);
+            for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
+            {
+                finalPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
+                    tempPoseB[nodeIndex_].position,
+                    tempPoseA[nodeIndex_].position,
+                    transitionAlpha_);
+                finalPose[nodeIndex_].rotation = DirectX::SimpleMath::Quaternion::Slerp(
+                    tempPoseB[nodeIndex_].rotation,
+                    tempPoseA[nodeIndex_].rotation,
+                    transitionAlpha_);
+                finalPose[nodeIndex_].rotation.Normalize();
+                finalPose[nodeIndex_].scale = DirectX::SimpleMath::Vector3::Lerp(
+                    tempPoseB[nodeIndex_].scale,
+                    tempPoseA[nodeIndex_].scale,
+                    transitionAlpha_);
+            }
         }
-    }
-    else
-    {
-        finalPose = tempPoseA;
+        else
+        {
+            finalPose = tempPoseA;
+        }
     }
 }
 

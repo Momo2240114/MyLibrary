@@ -14,9 +14,11 @@
 #include "Engine/GamePlay/System/AttackSystem.h"
 #include "Engine/Common/DebugLog.h"
 #include "Engine/Math/CollisionMath.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 
 #include <algorithm>
+#include <cstdint>
 #include <cmath>
 #include <string>
 
@@ -317,19 +319,33 @@ void CollisionStepSystem::PrepareInitialPhysicsState(float deltaTime_)
 
 void CollisionStepSystem::Step(float deltaTime_)
 {
-    RemoveExpiredColliders();
-    PhysXSystem::ComputeCharacterControllerInteractions(deltaTime_);
-    for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
+    BS_PROFILE_SCOPE("CollisionStepSystem::Step");
     {
-        const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock();
-        if (!collider_) continue;
+        BS_PROFILE_SCOPE("CollisionStepSystem::CollectColliders");
+        RemoveExpiredColliders();
+        BS_PROFILE_PLOT("Collision.ColliderCount", static_cast<int64_t>(colliders.size()));
+    }
+    {
+        BS_PROFILE_SCOPE("PhysX::CharacterControllerMove");
+        PhysXSystem::ComputeCharacterControllerInteractions(deltaTime_);
+    }
+    {
+        BS_PROFILE_SCOPE("CollisionStepSystem::PreparePhysicsStep");
+        for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
+        {
+            const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock();
+            if (!collider_) continue;
 
-        collider_->isGrounded = false;
-        collider_->SetHitFlag(false);
-        collider_->PreparePhysicsStep(deltaTime_);
+            collider_->isGrounded = false;
+            collider_->SetHitFlag(false);
+            collider_->PreparePhysicsStep(deltaTime_);
+        }
     }
 
-    StepCombatPairs();
+    {
+        BS_PROFILE_SCOPE("CollisionStepSystem::StepCombatPairs");
+        StepCombatPairs();
+    }
 }
 
 void CollisionStepSystem::HandlePhysXTrigger(
@@ -474,36 +490,43 @@ void CollisionStepSystem::StepCombatPairs()
     std::vector<std::shared_ptr<JustDodgeCollider>> justDodgeColliders_;
     std::vector<std::shared_ptr<GuardCollider>> guardColliders_;
 
-    for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
     {
-        const std::shared_ptr<ColliderComponent> collider_ =
-            registeredCollider_.lock();
-        if (!collider_) continue;
+        BS_PROFILE_SCOPE("CollisionStepSystem::BroadPhase");
+        for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
+        {
+            const std::shared_ptr<ColliderComponent> collider_ =
+                registeredCollider_.lock();
+            if (!collider_) continue;
 
-        if (const std::shared_ptr<HitBox> hitBox_ =
-            std::dynamic_pointer_cast<HitBox>(collider_))
-        {
-            hitBoxes_.push_back(hitBox_);
-            continue;
-        }
-        if (const std::shared_ptr<HurtBox> hurtBox_ =
-            std::dynamic_pointer_cast<HurtBox>(collider_))
-        {
-            hurtBoxes_.push_back(hurtBox_);
-        }
-        if (const std::shared_ptr<JustDodgeCollider> justDodgeCollider_ =
-            std::dynamic_pointer_cast<JustDodgeCollider>(collider_))
-        {
-            justDodgeColliders_.push_back(justDodgeCollider_);
-            continue;
-        }
-        if (const std::shared_ptr<GuardCollider> guardCollider_ =
-            std::dynamic_pointer_cast<GuardCollider>(collider_))
-        {
-            guardColliders_.push_back(guardCollider_);
-            continue;
+            if (const std::shared_ptr<HitBox> hitBox_ =
+                std::dynamic_pointer_cast<HitBox>(collider_))
+            {
+                hitBoxes_.push_back(hitBox_);
+                continue;
+            }
+            if (const std::shared_ptr<HurtBox> hurtBox_ =
+                std::dynamic_pointer_cast<HurtBox>(collider_))
+            {
+                hurtBoxes_.push_back(hurtBox_);
+            }
+            if (const std::shared_ptr<JustDodgeCollider> justDodgeCollider_ =
+                std::dynamic_pointer_cast<JustDodgeCollider>(collider_))
+            {
+                justDodgeColliders_.push_back(justDodgeCollider_);
+                continue;
+            }
+            if (const std::shared_ptr<GuardCollider> guardCollider_ =
+                std::dynamic_pointer_cast<GuardCollider>(collider_))
+            {
+                guardColliders_.push_back(guardCollider_);
+                continue;
+            }
         }
     }
+
+    BS_PROFILE_PLOT("Collision.HitBoxCount", static_cast<int64_t>(hitBoxes_.size()));
+    BS_PROFILE_PLOT("Collision.HurtBoxCount", static_cast<int64_t>(hurtBoxes_.size()));
+    BS_PROFILE_PLOT("Collision.GuardCheckCount", static_cast<int64_t>(guardColliders_.size()));
 
     std::vector<Capsule> hitCapsules_(hitBoxes_.size());
     std::vector<Capsule> hurtCapsules_(hurtBoxes_.size());
@@ -543,121 +566,133 @@ void CollisionStepSystem::StepCombatPairs()
         }
     }
 
-    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
     {
-        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
-        for (size_t dodgeIndex_ = 0; dodgeIndex_ < justDodgeColliders_.size(); ++dodgeIndex_)
+        BS_PROFILE_SCOPE("CollisionStepSystem::SensorCollision");
+        for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
         {
-            const std::shared_ptr<JustDodgeCollider>& justDodgeCollider_ =
-                justDodgeColliders_[dodgeIndex_];
-
-            bool isOverlapping_ = false;
-            if (hitBox_->IsEnabled() && justDodgeCollider_->IsEnabled())
+            const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
+            for (size_t dodgeIndex_ = 0; dodgeIndex_ < justDodgeColliders_.size(); ++dodgeIndex_)
             {
-                const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                    hitCapsules_[hitIndex_],
-                    justDodgeCapsules_[dodgeIndex_]);
-                isOverlapping_ = manifold_.isHit;
-            }
+                const std::shared_ptr<JustDodgeCollider>& justDodgeCollider_ =
+                    justDodgeColliders_[dodgeIndex_];
 
-            HandleTriggerPair(
-                hitBox_.get(),
-                justDodgeCollider_.get(),
-                isOverlapping_,
-                nullptr);
+                bool isOverlapping_ = false;
+                if (hitBox_->IsEnabled() && justDodgeCollider_->IsEnabled())
+                {
+                    const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
+                        hitCapsules_[hitIndex_],
+                        justDodgeCapsules_[dodgeIndex_]);
+                    isOverlapping_ = manifold_.isHit;
+                }
 
-            if (isOverlapping_ && justDodgeSystem)
-            {
-                BS_LOG_INFO(
-                    LOG_CATEGORY::PHYSICS,
-                    std::string("[JustDodge] CollisionStepSystem overlap. HitBox=")
-                    + hitBox_->GetName()
-                    + " JustDodgeCollider="
-                    + justDodgeCollider_->GetName());
+                HandleTriggerPair(
+                    hitBox_.get(),
+                    justDodgeCollider_.get(),
+                    isOverlapping_,
+                    nullptr);
 
-                JustDodgeContact contact_{};
-                contact_.normal = { 0.0f, 1.0f, 0.0f };
-                contact_.position = { 0.0f, 0.0f, 0.0f };
-                contact_.isValid = false;
+                if (isOverlapping_ && justDodgeSystem)
+                {
+                    BS_LOG_INFO(
+                        LOG_CATEGORY::PHYSICS,
+                        std::string("[JustDodge] CollisionStepSystem overlap. HitBox=")
+                        + hitBox_->GetName()
+                        + " JustDodgeCollider="
+                        + justDodgeCollider_->GetName());
 
-                justDodgeSystem->HandleJustDodge(
-                    *hitBox_,
-                    *justDodgeCollider_,
-                    contact_);
+                    JustDodgeContact contact_{};
+                    contact_.normal = { 0.0f, 1.0f, 0.0f };
+                    contact_.position = { 0.0f, 0.0f, 0.0f };
+                    contact_.isValid = false;
+
+                    justDodgeSystem->HandleJustDodge(
+                        *hitBox_,
+                        *justDodgeCollider_,
+                        contact_);
+                }
             }
         }
     }
 
-    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
     {
-        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
-        for (size_t guardIndex_ = 0; guardIndex_ < guardColliders_.size(); ++guardIndex_)
+        BS_PROFILE_SCOPE("CollisionStepSystem::GuardCollision");
+        for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
         {
-            const std::shared_ptr<GuardCollider>& guardCollider_ =
-                guardColliders_[guardIndex_];
-
-            bool isOverlapping_ = false;
-            GuardContact contact_{};
-            if (hitBox_->IsEnabled() && guardCollider_->IsEnabled())
+            const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
+            for (size_t guardIndex_ = 0; guardIndex_ < guardColliders_.size(); ++guardIndex_)
             {
-                const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                    hitCapsules_[hitIndex_],
-                    guardCapsules_[guardIndex_]);
-                isOverlapping_ = manifold_.isHit;
-                if (isOverlapping_)
+                const std::shared_ptr<GuardCollider>& guardCollider_ =
+                    guardColliders_[guardIndex_];
+
+                bool isOverlapping_ = false;
+                GuardContact contact_{};
+                if (hitBox_->IsEnabled() && guardCollider_->IsEnabled())
                 {
-                    contact_ = MakeGuardContact(
+                    const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
                         hitCapsules_[hitIndex_],
-                        guardCapsules_[guardIndex_],
-                        manifold_);
+                        guardCapsules_[guardIndex_]);
+                    isOverlapping_ = manifold_.isHit;
+                    if (isOverlapping_)
+                    {
+                        contact_ = MakeGuardContact(
+                            hitCapsules_[hitIndex_],
+                            guardCapsules_[guardIndex_],
+                            manifold_);
+                    }
                 }
-            }
 
-            HandleTriggerPair(
-                hitBox_.get(),
-                guardCollider_.get(),
-                isOverlapping_,
-                nullptr);
+                HandleTriggerPair(
+                    hitBox_.get(),
+                    guardCollider_.get(),
+                    isOverlapping_,
+                    nullptr);
 
-            if (isOverlapping_ && guardSystem)
-            {
-                const bool guarded_ = guardSystem->HandleGuard(
-                    *hitBox_,
-                    *guardCollider_,
-                    contact_);
-                if (guarded_) break;
+                if (isOverlapping_ && guardSystem)
+                {
+                    const bool guarded_ = guardSystem->HandleGuard(
+                        *hitBox_,
+                        *guardCollider_,
+                        contact_);
+                    if (guarded_) break;
+                }
             }
         }
     }
 
-    for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
     {
-        const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
-        for (size_t hurtIndex_ = 0; hurtIndex_ < hurtBoxes_.size(); ++hurtIndex_)
+        BS_PROFILE_SCOPE("CollisionStepSystem::HitBoxCollision");
+        BS_PROFILE_PLOT(
+            "Collision.NarrowPhasePairCount",
+            static_cast<int64_t>(hitBoxes_.size() * hurtBoxes_.size()));
+        for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
         {
-            const std::shared_ptr<HurtBox>& hurtBox_ = hurtBoxes_[hurtIndex_];
-            bool isOverlapping_ = false;
-            AttackHitContact contact_{};
-            if (hitBox_->IsEnabled() && hurtBox_->IsEnabled())
+            const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
+            for (size_t hurtIndex_ = 0; hurtIndex_ < hurtBoxes_.size(); ++hurtIndex_)
             {
-                const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
-                    hitCapsules_[hitIndex_],
-                    hurtCapsules_[hurtIndex_]);
-                isOverlapping_ = manifold_.isHit;
-                if (isOverlapping_)
+                const std::shared_ptr<HurtBox>& hurtBox_ = hurtBoxes_[hurtIndex_];
+                bool isOverlapping_ = false;
+                AttackHitContact contact_{};
+                if (hitBox_->IsEnabled() && hurtBox_->IsEnabled())
                 {
-                    contact_ = MakeAttackHitContact(
+                    const CollisionManifold manifold_ = CollisionMath::CapsuleVsCapsule(
                         hitCapsules_[hitIndex_],
-                        hurtCapsules_[hurtIndex_],
-                        manifold_);
+                        hurtCapsules_[hurtIndex_]);
+                    isOverlapping_ = manifold_.isHit;
+                    if (isOverlapping_)
+                    {
+                        contact_ = MakeAttackHitContact(
+                            hitCapsules_[hitIndex_],
+                            hurtCapsules_[hurtIndex_],
+                            manifold_);
+                    }
                 }
-            }
 
-            HandleTriggerPair(
-                hitBox_.get(),
-                hurtBox_.get(),
-                isOverlapping_,
-                contact_.isValid ? &contact_ : nullptr);
+                HandleTriggerPair(
+                    hitBox_.get(),
+                    hurtBox_.get(),
+                    isOverlapping_,
+                    contact_.isValid ? &contact_ : nullptr);
+            }
         }
     }
 

@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <fstream>
 #include <cmath>
+#include <cstdio>
 #include <unordered_map>
 
 #include "Engine/Debug/TracyProfiler.h"
@@ -195,6 +196,30 @@ void AnimationControllerComponent::Start()
 void AnimationControllerComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::Update");
+    BS_PROFILE_PLOT("Animation.ActiveControllerCount", 1);
+
+#if BS_PROFILE_DETAILED_ENABLED
+    {
+        const std::shared_ptr<GameObject> owner_ = GetGameObject();
+        const AnimState* activeState_ = animator.GetCurrentState();
+        char profileText_[256]{};
+        const int textLength_ = std::snprintf(
+            profileText_,
+            sizeof(profileText_),
+            "Object: %s\nState: %s\nBlend: %s\nGraphNodeCount: %zu\nStateCount: %zu",
+            owner_ ? owner_->GetName().c_str() : "None",
+            activeState_ ? activeState_->name.c_str() : "None",
+            activeState_ && activeState_->type != AnimStateType::Single ? "true" : "false",
+            graphNodes.size(),
+            states.size());
+        if (textLength_ > 0)
+        {
+            BS_PROFILE_TEXT(
+                profileText_,
+                static_cast<size_t>((std::min)(textLength_, static_cast<int>(sizeof(profileText_) - 1))));
+        }
+    }
+#endif
 
     {
         BS_PROFILE_SCOPE("Animation::EnsureNodeEditorContext");
@@ -280,7 +305,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
     const float animationDeltaTime_ = animationPaused ? 0.0f : deltaTime_;
 
     {
-        BS_PROFILE_SCOPE("ModelAnimator::Update");
+        BS_PROFILE_SCOPE("Animation::UpdateModelAnimator");
         animator.Update(
             animationDeltaTime_,
             modelComponent,
@@ -348,7 +373,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
     }
 
     {
-        BS_PROFILE_SCOPE("GltfModel::UpdateTransform");
+        BS_PROFILE_SCOPE("Animation::UpdateModelTransform");
         modelComponent->UpdateTransformIfDirty();
     }
 }

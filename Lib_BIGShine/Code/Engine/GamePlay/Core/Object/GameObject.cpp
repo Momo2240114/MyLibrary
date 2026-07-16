@@ -6,6 +6,37 @@
 
 #include "Engine/Debug/TracyProfiler.h"
 
+#include <algorithm>
+#include <cstdio>
+
+namespace
+{
+    void AddGameObjectProfileText(const GameObject& object_)
+    {
+#if BS_PROFILE_DETAILED_ENABLED
+        char profileText_[256]{};
+        const int textLength_ = std::snprintf(
+            profileText_,
+            sizeof(profileText_),
+            "Object: %s\nObjectID: %p\nLayer: %u\nSave: %s\nComponentCount: %zu\nColliderCount: %zu",
+            object_.GetName().c_str(),
+            static_cast<const void*>(&object_),
+            static_cast<unsigned int>(object_.GetLayer()),
+            object_.saveFlg ? "true" : "false",
+            object_.components.size(),
+            object_.colliderComponents.size());
+        if (textLength_ > 0)
+        {
+            BS_PROFILE_TEXT(
+                profileText_,
+                static_cast<size_t>((std::min)(textLength_, static_cast<int>(sizeof(profileText_) - 1))));
+        }
+#else
+        (void)object_;
+#endif
+    }
+}
+
 void GameObject::SetManager(GameObjectManager* manager_)
 {
     if (manager == manager_) return;
@@ -299,6 +330,9 @@ void GameObject::SetParent(std::shared_ptr<GameObject> parentGO)
 void GameObject::Update(float et)
 {
     BS_PROFILE_SCOPE("GameObject::Update");
+    AddGameObjectProfileText(*this);
+
+    int updatedComponentCount_ = 0;
 
     {
         BS_PROFILE_SCOPE("GameObject::UpdateComponents");
@@ -313,7 +347,9 @@ void GameObject::Update(float et)
                 name_ != "CharacterMovementComponent")
             {
                 BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
+                BS_PROFILE_TEXT(name_.c_str(), name_.size());
                 comp_->Update(et);
+                ++updatedComponentCount_;
             }
         }
     }
@@ -330,7 +366,9 @@ void GameObject::Update(float et)
             if (name_ == "CharacterMovementComponent")
             {
                 BS_PROFILE_SCOPE("CharacterMovementComponent::Update");
+                BS_PROFILE_TEXT(name_.c_str(), name_.size());
                 comp_->Update(et);
+                ++updatedComponentCount_;
             }
         }
     }
@@ -343,14 +381,22 @@ void GameObject::Update(float et)
             if (!collider_ || !collider_->IsEnabled() || !collider_->IsStarted()) continue;
 
             BS_PROFILE_SCOPE("ColliderComponent::Update");
+            const std::string& name_ = collider_->GetName();
+            BS_PROFILE_TEXT(name_.c_str(), name_.size());
             collider_->Update(et);
+            ++updatedComponentCount_;
         }
     }
+
+    BS_PROFILE_PLOT("Component.UpdatedCount", updatedComponentCount_);
 }
 
 void GameObject::LateUpdate(float et)
 {
     BS_PROFILE_SCOPE("GameObject::LateUpdate");
+    AddGameObjectProfileText(*this);
+
+    int lateUpdatedComponentCount_ = 0;
 
     {
         BS_PROFILE_SCOPE("GameObject::LateUpdateComponents");
@@ -364,7 +410,9 @@ void GameObject::LateUpdate(float et)
             if (name_ != "PhysicsCollisionComponent")
             {
                 BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
+                BS_PROFILE_TEXT(name_.c_str(), name_.size());
                 comp_->LateUpdate(et);
+                ++lateUpdatedComponentCount_;
             }
         }
     }
@@ -381,10 +429,14 @@ void GameObject::LateUpdate(float et)
             if (name_ == "PhysicsCollisionComponent")
             {
                 BS_PROFILE_SCOPE("PhysicsCollisionComponent::LateUpdate");
+                BS_PROFILE_TEXT(name_.c_str(), name_.size());
                 comp_->LateUpdate(et);
+                ++lateUpdatedComponentCount_;
             }
         }
     }
+
+    BS_PROFILE_PLOT("Component.LateUpdatedCount", lateUpdatedComponentCount_);
 }
 
 void GameObject::ExecuteAction(

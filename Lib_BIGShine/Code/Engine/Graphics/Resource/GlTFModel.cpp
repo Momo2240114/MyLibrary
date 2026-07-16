@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <cstdio>
 
 
 const std::vector<D3D11_INPUT_ELEMENT_DESC> GltfModelCommponennt::InputElementDescs =
@@ -894,24 +895,78 @@ void GltfModelCommponennt::UpdateTransform()
 		return;
 	}
 
-	DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
-	DirectX::XMMATRIX modelScaleMat_ = DirectX::XMMatrixScaling(localScale, localScale, localScale);
-	BS_PROFILE_PLOT("GltfModel.Nodes", static_cast<int64_t>(nodes.size()));
-
-	for (Node& node_ : nodes)
+	size_t boneCount_ = 0;
+	size_t rootNodeCount_ = 0;
+	for (const Mesh& mesh_ : meshes)
+	{
+		boneCount_ += mesh_.bones.size();
+	}
+	for (const Node& node_ : nodes)
 	{
 		if (node_.parent == nullptr)
 		{
-			DirectX::XMMATRIX rootParentGlobal_ = DirectX::XMMatrixIdentity();
-			UpdateNodeRecursive(node_, rootParentGlobal_, parentWorldTransform_, modelScaleMat_, true);
+			++rootNodeCount_;
 		}
 	}
 
-	DirectX::XMStoreFloat4x4(&cachedOwnerWorldTransform, parentWorldTransform_);
-	hasCachedOwnerWorldTransform = true;
-	poseDirty = false;
-	transformDirty = false;
-	MarkSkinningTransformsDirty();
+#if BS_PROFILE_DETAILED_ENABLED
+	{
+		char profileText_[256]{};
+		const int textLength_ = std::snprintf(
+			profileText_,
+			sizeof(profileText_),
+			"Model: %s\nNodeCount: %zu\nMeshCount: %zu\nRootNodeCount: %zu\nBoneCount: %zu",
+			modelName.c_str(),
+			nodes.size(),
+			meshes.size(),
+			rootNodeCount_,
+			boneCount_);
+		if (textLength_ > 0)
+		{
+			BS_PROFILE_TEXT(
+				profileText_,
+				static_cast<size_t>((std::min)(textLength_, static_cast<int>(sizeof(profileText_) - 1))));
+		}
+	}
+#endif
+
+	BS_PROFILE_PLOT("GltfModel.Nodes", static_cast<int64_t>(nodes.size()));
+	BS_PROFILE_PLOT("Animation.UpdatedModelCount", 1);
+	BS_PROFILE_PLOT("Animation.UpdatedBoneCount", static_cast<int64_t>(boneCount_));
+
+	DirectX::XMMATRIX parentWorldTransform_ = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX modelScaleMat_ = DirectX::XMMatrixIdentity();
+	{
+		BS_PROFILE_SCOPE("GltfModel::PrepareRootTransform");
+		parentWorldTransform_ = owner_->transform->GetWorldMatrix();
+		modelScaleMat_ = DirectX::XMMatrixScaling(localScale, localScale, localScale);
+	}
+
+	{
+		BS_PROFILE_SCOPE("GltfModel::UpdateNodeHierarchy");
+		BS_PROFILE_PLOT("GltfModel.RootNodeCount", static_cast<int64_t>(rootNodeCount_));
+
+		{
+			BS_PROFILE_SCOPE("GltfModel::CalculateGlobalTransforms");
+			for (Node& node_ : nodes)
+			{
+				if (node_.parent == nullptr)
+				{
+					DirectX::XMMATRIX rootParentGlobal_ = DirectX::XMMatrixIdentity();
+					UpdateNodeRecursive(node_, rootParentGlobal_, parentWorldTransform_, modelScaleMat_, true);
+				}
+			}
+		}
+	}
+
+	{
+		BS_PROFILE_SCOPE("GltfModel::FinalizeTransformUpdate");
+		DirectX::XMStoreFloat4x4(&cachedOwnerWorldTransform, parentWorldTransform_);
+		hasCachedOwnerWorldTransform = true;
+		poseDirty = false;
+		transformDirty = false;
+		MarkSkinningTransformsDirty();
+	}
 }
 
 const std::vector<DirectX::XMFLOAT4X4>& GltfModelCommponennt::GetSkinningTransforms(int meshIndex_)
@@ -935,7 +990,7 @@ void GltfModelCommponennt::UpdateSkinningTransforms(int meshIndex_)
 		return;
 	}
 
-	BS_PROFILE_SCOPE("GltfModelCommponennt::UpdateSkinningTransforms");
+	BS_PROFILE_SCOPE("GltfModel::CalculateSkinningMatrices");
 	//BS_PROFILE_PLOT("GltfModel.SkinningCacheRebuild", 1);
 
 	const size_t transformCount_ = mesh_.bones.empty()
@@ -946,6 +1001,8 @@ void GltfModelCommponennt::UpdateSkinningTransforms(int meshIndex_)
 
 	if (!mesh_.bones.empty())
 	{
+		BS_PROFILE_SCOPE("Skinning::BuildBoneMatrices");
+		BS_PROFILE_PLOT("Skinning.BoneCount", static_cast<int64_t>(mesh_.bones.size()));
 		for (size_t boneIndex_ = 0; boneIndex_ < transformCount_; ++boneIndex_)
 		{
 			const Bone& bone_ = mesh_.bones[boneIndex_];
@@ -962,13 +1019,22 @@ void GltfModelCommponennt::UpdateSkinningTransforms(int meshIndex_)
 	}
 	else if (mesh_.node)
 	{
+		BS_PROFILE_SCOPE("Skinning::WriteSkinningBuffer");
 		mesh_.cachedSkinningTransforms[0] = mesh_.node->worldTransform;
 	}
 	else
 	{
+		BS_PROFILE_SCOPE("Skinning::WriteSkinningBuffer");
 		DirectX::XMStoreFloat4x4(
 			&mesh_.cachedSkinningTransforms[0],
 			DirectX::XMMatrixIdentity());
+	}
+
+	{
+		BS_PROFILE_SCOPE("Skinning::WriteSkinningBuffer");
+		BS_PROFILE_PLOT(
+			"Skinning.UploadByteSize",
+			static_cast<int64_t>(mesh_.cachedSkinningTransforms.size() * sizeof(DirectX::XMFLOAT4X4)));
 	}
 
 	mesh_.skinningTransformDirty = false;
