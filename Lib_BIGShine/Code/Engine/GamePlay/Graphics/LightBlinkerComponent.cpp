@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "LightBlinkerComponent.h"
 #include "Engine/Graphics/Core/LightManager.h"
 

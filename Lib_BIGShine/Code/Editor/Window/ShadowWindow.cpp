@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ShadowWindow.h"
 
 void ShadowWindow::Draw()

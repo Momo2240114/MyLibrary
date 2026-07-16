@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "GuardCollider.h"
 
 #include "HitBox.h"

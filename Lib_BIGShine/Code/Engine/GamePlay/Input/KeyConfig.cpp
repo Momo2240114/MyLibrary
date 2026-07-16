@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "KeyConfig.h"
 #include "KeyInput.h"
 #include "MouseInput.h"

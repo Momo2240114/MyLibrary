@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 // Serialize / Asset Save Load / JSON 変換
 // AnimationControllerComponent の実装を役割ごとに分けたファイルです。
 // クラス自体は分離せず、同じクラスのメンバ関数定義だけを別 cpp に置いています。

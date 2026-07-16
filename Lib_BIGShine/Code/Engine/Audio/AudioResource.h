@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <Windows.h>
+#include <mmreg.h>
 
 // オーディオリソース
 class AudioResource

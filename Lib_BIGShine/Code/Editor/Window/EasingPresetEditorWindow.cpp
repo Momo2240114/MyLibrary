@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "EasingPresetEditorWindow.h"
 
 EasingPresetEditorWindow::EasingPresetEditorWindow(GameObjectManager* manager_)

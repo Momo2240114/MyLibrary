@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "NumberSwitcher.h"
 #include "Engine/Graphics/Resource/Sprite.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"

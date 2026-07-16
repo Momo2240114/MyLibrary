@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ModelAttachmentComponent.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 

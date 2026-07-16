@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "GuardSystem.h"
 
 #include "Engine/Common/DebugLog.h"

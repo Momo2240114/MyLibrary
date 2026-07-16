@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include"SceneGame.h"
 
 void SceneGame::Finalize()

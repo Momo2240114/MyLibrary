@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "EditorRenderTarget.h"
 
 #include <algorithm>

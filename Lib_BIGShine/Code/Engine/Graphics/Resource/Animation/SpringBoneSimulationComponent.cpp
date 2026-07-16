@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "SpringBoneSimulationComponent.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"

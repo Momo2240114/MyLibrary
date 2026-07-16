@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "DebugLogWindow.h"
 
 #include <algorithm>

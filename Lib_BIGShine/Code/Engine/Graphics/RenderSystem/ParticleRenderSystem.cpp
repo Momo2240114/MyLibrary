@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ParticleRenderSystem.h"
 
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"

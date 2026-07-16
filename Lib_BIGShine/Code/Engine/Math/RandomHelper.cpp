@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "RandomHelper.h"
 
 #include <cmath>

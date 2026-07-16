@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "XeGtaoSystem.h"
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"

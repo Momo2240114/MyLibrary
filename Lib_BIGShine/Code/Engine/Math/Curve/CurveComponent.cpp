@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CurveComponent.h"
 
 #include "Editor/AssetBrowserPayload.h"

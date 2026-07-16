@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "GltfModel.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"
 #include <filesystem>
@@ -1244,17 +1246,17 @@ float GltfModelCommponennt::GetAnimationDuration(int animationIndex) const
 		if (!nodeAnim.positionKeyframes.empty())
 		{
 			float end = nodeAnim.positionKeyframes.back().seconds;
-			maxDuration = max(maxDuration, end);
+			maxDuration = std::max(maxDuration, end);
 		}
 		if (!nodeAnim.rotationKeyframes.empty())
 		{
 			float end = nodeAnim.rotationKeyframes.back().seconds;
-			maxDuration = max(maxDuration, end);
+			maxDuration = std::max(maxDuration, end);
 		}
 		if (!nodeAnim.scaleKeyframes.empty())
 		{
 			float end = nodeAnim.scaleKeyframes.back().seconds;
-			maxDuration = max(maxDuration, end);
+			maxDuration = std::max(maxDuration, end);
 		}
 	}
 

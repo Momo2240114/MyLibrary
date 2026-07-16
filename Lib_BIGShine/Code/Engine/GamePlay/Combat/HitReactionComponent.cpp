@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "HitReactionComponent.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"

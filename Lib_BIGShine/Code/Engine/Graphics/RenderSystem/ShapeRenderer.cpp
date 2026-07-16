@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ShapeRenderer.h"
 #include "Engine/Common/misc.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ActionRegistry.h"
 #include "Engine/GamePlay/Scene/SceneManager.h"
 #include "Engine/GamePlay/Scene/SceneGame.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ShieldBlockIKComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "EditorWindowManager.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"

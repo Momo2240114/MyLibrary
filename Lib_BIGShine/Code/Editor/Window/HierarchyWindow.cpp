@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "HierarchyWindow.h"
 
 void HierarchyWindow::Draw()

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AudioComponent.h"
 
 #include "Engine/Audio/AudioManager.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "SceneTutorial.h"
 
 void SceneTutorial::Finalize()

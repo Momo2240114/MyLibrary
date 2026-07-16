@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AnimationEventTrack.h"
 
 #include <algorithm>

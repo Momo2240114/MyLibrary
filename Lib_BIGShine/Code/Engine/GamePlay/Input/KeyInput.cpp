@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "KeyInput.h"
 
 std::unordered_map<int, bool> KeyInput::oldState;

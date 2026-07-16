@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ImpactEffectComponent.h"
 
 #include "Editor/AssetSlotGui.h"

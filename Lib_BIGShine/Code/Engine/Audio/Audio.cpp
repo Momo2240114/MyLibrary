@@ -1,4 +1,6 @@
-﻿#include "Engine/Common/misc.h"
+#include "PrecompiledHeader.h"
+
+#include "Engine/Common/misc.h"
 #include "Audio.h"
 
 #include <fmod_errors.h>

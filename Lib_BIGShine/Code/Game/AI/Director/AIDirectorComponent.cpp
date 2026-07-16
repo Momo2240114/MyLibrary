@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AIDirectorComponent.h"
 
 #include "Game/GameMode/GameModeManager.h"

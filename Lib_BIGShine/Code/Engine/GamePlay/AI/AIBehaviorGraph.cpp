@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AIBehaviorGraph.h"
 
 #include "AIActionComponent.h"

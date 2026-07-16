@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "EventTrack.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"

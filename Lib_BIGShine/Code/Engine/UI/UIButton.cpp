@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "UIButton.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/Resource/Sprite.h" // SpriteRendererの定義

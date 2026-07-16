@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "PhysicsCollisionComponent.h"
 #include "PhysXSystem.h"
 #include "PhysXMath.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "EasingComponent.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"

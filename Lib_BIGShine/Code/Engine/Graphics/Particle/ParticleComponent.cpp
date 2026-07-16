@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ParticleComponent.h"
 
 #include "Editor/AssetSlotGui.h"

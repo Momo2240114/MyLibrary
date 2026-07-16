@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "HumanLookAtIKComponent.h"
 
 #include "AnimationControllerComponent.h"

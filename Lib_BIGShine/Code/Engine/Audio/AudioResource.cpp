@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "Engine/Common/misc.h"
 #include "AudioResource.h"
 

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "DecalComponent.h"
 
 #include "Editor/AssetSlotGui.h"

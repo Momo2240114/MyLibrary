@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "RadialBlurDirector.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"

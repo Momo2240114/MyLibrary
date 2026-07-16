@@ -73,6 +73,16 @@
                     "recordedAt": "2026-07-16T10:50:31",
                     "totalLoadMilliseconds": 5376.1644,
                     "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5531.1512,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T12:48:26",
+                    "totalLoadMilliseconds": 5531.1512,
+                    "workerCount": 8
                 }
             ]
         },
@@ -148,6 +158,16 @@
                     "parseMilliseconds": 0.0,
                     "recordedAt": "2026-07-16T10:50:29",
                     "totalLoadMilliseconds": 4112.342,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4495.2199,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T12:48:24",
+                    "totalLoadMilliseconds": 4495.2199,
                     "workerCount": 8
                 }
             ]
@@ -225,6 +245,16 @@
                     "recordedAt": "2026-07-16T10:50:29",
                     "totalLoadMilliseconds": 3967.5426,
                     "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4321.0332,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T12:48:24",
+                    "totalLoadMilliseconds": 4321.0332,
+                    "workerCount": 8
                 }
             ]
         },
@@ -300,6 +330,16 @@
                     "parseMilliseconds": 0.0,
                     "recordedAt": "2026-07-16T10:50:26",
                     "totalLoadMilliseconds": 1079.6878,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1577.9065,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T12:48:21",
+                    "totalLoadMilliseconds": 1577.9065,
                     "workerCount": 8
                 }
             ]
@@ -377,6 +417,16 @@
                     "recordedAt": "2026-07-16T10:50:31",
                     "totalLoadMilliseconds": 6260.5466,
                     "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 6634.926,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T12:48:26",
+                    "totalLoadMilliseconds": 6634.926,
+                    "workerCount": 8
                 }
             ]
         },
@@ -452,6 +502,16 @@
                     "parseMilliseconds": 0.0,
                     "recordedAt": "2026-07-16T10:50:26",
                     "totalLoadMilliseconds": 1341.5339,
+                    "workerCount": 8
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1970.19,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-16T12:48:22",
+                    "totalLoadMilliseconds": 1970.19,
                     "workerCount": 8
                 }
             ]

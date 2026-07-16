@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CascadeShadowMap.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include <algorithm>

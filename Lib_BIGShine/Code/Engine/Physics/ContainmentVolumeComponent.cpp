@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ContainmentVolumeComponent.h"
 
 #include <algorithm>

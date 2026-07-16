@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "PhysXSystem.h"
 #include "ColliderComponent.h"
 #include "PhysXEventCallback.h"

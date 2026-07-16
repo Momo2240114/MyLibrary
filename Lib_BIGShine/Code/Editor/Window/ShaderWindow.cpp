@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 // ShaderWindow.cpp
 #include "ShaderWindow.h"
 #include "Engine/Graphics/RenderSystem/ModelRenderSystem.h"

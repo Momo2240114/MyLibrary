@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AttackTemplateRuntime.h"
 
 #include "AttackTemplateManager.h"

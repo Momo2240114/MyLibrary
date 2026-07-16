@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CameraCollisionComponent.h"
 
 #include "CameraComponent.h"

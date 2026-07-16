@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ModelRenderSystem.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Shader/PBRShader.h"

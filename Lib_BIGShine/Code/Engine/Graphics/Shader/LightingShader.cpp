@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "LightingShader.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h" // 君が使っているローダーに合わせてくれ
 
