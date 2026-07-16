@@ -1740,7 +1740,7 @@ bool PlayerControllerComponent::TryDodgeCancelInput()
         return GetCurrentAction() == dodgeAction_;
     }
 
-    if (!KeyConfig::Instance().ActionPressedIn(PlayerInputAction::DODGE))
+    if (!KeyConfig::Instance().ActionPressed(PlayerInputAction::DODGE))
     {
         return false;
     }
