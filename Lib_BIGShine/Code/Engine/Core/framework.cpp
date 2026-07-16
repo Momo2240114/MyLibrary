@@ -27,6 +27,8 @@
 #include <imnodes.h>
 #include <imnodes_internal.h>
 
+#include <chrono>
+
 framework::framework(HWND hwnd) : hwnd(hwnd){}										  
 
 
@@ -189,6 +191,7 @@ int framework::run()
 		else
 		{
 			BS_PROFILE_SCOPE("Frame");
+			const auto frameProfileStart_ = std::chrono::steady_clock::now();
 
 			{
 				BS_PROFILE_SCOPE("tictoc.tick");
@@ -201,21 +204,42 @@ int framework::run()
 			}
 
 			const float elapsedTime_ = tictoc.time_interval();
+			BS_PROFILE_PLOT("Frame.TotalMilliseconds", static_cast<double>(elapsedTime_) * 1000.0);
 
 			{
 				BS_PROFILE_SCOPE("framework::update");
+				const auto updateProfileStart_ = std::chrono::steady_clock::now();
 				update(elapsedTime_);
+				const auto updateProfileEnd_ = std::chrono::steady_clock::now();
+				BS_PROFILE_PLOT(
+					"Frame.UpdateMilliseconds",
+					std::chrono::duration<double, std::milli>(updateProfileEnd_ - updateProfileStart_).count());
 			}
 
 			{
 				BS_PROFILE_SCOPE("framework::GuiDraw");
+				const auto guiProfileStart_ = std::chrono::steady_clock::now();
 				GuiDraw();
+				const auto guiProfileEnd_ = std::chrono::steady_clock::now();
+				BS_PROFILE_PLOT(
+					"Frame.GuiMilliseconds",
+					std::chrono::duration<double, std::milli>(guiProfileEnd_ - guiProfileStart_).count());
 			}
 
 			{
 				BS_PROFILE_SCOPE("framework::render");
+				const auto renderProfileStart_ = std::chrono::steady_clock::now();
 				render(elapsedTime_);
+				const auto renderProfileEnd_ = std::chrono::steady_clock::now();
+				BS_PROFILE_PLOT(
+					"Frame.RenderCpuMilliseconds",
+					std::chrono::duration<double, std::milli>(renderProfileEnd_ - renderProfileStart_).count());
 			}
+
+			const auto frameProfileEnd_ = std::chrono::steady_clock::now();
+			BS_PROFILE_PLOT(
+				"Frame.CpuMeasuredMilliseconds",
+				std::chrono::duration<double, std::milli>(frameProfileEnd_ - frameProfileStart_).count());
 
 			BS_PROFILE_FRAME_MARK();
 		}
