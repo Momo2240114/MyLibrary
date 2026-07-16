@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "MeshVFXComponent.h"
 
 #include "Editor/AssetSlotGui.h"

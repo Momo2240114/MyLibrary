@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include"GameObject.h"
 #include"GameObjectManager.h"
 #include"Engine/Physics/ColliderComponent.h"

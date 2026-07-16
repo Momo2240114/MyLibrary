@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "EffectAssetListWindow.h"
 
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"

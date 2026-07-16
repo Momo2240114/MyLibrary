@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "JustDodgeReactionComponent.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"

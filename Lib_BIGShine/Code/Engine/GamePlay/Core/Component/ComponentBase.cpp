@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ComponentBase.h"
 
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"

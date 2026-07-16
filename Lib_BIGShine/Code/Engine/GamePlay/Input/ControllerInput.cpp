@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ControllerInput.h"
 
 #include <SDL3/SDL_events.h>

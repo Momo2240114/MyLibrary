@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include <time.h>
 
 #include "framework.h"

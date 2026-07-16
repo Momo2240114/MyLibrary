@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CameraDirectorComponent.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"

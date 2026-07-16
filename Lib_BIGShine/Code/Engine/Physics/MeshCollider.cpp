@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "MeshCollider.h"
 
 #include "Engine/Debug/TracyProfiler.h"

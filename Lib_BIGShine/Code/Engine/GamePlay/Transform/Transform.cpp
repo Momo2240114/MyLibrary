@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "Transform.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"

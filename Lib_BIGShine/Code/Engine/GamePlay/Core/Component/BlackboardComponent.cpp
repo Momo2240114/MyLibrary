@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "BlackboardComponent.h"
 
 #include <algorithm>

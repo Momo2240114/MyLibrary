@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ModelResourceManager.h"
 #include "GLTFImporter.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"

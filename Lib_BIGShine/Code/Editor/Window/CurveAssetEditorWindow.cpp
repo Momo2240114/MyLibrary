@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CurveAssetEditorWindow.h"
 
 CurveAssetEditorWindow::CurveAssetEditorWindow(GameObjectManager* manager_)

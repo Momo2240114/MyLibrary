@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "MeshVFXShader.h"
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"

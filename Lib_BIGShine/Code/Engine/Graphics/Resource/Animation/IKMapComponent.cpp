@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "IKMapComponent.h"
 #include "SpringBoneSimulationComponent.h"
 

@@ -858,6 +858,9 @@
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.cpp">
+      <Filter>Code\Engine\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Wip.hpp">
@@ -1551,6 +1554,12 @@
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeaderConfig.h">
+      <Filter>Code\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.h">
+      <Filter>Code\Engine\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AIControllerComponent.h"
 
 #include "Editor/AssetBrowserPayload.h"

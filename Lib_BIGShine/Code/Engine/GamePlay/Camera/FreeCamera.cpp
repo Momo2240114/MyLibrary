@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "FreeCamera.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Input/KeyInput.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ModelAnimator.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "TransformDirector.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"

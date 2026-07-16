@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "UpperBodyLeanIKComponent.h"
 
 #include "AnimationControllerComponent.h"

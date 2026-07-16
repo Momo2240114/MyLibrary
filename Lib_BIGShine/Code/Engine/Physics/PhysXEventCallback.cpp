@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "PhysXEventCallback.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "ColliderComponent.h"

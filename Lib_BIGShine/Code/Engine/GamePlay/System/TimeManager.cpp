@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "TimeManager.h"
 
 #if defined(_MSC_VER)

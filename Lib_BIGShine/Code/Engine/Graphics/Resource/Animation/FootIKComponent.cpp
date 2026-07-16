@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "FootIKComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"

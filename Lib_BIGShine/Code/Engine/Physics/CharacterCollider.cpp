@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CharacterCollider.h"
 
 #include <algorithm>

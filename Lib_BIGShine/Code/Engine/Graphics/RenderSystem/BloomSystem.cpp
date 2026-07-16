@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "BloomSystem.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/RenderContext.h"

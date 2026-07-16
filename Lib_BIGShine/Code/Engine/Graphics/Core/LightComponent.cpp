@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "LightManager.h"
 #include "GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Transform/Transform.h"

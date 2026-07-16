@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "PoseLibraryResourceManager.h"
 #include <fstream>
 #include <iostream>

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "MotionVelocityRenderSystem.h"
 
 #include <algorithm>

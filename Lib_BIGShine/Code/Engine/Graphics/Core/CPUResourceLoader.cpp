@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CPUResourceLoader.h"
 #include "Engine/Common/Misc.h"
 
@@ -236,7 +238,7 @@ HRESULT CPUResourceLoader::LoadVertexShader(ID3D11Device* device, const char* fi
     fseek(fp, 0, SEEK_SET);
 
     // メモリ上に頂点シェーダーデータを格納する領域を用意する
-    std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
+    std::unique_ptr<std::uint8_t[]> data = std::make_unique<std::uint8_t[]>(size);
     fread(data.get(), size, 1, fp);
     fclose(fp);
 
@@ -267,7 +269,7 @@ HRESULT CPUResourceLoader::LoadPixelShader(ID3D11Device* device, const char* fil
     fseek(fp, 0, SEEK_SET);
 
     // メモリ上に頂点シェーダーデータを格納する領域を用意する
-    std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
+    std::unique_ptr<std::uint8_t[]> data = std::make_unique<std::uint8_t[]>(size);
     fread(data.get(), size, 1, fp);
     fclose(fp);
 

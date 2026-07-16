@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"

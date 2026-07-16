@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "InputEditorWindow.h"
 
 #include <Windows.h>

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "TimeManagerWindow.h"
 
 #include "Engine/GamePlay/System/TimeManager.h"

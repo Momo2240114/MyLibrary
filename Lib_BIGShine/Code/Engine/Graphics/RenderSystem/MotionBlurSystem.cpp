@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "MotionBlurSystem.h"
 
 #include <algorithm>

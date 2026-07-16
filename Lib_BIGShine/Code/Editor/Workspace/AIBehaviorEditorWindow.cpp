@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "AIBehaviorEditorWindow.h"
 
 #include "Editor/AssetBrowserPayload.h"

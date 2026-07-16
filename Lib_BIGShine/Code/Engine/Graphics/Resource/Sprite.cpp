@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "Sprite.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "ImGui.h"

@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "ToonShader.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"

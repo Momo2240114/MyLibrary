@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "HurtBox.h"
 
 #include "Engine/GamePlay/Core/Object/GameObject.h"

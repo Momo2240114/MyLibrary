@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "DragonAIComponent.h"
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"

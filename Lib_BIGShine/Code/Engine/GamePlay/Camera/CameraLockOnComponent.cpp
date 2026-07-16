@@ -1,3 +1,5 @@
+#include "PrecompiledHeader.h"
+
 #include "CameraLockOnComponent.h"
 
 #include "CameraComponent.h"
