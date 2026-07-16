@@ -129,12 +129,20 @@ std::vector<std::string> GameObject::GetComponentNames() const
 
 void GameObject::CallAllComponentStart()
 {
+    BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
 
     for (auto& collider_ : colliderComponents)
     {
         if (!collider_->IsStarted())
         {
-            collider_->Start();
+            {
+                BS_PROFILE_SCOPE("GameObject::StartCollider");
+                const std::string profileName_ = collider_->GetName();
+                {
+                    BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+                    collider_->Start();
+                }
+            }
             collider_->SetStarted(true);
         }
     }
@@ -153,7 +161,14 @@ void GameObject::CallAllComponentStart()
         try {
             if (!comp->IsStarted())
             {
-                comp->Start();
+                {
+                    BS_PROFILE_SCOPE("GameObject::StartComponent");
+                    const std::string profileName_ = comp->GetName();
+                    {
+                        BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+                        comp->Start();
+                    }
+                }
                 comp->SetStarted(true);
             }
         }
@@ -167,18 +182,33 @@ void GameObject::CallAllComponentStart()
 
 bool GameObject::IsReadyToStart()
 {
+    BS_PROFILE_SCOPE("GameObject::IsReadyToStart");
     for (const std::shared_ptr<Component>& collider_ : colliderComponents)
     {
         if (!collider_ || !collider_->IsEnabled()) continue;
-        collider_->UpdateLoadState();
-        if (!collider_->IsLoadReady()) return false;
+        {
+            BS_PROFILE_SCOPE("GameObject::CheckColliderLoadReady");
+            const std::string profileName_ = collider_->GetName();
+            {
+                BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+                collider_->UpdateLoadState();
+                if (!collider_->IsLoadReady()) return false;
+            }
+        }
     }
 
     for (const std::shared_ptr<Component>& comp_ : components)
     {
         if (!comp_ || !comp_->IsEnabled()) continue;
-        comp_->UpdateLoadState();
-        if (!comp_->IsLoadReady()) return false;
+        {
+            BS_PROFILE_SCOPE("GameObject::CheckComponentLoadReady");
+            const std::string profileName_ = comp_->GetName();
+            {
+                BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+                comp_->UpdateLoadState();
+                if (!comp_->IsLoadReady()) return false;
+            }
+        }
     }
 
     return true;

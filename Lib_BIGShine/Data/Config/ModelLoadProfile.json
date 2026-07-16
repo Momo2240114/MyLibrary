@@ -1,0 +1,79 @@
+{
+    "generatedAt": "2026-07-16T10:50:31",
+    "models": {
+        "data/model/dragon/sk_plainsdragon.gltf": {
+            "averageLoadMilliseconds": 5850.583514285715,
+            "estimatedLoadMilliseconds": 5850.583514285715,
+            "fileLastWriteTime": 13427883870,
+            "fileSize": 8834652,
+            "maximumLoadMilliseconds": 6804.7028,
+            "medianLoadMilliseconds": 5733.0703,
+            "minimumLoadMilliseconds": 5090.8298,
+            "relativeLoadWeight": 1.4378151035749218,
+            "sampleCount": 7,
+            "standardDeviationMilliseconds": 568.7369538971482
+        },
+        "data/model/stage/rock/rock01.gltf": {
+            "averageLoadMilliseconds": 4493.760642857143,
+            "estimatedLoadMilliseconds": 4493.760642857143,
+            "fileLastWriteTime": 13425642938,
+            "fileSize": 6837,
+            "maximumLoadMilliseconds": 5477.9546,
+            "medianLoadMilliseconds": 4466.748,
+            "minimumLoadMilliseconds": 3761.1628,
+            "relativeLoadWeight": 1.1043679503717645,
+            "sampleCount": 7,
+            "standardDeviationMilliseconds": 557.7211946357065
+        },
+        "data/model/stage/stage_floor05.gltf": {
+            "averageLoadMilliseconds": 4337.187157142857,
+            "estimatedLoadMilliseconds": 4337.187157142857,
+            "fileLastWriteTime": 13427437645,
+            "fileSize": 24003,
+            "maximumLoadMilliseconds": 5314.0541,
+            "medianLoadMilliseconds": 4306.7996,
+            "minimumLoadMilliseconds": 3601.3284,
+            "relativeLoadWeight": 1.0658891008639038,
+            "sampleCount": 7,
+            "standardDeviationMilliseconds": 550.1823136029102
+        },
+        "data/model/swordplayer/blender/sword.gltf": {
+            "averageLoadMilliseconds": 1260.0358714285717,
+            "estimatedLoadMilliseconds": 1260.0358714285717,
+            "fileLastWriteTime": 13426303246,
+            "fileSize": 2895,
+            "maximumLoadMilliseconds": 1510.5304,
+            "medianLoadMilliseconds": 1252.584,
+            "minimumLoadMilliseconds": 1066.6393,
+            "relativeLoadWeight": 0.30966118209618876,
+            "sampleCount": 7,
+            "standardDeviationMilliseconds": 163.71068655879947
+        },
+        "data/model/swordplayer/combatgirls_sword_shield.gltf": {
+            "averageLoadMilliseconds": 6832.71412857143,
+            "estimatedLoadMilliseconds": 6832.71412857143,
+            "fileLastWriteTime": 13428137754,
+            "fileSize": 165508804,
+            "maximumLoadMilliseconds": 8214.9025,
+            "medianLoadMilliseconds": 6431.7608,
+            "minimumLoadMilliseconds": 5856.1867,
+            "relativeLoadWeight": 1.6791794439787902,
+            "sampleCount": 7,
+            "standardDeviationMilliseconds": 760.1996141819026
+        },
+        "data/model/swordplayer/weapon/sword_shiledmodel.gltf": {
+            "averageLoadMilliseconds": 1640.1938142857143,
+            "estimatedLoadMilliseconds": 1640.1938142857143,
+            "fileLastWriteTime": 13426666599,
+            "fileSize": 2879,
+            "maximumLoadMilliseconds": 2050.8094,
+            "medianLoadMilliseconds": 1569.1087,
+            "minimumLoadMilliseconds": 1341.5339,
+            "relativeLoadWeight": 0.40308721911443046,
+            "sampleCount": 7,
+            "standardDeviationMilliseconds": 251.79379439793553
+        }
+    },
+    "sourceHistoryVersion": 1,
+    "version": 1
+}

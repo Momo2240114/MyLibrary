@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -36,6 +37,10 @@ struct ModelLoadEntry
     std::string errorMessage;
     int priority = 0;
     uint64_t requestOrder = 0;
+    double estimatedLoadMilliseconds = 1000.0;
+    double relativeLoadWeight = 1.0;
+    double completedLoadMilliseconds = 0.0;
+    std::chrono::steady_clock::time_point loadStartTime;
     mutable std::mutex mutex;
 };
 

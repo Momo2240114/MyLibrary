@@ -37,6 +37,17 @@
 
 #include "Engine/Debug/TracyProfiler.h"
 
+#include <chrono>
+
+namespace
+{
+    double GetSceneProfileMilliseconds()
+    {
+        const auto now_ = std::chrono::steady_clock::now().time_since_epoch();
+        return std::chrono::duration<double, std::milli>(now_).count();
+    }
+}
+
 void GameObjectManager::Initialize()
 {
     collisionStepSystem->SetAttackSystem(attackSystem.get());
@@ -143,7 +154,12 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
             for (auto& object_ : startList_)
             {
                 if (!object_) continue;
-                if (!object_->IsReadyToStart())
+                bool isReadyToStart_ = false;
+                {
+                    BS_PROFILE_SCOPE("PendingStarts::CheckReadyToStart");
+                    isReadyToStart_ = object_->IsReadyToStart();
+                }
+                if (!isReadyToStart_)
                 {
                     pendingStarts.push_back(object_);
                     continue;
@@ -151,6 +167,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
                 if (auto particleComponent_ = object_->GetComponent<ParticleComponent>())
                 {
+                    BS_PROFILE_SCOPE("PendingStarts::RegisterParticleComponent");
                     particleComponents.push_back(particleComponent_);
                 }
 
@@ -408,7 +425,12 @@ void GameObjectManager::ProcessPendingStarts()
         for (auto& object_ : startList_)
         {
             if (!object_) continue;
-            if (!object_->IsReadyToStart())
+            bool isReadyToStart_ = false;
+            {
+                BS_PROFILE_SCOPE("PendingStarts::CheckReadyToStart");
+                isReadyToStart_ = object_->IsReadyToStart();
+            }
+            if (!isReadyToStart_)
             {
                 pendingStarts.push_back(object_);
                 continue;
@@ -416,6 +438,7 @@ void GameObjectManager::ProcessPendingStarts()
 
             if (auto particleComponent_ = object_->GetComponent<ParticleComponent>())
             {
+                BS_PROFILE_SCOPE("PendingStarts::RegisterParticleComponent");
                 particleComponents.push_back(particleComponent_);
             }
 
@@ -488,7 +511,11 @@ bool GameObjectManager::WaitRequiredAssets()
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
         if (!object_ || !object_->IsRequiredForSceneStart()) continue;
-        if (!object_->IsReadyToStart()) return false;
+        const std::string objectName_ = object_->GetName();
+        {
+            BS_PROFILE_SCOPE_DYNAMIC(objectName_.c_str());
+            if (!object_->IsReadyToStart()) return false;
+        }
     }
 
     return true;
@@ -501,7 +528,11 @@ bool GameObjectManager::WaitRuntimeReady()
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
         if (!object_ || !object_->IsRequiredForSceneStart()) continue;
-        if (!object_->IsRuntimeReady()) return false;
+        const std::string objectName_ = object_->GetName();
+        {
+            BS_PROFILE_SCOPE_DYNAMIC(objectName_.c_str());
+            if (!object_->IsRuntimeReady()) return false;
+        }
     }
 
     return true;
@@ -1308,6 +1339,8 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 void GameObjectManager::LoadScene(const std::string& sceneName_)
 {
     BS_PROFILE_SCOPE("GameObjectManager::LoadScene");
+    const double loadSceneStartTimeMs_ = GetSceneProfileMilliseconds();
+    BS_PROFILE_PLOT("ModelLoad.LoadSceneStartTime", loadSceneStartTimeMs_);
 
     Clear(); // 現在のシーンをクリア
     std::string basePath = "Data/Scenes/" + sceneName_ + "/";
@@ -1359,31 +1392,43 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
 
 
 
-    // SceneListに記載されている名前の順にロード
-    for (const auto& name : listJson["ObjectList"]) {
-        BS_PROFILE_SCOPE("LoadScene::LoadObject");
-        std::string objName = name.get<std::string>();
-        std::string filePath = basePath + "Objects/" + objName + ".json";
+    {
+        BS_PROFILE_SCOPE("LoadScene::BuildModelLoadRequestList");
+        const double enqueueLoadGroupStartTimeMs_ = GetSceneProfileMilliseconds();
+        BS_PROFILE_PLOT("ModelLoad.EnqueueLoadGroupStartTime", enqueueLoadGroupStartTimeMs_);
+        BS_PROFILE_PLOT("ModelLoad.LoadSceneToEnqueueGapMs", enqueueLoadGroupStartTimeMs_ - loadSceneStartTimeMs_);
 
-        std::ifstream file(filePath);
-        if (file.is_open()) {
-            nlohmann::json objJson;
-            {
-                BS_PROFILE_SCOPE("LoadScene::ReadObjectJson");
-                file >> objJson;
-            }
+        {
+            BS_PROFILE_SCOPE("LoadScene::EnqueueLoadGroup");
+            // SceneListに記載されている名前の順にロード
+            for (const auto& name : listJson["ObjectList"]) {
+                BS_PROFILE_SCOPE("LoadScene::LoadObject");
+                std::string objName = name.get<std::string>();
+                std::string filePath = basePath + "Objects/" + objName + ".json";
 
-            // オブジェクト生成
-            auto obj = Create(objName);
+                std::ifstream file(filePath);
+                if (file.is_open()) {
+                    nlohmann::json objJson;
+                    {
+                        BS_PROFILE_SCOPE("LoadScene::ReadObjectJson");
+                        file >> objJson;
+                    }
 
-            obj->SetManager(this);
+                    // オブジェクト生成
+                    auto obj = Create(objName);
 
-            // オブジェクト自身にコンポーネントを含めて復元させる
-            {
-                BS_PROFILE_SCOPE("LoadScene::GameObjectLoad");
-                obj->Load(objJson);
+                    obj->SetManager(this);
+
+                    // オブジェクト自身にコンポーネントを含めて復元させる
+                    {
+                        BS_PROFILE_SCOPE("LoadScene::GameObjectLoad");
+                        obj->Load(objJson);
+                    }
+                }
             }
         }
+
+        BS_PROFILE_PLOT("ModelLoad.EnqueueLoadGroupEndTime", GetSceneProfileMilliseconds());
     }
 
     // ★ここで親子関係を復元する

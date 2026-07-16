@@ -9,6 +9,8 @@
 #include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Debug/TracyProfiler.h"
+
 #include <algorithm>
 #include <cctype>
 #include <cstring>
