@@ -43,7 +43,7 @@
                 "HitStopDurationKey": "HitStopDuration",
                 "HitStopLayerMask": 3,
                 "HitStopScale": 1.0,
-                "ImpactPower": 5.0,
+                "ImpactPower": 9.0,
                 "IsStatic": false,
                 "IsTrigger": true,
                 "KnockBackPower": 20.0,
@@ -78,6 +78,7 @@
             "Data": {
                 "AutoActivate": true,
                 "Damage": 5.0,
+                "ImpactPower": 9.0,
                 "HitStopDuration": 0.05000000074505806,
                 "HitStopScale": 1.0,
                 "KnockBackPower": 20.0,

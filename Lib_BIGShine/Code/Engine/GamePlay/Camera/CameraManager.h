@@ -13,6 +13,7 @@ public:
 
     // レンダリングで呼び出す「今使うべきカメラ」
     std::shared_ptr<CameraComponent> GetActiveCamera() const;
+    std::shared_ptr<CameraComponent> GetSourceCamera() const;
 
 private:
     void StartTransition(std::shared_ptr<CameraComponent> nextCam);

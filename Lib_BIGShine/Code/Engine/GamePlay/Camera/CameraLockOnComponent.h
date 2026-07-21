@@ -26,7 +26,9 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     void SetLockOnEnabled(bool enabled_);
+    void SetActionSuppressed(bool suppressed_);
     bool IsLockOnEnabled() const { return lockOnEnabled; }
+    bool IsActionSuppressed() const { return actionSuppressed; }
     bool IsWallCameraActive() const;
     float GetWallCameraRate() const { return currentWallCameraRate; }
     std::shared_ptr<GameObject> GetPlayerTarget() const { return playerTarget.lock(); }
@@ -125,6 +127,7 @@ private:
     std::string playerTargetName;
     std::string lockOnTargetName;
     bool lockOnEnabled = false;
+    bool actionSuppressed = false;
 
     DirectX::XMFLOAT3 playerOffset{ 0.0f, 1.5f, 0.0f };
     DirectX::XMFLOAT3 playerBottomOffset{ 0.0f, 0.05f, 0.0f };

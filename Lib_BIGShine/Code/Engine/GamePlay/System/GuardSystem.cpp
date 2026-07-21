@@ -5,6 +5,10 @@
 #include "Engine/Common/DebugLog.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Camera/CameraActionDirectorComponent.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/Physics/GuardCollider.h"
 
 #include <string>
@@ -16,6 +20,38 @@ namespace
     constexpr const char* DEFENDER_JUST_GUARD_ACTION = "OnJustGuardSucceeded";
     constexpr const char* ATTACKER_NORMAL_GUARDED_ACTION = "OnAttackGuarded";
     constexpr const char* ATTACKER_JUST_GUARDED_ACTION = "OnAttackJustGuarded";
+
+    void PlayJustGuardCameraAction(const GuardEvent& event_)
+    {
+        const std::shared_ptr<GameObject> defender_ = event_.defender.lock();
+        if (!defender_ || !defender_->manager) return;
+
+        CameraManager* cameraManager_ = defender_->manager->GetCameraManager();
+        if (!cameraManager_) return;
+
+        const std::shared_ptr<CameraComponent> camera_ =
+            cameraManager_->GetSourceCamera();
+        if (!camera_) return;
+
+        const std::shared_ptr<GameObject> cameraObject_ =
+            camera_->GetGameObject();
+        if (!cameraObject_) return;
+
+        const std::shared_ptr<CameraActionDirectorComponent> cameraAction_ =
+            cameraObject_->GetComponent<CameraActionDirectorComponent>();
+        if (!cameraAction_) return;
+
+        DirectX::XMFLOAT3 focusPosition_ = event_.guardPosition;
+        if (!event_.hasContact && defender_->transform)
+        {
+            focusPosition_ = defender_->transform->GetWorldPosition();
+        }
+
+        cameraAction_->PlayActionAtPosition(
+            "JustGuard",
+            focusPosition_,
+            event_.attackNormal);
+    }
 }
 
 void GuardSystem::BeginFrame()
@@ -259,6 +295,8 @@ void GuardSystem::PublishJustGuardToDefender(const GuardEvent& event_)
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         receiver_->GetOrAddComponent<BlackboardComponent>();
     if (!blackboard_) return;
+
+    PlayJustGuardCameraAction(event_);
 
     blackboard_->SetBool("Guard", "GuardSucceeded", true);
     blackboard_->SetBool("Guard", "JustGuardSucceeded", true);

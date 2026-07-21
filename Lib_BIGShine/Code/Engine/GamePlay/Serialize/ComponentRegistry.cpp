@@ -46,6 +46,8 @@
 #include "Engine/GamePlay/Camera/ThirdPersonCameraComponent.h"
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraCollisionComponent.h"
+#include "Engine/GamePlay/Camera/CameraActionDirectorComponent.h"
+#include "Engine/GamePlay/Camera/CameraShakeComponent.h"
 #include "Engine/GamePlay/Camera/LockOnTargetComponent.h"
 #include "Engine/GamePlay/Core/Component/Movement.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
@@ -151,6 +153,8 @@ void RegisterAllComponents()
     registry.Register<ThirdPersonCameraComponent>("ThirdPersonCameraComponent");
     registry.Register<CameraLockOnComponent>("CameraLockOnComponent");
     registry.Register<CameraCollisionComponent>("CameraCollisionComponent");
+    registry.Register<CameraActionDirectorComponent>("CameraActionDirectorComponent");
+    registry.Register<CameraShakeComponent>("CameraShakeComponent");
     registry.Register<LockOnTargetComponent>("LockOnTargetComponent");
 }
 

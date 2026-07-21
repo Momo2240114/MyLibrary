@@ -736,6 +736,12 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraShakeComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
@@ -1329,6 +1335,12 @@
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraShakeComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h">

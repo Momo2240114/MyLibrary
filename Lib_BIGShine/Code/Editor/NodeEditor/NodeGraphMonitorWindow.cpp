@@ -19,7 +19,7 @@
 
 namespace
 {
-    const ImVec2 NODE_SIZE(150.0f, 58.0f);
+    const ImVec2 NODE_SIZE(190.0f, 68.0f);
 
     const char* GetGraphTypeName(NODE_GRAPH_MONITOR_TYPE type_)
     {
@@ -30,6 +30,17 @@ namespace
         case NODE_GRAPH_MONITOR_TYPE::DRAGON_AI: return "Dragon AI";
         case NODE_GRAPH_MONITOR_TYPE::ANIMATION: return "Animation";
         default: return "Auto";
+        }
+    }
+
+    const char* GetFocusModeName(NODE_GRAPH_MONITOR_FOCUS_MODE mode_)
+    {
+        switch (mode_)
+        {
+        case NODE_GRAPH_MONITOR_FOCUS_MODE::GRAPH_ORIGIN: return "Graph Origin";
+        case NODE_GRAPH_MONITOR_FOCUS_MODE::SCOPE_CENTER: return "Scope Center";
+        case NODE_GRAPH_MONITOR_FOCUS_MODE::ACTIVE_NODE: return "Active Node";
+        default: return "Active Node";
         }
     }
 
@@ -91,6 +102,72 @@ namespace
             origin_.y + (graphPosition_.y - offset_.y) * zoom_);
     }
 
+    ImVec2 BuildOriginOffset(const ImVec2& minimumPosition_, float zoom_)
+    {
+        return ImVec2(
+            minimumPosition_.x - 28.0f / zoom_,
+            minimumPosition_.y - 28.0f / zoom_);
+    }
+
+    ImVec2 BuildFocusedOffset(const ImVec2& canvasSize_, const ImVec2& focusPosition_, float zoom_)
+    {
+        return ImVec2(
+            focusPosition_.x - (canvasSize_.x * 0.5f) / zoom_,
+            focusPosition_.y - (canvasSize_.y * 0.5f) / zoom_);
+    }
+
+    bool IsScopeMatch(const std::string& nodeScopeId_, const std::string& scopeId_)
+    {
+        const std::string normalizedNodeScopeId_ = nodeScopeId_.empty() ? std::string("Root") : nodeScopeId_;
+        const std::string normalizedScopeId_ = scopeId_.empty() ? std::string("Root") : scopeId_;
+        return normalizedNodeScopeId_ == normalizedScopeId_;
+    }
+
+    void AddUniqueScope(std::vector<std::string>& scopes_, const std::string& scopeId_)
+    {
+        const std::string normalizedScopeId_ = scopeId_.empty() ? std::string("Root") : scopeId_;
+        if (std::find(scopes_.begin(), scopes_.end(), normalizedScopeId_) == scopes_.end())
+        {
+            scopes_.push_back(normalizedScopeId_);
+        }
+    }
+
+    std::string GetAnimationNodeDisplayName(const AnimGraphNode& node_)
+    {
+        switch (node_.type)
+        {
+        case AnimGraphNodeType::Start: return "Start";
+        case AnimGraphNodeType::Any: return "Any";
+        case AnimGraphNodeType::Entry: return "Entry";
+        case AnimGraphNodeType::Exit: return "Exit";
+        default: return node_.stateName;
+        }
+    }
+
+    bool HasScope(const std::vector<std::string>& scopes_, const std::string& scopeId_)
+    {
+        return std::find(scopes_.begin(), scopes_.end(), scopeId_) != scopes_.end();
+    }
+
+    void DrawScopeCombo(const char* label_, std::string& scopeId_, const std::vector<std::string>& scopes_, bool& followRuntimeScope_)
+    {
+        ImGui::SetNextItemWidth(170.0f);
+        if (ImGui::BeginCombo(label_, scopeId_.c_str()))
+        {
+            for (const std::string& scope_ : scopes_)
+            {
+                const bool selected_ = scopeId_ == scope_;
+                if (ImGui::Selectable(scope_.c_str(), selected_))
+                {
+                    scopeId_ = scope_;
+                    followRuntimeScope_ = false;
+                }
+                if (selected_) ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+    }
+
     void DrawMonitorNode(
         ImDrawList* drawList_,
         const ImVec2& minimum_,
@@ -107,8 +184,10 @@ namespace
             : IM_COL32(120, 126, 138, 255);
         drawList_->AddRectFilled(minimum_, maximum_, fillColor_, 7.0f);
         drawList_->AddRect(minimum_, maximum_, borderColor_, 7.0f, 0, active_ ? 3.0f : 1.5f);
-        drawList_->AddText(ImVec2(minimum_.x + 8.0f, minimum_.y + 8.0f), IM_COL32(245, 247, 250, 255), title_);
-        drawList_->AddText(ImVec2(minimum_.x + 8.0f, minimum_.y + 32.0f), IM_COL32(185, 192, 202, 255), subtitle_);
+        drawList_->PushClipRect(ImVec2(minimum_.x + 8.0f, minimum_.y + 6.0f), ImVec2(maximum_.x - 8.0f, maximum_.y - 6.0f), true);
+        drawList_->AddText(ImVec2(minimum_.x + 10.0f, minimum_.y + 10.0f), IM_COL32(245, 247, 250, 255), title_);
+        drawList_->AddText(ImVec2(minimum_.x + 10.0f, minimum_.y + 40.0f), IM_COL32(185, 192, 202, 255), subtitle_);
+        drawList_->PopClipRect();
     }
 
     void DrawArrowLine(ImDrawList* drawList_, const ImVec2& from_, const ImVec2& to_, ImU32 color_, float thickness_)
@@ -281,7 +360,30 @@ void NodeGraphMonitorWindow::DrawGraphView(const std::shared_ptr<GameObject>& ta
         return;
     }
 
+    ImGui::SetNextItemWidth(180.0f);
     ImGui::SliderFloat("Zoom", &zoom, 0.25f, 1.2f);
+
+    ImGui::SameLine();
+    int focusModeIndex_ = static_cast<int>(focusMode);
+    ImGui::SetNextItemWidth(160.0f);
+    if (ImGui::BeginCombo("Focus", GetFocusModeName(focusMode)))
+    {
+        for (int index_ = 0; index_ <= static_cast<int>(NODE_GRAPH_MONITOR_FOCUS_MODE::ACTIVE_NODE); ++index_)
+        {
+            const NODE_GRAPH_MONITOR_FOCUS_MODE mode_ = static_cast<NODE_GRAPH_MONITOR_FOCUS_MODE>(index_);
+            const bool selected_ = focusModeIndex_ == index_;
+            if (ImGui::Selectable(GetFocusModeName(mode_), selected_))
+            {
+                focusMode = mode_;
+                focusModeIndex_ = index_;
+            }
+            if (selected_) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::SameLine();
+    ImGui::Checkbox("Follow Runtime Scope", &followRuntimeScope);
 
     const NODE_GRAPH_MONITOR_TYPE resolvedType_ = ResolveGraphType(targetObject_);
     if (resolvedType_ == NODE_GRAPH_MONITOR_TYPE::AI_BEHAVIOR)
@@ -315,6 +417,40 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
 {
     graph_.EnsureDefaultGraph();
 
+    std::vector<std::string> scopes_;
+    AddUniqueScope(scopes_, "Root");
+    for (const AIBehaviorNode& node_ : graph_.GetNodes())
+    {
+        AddUniqueScope(scopes_, node_.scopeId);
+        if (node_.type == AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH && !node_.subGraphName.empty())
+        {
+            AddUniqueScope(scopes_, node_.subGraphName);
+        }
+    }
+
+    if (!HasScope(scopes_, aiScopeId)) aiScopeId = "Root";
+
+    ImVec2 activeNodePosition_(0.0f, 0.0f);
+    std::string activeNodeScopeId_ = "Root";
+    bool hasActiveNode_ = false;
+    for (const AIBehaviorNode& node_ : graph_.GetNodes())
+    {
+        if (!graph_.IsNodeRuntimeActive(node_.id)) continue;
+        activeNodePosition_ = ImVec2(
+            node_.position.x + NODE_SIZE.x * 0.5f / zoom,
+            node_.position.y + NODE_SIZE.y * 0.5f / zoom);
+        activeNodeScopeId_ = node_.scopeId.empty() ? "Root" : node_.scopeId;
+        hasActiveNode_ = true;
+        if (followRuntimeScope)
+        {
+            aiScopeId = activeNodeScopeId_;
+        }
+    }
+
+    if (!HasScope(scopes_, aiScopeId)) aiScopeId = "Root";
+    DrawScopeCombo("Scope", aiScopeId, scopes_, followRuntimeScope);
+    if (!IsScopeMatch(activeNodeScopeId_, aiScopeId)) hasActiveNode_ = false;
+
     const ImVec2 canvasSize_ = ImGui::GetContentRegionAvail();
     ImGui::BeginChild("AIBehaviorGraphMonitorCanvas", canvasSize_, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
@@ -323,17 +459,35 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
     drawList_->AddRectFilled(canvasOrigin_, ImVec2(canvasOrigin_.x + canvasSize_.x, canvasOrigin_.y + canvasSize_.y), IM_COL32(25, 27, 32, 255));
 
     ImVec2 minimumPosition_(FLT_MAX, FLT_MAX);
+    ImVec2 maximumPosition_(-FLT_MAX, -FLT_MAX);
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
+        if (!IsScopeMatch(node_.scopeId, aiScopeId)) continue;
         minimumPosition_.x = (std::min)(minimumPosition_.x, node_.position.x);
         minimumPosition_.y = (std::min)(minimumPosition_.y, node_.position.y);
+        maximumPosition_.x = (std::max)(maximumPosition_.x, node_.position.x);
+        maximumPosition_.y = (std::max)(maximumPosition_.y, node_.position.y);
     }
     if (minimumPosition_.x == FLT_MAX) minimumPosition_ = ImVec2(0.0f, 0.0f);
-    const ImVec2 offset_(minimumPosition_.x - 24.0f / zoom, minimumPosition_.y - 24.0f / zoom);
+    if (maximumPosition_.x == -FLT_MAX) maximumPosition_ = minimumPosition_;
+
+    ImVec2 offset_ = BuildOriginOffset(minimumPosition_, zoom);
+    if (focusMode == NODE_GRAPH_MONITOR_FOCUS_MODE::SCOPE_CENTER)
+    {
+        const ImVec2 scopeCenter_(
+            (minimumPosition_.x + maximumPosition_.x) * 0.5f + NODE_SIZE.x * 0.5f / zoom,
+            (minimumPosition_.y + maximumPosition_.y) * 0.5f + NODE_SIZE.y * 0.5f / zoom);
+        offset_ = BuildFocusedOffset(canvasSize_, scopeCenter_, zoom);
+    }
+    else if (focusMode == NODE_GRAPH_MONITOR_FOCUS_MODE::ACTIVE_NODE && hasActiveNode_)
+    {
+        offset_ = BuildFocusedOffset(canvasSize_, activeNodePosition_, zoom);
+    }
 
     std::unordered_map<uintptr_t, ImVec2> nodeCenters_;
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
+        if (!IsScopeMatch(node_.scopeId, aiScopeId)) continue;
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(
             canvasOrigin_,
             ImVec2(node_.position.x, node_.position.y),
@@ -353,6 +507,7 @@ void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
 
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
+        if (!IsScopeMatch(node_.scopeId, aiScopeId)) continue;
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(
             canvasOrigin_,
             ImVec2(node_.position.x, node_.position.y),
@@ -380,6 +535,44 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
     const AnimState* activeState_ = animation_->GetCurrentState();
     const std::string activeStateName_ = activeState_ ? activeState_->name : std::string{};
 
+    std::vector<std::string> scopes_;
+    AddUniqueScope(scopes_, "Root");
+    for (const AnimGraphNode& node_ : nodes_)
+    {
+        AddUniqueScope(scopes_, node_.scopeId);
+        if (node_.type == AnimGraphNodeType::SubGraph && !node_.childScopeId.empty())
+        {
+            AddUniqueScope(scopes_, node_.childScopeId);
+        }
+    }
+    for (const AnimTransition& transition_ : transitions_)
+    {
+        AddUniqueScope(scopes_, transition_.scopeId);
+    }
+
+    if (!HasScope(scopes_, animationScopeId)) animationScopeId = "Root";
+
+    ImVec2 activeNodePosition_(0.0f, 0.0f);
+    std::string activeNodeScopeId_ = "Root";
+    bool hasActiveNode_ = false;
+    for (const AnimGraphNode& node_ : nodes_)
+    {
+        if (activeStateName_.empty() || node_.stateName != activeStateName_) continue;
+        activeNodePosition_ = ImVec2(
+            node_.pos.x + NODE_SIZE.x * 0.5f / zoom,
+            node_.pos.y + NODE_SIZE.y * 0.5f / zoom);
+        activeNodeScopeId_ = node_.scopeId.empty() ? "Root" : node_.scopeId;
+        hasActiveNode_ = true;
+        if (followRuntimeScope)
+        {
+            animationScopeId = activeNodeScopeId_;
+        }
+    }
+
+    if (!HasScope(scopes_, animationScopeId)) animationScopeId = "Root";
+    DrawScopeCombo("Scope", animationScopeId, scopes_, followRuntimeScope);
+    if (!IsScopeMatch(activeNodeScopeId_, animationScopeId)) hasActiveNode_ = false;
+
     const ImVec2 canvasSize_ = ImGui::GetContentRegionAvail();
     ImGui::BeginChild("AnimationGraphMonitorCanvas", canvasSize_, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
@@ -388,23 +581,42 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
     drawList_->AddRectFilled(canvasOrigin_, ImVec2(canvasOrigin_.x + canvasSize_.x, canvasOrigin_.y + canvasSize_.y), IM_COL32(25, 27, 32, 255));
 
     ImVec2 minimumPosition_(FLT_MAX, FLT_MAX);
+    ImVec2 maximumPosition_(-FLT_MAX, -FLT_MAX);
     for (const AnimGraphNode& node_ : nodes_)
     {
+        if (!IsScopeMatch(node_.scopeId, animationScopeId)) continue;
         minimumPosition_.x = (std::min)(minimumPosition_.x, node_.pos.x);
         minimumPosition_.y = (std::min)(minimumPosition_.y, node_.pos.y);
+        maximumPosition_.x = (std::max)(maximumPosition_.x, node_.pos.x);
+        maximumPosition_.y = (std::max)(maximumPosition_.y, node_.pos.y);
     }
     if (minimumPosition_.x == FLT_MAX) minimumPosition_ = ImVec2(0.0f, 0.0f);
-    const ImVec2 offset_(minimumPosition_.x - 24.0f / zoom, minimumPosition_.y - 24.0f / zoom);
+    if (maximumPosition_.x == -FLT_MAX) maximumPosition_ = minimumPosition_;
+
+    ImVec2 offset_ = BuildOriginOffset(minimumPosition_, zoom);
+    if (focusMode == NODE_GRAPH_MONITOR_FOCUS_MODE::SCOPE_CENTER)
+    {
+        const ImVec2 scopeCenter_(
+            (minimumPosition_.x + maximumPosition_.x) * 0.5f + NODE_SIZE.x * 0.5f / zoom,
+            (minimumPosition_.y + maximumPosition_.y) * 0.5f + NODE_SIZE.y * 0.5f / zoom);
+        offset_ = BuildFocusedOffset(canvasSize_, scopeCenter_, zoom);
+    }
+    else if (focusMode == NODE_GRAPH_MONITOR_FOCUS_MODE::ACTIVE_NODE && hasActiveNode_)
+    {
+        offset_ = BuildFocusedOffset(canvasSize_, activeNodePosition_, zoom);
+    }
 
     std::unordered_map<std::string, ImVec2> nodeCenters_;
     for (const AnimGraphNode& node_ : nodes_)
     {
+        if (!IsScopeMatch(node_.scopeId, animationScopeId)) continue;
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(canvasOrigin_, node_.pos, offset_, zoom);
         nodeCenters_[node_.stateName] = ImVec2(nodeMinimum_.x + NODE_SIZE.x * 0.5f, nodeMinimum_.y + NODE_SIZE.y * 0.5f);
     }
 
     for (const AnimTransition& transition_ : transitions_)
     {
+        if (!IsScopeMatch(transition_.scopeId, animationScopeId)) continue;
         const auto fromIt_ = nodeCenters_.find(transition_.fromStateName);
         const auto toIt_ = nodeCenters_.find(transition_.toStateName);
         if (fromIt_ == nodeCenters_.end() || toIt_ == nodeCenters_.end()) continue;
@@ -415,9 +627,11 @@ void NodeGraphMonitorWindow::DrawAnimationGraph(const std::shared_ptr<GameObject
 
     for (const AnimGraphNode& node_ : nodes_)
     {
+        if (!IsScopeMatch(node_.scopeId, animationScopeId)) continue;
         const bool active_ = !activeStateName_.empty() && node_.stateName == activeStateName_;
         const ImVec2 nodeMinimum_ = BuildCanvasPosition(canvasOrigin_, node_.pos, offset_, zoom);
-        DrawMonitorNode(drawList_, nodeMinimum_, node_.stateName.c_str(), GetAnimationNodeTypeName(node_.type), active_);
+        const std::string displayName_ = GetAnimationNodeDisplayName(node_);
+        DrawMonitorNode(drawList_, nodeMinimum_, displayName_.c_str(), GetAnimationNodeTypeName(node_.type), active_);
     }
 
     ImGui::Dummy(canvasSize_);

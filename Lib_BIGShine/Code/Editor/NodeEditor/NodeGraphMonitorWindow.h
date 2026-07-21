@@ -3,6 +3,7 @@
 #include "Editor/Window/EditorWindow.h"
 
 #include <memory>
+#include <string>
 
 class AIBehaviorGraph;
 class GameObject;
@@ -13,6 +14,13 @@ enum class NODE_GRAPH_MONITOR_TYPE
     AI_BEHAVIOR,
     DRAGON_AI,
     ANIMATION
+};
+
+enum class NODE_GRAPH_MONITOR_FOCUS_MODE
+{
+    GRAPH_ORIGIN,
+    SCOPE_CENTER,
+    ACTIVE_NODE
 };
 
 class NodeGraphMonitorWindow : public EditorWindow
@@ -35,5 +43,9 @@ private:
     std::weak_ptr<GameObject> targetObject;
     NODE_GRAPH_MONITOR_TYPE graphType = NODE_GRAPH_MONITOR_TYPE::AUTO;
     bool followSelectedObject = true;
+    bool followRuntimeScope = true;
     float zoom = 0.55f;
+    NODE_GRAPH_MONITOR_FOCUS_MODE focusMode = NODE_GRAPH_MONITOR_FOCUS_MODE::ACTIVE_NODE;
+    std::string aiScopeId = "Root";
+    std::string animationScopeId = "Root";
 };

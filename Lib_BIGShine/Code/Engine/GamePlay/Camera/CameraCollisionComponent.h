@@ -25,6 +25,9 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
+    void SetCollisionSuppressed(bool suppressed_);
+    bool IsCollisionSuppressed() const { return collisionSuppressed; }
+
 private:
     void ResolveReferences();
     bool SweepCameraSegment(
@@ -48,6 +51,7 @@ private:
     float minimumCameraDistance = 0.05f;
     float probeRadius = 0.3f;
     bool includeDynamicColliders = true;
+    bool collisionSuppressed = false;
     bool enableLockOnCollisionLift = true;
     bool reduceCollisionLiftWhenArenaWallCameraActive = true;
     float maxCollisionLiftHeight = 3.0f;

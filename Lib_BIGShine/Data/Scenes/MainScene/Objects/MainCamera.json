@@ -186,6 +186,18 @@
         },
         {
             "Data": null,
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraActionDirectorComponent"
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraShakeComponent"
+        },
+        {
+            "Data": null,
             "Enabled": false,
             "RequiredForSceneStart": false,
             "TypeName": "CameraFreeController"
