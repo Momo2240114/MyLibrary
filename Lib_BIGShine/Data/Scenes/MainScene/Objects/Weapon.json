@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 250,
+                "AttackInstanceId": 59,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
@@ -67,7 +67,7 @@
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
             },
-            "Enabled": false,
+            "Enabled": true,
             "RequiredForSceneStart": false,
             "TypeName": "HitBox"
         }
@@ -77,6 +77,11 @@
         {
             "Data": {
                 "LocalScale": 1.0,
+                "LocalScaleXYZ": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
                 "MaterialOverrides": [
                     {
                         "alphaCutoff": 0.5,
@@ -364,7 +369,7 @@
                     }
                 ],
                 "PlaybackSpeed": 1.0,
-                "TrailEmitting": false,
+                "TrailEmitting": true,
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,

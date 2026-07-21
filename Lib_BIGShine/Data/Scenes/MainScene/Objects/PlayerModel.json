@@ -126,6 +126,11 @@
         {
             "Data": {
                 "LocalScale": 0.014999999664723873,
+                "LocalScaleXYZ": [
+                    0.014999999664723873,
+                    0.014999999664723873,
+                    0.014999999664723873
+                ],
                 "MaterialOverrides": [
                     {
                         "alphaCutoff": 0.5,
@@ -451,7 +456,7 @@
                         },
                         "CanCounter": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanDodgeCancel": {
                             "type": "bool",
@@ -464,8 +469,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.7071067690849304,
+                                -0.7071067690849304
                             ]
                         },
                         "HitArmor": {
@@ -537,7 +542,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -605,7 +610,7 @@
                         },
                         "JustDodgeSucceeded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "JustDodgeTrigger": {
                             "type": "bool",
@@ -660,11 +665,11 @@
                         },
                         "CanCounter": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "DodgedAttackTag": {
                             "type": "string",
-                            "value": "DamageBox"
+                            "value": ""
                         },
                         "DodgedSourceAction": {
                             "type": "string",
@@ -676,7 +681,7 @@
                         },
                         "JustDodgeSucceeded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "JustDodgeTrigger": {
                             "type": "bool",
@@ -825,7 +830,7 @@
                         },
                         "CanCounter": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanDodgeCancel": {
                             "type": "bool",
@@ -838,8 +843,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.7071067690849304,
+                                -0.7071067690849304
                             ]
                         },
                         "HitArmor": {
@@ -911,7 +916,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -979,7 +984,7 @@
                         },
                         "JustDodgeSucceeded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "JustDodgeTrigger": {
                             "type": "bool",
@@ -37191,13 +37196,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            6.553131103515625,
-            -1.5422390699386597,
-            -15.145219802856445
+            12.706550598144531,
+            -1.5422389507293701,
+            39.81732177734375
         ],
         "Rot": [
             0.0,
-            67.888671875,
+            146.12806701660156,
             1.1004080988641363e-05
         ],
         "Scale": [

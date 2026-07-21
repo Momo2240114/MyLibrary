@@ -183,6 +183,36 @@
                     "recordedAt": "2026-07-21T09:02:04",
                     "totalLoadMilliseconds": 1989.7381,
                     "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2798.5557,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:12:41",
+                    "totalLoadMilliseconds": 2798.5557,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2686.8512,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:14",
+                    "totalLoadMilliseconds": 2686.8512,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1840.7583,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:31",
+                    "totalLoadMilliseconds": 1840.7583,
+                    "workerCount": 1
                 }
             ]
         },
@@ -368,6 +398,36 @@
                     "parseMilliseconds": 0.0,
                     "recordedAt": "2026-07-21T09:02:37",
                     "totalLoadMilliseconds": 5624.422,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5988.9294,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:13:19",
+                    "totalLoadMilliseconds": 5988.9294,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5120.1222,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:41",
+                    "totalLoadMilliseconds": 5120.1222,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4751.7312,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:59",
+                    "totalLoadMilliseconds": 4751.7312,
                     "workerCount": 1
                 }
             ]
@@ -555,6 +615,36 @@
                     "recordedAt": "2026-07-21T09:02:36",
                     "totalLoadMilliseconds": 5333.1314,
                     "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 5789.2995,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:13:19",
+                    "totalLoadMilliseconds": 5789.2995,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4951.0647,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:40",
+                    "totalLoadMilliseconds": 4951.0647,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 4571.8124,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:59",
+                    "totalLoadMilliseconds": 4571.8124,
+                    "workerCount": 1
                 }
             ]
         },
@@ -740,6 +830,36 @@
                     "parseMilliseconds": 0.0,
                     "recordedAt": "2026-07-21T09:02:32",
                     "totalLoadMilliseconds": 752.5648,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 963.5062,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:13:14",
+                    "totalLoadMilliseconds": 963.5062,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 778.1074,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:36",
+                    "totalLoadMilliseconds": 778.1074,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 660.2685,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:55",
+                    "totalLoadMilliseconds": 660.2685,
                     "workerCount": 1
                 }
             ]
@@ -927,6 +1047,36 @@
                     "recordedAt": "2026-07-21T09:02:04",
                     "totalLoadMilliseconds": 2061.1519,
                     "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2941.7355,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:12:41",
+                    "totalLoadMilliseconds": 2941.7355,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1056.7247,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:12",
+                    "totalLoadMilliseconds": 1056.7247,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1911.9035,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:31",
+                    "totalLoadMilliseconds": 1911.9035,
+                    "workerCount": 1
                 }
             ]
         },
@@ -1113,6 +1263,36 @@
                     "recordedAt": "2026-07-21T09:02:04",
                     "totalLoadMilliseconds": 2062.2671,
                     "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2936.7377,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:12:41",
+                    "totalLoadMilliseconds": 2936.7377,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2702.2139,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:14",
+                    "totalLoadMilliseconds": 2702.2139,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1927.8796,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:31",
+                    "totalLoadMilliseconds": 1927.8796,
+                    "workerCount": 1
                 }
             ]
         },
@@ -1198,6 +1378,36 @@
                     "parseMilliseconds": 0.0,
                     "recordedAt": "2026-07-21T09:02:02",
                     "totalLoadMilliseconds": 132.6957,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 179.8827,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:12:38",
+                    "totalLoadMilliseconds": 179.8827,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 2700.485,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:47:14",
+                    "totalLoadMilliseconds": 2700.485,
+                    "workerCount": 1
+                },
+                {
+                    "buildConfiguration": "DEBUG",
+                    "cpuBuildMilliseconds": 1926.0865,
+                    "fileReadMilliseconds": 0.0,
+                    "gpuCreateMilliseconds": 0.0,
+                    "parseMilliseconds": 0.0,
+                    "recordedAt": "2026-07-21T09:48:31",
+                    "totalLoadMilliseconds": 1926.0865,
                     "workerCount": 1
                 }
             ]
