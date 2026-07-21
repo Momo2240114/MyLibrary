@@ -188,6 +188,7 @@ private:
     DirectX::XMFLOAT3 collisionLookAt{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 collisionCameraPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 previousWallCameraPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 previousArenaOutwardDirection{ 0.0f, 0.0f, 1.0f };
     std::weak_ptr<GameObject> previousLockOnTarget;
     float baseFovY = 60.0f;
     float currentCollisionFov = 60.0f;
@@ -209,6 +210,7 @@ private:
     float currentWallCameraRate = 0.0f;
     float wallCameraSideHoldTimer = 0.0f;
     bool hasWallCameraPosition = false;
+    bool hasArenaOutwardDirection = false;
     bool debugHorizontalCorrection = false;
     bool debugVerticalCorrection = false;
     bool debugPlayerBottomCorrection = false;

@@ -33,6 +33,15 @@ void PlayerActionState::Execute(float)
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
-    player_->SendMoveInputToBlackboard(player_->GetMoveInput());
+    const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
+    player_->SendMoveInputToBlackboard(input_);
+    if (action == PLAYER_ACTION::GUARD)
+    {
+        const DirectX::XMFLOAT3 guardInput_ =
+            player_->GetGuardMoveInput(input_);
+        player_->SendGuardMoveInputToBlackboard(guardInput_);
+        player_->SetHorizontalVelocity(input_, player_->guardMoveSpeed, false);
+        player_->ApplyGuardFacingToTarget();
+    }
     player_->ProcessActionInput();
 }

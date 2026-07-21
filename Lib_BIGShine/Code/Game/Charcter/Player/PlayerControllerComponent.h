@@ -68,10 +68,15 @@ public:
     void Deserialize(const nlohmann::json& j_) override; // JsonからPlayer設定を復元する
 
     DirectX::XMFLOAT3 GetMoveInput() const; // カメラ基準の移動入力方向を取得する
+    DirectX::XMFLOAT3 GetGuardMoveInput(const DirectX::XMFLOAT3& worldMoveInput_) const;
     DirectX::XMFLOAT3 GetMoveInputAxis() const; // 生の移動入力Axisを取得する
     DirectX::XMFLOAT3 GetCameraForwardDirection() const; // カメラの水平Forward方向を取得する
     void SetFacingDirection(const DirectX::XMFLOAT3& direction_); // プレイヤーの向きを指定方向へ向ける
-    void SetHorizontalVelocity(const DirectX::XMFLOAT3& dir_, float speed_); // 次回反映する水平速度を設定する
+    void ApplyGuardFacingToTarget();
+    void SetHorizontalVelocity(
+        const DirectX::XMFLOAT3& dir_,
+        float speed_,
+        bool updateFacing_ = true); // 次回反映する水平速度を設定する
     void AddHorizontalVelocityAssist(const DirectX::XMFLOAT3& dir_, float speed_); // 予約済み水平速度へ補助速度を加算する
 
     ColliderComponent* GetCollider() const { return collider.get(); } // PlayerのColliderを返す
@@ -116,12 +121,15 @@ public:
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する
     void ProcessActionInput(); // 入力からAction要求を発行する
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る
+    void SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
+    void SendGuardInputToBlackboard(bool guardInput_);
     void SendJumpPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_);
     bool TryDodgeCancelInput();
 
     void NotifyJustDodge(); // ジャスト回避成功を現在のDodgeStateへ通知する
 
     float moveSpeed = 6.0f; // 通常移動速度
+    float guardMoveSpeed = 2.0f;
     float jumpImpulse = 8.5f;
     float doubleJumpImpulse = 8.0f;
     float airControlRate = 0.72f;
@@ -154,7 +162,9 @@ private:
     bool IsAirborneForAction() const;
     bool IsAnimationStateForAction(PLAYER_ACTION action_, const std::string& stateName_) const;
     bool IsDodgeAction(PLAYER_ACTION action_) const;
+    bool IsDodgeCancelAction(PLAYER_ACTION action_) const;
     bool CanStartDodgeAction(PLAYER_ACTION action_) const;
+    bool ShouldEnterGuardAfterActionEnd() const;
     void SyncCancelGateBlackboard();
     void TryConsumeBufferedActionForCancelGate(bool dodgeGate_);
     void UpdateDodgeRestrictions(float deltaTime_);
