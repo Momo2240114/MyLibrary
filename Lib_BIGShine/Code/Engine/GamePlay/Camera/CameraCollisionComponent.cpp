@@ -181,6 +181,13 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         lockOnCamera_ &&
         lockOnCamera_->IsLockOnEnabled();
     const bool canLift_ = enableLockOnCollisionLift && isLockOnActive_;
+    // 壁際専用カメラが内側へ逃がした後に、通常の持ち上げ補正で上へ跳ねすぎないよう弱める。
+    const float arenaWallCameraRate_ =
+        reduceCollisionLiftWhenArenaWallCameraActive &&
+            lockOnCamera_ &&
+            lockOnCamera_->IsWallCameraActive()
+        ? lockOnCamera_->GetWallCameraRate()
+        : 0.0f;
     const float safeLiftStartRate_ = std::clamp(
         collisionLiftStartRate,
         0.0f,
@@ -193,7 +200,9 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
             1.0f)
         : 0.0f;
     const float targetCollisionLift_ =
-        (std::max)(maxCollisionLiftHeight, 0.0f) * liftRate_;
+        (std::max)(maxCollisionLiftHeight, 0.0f) *
+        liftRate_ *
+        (1.0f - std::clamp(arenaWallCameraRate_, 0.0f, 1.0f));
     const float liftSpeed_ = targetCollisionLift_ > currentCollisionLift
         ? collisionLiftUpSpeed
         : collisionLiftDownSpeed;
@@ -393,6 +402,9 @@ void CameraCollisionComponent::Gui()
     ImGui::Checkbox(
         "Enable LockOn Collision Lift",
         &enableLockOnCollisionLift);
+    ImGui::Checkbox(
+        "Reduce Lift When Arena Wall Camera Active",
+        &reduceCollisionLiftWhenArenaWallCameraActive);
     ImGui::DragFloat(
         "Max Collision Lift Height",
         &maxCollisionLiftHeight,
@@ -438,6 +450,8 @@ void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
     json_["probeRadius"] = probeRadius;
     json_["includeDynamicColliders"] = includeDynamicColliders;
     json_["enableLockOnCollisionLift"] = enableLockOnCollisionLift;
+    json_["reduceCollisionLiftWhenArenaWallCameraActive"] =
+        reduceCollisionLiftWhenArenaWallCameraActive;
     json_["maxCollisionLiftHeight"] = maxCollisionLiftHeight;
     json_["collisionLiftStartRate"] = collisionLiftStartRate;
     json_["collisionLiftUpSpeed"] = collisionLiftUpSpeed;
@@ -455,6 +469,8 @@ void CameraCollisionComponent::Deserialize(const nlohmann::json& json_)
     includeDynamicColliders = json_.value("includeDynamicColliders", true);
     enableLockOnCollisionLift =
         json_.value("enableLockOnCollisionLift", true);
+    reduceCollisionLiftWhenArenaWallCameraActive =
+        json_.value("reduceCollisionLiftWhenArenaWallCameraActive", true);
     maxCollisionLiftHeight =
         json_.value("maxCollisionLiftHeight", 3.0f);
     collisionLiftStartRate =

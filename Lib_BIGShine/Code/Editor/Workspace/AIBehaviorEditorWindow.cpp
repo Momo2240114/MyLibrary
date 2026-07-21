@@ -801,6 +801,22 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 
 bool AIBehaviorEditorWindow::IsRuntimeActiveNode(const AIBehaviorNode& node_) const
 {
+    const std::shared_ptr<GameObject> targetObject_ = targetObject.lock();
+    if (targetObject_)
+    {
+        if (const std::shared_ptr<AIControllerComponent> aiController_ =
+            targetObject_->GetComponent<AIControllerComponent>())
+        {
+            if (aiController_->GetGraph().IsNodeRuntimeActive(node_.id)) return true;
+        }
+
+        if (const std::shared_ptr<DragonAIComponent> dragonAI_ =
+            targetObject_->GetComponent<DragonAIComponent>())
+        {
+            if (dragonAI_->GetBehaviorGraph().IsNodeRuntimeActive(node_.id)) return true;
+        }
+    }
+
     return !activeActionName.empty() &&
         node_.type == AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION &&
         node_.actionName == activeActionName;

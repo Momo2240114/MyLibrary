@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Editor/Window/EditorWindow.h"
 
@@ -13,6 +13,7 @@ public:
     }
 
     bool IsEditorWorkspace() const override { return true; }
+    bool ShouldShowInWindowMenu() const override { return false; }
 
 protected:
     bool BeginWorkspaceWindow(ImGuiWindowFlags flags_ = 0)

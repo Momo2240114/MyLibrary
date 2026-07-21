@@ -1,0 +1,54 @@
+コード構築メモ 一覧
+
+目的
+このフォルダ直下の Text は、作品説明やコードレビューで「自分がどの部分をどう作ったか」を説明するための入口として使う。
+細かいコード説明を読む前に、まずここで機能ごとの役割、関連ファイル、説明の方向性を確認する。
+
+直下 Text の役割
+
+Animation関係.txt
+- アニメーションシーケンサー、ノードグラフ、AnimationControllerComponent、AttackTemplate 連携、Particle / MeshVFX 呼び出しをまとめる。
+- 現在いちばん詳しく書いてあるメモ。
+- 攻撃アニメーションとゲーム処理を時間軸で結ぶ仕組みとして説明する。
+
+Particle関係.txt
+- ParticleComponent、ParticleEmitter、ParticleRenderSystem、ParticleEditorWindow、EffectManager との関係をまとめる。
+- GPU Particle、複数 Emitter、JSON Asset、ActionRegistry 連携を説明する。
+
+Combatシステム関係.txt
+- AttackTemplate、AttackTemplateRuntime、AttackSystem、HitBox、Health、HitReaction、JustDodge などをまとめる。
+- 攻撃データ、当たり判定、ヒット時処理、エフェクト発生の流れを説明する。
+
+Player関係.txt
+- PlayerControllerComponent、PlayerStateMachine、各 PlayerState、PlayerStateEditorWindow をまとめる。
+- 入力、状態遷移、移動、攻撃、回避、被弾の流れを説明する。
+
+AI関係.txt
+- AIControllerComponent、AIBehaviorGraph、AIActionComponent、AIBehaviorEditorWindow、AIDirector、DragonAI をまとめる。
+- BehaviorGraph と Blackboard による敵行動制御を説明する。
+
+Ik関係.txt
+- FootIK、HumanLookAtIK、ShieldBlockIK、DragonNeckIK、DragonTailIK、SpringBone、IKMap をまとめる。
+- モデルの骨制御、接地、注視、盾構え、ドラゴンの首・尻尾制御を説明する。
+
+PostEffect関係.txt
+- PostRenderSystem、BloomSystem、PostDistortionSystem、PostEffectWindow、MotionVelocity などをまとめる。
+- RenderTarget を使った画面効果、Bloom、Distortion、速度情報を説明する。
+
+EditorWindow設計.txt
+- EditorWindowManager、各 Editor Window、Component::Gui、Asset 編集、Preview、Debug 表示の方針をまとめる。
+- Runtime の処理を Editor から調整、保存、確認できるようにした設計を説明する。
+
+ライブラリー基板設計.txt
+- Component、GameObject、Manager、Serialize、Resource、Editor、ActionRegistry、Blackboard など、全体の土台をまとめる。
+- 各機能がどのように共通基盤へ乗っているかを説明する。
+
+読み方
+1. まずこの一覧で全体像を見る。
+2. 説明したい分野の Text を読む。
+3. 企業向けには「目的」「設計理由」「処理フロー」「工夫した点」「改善点」を中心に話す。
+4. コードレビュー向けには「関連クラス」「データフロー」「Serialize / Deserialize」「Runtime と Editor の分離」を中心に話す。
+
+全体を一言で説明するなら
+このプロジェクトでは、Component と JSON Asset を中心に、Animation、Combat、Particle、MeshVFX、AI、IK、PostEffect を Editor から調整できるようにしている。
+特に、ゲーム中の処理をコードだけに閉じず、Editor とデータで調整できる形に寄せたことが大きな特徴。

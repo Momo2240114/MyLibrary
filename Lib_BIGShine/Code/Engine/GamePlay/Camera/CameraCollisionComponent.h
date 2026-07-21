@@ -49,6 +49,7 @@ private:
     float probeRadius = 0.3f;
     bool includeDynamicColliders = true;
     bool enableLockOnCollisionLift = true;
+    bool reduceCollisionLiftWhenArenaWallCameraActive = true;
     float maxCollisionLiftHeight = 3.0f;
     float collisionLiftStartRate = 0.25f;
     float collisionLiftUpSpeed = 14.0f;

@@ -1,0 +1,1254 @@
+Animation / Sequencer / NodeGraph / Particle / MeshVFX / AttackTemplate 説明メモ
+
+
+最終編集日時
+7/14
+
+
+目的
+このメモは、ポートフォリオ、作品説明、作品発表、コードレビューで、自分の実装内容を自分の言葉で説明できるように整理したもの。
+単に「AIで作ったコード」ではなく、何を解決するための機能で、どういう構成で、どのデータがどこを通り、ゲーム内でどう動くかを説明できる状態を目指す。
+
+今回の対象
+- アニメーションシーケンサー
+- アニメーションノードグラフ
+- Particle の実装と Editor
+- MeshVFX の実装と Editor
+- Sequencer で利用している AttackTemplate
+- Sequencer で利用している Particle / MeshVFX 出現テンプレート
+
+注意
+このメモは、現在のコードから確認できる内容を根拠にしている。
+コードだけでは意図を断定できない部分は「こういう目的で設計したと説明できる」という形でまとめている。
+
+
+============================================================
+1. 全体概要
+============================================================
+
+この実装は、アニメーション再生、状態遷移、攻撃判定、エフェクト再生を、できるだけ Editor 上で調整できるようにするための仕組み。
+
+通常、攻撃アニメーションに合わせて当たり判定を出したり、ヒットエフェクトを出したり、斬撃 VFX を出したりする処理は、コードに直接タイミングを書くと調整が大変になる。
+そこで、アニメーションの状態ごとにイベントを持たせ、Sequencer で「何秒から何秒まで何をするか」を編集できるようにしている。
+
+さらに、アニメーションの状態遷移はノードグラフで編集できるようにしている。
+Start、Any、State、SubGraph、Entry、Exit などのノードを使い、Blackboard の値や Trigger、AnimationEnd を条件にして遷移できる。
+
+Particle と MeshVFX は、それぞれ JSON Asset として保存できる。
+攻撃テンプレートやアニメーションイベントから参照することで、攻撃ごとにコードを書かなくても、データを差し替えるだけで見た目や判定を調整できる。
+
+一言で説明するなら、
+「アニメーションの時間軸を中心に、攻撃判定、エフェクト、状態遷移を Editor で組めるようにした、自作のアニメーション制御・演出編集システム」
+と言える。
+
+
+============================================================
+2. この機能を作った理由
+============================================================
+
+解決したかった問題
+- 攻撃タイミングやエフェクト発生タイミングをコードに直接書くと、調整のたびにビルドが必要になる
+- 攻撃ごとにダメージ、ヒットストップ、ノックバック、ヒットエフェクトなどを個別に書くと重複が増える
+- アニメーション状態の遷移条件が増えると、コードだけでは全体像を把握しにくい
+- Particle や MeshVFX をゲーム中に出す処理が散らばると、再利用しづらくなる
+- チーム制作では、プログラマー以外が数値やタイミングを調整しやすい仕組みが必要になる
+
+この実装で改善したこと
+- アニメーションイベントを Sequencer で時間軸編集できる
+- 攻撃の内容を AttackTemplate として JSON 化し、再利用できる
+- Particle / MeshVFX を Asset 化し、攻撃やイベントから参照できる
+- アニメーション遷移をノードグラフで可視化できる
+- Blackboard を使って、状態遷移やイベント処理をデータ駆動に近い形で管理できる
+- Editor 側の作業とゲーム実行時の処理を分け、調整しやすくしている
+
+
+============================================================
+3. 全体構成
+============================================================
+
+主なクラス、構造体、ファイル
+
+AnimationControllerComponent
+- 種類: Component
+- 場所: Code/Engine/Graphics/Resource/Animation/
+- 主な責務:
+  アニメーション状態の管理、状態遷移、Sequencer Editor、Node Editor、Serialize / Deserialize を担当する中心クラス。
+- 保持している重要データ:
+  states
+  currentState
+  graphNodes
+  graphTransitions
+  sequenceAdapter
+  blackboardComponent
+  assetFilePath
+  graphAssetFilePath
+  useTransitionGraph
+  showSequencerWindow
+  showNodeEditor
+
+AnimState
+- 種類: struct
+- 場所: AnimationState.h
+- 主な責務:
+  1つのアニメーション状態を表す。
+- 保持している重要データ:
+  name
+  type
+  playbackSpeed
+  isLoop
+  animationIndex
+  Blend1D / Blend2D 用のアニメーション番号やパラメータ
+  rootMotion
+  events
+- 補足:
+  events に AnimEvent の配列を持つため、各アニメーション状態ごとに時間イベントを設定できる。
+
+AnimEvent
+- 種類: struct
+- 場所: AnimationState.h
+- 主な責務:
+  Sequencer 上の1つのイベント範囲を表す。
+- 保持している重要データ:
+  eventLabel
+  startTime
+  endTime
+  startAction
+  updateAction
+  endAction
+  blackboardWrites
+  eventTemplateType
+  attackTemplateId
+  meshVFXAssetPath
+  attachNodeName
+  localPosition
+  localRotation
+  localScale
+  meshVFXLifeTime
+  meshVFXPlaybackSpeed
+  attachToOwner
+  mirrorMeshVFX
+- 役割:
+  アニメーションの何秒から何秒まで、どの Action を呼ぶか、どの攻撃テンプレートや VFX を使うかを持つ。
+
+AnimBlackboardWrite
+- 種類: struct
+- 場所: AnimationState.h
+- 主な責務:
+  AnimEvent 開始時などに Blackboard へ書き込む値を表す。
+- 使い方:
+  Damage、HitStopDuration、HitParticleAssetPath、HitMeshVFXAssetPath などをイベントから書き込める。
+
+AnimGraphNode
+- 種類: struct
+- 場所: AnimationState.h
+- 主な責務:
+  Node Editor に表示されるノードを表す。
+- 保持している重要データ:
+  id
+  stateName
+  inputPin
+  outputPin
+  pos
+  type
+  scopeId
+  childScopeId
+- ノード種別:
+  State
+  Start
+  Any
+  SubGraph
+  Entry
+  Exit
+
+AnimTransition
+- 種類: struct
+- 場所: AnimationState.h
+- 主な責務:
+  ノード間の遷移リンクを表す。
+- 保持している重要データ:
+  fromStateName
+  toStateName
+  duration
+  logic
+  conditions
+  id
+  scopeId
+- 役割:
+  どの状態からどの状態へ、何秒フェードで、どの条件が成立したら遷移するかを持つ。
+
+AnimCondition
+- 種類: struct
+- 場所: AnimationState.h
+- 主な責務:
+  遷移条件を表す。
+- 条件種別:
+  Variable
+  AnimationEnd
+  Trigger
+- 比較:
+  Equal
+  NotEqual
+  Greater
+  Less
+
+AnimSequenceAdapter
+- 種類: Adapter
+- 主な責務:
+  AnimState の events を ImSequencer に渡せる形へ変換する。
+- 役割:
+  Editor の Sequencer 表示と、実データである AnimEvent 配列の間をつなぐ。
+
+AnimationEventTrack / EventTrackSequencer
+- 種類: Sequencer 補助クラス
+- 主な責務:
+  ImSequencer 用のイベントトラック処理。
+- 役割:
+  Add、Delete、Duplicate、Copy、Paste、Start / End の時間編集などを扱う。
+- 補足:
+  現在の AnimationControllerComponent 側では AnimSequenceAdapter を使って AnimState::events を編集している。
+
+ParticleComponent
+- 種類: Component / IActionProvider
+- 場所: Code/Engine/Graphics/Particle/
+- 主な責務:
+  複数の ParticleEmitter をまとめて管理し、Editor で編集、JSON 保存、Action 登録、再生制御を行う。
+- 保持している重要データ:
+  tracks
+  assetPath
+  emitterAssetPath
+  textureFiles
+  assetFiles
+  isPlaying
+  timer
+- 役割:
+  GameObject に付ける Particle の入口。
+
+ParticleEmitter
+- 種類: 低レベル描画・更新クラス
+- 場所: Code/Engine/Graphics/Particle/
+- 主な責務:
+  DirectX 11 の Compute Shader、StructuredBuffer、UAV、SRV を使って Particle を更新・描画する。
+- 特徴:
+  GPU 上で Particle の初期化、発生、更新、ソート、描画を行う。
+
+MeshVFXComponent
+- 種類: Component
+- 場所: Code/Engine/Graphics/VFX/
+- 主な責務:
+  Mesh を使った VFX の再生、Editor 編集、JSON 保存、GPU リソース再構築を行う。
+- 保持している重要データ:
+  asset
+  runtimeParts
+  assetPath
+  time
+  playbackSpeed
+  isPlaying
+
+MeshVFXAsset / MeshVFXPart / MeshVFXRuntimePart
+- 種類: VFX 用データ構造
+- 場所: MeshVFXResource.h
+- 主な責務:
+  MeshVFX の保存データと実行時リソースを分ける。
+- MeshVFXPart:
+  JSON に保存する編集対象データ。
+- MeshVFXRuntimePart:
+  実行時に使う ModelResource や Texture SRV などの GPU リソース。
+
+VFXManager
+- 種類: Manager
+- 場所: Code/Engine/Graphics/VFX/
+- 主な責務:
+  Particle / MeshVFX Asset のキャッシュと、ヒット時や攻撃時の一時 GameObject 生成を管理する。
+- 役割:
+  攻撃やイベントから「この Particle をこの位置に出す」「この MeshVFX を出す」という要求を受け、実体を生成する。
+
+AttackTemplateManager
+- 種類: Singleton Manager
+- 場所: Code/Engine/GamePlay/Combat/
+- 主な責務:
+  Data/AttackTemplate 以下の JSON を読み書きし、攻撃テンプレートを Editor で編集する。
+- 役割:
+  攻撃のダメージ、ヒットストップ、ノックバック、武器判定、斬撃 VFX、攻撃エフェクト、ヒット時エフェクトをまとめて管理する。
+
+AttackTemplateRuntime
+- 種類: Runtime helper
+- 場所: Code/Engine/GamePlay/Combat/
+- 主な責務:
+  AnimEvent で指定された AttackTemplate を、実行時に Start / Update / End で動かす。
+- 役割:
+  イベント開始時に攻撃インスタンスを作り、攻撃中に判定やエフェクトを出し、終了時に後片付けを行う。
+
+AttackEffectHitComponent
+- 種類: Component
+- 場所: Code/Engine/GamePlay/Combat/
+- 主な責務:
+  攻撃エフェクトに付く当たり判定を管理する。
+- 役割:
+  Projectile、Area、Beam など、武器本体ではなくエフェクト側に判定を持たせるための Component。
+
+
+============================================================
+4. アニメーションシーケンサー
+============================================================
+
+4.1 何をする機能か
+
+アニメーションシーケンサーは、アニメーション状態ごとに、時間範囲イベントを編集するための Editor。
+例えば攻撃アニメーションの 0.15 秒から 0.28 秒の間だけ当たり判定を有効にしたり、0.10 秒で斬撃 VFX を出したり、0.20 秒で Particle を出したりするために使う。
+
+コード上では AnimState が events を持ち、その中に AnimEvent が並ぶ。
+Sequencer Editor はこの events を時間軸上のバーとして表示し、開始時間、終了時間、ラベル、Action、Blackboard 書き込み、テンプレート情報を編集できる。
+
+4.2 初めて見る人向けの説明
+
+「アニメーションに合わせて処理を呼ぶためのタイムラインです。
+攻撃アニメーションのどのタイミングで判定を出すか、どのタイミングでエフェクトを出すかを、コードではなく Editor 上のバーで調整できます。
+この情報は JSON に保存され、ゲーム実行時に読み込まれて使われます。」
+
+4.3 プログラマー向けの説明
+
+「AnimState に std::vector<AnimEvent> を持たせ、ImSequencer 用の Adapter を通して Editor に表示しています。
+イベントには startTime / endTime、startAction / updateAction / endAction、Blackboard 書き込み、AttackTemplate や VFX の参照情報を持たせています。
+ゲーム実行時は ModelAnimator の再生時間に合わせてイベントの範囲判定を行い、開始、更新、終了のタイミングで Action や Template Runtime を呼びます。」
+
+4.4 データの流れ
+
+1. AnimationControllerComponent で編集対象の AnimState を選ぶ
+2. ShowSequencerEditor が開かれる
+3. RefreshSequenceAdapter で editingState の events を Sequencer 用に渡す
+4. ImSequencer 上でイベントバーを追加、削除、移動、リサイズする
+5. 変更されたフレームを startTime / endTime に戻す
+6. 選択中イベントの詳細欄で Action、Blackboard、AttackTemplate、VFX 情報を編集する
+7. Serialize 時に AnimState の events として JSON に保存する
+8. Deserialize 時に JSON から events を復元する
+9. ゲーム実行時に現在のアニメーション時間を見てイベントを実行する
+
+4.5 Sequencer の主な編集項目
+
+イベント名
+- 画面上のバーや一覧で見える名前。
+- 説明時は「調整者が何のイベントか分かるようにラベルを持たせている」と説明できる。
+
+StartTime / EndTime
+- イベントが有効になる時間範囲。
+- 攻撃判定や継続エフェクトの有効時間として使える。
+
+Start Action
+- イベント開始時に1回呼ぶ Action。
+- 例: HitBox を有効にする、Particle を Trigger する、状態を変更する。
+
+Update Action
+- イベントの時間範囲内で毎フレーム呼ぶ Action。
+- 継続的な処理や追従処理に使える。
+
+End Action
+- イベント終了時に1回呼ぶ Action。
+- 例: HitBox を無効にする、エフェクトを止める。
+
+Blackboard Writes
+- イベントから Blackboard に値を書き込む仕組み。
+- 攻撃用の Damage、HitStopDuration、HitParticleAssetPath、HitMeshVFXAssetPath などを設定できる。
+- 攻撃処理や HitBox 側が Blackboard の値を参照することで、コードを書き換えずに攻撃内容を差し替えられる。
+
+Template Type
+- NONE
+- ATTACK_TEMPLATE
+- TRAIL_TEMPLATE
+- VFX_TEMPLATE
+- SOUND_TEMPLATE
+- 現在は AttackTemplate や VFX 用のデータがコード上で確認できる。
+
+AttackTemplateId
+- Data/AttackTemplate 以下にある攻撃テンプレートを参照する ID。
+- AnimEvent にこの ID を持たせることで、アニメーションの指定タイミングで AttackTemplateRuntime を動かせる。
+
+MeshVFX 関連
+- meshVFXAssetPath
+- attachNodeName
+- localPosition
+- localRotation
+- localScale
+- meshVFXLifeTime
+- meshVFXPlaybackSpeed
+- attachToOwner
+- mirrorMeshVFX
+- アニメーションイベントから MeshVFX を出すための設定。
+
+4.6 設計上の良い点
+
+- アニメーション時間とゲーム処理のタイミングを Editor で見ながら調整できる
+- 攻撃、エフェクト、Blackboard 書き込みを同じ時間軸で扱える
+- Start / Update / End に分けているので、一瞬だけの処理と継続処理を分けやすい
+- JSON 保存により、調整データをコードから分離できる
+- ActionRegistry と組み合わせることで、ParticleComponent など他 Component の機能を Sequencer から呼べる
+
+4.7 注意点・改善点
+
+- Sequencer のイベント種類が増えるほど AnimEvent が大きくなりやすい
+- AttackTemplate、VFX、Sound などを同じ AnimEvent に持たせると責務が膨らむ可能性がある
+- 将来的には EventType ごとに専用データを分けると拡張しやすい
+- Undo / Redo がない場合、Editor 操作の取り消しが難しい
+- Action 名が文字列なので、名前変更時の参照切れに注意が必要
+
+
+============================================================
+5. アニメーションノードグラフ
+============================================================
+
+5.1 何をする機能か
+
+アニメーションノードグラフは、アニメーション状態と遷移を視覚的に編集する Editor。
+State ノード同士をリンクでつなぎ、Blackboard の値や Trigger、AnimationEnd を条件にして遷移する。
+
+Start ノードは初期状態を決める。
+Any ノードは現在状態に関係なく条件が成立したら遷移するために使う。
+SubGraph、Entry、Exit は複雑な遷移を階層化するために使う。
+
+5.2 初めて見る人向けの説明
+
+「キャラクターのアニメーション状態をノードでつないで、どの条件で次のアニメーションへ移るかを見えるようにした Editor です。
+移動、攻撃、回避、空中攻撃などの状態遷移を、コードだけでなくグラフとして確認・編集できます。」
+
+5.3 プログラマー向けの説明
+
+「AnimGraphNode と AnimTransition を持ち、imgui_node_editor で表示・編集しています。
+リンク作成時に from / to の stateName を持つ AnimTransition を作成し、条件として AnimCondition を設定します。
+Update では EvaluateGraphTransitions を呼び、現在 State から出る Transition、次に Any から出る Transition を評価して、条件成立時に ChangeState します。
+SubGraph は scopeId と childScopeId で階層を分け、Entry / Exit ノードを使って内部グラフへ入ったり親グラフへ戻ったりします。」
+
+5.4 ノード種別
+
+State
+- 通常のアニメーション状態。
+- AnimState の name と対応する。
+- 例: Idle、Run、Attack、Jump など。
+
+Start
+- グラフの初期遷移用ノード。
+- Start からつながっている State が初期状態になる。
+- Start からの遷移は基本的に最初の状態選択に使われる。
+
+Any
+- 現在の状態に関係なく遷移したい場合のノード。
+- 例: Damage、Dead、Stun など、どの状態からでも割り込む遷移。
+
+SubGraph
+- グラフの中にさらにグラフを持つノード。
+- 攻撃コンボや空中行動など、まとまりのある状態群を階層化できる。
+
+Entry
+- SubGraph 内へ入る入口ノード。
+- SubGraph に入った後、内部のどの状態へ入るかを決める。
+
+Exit
+- SubGraph から外へ出るための出口ノード。
+- 内部グラフから親グラフへ戻る流れを作る。
+
+5.5 遷移条件
+
+Variable
+- Blackboard の値をしきい値と比較する。
+- 例: Speed > 1.0、MoveInput が一定以上など。
+
+Trigger
+- 一度だけ反応するフラグとして使う。
+- 条件成立後に false へ戻す処理があるため、押しっぱなしではなく発火型の遷移に使える。
+
+AnimationEnd
+- 現在のアニメーションが終了したかどうかを条件にする。
+- 攻撃終了後に Idle へ戻るような遷移に使える。
+
+Logic
+- AND / OR を選べる。
+- 複数条件を全部満たす必要があるか、どれか1つで良いかを設定できる。
+
+5.6 処理フロー
+
+1. Editor で右クリックメニューから State / Empty State / SubGraph を作る
+2. ノードの Pin をつないで Transition を作る
+3. Transition Properties で Fade Duration と Conditions を設定する
+4. Graph Asset として JSON に保存する
+5. Deserialize または LoadGraphAsset で graphNodes / graphTransitions を復元する
+6. Start 時または Update 時に TryEnterStartState で初期状態へ入る
+7. 毎フレーム EvaluateGraphTransitions で遷移条件を評価する
+8. 条件が成立したら ChangeState で状態を切り替える
+9. Trigger 条件は遷移後に false に戻す
+
+5.7 Serialize / Deserialize
+
+保存される主な項目
+- GraphNodes
+- GraphTransitions
+- StateAssets
+- AnimationData
+- GraphAssetPath
+- UseTransitionGraph
+
+GraphNodes には以下が保存される
+- stateName
+- id
+- inputPin
+- outputPin
+- nodeType
+- scopeId
+- childScopeId
+- pos
+
+GraphTransitions には以下が保存される
+- from
+- to
+- duration
+- logic
+- id
+- scopeId
+- conditions
+
+良い点
+- ノードの見た目だけでなく、実行時に必要な from / to / 条件も保存される
+- scopeId により SubGraph の内部と外部を分けられる
+- StateAssets と組み合わせることで、状態データとグラフデータを分けて管理できる
+
+5.8 設計上の良い点
+
+- 状態遷移の全体像を視覚的に確認できる
+- Blackboard と連携して、入力やゲーム状態に応じた遷移ができる
+- Start / Any / SubGraph / Entry / Exit を用意しているため、単純な State Machine より複雑な構成に対応できる
+- フェード時間を Transition 側に持たせているため、遷移ごとにブレンド時間を変えられる
+- RuntimeActiveStateName を使って、現在再生中の状態を Editor 上で強調表示できる
+
+5.9 注意点・改善点
+
+- node id や pin id を保存しているため、壊れた JSON を読んだ時の復旧処理が重要
+- State 名をキーにしているため、名前変更時に Transition の from / to も更新する必要がある
+- 文字列参照が多いため、将来的には GUID 的な ID を導入すると安全性が上がる
+- SubGraph は便利だが、階層が深くなると追跡が難しくなる可能性がある
+
+
+============================================================
+6. Particle 実装
+============================================================
+
+6.1 何をする機能か
+
+ParticleComponent は、GameObject に付けて Particle を再生するための Component。
+1つの Component の中に複数の EmitterTrack を持ち、それぞれに ParticleEmitter と設定を持たせている。
+
+ParticleEmitter は DirectX 11 の GPU リソースを使う低レベルな Particle 実装。
+Compute Shader で Particle の発生、更新、ソート、描画用データの準備を行う。
+
+6.2 初めて見る人向けの説明
+
+「炎、ヒットエフェクト、桜、ステージ演出などを出すための Particle システムです。
+Editor で発生数、寿命、速度、色、Texture、Mask、BlendMode などを調整し、JSON として保存できます。
+保存した Particle は攻撃やアニメーションイベントから呼び出せます。」
+
+6.3 プログラマー向けの説明
+
+「ParticleComponent は複数 Emitter を管理する上位 Component で、Serialize / Deserialize、Editor GUI、Action 登録、再生制御を担当しています。
+ParticleEmitter は DirectX 11 の Compute Shader と StructuredBuffer を使い、Particle の生成、更新、深度ソート、Indirect Draw 用データを管理します。
+Component 側では Asset として JSON 保存し、実行時には RebuildEmitterResources で GPU リソースと Texture SRV を再構築します。」
+
+6.4 ParticleComponent の役割
+
+- Particle Asset 全体の読み込み、保存
+- Emitter 単体 Asset の読み込み、保存
+- 複数 Emitter の管理
+- Texture、Mask、Gradient、ShadeGradient の設定
+- Editor GUI の表示
+- Play / Stop / Trigger の制御
+- ActionRegistry への登録
+- Sequencer や他 Component から呼べる入口の提供
+- Mesh Vertices からの発生位置更新
+
+6.5 EmitterTrack の役割
+
+EmitterTrack は、1つの Emitter に必要な編集データと実行状態をまとめたもの。
+
+保持する主なデータ
+- emitter
+- settings
+- name
+- texturePath
+- maskTexturePath
+- gradientTexturePath
+- shadeGradientTexturePath
+- delay
+- meshVertexSampleCount
+- blendMode
+- spawnSpace
+- isPlaybackEnabled
+- isStarted
+
+6.6 ParticleEmitter の役割
+
+ParticleEmitter は GPU 側の実処理を担当する。
+
+主な処理
+- GPU バッファ作成
+- Particle 初期化
+- EmitParticleData 作成
+- Compute Shader で発生処理
+- Compute Shader で更新処理
+- Alpha Blend 用の深度ソート
+- DrawInstancedIndirect 用の引数作成
+- Texture / Mask / Gradient を Shader に渡す
+
+6.7 Particle の再生フロー
+
+1. ParticleComponent が Start で Asset 一覧や Texture 一覧を更新する
+2. assetPath があれば JSON を LoadAsset する
+3. Deserialize で EmitterTrack を復元する
+4. RebuildEmitterResources で ParticleEmitter と Texture SRV を作り直す
+5. Play / PlayEmitter / TriggerEmitter で再生状態にする
+6. Update で delay を見ながら Emitter を開始する
+7. Emitter の settings を更新し、GPU 側へ渡す
+8. ParticleEmitter::Update が Compute Shader を使って Particle を更新する
+9. RenderSystem 側で ParticleEmitter の SRV や Texture を使って描画する
+
+6.8 ActionRegistry との連携
+
+ParticleComponent は IActionProvider を実装している。
+RegisterActions で、Emitter 名ごとに Play / Stop / Trigger の Action を登録する。
+
+例として説明できる内容
+- GameObject 名 + Particle + Emitter 名 + Play
+- GameObject 名 + Particle + Emitter 名 + Stop
+- GameObject 名 + Particle + Emitter 名 + Trigger
+
+これにより、Sequencer の StartAction から特定 Emitter の Trigger を呼べる。
+つまり、アニメーションの指定タイミングで Particle を発生させられる。
+
+6.9 設計上の良い点
+
+- Component と Emitter を分けているため、Editor 操作と GPU 処理の責務が分かれている
+- 複数 Emitter を1つの Particle Asset としてまとめられる
+- Emitter 単体 Asset としても保存できるため、再利用しやすい
+- ActionRegistry に登録しているため、Sequencer から呼びやすい
+- GPU 更新により、多数の Particle を CPU で毎フレーム処理しない設計になっている
+- Mesh Vertices 発生など、モデル形状に沿った Particle にも対応しようとしている
+
+6.10 注意点・改善点
+
+- GPU リソースを扱うため、再構築タイミングや解放漏れに注意が必要
+- Texture Path が不正な場合の fallback やエラー表示を充実させると Editor として使いやすくなる
+- Emitter 名を Action 名に使うため、名前変更時に登録し直す必要がある
+- Editor 上の変更が即時反映か、Apply 後反映かを明確にすると操作ミスを減らせる
+
+
+============================================================
+7. MeshVFX 実装
+============================================================
+
+7.1 何をする機能か
+
+MeshVFX は、Mesh を使って斬撃、残像、発光、ディゾルブ、エッジ表現などを行うための VFX システム。
+Particle が点や板ポリゴンの集合を扱うのに対し、MeshVFX はモデルや生成 Mesh を使った大きな演出に向いている。
+
+7.2 初めて見る人向けの説明
+
+「斬撃の軌跡や魔法の輪のような、形を持ったエフェクトを作るための仕組みです。
+Mesh、Texture、Mask、Noise、発光、ディゾルブ、UV スクロールなどを Editor で調整し、JSON として保存できます。
+攻撃テンプレートやアニメーションイベントから呼び出して、同じ VFX を再利用できます。」
+
+7.3 プログラマー向けの説明
+
+「MeshVFXComponent は MeshVFXAsset を保持し、MeshVFXPart ごとの設定を JSON 保存します。
+実行時は MeshVFXRuntimePart に ModelResource や Texture SRV を読み込み、RenderSystem が MeshVFXShader を使って描画します。
+編集データと GPU リソースを分けており、Asset を変更したら RebuildRuntimeResources で実行時リソースを作り直します。」
+
+7.4 MeshVFXAsset
+
+MeshVFXAsset は、複数の MeshVFXPart を持つ。
+1つの VFX を複数 Part で構成できるため、例えば斬撃本体、外側の発光、ノイズの縁、追加のリングなどをまとめて扱える。
+
+7.5 MeshVFXPart
+
+MeshVFXPart は、1つの描画 Part の設定。
+
+主な項目
+- partAssetPath
+- modelPath
+- meshIndex
+- renderEnabled
+- position
+- rotation
+- scale
+- duration
+- loop
+- animateScale
+- scaleStart / scaleEnd
+- animateAlpha
+- alphaStart / alphaEnd
+- baseTexturePath
+- normalTexturePath
+- maskTexturePath
+- noiseTexturePath
+- distortionNoiseTexturePath
+- vertexNoiseTexturePath
+- emissiveTexturePath
+- gradientTexturePath
+- color
+- baseUVSpeed
+- maskUVSpeed
+- noiseUVSpeed
+- alpha
+- emissiveStrength
+- dissolveThreshold
+- edgeColor
+- fresnelPower
+- blendMode
+
+7.6 MeshVFXRuntimePart
+
+MeshVFXRuntimePart は、実行時に使う GPU リソース側のデータ。
+
+保持する主なもの
+- modelResource
+- baseTexture
+- normalTexture
+- maskTextures
+- noiseTextures
+- distortionNoiseTexture
+- vertexNoiseTexture
+- edgePatternTexture
+- emissiveTexture
+- gradientTexture
+
+保存用の MeshVFXPart と、実行時用の MeshVFXRuntimePart を分けている点が重要。
+これにより JSON にはパスや数値だけを保存し、DirectX のリソースは読み込み後に再構築する形にできる。
+
+7.7 MeshVFX の再生フロー
+
+1. MeshVFXComponent が JSON Asset を LoadAsset する
+2. Deserialize で MeshVFXAsset の parts を復元する
+3. RebuildRuntimeResources で Part ごとの ModelResource と Texture SRV を読み込む
+4. Play で time を進める状態にする
+5. Update で time を playbackSpeed に応じて進める
+6. RenderSystem が MeshVFXComponent を集める
+7. MeshVFXShader に Part のパラメータと Texture を渡して描画する
+
+7.8 Attack / Sequencer との関係
+
+AnimEvent には meshVFXAssetPath や attachNodeName、localPosition などがある。
+AttackTemplate にも slashEffects や attackEffects の中で vfxPath / meshVfxPath を持つ。
+
+つまり MeshVFX は、単体 Component として置くこともできるし、攻撃テンプレートやアニメーションイベントから一時的に出すこともできる。
+
+7.9 設計上の良い点
+
+- Particle では表現しにくい、形を持った演出を作れる
+- Part 単位で Texture、Mask、Noise、発光、ディゾルブを調整できる
+- JSON Asset 化しているため、演出を再利用できる
+- RuntimePart を分けているため、保存データと DirectX リソースが混ざりにくい
+- AttackTemplate と組み合わせることで、攻撃ごとに斬撃演出を差し替えられる
+
+7.10 注意点・改善点
+
+- MeshVFXPart の項目が多いため、Editor UI の整理が重要
+- Texture や Model の読み込み失敗時の表示を強化すると、調整作業が楽になる
+- 将来的に Part のプリセットやテンプレート化を進めると、量産しやすくなる
+- 描画負荷が高い設定を見つけやすくするため、Debug 表示や負荷表示があると便利
+
+
+============================================================
+8. AttackTemplate
+============================================================
+
+8.1 何をする機能か
+
+AttackTemplate は、攻撃に必要なデータを JSON Asset としてまとめたもの。
+AnimEvent から attackTemplateId を指定すると、AttackTemplateRuntime がその攻撃内容を実行する。
+
+攻撃のダメージだけでなく、ヒットストップ、ノックバック、ヒットエフェクト、武器判定、斬撃 VFX、飛び道具や範囲攻撃のような AttackEffect もまとめて管理する。
+
+8.2 初めて見る人向けの説明
+
+「攻撃の設定をまとめたテンプレートです。
+弱攻撃、強攻撃、空中攻撃などの違いを、コードではなく JSON データとして持てるようにしています。
+アニメーションイベントからテンプレートを呼ぶことで、その攻撃の判定、ダメージ、ヒット演出をまとめて再生できます。」
+
+8.3 プログラマー向けの説明
+
+「AttackTemplateManager が Data/AttackTemplate 以下の JSON を読み込み、AttackTemplate の配列として管理します。
+Sequencer の AnimEvent には attackTemplateId を持たせ、イベント開始時に AttackTemplateRuntime::Start、イベント中に Update、終了時に End を呼びます。
+Start では攻撃インスタンス ID を作り、武器 HitBox の設定や SlashEffect の Spawn を行います。
+Update では武器 HitBox の有効時間を見たり、AttackEffectSpawnTemplate の spawnTimeOffset に応じて EffectManager へ Spawn を投げます。
+End では HitBox を無効化し、Runtime 状態をクリアします。」
+
+8.4 AttackTemplate の主なデータ
+
+基本情報
+- id
+- displayName
+- ownerTarget
+- canHitOwner
+
+攻撃データ
+- damage
+- impactPower
+- hitStopDuration
+- hitStopScale
+- knockBackPower
+- targetAirLiftPower
+- attackerAirLiftPower
+- knockBackType
+- hitGroupId
+- allowMultiHit
+
+武器 HitBox
+- enabled
+- hitBoxName
+- startNodeName
+- endNodeName
+- radius
+- activeStartTime
+- activeEndTime
+
+ヒット時エフェクト
+- spawnOnHit
+- hitParticleAssetPath
+- hitParticleEmitterName
+- hitParticleLifeTime
+- hitParticleNormalOffset
+- hitMeshVfxAssetPath
+- hitMeshVfxLifeTime
+- hitMeshVfxNormalOffset
+
+Slash Effects
+- vfxPath
+- spawnTimeOffset
+- lifeTime
+- localOffset
+- localRotation
+- localScale
+- followOwner
+- followNode
+- baseNodeName
+- hitBox
+
+Attack Effects
+- effectType
+- particlePath
+- meshVfxPath
+- spawnTimeOffset
+- lifeTime
+- localOffset
+- localRotation
+- localScale
+- followOwner
+- followNode
+- baseNodeName
+- speed
+- localDirection
+- hitShapes
+
+8.5 AttackTemplateRuntime の処理フロー
+
+Start
+1. owner が存在するか確認する
+2. event の attackTemplateId から AttackTemplate を検索する
+3. attackTemplateRuntimeActive を true にする
+4. AttackSystem から攻撃インスタンス ID を作る
+5. spawnedAttackEffects をテンプレート数に合わせて初期化する
+6. weaponHitBox が有効なら、HitBox を探してダメージやヒットストップなどを設定する
+7. slashEffects を見て、VFX が設定されていれば EffectManager に SpawnSlashEffect を依頼する
+
+Update
+1. Runtime が有効でなければ何もしない
+2. weaponHitBox の activeStartTime / activeEndTime を見て HitBox を有効化、無効化する
+3. attackEffects を順番に確認する
+4. spawnTimeOffset を過ぎた effect をまだ出していなければ SpawnAttackEffect する
+5. spawnedAttackEffects を true にして二重生成を防ぐ
+
+End
+1. weaponHitBox が有効なら HitBox を無効化する
+2. HitBox の Blackboard Override などを元に戻す
+3. attackTemplateRuntimeActive を false にする
+4. spawnedAttackEffects をクリアする
+
+8.6 AttackTemplateManager Editor
+
+Editor で編集できる主な内容
+- ID
+- DisplayName
+- OwnerTarget
+- Damage
+- ImpactPower
+- HitStop
+- KnockBack
+- WeaponHitBox
+- HitEffect
+- SlashEffects
+- AttackEffects
+- HitShape
+- Particle Asset
+- MeshVFX / Sequence Asset
+
+保存時
+- Data/AttackTemplate 以下に JSON として保存する
+- ID 変更時はアニメーションやシーン側の参照を書き換える処理がある
+- LoadAll で JSON を読み直して一覧を更新する
+
+8.7 設計上の良い点
+
+- 攻撃ごとのデータをコードから分離できる
+- 攻撃判定、ヒット効果、見た目を1つのテンプレートにまとめられる
+- Sequencer と組み合わせることで、アニメーションの特定時間に攻撃を発生できる
+- 武器 HitBox とエフェクト側 HitBox の両方に対応している
+- SlashEffect と AttackEffect を分けているため、見た目だけの斬撃と判定を持つ攻撃エフェクトを分けやすい
+- Projectile、Area、Beam などへ拡張する入口がある
+
+8.8 注意点・改善点
+
+- AttackTemplate の項目が多いため、Editor でプリセットや折りたたみを使わないと扱いにくくなる
+- hitBoxName など文字列参照があるため、名前変更時の追従が必要
+- AttackTemplate ID の変更時に参照更新処理があるが、対象外ファイルがあると参照切れの可能性がある
+- 攻撃処理と VFX 処理が密接なので、将来的に責務分離を強める余地がある
+
+
+============================================================
+9. Particle / MeshVFX 出現テンプレート
+============================================================
+
+9.1 何をする機能か
+
+Particle / MeshVFX 出現テンプレートは、攻撃やアニメーションイベントからエフェクトを出すための設定。
+AttackTemplate 内では SlashEffectTemplate や AttackEffectSpawnTemplate として確認できる。
+AnimEvent には MeshVFX を直接出すための情報もある。
+
+9.2 SlashEffectTemplate
+
+主な目的
+- 斬撃や軌跡のような MeshVFX を、攻撃開始時や指定タイミングで出す
+
+主なデータ
+- enabled
+- vfxPath
+- spawnTimeOffset
+- lifeTime
+- localOffset
+- localRotation
+- localScale
+- alpha
+- followOwner
+- followNode
+- baseNodeName
+- hitBox
+
+説明
+SlashEffect は、攻撃に付随する見た目の斬撃を出すためのテンプレート。
+必要なら HitBox も持てるため、見た目だけでなく判定付きの斬撃として使える。
+
+9.3 AttackEffectSpawnTemplate
+
+主な目的
+- 飛び道具、範囲攻撃、ビーム、ブレスなど、攻撃エフェクト本体を生成する
+
+主なデータ
+- enabled
+- effectType
+- particlePath
+- meshVfxPath
+- spawnTimeOffset
+- lifeTime
+- localOffset
+- localRotation
+- localScale
+- followOwner
+- followNode
+- baseNodeName
+- speed
+- localDirection
+- hitShapes
+
+説明
+AttackEffect は、見た目と判定を持つ攻撃用 GameObject を作るためのテンプレート。
+spawnTimeOffset により、攻撃イベント開始から何秒後に出すかを調整できる。
+hitShapes により、Sphere、Box、Capsule、Fan、Cone、Ray などの判定形状を設定できる。
+
+9.4 Hit Effect
+
+主な目的
+- 攻撃が当たった瞬間に Particle や MeshVFX を出す
+
+主なデータ
+- hitParticleAssetPath
+- hitParticleEmitterName
+- hitParticleLifeTime
+- hitParticleNormalOffset
+- hitMeshVfxAssetPath
+- hitMeshVfxLifeTime
+- hitMeshVfxNormalOffset
+
+説明
+HitBox や AttackEffectHitComponent 側にヒット時エフェクト情報を渡し、実際にヒットした位置や法線方向を使って VFXManager から生成する。
+
+9.5 Sequencer との関係
+
+Sequencer の AnimEvent は attackTemplateId を持つ。
+イベントが開始すると AttackTemplateRuntime が Start され、攻撃テンプレート内の SlashEffect や AttackEffect が発生する。
+イベント中は Update が呼ばれ、spawnTimeOffset を過ぎた AttackEffect が順番に生成される。
+イベント終了時に End が呼ばれ、HitBox などが無効化される。
+
+このため、攻撃の発生タイミングは AnimEvent で決まり、その中の細かいエフェクト発生タイミングは AttackTemplate 側の spawnTimeOffset で決まる。
+
+9.6 設計上の良い点
+
+- アニメーション上の攻撃タイミングと、攻撃内部のエフェクト発生タイミングを分けて調整できる
+- Particle と MeshVFX の両方を同じ攻撃テンプレートから扱える
+- ヒット時エフェクトと攻撃発生時エフェクトを分けている
+- 見た目だけの SlashEffect と、判定を持つ AttackEffect を分けられる
+- 攻撃データを JSON 化しているため、弱攻撃、強攻撃、空中攻撃などに使い回せる
+
+
+============================================================
+10. Editor GUI の整理
+============================================================
+
+10.1 AnimationControllerComponent GUI
+
+主な役割
+- アニメーション State の一覧表示
+- State の追加、削除、選択
+- Animation Clip の割り当て
+- Blend1D / Blend2D の編集
+- RootMotion 設定
+- Blackboard の表示と編集
+- Sequencer Window の起動
+- Node Editor の起動
+
+10.2 Animation Sequence Editor
+
+主な役割
+- 選択中 State の events を時間軸表示する
+- Event の追加、削除、移動、リサイズを行う
+- 選択中 Event の詳細を編集する
+- Action を ActionRegistry から選択できる
+- Blackboard Writes を追加できる
+- AttackTemplate や VFX 関連の設定を編集できる
+
+10.3 Animation Graph Editor
+
+主な役割
+- State ノードを表示する
+- Start / Any / SubGraph / Entry / Exit を表示する
+- ノード間のリンクを作成、削除する
+- Transition の Fade Duration と Conditions を編集する
+- SubGraph の中へ入る、Back で戻る
+- 現在再生中の State を強調表示する
+
+10.4 Particle Editor / ParticleComponent GUI
+
+主な役割
+- Particle Asset の読み込み、保存
+- Emitter の追加、削除、名前変更
+- Texture、Mask、Gradient の設定
+- 発生数、寿命、速度、BlendMode などの調整
+- Play / Stop / Trigger のテスト
+- Emitter 単体 Asset の保存、読み込み
+
+10.5 MeshVFXComponent GUI
+
+主な役割
+- MeshVFX Asset の読み込み、保存
+- Part の追加、削除、編集
+- Mesh、Texture、Mask、Noise の設定
+- Alpha、Scale、Dissolve、Fresnel、Emissive などの調整
+- 再生速度や Play / Stop の確認
+
+10.6 AttackTemplateManager GUI
+
+主な役割
+- AttackTemplate の読み込み、保存
+- Damage、HitStop、KnockBack の編集
+- WeaponHitBox の編集
+- HitEffect の Particle / MeshVFX 設定
+- SlashEffects の追加、複製、削除
+- AttackEffects の追加、複製、削除
+- HitShape の編集
+- Asset 選択 Combo による Particle / MeshVFX の指定
+
+
+============================================================
+11. Serialize / Deserialize
+============================================================
+
+11.1 AnimationState / AnimEvent
+
+保存されるもの
+- State 名
+- State 種別
+- 再生速度
+- Loop
+- RootMotion
+- Animation Index
+- Blend1D / Blend2D 設定
+- events
+- AnimEvent の Action、Blackboard、Template、VFX 情報
+
+復元時
+- JSON にキーがない場合は value のデフォルト値を使う
+- 古い JSON との互換性をある程度保つ形になっている
+- Runtime 専用フラグは false や空に戻す
+
+11.2 Graph Asset
+
+保存されるもの
+- GraphNodes
+- GraphTransitions
+- StateAssets
+- AnimationData
+
+復元時
+- graphNodes と graphTransitions をクリアしてから読み直す
+- ID が不正な場合は GetNextId で補う処理がある
+- 読み込み後に SetIdCounterFloor で次の ID が衝突しないようにする
+- EnsureSpecialGraphNodes で Start / Any などの特殊ノードを保証する
+
+11.3 Particle
+
+保存されるもの
+- AssetPath
+- Emitters
+- Emitter ごとの settings
+- Texture Path
+- Mask Texture Path
+- Gradient Texture Path
+- BlendMode
+- SpawnSpace
+- Delay
+- Mesh Vertex Sample Count
+- IsPlaying
+
+復元時
+- tracks をクリアしてから復元する
+- RebuildEmitterResources で GPU リソースを作り直す
+- IsPlaying が true なら Play する
+
+11.4 MeshVFX
+
+保存されるもの
+- MeshVFXAsset
+- parts
+- Part ごとの Mesh / Texture / Mask / Noise / Color / Alpha / Curve / Blend 設定
+
+復元時
+- JSON の設定を asset に戻す
+- RebuildRuntimeResources で ModelResource や Texture SRV を読み込む
+
+11.5 AttackTemplate
+
+保存されるもの
+- AssetType
+- AssetVersion
+- id
+- displayName
+- owner
+- attack
+- weaponHitBox
+- hitEffect
+- slashEffects
+- attackEffects
+
+復元時
+- Data/AttackTemplate 以下の JSON を LoadAll で読む
+- Enum は文字列または整数から読む処理がある
+- 古いキー名も一部 fallback として読めるようになっている
+
+
+============================================================
+12. 実行時の大きな流れ
+============================================================
+
+12.1 初期化
+
+1. Scene や GameObject から Component が Deserialize される
+2. AnimationControllerComponent が AnimationData / GraphData / StateAsset を読む
+3. ParticleComponent が Particle JSON を読む
+4. MeshVFXComponent が MeshVFX JSON を読む
+5. AttackTemplateManager は必要時に Data/AttackTemplate を読む
+6. VFXManager が Particle / MeshVFX Asset をキャッシュする
+
+12.2 毎フレーム
+
+1. AnimationControllerComponent::Update が呼ばれる
+2. useTransitionGraph が true なら EvaluateGraphTransitions を行う
+3. Blackboard と現在状態から遷移条件を評価する
+4. 条件が成立すれば ChangeState する
+5. ModelAnimator が現在 State のアニメーションを更新する
+6. AnimEvent の時間範囲に応じて Action や Template Runtime が動く
+7. ParticleComponent が Emitter を更新する
+8. MeshVFXComponent が time を更新する
+9. VFXManager が一時生成した Effect の寿命を管理する
+10. RenderSystem が Particle / MeshVFX を描画する
+
+12.3 攻撃イベント発生時
+
+1. Sequencer の AnimEvent が開始する
+2. startAction があれば ActionRegistry から呼ばれる
+3. BlackboardWrites があれば Blackboard に書き込まれる
+4. eventTemplateType が ATTACK_TEMPLATE なら AttackTemplateRuntime::Start が呼ばれる
+5. AttackTemplateRuntime が AttackTemplate を探す
+6. 攻撃インスタンス ID を発行する
+7. 武器 HitBox を設定する
+8. SlashEffect を EffectManager から生成する
+
+12.4 攻撃イベント継続中
+
+1. updateAction があれば毎フレーム呼ぶ
+2. AttackTemplateRuntime::Update が呼ばれる
+3. WeaponHitBox の activeStartTime / activeEndTime を見て有効化する
+4. spawnTimeOffset を過ぎた AttackEffect を生成する
+5. 生成済みフラグで二重生成を防ぐ
+
+12.5 攻撃イベント終了時
+
+1. endAction があれば呼ぶ
+2. AttackTemplateRuntime::End が呼ばれる
+3. WeaponHitBox を無効化する
+4. Runtime 用フラグと生成済み情報をクリアする
+
+
+============================================================
+
+============================================================
+15. コードを変更するときの目安
+============================================================
+
+GUI 項目を増やしたい場合
+- まず保存先のデータ構造に項目を追加する
+- Serialize / Deserialize に追加する
+- Editor GUI に表示する
+- 実行時にその値を使う処理へ渡す
+- 古い JSON にキーがない場合のデフォルト値を用意する
+
+新しい AnimEvent 種類を増やしたい場合
+- ANIMATION_EVENT_TEMPLATE_TYPE に種類を追加する
+- AnimEvent に必要なデータを追加する
+- to_json / from_json に保存処理を追加する
+- Sequencer の Event Details に GUI を追加する
+- 実行時に Start / Update / End のどこで処理するかを決める
+
+新しい AttackEffectType を増やしたい場合
+- ATTACK_EFFECT_TYPE に種類を追加する
+- AttackTemplateManager の読み書きと GUI に追加する
+- EffectManager / AttackEffectHitComponent 側で生成と更新処理を追加する
+- HitShape や移動処理が必要なら AttackEffectHitComponent に渡す
+
+新しい Particle 設定を増やしたい場合
+- ParticleSystemConstants に値を追加する
+- ParticleComponent の GUI と Serialize / Deserialize に追加する
+- ParticleEmitter::ApplySettings や Shader 側へ渡す
+- HLSL 側の ConstantBuffer と C++ 側のアライメントを確認する
+
+新しい MeshVFX 設定を増やしたい場合
+- MeshVFXPart に保存データを追加する
+- Serialize / Deserialize と GUI に追加する
+- MeshVFXShader へ渡す定数を追加する
+- HLSL 側の ConstantBuffer と C++ 側の構造体の対応を確認する
+
+NodeGraph に新しいノード種別を増やしたい場合
+- AnimGraphNodeType に追加する
+- 表示名、色、Pin の扱いを追加する
+- Serialize / Deserialize で保存されることを確認する
+- EvaluateGraphTransitions 側で実行時の意味を定義する

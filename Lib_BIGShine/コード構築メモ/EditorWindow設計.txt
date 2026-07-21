@@ -1,0 +1,354 @@
+EditorWindow設計 説明メモ
+
+目的
+このメモは、各種 Editor Window の設計方針を企業向けに説明するためのもの。
+Animation、Particle、AI、PlayerState、PostEffect などの機能は、Runtime 処理だけでなく Editor 上で調整できることが大きな特徴なので、その土台を整理する。
+
+
+============================================================
+1. 全体概要
+============================================================
+
+EditorWindow は、ゲーム実行時のデータや Asset を、ImGui ベースの画面から確認、編集、保存するための仕組み。
+
+Component::Gui は各 Component の簡易 Inspector 的な役割を持ち、EditorWindow はより複雑な編集画面を担当する。
+例えば、Animation Sequencer や NodeGraph、AI BehaviorGraph、Particle Editor のように、専用の画面が必要なものは EditorWindow として分ける。
+
+一言で説明するなら、
+「Runtime の Component や Asset を、ImGui で編集、保存、Preview できるようにするための自作 Editor 基盤」
+と言える。
+
+この EditorWindow 設計の大きな特徴
+- 別 exe の Editor ではなく、ゲーム実行画面の上にフルスクリーンで重ねる Workspace 型 Editor にしている
+- Editor 用 Scene に切り替えるのではなく、今動いている Scene を見ながら編集できる
+- 実行画面で気になる点を見つけたら、すぐ Workspace を開いて編集、保存、読み込み、確認ができる
+- Animation、Particle、AI など、調整が必要な機能を同じ考え方で扱える
+- 就職作品として限られた制作時間の中で、検証と調整の往復を速くするための設計
+
+
+============================================================
+2. この機能を作った理由
+============================================================
+
+解決したかった問題
+- 数値やタイミングを変えるたびにコードを書き換えたくない
+- アニメーションイベントや AI Graph のような複雑なデータは Inspector だけでは編集しづらい
+- Particle や MeshVFX は見た目を確認しながら調整したい
+- PostEffect はリアルタイムに強さを変えて確認したい
+- チーム制作で、プログラマー以外も調整しやすい入口が必要
+
+この設計で改善したこと
+- 複雑な編集対象を専用 Window に分けた
+- Component::Gui と EditorWindow の役割を分けた
+- JSON Asset の読み込み、保存、Reload を Editor から行えるようにした
+- Runtime の Preview と Editor の調整をつなげた
+- Animation、AI、Particle などを同じ Editor 方針で拡張できるようにした
+
+別 exe / 別 Scene にしなかった理由
+- 別 exe の Editor を作ると、ゲーム側と Editor 側で Scene、Asset、Component の同期が必要になる
+- Editor 専用 Scene に切り替える方式だと、実際のプレイ中に見えた違和感をその場で直しにくい
+- 就職作品として完成度を上げるには、Editor 基盤そのものを大きく作り込むより、実際のゲーム画面で確認しながら調整できる方が効率がよい
+- Animation、Particle、AI は「実際に動いている状態」で見ないと調整しにくい
+- そのため、普段の描画の上に Workspace を重ね、実行中の状態を保ったまま編集できる形にした
+
+この設計で得られる制作上の利点
+- 気になった瞬間に Workspace を開ける
+- 編集後にすぐ Save / Load / Reload して確認できる
+- ゲーム中の見え方、タイミング、挙動をその場で調整できる
+- Animation、Particle、AI のように実行状態依存の機能を検証しやすい
+- 作品制作中のトライアンドエラーが速くなる
+
+
+============================================================
+3. Workspace 型 Editor の設計意図
+============================================================
+
+Workspace 型 Editor とは
+このプロジェクトでの Workspace は、ゲーム実行画面の上にフルスクリーンで重ねて表示する Editor 空間。
+完全に別の Tool exe を起動するのではなく、ゲーム本体の中で Editor を開く。
+
+通常プレイ時
+- ゲーム Scene が通常通り描画される
+- Player、Enemy、Particle、AI なども Runtime として動く
+- 実際の作品としての見た目を確認できる
+
+Workspace 展開時
+- 普段の描画結果の上に Editor UI を重ねる
+- Animation Editor、Particle Editor、AI Behavior Editor などを開ける
+- Scene を切り替えず、現在の状態を見ながら調整できる
+- 必要に応じて Save / Load / Reload を行い、変更結果をすぐ確認できる
+
+この設計の狙い
+- Runtime と Editor の距離を近くする
+- 調整対象を実際のゲーム画面で確認する
+- 別 exe 化による同期コストを避ける
+- Editor 開発に時間を使いすぎず、作品の完成度を上げる調整に時間を使う
+- 作品説明で「自分の制作効率を考えて設計判断した」と説明できるようにする
+
+Animation での利点
+- 実際のモデル、現在の Scene、現在の再生状態を見ながら Sequencer を調整できる
+- 攻撃判定や VFX のタイミングを、ゲーム中の見た目と合わせて確認できる
+- Save / Load で State や Graph の変更をすぐ確認できる
+
+Particle での利点
+- 実際の背景、ライティング、PostEffect の上で Particle の見え方を確認できる
+- Texture、発生数、寿命、BlendMode を調整してすぐ確認できる
+- ヒットエフェクトや環境 Particle をゲーム画面上で見ながら調整できる
+
+AI での利点
+- 実際に敵が動いている状態で BehaviorGraph や Blackboard を確認できる
+- 追跡、攻撃、待機などの行動が想定通りかをその場で見ることができる
+- Graph や条件を保存、読み込みして挙動の変化を確認しやすい
+
+Combat / VFX での利点
+- 攻撃アニメーション、HitBox、Particle、MeshVFX のつながりを同じ画面で確認できる
+- 攻撃テンプレートの調整結果を、実際のプレイ感と合わせて見られる
+
+設計上の注意点
+- Runtime と Editor が同じ exe 内にあるため、Editor 処理がゲーム処理へ悪影響を出さないようにする必要がある
+- Editor を開いた状態で時間を止めるのか、ゲームを動かし続けるのかを機能ごとに決める必要がある
+- 保存、読み込み、Reload のタイミングで Runtime Resource を正しく再構築する必要がある
+- Editor UI がゲーム画面を覆うため、Preview と操作の切り替えを分かりやすくする必要がある
+
+
+============================================================
+4. 全体構成
+============================================================
+
+EditorWindowManager
+- 種類: Manager
+- 主な責務:
+  Editor Window の生成、表示、更新を管理する。
+- 説明のポイント:
+  各 Window を個別に直接呼ぶのではなく、Manager を通して管理する。
+
+AnimationEditorWindow
+- 主な責務:
+  Animation、Pose、Node、Sequencer などの編集。
+- 説明のポイント:
+  アニメーション関連の編集画面として、モデル、ポーズ、状態、イベントの調整に使う。
+
+ParticleEditorWindow
+- 主な責務:
+  Particle Asset、Emitter、Texture、発生設定の編集。
+- 説明のポイント:
+  ParticleComponent の設定を専用画面で編集し、JSON 保存するための入口。
+
+AIBehaviorEditorWindow
+- 主な責務:
+  AIBehaviorGraph のノード、リンク、条件、Action を編集する。
+- 説明のポイント:
+  敵の行動ロジックを可視化して調整するための画面。
+
+PlayerStateEditorWindow
+- 主な責務:
+  PlayerState の状態確認や調整。
+- 説明のポイント:
+  Player の現在状態や遷移、Debug 情報を確認するための画面。
+
+PostEffectWindow
+- 主な責務:
+  Bloom、Distortion、MotionBlur、Vignette などの PostEffect パラメータを編集する。
+- 説明のポイント:
+  描画結果を見ながら画面効果をリアルタイム調整する。
+
+GameModeWindow
+- 主な責務:
+  GameMode や Blackboard など、ゲーム進行に関わる状態を編集、確認する。
+
+EffectAssetListWindow
+- 主な責務:
+  Particle、MeshVFX、VFXSequence などの Asset 一覧を確認する。
+
+
+============================================================
+5. Component::Gui との役割分担
+============================================================
+
+Component::Gui
+- Component に直接関係する簡単な設定を表示する
+- Object を選んだ時の Inspector 的な役割
+- 例:
+  Transform
+  Health
+  ParticleComponent の簡易操作
+  AnimationControllerComponent の状態一覧
+
+EditorWindow
+- 複雑な編集や広い画面が必要なものを担当する
+- Graph、Sequencer、Timeline、Asset Browser などに向いている
+- 例:
+  Animation Sequence Editor
+  Animation Graph Editor
+  AI BehaviorGraph Editor
+  Particle Editor
+  PostEffect Window
+
+説明例
+「簡単な Component 設定は Component::Gui に置き、ノードグラフやシーケンサーのような複雑な編集は専用 EditorWindow に分けています。
+これにより、Component の責務を保ちつつ、調整しやすい画面を作れます。」
+
+
+============================================================
+6. Editor の基本フロー
+============================================================
+
+表示
+1. EditorWindowManager が各 Window の表示フラグを持つ
+2. 表示中の Window の Gui / Draw が呼ばれる
+3. ImGui で項目を表示する
+4. ユーザーが数値、文字列、Asset、ノード、イベントを編集する
+
+編集
+1. ImGui の入力で一時データまたは実データを変更する
+2. 必要なら Dirty Flag を立てる
+3. Runtime Resource の再構築が必要なら Rebuild を呼ぶ
+4. Preview 中なら即座に反映する
+
+保存
+1. Save ボタンを押す
+2. Serialize で JSON 化する
+3. Asset Path へ保存する
+4. Asset 一覧や Cache を更新する
+
+読み込み
+1. Load / Reload を押す
+2. JSON を読む
+3. Deserialize でデータを復元する
+4. GPU Resource や Runtime Cache を再構築する
+5. Editor 表示を更新する
+
+
+============================================================
+7. Asset 編集の考え方
+============================================================
+
+Editor で扱う Asset
+- Animation State Asset
+- Animation Graph Asset
+- AttackTemplate
+- Particle Asset
+- Particle Emitter Asset
+- MeshVFX Asset
+- AI BehaviorGraph Asset
+- PostEffect 設定
+
+保存するもの
+- 数値
+- 名前
+- Path
+- Node / Link
+- Event
+- Color
+- Transform
+- Enum
+- フラグ
+
+保存しないもの
+- ID3D11Buffer などの GPU Resource
+- Texture SRV
+- Runtime の一時フラグ
+- ポインタ
+- 実行中だけ使うキャッシュ
+
+説明のポイント
+「Editor で編集するデータは JSON に保存し、GPU Resource や Runtime Cache は読み込み後に再構築します。
+保存データと実行時リソースを分けることで、Asset を扱いやすくしています。」
+
+
+============================================================
+8. Preview / Debug
+============================================================
+
+Preview の目的
+- 保存前に見た目や挙動を確認する
+- Animation の Scrub
+- Particle の Play / Trigger
+- MeshVFX の Play / Stop
+- PostEffect のリアルタイム調整
+- AI Graph の現在ノード確認
+
+Debug 表示で見たいもの
+- 現在選択中の Object
+- 現在の Animation State
+- Sequencer の currentTime
+- AI Blackboard の値
+- Player の currentState
+- Particle の Emitter 状態
+- VFX の寿命
+- PostEffect の有効フラグ
+
+説明のポイント
+「Editor は単なる保存画面ではなく、Runtime の状態を見ながら調整するための Debug / Preview ツールとして作っています。」
+
+
+============================================================
+9. 設計上の良い点
+============================================================
+
+- Runtime 用 Component と Editor 表示をつなげられる
+- 複雑な編集対象を専用 Window に分けられる
+- JSON Asset と相性がよい
+- Preview しながら調整できる
+- Animation、AI、Particle、PostEffect などを同じ方針で増やせる
+- プログラマー以外でも数値やタイミングを調整しやすくなる
+- 別 exe の Tool を作るより、ゲーム実行中の状態を直接見ながら調整できる
+- Scene 切り替えを挟まず、気になった部分をその場で直せる
+- 就職作品として、Editor 開発コストと作品完成度のバランスを取りやすい
+
+
+============================================================
+10. 注意点・改善点
+============================================================
+
+- Editor と Runtime の処理が混ざりすぎないようにする
+- Undo / Redo がない場合、誤操作に弱い
+- Asset Path の参照切れを検出する仕組みがあるとよい
+- Dirty Flag を分かりやすくし、保存忘れを防ぎたい
+- Editor 上の一時データと実データの区別を明確にする
+- Window が増えるほど、EditorWindowManager 側の整理が必要
+- Workspace を開いた時の時間停止、入力ブロック、Camera 操作の扱いを整理するとさらに使いやすい
+- Runtime 中の Reload は便利だが、参照中 Resource の差し替えに注意が必要
+
+
+============================================================
+
+============================================================
+13. Node Graph Monitor と Workspace Menu の扱い
+============================================================
+
+今回の変更で追加したもの
+- Scene Editor 側で使える簡易グラフ監視用 Window として NodeGraphMonitorWindow を追加した
+- 実ファイルは Code/Editor/NodeEditor に置き、VS filter も Code\Editor\NodeEditor に登録する
+- Workspace 系 EditorWindow は Window メニュー一覧には出さず、Workspace Selector から切り替える方針にした
+- EditorWindow に ShouldShowInWindowMenu() を追加し、EditorWorkspaceWindow では false を返す
+- EditorWindowManager の Window メニュー生成時に ShouldShowInWindowMenu() を見て、通常 Window だけを表示する
+
+NodeGraphMonitorWindow の目的
+- Animation / AI Behavior / Dragon AI の現在状態を、実行画面や Debug 表示と同時に見やすくするための軽量 Monitor
+- 編集用 Workspace ではなく、Scene Editor 上で横に置いて Runtime 状態を追うための Window
+- 大きな編集操作や Asset 保存は行わず、現在の実行状態を確認する用途に寄せる
+
+追従対象の選び方
+- Follow Selected を ON にすると、ObjectManager で現在選択している Object に追従する
+- Follow Selected を OFF にすると、Target Combo から任意の Object を固定して監視できる
+- Graph Combo で Auto / AI Behavior / Dragon AI / Animation を切り替えられる
+- Auto の場合は Dragon AI、AI Behavior、Animation の順で見つかった Graph を表示する
+
+AI Behavior Graph の Runtime 表示
+- AIBehaviorGraph は Tick 中に通った NodeId を runtimeActiveNodeIds として保持する
+- 最後の Tick 結果は lastTickStatus として保持する
+- Monitor Window は IsNodeRuntimeActive() を使って通過中の Node と Link を強調表示する
+- AIBehaviorEditorWindow 側も同じ Runtime 情報を見ることで、Root / Selector / Condition / Action などの実行経路を見やすくする
+
+Animation Graph の Runtime 表示
+- AnimationControllerComponent の GetCurrentState() を見て、現在 State に一致する Node を強調表示する
+- Transition Link は現在 State と関係するものを目安として強調する
+- Animation Graph の編集自体は既存の Animation Node Graph Workspace で行い、Monitor Window は確認に使う
+
+設計上の注意
+- NodeGraphMonitorWindow は EditorWorkspaceWindow ではなく通常の EditorWindow として扱う
+- そのため Window メニューから表示 / 非表示を切り替えられる
+- Workspace 系 Editor は Window メニューに混ぜず、上部の Workspace Selector に集約する
+- 実ファイル階層と VS filter を混ぜない。NodeEditor 系は Code/Editor/NodeEditor に置く
+- Runtime 監視用の Window では、なるべく Runtime データの読み取り中心にして、保存や大きな編集操作は Workspace 側へ寄せる

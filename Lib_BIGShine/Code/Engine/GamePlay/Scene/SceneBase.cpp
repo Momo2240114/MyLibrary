@@ -27,6 +27,7 @@
 #include "Editor/Window/GameModeWindow.h"
 #include "Editor/Window/DebugLogWindow.h"
 #include "Editor/NodeEditor/AnimNodeEditorWindow.h"
+#include "Editor/NodeEditor/NodeGraphMonitorWindow.h"
 #include "Editor/Workspace/ParticleEditorWindow.h"
 #include "Editor/Workspace/PlayerStateEditorWindow.h"
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
@@ -73,6 +74,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<EffectAssetListWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimationEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimNodeEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<NodeGraphMonitorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ParticleEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<PlayerStateEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));

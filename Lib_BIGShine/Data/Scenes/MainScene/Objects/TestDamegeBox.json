@@ -5,7 +5,7 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 58,
+                "AttackInstanceId": 206,
                 "AttackSourceType": 0,
                 "AttackTag": "DamageBox",
                 "AttackerAirLiftPower": 0.0,

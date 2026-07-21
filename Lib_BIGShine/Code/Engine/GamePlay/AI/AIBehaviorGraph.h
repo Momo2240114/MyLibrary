@@ -139,6 +139,7 @@ public:
     void EnsureDefaultGraph();
     AI_BEHAVIOR_STATUS Tick(AIBehaviorContext& context_);
     void ResetRuntime();
+    bool IsNodeRuntimeActive(uintptr_t nodeId_) const;
 
     AIBehaviorNode* AddNode(AI_BEHAVIOR_NODE_TYPE type_, const std::string& name_, const DirectX::XMFLOAT2& position_);
     bool RemoveNode(uintptr_t nodeId_);
@@ -163,6 +164,8 @@ public:
     const std::vector<AIBehaviorNode>& GetNodes() const { return nodes; }
     std::vector<AIBehaviorLink>& GetLinks() { return links; }
     const std::vector<AIBehaviorLink>& GetLinks() const { return links; }
+    const std::vector<uintptr_t>& GetRuntimeActiveNodeIds() const { return runtimeActiveNodeIds; }
+    AI_BEHAVIOR_STATUS GetLastTickStatus() const { return lastTickStatus; }
 
 private:
     AI_BEHAVIOR_STATUS TickNode(AIBehaviorNode& node_, AIBehaviorContext& context_);
@@ -179,5 +182,7 @@ private:
     std::vector<AIBehaviorNode> nodes;
     std::vector<AIBehaviorLink> links;
     std::unordered_map<uintptr_t, AIBehaviorRuntimeState> runtimeStates;
+    std::vector<uintptr_t> runtimeActiveNodeIds;
+    AI_BEHAVIOR_STATUS lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
     uintptr_t nextId = 1;
 };

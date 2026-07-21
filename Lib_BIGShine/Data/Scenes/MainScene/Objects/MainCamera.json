@@ -39,17 +39,17 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    12.329493522644043,
-                    4.614899158477783,
-                    54.73710632324219
+                    -61.615238189697266,
+                    15.135641098022461,
+                    -7.426057815551758
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    11.383073806762695,
-                    -0.322004497051239,
-                    13.43130874633789
+                    -24.789142608642578,
+                    1.0969185829162598,
+                    -18.067241668701172
                 ],
-                "fovY": 60.00000762939453,
+                "fovY": 65.52642822265625,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
@@ -64,8 +64,9 @@
         },
         {
             "Data": {
-                "currentPitch": -6.81393575668335,
-                "currentYaw": -91.31255340576172,
+                "baseDistance": 14.0,
+                "currentPitch": -20.11442756652832,
+                "currentYaw": -16.117055892944336,
                 "distance": 14.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -87,18 +88,26 @@
         },
         {
             "Data": {
+                "arenaCameraMargin": 0.800000011920929,
+                "arenaCenter": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "arenaRadius": 65.0,
                 "baseDistance": 7.0,
                 "cameraHeight": 1.0,
                 "closeDistance": 8.0,
-                "closeFocusBias": 0.2800000011920929,
+                "closeFocusBias": 0.18000000715255737,
                 "collisionFovInterpolationSpeed": 10.0,
-                "collisionFovMaxAddition": 18.0,
+                "collisionFovMaxAddition": 22.0,
                 "collisionLookAtInterpolationSpeed": 18.0,
                 "collisionLookAtLowerHeight": 1.100000023841858,
                 "collisionLookAtSearchRadius": 1.7999999523162842,
                 "currentSide": 1.0,
                 "distanceScale": 0.44999998807907104,
-                "farFocusBias": 0.5,
+                "enableCircularArenaCamera": true,
+                "farFocusBias": 0.3400000035762787,
                 "framingSmoothSpeed": 16.0,
                 "heightDifferenceScale": 1.0,
                 "horizontalSafeMax": 0.8999999761581421,
@@ -115,7 +124,7 @@
                     0.05000000074505806,
                     0.0
                 ],
-                "playerFocusWeight": 0.6200000047683716,
+                "playerFocusWeight": 0.75,
                 "playerOffset": [
                     0.0,
                     0.0,
@@ -125,7 +134,7 @@
                 "positionInterpolationSpeed": 7.0,
                 "separationHeightScale": 0.05000000074505806,
                 "sideOffset": 0.0,
-                "targetFocusWeight": 0.3799999952316284,
+                "targetFocusWeight": 0.25,
                 "targetOffset": [
                     0.0,
                     1.7999999523162842,
@@ -134,7 +143,23 @@
                 "verticalDistanceCorrectionStrength": 2.5,
                 "verticalFocusCorrectionStrength": 1.399999976158142,
                 "verticalSafeMax": 0.7799999713897705,
-                "verticalSafeMin": 0.2199999988079071
+                "verticalSafeMin": 0.2199999988079071,
+                "wallCameraDistance": 5.5,
+                "wallCameraHeight": 12.0,
+                "wallCameraMaximumFovAddition": 12.0,
+                "wallCameraMaximumHeightAddition": 1.2000000476837158,
+                "wallCameraPositionSmoothSpeed": 8.0,
+                "wallCameraRateSmoothSpeed": 7.0,
+                "wallCameraSideMinimumHoldTime": 0.5,
+                "wallCameraSideOffset": 7.5,
+                "wallCameraSideSwitchScoreThreshold": 0.3499999940395355,
+                "wallCameraStartDistance": 3.0,
+                "wallCameraOppositeSideMinimumHoldTime": 0.8500000238418579,
+                "wallCameraOppositeSideSwitchScoreThreshold": 0.75,
+                "wallCameraContinuityScoreWeight": 0.11999999731779099,
+                "wallLookAtPlayerBias": 0.41999998688697815,
+                "wallCenterWeight": 0.75,
+                "wallCombatWeight": 0.25
             },
             "Enabled": true,
             "RequiredForSceneStart": false,
@@ -152,7 +177,8 @@
                 "includeDynamicColliders": true,
                 "maxCollisionLiftHeight": 3.0,
                 "minimumCameraDistance": 0.05000000074505806,
-                "probeRadius": 0.30000001192092896
+                "probeRadius": 0.30000001192092896,
+                "reduceCollisionLiftWhenArenaWallCameraActive": true
             },
             "Enabled": true,
             "RequiredForSceneStart": false,
@@ -205,19 +231,19 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            12.329492568969727,
-            4.6149001121521,
-            54.73710632324219
+            -61.615230560302734,
+            15.135639190673828,
+            -7.426056861877441
         ],
         "Rot": [
-            6.813935279846191,
-            181.3125762939453,
-            360.0
+            20.114425659179688,
+            106.11705017089844,
+            0.0
         ],
         "Scale": [
-            1.0,
-            0.9999999403953552,
-            0.9999999403953552
+            0.9999998807907104,
+            0.9999998211860657,
+            0.9999998211860657
         ]
     }
 }

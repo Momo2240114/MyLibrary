@@ -1,0 +1,384 @@
+Particle関係 説明メモ
+
+目的
+このメモは、ParticleComponent、ParticleEmitter、ParticleRenderSystem、ParticleEditorWindow、EffectManager との関係を説明するための入口。
+Animation関係.txt にも Particle の説明はあるが、ここでは Particle 単体の設計に絞って整理する。
+
+主な関連ファイル
+- Code/Engine/Graphics/Particle/ParticleComponent.h / .cpp
+- Code/Engine/Graphics/Particle/ParticleEmitter.h / .cpp
+- Code/Engine/Graphics/Particle/ParticleEffectAsset.h
+- Code/Engine/Graphics/RenderSystem/ParticleRenderSystem.h / .cpp
+- Code/Editor/Workspace/ParticleEditorWindow.h / .cpp
+- Code/Engine/GamePlay/System/EffectManager.h / .cpp
+- Data/Particle/*.json
+
+この機能を一言で説明するなら
+複数 Emitter を JSON Asset として管理し、DirectX 11 の GPU 更新で大量の粒子を扱える Particle システム。
+
+説明の中心
+- ParticleComponent は GameObject に付く入口
+- 1つの ParticleComponent が複数 EmitterTrack を持つ
+- EmitterTrack は ParticleEmitter、設定、Texture、再生状態をまとめる
+- ParticleEmitter は Compute Shader と GPU Buffer を使って粒子を更新する
+- ParticleRenderSystem が描画を担当する
+- ParticleEditorWindow / Component GUI で Asset を編集、保存、読み込みする
+- ActionRegistry へ Play / Stop / Trigger を登録し、Sequencer から呼べる
+- EffectManager がヒット時や一時エフェクトとして Particle を生成する
+
+処理フロー
+1. ParticleComponent が JSON Asset を読み込む
+2. Deserialize で EmitterTrack を復元する
+3. RebuildEmitterResources で ParticleEmitter と Texture SRV を作る
+4. Play / Trigger で再生状態にする
+5. Update で delay や spawnSpace を見ながら Emitter を更新する
+6. ParticleEmitter が Compute Shader で Emit / Update / Sort を行う
+7. ParticleRenderSystem が描画する
+
+詳しく書くときの見出し
+1. Particle 全体の目的
+2. ParticleComponent の役割
+3. EmitterTrack のデータ
+4. ParticleEmitter の GPU リソース
+5. Compute Shader の流れ
+6. ParticleRenderSystem の描画
+7. Editor GUI
+8. ActionRegistry 連携
+9. EffectManager 連携
+10. 良い点と改善点
+
+良い点
+- Editor と GPU 処理の責務を分けている
+- 複数 Emitter を1つの Asset にまとめられる
+- Emitter 単位の再利用もできる
+- Sequencer から Trigger できる
+- GPU 更新により大量 Particle に向いた構成になっている
+
+改善点
+- Texture Path や Asset Path の不正時の表示を強化するとよい
+- GPU Resource の再構築タイミングを分かりやすく整理すると説明しやすい
+- Editor で負荷や Particle 数を見えるようにすると検証しやすい
+
+
+============================================================
+1. Particle 全体概要
+============================================================
+
+Particle システムは、炎、煙、ヒットエフェクト、魔法、環境演出などの粒子表現を扱うための仕組み。
+
+この実装では、GameObject に付く上位 Component として ParticleComponent があり、実際の GPU 更新を行う低レベルクラスとして ParticleEmitter がある。
+ParticleComponent は複数の EmitterTrack を持ち、1つの Particle Asset の中に複数 Emitter をまとめられる。
+
+Editor では Emitter ごとに Texture、Mask、Gradient、発生数、寿命、速度、BlendMode、SpawnSpace などを調整し、JSON に保存する。
+実行時には JSON から設定を復元し、RebuildEmitterResources で GPU Buffer や Texture SRV を作り直す。
+
+一言で説明するなら、
+「Editor で複数 Emitter を調整し、DirectX 11 の Compute Shader で更新する、自作 GPU Particle システム」
+と言える。
+
+
+============================================================
+2. この機能を作った理由
+============================================================
+
+解決したかった問題
+- 攻撃、ヒット、環境演出などで Particle を何度も使い回したい
+- Particle の見た目調整をコード変更なしで行いたい
+- Particle ごとに Texture や発生パラメータを外部データ化したい
+- CPU 側で大量の粒子を毎フレーム更新すると負荷が高くなりやすい
+- Animation Sequencer や AttackTemplate から Particle を呼び出したい
+
+この設計で改善したこと
+- ParticleComponent と ParticleEmitter を分け、Editor / Asset 管理と GPU 処理を分離した
+- EmitterTrack により、複数 Emitter を1つの Particle Asset として管理できる
+- JSON 保存により、Particle 調整データをコードから分離した
+- ActionRegistry に Play / Stop / Trigger を登録し、Sequencer から呼べるようにした
+- VFXManager から一時 Particle を生成できるようにした
+
+
+============================================================
+3. 全体構成
+============================================================
+
+ParticleComponent
+- 種類: Component / IActionProvider
+- 主な責務:
+  Particle Asset の読み込み、保存、Editor GUI、複数 Emitter の管理、Action 登録、再生制御を担当する。
+- 保持している重要データ:
+  tracks
+  textureFiles
+  assetFiles
+  assetPath
+  emitterAssetPath
+  selectedEmitterIndex
+  timer
+  isPlaying
+  registeredActionNames
+- 主な関数:
+  Start
+  Update
+  Gui
+  RegisterActions
+  Serialize
+  Deserialize
+  Play
+  Stop
+  ResetRuntime
+  PlayEmitter
+  StopEmitter
+  TriggerEmitter
+  SetEmitterPosition
+  TriggerEmitterAtPosition
+  SaveAsset
+  LoadAsset
+  SaveEmitterAsset
+  LoadEmitterAsset
+  RebuildEmitterResources
+
+EmitterTrack
+- 種類: ParticleComponent 内部 struct
+- 主な責務:
+  1つの Emitter の編集データと実行状態をまとめる。
+- 保持している重要データ:
+  emitter
+  settings
+  name
+  texturePath
+  maskTexturePath
+  gradientTexturePath
+  shadeGradientTexturePath
+  delay
+  meshVertexSampleCount
+  blendMode
+  spawnSpace
+  isPlaybackEnabled
+  isStarted
+
+ParticleEmitter
+- 種類: 低レベル Particle 実行クラス
+- 主な責務:
+  DirectX 11 の Compute Shader、StructuredBuffer、UAV、SRV を使って Particle を更新、描画準備する。
+- 保持している重要データ:
+  settings
+  particleDataBuffer
+  particleDataSRV
+  particleDataUAV
+  unusedIndexBuffer
+  emitBuffer
+  particleHeaderBuffer
+  indirectDataBuffer
+  textureSRV
+  maskTextureSRV
+  gradientTextureSRV
+  shadeGradientTextureSRV
+  meshSpawnPositions
+- 主な関数:
+  Update
+  Render
+  PrepareRender
+  ApplySettings
+  ResetRuntime
+  SetEmissionEnabled
+  SetTexture
+  SetMeshSpawnPositions
+  InitializeSharedShaders
+  BindSharedRenderShaders
+
+ParticleRenderSystem
+- 種類: RenderSystem
+- 主な責務:
+  Scene 内の ParticleComponent / ParticleEmitter を集めて描画する。
+- 説明のポイント:
+  Component はデータと更新、RenderSystem は描画という分担。
+
+ParticleEditorWindow
+- 種類: Editor Window
+- 主な責務:
+  Particle 編集用の専用 Window。
+- 説明のポイント:
+  Component GUI と同様に、Particle Asset の編集や Preview に使う。
+
+EffectManager
+- 種類: GamePlay System
+- 主な責務:
+  Particle や MeshVFX の Asset Cache と一時生成を管理する。
+- 説明のポイント:
+  ヒット時や攻撃時に Particle を GameObject として生成し、寿命で消す。
+
+
+============================================================
+4. ParticleComponent の処理
+============================================================
+
+Start
+1. Texture 一覧を更新する
+2. Particle Asset 一覧を更新する
+3. assetPath があれば LoadAsset する
+4. RebuildEmitterResources で実行時 Emitter を作る
+5. ActionRegistry に Emitter Action を登録する
+
+Update
+1. isPlaying が true なら timer を進める
+2. 各 EmitterTrack を確認する
+3. delay を過ぎたら Emitter の発生を有効にする
+4. spawnSpace が OWNER_RELATIVE の場合、Owner の Transform を反映する
+5. Mesh Vertices 発生を使う場合、UpdateMeshSpawnPositions でモデル頂点を更新する
+6. ParticleEmitter::ApplySettings で設定を渡す
+7. ParticleEmitter::Update で GPU 更新する
+8. Burst Trigger は1回使ったら戻す
+
+Play
+- 全 Emitter の再生を開始する。
+- delay がある Emitter は、delay 後に実際の発生が始まる。
+
+TriggerEmitter
+- 指定 Emitter を1回発生させるための入口。
+- Sequencer から呼ぶ場合に重要。
+
+SetEmitterPosition / TriggerEmitterAtPosition
+- VFXManager や HitEffect から、特定のワールド位置へ Particle を出すために使う。
+- ヒット位置に Particle を出す場合、この入口で説明できる。
+
+RebuildEmitterResources
+- 設定変更や Asset 読み込み後に、ParticleEmitter と GPU Resource を作り直す。
+- Texture SRV もここで読み直す。
+
+
+============================================================
+5. ParticleEmitter の GPU 処理
+============================================================
+
+ParticleEmitter は、ParticleComponent より低レベルの処理を担当する。
+DirectX 11 の Compute Shader を使い、Particle の発生、更新、深度ソート、Indirect Draw 用データを GPU 側で扱う。
+
+主な GPU リソース
+- particleDataBuffer:
+  Particle 本体の StructuredBuffer。
+- particleDataSRV:
+  描画 Shader から Particle を読むための SRV。
+- particleDataUAV:
+  Compute Shader から Particle を更新するための UAV。
+- unusedIndexBuffer:
+  未使用 Particle の Index を管理する Buffer。
+- emitBuffer:
+  CPU 側で作った EmitParticleData を GPU へ渡す Buffer。
+- particleHeaderBuffer:
+  生存数や Header 情報を持つ Buffer。
+- indirectDataBuffer:
+  DispatchIndirect / DrawIndirect 用の引数 Buffer。
+- textureSRV:
+  Particle のメイン Texture。
+- maskTextureSRV:
+  Alpha や形状制御用 Mask。
+- gradientTextureSRV:
+  Color over Life 用 Gradient。
+
+Compute Shader の流れとして説明できる内容
+1. BeginFrame でフレーム用の情報を初期化する
+2. CPU 側で EmitParticleData を作る
+3. Emit Shader で新規 Particle を生成する
+4. Update Shader で既存 Particle の寿命、位置、速度、色などを更新する
+5. 必要なら Bitonic Sort で深度順に並べる
+6. EndFrame で DrawIndirect 用の情報を作る
+7. Render で Particle を描画する
+
+設計上の良い点
+- CPU では全 Particle を直接更新しない
+- GPU 側で並列に Particle を更新できる
+- Alpha Blend 用の深度ソートを入れる入口がある
+- DrawInstancedIndirect により、描画数を GPU 側の結果に合わせられる
+
+注意点
+- GPU Buffer のサイズ、アライメント、初期化タイミングに注意が必要
+- Compute Shader の UAV / SRV の bind / unbind を整理しないと描画不具合が起きる
+- Debug が難しいため、Editor 側で Particle 数や状態を表示できるとよい
+
+
+============================================================
+6. Asset / JSON
+============================================================
+
+Particle Asset に保存するもの
+- AssetPath
+- Emitters
+- Emitter 名
+- ParticleSystemConstants
+- Texture Path
+- Mask Texture Path
+- Gradient Texture Path
+- Shade Gradient Texture Path
+- delay
+- meshVertexSampleCount
+- blendMode
+- spawnSpace
+- IsPlaying
+
+Emitter 単体 Asset
+- 1つの Emitter だけを別 JSON として保存できる
+- 別の Particle Asset に読み込んで再利用できる
+
+LoadAsset の流れ
+1. JSON を開く
+2. Deserialize で tracks を復元する
+3. assetPath を記録する
+4. RebuildEmitterResources で GPU Resource を作る
+
+SaveAsset の流れ
+1. Serialize で現在の tracks を JSON 化する
+2. AssetType と AssetVersion を付ける
+3. 指定パスへ保存する
+
+
+============================================================
+7. Editor GUI
+============================================================
+
+Particle GUI の主な項目
+- Asset Name
+- Load Asset
+- Save Particle JSON
+- Reload Asset
+- Play Effect
+- Stop Effect
+- Reset
+- Add Emitter
+- Remove Emitter
+- Emitter Name
+- Play Emitter
+- Stop Emitter
+- Trigger Emitter
+- Texture 設定
+- Mask Texture 設定
+- Gradient Texture 設定
+- 発生数、寿命、速度などの ParticleSystemConstants
+- BlendMode
+- SpawnSpace
+- Delay
+- Mesh Vertex Sample Count
+
+Editor で大事な考え方
+- 編集した数値は JSON に保存される
+- 反映には RebuildEmitterResources が必要な項目がある
+- 再生ボタンで Editor 上から確認できる
+- Emitter 名は ActionRegistry の Action 名にも関係する
+
+
+============================================================
+8. Animation / Combat との連携
+============================================================
+
+Animation Sequencer からの呼び出し
+1. ParticleComponent が RegisterActions で Play / Stop / Trigger を登録する
+2. Animation Sequencer の AnimEvent に StartAction を設定する
+3. イベント開始時に ActionRegistry から Particle Trigger が呼ばれる
+4. 指定 Emitter が再生される
+
+HitEffect としての呼び出し
+1. AttackTemplate の hitEffect に Particle Asset Path を設定する
+2. HitBox がヒット時にその情報を使う
+3. VFXManager が ParticleSpawnRequest を作る
+4. ParticleComponent を持つ一時 GameObject を生成する
+5. 寿命が来たら EffectManager 側で消す
+
+
+============================================================
