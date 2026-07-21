@@ -193,15 +193,7 @@ void ThirdPersonCameraComponent::BeginReturnBlendFromCurrentCamera()
         AddFloat3(targetPosition_, targetOffset);
     SynchronizeViewAngles(returnBlendStartPosition, followPosition_);
 
-    const DirectX::XMVECTOR distanceVector_ = DirectX::XMVectorSubtract(
-        DirectX::XMLoadFloat3(&followPosition_),
-        DirectX::XMLoadFloat3(&returnBlendStartPosition));
-    const float currentDistance_ =
-        DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVector_));
-    if (currentDistance_ > 0.001f)
-    {
-        distance = currentDistance_;
-    }
+    distance = (std::max)(baseDistance, 0.1f);
 
     smoothedCameraCenter = followPosition_;
     hasCameraCenter = true;
@@ -238,7 +230,12 @@ void ThirdPersonCameraComponent::Gui()
     ImGui::TextDisabled(controlSuppressed
         ? "Control is owned by CameraLockOnComponent."
         : "TPS control active.");
-    ImGui::DragFloat("Distance", &distance, 0.1f, 0.1f, 100.0f);
+    if (ImGui::DragFloat("Base Distance", &baseDistance, 0.1f, 0.1f, 100.0f))
+    {
+        baseDistance = (std::max)(baseDistance, 0.1f);
+        distance = baseDistance;
+    }
+    ImGui::Text("Current Distance: %.3f", distance);
     ImGui::DragFloat("Pitch", &currentPitch, 0.1f, minPitch, maxPitch);
     ImGui::DragFloat("Yaw", &currentYaw, 0.1f, -360.0f, 360.0f);
     ImGui::DragFloatRange2(
@@ -263,7 +260,8 @@ void ThirdPersonCameraComponent::Gui()
 void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 {
     json_["targetName"] = targetName;
-    json_["distance"] = distance;
+    json_["baseDistance"] = baseDistance;
+    json_["distance"] = baseDistance;
     json_["currentPitch"] = currentPitch;
     json_["currentYaw"] = currentYaw;
     json_["minPitch"] = minPitch;
@@ -279,7 +277,9 @@ void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
 void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
 {
     targetName = json_.value("targetName", std::string{});
-    distance = json_.value("distance", 6.0f);
+    baseDistance = json_.value("baseDistance", json_.value("distance", 6.0f));
+    baseDistance = (std::max)(baseDistance, 0.1f);
+    distance = baseDistance;
     currentPitch = json_.value("currentPitch", 20.0f);
     currentYaw = json_.value("currentYaw", 0.0f);
     minPitch = json_.value("minPitch", -60.0f);

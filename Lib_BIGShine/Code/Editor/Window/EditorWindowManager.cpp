@@ -201,6 +201,8 @@ void EditorWindowManager::DrawMenuBar()
 
             // 各窓の状態を切り替えるメニューを生成
             for (auto& window : windows) {
+                if (!window->ShouldShowInWindowMenu()) continue;
+
                 bool visible = window->IsVisible();
                 if (ImGui::MenuItem(window->GetName().c_str(), nullptr, &visible)) {
                     window->SetVisible(visible);

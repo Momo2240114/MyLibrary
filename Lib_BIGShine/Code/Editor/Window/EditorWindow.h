@@ -24,6 +24,7 @@ public:
     virtual void DrawMenuBar() {}
     virtual void OnVisibilityChanged(bool visible) {}
     virtual bool IsEditorWorkspace() const { return false; }
+    virtual bool ShouldShowInWindowMenu() const { return true; }
     virtual bool ShouldPauseScene() const { return false; }
     virtual bool ShouldRenderSceneWhenPaused() const { return false; }
 

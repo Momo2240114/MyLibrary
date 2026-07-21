@@ -469,8 +469,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                -0.7071067690849304,
-                                -0.7071067690849304
+                                0.0,
+                                0.0
                             ]
                         },
                         "HitArmor": {
@@ -542,7 +542,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -843,8 +843,8 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                -0.7071067690849304,
-                                -0.7071067690849304
+                                0.0,
+                                0.0
                             ]
                         },
                         "HitArmor": {
@@ -916,7 +916,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -37196,13 +37196,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            12.706550598144531,
-            -1.5422389507293701,
-            39.81732177734375
+            -59.9384765625,
+            -0.12384164333343506,
+            -23.104515075683594
         ],
         "Rot": [
             0.0,
-            146.12806701660156,
+            162.26446533203125,
             1.1004080988641363e-05
         ],
         "Scale": [

@@ -42,6 +42,7 @@ private:
     std::weak_ptr<CameraComponent> camera;
     std::string targetName;
 
+    float baseDistance = 6.0f;
     float distance = 6.0f;
     float currentPitch = 20.0f;
     float currentYaw = 0.0f;

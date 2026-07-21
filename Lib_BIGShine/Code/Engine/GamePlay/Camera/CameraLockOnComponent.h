@@ -27,6 +27,8 @@ public:
 
     void SetLockOnEnabled(bool enabled_);
     bool IsLockOnEnabled() const { return lockOnEnabled; }
+    bool IsWallCameraActive() const;
+    float GetWallCameraRate() const { return currentWallCameraRate; }
     std::shared_ptr<GameObject> GetPlayerTarget() const { return playerTarget.lock(); }
     std::shared_ptr<GameObject> GetLockOnTarget() const { return lockOnTarget.lock(); }
     void SetPlayerTarget(const std::shared_ptr<GameObject>& playerTarget_);
@@ -92,6 +94,16 @@ private:
     DirectX::XMFLOAT3 CalculateWeightedLookAt(
         const DirectX::XMFLOAT3& playerPosition_,
         const DirectX::XMFLOAT3& targetPosition_) const;
+    DirectX::XMFLOAT3 ClampCameraPositionToArena(
+        const DirectX::XMFLOAT3& cameraPosition_) const;
+    float CalculateWallCameraCandidateScore(
+        const DirectX::XMFLOAT3& candidatePosition_,
+        const DirectX::XMFLOAT3& lookAtPosition_,
+        const DirectX::XMFLOAT3& playerTopPosition_,
+        const DirectX::XMFLOAT3& playerBottomPosition_,
+        const DirectX::XMFLOAT3& targetPosition_,
+        float fovY_,
+        int candidateSide_) const;
     struct LockOnDistanceInfo
     {
         DirectX::XMFLOAT3 playerPosition{};
@@ -147,17 +159,53 @@ private:
     float collisionLookAtInterpolationSpeed = 18.0f;
     float collisionFovMaxAddition = 18.0f;
     float collisionFovInterpolationSpeed = 10.0f;
+    bool enableCircularArenaCamera = false;
+    DirectX::XMFLOAT3 arenaCenter{ 0.0f, 0.0f, 0.0f };
+    float arenaRadius = 15.0f;
+    float arenaCameraMargin = 0.8f;
+    float wallCameraStartDistance = 3.0f;
+    float wallCameraDistance = 5.5f;
+    float wallCameraHeight = 3.0f;
+    float wallCameraSideOffset = 1.5f;
+    float wallCenterWeight = 0.75f;
+    float wallCombatWeight = 0.25f;
+    float wallCameraPositionSmoothSpeed = 8.0f;
+    float wallCameraRateSmoothSpeed = 7.0f;
+    float wallCameraMaximumHeightAddition = 1.2f;
+    float wallCameraMaximumFovAddition = 12.0f;
+    float wallLookAtPlayerBias = 0.4f;
+    float wallCameraSideMinimumHoldTime = 0.5f;
+    float wallCameraSideSwitchScoreThreshold = 0.35f;
+    float wallCameraOppositeSideMinimumHoldTime = 0.85f;
+    float wallCameraOppositeSideSwitchScoreThreshold = 0.75f;
+    float wallCameraContinuityScoreWeight = 0.12f;
 
     DirectX::XMFLOAT3 interpolatedPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 interpolatedLookAt{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 collisionLookAt{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 collisionCameraPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 previousWallCameraPosition{ 0.0f, 0.0f, 0.0f };
     std::weak_ptr<GameObject> previousLockOnTarget;
     float baseFovY = 60.0f;
     float currentCollisionFov = 60.0f;
     DirectX::XMFLOAT2 debugPlayerScreen{ 0.5f, 0.5f };
     DirectX::XMFLOAT2 debugPlayerBottomScreen{ 0.5f, 0.5f };
     DirectX::XMFLOAT2 debugTargetScreen{ 0.5f, 0.5f };
+    DirectX::XMFLOAT3 debugNormalCameraPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 debugSelectedWallCameraPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 debugFinalDesiredCameraPosition{ 0.0f, 0.0f, 0.0f };
+    float debugDistanceToWall = 0.0f;
+    float debugRawWallCameraRate = 0.0f;
+    float debugCameraArenaRadius = 0.0f;
+    float debugMaximumCameraArenaRadius = 0.0f;
+    float debugSelectedCandidateScore = 0.0f;
+    float debugLeftCandidateScore = 0.0f;
+    float debugCenterCandidateScore = 0.0f;
+    float debugRightCandidateScore = 0.0f;
+    int currentWallCameraSide = 0;
+    float currentWallCameraRate = 0.0f;
+    float wallCameraSideHoldTimer = 0.0f;
+    bool hasWallCameraPosition = false;
     bool debugHorizontalCorrection = false;
     bool debugVerticalCorrection = false;
     bool debugPlayerBottomCorrection = false;

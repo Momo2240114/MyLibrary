@@ -318,6 +318,7 @@
     </ClCompile>
     <ClCompile Include="Code\Editor\EditorCameraData.cpp" />
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\NodeEditor\NodeGraphMonitorWindow.cpp" />
     <ClCompile Include="Code\Editor\Utility\EditorPrimitiveRenderer.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
@@ -579,6 +580,7 @@
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.h" />
     <ClInclude Include="Code\Editor\EditorCameraData.h" />
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h" />
+    <ClInclude Include="Code\Editor\NodeEditor\NodeGraphMonitorWindow.h" />
     <ClInclude Include="Code\Editor\Utility\EditorPrimitiveRenderer.h" />
     <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />

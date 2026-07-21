@@ -147,19 +147,29 @@ void AIBehaviorGraph::EnsureDefaultGraph()
 
 AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
 {
-    if (!context_.owner || !context_.blackboard) return AI_BEHAVIOR_STATUS::FAILURE;
+    runtimeActiveNodeIds.clear();
+    lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
+    if (!context_.owner || !context_.blackboard) return lastTickStatus;
 
     EnsureDefaultGraph();
 
     AIBehaviorNode* rootNode_ = FindRootNode();
-    if (!rootNode_) return AI_BEHAVIOR_STATUS::FAILURE;
+    if (!rootNode_) return lastTickStatus;
 
-    return TickNode(*rootNode_, context_);
+    lastTickStatus = TickNode(*rootNode_, context_);
+    return lastTickStatus;
 }
 
 void AIBehaviorGraph::ResetRuntime()
 {
     runtimeStates.clear();
+    runtimeActiveNodeIds.clear();
+    lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
+}
+
+bool AIBehaviorGraph::IsNodeRuntimeActive(uintptr_t nodeId_) const
+{
+    return std::find(runtimeActiveNodeIds.begin(), runtimeActiveNodeIds.end(), nodeId_) != runtimeActiveNodeIds.end();
 }
 
 AIBehaviorNode* AIBehaviorGraph::AddNode(
@@ -464,6 +474,8 @@ bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
 
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
+    runtimeActiveNodeIds.push_back(node_.id);
+
     if (IsComposite(node_.type))
     {
         return TickComposite(node_, context_);

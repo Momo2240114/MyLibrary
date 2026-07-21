@@ -16,6 +16,52 @@ namespace
 {
     constexpr int MODEL_LOAD_HISTORY_VERSION = 1;
     constexpr int MODEL_LOAD_PROFILE_VERSION = 1;
+    constexpr double MODEL_LOAD_ABSOLUTE_SAMPLE_LIMIT_MS = 15000.0;
+    constexpr double MODEL_LOAD_OUTLIER_MEDIAN_MULTIPLIER = 3.0;
+    constexpr double MODEL_LOAD_OUTLIER_MINIMUM_MARGIN_MS = 2000.0;
+
+    double CalculateMedian(const std::vector<double>& sortedValues_)
+    {
+        if (sortedValues_.empty()) return 0.0;
+        return sortedValues_.size() % 2 == 0
+            ? (sortedValues_[sortedValues_.size() / 2 - 1] + sortedValues_[sortedValues_.size() / 2]) * 0.5
+            : sortedValues_[sortedValues_.size() / 2];
+    }
+
+    double CalculateOutlierLimit(double median_)
+    {
+        return (std::max)(
+            median_ * MODEL_LOAD_OUTLIER_MEDIAN_MULTIPLIER,
+            median_ + MODEL_LOAD_OUTLIER_MINIMUM_MARGIN_MS);
+    }
+
+    void RemoveLongLoadOutliers(std::vector<double>& values_)
+    {
+        values_.erase(
+            std::remove_if(
+                values_.begin(),
+                values_.end(),
+                [](double value_)
+                {
+                    return value_ <= 0.0 || value_ > MODEL_LOAD_ABSOLUTE_SAMPLE_LIMIT_MS;
+                }),
+            values_.end());
+
+        if (values_.size() < 4) return;
+
+        std::sort(values_.begin(), values_.end());
+        const double median_ = CalculateMedian(values_);
+        const double outlierLimit_ = CalculateOutlierLimit(median_);
+        values_.erase(
+            std::remove_if(
+                values_.begin(),
+                values_.end(),
+                [outlierLimit_](double value_)
+                {
+                    return value_ > outlierLimit_;
+                }),
+            values_.end());
+    }
 }
 
 bool ModelLoadProfileManager::LoadProfile(const std::filesystem::path& filePath_)
@@ -200,14 +246,13 @@ bool ModelLoadProfileManager::GenerateProfileFromHistory()
                 values_.push_back(sample_.totalLoadMilliseconds);
             }
         }
+        RemoveLongLoadOutliers(values_);
         if (values_.empty()) continue;
 
         std::sort(values_.begin(), values_.end());
         const double sum_ = std::accumulate(values_.begin(), values_.end(), 0.0);
         const double average_ = sum_ / static_cast<double>(values_.size());
-        const double median_ = values_.size() % 2 == 0
-            ? (values_[values_.size() / 2 - 1] + values_[values_.size() / 2]) * 0.5
-            : values_[values_.size() / 2];
+        const double median_ = CalculateMedian(values_);
 
         double variance_ = 0.0;
         for (const double value_ : values_)
@@ -260,6 +305,19 @@ void ModelLoadProfileManager::RecordLoadResult(
 
     const std::string normalizedPath_ = NormalizePath(modelPath_);
     std::lock_guard<std::mutex> lock_(profileMutex);
+
+    auto profileFound_ = profileEntries.find(normalizedPath_);
+    if (profileFound_ != profileEntries.end() &&
+        profileFound_->second.medianLoadMilliseconds > 0.0)
+    {
+        const double outlierLimit_ =
+            CalculateOutlierLimit(profileFound_->second.medianLoadMilliseconds);
+        if (loadMilliseconds_ > outlierLimit_) return;
+    }
+    else if (loadMilliseconds_ > MODEL_LOAD_ABSOLUTE_SAMPLE_LIMIT_MS)
+    {
+        return;
+    }
 
     ModelLoadHistoryEntry& entry_ = historyEntries[normalizedPath_];
     entry_.modelPath = normalizedPath_;
