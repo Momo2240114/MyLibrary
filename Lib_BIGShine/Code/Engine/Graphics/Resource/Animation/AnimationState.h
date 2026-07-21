@@ -135,6 +135,7 @@ struct AnimState
     int blend2DIdleAnimationIndex = -1;
     std::string blend2DParamName = "MoveInput";
     DirectX::XMFLOAT2 blend2DDefaultInput = { 0.0f, 1.0f };
+    bool blend2DUseIdleStop = false;
     bool blend2DUseEightDirections = false;
     bool blend2DUseForwardBackwardLateral = false;
     float blend2DIdleThreshold = 0.05f;

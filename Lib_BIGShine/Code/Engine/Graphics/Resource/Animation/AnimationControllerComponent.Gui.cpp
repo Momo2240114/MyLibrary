@@ -834,26 +834,24 @@ void AnimationControllerComponent::Gui()
             {
                 editingState->blend2DUseForwardBackwardLateral = false;
             }
-            if (editingState->blend2DUseEightDirections ||
-                editingState->blend2DUseForwardBackwardLateral)
+            ImGui::Checkbox("Use Idle / Stop Clip", &editingState->blend2DUseIdleStop);
+            if (editingState->blend2DUseIdleStop &&
+                ImGui::TreeNode("Idle / Stop (0, 0)"))
             {
-                if (ImGui::TreeNode("Idle / Stop (0, 0)"))
-                {
-                    DrawAnimationIndex_(
-                        "Idle Animation", editingState->blend2DIdleAnimationIndex);
-                    ImGui::SliderFloat(
-                        "Idle Phase",
-                        &editingState->blend2DIdlePhaseOffset,
-                        -1.0f,
-                        1.0f);
-                    ImGui::DragFloat(
-                        "Idle Threshold",
-                        &editingState->blend2DIdleThreshold,
-                        0.01f,
-                        0.0f,
-                        1.0f);
-                    ImGui::TreePop();
-                }
+                DrawAnimationIndex_(
+                    "Idle Animation", editingState->blend2DIdleAnimationIndex);
+                ImGui::SliderFloat(
+                    "Idle Phase",
+                    &editingState->blend2DIdlePhaseOffset,
+                    -1.0f,
+                    1.0f);
+                ImGui::DragFloat(
+                    "Idle Threshold",
+                    &editingState->blend2DIdleThreshold,
+                    0.01f,
+                    0.0f,
+                    1.0f);
+                ImGui::TreePop();
             }
             if (ImGui::TreeNode("Forward (0, +1)"))
             {

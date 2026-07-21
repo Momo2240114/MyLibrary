@@ -256,6 +256,11 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
     debugSelectedCandidateScore = 0.0f;
     debugSelectedWallCameraPosition = ClampCameraPositionToArena(desiredPosition_);
     debugFinalDesiredCameraPosition = finalDesiredPosition_;
+    const float arenaDirectionDeadZone_ =
+        (std::max)(1.0f, (std::max)(arenaCameraMargin, 0.0f));
+    DirectX::XMFLOAT3 centerToPlayer_{ 0.0f, 0.0f, 0.0f };
+    float playerArenaRadius_ = 0.0f;
+    bool hasStableArenaDirection_ = false;
     const bool canUseCircularArenaCamera_ =
         enableCircularArenaCamera &&
         arenaRadius > 0.001f &&
@@ -264,9 +269,9 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
     bool isPlayerInsideArenaRange_ = false;
     if (canUseCircularArenaCamera_)
     {
-        const DirectX::XMFLOAT3 centerToPlayer_ =
-            SubtractFloat3(playerPosition_, arenaCenter);
-        const float playerArenaRadius_ = LengthHorizontal(centerToPlayer_);
+        centerToPlayer_ = SubtractFloat3(playerPosition_, arenaCenter);
+        playerArenaRadius_ = LengthHorizontal(centerToPlayer_);
+        hasStableArenaDirection_ = playerArenaRadius_ > arenaDirectionDeadZone_;
         debugDistanceToWall = arenaRadius - playerArenaRadius_;
         isPlayerInsideArenaRange_ =
             playerArenaRadius_ <=
@@ -278,7 +283,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
             1.0f);
     }
 
-    if (canUseCircularArenaCamera_ && isPlayerInsideArenaRange_)
+    if (canUseCircularArenaCamera_ && isPlayerInsideArenaRange_ && hasStableArenaDirection_)
     {
         currentWallCameraRate = std::lerp(
             currentWallCameraRate,
@@ -293,15 +298,19 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
             ExpSmoothingRate(wallCameraRateSmoothSpeed, deltaTime_));
     }
 
-    if (currentWallCameraRate > 0.001f)
+    if (currentWallCameraRate > 0.001f && hasStableArenaDirection_)
     {
         // 壁際では外周バリアへ押し込まれないよう、カメラ候補をステージ中心側へ寄せる。
         const DirectX::XMFLOAT3 normalCameraDirection_ = NormalizeHorizontal(
             SubtractFloat3(desiredPosition_, playerPosition_),
             backDirection_);
         const DirectX::XMFLOAT3 outwardDirection_ = NormalizeHorizontal(
-            SubtractFloat3(playerPosition_, arenaCenter),
-            ScaleFloat3(normalCameraDirection_, -1.0f));
+            centerToPlayer_,
+            hasArenaOutwardDirection
+                ? previousArenaOutwardDirection
+                : ScaleFloat3(normalCameraDirection_, -1.0f));
+        previousArenaOutwardDirection = outwardDirection_;
+        hasArenaOutwardDirection = true;
         const DirectX::XMFLOAT3 inwardDirection_
         {
             -outwardDirection_.x,
@@ -836,6 +845,7 @@ void CameraLockOnComponent::ResetTracking()
     currentWallCameraSide = 0;
     wallCameraSideHoldTimer = 0.0f;
     hasWallCameraPosition = false;
+    hasArenaOutwardDirection = false;
     previousLockOnTarget.reset();
 }
 
@@ -938,7 +948,9 @@ DirectX::XMFLOAT3 CameraLockOnComponent::ClampCameraPositionToArena(
     // 円形外周はPhysX結果だけに任せず、中心と半径から最終安全位置を決める。
     const DirectX::XMFLOAT3 direction_ = NormalizeHorizontal(
         centerToCamera_,
-        { 0.0f, 0.0f, 1.0f });
+        hasArenaOutwardDirection
+            ? previousArenaOutwardDirection
+            : SubtractFloat3(interpolatedPosition, arenaCenter));
     clampedPosition_.x = arenaCenter.x + direction_.x * maximumCameraRadius_;
     clampedPosition_.z = arenaCenter.z + direction_.z * maximumCameraRadius_;
     return clampedPosition_;

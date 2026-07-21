@@ -39,17 +39,17 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    -61.615238189697266,
-                    15.135641098022461,
-                    -7.426057815551758
+                    4.315741062164307,
+                    4.767445087432861,
+                    -56.10896682739258
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    -24.789142608642578,
-                    1.0969185829162598,
-                    -18.067241668701172
+                    7.747807025909424,
+                    0.7069690227508545,
+                    -32.54235076904297
                 ],
-                "fovY": 65.52642822265625,
+                "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
@@ -65,8 +65,8 @@
         {
             "Data": {
                 "baseDistance": 14.0,
-                "currentPitch": -20.11442756652832,
-                "currentYaw": -16.117055892944336,
+                "currentPitch": -9.675843238830566,
+                "currentYaw": 81.71411895751953,
                 "distance": 14.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -144,22 +144,22 @@
                 "verticalFocusCorrectionStrength": 1.399999976158142,
                 "verticalSafeMax": 0.7799999713897705,
                 "verticalSafeMin": 0.2199999988079071,
+                "wallCameraContinuityScoreWeight": 0.11999999731779099,
                 "wallCameraDistance": 5.5,
                 "wallCameraHeight": 12.0,
                 "wallCameraMaximumFovAddition": 12.0,
                 "wallCameraMaximumHeightAddition": 1.2000000476837158,
+                "wallCameraOppositeSideMinimumHoldTime": 0.8500000238418579,
+                "wallCameraOppositeSideSwitchScoreThreshold": 0.75,
                 "wallCameraPositionSmoothSpeed": 8.0,
                 "wallCameraRateSmoothSpeed": 7.0,
                 "wallCameraSideMinimumHoldTime": 0.5,
                 "wallCameraSideOffset": 7.5,
                 "wallCameraSideSwitchScoreThreshold": 0.3499999940395355,
                 "wallCameraStartDistance": 3.0,
-                "wallCameraOppositeSideMinimumHoldTime": 0.8500000238418579,
-                "wallCameraOppositeSideSwitchScoreThreshold": 0.75,
-                "wallCameraContinuityScoreWeight": 0.11999999731779099,
-                "wallLookAtPlayerBias": 0.41999998688697815,
                 "wallCenterWeight": 0.75,
-                "wallCombatWeight": 0.25
+                "wallCombatWeight": 0.25,
+                "wallLookAtPlayerBias": 0.41999998688697815
             },
             "Enabled": true,
             "RequiredForSceneStart": false,
@@ -185,13 +185,110 @@
             "TypeName": "CameraCollisionComponent"
         },
         {
-            "Data": null,
+            "Data": {
+                "presets": [
+                    {
+                        "actionName": "JustGuard",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Guard",
+                        "cameraOffset": [
+                            0.44999998807907104,
+                            0.3499999940395355,
+                            -2.200000047683716
+                        ],
+                        "enterDuration": 0.07999999821186066,
+                        "focusOffset": [
+                            0.0,
+                            0.15000000596046448,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 0.11999999731779099,
+                        "positionMode": "TARGET_LOCAL_RELATIVE",
+                        "priority": 20,
+                        "returnDuration": 0.18000000715255737,
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.03500000014901161,
+                        "suppressCameraCollision": false,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 42.0,
+                        "targetMode": "HIT_POSITION",
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "JustDodge",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Dodge",
+                        "cameraOffset": [
+                            0.699999988079071,
+                            0.44999998807907104,
+                            -1.399999976158142
+                        ],
+                        "enterDuration": 0.05999999865889549,
+                        "focusOffset": [
+                            0.0,
+                            1.100000023841858,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 0.10000000149011612,
+                        "positionMode": "PLAYER_FORWARD_RELATIVE",
+                        "priority": 15,
+                        "returnDuration": 0.1599999964237213,
+                        "shakeFrequency": 20.0,
+                        "shakeStrength": 0.014999999664723873,
+                        "suppressCameraCollision": false,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 50.0,
+                        "targetMode": "PLAYER",
+                        "useUnscaledTime": true
+                    }
+                ]
+            },
             "Enabled": true,
             "RequiredForSceneStart": false,
             "TypeName": "CameraActionDirectorComponent"
         },
         {
-            "Data": null,
+            "Data": {
+                "presets": [
+                    {
+                        "actionName": "Light",
+                        "duration": 0.20000000298023224,
+                        "fadeInRate": 0.0,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 25.0,
+                        "positionStrength": 0.03500000014901161,
+                        "priority": 0,
+                        "rotationStrength": 0.25,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "Heavy",
+                        "duration": 0.2800000011920929,
+                        "fadeInRate": 0.0,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 22.0,
+                        "positionStrength": 0.11999999731779099,
+                        "priority": 10,
+                        "rotationStrength": 1.2000000476837158,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "JustGuard",
+                        "duration": 0.18000000715255737,
+                        "fadeInRate": 0.0,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 30.0,
+                        "positionStrength": 0.07000000029802322,
+                        "priority": 20,
+                        "rotationStrength": 0.699999988079071,
+                        "useUnscaledTime": true
+                    }
+                ]
+            },
             "Enabled": true,
             "RequiredForSceneStart": false,
             "TypeName": "CameraShakeComponent"
@@ -243,19 +340,19 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -61.615230560302734,
-            15.135639190673828,
-            -7.426056861877441
+            4.315740585327148,
+            4.767444133758545,
+            -56.10896301269531
         ],
         "Rot": [
-            20.114425659179688,
-            106.11705017089844,
-            0.0
+            9.675843238830566,
+            8.285879135131836,
+            360.0
         ],
         "Scale": [
             0.9999998807907104,
-            0.9999998211860657,
-            0.9999998211860657
+            0.9999998807907104,
+            0.9999999403953552
         ]
     }
 }

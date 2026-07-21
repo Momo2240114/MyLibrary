@@ -2,6 +2,7 @@
 
 #include "PlayerControllerComponent.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "Engine/GamePlay/Camera/CameraComponent.h"
@@ -45,6 +46,7 @@ namespace
         inline constexpr const char* JUMP = "Player.Jump";
         inline constexpr const char* LOCK_ON = "Player.LockOn";
         inline constexpr const char* GUARD = "Player.Guard";
+        inline constexpr const char* JUST_GUARD = "Player.JustGuard";
         inline constexpr const char* DODGE = "Player.Dodge";
         inline constexpr const char* SKILL_A = "Player.SkillA";
         inline constexpr const char* SKILL_B = "Player.SkillB";
@@ -394,6 +396,72 @@ DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
     return GetCameraRelativeMoveDirection(gameObject.lock(), GetMoveInputAxis());
 }
 
+DirectX::XMFLOAT3 PlayerControllerComponent::GetGuardMoveInput(
+    const DirectX::XMFLOAT3& worldMoveInput_) const
+{
+    const float inputLengthSquared_ =
+        worldMoveInput_.x * worldMoveInput_.x +
+        worldMoveInput_.z * worldMoveInput_.z;
+    if (inputLengthSquared_ <= 0.0001f)
+    {
+        return { 0.0f, 0.0f, 0.0f };
+    }
+
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
+    if (!owner_ || !owner_->transform)
+    {
+        return { worldMoveInput_.x, 0.0f, worldMoveInput_.z };
+    }
+
+    DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
+    const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+        ResolveCameraLockOnComponent();
+    const std::shared_ptr<GameObject> target_ =
+        lockOn_ && lockOn_->IsLockOnEnabled()
+        ? lockOn_->GetLockOnTarget()
+        : nullptr;
+    if (target_ && target_->transform)
+    {
+        const DirectX::XMFLOAT3 ownerPosition_ =
+            owner_->transform->GetWorldPosition();
+        const DirectX::XMFLOAT3 targetPosition_ =
+            target_->transform->GetWorldPosition();
+        forward_ =
+        {
+            targetPosition_.x - ownerPosition_.x,
+            0.0f,
+            targetPosition_.z - ownerPosition_.z
+        };
+    }
+    else
+    {
+        const DirectX::XMMATRIX ownerWorld_ =
+            owner_->transform->GetWorldMatrix();
+        DirectX::XMStoreFloat3(
+            &forward_,
+            DirectX::XMVector3Normalize(ownerWorld_.r[2]));
+    }
+
+    forward_ = NormalizeHorizontalDirection(forward_, { 0.0f, 0.0f, 1.0f });
+    const DirectX::XMFLOAT3 right_
+    {
+        forward_.z,
+        0.0f,
+        -forward_.x
+    };
+
+    const DirectX::XMFLOAT3 normalizedInput_ = NormalizeHorizontalDirection(
+        worldMoveInput_,
+        { 0.0f, 0.0f, 0.0f });
+    const float inputLength_ = (std::min)(std::sqrt(inputLengthSquared_), 1.0f);
+    return
+    {
+        (normalizedInput_.x * right_.x + normalizedInput_.z * right_.z) * inputLength_,
+        0.0f,
+        (normalizedInput_.x * forward_.x + normalizedInput_.z * forward_.z) * inputLength_
+    };
+}
+
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInputAxis() const
 {
     auto& keyConfig_ = KeyConfig::Instance();
@@ -442,9 +510,42 @@ void PlayerControllerComponent::SetFacingDirection(const DirectX::XMFLOAT3& dire
         1.0f);
 }
 
+void PlayerControllerComponent::ApplyGuardFacingToTarget()
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const std::shared_ptr<CameraLockOnComponent> lockOn_ =
+        ResolveCameraLockOnComponent();
+    if (!lockOn_ || !lockOn_->IsLockOnEnabled()) return;
+
+    const std::shared_ptr<GameObject> target_ = lockOn_->GetLockOnTarget();
+    if (!target_ || !target_->transform) return;
+
+    const DirectX::XMFLOAT3 ownerPosition_ =
+        owner_->transform->GetWorldPosition();
+    const DirectX::XMFLOAT3 targetPosition_ =
+        target_->transform->GetWorldPosition();
+    const DirectX::XMFLOAT3 direction_
+    {
+        targetPosition_.x - ownerPosition_.x,
+        0.0f,
+        targetPosition_.z - ownerPosition_.z
+    };
+
+    if (movement)
+    {
+        movement->SetFacingDirection(direction_, false);
+        return;
+    }
+
+    SetFacingDirection(direction_);
+}
+
 void PlayerControllerComponent::SetHorizontalVelocity(
     const DirectX::XMFLOAT3& dir_,
-    float speed_)
+    float speed_,
+    bool updateFacing_)
 {
     const float inputLengthSq_ =
         dir_.x * dir_.x +
@@ -460,8 +561,15 @@ void PlayerControllerComponent::SetHorizontalVelocity(
     }
 
     pendingHorizontalVelocity = { dir_.x * speed_, 0.0f, dir_.z * speed_ };
-    pendingFacingDirection = { dir_.x, 0.0f, dir_.z };
-    hasPendingFacingDirection = true;
+    if (updateFacing_)
+    {
+        pendingFacingDirection = { dir_.x, 0.0f, dir_.z };
+        hasPendingFacingDirection = true;
+    }
+    else
+    {
+        hasPendingFacingDirection = false;
+    }
 }
 
 void PlayerControllerComponent::AddHorizontalVelocityAssist(
@@ -581,8 +689,8 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     const int requestedComboIndex_ = GetRequestedComboIndex(nextAction_);
     const bool isLocomotion_ =
         GetPlayerActionGroup(currentAction_) == PLAYER_ACTION_GROUP::LOCOMOTION;
-    const bool nextIsDodge_ = IsDodgeAction(nextAction_);
-    const bool canUseCancelTransition_ = nextIsDodge_
+    const bool nextUsesDodgeCancel_ = IsDodgeCancelAction(nextAction_);
+    const bool canUseCancelTransition_ = nextUsesDodgeCancel_
         ? (actionRuntime.canDodgeCancel && HasDodgeCancelTransition(currentAction_, nextAction_))
         : (actionRuntime.canActionBranch && HasActionBranchTransition(currentAction_, nextAction_));
     const bool canChangeImmediately_ =
@@ -617,7 +725,7 @@ bool PlayerControllerComponent::AddCancelTransition(
     PLAYER_ACTION from_,
     PLAYER_ACTION to_)
 {
-    return IsDodgeAction(to_)
+    return IsDodgeCancelAction(to_)
         ? AddDodgeCancelTransition(from_, to_)
         : AddActionBranchTransition(from_, to_);
 }
@@ -626,7 +734,7 @@ bool PlayerControllerComponent::RemoveCancelTransition(
     PLAYER_ACTION from_,
     PLAYER_ACTION to_)
 {
-    return IsDodgeAction(to_)
+    return IsDodgeCancelAction(to_)
         ? RemoveDodgeCancelTransition(from_, to_)
         : RemoveActionBranchTransition(from_, to_);
 }
@@ -778,6 +886,15 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
     AddDodgeCancelTransition(PLAYER_ACTION::AIR_WEAK_ATTACK, PLAYER_ACTION::AIR_DODGE);
     AddDodgeCancelTransition(PLAYER_ACTION::AIR_STRONG_ATTACK, PLAYER_ACTION::AIR_DODGE);
     AddDodgeCancelTransition(PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK, PLAYER_ACTION::AIR_DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::DODGE);
+    AddDodgeCancelTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::STRONG_ATTACK, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::STRONG_CHARGE_ATTACK, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::JUST_GUARD);
+    AddDodgeCancelTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::DODGE);
 
     AddActionBranchTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::STRONG_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::WEAK_ATTACK, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
@@ -791,6 +908,12 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
     AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_WEAK_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::WEAK_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::STRONG_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::COUNTER_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::WEAK_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::STRONG_ATTACK);
 
     AddActionBranchTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::IDLE);
     AddActionBranchTransition(PLAYER_ACTION::JUMP, PLAYER_ACTION::MOVE);
@@ -826,7 +949,17 @@ void PlayerControllerComponent::ToggleLockOn()
 
 void PlayerControllerComponent::NotifyGuardedAttack()
 {
-    if (GetCurrentAction() == PLAYER_ACTION::GUARD)
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (currentAction_ == PLAYER_ACTION::JUST_GUARD)
+    {
+        actionRuntime.canDodgeCancel = true;
+        actionRuntime.canActionBranch = true;
+        actionRuntime.canBufferInput = true;
+        SyncCancelGateBlackboard();
+        return;
+    }
+
+    if (currentAction_ == PLAYER_ACTION::GUARD)
     {
         RequestAction(PLAYER_ACTION::JUST_GUARD);
     }
@@ -965,7 +1098,8 @@ void PlayerControllerComponent::NotifyActionEnd()
 {
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (!IsPlayerActionTimelineDriven(currentAction_) &&
-        currentAction_ != PLAYER_ACTION::JUMP)
+        currentAction_ != PLAYER_ACTION::JUMP &&
+        currentAction_ != PLAYER_ACTION::GUARD)
     {
         return;
     }
@@ -1021,6 +1155,13 @@ void PlayerControllerComponent::NotifyActionEnd()
             jumpLoopResumeRequested = true;
             stateMachine.ChangeState(PLAYER_ACTION::JUMP);
         }
+        return;
+    }
+
+    if (ShouldEnterGuardAfterActionEnd())
+    {
+        SendGuardInputToBlackboard(true);
+        stateMachine.ChangeState(PLAYER_ACTION::GUARD);
         return;
     }
 
@@ -1277,6 +1418,12 @@ bool PlayerControllerComponent::IsDodgeAction(PLAYER_ACTION action_) const
         action_ == PLAYER_ACTION::AIR_DODGE;
 }
 
+bool PlayerControllerComponent::IsDodgeCancelAction(PLAYER_ACTION action_) const
+{
+    return IsDodgeAction(action_) ||
+        action_ == PLAYER_ACTION::JUST_GUARD;
+}
+
 bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
 {
     if (action_ == PLAYER_ACTION::DODGE)
@@ -1290,6 +1437,33 @@ bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
     }
 
     return true;
+}
+
+bool PlayerControllerComponent::ShouldEnterGuardAfterActionEnd() const
+{
+    if (!IsGrounded() || IsAirborneForAction())
+    {
+        return false;
+    }
+
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    if (currentAction_ == PLAYER_ACTION::GUARD ||
+        currentAction_ == PLAYER_ACTION::JUST_GUARD)
+    {
+        return false;
+    }
+
+    const PLAYER_ACTION_GROUP group_ = GetPlayerActionGroup(currentAction_);
+    const bool isAttackAction_ =
+        group_ == PLAYER_ACTION_GROUP::ATTACK ||
+        currentAction_ == PLAYER_ACTION::STRONG_CHARGE_ATTACK;
+    if (!isAttackAction_ &&
+        currentAction_ != PLAYER_ACTION::DODGE)
+    {
+        return false;
+    }
+
+    return KeyConfig::Instance().ActionPressed(PlayerInputAction::GUARD);
 }
 
 void PlayerControllerComponent::UpdateDodgeRestrictions(float deltaTime_)
@@ -1331,6 +1505,8 @@ void PlayerControllerComponent::UpdateAirborneActionContext()
 void PlayerControllerComponent::ProcessActionInput()
 {
     auto& keyConfig_ = KeyConfig::Instance();
+    const bool guardInput_ = keyConfig_.ActionPressed(PlayerInputAction::GUARD);
+    SendGuardInputToBlackboard(guardInput_);
 
     if (keyConfig_.ActionPressedIn(PlayerInputAction::LOCK_ON))
     {
@@ -1346,6 +1522,8 @@ void PlayerControllerComponent::ProcessActionInput()
 
     const bool isAirborne_ = IsAirborneForAction();
     if (TryDodgeCancelInput()) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::JUST_GUARD) &&
+        RequestAction(PLAYER_ACTION::JUST_GUARD)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_DODGE : PLAYER_ACTION::DODGE)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
@@ -1362,16 +1540,10 @@ void PlayerControllerComponent::ProcessActionInput()
     }
     if (UpdateStrongAttackInput()) return;
 
-    if (keyConfig_.ActionPressed(PlayerInputAction::GUARD))
+    if (guardInput_)
     {
         if (RequestAction(PLAYER_ACTION::GUARD)) return;
     }
-    else if (GetCurrentAction() == PLAYER_ACTION::GUARD)
-    {
-        RequestAction(PLAYER_ACTION::IDLE);
-        return;
-    }
-
     const DirectX::XMFLOAT3 input_ = GetMoveInput();
     const bool isLocomotion_ =
         GetPlayerActionGroup(GetCurrentAction()) == PLAYER_ACTION_GROUP::LOCOMOTION;
@@ -1711,6 +1883,22 @@ void PlayerControllerComponent::SendMoveInputToBlackboard(const DirectX::XMFLOAT
     blackboard->SetVector2(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::MOVE_INPUT, { input_.x, input_.z });
 }
 
+void PlayerControllerComponent::SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_)
+{
+    if (!blackboard) return;
+
+    blackboard->SetVector2(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::GUARD_MOVE_INPUT, { input_.x, input_.z });
+    blackboard->SetVector2(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::GUARD_MOVE_INPUT, { input_.x, input_.z });
+}
+
+void PlayerControllerComponent::SendGuardInputToBlackboard(bool guardInput_)
+{
+    if (!blackboard) return;
+
+    blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::GUARD_INPUT, guardInput_);
+    blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::GUARD_INPUT, guardInput_);
+}
+
 void PlayerControllerComponent::SendJumpPhaseToBlackboard(
     PLAYER_LOCOMOTION_PHASE phase_)
 {
@@ -1887,6 +2075,7 @@ void PlayerControllerComponent::Gui()
 
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Guard Move Speed", &guardMoveSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Double Jump Impulse", &doubleJumpImpulse, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Air Control Rate", &airControlRate, 0.01f, 0.0f, 2.0f, "%.2f");
@@ -1986,8 +2175,10 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetInt(category_, PlayerBlackboardKey::COMBO_INDEX, 0);
 
         blackboard->SetVector2(category_, PlayerBlackboardKey::MOVE_INPUT, { 0.0f, 0.0f });
+        blackboard->SetVector2(category_, PlayerBlackboardKey::GUARD_MOVE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::DODGE_INPUT, { 0.0f, 0.0f });
         blackboard->SetVector2(category_, PlayerBlackboardKey::HIT_DIRECTION, { 0.0f, 0.0f });
+        blackboard->SetBool(category_, PlayerBlackboardKey::GUARD_INPUT, false);
         blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_IMPACT_POWER, 0.0f);
         blackboard->SetFloat(category_, PlayerBlackboardKey::HIT_ARMOR, GetCurrentArmor());
         blackboard->SetInt(category_, PlayerBlackboardKey::HIT_REACTION_LEVEL, 0);
@@ -2041,6 +2232,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
 void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     j_["MoveSpeed"] = moveSpeed;
+    j_["GuardMoveSpeed"] = guardMoveSpeed;
     j_["JumpImpulse"] = jumpImpulse;
     j_["DoubleJumpImpulse"] = doubleJumpImpulse;
     j_["AirControlRate"] = airControlRate;
@@ -2090,6 +2282,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
+    guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
     doubleJumpImpulse = (std::max)(j_.value("DoubleJumpImpulse", doubleJumpImpulse), 0.0f);
     airControlRate = std::clamp(j_.value("AirControlRate", airControlRate), 0.0f, 2.0f);

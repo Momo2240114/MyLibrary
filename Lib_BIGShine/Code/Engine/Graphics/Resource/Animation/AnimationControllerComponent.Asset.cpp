@@ -848,6 +848,7 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"blend2DIdleAnimationIndex", s.blend2DIdleAnimationIndex},
             {"blend2DParamName", s.blend2DParamName},
             {"blend2DDefaultInput", {s.blend2DDefaultInput.x, s.blend2DDefaultInput.y}},
+            {"blend2DUseIdleStop", s.blend2DUseIdleStop},
             {"blend2DUseEightDirections", s.blend2DUseEightDirections},
             {"blend2DUseForwardBackwardLateral", s.blend2DUseForwardBackwardLateral},
             {"blend2DIdleThreshold", s.blend2DIdleThreshold},
@@ -924,6 +925,7 @@ void from_json(const nlohmann::json& j, AnimState& s)
             j["blend2DDefaultInput"][1].get<float>()
         };
     }
+    s.blend2DUseIdleStop = j.value("blend2DUseIdleStop", false);
     s.blend2DUseEightDirections = j.value("blend2DUseEightDirections", false);
     s.blend2DUseForwardBackwardLateral = j.value("blend2DUseForwardBackwardLateral", false);
     s.blend2DIdleThreshold = (std::max)(j.value("blend2DIdleThreshold", 0.05f), 0.0f);

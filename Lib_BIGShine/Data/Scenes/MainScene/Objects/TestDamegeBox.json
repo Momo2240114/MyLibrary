@@ -5,7 +5,7 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 206,
+                "AttackInstanceId": 111,
                 "AttackSourceType": 0,
                 "AttackTag": "DamageBox",
                 "AttackerAirLiftPower": 0.0,
@@ -78,9 +78,9 @@
             "Data": {
                 "AutoActivate": true,
                 "Damage": 5.0,
-                "ImpactPower": 9.0,
                 "HitStopDuration": 0.05000000074505806,
                 "HitStopScale": 1.0,
+                "ImpactPower": 9.0,
                 "KnockBackPower": 20.0,
                 "RearmInterval": 0.800000011920929
             },

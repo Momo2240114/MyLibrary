@@ -285,7 +285,7 @@ static Blend2DSelection ResolveBlend2DSelection(
     float absoluteX_ = std::abs(input_.x);
     float absoluteY_ = std::abs(input_.y);
     const float inputLength_ = std::sqrt(input_.x * input_.x + input_.y * input_.y);
-    if (state_->blend2DUseEightDirections &&
+    if (state_->blend2DUseIdleStop &&
         inputLength_ <= state_->blend2DIdleThreshold &&
         state_->blend2DIdleAnimationIndex >= 0)
     {
