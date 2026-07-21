@@ -220,10 +220,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
         SetFullscreen(true);
     }
 
-
-
     //成功したら true を返す
-
     return true;
 }
 

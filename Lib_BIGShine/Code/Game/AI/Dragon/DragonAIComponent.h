@@ -238,6 +238,7 @@ private:
     float walkSpeed = 2.0f;
     float runSpeed = 6.0f;
     float animationBlendDuration = 0.2f;
+    bool animationGraphDriven = true;
     std::string behaviorGraphAssetPath = "Data/AI/BehaviorGraph/DragonFirstForm.json";
     std::string behaviorGraphStatus;
     std::string statusText;

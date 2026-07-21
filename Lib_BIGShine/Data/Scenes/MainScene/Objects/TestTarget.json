@@ -277,7 +277,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 71.0599365234375
+                            "value": 171.888671875
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -355,31 +355,31 @@
                             "type": "bool",
                             "value": false
                         },
-                        "PlayerAngleDegrees": {
+                        "TargetAngle": {
                             "type": "float",
                             "value": 0.0
                         },
-                        "PlayerBehind": {
+                        "IsTargetBehind": {
                             "type": "bool",
                             "value": false
                         },
-                        "PlayerDistance": {
+                        "TargetDistance": {
                             "type": "float",
                             "value": 0.0
                         },
-                        "PlayerHorizontalDistance": {
+                        "TargetHorizontalDistance": {
                             "type": "float",
                             "value": 0.0
                         },
-                        "PlayerInFront": {
+                        "IsTargetInFront": {
                             "type": "bool",
                             "value": false
                         },
-                        "PlayerInSide": {
+                        "IsTargetInSide": {
                             "type": "bool",
                             "value": false
                         },
-                        "PlayerUnderBody": {
+                        "IsTargetUnderBody": {
                             "type": "bool",
                             "value": false
                         },
@@ -411,7 +411,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 0.6000000238418579
+                            "value": 0.0
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -419,7 +419,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 4.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -428,17 +428,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.8297595977783203,
-                                -0.5581210255622864
+                                0.812880277633667,
+                                0.5824308395385742
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.75
+                            "value": 0.02500000037252903
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.6000000238418579
+                            "value": 0.75
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -446,7 +446,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 4.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -454,22 +454,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 1.2000000476837158
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.7292492985725403,
-                                0.47706466913223267,
-                                -0.4905147850513458
+                                0.6826518774032593,
+                                0.5429054498672485,
+                                0.48912182450294495
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                -2.290511131286621,
-                                0.9546828269958496,
-                                -13.22475814819336
+                                7.715487480163574,
+                                0.6798974275588989,
+                                -15.490697860717773
                             ]
                         },
                         "Received": {
@@ -872,7 +872,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerUnderBody",
+                            "BlackboardKey": "IsTargetUnderBody",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -1028,7 +1028,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerBehind",
+                            "BlackboardKey": "IsTargetBehind",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -1340,7 +1340,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerDistance",
+                            "BlackboardKey": "TargetDistance",
                             "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
@@ -1379,7 +1379,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInFront",
+                            "BlackboardKey": "IsTargetInFront",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -1535,7 +1535,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerDistance",
+                            "BlackboardKey": "TargetDistance",
                             "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
@@ -1574,7 +1574,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInFront",
+                            "BlackboardKey": "IsTargetInFront",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -1730,7 +1730,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerDistance",
+                            "BlackboardKey": "TargetDistance",
                             "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
@@ -1769,7 +1769,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInFront",
+                            "BlackboardKey": "IsTargetInFront",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -1925,7 +1925,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInSide",
+                            "BlackboardKey": "IsTargetInSide",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -3229,7 +3229,7 @@
                         "Duration": 1.0,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonNeck_LookCenter",
+                        "IKActionName": "",
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3248,7 +3248,7 @@
                         "Duration": 1.399999976158142,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonNeck_LookWorldPosition",
+                        "IKActionName": "",
                         "RecoveryTime": 0.5,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3267,7 +3267,7 @@
                         "Duration": 2.0,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonNeck_SweepYaw",
+                        "IKActionName": "",
                         "RecoveryTime": 0.6000000238418579,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3286,7 +3286,7 @@
                         "Duration": 1.2000000476837158,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonTail_SweepLeft",
+                        "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3305,7 +3305,7 @@
                         "Duration": 2.0,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonTail_SpinSweep",
+                        "IKActionName": "",
                         "RecoveryTime": 0.6499999761581421,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3362,7 +3362,7 @@
                         "Duration": 1.2999999523162842,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonNeck_LookWorldPosition",
+                        "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3381,7 +3381,7 @@
                         "Duration": 2.0,
                         "Enabled": true,
                         "HitBoxActionName": "",
-                        "IKActionName": "DragonNeck_SweepYaw",
+                        "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
@@ -3792,7 +3792,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerUnderBody",
+                            "BlackboardKey": "IsTargetUnderBody",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -3948,7 +3948,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerBehind",
+                            "BlackboardKey": "IsTargetBehind",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -4260,7 +4260,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerDistance",
+                            "BlackboardKey": "TargetDistance",
                             "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
@@ -4299,7 +4299,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInFront",
+                            "BlackboardKey": "IsTargetInFront",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -4455,7 +4455,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerDistance",
+                            "BlackboardKey": "TargetDistance",
                             "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
@@ -4494,7 +4494,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInFront",
+                            "BlackboardKey": "IsTargetInFront",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -4650,7 +4650,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerDistance",
+                            "BlackboardKey": "TargetDistance",
                             "BlackboardScope": "Local",
                             "BoolValue": false,
                             "Comment": "",
@@ -4689,7 +4689,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInFront",
+                            "BlackboardKey": "IsTargetInFront",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -4845,7 +4845,7 @@
                             "ActionEndKey": "ActionEnded",
                             "ActionName": "",
                             "BlackboardCategory": "DragonAI",
-                            "BlackboardKey": "PlayerInSide",
+                            "BlackboardKey": "IsTargetInSide",
                             "BlackboardScope": "Local",
                             "BoolValue": true,
                             "Comment": "",
@@ -4971,6 +4971,7 @@
                 "FrontAngleDegrees": 45.0,
                 "MediumDistance": 10.0,
                 "PlayerObjectName": "Player",
+                "AnimationGraphDriven": true,
                 "RunSpeed": 6.0,
                 "SideAngleDegrees": 135.0,
                 "TurnSpeed": 6.0,
@@ -5078,9 +5079,9 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            0.05013791471719742,
+            10.072261810302734,
             -2.00177001953125,
-            -14.938933372497559
+            -13.760947227478027
         ],
         "Rot": [
             0.0,

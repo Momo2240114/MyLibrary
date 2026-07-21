@@ -9,6 +9,7 @@
 #include "Engine/Graphics/RenderSystem/ParticleRenderSystem.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 #include "Engine/Graphics/VFX/MeshVFXRenderSystem.h"
+#include "Editor/EditorCameraData.h"
 #include <vector>
 
 class AnimationControllerComponent;
@@ -246,6 +247,7 @@ private:
 
     // プレビューシーン専用のCamera。
     CameraComponent previewCamera;
+    EditorCameraData editorCamera;
 
     // 上下分割レイアウトにおけるタイムライン領域の高さ。
     float timelineHeight = 300.0f;

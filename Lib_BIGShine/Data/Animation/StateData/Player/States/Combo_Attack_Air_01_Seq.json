@@ -196,8 +196,8 @@
                 "startTime": 0.18333333730697632
             },
             {
-                "actionEnd": "PlayerModel_DisableActionBranch",
-                "actionStart": "PlayerModel_EnableActionBranch",
+                "actionEnd": "DisableActionBranch",
+                "actionStart": "EnableActionBranch",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
@@ -233,7 +233,7 @@
             },
             {
                 "actionEnd": "",
-                "actionStart": "PlayerModel_ComboTransition",
+                "actionStart": "ComboTransition",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,
@@ -269,7 +269,7 @@
             },
             {
                 "actionEnd": "",
-                "actionStart": "PlayerModel_ActionEnd",
+                "actionStart": "ActionEnd",
                 "actionUpdate": "",
                 "attachNodeName": "",
                 "attachToOwner": false,

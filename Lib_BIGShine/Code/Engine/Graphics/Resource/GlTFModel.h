@@ -341,8 +341,21 @@ public:
 
 	void SetLocalScale(float scale_)
 	{
-		if (localScale == scale_) return;
+		if (localScale == scale_ &&
+			localScaleXYZ.x == scale_ &&
+			localScaleXYZ.y == scale_ &&
+			localScaleXYZ.z == scale_) return;
 		localScale = scale_;
+		localScaleXYZ = { scale_, scale_, scale_ };
+		MarkTransformDirty();
+	}
+	void SetLocalScale(const DirectX::XMFLOAT3& scale_)
+	{
+		if (localScaleXYZ.x == scale_.x &&
+			localScaleXYZ.y == scale_.y &&
+			localScaleXYZ.z == scale_.z) return;
+		localScaleXYZ = scale_;
+		localScale = scale_.x;
 		MarkTransformDirty();
 	}
 	bool IsStaticModel() const { return isStaticModel; }
@@ -360,6 +373,7 @@ public:
 	void ShowMeshDetailsUI();
 	void ShowNodeTransformEditor();
 	float GetLocalScale() {return localScale;}
+	const DirectX::XMFLOAT3& GetLocalScaleXYZ() const { return localScaleXYZ; }
 	DirectX::SimpleMath::Quaternion GetRootRotationOffset() { return _RootRotationOffset; }
 private:
 	// シリアライズ
@@ -369,6 +383,7 @@ private:
 	void Deserialize(const char* filename);
 
 private:
+	DirectX::XMMATRIX MakeLocalScaleMatrix() const;
 	ModelShaderID shaderId = ModelShaderID::PBR;
 	std::string modelName = "";
 	std::string modelFullPass = "";
@@ -391,6 +406,7 @@ private:
 	DirectX::XMFLOAT4X4 cachedOwnerWorldTransform{};
 
 	float localScale = 1.0;
+	DirectX::XMFLOAT3 localScaleXYZ = { 1.0f, 1.0f, 1.0f };
 	DirectX::SimpleMath::Quaternion _RootRotationOffset;
 	std::string m_RootMotionName;
 

@@ -1204,213 +1204,258 @@
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Walk",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_IdleBreathe", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
+            "from": "__Any__",
             "id": 48,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "To_PlainsDragon_Walk", "threshold": 1.0, "type": 2 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 49,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Walk"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Run",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_Run", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 49,
+            "from": "__Any__",
+            "id": 50,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Run"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_BiteAttack",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_BiteAttack", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 50,
+            "from": "__Any__",
+            "id": 51,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_BiteAttack"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_SpitFireBall",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_SpitFireBall", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 51,
+            "from": "__Any__",
+            "id": 52,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_SpitFireBall"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_SpreadFire",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_SpreadFire", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 52,
+            "from": "__Any__",
+            "id": 53,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_SpreadFire"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Turn90L_RM",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_Turn90L_RM", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 53,
+            "from": "__Any__",
+            "id": 54,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Turn90L_RM"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_TakeOff",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_TakeOff", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 54,
+            "from": "__Any__",
+            "id": 55,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_TakeOff"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationary",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_FlyStationary", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 55,
+            "from": "__Any__",
+            "id": 56,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationary"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationarySpitFireBall",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_FlyStationarySpitFireBall", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 56,
+            "from": "__Any__",
+            "id": 57,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationarySpitFireBall"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationarySpreadFire",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_FlyStationarySpreadFire", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 57,
+            "from": "__Any__",
+            "id": 58,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationarySpreadFire"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationaryToLanding",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_FlyStationaryToLanding", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 58,
+            "from": "__Any__",
+            "id": 59,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationaryToLanding"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_GetHit1",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_GetHit1", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 59,
+            "from": "__Any__",
+            "id": 60,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_GetHit1"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Death",
-                    "threshold": 1.0,
-                    "type": 2
-                }
+                { "op": 0, "param": "To_PlainsDragon_Death", "threshold": 1.0, "type": 2 }
             ],
             "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 60,
+            "from": "__Any__",
+            "id": 61,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Death"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_BiteAttack",
+            "id": 62,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_SpitFireBall",
+            "id": 63,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_SpreadFire",
+            "id": 64,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_Turn90L_RM",
+            "id": 65,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_TakeOff",
+            "id": 66,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_FlyStationary"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_FlyStationarySpitFireBall",
+            "id": 67,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_FlyStationary"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_FlyStationarySpreadFire",
+            "id": 68,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_FlyStationary"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_FlyStationaryToLanding",
+            "id": 69,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_GetHit1",
+            "id": 70,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
         }
     ],
     "StateAssets": {},
-    "UseTransitionGraph": false
+    "UseTransitionGraph": true
 }

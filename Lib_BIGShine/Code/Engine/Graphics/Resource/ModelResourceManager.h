@@ -7,6 +7,7 @@
 #include "GLTFImporter.h"
 #include "ModelLoadTypes.h"
 #include "ModelLoadProfileManager.h"
+#include "StartupResourceConfig.h"
 #include <filesystem>
 #include <map>
 #include <condition_variable>
@@ -42,6 +43,9 @@ public:
     bool IsPreloadGroupReady(const std::string& groupName_) const;
     float GetPreloadGroupProgress(const std::string& groupName_) const;
     void LoadPreloadSettings(const std::string& filename_ = "Data/Settings/AssetPreload.json");
+    bool LoadStartupResourceSettings(const std::string& filename_ = "Data/Startup/StartupResources.json");
+    PreloadHandle RequestStartupCriticalModels();
+    void RequestStartupHighPriorityModels();
 
     // すべての記憶をリセットしてリソースをclear
     void Clear()
@@ -54,7 +58,9 @@ public:
         loadEntries.clear();
         preloadGroups.clear();
         preloadSettings.clear();
+        startupResourceConfig.Clear();
         preloadSettingsLoaded = false;
+        startupResourceSettingsLoaded = false;
         loadProfileManager.Clear();
         loadProfileLoaded = false;
         loadProfileDirty = false;
@@ -117,12 +123,14 @@ private:
     std::map<std::string, PreloadGroupSetting> preloadSettings;
     std::vector<std::thread> workerThreads;
     ModelLoadProfileManager loadProfileManager;
+    StartupResourceConfig startupResourceConfig;
     std::filesystem::path loadHistoryPath = "Data/Cache/ModelLoadHistory.json";
     std::filesystem::path loadProfilePath = "Data/Config/ModelLoadProfile.json";
     bool workerRunning = false;
     bool workerStopRequested = false;
     uint64_t nextRequestOrder = 1;
     bool preloadSettingsLoaded = false;
+    bool startupResourceSettingsLoaded = false;
     bool loadProfileLoaded = false;
     bool loadProfileDirty = false;
     unsigned int minimumModelLoadWorkerCount = 1;

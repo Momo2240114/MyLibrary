@@ -476,7 +476,7 @@ void AnimationEditorWindow::EnsurePreviewScene()
     previewObject_->AddComponent<ParticleComponent>();
     previewGameObjectManager->SetSelectedObject(previewObject_);
 
-    previewCamera.SetLookAt({ 0.0f, 1.8f, -6.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
+    editorCamera.ResetPreviewCamera(previewCamera);
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 1000.0f);
 
     previewGameObjectManager->Update(0.0f);
@@ -526,6 +526,14 @@ void AnimationEditorWindow::DrawPreviewPanel()
     previewSize_.x = (std::max)(1.0f, previewSize_.x);
     previewSize_.y = (std::max)(1.0f, previewSize_.y);
 
+    const bool previewHovered_ =
+        ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+    editorCamera.UpdatePreviewFreeCamera(
+        previewCamera,
+        ImGui::GetIO().DeltaTime,
+        previewHovered_);
+
     RenderPreview(previewSize_);
 
     if (previewTarget.GetShaderResourceView())
@@ -535,6 +543,11 @@ void AnimationEditorWindow::DrawPreviewPanel()
     else
     {
         ImGui::Dummy(previewSize_);
+    }
+
+    if (previewHovered_)
+    {
+        ImGui::TextDisabled("RMB + Mouse: Look / WASD: Move / Q,E: Up Down / Wheel: Speed");
     }
 }
 
@@ -549,7 +562,27 @@ void AnimationEditorWindow::DrawPreviewInspectorPanel()
         return;
     }
 
-    previewGameObjectManager->DrawInspectorGui();
+    if (ImGui::BeginTabBar("AnimationPreviewInspectorTabs"))
+    {
+        if (ImGui::BeginTabItem("Object"))
+        {
+            previewGameObjectManager->DrawInspectorGui();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Camera"))
+        {
+            editorCamera.Gui();
+
+            if (ImGui::Button("Reset Camera"))
+            {
+                editorCamera.ResetPreviewCamera(previewCamera);
+            }
+
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
+    }
 }
 
 void AnimationEditorWindow::DrawPreviewHierarchyPanel()
@@ -988,6 +1021,11 @@ void AnimationEditorWindow::Draw()
         }
         ImGui::MenuItem("Auto Update", nullptr, &autoUpdatePreview);
         ImGui::MenuItem("Grid", nullptr, &showPreviewGrid);
+        ImGui::MenuItem("Free Camera", nullptr, &editorCamera.enablePreviewFreeCamera);
+        if (ImGui::MenuItem("Reset Camera"))
+        {
+            editorCamera.ResetPreviewCamera(previewCamera);
+        }
         ImGui::EndMenuBar();
     }
 

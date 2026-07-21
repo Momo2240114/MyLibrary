@@ -14245,8 +14245,8 @@
                                     "startTime": 0.18333333730697632
                                 },
                                 {
-                                    "actionEnd": "PlayerModel_DisableActionBranch",
-                                    "actionStart": "PlayerModel_EnableActionBranch",
+                                    "actionEnd": "DisableActionBranch",
+                                    "actionStart": "EnableActionBranch",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -14282,7 +14282,7 @@
                                 },
                                 {
                                     "actionEnd": "",
-                                    "actionStart": "PlayerModel_ComboTransition",
+                                    "actionStart": "ComboTransition",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -14318,7 +14318,7 @@
                                 },
                                 {
                                     "actionEnd": "",
-                                    "actionStart": "PlayerModel_ActionEnd",
+                                    "actionStart": "ActionEnd",
                                     "actionUpdate": "",
                                     "attachNodeName": "",
                                     "attachToOwner": false,
@@ -37191,13 +37191,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -8.357248306274414,
-            -1.5422388315200806,
-            19.946727752685547
+            6.553131103515625,
+            -1.5422390699386597,
+            -15.145219802856445
         ],
         "Rot": [
             0.0,
-            162.47882080078125,
+            67.888671875,
             1.1004080988641363e-05
         ],
         "Scale": [

@@ -286,6 +286,7 @@ void DragonAIComponent::Gui()
         ImGui::DragFloat("Walk Speed", &walkSpeed, 0.1f, 0.0f, 30.0f);
         ImGui::DragFloat("Run Speed", &runSpeed, 0.1f, 0.0f, 60.0f);
         ImGui::DragFloat("Animation Blend", &animationBlendDuration, 0.01f, 0.0f, 2.0f);
+        ImGui::Checkbox("Animation Graph Driven", &animationGraphDriven);
     }
 
     if (ImGui::CollapsingHeader("Debug Action", ImGuiTreeNodeFlags_None))
@@ -380,6 +381,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
     json_["WalkSpeed"] = walkSpeed;
     json_["RunSpeed"] = runSpeed;
     json_["AnimationBlendDuration"] = animationBlendDuration;
+    json_["AnimationGraphDriven"] = animationGraphDriven;
 
     json_["ActionDefinitions"] = nlohmann::json::array();
     for (const DragonActionDefinition& definition_ : actionDefinitions)
@@ -431,6 +433,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     walkSpeed = json_.value("WalkSpeed", 2.0f);
     runSpeed = json_.value("RunSpeed", 6.0f);
     animationBlendDuration = json_.value("AnimationBlendDuration", 0.2f);
+    animationGraphDriven = json_.value("AnimationGraphDriven", true);
 
     InitializeDefaultDefinitions();
     if (json_.contains("ActionDefinitions") && json_["ActionDefinitions"].is_array())
@@ -764,15 +767,15 @@ void DragonAIComponent::InitializeDefaultDefinitions()
     addDefinition_(DRAGON_ACTION_TYPE::WALK_APPROACH, "WalkApproach", "PlainsDragon_Walk", "", 0.9f, 0.1f, 0.2f, 1.2f);
     addDefinition_(DRAGON_ACTION_TYPE::RUN_CHARGE, "RunCharge", "PlainsDragon_Run", "", 1.4f, 0.4f, 3.0f, 2.0f);
     addDefinition_(DRAGON_ACTION_TYPE::TURN_TO_PLAYER, "TurnToPlayer", "PlainsDragon_Turn90L_RM", "", 0.6f, 0.1f, 0.4f, 1.0f);
-    addDefinition_(DRAGON_ACTION_TYPE::BITE, "Bite", "PlainsDragon_BiteAttack", "DragonNeck_LookCenter", 1.0f, 0.35f, 1.2f, 2.0f);
-    addDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL, "FireBall", "PlainsDragon_SpitFireBall", "DragonNeck_LookWorldPosition", 1.4f, 0.5f, 2.0f, 2.5f);
-    addDefinition_(DRAGON_ACTION_TYPE::SPREAD_BREATH, "SpreadBreath", "PlainsDragon_SpreadFire", "DragonNeck_SweepYaw", 2.0f, 0.6f, 3.0f, 3.5f);
-    addDefinition_(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, "TurnTailSweep", "PlainsDragon_Turn90L_RM", "DragonTail_SweepLeft", 1.2f, 0.45f, 2.0f, 2.0f);
-    addDefinition_(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, "SpinTailSweep", "PlainsDragon_Turn90L_RM", "DragonTail_SpinSweep", 2.0f, 0.65f, 5.0f, 3.0f);
+    addDefinition_(DRAGON_ACTION_TYPE::BITE, "Bite", "PlainsDragon_BiteAttack", "", 1.0f, 0.35f, 1.2f, 2.0f);
+    addDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL, "FireBall", "PlainsDragon_SpitFireBall", "", 1.4f, 0.5f, 2.0f, 2.5f);
+    addDefinition_(DRAGON_ACTION_TYPE::SPREAD_BREATH, "SpreadBreath", "PlainsDragon_SpreadFire", "", 2.0f, 0.6f, 3.0f, 3.5f);
+    addDefinition_(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, "TurnTailSweep", "PlainsDragon_Turn90L_RM", "", 1.2f, 0.45f, 2.0f, 2.0f);
+    addDefinition_(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, "SpinTailSweep", "PlainsDragon_Turn90L_RM", "", 2.0f, 0.65f, 5.0f, 3.0f);
     addDefinition_(DRAGON_ACTION_TYPE::TAKE_OFF, "TakeOff", "PlainsDragon_TakeOff", "", 1.4f, 0.0f, 5.0f, 2.5f);
     addDefinition_(DRAGON_ACTION_TYPE::AIR_HOLD, "AirHold", "PlainsDragon_FlyStationary", "", 1.0f, 0.0f, 0.2f, 2.0f);
-    addDefinition_(DRAGON_ACTION_TYPE::AIR_FIRE_BALL, "AirFireBall", "PlainsDragon_FlyStationarySpitFireBall", "DragonNeck_LookWorldPosition", 1.3f, 0.0f, 2.0f, 2.5f);
-    addDefinition_(DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH, "AirSpreadBreath", "PlainsDragon_FlyStationarySpreadFire", "DragonNeck_SweepYaw", 2.0f, 0.0f, 3.0f, 3.5f);
+    addDefinition_(DRAGON_ACTION_TYPE::AIR_FIRE_BALL, "AirFireBall", "PlainsDragon_FlyStationarySpitFireBall", "", 1.3f, 0.0f, 2.0f, 2.5f);
+    addDefinition_(DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH, "AirSpreadBreath", "PlainsDragon_FlyStationarySpreadFire", "", 2.0f, 0.0f, 3.0f, 3.5f);
     addDefinition_(DRAGON_ACTION_TYPE::LANDING_ATTACK, "LandingAttack", "PlainsDragon_FlyStationaryToLanding", "", 1.5f, 0.6f, 4.0f, 2.5f);
     addDefinition_(DRAGON_ACTION_TYPE::GET_HIT, "GetHit", "PlainsDragon_GetHit1", "", 0.5f, 0.2f, 0.5f, 1.0f);
     addDefinition_(DRAGON_ACTION_TYPE::DEATH, "Death", "PlainsDragon_Death", "", 3.0f, 0.0f, 0.0f, 5.0f);
@@ -1100,6 +1103,13 @@ void DragonAIComponent::PlayAnimationState(const std::string& stateName_)
     if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
         animationController.lock())
     {
+        if (animationGraphDriven)
+        {
+            animationController_->SetUseTransitionGraph(true);
+            animationController_->SetTrigger("To_" + stateName_);
+            return;
+        }
+
         animationController_->ChangeState(stateName_, animationBlendDuration);
     }
 }

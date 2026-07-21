@@ -1,14 +1,15 @@
 #include "PrecompiledHeader.h"
 
 #include "SceneManager.h"
+#include "IScene.h"
 #include "SceneBase.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
-std::unique_ptr<SceneBase> SceneManager::NowScene = nullptr;
-std::unique_ptr<SceneBase> SceneManager::NextScene = nullptr;
+std::unique_ptr<Scene> SceneManager::NowScene = nullptr;
+std::unique_ptr<Scene> SceneManager::NextScene = nullptr;
 bool SceneManager::callInitOnChange;
 
-void SceneManager::Initialize(std::unique_ptr<SceneBase> firstScene)
+void SceneManager::Initialize(std::unique_ptr<Scene> firstScene)
 {
     // 所有権を NowScene に渡す
     NowScene = std::move(firstScene);
@@ -20,9 +21,10 @@ void SceneManager::Initialize(std::unique_ptr<SceneBase> firstScene)
         NowScene->Initialize();
 
         // 誕生したマネージャーに対し、現在のシーンを認識させる
-        if (NowScene->GetGameObjectManager())
+        SceneBase* sceneBase_ = dynamic_cast<SceneBase*>(NowScene.get());
+        if (sceneBase_ && sceneBase_->GetGameObjectManager())
         {
-            NowScene->GetGameObjectManager()->ChangeScene(NowScene.get());
+            sceneBase_->GetGameObjectManager()->ChangeScene(sceneBase_);
         }
     }
 
@@ -30,15 +32,15 @@ void SceneManager::Initialize(std::unique_ptr<SceneBase> firstScene)
 
 void SceneManager::Update(float elapsedTime)
 {
-    // シーン切り替え予約（NextScene）がある場合の跳躍儀式
+    // シーン切り替え予約（NextScene）がある場合
     if (NextScene)
     {
-        std::unique_ptr<SceneBase> nextScene_ = std::move(NextScene);
+        std::unique_ptr<Scene> nextScene_ = std::move(NextScene);
 
-        // 1. 旧世界の終焉（Finalize と GameObjectManager の破棄）
+        // 1. Finalize と GameObjectManager の破棄
         Clear();
 
-        // 2. 新世界への主権移譲
+        // 2. 主権移譲
         NowScene = std::move(nextScene_);
 
         if (NowScene)
@@ -49,15 +51,16 @@ void SceneManager::Update(float elapsedTime)
                 NowScene->Initialize();
             }
 
-            // キャストなしで、新世界のマネージャーに直接シーンを通知できる美しさ！
-            if (NowScene->GetGameObjectManager())
+            // マネージャーに直接シーンを通知
+            SceneBase* sceneBase_ = dynamic_cast<SceneBase*>(NowScene.get());
+            if (sceneBase_ && sceneBase_->GetGameObjectManager())
             {
-                NowScene->GetGameObjectManager()->ChangeScene(NowScene.get());
+                sceneBase_->GetGameObjectManager()->ChangeScene(sceneBase_);
             }
         }
     }
 
-    // 現在の世界の時間を進める
+    // 現在のsceneを進める
     if (NowScene)
     {
         NowScene->Update(elapsedTime);
@@ -80,7 +83,7 @@ void SceneManager::DrawGUI()
     }
 }
 
-void SceneManager::ChangeScene(std::unique_ptr<SceneBase> scene, bool callInitialize)
+void SceneManager::ChangeScene(std::unique_ptr<Scene> scene, bool callInitialize)
 {
     // 新しいシーンを予約（所有権を NextScene が持つ）
     NextScene = std::move(scene);
@@ -99,7 +102,7 @@ void SceneManager::Clear()
     NextScene.reset();
 }
 
-SceneBase* SceneManager::GetCurrentScene()
+Scene* SceneManager::GetCurrentScene()
 {
     return NowScene.get();
 }
