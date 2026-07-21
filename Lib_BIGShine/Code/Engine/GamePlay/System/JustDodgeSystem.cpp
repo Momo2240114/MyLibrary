@@ -4,11 +4,50 @@
 
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Camera/CameraActionDirectorComponent.h"
+#include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/Common/DebugLog.h"
 #include "Engine/Physics/HitBox.h"
 #include "Engine/Physics/JustDodgeCollider.h"
 
 #include <string>
+
+namespace
+{
+    void PlayJustDodgeCameraAction(const JustDodgeEvent& event_)
+    {
+        const std::shared_ptr<GameObject> dodger_ = event_.dodger.lock();
+        if (!dodger_ || !dodger_->manager) return;
+
+        CameraManager* cameraManager_ = dodger_->manager->GetCameraManager();
+        if (!cameraManager_) return;
+
+        const std::shared_ptr<CameraComponent> camera_ =
+            cameraManager_->GetSourceCamera();
+        if (!camera_) return;
+
+        const std::shared_ptr<GameObject> cameraObject_ =
+            camera_->GetGameObject();
+        if (!cameraObject_) return;
+
+        const std::shared_ptr<CameraActionDirectorComponent> cameraAction_ =
+            cameraObject_->GetComponent<CameraActionDirectorComponent>();
+        if (!cameraAction_) return;
+
+        DirectX::XMFLOAT3 focusPosition_ = event_.dodgePosition;
+        if (!event_.hasContact && dodger_->transform)
+        {
+            focusPosition_ = dodger_->transform->GetWorldPosition();
+        }
+
+        cameraAction_->PlayActionAtPosition(
+            "JustDodge",
+            focusPosition_,
+            event_.attackNormal);
+    }
+}
 
 void JustDodgeSystem::BeginFrame()
 {
@@ -128,6 +167,7 @@ void JustDodgeSystem::HandleJustDodge(
     frameJustDodgeEvents.push_back(event_);
     BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] Event accepted. Publishing blackboard/action.");
     PublishJustDodgeToBlackboard(event_);
+    PlayJustDodgeCameraAction(event_);
 
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,

@@ -107,6 +107,7 @@ void CameraCollisionComponent::Start()
 void CameraCollisionComponent::LateUpdate(float deltaTime_)
 {
     ResolveReferences();
+    if (collisionSuppressed) return;
 
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!camera_ || !PhysXSystem::GetScene()) return;
@@ -367,6 +368,16 @@ void CameraCollisionComponent::ApplyCameraPose(
             cameraPosition_,
             lookAtPosition_,
             { 0.0f, 1.0f, 0.0f });
+      }
+  }
+
+void CameraCollisionComponent::SetCollisionSuppressed(bool suppressed_)
+{
+    collisionSuppressed = suppressed_;
+    if (!collisionSuppressed)
+    {
+        currentCollisionLift = 0.0f;
+        debugCompressionRate = 0.0f;
     }
 }
 
@@ -398,6 +409,7 @@ void CameraCollisionComponent::Gui()
         5.0f);
     ImGui::DragFloat("Probe Radius", &probeRadius, 0.01f, 0.0f, 5.0f);
     ImGui::Checkbox("Include Dynamic Colliders", &includeDynamicColliders);
+    ImGui::Checkbox("Collision Suppressed", &collisionSuppressed);
     ImGui::SeparatorText("LockOn Collision Lift");
     ImGui::Checkbox(
         "Enable LockOn Collision Lift",

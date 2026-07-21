@@ -509,78 +509,6 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 9,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardLeft90AnimationIndex": -1,
-                "blend2DBackwardLeft90PhaseOffset": 0.0,
-                "blend2DBackwardLeftAnimationIndex": -1,
-                "blend2DBackwardLeftPhaseOffset": 0.0,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DBackwardRight90AnimationIndex": -1,
-                "blend2DBackwardRight90PhaseOffset": 0.0,
-                "blend2DBackwardRightAnimationIndex": -1,
-                "blend2DBackwardRightPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardLeft90AnimationIndex": -1,
-                "blend2DForwardLeft90PhaseOffset": 0.0,
-                "blend2DForwardLeftAnimationIndex": -1,
-                "blend2DForwardLeftPhaseOffset": 0.0,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DForwardRight90AnimationIndex": -1,
-                "blend2DForwardRight90PhaseOffset": 0.0,
-                "blend2DForwardRightAnimationIndex": -1,
-                "blend2DForwardRightPhaseOffset": 0.0,
-                "blend2DIdleAnimationIndex": -1,
-                "blend2DIdlePhaseOffset": 0.0,
-                "blend2DIdleThreshold": 0.05000000074505806,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blend2DUseEightDirections": false,
-                "blend2DUseForwardBackwardLateral": false,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": false,
-                "name": "PlainsDragon_FlyStationarySpitFireBall",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": true,
-                    "applyRotationY": true,
-                    "applyRotationZ": true,
-                    "cutVisualPositionX": true,
-                    "cutVisualPositionY": true,
-                    "cutVisualPositionZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
                 "animationIndex": 23,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
@@ -630,6 +558,78 @@
                 "events": [],
                 "loop": false,
                 "name": "PlainsDragon_TakeOff",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": true,
+                    "applyRotationY": true,
+                    "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 9,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlainsDragon_FlyStationarySpitFireBall",
                 "rootMotion": {
                     "applyPositionX": true,
                     "applyPositionY": true,
@@ -1021,8 +1021,8 @@
             "inputPin": 0,
             "nodeType": 1,
             "outputPin": 2,
-            "posX": -620.0,
-            "posY": -240.0,
+            "posX": -762.0,
+            "posY": -1096.0,
             "scopeId": "Root",
             "stateName": "__Start__"
         },
@@ -1032,8 +1032,8 @@
             "inputPin": 0,
             "nodeType": 2,
             "outputPin": 4,
-            "posX": -620.0,
-            "posY": 20.0,
+            "posX": -698.0,
+            "posY": -888.0,
             "scopeId": "Root",
             "stateName": "__Any__"
         },
@@ -1043,8 +1043,8 @@
             "inputPin": 6,
             "nodeType": 0,
             "outputPin": 7,
-            "posX": -332.0,
-            "posY": -245.0,
+            "posX": 452.0,
+            "posY": -1077.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_IdleBreathe"
         },
@@ -1204,7 +1204,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_IdleBreathe", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_IdleBreathe",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1215,7 +1220,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_Walk", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Walk",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1226,7 +1236,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_Run", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Run",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1237,7 +1252,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_BiteAttack", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_BiteAttack",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1248,7 +1268,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_SpitFireBall", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_SpitFireBall",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1259,7 +1284,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_SpreadFire", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_SpreadFire",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1270,7 +1300,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_Turn90L_RM", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Turn90L_RM",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1281,7 +1316,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_TakeOff", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_TakeOff",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1292,7 +1332,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_FlyStationary", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_FlyStationary",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1303,7 +1348,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_FlyStationarySpitFireBall", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_FlyStationarySpitFireBall",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1314,7 +1364,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_FlyStationarySpreadFire", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_FlyStationarySpreadFire",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1325,7 +1380,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_FlyStationaryToLanding", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_FlyStationaryToLanding",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1336,7 +1396,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_GetHit1", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_GetHit1",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1347,7 +1412,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "To_PlainsDragon_Death", "threshold": 1.0, "type": 2 }
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Death",
+                    "threshold": 1.0,
+                    "type": 2
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
@@ -1358,7 +1428,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_BiteAttack",
@@ -1369,7 +1444,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_SpitFireBall",
@@ -1380,7 +1460,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_SpreadFire",
@@ -1391,7 +1476,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_Turn90L_RM",
@@ -1402,7 +1492,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_TakeOff",
@@ -1413,7 +1508,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_FlyStationarySpitFireBall",
@@ -1424,7 +1524,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_FlyStationarySpreadFire",
@@ -1435,7 +1540,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_FlyStationaryToLanding",
@@ -1446,7 +1556,12 @@
         },
         {
             "conditions": [
-                { "op": 0, "param": "", "threshold": 0.0, "type": 1 }
+                {
+                    "op": 0,
+                    "param": "",
+                    "threshold": 0.0,
+                    "type": 1
+                }
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_GetHit1",

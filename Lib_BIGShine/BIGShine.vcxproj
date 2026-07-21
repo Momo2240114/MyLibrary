@@ -357,6 +357,8 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CameraShakeComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\AI\AIActionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\AI\AIBehaviorGraph.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\AI\AIControllerComponent.cpp" />
@@ -703,6 +705,8 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CameraShakeComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\AI\AIActionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\AI\AIBlackboardKeys.h" />
     <ClInclude Include="Code\Engine\GamePlay\AI\AIBehaviorGraph.h" />

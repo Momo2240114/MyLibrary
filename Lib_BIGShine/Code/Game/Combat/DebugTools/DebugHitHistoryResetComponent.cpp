@@ -46,6 +46,7 @@ void DebugHitHistoryResetComponent::ApplySettings()
     if (!hitBox_) return;
 
     hitBox_->damage = (std::max)(damage, 0.0f);
+    hitBox_->impactPower = (std::max)(impactPower, 0.0f);
     hitBox_->hitStopDuration = (std::max)(hitStopDuration, 0.0f);
     hitBox_->hitStopScale = (std::clamp)(hitStopScale, 0.0f, 1.0f);
     hitBox_->knockBackPower = (std::max)(knockBackPower, 0.0f);
@@ -68,6 +69,7 @@ void DebugHitHistoryResetComponent::Gui()
 {
     ImGui::Checkbox("Auto Activate", &autoActivate);
     ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f, 99999.0f);
     ImGui::DragFloat("Hit Stop Duration", &hitStopDuration, 0.001f, 0.0f, 10.0f);
     ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f, 99999.0f);
@@ -78,6 +80,7 @@ void DebugHitHistoryResetComponent::Gui()
 void DebugHitHistoryResetComponent::Serialize(nlohmann::json& json_) const
 {
     json_["Damage"] = damage;
+    json_["ImpactPower"] = impactPower;
     json_["HitStopDuration"] = hitStopDuration;
     json_["HitStopScale"] = hitStopScale;
     json_["KnockBackPower"] = knockBackPower;
@@ -88,6 +91,7 @@ void DebugHitHistoryResetComponent::Serialize(nlohmann::json& json_) const
 void DebugHitHistoryResetComponent::Deserialize(const nlohmann::json& json_)
 {
     damage = (std::max)(json_.value("Damage", 5.0f), 0.0f);
+    impactPower = (std::max)(json_.value("ImpactPower", 9.0f), 0.0f);
     hitStopDuration = (std::max)(json_.value("HitStopDuration", 0.05f), 0.0f);
     hitStopScale = (std::clamp)(json_.value("HitStopScale", 0.0f), 0.0f, 1.0f);
     knockBackPower = (std::max)(json_.value("KnockBackPower", 5.0f), 0.0f);

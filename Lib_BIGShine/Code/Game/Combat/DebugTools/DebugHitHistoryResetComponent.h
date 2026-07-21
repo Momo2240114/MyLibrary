@@ -28,6 +28,7 @@ private:
 
     std::weak_ptr<HitBox> hitBox;
     float damage = 5.0f;
+    float impactPower = 9.0f;
     float hitStopDuration = 0.05f;
     float hitStopScale = 0.0f;
     float knockBackPower = 5.0f;

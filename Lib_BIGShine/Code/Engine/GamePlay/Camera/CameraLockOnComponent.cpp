@@ -132,6 +132,7 @@ void CameraLockOnComponent::Start()
 void CameraLockOnComponent::LateUpdate(float deltaTime_)
 {
     ResolveReferences();
+    if (actionSuppressed) return;
     if (!lockOnEnabled)
     {
         ReleaseThirdPersonCamera();
@@ -533,6 +534,12 @@ void CameraLockOnComponent::SetLockOnEnabled(bool enabled_)
         }
         ReleaseThirdPersonCamera();
     }
+}
+
+void CameraLockOnComponent::SetActionSuppressed(bool suppressed_)
+{
+    actionSuppressed = suppressed_;
+    if (!actionSuppressed) ResetTracking();
 }
 
 bool CameraLockOnComponent::IsWallCameraActive() const

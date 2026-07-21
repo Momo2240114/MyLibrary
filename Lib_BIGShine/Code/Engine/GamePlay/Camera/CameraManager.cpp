@@ -89,6 +89,11 @@ std::shared_ptr<CameraComponent> CameraManager::GetActiveCamera() const
     return  m_proxyCamera;
 }
 
+std::shared_ptr<CameraComponent> CameraManager::GetSourceCamera() const
+{
+    return isTransitioning && targetCamera ? targetCamera : activeCameraComponent;
+}
+
 void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)
 {
     if (!nextCam) return;
