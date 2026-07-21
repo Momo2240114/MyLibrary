@@ -4,6 +4,11 @@
         {
             "Data": {
                 "LocalScale": 7.0,
+                "LocalScaleXYZ": [
+                    7.0,
+                    7.0,
+                    7.0
+                ],
                 "MaterialOverrides": [
                     {
                         "alphaCutoff": 0.5,

@@ -43,6 +43,33 @@ DamagePhase : int
 
 ## Minimum Graph Shape
 
+Portfolio layout rule:
+
+```text
+Root
+  Health Phase Gate
+    Collapse / Death Phase
+    Dark Leak Phase
+      Dark Leak State Gate
+        Idle State
+        Battle State
+          Distance / Angle Decision
+            Special SpinSweep
+            UnderBody TakeOff
+            Behind TailSweep
+            Side Turn
+            Close Bite
+            Far Breath
+            Mid FireBall
+            Approach
+    Cracked Phase
+      Cracked State Gate
+    Normal Phase
+      Normal State Gate
+```
+
+Place parent nodes above their children. Inputs should visually enter from the top, and child decisions/actions should flow downward to the next row.
+
 Available PlayAction names:
 
 ```text
