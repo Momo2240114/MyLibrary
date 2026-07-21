@@ -467,8 +467,9 @@ void GltfModelCommponennt::Gui()
 	}
 	ImGui::TextDisabled("Static models update nodes only when their transform or pose changes.");
 
-	if (ImGui::DragFloat("localScale", &localScale, 0.01f,0.0f,100.0f))
+	if (ImGui::DragFloat3("localScale XYZ", &localScaleXYZ.x, 0.01f, 0.0f, 100.0f))
 	{
+		localScale = localScaleXYZ.x;
 		MarkTransformDirty();
 	}
 	ImGui::Checkbox("usedNaviMeshSystemFlg", &usedNaviMeshSystemFlg);
@@ -777,8 +778,7 @@ void GltfModelCommponennt::UpdateNodeTransformOnly(int nodeIndex_)
 		? DirectX::XMMatrixIdentity()
 		: DirectX::XMLoadFloat4x4(&node_.parent->globalTransform);
 	const DirectX::XMMATRIX parentWorldTransform_ = owner_->transform->GetWorldMatrix();
-	const DirectX::XMMATRIX modelScaleMat_ =
-		DirectX::XMMatrixScaling(localScale, localScale, localScale);
+	const DirectX::XMMATRIX modelScaleMat_ = MakeLocalScaleMatrix();
 
 	UpdateNodeRecursive(
 		node_,
@@ -814,6 +814,14 @@ void GltfModelCommponennt::MarkSkinningTransformsDirty()
 	{
 		mesh_.skinningTransformDirty = true;
 	}
+}
+
+DirectX::XMMATRIX GltfModelCommponennt::MakeLocalScaleMatrix() const
+{
+	return DirectX::XMMatrixScaling(
+		localScaleXYZ.x,
+		localScaleXYZ.y,
+		localScaleXYZ.z);
 }
 
 void GltfModelCommponennt::UpdateTransformIfDirty()
@@ -941,7 +949,7 @@ void GltfModelCommponennt::UpdateTransform()
 	{
 		BS_PROFILE_SCOPE("GltfModel::PrepareRootTransform");
 		parentWorldTransform_ = owner_->transform->GetWorldMatrix();
-		modelScaleMat_ = DirectX::XMMatrixScaling(localScale, localScale, localScale);
+		modelScaleMat_ = MakeLocalScaleMatrix();
 	}
 
 	{
@@ -1058,8 +1066,7 @@ void GltfModelCommponennt::UpdateNodeTransformFrom(int nodeIndex_)
 	DirectX::XMMATRIX parentWorldTransform_ =
 		owner_->transform->GetWorldMatrix();
 
-	DirectX::XMMATRIX modelScaleMat_ =
-		DirectX::XMMatrixScaling(localScale, localScale, localScale);
+	DirectX::XMMATRIX modelScaleMat_ = MakeLocalScaleMatrix();
 
 	UpdateNodeRecursive(nodes[nodeIndex_], parentWorldTransform_, modelScaleMat_);
 	MarkSkinningTransformsDirty();
@@ -1384,6 +1391,7 @@ void GltfModelCommponennt::Serialize(nlohmann::json& j) const
 	j["ModelName"] = pathForSave;
 	j["ShaderID"] = static_cast<int>(shaderId);
 	j["LocalScale"] = localScale;
+	j["LocalScaleXYZ"] = { localScaleXYZ.x, localScaleXYZ.y, localScaleXYZ.z };
 	j["StaticModel"] = isStaticModel;
 	j["UsedNaviMeshSystemFlg"] = usedNaviMeshSystemFlg;
 	j["RootMotionName"] = m_RootMotionName;
@@ -1533,6 +1541,23 @@ void GltfModelCommponennt::Deserialize(const nlohmann::json& j)
 
 	if (j.contains("LocalScale")) {
 		localScale = static_cast<float>(j["LocalScale"].get<float>());
+		localScaleXYZ = { localScale, localScale, localScale };
+	}
+	if (j.contains("LocalScaleXYZ")) {
+		const auto& scale_ = j["LocalScaleXYZ"];
+		if (scale_.is_array() && scale_.size() >= 3)
+		{
+			localScaleXYZ.x = scale_.at(0).get<float>();
+			localScaleXYZ.y = scale_.at(1).get<float>();
+			localScaleXYZ.z = scale_.at(2).get<float>();
+		}
+		else if (scale_.is_object())
+		{
+			localScaleXYZ.x = scale_.value("x", localScaleXYZ.x);
+			localScaleXYZ.y = scale_.value("y", localScaleXYZ.y);
+			localScaleXYZ.z = scale_.value("z", localScaleXYZ.z);
+		}
+		localScale = localScaleXYZ.x;
 	}
 	if (j.contains("UsedNaviMeshSystemFlg")) {
 		usedNaviMeshSystemFlg = static_cast<bool>(j["UsedNaviMeshSystemFlg"].get<bool>());

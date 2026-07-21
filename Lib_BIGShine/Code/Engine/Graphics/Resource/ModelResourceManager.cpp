@@ -4,6 +4,7 @@
 #include "GLTFImporter.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Common/Misc.h"
+#include "Engine/Common/DebugLog.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include <fstream>
 #include <cereal/cereal.hpp>
@@ -1053,6 +1054,55 @@ void ModelResourceManager::LoadPreloadSettings(const std::string& filename_)
             if (!asset_.path.empty()) setting_.assets.push_back(asset_);
         }
         preloadSettings[setting_.name] = setting_;
+    }
+}
+
+bool ModelResourceManager::LoadStartupResourceSettings(const std::string& filename_)
+{
+    if (startupResourceSettingsLoaded) return true;
+    startupResourceSettingsLoaded = true;
+
+    const bool loaded_ = startupResourceConfig.Load(filename_);
+    if (!loaded_)
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[StartupResource] Startup resource config was not loaded: " + filename_);
+    }
+    return loaded_;
+}
+
+PreloadHandle ModelResourceManager::RequestStartupCriticalModels()
+{
+    BS_PROFILE_SCOPE("StartupResource::RequestCriticalModels");
+    LoadStartupResourceSettings();
+
+    auto group_ = std::make_shared<PreloadGroupState>();
+    group_->name = "STARTUP_CRITICAL";
+
+    for (const StartupModelEntry& entry_ : startupResourceConfig.GetCriticalModels())
+    {
+        if (entry_.filePath.empty()) continue;
+        group_->handles.push_back(
+            RequestResourceAsync(entry_.filePath, static_cast<int>(PRELOAD_PRIORITY::CRITICAL)));
+    }
+
+    if (group_->handles.empty())
+    {
+        return PreloadHandle();
+    }
+
+    preloadGroups[group_->name] = group_;
+    return PreloadHandle(group_, this);
+}
+
+void ModelResourceManager::RequestStartupHighPriorityModels()
+{
+    BS_PROFILE_SCOPE("StartupResource::RequestHighPriorityModels");
+    LoadStartupResourceSettings();
+
+    for (const StartupModelEntry& entry_ : startupResourceConfig.GetHighPriorityModels())
+    {
+        if (entry_.filePath.empty()) continue;
+        RequestResourceAsync(entry_.filePath, static_cast<int>(PRELOAD_PRIORITY::HIGH));
     }
 }
 

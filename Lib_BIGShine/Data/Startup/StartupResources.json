@@ -1,0 +1,22 @@
+{
+    "criticalModels": [
+        {
+            "filePath": "Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
+            "resourceName": "CombatGirls_Sword_Shield"
+        },
+        {
+            "filePath": "Data/Model/SwordPlayer/Weapon/SwordModel.gltf",
+            "resourceName": "SwordModel"
+        },
+        {
+            "filePath": "Data/Model/SwordPlayer/Weapon/Sword_ShiledModel.gltf",
+            "resourceName": "Sword_ShiledModel"
+        },
+        {
+            "filePath": "Data/Model/Dragon/SK_PlainsDragon.gltf",
+            "resourceName": "SK_PlainsDragon"
+        }
+    ],
+    "highPriorityModels": [],
+    "version": 1
+}

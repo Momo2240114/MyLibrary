@@ -71,6 +71,7 @@ struct PreloadGroupState
 class PreloadHandle
 {
 public:
+    PreloadHandle() = default;
     bool IsValid() const;
     bool IsReady() const;
     bool HasFailed() const;

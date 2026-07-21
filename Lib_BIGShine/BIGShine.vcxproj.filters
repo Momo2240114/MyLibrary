@@ -385,6 +385,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\StartupResourceConfig.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Sprite.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
@@ -481,6 +484,9 @@
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\StartupResourceEditorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\TimeManagerWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -542,6 +548,9 @@
       <Filter>Code\Engine\GamePlay\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Scene\SceneLoading.cpp">
+      <Filter>Code\Engine\GamePlay\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Scene\SceneStartUp.cpp">
       <Filter>Code\Engine\GamePlay\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Scene\SceneManager.cpp">
@@ -977,6 +986,9 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelResourceManager.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\StartupResourceConfig.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Sprite.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
@@ -1098,6 +1110,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\StartupResourceEditorWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\TimeManagerWindow.h">
@@ -1227,6 +1242,9 @@
       <Filter>Code\Engine\GamePlay\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneLoading.h">
+      <Filter>Code\Engine\GamePlay\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Scene\SceneStartUp.h">
       <Filter>Code\Engine\GamePlay\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneManager.h">

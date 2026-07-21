@@ -16,7 +16,7 @@
 #include "Engine/Graphics/RenderSystem/SpriteRenderSystem.h"
 
 #include"Engine/GamePlay/Scene/SceneGame.h"
-#include"Engine/GamePlay/Scene/SceneTitle.h"
+#include"Engine/GamePlay/Scene/SceneStartUp.h"
 
 
 #define SCREEN_WIDTH 1920
@@ -72,10 +72,9 @@ private:
 	}
 
 private:
-	//GraphicsDeviceManager graphicsDeviceManager;
 	SpriteRenderSystem spriteRenderSystem;
 
 	std::unique_ptr<SceneGame> m_pSceneGame;
-	std::unique_ptr<SceneTitle> m_pSceneTitle;
+	std::unique_ptr<SceneStartUp> m_pSceneStartUp;
 };
 

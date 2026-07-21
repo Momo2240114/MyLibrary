@@ -932,15 +932,16 @@ void PlayerControllerComponent::TryConsumeBufferedActionForCancelGate(bool dodge
         return;
     }
 
-    if (actionRuntime.bufferedAction != GetCurrentAction() &&
-        IsPlayerActionTimelineDriven(GetCurrentAction()) &&
-        !actionRuntime.actionEnded)
+    if (!actionRuntime.canActionBranch ||
+        !HasActionBranchTransition(currentAction_, nextAction_))
     {
-        NotifyActionEnd();
         return;
     }
 
-    ConsumeBufferedAction();
+    actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+    actionRuntime.bufferedComboIndex = 0;
+    pendingComboIndex = GetRequestedComboIndex(nextAction_);
+    stateMachine.ChangeState(nextAction_);
 }
 
 void PlayerControllerComponent::NotifyComboTransition()
@@ -1263,7 +1264,11 @@ bool PlayerControllerComponent::IsAirAction(PLAYER_ACTION action_) const
 
 bool PlayerControllerComponent::IsAirborneForAction() const
 {
-    return airborneActionContextActive && !IsGrounded();
+    const PLAYER_ACTION currentAction_ = GetCurrentAction();
+    return !IsGrounded() &&
+        (airborneActionContextActive ||
+            IsAirAction(currentAction_) ||
+            currentAction_ == PLAYER_ACTION::JUMP);
 }
 
 bool PlayerControllerComponent::IsDodgeAction(PLAYER_ACTION action_) const
@@ -1348,6 +1353,13 @@ void PlayerControllerComponent::ProcessActionInput()
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_WEAK_ATTACK : PLAYER_ACTION::WEAK_ATTACK)) return;
+    if (actionRuntime.canActionBranch &&
+        keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
+        RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_STRONG_ATTACK : PLAYER_ACTION::STRONG_ATTACK))
+    {
+        ResetStrongAttackInput();
+        return;
+    }
     if (UpdateStrongAttackInput()) return;
 
     if (keyConfig_.ActionPressed(PlayerInputAction::GUARD))

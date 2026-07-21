@@ -73,16 +73,13 @@ bool framework::initialize()
 	RegisterAllComponents();
 
 	//シーン作成
-	m_pSceneTitle = std::make_unique<SceneTitle>();
+	m_pSceneStartUp = std::make_unique<SceneStartUp>();
 
-	SceneManager::Initialize(std::move(m_pSceneTitle));
-
+	SceneManager::Initialize(std::move(m_pSceneStartUp));
 
 	spriteRenderSystem.Initialize(
 		GraphicsDeviceManager::Instance().GetDevice(),
 		GraphicsDeviceManager::Instance().GetContext());
-
-
 
 	return true;
 }
