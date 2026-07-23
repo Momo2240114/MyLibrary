@@ -7,6 +7,8 @@
 #include "Engine/Math/CollisionMath.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 #include <algorithm>
 #include <cmath>
@@ -62,6 +64,24 @@ namespace
             cross_.z * inverseScale_,
             scale_ * 0.5f).getNormalized();
     }
+
+    void CollectParentModelObjects(
+        const std::shared_ptr<GameObject>& owner_,
+        std::vector<std::shared_ptr<GameObject>>& objects_)
+    {
+        if (!owner_ || !owner_->transform) return;
+
+        std::shared_ptr<Transform> currentParent_ = owner_->transform->parent.lock();
+        while (currentParent_)
+        {
+            std::shared_ptr<GameObject> parentObject_ = currentParent_->gameObject.lock();
+            if (parentObject_ && parentObject_->GetComponent<GltfModelCommponennt>())
+            {
+                objects_.push_back(parentObject_);
+            }
+            currentParent_ = currentParent_->parent.lock();
+        }
+    }
 }
 
 void CapsuleCollider::Gui()
@@ -73,6 +93,35 @@ void CapsuleCollider::Gui()
 
     ImGui::SeparatorText("Node Segment");
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveNodeModel();
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    std::vector<std::shared_ptr<GameObject>> parentModelObjects_;
+    CollectParentModelObjects(owner_, parentModelObjects_);
+
+    std::string modelPreview_ = nodeModelObjectName.empty() ? "(Self)" : nodeModelObjectName;
+    if (ImGui::BeginCombo("Node Model", modelPreview_.c_str()))
+    {
+        if (ImGui::Selectable("(Self)", nodeModelObjectName.empty()))
+        {
+            nodeModelObjectName.clear();
+            startNodeIndex = -1;
+            endNodeIndex = -1;
+        }
+
+        for (const std::shared_ptr<GameObject>& parentObject_ : parentModelObjects_)
+        {
+            if (!parentObject_) continue;
+            const std::string& parentName_ = parentObject_->GetName();
+            if (ImGui::Selectable(parentName_.c_str(), nodeModelObjectName == parentName_))
+            {
+                nodeModelObjectName = parentName_;
+                startNodeIndex = -1;
+                endNodeIndex = -1;
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
     auto drawNodeCombo_ = [this, &model_](
         const char* label_,
         std::string& nodeName_,
@@ -102,7 +151,7 @@ void CapsuleCollider::Gui()
             }
             else
             {
-                ImGui::TextDisabled("This GameObject has no GLTF model.");
+                ImGui::TextDisabled("Selected GameObject has no ready GLTF model.");
             }
             ImGui::EndCombo();
         };
@@ -164,6 +213,7 @@ void CapsuleCollider::Serialize(nlohmann::json& json_) const
     ColliderComponent::Serialize(json_);
     json_["Radius"] = radius;
     json_["HalfHeight"] = halfHeight;
+    json_["NodeModelObjectName"] = nodeModelObjectName;
     json_["StartNodeName"] = startNodeName;
     json_["EndNodeName"] = endNodeName;
 }
@@ -173,6 +223,7 @@ void CapsuleCollider::Deserialize(const nlohmann::json& json_)
     ColliderComponent::Deserialize(json_);
     radius = json_.value("Radius", 0.5f);
     halfHeight = json_.value("HalfHeight", 1.0f);
+    nodeModelObjectName = json_.value("NodeModelObjectName", std::string{});
     startNodeName = json_.value("StartNodeName", std::string{});
     endNodeName = json_.value("EndNodeName", std::string{});
     startNodeIndex = -1;
@@ -192,7 +243,26 @@ void CapsuleCollider::OnPhysicsShapePrepared()
 std::shared_ptr<GltfModelCommponennt> CapsuleCollider::ResolveNodeModel()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
-    return owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
+    if (!owner_) return nullptr;
+
+    std::shared_ptr<GltfModelCommponennt> model_;
+    if (!nodeModelObjectName.empty() && owner_->manager)
+    {
+        const std::shared_ptr<GameObject> targetObject_ =
+            owner_->GetManager().Find(nodeModelObjectName);
+        if (targetObject_) model_ = targetObject_->GetComponent<GltfModelCommponennt>();
+    }
+    else
+    {
+        model_ = owner_->GetComponent<GltfModelCommponennt>();
+    }
+
+    if (model_)
+    {
+        model_->UpdateLoadState();
+        if (!model_->IsModelReady()) return nullptr;
+    }
+    return model_;
 }
 
 bool CapsuleCollider::ResolveNodeIndex(

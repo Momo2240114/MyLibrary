@@ -90,6 +90,13 @@ private:
 
     DragonTailIKCommand currentCommand;
     float commandTimer = 0.0f;
+    float currentYawDegrees = 0.0f;
+    float currentPitchDegrees = 0.0f;
+    float currentRollDegrees = 0.0f;
+    float targetYawDegrees = 0.0f;
+    float targetPitchDegrees = 0.0f;
+    float targetRollDegrees = 0.0f;
+    float followSpeed = 6.0f;
     bool attackActive = false;
 
     void UnregisterActions();

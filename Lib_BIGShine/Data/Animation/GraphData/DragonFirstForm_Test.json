@@ -509,6 +509,79 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
+                "animationIndex": 25,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlainsDragon_Turn90R_RM",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": true,
+                    "applyRotationY": true,
+                    "applyRotationZ": true,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0,
+                "TODO": "Temporary copy of PlainsDragon_Turn90L_RM until a right-turn animation clip is registered."
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
                 "animationIndex": 23,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
@@ -1021,8 +1094,8 @@
             "inputPin": 0,
             "nodeType": 1,
             "outputPin": 2,
-            "posX": -762.0,
-            "posY": -1096.0,
+            "posX": -780.0,
+            "posY": -120.0,
             "scopeId": "Root",
             "stateName": "__Start__"
         },
@@ -1032,8 +1105,8 @@
             "inputPin": 0,
             "nodeType": 2,
             "outputPin": 4,
-            "posX": -698.0,
-            "posY": -888.0,
+            "posX": -780.0,
+            "posY": 80.0,
             "scopeId": "Root",
             "stateName": "__Any__"
         },
@@ -1043,8 +1116,8 @@
             "inputPin": 6,
             "nodeType": 0,
             "outputPin": 7,
-            "posX": 452.0,
-            "posY": -1077.0,
+            "posX": -360.0,
+            "posY": 0.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_IdleBreathe"
         },
@@ -1054,8 +1127,8 @@
             "inputPin": 9,
             "nodeType": 0,
             "outputPin": 10,
-            "posX": 16.0,
-            "posY": -837.0,
+            "posX": 80.0,
+            "posY": -760.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Walk"
         },
@@ -1065,8 +1138,8 @@
             "inputPin": 12,
             "nodeType": 0,
             "outputPin": 13,
-            "posX": 0.0,
-            "posY": -677.0,
+            "posX": 80.0,
+            "posY": -640.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Run"
         },
@@ -1076,10 +1149,10 @@
             "inputPin": 15,
             "nodeType": 0,
             "outputPin": 16,
-            "posX": -12.0,
-            "posY": -517.0,
+            "posX": 80.0,
+            "posY": -520.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_BiteAttack"
+            "stateName": "PlainsDragon_Turn90L_RM"
         },
         {
             "childScopeId": "",
@@ -1087,10 +1160,10 @@
             "inputPin": 18,
             "nodeType": 0,
             "outputPin": 19,
-            "posX": -16.0,
-            "posY": -357.0,
+            "posX": 80.0,
+            "posY": -400.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_SpitFireBall"
+            "stateName": "PlainsDragon_Turn90R_RM"
         },
         {
             "childScopeId": "",
@@ -1098,10 +1171,10 @@
             "inputPin": 21,
             "nodeType": 0,
             "outputPin": 22,
-            "posX": -28.0,
-            "posY": -53.0,
+            "posX": 80.0,
+            "posY": -280.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_SpreadFire"
+            "stateName": "PlainsDragon_BiteAttack"
         },
         {
             "childScopeId": "",
@@ -1109,10 +1182,10 @@
             "inputPin": 24,
             "nodeType": 0,
             "outputPin": 25,
-            "posX": -28.0,
-            "posY": 107.0,
+            "posX": 80.0,
+            "posY": -160.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_Turn90L_RM"
+            "stateName": "PlainsDragon_SpitFireBall"
         },
         {
             "childScopeId": "",
@@ -1120,10 +1193,10 @@
             "inputPin": 27,
             "nodeType": 0,
             "outputPin": 28,
-            "posX": -28.0,
-            "posY": -213.0,
+            "posX": 80.0,
+            "posY": -40.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_TakeOff"
+            "stateName": "PlainsDragon_SpreadFire"
         },
         {
             "childScopeId": "",
@@ -1131,10 +1204,10 @@
             "inputPin": 30,
             "nodeType": 0,
             "outputPin": 31,
-            "posX": -16.0,
-            "posY": 251.0,
+            "posX": 80.0,
+            "posY": 80.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_FlyStationary"
+            "stateName": "PlainsDragon_TakeOff"
         },
         {
             "childScopeId": "",
@@ -1142,10 +1215,10 @@
             "inputPin": 33,
             "nodeType": 0,
             "outputPin": 34,
-            "posX": -12.0,
-            "posY": 395.0,
+            "posX": 80.0,
+            "posY": 200.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_FlyStationarySpitFireBall"
+            "stateName": "PlainsDragon_FlyStationary"
         },
         {
             "childScopeId": "",
@@ -1153,10 +1226,10 @@
             "inputPin": 36,
             "nodeType": 0,
             "outputPin": 37,
-            "posX": -12.0,
-            "posY": 555.0,
+            "posX": 80.0,
+            "posY": 320.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_FlyStationarySpreadFire"
+            "stateName": "PlainsDragon_FlyStationarySpitFireBall"
         },
         {
             "childScopeId": "",
@@ -1164,10 +1237,10 @@
             "inputPin": 39,
             "nodeType": 0,
             "outputPin": 40,
-            "posX": -12.0,
-            "posY": 763.0,
+            "posX": 80.0,
+            "posY": 440.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_FlyStationaryToLanding"
+            "stateName": "PlainsDragon_FlyStationarySpreadFire"
         },
         {
             "childScopeId": "",
@@ -1175,10 +1248,10 @@
             "inputPin": 42,
             "nodeType": 0,
             "outputPin": 43,
-            "posX": -16.0,
-            "posY": 939.0,
+            "posX": 80.0,
+            "posY": 560.0,
             "scopeId": "Root",
-            "stateName": "PlainsDragon_GetHit1"
+            "stateName": "PlainsDragon_FlyStationaryToLanding"
         },
         {
             "childScopeId": "",
@@ -1186,8 +1259,19 @@
             "inputPin": 45,
             "nodeType": 0,
             "outputPin": 46,
-            "posX": -28.0,
-            "posY": 1115.0,
+            "posX": 80.0,
+            "posY": 680.0,
+            "scopeId": "Root",
+            "stateName": "PlainsDragon_GetHit1"
+        },
+        {
+            "childScopeId": "",
+            "id": 47,
+            "inputPin": 48,
+            "nodeType": 0,
+            "outputPin": 49,
+            "posX": 80.0,
+            "posY": 800.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Death"
         }
@@ -1195,9 +1279,9 @@
     "GraphTransitions": [
         {
             "conditions": [],
-            "duration": 0.20000000298023224,
+            "duration": 0.2,
             "from": "__Start__",
-            "id": 47,
+            "id": 50,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_IdleBreathe"
@@ -1211,9 +1295,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
+            "duration": 0.2,
             "from": "__Any__",
-            "id": 48,
+            "id": 51,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_IdleBreathe"
@@ -1227,9 +1311,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 49,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 52,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Walk"
@@ -1243,12 +1327,44 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 50,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 53,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Run"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Turn90L_RM",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 54,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_Turn90L_RM"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Turn90R_RM",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 55,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_Turn90R_RM"
         },
         {
             "conditions": [
@@ -1259,9 +1375,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 51,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 56,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_BiteAttack"
@@ -1275,9 +1391,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 52,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 57,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_SpitFireBall"
@@ -1291,28 +1407,12 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 53,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 58,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_SpreadFire"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Turn90L_RM",
-                    "threshold": 1.0,
-                    "type": 2
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 54,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_Turn90L_RM"
         },
         {
             "conditions": [
@@ -1323,9 +1423,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 55,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 59,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_TakeOff"
@@ -1339,9 +1439,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 56,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 60,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationary"
@@ -1355,9 +1455,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 57,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 61,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationarySpitFireBall"
@@ -1371,9 +1471,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 58,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 62,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationarySpreadFire"
@@ -1387,9 +1487,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 59,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 63,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationaryToLanding"
@@ -1403,9 +1503,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 60,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 64,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_GetHit1"
@@ -1419,9 +1519,9 @@
                     "type": 2
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 61,
+            "duration": 0.2,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 65,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Death"
@@ -1430,125 +1530,61 @@
             "conditions": [
                 {
                     "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_BiteAttack",
-            "id": 62,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_IdleBreathe"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_SpitFireBall",
-            "id": 63,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_IdleBreathe"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_SpreadFire",
-            "id": 64,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_IdleBreathe"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_Turn90L_RM",
-            "id": 65,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_IdleBreathe"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_TakeOff",
+            "duration": 0.2,
+            "from": "PlainsDragon_Walk",
             "id": 66,
             "logic": 0,
             "scopeId": "Root",
-            "to": "PlainsDragon_FlyStationary"
+            "to": "PlainsDragon_IdleBreathe"
         },
         {
             "conditions": [
                 {
                     "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_FlyStationarySpitFireBall",
+            "duration": 0.2,
+            "from": "PlainsDragon_Run",
             "id": 67,
             "logic": 0,
             "scopeId": "Root",
-            "to": "PlainsDragon_FlyStationary"
+            "to": "PlainsDragon_IdleBreathe"
         },
         {
             "conditions": [
                 {
                     "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_FlyStationarySpreadFire",
+            "duration": 0.2,
+            "from": "PlainsDragon_Turn90L_RM",
             "id": 68,
             "logic": 0,
             "scopeId": "Root",
-            "to": "PlainsDragon_FlyStationary"
+            "to": "PlainsDragon_IdleBreathe"
         },
         {
             "conditions": [
                 {
                     "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_FlyStationaryToLanding",
+            "duration": 0.2,
+            "from": "PlainsDragon_Turn90R_RM",
             "id": 69,
             "logic": 0,
             "scopeId": "Root",
@@ -1558,14 +1594,142 @@
             "conditions": [
                 {
                     "op": 0,
-                    "param": "",
-                    "threshold": 0.0,
-                    "type": 1
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
                 }
             ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_GetHit1",
+            "duration": 0.2,
+            "from": "PlainsDragon_BiteAttack",
             "id": 70,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_SpitFireBall",
+            "id": 71,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_SpreadFire",
+            "id": 72,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_TakeOff",
+            "id": 73,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_FlyStationary",
+            "id": 74,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_FlyStationarySpitFireBall",
+            "id": 75,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_FlyStationarySpreadFire",
+            "id": 76,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_FlyStationaryToLanding",
+            "id": 77,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ActionEnded",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.2,
+            "from": "PlainsDragon_GetHit1",
+            "id": 78,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_IdleBreathe"

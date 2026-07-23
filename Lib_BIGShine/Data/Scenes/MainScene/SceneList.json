@@ -82,6 +82,13 @@
         "RockWall_07",
         "Wall",
         "TestTarget",
+        " CollisionRoot",
+        "HurtBoxRoot",
+        "HeadHurtBox",
+        "AttackHitBoxRoot",
+        "BiteHitBox",
+        "PhysicalRoot",
+        " ChestPhysical",
         "GameObject",
         "TestDamegeBox",
         "JustDodgeEventPool"

@@ -1,0 +1,43 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "attackerAirLiftPower": 5.0,
+        "damage": 10.0,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.4000000059604645,
+        "hitStopScale": 0.6000000238418579,
+        "impactPower": 15.0,
+        "knockBackPower": 3.0,
+        "knockBackType": 0,
+        "targetAirLiftPower": 0.0
+    },
+    "attackEffects": [],
+    "displayName": "Attack_Air_Strong",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 1.0,
+        "hitParticleNormalOffset": 0.0,
+        "spawnOnHit": true
+    },
+    "id": "Attack_Air_Strong",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.18000000715255737,
+        "activeStartTime": 0.0,
+        "enabled": true,
+        "endNodeName": "WeaponTip",
+        "hitBoxName": "Sword",
+        "radius": 0.18000000715255737,
+        "startNodeName": "WeaponRoot"
+    }
+}

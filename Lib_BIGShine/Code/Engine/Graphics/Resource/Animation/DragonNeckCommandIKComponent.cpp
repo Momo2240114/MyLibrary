@@ -19,6 +19,7 @@ namespace
 {
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
+    constexpr float EPSILON = 0.00001f;
     constexpr const char* ACTION_CLEAR = "DragonNeck_Clear";
     constexpr const char* ACTION_LOOK_LEFT = "DragonNeck_LookLeft";
     constexpr const char* ACTION_LOOK_RIGHT = "DragonNeck_LookRight";
@@ -40,7 +41,7 @@ namespace
             value_.y * value_.y +
             value_.z * value_.z);
 
-        if (length_ <= 0.00001f) return { 0.0f, 0.0f, 0.0f };
+        if (length_ <= EPSILON) return { 0.0f, 0.0f, 0.0f };
 
         return {
             value_.x / length_,
@@ -72,6 +73,40 @@ namespace
         const float horizontalLength_ =
             std::sqrt(direction_.x * direction_.x + direction_.z * direction_.z);
         return std::atan2(direction_.y, horizontalLength_) * RAD_TO_DEG;
+    }
+
+    bool IsFinite(float value_)
+    {
+        return std::isfinite(value_);
+    }
+
+    bool IsFinite(const DirectX::XMFLOAT3& value_)
+    {
+        return IsFinite(value_.x) && IsFinite(value_.y) && IsFinite(value_.z);
+    }
+
+    bool IsFinite(const DirectX::XMFLOAT4& value_)
+    {
+        return IsFinite(value_.x) && IsFinite(value_.y) && IsFinite(value_.z) && IsFinite(value_.w);
+    }
+
+    float LengthSquared(const DirectX::XMVECTOR& value_)
+    {
+        return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(value_));
+    }
+
+    bool TryNormalizeVector(DirectX::XMVECTOR& value_)
+    {
+        if (LengthSquared(value_) <= EPSILON * EPSILON) return false;
+        value_ = DirectX::XMVector3Normalize(value_);
+        return true;
+    }
+
+    bool TryStoreNormalizedVector(DirectX::XMFLOAT3& result_, DirectX::XMVECTOR value_)
+    {
+        if (!TryNormalizeVector(value_)) return false;
+        DirectX::XMStoreFloat3(&result_, value_);
+        return IsFinite(result_);
     }
 }
 
@@ -396,8 +431,6 @@ bool DragonNeckCommandIKComponent::ResolveTargetPosition(DirectX::XMFLOAT3& targ
 
 bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 {
-    (void)deltaTime_;
-
     auto* chain_ = ikMap->FindChain(chainName);
     if (!chain_ || !chain_->enabled) return false;
     if (!ikMap->ResolveChainByName(chainName)) return false;
@@ -405,12 +438,30 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 
     auto& nodes_ = model->GetNodes();
 
-    float targetYawDegrees_ = 0.0f;
-    float targetPitchDegrees_ = currentCommand.pitchOffsetDegrees;
+    const size_t boneCount_ = chain_->nodeIndices.size();
+    for (const int nodeIndex_ : chain_->nodeIndices)
+    {
+        if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+    }
+
+    std::vector<DirectX::XMFLOAT4> animationRotations_;
+    std::vector<DirectX::XMFLOAT4X4> animationWorldTransforms_;
+    animationRotations_.reserve(boneCount_);
+    animationWorldTransforms_.reserve(boneCount_);
+
+    for (const int nodeIndex_ : chain_->nodeIndices)
+    {
+        animationRotations_.push_back(nodes_.at(nodeIndex_).rotation);
+        animationWorldTransforms_.push_back(nodes_.at(nodeIndex_).worldTransform);
+    }
+
+    targetYawDegrees = 0.0f;
+    targetPitchDegrees = 0.0f;
 
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::FIXED_YAW_OFFSET)
     {
-        targetYawDegrees_ = currentCommand.startYawDegrees;
+        targetYawDegrees = currentCommand.startYawDegrees;
+        targetPitchDegrees = currentCommand.pitchOffsetDegrees;
     }
     else if (currentCommand.mode == DRAGON_NECK_IK_MODE::SWEEP_YAW)
     {
@@ -421,86 +472,217 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
                 0.0f,
                 1.0f);
 
-        targetYawDegrees_ =
+        targetYawDegrees =
             currentCommand.startYawDegrees +
             (currentCommand.endYawDegrees - currentCommand.startYawDegrees) * SmoothStep(t_);
+        targetPitchDegrees = currentCommand.pitchOffsetDegrees;
     }
-    else
+    else if (currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_TARGET ||
+        currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_WORLD_POSITION)
     {
         DirectX::XMFLOAT3 targetPosition_;
-        if (!ResolveTargetPosition(targetPosition_)) return false;
+        if (ResolveTargetPosition(targetPosition_))
+        {
+            const int aimBaseNodeIndex_ = chain_->nodeIndices[boneCount_ - 2];
+            const int aimTipNodeIndex_ = chain_->nodeIndices[boneCount_ - 1];
+            const auto& aimBaseNode_ = nodes_.at(aimBaseNodeIndex_);
+            const auto& aimTipNode_ = nodes_.at(aimTipNodeIndex_);
 
-        const int rootNodeIndex_ = chain_->nodeIndices.front();
-        const auto& rootNode_ = nodes_.at(rootNodeIndex_);
-        const DirectX::XMMATRIX rootWorldMatrix_ =
-            DirectX::XMLoadFloat4x4(&rootNode_.worldTransform);
-        const DirectX::XMMATRIX inverseRootWorldMatrix_ =
-            DirectX::XMMatrixInverse(nullptr, rootWorldMatrix_);
-        DirectX::XMFLOAT3 localTargetPosition_;
-        DirectX::XMStoreFloat3(
-            &localTargetPosition_,
-            DirectX::XMVector3TransformCoord(
+            const DirectX::XMMATRIX aimBaseWorldMatrix_ =
+                DirectX::XMLoadFloat4x4(&aimBaseNode_.worldTransform);
+            const DirectX::XMMATRIX inverseAimBaseWorldMatrix_ =
+                DirectX::XMMatrixInverse(nullptr, aimBaseWorldMatrix_);
+            const DirectX::XMMATRIX aimTipWorldMatrix_ =
+                DirectX::XMLoadFloat4x4(&aimTipNode_.worldTransform);
+
+            const DirectX::XMFLOAT3 aimTipWorldPosition_ = GetTranslation(aimTipNode_.worldTransform);
+            DirectX::XMVECTOR currentForwardWorld_ = DirectX::XMVector3TransformNormal(
+                DirectX::XMLoadFloat3(&localForwardAxis),
+                aimTipWorldMatrix_);
+            DirectX::XMVECTOR targetDirectionWorld_ = DirectX::XMVectorSubtract(
                 DirectX::XMLoadFloat3(&targetPosition_),
-                inverseRootWorldMatrix_));
-        const DirectX::XMFLOAT3 toTarget_ = Normalize(localTargetPosition_);
+                DirectX::XMLoadFloat3(&aimTipWorldPosition_));
 
-        if (toTarget_.x == 0.0f && toTarget_.y == 0.0f && toTarget_.z == 0.0f) return false;
+            if (TryNormalizeVector(currentForwardWorld_) &&
+                TryNormalizeVector(targetDirectionWorld_))
+            {
+                DirectX::XMFLOAT3 currentForwardInAimBase_;
+                DirectX::XMFLOAT3 targetDirectionInAimBase_;
 
-        const DirectX::XMFLOAT3 forwardAxis_ = Normalize(localForwardAxis);
-        const float baseYawDegrees_ = CalculateYawDegrees(forwardAxis_);
-        const float basePitchDegrees_ = CalculatePitchDegrees(forwardAxis_);
+                if (TryStoreNormalizedVector(
+                    currentForwardInAimBase_,
+                    DirectX::XMVector3TransformNormal(currentForwardWorld_, inverseAimBaseWorldMatrix_)) &&
+                    TryStoreNormalizedVector(
+                        targetDirectionInAimBase_,
+                        DirectX::XMVector3TransformNormal(targetDirectionWorld_, inverseAimBaseWorldMatrix_)))
+                {
+                    targetYawDegrees =
+                        NormalizeAngleDegrees(
+                            CalculateYawDegrees(targetDirectionInAimBase_) -
+                            CalculateYawDegrees(currentForwardInAimBase_)) +
+                        currentCommand.yawOffsetDegrees;
 
-        targetYawDegrees_ =
-            NormalizeAngleDegrees(CalculateYawDegrees(toTarget_) - baseYawDegrees_) +
-            currentCommand.yawOffsetDegrees;
-        targetPitchDegrees_ =
-            NormalizeAngleDegrees(CalculatePitchDegrees(toTarget_) - basePitchDegrees_) +
-            currentCommand.pitchOffsetDegrees;
+                    targetPitchDegrees =
+                        NormalizeAngleDegrees(
+                            CalculatePitchDegrees(targetDirectionInAimBase_) -
+                            CalculatePitchDegrees(currentForwardInAimBase_)) +
+                        currentCommand.pitchOffsetDegrees;
+                }
+            }
+        }
     }
 
-    targetYawDegrees_ = std::clamp(
-        targetYawDegrees_,
+    targetYawDegrees = std::clamp(
+        targetYawDegrees,
         -currentCommand.maxYawDegrees,
         currentCommand.maxYawDegrees);
 
-    targetPitchDegrees_ = std::clamp(
-        targetPitchDegrees_,
+    targetPitchDegrees = std::clamp(
+        targetPitchDegrees,
         -currentCommand.maxPitchDegrees,
         currentCommand.maxPitchDegrees);
 
-    const float blendRate_ = CalculateBlendRate() * std::clamp(chain_->influence, 0.0f, 1.0f);
-    if (blendRate_ <= 0.0001f) return false;
+    const float safeDeltaTime_ = std::clamp(deltaTime_, 0.0f, 0.1f);
+    const float followRate_ =
+        1.0f - std::exp(-(std::max)(followSpeed, 0.0f) * safeDeltaTime_);
 
-    const size_t boneCount_ = chain_->nodeIndices.size();
+    currentYawDegrees +=
+        NormalizeAngleDegrees(targetYawDegrees - currentYawDegrees) * followRate_;
+    currentPitchDegrees +=
+        (targetPitchDegrees - currentPitchDegrees) * followRate_;
+
+    if (std::abs(currentYawDegrees) < 0.01f &&
+        std::abs(currentPitchDegrees) < 0.01f &&
+        currentCommand.mode == DRAGON_NECK_IK_MODE::DISABLED)
+    {
+        currentYawDegrees = 0.0f;
+        currentPitchDegrees = 0.0f;
+    }
+
+    if (!IsFinite(currentYawDegrees) || !IsFinite(currentPitchDegrees))
+    {
+        currentYawDegrees = 0.0f;
+        currentPitchDegrees = 0.0f;
+        return false;
+    }
+
+    const float commandInfluence_ = currentCommand.mode == DRAGON_NECK_IK_MODE::DISABLED
+        ? 1.0f
+        : CalculateBlendRate();
+    const float influence_ = commandInfluence_ * std::clamp(chain_->influence, 0.0f, 1.0f);
+
+    if (currentCommand.mode != DRAGON_NECK_IK_MODE::DISABLED &&
+        commandInfluence_ <= 0.0001f &&
+        commandTimer >= currentCommand.blendInTime + currentCommand.duration)
+    {
+        currentYawDegrees = 0.0f;
+        currentPitchDegrees = 0.0f;
+        return false;
+    }
+
+    if (influence_ <= 0.0001f ||
+        (std::abs(currentYawDegrees) < 0.01f && std::abs(currentPitchDegrees) < 0.01f))
+    {
+        return false;
+    }
+
+    const DirectX::XMMATRIX aimBaseWorldMatrix_ =
+        DirectX::XMLoadFloat4x4(&nodes_.at(chain_->nodeIndices[boneCount_ - 2]).worldTransform);
+    DirectX::XMVECTOR aimYawAxisWorld_ = DirectX::XMVector3TransformNormal(
+        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),
+        aimBaseWorldMatrix_);
+    DirectX::XMVECTOR aimPitchAxisWorld_ = DirectX::XMVector3TransformNormal(
+        DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),
+        aimBaseWorldMatrix_);
+
+    if (!TryNormalizeVector(aimYawAxisWorld_) || !TryNormalizeVector(aimPitchAxisWorld_)) return false;
+
+    std::vector<float> yawWeights_(boneCount_, 0.0f);
+    std::vector<float> pitchWeights_(boneCount_, 0.0f);
+    float yawWeightTotal_ = 0.0f;
+    float pitchWeightTotal_ = 0.0f;
+
+    for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
+    {
+        const float normalizedPosition_ = boneCount_ <= 1
+            ? 1.0f
+            : static_cast<float>(boneIndex_) / static_cast<float>(boneCount_ - 1);
+
+        yawWeights_[boneIndex_] = 0.25f + normalizedPosition_ * normalizedPosition_;
+        pitchWeights_[boneIndex_] =
+            0.10f + normalizedPosition_ * normalizedPosition_ * normalizedPosition_;
+        yawWeightTotal_ += yawWeights_[boneIndex_];
+        pitchWeightTotal_ += pitchWeights_[boneIndex_];
+    }
+
+    for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
+    {
+        if (yawWeightTotal_ > EPSILON) yawWeights_[boneIndex_] /= yawWeightTotal_;
+        if (pitchWeightTotal_ > EPSILON) pitchWeights_[boneIndex_] /= pitchWeightTotal_;
+    }
+
     for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
     {
         const int nodeIndex_ = chain_->nodeIndices[boneIndex_];
         auto& node_ = nodes_.at(nodeIndex_);
 
-        const float boneRate_ = boneCount_ <= 1
-            ? 1.0f
-            : static_cast<float>(boneIndex_) / static_cast<float>(boneCount_ - 1);
+        const DirectX::XMFLOAT4X4* parentWorldTransform_ = nullptr;
+        if (node_.parentIndex >= 0)
+        {
+            const auto parentIterator_ = std::find(
+                chain_->nodeIndices.begin(),
+                chain_->nodeIndices.end(),
+                node_.parentIndex);
 
-        const float weight_ =
-            currentCommand.rootWeight +
-            (currentCommand.tipWeight - currentCommand.rootWeight) * boneRate_;
+            if (parentIterator_ != chain_->nodeIndices.end())
+            {
+                parentWorldTransform_ =
+                    &animationWorldTransforms_[std::distance(chain_->nodeIndices.begin(), parentIterator_)];
+            }
+            else if (node_.parentIndex < static_cast<int>(nodes_.size()))
+            {
+                parentWorldTransform_ = &nodes_.at(node_.parentIndex).worldTransform;
+            }
+        }
 
-        const float yawRadians_ = targetYawDegrees_ * DEG_TO_RAD * weight_ * blendRate_;
-        const float pitchRadians_ = targetPitchDegrees_ * DEG_TO_RAD * weight_ * blendRate_;
+        DirectX::XMMATRIX parentWorldMatrix_ = DirectX::XMMatrixIdentity();
+        if (parentWorldTransform_)
+        {
+            parentWorldMatrix_ = DirectX::XMLoadFloat4x4(parentWorldTransform_);
+        }
 
-        const DirectX::XMVECTOR localRotation_ = DirectX::XMLoadFloat4(&node_.rotation);
+        const DirectX::XMMATRIX inverseParentWorldMatrix_ =
+            DirectX::XMMatrixInverse(nullptr, parentWorldMatrix_);
+        DirectX::XMVECTOR boneYawAxisLocal_ =
+            DirectX::XMVector3TransformNormal(aimYawAxisWorld_, inverseParentWorldMatrix_);
+        DirectX::XMVECTOR bonePitchAxisLocal_ =
+            DirectX::XMVector3TransformNormal(aimPitchAxisWorld_, inverseParentWorldMatrix_);
+
+        if (!TryNormalizeVector(boneYawAxisLocal_) || !TryNormalizeVector(bonePitchAxisLocal_)) continue;
+
+        const float yawRadians_ = currentYawDegrees * DEG_TO_RAD * yawWeights_[boneIndex_] * influence_;
+        const float pitchRadians_ = currentPitchDegrees * DEG_TO_RAD * pitchWeights_[boneIndex_] * influence_;
+
+        const DirectX::XMVECTOR animationRotation_ =
+            DirectX::XMLoadFloat4(&animationRotations_[boneIndex_]);
         const DirectX::XMVECTOR yawRotation_ = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),
+            boneYawAxisLocal_,
             yawRadians_);
 
         const DirectX::XMVECTOR pitchRotation_ = DirectX::XMQuaternionRotationAxis(
-            DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),
+            bonePitchAxisLocal_,
             pitchRadians_);
 
+        const DirectX::XMVECTOR commandRotation_ =
+            DirectX::XMQuaternionMultiply(pitchRotation_, yawRotation_);
         const DirectX::XMVECTOR resultRotation_ = DirectX::XMQuaternionNormalize(
-            DirectX::XMQuaternionMultiply(localRotation_, DirectX::XMQuaternionMultiply(pitchRotation_, yawRotation_)));
+            DirectX::XMQuaternionMultiply(animationRotation_, commandRotation_));
 
-        DirectX::XMStoreFloat4(&node_.rotation, resultRotation_);
+        DirectX::XMFLOAT4 resultRotationStorage_;
+        DirectX::XMStoreFloat4(&resultRotationStorage_, resultRotation_);
+        if (!IsFinite(resultRotationStorage_)) continue;
+
+        node_.rotation = resultRotationStorage_;
         model->UpdateNodeTransformOnly(nodeIndex_);
     }
 
@@ -601,6 +783,21 @@ void DragonNeckCommandIKComponent::Gui()
     ImGui::DragFloat("Look Base Pitch", &lookTargetPitchOffsetDegrees, 0.5f, -90.0f, 90.0f);
     ImGui::DragFloat("Look Max Yaw", &lookTargetMaxYawDegrees, 0.5f, 0.0f, 180.0f);
     ImGui::DragFloat("Look Max Pitch", &lookTargetMaxPitchDegrees, 0.5f, 0.0f, 90.0f);
+    ImGui::DragFloat("Follow Speed", &followSpeed, 0.1f, 0.1f, 30.0f);
+    ImGui::Text("Target Yaw: %.2f", targetYawDegrees);
+    ImGui::Text("Target Pitch: %.2f", targetPitchDegrees);
+    ImGui::Text("Current Yaw: %.2f", currentYawDegrees);
+    ImGui::Text("Current Pitch: %.2f", currentPitchDegrees);
+    if (ikMap)
+    {
+        const auto* chain_ = ikMap->FindChain(chainName);
+        ImGui::Text("Chain Bones: %d", chain_ ? static_cast<int>(chain_->nodeIndices.size()) : 0);
+        if (chain_ && chain_->nodeIndices.size() >= 2)
+        {
+            ImGui::Text("Aim Base Index: %d", chain_->nodeIndices[chain_->nodeIndices.size() - 2]);
+            ImGui::Text("Aim Tip Index: %d", chain_->nodeIndices.back());
+        }
+    }
     if (ImGui::Button("Look Target Now"))
     {
         SetTargetObjectLookMode(true);
@@ -663,6 +860,7 @@ void DragonNeckCommandIKComponent::Serialize(nlohmann::json& json_) const
     json_["LookTargetPitchOffsetDegrees"] = lookTargetPitchOffsetDegrees;
     json_["LookTargetMaxYawDegrees"] = lookTargetMaxYawDegrees;
     json_["LookTargetMaxPitchDegrees"] = lookTargetMaxPitchDegrees;
+    json_["FollowSpeed"] = followSpeed;
 }
 
 void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
@@ -711,6 +909,7 @@ void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
     lookTargetPitchOffsetDegrees = json_.value("LookTargetPitchOffsetDegrees", 0.0f);
     lookTargetMaxYawDegrees = json_.value("LookTargetMaxYawDegrees", 65.0f);
     lookTargetMaxPitchDegrees = json_.value("LookTargetMaxPitchDegrees", 35.0f);
+    followSpeed = json_.value("FollowSpeed", 6.0f);
 
     RegisterActions();
     if (lookTargetObjectMode)

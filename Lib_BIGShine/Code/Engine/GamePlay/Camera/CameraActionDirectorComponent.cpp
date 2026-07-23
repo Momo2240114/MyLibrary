@@ -53,6 +53,7 @@ namespace
         {
         case CAMERA_ACTION_POSITION_MODE::TARGET_LOCAL_RELATIVE: return "TARGET_LOCAL_RELATIVE";
         case CAMERA_ACTION_POSITION_MODE::PLAYER_FORWARD_RELATIVE: return "PLAYER_FORWARD_RELATIVE";
+        case CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE: return "TPS_VIEW_RELATIVE";
         case CAMERA_ACTION_POSITION_MODE::WORLD_POSITION: return "WORLD_POSITION";
         case CAMERA_ACTION_POSITION_MODE::CURRENT_CAMERA_RELATIVE:
         default:
@@ -74,6 +75,7 @@ namespace
     {
         if (value_ == "TARGET_LOCAL_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TARGET_LOCAL_RELATIVE;
         if (value_ == "PLAYER_FORWARD_RELATIVE") return CAMERA_ACTION_POSITION_MODE::PLAYER_FORWARD_RELATIVE;
+        if (value_ == "TPS_VIEW_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE;
         if (value_ == "WORLD_POSITION") return CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
         return CAMERA_ACTION_POSITION_MODE::CURRENT_CAMERA_RELATIVE;
     }
@@ -122,6 +124,14 @@ namespace
         return { value_.x / length_, value_.y / length_, value_.z / length_ };
     }
 
+    float LengthFloat3(const DirectX::XMFLOAT3& value_)
+    {
+        return std::sqrt(
+            value_.x * value_.x +
+            value_.y * value_.y +
+            value_.z * value_.z);
+    }
+
     DirectX::XMFLOAT3 CrossFloat3(
         const DirectX::XMFLOAT3& left_,
         const DirectX::XMFLOAT3& right_)
@@ -163,8 +173,8 @@ void CameraActionDirectorComponent::Start()
         CameraActionPreset justGuard_;
         justGuard_.actionName = "JustGuard";
         justGuard_.targetMode = CAMERA_ACTION_TARGET_MODE::HIT_POSITION;
-        justGuard_.positionMode = CAMERA_ACTION_POSITION_MODE::TARGET_LOCAL_RELATIVE;
-        justGuard_.cameraOffset = { 0.45f, 0.35f, -2.2f };
+        justGuard_.positionMode = CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE;
+        justGuard_.cameraOffset = { 0.6f, 0.4f, 1.0f };
         justGuard_.focusOffset = { 0.0f, 0.15f, 0.0f };
         justGuard_.targetFov = 42.0f;
         justGuard_.shakeStrength = 0.035f;
@@ -566,6 +576,26 @@ DirectX::XMFLOAT3 CameraActionDirectorComponent::CalculateCameraPosition(
             }
         }
     }
+    else if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE)
+    {
+        DirectX::XMFLOAT3 viewBackDirection_ =
+            SubtractFloat3(startCameraPosition, focusPosition_);
+        const float cameraFocusDistance_ = LengthFloat3(viewBackDirection_);
+
+        viewBackDirection_.y = 0.0f;
+        viewBackDirection_ = NormalizeOr(
+            viewBackDirection_,
+            NormalizeOr(ScaleFloat3(defaultForward_, -1.0f), { 0.0f, 0.0f, -1.0f }));
+        right_ = NormalizeOr(CrossFloat3(up_, viewBackDirection_), right_);
+
+        const float baseDistance_ = std::max(cameraFocusDistance_, 1.5f);
+        const float finalDistance_ = std::max(baseDistance_ + preset_.cameraOffset.z, 0.75f);
+        return AddFloat3(
+            AddFloat3(
+                AddFloat3(focusPosition_, ScaleFloat3(viewBackDirection_, finalDistance_)),
+                ScaleFloat3(right_, preset_.cameraOffset.x)),
+            ScaleFloat3(up_, preset_.cameraOffset.y));
+    }
 
     DirectX::XMFLOAT3 basePosition_ = camera_ ? camera_->GetEye() : focusPosition_;
     if (preset_.positionMode != CAMERA_ACTION_POSITION_MODE::CURRENT_CAMERA_RELATIVE)
@@ -738,12 +768,16 @@ void CameraActionDirectorComponent::Gui()
             if (ImGui::Combo(
                 "Position Mode",
                 &positionMode_,
-                "CURRENT_CAMERA_RELATIVE\0TARGET_LOCAL_RELATIVE\0PLAYER_FORWARD_RELATIVE\0WORLD_POSITION\0"))
+                "CURRENT_CAMERA_RELATIVE\0TARGET_LOCAL_RELATIVE\0PLAYER_FORWARD_RELATIVE\0TPS_VIEW_RELATIVE\0WORLD_POSITION\0"))
             {
                 preset_.positionMode =
                     static_cast<CAMERA_ACTION_POSITION_MODE>(positionMode_);
             }
 
+            if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE)
+            {
+                ImGui::TextWrapped("TPS_VIEW_RELATIVE: X is side offset, Y is height, Z moves farther from the focus along the camera view at action start.");
+            }
             ImGui::DragFloat3("Camera Offset", &preset_.cameraOffset.x, 0.05f);
             ImGui::DragFloat3("Focus Offset", &preset_.focusOffset.x, 0.05f);
             ImGui::DragFloat("Enter", &preset_.enterDuration, 0.01f, 0.0f, 5.0f);

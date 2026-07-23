@@ -19,6 +19,7 @@
                 "IsStatic": false,
                 "IsTrigger": true,
                 "Mass": 0.0,
+                "NodeModelObjectName": "",
                 "Offset": [
                     0.0,
                     6.0,
@@ -59,6 +60,7 @@
                 "LimitHorizontalLift": true,
                 "Mass": 100.0,
                 "MaxHorizontalLift": 0.05000000074505806,
+                "NodeModelObjectName": "",
                 "Offset": [
                     0.0,
                     5.5,
@@ -67,7 +69,7 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 3.2799999713897705,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": false,
+                "ShapeRenderFlg": true,
                 "StartNodeName": "",
                 "StepOffset": 0.38999998569488525,
                 "UseGravity": true,
@@ -288,7 +290,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 0.09408889710903168
+                            "value": 0.14613209664821625
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -439,8 +441,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.9290334582328796,
-                                0.3699958324432373
+                                0.5509618520736694,
+                                -0.8345304727554321
                             ]
                         },
                         "HitStopDuration": {
@@ -470,17 +472,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.6196974515914917,
-                                0.7450268268585205,
-                                0.2468000203371048
+                                0.42238491773605347,
+                                0.642086923122406,
+                                -0.639777660369873
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                8.769197463989258,
-                                0.3780811131000519,
-                                -14.284025192260742
+                                9.692883491516113,
+                                2.0323996543884277,
+                                -12.89329719543457
                             ]
                         },
                         "Received": {
@@ -2112,6 +2114,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2184,6 +2187,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2256,6 +2260,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2328,6 +2333,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2400,6 +2406,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2472,6 +2479,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2544,6 +2552,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2616,6 +2625,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2688,6 +2698,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2760,6 +2771,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2832,6 +2844,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2904,6 +2917,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -2976,6 +2990,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -3048,6 +3063,7 @@
                             "blend2DSyncNormalizedTime": true,
                             "blend2DUseEightDirections": false,
                             "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
                             "blendDefaultWeight": 0.5,
                             "blendMaskRootNodes": [],
                             "blendParamName": "BlendAlpha",
@@ -3107,22 +3123,23 @@
                 ],
                 "ActionYawDegrees": 30.0,
                 "ChainName": "DragonNeck",
+                "FollowSpeed": 6.0,
                 "LocalForwardAxis": [
                     0.0,
-                    0.0,
-                    1.0
+                    0.5099999904632568,
+                    0.0
                 ],
-                "LookTargetBlendInTime": 0.15000000596046448,
-                "LookTargetMaxPitchDegrees": 35.0,
+                "LookTargetBlendInTime": 1.0,
+                "LookTargetMaxPitchDegrees": 36.5,
                 "LookTargetMaxYawDegrees": 65.0,
-                "LookTargetObjectMode": false,
+                "LookTargetObjectMode": true,
                 "LookTargetObjectName": "PlayerModel",
                 "LookTargetObjectOffset": [
                     0.0,
-                    1.2000000476837158,
+                    0.0,
                     0.0
                 ],
-                "LookTargetPitchOffsetDegrees": 0.0,
+                "LookTargetPitchOffsetDegrees": 50.0,
                 "LookTargetYawOffsetDegrees": 0.0,
                 "MouthNodeName": "Mouth",
                 "RegisterGlobalActions": false
@@ -3136,6 +3153,7 @@
                 "ActionCategory": "DragonIK",
                 "ActionDuration": 0.800000011920929,
                 "ChainName": "DragonTail",
+                "FollowSpeed": 6.0,
                 "LocalForwardAxis": [
                     0.0,
                     0.0,
@@ -9428,7 +9446,7 @@
                         "StartCollisionWarmup": 4,
                         "StartLift": 0.07999999821186066,
                         "Stiffness": 0.019999999552965164,
-                        "TipNode": "PlainsDragon_Tongue_4",
+                        "TipNode": "PlainsDragon_-Head",
                         "TipStiffnessScale": 0.20000000298023224,
                         "Type": 4
                     }
@@ -9467,9 +9485,9 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            10.561782836914063,
-            -0.5823216438293457,
-            -13.570111274719238
+            10.871545791625977,
+            -0.583014965057373,
+            -14.581846237182617
         ],
         "Rot": [
             0.0,

@@ -17,6 +17,7 @@ public:
 
     float radius = 0.5f;
     float halfHeight = 1.0f;
+    std::string nodeModelObjectName;
     std::string startNodeName;
     std::string endNodeName;
 
