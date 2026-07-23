@@ -183,6 +183,7 @@ void HurtBox::SyncCharacterColliderShape()
 
     radius = characterCollider_->radius;
     halfHeight = characterCollider_->halfHeight;
+    nodeModelObjectName = characterCollider_->nodeModelObjectName;
     startNodeName = characterCollider_->startNodeName;
     endNodeName = characterCollider_->endNodeName;
 }

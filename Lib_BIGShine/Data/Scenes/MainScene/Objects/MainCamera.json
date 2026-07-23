@@ -39,17 +39,17 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    4.315741062164307,
-                    4.767445087432861,
-                    -56.10896682739258
+                    -21.475915908813477,
+                    6.27042293548584,
+                    50.93183898925781
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    7.747807025909424,
-                    0.7069690227508545,
-                    -32.54235076904297
+                    -6.525129795074463,
+                    0.7067333459854126,
+                    20.310462951660156
                 ],
-                "fovY": 60.0,
+                "fovY": 60.000003814697266,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
@@ -65,8 +65,8 @@
         {
             "Data": {
                 "baseDistance": 14.0,
-                "currentPitch": -9.675843238830566,
-                "currentYaw": 81.71411895751953,
+                "currentPitch": -9.272947311401367,
+                "currentYaw": -63.9762077331543,
                 "distance": 14.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -94,7 +94,7 @@
                     0.0,
                     0.0
                 ],
-                "arenaRadius": 65.0,
+                "arenaRadius": 67.5,
                 "baseDistance": 7.0,
                 "cameraHeight": 1.0,
                 "closeDistance": 8.0,
@@ -192,9 +192,9 @@
                         "attackDirectionKey": "Normal",
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.44999998807907104,
-                            0.3499999940395355,
-                            -2.200000047683716
+                            0.6000000238418579,
+                            0.4000000059604645,
+                            1.0
                         ],
                         "enterDuration": 0.07999999821186066,
                         "focusOffset": [
@@ -204,7 +204,7 @@
                         ],
                         "focusPositionKey": "Position",
                         "holdDuration": 0.11999999731779099,
-                        "positionMode": "TARGET_LOCAL_RELATIVE",
+                        "positionMode": "TPS_VIEW_RELATIVE",
                         "priority": 20,
                         "returnDuration": 0.18000000715255737,
                         "shakeFrequency": 20.0,
@@ -217,7 +217,7 @@
                         "useUnscaledTime": true
                     },
                     {
-                        "actionName": "JustDodge",
+                        "actionName": "JustDodgeT",
                         "attackDirectionKey": "Normal",
                         "blackboardCategory": "Dodge",
                         "cameraOffset": [
@@ -340,19 +340,19 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            4.315740585327148,
-            4.767444133758545,
-            -56.10896301269531
+            -21.475914001464844,
+            6.270421504974365,
+            50.93183517456055
         ],
         "Rot": [
-            9.675843238830566,
-            8.285879135131836,
-            360.0
+            9.27294635772705,
+            153.9761962890625,
+            0.0
         ],
         "Scale": [
             0.9999998807907104,
             0.9999998807907104,
-            0.9999999403953552
+            0.9999998807907104
         ]
     }
 }

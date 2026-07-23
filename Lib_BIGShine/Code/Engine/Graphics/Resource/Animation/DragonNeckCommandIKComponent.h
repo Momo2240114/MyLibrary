@@ -128,6 +128,11 @@ private:
 
     DragonNeckIKCommand currentCommand;
     float commandTimer = 0.0f;
+    float currentYawDegrees = 0.0f;
+    float currentPitchDegrees = 0.0f;
+    float targetYawDegrees = 0.0f;
+    float targetPitchDegrees = 0.0f;
+    float followSpeed = 6.0f;
 
     void UnregisterActions();
     void ApplyTargetObjectLookMode();

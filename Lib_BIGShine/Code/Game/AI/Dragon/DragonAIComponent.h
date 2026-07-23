@@ -165,6 +165,12 @@ private:
     void EnterRecovery();
     void FinishRecovery();
     void ExecuteActionDefinition(const DragonActionDefinition& definition_);
+    std::string ResolveAnimationActionName(const DragonActionDefinition& definition_) const;
+    std::string ResolveAnimationStateName(const DragonActionDefinition& definition_) const;
+    void ApplyAnimationBlackboard(
+        const std::string& animationActionName_,
+        const std::string& animationStateName_,
+        bool actionTrigger_);
     void PlayAnimationState(const std::string& stateName_);
     void ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float duration_);
     void ExecuteOwnerAction(const std::string& actionName_);

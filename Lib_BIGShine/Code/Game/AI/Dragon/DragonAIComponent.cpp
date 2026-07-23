@@ -138,6 +138,10 @@ void DragonAIComponent::Start()
     }
     EnsureDefaultBehaviorGraph();
     RegisterActions();
+    if (const DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::IDLE))
+    {
+        ApplyAnimationBlackboard("Idle", definition_->animationStateName, false);
+    }
     PlayAnimationState("PlainsDragon_IdleBreathe");
     SendRuntimeToBlackboard();
 }
@@ -244,6 +248,31 @@ void DragonAIComponent::Gui()
         ImGui::Text("Current: %s", GetDragonActionName(runtime.currentAction));
         ImGui::Text("Last Started: %s  Count: %d", GetDragonActionName(lastStartedAction), actionStartCount);
         ImGui::Text("Last Rejected: %s", GetDragonActionName(lastRejectedAction));
+        const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
+        const AnimState* currentAnimationState_ = animationController_ ? animationController_->GetCurrentState() : nullptr;
+        const char* currentAnimationStateName_ = currentAnimationState_ ? currentAnimationState_->name.c_str() : "None";
+        std::string animCurrentAction_ = GetDragonActionName(runtime.currentAction);
+        std::string animActionTrigger_;
+        std::string animBlackboardStateName_;
+        bool animActionEnded_ = runtime.actionEnded;
+        bool animIsActing_ = runtime.actionStarted && !runtime.actionEnded;
+        if (blackboard)
+        {
+            blackboard->GetString("Anim", "CurrentAction", animCurrentAction_);
+            blackboard->GetString("Anim", "ActionTrigger", animActionTrigger_);
+            blackboard->GetBool("Anim", "ActionEnded", animActionEnded_);
+            blackboard->GetBool("Anim", "IsActing", animIsActing_);
+            blackboard->GetString("Anim", "CurrentAnimationState", animBlackboardStateName_);
+        }
+        ImGui::Text("Anim.CurrentAction: %s", animCurrentAction_.c_str());
+        ImGui::Text("Anim.ActionTrigger: %s", animActionTrigger_.c_str());
+        ImGui::Text("Anim.ActionEnded: %s", animActionEnded_ ? "true" : "false");
+        ImGui::Text("Anim.IsActing: %s", animIsActing_ ? "true" : "false");
+        if (!animBlackboardStateName_.empty())
+        {
+            ImGui::Text("Anim.CurrentAnimationState: %s", animBlackboardStateName_.c_str());
+        }
+        ImGui::Text("Animation State: %s", currentAnimationStateName_);
         ImGui::Text("Graph: %s  Tick: %d", GetBehaviorStatusName(lastBehaviorStatus), behaviorGraphTickCount);
         ImGui::Text("Target: %s  Distance: %.2f  Angle: %.1f",
             hasPlayerTarget ? "Found" : "Missing",
@@ -544,6 +573,12 @@ void DragonAIComponent::NotifyActionEnd()
     runtime.actionEnded = true;
     runtime.canCancel = true;
     runtime.canBufferAction = false;
+    if (const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction))
+    {
+        const std::string animationActionName_ = ResolveAnimationActionName(*definition_);
+        const std::string animationStateName_ = ResolveAnimationStateName(*definition_);
+        ApplyAnimationBlackboard(animationActionName_, animationStateName_, false);
+    }
 
     if (runtime.currentAction == DRAGON_ACTION_TYPE::DEATH)
     {
@@ -1061,6 +1096,10 @@ void DragonAIComponent::FinishRecovery()
     runtime.canBufferAction = false;
     aiState = DRAGON_AI_STATE::IDLE;
     StopMovement();
+    if (const DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::IDLE))
+    {
+        ApplyAnimationBlackboard("Idle", definition_->animationStateName, false);
+    }
     PlayAnimationState("PlainsDragon_IdleBreathe");
 }
 
@@ -1087,13 +1126,84 @@ void DragonAIComponent::UpdateActionTimeout()
 
 void DragonAIComponent::ExecuteActionDefinition(const DragonActionDefinition& definition_)
 {
-    PlayAnimationState(definition_.animationStateName);
+    const std::string animationActionName_ = ResolveAnimationActionName(definition_);
+    const std::string animationStateName_ = ResolveAnimationStateName(definition_);
+    ApplyAnimationBlackboard(animationActionName_, animationStateName_, true);
+    PlayAnimationState(animationStateName_);
     ExecuteDirectIK(definition_.action, definition_.duration);
     ExecuteOwnerAction(definition_.actionSequenceName);
     ExecuteOwnerAction(definition_.animationActionName);
     ExecuteOwnerAction(definition_.ikActionName);
     ExecuteOwnerAction(definition_.hitBoxActionName);
     ExecuteOwnerAction(definition_.vfxActionName);
+}
+
+std::string DragonAIComponent::ResolveAnimationActionName(
+    const DragonActionDefinition& definition_) const
+{
+    switch (definition_.action)
+    {
+    case DRAGON_ACTION_TYPE::TURN_TO_PLAYER:
+        return context.playerAngleDegrees < 0.0f ? "TurnToPlayerR" : "TurnToPlayerL";
+    case DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP:
+        return context.playerAngleDegrees < 0.0f ? "TailSweepR" : "TailSweepL";
+    default:
+        break;
+    }
+
+    if (!definition_.animationActionName.empty())
+    {
+        return definition_.animationActionName;
+    }
+    return definition_.actionName;
+}
+
+std::string DragonAIComponent::ResolveAnimationStateName(
+    const DragonActionDefinition& definition_) const
+{
+    switch (definition_.action)
+    {
+    case DRAGON_ACTION_TYPE::TURN_TO_PLAYER:
+    case DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP:
+        return context.playerAngleDegrees < 0.0f
+            ? "PlainsDragon_Turn90R_RM"
+            : "PlainsDragon_Turn90L_RM";
+    default:
+        break;
+    }
+
+    return definition_.animationStateName;
+}
+
+void DragonAIComponent::ApplyAnimationBlackboard(
+    const std::string& animationActionName_,
+    const std::string& animationStateName_,
+    bool actionTrigger_)
+{
+    const bool isActing_ =
+        (aiState == DRAGON_AI_STATE::ACTION ||
+            aiState == DRAGON_AI_STATE::AIR) &&
+        !runtime.actionEnded;
+
+    if (blackboard)
+    {
+        blackboard->SetString("Anim", "CurrentAction", animationActionName_);
+        blackboard->SetString("Anim", "ActionTrigger", actionTrigger_ ? animationActionName_ : "");
+        blackboard->SetBool("Anim", "ActionEnded", runtime.actionEnded);
+        blackboard->SetBool("Anim", "IsActing", isActing_);
+        blackboard->SetString("Anim", "CurrentAnimationState", animationStateName_);
+    }
+
+    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
+        animationController.lock())
+    {
+        animationController_->SetBlackboardCategory("Anim");
+        animationController_->SetParam("CurrentAction", animationActionName_);
+        animationController_->SetParam("ActionTrigger", actionTrigger_ ? animationActionName_ : std::string());
+        animationController_->SetParam("ActionEnded", runtime.actionEnded);
+        animationController_->SetParam("IsActing", isActing_);
+        animationController_->SetParam("CurrentAnimationState", animationStateName_);
+    }
 }
 
 void DragonAIComponent::PlayAnimationState(const std::string& stateName_)

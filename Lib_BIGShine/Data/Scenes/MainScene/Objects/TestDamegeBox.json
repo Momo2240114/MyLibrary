@@ -5,7 +5,7 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 111,
+                "AttackInstanceId": 591,
                 "AttackSourceType": 0,
                 "AttackTag": "DamageBox",
                 "AttackerAirLiftPower": 0.0,
@@ -49,6 +49,7 @@
                 "KnockBackPower": 20.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
+                "NodeModelObjectName": "",
                 "Offset": [
                     0.0,
                     0.0,
