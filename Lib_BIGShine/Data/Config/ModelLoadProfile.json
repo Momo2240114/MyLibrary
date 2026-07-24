@@ -1,89 +1,89 @@
 {
-    "generatedAt": "2026-07-24T11:09:09",
+    "generatedAt": "2026-07-24T12:08:31",
     "models": {
         "data/model/dragon/sk_plainsdragon.gltf": {
-            "averageLoadMilliseconds": 1747.012990625,
-            "estimatedLoadMilliseconds": 1747.012990625,
+            "averageLoadMilliseconds": 1671.5917937499999,
+            "estimatedLoadMilliseconds": 1671.5917937499999,
             "fileLastWriteTime": 13427883870,
             "fileSize": 8834652,
             "maximumLoadMilliseconds": 3118.3145,
-            "medianLoadMilliseconds": 1594.8331,
-            "minimumLoadMilliseconds": 1308.1822,
-            "relativeLoadWeight": 0.729650289117703,
+            "medianLoadMilliseconds": 1509.19885,
+            "minimumLoadMilliseconds": 1099.5445,
+            "relativeLoadWeight": 0.7132693465053046,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 434.49012012113934
+            "standardDeviationMilliseconds": 390.3304321377201
         },
         "data/model/stage/rock/rock01.gltf": {
-            "averageLoadMilliseconds": 4652.266453125001,
-            "estimatedLoadMilliseconds": 4652.266453125001,
+            "averageLoadMilliseconds": 4619.837437500001,
+            "estimatedLoadMilliseconds": 4619.837437500001,
             "fileLastWriteTime": 13425642938,
             "fileSize": 6837,
             "maximumLoadMilliseconds": 5592.4282,
-            "medianLoadMilliseconds": 4639.27235,
+            "medianLoadMilliseconds": 4601.1647,
             "minimumLoadMilliseconds": 2320.8575,
-            "relativeLoadWeight": 1.9430465490476083,
+            "relativeLoadWeight": 1.971287752384832,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 582.568380977892
+            "standardDeviationMilliseconds": 580.2324225471789
         },
         "data/model/stage/stage_floor05.gltf": {
-            "averageLoadMilliseconds": 4583.063728125001,
-            "estimatedLoadMilliseconds": 4583.063728125001,
+            "averageLoadMilliseconds": 4542.362725000001,
+            "estimatedLoadMilliseconds": 4542.362725000001,
             "fileLastWriteTime": 13427437645,
             "fileSize": 24003,
             "maximumLoadMilliseconds": 5406.3734,
-            "medianLoadMilliseconds": 4527.96015,
+            "medianLoadMilliseconds": 4493.3314,
             "minimumLoadMilliseconds": 3936.8766,
-            "relativeLoadWeight": 1.9141436224094277,
+            "relativeLoadWeight": 1.9382292402754897,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 399.8690664923975
+            "standardDeviationMilliseconds": 410.27187043629
         },
         "data/model/swordplayer/blender/sword.gltf": {
-            "averageLoadMilliseconds": 744.9819406250001,
-            "estimatedLoadMilliseconds": 744.9819406250001,
+            "averageLoadMilliseconds": 748.764453125,
+            "estimatedLoadMilliseconds": 748.764453125,
             "fileLastWriteTime": 13426303246,
             "fileSize": 2895,
             "maximumLoadMilliseconds": 899.2333,
-            "medianLoadMilliseconds": 723.05705,
+            "medianLoadMilliseconds": 729.1575499999999,
             "minimumLoadMilliseconds": 637.1903,
-            "relativeLoadWeight": 0.31114610554214167,
+            "relativeLoadWeight": 0.3194982974693552,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 70.64703272160418
+            "standardDeviationMilliseconds": 69.85692111839646
         },
         "data/model/swordplayer/combatgirls_sword_shield.gltf": {
-            "averageLoadMilliseconds": 1665.8987125,
-            "estimatedLoadMilliseconds": 1665.8987125,
+            "averageLoadMilliseconds": 1643.130109375,
+            "estimatedLoadMilliseconds": 1643.130109375,
             "fileLastWriteTime": 13429091566,
             "fileSize": 167512726,
             "maximumLoadMilliseconds": 2355.0486,
-            "medianLoadMilliseconds": 1617.26065,
+            "medianLoadMilliseconds": 1589.68875,
             "minimumLoadMilliseconds": 1029.5642,
-            "relativeLoadWeight": 0.6957724319963852,
+            "relativeLoadWeight": 0.7011247265744697,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 285.6548279762491
+            "standardDeviationMilliseconds": 282.96930400077343
         },
         "data/model/swordplayer/weapon/sword_shiledmodel.gltf": {
-            "averageLoadMilliseconds": 1632.0314624999999,
-            "estimatedLoadMilliseconds": 1632.0314624999999,
+            "averageLoadMilliseconds": 1564.3281812499997,
+            "estimatedLoadMilliseconds": 1564.3281812499997,
             "fileLastWriteTime": 13426666599,
             "fileSize": 2879,
             "maximumLoadMilliseconds": 3131.3639,
-            "medianLoadMilliseconds": 1594.6749,
+            "medianLoadMilliseconds": 1518.65355,
             "minimumLoadMilliseconds": 90.8593,
-            "relativeLoadWeight": 0.6816275750967916,
+            "relativeLoadWeight": 0.6674998906622379,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 648.2215164432225
+            "standardDeviationMilliseconds": 600.9056473712071
         },
         "data/model/swordplayer/weapon/swordmodel.gltf": {
-            "averageLoadMilliseconds": 1734.953153125,
-            "estimatedLoadMilliseconds": 1734.953153125,
+            "averageLoadMilliseconds": 1614.927715625,
+            "estimatedLoadMilliseconds": 1614.927715625,
             "fileLastWriteTime": 13426666563,
             "fileSize": 4402,
             "maximumLoadMilliseconds": 3129.9438,
-            "medianLoadMilliseconds": 1609.66265,
-            "minimumLoadMilliseconds": 74.364,
-            "relativeLoadWeight": 0.7246134267899424,
+            "medianLoadMilliseconds": 1557.2749,
+            "minimumLoadMilliseconds": 67.5342,
+            "relativeLoadWeight": 0.6890907461283103,
             "sampleCount": 32,
-            "standardDeviationMilliseconds": 520.3812101265505
+            "standardDeviationMilliseconds": 554.708946658148
         }
     },
     "sourceHistoryVersion": 1,

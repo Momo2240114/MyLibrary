@@ -41,6 +41,43 @@ public:
 	void OutLineSettingGui();
 	void SerializeGraphicsSettings(nlohmann::json& j_) const;
 	void DeserializeGraphicsSettings(const nlohmann::json& j_);
+
+	enum class RENDER_PROFILE_CATEGORY
+	{
+		STAGE,
+		BARRIER,
+		DRAGON,
+		PLAYER,
+		WEAPON,
+		OTHER,
+		COUNT
+	};
+
+	struct RenderProfileStatistics
+	{
+		uint64_t drawCallCount = 0;
+		uint64_t drawIndexedCount = 0;
+		uint64_t triangleCount = 0;
+		uint64_t vertexCount = 0;
+		uint64_t visibleModelCount = 0;
+		uint64_t staticModelCount = 0;
+		uint64_t skinnedModelCount = 0;
+		uint64_t opaqueDrawCount = 0;
+		uint64_t alphaTestDrawCount = 0;
+		uint64_t transparentDrawCount = 0;
+		uint64_t materialBindCount = 0;
+		uint64_t textureBindCount = 0;
+		uint64_t shaderBindCount = 0;
+		uint64_t shadowDrawCount = 0;
+		uint64_t shadowTriangleCount = 0;
+	};
+
+	struct RenderProfileFrame
+	{
+		RenderProfileStatistics total;
+		RenderProfileStatistics categories[static_cast<int>(RENDER_PROFILE_CATEGORY::COUNT)];
+	};
+
 private:
 	// CPUとHLSL間で共有する定数バッファ構造体。16バイト境界を維持すること。
 	struct CbScene
@@ -163,6 +200,7 @@ private:
 	std::shared_ptr<ModelShader>			shaders[static_cast<int>(ModelShaderID::EnumCount)];
 	std::vector<DrawInfo>					drawInfos;
 	std::vector<TransparencyDrawInfo>		transparencyDrawInfos;
+	RenderProfileFrame renderProfileFrame;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	sceneConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	skeletonConstantBuffer;

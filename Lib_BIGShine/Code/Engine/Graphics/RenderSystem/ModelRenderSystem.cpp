@@ -12,8 +12,148 @@
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
+#include <array>
+#include <cctype>
+#include <cstdio>
 #include <cstring>
+#include <initializer_list>
 #include <nlohmann/json.hpp>
+
+namespace
+{
+	enum class RENDER_PROFILE_DRAW_KIND
+	{
+		DRAW_KIND_OPAQUE,
+		DRAW_KIND_ALPHA_TEST,
+		DRAW_KIND_TRANSPARENT,
+		DRAW_KIND_SHADOW
+	};
+
+	std::string ToLowerAscii(std::string text_)
+	{
+		for (char& character_ : text_)
+		{
+			character_ = static_cast<char>(std::tolower(static_cast<unsigned char>(character_)));
+		}
+		return text_;
+	}
+
+	bool ContainsAny(const std::string& text_, std::initializer_list<const char*> keywords_)
+	{
+		for (const char* keyword_ : keywords_)
+		{
+			if (text_.find(keyword_) != std::string::npos)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	const char* GetRenderProfileCategoryName(ModelRenderSystem::RENDER_PROFILE_CATEGORY category_)
+	{
+		switch (category_)
+		{
+		case ModelRenderSystem::RENDER_PROFILE_CATEGORY::STAGE:
+			return "Stage";
+		case ModelRenderSystem::RENDER_PROFILE_CATEGORY::BARRIER:
+			return "Barrier";
+		case ModelRenderSystem::RENDER_PROFILE_CATEGORY::DRAGON:
+			return "Dragon";
+		case ModelRenderSystem::RENDER_PROFILE_CATEGORY::PLAYER:
+			return "Player";
+		case ModelRenderSystem::RENDER_PROFILE_CATEGORY::WEAPON:
+			return "Weapon";
+		default:
+			return "OtherModels";
+		}
+	}
+
+	void PlotRenderProfileStatistics(const char* prefix_, const ModelRenderSystem::RenderProfileStatistics& statistics_)
+	{
+		char plotName_[128]{};
+
+		sprintf_s(plotName_, "%s.DrawCallCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.drawCallCount));
+		sprintf_s(plotName_, "%s.DrawIndexedCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.drawIndexedCount));
+		sprintf_s(plotName_, "%s.TriangleCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.triangleCount));
+		sprintf_s(plotName_, "%s.VertexCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.vertexCount));
+		sprintf_s(plotName_, "%s.VisibleModelCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.visibleModelCount));
+		sprintf_s(plotName_, "%s.StaticModelCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.staticModelCount));
+		sprintf_s(plotName_, "%s.SkinnedModelCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.skinnedModelCount));
+		sprintf_s(plotName_, "%s.OpaqueDrawCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.opaqueDrawCount));
+		sprintf_s(plotName_, "%s.AlphaTestDrawCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.alphaTestDrawCount));
+		sprintf_s(plotName_, "%s.TransparentDrawCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.transparentDrawCount));
+		sprintf_s(plotName_, "%s.MaterialBindCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.materialBindCount));
+		sprintf_s(plotName_, "%s.TextureBindCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.textureBindCount));
+		sprintf_s(plotName_, "%s.ShaderBindCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shaderBindCount));
+		sprintf_s(plotName_, "%s.ShadowDrawCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowDrawCount));
+		sprintf_s(plotName_, "%s.ShadowTriangleCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowTriangleCount));
+	}
+
+	ModelRenderSystem::RENDER_PROFILE_CATEGORY ResolveRenderProfileCategory(
+		const std::shared_ptr<GltfModelCommponennt>& model_)
+	{
+		if (!model_)
+		{
+			return ModelRenderSystem::RENDER_PROFILE_CATEGORY::OTHER;
+		}
+
+		std::string categoryText_ = ToLowerAscii(model_->GetModelName());
+		const std::shared_ptr<GameObject> owner_ = model_->GetGameObject();
+		if (owner_)
+		{
+			categoryText_ += " ";
+			categoryText_ += ToLowerAscii(owner_->GetName());
+
+			if (owner_->GetLayer() == LayerType::Player)
+			{
+				return ModelRenderSystem::RENDER_PROFILE_CATEGORY::PLAYER;
+			}
+			if (owner_->GetLayer() == LayerType::Environment ||
+				owner_->GetLayer() == LayerType::Terrain)
+			{
+				return ModelRenderSystem::RENDER_PROFILE_CATEGORY::STAGE;
+			}
+		}
+
+		if (ContainsAny(categoryText_, { "stage", "terrain", "ground", "floor", "map" }))
+		{
+			return ModelRenderSystem::RENDER_PROFILE_CATEGORY::STAGE;
+		}
+		if (ContainsAny(categoryText_, { "barrier", "shield" }))
+		{
+			return ModelRenderSystem::RENDER_PROFILE_CATEGORY::BARRIER;
+		}
+		if (ContainsAny(categoryText_, { "dragon", "enemy" }))
+		{
+			return ModelRenderSystem::RENDER_PROFILE_CATEGORY::DRAGON;
+		}
+		if (ContainsAny(categoryText_, { "player", "hero" }))
+		{
+			return ModelRenderSystem::RENDER_PROFILE_CATEGORY::PLAYER;
+		}
+		if (ContainsAny(categoryText_, { "weapon", "sword", "blade" }))
+		{
+			return ModelRenderSystem::RENDER_PROFILE_CATEGORY::WEAPON;
+		}
+		return ModelRenderSystem::RENDER_PROFILE_CATEGORY::OTHER;
+	}
+}
 
 //---
 //  モデル描画に必要なバッファとシェーダーを初期化する
@@ -371,6 +511,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::RenderModels");
+	renderProfileFrame = {};
 
 	// シーン用定数バッファ更新
 	{
@@ -498,12 +639,112 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	// メッシュ描画関数
 	size_t modelSubmitCount_ = drawInfos.size();
 	size_t meshSubmitCount_ = 0;
+	std::vector<RENDER_PROFILE_CATEGORY> drawInfoCategories_;
+	drawInfoCategories_.reserve(drawInfos.size());
 	for (const DrawInfo& drawInfo_ : drawInfos)
 	{
+		const RENDER_PROFILE_CATEGORY category_ = ResolveRenderProfileCategory(drawInfo_.model);
+		drawInfoCategories_.push_back(category_);
 		if (!drawInfo_.model) continue;
 		meshSubmitCount_ += drawInfo_.model->GetMeshes().size();
+
+		++renderProfileFrame.total.visibleModelCount;
+		++renderProfileFrame.categories[static_cast<int>(category_)].visibleModelCount;
+		bool hasSkinningMesh_ = false;
+		for (const GltfModelCommponennt::Mesh& mesh_ : drawInfo_.model->GetMeshes())
+		{
+			if (!mesh_.bones.empty())
+			{
+				hasSkinningMesh_ = true;
+				break;
+			}
+		}
+		if (hasSkinningMesh_)
+		{
+			++renderProfileFrame.total.skinnedModelCount;
+			++renderProfileFrame.categories[static_cast<int>(category_)].skinnedModelCount;
+		}
+		else
+		{
+			++renderProfileFrame.total.staticModelCount;
+			++renderProfileFrame.categories[static_cast<int>(category_)].staticModelCount;
+		}
 	}
 	size_t skeletonUploadCount_ = 0;
+	const GltfModelCommponennt::Material* previousMaterial_ = nullptr;
+	std::array<ID3D11ShaderResourceView*, 5> previousTextureBindings_{};
+	bool hasPreviousTextureBindings_ = false;
+	ModelShaderID previousShaderId_ = ModelShaderID::EnumCount;
+	bool hasPreviousShaderId_ = false;
+
+	auto addRenderProfileDraw_ = [&](
+		RENDER_PROFILE_CATEGORY category_,
+		const GltfModelCommponennt::Mesh& mesh_,
+		RENDER_PROFILE_DRAW_KIND drawKind_,
+		ModelShaderID shaderId_)
+		{
+			RenderProfileStatistics& totalStatistics_ = renderProfileFrame.total;
+			RenderProfileStatistics& categoryStatistics_ =
+				renderProfileFrame.categories[static_cast<int>(category_)];
+
+			auto addToStatistics_ = [&](RenderProfileStatistics& statistics_)
+				{
+					++statistics_.drawCallCount;
+					++statistics_.drawIndexedCount;
+					statistics_.triangleCount += mesh_.indices.size() / 3;
+					statistics_.vertexCount += mesh_.vertices.size();
+					switch (drawKind_)
+					{
+					case RENDER_PROFILE_DRAW_KIND::DRAW_KIND_ALPHA_TEST:
+						++statistics_.alphaTestDrawCount;
+						break;
+					case RENDER_PROFILE_DRAW_KIND::DRAW_KIND_TRANSPARENT:
+						++statistics_.transparentDrawCount;
+						break;
+					case RENDER_PROFILE_DRAW_KIND::DRAW_KIND_SHADOW:
+						++statistics_.shadowDrawCount;
+						statistics_.shadowTriangleCount += mesh_.indices.size() / 3;
+						break;
+					default:
+						++statistics_.opaqueDrawCount;
+						break;
+					}
+				};
+
+			addToStatistics_(totalStatistics_);
+			addToStatistics_(categoryStatistics_);
+
+			if (mesh_.material != previousMaterial_)
+			{
+				++totalStatistics_.materialBindCount;
+				++categoryStatistics_.materialBindCount;
+				previousMaterial_ = mesh_.material;
+			}
+
+			std::array<ID3D11ShaderResourceView*, 5> textureBindings_ =
+			{
+				mesh_.material ? mesh_.material->baseMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->normalMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->emissiveMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->occlusionMap.Get() : nullptr,
+				mesh_.material ? mesh_.material->metalnessRoughnessMap.Get() : nullptr,
+			};
+			if (!hasPreviousTextureBindings_ || textureBindings_ != previousTextureBindings_)
+			{
+				++totalStatistics_.textureBindCount;
+				++categoryStatistics_.textureBindCount;
+				previousTextureBindings_ = textureBindings_;
+				hasPreviousTextureBindings_ = true;
+			}
+
+			if (!hasPreviousShaderId_ || shaderId_ != previousShaderId_)
+			{
+				++totalStatistics_.shaderBindCount;
+				++categoryStatistics_.shaderBindCount;
+				previousShaderId_ = shaderId_;
+				hasPreviousShaderId_ = true;
+			}
+		};
 
 	auto uploadSkeletonConstants_ = [&](GltfModelCommponennt& model_, int meshIndex_)
 		{
@@ -733,119 +974,154 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
 	// 不透明描画処理
-	for (DrawInfo& drawInfo : drawInfos)
 	{
-		if (!drawInfo.model) continue;
+		BS_PROFILE_SCOPE("RenderModels::OpaqueModels");
+		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main::OpaqueModels");
 
-		const auto& meshes_ = drawInfo.model->GetMeshes();
-		for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
+		for (size_t drawInfoIndex_ = 0; drawInfoIndex_ < drawInfos.size(); ++drawInfoIndex_)
 		{
-			const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
-			// マテリアルからシェーダーIDを取得
-			ModelShaderID currentShaderId = mesh.material->shaderId;
-			ModelShader* shader = shaders[static_cast<int>(currentShaderId)].get();
+			DrawInfo& drawInfo = drawInfos[drawInfoIndex_];
+			if (!drawInfo.model) continue;
 
-			// 半透明メッシュ登録
-			if (mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend ||
-				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f))
+			const RENDER_PROFILE_CATEGORY category_ =
+				drawInfoIndex_ < drawInfoCategories_.size()
+				? drawInfoCategories_[drawInfoIndex_]
+				: RENDER_PROFILE_CATEGORY::OTHER;
+			const auto& meshes_ = drawInfo.model->GetMeshes();
+			for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 			{
-				TransparencyDrawInfo& transparencyDrawInfo = transparencyDrawInfos.emplace_back();
-				transparencyDrawInfo.shaderId = currentShaderId;
-				transparencyDrawInfo.model = drawInfo.model;
-				transparencyDrawInfo.mesh = &mesh;
-				transparencyDrawInfo.meshIndex = meshIndex_;
-				// カメラとの距離を算出
-				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
-					mesh.node->worldTransform._41,
-					mesh.node->worldTransform._42,
-					mesh.node->worldTransform._43,
-					0.0f);
-				DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
-				transparencyDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
+				const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
+				if (!mesh.material) continue;
 
-				continue;
-			}
+				// マテリアルからシェーダーIDを取得
+				ModelShaderID currentShaderId = mesh.material->shaderId;
+				ModelShader* shader = shaders[static_cast<int>(currentShaderId)].get();
 
-			if (useDeferredRendering_)
-			{
-				drawGBufferMesh(*drawInfo.model, mesh, meshIndex_, currentShaderId, drawInfo.materialOverlay.get());
-			}
-			else
-			{
-				shader->Begin(rc);
-				drawMesh(*drawInfo.model, mesh, meshIndex_, shader);
-				if (isOutlineTarget(currentShaderId))
+				// 半透明メッシュ登録
+				if (mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend ||
+					(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f))
 				{
-					drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
+					TransparencyDrawInfo& transparencyDrawInfo = transparencyDrawInfos.emplace_back();
+					transparencyDrawInfo.shaderId = currentShaderId;
+					transparencyDrawInfo.model = drawInfo.model;
+					transparencyDrawInfo.mesh = &mesh;
+					transparencyDrawInfo.meshIndex = meshIndex_;
+					// カメラとの距離を算出
+					DirectX::XMVECTOR Position = DirectX::XMVectorSet(
+						mesh.node->worldTransform._41,
+						mesh.node->worldTransform._42,
+						mesh.node->worldTransform._43,
+						0.0f);
+					DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
+					transparencyDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
+
+					continue;
 				}
-				shader->End(rc);
+
+				const RENDER_PROFILE_DRAW_KIND drawKind_ =
+					mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Mask
+					? RENDER_PROFILE_DRAW_KIND::DRAW_KIND_ALPHA_TEST
+					: RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE;
+				addRenderProfileDraw_(category_, mesh, drawKind_, currentShaderId);
+
+				if (useDeferredRendering_)
+				{
+					drawGBufferMesh(*drawInfo.model, mesh, meshIndex_, currentShaderId, drawInfo.materialOverlay.get());
+				}
+				else
+				{
+					shader->Begin(rc);
+					drawMesh(*drawInfo.model, mesh, meshIndex_, shader);
+					if (isOutlineTarget(currentShaderId))
+					{
+						addRenderProfileDraw_(category_, mesh, RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE, currentShaderId);
+						drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
+					}
+					shader->End(rc);
+				}
 			}
 		}
 	}
 
 	if (useDeferredRendering_)
 	{
-		ID3D11ShaderResourceView* nullMaterialSrvs_[5] = {};
-		dc->PSSetShaderResources(0, _countof(nullMaterialSrvs_), nullMaterialSrvs_);
-		ID3D11ShaderResourceView* nullOverlaySrvs_[2] = {};
-		dc->PSSetShaderResources(9, _countof(nullOverlaySrvs_), nullOverlaySrvs_);
-		graphics_.SetSceneColorRenderTarget();
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
-		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
-		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+		{
+			BS_PROFILE_SCOPE("RenderModels::DeferredLighting");
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main::DeferredLighting");
+			ID3D11ShaderResourceView* nullMaterialSrvs_[5] = {};
+			dc->PSSetShaderResources(0, _countof(nullMaterialSrvs_), nullMaterialSrvs_);
+			ID3D11ShaderResourceView* nullOverlaySrvs_[2] = {};
+			dc->PSSetShaderResources(9, _countof(nullOverlaySrvs_), nullOverlaySrvs_);
+			graphics_.SetSceneColorRenderTarget();
+			dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+			dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+			dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
-		ID3D11ShaderResourceView* iblSrvs_[] =
-		{
-			graphics_.GetIBLDiffuseSRV(),
-			graphics_.GetIBLSpecularSRV(),
-			graphics_.GetIBLLutGGXSRV(),
-		};
-		dc->PSSetShaderResources(10, _countof(iblSrvs_), iblSrvs_);
+			ID3D11ShaderResourceView* iblSrvs_[] =
+			{
+				graphics_.GetIBLDiffuseSRV(),
+				graphics_.GetIBLSpecularSRV(),
+				graphics_.GetIBLLutGGXSRV(),
+			};
+			dc->PSSetShaderResources(10, _countof(iblSrvs_), iblSrvs_);
 
-		DirectX::XMFLOAT4 toonSteps_{ 0.05f, 0.05f, 0.05f, 0.05f };
-		DirectX::XMFLOAT4 toonFeathers_{ 0.05f, 0.05f, 0.05f, 0.05f };
-		DirectX::XMFLOAT4 toonPbrSteps_{ 0.45f, 0.45f, 0.45f, 0.45f };
-		DirectX::XMFLOAT4 toonPbrFeathers_{ 0.1f, 0.1f, 0.1f, 0.1f };
-		if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
-		{
-			toonSteps_ = toonShader_->GetShadeSteps();
-			toonFeathers_ = toonShader_->GetShadeFeather();
+			DirectX::XMFLOAT4 toonSteps_{ 0.05f, 0.05f, 0.05f, 0.05f };
+			DirectX::XMFLOAT4 toonFeathers_{ 0.05f, 0.05f, 0.05f, 0.05f };
+			DirectX::XMFLOAT4 toonPbrSteps_{ 0.45f, 0.45f, 0.45f, 0.45f };
+			DirectX::XMFLOAT4 toonPbrFeathers_{ 0.1f, 0.1f, 0.1f, 0.1f };
+			if (auto toonShader_ = std::dynamic_pointer_cast<ToonShader>(shaders[static_cast<int>(ModelShaderID::Toon)]))
+			{
+				toonSteps_ = toonShader_->GetShadeSteps();
+				toonFeathers_ = toonShader_->GetShadeFeather();
+			}
+			if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
+			{
+				toonPbrSteps_ = toonPbrShader_->GetShadeSteps();
+				toonPbrFeathers_ = toonPbrShader_->GetShadeFeather();
+			}
+			lightingShader->Execute(
+				rc,
+				graphics_.GetGBufferBaseColorSRV(),
+				graphics_.GetGBufferNormalSRV(),
+				graphics_.GetGBufferMaterialSRV(),
+				graphics_.GetGBufferEmissiveSRV(),
+				graphics_.GetMainDepthSRV(),
+				lightSRV.Get(),
+				spotLightSRV.Get(),
+				sceneConstantBuffer.Get(),
+				toonSteps_,
+				toonFeathers_,
+				toonPbrSteps_,
+				toonPbrFeathers_);
 		}
-		if (auto toonPbrShader_ = std::dynamic_pointer_cast<ToonPBRShader>(shaders[static_cast<int>(ModelShaderID::ToonPBR)]))
-		{
-			toonPbrSteps_ = toonPbrShader_->GetShadeSteps();
-			toonPbrFeathers_ = toonPbrShader_->GetShadeFeather();
-		}
-		lightingShader->Execute(
-			rc,
-			graphics_.GetGBufferBaseColorSRV(),
-			graphics_.GetGBufferNormalSRV(),
-			graphics_.GetGBufferMaterialSRV(),
-			graphics_.GetGBufferEmissiveSRV(),
-			graphics_.GetMainDepthSRV(),
-			lightSRV.Get(),
-			spotLightSRV.Get(),
-			sceneConstantBuffer.Get(),
-			toonSteps_,
-			toonFeathers_,
-			toonPbrSteps_,
-			toonPbrFeathers_);
 
 		graphics_.SetSceneRenderTarget();
 		graphics_.RenderSkyBox(rc);
 
-		for (DrawInfo& drawInfo : drawInfos)
 		{
-			if (!drawInfo.model) continue;
+			BS_PROFILE_SCOPE("RenderModels::OutlineModels");
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main::OutlineModels");
 
-			const auto& meshes_ = drawInfo.model->GetMeshes();
-			for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
+			for (size_t drawInfoIndex_ = 0; drawInfoIndex_ < drawInfos.size(); ++drawInfoIndex_)
 			{
-				const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
-				if (mesh.material->alphaMode != GltfModelCommponennt::AlphaMode::Blend &&
-					isOutlineTarget(mesh.material->shaderId))
+				DrawInfo& drawInfo = drawInfos[drawInfoIndex_];
+				if (!drawInfo.model) continue;
+
+				const RENDER_PROFILE_CATEGORY category_ =
+					drawInfoIndex_ < drawInfoCategories_.size()
+					? drawInfoCategories_[drawInfoIndex_]
+					: RENDER_PROFILE_CATEGORY::OTHER;
+				const auto& meshes_ = drawInfo.model->GetMeshes();
+				for (int meshIndex_ = 0; meshIndex_ < static_cast<int>(meshes_.size()); ++meshIndex_)
 				{
-					drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
+					const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
+					if (mesh.material &&
+						mesh.material->alphaMode != GltfModelCommponennt::AlphaMode::Blend &&
+						isOutlineTarget(mesh.material->shaderId))
+					{
+						addRenderProfileDraw_(category_, mesh, RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE, mesh.material->shaderId);
+						drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
+					}
 				}
 			}
 		}
@@ -862,30 +1138,49 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
 		{
 			return lhs.distance > rhs.distance;
-		});
+	});
 
 	// 半透明描画処理
-	for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
 	{
-		ModelShader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
+		BS_PROFILE_SCOPE("RenderModels::TransparentModels");
+		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main::TransparentModels");
 
-		shader->Begin(rc);
-
-		if (transparencyDrawInfo.model && transparencyDrawInfo.mesh)
+		for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
 		{
-			drawMesh(
-				*transparencyDrawInfo.model,
-				*transparencyDrawInfo.mesh,
-				transparencyDrawInfo.meshIndex,
-				shader);
-		}
+			ModelShader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
 
-		shader->End(rc);
+			shader->Begin(rc);
+
+			if (transparencyDrawInfo.model && transparencyDrawInfo.mesh)
+			{
+				const RENDER_PROFILE_CATEGORY category_ = ResolveRenderProfileCategory(transparencyDrawInfo.model);
+				addRenderProfileDraw_(
+					category_,
+					*transparencyDrawInfo.mesh,
+					RENDER_PROFILE_DRAW_KIND::DRAW_KIND_TRANSPARENT,
+					transparencyDrawInfo.shaderId);
+				drawMesh(
+					*transparencyDrawInfo.model,
+					*transparencyDrawInfo.mesh,
+					transparencyDrawInfo.meshIndex,
+					shader);
+			}
+
+			shader->End(rc);
+		}
 	}
 	BS_PROFILE_PLOT("Render.ModelSubmitCount", static_cast<int64_t>(modelSubmitCount_));
 	BS_PROFILE_PLOT("Render.MeshSubmitCount", static_cast<int64_t>(meshSubmitCount_));
 	BS_PROFILE_PLOT("Render.SkeletonUploadCount", static_cast<int64_t>(skeletonUploadCount_));
 	BS_PROFILE_PLOT("Render.TransparentMeshCount", static_cast<int64_t>(transparencyDrawInfos.size()));
+	PlotRenderProfileStatistics("Render", renderProfileFrame.total);
+	for (int categoryIndex_ = 0; categoryIndex_ < static_cast<int>(RENDER_PROFILE_CATEGORY::COUNT); ++categoryIndex_)
+	{
+		const RENDER_PROFILE_CATEGORY category_ = static_cast<RENDER_PROFILE_CATEGORY>(categoryIndex_);
+		char plotPrefix_[128]{};
+		sprintf_s(plotPrefix_, "Render.Category.%s", GetRenderProfileCategoryName(category_));
+		PlotRenderProfileStatistics(plotPrefix_, renderProfileFrame.categories[categoryIndex_]);
+	}
 	transparencyDrawInfos.clear();
 
 	// 定数バッファ設定解除
@@ -1176,6 +1471,8 @@ void ModelRenderSystem::RenderCascadeShadowMaps(RenderContext& rc, const DirectX
 
 	for (int cascadeIndex = 0; cascadeIndex < CascadeShadowMap::CascadeCount; ++cascadeIndex)
 	{
+		BS_PROFILE_SCOPE("RenderShadow::Cascade");
+		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade");
 		ID3D11DepthStencilView* dsv = rc.cascadeShadowMap->GetDSV(cascadeIndex);
 		dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
 		dc->OMSetRenderTargets(0, nullptr, dsv);
@@ -1190,6 +1487,9 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	ModelShader* shader = shaders[static_cast<int>(ModelShaderID::ShadowCaster)].get();
 	if (!shader || !rc.cascadeShadowMap) return;
+	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+	BS_PROFILE_SCOPE("RenderShadow::Casters");
+	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Casters");
 
 	CbShadowCaster shadowCaster{};
 	shadowCaster.lightViewProjection = rc.cascadeShadowMap->GetLightViewProjection(cascadeIndex);
@@ -1245,6 +1545,14 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			uploadSkeletonConstants_(*drawInfo.model, meshIndex_);
+			const RENDER_PROFILE_CATEGORY category_ = ResolveRenderProfileCategory(drawInfo.model);
+			RenderProfileStatistics& totalStatistics_ = renderProfileFrame.total;
+			RenderProfileStatistics& categoryStatistics_ =
+				renderProfileFrame.categories[static_cast<int>(category_)];
+			++totalStatistics_.shadowDrawCount;
+			totalStatistics_.shadowTriangleCount += mesh.indices.size() / 3;
+			++categoryStatistics_.shadowDrawCount;
+			categoryStatistics_.shadowTriangleCount += mesh.indices.size() / 3;
 			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 		}
 	}

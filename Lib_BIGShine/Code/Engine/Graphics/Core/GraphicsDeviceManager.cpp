@@ -441,10 +441,18 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
  */
 void GraphicsDeviceManager::EndFrame()
 {
-    CollectGpuProfilerFrame();
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::EndFrame");
 
-    // swapChain->Present() を呼び出し
-    swapChain->Present(vsyncEnabled ? 1 : 0, 0);
+    {
+        BS_PROFILE_SCOPE("GraphicsDeviceManager::CollectGpuProfilerFrame");
+        CollectGpuProfilerFrame();
+    }
+
+    {
+        BS_PROFILE_SCOPE("GraphicsDeviceManager::Present");
+        // swapChain->Present() を呼び出し
+        swapChain->Present(vsyncEnabled ? 1 : 0, 0);
+    }
 }
 
 void GraphicsDeviceManager::InitializeGpuProfiler()

@@ -135,17 +135,24 @@ void ImGuiRenderer::NewFrame()
 void ImGuiRenderer::RenderAll(ID3D11DeviceContext* context)
 {
 	// Rendering
-	ImGui::Render();
+	{
+		BS_PROFILE_SCOPE("ImGui::Render");
+		ImGui::Render();
+	}
 
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::ImGui");
 
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	{
+		BS_PROFILE_SCOPE("ImGui::RenderDrawData");
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	}
 
 	// Update and Render additional Platform Windows
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
+		BS_PROFILE_SCOPE("ImGui::RenderPlatformWindows");
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}

@@ -1611,6 +1611,9 @@
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeaderConfig.h">
       <Filter>Code\Engine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Core\BuildConfig.h">
+      <Filter>Code\Engine\Core</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.h">
       <Filter>Code\Engine\Core</Filter>
     </ClInclude>
