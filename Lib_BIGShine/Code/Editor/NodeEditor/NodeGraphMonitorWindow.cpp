@@ -216,7 +216,7 @@ namespace
 NodeGraphMonitorWindow::NodeGraphMonitorWindow(GameObjectManager* manager_)
     : EditorWindow("Node Graph Monitor", manager_)
 {
-    isVisible = true;
+    isVisible = false;
     defaultWindowSize = ImVec2(520.0f, 460.0f);
     style.backgroundColor = ImVec4(0.07f, 0.075f, 0.085f, 0.95f);
     style.titleBarColor = ImVec4(0.16f, 0.24f, 0.28f, 1.0f);
