@@ -8,6 +8,10 @@
 #include "ThirdPersonCameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/Input/ControllerInput.h"
+#include "Engine/GamePlay/Input/KeyConfig.h"
+#include "Engine/GamePlay/Input/KeyInput.h"
+#include "Engine/GamePlay/Input/MouseInput.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
@@ -133,19 +137,33 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 {
     ResolveReferences();
     if (actionSuppressed) return;
+    if (switchCooldownTimer > 0.0f)
+    {
+        switchCooldownTimer = (std::max)(switchCooldownTimer - deltaTime_, 0.0f);
+    }
     if (!lockOnEnabled)
     {
+        accumulatedMouseDelta = { 0.0f, 0.0f };
+        debugMouseAccumulatedDelta = accumulatedMouseDelta;
+        switchInputLatched = false;
         ReleaseThirdPersonCamera();
         return;
     }
 
     const std::shared_ptr<GameObject> player_ = playerTarget.lock();
     const std::shared_ptr<GameObject> enemy_ = lockOnTarget.lock();
+    if (!ResolveFocusTargetFallback())
+    {
+        SetLockOnEnabled(false);
+        return;
+    }
+    UpdateLockOnSwitchInput(deltaTime_);
+    const std::shared_ptr<GameObject> focusTarget_ = lockOnFocusTarget.lock();
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     const std::shared_ptr<ThirdPersonCameraComponent> thirdPerson_ =
         thirdPersonCamera.lock();
-    if (!player_ || !enemy_ || !camera_ ||
-        !player_->transform || !enemy_->transform)
+    if (!player_ || !enemy_ || !focusTarget_ || !camera_ ||
+        !player_->transform || !enemy_->transform || !focusTarget_->transform)
     {
         SetLockOnEnabled(false);
         return;
@@ -492,12 +510,19 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
     const std::shared_ptr<GameObject> previousTarget_ =
         previousLockOnTarget.lock();
+    const std::shared_ptr<GameObject> previousFocusTarget_ =
+        previousFocusTarget.lock();
     if (!hasTrackingPose || previousTarget_ != enemy_)
     {
         interpolatedPosition = camera_->GetEye();
         interpolatedLookAt = camera_->GetFocus();
         previousLockOnTarget = enemy_;
+        previousFocusTarget = focusTarget_;
         hasTrackingPose = true;
+    }
+    else if (previousFocusTarget_ != focusTarget_)
+    {
+        previousFocusTarget = focusTarget_;
     }
 
     interpolatedPosition = LerpFloat3(
@@ -531,10 +556,17 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
 void CameraLockOnComponent::SetLockOnEnabled(bool enabled_)
 {
-    lockOnEnabled = enabled_ && !lockOnTarget.expired();
+    if (enabled_) ResolveFocusTargetFallback();
+    lockOnEnabled = enabled_ && !lockOnTarget.expired() && !lockOnFocusTarget.expired();
     ResetTracking();
     if (!lockOnEnabled)
     {
+        lockOnFocusTarget.reset();
+        lockOnFocusTargetName.clear();
+        accumulatedMouseDelta = { 0.0f, 0.0f };
+        debugMouseAccumulatedDelta = accumulatedMouseDelta;
+        switchInputLatched = false;
+        switchCooldownTimer = 0.0f;
         if (const std::shared_ptr<CameraComponent> camera_ = camera.lock();
             camera_ && hasBaseFov)
         {
@@ -580,17 +612,97 @@ void CameraLockOnComponent::SetLockOnTarget(
         SetLockOnEnabled(false);
         return;
     }
+    lockOnFocusTarget.reset();
+    lockOnFocusTargetName.clear();
+    ResolveFocusTargetFallback();
     ResetTracking();
+}
+
+void CameraLockOnComponent::SetLockOnFocusTarget(
+    const std::shared_ptr<GameObject>& focusTarget_)
+{
+    if (!focusTarget_)
+    {
+        lockOnFocusTarget.reset();
+        lockOnFocusTargetName.clear();
+        ResolveFocusTargetFallback();
+        return;
+    }
+
+    lockOnFocusTarget = focusTarget_;
+    lockOnFocusTargetName = focusTarget_->GetName();
+    if (const std::shared_ptr<LockOnTargetComponent> lockTarget_ =
+        focusTarget_->GetComponent<LockOnTargetComponent>())
+    {
+        const std::shared_ptr<GameObject> combatOwner_ =
+            lockTarget_->GetCombatOwner();
+        if (combatOwner_)
+        {
+            lockOnTarget = combatOwner_;
+            lockOnTargetName = combatOwner_->GetName();
+        }
+    }
+    else
+    {
+        lockOnTarget = focusTarget_;
+        lockOnTargetName = focusTarget_->GetName();
+    }
 }
 
 std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
     const std::shared_ptr<GameObject>& playerTarget_) const
 {
+    return FindBestLockOnCandidate(playerTarget_).combatOwner.lock();
+}
+
+CameraLockOnComponent::LockOnCandidate CameraLockOnComponent::FindBestLockOnCandidate(
+    const std::shared_ptr<GameObject>& playerTarget_) const
+{
+    LockOnCandidate bestCandidate_{};
+    float bestScore_ = (std::numeric_limits<float>::max)();
+    const std::vector<LockOnCandidate> candidates_ =
+        CollectLockOnCandidates(playerTarget_);
+    for (LockOnCandidate candidate_ : candidates_)
+    {
+        const float centerX_ = candidate_.screenPosition.x - 0.5f;
+        const float centerY_ = candidate_.screenPosition.y - 0.5f;
+        const float centerDistance_ =
+            std::sqrt(centerX_ * centerX_ + centerY_ * centerY_);
+        candidate_.score =
+            centerDistance_ * 8.0f +
+            candidate_.distance / (std::max)(maxDistance, 0.001f) +
+            (candidate_.isVisible ? 0.0f : 40.0f) -
+            candidate_.priority * priorityWeight -
+            (candidate_.isDefaultTarget ? 3.0f : 0.0f) +
+            (candidate_.isCombatOwnerSelf ? 0.02f : 0.0f);
+
+        if (candidate_.score < bestScore_)
+        {
+            bestScore_ = candidate_.score;
+            bestCandidate_ = candidate_;
+        }
+    }
+
+    debugCandidateCount = static_cast<int>(candidates_.size());
+    debugLastSwitchScore = bestScore_ == (std::numeric_limits<float>::max)()
+        ? 0.0f
+        : bestScore_;
+    return bestCandidate_;
+}
+
+std::vector<CameraLockOnComponent::LockOnCandidate>
+CameraLockOnComponent::CollectLockOnCandidates(
+    const std::shared_ptr<GameObject>& playerTarget_) const
+{
+    std::vector<LockOnCandidate> candidates_;
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager || !playerTarget_ || !playerTarget_->transform)
     {
-        return nullptr;
+        return candidates_;
     }
+
+    const std::shared_ptr<CameraComponent> camera_ = camera.lock();
+    if (!camera_) return candidates_;
 
     const DirectX::XMFLOAT3 playerPosition_ =
         GetFocusPosition(playerTarget_, playerOffset);
@@ -602,6 +714,10 @@ std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
         {
             cameraForward_ = activeCamera_->GetFront();
         }
+    }
+    else
+    {
+        cameraForward_ = camera_->GetFront();
     }
 
     float forwardLength_ = std::sqrt(
@@ -615,23 +731,29 @@ std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
     cameraForward_.x /= forwardLength_;
     cameraForward_.z /= forwardLength_;
 
-    std::shared_ptr<GameObject> bestTarget_;
-    float bestScore_ = (std::numeric_limits<float>::max)();
     for (const std::shared_ptr<GameObject>& candidate_ : owner_->manager->GetObjects())
     {
-        if (!candidate_ || candidate_ == playerTarget_ || !candidate_->transform ||
-            !candidate_->GetComponent<LockOnTargetComponent>())
+        if (!candidate_ || candidate_ == playerTarget_ || !candidate_->transform)
         {
             continue;
         }
+        const std::shared_ptr<LockOnTargetComponent> lockTarget_ =
+            candidate_->GetComponent<LockOnTargetComponent>();
+        if (!lockTarget_ || !lockTarget_->IsLockOnEnabled()) continue;
 
-        const DirectX::XMFLOAT3 targetPosition_ =
-            GetFocusPosition(candidate_, targetOffset);
+        const std::shared_ptr<GameObject> combatOwner_ =
+            lockTarget_->GetCombatOwner();
+        if (!combatOwner_ || !combatOwner_->transform) continue;
+
+        const DirectX::XMFLOAT3 targetPosition_ = lockTarget_->GetFocusPosition();
         const float differenceX_ = targetPosition_.x - playerPosition_.x;
+        const float differenceY_ = targetPosition_.y - playerPosition_.y;
         const float differenceZ_ = targetPosition_.z - playerPosition_.z;
         const float horizontalDistance_ = std::sqrt(
             differenceX_ * differenceX_ + differenceZ_ * differenceZ_);
-        if (horizontalDistance_ <= 0.0001f || horizontalDistance_ > maxDistance)
+        const float targetDistance_ = std::sqrt(
+            horizontalDistance_ * horizontalDistance_ + differenceY_ * differenceY_);
+        if (targetDistance_ <= 0.0001f || targetDistance_ > maxDistance)
         {
             continue;
         }
@@ -642,16 +764,38 @@ std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
             cameraForward_.x * directionX_ + cameraForward_.z * directionZ_,
             -1.0f,
             1.0f);
-        const float centerPenalty_ = (1.0f - centerDot_) * maxDistance;
-        const float score_ = horizontalDistance_ + centerPenalty_;
-        if (score_ < bestScore_)
+        if (centerDot_ <= 0.0f) continue;
+
+        LockOnCandidate lockOnCandidate_{};
+        lockOnCandidate_.focusTarget = candidate_;
+        lockOnCandidate_.combatOwner = combatOwner_;
+        lockOnCandidate_.worldPosition = targetPosition_;
+        lockOnCandidate_.distance = targetDistance_;
+        lockOnCandidate_.priority = lockTarget_->GetPriority();
+        lockOnCandidate_.isDefaultTarget = lockTarget_->IsDefaultTarget();
+        lockOnCandidate_.isCombatOwnerSelf = candidate_ == combatOwner_;
+        lockOnCandidate_.isVisible = ProjectToScreenPosition(
+            camera_->GetEye(),
+            camera_->GetFocus(),
+            targetPosition_,
+            camera_->GetFovY(),
+            lockOnCandidate_.screenPosition);
+
+        if (!lockOnCandidate_.isVisible)
         {
-            bestScore_ = score_;
-            bestTarget_ = candidate_;
+            const float overflowX_ =
+                (std::max)(-lockOnCandidate_.screenPosition.x, 0.0f) +
+                (std::max)(lockOnCandidate_.screenPosition.x - 1.0f, 0.0f);
+            const float overflowY_ =
+                (std::max)(-lockOnCandidate_.screenPosition.y, 0.0f) +
+                (std::max)(lockOnCandidate_.screenPosition.y - 1.0f, 0.0f);
+            if (overflowX_ > 0.35f || overflowY_ > 0.35f) continue;
         }
+
+        candidates_.push_back(lockOnCandidate_);
     }
 
-    return bestTarget_;
+    return candidates_;
 }
 
 bool CameraLockOnComponent::ToggleLockOnForPlayer(
@@ -664,10 +808,440 @@ bool CameraLockOnComponent::ToggleLockOnForPlayer(
     }
 
     SetPlayerTarget(playerTarget_);
-    const std::shared_ptr<GameObject> target_ = FindBestLockOnTarget(playerTarget_);
-    SetLockOnTarget(target_);
-    SetLockOnEnabled(target_ != nullptr);
+    const LockOnCandidate target_ = FindBestLockOnCandidate(playerTarget_);
+    ApplyLockOnCandidate(target_);
+    SetLockOnEnabled(!target_.combatOwner.expired() && !target_.focusTarget.expired());
     return lockOnEnabled;
+}
+
+bool CameraLockOnComponent::SwitchLockOnTarget(
+    const DirectX::XMFLOAT2& inputDirection_)
+{
+    const std::shared_ptr<GameObject> target_ =
+        FindDirectionalLockOnTarget(inputDirection_);
+    if (!target_) return false;
+    SetLockOnFocusTarget(target_);
+    return true;
+}
+
+bool CameraLockOnComponent::SwitchLockOnTargetNext()
+{
+    const std::vector<LockOnCandidate> candidates_ =
+        CollectLockOnCandidates(playerTarget.lock());
+    if (candidates_.empty()) return false;
+
+    const std::shared_ptr<GameObject> currentFocusTarget_ =
+        lockOnFocusTarget.lock();
+    std::vector<LockOnCandidate> sortedCandidates_ = candidates_;
+    std::sort(
+        sortedCandidates_.begin(),
+        sortedCandidates_.end(),
+        [](const LockOnCandidate& left_, const LockOnCandidate& right_)
+        {
+            if (left_.screenPosition.x != right_.screenPosition.x)
+            {
+                return left_.screenPosition.x < right_.screenPosition.x;
+            }
+            return left_.screenPosition.y < right_.screenPosition.y;
+        });
+
+    std::size_t currentIndex_ = sortedCandidates_.size();
+    for (std::size_t index_ = 0; index_ < sortedCandidates_.size(); ++index_)
+    {
+        if (sortedCandidates_[index_].focusTarget.lock() == currentFocusTarget_)
+        {
+            currentIndex_ = index_;
+            break;
+        }
+    }
+
+    const std::size_t nextIndex_ =
+        currentIndex_ == sortedCandidates_.size()
+        ? 0
+        : (currentIndex_ + 1) % sortedCandidates_.size();
+    return ApplyLockOnCandidate(sortedCandidates_[nextIndex_]);
+}
+
+bool CameraLockOnComponent::SwitchLockOnTargetPrevious()
+{
+    const std::vector<LockOnCandidate> candidates_ =
+        CollectLockOnCandidates(playerTarget.lock());
+    if (candidates_.empty()) return false;
+
+    const std::shared_ptr<GameObject> currentFocusTarget_ =
+        lockOnFocusTarget.lock();
+    std::vector<LockOnCandidate> sortedCandidates_ = candidates_;
+    std::sort(
+        sortedCandidates_.begin(),
+        sortedCandidates_.end(),
+        [](const LockOnCandidate& left_, const LockOnCandidate& right_)
+        {
+            if (left_.screenPosition.x != right_.screenPosition.x)
+            {
+                return left_.screenPosition.x < right_.screenPosition.x;
+            }
+            return left_.screenPosition.y < right_.screenPosition.y;
+        });
+
+    std::size_t currentIndex_ = sortedCandidates_.size();
+    for (std::size_t index_ = 0; index_ < sortedCandidates_.size(); ++index_)
+    {
+        if (sortedCandidates_[index_].focusTarget.lock() == currentFocusTarget_)
+        {
+            currentIndex_ = index_;
+            break;
+        }
+    }
+
+    const std::size_t previousIndex_ =
+        currentIndex_ == sortedCandidates_.size() || currentIndex_ == 0
+        ? sortedCandidates_.size() - 1
+        : currentIndex_ - 1;
+    return ApplyLockOnCandidate(sortedCandidates_[previousIndex_]);
+}
+
+std::shared_ptr<GameObject> CameraLockOnComponent::FindDirectionalLockOnTarget(
+    const DirectX::XMFLOAT2& inputDirection_) const
+{
+    const float inputLength_ = std::sqrt(
+        inputDirection_.x * inputDirection_.x +
+        inputDirection_.y * inputDirection_.y);
+    if (inputLength_ <= 0.0001f) return nullptr;
+
+    const DirectX::XMFLOAT2 normalizedInput_
+    {
+        inputDirection_.x / inputLength_,
+        inputDirection_.y / inputLength_
+    };
+    const std::vector<LockOnCandidate> candidates_ =
+        CollectLockOnCandidates(playerTarget.lock());
+    const std::shared_ptr<GameObject> currentFocusTarget_ =
+        lockOnFocusTarget.lock();
+    if (candidates_.empty() || !currentFocusTarget_) return nullptr;
+
+    DirectX::XMFLOAT2 currentScreen_{ 0.5f, 0.5f };
+    bool foundCurrentScreen_ = false;
+    for (const LockOnCandidate& candidate_ : candidates_)
+    {
+        if (candidate_.focusTarget.lock() == currentFocusTarget_)
+        {
+            currentScreen_ = candidate_.screenPosition;
+            foundCurrentScreen_ = true;
+            break;
+        }
+    }
+    if (!foundCurrentScreen_) return nullptr;
+
+    LockOnCandidate bestCandidate_{};
+    float bestScore_ = -(std::numeric_limits<float>::max)();
+    for (LockOnCandidate candidate_ : candidates_)
+    {
+        if (candidate_.focusTarget.lock() == currentFocusTarget_) continue;
+
+        const DirectX::XMFLOAT2 screenDifference_
+        {
+            candidate_.screenPosition.x - currentScreen_.x,
+            candidate_.screenPosition.y - currentScreen_.y
+        };
+        const float screenDistance_ = std::sqrt(
+            screenDifference_.x * screenDifference_.x +
+            screenDifference_.y * screenDifference_.y);
+        if (screenDistance_ <= 0.0001f) continue;
+
+        const DirectX::XMFLOAT2 candidateDirection_
+        {
+            screenDifference_.x / screenDistance_,
+            screenDifference_.y / screenDistance_
+        };
+        const float directionDot_ =
+            normalizedInput_.x * candidateDirection_.x +
+            normalizedInput_.y * candidateDirection_.y;
+        if (directionDot_ < directionalDotThreshold) continue;
+
+        const float centerX_ = candidate_.screenPosition.x - 0.5f;
+        const float centerY_ = candidate_.screenPosition.y - 0.5f;
+        const float centerDistance_ =
+            std::sqrt(centerX_ * centerX_ + centerY_ * centerY_);
+        candidate_.score =
+            directionDot_ * 3.0f -
+            screenDistance_ * screenDistanceWeight -
+            centerDistance_ * centerDistanceWeight +
+            candidate_.priority * priorityWeight +
+            (candidate_.isDefaultTarget ? 0.2f : 0.0f);
+
+        if (candidate_.score > bestScore_)
+        {
+            bestScore_ = candidate_.score;
+            bestCandidate_ = candidate_;
+        }
+    }
+
+    debugCandidateCount = static_cast<int>(candidates_.size());
+    debugCurrentFocusScreen = currentScreen_;
+    debugLastSwitchScore = bestScore_ == -(std::numeric_limits<float>::max)()
+        ? 0.0f
+        : bestScore_;
+    return bestCandidate_.focusTarget.lock();
+}
+
+bool CameraLockOnComponent::ApplyLockOnCandidate(
+    const LockOnCandidate& candidate_)
+{
+    const std::shared_ptr<GameObject> combatOwner_ =
+        candidate_.combatOwner.lock();
+    const std::shared_ptr<GameObject> focusTarget_ =
+        candidate_.focusTarget.lock();
+    if (!combatOwner_ || !focusTarget_) return false;
+
+    lockOnTarget = combatOwner_;
+    lockOnTargetName = combatOwner_->GetName();
+    lockOnFocusTarget = focusTarget_;
+    lockOnFocusTargetName = focusTarget_->GetName();
+    debugLastSwitchScore = candidate_.score;
+    return true;
+}
+
+bool CameraLockOnComponent::ResolveFocusTargetFallback()
+{
+    const std::shared_ptr<GameObject> combatOwner_ = lockOnTarget.lock();
+    if (!combatOwner_) return false;
+
+    const std::shared_ptr<GameObject> focusTarget_ = lockOnFocusTarget.lock();
+    if (focusTarget_)
+    {
+        if (const std::shared_ptr<LockOnTargetComponent> lockTarget_ =
+            focusTarget_->GetComponent<LockOnTargetComponent>())
+        {
+            const std::shared_ptr<GameObject> focusCombatOwner_ =
+                lockTarget_->GetCombatOwner();
+            if (focusCombatOwner_ == combatOwner_ && lockTarget_->IsLockOnEnabled())
+            {
+                return true;
+            }
+        }
+        else if (focusTarget_ == combatOwner_)
+        {
+            return true;
+        }
+    }
+
+    const std::vector<LockOnCandidate> candidates_ =
+        CollectLockOnCandidates(playerTarget.lock());
+    LockOnCandidate fallbackCandidate_{};
+    bool hasFallback_ = false;
+    float bestScore_ = (std::numeric_limits<float>::max)();
+    for (LockOnCandidate candidate_ : candidates_)
+    {
+        if (candidate_.combatOwner.lock() != combatOwner_) continue;
+        const float centerX_ = candidate_.screenPosition.x - 0.5f;
+        const float centerY_ = candidate_.screenPosition.y - 0.5f;
+        const float centerDistance_ = std::sqrt(centerX_ * centerX_ + centerY_ * centerY_);
+        candidate_.score =
+            centerDistance_ -
+            candidate_.priority * 0.05f -
+            (candidate_.isDefaultTarget ? 1.0f : 0.0f) +
+            (candidate_.isCombatOwnerSelf ? 0.02f : 0.0f);
+        if (candidate_.score < bestScore_)
+        {
+            bestScore_ = candidate_.score;
+            fallbackCandidate_ = candidate_;
+            hasFallback_ = true;
+        }
+    }
+    if (hasFallback_) return ApplyLockOnCandidate(fallbackCandidate_);
+
+    if (combatOwner_->GetComponent<LockOnTargetComponent>())
+    {
+        lockOnFocusTarget = combatOwner_;
+        lockOnFocusTargetName = combatOwner_->GetName();
+        return true;
+    }
+    if (combatOwner_->transform)
+    {
+        lockOnFocusTarget = combatOwner_;
+        lockOnFocusTargetName = combatOwner_->GetName();
+        return true;
+    }
+    return false;
+}
+
+void CameraLockOnComponent::UpdateLockOnSwitchInput(float deltaTime_)
+{
+    DirectX::XMFLOAT2 inputDirection_ = GetKeyboardSwitchInput();
+    const DirectX::XMFLOAT2 controllerInput_ = GetControllerSwitchInput();
+    debugControllerSwitchInput = controllerInput_;
+
+    const float controllerLength_ = std::sqrt(
+        controllerInput_.x * controllerInput_.x +
+        controllerInput_.y * controllerInput_.y);
+    if (controllerLength_ > 0.0001f)
+    {
+        inputDirection_ = controllerInput_;
+    }
+
+    const DirectX::XMFLOAT2 mouseInput_ = GetMouseSwitchInput(deltaTime_);
+    const float mouseLength_ = std::sqrt(
+        mouseInput_.x * mouseInput_.x +
+        mouseInput_.y * mouseInput_.y);
+    if (mouseLength_ > 0.0001f)
+    {
+        inputDirection_ = mouseInput_;
+    }
+
+    const int wheelDelta_ = MouseInput::Instance().GetWheelDeltaThisFrame();
+    if (wheelDelta_ != 0)
+    {
+        MouseInput::Instance().ConsumeWheelDelta();
+    }
+    if (switchCooldownTimer <= 0.0f && wheelDelta_ != 0)
+    {
+        const bool switched_ = wheelDelta_ > 0
+            ? SwitchLockOnTargetNext()
+            : SwitchLockOnTargetPrevious();
+        if (switched_)
+        {
+            debugLastSwitchDirection = wheelDelta_ > 0
+                ? DirectX::XMFLOAT2{ 1.0f, 0.0f }
+                : DirectX::XMFLOAT2{ -1.0f, 0.0f };
+            switchCooldownTimer = switchCooldown;
+            accumulatedMouseDelta = { 0.0f, 0.0f };
+            debugMouseAccumulatedDelta = accumulatedMouseDelta;
+        }
+        return;
+    }
+
+    const float inputLength_ = std::sqrt(
+        inputDirection_.x * inputDirection_.x +
+        inputDirection_.y * inputDirection_.y);
+    if (inputLength_ <= switchStickReleaseThreshold)
+    {
+        switchInputLatched = false;
+        return;
+    }
+    if (inputLength_ < switchStickThreshold || switchInputLatched ||
+        switchCooldownTimer > 0.0f)
+    {
+        return;
+    }
+
+    const DirectX::XMFLOAT2 normalizedInput_
+    {
+        inputDirection_.x / inputLength_,
+        inputDirection_.y / inputLength_
+    };
+    if (SwitchLockOnTarget(normalizedInput_))
+    {
+        debugLastSwitchDirection = normalizedInput_;
+        switchInputLatched = true;
+        switchCooldownTimer = switchCooldown;
+        accumulatedMouseDelta = { 0.0f, 0.0f };
+        debugMouseAccumulatedDelta = accumulatedMouseDelta;
+    }
+}
+
+DirectX::XMFLOAT2 CameraLockOnComponent::GetKeyboardSwitchInput() const
+{
+    const KeyConfig& keyConfig_ = KeyConfig::Instance();
+    DirectX::XMFLOAT2 input_{ 0.0f, 0.0f };
+    if (keyConfig_.ActionPressedIn("LockOn_SwitchLeft")) input_.x -= 1.0f;
+    if (keyConfig_.ActionPressedIn("LockOn_SwitchRight")) input_.x += 1.0f;
+    if (keyConfig_.ActionPressedIn("LockOn_SwitchUp")) input_.y -= 1.0f;
+    if (keyConfig_.ActionPressedIn("LockOn_SwitchDown")) input_.y += 1.0f;
+    return input_;
+}
+
+DirectX::XMFLOAT2 CameraLockOnComponent::GetControllerSwitchInput() const
+{
+    const KeyConfig& keyConfig_ = KeyConfig::Instance();
+    return
+    {
+        keyConfig_.GetAxis("LockOn_SwitchX"),
+        -keyConfig_.GetAxis("LockOn_SwitchY")
+    };
+}
+
+DirectX::XMFLOAT2 CameraLockOnComponent::GetMouseSwitchInput(float deltaTime_)
+{
+    const Vector2 mouseDelta_ = MouseInput::Instance().GetSubMousePos();
+    if (std::abs(mouseDelta_.x) > 0.001f || std::abs(mouseDelta_.y) > 0.001f)
+    {
+        accumulatedMouseDelta.x += mouseDelta_.x;
+        accumulatedMouseDelta.y += mouseDelta_.y;
+        mouseAccumulationTimer = 0.0f;
+    }
+    else
+    {
+        mouseAccumulationTimer += (std::max)(deltaTime_, 0.0f);
+        if (mouseAccumulationTimer >= mouseAccumulationResetTime)
+        {
+            accumulatedMouseDelta = { 0.0f, 0.0f };
+        }
+    }
+    debugMouseAccumulatedDelta = accumulatedMouseDelta;
+
+    const float absoluteX_ = std::abs(accumulatedMouseDelta.x);
+    const float absoluteY_ = std::abs(accumulatedMouseDelta.y);
+    if (absoluteX_ < mouseSwitchThreshold && absoluteY_ < mouseSwitchThreshold)
+    {
+        return { 0.0f, 0.0f };
+    }
+
+    if (absoluteX_ >= absoluteY_)
+    {
+        return { accumulatedMouseDelta.x >= 0.0f ? 1.0f : -1.0f, 0.0f };
+    }
+    return { 0.0f, accumulatedMouseDelta.y >= 0.0f ? 1.0f : -1.0f };
+}
+
+void CameraLockOnComponent::RegisterDefaultSwitchInputBindings()
+{
+    KeyConfig& keyConfig_ = KeyConfig::Instance();
+    if (keyConfig_.GetActionMap().count("LockOn_SwitchLeft") == 0)
+    {
+        keyConfig_.BindAction(
+            "LockOn_SwitchLeft",
+            { { DeviceType::KBM, KeyInput::K_Left } });
+    }
+    if (keyConfig_.GetActionMap().count("LockOn_SwitchRight") == 0)
+    {
+        keyConfig_.BindAction(
+            "LockOn_SwitchRight",
+            { { DeviceType::KBM, KeyInput::K_Right } });
+    }
+    if (keyConfig_.GetActionMap().count("LockOn_SwitchUp") == 0)
+    {
+        keyConfig_.BindAction(
+            "LockOn_SwitchUp",
+            { { DeviceType::KBM, KeyInput::K_Up } });
+    }
+    if (keyConfig_.GetActionMap().count("LockOn_SwitchDown") == 0)
+    {
+        keyConfig_.BindAction(
+            "LockOn_SwitchDown",
+            { { DeviceType::KBM, KeyInput::K_Down } });
+    }
+    if (keyConfig_.GetAxisMap().count("LockOn_SwitchX") == 0)
+    {
+        keyConfig_.BindAxis(
+            "LockOn_SwitchX",
+            AxisUnit{
+                AxisSourceType::GamepadStick,
+                DeviceType::Gamepad,
+                static_cast<int>(AxisCode::RightStickX),
+                1.0f,
+                switchStickReleaseThreshold });
+    }
+    if (keyConfig_.GetAxisMap().count("LockOn_SwitchY") == 0)
+    {
+        keyConfig_.BindAxis(
+            "LockOn_SwitchY",
+            AxisUnit{
+                AxisSourceType::GamepadStick,
+                DeviceType::Gamepad,
+                static_cast<int>(AxisCode::RightStickY),
+                1.0f,
+                switchStickReleaseThreshold });
+    }
 }
 
 bool CameraLockOnComponent::ApplyCollisionComposition(
@@ -681,7 +1255,7 @@ bool CameraLockOnComponent::ApplyCollisionComposition(
     if (!lockOnEnabled) return false;
 
     const std::shared_ptr<GameObject> player_ = playerTarget.lock();
-    const std::shared_ptr<GameObject> target_ = lockOnTarget.lock();
+    const std::shared_ptr<GameObject> target_ = lockOnFocusTarget.lock();
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!player_ || !target_ || !camera_ ||
         !player_->transform || !target_->transform)
@@ -812,10 +1386,15 @@ void CameraLockOnComponent::ResolveReferences()
     {
         lockOnTarget = owner_->manager->Find(lockOnTargetName);
     }
+    if (lockOnFocusTarget.expired() && !lockOnFocusTargetName.empty())
+    {
+        lockOnFocusTarget = owner_->manager->Find(lockOnFocusTargetName);
+    }
 }
 
 void CameraLockOnComponent::RegisterActions()
 {
+    RegisterDefaultSwitchInputBindings();
     ActionRegistry& registry_ = ActionRegistry::Instance();
     registry_.RegisterAction("Camera", "LockOn_Enable", [this]()
     {
@@ -835,6 +1414,30 @@ void CameraLockOnComponent::RegisterActions()
     {
         currentSide = currentSide >= 0.0f ? -1.0f : 1.0f;
     });
+    registry_.RegisterAction("Camera", "LockOn_SwitchLeft", [this]()
+    {
+        SwitchLockOnTarget({ -1.0f, 0.0f });
+    });
+    registry_.RegisterAction("Camera", "LockOn_SwitchRight", [this]()
+    {
+        SwitchLockOnTarget({ 1.0f, 0.0f });
+    });
+    registry_.RegisterAction("Camera", "LockOn_SwitchUp", [this]()
+    {
+        SwitchLockOnTarget({ 0.0f, -1.0f });
+    });
+    registry_.RegisterAction("Camera", "LockOn_SwitchDown", [this]()
+    {
+        SwitchLockOnTarget({ 0.0f, 1.0f });
+    });
+    registry_.RegisterAction("Camera", "LockOn_SwitchNext", [this]()
+    {
+        SwitchLockOnTargetNext();
+    });
+    registry_.RegisterAction("Camera", "LockOn_SwitchPrevious", [this]()
+    {
+        SwitchLockOnTargetPrevious();
+    });
 }
 
 void CameraLockOnComponent::ResetTracking()
@@ -847,6 +1450,12 @@ void CameraLockOnComponent::ResetTracking()
     hasWallCameraPosition = false;
     hasArenaOutwardDirection = false;
     previousLockOnTarget.reset();
+    previousFocusTarget.reset();
+    switchCooldownTimer = 0.0f;
+    switchInputLatched = false;
+    mouseAccumulationTimer = 0.0f;
+    accumulatedMouseDelta = { 0.0f, 0.0f };
+    debugMouseAccumulatedDelta = accumulatedMouseDelta;
 }
 
 void CameraLockOnComponent::ReleaseThirdPersonCamera()
@@ -1335,20 +1944,24 @@ CameraLockOnComponent::CalculateLockOnDistanceInfo() const
 
     const std::shared_ptr<GameObject> player_ = playerTarget.lock();
     const std::shared_ptr<GameObject> target_ = lockOnTarget.lock();
+    const std::shared_ptr<GameObject> focusTarget_ = lockOnFocusTarget.lock();
 
-    if (!player_ || !target_ || !player_->transform || !target_->transform)
+    if (!player_ || !target_ || !focusTarget_ ||
+        !player_->transform || !target_->transform || !focusTarget_->transform)
     {
         return info_;
     }
 
     info_.playerPosition = GetFocusPosition(player_, playerOffset);
-    info_.targetPosition = GetFocusPosition(target_, targetOffset);
+    info_.targetPosition = GetFocusPosition(focusTarget_, targetOffset);
+    const DirectX::XMFLOAT3 combatTargetPosition_ =
+        GetFocusPosition(target_, targetOffset);
 
     info_.difference =
     {
-        info_.playerPosition.x - info_.targetPosition.x,
-        info_.playerPosition.y - info_.targetPosition.y,
-        info_.playerPosition.z - info_.targetPosition.z
+        info_.playerPosition.x - combatTargetPosition_.x,
+        info_.playerPosition.y - combatTargetPosition_.y,
+        info_.playerPosition.z - combatTargetPosition_.z
     };
 
     info_.horizontalDistance = std::sqrt(
@@ -1423,12 +2036,20 @@ void CameraLockOnComponent::Gui()
     }
     char targetBuffer_[128]{};
     strcpy_s(targetBuffer_, lockOnTargetName.c_str());
-    if (ImGui::InputText("Lock Target", targetBuffer_, sizeof(targetBuffer_)))
+    if (ImGui::InputText("Combat Owner", targetBuffer_, sizeof(targetBuffer_)))
     {
         lockOnTargetName = targetBuffer_;
         lockOnTarget.reset();
         ResolveReferences();
         ResetTracking();
+    }
+    char focusTargetBuffer_[128]{};
+    strcpy_s(focusTargetBuffer_, lockOnFocusTargetName.c_str());
+    if (ImGui::InputText("Focus Target", focusTargetBuffer_, sizeof(focusTargetBuffer_)))
+    {
+        lockOnFocusTargetName = focusTargetBuffer_;
+        lockOnFocusTarget.reset();
+        ResolveReferences();
     }
 
     ImGui::DragFloat3("Player Offset", &playerOffset.x, 0.05f);
@@ -1522,6 +2143,38 @@ void CameraLockOnComponent::Gui()
         0.01f,
         0.0f,
         2.0f);
+    ImGui::SeparatorText("LockOn Target Switch");
+    ImGui::DragFloat("Stick Switch Threshold", &switchStickThreshold, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Stick Release Threshold", &switchStickReleaseThreshold, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Mouse Switch Threshold", &mouseSwitchThreshold, 1.0f, 1.0f, 500.0f);
+    ImGui::DragFloat("Mouse Accumulation Reset Time", &mouseAccumulationResetTime, 0.01f, 0.01f, 1.0f);
+    ImGui::DragFloat("Switch Cooldown", &switchCooldown, 0.01f, 0.0f, 2.0f);
+    ImGui::DragFloat("Directional Dot Threshold", &directionalDotThreshold, 0.01f, -1.0f, 1.0f);
+    ImGui::DragFloat("Screen Distance Weight", &screenDistanceWeight, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Center Distance Weight", &centerDistanceWeight, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Priority Weight", &priorityWeight, 0.01f, 0.0f, 10.0f);
+    ImGui::Text("Current Combat Owner: %s", lockOnTargetName.c_str());
+    ImGui::Text("Current Focus Target: %s", lockOnFocusTargetName.c_str());
+    ImGui::Text("Candidate Count: %d", debugCandidateCount);
+    ImGui::Text(
+        "Last Switch Direction: %.3f, %.3f",
+        debugLastSwitchDirection.x,
+        debugLastSwitchDirection.y);
+    ImGui::Text(
+        "Controller Input: %.3f, %.3f",
+        debugControllerSwitchInput.x,
+        debugControllerSwitchInput.y);
+    ImGui::Text(
+        "Mouse Accumulated Delta: %.3f, %.3f",
+        debugMouseAccumulatedDelta.x,
+        debugMouseAccumulatedDelta.y);
+    ImGui::Text("Switch Latched: %s", switchInputLatched ? "true" : "false");
+    ImGui::Text("Switch Cooldown Timer: %.3f", switchCooldownTimer);
+    ImGui::Text("Last Switch Score: %.3f", debugLastSwitchScore);
+    ImGui::Text(
+        "Current Focus Screen: %.3f, %.3f",
+        debugCurrentFocusScreen.x,
+        debugCurrentFocusScreen.y);
     ImGui::Text("Distance To Wall: %.3f", debugDistanceToWall);
     ImGui::Text("Raw Wall Camera Rate: %.3f", debugRawWallCameraRate);
     ImGui::Text("Current Wall Camera Rate: %.3f", currentWallCameraRate);
@@ -1578,13 +2231,15 @@ void CameraLockOnComponent::Gui()
         debugVerticalCorrection ? "ON" : "OFF",
         debugPlayerBottomCorrection ? "ON" : "OFF",
         debugFovCorrection ? "ON" : "OFF");
-    ImGui::TextDisabled("Actions: LockOn_Enable / Disable / Toggle / SwitchSide");
+    ImGui::TextDisabled(
+        "Actions: LockOn_Enable / Disable / Toggle / SwitchSide / SwitchLeft / SwitchRight / SwitchUp / SwitchDown / SwitchNext / SwitchPrevious");
 }
 
 void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
 {
     json_["playerTargetName"] = playerTargetName;
     json_["lockOnTargetName"] = lockOnTargetName;
+    json_["lockOnFocusTargetName"] = lockOnFocusTargetName;
     json_["lockOnEnabled"] = lockOnEnabled;
     json_["playerOffset"] = { playerOffset.x, playerOffset.y, playerOffset.z };
     json_["playerBottomOffset"] =
@@ -1655,12 +2310,22 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
         wallCameraOppositeSideSwitchScoreThreshold;
     json_["wallCameraContinuityScoreWeight"] =
         wallCameraContinuityScoreWeight;
+    json_["switchStickThreshold"] = switchStickThreshold;
+    json_["switchStickReleaseThreshold"] = switchStickReleaseThreshold;
+    json_["switchCooldown"] = switchCooldown;
+    json_["mouseSwitchThreshold"] = mouseSwitchThreshold;
+    json_["mouseAccumulationResetTime"] = mouseAccumulationResetTime;
+    json_["directionalDotThreshold"] = directionalDotThreshold;
+    json_["screenDistanceWeight"] = screenDistanceWeight;
+    json_["centerDistanceWeight"] = centerDistanceWeight;
+    json_["priorityWeight"] = priorityWeight;
 }
 
 void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
 {
     playerTargetName = json_.value("playerTargetName", std::string{});
     lockOnTargetName = json_.value("lockOnTargetName", std::string{});
+    lockOnFocusTargetName = json_.value("lockOnFocusTargetName", std::string{});
     lockOnEnabled = json_.value("lockOnEnabled", false);
     auto loadFloat3_ = [&json_](
         const char* key_,
@@ -1747,6 +2412,24 @@ void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
         json_.value("wallCameraOppositeSideSwitchScoreThreshold", 0.75f);
     wallCameraContinuityScoreWeight =
         json_.value("wallCameraContinuityScoreWeight", 0.12f);
+    switchStickThreshold =
+        json_.value("switchStickThreshold", 0.65f);
+    switchStickReleaseThreshold =
+        json_.value("switchStickReleaseThreshold", 0.25f);
+    switchCooldown =
+        json_.value("switchCooldown", 0.18f);
+    mouseSwitchThreshold =
+        json_.value("mouseSwitchThreshold", 35.0f);
+    mouseAccumulationResetTime =
+        json_.value("mouseAccumulationResetTime", 0.12f);
+    directionalDotThreshold =
+        json_.value("directionalDotThreshold", 0.35f);
+    screenDistanceWeight =
+        json_.value("screenDistanceWeight", 0.55f);
+    centerDistanceWeight =
+        json_.value("centerDistanceWeight", 0.35f);
+    priorityWeight =
+        json_.value("priorityWeight", 0.25f);
 
     horizontalSafeMin = std::clamp(horizontalSafeMin, 0.0f, 0.95f);
     horizontalSafeMax = std::clamp(horizontalSafeMax, horizontalSafeMin + 0.01f, 1.0f);
@@ -1797,6 +2480,19 @@ void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
         std::clamp(wallCameraOppositeSideSwitchScoreThreshold, 0.0f, 10.0f);
     wallCameraContinuityScoreWeight =
         std::clamp(wallCameraContinuityScoreWeight, 0.0f, 2.0f);
+    switchStickReleaseThreshold =
+        std::clamp(switchStickReleaseThreshold, 0.0f, 1.0f);
+    switchStickThreshold =
+        std::clamp(switchStickThreshold, switchStickReleaseThreshold, 1.0f);
+    switchCooldown = std::clamp(switchCooldown, 0.0f, 2.0f);
+    mouseSwitchThreshold = std::clamp(mouseSwitchThreshold, 1.0f, 500.0f);
+    mouseAccumulationResetTime =
+        std::clamp(mouseAccumulationResetTime, 0.01f, 1.0f);
+    directionalDotThreshold =
+        std::clamp(directionalDotThreshold, -1.0f, 1.0f);
+    screenDistanceWeight = std::clamp(screenDistanceWeight, 0.0f, 10.0f);
+    centerDistanceWeight = std::clamp(centerDistanceWeight, 0.0f, 10.0f);
+    priorityWeight = std::clamp(priorityWeight, 0.0f, 10.0f);
     ResetTracking();
 }
 

@@ -5,6 +5,7 @@
 #include <DirectXMath.h>
 #include <memory>
 #include <string>
+#include <vector>
 
 class CameraComponent;
 class GameObject;
@@ -33,10 +34,15 @@ public:
     float GetWallCameraRate() const { return currentWallCameraRate; }
     std::shared_ptr<GameObject> GetPlayerTarget() const { return playerTarget.lock(); }
     std::shared_ptr<GameObject> GetLockOnTarget() const { return lockOnTarget.lock(); }
+    std::shared_ptr<GameObject> GetLockOnFocusTarget() const { return lockOnFocusTarget.lock(); }
     void SetPlayerTarget(const std::shared_ptr<GameObject>& playerTarget_);
     void SetLockOnTarget(const std::shared_ptr<GameObject>& lockOnTarget_);
+    void SetLockOnFocusTarget(const std::shared_ptr<GameObject>& focusTarget_);
     std::shared_ptr<GameObject> FindBestLockOnTarget(
         const std::shared_ptr<GameObject>& playerTarget_) const;
+    bool SwitchLockOnTarget(const DirectX::XMFLOAT2& inputDirection_);
+    bool SwitchLockOnTargetNext();
+    bool SwitchLockOnTargetPrevious();
     bool ToggleLockOnForPlayer(const std::shared_ptr<GameObject>& playerTarget_);
     bool ApplyCollisionComposition(
         const DirectX::XMFLOAT3& cameraPosition_,
@@ -116,16 +122,45 @@ private:
         bool isValid = false;
     };
 
+    struct LockOnCandidate
+    {
+        std::weak_ptr<GameObject> focusTarget;
+        std::weak_ptr<GameObject> combatOwner;
+        DirectX::XMFLOAT3 worldPosition{};
+        DirectX::XMFLOAT2 screenPosition{};
+        float distance = 0.0f;
+        float priority = 1.0f;
+        bool isVisible = false;
+        bool isDefaultTarget = false;
+        bool isCombatOwnerSelf = false;
+        float score = 0.0f;
+    };
+
     LockOnDistanceInfo CalculateLockOnDistanceInfo() const;
+    std::vector<LockOnCandidate> CollectLockOnCandidates(
+        const std::shared_ptr<GameObject>& playerTarget_) const;
+    LockOnCandidate FindBestLockOnCandidate(
+        const std::shared_ptr<GameObject>& playerTarget_) const;
+    std::shared_ptr<GameObject> FindDirectionalLockOnTarget(
+        const DirectX::XMFLOAT2& inputDirection_) const;
+    bool ApplyLockOnCandidate(const LockOnCandidate& candidate_);
+    bool ResolveFocusTargetFallback();
+    void UpdateLockOnSwitchInput(float deltaTime_);
+    DirectX::XMFLOAT2 GetKeyboardSwitchInput() const;
+    DirectX::XMFLOAT2 GetControllerSwitchInput() const;
+    DirectX::XMFLOAT2 GetMouseSwitchInput(float deltaTime_);
+    void RegisterDefaultSwitchInputBindings();
     void DrawLockOnDebugGui();
 private:
     std::weak_ptr<GameObject> playerTarget;
     std::weak_ptr<GameObject> lockOnTarget;
+    std::weak_ptr<GameObject> lockOnFocusTarget;
     std::weak_ptr<CameraComponent> camera;
     std::weak_ptr<ThirdPersonCameraComponent> thirdPersonCamera;
 
     std::string playerTargetName;
     std::string lockOnTargetName;
+    std::string lockOnFocusTargetName;
     bool lockOnEnabled = false;
     bool actionSuppressed = false;
 
@@ -182,6 +217,15 @@ private:
     float wallCameraOppositeSideMinimumHoldTime = 0.85f;
     float wallCameraOppositeSideSwitchScoreThreshold = 0.75f;
     float wallCameraContinuityScoreWeight = 0.12f;
+    float switchStickThreshold = 0.65f;
+    float switchStickReleaseThreshold = 0.25f;
+    float switchCooldown = 0.18f;
+    float mouseSwitchThreshold = 35.0f;
+    float mouseAccumulationResetTime = 0.12f;
+    float directionalDotThreshold = 0.35f;
+    float screenDistanceWeight = 0.55f;
+    float centerDistanceWeight = 0.35f;
+    float priorityWeight = 0.25f;
 
     DirectX::XMFLOAT3 interpolatedPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 interpolatedLookAt{ 0.0f, 0.0f, 0.0f };
@@ -190,6 +234,7 @@ private:
     DirectX::XMFLOAT3 previousWallCameraPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 previousArenaOutwardDirection{ 0.0f, 0.0f, 1.0f };
     std::weak_ptr<GameObject> previousLockOnTarget;
+    std::weak_ptr<GameObject> previousFocusTarget;
     float baseFovY = 60.0f;
     float currentCollisionFov = 60.0f;
     DirectX::XMFLOAT2 debugPlayerScreen{ 0.5f, 0.5f };
@@ -206,6 +251,12 @@ private:
     float debugLeftCandidateScore = 0.0f;
     float debugCenterCandidateScore = 0.0f;
     float debugRightCandidateScore = 0.0f;
+    mutable int debugCandidateCount = 0;
+    mutable float debugLastSwitchScore = 0.0f;
+    DirectX::XMFLOAT2 debugLastSwitchDirection{ 0.0f, 0.0f };
+    DirectX::XMFLOAT2 debugControllerSwitchInput{ 0.0f, 0.0f };
+    DirectX::XMFLOAT2 debugMouseAccumulatedDelta{ 0.0f, 0.0f };
+    mutable DirectX::XMFLOAT2 debugCurrentFocusScreen{ 0.5f, 0.5f };
     int currentWallCameraSide = 0;
     float currentWallCameraRate = 0.0f;
     float wallCameraSideHoldTimer = 0.0f;
@@ -219,4 +270,8 @@ private:
     bool hasBaseFov = false;
     bool hasCollisionComposition = false;
     bool ownsThirdPersonControl = false;
+    bool switchInputLatched = false;
+    float switchCooldownTimer = 0.0f;
+    float mouseAccumulationTimer = 0.0f;
+    DirectX::XMFLOAT2 accumulatedMouseDelta{ 0.0f, 0.0f };
 };

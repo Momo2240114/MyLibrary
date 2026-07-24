@@ -332,6 +332,7 @@
       <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
       <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp" />
       <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp" />
+      <ClCompile Include="Code\Editor\Window\InputMonitorWindow.cpp" />
       <ClCompile Include="Code\Editor\Window\StartupResourceEditorWindow.cpp" />
       <ClCompile Include="Code\Editor\Window\TimeManagerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp" />
@@ -600,6 +601,7 @@
       <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
       <ClInclude Include="Code\Editor\Window\GameModeWindow.h" />
       <ClInclude Include="Code\Editor\Window\InputEditorWindow.h" />
+      <ClInclude Include="Code\Editor\Window\InputMonitorWindow.h" />
       <ClInclude Include="Code\Editor\Window\StartupResourceEditorWindow.h" />
       <ClInclude Include="Code\Editor\Window\TimeManagerWindow.h" />
     <ClInclude Include="Code\Editor\Window\HierarchyWindow.h" />

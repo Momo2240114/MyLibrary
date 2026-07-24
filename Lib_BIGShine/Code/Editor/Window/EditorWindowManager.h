@@ -23,6 +23,7 @@ public:
     bool ShouldRenderSceneWhenPaused() const { return IsWorkspaceMode() && windows[activeWorkspaceIndex]->ShouldRenderSceneWhenPaused(); }
 private:
     void DrawMenuBar();
+    const char* GetWindowMenuCategory(const EditorWindow& window_) const;
     void DrawWorkspaceSelectorBar();
     void SetActiveWorkspace(int workspaceIndex_);
     std::string GetActiveWorkspaceName() const;

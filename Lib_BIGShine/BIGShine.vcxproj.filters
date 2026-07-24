@@ -490,6 +490,9 @@
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\InputMonitorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\StartupResourceEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -1135,6 +1138,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\InputMonitorWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\StartupResourceEditorWindow.h">

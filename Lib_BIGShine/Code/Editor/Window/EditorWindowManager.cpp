@@ -168,6 +168,33 @@ void EditorWindowManager::DrawSceneView(const ImVec2& pos, const ImVec2& size)
     ImGui::PopStyleColor();
 }
 
+const char* EditorWindowManager::GetWindowMenuCategory(
+    const EditorWindow& window_) const
+{
+    const std::string& name_ = window_.GetName();
+
+    if (window_.IsEditorWorkspace()) return "Workspace";
+    if (name_ == "Hierarchy" || name_ == "InspectorWindow") return "Core";
+    if (name_ == "Shader" || name_ == "Shadow" || name_ == "Post Effect") return "Rendering";
+    if (name_ == "Input Editor" || name_ == "Input Monitor") return "Input";
+    if (name_ == "Asset Browser" ||
+        name_ == "Curve Asset Editor" ||
+        name_ == "Easing Preset Editor" ||
+        name_ == "Effect Asset List" ||
+        name_ == "Startup Model Settings")
+    {
+        return "Assets";
+    }
+    if (name_ == "Animation Editor" ||
+        name_ == "Animation Node Graph" ||
+        name_ == "Action Sequence Editor")
+    {
+        return "Animation";
+    }
+    if (name_ == "Debug Log" || name_ == "Node Graph Monitor") return "Debug";
+    return "Tools";
+}
+
 void EditorWindowManager::DrawMenuBar()
 {
     if (ImGui::BeginMainMenuBar()) {
@@ -200,13 +227,40 @@ void EditorWindowManager::DrawMenuBar()
             ImGui::Separator();
 
             // 各窓の状態を切り替えるメニューを生成
-            for (auto& window : windows) {
-                if (!window->ShouldShowInWindowMenu()) continue;
+            const char* categories_[] =
+            {
+                "Core",
+                "Workspace",
+                "Input",
+                "Animation",
+                "Assets",
+                "Rendering",
+                "Debug",
+                "Tools"
+            };
 
-                bool visible = window->IsVisible();
-                if (ImGui::MenuItem(window->GetName().c_str(), nullptr, &visible)) {
-                    window->SetVisible(visible);
+            for (const char* category_ : categories_) {
+                bool hasCategoryWindow_ = false;
+                for (const auto& window_ : windows) {
+                    if (!window_->ShouldShowInWindowMenu()) continue;
+                    if (std::string(GetWindowMenuCategory(*window_)) == category_) {
+                        hasCategoryWindow_ = true;
+                        break;
+                    }
+                }
+                if (!hasCategoryWindow_) continue;
 
+                if (ImGui::BeginMenu(category_)) {
+                    for (auto& window_ : windows) {
+                        if (!window_->ShouldShowInWindowMenu()) continue;
+                        if (std::string(GetWindowMenuCategory(*window_)) != category_) continue;
+
+                        bool visible_ = window_->IsVisible();
+                        if (ImGui::MenuItem(window_->GetName().c_str(), nullptr, &visible_)) {
+                            window_->SetVisible(visible_);
+                        }
+                    }
+                    ImGui::EndMenu();
                 }
             }
             ImGui::EndMenu();
