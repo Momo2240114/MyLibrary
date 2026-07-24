@@ -62,7 +62,8 @@ InputEditorWindow::InputEditorWindow(GameObjectManager* manager_)
 
     mouseAxisOptions = {
     {"Mouse X", AxisCode::MouseX},
-    {"Mouse Y", AxisCode::MouseY}
+    {"Mouse Y", AxisCode::MouseY},
+    {"Mouse Wheel", AxisCode::MouseWheel}
     };
 
     stickAxisOptions = {

@@ -175,7 +175,13 @@ const char* EditorWindowManager::GetWindowMenuCategory(
 
     if (window_.IsEditorWorkspace()) return "Workspace";
     if (name_ == "Hierarchy" || name_ == "InspectorWindow") return "Core";
-    if (name_ == "Shader" || name_ == "Shadow" || name_ == "Post Effect") return "Rendering";
+	if (name_ == "Shader" ||
+		name_ == "GPU Render Investigation" ||
+		name_ == "Shadow" ||
+		name_ == "Post Effect")
+	{
+		return "Rendering";
+	}
     if (name_ == "Input Editor" || name_ == "Input Monitor") return "Input";
     if (name_ == "Asset Browser" ||
         name_ == "Curve Asset Editor" ||

@@ -145,7 +145,7 @@ bool DragonNeckCommandIKComponent::IsLoadReady() const
     return !model_->IsModelLoading();
 }
 
-void DragonNeckCommandIKComponent::LateUpdate(float deltaTime_)
+void DragonNeckCommandIKComponent::Update(float deltaTime_)
 {
     if (!model || !ikMap) return;
     model->UpdateLoadState();
@@ -166,6 +166,11 @@ void DragonNeckCommandIKComponent::LateUpdate(float deltaTime_)
     {
         ClearCommand();
     }
+}
+
+void DragonNeckCommandIKComponent::LateUpdate(float deltaTime_)
+{
+    (void)deltaTime_;
 }
 
 void DragonNeckCommandIKComponent::ClearCommand()

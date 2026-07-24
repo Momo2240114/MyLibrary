@@ -32,6 +32,7 @@ public:
     float CalculateReturnBlendRate() const;
 
 private:
+    void RegisterDefaultInputBindings();
     void ResolveTarget();
     void ResolveCamera();
     void ResetFollowTracking();

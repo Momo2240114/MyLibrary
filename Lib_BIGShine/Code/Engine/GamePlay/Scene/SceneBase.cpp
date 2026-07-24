@@ -13,6 +13,7 @@
 #include "Editor/Window/HierarchyWindow.h"
 #include "Editor/Window/InspectorWindow.h"
 #include "Editor/Window/ShaderWindow.h"
+#include "Editor/Window/GpuRenderInvestigationWindow.h"
 #include "Editor/Window/AnimationEditorWindow.h"
 #include "Editor/Window/AssetBrowserWindow.h"
 #include "Editor/Window/CurveAssetEditorWindow.h"
@@ -64,6 +65,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<HierarchyWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InspectorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ShaderWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
+	editorWindowManager->AddWindow(std::make_unique<GpuRenderInvestigationWindow>(_GameObjectManager.get(), m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<ShadowWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<PostEffectWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InputEditorWindow>(_GameObjectManager.get()));

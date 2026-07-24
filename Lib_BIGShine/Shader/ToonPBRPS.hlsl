@@ -43,7 +43,7 @@ float ToonRamp(float value)
 {
     float toonAmount = 0.0f;
     
-    // ‚»‚ê‚¼‚ê‚ÌƒXƒeƒbƒviè‡’lj‚É‘Î‚µ‚ÄA‘Î‰ž‚·‚éŒÂ•Ê‚ÌƒtƒFƒU[iƒ{ƒJƒV•j‚ð“K—p‚µ‚Ü‚·
+    // ãã‚Œãžã‚Œã®ã‚¹ãƒ†ãƒƒãƒ—ï¼ˆé–¾å€¤ï¼‰ã«å¯¾ã—ã¦ã€å¯¾å¿œã™ã‚‹å€‹åˆ¥ã®ãƒ•ã‚§ã‚¶ãƒ¼ï¼ˆãƒœã‚«ã‚·å¹…ï¼‰ã‚’é©ç”¨ã—ã¾ã™
     toonAmount += smoothstep(shadeSteps.x - shadeFeathers.x, shadeSteps.x + shadeFeathers.x, value);
     toonAmount += smoothstep(shadeSteps.y - shadeFeathers.y, shadeSteps.y + shadeFeathers.y, value);
     toonAmount += smoothstep(shadeSteps.z - shadeFeathers.z, shadeSteps.z + shadeFeathers.z, value);
@@ -137,12 +137,6 @@ PS_OUT main(VS_OUT pin)
     normalSample.z = sqrt(saturate(1.0f - dot(normalSample.xy, normalSample.xy)));
 
     N = normalize(mul(normalSample, TBN));
-    
-    // normalScale ‚ª 0 ‚È‚ç•½‚çA1 ‚È‚ç’ÊíA2 ˆÈã‚Å‰š“Ê‹­‚ß
-    normalSample.xy *= normalScale;
-
-    // XY‚ð‹­‚ß‚½‚ ‚ÆZ‚ðÄŒvŽZ‚µ‚Ä”j’]‚ðŒ¸‚ç‚·
-    normalSample.z = sqrt(saturate(1.0f - dot(normalSample.xy, normalSample.xy)));
     float3 V = normalize(cameraPosition.xyz - pin.position);
 
     float2 metalRoughSample = MetalRoughMap.Sample(LinearSampler, pin.texcoord).gr;
@@ -169,15 +163,18 @@ PS_OUT main(VS_OUT pin)
     {
         PointLightData pl = pointLights[i];
         float3 Lvec = pl.position - pin.position;
-        float d = length(Lvec);
-        if (d > pl.range)
+        float distanceSquared = dot(Lvec, Lvec);
+        float rangeSquared = pl.range * pl.range;
+        if (distanceSquared > rangeSquared)
             continue;
 
+        float inverseDistance = rsqrt(max(distanceSquared, 0.000001f));
+        float d = distanceSquared * inverseDistance;
         float att = saturate(1.0f - (d / pl.range));
         att *= att;
 
         totalDirectLighting += DirectToonPBR(
-            base.rgb, N, V, normalize(Lvec),
+            base.rgb, N, V, Lvec * inverseDistance,
             pl.color * pl.intensity * att,
             metalness, roughness, f0);
     }
@@ -187,11 +184,14 @@ PS_OUT main(VS_OUT pin)
     {
         SpotLightData sl = spotLights[j];
         float3 Lvec = sl.position - pin.position;
-        float d = length(Lvec);
-        if (d > sl.range)
+        float distanceSquared = dot(Lvec, Lvec);
+        float rangeSquared = sl.range * sl.range;
+        if (distanceSquared > rangeSquared)
             continue;
 
-        float3 L = normalize(Lvec);
+        float inverseDistance = rsqrt(max(distanceSquared, 0.000001f));
+        float d = distanceSquared * inverseDistance;
+        float3 L = Lvec * inverseDistance;
         float cosAngle = dot(normalize(sl.direction), -L);
         float cosInner = cos(radians(sl.innerAngle));
         float cosOuter = cos(radians(sl.outerAngle));

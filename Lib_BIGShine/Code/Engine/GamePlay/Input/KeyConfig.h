@@ -29,12 +29,14 @@ enum class AxisSourceType
 enum class AxisCode
 {
     MouseX = 0,
-    MouseY,
+    MouseY = 1,
 
-    LeftStickX,
-    LeftStickY,
-    RightStickX,
-    RightStickY
+    LeftStickX = 2,
+    LeftStickY = 3,
+    RightStickX = 4,
+    RightStickY = 5,
+
+    MouseWheel = 100
 };
 
 struct AxisUnit
@@ -89,6 +91,7 @@ public:
     void RemoveAxis(const std::string& axisName_);
 
     float GetAxis(const std::string& axisName_) const;
+    float GetRawAxis(const std::string& axisName_) const;
     const std::unordered_map<std::string, AxisBind>& GetAxisMap() const { return axisMap; }
 
 private:

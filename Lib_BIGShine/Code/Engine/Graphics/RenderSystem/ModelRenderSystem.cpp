@@ -79,14 +79,30 @@ namespace
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.drawIndexedCount));
 		sprintf_s(plotName_, "%s.TriangleCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.triangleCount));
+		sprintf_s(plotName_, "%s.IndexCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.indexCount));
 		sprintf_s(plotName_, "%s.VertexCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.vertexCount));
 		sprintf_s(plotName_, "%s.VisibleModelCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.visibleModelCount));
+		sprintf_s(plotName_, "%s.SkippedModelCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.skippedModelCount));
+		sprintf_s(plotName_, "%s.VisibleMeshCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.visibleMeshCount));
+		sprintf_s(plotName_, "%s.SkippedMeshCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.skippedMeshCount));
 		sprintf_s(plotName_, "%s.StaticModelCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.staticModelCount));
 		sprintf_s(plotName_, "%s.SkinnedModelCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.skinnedModelCount));
+		sprintf_s(plotName_, "%s.StaticDrawCallCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.staticDrawCallCount));
+		sprintf_s(plotName_, "%s.SkinnedDrawCallCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.skinnedDrawCallCount));
+		sprintf_s(plotName_, "%s.StaticTriangleCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.staticTriangleCount));
+		sprintf_s(plotName_, "%s.SkinnedTriangleCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.skinnedTriangleCount));
 		sprintf_s(plotName_, "%s.OpaqueDrawCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.opaqueDrawCount));
 		sprintf_s(plotName_, "%s.AlphaTestDrawCount", prefix_);
@@ -103,6 +119,14 @@ namespace
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowDrawCount));
 		sprintf_s(plotName_, "%s.ShadowTriangleCount", prefix_);
 		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowTriangleCount));
+		sprintf_s(plotName_, "%s.ShadowStaticDrawCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowStaticDrawCount));
+		sprintf_s(plotName_, "%s.ShadowSkinnedDrawCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowSkinnedDrawCount));
+		sprintf_s(plotName_, "%s.ShadowStaticTriangleCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowStaticTriangleCount));
+		sprintf_s(plotName_, "%s.ShadowSkinnedTriangleCount", prefix_);
+		BS_PROFILE_PLOT(plotName_, static_cast<int64_t>(statistics_.shadowSkinnedTriangleCount));
 	}
 
 	ModelRenderSystem::RENDER_PROFILE_CATEGORY ResolveRenderProfileCategory(
@@ -175,6 +199,11 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
+		sizeof(CbStaticMesh),
+		staticMeshConstantBuffer.GetAddressOf());
+
+	CPUResourceLoader::CreateConstantBuffer(
+		device,
 		sizeof(CbShadowData),
 		cascadeShadowConstantBuffer.GetAddressOf());
 
@@ -203,16 +232,29 @@ void ModelRenderSystem::Initialize(ID3D11Device* device)
 
 	CPUResourceLoader::LoadVertexShader(
 		device,
-		"Shader/PBRVS.cso",
+		"Shader/ToonPBRStaticVS.cso",
 		GltfModelCommponennt::InputElementDescs.data(),
 		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
 		gBufferInputLayout.GetAddressOf(),
-		gBufferVertexShader.GetAddressOf());
+		gBufferStaticVertexShader.GetAddressOf());
+
+	CPUResourceLoader::LoadVertexShader(
+		device,
+		"Shader/ToonPBRSkinnedVS.cso",
+		GltfModelCommponennt::InputElementDescs.data(),
+		static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
+		nullptr,
+		gBufferSkinnedVertexShader.GetAddressOf());
 
 	CPUResourceLoader::LoadPixelShader(
 		device,
 		"Shader/GBufferPS.cso",
 		gBufferPixelShader.GetAddressOf());
+
+	CPUResourceLoader::LoadPixelShader(
+		device,
+		"Shader/GpuDebugSimpleGBufferPS.cso",
+		gBufferSimplePixelShader.GetAddressOf());
 
 	CPUResourceLoader::CreateConstantBuffer(
 		device,
@@ -427,6 +469,81 @@ void ModelRenderSystem::ShaderSettingGui()
 	}
 }
 
+void ModelRenderSystem::RenderInvestigationSettingGui()
+{
+	auto applyDefaultSettings_ = [&]()
+		{
+			renderInvestigationSettings = {};
+			renderInvestigationSettings.enabled = true;
+			renderInvestigationSettings.enableDeferredPass = true;
+			renderInvestigationSettings.enableShadowPass = true;
+			renderInvestigationSettings.renderStaticModels = true;
+			renderInvestigationSettings.renderSkinnedModels = true;
+			renderInvestigationSettings.renderShadowStaticModels = true;
+			renderInvestigationSettings.renderShadowSkinnedModels = true;
+			renderInvestigationSettings.enableRenderStatistics = true;
+		};
+
+	auto drawPresetButton_ = [&](
+		const char* label_,
+		bool enableDeferredPass_,
+		bool enableShadowPass_,
+		bool renderStaticModels_,
+		bool renderSkinnedModels_,
+		bool renderShadowStaticModels_,
+		bool renderShadowSkinnedModels_)
+		{
+			if (ImGui::Button(label_))
+			{
+				applyDefaultSettings_();
+				renderInvestigationSettings.enableDeferredPass = enableDeferredPass_;
+				renderInvestigationSettings.enableShadowPass = enableShadowPass_;
+				renderInvestigationSettings.renderStaticModels = renderStaticModels_;
+				renderInvestigationSettings.renderSkinnedModels = renderSkinnedModels_;
+				renderInvestigationSettings.renderShadowStaticModels = renderShadowStaticModels_;
+				renderInvestigationSettings.renderShadowSkinnedModels = renderShadowSkinnedModels_;
+			}
+		};
+
+	ImGui::Checkbox("Enable Investigation Mode", &renderInvestigationSettings.enabled);
+	ImGui::Separator();
+
+	ImGui::BeginDisabled(!renderInvestigationSettings.enabled);
+	ImGui::Checkbox("Use Simple GBuffer Pixel Shader", &renderInvestigationSettings.useSimpleGBufferPixelShader);
+	ImGui::Checkbox("Use Depth Only Main Pass", &renderInvestigationSettings.useDepthOnlyMainPass);
+	ImGui::Checkbox("Enable Deferred Lighting Pass", &renderInvestigationSettings.enableDeferredPass);
+	ImGui::Checkbox("Enable Shadow Pass", &renderInvestigationSettings.enableShadowPass);
+	ImGui::Separator();
+	ImGui::Checkbox("Main Static Models", &renderInvestigationSettings.renderStaticModels);
+	ImGui::Checkbox("Main Skinned Models", &renderInvestigationSettings.renderSkinnedModels);
+	ImGui::Checkbox("Shadow Static Models", &renderInvestigationSettings.renderShadowStaticModels);
+	ImGui::Checkbox("Shadow Skinned Models", &renderInvestigationSettings.renderShadowSkinnedModels);
+	ImGui::Checkbox("Render Statistics", &renderInvestigationSettings.enableRenderStatistics);
+	ImGui::Separator();
+	if (ImGui::CollapsingHeader("Capture Presets", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		drawPresetButton_("01 Baseline", true, true, true, true, true, true);
+		ImGui::SameLine();
+		drawPresetButton_("02 No Shadow Pass", true, false, true, true, true, true);
+		ImGui::SameLine();
+		drawPresetButton_("03 No Deferred Lighting", false, true, true, true, true, true);
+		drawPresetButton_("04 Main Static OFF", true, true, false, true, true, true);
+		ImGui::SameLine();
+		drawPresetButton_("05 Shadow Static OFF", true, true, true, true, false, true);
+		ImGui::SameLine();
+		drawPresetButton_("06 Main Skinned OFF", true, true, true, false, true, true);
+		ImGui::SameLine();
+		drawPresetButton_("07 Shadow Skinned OFF", true, true, true, true, true, false);
+		ImGui::TextUnformatted("Send Tracy screenshots in preset order 01 to 07 with the same camera.");
+	}
+	ImGui::Separator();
+	if (ImGui::Button("Reset Investigation Settings"))
+	{
+		renderInvestigationSettings = {};
+	}
+	ImGui::EndDisabled();
+}
+
 void ModelRenderSystem::ShadowSettingGui()
 {
 	CascadeShadowMap& cascadeShadowMap =
@@ -512,6 +629,9 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::RenderModels");
 	renderProfileFrame = {};
+	const bool investigationEnabled_ = renderInvestigationSettings.enabled;
+	const bool depthOnlyMainPass_ =
+		investigationEnabled_ && renderInvestigationSettings.useDepthOnlyMainPass;
 
 	// シーン用定数バッファ更新
 	{
@@ -543,7 +663,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		cbScene.lightDirection = { strongestLight.direction.x, strongestLight.direction.y, strongestLight.direction.z, strongestLight.intensity };
 		cbScene.lightColor = { strongestLight.color.x, strongestLight.color.y, strongestLight.color.z, 0.0f };
 
-		if (rc.cascadeShadowMap && rc.camera && rc.cascadeShadowMap->IsUseCascadeShadow())
+		if (rc.cascadeShadowMap &&
+			rc.camera &&
+			rc.cascadeShadowMap->IsUseCascadeShadow() &&
+			(!investigationEnabled_ || renderInvestigationSettings.enableShadowPass))
 		{
 			DirectX::XMFLOAT3 shadowLightDirection{ strongestLight.direction.x, strongestLight.direction.y, strongestLight.direction.z };
 			RenderContext shadowRc = rc;
@@ -589,16 +712,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 
 	// 定数バッファ設定
-	ID3D11Buffer* vsConstantBuffers[] =
-	{
-		skeletonConstantBuffer.Get(),
-		sceneConstantBuffer.Get(),
-	};
 	ID3D11Buffer* psConstantBuffers[] =
 	{
 		sceneConstantBuffer.Get(),
 	};
-	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
+	dc->VSSetConstantBuffers(7, 1, sceneConstantBuffer.GetAddressOf());
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
 	if (rc.cascadeShadowMap)
@@ -611,6 +729,10 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		shadowData.cascadeSplits = rc.cascadeShadowMap->GetCascadeSplits();
 		shadowData.cascadeShadowBias = cascadeShadowBias;
 		shadowData.shadowAttenuation = shadowAttenuation;
+		if (investigationEnabled_ && !renderInvestigationSettings.enableShadowPass)
+		{
+			shadowData.shadowAttenuation = 1.0f;
+		}
 
 		dc->UpdateSubresource(cascadeShadowConstantBuffer.Get(), 0, nullptr, &shadowData, 0, 0);
 		dc->PSSetConstantBuffers(8, 1, cascadeShadowConstantBuffer.GetAddressOf());
@@ -681,7 +803,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		RENDER_PROFILE_CATEGORY category_,
 		const GltfModelCommponennt::Mesh& mesh_,
 		RENDER_PROFILE_DRAW_KIND drawKind_,
-		ModelShaderID shaderId_)
+		ModelShaderID shaderId_,
+		bool isSkinnedMesh_)
 		{
 			RenderProfileStatistics& totalStatistics_ = renderProfileFrame.total;
 			RenderProfileStatistics& categoryStatistics_ =
@@ -692,7 +815,19 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					++statistics_.drawCallCount;
 					++statistics_.drawIndexedCount;
 					statistics_.triangleCount += mesh_.indices.size() / 3;
+					statistics_.indexCount += mesh_.indices.size();
 					statistics_.vertexCount += mesh_.vertices.size();
+					++statistics_.visibleMeshCount;
+					if (isSkinnedMesh_)
+					{
+						++statistics_.skinnedDrawCallCount;
+						statistics_.skinnedTriangleCount += mesh_.indices.size() / 3;
+					}
+					else
+					{
+						++statistics_.staticDrawCallCount;
+						statistics_.staticTriangleCount += mesh_.indices.size() / 3;
+					}
 					switch (drawKind_)
 					{
 					case RENDER_PROFILE_DRAW_KIND::DRAW_KIND_ALPHA_TEST:
@@ -770,6 +905,78 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			}
 
 			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+			++renderProfileFrame.total.skeletonBufferUpdateCount;
+			renderProfileFrame.total.skeletonMatrixUploadCount += transformCount_;
+		};
+
+	auto isSkinnedMesh_ = [](
+		const GltfModelCommponennt& model_,
+		const GltfModelCommponennt::Mesh& mesh_)
+		{
+			return !model_.IsStaticModel() && !mesh_.bones.empty();
+		};
+
+	auto updateStaticMeshConstants_ = [&](const GltfModelCommponennt::Mesh& mesh_)
+		{
+			CbStaticMesh cbStaticMesh_{};
+			if (mesh_.node)
+			{
+				cbStaticMesh_.world = mesh_.node->worldTransform;
+				const DirectX::XMMATRIX worldMatrix_ =
+					DirectX::XMLoadFloat4x4(&mesh_.node->worldTransform);
+				const DirectX::XMMATRIX normalTransform_ =
+					DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, worldMatrix_));
+				DirectX::XMStoreFloat4x4(&cbStaticMesh_.normalTransform, normalTransform_);
+			}
+			else
+			{
+				DirectX::XMStoreFloat4x4(&cbStaticMesh_.world, DirectX::XMMatrixIdentity());
+				DirectX::XMStoreFloat4x4(&cbStaticMesh_.normalTransform, DirectX::XMMatrixIdentity());
+			}
+			dc->UpdateSubresource(staticMeshConstantBuffer.Get(), 0, nullptr, &cbStaticMesh_, 0, 0);
+		};
+
+	auto bindMeshVertexConstants_ = [&](
+		GltfModelCommponennt& model_,
+		const GltfModelCommponennt::Mesh& mesh_,
+		int meshIndex_)
+		{
+			ID3D11Buffer* nullBuffer_ = nullptr;
+			if (isSkinnedMesh_(model_, mesh_))
+			{
+				uploadSkeletonConstants_(model_, meshIndex_);
+				dc->VSSetConstantBuffers(5, 1, &nullBuffer_);
+				dc->VSSetConstantBuffers(6, 1, skeletonConstantBuffer.GetAddressOf());
+				return true;
+			}
+
+			updateStaticMeshConstants_(mesh_);
+			dc->VSSetConstantBuffers(5, 1, staticMeshConstantBuffer.GetAddressOf());
+			dc->VSSetConstantBuffers(6, 1, &nullBuffer_);
+			return false;
+		};
+
+	auto shouldRenderInvestigationMesh_ = [&](
+		GltfModelCommponennt& model_,
+		const GltfModelCommponennt::Mesh& mesh_)
+		{
+			if (!investigationEnabled_)
+			{
+				return true;
+			}
+
+			const bool isSkinnedMeshResult_ = isSkinnedMesh_(model_, mesh_);
+			if (isSkinnedMeshResult_ && !renderInvestigationSettings.renderSkinnedModels)
+			{
+				++renderProfileFrame.total.skippedMeshCount;
+				return false;
+			}
+			if (!isSkinnedMeshResult_ && !renderInvestigationSettings.renderStaticModels)
+			{
+				++renderProfileFrame.total.skippedMeshCount;
+				return false;
+			}
+			return true;
 		};
 
 	auto drawMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_, ModelShader* shader)
@@ -782,7 +989,11 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			// スケルトン用定数バッファ更新
-			uploadSkeletonConstants_(model_, meshIndex_);
+			const bool isSkinnedMeshResult_ = bindMeshVertexConstants_(model_, mesh, meshIndex_);
+			if (ToonPBRShader* toonPbrShader_ = dynamic_cast<ToonPBRShader*>(shader))
+			{
+				toonPbrShader_->BindVertexShader(rc, isSkinnedMeshResult_);
+			}
 
 			// 更新
 			shader->Update(rc, mesh);
@@ -806,12 +1017,35 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride_, &offset_);
 			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			dc->VSSetShader(gBufferVertexShader.Get(), nullptr, 0);
-			dc->PSSetShader(gBufferPixelShader.Get(), nullptr, 0);
+			const bool isSkinnedMeshResult_ = bindMeshVertexConstants_(model_, mesh, meshIndex_);
+			dc->VSSetShader(
+				isSkinnedMeshResult_ ? gBufferSkinnedVertexShader.Get() : gBufferStaticVertexShader.Get(),
+				nullptr,
+				0);
+			dc->PSSetShader(
+				depthOnlyMainPass_
+				? nullptr
+				: (investigationEnabled_ && renderInvestigationSettings.useSimpleGBufferPixelShader
+					? gBufferSimplePixelShader.Get()
+					: gBufferPixelShader.Get()),
+				nullptr,
+				0);
+			if (depthOnlyMainPass_)
+			{
+				if (isSkinnedMeshResult_)
+				{
+					BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Main::SkinnedModels");
+					dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+				}
+				else
+				{
+					BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Main::StaticModels");
+					dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+				}
+				return;
+			}
 			dc->PSSetConstantBuffers(0, 1, gBufferMaterialConstantBuffer.GetAddressOf());
 			dc->PSSetConstantBuffers(1, 1, materialOverlayConstantBuffer.GetAddressOf());
-
-			uploadSkeletonConstants_(model_, meshIndex_);
 
 			CbGBufferMaterial material_{};
 			material_.baseColor = mesh.material->baseColor;
@@ -911,7 +1145,16 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			}
 			dc->UpdateSubresource(materialOverlayConstantBuffer.Get(), 0, nullptr, &overlayConstants_, 0, 0);
 			dc->PSSetShaderResources(9, _countof(overlaySrvs_), overlaySrvs_);
-			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+			if (isSkinnedMeshResult_)
+			{
+				BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Main::SkinnedModels");
+				dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+			}
+			else
+			{
+				BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Main::StaticModels");
+				dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+			}
 		};
 
 	auto isOutlineTarget = [](ModelShaderID shaderId)
@@ -959,8 +1202,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 
 	GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
-	const bool useDeferredRendering_ = rc.cascadeShadowMap != nullptr;
-	if (useDeferredRendering_)
+	const bool useDeferredRendering_ = rc.cascadeShadowMap != nullptr || depthOnlyMainPass_;
+	if (depthOnlyMainPass_)
+	{
+		dc->OMSetRenderTargets(0, nullptr, graphics_.GetDepthStencilView());
+	}
+	else if (useDeferredRendering_)
 	{
 		graphics_.SetGBufferRenderTargets();
 	}
@@ -992,6 +1239,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			{
 				const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
 				if (!mesh.material) continue;
+				if (!shouldRenderInvestigationMesh_(*drawInfo.model, mesh)) continue;
+				const bool isSkinnedMeshResult_ = isSkinnedMesh_(*drawInfo.model, mesh);
 
 				// マテリアルからシェーダーIDを取得
 				ModelShaderID currentShaderId = mesh.material->shaderId;
@@ -1022,7 +1271,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					mesh.material->alphaMode == GltfModelCommponennt::AlphaMode::Mask
 					? RENDER_PROFILE_DRAW_KIND::DRAW_KIND_ALPHA_TEST
 					: RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE;
-				addRenderProfileDraw_(category_, mesh, drawKind_, currentShaderId);
+				addRenderProfileDraw_(category_, mesh, drawKind_, currentShaderId, isSkinnedMeshResult_);
 
 				if (useDeferredRendering_)
 				{
@@ -1034,7 +1283,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					drawMesh(*drawInfo.model, mesh, meshIndex_, shader);
 					if (isOutlineTarget(currentShaderId))
 					{
-						addRenderProfileDraw_(category_, mesh, RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE, currentShaderId);
+						addRenderProfileDraw_(
+							category_,
+							mesh,
+							RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE,
+							currentShaderId,
+							isSkinnedMeshResult_);
 						drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
 					}
 					shader->End(rc);
@@ -1043,7 +1297,9 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		}
 	}
 
-	if (useDeferredRendering_)
+	if (useDeferredRendering_ &&
+		!depthOnlyMainPass_ &&
+		(!investigationEnabled_ || renderInvestigationSettings.enableDeferredPass))
 	{
 		{
 			BS_PROFILE_SCOPE("RenderModels::DeferredLighting");
@@ -1117,21 +1373,37 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					const GltfModelCommponennt::Mesh& mesh = meshes_[meshIndex_];
 					if (mesh.material &&
 						mesh.material->alphaMode != GltfModelCommponennt::AlphaMode::Blend &&
-						isOutlineTarget(mesh.material->shaderId))
+						isOutlineTarget(mesh.material->shaderId) &&
+						shouldRenderInvestigationMesh_(*drawInfo.model, mesh))
 					{
-						addRenderProfileDraw_(category_, mesh, RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE, mesh.material->shaderId);
+						addRenderProfileDraw_(
+							category_,
+							mesh,
+							RENDER_PROFILE_DRAW_KIND::DRAW_KIND_OPAQUE,
+							mesh.material->shaderId,
+							isSkinnedMesh_(*drawInfo.model, mesh));
 						drawOutlineMesh(*drawInfo.model, mesh, meshIndex_);
 					}
 				}
 			}
 		}
 	}
+	else if (useDeferredRendering_ &&
+		!depthOnlyMainPass_ &&
+		investigationEnabled_ &&
+		!renderInvestigationSettings.enableDeferredPass)
+	{
+		graphics_.SetSceneRenderTarget();
+	}
 	drawInfos.clear();
 
 
 	// ★ デカール描画実行
 	// RenderDecals 内では copyDepthStencilSRV (コピーされた方) を使うこと！
-	RenderDecals(rc);
+	if (!depthOnlyMainPass_)
+	{
+		RenderDecals(rc);
+	}
 
 	// カメラから遠い順にソート
 	std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
@@ -1141,12 +1413,19 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	});
 
 	// 半透明描画処理
+	if (!depthOnlyMainPass_)
 	{
 		BS_PROFILE_SCOPE("RenderModels::TransparentModels");
 		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main::TransparentModels");
 
 		for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
 		{
+			if (transparencyDrawInfo.model &&
+				transparencyDrawInfo.mesh &&
+				!shouldRenderInvestigationMesh_(*transparencyDrawInfo.model, *transparencyDrawInfo.mesh))
+			{
+				continue;
+			}
 			ModelShader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
 
 			shader->Begin(rc);
@@ -1158,7 +1437,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 					category_,
 					*transparencyDrawInfo.mesh,
 					RENDER_PROFILE_DRAW_KIND::DRAW_KIND_TRANSPARENT,
-					transparencyDrawInfo.shaderId);
+					transparencyDrawInfo.shaderId,
+					isSkinnedMesh_(*transparencyDrawInfo.model, *transparencyDrawInfo.mesh));
 				drawMesh(
 					*transparencyDrawInfo.model,
 					*transparencyDrawInfo.mesh,
@@ -1172,21 +1452,54 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 	BS_PROFILE_PLOT("Render.ModelSubmitCount", static_cast<int64_t>(modelSubmitCount_));
 	BS_PROFILE_PLOT("Render.MeshSubmitCount", static_cast<int64_t>(meshSubmitCount_));
 	BS_PROFILE_PLOT("Render.SkeletonUploadCount", static_cast<int64_t>(skeletonUploadCount_));
+	BS_PROFILE_PLOT("Render.SkeletonBufferUpdateCount", static_cast<int64_t>(renderProfileFrame.total.skeletonBufferUpdateCount));
+	BS_PROFILE_PLOT("Render.SkeletonMatrixUploadCount", static_cast<int64_t>(renderProfileFrame.total.skeletonMatrixUploadCount));
 	BS_PROFILE_PLOT("Render.TransparentMeshCount", static_cast<int64_t>(transparencyDrawInfos.size()));
-	PlotRenderProfileStatistics("Render", renderProfileFrame.total);
-	for (int categoryIndex_ = 0; categoryIndex_ < static_cast<int>(RENDER_PROFILE_CATEGORY::COUNT); ++categoryIndex_)
+	BS_PROFILE_PLOT("Render.DepthOnlyEnabled", depthOnlyMainPass_ ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.SimplePixelShaderEnabled",
+		investigationEnabled_ && renderInvestigationSettings.useSimpleGBufferPixelShader ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.DeferredPassEnabled",
+		!investigationEnabled_ || renderInvestigationSettings.enableDeferredPass ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.ShadowPassEnabled",
+		!investigationEnabled_ || renderInvestigationSettings.enableShadowPass ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.MainStaticModelsEnabled",
+		!investigationEnabled_ || renderInvestigationSettings.renderStaticModels ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.MainSkinnedModelsEnabled",
+		!investigationEnabled_ || renderInvestigationSettings.renderSkinnedModels ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.ShadowStaticModelsEnabled",
+		!investigationEnabled_ || renderInvestigationSettings.renderShadowStaticModels ? 1 : 0);
+	BS_PROFILE_PLOT(
+		"Render.ShadowSkinnedModelsEnabled",
+		!investigationEnabled_ || renderInvestigationSettings.renderShadowSkinnedModels ? 1 : 0);
+	if (!investigationEnabled_ || renderInvestigationSettings.enableRenderStatistics)
 	{
-		const RENDER_PROFILE_CATEGORY category_ = static_cast<RENDER_PROFILE_CATEGORY>(categoryIndex_);
-		char plotPrefix_[128]{};
-		sprintf_s(plotPrefix_, "Render.Category.%s", GetRenderProfileCategoryName(category_));
-		PlotRenderProfileStatistics(plotPrefix_, renderProfileFrame.categories[categoryIndex_]);
+		PlotRenderProfileStatistics("Render", renderProfileFrame.total);
+		for (int cascadeIndex_ = 0; cascadeIndex_ < CascadeShadowMap::CascadeCount; ++cascadeIndex_)
+		{
+			char plotPrefix_[128]{};
+			sprintf_s(plotPrefix_, "Render.Shadow.Cascade%d", cascadeIndex_);
+			PlotRenderProfileStatistics(plotPrefix_, renderProfileFrame.shadowCascades[cascadeIndex_]);
+		}
+		for (int categoryIndex_ = 0; categoryIndex_ < static_cast<int>(RENDER_PROFILE_CATEGORY::COUNT); ++categoryIndex_)
+		{
+			const RENDER_PROFILE_CATEGORY category_ = static_cast<RENDER_PROFILE_CATEGORY>(categoryIndex_);
+			char plotPrefix_[128]{};
+			sprintf_s(plotPrefix_, "Render.Category.%s", GetRenderProfileCategoryName(category_));
+			PlotRenderProfileStatistics(plotPrefix_, renderProfileFrame.categories[categoryIndex_]);
+		}
 	}
 	transparencyDrawInfos.clear();
 
 	// 定数バッファ設定解除
-	for (ID3D11Buffer*& vsConstantBuffer : vsConstantBuffers) { vsConstantBuffer = nullptr; }
+	ID3D11Buffer* vsConstantBuffers[] = { nullptr, nullptr, nullptr };
 	for (ID3D11Buffer*& psConstantBuffer : psConstantBuffers) { psConstantBuffer = nullptr; }
-	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
+	dc->VSSetConstantBuffers(5, _countof(vsConstantBuffers), vsConstantBuffers);
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
 
@@ -1469,14 +1782,50 @@ void ModelRenderSystem::RenderCascadeShadowMaps(RenderContext& rc, const DirectX
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
+	auto renderCascade_ = [&](int cascadeIndex_)
+		{
+			ID3D11DepthStencilView* dsv_ = rc.cascadeShadowMap->GetDSV(cascadeIndex_);
+			dc->ClearDepthStencilView(dsv_, D3D11_CLEAR_DEPTH, 1.0f, 0);
+			dc->OMSetRenderTargets(0, nullptr, dsv_);
+			RenderShadowCasters(rc, cascadeIndex_);
+		};
+
 	for (int cascadeIndex = 0; cascadeIndex < CascadeShadowMap::CascadeCount; ++cascadeIndex)
 	{
 		BS_PROFILE_SCOPE("RenderShadow::Cascade");
-		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade");
-		ID3D11DepthStencilView* dsv = rc.cascadeShadowMap->GetDSV(cascadeIndex);
-		dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
-		dc->OMSetRenderTargets(0, nullptr, dsv);
-		RenderShadowCasters(rc, cascadeIndex);
+		switch (cascadeIndex)
+		{
+		case 0:
+		{
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade0");
+			renderCascade_(cascadeIndex);
+			break;
+		}
+		case 1:
+		{
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade1");
+			renderCascade_(cascadeIndex);
+			break;
+		}
+		case 2:
+		{
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade2");
+			renderCascade_(cascadeIndex);
+			break;
+		}
+		case 3:
+		{
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade3");
+			renderCascade_(cascadeIndex);
+			break;
+		}
+		default:
+		{
+			BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Cascade");
+			renderCascade_(cascadeIndex);
+			break;
+		}
+		}
 	}
 
 	GraphicsDeviceManager::Instance().SetSceneRenderTarget();
@@ -1490,14 +1839,12 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 	BS_PROFILE_SCOPE("RenderShadow::Casters");
 	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow::Casters");
+	const bool investigationEnabled_ = renderInvestigationSettings.enabled;
 
 	CbShadowCaster shadowCaster{};
 	shadowCaster.lightViewProjection = rc.cascadeShadowMap->GetLightViewProjection(cascadeIndex);
 	dc->UpdateSubresource(shadowCasterConstantBuffer.Get(), 0, nullptr, &shadowCaster, 0, 0);
 	dc->VSSetConstantBuffers(8, 1, shadowCasterConstantBuffer.GetAddressOf());
-
-	ID3D11Buffer* vsConstantBuffers[] = { skeletonConstantBuffer.Get() };
-	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
 
 	auto uploadSkeletonConstants_ = [&](GltfModelCommponennt& model_, int meshIndex_)
 		{
@@ -1522,6 +1869,55 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 			}
 
 			dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &cbSkeleton_, 0, 0);
+			++renderProfileFrame.total.skeletonBufferUpdateCount;
+			renderProfileFrame.total.skeletonMatrixUploadCount += transformCount_;
+		};
+
+	auto isSkinnedMesh_ = [](
+		const GltfModelCommponennt& model_,
+		const GltfModelCommponennt::Mesh& mesh_)
+		{
+			return !model_.IsStaticModel() && !mesh_.bones.empty();
+		};
+
+	auto updateStaticMeshConstants_ = [&](const GltfModelCommponennt::Mesh& mesh_)
+		{
+			CbStaticMesh cbStaticMesh_{};
+			if (mesh_.node)
+			{
+				cbStaticMesh_.world = mesh_.node->worldTransform;
+				const DirectX::XMMATRIX worldMatrix_ =
+					DirectX::XMLoadFloat4x4(&mesh_.node->worldTransform);
+				const DirectX::XMMATRIX normalTransform_ =
+					DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, worldMatrix_));
+				DirectX::XMStoreFloat4x4(&cbStaticMesh_.normalTransform, normalTransform_);
+			}
+			else
+			{
+				DirectX::XMStoreFloat4x4(&cbStaticMesh_.world, DirectX::XMMatrixIdentity());
+				DirectX::XMStoreFloat4x4(&cbStaticMesh_.normalTransform, DirectX::XMMatrixIdentity());
+			}
+			dc->UpdateSubresource(staticMeshConstantBuffer.Get(), 0, nullptr, &cbStaticMesh_, 0, 0);
+		};
+
+	auto bindShadowVertexConstants_ = [&](
+		GltfModelCommponennt& model_,
+		const GltfModelCommponennt::Mesh& mesh_,
+		int meshIndex_)
+		{
+			ID3D11Buffer* nullBuffer_ = nullptr;
+			if (isSkinnedMesh_(model_, mesh_))
+			{
+				uploadSkeletonConstants_(model_, meshIndex_);
+				dc->VSSetConstantBuffers(5, 1, &nullBuffer_);
+				dc->VSSetConstantBuffers(6, 1, skeletonConstantBuffer.GetAddressOf());
+				return true;
+			}
+
+			updateStaticMeshConstants_(mesh_);
+			dc->VSSetConstantBuffers(5, 1, staticMeshConstantBuffer.GetAddressOf());
+			dc->VSSetConstantBuffers(6, 1, &nullBuffer_);
+			return false;
 		};
 
 	shader->Begin(rc);
@@ -1537,6 +1933,14 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 			{
 				continue;
 			}
+			const bool isSkinnedMeshResult_ = isSkinnedMesh_(*drawInfo.model, mesh);
+			if (investigationEnabled_ &&
+				((isSkinnedMeshResult_ && !renderInvestigationSettings.renderShadowSkinnedModels) ||
+					(!isSkinnedMeshResult_ && !renderInvestigationSettings.renderShadowStaticModels)))
+			{
+				++renderProfileFrame.total.skippedMeshCount;
+				continue;
+			}
 
 			UINT stride = sizeof(GltfModelCommponennt::Vertex);
 			UINT offset = 0;
@@ -1544,20 +1948,57 @@ void ModelRenderSystem::RenderShadowCasters(const RenderContext& rc, int cascade
 			dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			uploadSkeletonConstants_(*drawInfo.model, meshIndex_);
+			const bool boundSkinnedMesh_ = bindShadowVertexConstants_(*drawInfo.model, mesh, meshIndex_);
+			if (ShadowCasterShader* shadowCasterShader_ = dynamic_cast<ShadowCasterShader*>(shader))
+			{
+				shadowCasterShader_->BindVertexShader(rc, boundSkinnedMesh_);
+			}
 			const RENDER_PROFILE_CATEGORY category_ = ResolveRenderProfileCategory(drawInfo.model);
 			RenderProfileStatistics& totalStatistics_ = renderProfileFrame.total;
 			RenderProfileStatistics& categoryStatistics_ =
 				renderProfileFrame.categories[static_cast<int>(category_)];
+			RenderProfileStatistics& cascadeStatistics_ =
+				renderProfileFrame.shadowCascades[cascadeIndex];
 			++totalStatistics_.shadowDrawCount;
 			totalStatistics_.shadowTriangleCount += mesh.indices.size() / 3;
 			++categoryStatistics_.shadowDrawCount;
 			categoryStatistics_.shadowTriangleCount += mesh.indices.size() / 3;
-			dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+			++cascadeStatistics_.shadowDrawCount;
+			cascadeStatistics_.shadowTriangleCount += mesh.indices.size() / 3;
+			if (isSkinnedMeshResult_)
+			{
+				++totalStatistics_.shadowSkinnedDrawCount;
+				totalStatistics_.shadowSkinnedTriangleCount += mesh.indices.size() / 3;
+				++categoryStatistics_.shadowSkinnedDrawCount;
+				categoryStatistics_.shadowSkinnedTriangleCount += mesh.indices.size() / 3;
+				++cascadeStatistics_.shadowSkinnedDrawCount;
+				cascadeStatistics_.shadowSkinnedTriangleCount += mesh.indices.size() / 3;
+			}
+			else
+			{
+				++totalStatistics_.shadowStaticDrawCount;
+				totalStatistics_.shadowStaticTriangleCount += mesh.indices.size() / 3;
+				++categoryStatistics_.shadowStaticDrawCount;
+				categoryStatistics_.shadowStaticTriangleCount += mesh.indices.size() / 3;
+				++cascadeStatistics_.shadowStaticDrawCount;
+				cascadeStatistics_.shadowStaticTriangleCount += mesh.indices.size() / 3;
+			}
+			if (isSkinnedMeshResult_)
+			{
+				BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Shadow::SkinnedModels");
+				dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+			}
+			else
+			{
+				BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Shadow::StaticModels");
+				dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+			}
 		}
 	}
 	shader->End(rc);
 
 	ID3D11Buffer* nullBuffer = nullptr;
+	dc->VSSetConstantBuffers(5, 1, &nullBuffer);
+	dc->VSSetConstantBuffers(6, 1, &nullBuffer);
 	dc->VSSetConstantBuffers(8, 1, &nullBuffer);
 }

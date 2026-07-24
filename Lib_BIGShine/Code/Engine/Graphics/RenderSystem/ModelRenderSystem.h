@@ -37,6 +37,7 @@ public:
 	void RenderDecals(const RenderContext& rc);
 	const auto& GetShaders() const { return shaders; }
 	void ShaderSettingGui();
+	void RenderInvestigationSettingGui();
 	void ShadowSettingGui();
 	void OutLineSettingGui();
 	void SerializeGraphicsSettings(nlohmann::json& j_) const;
@@ -58,10 +59,18 @@ public:
 		uint64_t drawCallCount = 0;
 		uint64_t drawIndexedCount = 0;
 		uint64_t triangleCount = 0;
+		uint64_t indexCount = 0;
 		uint64_t vertexCount = 0;
 		uint64_t visibleModelCount = 0;
+		uint64_t skippedModelCount = 0;
+		uint64_t visibleMeshCount = 0;
+		uint64_t skippedMeshCount = 0;
 		uint64_t staticModelCount = 0;
 		uint64_t skinnedModelCount = 0;
+		uint64_t staticDrawCallCount = 0;
+		uint64_t skinnedDrawCallCount = 0;
+		uint64_t staticTriangleCount = 0;
+		uint64_t skinnedTriangleCount = 0;
 		uint64_t opaqueDrawCount = 0;
 		uint64_t alphaTestDrawCount = 0;
 		uint64_t transparentDrawCount = 0;
@@ -70,12 +79,33 @@ public:
 		uint64_t shaderBindCount = 0;
 		uint64_t shadowDrawCount = 0;
 		uint64_t shadowTriangleCount = 0;
+		uint64_t shadowStaticDrawCount = 0;
+		uint64_t shadowSkinnedDrawCount = 0;
+		uint64_t shadowStaticTriangleCount = 0;
+		uint64_t shadowSkinnedTriangleCount = 0;
+		uint64_t skeletonBufferUpdateCount = 0;
+		uint64_t skeletonMatrixUploadCount = 0;
 	};
 
 	struct RenderProfileFrame
 	{
 		RenderProfileStatistics total;
 		RenderProfileStatistics categories[static_cast<int>(RENDER_PROFILE_CATEGORY::COUNT)];
+		RenderProfileStatistics shadowCascades[4];
+	};
+
+	struct RenderInvestigationSettings
+	{
+		bool enabled = false;
+		bool useSimpleGBufferPixelShader = false;
+		bool useDepthOnlyMainPass = false;
+		bool enableDeferredPass = true;
+		bool enableShadowPass = true;
+		bool renderStaticModels = true;
+		bool renderSkinnedModels = true;
+		bool renderShadowStaticModels = true;
+		bool renderShadowSkinnedModels = true;
+		bool enableRenderStatistics = true;
 	};
 
 private:
@@ -128,6 +158,12 @@ private:
 	struct CbSkeleton
 	{
 		DirectX::XMFLOAT4X4		boneTransforms[256];
+	};
+
+	struct CbStaticMesh
+	{
+		DirectX::XMFLOAT4X4 world;
+		DirectX::XMFLOAT4X4 normalTransform;
 	};
 
 	struct CbOutline
@@ -204,6 +240,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	sceneConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	skeletonConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	staticMeshConstantBuffer;
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> outlineVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> outlinePixelShader;
@@ -212,12 +249,15 @@ private:
 	DirectX::XMFLOAT4 outlineColor = { 0.02f, 0.02f, 0.025f, 1.0f };
 	float outlineThickness = 0.00f;
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> gBufferVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> gBufferStaticVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> gBufferSkinnedVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferPixelShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> gBufferSimplePixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> gBufferInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gBufferMaterialConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> materialOverlayConstantBuffer;
 	std::shared_ptr<LightingShader> lightingShader;
+	RenderInvestigationSettings renderInvestigationSettings;
 
 	// ライト数に応じて容量を拡張するGPUバッファ。毎フレームの再生成を避ける。
 	Microsoft::WRL::ComPtr<ID3D11Buffer> lightStructuredBuffer;

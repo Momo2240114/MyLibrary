@@ -250,6 +250,16 @@ void KeyConfig::RemoveAxis(const std::string& axisName_)
 
 float KeyConfig::GetAxis(const std::string& axisName_) const
 {
+    float value_ = GetRawAxis(axisName_);
+
+    if (value_ > 1.0f) value_ = 1.0f;
+    if (value_ < -1.0f) value_ = -1.0f;
+
+    return value_;
+}
+
+float KeyConfig::GetRawAxis(const std::string& axisName_) const
+{
     auto it_ = axisMap.find(axisName_);
     if (it_ == axisMap.end()) return 0.0f;
 
@@ -259,9 +269,6 @@ float KeyConfig::GetAxis(const std::string& axisName_) const
     {
         value_ += GetAxisUnitValue(unit_);
     }
-
-    if (value_ > 1.0f) value_ = 1.0f;
-    if (value_ < -1.0f) value_ = -1.0f;
 
     return value_;
 }
@@ -286,6 +293,10 @@ float KeyConfig::GetAxisUnitValue(const AxisUnit& unit_) const
         else if (unit_.code == static_cast<int>(AxisCode::MouseY))
         {
             value_ = MouseInput::Instance().GetSubMousePos().y;
+        }
+        else if (unit_.code == static_cast<int>(AxisCode::MouseWheel))
+        {
+            value_ = static_cast<float>(MouseInput::Instance().GetWheelDeltaThisFrame());
         }
 
         return value_ * unit_.scale;
