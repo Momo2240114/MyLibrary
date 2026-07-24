@@ -2,6 +2,7 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "ModelAnimator.h"
 #include "AnimSequenceAdapter.h"
+#include "AnimationState.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
@@ -28,7 +29,8 @@ public:
     void SetSequencerWindowVisible(bool visible_) { showSequencerWindow = visible_; }
     // エディタ用表示関数
     void OnGuiNodeEditor();
-    void DrawNodeEditorContent();
+    void DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE connectionMode_ = ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN);
+    void DrawTransitionInspectorContent();
 
     // エディタ側からポーズライブラリを直接操作・保存できるように、ゲッターを用意すると便利です
     std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return poseLibrary; }
@@ -175,6 +177,7 @@ private:
     ImVec2       newNodeSpawnPosition = { 0,0 };
     uintptr_t    nodeToPlaceId = 0;
     bool         needsPositionRestore = false;
+    ed::LinkId   selectedTransitionLinkId;
     std::string  currentGraphScopeId = "Root";
     std::vector<std::string> graphScopeStack;
 

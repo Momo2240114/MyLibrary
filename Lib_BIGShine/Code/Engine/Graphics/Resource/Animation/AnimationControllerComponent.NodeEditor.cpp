@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <fstream>
 #include <cmath>
+#include <cfloat>
 #include <cctype>
 #include <unordered_map>
 
@@ -116,6 +117,45 @@ static ImU32 GetGraphNodeTitleColor(const AnimGraphNode& node_)
 }
 
 // ベジェ曲線の中点に三角形の矢印を描画するヘルパー
+static void DrawStraightLink(ImDrawList* drawList_, const ImVec2& start_, const ImVec2& end_, ImU32 color_, float thickness_)
+{
+    drawList_->AddLine(start_, end_, color_, thickness_);
+}
+
+static void DrawStraightLinkArrow(ImDrawList* drawList_, const ImVec2& start_, const ImVec2& end_, ImU32 color_)
+{
+    const float deltaX_ = end_.x - start_.x;
+    const float deltaY_ = end_.y - start_.y;
+    const float distance_ = std::sqrt(deltaX_ * deltaX_ + deltaY_ * deltaY_);
+    if (distance_ < 36.0f)
+    {
+        return;
+    }
+
+    const ImVec2 direction_(deltaX_ / distance_, deltaY_ / distance_);
+    const ImVec2 perpendicular_(-direction_.y, direction_.x);
+    const ImVec2 center_(
+        start_.x + deltaX_ * 0.58f,
+        start_.y + deltaY_ * 0.58f);
+
+    constexpr float ARROW_LENGTH = 15.0f;
+    constexpr float ARROW_WIDTH = 10.0f;
+    const ImVec2 tip_(
+        center_.x + direction_.x * ARROW_LENGTH,
+        center_.y + direction_.y * ARROW_LENGTH);
+    const ImVec2 backCenter_(
+        center_.x - direction_.x * ARROW_LENGTH,
+        center_.y - direction_.y * ARROW_LENGTH);
+    const ImVec2 backA_(
+        backCenter_.x + perpendicular_.x * ARROW_WIDTH,
+        backCenter_.y + perpendicular_.y * ARROW_WIDTH);
+    const ImVec2 backB_(
+        backCenter_.x - perpendicular_.x * ARROW_WIDTH,
+        backCenter_.y - perpendicular_.y * ARROW_WIDTH);
+
+    drawList_->AddTriangleFilled(tip_, backA_, backB_, IM_COL32(255, 190, 40, 255));
+    drawList_->AddTriangle(tip_, backA_, backB_, IM_COL32(70, 45, 0, 255), 2.0f);
+}
 static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& p3, ImU32 color)
 {
     if (p0.x == 0.0f && p0.y == 0.0f) return;
@@ -260,6 +300,96 @@ static void DrawLinkArrow(ImDrawList* drawList, const ImVec2& p0, const ImVec2& 
     drawArrowAt(targetT);
 }
 const std::string ASSET_DIR = "Data/Animation/StateData/";
+static constexpr float BIDIRECTIONAL_LINK_OFFSET = 14.0f;
+
+struct AnimGraphNodeVisualInfo
+{
+    ImVec2 minimum;
+    ImVec2 maximum;
+    ImVec2 center;
+    ImVec2 inputPosition;
+    ImVec2 outputPosition;
+};
+
+static ImVec2 AddImVec2(const ImVec2& left_, const ImVec2& right_)
+{
+    return ImVec2(left_.x + right_.x, left_.y + right_.y);
+}
+
+static ImVec2 SubImVec2(const ImVec2& left_, const ImVec2& right_)
+{
+    return ImVec2(left_.x - right_.x, left_.y - right_.y);
+}
+
+static ImVec2 MulImVec2(const ImVec2& value_, float scale_)
+{
+    return ImVec2(value_.x * scale_, value_.y * scale_);
+}
+
+static float DotImVec2(const ImVec2& left_, const ImVec2& right_)
+{
+    return left_.x * right_.x + left_.y * right_.y;
+}
+
+static float LengthImVec2(const ImVec2& value_)
+{
+    return std::sqrt(DotImVec2(value_, value_));
+}
+
+static ImVec2 NormalizeImVec2(const ImVec2& value_)
+{
+    const float length_ = LengthImVec2(value_);
+    if (length_ <= 0.0001f)
+    {
+        return ImVec2(1.0f, 0.0f);
+    }
+    return ImVec2(value_.x / length_, value_.y / length_);
+}
+
+static ImVec2 CalculateNodeBoundaryPoint(const ImVec2& nodeMinimum_, const ImVec2& nodeMaximum_, const ImVec2& direction_, float padding_)
+{
+    const ImVec2 center_((nodeMinimum_.x + nodeMaximum_.x) * 0.5f, (nodeMinimum_.y + nodeMaximum_.y) * 0.5f);
+    const ImVec2 halfSize_((nodeMaximum_.x - nodeMinimum_.x) * 0.5f, (nodeMaximum_.y - nodeMinimum_.y) * 0.5f);
+    const ImVec2 normalizedDirection_ = NormalizeImVec2(direction_);
+
+    float scale_ = FLT_MAX;
+    if (std::abs(normalizedDirection_.x) > 0.0001f)
+    {
+        scale_ = (std::min)(scale_, halfSize_.x / std::abs(normalizedDirection_.x));
+    }
+    if (std::abs(normalizedDirection_.y) > 0.0001f)
+    {
+        scale_ = (std::min)(scale_, halfSize_.y / std::abs(normalizedDirection_.y));
+    }
+    if (scale_ == FLT_MAX)
+    {
+        scale_ = 0.0f;
+    }
+
+    scale_ = (std::max)(0.0f, scale_ - padding_);
+    return AddImVec2(center_, MulImVec2(normalizedDirection_, scale_));
+}
+
+static ImVec2 CalculateBidirectionalLinkOffset(const AnimTransition& transition_, const std::vector<AnimTransition>& transitions_, const ImVec2& sourceCenter_, const ImVec2& targetCenter_)
+{
+    const bool hasReverseTransition_ = std::any_of(transitions_.begin(), transitions_.end(),
+        [&](const AnimTransition& otherTransition_)
+        {
+            return otherTransition_.scopeId == transition_.scopeId &&
+                otherTransition_.fromStateName == transition_.toStateName &&
+                otherTransition_.toStateName == transition_.fromStateName;
+        });
+
+    if (!hasReverseTransition_)
+    {
+        return ImVec2(0.0f, 0.0f);
+    }
+
+    const ImVec2 direction_ = NormalizeImVec2(SubImVec2(targetCenter_, sourceCenter_));
+    ImVec2 perpendicular_(-direction_.y, direction_.x);
+    const bool positiveSide_ = transition_.fromStateName < transition_.toStateName;
+    return MulImVec2(perpendicular_, positiveSide_ ? BIDIRECTIONAL_LINK_OFFSET : -BIDIRECTIONAL_LINK_OFFSET);
+}
 
 
 void AnimationControllerComponent::OnGuiNodeEditor()
@@ -267,11 +397,11 @@ void AnimationControllerComponent::OnGuiNodeEditor()
     if (!nodeEditorContext) return;
 
     ImGui::Begin("Animation Graph Editor");
-    DrawNodeEditorContent();
+    DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN);
     ImGui::End();
 }
 
-void AnimationControllerComponent::DrawNodeEditorContent()
+void AnimationControllerComponent::DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE connectionMode_)
 {
     if (!nodeEditorContext) return;
 
@@ -410,13 +540,23 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     ImGui::SameLine();
     ImGui::TextDisabled("Double-click SubGraph to enter / Right-click: Add node");
 
+    const bool isUnityStyleConnectionMode_ = connectionMode_ == ANIM_GRAPH_CONNECTION_MODE::UNITY_STYLE;
+    if (isUnityStyleConnectionMode_)
+    {
+        ed::PushStyleColor(ed::StyleColor_HovLinkBorder, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        ed::PushStyleColor(ed::StyleColor_SelLinkBorder, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        ed::PushStyleColor(ed::StyleColor_HighlightLinkBorder, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    }
+
     ed::Begin("Animation Graph", ImVec2(0.0f, 0.0f));
 
     std::unordered_map<uintptr_t, ImVec2> pinPositions_;
+    std::unordered_map<std::string, AnimGraphNodeVisualInfo> nodeVisualInfos_;
 
     auto drawGraphNode_ = [&](AnimGraphNode& node_)
         {
             const bool isSpecial_ = IsSpecialGraphNode(node_);
+            const bool isUnityStyle_ = connectionMode_ == ANIM_GRAPH_CONNECTION_MODE::UNITY_STYLE && !isSpecial_;
             const bool isActive_ = !runtimeActiveStateName.empty() &&
                 (node_.stateName == runtimeActiveStateName) &&
                 !isSpecial_;
@@ -511,59 +651,104 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             }
             else
             {
-                drawList_->AddLine(
-                    ImVec2(nodeMinimum_.x + nodeWidth_ * 0.5f, nodeMinimum_.y + titleHeight_),
-                    ImVec2(nodeMinimum_.x + nodeWidth_ * 0.5f, nodeMaximum_.y),
-                    lineColor_, 2.0f);
+                if (!isUnityStyle_)
+                {
+                    drawList_->AddLine(
+                        ImVec2(nodeMinimum_.x + nodeWidth_ * 0.5f, nodeMinimum_.y + titleHeight_),
+                        ImVec2(nodeMinimum_.x + nodeWidth_ * 0.5f, nodeMaximum_.y),
+                        lineColor_, 2.0f);
+                }
 
-                const char* inputText_ = "In";
-                const char* outputText_ = "Out";
-                const ImVec2 inputTextSize_ = ImGui::CalcTextSize(inputText_);
-                const ImVec2 outputTextSize_ = ImGui::CalcTextSize(outputText_);
-                const float leftHalfCenter_ = nodeMinimum_.x + nodeWidth_ * 0.25f;
-                const float rightHalfCenter_ = nodeMinimum_.x + nodeWidth_ * 0.75f;
-                const float textY_ = nodeMinimum_.y + titleHeight_ +
-                    (bodyHeight_ - inputTextSize_.y) * 0.5f;
+                if (!isUnityStyle_)
+                {
+                    const char* inputText_ = "In";
+                    const char* outputText_ = "Out";
+                    const ImVec2 inputTextSize_ = ImGui::CalcTextSize(inputText_);
+                    const ImVec2 outputTextSize_ = ImGui::CalcTextSize(outputText_);
+                    const float leftHalfCenter_ = nodeMinimum_.x + nodeWidth_ * 0.25f;
+                    const float rightHalfCenter_ = nodeMinimum_.x + nodeWidth_ * 0.75f;
+                    const float textY_ = nodeMinimum_.y + titleHeight_ +
+                        (bodyHeight_ - inputTextSize_.y) * 0.5f;
 
-                drawList_->AddText(
-                    ImVec2(leftHalfCenter_ - inputTextSize_.x * 0.5f, textY_),
-                    IM_COL32(0, 0, 0, 255), inputText_);
-                drawList_->AddText(
-                    ImVec2(rightHalfCenter_ - outputTextSize_.x * 0.5f, textY_),
-                    IM_COL32(0, 0, 0, 255), outputText_);
+                    drawList_->AddText(
+                        ImVec2(leftHalfCenter_ - inputTextSize_.x * 0.5f, textY_),
+                        IM_COL32(0, 0, 0, 255), inputText_);
+                    drawList_->AddText(
+                        ImVec2(rightHalfCenter_ - outputTextSize_.x * 0.5f, textY_),
+                        IM_COL32(0, 0, 0, 255), outputText_);
+                }
 
                 const ImVec2 inputCenter_(
                     nodeMinimum_.x + 28.0f,
                     nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f);
-                ImGui::SetCursorScreenPos(ImVec2(
-                    inputCenter_.x - pinRadius_, inputCenter_.y - pinRadius_));
-                ed::BeginPin(node_.inputPin, ed::PinKind::Input);
-                ImGui::Dummy(pinSize_);
-                ed::EndPin();
+                if (isUnityStyle_)
+                {
+                    ImGui::SetCursorScreenPos(ImVec2(nodeMinimum_.x, nodeMinimum_.y + titleHeight_));
+                    ed::BeginPin(node_.inputPin, ed::PinKind::Input);
+                    ImGui::Dummy(ImVec2(nodeWidth_ * 0.5f, bodyHeight_));
+                    ed::EndPin();
+                }
+                else
+                {
+                    ImGui::SetCursorScreenPos(ImVec2(
+                        inputCenter_.x - pinRadius_, inputCenter_.y - pinRadius_));
+                    ed::BeginPin(node_.inputPin, ed::PinKind::Input);
+                    ImGui::Dummy(pinSize_);
+                    ed::EndPin();
+                }
                 pinPositions_[static_cast<uintptr_t>(node_.inputPin.Get())] = inputCenter_;
 
-                const ImU32 inputColor_ = isPinCircleHovered_(inputCenter_)
-                    ? IM_COL32(255, 255, 255, 255)
-                    : IM_COL32(235, 220, 0, 255);
-                drawList_->AddCircle(inputCenter_, pinRadius_, inputColor_, 24, 3.0f);
+                if (!isUnityStyle_)
+                {
+                    const ImU32 inputColor_ = isPinCircleHovered_(inputCenter_)
+                        ? IM_COL32(255, 255, 255, 255)
+                        : IM_COL32(235, 220, 0, 255);
+                    drawList_->AddCircle(inputCenter_, pinRadius_, inputColor_, 24, 3.0f);
+                }
 
                 const ImVec2 outputCenter_(
                     nodeMaximum_.x - 28.0f,
                     nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f);
-                ImGui::SetCursorScreenPos(ImVec2(
-                    outputCenter_.x - pinRadius_, outputCenter_.y - pinRadius_));
-                ed::BeginPin(node_.outputPin, ed::PinKind::Output);
-                ImGui::Dummy(pinSize_);
-                ed::EndPin();
+                if (isUnityStyle_)
+                {
+                    constexpr float UNITY_STYLE_OUTPUT_HIT_PADDING = 14.0f;
+                    ImGui::SetCursorScreenPos(ImVec2(
+                        nodeMinimum_.x + nodeWidth_ * 0.5f - UNITY_STYLE_OUTPUT_HIT_PADDING,
+                        nodeMinimum_.y - UNITY_STYLE_OUTPUT_HIT_PADDING));
+                    ed::BeginPin(node_.outputPin, ed::PinKind::Output);
+                    ImGui::Dummy(ImVec2(
+                        nodeWidth_ * 0.5f + UNITY_STYLE_OUTPUT_HIT_PADDING * 2.0f,
+                        nodeHeight_ + UNITY_STYLE_OUTPUT_HIT_PADDING * 2.0f));
+                    ed::EndPin();
+                }
+                else
+                {
+                    ImGui::SetCursorScreenPos(ImVec2(
+                        outputCenter_.x - pinRadius_, outputCenter_.y - pinRadius_));
+                    ed::BeginPin(node_.outputPin, ed::PinKind::Output);
+                    ImGui::Dummy(pinSize_);
+                    ed::EndPin();
+                }
                 pinPositions_[static_cast<uintptr_t>(node_.outputPin.Get())] = outputCenter_;
 
-                const ImU32 outputColor_ = isPinCircleHovered_(outputCenter_)
-                    ? IM_COL32(255, 255, 255, 255)
-                    : IM_COL32(230, 45, 55, 255);
-                drawList_->AddCircle(outputCenter_, pinRadius_, outputColor_, 24, 3.0f);
+                if (!isUnityStyle_)
+                {
+                    const ImU32 outputColor_ = isPinCircleHovered_(outputCenter_)
+                        ? IM_COL32(255, 255, 255, 255)
+                        : IM_COL32(230, 45, 55, 255);
+                    drawList_->AddCircle(outputCenter_, pinRadius_, outputColor_, 24, 3.0f);
+                }
             }
 
             // 絶対位置で配置したタイトルとピンの後でも、NodeEditorへ正しい矩形を渡す。
+            nodeVisualInfos_[node_.stateName] = {
+                nodeMinimum_,
+                nodeMaximum_,
+                ImVec2((nodeMinimum_.x + nodeMaximum_.x) * 0.5f, (nodeMinimum_.y + nodeMaximum_.y) * 0.5f),
+                ImVec2(nodeMinimum_.x + 28.0f, nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f),
+                ImVec2(nodeMaximum_.x - 28.0f, nodeMinimum_.y + titleHeight_ + bodyHeight_ * 0.5f)
+            };
+
             ImGui::SetCursorScreenPos(nodeMaximum_);
             ImGui::PopID();
             ed::EndNode();
@@ -611,7 +796,14 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             ImVec4 color = (link.fromStateName == runtimeActiveStateName || link.fromStateName == ANY_NODE_NAME)
                 ? ImVec4(0.25f, 0.65f, 1.0f, 1.0f)
                 : ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
-            ed::Link(link.id, startNode->outputPin, endNode->inputPin, color, 3.0f);
+            if (connectionMode_ == ANIM_GRAPH_CONNECTION_MODE::UNITY_STYLE)
+            {
+                ed::Link(link.id, startNode->outputPin, endNode->inputPin, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), 8.0f);
+            }
+            else
+            {
+                ed::Link(link.id, startNode->outputPin, endNode->inputPin, color, 3.0f);
+            }
         }
     }
 
@@ -641,16 +833,45 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             continue;
         }
 
+        ImVec2 sourceLinkPosition_ = sourcePosition_->second;
+        ImVec2 targetLinkPosition_ = targetPosition_->second;
+        if (connectionMode_ == ANIM_GRAPH_CONNECTION_MODE::UNITY_STYLE)
+        {
+            const auto sourceVisualInfo_ = nodeVisualInfos_.find(link_.fromStateName);
+            const auto targetVisualInfo_ = nodeVisualInfos_.find(link_.toStateName);
+            if (sourceVisualInfo_ != nodeVisualInfos_.end() && targetVisualInfo_ != nodeVisualInfos_.end())
+            {
+                const ImVec2 direction_ = NormalizeImVec2(SubImVec2(targetVisualInfo_->second.center, sourceVisualInfo_->second.center));
+                sourceLinkPosition_ = CalculateNodeBoundaryPoint(sourceVisualInfo_->second.minimum, sourceVisualInfo_->second.maximum, direction_, 5.0f);
+                targetLinkPosition_ = CalculateNodeBoundaryPoint(targetVisualInfo_->second.minimum, targetVisualInfo_->second.maximum, MulImVec2(direction_, -1.0f), 5.0f);
+                const ImVec2 linkOffset_ = CalculateBidirectionalLinkOffset(link_, graphTransitions, sourceVisualInfo_->second.center, targetVisualInfo_->second.center);
+                sourceLinkPosition_ = AddImVec2(sourceLinkPosition_, linkOffset_);
+                targetLinkPosition_ = AddImVec2(targetLinkPosition_, linkOffset_);
+            }
+        }
+
         const ImU32 arrowColor_ =
             link_.fromStateName == runtimeActiveStateName ||
             link_.fromStateName == ANY_NODE_NAME
             ? IM_COL32(80, 165, 255, 255)
             : IM_COL32(120, 120, 120, 255);
-        DrawLinkArrow(
-            arrowDrawList_,
-            sourcePosition_->second,
-            targetPosition_->second,
-            arrowColor_);
+        if (connectionMode_ == ANIM_GRAPH_CONNECTION_MODE::UNITY_STYLE)
+        {
+            DrawStraightLink(arrowDrawList_, sourceLinkPosition_, targetLinkPosition_, arrowColor_, 5.0f);
+            DrawStraightLinkArrow(
+                arrowDrawList_,
+                sourceLinkPosition_,
+                targetLinkPosition_,
+                arrowColor_);
+        }
+        else
+        {
+            DrawLinkArrow(
+                arrowDrawList_,
+                sourceLinkPosition_,
+                targetLinkPosition_,
+                arrowColor_);
+        }
     }
 
     if (needsPositionRestore)
@@ -862,7 +1083,10 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             auto it = std::find_if(graphNodes.begin(), graphNodes.end(),
                 [&](const auto& n) { return n.id == selectedNodeId; });
             if (it != graphNodes.end() && it->type == AnimGraphNodeType::State && states.count(it->stateName))
+            {
                 editingState = states[it->stateName].get();
+                selectedTransitionLinkId = ed::LinkId(0);
+            }
         }
     }
 
@@ -913,116 +1137,11 @@ void AnimationControllerComponent::DrawNodeEditorContent()
             ed::Resume();
         }
     }
-    static ed::LinkId selectedLinkId;
-    if (ed::GetSelectedLinks(&selectedLinkId, 1) > 0)
+    ed::LinkId selectedTransitionLinkId_;
+    if (ed::GetSelectedLinks(&selectedTransitionLinkId_, 1) > 0)
     {
-        auto it = std::find_if(graphTransitions.begin(), graphTransitions.end(),
-            [&](const auto& t) { return t.id == selectedLinkId; });
-
-        if (it != graphTransitions.end() && it->scopeId == currentScopeName())
-        {
-            ed::Suspend();
-
-            ImGui::Begin("Transition Properties");
-
-            auto* fromNode = FindNodeByName(it->fromStateName);
-            auto* toNode = FindNodeByName(it->toStateName);
-            if (fromNode && toNode)
-                ImGui::Text("Transition: %s -> %s", GetGraphNodeDisplayName(*fromNode), GetGraphNodeDisplayName(*toNode));
-            else
-                ImGui::Text("Transition: (Invalid Nodes)");
-
-            ImGui::Separator();
-            ImGui::DragFloat("Fade Duration", &it->duration, 0.01f, 0.0f, 2.0f);
-
-            if (it->fromStateName == START_NODE_NAME)
-            {
-                ImGui::TextDisabled("Start transitions are used only to choose the first state.");
-            }
-            else
-            {
-                ImGui::TextColored(ImVec4(0, 1, 1, 1), "Conditions");
-                int logic = static_cast<int>(it->logic);
-                const char* logicItems[] = { "AND", "OR" };
-                if (ImGui::Combo("Logic", &logic, logicItems, IM_ARRAYSIZE(logicItems))) {
-                    it->logic = static_cast<TransitionLogic>(logic);
-                    useTransitionGraph = true;
-                }
-                if (ImGui::Button("+ Add Condition"))
-                    it->conditions.push_back(AnimCondition());
-
-                for (int i = 0; i < (int)it->conditions.size(); i++)
-                {
-                    ImGui::PushID(i);
-                    auto& cond = it->conditions[i];
-
-                    const char* condTypes[] = { "Variable", "AnimationEnd", "Trigger" };
-                    int typeIdx = (int)cond.type;
-                    if (ImGui::Combo("Type", &typeIdx, condTypes, IM_ARRAYSIZE(condTypes))) {
-                        cond.type = (ConditionType)typeIdx;
-                        useTransitionGraph = true;
-                    }
-
-                    if (cond.type == ConditionType::Variable || cond.type == ConditionType::Trigger)
-                    {
-                        if (!GetEditableBlackboard().empty())
-                        {
-                            std::vector<const char*> keys;
-                            for (auto& [k, v] : GetEditableBlackboard()) keys.push_back(k.c_str());
-                            int curIdx = 0;
-                            for (int k = 0; k < (int)keys.size(); k++)
-                                if (cond.parameterName == keys[k]) { curIdx = k; break; }
-                            ImGui::SetNextItemWidth(160.0f);
-                            if (ImGui::Combo("Parameter", &curIdx, keys.data(), (int)keys.size())) {
-                                cond.parameterName = keys[curIdx];
-                                useTransitionGraph = true;
-                            }
-                        }
-                        else
-                        {
-                            if (ImGui::InputText("Parameter", &cond.parameterName)) {
-                                useTransitionGraph = true;
-                            }
-                            ImGui::SameLine();
-                            ImGui::TextDisabled("(Blackboardにパラメータを追加してください)");
-                        }
-                    }
-
-                    if (cond.type == ConditionType::Variable)
-                    {
-                        const char* ops[] = { "==", "!=", ">", "<" };
-                        int opIdx = (int)cond.op;
-                        ImGui::SetNextItemWidth(60);
-                        if (ImGui::Combo("Op", &opIdx, ops, IM_ARRAYSIZE(ops)))
-                        {
-                            cond.op = (ConditionOp)opIdx;
-                            useTransitionGraph = true;
-                        }
-                        ImGui::SameLine();
-                        if(ImGui::DragFloat("Threshold", &cond.threshold, 0.1f))
-                        {
-                            useTransitionGraph = true;
-                        }
-                    }
-
-                    if (ImGui::Button("Remove Condition"))
-                    {
-                        it->conditions.erase(it->conditions.begin() + i);
-                        --i;
-                        useTransitionGraph = true;
-                    }
-
-                    ImGui::Separator();
-                    ImGui::PopID();
-                }
-            }
-
-            ImGui::End();
-
-            ed::Resume();
-        }
+        selectedTransitionLinkId = selectedTransitionLinkId_;
     }
-
     ed::Suspend();
     if (ed::ShowBackgroundContextMenu()) {
         ImGui::OpenPopup("Create New Node");
@@ -1114,5 +1233,160 @@ void AnimationControllerComponent::DrawNodeEditorContent()
     ed::Resume();
 
     ed::End();
+    if (isUnityStyleConnectionMode_)
+    {
+        ed::PopStyleColor(3);
+    }
     ed::SetCurrentEditor(nullptr);
+}
+
+void AnimationControllerComponent::DrawTransitionInspectorContent()
+{
+    const std::string currentScopeName_ = currentGraphScopeId.empty() ? std::string("Root") : currentGraphScopeId;
+    auto transitionIterator_ = std::find_if(graphTransitions.begin(), graphTransitions.end(),
+        [&](const AnimTransition& transition_)
+        {
+            return transition_.id == selectedTransitionLinkId &&
+                transition_.scopeId == currentScopeName_;
+        });
+
+    if (transitionIterator_ == graphTransitions.end())
+    {
+        selectedTransitionLinkId = ed::LinkId(0);
+        ImGui::TextUnformatted("Transition Inspector");
+        ImGui::Separator();
+        ImGui::TextDisabled("Select a transition link.");
+        return;
+    }
+
+    AnimTransition& transition_ = *transitionIterator_;
+    ImGui::TextUnformatted("Transition Inspector");
+    ImGui::Separator();
+
+    auto* fromNode_ = FindNodeByName(transition_.fromStateName);
+    auto* toNode_ = FindNodeByName(transition_.toStateName);
+    if (fromNode_ && toNode_)
+    {
+        ImGui::Text("%s -> %s", GetGraphNodeDisplayName(*fromNode_), GetGraphNodeDisplayName(*toNode_));
+    }
+    else
+    {
+        ImGui::TextUnformatted("(Invalid Nodes)");
+    }
+
+    ImGui::Separator();
+    if (ImGui::DragFloat("Fade Duration", &transition_.duration, 0.01f, 0.0f, 2.0f))
+    {
+        useTransitionGraph = true;
+    }
+
+    if (transition_.fromStateName == START_NODE_NAME)
+    {
+        ImGui::TextDisabled("Start transitions are used only to choose the first state.");
+    }
+    else
+    {
+        ImGui::TextColored(ImVec4(0, 1, 1, 1), "Conditions");
+        int logic_ = static_cast<int>(transition_.logic);
+        const char* logicItems_[] = { "AND", "OR" };
+        if (ImGui::Combo("Logic", &logic_, logicItems_, IM_ARRAYSIZE(logicItems_)))
+        {
+            transition_.logic = static_cast<TransitionLogic>(logic_);
+            useTransitionGraph = true;
+        }
+
+        if (ImGui::Button("+ Add Condition"))
+        {
+            transition_.conditions.push_back(AnimCondition());
+            useTransitionGraph = true;
+        }
+
+        int removeConditionIndex_ = -1;
+        for (int conditionIndex_ = 0; conditionIndex_ < static_cast<int>(transition_.conditions.size()); ++conditionIndex_)
+        {
+            ImGui::PushID(static_cast<int>(transition_.id.Get()));
+            ImGui::PushID(conditionIndex_);
+            AnimCondition& condition_ = transition_.conditions[conditionIndex_];
+
+            const char* conditionTypes_[] = { "Variable", "AnimationEnd", "Trigger" };
+            int typeIndex_ = static_cast<int>(condition_.type);
+            if (ImGui::Combo("Type", &typeIndex_, conditionTypes_, IM_ARRAYSIZE(conditionTypes_)))
+            {
+                condition_.type = static_cast<ConditionType>(typeIndex_);
+                useTransitionGraph = true;
+            }
+
+            if (condition_.type == ConditionType::Variable || condition_.type == ConditionType::Trigger)
+            {
+                if (!GetEditableBlackboard().empty())
+                {
+                    std::vector<const char*> keys_;
+                    for (auto& blackboardValue_ : GetEditableBlackboard())
+                    {
+                        keys_.push_back(blackboardValue_.first.c_str());
+                    }
+
+                    int currentIndex_ = 0;
+                    for (int keyIndex_ = 0; keyIndex_ < static_cast<int>(keys_.size()); ++keyIndex_)
+                    {
+                        if (condition_.parameterName == keys_[keyIndex_])
+                        {
+                            currentIndex_ = keyIndex_;
+                            break;
+                        }
+                    }
+
+                    ImGui::SetNextItemWidth(160.0f);
+                    if (ImGui::Combo("Parameter", &currentIndex_, keys_.data(), static_cast<int>(keys_.size())))
+                    {
+                        condition_.parameterName = keys_[currentIndex_];
+                        useTransitionGraph = true;
+                    }
+                }
+                else if (ImGui::InputText("Parameter", &condition_.parameterName))
+                {
+                    useTransitionGraph = true;
+                }
+            }
+
+            if (condition_.type == ConditionType::Variable)
+            {
+                const char* operators_[] = { "==", "!=", ">", "<" };
+                int operatorIndex_ = static_cast<int>(condition_.op);
+                ImGui::SetNextItemWidth(60.0f);
+                if (ImGui::Combo("Op", &operatorIndex_, operators_, IM_ARRAYSIZE(operators_)))
+                {
+                    condition_.op = static_cast<ConditionOp>(operatorIndex_);
+                    useTransitionGraph = true;
+                }
+                if (ImGui::DragFloat("Threshold", &condition_.threshold, 0.1f))
+                {
+                    useTransitionGraph = true;
+                }
+            }
+
+            if (ImGui::Button("Remove Condition"))
+            {
+                removeConditionIndex_ = conditionIndex_;
+            }
+
+            ImGui::Separator();
+            ImGui::PopID();
+            ImGui::PopID();
+        }
+
+        if (removeConditionIndex_ >= 0 && removeConditionIndex_ < static_cast<int>(transition_.conditions.size()))
+        {
+            transition_.conditions.erase(transition_.conditions.begin() + removeConditionIndex_);
+            useTransitionGraph = true;
+        }
+    }
+
+    ImGui::Separator();
+    if (ImGui::Button("Delete Transition"))
+    {
+        graphTransitions.erase(transitionIterator_);
+        selectedTransitionLinkId = ed::LinkId(0);
+        useTransitionGraph = true;
+    }
 }
