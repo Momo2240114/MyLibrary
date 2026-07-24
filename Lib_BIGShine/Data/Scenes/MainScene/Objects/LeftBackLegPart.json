@@ -1,0 +1,127 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 0.8999999761581421,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.949999988079071,
+                "HurtTag": "LEFT_BACK_LEG",
+                "InvincibilityDuration": 0.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.41999998688697815,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "SyncCharacterColliderShape": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0,
+                "ColliderName": "LeftBackLegHurtBox"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox"
+        },
+        {
+            "Data": {
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.15000000596046448,
+                    0.550000011920929,
+                    1.0,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.8199999928474426,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.3400000035762787,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0,
+                "ColliderName": "LeftBackLegPhysical"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "CapsuleCollider"
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 75,
+                "targetStartNodeName": "PlainsDragon_-L-Calf"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment"
+        },
+        {
+            "Data": {
+                "BodyPart": "LEFT_BACK_LEG",
+                "CombatOwnerObjectName": "TestTarget"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "DragonBodyPartHurtBoxComponent"
+        }
+    ],
+    "Layer": 2,
+    "Name": "LeftBackLegPart",
+    "ParentName": "BodyPartRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

@@ -372,7 +372,8 @@ void CollisionStepSystem::HandleTriggerPair(
 
     const bool existsA_ = colliderA_->currentTriggers.count(objectB_) != 0;
     const bool existsB_ = colliderB_->currentTriggers.count(objectA_) != 0;
-    if (!IsAllowedCombatTriggerPair(colliderA_, colliderB_))
+    if (colliderA_->GetCollisionOwnerId() == colliderB_->GetCollisionOwnerId() ||
+        !IsAllowedCombatTriggerPair(colliderA_, colliderB_))
     {
         hit_ = false;
         contact_ = nullptr;

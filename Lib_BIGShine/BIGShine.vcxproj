@@ -495,6 +495,8 @@
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerActionState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
@@ -790,6 +792,8 @@
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h" />
+    <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.h" />
+    <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.h" />
     <ClInclude Include="Code\Game\AI\Director\AIDirectorBlackboardKeys.h" />
     <ClInclude Include="Code\Game\AI\Director\AIDirectorComponent.h" />
     <ClInclude Include="Code\Game\AI\Director\AIDirectorTypes.h" />

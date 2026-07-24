@@ -1,8 +1,8 @@
 {
     "CollisionMask": 0,
-    "Layer": 0,
+    "Layer": 2,
     "Name": "HurtBoxRoot",
-    "ParentName": " CollisionRoot",
+    "ParentName": "CollisionRoot",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

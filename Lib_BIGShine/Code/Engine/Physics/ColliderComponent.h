@@ -2,6 +2,7 @@
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include <cstdint>
 #include <unordered_set>
 #include <PxPhysicsAPI.h>
 
@@ -45,6 +46,8 @@ public:
     DirectX::XMFLOAT3 velocity = { 0, 0, 0 }; // 現在の移動速度（落下速度用）
     CollisionRole collisionRole = CollisionRole::PHYSICAL;
     float shapeSizeScale = 1.0f;
+    std::string colliderName;
+    std::string collisionOwnerObjectName;
 
     // ColliderComponent.h 内
     void Serialize(nlohmann::json& j) const override;
@@ -56,6 +59,10 @@ public:
     void RecreatePhysXActor();
     void ReleasePhysXActor();
     CollisionRole GetCollisionRole() const { return collisionRole; }
+    std::shared_ptr<GameObject> ResolveCollisionOwnerObject();
+    uint32_t GetCollisionOwnerId();
+    const std::string& GetColliderName() const { return colliderName; }
+    const std::string& GetCollisionOwnerObjectName() const { return collisionOwnerObjectName; }
     float GetMass() const { return mass; }
     void SetVelocityRotationMode(VelocityRotationMode mode_) { velocityRotationMode = mode_; }
     VelocityRotationMode GetVelocityRotationMode() const { return velocityRotationMode; }
@@ -126,6 +133,3 @@ private:
     bool characterGroundedForStep = false;
     CollisionContainmentMode containmentMode = CollisionContainmentMode::NONE;
 };
-
-
-

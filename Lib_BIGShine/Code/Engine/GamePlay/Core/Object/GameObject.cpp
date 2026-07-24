@@ -719,7 +719,14 @@ void GameObject::Gui()
 
         if (!enabled) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
 
-        bool open = ImGui::CollapsingHeader(collider_->GetName().c_str());
+        std::string colliderHeader_ = collider_->GetName();
+        const auto colliderComponent_ = std::dynamic_pointer_cast<ColliderComponent>(collider_);
+        if (colliderComponent_ && !colliderComponent_->GetColliderName().empty())
+        {
+            colliderHeader_ += " - ";
+            colliderHeader_ += colliderComponent_->GetColliderName();
+        }
+        bool open = ImGui::CollapsingHeader(colliderHeader_.c_str());
 
         // ★ コンテキストメニュー
         if (ImGui::BeginPopupContextItem("ColliderContextMenu"))
@@ -848,10 +855,10 @@ void GameObject::Load(const nlohmann::json& j)
 
     // 3. コンポーネントの形成（復元）
 // コンポーネントの復元 (通常のComponentsもColliderComponentも共通の処理へ)
-    auto loadComponent = [&](const nlohmann::json& cJson) {
+    auto loadComponent = [&](const nlohmann::json& cJson, bool allowDuplicate_) {
         std::string typeName = cJson["TypeName"];
         // 1. インスタンス生成
-        auto comp = ComponentRegistry::Instance().Create(typeName, shared_from_this(), false);
+        auto comp = ComponentRegistry::Instance().Create(typeName, shared_from_this(), false, allowDuplicate_);
 
         printf("Loading component: %s\n", typeName.c_str());
         if (comp) printf("Instance created successfully.\n");
@@ -877,17 +884,17 @@ void GameObject::Load(const nlohmann::json& j)
     // 通常のコンポーネント配列の処理
     if (j.contains("Components")) {
         for (const auto& cJson : j["Components"]) {
-            loadComponent(cJson);
+              loadComponent(cJson, false);
         }
     }
 
     // 特別なコライダー枠（もしJSONに分かれて残っているなら）の処理
     if (j.contains("ColliderComponent")) {
-        loadComponent(j["ColliderComponent"]);
+        loadComponent(j["ColliderComponent"], false);
     }
     if (j.contains("ColliderComponents")) {
         for (const auto& colliderJson_ : j["ColliderComponents"]) {
-            loadComponent(colliderJson_);
+            loadComponent(colliderJson_, true);
         }
     }
 

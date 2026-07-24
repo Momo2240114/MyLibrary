@@ -2,6 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CollisionOwnerObjectName": "",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
                 "DebugPrimitiveColor": [
@@ -36,6 +37,7 @@
         },
         {
             "Data": {
+                "CollisionOwnerObjectName": "",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
                 "Convex": false,

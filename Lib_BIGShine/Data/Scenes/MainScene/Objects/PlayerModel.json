@@ -2,6 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CollisionOwnerObjectName": "",
                 "CollisionRole": 1,
                 "ContactOffset": 0.019999999552965164,
                 "ContainmentMode": 0,
@@ -43,6 +44,7 @@
         },
         {
             "Data": {
+                "CollisionOwnerObjectName": "",
                 "CollisionRole": 3,
                 "ContainmentMode": 0,
                 "DamageMultiplier": 1.0,
@@ -86,6 +88,7 @@
                 "ActionPrefix": "JustDodge",
                 "ActivateActionName": "EnableJustDodgeCollider",
                 "CanReactToOwnerAttack": false,
+                "CollisionOwnerObjectName": "",
                 "CollisionRole": 5,
                 "ContainmentMode": 0,
                 "DeactivateActionName": "DisableJustDodgeCollider",
@@ -473,7 +476,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                1.0
                             ]
                         },
                         "GuardInput": {
@@ -756,8 +759,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.9979497194290161,
-                                0.06400270760059357
+                                -0.9576507210731506,
+                                -0.28793251514434814
                             ]
                         },
                         "HitStopDuration": {
@@ -783,17 +786,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.994783878326416,
-                                -0.07959111034870148,
-                                0.0637996718287468
+                                -0.9548825621604919,
+                                -0.07597887516021729,
+                                -0.287100225687027
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                31.888639450073242,
-                                2.257497787475586,
-                                0.1211264431476593
+                                28.13498306274414,
+                                2.2602076530456543,
+                                -0.5607459545135498
                             ]
                         },
                         "ReactionDirection": {
@@ -858,7 +861,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                1.0
                             ]
                         },
                         "GuardInput": {
@@ -38236,13 +38239,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -16.04252815246582,
-            -0.12279045581817627,
-            37.98505401611328
+            11.456768035888672,
+            -0.12279021739959717,
+            -7.845624923706055
         ],
         "Rot": [
             0.0,
-            252.22303771972656,
+            190.4365234375,
             1.1004080988641363e-05
         ],
         "Scale": [

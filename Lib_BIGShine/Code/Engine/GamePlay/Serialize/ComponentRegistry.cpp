@@ -57,6 +57,8 @@
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Game/Combat/DebugTools/DebugHitHistoryResetComponent.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
+#include "Game/AI/Dragon/DragonBodyPartHurtBoxComponent.h"
+#include "Game/AI/Dragon/DragonBodyPartManagerComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
@@ -149,6 +151,8 @@ void RegisterAllComponents()
     registry.Register<HealthComponent>("HealthComponent");
     registry.Register<DebugHitHistoryResetComponent>("DamageBoxComponent");
     registry.Register<DragonAIComponent>("DragonAIComponent");
+    registry.Register<DragonBodyPartHurtBoxComponent>("DragonBodyPartHurtBoxComponent");
+    registry.Register<DragonBodyPartManagerComponent>("DragonBodyPartManagerComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");
     registry.Register<ThirdPersonCameraComponent>("ThirdPersonCameraComponent");
     registry.Register<CameraLockOnComponent>("CameraLockOnComponent");
@@ -159,17 +163,22 @@ void RegisterAllComponents()
 }
 
 
-std::shared_ptr<Component> ComponentRegistry::Create(const std::string& name, std::shared_ptr<GameObject> go,bool casllStart)
+std::shared_ptr<Component> ComponentRegistry::Create(
+    const std::string& name_,
+    std::shared_ptr<GameObject> go_,
+    bool callStart_,
+    bool allowDuplicate_)
 {
-    auto it = creators.find(name);
+    auto it = creators.find(name_);
     if (it == creators.end())
         return nullptr;
 
-    auto existing = go->GetComponentByName(name);
-    if (existing)
-        return existing;
+    if (!allowDuplicate_)
+    {
+        auto existing_ = go_->GetComponentByName(name_);
+        if (existing_)
+            return existing_;
+    }
 
-    return it->second(go,casllStart);
+    return it->second(go_, callStart_);
 }
-
-

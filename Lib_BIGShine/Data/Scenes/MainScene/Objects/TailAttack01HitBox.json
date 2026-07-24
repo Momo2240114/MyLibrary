@@ -1,0 +1,111 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "ActionPrefix": "TailAttack01HitBox",
+                "ActivateActionName": "EnableHitBox",
+                "AllowMultiHit": false,
+                "AttackInstanceId": 0,
+                "AttackSourceType": 0,
+                "AttackTag": "TailAttack01",
+                "AttackerAirLiftPower": 0.0,
+                "BlackboardCategory": "Attack",
+                "CanHitOwner": false,
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 2,
+                "ContainmentMode": 0,
+                "Damage": 9.0,
+                "DamageKey": "Damage",
+                "DeactivateActionName": "DisableHitBox",
+                "DebugPrimitiveColor": [
+                    1.0,
+                    0.18000000715255737,
+                    0.11999999731779099,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.0499999523162842,
+                "HitGroupId": 50,
+                "HitMeshVFXAssetPath": "",
+                "HitMeshVFXLifeTime": 1.0,
+                "HitMeshVFXNormalOffset": 0.0,
+                "HitOncePerActivation": true,
+                "HitParticleAssetPath": "",
+                "HitParticleEmitterName": "",
+                "HitParticleLifeTime": 1.0,
+                "HitParticleNormalOffset": 0.0,
+                "HitSoundMuffled": false,
+                "HitSoundMuffledCutoff": 1200.0,
+                "HitSoundPath": "",
+                "HitSoundPathKey": "",
+                "HitSoundVolume": 1.0,
+                "HitStopDuration": 0.0,
+                "HitStopDurationKey": "HitStopDuration",
+                "HitStopLayerMask": 3,
+                "HitStopScale": 0.0,
+                "ImpactPower": 9.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "KnockBackPower": 4.5,
+                "KnockBackPowerKey": "KnockBackPower",
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.3799999952316284,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "SourceAction": "TailAttack01",
+                "StartNodeName": "",
+                "TargetAirLiftPower": 0.0,
+                "TeamId": 1,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": false,
+            "RequiredForSceneStart": false,
+            "TypeName": "HitBox"
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 91,
+                "targetStartNodeName": "PlainsDragon_-Tail5"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment"
+        }
+    ],
+    "Layer": 2,
+    "Name": "TailAttack01HitBox",
+    "ParentName": "AttackHitBoxRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

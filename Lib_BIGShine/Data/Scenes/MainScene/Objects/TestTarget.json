@@ -2,46 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
-                "CollisionRole": 3,
-                "ContainmentMode": 0,
-                "DamageMultiplier": 1.0,
-                "DebugPrimitiveColor": [
-                    0.20000000298023224,
-                    1.0,
-                    0.30000001192092896,
-                    1.0
-                ],
-                "EndNodeName": "",
-                "GravityScale": 1.0,
-                "HalfHeight": 1.649999976158142,
-                "HurtTag": "Body",
-                "InvincibilityDuration": 0.07999999821186066,
-                "IsStatic": false,
-                "IsTrigger": true,
-                "Mass": 0.0,
-                "NodeModelObjectName": "",
-                "Offset": [
-                    0.0,
-                    6.0,
-                    0.0
-                ],
-                "PhysicsControlsTransform": false,
-                "Radius": 3.2799999713897705,
-                "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": false,
-                "StartNodeName": "",
-                "SyncCharacterColliderShape": true,
-                "UseGravity": false,
-                "UsePhysicsResponse": false,
-                "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0
-            },
-            "Enabled": true,
-            "RequiredForSceneStart": false,
-            "TypeName": "HurtBox"
-        },
-        {
-            "Data": {
+                "CollisionOwnerObjectName": "",
                 "CollisionRole": 1,
                 "ContactOffset": 0.029999999329447746,
                 "ContainmentMode": 0,
@@ -270,6 +231,26 @@
                         }
                     },
                     "Anim": {
+                        "ActionEnded": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "ActionTrigger": {
+                            "type": "string",
+                            "value": ""
+                        },
+                        "CurrentAction": {
+                            "type": "string",
+                            "value": "Idle"
+                        },
+                        "CurrentAnimationState": {
+                            "type": "string",
+                            "value": "PlainsDragon_IdleBreathe"
+                        },
+                        "IsActing": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "To_PlainsDragon_IdleBreathe": {
                             "type": "bool",
                             "value": true
@@ -290,7 +271,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 0.14613209664821625
+                            "value": 0.08946890383958817
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -346,7 +327,7 @@
                         },
                         "HpRate": {
                             "type": "float",
-                            "value": 1.0
+                            "value": 0.9100000262260437
                         },
                         "IsActing": {
                             "type": "bool",
@@ -417,6 +398,38 @@
                             "value": 0.0
                         }
                     },
+                    "DragonBodyPart": {
+                        "LastBodyPart": {
+                            "type": "int",
+                            "value": 0
+                        },
+                        "LastBrokenThisHit": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "LastDurabilityDamage": {
+                            "type": "float",
+                            "value": 6.0
+                        },
+                        "LastHealthDamage": {
+                            "type": "float",
+                            "value": 6.0
+                        }
+                    },
+                    "Health": {
+                        "Current": {
+                            "type": "float",
+                            "value": 910.0
+                        },
+                        "Dead": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "Max": {
+                            "type": "float",
+                            "value": 1000.0
+                        }
+                    },
                     "Hit": {
                         "Armor": {
                             "type": "float",
@@ -424,7 +437,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 5.0
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -432,7 +445,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 4.0
+                            "value": 10.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -441,17 +454,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.5509618520736694,
-                                -0.8345304727554321
+                                -0.20733784139156342,
+                                -0.9782693982124329
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.02500000037252903
+                            "value": 0.4000000059604645
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.75
+                            "value": 0.6000000238418579
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -459,7 +472,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 4.0
+                            "value": 15.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -467,22 +480,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 1.2000000476837158
+                            "value": 3.0
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.42238491773605347,
-                                0.642086923122406,
-                                -0.639777660369873
+                                -0.2065114676952362,
+                                0.08919303119182587,
+                                -0.9743703603744507
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                9.692883491516113,
-                                2.0323996543884277,
-                                -12.89329719543457
+                                8.777790069580078,
+                                3.506481647491455,
+                                -20.004737854003906
                             ]
                         },
                         "Received": {
@@ -2566,6 +2579,79 @@
                             "events": [],
                             "loop": false,
                             "name": "PlainsDragon_Turn90L_RM",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 25,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": false,
+                            "name": "PlainsDragon_Turn90R_RM",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -9477,6 +9563,113 @@
             "Enabled": true,
             "RequiredForSceneStart": false,
             "TypeName": "SpringBoneSimulationComponent"
+        },
+        {
+            "Data": {
+                "CurrentHealth": 910.0,
+                "MaxHealth": 1000.0
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "HealthComponent"
+        },
+        {
+            "Data": {
+                "BodyParts": [
+                    {
+                        "BodyPart": "HEAD",
+                        "Broken": false,
+                        "CurrentDurability": 10.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "NECK",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "CHEST",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "BODY",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "LEFT_FRONT_LEG",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "RIGHT_FRONT_LEG",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "LEFT_BACK_LEG",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "RIGHT_BACK_LEG",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "LEFT_WING",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "RIGHT_WING",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    },
+                    {
+                        "BodyPart": "TAIL",
+                        "Broken": false,
+                        "CurrentDurability": 100.0,
+                        "DurabilityDamageRate": 1.0,
+                        "HealthDamageRate": 1.0,
+                        "MaxDurability": 100.0
+                    }
+                ],
+                "DebugLogEnabled": true
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "DragonBodyPartManagerComponent"
         }
     ],
     "Layer": 2,
@@ -9485,9 +9678,9 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            10.871545791625977,
-            -0.583014965057373,
-            -14.581846237182617
+            8.112678527832031,
+            -0.5823211669921875,
+            -23.14289665222168
         ],
         "Rot": [
             0.0,

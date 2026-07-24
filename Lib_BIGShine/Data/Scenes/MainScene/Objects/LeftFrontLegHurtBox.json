@@ -1,0 +1,88 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 0.8999999761581421,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.8500000238418579,
+                "HurtTag": "LEFT_FRONT_LEG",
+                "InvincibilityDuration": 0.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.3400000035762787,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "SyncCharacterColliderShape": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox"
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 16,
+                "targetStartNodeName": "PlainsDragon_-L-Forearm"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment"
+        },
+        {
+            "Data": {
+                "BodyPart": "LEFT_FRONT_LEG",
+                "CombatOwnerObjectName": "TestTarget"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "DragonBodyPartHurtBoxComponent"
+        }
+    ],
+    "Layer": 2,
+    "Name": "LeftFrontLegHurtBox",
+    "ParentName": "HurtBoxRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}
