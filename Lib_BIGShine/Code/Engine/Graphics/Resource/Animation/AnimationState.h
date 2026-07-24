@@ -193,6 +193,12 @@ enum class AnimGraphNodeType
     Exit
 };
 
+enum class ANIM_GRAPH_CONNECTION_MODE
+{
+    LEGACY_TWO_PIN,
+    UNITY_STYLE
+};
+
 // 遷移条件
 struct AnimCondition {
     ConditionType type = ConditionType::Variable;

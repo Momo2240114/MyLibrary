@@ -256,6 +256,18 @@ void AnimNodeEditorWindow::DrawSceneInspectorPanel()
 void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animController_)
 {
     ImGui::TextUnformatted("Graph Node");
+    ImGui::SameLine();
+
+    const char* connectionModeItems_[] = { "Legacy Two Pin", "Unity Style" };
+    int connectionModeIndex_ = static_cast<int>(graphConnectionMode);
+    ImGui::TextUnformatted("Connection Mode:");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(150.0f);
+    if (ImGui::Combo("##AnimGraphConnectionMode", &connectionModeIndex_, connectionModeItems_, IM_ARRAYSIZE(connectionModeItems_)))
+    {
+        graphConnectionMode = static_cast<ANIM_GRAPH_CONNECTION_MODE>(connectionModeIndex_);
+    }
+
     ImGui::Separator();
 
     if (!animController_)
@@ -264,7 +276,35 @@ void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animCont
         return;
     }
 
-    animController_->DrawNodeEditorContent();
+    constexpr float SPLITTER_SIZE = 6.0f;
+    constexpr float MINIMUM_TRANSITION_INSPECTOR_WIDTH = 260.0f;
+    constexpr float MINIMUM_GRAPH_CANVAS_WIDTH = 360.0f;
+
+    const ImVec2 available_ = ImGui::GetContentRegionAvail();
+    transitionInspectorWidth = std::clamp(
+        transitionInspectorWidth,
+        MINIMUM_TRANSITION_INSPECTOR_WIDTH,
+        (std::max)(MINIMUM_TRANSITION_INSPECTOR_WIDTH, available_.x - MINIMUM_GRAPH_CANVAS_WIDTH - SPLITTER_SIZE));
+
+    const float graphCanvasWidth_ = (std::max)(
+        MINIMUM_GRAPH_CANVAS_WIDTH,
+        available_.x - transitionInspectorWidth - SPLITTER_SIZE);
+
+    ImGui::BeginChild("AnimNodeGraphCanvas", ImVec2(graphCanvasWidth_, 0.0f), false);
+    animController_->DrawNodeEditorContent(graphConnectionMode);
+    ImGui::EndChild();
+
+    ImGui::SameLine(0.0f, 0.0f);
+    DrawVerticalSplitter(
+        "##AnimNodeGraphTransitionSplitter",
+        available_.y,
+        transitionInspectorWidth,
+        -1.0f);
+
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::BeginChild("AnimNodeTransitionInspector", ImVec2(0.0f, 0.0f), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    animController_->DrawTransitionInspectorContent();
+    ImGui::EndChild();
 }
 
 void AnimNodeEditorWindow::DrawAssetBrowserPanel()

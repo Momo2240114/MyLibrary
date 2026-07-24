@@ -2,6 +2,7 @@
 
 #include "Editor/Workspace/EditorWorkspaceWindow.h"
 #include "Editor/Window/AssetBrowserWindow.h"
+#include "Engine/Graphics/Resource/Animation/AnimationState.h"
 
 class AnimationControllerComponent;
 class GltfModelCommponennt;
@@ -33,6 +34,8 @@ private:
     float scenePreviewHeight = 420.0f;
     float hierarchyWidth = 260.0f;
     float assetBrowserHeight = 260.0f;
+    float transitionInspectorWidth = 320.0f;
+    ANIM_GRAPH_CONNECTION_MODE graphConnectionMode = ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN;
     bool layoutSizeInitialized = false;
 };
 
