@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Core/BuildConfig.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <chrono>
@@ -75,14 +77,35 @@ private:
 #define BS_LOG(category_, level_, text_) \
     DebugLog::Instance().AddLog((category_), (level_), __FILE__, __LINE__, (text_))
 
+#define BS_LOG_NOOP(category_, text_) \
+    do \
+    { \
+    } while (false)
+
+#if BS_ENABLE_DEBUG_LOG
 #define BS_LOG_INFO(category_, text_) \
     BS_LOG((category_), LOG_LEVEL::INFO, (text_))
+#else
+#define BS_LOG_INFO(category_, text_) BS_LOG_NOOP((category_), (text_))
+#endif
 
+#if BS_ENABLE_DEBUG_LOG
 #define BS_LOG_SUCCESS(category_, text_) \
     BS_LOG((category_), LOG_LEVEL::SUCCESS, (text_))
+#else
+#define BS_LOG_SUCCESS(category_, text_) BS_LOG_NOOP((category_), (text_))
+#endif
 
+#if BS_ENABLE_WARNING_LOG
 #define BS_LOG_WARNING(category_, text_) \
     BS_LOG((category_), LOG_LEVEL::WARNING, (text_))
+#else
+#define BS_LOG_WARNING(category_, text_) BS_LOG_NOOP((category_), (text_))
+#endif
 
+#if BS_ENABLE_ERROR_LOG
 #define BS_LOG_ERROR(category_, text_) \
     BS_LOG((category_), LOG_LEVEL::ERROR_LOG, (text_))
+#else
+#define BS_LOG_ERROR(category_, text_) BS_LOG_NOOP((category_), (text_))
+#endif

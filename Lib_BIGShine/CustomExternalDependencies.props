@@ -165,13 +165,12 @@
   <!-- Release -->
   <!-- ========================================= -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='x64'">
-	  <ClCompile>
-		  <PreprocessorDefinitions>
-			  TRACY_ENABLE;
-			  %(PreprocessorDefinitions)
-		  </PreprocessorDefinitions>
-	  </ClCompile>
-	  
+    <ClCompile>
+      <PreprocessorDefinitions>
+        TRACY_ENABLE;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
+    </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
         $(ProjectDir)External\DirectXTK-main\Bin\Desktop_2022\x64\Release;
@@ -182,6 +181,27 @@
     </Link>
   </ItemDefinitionGroup>
 
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='DevelopmentEditor' and '$(Platform)'=='x64'">
+    <Link>
+      <AdditionalLibraryDirectories>
+        $(ProjectDir)External\DirectXTK-main\Bin\Desktop_2022\x64\Release;
+        C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\lib\vs2022\x64\release;
+        $(ProjectDir)External\PhisXLib\lib\x64\release;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Shipping' and '$(Platform)'=='x64'">
+    <Link>
+      <AdditionalLibraryDirectories>
+        $(ProjectDir)External\DirectXTK-main\Bin\Desktop_2022\x64\Release;
+        C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.4\lib\vs2022\x64\release;
+        $(ProjectDir)External\PhisXLib\lib\x64\release;
+        %(AdditionalLibraryDirectories)
+      </AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' and '$(Platform)'=='Win32'">
     <Link>
       <AdditionalLibraryDirectories>
@@ -191,32 +211,11 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <!-- ========================================= -->
-  <!-- Checked -->
-  <!-- ========================================= -->
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='checked'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>
-        $(ProjectDir)PhysXMatu\physx\include;
-        %(AdditionalIncludeDirectories)
-      </AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>
-        $(ProjectDir)External\PhisXLib\lib\x64\checked;
-        %(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
-      <AdditionalDependencies>
-        $(CoreLibraryDependencies);
-        %(AdditionalDependencies)
-      </AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
 
 	<!-- ========================================= -->
 	<!-- Tracy Client -->
 	<!-- ========================================= -->
-	<ItemGroup Condition="'$(Platform)'=='x64'">
+	<ItemGroup Condition="'$(Platform)'=='x64' and ('$(Configuration)'=='Debug' or '$(Configuration)'=='Release')">
 		<ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp">
 			<PrecompiledHeader>NotUsing</PrecompiledHeader>
 			<DisableSpecificWarnings>4828;%(DisableSpecificWarnings)</DisableSpecificWarnings>
