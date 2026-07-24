@@ -197,7 +197,12 @@ const char* EditorWindowManager::GetWindowMenuCategory(
     {
         return "Animation";
     }
-    if (name_ == "Debug Log" || name_ == "Node Graph Monitor") return "Debug";
+    if (name_ == "Debug Log" ||
+        name_ == "Node Graph Monitor" ||
+        name_ == "Component Update Sequencer")
+    {
+        return "Debug";
+    }
     return "Tools";
 }
 

@@ -13,6 +13,29 @@
 
 namespace
 {
+    struct ComponentUpdateEntry
+    {
+        std::shared_ptr<Component> component;
+        int order = 0;
+    };
+
+    void SortUpdateEntries(std::vector<ComponentUpdateEntry>& entries_, bool lateUpdate_)
+    {
+        std::stable_sort(entries_.begin(), entries_.end(),
+            [lateUpdate_](const ComponentUpdateEntry& left_, const ComponentUpdateEntry& right_)
+            {
+                const int leftPriority_ = lateUpdate_
+                    ? left_.component->GetLateUpdatePriority()
+                    : left_.component->GetUpdatePriority();
+                const int rightPriority_ = lateUpdate_
+                    ? right_.component->GetLateUpdatePriority()
+                    : right_.component->GetUpdatePriority();
+
+                if (leftPriority_ != rightPriority_) return leftPriority_ < rightPriority_;
+                return left_.order < right_.order;
+            });
+    }
+
     void AddGameObjectProfileText(const GameObject& object_)
     {
 #if BS_PROFILE_DETAILED_ENABLED
@@ -339,51 +362,86 @@ void GameObject::Update(float et)
     {
         BS_PROFILE_SCOPE("GameObject::UpdateComponents");
 
-        for (auto& comp_ : components)
+        std::vector<ComponentUpdateEntry> entries_;
+        for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
+            auto& comp_ = components[order_];
             if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
+            if (!comp_->ShouldUpdate()) continue;
 
             const std::string& name_ = comp_->GetName();
 
             if (name_ != "PhysicsCollisionComponent" &&
                 name_ != "CharacterMovementComponent")
             {
-                BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
-                BS_PROFILE_TEXT(name_.c_str(), name_.size());
-                comp_->Update(et);
-                ++updatedComponentCount_;
+                entries_.push_back({ comp_, order_ });
             }
+        }
+
+        SortUpdateEntries(entries_, false);
+
+        for (const ComponentUpdateEntry& entry_ : entries_)
+        {
+            const std::shared_ptr<Component>& comp_ = entry_.component;
+            const std::string& name_ = comp_->GetName();
+            BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
+            BS_PROFILE_TEXT(name_.c_str(), name_.size());
+            comp_->Update(et);
+            ++updatedComponentCount_;
         }
     }
 
     {
         BS_PROFILE_SCOPE("GameObject::CharacterMovementUpdate");
 
-        for (auto& comp_ : components)
+        std::vector<ComponentUpdateEntry> entries_;
+        for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
+            auto& comp_ = components[order_];
             if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
+            if (!comp_->ShouldUpdate()) continue;
 
             const std::string& name_ = comp_->GetName();
 
             if (name_ == "CharacterMovementComponent")
             {
-                BS_PROFILE_SCOPE("CharacterMovementComponent::Update");
-                BS_PROFILE_TEXT(name_.c_str(), name_.size());
-                comp_->Update(et);
-                ++updatedComponentCount_;
+                entries_.push_back({ comp_, order_ });
             }
+        }
+
+        SortUpdateEntries(entries_, false);
+
+        for (const ComponentUpdateEntry& entry_ : entries_)
+        {
+            const std::shared_ptr<Component>& comp_ = entry_.component;
+            const std::string& name_ = comp_->GetName();
+            BS_PROFILE_SCOPE("CharacterMovementComponent::Update");
+            BS_PROFILE_TEXT(name_.c_str(), name_.size());
+            comp_->Update(et);
+            ++updatedComponentCount_;
         }
     }
 
     {
         BS_PROFILE_SCOPE("GameObject::ColliderUpdate");
 
-        for (auto& collider_ : colliderComponents)
+        std::vector<ComponentUpdateEntry> entries_;
+        for (int order_ = 0; order_ < static_cast<int>(colliderComponents.size()); ++order_)
         {
+            auto& collider_ = colliderComponents[order_];
             if (!collider_ || !collider_->IsEnabled() || !collider_->IsStarted()) continue;
+            if (!collider_->ShouldUpdate()) continue;
 
-            BS_PROFILE_SCOPE("ColliderComponent::Update");
+            entries_.push_back({ collider_, order_ });
+        }
+
+        SortUpdateEntries(entries_, false);
+
+        for (const ComponentUpdateEntry& entry_ : entries_)
+        {
+            const std::shared_ptr<Component>& collider_ = entry_.component;
             const std::string& name_ = collider_->GetName();
+            BS_PROFILE_SCOPE("ColliderComponent::Update");
             BS_PROFILE_TEXT(name_.c_str(), name_.size());
             collider_->Update(et);
             ++updatedComponentCount_;
@@ -403,38 +461,62 @@ void GameObject::LateUpdate(float et)
     {
         BS_PROFILE_SCOPE("GameObject::LateUpdateComponents");
 
-        for (auto& comp_ : components)
+        std::vector<ComponentUpdateEntry> entries_;
+        for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
+            auto& comp_ = components[order_];
             if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
+            if (!comp_->ShouldLateUpdate()) continue;
 
             const std::string& name_ = comp_->GetName();
 
             if (name_ != "PhysicsCollisionComponent")
             {
-                BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
-                BS_PROFILE_TEXT(name_.c_str(), name_.size());
-                comp_->LateUpdate(et);
-                ++lateUpdatedComponentCount_;
+                entries_.push_back({ comp_, order_ });
             }
+        }
+
+        SortUpdateEntries(entries_, true);
+
+        for (const ComponentUpdateEntry& entry_ : entries_)
+        {
+            const std::shared_ptr<Component>& comp_ = entry_.component;
+            const std::string& name_ = comp_->GetName();
+            BS_PROFILE_SCOPE_DYNAMIC(name_.c_str());
+            BS_PROFILE_TEXT(name_.c_str(), name_.size());
+            comp_->LateUpdate(et);
+            ++lateUpdatedComponentCount_;
         }
     }
 
     {
         BS_PROFILE_SCOPE("GameObject::PhysicsLateUpdate");
 
-        for (auto& comp_ : components)
+        std::vector<ComponentUpdateEntry> entries_;
+        for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
+            auto& comp_ = components[order_];
             if (!comp_ || !comp_->IsEnabled() || !comp_->IsStarted()) continue;
+            if (!comp_->ShouldLateUpdate()) continue;
 
             const std::string& name_ = comp_->GetName();
 
             if (name_ == "PhysicsCollisionComponent")
             {
-                BS_PROFILE_SCOPE("PhysicsCollisionComponent::LateUpdate");
-                BS_PROFILE_TEXT(name_.c_str(), name_.size());
-                comp_->LateUpdate(et);
-                ++lateUpdatedComponentCount_;
+                entries_.push_back({ comp_, order_ });
             }
+        }
+
+        SortUpdateEntries(entries_, true);
+
+        for (const ComponentUpdateEntry& entry_ : entries_)
+        {
+            const std::shared_ptr<Component>& comp_ = entry_.component;
+            const std::string& name_ = comp_->GetName();
+            BS_PROFILE_SCOPE("PhysicsCollisionComponent::LateUpdate");
+            BS_PROFILE_TEXT(name_.c_str(), name_.size());
+            comp_->LateUpdate(et);
+            ++lateUpdatedComponentCount_;
         }
     }
 
@@ -799,6 +881,10 @@ nlohmann::json GameObject::Save() const
         cj["TypeName"] = comp->GetName();
         cj["Enabled"] = comp->IsEnabled();
         cj["RequiredForSceneStart"] = comp->IsRequiredForSceneStart();
+        cj["UpdateEnabled"] = comp->ShouldUpdate();
+        cj["LateUpdateEnabled"] = comp->ShouldLateUpdate();
+        cj["UpdatePriority"] = comp->GetUpdatePriority();
+        cj["LateUpdatePriority"] = comp->GetLateUpdatePriority();
 
         // 各コンポーネント固有の変数を保存
         nlohmann::json data;
@@ -814,6 +900,10 @@ nlohmann::json GameObject::Save() const
         cj["TypeName"] = collider_->GetName();
         cj["Enabled"] = collider_->IsEnabled();
         cj["RequiredForSceneStart"] = collider_->IsRequiredForSceneStart();
+        cj["UpdateEnabled"] = collider_->ShouldUpdate();
+        cj["LateUpdateEnabled"] = collider_->ShouldLateUpdate();
+        cj["UpdatePriority"] = collider_->GetUpdatePriority();
+        cj["LateUpdatePriority"] = collider_->GetLateUpdatePriority();
 
         nlohmann::json data;
         collider_->Serialize(data);
@@ -868,6 +958,10 @@ void GameObject::Load(const nlohmann::json& j)
             comp->SetEnabled(cJson.value("Enabled", true));
             comp->SetRequiredForSceneStart(
                 cJson.value("RequiredForSceneStart", comp->IsRequiredForSceneStart()));
+            comp->SetUpdateEnabled(cJson.value("UpdateEnabled", comp->ShouldUpdate()));
+            comp->SetLateUpdateEnabled(cJson.value("LateUpdateEnabled", comp->ShouldLateUpdate()));
+            comp->SetUpdatePriority(cJson.value("UpdatePriority", comp->GetUpdatePriority()));
+            comp->SetLateUpdatePriority(cJson.value("LateUpdatePriority", comp->GetLateUpdatePriority()));
             comp->DeserializeProfiled(cJson["Data"]);
 
             // 3. 型を判別して適切な場所に格納 (AddComponentのロジックと合わせる)
