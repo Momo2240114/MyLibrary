@@ -1,0 +1,75 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.15000000596046448,
+                    0.550000011920929,
+                    1.0,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.41999998688697815,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.5199999809265137,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "CapsuleCollider"
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 8,
+                "targetStartNodeName": "PlainsDragon_-Head"
+            },
+            "Enabled": true,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment"
+        }
+    ],
+    "Layer": 2,
+    "Name": "HeadPhysical",
+    "ParentName": "PhysicalColliderRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.11999999731779099
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

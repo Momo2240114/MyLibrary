@@ -31,6 +31,7 @@ namespace
     constexpr PxU32 ROLE_SENSOR = 4;
     constexpr PxU32 ROLE_JUST_DODGE_BOX = 5;
     constexpr PxU32 ROLE_GUARD_BOX = 6;
+    constexpr PxU32 COLLISION_OWNER_MASK = 0x7FFFFFFFu;
 
     bool IsCctMoveIgnoredRole(PxU32 role_)
     {
@@ -52,8 +53,8 @@ namespace
         {
             if (!shape_) return PxQueryHitType::eNONE;
 
-            const PxFilterData filterData_ = shape_->getSimulationFilterData();
-            if (IsCctMoveIgnoredRole(filterData_.word2))
+            const PxFilterData shapeFilterData_ = shape_->getSimulationFilterData();
+            if (IsCctMoveIgnoredRole(shapeFilterData_.word2))
             {
                 return PxQueryHitType::eNONE;
             }
@@ -136,7 +137,9 @@ static PxFilterFlags PhysXFilterShader(
     const PxU32 ownerMask_ = 0x7FFFFFFFu;
     const PxU32 responseMask_ = 0x80000000u;
 
-    if ((filterData0_.word3 & ownerMask_) == (filterData1_.word3 & ownerMask_))
+    const PxU32 ownerId0_ = filterData0_.word3 & ownerMask_;
+    const PxU32 ownerId1_ = filterData1_.word3 & ownerMask_;
+    if (ownerId0_ != 0u && ownerId1_ != 0u && ownerId0_ == ownerId1_)
     {
         return PxFilterFlag::eSUPPRESS;
     }

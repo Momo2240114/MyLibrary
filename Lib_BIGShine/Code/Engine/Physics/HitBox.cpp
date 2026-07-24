@@ -92,6 +92,10 @@ std::shared_ptr<GameObject> HitBox::GetAttackOwner()
     {
         return ownerObject->shared_from_this();
     }
+    if (const std::shared_ptr<GameObject> collisionOwner_ = ResolveCollisionOwnerObject())
+    {
+        return collisionOwner_;
+    }
     return GetGameObject();
 }
 

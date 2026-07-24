@@ -248,6 +248,9 @@
     <Filter Include="Code\Game\Logics\AI\Dragon">
       <UniqueIdentifier>{7e4fe2ff-2f49-4d13-b7bd-29de1e6d20e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\Debug">
+      <UniqueIdentifier>{7001ca54-6aba-4f76-8e51-fdf0632f42cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp">
@@ -850,7 +853,6 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp" />
     <ClCompile Include="Code\Editor\EditorCameraData.cpp">
       <Filter>Code\Editor\Utility</Filter>
     </ClCompile>
@@ -860,7 +862,6 @@
     <ClCompile Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.cpp">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp" />
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClCompile>
@@ -878,6 +879,18 @@
     </ClCompile>
     <ClCompile Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.cpp">
       <Filter>Code\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp">
+      <Filter>Code\Game\Logics\Combat</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp">
+      <Filter>Code\Engine\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1553,7 +1566,6 @@
     <ClInclude Include="Code\Engine\Common\DebugLog.h">
       <Filter>Code\Engine\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
     <ClInclude Include="Code\Editor\EditorCameraData.h">
       <Filter>Code\Editor\Utility</Filter>
     </ClInclude>
@@ -1566,7 +1578,6 @@
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.h">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h" />
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClInclude>
@@ -1596,6 +1607,18 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.h">
       <Filter>Code\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.h">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.h">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h">
+      <Filter>Code\Game\Logics\Combat</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Debug\TracyProfiler.h">
+      <Filter>Code\Engine\Debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

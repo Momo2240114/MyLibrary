@@ -1,0 +1,372 @@
+#include "PrecompiledHeader.h"
+
+#include "DragonBodyPartManagerComponent.h"
+
+#include "DragonBodyPartHurtBoxComponent.h"
+#include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/GamePlay/System/AttackSystem.h"
+#include "Engine/Physics/HurtBox.h"
+
+#include <algorithm>
+#include <imgui.h>
+
+namespace
+{
+    constexpr DRAGON_BODY_PART DEFAULT_BODY_PARTS[] =
+    {
+        DRAGON_BODY_PART::HEAD,
+        DRAGON_BODY_PART::NECK,
+        DRAGON_BODY_PART::CHEST,
+        DRAGON_BODY_PART::BODY,
+        DRAGON_BODY_PART::LEFT_FRONT_LEG,
+        DRAGON_BODY_PART::RIGHT_FRONT_LEG,
+        DRAGON_BODY_PART::LEFT_BACK_LEG,
+        DRAGON_BODY_PART::RIGHT_BACK_LEG,
+        DRAGON_BODY_PART::LEFT_WING,
+        DRAGON_BODY_PART::RIGHT_WING,
+        DRAGON_BODY_PART::TAIL
+    };
+}
+
+const char* GetDragonBodyPartName(DRAGON_BODY_PART bodyPart_)
+{
+    switch (bodyPart_)
+    {
+    case DRAGON_BODY_PART::HEAD: return "HEAD";
+    case DRAGON_BODY_PART::NECK: return "NECK";
+    case DRAGON_BODY_PART::CHEST: return "CHEST";
+    case DRAGON_BODY_PART::BODY: return "BODY";
+    case DRAGON_BODY_PART::LEFT_FRONT_LEG: return "LEFT_FRONT_LEG";
+    case DRAGON_BODY_PART::RIGHT_FRONT_LEG: return "RIGHT_FRONT_LEG";
+    case DRAGON_BODY_PART::LEFT_BACK_LEG: return "LEFT_BACK_LEG";
+    case DRAGON_BODY_PART::RIGHT_BACK_LEG: return "RIGHT_BACK_LEG";
+    case DRAGON_BODY_PART::LEFT_WING: return "LEFT_WING";
+    case DRAGON_BODY_PART::RIGHT_WING: return "RIGHT_WING";
+    case DRAGON_BODY_PART::TAIL: return "TAIL";
+    default: return "BODY";
+    }
+}
+
+DRAGON_BODY_PART ParseDragonBodyPart(const std::string& bodyPartName_)
+{
+    for (const DRAGON_BODY_PART bodyPart_ : DEFAULT_BODY_PARTS)
+    {
+        if (bodyPartName_ == GetDragonBodyPartName(bodyPart_))
+        {
+            return bodyPart_;
+        }
+    }
+    return DRAGON_BODY_PART::BODY;
+}
+
+void DragonBodyPartManagerComponent::Start()
+{
+    EnsureDefaultBodyParts();
+    ResolveHealthComponent();
+    RegisterAttackHitCallback();
+    PublishLastDamageToBlackboard();
+}
+
+BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
+    DRAGON_BODY_PART bodyPart_,
+    const DamageContext& damageContext_)
+{
+    EnsureDefaultBodyParts();
+    ResolveHealthComponent();
+
+    BodyPartDamageResult result_;
+    result_.bodyPart = bodyPart_;
+
+    DragonBodyPartStatus* status_ = FindBodyPartStatus(bodyPart_);
+    if (!status_) return result_;
+
+    result_.alreadyBroken = status_->broken;
+    result_.appliedHealthDamage =
+        (std::max)(damageContext_.healthDamage, 0.0f) *
+        (std::max)(status_->healthDamageRate, 0.0f);
+    result_.appliedDurabilityDamage =
+        (std::max)(damageContext_.durabilityDamage, 0.0f) *
+        (std::max)(status_->durabilityDamageRate, 0.0f);
+
+    if (health)
+    {
+        health->ApplyDamage(result_.appliedHealthDamage);
+    }
+
+    const bool wasBroken_ = status_->broken;
+    status_->currentDurability = (std::max)(
+        status_->currentDurability - result_.appliedDurabilityDamage,
+        0.0f);
+    status_->broken = status_->currentDurability <= 0.0f;
+    result_.bodyPartBrokenThisHit = !wasBroken_ && status_->broken;
+
+    lastDamageResult = result_;
+    lastAttackInstanceId = damageContext_.attackInstanceId;
+    if (const std::shared_ptr<GameObject> attacker_ =
+        damageContext_.attacker.lock())
+    {
+        lastAttackerName = attacker_->GetName();
+    }
+    PublishLastDamageToBlackboard();
+
+    if (result_.bodyPartBrokenThisHit)
+    {
+        if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+        {
+            owner_->ExecuteAction("DragonBodyPart_Broken");
+        }
+    }
+
+    return result_;
+}
+
+void DragonBodyPartManagerComponent::HandleAttackHit(
+    const AttackHitEvent& event_,
+    const DragonBodyPartHurtBoxComponent& hurtBoxComponent_)
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    const std::shared_ptr<GameObject> target_ = event_.target.lock();
+    if (!owner_ || target_ != owner_) return;
+
+    DamageContext damageContext_;
+    damageContext_.attackInstanceId = event_.attackInstanceId;
+    damageContext_.attacker = event_.attacker;
+    damageContext_.targetCombatOwner = event_.target;
+    damageContext_.healthDamage = event_.damage;
+    damageContext_.durabilityDamage = event_.damage;
+    damageContext_.hitPosition = event_.hitPosition;
+    damageContext_.hitDirection = event_.hitNormal;
+
+    if (event_.hurtBox)
+    {
+        if (const std::shared_ptr<GameObject> hurtBoxObject_ =
+            event_.hurtBox->GetGameObject())
+        {
+            lastHurtBoxName = hurtBoxObject_->GetName();
+        }
+    }
+
+    ApplyDamage(hurtBoxComponent_.GetBodyPart(), damageContext_);
+}
+
+const DragonBodyPartStatus* DragonBodyPartManagerComponent::GetBodyPartStatus(
+    DRAGON_BODY_PART bodyPart_) const
+{
+    for (const DragonBodyPartStatus& status_ : bodyParts)
+    {
+        if (status_.bodyPart == bodyPart_) return &status_;
+    }
+    return nullptr;
+}
+
+bool DragonBodyPartManagerComponent::IsBodyPartBroken(
+    DRAGON_BODY_PART bodyPart_) const
+{
+    const DragonBodyPartStatus* status_ = GetBodyPartStatus(bodyPart_);
+    return status_ && status_->broken;
+}
+
+void DragonBodyPartManagerComponent::ResetBodyParts()
+{
+    EnsureDefaultBodyParts();
+    for (DragonBodyPartStatus& status_ : bodyParts)
+    {
+        status_.currentDurability = status_.maxDurability;
+        status_.broken = false;
+    }
+    lastDamageResult = {};
+    lastAttackerName.clear();
+    lastHurtBoxName.clear();
+    lastAttackInstanceId = 0;
+    PublishLastDamageToBlackboard();
+}
+
+void DragonBodyPartManagerComponent::EnsureDefaultBodyParts()
+{
+    for (const DRAGON_BODY_PART bodyPart_ : DEFAULT_BODY_PARTS)
+    {
+        if (!FindBodyPartStatus(bodyPart_))
+        {
+            DragonBodyPartStatus status_;
+            status_.bodyPart = bodyPart_;
+            bodyParts.push_back(status_);
+        }
+    }
+}
+
+DragonBodyPartStatus* DragonBodyPartManagerComponent::FindBodyPartStatus(
+    DRAGON_BODY_PART bodyPart_)
+{
+    for (DragonBodyPartStatus& status_ : bodyParts)
+    {
+        if (status_.bodyPart == bodyPart_) return &status_;
+    }
+    return nullptr;
+}
+
+void DragonBodyPartManagerComponent::ResolveHealthComponent()
+{
+    if (health) return;
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    health = owner_->GetOrAddComponent<HealthComponent>().get();
+}
+
+void DragonBodyPartManagerComponent::RegisterAttackHitCallback()
+{
+    if (callbackRegistered) return;
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    std::weak_ptr<DragonBodyPartManagerComponent> weakManager_;
+    for (const std::shared_ptr<Component>& component_ : owner_->components)
+    {
+        const std::shared_ptr<DragonBodyPartManagerComponent> manager_ =
+            std::dynamic_pointer_cast<DragonBodyPartManagerComponent>(component_);
+        if (manager_.get() == this)
+        {
+            weakManager_ = manager_;
+            break;
+        }
+    }
+
+    owner_->GetManager().GetAttackSystem().AddHitCallback(
+        [weakManager_](const AttackHitEvent& event_)
+        {
+            const std::shared_ptr<DragonBodyPartManagerComponent> manager_ =
+                weakManager_.lock();
+            if (!manager_ || !event_.hurtBox) return;
+
+            const std::shared_ptr<GameObject> hurtBoxObject_ =
+                event_.hurtBox->GetGameObject();
+            if (!hurtBoxObject_) return;
+
+            const std::shared_ptr<DragonBodyPartHurtBoxComponent> hurtBoxComponent_ =
+                hurtBoxObject_->GetComponent<DragonBodyPartHurtBoxComponent>();
+            if (!hurtBoxComponent_) return;
+
+            manager_->HandleAttackHit(event_, *hurtBoxComponent_);
+        });
+    callbackRegistered = true;
+}
+
+void DragonBodyPartManagerComponent::PublishLastDamageToBlackboard()
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    const std::shared_ptr<BlackboardComponent> blackboard_ =
+        owner_->GetOrAddComponent<BlackboardComponent>();
+    if (!blackboard_) return;
+
+    blackboard_->SetInt(
+        "DragonBodyPart",
+        "LastBodyPart",
+        static_cast<int>(lastDamageResult.bodyPart));
+    blackboard_->SetFloat(
+        "DragonBodyPart",
+        "LastHealthDamage",
+        lastDamageResult.appliedHealthDamage);
+    blackboard_->SetFloat(
+        "DragonBodyPart",
+        "LastDurabilityDamage",
+        lastDamageResult.appliedDurabilityDamage);
+    blackboard_->SetBool(
+        "DragonBodyPart",
+        "LastBrokenThisHit",
+        lastDamageResult.bodyPartBrokenThisHit);
+}
+
+void DragonBodyPartManagerComponent::Gui()
+{
+    EnsureDefaultBodyParts();
+    ResolveHealthComponent();
+
+    ImGui::Text("Health Component: %s", health ? "Ready" : "None");
+    ImGui::Checkbox("Debug Log", &debugLogEnabled);
+    if (ImGui::Button("Reset Body Parts")) ResetBodyParts();
+
+    ImGui::SeparatorText("Last Hit");
+    ImGui::Text("Attack ID: %llu", static_cast<unsigned long long>(lastAttackInstanceId));
+    ImGui::Text("Body Part: %s", GetDragonBodyPartName(lastDamageResult.bodyPart));
+    ImGui::Text("Health Damage: %.2f", lastDamageResult.appliedHealthDamage);
+    ImGui::Text("Durability Damage: %.2f", lastDamageResult.appliedDurabilityDamage);
+    ImGui::Text("Broken This Hit: %s", lastDamageResult.bodyPartBrokenThisHit ? "Yes" : "No");
+    ImGui::Text("Attacker: %s", lastAttackerName.c_str());
+    ImGui::Text("HurtBox: %s", lastHurtBoxName.c_str());
+
+    ImGui::SeparatorText("Body Parts");
+    for (DragonBodyPartStatus& status_ : bodyParts)
+    {
+        if (ImGui::TreeNode(GetDragonBodyPartName(status_.bodyPart)))
+        {
+            ImGui::DragFloat("Max Durability", &status_.maxDurability, 1.0f, 1.0f, 99999.0f);
+            status_.currentDurability = (std::clamp)(
+                status_.currentDurability,
+                0.0f,
+                status_.maxDurability);
+            ImGui::DragFloat("Current Durability", &status_.currentDurability, 1.0f, 0.0f, status_.maxDurability);
+            ImGui::DragFloat("Health Damage Rate", &status_.healthDamageRate, 0.05f, 0.0f, 10.0f);
+            ImGui::DragFloat("Durability Damage Rate", &status_.durabilityDamageRate, 0.05f, 0.0f, 10.0f);
+            status_.broken = status_.currentDurability <= 0.0f;
+            ImGui::Text("Broken: %s", status_.broken ? "Yes" : "No");
+            ImGui::TreePop();
+        }
+    }
+}
+
+void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
+{
+    json_["DebugLogEnabled"] = debugLogEnabled;
+    json_["BodyParts"] = nlohmann::json::array();
+    for (const DragonBodyPartStatus& status_ : bodyParts)
+    {
+        json_["BodyParts"].push_back({
+            { "BodyPart", GetDragonBodyPartName(status_.bodyPart) },
+            { "MaxDurability", status_.maxDurability },
+            { "CurrentDurability", status_.currentDurability },
+            { "HealthDamageRate", status_.healthDamageRate },
+            { "DurabilityDamageRate", status_.durabilityDamageRate },
+            { "Broken", status_.broken },
+            });
+    }
+}
+
+void DragonBodyPartManagerComponent::Deserialize(const nlohmann::json& json_)
+{
+    debugLogEnabled = json_.value("DebugLogEnabled", true);
+    bodyParts.clear();
+
+    if (json_.contains("BodyParts") && json_["BodyParts"].is_array())
+    {
+        for (const nlohmann::json& bodyPartJson_ : json_["BodyParts"])
+        {
+            DragonBodyPartStatus status_;
+            status_.bodyPart = ParseDragonBodyPart(
+                bodyPartJson_.value("BodyPart", std::string("BODY")));
+            status_.maxDurability = (std::max)(
+                bodyPartJson_.value("MaxDurability", 100.0f),
+                1.0f);
+            status_.currentDurability = (std::clamp)(
+                bodyPartJson_.value("CurrentDurability", status_.maxDurability),
+                0.0f,
+                status_.maxDurability);
+            status_.healthDamageRate = (std::max)(
+                bodyPartJson_.value("HealthDamageRate", 1.0f),
+                0.0f);
+            status_.durabilityDamageRate = (std::max)(
+                bodyPartJson_.value("DurabilityDamageRate", 1.0f),
+                0.0f);
+            status_.broken = bodyPartJson_.value("Broken", status_.currentDurability <= 0.0f);
+            bodyParts.push_back(status_);
+        }
+    }
+
+    EnsureDefaultBodyParts();
+}

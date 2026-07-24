@@ -68,8 +68,10 @@ void AttackSystem::HandleHit(
 {
     const std::shared_ptr<GameObject> hitBoxObject_ = hitBox_.GetGameObject();
     const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
-    const std::shared_ptr<GameObject> target_ = hurtBox_.GetGameObject();
-    if (!hitBoxObject_ || !attacker_ || !target_) return;
+    const std::shared_ptr<GameObject> hurtBoxObject_ = hurtBox_.GetGameObject();
+    std::shared_ptr<GameObject> target_ = hurtBox_.ResolveCollisionOwnerObject();
+    if (!target_) target_ = hurtBoxObject_;
+    if (!hitBoxObject_ || !attacker_ || !target_ || !hurtBoxObject_) return;
     if (!hitBox_.canHitOwner && IsSameHierarchy(attacker_, target_)) return;
     if (!hitBox_.IsEnabled() || !hurtBox_.IsEnabled()) return;
     if (!hitBox_.CanHit(target_.get())) return;

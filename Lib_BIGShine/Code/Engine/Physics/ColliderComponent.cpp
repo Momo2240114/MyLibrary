@@ -12,6 +12,8 @@
 #include "PhysXMath.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -137,10 +139,7 @@ void ColliderComponent::CreateCharacterController()
             filterData_.word2 = static_cast<physx::PxU32>(collisionRole);
 
             const physx::PxU32 ownerId_ =
-                static_cast<physx::PxU32>(
-                    reinterpret_cast<uintptr_t>(owner_.get()) & 0x7FFFFFFF
-                    );
-
+                collisionOwnerObjectName.empty() ? 0u : GetCollisionOwnerId();
             filterData_.word3 = ownerId_ | 0x80000000u;
 
             shape_->setSimulationFilterData(filterData_);
@@ -168,6 +167,32 @@ void ColliderComponent::ReleaseCharacterController()
         characterController->release();
         characterController = nullptr;
     }
+}
+
+std::shared_ptr<GameObject> ColliderComponent::ResolveCollisionOwnerObject()
+{
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return nullptr;
+
+    if (!collisionOwnerObjectName.empty() && owner_->manager)
+    {
+        const std::shared_ptr<GameObject> collisionOwner_ =
+            owner_->GetManager().Find(collisionOwnerObjectName);
+        if (collisionOwner_) return collisionOwner_;
+    }
+
+    return owner_;
+}
+
+uint32_t ColliderComponent::GetCollisionOwnerId()
+{
+    const std::shared_ptr<GameObject> collisionOwner_ = ResolveCollisionOwnerObject();
+    const GameObject* ownerPointer_ = collisionOwner_
+        ? collisionOwner_.get()
+        : GetGameObject().get();
+
+    return static_cast<uint32_t>(
+        reinterpret_cast<uintptr_t>(ownerPointer_) & 0x7FFFFFFF);
 }
 
 bool ColliderComponent::UsesCharacterController() const
@@ -432,7 +457,8 @@ void ColliderComponent::UpdatePhysXShape()
     filterData_.word0 = static_cast<PxU32>(owner_->layer);
     filterData_.word1 = owner_->mask;
     filterData_.word2 = static_cast<PxU32>(collisionRole);
-    const PxU32 ownerId_ = static_cast<PxU32>(reinterpret_cast<uintptr_t>(owner_.get()) & 0x7FFFFFFF);
+    const PxU32 ownerId_ =
+        collisionOwnerObjectName.empty() ? 0u : GetCollisionOwnerId();
     filterData_.word3 = ownerId_ | (usePhysicsResponse ? 0x80000000u : 0u);
     shape_->setSimulationFilterData(filterData_);
 }
@@ -851,6 +877,13 @@ void ColliderComponent::Gui()
     const bool previousTrigger_ = isTrigger;
     const bool previousPhysicsControlsTransform_ = physicsControlsTransform;
 
+    char colliderNameBuffer_[128];
+    strncpy_s(colliderNameBuffer_, colliderName.c_str(), sizeof(colliderNameBuffer_));
+    if (ImGui::InputText("Collider Name", colliderNameBuffer_, sizeof(colliderNameBuffer_)))
+    {
+        colliderName = colliderNameBuffer_;
+    }
+
     const char* roleNames_[] =
     {
         "Physical",
@@ -972,11 +1005,13 @@ void ColliderComponent::Gui()
 void ColliderComponent::Serialize(nlohmann::json& j) const  {
     j["Offset"] = { offset.x, offset.y, offset.z };
     j["shapeSizeScale"] = shapeSizeScale;
+    j["ColliderName"] = colliderName;
     j["IsTrigger"] = isTrigger;
     j["IsStatic"] = isStatic;
     j["UsePhysicsResponse"] = usePhysicsResponse;
     j["PhysicsControlsTransform"] = physicsControlsTransform;
     j["CollisionRole"] = static_cast<int>(collisionRole);
+    j["CollisionOwnerObjectName"] = collisionOwnerObjectName;
     j["ShapeRenderFlg"] = shapeRenderEnabled;
     j["UseGravity"] = useGravity;
     j["GravityScale"] = gravityScale;
@@ -999,6 +1034,8 @@ void ColliderComponent::Deserialize(const nlohmann::json& j) {
     usePhysicsResponse = j.value("UsePhysicsResponse", true);
     physicsControlsTransform = j.value("PhysicsControlsTransform", false);
     collisionRole = static_cast<CollisionRole>(j.value("CollisionRole", static_cast<int>(CollisionRole::PHYSICAL)));
+    colliderName = j.value("ColliderName", std::string{});
+    collisionOwnerObjectName = j.value("CollisionOwnerObjectName", std::string{});
     shapeRenderEnabled = j.value("ShapeRenderFlg", true);
     useGravity = j.value("UseGravity", false);
     gravityScale = j.value("GravityScale", 1.0f);

@@ -26,9 +26,10 @@ public:
 
 
     std::shared_ptr<Component> Create(
-        const std::string& name,
-        std::shared_ptr<GameObject> go,
-        bool callStart = true
+        const std::string& name_,
+        std::shared_ptr<GameObject> go_,
+        bool callStart_ = true,
+        bool allowDuplicate_ = false
     );
 
     // --- 直接関数を登録する ---
