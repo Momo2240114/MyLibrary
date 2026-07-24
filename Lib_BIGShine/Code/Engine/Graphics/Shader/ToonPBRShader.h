@@ -20,6 +20,7 @@ public:
     void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override;
     void End(const RenderContext& rc) override;
     void Gui() override;
+    void BindVertexShader(const RenderContext& rc_, bool isSkinnedMesh_);
     const DirectX::XMFLOAT4& GetShadeSteps() const { return shadeSteps; }
     DirectX::XMFLOAT4 GetShadeFeather() const { return shadeFeathers; }
     void SetShadeFeather(DirectX::XMFLOAT4 shadeFeather_) { shadeFeathers = shadeFeather_; }
@@ -43,7 +44,8 @@ private:
     DirectX::XMFLOAT4 shadeSteps{ 0.45f, 0.45f, 0.45f, 0.45f };
     DirectX::XMFLOAT4 shadeFeathers = { 0.1f,0.1f,0.1f,0.1f };
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> staticVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> skinnedVertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11Buffer> meshConstantBuffer;

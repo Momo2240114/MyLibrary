@@ -5,8 +5,7 @@
 #include "CameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
-#include "Engine/GamePlay/Input/ControllerInput.h"
-#include "Engine/GamePlay/Input/MouseInput.h"
+#include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 
@@ -50,6 +49,7 @@ namespace
 
 void ThirdPersonCameraComponent::Start()
 {
+    RegisterDefaultInputBindings();
     ResolveCamera();
     ResolveTarget();
 }
@@ -70,13 +70,13 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
 
     if (!returnBlendActive)
     {
-        const Vector2 mouseDelta_ = MouseInput::Instance().GetSubMousePos();
-        DirectX::XMFLOAT2 stickDelta_{ 0.0f, 0.0f };
-        ControllerInput& controller_ = ControllerInput::Instance();
-        if (controller_.IsConnected()) stickDelta_ = controller_.GetRightStick();
-
-        const float lookX_ = stickDelta_.x + mouseDelta_.x * mouseSensitivity;
-        const float lookY_ = -stickDelta_.y + mouseDelta_.y * mouseSensitivity;
+        const KeyConfig& keyConfig_ = KeyConfig::Instance();
+        const float lookX_ =
+            keyConfig_.GetAxis("Camera_LookStickX") +
+            keyConfig_.GetRawAxis("Camera_LookMouseX") * mouseSensitivity;
+        const float lookY_ =
+            -keyConfig_.GetAxis("Camera_LookStickY") +
+            keyConfig_.GetRawAxis("Camera_LookMouseY") * mouseSensitivity;
         currentYaw += -lookX_ * lookSpeedX * deltaTime_;
         currentPitch += -lookY_ * lookSpeedY * deltaTime_;
         currentPitch = std::clamp(currentPitch, minPitch, maxPitch);
@@ -301,6 +301,57 @@ void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
         };
     }
     ResetFollowTracking();
+}
+
+void ThirdPersonCameraComponent::RegisterDefaultInputBindings()
+{
+    KeyConfig& keyConfig_ = KeyConfig::Instance();
+    const auto& axisMap_ = keyConfig_.GetAxisMap();
+
+    if (axisMap_.count("Camera_LookStickX") == 0)
+    {
+        keyConfig_.BindAxis(
+            "Camera_LookStickX",
+            AxisUnit{
+                AxisSourceType::GamepadStick,
+                DeviceType::Gamepad,
+                static_cast<int>(AxisCode::RightStickX),
+                1.0f,
+                0.15f });
+    }
+    if (axisMap_.count("Camera_LookStickY") == 0)
+    {
+        keyConfig_.BindAxis(
+            "Camera_LookStickY",
+            AxisUnit{
+                AxisSourceType::GamepadStick,
+                DeviceType::Gamepad,
+                static_cast<int>(AxisCode::RightStickY),
+                1.0f,
+                0.15f });
+    }
+    if (axisMap_.count("Camera_LookMouseX") == 0)
+    {
+        keyConfig_.BindAxis(
+            "Camera_LookMouseX",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseX),
+                1.0f,
+                0.0f });
+    }
+    if (axisMap_.count("Camera_LookMouseY") == 0)
+    {
+        keyConfig_.BindAxis(
+            "Camera_LookMouseY",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseY),
+                1.0f,
+                0.0f });
+    }
 }
 
 void ThirdPersonCameraComponent::ResolveTarget()

@@ -9,6 +9,7 @@ public:
     void Begin(const RenderContext& rc) override;
     void Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh) override;
     void End(const RenderContext& rc) override;
+    void BindVertexShader(const RenderContext& rc_, bool isSkinnedMesh_);
 
 private:
     struct CbShadow
@@ -16,7 +17,8 @@ private:
         DirectX::XMFLOAT4X4 lightViewProjection;
     };
     Microsoft::WRL::ComPtr<ID3D11Buffer> shadowConstantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>  vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>  staticVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>  skinnedVertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>   pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>   inputLayout;
 };

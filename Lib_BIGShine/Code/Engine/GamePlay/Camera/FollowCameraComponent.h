@@ -45,4 +45,6 @@ public:
     // ピッチの最小・最大制限（上下回転の制限）
     float cameraMinPitch = -DirectX::XM_PIDIV2 + 0.1f;  // 最小ピッチ（-90度 - 少しの余裕）
     float cameraMaxPitch = DirectX::XM_PIDIV2 - 0.1f;   // 最大ピッチ（90度 - 少しの余裕）
+private:
+    void RegisterDefaultInputBindings();
 };

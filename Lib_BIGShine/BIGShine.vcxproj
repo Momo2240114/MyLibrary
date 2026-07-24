@@ -356,6 +356,7 @@
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\GpuRenderInvestigationWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\InputEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\InputMonitorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\StartupResourceEditorWindow.cpp" />
@@ -625,6 +626,7 @@
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
     <ClInclude Include="Code\Editor\Window\GameModeWindow.h" />
+    <ClInclude Include="Code\Editor\Window\GpuRenderInvestigationWindow.h" />
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\InputMonitorWindow.h" />
     <ClInclude Include="Code\Editor\Window\StartupResourceEditorWindow.h" />
@@ -918,6 +920,10 @@
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
+    <FxCompile Include="Shader\GpuDebugSimpleGBufferPS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Shader\KawaseBlurPS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ShaderModel>5.0</ShaderModel>
@@ -1088,6 +1094,22 @@
     </FxCompile>
     <FxCompile Include="Shader\ToonPBRPS.hlsl">
       <ShaderType>Pixel</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonPBRStaticVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ToonPBRSkinnedVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowStaticVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowSkinnedVS.hlsl">
+      <ShaderType>Vertex</ShaderType>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shader\ToonPS.hlsl">

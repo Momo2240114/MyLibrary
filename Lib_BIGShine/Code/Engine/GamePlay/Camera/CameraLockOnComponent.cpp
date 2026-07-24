@@ -8,7 +8,6 @@
 #include "ThirdPersonCameraComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
-#include "Engine/GamePlay/Input/ControllerInput.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/GamePlay/Input/KeyInput.h"
 #include "Engine/GamePlay/Input/MouseInput.h"
@@ -1088,19 +1087,20 @@ void CameraLockOnComponent::UpdateLockOnSwitchInput(float deltaTime_)
         inputDirection_ = mouseInput_;
     }
 
-    const int wheelDelta_ = MouseInput::Instance().GetWheelDeltaThisFrame();
-    if (wheelDelta_ != 0)
+    const float wheelAxis_ = KeyConfig::Instance().GetRawAxis("LockOn_SwitchWheel");
+    const int wheelDirection_ = wheelAxis_ > 0.0f ? 1 : wheelAxis_ < 0.0f ? -1 : 0;
+    if (wheelDirection_ != 0)
     {
         MouseInput::Instance().ConsumeWheelDelta();
     }
-    if (switchCooldownTimer <= 0.0f && wheelDelta_ != 0)
+    if (switchCooldownTimer <= 0.0f && wheelDirection_ != 0)
     {
-        const bool switched_ = wheelDelta_ > 0
+        const bool switched_ = wheelDirection_ > 0
             ? SwitchLockOnTargetNext()
             : SwitchLockOnTargetPrevious();
         if (switched_)
         {
-            debugLastSwitchDirection = wheelDelta_ > 0
+            debugLastSwitchDirection = wheelDirection_ > 0
                 ? DirectX::XMFLOAT2{ 1.0f, 0.0f }
                 : DirectX::XMFLOAT2{ -1.0f, 0.0f };
             switchCooldownTimer = switchCooldown;
@@ -1162,7 +1162,12 @@ DirectX::XMFLOAT2 CameraLockOnComponent::GetControllerSwitchInput() const
 
 DirectX::XMFLOAT2 CameraLockOnComponent::GetMouseSwitchInput(float deltaTime_)
 {
-    const Vector2 mouseDelta_ = MouseInput::Instance().GetSubMousePos();
+    const KeyConfig& keyConfig_ = KeyConfig::Instance();
+    const DirectX::XMFLOAT2 mouseDelta_
+    {
+        keyConfig_.GetRawAxis("LockOn_SwitchMouseX"),
+        keyConfig_.GetRawAxis("LockOn_SwitchMouseY")
+    };
     if (std::abs(mouseDelta_.x) > 0.001f || std::abs(mouseDelta_.y) > 0.001f)
     {
         accumulatedMouseDelta.x += mouseDelta_.x;
@@ -1241,6 +1246,39 @@ void CameraLockOnComponent::RegisterDefaultSwitchInputBindings()
                 static_cast<int>(AxisCode::RightStickY),
                 1.0f,
                 switchStickReleaseThreshold });
+    }
+    if (keyConfig_.GetAxisMap().count("LockOn_SwitchMouseX") == 0)
+    {
+        keyConfig_.BindAxis(
+            "LockOn_SwitchMouseX",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseX),
+                1.0f,
+                0.0f });
+    }
+    if (keyConfig_.GetAxisMap().count("LockOn_SwitchMouseY") == 0)
+    {
+        keyConfig_.BindAxis(
+            "LockOn_SwitchMouseY",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseY),
+                1.0f,
+                0.0f });
+    }
+    if (keyConfig_.GetAxisMap().count("LockOn_SwitchWheel") == 0)
+    {
+        keyConfig_.BindAxis(
+            "LockOn_SwitchWheel",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseWheel),
+                1.0f / 120.0f,
+                0.0f });
     }
 }
 

@@ -3,21 +3,27 @@
 #include"FollowCameraComponent.h"
 #include"CameraComponent.h"
 #include"Engine/GamePlay/Core/Object/GameObject.h"
-#include "Engine/GamePlay/Input/MouseInput.h"
+#include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 
 void FollowCameraComponent::Update(float deltaTime)
 {
+    RegisterDefaultInputBindings();
+
     auto tgtGO = target.lock();
     if (!tgtGO) return;
 
     // --- 1. マウスの移動量（Delta）を取得 ---
     // m_SubMousePos が中央からのズレなので、これを回転量として加算する
-    Vector2 mouseDelta = MouseInput::Instance().GetSubMousePos();
+    const KeyConfig& keyConfig_ = KeyConfig::Instance();
+    DirectX::XMFLOAT2 mouseDelta_{
+        keyConfig_.GetRawAxis("FollowCamera_LookMouseX"),
+        keyConfig_.GetRawAxis("FollowCamera_LookMouseY")
+    };
 
     // Yaw(横回転)はXの動き、Pitch(縦回転)はYの動き
-    cameraAngle.y += mouseDelta.x * cameraYawSpeed;
-    cameraAngle.x += mouseDelta.y * cameraPitchSpeed;
+    cameraAngle.y += mouseDelta_.x * cameraYawSpeed;
+    cameraAngle.x += mouseDelta_.y * cameraPitchSpeed;
 
     // ピッチ制限（ひっくり返らないように）
     cameraAngle.x = std::clamp(cameraAngle.x, cameraMinPitch, cameraMaxPitch);
@@ -104,4 +110,32 @@ void FollowCameraComponent::Gui()
     // カメラの回転状態
     ImGui::Text("Camera Angle (Pitch, Yaw): (%.2f, %.2f)", cameraAngle.x, cameraAngle.y);
     ImGui::Text("Camera Distance: %.2f", cameraDistance);
+}
+
+void FollowCameraComponent::RegisterDefaultInputBindings()
+{
+    KeyConfig& keyConfig_ = KeyConfig::Instance();
+
+    if (keyConfig_.GetAxisMap().count("FollowCamera_LookMouseX") == 0)
+    {
+        keyConfig_.BindAxis(
+            "FollowCamera_LookMouseX",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseX),
+                1.0f,
+                0.0f });
+    }
+    if (keyConfig_.GetAxisMap().count("FollowCamera_LookMouseY") == 0)
+    {
+        keyConfig_.BindAxis(
+            "FollowCamera_LookMouseY",
+            AxisUnit{
+                AxisSourceType::MouseMove,
+                DeviceType::KBM,
+                static_cast<int>(AxisCode::MouseY),
+                1.0f,
+                0.0f });
+    }
 }

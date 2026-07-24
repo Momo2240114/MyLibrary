@@ -61,6 +61,29 @@ void InputMonitorWindow::UpdateInputState()
     ++frameCounter;
 
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
+    for (auto iterator_ = monitoredActions.begin(); iterator_ != monitoredActions.end();)
+    {
+        if (keyConfig_.GetActionMap().find(*iterator_) == keyConfig_.GetActionMap().end())
+        {
+            iterator_ = monitoredActions.erase(iterator_);
+        }
+        else
+        {
+            ++iterator_;
+        }
+    }
+    for (auto iterator_ = monitoredAxes.begin(); iterator_ != monitoredAxes.end();)
+    {
+        if (keyConfig_.GetAxisMap().find(*iterator_) == keyConfig_.GetAxisMap().end())
+        {
+            iterator_ = monitoredAxes.erase(iterator_);
+        }
+        else
+        {
+            ++iterator_;
+        }
+    }
+
     for (const std::string& actionName_ : BuildActionNames())
     {
         if (!IsActionMonitored(actionName_)) continue;

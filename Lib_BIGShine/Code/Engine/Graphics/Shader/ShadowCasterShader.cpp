@@ -7,23 +7,37 @@
 ShadowCasterShader::ShadowCasterShader(ID3D11Device* device)
 {
     // VSだけ読み込む。PSは不要なのでnullptrでよい
-    CPUResourceLoader::LoadVertexShader(device, "Shader/ShadowCasterVS.cso",
+    CPUResourceLoader::LoadVertexShader(device, "Shader/ShadowStaticVS.cso",
         GltfModelCommponennt::InputElementDescs.data(),
         static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
-        inputLayout.GetAddressOf(), vertexShader.GetAddressOf());
+        inputLayout.GetAddressOf(), staticVertexShader.GetAddressOf());
+
+    CPUResourceLoader::LoadVertexShader(device, "Shader/ShadowSkinnedVS.cso",
+        GltfModelCommponennt::InputElementDescs.data(),
+        static_cast<UINT>(GltfModelCommponennt::InputElementDescs.size()),
+        nullptr, skinnedVertexShader.GetAddressOf());
 }
 
 void ShadowCasterShader::Begin(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
     dc->IASetInputLayout(inputLayout.Get());
-    dc->VSSetShader(vertexShader.Get(), nullptr, 0);
+    dc->VSSetShader(skinnedVertexShader.Get(), nullptr, 0);
     dc->PSSetShader(nullptr, nullptr, 0); // 深度のみなのでピクセルシェーダーは不要
 }
 
 void ShadowCasterShader::Update(const RenderContext& rc, const GltfModelCommponennt::Mesh& mesh)
 {
  
+}
+
+void ShadowCasterShader::BindVertexShader(const RenderContext& rc_, bool isSkinnedMesh_)
+{
+    ID3D11DeviceContext* dc_ = rc_.deviceContext;
+    dc_->VSSetShader(
+        isSkinnedMesh_ ? skinnedVertexShader.Get() : staticVertexShader.Get(),
+        nullptr,
+        0);
 }
 
 void ShadowCasterShader::End(const RenderContext& rc)
