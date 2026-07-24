@@ -79,6 +79,22 @@ public:
     bool IsEnabled() const { return enabled; }
     void SetEnabled(bool enabled_) { enabled = enabled_; }
 
+    bool ShouldUpdate() const { return updateEnabled; }
+    void SetUpdateEnabled(bool enabled_) { updateEnabled = enabled_; }
+    bool ShouldLateUpdate() const { return lateUpdateEnabled; }
+    void SetLateUpdateEnabled(bool enabled_) { lateUpdateEnabled = enabled_; }
+    int GetUpdatePriority() const { return updatePriority; }
+    void SetUpdatePriority(int priority_) { updatePriority = priority_; }
+    int GetLateUpdatePriority() const { return lateUpdatePriority; }
+    void SetLateUpdatePriority(int priority_) { lateUpdatePriority = priority_; }
+    void ResetUpdateTiming()
+    {
+        updateEnabled = true;
+        lateUpdateEnabled = true;
+        updatePriority = 0;
+        lateUpdatePriority = 0;
+    }
+
     // Startが既に呼ばれたかどうか
     bool IsStarted() const { return isStarted; }
 
@@ -90,5 +106,9 @@ public:
 protected:
     bool isStarted = false;
     bool requiredForSceneStart = false;
+    bool updateEnabled = true;
+    bool lateUpdateEnabled = true;
+    int updatePriority = 0;
+    int lateUpdatePriority = 0;
     std::weak_ptr<GameObject> gameObject;
 };

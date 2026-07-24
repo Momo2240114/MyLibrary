@@ -352,6 +352,7 @@
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\ComponentUpdateSequencerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\DebugLogWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
@@ -621,6 +622,7 @@
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\ComponentUpdateSequencerWindow.h" />
     <ClInclude Include="Code\Editor\Window\DebugLogWindow.h" />
     <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />

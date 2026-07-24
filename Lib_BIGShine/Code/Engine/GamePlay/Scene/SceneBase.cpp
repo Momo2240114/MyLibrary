@@ -24,6 +24,7 @@
 #include "Editor/Window/PostEffectWindow.h"
 #include "Editor/Window/InputEditorWindow.h"
 #include "Editor/Window/InputMonitorWindow.h"
+#include "Editor/Window/ComponentUpdateSequencerWindow.h"
 #include "Editor/Window/StartupResourceEditorWindow.h"
 #include "Editor/Window/TimeManagerWindow.h"
 #include "Editor/Window/GameModeWindow.h"
@@ -70,6 +71,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<PostEffectWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InputEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InputMonitorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<ComponentUpdateSequencerWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<StartupResourceEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<TimeManagerWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<GameModeWindow>(_GameObjectManager.get()));
