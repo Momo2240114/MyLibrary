@@ -169,11 +169,13 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
         _ASSERT_EXPR(false, L"Failed: CreateDeviceAndSwapChain");
         return false;
     }
+    InitializeGpuProfiler();
 
     // バックバッファRTVを作成
     if (!CreateRenderTarget())
     {
         _ASSERT_EXPR(false, L"Failed: CreateRenderTarget");
+        ShutdownGpuProfiler();
         return false;
     }
 
@@ -181,6 +183,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     if (!CreateDepthStencil())
     {
         _ASSERT_EXPR(false, L"Failed: CreateDepthStencil");
+        ShutdownGpuProfiler();
         return false;
     }
 
@@ -198,16 +201,40 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
 
-    if (!LoadIBLTextures())  return false;
-    if (!InitializeSkyBox()) return false;
+    if (!LoadIBLTextures())
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
+    if (!InitializeSkyBox())
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
 
     // --- 追加：シーンバッファの作成 ---
-    if (!CreateSceneRenderTarget(width, height)) return false;
-    if (!CreateGBufferTargets(width, height)) return false;
+    if (!CreateSceneRenderTarget(width, height))
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
+    if (!CreateGBufferTargets(width, height))
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
 
 
-    if (!postRenderSystem.Initialize(device.Get(), width, height)) return false;
-    if (!cascadeShadowMap.Initialize(device.Get())) return false;
+    if (!postRenderSystem.Initialize(device.Get(), width, height))
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
+    if (!cascadeShadowMap.Initialize(device.Get()))
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
 
     //modelRenderSystem.Init(device, immediateContext);
     shapeRendererSystem.Initialize(device.Get());
@@ -236,6 +263,8 @@ void GraphicsDeviceManager::Shutdown()
         immediateContext->ClearState();
         immediateContext->Flush();
     }
+
+    ShutdownGpuProfiler();
 
 
     // デバイスリソースの解放
@@ -412,8 +441,35 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
  */
 void GraphicsDeviceManager::EndFrame()
 {
+    CollectGpuProfilerFrame();
+
     // swapChain->Present() を呼び出し
     swapChain->Present(vsyncEnabled ? 1 : 0, 0);
+}
+
+void GraphicsDeviceManager::InitializeGpuProfiler()
+{
+    if (!device || !immediateContext || tracyGpuContext != nullptr)
+    {
+        return;
+    }
+
+    // TracyのD3D11 ContextはDeviceとImmediate Contextの生成後でないとQueryを作れない。
+    tracyGpuContext = BS_PROFILE_GPU_CONTEXT(device.Get(), immediateContext.Get());
+    BS_PROFILE_GPU_CONTEXT_NAME(tracyGpuContext, "DirectX 11 GPU");
+}
+
+void GraphicsDeviceManager::ShutdownGpuProfiler()
+{
+    // DeviceやImmediate Contextより先に破棄し、Tracyが保持しているD3D11 Queryを安全に解放する。
+    BS_PROFILE_GPU_DESTROY(tracyGpuContext);
+    tracyGpuContext = nullptr;
+}
+
+void GraphicsDeviceManager::CollectGpuProfilerFrame()
+{
+    // GPU計測はFlushで同期せず、Tracy側の非同期回収だけを1フレーム1回行う。
+    BS_PROFILE_GPU_FRAME_MARK(tracyGpuContext);
 }
 
 void GraphicsDeviceManager::SetParticleRenderTarget()

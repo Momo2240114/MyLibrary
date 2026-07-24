@@ -570,6 +570,8 @@ void MeshVFXRenderSystem::RenderAll(
     }
 
     ID3D11DeviceContext* deviceContext_ = renderContext_.deviceContext;
+    auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+    BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::MeshVFX Draw Pass");
     deviceContext_->OMSetDepthStencilState(
         renderContext_.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
     deviceContext_->RSSetState(

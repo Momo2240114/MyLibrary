@@ -16,6 +16,7 @@
 #include "Engine/Graphics/RenderSystem/RadialBlurSystem.h"
 
 #include "Engine/Graphics/RenderSystem/CascadeShadowMap.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 // ============================================================================
 // GraphicsDeviceManager
@@ -49,6 +50,7 @@ public:
     ID3D11Device* GetDevice() const { return device.Get(); }
     ID3D11DeviceContext* GetContext() const { return immediateContext.Get(); }
     IDXGISwapChain* GetSwapChain() const { return swapChain.Get(); }
+    BS_PROFILE_GPU_CONTEXT_HANDLE GetTracyGpuContext() const { return tracyGpuContext; }
     ID3D11RenderTargetView* GetRenderTargetView() const { return renderTargetView.Get(); }
     ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView.Get(); }
     ID3D11ShaderResourceView* GetMainDepthSRV() const { return depthStencilSRV.Get(); }
@@ -167,6 +169,9 @@ private:
     // 内部ヘルパ関数
     //====================================================
     bool CreateDeviceAndSwapChain(HWND hwnd_);
+    void InitializeGpuProfiler();
+    void ShutdownGpuProfiler();
+    void CollectGpuProfilerFrame();
     bool CreateRenderTarget();
     bool CreateDepthStencil();
     void ReleaseResources();
@@ -208,6 +213,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblLutGgxSRV;
 
     bool LoadIBLTextures();
+    BS_PROFILE_GPU_CONTEXT_HANDLE tracyGpuContext = nullptr;
 
     // -------------------------------------------------------
     // スカイボックス

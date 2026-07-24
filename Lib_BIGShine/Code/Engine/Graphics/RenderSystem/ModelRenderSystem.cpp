@@ -369,6 +369,8 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 {
 	BS_PROFILE_SCOPE("Render::Model");
 	ID3D11DeviceContext* dc = rc.deviceContext;
+	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::RenderModels");
 
 	// シーン用定数バッファ更新
 	{
@@ -1160,6 +1162,8 @@ void ModelRenderSystem::RenderCascadeShadowMaps(RenderContext& rc, const DirectX
 	if (!rc.cascadeShadowMap || !rc.camera) return;
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
+	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shadow Pass");
 	rc.cascadeShadowMap->UpdateMatrices(*rc.camera, lightDirection);
 	rc.cascadeShadowMap->SetViewport(dc);
 

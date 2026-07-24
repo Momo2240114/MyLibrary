@@ -1088,6 +1088,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
+    auto tracyGpuContext_ = graphicsDeviceManager_.GetTracyGpuContext();
 
     // --- 追加: ライト情報の収集 ---
     LightManager lightManager_;
@@ -1176,13 +1177,16 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     deviceContext_->PSSetSamplers(0, 1, samplers_);
 
     // 1. シーンバッファ（HDR）へ描画開始
-    graphicsDeviceManager_.SetSceneRenderTarget();
-
-    modelSystem_.RenderAll(renderContext_);
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Main Model Pass");
+        graphicsDeviceManager_.SetSceneRenderTarget();
+        modelSystem_.RenderAll(renderContext_);
+    }
 
 
     if(shapeRenderEnabled)
     {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Shape Render");
         GraphicsDeviceManager::Instance().GetShapeRendererSystem().Render(deviceContext_, renderContext_.camera->GetView(), renderContext_.camera->GetProjection());
         deviceContext_->OMSetDepthStencilState(
             renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -1201,7 +1205,10 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
             }
         }
     }
-    meshVFXRenderSystem->RenderAll(renderContext_);
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::MeshVFX");
+        meshVFXRenderSystem->RenderAll(renderContext_);
+    }
 
     // MeshVFX can switch between temporary and distortion render targets.
     // Rebind the scene color target so particles are included in the post-process input.
@@ -1218,16 +1225,22 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
         }
     }
 
-    particleRenderSystem->RenderAll(renderContext_);
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle");
+        particleRenderSystem->RenderAll(renderContext_);
+    }
 
     auto* finalRTV = graphicsDeviceManager_.GetRenderTargetView();
 
     // 2. ポストレンダーシステムを実行
-    graphicsDeviceManager_.GetPostRenderSystem().Execute(
-        renderContext_,
-        graphicsDeviceManager_.GetSceneSRV(), // 描画結果のSRV
-        finalRTV           // 最終出力先
-    );
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::PostEffect");
+        graphicsDeviceManager_.GetPostRenderSystem().Execute(
+            renderContext_,
+            graphicsDeviceManager_.GetSceneSRV(), // 描画結果のSRV
+            finalRTV           // 最終出力先
+        );
+    }
 
 
     // SpriteRenderSubmit
@@ -1240,7 +1253,10 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 
     deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
 
-    spriteSystem_.RenderAll(deviceContext_);
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Sprite");
+        spriteSystem_.RenderAll(deviceContext_);
+    }
 }
 
 void GameObjectManager::RegisterMotionVelocityComponent(

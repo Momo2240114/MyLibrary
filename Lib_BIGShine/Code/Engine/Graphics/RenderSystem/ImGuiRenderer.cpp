@@ -8,6 +8,8 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include "ImGuiRenderer.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -134,6 +136,9 @@ void ImGuiRenderer::RenderAll(ID3D11DeviceContext* context)
 {
 	// Rendering
 	ImGui::Render();
+
+	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::ImGui");
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
