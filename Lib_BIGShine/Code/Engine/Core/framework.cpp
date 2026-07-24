@@ -145,22 +145,27 @@ void framework::update(float elapsedTime_/*Elapsed seconds from last frame*/)
 void framework::render(float elapsedTime_/*Elapsed seconds from last frame*/)
 {
 	BS_PROFILE_SCOPE("framework::render");
+	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 
 	float color[4] = { 0.5f,0.5f, 0.5f, 1.0f };
 
 	{
-		BS_PROFILE_SCOPE("GraphicsDeviceManager::BeginFrame");
-		GraphicsDeviceManager::Instance().BeginFrame(color);
-	}
+		BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Frame");
 
-	{
-		BS_PROFILE_SCOPE("SceneManager::Render");
-		SceneManager::Render(elapsedTime_);
-	}
+		{
+			BS_PROFILE_SCOPE("GraphicsDeviceManager::BeginFrame");
+			GraphicsDeviceManager::Instance().BeginFrame(color);
+		}
 
-	{
-		BS_PROFILE_SCOPE("ImGuiRenderer::RenderAll");
-		ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
+		{
+			BS_PROFILE_SCOPE("SceneManager::Render");
+			SceneManager::Render(elapsedTime_);
+		}
+
+		{
+			BS_PROFILE_SCOPE("ImGuiRenderer::RenderAll");
+			ImGuiRenderer::RenderAll(GraphicsDeviceManager::Instance().GetContext());
+		}
 	}
 
 	{

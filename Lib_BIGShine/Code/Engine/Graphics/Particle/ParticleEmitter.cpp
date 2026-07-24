@@ -8,6 +8,8 @@
 #include <vector>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 Microsoft::WRL::ComPtr<ID3D11ComputeShader> ParticleEmitter::initShader;
 Microsoft::WRL::ComPtr<ID3D11ComputeShader> ParticleEmitter::beginFrameShader;
@@ -166,6 +168,8 @@ void ParticleEmitter::Emit(const EmitParticleData& data)
 void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 {
     if (!context) return;
+    auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+    BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Update CS");
 
     // CPU側で今フレーム発生するParticleリストを作ってからGPU更新へ渡す。
     settings.time += dt;
@@ -207,11 +211,15 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
         // 初回だけGPU上のParticle/Index状態を初期化する。
         initialized = true;
         context->CSSetShader(initShader.Get(), nullptr, 0);
+        BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Particle Init CS");
         context->Dispatch(numParticles / NumParticleThread, 1, 1);
     }
 
     context->CSSetShader(beginFrameShader.Get(), nullptr, 0);
-    context->Dispatch(1, 1, 1);
+    {
+        BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Particle BeginFrame CS");
+        context->Dispatch(1, 1, 1);
+    }
 
     if (!emitParticles.empty())
     {
@@ -223,20 +231,29 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
         context->UpdateSubresource(emitBuffer.Get(), 0, &box, emitParticles.data(), box.right, 0);
 
         context->CSSetShader(emitShader.Get(), nullptr, 0);
-        context->DispatchIndirect(indirectDataBuffer.Get(), EmitDispatchIndirectOffset);
+        {
+            BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Emit CS");
+            context->DispatchIndirect(indirectDataBuffer.Get(), EmitDispatchIndirectOffset);
+        }
         emitParticles.clear();
     }
 
     // 生存Particleの寿命、速度、位置、色、深度を更新する。
     context->CSSetShader(updateShader.Get(), nullptr, 0);
-    context->DispatchIndirect(indirectDataBuffer.Get(), UpdateDispatchIndirectOffset);
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Simulate CS");
+        context->DispatchIndirect(indirectDataBuffer.Get(), UpdateDispatchIndirectOffset);
+    }
 
     // DrawInstancedIndirect draws only the leading live-count range.
     // Sorting also compacts live headers into that range, so it cannot be skipped.
     RunBitonicSort(context);
 
     context->CSSetShader(endFrameShader.Get(), nullptr, 0);
-    context->Dispatch(1, 1, 1);
+    {
+        BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Particle EndFrame CS");
+        context->Dispatch(1, 1, 1);
+    }
 
     ID3D11UnorderedAccessView* nullUAVs[] = { nullptr, nullptr, nullptr, nullptr };
     context->CSSetUnorderedAccessViews(0, _countof(nullUAVs), nullUAVs, nullptr);
@@ -277,6 +294,8 @@ bool ParticleEmitter::HasGPUResources() const
 void ParticleEmitter::Render(ID3D11DeviceContext* context)
 {
     if (!context) return;
+    auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+    BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Draw");
 
     ID3D11ShaderResourceView* dataSRV = particleDataSRV.Get();
     ID3D11ShaderResourceView* headerSRV = particleHeaderSRV.Get();
@@ -520,6 +539,9 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
 
 void ParticleEmitter::RunBitonicSort(ID3D11DeviceContext* context)
 {
+    auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+    BS_PROFILE_GPU_DETAILED_SCOPE(tracyGpuContext_, "GPU::Particle Sort CS");
+
     // 半透明Particleを奥から描けるように、GPU上でHeaderを深度順に並べる。
     float exponentF = std::log2(static_cast<float>(numParticles));
     UINT exponent = static_cast<UINT>(std::ceil(exponentF) + 0.5f);

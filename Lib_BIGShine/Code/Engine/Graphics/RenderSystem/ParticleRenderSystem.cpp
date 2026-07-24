@@ -64,6 +64,8 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
     BS_PROFILE_SCOPE("Render::Particle");
     ID3D11DeviceContext* dc = rc.deviceContext;
     if (!dc || !rc.camera || drawInfos.empty()) return;
+    auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
+    BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Draw Pass");
 
     {
         BS_PROFILE_SCOPE("ParticleRender::ApplySceneConstants");

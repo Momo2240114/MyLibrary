@@ -21,6 +21,7 @@ void PostRenderSystem::Shutdown() {
 void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView* sceneSRV, ID3D11RenderTargetView* finalRTV)
 {
     auto& graphics_ = GraphicsDeviceManager::Instance();
+    auto tracyGpuContext_ = graphics_.GetTracyGpuContext();
     auto& bloomParams_ = graphics_.GetBloomParams();
     auto& filterParams_ = graphics_.GetFilterParams();
     auto& radialBlurParams_ = graphics_.GetRadialBlurParams();
@@ -41,21 +42,27 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (!radialBlurEnabled_ && !xeGtaoEnabled_ && !motionBlurEnabled_ && !vignetteEnabled_ && !distortionEnabled_)
     {
-        bloom.Execute(
-            rc,
-            sceneSRV,
-            finalRTV,
-            bloomParams_,
-            filterParams_);
+        {
+            BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Final Composite");
+            bloom.Execute(
+                rc,
+                sceneSRV,
+                finalRTV,
+                bloomParams_,
+                filterParams_);
+        }
         return;
     }
 
-    bloom.Execute(
-        rc,
-        sceneSRV,
-        workBuffers[0].rtv.Get(),
-        bloomParams_,
-        filterParams_);
+    {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Bloom");
+        bloom.Execute(
+            rc,
+            sceneSRV,
+            workBuffers[0].rtv.Get(),
+            bloomParams_,
+            filterParams_);
+    }
 
     ID3D11ShaderResourceView* currentSRV_ = workBuffers[0].srv.Get();
     int currentBufferIndex_ = 0;
@@ -63,11 +70,14 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     if (radialBlurEnabled_)
     {
         const bool hasNextPass_ = xeGtaoEnabled_ || motionBlurEnabled_ || vignetteEnabled_ || distortionEnabled_;
-        radialBlur.Execute(
-            rc,
-            currentSRV_,
-            hasNextPass_ ? workBuffers[1].rtv.Get() : finalRTV,
-            radialBlurParams_);
+        {
+            BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::RadialBlur");
+            radialBlur.Execute(
+                rc,
+                currentSRV_,
+                hasNextPass_ ? workBuffers[1].rtv.Get() : finalRTV,
+                radialBlurParams_);
+        }
 
         if (!hasNextPass_)
         {
@@ -82,13 +92,16 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     {
         const bool hasNextPass_ = motionBlurEnabled_ || vignetteEnabled_ || distortionEnabled_;
         const int nextBufferIndex_ = currentBufferIndex_ == 0 ? 1 : 0;
-        xeGtao.Execute(
-            rc,
-            currentSRV_,
-            graphics_.GetMainDepthSRV(),
-            graphics_.GetSceneNormalSRV(),
-            hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
-            xeGtaoParams_);
+        {
+            BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::XeGTAO");
+            xeGtao.Execute(
+                rc,
+                currentSRV_,
+                graphics_.GetMainDepthSRV(),
+                graphics_.GetSceneNormalSRV(),
+                hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
+                xeGtaoParams_);
+        }
 
         if (!hasNextPass_)
         {
@@ -103,12 +116,15 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     {
         const bool hasNextPass_ = vignetteEnabled_ || distortionEnabled_;
         const int nextBufferIndex_ = currentBufferIndex_ == 0 ? 1 : 0;
-        motionBlur.Execute(
-            rc,
-            currentSRV_,
-            graphics_.GetMainDepthSRV(),
-            hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
-            motionBlurParams_);
+        {
+            BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::MotionBlur");
+            motionBlur.Execute(
+                rc,
+                currentSRV_,
+                graphics_.GetMainDepthSRV(),
+                hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
+                motionBlurParams_);
+        }
 
         if (!hasNextPass_)
         {
@@ -123,11 +139,14 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     {
         const bool hasNextPass_ = distortionEnabled_;
         const int nextBufferIndex_ = currentBufferIndex_ == 0 ? 1 : 0;
-        vignette.Execute(
-            rc,
-            currentSRV_,
-            hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
-            vignetteParams_);
+        {
+            BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Vignette");
+            vignette.Execute(
+                rc,
+                currentSRV_,
+                hasNextPass_ ? workBuffers[nextBufferIndex_].rtv.Get() : finalRTV,
+                vignetteParams_);
+        }
 
         if (!hasNextPass_)
         {
@@ -139,6 +158,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (distortionEnabled_)
     {
+        BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Final Composite");
         postDistortion.Execute(
             rc,
             currentSRV_,
