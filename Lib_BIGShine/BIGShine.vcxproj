@@ -431,6 +431,7 @@
     <ClCompile Include="Code\Engine\Graphics\Core\RenderState.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Decal\DecalComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp" />
@@ -686,6 +687,7 @@
     <ClInclude Include="Code\Editor\AssetSlotGui.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />

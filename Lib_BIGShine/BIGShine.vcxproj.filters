@@ -874,6 +874,9 @@
     <ClCompile Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.cpp">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.cpp">
+      <Filter>Code\Engine\GamePlay\VFX</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClCompile>
@@ -1600,6 +1603,9 @@
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.h">
+      <Filter>Code\Engine\GamePlay\VFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.h">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h">

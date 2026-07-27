@@ -45,6 +45,7 @@ namespace
     constexpr const char* INTERNAL_MESH_SLASH_CROSS_CRESCENT_MODEL_PATH = "__InternalMeshSlashCrossCrescent__";
     constexpr const char* INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH = "__InternalMeshSlashVerticalCrescent__";
     constexpr const char* INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH = "__InternalMeshSlashRaisedCrescent__";
+    constexpr const char* INTERNAL_MESH_BREATH_BEAM_MODEL_PATH = "__InternalMeshBreathBeam__";
 
     constexpr int INTERNAL_MESH_CYLINDER_SEGMENTS = 256;
     constexpr int INTERNAL_MESH_SLASH_SEGMENTS = 96;
@@ -254,6 +255,28 @@ namespace
             baseIndex_ + 3);
     }
 
+    void AddTwoSidedBeamPanel(
+        GltfModelCommponennt::Mesh& mesh_,
+        const DirectX::XMFLOAT2& edgeA_,
+        const DirectX::XMFLOAT2& edgeB_,
+        float length_,
+        float uStart_,
+        float uEnd_)
+    {
+        const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+        const DirectX::XMFLOAT3 startA_ = { edgeA_.x, edgeA_.y, 0.0f };
+        const DirectX::XMFLOAT3 startB_ = { edgeB_.x, edgeB_.y, 0.0f };
+        const DirectX::XMFLOAT3 endA_ = { edgeA_.x, edgeA_.y, length_ };
+        const DirectX::XMFLOAT3 endB_ = { edgeB_.x, edgeB_.y, length_ };
+
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(startA_, uStart_, 1.0f));
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(startB_, uEnd_, 1.0f));
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(endA_, uStart_, 0.0f));
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex(endB_, uEnd_, 0.0f));
+        AddQuadIndices(mesh_.indices, baseIndex_, baseIndex_ + 1, baseIndex_ + 2, baseIndex_ + 3);
+        AddQuadIndices(mesh_.indices, baseIndex_ + 2, baseIndex_ + 3, baseIndex_, baseIndex_ + 1);
+    }
+
     std::shared_ptr<ModelResource> CreateInternalMeshSlashArcModelResource(
         ID3D11Device* device_,
         const char* modelPath_,
@@ -315,16 +338,16 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 0 -> 1 -> 0。中央だけ太く、両端を尖らせる。
+            // 0 -> 1 -> 0縲ゆｸｭ螟ｮ縺縺大､ｪ縺上∽ｸ｡遶ｯ繧貞ｰ悶ｉ縺帙ｋ縲・
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
             const float sharpTaper_ = taper_ * taper_;
 
             const float width_ = tipWidth_ + maxWidth_ * sharpTaper_;
 
-            // 中心線も少しだけ中央で外へ出して、弓なり感を強める。
+            // 荳ｭ蠢・ｷ壹ｂ蟆代＠縺縺台ｸｭ螟ｮ縺ｧ螟悶∈蜃ｺ縺励※縲∝ｼ薙↑繧頑─繧貞ｼｷ繧√ｋ縲・
             const float currentCenterRadius_ = centerRadius_ + 0.05f * taper_;
 
-            // 内側は浅く、外側は大きく膨らませる。
+            // 蜀・・縺ｯ豬・￥縲∝､門・縺ｯ螟ｧ縺阪￥閹ｨ繧峨∪縺帙ｋ縲・
             const float innerRadius_ = currentCenterRadius_ - width_ * 0.35f;
             const float outerRadius_ = currentCenterRadius_ + width_ * 1.25f;
 
@@ -431,7 +454,7 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 中央を高く、両端は細くする。
+            // 荳ｭ螟ｮ繧帝ｫ倥￥縲∽ｸ｡遶ｯ縺ｯ邏ｰ縺上☆繧九・
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
 
             const float currentHeight_ = height_ * (0.18f + 0.82f * taper_);
@@ -546,11 +569,11 @@ namespace
             static_cast<size_t>(segmentCount_ + 1) *
             static_cast<size_t>(CROSS_SECTION_VERTEX_COUNT));
 
-        // 3面分:
+        // 3髱｢蛻・
         // outer -> wallCenter
         // wallCenter -> wallTop
         // wallBottom -> wallCenter
-        // double sided なので 1Quad = 12 indices
+        // double sided 縺ｪ縺ｮ縺ｧ 1Quad = 12 indices
         mesh_.indices.reserve(
             static_cast<size_t>(segmentCount_) *
             3u *
@@ -567,7 +590,7 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 両端を細く、中央を太く・高くする。
+            // 荳｡遶ｯ繧堤ｴｰ縺上∽ｸｭ螟ｮ繧貞､ｪ縺上・鬮倥￥縺吶ｋ縲・
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
             const float sharpTaper_ = std::pow(
                 (std::max)(taper_, 0.0f),
@@ -584,14 +607,14 @@ namespace
             const float innerRadius_ = baseRadius_ - width_ * settings_.innerWidthScale;
             const float outerRadius_ = baseRadius_ + width_ * settings_.outerWidthScale;
 
-            // 垂直壁の位置。0.45～0.60くらいが使いやすい。
+            // 蝙ら峩螢√・菴咲ｽｮ縲・.45・・.60縺上ｉ縺・′菴ｿ縺・ｄ縺吶＞縲・
             const float wallPositionRate_ = std::clamp(settings_.wallPositionRate, 0.0f, 1.0f);
 
             const float wallRadius_ =
                 innerRadius_ * (1.0f - wallPositionRate_) +
                 outerRadius_ * wallPositionRate_;
 
-            // 端では壁の上下も中央へ集める。
+            // 遶ｯ縺ｧ縺ｯ螢√・荳贋ｸ九ｂ荳ｭ螟ｮ縺ｸ髮・ａ繧九・
             const float tipGather_ = 1.0f - sharpTaper_;
             const float tipRadius_ =
                 innerRadius_ * 0.5f +
@@ -632,7 +655,7 @@ namespace
                 cos_ * gatheredWallRadius_
             };
 
-            // 円弧方向の接線。
+            // 蜀・ｼｧ譁ｹ蜷代・謗･邱壹・
             const DirectX::XMFLOAT4 arcTangent_ =
             {
                 cos_,
@@ -641,7 +664,7 @@ namespace
                 1.0f
             };
 
-            // 床面用。MeshVFXなら上向きで十分。
+            // 蠎企擇逕ｨ縲・eshVFX縺ｪ繧我ｸ雁髄縺阪〒蜊∝・縲・
             const DirectX::XMFLOAT3 floorNormal_ =
             {
                 0.0f,
@@ -649,7 +672,7 @@ namespace
                 0.0f
             };
 
-            // 壁面用。円の外側方向。
+            // 螢・擇逕ｨ縲ょ・縺ｮ螟門・譁ｹ蜷代・
             const DirectX::XMFLOAT3 wallNormal_ =
             {
                 sin_,
@@ -658,11 +681,11 @@ namespace
             };
 
             // UV:
-            // U = 円弧方向
-            // V = 断面方向
-            // 0.0: 壁上端
-            // 0.5: 中央
-            // 1.0: 外側・下端
+            // U = 蜀・ｼｧ譁ｹ蜷・
+            // V = 譁ｭ髱｢譁ｹ蜷・
+            // 0.0: 螢∽ｸ顔ｫｯ
+            // 0.5: 荳ｭ螟ｮ
+            // 1.0: 螟門・繝ｻ荳狗ｫｯ
             const float u_ = rate_;
 
             mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
@@ -710,7 +733,7 @@ namespace
             const uint32_t nextWallTop_ = next_ + 2;
             const uint32_t nextWallBottom_ = next_ + 3;
 
-            // 下の半月板部分。
+            // 荳九・蜊頑怦譚ｿ驛ｨ蛻・・
             AddQuadIndicesDoubleSided(
                 mesh_.indices,
                 currentOuter_,
@@ -718,7 +741,7 @@ namespace
                 nextOuter_,
                 nextWallCenter_);
 
-            // 上に立ち上がる壁部分。
+            // 荳翫↓遶九■荳翫′繧句｣・Κ蛻・・
             AddQuadIndicesDoubleSided(
                 mesh_.indices,
                 currentWallCenter_,
@@ -726,7 +749,7 @@ namespace
                 nextWallCenter_,
                 nextWallTop_);
 
-            // 下に貫通する壁部分。
+            // 荳九↓雋ｫ騾壹☆繧句｣・Κ蛻・・
             AddQuadIndicesDoubleSided(
                 mesh_.indices,
                 currentWallBottom_,
@@ -925,6 +948,41 @@ namespace
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
     }
 
+    std::shared_ptr<ModelResource> CreateInternalMeshBreathBeamModelResource(
+        ID3D11Device* device_,
+        const MeshVFXInternalMeshSettings& settings_)
+    {
+        BS_PROFILE_SCOPE("CreateInternalMeshBreathBeamModelResource");
+        if (!device_) return nullptr;
+
+        const float length_ = (std::max)(settings_.beamLength, 0.001f);
+        const float halfHeight_ = (std::max)(settings_.beamHalfHeight, 0.001f);
+        const float halfWidth_ = (std::max)(settings_.beamHalfWidth, 0.001f);
+        const float depthThickness_ = (std::max)(settings_.beamDepthThickness, 0.0f);
+        const float sidePanelRate_ = std::clamp(settings_.beamSidePanelRate, 0.0f, 1.0f);
+        const float shoulderHeight_ = halfHeight_ * sidePanelRate_;
+        const float ridgeOffset_ = depthThickness_ * 0.5f;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_BREATH_BEAM_MODEL_PATH);
+        resource_->modelName = INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve(48u);
+        mesh_.indices.reserve(84u);
+
+        AddTwoSidedBeamPanel(mesh_, { 0.0f, -halfHeight_ }, { 0.0f, halfHeight_ }, length_, 0.45f, 0.55f);
+        AddTwoSidedBeamPanel(mesh_, { -halfWidth_, shoulderHeight_ }, { 0.0f, 0.0f }, length_, 0.0f, 0.5f);
+        AddTwoSidedBeamPanel(mesh_, { 0.0f, 0.0f }, { halfWidth_, shoulderHeight_ }, length_, 0.5f, 1.0f);
+        AddTwoSidedBeamPanel(mesh_, { -halfWidth_, -shoulderHeight_ }, { 0.0f, 0.0f }, length_, 0.0f, 0.5f);
+        AddTwoSidedBeamPanel(mesh_, { 0.0f, 0.0f }, { halfWidth_, -shoulderHeight_ }, length_, 0.5f, 1.0f);
+        if (ridgeOffset_ > 0.0f)
+        {
+            AddTwoSidedBeamPanel(mesh_, { -ridgeOffset_, -halfHeight_ }, { -ridgeOffset_, halfHeight_ }, length_, 0.42f, 0.48f);
+            AddTwoSidedBeamPanel(mesh_, { ridgeOffset_, -halfHeight_ }, { ridgeOffset_, halfHeight_ }, length_, 0.52f, 0.58f);
+        }
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
     GltfModelCommponennt::Vertex CreateInternalMeshSlashVertexTransformed(
         const DirectX::XMFLOAT3& position_,
         float u_,
@@ -1096,14 +1154,14 @@ namespace
 
 void MeshVFXComponent::Start()
 {
-    // Assetに書かれたTexture/Modelを実行用RuntimePartへ読み込む。
+    // Asset縺ｫ譖ｸ縺九ｌ縺鬱exture/Model繧貞ｮ溯｡檎畑RuntimePart縺ｸ隱ｭ縺ｿ霎ｼ繧縲・
     RefreshAssetLists();
     LoadPartResources();
 }
 
 void MeshVFXComponent::Update(float deltaTime_)
 {
-    // 再生中だけComponent全体の時間を進める。Part個別の時間はRenderSystem側で計算する。
+    // 蜀咲函荳ｭ縺縺舛omponent蜈ｨ菴薙・譎る俣繧帝ｲ繧√ｋ縲１art蛟句挨縺ｮ譎る俣縺ｯRenderSystem蛛ｴ縺ｧ險育ｮ励☆繧九・
     if (isPlaying) time += deltaTime_ * playbackSpeed;
 }
 
@@ -1144,7 +1202,7 @@ float MeshVFXComponent::EvaluateCurveValue(
 
 void MeshVFXComponent::Gui()
 {
-    // MeshVFX Asset、Part、Texture、UV、Noise、Edgeなどの編集UIをまとめる。
+    // MeshVFX Asset縲￣art縲ゝexture縲ゞV縲¨oise縲・dge縺ｪ縺ｩ縺ｮ邱ｨ髮・I繧偵∪縺ｨ繧√ｋ縲・
     ImGui::SeparatorText("Mesh VFX");
     if (ImGui::Button(isPlaying ? "Stop" : "Play")) isPlaying ? Stop() : Play();
     ImGui::SameLine();
@@ -1259,6 +1317,13 @@ void MeshVFXComponent::Gui()
                 part_.modelPath = INTERNAL_MESH_CONE_MODEL_PATH;
                 part_.meshIndex = 0;
                 part_.shapeCylinderRadius = (std::max)(part_.shapeCylinderRadius, 0.0001f);
+                LoadPartResource(static_cast<size_t>(partIndex_));
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Use Breath Beam Mesh"))
+            {
+                part_.modelPath = INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
+                part_.meshIndex = 0;
                 LoadPartResource(static_cast<size_t>(partIndex_));
             }
 
@@ -1576,12 +1641,16 @@ void MeshVFXComponent::Gui()
 
             const bool isEditableInternalMesh_ =
                 part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
-                part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH;
+                part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
             if (isEditableInternalMesh_ && ImGui::TreeNode("Internal Mesh Shape"))
             {
                 MeshVFXInternalMeshSettings& settings_ = part_.internalMeshSettings;
                 bool shapeChanged_ = false;
-                shapeChanged_ |= ImGui::SliderInt("Segments", &settings_.segments, 3, 256);
+                if (part_.modelPath != INTERNAL_MESH_BREATH_BEAM_MODEL_PATH)
+                {
+                    shapeChanged_ |= ImGui::SliderInt("Segments", &settings_.segments, 3, 256);
+                }
 
                 if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
                 {
@@ -1597,6 +1666,38 @@ void MeshVFXComponent::Gui()
                         0.01f,
                         0.001f,
                         100.0f);
+                }
+                else if (part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH)
+                {
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Beam Length",
+                        &settings_.beamLength,
+                        0.01f,
+                        0.001f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Beam Half Height",
+                        &settings_.beamHalfHeight,
+                        0.01f,
+                        0.001f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Beam Half Width",
+                        &settings_.beamHalfWidth,
+                        0.005f,
+                        0.001f,
+                        100.0f);
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Beam Depth Thickness",
+                        &settings_.beamDepthThickness,
+                        0.001f,
+                        0.0f,
+                        10.0f);
+                    shapeChanged_ |= ImGui::SliderFloat(
+                        "Beam Side Panel Rate",
+                        &settings_.beamSidePanelRate,
+                        0.0f,
+                        1.0f);
                 }
                 else
                 {
@@ -1883,7 +1984,7 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Masked Area Distortion"))
             {
-                // Maskで消える領域に背景歪みを重ね、熱気や空間歪みのような表現を作る。
+                // Mask縺ｧ豸医∴繧矩伜沺縺ｫ閭梧勹豁ｪ縺ｿ繧帝㍾縺ｭ縲∫・豌励ｄ遨ｺ髢捺ｭｪ縺ｿ縺ｮ繧医≧縺ｪ陦ｨ迴ｾ繧剃ｽ懊ｋ縲・
                 ImGui::Checkbox("Use Mask Distortion", &part_.useMaskDistortion);
                 ImGui::TextDisabled("Distorts the background where the mask becomes transparent. Uses Distortion Noise Resource.");
                 ImGui::DragFloat(
@@ -1904,7 +2005,7 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Edge Highlight"))
             {
-                // 頂点を膨らませず、Mesh面の内側だけでシルエットや交差部分を強調する。
+                // 鬆らせ繧定・繧峨∪縺帙★縲｀esh髱｢縺ｮ蜀・・縺縺代〒繧ｷ繝ｫ繧ｨ繝・ヨ繧・ｺ､蟾ｮ驛ｨ蛻・ｒ蠑ｷ隱ｿ縺吶ｋ縲・
                 ImGui::Checkbox("Use Edge Highlight", &part_.useEdgeHighlight);
                 ImGui::TextDisabled("Highlights the mesh silhouette/intersection inside the mesh surface. It does not expand vertices.");
                 ImGui::ColorEdit4("Edge Color", &part_.edgeColor.x);
@@ -2012,7 +2113,7 @@ void MeshVFXComponent::RefreshAssetLists()
 
 void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 {
-    // MeshVFX全体をJSONへ保存する。Part単体保存でもこの形式から該当Partだけ抜き出す。
+    // MeshVFX蜈ｨ菴薙ｒJSON縺ｸ菫晏ｭ倥☆繧九１art蜊倅ｽ謎ｿ晏ｭ倥〒繧ゅ％縺ｮ蠖｢蠑上°繧芽ｩｲ蠖撤art縺縺第栢縺榊・縺吶・
     json_["IsPlaying"] = isPlaying;
     json_["PlaybackSpeed"] = playbackSpeed;
     json_["Parts"] = nlohmann::json::array();
@@ -2047,6 +2148,11 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
             { "WallDepth", internalMesh_.wallDepth },
             { "ConeTipRadiusRate", internalMesh_.coneTipRadiusRate },
             { "ConeLength", internalMesh_.coneLength },
+            { "BeamLength", internalMesh_.beamLength },
+            { "BeamHalfHeight", internalMesh_.beamHalfHeight },
+            { "BeamHalfWidth", internalMesh_.beamHalfWidth },
+            { "BeamDepthThickness", internalMesh_.beamDepthThickness },
+            { "BeamSidePanelRate", internalMesh_.beamSidePanelRate },
         };
         partJson_["MeshRotationSpeed"] =
         {
@@ -2191,7 +2297,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 
 void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 {
-    // JSONからPart設定を復元する。旧形式のMask/Noise単体パスもLayer配列へ補完する。
+    // JSON縺九ｉPart險ｭ螳壹ｒ蠕ｩ蜈・☆繧九よ立蠖｢蠑上・Mask/Noise蜊倅ｽ薙ヱ繧ｹ繧・ayer驟榊・縺ｸ陬懷ｮ後☆繧九・
     asset.parts.clear();
     runtimeParts.clear();
     isPlaying = json_.value("IsPlaying", true);
@@ -2274,6 +2380,22 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
             internalMesh_.coneLength = (std::max)(
                 internalMeshJson_.value("ConeLength", internalMesh_.coneLength),
                 0.0001f);
+            internalMesh_.beamLength = (std::max)(
+                internalMeshJson_.value("BeamLength", internalMesh_.beamLength),
+                0.0001f);
+            internalMesh_.beamHalfHeight = (std::max)(
+                internalMeshJson_.value("BeamHalfHeight", internalMesh_.beamHalfHeight),
+                0.0001f);
+            internalMesh_.beamHalfWidth = (std::max)(
+                internalMeshJson_.value("BeamHalfWidth", internalMesh_.beamHalfWidth),
+                0.0001f);
+            internalMesh_.beamDepthThickness = (std::max)(
+                internalMeshJson_.value("BeamDepthThickness", internalMesh_.beamDepthThickness),
+                0.0f);
+            internalMesh_.beamSidePanelRate = std::clamp(
+                internalMeshJson_.value("BeamSidePanelRate", internalMesh_.beamSidePanelRate),
+                0.0f,
+                1.0f);
         }
         ReadFloatArray(partJson_, "MeshRotationSpeed", part_.meshRotationSpeed, 3);
         part_.duration = (std::max)(partJson_.value("Duration", 0.0f), 0.0f);
@@ -2430,7 +2552,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 
 bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 {
-    // 現在のMeshVFX全体をAsset JSONとして保存する。
+    // 迴ｾ蝨ｨ縺ｮMeshVFX蜈ｨ菴薙ｒAsset JSON縺ｨ縺励※菫晏ｭ倥☆繧九・
     if (path_.empty()) return false;
     nlohmann::json json_;
     json_["AssetType"] = "MeshVFX";
@@ -2452,7 +2574,7 @@ bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 
 bool MeshVFXComponent::LoadAsset(const std::string& path_)
 {
-    // MeshVFX Asset JSONを読み込み、関連Runtimeリソースを再構築する。
+    // MeshVFX Asset JSON繧定ｪｭ縺ｿ霎ｼ縺ｿ縲・未騾｣Runtime繝ｪ繧ｽ繝ｼ繧ｹ繧貞・讒狗ｯ峨☆繧九・
     if (path_.empty()) return false;
     const std::filesystem::path assetPath_ = WindowsDialogHelper::Utf8ToPath(path_);
     std::ifstream file_(assetPath_);
@@ -2477,7 +2599,7 @@ bool MeshVFXComponent::LoadAsset(const std::string& path_)
 
 bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_) const
 {
-    // 選択中Partだけを単体Assetとして保存し、他のMeshVFXへ再利用できるようにする。
+    // 驕ｸ謚樔ｸｭPart縺縺代ｒ蜊倅ｽ鄭sset縺ｨ縺励※菫晏ｭ倥＠縲∽ｻ悶・MeshVFX縺ｸ蜀榊茜逕ｨ縺ｧ縺阪ｋ繧医≧縺ｫ縺吶ｋ縲・
     if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
 
     nlohmann::json componentJson_;
@@ -2502,7 +2624,7 @@ bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_
 
 bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_)
 {
-    // 単体Part Assetを読み込み、現在のPartスロットへ差し替える。
+    // 蜊倅ｽ撤art Asset繧定ｪｭ縺ｿ霎ｼ縺ｿ縲∫樟蝨ｨ縺ｮPart繧ｹ繝ｭ繝・ヨ縺ｸ蟾ｮ縺玲崛縺医ｋ縲・
     if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
     if (!file_.is_open()) return false;
@@ -2541,7 +2663,7 @@ bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_
 
 void MeshVFXComponent::SetAsset(const MeshVFXAsset& asset_)
 {
-    // 外部から渡されたAsset設定を適用し、Texture/Modelを再読み込みする。
+    // 螟夜Κ縺九ｉ貂｡縺輔ｌ縺蘗sset險ｭ螳壹ｒ驕ｩ逕ｨ縺励ゝexture/Model繧貞・隱ｭ縺ｿ霎ｼ縺ｿ縺吶ｋ縲・
     asset = asset_;
     time = 0.0f;
     RebuildRuntimeResources();
@@ -2549,7 +2671,7 @@ void MeshVFXComponent::SetAsset(const MeshVFXAsset& asset_)
 
 void MeshVFXComponent::RebuildRuntimeResources()
 {
-    // Editor変更後など、保存データから実行時GPUリソースを作り直す。
+    // Editor螟画峩蠕後↑縺ｩ縲∽ｿ晏ｭ倥ョ繝ｼ繧ｿ縺九ｉ螳溯｡梧凾GPU繝ｪ繧ｽ繝ｼ繧ｹ繧剃ｽ懊ｊ逶ｴ縺吶・
     LoadPartResources();
 }
 
@@ -2571,7 +2693,7 @@ bool MeshVFXComponent::HasRuntimeResources() const
 
 void MeshVFXComponent::LoadPartResources()
 {
-    // 全PartのRuntimeリソースを再読み込みする。
+    // 蜈ｨPart縺ｮRuntime繝ｪ繧ｽ繝ｼ繧ｹ繧貞・隱ｭ縺ｿ霎ｼ縺ｿ縺吶ｋ縲・
     runtimeParts.resize(asset.parts.size());
     for (size_t partIndex_ = 0; partIndex_ < asset.parts.size(); ++partIndex_)
     {
@@ -2581,7 +2703,7 @@ void MeshVFXComponent::LoadPartResources()
 
 void MeshVFXComponent::LoadPartResource(size_t partIndex_)
 {
-    // 指定PartのModel/Textureを読み込み、描画時に参照するRuntimePartへ詰める。
+    // 謖・ｮ啀art縺ｮModel/Texture繧定ｪｭ縺ｿ霎ｼ縺ｿ縲∵緒逕ｻ譎ゅ↓蜿ら・縺吶ｋRuntimePart縺ｸ隧ｰ繧√ｋ縲・
     if (partIndex_ >= asset.parts.size()) return;
     if (runtimeParts.size() < asset.parts.size()) runtimeParts.resize(asset.parts.size());
 
@@ -2601,6 +2723,12 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
         runtimePart_.modelResource = CreateInternalMeshConeModelResource(
             device_,
             part_.shapeCylinderRadius,
+            part_.internalMeshSettings);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshBreathBeamModelResource(
+            device_,
             part_.internalMeshSettings);
     }
     else if (part_.modelPath == INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH)
@@ -2715,7 +2843,7 @@ void MeshVFXComponent::LoadTexture(
     UINT fallbackColor_,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& texture_)
 {
-    // Texture未設定や読み込み失敗時もShaderが安全に動くよう、指定色のDummy Textureへフォールバックする。
+    // Texture譛ｪ險ｭ螳壹ｄ隱ｭ縺ｿ霎ｼ縺ｿ螟ｱ謨玲凾繧４hader縺悟ｮ牙・縺ｫ蜍輔￥繧医≧縲∵欠螳夊牡縺ｮDummy Texture縺ｸ繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ縺吶ｋ縲・
     texture_.Reset();
     if (!path_.empty() && std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_)))
     {
