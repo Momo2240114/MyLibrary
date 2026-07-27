@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "Tail01HurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,
                 "ContainmentMode": 0,
@@ -12,35 +14,81 @@
                     0.30000001192092896,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-Tail4",
                 "GravityScale": 1.0,
-                "HalfHeight": 1.0499999523162842,
+                "HalfHeight": 11.0,
                 "HurtTag": "TAIL",
                 "InvincibilityDuration": 0.0,
                 "IsStatic": false,
                 "IsTrigger": true,
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 0.44999998807907104,
+                "Radius": 50.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Pelvis",
                 "SyncCharacterColliderShape": false,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "Tail01HurtBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HurtBox"
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "Tail01Part",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.14901961386203766,
+                    0.5490196347236633,
+                    1.0,
+                    1.0
+                ],
+                "EndNodeName": "PlainsDragon_-Tail3",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.0,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "NodeModelObjectName": "TestTarget",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 50.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "PlainsDragon_-Pelvis",
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CapsuleCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -52,8 +100,12 @@
                 "targetStartNodeName": "PlainsDragon_-Tail2"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ModelAttachment"
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -61,8 +113,12 @@
                 "CombatOwnerObjectName": "TestTarget"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonBodyPartHurtBoxComponent"
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,

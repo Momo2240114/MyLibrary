@@ -22,6 +22,7 @@ DebugLogWindow::DebugLogWindow(GameObjectManager* manager_)
     defaultWindowSize = ImVec2(760.0f, 520.0f);
     categoryFilters.fill(true);
     levelFilters.fill(true);
+    isVisible = false;
 }
 
 void DebugLogWindow::Draw()

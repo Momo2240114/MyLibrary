@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "ChestHurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,
                 "ContainmentMode": 0,
@@ -12,38 +14,43 @@
                     0.30000001192092896,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-Neck",
                 "GravityScale": 1.0,
-                "HalfHeight": 1.149999976158142,
+                "HalfHeight": 13.0,
                 "HurtTag": "CHEST",
                 "InvincibilityDuration": 0.0,
                 "IsStatic": false,
                 "IsTrigger": true,
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 1.0499999523162842,
+                "Radius": 112.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Spine1",
                 "SyncCharacterColliderShape": false,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "ChestHurtBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HurtBox"
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "ChestPhysical",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
@@ -53,32 +60,35 @@
                     1.0,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-Neck",
                 "GravityScale": 1.0,
-                "HalfHeight": 1.100000023841858,
+                "HalfHeight": 11.0,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 0.949999988079071,
+                "Radius": 70.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Spine1",
                 "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "ChestPhysical"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CapsuleCollider"
+            "TypeName": "CapsuleCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -90,8 +100,12 @@
                 "targetStartNodeName": "PlainsDragon_-Spine1"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ModelAttachment"
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -99,8 +113,12 @@
                 "CombatOwnerObjectName": "TestTarget"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonBodyPartHurtBoxComponent"
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,

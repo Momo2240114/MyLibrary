@@ -33,6 +33,11 @@ namespace
     constexpr PxU32 ROLE_GUARD_BOX = 6;
     constexpr PxU32 COLLISION_OWNER_MASK = 0x7FFFFFFFu;
 
+    bool HasSameCollisionOwner(PxU32 ownerIdA_, PxU32 ownerIdB_)
+    {
+        return ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_;
+    }
+
     bool IsCctMoveIgnoredRole(PxU32 role_)
     {
         return role_ == ROLE_HIT_BOX ||
@@ -46,7 +51,7 @@ namespace
     {
     public:
         PxQueryHitType::Enum preFilter(
-            const PxFilterData&,
+            const PxFilterData& filterData_,
             const PxShape* shape_,
             const PxRigidActor*,
             PxHitFlags&) override
@@ -55,6 +60,13 @@ namespace
 
             const PxFilterData shapeFilterData_ = shape_->getSimulationFilterData();
             if (IsCctMoveIgnoredRole(shapeFilterData_.word2))
+            {
+                return PxQueryHitType::eNONE;
+            }
+
+            const PxU32 queryOwnerId_ = filterData_.word3 & COLLISION_OWNER_MASK;
+            const PxU32 shapeOwnerId_ = shapeFilterData_.word3 & COLLISION_OWNER_MASK;
+            if (HasSameCollisionOwner(queryOwnerId_, shapeOwnerId_))
             {
                 return PxQueryHitType::eNONE;
             }
@@ -77,6 +89,15 @@ namespace
     public:
         PxControllerBehaviorFlags getBehaviorFlags(const PxShape& shape_, const PxActor&) override
         {
+            const PxRigidActor* actor_ = shape_.getActor();
+            const ColliderComponent* collider_ = actor_
+                ? static_cast<const ColliderComponent*>(actor_->userData)
+                : nullptr;
+            if (collider_ && !collider_->CanBeCharacterGround())
+            {
+                return PxControllerBehaviorFlag::eCCT_SLIDE;
+            }
+
             const PxFilterData filterData_ = shape_.getSimulationFilterData();
             if (filterData_.word2 == ROLE_CHARACTER)
             {
@@ -106,6 +127,13 @@ namespace
             const ColliderComponent* colliderB_ =
                 static_cast<const ColliderComponent*>(controllerB_.getUserData());
             if (!colliderA_ || !colliderB_) return true;
+
+            if (HasSameCollisionOwner(
+                const_cast<ColliderComponent*>(colliderA_)->GetCollisionOwnerId(),
+                const_cast<ColliderComponent*>(colliderB_)->GetCollisionOwnerId()))
+            {
+                return false;
+            }
 
             const bool bothCharacters_ =
                 colliderA_->GetCollisionRole() == ColliderComponent::CollisionRole::CHARACTER &&
@@ -139,7 +167,7 @@ static PxFilterFlags PhysXFilterShader(
 
     const PxU32 ownerId0_ = filterData0_.word3 & ownerMask_;
     const PxU32 ownerId1_ = filterData1_.word3 & ownerMask_;
-    if (ownerId0_ != 0u && ownerId1_ != 0u && ownerId0_ == ownerId1_)
+    if (HasSameCollisionOwner(ownerId0_, ownerId1_))
     {
         return PxFilterFlag::eSUPPRESS;
     }
@@ -426,4 +454,3 @@ PxTriangleMesh* PhysXSystem::CreateTriangleMesh(
     PxCookingParams params_(gPhysics->getTolerancesScale());
     return PxCreateTriangleMesh(params_, desc_, gPhysics->getPhysicsInsertionCallback());
 }
-

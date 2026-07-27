@@ -227,8 +227,12 @@
                 "PlaybackSpeed": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "MeshVFXComponent"
+            "TypeName": "MeshVFXComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -248,8 +252,12 @@
                 "TargetRadius": 0.3499999940395355
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ContainmentVolumeComponent"
+            "TypeName": "ContainmentVolumeComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -407,8 +415,12 @@
                 "IsPlaying": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ParticleComponent"
+            "TypeName": "ParticleComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 0,

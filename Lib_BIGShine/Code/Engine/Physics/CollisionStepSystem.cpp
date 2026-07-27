@@ -218,6 +218,15 @@ namespace
 
         return hitHurtPair_ || hitJustDodgePair_ || hitGuardPair_;
     }
+
+    bool ShouldSuppressTriggerPair(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
+    {
+        if (!colliderA_ || !colliderB_) return true;
+        const uint32_t ownerIdA_ = colliderA_->GetCollisionOwnerId();
+        const uint32_t ownerIdB_ = colliderB_->GetCollisionOwnerId();
+        return (ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_) ||
+            !IsAllowedCombatTriggerPair(colliderA_, colliderB_);
+    }
 }
 
 void CollisionStepSystem::RegisterCollider(
@@ -372,8 +381,7 @@ void CollisionStepSystem::HandleTriggerPair(
 
     const bool existsA_ = colliderA_->currentTriggers.count(objectB_) != 0;
     const bool existsB_ = colliderB_->currentTriggers.count(objectA_) != 0;
-    if (colliderA_->GetCollisionOwnerId() == colliderB_->GetCollisionOwnerId() ||
-        !IsAllowedCombatTriggerPair(colliderA_, colliderB_))
+    if (ShouldSuppressTriggerPair(colliderA_, colliderB_))
     {
         hit_ = false;
         contact_ = nullptr;
@@ -456,6 +464,10 @@ void CollisionStepSystem::HandlePhysXContact(
     const std::shared_ptr<GameObject> objectA_ = colliderA_->GetGameObject();
     const std::shared_ptr<GameObject> objectB_ = colliderB_->GetGameObject();
     if (!objectA_ || !objectB_) return;
+    if (colliderA_->GetCollisionOwnerId() == colliderB_->GetCollisionOwnerId())
+    {
+        return;
+    }
 
     colliderA_->OnCollisionEnter(objectB_);
     colliderB_->OnCollisionEnter(objectA_);
@@ -594,7 +606,9 @@ void CollisionStepSystem::StepCombatPairs()
                     isOverlapping_,
                     nullptr);
 
-                if (isOverlapping_ && justDodgeSystem)
+                if (isOverlapping_ &&
+                    !ShouldSuppressTriggerPair(hitBox_.get(), justDodgeCollider_.get()) &&
+                    justDodgeSystem)
                 {
                     BS_LOG_INFO(
                         LOG_CATEGORY::PHYSICS,
@@ -650,7 +664,9 @@ void CollisionStepSystem::StepCombatPairs()
                     isOverlapping_,
                     nullptr);
 
-                if (isOverlapping_ && guardSystem)
+                if (isOverlapping_ &&
+                    !ShouldSuppressTriggerPair(hitBox_.get(), guardCollider_.get()) &&
+                    guardSystem)
                 {
                     const bool guarded_ = guardSystem->HandleGuard(
                         *hitBox_,

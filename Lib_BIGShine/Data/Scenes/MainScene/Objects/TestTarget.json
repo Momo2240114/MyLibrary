@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 1,
                 "ContactOffset": 0.029999999329447746,
@@ -39,23 +41,35 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CharacterCollider"
+            "TypeName": "CharacterCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
     "Components": [
         {
             "Data": {
+                "CombatOwnerName": "",
+                "DefaultTarget": false,
+                "LockOnEnabled": true,
                 "Offset": [
                     0.0,
                     2.9000000953674316,
                     0.0
-                ]
+                ],
+                "Priority": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "LockOnTargetComponent"
+            "TypeName": "LockOnTargetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -115,8 +129,12 @@
                 }
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "GltfModel"
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -125,8 +143,12 @@
                 "UsePhysicsVelocity": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CharacterMovementComponent"
+            "TypeName": "CharacterMovementComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -154,8 +176,12 @@
                 "UseKnockBack": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitReactionComponent"
+            "TypeName": "HitReactionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -241,25 +267,29 @@
                         },
                         "CurrentAction": {
                             "type": "string",
-                            "value": "Idle"
+                            "value": "Death"
                         },
                         "CurrentAnimationState": {
                             "type": "string",
-                            "value": "PlainsDragon_IdleBreathe"
+                            "value": "PlainsDragon_Death"
                         },
                         "IsActing": {
                             "type": "bool",
                             "value": false
                         },
+                        "To_PlainsDragon_Death": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "To_PlainsDragon_IdleBreathe": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         }
                     },
                     "DragonAI": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 15
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -267,11 +297,11 @@
                         },
                         "ActionName": {
                             "type": "string",
-                            "value": "Idle"
+                            "value": "Death"
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 0.08946890383958817
+                            "value": 5.008976936340332
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -299,7 +329,7 @@
                         },
                         "CanUseSpinSweep": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseSpreadBreath": {
                             "type": "bool",
@@ -315,11 +345,11 @@
                         },
                         "CurrentAction": {
                             "type": "int",
-                            "value": 0
+                            "value": 15
                         },
                         "DamagePhase": {
                             "type": "int",
-                            "value": 0
+                            "value": 3
                         },
                         "HasTarget": {
                             "type": "bool",
@@ -327,7 +357,7 @@
                         },
                         "HpRate": {
                             "type": "float",
-                            "value": 0.9100000262260437
+                            "value": 0.0
                         },
                         "IsActing": {
                             "type": "bool",
@@ -383,7 +413,7 @@
                         },
                         "State": {
                             "type": "int",
-                            "value": 0
+                            "value": 6
                         },
                         "TargetAngle": {
                             "type": "float",
@@ -401,7 +431,7 @@
                     "DragonBodyPart": {
                         "LastBodyPart": {
                             "type": "int",
-                            "value": 0
+                            "value": 3
                         },
                         "LastBrokenThisHit": {
                             "type": "bool",
@@ -409,21 +439,21 @@
                         },
                         "LastDurabilityDamage": {
                             "type": "float",
-                            "value": 6.0
+                            "value": 0.0
                         },
                         "LastHealthDamage": {
                             "type": "float",
-                            "value": 6.0
+                            "value": 0.0
                         }
                     },
                     "Health": {
                         "Current": {
                             "type": "float",
-                            "value": 910.0
+                            "value": 0.0
                         },
                         "Dead": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "Max": {
                             "type": "float",
@@ -437,7 +467,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 0.0
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -445,7 +475,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 10.0
+                            "value": 7.200000286102295
                         },
                         "Dead": {
                             "type": "bool",
@@ -454,13 +484,13 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.20733784139156342,
-                                -0.9782693982124329
+                                0.29716503620147705,
+                                -0.9548261165618896
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.4000000059604645
+                            "value": 0.054999999701976776
                         },
                         "HitStopScale": {
                             "type": "float",
@@ -472,7 +502,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 15.0
+                            "value": 9.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -480,22 +510,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 3.0
+                            "value": 5.5
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.2065114676952362,
-                                0.08919303119182587,
-                                -0.9743703603744507
+                                0.29419392347335815,
+                                0.14105460047721863,
+                                -0.9452796578407288
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                8.777790069580078,
-                                3.506481647491455,
-                                -20.004737854003906
+                                9.571670532226563,
+                                2.0050055980682373,
+                                7.066173553466797
                             ]
                         },
                         "Received": {
@@ -510,8 +540,12 @@
                 }
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "BlackboardComponent"
+            "TypeName": "BlackboardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -539,8 +573,12 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "AIActionComponent"
+            "TypeName": "AIActionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -2080,8 +2118,12 @@
                 "WriteDebugBlackboard": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "AIControllerComponent"
+            "TypeName": "AIControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -3191,8 +3233,12 @@
                 "UseTransitionGraph": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "AnimationControllerComponent"
+            "TypeName": "AnimationControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -3231,8 +3277,12 @@
                 "RegisterGlobalActions": false
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonNeckCommandIKComponent"
+            "TypeName": "DragonNeckCommandIKComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -3249,8 +3299,12 @@
                 "SpinActionDuration": 1.600000023841858
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonTailCommandIKComponent"
+            "TypeName": "DragonTailCommandIKComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -9472,8 +9526,12 @@
                 "WalkSpeed": 2.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonAIComponent"
+            "TypeName": "DragonAIComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -9540,8 +9598,12 @@
                 "ShowBodyCollisionShapes": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "IKMapComponent"
+            "TypeName": "IKMapComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -9561,25 +9623,33 @@
                 "ShowHairCollisionShapes": false
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "SpringBoneSimulationComponent"
+            "TypeName": "SpringBoneSimulationComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
-                "CurrentHealth": 910.0,
+                "CurrentHealth": 0.0,
                 "MaxHealth": 1000.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HealthComponent"
+            "TypeName": "HealthComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
                 "BodyParts": [
                     {
                         "BodyPart": "HEAD",
-                        "Broken": false,
-                        "CurrentDurability": 10.0,
+                        "Broken": true,
+                        "CurrentDurability": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9587,23 +9657,23 @@
                     {
                         "BodyPart": "NECK",
                         "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "CurrentDurability": 90.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
                     },
                     {
                         "BodyPart": "CHEST",
-                        "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "Broken": true,
+                        "CurrentDurability": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
                     },
                     {
                         "BodyPart": "BODY",
-                        "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "Broken": true,
+                        "CurrentDurability": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9611,7 +9681,7 @@
                     {
                         "BodyPart": "LEFT_FRONT_LEG",
                         "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "CurrentDurability": 86.5,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9619,15 +9689,15 @@
                     {
                         "BodyPart": "RIGHT_FRONT_LEG",
                         "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "CurrentDurability": 71.20000457763672,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
                     },
                     {
                         "BodyPart": "LEFT_BACK_LEG",
-                        "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "Broken": true,
+                        "CurrentDurability": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9635,7 +9705,7 @@
                     {
                         "BodyPart": "RIGHT_BACK_LEG",
                         "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "CurrentDurability": 96.4000015258789,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9659,7 +9729,7 @@
                     {
                         "BodyPart": "TAIL",
                         "Broken": false,
-                        "CurrentDurability": 100.0,
+                        "CurrentDurability": 13.600013732910156,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9668,8 +9738,12 @@
                 "DebugLogEnabled": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonBodyPartManagerComponent"
+            "TypeName": "DragonBodyPartManagerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,
@@ -9678,9 +9752,9 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            8.112678527832031,
+            26.40360450744629,
             -0.5823211669921875,
-            -23.14289665222168
+            11.319045066833496
         ],
         "Rot": [
             0.0,

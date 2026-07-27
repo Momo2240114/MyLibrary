@@ -13,8 +13,7 @@
 
 class GameObject;
 
-// Generic UE-like behavior graph node type.
-// Game-specific AI is built as graph assets and actions on top of this layer.
+// AIの判断グラフで使用するノード種別
 enum class AI_BEHAVIOR_NODE_TYPE
 {
     ROOT,
@@ -65,6 +64,7 @@ enum class AI_BEHAVIOR_STATUS
     RUNNING,
 };
 
+// AIの判断グラフ上に配置される1つのノード情報
 struct AIBehaviorNode
 {
     uintptr_t id = 0;
@@ -99,6 +99,7 @@ struct AIBehaviorNode
     float weight = 1.0f;
 };
 
+// ノード同士の接続情報を保持するリンク
 struct AIBehaviorLink
 {
     uintptr_t id = 0;
@@ -108,6 +109,7 @@ struct AIBehaviorLink
     uintptr_t toPinId = 0;
 };
 
+// 実行中ノードの経過時間や進行位置を保持する
 struct AIBehaviorRuntimeState
 {
     float elapsedTime = 0.0f;
@@ -115,6 +117,7 @@ struct AIBehaviorRuntimeState
     bool actionStarted = false;
 };
 
+// AIグラフの実行時に参照する対象やBlackboard情報をまとめる
 struct AIBehaviorContext
 {
     GameObject* owner = nullptr;
@@ -132,6 +135,7 @@ struct AIBehaviorContext
     bool hasTarget = false;
 };
 
+// BlackboardとActionを使用して敵AIの判断グラフを実行する
 class AIBehaviorGraph
 {
 public:

@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 1,
                 "ContactOffset": 0.019999999552965164,
@@ -39,11 +41,17 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CharacterCollider"
+            "TypeName": "CharacterCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 3,
                 "ContainmentMode": 0,
@@ -80,14 +88,20 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HurtBox"
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
                 "ActionPrefix": "JustDodge",
                 "ActivateActionName": "EnableJustDodgeCollider",
+                "CanBeCharacterGround": true,
                 "CanReactToOwnerAttack": false,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 5,
                 "ContainmentMode": 0,
@@ -123,8 +137,12 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "JustDodgeCollider"
+            "TypeName": "JustDodgeCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -362,8 +380,12 @@
                 }
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "GltfModel"
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -417,8 +439,12 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CurveComponent"
+            "TypeName": "CurveComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -476,7 +502,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                1.0
+                                0.0
                             ]
                         },
                         "GuardInput": {
@@ -486,8 +512,8 @@
                         "GuardMoveInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                0.0005968809127807617,
+                                -0.9999998211860657
                             ]
                         },
                         "HitArmor": {
@@ -678,7 +704,7 @@
                     "Dodge": {
                         "AttackInstanceId": {
                             "type": "int",
-                            "value": 20
+                            "value": 185
                         },
                         "CanCounter": {
                             "type": "bool",
@@ -750,7 +776,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 12.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -759,21 +785,21 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.9576507210731506,
-                                -0.28793251514434814
+                                0.5890123844146729,
+                                0.8081240653991699
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.05000000074505806
+                            "value": 0.0
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 1.0
+                            "value": 0.0
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 9.0
+                            "value": 12.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -781,22 +807,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 20.0
+                            "value": 6.0
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.9548825621604919,
-                                -0.07597887516021729,
-                                -0.287100225687027
+                                0.42579516768455505,
+                                -0.6909559965133667,
+                                0.584190309047699
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                28.13498306274414,
-                                2.2602076530456543,
-                                -0.5607459545135498
+                                38.06847381591797,
+                                5.5628228187561035,
+                                18.473695755004883
                             ]
                         },
                         "ReactionDirection": {
@@ -861,7 +887,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                1.0
+                                0.0
                             ]
                         },
                         "GuardInput": {
@@ -871,8 +897,8 @@
                         "GuardMoveInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                0.0005968809127807617,
+                                -0.9999998211860657
                             ]
                         },
                         "HitArmor": {
@@ -1033,8 +1059,12 @@
                 }
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "BlackboardComponent"
+            "TypeName": "BlackboardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -36456,8 +36486,12 @@
                 "UseTransitionGraph": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "AnimationControllerComponent"
+            "TypeName": "AnimationControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -36828,8 +36862,12 @@
                 "ShowBodyCollisionShapes": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "IKMapComponent"
+            "TypeName": "IKMapComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -36933,8 +36971,12 @@
                 "UseLockOnTarget": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HumanLookAtIKComponent"
+            "TypeName": "HumanLookAtIKComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -37185,8 +37227,12 @@
                 "TimelineActionFallbackDuration": 1.5
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "PlayerControllerComponent"
+            "TypeName": "PlayerControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38046,8 +38092,12 @@
                 "StartAlpha": 0.800000011920929
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "AfterimageComponent"
+            "TypeName": "AfterimageComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38056,8 +38106,12 @@
                 "UsePhysicsVelocity": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CharacterMovementComponent"
+            "TypeName": "CharacterMovementComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38077,8 +38131,12 @@
                 "ShowHairCollisionShapes": false
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "SpringBoneSimulationComponent"
+            "TypeName": "SpringBoneSimulationComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38109,8 +38167,12 @@
                 "ShowDebugShapes": false
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "FootIKComponent"
+            "TypeName": "FootIKComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38118,8 +38180,12 @@
                 "MaxHealth": 100.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HealthComponent"
+            "TypeName": "HealthComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38155,8 +38221,12 @@
                 "UseKnockBack": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitReactionComponent"
+            "TypeName": "HitReactionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38219,8 +38289,12 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ActionSequence"
+            "TypeName": "ActionSequence",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -38229,8 +38303,12 @@
                 "SelectedCategory": "Sequence"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "JustDodgeReactionComponent"
+            "TypeName": "JustDodgeReactionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 1,
@@ -38239,13 +38317,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            11.456768035888672,
-            -0.12279021739959717,
-            -7.845624923706055
+            -1.7866859436035156,
+            -0.12279033660888672,
+            -36.57752227783203
         ],
         "Rot": [
             0.0,
-            190.4365234375,
+            9.813234329223633,
             1.1004080988641363e-05
         ],
         "Scale": [

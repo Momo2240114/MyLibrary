@@ -19,6 +19,31 @@
 
 using namespace physx;
 
+namespace
+{
+    std::shared_ptr<GameObject> ResolveHierarchyCollisionOwnerObject(
+        const std::shared_ptr<GameObject>& object_)
+    {
+        std::shared_ptr<GameObject> collisionOwnerObject_ = object_;
+        std::shared_ptr<GameObject> currentObject_ = object_;
+        while (currentObject_ && currentObject_->transform)
+        {
+            const std::shared_ptr<Transform> parentTransform_ =
+                currentObject_->transform->parent.lock();
+            if (!parentTransform_) break;
+
+            const std::shared_ptr<GameObject> parentObject_ =
+                parentTransform_->gameObject.lock();
+            if (!parentObject_) break;
+
+            collisionOwnerObject_ = parentObject_;
+            currentObject_ = parentObject_;
+        }
+
+        return collisionOwnerObject_;
+    }
+}
+
 ColliderComponent::~ColliderComponent()
 {
     ReleasePhysXActor();
@@ -138,11 +163,11 @@ void ColliderComponent::CreateCharacterController()
             filterData_.word1 = owner_->mask;
             filterData_.word2 = static_cast<physx::PxU32>(collisionRole);
 
-            const physx::PxU32 ownerId_ =
-                collisionOwnerObjectName.empty() ? 0u : GetCollisionOwnerId();
+            const physx::PxU32 ownerId_ = GetCollisionOwnerId();
             filterData_.word3 = ownerId_ | 0x80000000u;
 
             shape_->setSimulationFilterData(filterData_);
+            shape_->setQueryFilterData(filterData_);
             shape_->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
             shape_->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
         }
@@ -181,7 +206,7 @@ std::shared_ptr<GameObject> ColliderComponent::ResolveCollisionOwnerObject()
         if (collisionOwner_) return collisionOwner_;
     }
 
-    return owner_;
+    return ResolveHierarchyCollisionOwnerObject(owner_);
 }
 
 uint32_t ColliderComponent::GetCollisionOwnerId()
@@ -457,10 +482,10 @@ void ColliderComponent::UpdatePhysXShape()
     filterData_.word0 = static_cast<PxU32>(owner_->layer);
     filterData_.word1 = owner_->mask;
     filterData_.word2 = static_cast<PxU32>(collisionRole);
-    const PxU32 ownerId_ =
-        collisionOwnerObjectName.empty() ? 0u : GetCollisionOwnerId();
+    const PxU32 ownerId_ = GetCollisionOwnerId();
     filterData_.word3 = ownerId_ | (usePhysicsResponse ? 0x80000000u : 0u);
     shape_->setSimulationFilterData(filterData_);
+    shape_->setQueryFilterData(filterData_);
 }
 
 void ColliderComponent::SyncFromPhysics(float dt_)
@@ -657,8 +682,13 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.x * safeDeltaTime_,
             verticalDisplacement_,
             velocity.z * safeDeltaTime_);
+        PxFilterData filterData_;
+        filterData_.word0 = static_cast<PxU32>(owner_->layer);
+        filterData_.word1 = owner_->mask;
+        filterData_.word2 = static_cast<PxU32>(collisionRole);
+        filterData_.word3 = GetCollisionOwnerId() | 0x80000000u;
         PxControllerFilters filters_(
-            nullptr,
+            &filterData_,
             PhysXSystem::GetCharacterControllerQueryFilterCallback(),
             nullptr);
         const PxControllerCollisionFlags collisionFlags_ =
@@ -979,6 +1009,7 @@ void ColliderComponent::Gui()
     }
 
     ImGui::Checkbox("Debug Shape", &shapeRenderEnabled);
+    ImGui::Checkbox("Character Ground", &canBeCharacterGround);
     ImGui::Text("Touching: %s", m_IsHitFlag ? "Yes" : "No");
 
     if (useGravity) {
@@ -1013,6 +1044,7 @@ void ColliderComponent::Serialize(nlohmann::json& j) const  {
     j["CollisionRole"] = static_cast<int>(collisionRole);
     j["CollisionOwnerObjectName"] = collisionOwnerObjectName;
     j["ShapeRenderFlg"] = shapeRenderEnabled;
+    j["CanBeCharacterGround"] = canBeCharacterGround;
     j["UseGravity"] = useGravity;
     j["GravityScale"] = gravityScale;
     j["VelocityRotationMode"] = static_cast<int>(velocityRotationMode);
@@ -1037,6 +1069,7 @@ void ColliderComponent::Deserialize(const nlohmann::json& j) {
     colliderName = j.value("ColliderName", std::string{});
     collisionOwnerObjectName = j.value("CollisionOwnerObjectName", std::string{});
     shapeRenderEnabled = j.value("ShapeRenderFlg", true);
+    canBeCharacterGround = j.value("CanBeCharacterGround", true);
     useGravity = j.value("UseGravity", false);
     gravityScale = j.value("GravityScale", 1.0f);
     mass = j.value("Mass", 1.0f);

@@ -663,8 +663,12 @@
                 "PlaybackSpeed": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "MeshVFXComponent"
+            "TypeName": "MeshVFXComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 0,

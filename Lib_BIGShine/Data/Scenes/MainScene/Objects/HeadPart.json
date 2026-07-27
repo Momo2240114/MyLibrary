@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "HeadHurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,
                 "ContainmentMode": 0,
@@ -12,7 +14,7 @@
                     0.30000001192092896,
                     1.0
                 ],
-                "EndNodeName": "PlainsDragon_-Ponytail1",
+                "EndNodeName": "PlainsDragon_Tongue_4",
                 "GravityScale": 1.0,
                 "HalfHeight": 60.0,
                 "HurtTag": "HEAD",
@@ -35,15 +37,20 @@
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "HeadHurtBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HurtBox"
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "HeadPhysical",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
@@ -53,32 +60,35 @@
                     1.0,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_Tongue_4",
                 "GravityScale": 1.0,
-                "HalfHeight": 0.41999998688697815,
+                "HalfHeight": 60.0,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.11999999731779099
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 0.5199999809265137,
+                "Radius": 60.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Head",
                 "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "HeadPhysical"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CapsuleCollider"
+            "TypeName": "CapsuleCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -90,7 +100,9 @@
                 "AttackTag": "Bite",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
                 "CanHitOwner": false,
+                "ColliderName": "BiteHitBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
@@ -103,7 +115,7 @@
                     0.11999999731779099,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_Tongue_4",
                 "GravityScale": 1.0,
                 "HalfHeight": 0.6200000047683716,
                 "HitGroupId": 10,
@@ -130,29 +142,32 @@
                 "KnockBackPower": 5.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.5799999833106995
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 0.5199999809265137,
+                "Radius": 110.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "SourceAction": "Bite",
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_Tongue_2",
                 "TargetAirLiftPower": 0.0,
                 "TeamId": 1,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "BiteHitBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitBox"
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -164,7 +179,9 @@
                 "AttackTag": "HeadCharge",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
                 "CanHitOwner": false,
+                "ColliderName": "HeadChargeHitBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
@@ -177,7 +194,7 @@
                     0.11999999731779099,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-Head",
                 "GravityScale": 1.0,
                 "HalfHeight": 0.8500000238418579,
                 "HitGroupId": 20,
@@ -204,29 +221,32 @@
                 "KnockBackPower": 6.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.3499999940395355
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 0.699999988079071,
+                "Radius": 150.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "SourceAction": "HeadCharge",
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Neck",
                 "TargetAirLiftPower": 0.0,
                 "TeamId": 1,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "HeadChargeHitBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitBox"
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -238,8 +258,12 @@
                 "targetStartNodeName": "PlainsDragon_-Head"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ModelAttachment"
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -247,8 +271,12 @@
                 "CombatOwnerObjectName": "TestTarget"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonBodyPartHurtBoxComponent"
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,

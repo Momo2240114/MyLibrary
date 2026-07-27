@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "BodyHurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,
                 "ContainmentMode": 0,
@@ -12,38 +14,43 @@
                     0.30000001192092896,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-Spine1",
                 "GravityScale": 1.0,
-                "HalfHeight": 1.4500000476837158,
+                "HalfHeight": 16.0,
                 "HurtTag": "BODY",
                 "InvincibilityDuration": 0.0,
                 "IsStatic": false,
                 "IsTrigger": true,
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 1.2000000476837158,
+                "Radius": 130.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Pelvis",
                 "SyncCharacterColliderShape": false,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "BodyHurtBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HurtBox"
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "BodyPhysical",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
@@ -53,32 +60,35 @@
                     1.0,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-Spine1",
                 "GravityScale": 1.0,
-                "HalfHeight": 1.350000023841858,
+                "HalfHeight": 13.5,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 1.0499999523162842,
+                "Radius": 70.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-Pelvis",
                 "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "BodyPhysical"
+                "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CapsuleCollider"
+            "TypeName": "CapsuleCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -90,7 +100,9 @@
                 "AttackTag": "BodyCharge",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
                 "CanHitOwner": false,
+                "ColliderName": "BodyChargeHitBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
@@ -147,12 +159,15 @@
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "BodyChargeHitBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitBox"
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -164,8 +179,12 @@
                 "targetStartNodeName": "PlainsDragon_-Spine"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ModelAttachment"
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -173,8 +192,12 @@
                 "CombatOwnerObjectName": "TestTarget"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonBodyPartHurtBoxComponent"
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,

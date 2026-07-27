@@ -183,6 +183,16 @@ public:
     void ApplyDestroys(std::shared_ptr<GameObject> object_);
 
     void SetShapeRenderEnabled(bool enabled_) { shapeRenderEnabled = enabled_; }
+    bool IsShapeRenderEnabled() const { return shapeRenderEnabled; }
+    size_t SetAllCollisionShapeRenderEnabled(bool enabled_);
+    size_t SetCollisionShapeRenderEnabledInHierarchy(
+        const std::string& rootObjectName_,
+        bool enabled_,
+        bool includeChildren_ = true);
+    size_t CountAllCollisionShapes();
+    size_t CountCollisionShapesInHierarchy(
+        const std::string& rootObjectName_,
+        bool includeChildren_ = true);
 
     //すべてのオブジェクトやコンポーネントが平等にアクセスするための窓口
     ResourceManager* GetResourceManager() { return resourceManager.get(); }
@@ -284,4 +294,3 @@ private:
 public:
         SceneState& GetSceneState() { return sceneState; }
 };
-

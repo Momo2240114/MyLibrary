@@ -26,6 +26,7 @@
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 
 #include <fstream>
+#include <unordered_set>
 #include"Engine/GamePlay/EventSystem/EventManager.h"
 
 #include "Engine/GamePlay/System/TimeManager.h"
@@ -717,6 +718,109 @@ void GameObjectManager::RemoveObject(const std::string& name_)
     if (iterator_ == objects.end()) return;
     if (selectedObject && selectedObject->GetName() == name_) selectedObject = nullptr;
     objects.erase(iterator_, objects.end());
+}
+
+size_t GameObjectManager::SetAllCollisionShapeRenderEnabled(bool enabled_)
+{
+    size_t changedCount_ = 0;
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_) continue;
+        for (const std::shared_ptr<ColliderComponent>& collider_ :
+            object_->GetComponents<ColliderComponent>())
+        {
+            if (!collider_) continue;
+            collider_->shapeRenderEnabled = enabled_;
+            ++changedCount_;
+        }
+    }
+    return changedCount_;
+}
+
+size_t GameObjectManager::SetCollisionShapeRenderEnabledInHierarchy(
+    const std::string& rootObjectName_,
+    bool enabled_,
+    bool includeChildren_)
+{
+    size_t changedCount_ = 0;
+    std::vector<std::shared_ptr<GameObject>> pendingObjects_;
+    const std::shared_ptr<GameObject> rootObject_ = Find(rootObjectName_);
+    if (!rootObject_) return 0;
+
+    pendingObjects_.push_back(rootObject_);
+    while (!pendingObjects_.empty())
+    {
+        const std::shared_ptr<GameObject> object_ = pendingObjects_.back();
+        pendingObjects_.pop_back();
+        if (!object_) continue;
+
+        for (const std::shared_ptr<ColliderComponent>& collider_ :
+            object_->GetComponents<ColliderComponent>())
+        {
+            if (!collider_) continue;
+            collider_->shapeRenderEnabled = enabled_;
+            ++changedCount_;
+        }
+
+        if (!includeChildren_ || !object_->transform) continue;
+        for (const std::shared_ptr<Transform>& childTransform_ :
+            object_->transform->children)
+        {
+            if (!childTransform_) continue;
+            if (const std::shared_ptr<GameObject> childObject_ =
+                childTransform_->gameObject.lock())
+            {
+                pendingObjects_.push_back(childObject_);
+            }
+        }
+    }
+
+    return changedCount_;
+}
+
+size_t GameObjectManager::CountAllCollisionShapes()
+{
+    size_t colliderCount_ = 0;
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (!object_) continue;
+        colliderCount_ += object_->GetComponents<ColliderComponent>().size();
+    }
+    return colliderCount_;
+}
+
+size_t GameObjectManager::CountCollisionShapesInHierarchy(
+    const std::string& rootObjectName_,
+    bool includeChildren_)
+{
+    size_t colliderCount_ = 0;
+    std::vector<std::shared_ptr<GameObject>> pendingObjects_;
+    const std::shared_ptr<GameObject> rootObject_ = Find(rootObjectName_);
+    if (!rootObject_) return 0;
+
+    pendingObjects_.push_back(rootObject_);
+    while (!pendingObjects_.empty())
+    {
+        const std::shared_ptr<GameObject> object_ = pendingObjects_.back();
+        pendingObjects_.pop_back();
+        if (!object_) continue;
+
+        colliderCount_ += object_->GetComponents<ColliderComponent>().size();
+
+        if (!includeChildren_ || !object_->transform) continue;
+        for (const std::shared_ptr<Transform>& childTransform_ :
+            object_->transform->children)
+        {
+            if (!childTransform_) continue;
+            if (const std::shared_ptr<GameObject> childObject_ =
+                childTransform_->gameObject.lock())
+            {
+                pendingObjects_.push_back(childObject_);
+            }
+        }
+    }
+
+    return colliderCount_;
 }
 
 std::vector<std::string> GetSceneDirectories()
@@ -1429,9 +1533,15 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
         {
             BS_PROFILE_SCOPE("LoadScene::EnqueueLoadGroup");
             // SceneListに記載されている名前の順にロード
+            std::unordered_set<std::string> loadedObjectNames_;
             for (const auto& name : listJson["ObjectList"]) {
                 BS_PROFILE_SCOPE("LoadScene::LoadObject");
                 std::string objName = name.get<std::string>();
+                if (!loadedObjectNames_.insert(objName).second)
+                {
+                    BS_LOG_WARNING(LOG_CATEGORY::CORE, "LoadScene skipped duplicate ObjectList entry: " + objName);
+                    continue;
+                }
                 std::string filePath = basePath + "Objects/" + objName + ".json";
 
                 std::ifstream file(filePath);
@@ -1704,6 +1814,3 @@ void GameObjectManager::EnsureGlobalActionObjects()
         eventPool_->GetOrAddComponent<ActionSequence>(false);
     if (sequence_) sequence_->SetRegisterGlobal(true);
 }
-
-
-

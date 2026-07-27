@@ -5,12 +5,14 @@
                 "ActionPrefix": "",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 593,
+                "AttackInstanceId": 33,
                 "AttackSourceType": 0,
                 "AttackTag": "DamageBox",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
                 "CanHitOwner": false,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
@@ -70,8 +72,12 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitBox"
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -87,8 +93,12 @@
                 "RearmInterval": 0.800000011920929
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DebugHitHistoryResetComponent"
+            "TypeName": "DebugHitHistoryResetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 0,

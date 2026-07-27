@@ -18,6 +18,7 @@ class HitBox;
 struct AttackEffectSpawnTemplate;
 struct AttackTemplate;
 
+// Particle生成時に使用するAsset、位置、再生対象Emitterをまとめる
 struct ParticleSpawnRequest
 {
     std::string assetPath;
@@ -28,6 +29,7 @@ struct ParticleSpawnRequest
     float normalOffset = 0.0f;
 };
 
+// MeshVFX生成時に使用するAsset、位置、寿命をまとめる
 struct MeshVFXSpawnRequest
 {
     std::string assetPath;
@@ -37,6 +39,7 @@ struct MeshVFXSpawnRequest
     float normalOffset = 0.0f;
 };
 
+// Decal生成時に使用するTexture、姿勢、フェード設定をまとめる
 struct DecalSpawnRequest
 {
     std::string texturePath;
@@ -49,6 +52,7 @@ struct DecalSpawnRequest
     float normalOffset = 0.01f;
 };
 
+// ヒット位置に発生させるParticle、MeshVFX、Decalの設定をまとめる
 struct ImpactEffectSpawnRequest
 {
     DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
@@ -61,6 +65,7 @@ struct ImpactEffectSpawnRequest
     DecalSpawnRequest decal;
 };
 
+// 攻撃演出のVFX、追従、HitBox設定をまとめる
 struct SlashEffectSpawnSetting
 {
     std::string vfxPath;
@@ -91,6 +96,7 @@ struct SlashEffectSpawnSetting
     bool mirror = false;
 };
 
+// 攻撃演出の生成設定と発生元情報をまとめる
 struct AttackEffectSpawnRequest
 {
     SlashEffectSpawnSetting setting;
@@ -98,6 +104,7 @@ struct AttackEffectSpawnRequest
     uint32_t attackInstanceId = 0u;
 };
 
+// Effect Asset一覧で表示、解決するためのキーとファイルパスを保持する
 struct EffectAssetEntry
 {
     std::string key;
@@ -108,6 +115,7 @@ struct EffectAssetEntry
 void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_);
 void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_);
 
+// Particle、MeshVFX、Decal、攻撃演出を生成・再利用する管理クラス
 class EffectManager
 {
 public:
@@ -216,6 +224,7 @@ private:
         bool active = false;
     };
 
+    // ParticleとMeshVFXを時間軸TrackとしてまとめたVFX Sequence Asset
     struct VFXSequenceAsset
     {
         ParticleEffectAsset particleAsset;
@@ -227,6 +236,7 @@ private:
         bool hasMeshVFX = false;
     };
 
+    // 生成済みEffectの寿命、HitBox有効時間、Pool種別を管理する
     struct ManagedEffect
     {
         std::weak_ptr<GameObject> object;
@@ -243,6 +253,7 @@ private:
         std::vector<VFXSequenceTrack> sequenceTracks;
     };
 
+    // spawnTimeまで遅延して生成する攻撃演出を保持する
     struct ScheduledAttackEffect
     {
         AttackEffectSpawnRequest request;
@@ -250,10 +261,12 @@ private:
     };
 
 private:
+    // 発生位置を法線方向へ指定距離だけ移動する
     DirectX::XMFLOAT3 ApplyNormalOffset(
         const DirectX::XMFLOAT3& position_,
         const DirectX::XMFLOAT3& normal_,
         float normalOffset_) const;
+    // 生成済みEffectを寿命管理対象として登録する
     void RegisterManagedEffect(
         const std::shared_ptr<GameObject>& object_,
         float lifeTime_,
@@ -262,43 +275,60 @@ private:
         float hitEndTime_ = 0.0f,
         EFFECT_POOL_TYPE poolType_ = EFFECT_POOL_TYPE::NONE,
         const std::string& assetPath_ = {});
+    // PoolからParticle用GameObjectを取得する
     std::shared_ptr<GameObject> AcquireParticleObject(
         const std::string& resolvedAssetPath_);
+    // PoolからMeshVFX用GameObjectを取得する
     std::shared_ptr<GameObject> AcquireMeshVFXObject(
         const std::string& resolvedAssetPath_);
+    // Particle Assetを設定したPool用GameObjectを生成する
     std::shared_ptr<GameObject> CreateParticlePoolObject(
         const std::string& resolvedAssetPath_,
         const ParticleEffectAsset& asset_);
+    // MeshVFX Assetを設定したPool用GameObjectを生成する
     std::shared_ptr<GameObject> CreateMeshVFXPoolObject(
         const std::string& resolvedAssetPath_,
         const MeshVFXAsset& asset_);
+    // PoolからVFX Sequence用GameObjectを取得する
     std::shared_ptr<GameObject> AcquireVFXSequenceObject(
         const std::string& resolvedAssetPath_);
+    // VFX Sequence Assetを設定したPool用GameObjectを生成する
     std::shared_ptr<GameObject> CreateVFXSequencePoolObject(
         const std::string& resolvedAssetPath_,
         const VFXSequenceAsset& asset_);
+    // VFX Sequence Assetを時間軸つきEffectとして生成する
     std::shared_ptr<GameObject> SpawnVFXSequence(
         const MeshVFXSpawnRequest& request_,
         const std::string& resolvedAssetPath_);
+    // VFX SequenceのTrack時間に合わせてParticleとMeshVFXを再生する
     void UpdateVFXSequence(ManagedEffect& effect_);
+    // Pool対象のEffectを停止し、再利用できる状態へ戻す
     void ReleasePooledEffect(ManagedEffect& effect_);
+    // 指定フォルダ以下のJSON Assetパスを収集する
     void CollectJsonAssets(
         const std::string& rootPath_,
         std::vector<std::string>& paths_) const;
+    // Assetパスから表示用Entryと名前解決用Mapを構築する
     void BuildAssetNameMap(
         const std::vector<std::string>& paths_,
         const std::string& rootPath_,
         std::vector<EffectAssetEntry>& entries_,
         std::vector<std::string>& keys_,
         std::unordered_map<std::string, std::string>& pathByKey_) const;
+    // Asset名やファイル名からフルパスへ解決するためのキーを登録する
     void RegisterAssetKey(
         const std::string& key_,
         const std::string& fullPath_,
         std::unordered_map<std::string, std::string>& pathByKey_) const;
+    // Particle Assetを読み込み、CacheとPoolを準備する
     void PreloadParticleAsset(const std::string& path_);
+    // MeshVFX Assetを読み込み、CacheとPoolを準備する
     void PreloadMeshVFXAsset(const std::string& path_);
+    // VFX Sequence Assetを読み込み、CacheとPoolを準備する
     void PreloadVFXSequenceAsset(const std::string& path_);
+    // Impact Effect Assetを読み込み、Cacheへ登録する
     void PreloadImpactEffectAsset(const std::string& path_);
+    // AssetパスからData配下基準のAsset名を生成する
     std::string BuildAssetNameFromPath(
         const std::string& path_,
         const std::string& rootPath_) const;

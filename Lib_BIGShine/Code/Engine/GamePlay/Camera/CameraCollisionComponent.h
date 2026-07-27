@@ -2,6 +2,7 @@
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -38,6 +39,8 @@ private:
     void ApplyCameraPose(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_);
+    static uint32_t GetDefaultCollisionLayerMask();
+    void DrawCollisionLayerMaskGui();
 
 private:
     std::weak_ptr<CameraComponent> camera;
@@ -48,6 +51,7 @@ private:
     std::string ignoreLockOnTargetName;
 
     float collisionOffset = 0.15f;
+    uint32_t cameraCollisionLayerMask = GetDefaultCollisionLayerMask();
     float minimumCameraDistance = 0.05f;
     float probeRadius = 0.3f;
     bool includeDynamicColliders = true;
@@ -62,4 +66,8 @@ private:
     float debugDesiredDistance = 0.0f;
     float debugCorrectedDistance = 0.0f;
     float debugCompressionRate = 0.0f;
+    mutable std::string debugLastHitObjectName;
+    mutable std::string debugLastHitColliderName;
+    mutable uint32_t debugLastHitLayer = 0u;
+    mutable bool debugLastHitAccepted = false;
 };

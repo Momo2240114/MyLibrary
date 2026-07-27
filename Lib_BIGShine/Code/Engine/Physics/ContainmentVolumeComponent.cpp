@@ -253,6 +253,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     const PxU32 ownerId_ = static_cast<PxU32>(reinterpret_cast<uintptr_t>(this) & 0x7FFFFFFF);
     filterData_.word3 = ownerId_ | PHYSICS_RESPONSE_BIT;
     shape_->setSimulationFilterData(filterData_);
+    shape_->setQueryFilterData(filterData_);
 
     scene_->addActor(*actor);
 

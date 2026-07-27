@@ -1,0 +1,102 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "RightWingFingerB1HurtBox",
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 0.75,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "PlainsDragon_WingR_FingerB_1",
+                "GravityScale": 1.0,
+                "HalfHeight": 5.0,
+                "HurtTag": "RIGHT_WING",
+                "InvincibilityDuration": 0.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "TestTarget",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 34.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "PlainsDragon_WingR_Hand",
+                "SyncCharacterColliderShape": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 40,
+                "targetStartNodeName": "PlainsDragon_WingR_Hand"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "BodyPart": "RIGHT_WING",
+                "CombatOwnerObjectName": "TestTarget"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 2,
+    "Name": "RightWingFingerB1Part",
+    "ParentName": "RightWingRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

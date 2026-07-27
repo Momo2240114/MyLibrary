@@ -104,10 +104,12 @@ void EffectManager::Initialize(GameObjectManager* gameObjectManager_)
     PreloadAllEffects();
 }
 
+// 遅延中の攻撃演出と生成済みEffectの寿命を更新する
 void EffectManager::Update(float deltaTime_)
 {
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
 
+    // spawnTimeが設定された攻撃演出を生成可能になるまで進める
     for (ScheduledAttackEffect& scheduledEffect_ : scheduledAttackEffects)
     {
         scheduledEffect_.timeRemaining -= safeDeltaTime_;
@@ -135,6 +137,7 @@ void EffectManager::Update(float deltaTime_)
         SpawnSlashEffect(readyRequest_);
     }
 
+    // 管理中Effectの寿命、Sequence時間、HitBox有効時間を更新する
     for (ManagedEffect& effect_ : managedEffects)
     {
         effect_.lifeTimer -= safeDeltaTime_;
@@ -154,6 +157,7 @@ void EffectManager::Update(float deltaTime_)
         }
     }
 
+    // 寿命が終わったEffectをPoolへ戻すかGameObjectとして破棄する
     managedEffects.erase(
         std::remove_if(
             managedEffects.begin(),
@@ -178,6 +182,7 @@ void EffectManager::Update(float deltaTime_)
         managedEffects.end());
 }
 
+// 管理中Effectを解放し、遅延生成待ちの攻撃演出を消去する
 void EffectManager::Clear()
 {
     for (ManagedEffect& effect_ : managedEffects)
@@ -191,6 +196,7 @@ void EffectManager::Clear()
     scheduledAttackEffects.clear();
 }
 
+// Effect用AssetフォルダからJSON Asset一覧を収集する
 void EffectManager::RefreshAssetCache()
 {
     CollectJsonAssets("Data/Particle", particleAssetPaths);
@@ -199,6 +205,7 @@ void EffectManager::RefreshAssetCache()
     CollectJsonAssets("Data/ImpactEffect", impactEffectAssetPaths);
 }
 
+// 収集したAssetパスから名前解決用のMapを作成する
 void EffectManager::BuildAssetNameMap()
 {
     BuildAssetNameMap(
@@ -227,6 +234,7 @@ void EffectManager::BuildAssetNameMap()
         impactEffectPathByKey);
 }
 
+// 登録済みEffect Assetを読み込み、Runtime用CacheとPoolを作成する
 void EffectManager::PreloadAllEffects()
 {
     Clear();
@@ -257,6 +265,7 @@ void EffectManager::PreloadAllEffects()
     }
 }
 
+// Cache済みAssetからRuntime用Poolを作り直す
 void EffectManager::RebuildRuntimePools()
 {
     particleObjectPool.clear();
@@ -327,6 +336,7 @@ void EffectManager::RebuildRuntimePools()
         vfxSequenceObjectPool.size());
 }
 
+// Particle Asset名またはパスを実際のJSONパスへ解決する
 std::string EffectManager::ResolveParticlePath(const std::string& assetNameOrPath_) const
 {
     if (assetNameOrPath_.empty()) return {};
@@ -349,6 +359,7 @@ std::string EffectManager::ResolveParticlePath(const std::string& assetNameOrPat
     return assetNameOrPath_;
 }
 
+// MeshVFX Asset名またはパスを実際のJSONパスへ解決する
 std::string EffectManager::ResolveMeshVFXPath(const std::string& assetNameOrPath_) const
 {
     if (assetNameOrPath_.empty()) return {};
@@ -371,6 +382,7 @@ std::string EffectManager::ResolveMeshVFXPath(const std::string& assetNameOrPath
     return assetNameOrPath_;
 }
 
+// VFX Sequence Asset名またはパスを実際のJSONパスへ解決する
 std::string EffectManager::ResolveVFXSequencePath(
     const std::string& assetNameOrPath_) const
 {
@@ -396,6 +408,7 @@ std::string EffectManager::ResolveVFXSequencePath(
     return {};
 }
 
+// Impact Effect Asset名またはパスを実際のJSONパスへ解決する
 std::string EffectManager::ResolveImpactEffectPath(
     const std::string& assetNameOrPath_) const
 {
@@ -419,6 +432,7 @@ std::string EffectManager::ResolveImpactEffectPath(
     return {};
 }
 
+// Particle Assetを取得し、指定位置でEmitterを再生する
 std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     const ParticleSpawnRequest& request_)
 {
@@ -453,6 +467,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     particle_->SetEnabled(true);
     particle_->ResetRuntime();
 
+    // Emitter名が指定されている場合は単体Emitterを優先して再生する
     bool played_ = false;
     if (!request_.emitterName.empty())
     {
@@ -483,6 +498,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     return object_;
 }
 
+// 攻撃用MeshVFXを生成し、必要に応じてHitBoxを設定する
 std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     const AttackEffectSpawnRequest& request_)
 {
@@ -512,6 +528,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     {
         localScale_.x *= -1.0f;
     }
+    // 攻撃者の姿勢を基準に、演出用のローカル姿勢をワールドへ反映する
     const XMMATRIX localMatrix_ =
         XMMatrixScaling(
             localScale_.x,
@@ -561,6 +578,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     std::shared_ptr<HitBox> hitBox_;
     if (request_.setting.hasHitBox)
     {
+        // 攻撃元と同じAttackInstanceIdを使用して同一攻撃のHit管理へ接続する
         uint32_t attackInstanceId_ = request_.attackInstanceId;
         std::shared_ptr<HitBox> sourceHitBox_;
         if (request_.ownerObject != nullptr)
@@ -603,6 +621,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
         }
     }
 
+    // Effectの寿命管理情報へHitBoxの有効時間を設定する
     for (ManagedEffect& effect_ : managedEffects)
     {
         if (effect_.object.lock() == object_)
@@ -622,6 +641,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     return SpawnSlashEffect(request_);
 }
 
+// AttackTemplateとEffectTemplateから攻撃判定付きのRuntime Effectを生成する
 std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     const AttackEffectSpawnTemplate& effectTemplate_,
     const AttackTemplate& attackTemplate_,
@@ -634,6 +654,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     object_->SetNoSaveObject();
 
     using namespace DirectX;
+    // 攻撃者の姿勢を基準にEffectTemplateのローカル姿勢を反映する
     const XMMATRIX localMatrix_ =
         XMMatrixScaling(effectTemplate_.localScale.x, effectTemplate_.localScale.y, effectTemplate_.localScale.z) *
         XMMatrixRotationRollPitchYaw(
@@ -655,10 +676,11 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     {
         object_->transform->ApplyWorldMatrix(localMatrix_ * ownerMatrix_);
     }
-    object_->UpdateTransform();
+        object_->UpdateTransform();
 
     if (!effectTemplate_.particlePath.empty())
     {
+        // EffectTemplateに設定されたParticle AssetをRuntime Effectへ追加する
         const std::string resolvedParticlePath_ =
             ResolveParticlePath(effectTemplate_.particlePath);
         const ParticleEffectAsset* particleAsset_ =
@@ -680,6 +702,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     }
     if (!effectTemplate_.meshVfxPath.empty())
     {
+        // EffectTemplateに設定されたMeshVFX AssetをRuntime Effectへ追加する
         const std::string resolvedMeshVFXPath_ =
             ResolveMeshVFXPath(effectTemplate_.meshVfxPath);
         const MeshVFXAsset* meshVFXAsset_ =
@@ -703,6 +726,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
     std::shared_ptr<AttackEffectHitComponent> attackHit_ = object_->AddComponent<AttackEffectHitComponent>();
     if (attackHit_)
     {
+        // AttackTemplateの攻撃性能をEffect側のHit処理へ渡す
         attackHit_->SetOwner(ownerObject_);
         attackHit_->SetAttackInstanceId(attackInstanceId_);
         attackHit_->SetHitGroupId(attackTemplate_.hitGroupId);
@@ -749,6 +773,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnEffectWithHitBox(
     return SpawnSlashEffect(hitBoxRequest_);
 }
 
+// MeshVFXまたはVFX Sequenceを生成し、寿命管理対象として登録する
 std::shared_ptr<GameObject> EffectManager::SpawnMeshVFX(
     const MeshVFXSpawnRequest& request_)
 {
@@ -837,6 +862,7 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
     }
 }
 
+// 指定TextureのDecalを生成し、寿命とフェード時間を設定する
 std::shared_ptr<GameObject> EffectManager::SpawnDecal(
     const DecalSpawnRequest& request_)
 {
@@ -884,6 +910,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnDecal(
     return object_;
 }
 
+// 指定された有効フラグに従ってParticle、MeshVFX、Decalをまとめて生成する
 void EffectManager::SpawnImpactEffect(const ImpactEffectSpawnRequest& request_)
 {
     if (request_.spawnParticle && !request_.particle.assetPath.empty())
@@ -909,6 +936,7 @@ void EffectManager::SpawnImpactEffect(const ImpactEffectSpawnRequest& request_)
     }
 }
 
+// Impact Effect Assetを読み込み済みCacheから取得し、ヒット位置へ生成する
 void EffectManager::SpawnImpactEffectAsset(
     const std::string& assetNameOrPath_,
     const DirectX::XMFLOAT3& position_,
@@ -962,6 +990,7 @@ void EffectManager::SpawnImpactEffectAsset(
     }
 }
 
+// 管理中Effectを停止し、Pool対象の場合は再利用状態へ戻す
 void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_)
 {
     if (!object_) return;
@@ -986,6 +1015,7 @@ void EffectManager::StopEffect(const std::shared_ptr<GameObject>& object_)
     managedEffects.erase(iterator_);
 }
 
+// 位置を法線方向へずらし、Effectが面から浮くようにする
 DirectX::XMFLOAT3 EffectManager::ApplyNormalOffset(
     const DirectX::XMFLOAT3& position_,
     const DirectX::XMFLOAT3& normal_,
@@ -1009,6 +1039,7 @@ DirectX::XMFLOAT3 EffectManager::ApplyNormalOffset(
     return result_;
 }
 
+// 生成済みEffectを寿命、HitBox時間、Pool情報と一緒に管理リストへ登録する
 void EffectManager::RegisterManagedEffect(
     const std::shared_ptr<GameObject>& object_,
     float lifeTime_,
@@ -1035,6 +1066,7 @@ void EffectManager::RegisterManagedEffect(
     managedEffects.push_back(managedEffect_);
 }
 
+// Particle用GameObjectをPoolから取り出す
 std::shared_ptr<GameObject> EffectManager::AcquireParticleObject(
     const std::string& resolvedAssetPath_)
 {
@@ -1061,6 +1093,7 @@ std::shared_ptr<GameObject> EffectManager::AcquireParticleObject(
     return nullptr;
 }
 
+// MeshVFX用GameObjectをPoolから取り出す
 std::shared_ptr<GameObject> EffectManager::AcquireMeshVFXObject(
     const std::string& resolvedAssetPath_)
 {
@@ -1087,6 +1120,7 @@ std::shared_ptr<GameObject> EffectManager::AcquireMeshVFXObject(
     return nullptr;
 }
 
+// ParticleComponentにAssetを設定した非保存GameObjectをPool用に作成する
 std::shared_ptr<GameObject> EffectManager::CreateParticlePoolObject(
     const std::string& resolvedAssetPath_,
     const ParticleEffectAsset& asset_)
@@ -1116,6 +1150,7 @@ std::shared_ptr<GameObject> EffectManager::CreateParticlePoolObject(
     return object_;
 }
 
+// MeshVFXComponentにAssetを設定した非保存GameObjectをPool用に作成する
 std::shared_ptr<GameObject> EffectManager::CreateMeshVFXPoolObject(
     const std::string& resolvedAssetPath_,
     const MeshVFXAsset& asset_)
@@ -1146,6 +1181,7 @@ std::shared_ptr<GameObject> EffectManager::CreateMeshVFXPoolObject(
     return object_;
 }
 
+// VFX Sequence用GameObjectをPoolから取り出す
 std::shared_ptr<GameObject> EffectManager::AcquireVFXSequenceObject(
     const std::string& resolvedAssetPath_)
 {
@@ -1177,6 +1213,7 @@ std::shared_ptr<GameObject> EffectManager::AcquireVFXSequenceObject(
     return nullptr;
 }
 
+// VFX Sequence用にParticleComponentとMeshVFXComponentを持つGameObjectを作成する
 std::shared_ptr<GameObject> EffectManager::CreateVFXSequencePoolObject(
     const std::string& resolvedAssetPath_,
     const VFXSequenceAsset& asset_)
@@ -1236,6 +1273,7 @@ std::shared_ptr<GameObject> EffectManager::CreateVFXSequencePoolObject(
     return object_;
 }
 
+// VFX Sequenceを生成位置へ配置し、Track情報を寿命管理へ登録する
 std::shared_ptr<GameObject> EffectManager::SpawnVFXSequence(
     const MeshVFXSpawnRequest& request_,
     const std::string& resolvedAssetPath_)
@@ -1290,6 +1328,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnVFXSequence(
     return object_;
 }
 
+// Sequence時間に入ったTrackを再生し、時間外になったParticle Trackを停止する
 void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
 {
     const std::shared_ptr<GameObject> object_ = effect_.object.lock();
@@ -1315,6 +1354,7 @@ void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
         }
     }
 
+    // 各Trackの開始時間とDurationを使用して再生状態を切り替える
     bool meshTrackActive_ = false;
     for (VFXSequenceTrack& track_ : effect_.sequenceTracks)
     {
@@ -1373,6 +1413,7 @@ void EffectManager::UpdateVFXSequence(ManagedEffect& effect_)
     }
 }
 
+// Poolへ戻すEffectのComponentとTransformを初期状態へ戻す
 void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
 {
     const std::shared_ptr<GameObject> object_ = effect_.object.lock();
@@ -1413,6 +1454,7 @@ void EffectManager::ReleasePooledEffect(ManagedEffect& effect_)
     if (gameObjectManager) gameObjectManager->DetachObject(object_);
 }
 
+// 指定フォルダ以下のJSONファイルをAsset候補として収集する
 void EffectManager::CollectJsonAssets(
     const std::string& rootPath_,
     std::vector<std::string>& paths_) const
@@ -1438,6 +1480,7 @@ void EffectManager::CollectJsonAssets(
     std::sort(paths_.begin(), paths_.end());
 }
 
+// Asset一覧表示用Entryと、複数形式の名前から引けるPath Mapを構築する
 void EffectManager::BuildAssetNameMap(
     const std::vector<std::string>& paths_,
     const std::string& rootPath_,
@@ -1488,6 +1531,7 @@ void EffectManager::BuildAssetNameMap(
     }
 }
 
+// Asset解決用Mapにキーを登録し、重複時は既存の解決先を保持する
 void EffectManager::RegisterAssetKey(
     const std::string& key_,
     const std::string& fullPath_,
@@ -1512,6 +1556,7 @@ void EffectManager::RegisterAssetKey(
     }
 }
 
+// Particle AssetをCacheへ読み込み、初期Poolを作成する
 void EffectManager::PreloadParticleAsset(const std::string& path_)
 {
     ParticleEffectAsset asset_{};
@@ -1535,6 +1580,7 @@ void EffectManager::PreloadParticleAsset(const std::string& path_)
     }
 }
 
+// MeshVFX AssetをCacheへ読み込み、初期Poolを作成する
 void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
 {
     MeshVFXComponent component_;
@@ -1559,6 +1605,7 @@ void EffectManager::PreloadMeshVFXAsset(const std::string& path_)
     }
 }
 
+// VFX Sequence Assetを読み込み、Track情報と初期Poolを作成する
 void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
 {
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
@@ -1584,6 +1631,7 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
     asset_.duration = (std::max)(json_.value("Duration", 1.0f), 0.001f);
     asset_.loop = json_.value("Loop", false);
 
+    // Sequence内に埋め込まれたParticleとMeshVFXの設定を復元する
     if (json_.contains("Particle") && json_["Particle"].is_object())
     {
         ParticleComponent component_;
@@ -1600,6 +1648,7 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
     }
     if (json_.contains("Tracks") && json_["Tracks"].is_array())
     {
+        // Editorで設定されたTrack時間をRuntime用Trackへ変換する
         for (const nlohmann::json& trackJson_ : json_["Tracks"])
         {
             VFXSequenceTrack track_{};
@@ -1613,6 +1662,7 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
     if (!asset_.hasParticle && !asset_.hasMeshVFX) return;
     if (asset_.tracks.empty())
     {
+        // Track未設定のAssetは保持しているEffect種別を全時間再生対象にする
         if (asset_.hasParticle)
         {
             VFXSequenceTrack track_{};
@@ -1643,6 +1693,7 @@ void EffectManager::PreloadVFXSequenceAsset(const std::string& path_)
     }
 }
 
+// Impact Effect AssetをCacheへ読み込む
 void EffectManager::PreloadImpactEffectAsset(const std::string& path_)
 {
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
@@ -1665,6 +1716,7 @@ void EffectManager::PreloadImpactEffectAsset(const std::string& path_)
     }
 }
 
+// Data配下のAssetパスを名前解決に使う相対キーへ変換する
 std::string EffectManager::BuildAssetNameFromPath(
     const std::string& path_,
     const std::string& rootPath_) const
