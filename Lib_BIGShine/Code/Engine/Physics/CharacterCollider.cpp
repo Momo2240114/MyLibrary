@@ -28,11 +28,16 @@ void CharacterCollider::Gui()
     ImGui::DragFloat("Ground Snap Distance", &groundSnapDistance, 0.01f, 0.0f, 5.0f);
     ImGui::Checkbox("Limit Horizontal Lift", &limitHorizontalLift);
     ImGui::DragFloat("Max Horizontal Lift", &maxHorizontalLift, 0.01f, 0.0f, 5.0f);
+    ImGui::Checkbox("Slide Off Non Ground", &slideOffNonGround);
+    ImGui::DragFloat("Non Ground Slide Speed", &nonGroundSlideSpeed, 0.01f, 0.0f, 20.0f);
+    ImGui::DragFloat("Non Ground Lift", &nonGroundLift, 0.001f, 0.0f, 1.0f);
 
     stepOffset = (std::max)(stepOffset, 0.0f);
     contactOffset = (std::max)(contactOffset, 0.001f);
     groundSnapDistance = (std::max)(groundSnapDistance, 0.0f);
     maxHorizontalLift = (std::max)(maxHorizontalLift, 0.0f);
+    nonGroundSlideSpeed = (std::max)(nonGroundSlideSpeed, 0.0f);
+    nonGroundLift = (std::max)(nonGroundLift, 0.0f);
     if (recreateController_)
     {
         RecreatePhysXActor();
@@ -47,6 +52,9 @@ void CharacterCollider::Serialize(nlohmann::json& json_) const
     json_["GroundSnapDistance"] = groundSnapDistance;
     json_["LimitHorizontalLift"] = limitHorizontalLift;
     json_["MaxHorizontalLift"] = maxHorizontalLift;
+    json_["SlideOffNonGround"] = slideOffNonGround;
+    json_["NonGroundSlideSpeed"] = nonGroundSlideSpeed;
+    json_["NonGroundLift"] = nonGroundLift;
 }
 
 void CharacterCollider::Deserialize(const nlohmann::json& j_)
@@ -57,6 +65,9 @@ void CharacterCollider::Deserialize(const nlohmann::json& j_)
     groundSnapDistance = (std::max)(j_.value("GroundSnapDistance", 0.9f), 0.0f);
     limitHorizontalLift = j_.value("LimitHorizontalLift", true);
     maxHorizontalLift = (std::max)(j_.value("MaxHorizontalLift", 0.05f), 0.0f);
+    slideOffNonGround = j_.value("SlideOffNonGround", true);
+    nonGroundSlideSpeed = (std::max)(j_.value("NonGroundSlideSpeed", 3.0f), 0.0f);
+    nonGroundLift = (std::max)(j_.value("NonGroundLift", 0.16f), 0.0f);
     EnforceCharacterSettings();
 }
 

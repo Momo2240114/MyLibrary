@@ -54,6 +54,13 @@ struct AttackHitEvent
     float hitSoundVolume = 1.0f;
     bool hitSoundMuffled = false;
     float hitSoundMuffledCutoff = 1200.0f;
+    bool cameraShakeEnabled = false;
+    float cameraShakeReceiveDuration = 0.0f;
+    float cameraShakeReceivePositionStrength = 0.0f;
+    float cameraShakeReceiveRotationStrength = 0.0f;
+    float cameraShakeAttackScale = 0.5f;
+    float cameraShakeFrequency = 24.0f;
+    int cameraShakePriority = 0;
 };
 
 class AttackSystem
@@ -90,6 +97,7 @@ private:
     std::shared_ptr<GameObject> GetHierarchyRoot(
         std::shared_ptr<GameObject> object_) const;
     void PublishHitToBlackboard(const AttackHitEvent& event_);
+    void PlayCameraShake(const AttackHitEvent& event_) const;
 
 private:
     std::vector<AttackHitEvent> frameHitEvents;

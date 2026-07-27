@@ -64,6 +64,12 @@ namespace
             if (name_ == "FROM_EFFECT_TO_TARGET") return Enum_::FROM_EFFECT_TO_TARGET;
             return Enum_::OWNER_FORWARD;
         }
+        if constexpr (std::is_same_v<Enum_, CAMERA_SHAKE_POWER_LEVEL>)
+        {
+            if (name_ == "MEDIUM") return Enum_::MEDIUM;
+            if (name_ == "HEAVY") return Enum_::HEAVY;
+            return Enum_::MINIMUM;
+        }
         if constexpr (std::is_same_v<Enum_, ATTACK_EFFECT_TYPE>)
         {
             if (name_ == "PROJECTILE") return Enum_::PROJECTILE;
@@ -89,6 +95,34 @@ namespace
     void DrawVector3(const char* label_, DirectX::XMFLOAT3& value_)
     {
         ImGui::DragFloat3(label_, &value_.x, 0.01f);
+    }
+
+    void ApplyCameraShakePowerLevel(AttackCameraShakeTemplate& cameraShake_)
+    {
+        switch (cameraShake_.powerLevel)
+        {
+        case CAMERA_SHAKE_POWER_LEVEL::MEDIUM:
+            cameraShake_.receiveDuration = 0.18f;
+            cameraShake_.receivePositionStrength = 0.055f;
+            cameraShake_.receiveRotationStrength = 0.45f;
+            cameraShake_.priority = 8;
+            break;
+        case CAMERA_SHAKE_POWER_LEVEL::HEAVY:
+            cameraShake_.receiveDuration = 0.24f;
+            cameraShake_.receivePositionStrength = 0.085f;
+            cameraShake_.receiveRotationStrength = 0.75f;
+            cameraShake_.priority = 12;
+            break;
+        case CAMERA_SHAKE_POWER_LEVEL::MINIMUM:
+        default:
+            cameraShake_.receiveDuration = 0.12f;
+            cameraShake_.receivePositionStrength = 0.025f;
+            cameraShake_.receiveRotationStrength = 0.18f;
+            cameraShake_.priority = 5;
+            break;
+        }
+        cameraShake_.attackScale = 0.5f;
+        cameraShake_.frequency = 24.0f;
     }
 
     void DrawAssetPathCombo(
@@ -371,6 +405,22 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.knockBackType = ReadEnum(attack_, "knockBackType", KNOCK_BACK_TYPE::OWNER_FORWARD);
     result_.hitGroupId = attack_.value("hitGroupId", 0u);
     result_.allowMultiHit = attack_.value("allowMultiHit", false);
+    const Json_ cameraShake_ = json_.value("cameraShake", Json_::object());
+    result_.cameraShake.enabled = cameraShake_.value("enabled", true);
+    result_.cameraShake.powerLevel =
+        ReadEnum(cameraShake_, "powerLevel", CAMERA_SHAKE_POWER_LEVEL::MINIMUM);
+    ApplyCameraShakePowerLevel(result_.cameraShake);
+    result_.cameraShake.receiveDuration =
+        (std::max)(cameraShake_.value("receiveDuration", result_.cameraShake.receiveDuration), 0.0f);
+    result_.cameraShake.receivePositionStrength =
+        (std::max)(cameraShake_.value("receivePositionStrength", result_.cameraShake.receivePositionStrength), 0.0f);
+    result_.cameraShake.receiveRotationStrength =
+        (std::max)(cameraShake_.value("receiveRotationStrength", result_.cameraShake.receiveRotationStrength), 0.0f);
+    result_.cameraShake.attackScale =
+        (std::clamp)(cameraShake_.value("attackScale", result_.cameraShake.attackScale), 0.0f, 1.0f);
+    result_.cameraShake.frequency =
+        (std::max)(cameraShake_.value("frequency", result_.cameraShake.frequency), 0.0f);
+    result_.cameraShake.priority = cameraShake_.value("priority", result_.cameraShake.priority);
     const Json_ weapon_ = json_.value("weaponHitBox", Json_::object());
     result_.weaponHitBox.enabled = weapon_.value("enabled", false);
     result_.weaponHitBox.hitBoxName = weapon_.value("hitBoxName", std::string("HitBox"));
@@ -522,6 +572,14 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
             { "knockBackType", static_cast<int>(attackTemplate_.knockBackType) },
             { "hitGroupId", attackTemplate_.hitGroupId },
             { "allowMultiHit", attackTemplate_.allowMultiHit } } },
+        { "cameraShake", { { "enabled", attackTemplate_.cameraShake.enabled },
+            { "powerLevel", static_cast<int>(attackTemplate_.cameraShake.powerLevel) },
+            { "receiveDuration", attackTemplate_.cameraShake.receiveDuration },
+            { "receivePositionStrength", attackTemplate_.cameraShake.receivePositionStrength },
+            { "receiveRotationStrength", attackTemplate_.cameraShake.receiveRotationStrength },
+            { "attackScale", attackTemplate_.cameraShake.attackScale },
+            { "frequency", attackTemplate_.cameraShake.frequency },
+            { "priority", attackTemplate_.cameraShake.priority } } },
         { "weaponHitBox", { { "enabled", attackTemplate_.weaponHitBox.enabled },
             { "hitBoxName", attackTemplate_.weaponHitBox.hitBoxName },
             { "startNodeName", attackTemplate_.weaponHitBox.startNodeName },
@@ -838,6 +896,30 @@ bool AttackTemplateManager::DrawEditorContent(
         ImGui::Checkbox(
             "Allow Multi Hit",
             &attackTemplate_->allowMultiHit);
+
+        ImGui::SeparatorText("Camera Shake");
+        ImGui::Checkbox("Camera Shake Enabled", &attackTemplate_->cameraShake.enabled);
+        int cameraShakePowerLevel_ =
+            static_cast<int>(attackTemplate_->cameraShake.powerLevel);
+        const char* cameraShakePowerNames_[] =
+        {
+            "Minimum",
+            "Medium",
+            "Heavy"
+        };
+        if (ImGui::Combo(
+            "Camera Shake Power",
+            &cameraShakePowerLevel_,
+            cameraShakePowerNames_,
+            IM_ARRAYSIZE(cameraShakePowerNames_)))
+        {
+            attackTemplate_->cameraShake.powerLevel =
+                static_cast<CAMERA_SHAKE_POWER_LEVEL>(
+                    (std::clamp)(cameraShakePowerLevel_, 0, 2));
+            ApplyCameraShakePowerLevel(attackTemplate_->cameraShake);
+        }
+        ImGui::TextDisabled(
+            "Attacker shake uses half of receiver strength and duration.");
     }
 
     // =========================================================

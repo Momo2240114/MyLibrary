@@ -2,6 +2,8 @@
 
 #include "AttackSystem.h"
 
+#include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Camera/CameraShakeComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
@@ -11,6 +13,29 @@
 
 #include <algorithm>
 #include <cmath>
+
+namespace
+{
+    bool IsPlayerObject(const std::shared_ptr<GameObject>& object_)
+    {
+        if (!object_) return false;
+        if (object_->GetLayer() == LayerType::Player) return true;
+
+        std::shared_ptr<GameObject> current_ = object_;
+        while (current_)
+        {
+            const std::string& name_ = current_->GetName();
+            if (name_.find("Player") != std::string::npos) return true;
+            if (!current_->transform) break;
+
+            const std::shared_ptr<Transform> parentTransform_ =
+                current_->transform->parent.lock();
+            if (!parentTransform_) break;
+            current_ = parentTransform_->gameObject.lock();
+        }
+        return false;
+    }
+}
 
 void AttackSystem::BeginFrame()
 {
@@ -66,6 +91,7 @@ void AttackSystem::HandleHit(
     HurtBox& hurtBox_,
     const AttackHitContact& contact_)
 {
+    BS_PROFILE_SCOPE("AttackSystem::HandleHit");
     const std::shared_ptr<GameObject> hitBoxObject_ = hitBox_.GetGameObject();
     const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
     const std::shared_ptr<GameObject> hurtBoxObject_ = hurtBox_.GetGameObject();
@@ -118,9 +144,19 @@ void AttackSystem::HandleHit(
     event_.hitSoundVolume = hitBox_.hitSoundVolume;
     event_.hitSoundMuffled = hitBox_.hitSoundMuffled;
     event_.hitSoundMuffledCutoff = hitBox_.hitSoundMuffledCutoff;
+    event_.cameraShakeEnabled = hitBox_.cameraShakeEnabled;
+    event_.cameraShakeReceiveDuration = hitBox_.cameraShakeReceiveDuration;
+    event_.cameraShakeReceivePositionStrength =
+        hitBox_.cameraShakeReceivePositionStrength;
+    event_.cameraShakeReceiveRotationStrength =
+        hitBox_.cameraShakeReceiveRotationStrength;
+    event_.cameraShakeAttackScale = hitBox_.cameraShakeAttackScale;
+    event_.cameraShakeFrequency = hitBox_.cameraShakeFrequency;
+    event_.cameraShakePriority = hitBox_.cameraShakePriority;
 
     frameHitEvents.push_back(event_);
     PublishHitToBlackboard(event_);
+    PlayCameraShake(event_);
 
     if (event_.attackerAirLiftPower > 0.0f)
     {
@@ -286,5 +322,36 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     blackboard_->SetTrigger("Hit", "Received");
 
     receiver_->ExecuteAction("OnHit");
+}
+
+void AttackSystem::PlayCameraShake(const AttackHitEvent& event_) const
+{
+    BS_PROFILE_SCOPE("AttackSystem::PlayCameraShake");
+    if (!event_.cameraShakeEnabled) return;
+
+    const std::shared_ptr<GameObject> attacker_ = event_.attacker.lock();
+    const std::shared_ptr<GameObject> target_ = event_.target.lock();
+    if (!attacker_ || !target_) return;
+
+    const bool playerIsTarget_ = IsPlayerObject(target_);
+    const bool playerIsAttacker_ = IsPlayerObject(attacker_);
+    if (!playerIsTarget_ && !playerIsAttacker_) return;
+
+    const float scale_ = playerIsTarget_
+        ? 1.0f
+        : event_.cameraShakeAttackScale;
+    const float durationScale_ = playerIsTarget_
+        ? 1.0f
+        : event_.cameraShakeAttackScale;
+    const std::vector<std::shared_ptr<CameraShakeComponent>> cameraShakes_ =
+        target_->GetManager().FindComponents<CameraShakeComponent>();
+    if (cameraShakes_.empty()) return;
+
+    cameraShakes_.front()->PlayShake(
+        event_.cameraShakeReceiveDuration * durationScale_,
+        event_.cameraShakeReceivePositionStrength * scale_,
+        event_.cameraShakeReceiveRotationStrength * scale_,
+        event_.cameraShakeFrequency,
+        event_.cameraShakePriority);
 }
 

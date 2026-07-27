@@ -10,6 +10,10 @@
         "knockBackPower": 5.5,
         "knockBackType": 0
     },
+    "cameraShake": {
+        "enabled": true,
+        "powerLevel": 1
+    },
     "attackEffects": [],
     "displayName": "WeakAttack_04_Kick",
     "hitEffect": {

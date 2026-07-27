@@ -13,6 +13,10 @@
         "knockBackType": 0,
         "targetAirLiftPower": 0.0
     },
+    "cameraShake": {
+        "enabled": true,
+        "powerLevel": 1
+    },
     "attackEffects": [],
     "displayName": "Attack_Air_Strong",
     "hitEffect": {

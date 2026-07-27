@@ -16,6 +16,20 @@ struct SkyBoxVertex
     float texcoord[2];
 };
 
+namespace
+{
+    void UnbindShaderResourceViews(ID3D11DeviceContext* deviceContext_)
+    {
+        if (!deviceContext_) return;
+
+        ID3D11ShaderResourceView* nullShaderResources_[16] = {};
+        // Render-target hazards in this renderer come from post/scene sampling.
+        // Keep VS/GS resources because MeshVFX prepares instancing SRVs before target restore.
+        deviceContext_->PSSetShaderResources(0, _countof(nullShaderResources_), nullShaderResources_);
+        deviceContext_->CSSetShaderResources(0, _countof(nullShaderResources_), nullShaderResources_);
+    }
+}
+
 bool GraphicsDeviceManager::LoadIBLTextures()
 {
     // ---- プロジェクトに合わせて書き換える ----
@@ -411,6 +425,7 @@ void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
 {
     // --- 変更点：バックバッファではなく、シーン用HDRバッファをクリアする ---
     sceneDistortionUsed = false;
+    UnbindShaderResourceViews(immediateContext.Get());
     immediateContext->ClearRenderTargetView(sceneRTV.Get(), clearColor_);
     const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; // 修正：{} を使い、変数名を black に
     immediateContext->ClearRenderTargetView(sceneNormalRTV.Get(), black);
@@ -482,6 +497,7 @@ void GraphicsDeviceManager::CollectGpuProfilerFrame()
 
 void GraphicsDeviceManager::SetParticleRenderTarget()
 {
+    UnbindShaderResourceViews(immediateContext.Get());
     ID3D11RenderTargetView* renderTarget_ = sceneRTV.Get();
     // ターゲットを1枚（sceneRTVのみ）としてセット
     immediateContext->OMSetRenderTargets(1, &renderTarget_, depthStencilView.Get());
@@ -490,17 +506,20 @@ void GraphicsDeviceManager::SetParticleRenderTarget()
 void GraphicsDeviceManager::SetParticleRenderTargetWithDistortion()
 {
     sceneDistortionUsed = true;
+    UnbindShaderResourceViews(immediateContext.Get());
     ID3D11RenderTargetView* renderTargets_[] = { sceneRTV.Get(), sceneDistortionRTV.Get() };
     immediateContext->OMSetRenderTargets(2, renderTargets_, depthStencilView.Get());
 }
 void GraphicsDeviceManager::SetBackBufferRenderTarget()
 {
+    UnbindShaderResourceViews(immediateContext.Get());
     immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 }
 
 void GraphicsDeviceManager::SetSceneRenderTarget()
 {
+    UnbindShaderResourceViews(immediateContext.Get());
     // 描画先を「シーンカラー」と「シーン法線」の2枚に切り替える
     ID3D11RenderTargetView* renderTargets_[] = {
         sceneRTV.Get(),
@@ -515,6 +534,7 @@ void GraphicsDeviceManager::SetSceneRenderTarget()
 
 void GraphicsDeviceManager::SetSceneColorRenderTarget()
 {
+    UnbindShaderResourceViews(immediateContext.Get());
     ID3D11RenderTargetView* rtv_ = sceneRTV.Get();
     immediateContext->OMSetRenderTargets(1, &rtv_, nullptr);
     immediateContext->RSSetViewports(1, &viewport);
@@ -523,6 +543,7 @@ void GraphicsDeviceManager::SetSceneColorRenderTarget()
 void GraphicsDeviceManager::SetSceneDistortionRenderTarget()
 {
     sceneDistortionUsed = true;
+    UnbindShaderResourceViews(immediateContext.Get());
     ID3D11RenderTargetView* rtv_ = sceneDistortionRTV.Get();
     immediateContext->OMSetRenderTargets(1, &rtv_, depthStencilView.Get());
     immediateContext->RSSetViewports(1, &viewport);
@@ -530,6 +551,7 @@ void GraphicsDeviceManager::SetSceneDistortionRenderTarget()
 
 void GraphicsDeviceManager::SetGBufferRenderTargets()
 {
+    UnbindShaderResourceViews(immediateContext.Get());
     ID3D11RenderTargetView* rtvs_[] =
     {
         gBufferBaseColorRTV.Get(),
@@ -543,6 +565,7 @@ void GraphicsDeviceManager::SetGBufferRenderTargets()
 
 void GraphicsDeviceManager::ResolveBloom(const RenderContext& rc) {
     auto depthStencil_ = depthStencilView.Get();
+    UnbindShaderResourceViews(immediateContext.Get());
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencil_);
 
     postRenderSystem.Execute(rc, sceneSRV.Get(), renderTargetView.Get());
@@ -984,6 +1007,7 @@ void GraphicsDeviceManager::ReleaseResources()
 }
 void GraphicsDeviceManager::SetRenderTargets()
 {
+    UnbindShaderResourceViews(immediateContext.Get());
     immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 }

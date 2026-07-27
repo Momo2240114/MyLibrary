@@ -128,7 +128,7 @@
         },
         {
             "Data": {
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "ColliderName": "Tail03Part",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 0,
@@ -157,7 +157,7 @@
                 "ShapeRenderFlg": true,
                 "StartNodeName": "PlainsDragon_-Tail7",
                 "UseGravity": false,
-                "UsePhysicsResponse": true,
+                "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
             },

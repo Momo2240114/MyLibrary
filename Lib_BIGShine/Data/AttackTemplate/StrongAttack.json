@@ -10,6 +10,10 @@
         "knockBackPower": 6.0,
         "knockBackType": 0
     },
+    "cameraShake": {
+        "enabled": true,
+        "powerLevel": 1
+    },
     "attackEffects": [],
     "displayName": "StrongAttack",
     "hitEffect": {

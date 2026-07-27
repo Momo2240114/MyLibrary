@@ -80,6 +80,14 @@ public:
     void SetHitStopScale(float hitStopScale_);
     void SetKnockBackPower(float knockBackPower_);
     void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
+    void SetCameraShake(
+        bool enabled_,
+        float receiveDuration_,
+        float receivePositionStrength_,
+        float receiveRotationStrength_,
+        float attackScale_,
+        float frequency_,
+        int priority_);
     void SetHitParticleAssetPath(const std::string& path_);
     void SetHitParticleEmitterName(const std::string& emitterName_);
     void SetHitParticleLifeTime(float lifeTime_);
@@ -126,6 +134,13 @@ private:
     float knockBackPower = 0.0f;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;
+    bool cameraShakeEnabled = true;
+    float cameraShakeReceiveDuration = 0.12f;
+    float cameraShakeReceivePositionStrength = 0.025f;
+    float cameraShakeReceiveRotationStrength = 0.18f;
+    float cameraShakeAttackScale = 0.5f;
+    float cameraShakeFrequency = 24.0f;
+    int cameraShakePriority = 5;
     std::string hitParticleAssetPath;
     std::string hitParticleEmitterName;
     float hitParticleLifeTime = 1.0f;

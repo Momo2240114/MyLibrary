@@ -18,6 +18,9 @@ public:
     float GetGroundSnapDistance() const { return groundSnapDistance; }
     bool ShouldLimitHorizontalLift() const { return limitHorizontalLift; }
     float GetMaxHorizontalLift() const { return maxHorizontalLift; }
+    bool ShouldSlideOffNonGround() const { return slideOffNonGround; }
+    float GetNonGroundSlideSpeed() const { return nonGroundSlideSpeed; }
+    float GetNonGroundLift() const { return nonGroundLift; }
 
 private:
     void EnforceCharacterSettings();
@@ -27,4 +30,7 @@ private:
     float groundSnapDistance = 0.9f;
     bool limitHorizontalLift = true;
     float maxHorizontalLift = 0.05f;
+    bool slideOffNonGround = true;
+    float nonGroundSlideSpeed = 3.0f;
+    float nonGroundLift = 0.16f;
 };

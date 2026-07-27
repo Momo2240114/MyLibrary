@@ -100,6 +100,25 @@ void AttackEffectHitComponent::SetAirLiftPower(float targetAirLiftPower_, float 
     targetAirLiftPower = (std::max)(targetAirLiftPower_, 0.0f);
     attackerAirLiftPower = (std::max)(attackerAirLiftPower_, 0.0f);
 }
+
+void AttackEffectHitComponent::SetCameraShake(
+    bool enabled_,
+    float receiveDuration_,
+    float receivePositionStrength_,
+    float receiveRotationStrength_,
+    float attackScale_,
+    float frequency_,
+    int priority_)
+{
+    cameraShakeEnabled = enabled_;
+    cameraShakeReceiveDuration = (std::max)(receiveDuration_, 0.0f);
+    cameraShakeReceivePositionStrength = (std::max)(receivePositionStrength_, 0.0f);
+    cameraShakeReceiveRotationStrength = (std::max)(receiveRotationStrength_, 0.0f);
+    cameraShakeAttackScale = (std::clamp)(attackScale_, 0.0f, 1.0f);
+    cameraShakeFrequency = (std::max)(frequency_, 0.0f);
+    cameraShakePriority = priority_;
+}
+
 void AttackEffectHitComponent::SetHitParticleAssetPath(const std::string& path_)
 {
     hitParticleAssetPath = path_;
@@ -218,6 +237,13 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitStopScale = hitStopScale;
     hitBox_->SetKnockBackPower(knockBackPower);
     hitBox_->SetAirLiftPower(targetAirLiftPower, attackerAirLiftPower);
+    hitBox_->cameraShakeEnabled = cameraShakeEnabled;
+    hitBox_->cameraShakeReceiveDuration = cameraShakeReceiveDuration;
+    hitBox_->cameraShakeReceivePositionStrength = cameraShakeReceivePositionStrength;
+    hitBox_->cameraShakeReceiveRotationStrength = cameraShakeReceiveRotationStrength;
+    hitBox_->cameraShakeAttackScale = cameraShakeAttackScale;
+    hitBox_->cameraShakeFrequency = cameraShakeFrequency;
+    hitBox_->cameraShakePriority = cameraShakePriority;
     hitBox_->hitParticleAssetPath = hitParticleAssetPath;
     hitBox_->hitParticleEmitterName = hitParticleEmitterName;
     hitBox_->hitParticleLifeTime = hitParticleLifeTime;

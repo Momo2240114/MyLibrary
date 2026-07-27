@@ -197,6 +197,15 @@ void HitBox::Gui()
     ImGui::Checkbox("Hit Sound Muffled", &hitSoundMuffled);
     ImGui::DragFloat("Hit Sound Cutoff", &hitSoundMuffledCutoff, 10.0f, 10.0f, 22000.0f);
 
+    ImGui::SeparatorText("Camera Shake");
+    ImGui::Checkbox("Camera Shake Enabled", &cameraShakeEnabled);
+    ImGui::DragFloat("Receive Duration", &cameraShakeReceiveDuration, 0.01f, 0.0f, 5.0f);
+    ImGui::DragFloat("Receive Position Strength", &cameraShakeReceivePositionStrength, 0.001f, 0.0f, 2.0f);
+    ImGui::DragFloat("Receive Rotation Strength", &cameraShakeReceiveRotationStrength, 0.01f, 0.0f, 20.0f);
+    ImGui::DragFloat("Attack Scale", &cameraShakeAttackScale, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Frequency##CameraShake", &cameraShakeFrequency, 0.1f, 0.0f, 120.0f);
+    ImGui::DragInt("Priority##CameraShake", &cameraShakePriority);
+
     ImGui::SeparatorText("Actions");
     char actionPrefixBuffer_[64];
     strncpy_s(actionPrefixBuffer_, actionPrefix.c_str(), sizeof(actionPrefixBuffer_));
@@ -264,6 +273,13 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitSoundVolume"] = hitSoundVolume;
     j_["HitSoundMuffled"] = hitSoundMuffled;
     j_["HitSoundMuffledCutoff"] = hitSoundMuffledCutoff;
+    j_["CameraShakeEnabled"] = cameraShakeEnabled;
+    j_["CameraShakeReceiveDuration"] = cameraShakeReceiveDuration;
+    j_["CameraShakeReceivePositionStrength"] = cameraShakeReceivePositionStrength;
+    j_["CameraShakeReceiveRotationStrength"] = cameraShakeReceiveRotationStrength;
+    j_["CameraShakeAttackScale"] = cameraShakeAttackScale;
+    j_["CameraShakeFrequency"] = cameraShakeFrequency;
+    j_["CameraShakePriority"] = cameraShakePriority;
     j_["ActionPrefix"] = actionPrefix;
     j_["ActivateActionName"] = activateActionName;
     j_["DeactivateActionName"] = deactivateActionName;
@@ -306,6 +322,18 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitSoundVolume = (std::max)(j_.value("HitSoundVolume", 1.0f), 0.0f);
     hitSoundMuffled = j_.value("HitSoundMuffled", false);
     hitSoundMuffledCutoff = (std::max)(j_.value("HitSoundMuffledCutoff", 1200.0f), 10.0f);
+    cameraShakeEnabled = j_.value("CameraShakeEnabled", true);
+    cameraShakeReceiveDuration =
+        (std::max)(j_.value("CameraShakeReceiveDuration", 0.12f), 0.0f);
+    cameraShakeReceivePositionStrength =
+        (std::max)(j_.value("CameraShakeReceivePositionStrength", 0.025f), 0.0f);
+    cameraShakeReceiveRotationStrength =
+        (std::max)(j_.value("CameraShakeReceiveRotationStrength", 0.18f), 0.0f);
+    cameraShakeAttackScale =
+        (std::clamp)(j_.value("CameraShakeAttackScale", 0.5f), 0.0f, 1.0f);
+    cameraShakeFrequency =
+        (std::max)(j_.value("CameraShakeFrequency", 24.0f), 0.0f);
+    cameraShakePriority = j_.value("CameraShakePriority", 5);
     actionPrefix = j_.value("ActionPrefix", std::string("HitBox"));
     activateActionName = "EnableHitBox";
     deactivateActionName = "DisableHitBox";

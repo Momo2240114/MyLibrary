@@ -3,6 +3,7 @@
 #include "CameraShakeComponent.h"
 
 #include "CameraComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
@@ -23,6 +24,7 @@ namespace
 
 void CameraShakeComponent::Start()
 {
+    BS_PROFILE_SCOPE("CameraShakeComponent::Start");
     ResolveCamera();
     if (presets.empty())
     {
@@ -56,6 +58,7 @@ void CameraShakeComponent::Start()
 
 void CameraShakeComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("CameraShakeComponent::LateUpdate");
     ResolveCamera();
     if (!playing) return;
 
@@ -98,6 +101,7 @@ void CameraShakeComponent::LateUpdate(float deltaTime_)
 
 void CameraShakeComponent::PlayShakeByIndex(int index_)
 {
+    BS_PROFILE_SCOPE("CameraShakeComponent::PlayShakeByIndex");
     if (index_ < 0 || index_ >= static_cast<int>(presets.size())) return;
     if (playing && presets[index_].priority < activePriority) return;
 
@@ -110,6 +114,32 @@ void CameraShakeComponent::PlayShakeByIndex(int index_)
 void CameraShakeComponent::PlayShakeByName(const std::string& actionName_)
 {
     PlayShakeByIndex(FindPresetIndex(actionName_));
+}
+
+void CameraShakeComponent::PlayShake(
+    float duration_,
+    float positionStrength_,
+    float rotationStrength_,
+    float frequency_,
+    int priority_)
+{
+    BS_PROFILE_SCOPE("CameraShakeComponent::PlayShake");
+    if (playing && priority_ < activePriority) return;
+
+    CameraShakePreset preset_;
+    preset_.actionName = "Runtime";
+    preset_.duration = (std::max)(duration_, 0.0f);
+    preset_.positionStrength = (std::max)(positionStrength_, 0.0f);
+    preset_.rotationStrength = (std::max)(rotationStrength_, 0.0f);
+    preset_.frequency = (std::max)(frequency_, 0.0f);
+    preset_.priority = priority_;
+
+    activePreset = preset_;
+    activePriority = activePreset.priority;
+    elapsed = 0.0f;
+    playing = activePreset.duration > 0.0001f &&
+        (activePreset.positionStrength > 0.0001f ||
+            activePreset.rotationStrength > 0.0001f);
 }
 
 void CameraShakeComponent::StopShake(bool immediate_)

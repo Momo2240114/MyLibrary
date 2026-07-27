@@ -42,6 +42,12 @@ public:
 
     void PlayShakeByIndex(int index_);
     void PlayShakeByName(const std::string& actionName_);
+    void PlayShake(
+        float duration_,
+        float positionStrength_,
+        float rotationStrength_,
+        float frequency_,
+        int priority_);
     void StopShake(bool immediate_);
 
 private:

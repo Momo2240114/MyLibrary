@@ -42,6 +42,117 @@ namespace
 
         return collisionOwnerObject_;
     }
+
+    ColliderComponent* GetColliderFromShape(const PxShape* shape_)
+    {
+        if (!shape_) return nullptr;
+
+        const PxRigidActor* actor_ = shape_->getActor();
+        if (!actor_) return nullptr;
+
+        return static_cast<ColliderComponent*>(actor_->userData);
+    }
+
+    bool HasSameCollisionOwner(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
+    {
+        if (!colliderA_ || !colliderB_) return false;
+
+        const uint32_t ownerIdA_ = colliderA_->GetCollisionOwnerId();
+        const uint32_t ownerIdB_ = colliderB_->GetCollisionOwnerId();
+        return ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_;
+    }
+
+    bool TryGetNonGroundPush(
+        const PxExtendedVec3& position_,
+        const PxCapsuleGeometry& geometry_,
+        ColliderComponent* selfCollider_,
+        float maxHorizontalDistance_,
+        float maxLiftDistance_,
+        bool forceLift_,
+        PxVec3& pushDisplacement_)
+    {
+        PxScene* scene_ = PhysXSystem::GetScene();
+        if (!scene_ || !selfCollider_) return false;
+
+        const PxTransform selfPose_(
+            PxVec3(
+                static_cast<PxReal>(position_.x),
+                static_cast<PxReal>(position_.y),
+                static_cast<PxReal>(position_.z)),
+            PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+        PxOverlapHit overlapHits_[16];
+        PxOverlapBuffer overlapBuffer_(overlapHits_, 16);
+        const PxQueryFilterData queryFilterData_(
+            PxQueryFlag::eSTATIC | PxQueryFlag::eDYNAMIC);
+
+        if (!scene_->overlap(
+            geometry_,
+            selfPose_,
+            overlapBuffer_,
+            queryFilterData_))
+        {
+            return false;
+        }
+
+        PxVec3 accumulatedDisplacement_(0.0f, 0.0f, 0.0f);
+        for (PxU32 hitIndex_ = 0; hitIndex_ < overlapBuffer_.getNbAnyHits(); ++hitIndex_)
+        {
+            const PxOverlapHit& hit_ = overlapBuffer_.getAnyHit(hitIndex_);
+            ColliderComponent* otherCollider_ = GetColliderFromShape(hit_.shape);
+            if (!otherCollider_ || otherCollider_ == selfCollider_) continue;
+            if (HasSameCollisionOwner(selfCollider_, otherCollider_)) continue;
+            if (otherCollider_->CanBeCharacterGround()) continue;
+
+            const PxRigidActor* otherActor_ = hit_.actor;
+            if (!otherActor_) continue;
+
+            PxVec3 direction_(0.0f, 0.0f, 0.0f);
+            PxF32 depth_ = 0.0f;
+            const PxGeometryHolder otherGeometry_ = hit_.shape->getGeometry();
+            const PxTransform otherPose_ =
+                otherActor_->getGlobalPose() * hit_.shape->getLocalPose();
+            if (!PxGeometryQuery::computePenetration(
+                direction_,
+                depth_,
+                geometry_,
+                selfPose_,
+                otherGeometry_.any(),
+                otherPose_))
+            {
+                continue;
+            }
+
+            if (direction_.magnitudeSquared() <= 0.000001f || depth_ <= 0.0f) continue;
+            accumulatedDisplacement_ += direction_.getNormalized() * depth_;
+        }
+
+        if (accumulatedDisplacement_.magnitudeSquared() <= 0.000001f) return false;
+
+        const PxVec3 horizontalDisplacement_(
+            accumulatedDisplacement_.x,
+            0.0f,
+            accumulatedDisplacement_.z);
+        PxVec3 finalDisplacement_(0.0f, 0.0f, 0.0f);
+        const float horizontalLength_ = horizontalDisplacement_.magnitude();
+        if (horizontalLength_ > 0.000001f && maxHorizontalDistance_ > 0.0f)
+        {
+            finalDisplacement_ += horizontalDisplacement_.getNormalized() *
+                (std::min)(horizontalLength_, maxHorizontalDistance_);
+        }
+
+        finalDisplacement_.y = (std::min)(
+            (std::max)(accumulatedDisplacement_.y, 0.0f),
+            maxLiftDistance_);
+        if (forceLift_ && finalDisplacement_.y <= 0.000001f)
+        {
+            finalDisplacement_.y = maxLiftDistance_;
+        }
+
+        if (finalDisplacement_.magnitudeSquared() <= 0.000001f) return false;
+
+        pushDisplacement_ = finalDisplacement_;
+        return true;
+    }
 }
 
 ColliderComponent::~ColliderComponent()
@@ -667,17 +778,54 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.y = 0.0f;
         }
 
-        float verticalDisplacement_ = velocity.y * safeDeltaTime_;
-        if (characterGroundedForStep && velocity.y <= 0.0f)
+        const PxExtendedVec3 previousPosition_ = characterController->getPosition();
+        const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this);
+        PxCapsuleGeometry characterGeometry_(0.001f, 0.001f);
+        if (characterCollider_)
         {
-            if (const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this))
+            const std::shared_ptr<GameObject> ownerObject_ = GetGameObject();
+            const auto scale_ = ownerObject_ && ownerObject_->transform
+                ? ownerObject_->transform->GetWorldScale()
+                : DirectX::XMFLOAT3{ 1.0f, 1.0f, 1.0f };
+            characterGeometry_ = PxCapsuleGeometry(
+                (std::max)(characterCollider_->radius * scale_.x * shapeSizeScale, 0.001f),
+                (std::max)(characterCollider_->halfHeight * scale_.y * shapeSizeScale, 0.001f));
+        }
+
+        PxVec3 preNonGroundPushDisplacement_(0.0f, 0.0f, 0.0f);
+        const bool hasPreNonGroundSupport_ =
+            characterCollider_ &&
+            characterCollider_->ShouldSlideOffNonGround() &&
+            TryGetNonGroundPush(
+                previousPosition_,
+                characterGeometry_,
+                this,
+                characterCollider_->GetNonGroundSlideSpeed() * safeDeltaTime_,
+                characterCollider_->GetNonGroundLift(),
+                true,
+                preNonGroundPushDisplacement_);
+
+        bool hasNonGroundVelocity_ = false;
+        if (hasPreNonGroundSupport_ && safeDeltaTime_ > 0.0f)
+        {
+            const float inverseDeltaTime_ = 1.0f / safeDeltaTime_;
+            velocity.x += preNonGroundPushDisplacement_.x * inverseDeltaTime_;
+            velocity.z += preNonGroundPushDisplacement_.z * inverseDeltaTime_;
+            velocity.y = (std::max)(
+                velocity.y,
+                preNonGroundPushDisplacement_.y * inverseDeltaTime_);
+            hasNonGroundVelocity_ = true;
+        }
+
+        float verticalDisplacement_ = velocity.y * safeDeltaTime_;
+        if (characterGroundedForStep && !hasPreNonGroundSupport_ && velocity.y <= 0.0f)
+        {
+            if (characterCollider_)
             {
-                // 接地中は小さな下り段差へ追従させ、重力加速待ちによる浮遊感を防ぐ。
                 verticalDisplacement_ -= characterCollider_->GetGroundSnapDistance();
             }
         }
 
-        const PxExtendedVec3 previousPosition_ = characterController->getPosition();
         const PxVec3 displacement_(
             velocity.x * safeDeltaTime_,
             verticalDisplacement_,
@@ -690,11 +838,30 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         PxControllerFilters filters_(
             &filterData_,
             PhysXSystem::GetCharacterControllerQueryFilterCallback(),
-            nullptr);
+            PhysXSystem::GetCharacterControllerFilterCallback());
         const PxControllerCollisionFlags collisionFlags_ =
             characterController->move(displacement_, 0.001f, safeDeltaTime_, filters_);
 
-        isGrounded = collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_DOWN);
+        PxExtendedVec3 position_ = characterController->getPosition();
+        PxVec3 nonGroundPushCheckDisplacement_(0.0f, 0.0f, 0.0f);
+        const bool hasNonGroundSupport_ =
+            (hasNonGroundVelocity_ ||
+                collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_DOWN)) &&
+            characterCollider_ &&
+            characterCollider_->ShouldSlideOffNonGround() &&
+            (hasNonGroundVelocity_ ||
+                TryGetNonGroundPush(
+                    position_,
+                    characterGeometry_,
+                    this,
+                    characterCollider_->GetNonGroundSlideSpeed() * safeDeltaTime_,
+                    characterCollider_->GetNonGroundLift(),
+                    false,
+                    nonGroundPushCheckDisplacement_));
+
+        isGrounded =
+            collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_DOWN) &&
+            !hasNonGroundSupport_;
         characterGroundedForStep = isGrounded;
         if ((isGrounded && velocity.y < 0.0f) ||
             (collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_UP) && velocity.y > 0.0f))
@@ -702,7 +869,7 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.y = 0.0f;
         }
 
-        PxExtendedVec3 position_ = characterController->getPosition();
+        position_ = characterController->getPosition();
         const bool hasSideCollision_ =
             collisionFlags_.isSet(PxControllerCollisionFlag::eCOLLISION_SIDES);
         const bool hasHorizontalMove_ =

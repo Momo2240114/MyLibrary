@@ -92,6 +92,13 @@ struct SlashEffectSpawnSetting
     std::string hitEffectPath;
     uint32_t hitGroupId = 0u;
     bool allowMultiHit = false;
+    bool cameraShakeEnabled = true;
+    float cameraShakeReceiveDuration = 0.12f;
+    float cameraShakeReceivePositionStrength = 0.025f;
+    float cameraShakeReceiveRotationStrength = 0.18f;
+    float cameraShakeAttackScale = 0.5f;
+    float cameraShakeFrequency = 24.0f;
+    int cameraShakePriority = 5;
     bool followOwner = false;
     bool mirror = false;
 };

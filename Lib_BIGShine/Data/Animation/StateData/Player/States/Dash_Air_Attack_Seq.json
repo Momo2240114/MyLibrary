@@ -255,9 +255,9 @@
                     0.0
                 ],
                 "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
+                    1.5,
+                    1.5,
+                    1.5
                 ],
                 "meshVFXAssetPath": "PlayerSwordArc_Strong",
                 "meshVFXLifeTime": 0.6000000238418579,

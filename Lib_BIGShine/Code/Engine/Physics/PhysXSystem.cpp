@@ -135,10 +135,7 @@ namespace
                 return false;
             }
 
-            const bool bothCharacters_ =
-                colliderA_->GetCollisionRole() == ColliderComponent::CollisionRole::CHARACTER &&
-                colliderB_->GetCollisionRole() == ColliderComponent::CollisionRole::CHARACTER;
-            return !bothCharacters_;
+            return true;
         }
     };
 

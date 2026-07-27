@@ -78,7 +78,7 @@
                 "ShapeRenderFlg": true,
                 "StartNodeName": "PlainsDragon_-Head",
                 "UseGravity": false,
-                "UsePhysicsResponse": true,
+                "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
             },

@@ -44,6 +44,13 @@ public:
     float hitSoundVolume = 1.0f;
     bool hitSoundMuffled = false;
     float hitSoundMuffledCutoff = 1200.0f;
+    bool cameraShakeEnabled = true;
+    float cameraShakeReceiveDuration = 0.12f;
+    float cameraShakeReceivePositionStrength = 0.025f;
+    float cameraShakeReceiveRotationStrength = 0.18f;
+    float cameraShakeAttackScale = 0.5f;
+    float cameraShakeFrequency = 24.0f;
+    int cameraShakePriority = 5;
 
     // 空なら GameObject 名を使う
     std::string actionPrefix = "";

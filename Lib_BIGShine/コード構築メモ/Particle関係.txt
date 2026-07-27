@@ -1,5 +1,9 @@
 Particle関係 説明メモ
 
+
+最終編集日時
+7/12
+
 目的
 このメモは、ParticleComponent、ParticleEmitter、ParticleRenderSystem、ParticleEditorWindow、EffectManager との関係を説明するための入口。
 Animation関係.txt にも Particle の説明はあるが、ここでは Particle 単体の設計に絞って整理する。
@@ -25,6 +29,11 @@ Animation関係.txt にも Particle の説明はあるが、ここでは Particl
 - ParticleEditorWindow / Component GUI で Asset を編集、保存、読み込みする
 - ActionRegistry へ Play / Stop / Trigger を登録し、Sequencer から呼べる
 - EffectManager がヒット時や一時エフェクトとして Particle を生成する
+
+面接での短い説明
+「Particle は、Component 側で Editor や JSON、複数 Emitter の管理を行い、Emitter 側で DirectX 11 の Compute Shader を使った粒子更新を行うように分けています。
+Emitter ごとに Texture、Mask、Gradient、発生設定を持たせ、JSON Asset として保存できます。
+また ActionRegistry に Play や Trigger を登録しているので、Animation Sequencer から特定タイミングで Particle を出せます。」
 
 処理フロー
 1. ParticleComponent が JSON Asset を読み込む
@@ -380,5 +389,33 @@ HitEffect としての呼び出し
 4. ParticleComponent を持つ一時 GameObject を生成する
 5. 寿命が来たら EffectManager 側で消す
 
+面接での言い方
+「Particle 自体は独立した Asset として作っていますが、ActionRegistry と VFXManager を通すことで、Animation Sequencer や AttackTemplate から再利用できるようにしています。」
+
 
 ============================================================
+9. 想定質問と回答例
+============================================================
+
+質問: ParticleComponent と ParticleEmitter を分けた理由は？
+回答:
+ParticleComponent は GameObject に付く Component として、Editor、JSON、複数 Emitter、Action 登録を扱います。
+ParticleEmitter は GPU Buffer や Compute Shader などの低レベル処理を扱います。
+役割を分けることで、Editor 側の管理と描画実装が混ざりにくくなります。
+
+質問: なぜ GPU Particle にしたのですか？
+回答:
+大量の Particle を CPU で1つずつ更新すると負荷が高くなりやすいからです。
+Compute Shader を使えば、Particle の発生や更新を GPU で並列に処理できるため、演出の粒子数を増やしやすくなります。
+
+質問: Particle が出ないときはどこを見ますか？
+回答:
+まず Asset Path と Texture Path が正しいかを確認します。
+次に Emitter 名が正しいか、ActionRegistry に登録されているか、Trigger が呼ばれているかを見ます。
+GPU 側では Emitter の Resource が作られているか、SRV / UAV が正しく設定されているかを確認します。
+
+質問: Particle と MeshVFX の使い分けは？
+回答:
+Particle は火花、煙、ヒットエフェクトのような粒子表現に向いています。
+MeshVFX は斬撃、リング、残像のように形を持つ表現に向いています。
+攻撃では両方を組み合わせられるようにしています。
