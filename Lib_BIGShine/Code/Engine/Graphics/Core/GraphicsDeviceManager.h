@@ -163,7 +163,7 @@ private:
     bool isChangingFullscreen = false;
     WINDOWPLACEMENT windowedPlacement{ sizeof(WINDOWPLACEMENT) };
     DWORD windowedStyle = WS_OVERLAPPEDWINDOW;
-    bool vsyncEnabled = false;
+    bool vsyncEnabled = true;
 
     //====================================================
     // 内部ヘルパ関数

@@ -1,5 +1,8 @@
 PostEffect関係 説明メモ
 
+最終編集日時
+7/18
+
 目的
 このメモは、PostRenderSystem、Bloom、Distortion、MotionVelocity、PostEffectWindow など、画面全体にかける描画効果を説明するための入口。
 DirectX 11 の RenderTarget を使った描画後処理として整理する。
@@ -22,6 +25,11 @@ DirectX 11 の RenderTarget を使った描画後処理として整理する。
 - PostDistortionSystem が歪み表現を行う
 - MotionVelocityRenderSystem が速度情報を扱う
 - PostEffectWindow で各効果のパラメータを調整する
+
+面接での短い説明
+「PostEffect は、3D 描画結果を直接画面に出すのではなく、一度 RenderTarget に描いてから Shader で加工する仕組みです。
+Bloom では明るい部分を抽出してぼかし、元の画面へ合成しています。
+また Distortion や MotionVelocity など、画面全体に関わる効果を RenderSystem と Editor Window で調整できるようにしています。」
 
 処理フロー
 1. 通常の 3D / Sprite / VFX を RenderTarget に描画する
@@ -271,3 +279,27 @@ PostEffectWindow で調整したい項目
 
 
 ============================================================
+9. 想定質問と回答例
+============================================================
+
+質問: PostEffect はなぜ RenderTarget を使うのですか？
+回答:
+画面全体を Shader で加工するには、一度描画結果を Texture として読む必要があるからです。
+そのため Scene を RenderTarget に描き、その SRV を PostEffect Shader で読みます。
+
+質問: Bloom の処理を説明してください。
+回答:
+まず元画像から明るい部分を抽出します。
+次にその画像をぼかし、最後に元画像へ加算します。
+これにより発光しているようなにじみを作れます。
+
+質問: PostEffect のバグはどこを見ますか？
+回答:
+まず RenderTarget が正しく作られているか、RTV と SRV の切り替えが正しいかを見ます。
+次に Shader に渡す Texture や ConstantBuffer が正しいか、Pass の順番が想定通りかを確認します。
+
+質問: 効果の順番は重要ですか？
+回答:
+重要です。
+Bloom、Distortion、MotionBlur の順番が変わると見た目も変わります。
+そのため、PostRenderSystem 側で適用順を管理する必要があります。

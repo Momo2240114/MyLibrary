@@ -36,6 +36,13 @@ enum class KNOCK_BACK_TYPE
     FROM_EFFECT_TO_TARGET
 };
 
+enum class CAMERA_SHAKE_POWER_LEVEL
+{
+    MINIMUM,
+    MEDIUM,
+    HEAVY
+};
+
 struct EffectHitBoxTemplate
 {
     bool enabled = false;
@@ -89,6 +96,18 @@ struct AttackHitEffectTemplate
     float hitMeshVfxNormalOffset = 0.0f;
 };
 
+struct AttackCameraShakeTemplate
+{
+    bool enabled = true;
+    CAMERA_SHAKE_POWER_LEVEL powerLevel = CAMERA_SHAKE_POWER_LEVEL::MINIMUM;
+    float receiveDuration = 0.12f;
+    float receivePositionStrength = 0.025f;
+    float receiveRotationStrength = 0.18f;
+    float attackScale = 0.5f;
+    float frequency = 24.0f;
+    int priority = 5;
+};
+
 struct AttackEffectSpawnTemplate
 {
     bool enabled = true;
@@ -126,6 +145,7 @@ struct AttackTemplate
     bool canHitOwner = false;
     WeaponHitBoxTemplate weaponHitBox;
     AttackHitEffectTemplate hitEffect;
+    AttackCameraShakeTemplate cameraShake;
     std::vector<SlashEffectTemplate> slashEffects;
     std::vector<AttackEffectSpawnTemplate> attackEffects;
 };

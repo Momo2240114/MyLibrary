@@ -1,5 +1,9 @@
 Player関係 説明メモ
 
+
+最終編集日時
+7/10
+
 目的
 このメモは、PlayerController、PlayerStateMachine、各 PlayerState、PlayerStateEditorWindow を説明するための入口。
 入力から状態が変わり、移動、攻撃、回避、被弾へつながる流れとして整理する。
@@ -27,6 +31,11 @@ Player関係 説明メモ
 - Idle / Move / Jump / Attack / Dodge / Hit などを個別 State として分ける
 - PlayerAttackState は Animation Sequencer や AttackTemplate とつながる
 - PlayerStateEditorWindow で状態や遷移を確認、調整する
+
+面接での短い説明
+「プレイヤー処理は、入力を直接巨大な if 文で処理するのではなく、StateMachine で Idle、Move、Jump、Attack、Dodge、Hit などに分けています。
+各 State が Enter、Update、Exit のような役割を持ち、状態ごとの責務を分けることで、攻撃や回避などを拡張しやすくしています。
+攻撃状態では Animation Sequencer や AttackTemplate と連携し、アニメーションに合わせた攻撃処理を行います。」
 
 処理フロー
 1. PlayerControllerComponent が入力や現在状況を読む
@@ -208,7 +217,7 @@ PlayerStateEditorWindow
 
 説明時の注意
 コード上で Enter / Exit の名前が実際にどう定義されているかは PlayerState 側を確認して話す。
-説明時は「状態ごとに初期化、更新、終了を分けられる設計」と表現すると安全。
+面接では「状態ごとに初期化、更新、終了を分けられる設計」と表現すると安全。
 
 
 ============================================================
@@ -283,3 +292,27 @@ Debug で見るとよい値
 
 
 ============================================================
+8. 想定質問と回答例
+============================================================
+
+質問: PlayerStateMachine を作った理由は？
+回答:
+プレイヤーは移動、攻撃、回避、被弾などで入力の扱いが大きく変わります。
+それを1つの Update に書くと複雑になるため、StateMachine で状態ごとに処理を分けました。
+
+質問: Animation のノードグラフと PlayerStateMachine は重複しませんか？
+回答:
+役割を分けています。
+PlayerStateMachine はゲームプレイ上の状態、AnimationController は再生するアニメーションとブレンドを管理します。
+攻撃するかどうかは Player 側、攻撃中の判定タイミングは Animation Sequencer 側で扱います。
+
+質問: 攻撃コンボはどこで管理しますか？
+回答:
+入力や次の攻撃へ進む判断は PlayerAttackState 側で扱い、各攻撃の判定タイミングやエフェクトは Animation Sequencer と AttackTemplate 側で管理する形です。
+これにより、入力受付と攻撃データを分けられます。
+
+質問: バグが起きた時はどこを確認しますか？
+回答:
+まず PlayerStateMachine の currentAction を見ます。
+次に PlayerController が入力を正しく読んでいるか、State の遷移条件が成立しているかを確認します。
+攻撃なら Animation Sequencer のイベント、AttackTemplate、HitBox の順に追います。

@@ -54,6 +54,13 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
         { "hitEffectPath", setting_.hitEffectPath },
         { "hitGroupId", setting_.hitGroupId },
         { "allowMultiHit", setting_.allowMultiHit },
+        { "cameraShakeEnabled", setting_.cameraShakeEnabled },
+        { "cameraShakeReceiveDuration", setting_.cameraShakeReceiveDuration },
+        { "cameraShakeReceivePositionStrength", setting_.cameraShakeReceivePositionStrength },
+        { "cameraShakeReceiveRotationStrength", setting_.cameraShakeReceiveRotationStrength },
+        { "cameraShakeAttackScale", setting_.cameraShakeAttackScale },
+        { "cameraShakeFrequency", setting_.cameraShakeFrequency },
+        { "cameraShakePriority", setting_.cameraShakePriority },
         { "followOwner", setting_.followOwner },
         { "mirror", setting_.mirror },
     };
@@ -92,6 +99,18 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
     setting_.hitEffectPath = json_.value("hitEffectPath", std::string{});
     setting_.hitGroupId = json_.value("hitGroupId", 0u);
     setting_.allowMultiHit = json_.value("allowMultiHit", false);
+    setting_.cameraShakeEnabled = json_.value("cameraShakeEnabled", true);
+    setting_.cameraShakeReceiveDuration =
+        (std::max)(json_.value("cameraShakeReceiveDuration", 0.12f), 0.0f);
+    setting_.cameraShakeReceivePositionStrength =
+        (std::max)(json_.value("cameraShakeReceivePositionStrength", 0.025f), 0.0f);
+    setting_.cameraShakeReceiveRotationStrength =
+        (std::max)(json_.value("cameraShakeReceiveRotationStrength", 0.18f), 0.0f);
+    setting_.cameraShakeAttackScale =
+        (std::clamp)(json_.value("cameraShakeAttackScale", 0.5f), 0.0f, 1.0f);
+    setting_.cameraShakeFrequency =
+        (std::max)(json_.value("cameraShakeFrequency", 24.0f), 0.0f);
+    setting_.cameraShakePriority = json_.value("cameraShakePriority", 5);
     setting_.followOwner = json_.value("followOwner", false);
     setting_.mirror = json_.value("mirror", false);
 }
@@ -614,6 +633,17 @@ std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
             hitBox_->hitStopDuration = request_.setting.hitStopDuration;
             hitBox_->hitStopScale = request_.setting.hitStopScale;
             hitBox_->allowMultiHit = request_.setting.allowMultiHit;
+            hitBox_->cameraShakeEnabled = request_.setting.cameraShakeEnabled;
+            hitBox_->cameraShakeReceiveDuration =
+                request_.setting.cameraShakeReceiveDuration;
+            hitBox_->cameraShakeReceivePositionStrength =
+                request_.setting.cameraShakeReceivePositionStrength;
+            hitBox_->cameraShakeReceiveRotationStrength =
+                request_.setting.cameraShakeReceiveRotationStrength;
+            hitBox_->cameraShakeAttackScale =
+                request_.setting.cameraShakeAttackScale;
+            hitBox_->cameraShakeFrequency = request_.setting.cameraShakeFrequency;
+            hitBox_->cameraShakePriority = request_.setting.cameraShakePriority;
             hitBox_->radius = request_.setting.hitBoxRadius;
             hitBox_->halfHeight = request_.setting.hitBoxHalfHeight;
             hitBox_->Deactivate();
@@ -738,6 +768,14 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
         attackHit_->SetAirLiftPower(
             attackTemplate_.targetAirLiftPower,
             attackTemplate_.attackerAirLiftPower);
+        attackHit_->SetCameraShake(
+            attackTemplate_.cameraShake.enabled,
+            attackTemplate_.cameraShake.receiveDuration,
+            attackTemplate_.cameraShake.receivePositionStrength,
+            attackTemplate_.cameraShake.receiveRotationStrength,
+            attackTemplate_.cameraShake.attackScale,
+            attackTemplate_.cameraShake.frequency,
+            attackTemplate_.cameraShake.priority);
         attackHit_->SetHitParticleAssetPath(
             attackTemplate_.hitEffect.spawnOnHit
             ? attackTemplate_.hitEffect.hitParticleAssetPath

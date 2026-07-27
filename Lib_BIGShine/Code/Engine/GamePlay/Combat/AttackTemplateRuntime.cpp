@@ -92,6 +92,15 @@ namespace
             : std::string{};
         hitBox_->hitMeshVFXLifeTime = attackTemplate_.hitEffect.hitMeshVfxLifeTime;
         hitBox_->hitMeshVFXNormalOffset = attackTemplate_.hitEffect.hitMeshVfxNormalOffset;
+        hitBox_->cameraShakeEnabled = attackTemplate_.cameraShake.enabled;
+        hitBox_->cameraShakeReceiveDuration = attackTemplate_.cameraShake.receiveDuration;
+        hitBox_->cameraShakeReceivePositionStrength =
+            attackTemplate_.cameraShake.receivePositionStrength;
+        hitBox_->cameraShakeReceiveRotationStrength =
+            attackTemplate_.cameraShake.receiveRotationStrength;
+        hitBox_->cameraShakeAttackScale = attackTemplate_.cameraShake.attackScale;
+        hitBox_->cameraShakeFrequency = attackTemplate_.cameraShake.frequency;
+        hitBox_->cameraShakePriority = attackTemplate_.cameraShake.priority;
         hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
         hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
@@ -141,6 +150,15 @@ void AttackTemplateRuntime::Start(
         request_.setting.hitEffectPath = attackTemplate_->hitEffect.hitMeshVfxAssetPath;
         request_.setting.hitGroupId = attackTemplate_->hitGroupId;
         request_.setting.allowMultiHit = attackTemplate_->allowMultiHit;
+        request_.setting.cameraShakeEnabled = attackTemplate_->cameraShake.enabled;
+        request_.setting.cameraShakeReceiveDuration = attackTemplate_->cameraShake.receiveDuration;
+        request_.setting.cameraShakeReceivePositionStrength =
+            attackTemplate_->cameraShake.receivePositionStrength;
+        request_.setting.cameraShakeReceiveRotationStrength =
+            attackTemplate_->cameraShake.receiveRotationStrength;
+        request_.setting.cameraShakeAttackScale = attackTemplate_->cameraShake.attackScale;
+        request_.setting.cameraShakeFrequency = attackTemplate_->cameraShake.frequency;
+        request_.setting.cameraShakePriority = attackTemplate_->cameraShake.priority;
         owner_->GetManager().GetEffectManager().SpawnSlashEffect(request_);
     }
 }

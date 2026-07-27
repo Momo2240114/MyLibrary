@@ -14,11 +14,12 @@ Camera / CameraAction / LockOn / Collision 説明メモ
 
 このプロジェクトの通常カメラは、主に次のコンポーネントで構成している。
 
+- CameraManager
 - CameraComponent
+
 - ThirdPersonCameraComponent
 - CameraLockOnComponent
 - CameraCollisionComponent
-- CameraManager
 - CameraDirector
 - FovDirector
 - CameraActionDirectorComponent
@@ -31,7 +32,7 @@ CameraCollisionComponent は、通常カメラやロックオンカメラの結�
 CameraManager は、レンダリングで使用するアクティブカメラを選び、必要に応じてプロキシカメラへコピーする。
 CameraDirector と FovDirector は、登録済みのウェイポイントやFOV演出を再生する既存の演出用コンポーネント。
 
-今回追加した CameraActionDirectorComponent は、通常カメラが出した姿勢に対して、戦闘中の短時間だけ割り込む一時演出レイヤーとして設計している。
+CameraActionDirectorComponent は、通常カメラが出した姿勢に対して、戦闘中の短時間だけ割り込む一時演出レイヤーとして設計している。
 ジャスト回避やジャストガードのような、0.1秒から0.4秒程度の「見せたい瞬間」だけ、カメラ位置、注視点、FOV、軽い揺れを補正する。
 
 CameraShakeComponent は、構図変更を伴わないカメラ揺れ専用のコンポーネント。

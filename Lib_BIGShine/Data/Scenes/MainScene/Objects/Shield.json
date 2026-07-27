@@ -1,4 +1,57 @@
 {
+    "ColliderComponents": [
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "ActivateActionName": "EnableGuardCollider",
+                "CanBeCharacterGround": true,
+                "CanGuardOwnerAttack": false,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 6,
+                "ContainmentMode": 0,
+                "DeactivateActionName": "DisableGuardCollider",
+                "DebugPrimitiveColor": [
+                    1.0,
+                    0.800000011920929,
+                    1.0,
+                    1.0
+                ],
+                "DisableJustGuardActionName": "DisableJustGuard",
+                "EnableJustGuardActionName": "EnableJustGuard",
+                "EndNodeName": "ShiledMiddle",
+                "GravityScale": 1.0,
+                "HalfHeight": 1.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "OncePerAttackActivation": true,
+                "PhysicsControlsTransform": false,
+                "Radius": 25.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "ShiledTop",
+                "TeamId": 0,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "GuardCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
     "CollisionMask": 0,
     "Components": [
         {

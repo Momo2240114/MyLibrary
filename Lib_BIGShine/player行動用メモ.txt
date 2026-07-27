@@ -54,3 +54,34 @@ Player.CanCancel	Bool	現在キャンセル可能か
 Player.CanBufferInput	Bool	先行入力受付中か
 Player.CanCombo	Bool	コンボ入力受付中か
 Player.ActionEnded	Bool	ActionEnd/NotifyActionEndが呼ばれた後true
+
+
+ガード
+Idle / Move
+  + GuardInput
+    -> Block_Start
+    -> Block_Loop
+
+Block_Loop
+  + MoveInput
+    -> ガードしながら移動ブレンド
+
+Block_Loop
+  + !GuardInput
+    -> Block_End
+    -> Idle / Move
+
+Attack
+  + CanActionBranch
+  + GuardInput
+    -> Block_Start / Guard
+
+Guard
+  + JustGuardInput
+    -> Parry / JustGuard animation
+
+Parry / JustGuard animation
+  -> Sequencerで *_EnableJustGuard
+  -> Sequencerで *_DisableJustGuard
+  -> 終了時、GuardInputが残っていればGuardへ戻る
+  -> 残っていなければIdle / Moveへ
