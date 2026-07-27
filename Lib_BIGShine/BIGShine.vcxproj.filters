@@ -448,6 +448,9 @@
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\CollisionShapeManagerWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -1102,6 +1105,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\CollisionShapeManagerWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\DebugLogWindow.h">

@@ -5,12 +5,14 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 590,
+                "AttackInstanceId": 24,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
                 "CanHitOwner": false,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
@@ -70,8 +72,12 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitBox"
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -134,8 +140,12 @@
                 }
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "GltfModel"
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -144,8 +154,12 @@
                 "targetStartNodeName": "hand_r"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ModelAttachment"
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -395,8 +409,12 @@
                 "WeaponTargetStartNodeName": "TrailStart"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "WeaponTrailComponent"
+            "TypeName": "WeaponTrailComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -625,8 +643,12 @@
                 "PlaybackSpeed": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "MaterialOverlayComponent"
+            "TypeName": "MaterialOverlayComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 0,

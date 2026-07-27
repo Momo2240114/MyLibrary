@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
@@ -30,8 +32,12 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "SphereCollider"
+            "TypeName": "SphereCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -40,15 +46,15 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    14.492254257202148,
-                    4.14478874206543,
-                    6.7200093269348145
+                    -8.92915153503418,
+                    6.143150806427002,
+                    -49.696475982666016
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    10.382079124450684,
-                    0.7069690227508545,
-                    -12.543414115905762
+                    7.7386860847473145,
+                    0.7069692015647888,
+                    -20.784915924072266
                 ],
                 "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
@@ -60,14 +66,18 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraComponent"
+            "TypeName": "CameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
                 "baseDistance": 14.0,
-                "currentPitch": -9.90038776397705,
-                "currentYaw": -102.04440307617188,
+                "currentPitch": -9.251997947692871,
+                "currentYaw": 60.036067962646484,
                 "distance": 14.0,
                 "lookSpeedX": 500.0,
                 "lookSpeedY": 300.0,
@@ -84,8 +94,12 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ThirdPersonCameraComponent"
+            "TypeName": "ThirdPersonCameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -98,6 +112,7 @@
                 "arenaRadius": 67.5,
                 "baseDistance": 7.0,
                 "cameraHeight": 1.0,
+                "centerDistanceWeight": 0.3499999940395355,
                 "closeDistance": 8.0,
                 "closeFocusBias": 0.18000000715255737,
                 "collisionFovInterpolationSpeed": 10.0,
@@ -106,6 +121,7 @@
                 "collisionLookAtLowerHeight": 1.100000023841858,
                 "collisionLookAtSearchRadius": 1.7999999523162842,
                 "currentSide": 1.0,
+                "directionalDotThreshold": 0.3499999940395355,
                 "distanceScale": 0.44999998807907104,
                 "enableCircularArenaCamera": true,
                 "farFocusBias": 0.3400000035762787,
@@ -114,11 +130,14 @@
                 "horizontalSafeMax": 0.8999999761581421,
                 "horizontalSafeMin": 0.10000000149011612,
                 "lockOnEnabled": true,
+                "lockOnFocusTargetName": "TestTarget",
                 "lockOnTargetName": "TestTarget",
                 "lookAtInterpolationSpeed": 12.5,
                 "maxCameraDistance": 14.0,
                 "maxDistance": 255.0,
                 "minCameraDistance": 6.0,
+                "mouseAccumulationResetTime": 0.11999999731779099,
+                "mouseSwitchThreshold": 35.0,
                 "playerBottomLimit": 0.699999988079071,
                 "playerBottomOffset": [
                     0.0,
@@ -133,8 +152,13 @@
                 ],
                 "playerTargetName": "PlayerModel",
                 "positionInterpolationSpeed": 7.0,
+                "priorityWeight": 0.25,
+                "screenDistanceWeight": 0.550000011920929,
                 "separationHeightScale": 0.05000000074505806,
                 "sideOffset": 0.0,
+                "switchCooldown": 0.18000000715255737,
+                "switchStickReleaseThreshold": 0.25,
+                "switchStickThreshold": 0.6499999761581421,
                 "targetFocusWeight": 0.25,
                 "targetOffset": [
                     0.0,
@@ -163,11 +187,16 @@
                 "wallLookAtPlayerBias": 0.41999998688697815
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraLockOnComponent"
+            "TypeName": "CameraLockOnComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
+                "cameraCollisionLayerMask": 672,
                 "collisionLiftDownSpeed": 5.0,
                 "collisionLiftStartRate": 0.25,
                 "collisionLiftUpSpeed": 14.0,
@@ -182,8 +211,12 @@
                 "reduceCollisionLiftWhenArenaWallCameraActive": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraCollisionComponent"
+            "TypeName": "CameraCollisionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -249,8 +282,12 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraActionDirectorComponent"
+            "TypeName": "CameraActionDirectorComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -291,14 +328,22 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraShakeComponent"
+            "TypeName": "CameraShakeComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": null,
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CameraFreeController"
+            "TypeName": "CameraFreeController",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -325,14 +370,22 @@
                 ]
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "FovDirector"
+            "TypeName": "FovDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": null,
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "Easing"
+            "TypeName": "Easing",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 1,
@@ -341,19 +394,19 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            14.492256164550781,
-            4.14478874206543,
-            6.720009803771973
+            -8.929153442382813,
+            6.14315128326416,
+            -49.696475982666016
         ],
         "Rot": [
-            9.900385856628418,
-            192.04441833496094,
-            1.0833500141416152e-07
+            9.251998901367188,
+            29.96392822265625,
+            6.487701966761961e-07
         ],
         "Scale": [
-            1.0,
-            1.0,
-            0.9999999403953552
+            0.9999999403953552,
+            0.9999999403953552,
+            1.0
         ]
     }
 }

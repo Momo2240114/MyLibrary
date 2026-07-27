@@ -38,6 +38,7 @@ public:
     bool enabled = true;                               // 有効フラグ
     bool isGrounded = false;
     bool shapeRenderEnabled = true;
+    bool canBeCharacterGround = true;
     float mass = 0.0f;
 
     Vector4 debugPrimitiveColor = { 0,0,0,1 };
@@ -67,6 +68,7 @@ public:
     void SetVelocityRotationMode(VelocityRotationMode mode_) { velocityRotationMode = mode_; }
     VelocityRotationMode GetVelocityRotationMode() const { return velocityRotationMode; }
     bool UsesPhysicsResponse() const { return usePhysicsResponse; }
+    bool CanBeCharacterGround() const { return canBeCharacterGround; }
     virtual bool HasFixedCollisionRole() const { return false; }
     virtual bool HasFixedPhysicsBehavior() const { return false; }
     void ApplyRoleDefaults();

@@ -140,11 +140,13 @@ void AIBehaviorGraph::EnsureDefaultGraph()
 {
     if (!nodes.empty()) return;
 
+    // 空のグラフに実行開始用のRootとSelectorを生成する
     AddNode(AI_BEHAVIOR_NODE_TYPE::ROOT, "Root", { 40.0f, 120.0f });
     AddNode(AI_BEHAVIOR_NODE_TYPE::SELECTOR, "Selector", { 280.0f, 120.0f });
     AddLink(nodes[0].id, nodes[1].id);
 }
 
+// BlackboardとRootノードを確認し、AIグラフの実行結果を更新する
 AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
 {
     runtimeActiveNodeIds.clear();
@@ -160,6 +162,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
     return lastTickStatus;
 }
 
+// AIグラフの実行状態と実行中ノード情報を初期化する
 void AIBehaviorGraph::ResetRuntime()
 {
     runtimeStates.clear();
@@ -198,6 +201,7 @@ AIBehaviorNode* AIBehaviorGraph::AddNode(
     return &nodes.back();
 }
 
+// 指定したノードと接続リンクをグラフから削除する
 bool AIBehaviorGraph::RemoveNode(uintptr_t nodeId_)
 {
     const auto nodeIt_ = std::find_if(nodes.begin(), nodes.end(),
@@ -240,6 +244,7 @@ AIBehaviorLink* AIBehaviorGraph::AddLink(uintptr_t fromNodeId_, uintptr_t toNode
     return &links.back();
 }
 
+// 指定したリンクを削除し、実行状態を初期化する
 bool AIBehaviorGraph::RemoveLink(uintptr_t linkId_)
 {
     const auto linkIt_ = std::remove_if(links.begin(), links.end(),
@@ -301,11 +306,13 @@ uintptr_t AIBehaviorGraph::GenerateId()
     return nextId++;
 }
 
+// 読み込み済みIDと重ならないように次回生成IDの下限を更新する
 void AIBehaviorGraph::SetIdCounterFloor(uintptr_t minValue_)
 {
     if (nextId < minValue_) nextId = minValue_;
 }
 
+// ノード、リンク、実行に必要な設定をJSONへ変換する
 void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
 {
     json_ = nlohmann::json::object();
@@ -359,6 +366,7 @@ void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
     }
 }
 
+// JSONからノードとリンクを復元し、実行可能なグラフ状態へ戻す
 void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::Deserialize");
@@ -439,6 +447,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
     EnsureDefaultGraph();
 }
 
+// AIグラフをJSONファイルとして保存する
 bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
 {
     const std::filesystem::path filePath_(path_);
@@ -456,6 +465,7 @@ bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
     return true;
 }
 
+// JSONファイルからAIグラフを読み込む
 bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::LoadFromFile");
@@ -472,6 +482,7 @@ bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
     return true;
 }
 
+// ノード種別に応じてCompositeまたはTaskとして実行する
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     runtimeActiveNodeIds.push_back(node_.id);
@@ -483,6 +494,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorCo
     return TickTask(node_, context_);
 }
 
+// 子ノードの結果を使用してSelectorやSequenceの成否を判定する
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     std::vector<AIBehaviorNode*> children_ = GetChildren(node_);
@@ -497,6 +509,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
 
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::SEQUENCE)
     {
+        // Sequenceは失敗または実行中になるまで子ノードを順番に進める
         while (state_.childIndex < children_.size())
         {
             AI_BEHAVIOR_STATUS result_ = TickNode(*children_[state_.childIndex], context_);
@@ -523,6 +536,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
 
         if (totalWeight_ > 0.0001f)
         {
+            // 子ノードのWeightを使用して実行対象を1つ選択する
             std::uniform_real_distribution<float> distribution_(0.0f, totalWeight_);
             float pick_ = distribution_(randomEngine_);
             for (AIBehaviorNode* child_ : children_)
@@ -549,6 +563,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
     return AI_BEHAVIOR_STATUS::FAILURE;
 }
 
+// Blackboard操作、Action実行、待機などの実処理ノードを実行する
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     BlackboardComponent& blackboard_ = *context_.blackboard;
@@ -619,6 +634,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
     }
 }
 
+// リンク情報から指定ノードの子ノードを取得し、優先度順に並べる
 std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& node_)
 {
     std::vector<AIBehaviorNode*> children_;
@@ -638,6 +654,7 @@ std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& 
     return children_;
 }
 
+// ノード設定に応じてLocalまたはGlobalのBlackboardを取得する
 BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -649,6 +666,7 @@ BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
     return context_.blackboard;
 }
 
+// Blackboardの値とノードに設定された比較条件を照合する
 bool AIBehaviorGraph::EvaluateBlackboardCondition(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -664,6 +682,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
 
     if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::STRING)
     {
+        // 文字列は数値化せず、等価または不一致の条件だけを判定する
         std::string stringValue_;
         if (!blackboard_->GetString(node_.blackboardCategory, node_.blackboardKey, stringValue_)) return false;
         const bool equal_ = stringValue_ == node_.stringValue;
@@ -687,6 +706,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
     }
 }
 
+// ノードに設定された値を対象Blackboardへ書き込む
 void AIBehaviorGraph::SetBlackboardValue(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -722,6 +742,7 @@ void AIBehaviorGraph::SetBlackboardValue(
     }
 }
 
+// Action終了通知用のBlackboard値がtrueになっているかを判定する
 bool AIBehaviorGraph::IsActionEndReached(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const
 {
     bool ended_ = false;
@@ -729,6 +750,7 @@ bool AIBehaviorGraph::IsActionEndReached(const AIBehaviorNode& node_, Blackboard
     return ended_;
 }
 
+// グラフ実行の開始点になるRootノードを取得する
 AIBehaviorNode* AIBehaviorGraph::FindRootNode()
 {
     for (AIBehaviorNode& node_ : nodes)

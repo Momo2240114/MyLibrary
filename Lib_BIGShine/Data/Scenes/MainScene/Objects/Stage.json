@@ -2,6 +2,8 @@
     "ColliderComponents": [
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
@@ -32,11 +34,17 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "CylinderCollider"
+            "TypeName": "CylinderCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "",
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 0,
                 "ContainmentMode": 0,
@@ -65,8 +73,12 @@
                 "shapeSizeScale": 1.0
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": true,
-            "TypeName": "MeshCollider"
+            "TypeName": "MeshCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -234,8 +246,12 @@
                 }
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "GltfModel"
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -393,8 +409,12 @@
                 "IsPlaying": true
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ParticleComponent"
+            "TypeName": "ParticleComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 0,

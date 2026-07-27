@@ -1,0 +1,224 @@
+{
+    "ColliderComponents": [
+        {
+            "Data": {
+                "CanBeCharacterGround": true,
+                "ColliderName": "LeftFrontLegDownHurtBox",
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 3,
+                "ContainmentMode": 0,
+                "DamageMultiplier": 0.8999999761581421,
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    1.0,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "EndNodeName": "PlainsDragon_-L-Hand",
+                "GravityScale": 1.0,
+                "HalfHeight": 6.0,
+                "HurtTag": "LEFT_FRONT_LEG",
+                "InvincibilityDuration": 0.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "TestTarget",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 42.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "PlainsDragon_-L-Forearm",
+                "SyncCharacterColliderShape": false,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HurtBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CanBeCharacterGround": false,
+                "ColliderName": "LeftFrontLegDownPhysical",
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 0,
+                "ContainmentMode": 0,
+                "DebugPrimitiveColor": [
+                    0.15000000596046448,
+                    0.550000011920929,
+                    1.0,
+                    1.0
+                ],
+                "EndNodeName": "PlainsDragon_-L-Hand",
+                "GravityScale": 1.0,
+                "HalfHeight": 5.400000095367432,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 0.0,
+                "NodeModelObjectName": "TestTarget",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 28.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "PlainsDragon_-L-Forearm",
+                "UseGravity": false,
+                "UsePhysicsResponse": true,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CapsuleCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ActionPrefix": "LeftFrontLegHitBox",
+                "ActivateActionName": "EnableHitBox",
+                "AllowMultiHit": false,
+                "AttackInstanceId": 0,
+                "AttackSourceType": 0,
+                "AttackTag": "LeftFrontLeg",
+                "AttackerAirLiftPower": 0.0,
+                "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
+                "CanHitOwner": false,
+                "ColliderName": "LeftFrontLegHitBox",
+                "CollisionOwnerObjectName": "TestTarget",
+                "CollisionRole": 2,
+                "ContainmentMode": 0,
+                "Damage": 7.0,
+                "DamageKey": "Damage",
+                "DeactivateActionName": "DisableHitBox",
+                "DebugPrimitiveColor": [
+                    1.0,
+                    0.18000000715255737,
+                    0.11999999731779099,
+                    1.0
+                ],
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.75,
+                "HitGroupId": 40,
+                "HitMeshVFXAssetPath": "",
+                "HitMeshVFXLifeTime": 1.0,
+                "HitMeshVFXNormalOffset": 0.0,
+                "HitOncePerActivation": true,
+                "HitParticleAssetPath": "",
+                "HitParticleEmitterName": "",
+                "HitParticleLifeTime": 1.0,
+                "HitParticleNormalOffset": 0.0,
+                "HitSoundMuffled": false,
+                "HitSoundMuffledCutoff": 1200.0,
+                "HitSoundPath": "",
+                "HitSoundPathKey": "",
+                "HitSoundVolume": 1.0,
+                "HitStopDuration": 0.0,
+                "HitStopDurationKey": "HitStopDuration",
+                "HitStopLayerMask": 3,
+                "HitStopScale": 0.0,
+                "ImpactPower": 7.0,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "KnockBackPower": 3.5,
+                "KnockBackPowerKey": "KnockBackPower",
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "PhysicsControlsTransform": false,
+                "Radius": 0.36000001430511475,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "SourceAction": "LeftFrontLeg",
+                "StartNodeName": "",
+                "TargetAirLiftPower": 0.0,
+                "TeamId": 1,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 16,
+                "targetStartNodeName": "PlainsDragon_-L-Forearm"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "BodyPart": "LEFT_FRONT_LEG",
+                "CombatOwnerObjectName": "TestTarget"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 2,
+    "Name": "LeftFrontLegDownPart",
+    "ParentName": "BodyPartRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

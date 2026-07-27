@@ -20,11 +20,67 @@ using namespace physx;
 
 namespace
 {
+    struct CameraCollisionLayerView
+    {
+        const char* name;
+        LayerType layer;
+    };
+
+    constexpr CameraCollisionLayerView cameraCollisionLayerViews_[] =
+    {
+        { "Player", LayerType::Player },
+        { "Enemy", LayerType::Enemy },
+        { "PlayerBullet", LayerType::PlayerBullet },
+        { "EnemyBullet", LayerType::EnemyBullet },
+        { "UI", LayerType::UI },
+        { "Environment", LayerType::Environment },
+        { "SneakObject", LayerType::SneakObject },
+        { "Terrain", LayerType::Terrain },
+        { "Wall", LayerType::Wall },
+        { "Item", LayerType::Item },
+    };
+
+    const char* GetCameraCollisionLayerName(uint32_t layer_)
+    {
+        if (layer_ == static_cast<uint32_t>(LayerType::Default)) return "Default";
+
+        for (const CameraCollisionLayerView& layerView_ : cameraCollisionLayerViews_)
+        {
+            if (layer_ == static_cast<uint32_t>(layerView_.layer))
+            {
+                return layerView_.name;
+            }
+        }
+
+        return "Unknown";
+    }
+
+    ColliderComponent* GetColliderFromActor(const PxRigidActor* actor_)
+    {
+        if (!actor_ || !actor_->userData) return nullptr;
+        return static_cast<ColliderComponent*>(actor_->userData);
+    }
+
+    uint32_t GetShapeLayer(const PxShape* shape_)
+    {
+        if (!shape_) return static_cast<uint32_t>(LayerType::Default);
+
+        PxFilterData filterData_ = shape_->getQueryFilterData();
+        if (filterData_.word0 == 0u)
+        {
+            filterData_ = shape_->getSimulationFilterData();
+        }
+        return filterData_.word0;
+    }
+
     class CameraQueryFilter : public PxQueryFilterCallback
     {
     public:
-        explicit CameraQueryFilter(const std::vector<const void*>& ignoredUserData_)
-            : ignoredUserData(ignoredUserData_)
+        CameraQueryFilter(
+            const std::vector<const void*>& ignoredUserData_,
+            uint32_t layerMask_)
+            : ignoredUserData(ignoredUserData_),
+            layerMask(layerMask_)
         {
         }
 
@@ -45,6 +101,13 @@ namespace
             {
                 return PxQueryHitType::eNONE;
             }
+
+            const uint32_t shapeLayer_ = GetShapeLayer(shape_);
+            if ((layerMask & shapeLayer_) == 0u)
+            {
+                return PxQueryHitType::eNONE;
+            }
+
             if (std::find(
                 ignoredUserData.begin(),
                 ignoredUserData.end(),
@@ -70,6 +133,7 @@ namespace
 
     private:
         const std::vector<const void*>& ignoredUserData;
+        uint32_t layerMask = 0u;
     };
 
     void CollectIgnoredUserData(
@@ -97,6 +161,14 @@ namespace
             differenceZ_ * differenceZ_);
     }
 
+}
+
+uint32_t CameraCollisionComponent::GetDefaultCollisionLayerMask()
+{
+    return
+        static_cast<uint32_t>(LayerType::Environment) |
+        static_cast<uint32_t>(LayerType::Terrain) |
+        static_cast<uint32_t>(LayerType::Wall);
 }
 
 void CameraCollisionComponent::Start()
@@ -299,17 +371,24 @@ bool CameraCollisionComponent::SweepCameraSegment(
     const float distance_ = DistanceFloat3(startPosition_, endPosition_);
     if (distance_ <= 0.001f) return false;
 
+    debugLastHitObjectName.clear();
+    debugLastHitColliderName.clear();
+    debugLastHitLayer = 0u;
+    debugLastHitAccepted = false;
+
     const PxVec3 origin_(startPosition_.x, startPosition_.y, startPosition_.z);
     const PxVec3 direction_(
         (endPosition_.x - startPosition_.x) / distance_,
         (endPosition_.y - startPosition_.y) / distance_,
         (endPosition_.z - startPosition_.z) / distance_);
 
-    CameraQueryFilter queryFilter_(ignoredUserData_);
+    CameraQueryFilter queryFilter_(ignoredUserData_, cameraCollisionLayerMask);
 
     PxQueryFlags queryFlags_ = PxQueryFlag::eSTATIC | PxQueryFlag::ePREFILTER;
     if (includeDynamicColliders) queryFlags_ |= PxQueryFlag::eDYNAMIC;
-    const PxQueryFilterData filterData_(PxFilterData(), queryFlags_);
+    const PxQueryFilterData filterData_(
+        PxFilterData(cameraCollisionLayerMask, 0u, 0u, 0u),
+        queryFlags_);
     const PxHitFlags hitFlags_ =
         PxHitFlag::eDEFAULT | PxHitFlag::eMESH_BOTH_SIDES;
     if (probeRadius > 0.001f)
@@ -328,6 +407,18 @@ bool CameraCollisionComponent::SweepCameraSegment(
         {
             return false;
         }
+        debugLastHitAccepted = true;
+        debugLastHitLayer = GetShapeLayer(sweepHit_.block.shape);
+        if (ColliderComponent* collider_ =
+            GetColliderFromActor(sweepHit_.block.actor))
+        {
+            debugLastHitColliderName = collider_->GetColliderName();
+            if (const std::shared_ptr<GameObject> object_ =
+                collider_->GetGameObject())
+            {
+                debugLastHitObjectName = object_->GetName();
+            }
+        }
         hitDistance_ = sweepHit_.block.distance;
         return true;
     }
@@ -344,8 +435,52 @@ bool CameraCollisionComponent::SweepCameraSegment(
     {
         return false;
     }
+    debugLastHitAccepted = true;
+    debugLastHitLayer = GetShapeLayer(rayHit_.block.shape);
+    if (ColliderComponent* collider_ = GetColliderFromActor(rayHit_.block.actor))
+    {
+        debugLastHitColliderName = collider_->GetColliderName();
+        if (const std::shared_ptr<GameObject> object_ = collider_->GetGameObject())
+        {
+            debugLastHitObjectName = object_->GetName();
+        }
+    }
     hitDistance_ = rayHit_.block.distance;
     return true;
+}
+
+void CameraCollisionComponent::DrawCollisionLayerMaskGui()
+{
+    ImGui::SeparatorText("Camera Collision Layer Mask");
+
+    for (const CameraCollisionLayerView& layerView_ : cameraCollisionLayerViews_)
+    {
+        const uint32_t layerMask_ = static_cast<uint32_t>(layerView_.layer);
+        bool enabled_ = (cameraCollisionLayerMask & layerMask_) != 0u;
+        if (ImGui::Checkbox(layerView_.name, &enabled_))
+        {
+            if (enabled_)
+            {
+                cameraCollisionLayerMask |= layerMask_;
+            }
+            else
+            {
+                cameraCollisionLayerMask &= ~layerMask_;
+            }
+        }
+    }
+
+    if (ImGui::Button("Use Camera Default Layers"))
+    {
+        cameraCollisionLayerMask = GetDefaultCollisionLayerMask();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Clear Camera Layers"))
+    {
+        cameraCollisionLayerMask = 0u;
+    }
+
+    ImGui::Text("Layer Mask: %u", cameraCollisionLayerMask);
 }
 
 void CameraCollisionComponent::ApplyCameraPose(
@@ -410,6 +545,7 @@ void CameraCollisionComponent::Gui()
     ImGui::DragFloat("Probe Radius", &probeRadius, 0.01f, 0.0f, 5.0f);
     ImGui::Checkbox("Include Dynamic Colliders", &includeDynamicColliders);
     ImGui::Checkbox("Collision Suppressed", &collisionSuppressed);
+    DrawCollisionLayerMaskGui();
     ImGui::SeparatorText("LockOn Collision Lift");
     ImGui::Checkbox(
         "Enable LockOn Collision Lift",
@@ -450,6 +586,18 @@ void CameraCollisionComponent::Gui()
         ImGui::Text("Compression Rate: %.3f", debugCompressionRate);
         ImGui::Text("Current Collision Lift: %.3f", currentCollisionLift);
     }
+    ImGui::SeparatorText("Last Camera Collision Hit");
+    ImGui::Text(
+        "Object: %s",
+        debugLastHitObjectName.empty() ? "None" : debugLastHitObjectName.c_str());
+    ImGui::Text(
+        "Collider: %s",
+        debugLastHitColliderName.empty() ? "None" : debugLastHitColliderName.c_str());
+    ImGui::Text(
+        "Layer: %s (%u)",
+        GetCameraCollisionLayerName(debugLastHitLayer),
+        debugLastHitLayer);
+    ImGui::Text("Accepted By Mask: %s", debugLastHitAccepted ? "Yes" : "No");
 }
 
 void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
@@ -458,6 +606,7 @@ void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
     json_["ignoreLockOnTargetName"] = ignoreLockOnTargetName;
 
     json_["collisionOffset"] = collisionOffset;
+    json_["cameraCollisionLayerMask"] = cameraCollisionLayerMask;
     json_["minimumCameraDistance"] = minimumCameraDistance;
     json_["probeRadius"] = probeRadius;
     json_["includeDynamicColliders"] = includeDynamicColliders;
@@ -476,6 +625,9 @@ void CameraCollisionComponent::Deserialize(const nlohmann::json& json_)
     ignoreLockOnTargetName = json_.value("ignoreLockOnTargetName", std::string{});
 
     collisionOffset = json_.value("collisionOffset", 0.15f);
+    cameraCollisionLayerMask = json_.value(
+        "cameraCollisionLayerMask",
+        json_.value("collisionLayerMask", GetDefaultCollisionLayerMask()));
     minimumCameraDistance = json_.value("minimumCameraDistance", 0.05f);
     probeRadius = json_.value("probeRadius", 0.3f);
     includeDynamicColliders = json_.value("includeDynamicColliders", true);

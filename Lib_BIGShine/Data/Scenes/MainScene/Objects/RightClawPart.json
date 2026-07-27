@@ -10,7 +10,9 @@
                 "AttackTag": "RightClaw",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CanBeCharacterGround": true,
                 "CanHitOwner": false,
+                "ColliderName": "RightClawHitBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
@@ -23,7 +25,7 @@
                     0.11999999731779099,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "PlainsDragon_-R-Finger21",
                 "GravityScale": 1.0,
                 "HalfHeight": 0.41999998688697815,
                 "HitGroupId": 31,
@@ -50,29 +52,32 @@
                 "KnockBackPower": 4.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,
                     0.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 0.3199999928474426,
+                "Radius": 60.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "SourceAction": "RightClaw",
-                "StartNodeName": "",
+                "StartNodeName": "PlainsDragon_-R-Hand",
                 "TargetAirLiftPower": 0.0,
                 "TeamId": 1,
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0,
-                "ColliderName": "RightClawHitBox"
+                "shapeSizeScale": 1.0
             },
             "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "HitBox"
+            "TypeName": "HitBox",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -84,8 +89,12 @@
                 "targetStartNodeName": "PlainsDragon_-R-Hand"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "ModelAttachment"
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
             "Data": {
@@ -93,8 +102,12 @@
                 "CombatOwnerObjectName": "TestTarget"
             },
             "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "DragonBodyPartHurtBoxComponent"
+            "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,
