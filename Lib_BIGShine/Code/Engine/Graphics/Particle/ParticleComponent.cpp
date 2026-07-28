@@ -9,6 +9,7 @@
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Debug/TracyProfiler.h"
@@ -21,6 +22,23 @@
 #include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
 
+namespace
+{
+    void MultiplyParticleColor(
+        DirectX::XMFLOAT4& color_,
+        const VFXMaterialData& materialData_)
+    {
+        BS_PROFILE_SCOPE("ParticleComponent::MultiplyParticleColor");
+
+        const float alpha_ = std::max(0.0f, materialData_.alpha);
+        const float emissiveMultiplier_ = std::max(1.0f, materialData_.emissiveIntensity);
+
+        color_.x *= materialData_.baseColor.x * materialData_.emissiveColor.x * emissiveMultiplier_;
+        color_.y *= materialData_.baseColor.y * materialData_.emissiveColor.y * emissiveMultiplier_;
+        color_.z *= materialData_.baseColor.z * materialData_.emissiveColor.z * emissiveMultiplier_;
+        color_.w *= materialData_.baseColor.w * alpha_;
+    }
+}
 void ParticleComponent::Start()
 {
     // Editor候補の更新と、保存済みAssetが指定されている場合の遅延読み込みを行う。
@@ -376,6 +394,16 @@ void ParticleComponent::Gui()
         if (ImGui::BeginTabItem("Texture"))
         {
             // 色Texture、Mask、Gradient、SpriteSheetを差し替える。
+            if (AssetSlotGui::Draw(
+                "VFX Material",
+                AssetSlotType::MATERIAL,
+                track.materialPath,
+                track.materialResource ? track.materialResource->GetBaseTexture() : nullptr,
+                "Data/VFXMaterials"))
+            {
+                LoadEmitterMaterial(track, track.materialPath);
+            }
+
             auto drawTextureSlot_ = [&](const char* label_, std::string& fileName_, std::string& path_, int slot_)
                 {
                     ID3D11ShaderResourceView* texture_ = nullptr;
@@ -598,6 +626,106 @@ bool ParticleComponent::LoadEmitterTextureSlot(EmitterTrack& track, const std::s
     return false;
 }
 
+bool ParticleComponent::LoadEmitterMaterial(
+    EmitterTrack& track_,
+    const std::string& materialPath_)
+{
+    BS_PROFILE_SCOPE("ParticleComponent::LoadEmitterMaterial");
+
+    if (!LoadEmitterMaterialResource(track_, materialPath_)) return false;
+
+    ApplyEmitterMaterialTextures(track_);
+
+    if (track_.emitter)
+    {
+        ParticleSystemConstants evaluatedSettings_ = track_.settings;
+        ApplyEmitterMaterialToSettings(track_, evaluatedSettings_);
+        track_.emitter->ApplySettings(evaluatedSettings_);
+        track_.emitter->SetDepthSortEnabled(track_.runtimeBlendMode == ParticleBlendMode::ALPHA);
+    }
+
+    return true;
+}
+
+bool ParticleComponent::LoadEmitterMaterialResource(
+    EmitterTrack& track_,
+    const std::string& materialPath_)
+{
+    BS_PROFILE_SCOPE("ParticleComponent::LoadEmitterMaterialResource");
+
+    track_.materialPath = materialPath_;
+    track_.materialResource.reset();
+    track_.runtimeBlendMode = track_.blendMode;
+
+    if (track_.materialPath.empty()) return false;
+
+    track_.materialResource =
+        VFXMaterialResourceManager::GetInstance().Load(track_.materialPath);
+    if (!track_.materialResource) return false;
+
+    const VFXMaterialData& materialData_ = track_.materialResource->GetMaterialData();
+    if (materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE)
+    {
+        track_.runtimeBlendMode = ParticleBlendMode::ADDITIVE;
+    }
+
+    return true;
+}
+
+void ParticleComponent::ApplyEmitterMaterialToSettings(
+    const EmitterTrack& track_,
+    ParticleSystemConstants& settings_) const
+{
+    BS_PROFILE_SCOPE("ParticleComponent::ApplyEmitterMaterialToSettings");
+
+    if (!track_.materialResource) return;
+
+    const VFXMaterialData& materialData_ = track_.materialResource->GetMaterialData();
+    MultiplyParticleColor(settings_.manualColor, materialData_);
+    MultiplyParticleColor(settings_.colorStart, materialData_);
+    MultiplyParticleColor(settings_.colorEnd, materialData_);
+
+    if (!materialData_.maskTexturePath.empty() && track_.materialResource->GetMaskTexture())
+    {
+        settings_.useMaskTexture = 1u;
+    }
+}
+
+void ParticleComponent::ApplyEmitterMaterialTextures(EmitterTrack& track_)
+{
+    BS_PROFILE_SCOPE("ParticleComponent::ApplyEmitterMaterialTextures");
+
+    if (!track_.materialResource) return;
+
+    const VFXMaterialData& materialData_ = track_.materialResource->GetMaterialData();
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseTexture_;
+    baseTexture_ = track_.materialResource->GetBaseTexture();
+    if (baseTexture_)
+    {
+        if (track_.emitter) track_.emitter->SetTexture(baseTexture_);
+        if (!materialData_.baseTexturePath.empty())
+        {
+            track_.texturePath = materialData_.baseTexturePath;
+            track_.textureFileName = WindowsDialogHelper::PathToUtf8(
+                WindowsDialogHelper::Utf8ToPath(track_.texturePath).filename());
+        }
+    }
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> maskTexture_;
+    maskTexture_ = track_.materialResource->GetMaskTexture();
+    if (maskTexture_)
+    {
+        if (track_.emitter) track_.emitter->SetMaskTexture(maskTexture_);
+        if (!materialData_.maskTexturePath.empty())
+        {
+            track_.maskTexturePath = materialData_.maskTexturePath;
+            track_.maskTextureFileName = WindowsDialogHelper::PathToUtf8(
+                WindowsDialogHelper::Utf8ToPath(track_.maskTexturePath).filename());
+        }
+    }
+}
+
 void ParticleComponent::Stop()
 {
     isPlaying = false;
@@ -675,6 +803,7 @@ ParticleEffectAsset ParticleComponent::GetAsset() const
         ParticleEmitterAsset emitterAsset_{};
         emitterAsset_.settings = track_.settings;
         emitterAsset_.name = track_.name;
+        emitterAsset_.materialPath = track_.materialPath;
         emitterAsset_.texturePath = track_.texturePath;
         emitterAsset_.textureFileName = track_.textureFileName;
         emitterAsset_.maskTexturePath = track_.maskTexturePath;
@@ -708,6 +837,7 @@ void ParticleComponent::SetAsset(const ParticleEffectAsset& asset_)
         EmitterTrack track_{};
         track_.settings = emitterAsset_.settings;
         track_.name = emitterAsset_.name;
+        track_.materialPath = emitterAsset_.materialPath;
         track_.texturePath = emitterAsset_.texturePath;
         track_.textureFileName = emitterAsset_.textureFileName;
         track_.maskTexturePath = emitterAsset_.maskTexturePath;
@@ -1017,8 +1147,9 @@ void ParticleComponent::Update(float deltaTime)
             tempSettings_.emissionPosition.z = worldPosition_.z + track_.settings.emissionPosition.z;
         }
 
+        ApplyEmitterMaterialToSettings(track_, tempSettings_);
         track_.emitter->ApplySettings(tempSettings_);
-        track_.emitter->SetDepthSortEnabled(track_.blendMode == ParticleBlendMode::ALPHA);
+        track_.emitter->SetDepthSortEnabled(track_.runtimeBlendMode == ParticleBlendMode::ALPHA);
         track_.emitter->SetDepthSortInterval(2);
         track_.emitter->Update(context_, deltaTime);
 
@@ -1038,6 +1169,7 @@ void ParticleComponent::Serialize(nlohmann::json& j) const
 
         ej["Name"] = track.name;
         ej["SpawnSpace"] = static_cast<int>(track.spawnSpace);
+        ej["MaterialPath"] = track.materialPath;
         ej["TexturePath"] = track.texturePath;
         ej["texturePath"] = track.texturePath;
         ej["MaskTexturePath"] = track.maskTexturePath;
@@ -1134,6 +1266,7 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
 
             track.texturePath = ej.value(
                 "texturePath", ej.value("TexturePath", ej.value("texture_path", std::string{})));
+            track.materialPath = ej.value("MaterialPath", std::string{});
             track.maskTexturePath = ej.value(
                 "maskTexturePath", ej.value("MaskTexturePath", std::string{}));
             track.gradientTexturePath = ej.value(
@@ -1312,7 +1445,13 @@ void ParticleComponent::RebuildEmitterResources()
         const uint32_t useMaskTexture_ = track_.settings.useMaskTexture;
         const uint32_t useGradientTexture_ = track_.settings.useGradientTexture;
         const uint32_t useShadeGradientTexture_ = track_.settings.useShadeGradientTexture;
+        track_.runtimeBlendMode = track_.blendMode;
         track_.emitter = std::make_unique<ParticleEmitter>(device_, track_.settings, track_.settings.maxParticleCount);
+        if (!track_.materialPath.empty())
+        {
+            LoadEmitterMaterialResource(track_, track_.materialPath);
+            ApplyEmitterMaterialTextures(track_);
+        }
         if (!track_.texturePath.empty()) LoadEmitterTextureSlot(track_, track_.texturePath, 0);
         if (!track_.maskTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.maskTexturePath, 1);
         if (!track_.gradientTexturePath.empty()) LoadEmitterTextureSlot(track_, track_.gradientTexturePath, 2);
@@ -1320,7 +1459,11 @@ void ParticleComponent::RebuildEmitterResources()
         track_.settings.useMaskTexture = useMaskTexture_;
         track_.settings.useGradientTexture = useGradientTexture_;
         track_.settings.useShadeGradientTexture = useShadeGradientTexture_;
-        track_.emitter->ApplySettings(track_.settings);
+
+        ParticleSystemConstants evaluatedSettings_ = track_.settings;
+        ApplyEmitterMaterialToSettings(track_, evaluatedSettings_);
+        track_.emitter->ApplySettings(evaluatedSettings_);
+        track_.emitter->SetDepthSortEnabled(track_.runtimeBlendMode == ParticleBlendMode::ALPHA);
         track_.emitter->SetEmissionEnabled(track_.isPlaybackEnabled);
     }
     RegisterActions();

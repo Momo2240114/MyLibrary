@@ -356,6 +356,7 @@
     <ClCompile Include="Code\Editor\Window\ComponentUpdateSequencerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\DebugLogWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\MaterialAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\GpuRenderInvestigationWindow.cpp" />
@@ -492,10 +493,14 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResourceManager.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialSerializer.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\TextureResourceManager.cpp" />
     <ClCompile Include="Code\Editor\Window\AssetBrowserWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\CurveAssetEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EasingPresetEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\VFXMaterialEditorWindow.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp" />
@@ -628,6 +633,7 @@
     <ClInclude Include="Code\Editor\Window\ComponentUpdateSequencerWindow.h" />
     <ClInclude Include="Code\Editor\Window\DebugLogWindow.h" />
     <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h" />
+    <ClInclude Include="Code\Editor\Window\MaterialAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
     <ClInclude Include="Code\Editor\Window\GameModeWindow.h" />
@@ -683,6 +689,7 @@
     <ClInclude Include="Code\Editor\Window\AssetBrowserWindow.h" />
     <ClInclude Include="Code\Editor\Window\CurveAssetEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EasingPresetEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\VFXMaterialEditorWindow.h" />
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h" />
     <ClInclude Include="Code\Editor\AssetSlotGui.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />
@@ -730,6 +737,11 @@
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialData.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialInstance.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResourceManager.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialSerializer.h" />
     <ClInclude Include="Code\Engine\Audio\Audio.h" />
     <ClInclude Include="Code\Engine\Audio\AudioComponent.h" />
     <ClInclude Include="Code\Engine\Audio\AudioManager.h" />

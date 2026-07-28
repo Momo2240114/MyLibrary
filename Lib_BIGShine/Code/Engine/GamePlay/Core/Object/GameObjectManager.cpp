@@ -1187,7 +1187,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
     }
 }
 
-void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_)
+void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_, ID3D11RenderTargetView* finalRenderTargetView_)
 {
     BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
@@ -1334,7 +1334,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
         particleRenderSystem->RenderAll(renderContext_);
     }
 
-    auto* finalRTV = graphicsDeviceManager_.GetRenderTargetView();
+    ID3D11RenderTargetView* finalRTV_ = finalRenderTargetView_ ? finalRenderTargetView_ : graphicsDeviceManager_.GetRenderTargetView();
 
     // 2. ポストレンダーシステムを実行
     {
@@ -1342,7 +1342,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
         graphicsDeviceManager_.GetPostRenderSystem().Execute(
             renderContext_,
             graphicsDeviceManager_.GetSceneSRV(), // 描画結果のSRV
-            finalRTV           // 最終出力先
+            finalRTV_           // 最終出力先
         );
     }
 

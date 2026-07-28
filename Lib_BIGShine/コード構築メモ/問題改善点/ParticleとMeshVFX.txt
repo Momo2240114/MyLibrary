@@ -194,4 +194,153 @@ Shader/ParticleBeginFrame_CS.hlsl
 Shader/ParticleEmit_CS.hlsl
 Shader/ParticleUpdate_CS.hlsl
 Shader/ParticleEndFrame_CS.hlsl
+
+============================================================
+
+MeshVFXのMaterial表現をParticleやDecalにも使い回したい問題
+
+■起こった問題
+MeshVFXはTexture、Mask、Noise、Normal、Distortion、Color、Emissive、Blendなどの見た目調整項目が強く、斬撃やブレスの表現を作り込める一方で、ParticleやDeferred Decalでは同じようなMaterial設定を再利用しにくかった。
+
+■原因
+MeshVFX、Particle、Decalがそれぞれ個別にTextureやMaterial風の値を持っていたため、似た見た目の炎、魔法、ブレス、ヒット演出を作る場合でも、各Componentで別々に設定し直す必要があった。
+MeshVFXのMaterial設定をそのまま他へ広げると、MeshVFX専用のMesh、Trail、頂点変形、Curveなどまで混ざってしまい、ParticleやDecal側の責任範囲が曖昧になる問題もあった。
+
+■発生する状況
+MeshVFXで作った発光Texture、Mask、Noise、DistortionをParticleやDecalにも使いたい場面で発生する。
+ドラゴンのブレス、魔法、ビーム、範囲攻撃、Hit VFXなど、複数のVFX種類を組み合わせる場面で特に起こりやすい。
+
+■修正方針
+MeshVFX専用の全設定を共通化するのではなく、Texture、Color、Emissive、Alpha、UV、Dissolve、Distortion、Blend、Cull、Depthだけを共通のVFXMaterialとして切り出す。
+MeshVFX固有のMesh、Trail、頂点変形、Curve、内部Mesh設定はMeshVFX側に残す。
+Particle固有の発生数、寿命、速度、SpriteSheet、Spawn設定はParticle側に残す。
+Decal固有の投影や寿命、Debug BoundsなどはDecal側に残す。
+
+■追加・変更した処理
+VFXMaterialData、VFXMaterialSerializer、VFXMaterialResource、VFXMaterialResourceManager、VFXMaterialInstanceを追加した。
+VFXMaterialは.vfxmat JSONとして保存し、TextureResourceManager経由でTextureを読み込む。
+AssetBrowserとAssetSlotGuiでVFXMaterialを選択、ドラッグできるようにした。
+VFXMaterialEditorWindowを追加し、共通MaterialをEditorから作成、編集、保存できるようにした。
+MeshVFXPart、ParticleEmitterAsset、DecalComponentにMaterialPathを追加した。
+
+MeshVFXではMaterialをPart保存データへ直接焼き込まず、描画直前にMeshVFX Partの値へ合成する方針にした。
+これにより、Materialは共通の見た目ベースとして働き、MeshVFX側のColor、Alpha、Curve、UV、Dissolveなどは演出用の上乗せとして残せる。
+
+■改善結果
+MeshVFXで作り込んでいたMaterial表現を、ParticleやDecalにも共有しやすくなった。
+同じ炎や魔法のMaterialを、MeshVFXのビーム、Particleの飛沫、Decalの着弾痕に使い回せる。
+一方で、MeshVFX専用の強い設定をそのまま他Componentへ押し付けないため、各Componentの役割が崩れにくくなった。
+
+■関連箇所
+Code/Engine/Graphics/VFXMaterial/VFXMaterialData.h
+Code/Engine/Graphics/VFXMaterial/VFXMaterialResource.h
+Code/Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.cpp
+Code/Engine/Graphics/VFXMaterial/VFXMaterialSerializer.cpp
+Code/Editor/Window/VFXMaterialEditorWindow.cpp
+Code/Editor/Window/AssetBrowserWindow.cpp
+Code/Editor/AssetSlotGui.h
+Code/Engine/Graphics/VFX/MeshVFXComponent.cpp
+Code/Engine/Graphics/VFX/MeshVFXRenderSystem.cpp
+Code/Engine/Graphics/VFX/MeshVFXShader.cpp
+Code/Engine/Graphics/Particle/ParticleComponent.cpp
+Code/Engine/Graphics/Decal/DecalComponent.cpp
 コード構築メモ/Particle関係.txt
+
+Particle側でVFXMaterialの見た目が実描画へ十分反映されていなかった問題
+
+問題:
+ParticleEmitterAssetとParticleComponentにはMaterialPathを持たせたが、Particle側ではMaterialのBase/Mask Textureを読み込む程度で、VFXMaterialのColor、Alpha、Emissive、Blend設定が実描画へ十分に反映されていなかった。
+そのため、MeshVFXやDecalと同じMaterialを選んでも、Particleだけ見た目の統一感が出にくかった。
+
+原因:
+Particleは寿命、発生数、速度、Color Over Life、Gradientなど独自の調整項目を多く持つため、Material設定をそのまま保存データへ焼き込むとParticle固有の調整を壊してしまう可能性があった。
+一方で、描画直前の評価処理がなかったため、Materialを共通の見た目ベースとして重ねる場所が不足していた。
+
+対応:
+ParticleComponentにMaterial Resource読み込み、Material Texture適用、Material設定の評価処理を分けて追加した。
+VFXMaterialのBaseColor、Alpha、EmissiveColor、EmissiveIntensityをParticleSystemConstantsのmanualColor、colorStart、colorEndへ掛け合わせるようにした。
+MaterialのMask Textureがある場合はParticleのMask使用を評価後設定で有効化する。
+MaterialのBlendModeがAdditiveの場合は、保存用のblendModeを直接変更せずruntimeBlendModeへ反映し、ParticleRenderSystemはruntimeBlendModeを見て描画Blendを決めるようにした。
+
+結果:
+Particle固有の発生設定やColor Over Lifeを残したまま、VFXMaterialを共通の見た目テンプレートとして使えるようになった。
+MeshVFX、Particle、Decalで炎、魔法、ブレス、ヒット演出などのMaterialを共有しやすくなった。
+
+関連ファイル:
+Code/Engine/Graphics/Particle/ParticleComponent.h
+Code/Engine/Graphics/Particle/ParticleComponent.cpp
+Code/Engine/Graphics/RenderSystem/ParticleRenderSystem.cpp
+Decal側でVFXMaterialを共通Materialとして使い切れなかった問題
+
+問題:
+DecalComponentにはMaterialPathを追加していたが、Base TextureをDecal Textureとして使う程度で、VFXMaterialのColor、Alpha、Emissive、Mask、Dissolve、Blend設定がDecal描画へ十分に反映されていなかった。
+そのため、MeshVFXやParticleと同じMaterialを選んでも、着弾痕や魔法陣Decalだけ見た目が揃いにくかった。
+
+原因:
+DecalはScene Colorへ画面空間で直接合成するため、通常のBlendStateだけではVFXMaterialのAdditive表現をそのまま使えない。
+またDecalDataとGBufferDecalConstantsがColorとTextureだけを渡す構造だったため、Material側の追加情報をRenderSystemやShaderへ渡す経路が不足していた。
+
+対応:
+DecalDataにemissiveColorAndIntensity、uvScaleOffset、dissolveParams、dissolveEdgeColor、blendMode、useDissolve、maskTexture、noiseTextureを追加した。
+DecalComponent::ApplyMaterialToDecalDataでVFXMaterialのBaseColor、Alpha、Emissive、MainUV、Dissolve、Blend、Base/Mask/Noise TextureをDecalDataへ評価するようにした。
+ModelRenderSystemのDecal定数バッファとSRV bindを拡張し、Decal_PSでMask、Dissolve、Emissive、Alpha/Additive合成を反映するようにした。
+Textureを直接選び直した場合はMaterial参照を外し、従来通り単体Texture Decalとして扱えるようにした。
+
+結果:
+MeshVFX、Particle、Decalで同じVFXMaterialを共有し、炎、魔法、ブレス、着弾痕、魔法陣などの見た目を揃えやすくなった。
+Decal固有の寿命、Fade、投影範囲、Debug表示はDecalComponent側に残し、Materialは共通の見た目ベースとして扱えるようになった。
+
+関連ファイル:
+Code/Engine/Graphics/Decal/DecalComponent.h
+Code/Engine/Graphics/Decal/DecalComponent.cpp
+Code/Engine/Graphics/Decal/DecalManager.h
+Code/Engine/Graphics/RenderSystem/ModelRenderSystem.h
+Code/Engine/Graphics/RenderSystem/ModelRenderSystem.cpp
+Code/Engine/Graphics/Shader/DecalShader.cpp
+Shader/decal_common.hlsli
+Shader/Decal_PS.hlsl
+VFXMaterialのUVスクロールがBase以外のTextureへ十分に広がっていなかった問題
+
+問題:
+VFXMaterialにはMainUVとNoiseUVがあり、ScrollSpeedも保存できるが、DecalではBase/Mask/NoiseのUVが固定的で、Material側のスクロールを使った表現が限定的だった。
+MeshVFXでもMaterialのMainUVはBase中心に反映され、Mask側のスクロールをMaterialと揃えたい場合に個別設定が必要だった。
+
+対応:
+DecalではMainUVをBase TextureとMask Textureに適用し、NoiseUVをNoise Texture / Dissolve Textureに適用するようにした。
+DecalComponentでMaterial再生時間を進め、MainUV.scrollSpeedとNoiseUV.scrollSpeedをoffsetへ加算してDecalDataへ渡す。
+ModelRenderSystemとDecal shaderの定数を拡張し、Base/Mask用UVとNoise用UVを別々に計算するようにした。
+MeshVFXではVFXMaterialのMainUV scale / scroll / rotationSpeedをMaskUVにも反映し、BaseとMaskの流れをMaterial側で揃えられるようにした。
+
+結果:
+同じVFXMaterialを選んだときに、DecalのBase/Mask/NoiseやMeshVFXのMaskもMaterialのUVスクロールに追従し、炎、魔法陣、ブレス跡、斬撃マスクなどの動きが統一しやすくなった。
+
+関連ファイル:
+Code/Engine/Graphics/Decal/DecalComponent.h
+Code/Engine/Graphics/Decal/DecalComponent.cpp
+Code/Engine/Graphics/Decal/DecalManager.h
+Code/Engine/Graphics/RenderSystem/ModelRenderSystem.h
+Code/Engine/Graphics/RenderSystem/ModelRenderSystem.cpp
+Shader/decal_common.hlsli
+Shader/Decal_PS.hlsl
+Code/Engine/Graphics/VFX/MeshVFXRenderSystem.cpp
+VFXMaterialのKey一覧をEditor上で確認しにくかった問題
+
+問題:
+Effect Asset KeysはParticle、MeshVFX、VFXSequence、ImpactEffectのKeyを確認できるが、VFXMaterialはAsset BrowserやMaterial Editorから個別に探す必要があり、ComponentやテンプレートへMaterialPathを指定するときにKeyとPathを確認しにくかった。
+
+対応:
+MaterialAssetListWindowを追加し、Data/VFXMaterials以下のVFXMaterialを再帰スキャンしてKey、Material名、File、FullPath、Base/Mask/Noise Textureを一覧表示するようにした。
+Keyは基本的にファイル名stemを使い、重複時はData/VFXMaterialsからの相対パスKeyに切り替える。
+一覧のKeyクリックでKeyをコピー、PathクリックでPathをコピー、Key行のドラッグでMaterial用Payloadを渡せるようにした。
+SceneBaseへWindow登録し、AssetsメニューへMaterial Asset Keysとして並べるようにした。
+
+結果:
+Particle、MeshVFX、Decal、AttackTemplate、EffectEmitterなどでVFXMaterialを使うときに、Editor上でMaterial KeyとPathをすぐ確認できるようになった。
+
+関連ファイル:
+Code/Editor/Window/MaterialAssetListWindow.h
+Code/Editor/Window/MaterialAssetListWindow.cpp
+Code/Editor/Window/EditorWindowManager.cpp
+Code/Engine/GamePlay/Scene/SceneBase.cpp
+BIGShine.vcxproj
+BIGShine.vcxproj.filters

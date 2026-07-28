@@ -59,6 +59,7 @@ private:
     void ApplyCameraPose(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_);
+    void SynchronizeExternalFovChange(const std::shared_ptr<CameraComponent>& camera_);
     DirectX::XMFLOAT3 GetFocusPosition(
         const std::shared_ptr<GameObject>& object_,
         const DirectX::XMFLOAT3& fallbackOffset_) const;

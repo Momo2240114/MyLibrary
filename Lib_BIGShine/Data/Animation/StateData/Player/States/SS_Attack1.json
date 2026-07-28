@@ -40,6 +40,7 @@
         "blend2DSyncNormalizedTime": true,
         "blend2DUseEightDirections": false,
         "blend2DUseForwardBackwardLateral": false,
+        "blend2DUseIdleStop": false,
         "blendDefaultWeight": 0.5,
         "blendMaskRootNodes": [],
         "blendParamName": "BlendAlpha",

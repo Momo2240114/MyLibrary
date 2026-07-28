@@ -8,6 +8,7 @@
 #include "Engine/Graphics/Resource/ModelResource.h"
 #include "Engine/Graphics/Resource/ModelResourceManager.h"
 #include "Engine/Graphics/Resource/TextureResourceManager.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -338,16 +339,16 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 0 -> 1 -> 0縲ゆｸｭ螟ｮ縺縺大､ｪ縺上∽ｸ｡遶ｯ繧貞ｰ悶ｉ縺帙ｋ縲・
+            // 0 -> 1 -> 0: wider in the center and sharper at both tips.
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
             const float sharpTaper_ = taper_ * taper_;
 
             const float width_ = tipWidth_ + maxWidth_ * sharpTaper_;
 
-            // 荳ｭ蠢・ｷ壹ｂ蟆代＠縺縺台ｸｭ螟ｮ縺ｧ螟悶∈蜃ｺ縺励※縲∝ｼ薙↑繧頑─繧貞ｼｷ繧√ｋ縲・
+            // Push the center slightly outward to emphasize the slash arc.
             const float currentCenterRadius_ = centerRadius_ + 0.05f * taper_;
 
-            // 蜀・・縺ｯ豬・￥縲∝､門・縺ｯ螟ｧ縺阪￥閹ｨ繧峨∪縺帙ｋ縲・
+            // Keep the inner edge thin and let the outer edge swell.
             const float innerRadius_ = currentCenterRadius_ - width_ * 0.35f;
             const float outerRadius_ = currentCenterRadius_ + width_ * 1.25f;
 
@@ -454,7 +455,7 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 荳ｭ螟ｮ繧帝ｫ倥￥縲∽ｸ｡遶ｯ縺ｯ邏ｰ縺上☆繧九・
+            // Make the center taller while keeping both ends narrow.
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
 
             const float currentHeight_ = height_ * (0.18f + 0.82f * taper_);
@@ -569,11 +570,11 @@ namespace
             static_cast<size_t>(segmentCount_ + 1) *
             static_cast<size_t>(CROSS_SECTION_VERTEX_COUNT));
 
-        // 3髱｢蛻・
+        // Three panels:
         // outer -> wallCenter
         // wallCenter -> wallTop
         // wallBottom -> wallCenter
-        // double sided 縺ｪ縺ｮ縺ｧ 1Quad = 12 indices
+        // Double sided, so one quad uses 12 indices.
         mesh_.indices.reserve(
             static_cast<size_t>(segmentCount_) *
             3u *
@@ -590,7 +591,7 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 荳｡遶ｯ繧堤ｴｰ縺上∽ｸｭ螟ｮ繧貞､ｪ縺上・鬮倥￥縺吶ｋ縲・
+            // Taper both ends and keep the middle thick and tall.
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
             const float sharpTaper_ = std::pow(
                 (std::max)(taper_, 0.0f),
@@ -607,14 +608,14 @@ namespace
             const float innerRadius_ = baseRadius_ - width_ * settings_.innerWidthScale;
             const float outerRadius_ = baseRadius_ + width_ * settings_.outerWidthScale;
 
-            // 蝙ら峩螢√・菴咲ｽｮ縲・.45・・.60縺上ｉ縺・′菴ｿ縺・ｄ縺吶＞縲・
+            // Wall position is easiest to tune around the middle of the cross-section.
             const float wallPositionRate_ = std::clamp(settings_.wallPositionRate, 0.0f, 1.0f);
 
             const float wallRadius_ =
                 innerRadius_ * (1.0f - wallPositionRate_) +
                 outerRadius_ * wallPositionRate_;
 
-            // 遶ｯ縺ｧ縺ｯ螢√・荳贋ｸ九ｂ荳ｭ螟ｮ縺ｸ髮・ａ繧九・
+            // Gather wall vertices toward the center near the tips.
             const float tipGather_ = 1.0f - sharpTaper_;
             const float tipRadius_ =
                 innerRadius_ * 0.5f +
@@ -655,7 +656,7 @@ namespace
                 cos_ * gatheredWallRadius_
             };
 
-            // 蜀・ｼｧ譁ｹ蜷代・謗･邱壹・
+            // Tangent along the arc direction.
             const DirectX::XMFLOAT4 arcTangent_ =
             {
                 cos_,
@@ -664,7 +665,7 @@ namespace
                 1.0f
             };
 
-            // 蠎企擇逕ｨ縲・eshVFX縺ｪ繧我ｸ雁髄縺阪〒蜊∝・縲・
+            // Floor-facing panel normal.
             const DirectX::XMFLOAT3 floorNormal_ =
             {
                 0.0f,
@@ -672,7 +673,7 @@ namespace
                 0.0f
             };
 
-            // 螢・擇逕ｨ縲ょ・縺ｮ螟門・譁ｹ蜷代・
+            // Outer-facing wall normal.
             const DirectX::XMFLOAT3 wallNormal_ =
             {
                 sin_,
@@ -681,11 +682,11 @@ namespace
             };
 
             // UV:
-            // U = 蜀・ｼｧ譁ｹ蜷・
-            // V = 譁ｭ髱｢譁ｹ蜷・
-            // 0.0: 螢∽ｸ顔ｫｯ
+            // U = arc direction
+            // V = cross-section direction
+            // 0.0: wall top
             // 0.5: 荳ｭ螟ｮ
-            // 1.0: 螟門・繝ｻ荳狗ｫｯ
+            // 1.0: outer/bottom edge
             const float u_ = rate_;
 
             mesh_.vertices.push_back(CreateInternalMeshSlashVertexFull(
@@ -733,7 +734,7 @@ namespace
             const uint32_t nextWallTop_ = next_ + 2;
             const uint32_t nextWallBottom_ = next_ + 3;
 
-            // 荳九・蜊頑怦譚ｿ驛ｨ蛻・・
+            // Lower flat panel.
             AddQuadIndicesDoubleSided(
                 mesh_.indices,
                 currentOuter_,
@@ -741,7 +742,7 @@ namespace
                 nextOuter_,
                 nextWallCenter_);
 
-            // 荳翫↓遶九■荳翫′繧句｣・Κ蛻・・
+            // Upper standing wall panel.
             AddQuadIndicesDoubleSided(
                 mesh_.indices,
                 currentWallCenter_,
@@ -749,7 +750,7 @@ namespace
                 nextWallCenter_,
                 nextWallTop_);
 
-            // 荳九↓雋ｫ騾壹☆繧句｣・Κ蛻・・
+            // Lower standing wall panel.
             AddQuadIndicesDoubleSided(
                 mesh_.indices,
                 currentWallBottom_,
@@ -1154,14 +1155,14 @@ namespace
 
 void MeshVFXComponent::Start()
 {
-    // Asset縺ｫ譖ｸ縺九ｌ縺鬱exture/Model繧貞ｮ溯｡檎畑RuntimePart縺ｸ隱ｭ縺ｿ霎ｼ繧縲・
+    // Rebuild runtime resources from the serialized asset data.
     RefreshAssetLists();
     LoadPartResources();
 }
 
 void MeshVFXComponent::Update(float deltaTime_)
 {
-    // 蜀咲函荳ｭ縺縺舛omponent蜈ｨ菴薙・譎る俣繧帝ｲ繧√ｋ縲１art蛟句挨縺ｮ譎る俣縺ｯRenderSystem蛛ｴ縺ｧ險育ｮ励☆繧九・
+    // Advance the component time. Per-part time is evaluated by the render system.
     if (isPlaying) time += deltaTime_ * playbackSpeed;
 }
 
@@ -1202,7 +1203,7 @@ float MeshVFXComponent::EvaluateCurveValue(
 
 void MeshVFXComponent::Gui()
 {
-    // MeshVFX Asset縲￣art縲ゝexture縲ゞV縲¨oise縲・dge縺ｪ縺ｩ縺ｮ邱ｨ髮・I繧偵∪縺ｨ繧√ｋ縲・
+    // Draw the MeshVFX asset, part, texture, UV, noise, and edge editing UI.
     ImGui::SeparatorText("Mesh VFX");
     if (ImGui::Button(isPlaying ? "Stop" : "Play")) isPlaying ? Stop() : Play();
     ImGui::SameLine();
@@ -1436,6 +1437,25 @@ void MeshVFXComponent::Gui()
 
                 if (ImGui::BeginTabItem("Textures"))
                 {
+
+            ImGui::SeparatorText("Shared Material");
+            if (AssetSlotGui::Draw(
+                "VFX Material Asset",
+                AssetSlotType::MATERIAL,
+                part_.materialPath,
+                runtimePart_ && runtimePart_->materialResource
+                    ? runtimePart_->materialResource->GetBaseTexture()
+                    : nullptr,
+                "Data/VFXMaterials"))
+            {
+                LoadPartResource(static_cast<size_t>(partIndex_));
+            }
+            if (runtimePart_ && runtimePart_->materialResource)
+            {
+                ImGui::TextDisabled(
+                    "Loaded Material: %s",
+                    runtimePart_->materialResource->GetMaterialData().materialName.c_str());
+            }
 
             ImGui::SeparatorText("Textures");
             // Base texture selection
@@ -1984,7 +2004,7 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Masked Area Distortion"))
             {
-                // Mask縺ｧ豸医∴繧矩伜沺縺ｫ閭梧勹豁ｪ縺ｿ繧帝㍾縺ｭ縲∫・豌励ｄ遨ｺ髢捺ｭｪ縺ｿ縺ｮ繧医≧縺ｪ陦ｨ迴ｾ繧剃ｽ懊ｋ縲・
+                // Add background distortion only where the mask removes pixels.
                 ImGui::Checkbox("Use Mask Distortion", &part_.useMaskDistortion);
                 ImGui::TextDisabled("Distorts the background where the mask becomes transparent. Uses Distortion Noise Resource.");
                 ImGui::DragFloat(
@@ -2005,7 +2025,7 @@ void MeshVFXComponent::Gui()
 
             if (ImGui::TreeNode("Edge Highlight"))
             {
-                // 鬆らせ繧定・繧峨∪縺帙★縲｀esh髱｢縺ｮ蜀・・縺縺代〒繧ｷ繝ｫ繧ｨ繝・ヨ繧・ｺ､蟾ｮ驛ｨ蛻・ｒ蠑ｷ隱ｿ縺吶ｋ縲・
+                // Highlight silhouette and intersection edges on the mesh surface.
                 ImGui::Checkbox("Use Edge Highlight", &part_.useEdgeHighlight);
                 ImGui::TextDisabled("Highlights the mesh silhouette/intersection inside the mesh surface. It does not expand vertices.");
                 ImGui::ColorEdit4("Edge Color", &part_.edgeColor.x);
@@ -2113,7 +2133,7 @@ void MeshVFXComponent::RefreshAssetLists()
 
 void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 {
-    // MeshVFX蜈ｨ菴薙ｒJSON縺ｸ菫晏ｭ倥☆繧九１art蜊倅ｽ謎ｿ晏ｭ倥〒繧ゅ％縺ｮ蠖｢蠑上°繧芽ｩｲ蠖撤art縺縺第栢縺榊・縺吶・
+    // Save the full MeshVFX asset to JSON. Part assets reuse the same part schema.
     json_["IsPlaying"] = isPlaying;
     json_["PlaybackSpeed"] = playbackSpeed;
     json_["Parts"] = nlohmann::json::array();
@@ -2121,6 +2141,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
     {
         nlohmann::json partJson_;
         partJson_["ModelPath"] = part_.modelPath;
+        partJson_["MaterialPath"] = part_.materialPath;
         partJson_["MeshIndex"] = part_.meshIndex;
         partJson_["RenderEnabled"] = part_.renderEnabled;
         partJson_["UseMaterialBaseTexture"] = part_.useMaterialBaseTexture;
@@ -2297,7 +2318,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
 
 void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 {
-    // JSON縺九ｉPart險ｭ螳壹ｒ蠕ｩ蜈・☆繧九よ立蠖｢蠑上・Mask/Noise蜊倅ｽ薙ヱ繧ｹ繧・ayer驟榊・縺ｸ陬懷ｮ後☆繧九・
+    // Restore part settings from JSON while keeping old mask/noise path compatibility.
     asset.parts.clear();
     runtimeParts.clear();
     isPlaying = json_.value("IsPlaying", true);
@@ -2309,6 +2330,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
     {
         MeshVFXPart part_;
         part_.modelPath = partJson_.value("ModelPath", "");
+        part_.materialPath = partJson_.value("MaterialPath", "");
         NormalizeInternalMeshModelPath(part_.modelPath);
         part_.meshIndex = partJson_.value("MeshIndex", -1);
         part_.renderEnabled = partJson_.value("RenderEnabled", false);
@@ -2552,7 +2574,7 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
 
 bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 {
-    // 迴ｾ蝨ｨ縺ｮMeshVFX蜈ｨ菴薙ｒAsset JSON縺ｨ縺励※菫晏ｭ倥☆繧九・
+    // Save the current full MeshVFX asset JSON.
     if (path_.empty()) return false;
     nlohmann::json json_;
     json_["AssetType"] = "MeshVFX";
@@ -2574,7 +2596,7 @@ bool MeshVFXComponent::SaveAsset(const std::string& path_) const
 
 bool MeshVFXComponent::LoadAsset(const std::string& path_)
 {
-    // MeshVFX Asset JSON繧定ｪｭ縺ｿ霎ｼ縺ｿ縲・未騾｣Runtime繝ｪ繧ｽ繝ｼ繧ｹ繧貞・讒狗ｯ峨☆繧九・
+    // Load a MeshVFX asset JSON and rebuild its runtime resources.
     if (path_.empty()) return false;
     const std::filesystem::path assetPath_ = WindowsDialogHelper::Utf8ToPath(path_);
     std::ifstream file_(assetPath_);
@@ -2599,7 +2621,7 @@ bool MeshVFXComponent::LoadAsset(const std::string& path_)
 
 bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_) const
 {
-    // 驕ｸ謚樔ｸｭPart縺縺代ｒ蜊倅ｽ鄭sset縺ｨ縺励※菫晏ｭ倥＠縲∽ｻ悶・MeshVFX縺ｸ蜀榊茜逕ｨ縺ｧ縺阪ｋ繧医≧縺ｫ縺吶ｋ縲・
+    // Save only the selected part as a reusable part asset.
     if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
 
     nlohmann::json componentJson_;
@@ -2624,7 +2646,7 @@ bool MeshVFXComponent::SavePartAsset(size_t partIndex_, const std::string& path_
 
 bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_)
 {
-    // 蜊倅ｽ撤art Asset繧定ｪｭ縺ｿ霎ｼ縺ｿ縲∫樟蝨ｨ縺ｮPart繧ｹ繝ｭ繝・ヨ縺ｸ蟾ｮ縺玲崛縺医ｋ縲・
+    // Load a single part asset into the selected part slot.
     if (path_.empty() || partIndex_ >= asset.parts.size()) return false;
     std::ifstream file_(WindowsDialogHelper::Utf8ToPath(path_));
     if (!file_.is_open()) return false;
@@ -2663,7 +2685,7 @@ bool MeshVFXComponent::LoadPartAsset(size_t partIndex_, const std::string& path_
 
 void MeshVFXComponent::SetAsset(const MeshVFXAsset& asset_)
 {
-    // 螟夜Κ縺九ｉ貂｡縺輔ｌ縺蘗sset險ｭ螳壹ｒ驕ｩ逕ｨ縺励ゝexture/Model繧貞・隱ｭ縺ｿ霎ｼ縺ｿ縺吶ｋ縲・
+    // Apply externally supplied asset settings and preload model/texture resources.
     asset = asset_;
     time = 0.0f;
     RebuildRuntimeResources();
@@ -2671,7 +2693,7 @@ void MeshVFXComponent::SetAsset(const MeshVFXAsset& asset_)
 
 void MeshVFXComponent::RebuildRuntimeResources()
 {
-    // Editor螟画峩蠕後↑縺ｩ縲∽ｿ晏ｭ倥ョ繝ｼ繧ｿ縺九ｉ螳溯｡梧凾GPU繝ｪ繧ｽ繝ｼ繧ｹ繧剃ｽ懊ｊ逶ｴ縺吶・
+    // Rebuild runtime GPU resources after editor data changes.
     LoadPartResources();
 }
 
@@ -2693,7 +2715,7 @@ bool MeshVFXComponent::HasRuntimeResources() const
 
 void MeshVFXComponent::LoadPartResources()
 {
-    // 蜈ｨPart縺ｮRuntime繝ｪ繧ｽ繝ｼ繧ｹ繧貞・隱ｭ縺ｿ霎ｼ縺ｿ縺吶ｋ縲・
+    // Load runtime resources for every part.
     runtimeParts.resize(asset.parts.size());
     for (size_t partIndex_ = 0; partIndex_ < asset.parts.size(); ++partIndex_)
     {
@@ -2703,7 +2725,7 @@ void MeshVFXComponent::LoadPartResources()
 
 void MeshVFXComponent::LoadPartResource(size_t partIndex_)
 {
-    // 謖・ｮ啀art縺ｮModel/Texture繧定ｪｭ縺ｿ霎ｼ縺ｿ縲∵緒逕ｻ譎ゅ↓蜿ら・縺吶ｋRuntimePart縺ｸ隧ｰ繧√ｋ縲・
+    // Load model, material, and texture resources for the selected part.
     if (partIndex_ >= asset.parts.size()) return;
     if (runtimeParts.size() < asset.parts.size()) runtimeParts.resize(asset.parts.size());
 
@@ -2713,6 +2735,13 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     MeshVFXPart& part_ = asset.parts[partIndex_];
     MeshVFXRuntimePart& runtimePart_ = runtimeParts[partIndex_];
     runtimePart_.modelResource.reset();
+    runtimePart_.materialResource.reset();
+    if (!part_.materialPath.empty())
+    {
+        runtimePart_.materialResource =
+            VFXMaterialResourceManager::GetInstance().Load(part_.materialPath);
+    }
+
     NormalizeInternalMeshModelPath(part_.modelPath);
     if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH)
     {
@@ -2843,7 +2872,7 @@ void MeshVFXComponent::LoadTexture(
     UINT fallbackColor_,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& texture_)
 {
-    // Texture譛ｪ險ｭ螳壹ｄ隱ｭ縺ｿ霎ｼ縺ｿ螟ｱ謨玲凾繧４hader縺悟ｮ牙・縺ｫ蜍輔￥繧医≧縲∵欠螳夊牡縺ｮDummy Texture縺ｸ繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ縺吶ｋ縲・
+    // Use a dummy texture when the slot is empty or loading fails.
     texture_.Reset();
     if (!path_.empty() && std::filesystem::exists(WindowsDialogHelper::Utf8ToPath(path_)))
     {

@@ -179,6 +179,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         currentCollisionFov = baseFovY;
         hasBaseFov = true;
     }
+    SynchronizeExternalFovChange(camera_);
 
     const LockOnDistanceInfo distanceInfo_ = CalculateLockOnDistanceInfo();
 
@@ -569,8 +570,17 @@ void CameraLockOnComponent::SetLockOnEnabled(bool enabled_)
         if (const std::shared_ptr<CameraComponent> camera_ = camera.lock();
             camera_ && hasBaseFov)
         {
-            currentCollisionFov = baseFovY;
-            camera_->SetFov(baseFovY);
+            const float cameraFov_ = camera_->GetFovY();
+            if (std::abs(cameraFov_ - currentCollisionFov) <= 0.05f)
+            {
+                currentCollisionFov = baseFovY;
+                camera_->SetFov(baseFovY);
+            }
+            else
+            {
+                baseFovY = cameraFov_;
+                currentCollisionFov = cameraFov_;
+            }
         }
         ReleaseThirdPersonCamera();
     }
@@ -1300,6 +1310,7 @@ bool CameraLockOnComponent::ApplyCollisionComposition(
     {
         return false;
     }
+    SynchronizeExternalFovChange(camera_);
 
     const DirectX::XMFLOAT3 playerTopPosition_ =
         GetFocusPosition(player_, playerOffset);
@@ -1531,6 +1542,33 @@ void CameraLockOnComponent::ApplyCameraPose(
             lookAtPosition_,
             { 0.0f, 1.0f, 0.0f });
     }
+}
+
+void CameraLockOnComponent::SynchronizeExternalFovChange(
+    const std::shared_ptr<CameraComponent>& camera_)
+{
+    BS_PROFILE_SCOPE("CameraLockOnComponent::SynchronizeExternalFovChange");
+
+    if (!camera_) return;
+
+    const float cameraFov_ = camera_->GetFovY();
+    if (!hasBaseFov)
+    {
+        baseFovY = cameraFov_;
+        currentCollisionFov = cameraFov_;
+        hasBaseFov = true;
+        return;
+    }
+
+    constexpr float externalFovThreshold_ = 0.05f;
+    if (std::abs(cameraFov_ - currentCollisionFov) <= externalFovThreshold_)
+    {
+        return;
+    }
+
+    const float lockOnFovAddition_ = currentCollisionFov - baseFovY;
+    baseFovY = std::clamp(cameraFov_ - lockOnFovAddition_, 1.0f, 170.0f);
+    currentCollisionFov = cameraFov_;
 }
 
 DirectX::XMFLOAT3 CameraLockOnComponent::GetFocusPosition(

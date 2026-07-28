@@ -43,6 +43,16 @@ public:
         const std::string& initialPath_ = "Data",
         HWND ownerWindow_ = nullptr);
 
+    static std::string OpenVFXMaterialDialog(
+        const wchar_t* title_,
+        const std::string& initialDir_ = "Data/VFXMaterials",
+        HWND ownerWindow_ = nullptr);
+
+    static std::string SaveVFXMaterialDialog(
+        const wchar_t* title_,
+        const std::string& initialPath_ = "Data/VFXMaterials",
+        HWND ownerWindow_ = nullptr);
+
     static std::string OpenGltfDialog(
         const wchar_t* title_,
         const std::string& initialDir_ = "Data/Model",

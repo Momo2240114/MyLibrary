@@ -5,6 +5,7 @@
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Resource/GLTFModel.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResource.h"
 
 #include <algorithm>
 #include <cmath>
@@ -267,7 +268,12 @@ void MeshVFXShader::UpdatePart(
     constants_.useMaskDistortion = part_.useMaskDistortion ? 1u : 0u;
     constants_.useEdgeHighlight = part_.useEdgeHighlight ? 1u : 0u;
 
-    constants_.hasDistortionNoiseTexture = runtimePart_.distortionNoiseTexture ? 1u : 0u;
+    const bool hasMaterialDistortionTexture_ =
+        runtimePart_.materialResource &&
+        !runtimePart_.materialResource->GetMaterialData().distortionTexturePath.empty() &&
+        runtimePart_.materialResource->GetDistortionTexture();
+    constants_.hasDistortionNoiseTexture =
+        (runtimePart_.distortionNoiseTexture || hasMaterialDistortionTexture_) ? 1u : 0u;
     constants_.hasVertexNoiseTexture = runtimePart_.vertexNoiseTexture ? 1u : 0u;
 
     constants_.edgePatternMode = static_cast<uint32_t>(part_.edgePatternMode);
@@ -325,6 +331,10 @@ void MeshVFXShader::UpdatePart(
     deviceContext_->PSSetShaderResources(3, 1, &normalTextureView_);
 
     ID3D11ShaderResourceView* distortionNoiseTextureView_ = runtimePart_.distortionNoiseTexture.Get();
+    if (!distortionNoiseTextureView_ && hasMaterialDistortionTexture_)
+    {
+        distortionNoiseTextureView_ = runtimePart_.materialResource->GetDistortionTexture();
+    }
     deviceContext_->PSSetShaderResources(4, 1, &distortionNoiseTextureView_);
 
     ID3D11ShaderResourceView* edgePatternTextureView_ = runtimePart_.edgePatternTexture.Get();

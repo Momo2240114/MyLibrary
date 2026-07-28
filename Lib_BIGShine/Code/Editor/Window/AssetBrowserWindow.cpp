@@ -170,8 +170,9 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
         const char* icon_ = node_.isDirectory ? "[Folder]" :
             (node_.type == AssetType::TEXTURE ? "[Texture]" :
                 (node_.type == AssetType::MODEL ? "[Model]" :
-                    (node_.type == AssetType::CURVE ? "[Curve]" :
-                        (node_.type == AssetType::JSON ? "[JSON]" : "[File]"))));
+                    (node_.type == AssetType::MATERIAL ? "[Material]" :
+                        (node_.type == AssetType::CURVE ? "[Curve]" :
+                            (node_.type == AssetType::JSON ? "[JSON]" : "[File]")))));
         ImGui::Button(icon_, ImVec2(iconSize, iconSize));
     }
 
@@ -212,6 +213,10 @@ void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
     else if (node_.type == AssetType::JSON)
     {
         payloadType_ = AssetBrowserPayload::JSON;
+    }
+    else if (node_.type == AssetType::MATERIAL)
+    {
+        payloadType_ = AssetBrowserPayload::MATERIAL;
     }
     else if (node_.type == AssetType::CURVE)
     {
@@ -258,6 +263,10 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
     {
         return AssetType::MODEL;
     }
+    if (extension_ == ".vfxmat")
+    {
+        return AssetType::MATERIAL;
+    }
     if (extension_ == ".json")
     {
         std::ifstream file_(path_);
@@ -268,6 +277,7 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
                 nlohmann::json json_;
                 file_ >> json_;
                 if (json_.value("AssetType", "") == "CurveTrack") return AssetType::CURVE;
+                if (json_.value("AssetType", "") == "VFXMaterial") return AssetType::MATERIAL;
             }
             catch (const nlohmann::json::exception&)
             {

@@ -11,6 +11,7 @@ struct ParticleEmitterAsset
     ParticleSystemConstants settings;
 
     std::string name = "Emitter";
+    std::string materialPath;
     std::string texturePath;
     std::string textureFileName;
     std::string maskTexturePath;

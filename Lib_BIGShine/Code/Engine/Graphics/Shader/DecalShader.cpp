@@ -68,7 +68,7 @@ void DecalShader::End(const RenderContext& rc)
     dc->PSSetShader(nullptr, nullptr, 0);
     dc->IASetInputLayout(nullptr);
 
-    // SRV解除 (t4: Depth, t10: DecalTexture)
-    ID3D11ShaderResourceView* nullSRVs[11] = { nullptr };
-    dc->PSSetShaderResources(0, 11, nullSRVs);
+    // Clear decal SRVs: scene, depth, base, mask, noise.
+    ID3D11ShaderResourceView* nullSRVs[13] = { nullptr };
+    dc->PSSetShaderResources(0, 13, nullSRVs);
 }

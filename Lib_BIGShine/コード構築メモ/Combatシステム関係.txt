@@ -1,5 +1,10 @@
 Combatシステム関係 説明メモ
 
+
+最終編集日時
+7/16
+
+
 目的
 このメモは、攻撃、当たり判定、ダメージ、ヒットリアクション、ジャスト回避、攻撃テンプレートを説明するための入口。
 Animation Sequencer や Particle / MeshVFX とつながる、ゲームプレイ寄りの戦闘処理として整理する。
@@ -27,6 +32,11 @@ Animation Sequencer や Particle / MeshVFX とつながる、ゲームプレイ�
 - HitReactionComponent が被弾時の反応を担当する
 - JustDodgeReactionComponent がジャスト回避時の反応を担当する
 - Particle / MeshVFX はヒット時や攻撃発生時の演出として呼ばれる
+
+面接での短い説明
+「戦闘処理では、攻撃ごとのダメージ、ヒットストップ、ノックバック、ヒットエフェクトを AttackTemplate として JSON 化しています。
+Animation Sequencer のイベントから AttackTemplateRuntime を呼び、イベントの開始、継続、終了に合わせて HitBox や攻撃エフェクトを制御します。
+これにより、攻撃ごとの調整をコードではなくデータ側で行えるようにしています。」
 
 処理フロー
 1. Animation Sequencer の攻撃イベントが開始する
@@ -383,3 +393,31 @@ AttackTemplateManager Editor の主な編集項目
 
 
 ============================================================
+8. 想定質問と回答例
+============================================================
+
+質問: AttackTemplate と AnimEvent の役割分担は？
+回答:
+AnimEvent は「アニメーションの何秒から何秒まで攻撃を行うか」を持ちます。
+AttackTemplate は「その攻撃がどんなダメージ、判定、エフェクトを持つか」を持ちます。
+タイミングと攻撃内容を分けることで、同じテンプレートを別のアニメーションでも使いやすくしています。
+
+質問: なぜ AttackTemplateRuntime を分けていますか？
+回答:
+AttackTemplate は保存用のデータなので、それを直接実行処理にすると責務が混ざります。
+Runtime を分けることで、JSON データを読み、HitBox や EffectManager へ反映する実行時処理をまとめています。
+
+質問: HitBox と AttackEffectHitComponent の違いは？
+回答:
+HitBox は武器やキャラクターに付いている判定として使います。
+AttackEffectHitComponent は、飛び道具や範囲攻撃など、生成された攻撃エフェクト側に判定を持たせるために使います。
+
+質問: 多段ヒットはどう考えていますか？
+回答:
+attackInstanceId、hitGroupId、allowMultiHit を使い、同じ攻撃が同じ対象に何度当たれるかを制御する設計です。
+多段ヒットを許可する攻撃と、1回だけ当たる攻撃をデータで分けられるようにしています。
+
+質問: ヒットエフェクトが出ない場合どこを見ますか？
+回答:
+まず AttackTemplate の hitEffect に Particle / MeshVFX の Asset Path が入っているかを確認します。
+次に HitBox へその情報が渡っているか、VFXManager が Asset をキャッシュできているか、ヒット位置が正しいかを見ます。

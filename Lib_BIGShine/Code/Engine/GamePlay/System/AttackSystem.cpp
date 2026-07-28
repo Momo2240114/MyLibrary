@@ -5,6 +5,7 @@
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Camera/CameraShakeComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Physics/ColliderComponent.h"

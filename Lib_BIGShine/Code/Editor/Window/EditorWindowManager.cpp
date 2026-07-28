@@ -9,163 +9,131 @@
 #include <string>
 #include <vector>
 
-void EditorWindowManager::ApplyEngineLayout(ImVec2& scenePos, ImVec2& sceneSize)
+void EditorWindowManager::BuildDefaultDockLayout(ImGuiID dockspaceId_, const ImVec2& dockspaceSize_)
 {
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    if (!viewport) return;
+    BS_PROFILE_SCOPE("EditorWindowManager::BuildDefaultDockLayout");
 
-    const float workspaceSelectorHeight = GetWorkspaceSelectorHeight();
-    const ImVec2 workPos = viewport->WorkPos;
-    const ImVec2 workSize = viewport->WorkSize;
+    ImGui::DockBuilderRemoveNode(dockspaceId_);
+    ImGui::DockBuilderAddNode(dockspaceId_, ImGuiDockNodeFlags_DockSpace);
+    ImGui::DockBuilderSetNodeSize(dockspaceId_, dockspaceSize_);
 
-    const float top = workPos.y + workspaceSelectorHeight;
-    const float usableHeight = (std::max)(120.0f, workSize.y - workspaceSelectorHeight);
-    leftPanelWidth = (std::max)(180.0f, (std::min)(leftPanelWidth, workSize.x * 0.45f));
-    rightPanelWidth = (std::max)(220.0f, (std::min)(rightPanelWidth, workSize.x * 0.45f));
-    bottomPanelHeight = (std::max)(120.0f, (std::min)(bottomPanelHeight, usableHeight * 0.65f));
-    const float leftWidth = leftPanelWidth;
-    const float rightWidth = rightPanelWidth;
-    const float bottomHeight = bottomPanelHeight;
-    const float centerWidth = (std::max)(120.0f, workSize.x - leftWidth - rightWidth);
-    const float sceneHeight = (std::max)(90.0f, usableHeight - bottomHeight);
+    ImGuiID centerDockId_ = dockspaceId_;
+    leftDockId = ImGui::DockBuilderSplitNode(centerDockId_, ImGuiDir_Left, 0.20f, nullptr, &centerDockId_);
+    rightDockId = ImGui::DockBuilderSplitNode(centerDockId_, ImGuiDir_Right, 0.24f, nullptr, &centerDockId_);
+    bottomDockId = ImGui::DockBuilderSplitNode(centerDockId_, ImGuiDir_Down, 0.32f, nullptr, &sceneDockId);
 
-    const ImVec2 hierarchyPos(workPos.x, top);
-    const ImVec2 hierarchySize(leftWidth, usableHeight);
-    const ImVec2 inspectorPos(workPos.x + workSize.x - rightWidth, top);
-    const ImVec2 inspectorSize(rightWidth, usableHeight);
-    bottomDockPos = ImVec2(workPos.x + leftWidth, top + sceneHeight);
-    bottomDockSize = ImVec2(centerWidth, bottomHeight);
-
-    scenePos = ImVec2(workPos.x + leftWidth, top);
-    sceneSize = ImVec2(centerWidth, sceneHeight);
-
-    const float tabHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2.0f + 4.0f;
-    for (auto& window : windows)
+    ImGui::DockBuilderDockWindow("Scene", sceneDockId);
+    for (const auto& window_ : windows)
     {
-        window->ClearDockId();
-        window->ClearLayoutRect();
+        if (window_->IsEditorWorkspace()) continue;
 
-        const std::string& name = window->GetName();
-        if (name == "Hierarchy")
+        const std::string& name_ = window_->GetName();
+        if (name_ == "Hierarchy")
         {
-            window->SetLayoutRect(hierarchyPos, hierarchySize);
+            ImGui::DockBuilderDockWindow(name_.c_str(), leftDockId);
         }
-        else if (name == "InspectorWindow")
+        else if (name_ == "InspectorWindow")
         {
-            window->SetLayoutRect(inspectorPos, inspectorSize);
+            ImGui::DockBuilderDockWindow(name_.c_str(), rightDockId);
+        }
+        else
+        {
+            ImGui::DockBuilderDockWindow(name_.c_str(), bottomDockId);
         }
     }
+
+    ImGui::DockBuilderFinish(dockspaceId_);
 }
 
-
-void EditorWindowManager::DrawLayoutSplitters()
+void EditorWindowManager::DrawSceneEditorDockSpace()
 {
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    if (!viewport) return;
+    BS_PROFILE_SCOPE("EditorWindowManager::DrawSceneEditorDockSpace");
 
-    const float workspaceSelectorHeight = GetWorkspaceSelectorHeight();
-    const ImVec2 workPos = viewport->WorkPos;
-    const ImVec2 workSize = viewport->WorkSize;
-    const float top = workPos.y + workspaceSelectorHeight;
-    const float usableHeight = (std::max)(120.0f, workSize.y - workspaceSelectorHeight);
-    const float splitterSize = 6.0f;
+    const ImGuiViewport* viewport_ = ImGui::GetMainViewport();
+    if (!viewport_) return;
 
-    auto drawVerticalSplitter = [&](const char* name, float x, bool leftSide)
-        {
-            ImGui::SetNextWindowPos(ImVec2(x - splitterSize * 0.5f, top), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(splitterSize, usableHeight), ImGuiCond_Always);
-            ImGui::SetNextWindowBgAlpha(0.0f);
-            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
-                ImGuiWindowFlags_NoMove |
-                ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoCollapse |
-                ImGuiWindowFlags_NoSavedSettings |
-                ImGuiWindowFlags_NoScrollbar |
-                ImGuiWindowFlags_NoScrollWithMouse |
-                ImGuiWindowFlags_NoBackground;
+    const float workspaceSelectorHeight_ = GetWorkspaceSelectorHeight();
+    ImVec2 dockspacePos_ = viewport_->WorkPos;
+    ImVec2 dockspaceSize_ = viewport_->WorkSize;
+    dockspacePos_.y += workspaceSelectorHeight_;
+    dockspaceSize_.y = (std::max)(1.0f, dockspaceSize_.y - workspaceSelectorHeight_);
 
-            if (ImGui::Begin(name, nullptr, flags))
-            {
-                ImGui::InvisibleButton("##splitter", ImVec2(splitterSize, usableHeight));
-                if (ImGui::IsItemHovered() || ImGui::IsItemActive())
-                {
-                    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-                }
-                if (ImGui::IsItemActive())
-                {
-                    const float delta = ImGui::GetIO().MouseDelta.x;
-                    if (leftSide)
-                    {
-                        leftPanelWidth += delta;
-                    }
-                    else
-                    {
-                        rightPanelWidth -= delta;
-                    }
-                }
-            }
-            ImGui::End();
-        };
-
-    auto drawHorizontalSplitter = [&]()
-        {
-            ImGui::SetNextWindowPos(ImVec2(bottomDockPos.x, bottomDockPos.y - splitterSize * 0.5f), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(bottomDockSize.x, splitterSize), ImGuiCond_Always);
-            ImGui::SetNextWindowBgAlpha(0.0f);
-            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar |
-                ImGuiWindowFlags_NoMove |
-                ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoCollapse |
-                ImGuiWindowFlags_NoSavedSettings |
-                ImGuiWindowFlags_NoScrollbar |
-                ImGuiWindowFlags_NoScrollWithMouse |
-                ImGuiWindowFlags_NoBackground;
-
-            if (ImGui::Begin("Bottom Splitter", nullptr, flags))
-            {
-                ImGui::InvisibleButton("##splitter", ImVec2(bottomDockSize.x, splitterSize));
-                if (ImGui::IsItemHovered() || ImGui::IsItemActive())
-                {
-                    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-                }
-                if (ImGui::IsItemActive())
-                {
-                    bottomPanelHeight -= ImGui::GetIO().MouseDelta.y;
-                }
-            }
-            ImGui::End();
-        };
-
-    drawVerticalSplitter("Hierarchy Splitter", workPos.x + leftPanelWidth, true);
-    drawVerticalSplitter("Inspector Splitter", workPos.x + workSize.x - rightPanelWidth, false);
-    drawHorizontalSplitter();
-}
-
-void EditorWindowManager::DrawSceneView(const ImVec2& pos, const ImVec2& size)
-{
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove |
+    ImGuiWindowFlags windowFlags_ = ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus |
         ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoScrollWithMouse;
+        ImGuiWindowFlags_NoScrollWithMouse |
+        ImGuiWindowFlags_NoBackground;
 
-    ImGui::SetNextWindowPos(pos, ImGuiCond_Always);
-    ImGui::SetNextWindowSize(size, ImGuiCond_Always);
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.07f, 0.07f, 0.08f, 0.0f));
+    ImGui::SetNextWindowPos(dockspacePos_, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(dockspaceSize_, ImGuiCond_Always);
+    ImGui::SetNextWindowViewport(viewport_->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, ImVec4(0.1f, 0.1f, 0.1f, 0.18f));
     ImGui::SetNextWindowBgAlpha(0.0f);
 
-    if (ImGui::Begin("Scene", nullptr, flags))
+    if (ImGui::Begin("Scene Editor DockSpace", nullptr, windowFlags_))
     {
-        ID3D11ShaderResourceView* sceneSRV = GraphicsDeviceManager::Instance().GetSceneSRV();
-        const ImVec2 available = ImGui::GetContentRegionAvail();
-        if (sceneSRV && available.x > 1.0f && available.y > 1.0f)
+        ImGuiID dockspaceId_ = ImGui::GetID("SceneEditorDockSpace");
+        if (!ImGui::DockBuilderGetNode(dockspaceId_))
         {
-            ImGui::Image((void*)sceneSRV, available);
+            BuildDefaultDockLayout(dockspaceId_, dockspaceSize_);
         }
+
+        ImGui::DockSpace(dockspaceId_, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     }
     ImGui::End();
     ImGui::PopStyleColor();
+    ImGui::PopStyleVar(3);
+}
+
+void EditorWindowManager::DrawSceneView()
+{
+    if (sceneDockId != 0)
+    {
+        ImGui::SetNextWindowDockID(sceneDockId, ImGuiCond_FirstUseEver);
+    }
+
+    ImGuiWindowFlags flags_ = ImGuiWindowFlags_NoCollapse;
+    if (ImGui::Begin("Scene", nullptr, flags_))
+    {
+        auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
+        ID3D11ShaderResourceView* sceneSRV_ = graphicsDeviceManager_.GetSceneViewSRV();
+        const ImVec2 available_ = ImGui::GetContentRegionAvail();
+        if (sceneSRV_ && available_.x > 1.0f && available_.y > 1.0f)
+        {
+            const float renderWidth_ = static_cast<float>(graphicsDeviceManager_.GetRenderWidth());
+            const float renderHeight_ = static_cast<float>(graphicsDeviceManager_.GetRenderHeight());
+            ImVec2 imageSize_ = available_;
+            if (renderWidth_ > 0.0f && renderHeight_ > 0.0f)
+            {
+                const float renderAspect_ = renderWidth_ / renderHeight_;
+                const float availableAspect_ = available_.x / available_.y;
+                if (availableAspect_ > renderAspect_)
+                {
+                    imageSize_.x = available_.y * renderAspect_;
+                }
+                else
+                {
+                    imageSize_.y = available_.x / renderAspect_;
+                }
+            }
+
+            const ImVec2 cursorPos_ = ImGui::GetCursorPos();
+            ImGui::SetCursorPos(ImVec2(
+                cursorPos_.x + (available_.x - imageSize_.x) * 0.5f,
+                cursorPos_.y + (available_.y - imageSize_.y) * 0.5f));
+            ImGui::Image(reinterpret_cast<void*>(sceneSRV_), imageSize_);
+        }
+    }
+    ImGui::End();
 }
 
 const char* EditorWindowManager::GetWindowMenuCategory(
@@ -186,7 +154,9 @@ const char* EditorWindowManager::GetWindowMenuCategory(
     if (name_ == "Asset Browser" ||
         name_ == "Curve Asset Editor" ||
         name_ == "Easing Preset Editor" ||
+        name_ == "Effect Asset Keys" ||
         name_ == "Effect Asset List" ||
+        name_ == "Material Asset Keys" ||
         name_ == "Startup Model Settings")
     {
         return "Assets";
@@ -235,6 +205,7 @@ void EditorWindowManager::DrawMenuBar()
                     window->SetLockToMainViewport(useMainViewport);
                 }
             }
+            ImGui::MenuItem("Use Docked Scene View", nullptr, &useDockedSceneView);
             ImGui::Separator();
 
             // 各窓の状態を切り替えるメニューを生成
@@ -379,12 +350,11 @@ void EditorWindowManager::DrawAll()
 
     if (!hasActiveWorkspace)
     {
-        ImVec2 scenePos(0.0f, 0.0f);
-        ImVec2 sceneSize(0.0f, 0.0f);
-        ApplyEngineLayout(scenePos, sceneSize);
-        //DrawSceneView(scenePos, sceneSize);
-
-        DrawLayoutSplitters();
+        DrawSceneEditorDockSpace();
+        if (useDockedSceneView)
+        {
+            DrawSceneView();
+        }
     }
 
     for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_) {

@@ -13,6 +13,7 @@ enum class AssetSlotType
     TEXTURE,
     MODEL,
     JSON,
+    MATERIAL,
 };
 
 namespace AssetSlotGui
@@ -36,6 +37,7 @@ namespace AssetSlotGui
         case AssetSlotType::TEXTURE: return AssetBrowserPayload::TEXTURE;
         case AssetSlotType::MODEL: return AssetBrowserPayload::MODEL;
         case AssetSlotType::JSON: return AssetBrowserPayload::JSON;
+        case AssetSlotType::MATERIAL: return AssetBrowserPayload::MATERIAL;
         }
         return AssetBrowserPayload::FILE;
     }
@@ -47,6 +49,7 @@ namespace AssetSlotGui
         case AssetSlotType::TEXTURE: return "[Texture]";
         case AssetSlotType::MODEL: return "[Model]";
         case AssetSlotType::JSON: return "[JSON]";
+        case AssetSlotType::MATERIAL: return "[Material]";
         }
         return "[Asset]";
     }
@@ -71,6 +74,8 @@ namespace AssetSlotGui
             return WindowsDialogHelper::OpenGltfDialog(L"Select Model", directory_, window_);
         case AssetSlotType::JSON:
             return WindowsDialogHelper::OpenJsonDialog(L"Select JSON Asset", directory_, window_);
+        case AssetSlotType::MATERIAL:
+            return WindowsDialogHelper::OpenVFXMaterialDialog(L"Select VFX Material", directory_, window_);
         }
         return {};
     }

@@ -2,6 +2,8 @@
 
 #include "WindowsDialogHelper.h"
 
+#include "Engine/Debug/TracyProfiler.h"
+
 #include <commdlg.h>
 #include <filesystem>
 #include <system_error>
@@ -211,6 +213,38 @@ std::string WindowsDialogHelper::SaveJsonDialog(
         },
         initialPath_,
         L"json",
+        ownerWindow_);
+}
+
+std::string WindowsDialogHelper::OpenVFXMaterialDialog(
+    const wchar_t* title_,
+    const std::string& initialDir_,
+    HWND ownerWindow_)
+{
+    BS_PROFILE_SCOPE("WindowsDialogHelper::OpenVFXMaterialDialog");
+    return OpenFileDialog(title_,
+        {
+            { L"VFX Material Files", L"*.vfxmat;*.json" },
+            { L"All Files", L"*.*" },
+        },
+        initialDir_,
+        ownerWindow_);
+}
+
+std::string WindowsDialogHelper::SaveVFXMaterialDialog(
+    const wchar_t* title_,
+    const std::string& initialPath_,
+    HWND ownerWindow_)
+{
+    BS_PROFILE_SCOPE("WindowsDialogHelper::SaveVFXMaterialDialog");
+    return SaveFileDialog(title_,
+        {
+            { L"VFX Material Files", L"*.vfxmat" },
+            { L"JSON Files", L"*.json" },
+            { L"All Files", L"*.*" },
+        },
+        initialPath_,
+        L"vfxmat",
         ownerWindow_);
 }
 

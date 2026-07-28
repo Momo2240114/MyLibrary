@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+class VFXMaterialResource;
+
 // GameObjectに付けるParticleの入口コンポーネント
 // 複数Emitterの編集、再生制御、JSON保存、イベントAction登録をまとめて担当する
 class ParticleComponent : public Component, public IActionProvider
@@ -21,6 +23,7 @@ private:
         ParticleSystemConstants settings;          // GUI/JSONで編集する発生・描画設定
 
         std::string name = "Emitter";              // ActionやTimelineから指定するEmitter名
+        std::string materialPath;                  // 共通VFX Materialの保存パス
         std::string texturePath;                   // 色Textureの保存パス
         std::string textureFileName;               // GUI表示用の色Textureファイル名
         std::string maskTexturePath;               // Mask Textureの保存パス
@@ -29,10 +32,12 @@ private:
         std::string gradientTextureFileName;       // GUI表示用のGradient Textureファイル名
         std::string shadeGradientTexturePath;      // Shade Gradient Textureの保存パス
         std::string shadeGradientTextureFileName;  // GUI表示用のShade Gradient Textureファイル名
+        std::shared_ptr<VFXMaterialResource> materialResource;
 
         float delay = 0.0f;                        // 再生開始からEmitterを有効化するまでの待ち時間
         uint32_t meshVertexSampleCount = 2048;     // Mesh Vertices発生で使う頂点サンプル最大数
         ParticleBlendMode blendMode = ParticleBlendMode::ALPHA; // 描画時の合成方法
+        ParticleBlendMode runtimeBlendMode = ParticleBlendMode::ALPHA; // VFXMaterial適用後の描画時の合成方法
         ParticleSpawnSpace spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE; // 発生位置の座標空間
         bool isPlaybackEnabled = false;            // Play/Triggerで再生対象になっているか
         bool isStarted = false;                    // delay経過後、実際にEmitterが開始済みか
@@ -97,6 +102,10 @@ public:
 private:
     bool LoadEmitterTexture(EmitterTrack& track, const std::string& fullPath);
     bool LoadEmitterTextureSlot(EmitterTrack& track, const std::string& fullPath, int slot);
+    bool LoadEmitterMaterial(EmitterTrack& track_, const std::string& materialPath_);
+    bool LoadEmitterMaterialResource(EmitterTrack& track_, const std::string& materialPath_);
+    void ApplyEmitterMaterialToSettings(const EmitterTrack& track_, ParticleSystemConstants& settings_) const;
+    void ApplyEmitterMaterialTextures(EmitterTrack& track_);
     void UpdateMeshSpawnPositions(EmitterTrack& track_);
     void RebuildEmitterResources();
     std::string BuildAssetPathFromName() const;

@@ -18,8 +18,10 @@
 #include "Editor/Window/AssetBrowserWindow.h"
 #include "Editor/Window/CurveAssetEditorWindow.h"
 #include "Editor/Window/EasingPresetEditorWindow.h"
+#include "Editor/Window/VFXMaterialEditorWindow.h"
 #include "Editor/Window/ActionSequenceEditorWindow.h"
 #include "Editor/Window/EffectAssetListWindow.h"
+#include "Editor/Window/MaterialAssetListWindow.h"
 #include "Editor/Window/ShadowWindow.h"
 #include "Editor/Window/PostEffectWindow.h"
 #include "Editor/Window/InputEditorWindow.h"
@@ -80,6 +82,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<DebugLogWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ActionSequenceEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EffectAssetListWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<MaterialAssetListWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimationEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimNodeEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<NodeGraphMonitorWindow>(_GameObjectManager.get()));
@@ -90,6 +93,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<CurveAssetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EasingPresetEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<VFXMaterialEditorWindow>(_GameObjectManager.get()));
 
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
@@ -131,7 +135,18 @@ void SceneBase::Render(float elapsedTime)
 		return;
 	}
 
-	_GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem);
+    const bool useDockedSceneView_ = isEditorVisible &&
+        editorWindowManager &&
+        editorWindowManager->ShouldUseDockedSceneView();
+    ID3D11RenderTargetView* finalRenderTargetView_ = useDockedSceneView_
+        ? GraphicsDeviceManager::Instance().GetSceneViewRenderTargetView()
+        : nullptr;
+    _GameObjectManager->RenderAll(m_SpriteRenderSystem, m_ModelRenderSystem, finalRenderTargetView_);
+
+    if (useDockedSceneView_)
+    {
+        GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
+    }
 
 }
 

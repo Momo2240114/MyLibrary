@@ -60,6 +60,10 @@ public:
     RenderState* GetRenderState() { return renderState.get(); }
     // アクセッサ欄に追加
     ID3D11ShaderResourceView* GetSceneSRV(){ return sceneSRV.Get(); }
+    ID3D11RenderTargetView* GetSceneViewRenderTargetView() const { return sceneViewRTV.Get(); }
+    ID3D11ShaderResourceView* GetSceneViewSRV() const { return sceneViewSRV.Get(); }
+    int GetRenderWidth() const { return width; }
+    int GetRenderHeight() const { return height; }
     ID3D11ShaderResourceView* GetNormalSRV() { return gBufferNormalSRV.Get(); }
     ID3D11ShaderResourceView* GetSceneNormalSRV() { return sceneNormalSRV.Get(); }
     ID3D11ShaderResourceView* GetSceneDistortionSRV() { return sceneDistortionSRV.Get(); }
@@ -191,6 +195,8 @@ private:
     // ポストプロセス用のソーステクスチャ (HDR対応)
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneSRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   sceneViewRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneViewSRV;
     bool sceneDistortionUsed = false;
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> gBufferBaseColorRTV;
@@ -231,5 +237,6 @@ private:
 
     // 内部ヘルパー
     bool CreateSceneRenderTarget(int width_, int height_);
+    bool CreateSceneViewRenderTarget(int width_, int height_);
     bool CreateGBufferTargets(int width_, int height_);
 };

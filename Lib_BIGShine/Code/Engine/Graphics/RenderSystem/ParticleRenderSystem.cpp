@@ -103,7 +103,7 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
 
                 BS_PROFILE_SCOPE("ParticleRender::Track");
 
-                const BlendState blendState_ = track.blendMode == ParticleBlendMode::ADDITIVE
+                const BlendState blendState_ = track.runtimeBlendMode == ParticleBlendMode::ADDITIVE
                     ? BlendState::AdditiveKeepAlpha
                     : (isEditorWindow_ ? BlendState::TransparencyKeepAlpha : BlendState::Transparency);
 

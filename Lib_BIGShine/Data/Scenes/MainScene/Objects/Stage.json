@@ -307,6 +307,7 @@
                             15.399999618530273
                         ],
                         "MaskTexturePath": "",
+                        "MaterialPath": "",
                         "MaxCount": 1000,
                         "MeshVertexSampleCount": 2048,
                         "Name": "Emitter_0",
@@ -417,7 +418,7 @@
             "UpdatePriority": 0
         }
     ],
-    "Layer": 0,
+    "Layer": 128,
     "Name": "Stage",
     "ParentName": "",
     "RequiredForSceneStart": false,
