@@ -142,6 +142,26 @@ void AttackEffectHitComponent::SetHitParticleNormalOffset(float normalOffset_)
     hitParticleNormalOffset = normalOffset_;
 }
 
+void AttackEffectHitComponent::SetHitParticleImpactAxis(
+    bool enabled_,
+    float axisToAttackerBlend_)
+{
+    hitParticleUseImpactAxis = enabled_;
+    hitParticleAxisToAttackerBlend = std::clamp(axisToAttackerBlend_, 0.0f, 1.0f);
+}
+
+void AttackEffectHitComponent::SetHitParticleTargetAttraction(
+    bool enabled_,
+    float strength_,
+    float range_,
+    float falloff_)
+{
+    hitParticleUseTargetAttraction = enabled_;
+    hitParticleTargetAttractionStrength = strength_;
+    hitParticleTargetAttractionRange = (std::max)(range_, 0.0f);
+    hitParticleTargetAttractionFalloff = (std::max)(falloff_, 0.001f);
+}
+
 void AttackEffectHitComponent::SetHitMeshVFXAssetPath(const std::string& path_)
 {
     hitMeshVFXAssetPath = path_;
@@ -248,6 +268,12 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitParticleEmitterName = hitParticleEmitterName;
     hitBox_->hitParticleLifeTime = hitParticleLifeTime;
     hitBox_->hitParticleNormalOffset = hitParticleNormalOffset;
+    hitBox_->hitParticleUseImpactAxis = hitParticleUseImpactAxis;
+    hitBox_->hitParticleAxisToAttackerBlend = hitParticleAxisToAttackerBlend;
+    hitBox_->hitParticleUseTargetAttraction = hitParticleUseTargetAttraction;
+    hitBox_->hitParticleTargetAttractionStrength = hitParticleTargetAttractionStrength;
+    hitBox_->hitParticleTargetAttractionRange = hitParticleTargetAttractionRange;
+    hitBox_->hitParticleTargetAttractionFalloff = hitParticleTargetAttractionFalloff;
     hitBox_->hitMeshVFXAssetPath = hitMeshVFXAssetPath;
     hitBox_->hitMeshVFXLifeTime = hitMeshVFXLifeTime;
     hitBox_->hitMeshVFXNormalOffset = hitMeshVFXNormalOffset;
@@ -328,6 +354,16 @@ void AttackEffectHitComponent::Gui()
     ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Knock Back Power", &knockBackPower, 0.1f, 0.0f);
     ImGui::InputText("Hit Particle", &hitParticleAssetPath);
+    ImGui::Checkbox("Use Particle Impact Axis", &hitParticleUseImpactAxis);
+    ImGui::BeginDisabled(!hitParticleUseImpactAxis);
+    ImGui::SliderFloat("Axis To Attacker Blend", &hitParticleAxisToAttackerBlend, 0.0f, 1.0f);
+    ImGui::EndDisabled();
+    ImGui::Checkbox("Use Particle Target Pull", &hitParticleUseTargetAttraction);
+    ImGui::BeginDisabled(!hitParticleUseTargetAttraction);
+    ImGui::DragFloat("Target Pull Strength", &hitParticleTargetAttractionStrength, 0.01f, -100.0f, 100.0f);
+    ImGui::DragFloat("Target Pull Range", &hitParticleTargetAttractionRange, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat("Target Pull Falloff", &hitParticleTargetAttractionFalloff, 0.01f, 0.001f, 8.0f);
+    ImGui::EndDisabled();
     ImGui::InputText("Hit Mesh VFX", &hitMeshVFXAssetPath);
     ImGui::DragFloat3("Movement Direction", &movementDirection.x, 0.01f);
     ImGui::DragFloat("Movement Speed", &movementSpeed, 0.1f);
@@ -437,6 +473,12 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["HitParticleEmitterName"] = hitParticleEmitterName;
     json_["HitParticleLifeTime"] = hitParticleLifeTime;
     json_["HitParticleNormalOffset"] = hitParticleNormalOffset;
+    json_["HitParticleUseImpactAxis"] = hitParticleUseImpactAxis;
+    json_["HitParticleAxisToAttackerBlend"] = hitParticleAxisToAttackerBlend;
+    json_["HitParticleUseTargetAttraction"] = hitParticleUseTargetAttraction;
+    json_["HitParticleTargetAttractionStrength"] = hitParticleTargetAttractionStrength;
+    json_["HitParticleTargetAttractionRange"] = hitParticleTargetAttractionRange;
+    json_["HitParticleTargetAttractionFalloff"] = hitParticleTargetAttractionFalloff;
     json_["HitMeshVFXAssetPath"] = hitMeshVFXAssetPath;
     json_["HitMeshVFXLifeTime"] = hitMeshVFXLifeTime;
     json_["HitMeshVFXNormalOffset"] = hitMeshVFXNormalOffset;
@@ -483,6 +525,18 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     hitParticleEmitterName = json_.value("HitParticleEmitterName", std::string{});
     hitParticleLifeTime = (std::max)(json_.value("HitParticleLifeTime", 1.0f), 0.0f);
     hitParticleNormalOffset = json_.value("HitParticleNormalOffset", 0.0f);
+    hitParticleUseImpactAxis = json_.value("HitParticleUseImpactAxis", false);
+    hitParticleAxisToAttackerBlend = std::clamp(
+        json_.value("HitParticleAxisToAttackerBlend", 0.0f),
+        0.0f,
+        1.0f);
+    hitParticleUseTargetAttraction = json_.value("HitParticleUseTargetAttraction", false);
+    hitParticleTargetAttractionStrength =
+        json_.value("HitParticleTargetAttractionStrength", 0.0f);
+    hitParticleTargetAttractionRange =
+        (std::max)(json_.value("HitParticleTargetAttractionRange", 0.0f), 0.0f);
+    hitParticleTargetAttractionFalloff =
+        (std::max)(json_.value("HitParticleTargetAttractionFalloff", 1.0f), 0.001f);
     hitMeshVFXAssetPath = json_.value("HitMeshVFXAssetPath", std::string{});
     hitMeshVFXLifeTime = (std::max)(json_.value("HitMeshVFXLifeTime", 1.0f), 0.0f);
     hitMeshVFXNormalOffset = json_.value("HitMeshVFXNormalOffset", 0.0f);

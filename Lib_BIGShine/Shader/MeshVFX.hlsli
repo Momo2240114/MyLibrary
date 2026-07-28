@@ -70,6 +70,21 @@ cbuffer CbMeshVFX : register(b0)
     float gradientEndUv;
     float gradientPadding;
     float3 gradientRegisterPadding;
+
+    float4 trailOldRootColor;
+    float4 trailOldTipColor;
+    float4 trailNewRootColor;
+    float4 trailNewTipColor;
+
+    float trailRecencyPower;
+    float trailTipPower;
+    float trailRecencyIntensity;
+    float trailTipIntensity;
+
+    float trailOldAlpha;
+    float trailNewAlpha;
+    uint useTrailColorRamp;
+    uint trailColorRampPadding;
     
     float4 dissolveEdgeColor;
     float4 backFaceColor;

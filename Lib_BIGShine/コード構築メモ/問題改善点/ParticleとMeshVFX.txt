@@ -344,3 +344,55 @@ Code/Editor/Window/EditorWindowManager.cpp
 Code/Engine/GamePlay/Scene/SceneBase.cpp
 BIGShine.vcxproj
 BIGShine.vcxproj.filters
+
+MeshVFXのClamp Texture端が引き伸ばされて切れ目として目立つ問題
+
+問題:
+MeshVFXでSamplerをClampにしたTextureは、UVが0～1の外へ出たときに端ピクセルがそのまま伸びる。
+ブレス、ビーム、細長い板ポリEffect、Dissolve用Maskなどでは、この端の伸びが帯や直線の切れ目としてかなり目立つ。
+
+対応:
+MeshVFXPS / MeshVFXDistortionPSのSampleVFXTextureを拡張し、SamplerModeがClampのときだけClampUVWithEdgeJitterを通すようにした。
+ClampUVWithEdgeJitterはTextureサイズからtexel幅を取り、UVが端付近または外側に出た場合だけ、端の接線方向へ1～2texel程度の微小な揺れを入れる。
+Wrap / Border指定のTextureは従来通りで、Clamp指定のTextureだけ端の引き伸ばしを崩す。
+通常描画パスとDistortionパスの両方で同じ処理を使い、見た目と歪みの境界がズレにくいようにした。
+
+結果:
+Clamp時の端ピクセル固定による直線的な切れ目が目立ちにくくなる。
+Base / Mask / Noise / Normal / Emissive / Gradient / Distortionなど、MeshVFXのClamp指定テクスチャ全般に同じ改善が入る。
+
+関連ファイル:
+Shader/MeshVFXPS.hlsl
+Shader/MeshVFXDistortionPS.hlsl
+
+VFXMaterialのカラーランプとランダムカラーをParticle / MeshVFXで共通利用したい問題
+
+問題:
+Particleの2色グラデーションだけでは、炎、魔法、ブレス、ビームなどで必要になる多段階の色変化をMaterial側で表現しにくかった。
+MeshVFX側もMaterialのBaseColorやEmissiveは使えるが、時間や寿命に応じた色変化、ランダムな色揺らぎをMaterialテンプレートとして共有できなかった。
+
+対応:
+VFXMaterialDataに複数Stopを持つColorRampとRandomColorを追加した。
+ColorRampはSampleSource(Life/Time/Fixed)、BlendMode(Multiply/Override/Add)、Interpolation(Linear/Constant/Smooth)、WrapMode(Clamp/Repeat/Mirror)、Influence、AffectAlphaを持つ。
+RandomColorはMin/Max Color、BlendMode、Influence、AffectAlpha、Seedを持つ。
+VFXMaterialColorUtilityを追加し、ParticleとMeshVFXの両方が同じ計算でColorRamp / RandomColorを適用するようにした。
+VFXMaterialSerializerでColorRamp / RandomColorをJSON保存・読み込みできるようにし、旧StartColor/EndColor形式が残っていても2Stopへ変換できるようにした。
+VFXMaterialEditorWindowにColor Ramp / Random Color編集UIを追加し、Stop追加、削除、ソート、補間、繰り返し、合成方式を編集できるようにした。
+
+結果:
+ParticleではMaterial側のLifeランプを既存のColor Over Lifeへ流し込めるようになった。
+MeshVFXではパートの正規化時間を使ってMaterialランプを評価できるようになった。
+Materialテンプレート単位で、炎色の中間色追加、魔法色の時間スクロール、個体ごとのランダム色差などを共有しやすくなった。
+
+関連ファイル:
+Code/Engine/Graphics/VFXMaterial/VFXMaterialData.h
+Code/Engine/Graphics/VFXMaterial/VFXMaterialColorUtility.h
+Code/Engine/Graphics/VFXMaterial/VFXMaterialColorUtility.cpp
+Code/Engine/Graphics/VFXMaterial/VFXMaterialSerializer.cpp
+Code/Editor/Window/VFXMaterialEditorWindow.h
+Code/Editor/Window/VFXMaterialEditorWindow.cpp
+Code/Engine/Graphics/Particle/ParticleComponent.h
+Code/Engine/Graphics/Particle/ParticleComponent.cpp
+Code/Engine/Graphics/VFX/MeshVFXRenderSystem.cpp
+BIGShine.vcxproj
+BIGShine.vcxproj.filters

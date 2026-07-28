@@ -25,8 +25,15 @@ struct ParticleSpawnRequest
     std::string emitterName;
     DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 normal = { 0.0f, 1.0f, 0.0f };
+    DirectX::XMFLOAT3 axis = { 0.0f, 1.0f, 0.0f };
+    DirectX::XMFLOAT3 targetPosition = { 0.0f, 0.0f, 0.0f };
     float lifeTime = 1.0f;
     float normalOffset = 0.0f;
+    bool overrideAxis = false;
+    bool overrideTargetAttraction = false;
+    float targetAttractionStrength = 0.0f;
+    float targetAttractionRange = 0.0f;
+    float targetAttractionFalloff = 1.0f;
 };
 
 // MeshVFX生成時に使用するAsset、位置、寿命をまとめる

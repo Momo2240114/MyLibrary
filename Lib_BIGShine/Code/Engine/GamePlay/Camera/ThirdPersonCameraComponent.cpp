@@ -103,10 +103,20 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
         smoothedCameraCenter = followPosition_;
         hasCameraCenter = true;
     }
-    smoothedCameraCenter = LerpFloat3(
-        smoothedCameraCenter,
-        followPosition_,
-        ExpSmoothingRate(objectFollowSpeed, deltaTime_));
+    const float horizontalFollowRate_ =
+        ExpSmoothingRate(horizontalFollowSpeed, deltaTime_);
+
+    const float verticalFollowRate_ =
+        ExpSmoothingRate(verticalFollowSpeed, deltaTime_);
+
+    smoothedCameraCenter.x +=
+        (followPosition_.x - smoothedCameraCenter.x) * horizontalFollowRate_;
+
+    smoothedCameraCenter.y +=
+        (followPosition_.y - smoothedCameraCenter.y) * verticalFollowRate_;
+
+    smoothedCameraCenter.z +=
+        (followPosition_.z - smoothedCameraCenter.z) * horizontalFollowRate_;
 
     const DirectX::XMVECTOR cameraPositionVector_ = DirectX::XMVectorSubtract(
         DirectX::XMLoadFloat3(&smoothedCameraCenter),
@@ -248,7 +258,20 @@ void ThirdPersonCameraComponent::Gui()
     ImGui::DragFloat("Look Speed X", &lookSpeedX, 1.0f, 1.0f, 1000.0f);
     ImGui::DragFloat("Look Speed Y", &lookSpeedY, 1.0f, 1.0f, 1000.0f);
     ImGui::DragFloat("Mouse Sensitivity", &mouseSensitivity, 0.01f, 0.0f, 10.0f);
-    ImGui::DragFloat("Object Follow Speed", &objectFollowSpeed, 0.1f, 0.1f, 100.0f);
+    ImGui::DragFloat(
+        "Horizontal Follow Speed",
+        &horizontalFollowSpeed,
+        0.1f,
+        0.0f,
+        100.0f);
+
+    ImGui::DragFloat(
+        "Vertical Follow Speed",
+        &verticalFollowSpeed,
+        0.1f,
+        0.0f,
+        100.0f);
+
     if (ImGui::DragFloat3("Target Offset", &targetOffset.x, 0.1f))
     {
         ResetFollowTracking();
@@ -269,7 +292,8 @@ void ThirdPersonCameraComponent::Serialize(nlohmann::json& json_) const
     json_["lookSpeedX"] = lookSpeedX;
     json_["lookSpeedY"] = lookSpeedY;
     json_["mouseSensitivity"] = mouseSensitivity;
-    json_["objectFollowSpeed"] = objectFollowSpeed;
+    json_["horizontalFollowSpeed"] = horizontalFollowSpeed;
+    json_["verticalFollowSpeed"] = verticalFollowSpeed;
     json_["returnBlendDuration"] = returnBlendDuration;
     json_["targetOffset"] = { targetOffset.x, targetOffset.y, targetOffset.z };
 }
@@ -287,7 +311,15 @@ void ThirdPersonCameraComponent::Deserialize(const nlohmann::json& json_)
     lookSpeedX = json_.value("lookSpeedX", 300.0f);
     lookSpeedY = json_.value("lookSpeedY", 200.0f);
     mouseSensitivity = json_.value("mouseSensitivity", 0.1f);
-    objectFollowSpeed = json_.value("objectFollowSpeed", 5.0f);
+    const float legacyFollowSpeed_ =
+        json_.value("objectFollowSpeed", 5.0f);
+
+    horizontalFollowSpeed =
+        json_.value("horizontalFollowSpeed", legacyFollowSpeed_);
+
+    verticalFollowSpeed =
+        json_.value("verticalFollowSpeed", legacyFollowSpeed_);
+
     returnBlendDuration = json_.value("returnBlendDuration", 0.35f);
     if (json_.contains("targetOffset") &&
         json_["targetOffset"].is_array() &&

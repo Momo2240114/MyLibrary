@@ -294,7 +294,7 @@
                     1.0,
                     2.0
                 ],
-                "meshVFXAssetPath": "PlayerSwordArc_Strong",
+                "meshVFXAssetPath": "PlayerSwordArc_Strong_Green",
                 "meshVFXLifeTime": 0.07500000298023224,
                 "meshVFXPlaybackSpeed": 1.0,
                 "mirrorMeshVFX": true,

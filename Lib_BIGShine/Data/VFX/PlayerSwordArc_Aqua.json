@@ -32,9 +32,9 @@
                                       "Alpha":  0.95,
                                       "BlendMode":  1,
                                       "Color":  [
-                                                    0.78,
+                                                    0.45,
                                                     1.0,
-                                                    1.0,
+                                                    0.54,
                                                     1.0
                                                 ],
                                       "EmissiveStrength":  14.0,
@@ -119,9 +119,9 @@
                                       "Alpha":  0.48,
                                       "BlendMode":  0,
                                       "Color":  [
-                                                    0.10,
-                                                    0.86,
-                                                    0.72,
+                                                    0.03,
+                                                    0.74,
+                                                    0.28,
                                                     1.0
                                                 ],
                                       "EmissiveStrength":  7.0,
@@ -206,9 +206,9 @@
                                       "Alpha":  1.0,
                                       "BlendMode":  1,
                                       "Color":  [
+                                                    0.72,
                                                     1.0,
-                                                    1.0,
-                                                    1.0,
+                                                    0.62,
                                                     1.0
                                                 ],
                                       "EmissiveStrength":  20.0,

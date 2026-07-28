@@ -12,6 +12,7 @@ struct ParticleEmitterAsset
 
     std::string name = "Emitter";
     std::string materialPath;
+    std::vector<std::string> materialPaths;
     std::string texturePath;
     std::string textureFileName;
     std::string maskTexturePath;

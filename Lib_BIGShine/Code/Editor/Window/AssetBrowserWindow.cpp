@@ -3,6 +3,7 @@
 #include "AssetBrowserWindow.h"
 
 #include "Editor/AssetBrowserPayload.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Resource/TextureResourceManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -13,16 +14,89 @@
 #include <imgui_internal.h>
 #include <nlohmann/json.hpp>
 
+namespace
+{
+    constexpr const char* ASSET_BROWSER_ICON_DIRECTORY = "Data/Editor/AssetBrowserIcons";
+    constexpr float ASSET_DRAG_PREVIEW_SIZE = 64.0f;
+    constexpr float ASSET_SELECTION_ROUNDING = 4.0f;
+    constexpr float ASSET_SELECTION_THICKNESS = 2.0f;
+
+    std::string ToLowerString(std::string text_)
+    {
+        std::transform(text_.begin(), text_.end(), text_.begin(),
+            [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+        return text_;
+    }
+
+    std::string FindExistingIconPath(const std::initializer_list<const char*>& fileNames_)
+    {
+        for (const char* fileName_ : fileNames_)
+        {
+            const std::filesystem::path iconPath_ =
+                std::filesystem::path(ASSET_BROWSER_ICON_DIRECTORY) / fileName_;
+            std::error_code error_;
+            if (std::filesystem::exists(iconPath_, error_))
+            {
+                return WindowsDialogHelper::PathToUtf8(iconPath_.lexically_normal());
+            }
+        }
+        return {};
+    }
+
+    void RetainDrawTexture(ID3D11ShaderResourceView* texture_)
+    {
+        if (texture_) texture_->AddRef();
+    }
+
+    void ReleaseAssetBrowserDrawTexture(const ImDrawList* parentList_, const ImDrawCmd* command_)
+    {
+        (void)parentList_;
+        ID3D11ShaderResourceView* texture_ =
+            static_cast<ID3D11ShaderResourceView*>(command_->UserCallbackData);
+        if (texture_) texture_->Release();
+    }
+
+    bool DrawRetainedImageButton(
+        const char* id_,
+        ID3D11ShaderResourceView* texture_,
+        const ImVec2& size_)
+    {
+        RetainDrawTexture(texture_);
+        const bool pressed_ = ImGui::ImageButton(
+            id_,
+            reinterpret_cast<ImTextureID>(texture_),
+            size_);
+        ImGui::GetWindowDrawList()->AddCallback(
+            ReleaseAssetBrowserDrawTexture,
+            texture_);
+        return pressed_;
+    }
+
+    void DrawRetainedImage(ID3D11ShaderResourceView* texture_, const ImVec2& size_)
+    {
+        RetainDrawTexture(texture_);
+        ImGui::Image(
+            reinterpret_cast<ImTextureID>(texture_),
+            size_);
+        ImGui::GetWindowDrawList()->AddCallback(
+            ReleaseAssetBrowserDrawTexture,
+            texture_);
+    }
+}
+
 AssetBrowserWindow::AssetBrowserWindow(GameObjectManager* manager_)
     : EditorWindow("Asset Browser", manager_)
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::AssetBrowserWindow");
     isVisible = false;
     defaultWindowSize = ImVec2(840.0f, 560.0f);
+    LoadAssetBrowserIcons();
     Refresh();
 }
 
 void AssetBrowserWindow::Draw()
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::Draw");
     if (!BeginEditorWindow())
     {
         EndEditorWindow();
@@ -36,6 +110,7 @@ void AssetBrowserWindow::Draw()
 
 void AssetBrowserWindow::DrawContent()
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::DrawContent");
     ImGui::PushID(this);
     ImGui::InputTextWithHint("##AssetSearch", "Search current folder...", searchText, sizeof(searchText));
     ImGui::SameLine();
@@ -80,6 +155,7 @@ void AssetBrowserWindow::DrawContent()
 
 void AssetBrowserWindow::Refresh()
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::Refresh");
     rootNode = {};
     rootNode.name = "Data";
     rootNode.path = "Data";
@@ -95,6 +171,7 @@ void AssetBrowserWindow::Refresh()
 
 void AssetBrowserWindow::LoadDirectory(const std::filesystem::path& path_, AssetNode& node_)
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::LoadDirectory");
     std::error_code error_;
     if (!std::filesystem::is_directory(path_, error_)) return;
 
@@ -140,6 +217,7 @@ void AssetBrowserWindow::DrawFolderTree(AssetNode& node_)
 
 void AssetBrowserWindow::DrawGrid()
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::DrawGrid");
     AssetNode* folder_ = selectedFolder ? selectedFolder : &rootNode;
     ImGui::TextUnformatted(folder_->path.c_str());
     ImGui::Separator();
@@ -157,26 +235,38 @@ void AssetBrowserWindow::DrawGrid()
 
 void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
 {
+    BS_PROFILE_SCOPE("AssetBrowserWindow::DrawAssetCard");
     ImGui::PushID(node_.path.c_str());
-    ID3D11ShaderResourceView* texture_ = node_.type == AssetType::TEXTURE
-        ? TextureResourceManager::Instance().GetTexture(node_.path)
-        : nullptr;
+
+    ID3D11ShaderResourceView* texture_ = GetAssetIcon(node_);
+    bool pressed_ = false;
     if (texture_)
     {
-        ImGui::Image(reinterpret_cast<void*>(texture_), ImVec2(iconSize, iconSize));
+        pressed_ = DrawRetainedImageButton("##AssetIcon", texture_, ImVec2(iconSize, iconSize));
     }
     else
     {
-        const char* icon_ = node_.isDirectory ? "[Folder]" :
-            (node_.type == AssetType::TEXTURE ? "[Texture]" :
-                (node_.type == AssetType::MODEL ? "[Model]" :
-                    (node_.type == AssetType::MATERIAL ? "[Material]" :
-                        (node_.type == AssetType::CURVE ? "[Curve]" :
-                            (node_.type == AssetType::JSON ? "[JSON]" : "[File]")))));
-        ImGui::Button(icon_, ImVec2(iconSize, iconSize));
+        pressed_ = ImGui::Button("Asset", ImVec2(iconSize, iconSize));
     }
 
-    if (ImGui::IsItemClicked())
+    const ImVec2 itemMinimum_ = ImGui::GetItemRectMin();
+    const ImVec2 itemMaximum_ = ImGui::GetItemRectMax();
+    const bool selected_ =
+        (node_.isDirectory && selectedFolderPath == node_.path) ||
+        (!node_.isDirectory && selectedFilePath == node_.path);
+    if (selected_)
+    {
+        const ImU32 selectionColor_ = ImGui::GetColorU32(ImGuiCol_HeaderActive);
+        ImGui::GetWindowDrawList()->AddRect(
+            itemMinimum_,
+            itemMaximum_,
+            selectionColor_,
+            ASSET_SELECTION_ROUNDING,
+            0,
+            ASSET_SELECTION_THICKNESS);
+    }
+
+    if (pressed_)
     {
         if (node_.isDirectory)
         {
@@ -197,34 +287,108 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
 void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
 {
     if (!ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) return;
+    BS_PROFILE_SCOPE("AssetBrowserWindow::BeginAssetDrag");
 
-    const char* payloadType_ = AssetBrowserPayload::FILE;
-    if (node_.type == AssetType::TEXTURE)
+    const char* payloadType_ = GetPayloadType(node_);
+    if (ID3D11ShaderResourceView* texture_ = GetAssetIcon(node_))
     {
-        payloadType_ = AssetBrowserPayload::TEXTURE;
-        ID3D11ShaderResourceView* texture_ = TextureResourceManager::Instance().LoadTexture(
-            GraphicsDeviceManager::Instance().GetDevice(), node_.path);
-        if (texture_) ImGui::Image(reinterpret_cast<void*>(texture_), ImVec2(64.0f, 64.0f));
-    }
-    else if (node_.type == AssetType::MODEL)
-    {
-        payloadType_ = AssetBrowserPayload::MODEL;
-    }
-    else if (node_.type == AssetType::JSON)
-    {
-        payloadType_ = AssetBrowserPayload::JSON;
-    }
-    else if (node_.type == AssetType::MATERIAL)
-    {
-        payloadType_ = AssetBrowserPayload::MATERIAL;
-    }
-    else if (node_.type == AssetType::CURVE)
-    {
-        payloadType_ = AssetBrowserPayload::CURVE;
+        DrawRetainedImage(texture_, ImVec2(ASSET_DRAG_PREVIEW_SIZE, ASSET_DRAG_PREVIEW_SIZE));
     }
     ImGui::SetDragDropPayload(payloadType_, node_.path.c_str(), node_.path.size() + 1);
     ImGui::TextUnformatted(node_.name.c_str());
     ImGui::EndDragDropSource();
+}
+
+void AssetBrowserWindow::LoadAssetBrowserIcons()
+{
+    BS_PROFILE_SCOPE("AssetBrowserWindow::LoadAssetBrowserIcons");
+    assetBrowserIcons.folderPath = FindExistingIconPath({ "Folder.png", "folder.png" });
+    assetBrowserIcons.modelPath = FindExistingIconPath({ "Model.png", "model.png" });
+    assetBrowserIcons.texturePath = FindExistingIconPath({ "Texture.png", "texture.png" });
+    assetBrowserIcons.jsonPath = FindExistingIconPath({ "Json.png", "JSON.png", "json.png" });
+    assetBrowserIcons.materialPath = FindExistingIconPath({ "Material.png", "material.png" });
+    assetBrowserIcons.curvePath = FindExistingIconPath({ "Curve.png", "curve.png" });
+    assetBrowserIcons.filePath = FindExistingIconPath({ "File.png", "file.png" });
+    assetBrowserIcons.missingPath = FindExistingIconPath({ "Missing.png", "missing.png" });
+}
+
+ID3D11ShaderResourceView* AssetBrowserWindow::GetAssetIcon(const AssetNode& node_) const
+{
+    if (node_.isDirectory)
+    {
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.folderPath));
+    }
+
+    switch (node_.type)
+    {
+    case AssetType::TEXTURE:
+        if (ID3D11ShaderResourceView* thumbnail_ = GetTextureThumbnail(node_))
+        {
+            return thumbnail_;
+        }
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.texturePath));
+    case AssetType::MODEL:
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.modelPath));
+    case AssetType::MATERIAL:
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.materialPath));
+    case AssetType::CURVE:
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.curvePath));
+    case AssetType::JSON:
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.jsonPath));
+    case AssetType::FILE:
+    default:
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.filePath));
+    }
+}
+
+ID3D11ShaderResourceView* AssetBrowserWindow::GetIconTexture(const std::string& path_) const
+{
+    if (path_.empty()) return nullptr;
+    TextureResourceManager& manager_ = TextureResourceManager::Instance();
+    if (ID3D11ShaderResourceView* texture_ = manager_.GetTexture(path_))
+    {
+        return texture_;
+    }
+    return manager_.LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), path_);
+}
+
+ID3D11ShaderResourceView* AssetBrowserWindow::GetTextureThumbnail(const AssetNode& node_) const
+{
+    TextureResourceManager& manager_ = TextureResourceManager::Instance();
+    if (ID3D11ShaderResourceView* texture_ = manager_.GetTexture(node_.path))
+    {
+        return texture_;
+    }
+    return manager_.LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), node_.path);
+}
+
+const std::string& AssetBrowserWindow::GetFallbackIconPath(const std::string& preferredPath_) const
+{
+    if (!preferredPath_.empty()) return preferredPath_;
+    if (!assetBrowserIcons.jsonPath.empty()) return assetBrowserIcons.jsonPath;
+    if (!assetBrowserIcons.filePath.empty()) return assetBrowserIcons.filePath;
+    if (!assetBrowserIcons.missingPath.empty()) return assetBrowserIcons.missingPath;
+    return assetBrowserIcons.texturePath;
+}
+
+const char* AssetBrowserWindow::GetPayloadType(const AssetNode& node_) const
+{
+    switch (node_.type)
+    {
+    case AssetType::TEXTURE:
+        return AssetBrowserPayload::TEXTURE;
+    case AssetType::MODEL:
+        return AssetBrowserPayload::MODEL;
+    case AssetType::JSON:
+        return AssetBrowserPayload::JSON;
+    case AssetType::MATERIAL:
+        return AssetBrowserPayload::MATERIAL;
+    case AssetType::CURVE:
+        return AssetBrowserPayload::CURVE;
+    case AssetType::FILE:
+    default:
+        return AssetBrowserPayload::FILE;
+    }
 }
 
 AssetBrowserWindow::AssetNode* AssetBrowserWindow::FindNode(const std::string& path_, AssetNode& node_)
@@ -240,20 +404,30 @@ AssetBrowserWindow::AssetNode* AssetBrowserWindow::FindNode(const std::string& p
 bool AssetBrowserWindow::MatchesSearch(const AssetNode& node_) const
 {
     if (searchText[0] == '\0') return true;
-    std::string name_ = node_.name;
-    std::string search_ = searchText;
-    std::transform(name_.begin(), name_.end(), name_.begin(),
-        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
-    std::transform(search_.begin(), search_.end(), search_.begin(),
-        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+    std::string name_ = ToLowerString(node_.name);
+    std::string search_ = ToLowerString(searchText);
     return name_.find(search_) != std::string::npos;
+}
+
+bool AssetBrowserWindow::HasPathComponent(
+    const std::filesystem::path& path_,
+    const std::string& componentName_) const
+{
+    const std::filesystem::path normalizedPath_ = path_.lexically_normal();
+    const std::string targetName_ = ToLowerString(componentName_);
+    for (const std::filesystem::path& component_ : normalizedPath_)
+    {
+        if (ToLowerString(component_.string()) == targetName_)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::filesystem::path& path_) const
 {
-    std::string extension_ = path_.extension().string();
-    std::transform(extension_.begin(), extension_.end(), extension_.begin(),
-        [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
+    std::string extension_ = ToLowerString(path_.extension().string());
     if (extension_ == ".png" || extension_ == ".jpg" || extension_ == ".jpeg" ||
         extension_ == ".bmp" || extension_ == ".tga" || extension_ == ".dds" || extension_ == ".hdr")
     {
@@ -269,6 +443,15 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
     }
     if (extension_ == ".json")
     {
+        if (HasPathComponent(path_, "VFXMaterial"))
+        {
+            return AssetType::MATERIAL;
+        }
+        if (HasPathComponent(path_, "Curve"))
+        {
+            return AssetType::CURVE;
+        }
+
         std::ifstream file_(path_);
         if (file_.is_open())
         {

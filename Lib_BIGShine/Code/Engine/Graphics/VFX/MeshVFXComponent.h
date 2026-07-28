@@ -73,6 +73,7 @@ private:
     void RefreshAssetLists();
     void LoadPartResources();
     void LoadPartResource(size_t partIndex_);
+    bool ConvertPartToMaterial(size_t partIndex_);
     void LoadTexture(
         ID3D11Device* device_,
         const std::string& path_,

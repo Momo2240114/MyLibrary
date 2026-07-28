@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 class VFXMaterialResource;
 
@@ -26,6 +27,7 @@ public:
     void Start() override;
     void SetTexture(const std::string& path_);
     void SetMaterial(const std::string& path_);
+    void SetMaterials(const std::vector<std::string>& paths_);
     const std::string& GetMaterialPath() const { return materialPath; }
     const std::string& GetTexturePath() const { return texturePath; }
     void SetLifeTime(float lifeTime_, float fadeOutDuration_ = 0.0f);
@@ -42,6 +44,7 @@ public:
 
 private:
     void ApplyMaterialToDecalData(DecalData& data_) const;
+    bool ConvertToMaterial();
 
 private:
     bool showDebugBounds = true;
@@ -54,5 +57,7 @@ private:
     static inline const std::string componentName = "DecalComponent";
     std::string texturePath;
     std::string materialPath;
+    std::vector<std::string> materialPaths;
     std::shared_ptr<VFXMaterialResource> materialResource;
+    std::vector<std::shared_ptr<VFXMaterialResource>> materialResources;
 };

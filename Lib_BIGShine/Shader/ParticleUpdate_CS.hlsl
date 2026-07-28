@@ -113,6 +113,21 @@ void main(uint3 dispatchThreadID : SV_DispatchThreadID)
     }
 
     // Noise/Turbulence。旧noiseScaleも0以外なら使えるように互換維持。
+    if (useTargetAttraction != 0 && abs(targetAttractionStrength) > 0.0001f)
+    {
+        float3 toTarget = targetPosition.xyz - data.position.xyz;
+        float distanceToTarget = length(toTarget);
+        if (distanceToTarget > 0.0001f)
+        {
+            float rangeRate = targetAttractionRange > 0.0001f
+                ? 1.0f - saturate(distanceToTarget / targetAttractionRange)
+                : 1.0f;
+            float attractionRate = pow(saturate(rangeRate), max(targetAttractionFalloff, 0.001f));
+            data.velocity.xyz += toTarget / distanceToTarget *
+                targetAttractionStrength * attractionRate * elapsedTime;
+        }
+    }
+
     float finalNoiseStrength = max(noiseStrength, noiseScale);
     if (finalNoiseStrength > 0.0f)
     {

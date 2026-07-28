@@ -2,6 +2,7 @@
 
 #include "AfterimageTrailComponent.h"
 
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 
@@ -62,6 +63,7 @@ void AfterimageTrailComponent::Start()
 
 void AfterimageTrailComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("AfterimageTrailComponent::LateUpdate");
     DirectX::XMFLOAT3 leftPosition_{};
     DirectX::XMFLOAT3 rightPosition_{};
     if (IsEmitting() && GetTrailSegment(leftPosition_, rightPosition_))
@@ -74,6 +76,7 @@ void AfterimageTrailComponent::LateUpdate(float deltaTime_)
 
 void AfterimageTrailComponent::Gui()
 {
+    BS_PROFILE_SCOPE("AfterimageTrailComponent::Gui");
     TrailMeshComponent::Gui();
     ImGui::SeparatorText("Afterimage Trail");
     ImGui::DragFloat("Trail Width", &trailWidth, 0.01f, 0.001f, 100.0f);
@@ -84,6 +87,7 @@ void AfterimageTrailComponent::Gui()
 
 void AfterimageTrailComponent::Serialize(nlohmann::json& json_) const
 {
+    BS_PROFILE_SCOPE("AfterimageTrailComponent::Serialize");
     TrailMeshComponent::Serialize(json_);
     json_["AfterimageTrailWidth"] = trailWidth;
     json_["AfterimageTrailVerticalOffset"] = verticalOffset;
@@ -93,6 +97,7 @@ void AfterimageTrailComponent::Serialize(nlohmann::json& json_) const
 
 void AfterimageTrailComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("AfterimageTrailComponent::Deserialize");
     TrailMeshComponent::Deserialize(json_);
     if (!json_.contains("TrailEmitting")) SetEmitting(false);
     trailWidth = (std::max)(json_.value("AfterimageTrailWidth", 1.8f), 0.001f);

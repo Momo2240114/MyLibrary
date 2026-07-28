@@ -92,6 +92,12 @@ public:
     void SetHitParticleEmitterName(const std::string& emitterName_);
     void SetHitParticleLifeTime(float lifeTime_);
     void SetHitParticleNormalOffset(float normalOffset_);
+    void SetHitParticleImpactAxis(bool enabled_, float axisToAttackerBlend_);
+    void SetHitParticleTargetAttraction(
+        bool enabled_,
+        float strength_,
+        float range_,
+        float falloff_);
     void SetHitMeshVFXAssetPath(const std::string& path_);
     void SetHitMeshVFXLifeTime(float lifeTime_);
     void SetHitMeshVFXNormalOffset(float normalOffset_);
@@ -145,6 +151,12 @@ private:
     std::string hitParticleEmitterName;
     float hitParticleLifeTime = 1.0f;
     float hitParticleNormalOffset = 0.0f;
+    bool hitParticleUseImpactAxis = false;
+    float hitParticleAxisToAttackerBlend = 0.0f;
+    bool hitParticleUseTargetAttraction = false;
+    float hitParticleTargetAttractionStrength = 0.0f;
+    float hitParticleTargetAttractionRange = 0.0f;
+    float hitParticleTargetAttractionFalloff = 1.0f;
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;

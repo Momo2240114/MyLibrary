@@ -15,7 +15,7 @@ class VFXMaterialResource;
 // 複数Emitterの編集、再生制御、JSON保存、イベントAction登録をまとめて担当する
 class ParticleComponent : public Component, public IActionProvider
 {
-private:
+public:
     // 1つのEmitterスロットEditor上ではこの単位で名前、Texture、発生設定を編集する
     struct EmitterTrack
     {
@@ -24,6 +24,7 @@ private:
 
         std::string name = "Emitter";              // ActionやTimelineから指定するEmitter名
         std::string materialPath;                  // 共通VFX Materialの保存パス
+        std::vector<std::string> materialPaths;
         std::string texturePath;                   // 色Textureの保存パス
         std::string textureFileName;               // GUI表示用の色Textureファイル名
         std::string maskTexturePath;               // Mask Textureの保存パス
@@ -33,6 +34,10 @@ private:
         std::string shadeGradientTexturePath;      // Shade Gradient Textureの保存パス
         std::string shadeGradientTextureFileName;  // GUI表示用のShade Gradient Textureファイル名
         std::shared_ptr<VFXMaterialResource> materialResource;
+        std::vector<std::shared_ptr<VFXMaterialResource>> materialResources;
+        std::vector<DirectX::XMFLOAT4> materialRandomColors;
+        DirectX::XMFLOAT4 materialRandomColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+        uint32_t materialRandomSeed = 0u;
 
         float delay = 0.0f;                        // 再生開始からEmitterを有効化するまでの待ち時間
         uint32_t meshVertexSampleCount = 2048;     // Mesh Vertices発生で使う頂点サンプル最大数
@@ -104,7 +109,11 @@ private:
     bool LoadEmitterTextureSlot(EmitterTrack& track, const std::string& fullPath, int slot);
     bool LoadEmitterMaterial(EmitterTrack& track_, const std::string& materialPath_);
     bool LoadEmitterMaterialResource(EmitterTrack& track_, const std::string& materialPath_);
-    void ApplyEmitterMaterialToSettings(const EmitterTrack& track_, ParticleSystemConstants& settings_) const;
+    bool ConvertEmitterToMaterial(EmitterTrack& track_);
+    void ApplyEmitterMaterialToSettings(
+        const EmitterTrack& track_,
+        ParticleSystemConstants& settings_,
+        float materialTime_) const;
     void ApplyEmitterMaterialTextures(EmitterTrack& track_);
     void UpdateMeshSpawnPositions(EmitterTrack& track_);
     void RebuildEmitterResources();

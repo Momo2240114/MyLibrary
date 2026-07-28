@@ -138,6 +138,12 @@ void AttackSystem::HandleHit(
     event_.hitParticleEmitterName = hitBox_.hitParticleEmitterName;
     event_.hitParticleLifeTime = hitBox_.hitParticleLifeTime;
     event_.hitParticleNormalOffset = hitBox_.hitParticleNormalOffset;
+    event_.hitParticleUseImpactAxis = hitBox_.hitParticleUseImpactAxis;
+    event_.hitParticleAxisToAttackerBlend = hitBox_.hitParticleAxisToAttackerBlend;
+    event_.hitParticleUseTargetAttraction = hitBox_.hitParticleUseTargetAttraction;
+    event_.hitParticleTargetAttractionStrength = hitBox_.hitParticleTargetAttractionStrength;
+    event_.hitParticleTargetAttractionRange = hitBox_.hitParticleTargetAttractionRange;
+    event_.hitParticleTargetAttractionFalloff = hitBox_.hitParticleTargetAttractionFalloff;
     event_.hitMeshVFXAssetPath = hitBox_.hitMeshVFXAssetPath;
     event_.hitMeshVFXLifeTime = hitBox_.hitMeshVFXLifeTime;
     event_.hitMeshVFXNormalOffset = hitBox_.hitMeshVFXNormalOffset;

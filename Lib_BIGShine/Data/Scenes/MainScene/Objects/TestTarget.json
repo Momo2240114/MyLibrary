@@ -304,7 +304,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 5.003806114196777
+                            "value": 5.015622138977051
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -434,7 +434,7 @@
                     "DragonBodyPart": {
                         "LastBodyPart": {
                             "type": "int",
-                            "value": 3
+                            "value": 6
                         },
                         "LastBrokenThisHit": {
                             "type": "bool",
@@ -442,11 +442,11 @@
                         },
                         "LastDurabilityDamage": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 14.399999618530273
                         },
                         "LastHealthDamage": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 14.399999618530273
                         }
                     },
                     "Health": {
@@ -470,7 +470,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 0.0
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -478,7 +478,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 4.5
+                            "value": 14.399999618530273
                         },
                         "Dead": {
                             "type": "bool",
@@ -487,17 +487,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.9812650680541992,
-                                -0.19266276061534882
+                                0.2638905942440033,
+                                -0.964552640914917
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.10000000149011612
+                            "value": 0.20000000298023224
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.75
+                            "value": 0.30000001192092896
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -505,7 +505,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 16.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -513,22 +513,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 1.0
+                            "value": 6.0
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.8880985975265503,
-                                0.4252950847148895,
-                                -0.17437034845352173
+                                0.2554177939891815,
+                                -0.2513637840747833,
+                                -0.9335834980010986
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                22.92148208618164,
-                                2.3356757164001465,
-                                20.769378662109375
+                                17.778053283691406,
+                                2.412846565246582,
+                                20.368301391601563
                             ]
                         },
                         "Received": {
@@ -9756,7 +9756,7 @@
     "Transform": {
         "Pos": [
             26.241140365600586,
-            -0.5826830863952637,
+            -0.5823211669921875,
             17.301151275634766
         ],
         "Rot": [

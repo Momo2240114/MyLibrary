@@ -77,6 +77,56 @@ namespace
         }
     }
 
+    const char* ToString(VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE source_)
+    {
+        switch (source_)
+        {
+        case VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::TIME: return "TIME";
+        case VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::FIXED: return "FIXED";
+        default: return "LIFE";
+        }
+    }
+
+    const char* ToString(VFX_MATERIAL_COLOR_RAMP_BLEND_MODE mode_)
+    {
+        switch (mode_)
+        {
+        case VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::OVERRIDE: return "OVERRIDE";
+        case VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::ADD: return "ADD";
+        default: return "MULTIPLY";
+        }
+    }
+
+    const char* ToString(VFX_MATERIAL_COLOR_RAMP_INTERPOLATION interpolation_)
+    {
+        switch (interpolation_)
+        {
+        case VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::CONSTANT: return "CONSTANT";
+        case VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::SMOOTH: return "SMOOTH";
+        default: return "LINEAR";
+        }
+    }
+
+    const char* ToString(VFX_MATERIAL_COLOR_RAMP_WRAP_MODE mode_)
+    {
+        switch (mode_)
+        {
+        case VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::REPEAT: return "REPEAT";
+        case VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::MIRROR: return "MIRROR";
+        default: return "CLAMP";
+        }
+    }
+
+    const char* ToString(VFX_MATERIAL_RANDOM_COLOR_MODE mode_)
+    {
+        switch (mode_)
+        {
+        case VFX_MATERIAL_RANDOM_COLOR_MODE::OVERRIDE: return "OVERRIDE";
+        case VFX_MATERIAL_RANDOM_COLOR_MODE::ADD: return "ADD";
+        default: return "MULTIPLY";
+        }
+    }
+
     VFX_MATERIAL_BLEND_MODE ParseBlendMode(const nlohmann::json& json_)
     {
         if (json_.is_number_integer())
@@ -99,12 +149,73 @@ namespace
         return VFX_MATERIAL_CULL_MODE::NONE;
     }
 
+    VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE ParseColorRampSampleSource(const nlohmann::json& json_)
+    {
+        if (json_.is_number_integer())
+        {
+            return static_cast<VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE>(std::clamp(json_.get<int>(), 0, 2));
+        }
+        const std::string value_ = json_.is_string() ? json_.get<std::string>() : "LIFE";
+        if (value_ == "TIME") return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::TIME;
+        if (value_ == "FIXED") return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::FIXED;
+        return VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::LIFE;
+    }
+
+    VFX_MATERIAL_COLOR_RAMP_BLEND_MODE ParseColorRampBlendMode(const nlohmann::json& json_)
+    {
+        if (json_.is_number_integer())
+        {
+            return static_cast<VFX_MATERIAL_COLOR_RAMP_BLEND_MODE>(std::clamp(json_.get<int>(), 0, 2));
+        }
+        const std::string value_ = json_.is_string() ? json_.get<std::string>() : "MULTIPLY";
+        if (value_ == "OVERRIDE") return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::OVERRIDE;
+        if (value_ == "ADD") return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::ADD;
+        return VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::MULTIPLY;
+    }
+
+    VFX_MATERIAL_COLOR_RAMP_INTERPOLATION ParseColorRampInterpolation(const nlohmann::json& json_)
+    {
+        if (json_.is_number_integer())
+        {
+            return static_cast<VFX_MATERIAL_COLOR_RAMP_INTERPOLATION>(std::clamp(json_.get<int>(), 0, 2));
+        }
+        const std::string value_ = json_.is_string() ? json_.get<std::string>() : "LINEAR";
+        if (value_ == "CONSTANT") return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::CONSTANT;
+        if (value_ == "SMOOTH") return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::SMOOTH;
+        return VFX_MATERIAL_COLOR_RAMP_INTERPOLATION::LINEAR;
+    }
+
+    VFX_MATERIAL_COLOR_RAMP_WRAP_MODE ParseColorRampWrapMode(const nlohmann::json& json_)
+    {
+        if (json_.is_number_integer())
+        {
+            return static_cast<VFX_MATERIAL_COLOR_RAMP_WRAP_MODE>(std::clamp(json_.get<int>(), 0, 2));
+        }
+        const std::string value_ = json_.is_string() ? json_.get<std::string>() : "CLAMP";
+        if (value_ == "REPEAT") return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::REPEAT;
+        if (value_ == "MIRROR") return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::MIRROR;
+        return VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::CLAMP;
+    }
+
+    VFX_MATERIAL_RANDOM_COLOR_MODE ParseRandomColorMode(const nlohmann::json& json_)
+    {
+        if (json_.is_number_integer())
+        {
+            return static_cast<VFX_MATERIAL_RANDOM_COLOR_MODE>(std::clamp(json_.get<int>(), 0, 2));
+        }
+        const std::string value_ = json_.is_string() ? json_.get<std::string>() : "MULTIPLY";
+        if (value_ == "OVERRIDE") return VFX_MATERIAL_RANDOM_COLOR_MODE::OVERRIDE;
+        if (value_ == "ADD") return VFX_MATERIAL_RANDOM_COLOR_MODE::ADD;
+        return VFX_MATERIAL_RANDOM_COLOR_MODE::MULTIPLY;
+    }
+
     nlohmann::json WriteUv(const VFXMaterialUVData& uv_)
     {
         return {
             { "Scale", WriteVector2(uv_.scale) },
             { "Offset", WriteVector2(uv_.offset) },
             { "ScrollSpeed", WriteVector2(uv_.scrollSpeed) },
+            { "Rotation", uv_.rotation },
             { "RotationSpeed", uv_.rotationSpeed },
             { "Pivot", WriteVector2(uv_.pivot) },
         };
@@ -117,8 +228,117 @@ namespace
         uv_.scale = ReadVector2(json_, "Scale", uv_.scale);
         uv_.offset = ReadVector2(json_, "Offset", uv_.offset);
         uv_.scrollSpeed = ReadVector2(json_, "ScrollSpeed", uv_.scrollSpeed);
+        uv_.rotation = json_.value("Rotation", uv_.rotation);
         uv_.rotationSpeed = json_.value("RotationSpeed", uv_.rotationSpeed);
         uv_.pivot = ReadVector2(json_, "Pivot", uv_.pivot);
+    }
+
+    nlohmann::json WriteColorRamp(const VFXMaterialColorRampData& colorRamp_)
+    {
+        nlohmann::json stops_ = nlohmann::json::array();
+        for (const VFXMaterialColorRampStopData& stop_ : colorRamp_.stops)
+        {
+            stops_.push_back(
+                {
+                    { "Position", stop_.position },
+                    { "Color", WriteVector4(stop_.color) },
+                });
+        }
+
+        return
+        {
+            { "Enabled", colorRamp_.enabled },
+            { "SampleSource", ToString(colorRamp_.sampleSource) },
+            { "BlendMode", ToString(colorRamp_.blendMode) },
+            { "Interpolation", ToString(colorRamp_.interpolation) },
+            { "WrapMode", ToString(colorRamp_.wrapMode) },
+            { "FixedPosition", colorRamp_.fixedPosition },
+            { "ScrollSpeed", colorRamp_.scrollSpeed },
+            { "Influence", colorRamp_.influence },
+            { "AffectAlpha", colorRamp_.affectAlpha },
+            { "Stops", stops_ },
+        };
+    }
+
+    void ReadColorRamp(
+        const nlohmann::json& json_,
+        VFXMaterialColorRampData& colorRamp_)
+    {
+        colorRamp_.enabled = json_.value("Enabled", json_.value("enabled", colorRamp_.enabled));
+        const nlohmann::json sampleSource_ = json_.contains("SampleSource")
+            ? json_["SampleSource"]
+            : json_.value("sampleSource", nlohmann::json{ "LIFE" });
+        const nlohmann::json blendMode_ = json_.contains("BlendMode")
+            ? json_["BlendMode"]
+            : json_.value("blendMode", nlohmann::json{ "MULTIPLY" });
+        const nlohmann::json interpolation_ = json_.contains("Interpolation")
+            ? json_["Interpolation"]
+            : json_.value("interpolation", nlohmann::json{ "LINEAR" });
+        const nlohmann::json wrapMode_ = json_.contains("WrapMode")
+            ? json_["WrapMode"]
+            : json_.value("wrapMode", nlohmann::json{ "CLAMP" });
+        colorRamp_.sampleSource = ParseColorRampSampleSource(sampleSource_);
+        colorRamp_.blendMode = ParseColorRampBlendMode(blendMode_);
+        colorRamp_.interpolation = ParseColorRampInterpolation(interpolation_);
+        colorRamp_.wrapMode = ParseColorRampWrapMode(wrapMode_);
+        colorRamp_.fixedPosition = json_.value("FixedPosition", json_.value("fixedPosition", colorRamp_.fixedPosition));
+        colorRamp_.scrollSpeed = json_.value("ScrollSpeed", json_.value("scrollSpeed", colorRamp_.scrollSpeed));
+        colorRamp_.influence = json_.value("Influence", json_.value("influence", colorRamp_.influence));
+        colorRamp_.affectAlpha = json_.value("AffectAlpha", json_.value("affectAlpha", colorRamp_.affectAlpha));
+
+        colorRamp_.stops.clear();
+        const nlohmann::json stops_ = json_.value("Stops", json_.value("stops", nlohmann::json::array()));
+        if (stops_.is_array())
+        {
+            for (const nlohmann::json& stop_ : stops_)
+            {
+                VFXMaterialColorRampStopData stopData_{};
+                stopData_.position = std::clamp(stop_.value("Position", stop_.value("position", 0.0f)), 0.0f, 1.0f);
+                stopData_.color = ReadVector4(stop_, "Color", ReadVector4(stop_, "color", stopData_.color));
+                colorRamp_.stops.push_back(stopData_);
+            }
+        }
+
+        if (colorRamp_.stops.empty() && json_.contains("StartColor") && json_.contains("EndColor"))
+        {
+            colorRamp_.stops.push_back({ 0.0f, ReadVector4(json_, "StartColor", { 1.0f, 1.0f, 1.0f, 1.0f }) });
+            colorRamp_.stops.push_back({ 1.0f, ReadVector4(json_, "EndColor", { 1.0f, 1.0f, 1.0f, 1.0f }) });
+        }
+        if (colorRamp_.stops.empty())
+        {
+            colorRamp_.stops.push_back({ 0.0f, { 1.0f, 1.0f, 1.0f, 1.0f } });
+            colorRamp_.stops.push_back({ 1.0f, { 1.0f, 1.0f, 1.0f, 1.0f } });
+        }
+    }
+
+    nlohmann::json WriteRandomColor(const VFXMaterialRandomColorData& randomColor_)
+    {
+        return
+        {
+            { "Enabled", randomColor_.enabled },
+            { "Mode", ToString(randomColor_.mode) },
+            { "MinColor", WriteVector4(randomColor_.minColor) },
+            { "MaxColor", WriteVector4(randomColor_.maxColor) },
+            { "Influence", randomColor_.influence },
+            { "AffectAlpha", randomColor_.affectAlpha },
+            { "Seed", randomColor_.seed },
+        };
+    }
+
+    void ReadRandomColor(
+        const nlohmann::json& json_,
+        VFXMaterialRandomColorData& randomColor_)
+    {
+        randomColor_.enabled = json_.value("Enabled", json_.value("enabled", randomColor_.enabled));
+        const nlohmann::json mode_ = json_.contains("Mode")
+            ? json_["Mode"]
+            : json_.value("mode", nlohmann::json{ "MULTIPLY" });
+        randomColor_.mode = ParseRandomColorMode(mode_);
+        randomColor_.minColor = ReadVector4(json_, "MinColor", ReadVector4(json_, "minColor", randomColor_.minColor));
+        randomColor_.maxColor = ReadVector4(json_, "MaxColor", ReadVector4(json_, "maxColor", randomColor_.maxColor));
+        randomColor_.influence = json_.value("Influence", json_.value("influence", randomColor_.influence));
+        randomColor_.affectAlpha = json_.value("AffectAlpha", json_.value("affectAlpha", randomColor_.affectAlpha));
+        randomColor_.seed = json_.value("Seed", json_.value("seed", randomColor_.seed));
     }
 }
 
@@ -167,6 +387,11 @@ bool VFXMaterialSerializer::Load(
         const nlohmann::json distortion_ = json_.value("Distortion", json_.value("distortion", nlohmann::json::object()));
         materialData_.distortion.enabled = distortion_.value("Enabled", distortion_.value("enabled", materialData_.distortion.enabled));
         materialData_.distortion.strength = distortion_.value("Strength", distortion_.value("strength", materialData_.distortion.strength));
+
+        if (json_.contains("ColorRamp")) ReadColorRamp(json_["ColorRamp"], materialData_.colorRamp);
+        else if (json_.contains("colorRamp")) ReadColorRamp(json_["colorRamp"], materialData_.colorRamp);
+        if (json_.contains("RandomColor")) ReadRandomColor(json_["RandomColor"], materialData_.randomColor);
+        else if (json_.contains("randomColor")) ReadRandomColor(json_["randomColor"], materialData_.randomColor);
 
         const nlohmann::json renderState_ = json_.value("RenderState", json_.value("renderState", nlohmann::json::object()));
         const nlohmann::json blendMode_ = renderState_.contains("BlendMode")
@@ -232,6 +457,8 @@ bool VFXMaterialSerializer::Save(
         { "Enabled", materialData_.distortion.enabled },
         { "Strength", materialData_.distortion.strength },
     };
+    json_["ColorRamp"] = WriteColorRamp(materialData_.colorRamp);
+    json_["RandomColor"] = WriteRandomColor(materialData_.randomColor);
     json_["RenderState"] =
     {
         { "BlendMode", ToString(materialData_.renderState.blendMode) },
