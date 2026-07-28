@@ -116,6 +116,12 @@ cbuffer ParticleSystemConstants : register(b9)
     uint spawnDirectionMode; // CPU生成時の初速方向モード。
     uint cpuSpawnPadding0; // 16byteアライン用。
     uint cpuSpawnPadding1; // 16byteアライン用。
+    float4 emissionAxis;
+    float4 targetPosition;
+    float targetAttractionStrength;
+    float targetAttractionRange;
+    float targetAttractionFalloff;
+    uint useTargetAttraction;
     uint gradientSampleMode;
     uint gradientDirection;
     uint useShadeGradientTexture;

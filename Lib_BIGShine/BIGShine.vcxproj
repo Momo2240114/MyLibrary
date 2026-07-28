@@ -493,6 +493,8 @@
     <ClCompile Include="Code\Engine\Graphics\VFX\AfterimageComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialColorUtility.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialConversionUtility.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialSerializer.cpp" />
@@ -501,6 +503,7 @@
     <ClCompile Include="Code\Editor\Window\CurveAssetEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EasingPresetEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\VFXMaterialEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\VFXMaterialPreviewWindow.cpp" />
     <ClCompile Include="Code\Engine\Math\Curve\CurveComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\EasingComponent.cpp" />
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp" />
@@ -690,6 +693,7 @@
     <ClInclude Include="Code\Editor\Window\CurveAssetEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\EasingPresetEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\VFXMaterialEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\VFXMaterialPreviewWindow.h" />
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h" />
     <ClInclude Include="Code\Editor\AssetSlotGui.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />
@@ -737,6 +741,8 @@
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXRenderSystem.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h" />
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXShader.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialColorUtility.h" />
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialConversionUtility.h" />
     <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialData.h" />
     <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialInstance.h" />
     <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.h" />

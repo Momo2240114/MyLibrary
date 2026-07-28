@@ -33,6 +33,12 @@
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 0.44999998807907104,
         "hitParticleNormalOffset": 0.05000000074505806,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleAxisToAttackerBlend": 0.85,
+        "hitParticleUseTargetAttraction": true,
+        "hitParticleTargetAttractionStrength": 1.4,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionFalloff": 1.25,
         "spawnOnHit": true
     },
     "id": "WeakAttack01",

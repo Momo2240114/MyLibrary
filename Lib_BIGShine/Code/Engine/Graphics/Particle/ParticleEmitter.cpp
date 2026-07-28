@@ -510,6 +510,47 @@ EmitParticleData ParticleEmitter::MakeEmitData(UINT seed) const
                 dir.z = radialVector_.z * invRadialLength_ * directionSign_;
             }
         }
+        else if (settings.spawnDirectionMode ==
+            static_cast<uint32_t>(PARTICLE_SPAWN_DIRECTION_MODE::AXIS))
+        {
+            DirectX::XMFLOAT3 axis_
+            {
+                settings.emissionAxis.x,
+                settings.emissionAxis.y,
+                settings.emissionAxis.z
+            };
+            const float axisLengthSq_ =
+                axis_.x * axis_.x + axis_.y * axis_.y + axis_.z * axis_.z;
+            if (axisLengthSq_ > 0.000001f)
+            {
+                const float invAxisLength_ = 1.0f / std::sqrt(axisLengthSq_);
+                axis_.x *= invAxisLength_;
+                axis_.y *= invAxisLength_;
+                axis_.z *= invAxisLength_;
+
+                const float coneAngle_ = std::max(theta, 0.0f);
+                DirectX::XMFLOAT3 reference_
+                {
+                    std::abs(axis_.y) < 0.98f ? 0.0f : 1.0f,
+                    std::abs(axis_.y) < 0.98f ? 1.0f : 0.0f,
+                    0.0f
+                };
+                DirectX::XMVECTOR axisVector_ = DirectX::XMLoadFloat3(&axis_);
+                DirectX::XMVECTOR referenceVector_ = DirectX::XMLoadFloat3(&reference_);
+                DirectX::XMVECTOR tangentVector_ = DirectX::XMVector3Normalize(
+                    DirectX::XMVector3Cross(referenceVector_, axisVector_));
+                DirectX::XMVECTOR bitangentVector_ = DirectX::XMVector3Normalize(
+                    DirectX::XMVector3Cross(axisVector_, tangentVector_));
+                DirectX::XMVECTOR coneVector_ = DirectX::XMVectorAdd(
+                    DirectX::XMVectorScale(axisVector_, std::cos(coneAngle_)),
+                    DirectX::XMVectorScale(
+                        DirectX::XMVectorAdd(
+                            DirectX::XMVectorScale(tangentVector_, std::cos(phi)),
+                            DirectX::XMVectorScale(bitangentVector_, std::sin(phi))),
+                        std::sin(coneAngle_)));
+                DirectX::XMStoreFloat3(&dir, DirectX::XMVector3Normalize(coneVector_));
+            }
+        }
 
         data.velocity = { dir.x * speed, dir.y * speed, dir.z * speed, 0.0f };
     }

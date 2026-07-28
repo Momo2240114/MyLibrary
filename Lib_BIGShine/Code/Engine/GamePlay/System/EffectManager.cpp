@@ -7,6 +7,7 @@
 #include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
 #include "Engine/GamePlay/Combat/AttackTemplateManager.h"
 #include "Engine/GamePlay/Transform/ModelAttachmentComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/Graphics/Resource/GLTFModel.h"
@@ -24,6 +25,41 @@
 
 namespace
 {
+    DirectX::XMFLOAT3 NormalizeOrDefault(
+        const DirectX::XMFLOAT3& vector_,
+        const DirectX::XMFLOAT3& fallback_)
+    {
+        BS_PROFILE_SCOPE("EffectManager::NormalizeOrDefault");
+
+        const float lengthSq_ =
+            vector_.x * vector_.x + vector_.y * vector_.y + vector_.z * vector_.z;
+        if (lengthSq_ <= 0.000001f) return fallback_;
+        const float invLength_ = 1.0f / std::sqrt(lengthSq_);
+        return
+        {
+            vector_.x * invLength_,
+            vector_.y * invLength_,
+            vector_.z * invLength_,
+        };
+    }
+
+    DirectX::XMFLOAT3 LerpDirection(
+        const DirectX::XMFLOAT3& firstDirection_,
+        const DirectX::XMFLOAT3& secondDirection_,
+        float amount_)
+    {
+        BS_PROFILE_SCOPE("EffectManager::LerpDirection");
+
+        const float clampedAmount_ = std::clamp(amount_, 0.0f, 1.0f);
+        return NormalizeOrDefault(
+            {
+                firstDirection_.x + (secondDirection_.x - firstDirection_.x) * clampedAmount_,
+                firstDirection_.y + (secondDirection_.y - firstDirection_.y) * clampedAmount_,
+                firstDirection_.z + (secondDirection_.z - firstDirection_.z) * clampedAmount_,
+            },
+            firstDirection_);
+    }
+
     constexpr size_t EFFECT_PREWARM_COUNT = 4u;
 }
 
@@ -485,6 +521,36 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     if (!particle_) return object_;
     particle_->SetEnabled(true);
     particle_->ResetRuntime();
+    if (request_.overrideAxis || request_.overrideTargetAttraction)
+    {
+        for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
+        {
+            if (request_.overrideAxis)
+            {
+                const DirectX::XMFLOAT3 axis_ = NormalizeOrDefault(
+                    request_.axis,
+                    { 0.0f, 1.0f, 0.0f });
+                track_.settings.spawnDirectionMode =
+                    static_cast<uint32_t>(PARTICLE_SPAWN_DIRECTION_MODE::AXIS);
+                track_.settings.emissionAxis = { axis_.x, axis_.y, axis_.z, 0.0f };
+            }
+            if (request_.overrideTargetAttraction)
+            {
+                track_.settings.useTargetAttraction = 1u;
+                track_.settings.targetPosition =
+                {
+                    request_.targetPosition.x,
+                    request_.targetPosition.y,
+                    request_.targetPosition.z,
+                    1.0f
+                };
+                track_.settings.targetAttractionStrength = request_.targetAttractionStrength;
+                track_.settings.targetAttractionRange = request_.targetAttractionRange;
+                track_.settings.targetAttractionFalloff =
+                    (std::max)(request_.targetAttractionFalloff, 0.001f);
+            }
+        }
+    }
 
     // Emitter名が指定されている場合は単体Emitterを優先して再生する
     bool played_ = false;
@@ -786,6 +852,14 @@ std::shared_ptr<GameObject> EffectManager::SpawnAttackEffect(
             : std::string{});
         attackHit_->SetHitParticleLifeTime(attackTemplate_.hitEffect.hitParticleLifeTime);
         attackHit_->SetHitParticleNormalOffset(attackTemplate_.hitEffect.hitParticleNormalOffset);
+        attackHit_->SetHitParticleImpactAxis(
+            attackTemplate_.hitEffect.hitParticleUseImpactAxis,
+            attackTemplate_.hitEffect.hitParticleAxisToAttackerBlend);
+        attackHit_->SetHitParticleTargetAttraction(
+            attackTemplate_.hitEffect.hitParticleUseTargetAttraction,
+            attackTemplate_.hitEffect.hitParticleTargetAttractionStrength,
+            attackTemplate_.hitEffect.hitParticleTargetAttractionRange,
+            attackTemplate_.hitEffect.hitParticleTargetAttractionFalloff);
         attackHit_->SetHitMeshVFXAssetPath(
             attackTemplate_.hitEffect.spawnOnHit
             ? attackTemplate_.hitEffect.hitMeshVfxAssetPath
@@ -885,6 +959,44 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
         request_.normal = event_.hitNormal;
         request_.lifeTime = event_.hitParticleLifeTime;
         request_.normalOffset = event_.hitParticleNormalOffset;
+        if (event_.hitParticleUseImpactAxis)
+        {
+            DirectX::XMFLOAT3 attackerDirection_ = event_.hitNormal;
+            if (const std::shared_ptr<GameObject> attacker_ = event_.attacker.lock())
+            {
+                if (attacker_->transform)
+                {
+                    const DirectX::XMFLOAT3 attackerPosition_ =
+                        attacker_->transform->GetWorldPosition();
+                    attackerDirection_ =
+                    {
+                        attackerPosition_.x - event_.hitPosition.x,
+                        attackerPosition_.y - event_.hitPosition.y,
+                        attackerPosition_.z - event_.hitPosition.z,
+                    };
+                }
+            }
+            request_.overrideAxis = true;
+            request_.axis = LerpDirection(
+                NormalizeOrDefault(event_.hitNormal, { 0.0f, 1.0f, 0.0f }),
+                NormalizeOrDefault(attackerDirection_, { 0.0f, 1.0f, 0.0f }),
+                event_.hitParticleAxisToAttackerBlend);
+        }
+        if (event_.hitParticleUseTargetAttraction)
+        {
+            request_.overrideTargetAttraction = true;
+            request_.targetPosition = event_.hitPosition;
+            if (const std::shared_ptr<GameObject> target_ = event_.target.lock())
+            {
+                if (target_->transform)
+                {
+                    request_.targetPosition = target_->transform->GetWorldPosition();
+                }
+            }
+            request_.targetAttractionStrength = event_.hitParticleTargetAttractionStrength;
+            request_.targetAttractionRange = event_.hitParticleTargetAttractionRange;
+            request_.targetAttractionFalloff = event_.hitParticleTargetAttractionFalloff;
+        }
         SpawnParticle(request_);
     }
 

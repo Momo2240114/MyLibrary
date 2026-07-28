@@ -19,6 +19,7 @@
 #include "Editor/Window/CurveAssetEditorWindow.h"
 #include "Editor/Window/EasingPresetEditorWindow.h"
 #include "Editor/Window/VFXMaterialEditorWindow.h"
+#include "Editor/Window/VFXMaterialPreviewWindow.h"
 #include "Editor/Window/ActionSequenceEditorWindow.h"
 #include "Editor/Window/EffectAssetListWindow.h"
 #include "Editor/Window/MaterialAssetListWindow.h"
@@ -94,6 +95,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<CurveAssetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EasingPresetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<VFXMaterialEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<VFXMaterialPreviewWindow>(_GameObjectManager.get()));
 
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);

@@ -446,6 +446,19 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.hitEffect.hitParticleEmitterName = hitEffect_.value("hitParticleEmitterName", std::string{});
     result_.hitEffect.hitParticleLifeTime = (std::max)(hitEffect_.value("hitParticleLifeTime", 1.0f), 0.0f);
     result_.hitEffect.hitParticleNormalOffset = hitEffect_.value("hitParticleNormalOffset", 0.0f);
+    result_.hitEffect.hitParticleUseImpactAxis = hitEffect_.value("hitParticleUseImpactAxis", false);
+    result_.hitEffect.hitParticleAxisToAttackerBlend = std::clamp(
+        hitEffect_.value("hitParticleAxisToAttackerBlend", 0.0f),
+        0.0f,
+        1.0f);
+    result_.hitEffect.hitParticleUseTargetAttraction =
+        hitEffect_.value("hitParticleUseTargetAttraction", false);
+    result_.hitEffect.hitParticleTargetAttractionStrength =
+        hitEffect_.value("hitParticleTargetAttractionStrength", 0.0f);
+    result_.hitEffect.hitParticleTargetAttractionRange =
+        (std::max)(hitEffect_.value("hitParticleTargetAttractionRange", 0.0f), 0.0f);
+    result_.hitEffect.hitParticleTargetAttractionFalloff =
+        (std::max)(hitEffect_.value("hitParticleTargetAttractionFalloff", 1.0f), 0.001f);
     result_.hitEffect.hitMeshVfxLifeTime = (std::max)(hitEffect_.value("hitMeshVfxLifeTime", 1.0f), 0.0f);
     result_.hitEffect.hitMeshVfxNormalOffset = hitEffect_.value("hitMeshVfxNormalOffset", 0.0f);
     std::printf(
@@ -592,6 +605,12 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
             { "hitParticleEmitterName", attackTemplate_.hitEffect.hitParticleEmitterName },
             { "hitParticleLifeTime", attackTemplate_.hitEffect.hitParticleLifeTime },
             { "hitParticleNormalOffset", attackTemplate_.hitEffect.hitParticleNormalOffset },
+            { "hitParticleUseImpactAxis", attackTemplate_.hitEffect.hitParticleUseImpactAxis },
+            { "hitParticleAxisToAttackerBlend", attackTemplate_.hitEffect.hitParticleAxisToAttackerBlend },
+            { "hitParticleUseTargetAttraction", attackTemplate_.hitEffect.hitParticleUseTargetAttraction },
+            { "hitParticleTargetAttractionStrength", attackTemplate_.hitEffect.hitParticleTargetAttractionStrength },
+            { "hitParticleTargetAttractionRange", attackTemplate_.hitEffect.hitParticleTargetAttractionRange },
+            { "hitParticleTargetAttractionFalloff", attackTemplate_.hitEffect.hitParticleTargetAttractionFalloff },
             { "hitMeshVfxAssetPath", attackTemplate_.hitEffect.hitMeshVfxAssetPath },
             { "hitMeshVfxLifeTime", attackTemplate_.hitEffect.hitMeshVfxLifeTime },
             { "hitMeshVfxNormalOffset", attackTemplate_.hitEffect.hitMeshVfxNormalOffset } } },
@@ -984,6 +1003,39 @@ bool AttackTemplateManager::DrawEditorContent(
             "Particle Normal Offset",
             &attackTemplate_->hitEffect.hitParticleNormalOffset,
             0.01f);
+        ImGui::Checkbox(
+            "Use Particle Impact Axis",
+            &attackTemplate_->hitEffect.hitParticleUseImpactAxis);
+        ImGui::BeginDisabled(!attackTemplate_->hitEffect.hitParticleUseImpactAxis);
+        ImGui::SliderFloat(
+            "Axis To Attacker Blend",
+            &attackTemplate_->hitEffect.hitParticleAxisToAttackerBlend,
+            0.0f,
+            1.0f);
+        ImGui::EndDisabled();
+        ImGui::Checkbox(
+            "Use Particle Target Pull",
+            &attackTemplate_->hitEffect.hitParticleUseTargetAttraction);
+        ImGui::BeginDisabled(!attackTemplate_->hitEffect.hitParticleUseTargetAttraction);
+        ImGui::DragFloat(
+            "Target Pull Strength",
+            &attackTemplate_->hitEffect.hitParticleTargetAttractionStrength,
+            0.01f,
+            -100.0f,
+            100.0f);
+        ImGui::DragFloat(
+            "Target Pull Range",
+            &attackTemplate_->hitEffect.hitParticleTargetAttractionRange,
+            0.01f,
+            0.0f,
+            100.0f);
+        ImGui::DragFloat(
+            "Target Pull Falloff",
+            &attackTemplate_->hitEffect.hitParticleTargetAttractionFalloff,
+            0.01f,
+            0.001f,
+            8.0f);
+        ImGui::EndDisabled();
 
         DrawAssetPathCombo(
             "Mesh VFX / Sequence Asset",

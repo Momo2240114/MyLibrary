@@ -52,7 +52,9 @@ private:
     float lookSpeedX = 300.0f;
     float lookSpeedY = 200.0f;
     float mouseSensitivity = 0.1f;
-    float objectFollowSpeed = 5.0f;
+
+    float horizontalFollowSpeed = 5.0f;
+    float verticalFollowSpeed = 3.0f;
 
     DirectX::XMFLOAT3 targetOffset{ 0.0f, 1.5f, 0.0f };
     DirectX::XMFLOAT3 smoothedCameraCenter{ 0.0f, 0.0f, 0.0f };

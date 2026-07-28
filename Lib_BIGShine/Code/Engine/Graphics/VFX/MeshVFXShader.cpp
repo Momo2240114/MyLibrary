@@ -295,6 +295,18 @@ void MeshVFXShader::UpdatePart(
     constants_.gradientStartUv = part_.gradientStartUv;
     constants_.gradientEndUv = part_.gradientEndUv;
 
+    constants_.trailOldRootColor = part_.trailOldRootColor;
+    constants_.trailOldTipColor = part_.trailOldTipColor;
+    constants_.trailNewRootColor = part_.trailNewRootColor;
+    constants_.trailNewTipColor = part_.trailNewTipColor;
+    constants_.trailRecencyPower = (std::max)(part_.trailRecencyPower, 0.001f);
+    constants_.trailTipPower = (std::max)(part_.trailTipPower, 0.001f);
+    constants_.trailRecencyIntensity = std::clamp(part_.trailRecencyIntensity, 0.0f, 1.0f);
+    constants_.trailTipIntensity = std::clamp(part_.trailTipIntensity, 0.0f, 1.0f);
+    constants_.trailOldAlpha = std::clamp(part_.trailOldAlpha, 0.0f, 1.0f);
+    constants_.trailNewAlpha = std::clamp(part_.trailNewAlpha, 0.0f, 1.0f);
+    constants_.useTrailColorRamp = part_.useTrailColorRamp ? 1u : 0u;
+
     constants_.dissolveEdgeColor = part_.dissolveEdgeColor;
     constants_.backFaceColor = part_.backFaceColor;
     constants_.dissolveEdgeWidth = part_.dissolveEdgeWidth;

@@ -12,21 +12,21 @@
             "BlendMode": 1,
             "BurstCount": 1,
             "Color": [
-                0.8199999928474426,
+                0.82,
                 1.0,
-                1.0,
+                0.72,
                 1.0
             ],
             "ColorEnd": [
-                0.10000000149011612,
-                0.8500000238418579,
-                0.75,
+                0.08,
+                0.92,
+                0.42,
                 0.0
             ],
             "ColorStart": [
+                0.95,
                 1.0,
-                1.0,
-                1.0,
+                0.88,
                 1.0
             ],
             "ConeAngle": [
@@ -38,10 +38,10 @@
             "EmissionMode": 1,
             "Fade": [
                 0.0,
-                0.07999999821186066
+                0.07
             ],
             "FresnelPower": 1.0,
-            "FresnelStrength": 25.0,
+            "FresnelStrength": 30.0,
             "GradientTexturePath": "",
             "Gravity": 0.0,
             "LegacyRadius": [
@@ -49,8 +49,8 @@
                 0.0
             ],
             "Lifespan": [
-                0.10000000149011612,
-                0.12999999523162842
+                0.08,
+                0.12
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles 3/masks for particles 3/17.png",
             "MaxCount": 1,
@@ -87,8 +87,8 @@
                 0.0
             ],
             "Size": [
-                2.0,
-                3.0
+                2.7,
+                4.0
             ],
             "SizeRandomEnd": [
                 1.0,
@@ -99,6 +99,20 @@
                 1.0
             ],
             "SpawnDirectionMode": 0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
             "SpawnShape": 0,
             "SpawnSpace": 0,
             "Speed": [
@@ -158,31 +172,31 @@
                 0.0
             ],
             "BlendMode": 1,
-            "BurstCount": 30,
+            "BurstCount": 46,
             "Color": [
-                0.25,
+                0.24,
                 1.0,
-                0.8399999737739563,
+                0.52,
                 1.0
             ],
             "ColorEnd": [
                 0.019999999552965164,
-                0.550000011920929,
-                0.41999998688697815,
+                0.62,
+                0.24,
                 0.0
             ],
             "ColorStart": [
-                0.8999999761581421,
+                0.86,
                 1.0,
-                1.0,
+                0.78,
                 1.0
             ],
             "ConeAngle": [
-                12.0,
-                48.0
+                6.0,
+                35.0
             ],
             "Delay": 0.014999999664723873,
-            "Drag": 5.5,
+            "Drag": 6.0,
             "EmissionMode": 1,
             "Fade": [
                 0.019999999552965164,
@@ -201,12 +215,12 @@
                 0.2800000011920929
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
-            "MaxCount": 64,
+            "MaxCount": 96,
             "MeshVertexSampleCount": 2048,
             "Name": "SwordHit_Streaks",
             "NoiseFrequency": 3.0,
             "NoiseSpeed": 8.0,
-            "NoiseStrength": 0.800000011920929,
+            "NoiseStrength": 0.6,
             "OrbitVelocity": 0.0,
             "PosOffset": [
                 0.0,
@@ -235,8 +249,8 @@
                 0.0
             ],
             "Size": [
-                0.5,
-                0.6000000238418579
+                0.65,
+                0.95
             ],
             "SizeRandomEnd": [
                 1.0,
@@ -246,12 +260,26 @@
                 1.0,
                 1.0
             ],
-            "SpawnDirectionMode": 0,
+            "SpawnDirectionMode": 3,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
             "SpawnShape": 0,
             "SpawnSpace": 0,
             "Speed": [
-                7.0,
-                15.0
+                9.0,
+                18.0
             ],
             "SpriteAnimationFps": 12.0,
             "SpriteAnimationLoop": 1,
@@ -263,8 +291,8 @@
                 0,
                 0
             ],
-            "StretchMax": 2.5,
-            "StretchScale": 0.18000000715255737,
+            "StretchMax": 3.2,
+            "StretchScale": 0.24,
             "TexturePath": "",
             "TextureSplitCount": [
                 1,
@@ -306,23 +334,23 @@
                 0.0
             ],
             "BlendMode": 1,
-            "BurstCount": 18,
+            "BurstCount": 28,
             "Color": [
-                0.10000000149011612,
-                0.8999999761581421,
-                0.75,
+                0.12,
+                1.0,
+                0.45,
                 1.0
             ],
             "ColorEnd": [
                 0.019999999552965164,
-                0.3499999940395355,
-                0.2199999988079071,
+                0.42,
+                0.16,
                 0.0
             ],
             "ColorStart": [
-                0.75,
+                0.78,
                 1.0,
-                0.949999988079071,
+                0.72,
                 1.0
             ],
             "ConeAngle": [
@@ -349,12 +377,12 @@
                 0.5799999833106995
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
-            "MaxCount": 32,
+            "MaxCount": 48,
             "MeshVertexSampleCount": 2048,
             "Name": "SwordHit_Motes",
             "NoiseFrequency": 2.0,
             "NoiseSpeed": 3.0,
-            "NoiseStrength": 1.399999976158142,
+            "NoiseStrength": 1.7,
             "OrbitVelocity": 0.0,
             "PosOffset": [
                 0.0,
@@ -373,9 +401,9 @@
                 0.0
             ],
             "ShapeSize": [
-                0.3499999940395355,
-                0.3499999940395355,
-                0.3499999940395355
+                0.48,
+                0.48,
+                0.48
             ],
             "ShapeStart": [
                 0.0,
@@ -383,8 +411,8 @@
                 0.0
             ],
             "Size": [
-                0.07000000029802322,
-                0.15000000596046448
+                0.09,
+                0.22
             ],
             "SizeRandomEnd": [
                 1.0,
@@ -395,11 +423,25 @@
                 1.0
             ],
             "SpawnDirectionMode": 0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "UseTargetAttraction": 0,
+            "TargetAttractionStrength": 0.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionFalloff": 1.0,
             "SpawnShape": 3,
             "SpawnSpace": 0,
             "Speed": [
-                1.5,
-                4.5
+                2.5,
+                6.0
             ],
             "SpriteAnimationFps": 12.0,
             "SpriteAnimationLoop": 1,

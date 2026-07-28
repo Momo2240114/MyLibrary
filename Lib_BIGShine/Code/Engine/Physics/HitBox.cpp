@@ -181,6 +181,16 @@ void HitBox::Gui()
     if (ImGui::InputText("Particle Emitter", particleEmitterBuffer_, sizeof(particleEmitterBuffer_))) hitParticleEmitterName = particleEmitterBuffer_;
     ImGui::DragFloat("Particle Life Time", &hitParticleLifeTime, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("Particle Normal Offset", &hitParticleNormalOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::Checkbox("Use Particle Impact Axis", &hitParticleUseImpactAxis);
+    ImGui::BeginDisabled(!hitParticleUseImpactAxis);
+    ImGui::SliderFloat("Axis To Attacker Blend", &hitParticleAxisToAttackerBlend, 0.0f, 1.0f);
+    ImGui::EndDisabled();
+    ImGui::Checkbox("Use Particle Target Pull", &hitParticleUseTargetAttraction);
+    ImGui::BeginDisabled(!hitParticleUseTargetAttraction);
+    ImGui::DragFloat("Target Pull Strength", &hitParticleTargetAttractionStrength, 0.01f, -100.0f, 100.0f);
+    ImGui::DragFloat("Target Pull Range", &hitParticleTargetAttractionRange, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat("Target Pull Falloff", &hitParticleTargetAttractionFalloff, 0.01f, 0.001f, 8.0f);
+    ImGui::EndDisabled();
 
     ImGui::SeparatorText("Hit MeshVFX");
     char meshVFXAssetBuffer_[256];
@@ -266,6 +276,12 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitParticleEmitterName"] = hitParticleEmitterName;
     j_["HitParticleLifeTime"] = hitParticleLifeTime;
     j_["HitParticleNormalOffset"] = hitParticleNormalOffset;
+    j_["HitParticleUseImpactAxis"] = hitParticleUseImpactAxis;
+    j_["HitParticleAxisToAttackerBlend"] = hitParticleAxisToAttackerBlend;
+    j_["HitParticleUseTargetAttraction"] = hitParticleUseTargetAttraction;
+    j_["HitParticleTargetAttractionStrength"] = hitParticleTargetAttractionStrength;
+    j_["HitParticleTargetAttractionRange"] = hitParticleTargetAttractionRange;
+    j_["HitParticleTargetAttractionFalloff"] = hitParticleTargetAttractionFalloff;
     j_["HitMeshVFXAssetPath"] = hitMeshVFXAssetPath;
     j_["HitMeshVFXLifeTime"] = hitMeshVFXLifeTime;
     j_["HitMeshVFXNormalOffset"] = hitMeshVFXNormalOffset;
@@ -315,6 +331,15 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitParticleEmitterName = j_.value("HitParticleEmitterName", std::string{});
     hitParticleLifeTime = (std::max)(j_.value("HitParticleLifeTime", 1.0f), 0.0f);
     hitParticleNormalOffset = j_.value("HitParticleNormalOffset", 0.0f);
+    hitParticleUseImpactAxis = j_.value("HitParticleUseImpactAxis", false);
+    hitParticleAxisToAttackerBlend =
+        (std::clamp)(j_.value("HitParticleAxisToAttackerBlend", 0.0f), 0.0f, 1.0f);
+    hitParticleUseTargetAttraction = j_.value("HitParticleUseTargetAttraction", false);
+    hitParticleTargetAttractionStrength = j_.value("HitParticleTargetAttractionStrength", 0.0f);
+    hitParticleTargetAttractionRange =
+        (std::max)(j_.value("HitParticleTargetAttractionRange", 0.0f), 0.0f);
+    hitParticleTargetAttractionFalloff =
+        (std::max)(j_.value("HitParticleTargetAttractionFalloff", 1.0f), 0.001f);
     hitMeshVFXAssetPath = j_.value("HitMeshVFXAssetPath", std::string{});
     hitMeshVFXLifeTime = (std::max)(j_.value("HitMeshVFXLifeTime", 1.0f), 0.0f);
     hitMeshVFXNormalOffset = j_.value("HitMeshVFXNormalOffset", 0.0f);
@@ -489,6 +514,26 @@ void HitBox::ApplyBlackboardValues()
         hitParticleNormalOffset = value_;
     }
     if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitParticleAxisToAttackerBlend", value_))
+    {
+        hitParticleAxisToAttackerBlend = (std::clamp)(value_, 0.0f, 1.0f);
+    }
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitParticleTargetAttractionStrength", value_))
+    {
+        hitParticleTargetAttractionStrength = value_;
+    }
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitParticleTargetAttractionRange", value_))
+    {
+        hitParticleTargetAttractionRange = (std::max)(value_, 0.0f);
+    }
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetFloat(blackboardCategory, "HitParticleTargetAttractionFalloff", value_))
+    {
+        hitParticleTargetAttractionFalloff = (std::max)(value_, 0.001f);
+    }
+    if (hitEffectBlackboardOverrideEnabled &&
         blackboard_->GetFloat(blackboardCategory, "HitMeshVFXLifeTime", value_))
     {
         hitMeshVFXLifeTime = (std::max)(value_, 0.0f);
@@ -510,6 +555,16 @@ void HitBox::ApplyBlackboardValues()
     if (blackboard_->GetBool(blackboardCategory, "HitSoundMuffled", boolValue_))
     {
         hitSoundMuffled = boolValue_;
+    }
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetBool(blackboardCategory, "HitParticleUseImpactAxis", boolValue_))
+    {
+        hitParticleUseImpactAxis = boolValue_;
+    }
+    if (hitEffectBlackboardOverrideEnabled &&
+        blackboard_->GetBool(blackboardCategory, "HitParticleUseTargetAttraction", boolValue_))
+    {
+        hitParticleUseTargetAttraction = boolValue_;
     }
 }
 

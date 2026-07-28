@@ -20,6 +20,12 @@
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 1.0,
         "hitParticleNormalOffset": 0.0,
+        "hitParticleUseImpactAxis": false,
+        "hitParticleAxisToAttackerBlend": 0.85,
+        "hitParticleUseTargetAttraction": false,
+        "hitParticleTargetAttractionStrength": 1.4,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionFalloff": 1.25,
         "spawnOnHit": true
     },
     "id": "NewAttackTemplate2",

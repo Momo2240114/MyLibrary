@@ -289,6 +289,11 @@
                         ],
                         "Delay": 0.0,
                         "Drag": 1.0,
+                        "EmissionAxis": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
                         "EmissionMode": 0,
                         "Fade": [
                             0.0,
@@ -308,6 +313,7 @@
                         ],
                         "MaskTexturePath": "",
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MaxCount": 1000,
                         "MeshVertexSampleCount": 2048,
                         "Name": "Emitter_0",
@@ -372,6 +378,14 @@
                         ],
                         "StretchMax": 100.0,
                         "StretchScale": 0.03999999910593033,
+                        "TargetAttractionFalloff": 1.0,
+                        "TargetAttractionRange": 0.0,
+                        "TargetAttractionStrength": 0.0,
+                        "TargetPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
                         "TexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles transparent/10.png",
                         "TextureSplitCount": [
                             1,
@@ -383,6 +397,7 @@
                         "UseMask": 0,
                         "UseRandomSize": 0,
                         "UseSpriteAnimation": 0,
+                        "UseTargetAttraction": 0,
                         "VerticalSpawnRange": 15.0,
                         "Wind": [
                             0.0,

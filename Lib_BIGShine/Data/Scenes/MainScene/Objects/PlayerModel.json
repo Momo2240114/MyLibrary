@@ -505,7 +505,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                0.0
+                                -1.0
                             ]
                         },
                         "GuardInput": {
@@ -890,7 +890,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                0.0
+                                -1.0
                             ]
                         },
                         "GuardInput": {
@@ -1697,7 +1697,7 @@
                                         1.0,
                                         2.0
                                     ],
-                                    "meshVFXAssetPath": "PlayerSwordArc_Strong",
+                                    "meshVFXAssetPath": "PlayerSwordArc_Strong_Green",
                                     "meshVFXLifeTime": 0.07500000298023224,
                                     "meshVFXPlaybackSpeed": 1.0,
                                     "mirrorMeshVFX": true,
@@ -15817,7 +15817,7 @@
                                     "localPosition": [
                                         0.0,
                                         1.7000000476837158,
-                                        0.0
+                                        -0.5
                                     ],
                                     "localRotation": [
                                         0.0,
@@ -37376,6 +37376,7 @@
                             -0.20000000298023224
                         ],
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MeshIndex": -1,
                         "MeshRotationSpeed": [
                             0.0,
@@ -37433,6 +37434,37 @@
                         ],
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0,
                         "UVRotationCenter": [
@@ -37592,6 +37624,7 @@
                             -0.20000000298023224
                         ],
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MeshIndex": -1,
                         "MeshRotationSpeed": [
                             0.0,
@@ -37649,6 +37682,37 @@
                         ],
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0,
                         "UVRotationCenter": [
@@ -37808,6 +37872,7 @@
                             -0.20000000298023224
                         ],
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MeshIndex": -1,
                         "MeshRotationSpeed": [
                             0.0,
@@ -37865,6 +37930,37 @@
                         ],
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0,
                         "UVRotationCenter": [
@@ -38024,6 +38120,7 @@
                             -0.20000000298023224
                         ],
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MeshIndex": -1,
                         "MeshRotationSpeed": [
                             0.0,
@@ -38081,6 +38178,37 @@
                         ],
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.9800000190734863,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0,
                         "UVRotationCenter": [
@@ -38344,13 +38472,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -32.42461013793945,
+            -5.007636547088623,
             -0.12279033660888672,
-            22.391651153564453
+            -13.233297348022461
         ],
         "Rot": [
             0.0,
-            201.0459442138672,
+            146.82635498046875,
             1.1004080988641363e-05
         ],
         "Scale": [

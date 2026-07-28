@@ -700,8 +700,17 @@
     <ClCompile Include="Code\Editor\Window\VFXMaterialEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\VFXMaterialPreviewWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp">
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialColorUtility.cpp">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialConversionUtility.cpp">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.cpp">
       <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
@@ -1269,6 +1278,9 @@
     <ClInclude Include="Code\Editor\Window\VFXMaterialEditorWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Window\VFXMaterialPreviewWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h">
       <Filter>Code\Editor</Filter>
     </ClInclude>
@@ -1610,6 +1622,12 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
       <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialColorUtility.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialConversionUtility.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialData.h">
       <Filter>Code\Engine\Graphics\VFXMaterial</Filter>

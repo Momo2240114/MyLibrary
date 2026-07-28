@@ -87,6 +87,17 @@ namespace
             : std::string{};
         hitBox_->hitParticleLifeTime = attackTemplate_.hitEffect.hitParticleLifeTime;
         hitBox_->hitParticleNormalOffset = attackTemplate_.hitEffect.hitParticleNormalOffset;
+        hitBox_->hitParticleUseImpactAxis = attackTemplate_.hitEffect.hitParticleUseImpactAxis;
+        hitBox_->hitParticleAxisToAttackerBlend =
+            attackTemplate_.hitEffect.hitParticleAxisToAttackerBlend;
+        hitBox_->hitParticleUseTargetAttraction =
+            attackTemplate_.hitEffect.hitParticleUseTargetAttraction;
+        hitBox_->hitParticleTargetAttractionStrength =
+            attackTemplate_.hitEffect.hitParticleTargetAttractionStrength;
+        hitBox_->hitParticleTargetAttractionRange =
+            attackTemplate_.hitEffect.hitParticleTargetAttractionRange;
+        hitBox_->hitParticleTargetAttractionFalloff =
+            attackTemplate_.hitEffect.hitParticleTargetAttractionFalloff;
         hitBox_->hitMeshVFXAssetPath = attackTemplate_.hitEffect.spawnOnHit
             ? attackTemplate_.hitEffect.hitMeshVfxAssetPath
             : std::string{};

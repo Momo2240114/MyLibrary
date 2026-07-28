@@ -25,6 +25,7 @@ enum class PARTICLE_SPAWN_DIRECTION_MODE : uint32_t
     CONE = 0,       // Cone Angleで決めた方向へ飛ばす。
     OUTWARD = 1,    // エミッター中心から外側へ飛ばす。
     INWARD = 2,     // 発生位置からエミッター中心へ向けて飛ばす。
+    AXIS = 3,       // 指定軸を中心に飛ばす。
 };
 
 enum PARTICLE_GRADIENT_SAMPLE_MODE
@@ -150,6 +151,12 @@ struct ParticleSystemConstants
     uint32_t spawnDirectionMode = 0;       // PARTICLE_SPAWN_DIRECTION_MODE
     uint32_t cpuSpawnPadding0 = 0;
     uint32_t cpuSpawnPadding1 = 0;
+    DirectX::XMFLOAT4 emissionAxis = { 0.0f, 1.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT4 targetPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float targetAttractionStrength = 0.0f;
+    float targetAttractionRange = 0.0f;
+    float targetAttractionFalloff = 1.0f;
+    uint32_t useTargetAttraction = 0;
 
     uint32_t gradientSampleMode = PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL;
     uint32_t gradientDirection = PARTICLE_GRADIENT_DIRECTION_FORWARD;

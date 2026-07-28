@@ -139,6 +139,12 @@ void to_json(nlohmann::json& json_, const EffectEmitterHitTemplate& hit_)
         { "HitParticleEmitterName", hit_.hitParticleEmitterName },
         { "HitParticleLifeTime", hit_.hitParticleLifeTime },
         { "HitParticleNormalOffset", hit_.hitParticleNormalOffset },
+        { "HitParticleUseImpactAxis", hit_.hitParticleUseImpactAxis },
+        { "HitParticleAxisToAttackerBlend", hit_.hitParticleAxisToAttackerBlend },
+        { "HitParticleUseTargetAttraction", hit_.hitParticleUseTargetAttraction },
+        { "HitParticleTargetAttractionStrength", hit_.hitParticleTargetAttractionStrength },
+        { "HitParticleTargetAttractionRange", hit_.hitParticleTargetAttractionRange },
+        { "HitParticleTargetAttractionFalloff", hit_.hitParticleTargetAttractionFalloff },
         { "HitMeshVFXAssetPath", hit_.hitMeshVFXAssetPath },
         { "HitMeshVFXLifeTime", hit_.hitMeshVFXLifeTime },
         { "HitMeshVFXNormalOffset", hit_.hitMeshVFXNormalOffset },
@@ -170,6 +176,16 @@ void from_json(const nlohmann::json& json_, EffectEmitterHitTemplate& hit_)
     hit_.hitParticleEmitterName = json_.value("HitParticleEmitterName", std::string{});
     hit_.hitParticleLifeTime = (std::max)(json_.value("HitParticleLifeTime", 1.0f), 0.01f);
     hit_.hitParticleNormalOffset = json_.value("HitParticleNormalOffset", 0.0f);
+    hit_.hitParticleUseImpactAxis = json_.value("HitParticleUseImpactAxis", false);
+    hit_.hitParticleAxisToAttackerBlend =
+        std::clamp(json_.value("HitParticleAxisToAttackerBlend", 0.0f), 0.0f, 1.0f);
+    hit_.hitParticleUseTargetAttraction = json_.value("HitParticleUseTargetAttraction", false);
+    hit_.hitParticleTargetAttractionStrength =
+        json_.value("HitParticleTargetAttractionStrength", 0.0f);
+    hit_.hitParticleTargetAttractionRange =
+        (std::max)(json_.value("HitParticleTargetAttractionRange", 0.0f), 0.0f);
+    hit_.hitParticleTargetAttractionFalloff =
+        (std::max)(json_.value("HitParticleTargetAttractionFalloff", 1.0f), 0.001f);
     hit_.hitMeshVFXAssetPath = json_.value("HitMeshVFXAssetPath", std::string{});
     hit_.hitMeshVFXLifeTime = (std::max)(json_.value("HitMeshVFXLifeTime", 1.0f), 0.01f);
     hit_.hitMeshVFXNormalOffset = json_.value("HitMeshVFXNormalOffset", 0.0f);
@@ -447,6 +463,14 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
     attackHit_->SetHitParticleEmitterName(hit_.hitParticleEmitterName);
     attackHit_->SetHitParticleLifeTime(hit_.hitParticleLifeTime);
     attackHit_->SetHitParticleNormalOffset(hit_.hitParticleNormalOffset);
+    attackHit_->SetHitParticleImpactAxis(
+        hit_.hitParticleUseImpactAxis,
+        hit_.hitParticleAxisToAttackerBlend);
+    attackHit_->SetHitParticleTargetAttraction(
+        hit_.hitParticleUseTargetAttraction,
+        hit_.hitParticleTargetAttractionStrength,
+        hit_.hitParticleTargetAttractionRange,
+        hit_.hitParticleTargetAttractionFalloff);
     attackHit_->SetHitMeshVFXAssetPath(hit_.hitMeshVFXAssetPath);
     attackHit_->SetHitMeshVFXLifeTime(hit_.hitMeshVFXLifeTime);
     attackHit_->SetHitMeshVFXNormalOffset(hit_.hitMeshVFXNormalOffset);
@@ -689,6 +713,18 @@ void EffectEmitterComponent::Gui()
                 ImGui::Checkbox("Destroy On Hit", &template_.hit.destroyOnHit);
                 AssetSlotGui::Draw("Hit Particle", AssetSlotType::JSON, template_.hit.hitParticleAssetPath);
                 ImGui::InputText("Hit Emitter Name", &template_.hit.hitParticleEmitterName);
+                ImGui::DragFloat("Hit Particle Life Time", &template_.hit.hitParticleLifeTime, 0.01f, 0.0f, 30.0f);
+                ImGui::DragFloat("Hit Particle Normal Offset", &template_.hit.hitParticleNormalOffset, 0.01f, -10.0f, 10.0f);
+                ImGui::Checkbox("Use Particle Impact Axis", &template_.hit.hitParticleUseImpactAxis);
+                ImGui::BeginDisabled(!template_.hit.hitParticleUseImpactAxis);
+                ImGui::SliderFloat("Axis To Attacker Blend", &template_.hit.hitParticleAxisToAttackerBlend, 0.0f, 1.0f);
+                ImGui::EndDisabled();
+                ImGui::Checkbox("Use Particle Target Pull", &template_.hit.hitParticleUseTargetAttraction);
+                ImGui::BeginDisabled(!template_.hit.hitParticleUseTargetAttraction);
+                ImGui::DragFloat("Target Pull Strength", &template_.hit.hitParticleTargetAttractionStrength, 0.01f, -100.0f, 100.0f);
+                ImGui::DragFloat("Target Pull Range", &template_.hit.hitParticleTargetAttractionRange, 0.01f, 0.0f, 100.0f);
+                ImGui::DragFloat("Target Pull Falloff", &template_.hit.hitParticleTargetAttractionFalloff, 0.01f, 0.001f, 8.0f);
+                ImGui::EndDisabled();
                 AssetSlotGui::Draw("Hit Mesh VFX", AssetSlotType::JSON, template_.hit.hitMeshVFXAssetPath);
                 ImGui::Checkbox("Camera Shake", &template_.hit.cameraShakeEnabled);
                 ImGui::DragFloat("Shake Duration", &template_.hit.cameraShakeReceiveDuration, 0.001f, 0.0f, 10.0f);

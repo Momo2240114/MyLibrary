@@ -2,6 +2,7 @@
 
 #include "WeaponTrailComponent.h"
 
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
@@ -111,6 +112,7 @@ WeaponTrailComponent::WeaponTrailComponent()
 
 void WeaponTrailComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("WeaponTrailComponent::LateUpdate");
     DirectX::XMFLOAT3 rootPosition_{};
     DirectX::XMFLOAT3 tipPosition_{};
     const bool hasBladeSegment_ = GetBladeSegment(rootPosition_, tipPosition_);
@@ -279,6 +281,7 @@ bool WeaponTrailComponent::GetBladeSegment(
     DirectX::XMFLOAT3& rootPosition_,
     DirectX::XMFLOAT3& tipPosition_)
 {
+    BS_PROFILE_SCOPE("WeaponTrailComponent::GetBladeSegment");
     const std::shared_ptr<GameObject> targetObject_ = ResolveTargetObject();
     if (!targetObject_ || !targetObject_->transform) return false;
 
@@ -378,6 +381,7 @@ void WeaponTrailComponent::InvalidateTarget()
 
 void WeaponTrailComponent::Gui()
 {
+    BS_PROFILE_SCOPE("WeaponTrailComponent::Gui");
     TrailMeshComponent::Gui();
     ImGui::SeparatorText("Weapon Trail");
 
@@ -481,6 +485,7 @@ void WeaponTrailComponent::Gui()
 
 void WeaponTrailComponent::Serialize(nlohmann::json& json_) const
 {
+    BS_PROFILE_SCOPE("WeaponTrailComponent::Serialize");
     TrailMeshComponent::Serialize(json_);
     json_["WeaponTargetGameObjectName"] = targetGameObjectName;
     json_["WeaponTargetNodeName"] = targetStartNodeName;
@@ -500,6 +505,7 @@ void WeaponTrailComponent::Serialize(nlohmann::json& json_) const
 
 void WeaponTrailComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("WeaponTrailComponent::Deserialize");
     TrailMeshComponent::Deserialize(json_);
     if (!json_.contains("TrailEmitting")) SetEmitting(false);
     targetGameObjectName = json_.value("WeaponTargetGameObjectName", std::string{});

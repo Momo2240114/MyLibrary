@@ -155,6 +155,21 @@ private:
         float gradientPadding;         // HLSL cbuffer境界合わせ用
         DirectX::XMFLOAT3 gradientRegisterPadding{}; // gradientPadding後の12byte埋め
 
+        DirectX::XMFLOAT4 trailOldRootColor;
+        DirectX::XMFLOAT4 trailOldTipColor;
+        DirectX::XMFLOAT4 trailNewRootColor;
+        DirectX::XMFLOAT4 trailNewTipColor;
+
+        float trailRecencyPower;
+        float trailTipPower;
+        float trailRecencyIntensity;
+        float trailTipIntensity;
+
+        float trailOldAlpha;
+        float trailNewAlpha;
+        uint32_t useTrailColorRamp;
+        uint32_t trailColorRampPadding;
+
         DirectX::XMFLOAT4 dissolveEdgeColor; // Dissolve境界発光色
         DirectX::XMFLOAT4 backFaceColor;     // 背面Boost色
 

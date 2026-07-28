@@ -23,6 +23,12 @@
         "hitParticleEmitterName": "",
         "hitParticleLifeTime": 2.0,
         "hitParticleNormalOffset": 0.0,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleAxisToAttackerBlend": 0.85,
+        "hitParticleUseTargetAttraction": true,
+        "hitParticleTargetAttractionStrength": 1.4,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionFalloff": 1.25,
         "spawnOnHit": true
     },
     "id": "AirCombo_03_01",

@@ -9,6 +9,8 @@
 #include "Engine/Graphics/Resource/ModelResourceManager.h"
 #include "Engine/Graphics/Resource/TextureResourceManager.h"
 #include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialConversionUtility.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialSerializer.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
@@ -962,23 +964,99 @@ namespace
         const float depthThickness_ = (std::max)(settings_.beamDepthThickness, 0.0f);
         const float sidePanelRate_ = std::clamp(settings_.beamSidePanelRate, 0.0f, 1.0f);
         const float shoulderHeight_ = halfHeight_ * sidePanelRate_;
-        const float ridgeOffset_ = depthThickness_ * 0.5f;
+        const float halfDepth_ = (std::max)(depthThickness_ * 0.5f, 0.001f);
+        const float beamOuterWidth_ = halfWidth_ + halfDepth_;
+        const float shoulderWidth_ = beamOuterWidth_ * 0.75f;
+        const int lengthSegmentCount_ = std::clamp(settings_.segments, 1, 512);
 
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_BREATH_BEAM_MODEL_PATH);
         resource_->modelName = INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
         auto& mesh_ = resource_->meshes[0];
-        mesh_.vertices.reserve(48u);
-        mesh_.indices.reserve(84u);
+        constexpr int RING_VERTEX_COUNT = 8;
+        mesh_.vertices.reserve(static_cast<size_t>(lengthSegmentCount_ + 1) * RING_VERTEX_COUNT);
+        mesh_.indices.reserve(static_cast<size_t>(lengthSegmentCount_) * RING_VERTEX_COUNT * 6u + 48u);
 
-        AddTwoSidedBeamPanel(mesh_, { 0.0f, -halfHeight_ }, { 0.0f, halfHeight_ }, length_, 0.45f, 0.55f);
-        AddTwoSidedBeamPanel(mesh_, { -halfWidth_, shoulderHeight_ }, { 0.0f, 0.0f }, length_, 0.0f, 0.5f);
-        AddTwoSidedBeamPanel(mesh_, { 0.0f, 0.0f }, { halfWidth_, shoulderHeight_ }, length_, 0.5f, 1.0f);
-        AddTwoSidedBeamPanel(mesh_, { -halfWidth_, -shoulderHeight_ }, { 0.0f, 0.0f }, length_, 0.0f, 0.5f);
-        AddTwoSidedBeamPanel(mesh_, { 0.0f, 0.0f }, { halfWidth_, -shoulderHeight_ }, length_, 0.5f, 1.0f);
-        if (ridgeOffset_ > 0.0f)
+        const DirectX::XMFLOAT2 ringPoints_[RING_VERTEX_COUNT] =
         {
-            AddTwoSidedBeamPanel(mesh_, { -ridgeOffset_, -halfHeight_ }, { -ridgeOffset_, halfHeight_ }, length_, 0.42f, 0.48f);
-            AddTwoSidedBeamPanel(mesh_, { ridgeOffset_, -halfHeight_ }, { ridgeOffset_, halfHeight_ }, length_, 0.52f, 0.58f);
+            { 0.0f, halfHeight_ },
+            { shoulderWidth_, shoulderHeight_ },
+            { beamOuterWidth_, 0.0f },
+            { shoulderWidth_, -shoulderHeight_ },
+            { 0.0f, -halfHeight_ },
+            { -shoulderWidth_, -shoulderHeight_ },
+            { -beamOuterWidth_, 0.0f },
+            { -shoulderWidth_, shoulderHeight_ },
+        };
+
+        for (int segmentIndex_ = 0; segmentIndex_ <= lengthSegmentCount_; ++segmentIndex_)
+        {
+            const float lengthRate_ = static_cast<float>(segmentIndex_) /
+                static_cast<float>(lengthSegmentCount_);
+            const float z_ = length_ * lengthRate_;
+            for (int ringIndex_ = 0; ringIndex_ < RING_VERTEX_COUNT; ++ringIndex_)
+            {
+                const float angleRate_ = static_cast<float>(ringIndex_) /
+                    static_cast<float>(RING_VERTEX_COUNT);
+                const DirectX::XMFLOAT2& point_ = ringPoints_[ringIndex_];
+                const DirectX::XMVECTOR normalVector_ = DirectX::XMVector3Normalize(
+                    DirectX::XMVectorSet(point_.x / beamOuterWidth_, point_.y / halfHeight_, 0.0f, 0.0f));
+                DirectX::XMFLOAT3 normal_{};
+                DirectX::XMStoreFloat3(&normal_, normalVector_);
+
+                GltfModelCommponennt::Vertex vertex_{};
+                vertex_.position = { point_.x, point_.y, z_ };
+                vertex_.normal = normal_;
+                vertex_.tangent = { 0.0f, 0.0f, 1.0f, 1.0f };
+                vertex_.texcoord = { angleRate_, 1.0f - lengthRate_ };
+                mesh_.vertices.push_back(vertex_);
+            }
+        }
+
+        for (int segmentIndex_ = 0; segmentIndex_ < lengthSegmentCount_; ++segmentIndex_)
+        {
+            const uint32_t currentBaseIndex_ =
+                static_cast<uint32_t>(segmentIndex_ * RING_VERTEX_COUNT);
+            const uint32_t nextBaseIndex_ =
+                static_cast<uint32_t>((segmentIndex_ + 1) * RING_VERTEX_COUNT);
+            for (int ringIndex_ = 0; ringIndex_ < RING_VERTEX_COUNT; ++ringIndex_)
+            {
+                const uint32_t currentA_ = currentBaseIndex_ + static_cast<uint32_t>(ringIndex_);
+                const uint32_t currentB_ = currentBaseIndex_ +
+                    static_cast<uint32_t>((ringIndex_ + 1) % RING_VERTEX_COUNT);
+                const uint32_t nextA_ = nextBaseIndex_ + static_cast<uint32_t>(ringIndex_);
+                const uint32_t nextB_ = nextBaseIndex_ +
+                    static_cast<uint32_t>((ringIndex_ + 1) % RING_VERTEX_COUNT);
+                AddQuadIndices(mesh_.indices, currentA_, currentB_, nextA_, nextB_);
+            }
+        }
+
+        const uint32_t startCenterIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+        GltfModelCommponennt::Vertex startCenterVertex_{};
+        startCenterVertex_.position = { 0.0f, 0.0f, 0.0f };
+        startCenterVertex_.normal = { 0.0f, 0.0f, -1.0f };
+        startCenterVertex_.tangent = { 1.0f, 0.0f, 0.0f, 1.0f };
+        startCenterVertex_.texcoord = { 0.5f, 0.5f };
+        mesh_.vertices.push_back(startCenterVertex_);
+
+        const uint32_t endCenterIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
+        GltfModelCommponennt::Vertex endCenterVertex_ = startCenterVertex_;
+        endCenterVertex_.position = { 0.0f, 0.0f, length_ };
+        endCenterVertex_.normal = { 0.0f, 0.0f, 1.0f };
+        mesh_.vertices.push_back(endCenterVertex_);
+
+        const uint32_t endBaseIndex_ =
+            static_cast<uint32_t>(lengthSegmentCount_ * RING_VERTEX_COUNT);
+        for (int ringIndex_ = 0; ringIndex_ < RING_VERTEX_COUNT; ++ringIndex_)
+        {
+            const uint32_t current_ = static_cast<uint32_t>(ringIndex_);
+            const uint32_t next_ = static_cast<uint32_t>((ringIndex_ + 1) % RING_VERTEX_COUNT);
+            mesh_.indices.push_back(startCenterIndex_);
+            mesh_.indices.push_back(next_);
+            mesh_.indices.push_back(current_);
+
+            mesh_.indices.push_back(endCenterIndex_);
+            mesh_.indices.push_back(endBaseIndex_ + current_);
+            mesh_.indices.push_back(endBaseIndex_ + next_);
         }
 
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
@@ -1439,8 +1517,56 @@ void MeshVFXComponent::Gui()
                 {
 
             ImGui::SeparatorText("Shared Material");
+            if (part_.materialPaths.empty())
+            {
+                part_.materialPaths.push_back(part_.materialPath);
+            }
+            int removeMaterialIndex_ = -1;
+            for (int materialIndex_ = 0; materialIndex_ < static_cast<int>(part_.materialPaths.size()); ++materialIndex_)
+            {
+                ImGui::PushID(materialIndex_);
+                ID3D11ShaderResourceView* materialPreviewTexture_ = nullptr;
+                if (runtimePart_ &&
+                    materialIndex_ < static_cast<int>(runtimePart_->materialResources.size()) &&
+                    runtimePart_->materialResources[materialIndex_])
+                {
+                    materialPreviewTexture_ = runtimePart_->materialResources[materialIndex_]->GetBaseTexture();
+                }
+                if (AssetSlotGui::Draw(
+                    "VFX Material Asset",
+                    AssetSlotType::MATERIAL,
+                    part_.materialPaths[materialIndex_],
+                    materialPreviewTexture_,
+                    "Data/VFXMaterials"))
+                {
+                    part_.materialPath = part_.materialPaths.empty() ? std::string{} : part_.materialPaths.front();
+                    LoadPartResource(static_cast<size_t>(partIndex_));
+                }
+                if (part_.materialPaths.size() > 1u)
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("Remove")) removeMaterialIndex_ = materialIndex_;
+                }
+                ImGui::PopID();
+            }
+            if (removeMaterialIndex_ >= 0)
+            {
+                part_.materialPaths.erase(part_.materialPaths.begin() + removeMaterialIndex_);
+                part_.materialPath = part_.materialPaths.empty() ? std::string{} : part_.materialPaths.front();
+                LoadPartResource(static_cast<size_t>(partIndex_));
+            }
+            if (ImGui::Button("Add VFX Material"))
+            {
+                part_.materialPaths.emplace_back();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Convert Part To VFX Material"))
+            {
+                ConvertPartToMaterial(static_cast<size_t>(partIndex_));
+            }
+            ImGui::Separator();
             if (AssetSlotGui::Draw(
-                "VFX Material Asset",
+                "Legacy VFX Material Asset",
                 AssetSlotType::MATERIAL,
                 part_.materialPath,
                 runtimePart_ && runtimePart_->materialResource
@@ -1448,6 +1574,8 @@ void MeshVFXComponent::Gui()
                     : nullptr,
                 "Data/VFXMaterials"))
             {
+                if (part_.materialPaths.empty()) part_.materialPaths.push_back(part_.materialPath);
+                else part_.materialPaths.front() = part_.materialPath;
                 LoadPartResource(static_cast<size_t>(partIndex_));
             }
             if (runtimePart_ && runtimePart_->materialResource)
@@ -2142,6 +2270,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         nlohmann::json partJson_;
         partJson_["ModelPath"] = part_.modelPath;
         partJson_["MaterialPath"] = part_.materialPath;
+        partJson_["MaterialPaths"] = part_.materialPaths;
         partJson_["MeshIndex"] = part_.meshIndex;
         partJson_["RenderEnabled"] = part_.renderEnabled;
         partJson_["UseMaterialBaseTexture"] = part_.useMaterialBaseTexture;
@@ -2292,6 +2421,41 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
         partJson_["GradientFixedUv"] = part_.gradientFixedUv;
         partJson_["GradientStartUv"] = part_.gradientStartUv;
         partJson_["GradientEndUv"] = part_.gradientEndUv;
+        partJson_["TrailUseColorRamp"] = part_.useTrailColorRamp;
+        partJson_["TrailOldRootColor"] =
+        {
+            part_.trailOldRootColor.x,
+            part_.trailOldRootColor.y,
+            part_.trailOldRootColor.z,
+            part_.trailOldRootColor.w,
+        };
+        partJson_["TrailOldTipColor"] =
+        {
+            part_.trailOldTipColor.x,
+            part_.trailOldTipColor.y,
+            part_.trailOldTipColor.z,
+            part_.trailOldTipColor.w,
+        };
+        partJson_["TrailNewRootColor"] =
+        {
+            part_.trailNewRootColor.x,
+            part_.trailNewRootColor.y,
+            part_.trailNewRootColor.z,
+            part_.trailNewRootColor.w,
+        };
+        partJson_["TrailNewTipColor"] =
+        {
+            part_.trailNewTipColor.x,
+            part_.trailNewTipColor.y,
+            part_.trailNewTipColor.z,
+            part_.trailNewTipColor.w,
+        };
+        partJson_["TrailRecencyPower"] = part_.trailRecencyPower;
+        partJson_["TrailTipPower"] = part_.trailTipPower;
+        partJson_["TrailRecencyIntensity"] = part_.trailRecencyIntensity;
+        partJson_["TrailTipIntensity"] = part_.trailTipIntensity;
+        partJson_["TrailOldAlpha"] = part_.trailOldAlpha;
+        partJson_["TrailNewAlpha"] = part_.trailNewAlpha;
         partJson_["AlphaCurveName"] = part_.alphaCurveName;
         partJson_["ScaleCurveName"] = part_.scaleCurveName;
         partJson_["DissolveCurveName"] = part_.dissolveCurveName;
@@ -2331,6 +2495,21 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         MeshVFXPart part_;
         part_.modelPath = partJson_.value("ModelPath", "");
         part_.materialPath = partJson_.value("MaterialPath", "");
+        if (partJson_.contains("MaterialPaths") && partJson_["MaterialPaths"].is_array())
+        {
+            for (const auto& materialPathJson_ : partJson_["MaterialPaths"])
+            {
+                part_.materialPaths.push_back(materialPathJson_.get<std::string>());
+            }
+        }
+        if (part_.materialPaths.empty() && !part_.materialPath.empty())
+        {
+            part_.materialPaths.push_back(part_.materialPath);
+        }
+        if (part_.materialPath.empty() && !part_.materialPaths.empty())
+        {
+            part_.materialPath = part_.materialPaths.front();
+        }
         NormalizeInternalMeshModelPath(part_.modelPath);
         part_.meshIndex = partJson_.value("MeshIndex", -1);
         part_.renderEnabled = partJson_.value("RenderEnabled", false);
@@ -2545,6 +2724,17 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
         part_.gradientFixedUv = std::clamp(partJson_.value("GradientFixedUv", 0.5f), 0.0f, 1.0f);
         part_.gradientStartUv = std::clamp(partJson_.value("GradientStartUv", 0.0f), 0.0f, 1.0f);
         part_.gradientEndUv = std::clamp(partJson_.value("GradientEndUv", 1.0f), 0.0f, 1.0f);
+        part_.useTrailColorRamp = partJson_.value("TrailUseColorRamp", false);
+        ReadFloatArray(partJson_, "TrailOldRootColor", part_.trailOldRootColor, 4);
+        ReadFloatArray(partJson_, "TrailOldTipColor", part_.trailOldTipColor, 4);
+        ReadFloatArray(partJson_, "TrailNewRootColor", part_.trailNewRootColor, 4);
+        ReadFloatArray(partJson_, "TrailNewTipColor", part_.trailNewTipColor, 4);
+        part_.trailRecencyPower = (std::max)(partJson_.value("TrailRecencyPower", 1.0f), 0.001f);
+        part_.trailTipPower = (std::max)(partJson_.value("TrailTipPower", 1.0f), 0.001f);
+        part_.trailRecencyIntensity = std::clamp(partJson_.value("TrailRecencyIntensity", 1.0f), 0.0f, 1.0f);
+        part_.trailTipIntensity = std::clamp(partJson_.value("TrailTipIntensity", 1.0f), 0.0f, 1.0f);
+        part_.trailOldAlpha = std::clamp(partJson_.value("TrailOldAlpha", 1.0f), 0.0f, 1.0f);
+        part_.trailNewAlpha = std::clamp(partJson_.value("TrailNewAlpha", 1.0f), 0.0f, 1.0f);
         part_.alphaCurveName = partJson_.value("AlphaCurveName", std::string{});
         part_.scaleCurveName = partJson_.value("ScaleCurveName", std::string{});
         part_.dissolveCurveName = partJson_.value("DissolveCurveName", std::string{});
@@ -2736,10 +2926,32 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     MeshVFXRuntimePart& runtimePart_ = runtimeParts[partIndex_];
     runtimePart_.modelResource.reset();
     runtimePart_.materialResource.reset();
-    if (!part_.materialPath.empty())
+    runtimePart_.materialResources.clear();
+    if (part_.materialPaths.empty() && !part_.materialPath.empty())
+    {
+        part_.materialPaths.push_back(part_.materialPath);
+    }
+    if (part_.materialPath.empty() && !part_.materialPaths.empty())
+    {
+        part_.materialPath = part_.materialPaths.front();
+    }
+    for (const std::string& materialPath_ : part_.materialPaths)
+    {
+        if (materialPath_.empty()) continue;
+        std::shared_ptr<VFXMaterialResource> materialResource_ =
+            VFXMaterialResourceManager::GetInstance().Load(materialPath_);
+        if (!materialResource_) continue;
+        runtimePart_.materialResources.push_back(materialResource_);
+        if (!runtimePart_.materialResource) runtimePart_.materialResource = materialResource_;
+    }
+    if (!runtimePart_.materialResource && !part_.materialPath.empty())
     {
         runtimePart_.materialResource =
             VFXMaterialResourceManager::GetInstance().Load(part_.materialPath);
+        if (runtimePart_.materialResource)
+        {
+            runtimePart_.materialResources.push_back(runtimePart_.materialResource);
+        }
     }
 
     NormalizeInternalMeshModelPath(part_.modelPath);
@@ -2864,6 +3076,32 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
             runtimePart_.emissiveTexture);
     }
     LoadTexture(device_, part_.gradientTexturePath, 0xFFFFFFFF, runtimePart_.gradientTexture);
+}
+
+bool MeshVFXComponent::ConvertPartToMaterial(size_t partIndex_)
+{
+    BS_PROFILE_SCOPE("MeshVFXComponent::ConvertPartToMaterial");
+    if (partIndex_ >= asset.parts.size()) return false;
+
+    MeshVFXPart& part_ = asset.parts[partIndex_];
+    const std::string defaultPath_ =
+        "Data/VFXMaterials/MeshVFXPart_" + std::to_string(partIndex_) + ".vfxmat";
+    const std::string selectedPath_ = WindowsDialogHelper::SaveVFXMaterialDialog(
+        L"Convert MeshVFX Part To VFX Material",
+        defaultPath_,
+        GraphicsDeviceManager::Instance().GetWindowHandle());
+    if (selectedPath_.empty()) return false;
+
+    VFXMaterialData materialData_ = VFXMaterialConversionUtility::FromMeshVFXPart(
+        part_,
+        "MeshVFXPart_" + std::to_string(partIndex_) + "_Material");
+    if (!VFXMaterialSerializer::Save(selectedPath_, materialData_)) return false;
+
+    if (part_.materialPaths.empty()) part_.materialPaths.push_back(selectedPath_);
+    else part_.materialPaths.front() = selectedPath_;
+    part_.materialPath = selectedPath_;
+    LoadPartResource(partIndex_);
+    return true;
 }
 
 void MeshVFXComponent::LoadTexture(

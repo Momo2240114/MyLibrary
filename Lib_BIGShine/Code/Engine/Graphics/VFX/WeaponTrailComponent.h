@@ -5,7 +5,7 @@
 class GltfModelCommponennt;
 
 // 武器の根元と先端を追跡し、TrailMeshComponentへ軌跡サンプルを渡すComponent。
-// 対象Node名が空の場合は、対象GameObjectのWorldTransformを基準として使う。
+// 対象Node名が空の場合は、対象GameObjectのWorldTransformを基準として使用します。
 class WeaponTrailComponent : public TrailMeshComponent
 {
 public:

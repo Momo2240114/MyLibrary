@@ -2,14 +2,19 @@
 
 #include "TrailMeshComponent.h"
 
+#include "Editor/AssetSlotGui.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <nlohmann/json.hpp>
 
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
@@ -62,6 +67,24 @@ namespace
         if (sampleCount_ < 2) return sampleCount_;
         return (sampleCount_ - 1) * static_cast<size_t>((std::max)(smoothStep_, 1)) + 1;
     }
+
+    float Clamp01(float value_)
+    {
+        return std::clamp(value_, 0.0f, 1.0f);
+    }
+
+    DirectX::XMFLOAT3 LerpPosition(
+        const DirectX::XMFLOAT3& firstPosition_,
+        const DirectX::XMFLOAT3& secondPosition_,
+        float amount_)
+    {
+        return
+        {
+            firstPosition_.x + (secondPosition_.x - firstPosition_.x) * amount_,
+            firstPosition_.y + (secondPosition_.y - firstPosition_.y) * amount_,
+            firstPosition_.z + (secondPosition_.z - firstPosition_.z) * amount_,
+        };
+    }
 }
 
 TrailMeshComponent::TrailMeshComponent()
@@ -100,7 +123,7 @@ void TrailMeshComponent::RegisterActions()
     if (!parentObject_) return;
 
 
-   unregisterActions_(parentObject_->GetLocalRegistry());
+    unregisterActions_(parentObject_->GetLocalRegistry());
 
     registeredActionNames.clear();
 
@@ -172,8 +195,11 @@ void TrailMeshComponent::Start()
 
 void TrailMeshComponent::Update(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::Update");
     MeshVFXComponent::Update(deltaTime_);
-    if (deltaTime_ <= 0.0f || samples.empty()) return;
+    if (deltaTime_ <= 0.0f) return;
+    UpdateTrailParticleEmission(deltaTime_);
+    if (samples.empty()) return;
 
     for (TrailSample& sample_ : samples) sample_.age += deltaTime_;
     const auto removeBegin_ = std::remove_if(
@@ -188,6 +214,7 @@ void TrailMeshComponent::Update(float deltaTime_)
 
 void TrailMeshComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::LateUpdate");
     (void)deltaTime_;
     if (!meshDirty) return;
     RebuildMesh();
@@ -195,14 +222,16 @@ void TrailMeshComponent::LateUpdate(float deltaTime_)
     meshDirty = false;
 }
 
-void TrailMeshComponent::AddSample(
+TRAIL_SAMPLE_RESULT TrailMeshComponent::AddSample(
     const DirectX::XMFLOAT3& leftPosition_,
     const DirectX::XMFLOAT3& rightPosition_)
 {
-    if (!emitting || maxSampleCount < 2) return;
+    BS_PROFILE_SCOPE("TrailMeshComponent::AddSample");
+    if (!emitting || maxSampleCount < 2) return TRAIL_SAMPLE_RESULT::REJECTED;
 
     if (!samples.empty())
     {
+        const TrailSample previousSample_ = samples.front();
         const DirectX::XMFLOAT3 currentCenter_ = CalculateCenter(leftPosition_, rightPosition_);
         const DirectX::XMFLOAT3 previousCenter_ =
             CalculateCenter(samples.front().leftPosition, samples.front().rightPosition);
@@ -213,21 +242,44 @@ void TrailMeshComponent::AddSample(
             samples.front().rightPosition = rightPosition_;
             samples.front().age = 0.0f;
             meshDirty = true;
-            return;
+            return TRAIL_SAMPLE_RESULT::UPDATED_LATEST;
+        }
+
+        if (useTrailParticle &&
+            trailParticleEmissionMode == TRAIL_PARTICLE_EMISSION_MODE::DISTANCE_INTERVAL)
+        {
+            const TrailSample currentSample_{ leftPosition_, rightPosition_, 0.0f };
+            const float distance_ = std::sqrt(CalculateDistanceSquared(currentCenter_, previousCenter_));
+            EmitTrailParticlesAlongMovement(previousSample_, currentSample_, distance_);
         }
     }
 
     samples.insert(samples.begin(), { leftPosition_, rightPosition_, 0.0f });
     if (samples.size() > maxSampleCount) samples.resize(maxSampleCount);
     meshDirty = true;
+
+    if (useTrailParticle &&
+        trailParticleEmissionMode == TRAIL_PARTICLE_EMISSION_MODE::SAMPLE_INTERVAL)
+    {
+        ++trailParticleAddedSampleCounter;
+        const int interval_ = (std::max)(trailParticleSampleInterval, 1);
+        if (trailParticleAddedSampleCounter >= interval_)
+        {
+            trailParticleAddedSampleCounter = 0;
+            EmitTrailParticlesAtSample(samples.front(), trailParticleSpawnCount);
+        }
+    }
+    return TRAIL_SAMPLE_RESULT::ADDED;
 }
 
 void TrailMeshComponent::Clear()
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::Clear");
     samples.clear();
     vertices.clear();
     indices.clear();
     meshDirty = true;
+    ResetParticleEmissionState();
     OnTrailCleared();
 }
 
@@ -273,6 +325,7 @@ void TrailMeshComponent::ClearTrail()
 
 bool TrailMeshComponent::CreateBuffers()
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::CreateBuffers");
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
     if (!device_) return false;
 
@@ -307,6 +360,7 @@ bool TrailMeshComponent::CreateBuffers()
 
 void TrailMeshComponent::RebuildMesh()
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::RebuildMesh");
     vertices.clear();
     indices.clear();
     if (samples.size() < 2) return;
@@ -418,6 +472,7 @@ void TrailMeshComponent::RebuildMesh()
 
 void TrailMeshComponent::UploadMesh()
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::UploadMesh");
     if ((!vertexBuffer || !indexBuffer) && !CreateBuffers()) return;
     if (vertices.empty() || indices.empty()) return;
 
@@ -437,6 +492,144 @@ void TrailMeshComponent::UploadMesh()
     }
 }
 
+void TrailMeshComponent::ResetParticleEmissionState()
+{
+    BS_PROFILE_SCOPE("TrailMeshComponent::ResetParticleEmissionState");
+    trailParticleTimeAccumulator = 0.0f;
+    trailParticleDistanceAccumulator = 0.0f;
+    trailParticleAddedSampleCounter = 0;
+    if (trailParticleClearOnTrailClear)
+    {
+        // Spawned pooled particles are owned by EffectManager, so Trail only resets future emission state.
+    }
+}
+
+void TrailMeshComponent::UpdateTrailParticleEmission(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("TrailMeshComponent::UpdateTrailParticleEmission");
+    if (!useTrailParticle ||
+        trailParticleEmissionMode != TRAIL_PARTICLE_EMISSION_MODE::TIME_INTERVAL ||
+        samples.empty() ||
+        trailParticleAssetPath.empty())
+    {
+        return;
+    }
+    if (!emitting && !trailParticleEmitWhileStopping) return;
+
+    trailParticleTimeAccumulator += deltaTime_;
+    const float interval_ = (std::max)(trailParticleInterval, 0.001f);
+    const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
+    int spawned_ = 0;
+    while (trailParticleTimeAccumulator >= interval_ && spawned_ < maxSpawn_)
+    {
+        trailParticleTimeAccumulator -= interval_;
+        const int requestCount_ = (std::min)(trailParticleSpawnCount, maxSpawn_ - spawned_);
+        EmitTrailParticlesAtSample(samples.front(), requestCount_);
+        spawned_ += requestCount_;
+    }
+    if (spawned_ >= maxSpawn_)
+    {
+        trailParticleTimeAccumulator = std::fmod(trailParticleTimeAccumulator, interval_);
+    }
+}
+
+void TrailMeshComponent::EmitTrailParticlesAtSample(
+    const TrailSample& sample_,
+    int spawnCount_)
+{
+    BS_PROFILE_SCOPE("TrailMeshComponent::EmitTrailParticlesAtSample");
+    if (!useTrailParticle || trailParticleAssetPath.empty()) return;
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_ || !owner_->manager) return;
+
+    const int clampedSpawnCount_ = (std::max)(spawnCount_, 1);
+    const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
+    const int spawnCountThisCall_ = (std::min)(clampedSpawnCount_, maxSpawn_);
+    EffectManager& effectManager_ = owner_->GetManager().GetEffectManager();
+    const DirectX::XMFLOAT3 normal_ = BuildTrailParticleNormal(sample_);
+    for (int spawnIndex_ = 0; spawnIndex_ < spawnCountThisCall_; ++spawnIndex_)
+    {
+        ParticleSpawnRequest request_{};
+        request_.assetPath = trailParticleAssetPath;
+        request_.emitterName = trailParticleEmitterName;
+        request_.position = BuildTrailParticlePosition(sample_);
+        request_.normal = normal_;
+        request_.lifeTime = lifeTime;
+        effectManager_.SpawnParticle(request_);
+    }
+}
+
+void TrailMeshComponent::EmitTrailParticlesAlongMovement(
+    const TrailSample& fromSample_,
+    const TrailSample& toSample_,
+    float distance_)
+{
+    BS_PROFILE_SCOPE("TrailMeshComponent::EmitTrailParticlesAlongMovement");
+    if (!useTrailParticle || trailParticleAssetPath.empty()) return;
+
+    const float intervalDistance_ = (std::max)(trailParticleDistance, 0.001f);
+    trailParticleDistanceAccumulator += (std::max)(distance_, 0.0f);
+    int spawned_ = 0;
+    const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
+    while (trailParticleDistanceAccumulator >= intervalDistance_ && spawned_ < maxSpawn_)
+    {
+        trailParticleDistanceAccumulator -= intervalDistance_;
+        const float movementRate_ = distance_ > 0.00001f
+            ? Clamp01(1.0f - trailParticleDistanceAccumulator / distance_)
+            : 1.0f;
+        TrailSample sample_{};
+        sample_.leftPosition = LerpPosition(fromSample_.leftPosition, toSample_.leftPosition, movementRate_);
+        sample_.rightPosition = LerpPosition(fromSample_.rightPosition, toSample_.rightPosition, movementRate_);
+        sample_.age = 0.0f;
+        const int requestCount_ = (std::min)(trailParticleSpawnCount, maxSpawn_ - spawned_);
+        EmitTrailParticlesAtSample(sample_, requestCount_);
+        spawned_ += requestCount_;
+    }
+    if (spawned_ >= maxSpawn_)
+    {
+        trailParticleDistanceAccumulator = std::fmod(trailParticleDistanceAccumulator, intervalDistance_);
+    }
+}
+
+DirectX::XMFLOAT3 TrailMeshComponent::BuildTrailParticlePosition(const TrailSample& sample_)
+{
+    BS_PROFILE_SCOPE("TrailMeshComponent::BuildTrailParticlePosition");
+    const float randomWidth_ = GenerateTrailParticleRandom01();
+    const float minWidth_ = Clamp01((std::min)(trailParticleWidthMin, trailParticleWidthMax));
+    const float maxWidth_ = Clamp01((std::max)(trailParticleWidthMin, trailParticleWidthMax));
+    const float biasedWidth_ = Clamp01(randomWidth_ + trailParticleTipBias);
+    const float widthRate_ = minWidth_ + (maxWidth_ - minWidth_) * biasedWidth_;
+    DirectX::XMFLOAT3 position_ = LerpPosition(sample_.leftPosition, sample_.rightPosition, widthRate_);
+    if (trailParticlePositionJitter > 0.0f)
+    {
+        position_.x += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * trailParticlePositionJitter;
+        position_.y += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * trailParticlePositionJitter;
+        position_.z += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * trailParticlePositionJitter;
+    }
+    return position_;
+}
+
+DirectX::XMFLOAT3 TrailMeshComponent::BuildTrailParticleNormal(const TrailSample& sample_) const
+{
+    DirectX::XMFLOAT3 normal_{ 0.0f, 1.0f, 0.0f };
+    const DirectX::XMVECTOR widthVector_ = DirectX::XMVectorSubtract(
+        DirectX::XMLoadFloat3(&sample_.rightPosition),
+        DirectX::XMLoadFloat3(&sample_.leftPosition));
+    if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(widthVector_)) > 0.000001f)
+    {
+        DirectX::XMStoreFloat3(&normal_, DirectX::XMVector3Normalize(widthVector_));
+    }
+    return normal_;
+}
+
+float TrailMeshComponent::GenerateTrailParticleRandom01()
+{
+    trailParticleRandomState = trailParticleRandomState * 1664525u + 1013904223u;
+    return static_cast<float>((trailParticleRandomState >> 8) & 0x00FFFFFFu) /
+        static_cast<float>(0x01000000u);
+}
+
 bool TrailMeshComponent::GetDynamicMesh(MeshVFXDynamicMesh& mesh_) const
 {
     mesh_.vertexBuffer = vertexBuffer.Get();
@@ -448,6 +641,7 @@ bool TrailMeshComponent::GetDynamicMesh(MeshVFXDynamicMesh& mesh_) const
 
 void TrailMeshComponent::Gui()
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::Gui");
     MeshVFXComponent::Gui();
     ImGui::SeparatorText("Trail Mesh");
     ImGui::Checkbox("Emitting", &emitting);
@@ -469,24 +663,124 @@ void TrailMeshComponent::Gui()
     ImGui::Text("Current Samples: %zu", samples.size());
     if (ImGui::Button("Clear Trail")) Clear();
 
-    if (ImGui::Button("ActionRegistory"))
+    if (ImGui::Button("Register Trail Actions"))
     {
         RegisterActions();
+    }
+
+    MeshVFXAsset& asset_ = GetAsset();
+    if (!asset_.parts.empty() && ImGui::TreeNode("Trail Color Ramp"))
+    {
+        MeshVFXPart& part_ = asset_.parts.front();
+        ImGui::Checkbox("Use Trail Color Ramp", &part_.useTrailColorRamp);
+        ImGui::BeginDisabled(!part_.useTrailColorRamp);
+        ImGui::ColorEdit4("Old Root Color", &part_.trailOldRootColor.x);
+        ImGui::ColorEdit4("Old Tip Color", &part_.trailOldTipColor.x);
+        ImGui::ColorEdit4("New Root Color", &part_.trailNewRootColor.x);
+        ImGui::ColorEdit4("New Tip Color", &part_.trailNewTipColor.x);
+        ImGui::DragFloat("Recency Power", &part_.trailRecencyPower, 0.01f, 0.001f, 16.0f);
+        ImGui::DragFloat("Tip Power", &part_.trailTipPower, 0.01f, 0.001f, 16.0f);
+        ImGui::SliderFloat("Recency Intensity", &part_.trailRecencyIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Tip Intensity", &part_.trailTipIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Old Alpha", &part_.trailOldAlpha, 0.0f, 1.0f);
+        ImGui::SliderFloat("New Alpha", &part_.trailNewAlpha, 0.0f, 1.0f);
+        if (ImGui::Button("Warm Slash Preset"))
+        {
+            part_.useTrailColorRamp = true;
+            part_.trailOldRootColor = { 0.15f, 0.05f, 0.02f, 0.15f };
+            part_.trailOldTipColor = { 0.9f, 0.2f, 0.05f, 0.25f };
+            part_.trailNewRootColor = { 0.7f, 0.15f, 0.04f, 0.75f };
+            part_.trailNewTipColor = { 1.0f, 0.8f, 0.25f, 1.0f };
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cool Slash Preset"))
+        {
+            part_.useTrailColorRamp = true;
+            part_.trailOldRootColor = { 0.02f, 0.08f, 0.18f, 0.12f };
+            part_.trailOldTipColor = { 0.05f, 0.35f, 0.9f, 0.25f };
+            part_.trailNewRootColor = { 0.15f, 0.65f, 1.0f, 0.7f };
+            part_.trailNewTipColor = { 0.8f, 1.0f, 1.0f, 1.0f };
+        }
+        ImGui::EndDisabled();
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNode("Trail Particle"))
+    {
+        ImGui::Checkbox("Use Trail Particle", &useTrailParticle);
+        ImGui::BeginDisabled(!useTrailParticle);
+        AssetSlotGui::Draw(
+            "Particle Asset",
+            AssetSlotType::JSON,
+            trailParticleAssetPath,
+            nullptr,
+            "Data/Particle");
+        ImGui::InputText("Emitter Name", &trailParticleEmitterName);
+        const char* modeItems_[] = { "Time Interval", "Distance Interval", "Sample Interval" };
+        int mode_ = static_cast<int>(trailParticleEmissionMode);
+        if (ImGui::Combo("Emission Mode", &mode_, modeItems_, IM_ARRAYSIZE(modeItems_)))
+        {
+            trailParticleEmissionMode = static_cast<TRAIL_PARTICLE_EMISSION_MODE>(
+                std::clamp(mode_, 0, 2));
+            ResetParticleEmissionState();
+        }
+        ImGui::BeginDisabled(trailParticleEmissionMode != TRAIL_PARTICLE_EMISSION_MODE::TIME_INTERVAL);
+        ImGui::DragFloat("Time Interval", &trailParticleInterval, 0.001f, 0.001f, 10.0f);
+        ImGui::EndDisabled();
+        ImGui::BeginDisabled(trailParticleEmissionMode != TRAIL_PARTICLE_EMISSION_MODE::DISTANCE_INTERVAL);
+        ImGui::DragFloat("Distance Interval", &trailParticleDistance, 0.001f, 0.001f, 100.0f);
+        ImGui::EndDisabled();
+        ImGui::BeginDisabled(trailParticleEmissionMode != TRAIL_PARTICLE_EMISSION_MODE::SAMPLE_INTERVAL);
+        ImGui::DragInt("Sample Interval", &trailParticleSampleInterval, 1.0f, 1, 128);
+        ImGui::EndDisabled();
+        ImGui::DragInt("Spawn Count", &trailParticleSpawnCount, 1.0f, 1, 64);
+        ImGui::SliderFloat("Width Min", &trailParticleWidthMin, 0.0f, 1.0f);
+        ImGui::SliderFloat("Width Max", &trailParticleWidthMax, 0.0f, 1.0f);
+        ImGui::SliderFloat("Tip Bias", &trailParticleTipBias, -1.0f, 1.0f);
+        ImGui::DragFloat("Position Jitter", &trailParticlePositionJitter, 0.001f, 0.0f, 10.0f);
+        ImGui::DragInt("Max Spawn Per Frame", &trailParticleMaximumSpawnPerFrame, 1.0f, 1, 128);
+        ImGui::Checkbox("Emit While Stopping", &trailParticleEmitWhileStopping);
+        ImGui::Checkbox("Clear State On Trail Clear", &trailParticleClearOnTrailClear);
+        if (ImGui::Button("Preview Particle") && !samples.empty())
+        {
+            EmitTrailParticlesAtSample(samples.front(), trailParticleSpawnCount);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Reset Particle Timer")) ResetParticleEmissionState();
+        ImGui::EndDisabled();
+        ImGui::TreePop();
     }
 }
 
 void TrailMeshComponent::Serialize(nlohmann::json& json_) const
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::Serialize");
     MeshVFXComponent::Serialize(json_);
     json_["TrailLifeTime"] = lifeTime;
     json_["TrailMaxSampleCount"] = maxSampleCount;
     json_["TrailMinimumSampleDistance"] = minimumSampleDistance;
     json_["TrailSmoothStep"] = smoothStep;
     json_["TrailEmitting"] = emitting;
+    json_["TrailUseParticle"] = useTrailParticle;
+    json_["TrailParticleAssetPath"] = trailParticleAssetPath;
+    json_["TrailParticleEmitterName"] = trailParticleEmitterName;
+    json_["TrailParticleEmissionMode"] = static_cast<int>(trailParticleEmissionMode);
+    json_["TrailParticleInterval"] = trailParticleInterval;
+    json_["TrailParticleDistance"] = trailParticleDistance;
+    json_["TrailParticleSampleInterval"] = trailParticleSampleInterval;
+    json_["TrailParticleSpawnCount"] = trailParticleSpawnCount;
+    json_["TrailParticleWidthMin"] = trailParticleWidthMin;
+    json_["TrailParticleWidthMax"] = trailParticleWidthMax;
+    json_["TrailParticleTipBias"] = trailParticleTipBias;
+    json_["TrailParticlePositionJitter"] = trailParticlePositionJitter;
+    json_["TrailParticleMaximumSpawnPerFrame"] = trailParticleMaximumSpawnPerFrame;
+    json_["TrailParticleEmitWhileStopping"] = trailParticleEmitWhileStopping;
+    json_["TrailParticleClearOnTrailClear"] = trailParticleClearOnTrailClear;
 }
 
 void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("TrailMeshComponent::Deserialize");
     MeshVFXComponent::Deserialize(json_);
     lifeTime = (std::max)(json_.value("TrailLifeTime", 0.35f), 0.001f);
     maxSampleCount = (std::max)(json_.value("TrailMaxSampleCount", static_cast<size_t>(64)),
@@ -494,6 +788,25 @@ void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
     minimumSampleDistance = (std::max)(json_.value("TrailMinimumSampleDistance", 0.01f), 0.0f);
     smoothStep = (std::clamp)(json_.value("TrailSmoothStep", 2), 1, 8);
     emitting = false;
+    useTrailParticle = json_.value("TrailUseParticle", false);
+    trailParticleAssetPath = json_.value("TrailParticleAssetPath", std::string{});
+    trailParticleEmitterName = json_.value("TrailParticleEmitterName", std::string{});
+    trailParticleEmissionMode = static_cast<TRAIL_PARTICLE_EMISSION_MODE>(
+        std::clamp(json_.value("TrailParticleEmissionMode", 1), 0, 2));
+    trailParticleInterval = (std::max)(json_.value("TrailParticleInterval", 0.04f), 0.001f);
+    trailParticleDistance = (std::max)(json_.value("TrailParticleDistance", 0.15f), 0.001f);
+    trailParticleSampleInterval = (std::max)(json_.value("TrailParticleSampleInterval", 1), 1);
+    trailParticleSpawnCount = (std::max)(json_.value("TrailParticleSpawnCount", 1), 1);
+    trailParticleWidthMin = std::clamp(json_.value("TrailParticleWidthMin", 0.35f), 0.0f, 1.0f);
+    trailParticleWidthMax = std::clamp(json_.value("TrailParticleWidthMax", 1.0f), 0.0f, 1.0f);
+    trailParticleTipBias = std::clamp(json_.value("TrailParticleTipBias", 0.0f), -1.0f, 1.0f);
+    trailParticlePositionJitter = (std::max)(json_.value("TrailParticlePositionJitter", 0.0f), 0.0f);
+    trailParticleMaximumSpawnPerFrame = (std::max)(
+        json_.value("TrailParticleMaximumSpawnPerFrame", 8),
+        1);
+    trailParticleEmitWhileStopping = json_.value("TrailParticleEmitWhileStopping", false);
+    trailParticleClearOnTrailClear = json_.value("TrailParticleClearOnTrailClear", false);
+    ResetParticleEmissionState();
     Clear();
     CreateBuffers();
 }

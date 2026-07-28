@@ -36,6 +36,20 @@
                 }
             ]
         ],
+        "Player.LockOn": [
+            [
+                {
+                    "code": 90,
+                    "dev": 0
+                }
+            ],
+            [
+                {
+                    "code": 128,
+                    "dev": 1
+                }
+            ]
+        ],
         "Player.SkillA": [
             [
                 {

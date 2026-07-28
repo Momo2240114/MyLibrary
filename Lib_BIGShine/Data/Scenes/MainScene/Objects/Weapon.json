@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 22,
+                "AttackInstanceId": 158,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
@@ -23,7 +23,7 @@
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
-                "Damage": 4.0,
+                "Damage": 16.0,
                 "DamageKey": "Damage",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
@@ -41,22 +41,28 @@
                 "HitMeshVFXNormalOffset": 0.0,
                 "HitOncePerActivation": true,
                 "HitParticleAssetPath": "SwordHit_Aqua",
+                "HitParticleAxisToAttackerBlend": 0.8500000238418579,
                 "HitParticleEmitterName": "",
                 "HitParticleLifeTime": 0.44999998807907104,
                 "HitParticleNormalOffset": 0.05000000074505806,
+                "HitParticleTargetAttractionFalloff": 1.25,
+                "HitParticleTargetAttractionRange": 3.0,
+                "HitParticleTargetAttractionStrength": 1.399999976158142,
+                "HitParticleUseImpactAxis": true,
+                "HitParticleUseTargetAttraction": true,
                 "HitSoundMuffled": false,
                 "HitSoundMuffledCutoff": 1200.0,
                 "HitSoundPath": "",
                 "HitSoundPathKey": "HitSoundPath",
                 "HitSoundVolume": 1.0,
-                "HitStopDuration": 0.02500000037252903,
+                "HitStopDuration": 0.20000000298023224,
                 "HitStopDurationKey": "HitStopDuration",
                 "HitStopLayerMask": 3,
-                "HitStopScale": 0.75,
-                "ImpactPower": 4.0,
+                "HitStopScale": 0.30000001192092896,
+                "ImpactPower": 16.0,
                 "IsStatic": false,
                 "IsTrigger": true,
-                "KnockBackPower": 1.2000000476837158,
+                "KnockBackPower": 6.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
                 "NodeModelObjectName": "",
@@ -200,10 +206,10 @@
                         ],
                         "BlendMode": 1,
                         "Color": [
-                            0.2800000011920929,
-                            0.6800000071525574,
-                            1.0,
-                            0.5799999833106995
+                            0.16862745583057404,
+                            0.8352941274642944,
+                            0.37254902720451355,
+                            0.6745098233222961
                         ],
                         "DissolveCurveName": "",
                         "DissolveEdgeColor": [
@@ -305,6 +311,7 @@
                             0.0
                         ],
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MeshIndex": 0,
                         "MeshRotationSpeed": [
                             0.0,
@@ -364,6 +371,37 @@
                         ],
                         "SilhouetteEdgePower": 4.0,
                         "SilhouetteEdgeStrength": 0.699999988079071,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0010000000474974513,
                         "UVRotationCenter": [
@@ -402,7 +440,22 @@
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,
+                "TrailParticleAssetPath": "",
+                "TrailParticleClearOnTrailClear": false,
+                "TrailParticleDistance": 0.15000000596046448,
+                "TrailParticleEmissionMode": 1,
+                "TrailParticleEmitWhileStopping": false,
+                "TrailParticleEmitterName": "",
+                "TrailParticleInterval": 0.03999999910593033,
+                "TrailParticleMaximumSpawnPerFrame": 8,
+                "TrailParticlePositionJitter": 0.0,
+                "TrailParticleSampleInterval": 1,
+                "TrailParticleSpawnCount": 1,
+                "TrailParticleTipBias": 0.0,
+                "TrailParticleWidthMax": 1.0,
+                "TrailParticleWidthMin": 0.3499999940395355,
                 "TrailSmoothStep": 3,
+                "TrailUseParticle": false,
                 "WeaponBladeGuideRadius": 0.0949999988079071,
                 "WeaponBladeLength": 80.0,
                 "WeaponRootOffset": [
@@ -569,6 +622,7 @@
                             0.0
                         ],
                         "MaterialPath": "",
+                        "MaterialPaths": [],
                         "MeshIndex": -1,
                         "MeshRotationSpeed": [
                             0.0,
@@ -626,6 +680,37 @@
                         ],
                         "SilhouetteEdgePower": 3.0,
                         "SilhouetteEdgeStrength": 0.9800000190734863,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
                         "UVRadialScale": 1.0,
                         "UVRadialScaleSpeed": 0.0,
                         "UVRotationCenter": [

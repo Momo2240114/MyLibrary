@@ -52,6 +52,13 @@ enum class MESH_VFX_SAMPLER_MODE
     BORDER,
 };
 
+enum class TRAIL_PARTICLE_EMISSION_MODE
+{
+    TIME_INTERVAL,
+    DISTANCE_INTERVAL,
+    SAMPLE_INTERVAL,
+};
+
 // One mask texture layer.
 struct MeshVFXMaskLayer
 {
@@ -93,6 +100,7 @@ struct MeshVFXPart
 {
     std::string partAssetPath;
     std::string materialPath;
+    std::vector<std::string> materialPaths;
     std::string modelPath;
     int meshIndex = -1;
     bool renderEnabled = false;
@@ -184,6 +192,18 @@ struct MeshVFXPart
     float gradientPadding;
     DirectX::XMFLOAT3 gradientRegisterPadding{};
 
+    DirectX::XMFLOAT4 trailOldRootColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT4 trailOldTipColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT4 trailNewRootColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT4 trailNewTipColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float trailRecencyPower = 1.0f;
+    float trailTipPower = 1.0f;
+    float trailRecencyIntensity = 1.0f;
+    float trailTipIntensity = 1.0f;
+    float trailOldAlpha = 1.0f;
+    float trailNewAlpha = 1.0f;
+    bool useTrailColorRamp = false;
+
     DirectX::XMFLOAT4 dissolveEdgeColor;
     DirectX::XMFLOAT4 backFaceColor;
     float dissolveEdgeWidth = 0.05f;
@@ -219,6 +239,7 @@ struct MeshVFXRuntimePart
 {
     std::shared_ptr<ModelResource> modelResource;
     std::shared_ptr<VFXMaterialResource> materialResource;
+    std::vector<std::shared_ptr<VFXMaterialResource>> materialResources;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalTexture;
     std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> maskTextures;

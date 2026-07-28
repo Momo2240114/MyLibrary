@@ -7,12 +7,14 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Resource/ModelResource.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialColorUtility.h"
 #include "Engine/Graphics/VFXMaterial/VFXMaterialResource.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "MeshVFXComponent.h"
 
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <unordered_map>
 #include <cmath>
 
@@ -126,17 +128,38 @@ namespace
 
     void ApplyMaterialToPart(
         MeshVFXPart& part_,
-        const MeshVFXRuntimePart& runtimePart_)
+        const std::shared_ptr<VFXMaterialResource>& materialResource_,
+        float normalizedTime_,
+        float materialTime_)
     {
         BS_PROFILE_SCOPE("MeshVFXRenderSystem::ApplyMaterialToPart");
-        if (!runtimePart_.materialResource) return;
+        if (!materialResource_) return;
 
         const VFXMaterialData& materialData_ =
-            runtimePart_.materialResource->GetMaterialData();
+            materialResource_->GetMaterialData();
+        const std::string randomSeedKey_ =
+            part_.materialPath + ":" + part_.modelPath + ":" + part_.baseTexturePath;
+        const uint32_t randomSeed_ =
+            static_cast<uint32_t>(std::hash<std::string>{}(randomSeedKey_));
+        const DirectX::XMFLOAT4 rampColor_ = VFXMaterialColorUtility::SampleColorRamp(
+            materialData_.colorRamp,
+            normalizedTime_,
+            materialTime_);
+        const DirectX::XMFLOAT4 randomColor_ = VFXMaterialColorUtility::SampleRandomColor(
+            materialData_.randomColor,
+            randomSeed_);
         part_.color.x *= materialData_.baseColor.x;
         part_.color.y *= materialData_.baseColor.y;
         part_.color.z *= materialData_.baseColor.z;
         part_.color.w *= materialData_.baseColor.w;
+        part_.color = VFXMaterialColorUtility::ApplyColorRamp(
+            part_.color,
+            materialData_.colorRamp,
+            rampColor_);
+        part_.color = VFXMaterialColorUtility::ApplyRandomColor(
+            part_.color,
+            materialData_.randomColor,
+            randomColor_);
         part_.alpha *= materialData_.alpha;
 
         part_.baseUVScale.x *= materialData_.mainUV.scale.x;
@@ -149,6 +172,8 @@ namespace
         part_.baseUVSpeed.y += materialData_.mainUV.scrollSpeed.y;
         part_.maskUVSpeed.x += materialData_.mainUV.scrollSpeed.x;
         part_.maskUVSpeed.y += materialData_.mainUV.scrollSpeed.y;
+        part_.baseUVRotation += materialData_.mainUV.rotation;
+        part_.maskUVRotation += materialData_.mainUV.rotation;
         part_.baseUVRotationSpeed += materialData_.mainUV.rotationSpeed;
         part_.maskUVRotationSpeed += materialData_.mainUV.rotationSpeed;
 
@@ -156,6 +181,7 @@ namespace
         part_.noiseUVScale.y *= materialData_.noiseUV.scale.y;
         part_.noiseUVSpeed.x += materialData_.noiseUV.scrollSpeed.x;
         part_.noiseUVSpeed.y += materialData_.noiseUV.scrollSpeed.y;
+        part_.noiseUVRotation += materialData_.noiseUV.rotation;
         part_.noiseUVRotationSpeed += materialData_.noiseUV.rotationSpeed;
 
         if (materialData_.emissiveIntensity > 0.0f)
@@ -184,6 +210,25 @@ namespace
             materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE
                 ? MeshVFXBlendMode::ADDITIVE
                 : part_.blendMode;
+    }
+
+    void ApplyMaterialsToPart(
+        MeshVFXPart& part_,
+        const MeshVFXRuntimePart& runtimePart_,
+        float normalizedTime_,
+        float materialTime_)
+    {
+        BS_PROFILE_SCOPE("MeshVFXRenderSystem::ApplyMaterialsToPart");
+        if (!runtimePart_.materialResources.empty())
+        {
+            for (const std::shared_ptr<VFXMaterialResource>& materialResource_ : runtimePart_.materialResources)
+            {
+                ApplyMaterialToPart(part_, materialResource_, normalizedTime_, materialTime_);
+            }
+            return;
+        }
+
+        ApplyMaterialToPart(part_, runtimePart_.materialResource, normalizedTime_, materialTime_);
     }
 
     DirectX::XMMATRIX CreatePartTransform(
@@ -722,7 +767,11 @@ void MeshVFXRenderSystem::RenderAll(
                 part_,
                 *component_,
                 animation_.normalizedTime);
-            ApplyMaterialToPart(evaluatedPart_, runtimePart_);
+            ApplyMaterialsToPart(
+                evaluatedPart_,
+                runtimePart_,
+                animation_.normalizedTime,
+                component_->GetTime());
 
             const bool partUsesDistortion_ =
                 !isEditorWindow_ &&

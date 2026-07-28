@@ -15,9 +15,44 @@ SamplerState LinearWrapSampler : register(s0);
 SamplerState LinearBorderSampler : register(s1);
 SamplerState LinearClampSampler : register(s2);
 
-float4 SampleVFXTexture(Texture2D texture_, float2 uv_, uint samplerMode_)
+float Hash12(float2 value_)
 {
-    if (samplerMode_ == 1) return texture_.Sample(LinearClampSampler, uv_);
+    return frac(sin(dot(value_, float2(127.1f, 311.7f))) * 43758.5453f);
+}
+
+float2 ClampUVWithEdgeJitter(Texture2D texture_, float2 uv_, float effectTime_)
+{
+    uint width_;
+    uint height_;
+    texture_.GetDimensions(width_, height_);
+    float2 textureSize_ = max(float2(width_, height_), float2(1.0f, 1.0f));
+    float2 texel_ = 1.0f / textureSize_;
+    float2 clampedUV_ = clamp(uv_, texel_ * 0.5f, 1.0f - texel_ * 0.5f);
+
+    float outsideAmount_ = max(
+        max(-uv_.x, uv_.x - 1.0f),
+        max(-uv_.y, uv_.y - 1.0f));
+    float edgeDistance_ = min(
+        min(uv_.x, 1.0f - uv_.x),
+        min(uv_.y, 1.0f - uv_.y));
+    float nearEdgeAmount_ = 1.0f - saturate(edgeDistance_ / max(max(texel_.x, texel_.y) * 2.0f, 0.00001f));
+    float jitterAmount_ = saturate(outsideAmount_ * 32.0f + nearEdgeAmount_ * 0.35f);
+    if (jitterAmount_ <= 0.0f)
+    {
+        return clampedUV_;
+    }
+
+    float xEdgeAmount_ = max(0.0f, abs(clampedUV_.x - 0.5f) - abs(clampedUV_.y - 0.5f));
+    float2 tangent_ = xEdgeAmount_ > 0.0f ? float2(0.0f, 1.0f) : float2(1.0f, 0.0f);
+    float stableNoise_ = Hash12(floor(clampedUV_ * textureSize_ * 0.5f));
+    float animatedNoise_ = sin(stableNoise_ * 6.2831853f + effectTime_ * 2.7f);
+    float2 jitterUV_ = tangent_ * animatedNoise_ * texel_ * 2.0f * jitterAmount_;
+    return clamp(clampedUV_ + jitterUV_, texel_ * 0.5f, 1.0f - texel_ * 0.5f);
+}
+
+float4 SampleVFXTexture(Texture2D texture_, float2 uv_, uint samplerMode_, float effectTime_)
+{
+    if (samplerMode_ == 1) return texture_.Sample(LinearClampSampler, ClampUVWithEdgeJitter(texture_, uv_, effectTime_));
     if (samplerMode_ == 2) return texture_.Sample(LinearBorderSampler, uv_);
     return texture_.Sample(LinearWrapSampler, uv_);
 }
@@ -84,7 +119,7 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     if (useNoise != 0)
     {
         // Noise TextureのRGを-1～1のUVオフセットとして使い、Base/Maskを同じ方向へ歪ませる。
-        sampledNoise = SampleVFXTexture(NoiseTexture, noiseUV, noiseSamplerMode).rg * 2.0f - 1.0f;
+        sampledNoise = SampleVFXTexture(NoiseTexture, noiseUV, noiseSamplerMode, effectTime).rg * 2.0f - 1.0f;
 
         if (useNoise != 0)
         {
@@ -94,16 +129,30 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     }
 
     // BaseTextureは色として使うだけでなく、Edge Patternの模様元にも使う。
-    float4 baseSample = SampleVFXTexture(BaseTexture, baseUV, baseSamplerMode);
+    float4 baseSample = SampleVFXTexture(BaseTexture, baseUV, baseSamplerMode, effectTime);
     float4 baseColor = baseSample * vfxColor;
     if (useGradientTexture != 0 && hasGradientTexture != 0)
     {
         float4 gradientSample = SampleVFXTexture(
             GradientTexture,
             GetGradientUV(input.texcoord),
-            gradientSamplerMode);
+            gradientSamplerMode,
+            effectTime);
         baseColor.rgb = gradientSample.rgb * vfxColor.rgb;
         baseColor.a = baseSample.a * gradientSample.a * vfxColor.a;
+    }
+    if (useTrailColorRamp != 0)
+    {
+        float recencyFactor = pow(saturate(1.0f - input.texcoord.y), max(trailRecencyPower, 0.001f));
+        float tipFactor = pow(saturate(input.texcoord.x), max(trailTipPower, 0.001f));
+        recencyFactor *= saturate(trailRecencyIntensity);
+        tipFactor *= saturate(trailTipIntensity);
+
+        float4 oldColor = lerp(trailOldRootColor, trailOldTipColor, tipFactor);
+        float4 newColor = lerp(trailNewRootColor, trailNewTipColor, tipFactor);
+        float4 trailColor = lerp(oldColor, newColor, recencyFactor);
+        trailColor.a *= lerp(saturate(trailOldAlpha), saturate(trailNewAlpha), recencyFactor);
+        baseColor *= trailColor;
     }
 
     float mask = 1.0f;
@@ -111,7 +160,7 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     if (useMask != 0)
     {
         // Maskは表示/非表示、Dissolve、Edge Patternの参照元として使う。
-        mask = SampleVFXTexture(MaskTexture, maskUV, maskSamplerMode).r;
+        mask = SampleVFXTexture(MaskTexture, maskUV, maskSamplerMode, effectTime).r;
     }
 
     bool distortionEnabled = useMaskDistortion != 0 && hasDistortionNoiseTexture != 0;
@@ -139,7 +188,8 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             float3 sampledNormal_ = SampleVFXTexture(
                 NormalTexture,
                 normalUV,
-                normalSamplerMode).xyz * 2.0f - 1.0f;
+                normalSamplerMode,
+                effectTime).xyz * 2.0f - 1.0f;
             sampledNormal_.xy *= normalStrength;
             normal = normalize(mul(sampledNormal_, tangentBasis_));
         }
@@ -152,7 +202,8 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             float fresnelNoiseSample_ = SampleVFXTexture(
                 NoiseTexture,
                 noiseUV,
-                noiseSamplerMode).r;
+                noiseSamplerMode,
+                effectTime).r;
             fresnelFactor *= lerp(1.0f, saturate(fresnelNoiseSample_ * 2.0f), saturate(fresnelNoiseStrength));
         }
     }
@@ -181,7 +232,7 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     if (emissiveStrength > 0.0f)
     {
         float4 emissiveSample = hasEmissiveTexture != 0
-            ? SampleVFXTexture(EmissiveTexture, emissiveUV, emissiveSamplerMode)
+            ? SampleVFXTexture(EmissiveTexture, emissiveUV, emissiveSamplerMode, effectTime)
             : baseSample;
         float emissivePulse = 1.0f + sin(effectTime * emissivePulseSpeed) * emissivePulseAmount;
         finalColor += emissiveSample.rgb * vfxColor.rgb * max(emissiveStrength, 0.0f) * max(emissivePulse, 0.0f) * saturate(emissiveSample.a * finalAlpha);
@@ -222,14 +273,14 @@ float4 main(VS_OUT input, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         if (edgePatternMode == 1)
         {
             float4 edgeSample = hasEdgePatternTexture != 0
-                ? SampleVFXTexture(EdgePatternTexture, edgePatternUV, edgePatternSamplerMode)
+                ? SampleVFXTexture(EdgePatternTexture, edgePatternUV, edgePatternSamplerMode, effectTime)
                 : baseSample;
             edgePattern = saturate(dot(edgeSample.rgb, float3(0.299f, 0.587f, 0.114f)) * edgeSample.a);
         }
         else if (edgePatternMode == 2)
         {
             edgePattern = hasEdgePatternTexture != 0
-                ? SampleVFXTexture(EdgePatternTexture, edgePatternUV, edgePatternSamplerMode).r
+                ? SampleVFXTexture(EdgePatternTexture, edgePatternUV, edgePatternSamplerMode, effectTime).r
                 : (useMask != 0 ? mask : 1.0f);
         }
 
