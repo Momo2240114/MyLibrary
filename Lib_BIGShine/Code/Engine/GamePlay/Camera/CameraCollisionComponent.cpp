@@ -73,6 +73,41 @@ namespace
         return filterData_.word0;
     }
 
+    bool IsLayerMaskAccepted(uint32_t layer_, uint32_t layerMask_)
+    {
+        return layer_ != static_cast<uint32_t>(LayerType::Default) &&
+            (layerMask_ & layer_) != 0u;
+    }
+
+    bool IsCameraCollisionLayerAccepted(
+        const PxShape* shape_,
+        const PxRigidActor* actor_,
+        uint32_t layerMask_)
+    {
+        if (!shape_ || !actor_) return false;
+
+        PxFilterData filterData_ = shape_->getQueryFilterData();
+        if (filterData_.word0 == 0u)
+        {
+            filterData_ = shape_->getSimulationFilterData();
+        }
+
+        const uint32_t shapeLayer_ = filterData_.word0;
+        if (IsLayerMaskAccepted(shapeLayer_, layerMask_))
+        {
+            return true;
+        }
+
+        if (shapeLayer_ == static_cast<uint32_t>(LayerType::Default))
+        {
+            return actor_->is<PxRigidStatic>() &&
+                filterData_.word2 ==
+                static_cast<uint32_t>(ColliderComponent::CollisionRole::PHYSICAL);
+        }
+
+        return false;
+    }
+
     class CameraQueryFilter : public PxQueryFilterCallback
     {
     public:
@@ -102,8 +137,7 @@ namespace
                 return PxQueryHitType::eNONE;
             }
 
-            const uint32_t shapeLayer_ = GetShapeLayer(shape_);
-            if ((layerMask & shapeLayer_) == 0u)
+            if (!IsCameraCollisionLayerAccepted(shape_, actor_, layerMask))
             {
                 return PxQueryHitType::eNONE;
             }
@@ -365,6 +399,8 @@ bool CameraCollisionComponent::SweepCameraSegment(
     const std::vector<const void*>& ignoredUserData_,
     float& hitDistance_) const
 {
+    BS_PROFILE_SCOPE("CameraCollisionComponent::SweepCameraSegment");
+
     PxScene* scene_ = PhysXSystem::GetScene();
     if (!scene_) return false;
 
@@ -391,11 +427,14 @@ bool CameraCollisionComponent::SweepCameraSegment(
         queryFlags_);
     const PxHitFlags hitFlags_ =
         PxHitFlag::eDEFAULT | PxHitFlag::eMESH_BOTH_SIDES;
+    bool hasHit_ = false;
+    float nearestHitDistance_ = distance_;
+
     if (probeRadius > 0.001f)
     {
         PxSweepBuffer sweepHit_;
         const PxSphereGeometry probeGeometry_((std::max)(probeRadius, 0.001f));
-        if (!scene_->sweep(
+        if (scene_->sweep(
             probeGeometry_,
             PxTransform(origin_),
             direction_,
@@ -405,26 +444,21 @@ bool CameraCollisionComponent::SweepCameraSegment(
             filterData_,
             &queryFilter_))
         {
-            return false;
-        }
-        debugLastHitAccepted = true;
-        debugLastHitLayer = GetShapeLayer(sweepHit_.block.shape);
-        if (ColliderComponent* collider_ =
-            GetColliderFromActor(sweepHit_.block.actor))
-        {
-            debugLastHitColliderName = collider_->GetColliderName();
-            if (const std::shared_ptr<GameObject> object_ =
-                collider_->GetGameObject())
+            hasHit_ = true;
+            nearestHitDistance_ = sweepHit_.block.distance;
+            debugLastHitAccepted = true;
+            debugLastHitLayer = GetShapeLayer(sweepHit_.block.shape);
+            if (ColliderComponent* collider_ =
+                GetColliderFromActor(sweepHit_.block.actor))
             {
-                debugLastHitObjectName = object_->GetName();
+                debugLastHitColliderName = collider_->GetColliderName();
+                debugLastHitObjectName = collider_->GetCollisionOwnerObjectName();
             }
         }
-        hitDistance_ = sweepHit_.block.distance;
-        return true;
     }
 
     PxRaycastBuffer rayHit_;
-    if (!scene_->raycast(
+    if (scene_->raycast(
         origin_,
         direction_,
         distance_,
@@ -433,19 +467,23 @@ bool CameraCollisionComponent::SweepCameraSegment(
         filterData_,
         &queryFilter_))
     {
-        return false;
-    }
-    debugLastHitAccepted = true;
-    debugLastHitLayer = GetShapeLayer(rayHit_.block.shape);
-    if (ColliderComponent* collider_ = GetColliderFromActor(rayHit_.block.actor))
-    {
-        debugLastHitColliderName = collider_->GetColliderName();
-        if (const std::shared_ptr<GameObject> object_ = collider_->GetGameObject())
+        if (!hasHit_ || rayHit_.block.distance < nearestHitDistance_)
         {
-            debugLastHitObjectName = object_->GetName();
+            hasHit_ = true;
+            nearestHitDistance_ = rayHit_.block.distance;
+            debugLastHitAccepted = true;
+            debugLastHitLayer = GetShapeLayer(rayHit_.block.shape);
+            if (ColliderComponent* collider_ = GetColliderFromActor(rayHit_.block.actor))
+            {
+                debugLastHitColliderName = collider_->GetColliderName();
+                debugLastHitObjectName = collider_->GetCollisionOwnerObjectName();
+            }
         }
     }
-    hitDistance_ = rayHit_.block.distance;
+
+    if (!hasHit_) return false;
+
+    hitDistance_ = nearestHitDistance_;
     return true;
 }
 
@@ -628,6 +666,10 @@ void CameraCollisionComponent::Deserialize(const nlohmann::json& json_)
     cameraCollisionLayerMask = json_.value(
         "cameraCollisionLayerMask",
         json_.value("collisionLayerMask", GetDefaultCollisionLayerMask()));
+    if (cameraCollisionLayerMask == 0u)
+    {
+        cameraCollisionLayerMask = GetDefaultCollisionLayerMask();
+    }
     minimumCameraDistance = json_.value("minimumCameraDistance", 0.05f);
     probeRadius = json_.value("probeRadius", 0.3f);
     includeDynamicColliders = json_.value("includeDynamicColliders", true);

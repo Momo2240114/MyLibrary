@@ -153,6 +153,14 @@ private:
 		DirectX::XMFLOAT4X4 decal_inverse_transform; // PS用：床座標を箱空間に戻す
 		DirectX::XMFLOAT4   decal_direction;         // 予備・方向制御用
 		DirectX::XMFLOAT4   decalBaseColor;          // 色・アルファ
+		DirectX::XMFLOAT4   decalEmissive;           // xyz: emissive color, w: intensity
+		DirectX::XMFLOAT4   decalUvScaleOffset;       // xy: scale, zw: offset
+		DirectX::XMFLOAT4   decalNoiseUvScaleOffset;  // xy: scale, zw: offset
+		DirectX::XMFLOAT4   decalDissolveParams;     // x: enabled, y: threshold, z: edge width
+		DirectX::XMFLOAT4   decalDissolveEdgeColor;
+		uint32_t decalBlendMode = 0u;          // 0: Alpha, 1: Additive
+		uint32_t decalUseDissolve = 0u;
+		DirectX::XMFLOAT2 decalPadding = { 0.0f, 0.0f };
 	};
 
 	struct CbSkeleton

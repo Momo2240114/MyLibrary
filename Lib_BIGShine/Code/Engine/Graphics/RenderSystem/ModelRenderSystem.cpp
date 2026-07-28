@@ -1688,13 +1688,23 @@ void ModelRenderSystem::RenderDecals(const RenderContext& rc)
 		DirectX::XMStoreFloat4x4(&cb.decal_world_matrix, World);
 		DirectX::XMStoreFloat4x4(&cb.decal_inverse_transform, invWorld);
 		cb.decalBaseColor = decal.color;
+		cb.decalEmissive = decal.emissiveColorAndIntensity;
+		cb.decalUvScaleOffset = decal.uvScaleOffset;
+		cb.decalDissolveParams = decal.dissolveParams;
+		cb.decalDissolveEdgeColor = decal.dissolveEdgeColor;
+		cb.decalBlendMode = decal.blendMode;
+		cb.decalUseDissolve = decal.useDissolve;
+		cb.decalPadding = { 0.0f, 0.0f };
 
 		dc->UpdateSubresource(decalConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 		dc->VSSetConstantBuffers(10, 1, decalConstantBuffer.GetAddressOf());
 		dc->PSSetConstantBuffers(10, 1, decalConstantBuffer.GetAddressOf());
 
 		ID3D11ShaderResourceView* texSRV = decal.texture ? decal.texture.Get() : whiteTextureSRV.Get();
-		dc->PSSetShaderResources(10, 1, &texSRV);
+		ID3D11ShaderResourceView* maskSRV = decal.maskTexture ? decal.maskTexture.Get() : whiteTextureSRV.Get();
+		ID3D11ShaderResourceView* noiseSRV = decal.noiseTexture ? decal.noiseTexture.Get() : whiteTextureSRV.Get();
+		ID3D11ShaderResourceView* decalSRVs_[] = { texSRV, maskSRV, noiseSRV };
+		dc->PSSetShaderResources(10, 3, decalSRVs_);
 
 		rc.shapeSystem->BindBoxVB(dc);
 		dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

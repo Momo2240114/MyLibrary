@@ -215,6 +215,9 @@
     <Filter Include="Code\Engine\Graphics\Effect\MeshVFX">
       <UniqueIdentifier>{62fb086d-369f-4c03-b18d-f36cc8f9f42f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Engine\Graphics\VFXMaterial">
+      <UniqueIdentifier>{df2bd035-40a3-4c95-9c7e-3417f5e1478f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Code\Engine\Graphics\RenderSystem\Particle">
       <UniqueIdentifier>{a0ace4d4-2f99-45e2-bf7c-597f5b2aa447}</UniqueIdentifier>
     </Filter>
@@ -463,6 +466,9 @@
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\MaterialAssetListWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp">
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClCompile>
@@ -691,8 +697,20 @@
     <ClCompile Include="Code\Editor\Window\EasingPresetEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\VFXMaterialEditorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\VFX\MeshVFXShader.cpp">
       <Filter>Code\Engine\Graphics\Effect\MeshVFX</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.cpp">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResourceManager.cpp">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialSerializer.cpp">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\RenderSystem\ModelRenderSystem.cpp">
       <Filter>Code\Engine\Graphics\RenderSystem\Model</Filter>
@@ -1125,6 +1143,9 @@
     <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Window\MaterialAssetListWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.h">
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClInclude>
@@ -1243,6 +1264,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\EasingPresetEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\VFXMaterialEditorWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\AssetBrowserPayload.h">
@@ -1586,6 +1610,21 @@
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\VFX\MeshVFXResource.h">
       <Filter>Code\Engine\Graphics\RenderSystem\MeshVFX</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialData.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialInstance.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResource.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialResourceManager.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\VFXMaterial\VFXMaterialSerializer.h">
+      <Filter>Code\Engine\Graphics\VFXMaterial</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Particle\ParticleEffectAsset.h">
       <Filter>Code\Engine\Graphics\Effect\Particle</Filter>

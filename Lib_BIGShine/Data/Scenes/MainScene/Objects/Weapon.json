@@ -5,11 +5,18 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 168,
+                "AttackInstanceId": 22,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
                 "BlackboardCategory": "Attack",
+                "CameraShakeAttackScale": 0.5,
+                "CameraShakeEnabled": true,
+                "CameraShakeFrequency": 24.0,
+                "CameraShakePriority": 8,
+                "CameraShakeReceiveDuration": 0.18000000715255737,
+                "CameraShakeReceivePositionStrength": 0.054999999701976776,
+                "CameraShakeReceiveRotationStrength": 0.44999998807907104,
                 "CanBeCharacterGround": true,
                 "CanHitOwner": false,
                 "ColliderName": "",
@@ -71,7 +78,7 @@
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
             },
-            "Enabled": true,
+            "Enabled": false,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
@@ -252,6 +259,11 @@
                         "InternalMeshCylinderRadius": 1.0,
                         "InternalMeshSettings": {
                             "BaseRadius": 1.1200000047683716,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
                             "CenterWidth": 0.5600000023841858,
                             "ConeLength": 1.0,
                             "ConeTipRadiusRate": 0.03500000014901161,
@@ -292,6 +304,7 @@
                             0.0,
                             0.0
                         ],
+                        "MaterialPath": "",
                         "MeshIndex": 0,
                         "MeshRotationSpeed": [
                             0.0,
@@ -385,7 +398,7 @@
                     }
                 ],
                 "PlaybackSpeed": 1.0,
-                "TrailEmitting": true,
+                "TrailEmitting": false,
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,
@@ -510,6 +523,11 @@
                         "InternalMeshCylinderRadius": 1.0,
                         "InternalMeshSettings": {
                             "BaseRadius": 1.1200000047683716,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
                             "CenterWidth": 0.5600000023841858,
                             "ConeLength": 1.0,
                             "ConeTipRadiusRate": 0.03500000014901161,
@@ -550,6 +568,7 @@
                             0.0,
                             0.0
                         ],
+                        "MaterialPath": "",
                         "MeshIndex": -1,
                         "MeshRotationSpeed": [
                             0.0,

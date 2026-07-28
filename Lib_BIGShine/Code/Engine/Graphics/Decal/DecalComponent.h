@@ -3,7 +3,10 @@
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "DecalManager.h"
 
+#include <memory>
 #include <string>
+
+class VFXMaterialResource;
 
 class DecalComponent : public Component
 {
@@ -22,6 +25,8 @@ public:
 
     void Start() override;
     void SetTexture(const std::string& path_);
+    void SetMaterial(const std::string& path_);
+    const std::string& GetMaterialPath() const { return materialPath; }
     const std::string& GetTexturePath() const { return texturePath; }
     void SetLifeTime(float lifeTime_, float fadeOutDuration_ = 0.0f);
     void SetDestroyOnLifeEnd(bool destroyOnLifeEnd_)
@@ -36,12 +41,18 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
 private:
+    void ApplyMaterialToDecalData(DecalData& data_) const;
+
+private:
     bool showDebugBounds = true;
     bool destroyOnLifeEnd = false;
     float lifeTime = 0.0f;
     float fadeOutDuration = 0.0f;
     float elapsedTime = 0.0f;
+    float materialTime = 0.0f;
     float initialAlpha = 1.0f;
     static inline const std::string componentName = "DecalComponent";
     std::string texturePath;
+    std::string materialPath;
+    std::shared_ptr<VFXMaterialResource> materialResource;
 };

@@ -37,6 +37,26 @@ Code/Engine/GamePlay/Camera/CameraComponent.cpp
 Code/Engine/GamePlay/Camera/ThirdPersonCameraComponent.cpp
 Code/Engine/GamePlay/Camera/CameraLockOnComponent.cpp
 Code/Engine/GamePlay/Camera/CameraCollisionComponent.cpp
+
+============================================================
+
+DefaultレイヤーのステージColliderにカメラ衝突が当たらない問題
+
+■起こった問題
+カメラの衝突補正がステージや壁に反応せず、カメラが地形や壁へ入り込むことがあった。
+
+■原因
+CameraCollisionComponentはEnvironment/Terrain/Wallなどのビットマスクで衝突対象を選んでいる。
+一方でMainSceneのStage、Wall、RockWallなどはLayerType::Default、つまり値0のレイヤーになっていた。
+Defaultはビットマスク上では0なので、単純に layerMask & shapeLayer を行うと必ず対象外になっていた。
+
+■修正方針
+明示レイヤーが設定されているColliderは従来通りcameraCollisionLayerMaskで判定する。
+LayerType::DefaultのColliderは、StaticかつCollisionRole::PHYSICALの場合だけカメラ衝突対象として扱う。
+これにより、DefaultのステージColliderは拾いつつ、Defaultの動的な武器や一時Objectを拾いすぎないようにする。
+
+■関連箇所
+Code/Engine/GamePlay/Camera/CameraCollisionComponent.cpp
 Code/Engine/GamePlay/Camera/CameraActionDirectorComponent
 コード構築メモ/Camera関係.txt
 

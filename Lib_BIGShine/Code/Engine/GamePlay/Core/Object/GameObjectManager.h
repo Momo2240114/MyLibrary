@@ -18,6 +18,7 @@ class GltfModelCommponennt;
 class TimeManager;
 class CameraManager;
 class MotionVelocityComponent;
+struct ID3D11RenderTargetView;
 
 enum class SCENE_RUNTIME_STATE
 {
@@ -109,7 +110,7 @@ public:
         return results_;
     }
 
-    void RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem);
+    void RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem, ID3D11RenderTargetView* finalRenderTargetView_ = nullptr);
     void SetModelRenderSystem(ModelRenderSystem* modelRenderSystem_) { modelRenderSystem = modelRenderSystem_; }
     void RegisterMotionVelocityComponent(const std::shared_ptr<MotionVelocityComponent>& component_);
     void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);

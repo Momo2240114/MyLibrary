@@ -8,7 +8,9 @@
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Resource/TextureResourceManager.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <cstdio>
 #include <algorithm>
@@ -16,12 +18,15 @@
 
 void DecalComponent::Start()
 {
-    if (!texturePath.empty() && !texture) SetTexture(texturePath);
+    BS_PROFILE_SCOPE("DecalComponent::Start");
+    if (!materialPath.empty() && !texture) SetMaterial(materialPath);
+    else if (!texturePath.empty() && !texture) SetTexture(texturePath);
     ResetLifeTime();
 }
 
 void DecalComponent::SetLifeTime(float lifeTime_, float fadeOutDuration_)
 {
+    BS_PROFILE_SCOPE("DecalComponent::SetLifeTime");
     lifeTime = (std::max)(lifeTime_, 0.0f);
     fadeOutDuration = (std::clamp)(fadeOutDuration_, 0.0f, lifeTime);
     ResetLifeTime();
@@ -29,12 +34,18 @@ void DecalComponent::SetLifeTime(float lifeTime_, float fadeOutDuration_)
 
 void DecalComponent::ResetLifeTime()
 {
+    BS_PROFILE_SCOPE("DecalComponent::ResetLifeTime");
     elapsedTime = 0.0f;
+    materialTime = 0.0f;
     initialAlpha = color.w;
 }
 
 void DecalComponent::SetTexture(const std::string& path_)
 {
+    BS_PROFILE_SCOPE("DecalComponent::SetTexture");
+
+    materialPath.clear();
+    materialResource.reset();
     texturePath = path_;
     texture.Reset();
     if (texturePath.empty()) return;
@@ -59,8 +70,66 @@ void DecalComponent::SetTexture(const std::string& path_)
         texturePath.c_str());
 }
 
+void DecalComponent::SetMaterial(const std::string& path_)
+{
+    BS_PROFILE_SCOPE("DecalComponent::SetMaterial");
+    materialPath = path_;
+    materialResource.reset();
+    if (materialPath.empty()) return;
+
+    materialResource = VFXMaterialResourceManager::GetInstance().Load(materialPath);
+    if (!materialResource) return;
+
+    texture = materialResource->GetBaseTexture();
+    texturePath = materialResource->GetMaterialData().baseTexturePath;
+}
+
+void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
+{
+    BS_PROFILE_SCOPE("DecalComponent::ApplyMaterialToDecalData");
+
+    if (!materialResource) return;
+
+    const VFXMaterialData& materialData_ = materialResource->GetMaterialData();
+    data_.color.x *= materialData_.baseColor.x;
+    data_.color.y *= materialData_.baseColor.y;
+    data_.color.z *= materialData_.baseColor.z;
+    data_.color.w *= materialData_.baseColor.w * materialData_.alpha;
+    data_.emissiveColorAndIntensity = {
+        materialData_.emissiveColor.x,
+        materialData_.emissiveColor.y,
+        materialData_.emissiveColor.z,
+        materialData_.emissiveIntensity
+    };
+    data_.uvScaleOffset = {
+        materialData_.mainUV.scale.x,
+        materialData_.mainUV.scale.y,
+        materialData_.mainUV.offset.x + materialData_.mainUV.scrollSpeed.x * materialTime,
+        materialData_.mainUV.offset.y + materialData_.mainUV.scrollSpeed.y * materialTime
+    };
+    data_.noiseUvScaleOffset = {
+        materialData_.noiseUV.scale.x,
+        materialData_.noiseUV.scale.y,
+        materialData_.noiseUV.offset.x + materialData_.noiseUV.scrollSpeed.x * materialTime,
+        materialData_.noiseUV.offset.y + materialData_.noiseUV.scrollSpeed.y * materialTime
+    };
+    data_.dissolveParams = {
+        materialData_.dissolve.enabled ? 1.0f : 0.0f,
+        materialData_.dissolve.threshold,
+        materialData_.dissolve.edgeWidth,
+        0.0f
+    };
+    data_.dissolveEdgeColor = materialData_.dissolve.edgeColor;
+    data_.blendMode = materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE ? 1u : 0u;
+    data_.useDissolve = materialData_.dissolve.enabled ? 1u : 0u;
+    if (materialResource->GetBaseTexture()) data_.texture = materialResource->GetBaseTexture();
+    if (materialResource->GetMaskTexture()) data_.maskTexture = materialResource->GetMaskTexture();
+    if (materialResource->GetNoiseTexture()) data_.noiseTexture = materialResource->GetNoiseTexture();
+}
+
 void DecalComponent::SubmitDecal(DecalManager& manager_)
 {
+    BS_PROFILE_SCOPE("DecalComponent::SubmitDecal");
     if (!IsEnabled()) return;
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -72,11 +141,14 @@ void DecalComponent::SubmitDecal(DecalManager& manager_)
         owner_->transform->GetWorldMatrix());
     data_.color = color;
     data_.texture = texture.Get();
+    ApplyMaterialToDecalData(data_);
     manager_.AddDecal(data_);
 }
 
 void DecalComponent::Update(float elapsedTime_)
 {
+    BS_PROFILE_SCOPE("DecalComponent::Update");
+    materialTime += (std::max)(elapsedTime_, 0.0f);
     if (lifeTime > 0.0f)
     {
         elapsedTime += (std::max)(elapsedTime_, 0.0f);
@@ -120,11 +192,23 @@ void DecalComponent::Update(float elapsedTime_)
 
 void DecalComponent::Gui()
 {
+    BS_PROFILE_SCOPE("DecalComponent::Gui");
     ImGui::ColorEdit4("Decal Color", &color.x);
     ImGui::Checkbox("Show Debug Bounds", &showDebugBounds);
     ImGui::DragFloat("Life Time", &lifeTime, 0.05f, 0.0f, 120.0f);
     ImGui::DragFloat("Fade Out Duration", &fadeOutDuration, 0.05f, 0.0f, lifeTime);
     ImGui::Checkbox("Destroy On Life End", &destroyOnLifeEnd);
+
+    std::string selectedMaterialPath_ = materialPath;
+    if (AssetSlotGui::Draw(
+        "VFX Material",
+        AssetSlotType::MATERIAL,
+        selectedMaterialPath_,
+        materialResource ? materialResource->GetBaseTexture() : nullptr,
+        "Data/VFXMaterials"))
+    {
+        SetMaterial(selectedMaterialPath_);
+    }
 
     std::string selectedPath_ = texturePath;
     if (AssetSlotGui::Draw(
@@ -140,7 +224,9 @@ void DecalComponent::Gui()
 
 void DecalComponent::Serialize(nlohmann::json& json_) const
 {
+    BS_PROFILE_SCOPE("DecalComponent::Serialize");
     json_["ComponentName"] = componentName;
+    json_["MaterialPath"] = materialPath;
     json_["TexturePath"] = texturePath;
     json_["TextureFile"] = texturePath.empty()
         ? std::string{}
@@ -155,6 +241,7 @@ void DecalComponent::Serialize(nlohmann::json& json_) const
 
 void DecalComponent::Deserialize(const nlohmann::json& json_)
 {
+    BS_PROFILE_SCOPE("DecalComponent::Deserialize");
     if (json_.contains("Color") &&
         json_["Color"].is_array() &&
         json_["Color"].size() >= 4u)
@@ -171,6 +258,7 @@ void DecalComponent::Deserialize(const nlohmann::json& json_)
         0.0f,
         lifeTime);
     destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", false);
+    materialPath = json_.value("MaterialPath", std::string{});
 
     std::string loadedPath_ = json_.value("TexturePath", std::string{});
     if (loadedPath_.empty())
@@ -186,6 +274,7 @@ void DecalComponent::Deserialize(const nlohmann::json& json_)
                 : "Data/Decal/" + legacyFile_;
         }
     }
-    SetTexture(loadedPath_);
+    if (!materialPath.empty()) SetMaterial(materialPath);
+    else SetTexture(loadedPath_);
     ResetLifeTime();
 }

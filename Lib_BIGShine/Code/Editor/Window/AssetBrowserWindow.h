@@ -20,6 +20,7 @@ private:
         TEXTURE,
         MODEL,
         JSON,
+        MATERIAL,
         CURVE,
     };
 

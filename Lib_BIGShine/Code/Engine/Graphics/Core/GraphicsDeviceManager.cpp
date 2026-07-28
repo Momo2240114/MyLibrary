@@ -232,6 +232,11 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
         ShutdownGpuProfiler();
         return false;
     }
+    if (!CreateSceneViewRenderTarget(width, height))
+    {
+        ShutdownGpuProfiler();
+        return false;
+    }
     if (!CreateGBufferTargets(width, height))
     {
         ShutdownGpuProfiler();
@@ -286,6 +291,8 @@ void GraphicsDeviceManager::Shutdown()
     depthStencilView.Reset();
     sceneRTV.Reset();
     sceneSRV.Reset();
+    sceneViewRTV.Reset();
+    sceneViewSRV.Reset();
     sceneDistortionRTV.Reset();
     sceneDistortionSRV.Reset();
     swapChain.Reset();
@@ -330,6 +337,8 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     // --- 【修正】シーン用バッファとブルームもリセット ---
     sceneRTV.Reset();
     sceneSRV.Reset();
+    sceneViewRTV.Reset();
+    sceneViewSRV.Reset();
     sceneDistortionRTV.Reset();
     sceneDistortionSRV.Reset();
     sceneNormalRTV.Reset();
@@ -355,6 +364,7 @@ void GraphicsDeviceManager::OnResize(int newWidth_, int newHeight_)
     CreateRenderTarget();
     CreateDepthStencil();
     CreateSceneRenderTarget(width, height); // シーンバッファを新しいサイズで作る
+    CreateSceneViewRenderTarget(width, height);
     CreateGBufferTargets(width, height);
     postRenderSystem.Initialize(device.Get(), width, height); // ポストプロセスも再初期化
 
@@ -1014,6 +1024,8 @@ void GraphicsDeviceManager::SetRenderTargets()
 
 bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
 {
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::CreateSceneRenderTarget");
+
     D3D11_TEXTURE2D_DESC desc{};
     desc.Width = width_;
     desc.Height = height_;
@@ -1066,6 +1078,31 @@ bool GraphicsDeviceManager::CreateSceneRenderTarget(int width_, int height_)
     if (FAILED(result_)) return false;
 
     return true;
+}
+
+bool GraphicsDeviceManager::CreateSceneViewRenderTarget(int width_, int height_)
+{
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::CreateSceneViewRenderTarget");
+
+    D3D11_TEXTURE2D_DESC desc_{};
+    desc_.Width = width_;
+    desc_.Height = height_;
+    desc_.MipLevels = 1;
+    desc_.ArraySize = 1;
+    desc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc_.SampleDesc.Count = 1;
+    desc_.Usage = D3D11_USAGE_DEFAULT;
+    desc_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture_;
+    HRESULT result_ = device->CreateTexture2D(&desc_, nullptr, texture_.GetAddressOf());
+    if (FAILED(result_)) return false;
+
+    result_ = device->CreateRenderTargetView(texture_.Get(), nullptr, sceneViewRTV.ReleaseAndGetAddressOf());
+    if (FAILED(result_)) return false;
+
+    result_ = device->CreateShaderResourceView(texture_.Get(), nullptr, sceneViewSRV.ReleaseAndGetAddressOf());
+    return SUCCEEDED(result_);
 }
 
 bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)

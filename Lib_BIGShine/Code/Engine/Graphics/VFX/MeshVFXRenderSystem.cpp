@@ -7,6 +7,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Resource/ModelResource.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResource.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "MeshVFXComponent.h"
 
@@ -123,6 +124,68 @@ namespace
         return result_;
     }
 
+    void ApplyMaterialToPart(
+        MeshVFXPart& part_,
+        const MeshVFXRuntimePart& runtimePart_)
+    {
+        BS_PROFILE_SCOPE("MeshVFXRenderSystem::ApplyMaterialToPart");
+        if (!runtimePart_.materialResource) return;
+
+        const VFXMaterialData& materialData_ =
+            runtimePart_.materialResource->GetMaterialData();
+        part_.color.x *= materialData_.baseColor.x;
+        part_.color.y *= materialData_.baseColor.y;
+        part_.color.z *= materialData_.baseColor.z;
+        part_.color.w *= materialData_.baseColor.w;
+        part_.alpha *= materialData_.alpha;
+
+        part_.baseUVScale.x *= materialData_.mainUV.scale.x;
+        part_.baseUVScale.y *= materialData_.mainUV.scale.y;
+        part_.normalUVScale.x *= materialData_.mainUV.scale.x;
+        part_.normalUVScale.y *= materialData_.mainUV.scale.y;
+        part_.maskUVScale.x *= materialData_.mainUV.scale.x;
+        part_.maskUVScale.y *= materialData_.mainUV.scale.y;
+        part_.baseUVSpeed.x += materialData_.mainUV.scrollSpeed.x;
+        part_.baseUVSpeed.y += materialData_.mainUV.scrollSpeed.y;
+        part_.maskUVSpeed.x += materialData_.mainUV.scrollSpeed.x;
+        part_.maskUVSpeed.y += materialData_.mainUV.scrollSpeed.y;
+        part_.baseUVRotationSpeed += materialData_.mainUV.rotationSpeed;
+        part_.maskUVRotationSpeed += materialData_.mainUV.rotationSpeed;
+
+        part_.noiseUVScale.x *= materialData_.noiseUV.scale.x;
+        part_.noiseUVScale.y *= materialData_.noiseUV.scale.y;
+        part_.noiseUVSpeed.x += materialData_.noiseUV.scrollSpeed.x;
+        part_.noiseUVSpeed.y += materialData_.noiseUV.scrollSpeed.y;
+        part_.noiseUVRotationSpeed += materialData_.noiseUV.rotationSpeed;
+
+        if (materialData_.emissiveIntensity > 0.0f)
+        {
+            part_.emissiveStrength *= materialData_.emissiveIntensity;
+        }
+        part_.useMask = part_.useMask || !materialData_.maskTexturePath.empty();
+        part_.useNoise = part_.useNoise || !materialData_.noiseTexturePath.empty();
+        part_.useNormal = part_.useNormal || !materialData_.normalTexturePath.empty();
+        if (materialData_.dissolve.enabled)
+        {
+            part_.dissolveThreshold += materialData_.dissolve.threshold;
+            part_.dissolveEdgeWidth = (std::max)(
+                part_.dissolveEdgeWidth,
+                materialData_.dissolve.edgeWidth);
+            part_.dissolveEdgeColor = materialData_.dissolve.edgeColor;
+            part_.useDissolveEdge = true;
+        }
+        if (materialData_.distortion.enabled)
+        {
+            part_.maskDistortionStrength *= materialData_.distortion.strength;
+            part_.useMaskDistortion = part_.useMaskDistortion ||
+                !materialData_.distortionTexturePath.empty();
+        }
+        part_.blendMode =
+            materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE
+                ? MeshVFXBlendMode::ADDITIVE
+                : part_.blendMode;
+    }
+
     DirectX::XMMATRIX CreatePartTransform(
         const MeshVFXPart& part_,
         const PartAnimationState& animation_)
@@ -156,7 +219,7 @@ namespace
 
 bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 {
-    // 隍・焚Texture繧竪PU荳翫〒蜷域・縺吶ｋ縺溘ａ縺ｮ蜈ｨ逕ｻ髱｢Shader縺ｨ荳譎３T繧呈ｺ門ｙ縺吶ｋ縲・
+    // Prepare fullscreen shader and temporary render targets for GPU texture mixing.
     if (!device_) return false;
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
@@ -178,7 +241,7 @@ bool MeshVFXTextureMixer::Initialize(ID3D11Device* device_)
 
 bool MeshVFXTextureMixer::CreateTarget(ID3D11Device* device_, Target& target_)
 {
-    // Mask/Noise蜷域・邨先棡繧剃ｿ晄戟縺吶ｋ1024x1024縺ｮ荳譎５exture繧剃ｽ懊ｋ縲・
+    // Create a temporary 1024x1024 texture that stores mixed mask/noise results.
     D3D11_TEXTURE2D_DESC description_{};
     description_.Width = 1024;
     description_.Height = 1024;
@@ -206,7 +269,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     const std::vector<bool>* invertLayers_,
     bool average_)
 {
-    // Texture縺・譫壹□縺代↑繧牙粋謌舌○縺壹◎縺ｮ縺ｾ縺ｾ霑斐＠縲∬､・焚譫壹・蝣ｴ蜷医□縺善ing-Pong蜷域・縺吶ｋ縲・
+    // Return the original texture when there is only one input; otherwise mix by ping-pong rendering.
     if (textures_.empty() || !renderContext_.deviceContext || !renderContext_.renderState) return nullptr;
     if (textures_.size() == 1 && (!invertLayers_ || invertLayers_->empty() || !(*invertLayers_)[0]))
     {
@@ -245,7 +308,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
     ID3D11ShaderResourceView* currentTexture_ = textures_[0];
     for (size_t layerIndex_ = 0; layerIndex_ < textures_.size(); ++layerIndex_)
     {
-        // 1Layer縺壹▽迴ｾ蝨ｨ邨先棡縺ｨ谺｡Texture繧貞粋謌舌＠縲∝・蜉帛・繧剃ｺ､莠偵↓蛻・ｊ譖ｿ縺医ｋ縲・
+        // Mix the current result and next texture layer, then swap input and output.
         MixConstants constants_{};
         constants_.blendMode = layerIndex_ == 0
             ? 2u
@@ -274,7 +337,7 @@ ID3D11ShaderResourceView* MeshVFXTextureMixer::Mix(
 
 bool MeshVFXRenderSystem::Initialize(ID3D11Device* device_)
 {
-    // Shader譛ｬ菴薙→縲｀ask/Noise逕ｨTextureMixer繧偵∪縺ｨ繧√※蛻晄悄蛹悶☆繧九・
+    // Initialize the MeshVFX shader and texture mixers used for mask/noise layers.
     shader = std::make_unique<MeshVFXShader>();
     isInitialized =
         shader->Initialize(device_) &&
@@ -291,7 +354,7 @@ bool MeshVFXRenderSystem::EnsureAfterimageBuffers(
     ID3D11Device* device_,
     UINT instanceCapacity_)
 {
-    // Afterimage縺ｮ謨ｰ縺悟｢励∴縺溘→縺阪□縺代∝ｿ・ｦ∵焚莉･荳翫・StructuredBuffer縺ｸ諡｡蠑ｵ縺吶ｋ縲・
+    // Grow afterimage structured buffers when the required instance count increases.
     if (!device_ || instanceCapacity_ == 0) return false;
     if (afterimageInstanceCapacity >= instanceCapacity_ &&
         afterimageBoneBuffer && afterimageInstanceBuffer)
@@ -354,7 +417,7 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
     const std::vector<const MeshVFXModelPoseView*>& poses_,
     size_t meshIndex_)
 {
-    // 隍・焚Pose縺ｮ繝懊・繝ｳ陦悟・縺ｨAlpha/Time繧棚nstancing逕ｨBuffer縺ｸ隧ｰ繧√ｋ縲・
+    // Pack multiple pose matrices and per-instance alpha/time into instancing buffers.
     if (poses_.empty() || !renderContext_.deviceContext)
     {
         return 0;
@@ -420,7 +483,7 @@ UINT MeshVFXRenderSystem::UpdateAfterimageBuffers(
 
 void MeshVFXRenderSystem::PushSubmit(MeshVFXComponent* component_)
 {
-    // 謠冗判蜿ｯ閭ｽ縺ｪComponent縺縺代ｒ莉翫ヵ繝ｬ繝ｼ繝縺ｮRenderAll蟇ｾ雎｡縺ｸ遨阪・縲・
+    // Queue only drawable components for this frame.
     if (!isInitialized || !component_ || !component_->IsEnabled()) return;
 
     if (component_->UsesOwnerModel())
@@ -464,7 +527,7 @@ bool MeshVFXRenderSystem::EnsureCopyTexture(
     Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_)
 {
-    // Scene Color/Depth繧担hader縺九ｉSample縺吶ｋ縺溘ａ縲√し繧､繧ｺ縺ｨ蠖｢蠑上′蜷医≧繧ｳ繝斐・Texture繧堤｢ｺ菫昴☆繧九・
+    // Ensure copy textures with matching size/format so shaders can sample scene color/depth.
     if (!device_ || !source_) return false;
 
     Microsoft::WRL::ComPtr<ID3D11Resource> sourceResource_;
@@ -523,7 +586,7 @@ bool MeshVFXRenderSystem::PrepareSceneSampling(
     ID3D11RenderTargetView* activeRenderTarget_,
     ID3D11DepthStencilView* activeDepthStencil_)
 {
-    // 閭梧勹豁ｪ縺ｿ繧・ｷｱ蠎ｦ莠､蟾ｮEdge縺ｧ菴ｿ縺・◆繧√∫樟蝨ｨ縺ｮScene Color/Depth繧呈緒逕ｻ蜑阪↓騾驕ｿ縺吶ｋ縲・
+    // Resolve current scene color/depth before drawing parts that use distortion or intersection edges.
     ID3D11Device* device_ = renderContext_.device
         ? renderContext_.device
         : GraphicsDeviceManager::Instance().GetDevice();
@@ -561,7 +624,7 @@ void MeshVFXRenderSystem::RenderAll(
     ID3D11DepthStencilView* activeDepthStencil_)
 {
     BS_PROFILE_SCOPE("Render::VFX");
-    // PushSubmit縺輔ｌ縺溷・MeshVFX繧偵・壼ｸｸMesh繝ｻ蜍慕噪Mesh繝ｻAfterimage Pose縺ｮ3邉ｻ邨ｱ縺ｫ蛻・￠縺ｦ謠冗判縺吶ｋ縲・
+    // Draw submitted MeshVFX as regular meshes, dynamic meshes, or afterimage pose instances.
     if (!isInitialized || !shader || !renderContext_.deviceContext || !renderContext_.camera ||
         !renderContext_.renderState || components.empty())
     {
@@ -601,7 +664,7 @@ void MeshVFXRenderSystem::RenderAll(
                         part_.intersectionEdgeStrength > 0.0f;
                 });
         });
-    // 蠢・ｦ√↑Part縺後≠繧句ｴ蜷医□縺全cene Color/Depth繧偵さ繝斐・縺励∽ｸ崎ｦ√↑繝輔Ξ繝ｼ繝縺ｮ繧ｳ繧ｹ繝医ｒ驕ｿ縺代ｋ縲・
+    // Copy scene color/depth only when an enabled part needs intersection sampling.
     const bool sceneSamplingReady_ = needsSceneSampling_ && PrepareSceneSampling(
         renderContext_,
         isEditorWindow_,
@@ -655,10 +718,11 @@ void MeshVFXRenderSystem::RenderAll(
             const PartAnimationState animation_ =
                 CalculatePartAnimation(part_, *component_, component_->GetTime());
             if (!animation_.active) continue;
-            const MeshVFXPart evaluatedPart_ = ApplyPartTimeCurves(
+            MeshVFXPart evaluatedPart_ = ApplyPartTimeCurves(
                 part_,
                 *component_,
                 animation_.normalizedTime);
+            ApplyMaterialToPart(evaluatedPart_, runtimePart_);
 
             const bool partUsesDistortion_ =
                 !isEditorWindow_ &&
@@ -679,17 +743,31 @@ void MeshVFXRenderSystem::RenderAll(
                 float poseTime_, float poseAlpha_,
                 UINT instanceCount_, bool useInstancedPose_)
             {
-                // Mesh1縺､蛻・・Texture隗｣豎ｺ縲ヾhader譖ｴ譁ｰ縲〃ertex/Index險ｭ螳壹．raw蜻ｼ縺ｳ蜃ｺ縺励ｒ蜈ｱ騾壼喧縺吶ｋ縲・
+                // Shared per-mesh draw path: resolve textures, update shader, then draw.
                 if (!vertexBuffer_ || !indexBuffer_ || indexCount_ == 0) return;
 
                 ID3D11ShaderResourceView* baseTexture_ = runtimePart_.baseTexture.Get();
-                if (part_.useMaterialBaseTexture && part_.baseTexturePath.empty() &&
+                if (runtimePart_.materialResource &&
+                    !runtimePart_.materialResource->GetMaterialData().baseTexturePath.empty() &&
+                    evaluatedPart_.baseTexturePath.empty() &&
+                    runtimePart_.materialResource->GetBaseTexture())
+                {
+                    baseTexture_ = runtimePart_.materialResource->GetBaseTexture();
+                }
+                else if (part_.useMaterialBaseTexture && part_.baseTexturePath.empty() &&
                     sourceMesh_ && sourceMesh_->material && sourceMesh_->material->baseMap)
                 {
                     baseTexture_ = sourceMesh_->material->baseMap.Get();
                 }
                 ID3D11ShaderResourceView* normalTexture_ = runtimePart_.normalTexture.Get();
-                if (part_.useMaterialNormalTexture && part_.normalTexturePath.empty() &&
+                if (runtimePart_.materialResource &&
+                    !runtimePart_.materialResource->GetMaterialData().normalTexturePath.empty() &&
+                    evaluatedPart_.normalTexturePath.empty() &&
+                    runtimePart_.materialResource->GetNormalTexture())
+                {
+                    normalTexture_ = runtimePart_.materialResource->GetNormalTexture();
+                }
+                else if (part_.useMaterialNormalTexture && part_.normalTexturePath.empty() &&
                     sourceMesh_ && sourceMesh_->material && sourceMesh_->material->normalMap)
                 {
                     normalTexture_ = sourceMesh_->material->normalMap.Get();
@@ -712,10 +790,26 @@ void MeshVFXRenderSystem::RenderAll(
                     maskBlendModes_.push_back(MeshVFXMaskBlendMode::MULTIPLY);
                     invertMaskLayers_.push_back(false);
                 }
+                if (maskTextures_.empty() &&
+                    runtimePart_.materialResource &&
+                    !runtimePart_.materialResource->GetMaterialData().maskTexturePath.empty() &&
+                    runtimePart_.materialResource->GetMaskTexture())
+                {
+                    maskTextures_.push_back(runtimePart_.materialResource->GetMaskTexture());
+                    maskBlendModes_.push_back(MeshVFXMaskBlendMode::MULTIPLY);
+                    invertMaskLayers_.push_back(false);
+                }
                 std::vector<ID3D11ShaderResourceView*> noiseTextures_;
                 for (const auto& texture_ : runtimePart_.noiseTextures)
                 {
                     noiseTextures_.push_back(texture_.Get());
+                }
+                if (noiseTextures_.empty() &&
+                    runtimePart_.materialResource &&
+                    !runtimePart_.materialResource->GetMaterialData().noiseTexturePath.empty() &&
+                    runtimePart_.materialResource->GetNoiseTexture())
+                {
+                    noiseTextures_.push_back(runtimePart_.materialResource->GetNoiseTexture());
                 }
 
 
@@ -816,7 +910,7 @@ void MeshVFXRenderSystem::RenderAll(
 
             if (useDynamicMesh_)
             {
-                // Trail縺ｪ縺ｩ縺ｮ螳溯｡梧凾逕滓・Mesh縺ｯ縲，omponent蛛ｴ縺梧戟縺､Buffer繧偵◎縺ｮ縺ｾ縺ｾ謠冗判縺吶ｋ縲・
+                // Dynamic meshes such as trails are drawn from buffers owned by the component.
                 renderMesh_(dynamicMesh_.vertexBuffer, dynamicMesh_.indexBuffer,
                     dynamicMesh_.indexCount, dynamicMesh_.vertexStride,
                     DirectX::XMMatrixIdentity(), nullptr, nullptr,
@@ -826,7 +920,7 @@ void MeshVFXRenderSystem::RenderAll(
 
             if (hasModelPoses_)
             {
-                // Afterimage縺ｯ蜷後§Mesh繧定､・焚Pose縺ｧInstancing謠冗判縺励．rawCall繧呈椛縺医ｋ縲・
+                // Draw afterimages by instancing the same mesh across multiple stored poses.
                 std::unordered_map<
                     GltfModelCommponennt*,
                     std::vector<const MeshVFXModelPoseView*>> poseGroups_;
@@ -860,7 +954,7 @@ void MeshVFXRenderSystem::RenderAll(
             const auto& meshes_ = useOwnerModel_ ? ownerModel_->GetMeshes() : runtimePart_.modelResource->meshes;
             for (size_t meshIndex_ = 0; meshIndex_ < meshes_.size(); ++meshIndex_)
             {
-                // 騾壼ｸｸMeshVFX縺ｯPartTransform縺ｨOwnerTransform繧貞粋謌舌＠縺ｦ謠冗判縺吶ｋ縲・
+                // Regular MeshVFX combines the part transform with the owner transform.
                 if (part_.meshIndex >= 0 && part_.meshIndex != static_cast<int>(meshIndex_)) continue;
 
                 const GltfModelCommponennt::Mesh& mesh_ = meshes_[meshIndex_];

@@ -92,6 +92,11 @@
                         "InternalMeshCylinderRadius": 1.0,
                         "InternalMeshSettings": {
                             "BaseRadius": 1.1200000047683716,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
                             "CenterWidth": 0.5600000023841858,
                             "ConeLength": 1.0,
                             "ConeTipRadiusRate": 0.03500000014901161,
@@ -132,6 +137,7 @@
                             0.0,
                             0.05000000074505806
                         ],
+                        "MaterialPath": "",
                         "MeshIndex": 0,
                         "MeshRotationSpeed": [
                             0.0,
@@ -313,6 +319,7 @@
                             5.5
                         ],
                         "MaskTexturePath": "",
+                        "MaterialPath": "",
                         "MaxCount": 10000,
                         "MeshVertexSampleCount": 2048,
                         "Name": "Emitter_0",
