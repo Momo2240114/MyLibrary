@@ -98,6 +98,7 @@ private:
         TRAIL_PARTICLE_EMISSION_MODE::DISTANCE_INTERVAL;
     float trailParticleInterval = 0.04f;
     float trailParticleDistance = 0.15f;
+    float trailParticleLifeTime = 0.8f;
     int trailParticleSampleInterval = 1;
     int trailParticleSpawnCount = 1;
     float trailParticleWidthMin = 0.35f;
