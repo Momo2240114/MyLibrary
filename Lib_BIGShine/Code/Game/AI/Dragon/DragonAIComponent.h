@@ -55,6 +55,14 @@ enum class DRAGON_DAMAGE_PHASE
     COLLAPSE
 };
 
+enum class DRAGON_ACTION_FINISH_MODE
+{
+    SEQUENCER,
+    AI_CONDITION,
+    AI_DURATION,
+    MANUAL
+};
+
 struct DragonAIContext
 {
     float hpRate = 1.0f;
@@ -116,6 +124,7 @@ struct DragonActionDefinition
     bool allowBuffer = true;
     bool useActionTimeout = true;
     float actionTimeout = 5.0f;
+    DRAGON_ACTION_FINISH_MODE finishMode = DRAGON_ACTION_FINISH_MODE::SEQUENCER;
 };
 
 class DragonAIComponent : public Component
@@ -129,9 +138,12 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     bool RequestAction(DRAGON_ACTION_TYPE action_);
+    void ForceAction(DRAGON_ACTION_TYPE action_);
     void SetCanCancel(bool enabled_);
     void SetCanBufferAction(bool enabled_);
     void NotifyActionEnd();
+    void NotifySequencerActionEnd();
+    void NotifyAIActionEnd();
     bool ConsumeBufferedAction();
     void RegisterActions();
     void ResetBehaviorGraphRuntime();
@@ -152,12 +164,16 @@ public:
 private:
     void EnsureDependencies();
     void InitializeDefaultDefinitions();
+    void ApplyActionDefinitionRuntimePolicies();
     void UpdateContext();
     void UpdateCooldowns(float deltaTime_);
     void UpdateDecision(float deltaTime_);
     void UpdateBehaviorGraph(float deltaTime_);
     void UpdateActionMotion(float deltaTime_);
+    bool UpdateAIControlledActionEnd();
+    bool UpdateDurationControlledActionEnd();
     void UpdateActionTimeout();
+    void CompleteActionEnd();
     void TurnTowardPlayer(float deltaTime_);
     void MoveForward(float speed_, float deltaTime_);
     void StopMovement();
@@ -196,6 +212,8 @@ private:
     void RegisterRuntimeActions();
     DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_);
     const DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_) const;
+    bool IsAIControlledAction(DRAGON_ACTION_TYPE action_) const;
+    bool IsSequencerControlledAction(DRAGON_ACTION_TYPE action_) const;
     float GetCooldown(DRAGON_ACTION_TYPE action_) const;
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);
     bool IsActionAvailable(DRAGON_ACTION_TYPE action_) const;
@@ -266,3 +284,4 @@ private:
 const char* GetDragonActionName(DRAGON_ACTION_TYPE action_);
 const char* GetDragonAIStateName(DRAGON_AI_STATE state_);
 const char* GetDragonDamagePhaseName(DRAGON_DAMAGE_PHASE phase_);
+const char* GetDragonActionFinishModeName(DRAGON_ACTION_FINISH_MODE mode_);

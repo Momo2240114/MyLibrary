@@ -39,6 +39,7 @@
 #include "Editor/Workspace/PlayerStateEditorWindow.h"
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
 #include "Editor/Workspace/AIBehaviorEditorWindow.h"
+#include "Editor/Workspace/UIWidgetEditorWindow.h"
 #include <imgui.h>
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
@@ -91,6 +92,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<PlayerStateEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AIBehaviorEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<UIWidgetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<CurveAssetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EasingPresetEditorWindow>(_GameObjectManager.get()));

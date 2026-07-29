@@ -97,6 +97,7 @@
                             "BeamHalfWidth": 0.11999999731779099,
                             "BeamLength": 1.0,
                             "BeamSidePanelRate": 0.550000011920929,
+                            "CapsuleLength": 2.0,
                             "CenterWidth": 0.5600000023841858,
                             "ConeLength": 1.0,
                             "ConeTipRadiusRate": 0.03500000014901161,

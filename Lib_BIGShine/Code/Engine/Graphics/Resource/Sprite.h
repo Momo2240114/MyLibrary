@@ -98,7 +98,7 @@ private:
     DirectX::XMFLOAT2 localSize{ 1280,710 };//描画時のスクリーン座標の大きさ
     DirectX::XMFLOAT2 catSize{ 350,350 };//描画時のスクリーン座標の大きさ
     DirectX::XMFLOAT2 catPos{ 0,0 };//描画時のスクリーン座標の大きさ
-    DirectX::XMFLOAT2 textureSize;
+    DirectX::XMFLOAT2 textureSize{ 1.0f, 1.0f };
     float localRotation = 0;   
 
     DirectX::XMFLOAT4 color{ 1,1,1,1 };

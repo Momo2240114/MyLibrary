@@ -213,14 +213,14 @@
                         "OwnerPosition": {
                             "type": "vector3",
                             "value": [
-                                -20.364925384521484,
-                                -0.7817702293395996,
-                                -2.9300103187561035
+                                28.241580963134766,
+                                -0.5823211669921875,
+                                17.795269012451172
                             ]
                         },
                         "SpawnDistance": {
                             "type": "float",
-                            "value": 30.09937858581543
+                            "value": 22.980432510375977
                         },
                         "SpawnPosition": {
                             "type": "vector3",
@@ -232,41 +232,41 @@
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 18.001808166503906
+                            "value": 31.648313522338867
                         },
                         "TargetPosition": {
                             "type": "vector3",
                             "value": [
-                                -21.534086227416992,
-                                -1.5422390699386597,
-                                15.017687797546387
+                                19.36963653564453,
+                                -0.11484146118164063,
+                                48.17101287841797
                             ]
                         },
                         "ToSpawnDirection": {
                             "type": "vector3",
                             "value": [
-                                0.9491569399833679,
-                                -1.584209385896429e-08,
-                                0.31480321288108826
+                                -0.8719362616539001,
+                                -0.0086791031062603,
+                                -0.48954251408576965
                             ]
                         },
                         "ToTargetDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.06494685262441635,
-                                -0.04224402457475662,
-                                0.9969941973686218
+                                -0.2803291380405426,
+                                0.014771077781915665,
+                                0.9597902894020081
                             ]
                         }
                     },
                     "Anim": {
                         "ActionEnded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "ActionTrigger": {
                             "type": "string",
-                            "value": ""
+                            "value": "Death"
                         },
                         "CurrentAction": {
                             "type": "string",
@@ -278,13 +278,25 @@
                         },
                         "IsActing": {
                             "type": "bool",
+                            "value": true
+                        },
+                        "ReturnToIdle": {
+                            "type": "bool",
                             "value": false
                         },
                         "To_PlainsDragon_Death": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "To_PlainsDragon_IdleBreathe": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "To_PlainsDragon_Turn90L_RM": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "To_PlainsDragon_Walk": {
                             "type": "bool",
                             "value": false
                         }
@@ -296,7 +308,7 @@
                         },
                         "ActionEnded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "ActionName": {
                             "type": "string",
@@ -304,7 +316,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 5.015622138977051
+                            "value": 3.708049774169922
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -312,11 +324,11 @@
                         },
                         "CanBufferAction": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseBite": {
                             "type": "bool",
@@ -364,7 +376,7 @@
                         },
                         "IsActing": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsTargetBehind": {
                             "type": "bool",
@@ -416,7 +428,7 @@
                         },
                         "State": {
                             "type": "int",
-                            "value": 6
+                            "value": 3
                         },
                         "TargetAngle": {
                             "type": "float",
@@ -434,7 +446,7 @@
                     "DragonBodyPart": {
                         "LastBodyPart": {
                             "type": "int",
-                            "value": 6
+                            "value": 10
                         },
                         "LastBrokenThisHit": {
                             "type": "bool",
@@ -442,11 +454,11 @@
                         },
                         "LastDurabilityDamage": {
                             "type": "float",
-                            "value": 14.399999618530273
+                            "value": 4.0
                         },
                         "LastHealthDamage": {
                             "type": "float",
-                            "value": 14.399999618530273
+                            "value": 4.0
                         }
                     },
                     "Health": {
@@ -478,7 +490,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 14.399999618530273
+                            "value": 4.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -487,17 +499,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.2638905942440033,
-                                -0.964552640914917
+                                0.9930813312530518,
+                                0.11742852628231049
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.20000000298023224
+                            "value": 0.05000000074505806
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.30000001192092896
+                            "value": 1.0
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -505,7 +517,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 16.0
+                            "value": 9.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -513,22 +525,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 6.0
+                            "value": 20.0
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.2554177939891815,
-                                -0.2513637840747833,
-                                -0.9335834980010986
+                                0.9930813312530518,
+                                3.5709709322873096e-07,
+                                0.11742852628231049
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                17.778053283691406,
-                                2.412846565246582,
-                                20.368301391601563
+                                30.629444122314453,
+                                2.4283981323242188,
+                                0.07442957907915115
                             ]
                         },
                         "Received": {
@@ -586,7 +598,7 @@
         {
             "Data": {
                 "AttackRange": 2.0,
-                "ChaseSpeed": 0.0,
+                "ChaseSpeed": 8.0,
                 "DetectRange": 12.0,
                 "Graph": {
                     "Links": [
@@ -2108,10 +2120,10 @@
                     "Version": 1
                 },
                 "GraphAssetPath": "Data/AI/BehaviorGraph/DragonFirstForm.json",
-                "IsRunning": false,
+                "IsRunning": true,
                 "LostRange": 16.0,
-                "ReturnSpeed": 0.0,
-                "ReturnStopDistance": 0.0,
+                "ReturnSpeed": 8.0,
+                "ReturnStopDistance": 6.0,
                 "SpawnPosition": [
                     8.204109191894531,
                     -0.7817707061767578,
@@ -2720,79 +2732,6 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 9,
-                            "blend2DBackwardAnimationIndex": -1,
-                            "blend2DBackwardLeft90AnimationIndex": -1,
-                            "blend2DBackwardLeft90PhaseOffset": 0.0,
-                            "blend2DBackwardLeftAnimationIndex": -1,
-                            "blend2DBackwardLeftPhaseOffset": 0.0,
-                            "blend2DBackwardPhaseOffset": 0.0,
-                            "blend2DBackwardRight90AnimationIndex": -1,
-                            "blend2DBackwardRight90PhaseOffset": 0.0,
-                            "blend2DBackwardRightAnimationIndex": -1,
-                            "blend2DBackwardRightPhaseOffset": 0.0,
-                            "blend2DDefaultInput": [
-                                0.0,
-                                1.0
-                            ],
-                            "blend2DForwardAnimationIndex": -1,
-                            "blend2DForwardLeft90AnimationIndex": -1,
-                            "blend2DForwardLeft90PhaseOffset": 0.0,
-                            "blend2DForwardLeftAnimationIndex": -1,
-                            "blend2DForwardLeftPhaseOffset": 0.0,
-                            "blend2DForwardPhaseOffset": 0.0,
-                            "blend2DForwardRight90AnimationIndex": -1,
-                            "blend2DForwardRight90PhaseOffset": 0.0,
-                            "blend2DForwardRightAnimationIndex": -1,
-                            "blend2DForwardRightPhaseOffset": 0.0,
-                            "blend2DIdleAnimationIndex": -1,
-                            "blend2DIdlePhaseOffset": 0.0,
-                            "blend2DIdleThreshold": 0.05000000074505806,
-                            "blend2DLeftAnimationIndex": -1,
-                            "blend2DLeftPhaseOffset": 0.0,
-                            "blend2DParamName": "MoveInput",
-                            "blend2DRightAnimationIndex": -1,
-                            "blend2DRightPhaseOffset": 0.0,
-                            "blend2DSyncNormalizedTime": true,
-                            "blend2DUseEightDirections": false,
-                            "blend2DUseForwardBackwardLateral": false,
-                            "blend2DUseIdleStop": false,
-                            "blendDefaultWeight": 0.5,
-                            "blendMaskRootNodes": [],
-                            "blendParamName": "BlendAlpha",
-                            "blendParameterMax": 1.0,
-                            "blendParameterMin": 0.0,
-                            "blendPhaseOffsetA": 0.0,
-                            "blendPhaseOffsetB": 0.0,
-                            "blendSyncNormalizedTime": true,
-                            "blendUseMask": false,
-                            "customAnimIndex": -1,
-                            "events": [],
-                            "loop": false,
-                            "name": "PlainsDragon_FlyStationarySpitFireBall",
-                            "rootMotion": {
-                                "applyPositionX": true,
-                                "applyPositionY": true,
-                                "applyPositionZ": true,
-                                "applyRotationX": true,
-                                "applyRotationY": true,
-                                "applyRotationZ": true,
-                                "cutVisualPositionX": true,
-                                "cutVisualPositionY": true,
-                                "cutVisualPositionZ": true,
-                                "enable": false,
-                                "sourceNodeName": ""
-                            },
-                            "rootMotionScale": 1.0,
-                            "rootMotionScaleCurveName": "",
-                            "sequencer": "",
-                            "speed": 1.0,
-                            "speedCurveName": "",
-                            "type": 0
-                        },
-                        {
-                            "animIndexA": -1,
-                            "animIndexB": -1,
                             "animationIndex": 23,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
@@ -2843,6 +2782,79 @@
                             "events": [],
                             "loop": false,
                             "name": "PlainsDragon_TakeOff",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": true,
+                                "applyRotationY": true,
+                                "applyRotationZ": true,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 9,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": false,
+                            "name": "PlainsDragon_FlyStationarySpitFireBall",
                             "rootMotion": {
                                 "applyPositionX": true,
                                 "applyPositionY": true,
@@ -3232,8 +3244,11 @@
                 },
                 "AssetPath": "",
                 "GraphAssetPath": "DragonFirstForm_Test",
-                "StateAssets": {},
-                "UseTransitionGraph": true
+                "StateAssets": {
+                    "PlainsDragon_Turn90L_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90L_RM.json",
+                    "PlainsDragon_Turn90R_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90R_RM.json"
+                },
+                "UseTransitionGraph": false
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -3324,6 +3339,7 @@
                         "CooldownTime": 0.0,
                         "Duration": 0.10000000149011612,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
@@ -3343,13 +3359,14 @@
                         "CooldownTime": 0.20000000298023224,
                         "Duration": 0.8999999761581421,
                         "Enabled": true,
+                        "FinishMode": 1,
                         "HitBoxActionName": "",
                         "IKActionName": "",
-                        "RecoveryTime": 0.10000000149011612,
+                        "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
-                        "UseActionTimeout": true,
+                        "UseActionTimeout": false,
                         "VFXActionName": "",
-                        "WaitForActionEnd": false
+                        "WaitForActionEnd": true
                     },
                     {
                         "Action": 2,
@@ -3362,6 +3379,7 @@
                         "CooldownTime": 3.0,
                         "Duration": 1.399999976158142,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.4000000059604645,
@@ -3378,16 +3396,17 @@
                         "AllowBuffer": true,
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Turn90L_RM",
-                        "CooldownTime": 0.4000000059604645,
+                        "CooldownTime": 0.0,
                         "Duration": 0.6000000238418579,
                         "Enabled": true,
+                        "FinishMode": 1,
                         "HitBoxActionName": "",
                         "IKActionName": "",
-                        "RecoveryTime": 0.10000000149011612,
+                        "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
-                        "UseActionTimeout": true,
+                        "UseActionTimeout": false,
                         "VFXActionName": "",
-                        "WaitForActionEnd": false
+                        "WaitForActionEnd": true
                     },
                     {
                         "Action": 4,
@@ -3400,6 +3419,7 @@
                         "CooldownTime": 1.2000000476837158,
                         "Duration": 1.0,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.3499999940395355,
@@ -3419,6 +3439,7 @@
                         "CooldownTime": 2.0,
                         "Duration": 1.399999976158142,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.5,
@@ -3438,6 +3459,7 @@
                         "CooldownTime": 3.0,
                         "Duration": 2.0,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.6000000238418579,
@@ -3457,6 +3479,7 @@
                         "CooldownTime": 2.0,
                         "Duration": 1.2000000476837158,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
@@ -3476,6 +3499,7 @@
                         "CooldownTime": 5.0,
                         "Duration": 2.0,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.6499999761581421,
@@ -3495,6 +3519,7 @@
                         "CooldownTime": 5.0,
                         "Duration": 1.399999976158142,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
@@ -3514,13 +3539,14 @@
                         "CooldownTime": 0.20000000298023224,
                         "Duration": 1.0,
                         "Enabled": true,
+                        "FinishMode": 2,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
-                        "UseActionTimeout": true,
+                        "UseActionTimeout": false,
                         "VFXActionName": "",
-                        "WaitForActionEnd": false
+                        "WaitForActionEnd": true
                     },
                     {
                         "Action": 11,
@@ -3533,6 +3559,7 @@
                         "CooldownTime": 2.0,
                         "Duration": 1.2999999523162842,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
@@ -3552,6 +3579,7 @@
                         "CooldownTime": 3.0,
                         "Duration": 2.0,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
@@ -3571,6 +3599,7 @@
                         "CooldownTime": 4.0,
                         "Duration": 1.5,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.6000000238418579,
@@ -3590,6 +3619,7 @@
                         "CooldownTime": 0.5,
                         "Duration": 0.5,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.20000000298023224,
@@ -3609,6 +3639,7 @@
                         "CooldownTime": 0.0,
                         "Duration": 3.0,
                         "Enabled": true,
+                        "FinishMode": 0,
                         "HitBoxActionName": "",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
@@ -9534,7 +9565,7 @@
             "RequiredForSceneStart": false,
             "TypeName": "DragonAIComponent",
             "UpdateEnabled": true,
-            "UpdatePriority": 0
+            "UpdatePriority": 10
         },
         {
             "Data": {
@@ -9684,7 +9715,7 @@
                     {
                         "BodyPart": "LEFT_FRONT_LEG",
                         "Broken": false,
-                        "CurrentDurability": 86.5,
+                        "CurrentDurability": 54.099998474121094,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9731,8 +9762,8 @@
                     },
                     {
                         "BodyPart": "TAIL",
-                        "Broken": false,
-                        "CurrentDurability": 13.600013732910156,
+                        "Broken": true,
+                        "CurrentDurability": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0
@@ -9755,9 +9786,9 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            26.241140365600586,
+            28.241580963134766,
             -0.5823211669921875,
-            17.301151275634766
+            17.795269012451172
         ],
         "Rot": [
             0.0,
