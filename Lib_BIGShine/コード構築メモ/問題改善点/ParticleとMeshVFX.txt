@@ -365,6 +365,27 @@ Base / Mask / Noise / Normal / Emissive / Gradient / Distortionなど、MeshVFX�
 Shader/MeshVFXPS.hlsl
 Shader/MeshVFXDistortionPS.hlsl
 
+MeshVFXの内部メッシュにカプセル形状が欲しい問題
+
+問題:
+MeshVFXの内部メッシュにはCylinder / Cone / BreathBeam / Slash系はあるが、丸い端を持つカプセル形状がなかった。
+外部モデルを用意せず、当たりやビーム芯、魔法弾の軌跡などに使える単純なカプセルを内部生成したい。
+
+対応:
+Internal Meshに__InternalMeshCapsule__を追加した。
+CreateInternalMeshCapsuleModelResourceで、上下半球と中央胴体を1つのModelResource内のmeshes[0]だけに生成するようにした。
+頂点・インデックスは1つのMeshにまとめ、複数サブメッシュや別Modelには分けない。
+EditorのModelタブにUse Internal Capsuleを追加し、ShapeタブでInternal Capsule RadiusとCapsule Length、Segmentsを編集できるようにした。
+InternalMeshSettingsにCapsuleLengthを追加し、Serialize / Deserializeへ対応した。
+
+結果:
+MeshVFXのPartから、外部モデルなしで単一Mesh構成のカプセルを選択できるようになった。
+既存のMaterial、UV、Dissolve、Noise、ColorRampなどのMeshVFX表現をそのままカプセル形状へ適用できる。
+
+関連ファイル:
+Code/Engine/Graphics/VFX/MeshVFXResource.h
+Code/Engine/Graphics/VFX/MeshVFXComponent.cpp
+
 VFXMaterialのカラーランプとランダムカラーをParticle / MeshVFXで共通利用したい問題
 
 問題:

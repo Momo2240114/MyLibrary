@@ -10,7 +10,7 @@
                 0.0
             ],
             "BlendMode": 0,
-            "BurstCount": 25,
+            "BurstCount": 60,
             "Color": [
                 0.5647059082984924,
                 1.0,
@@ -34,7 +34,7 @@
                 0.0
             ],
             "Delay": 0.0,
-            "Drag": 1.159999966621399,
+            "Drag": 15.0,
             "EmissionAxis": [
                 0.0,
                 1.0,
@@ -48,10 +48,10 @@
             "FresnelPower": 2.0,
             "FresnelStrength": 1.0,
             "GradientTexturePath": "",
-            "Gravity": 5.0,
+            "Gravity": 8.0,
             "LegacyRadius": [
-                1.0,
-                0.0
+                0.4000000059604645,
+                0.4000000059604645
             ],
             "Lifespan": [
                 0.20000000298023224,
@@ -62,7 +62,7 @@
             "MaterialPaths": [
                 ""
             ],
-            "MaxCount": 50,
+            "MaxCount": 120,
             "MeshVertexSampleCount": 2048,
             "Name": "WindParticle_Small",
             "NoiseFrequency": 1.0,
@@ -77,8 +77,8 @@
             "RadialVelocity": 5.599999904632568,
             "RenderType": 0,
             "RotationSpeed": [
-                -2.9700000286102295,
-                -11.039999961853027
+                -30.0,
+                30.0
             ],
             "ShapeEnd": [
                 0.0,
@@ -96,8 +96,8 @@
                 0.0
             ],
             "Size": [
-                1.0,
-                1.0
+                0.4000000059604645,
+                0.800000011920929
             ],
             "SizeRandomEnd": [
                 1.0,
@@ -176,7 +176,7 @@
                 0.0
             ],
             "BlendMode": 0,
-            "BurstCount": 5,
+            "BurstCount": 20,
             "Color": [
                 0.47058823704719543,
                 1.0,
@@ -200,7 +200,7 @@
                 0.0
             ],
             "Delay": 0.0,
-            "Drag": 1.0,
+            "Drag": 18.0,
             "EmissionAxis": [
                 0.0,
                 1.0,
@@ -214,9 +214,9 @@
             "FresnelPower": 5.0,
             "FresnelStrength": 1.0,
             "GradientTexturePath": "",
-            "Gravity": 6.0,
+            "Gravity": 8.0,
             "LegacyRadius": [
-                0.8500000238418579,
+                0.30000001192092896,
                 0.0
             ],
             "Lifespan": [
@@ -228,12 +228,12 @@
             "MaterialPaths": [
                 ""
             ],
-            "MaxCount": 25,
+            "MaxCount": 60,
             "MeshVertexSampleCount": 2048,
             "Name": "WindParticle_Big",
             "NoiseFrequency": 1.0,
             "NoiseSpeed": 1.0,
-            "NoiseStrength": 5.929999828338623,
+            "NoiseStrength": 10.0,
             "OrbitVelocity": 0.0,
             "PosOffset": [
                 0.0,
@@ -262,8 +262,8 @@
                 0.0
             ],
             "Size": [
-                1.100000023841858,
-                2.0
+                0.5,
+                1.0
             ],
             "SizeRandomEnd": [
                 1.0,

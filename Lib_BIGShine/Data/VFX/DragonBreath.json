@@ -1,0 +1,529 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": false,
+        "Parts": [
+            {
+                "Alpha": 1.0,
+                "AlphaCurveName": "",
+                "AlphaEnd": 1.0,
+                "AlphaStart": 1.0,
+                "AnimateAlpha": false,
+                "AnimateScale": false,
+                "BackFaceColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "BackFaceEmissiveStrength": 0.0,
+                "BaseSamplerMode": 0,
+                "BaseTexturePath": "",
+                "BaseUVRotation": 0.0,
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    0.5098039507865906,
+                    0.18039216101169586,
+                    1.0
+                ],
+                "DissolveCurveName": "",
+                "DissolveEdgeColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "DissolveEdgeStrength": 3.0,
+                "DissolveEdgeWidth": 0.05000000074505806,
+                "DissolveThreshold": 0.0,
+                "DistortionNoiseTexturePath": "",
+                "DistortionNoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "DistortionSamplerMode": 0,
+                "Duration": 0.0,
+                "EdgeColor": [
+                    1.0,
+                    0.29411765933036804,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "EdgePatternMode": 0,
+                "EdgePatternSamplerMode": 0,
+                "EdgePatternStrength": 0.0,
+                "EdgePatternTexturePath": "",
+                "EdgePatternUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "EmissiveCurveName": "",
+                "EmissivePulseAmount": 0.3499999940395355,
+                "EmissivePulseSpeed": 2.0,
+                "EmissiveSamplerMode": 0,
+                "EmissiveStrength": 3.0,
+                "EmissiveTexturePath": "",
+                "EmissiveUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "FresnelNoiseStrength": 0.0,
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "GradientDirection": 0,
+                "GradientEndUv": 1.0,
+                "GradientFixedUv": 0.5,
+                "GradientSampleMode": 0,
+                "GradientSamplerMode": 0,
+                "GradientStartUv": 0.0,
+                "GradientTexturePath": "",
+                "InternalMeshCylinderRadius": 1.0,
+                "InternalMeshSettings": {
+                    "BaseRadius": 1.1200000047683716,
+                    "BeamDepthThickness": 0.017999999225139618,
+                    "BeamHalfHeight": 1.0,
+                    "BeamHalfWidth": 1.0,
+                    "BeamLength": 5.0,
+                    "BeamSidePanelRate": 0.6269999742507935,
+                    "CapsuleLength": 2.0,
+                    "CenterWidth": 0.5600000023841858,
+                    "ConeLength": 1.0,
+                    "ConeTipRadiusRate": 0.03500000014901161,
+                    "EndAngleDegrees": 78.0,
+                    "InnerWidthScale": 0.3499999940395355,
+                    "OuterWidthScale": 1.25,
+                    "RadiusTaperAmount": 0.05000000074505806,
+                    "Segments": 96,
+                    "StartAngleDegrees": -78.0,
+                    "TaperPower": 2.0,
+                    "TipRate": 0.019999999552965164,
+                    "TipWidth": 0.009999999776482582,
+                    "WallDepth": 0.5,
+                    "WallHeight": 1.100000023841858,
+                    "WallPositionRate": 0.5
+                },
+                "IntersectionEdgeStrength": 0.0,
+                "IntersectionEdgeWidth": 0.0020000000949949026,
+                "Loop": true,
+                "MaskDistortionOpacity": 0.5,
+                "MaskDistortionStrength": 8.0,
+                "MaskLayers": [
+                    {
+                        "BlendMode": 0,
+                        "Invert": false,
+                        "Path": "Data/Texture/VFX/T_Free_Magic_Trail_Fire.PNG"
+                    }
+                ],
+                "MaskSamplerMode": 0,
+                "MaskTexturePath": "",
+                "MaskUVRotation": -80.0,
+                "MaskUVRotationSpeed": 0.0,
+                "MaskUVScale": [
+                    1.0,
+                    3.2699999809265137
+                ],
+                "MaskUVSpeed": [
+                    0.1899999976158142,
+                    -0.18000000715255737
+                ],
+                "MaterialPath": "",
+                "MaterialPaths": [
+                    ""
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "__InternalMeshBreathBeam__",
+                "NoiseSamplerMode": 0,
+                "NoiseStrength": 0.05000000074505806,
+                "NoiseTexturePath": "",
+                "NoiseTexturePaths": [],
+                "NoiseUVRotation": 0.0,
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "NoiseUVSpeed": [
+                    0.20000000298023224,
+                    -0.800000011920929
+                ],
+                "NormalSamplerMode": 0,
+                "NormalStrength": 1.0,
+                "NormalTexturePath": "",
+                "NormalUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleCurveName": "",
+                "ScaleEnd": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleStart": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "SilhouetteEdgePower": 0.10000000149011612,
+                "SilhouetteEdgeStrength": 0.46000000834465027,
+                "TrailNewAlpha": 1.0,
+                "TrailNewRootColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailNewTipColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailOldAlpha": 1.0,
+                "TrailOldRootColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailOldTipColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailRecencyIntensity": 1.0,
+                "TrailRecencyPower": 1.0,
+                "TrailTipIntensity": 1.0,
+                "TrailTipPower": 1.0,
+                "TrailUseColorRamp": false,
+                "UVRadialScale": 1.0,
+                "UVRadialScaleSpeed": 0.0,
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UVRotationCurveName": "",
+                "UVScrollCurveName": "",
+                "UseBackFaceBoost": false,
+                "UseDissolveEdge": false,
+                "UseEdgeHighlight": true,
+                "UseFresnel": false,
+                "UseFresnelNoise": false,
+                "UseGradientTexture": false,
+                "UseMask": true,
+                "UseMaskDistortion": false,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": false,
+                "UseNormal": false,
+                "UseVertexNoise": false,
+                "VertexNoiseHorizontalScale": 1.0,
+                "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                "VertexNoiseSpeed": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "VertexNoiseTexturePath": "",
+                "VertexNoiseVerticalScale": 1.0,
+                "VertexNoiseVerticalStrength": 0.10000000149011612
+            },
+            {
+                "Alpha": 0.10000000149011612,
+                "AlphaCurveName": "",
+                "AlphaEnd": 1.0,
+                "AlphaStart": 1.0,
+                "AnimateAlpha": false,
+                "AnimateScale": false,
+                "BackFaceColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "BackFaceEmissiveStrength": 0.0,
+                "BaseSamplerMode": 0,
+                "BaseTexturePath": "",
+                "BaseUVRotation": 0.0,
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "BaseUVSpeed": [
+                    0.0,
+                    -0.5
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    0.7607843279838562,
+                    0.5372549295425415,
+                    1.0
+                ],
+                "DissolveCurveName": "",
+                "DissolveEdgeColor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "DissolveEdgeStrength": 3.0,
+                "DissolveEdgeWidth": 0.05000000074505806,
+                "DissolveThreshold": 0.0,
+                "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+                "DistortionNoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "DistortionSamplerMode": 0,
+                "Duration": 0.0,
+                "EdgeColor": [
+                    0.25,
+                    0.75,
+                    1.0,
+                    1.0
+                ],
+                "EdgePatternMode": 0,
+                "EdgePatternSamplerMode": 0,
+                "EdgePatternStrength": 0.0,
+                "EdgePatternTexturePath": "",
+                "EdgePatternUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "EmissiveCurveName": "",
+                "EmissivePulseAmount": 0.3499999940395355,
+                "EmissivePulseSpeed": 2.0,
+                "EmissiveSamplerMode": 0,
+                "EmissiveStrength": 3.0,
+                "EmissiveTexturePath": "",
+                "EmissiveUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "FresnelNoiseStrength": 0.0,
+                "FresnelPower": 2.0,
+                "FresnelStrength": 1.0,
+                "GradientDirection": 0,
+                "GradientEndUv": 1.0,
+                "GradientFixedUv": 0.5,
+                "GradientSampleMode": 0,
+                "GradientSamplerMode": 0,
+                "GradientStartUv": 0.0,
+                "GradientTexturePath": "",
+                "InternalMeshCylinderRadius": 1.0,
+                "InternalMeshSettings": {
+                    "BaseRadius": 1.1200000047683716,
+                    "BeamDepthThickness": 0.017999999225139618,
+                    "BeamHalfHeight": 0.44999998807907104,
+                    "BeamHalfWidth": 0.11999999731779099,
+                    "BeamLength": 1.0,
+                    "BeamSidePanelRate": 0.550000011920929,
+                    "CapsuleLength": 6.769999980926514,
+                    "CenterWidth": 0.5600000023841858,
+                    "ConeLength": 1.0,
+                    "ConeTipRadiusRate": 0.03500000014901161,
+                    "EndAngleDegrees": 78.0,
+                    "InnerWidthScale": 0.3499999940395355,
+                    "OuterWidthScale": 1.25,
+                    "RadiusTaperAmount": 0.05000000074505806,
+                    "Segments": 118,
+                    "StartAngleDegrees": -78.0,
+                    "TaperPower": 2.0,
+                    "TipRate": 0.019999999552965164,
+                    "TipWidth": 0.009999999776482582,
+                    "WallDepth": 0.5,
+                    "WallHeight": 1.100000023841858,
+                    "WallPositionRate": 0.5
+                },
+                "IntersectionEdgeStrength": 0.0,
+                "IntersectionEdgeWidth": 0.0020000000949949026,
+                "Loop": true,
+                "MaskDistortionOpacity": 0.49000000953674316,
+                "MaskDistortionStrength": 23.899999618530273,
+                "MaskLayers": [
+                    {
+                        "BlendMode": 0,
+                        "Invert": false,
+                        "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                    },
+                    {
+                        "BlendMode": 0,
+                        "Invert": false,
+                        "Path": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                    }
+                ],
+                "MaskSamplerMode": 0,
+                "MaskTexturePath": "",
+                "MaskUVRotation": 0.0,
+                "MaskUVRotationSpeed": 0.0,
+                "MaskUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "MaskUVSpeed": [
+                    0.0,
+                    -0.20000000298023224
+                ],
+                "MaterialPath": "",
+                "MaterialPaths": [
+                    ""
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "__InternalMeshCapsule__",
+                "NoiseSamplerMode": 0,
+                "NoiseStrength": 0.7210000157356262,
+                "NoiseTexturePath": "",
+                "NoiseTexturePaths": [],
+                "NoiseUVRotation": 0.0,
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "NoiseUVSpeed": [
+                    0.20000000298023224,
+                    -0.800000011920929
+                ],
+                "NormalSamplerMode": 0,
+                "NormalStrength": 7.03000020980835,
+                "NormalTexturePath": "",
+                "NormalUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0,
+                    2.4600000381469727
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.5,
+                    1.5,
+                    1.5
+                ],
+                "ScaleCurveName": "",
+                "ScaleEnd": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "ScaleStart": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "SilhouetteEdgePower": 3.0,
+                "SilhouetteEdgeStrength": 0.0,
+                "TrailNewAlpha": 1.0,
+                "TrailNewRootColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailNewTipColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailOldAlpha": 1.0,
+                "TrailOldRootColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailOldTipColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailRecencyIntensity": 1.0,
+                "TrailRecencyPower": 1.0,
+                "TrailTipIntensity": 1.0,
+                "TrailTipPower": 1.0,
+                "TrailUseColorRamp": false,
+                "UVRadialScale": 1.0,
+                "UVRadialScaleSpeed": 0.0,
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UVRotationCurveName": "",
+                "UVScrollCurveName": "",
+                "UseBackFaceBoost": false,
+                "UseDissolveEdge": false,
+                "UseEdgeHighlight": false,
+                "UseFresnel": false,
+                "UseFresnelNoise": false,
+                "UseGradientTexture": false,
+                "UseMask": true,
+                "UseMaskDistortion": true,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": false,
+                "UseNormal": false,
+                "UseVertexNoise": false,
+                "VertexNoiseHorizontalScale": 1.0,
+                "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                "VertexNoiseSpeed": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "VertexNoiseTexturePath": "",
+                "VertexNoiseVerticalScale": 1.0,
+                "VertexNoiseVerticalStrength": 0.10000000149011612
+            }
+        ],
+        "PlaybackSpeed": 1.0
+    }
+}

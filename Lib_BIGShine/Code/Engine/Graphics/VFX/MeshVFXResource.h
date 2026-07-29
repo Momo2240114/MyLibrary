@@ -89,6 +89,8 @@ struct MeshVFXInternalMeshSettings
     float coneTipRadiusRate = 0.035f;
     float coneLength = 1.0f;
 
+    float capsuleLength = 2.0f;
+
     float beamLength = 1.0f;
     float beamHalfHeight = 0.45f;
     float beamHalfWidth = 0.12f;

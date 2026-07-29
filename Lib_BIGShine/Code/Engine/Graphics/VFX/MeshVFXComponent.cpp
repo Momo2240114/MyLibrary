@@ -40,6 +40,7 @@ namespace
     constexpr const char* INTERNAL_MESH__MODEL_PATH = "__InternalMesh__";
     constexpr const char* INTERNAL_MESH_CYLINDER_MODEL_PATH = "__InternalMeshCylinder__";
     constexpr const char* INTERNAL_MESH_CONE_MODEL_PATH = "__InternalMeshCone__";
+    constexpr const char* INTERNAL_MESH_CAPSULE_MODEL_PATH = "__InternalMeshCapsule__";
     constexpr const char* INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH = "__InternalMeshSlashCrescent__";
     constexpr const char* INTERNAL_MESH_SLASH_FAN_MODEL_PATH = "__InternalMeshSlashFan__";
     constexpr const char* INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH = "__InternalMeshSlashArcRibbon__";
@@ -951,6 +952,96 @@ namespace
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
     }
 
+    std::shared_ptr<ModelResource> CreateInternalMeshCapsuleModelResource(
+        ID3D11Device* device_,
+        float radius_,
+        const MeshVFXInternalMeshSettings& settings_)
+    {
+        BS_PROFILE_SCOPE("CreateInternalMeshCapsuleModelResource");
+        if (!device_) return nullptr;
+
+        const float safeRadius_ = (std::max)(radius_, 0.0001f);
+        const float capsuleLength_ = (std::max)(settings_.capsuleLength, safeRadius_ * 2.0f);
+        const float bodyHalfLength_ = (std::max)(capsuleLength_ * 0.5f - safeRadius_, 0.0f);
+        const float fullLength_ = bodyHalfLength_ * 2.0f + safeRadius_ * 2.0f;
+        const int segmentCount_ = std::clamp(settings_.segments, 8, 512);
+        const int capRingCount_ = std::clamp(settings_.segments / 4, 4, 64);
+        const int ringCount_ = (capRingCount_ + 1) * 2;
+
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_CAPSULE_MODEL_PATH);
+        resource_->modelName = INTERNAL_MESH_CAPSULE_MODEL_PATH;
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve(static_cast<size_t>(ringCount_) * static_cast<size_t>(segmentCount_));
+        mesh_.indices.reserve(static_cast<size_t>(ringCount_ - 1) * static_cast<size_t>(segmentCount_) * 6u);
+
+        auto addRing_ = [&](
+            float ringRadius_,
+            float z_,
+            float normalRadius_,
+            float normalZ_,
+            float v_)
+            {
+                for (int segmentIndex_ = 0; segmentIndex_ < segmentCount_; ++segmentIndex_)
+                {
+                    const float rate_ = static_cast<float>(segmentIndex_) /
+                        static_cast<float>(segmentCount_);
+                    const float angle_ = DirectX::XM_2PI * rate_;
+                    const float sin_ = std::sin(angle_);
+                    const float cos_ = std::cos(angle_);
+                    GltfModelCommponennt::Vertex vertex_{};
+                    vertex_.position = { sin_ * ringRadius_, cos_ * ringRadius_, z_ };
+                    const DirectX::XMVECTOR normalVector_ = DirectX::XMVector3Normalize(
+                        DirectX::XMVectorSet(sin_ * normalRadius_, cos_ * normalRadius_, normalZ_, 0.0f));
+                    DirectX::XMStoreFloat3(&vertex_.normal, normalVector_);
+                    vertex_.tangent = { cos_, -sin_, 0.0f, 1.0f };
+                    vertex_.texcoord = { rate_, v_ };
+                    mesh_.vertices.push_back(vertex_);
+                }
+            };
+
+        for (int ringIndex_ = 0; ringIndex_ <= capRingCount_; ++ringIndex_)
+        {
+            const float rate_ = static_cast<float>(ringIndex_) /
+                static_cast<float>(capRingCount_);
+            const float angle_ = -DirectX::XM_PIDIV2 + DirectX::XM_PIDIV2 * rate_;
+            const float ringRadius_ = std::cos(angle_) * safeRadius_;
+            const float z_ = -bodyHalfLength_ + std::sin(angle_) * safeRadius_;
+            const float v_ = (z_ + fullLength_ * 0.5f) / fullLength_;
+            addRing_(ringRadius_, z_, std::cos(angle_), std::sin(angle_), v_);
+        }
+
+        for (int ringIndex_ = 0; ringIndex_ <= capRingCount_; ++ringIndex_)
+        {
+            const float rate_ = static_cast<float>(ringIndex_) /
+                static_cast<float>(capRingCount_);
+            const float angle_ = DirectX::XM_PIDIV2 * rate_;
+            const float ringRadius_ = std::cos(angle_) * safeRadius_;
+            const float z_ = bodyHalfLength_ + std::sin(angle_) * safeRadius_;
+            const float v_ = (z_ + fullLength_ * 0.5f) / fullLength_;
+            addRing_(ringRadius_, z_, std::cos(angle_), std::sin(angle_), v_);
+        }
+
+        for (int ringIndex_ = 0; ringIndex_ < ringCount_ - 1; ++ringIndex_)
+        {
+            const uint32_t currentRing_ = static_cast<uint32_t>(ringIndex_ * segmentCount_);
+            const uint32_t nextRing_ = static_cast<uint32_t>((ringIndex_ + 1) * segmentCount_);
+            for (int segmentIndex_ = 0; segmentIndex_ < segmentCount_; ++segmentIndex_)
+            {
+                const uint32_t currentA_ = currentRing_ + static_cast<uint32_t>(segmentIndex_);
+                const uint32_t currentB_ = currentRing_ +
+                    static_cast<uint32_t>((segmentIndex_ + 1) % segmentCount_);
+                const uint32_t nextA_ = nextRing_ + static_cast<uint32_t>(segmentIndex_);
+                const uint32_t nextB_ = nextRing_ +
+                    static_cast<uint32_t>((segmentIndex_ + 1) % segmentCount_);
+                mesh_.indices.insert(
+                    mesh_.indices.end(),
+                    { currentA_, nextA_, currentB_, currentB_, nextA_, nextB_ });
+            }
+        }
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
     std::shared_ptr<ModelResource> CreateInternalMeshBreathBeamModelResource(
         ID3D11Device* device_,
         const MeshVFXInternalMeshSettings& settings_)
@@ -1399,6 +1490,14 @@ void MeshVFXComponent::Gui()
                 LoadPartResource(static_cast<size_t>(partIndex_));
             }
             ImGui::SameLine();
+            if (ImGui::Button("Use Internal Capsule"))
+            {
+                part_.modelPath = INTERNAL_MESH_CAPSULE_MODEL_PATH;
+                part_.meshIndex = 0;
+                part_.shapeCylinderRadius = (std::max)(part_.shapeCylinderRadius, 0.0001f);
+                LoadPartResource(static_cast<size_t>(partIndex_));
+            }
+            ImGui::SameLine();
             if (ImGui::Button("Use Breath Beam Mesh"))
             {
                 part_.modelPath = INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
@@ -1776,11 +1875,18 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat3("Rotation", &part_.rotation.x, 0.5f);
             ImGui::DragFloat3("Scale", &part_.scale.x, 0.01f);
             if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH ||
-                part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
+                part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH)
             {
-                const char* radiusLabel_ = part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH
-                    ? "Internal Cone Base Radius"
-                    : "Internal Cylinder Radius";
+                const char* radiusLabel_ = "Internal Cylinder Radius";
+                if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
+                {
+                    radiusLabel_ = "Internal Cone Base Radius";
+                }
+                else if (part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH)
+                {
+                    radiusLabel_ = "Internal Capsule Radius";
+                }
                 if (ImGui::DragFloat(radiusLabel_, &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
                 {
                     LoadPartResource(static_cast<size_t>(partIndex_));
@@ -1789,6 +1895,7 @@ void MeshVFXComponent::Gui()
 
             const bool isEditableInternalMesh_ =
                 part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
             if (isEditableInternalMesh_ && ImGui::TreeNode("Internal Mesh Shape"))
@@ -1811,6 +1918,15 @@ void MeshVFXComponent::Gui()
                     shapeChanged_ |= ImGui::DragFloat(
                         "Length",
                         &settings_.coneLength,
+                        0.01f,
+                        0.001f,
+                        100.0f);
+                }
+                else if (part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH)
+                {
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Capsule Length",
+                        &settings_.capsuleLength,
                         0.01f,
                         0.001f,
                         100.0f);
@@ -2298,6 +2414,7 @@ void MeshVFXComponent::Serialize(nlohmann::json& json_) const
             { "WallDepth", internalMesh_.wallDepth },
             { "ConeTipRadiusRate", internalMesh_.coneTipRadiusRate },
             { "ConeLength", internalMesh_.coneLength },
+            { "CapsuleLength", internalMesh_.capsuleLength },
             { "BeamLength", internalMesh_.beamLength },
             { "BeamHalfHeight", internalMesh_.beamHalfHeight },
             { "BeamHalfWidth", internalMesh_.beamHalfWidth },
@@ -2580,6 +2697,9 @@ void MeshVFXComponent::Deserialize(const nlohmann::json& json_)
                 1.0f);
             internalMesh_.coneLength = (std::max)(
                 internalMeshJson_.value("ConeLength", internalMesh_.coneLength),
+                0.0001f);
+            internalMesh_.capsuleLength = (std::max)(
+                internalMeshJson_.value("CapsuleLength", internalMesh_.capsuleLength),
                 0.0001f);
             internalMesh_.beamLength = (std::max)(
                 internalMeshJson_.value("BeamLength", internalMesh_.beamLength),
@@ -2962,6 +3082,13 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     else if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
     {
         runtimePart_.modelResource = CreateInternalMeshConeModelResource(
+            device_,
+            part_.shapeCylinderRadius,
+            part_.internalMeshSettings);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshCapsuleModelResource(
             device_,
             part_.shapeCylinderRadius,
             part_.internalMeshSettings);

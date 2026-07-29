@@ -555,7 +555,7 @@ void TrailMeshComponent::EmitTrailParticlesAtSample(
         request_.emitterName = trailParticleEmitterName;
         request_.position = BuildTrailParticlePosition(sample_);
         request_.normal = normal_;
-        request_.lifeTime = lifeTime;
+        request_.lifeTime = trailParticleLifeTime;
         effectManager_.SpawnParticle(request_);
     }
 }
@@ -733,6 +733,7 @@ void TrailMeshComponent::Gui()
         ImGui::BeginDisabled(trailParticleEmissionMode != TRAIL_PARTICLE_EMISSION_MODE::SAMPLE_INTERVAL);
         ImGui::DragInt("Sample Interval", &trailParticleSampleInterval, 1.0f, 1, 128);
         ImGui::EndDisabled();
+        ImGui::DragFloat("Particle Life Time", &trailParticleLifeTime, 0.01f, 0.001f, 10.0f);
         ImGui::DragInt("Spawn Count", &trailParticleSpawnCount, 1.0f, 1, 64);
         ImGui::SliderFloat("Width Min", &trailParticleWidthMin, 0.0f, 1.0f);
         ImGui::SliderFloat("Width Max", &trailParticleWidthMax, 0.0f, 1.0f);
@@ -767,6 +768,7 @@ void TrailMeshComponent::Serialize(nlohmann::json& json_) const
     json_["TrailParticleEmissionMode"] = static_cast<int>(trailParticleEmissionMode);
     json_["TrailParticleInterval"] = trailParticleInterval;
     json_["TrailParticleDistance"] = trailParticleDistance;
+    json_["TrailParticleLifeTime"] = trailParticleLifeTime;
     json_["TrailParticleSampleInterval"] = trailParticleSampleInterval;
     json_["TrailParticleSpawnCount"] = trailParticleSpawnCount;
     json_["TrailParticleWidthMin"] = trailParticleWidthMin;
@@ -795,6 +797,9 @@ void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
         std::clamp(json_.value("TrailParticleEmissionMode", 1), 0, 2));
     trailParticleInterval = (std::max)(json_.value("TrailParticleInterval", 0.04f), 0.001f);
     trailParticleDistance = (std::max)(json_.value("TrailParticleDistance", 0.15f), 0.001f);
+    trailParticleLifeTime = (std::max)(
+        json_.value("TrailParticleLifeTime", (std::max)(lifeTime, 0.8f)),
+        0.001f);
     trailParticleSampleInterval = (std::max)(json_.value("TrailParticleSampleInterval", 1), 1);
     trailParticleSpawnCount = (std::max)(json_.value("TrailParticleSpawnCount", 1), 1);
     trailParticleWidthMin = std::clamp(json_.value("TrailParticleWidthMin", 0.35f), 0.0f, 1.0f);
