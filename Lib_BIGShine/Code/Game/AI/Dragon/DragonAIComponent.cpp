@@ -114,6 +114,18 @@ const char* GetDragonDamagePhaseName(DRAGON_DAMAGE_PHASE phase_)
     }
 }
 
+const char* GetDragonActionFinishModeName(DRAGON_ACTION_FINISH_MODE mode_)
+{
+    switch (mode_)
+    {
+    case DRAGON_ACTION_FINISH_MODE::SEQUENCER: return "Sequencer";
+    case DRAGON_ACTION_FINISH_MODE::AI_CONDITION: return "AI Condition";
+    case DRAGON_ACTION_FINISH_MODE::AI_DURATION: return "AI Duration";
+    case DRAGON_ACTION_FINISH_MODE::MANUAL: return "Manual";
+    default: return "Sequencer";
+    }
+}
+
 const std::string& DragonAIComponent::GetName() const
 {
     static std::string name_ = "DragonAIComponent";
@@ -170,28 +182,26 @@ void DragonAIComponent::Update(float deltaTime_)
     if (aiState == DRAGON_AI_STATE::ACTION)
     {
         UpdateActionMotion(deltaTime_);
-        UpdateActionTimeout();
-        const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
-        if (definition_ && !definition_->waitForActionEnd && runtime.actionTimer >= definition_->duration)
+        if (UpdateAIControlledActionEnd())
         {
-            if (runtime.currentAction == DRAGON_ACTION_TYPE::DEATH)
-            {
-                aiState = DRAGON_AI_STATE::DEAD;
-            }
-            else
-            {
-                NotifyActionEnd();
-            }
+            SendRuntimeToBlackboard();
+            return;
+        }
+        UpdateActionTimeout();
+        if (UpdateDurationControlledActionEnd())
+        {
+            SendRuntimeToBlackboard();
+            return;
         }
     }
     else if (aiState == DRAGON_AI_STATE::AIR)
     {
         UpdateActionMotion(deltaTime_);
         UpdateActionTimeout();
-        const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
-        if (definition_ && !definition_->waitForActionEnd && runtime.actionTimer >= definition_->duration)
+        if (UpdateDurationControlledActionEnd())
         {
-            NotifyActionEnd();
+            SendRuntimeToBlackboard();
+            return;
         }
     }
     else if (aiState == DRAGON_AI_STATE::RECOVERY)
@@ -288,7 +298,9 @@ void DragonAIComponent::Gui()
         ImGui::SameLine();
         if (ImGui::Button("Test FireBall")) RequestAction(DRAGON_ACTION_TYPE::FIRE_BALL);
         ImGui::SameLine();
-        if (ImGui::Button("Action End")) NotifyActionEnd();
+        if (ImGui::Button("AI Action End")) NotifyAIActionEnd();
+        ImGui::SameLine();
+        if (ImGui::Button("Sequencer Action End")) NotifySequencerActionEnd();
         if (ImGui::Button("Test TakeOff")) RequestAction(DRAGON_ACTION_TYPE::TAKE_OFF);
         ImGui::SameLine();
         if (ImGui::Button("Force Death")) StartAction(DRAGON_ACTION_TYPE::DEATH);
@@ -353,6 +365,25 @@ void DragonAIComponent::Gui()
         {
             RequestAction(debugAction);
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Force Debug Action"))
+        {
+            ForceAction(debugAction);
+        }
+        if (ImGui::Button("Force Idle"))
+        {
+            ForceAction(DRAGON_ACTION_TYPE::IDLE);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Force Turn"))
+        {
+            ForceAction(DRAGON_ACTION_TYPE::TURN_TO_PLAYER);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Force Walk"))
+        {
+            ForceAction(DRAGON_ACTION_TYPE::WALK_APPROACH);
+        }
         if (ImGui::Button("Test SpreadBreath")) RequestAction(DRAGON_ACTION_TYPE::SPREAD_BREATH);
         ImGui::SameLine();
         if (ImGui::Button("Test TailSweep")) RequestAction(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP);
@@ -367,7 +398,10 @@ void DragonAIComponent::Gui()
             ImGui::PushID(static_cast<int>(definition_.action));
             ImGui::Checkbox("##Enabled", &definition_.enabled);
             ImGui::SameLine();
-            ImGui::Text("%s  CD %.2f", GetDragonActionName(definition_.action), GetCooldown(definition_.action));
+            ImGui::Text("%s  %s  CD %.2f",
+                GetDragonActionName(definition_.action),
+                GetDragonActionFinishModeName(definition_.finishMode),
+                GetCooldown(definition_.action));
             ImGui::SameLine();
             if (ImGui::SmallButton("Run"))
             {
@@ -390,6 +424,8 @@ void DragonAIComponent::Gui()
 
 void DragonAIComponent::Serialize(nlohmann::json& json_) const
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::Serialize");
+
     json_["PlayerObjectName"] = playerObjectName;
     json_["ActionCategory"] = actionCategory;
     json_["BlackboardCategory"] = blackboardCategory;
@@ -433,6 +469,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
             { "AllowBuffer", definition_.allowBuffer },
             { "UseActionTimeout", definition_.useActionTimeout },
             { "ActionTimeout", definition_.actionTimeout },
+            { "FinishMode", static_cast<int>(definition_.finishMode) },
             });
     }
     behaviorGraph.Serialize(json_["BehaviorGraph"]);
@@ -490,8 +527,11 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
             definition_->allowBuffer = definitionJson_.value("AllowBuffer", definition_->allowBuffer);
             definition_->useActionTimeout = definitionJson_.value("UseActionTimeout", definition_->useActionTimeout);
             definition_->actionTimeout = definitionJson_.value("ActionTimeout", definition_->actionTimeout);
+            definition_->finishMode = static_cast<DRAGON_ACTION_FINISH_MODE>(
+                definitionJson_.value("FinishMode", static_cast<int>(definition_->finishMode)));
         }
     }
+    ApplyActionDefinitionRuntimePolicies();
 
     if (json_.contains("BehaviorGraph"))
     {
@@ -509,6 +549,8 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
 
 bool DragonAIComponent::RequestAction(DRAGON_ACTION_TYPE action_)
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::RequestAction");
+
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {
         FinishRecovery();
@@ -546,6 +588,28 @@ bool DragonAIComponent::RequestAction(DRAGON_ACTION_TYPE action_)
     return true;
 }
 
+void DragonAIComponent::ForceAction(DRAGON_ACTION_TYPE action_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::ForceAction");
+
+    if (action_ == DRAGON_ACTION_TYPE::IDLE)
+    {
+        FinishRecovery();
+        SendRuntimeToBlackboard();
+        return;
+    }
+    if (!FindDefinition(action_))
+    {
+        lastRejectedAction = action_;
+        return;
+    }
+
+    StopMovement();
+    runtime.bufferedAction = DRAGON_ACTION_TYPE::IDLE;
+    behaviorGraph.ResetRuntime();
+    StartAction(action_);
+}
+
 void DragonAIComponent::SetCanCancel(bool enabled_)
 {
     runtime.canCancel = enabled_;
@@ -564,6 +628,43 @@ void DragonAIComponent::SetCanBufferAction(bool enabled_)
 
 void DragonAIComponent::NotifyActionEnd()
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::NotifyActionEnd");
+    NotifySequencerActionEnd();
+}
+
+void DragonAIComponent::NotifySequencerActionEnd()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::NotifySequencerActionEnd");
+
+    if (!IsSequencerControlledAction(runtime.currentAction))
+    {
+        statusText = "Ignored SequencerActionEnd: " +
+            std::string(GetDragonActionName(runtime.currentAction)) +
+            " is AI controlled.";
+        return;
+    }
+
+    CompleteActionEnd();
+}
+
+void DragonAIComponent::NotifyAIActionEnd()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::NotifyAIActionEnd");
+    if (IsSequencerControlledAction(runtime.currentAction))
+    {
+        statusText = "Ignored AIActionEnd: " +
+            std::string(GetDragonActionName(runtime.currentAction)) +
+            " is Sequencer controlled.";
+        return;
+    }
+
+    CompleteActionEnd();
+}
+
+void DragonAIComponent::CompleteActionEnd()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::CompleteActionEnd");
+
     if (aiState != DRAGON_AI_STATE::ACTION &&
         aiState != DRAGON_AI_STATE::AIR)
     {
@@ -656,6 +757,13 @@ void DragonAIComponent::RegisterActions()
 
 DRAGON_ACTION_TYPE DragonAIComponent::SelectNextAction(const DragonAIContext& context_)
 {
+    if (hasPlayerTarget &&
+        !context_.isPlayerInFront &&
+        IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
+    {
+        return DRAGON_ACTION_TYPE::TURN_TO_PLAYER;
+    }
+
     std::vector<DragonActionCandidate> candidates_;
     AddActionCandidates(context_, candidates_);
     if (candidates_.empty())
@@ -771,7 +879,15 @@ void DragonAIComponent::EnsureDependencies()
 
 void DragonAIComponent::InitializeDefaultDefinitions()
 {
-    if (!actionDefinitions.empty()) return;
+    if (!actionDefinitions.empty())
+    {
+        ApplyActionDefinitionRuntimePolicies();
+        if (actionCooldowns.size() != DRAGON_ACTION_COUNT)
+        {
+            actionCooldowns.assign(DRAGON_ACTION_COUNT, 0.0f);
+        }
+        return;
+    }
 
     auto addDefinition_ = [this](
         DRAGON_ACTION_TYPE action_,
@@ -795,6 +911,7 @@ void DragonAIComponent::InitializeDefaultDefinitions()
             definition_.waitForActionEnd = true;
             definition_.useActionTimeout = true;
             definition_.actionTimeout = actionTimeout_;
+            definition_.finishMode = DRAGON_ACTION_FINISH_MODE::SEQUENCER;
             actionDefinitions.push_back(definition_);
         };
 
@@ -815,7 +932,36 @@ void DragonAIComponent::InitializeDefaultDefinitions()
     addDefinition_(DRAGON_ACTION_TYPE::GET_HIT, "GetHit", "PlainsDragon_GetHit1", "", 0.5f, 0.2f, 0.5f, 1.0f);
     addDefinition_(DRAGON_ACTION_TYPE::DEATH, "Death", "PlainsDragon_Death", "", 3.0f, 0.0f, 0.0f, 5.0f);
 
+    ApplyActionDefinitionRuntimePolicies();
+
     actionCooldowns.assign(DRAGON_ACTION_COUNT, 0.0f);
+}
+
+void DragonAIComponent::ApplyActionDefinitionRuntimePolicies()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::ApplyActionDefinitionRuntimePolicies");
+
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::WALK_APPROACH))
+    {
+        definition_->finishMode = DRAGON_ACTION_FINISH_MODE::AI_CONDITION;
+        definition_->waitForActionEnd = true;
+        definition_->useActionTimeout = false;
+        definition_->recoveryTime = 0.0f;
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
+    {
+        definition_->finishMode = DRAGON_ACTION_FINISH_MODE::AI_CONDITION;
+        definition_->waitForActionEnd = true;
+        definition_->useActionTimeout = false;
+        definition_->cooldownTime = 0.0f;
+        definition_->recoveryTime = 0.0f;
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::AIR_HOLD))
+    {
+        definition_->finishMode = DRAGON_ACTION_FINISH_MODE::AI_DURATION;
+        definition_->waitForActionEnd = true;
+        definition_->useActionTimeout = false;
+    }
 }
 
 void DragonAIComponent::UpdateContext()
@@ -988,6 +1134,70 @@ void DragonAIComponent::UpdateActionMotion(float deltaTime_)
     }
 }
 
+bool DragonAIComponent::UpdateAIControlledActionEnd()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::UpdateAIControlledActionEnd");
+
+    if (!IsAIControlledAction(runtime.currentAction))
+    {
+        return false;
+    }
+
+    switch (runtime.currentAction)
+    {
+    case DRAGON_ACTION_TYPE::WALK_APPROACH:
+        if (!hasPlayerTarget || context.playerDistance <= biteDistance)
+        {
+            StopMovement();
+            statusText = "AI finished WalkApproach.";
+            NotifyAIActionEnd();
+            return true;
+        }
+        break;
+    case DRAGON_ACTION_TYPE::TURN_TO_PLAYER:
+    {
+        const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
+        if (!definition_)
+        {
+            return false;
+        }
+        if (!hasPlayerTarget ||
+            context.isPlayerInFront ||
+            runtime.actionTimer >= definition_->duration)
+        {
+            StopMovement();
+            statusText = context.isPlayerInFront
+                ? "AI finished TurnToPlayer: target in front."
+                : "AI finished TurnToPlayer: turn slice ended.";
+            NotifyAIActionEnd();
+            return true;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    return false;
+}
+
+bool DragonAIComponent::UpdateDurationControlledActionEnd()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::UpdateDurationControlledActionEnd");
+
+    const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
+    if (!definition_ ||
+        definition_->finishMode != DRAGON_ACTION_FINISH_MODE::AI_DURATION ||
+        runtime.actionTimer < definition_->duration)
+    {
+        return false;
+    }
+
+    statusText = "AI duration finished: DragonAI_" + definition_->actionName;
+    NotifyAIActionEnd();
+    return true;
+}
+
 void DragonAIComponent::TurnTowardPlayer(float deltaTime_)
 {
     const auto owner_ = GetGameObject();
@@ -1112,7 +1322,6 @@ void DragonAIComponent::UpdateActionTimeout()
 
     const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
     if (!definition_ ||
-        !definition_->waitForActionEnd ||
         !definition_->useActionTimeout ||
         definition_->actionTimeout <= 0.0f ||
         runtime.actionTimer < definition_->actionTimeout)
@@ -1120,8 +1329,8 @@ void DragonAIComponent::UpdateActionTimeout()
         return;
     }
 
-    statusText = "Action timeout: DragonAI_" + definition_->actionName;
-    NotifyActionEnd();
+    statusText = "Action timeout fallback: DragonAI_" + definition_->actionName;
+    CompleteActionEnd();
 }
 
 void DragonAIComponent::ExecuteActionDefinition(const DragonActionDefinition& definition_)
@@ -1184,12 +1393,16 @@ void DragonAIComponent::ApplyAnimationBlackboard(
         (aiState == DRAGON_AI_STATE::ACTION ||
             aiState == DRAGON_AI_STATE::AIR) &&
         !runtime.actionEnded;
+    const bool returnToIdle_ =
+        runtime.actionEnded &&
+        runtime.currentAction != DRAGON_ACTION_TYPE::DEATH;
 
     if (blackboard)
     {
         blackboard->SetString("Anim", "CurrentAction", animationActionName_);
         blackboard->SetString("Anim", "ActionTrigger", actionTrigger_ ? animationActionName_ : "");
         blackboard->SetBool("Anim", "ActionEnded", runtime.actionEnded);
+        blackboard->SetBool("Anim", "ReturnToIdle", returnToIdle_);
         blackboard->SetBool("Anim", "IsActing", isActing_);
         blackboard->SetString("Anim", "CurrentAnimationState", animationStateName_);
     }
@@ -1201,6 +1414,7 @@ void DragonAIComponent::ApplyAnimationBlackboard(
         animationController_->SetParam("CurrentAction", animationActionName_);
         animationController_->SetParam("ActionTrigger", actionTrigger_ ? animationActionName_ : std::string());
         animationController_->SetParam("ActionEnded", runtime.actionEnded);
+        animationController_->SetParam("ReturnToIdle", returnToIdle_);
         animationController_->SetParam("IsActing", isActing_);
         animationController_->SetParam("CurrentAnimationState", animationStateName_);
     }
@@ -1470,8 +1684,10 @@ void DragonAIComponent::RegisterRuntimeActions()
     registerAction_("DragonAI_CanCancelOff", [this]() { SetCanCancel(false); });
     registerAction_("DragonAI_InputBufferOn", [this]() { SetCanBufferAction(true); });
     registerAction_("DragonAI_InputBufferOff", [this]() { SetCanBufferAction(false); });
-    registerAction_("DragonAI_ActionEnd", [this]() { NotifyActionEnd(); });
-    registerAction_("DragonAI_NotifyActionEnd", [this]() { NotifyActionEnd(); });
+    registerAction_("DragonAI_ActionEnd", [this]() { NotifySequencerActionEnd(); });
+    registerAction_("DragonAI_SequencerActionEnd", [this]() { NotifySequencerActionEnd(); });
+    registerAction_("DragonAI_NotifyActionEnd", [this]() { NotifyAIActionEnd(); });
+    registerAction_("DragonAI_AIActionEnd", [this]() { NotifyAIActionEnd(); });
     registerAction_("DragonAI_Enable", [this]() { autoDecisionEnabled = true; });
     registerAction_("DragonAI_Disable", [this]()
         {
@@ -1483,7 +1699,10 @@ void DragonAIComponent::RegisterRuntimeActions()
     registerAction_("DragonAI_TestSpreadBreath", [this]() { RequestAction(DRAGON_ACTION_TYPE::SPREAD_BREATH); });
     registerAction_("DragonAI_TestTailSweep", [this]() { RequestAction(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP); });
     registerAction_("DragonAI_TestTakeOff", [this]() { RequestAction(DRAGON_ACTION_TYPE::TAKE_OFF); });
-    registerAction_("DragonAI_ForceDeath", [this]() { StartAction(DRAGON_ACTION_TYPE::DEATH); });
+    registerAction_("DragonAI_ForceIdle", [this]() { ForceAction(DRAGON_ACTION_TYPE::IDLE); });
+    registerAction_("DragonAI_ForceTurn", [this]() { ForceAction(DRAGON_ACTION_TYPE::TURN_TO_PLAYER); });
+    registerAction_("DragonAI_ForceWalk", [this]() { ForceAction(DRAGON_ACTION_TYPE::WALK_APPROACH); });
+    registerAction_("DragonAI_ForceDeath", [this]() { ForceAction(DRAGON_ACTION_TYPE::DEATH); });
 }
 
 DragonActionDefinition* DragonAIComponent::FindDefinition(DRAGON_ACTION_TYPE action_)
@@ -1502,6 +1721,27 @@ const DragonActionDefinition* DragonAIComponent::FindDefinition(DRAGON_ACTION_TY
         if (definition_.action == action_) return &definition_;
     }
     return nullptr;
+}
+
+bool DragonAIComponent::IsAIControlledAction(DRAGON_ACTION_TYPE action_) const
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::IsAIControlledAction");
+
+    const DragonActionDefinition* definition_ = FindDefinition(action_);
+    if (!definition_) return false;
+
+    return definition_->finishMode == DRAGON_ACTION_FINISH_MODE::AI_CONDITION ||
+        definition_->finishMode == DRAGON_ACTION_FINISH_MODE::AI_DURATION;
+}
+
+bool DragonAIComponent::IsSequencerControlledAction(DRAGON_ACTION_TYPE action_) const
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::IsSequencerControlledAction");
+
+    const DragonActionDefinition* definition_ = FindDefinition(action_);
+    if (!definition_) return false;
+
+    return definition_->finishMode == DRAGON_ACTION_FINISH_MODE::SEQUENCER;
 }
 
 float DragonAIComponent::GetCooldown(DRAGON_ACTION_TYPE action_) const

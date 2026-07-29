@@ -37,6 +37,9 @@
 #include "Engine/GamePlay/Graphics/MotionVelocityComponent.h"
 #include "Engine/Graphics/Resource/ModelResourceManager.h"
 #include "Engine/Common/DebugLog.h"
+#include "Engine/UI/UIVertexModifierComponent.h"
+#include "Engine/UI/UIWidgetComponent.h"
+#include "Engine/UI/WidgetBoardComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"
 
@@ -48,6 +51,47 @@ namespace
     {
         const auto now_ = std::chrono::steady_clock::now().time_since_epoch();
         return std::chrono::duration<double, std::milli>(now_).count();
+    }
+
+    std::shared_ptr<WidgetBoardComponent> ResolveWidgetBoard(const std::shared_ptr<GameObject>& object_)
+    {
+        if (!object_) return nullptr;
+
+        auto board_ = object_->GetComponent<WidgetBoardComponent>();
+        if (board_) return board_;
+
+        auto transform_ = object_->transform;
+        while (transform_)
+        {
+            auto parentTransform_ = transform_->parent.lock();
+            if (!parentTransform_) break;
+
+            auto parentObject_ = parentTransform_->gameObject.lock();
+            if (parentObject_)
+            {
+                board_ = parentObject_->GetComponent<WidgetBoardComponent>();
+                if (board_) return board_;
+            }
+
+            transform_ = parentTransform_;
+        }
+
+        return nullptr;
+    }
+
+    int CalculateHierarchyDepth(const std::shared_ptr<GameObject>& object_)
+    {
+        int depth_ = 0;
+        if (!object_ || !object_->transform) return depth_;
+
+        auto parentTransform_ = object_->transform->parent.lock();
+        while (parentTransform_)
+        {
+            ++depth_;
+            parentTransform_ = parentTransform_->parent.lock();
+        }
+
+        return depth_;
     }
 }
 
@@ -1352,7 +1396,24 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
     {
         auto sr = object_->GetComponent<SpriteRenderer>();
         if (sr && sr->enabled)
-            spriteSystem_.Submit(sr, sr->GetSpriteShaderID());
+        {
+            SpriteRenderSystem::SpriteRenderCommand command_;
+            command_.sprite = sr;
+            command_.shaderID = sr->GetSpriteShaderID();
+
+            auto widget_ = object_->GetComponent<UIWidgetComponent>();
+            auto vertexModifier_ = object_->GetComponent<UIVertexModifierComponent>();
+            auto board_ = ResolveWidgetBoard(object_);
+
+            command_.widget = widget_.get();
+            command_.vertexModifier = vertexModifier_.get();
+            command_.widgetBoard = board_.get();
+            command_.boardLayer = board_ ? board_->GetBoardLayer() : 0;
+            command_.boardZOrder = board_ ? board_->GetZOrder() : 0;
+            command_.widgetZOrder = widget_ ? widget_->GetZOrder() : 0;
+            command_.hierarchyOrder = CalculateHierarchyDepth(object_);
+            spriteSystem_.Submit(command_);
+        }
     }
 
     deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);

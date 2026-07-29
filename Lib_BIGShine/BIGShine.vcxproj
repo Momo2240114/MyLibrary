@@ -350,6 +350,7 @@
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\UIWidgetEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\CollisionShapeManagerWindow.cpp" />
@@ -532,6 +533,10 @@
     <ClCompile Include="Code\Engine\Platform\WindowsDialogHelper.cpp" />
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIAnimationPlayerComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIVertexModifierComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.cpp" />
@@ -630,6 +635,7 @@
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\UIWidgetEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\CollisionShapeManagerWindow.h" />
@@ -862,6 +868,10 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerMoveState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h" />
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
+    <ClInclude Include="Code\Engine\UI\UIAnimationPlayerComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UIVertexModifierComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UIWidgetComponent.h" />
+    <ClInclude Include="Code\Engine\UI\WidgetBoardComponent.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
     <ClInclude Include="Code\Game\GameMode\GameModeBlackboardKeys.h" />

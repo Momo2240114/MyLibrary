@@ -17,6 +17,7 @@
 #include "Engine/Physics/ContainmentVolumeComponent.h"
 #include "Engine/Graphics/Decal/DecalComponent.h"
 #include "Engine/UI/UIButton.h"
+#include "Engine/UI/UIAnimationPlayerComponent.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Graphics/Resource/Animation/IKMapComponent.h"
 #include "Engine/Graphics/Resource/Animation/SpringBoneSimulationComponent.h"
@@ -40,6 +41,9 @@
 #include "Engine/Graphics/PostEffect/VignetteDirector.h"
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 #include "Engine/UI/NumberSwitcher.h"
+#include "Engine/UI/UIVertexModifierComponent.h"
+#include "Engine/UI/UIWidgetComponent.h"
+#include "Engine/UI/WidgetBoardComponent.h"
 //#include "CurvePlayerComponent.h"
 #include "Engine/Graphics/Particle/ParticleComponent.h"
 #include "Engine/GamePlay/Camera/FollowCameraComponent.h"
@@ -130,6 +134,10 @@ void RegisterAllComponents()
 
     //ゲームシステム
     registry.Register<UIButton>("UIButton");
+    registry.Register<WidgetBoardComponent>("WidgetBoardComponent");
+    registry.Register<UIWidgetComponent>("UIWidgetComponent");
+    registry.Register<UIVertexModifierComponent>("UIVertexModifierComponent");
+    registry.Register<UIAnimationPlayerComponent>("UIAnimationPlayerComponent");
     registry.Register<CameraDirector>("CameraDirector");
     registry.Register<ActionSequence>("ActionSequence");
     registry.Register<FovDirector>("FovDirector");

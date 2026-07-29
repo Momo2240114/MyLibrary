@@ -1,257 +1,439 @@
 #include "PrecompiledHeader.h"
 
 #include "SpriteRenderSystem.h"
+
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/UI/UIVertexModifierComponent.h"
+#include "Engine/UI/UIWidgetComponent.h"
+#include "Engine/UI/WidgetBoardComponent.h"
+
+#include <algorithm>
+#include <cmath>
+
+namespace
+{
+    DirectX::XMFLOAT2 ToNdc(const DirectX::XMFLOAT2& position_, const DirectX::XMFLOAT2& screenSize_)
+    {
+        return
+        {
+            2.0f * position_.x / (std::max)(1.0f, screenSize_.x) - 1.0f,
+            1.0f - 2.0f * position_.y / (std::max)(1.0f, screenSize_.y)
+        };
+    }
+
+    DirectX::XMFLOAT4 MultiplyColor(
+        const DirectX::XMFLOAT4& left_,
+        const DirectX::XMFLOAT4& right_)
+    {
+        return
+        {
+            left_.x * right_.x,
+            left_.y * right_.y,
+            left_.z * right_.z,
+            left_.w * right_.w
+        };
+    }
+
+    void RotateAroundPivot(
+        DirectX::XMFLOAT2& point_,
+        const DirectX::XMFLOAT2& pivot_,
+        float rotationDegree_)
+    {
+        const float theta_ = DirectX::XMConvertToRadians(rotationDegree_);
+        const float cos_ = std::cos(theta_);
+        const float sin_ = std::sin(theta_);
+        const float localX_ = point_.x - pivot_.x;
+        const float localY_ = point_.y - pivot_.y;
+
+        point_.x = pivot_.x + localX_ * cos_ - localY_ * sin_;
+        point_.y = pivot_.y + localX_ * sin_ + localY_ * cos_;
+    }
+}
 
 void SpriteRenderSystem::Finalize()
 {
+    BS_PROFILE_SCOPE("SpriteRenderSystem::Finalize");
+
+    drawList.clear();
+    nextSubmitOrder = 0;
     vertexBuffer.Reset();
     indexBuffer.Reset();
     constantBuffer.Reset();
     samplerState.Reset();
-    for (auto& s : shaders) {
-        s.second.vertexShader.Reset();
-        s.second.pixelShader.Reset();
-        s.second.inputLayout.Reset();
+    for (auto& shader_ : shaders)
+    {
+        shader_.second.vertexShader.Reset();
+        shader_.second.pixelShader.Reset();
+        shader_.second.inputLayout.Reset();
     }
+    shaders.clear();
 }
 
 void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* context_)
 {
-    // --- 頂点レイアウト定義（SpriteVertex 構造に合わせる） ---
+    BS_PROFILE_SCOPE("SpriteRenderSystem::Initialize");
+    (void)context_;
+
+    Finalize();
+
     D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
     {
-        // SemanticName, SemanticIndex, Format, Slot, AlignedByteOffset, InputSlotClass, InstanceDataStepRate
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
-    UINT numElements = _countof(inputElementDesc); // または ARRAYSIZE(inputElementDesc)
+    const UINT numElements_ = _countof(inputElementDesc);
 
-    // --- シェーダ作成（CreateVSFromCSO / CreatePSFromCSO をラッパーとして使用） ---
-    // ここでは shaders マップに SpriteShader を格納する想定
-    CreateShader(device_, SpriteShaderID::Default, "Shader/sprite_VS.cso", "Shader/sprite_PS.cso", inputElementDesc, numElements);
-    //CreateShader(device_, SpriteShaderID::Dissolve, "dissolve_VS.cso", "dissolve_PS.cso", inputElementDesc, numElements);
+    CreateShader(device_, SpriteShaderID::Default, "Shader/sprite_VS.cso", "Shader/sprite_PS.cso", inputElementDesc, numElements_);
 
-    // --- 定数バッファやサンプラ作成（例） ---
-    D3D11_BUFFER_DESC cbd{};
-    cbd.Usage = D3D11_USAGE_DEFAULT;
-    cbd.ByteWidth = sizeof(ConstantBuffer); // 定義しておくこと
-    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    device_->CreateBuffer(&cbd, nullptr, constantBuffer.GetAddressOf());
+    D3D11_BUFFER_DESC cbd_{};
+    cbd_.Usage = D3D11_USAGE_DEFAULT;
+    cbd_.ByteWidth = sizeof(ConstantBuffer);
+    cbd_.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    device_->CreateBuffer(&cbd_, nullptr, constantBuffer.GetAddressOf());
 
-    D3D11_SAMPLER_DESC sd{};
-    sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    device_->CreateSamplerState(&sd, samplerState.GetAddressOf());
+    D3D11_SAMPLER_DESC samplerDesc_{};
+    samplerDesc_.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc_.AddressU = samplerDesc_.AddressV = samplerDesc_.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    device_->CreateSamplerState(&samplerDesc_, samplerState.GetAddressOf());
 
-    // --- 頂点バッファ作成 ---
-    SpriteVertex vertices[4] =
+    SpriteVertex vertices_[4] =
     {
-        { {-0.5f, -0.5f, 0.f}, {1,1,1,1}, {0,1} },
-        { {-0.5f,  0.5f, 0.f}, {1,1,1,1}, {0,0} },
-        { { 0.5f,  0.5f, 0.f}, {1,1,1,1}, {1,0} },
-        { { 0.5f, -0.5f, 0.f}, {1,1,1,1}, {1,1} }
+        { {-0.5f, -0.5f, 0.0f}, {1, 1, 1, 1}, {0, 1} },
+        { {-0.5f,  0.5f, 0.0f}, {1, 1, 1, 1}, {0, 0} },
+        { { 0.5f,  0.5f, 0.0f}, {1, 1, 1, 1}, {1, 0} },
+        { { 0.5f, -0.5f, 0.0f}, {1, 1, 1, 1}, {1, 1} }
     };
 
-    D3D11_BUFFER_DESC bd{};
-    bd.Usage = D3D11_USAGE_DYNAMIC;             // ← 動的
-    bd.ByteWidth = sizeof(vertices);
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // ← 書き込み可能
-    bd.MiscFlags = 0;
-    bd.StructureByteStride = sizeof(SpriteVertex);
+    D3D11_BUFFER_DESC bufferDesc_{};
+    bufferDesc_.Usage = D3D11_USAGE_DYNAMIC;
+    bufferDesc_.ByteWidth = sizeof(vertices_);
+    bufferDesc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bufferDesc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    bufferDesc_.StructureByteStride = sizeof(SpriteVertex);
 
-    D3D11_SUBRESOURCE_DATA initData{};
-    initData.pSysMem = vertices;
+    D3D11_SUBRESOURCE_DATA initData_{};
+    initData_.pSysMem = vertices_;
+    device_->CreateBuffer(&bufferDesc_, &initData_, vertexBuffer.GetAddressOf());
 
-    device_->CreateBuffer(&bd, &initData, vertexBuffer.GetAddressOf());
+    unsigned short indices_[6] = { 0, 1, 2, 0, 2, 3 };
+    bufferDesc_.ByteWidth = sizeof(indices_);
+    bufferDesc_.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bufferDesc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    bufferDesc_.StructureByteStride = 0;
+    initData_.pSysMem = indices_;
+    device_->CreateBuffer(&bufferDesc_, &initData_, indexBuffer.GetAddressOf());
+}
 
-    // --- インデックスバッファ作成 ---
-    unsigned short indices[6] = { 0,1,2, 0,2,3 };
-    bd.ByteWidth = sizeof(indices);
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    initData.pSysMem = indices;
-
-    device_->CreateBuffer(&bd, &initData, indexBuffer.GetAddressOf());
+void SpriteRenderSystem::Submit(const SpriteRenderCommand& command_)
+{
+    SpriteRenderCommand copiedCommand_ = command_;
+    copiedCommand_.submitOrder = nextSubmitOrder++;
+    drawList.push_back(copiedCommand_);
 }
 
 void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
 {
-    // ビューポート取得
-    D3D11_VIEWPORT viewport_{};
-    UINT num_viewports_{ 1 };
-    context_->RSGetViewports(&num_viewports_, &viewport_);
-    float screenWidth_ = viewport_.Width;
-    float screenHeight_ = viewport_.Height;
+    BS_PROFILE_SCOPE("SpriteRenderSystem::RenderAll");
 
-    // 頂点バッファ設定
+    D3D11_VIEWPORT viewport_{};
+    UINT numViewports_{ 1 };
+    context_->RSGetViewports(&numViewports_, &viewport_);
+    const DirectX::XMFLOAT2 screenSize_ = { viewport_.Width, viewport_.Height };
+
     UINT stride_ = sizeof(SpriteVertex);
     UINT offset_ = 0;
     context_->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride_, &offset_);
     context_->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
     context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // インデックス設定
-    context_->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
-    context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    SortDrawList();
 
-    // --- 各スプライト描画ループ ---
-    for (auto& info_ : drawList)
+    for (SpriteRenderCommand& renderCommand_ : drawList)
     {
-        auto sprite_ = info_.sprite;
-        if (!sprite_ || !sprite_->IsVisible())
-            continue;
-
-        auto t_ = sprite_->GetTransform();
-        if (!t_)
-            continue;
-
-        DirectX::XMFLOAT3 tPos_ = t_->GetWorldPosition();
-        DirectX::XMFLOAT2 dSize_ = sprite_->GetSize(); // 描画サイズ
-
-        // --- ピボットによるオフセット計算 ---
-        // pivotOffset は「Transform位置から見た左上頂点の相対位置」
-        DirectX::XMFLOAT2 pivotOffset = { 0.0f, 0.0f };
-
-        switch (sprite_->GetPivot())
-        {
-        case PosOfsset::TOP_L:   // 左上基準：画像は右下に広がる
-            pivotOffset = { 0.0f, 0.0f };
-            break;
-        case PosOfsset::MID:     // 中央基準：画像は上下左右均等に広がる
-            pivotOffset = { -dSize_.x * 0.5f, -dSize_.y * 0.5f };
-            break;
-        case PosOfsset::UNDER_M: // 中央下基準：画像は上に伸び、左右均等
-            pivotOffset = { -dSize_.x * 0.5f, -dSize_.y };
-            break;
-        }
-
-        // ローカル座標での4頂点（ピボットを 0,0 とした位置）
-        // pivotOffset を起点にサイズ分広げる
-        DirectX::XMFLOAT2 positions_[4] =
-        {
-            { pivotOffset.x,            pivotOffset.y + dSize_.y }, // 左下
-            { pivotOffset.x,            pivotOffset.y },            // 左上
-            { pivotOffset.x + dSize_.x, pivotOffset.y },            // 右上
-            { pivotOffset.x + dSize_.x, pivotOffset.y + dSize_.y }, // 右下
-        };
-
-        // Z回転角を取得（度→ラジアン）
-        float theta_ = DirectX::XMConvertToRadians(t_->GetWorldRotation().z);
-        DirectX::XMMATRIX rotMat = DirectX::XMMatrixRotationZ(theta_);
-
-        // 4頂点を「ピボット(0,0)」を中心に回転させ、最後にワールド座標(tPos_)を足す
-        for (auto& p : positions_)
-        {
-            DirectX::XMVECTOR pos = DirectX::XMVectorSet(p.x, p.y, 0.0f, 1.0f);
-            pos = DirectX::XMVector3Transform(pos, rotMat);
-
-            DirectX::XMFLOAT3 result;
-            DirectX::XMStoreFloat3(&result, pos);
-
-            // 回転後の座標 + Transformのワールド座標
-            p.x = result.x + tPos_.x;
-            p.y = result.y + tPos_.y;
-        }
-
-        // スクリーン→NDC
-        for (auto& p : positions_)
-        {
-            p.x = 2.0f * p.x / screenWidth_ - 1.0f;
-            p.y = 1.0f - 2.0f * p.y / screenHeight_;
-        }
-
-        // 切り抜き範囲（ピクセル単位）
-        DirectX::XMFLOAT2 catPos_ = sprite_->GetCatPos();   // 切り抜き開始位置（左上）
-        DirectX::XMFLOAT2 catSize_ = sprite_->GetCatSize();  // 切り抜く範囲サイズ
-
-        // テクスチャサイズ
-        DirectX::XMFLOAT2 texSize_ = sprite_->GetTextureSize();
-
-        // --- テクスチャ座標を算出（01に正規化） ---
-        float u0 = catPos_.x / texSize_.x;             // 左
-        float v0 = catPos_.y / texSize_.y;             // 上
-        float u1 = (catPos_.x + catSize_.x) / texSize_.x; // 右
-        float v1 = (catPos_.y + catSize_.y) / texSize_.y; // 下
-
-        // DirectXは通常テクスチャの原点が左上なので、
-        // 上下の反転が必要な場合はv0,v1を入れ替える（使ってるローダーに応じて調整）
-
-        // 頂点に設定するUV座標
-        DirectX::XMFLOAT2 texcoords_[4] =
-        {
-            { u0, v1 }, // 左下
-            { u0, v0 }, // 左上
-            { u1, v0 }, // 右上
-            { u1, v1 }, // 右下
-        };
-
-        // 頂点バッファ更新
-        D3D11_MAPPED_SUBRESOURCE mapped{};
-        HRESULT hr = context_->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        if (SUCCEEDED(hr))
-        {
-            SpriteVertex* v = static_cast<SpriteVertex*>(mapped.pData);
-            for (int i = 0; i < 4; ++i)
-            {
-                v[i].pos = { positions_[i].x, positions_[i].y, tPos_.z };
-                v[i].color = sprite_->GetColor();
-                // --- 切り抜きUV適用 ---
-                v[i].texcoord = texcoords_[i];
-            }
-            context_->Unmap(vertexBuffer.Get(), 0);
-        }
-
-        // テクスチャとサンプラ設定
-        context_->PSSetShaderResources(0, 1, sprite_->GetTexture().GetAddressOf());
-        context_->PSSetSamplers(0, 1, samplerState.GetAddressOf());
-
-
-        // シェーダ設定
-        auto& shader_ = shaders[info_.shaderID];
-        context_->IASetInputLayout(shader_.inputLayout.Get());
-        context_->VSSetShader(shader_.vertexShader.Get(), nullptr, 0);
-        context_->PSSetShader(shader_.pixelShader.Get(), nullptr, 0);
-
-        // --- ★2枚の三角形（6インデックス）描画 ---
-        context_->DrawIndexed(6, 0, 0);
+        RenderSprite(renderCommand_, context_, screenSize_);
     }
 
-    drawList.clear();
+    ID3D11ShaderResourceView* nullShaderResourceView_ = nullptr;
+    ID3D11SamplerState* nullSamplerState_ = nullptr;
+    context_->PSSetShaderResources(0, 1, &nullShaderResourceView_);
+    context_->PSSetSamplers(0, 1, &nullSamplerState_);
 
+    drawList.clear();
+    nextSubmitOrder = 0;
 }
 
-
-void SpriteRenderSystem::CreateShader(ID3D11Device* device_,
-	SpriteShaderID id_, 
-	const char* vsFile_, const char* psFile_, 
-	D3D11_INPUT_ELEMENT_DESC* inputElementDesc_,
-	UINT numElements_)
+void SpriteRenderSystem::SortDrawList()
 {
-    SpriteShader shader_;
+    BS_PROFILE_SCOPE("SpriteRenderSystem::SortDrawList");
 
-    // CPUResourceLoader::createVSFromCSO のシグネチャに合わせる
-    HRESULT hr = CPUResourceLoader::CreateVSFromCSO(
+    std::stable_sort(
+        drawList.begin(),
+        drawList.end(),
+        [](const SpriteRenderCommand& left_, const SpriteRenderCommand& right_)
+        {
+            if (left_.boardLayer != right_.boardLayer) return left_.boardLayer < right_.boardLayer;
+            if (left_.boardZOrder != right_.boardZOrder) return left_.boardZOrder < right_.boardZOrder;
+            if (left_.widgetZOrder != right_.widgetZOrder) return left_.widgetZOrder < right_.widgetZOrder;
+            if (left_.hierarchyOrder != right_.hierarchyOrder) return left_.hierarchyOrder < right_.hierarchyOrder;
+            return left_.submitOrder < right_.submitOrder;
+        });
+}
+
+void SpriteRenderSystem::BuildSpriteVertices(
+    SpriteRenderCommand& renderCommand_,
+    const DirectX::XMFLOAT2& screenSize_,
+    std::array<SpriteVertex, 4>& vertices_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::BuildSpriteVertices");
+
+    BuildLegacySpriteVertices(renderCommand_, screenSize_, vertices_);
+
+    if (renderCommand_.widget)
+    {
+        ApplyWidgetLayout(renderCommand_, screenSize_, vertices_);
+    }
+
+    ApplyVertexModification(renderCommand_, screenSize_, vertices_);
+}
+
+void SpriteRenderSystem::BuildLegacySpriteVertices(
+    const SpriteRenderCommand& renderCommand_,
+    const DirectX::XMFLOAT2& screenSize_,
+    std::array<SpriteVertex, 4>& vertices_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::BuildLegacySpriteVertices");
+
+    auto sprite_ = renderCommand_.sprite;
+    if (!sprite_) return;
+
+    auto transform_ = sprite_->GetTransform();
+    if (!transform_) return;
+
+    const DirectX::XMFLOAT3 transformPosition_ = transform_->GetWorldPosition();
+    const DirectX::XMFLOAT2 drawSize_ = sprite_->GetSize();
+
+    DirectX::XMFLOAT2 pivotOffset_ = { 0.0f, 0.0f };
+    switch (sprite_->GetPivot())
+    {
+    case PosOfsset::TOP_L:
+        pivotOffset_ = { 0.0f, 0.0f };
+        break;
+    case PosOfsset::MID:
+        pivotOffset_ = { -drawSize_.x * 0.5f, -drawSize_.y * 0.5f };
+        break;
+    case PosOfsset::UNDER_M:
+        pivotOffset_ = { -drawSize_.x * 0.5f, -drawSize_.y };
+        break;
+    }
+
+    std::array<DirectX::XMFLOAT2, 4> positions_ =
+    {
+        DirectX::XMFLOAT2{ pivotOffset_.x,               pivotOffset_.y + drawSize_.y },
+        DirectX::XMFLOAT2{ pivotOffset_.x,               pivotOffset_.y },
+        DirectX::XMFLOAT2{ pivotOffset_.x + drawSize_.x, pivotOffset_.y },
+        DirectX::XMFLOAT2{ pivotOffset_.x + drawSize_.x, pivotOffset_.y + drawSize_.y }
+    };
+
+    const float theta_ = DirectX::XMConvertToRadians(transform_->GetWorldRotation().z);
+    const DirectX::XMMATRIX rotationMatrix_ = DirectX::XMMatrixRotationZ(theta_);
+
+    for (DirectX::XMFLOAT2& position_ : positions_)
+    {
+        DirectX::XMVECTOR positionVector_ = DirectX::XMVectorSet(position_.x, position_.y, 0.0f, 1.0f);
+        positionVector_ = DirectX::XMVector3Transform(positionVector_, rotationMatrix_);
+
+        DirectX::XMFLOAT3 result_;
+        DirectX::XMStoreFloat3(&result_, positionVector_);
+        position_.x = result_.x + transformPosition_.x;
+        position_.y = result_.y + transformPosition_.y;
+    }
+
+    const DirectX::XMFLOAT2 catPos_ = sprite_->GetCatPos();
+    const DirectX::XMFLOAT2 catSize_ = sprite_->GetCatSize();
+    DirectX::XMFLOAT2 textureSize_ = sprite_->GetTextureSize();
+    textureSize_.x = (std::max)(1.0f, textureSize_.x);
+    textureSize_.y = (std::max)(1.0f, textureSize_.y);
+
+    const float u0_ = catPos_.x / textureSize_.x;
+    const float v0_ = catPos_.y / textureSize_.y;
+    const float u1_ = (catPos_.x + catSize_.x) / textureSize_.x;
+    const float v1_ = (catPos_.y + catSize_.y) / textureSize_.y;
+
+    const std::array<DirectX::XMFLOAT2, 4> texcoords_ =
+    {
+        DirectX::XMFLOAT2{ u0_, v1_ },
+        DirectX::XMFLOAT2{ u0_, v0_ },
+        DirectX::XMFLOAT2{ u1_, v0_ },
+        DirectX::XMFLOAT2{ u1_, v1_ }
+    };
+
+    const DirectX::XMFLOAT4 color_ = sprite_->GetColor();
+    for (size_t index_ = 0; index_ < vertices_.size(); ++index_)
+    {
+        const DirectX::XMFLOAT2 ndc_ = ToNdc(positions_[index_], screenSize_);
+        vertices_[index_].pos = { ndc_.x, ndc_.y, transformPosition_.z };
+        vertices_[index_].color = color_;
+        vertices_[index_].texcoord = texcoords_[index_];
+    }
+}
+
+void SpriteRenderSystem::ApplyWidgetLayout(
+    SpriteRenderCommand& renderCommand_,
+    const DirectX::XMFLOAT2& screenSize_,
+    std::array<SpriteVertex, 4>& vertices_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::ApplyWidgetLayout");
+
+    if (!renderCommand_.widget || !renderCommand_.sprite) return;
+
+    UIWidgetComponent* parentWidget_ = renderCommand_.widget->GetParentWidget();
+    renderCommand_.widget->CalculateLayout(renderCommand_.widgetBoard, parentWidget_, screenSize_);
+
+    const UIScreenRect& rect_ = renderCommand_.widget->GetScreenRect();
+    const UIRectTransform& rectTransform_ = renderCommand_.widget->GetRectTransform();
+    const DirectX::XMFLOAT2 rectSize_ = rect_.GetSize();
+    const DirectX::XMFLOAT2 pivotPosition_ =
+    {
+        rect_.min.x + rectSize_.x * rectTransform_.pivot.x,
+        rect_.min.y + rectSize_.y * rectTransform_.pivot.y
+    };
+
+    std::array<DirectX::XMFLOAT2, 4> positions_ =
+    {
+        DirectX::XMFLOAT2{ rect_.min.x, rect_.max.y },
+        DirectX::XMFLOAT2{ rect_.min.x, rect_.min.y },
+        DirectX::XMFLOAT2{ rect_.max.x, rect_.min.y },
+        DirectX::XMFLOAT2{ rect_.max.x, rect_.max.y }
+    };
+
+    for (DirectX::XMFLOAT2& position_ : positions_)
+    {
+        RotateAroundPivot(position_, pivotPosition_, rectTransform_.localRotation);
+    }
+
+    auto transform_ = renderCommand_.sprite->GetTransform();
+    const float z_ = transform_ ? transform_->GetWorldPosition().z : 0.0f;
+
+    for (size_t index_ = 0; index_ < vertices_.size(); ++index_)
+    {
+        const DirectX::XMFLOAT2 ndc_ = ToNdc(positions_[index_], screenSize_);
+        vertices_[index_].pos.x = ndc_.x;
+        vertices_[index_].pos.y = ndc_.y;
+        vertices_[index_].pos.z = z_;
+    }
+}
+
+void SpriteRenderSystem::ApplyVertexModification(
+    const SpriteRenderCommand& renderCommand_,
+    const DirectX::XMFLOAT2& screenSize_,
+    std::array<SpriteVertex, 4>& vertices_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::ApplyVertexModification");
+
+    if (!renderCommand_.vertexModifier) return;
+
+    const std::array<UI_VERTEX_INDEX, 4> vertexIndexMap_ =
+    {
+        UI_VERTEX_INDEX::LEFT_BOTTOM,
+        UI_VERTEX_INDEX::LEFT_TOP,
+        UI_VERTEX_INDEX::RIGHT_TOP,
+        UI_VERTEX_INDEX::RIGHT_BOTTOM
+    };
+
+    for (size_t index_ = 0; index_ < vertices_.size(); ++index_)
+    {
+        const UIVertexModification& modification_ =
+            renderCommand_.vertexModifier->GetVertexModification(vertexIndexMap_[index_]);
+        vertices_[index_].pos.x += 2.0f * modification_.positionOffset.x / (std::max)(1.0f, screenSize_.x);
+        vertices_[index_].pos.y -= 2.0f * modification_.positionOffset.y / (std::max)(1.0f, screenSize_.y);
+        vertices_[index_].texcoord.x += modification_.uvOffset.x;
+        vertices_[index_].texcoord.y += modification_.uvOffset.y;
+        vertices_[index_].color = MultiplyColor(vertices_[index_].color, modification_.colorMultiplier);
+    }
+}
+
+void SpriteRenderSystem::RenderSprite(
+    SpriteRenderCommand& renderCommand_,
+    ID3D11DeviceContext* context_,
+    const DirectX::XMFLOAT2& screenSize_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::RenderSprite");
+
+    auto sprite_ = renderCommand_.sprite;
+    if (!sprite_ || !sprite_->IsVisible()) return;
+    if (renderCommand_.widgetBoard &&
+        (!renderCommand_.widgetBoard->IsVisible() || !renderCommand_.widgetBoard->IsEnabled()))
+    {
+        return;
+    }
+    if (renderCommand_.widget &&
+        (!renderCommand_.widget->IsVisible() || !renderCommand_.widget->IsEnabled()))
+    {
+        return;
+    }
+
+    std::array<SpriteVertex, 4> vertices_{};
+    BuildSpriteVertices(renderCommand_, screenSize_, vertices_);
+
+    D3D11_MAPPED_SUBRESOURCE mapped_{};
+    const HRESULT hr_ = context_->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_);
+    if (FAILED(hr_)) return;
+
+    SpriteVertex* mappedVertices_ = static_cast<SpriteVertex*>(mapped_.pData);
+    for (size_t index_ = 0; index_ < vertices_.size(); ++index_)
+    {
+        mappedVertices_[index_] = vertices_[index_];
+    }
+    context_->Unmap(vertexBuffer.Get(), 0);
+
+    context_->PSSetShaderResources(0, 1, sprite_->GetTexture().GetAddressOf());
+    context_->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+
+    auto shaderIterator_ = shaders.find(renderCommand_.shaderID);
+    if (shaderIterator_ == shaders.end())
+    {
+        shaderIterator_ = shaders.find(SpriteShaderID::Default);
+    }
+    if (shaderIterator_ == shaders.end()) return;
+
+    SpriteShader& shader_ = shaderIterator_->second;
+    context_->IASetInputLayout(shader_.inputLayout.Get());
+    context_->VSSetShader(shader_.vertexShader.Get(), nullptr, 0);
+    context_->PSSetShader(shader_.pixelShader.Get(), nullptr, 0);
+    context_->DrawIndexed(6, 0, 0);
+}
+
+void SpriteRenderSystem::CreateShader(
+    ID3D11Device* device_,
+    SpriteShaderID id_,
+    const char* vsFile_,
+    const char* psFile_,
+    D3D11_INPUT_ELEMENT_DESC* inputElementDesc_,
+    UINT numElements_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::CreateShader");
+
+    SpriteShader shader_;
+    HRESULT hr_ = CPUResourceLoader::CreateVSFromCSO(
         device_,
         vsFile_,
         shader_.vertexShader.GetAddressOf(),
         shader_.inputLayout.GetAddressOf(),
         inputElementDesc_,
         numElements_);
-    if (FAILED(hr))
+    if (FAILED(hr_))
     {
-        // エラーハンドリング（ログ等）
         return;
     }
 
-    hr = CPUResourceLoader::CreatePSFromCSO(
+    hr_ = CPUResourceLoader::CreatePSFromCSO(
         device_,
         psFile_,
         shader_.pixelShader.GetAddressOf());
-    if (FAILED(hr))
+    if (FAILED(hr_))
     {
-        // エラーハンドリング（ログ等）
         return;
     }
 

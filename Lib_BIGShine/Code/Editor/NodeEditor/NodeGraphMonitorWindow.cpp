@@ -415,8 +415,6 @@ void NodeGraphMonitorWindow::DrawGraphView(const std::shared_ptr<GameObject>& ta
 
 void NodeGraphMonitorWindow::DrawAIBehaviorGraph(AIBehaviorGraph& graph_)
 {
-    graph_.EnsureDefaultGraph();
-
     std::vector<std::string> scopes_;
     AddUniqueScope(scopes_, "Root");
     for (const AIBehaviorNode& node_ : graph_.GetNodes())

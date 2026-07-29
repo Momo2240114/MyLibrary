@@ -490,6 +490,9 @@
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\UIWidgetEditorWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\HierarchyWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -635,6 +638,18 @@
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIAnimationPlayerComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIVertexModifierComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Math\RandomHelper.cpp">
@@ -1179,6 +1194,9 @@
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\UIWidgetEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\AnimationStateMachineComponent.h">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
@@ -1390,6 +1408,18 @@
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIAnimationPlayerComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIVertexModifierComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIWidgetComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\WidgetBoardComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Common\misc.h">

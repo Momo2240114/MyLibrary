@@ -1,0 +1,138 @@
+{
+    "AssetType": "VFXMaterial",
+    "Color": {
+        "Alpha": 1.0,
+        "BaseColor": [
+            0.0,
+            0.6392157077789307,
+            0.9686274528503418,
+            0.29411765933036804
+        ],
+        "EmissiveColor": [
+            0.0,
+            0.6392157077789307,
+            0.9686274528503418
+        ],
+        "EmissiveIntensity": 0.0
+    },
+    "ColorRamp": {
+        "AffectAlpha": true,
+        "BlendMode": "MULTIPLY",
+        "Enabled": false,
+        "FixedPosition": 0.0,
+        "Influence": 1.0,
+        "Interpolation": "LINEAR",
+        "SampleSource": "LIFE",
+        "ScrollSpeed": 0.0,
+        "Stops": [
+            {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Position": 0.0
+            },
+            {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Position": 1.0
+            }
+        ],
+        "WrapMode": "CLAMP"
+    },
+    "Dissolve": {
+        "EdgeColor": [
+            -107374176.0,
+            -107374176.0,
+            -107374176.0,
+            -107374176.0
+        ],
+        "EdgeWidth": 0.05000000074505806,
+        "Enabled": false,
+        "Threshold": 0.0
+    },
+    "Distortion": {
+        "Enabled": false,
+        "Strength": 4.0
+    },
+    "MainUV": {
+        "Offset": [
+            0.0,
+            0.0
+        ],
+        "Pivot": [
+            0.5,
+            0.5
+        ],
+        "Rotation": 0.0,
+        "RotationSpeed": 0.0,
+        "Scale": [
+            1.0,
+            1.0
+        ],
+        "ScrollSpeed": [
+            0.0,
+            0.0
+        ]
+    },
+    "MaterialName": "MeshVFXPart_0_Material",
+    "NoiseUV": {
+        "Offset": [
+            0.0,
+            0.0
+        ],
+        "Pivot": [
+            0.5,
+            0.5
+        ],
+        "Rotation": 0.0,
+        "RotationSpeed": 0.0,
+        "Scale": [
+            1.0,
+            1.0
+        ],
+        "ScrollSpeed": [
+            -0.02500000037252903,
+            0.05000000074505806
+        ]
+    },
+    "RandomColor": {
+        "AffectAlpha": false,
+        "Enabled": false,
+        "Influence": 1.0,
+        "MaxColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "MinColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "Mode": "MULTIPLY",
+        "Seed": 0
+    },
+    "RenderState": {
+        "BlendMode": "ALPHA",
+        "CullMode": "NONE",
+        "DepthTest": true,
+        "DepthWrite": false
+    },
+    "Textures": {
+        "BaseTexturePath": "",
+        "DistortionTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+        "MaskTexturePath": "",
+        "NoiseTexturePath": "",
+        "NormalTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1_normal.PNG"
+    },
+    "Version": 1
+}
