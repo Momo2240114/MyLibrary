@@ -15,6 +15,7 @@ public:
     };
 
     bool Initialize(ID3D11Device* device, int width, int height);
+    void Shutdown();
 
     void Execute(
         const RenderContext& rc,

@@ -23,6 +23,11 @@ public:
     MotionBlurSystem& GetMotionBlurSystem() { return motionBlur; }
     VignetteSystem& GetVignetteSystem() { return vignette; }
     PostDistortionSystem& GetPostDistortionSystem() { return postDistortion; }
+    ID3D11ShaderResourceView* GetWorkBufferSRV(int index_) const
+    {
+        if (index_ < 0 || index_ >= 2) return nullptr;
+        return workBuffers[index_].srv.Get();
+    }
 private:
     struct PostBuffer {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;

@@ -3,6 +3,7 @@
 #include "XeGtaoSystem.h"
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 bool XeGtaoSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
@@ -46,6 +47,20 @@ bool XeGtaoSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     desc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     return SUCCEEDED(device_->CreateBuffer(&desc_, nullptr, constantBuffer.GetAddressOf()));
+}
+
+void XeGtaoSystem::Shutdown()
+{
+    BS_PROFILE_SCOPE("XeGtaoSystem::Shutdown");
+
+    aoUav.Reset();
+    aoSrv.Reset();
+    aoTexture.Reset();
+    constantBuffer.Reset();
+    xeGtaoCs.Reset();
+    compositePs.Reset();
+    fullScreenVs.Reset();
+    aoReady = false;
 }
 
 void XeGtaoSystem::Execute(

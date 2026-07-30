@@ -16,6 +16,21 @@ bool PostRenderSystem::Initialize(ID3D11Device* device, int width, int height) {
 }
 
 void PostRenderSystem::Shutdown() {
+    BS_PROFILE_SCOPE("PostRenderSystem::Shutdown");
+
+    bloom.Shutdown();
+    radialBlur.Shutdown();
+    xeGtao.Shutdown();
+    motionBlur.Shutdown();
+    vignette.Shutdown();
+    postDistortion.Shutdown();
+
+    for (PostBuffer& buffer_ : workBuffers)
+    {
+        buffer_.srv.Reset();
+        buffer_.rtv.Reset();
+        buffer_.texture.Reset();
+    }
 }
 
 void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView* sceneSRV, ID3D11RenderTargetView* finalRTV)

@@ -239,6 +239,7 @@ private:
 		DirectX::XMFLOAT4   cascadeShadowBias{ 0.001f, 0.002f, 0.003f, 0.004f };
 		float shadowAttenuation = 0.35f;
 		DirectX::XMFLOAT3 padding{};
+		DirectX::XMFLOAT4 cascadeShadowSoftness{ 2.0f, 8.0f, 1.0f, 1.0f };
 	};
 
 	std::shared_ptr<ModelShader>			shaders[static_cast<int>(ModelShaderID::EnumCount)];
@@ -311,6 +312,10 @@ private:
 
 	bool useCascadeShadow;
 	float shadowAttenuation = 0.35f;
+	float cascadeShadowSoftnessRadius = 2.0f;
+	int cascadeShadowSoftnessSampleCount = 8;
+	bool useCascadeShadowSoftness = true;
+	bool useCascadeShadowRandomRotation = true;
 
 	// カスケードごとの深度マップを生成し、後段のライティングパスで参照できる状態にする。
 	void RenderCascadeShadowMaps(RenderContext& rc, const DirectX::XMFLOAT3& lightDirection);

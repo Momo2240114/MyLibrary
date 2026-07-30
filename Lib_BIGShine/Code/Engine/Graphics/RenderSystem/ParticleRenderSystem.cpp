@@ -83,8 +83,14 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
         dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
         ParticleEmitter::BindSharedRenderShaders(dc);
 
-        ID3D11SamplerState* sampler = rc.renderState->GetSamplerState(SamplerState::LinearWrap);
-        dc->PSSetSamplers(0, 1, &sampler);
+        ID3D11SamplerState* sampler_ = rc.renderState->GetSamplerState(SamplerState::LinearWrap);
+        ID3D11SamplerState* samplerStates_[3] =
+        {
+            sampler_,
+            sampler_,
+            sampler_
+        };
+        dc->PSSetSamplers(0, _countof(samplerStates_), samplerStates_);
     }
 
     float blendFactor[4] = { 0, 0, 0, 0 };
@@ -130,6 +136,8 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
 
         ID3D11ShaderResourceView* nullPSViews[] = { nullptr, nullptr, nullptr, nullptr };
         dc->PSSetShaderResources(0, _countof(nullPSViews), nullPSViews);
+        ID3D11SamplerState* nullSamplerStates_[3] = {};
+        dc->PSSetSamplers(0, _countof(nullSamplerStates_), nullSamplerStates_);
 
         ID3D11Buffer* nullCB = nullptr;
         dc->VSSetConstantBuffers(7, 1, &nullCB);

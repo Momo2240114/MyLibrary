@@ -10,6 +10,7 @@ class PostDistortionSystem
 {
 public:
     bool Initialize(ID3D11Device* device_, int width_, int height_);
+    void Shutdown();
 
     void Execute(
         const RenderContext& rc_,

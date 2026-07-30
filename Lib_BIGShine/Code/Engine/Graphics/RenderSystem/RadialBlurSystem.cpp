@@ -4,6 +4,7 @@
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "OutlineSystem.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
 {
@@ -31,6 +32,15 @@ bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
     desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     return SUCCEEDED(device->CreateBuffer(&desc, nullptr, constantBuffer.GetAddressOf()));
+}
+
+void RadialBlurSystem::Shutdown()
+{
+    BS_PROFILE_SCOPE("RadialBlurSystem::Shutdown");
+
+    constantBuffer.Reset();
+    radialBlurPS.Reset();
+    fullScreenVS.Reset();
 }
 
 void RadialBlurSystem::Execute(

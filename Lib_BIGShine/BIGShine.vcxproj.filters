@@ -634,6 +634,9 @@
     <ClCompile Include="Code\Editor\Window\PostEffectWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\DebugTextureViewerWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\UI\UIButton.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
@@ -788,6 +791,9 @@
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.cpp">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp">
@@ -1404,6 +1410,9 @@
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Window\DebugTextureViewerWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIButton.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
@@ -1438,6 +1447,9 @@
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h">
+      <Filter>Code\Engine\GamePlay\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.h">
       <Filter>Code\Engine\GamePlay\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h">

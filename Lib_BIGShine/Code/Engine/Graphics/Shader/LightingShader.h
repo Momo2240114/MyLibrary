@@ -18,6 +18,7 @@ public:
         ID3D11ShaderResourceView* pointLightSRV,  // 追加
         ID3D11ShaderResourceView* spotLightSRV,
         ID3D11Buffer* sceneConstantBuffer,
+        ID3D11Buffer* cascadeShadowConstantBuffer,
         const DirectX::XMFLOAT4& toonShadeSteps_,
         const DirectX::XMFLOAT4& toonShadeFeathers_,
         const DirectX::XMFLOAT4& toonPbrShadeSteps_,

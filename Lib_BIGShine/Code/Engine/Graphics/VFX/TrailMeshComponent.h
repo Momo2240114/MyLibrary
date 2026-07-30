@@ -74,9 +74,6 @@ private:
         const TrailSample& fromSample_,
         const TrailSample& toSample_,
         float distance_);
-    DirectX::XMFLOAT3 BuildTrailParticlePosition(const TrailSample& sample_);
-    DirectX::XMFLOAT3 BuildTrailParticleNormal(const TrailSample& sample_) const;
-    float GenerateTrailParticleRandom01();
 
 private:
     std::vector<TrailSample> samples;
@@ -111,5 +108,4 @@ private:
     float trailParticleTimeAccumulator = 0.0f;
     float trailParticleDistanceAccumulator = 0.0f;
     int trailParticleAddedSampleCounter = 0;
-    uint32_t trailParticleRandomState = 0x6D2B79F5u;
 };

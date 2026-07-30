@@ -370,6 +370,7 @@
     <ClCompile Include="Code\Editor\Window\ShaderWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ShadowWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\PostEffectWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\DebugTextureViewerWindow.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioComponent.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioManager.cpp" />
@@ -387,6 +388,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Camera\CameraShakeComponent.cpp" />
@@ -656,6 +658,7 @@
     <ClInclude Include="Code\Editor\Window\ShaderWindow.h" />
     <ClInclude Include="Code\Editor\Window\ShadowWindow.h" />
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h" />
+    <ClInclude Include="Code\Editor\Window\DebugTextureViewerWindow.h" />
     <ClInclude Include="Code\Engine\Common\misc.h" />
     <ClInclude Include="Code\Engine\Common\DebugLog.h" />
     <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
@@ -766,6 +769,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Camera\LockOnTargetComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\ThirdPersonCameraComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraLockOnComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Camera\CombatCameraCompositionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraCollisionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraActionDirectorComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraShakeComponent.h" />

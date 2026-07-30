@@ -13,6 +13,7 @@ public:
     static constexpr UINT ShadowmapSize = 2048;
 
     bool Initialize(ID3D11Device* device);
+    void Shutdown();
     void UpdateMatrices(const CameraComponent& camera, const DirectX::XMFLOAT3& lightDirection);
 
     ID3D11DepthStencilView* GetDSV(int index) const { return shadowDSVs[index].Get(); }
@@ -29,6 +30,18 @@ public:
     bool IsDisplayCascadeArea() const { return displayCascadeArea; }
     void SetDisplayCascadeArea(bool enable) { displayCascadeArea = enable; }
 
+    float GetLightDistance() const { return lightDistance; }
+    void SetLightDistance(float distance_) { lightDistance = distance_; }
+
+    float GetCascadeXyPadding() const { return cascadeXyPadding; }
+    void SetCascadeXyPadding(float padding_) { cascadeXyPadding = padding_; }
+
+    float GetCascadeDepthPadding() const { return cascadeDepthPadding; }
+    void SetCascadeDepthPadding(float padding_) { cascadeDepthPadding = padding_; }
+
+    bool IsTexelSnapEnabled() const { return texelSnapEnabled; }
+    void SetTexelSnapEnabled(bool enabled_) { texelSnapEnabled = enabled_; }
+
     float* GetCascadeSplitDistances() { return cascadeSplitDistances; }
     const float* GetCascadeSplitDistances() const { return cascadeSplitDistances; }
     void SetCascadeSplitDistance(int index_, float distance_);
@@ -44,6 +57,10 @@ private:
 
     bool useCascadeShadow = true;
     bool displayCascadeArea = false;
+    bool texelSnapEnabled = true;
+    float lightDistance = 500.0f;
+    float cascadeXyPadding = 8.0f;
+    float cascadeDepthPadding = 180.0f;
     
     float cascadeSplitDistances[4] =
     {

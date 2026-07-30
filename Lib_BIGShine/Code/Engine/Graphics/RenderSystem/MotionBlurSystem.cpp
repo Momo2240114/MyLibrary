@@ -6,6 +6,7 @@
 #include <cstring>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 bool MotionBlurSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
@@ -56,6 +57,29 @@ bool MotionBlurSystem::Initialize(ID3D11Device* device_, int width_, int height_
     desc_.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     desc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     return SUCCEEDED(device_->CreateBuffer(&desc_, nullptr, constantBuffer.GetAddressOf()));
+}
+
+void MotionBlurSystem::Shutdown()
+{
+    BS_PROFILE_SCOPE("MotionBlurSystem::Shutdown");
+
+    velocityBuffer.srv.Reset();
+    velocityBuffer.rtv.Reset();
+    velocityBuffer.texture.Reset();
+    tileMaxBuffer.srv.Reset();
+    tileMaxBuffer.rtv.Reset();
+    tileMaxBuffer.texture.Reset();
+    neighborMaxBuffer.srv.Reset();
+    neighborMaxBuffer.rtv.Reset();
+    neighborMaxBuffer.texture.Reset();
+    constantBuffer.Reset();
+    velocityPixelShader.Reset();
+    tileMaxPixelShader.Reset();
+    neighborMaxPixelShader.Reset();
+    pixelShader.Reset();
+    fullScreenVs.Reset();
+    objectVelocityRenderer = nullptr;
+    hasPreviousViewProjection = false;
 }
 
 void MotionBlurSystem::SynchronizeCameraHistory(const RenderContext& rc_)

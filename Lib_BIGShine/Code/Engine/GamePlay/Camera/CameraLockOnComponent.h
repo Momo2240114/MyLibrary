@@ -11,6 +11,17 @@ class CameraComponent;
 class GameObject;
 class ThirdPersonCameraComponent;
 
+struct LockOnCameraCompositionCorrection
+{
+    float sideOffset = 0.0f;
+    float distanceOffset = 0.0f;
+    float heightOffset = 0.0f;
+    float lookAtHeightOffset = 0.0f;
+    float focusTargetRateOffset = 0.0f;
+    float fovOffset = 0.0f;
+    float weight = 0.0f;
+};
+
 class CameraLockOnComponent : public Component
 {
 public:
@@ -32,6 +43,11 @@ public:
     bool IsActionSuppressed() const { return actionSuppressed; }
     bool IsWallCameraActive() const;
     float GetWallCameraRate() const { return currentWallCameraRate; }
+    float GetCurrentTargetDistance() const { return currentTargetDistance; }
+    DirectX::XMFLOAT3 GetCurrentArenaOutwardDirection() const { return previousArenaOutwardDirection; }
+    DirectX::XMFLOAT3 GetCurrentBaseCameraPosition() const { return currentBaseCameraPosition; }
+    DirectX::XMFLOAT3 GetCurrentBaseLookAtPosition() const { return currentBaseLookAtPosition; }
+    const LockOnCameraCompositionCorrection& GetCompositionCorrection() const { return compositionCorrection; }
     std::shared_ptr<GameObject> GetPlayerTarget() const { return playerTarget.lock(); }
     std::shared_ptr<GameObject> GetLockOnTarget() const { return lockOnTarget.lock(); }
     std::shared_ptr<GameObject> GetLockOnFocusTarget() const { return lockOnFocusTarget.lock(); }
@@ -50,6 +66,9 @@ public:
         float compressionRate_,
         float collisionLift_,
         float deltaTime_);
+    void SetCompositionCorrection(
+        const LockOnCameraCompositionCorrection& correction_);
+    void ClearCompositionCorrection();
 
 private:
     void ResolveReferences();
@@ -234,10 +253,14 @@ private:
     DirectX::XMFLOAT3 collisionCameraPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 previousWallCameraPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 previousArenaOutwardDirection{ 0.0f, 0.0f, 1.0f };
+    DirectX::XMFLOAT3 currentBaseCameraPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 currentBaseLookAtPosition{ 0.0f, 0.0f, 0.0f };
     std::weak_ptr<GameObject> previousLockOnTarget;
     std::weak_ptr<GameObject> previousFocusTarget;
+    LockOnCameraCompositionCorrection compositionCorrection;
     float baseFovY = 60.0f;
     float currentCollisionFov = 60.0f;
+    float currentTargetDistance = 0.0f;
     DirectX::XMFLOAT2 debugPlayerScreen{ 0.5f, 0.5f };
     DirectX::XMFLOAT2 debugPlayerBottomScreen{ 0.5f, 0.5f };
     DirectX::XMFLOAT2 debugTargetScreen{ 0.5f, 0.5f };

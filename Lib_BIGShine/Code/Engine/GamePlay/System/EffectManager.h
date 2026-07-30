@@ -36,6 +36,20 @@ struct ParticleSpawnRequest
     float targetAttractionFalloff = 1.0f;
 };
 
+struct TrailParticleEmissionRequest
+{
+    std::string assetPath;
+    std::string emitterName;
+    DirectX::XMFLOAT3 leftPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 rightPosition = { 0.0f, 0.0f, 0.0f };
+    float lifeTime = 0.8f;
+    int spawnCount = 1;
+    float widthMin = 0.35f;
+    float widthMax = 1.0f;
+    float tipBias = 0.0f;
+    float positionJitter = 0.0f;
+};
+
 // MeshVFX生成時に使用するAsset、位置、寿命をまとめる
 struct MeshVFXSpawnRequest
 {
@@ -147,6 +161,8 @@ public:
 
     std::shared_ptr<GameObject> SpawnParticle(
         const ParticleSpawnRequest& request_);
+    void QueueTrailParticleEmission(
+        const TrailParticleEmissionRequest& request_);
     std::shared_ptr<GameObject> SpawnMeshVFX(
         const MeshVFXSpawnRequest& request_);
     std::shared_ptr<GameObject> SpawnDecal(
@@ -318,6 +334,12 @@ private:
     void UpdateVFXSequence(ManagedEffect& effect_);
     // Pool対象のEffectを停止し、再利用できる状態へ戻す
     void ReleasePooledEffect(ManagedEffect& effect_);
+    void ProcessTrailParticleEmissions();
+    DirectX::XMFLOAT3 BuildTrailParticlePosition(
+        const TrailParticleEmissionRequest& request_);
+    DirectX::XMFLOAT3 BuildTrailParticleNormal(
+        const TrailParticleEmissionRequest& request_) const;
+    float GenerateTrailParticleRandom01();
     // 指定フォルダ以下のJSON Assetパスを収集する
     void CollectJsonAssets(
         const std::string& rootPath_,
@@ -378,4 +400,6 @@ private:
     std::unordered_map<std::string, std::vector<std::shared_ptr<GameObject>>> particleObjectPool;
     std::unordered_map<std::string, std::vector<std::shared_ptr<GameObject>>> meshVFXObjectPool;
     std::unordered_map<std::string, std::vector<std::shared_ptr<GameObject>>> vfxSequenceObjectPool;
+    std::vector<TrailParticleEmissionRequest> queuedTrailParticleEmissions;
+    uint32_t trailParticleRandomState = 0x6D2B79F5u;
 };

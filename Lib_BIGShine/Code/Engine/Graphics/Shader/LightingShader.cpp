@@ -43,11 +43,14 @@ void LightingShader::Execute(const RenderContext& rc,
     ID3D11ShaderResourceView* pointLightSRV,  // 追加
     ID3D11ShaderResourceView* spotLightSRV,
     ID3D11Buffer* sceneConstantBuffer,
+    ID3D11Buffer* cascadeShadowConstantBuffer,
     const DirectX::XMFLOAT4& toonShadeSteps_,
     const DirectX::XMFLOAT4& toonShadeFeathers_,
     const DirectX::XMFLOAT4& toonPbrShadeSteps_,
     const DirectX::XMFLOAT4& toonPbrShadeFeathers_)
 {
+    BS_PROFILE_SCOPE("LightingShader::Execute");
+
     auto dc = rc.deviceContext;
 
 
@@ -57,19 +60,36 @@ void LightingShader::Execute(const RenderContext& rc,
     _ASSERT_EXPR(emissive != nullptr, L"Emissive SRV is null!");
     _ASSERT_EXPR(depth != nullptr, L"Depth SRV is null!");
     _ASSERT_EXPR(sceneConstantBuffer != nullptr, L"Constant Buffer is null!");
+    _ASSERT_EXPR(cascadeShadowConstantBuffer != nullptr, L"Cascade shadow constant buffer is null!");
 
     // 1. シェーダーとサンプラーセット
     dc->VSSetShader(vertexShader.Get(), nullptr, 0);
     dc->PSSetShader(pixelShader.Get(), nullptr, 0);
     dc->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+    if (rc.renderState)
+    {
+        ID3D11SamplerState* shadowSampler_ = rc.renderState->GetSamplerState(SamplerState::LinearBorder);
+        dc->PSSetSamplers(1, 1, &shadowSampler_);
+    }
 
     ID3D11ShaderResourceView* srvs[] = { color, normal, material, emissive, depth };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
+
+    ID3D11ShaderResourceView* shadowSrvs_[CascadeShadowMap::CascadeCount] = {};
+    if (rc.cascadeShadowMap)
+    {
+        for (int index_ = 0; index_ < CascadeShadowMap::CascadeCount; ++index_)
+        {
+            shadowSrvs_[index_] = rc.cascadeShadowMap->GetSRV(index_);
+        }
+    }
+    dc->PSSetShaderResources(13, _countof(shadowSrvs_), shadowSrvs_);
 
 
     // 3. ライティングに必要なライト情報を定数バッファへ更新
     // rc.lights を使って lightConstantBuffer を更新せよ
     dc->PSSetConstantBuffers(7, 1, &sceneConstantBuffer); // b7 (CbScene)
+    dc->PSSetConstantBuffers(8, 1, &cascadeShadowConstantBuffer);
 
     CbDeferredSettings settings_{};
     settings_.toonShadeSteps = toonShadeSteps_;
@@ -91,6 +111,16 @@ void LightingShader::Execute(const RenderContext& rc,
     // 5. 解除 (バインドしたものをすべてnullptrにする)
     ID3D11ShaderResourceView* nullGBufferSRVs[5] = {};
     dc->PSSetShaderResources(0, _countof(nullGBufferSRVs), nullGBufferSRVs);
+    ID3D11ShaderResourceView* nullLightSRVs_[2] = {};
+    dc->PSSetShaderResources(5, _countof(nullLightSRVs_), nullLightSRVs_);
     ID3D11ShaderResourceView* nullIblSRVs[3] = {};
     dc->PSSetShaderResources(10, _countof(nullIblSRVs), nullIblSRVs);
+    ID3D11ShaderResourceView* nullShadowSRVs[CascadeShadowMap::CascadeCount] = {};
+    dc->PSSetShaderResources(13, _countof(nullShadowSRVs), nullShadowSRVs);
+    ID3D11SamplerState* nullSamplers_[2] = {};
+    dc->PSSetSamplers(0, _countof(nullSamplers_), nullSamplers_);
+    ID3D11Buffer* nullConstantBuffers_[3] = {};
+    dc->PSSetConstantBuffers(7, _countof(nullConstantBuffers_), nullConstantBuffers_);
+    dc->VSSetShader(nullptr, nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
 }

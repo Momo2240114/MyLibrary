@@ -547,17 +547,18 @@ void TrailMeshComponent::EmitTrailParticlesAtSample(
     const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
     const int spawnCountThisCall_ = (std::min)(clampedSpawnCount_, maxSpawn_);
     EffectManager& effectManager_ = owner_->GetManager().GetEffectManager();
-    const DirectX::XMFLOAT3 normal_ = BuildTrailParticleNormal(sample_);
-    for (int spawnIndex_ = 0; spawnIndex_ < spawnCountThisCall_; ++spawnIndex_)
-    {
-        ParticleSpawnRequest request_{};
-        request_.assetPath = trailParticleAssetPath;
-        request_.emitterName = trailParticleEmitterName;
-        request_.position = BuildTrailParticlePosition(sample_);
-        request_.normal = normal_;
-        request_.lifeTime = trailParticleLifeTime;
-        effectManager_.SpawnParticle(request_);
-    }
+    TrailParticleEmissionRequest request_{};
+    request_.assetPath = trailParticleAssetPath;
+    request_.emitterName = trailParticleEmitterName;
+    request_.leftPosition = sample_.leftPosition;
+    request_.rightPosition = sample_.rightPosition;
+    request_.lifeTime = trailParticleLifeTime;
+    request_.spawnCount = spawnCountThisCall_;
+    request_.widthMin = trailParticleWidthMin;
+    request_.widthMax = trailParticleWidthMax;
+    request_.tipBias = trailParticleTipBias;
+    request_.positionJitter = trailParticlePositionJitter;
+    effectManager_.QueueTrailParticleEmission(request_);
 }
 
 void TrailMeshComponent::EmitTrailParticlesAlongMovement(
@@ -590,44 +591,6 @@ void TrailMeshComponent::EmitTrailParticlesAlongMovement(
     {
         trailParticleDistanceAccumulator = std::fmod(trailParticleDistanceAccumulator, intervalDistance_);
     }
-}
-
-DirectX::XMFLOAT3 TrailMeshComponent::BuildTrailParticlePosition(const TrailSample& sample_)
-{
-    BS_PROFILE_SCOPE("TrailMeshComponent::BuildTrailParticlePosition");
-    const float randomWidth_ = GenerateTrailParticleRandom01();
-    const float minWidth_ = Clamp01((std::min)(trailParticleWidthMin, trailParticleWidthMax));
-    const float maxWidth_ = Clamp01((std::max)(trailParticleWidthMin, trailParticleWidthMax));
-    const float biasedWidth_ = Clamp01(randomWidth_ + trailParticleTipBias);
-    const float widthRate_ = minWidth_ + (maxWidth_ - minWidth_) * biasedWidth_;
-    DirectX::XMFLOAT3 position_ = LerpPosition(sample_.leftPosition, sample_.rightPosition, widthRate_);
-    if (trailParticlePositionJitter > 0.0f)
-    {
-        position_.x += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * trailParticlePositionJitter;
-        position_.y += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * trailParticlePositionJitter;
-        position_.z += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * trailParticlePositionJitter;
-    }
-    return position_;
-}
-
-DirectX::XMFLOAT3 TrailMeshComponent::BuildTrailParticleNormal(const TrailSample& sample_) const
-{
-    DirectX::XMFLOAT3 normal_{ 0.0f, 1.0f, 0.0f };
-    const DirectX::XMVECTOR widthVector_ = DirectX::XMVectorSubtract(
-        DirectX::XMLoadFloat3(&sample_.rightPosition),
-        DirectX::XMLoadFloat3(&sample_.leftPosition));
-    if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(widthVector_)) > 0.000001f)
-    {
-        DirectX::XMStoreFloat3(&normal_, DirectX::XMVector3Normalize(widthVector_));
-    }
-    return normal_;
-}
-
-float TrailMeshComponent::GenerateTrailParticleRandom01()
-{
-    trailParticleRandomState = trailParticleRandomState * 1664525u + 1013904223u;
-    return static_cast<float>((trailParticleRandomState >> 8) & 0x00FFFFFFu) /
-        static_cast<float>(0x01000000u);
 }
 
 bool TrailMeshComponent::GetDynamicMesh(MeshVFXDynamicMesh& mesh_) const

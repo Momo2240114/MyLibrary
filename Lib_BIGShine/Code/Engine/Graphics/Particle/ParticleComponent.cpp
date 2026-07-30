@@ -923,15 +923,12 @@ void ParticleComponent::ResetRuntime()
 {
     Stop();
     timer = 0.0f;
-    ID3D11DeviceContext* context_ =
-        GraphicsDeviceManager::Instance().GetContext();
     for (EmitterTrack& track_ : tracks)
     {
         track_.isStarted = false;
         if (!track_.emitter) continue;
         track_.emitter->ResetRuntime();
         track_.emitter->SetEmissionEnabled(false);
-        if (context_) track_.emitter->Update(context_, 0.0f);
     }
 }
 

@@ -35,6 +35,7 @@ public:
     };
 
     bool Initialize(ID3D11Device* device, int width, int height);
+    void Shutdown();
     void Execute(
         const RenderContext& rc,
         ID3D11ShaderResourceView* sceneSRV, 
@@ -47,6 +48,14 @@ public:
         ID3D11RenderTargetView* finalRTV,
         const Parameters& params,
         const CbColorFilter& colorFilterparamas );
+
+    ID3D11ShaderResourceView* GetBrightSRV() const { return brightTarget.srv.Get(); }
+    ID3D11ShaderResourceView* GetBlurSRV(size_t index_) const
+    {
+        if (index_ >= blurTargets.size()) return nullptr;
+        return blurTargets[index_].srv.Get();
+    }
+    size_t GetBlurTargetCount() const { return blurTargets.size(); }
 
 private:
     struct RenderTarget 

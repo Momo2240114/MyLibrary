@@ -317,8 +317,16 @@ void ModelRenderSystem::SerializeGraphicsSettings(nlohmann::json& j_) const
 	j_["ShadowMap"] = {
 		{"useCascadeShadow", cascadeShadowMap_.IsUseCascadeShadow()},
 		{"displayCascadeArea", cascadeShadowMap_.IsDisplayCascadeArea()},
+		{"texelSnapEnabled", cascadeShadowMap_.IsTexelSnapEnabled()},
+		{"lightDistance", cascadeShadowMap_.GetLightDistance()},
+		{"cascadeXyPadding", cascadeShadowMap_.GetCascadeXyPadding()},
+		{"cascadeDepthPadding", cascadeShadowMap_.GetCascadeDepthPadding()},
 		{"cascadeSplitDistances", {splits_[0], splits_[1], splits_[2], splits_[3]}},
 		{"shadowAttenuation", shadowAttenuation},
+		{"useCascadeShadowSoftness", useCascadeShadowSoftness},
+		{"useCascadeShadowRandomRotation", useCascadeShadowRandomRotation},
+		{"cascadeShadowSoftnessRadius", cascadeShadowSoftnessRadius},
+		{"cascadeShadowSoftnessSampleCount", cascadeShadowSoftnessSampleCount},
 		{"cascadeShadowBias", {cascadeShadowBias.x, cascadeShadowBias.y, cascadeShadowBias.z, cascadeShadowBias.w}}
 	};
 
@@ -412,6 +420,10 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 		CascadeShadowMap& cascadeShadowMap_ = GraphicsDeviceManager::Instance().GetCascadeShadowMap();
 		cascadeShadowMap_.SetUseCascadeShadow(shadowJson_.value("useCascadeShadow", cascadeShadowMap_.IsUseCascadeShadow()));
 		cascadeShadowMap_.SetDisplayCascadeArea(shadowJson_.value("displayCascadeArea", cascadeShadowMap_.IsDisplayCascadeArea()));
+		cascadeShadowMap_.SetTexelSnapEnabled(shadowJson_.value("texelSnapEnabled", cascadeShadowMap_.IsTexelSnapEnabled()));
+		cascadeShadowMap_.SetLightDistance(shadowJson_.value("lightDistance", cascadeShadowMap_.GetLightDistance()));
+		cascadeShadowMap_.SetCascadeXyPadding(shadowJson_.value("cascadeXyPadding", cascadeShadowMap_.GetCascadeXyPadding()));
+		cascadeShadowMap_.SetCascadeDepthPadding(shadowJson_.value("cascadeDepthPadding", cascadeShadowMap_.GetCascadeDepthPadding()));
 
 		if (shadowJson_.contains("cascadeSplitDistances") && shadowJson_["cascadeSplitDistances"].is_array())
 		{
@@ -423,6 +435,10 @@ void ModelRenderSystem::DeserializeGraphicsSettings(const nlohmann::json& j_)
 		}
 
 		shadowAttenuation = shadowJson_.value("shadowAttenuation", shadowAttenuation);
+		useCascadeShadowSoftness = shadowJson_.value("useCascadeShadowSoftness", useCascadeShadowSoftness);
+		useCascadeShadowRandomRotation = shadowJson_.value("useCascadeShadowRandomRotation", useCascadeShadowRandomRotation);
+		cascadeShadowSoftnessRadius = shadowJson_.value("cascadeShadowSoftnessRadius", cascadeShadowSoftnessRadius);
+		cascadeShadowSoftnessSampleCount = shadowJson_.value("cascadeShadowSoftnessSampleCount", cascadeShadowSoftnessSampleCount);
 
 		if (shadowJson_.contains("cascadeShadowBias") && shadowJson_["cascadeShadowBias"].is_array())
 		{
@@ -563,6 +579,12 @@ void ModelRenderSystem::ShadowSettingGui()
 			cascadeShadowMap.SetDisplayCascadeArea(displayCascadeArea);
 		}
 
+		bool texelSnapEnabled_ = cascadeShadowMap.IsTexelSnapEnabled();
+		if (ImGui::Checkbox("Texel Snap", &texelSnapEnabled_))
+		{
+			cascadeShadowMap.SetTexelSnapEnabled(texelSnapEnabled_);
+		}
+
 		float* splits = cascadeShadowMap.GetCascadeSplitDistances();
 
 		ImGui::DragFloat("Cascade 0 Far", &splits[0], 0.1f, 0.1f, 5000.0f);
@@ -570,11 +592,40 @@ void ModelRenderSystem::ShadowSettingGui()
 		ImGui::DragFloat("Cascade 2 Far", &splits[2], 0.1f, splits[1] + 0.1f, 5000.0f);
 		ImGui::DragFloat("Cascade 3 Far", &splits[3], 0.1f, splits[2] + 0.1f, 5000.0f);
 
+		ImGui::Separator();
+
+		ImGui::Text("Cascade Fit");
+		float lightDistance_ = cascadeShadowMap.GetLightDistance();
+		if (ImGui::DragFloat("Light Distance", &lightDistance_, 1.0f, 1.0f, 5000.0f))
+		{
+			cascadeShadowMap.SetLightDistance(lightDistance_);
+		}
+
+		float cascadeXyPadding_ = cascadeShadowMap.GetCascadeXyPadding();
+		if (ImGui::DragFloat("XY Padding", &cascadeXyPadding_, 0.1f, 0.0f, 500.0f))
+		{
+			cascadeShadowMap.SetCascadeXyPadding(cascadeXyPadding_);
+		}
+
+		float cascadeDepthPadding_ = cascadeShadowMap.GetCascadeDepthPadding();
+		if (ImGui::DragFloat("Depth Padding", &cascadeDepthPadding_, 1.0f, 0.0f, 5000.0f))
+		{
+			cascadeShadowMap.SetCascadeDepthPadding(cascadeDepthPadding_);
+		}
+
 
 		ImGui::Separator();
 
 		ImGui::Text("Shadow Strength");
 		ImGui::SliderFloat("Shadow Attenuation", &shadowAttenuation, 0.0f, 1.0f);
+
+		ImGui::Separator();
+
+		ImGui::Text("Shadow Softness");
+		ImGui::Checkbox("Use Soft Shadow", &useCascadeShadowSoftness);
+		ImGui::Checkbox("Random Rotation", &useCascadeShadowRandomRotation);
+		ImGui::DragFloat("Poisson Radius", &cascadeShadowSoftnessRadius, 0.05f, 0.0f, 16.0f, "%.2f");
+		ImGui::SliderInt("Poisson Samples", &cascadeShadowSoftnessSampleCount, 1, 16);
 
 		ImGui::Separator();
 
@@ -729,6 +780,13 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 		shadowData.cascadeSplits = rc.cascadeShadowMap->GetCascadeSplits();
 		shadowData.cascadeShadowBias = cascadeShadowBias;
 		shadowData.shadowAttenuation = shadowAttenuation;
+		shadowData.cascadeShadowSoftness =
+		{
+			cascadeShadowSoftnessRadius,
+			static_cast<float>(cascadeShadowSoftnessSampleCount),
+			useCascadeShadowRandomRotation ? 1.0f : 0.0f,
+			useCascadeShadowSoftness ? 1.0f : 0.0f
+		};
 		if (investigationEnabled_ && !renderInvestigationSettings.enableShadowPass)
 		{
 			shadowData.shadowAttenuation = 1.0f;
@@ -1187,6 +1245,12 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			dc->PSSetShader(outlinePixelShader.Get(), nullptr, 0);
 			dc->VSSetConstantBuffers(0, 1, outlineConstantBuffer.GetAddressOf());
 			dc->PSSetConstantBuffers(0, 1, outlineConstantBuffer.GetAddressOf());
+			ID3D11SamplerState* outlineSamplers_[] =
+			{
+				rc.renderState->GetSamplerState(SamplerState::LinearWrap),
+				rc.renderState->GetSamplerState(SamplerState::LinearBorder),
+			};
+			dc->PSSetSamplers(0, _countof(outlineSamplers_), outlineSamplers_);
 			dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 			dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
 			dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));
@@ -1345,6 +1409,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				lightSRV.Get(),
 				spotLightSRV.Get(),
 				sceneConstantBuffer.Get(),
+				cascadeShadowConstantBuffer.Get(),
 				toonSteps_,
 				toonFeathers_,
 				toonPbrSteps_,
