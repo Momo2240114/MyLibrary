@@ -53,6 +53,22 @@ void ParticleEmitter::InitializeSharedShaders(ID3D11Device* device)
     CPUResourceLoader::LoadPixelShader(device, "Shader/ParticleDraw_PS.cso", pixelShader.GetAddressOf());
 }
 
+void ParticleEmitter::ShutdownSharedShaders()
+{
+    BS_PROFILE_SCOPE("ParticleEmitter::ShutdownSharedShaders");
+
+    pixelShader.Reset();
+    geometryShader.Reset();
+    vertexShader.Reset();
+    sortC2Shader.Reset();
+    sortB2Shader.Reset();
+    endFrameShader.Reset();
+    updateShader.Reset();
+    emitShader.Reset();
+    beginFrameShader.Reset();
+    initShader.Reset();
+}
+
 void ParticleEmitter::BindSharedRenderShaders(ID3D11DeviceContext* context)
 {
     context->VSSetShader(vertexShader.Get(), nullptr, 0);

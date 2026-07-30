@@ -146,7 +146,8 @@ const char* EditorWindowManager::GetWindowMenuCategory(
 	if (name_ == "Shader" ||
 		name_ == "GPU Render Investigation" ||
 		name_ == "Shadow" ||
-		name_ == "Post Effect")
+		name_ == "Post Effect" ||
+		name_ == "Debug Texture Viewer")
 	{
 		return "Rendering";
 	}

@@ -61,6 +61,25 @@ namespace
     }
 
     constexpr size_t EFFECT_PREWARM_COUNT = 4u;
+    constexpr size_t EFFECT_DYNAMIC_POOL_MAX_COUNT = 64u;
+
+    float Clamp01(float value_)
+    {
+        return std::clamp(value_, 0.0f, 1.0f);
+    }
+
+    DirectX::XMFLOAT3 LerpPosition(
+        const DirectX::XMFLOAT3& firstPosition_,
+        const DirectX::XMFLOAT3& secondPosition_,
+        float amount_)
+    {
+        return
+        {
+            firstPosition_.x + (secondPosition_.x - firstPosition_.x) * amount_,
+            firstPosition_.y + (secondPosition_.y - firstPosition_.y) * amount_,
+            firstPosition_.z + (secondPosition_.z - firstPosition_.z) * amount_,
+        };
+    }
 }
 
 void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
@@ -191,6 +210,7 @@ void EffectManager::Update(float deltaTime_)
         readyRequest_.setting.spawnTime = 0.0f;
         SpawnSlashEffect(readyRequest_);
     }
+    ProcessTrailParticleEmissions();
 
     // 管理中Effectの寿命、Sequence時間、HitBox有効時間を更新する
     for (ManagedEffect& effect_ : managedEffects)
@@ -249,6 +269,7 @@ void EffectManager::Clear()
     }
     managedEffects.clear();
     scheduledAttackEffects.clear();
+    queuedTrailParticleEmissions.clear();
 }
 
 // Effect用AssetフォルダからJSON Asset一覧を収集する
@@ -584,6 +605,81 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
 }
 
 // 攻撃用MeshVFXを生成し、必要に応じてHitBoxを設定する
+void EffectManager::QueueTrailParticleEmission(
+    const TrailParticleEmissionRequest& request_)
+{
+    BS_PROFILE_SCOPE("EffectManager::QueueTrailParticleEmission");
+    if (request_.assetPath.empty()) return;
+    queuedTrailParticleEmissions.push_back(request_);
+}
+
+void EffectManager::ProcessTrailParticleEmissions()
+{
+    BS_PROFILE_SCOPE("EffectManager::ProcessTrailParticleEmissions");
+    if (queuedTrailParticleEmissions.empty()) return;
+
+    std::vector<TrailParticleEmissionRequest> requests_ =
+        std::move(queuedTrailParticleEmissions);
+    queuedTrailParticleEmissions.clear();
+
+    for (const TrailParticleEmissionRequest& request_ : requests_)
+    {
+        const int spawnCount_ = std::clamp(request_.spawnCount, 1, 32);
+        const DirectX::XMFLOAT3 normal_ = BuildTrailParticleNormal(request_);
+        for (int spawnIndex_ = 0; spawnIndex_ < spawnCount_; ++spawnIndex_)
+        {
+            ParticleSpawnRequest particleRequest_{};
+            particleRequest_.assetPath = request_.assetPath;
+            particleRequest_.emitterName = request_.emitterName;
+            particleRequest_.position = BuildTrailParticlePosition(request_);
+            particleRequest_.normal = normal_;
+            particleRequest_.lifeTime = request_.lifeTime;
+            SpawnParticle(particleRequest_);
+        }
+    }
+}
+
+DirectX::XMFLOAT3 EffectManager::BuildTrailParticlePosition(
+    const TrailParticleEmissionRequest& request_)
+{
+    BS_PROFILE_SCOPE("EffectManager::BuildTrailParticlePosition");
+    const float randomWidth_ = GenerateTrailParticleRandom01();
+    const float minWidth_ = Clamp01((std::min)(request_.widthMin, request_.widthMax));
+    const float maxWidth_ = Clamp01((std::max)(request_.widthMin, request_.widthMax));
+    const float biasedWidth_ = Clamp01(randomWidth_ + request_.tipBias);
+    const float widthRate_ = minWidth_ + (maxWidth_ - minWidth_) * biasedWidth_;
+    DirectX::XMFLOAT3 position_ =
+        LerpPosition(request_.leftPosition, request_.rightPosition, widthRate_);
+    if (request_.positionJitter > 0.0f)
+    {
+        position_.x += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * request_.positionJitter;
+        position_.y += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * request_.positionJitter;
+        position_.z += (GenerateTrailParticleRandom01() * 2.0f - 1.0f) * request_.positionJitter;
+    }
+    return position_;
+}
+
+DirectX::XMFLOAT3 EffectManager::BuildTrailParticleNormal(
+    const TrailParticleEmissionRequest& request_) const
+{
+    DirectX::XMFLOAT3 normal_{ 0.0f, 1.0f, 0.0f };
+    const DirectX::XMVECTOR widthVector_ = DirectX::XMVectorSubtract(
+        DirectX::XMLoadFloat3(&request_.rightPosition),
+        DirectX::XMLoadFloat3(&request_.leftPosition));
+    if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(widthVector_)) > 0.000001f)
+    {
+        DirectX::XMStoreFloat3(&normal_, DirectX::XMVector3Normalize(widthVector_));
+    }
+    return normal_;
+}
+
+float EffectManager::GenerateTrailParticleRandom01()
+{
+    trailParticleRandomState = trailParticleRandomState * 1664525u + 1013904223u;
+    return static_cast<float>((trailParticleRandomState >> 8) & 0x00FFFFFFu) /
+        static_cast<float>(0x01000000u);
+}
+
 std::shared_ptr<GameObject> EffectManager::SpawnSlashEffect(
     const AttackEffectSpawnRequest& request_)
 {
@@ -1236,6 +1332,22 @@ std::shared_ptr<GameObject> EffectManager::AcquireParticleObject(
         }
     }
 
+    if (objects_.size() < EFFECT_DYNAMIC_POOL_MAX_COUNT)
+    {
+        const auto assetIterator_ = particleAssetCache.find(assetName_);
+        if (assetIterator_ != particleAssetCache.end())
+        {
+            std::shared_ptr<GameObject> object_ =
+                CreateParticlePoolObject(resolvedAssetPath_, assetIterator_->second);
+            if (object_)
+            {
+                objects_.push_back(object_);
+                gameObjectManager->AddObject(object_);
+                return object_;
+            }
+        }
+    }
+
     std::printf(
         "[EffectManager] Particle pool exhausted: %s size=%zu\n",
         resolvedAssetPath_.c_str(),
@@ -1260,6 +1372,22 @@ std::shared_ptr<GameObject> EffectManager::AcquireMeshVFXObject(
         {
             gameObjectManager->AddObject(object_);
             return object_;
+        }
+    }
+
+    if (objects_.size() < EFFECT_DYNAMIC_POOL_MAX_COUNT)
+    {
+        const auto assetIterator_ = meshVFXAssetCache.find(assetName_);
+        if (assetIterator_ != meshVFXAssetCache.end())
+        {
+            std::shared_ptr<GameObject> object_ =
+                CreateMeshVFXPoolObject(resolvedAssetPath_, assetIterator_->second);
+            if (object_)
+            {
+                objects_.push_back(object_);
+                gameObjectManager->AddObject(object_);
+                return object_;
+            }
         }
     }
 
@@ -1353,6 +1481,22 @@ std::shared_ptr<GameObject> EffectManager::AcquireVFXSequenceObject(
         {
             gameObjectManager->AddObject(object_);
             return object_;
+        }
+    }
+
+    if (objects_.size() < EFFECT_DYNAMIC_POOL_MAX_COUNT)
+    {
+        const auto assetIterator_ = vfxSequenceAssetCache.find(assetName_);
+        if (assetIterator_ != vfxSequenceAssetCache.end())
+        {
+            std::shared_ptr<GameObject> object_ =
+                CreateVFXSequencePoolObject(resolvedAssetPath_, assetIterator_->second);
+            if (object_)
+            {
+                objects_.push_back(object_);
+                gameObjectManager->AddObject(object_);
+                return object_;
+            }
         }
     }
 

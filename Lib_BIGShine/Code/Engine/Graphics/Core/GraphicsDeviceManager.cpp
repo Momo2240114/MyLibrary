@@ -8,6 +8,7 @@
 #include <d3d11sdklayers.h>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Particle/ParticleEmitter.h"
 
 struct SkyBoxVertex
 {
@@ -22,11 +23,27 @@ namespace
     {
         if (!deviceContext_) return;
 
-        ID3D11ShaderResourceView* nullShaderResources_[16] = {};
+        ID3D11ShaderResourceView* nullShaderResources_[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
         // Render-target hazards in this renderer come from post/scene sampling.
         // Keep VS/GS resources because MeshVFX prepares instancing SRVs before target restore.
         deviceContext_->PSSetShaderResources(0, _countof(nullShaderResources_), nullShaderResources_);
         deviceContext_->CSSetShaderResources(0, _countof(nullShaderResources_), nullShaderResources_);
+    }
+
+    void ReportLiveDeviceObjects(ID3D11Device* device_)
+    {
+        if (!device_) return;
+
+#if defined(DEBUG) || defined(_DEBUG)
+        Microsoft::WRL::ComPtr<ID3D11Debug> debugDevice_;
+        if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(debugDevice_.GetAddressOf()))))
+        {
+            debugDevice_->ReportLiveDeviceObjects(
+                D3D11_RLDO_DETAIL | D3D11_RLDO_IGNORE_INTERNAL);
+        }
+#else
+        (void)device_;
+#endif
     }
 }
 
@@ -205,8 +222,8 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
     // ビューポート設定
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
-    viewport.Width = width;
-    viewport.Height = height;
+    viewport.Width = float(width);
+    viewport.Height = float(height);
     viewport.MaxDepth = 1.0f;
     viewport.MinDepth = 0.0f;
 
@@ -276,30 +293,70 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
  */
 void GraphicsDeviceManager::Shutdown()
 {
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::Shutdown");
+
     // GPU待機（context->ClearState / Flush）
     if (immediateContext)
     {
+        immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
         immediateContext->ClearState();
         immediateContext->Flush();
     }
 
     ShutdownGpuProfiler();
 
+    postRenderSystem.Shutdown();
+    cascadeShadowMap.Shutdown();
+    ParticleEmitter::ShutdownSharedShaders();
+    CPUResourceLoader::ReleaseAllTextures();
+
 
     // デバイスリソースの解放
+    iblDiffuseIemSRV.Reset();
+    iblSpecularPmremSRV.Reset();
+    iblLutGgxSRV.Reset();
+    renderState.reset();
     renderTargetView.Reset();
     depthStencilView.Reset();
+    depthStencilTexture.Reset();
+    depthStencilSRV.Reset();
+    copyDepthStencilTexture.Reset();
+    copyDepthStencilSRV.Reset();
     sceneRTV.Reset();
     sceneSRV.Reset();
     sceneViewRTV.Reset();
     sceneViewSRV.Reset();
+    sceneNormalRTV.Reset();
+    sceneNormalSRV.Reset();
     sceneDistortionRTV.Reset();
     sceneDistortionSRV.Reset();
+    copySceneColorTexture.Reset();
+    copySceneColorSRV.Reset();
+    copyNormalTexture.Reset();
+    copyNormalSRV.Reset();
+    gBufferBaseColorRTV.Reset();
+    gBufferBaseColorSRV.Reset();
+    gBufferNormalRTV.Reset();
+    gBufferNormalSRV.Reset();
+    gBufferMaterialRTV.Reset();
+    gBufferMaterialSRV.Reset();
+    gBufferEmissiveRTV.Reset();
+    gBufferEmissiveSRV.Reset();
     swapChain.Reset();
-    immediateContext.Reset();
-
     skyBoxVertexBuffer.Reset();
     skyBoxIndexBuffer.Reset();
+    skyBoxVertexShader.Reset();
+    skyBoxPixelShader.Reset();
+    skyBoxInputLayout.Reset();
+    skyBoxDepthStencilState.Reset();
+
+    if (immediateContext)
+    {
+        immediateContext->Flush();
+    }
+    immediateContext.Reset();
+
+    ReportLiveDeviceObjects(device.Get());
 
     // 最後にデバイスを消す
     device.Reset();
@@ -589,6 +646,9 @@ void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
     // IBL specular_pmrem を t10 にバインド
     ID3D11ShaderResourceView* shaderResources_[] = { iblSpecularPmremSRV.Get() };
     deviceContext_->PSSetShaderResources(10, 1, shaderResources_);
+    ID3D11SamplerState* skyBoxSampler_ =
+        renderState->GetSamplerState(SamplerState::LinearWrap);
+    deviceContext_->PSSetSamplers(0, 1, &skyBoxSampler_);
 
     // 深度テスト LESS_EQUAL・書き込みOFF
     deviceContext_->OMSetDepthStencilState(skyBoxDepthStencilState.Get(), 0);
@@ -619,7 +679,9 @@ void GraphicsDeviceManager::RenderSkyBox(const RenderContext& rc)
     deviceContext_->IASetInputLayout(nullptr);
 
     ID3D11ShaderResourceView* nullShaderResource_ = nullptr;
+    ID3D11SamplerState* nullSampler_ = nullptr;
     deviceContext_->PSSetShaderResources(10, 1, &nullShaderResource_);
+    deviceContext_->PSSetSamplers(0, 1, &nullSampler_);
 
     deviceContext_->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     deviceContext_->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
@@ -1152,5 +1214,7 @@ bool GraphicsDeviceManager::CreateGBufferTargets(int width_, int height_)
 }
 void GraphicsDeviceManager::Finalize()
 {
-    // スワップチェーンは常にウィンドウモードなので、DXGIの排他解除は不要。
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::Finalize");
+
+    Shutdown();
 }

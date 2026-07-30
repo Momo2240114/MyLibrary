@@ -33,6 +33,7 @@ public:
     };
 
     bool Initialize(ID3D11Device* device_, int width_, int height_);
+    void Shutdown();
     void SynchronizeCameraHistory(const RenderContext& rc_);
     void ResetCameraHistory();
     void SetObjectVelocityRenderer(ObjectVelocityRenderer* objectVelocityRenderer_);
@@ -46,6 +47,8 @@ public:
 
     ID3D11RenderTargetView* GetVelocityRTV() const { return velocityBuffer.rtv.Get(); }
     ID3D11ShaderResourceView* GetVelocitySRV() const { return velocityBuffer.srv.Get(); }
+    ID3D11ShaderResourceView* GetTileMaxSRV() const { return tileMaxBuffer.srv.Get(); }
+    ID3D11ShaderResourceView* GetNeighborMaxSRV() const { return neighborMaxBuffer.srv.Get(); }
     int GetVelocityWidth() const { return width; }
     int GetVelocityHeight() const { return height; }
 

@@ -2,6 +2,7 @@
 
 #include "CascadeShadowMap.h"
 #include "Engine/GamePlay/Camera/CameraComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -51,9 +52,23 @@ bool CascadeShadowMap::Initialize(ID3D11Device* device)
     return true;
 }
 
+void CascadeShadowMap::Shutdown()
+{
+    BS_PROFILE_SCOPE("CascadeShadowMap::Shutdown");
+
+    for (int index_ = 0; index_ < CascadeCount; ++index_)
+    {
+        shadowSRVs[index_].Reset();
+        shadowDSVs[index_].Reset();
+        shadowTextures[index_].Reset();
+    }
+}
+
 
 void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const DirectX::XMFLOAT3& lightDirection)
 {
+    BS_PROFILE_SCOPE("CascadeShadowMap::UpdateMatrices");
+
     using namespace DirectX;
 
     const float splitTable[CascadeCount + 1] =
@@ -78,13 +93,12 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
     }
     lightDir = XMVector3Normalize(lightDir);
 
-    XMVECTOR lightPosition = XMVectorScale(lightDir, -250.0f);
-    XMMATRIX lightView = XMMatrixLookAtLH(
-        lightPosition,
-        XMVectorZero(),
-        XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-    XMMATRIX lightProjection = XMMatrixOrthographicLH(10000.0f, 10000.0f, 0.1f, 1000.0f);
-    XMMATRIX lightViewProjection = lightView * lightProjection;
+    XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    const float lightUpDot_ = std::abs(XMVectorGetX(XMVector3Dot(lightDir, lightUp)));
+    if (lightUpDot_ > 0.98f)
+    {
+        lightUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+    }
 
     const float fovY = XMConvertToRadians(camera.GetFovY());
     const float aspect = camera.GetAspect();
@@ -116,29 +130,58 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
         vertex[6] = XMVectorAdd(farPosition, XMVectorAdd(XMVectorScale(cameraUp, -farY), XMVectorScale(cameraRight, farX)));
         vertex[7] = XMVectorAdd(farPosition, XMVectorAdd(XMVectorScale(cameraUp, -farY), XMVectorScale(cameraRight, -farX)));
 
-        XMFLOAT2 vertexMin(FLT_MAX, FLT_MAX);
-        XMFLOAT2 vertexMax(-FLT_MAX, -FLT_MAX);
-        for (auto& v : vertex)
+        XMVECTOR cascadeCenter = XMVectorZero();
+        for (const XMVECTOR& vertex_ : vertex)
         {
-            XMFLOAT3 p;
-            XMStoreFloat3(&p, XMVector3TransformCoord(v, lightViewProjection));
-            vertexMin.x = (std::min)(vertexMin.x, p.x);
-            vertexMin.y = (std::min)(vertexMin.y, p.y);
-            vertexMax.x = (std::max)(vertexMax.x, p.x);
-            vertexMax.y = (std::max)(vertexMax.y, p.y);
+            cascadeCenter = XMVectorAdd(cascadeCenter, vertex_);
+        }
+        cascadeCenter = XMVectorScale(cascadeCenter, 1.0f / 8.0f);
+
+        const float safeLightDistance_ = (std::max)(lightDistance, 1.0f);
+        XMVECTOR lightPosition = XMVectorSubtract(cascadeCenter, XMVectorScale(lightDir, safeLightDistance_));
+        XMMATRIX lightView = XMMatrixLookAtLH(lightPosition, cascadeCenter, lightUp);
+
+        XMFLOAT3 vertexMin(FLT_MAX, FLT_MAX, FLT_MAX);
+        XMFLOAT3 vertexMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+        for (const XMVECTOR& vertex_ : vertex)
+        {
+            XMFLOAT3 transformedVertex_;
+            XMStoreFloat3(&transformedVertex_, XMVector3TransformCoord(vertex_, lightView));
+            vertexMin.x = (std::min)(vertexMin.x, transformedVertex_.x);
+            vertexMin.y = (std::min)(vertexMin.y, transformedVertex_.y);
+            vertexMin.z = (std::min)(vertexMin.z, transformedVertex_.z);
+            vertexMax.x = (std::max)(vertexMax.x, transformedVertex_.x);
+            vertexMax.y = (std::max)(vertexMax.y, transformedVertex_.y);
+            vertexMax.z = (std::max)(vertexMax.z, transformedVertex_.z);
         }
 
-        XMMATRIX cropMatrix = XMMatrixIdentity();
-        XMFLOAT4X4 crop{};
-        XMStoreFloat4x4(&crop, cropMatrix);
-        const float xScale = 2.0f / (vertexMax.x - vertexMin.x);
-        const float yScale = 2.0f / (vertexMax.y - vertexMin.y);
-        crop._11 = xScale;
-        crop._22 = yScale;
-        crop._41 = -0.5f * (vertexMax.x + vertexMin.x) * xScale;
-        crop._42 = -0.5f * (vertexMax.y + vertexMin.y) * yScale;
+        const float safeXyPadding_ = (std::max)(cascadeXyPadding, 0.0f);
+        const float safeDepthPadding_ = (std::max)(cascadeDepthPadding, 0.0f);
+        float left_ = vertexMin.x - safeXyPadding_;
+        float right_ = vertexMax.x + safeXyPadding_;
+        float bottom_ = vertexMin.y - safeXyPadding_;
+        float top_ = vertexMax.y + safeXyPadding_;
+        float nearZ_ = (std::max)(0.1f, vertexMin.z - safeDepthPadding_);
+        float farZ_ = (std::max)(nearZ_ + 1.0f, vertexMax.z + safeDepthPadding_);
 
-        XMStoreFloat4x4(&lightViewProjections[index], lightViewProjection * XMLoadFloat4x4(&crop));
+        if (texelSnapEnabled)
+        {
+            const float width_ = (std::max)(right_ - left_, 1.0f);
+            const float height_ = (std::max)(top_ - bottom_, 1.0f);
+            const float texelWidth_ = width_ / static_cast<float>(ShadowmapSize);
+            const float texelHeight_ = height_ / static_cast<float>(ShadowmapSize);
+            float centerX_ = (left_ + right_) * 0.5f;
+            float centerY_ = (bottom_ + top_) * 0.5f;
+            centerX_ = std::floor(centerX_ / texelWidth_) * texelWidth_;
+            centerY_ = std::floor(centerY_ / texelHeight_) * texelHeight_;
+            left_ = centerX_ - width_ * 0.5f;
+            right_ = centerX_ + width_ * 0.5f;
+            bottom_ = centerY_ - height_ * 0.5f;
+            top_ = centerY_ + height_ * 0.5f;
+        }
+
+        XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(left_, right_, bottom_, top_, nearZ_, farZ_);
+        XMStoreFloat4x4(&lightViewProjections[index], lightView * lightProjection);
     }
 }
 

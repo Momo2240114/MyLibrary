@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Core/RenderContext.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
 {
@@ -51,6 +52,21 @@ bool BloomSystem::Initialize(ID3D11Device* device, int width, int height)
     device->CreateBuffer(&cbDesc, nullptr, filterBuffer.GetAddressOf());
     
     return true;
+}
+
+void BloomSystem::Shutdown()
+{
+    BS_PROFILE_SCOPE("BloomSystem::Shutdown");
+
+    brightTarget.rtv.Reset();
+    brightTarget.srv.Reset();
+    blurTargets.clear();
+    constantBuffer.Reset();
+    filterBuffer.Reset();
+    brightPS.Reset();
+    kawasePS.Reset();
+    compositePS.Reset();
+    fullScreenVS.Reset();
 }
 
 void BloomSystem::Execute(

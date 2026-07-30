@@ -47,6 +47,7 @@ public:
     UINT GetMaxParticles() const { return numParticles; }
 
     static void InitializeSharedShaders(ID3D11Device* device);
+    static void ShutdownSharedShaders();
     static void BindSharedRenderShaders(ID3D11DeviceContext* context);
 
 private:

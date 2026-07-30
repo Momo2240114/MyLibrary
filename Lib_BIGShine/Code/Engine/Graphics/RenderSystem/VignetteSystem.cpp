@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
@@ -37,6 +38,15 @@ bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
     desc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     return SUCCEEDED(device_->CreateBuffer(&desc_, nullptr, constantBuffer.GetAddressOf()));
+}
+
+void VignetteSystem::Shutdown()
+{
+    BS_PROFILE_SCOPE("VignetteSystem::Shutdown");
+
+    constantBuffer.Reset();
+    pixelShader.Reset();
+    fullScreenVs.Reset();
 }
 
 void VignetteSystem::Execute(

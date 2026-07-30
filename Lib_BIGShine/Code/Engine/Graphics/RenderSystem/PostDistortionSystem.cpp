@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 bool PostDistortionSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
@@ -37,6 +38,15 @@ bool PostDistortionSystem::Initialize(ID3D11Device* device_, int width_, int hei
     desc_.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     return SUCCEEDED(device_->CreateBuffer(&desc_, nullptr, constantBuffer.GetAddressOf()));
+}
+
+void PostDistortionSystem::Shutdown()
+{
+    BS_PROFILE_SCOPE("PostDistortionSystem::Shutdown");
+
+    constantBuffer.Reset();
+    pixelShader.Reset();
+    fullScreenVs.Reset();
 }
 
 void PostDistortionSystem::Execute(

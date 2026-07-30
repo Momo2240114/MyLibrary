@@ -155,10 +155,10 @@ void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
         RenderSprite(renderCommand_, context_, screenSize_);
     }
 
-    ID3D11ShaderResourceView* nullShaderResourceView_ = nullptr;
-    ID3D11SamplerState* nullSamplerState_ = nullptr;
-    context_->PSSetShaderResources(0, 1, &nullShaderResourceView_);
-    context_->PSSetSamplers(0, 1, &nullSamplerState_);
+    ID3D11ShaderResourceView* nullShaderResourceViews_[1] = {};
+    ID3D11SamplerState* nullSamplerStates_[3] = {};
+    context_->PSSetShaderResources(0, _countof(nullShaderResourceViews_), nullShaderResourceViews_);
+    context_->PSSetSamplers(0, _countof(nullSamplerStates_), nullSamplerStates_);
 
     drawList.clear();
     nextSubmitOrder = 0;
@@ -389,7 +389,13 @@ void SpriteRenderSystem::RenderSprite(
     context_->Unmap(vertexBuffer.Get(), 0);
 
     context_->PSSetShaderResources(0, 1, sprite_->GetTexture().GetAddressOf());
-    context_->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+    ID3D11SamplerState* samplerStates_[3] =
+    {
+        samplerState.Get(),
+        samplerState.Get(),
+        samplerState.Get()
+    };
+    context_->PSSetSamplers(0, _countof(samplerStates_), samplerStates_);
 
     auto shaderIterator_ = shaders.find(renderCommand_.shaderID);
     if (shaderIterator_ == shaders.end())

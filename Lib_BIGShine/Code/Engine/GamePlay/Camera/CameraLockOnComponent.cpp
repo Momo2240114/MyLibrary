@@ -122,6 +122,7 @@ namespace
 
 void CameraLockOnComponent::Start()
 {
+    BS_PROFILE_SCOPE("CameraLockOnComponent::Start");
     ResolveReferences();
     if (const std::shared_ptr<CameraComponent> camera_ = camera.lock())
     {
@@ -134,6 +135,7 @@ void CameraLockOnComponent::Start()
 
 void CameraLockOnComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("CameraLockOnComponent::LateUpdate");
     ResolveReferences();
     if (actionSuppressed) return;
     if (switchCooldownTimer > 0.0f)
@@ -196,6 +198,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
     const float differenceZ_ = distanceInfo_.difference.z;
     const float horizontalDistance_ = distanceInfo_.horizontalDistance;
     const float targetDistance_ = distanceInfo_.targetDistance;
+    currentTargetDistance = targetDistance_;
 
     if (targetDistance_ > maxDistance)
     {
@@ -240,7 +243,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         horizontalDistance_ * separationHeightScale +
         (std::max)(enemyPosition_.y - playerPosition_.y, 0.0f) *
             heightDifferenceScale;
-    const DirectX::XMFLOAT3 desiredPosition_
+    DirectX::XMFLOAT3 desiredPosition_
     {
         playerPosition_.x + backDirection_.x * desiredDistance_ +
             sideDirection_.x * sideOffset * currentSide,
@@ -258,13 +261,36 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         closeFocusBias,
         farFocusBias,
         focusRate_);
-    const DirectX::XMFLOAT3 desiredLookAt_ = LerpFloat3(
+    DirectX::XMFLOAT3 desiredLookAt_ = LerpFloat3(
         playerPosition_,
         enemyPosition_,
         enemyFocusWeight_);
+    currentBaseCameraPosition = desiredPosition_;
+    currentBaseLookAtPosition = desiredLookAt_;
+
+    const float compositionWeight_ =
+        std::clamp(compositionCorrection.weight, 0.0f, 1.0f);
+    if (compositionWeight_ > 0.0001f)
+    {
+        desiredPosition_ = AddFloat3(
+            desiredPosition_,
+            ScaleFloat3(
+                backDirection_,
+                compositionCorrection.distanceOffset * compositionWeight_));
+        desiredPosition_.y +=
+            compositionCorrection.heightOffset * compositionWeight_;
+        desiredLookAt_.y +=
+            compositionCorrection.lookAtHeightOffset * compositionWeight_;
+        desiredLookAt_ = AddFloat3(
+            desiredLookAt_,
+            ScaleFloat3(
+                SubtractFloat3(enemyPosition_, playerPosition_),
+                compositionCorrection.focusTargetRateOffset * compositionWeight_));
+    }
     DirectX::XMFLOAT3 finalDesiredPosition_ = desiredPosition_;
     DirectX::XMFLOAT3 finalDesiredLookAt_ = desiredLookAt_;
-    float wallFovAddition_ = 0.0f;
+    float wallFovAddition_ =
+        compositionCorrection.fovOffset * compositionWeight_;
 
     debugDistanceToWall = arenaRadius;
     debugRawWallCameraRate = 0.0f;
@@ -501,6 +527,21 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
             hasWallCameraPosition = false;
         }
     }
+    if (compositionWeight_ > 0.0001f)
+    {
+        const float sideAllowRate_ = std::clamp(
+            1.0f - currentWallCameraRate * 0.8f,
+            0.0f,
+            1.0f);
+        finalDesiredPosition_ = AddFloat3(
+            finalDesiredPosition_,
+            ScaleFloat3(
+                sideDirection_,
+                compositionCorrection.sideOffset *
+                    compositionWeight_ *
+                    sideAllowRate_));
+        finalDesiredPosition_ = ClampCameraPositionToArena(finalDesiredPosition_);
+    }
     debugFinalDesiredCameraPosition = finalDesiredPosition_;
     debugCameraArenaRadius = LengthHorizontal(
         SubtractFloat3(finalDesiredPosition_, arenaCenter));
@@ -561,6 +602,7 @@ void CameraLockOnComponent::SetLockOnEnabled(bool enabled_)
     ResetTracking();
     if (!lockOnEnabled)
     {
+        ClearCompositionCorrection();
         lockOnFocusTarget.reset();
         lockOnFocusTargetName.clear();
         accumulatedMouseDelta = { 0.0f, 0.0f };
@@ -590,6 +632,19 @@ void CameraLockOnComponent::SetActionSuppressed(bool suppressed_)
 {
     actionSuppressed = suppressed_;
     if (!actionSuppressed) ResetTracking();
+}
+
+void CameraLockOnComponent::SetCompositionCorrection(
+    const LockOnCameraCompositionCorrection& correction_)
+{
+    compositionCorrection = correction_;
+    compositionCorrection.weight =
+        std::clamp(compositionCorrection.weight, 0.0f, 1.0f);
+}
+
+void CameraLockOnComponent::ClearCompositionCorrection()
+{
+    compositionCorrection = {};
 }
 
 bool CameraLockOnComponent::IsWallCameraActive() const
@@ -2070,6 +2125,12 @@ void CameraLockOnComponent::DrawLockOnDebugGui()
     ImGui::Text("Horizontal Distance: %.3f", distanceInfo_.horizontalDistance);
     ImGui::Text("Height Difference: %.3f", distanceInfo_.difference.y);
     ImGui::Text("Max Distance: %.3f", maxDistance);
+    ImGui::Text("Composition Weight: %.3f", compositionCorrection.weight);
+    ImGui::Text(
+        "Composition Offset Side/Distance/Height: %.3f / %.3f / %.3f",
+        compositionCorrection.sideOffset,
+        compositionCorrection.distanceOffset,
+        compositionCorrection.heightOffset);
 
     ImGui::Text(
         "Player Focus: %.3f, %.3f, %.3f",
