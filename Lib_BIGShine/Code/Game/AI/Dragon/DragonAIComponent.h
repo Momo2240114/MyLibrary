@@ -268,7 +268,7 @@ private:
     bool useDebugHpRate = false;
     float decisionInterval = 0.25f;
     float decisionTimer = 0.0f;
-    float behaviorGraphTickInterval = 0.20f;
+    float behaviorGraphTickInterval = 0.10f;
     float behaviorGraphTickTimer = 0.0f;
     float debugHpRate = 1.0f;
     float frontAngleDegrees = 115.0f;

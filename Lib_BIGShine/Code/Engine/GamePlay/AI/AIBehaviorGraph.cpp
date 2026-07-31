@@ -140,13 +140,13 @@ void AIBehaviorGraph::EnsureDefaultGraph()
 {
     if (!nodes.empty()) return;
 
-    // 空のグラフに実行開始用のRootとSelectorを生成する
+    // 遨ｺ縺ｮ繧ｰ繝ｩ繝輔↓螳溯｡碁幕蟋狗畑縺ｮRoot縺ｨSelector繧堤函謌舌☆繧・
     AddNode(AI_BEHAVIOR_NODE_TYPE::ROOT, "Root", { 40.0f, 120.0f });
     AddNode(AI_BEHAVIOR_NODE_TYPE::SELECTOR, "Selector", { 280.0f, 120.0f });
     AddLink(nodes[0].id, nodes[1].id);
 }
 
-// BlackboardとRootノードを確認し、AIグラフの実行結果を更新する
+// Blackboard縺ｨRoot繝弱・繝峨ｒ遒ｺ隱阪＠縲、I繧ｰ繝ｩ繝輔・螳溯｡檎ｵ先棡繧呈峩譁ｰ縺吶ｋ
 AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
 {
     runtimeActiveNodeIds.clear();
@@ -162,7 +162,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
     return lastTickStatus;
 }
 
-// AIグラフの実行状態と実行中ノード情報を初期化する
+// AI繧ｰ繝ｩ繝輔・螳溯｡檎憾諷九→螳溯｡御ｸｭ繝弱・繝画ュ蝣ｱ繧貞・譛溷喧縺吶ｋ
 void AIBehaviorGraph::ResetRuntime()
 {
     runtimeStates.clear();
@@ -201,7 +201,7 @@ AIBehaviorNode* AIBehaviorGraph::AddNode(
     return &nodes.back();
 }
 
-// 指定したノードと接続リンクをグラフから削除する
+// 謖・ｮ壹＠縺溘ヮ繝ｼ繝峨→謗･邯壹Μ繝ｳ繧ｯ繧偵げ繝ｩ繝輔°繧牙炎髯､縺吶ｋ
 bool AIBehaviorGraph::RemoveNode(uintptr_t nodeId_)
 {
     const auto nodeIt_ = std::find_if(nodes.begin(), nodes.end(),
@@ -244,7 +244,7 @@ AIBehaviorLink* AIBehaviorGraph::AddLink(uintptr_t fromNodeId_, uintptr_t toNode
     return &links.back();
 }
 
-// 指定したリンクを削除し、実行状態を初期化する
+// 謖・ｮ壹＠縺溘Μ繝ｳ繧ｯ繧貞炎髯､縺励∝ｮ溯｡檎憾諷九ｒ蛻晄悄蛹悶☆繧・
 bool AIBehaviorGraph::RemoveLink(uintptr_t linkId_)
 {
     const auto linkIt_ = std::remove_if(links.begin(), links.end(),
@@ -306,13 +306,13 @@ uintptr_t AIBehaviorGraph::GenerateId()
     return nextId++;
 }
 
-// 読み込み済みIDと重ならないように次回生成IDの下限を更新する
+// 隱ｭ縺ｿ霎ｼ縺ｿ貂医∩ID縺ｨ驥阪↑繧峨↑縺・ｈ縺・↓谺｡蝗樒函謌蝕D縺ｮ荳矩剞繧呈峩譁ｰ縺吶ｋ
 void AIBehaviorGraph::SetIdCounterFloor(uintptr_t minValue_)
 {
     if (nextId < minValue_) nextId = minValue_;
 }
 
-// ノード、リンク、実行に必要な設定をJSONへ変換する
+// 繝弱・繝峨√Μ繝ｳ繧ｯ縲∝ｮ溯｡後↓蠢・ｦ√↑險ｭ螳壹ｒJSON縺ｸ螟画鋤縺吶ｋ
 void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
 {
     json_ = nlohmann::json::object();
@@ -366,7 +366,7 @@ void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
     }
 }
 
-// JSONからノードとリンクを復元し、実行可能なグラフ状態へ戻す
+// JSON縺九ｉ繝弱・繝峨→繝ｪ繝ｳ繧ｯ繧貞ｾｩ蜈・＠縲∝ｮ溯｡悟庄閭ｽ縺ｪ繧ｰ繝ｩ繝慕憾諷九∈謌ｻ縺・
 void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::Deserialize");
@@ -447,7 +447,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
     EnsureDefaultGraph();
 }
 
-// AIグラフをJSONファイルとして保存する
+// AI繧ｰ繝ｩ繝輔ｒJSON繝輔ぃ繧､繝ｫ縺ｨ縺励※菫晏ｭ倥☆繧・
 bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
 {
     const std::filesystem::path filePath_(path_);
@@ -465,7 +465,7 @@ bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
     return true;
 }
 
-// JSONファイルからAIグラフを読み込む
+// JSON繝輔ぃ繧､繝ｫ縺九ｉAI繧ｰ繝ｩ繝輔ｒ隱ｭ縺ｿ霎ｼ繧
 bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::LoadFromFile");
@@ -482,7 +482,7 @@ bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
     return true;
 }
 
-// ノード種別に応じてCompositeまたはTaskとして実行する
+// 繝弱・繝臥ｨｮ蛻･縺ｫ蠢懊§縺ｦComposite縺ｾ縺溘・Task縺ｨ縺励※螳溯｡後☆繧・
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     runtimeActiveNodeIds.push_back(node_.id);
@@ -494,7 +494,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorCo
     return TickTask(node_, context_);
 }
 
-// 子ノードの結果を使用してSelectorやSequenceの成否を判定する
+// 蟄舌ヮ繝ｼ繝峨・邨先棡繧剃ｽｿ逕ｨ縺励※Selector繧Тequence縺ｮ謌仙凄繧貞愛螳壹☆繧・
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     std::vector<AIBehaviorNode*> children_ = GetChildren(node_);
@@ -509,7 +509,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
 
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::SEQUENCE)
     {
-        // Sequenceは失敗または実行中になるまで子ノードを順番に進める
+        // Sequence縺ｯ螟ｱ謨励∪縺溘・螳溯｡御ｸｭ縺ｫ縺ｪ繧九∪縺ｧ蟄舌ヮ繝ｼ繝峨ｒ鬆・分縺ｫ騾ｲ繧√ｋ
         while (state_.childIndex < children_.size())
         {
             AI_BEHAVIOR_STATUS result_ = TickNode(*children_[state_.childIndex], context_);
@@ -527,30 +527,44 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
 
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::RANDOM_SELECTOR)
     {
-        static std::mt19937 randomEngine_(std::random_device{}());
-        float totalWeight_ = 0.0f;
-        for (const AIBehaviorNode* child_ : children_)
-        {
-            totalWeight_ += (std::max)(0.0f, child_->weight);
-        }
+        BS_PROFILE_SCOPE("AIBehaviorGraph::TickRandomSelector");
 
-        if (totalWeight_ > 0.0001f)
+        static std::mt19937 randomEngineFallback_(std::random_device{}());
+        std::vector<AIBehaviorNode*> remainingChildren_ = children_;
+        while (!remainingChildren_.empty())
         {
-            // 子ノードのWeightを使用して実行対象を1つ選択する
-            std::uniform_real_distribution<float> distribution_(0.0f, totalWeight_);
-            float pick_ = distribution_(randomEngine_);
-            for (AIBehaviorNode* child_ : children_)
+            float totalWeight_ = 0.0f;
+            for (const AIBehaviorNode* child_ : remainingChildren_)
             {
-                pick_ -= (std::max)(0.0f, child_->weight);
-                if (pick_ <= 0.0f)
+                totalWeight_ += (std::max)(0.0f, child_->weight);
+            }
+
+            size_t selectedIndex_ = 0;
+            if (totalWeight_ > 0.0001f)
+            {
+                std::uniform_real_distribution<float> distribution_(0.0f, totalWeight_);
+                float pick_ = distribution_(randomEngineFallback_);
+                for (size_t childIndex_ = 0; childIndex_ < remainingChildren_.size(); ++childIndex_)
                 {
-                    return TickNode(*child_, context_);
+                    pick_ -= (std::max)(0.0f, remainingChildren_[childIndex_]->weight);
+                    if (pick_ <= 0.0f)
+                    {
+                        selectedIndex_ = childIndex_;
+                        break;
+                    }
                 }
             }
-            return TickNode(*children_.back(), context_);
+
+            AIBehaviorNode* selectedChild_ = remainingChildren_[selectedIndex_];
+            remainingChildren_.erase(remainingChildren_.begin() + selectedIndex_);
+
+            const AI_BEHAVIOR_STATUS result_ = TickNode(*selectedChild_, context_);
+            if (result_ == AI_BEHAVIOR_STATUS::RUNNING) return result_;
+            if (result_ == AI_BEHAVIOR_STATUS::SUCCESS) return AI_BEHAVIOR_STATUS::SUCCESS;
         }
 
-        std::shuffle(children_.begin(), children_.end(), randomEngine_);
+        return AI_BEHAVIOR_STATUS::FAILURE;
+
     }
 
     for (AIBehaviorNode* child_ : children_)
@@ -563,7 +577,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
     return AI_BEHAVIOR_STATUS::FAILURE;
 }
 
-// Blackboard操作、Action実行、待機などの実処理ノードを実行する
+// Blackboard謫堺ｽ懊、ction螳溯｡後∝ｾ・ｩ溘↑縺ｩ縺ｮ螳溷・逅・ヮ繝ｼ繝峨ｒ螳溯｡後☆繧・
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     BlackboardComponent& blackboard_ = *context_.blackboard;
@@ -634,7 +648,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
     }
 }
 
-// リンク情報から指定ノードの子ノードを取得し、優先度順に並べる
+// 繝ｪ繝ｳ繧ｯ諠・ｱ縺九ｉ謖・ｮ壹ヮ繝ｼ繝峨・蟄舌ヮ繝ｼ繝峨ｒ蜿門ｾ励＠縲∝━蜈亥ｺｦ鬆・↓荳ｦ縺ｹ繧・
 std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& node_)
 {
     std::vector<AIBehaviorNode*> children_;
@@ -654,7 +668,7 @@ std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& 
     return children_;
 }
 
-// ノード設定に応じてLocalまたはGlobalのBlackboardを取得する
+// 繝弱・繝芽ｨｭ螳壹↓蠢懊§縺ｦLocal縺ｾ縺溘・Global縺ｮBlackboard繧貞叙蠕励☆繧・
 BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -666,7 +680,7 @@ BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
     return context_.blackboard;
 }
 
-// Blackboardの値とノードに設定された比較条件を照合する
+// Blackboard縺ｮ蛟､縺ｨ繝弱・繝峨↓險ｭ螳壹＆繧後◆豈碑ｼ・擅莉ｶ繧堤・蜷医☆繧・
 bool AIBehaviorGraph::EvaluateBlackboardCondition(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -682,7 +696,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
 
     if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::STRING)
     {
-        // 文字列は数値化せず、等価または不一致の条件だけを判定する
+        // 譁・ｭ怜・縺ｯ謨ｰ蛟､蛹悶○縺壹∫ｭ我ｾ｡縺ｾ縺溘・荳堺ｸ閾ｴ縺ｮ譚｡莉ｶ縺縺代ｒ蛻､螳壹☆繧・
         std::string stringValue_;
         if (!blackboard_->GetString(node_.blackboardCategory, node_.blackboardKey, stringValue_)) return false;
         const bool equal_ = stringValue_ == node_.stringValue;
@@ -706,7 +720,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
     }
 }
 
-// ノードに設定された値を対象Blackboardへ書き込む
+// 繝弱・繝峨↓險ｭ螳壹＆繧後◆蛟､繧貞ｯｾ雎｡Blackboard縺ｸ譖ｸ縺崎ｾｼ繧
 void AIBehaviorGraph::SetBlackboardValue(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -742,7 +756,7 @@ void AIBehaviorGraph::SetBlackboardValue(
     }
 }
 
-// Action終了通知用のBlackboard値がtrueになっているかを判定する
+// Action邨ゆｺ・夂衍逕ｨ縺ｮBlackboard蛟､縺荊rue縺ｫ縺ｪ縺｣縺ｦ縺・ｋ縺九ｒ蛻､螳壹☆繧・
 bool AIBehaviorGraph::IsActionEndReached(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const
 {
     bool ended_ = false;
@@ -750,7 +764,7 @@ bool AIBehaviorGraph::IsActionEndReached(const AIBehaviorNode& node_, Blackboard
     return ended_;
 }
 
-// グラフ実行の開始点になるRootノードを取得する
+// 繧ｰ繝ｩ繝募ｮ溯｡後・髢句ｧ狗せ縺ｫ縺ｪ繧騎oot繝弱・繝峨ｒ蜿門ｾ励☆繧・
 AIBehaviorNode* AIBehaviorGraph::FindRootNode()
 {
     for (AIBehaviorNode& node_ : nodes)

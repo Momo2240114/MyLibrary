@@ -215,7 +215,7 @@ void DragonAIComponent::Update(float deltaTime_)
     }
     else if (aiState == DRAGON_AI_STATE::AIR)
     {
-        UpdateAirbornePhysics(deltaTime_);
+        UpdateActionMotion(deltaTime_);
         if (runtime.currentAction == DRAGON_ACTION_TYPE::AIR_HOLD &&
             runtime.actionEnded)
         {
@@ -223,7 +223,6 @@ void DragonAIComponent::Update(float deltaTime_)
             SendRuntimeToBlackboard();
             return;
         }
-        UpdateActionMotion(deltaTime_);
         UpdateActionTimeout();
         if (UpdateDurationControlledActionEnd())
         {
@@ -555,7 +554,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     useDebugHpRate = json_.value("UseDebugHpRate", false);
     debugHpRate = json_.value("DebugHpRate", 1.0f);
     decisionInterval = json_.value("DecisionInterval", 0.25f);
-    behaviorGraphTickInterval = json_.value("BehaviorGraphTickInterval", 0.2f);
+    behaviorGraphTickInterval = json_.value("BehaviorGraphTickInterval", 0.1f);
     frontAngleDegrees = json_.value("FrontAngleDegrees", 115.0f);
     sideAngleDegrees = json_.value("SideAngleDegrees", 135.0f);
     underBodyDistance = json_.value("UnderBodyDistance", 4.5f);
@@ -1472,9 +1471,11 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
     switch (runtime.currentAction)
     {
     case DRAGON_ACTION_TYPE::WALK_APPROACH:
+    {
+        const float moveEndDistance_ = (std::max)(approachEndDistance, biteDistance + 0.75f);
         if (!hasPlayerTarget ||
             !context.isPlayerInFront ||
-            context.playerDistance <= approachEndDistance)
+            context.playerHorizontalDistance <= moveEndDistance_)
         {
             StopMovement();
             statusText = !context.isPlayerInFront
@@ -1484,6 +1485,7 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
             return true;
         }
         break;
+    }
     case DRAGON_ACTION_TYPE::RUN_CHARGE:
     {
         const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
@@ -1491,15 +1493,16 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
         {
             return false;
         }
+        const float moveEndDistance_ = (std::max)(approachEndDistance, biteDistance + 0.75f);
         if (!hasPlayerTarget ||
             !context.isPlayerInFront ||
-            context.playerDistance <= approachEndDistance ||
+            context.playerHorizontalDistance <= moveEndDistance_ ||
             runtime.actionTimer >= definition_->duration)
         {
             StopMovement();
             statusText = !context.isPlayerInFront
                 ? "AI finished RunCharge: turn required."
-                : context.playerDistance <= approachEndDistance
+                : context.playerHorizontalDistance <= moveEndDistance_
                 ? "AI finished RunCharge: target reached."
                 : "AI finished RunCharge: charge slice ended.";
             NotifyAIActionEnd();
@@ -1906,6 +1909,7 @@ void DragonAIComponent::RequestAirIdleGraphTransition()
         animationController_->SetParam("ReturnToIdle", false);
         animationController_->SetParam("ReturnToAirIdle", true);
         animationController_->SetTrigger(triggerName_);
+        animationController_->EvaluateGraphTransitions();
     }
 }
 
