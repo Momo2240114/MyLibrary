@@ -73,7 +73,7 @@
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 70.0,
+                "Radius": 85.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "StartNodeName": "PlainsDragon_-Pelvis",

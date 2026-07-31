@@ -38,8 +38,9 @@ public:
         return desiredHorizontalVelocity;
     }
 
-private:
     std::shared_ptr<ColliderComponent> ResolveCollider();
+private:
+
     void ApplyFacing(float deltaTime_);
     void ClearFrameRequests();
 

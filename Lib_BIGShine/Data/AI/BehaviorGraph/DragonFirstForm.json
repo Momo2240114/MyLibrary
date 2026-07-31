@@ -10,23 +10,23 @@
         {
             "FromNodeId": 4,
             "FromPinId": 6,
-            "Id": 11,
+            "Id": 17,
             "ToNodeId": 8,
             "ToPinId": 9
         },
         {
-            "FromNodeId": 8,
-            "FromPinId": 10,
-            "Id": 15,
-            "ToNodeId": 12,
-            "ToPinId": 13
+            "FromNodeId": 4,
+            "FromPinId": 6,
+            "Id": 18,
+            "ToNodeId": 11,
+            "ToPinId": 12
         },
         {
-            "FromNodeId": 8,
-            "FromPinId": 10,
+            "FromNodeId": 4,
+            "FromPinId": 6,
             "Id": 19,
-            "ToNodeId": 16,
-            "ToPinId": 17
+            "ToNodeId": 14,
+            "ToPinId": 15
         },
         {
             "FromNodeId": 8,
@@ -36,36 +36,36 @@
             "ToPinId": 21
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 20,
+            "FromPinId": 22,
             "Id": 27,
             "ToNodeId": 24,
             "ToPinId": 25
         },
         {
-            "FromNodeId": 24,
-            "FromPinId": 26,
+            "FromNodeId": 20,
+            "FromPinId": 22,
             "Id": 31,
             "ToNodeId": 28,
             "ToPinId": 29
         },
         {
-            "FromNodeId": 24,
-            "FromPinId": 26,
+            "FromNodeId": 20,
+            "FromPinId": 22,
             "Id": 35,
             "ToNodeId": 32,
             "ToPinId": 33
         },
         {
-            "FromNodeId": 24,
-            "FromPinId": 26,
+            "FromNodeId": 20,
+            "FromPinId": 22,
             "Id": 39,
             "ToNodeId": 36,
             "ToPinId": 37
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 8,
+            "FromPinId": 10,
             "Id": 43,
             "ToNodeId": 40,
             "ToPinId": 41
@@ -92,140 +92,476 @@
             "ToPinId": 53
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 40,
+            "FromPinId": 42,
             "Id": 59,
             "ToNodeId": 56,
             "ToPinId": 57
         },
         {
-            "FromNodeId": 56,
-            "FromPinId": 58,
+            "FromNodeId": 40,
+            "FromPinId": 42,
             "Id": 63,
             "ToNodeId": 60,
             "ToPinId": 61
         },
         {
-            "FromNodeId": 56,
-            "FromPinId": 58,
+            "FromNodeId": 8,
+            "FromPinId": 10,
             "Id": 67,
             "ToNodeId": 64,
             "ToPinId": 65
         },
         {
-            "FromNodeId": 56,
-            "FromPinId": 58,
+            "FromNodeId": 64,
+            "FromPinId": 66,
             "Id": 71,
             "ToNodeId": 68,
             "ToPinId": 69
         },
         {
-            "FromNodeId": 56,
-            "FromPinId": 58,
+            "FromNodeId": 64,
+            "FromPinId": 66,
             "Id": 75,
             "ToNodeId": 72,
             "ToPinId": 73
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 64,
+            "FromPinId": 66,
             "Id": 79,
             "ToNodeId": 76,
             "ToPinId": 77
         },
         {
-            "FromNodeId": 76,
-            "FromPinId": 78,
+            "FromNodeId": 64,
+            "FromPinId": 66,
             "Id": 83,
             "ToNodeId": 80,
             "ToPinId": 81
         },
         {
-            "FromNodeId": 76,
-            "FromPinId": 78,
+            "FromNodeId": 11,
+            "FromPinId": 13,
             "Id": 87,
             "ToNodeId": 84,
             "ToPinId": 85
         },
         {
-            "FromNodeId": 76,
-            "FromPinId": 78,
+            "FromNodeId": 84,
+            "FromPinId": 86,
             "Id": 91,
             "ToNodeId": 88,
             "ToPinId": 89
         },
         {
-            "FromNodeId": 76,
-            "FromPinId": 78,
+            "FromNodeId": 84,
+            "FromPinId": 86,
             "Id": 95,
             "ToNodeId": 92,
             "ToPinId": 93
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 84,
+            "FromPinId": 86,
             "Id": 99,
             "ToNodeId": 96,
             "ToPinId": 97
         },
         {
-            "FromNodeId": 96,
-            "FromPinId": 98,
+            "FromNodeId": 84,
+            "FromPinId": 86,
             "Id": 103,
             "ToNodeId": 100,
             "ToPinId": 101
         },
         {
-            "FromNodeId": 96,
-            "FromPinId": 98,
+            "FromNodeId": 84,
+            "FromPinId": 86,
             "Id": 107,
             "ToNodeId": 104,
             "ToPinId": 105
         },
         {
-            "FromNodeId": 96,
-            "FromPinId": 98,
+            "FromNodeId": 11,
+            "FromPinId": 13,
             "Id": 111,
             "ToNodeId": 108,
             "ToPinId": 109
         },
         {
-            "FromNodeId": 96,
-            "FromPinId": 98,
+            "FromNodeId": 108,
+            "FromPinId": 110,
             "Id": 115,
             "ToNodeId": 112,
             "ToPinId": 113
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 108,
+            "FromPinId": 110,
             "Id": 119,
             "ToNodeId": 116,
             "ToPinId": 117
         },
         {
-            "FromNodeId": 116,
-            "FromPinId": 118,
+            "FromNodeId": 108,
+            "FromPinId": 110,
             "Id": 123,
             "ToNodeId": 120,
             "ToPinId": 121
         },
         {
-            "FromNodeId": 116,
-            "FromPinId": 118,
+            "FromNodeId": 108,
+            "FromPinId": 110,
             "Id": 127,
             "ToNodeId": 124,
             "ToPinId": 125
         },
         {
-            "FromNodeId": 4,
-            "FromPinId": 6,
+            "FromNodeId": 11,
+            "FromPinId": 13,
             "Id": 131,
             "ToNodeId": 128,
             "ToPinId": 129
+        },
+        {
+            "FromNodeId": 128,
+            "FromPinId": 130,
+            "Id": 135,
+            "ToNodeId": 132,
+            "ToPinId": 133
+        },
+        {
+            "FromNodeId": 128,
+            "FromPinId": 130,
+            "Id": 139,
+            "ToNodeId": 136,
+            "ToPinId": 137
+        },
+        {
+            "FromNodeId": 128,
+            "FromPinId": 130,
+            "Id": 143,
+            "ToNodeId": 140,
+            "ToPinId": 141
+        },
+        {
+            "FromNodeId": 128,
+            "FromPinId": 130,
+            "Id": 147,
+            "ToNodeId": 144,
+            "ToPinId": 145
+        },
+        {
+            "FromNodeId": 11,
+            "FromPinId": 13,
+            "Id": 151,
+            "ToNodeId": 148,
+            "ToPinId": 149
+        },
+        {
+            "FromNodeId": 148,
+            "FromPinId": 150,
+            "Id": 155,
+            "ToNodeId": 152,
+            "ToPinId": 153
+        },
+        {
+            "FromNodeId": 148,
+            "FromPinId": 150,
+            "Id": 159,
+            "ToNodeId": 156,
+            "ToPinId": 157
+        },
+        {
+            "FromNodeId": 148,
+            "FromPinId": 150,
+            "Id": 163,
+            "ToNodeId": 160,
+            "ToPinId": 161
+        },
+        {
+            "FromNodeId": 148,
+            "FromPinId": 150,
+            "Id": 167,
+            "ToNodeId": 164,
+            "ToPinId": 165
+        },
+        {
+            "FromNodeId": 148,
+            "FromPinId": 150,
+            "Id": 171,
+            "ToNodeId": 168,
+            "ToPinId": 169
+        },
+        {
+            "FromNodeId": 14,
+            "FromPinId": 16,
+            "Id": 175,
+            "ToNodeId": 172,
+            "ToPinId": 173
+        },
+        {
+            "FromNodeId": 172,
+            "FromPinId": 174,
+            "Id": 179,
+            "ToNodeId": 176,
+            "ToPinId": 177
+        },
+        {
+            "FromNodeId": 172,
+            "FromPinId": 174,
+            "Id": 183,
+            "ToNodeId": 180,
+            "ToPinId": 181
+        },
+        {
+            "FromNodeId": 172,
+            "FromPinId": 174,
+            "Id": 187,
+            "ToNodeId": 184,
+            "ToPinId": 185
+        },
+        {
+            "FromNodeId": 172,
+            "FromPinId": 174,
+            "Id": 191,
+            "ToNodeId": 188,
+            "ToPinId": 189
+        },
+        {
+            "FromNodeId": 172,
+            "FromPinId": 174,
+            "Id": 195,
+            "ToNodeId": 192,
+            "ToPinId": 193
+        },
+        {
+            "FromNodeId": 192,
+            "FromPinId": 194,
+            "Id": 199,
+            "ToNodeId": 196,
+            "ToPinId": 197
+        },
+        {
+            "FromNodeId": 196,
+            "FromPinId": 198,
+            "Id": 203,
+            "ToNodeId": 200,
+            "ToPinId": 201
+        },
+        {
+            "FromNodeId": 196,
+            "FromPinId": 198,
+            "Id": 207,
+            "ToNodeId": 204,
+            "ToPinId": 205
+        },
+        {
+            "FromNodeId": 192,
+            "FromPinId": 194,
+            "Id": 211,
+            "ToNodeId": 208,
+            "ToPinId": 209
+        },
+        {
+            "FromNodeId": 208,
+            "FromPinId": 210,
+            "Id": 215,
+            "ToNodeId": 212,
+            "ToPinId": 213
+        },
+        {
+            "FromNodeId": 208,
+            "FromPinId": 210,
+            "Id": 219,
+            "ToNodeId": 216,
+            "ToPinId": 217
+        },
+        {
+            "FromNodeId": 14,
+            "FromPinId": 16,
+            "Id": 223,
+            "ToNodeId": 220,
+            "ToPinId": 221
+        },
+        {
+            "FromNodeId": 220,
+            "FromPinId": 222,
+            "Id": 227,
+            "ToNodeId": 224,
+            "ToPinId": 225
+        },
+        {
+            "FromNodeId": 220,
+            "FromPinId": 222,
+            "Id": 231,
+            "ToNodeId": 228,
+            "ToPinId": 229
+        },
+        {
+            "FromNodeId": 220,
+            "FromPinId": 222,
+            "Id": 235,
+            "ToNodeId": 232,
+            "ToPinId": 233
+        },
+        {
+            "FromNodeId": 220,
+            "FromPinId": 222,
+            "Id": 239,
+            "ToNodeId": 236,
+            "ToPinId": 237
+        },
+        {
+            "FromNodeId": 236,
+            "FromPinId": 238,
+            "Id": 243,
+            "ToNodeId": 240,
+            "ToPinId": 241
+        },
+        {
+            "FromNodeId": 240,
+            "FromPinId": 242,
+            "Id": 247,
+            "ToNodeId": 244,
+            "ToPinId": 245
+        },
+        {
+            "FromNodeId": 240,
+            "FromPinId": 242,
+            "Id": 251,
+            "ToNodeId": 248,
+            "ToPinId": 249
+        },
+        {
+            "FromNodeId": 236,
+            "FromPinId": 238,
+            "Id": 255,
+            "ToNodeId": 252,
+            "ToPinId": 253
+        },
+        {
+            "FromNodeId": 252,
+            "FromPinId": 254,
+            "Id": 259,
+            "ToNodeId": 256,
+            "ToPinId": 257
+        },
+        {
+            "FromNodeId": 252,
+            "FromPinId": 254,
+            "Id": 263,
+            "ToNodeId": 260,
+            "ToPinId": 261
+        },
+        {
+            "FromNodeId": 14,
+            "FromPinId": 16,
+            "Id": 267,
+            "ToNodeId": 264,
+            "ToPinId": 265
+        },
+        {
+            "FromNodeId": 264,
+            "FromPinId": 266,
+            "Id": 271,
+            "ToNodeId": 268,
+            "ToPinId": 269
+        },
+        {
+            "FromNodeId": 264,
+            "FromPinId": 266,
+            "Id": 275,
+            "ToNodeId": 272,
+            "ToPinId": 273
+        },
+        {
+            "FromNodeId": 264,
+            "FromPinId": 266,
+            "Id": 279,
+            "ToNodeId": 276,
+            "ToPinId": 277
+        },
+        {
+            "FromNodeId": 264,
+            "FromPinId": 266,
+            "Id": 283,
+            "ToNodeId": 280,
+            "ToPinId": 281
+        },
+        {
+            "FromNodeId": 264,
+            "FromPinId": 266,
+            "Id": 287,
+            "ToNodeId": 284,
+            "ToPinId": 285
+        },
+        {
+            "FromNodeId": 14,
+            "FromPinId": 16,
+            "Id": 291,
+            "ToNodeId": 288,
+            "ToPinId": 289
+        },
+        {
+            "FromNodeId": 288,
+            "FromPinId": 290,
+            "Id": 295,
+            "ToNodeId": 292,
+            "ToPinId": 293
+        },
+        {
+            "FromNodeId": 288,
+            "FromPinId": 290,
+            "Id": 299,
+            "ToNodeId": 296,
+            "ToPinId": 297
+        },
+        {
+            "FromNodeId": 288,
+            "FromPinId": 290,
+            "Id": 303,
+            "ToNodeId": 300,
+            "ToPinId": 301
+        },
+        {
+            "FromNodeId": 288,
+            "FromPinId": 290,
+            "Id": 307,
+            "ToNodeId": 304,
+            "ToPinId": 305
+        },
+        {
+            "FromNodeId": 14,
+            "FromPinId": 16,
+            "Id": 311,
+            "ToNodeId": 308,
+            "ToPinId": 309
+        },
+        {
+            "FromNodeId": 308,
+            "FromPinId": 310,
+            "Id": 315,
+            "ToNodeId": 312,
+            "ToPinId": 313
+        },
+        {
+            "FromNodeId": 308,
+            "FromPinId": 310,
+            "Id": 319,
+            "ToNodeId": 316,
+            "ToPinId": 317
+        },
+        {
+            "FromNodeId": 308,
+            "FromPinId": 310,
+            "Id": 323,
+            "ToNodeId": 320,
+            "ToPinId": 321
         }
     ],
-    "NextId": 132,
+    "NextId": 324,
     "Nodes": [
         {
             "ActionEndCategory": "DragonAI",
@@ -244,8 +580,8 @@
             "Name": "Dragon Root",
             "OutputPinId": 3,
             "Position": [
-                113.0,
-                -476.0
+                0.0,
+                0.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -280,11 +616,11 @@
             "Id": 4,
             "InputPinId": 5,
             "IntValue": 0,
-            "Name": "First Form Decision",
+            "Name": "Dragon Decision Selector",
             "OutputPinId": 6,
             "Position": [
-                113.0,
-                -316.0
+                0.0,
+                180.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -319,17 +655,17 @@
             "Id": 8,
             "InputPinId": 9,
             "IntValue": 0,
-            "Name": "Under Body Sequence",
+            "Name": "Air Decision",
             "OutputPinId": 10,
             "Position": [
-                -2575.0,
-                -28.0
+                -1743.0,
+                420.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
-            "Type": "Sequence",
+            "Type": "Selector",
             "ValueType": "Bool",
             "Vector2Value": [
                 0.0,
@@ -349,65 +685,26 @@
             "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "IsTargetUnderBody",
+            "BlackboardKey": "",
             "BlackboardScope": "Local",
-            "BoolValue": true,
+            "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
-            "Id": 12,
-            "InputPinId": 13,
+            "Id": 11,
+            "InputPinId": 12,
             "IntValue": 0,
-            "Name": "Under Body",
-            "OutputPinId": 0,
+            "Name": "Ground Turn / Close Decision",
+            "OutputPinId": 13,
             "Position": [
-                -2815.0,
-                144.0
-            ],
-            "Priority": 0,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "CanUseTakeOff",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 16,
-            "InputPinId": 17,
-            "IntValue": 0,
-            "Name": "Can Under Body",
-            "OutputPinId": 0,
-            "Position": [
-                -2575.0,
-                160.0
+                -431.0,
+                416.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
-            "Type": "BlackboardCondition",
+            "Type": "Selector",
             "ValueType": "Bool",
             "Vector2Value": [
                 0.0,
@@ -425,7 +722,46 @@
         {
             "ActionEndCategory": "DragonAI",
             "ActionEndKey": "ActionEnded",
-            "ActionName": "DragonAI_TakeOff",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 14,
+            "InputPinId": 15,
+            "IntValue": 0,
+            "Name": "Ground Ranged / Move Decision",
+            "OutputPinId": 16,
+            "Position": [
+                1137.0,
+                384.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Selector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
             "BlackboardCategory": "DragonAI",
             "BlackboardKey": "",
             "BlackboardScope": "Local",
@@ -436,52 +772,13 @@
             "Id": 20,
             "InputPinId": 21,
             "IntValue": 0,
-            "Name": "Under Body Action",
-            "OutputPinId": 0,
+            "Name": "Air Landing Sequence",
+            "OutputPinId": 22,
             "Position": [
-                -2303.0,
-                144.0
+                -2083.0,
+                680.0
             ],
-            "Priority": 2,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 24,
-            "InputPinId": 25,
-            "IntValue": 0,
-            "Name": "Behind Sequence",
-            "OutputPinId": 26,
-            "Position": [
-                -1695.0,
-                -16.0
-            ],
-            "Priority": 1,
+            "Priority": 0,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -505,20 +802,20 @@
             "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "IsTargetBehind",
+            "BlackboardKey": "IsAirIdle",
             "BlackboardScope": "Local",
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
-            "Id": 28,
-            "InputPinId": 29,
+            "Id": 24,
+            "InputPinId": 25,
             "IntValue": 0,
-            "Name": "Behind",
+            "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                -1967.0,
-                160.0
+                -2083.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -544,20 +841,20 @@
             "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "CanUseTailSweep",
+            "BlackboardKey": "PendingAirLandingDecision",
             "BlackboardScope": "Local",
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
-            "Id": 32,
-            "InputPinId": 33,
+            "Id": 28,
+            "InputPinId": 29,
             "IntValue": 0,
-            "Name": "Can Behind",
+            "Name": "Need Landing",
             "OutputPinId": 0,
             "Position": [
-                -1695.0,
-                192.0
+                -2083.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -581,7 +878,46 @@
         {
             "ActionEndCategory": "DragonAI",
             "ActionEndKey": "ActionEnded",
-            "ActionName": "DragonAI_TurnTailSweep",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseLandingAttack",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 32,
+            "InputPinId": 33,
+            "IntValue": 0,
+            "Name": "Can Landing",
+            "OutputPinId": 0,
+            "Position": [
+                -2083.0,
+                1080.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_LandingAttack",
             "BlackboardCategory": "DragonAI",
             "BlackboardKey": "",
             "BlackboardScope": "Local",
@@ -592,13 +928,13 @@
             "Id": 36,
             "InputPinId": 37,
             "IntValue": 0,
-            "Name": "Behind Action",
+            "Name": "Air Landing Action",
             "OutputPinId": 0,
             "Position": [
-                -1391.0,
-                160.0
+                -2083.0,
+                1195.0
             ],
-            "Priority": 2,
+            "Priority": 3,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -631,11 +967,245 @@
             "Id": 40,
             "InputPinId": 41,
             "IntValue": 0,
-            "Name": "Low HP Spin Sequence",
+            "Name": "Air Spread Breath Sequence",
             "OutputPinId": 42,
             "Position": [
-                -815.0,
-                16.0
+                -1743.0,
+                680.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsAirIdle",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 44,
+            "InputPinId": 45,
+            "IntValue": 0,
+            "Name": "Air Idle",
+            "OutputPinId": 0,
+            "Position": [
+                -1743.0,
+                850.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "PendingAirAttackDecision",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 48,
+            "InputPinId": 49,
+            "IntValue": 0,
+            "Name": "Need Air Attack",
+            "OutputPinId": 0,
+            "Position": [
+                -1743.0,
+                965.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "GreaterEqual",
+            "FloatValue": 12.0,
+            "Id": 52,
+            "InputPinId": 53,
+            "IntValue": 0,
+            "Name": "Air Far Range",
+            "OutputPinId": 0,
+            "Position": [
+                -1743.0,
+                1080.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseAirSpreadBreath",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 56,
+            "InputPinId": 57,
+            "IntValue": 0,
+            "Name": "Can Air Spread",
+            "OutputPinId": 0,
+            "Position": [
+                -1743.0,
+                1195.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_AirSpreadBreath",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 60,
+            "InputPinId": 61,
+            "IntValue": 0,
+            "Name": "Air Spread Breath Action",
+            "OutputPinId": 0,
+            "Position": [
+                -1743.0,
+                1310.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 64,
+            "InputPinId": 65,
+            "IntValue": 0,
+            "Name": "Air Fire Ball Sequence",
+            "OutputPinId": 66,
+            "Position": [
+                -1403.0,
+                680.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -661,20 +1231,215 @@
             "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "DamagePhase",
+            "BlackboardKey": "IsAirIdle",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 68,
+            "InputPinId": 69,
+            "IntValue": 0,
+            "Name": "Air Idle",
+            "OutputPinId": 0,
+            "Position": [
+                -1403.0,
+                850.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "PendingAirAttackDecision",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 72,
+            "InputPinId": 73,
+            "IntValue": 0,
+            "Name": "Need Air Attack",
+            "OutputPinId": 0,
+            "Position": [
+                -1403.0,
+                965.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseAirFireBall",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 76,
+            "InputPinId": 77,
+            "IntValue": 0,
+            "Name": "Can Air Fire Ball",
+            "OutputPinId": 0,
+            "Position": [
+                -1403.0,
+                1080.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_AirFireBall",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
             "BlackboardScope": "Local",
             "BoolValue": false,
             "Comment": "",
-            "CompareType": "GreaterEqual",
+            "CompareType": "Equal",
             "FloatValue": 0.0,
-            "Id": 44,
-            "InputPinId": 45,
-            "IntValue": 2,
-            "Name": "Low HP Spin",
+            "Id": 80,
+            "InputPinId": 81,
+            "IntValue": 0,
+            "Name": "Air Fire Ball Action",
             "OutputPinId": 0,
             "Position": [
-                -1071.0,
-                172.0
+                -1403.0,
+                1195.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 84,
+            "InputPinId": 85,
+            "IntValue": 0,
+            "Name": "Turn To Player Sequence",
+            "OutputPinId": 86,
+            "Position": [
+                -911.0,
+                676.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 88,
+            "InputPinId": 89,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                -911.0,
+                846.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -700,455 +1465,26 @@
             "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "CanUseSpinSweep",
+            "BlackboardKey": "HasTarget",
             "BlackboardScope": "Local",
             "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 48,
-            "InputPinId": 49,
-            "IntValue": 0,
-            "Name": "Can Low HP Spin",
-            "OutputPinId": 0,
-            "Position": [
-                -815.0,
-                204.0
-            ],
-            "Priority": 1,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "DragonAI_SpinTailSweep",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 52,
-            "InputPinId": 53,
-            "IntValue": 0,
-            "Name": "Low HP Spin Action",
-            "OutputPinId": 0,
-            "Position": [
-                -575.0,
-                156.0
-            ],
-            "Priority": 2,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 56,
-            "InputPinId": 57,
-            "IntValue": 0,
-            "Name": "Close Bite Sequence",
-            "OutputPinId": 58,
-            "Position": [
-                113.0,
-                36.0
-            ],
-            "Priority": 3,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Sequence",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "TargetDistance",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "LessEqual",
-            "FloatValue": 4.0,
-            "Id": 60,
-            "InputPinId": 61,
-            "IntValue": 0,
-            "Name": "Close Bite",
-            "OutputPinId": 0,
-            "Position": [
-                -195.0,
-                164.0
-            ],
-            "Priority": 0,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Float",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "IsTargetInFront",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 64,
-            "InputPinId": 65,
-            "IntValue": 0,
-            "Name": "Front For Close Bite",
-            "OutputPinId": 0,
-            "Position": [
-                253.0,
-                260.0
-            ],
-            "Priority": 2,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "CanUseBite",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 68,
-            "InputPinId": 69,
-            "IntValue": 0,
-            "Name": "Can Close Bite",
-            "OutputPinId": 0,
-            "Position": [
-                -67.0,
-                244.0
-            ],
-            "Priority": 1,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "DragonAI_Bite",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 72,
-            "InputPinId": 73,
-            "IntValue": 0,
-            "Name": "Close Bite Action",
-            "OutputPinId": 0,
-            "Position": [
-                477.0,
-                196.0
-            ],
-            "Priority": 3,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 76,
-            "InputPinId": 77,
-            "IntValue": 0,
-            "Name": "Far Breath Sequence",
-            "OutputPinId": 78,
-            "Position": [
-                1105.0,
-                96.0
-            ],
-            "Priority": 4,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Sequence",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "TargetDistance",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "GreaterEqual",
-            "FloatValue": 10.0,
-            "Id": 80,
-            "InputPinId": 81,
-            "IntValue": 0,
-            "Name": "Far Breath",
-            "OutputPinId": 0,
-            "Position": [
-                845.0,
-                256.0
-            ],
-            "Priority": 0,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Float",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "IsTargetInFront",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 84,
-            "InputPinId": 85,
-            "IntValue": 0,
-            "Name": "Front For Far Breath",
-            "OutputPinId": 0,
-            "Position": [
-                1261.0,
-                288.0
-            ],
-            "Priority": 2,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "CanUseSpreadBreath",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 88,
-            "InputPinId": 89,
-            "IntValue": 0,
-            "Name": "Can Far Breath",
-            "OutputPinId": 0,
-            "Position": [
-                1053.0,
-                304.0
-            ],
-            "Priority": 1,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "DragonAI_SpreadBreath",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
             "Id": 92,
             "InputPinId": 93,
             "IntValue": 0,
-            "Name": "Far Breath Action",
+            "Name": "Has Target",
             "OutputPinId": 0,
             "Position": [
-                1485.0,
-                272.0
+                -911.0,
+                961.0
             ],
-            "Priority": 3,
+            "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
-            "Type": "PlayAction",
+            "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
                 0.0,
@@ -1168,7 +1504,7 @@
             "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
+            "BlackboardKey": "IsTargetInFront",
             "BlackboardScope": "Local",
             "BoolValue": false,
             "Comment": "",
@@ -1177,128 +1513,11 @@
             "Id": 96,
             "InputPinId": 97,
             "IntValue": 0,
-            "Name": "Mid Fire Ball Sequence",
-            "OutputPinId": 98,
-            "Position": [
-                1989.0,
-                80.0
-            ],
-            "Priority": 5,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Sequence",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "TargetDistance",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "LessEqual",
-            "FloatValue": 10.0,
-            "Id": 100,
-            "InputPinId": 101,
-            "IntValue": 0,
-            "Name": "Mid Fire Ball",
+            "Name": "Not Front",
             "OutputPinId": 0,
             "Position": [
-                1713.0,
-                224.0
-            ],
-            "Priority": 0,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Float",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "IsTargetInFront",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 104,
-            "InputPinId": 105,
-            "IntValue": 0,
-            "Name": "Front For Mid Fire Ball",
-            "OutputPinId": 0,
-            "Position": [
-                1985.0,
-                272.0
-            ],
-            "Priority": 1,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "BlackboardCondition",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "CanUseFireBall",
-            "BlackboardScope": "Local",
-            "BoolValue": true,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 108,
-            "InputPinId": 109,
-            "IntValue": 0,
-            "Name": "Can Mid Fire Ball",
-            "OutputPinId": 0,
-            "Position": [
-                2225.0,
-                256.0
+                -911.0,
+                1076.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1322,102 +1541,24 @@
         {
             "ActionEndCategory": "DragonAI",
             "ActionEndKey": "ActionEnded",
-            "ActionName": "DragonAI_FireBall",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 112,
-            "InputPinId": 113,
-            "IntValue": 0,
-            "Name": "Mid Fire Ball Action",
-            "OutputPinId": 0,
-            "Position": [
-                2433.0,
-                224.0
-            ],
-            "Priority": 3,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "PlayAction",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
             "ActionName": "",
             "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0.0,
-            "Id": 116,
-            "InputPinId": 117,
-            "IntValue": 0,
-            "Name": "Side Turn Sequence",
-            "OutputPinId": 118,
-            "Position": [
-                3025.0,
-                84.0
-            ],
-            "Priority": 6,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Sequence",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0.0,
-                0.0
-            ],
-            "Vector3Value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0.0,
-            "Weight": 1.0
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "IsTargetInSide",
+            "BlackboardKey": "CanUseTurnToPlayer",
             "BlackboardScope": "Local",
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
-            "Id": 120,
-            "InputPinId": 121,
+            "Id": 100,
+            "InputPinId": 101,
             "IntValue": 0,
-            "Name": "Side Turn",
+            "Name": "Can Turn",
             "OutputPinId": 0,
             "Position": [
-                2849.0,
-                288.0
+                -911.0,
+                1191.0
             ],
-            "Priority": 0,
+            "Priority": 3,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
@@ -1447,20 +1588,2087 @@
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
+            "Id": 104,
+            "InputPinId": 105,
+            "IntValue": 0,
+            "Name": "Turn To Player Action",
+            "OutputPinId": 0,
+            "Position": [
+                -911.0,
+                1306.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 108,
+            "InputPinId": 109,
+            "IntValue": 0,
+            "Name": "Under Body Bite Sequence",
+            "OutputPinId": 110,
+            "Position": [
+                -591.0,
+                676.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 112,
+            "InputPinId": 113,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                -591.0,
+                846.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsTargetUnderBody",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 116,
+            "InputPinId": 117,
+            "IntValue": 0,
+            "Name": "Under Body",
+            "OutputPinId": 0,
+            "Position": [
+                -591.0,
+                961.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseBite",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 120,
+            "InputPinId": 121,
+            "IntValue": 0,
+            "Name": "Can Bite",
+            "OutputPinId": 0,
+            "Position": [
+                -591.0,
+                1076.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_Bite",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
             "Id": 124,
             "InputPinId": 125,
             "IntValue": 0,
-            "Name": "Side Turn Action",
+            "Name": "Under Body Bite Action",
             "OutputPinId": 0,
             "Position": [
-                3169.0,
-                288.0
+                -591.0,
+                1191.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 128,
+            "InputPinId": 129,
+            "IntValue": 0,
+            "Name": "Close TakeOff Sequence",
+            "OutputPinId": 130,
+            "Position": [
+                -271.0,
+                676.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 132,
+            "InputPinId": 133,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                -271.0,
+                846.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "LessEqual",
+            "FloatValue": 8.0,
+            "Id": 136,
+            "InputPinId": 137,
+            "IntValue": 0,
+            "Name": "Close TakeOff Range",
+            "OutputPinId": 0,
+            "Position": [
+                -271.0,
+                961.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseTakeOff",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 140,
+            "InputPinId": 141,
+            "IntValue": 0,
+            "Name": "Can TakeOff",
+            "OutputPinId": 0,
+            "Position": [
+                -271.0,
+                1076.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_TakeOff",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 144,
+            "InputPinId": 145,
+            "IntValue": 0,
+            "Name": "Close TakeOff Action",
+            "OutputPinId": 0,
+            "Position": [
+                -271.0,
+                1191.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 148,
+            "InputPinId": 149,
+            "IntValue": 0,
+            "Name": "Close Bite Sequence",
+            "OutputPinId": 150,
+            "Position": [
+                33.0,
+                676.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 152,
+            "InputPinId": 153,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                33.0,
+                846.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsTargetInFront",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 156,
+            "InputPinId": 157,
+            "IntValue": 0,
+            "Name": "Front Bite",
+            "OutputPinId": 0,
+            "Position": [
+                33.0,
+                961.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Less",
+            "FloatValue": 6.5,
+            "Id": 160,
+            "InputPinId": 161,
+            "IntValue": 0,
+            "Name": "Bite Range",
+            "OutputPinId": 0,
+            "Position": [
+                33.0,
+                1076.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseBite",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 164,
+            "InputPinId": 165,
+            "IntValue": 0,
+            "Name": "Can Bite",
+            "OutputPinId": 0,
+            "Position": [
+                33.0,
+                1191.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_Bite",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 168,
+            "InputPinId": 169,
+            "IntValue": 0,
+            "Name": "Close Bite Action",
+            "OutputPinId": 0,
+            "Position": [
+                33.0,
+                1306.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 172,
+            "InputPinId": 173,
+            "IntValue": 0,
+            "Name": "Mid Fire Ball Sequence",
+            "OutputPinId": 174,
+            "Position": [
+                717.0,
+                644.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 176,
+            "InputPinId": 177,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                717.0,
+                814.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsTargetInFront",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 180,
+            "InputPinId": 181,
+            "IntValue": 0,
+            "Name": "Front Fire",
+            "OutputPinId": 0,
+            "Position": [
+                717.0,
+                929.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "GreaterEqual",
+            "FloatValue": 6.5,
+            "Id": 184,
+            "InputPinId": 185,
+            "IntValue": 0,
+            "Name": "Beyond Bite",
+            "OutputPinId": 0,
+            "Position": [
+                717.0,
+                1044.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Less",
+            "FloatValue": 12.0,
+            "Id": 188,
+            "InputPinId": 189,
+            "IntValue": 0,
+            "Name": "Mid Range",
+            "OutputPinId": 0,
+            "Position": [
+                717.0,
+                1159.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 192,
+            "InputPinId": 193,
+            "IntValue": 0,
+            "Name": "Mid Fire Ball Random",
+            "OutputPinId": 194,
+            "Position": [
+                717.0,
+                1274.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "RandomSelector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 196,
+            "InputPinId": 197,
+            "IntValue": 0,
+            "Name": "Fire Ball Choice",
+            "OutputPinId": 198,
+            "Position": [
+                557.0,
+                1464.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.2000000476837158
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseFireBall",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 200,
+            "InputPinId": 201,
+            "IntValue": 0,
+            "Name": "Can Fire Ball",
+            "OutputPinId": 0,
+            "Position": [
+                557.0,
+                1634.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_FireBall",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 204,
+            "InputPinId": 205,
+            "IntValue": 0,
+            "Name": "Fire Ball Action",
+            "OutputPinId": 0,
+            "Position": [
+                557.0,
+                1749.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
             "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.2000000476837158
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 208,
+            "InputPinId": 209,
+            "IntValue": 0,
+            "Name": "Fire Ball Sweep Choice",
+            "OutputPinId": 210,
+            "Position": [
+                877.0,
+                1464.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 0.800000011920929
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseFireBallSweep",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 212,
+            "InputPinId": 213,
+            "IntValue": 0,
+            "Name": "Can Fire Ball Sweep",
+            "OutputPinId": 0,
+            "Position": [
+                877.0,
+                1634.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_FireBallSweep",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 216,
+            "InputPinId": 217,
+            "IntValue": 0,
+            "Name": "Fire Ball Sweep Action",
+            "OutputPinId": 0,
+            "Position": [
+                877.0,
+                1749.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 0.800000011920929
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 220,
+            "InputPinId": 221,
+            "IntValue": 0,
+            "Name": "Far Breath Sequence",
+            "OutputPinId": 222,
+            "Position": [
+                1297.0,
+                644.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 224,
+            "InputPinId": 225,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                1297.0,
+                814.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsTargetInFront",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 228,
+            "InputPinId": 229,
+            "IntValue": 0,
+            "Name": "Front Breath",
+            "OutputPinId": 0,
+            "Position": [
+                1297.0,
+                929.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "GreaterEqual",
+            "FloatValue": 12.0,
+            "Id": 232,
+            "InputPinId": 233,
+            "IntValue": 0,
+            "Name": "Far Range",
+            "OutputPinId": 0,
+            "Position": [
+                1297.0,
+                1044.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 236,
+            "InputPinId": 237,
+            "IntValue": 0,
+            "Name": "Far Breath Random",
+            "OutputPinId": 238,
+            "Position": [
+                1297.0,
+                1159.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "RandomSelector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 240,
+            "InputPinId": 241,
+            "IntValue": 0,
+            "Name": "Spread Breath Choice",
+            "OutputPinId": 242,
+            "Position": [
+                1137.0,
+                1349.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 0.8999999761581421
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseSpreadBreath",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 244,
+            "InputPinId": 245,
+            "IntValue": 0,
+            "Name": "Can Spread Breath",
+            "OutputPinId": 0,
+            "Position": [
+                1137.0,
+                1519.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_SpreadBreath",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 248,
+            "InputPinId": 249,
+            "IntValue": 0,
+            "Name": "Spread Breath Action",
+            "OutputPinId": 0,
+            "Position": [
+                1137.0,
+                1634.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 0.8999999761581421
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 252,
+            "InputPinId": 253,
+            "IntValue": 0,
+            "Name": "Spread Breath Forward Choice",
+            "OutputPinId": 254,
+            "Position": [
+                1457.0,
+                1349.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 0.699999988079071
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseSpreadBreathForward",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 256,
+            "InputPinId": 257,
+            "IntValue": 0,
+            "Name": "Can Spread Breath Forward",
+            "OutputPinId": 0,
+            "Position": [
+                1457.0,
+                1519.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_SpreadBreathForward",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 260,
+            "InputPinId": 261,
+            "IntValue": 0,
+            "Name": "Spread Breath Forward Action",
+            "OutputPinId": 0,
+            "Position": [
+                1457.0,
+                1634.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 0.699999988079071
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 264,
+            "InputPinId": 265,
+            "IntValue": 0,
+            "Name": "Run Charge Sequence",
+            "OutputPinId": 266,
+            "Position": [
+                1697.0,
+                644.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 268,
+            "InputPinId": 269,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                1697.0,
+                814.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsTargetInFront",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 272,
+            "InputPinId": 273,
+            "IntValue": 0,
+            "Name": "Front Run",
+            "OutputPinId": 0,
+            "Position": [
+                1697.0,
+                929.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "TargetDistance",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "GreaterEqual",
+            "FloatValue": 10.0,
+            "Id": 276,
+            "InputPinId": 277,
+            "IntValue": 0,
+            "Name": "Run Range",
+            "OutputPinId": 0,
+            "Position": [
+                1697.0,
+                1044.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Float",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseRunCharge",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 280,
+            "InputPinId": 281,
+            "IntValue": 0,
+            "Name": "Can Run",
+            "OutputPinId": 0,
+            "Position": [
+                1697.0,
+                1159.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_RunCharge",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 284,
+            "InputPinId": 285,
+            "IntValue": 0,
+            "Name": "Run Charge Action",
+            "OutputPinId": 0,
+            "Position": [
+                1697.0,
+                1274.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 288,
+            "InputPinId": 289,
+            "IntValue": 0,
+            "Name": "Low HP Spin Sequence",
+            "OutputPinId": 290,
+            "Position": [
+                2017.0,
+                644.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 292,
+            "InputPinId": 293,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                2017.0,
+                814.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "DamagePhase",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "GreaterEqual",
+            "FloatValue": 0.0,
+            "Id": 296,
+            "InputPinId": 297,
+            "IntValue": 2,
+            "Name": "Damage Phase",
+            "OutputPinId": 0,
+            "Position": [
+                2017.0,
+                929.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseSpinSweep",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 300,
+            "InputPinId": 301,
+            "IntValue": 0,
+            "Name": "Can Spin",
+            "OutputPinId": 0,
+            "Position": [
+                2017.0,
+                1044.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_SpinTailSweep",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 304,
+            "InputPinId": 305,
+            "IntValue": 0,
+            "Name": "Low HP Spin Action",
+            "OutputPinId": 0,
+            "Position": [
+                2017.0,
+                1159.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 308,
+            "InputPinId": 309,
+            "IntValue": 0,
+            "Name": "Walk Approach Sequence",
+            "OutputPinId": 310,
+            "Position": [
+                2337.0,
+                644.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 312,
+            "InputPinId": 313,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                2337.0,
+                814.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "HasTarget",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 316,
+            "InputPinId": 317,
+            "IntValue": 0,
+            "Name": "Has Target",
+            "OutputPinId": 0,
+            "Position": [
+                2337.0,
+                929.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
                 0.0,
@@ -1486,16 +3694,16 @@
             "Comment": "",
             "CompareType": "Equal",
             "FloatValue": 0.0,
-            "Id": 128,
-            "InputPinId": 129,
+            "Id": 320,
+            "InputPinId": 321,
             "IntValue": 0,
-            "Name": "Walk Approach",
+            "Name": "Walk Approach Action",
             "OutputPinId": 0,
             "Position": [
-                3601.0,
-                80.0
+                2337.0,
+                1044.0
             ],
-            "Priority": 7,
+            "Priority": 2,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",

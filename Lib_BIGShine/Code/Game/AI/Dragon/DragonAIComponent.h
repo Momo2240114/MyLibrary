@@ -15,6 +15,7 @@ class DragonNeckCommandIKComponent;
 class DragonTailCommandIKComponent;
 class GameObject;
 class HealthComponent;
+class ColliderComponent;
 
 enum class DRAGON_ACTION_TYPE
 {
@@ -33,7 +34,10 @@ enum class DRAGON_ACTION_TYPE
     AIR_SPREAD_BREATH,
     LANDING_ATTACK,
     GET_HIT,
-    DEATH
+    DEATH,
+    FIRE_BALL_SWEEP,
+    SPREAD_BREATH_FORWARD,
+    AIR_GET_HIT
 };
 
 enum class DRAGON_AI_STATE
@@ -138,6 +142,8 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
     bool RequestAction(DRAGON_ACTION_TYPE action_);
+    bool RequestWeightedAction();
+    void RequestDamageReaction();
     void ForceAction(DRAGON_ACTION_TYPE action_);
     void SetCanCancel(bool enabled_);
     void SetCanBufferAction(bool enabled_);
@@ -169,13 +175,21 @@ private:
     void UpdateCooldowns(float deltaTime_);
     void UpdateDecision(float deltaTime_);
     void UpdateBehaviorGraph(float deltaTime_);
+    DRAGON_ACTION_TYPE SelectNextAirAction() const;
+    bool ShouldWaitForIdleAnimation() const;
+    bool UpdateIdleAnimationGraphReturn();
     void UpdateActionMotion(float deltaTime_);
     bool UpdateAIControlledActionEnd();
     bool UpdateDurationControlledActionEnd();
     void UpdateActionTimeout();
     void CompleteActionEnd();
-    void TurnTowardPlayer(float deltaTime_);
+    void FaceTargetFromAnimationEvent();
     void MoveForward(float speed_, float deltaTime_);
+    void TurnTowardPlayerLimited(float turnSpeed_, float deltaTime_);
+    void MoveGround(float speed_, float turnSpeed_, float deltaTime_);
+    void MoveAir(float speed_, float turnSpeed_, float deltaTime_);
+    void UpdateAirbornePhysics(float deltaTime_);
+    void SetAirbornePhysicsEnabled(bool enabled_);
     void StopMovement();
     void StartAction(DRAGON_ACTION_TYPE action_);
     void EnterRecovery();
@@ -187,7 +201,10 @@ private:
         const std::string& animationActionName_,
         const std::string& animationStateName_,
         bool actionTrigger_);
+    void RequestIdleGraphTransition();
+    void RequestAirIdleGraphTransition();
     void PlayAnimationState(const std::string& stateName_);
+    void ResetAnimationActionTriggers(const std::string& keepTriggerName_);
     void ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float duration_);
     void ExecuteOwnerAction(const std::string& actionName_);
     void SendRuntimeToBlackboard();
@@ -214,6 +231,8 @@ private:
     const DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_) const;
     bool IsAIControlledAction(DRAGON_ACTION_TYPE action_) const;
     bool IsSequencerControlledAction(DRAGON_ACTION_TYPE action_) const;
+    bool IsAirborneAction(DRAGON_ACTION_TYPE action_) const;
+    bool IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const;
     float GetCooldown(DRAGON_ACTION_TYPE action_) const;
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);
     bool IsActionAvailable(DRAGON_ACTION_TYPE action_) const;
@@ -252,15 +271,23 @@ private:
     float behaviorGraphTickInterval = 0.20f;
     float behaviorGraphTickTimer = 0.0f;
     float debugHpRate = 1.0f;
-    float frontAngleDegrees = 45.0f;
+    float frontAngleDegrees = 115.0f;
     float sideAngleDegrees = 135.0f;
-    float underBodyDistance = 3.0f;
-    float biteDistance = 4.0f;
+    float underBodyDistance = 4.5f;
+    float biteDistance = 6.5f;
+    float approachEndDistance = 6.0f;
     float mediumDistance = 10.0f;
     float farDistance = 12.0f;
+    float takeOffBackSpeed = 7.0f;
+    float groundMoveTurnSpeed = 2.0f;
+    float airForwardSpeed = 3.0f;
+    float airAttackBackSpeed = 2.0f;
+    float airTurnSpeed = 75.0f;
+    float airHoverHeight = 10.0f;
+    float airHoverAdjustSpeed = 8.0f;
     float turnSpeed = 6.0f;
-    float walkSpeed = 2.0f;
-    float runSpeed = 6.0f;
+    float walkSpeed = 5.0f;
+    float runSpeed = 12.0f;
     float animationBlendDuration = 0.2f;
     bool animationGraphDriven = true;
     std::string behaviorGraphAssetPath = "Data/AI/BehaviorGraph/DragonFirstForm.json";
@@ -269,6 +296,7 @@ private:
     AI_BEHAVIOR_STATUS lastBehaviorStatus = AI_BEHAVIOR_STATUS::FAILURE;
     DRAGON_ACTION_TYPE lastStartedAction = DRAGON_ACTION_TYPE::IDLE;
     DRAGON_ACTION_TYPE lastRejectedAction = DRAGON_ACTION_TYPE::IDLE;
+    DRAGON_ACTION_TYPE lastCompletedAttackAction = DRAGON_ACTION_TYPE::IDLE;
     int behaviorGraphTickCount = 0;
     int actionStartCount = 0;
     bool hasPlayerTarget = false;
@@ -276,6 +304,11 @@ private:
     bool hasMovementComponent = false;
     bool hasNeckIK = false;
     bool hasTailIK = false;
+    bool pendingSequencerActionEnd = false;
+    bool pendingAirAttackDecision = false;
+    bool pendingAirLandingDecision = false;
+    bool airbornePhysicsApplied = false;
+    bool previousColliderUseGravity = false;
 
     DRAGON_ACTION_TYPE debugAction = DRAGON_ACTION_TYPE::BITE;
     std::mt19937 randomEngine;

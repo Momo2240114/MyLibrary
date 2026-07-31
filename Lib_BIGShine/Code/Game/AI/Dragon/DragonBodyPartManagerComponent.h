@@ -45,6 +45,13 @@ struct DragonBodyPartStatus
     float currentDurability = 100.0f;
     float healthDamageRate = 1.0f;
     float durabilityDamageRate = 1.0f;
+    float brokenHealthDamageRate = 1.25f;
+    float baseMaxStagger = 45.0f;
+    float currentMaxStagger = 45.0f;
+    float currentStagger = 0.0f;
+    float staggerDamageRate = 1.0f;
+    float staggerRecoveryBaseMultiplier = 1.25f;
+    std::string brokenActionName;
     bool broken = false;
 };
 
@@ -70,6 +77,7 @@ public:
     }
 
     void Start() override;
+    void Update(float deltaTime_) override;
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
@@ -92,11 +100,18 @@ private:
     void ResolveHealthComponent();
     void RegisterAttackHitCallback();
     void PublishLastDamageToBlackboard();
+    void TryRequestDamageReaction(DragonBodyPartStatus& status_);
+    void ExecuteBodyPartBrokenActions(const DragonBodyPartStatus& status_);
 
     std::vector<DragonBodyPartStatus> bodyParts;
     HealthComponent* health = nullptr;
     bool callbackRegistered = false;
     bool debugLogEnabled = true;
+    bool reactionEnabled = true;
+    float reactionCooldownTime = 2.0f;
+    float reactionCooldownTimer = 0.0f;
+    std::string reactionActionName = "DragonAI_DamageReaction";
+    std::string commonBrokenActionName = "DragonBodyPart_Broken";
     BodyPartDamageResult lastDamageResult;
     std::string lastAttackerName;
     std::string lastHurtBoxName;

@@ -5,7 +5,7 @@
                 "ActionPrefix": "Kick",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 465,
+                "AttackInstanceId": 245,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
@@ -32,7 +32,7 @@
                     0.20000000298023224,
                     1.0
                 ],
-                "EndNodeName": "",
+                "EndNodeName": "thigh_l",
                 "GravityScale": 1.0,
                 "HalfHeight": 15.0,
                 "HitGroupId": 1,
@@ -65,18 +65,18 @@
                 "KnockBackPower": 5.5,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
-                "NodeModelObjectName": "",
+                "NodeModelObjectName": "PlayerModel",
                 "Offset": [
                     0.0,
                     12.0,
                     0.0
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 10.0,
+                "Radius": 15.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": true,
                 "SourceAction": "",
-                "StartNodeName": "",
+                "StartNodeName": "ball_l_end",
                 "TargetAirLiftPower": 0.0,
                 "TeamId": 0,
                 "UseGravity": false,
@@ -116,19 +116,19 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -0.2633476257324219,
-            0.5138373374938965,
-            -0.2708015441894531
+            -0.24329471588134766,
+            1.2941522598266602,
+            0.5843305587768555
         ],
         "Rot": [
             0.0,
             180.0,
-            89.5
+            180.0
         ],
         "Scale": [
-            1.0,
-            1.0,
-            1.0
+            0.0,
+            0.0,
+            0.0
         ]
     }
 }

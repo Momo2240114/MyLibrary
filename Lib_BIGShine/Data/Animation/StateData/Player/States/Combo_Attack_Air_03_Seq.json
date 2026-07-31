@@ -1,473 +1,497 @@
 {
-    "AssetType": "AnimationState",
-    "AssetVersion": 2,
-    "State": {
-        "animIndexA": -1,
-        "animIndexB": -1,
-        "animationIndex": 87,
-        "blend2DBackwardAnimationIndex": -1,
-        "blend2DBackwardLeft90AnimationIndex": -1,
-        "blend2DBackwardLeft90PhaseOffset": 0.0,
-        "blend2DBackwardLeftAnimationIndex": -1,
-        "blend2DBackwardLeftPhaseOffset": 0.0,
-        "blend2DBackwardPhaseOffset": 0.0,
-        "blend2DBackwardRight90AnimationIndex": -1,
-        "blend2DBackwardRight90PhaseOffset": 0.0,
-        "blend2DBackwardRightAnimationIndex": -1,
-        "blend2DBackwardRightPhaseOffset": 0.0,
-        "blend2DDefaultInput": [
-            0.0,
-            1.0
-        ],
-        "blend2DForwardAnimationIndex": -1,
-        "blend2DForwardLeft90AnimationIndex": -1,
-        "blend2DForwardLeft90PhaseOffset": 0.0,
-        "blend2DForwardLeftAnimationIndex": -1,
-        "blend2DForwardLeftPhaseOffset": 0.0,
-        "blend2DForwardPhaseOffset": 0.0,
-        "blend2DForwardRight90AnimationIndex": -1,
-        "blend2DForwardRight90PhaseOffset": 0.0,
-        "blend2DForwardRightAnimationIndex": -1,
-        "blend2DForwardRightPhaseOffset": 0.0,
-        "blend2DIdleAnimationIndex": -1,
-        "blend2DIdlePhaseOffset": 0.0,
-        "blend2DIdleThreshold": 0.05000000074505806,
-        "blend2DLeftAnimationIndex": -1,
-        "blend2DLeftPhaseOffset": 0.0,
-        "blend2DParamName": "MoveInput",
-        "blend2DRightAnimationIndex": -1,
-        "blend2DRightPhaseOffset": 0.0,
-        "blend2DSyncNormalizedTime": true,
-        "blend2DUseEightDirections": false,
-        "blend2DUseForwardBackwardLateral": false,
-        "blendDefaultWeight": 0.5,
-        "blendMaskRootNodes": [],
-        "blendParamName": "BlendAlpha",
-        "blendParameterMax": 1.0,
-        "blendParameterMin": 0.0,
-        "blendPhaseOffsetA": 0.0,
-        "blendPhaseOffsetB": 0.0,
-        "blendSyncNormalizedTime": true,
-        "blendUseMask": false,
-        "customAnimIndex": -1,
-        "events": [
-            {
-                "actionEnd": "InputBufferOff",
-                "actionStart": "InputBufferOn",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 1.3333333730697632,
-                "eventTemplateType": "NONE",
-                "label": "InputBufferOn",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.0
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": true,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": false,
-                "endTime": 0.2666666805744171,
-                "eventTemplateType": "VFX_TEMPLATE",
-                "label": "MeshVFX",
-                "localPosition": [
-                    0.0,
-                    2.859999895095825,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    -28.5
-                ],
-                "localScale": [
-                    0.8999999761581421,
-                    0.6000000238418579,
-                    1.0
-                ],
-                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
-                "meshVFXLifeTime": 0.5,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": true,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.06666667014360428
-            },
-            {
-                "actionEnd": "Trail_Stop",
-                "actionStart": "Trail_Start",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 0.2666666805744171,
-                "eventTemplateType": "NONE",
-                "label": "Tril",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.06666667014360428
-            },
-            {
-                "actionEnd": "DisableDodgeCancel",
-                "actionStart": "EnableDodgeCancel",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 1.399999976158142,
-                "eventTemplateType": "NONE",
-                "label": "DodgeCancel",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.06666667014360428
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "AirCombo_03_01",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 0.21666666865348816,
-                "eventTemplateType": "ATTACK_TEMPLATE",
-                "label": "AirCombo_03_01",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.0833333358168602
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": true,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": false,
-                "endTime": 0.6666666865348816,
-                "eventTemplateType": "VFX_TEMPLATE",
-                "label": "MeshVFX",
-                "localPosition": [
-                    0.0,
-                    2.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    -48.5
-                ],
-                "localScale": [
-                    0.800000011920929,
-                    0.6000000238418579,
-                    1.0
-                ],
-                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
-                "meshVFXLifeTime": 0.5,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.46666666865348816
-            },
-            {
-                "actionEnd": "Trail_Stop",
-                "actionStart": "Trail_Start",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 0.6666666865348816,
-                "eventTemplateType": "NONE",
-                "label": "Trail_02",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.46666666865348816
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "AirCombo_03_02",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 0.6333333253860474,
-                "eventTemplateType": "ATTACK_TEMPLATE",
-                "label": "AirCombo_03_02",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.5
-            },
-            {
-                "actionEnd": "CanCancelOff",
-                "actionStart": "CanCancelOn",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 2.066666603088379,
-                "eventTemplateType": "NONE",
-                "label": "ActionBranch",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.8833333253860474
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "ComboTransition",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 1.3333333730697632,
-                "eventTemplateType": "NONE",
-                "label": "ComboTransition",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 0.7333333492279053
-            },
-            {
-                "actionEnd": "",
-                "actionStart": "ActionEnd",
-                "actionUpdate": "",
-                "attachNodeName": "",
-                "attachToOwner": false,
-                "attackTemplateId": "",
-                "blackboardWrites": [],
-                "callEndOnStateExit": true,
-                "endTime": 2.0166666507720947,
-                "eventTemplateType": "NONE",
-                "label": "ActionEnd",
-                "localPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "localScale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "meshVFXAssetPath": "",
-                "meshVFXLifeTime": 1.0,
-                "meshVFXPlaybackSpeed": 1.0,
-                "mirrorMeshVFX": false,
-                "overridePlaybackSpeed": false,
-                "ownerTarget": "Self",
-                "playbackSpeed": 1.0,
-                "startTime": 1.25
-            }
-        ],
-        "loop": false,
-        "name": "Combo_Attack_Air_03_Seq",
-        "rootMotion": {
-            "applyPositionX": true,
-            "applyPositionY": false,
-            "applyPositionZ": true,
-            "applyRotationX": true,
-            "applyRotationY": true,
-            "applyRotationZ": true,
-            "cutVisualPositionX": true,
-            "cutVisualPositionY": true,
-            "cutVisualPositionZ": true,
-            "enable": true,
-            "sourceNodeName": "pelvis"
-        },
-        "rootMotionScale": 0.009999999776482582,
-        "rootMotionScaleCurveName": "",
-        "sequencer": "",
-        "speed": 1.100000023841858,
-        "speedCurveName": "",
-        "type": 0
-    }
+    "AssetType":  "AnimationState",
+    "AssetVersion":  2,
+    "State":  {
+                  "animIndexA":  -1,
+                  "animIndexB":  -1,
+                  "animationIndex":  87,
+                  "blend2DBackwardAnimationIndex":  -1,
+                  "blend2DBackwardLeft90AnimationIndex":  -1,
+                  "blend2DBackwardLeft90PhaseOffset":  0.0,
+                  "blend2DBackwardLeftAnimationIndex":  -1,
+                  "blend2DBackwardLeftPhaseOffset":  0.0,
+                  "blend2DBackwardPhaseOffset":  0.0,
+                  "blend2DBackwardRight90AnimationIndex":  -1,
+                  "blend2DBackwardRight90PhaseOffset":  0.0,
+                  "blend2DBackwardRightAnimationIndex":  -1,
+                  "blend2DBackwardRightPhaseOffset":  0.0,
+                  "blend2DDefaultInput":  [
+                                              0.0,
+                                              1.0
+                                          ],
+                  "blend2DForwardAnimationIndex":  -1,
+                  "blend2DForwardLeft90AnimationIndex":  -1,
+                  "blend2DForwardLeft90PhaseOffset":  0.0,
+                  "blend2DForwardLeftAnimationIndex":  -1,
+                  "blend2DForwardLeftPhaseOffset":  0.0,
+                  "blend2DForwardPhaseOffset":  0.0,
+                  "blend2DForwardRight90AnimationIndex":  -1,
+                  "blend2DForwardRight90PhaseOffset":  0.0,
+                  "blend2DForwardRightAnimationIndex":  -1,
+                  "blend2DForwardRightPhaseOffset":  0.0,
+                  "blend2DIdleAnimationIndex":  -1,
+                  "blend2DIdlePhaseOffset":  0.0,
+                  "blend2DIdleThreshold":  0.05000000074505806,
+                  "blend2DLeftAnimationIndex":  -1,
+                  "blend2DLeftPhaseOffset":  0.0,
+                  "blend2DParamName":  "MoveInput",
+                  "blend2DRightAnimationIndex":  -1,
+                  "blend2DRightPhaseOffset":  0.0,
+                  "blend2DSyncNormalizedTime":  true,
+                  "blend2DUseEightDirections":  false,
+                  "blend2DUseForwardBackwardLateral":  false,
+                  "blendDefaultWeight":  0.5,
+                  "blendMaskRootNodes":  [
+
+                                         ],
+                  "blendParamName":  "BlendAlpha",
+                  "blendParameterMax":  1.0,
+                  "blendParameterMin":  0.0,
+                  "blendPhaseOffsetA":  0.0,
+                  "blendPhaseOffsetB":  0.0,
+                  "blendSyncNormalizedTime":  true,
+                  "blendUseMask":  false,
+                  "customAnimIndex":  -1,
+                  "events":  [
+                                 {
+                                     "actionEnd":  "InputBufferOff",
+                                     "actionStart":  "InputBufferOn",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  1.3333333730697632,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "InputBufferOn",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.0
+                                 },
+                                 {
+                                     "actionEnd":  "",
+                                     "actionStart":  "",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  true,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  false,
+                                     "endTime":  0.2666666805744171,
+                                     "eventTemplateType":  "VFX_TEMPLATE",
+                                     "label":  "MeshVFX",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           2.859999895095825,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           -28.5
+                                                       ],
+                                     "localScale":  [
+                                                        0.8999999761581421,
+                                                        0.6000000238418579,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "PlayerSwordArc_Aqua",
+                                     "meshVFXLifeTime":  0.5,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  true,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.06666667014360428
+                                 },
+                                 {
+                                     "actionEnd":  "Trail_Stop",
+                                     "actionStart":  "Trail_Start",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  0.2666666805744171,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "Tril",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.06666667014360428
+                                 },
+                                 {
+                                     "actionEnd":  "DisableDodgeCancel",
+                                     "actionStart":  "EnableDodgeCancel",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  1.399999976158142,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "DodgeCancel",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.06666667014360428
+                                 },
+                                 {
+                                     "actionEnd":  "",
+                                     "actionStart":  "",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "AirCombo_03_01",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  0.21666666865348816,
+                                     "eventTemplateType":  "ATTACK_TEMPLATE",
+                                     "label":  "AirCombo_03_01",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.0833333358168602
+                                 },
+                                 {
+                                     "actionEnd":  "",
+                                     "actionStart":  "",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  true,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  false,
+                                     "endTime":  0.6666666865348816,
+                                     "eventTemplateType":  "VFX_TEMPLATE",
+                                     "label":  "MeshVFX",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           2.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           -48.5
+                                                       ],
+                                     "localScale":  [
+                                                        0.800000011920929,
+                                                        0.6000000238418579,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "PlayerSwordArc_Aqua",
+                                     "meshVFXLifeTime":  0.5,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.46666666865348816
+                                 },
+                                 {
+                                     "actionEnd":  "Trail_Stop",
+                                     "actionStart":  "Trail_Start",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  0.6666666865348816,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "Trail_02",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.46666666865348816
+                                 },
+                                 {
+                                     "actionEnd":  "",
+                                     "actionStart":  "",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "AirCombo_03_02",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  0.6333333253860474,
+                                     "eventTemplateType":  "ATTACK_TEMPLATE",
+                                     "label":  "AirCombo_03_02",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.5
+                                 },
+                                 {
+                                     "actionEnd":  "CanCancelOff",
+                                     "actionStart":  "CanCancelOn",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  2.066666603088379,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "ActionBranch",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.8833333253860474
+                                 },
+                                 {
+                                     "actionEnd":  "",
+                                     "actionStart":  "ComboTransition",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  1.3333333730697632,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "ComboTransition",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  0.7333333492279053
+                                 },
+                                 {
+                                     "actionEnd":  "",
+                                     "actionStart":  "ActionEnd",
+                                     "actionUpdate":  "",
+                                     "attachNodeName":  "",
+                                     "attachToOwner":  false,
+                                     "attackTemplateId":  "",
+                                     "blackboardWrites":  [
+
+                                                          ],
+                                     "callEndOnStateExit":  true,
+                                     "endTime":  2.0166666507720947,
+                                     "eventTemplateType":  "NONE",
+                                     "label":  "ActionEnd",
+                                     "localPosition":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localRotation":  [
+                                                           0.0,
+                                                           0.0,
+                                                           0.0
+                                                       ],
+                                     "localScale":  [
+                                                        1.0,
+                                                        1.0,
+                                                        1.0
+                                                    ],
+                                     "meshVFXAssetPath":  "",
+                                     "meshVFXLifeTime":  1.0,
+                                     "meshVFXPlaybackSpeed":  1.0,
+                                     "mirrorMeshVFX":  false,
+                                     "overridePlaybackSpeed":  false,
+                                     "ownerTarget":  "Self",
+                                     "playbackSpeed":  1.0,
+                                     "startTime":  1.25
+                                 }
+                             ],
+                  "loop":  false,
+                  "name":  "Combo_Attack_Air_03_Seq",
+                  "rootMotion":  {
+                                     "applyPositionX":  true,
+                                     "applyPositionY":  false,
+                                     "applyPositionZ":  true,
+                                     "applyRotationX":  false,
+                                     "applyRotationY":  false,
+                                     "applyRotationZ":  false,
+                                     "cutVisualPositionX":  true,
+                                     "cutVisualPositionY":  true,
+                                     "cutVisualPositionZ":  true,
+                                     "enable":  true,
+                                     "sourceNodeName":  "pelvis"
+                                 },
+                  "rootMotionScale":  0.009999999776482582,
+                  "rootMotionScaleCurveName":  "",
+                  "sequencer":  "",
+                  "speed":  1.100000023841858,
+                  "speedCurveName":  "",
+                  "type":  0
+              }
 }

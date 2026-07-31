@@ -12,6 +12,24 @@
 #include <cstdio>
 
 
+namespace
+{
+    float NormalizeAngleDegrees(float degrees_)
+    {
+        while (degrees_ > 180.0f) degrees_ -= 360.0f;
+        while (degrees_ < -180.0f) degrees_ += 360.0f;
+        return degrees_;
+    }
+
+    float GetYawDegreesFromQuaternion(
+        const DirectX::SimpleMath::Quaternion& rotation_)
+    {
+        return NormalizeAngleDegrees(
+            DirectX::XMConvertToDegrees(
+                2.0f * std::atan2(rotation_.y, rotation_.w)));
+    }
+}
+
 
 static bool CallLocalAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
@@ -503,6 +521,8 @@ void ModelAnimator::SetCurrentTime(float time_)
     isFirstFrame = true;
     prevTime = current.time;
     _prevRootMotionState = nullptr;
+    prevRootRotation = DirectX::SimpleMath::Quaternion::Identity;
+    prevRootYawDegrees = 0.0f;
     previousRootMotionNodeIndex = -1;
     hasPrevPose = false;
 }
@@ -784,11 +804,12 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
 
     // ------------------------------------------------------------
-    // 5. RootMotion extraction
-    // ------------------------------------------------------------
+     // 5. RootMotion extraction
+     // 現在のRootノード姿勢と前フレーム姿勢の差から、GameObjectへ渡す移動・回転差分を求める。
+     // ------------------------------------------------------------
     currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
     currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
-
+    // ステート指定のRootMotionノードを優先し、未指定時はモデル設定または"root"ノードを使用する。
     auto resolveRootNodeIndex_ = [&](const AnimState* state_)
         {
             if (!state_ || !state_->rootMotion.enable) return -1;
@@ -797,7 +818,18 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 ? model->GetRootMotionName()
                 : state_->rootMotion.sourceNodeName;
 
-            return rootName_.empty() ? -1 : model->GetNodeIndex(rootName_.c_str());
+            if (!rootName_.empty())
+            {
+                const int rootNodeIndex_ = model->GetNodeIndex(rootName_.c_str());
+                if (rootNodeIndex_ != -1)
+                {
+                    return rootNodeIndex_;
+                }
+            }
+
+            return state_->rootMotion.sourceNodeName.empty()
+                ? model->GetNodeIndex("root")
+                : -1;
         };
 
     const int currentRootNodeIndex_ = resolveRootNodeIndex_(current.state);
@@ -806,7 +838,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         ? -1
         : model->GetNodeIndex(model->GetRootMotionName().c_str());
     const auto& nodes_ = model->GetNodes();
-
+    // ノード姿勢からローカル行列を作り、Rootノードの親階層変換を算出するために使用する。
     auto makeNodeLocalMatrix_ = [](const GltfModelCommponennt::NodePose& pose_)
         {
             using namespace DirectX::SimpleMath;
@@ -814,7 +846,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 * Matrix::CreateFromQuaternion(pose_.rotation)
                 * Matrix::CreateTranslation(pose_.position);
         };
-
+    // Rootノードより上の親階層をたどり、Root移動をモデル基準へ変換する行列を組み立てる。
     auto getParentGlobalMatrix_ = [&](const std::vector<GltfModelCommponennt::NodePose>& pose_, int nodeIndex_)
         {
             if (nodeIndex_ < 0 || nodeIndex_ >= static_cast<int>(nodes_.size()))
@@ -844,7 +876,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         const bool looped_ = (current.time < prevTime);
         const bool stateChanged_ = (_prevRootMotionState != current.state);
         const bool sourceNodeChanged_ = (previousRootMotionNodeIndex != currentRootNodeIndex_);
-        const bool resetBasePosition_ = isFirstFrame || sourceNodeChanged_;
+        const bool resetBasePosition_ = isFirstFrame || stateChanged_ || sourceNodeChanged_;
+        // ステート固有倍率にカーブ値を掛け、時間帯ごとのRootMotion強度を決定する。
         float rootMotionScale_ = current.state->rootMotionScale;
         if (curvecomp && !current.state->rootMotionScaleCurveName.empty())
         {
@@ -853,12 +886,16 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             rootMotionScale_ *= curvecomp->GetValue(current.state->rootMotionScaleCurveName, normalizedTime_);
         }
 
+        // 初回・ステート変更・抽出元ノード変更時は差分を出さず、比較用の基準値だけを更新する。
         if (isFirstFrame || stateChanged_ || sourceNodeChanged_)
         {
             prevRootPos = rawPos_;
+            prevRootRotation = tempPoseA[currentRootNodeIndex_].rotation;
+            prevRootYawDegrees = GetYawDegreesFromQuaternion(prevRootRotation);
             if (resetBasePosition_)
             {
                 rootMotionBasePosition = rawPos_;
+                rootMotionBaseRotation = prevRootRotation;
             }
             prevTime = current.time;
             _prevRootMotionState = current.state;
@@ -868,6 +905,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         else
         {
             Vector3 deltaPos_;
+            const Quaternion rawRotation_ = tempPoseA[currentRootNodeIndex_].rotation;
+            // ループ境界では「前フレーム→終端」と「先頭→現在」の差分を合成し、移動の途切れを防ぐ。
             if (looped_)
             {
                 const float loopEndTime_ = (std::max)(0.0f, baseDuration - 0.0001f);
@@ -883,15 +922,29 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                 deltaPos_ = rawPos_ - prevRootPos;
             }
 
+            // ステート設定で許可されていない軸の移動差分を除外する。
             if (!current.state->rootMotion.applyPositionX) deltaPos_.x = 0.0f;
             if (!current.state->rootMotion.applyPositionY) deltaPos_.y = 0.0f;
             if (!current.state->rootMotion.applyPositionZ) deltaPos_.z = 0.0f;
 
             const Matrix parentGlobalMatrix_ = getParentGlobalMatrix_(tempPoseA, currentRootNodeIndex_);
+            // Rootノードの親階層方向を反映し、最終的なローカルRootMotion移動差分として保存する。
             currentRootMotionDelta.deltaPosition =
                 Vector3::TransformNormal(deltaPos_, parentGlobalMatrix_) * rootMotionScale_;
+            const float rawYawDegrees_ = GetYawDegreesFromQuaternion(rawRotation_);
+            const float deltaYawDegrees_ =
+                NormalizeAngleDegrees(rawYawDegrees_ - prevRootYawDegrees) * rootMotionScale_;
+
+              // Quaternion全体ではなくYaw差分だけを抽出し、キャラクターの水平回転へ使用する。
+            currentRootMotionDelta.deltaRotation =
+                Quaternion::CreateFromYawPitchRoll(
+                    DirectX::XMConvertToRadians(deltaYawDegrees_),
+                    0.0f,
+                    0.0f);
 
             prevRootPos = rawPos_;
+            prevRootRotation = rawRotation_;
+            prevRootYawDegrees = rawYawDegrees_;
             prevTime = current.time;
             _prevRootMotionState = current.state;
             previousRootMotionNodeIndex = currentRootNodeIndex_;
@@ -902,6 +955,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
         isFirstFrame = true;
         prevTime = 0.0f;
         _prevRootMotionState = nullptr;
+        prevRootRotation = DirectX::SimpleMath::Quaternion::Identity;
+        prevRootYawDegrees = 0.0f;
         previousRootMotionNodeIndex = -1;
         currentRootMotionDelta.deltaPosition = DirectX::SimpleMath::Vector3::Zero;
         currentRootMotionDelta.deltaRotation = DirectX::SimpleMath::Quaternion::Identity;
@@ -923,17 +978,36 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             if (resetZ_) pose_[nodeIndex_].position.z = basePosition_.z;
         };
 
+    auto resetVisualRootRotation_ = [&](
+        std::vector<GltfModelCommponennt::NodePose>& pose_,
+        const AnimState* state_,
+        int nodeIndex_,
+        const DirectX::SimpleMath::Quaternion& baseRotation_)
+        {
+            if (!state_ || nodeIndex_ < 0 || pose_.size() <= nodeIndex_) return;
+
+            if (state_->rootMotion.applyRotationX ||
+                state_->rootMotion.applyRotationY ||
+                state_->rootMotion.applyRotationZ)
+            {
+                pose_[nodeIndex_].rotation = baseRotation_;
+                pose_[nodeIndex_].rotation.Normalize();
+            }
+        };
+    // GameObjectへ移動を適用した分だけモデルRootを基準姿勢へ戻し、二重移動を防ぐ。
     auto applyVisualRootMotionCut_ = [&](
         std::vector<GltfModelCommponennt::NodePose>& pose_,
         const AnimState* state_,
         int sourceNodeIndex_,
-        const DirectX::SimpleMath::Vector3& basePosition_)
+        const DirectX::SimpleMath::Vector3& basePosition_,
+        const DirectX::SimpleMath::Quaternion& baseRotation_)
         {
             if (!state_ || sourceNodeIndex_ < 0 || pose_.size() <= sourceNodeIndex_) return;
 
             if (sourceNodeIndex_ == defaultRootNodeIndex_)
             {
                 resetVisualRootPosition_(pose_, state_, sourceNodeIndex_, basePosition_);
+                resetVisualRootRotation_(pose_, state_, sourceNodeIndex_, baseRotation_);
                 return;
             }
 
@@ -948,14 +1022,25 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             if (state_->rootMotion.applyPositionZ || state_->rootMotion.cutVisualPositionZ) currentGlobalPosition_.z = baseGlobalPosition_.z;
 
             pose_[sourceNodeIndex_].position = Vector3::Transform(currentGlobalPosition_, inverseParentGlobalMatrix_);
+            resetVisualRootRotation_(pose_, state_, sourceNodeIndex_, baseRotation_);
         };
 
     {
         BS_PROFILE_SCOPE("ModelAnimator::ApplyPose");
-        applyVisualRootMotionCut_(tempPoseA, current.state, currentRootNodeIndex_, rootMotionBasePosition);
+        applyVisualRootMotionCut_(
+            tempPoseA,
+            current.state,
+            currentRootNodeIndex_,
+            rootMotionBasePosition,
+            rootMotionBaseRotation);
         if (isTransitioning && previous.state)
         {
-            applyVisualRootMotionCut_(tempPoseB, previous.state, previousRootNodeIndex_, previousRootMotionBasePosition);
+            applyVisualRootMotionCut_(
+                tempPoseB,
+                previous.state,
+                previousRootNodeIndex_,
+                previousRootMotionBasePosition,
+                previousRootMotionBaseRotation);
             for (size_t nodeIndex_ = 0; nodeIndex_ < nodeCount; ++nodeIndex_)
             {
                 finalPose[nodeIndex_].position = DirectX::SimpleMath::Vector3::Lerp(
@@ -986,7 +1071,6 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
     if (!model) return;
 
     // 1. 各アニメーションの時間を進める (簡易化のため共通の時間管理)
-
     float durationA = model->GetAnimationDuration(indexA);
     manualBlendTime += et * speed;
     if (loop && durationA > 0.0f) manualBlendTime = fmod(manualBlendTime, durationA);
@@ -1025,6 +1109,7 @@ void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::
 
     CallStateExitEndActions(current, owner);
     previousRootMotionBasePosition = rootMotionBasePosition;
+    previousRootMotionBaseRotation = rootMotionBaseRotation;
     previous = current;
 
     current.state = newState;

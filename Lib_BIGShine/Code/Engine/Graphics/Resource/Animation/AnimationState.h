@@ -47,9 +47,9 @@ struct RootMotionSettings {
     bool cutVisualPositionX = true;
     bool cutVisualPositionY = true;
     bool cutVisualPositionZ = true;
-    bool applyRotationX = true; // X軸の傾きを許すか
-    bool applyRotationY = true; // Y軸の振り向く力を許すか
-    bool applyRotationZ = true; // Z軸の傾げを許すか
+    bool applyRotationX = false; // X軸の傾きを許すか
+    bool applyRotationY = false; // Y軸の振り向く力を許すか
+    bool applyRotationZ = false; // Z軸の傾げを許すか
 };
 
 struct AnimEvent 
@@ -265,9 +265,9 @@ inline void from_json(const nlohmann::json& j, RootMotionSettings& r) {
     r.cutVisualPositionX = j.value("cutVisualPositionX", true);
     r.cutVisualPositionY = j.value("cutVisualPositionY", true);
     r.cutVisualPositionZ = j.value("cutVisualPositionZ", true);
-    r.applyRotationX = j.value("applyRotationX", true);
-    r.applyRotationY = j.value("applyRotationY", true);
-    r.applyRotationZ = j.value("applyRotationZ", true);
+    r.applyRotationX = j.value("applyRotationX", false);
+    r.applyRotationY = j.value("applyRotationY", false);
+    r.applyRotationZ = j.value("applyRotationZ", false);
 }
 
 

@@ -397,6 +397,7 @@
     <ClCompile Include="Code\Engine\GamePlay\AI\AIControllerComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\Movement.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MovementComponent.cpp" />
@@ -779,6 +780,7 @@
     <ClInclude Include="Code\Engine\GamePlay\AI\AIControllerComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h" />

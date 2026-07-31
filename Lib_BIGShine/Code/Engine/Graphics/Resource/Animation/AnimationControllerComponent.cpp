@@ -9,6 +9,7 @@
 #include "AnimSequenceAdapter.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/Common/DebugLog.h"
 #include "AnimationDataAsset.h"
 #include "PoseLibraryResourceManager.h"
@@ -318,11 +319,14 @@ void AnimationControllerComponent::Update(float deltaTime_)
     }
 
     {
+        // ModelAnimatorが抽出したRootMotion差分を、実際のGameObject移動へ反映する。
+        // MotionWarpComponentが存在する場合は、移動へ渡す直前に差分を補正する。
         BS_PROFILE_SCOPE("Animation::RootMotion");
 
         const AnimState* activeState_ = animator.GetCurrentState();
         if (activeState_ && activeState_->rootMotion.enable)
         {
+            // アニメーションのRootノードから算出された、このフレーム分の移動・回転差分を取得する。
             auto rootMotionDelta_ = animator.GetRootMotionDelta();
             auto transform_ = GetGameObject()->transform;
 
@@ -335,15 +339,26 @@ void AnimationControllerComponent::Update(float deltaTime_)
                 float yRadians_ = XMConvertToRadians(transform_->localRotation.y);
                 float zRadians_ = XMConvertToRadians(transform_->localRotation.z);
 
+                // RootMotionのローカル移動をワールド方向へ変換するため、現在のObject回転をQuaternionへ変換する。
                 Quaternion currentRotation_ = Quaternion::CreateFromYawPitchRoll(
                     yRadians_,
                     xRadians_,
                     zRadians_);
 
                 currentRotation_.Normalize();
-
+                // アニメーション基準の移動差分を、現在のキャラクターの向きに合わせたワールド移動へ変換する。
                 Vector3 worldDeltaPosition_ =
                     Vector3::Transform(rootMotionDelta_.deltaPosition, currentRotation_);
+                Quaternion deltaRotation_ = rootMotionDelta_.deltaRotation;
+                deltaRotation_.Normalize();
+                float rootMotionYawDegrees_ = 0.0f;
+                // Y回転を使用するステートだけ、RootMotionの回転差分からYaw角を取り出す。
+                if (activeState_->rootMotion.applyRotationY)
+                {
+                    rootMotionYawDegrees_ = XMConvertToDegrees(std::atan2(
+                        2.0f * (deltaRotation_.w * deltaRotation_.y + deltaRotation_.x * deltaRotation_.z),
+                        1.0f - 2.0f * (deltaRotation_.y * deltaRotation_.y + deltaRotation_.x * deltaRotation_.x)));
+                }
 
                 if (!activeState_->rootMotion.applyPositionY)
                 {
@@ -351,6 +366,25 @@ void AnimationControllerComponent::Update(float deltaTime_)
                 }
 
                 const std::shared_ptr<GameObject> owner_ = GetGameObject();
+                rootMotionDelta_.deltaPosition = worldDeltaPosition_;
+                // MotionWarpが有効なら、現在の再生位置を正規化してRootMotion差分を補正させる。
+                if (const std::shared_ptr<MotionWarpComponent> motionWarp_ = owner_
+                    ? owner_->GetComponent<MotionWarpComponent>()
+                    : nullptr)
+                {
+                    const float duration_ = animator.GetCurrentSampleDuration();
+                    const float normalizedTime_ = duration_ > 0.000001f
+                        ? std::clamp(animator.GetCurrentFadeTime() / duration_, 0.0f, 1.0f)
+                        : 0.0f;
+                    const MotionWarpResult warpResult_ =
+                        motionWarp_->ApplyRootMotionWarp(
+                            rootMotionDelta_,
+                            normalizedTime_,
+                            deltaTime_);
+                    rootMotionDelta_ = warpResult_.rootMotionDelta;
+                    worldDeltaPosition_ = rootMotionDelta_.deltaPosition;
+                }
+
                 const std::shared_ptr<CharacterMovementComponent> movement_ = owner_
                     ? owner_->GetComponent<CharacterMovementComponent>()
                     : nullptr;
@@ -363,6 +397,11 @@ void AnimationControllerComponent::Update(float deltaTime_)
                 else
                 {
                     transform_->AddMoveOffset(worldDeltaPosition_);
+                }
+                // 微小な誤差を除外し、抽出したYaw回転だけをObjectへ加算する。
+                if (std::abs(rootMotionYawDegrees_) > 0.0001f)
+                {
+                    transform_->localRotation.y += rootMotionYawDegrees_;
                     transform_->MarkDirty();
                 }
             }

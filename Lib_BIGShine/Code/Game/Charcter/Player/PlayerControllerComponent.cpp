@@ -542,6 +542,12 @@ void PlayerControllerComponent::ApplyGuardFacingToTarget()
     SetFacingDirection(direction_);
 }
 
+void PlayerControllerComponent::SetAttackAssistTarget(
+    const std::shared_ptr<GameObject>& target_)
+{
+    attackAssistTarget = target_;
+}
+
 void PlayerControllerComponent::SetHorizontalVelocity(
     const DirectX::XMFLOAT3& dir_,
     float speed_,
@@ -2140,6 +2146,20 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Assist Turn Speed", &attackAssistSettings.turnSpeed, 0.1f, 0.0f, 60.0f, "%.2f");
     ImGui::DragFloat("Assist Search Distance", &attackAssistSettings.searchDistance, 0.1f, 0.0f, 100.0f, "%.2f");
     ImGui::SliderFloat("Camera Center Angle", &attackAssistSettings.cameraCenterAngle, 0.0f, 180.0f, "%.1f deg");
+    ImGui::Checkbox("Lock Target On Enter", &attackAssistSettings.lockTargetOnAttackEnter);
+    ImGui::Checkbox("Allow Retarget During Attack", &attackAssistSettings.allowRetargetDuringAttack);
+    ImGui::Checkbox("Nearest Fallback When Non Lock-On", &attackAssistSettings.nonLockOnUseNearestFallback);
+    ImGui::SliderFloat("Non Lock-On Max Angle", &attackAssistSettings.nonLockOnMaximumTargetAngleDegrees, 0.0f, 180.0f, "%.1f deg");
+    ImGui::SliderFloat("Lock-On Max Angle", &attackAssistSettings.lockOnMaximumTargetAngleDegrees, 0.0f, 180.0f, "%.1f deg");
+    ImGui::SliderFloat("Max Total Rotation", &attackAssistSettings.maximumTotalRotationDegrees, 0.0f, 180.0f, "%.1f deg");
+    ImGui::SliderFloat("Facing Start Time", &attackAssistSettings.facingAssistStartNormalizedTime, 0.0f, 1.0f, "%.2f");
+    ImGui::SliderFloat("Facing Full End Time", &attackAssistSettings.facingAssistFullStrengthEndNormalizedTime, 0.0f, 1.0f, "%.2f");
+    ImGui::SliderFloat("Facing End Time", &attackAssistSettings.facingAssistEndNormalizedTime, 0.0f, 1.0f, "%.2f");
+    ImGui::DragFloat("Minimum Input Magnitude", &attackAssistSettings.minimumInputMagnitude, 0.01f, 0.0f, 1.0f, "%.2f");
+    ImGui::Checkbox("Prefer Move Input Direction", &attackAssistSettings.preferMoveInputDirection);
+    ImGui::Checkbox("Prefer Camera Forward Direction", &attackAssistSettings.preferCameraForwardDirection);
+    ImGui::Checkbox("Preserve Target Across Combo", &attackAssistSettings.preserveTargetAcrossCombo);
+    ImGui::Checkbox("Stop Assist When Target Invalid", &attackAssistSettings.stopAssistWhenTargetInvalid);
 
     ImGui::SeparatorText("Attack Position Assist");
     ImGui::SliderFloat("Position Strength", &attackAssistSettings.positionStrength, 0.0f, 1.0f, "%.2f");
@@ -2147,7 +2167,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Max Position Correction", &attackAssistSettings.maxPositionCorrection, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Target Stop Distance", &attackAssistSettings.targetStopDistance, 0.01f, 0.0f, 10.0f, "%.2f");
 
-    ImGui::TextDisabled("Priority: Camera Lock-On > Camera Center > Nearest Enemy");
+    ImGui::TextDisabled("Priority: Lock-On > Move Input > Camera Forward > Player Forward");
 }
 
 //blackboardに値やカテゴリーを最初に登録する機構
@@ -2256,6 +2276,20 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
         { "TurnSpeed", attackAssistSettings.turnSpeed },
         { "SearchDistance", attackAssistSettings.searchDistance },
         { "CameraCenterAngle", attackAssistSettings.cameraCenterAngle },
+        { "LockTargetOnAttackEnter", attackAssistSettings.lockTargetOnAttackEnter },
+        { "AllowRetargetDuringAttack", attackAssistSettings.allowRetargetDuringAttack },
+        { "NonLockOnUseNearestFallback", attackAssistSettings.nonLockOnUseNearestFallback },
+        { "NonLockOnMaximumTargetAngleDegrees", attackAssistSettings.nonLockOnMaximumTargetAngleDegrees },
+        { "LockOnMaximumTargetAngleDegrees", attackAssistSettings.lockOnMaximumTargetAngleDegrees },
+        { "MaximumTotalRotationDegrees", attackAssistSettings.maximumTotalRotationDegrees },
+        { "FacingAssistStartNormalizedTime", attackAssistSettings.facingAssistStartNormalizedTime },
+        { "FacingAssistFullStrengthEndNormalizedTime", attackAssistSettings.facingAssistFullStrengthEndNormalizedTime },
+        { "FacingAssistEndNormalizedTime", attackAssistSettings.facingAssistEndNormalizedTime },
+        { "MinimumInputMagnitude", attackAssistSettings.minimumInputMagnitude },
+        { "PreferMoveInputDirection", attackAssistSettings.preferMoveInputDirection },
+        { "PreferCameraForwardDirection", attackAssistSettings.preferCameraForwardDirection },
+        { "PreserveTargetAcrossCombo", attackAssistSettings.preserveTargetAcrossCombo },
+        { "StopAssistWhenTargetInvalid", attackAssistSettings.stopAssistWhenTargetInvalid },
         { "PositionStrength", attackAssistSettings.positionStrength },
         { "PositionSpeed", attackAssistSettings.positionSpeed },
         { "MaxPositionCorrection", attackAssistSettings.maxPositionCorrection },
@@ -2331,6 +2365,48 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
             attackAssistJson_.value("CameraCenterAngle", attackAssistSettings.cameraCenterAngle),
             0.0f,
             180.0f);
+        attackAssistSettings.lockTargetOnAttackEnter =
+            attackAssistJson_.value("LockTargetOnAttackEnter", attackAssistSettings.lockTargetOnAttackEnter);
+        attackAssistSettings.allowRetargetDuringAttack =
+            attackAssistJson_.value("AllowRetargetDuringAttack", attackAssistSettings.allowRetargetDuringAttack);
+        attackAssistSettings.nonLockOnUseNearestFallback =
+            attackAssistJson_.value("NonLockOnUseNearestFallback", attackAssistSettings.nonLockOnUseNearestFallback);
+        attackAssistSettings.nonLockOnMaximumTargetAngleDegrees = std::clamp(
+            attackAssistJson_.value("NonLockOnMaximumTargetAngleDegrees", attackAssistSettings.nonLockOnMaximumTargetAngleDegrees),
+            0.0f,
+            180.0f);
+        attackAssistSettings.lockOnMaximumTargetAngleDegrees = std::clamp(
+            attackAssistJson_.value("LockOnMaximumTargetAngleDegrees", attackAssistSettings.lockOnMaximumTargetAngleDegrees),
+            0.0f,
+            180.0f);
+        attackAssistSettings.maximumTotalRotationDegrees = std::clamp(
+            attackAssistJson_.value("MaximumTotalRotationDegrees", attackAssistSettings.maximumTotalRotationDegrees),
+            0.0f,
+            180.0f);
+        attackAssistSettings.facingAssistStartNormalizedTime = std::clamp(
+            attackAssistJson_.value("FacingAssistStartNormalizedTime", attackAssistSettings.facingAssistStartNormalizedTime),
+            0.0f,
+            1.0f);
+        attackAssistSettings.facingAssistFullStrengthEndNormalizedTime = std::clamp(
+            attackAssistJson_.value("FacingAssistFullStrengthEndNormalizedTime", attackAssistSettings.facingAssistFullStrengthEndNormalizedTime),
+            0.0f,
+            1.0f);
+        attackAssistSettings.facingAssistEndNormalizedTime = std::clamp(
+            attackAssistJson_.value("FacingAssistEndNormalizedTime", attackAssistSettings.facingAssistEndNormalizedTime),
+            0.0f,
+            1.0f);
+        attackAssistSettings.minimumInputMagnitude = std::clamp(
+            attackAssistJson_.value("MinimumInputMagnitude", attackAssistSettings.minimumInputMagnitude),
+            0.0f,
+            1.0f);
+        attackAssistSettings.preferMoveInputDirection =
+            attackAssistJson_.value("PreferMoveInputDirection", attackAssistSettings.preferMoveInputDirection);
+        attackAssistSettings.preferCameraForwardDirection =
+            attackAssistJson_.value("PreferCameraForwardDirection", attackAssistSettings.preferCameraForwardDirection);
+        attackAssistSettings.preserveTargetAcrossCombo =
+            attackAssistJson_.value("PreserveTargetAcrossCombo", attackAssistSettings.preserveTargetAcrossCombo);
+        attackAssistSettings.stopAssistWhenTargetInvalid =
+            attackAssistJson_.value("StopAssistWhenTargetInvalid", attackAssistSettings.stopAssistWhenTargetInvalid);
 
         attackAssistSettings.positionStrength = std::clamp(
             attackAssistJson_.value("PositionStrength", attackAssistSettings.positionStrength),

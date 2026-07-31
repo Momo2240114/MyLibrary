@@ -62,6 +62,170 @@ namespace
         return ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_;
     }
 
+    float Clamp01(float value_)
+    {
+        return (std::max)(0.0f, (std::min)(value_, 1.0f));
+    }
+
+    void ClosestPointsOnSegments(
+        const DirectX::XMVECTOR& startA_,
+        const DirectX::XMVECTOR& endA_,
+        const DirectX::XMVECTOR& startB_,
+        const DirectX::XMVECTOR& endB_,
+        DirectX::XMVECTOR& closestA_,
+        DirectX::XMVECTOR& closestB_)
+    {
+        using namespace DirectX;
+
+        const XMVECTOR segmentA_ = XMVectorSubtract(endA_, startA_);
+        const XMVECTOR segmentB_ = XMVectorSubtract(endB_, startB_);
+        const XMVECTOR startDelta_ = XMVectorSubtract(startA_, startB_);
+
+        const float a_ = XMVectorGetX(XMVector3Dot(segmentA_, segmentA_));
+        const float b_ = XMVectorGetX(XMVector3Dot(segmentA_, segmentB_));
+        const float c_ = XMVectorGetX(XMVector3Dot(segmentB_, segmentB_));
+        const float d_ = XMVectorGetX(XMVector3Dot(segmentA_, startDelta_));
+        const float e_ = XMVectorGetX(XMVector3Dot(segmentB_, startDelta_));
+        const float denominator_ = a_ * c_ - b_ * b_;
+
+        float parameterA_ = 0.0f;
+        float parameterB_ = 0.0f;
+
+        if (a_ <= 0.000001f && c_ <= 0.000001f)
+        {
+            closestA_ = startA_;
+            closestB_ = startB_;
+            return;
+        }
+
+        if (a_ <= 0.000001f)
+        {
+            parameterB_ = Clamp01(e_ / c_);
+        }
+        else if (c_ <= 0.000001f)
+        {
+            parameterA_ = Clamp01(-d_ / a_);
+        }
+        else
+        {
+            if (denominator_ != 0.0f)
+            {
+                parameterA_ = Clamp01((b_ * e_ - c_ * d_) / denominator_);
+            }
+
+            parameterB_ = (b_ * parameterA_ + e_) / c_;
+            if (parameterB_ < 0.0f)
+            {
+                parameterB_ = 0.0f;
+                parameterA_ = Clamp01(-d_ / a_);
+            }
+            else if (parameterB_ > 1.0f)
+            {
+                parameterB_ = 1.0f;
+                parameterA_ = Clamp01((b_ - d_) / a_);
+            }
+        }
+
+        closestA_ = XMVectorAdd(startA_, XMVectorScale(segmentA_, parameterA_));
+        closestB_ = XMVectorAdd(startB_, XMVectorScale(segmentB_, parameterB_));
+    }
+
+    DirectX::XMFLOAT3 ToFloat3(const DirectX::XMVECTOR& vector_)
+    {
+        DirectX::XMFLOAT3 value_{};
+        DirectX::XMStoreFloat3(&value_, vector_);
+        return value_;
+    }
+
+    PxVec3 BuildHorizontalPushDirection(
+        const DirectX::XMFLOAT3& selfPoint_,
+        const DirectX::XMFLOAT3& otherPoint_,
+        const DirectX::XMFLOAT3& selfCenter_,
+        const PxVec3& fallbackDirection_)
+    {
+        PxVec3 direction_(
+            selfPoint_.x - otherPoint_.x,
+            0.0f,
+            selfPoint_.z - otherPoint_.z);
+        if (direction_.magnitudeSquared() > 0.000001f)
+        {
+            return direction_.getNormalized();
+        }
+
+        direction_ = PxVec3(
+            selfCenter_.x - otherPoint_.x,
+            0.0f,
+            selfCenter_.z - otherPoint_.z);
+        if (direction_.magnitudeSquared() > 0.000001f)
+        {
+            return direction_.getNormalized();
+        }
+
+        direction_ = PxVec3(fallbackDirection_.x, 0.0f, fallbackDirection_.z);
+        if (direction_.magnitudeSquared() > 0.000001f)
+        {
+            return direction_.getNormalized();
+        }
+
+        return PxVec3(0.0f, 0.0f, 0.0f);
+    }
+
+    bool TryBuildCapsuleOverlapPush(
+        const PxExtendedVec3& position_,
+        const PxCapsuleGeometry& geometry_,
+        CapsuleCollider& otherCapsule_,
+        const PxVec3& fallbackDirection_,
+        PxVec3& displacement_)
+    {
+        using namespace DirectX;
+
+        const XMVECTOR selfCenter_ = XMVectorSet(
+            static_cast<float>(position_.x),
+            static_cast<float>(position_.y),
+            static_cast<float>(position_.z),
+            0.0f);
+        const XMVECTOR selfAxis_ = XMVectorSet(0.0f, geometry_.halfHeight, 0.0f, 0.0f);
+        const Capsule selfCapsule_
+        {
+            XMVectorAdd(selfCenter_, selfAxis_),
+            XMVectorSubtract(selfCenter_, selfAxis_),
+            geometry_.radius
+        };
+        const Capsule otherCapsuleData_ = otherCapsule_.GetCapsuleData();
+
+        XMVECTOR closestSelf_{};
+        XMVECTOR closestOther_{};
+        ClosestPointsOnSegments(
+            selfCapsule_.p0,
+            selfCapsule_.p1,
+            otherCapsuleData_.p0,
+            otherCapsuleData_.p1,
+            closestSelf_,
+            closestOther_);
+
+        const XMFLOAT3 closestSelfFloat_ = ToFloat3(closestSelf_);
+        const XMFLOAT3 closestOtherFloat_ = ToFloat3(closestOther_);
+        const XMFLOAT3 selfCenterFloat_ = ToFloat3(selfCenter_);
+        const float horizontalDistance_ = std::sqrt(
+            (closestSelfFloat_.x - closestOtherFloat_.x) *
+            (closestSelfFloat_.x - closestOtherFloat_.x) +
+            (closestSelfFloat_.z - closestOtherFloat_.z) *
+            (closestSelfFloat_.z - closestOtherFloat_.z));
+        const float radiusSum_ = selfCapsule_.radius + otherCapsuleData_.radius;
+        const float horizontalDepth_ = radiusSum_ - horizontalDistance_;
+        if (horizontalDepth_ <= 0.0f) return false;
+
+        const PxVec3 horizontalDirection_ = BuildHorizontalPushDirection(
+            closestSelfFloat_,
+            closestOtherFloat_,
+            selfCenterFloat_,
+            fallbackDirection_);
+        if (horizontalDirection_.magnitudeSquared() <= 0.000001f) return false;
+
+        displacement_ = horizontalDirection_ * horizontalDepth_;
+        return true;
+    }
+
     bool TryGetNonGroundPush(
         const PxExtendedVec3& position_,
         const PxCapsuleGeometry& geometry_,
@@ -71,6 +235,8 @@ namespace
         bool forceLift_,
         PxVec3& pushDisplacement_)
     {
+        BS_PROFILE_SCOPE("ColliderComponent::TryGetNonGroundPush");
+
         PxScene* scene_ = PhysXSystem::GetScene();
         if (!scene_ || !selfCollider_) return false;
 
@@ -123,7 +289,32 @@ namespace
             }
 
             if (direction_.magnitudeSquared() <= 0.000001f || depth_ <= 0.0f) continue;
-            accumulatedDisplacement_ += direction_.getNormalized() * depth_;
+
+            PxVec3 displacement_ = direction_.getNormalized() * depth_;
+            if (CapsuleCollider* otherCapsule_ =
+                dynamic_cast<CapsuleCollider*>(otherCollider_))
+            {
+                PxVec3 capsuleDisplacement_(0.0f, 0.0f, 0.0f);
+                if (TryBuildCapsuleOverlapPush(
+                    position_,
+                    geometry_,
+                    *otherCapsule_,
+                    direction_,
+                    capsuleDisplacement_))
+                {
+                    displacement_.x = capsuleDisplacement_.x;
+                    displacement_.z = capsuleDisplacement_.z;
+                    displacement_.y = (std::max)(direction_.y * depth_, 0.0f);
+                }
+                else
+                {
+                    displacement_.x = 0.0f;
+                    displacement_.z = 0.0f;
+                    displacement_.y = (std::max)(direction_.y * depth_, 0.0f);
+                }
+            }
+
+            accumulatedDisplacement_ += displacement_;
         }
 
         if (accumulatedDisplacement_.magnitudeSquared() <= 0.000001f) return false;

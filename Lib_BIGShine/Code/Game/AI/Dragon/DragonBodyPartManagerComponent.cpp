@@ -70,6 +70,13 @@ void DragonBodyPartManagerComponent::Start()
     PublishLastDamageToBlackboard();
 }
 
+void DragonBodyPartManagerComponent::Update(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::Update");
+
+    reactionCooldownTimer = (std::max)(0.0f, reactionCooldownTimer - deltaTime_);
+}
+
 BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     DRAGON_BODY_PART bodyPart_,
     const DamageContext& damageContext_)
@@ -84,12 +91,18 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     if (!status_) return result_;
 
     result_.alreadyBroken = status_->broken;
+    const float healthDamageRate_ = status_->broken
+        ? status_->healthDamageRate * status_->brokenHealthDamageRate
+        : status_->healthDamageRate;
     result_.appliedHealthDamage =
         (std::max)(damageContext_.healthDamage, 0.0f) *
-        (std::max)(status_->healthDamageRate, 0.0f);
+        (std::max)(healthDamageRate_, 0.0f);
     result_.appliedDurabilityDamage =
         (std::max)(damageContext_.durabilityDamage, 0.0f) *
         (std::max)(status_->durabilityDamageRate, 0.0f);
+    const float appliedStaggerDamage_ =
+        (std::max)(damageContext_.durabilityDamage, 0.0f) *
+        (std::max)(status_->staggerDamageRate, 0.0f);
 
     if (health)
     {
@@ -100,6 +113,7 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     status_->currentDurability = (std::max)(
         status_->currentDurability - result_.appliedDurabilityDamage,
         0.0f);
+    status_->currentStagger += appliedStaggerDamage_;
     status_->broken = status_->currentDurability <= 0.0f;
     result_.bodyPartBrokenThisHit = !wasBroken_ && status_->broken;
 
@@ -114,11 +128,9 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
 
     if (result_.bodyPartBrokenThisHit)
     {
-        if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
-        {
-            owner_->ExecuteAction("DragonBodyPart_Broken");
-        }
+        ExecuteBodyPartBrokenActions(*status_);
     }
+    TryRequestDamageReaction(*status_);
 
     return result_;
 }
@@ -175,6 +187,8 @@ void DragonBodyPartManagerComponent::ResetBodyParts()
     for (DragonBodyPartStatus& status_ : bodyParts)
     {
         status_.currentDurability = status_.maxDurability;
+        status_.currentMaxStagger = status_.baseMaxStagger;
+        status_.currentStagger = 0.0f;
         status_.broken = false;
     }
     lastDamageResult = {};
@@ -283,6 +297,52 @@ void DragonBodyPartManagerComponent::PublishLastDamageToBlackboard()
         lastDamageResult.bodyPartBrokenThisHit);
 }
 
+void DragonBodyPartManagerComponent::TryRequestDamageReaction(
+    DragonBodyPartStatus& status_)
+{
+    BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::TryRequestDamageReaction");
+
+    if (!reactionEnabled ||
+        reactionActionName.empty() ||
+        reactionCooldownTimer > 0.0f ||
+        status_.currentMaxStagger <= 0.0f ||
+        status_.currentStagger < status_.currentMaxStagger)
+    {
+        return;
+    }
+
+    status_.currentStagger = 0.0f;
+    status_.baseMaxStagger *= (std::max)(status_.staggerRecoveryBaseMultiplier, 1.0f);
+    status_.currentMaxStagger = status_.baseMaxStagger;
+    reactionCooldownTimer = (std::max)(reactionCooldownTime, 0.0f);
+
+    if (const std::shared_ptr<GameObject> owner_ = GetGameObject())
+    {
+        owner_->ExecuteAction(reactionActionName);
+    }
+}
+
+void DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions(
+    const DragonBodyPartStatus& status_)
+{
+    BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions");
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    if (!commonBrokenActionName.empty())
+    {
+        owner_->ExecuteAction(commonBrokenActionName);
+    }
+    owner_->ExecuteAction(
+        std::string("DragonBodyPart_Broken_") +
+        GetDragonBodyPartName(status_.bodyPart));
+    if (!status_.brokenActionName.empty())
+    {
+        owner_->ExecuteAction(status_.brokenActionName);
+    }
+}
+
 void DragonBodyPartManagerComponent::Gui()
 {
     EnsureDefaultBodyParts();
@@ -290,6 +350,21 @@ void DragonBodyPartManagerComponent::Gui()
 
     ImGui::Text("Health Component: %s", health ? "Ready" : "None");
     ImGui::Checkbox("Debug Log", &debugLogEnabled);
+    ImGui::Checkbox("Damage Reaction", &reactionEnabled);
+    ImGui::DragFloat("Reaction Cooldown", &reactionCooldownTime, 0.1f, 0.0f, 30.0f);
+    ImGui::Text("Reaction Cooldown Timer: %.2f", reactionCooldownTimer);
+    char reactionActionBuffer_[128]{};
+    strncpy_s(reactionActionBuffer_, reactionActionName.c_str(), sizeof(reactionActionBuffer_));
+    if (ImGui::InputText("Reaction Action", reactionActionBuffer_, sizeof(reactionActionBuffer_)))
+    {
+        reactionActionName = reactionActionBuffer_;
+    }
+    char commonBrokenActionBuffer_[128]{};
+    strncpy_s(commonBrokenActionBuffer_, commonBrokenActionName.c_str(), sizeof(commonBrokenActionBuffer_));
+    if (ImGui::InputText("Common Broken Action", commonBrokenActionBuffer_, sizeof(commonBrokenActionBuffer_)))
+    {
+        commonBrokenActionName = commonBrokenActionBuffer_;
+    }
     if (ImGui::Button("Reset Body Parts")) ResetBodyParts();
 
     ImGui::SeparatorText("Last Hit");
@@ -313,7 +388,19 @@ void DragonBodyPartManagerComponent::Gui()
                 status_.maxDurability);
             ImGui::DragFloat("Current Durability", &status_.currentDurability, 1.0f, 0.0f, status_.maxDurability);
             ImGui::DragFloat("Health Damage Rate", &status_.healthDamageRate, 0.05f, 0.0f, 10.0f);
+            ImGui::DragFloat("Broken Health Rate", &status_.brokenHealthDamageRate, 0.05f, 0.0f, 10.0f);
             ImGui::DragFloat("Durability Damage Rate", &status_.durabilityDamageRate, 0.05f, 0.0f, 10.0f);
+            ImGui::DragFloat("Base Max Stagger", &status_.baseMaxStagger, 1.0f, 0.0f, 99999.0f);
+            ImGui::DragFloat("Current Max Stagger", &status_.currentMaxStagger, 1.0f, 0.0f, 99999.0f);
+            ImGui::DragFloat("Current Stagger", &status_.currentStagger, 1.0f, 0.0f, 99999.0f);
+            ImGui::DragFloat("Stagger Damage Rate", &status_.staggerDamageRate, 0.05f, 0.0f, 10.0f);
+            ImGui::DragFloat("Stagger Recovery Base Multiplier", &status_.staggerRecoveryBaseMultiplier, 0.01f, 1.0f, 10.0f);
+            char brokenActionBuffer_[128]{};
+            strncpy_s(brokenActionBuffer_, status_.brokenActionName.c_str(), sizeof(brokenActionBuffer_));
+            if (ImGui::InputText("Broken Action", brokenActionBuffer_, sizeof(brokenActionBuffer_)))
+            {
+                status_.brokenActionName = brokenActionBuffer_;
+            }
             status_.broken = status_.currentDurability <= 0.0f;
             ImGui::Text("Broken: %s", status_.broken ? "Yes" : "No");
             ImGui::TreePop();
@@ -324,6 +411,11 @@ void DragonBodyPartManagerComponent::Gui()
 void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
 {
     json_["DebugLogEnabled"] = debugLogEnabled;
+    json_["ReactionEnabled"] = reactionEnabled;
+    json_["ReactionCooldownTime"] = reactionCooldownTime;
+    json_["ReactionCooldownTimer"] = reactionCooldownTimer;
+    json_["ReactionActionName"] = reactionActionName;
+    json_["CommonBrokenActionName"] = commonBrokenActionName;
     json_["BodyParts"] = nlohmann::json::array();
     for (const DragonBodyPartStatus& status_ : bodyParts)
     {
@@ -333,6 +425,13 @@ void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
             { "CurrentDurability", status_.currentDurability },
             { "HealthDamageRate", status_.healthDamageRate },
             { "DurabilityDamageRate", status_.durabilityDamageRate },
+            { "BrokenHealthDamageRate", status_.brokenHealthDamageRate },
+            { "BaseMaxStagger", status_.baseMaxStagger },
+            { "CurrentMaxStagger", status_.currentMaxStagger },
+            { "CurrentStagger", status_.currentStagger },
+            { "StaggerDamageRate", status_.staggerDamageRate },
+            { "StaggerRecoveryBaseMultiplier", status_.staggerRecoveryBaseMultiplier },
+            { "BrokenActionName", status_.brokenActionName },
             { "Broken", status_.broken },
             });
     }
@@ -341,6 +440,15 @@ void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
 void DragonBodyPartManagerComponent::Deserialize(const nlohmann::json& json_)
 {
     debugLogEnabled = json_.value("DebugLogEnabled", true);
+    reactionEnabled = json_.value("ReactionEnabled", true);
+    reactionCooldownTime = (std::max)(json_.value("ReactionCooldownTime", 2.0f), 0.0f);
+    reactionCooldownTimer = (std::max)(json_.value("ReactionCooldownTimer", 0.0f), 0.0f);
+    reactionActionName = json_.value(
+        "ReactionActionName",
+        std::string("DragonAI_DamageReaction"));
+    commonBrokenActionName = json_.value(
+        "CommonBrokenActionName",
+        std::string("DragonBodyPart_Broken"));
     bodyParts.clear();
 
     if (json_.contains("BodyParts") && json_["BodyParts"].is_array())
@@ -363,6 +471,37 @@ void DragonBodyPartManagerComponent::Deserialize(const nlohmann::json& json_)
             status_.durabilityDamageRate = (std::max)(
                 bodyPartJson_.value("DurabilityDamageRate", 1.0f),
                 0.0f);
+            status_.brokenHealthDamageRate = (std::max)(
+                bodyPartJson_.value("BrokenHealthDamageRate", 1.25f),
+                0.0f);
+            status_.baseMaxStagger = (std::max)(
+                bodyPartJson_.value(
+                    "BaseMaxStagger",
+                    bodyPartJson_.value(
+                        "MaxStagger",
+                        bodyPartJson_.value("ReactionDamageThreshold", 45.0f))),
+                0.0f);
+            status_.currentMaxStagger = (std::max)(
+                bodyPartJson_.value(
+                    "CurrentMaxStagger",
+                    bodyPartJson_.value(
+                        "MaxStagger",
+                        bodyPartJson_.value("ReactionDamageThreshold", 45.0f))),
+                0.0f);
+            status_.currentStagger = (std::max)(
+                bodyPartJson_.value(
+                    "CurrentStagger",
+                    bodyPartJson_.value("AccumulatedReactionDamage", 0.0f)),
+                0.0f);
+            status_.staggerDamageRate = (std::max)(
+                bodyPartJson_.value("StaggerDamageRate", 1.0f),
+                0.0f);
+            status_.staggerRecoveryBaseMultiplier = (std::max)(
+                bodyPartJson_.value(
+                    "StaggerRecoveryBaseMultiplier",
+                    1.0f + bodyPartJson_.value("StaggerMaxIncreaseRate", 0.25f)),
+                1.0f);
+            status_.brokenActionName = bodyPartJson_.value("BrokenActionName", std::string{});
             status_.broken = bodyPartJson_.value("Broken", status_.currentDurability <= 0.0f);
             bodyParts.push_back(status_);
         }
