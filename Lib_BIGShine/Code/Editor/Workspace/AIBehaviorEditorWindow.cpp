@@ -696,21 +696,27 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
 
 void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 {
+    BS_PROFILE_SCOPE("AIBehaviorEditorWindow::DrawNode");
+
     const bool selected_ = selectedNodeId == node_.id;
     const bool runtimeActive_ = IsRuntimeActiveNode(node_);
-    const ImU32 nodeColor_ = runtimeActive_ ? IM_COL32(28, 96, 62, 255) : GetNodeColor(node_.type);
+    const ImU32 categoryColor_ = runtimeActive_ ? IM_COL32(28, 96, 62, 255) : GetNodeColor(node_.type);
+    const ImU32 bodyColor_ = IM_COL32(248, 250, 252, 255);
     const ImU32 borderColor_ = runtimeActive_
         ? IM_COL32(80, 255, 150, 255)
         : (selected_ ? IM_COL32(255, 245, 120, 255) : IM_COL32(35, 35, 35, 255));
+    const ImU32 categoryTextColor_ = IM_COL32(20, 24, 28, 255);
+    const ImU32 nameTextColor_ = IM_COL32(28, 32, 36, 255);
     constexpr float nodeWidth_ = 190.0f;
     constexpr float nodeHeight_ = 92.0f;
+    constexpr float categoryHeight_ = 28.0f;
     constexpr float portWidth_ = 86.0f;
     constexpr float portHeight_ = 24.0f;
     const ImVec2 portSize_(portWidth_, portHeight_);
 
     ed::PushStyleVar(ed::StyleVar_NodeRounding, 8.0f);
     ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    ed::PushStyleColor(ed::StyleColor_NodeBg, ImGui::ColorConvertU32ToFloat4(nodeColor_));
+    ed::PushStyleColor(ed::StyleColor_NodeBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ed::PushStyleColor(ed::StyleColor_NodeBorder, ImGui::ColorConvertU32ToFloat4(borderColor_));
 
     ed::BeginNode(ed::NodeId(node_.id));
@@ -721,26 +727,36 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
     const ImVec2 nodeMax_(nodeMin_.x + nodeWidth_, nodeMin_.y + nodeHeight_);
     ImDrawList* drawList_ = ImGui::GetWindowDrawList();
 
-    drawList_->AddRectFilled(nodeMin_, nodeMax_, nodeColor_, 10.0f);
+    drawList_->AddRectFilled(nodeMin_, nodeMax_, bodyColor_, 10.0f);
+    drawList_->AddRectFilled(
+        nodeMin_,
+        ImVec2(nodeMax_.x, nodeMin_.y + categoryHeight_),
+        categoryColor_,
+        10.0f,
+        ImDrawFlags_RoundCornersTop);
     drawList_->AddRect(nodeMin_, nodeMax_, borderColor_, 10.0f, 0, runtimeActive_ ? 4.0f : (selected_ ? 3.0f : 2.0f));
     drawList_->AddLine(
-        ImVec2(nodeMin_.x, nodeMin_.y + 28.0f),
-        ImVec2(nodeMax_.x, nodeMin_.y + 28.0f),
+        ImVec2(nodeMin_.x, nodeMin_.y + categoryHeight_),
+        ImVec2(nodeMax_.x, nodeMin_.y + categoryHeight_),
         IM_COL32(35, 35, 35, 210),
         1.5f);
-
-    const ImVec2 titleSize_ = ImGui::CalcTextSize(node_.name.c_str());
-    ImGui::SetCursorScreenPos(ImVec2(
-        nodeMin_.x + (nodeWidth_ - titleSize_.x) * 0.5f,
-        nodeMin_.y + 7.0f));
-    ImGui::Text("%s", node_.name.c_str());
 
     const char* typeName_ = GetNodeTypeName(node_.type);
     const ImVec2 typeSize_ = ImGui::CalcTextSize(typeName_);
     ImGui::SetCursorScreenPos(ImVec2(
         nodeMin_.x + (nodeWidth_ - typeSize_.x) * 0.5f,
+        nodeMin_.y + 7.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, categoryTextColor_);
+    ImGui::Text("%s", typeName_);
+    ImGui::PopStyleColor();
+
+    const ImVec2 titleSize_ = ImGui::CalcTextSize(node_.name.c_str());
+    ImGui::SetCursorScreenPos(ImVec2(
+        nodeMin_.x + (nodeWidth_ - titleSize_.x) * 0.5f,
         nodeMin_.y + 48.0f));
-    ImGui::TextDisabled("%s", typeName_);
+    ImGui::PushStyleColor(ImGuiCol_Text, nameTextColor_);
+    ImGui::Text("%s", node_.name.c_str());
+    ImGui::PopStyleColor();
 
     if (node_.inputPinId != 0)
     {

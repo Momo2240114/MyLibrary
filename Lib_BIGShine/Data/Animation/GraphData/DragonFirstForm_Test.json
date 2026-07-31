@@ -78,79 +78,6 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 22,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardLeft90AnimationIndex": -1,
-                "blend2DBackwardLeft90PhaseOffset": 0.0,
-                "blend2DBackwardLeftAnimationIndex": -1,
-                "blend2DBackwardLeftPhaseOffset": 0.0,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DBackwardRight90AnimationIndex": -1,
-                "blend2DBackwardRight90PhaseOffset": 0.0,
-                "blend2DBackwardRightAnimationIndex": -1,
-                "blend2DBackwardRightPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardLeft90AnimationIndex": -1,
-                "blend2DForwardLeft90PhaseOffset": 0.0,
-                "blend2DForwardLeftAnimationIndex": -1,
-                "blend2DForwardLeftPhaseOffset": 0.0,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DForwardRight90AnimationIndex": -1,
-                "blend2DForwardRight90PhaseOffset": 0.0,
-                "blend2DForwardRightAnimationIndex": -1,
-                "blend2DForwardRightPhaseOffset": 0.0,
-                "blend2DIdleAnimationIndex": -1,
-                "blend2DIdlePhaseOffset": 0.0,
-                "blend2DIdleThreshold": 0.05000000074505806,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blend2DUseEightDirections": false,
-                "blend2DUseForwardBackwardLateral": false,
-                "blend2DUseIdleStop": false,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": false,
-                "name": "PlainsDragon_SpreadFire_Forward",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": false,
-                    "applyRotationY": false,
-                    "applyRotationZ": false,
-                    "cutVisualPositionX": true,
-                    "cutVisualPositionY": true,
-                    "cutVisualPositionZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
                 "animationIndex": 28,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
@@ -201,6 +128,79 @@
                 "events": [],
                 "loop": true,
                 "name": "PlainsDragon_Walk",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 22,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlainsDragon_SpreadFire_Forward",
                 "rootMotion": {
                     "applyPositionX": true,
                     "applyPositionY": true,
@@ -626,79 +626,6 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 21,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardLeft90AnimationIndex": -1,
-                "blend2DBackwardLeft90PhaseOffset": 0.0,
-                "blend2DBackwardLeftAnimationIndex": -1,
-                "blend2DBackwardLeftPhaseOffset": 0.0,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DBackwardRight90AnimationIndex": -1,
-                "blend2DBackwardRight90PhaseOffset": 0.0,
-                "blend2DBackwardRightAnimationIndex": -1,
-                "blend2DBackwardRightPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardLeft90AnimationIndex": -1,
-                "blend2DForwardLeft90PhaseOffset": 0.0,
-                "blend2DForwardLeftAnimationIndex": -1,
-                "blend2DForwardLeftPhaseOffset": 0.0,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DForwardRight90AnimationIndex": -1,
-                "blend2DForwardRight90PhaseOffset": 0.0,
-                "blend2DForwardRightAnimationIndex": -1,
-                "blend2DForwardRightPhaseOffset": 0.0,
-                "blend2DIdleAnimationIndex": -1,
-                "blend2DIdlePhaseOffset": 0.0,
-                "blend2DIdleThreshold": 0.05000000074505806,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blend2DUseEightDirections": false,
-                "blend2DUseForwardBackwardLateral": false,
-                "blend2DUseIdleStop": false,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": false,
-                "name": "PlainsDragon_SpitFireBall_Sweep",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": false,
-                    "applyRotationY": false,
-                    "applyRotationZ": false,
-                    "cutVisualPositionX": true,
-                    "cutVisualPositionY": true,
-                    "cutVisualPositionZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
                 "animationIndex": 27,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
@@ -809,6 +736,152 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
+                "animationIndex": 21,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlainsDragon_SpitFireBall_Sweep",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 9,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [],
+                "loop": false,
+                "name": "PlainsDragon_FlyStationarySpitFireBall",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
                 "animationIndex": 23,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
@@ -891,84 +964,11 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 1.8333333730697632
+                        "startTime": 1.6333333253860474
                     }
                 ],
                 "loop": false,
                 "name": "PlainsDragon_TakeOff",
-                "rootMotion": {
-                    "applyPositionX": true,
-                    "applyPositionY": true,
-                    "applyPositionZ": true,
-                    "applyRotationX": false,
-                    "applyRotationY": false,
-                    "applyRotationZ": false,
-                    "cutVisualPositionX": true,
-                    "cutVisualPositionY": true,
-                    "cutVisualPositionZ": true,
-                    "enable": false,
-                    "sourceNodeName": ""
-                },
-                "rootMotionScale": 1.0,
-                "rootMotionScaleCurveName": "",
-                "sequencer": "",
-                "speed": 1.0,
-                "speedCurveName": "",
-                "type": 0
-            },
-            {
-                "animIndexA": -1,
-                "animIndexB": -1,
-                "animationIndex": 9,
-                "blend2DBackwardAnimationIndex": -1,
-                "blend2DBackwardLeft90AnimationIndex": -1,
-                "blend2DBackwardLeft90PhaseOffset": 0.0,
-                "blend2DBackwardLeftAnimationIndex": -1,
-                "blend2DBackwardLeftPhaseOffset": 0.0,
-                "blend2DBackwardPhaseOffset": 0.0,
-                "blend2DBackwardRight90AnimationIndex": -1,
-                "blend2DBackwardRight90PhaseOffset": 0.0,
-                "blend2DBackwardRightAnimationIndex": -1,
-                "blend2DBackwardRightPhaseOffset": 0.0,
-                "blend2DDefaultInput": [
-                    0.0,
-                    1.0
-                ],
-                "blend2DForwardAnimationIndex": -1,
-                "blend2DForwardLeft90AnimationIndex": -1,
-                "blend2DForwardLeft90PhaseOffset": 0.0,
-                "blend2DForwardLeftAnimationIndex": -1,
-                "blend2DForwardLeftPhaseOffset": 0.0,
-                "blend2DForwardPhaseOffset": 0.0,
-                "blend2DForwardRight90AnimationIndex": -1,
-                "blend2DForwardRight90PhaseOffset": 0.0,
-                "blend2DForwardRightAnimationIndex": -1,
-                "blend2DForwardRightPhaseOffset": 0.0,
-                "blend2DIdleAnimationIndex": -1,
-                "blend2DIdlePhaseOffset": 0.0,
-                "blend2DIdleThreshold": 0.05000000074505806,
-                "blend2DLeftAnimationIndex": -1,
-                "blend2DLeftPhaseOffset": 0.0,
-                "blend2DParamName": "MoveInput",
-                "blend2DRightAnimationIndex": -1,
-                "blend2DRightPhaseOffset": 0.0,
-                "blend2DSyncNormalizedTime": true,
-                "blend2DUseEightDirections": false,
-                "blend2DUseForwardBackwardLateral": false,
-                "blend2DUseIdleStop": false,
-                "blendDefaultWeight": 0.5,
-                "blendMaskRootNodes": [],
-                "blendParamName": "BlendAlpha",
-                "blendParameterMax": 1.0,
-                "blendParameterMin": 0.0,
-                "blendPhaseOffsetA": 0.0,
-                "blendPhaseOffsetB": 0.0,
-                "blendSyncNormalizedTime": true,
-                "blendUseMask": false,
-                "customAnimIndex": -1,
-                "events": [],
-                "loop": false,
-                "name": "PlainsDragon_FlyStationarySpitFireBall",
                 "rootMotion": {
                     "applyPositionX": true,
                     "applyPositionY": true,
@@ -1548,8 +1548,8 @@
             "inputPin": 0,
             "nodeType": 1,
             "outputPin": 2,
-            "posX": -780.0,
-            "posY": -120.0,
+            "posX": -900.0,
+            "posY": -80.0,
             "scopeId": "Root",
             "stateName": "__Start__"
         },
@@ -1559,8 +1559,8 @@
             "inputPin": 0,
             "nodeType": 2,
             "outputPin": 4,
-            "posX": -780.0,
-            "posY": 80.0,
+            "posX": -900.0,
+            "posY": 240.0,
             "scopeId": "Root",
             "stateName": "__Any__"
         },
@@ -1570,7 +1570,7 @@
             "inputPin": 6,
             "nodeType": 0,
             "outputPin": 7,
-            "posX": -360.0,
+            "posX": -280.0,
             "posY": 0.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_IdleBreathe"
@@ -1581,8 +1581,8 @@
             "inputPin": 9,
             "nodeType": 0,
             "outputPin": 10,
-            "posX": 80.0,
-            "posY": -760.0,
+            "posX": 120.0,
+            "posY": -360.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Walk"
         },
@@ -1592,8 +1592,8 @@
             "inputPin": 12,
             "nodeType": 0,
             "outputPin": 13,
-            "posX": 80.0,
-            "posY": -640.0,
+            "posX": 120.0,
+            "posY": -240.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Run"
         },
@@ -1603,8 +1603,8 @@
             "inputPin": 15,
             "nodeType": 0,
             "outputPin": 16,
-            "posX": 80.0,
-            "posY": -520.0,
+            "posX": 120.0,
+            "posY": -120.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Turn90L_RM"
         },
@@ -1614,8 +1614,8 @@
             "inputPin": 18,
             "nodeType": 0,
             "outputPin": 19,
-            "posX": 80.0,
-            "posY": -400.0,
+            "posX": 120.0,
+            "posY": 0.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Turn90R_RM"
         },
@@ -1625,8 +1625,8 @@
             "inputPin": 21,
             "nodeType": 0,
             "outputPin": 22,
-            "posX": 80.0,
-            "posY": -280.0,
+            "posX": 120.0,
+            "posY": 120.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_BiteAttack"
         },
@@ -1636,8 +1636,8 @@
             "inputPin": 24,
             "nodeType": 0,
             "outputPin": 25,
-            "posX": 80.0,
-            "posY": -160.0,
+            "posX": 120.0,
+            "posY": 240.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_SpitFireBall"
         },
@@ -1647,8 +1647,8 @@
             "inputPin": 27,
             "nodeType": 0,
             "outputPin": 28,
-            "posX": 80.0,
-            "posY": -40.0,
+            "posX": 120.0,
+            "posY": 360.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_SpreadFire"
         },
@@ -1658,8 +1658,8 @@
             "inputPin": 30,
             "nodeType": 0,
             "outputPin": 31,
-            "posX": 80.0,
-            "posY": 80.0,
+            "posX": 120.0,
+            "posY": 480.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_TakeOff"
         },
@@ -1669,8 +1669,8 @@
             "inputPin": 33,
             "nodeType": 0,
             "outputPin": 34,
-            "posX": 80.0,
-            "posY": 200.0,
+            "posX": 120.0,
+            "posY": 640.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_FlyStationary"
         },
@@ -1680,8 +1680,8 @@
             "inputPin": 36,
             "nodeType": 0,
             "outputPin": 37,
-            "posX": 80.0,
-            "posY": 320.0,
+            "posX": 120.0,
+            "posY": 760.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_FlyStationarySpitFireBall"
         },
@@ -1691,8 +1691,8 @@
             "inputPin": 39,
             "nodeType": 0,
             "outputPin": 40,
-            "posX": 80.0,
-            "posY": 440.0,
+            "posX": 420.0,
+            "posY": 760.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_FlyStationarySpreadFire"
         },
@@ -1702,8 +1702,8 @@
             "inputPin": 42,
             "nodeType": 0,
             "outputPin": 43,
-            "posX": 80.0,
-            "posY": 560.0,
+            "posX": 720.0,
+            "posY": 760.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_FlyStationaryToLanding"
         },
@@ -1713,8 +1713,8 @@
             "inputPin": 45,
             "nodeType": 0,
             "outputPin": 46,
-            "posX": 80.0,
-            "posY": 680.0,
+            "posX": -600.0,
+            "posY": -180.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_GetHit1"
         },
@@ -1724,8 +1724,8 @@
             "inputPin": 48,
             "nodeType": 0,
             "outputPin": 49,
-            "posX": 80.0,
-            "posY": 800.0,
+            "posX": 420.0,
+            "posY": 0.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Death"
         },
@@ -1735,8 +1735,8 @@
             "inputPin": 68,
             "nodeType": 0,
             "outputPin": 69,
-            "posX": 320.0,
-            "posY": -160.0,
+            "posX": 420.0,
+            "posY": 240.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_SpitFireBall_Sweep"
         },
@@ -1746,30 +1746,30 @@
             "inputPin": 71,
             "nodeType": 0,
             "outputPin": 72,
-            "posX": 320.0,
-            "posY": -40.0,
+            "posX": 420.0,
+            "posY": 360.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_SpreadFire_Forward"
         },
         {
             "childScopeId": "",
-            "id": 71,
+            "id": 80,
             "inputPin": 73,
             "nodeType": 0,
             "outputPin": 74,
-            "posX": 560.0,
-            "posY": 680.0,
+            "posX": -600.0,
+            "posY": 620.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_FlyStationaryGetHit"
         },
         {
             "childScopeId": "",
-            "id": 72,
+            "id": 81,
             "inputPin": 75,
             "nodeType": 0,
             "outputPin": 76,
-            "posX": 560.0,
-            "posY": 80.0,
+            "posX": -280.0,
+            "posY": 520.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_Fly"
         }
@@ -1779,19 +1779,13 @@
             "conditions": [],
             "duration": 0.20000000298023224,
             "from": "__Start__",
-            "id": 50,
+            "id": 86,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_IdleBreathe"
         },
         {
             "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_IdleBreathe",
-                    "threshold": 1.0,
-                    "type": 2
-                },
                 {
                     "op": 0,
                     "param": "ReturnToIdle",
@@ -1801,10 +1795,106 @@
             ],
             "duration": 0.20000000298023224,
             "from": "__Any__",
-            "id": 51,
-            "logic": 1,
+            "id": 87,
+            "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ReturnToAirIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 88,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_Fly"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_GetHit1",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 89,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_GetHit1"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_FlyStationaryGetHit",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 90,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_FlyStationaryGetHit"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_Death",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 91,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_Death"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ReturnToIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_GetHit1",
+            "id": 92,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_IdleBreathe"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "ReturnToAirIdle",
+                    "threshold": 1.0,
+                    "type": 0
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_FlyStationaryGetHit",
+            "id": 93,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_Fly"
         },
         {
             "conditions": [
@@ -1817,7 +1907,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 52,
+            "id": 94,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Walk"
@@ -1833,7 +1923,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 53,
+            "id": 95,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Run"
@@ -1849,7 +1939,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 54,
+            "id": 96,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Turn90L_RM"
@@ -1865,7 +1955,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 55,
+            "id": 97,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_Turn90R_RM"
@@ -1881,7 +1971,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 56,
+            "id": 98,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_BiteAttack"
@@ -1897,10 +1987,26 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 57,
+            "id": 99,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_SpitFireBall"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_SpitFireBall_Sweep",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 100,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_SpitFireBall_Sweep"
         },
         {
             "conditions": [
@@ -1913,10 +2019,26 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 58,
+            "id": 101,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_SpreadFire"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_PlainsDragon_SpreadFire_Forward",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "PlainsDragon_IdleBreathe",
+            "id": 102,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "PlainsDragon_SpreadFire_Forward"
         },
         {
             "conditions": [
@@ -1929,7 +2051,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_IdleBreathe",
-            "id": 59,
+            "id": 103,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_TakeOff"
@@ -1944,8 +2066,8 @@
                 }
             ],
             "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 60,
+            "from": "PlainsDragon_Fly",
+            "id": 104,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationary"
@@ -1961,7 +2083,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_Fly",
-            "id": 61,
+            "id": 105,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationarySpitFireBall"
@@ -1977,7 +2099,7 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_Fly",
-            "id": 62,
+            "id": 106,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationarySpreadFire"
@@ -1993,178 +2115,10 @@
             ],
             "duration": 0.20000000298023224,
             "from": "PlainsDragon_Fly",
-            "id": 63,
+            "id": 107,
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_FlyStationaryToLanding"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_GetHit1",
-                    "threshold": 1.0,
-                    "type": 2
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 64,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_GetHit1"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Death",
-                    "threshold": 1.0,
-                    "type": 2
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 65,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_Death"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_SpitFireBall_Sweep",
-                    "threshold": 1.0,
-                    "type": 2
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 73,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_SpitFireBall_Sweep"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_SpreadFire_Forward",
-                    "threshold": 1.0,
-                    "type": 2
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_IdleBreathe",
-            "id": 74,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_SpreadFire_Forward"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationary",
-                    "threshold": 1.0,
-                    "type": 2
-                },
-                {
-                    "op": 0,
-                    "param": "ReturnToAirIdle",
-                    "threshold": 1.0,
-                    "type": 0
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 75,
-            "logic": 1,
-            "scopeId": "Root",
-            "to": "PlainsDragon_Fly"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationaryGetHit",
-                    "threshold": 1.0,
-                    "type": 2
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 76,
-            "logic": 0,
-            "scopeId": "Root",
-            "to": "PlainsDragon_FlyStationaryGetHit"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_FlyStationary",
-                    "threshold": 1.0,
-                    "type": 2
-                },
-                {
-                    "op": 0,
-                    "param": "ReturnToAirIdle",
-                    "threshold": 1.0,
-                    "type": 0
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_FlyStationaryGetHit",
-            "id": 77,
-            "logic": 1,
-            "scopeId": "Root",
-            "to": "PlainsDragon_Fly"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_IdleBreathe",
-                    "threshold": 1.0,
-                    "type": 2
-                },
-                {
-                    "op": 0,
-                    "param": "ReturnToIdle",
-                    "threshold": 1.0,
-                    "type": 0
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "PlainsDragon_GetHit1",
-            "id": 78,
-            "logic": 1,
-            "scopeId": "Root",
-            "to": "PlainsDragon_IdleBreathe"
-        },
-        {
-            "conditions": [
-                {
-                    "op": 0,
-                    "param": "To_PlainsDragon_Fly",
-                    "threshold": 1.0,
-                    "type": 2
-                },
-                {
-                    "op": 0,
-                    "param": "ReturnToAirIdle",
-                    "threshold": 1.0,
-                    "type": 0
-                }
-            ],
-            "duration": 0.20000000298023224,
-            "from": "__Any__",
-            "id": 79,
-            "logic": 1,
-            "scopeId": "Root",
-            "to": "PlainsDragon_Fly"
         }
     ],
     "StateAssets": {
@@ -2173,5 +2127,5 @@
         "PlainsDragon_Turn90L_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90L_RM.json",
         "PlainsDragon_Turn90R_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90R_RM.json"
     },
-    "UseTransitionGraph": true
+    "UseTransitionGraph": false
 }

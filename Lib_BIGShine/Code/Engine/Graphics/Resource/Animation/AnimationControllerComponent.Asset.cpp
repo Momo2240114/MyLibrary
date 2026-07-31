@@ -20,6 +20,7 @@
 #include <fstream>
 #include <cmath>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace ed = ax::NodeEditor;
@@ -118,6 +119,44 @@ namespace
         }
 
         return "";
+    }
+
+    void EnsureUniqueGraphElementIds(
+        std::vector<AnimGraphNode>& graphNodes_,
+        std::vector<AnimTransition>& graphTransitions_,
+        uintptr_t& maxId_)
+    {
+        BS_PROFILE_SCOPE("AnimationGraphAsset::EnsureUniqueGraphElementIds");
+
+        std::unordered_set<uintptr_t> usedIds_;
+        auto getNextUniqueId_ = [&]() -> uintptr_t
+            {
+                do
+                {
+                    ++maxId_;
+                } while (maxId_ == 0 || usedIds_.count(maxId_) > 0);
+                usedIds_.insert(maxId_);
+                return maxId_;
+            };
+
+        auto fixId_ = [&](uintptr_t id_) -> uintptr_t
+            {
+                if (id_ == 0) return 0;
+                if (usedIds_.insert(id_).second) return id_;
+                return getNextUniqueId_();
+            };
+
+        for (AnimGraphNode& node_ : graphNodes_)
+        {
+            node_.id = ed::NodeId(fixId_(static_cast<uintptr_t>(node_.id.Get())));
+            node_.inputPin = ed::PinId(fixId_(static_cast<uintptr_t>(node_.inputPin.Get())));
+            node_.outputPin = ed::PinId(fixId_(static_cast<uintptr_t>(node_.outputPin.Get())));
+        }
+
+        for (AnimTransition& transition_ : graphTransitions_)
+        {
+            transition_.id = ed::LinkId(fixId_(static_cast<uintptr_t>(transition_.id.Get())));
+        }
     }
 }
 
@@ -632,6 +671,7 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
         }
     }
 
+    EnsureUniqueGraphElementIds(graphNodes, graphTransitions, maxId);
     SetIdCounterFloor(maxId);
     EnsureSpecialGraphNodes();
 
