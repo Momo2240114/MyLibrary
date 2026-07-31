@@ -102,7 +102,7 @@ private:
     bool showSequencerWindow = false; // ウィンドウの表示状態を管理
     bool showNodeEditor = false; // ウィンドウの表示状態を管理
 
-    // 【追加】このコンポーネントが紐づくモデル固有のポーズの記憶
+    // このコンポーネントが紐づくモデル固有のポーズの記憶
     std::shared_ptr<PoseLibraryResource> poseLibrary = nullptr;
     bool editorPoseOverride = false;
     bool animationPaused = false;

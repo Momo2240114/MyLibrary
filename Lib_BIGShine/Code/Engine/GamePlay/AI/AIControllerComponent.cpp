@@ -48,6 +48,8 @@ namespace
 
 void AIControllerComponent::Start()
 {
+    BS_PROFILE_SCOPE("AIControllerComponent::Start");
+
     EnsureBlackboard();
 
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -56,6 +58,10 @@ void AIControllerComponent::Start()
         spawnPosition = owner_->transform->GetWorldPosition();
     }
 
+    if (!graphAssetPath.empty())
+    {
+        LoadGraphAsset(graphAssetPath);
+    }
     graph.EnsureDefaultGraph();
     RegisterDefaultAIActions();
 }
@@ -134,6 +140,8 @@ void AIControllerComponent::Gui()
 
 void AIControllerComponent::Serialize(nlohmann::json& json_) const
 {
+    BS_PROFILE_SCOPE("AIControllerComponent::Serialize");
+
     json_["IsRunning"] = isRunning;
     json_["GraphAssetPath"] = graphAssetPath;
     json_["TargetName"] = targetName;
@@ -145,7 +153,6 @@ void AIControllerComponent::Serialize(nlohmann::json& json_) const
     json_["ReturnSpeed"] = returnSpeed;
     json_["SpawnPosition"] = { spawnPosition.x, spawnPosition.y, spawnPosition.z };
     json_["WriteDebugBlackboard"] = writeDebugBlackboard;
-    graph.Serialize(json_["Graph"]);
 }
 
 void AIControllerComponent::Deserialize(const nlohmann::json& json_)
@@ -175,15 +182,15 @@ void AIControllerComponent::Deserialize(const nlohmann::json& json_)
         hasSerializedSpawnPosition = false;
     }
 
-    if (json_.contains("Graph"))
-    {
-        BS_PROFILE_SCOPE("AIController::DeserializeInlineGraph");
-        graph.Deserialize(json_["Graph"]);
-    }
-    else if (!graphAssetPath.empty())
+    if (!graphAssetPath.empty())
     {
         BS_PROFILE_SCOPE("AIController::LoadGraphAssetOnDeserialize");
         graph.LoadFromFile(graphAssetPath);
+    }
+    else if (json_.contains("Graph"))
+    {
+        BS_PROFILE_SCOPE("AIController::DeserializeInlineGraphFallback");
+        graph.Deserialize(json_["Graph"]);
     }
 }
 

@@ -10,21 +10,29 @@
             "toneMappingEnabled": true
         },
         "ShadowMap": {
+            "cascadeDepthPadding": 180.0,
             "cascadeShadowBias": [
                 0.0008999999845400453,
                 0.0020000000949949026,
                 0.003000000026077032,
                 0.004999999888241291
             ],
+            "cascadeShadowSoftnessRadius": 2.0,
+            "cascadeShadowSoftnessSampleCount": 8,
             "cascadeSplitDistances": [
                 25.0,
                 100.0,
                 250.0,
                 1000.0
             ],
+            "cascadeXyPadding": 8.0,
             "displayCascadeArea": false,
+            "lightDistance": 500.0,
             "shadowAttenuation": 0.0,
-            "useCascadeShadow": true
+            "texelSnapEnabled": true,
+            "useCascadeShadow": true,
+            "useCascadeShadowRandomRotation": true,
+            "useCascadeShadowSoftness": true
         },
         "Toon": {
             "shadeFeathers": [

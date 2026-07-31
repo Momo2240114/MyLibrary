@@ -85,7 +85,7 @@ namespace
 
     AnimationDataAsset BuildAnimationDataAsset(
         const std::unordered_map<std::string, std::unique_ptr<AnimState>>& states_,
-        const AnimState* currentState_)
+        const std::string& defaultStateName_)
     {
         AnimationDataAsset asset_;
         for (const auto& [name_, state_] : states_)
@@ -96,12 +96,28 @@ namespace
             }
         }
 
-        if (currentState_)
+        if (!defaultStateName_.empty() && states_.count(defaultStateName_))
         {
-            asset_.defaultStateName = currentState_->name;
+            asset_.defaultStateName = defaultStateName_;
         }
 
         return asset_;
+    }
+
+    std::string ResolveGraphStartStateName(
+        const std::vector<AnimTransition>& graphTransitions_,
+        const std::unordered_map<std::string, std::unique_ptr<AnimState>>& states_)
+    {
+        for (const AnimTransition& transition_ : graphTransitions_)
+        {
+            if (transition_.fromStateName == START_NODE_NAME &&
+                states_.count(transition_.toStateName))
+            {
+                return transition_.toStateName;
+            }
+        }
+
+        return "";
     }
 }
 
@@ -119,7 +135,12 @@ void AnimationControllerComponent::Serialize(nlohmann::json& json_) const
         }
     }
 
-    AnimationDataAsset asset_ = BuildAnimationDataAsset(states, currentState);
+    std::string defaultStateName_ = ResolveGraphStartStateName(graphTransitions, states);
+    if (defaultStateName_.empty() && currentState)
+    {
+        defaultStateName_ = currentState->name;
+    }
+    AnimationDataAsset asset_ = BuildAnimationDataAsset(states, defaultStateName_);
     nlohmann::json animationData_;
     asset_.Serialize(animationData_);
     json_["AnimationData"] = animationData_;
@@ -358,7 +379,12 @@ void AnimationControllerComponent::SaveGraphAsset(const std::string& assetName_)
         if (!path_.empty()) j["StateAssets"][stateName_] = path_;
     }
 
-    AnimationDataAsset asset_ = BuildAnimationDataAsset(states, currentState);
+    std::string defaultStateName_ = ResolveGraphStartStateName(graphTransitions, states);
+    if (defaultStateName_.empty() && currentState)
+    {
+        defaultStateName_ = currentState->name;
+    }
+    AnimationDataAsset asset_ = BuildAnimationDataAsset(states, defaultStateName_);
     nlohmann::json animationData_;
     asset_.Serialize(animationData_);
     j["AnimationData"] = animationData_;
@@ -468,6 +494,7 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
     stateAssetPaths.clear();
 
     std::string stateAssetPath = j.value("AssetPath", "");
+    std::string loadedDefaultStateName_;
     if (j.contains("AnimationData") && j["AnimationData"].is_object())
     {
         AnimationDataAsset asset;
@@ -489,11 +516,8 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
         MarkAnimationMaskCacheDirty();
 
         assetFilePath = stateAssetPath;
+        loadedDefaultStateName_ = asset.defaultStateName;
 
-        if (!asset.defaultStateName.empty() && states.count(asset.defaultStateName))
-        {
-            ChangeState(asset.defaultStateName, 0.0f);
-        }
     }
     else if (!stateAssetPath.empty())
     {
@@ -627,6 +651,11 @@ bool AnimationControllerComponent::LoadGraphAsset(const std::string& assetName_)
     }
     EnsureNodeEditorContext();
     needsPositionRestore = true;
+    TryEnterStartState();
+    if (!currentState && !loadedDefaultStateName_.empty() && states.count(loadedDefaultStateName_))
+    {
+        ChangeState(loadedDefaultStateName_, 0.0f);
+    }
     return true;
 }
 
@@ -679,7 +708,12 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
     std::string fullPath = GetFullAssetPath(assetName_);
     std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
 
-    AnimationDataAsset asset = BuildAnimationDataAsset(states, currentState);
+    std::string defaultStateName_ = ResolveGraphStartStateName(graphTransitions, states);
+    if (defaultStateName_.empty() && currentState)
+    {
+        defaultStateName_ = currentState->name;
+    }
+    AnimationDataAsset asset = BuildAnimationDataAsset(states, defaultStateName_);
 
     nlohmann::json j;
     asset.Serialize(j);

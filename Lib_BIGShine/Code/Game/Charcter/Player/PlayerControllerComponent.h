@@ -35,6 +35,21 @@ struct PlayerCancelTransition
 // 攻撃時にターゲットへ向きや位置を補正する設定
 struct PlayerAttackAssistSettings
 {
+    bool lockTargetOnAttackEnter = true;
+    bool allowRetargetDuringAttack = false;
+    bool nonLockOnUseNearestFallback = false;
+    float nonLockOnMaximumTargetAngleDegrees = 50.0f;
+    float lockOnMaximumTargetAngleDegrees = 180.0f;
+    float maximumTotalRotationDegrees = 35.0f;
+    float facingAssistStartNormalizedTime = 0.0f;
+    float facingAssistFullStrengthEndNormalizedTime = 0.15f;
+    float facingAssistEndNormalizedTime = 0.35f;
+    float minimumInputMagnitude = 0.15f;
+    bool preferMoveInputDirection = true;
+    bool preferCameraForwardDirection = true;
+    bool preserveTargetAcrossCombo = true;
+    bool stopAssistWhenTargetInvalid = true;
+
     bool enabled = true; // 攻撃補正を有効にするか
     float strength = 0.75f; // 向き補正の強さ
     float turnSpeed = 10.0f; // 向き補正の追従速度
@@ -73,6 +88,9 @@ public:
     DirectX::XMFLOAT3 GetCameraForwardDirection() const; // カメラの水平Forward方向を取得する
     void SetFacingDirection(const DirectX::XMFLOAT3& direction_); // プレイヤーの向きを指定方向へ向ける
     void ApplyGuardFacingToTarget();
+    void SetAttackAssistTarget(const std::shared_ptr<GameObject>& target_);
+    std::shared_ptr<GameObject> GetAttackAssistTarget() const { return attackAssistTarget.lock(); }
+    void ClearAttackAssistTarget() { attackAssistTarget.reset(); }
     void SetHorizontalVelocity(
         const DirectX::XMFLOAT3& dir_,
         float speed_,
@@ -223,6 +241,7 @@ private:
     float groundDodgeCooldownTimer = 0.0f;
     float runtimeArmor = 5.0f;
     PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
+    std::weak_ptr<GameObject> attackAssistTarget;
 
     PLAYER_ACTION debugSelectedAction = PLAYER_ACTION::IDLE; // Debug UIで選択中のAction
 };

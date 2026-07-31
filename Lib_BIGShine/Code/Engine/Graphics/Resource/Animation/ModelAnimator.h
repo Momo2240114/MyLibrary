@@ -51,7 +51,7 @@ public:
     void SetCurrentTime(float time_);
     const AnimState* GetCurrentState() const { return current.state; }
 private:
-    // 【追加】カスタムアニメーション（ポーズの系譜）から一本のポーズを編み出す秘術
+    // カスタムアニメーション（ポーズの系譜）から一本のポーズを編み出す秘術
     void ComputeCustomAnimationPose(
         const CustomAnimation& customAnim,
         float time,
@@ -65,8 +65,12 @@ private:
 
     // 前フレームの座標を保持する変数
     DirectX::SimpleMath::Vector3 prevRootPos = { 0, 0, 0 };
+    DirectX::SimpleMath::Quaternion prevRootRotation = DirectX::SimpleMath::Quaternion::Identity;
+    float prevRootYawDegrees = 0.0f;
     DirectX::SimpleMath::Vector3 rootMotionBasePosition = { 0, 0, 0 };
+    DirectX::SimpleMath::Quaternion rootMotionBaseRotation = DirectX::SimpleMath::Quaternion::Identity;
     DirectX::SimpleMath::Vector3 previousRootMotionBasePosition = { 0, 0, 0 };
+    DirectX::SimpleMath::Quaternion previousRootMotionBaseRotation = DirectX::SimpleMath::Quaternion::Identity;
     int previousRootMotionNodeIndex = -1;
     // アニメーションが切り替わったことを検知するフラグ
     bool isFirstFrame = true;

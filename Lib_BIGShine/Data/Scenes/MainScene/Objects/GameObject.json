@@ -790,7 +790,7 @@
     ],
     "Layer": 0,
     "Name": "GameObject",
-    "ParentName": "",
+    "ParentName": "TestTarget",
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [

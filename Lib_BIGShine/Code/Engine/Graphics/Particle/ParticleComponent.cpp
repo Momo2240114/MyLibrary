@@ -1734,3 +1734,4 @@ std::string ParticleComponent::BuildEmitterAssetPathFromName(size_t emitterIndex
 
     return "Data/Particle/Emitter/" + name_ + ".json";
 }
+

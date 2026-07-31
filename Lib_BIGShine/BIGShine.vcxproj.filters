@@ -871,6 +871,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp">
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClCompile>
@@ -1630,6 +1633,9 @@
       <Filter>Code\Engine\GamePlay\AI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.h">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">

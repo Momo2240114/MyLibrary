@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Physics/CapsuleCollider.h"
 #include "PlayerControllerComponent.h"
 
@@ -17,6 +18,10 @@
 
 namespace
 {
+    constexpr float MINIMUM_HORIZONTAL_LENGTH_SQUARED = 0.000001f;
+    constexpr float RADIANS_TO_DEGREES = 180.0f / DirectX::XM_PI;
+    constexpr float DEGREES_TO_RADIANS = DirectX::XM_PI / 180.0f;
+
     float GetWorldCapsuleRadius(const std::shared_ptr<GameObject>& object_)
     {
         if (!object_ || !object_->transform) return 0.0f;
@@ -29,6 +34,69 @@ namespace
         const float horizontalScale_ =
             (std::max)(std::abs(scale_.x), std::abs(scale_.z));
         return capsule_->radius * capsule_->shapeSizeScale * horizontalScale_;
+    }
+
+    bool NormalizeHorizontal(DirectX::XMFLOAT3& direction_)
+    {
+        direction_.y = 0.0f;
+        const float lengthSquared_ =
+            direction_.x * direction_.x + direction_.z * direction_.z;
+        if (lengthSquared_ <= MINIMUM_HORIZONTAL_LENGTH_SQUARED) return false;
+
+        const float inverseLength_ = 1.0f / std::sqrt(lengthSquared_);
+        direction_.x *= inverseLength_;
+        direction_.z *= inverseLength_;
+        return true;
+    }
+
+    float DotHorizontal(
+        const DirectX::XMFLOAT3& a_,
+        const DirectX::XMFLOAT3& b_)
+    {
+        return a_.x * b_.x + a_.z * b_.z;
+    }
+
+    float GetYawDegrees(const DirectX::XMFLOAT3& direction_)
+    {
+        return std::atan2(direction_.x, direction_.z) * RADIANS_TO_DEGREES;
+    }
+
+    float NormalizeAngleDegrees(float angle_)
+    {
+        while (angle_ > 180.0f) angle_ -= 360.0f;
+        while (angle_ < -180.0f) angle_ += 360.0f;
+        return angle_;
+    }
+
+    DirectX::XMFLOAT3 DirectionFromYawDegrees(float yawDegrees_)
+    {
+        const float radians_ = yawDegrees_ * DEGREES_TO_RADIANS;
+        return { std::sin(radians_), 0.0f, std::cos(radians_) };
+    }
+
+    float SmoothStep(float value_)
+    {
+        const float clamped_ = std::clamp(value_, 0.0f, 1.0f);
+        return clamped_ * clamped_ * (3.0f - 2.0f * clamped_);
+    }
+
+    float CalculateFacingAssistWeight(
+        float normalizedTime_,
+        const PlayerAttackAssistSettings& settings_)
+    {
+        const float start_ = std::clamp(settings_.facingAssistStartNormalizedTime, 0.0f, 1.0f);
+        const float fullEnd_ = std::clamp(settings_.facingAssistFullStrengthEndNormalizedTime, start_, 1.0f);
+        const float end_ = std::clamp(settings_.facingAssistEndNormalizedTime, fullEnd_, 1.0f);
+
+        if (normalizedTime_ < start_ || normalizedTime_ >= end_) return 0.0f;
+        if (normalizedTime_ <= fullEnd_)
+        {
+            const float duration_ = (std::max)(fullEnd_ - start_, 0.0001f);
+            return SmoothStep((normalizedTime_ - start_) / duration_);
+        }
+
+        const float duration_ = (std::max)(end_ - fullEnd_, 0.0001f);
+        return 1.0f - SmoothStep((normalizedTime_ - fullEnd_) / duration_);
     }
 }
 
@@ -45,6 +113,11 @@ void PlayerAttackState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
+    attackElapsedTime = 0.0f;
+    accumulatedFacingCorrectionDegrees = 0.0f;
+    hasLockedAssistDirection = false;
+    attackAssistTargetResolved = false;
+    attackAssistTarget.reset();
     player_->EnterAction(action);
     const bool isStrongCharge_ =
         action == PLAYER_ACTION::STRONG_CHARGE_ATTACK ||
@@ -78,6 +151,8 @@ void PlayerAttackState::Enter()
     {
         player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
     }
+
+    ResolveAttackAssistTarget();
 }
 
 void PlayerAttackState::Execute(float elapsedTime_)
@@ -85,6 +160,7 @@ void PlayerAttackState::Execute(float elapsedTime_)
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
+    attackElapsedTime += (std::max)(elapsedTime_, 0.0f);
     ApplyAttackAssist(elapsedTime_);
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());
     player_->ProcessActionInput();
@@ -96,6 +172,10 @@ void PlayerAttackState::Exit()
     {
         player_->SetCanBufferInput(false);
         player_->SetCanCombo(false);
+        if (!player_->GetAttackAssistSettings().preserveTargetAcrossCombo)
+        {
+            player_->ClearAttackAssistTarget();
+        }
     }
 }
 
@@ -117,11 +197,15 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
         const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
         const float differenceX_ = targetPosition_.x - ownerPosition_.x;
         const float differenceZ_ = targetPosition_.z - ownerPosition_.z;
-        return differenceX_ * differenceX_ + differenceZ_ * differenceZ_ <= maximumDistanceSquared_;
+        const float distanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
+        return
+            distanceSquared_ <= maximumDistanceSquared_ &&
+            distanceSquared_ > MINIMUM_HORIZONTAL_LENGTH_SQUARED;
     };
 
     const std::shared_ptr<CameraLockOnComponent> lockOn_ = ResolveCameraLockOnComponent();
-    if (lockOn_ && lockOn_->IsLockOnEnabled())
+    const bool isLockOn_ = lockOn_ && lockOn_->IsLockOnEnabled();
+    if (isLockOn_)
     {
         const std::shared_ptr<GameObject> lockOnTarget_ = lockOn_->GetLockOnTarget();
         if (isValidTarget_(lockOnTarget_)) return lockOnTarget_;
@@ -133,29 +217,50 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
         camera_ = cameraManager_->GetActiveCamera();
     }
 
-    DirectX::XMFLOAT3 cameraForward_{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 moveInput_ = player_->GetMoveInput();
+    const bool hasMoveInput_ =
+        settings_.preferMoveInputDirection &&
+        NormalizeHorizontal(moveInput_) &&
+        std::sqrt(
+            player_->GetMoveInput().x * player_->GetMoveInput().x +
+            player_->GetMoveInput().z * player_->GetMoveInput().z) >=
+            (std::max)(settings_.minimumInputMagnitude, 0.0f);
+
+    DirectX::XMFLOAT3 cameraForward_{ 0.0f, 0.0f, 1.0f };
     bool hasCameraForward_ = false;
     if (camera_)
     {
         cameraForward_ = camera_->GetFront();
-        cameraForward_.y = 0.0f;
-        const float cameraLengthSquared_ =
-            cameraForward_.x * cameraForward_.x + cameraForward_.z * cameraForward_.z;
-        if (cameraLengthSquared_ > 0.000001f)
-        {
-            const float inverseLength_ = 1.0f / std::sqrt(cameraLengthSquared_);
-            cameraForward_.x *= inverseLength_;
-            cameraForward_.z *= inverseLength_;
-            hasCameraForward_ = true;
-        }
+        hasCameraForward_ = NormalizeHorizontal(cameraForward_);
     }
 
+    DirectX::XMFLOAT3 ownerForward_
+    {
+        owner_->transform->GetFront().x,
+        0.0f,
+        owner_->transform->GetFront().z
+    };
+    if (!NormalizeHorizontal(ownerForward_))
+    {
+        ownerForward_ = { 0.0f, 0.0f, 1.0f };
+    }
+
+    const float maximumAngleDegrees_ = isLockOn_
+        ? settings_.lockOnMaximumTargetAngleDegrees
+        : settings_.nonLockOnMaximumTargetAngleDegrees;
+    const float targetThreshold_ = std::cos(
+        std::clamp(maximumAngleDegrees_, 0.0f, 180.0f) * DEGREES_TO_RADIANS);
     const float centerThreshold_ = std::cos(
-        std::clamp(settings_.cameraCenterAngle, 0.0f, 180.0f) *
-        DirectX::XM_PI / 180.0f);
-    std::shared_ptr<GameObject> centerTarget_;
+        std::clamp(settings_.cameraCenterAngle, 0.0f, 180.0f) * DEGREES_TO_RADIANS);
+    const DirectX::XMFLOAT3 primaryDirection_ = hasMoveInput_
+        ? moveInput_
+        : (settings_.preferCameraForwardDirection && hasCameraForward_
+            ? cameraForward_
+            : ownerForward_);
+
+    std::shared_ptr<GameObject> bestTarget_;
     std::shared_ptr<GameObject> nearestTarget_;
-    float bestCenterDot_ = -1.0f;
+    float bestScore_ = -(std::numeric_limits<float>::max)();
     float nearestDistanceSquared_ = (std::numeric_limits<float>::max)();
 
     for (const std::shared_ptr<GameObject>& candidate_ : owner_->GetManager().GetObjects())
@@ -167,26 +272,118 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
         const float differenceZ_ = candidatePosition_.z - ownerPosition_.z;
         const float distanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
 
+        DirectX::XMFLOAT3 targetDirection_{ differenceX_, 0.0f, differenceZ_ };
+        if (!NormalizeHorizontal(targetDirection_)) continue;
+
+        const float primaryDot_ = DotHorizontal(targetDirection_, primaryDirection_);
+        if (primaryDot_ < targetThreshold_) continue;
+
         if (distanceSquared_ < nearestDistanceSquared_)
         {
             nearestDistanceSquared_ = distanceSquared_;
             nearestTarget_ = candidate_;
         }
 
-        if (!hasCameraForward_ || distanceSquared_ <= 0.000001f) continue;
+        const float cameraDot_ = hasCameraForward_
+            ? DotHorizontal(targetDirection_, cameraForward_)
+            : primaryDot_;
+        const float ownerDot_ = DotHorizontal(targetDirection_, ownerForward_);
+        const float distance_ = std::sqrt(distanceSquared_);
+        const float distanceScore_ = 1.0f - std::clamp(distance_ / (std::max)(settings_.searchDistance, 0.001f), 0.0f, 1.0f);
+        const float centerScore_ = hasCameraForward_ && cameraDot_ >= centerThreshold_
+            ? 0.2f
+            : 0.0f;
+        const float score_ =
+            primaryDot_ * 0.55f +
+            cameraDot_ * 0.2f +
+            ownerDot_ * 0.15f +
+            distanceScore_ * 0.1f +
+            centerScore_;
 
-        const float inverseDistance_ = 1.0f / std::sqrt(distanceSquared_);
-        const float centerDot_ =
-            differenceX_ * inverseDistance_ * cameraForward_.x +
-            differenceZ_ * inverseDistance_ * cameraForward_.z;
-        if (centerDot_ >= centerThreshold_ && centerDot_ > bestCenterDot_)
+        if (score_ > bestScore_)
         {
-            bestCenterDot_ = centerDot_;
-            centerTarget_ = candidate_;
+            bestScore_ = score_;
+            bestTarget_ = candidate_;
         }
     }
 
-    return centerTarget_ ? centerTarget_ : nearestTarget_;
+    if (bestTarget_) return bestTarget_;
+    return settings_.nonLockOnUseNearestFallback ? nearestTarget_ : nullptr;
+}
+
+void PlayerAttackState::ResolveAttackAssistTarget()
+{
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    PlayerControllerComponent* player_ = GetPlayerController();
+    if (!owner_ || !owner_->transform || !player_) return;
+
+    const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
+
+    DirectX::XMFLOAT3 startForward_
+    {
+        owner_->transform->GetFront().x,
+        0.0f,
+        owner_->transform->GetFront().z
+    };
+    if (!NormalizeHorizontal(startForward_))
+    {
+        startForward_ = { 0.0f, 0.0f, 1.0f };
+    }
+
+    DirectX::XMFLOAT3 moveInput_ = player_->GetMoveInput();
+    const float moveInputLength_ = std::sqrt(
+        moveInput_.x * moveInput_.x + moveInput_.z * moveInput_.z);
+    if (settings_.preferMoveInputDirection &&
+        moveInputLength_ >= (std::max)(settings_.minimumInputMagnitude, 0.0f) &&
+        NormalizeHorizontal(moveInput_))
+    {
+        startForward_ = moveInput_;
+    }
+
+    attackStartForward = startForward_;
+    lockedAssistDirection = startForward_;
+    hasLockedAssistDirection = true;
+
+    std::shared_ptr<GameObject> target_;
+    if (settings_.preserveTargetAcrossCombo)
+    {
+        const std::shared_ptr<GameObject> preservedTarget_ =
+            player_->GetAttackAssistTarget();
+        if (preservedTarget_ &&
+            preservedTarget_->transform &&
+            preservedTarget_->layer == LayerType::Enemy)
+        {
+            target_ = preservedTarget_;
+        }
+    }
+
+    if (settings_.lockTargetOnAttackEnter)
+    {
+        if (!target_)
+        {
+            target_ = FindAssistTarget();
+        }
+    }
+
+    attackAssistTarget = target_;
+    attackAssistTargetResolved = true;
+    player_->SetAttackAssistTarget(target_);
+
+    if (target_ && target_->transform)
+    {
+        const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
+        const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
+        DirectX::XMFLOAT3 targetDirection_
+        {
+            targetPosition_.x - ownerPosition_.x,
+            0.0f,
+            targetPosition_.z - ownerPosition_.z
+        };
+        if (NormalizeHorizontal(targetDirection_))
+        {
+            lockedAssistDirection = targetDirection_;
+        }
+    }
 }
 
 void PlayerAttackState::ApplyAttackAssist(float elapsedTime_)
@@ -198,8 +395,21 @@ void PlayerAttackState::ApplyAttackAssist(float elapsedTime_)
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
     if (!settings_.enabled || settings_.searchDistance <= 0.0f) return;
 
-    const std::shared_ptr<GameObject> target_ = FindAssistTarget();
-    if (!target_ || !target_->transform) return;
+    if (!attackAssistTargetResolved || settings_.allowRetargetDuringAttack)
+    {
+        ResolveAttackAssistTarget();
+    }
+
+    const std::shared_ptr<GameObject> target_ = attackAssistTarget.lock();
+    if (!target_ || !target_->transform)
+    {
+        if (settings_.stopAssistWhenTargetInvalid)
+        {
+            player_->ClearAttackAssistTarget();
+            attackAssistTarget.reset();
+        }
+        return;
+    }
 
     ApplyAttackFacingAssist(target_, elapsedTime_);
     ApplyAttackPositionAssist(target_, elapsedTime_);
@@ -217,6 +427,11 @@ void PlayerAttackState::ApplyAttackFacingAssist(
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
     if (settings_.strength <= 0.0f || settings_.turnSpeed <= 0.0f) return;
 
+    const float normalizedTime_ = GetAttackNormalizedTime();
+    const float assistWeight_ =
+        CalculateFacingAssistWeight(normalizedTime_, settings_) * settings_.strength;
+    if (assistWeight_ <= 0.0f) return;
+
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
     const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
 
@@ -227,15 +442,11 @@ void PlayerAttackState::ApplyAttackFacingAssist(
         targetPosition_.z - ownerPosition_.z
     };
 
-    const float desiredLengthSquared_ =
-        desiredDirection_.x * desiredDirection_.x +
-        desiredDirection_.z * desiredDirection_.z;
-
-    if (desiredLengthSquared_ <= 0.000001f) return;
-
-    const float desiredInverseLength_ = 1.0f / std::sqrt(desiredLengthSquared_);
-    desiredDirection_.x *= desiredInverseLength_;
-    desiredDirection_.z *= desiredInverseLength_;
+    if (!NormalizeHorizontal(desiredDirection_))
+    {
+        desiredDirection_ = lockedAssistDirection;
+        if (!NormalizeHorizontal(desiredDirection_)) return;
+    }
 
     const Vector3 currentForwardVector_ = owner_->transform->GetFront();
 
@@ -246,43 +457,43 @@ void PlayerAttackState::ApplyAttackFacingAssist(
         currentForwardVector_.z
     };
 
-    const float currentLengthSquared_ =
-        currentDirection_.x * currentDirection_.x +
-        currentDirection_.z * currentDirection_.z;
-
-    if (currentLengthSquared_ > 0.000001f)
+    if (!NormalizeHorizontal(currentDirection_))
     {
-        const float currentInverseLength_ = 1.0f / std::sqrt(currentLengthSquared_);
-        currentDirection_.x *= currentInverseLength_;
-        currentDirection_.z *= currentInverseLength_;
-    }
-    else
-    {
-        currentDirection_ = desiredDirection_;
+        currentDirection_ = attackStartForward;
+        if (!NormalizeHorizontal(currentDirection_))
+        {
+            currentDirection_ = desiredDirection_;
+        }
     }
 
-    const float blend_ = std::clamp(
-        settings_.turnSpeed * (std::max)(elapsedTime_, 0.0f) * settings_.strength,
-        0.0f,
-        1.0f);
+    const float currentYaw_ = GetYawDegrees(currentDirection_);
+    const float desiredYaw_ = GetYawDegrees(desiredDirection_);
+    float yawDifference_ = NormalizeAngleDegrees(desiredYaw_ - currentYaw_);
+    if (std::abs(yawDifference_) <= 0.001f) return;
 
-    DirectX::XMFLOAT3 correctedDirection_
+    const float remainingTotalDegrees_ =
+        (std::max)(settings_.maximumTotalRotationDegrees, 0.0f) -
+        accumulatedFacingCorrectionDegrees;
+    if (remainingTotalDegrees_ <= 0.0f) return;
+
+    const float maxDegreesPerSecond_ = (std::max)(settings_.turnSpeed * 36.0f, 0.0f);
+    const float frameLimitDegrees_ =
+        maxDegreesPerSecond_ * (std::max)(elapsedTime_, 0.0f) * assistWeight_;
+    const float allowedDegrees_ =
+        (std::min)(remainingTotalDegrees_, frameLimitDegrees_);
+    if (allowedDegrees_ <= 0.0f) return;
+
+    const float appliedYawDifference_ =
+        std::clamp(yawDifference_, -allowedDegrees_, allowedDegrees_);
+    const float correctedYaw_ = currentYaw_ + appliedYawDifference_;
+    DirectX::XMFLOAT3 correctedDirection_ = DirectionFromYawDegrees(correctedYaw_);
+
+    if (!NormalizeHorizontal(correctedDirection_))
     {
-        currentDirection_.x + (desiredDirection_.x - currentDirection_.x) * blend_,
-        0.0f,
-        currentDirection_.z + (desiredDirection_.z - currentDirection_.z) * blend_
-    };
+        return;
+    }
 
-    const float correctedLengthSquared_ =
-        correctedDirection_.x * correctedDirection_.x +
-        correctedDirection_.z * correctedDirection_.z;
-
-    if (correctedLengthSquared_ <= 0.000001f) return;
-
-    const float correctedInverseLength_ = 1.0f / std::sqrt(correctedLengthSquared_);
-    correctedDirection_.x *= correctedInverseLength_;
-    correctedDirection_.z *= correctedInverseLength_;
-
+    accumulatedFacingCorrectionDegrees += std::abs(appliedYawDifference_);
     player_->SetFacingDirection(correctedDirection_);
 }
 
@@ -347,6 +558,30 @@ void PlayerAttackState::ApplyAttackPositionAssist(
 
     player_->AddHorizontalVelocityAssist(toTarget_, assistSpeed_);
 }
+
+float PlayerAttackState::GetAttackNormalizedTime()
+{
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    if (owner_)
+    {
+        const std::shared_ptr<AnimationControllerComponent> animationController_ =
+            owner_->GetComponent<AnimationControllerComponent>();
+        if (animationController_)
+        {
+            const float duration_ = animationController_->GetCurrentSampleDuration();
+            if (duration_ > 0.000001f)
+            {
+                return std::clamp(
+                    animationController_->GetAnimatorTime() / duration_,
+                    0.0f,
+                    1.0f);
+            }
+        }
+    }
+
+    return std::clamp(attackElapsedTime, 0.0f, 1.0f);
+}
+
 std::shared_ptr<CameraLockOnComponent> PlayerAttackState::ResolveCameraLockOnComponent()
 {
     if (const std::shared_ptr<CameraLockOnComponent> cached_ = cameraLockOnComponent.lock())

@@ -227,6 +227,15 @@ namespace
         return (ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_) ||
             !IsAllowedCombatTriggerPair(colliderA_, colliderB_);
     }
+
+    bool CanStepCollider(const std::shared_ptr<ColliderComponent>& collider_)
+    {
+        if (!collider_ || !collider_->IsEnabled()) return false;
+        if (!collider_->IsStarted()) return false;
+
+        collider_->UpdateLoadState();
+        return collider_->IsLoadReady();
+    }
 }
 
 void CollisionStepSystem::RegisterCollider(
@@ -293,7 +302,7 @@ std::vector<std::shared_ptr<HitBox>> CollisionStepSystem::CollectActiveHitBoxes(
     {
         const std::shared_ptr<ColliderComponent> collider_ =
             registeredCollider_.lock();
-        if (!collider_ || !collider_->IsEnabled()) continue;
+        if (!CanStepCollider(collider_)) continue;
 
         if (const std::shared_ptr<HitBox> hitBox_ =
             std::dynamic_pointer_cast<HitBox>(collider_))
@@ -311,6 +320,7 @@ void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
     {
         if (const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock())
         {
+            if (!CanStepCollider(collider_)) continue;
             collider_->SyncFromPhysics(deltaTime_);
         }
     }
@@ -323,6 +333,7 @@ void CollisionStepSystem::PrepareInitialPhysicsState(float deltaTime_)
     {
         if (const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock())
         {
+            if (!CanStepCollider(collider_)) continue;
             collider_->PreparePhysicsStep(deltaTime_);
         }
     }
@@ -345,7 +356,7 @@ void CollisionStepSystem::Step(float deltaTime_)
         for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
         {
             const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock();
-            if (!collider_) continue;
+            if (!CanStepCollider(collider_)) continue;
 
             collider_->isGrounded = false;
             collider_->SetHitFlag(false);
