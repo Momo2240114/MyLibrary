@@ -16,6 +16,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/UI/ImGuiColorEditor.h"
 
 #include <algorithm>
 #include <cctype>
@@ -413,12 +414,12 @@ void ParticleComponent::Gui()
 
             if (s.useColorOverLife != 0)
             {
-                ImGui::ColorEdit4("Start Color", &s.colorStart.x);
-                ImGui::ColorEdit4("End Color", &s.colorEnd.x);
+                ImGuiColorEditor::DrawColorEdit4("Start Color", &s.colorStart.x);
+                ImGuiColorEditor::DrawColorEdit4("End Color", &s.colorEnd.x);
             }
             else
             {
-                ImGui::ColorEdit4("Color", &s.manualColor.x);
+                ImGuiColorEditor::DrawColorEdit4("Color", &s.manualColor.x);
             }
 
             ImGui::DragFloat2("Size Start/End", &s.emissionSize.x, 0.02f, 0.01f, 100.0f);

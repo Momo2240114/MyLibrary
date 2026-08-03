@@ -162,17 +162,28 @@ void HealthComponent::Gui()
         currentHealth = (std::clamp)(currentHealth, 0.0f, maxHealth);
         PublishToBlackboard();
     }
-    if (ImGui::Button("Damage 10"))
+    if (ImGui::Button("Damage 100"))
     {
-        ApplyDamage(10.0f);
+        ApplyDamage(100.0f);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Heal 10"))
+    if (ImGui::Button("Heal 100"))
     {
-        Heal(10.0f);
+        Heal(100.0f);
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset Health")) ResetHealth();
+    ImGui::InputFloat("Debug Health Amount", &debugHealthAmount, 10.0f, 100.0f);
+    debugHealthAmount = (std::max)(debugHealthAmount, 0.0f);
+    if (ImGui::Button("Damage Custom"))
+    {
+        ApplyDamage(debugHealthAmount);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Heal Custom"))
+    {
+        Heal(debugHealthAmount);
+    }
     ImGui::Text("Dead: %s", IsDead() ? "Yes" : "No");
 }
 

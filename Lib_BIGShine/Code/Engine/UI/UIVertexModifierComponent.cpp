@@ -3,6 +3,7 @@
 #include "UIVertexModifierComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/UI/ImGuiColorEditor.h"
 #include "imgui.h"
 
 namespace
@@ -63,7 +64,7 @@ void UIVertexModifierComponent::Gui()
         {
             ImGui::DragFloat2("Position Offset", &modification_.positionOffset.x, 1.0f);
             ImGui::DragFloat2("UV Offset", &modification_.uvOffset.x, 0.001f);
-            ImGui::ColorEdit4("Color Multiplier", &modification_.colorMultiplier.x);
+            ImGuiColorEditor::DrawColorEdit4("Color Multiplier", &modification_.colorMultiplier.x);
             ImGui::TreePop();
         }
     }

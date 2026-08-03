@@ -10,23 +10,35 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
+#include "Engine/UI/ImGuiColorEditor.h"
 
 
 void SpriteRenderer::Start()
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::Start");
+
     // 同じGameObjectからSpriteRendererを探して保持しておく
     if (auto obj = GetGameObject()) {
         transform = obj->transform;
     }
+    EnsureFallbackTexture(GraphicsDeviceManager::Instance().GetDevice());
 }
 
 
 void SpriteRenderer::Update(float deltaTime)
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::Update");
+    (void)deltaTime;
+
     // 同じGameObjectからSpriteRendererを探して保持しておく
     if (!transform.lock()) {
         auto obj = GetGameObject();
         transform = obj->transform;
+    }
+
+    if (!texture)
+    {
+        EnsureFallbackTexture(GraphicsDeviceManager::Instance().GetDevice());
     }
 }
 
@@ -45,6 +57,7 @@ void SpriteRenderer::Gui()
 
     h = catPos;
     if (ImGui::DragFloat2("catPosLeftTop", &h.x, 0.01f)) catPos = h;
+    ImGuiColorEditor::DrawColorEdit4("Color", &color.x);
 
     // --- Pivot設定の追加 ---
     const char* pivotNames[] = { "Top-Left", "Center", "Bottom-Center" };
@@ -87,9 +100,32 @@ void SpriteRenderer::Gui()
     }
 }
 
+void SpriteRenderer::SetTextureResource(
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture_,
+    const D3D11_TEXTURE2D_DESC& textureDesc_)
+{
+    texture = texture_;
+    texture2dDesc = textureDesc_;
+    textureSize =
+    {
+        static_cast<float>((std::max)(1u, texture2dDesc.Width)),
+        static_cast<float>((std::max)(1u, texture2dDesc.Height))
+    };
+    catPos = { 0.0f, 0.0f };
+    catSize = textureSize;
+    localSize = textureSize;
+}
+
 bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filename_)
 {
     BS_PROFILE_SCOPE("SpriteRenderer::LoadTexture");
+
+    if (filename_.empty())
+    {
+        texturePath.clear();
+        texture.Reset();
+        return EnsureFallbackTexture(device_);
+    }
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv_;
     //D3D11_TEXTURE2D_DESC desc_ = {};
@@ -119,6 +155,38 @@ bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filen
     // ComPtrに引き継ぎ
     texture = srv_;
 
+    return true;
+}
+
+bool SpriteRenderer::EnsureFallbackTexture(ID3D11Device* device_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderer::EnsureFallbackTexture");
+
+    if (texture) return true;
+    if (!device_) return false;
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> fallbackTexture_;
+    if (FAILED(CPUResourceLoader::CreateDummyTexture(
+        device_,
+        0xFFFFFFFFu,
+        fallbackTexture_.GetAddressOf())))
+    {
+        return false;
+    }
+
+    texture = fallbackTexture_;
+    texture2dDesc = {};
+    texture2dDesc.Width = 1;
+    texture2dDesc.Height = 1;
+    texture2dDesc.MipLevels = 1;
+    texture2dDesc.ArraySize = 1;
+    texture2dDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texture2dDesc.SampleDesc.Count = 1;
+    texture2dDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    texture2dDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    textureSize = { 1.0f, 1.0f };
+    catPos = { 0.0f, 0.0f };
+    catSize = { 1.0f, 1.0f };
     return true;
 }
 

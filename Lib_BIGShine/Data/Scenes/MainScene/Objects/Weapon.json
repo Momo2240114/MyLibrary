@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 35,
+                "AttackInstanceId": 32,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
@@ -23,7 +23,7 @@
                 "CollisionOwnerObjectName": "",
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
-                "Damage": 4.0,
+                "Damage": 100.0,
                 "DamageKey": "Damage",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [

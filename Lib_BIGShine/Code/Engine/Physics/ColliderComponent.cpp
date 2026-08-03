@@ -67,6 +67,61 @@ namespace
         return (std::max)(0.0f, (std::min)(value_, 1.0f));
     }
 
+    bool IsFiniteFloat(float value_)
+    {
+        return std::isfinite(value_);
+    }
+
+    bool IsFiniteFloat3(const DirectX::XMFLOAT3& value_)
+    {
+        return IsFiniteFloat(value_.x) &&
+            IsFiniteFloat(value_.y) &&
+            IsFiniteFloat(value_.z);
+    }
+
+    DirectX::XMFLOAT3 SanitizeScale(const DirectX::XMFLOAT3& scale_)
+    {
+        constexpr float MIN_SCALE = 0.001f;
+        return
+        {
+            IsFiniteFloat(scale_.x) ? (std::max)(std::abs(scale_.x), MIN_SCALE) : MIN_SCALE,
+            IsFiniteFloat(scale_.y) ? (std::max)(std::abs(scale_.y), MIN_SCALE) : MIN_SCALE,
+            IsFiniteFloat(scale_.z) ? (std::max)(std::abs(scale_.z), MIN_SCALE) : MIN_SCALE
+        };
+    }
+
+    float SanitizePositiveSize(float value_)
+    {
+        constexpr float MIN_SIZE = 0.001f;
+        if (!IsFiniteFloat(value_)) return MIN_SIZE;
+        return (std::max)(std::abs(value_), MIN_SIZE);
+    }
+
+    PxVec3 ToPxVec3(const DirectX::XMFLOAT3& value_)
+    {
+        return PxVec3(value_.x, value_.y, value_.z);
+    }
+
+    bool IsFinitePxVec3(const PxVec3& value_)
+    {
+        return IsFiniteFloat(value_.x) &&
+            IsFiniteFloat(value_.y) &&
+            IsFiniteFloat(value_.z);
+    }
+
+    bool TryBuildActorPose(
+        const DirectX::XMFLOAT3& position_,
+        const DirectX::XMFLOAT3& rotation_,
+        PxTransform& pose_)
+    {
+        if (!IsFiniteFloat3(position_) || !IsFiniteFloat3(rotation_)) return false;
+
+        pose_ = PxTransform(
+            PxVec3(position_.x, position_.y, position_.z),
+            EulerToPxQuat(rotation_));
+        return pose_.isSane();
+    }
+
     void ClosestPointsOnSegments(
         const DirectX::XMVECTOR& startA_,
         const DirectX::XMVECTOR& endA_,
@@ -413,23 +468,32 @@ void ColliderComponent::CreateCharacterController()
     scale_.x *= shapeSizeScale;
     scale_.y *= shapeSizeScale;
     scale_.z *= shapeSizeScale;
+    scale_ = SanitizeScale(scale_);
 
     auto material_ = GetShapeMaterial();
     if (!material_) return;
 
     physx::PxCapsuleControllerDesc desc_;
     desc_.material = material_;
-    desc_.position = physx::PxExtendedVec3(
+    const DirectX::XMFLOAT3 controllerPosition_
+    {
         transform_->localPosition.x + offset.x,
         transform_->localPosition.y + offset.y,
         transform_->localPosition.z + offset.z
+    };
+    if (!IsFiniteFloat3(controllerPosition_)) return;
+
+    desc_.position = physx::PxExtendedVec3(
+        controllerPosition_.x,
+        controllerPosition_.y,
+        controllerPosition_.z
     );
 
-    desc_.radius = std::max<float>(capsule_->radius * scale_.x, 0.001f);
+    desc_.radius = SanitizePositiveSize(capsule_->radius * scale_.x);
 
     // PxCapsuleControllerDesc::height は「円柱部分の高さ」。
     // 既存 CapsuleCollider の halfHeight が PhysX PxCapsuleGeometry の halfHeight と同じ意味なら *2。
-    desc_.height = std::max<float>(capsule_->halfHeight * 2.0f * scale_.y, 0.001f);
+    desc_.height = SanitizePositiveSize(capsule_->halfHeight * 2.0f * scale_.y);
 
     desc_.upDirection = physx::PxVec3(0.0f, 1.0f, 0.0f);
     const auto characterCollider_ = dynamic_cast<CharacterCollider*>(this);
@@ -550,9 +614,11 @@ void ColliderComponent::CreatePhysXActor()
     if (!owner_ || !physics_ || !scene_) return;
 
     auto transform_ = owner_->transform;
-    PxTransform pose_(
-        PxVec3(transform_->localPosition.x, transform_->localPosition.y, transform_->localPosition.z),
-        EulerToPxQuat(transform_->localRotation));
+    PxTransform pose_;
+    if (!transform_ || !TryBuildActorPose(transform_->localPosition, transform_->localRotation, pose_))
+    {
+        return;
+    }
 
     if (GetColliderType() == ColliderType::Mesh && !static_cast<MeshCollider*>(this)->convex)
     {
@@ -596,10 +662,13 @@ void ColliderComponent::UpdatePhysXShape()
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    if (!owner_->transform) return;
+
     auto scale_ = owner_->transform->GetWorldScale();
     scale_.x *= shapeSizeScale;
     scale_.y *= shapeSizeScale;
     scale_.z *= shapeSizeScale;
+    scale_ = SanitizeScale(scale_);
 
     if (!shape_)
     {
@@ -614,9 +683,9 @@ void ColliderComponent::UpdatePhysXShape()
             shape_ = PxRigidActorExt::createExclusiveShape(
                 *actor,
                 PxBoxGeometry(
-                    std::max<float>(box_->halfSize.x * scale_.x, 0.001f),
-                    std::max<float>(box_->halfSize.y * scale_.y, 0.001f),
-                    std::max<float>(box_->halfSize.z * scale_.z, 0.001f)),
+                    SanitizePositiveSize(box_->halfSize.x * scale_.x),
+                    SanitizePositiveSize(box_->halfSize.y * scale_.y),
+                    SanitizePositiveSize(box_->halfSize.z * scale_.z)),
                 *material_);
             break;
         }
@@ -625,7 +694,7 @@ void ColliderComponent::UpdatePhysXShape()
             auto sphere_ = static_cast<SphereCollider*>(this);
             shape_ = PxRigidActorExt::createExclusiveShape(
                 *actor,
-                PxSphereGeometry(std::max<float>(sphere_->radius * scale_.x, 0.001f)),
+                PxSphereGeometry(SanitizePositiveSize(sphere_->radius * scale_.x)),
                 *material_);
             break;
         }
@@ -635,8 +704,8 @@ void ColliderComponent::UpdatePhysXShape()
             shape_ = PxRigidActorExt::createExclusiveShape(
                 *actor,
                 PxCapsuleGeometry(
-                    std::max<float>(capsule_->radius * scale_.x, 0.001f),
-                    std::max<float>(capsule_->halfHeight * scale_.y, 0.001f)),
+                    SanitizePositiveSize(capsule_->radius * scale_.x),
+                    SanitizePositiveSize(capsule_->halfHeight * scale_.y)),
                 *material_);
             break;
         }
@@ -660,7 +729,7 @@ void ColliderComponent::UpdatePhysXShape()
             {
                 shape_ = PxRigidActorExt::createExclusiveShape(
                     *actor,
-                    PxConvexMeshGeometry(mesh_, PxMeshScale(PxVec3(scale_.x, scale_.y, scale_.z))),
+                    PxConvexMeshGeometry(mesh_, PxMeshScale(ToPxVec3(scale_))),
                     *material_);
                 mesh_->release();
             }
@@ -695,7 +764,7 @@ void ColliderComponent::UpdatePhysXShape()
 
 			// node.globalTransformにはModelのLocalScaleが含まれる。
 			// GameObject側のワールドスケールとCollider固有倍率はPhysXのMeshScaleで適用する。
-			const PxMeshScale meshScale_(PxVec3(scale_.x, scale_.y, scale_.z));
+			const PxMeshScale meshScale_(ToPxVec3(scale_));
             if (meshCollider_->convex)
             {
                 auto mesh_ = PhysXSystem::CreateConvexMesh(vertices_);
@@ -728,23 +797,23 @@ void ColliderComponent::UpdatePhysXShape()
         {
             auto box_ = static_cast<BoxCollider*>(this);
             shape_->setGeometry(PxBoxGeometry(
-                std::max<float>(box_->halfSize.x * scale_.x, 0.001f),
-                std::max<float>(box_->halfSize.y * scale_.y, 0.001f),
-                std::max<float>(box_->halfSize.z * scale_.z, 0.001f)));
+                SanitizePositiveSize(box_->halfSize.x * scale_.x),
+                SanitizePositiveSize(box_->halfSize.y * scale_.y),
+                SanitizePositiveSize(box_->halfSize.z * scale_.z)));
             break;
         }
         case ColliderType::Sphere:
         {
             auto sphere_ = static_cast<SphereCollider*>(this);
-            shape_->setGeometry(PxSphereGeometry(std::max<float>(sphere_->radius * scale_.x, 0.001f)));
+            shape_->setGeometry(PxSphereGeometry(SanitizePositiveSize(sphere_->radius * scale_.x)));
             break;
         }
         case ColliderType::Capsule:
         {
             auto capsule_ = static_cast<CapsuleCollider*>(this);
             shape_->setGeometry(PxCapsuleGeometry(
-                std::max<float>(capsule_->radius * scale_.x, 0.001f),
-                std::max<float>(capsule_->halfHeight * scale_.y, 0.001f)));
+                SanitizePositiveSize(capsule_->radius * scale_.x),
+                SanitizePositiveSize(capsule_->halfHeight * scale_.y)));
             break;
         }
         case ColliderType::Cylinder:
@@ -753,7 +822,7 @@ void ColliderComponent::UpdatePhysXShape()
             if (shape_->getGeometry().getType() == PxGeometryType::eCONVEXMESH)
             {
                 auto convexGeometry_ = static_cast<const PxConvexMeshGeometry&>(shape_->getGeometry());
-                convexGeometry_.scale = PxMeshScale(PxVec3(scale_.x, scale_.y, scale_.z));
+                convexGeometry_.scale = PxMeshScale(ToPxVec3(scale_));
                 shape_->setGeometry(convexGeometry_);
                 break;
             }
@@ -761,7 +830,7 @@ void ColliderComponent::UpdatePhysXShape()
             if (shape_->getGeometry().getType() == PxGeometryType::eTRIANGLEMESH)
             {
                 auto triangleGeometry_ = static_cast<const PxTriangleMeshGeometry&>(shape_->getGeometry());
-                triangleGeometry_.scale = PxMeshScale(PxVec3(scale_.x, scale_.y, scale_.z));
+                triangleGeometry_.scale = PxMeshScale(ToPxVec3(scale_));
                 shape_->setGeometry(triangleGeometry_);
             }
             break;
@@ -776,7 +845,11 @@ void ColliderComponent::UpdatePhysXShape()
     {
         shapeRotation_ = PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f));
     }
-    shape_->setLocalPose(PxTransform(PxVec3(offset.x, offset.y, offset.z), shapeRotation_));
+    if (!IsFiniteFloat3(offset)) return;
+    const PxTransform localPose_(PxVec3(offset.x, offset.y, offset.z), shapeRotation_);
+    if (!localPose_.isSane()) return;
+
+    shape_->setLocalPose(localPose_);
     shape_->setFlag(PxShapeFlag::eSIMULATION_SHAPE, !isTrigger);
     shape_->setFlag(PxShapeFlag::eTRIGGER_SHAPE, isTrigger);
 
@@ -799,11 +872,19 @@ void ColliderComponent::SyncFromPhysics(float dt_)
 
         if (HasExternalTransformChange())
         {
+            const DirectX::XMFLOAT3 controllerPosition_
+            {
+                owner_->transform->localPosition.x + offset.x,
+                owner_->transform->localPosition.y + offset.y,
+                owner_->transform->localPosition.z + offset.z
+            };
+            if (!IsFiniteFloat3(controllerPosition_)) return;
+
             characterController->setPosition(
                 PxExtendedVec3(
-                    owner_->transform->localPosition.x + offset.x,
-                    owner_->transform->localPosition.y + offset.y,
-                    owner_->transform->localPosition.z + offset.z));
+                    controllerPosition_.x,
+                    controllerPosition_.y,
+                    controllerPosition_.z));
             CaptureTransformSnapshot();
             return;
         }
@@ -951,11 +1032,19 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 
         if (HasExternalTransformChange())
         {
+            const DirectX::XMFLOAT3 controllerPosition_
+            {
+                owner_->transform->localPosition.x + offset.x,
+                owner_->transform->localPosition.y + offset.y,
+                owner_->transform->localPosition.z + offset.z
+            };
+            if (!IsFiniteFloat3(controllerPosition_)) return;
+
             characterController->setPosition(
                 PxExtendedVec3(
-                    owner_->transform->localPosition.x + offset.x,
-                    owner_->transform->localPosition.y + offset.y,
-                    owner_->transform->localPosition.z + offset.z));
+                    controllerPosition_.x,
+                    controllerPosition_.y,
+                    controllerPosition_.z));
             CaptureTransformSnapshot();
         }
 
@@ -975,12 +1064,16 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
         if (characterCollider_)
         {
             const std::shared_ptr<GameObject> ownerObject_ = GetGameObject();
-            const auto scale_ = ownerObject_ && ownerObject_->transform
+            auto scale_ = ownerObject_ && ownerObject_->transform
                 ? ownerObject_->transform->GetWorldScale()
                 : DirectX::XMFLOAT3{ 1.0f, 1.0f, 1.0f };
+            scale_.x *= shapeSizeScale;
+            scale_.y *= shapeSizeScale;
+            scale_.z *= shapeSizeScale;
+            scale_ = SanitizeScale(scale_);
             characterGeometry_ = PxCapsuleGeometry(
-                (std::max)(characterCollider_->radius * scale_.x * shapeSizeScale, 0.001f),
-                (std::max)(characterCollider_->halfHeight * scale_.y * shapeSizeScale, 0.001f));
+                SanitizePositiveSize(characterCollider_->radius * scale_.x),
+                SanitizePositiveSize(characterCollider_->halfHeight * scale_.y));
         }
 
         PxVec3 preNonGroundPushDisplacement_(0.0f, 0.0f, 0.0f);
@@ -1021,6 +1114,12 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
             velocity.x * safeDeltaTime_,
             verticalDisplacement_,
             velocity.z * safeDeltaTime_);
+        if (!IsFinitePxVec3(displacement_))
+        {
+            velocity = { 0.0f, 0.0f, 0.0f };
+            return;
+        }
+
         PxFilterData filterData_;
         filterData_.word0 = static_cast<PxU32>(owner_->layer);
         filterData_.word1 = owner_->mask;
@@ -1107,9 +1206,11 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
     UpdatePhysXShape();
 
     auto transform_ = owner_->transform;
-    PxTransform pose_(
-        PxVec3(transform_->localPosition.x, transform_->localPosition.y, transform_->localPosition.z),
-        EulerToPxQuat(transform_->localRotation));
+    PxTransform pose_;
+    if (!transform_ || !TryBuildActorPose(transform_->localPosition, transform_->localRotation, pose_))
+    {
+        return;
+    }
     actor->setGlobalPose(pose_);
     CaptureTransformSnapshot();
 
@@ -1224,9 +1325,12 @@ void ColliderComponent::PushTransformToPhysics()
     if (!owner_) return;
 
     const auto transform_ = owner_->transform;
-    actor->setGlobalPose(PxTransform(
-        PxVec3(transform_->localPosition.x, transform_->localPosition.y, transform_->localPosition.z),
-        EulerToPxQuat(transform_->localRotation)));
+    PxTransform pose_;
+    if (!transform_ || !TryBuildActorPose(transform_->localPosition, transform_->localRotation, pose_))
+    {
+        return;
+    }
+    actor->setGlobalPose(pose_);
 }
 
 void ColliderComponent::ApplyRoleDefaults()

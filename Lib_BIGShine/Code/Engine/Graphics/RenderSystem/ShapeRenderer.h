@@ -13,6 +13,7 @@ public:
 	~ShapeRenderSystem() {}
 
 	void Initialize(ID3D11Device* device);
+	void Finalize();
 
 	// 箱描画
 	void DrawBox(

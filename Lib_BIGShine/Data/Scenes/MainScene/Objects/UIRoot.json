@@ -1,0 +1,94 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "BoardId": "battle_hud",
+                "BoardLayer": 10,
+                "BoardName": "BattleHud",
+                "InputEnabled": true,
+                "ReferenceResolution": [
+                    1920.0,
+                    1080.0
+                ],
+                "ScaleMode": "SCALE_WITH_SCREEN_SIZE",
+                "Version": 1,
+                "Visible": true,
+                "ZOrder": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "WidgetBoardComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "InputEnabled": true,
+                "ParentWidgetId": "",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchorMin": [
+                        0.5,
+                        0.5
+                    ],
+                    "AnchoredPosition": [
+                        0.0,
+                        0.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "SizeDelta": [
+                        1920.0,
+                        1080.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "UIRoot",
+                "ZOrder": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "UIRoot",
+    "ParentName": "",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

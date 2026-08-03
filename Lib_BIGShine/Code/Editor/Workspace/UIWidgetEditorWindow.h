@@ -6,6 +6,7 @@
 #include <vector>
 
 class GameObject;
+class SpriteRenderer;
 class UIAnimationPlayerComponent;
 class UIWidgetComponent;
 class UIVertexModifierComponent;
@@ -24,6 +25,7 @@ private:
     {
         std::shared_ptr<GameObject> object;
         std::shared_ptr<UIWidgetComponent> widget;
+        std::shared_ptr<SpriteRenderer> sprite;
         std::shared_ptr<WidgetBoardComponent> board;
         std::shared_ptr<UIVertexModifierComponent> vertexModifier;
         std::shared_ptr<UIAnimationPlayerComponent> animationPlayer;

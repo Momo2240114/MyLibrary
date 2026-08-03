@@ -73,6 +73,11 @@ private:
         SpriteRenderCommand& renderCommand_,
         const DirectX::XMFLOAT2& screenSize_,
         std::array<SpriteVertex, 4>& vertices_);
+    void CalculateWidgetLayoutRecursive(
+        UIWidgetComponent* widget_,
+        WidgetBoardComponent* board_,
+        const DirectX::XMFLOAT2& screenSize_,
+        int depth_);
     void ApplyVertexModification(
         const SpriteRenderCommand& renderCommand_,
         const DirectX::XMFLOAT2& screenSize_,

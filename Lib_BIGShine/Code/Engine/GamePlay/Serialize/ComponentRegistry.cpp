@@ -41,6 +41,9 @@
 #include "Engine/Graphics/PostEffect/VignetteDirector.h"
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 #include "Engine/UI/NumberSwitcher.h"
+#include "Engine/UI/UIProgressBarComponent.h"
+#include "Engine/UI/UISpriteSheetComponent.h"
+#include "Engine/UI/UITextComponent.h"
 #include "Engine/UI/UIVertexModifierComponent.h"
 #include "Engine/UI/UIWidgetComponent.h"
 #include "Engine/UI/WidgetBoardComponent.h"
@@ -137,6 +140,9 @@ void RegisterAllComponents()
     registry.Register<UIButton>("UIButton");
     registry.Register<WidgetBoardComponent>("WidgetBoardComponent");
     registry.Register<UIWidgetComponent>("UIWidgetComponent");
+    registry.Register<UIProgressBarComponent>("UIProgressBarComponent");
+    registry.Register<UISpriteSheetComponent>("UISpriteSheetComponent");
+    registry.Register<UITextComponent>("UITextComponent");
     registry.Register<UIVertexModifierComponent>("UIVertexModifierComponent");
     registry.Register<UIAnimationPlayerComponent>("UIAnimationPlayerComponent");
     registry.Register<CameraDirector>("CameraDirector");

@@ -4,6 +4,7 @@
 #include "Engine/Common/misc.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 
+#include "Engine/Debug/TracyProfiler.h"
 
 void ShapeRenderSystem::Initialize(ID3D11Device* device)
 {
@@ -49,6 +50,25 @@ void ShapeRenderSystem::Initialize(ID3D11Device* device)
 
 	// 骨メッシュ生成
 	CreateBoneMesh(device, 1.0f);
+}
+
+void ShapeRenderSystem::Finalize()
+{
+	{
+		BS_PROFILE_SCOPE("ShapeRenderSystem::Finalize");
+	}
+
+	boxMesh.vertexBuffer.Reset();
+	sphereMesh.vertexBuffer.Reset();
+	halfSphereMesh.vertexBuffer.Reset();
+	cylinderMesh.vertexBuffer.Reset();
+	boneMesh.vertexBuffer.Reset();
+	unitBoxMesh.vertexBuffer.Reset();
+	instances.clear();
+	vertexShader.Reset();
+	pixelShader.Reset();
+	inputLayout.Reset();
+	constantBuffer.Reset();
 }
 
 

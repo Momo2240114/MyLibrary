@@ -3,7 +3,7 @@
     "AssetVersion": 1,
     "attack": {
         "allowMultiHit": false,
-        "damage": 16.0,
+        "damage": 400.0,
         "hitGroupId": 0,
         "hitStopDuration": 0.20000000298023224,
         "hitStopScale": 0.30000001192092896,

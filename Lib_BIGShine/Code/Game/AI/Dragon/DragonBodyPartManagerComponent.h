@@ -99,6 +99,7 @@ private:
     DragonBodyPartStatus* FindBodyPartStatus(DRAGON_BODY_PART bodyPart_);
     void ResolveHealthComponent();
     void RegisterAttackHitCallback();
+    void UpdateBossHpRate();
     void PublishLastDamageToBlackboard();
     void TryRequestDamageReaction(DragonBodyPartStatus& status_);
     void ExecuteBodyPartBrokenActions(const DragonBodyPartStatus& status_);
