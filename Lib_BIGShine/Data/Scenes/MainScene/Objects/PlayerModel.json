@@ -505,7 +505,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                0.0
                             ]
                         },
                         "GuardInput": {
@@ -788,8 +788,8 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.8358010649681091,
-                                -0.54903244972229
+                                -0.6704696416854858,
+                                0.7419370412826538
                             ]
                         },
                         "HitStopDuration": {
@@ -815,17 +815,17 @@
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.8334417939186096,
-                                -0.07508356869220734,
-                                -0.5474826693534851
+                                -0.6686106324195862,
+                                -0.07441473752260208,
+                                0.7398799061775208
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                41.19794845581055,
-                                2.260878562927246,
-                                -1.0771641731262207
+                                38.23536682128906,
+                                2.261380672454834,
+                                1.4637964963912964
                             ]
                         },
                         "ReactionDirection": {
@@ -890,7 +890,7 @@
                             "type": "vector2",
                             "value": [
                                 0.0,
-                                -1.0
+                                0.0
                             ]
                         },
                         "GuardInput": {
@@ -38611,9 +38611,10 @@
                 "blackboardCategory": "CameraComposition",
                 "clearTriggerKey": "Clear",
                 "closeRangeAssistBlendDistance": 1.0,
-                "closeRangeAssistDistanceOffset": 0.44999998807907104,
-                "closeRangeAssistHeightOffset": -2.0,
-                "closeRangeAssistMaximumDistance": 6.5,
+                "closeRangeAssistDistanceOffset": 12.5,
+                "closeRangeAssistHeightOffset": -3.0,
+                "closeRangeAssistMaximumDistance": 15.0,
+                "closeRangeAssistMaximumDistanceOffset": 20.0,
                 "closeRangeAssistMinimumDistance": 0.0,
                 "enableCloseRangePlayerAssist": true,
                 "maximumDistanceOffset": 1.5,
@@ -38801,13 +38802,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -11.191105842590332,
-            -0.12279093265533447,
-            -6.906938552856445
+            18.53438949584961,
+            -0.12279117107391357,
+            -10.812490463256836
         ],
         "Rot": [
             9.363552468111269e-12,
-            79.9625015258789,
+            6.56536865234375,
             1.1004056432284415e-05
         ],
         "Scale": [

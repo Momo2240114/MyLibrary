@@ -37,7 +37,10 @@ enum class DRAGON_ACTION_TYPE
     DEATH,
     FIRE_BALL_SWEEP,
     SPREAD_BREATH_FORWARD,
-    AIR_GET_HIT
+    AIR_GET_HIT,
+    AIR_DEATH_FALL_START,
+    FALLING,
+    DEATH_HIT_GROUND
 };
 
 enum class DRAGON_AI_STATE
@@ -175,7 +178,7 @@ private:
     void UpdateCooldowns(float deltaTime_);
     void UpdateDecision(float deltaTime_);
     void UpdateBehaviorGraph(float deltaTime_);
-    DRAGON_ACTION_TYPE SelectNextAirAction() const;
+    DRAGON_ACTION_TYPE SelectNextAirAction();
     bool ShouldWaitForIdleAnimation() const;
     bool UpdateIdleAnimationGraphReturn();
     void UpdateActionMotion(float deltaTime_);
@@ -189,7 +192,10 @@ private:
     void MoveGround(float speed_, float turnSpeed_, float deltaTime_);
     void MoveAir(float speed_, float turnSpeed_, float deltaTime_);
     void UpdateAirbornePhysics(float deltaTime_);
+    void UpdateLandingDescend(float deltaTime_);
     void SetAirbornePhysicsEnabled(bool enabled_);
+    bool IsGrounded();
+    bool IsReadyToPlayLandingAnimation();
     void StopMovement();
     void StartAction(DRAGON_ACTION_TYPE action_);
     void EnterRecovery();
@@ -232,6 +238,7 @@ private:
     bool IsAIControlledAction(DRAGON_ACTION_TYPE action_) const;
     bool IsSequencerControlledAction(DRAGON_ACTION_TYPE action_) const;
     bool IsAirborneAction(DRAGON_ACTION_TYPE action_) const;
+    bool IsDeathAction(DRAGON_ACTION_TYPE action_) const;
     bool IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const;
     float GetCooldown(DRAGON_ACTION_TYPE action_) const;
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);
@@ -285,6 +292,8 @@ private:
     float airTurnSpeed = 75.0f;
     float airHoverHeight = 10.0f;
     float airHoverAdjustSpeed = 8.0f;
+    float airLandingAnimationStartHeight = 0.5f;
+    float airLandingDescendSpeed = 12.0f;
     float turnSpeed = 6.0f;
     float walkSpeed = 5.0f;
     float runSpeed = 12.0f;
@@ -307,8 +316,8 @@ private:
     bool pendingSequencerActionEnd = false;
     bool pendingAirAttackDecision = false;
     bool pendingAirLandingDecision = false;
+    bool waitingForLandingGround = false;
     bool airbornePhysicsApplied = false;
-    bool previousColliderUseGravity = false;
 
     DRAGON_ACTION_TYPE debugAction = DRAGON_ACTION_TYPE::BITE;
     std::mt19937 randomEngine;

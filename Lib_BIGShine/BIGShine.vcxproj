@@ -537,6 +537,9 @@
     <ClCompile Include="Code\Engine\UI\UIButton.cpp" />
     <ClCompile Include="Code\Engine\UI\NumberSwitcher.cpp" />
     <ClCompile Include="Code\Engine\UI\UIAnimationPlayerComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIProgressBarComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UISpriteSheetComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UITextComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIVertexModifierComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
@@ -875,6 +878,10 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerState.h" />
     <ClInclude Include="Code\Engine\UI\NumberSwitcher.h" />
     <ClInclude Include="Code\Engine\UI\UIAnimationPlayerComponent.h" />
+    <ClInclude Include="Code\Engine\UI\ImGuiColorEditor.h" />
+    <ClInclude Include="Code\Engine\UI\UIProgressBarComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UISpriteSheetComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UITextComponent.h" />
     <ClInclude Include="Code\Engine\UI\UIVertexModifierComponent.h" />
     <ClInclude Include="Code\Engine\UI\UIWidgetComponent.h" />
     <ClInclude Include="Code\Engine\UI\WidgetBoardComponent.h" />

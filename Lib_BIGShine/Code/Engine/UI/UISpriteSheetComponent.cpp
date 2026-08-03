@@ -1,0 +1,135 @@
+#include "PrecompiledHeader.h"
+
+#include "UISpriteSheetComponent.h"
+
+#include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Core/Object/GameObject.h"
+#include "Engine/Graphics/Resource/Sprite.h"
+#include "imgui.h"
+
+#include <algorithm>
+
+void UISpriteSheetComponent::Start()
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::Start");
+    ResolveSpriteRenderer();
+    NormalizeSettings();
+    ApplySlice();
+}
+
+void UISpriteSheetComponent::Update(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::Update");
+    (void)deltaTime_;
+
+    if (spriteRenderer.expired())
+    {
+        ResolveSpriteRenderer();
+    }
+
+    if (applyEveryFrame)
+    {
+        ApplySlice();
+    }
+}
+
+void UISpriteSheetComponent::Gui()
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::Gui");
+
+    bool changed_ = false;
+    changed_ |= ImGui::DragInt("Column Count", &columnCount, 1.0f, 1, 256);
+    changed_ |= ImGui::DragInt("Row Count", &rowCount, 1.0f, 1, 256);
+    changed_ |= ImGui::DragInt("Column Index", &columnIndex, 1.0f, 0, 255);
+    changed_ |= ImGui::DragInt("Row Index", &rowIndex, 1.0f, 0, 255);
+    changed_ |= ImGui::DragFloat("Padding Left", &paddingLeft, 0.25f, 0.0f, 4096.0f);
+    changed_ |= ImGui::DragFloat("Padding Top", &paddingTop, 0.25f, 0.0f, 4096.0f);
+    changed_ |= ImGui::DragFloat("Padding Right", &paddingRight, 0.25f, 0.0f, 4096.0f);
+    changed_ |= ImGui::DragFloat("Padding Bottom", &paddingBottom, 0.25f, 0.0f, 4096.0f);
+    ImGui::Checkbox("Apply Every Frame", &applyEveryFrame);
+
+    if (changed_)
+    {
+        NormalizeSettings();
+        ApplySlice();
+    }
+
+    if (ImGui::Button("Apply Slice"))
+    {
+        ResolveSpriteRenderer();
+        NormalizeSettings();
+        ApplySlice();
+    }
+}
+
+void UISpriteSheetComponent::Serialize(nlohmann::json& json_) const
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::Serialize");
+
+    json_["Version"] = 1;
+    json_["ColumnCount"] = columnCount;
+    json_["RowCount"] = rowCount;
+    json_["ColumnIndex"] = columnIndex;
+    json_["RowIndex"] = rowIndex;
+    json_["PaddingLeft"] = paddingLeft;
+    json_["PaddingTop"] = paddingTop;
+    json_["PaddingRight"] = paddingRight;
+    json_["PaddingBottom"] = paddingBottom;
+    json_["ApplyEveryFrame"] = applyEveryFrame;
+}
+
+void UISpriteSheetComponent::Deserialize(const nlohmann::json& json_)
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::Deserialize");
+
+    columnCount = json_.value("ColumnCount", columnCount);
+    rowCount = json_.value("RowCount", rowCount);
+    columnIndex = json_.value("ColumnIndex", columnIndex);
+    rowIndex = json_.value("RowIndex", rowIndex);
+    paddingLeft = json_.value("PaddingLeft", paddingLeft);
+    paddingTop = json_.value("PaddingTop", paddingTop);
+    paddingRight = json_.value("PaddingRight", paddingRight);
+    paddingBottom = json_.value("PaddingBottom", paddingBottom);
+    applyEveryFrame = json_.value("ApplyEveryFrame", applyEveryFrame);
+    NormalizeSettings();
+}
+
+void UISpriteSheetComponent::ApplySlice()
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::ApplySlice");
+
+    const std::shared_ptr<SpriteRenderer> spriteRenderer_ = spriteRenderer.lock();
+    if (!spriteRenderer_) return;
+
+    const DirectX::XMFLOAT2 textureSize_ = spriteRenderer_->GetTextureSize();
+    const float usableWidth_ = (std::max)(1.0f, textureSize_.x - paddingLeft - paddingRight);
+    const float usableHeight_ = (std::max)(1.0f, textureSize_.y - paddingTop - paddingBottom);
+    const float cellWidth_ = usableWidth_ / static_cast<float>((std::max)(1, columnCount));
+    const float cellHeight_ = usableHeight_ / static_cast<float>((std::max)(1, rowCount));
+    const float left_ = paddingLeft + cellWidth_ * static_cast<float>(columnIndex);
+    const float top_ = paddingTop + cellHeight_ * static_cast<float>(rowIndex);
+
+    spriteRenderer_->SetUVRect(left_, top_, cellWidth_, cellHeight_);
+}
+
+void UISpriteSheetComponent::ResolveSpriteRenderer()
+{
+    BS_PROFILE_SCOPE("UISpriteSheetComponent::ResolveSpriteRenderer");
+
+    if (const std::shared_ptr<GameObject> gameObject_ = GetGameObject())
+    {
+        spriteRenderer = gameObject_->GetComponent<SpriteRenderer>();
+    }
+}
+
+void UISpriteSheetComponent::NormalizeSettings()
+{
+    columnCount = (std::max)(1, columnCount);
+    rowCount = (std::max)(1, rowCount);
+    columnIndex = std::clamp(columnIndex, 0, columnCount - 1);
+    rowIndex = std::clamp(rowIndex, 0, rowCount - 1);
+    paddingLeft = (std::max)(0.0f, paddingLeft);
+    paddingTop = (std::max)(0.0f, paddingTop);
+    paddingRight = (std::max)(0.0f, paddingRight);
+    paddingBottom = (std::max)(0.0f, paddingBottom);
+}

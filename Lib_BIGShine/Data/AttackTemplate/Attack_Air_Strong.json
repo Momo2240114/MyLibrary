@@ -4,7 +4,7 @@
     "attack": {
         "allowMultiHit": false,
         "attackerAirLiftPower": 5.0,
-        "damage": 10.0,
+        "damage": 250.0,
         "hitGroupId": 0,
         "hitStopDuration": 0.4000000059604645,
         "hitStopScale": 0.6000000238418579,

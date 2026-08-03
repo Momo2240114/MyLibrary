@@ -26,7 +26,7 @@
 namespace
 {
     constexpr int DRAGON_ACTION_COUNT =
-        static_cast<int>(DRAGON_ACTION_TYPE::AIR_GET_HIT) + 1;
+        static_cast<int>(DRAGON_ACTION_TYPE::DEATH_HIT_GROUND) + 1;
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
     constexpr float MIN_MOVE_DISTANCE = 0.001f;
@@ -88,6 +88,9 @@ const char* GetDragonActionName(DRAGON_ACTION_TYPE action_)
     case DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP: return "FireBallSweep";
     case DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD: return "SpreadBreathForward";
     case DRAGON_ACTION_TYPE::AIR_GET_HIT: return "AirGetHit";
+    case DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START: return "AirDeathFallStart";
+    case DRAGON_ACTION_TYPE::FALLING: return "Falling";
+    case DRAGON_ACTION_TYPE::DEATH_HIT_GROUND: return "DeathHitGround";
     default: return "Idle";
     }
 }
@@ -190,9 +193,11 @@ void DragonAIComponent::Update(float deltaTime_)
 
     if (health && health->IsDead())
     {
-        if (runtime.currentAction != DRAGON_ACTION_TYPE::DEATH)
+        if (!IsDeathAction(runtime.currentAction))
         {
-            StartAction(DRAGON_ACTION_TYPE::DEATH);
+            StartAction(IsGrounded()
+                ? DRAGON_ACTION_TYPE::DEATH
+                : DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START);
         }
     }
 
@@ -219,6 +224,12 @@ void DragonAIComponent::Update(float deltaTime_)
         if (runtime.currentAction == DRAGON_ACTION_TYPE::AIR_HOLD &&
             runtime.actionEnded)
         {
+            if (pendingAirLandingDecision &&
+                !IsReadyToPlayLandingAnimation())
+            {
+                SendRuntimeToBlackboard();
+                return;
+            }
             UpdateDecision(deltaTime_);
             SendRuntimeToBlackboard();
             return;
@@ -232,6 +243,17 @@ void DragonAIComponent::Update(float deltaTime_)
     }
     else if (aiState == DRAGON_AI_STATE::RECOVERY)
     {
+        if (waitingForLandingGround)
+        {
+            StopMovement();
+            if (!IsGrounded())
+            {
+                SendRuntimeToBlackboard();
+                return;
+            }
+            waitingForLandingGround = false;
+        }
+
         runtime.recoveryTimer -= deltaTime_;
         if (runtime.recoveryTimer <= 0.0f)
         {
@@ -382,6 +404,8 @@ void DragonAIComponent::Gui()
         ImGui::DragFloat("Air Turn Speed", &airTurnSpeed, 1.0f, 0.0f, 360.0f);
         ImGui::DragFloat("Air Hover Height", &airHoverHeight, 0.1f, 0.0f, 80.0f);
         ImGui::DragFloat("Air Hover Adjust Speed", &airHoverAdjustSpeed, 0.1f, 0.0f, 80.0f);
+        ImGui::DragFloat("Air Landing Start Height", &airLandingAnimationStartHeight, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat("Air Landing Descend Speed", &airLandingDescendSpeed, 0.1f, 0.0f, 80.0f);
         ImGui::DragFloat("Turn Speed", &turnSpeed, 0.1f, 0.0f, 30.0f);
         ImGui::DragFloat("Walk Speed", &walkSpeed, 0.1f, 0.0f, 30.0f);
         ImGui::DragFloat("Run Speed", &runSpeed, 0.1f, 0.0f, 60.0f);
@@ -509,6 +533,8 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
     json_["AirTurnSpeed"] = airTurnSpeed;
     json_["AirHoverHeight"] = airHoverHeight;
     json_["AirHoverAdjustSpeed"] = airHoverAdjustSpeed;
+    json_["AirLandingAnimationStartHeight"] = airLandingAnimationStartHeight;
+    json_["AirLandingDescendSpeed"] = airLandingDescendSpeed;
     json_["TurnSpeed"] = turnSpeed;
     json_["WalkSpeed"] = walkSpeed;
     json_["RunSpeed"] = runSpeed;
@@ -569,6 +595,8 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     airTurnSpeed = json_.value("AirTurnSpeed", 75.0f);
     airHoverHeight = json_.value("AirHoverHeight", 10.0f);
     airHoverAdjustSpeed = json_.value("AirHoverAdjustSpeed", 8.0f);
+    airLandingAnimationStartHeight = json_.value("AirLandingAnimationStartHeight", 0.5f);
+    airLandingDescendSpeed = json_.value("AirLandingDescendSpeed", 12.0f);
     turnSpeed = json_.value("TurnSpeed", 6.0f);
     walkSpeed = json_.value("WalkSpeed", 5.0f);
     runSpeed = json_.value("RunSpeed", 12.0f);
@@ -794,9 +822,11 @@ void DragonAIComponent::CompleteActionEnd()
         const std::string animationStateName_ = ResolveAnimationStateName(*definition_);
         ApplyAnimationBlackboard(animationActionName_, animationStateName_, false);
     }
-    if (runtime.currentAction == DRAGON_ACTION_TYPE::DEATH)
+    if (runtime.currentAction == DRAGON_ACTION_TYPE::DEATH ||
+        runtime.currentAction == DRAGON_ACTION_TYPE::DEATH_HIT_GROUND)
     {
         aiState = DRAGON_AI_STATE::DEAD;
+        SetAirbornePhysicsEnabled(false);
         StopMovement();
         SendRuntimeToBlackboard();
         return;
@@ -824,11 +854,26 @@ void DragonAIComponent::CompleteActionEnd()
     if (completedAction_ == DRAGON_ACTION_TYPE::LANDING_ATTACK)
     {
         SetAirbornePhysicsEnabled(false);
+        waitingForLandingGround = true;
+        StopMovement();
     }
     if (completedAction_ == DRAGON_ACTION_TYPE::AIR_GET_HIT)
     {
         pendingAirAttackDecision = false;
         StartAction(DRAGON_ACTION_TYPE::AIR_HOLD);
+        return;
+    }
+    if (completedAction_ == DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START)
+    {
+        SetAirbornePhysicsEnabled(false);
+        StartAction(IsGrounded()
+            ? DRAGON_ACTION_TYPE::DEATH_HIT_GROUND
+            : DRAGON_ACTION_TYPE::FALLING);
+        return;
+    }
+    if (completedAction_ == DRAGON_ACTION_TYPE::FALLING)
+    {
+        StartAction(DRAGON_ACTION_TYPE::DEATH_HIT_GROUND);
         return;
     }
 
@@ -1102,6 +1147,9 @@ void DragonAIComponent::InitializeDefaultDefinitions()
     addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP, "FireBallSweep", "PlainsDragon_SpitFireBall_Sweep", "", 1.6f, 0.5f, 2.5f, 2.8f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD, "SpreadBreathForward", "PlainsDragon_SpreadFire_Forward", "", 2.0f, 0.6f, 3.5f, 3.5f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::AIR_GET_HIT, "AirGetHit", "PlainsDragon_FlyStationaryGetHit", "", 0.5f, 0.0f, 0.5f, 1.0f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START, "AirDeathFallStart", "PlainsDragon_FlyStationaryGetHitToFalling", "", 1.0f, 0.0f, 0.0f, 2.0f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::FALLING, "Falling", "PlainsDragon_Falling", "", 1.0f, 0.0f, 0.0f, 0.0f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::DEATH_HIT_GROUND, "DeathHitGround", "PlainsDragon_DeathHitTheGround", "", 1.5f, 0.0f, 0.0f, 3.0f);
 
     ApplyActionDefinitionRuntimePolicies();
 
@@ -1190,6 +1238,28 @@ void DragonAIComponent::ApplyActionDefinitionRuntimePolicies()
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::AIR_GET_HIT))
     {
         definition_->cooldownTime = 0.5f;
+        definition_->recoveryTime = 0.0f;
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START))
+    {
+        definition_->finishMode = DRAGON_ACTION_FINISH_MODE::SEQUENCER;
+        definition_->useActionTimeout = true;
+        definition_->cooldownTime = 0.0f;
+        definition_->recoveryTime = 0.0f;
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FALLING))
+    {
+        definition_->finishMode = DRAGON_ACTION_FINISH_MODE::AI_CONDITION;
+        definition_->waitForActionEnd = false;
+        definition_->useActionTimeout = false;
+        definition_->cooldownTime = 0.0f;
+        definition_->recoveryTime = 0.0f;
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::DEATH_HIT_GROUND))
+    {
+        definition_->finishMode = DRAGON_ACTION_FINISH_MODE::SEQUENCER;
+        definition_->useActionTimeout = true;
+        definition_->cooldownTime = 0.0f;
         definition_->recoveryTime = 0.0f;
     }
 }
@@ -1347,12 +1417,16 @@ void DragonAIComponent::UpdateBehaviorGraph(float deltaTime_)
     ++behaviorGraphTickCount;
 }
 
-DRAGON_ACTION_TYPE DragonAIComponent::SelectNextAirAction() const
+DRAGON_ACTION_TYPE DragonAIComponent::SelectNextAirAction()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::SelectNextAirAction");
 
     if (pendingAirLandingDecision)
     {
+        if (!IsReadyToPlayLandingAnimation())
+        {
+            return DRAGON_ACTION_TYPE::AIR_HOLD;
+        }
         return DRAGON_ACTION_TYPE::LANDING_ATTACK;
     }
 
@@ -1433,6 +1507,11 @@ void DragonAIComponent::UpdateActionMotion(float deltaTime_)
         UpdateAirbornePhysics(deltaTime_);
         break;
     case DRAGON_ACTION_TYPE::AIR_HOLD:
+        if (pendingAirLandingDecision)
+        {
+            UpdateLandingDescend(deltaTime_);
+            break;
+        }
         UpdateAirbornePhysics(deltaTime_);
         MoveAir(airForwardSpeed, airTurnSpeed, deltaTime_);
         break;
@@ -1510,6 +1589,15 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
         }
         break;
     }
+    case DRAGON_ACTION_TYPE::FALLING:
+        if (IsGrounded())
+        {
+            StopMovement();
+            statusText = "AI finished Falling: ground reached.";
+            NotifyAIActionEnd();
+            return true;
+        }
+        break;
     default:
         break;
     }
@@ -1614,6 +1702,26 @@ void DragonAIComponent::UpdateAirbornePhysics(float deltaTime_)
     owner_->transform->AddMoveOffset({ 0.0f, deltaY_, 0.0f });
 }
 
+void DragonAIComponent::UpdateLandingDescend(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::UpdateLandingDescend");
+
+    SetAirbornePhysicsEnabled(true);
+    StopMovement();
+
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return;
+
+    const float currentY_ = owner_->transform->localPosition.y;
+    const float targetY_ = (std::max)(airLandingAnimationStartHeight, 0.0f);
+    const float maxStep_ = (std::max)(airLandingDescendSpeed, 0.0f) * deltaTime_;
+    const float deltaY_ = std::clamp(
+        targetY_ - currentY_,
+        -maxStep_,
+        maxStep_);
+    owner_->transform->AddMoveOffset({ 0.0f, deltaY_, 0.0f });
+}
+
 void DragonAIComponent::SetAirbornePhysicsEnabled(bool enabled_)
 {
     BS_PROFILE_SCOPE("DragonAIComponent::SetAirbornePhysicsEnabled");
@@ -1632,17 +1740,14 @@ void DragonAIComponent::SetAirbornePhysicsEnabled(bool enabled_)
             collider_ = owner_->GetComponent<ColliderComponent>();
         }
     }
-    if (!collider_) return;
-
     if (enabled_)
     {
-        if (!airbornePhysicsApplied)
+        airbornePhysicsApplied = true;
+        if (collider_)
         {
-            previousColliderUseGravity = collider_->useGravity;
-            airbornePhysicsApplied = true;
+            collider_->useGravity = false;
+            collider_->velocity.y = 0.0f;
         }
-        collider_->useGravity = false;
-        collider_->velocity.y = 0.0f;
         if (movement_)
         {
             movement_->ResetVerticalVelocity();
@@ -1651,16 +1756,53 @@ void DragonAIComponent::SetAirbornePhysicsEnabled(bool enabled_)
         return;
     }
 
-    if (airbornePhysicsApplied)
+    airbornePhysicsApplied = false;
+    if (collider_)
     {
-        collider_->useGravity = previousColliderUseGravity;
-        airbornePhysicsApplied = false;
+        collider_->useGravity = true;
+        if (collider_->velocity.y > 0.0f)
+        {
+            collider_->velocity.y = 0.0f;
+        }
     }
     if (movement_)
     {
         movement_->SetVerticalMovementLocked(false);
         movement_->ResetVerticalVelocity();
     }
+}
+
+bool DragonAIComponent::IsGrounded()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::IsGrounded");
+
+    const std::shared_ptr<CharacterMovementComponent> movement_ = movement.lock();
+    std::shared_ptr<ColliderComponent> collider_;
+    if (movement_)
+    {
+        collider_ = movement_->ResolveCollider();
+    }
+    if (!collider_)
+    {
+        const auto owner_ = GetGameObject();
+        if (owner_)
+        {
+            collider_ = owner_->GetComponent<ColliderComponent>();
+        }
+    }
+
+    return !collider_ || collider_->isGrounded;
+}
+
+bool DragonAIComponent::IsReadyToPlayLandingAnimation()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::IsReadyToPlayLandingAnimation");
+
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform) return true;
+
+    return owner_->transform->localPosition.y <=
+        (std::max)(airLandingAnimationStartHeight, 0.0f) + 0.001f;
 }
 
 void DragonAIComponent::StopMovement()
@@ -1687,12 +1829,12 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     runtime.actionEnded = false;
     runtime.canCancel = false;
     runtime.canBufferAction = definition_->allowBuffer;
+    waitingForLandingGround = false;
     statusText.clear();
 
     const bool usesAirbornePhysics_ =
-        action_ == DRAGON_ACTION_TYPE::TAKE_OFF ||
-        action_ == DRAGON_ACTION_TYPE::LANDING_ATTACK ||
-        IsAirborneAction(action_);
+        IsAirborneAction(action_) &&
+        action_ != DRAGON_ACTION_TYPE::LANDING_ATTACK;
     SetAirbornePhysicsEnabled(usesAirbornePhysics_);
 
     if (action_ == DRAGON_ACTION_TYPE::AIR_FIRE_BALL ||
@@ -1743,6 +1885,7 @@ void DragonAIComponent::FinishRecovery()
     aiState = DRAGON_AI_STATE::IDLE;
     pendingAirAttackDecision = false;
     pendingAirLandingDecision = false;
+    waitingForLandingGround = false;
     SetAirbornePhysicsEnabled(false);
     StopMovement();
     if (const DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::IDLE))
@@ -1941,6 +2084,9 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
         "PlainsDragon_FlyStationaryToLanding",
         "PlainsDragon_GetHit1",
         "PlainsDragon_FlyStationaryGetHit",
+        "PlainsDragon_FlyStationaryGetHitToFalling",
+        "PlainsDragon_Falling",
+        "PlainsDragon_DeathHitTheGround",
         "PlainsDragon_Death"
     };
 
@@ -2329,6 +2475,16 @@ bool DragonAIComponent::IsAirborneAction(DRAGON_ACTION_TYPE action_) const
     default:
         return false;
     }
+}
+
+bool DragonAIComponent::IsDeathAction(DRAGON_ACTION_TYPE action_) const
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::IsDeathAction");
+
+    return action_ == DRAGON_ACTION_TYPE::DEATH ||
+        action_ == DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START ||
+        action_ == DRAGON_ACTION_TYPE::FALLING ||
+        action_ == DRAGON_ACTION_TYPE::DEATH_HIT_GROUND;
 }
 
 bool DragonAIComponent::IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const

@@ -9,6 +9,7 @@
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/UI/ImGuiColorEditor.h"
 
 #include <algorithm>
 #include <cmath>
@@ -637,10 +638,10 @@ void TrailMeshComponent::Gui()
         MeshVFXPart& part_ = asset_.parts.front();
         ImGui::Checkbox("Use Trail Color Ramp", &part_.useTrailColorRamp);
         ImGui::BeginDisabled(!part_.useTrailColorRamp);
-        ImGui::ColorEdit4("Old Root Color", &part_.trailOldRootColor.x);
-        ImGui::ColorEdit4("Old Tip Color", &part_.trailOldTipColor.x);
-        ImGui::ColorEdit4("New Root Color", &part_.trailNewRootColor.x);
-        ImGui::ColorEdit4("New Tip Color", &part_.trailNewTipColor.x);
+        ImGuiColorEditor::DrawColorEdit4("Old Root Color", &part_.trailOldRootColor.x);
+        ImGuiColorEditor::DrawColorEdit4("Old Tip Color", &part_.trailOldTipColor.x);
+        ImGuiColorEditor::DrawColorEdit4("New Root Color", &part_.trailNewRootColor.x);
+        ImGuiColorEditor::DrawColorEdit4("New Tip Color", &part_.trailNewTipColor.x);
         ImGui::DragFloat("Recency Power", &part_.trailRecencyPower, 0.01f, 0.001f, 16.0f);
         ImGui::DragFloat("Tip Power", &part_.trailTipPower, 0.01f, 0.001f, 16.0f);
         ImGui::SliderFloat("Recency Intensity", &part_.trailRecencyIntensity, 0.0f, 1.0f);

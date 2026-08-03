@@ -6,9 +6,13 @@
 
 #include <d3d11.h>
 #include <d3d11sdklayers.h>
+#include <dxgidebug.h>
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Particle/ParticleEmitter.h"
+#include "Engine/Graphics/Resource/ModelResourceManager.h"
+#include "Engine/Graphics/Resource/TextureResourceManager.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
 
 struct SkyBoxVertex
 {
@@ -43,6 +47,39 @@ namespace
         }
 #else
         (void)device_;
+#endif
+    }
+
+    void ReportLiveDxgiObjects()
+    {
+#if defined(DEBUG) || defined(_DEBUG)
+        BS_PROFILE_SCOPE("GraphicsDeviceManager::ReportLiveDxgiObjects");
+
+        using DXGIGetDebugInterfaceFunc =
+            HRESULT(WINAPI*)(REFIID riid_, void** debugInterface_);
+
+        HMODULE dxgiDebugModule_ = LoadLibraryW(L"dxgidebug.dll");
+        if (!dxgiDebugModule_) return;
+
+        auto getDebugInterface_ = reinterpret_cast<DXGIGetDebugInterfaceFunc>(
+            GetProcAddress(dxgiDebugModule_, "DXGIGetDebugInterface"));
+        if (!getDebugInterface_)
+        {
+            FreeLibrary(dxgiDebugModule_);
+            return;
+        }
+
+        Microsoft::WRL::ComPtr<IDXGIDebug> dxgiDebug_;
+        if (SUCCEEDED(getDebugInterface_(IID_PPV_ARGS(dxgiDebug_.GetAddressOf()))))
+        {
+            dxgiDebug_->ReportLiveObjects(
+                DXGI_DEBUG_ALL,
+                static_cast<DXGI_DEBUG_RLO_FLAGS>(
+                    DXGI_DEBUG_RLO_DETAIL |
+                    DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+        }
+        dxgiDebug_.Reset();
+        FreeLibrary(dxgiDebugModule_);
 #endif
     }
 }
@@ -307,7 +344,11 @@ void GraphicsDeviceManager::Shutdown()
 
     postRenderSystem.Shutdown();
     cascadeShadowMap.Shutdown();
+    shapeRendererSystem.Finalize();
     ParticleEmitter::ShutdownSharedShaders();
+    VFXMaterialResourceManager::GetInstance().Clear();
+    TextureResourceManager::Instance().Clear();
+    ModelResourceManager::Instance().Clear();
     CPUResourceLoader::ReleaseAllTextures();
 
 
@@ -360,6 +401,7 @@ void GraphicsDeviceManager::Shutdown()
 
     // 最後にデバイスを消す
     device.Reset();
+    ReportLiveDxgiObjects();
 }
 /**
  * @brief ウィンドウサイズ変更時に呼び出される

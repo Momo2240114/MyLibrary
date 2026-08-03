@@ -14,6 +14,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Math/Curve/CurveComponent.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
+#include "Engine/UI/ImGuiColorEditor.h"
 
 #include <algorithm>
 #include <cctype>
@@ -2122,7 +2123,7 @@ void MeshVFXComponent::Gui()
                 if (ImGui::BeginTabItem("Material"))
                 {
 
-            ImGui::ColorEdit4("Color", &part_.color.x);
+            ImGuiColorEditor::DrawColorEdit4("Color", &part_.color.x);
             ImGui::DragFloat("Emissive Strength", &part_.emissiveStrength, 0.05f, 0.0f, 50.0f);
             ImGui::DragFloat("Emissive Pulse Speed", &part_.emissivePulseSpeed, 0.05f, 0.0f, 30.0f);
             ImGui::DragFloat("Emissive Pulse Amount", &part_.emissivePulseAmount, 0.01f, 0.0f, 2.0f);
@@ -2217,7 +2218,7 @@ void MeshVFXComponent::Gui()
             if (ImGui::TreeNode("Dissolve Edge"))
             {
                 ImGui::Checkbox("Use Dissolve Edge", &part_.useDissolveEdge);
-                ImGui::ColorEdit4("Dissolve Edge Color", &part_.dissolveEdgeColor.x);
+                ImGuiColorEditor::DrawColorEdit4("Dissolve Edge Color", &part_.dissolveEdgeColor.x);
                 ImGui::DragFloat("Dissolve Edge Width", &part_.dissolveEdgeWidth, 0.001f, 0.0f, 1.0f);
                 ImGui::DragFloat("Dissolve Edge Strength", &part_.dissolveEdgeStrength, 0.05f, 0.0f, 50.0f);
                 ImGui::TreePop();
@@ -2232,7 +2233,7 @@ void MeshVFXComponent::Gui()
             if (ImGui::TreeNode("Back Face Boost"))
             {
                 ImGui::Checkbox("Use Back Face Boost", &part_.useBackFaceBoost);
-                ImGui::ColorEdit4("Back Face Color", &part_.backFaceColor.x);
+                ImGuiColorEditor::DrawColorEdit4("Back Face Color", &part_.backFaceColor.x);
                 ImGui::DragFloat(
                     "Back Face Emissive Strength",
                     &part_.backFaceEmissiveStrength,
@@ -2272,7 +2273,7 @@ void MeshVFXComponent::Gui()
                 // Highlight silhouette and intersection edges on the mesh surface.
                 ImGui::Checkbox("Use Edge Highlight", &part_.useEdgeHighlight);
                 ImGui::TextDisabled("Highlights the mesh silhouette/intersection inside the mesh surface. It does not expand vertices.");
-                ImGui::ColorEdit4("Edge Color", &part_.edgeColor.x);
+                ImGuiColorEditor::DrawColorEdit4("Edge Color", &part_.edgeColor.x);
                 ImGui::DragFloat(
                     "Silhouette Edge Strength",
                     &part_.silhouetteEdgeStrength,

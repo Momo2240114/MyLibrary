@@ -9,6 +9,7 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
 #include "Engine/Physics/HurtBox.h"
+#include "Game/GameMode/GameModeManager.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -107,6 +108,7 @@ void DragonBodyPartManagerComponent::Start()
 {
     EnsureDefaultBodyParts();
     ResolveHealthComponent();
+    UpdateBossHpRate();
     RegisterAttackHitCallback();
     PublishLastDamageToBlackboard();
 }
@@ -116,6 +118,7 @@ void DragonBodyPartManagerComponent::Update(float deltaTime_)
     BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::Update");
 
     reactionCooldownTimer = (std::max)(0.0f, reactionCooldownTimer - deltaTime_);
+    UpdateBossHpRate();
 }
 
 BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
@@ -149,6 +152,7 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     {
         health->ApplyDamage(result_.appliedHealthDamage);
     }
+    UpdateBossHpRate();
 
     const bool wasBroken_ = status_->broken;
     status_->currentDurability = (std::max)(
@@ -236,6 +240,7 @@ void DragonBodyPartManagerComponent::ResetBodyParts()
     lastAttackerName.clear();
     lastHurtBoxName.clear();
     lastAttackInstanceId = 0;
+    UpdateBossHpRate();
     PublishLastDamageToBlackboard();
 }
 
@@ -270,6 +275,30 @@ void DragonBodyPartManagerComponent::ResolveHealthComponent()
     if (!owner_) return;
 
     health = owner_->GetOrAddComponent<HealthComponent>().get();
+}
+
+void DragonBodyPartManagerComponent::UpdateBossHpRate()
+{
+    BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::UpdateBossHpRate");
+
+    ResolveHealthComponent();
+
+    float bossHpRate_ = 1.0f;
+    if (health && health->GetMaxHealth() > 0.0f)
+    {
+        bossHpRate_ = (std::clamp)(
+            health->GetCurrentHealth() / health->GetMaxHealth(),
+            0.0f,
+            1.0f);
+    }
+
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    if (!owner_) return;
+
+    GameModeManager* gameModeManager_ = owner_->GetManager().GetGameModeManager();
+    if (!gameModeManager_) return;
+
+    gameModeManager_->SetBossHpRate(bossHpRate_);
 }
 
 void DragonBodyPartManagerComponent::RegisterAttackHitCallback()

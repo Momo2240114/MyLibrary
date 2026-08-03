@@ -6,6 +6,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
+#include "Engine/UI/ImGuiColorEditor.h"
 
 #include <algorithm>
 #include <imgui.h>
@@ -158,8 +159,8 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
 
     if (ImGui::CollapsingHeader("Color", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::ColorEdit4("Base Color", &materialData_.baseColor.x);
-        ImGui::ColorEdit3("Emissive Color", &materialData_.emissiveColor.x);
+        ImGuiColorEditor::DrawColorEdit4("Base Color", &materialData_.baseColor.x);
+        ImGuiColorEditor::DrawColorEdit3("Emissive Color", &materialData_.emissiveColor.x);
         ImGui::DragFloat("Emissive Intensity", &materialData_.emissiveIntensity, 0.05f, 0.0f, 100.0f);
         ImGui::DragFloat("Alpha", &materialData_.alpha, 0.01f, 0.0f, 1.0f);
     }
@@ -185,7 +186,7 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
         ImGui::Checkbox("Dissolve Enabled", &materialData_.dissolve.enabled);
         ImGui::DragFloat("Threshold", &materialData_.dissolve.threshold, 0.01f, 0.0f, 1.0f);
         ImGui::DragFloat("Edge Width", &materialData_.dissolve.edgeWidth, 0.01f, 0.0f, 1.0f);
-        ImGui::ColorEdit4("Edge Color", &materialData_.dissolve.edgeColor.x);
+        ImGuiColorEditor::DrawColorEdit4("Edge Color", &materialData_.dissolve.edgeColor.x);
     }
 
     if (ImGui::CollapsingHeader("Distortion"))
@@ -303,7 +304,7 @@ void VFXMaterialEditorWindow::DrawColorRampEditor(VFXMaterialColorRampData& colo
         ImGui::Text("Stop %d", stopIndex_);
         ImGui::DragFloat("Position", &stop_.position, 0.01f, 0.0f, 1.0f);
         stop_.position = std::clamp(stop_.position, 0.0f, 1.0f);
-        ImGui::ColorEdit4("Color", &stop_.color.x);
+        ImGuiColorEditor::DrawColorEdit4("Color", &stop_.color.x);
         if (colorRamp_.stops.size() > 1u && ImGui::Button("Remove Stop"))
         {
             removeIndex_ = stopIndex_;
@@ -330,8 +331,8 @@ void VFXMaterialEditorWindow::DrawRandomColorEditor(VFXMaterialRandomColorData& 
             std::clamp(mode_, 0, IM_ARRAYSIZE(modeNames_) - 1));
     }
 
-    ImGui::ColorEdit4("Random Min Color", &randomColor_.minColor.x);
-    ImGui::ColorEdit4("Random Max Color", &randomColor_.maxColor.x);
+    ImGuiColorEditor::DrawColorEdit4("Random Min Color", &randomColor_.minColor.x);
+    ImGuiColorEditor::DrawColorEdit4("Random Max Color", &randomColor_.maxColor.x);
     ImGui::DragFloat("Random Influence", &randomColor_.influence, 0.01f, 0.0f, 1.0f);
     ImGui::Checkbox("Random Affect Alpha", &randomColor_.affectAlpha);
 

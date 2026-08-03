@@ -17,6 +17,11 @@ namespace
 {
     constexpr float SPLITTER_SIZE = 6.0f;
 
+    ImU32 ToImColor(const DirectX::XMFLOAT4& color_)
+    {
+        return ImGui::ColorConvertFloat4ToU32(ImVec4(color_.x, color_.y, color_.z, color_.w));
+    }
+
     void DrawVerticalSplitter(const char* id_, float height_, float& width_, float direction_)
     {
         ImGui::InvisibleButton(id_, ImVec2(SPLITTER_SIZE, height_));
@@ -146,6 +151,7 @@ void UIWidgetEditorWindow::RefreshCache()
         WidgetEntry entry_;
         entry_.object = object_;
         entry_.widget = widget_;
+        entry_.sprite = object_->GetComponent<SpriteRenderer>();
         entry_.board = board_ ? board_ : ResolveBoard(object_);
         entry_.vertexModifier = object_->GetComponent<UIVertexModifierComponent>();
         entry_.animationPlayer = object_->GetComponent<UIAnimationPlayerComponent>();
@@ -342,6 +348,36 @@ void UIWidgetEditorWindow::DrawPreviewPanel(const ImVec2& previewSize_)
             designOrigin_.y + rect_.max.y * previewZoom);
         const bool selected_ = selectedObject.lock() == entry_.object;
         const ImU32 color_ = selected_ ? IM_COL32(70, 180, 210, 230) : IM_COL32(130, 150, 155, 170);
+        if (entry_.sprite && entry_.sprite->IsVisible())
+        {
+            const DirectX::XMFLOAT4 spriteColor_ = entry_.sprite->GetColor();
+            ID3D11ShaderResourceView* texture_ = entry_.sprite->GetTexture().Get();
+            if (texture_)
+            {
+                DirectX::XMFLOAT2 textureSize_ = entry_.sprite->GetTextureSize();
+                textureSize_.x = (std::max)(1.0f, textureSize_.x);
+                textureSize_.y = (std::max)(1.0f, textureSize_.y);
+
+                const DirectX::XMFLOAT2 catPos_ = entry_.sprite->GetCatPos();
+                const DirectX::XMFLOAT2 catSize_ = entry_.sprite->GetCatSize();
+                const ImVec2 uvMin_ = ImVec2(catPos_.x / textureSize_.x, catPos_.y / textureSize_.y);
+                const ImVec2 uvMax_ = ImVec2(
+                    (catPos_.x + catSize_.x) / textureSize_.x,
+                    (catPos_.y + catSize_.y) / textureSize_.y);
+
+                drawList_->AddImage(
+                    reinterpret_cast<ImTextureID>(texture_),
+                    min_,
+                    max_,
+                    uvMin_,
+                    uvMax_,
+                    ToImColor(spriteColor_));
+            }
+            else if (spriteColor_.w > 0.0f)
+            {
+                drawList_->AddRectFilled(min_, max_, ToImColor(spriteColor_));
+            }
+        }
         drawList_->AddRect(min_, max_, color_, 0.0f, 0, selected_ ? 3.0f : 1.5f);
         drawList_->AddText(ImVec2(min_.x + 4.0f, min_.y + 4.0f), color_, entry_.widget->GetWidgetId().c_str());
 

@@ -51,6 +51,7 @@ std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 void SceneBase::Finalize()
 {
 	m_SpriteRenderSystem.Finalize();
+	m_ShapeRenderSystem.Finalize();
 	actionRegistry.reset();
 
 

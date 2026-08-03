@@ -31,4 +31,5 @@ private:
 
     float maxHealth = 100.0f;
     float currentHealth = 100.0f;
+    float debugHealthAmount = 100.0f;
 };

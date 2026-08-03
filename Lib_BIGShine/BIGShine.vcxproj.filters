@@ -646,6 +646,15 @@
     <ClCompile Include="Code\Engine\UI\UIAnimationPlayerComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIProgressBarComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UISpriteSheetComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UITextComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\UI\UIVertexModifierComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
@@ -1423,6 +1432,18 @@
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIAnimationPlayerComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\ImGuiColorEditor.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIProgressBarComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UISpriteSheetComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UITextComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIVertexModifierComponent.h">

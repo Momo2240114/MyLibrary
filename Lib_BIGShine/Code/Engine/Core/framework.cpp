@@ -5,6 +5,9 @@
 #include "ImGui.h"
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
+#include "Engine/Graphics/Resource/ModelResourceManager.h"
+#include "Engine/Graphics/Resource/TextureResourceManager.h"
+#include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
 
 #include "Engine/Graphics/Resource/GltfModel.h"
 
@@ -371,6 +374,8 @@ LRESULT framework::handle_message(HWND hWnd_, UINT msg_, WPARAM wParam_, LPARAM 
 
 bool framework::uninitialize()
 {
+	BS_PROFILE_SCOPE("framework::uninitialize");
+
 	//m_pSceneGame->Finalize();
 	SceneManager::Clear();
 
@@ -378,13 +383,16 @@ bool framework::uninitialize()
 	AudioManager::Instance().Finalize();
 
 	spriteRenderSystem.Finalize();
-	GraphicsDeviceManager::Instance().Finalize();
 
 
-	ImNodes::DestroyContext();
-	// IMGUI終了化
 	ImGuiRenderer::Finalize();
+	ImNodes::DestroyContext();
 
+	VFXMaterialResourceManager::GetInstance().Clear();
+	TextureResourceManager::Instance().Clear();
+	ModelResourceManager::Instance().Clear();
+
+	GraphicsDeviceManager::Instance().Finalize();
 	return true;
 }
 

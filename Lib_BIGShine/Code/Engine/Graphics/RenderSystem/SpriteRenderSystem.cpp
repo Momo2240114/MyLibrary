@@ -288,8 +288,7 @@ void SpriteRenderSystem::ApplyWidgetLayout(
 
     if (!renderCommand_.widget || !renderCommand_.sprite) return;
 
-    UIWidgetComponent* parentWidget_ = renderCommand_.widget->GetParentWidget();
-    renderCommand_.widget->CalculateLayout(renderCommand_.widgetBoard, parentWidget_, screenSize_);
+    CalculateWidgetLayoutRecursive(renderCommand_.widget, renderCommand_.widgetBoard, screenSize_, 0);
 
     const UIScreenRect& rect_ = renderCommand_.widget->GetScreenRect();
     const UIRectTransform& rectTransform_ = renderCommand_.widget->GetRectTransform();
@@ -323,6 +322,30 @@ void SpriteRenderSystem::ApplyWidgetLayout(
         vertices_[index_].pos.y = ndc_.y;
         vertices_[index_].pos.z = z_;
     }
+}
+
+void SpriteRenderSystem::CalculateWidgetLayoutRecursive(
+    UIWidgetComponent* widget_,
+    WidgetBoardComponent* board_,
+    const DirectX::XMFLOAT2& screenSize_,
+    int depth_)
+{
+    BS_PROFILE_SCOPE("SpriteRenderSystem::CalculateWidgetLayoutRecursive");
+
+    if (!widget_ || depth_ > 32) return;
+
+    if (!widget_->GetParentWidgetId().empty() && !widget_->GetParentWidget())
+    {
+        widget_->ResolveParentWidget();
+    }
+
+    UIWidgetComponent* parentWidget_ = widget_->GetParentWidget();
+    if (parentWidget_)
+    {
+        CalculateWidgetLayoutRecursive(parentWidget_, board_, screenSize_, depth_ + 1);
+    }
+
+    widget_->CalculateLayout(board_, parentWidget_, screenSize_);
 }
 
 void SpriteRenderSystem::ApplyVertexModification(

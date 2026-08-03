@@ -46,6 +46,9 @@ public:
 
     // ===== セッター  =====
     void SetTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tex) { texture = tex; }
+    void SetTextureResource(
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture_,
+        const D3D11_TEXTURE2D_DESC& textureDesc_);
     void SetColor(const DirectX::XMFLOAT4& c) { color = c; }
     void SetVisible(bool v) { visible = v; }
     void SetLocalSize(const DirectX::XMFLOAT2& s) { localSize = s; }
@@ -93,6 +96,9 @@ public:
 
     void Deserialize(const nlohmann::json& j);
  
+private:
+    bool EnsureFallbackTexture(ID3D11Device* device_);
+
 private:
     // Sprite 独自設定
     DirectX::XMFLOAT2 localSize{ 1280,710 };//描画時のスクリーン座標の大きさ
