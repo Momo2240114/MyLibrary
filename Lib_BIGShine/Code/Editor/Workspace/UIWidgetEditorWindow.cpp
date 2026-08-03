@@ -229,26 +229,117 @@ void UIWidgetEditorWindow::DrawPreviewPanel(const ImVec2& previewSize_)
 {
     BS_PROFILE_SCOPE("UIWidgetEditorWindow::DrawPreviewPanel");
 
+    DirectX::XMFLOAT2 designSize_ = { 1920.0f, 1080.0f };
+    if (std::shared_ptr<GameObject> selectedObject_ = selectedObject.lock())
+    {
+        if (std::shared_ptr<WidgetBoardComponent> board_ = ResolveBoard(selectedObject_))
+        {
+            designSize_ = board_->GetReferenceResolution();
+        }
+    }
+    else if (!boardObjects.empty() && boardObjects.front())
+    {
+        if (std::shared_ptr<WidgetBoardComponent> board_ = boardObjects.front()->GetComponent<WidgetBoardComponent>())
+        {
+            designSize_ = board_->GetReferenceResolution();
+        }
+    }
+    designSize_.x = (std::max)(1.0f, designSize_.x);
+    designSize_.y = (std::max)(1.0f, designSize_.y);
+
+    ImGui::Text("Canvas %.0fx%.0f", designSize_.x, designSize_.y);
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Fit")) previewAutoFit = true;
+    ImGui::SameLine();
+    if (ImGui::SmallButton("100%"))
+    {
+        previewZoom = 1.0f;
+        previewPan = ImVec2(0.0f, 0.0f);
+        previewAutoFit = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Center"))
+    {
+        previewPan = ImVec2(0.0f, 0.0f);
+        previewAutoFit = false;
+    }
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(120.0f);
+    if (ImGui::SliderFloat("Zoom", &previewZoom, 0.05f, 4.0f, "%.2fx"))
+    {
+        previewAutoFit = false;
+    }
+
     ImDrawList* drawList_ = ImGui::GetWindowDrawList();
     const ImVec2 origin_ = ImGui::GetCursorScreenPos();
-    const ImVec2 canvasSize_ = ImVec2((std::max)(1.0f, previewSize_.x), (std::max)(1.0f, previewSize_.y));
+    const ImVec2 remainingSize_ = ImGui::GetContentRegionAvail();
+    const ImVec2 canvasSize_ = ImVec2(
+        (std::max)(1.0f, previewSize_.x),
+        (std::max)(1.0f, remainingSize_.y));
     const ImVec2 canvasEnd_ = ImVec2(origin_.x + canvasSize_.x, origin_.y + canvasSize_.y);
 
     ImGui::InvisibleButton("##UIWidgetPreviewCanvas", canvasSize_);
+    const bool canvasHovered_ = ImGui::IsItemHovered();
     const ImVec2 afterCanvasCursor_ = ImGui::GetCursorScreenPos();
     drawList_->AddRectFilled(origin_, canvasEnd_, IM_COL32(18, 21, 23, 255));
     drawList_->AddRect(origin_, canvasEnd_, IM_COL32(80, 92, 96, 255));
+
+    previewZoom = std::clamp(previewZoom, 0.05f, 4.0f);
+    const float fitZoom_ = (std::min)(
+        canvasSize_.x / designSize_.x,
+        canvasSize_.y / designSize_.y) * 0.95f;
+    if (previewAutoFit)
+    {
+        previewZoom = std::clamp(fitZoom_, 0.05f, 4.0f);
+        previewPan = ImVec2(
+            (canvasSize_.x - designSize_.x * previewZoom) * 0.5f,
+            (canvasSize_.y - designSize_.y * previewZoom) * 0.5f);
+    }
+
+    ImGuiIO& io_ = ImGui::GetIO();
+    if (canvasHovered_ && io_.MouseWheel != 0.0f)
+    {
+        const ImVec2 mouseLocal_ = ImVec2(io_.MousePos.x - origin_.x, io_.MousePos.y - origin_.y);
+        const float oldZoom_ = previewZoom;
+        const float zoomScale_ = io_.MouseWheel > 0.0f ? 1.1f : 1.0f / 1.1f;
+        previewZoom = std::clamp(previewZoom * zoomScale_, 0.05f, 4.0f);
+        if (oldZoom_ > 0.0001f)
+        {
+            previewPan.x = mouseLocal_.x - (mouseLocal_.x - previewPan.x) * (previewZoom / oldZoom_);
+            previewPan.y = mouseLocal_.y - (mouseLocal_.y - previewPan.y) * (previewZoom / oldZoom_);
+        }
+        previewAutoFit = false;
+    }
+    if (canvasHovered_ &&
+        (ImGui::IsMouseDragging(ImGuiMouseButton_Middle) || ImGui::IsMouseDragging(ImGuiMouseButton_Right)))
+    {
+        previewPan.x += io_.MouseDelta.x;
+        previewPan.y += io_.MouseDelta.y;
+        previewAutoFit = false;
+    }
+
+    const ImVec2 designOrigin_ = ImVec2(origin_.x + previewPan.x, origin_.y + previewPan.y);
+    const ImVec2 designEnd_ = ImVec2(
+        designOrigin_.x + designSize_.x * previewZoom,
+        designOrigin_.y + designSize_.y * previewZoom);
+    drawList_->PushClipRect(origin_, canvasEnd_, true);
+    drawList_->AddRectFilled(designOrigin_, designEnd_, IM_COL32(28, 32, 35, 255));
+    drawList_->AddRect(designOrigin_, designEnd_, IM_COL32(120, 135, 140, 255));
 
     for (WidgetEntry& entry_ : widgets)
     {
         if (!entry_.widget || !entry_.object) continue;
 
         UIWidgetComponent* parentWidget_ = ResolveParentWidget(entry_.widget.get());
-        entry_.widget->CalculateLayout(entry_.board.get(), parentWidget_, { canvasSize_.x, canvasSize_.y });
+        entry_.widget->CalculateLayout(entry_.board.get(), parentWidget_, designSize_);
         const UIScreenRect& rect_ = entry_.widget->GetScreenRect();
 
-        ImVec2 min_ = ImVec2(origin_.x + rect_.min.x, origin_.y + rect_.min.y);
-        ImVec2 max_ = ImVec2(origin_.x + rect_.max.x, origin_.y + rect_.max.y);
+        ImVec2 min_ = ImVec2(
+            designOrigin_.x + rect_.min.x * previewZoom,
+            designOrigin_.y + rect_.min.y * previewZoom);
+        ImVec2 max_ = ImVec2(
+            designOrigin_.x + rect_.max.x * previewZoom,
+            designOrigin_.y + rect_.max.y * previewZoom);
         const bool selected_ = selectedObject.lock() == entry_.object;
         const ImU32 color_ = selected_ ? IM_COL32(70, 180, 210, 230) : IM_COL32(130, 150, 155, 170);
         drawList_->AddRect(min_, max_, color_, 0.0f, 0, selected_ ? 3.0f : 1.5f);
@@ -267,14 +358,15 @@ void UIWidgetEditorWindow::DrawPreviewPanel(const ImVec2& previewSize_)
             const ImVec2 delta_ = ImGui::GetIO().MouseDelta;
             UIRectTransform& rectTransform_ = entry_.widget->GetRectTransform();
             const DirectX::XMFLOAT2 scale_ = entry_.board
-                ? entry_.board->CalculateBoardScale({ canvasSize_.x, canvasSize_.y })
+                ? entry_.board->CalculateBoardScale(designSize_)
                 : DirectX::XMFLOAT2{ 1.0f, 1.0f };
-            rectTransform_.anchoredPosition.x += delta_.x / (std::max)(0.0001f, scale_.x);
-            rectTransform_.anchoredPosition.y += delta_.y / (std::max)(0.0001f, scale_.y);
+            rectTransform_.anchoredPosition.x += delta_.x / (std::max)(0.0001f, scale_.x * previewZoom);
+            rectTransform_.anchoredPosition.y += delta_.y / (std::max)(0.0001f, scale_.y * previewZoom);
             entry_.widget->MarkLayoutDirty();
         }
         ImGui::PopID();
     }
+    drawList_->PopClipRect();
 
     ImGui::SetCursorScreenPos(afterCanvasCursor_);
     ImGui::Dummy(ImVec2(0.0f, 0.0f));

@@ -149,7 +149,8 @@
         "Tail03Part",
         "GameObject",
         "TestDamegeBox",
-        "JustDodgeEventPool"
+        "JustDodgeEventPool",
+        "UIObject"
     ],
     "SceneName": "MainScene"
 }

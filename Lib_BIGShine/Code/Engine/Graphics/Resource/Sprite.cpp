@@ -1,12 +1,15 @@
 #include "PrecompiledHeader.h"
 
 #include "Sprite.h"
+#include "Editor/AssetSlotGui.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "ImGui.h"
 
 #include "format"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/Platform/WindowsDialogHelper.h"
 
 
 void SpriteRenderer::Start()
@@ -29,6 +32,8 @@ void SpriteRenderer::Update(float deltaTime)
 
 void SpriteRenderer::Gui()
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::Gui");
+
     auto t_ = transform.lock();
     if (!t_) return;
 
@@ -52,31 +57,27 @@ void SpriteRenderer::Gui()
     ImGui::Separator();
 
 
-    // --- ファイル選択コンボボックス ---
-    const char* previewValue = (selectedFileIndex >= 0) ? spriteFiles[selectedFileIndex].c_str() : "Select a sprite...";
-
-    if (ImGui::BeginCombo("Sprite Texture", previewValue)) {
-        for (int i = 0; i < (int)spriteFiles.size(); i++) {
-            const bool isSelected = (selectedFileIndex == i);
-            if (ImGui::Selectable(spriteFiles[i].c_str(), isSelected)) {
-                selectedFileIndex = i;
-
-                // ファイルが選ばれたら即座にロード
-                std::string fullPath = "Data/Sprite/" + spriteFiles[i];
-                LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), fullPath.c_str()); // 前に作ったロード関数を呼び出す
-            }
-            ;
-
-            if (isSelected) {
-                ImGui::SetItemDefaultFocus();
-            }
+    // --- Asset Browser compatible texture slot ---
+    std::string selectedTexturePath_ = texturePath;
+    if (AssetSlotGui::Draw(
+        "Sprite Texture",
+        AssetSlotType::TEXTURE,
+        selectedTexturePath_,
+        texture.Get(),
+        "Data/Sprite"))
+    {
+        if (selectedTexturePath_.empty())
+        {
+            texture.Reset();
+            texturePath.clear();
+            texture2dDesc = {};
+            textureSize = { 1.0f, 1.0f };
+            selectedFileIndex = -1;
         }
-        ImGui::EndCombo();
-    }
-
-    // 更新ボタン（フォルダに新しい画像を入れた時用）
-    if (ImGui::Button("Refresh Folder")) {
-        RefreshSpriteFileList();
+        else
+        {
+            LoadTexture(GraphicsDeviceManager::Instance().GetDevice(), selectedTexturePath_);
+        }
     }
 
     if (texture) {
@@ -88,15 +89,17 @@ void SpriteRenderer::Gui()
 
 bool SpriteRenderer::LoadTexture(ID3D11Device* device_, const std::string& filename_)
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::LoadTexture");
+
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv_;
     //D3D11_TEXTURE2D_DESC desc_ = {};
 
         // std::string を wchar_t* (std::wstring) に変換
-    std::wstring wpath = std::wstring(filename_.begin(), filename_.end());
+    const std::wstring wpath_ = WindowsDialogHelper::Utf8ToPath(filename_).wstring();
 
     HRESULT hr = CPUResourceLoader::LoadTextureFromFile(
         device_,
-        wpath.c_str(),
+        wpath_.c_str(),
         srv_.GetAddressOf(),
         &texture2dDesc
     );
@@ -189,6 +192,8 @@ bool SpriteRenderer::GetRenderData(RenderData& outData_) const
 
 void SpriteRenderer::RefreshSpriteFileList()
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::RefreshSpriteFileList");
+
     spriteFiles.clear();
     std::string path = "Data/Sprite/";
 
@@ -208,6 +213,8 @@ void SpriteRenderer::RefreshSpriteFileList()
 
 void SpriteRenderer::Serialize(nlohmann::json& j) const
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::Serialize");
+
     // パス正規化ロジックの踏襲
     std::string pathForSave = texturePath; // 読み込み時のパスを保持しておく変数が必要
     if (!pathForSave.empty()) {
@@ -230,6 +237,8 @@ void SpriteRenderer::Serialize(nlohmann::json& j) const
 
 void SpriteRenderer::Deserialize(const nlohmann::json& j)
 {
+    BS_PROFILE_SCOPE("SpriteRenderer::Deserialize");
+
     if (j.contains("TexturePath")) {
         std::string name = j["TexturePath"];
         if (!name.empty()) {

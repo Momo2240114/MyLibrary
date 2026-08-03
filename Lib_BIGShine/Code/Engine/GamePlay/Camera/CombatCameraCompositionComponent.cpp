@@ -72,6 +72,7 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
     if (!lockOn_ || !lockOn_->IsLockOnEnabled())
     {
         debugAppliedCorrection = {};
+        debugCloseRangeAssistWeight = 0.0f;
         return;
     }
 
@@ -87,8 +88,16 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
 
     if (!hasActiveLayer_)
     {
-        lockOn_->ClearCompositionCorrection();
-        debugAppliedCorrection = {};
+        debugAppliedCorrection =
+            ClampCorrection(BuildCloseRangePlayerCorrection());
+        if (debugAppliedCorrection.weight > 0.0001f)
+        {
+            lockOn_->SetCompositionCorrection(debugAppliedCorrection);
+        }
+        else
+        {
+            lockOn_->ClearCompositionCorrection();
+        }
         return;
     }
 
@@ -179,6 +188,7 @@ void CombatCameraCompositionComponent::ClearPreset()
         layer_ = {};
     }
     debugAppliedCorrection = {};
+    debugCloseRangeAssistWeight = 0.0f;
     if (const std::shared_ptr<CameraLockOnComponent> lockOn_ = lockOnCamera.lock())
     {
         lockOn_->ClearCompositionCorrection();
@@ -580,7 +590,7 @@ CombatCameraCompositionComponent::BuildCorrection(
 LockOnCameraCompositionCorrection
 CombatCameraCompositionComponent::BuildLayeredCorrection() const
 {
-    LockOnCameraCompositionCorrection result_;
+    LockOnCameraCompositionCorrection result_ = BuildCloseRangePlayerCorrection();
     for (const CameraCompositionLayerState& layer_ : layers)
     {
         if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) continue;
@@ -602,6 +612,61 @@ CombatCameraCompositionComponent::BuildLayeredCorrection() const
     return ClampCorrection(result_);
 }
 
+float CombatCameraCompositionComponent::CalculateCloseRangeAssistWeight(
+    float targetDistance_) const
+{
+    if (!enableCloseRangePlayerAssist) return 0.0f;
+    if (closeRangeAssistMaximumDistance <= closeRangeAssistMinimumDistance)
+    {
+        return 0.0f;
+    }
+    if (targetDistance_ < closeRangeAssistMinimumDistance ||
+        targetDistance_ > closeRangeAssistMaximumDistance)
+    {
+        return 0.0f;
+    }
+
+    const float blendDistance_ =
+        (std::max)(closeRangeAssistBlendDistance, 0.0f);
+    if (blendDistance_ <= 0.0001f) return 1.0f;
+
+    const float inWeight_ = closeRangeAssistMinimumDistance > 0.0001f
+        ? std::clamp(
+            (targetDistance_ - closeRangeAssistMinimumDistance) / blendDistance_,
+            0.0f,
+            1.0f)
+        : 1.0f;
+    const float outWeight_ = std::clamp(
+        (closeRangeAssistMaximumDistance - targetDistance_) / blendDistance_,
+        0.0f,
+        1.0f);
+    return SmoothStep((std::min)(inWeight_, outWeight_));
+}
+
+LockOnCameraCompositionCorrection
+CombatCameraCompositionComponent::BuildCloseRangePlayerCorrection() const
+{
+    BS_PROFILE_SCOPE("CombatCameraCompositionComponent::BuildCloseRangePlayerCorrection");
+    LockOnCameraCompositionCorrection correction_;
+    const std::shared_ptr<CameraLockOnComponent> lockOn_ = lockOnCamera.lock();
+    if (!lockOn_)
+    {
+        debugCloseRangeAssistWeight = 0.0f;
+        return correction_;
+    }
+
+    const float weight_ =
+        CalculateCloseRangeAssistWeight(lockOn_->GetCurrentTargetDistance());
+    debugCloseRangeAssistWeight = weight_;
+    if (weight_ <= 0.0001f) return correction_;
+
+    correction_.distanceOffset = closeRangeAssistDistanceOffset;
+    correction_.heightOffset = closeRangeAssistHeightOffset;
+    correction_.lookAtHeightOffset = 0.0f;
+    correction_.weight = weight_;
+    return correction_;
+}
+
 LockOnCameraCompositionCorrection
 CombatCameraCompositionComponent::ClampCorrection(
     const LockOnCameraCompositionCorrection& correction_) const
@@ -611,13 +676,21 @@ CombatCameraCompositionComponent::ClampCorrection(
         result_.sideOffset,
         -std::abs(maximumSideOffset),
         std::abs(maximumSideOffset));
+    const float maximumCameraDistanceOffset_ = enableCloseRangePlayerAssist
+        ? (std::max)(
+            maximumDistanceOffset,
+            closeRangeAssistMaximumDistanceOffset)
+        : maximumDistanceOffset;
     result_.distanceOffset = std::clamp(
         result_.distanceOffset,
         minimumDistanceOffset,
-        maximumDistanceOffset);
+        maximumCameraDistanceOffset_);
+    const float minimumCameraHeightOffset_ = enableCloseRangePlayerAssist
+        ? (std::min)(minimumHeightOffset, closeRangeAssistHeightOffset)
+        : minimumHeightOffset;
     result_.heightOffset = std::clamp(
         result_.heightOffset,
-        minimumHeightOffset,
+        minimumCameraHeightOffset_,
         maximumHeightOffset);
     result_.lookAtHeightOffset = std::clamp(
         result_.lookAtHeightOffset,
@@ -723,6 +796,40 @@ void CombatCameraCompositionComponent::Gui()
         lockOnCamera.lock() ? lockOnCamera.lock()->GetCurrentTargetDistance() : 0.0f);
     ImGui::Text("Wall Rate: %.3f",
         lockOnCamera.lock() ? lockOnCamera.lock()->GetWallCameraRate() : 0.0f);
+    ImGui::SeparatorText("Close Range Player Assist");
+    ImGui::Checkbox("Enable Close Range Assist", &enableCloseRangePlayerAssist);
+    ImGui::Text("Assist Weight: %.3f", debugCloseRangeAssistWeight);
+    ImGui::DragFloatRange2(
+        "Assist Distance Range",
+        &closeRangeAssistMinimumDistance,
+        &closeRangeAssistMaximumDistance,
+        0.05f,
+        0.0f,
+        100.0f);
+    ImGui::DragFloat(
+        "Assist Blend Distance",
+        &closeRangeAssistBlendDistance,
+        0.05f,
+        0.0f,
+        20.0f);
+    ImGui::DragFloat(
+        "Assist Distance Offset",
+        &closeRangeAssistDistanceOffset,
+        0.01f,
+        -20.0f,
+        50.0f);
+    ImGui::DragFloat(
+        "Assist Max Distance Offset",
+        &closeRangeAssistMaximumDistanceOffset,
+        0.05f,
+        0.0f,
+        50.0f);
+    ImGui::DragFloat(
+        "Assist Height Offset",
+        &closeRangeAssistHeightOffset,
+        0.01f,
+        -5.0f,
+        5.0f);
 
     char targetBuffer_[128]{};
     strcpy_s(targetBuffer_, targetCameraObjectName.c_str());
@@ -848,6 +955,17 @@ void CombatCameraCompositionComponent::Serialize(nlohmann::json& json_) const
     json_["maximumFovOffset"] = maximumFovOffset;
     json_["minimumFocusTargetRateOffset"] = minimumFocusTargetRateOffset;
     json_["maximumFocusTargetRateOffset"] = maximumFocusTargetRateOffset;
+    json_["enableCloseRangePlayerAssist"] = enableCloseRangePlayerAssist;
+    json_["closeRangeAssistMinimumDistance"] =
+        closeRangeAssistMinimumDistance;
+    json_["closeRangeAssistMaximumDistance"] =
+        closeRangeAssistMaximumDistance;
+    json_["closeRangeAssistBlendDistance"] = closeRangeAssistBlendDistance;
+    json_["closeRangeAssistDistanceOffset"] =
+        closeRangeAssistDistanceOffset;
+    json_["closeRangeAssistMaximumDistanceOffset"] =
+        closeRangeAssistMaximumDistanceOffset;
+    json_["closeRangeAssistHeightOffset"] = closeRangeAssistHeightOffset;
     json_["presets"] = nlohmann::json::array();
 
     for (const CameraCompositionPreset& preset_ : presets)
@@ -902,6 +1020,20 @@ void CombatCameraCompositionComponent::Deserialize(const nlohmann::json& json_)
         json_.value("minimumFocusTargetRateOffset", -0.2f);
     maximumFocusTargetRateOffset =
         json_.value("maximumFocusTargetRateOffset", 0.25f);
+    enableCloseRangePlayerAssist =
+        json_.value("enableCloseRangePlayerAssist", true);
+    closeRangeAssistMinimumDistance =
+        json_.value("closeRangeAssistMinimumDistance", 0.0f);
+    closeRangeAssistMaximumDistance =
+        json_.value("closeRangeAssistMaximumDistance", 6.5f);
+    closeRangeAssistBlendDistance =
+        json_.value("closeRangeAssistBlendDistance", 1.0f);
+    closeRangeAssistDistanceOffset =
+        json_.value("closeRangeAssistDistanceOffset", 0.45f);
+    closeRangeAssistMaximumDistanceOffset =
+        json_.value("closeRangeAssistMaximumDistanceOffset", 10.0f);
+    closeRangeAssistHeightOffset =
+        json_.value("closeRangeAssistHeightOffset", -2.0f);
 
     presets.clear();
     if (json_.contains("presets") && json_["presets"].is_array())

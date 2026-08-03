@@ -16,6 +16,8 @@
 namespace ax { namespace NodeEditor { struct EditorContext; } }
 
 
+// アニメーション再生、遷移グラフ、SequencerイベントをまとめるComponent。
+// PlayerStateやAIが決めた行動を見た目のStateへ変換し、必要なActionRegistry呼び出しもここから流す。
 class AnimationControllerComponent : public Component
 {
 public:
@@ -136,6 +138,8 @@ private:
         std::vector<std::string> actionNames;
     };
 
+    // Sequencer編集データをRuntime再生へ渡すためのAdapter。
+    // 攻撃、Particle、MeshVFXなどの時間イベントはここを経由してActionRegistryへつながる。
     AnimSequenceAdapter sequenceAdapter;
     AnimState* sequenceAdapterState = nullptr;
     bool sequenceAdapterDirty = true;

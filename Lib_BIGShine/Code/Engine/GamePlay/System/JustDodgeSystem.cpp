@@ -18,6 +18,7 @@ namespace
 {
     void PlayJustDodgeCameraAction(const JustDodgeEvent& event_)
     {
+        // ジャスト回避成立位置を実カメラ側へ渡し、CameraActionの短い回避演出を再生する。
         const std::shared_ptr<GameObject> dodger_ = event_.dodger.lock();
         if (!dodger_ || !dodger_->manager) return;
 
@@ -64,6 +65,7 @@ void JustDodgeSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
     if (attackInstanceId_ == 0u) return;
 
+    // 攻撃IDが終わったら、その攻撃で成立済みのジャスト回避履歴をまとめて消す。
     for (auto iterator_ = registeredDodgeTargets.begin();
         iterator_ != registeredDodgeTargets.end();)
     {
@@ -104,6 +106,7 @@ void JustDodgeSystem::HandleJustDodge(
     JustDodgeCollider& justDodgeCollider_,
     const JustDodgeContact& contact_)
 {
+    // HitBoxとJustDodgeColliderの条件を通過したときだけ、回避成功イベントとして扱う。
     const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
     const std::shared_ptr<GameObject> dodger_ = justDodgeCollider_.GetGameObject();
 
@@ -150,6 +153,7 @@ void JustDodgeSystem::HandleJustDodge(
 
     justDodgeCollider_.RecordDodgedAttack(hitBox_);
 
+    // ここから先はジャスト回避成立。Blackboard、CameraAction、Callbackへ渡す情報をまとめる。
     JustDodgeEvent event_{};
     event_.dodger = dodger_;
     event_.attacker = attacker_;
@@ -195,6 +199,7 @@ bool JustDodgeSystem::RegisterJustDodge(
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
         static_cast<uint64_t>(hitGroupId_);
 
+    // 同じ攻撃判定で同じ回避者へ何度も成功通知しないよう履歴を持つ。
     return registeredDodgeTargets[dodgeKey_].insert(dodger_).second;
 }
 
@@ -237,6 +242,7 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
     const std::shared_ptr<GameObject> dodger_ = event_.dodger.lock();
     if (!dodger_) return;
 
+    // Colliderが子Objectにあっても、親のBlackboardへ成功情報を届けられるよう上へたどる。
     std::shared_ptr<GameObject> receiver_ = dodger_;
     std::shared_ptr<BlackboardComponent> blackboard_;
 
@@ -272,6 +278,7 @@ void JustDodgeSystem::PublishJustDodgeToBlackboard(
     blackboard_->SetVector3("Dodge", "Position", event_.dodgePosition);
     blackboard_->SetVector3("Dodge", "Normal", event_.attackNormal);
 
+    // Blackboardを書いた後でOnJustDodgeを呼び、反撃や演出側が最新情報を読めるようにする。
     std::shared_ptr<GameObject> actionReceiver_ = dodger_;
     bool onJustDodgeCalled_ = false;
     while (actionReceiver_)

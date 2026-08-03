@@ -170,6 +170,7 @@ void CameraActionDirectorComponent::Start()
     ResolveReferences();
     if (presets.empty())
     {
+        // JSON未設定でも戦闘確認ができるよう、ジャストガード/回避の標準プリセットを用意する。
         CameraActionPreset justGuard_;
         justGuard_.actionName = "JustGuard";
         justGuard_.targetMode = CAMERA_ACTION_TARGET_MODE::HIT_POSITION;
@@ -209,6 +210,7 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
     ResolveReferences();
     if (phase == CAMERA_ACTION_PHASE::IDLE) return;
 
+    // ENTER/HOLD/RETURNの3段階で通常カメラへ上書きし、終了時に自然に元の制御へ戻す。
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!camera_)
     {
@@ -398,6 +400,7 @@ void CameraActionDirectorComponent::BeginAction(
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!camera_) return;
 
+    // 低優先度の演出で、再生中の重要なカメラ演出を上書きしないようにする。
     if (phase != CAMERA_ACTION_PHASE::IDLE &&
         preset_.priority < activePriority)
     {
@@ -422,6 +425,7 @@ void CameraActionDirectorComponent::BeginAction(
         attackDirection_);
     activeFov = ClampFov(preset_.targetFov);
 
+    // 演出中にTPS/LockOn/Collisionが同じCameraComponentを書き換えないよう必要分だけ抑制する。
     if (preset_.suppressThirdPersonControl)
     {
         if (const std::shared_ptr<ThirdPersonCameraComponent> thirdPerson_ =
@@ -459,6 +463,7 @@ bool CameraActionDirectorComponent::ResolvePresetFocus(
     DirectX::XMFLOAT3& focusPosition_,
     DirectX::XMFLOAT3& attackDirection_)
 {
+    // Guard/DodgeなどはSystemがBlackboardへ書いた接触位置を優先し、なければ通常の対象位置へ戻す。
     if (TryReadBlackboardVector3(
         preset_.blackboardCategory,
         preset_.focusPositionKey,
@@ -542,6 +547,7 @@ DirectX::XMFLOAT3 CameraActionDirectorComponent::CalculateCameraPosition(
         return preset_.cameraOffset;
     }
 
+    // プリセットのPositionModeごとに、offsetをどの基準軸で解釈するかを切り替える。
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     const DirectX::XMFLOAT3 defaultForward_ =
         camera_ ? camera_->GetFront() : DirectX::XMFLOAT3{ 0.0f, 0.0f, 1.0f };
@@ -638,6 +644,7 @@ void CameraActionDirectorComponent::ApplyCameraPose(
 
 void CameraActionDirectorComponent::ReleaseSuppression()
 {
+    // 抑制を解除するとき、TPS側のyaw/pitchも現在カメラへ同期して急な跳ね戻りを防ぐ。
     if (ownsThirdPersonSuppression)
     {
         if (const std::shared_ptr<ThirdPersonCameraComponent> thirdPerson_ =

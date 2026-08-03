@@ -47,5 +47,8 @@ private:
     float hierarchyWidth = 280.0f;
     float inspectorWidth = 360.0f;
     float animationHeight = 180.0f;
+    float previewZoom = 1.0f;
+    ImVec2 previewPan = ImVec2(0.0f, 0.0f);
+    bool previewAutoFit = true;
     bool autoRefresh = true;
 };

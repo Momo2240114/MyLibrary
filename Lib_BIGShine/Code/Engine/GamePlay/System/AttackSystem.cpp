@@ -51,6 +51,7 @@ void AttackSystem::Clear()
 
 uint32_t AttackSystem::CreateAttackInstance()
 {
+    // 1回の攻撃単位を識別するID。多段ヒットや同一対象への再ヒット制御に使う。
     const uint32_t attackInstanceId_ = nextAttackInstanceId++;
     if (nextAttackInstanceId == 0u) nextAttackInstanceId = 1u;
     return attackInstanceId_;
@@ -59,6 +60,8 @@ uint32_t AttackSystem::CreateAttackInstance()
 void AttackSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
     if (attackInstanceId_ == 0u) return;
+
+    // 攻撃が終わったら、その攻撃IDに紐づくヒット履歴をまとめて破棄する。
     for (auto iterator_ = registeredHitTargets.begin(); iterator_ != registeredHitTargets.end();)
     {
         if (static_cast<uint32_t>(iterator_->first >> 32u) == attackInstanceId_)
@@ -93,6 +96,8 @@ void AttackSystem::HandleHit(
     const AttackHitContact& contact_)
 {
     BS_PROFILE_SCOPE("AttackSystem::HandleHit");
+
+    // HitBox/HurtBoxの状態、同一階層、ガード済み履歴などを通過したものだけHitEvent化する。
     const std::shared_ptr<GameObject> hitBoxObject_ = hitBox_.GetGameObject();
     const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
     const std::shared_ptr<GameObject> hurtBoxObject_ = hurtBox_.GetGameObject();
@@ -109,6 +114,7 @@ void AttackSystem::HandleHit(
         target_.get(),
         hitBox_.allowMultiHit)) return;
 
+    // ここから先は「ヒット成立」。反応ComponentやVFXが使う情報をAttackHitEventへ詰める。
     hitBox_.RegisterHit(target_.get());
     hurtBox_.RecordHit(hitBox_);
 
@@ -162,6 +168,7 @@ void AttackSystem::HandleHit(
     event_.cameraShakePriority = hitBox_.cameraShakePriority;
 
     frameHitEvents.push_back(event_);
+    // 受け手のBlackboardとCameraShakeへ公開し、Health/HitReactionなどはAction側で処理する。
     PublishHitToBlackboard(event_);
     PlayCameraShake(event_);
 
@@ -201,6 +208,8 @@ bool AttackSystem::RegisterAttackHit(
     bool allowMultiHit_)
 {
     if (allowMultiHit_ || attackInstanceId_ == 0u || target_ == nullptr) return true;
+
+    // attackInstanceId + hitGroupIdごとに対象を記録し、同じ攻撃の重複ヒットを防ぐ。
     const uint64_t hitKey_ =
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
         static_cast<uint64_t>(hitGroupId_);
@@ -241,6 +250,7 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     const std::shared_ptr<GameObject> target_ = event_.target.lock();
     if (!target_) return;
 
+    // HurtBoxが子Objectにある場合も、親のBlackboardへヒット情報を届けられるよう上へたどる。
     std::shared_ptr<GameObject> receiver_ = target_;
     std::shared_ptr<BlackboardComponent> blackboard_;
     while (receiver_)
@@ -328,6 +338,7 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     }
     blackboard_->SetTrigger("Hit", "Received");
 
+    // Blackboardへ値を書いたあとでActionを呼び、受け手側が最新Hit情報を読める順序にする。
     receiver_->ExecuteAction("OnHit");
 }
 
@@ -336,6 +347,7 @@ void AttackSystem::PlayCameraShake(const AttackHitEvent& event_) const
     BS_PROFILE_SCOPE("AttackSystem::PlayCameraShake");
     if (!event_.cameraShakeEnabled) return;
 
+    // Playerが攻撃側か被弾側にいるときだけ、見た目の手応えとしてCameraShakeを再生する。
     const std::shared_ptr<GameObject> attacker_ = event_.attacker.lock();
     const std::shared_ptr<GameObject> target_ = event_.target.lock();
     if (!attacker_ || !target_) return;

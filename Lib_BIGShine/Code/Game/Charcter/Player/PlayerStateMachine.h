@@ -8,6 +8,8 @@
 
 class PlayerControllerComponent;
 
+// Playerの現在行動を1つだけ保持し、Idle/Move/Jump/Attack/Dodge/Hitへ処理を振り分ける。
+// 入力処理そのものはController側、行動中の細かい責務は各PlayerState側に置く。
 class PlayerStateMachine
 {
 public:

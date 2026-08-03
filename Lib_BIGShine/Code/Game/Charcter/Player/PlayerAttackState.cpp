@@ -113,6 +113,8 @@ void PlayerAttackState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
+
+    // 攻撃開始ごとに補正状態をリセットし、今回の攻撃だけで向き/位置補正を計算する。
     attackElapsedTime = 0.0f;
     accumulatedFacingCorrectionDegrees = 0.0f;
     hasLockedAssistDirection = false;
@@ -139,6 +141,7 @@ void PlayerAttackState::Enter()
 
     if (isStrongCharge_)
     {
+        // 溜め強攻撃は開始時の入力方向、入力が無い場合はカメラ前方へ踏み込ませる。
         DirectX::XMFLOAT3 direction_ = player_->GetMoveInput();
         if (direction_.x == 0.0f && direction_.z == 0.0f)
         {
@@ -160,6 +163,7 @@ void PlayerAttackState::Execute(float elapsedTime_)
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!player_) return;
 
+    // 攻撃中も入力をBlackboardへ流し、コンボ分岐やキャンセル判定に使える状態を保つ。
     attackElapsedTime += (std::max)(elapsedTime_, 0.0f);
     ApplyAttackAssist(elapsedTime_);
     player_->SendMoveInputToBlackboard(player_->GetMoveInput());
@@ -185,6 +189,7 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!owner_ || !owner_->transform || !player_) return nullptr;
 
+    // ロックオン、入力方向、カメラ正面、距離をスコア化して攻撃補正先を選ぶ。
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
     const float maximumDistanceSquared_ = settings_.searchDistance * settings_.searchDistance;
@@ -317,6 +322,7 @@ void PlayerAttackState::ResolveAttackAssistTarget()
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!owner_ || !owner_->transform || !player_) return;
 
+    // コンボ中の補正先維持や入力方向優先をここで決め、攻撃中に使う基準方向を固定する。
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
 
     DirectX::XMFLOAT3 startForward_
@@ -392,6 +398,7 @@ void PlayerAttackState::ApplyAttackAssist(float elapsedTime_)
     const std::shared_ptr<GameObject> owner_ = GetOwner();
     if (!player_ || !owner_ || !owner_->transform) return;
 
+    // 攻撃中の見た目と手触りを補助するため、向き補正と位置補正を分けて適用する。
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
     if (!settings_.enabled || settings_.searchDistance <= 0.0f) return;
 
@@ -432,6 +439,7 @@ void PlayerAttackState::ApplyAttackFacingAssist(
         CalculateFacingAssistWeight(normalizedTime_, settings_) * settings_.strength;
     if (assistWeight_ <= 0.0f) return;
 
+    // アニメーション時間に応じて補正量を変え、攻撃終盤で不自然に回り続けないようにする。
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
     const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
 
@@ -547,6 +555,7 @@ void PlayerAttackState::ApplyAttackPositionAssist(
     const float availableDistance_ = distance_ - stopDistance_;
     const float maxCorrectionSpeed_ = (std::max)(settings_.maxPositionCorrection, 0.0f);
 
+    // 近づきすぎない停止距離を残しつつ、届きにくい攻撃だけ軽く吸い付かせる。
     float assistSpeed_ =
         (std::min)(availableDistance_, maxCorrectionSpeed_) *
         settings_.positionSpeed *

@@ -38,7 +38,7 @@
                 "SlideOffNonGround": true,
                 "StartNodeName": "",
                 "StepOffset": 0.38999998569488525,
-                "UseGravity": true,
+                "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
@@ -208,19 +208,19 @@
                         },
                         "IsTargetLost": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "OwnerPosition": {
                             "type": "vector3",
                             "value": [
-                                12.119081497192383,
-                                -0.5823211669921875,
-                                -4.593623161315918
+                                1.296989917755127,
+                                -0.4534534811973572,
+                                -6.746618747711182
                             ]
                         },
                         "SpawnDistance": {
                             "type": "float",
-                            "value": 12.97353458404541
+                            "value": 6.885104656219482
                         },
                         "SpawnPosition": {
                             "type": "vector3",
@@ -232,30 +232,30 @@
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 28.703857421875
+                            "value": 12.812522888183594
                         },
                         "TargetPosition": {
                             "type": "vector3",
                             "value": [
-                                -14.508809089660645,
-                                -0.12279045581817627,
-                                6.114112377166748
+                                -11.509077072143555,
+                                -0.12279081344604492,
+                                -6.9833574295043945
                             ]
                         },
                         "ToSpawnDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.9341387748718262,
-                                0.044885315001010895,
-                                0.35407644510269165
+                                -0.18837620317935944,
+                                0.0658600702881813,
+                                0.9798861742019653
                             ]
                         },
                         "ToTargetDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.9276764392852783,
-                                0.016009371727705002,
-                                0.37304168939590454
+                                -0.9994961023330688,
+                                0.02580777183175087,
+                                -0.01847713254392147
                             ]
                         }
                     },
@@ -266,15 +266,15 @@
                         },
                         "ActionTrigger": {
                             "type": "string",
-                            "value": "SpreadBreathForward"
+                            "value": "AirHold"
                         },
                         "CurrentAction": {
                             "type": "string",
-                            "value": "SpreadBreathForward"
+                            "value": "AirHold"
                         },
                         "CurrentAnimationState": {
                             "type": "string",
-                            "value": "PlainsDragon_SpreadFire_Forward"
+                            "value": "PlainsDragon_Fly"
                         },
                         "IsActing": {
                             "type": "bool",
@@ -282,7 +282,7 @@
                         },
                         "ReturnToAirIdle": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "ReturnToIdle": {
                             "type": "bool",
@@ -298,7 +298,7 @@
                         },
                         "To_PlainsDragon_Fly": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "To_PlainsDragon_FlyStationaryGetHit": {
                             "type": "bool",
@@ -342,7 +342,7 @@
                         },
                         "To_PlainsDragon_SpreadFire_Forward": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "To_PlainsDragon_TakeOff": {
                             "type": "bool",
@@ -364,19 +364,19 @@
                     "DragonAI": {
                         "Action": {
                             "type": "int",
-                            "value": 17
+                            "value": 10
                         },
                         "ActionEnded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "ActionName": {
                             "type": "string",
-                            "value": "SpreadBreathForward"
+                            "value": "AirHold"
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 1.3481519222259521
+                            "value": 16.1087703704834
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -388,7 +388,7 @@
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseAirFireBall": {
                             "type": "bool",
@@ -396,7 +396,7 @@
                         },
                         "CanUseAirSpreadBreath": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseBite": {
                             "type": "bool",
@@ -424,11 +424,11 @@
                         },
                         "CanUseSpreadBreath": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseSpreadBreathForward": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseTailSweep": {
                             "type": "bool",
@@ -444,7 +444,7 @@
                         },
                         "CurrentAction": {
                             "type": "int",
-                            "value": 17
+                            "value": 10
                         },
                         "DamagePhase": {
                             "type": "int",
@@ -456,15 +456,15 @@
                         },
                         "HpRate": {
                             "type": "float",
-                            "value": 0.8102499842643738
+                            "value": 0.9903249740600586
                         },
                         "IsActing": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAirIdle": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsTargetBehind": {
                             "type": "bool",
@@ -472,11 +472,11 @@
                         },
                         "IsTargetInFront": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsTargetInSide": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsTargetUnderBody": {
                             "type": "bool",
@@ -492,7 +492,7 @@
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": 94.31263732910156
+                            "value": 0.2350006103515625
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -500,19 +500,19 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 28.703857421875
+                            "value": 12.816495895385742
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 28.700178146362305
+                            "value": 12.808255195617676
                         },
                         "PlayerInFront": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "PlayerInSide": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "PlayerUnderBody": {
                             "type": "bool",
@@ -524,19 +524,19 @@
                         },
                         "State": {
                             "type": "int",
-                            "value": 3
+                            "value": 5
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": 94.31263732910156
+                            "value": 0.2350006103515625
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 28.703857421875
+                            "value": 12.816495895385742
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 28.700178146362305
+                            "value": 12.808255195617676
                         }
                     },
                     "DragonBodyPart": {
@@ -550,17 +550,17 @@
                         },
                         "LastDurabilityDamage": {
                             "type": "float",
-                            "value": 12.0
+                            "value": 4.800000190734863
                         },
                         "LastHealthDamage": {
                             "type": "float",
-                            "value": 15.0
+                            "value": 6.0
                         }
                     },
                     "Health": {
                         "Current": {
                             "type": "float",
-                            "value": 810.25
+                            "value": 9903.25
                         },
                         "Dead": {
                             "type": "bool",
@@ -568,7 +568,7 @@
                         },
                         "Max": {
                             "type": "float",
-                            "value": 1000.0
+                            "value": 10000.0
                         }
                     },
                     "Hit": {
@@ -578,7 +578,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 0.0
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -586,7 +586,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 12.0
+                            "value": 4.800000190734863
                         },
                         "Dead": {
                             "type": "bool",
@@ -595,17 +595,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.3597680926322937,
-                                0.9330417513847351
+                                -0.9989266991615295,
+                                0.04631950333714485
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.4000000059604645
+                            "value": 0.02500000037252903
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.6000000238418579
+                            "value": 0.75
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -613,7 +613,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 15.0
+                            "value": 4.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -621,22 +621,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 3.0
+                            "value": 1.2000000476837158
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.35485848784446716,
-                                -0.16464214026927948,
-                                0.9203088879585266
+                                -0.8433049321174622,
+                                0.5360109806060791,
+                                0.0391034372150898
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                -6.254419326782227,
-                                5.579402446746826,
-                                -6.924456596374512
+                                -4.3200554847717285,
+                                3.283997058868408,
+                                -7.472005844116211
                             ]
                         },
                         "Received": {
@@ -2864,8 +2864,8 @@
         },
         {
             "Data": {
-                "CurrentHealth": 810.25,
-                "MaxHealth": 1000.0
+                "CurrentHealth": 9903.25,
+                "MaxHealth": 10000.0
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -2879,14 +2879,14 @@
             "Data": {
                 "BodyParts": [
                     {
-                        "BaseMaxStagger": 171.661376953125,
+                        "BaseMaxStagger": 335.276123046875,
                         "BodyPart": "HEAD",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 171.661376953125,
-                        "CurrentStagger": 156.0,
+                        "CurrentMaxStagger": 335.276123046875,
+                        "CurrentStagger": 43.19999694824219,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -2909,14 +2909,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 45.0,
+                        "BaseMaxStagger": 70.3125,
                         "BodyPart": "CHEST",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 45.0,
-                        "CurrentStagger": 28.0,
+                        "CurrentMaxStagger": 70.3125,
+                        "CurrentStagger": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -2924,14 +2924,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 70.3125,
+                        "BaseMaxStagger": 87.890625,
                         "BodyPart": "BODY",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 70.3125,
-                        "CurrentStagger": 10.0,
+                        "CurrentMaxStagger": 87.890625,
+                        "CurrentStagger": 4.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -2946,7 +2946,7 @@
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
                         "CurrentMaxStagger": 56.25,
-                        "CurrentStagger": 3.5999999046325684,
+                        "CurrentStagger": 53.099998474121094,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -2959,9 +2959,9 @@
                         "Broken": false,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
-                        "CurrentDurability": 21.70000457763672,
+                        "CurrentDurability": 3.700005054473877,
                         "CurrentMaxStagger": 56.25,
-                        "CurrentStagger": 4.5,
+                        "CurrentStagger": 22.5,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -2969,14 +2969,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 45.0,
+                        "BaseMaxStagger": 70.3125,
                         "BodyPart": "LEFT_BACK_LEG",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 45.0,
-                        "CurrentStagger": 18.0,
+                        "CurrentMaxStagger": 70.3125,
+                        "CurrentStagger": 17.099998474121094,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -2984,14 +2984,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 45.0,
+                        "BaseMaxStagger": 109.86328125,
                         "BodyPart": "RIGHT_BACK_LEG",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 45.0,
-                        "CurrentStagger": 41.400001525878906,
+                        "CurrentMaxStagger": 109.86328125,
+                        "CurrentStagger": 77.4000015258789,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3004,9 +3004,9 @@
                         "Broken": false,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
-                        "CurrentDurability": 100.0,
+                        "CurrentDurability": 88.75,
                         "CurrentMaxStagger": 45.0,
-                        "CurrentStagger": 0.0,
+                        "CurrentStagger": 11.25,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3066,13 +3066,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            12.119081497192383,
+            1.2486729621887207,
             -0.5823211669921875,
-            -4.593623161315918
+            -6.747511863708496
         ],
         "Rot": [
             0.0,
-            197.5936279296875,
+            268.94091796875,
             0.0
         ],
         "Scale": [

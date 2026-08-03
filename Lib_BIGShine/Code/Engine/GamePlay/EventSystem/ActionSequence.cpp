@@ -118,6 +118,7 @@ void ActionSequence::Start()
 
 void ActionSequence::Update(float elapsedTime_)
 {
+    // StartSequenceで予約したActionを、残り時間が0になった順に実行する。
     for (auto iterator_ = pendingActions.begin(); iterator_ != pendingActions.end(); ) {
         iterator_->timer -= elapsedTime_;
         if (iterator_->timer <= 0.0f) {
@@ -138,6 +139,7 @@ void ActionSequence::StartSequence(int index_)
 
     pendingActions.clear();
 
+    // 0秒のActionは即時実行し、それ以降のActionはUpdateで処理する予約リストへ積む。
     for (const ActionReference& action_ : sequences[index_].actions) {
         if (action_.actionName.empty()) continue;
 
@@ -190,6 +192,7 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName_)
     if (!owner_) return;
     ActionRegistry& localRegistry_ = owner_->GetLocalRegistry();
 
+    // Sequence名をActionとして登録し、外部から「Sequenceカテゴリ + 名前」で再生できるようにする。
     for (int index_ = 0; index_ < static_cast<int>(sequences.size()); ++index_) {
         if (sequences[index_].name.empty()) continue;
 
@@ -222,6 +225,7 @@ void ActionSequence::ApplyBlackboardWrites(
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || writes_.empty()) return;
 
+    // Action実行直前にBlackboardへ値を書き、呼び出し先へ簡易引数のように渡す。
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetComponent<BlackboardComponent>();
     if (!blackboard_) return;

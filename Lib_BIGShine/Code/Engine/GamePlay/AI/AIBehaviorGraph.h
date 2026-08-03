@@ -14,6 +14,8 @@
 class GameObject;
 
 // AIの判断グラフで使用するノード種別
+// ノードグラフでAIの判断順を表すための種類。
+// Composite、Condition、Actionを分けることで、敵ごとの差分をJSON側に逃がしやすくしている。
 enum class AI_BEHAVIOR_NODE_TYPE
 {
     ROOT,
@@ -65,6 +67,7 @@ enum class AI_BEHAVIOR_STATUS
 };
 
 // AIの判断グラフ上に配置される1つのノード情報
+// Editor上の1ノード分の保存データ。条件用の値、Action名、Wait時間などをここに集約する。
 struct AIBehaviorNode
 {
     uintptr_t id = 0;
@@ -136,6 +139,7 @@ struct AIBehaviorContext
 };
 
 // BlackboardとActionを使用して敵AIの判断グラフを実行する
+// Rootからノードを評価し、Blackboard条件とActionRegistry呼び出しをつなぐ実行本体。
 class AIBehaviorGraph
 {
 public:

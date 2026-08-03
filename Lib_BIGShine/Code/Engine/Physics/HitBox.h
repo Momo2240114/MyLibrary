@@ -12,9 +12,12 @@ enum class ATTACK_SOURCE_TYPE
     REMOTE
 };
 
+// 攻撃判定用Collider。
+// AttackTemplateRuntimeや攻撃エフェクトからダメージ情報を受け取り、ヒット済み対象を管理する。
 class HitBox : public CapsuleCollider
 {
 public:
+    // Combat側から流し込まれる攻撃結果データ。Health、HitReaction、VFX生成の入力になる。
     float damage = 1.0f;
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;
@@ -112,6 +115,7 @@ private:
     void RegisterActions();
 
 private:
+    // 同じ攻撃の多重ヒット制御用。ActivateごとにIDを進め、既に当てた対象を記録する。
     uint64_t activationId = 0;
     bool hitEffectBlackboardOverrideEnabled = true;
     bool attackDataBlackboardOverrideEnabled = true;

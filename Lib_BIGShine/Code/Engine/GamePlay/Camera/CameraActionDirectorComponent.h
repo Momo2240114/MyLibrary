@@ -42,6 +42,8 @@ enum class CAMERA_ACTION_POSITION_MODE
     WORLD_POSITION
 };
 
+// ジャスト回避・ジャストガードなど、短時間だけ通常カメラへ上書きする演出プリセット。
+// ターゲットの取り方、カメラ位置の解釈、抑制する通常制御をまとめてJSON保存する。
 struct CameraActionPreset
 {
     std::string actionName = "JustGuard";
@@ -74,6 +76,8 @@ struct CameraActionPreset
     std::string attackDirectionKey = "Normal";
 };
 
+// EventSystemから呼ばれる戦闘用カメラ演出Component。
+// TPS、LockOn、Collisionを必要に応じて一時停止し、ENTER/HOLD/RETURNで自然に通常カメラへ戻す。
 class CameraActionDirectorComponent : public Component, public IActionProvider
 {
 public:

@@ -123,6 +123,8 @@ private:
         bool useAttackDirectionSide_) const;
     LockOnCameraCompositionCorrection BuildCorrection(
         const CameraCompositionLayerState& layer_) const;
+    float CalculateCloseRangeAssistWeight(float targetDistance_) const;
+    LockOnCameraCompositionCorrection BuildCloseRangePlayerCorrection() const;
     LockOnCameraCompositionCorrection BuildLayeredCorrection() const;
     LockOnCameraCompositionCorrection ClampCorrection(
         const LockOnCameraCompositionCorrection& correction_) const;
@@ -161,5 +163,14 @@ private:
     float minimumFocusTargetRateOffset = -0.2f;
     float maximumFocusTargetRateOffset = 0.25f;
 
+    bool enableCloseRangePlayerAssist = true;
+    float closeRangeAssistMinimumDistance = 0.0f;
+    float closeRangeAssistMaximumDistance = 6.5f;
+    float closeRangeAssistBlendDistance = 1.0f;
+    float closeRangeAssistDistanceOffset = 0.45f;
+    float closeRangeAssistMaximumDistanceOffset = 10.0f;
+    float closeRangeAssistHeightOffset = -2.0f;
+
     LockOnCameraCompositionCorrection debugAppliedCorrection;
+    mutable float debugCloseRangeAssistWeight = 0.0f;
 };
