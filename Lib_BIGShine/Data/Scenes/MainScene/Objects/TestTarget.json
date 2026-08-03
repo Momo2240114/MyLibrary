@@ -38,7 +38,7 @@
                 "SlideOffNonGround": true,
                 "StartNodeName": "",
                 "StepOffset": 0.38999998569488525,
-                "UseGravity": false,
+                "UseGravity": true,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
@@ -204,23 +204,23 @@
                         },
                         "IsTargetInDetectRange": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsTargetLost": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "OwnerPosition": {
                             "type": "vector3",
                             "value": [
-                                9.257381439208984,
-                                -0.44142597913742065,
-                                -11.243377685546875
+                                45.83970260620117,
+                                -0.5823202133178711,
+                                10.323271751403809
                             ]
                         },
                         "SpawnDistance": {
                             "type": "float",
-                            "value": 14.570775985717773
+                            "value": 46.99135208129883
                         },
                         "SpawnPosition": {
                             "type": "vector3",
@@ -232,30 +232,30 @@
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 9.28621768951416
+                            "value": 40.984375
                         },
                         "TargetPosition": {
                             "type": "vector3",
                             "value": [
-                                18.537586212158203,
-                                -0.12279105186462402,
-                                -11.142860412597656
+                                5.774721145629883,
+                                3.8551392555236816,
+                                2.918849468231201
                             ]
                         },
                         "ToSpawnDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.6353389620780945,
-                                0.030295295640826225,
-                                0.7716389298439026
+                                -0.9754922986030579,
+                                0.012392072007060051,
+                                -0.21968449652194977
                             ]
                         },
                         "ToTargetDirection": {
                             "type": "vector3",
                             "value": [
-                                0.9993525147438049,
-                                0.034312669187784195,
-                                0.010824350640177727
+                                -0.977567195892334,
+                                0.10827197879552841,
+                                -0.18066450953483582
                             ]
                         }
                     },
@@ -266,15 +266,15 @@
                         },
                         "ActionTrigger": {
                             "type": "string",
-                            "value": "TakeOff"
+                            "value": "RunCharge"
                         },
                         "CurrentAction": {
                             "type": "string",
-                            "value": "TakeOff"
+                            "value": "RunCharge"
                         },
                         "CurrentAnimationState": {
                             "type": "string",
-                            "value": "PlainsDragon_TakeOff"
+                            "value": "PlainsDragon_Run"
                         },
                         "IsActing": {
                             "type": "bool",
@@ -346,7 +346,7 @@
                         },
                         "To_PlainsDragon_TakeOff": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "To_PlainsDragon_Turn90L_RM": {
                             "type": "bool",
@@ -364,7 +364,7 @@
                     "DragonAI": {
                         "Action": {
                             "type": "int",
-                            "value": 9
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -372,11 +372,11 @@
                         },
                         "ActionName": {
                             "type": "string",
-                            "value": "TakeOff"
+                            "value": "RunCharge"
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 0.3916968107223511
+                            "value": 0.9144576787948608
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -424,11 +424,11 @@
                         },
                         "CanUseSpreadBreath": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseSpreadBreathForward": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseTailSweep": {
                             "type": "bool",
@@ -436,7 +436,7 @@
                         },
                         "CanUseTakeOff": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseTurnToPlayer": {
                             "type": "bool",
@@ -444,7 +444,7 @@
                         },
                         "CurrentAction": {
                             "type": "int",
-                            "value": 9
+                            "value": 2
                         },
                         "DamagePhase": {
                             "type": "int",
@@ -492,7 +492,7 @@
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": -24.159225463867188
+                            "value": -32.42936706542969
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -500,11 +500,11 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 9.292119026184082
+                            "value": 40.984375
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 9.280749320983887
+                            "value": 40.74344253540039
                         },
                         "PlayerInFront": {
                             "type": "bool",
@@ -528,21 +528,21 @@
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": -24.159225463867188
+                            "value": -32.42936706542969
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 9.292119026184082
+                            "value": 40.984375
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 9.280749320983887
+                            "value": 40.74344253540039
                         }
                     },
                     "DragonBodyPart": {
                         "LastBodyPart": {
                             "type": "int",
-                            "value": 2
+                            "value": 3
                         },
                         "LastBrokenThisHit": {
                             "type": "bool",
@@ -550,11 +550,11 @@
                         },
                         "LastDurabilityDamage": {
                             "type": "float",
-                            "value": 250.0
+                            "value": 0.0
                         },
                         "LastHealthDamage": {
                             "type": "float",
-                            "value": 312.5
+                            "value": 0.0
                         }
                     },
                     "Health": {
@@ -2256,6 +2256,299 @@
                             "speed": 1.0,
                             "speedCurveName": "",
                             "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 8,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "TestTarget_DragonAI_SequencerActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.3333333730697632,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ActionEnd",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 1.3333333730697632
+                                }
+                            ],
+                            "loop": false,
+                            "name": "PlainsDragon_FlyStationaryGetHitToFalling",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 4,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": true,
+                            "name": "PlainsDragon_Falling",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 3,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "TestTarget_DragonAI_SequencerActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.6666666865348816,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ActionEnd",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.6666666865348816
+                                }
+                            ],
+                            "loop": false,
+                            "name": "PlainsDragon_DeathHitTheGround",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
                         }
                     ]
                 },
@@ -2726,6 +3019,66 @@
                         "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
+                    },
+                    {
+                        "Action": 19,
+                        "ActionName": "AirDeathFallStart",
+                        "ActionSequenceName": "AirDeathFallStart",
+                        "ActionTimeout": 2.0,
+                        "AllowBuffer": true,
+                        "AnimationActionName": "",
+                        "AnimationStateName": "PlainsDragon_FlyStationaryGetHitToFalling",
+                        "CooldownTime": 0.0,
+                        "Duration": 1.0,
+                        "Enabled": true,
+                        "FinishMode": 0,
+                        "HitBoxActionName": "",
+                        "IKActionName": "",
+                        "RecoveryTime": 0.0,
+                        "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
+                        "VFXActionName": "",
+                        "WaitForActionEnd": true
+                    },
+                    {
+                        "Action": 20,
+                        "ActionName": "Falling",
+                        "ActionSequenceName": "Falling",
+                        "ActionTimeout": 0.0,
+                        "AllowBuffer": true,
+                        "AnimationActionName": "",
+                        "AnimationStateName": "PlainsDragon_Falling",
+                        "CooldownTime": 0.0,
+                        "Duration": 1.0,
+                        "Enabled": true,
+                        "FinishMode": 1,
+                        "HitBoxActionName": "",
+                        "IKActionName": "",
+                        "RecoveryTime": 0.0,
+                        "SelectionWeight": 1.0,
+                        "UseActionTimeout": false,
+                        "VFXActionName": "",
+                        "WaitForActionEnd": false
+                    },
+                    {
+                        "Action": 21,
+                        "ActionName": "DeathHitGround",
+                        "ActionSequenceName": "DeathHitGround",
+                        "ActionTimeout": 3.0,
+                        "AllowBuffer": true,
+                        "AnimationActionName": "",
+                        "AnimationStateName": "PlainsDragon_DeathHitTheGround",
+                        "CooldownTime": 0.0,
+                        "Duration": 1.5,
+                        "Enabled": true,
+                        "FinishMode": 0,
+                        "HitBoxActionName": "",
+                        "IKActionName": "",
+                        "RecoveryTime": 0.0,
+                        "SelectionWeight": 1.0,
+                        "UseActionTimeout": true,
+                        "VFXActionName": "",
+                        "WaitForActionEnd": true
                     }
                 ],
                 "AirAttackBackSpeed": 2.0,
@@ -3068,13 +3421,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            9.144356727600098,
-            -0.5823211669921875,
-            -11.19414234161377
+            45.508056640625,
+            -0.5823202133178711,
+            10.456987380981445
         ],
         "Rot": [
             0.0,
-            113.53866577148438,
+            291.9415283203125,
             0.0
         ],
         "Scale": [

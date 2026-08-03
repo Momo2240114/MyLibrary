@@ -455,7 +455,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 2
+                            "value": 13
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -467,7 +467,7 @@
                         },
                         "AttackEnter": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "AttackType": {
                             "type": "int",
@@ -544,11 +544,11 @@
                         },
                         "IsAirAction": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsAirAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsAirDodge": {
                             "type": "bool",
@@ -576,7 +576,7 @@
                         },
                         "IsAirWeakAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsAttack": {
                             "type": "bool",
@@ -588,7 +588,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -844,7 +844,7 @@
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 2
+                            "value": 13
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -929,11 +929,11 @@
                         },
                         "IsAirAction": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsAirAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsAirDodge": {
                             "type": "bool",
@@ -961,7 +961,7 @@
                         },
                         "IsAirWeakAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsAttack": {
                             "type": "bool",
@@ -973,7 +973,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -38802,13 +38802,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            18.53438949584961,
-            -0.12279117107391357,
-            -10.812490463256836
+            5.915065288543701,
+            3.793621063232422,
+            2.8852949142456055
         ],
         "Rot": [
             9.363552468111269e-12,
-            6.56536865234375,
+            103.4462661743164,
             1.1004056432284415e-05
         ],
         "Scale": [

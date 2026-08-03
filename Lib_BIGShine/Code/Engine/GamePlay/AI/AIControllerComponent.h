@@ -9,8 +9,9 @@
 class BlackboardComponent;
 class CharacterMovementComponent;
 
-// AI制御の入口になるComponent。
-// Blackboardへ現在状況を書き込み、BehaviorGraphをTickして、選ばれたActionを実行する。
+// 敵AI制御の入口となるComponent。
+// Owner・Target・初期位置の関係を毎フレーム計算してBlackboardへ書き込み、
+// BehaviorGraphをTickすることで条件判定とAction実行を進める。
 class AIControllerComponent : public Component
 {
 public:
@@ -59,21 +60,54 @@ private:
 
 private:
     // 毎フレームBehaviorGraphへ渡す、ターゲット・距離・スポーン位置などの判断材料。
+    // JSON Assetから復元され、毎フレーム評価されるAI判断グラフ。
     AIBehaviorGraph graph;
+
+    // 現在のTarget、距離、方向、Blackboard参照などをGraphへ渡す実行Context。
     AIBehaviorContext context;
+
+    // Ownerが保持するLocal Blackboardへの非所有参照。
     BlackboardComponent* blackboardComponent = nullptr;
+
+    // 読み書きするBehaviorGraph JSON Assetのパス。
     std::string graphAssetPath = "Data/AI/BehaviorGraph/DefaultAI.json";
+
+    // 優先的にTargetとして検索するGameObject名。
     std::string targetName = "Player";
+
+    // Graph保存・読み込み結果をImGuiへ表示する文字列。
     std::string statusText;
+
+    // 帰還行動の目的地となるAI生成時のWorld座標。
     DirectX::XMFLOAT3 spawnPosition = { 0.0f, 0.0f, 0.0f };
+
+    // Targetを発見済みと判定する最大距離。
     float detectRange = 12.0f;
+
+    // Targetが攻撃可能範囲内にいると判定する距離。
     float attackRange = 2.0f;
+
+    // Targetを見失ったと判定する距離。
     float lostRange = 16.0f;
+
+    // 初期位置への帰還を完了し、移動を停止する距離。
     float returnStopDistance = 0.25f;
+
+    // Target追跡時に使用する水平移動速度。
     float chaseSpeed = 4.0f;
+
+    // 初期位置へ戻る際に使用する水平移動速度。
     float returnSpeed = 3.0f;
+
+    // trueの間だけUpdateでBehaviorGraphをTickする。
     bool isRunning = true;
+
+    // Contextから計算した判断値をBlackboardへ書き込むかを指定する。
     bool writeDebugBlackboard = true;
+
+    // SpawnPositionがJSONから明示的に復元されたかを示す。
     bool hasSerializedSpawnPosition = false;
+
+    // 標準AI Actionを重複なく解除するための登録名一覧。
     std::vector<std::string> registeredDefaultActionNames;
 };

@@ -128,35 +128,41 @@ namespace
     }
 }
 
+// 保存データと実行時データをすべて破棄し、ID発行番号を初期値へ戻す。
 void AIBehaviorGraph::Clear()
 {
+    // Assetとして保持するノードと接続情報を破棄する。
     nodes.clear();
     links.clear();
+    // 実行途中の状態も破棄し、新規GraphとしてIDを1から発行し直す。
     runtimeStates.clear();
     nextId = 1;
 }
 
+// Graphが空の場合に、Editor表示と実行が成立するRoot→Selectorの最小構成を生成する。
 void AIBehaviorGraph::EnsureDefaultGraph()
 {
     if (!nodes.empty()) return;
 
     // 空のGraphでも実行とEditor表示が成立するよう、RootからSelectorへつながる最小構成を作る。
-    // 遨ｺ縺ｮ繧ｰ繝ｩ繝輔↓螳溯｡碁幕蟋狗畑縺ｮRoot縺ｨSelector繧堤函謌舌☆繧・
     AddNode(AI_BEHAVIOR_NODE_TYPE::ROOT, "Root", { 40.0f, 120.0f });
     AddNode(AI_BEHAVIOR_NODE_TYPE::SELECTOR, "Selector", { 280.0f, 120.0f });
     AddLink(nodes[0].id, nodes[1].id);
 }
 
-// Blackboard縺ｨRoot繝弱・繝峨ｒ遒ｺ隱阪＠縲、I繧ｰ繝ｩ繝輔・螳溯｡檎ｵ先棡繧呈峩譁ｰ縺吶ｋ
+// RootノードからBehaviorGraphを1回評価し、そのTick全体の実行結果を返す。
 AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
 {
     // 1TickごとにRuntime表示用のActiveノードを作り直し、Rootから評価を開始する。
+    // Editorの実行中表示はTick単位で作り直し、未実行時の既定結果をFailureにする。
     runtimeActiveNodeIds.clear();
     lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
+    // Action実行元または判断値の保存先がなければGraphを安全に中断する。
     if (!context_.owner || !context_.blackboard) return lastTickStatus;
 
     EnsureDefaultGraph();
 
+    // 必ずRootを開始地点とし、Rootが存在しない不正GraphはFailureとして扱う。
     AIBehaviorNode* rootNode_ = FindRootNode();
     if (!rootNode_) return lastTickStatus;
 
@@ -164,7 +170,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
     return lastTickStatus;
 }
 
-// AI繧ｰ繝ｩ繝輔・螳溯｡檎憾諷九→螳溯｡御ｸｭ繝弱・繝画ュ蝣ｱ繧貞・譛溷喧縺吶ｋ
+// ノード構成は維持したまま、実行中の進行状態とEditor表示用情報だけを初期化する。
 void AIBehaviorGraph::ResetRuntime()
 {
     runtimeStates.clear();
@@ -172,17 +178,20 @@ void AIBehaviorGraph::ResetRuntime()
     lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
 }
 
+// 指定ノードが直前のTickで評価対象になったかを確認する。
 bool AIBehaviorGraph::IsNodeRuntimeActive(uintptr_t nodeId_) const
 {
     return std::find(runtimeActiveNodeIds.begin(), runtimeActiveNodeIds.end(), nodeId_) != runtimeActiveNodeIds.end();
 }
 
+// 新しいノードとPin用IDを発行し、ノード種別に応じて使用しないPinを無効化する。
 AIBehaviorNode* AIBehaviorGraph::AddNode(
     AI_BEHAVIOR_NODE_TYPE type_,
     const std::string& name_,
     const DirectX::XMFLOAT2& position_)
 {
     AIBehaviorNode node_;
+    // ノード本体と各PinはEditor上で個別に識別されるため、それぞれ一意IDを持たせる。
     node_.id = GenerateId();
     node_.inputPinId = GenerateId();
     node_.outputPinId = GenerateId();
@@ -190,6 +199,7 @@ AIBehaviorNode* AIBehaviorGraph::AddNode(
     node_.name = name_;
     node_.position = position_;
 
+    // Rootは親を持たないため入力Pinを、Taskは子を持たないため出力Pinを無効化する。
     if (type_ == AI_BEHAVIOR_NODE_TYPE::ROOT)
     {
         node_.inputPinId = 0;
@@ -203,7 +213,7 @@ AIBehaviorNode* AIBehaviorGraph::AddNode(
     return &nodes.back();
 }
 
-// 謖・ｮ壹＠縺溘ヮ繝ｼ繝峨→謗･邯壹Μ繝ｳ繧ｯ繧偵げ繝ｩ繝輔°繧牙炎髯､縺吶ｋ
+// Root以外の指定ノードと、そのノードへ接続されているLink・Runtime状態を削除する。
 bool AIBehaviorGraph::RemoveNode(uintptr_t nodeId_)
 {
     const auto nodeIt_ = std::find_if(nodes.begin(), nodes.end(),
@@ -223,14 +233,17 @@ bool AIBehaviorGraph::RemoveNode(uintptr_t nodeId_)
     return true;
 }
 
+// 2ノード間の接続条件を検証し、重複していなければ新しいLinkを追加する。
 AIBehaviorLink* AIBehaviorGraph::AddLink(uintptr_t fromNodeId_, uintptr_t toNodeId_)
 {
+    // 接続元と接続先が実在し、使用可能なPinを持っているかを先に検証する。
     AIBehaviorNode* fromNode_ = FindNode(fromNodeId_);
     AIBehaviorNode* toNode_ = FindNode(toNodeId_);
     if (!fromNode_ || !toNode_) return nullptr;
     if (fromNode_->outputPinId == 0 || toNode_->inputPinId == 0) return nullptr;
     if (fromNode_->id == toNode_->id) return nullptr;
 
+    // 同じ方向の接続がすでにある場合は新規作成せず、既存Linkを返す。
     for (AIBehaviorLink& link_ : links)
     {
         if (link_.fromNodeId == fromNodeId_ && link_.toNodeId == toNodeId_) return &link_;
@@ -246,7 +259,7 @@ AIBehaviorLink* AIBehaviorGraph::AddLink(uintptr_t fromNodeId_, uintptr_t toNode
     return &links.back();
 }
 
-// 謖・ｮ壹＠縺溘Μ繝ｳ繧ｯ繧貞炎髯､縺励∝ｮ溯｡檎憾諷九ｒ蛻晄悄蛹悶☆繧・
+// 指定Linkを削除し、古い進行位置を参照しないようRuntime状態をリセットする。
 bool AIBehaviorGraph::RemoveLink(uintptr_t linkId_)
 {
     const auto linkIt_ = std::remove_if(links.begin(), links.end(),
@@ -258,6 +271,7 @@ bool AIBehaviorGraph::RemoveLink(uintptr_t linkId_)
     return true;
 }
 
+// IDが一致する編集可能なノードを検索する。
 AIBehaviorNode* AIBehaviorGraph::FindNode(uintptr_t nodeId_)
 {
     for (AIBehaviorNode& node_ : nodes)
@@ -267,6 +281,7 @@ AIBehaviorNode* AIBehaviorGraph::FindNode(uintptr_t nodeId_)
     return nullptr;
 }
 
+// IDが一致する読み取り専用ノードを検索する。
 const AIBehaviorNode* AIBehaviorGraph::FindNode(uintptr_t nodeId_) const
 {
     for (const AIBehaviorNode& node_ : nodes)
@@ -276,6 +291,7 @@ const AIBehaviorNode* AIBehaviorGraph::FindNode(uintptr_t nodeId_) const
     return nullptr;
 }
 
+// 入力Pinまたは出力PinのIDが一致する編集可能なノードを検索する。
 AIBehaviorNode* AIBehaviorGraph::FindNodeByPin(uintptr_t pinId_)
 {
     for (AIBehaviorNode& node_ : nodes)
@@ -285,6 +301,7 @@ AIBehaviorNode* AIBehaviorGraph::FindNodeByPin(uintptr_t pinId_)
     return nullptr;
 }
 
+// 入力Pinまたは出力PinのIDが一致する読み取り専用ノードを検索する。
 const AIBehaviorNode* AIBehaviorGraph::FindNodeByPin(uintptr_t pinId_) const
 {
     for (const AIBehaviorNode& node_ : nodes)
@@ -294,6 +311,7 @@ const AIBehaviorNode* AIBehaviorGraph::FindNodeByPin(uintptr_t pinId_) const
     return nullptr;
 }
 
+// IDが一致するLinkを検索する。
 AIBehaviorLink* AIBehaviorGraph::FindLink(uintptr_t linkId_)
 {
     for (AIBehaviorLink& link_ : links)
@@ -303,18 +321,19 @@ AIBehaviorLink* AIBehaviorGraph::FindLink(uintptr_t linkId_)
     return nullptr;
 }
 
+// ノード・Pin・Linkで共有する一意IDを発行し、次回用の値を進める。
 uintptr_t AIBehaviorGraph::GenerateId()
 {
     return nextId++;
 }
 
-// 隱ｭ縺ｿ霎ｼ縺ｿ貂医∩ID縺ｨ驥阪↑繧峨↑縺・ｈ縺・↓谺｡蝗樒函謌蝕D縺ｮ荳矩剞繧呈峩譁ｰ縺吶ｋ
+// 復元済みIDと衝突しないよう、次回発行IDの下限を引き上げる。
 void AIBehaviorGraph::SetIdCounterFloor(uintptr_t minValue_)
 {
     if (nextId < minValue_) nextId = minValue_;
 }
 
-// 繝弱・繝峨√Μ繝ｳ繧ｯ縲∝ｮ溯｡後↓蠢・ｦ√↑險ｭ螳壹ｒJSON縺ｸ螟画鋤縺吶ｋ
+// ノード設定・Editor位置・Link構成をBehaviorGraph Asset用JSONへ変換する。
 void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
 {
     // NodeEditorで編集したノード位置、条件、Action名、LinkをそのままJSON Assetへ保存する。
@@ -369,7 +388,7 @@ void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
     }
 }
 
-// JSON縺九ｉ繝弱・繝峨→繝ｪ繝ｳ繧ｯ繧貞ｾｩ蜈・＠縲∝ｮ溯｡悟庄閭ｽ縺ｪ繧ｰ繝ｩ繝慕憾諷九∈謌ｻ縺・
+// JSONからノードとLinkを復元し、次回発行IDと最小Graph構成を整える。
 void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::Deserialize");
@@ -451,7 +470,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
     EnsureDefaultGraph();
 }
 
-// AI繧ｰ繝ｩ繝輔ｒJSON繝輔ぃ繧､繝ｫ縺ｨ縺励※菫晏ｭ倥☆繧・
+// BehaviorGraphをJSONへ変換し、必要な親フォルダーを作成してファイル保存する。
 bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
 {
     const std::filesystem::path filePath_(path_);
@@ -469,7 +488,7 @@ bool AIBehaviorGraph::SaveToFile(const std::string& path_) const
     return true;
 }
 
-// JSON繝輔ぃ繧､繝ｫ縺九ｉAI繧ｰ繝ｩ繝輔ｒ隱ｭ縺ｿ霎ｼ繧
+// 指定JSONファイルを読み込み、BehaviorGraphの保存データへ復元する。
 bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::LoadFromFile");
@@ -486,7 +505,7 @@ bool AIBehaviorGraph::LoadFromFile(const std::string& path_)
     return true;
 }
 
-// 繝弱・繝臥ｨｮ蛻･縺ｫ蠢懊§縺ｦComposite縺ｾ縺溘・Task縺ｨ縺励※螳溯｡後☆繧・
+// ノードを実行中として記録し、CompositeまたはTaskの対応処理へ振り分ける。
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     runtimeActiveNodeIds.push_back(node_.id);
@@ -498,7 +517,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorCo
     return TickTask(node_, context_);
 }
 
-// 蟄舌ヮ繝ｼ繝峨・邨先棡繧剃ｽｿ逕ｨ縺励※Selector繧Тequence縺ｮ謌仙凄繧貞愛螳壹☆繧・
+// 子ノードの結果を集約し、Root・Sequence・Selector・RandomSelectorの結果を決定する。
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     std::vector<AIBehaviorNode*> children_ = GetChildren(node_);
@@ -512,9 +531,9 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
 
     AIBehaviorRuntimeState& state_ = runtimeStates[node_.id];
 
+    // Sequenceは子を順番に実行し、途中状態をchildIndexへ保持して次Tickから再開する。
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::SEQUENCE)
     {
-        // Sequence縺ｯ螟ｱ謨励∪縺溘・螳溯｡御ｸｭ縺ｫ縺ｪ繧九∪縺ｧ蟄舌ヮ繝ｼ繝峨ｒ鬆・分縺ｫ騾ｲ繧√ｋ
         while (state_.childIndex < children_.size())
         {
             AI_BEHAVIOR_STATUS result_ = TickNode(*children_[state_.childIndex], context_);
@@ -534,6 +553,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
     {
         BS_PROFILE_SCOPE("AIBehaviorGraph::TickRandomSelector");
 
+        // 子のWeightを抽選確率として使用し、失敗した子を候補から外しながら再抽選する。
         static std::mt19937 randomEngineFallback_(std::random_device{}());
         std::vector<AIBehaviorNode*> remainingChildren_ = children_;
         while (!remainingChildren_.empty())
@@ -572,6 +592,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
 
     }
 
+    // 通常のSelectorは優先順に評価し、最初のSuccessまたはRunningを親の結果にする。
     for (AIBehaviorNode* child_ : children_)
     {
         AI_BEHAVIOR_STATUS result_ = TickNode(*child_, context_);
@@ -582,7 +603,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
     return AI_BEHAVIOR_STATUS::FAILURE;
 }
 
-// Blackboard謫堺ｽ懊、ction螳溯｡後∝ｾ・ｩ溘↑縺ｩ縺ｮ螳溷・逅・ヮ繝ｼ繝峨ｒ螳溯｡後☆繧・
+// Condition、Blackboard操作、Action実行、待機など末端ノードの処理を実行する。
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     BlackboardComponent& blackboard_ = *context_.blackboard;
@@ -601,13 +622,16 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
         return AI_BEHAVIOR_STATUS::SUCCESS;
 
     case AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION:
+        // Actionは最初のTickで一度だけ開始し、以降は終了フラグの監視だけを行う。
         if (!state_.actionStarted)
         {
             bool executed_ = false;
+            // AIActionComponentがあればBlackboard・Animation連携込みで実行する。
             if (auto aiActionComponent_ = context_.owner->GetComponent<AIActionComponent>())
             {
                 executed_ = aiActionComponent_->ExecuteAIAction(node_.actionName);
             }
+            // 専用定義がないActionは、Ownerの通常Actionとして直接実行する。
             if (!executed_)
             {
                 context_.owner->ExecuteAction(node_.actionName);
@@ -627,6 +651,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
         return AI_BEHAVIOR_STATUS::RUNNING;
 
     case AI_BEHAVIOR_NODE_TYPE::WAIT:
+        // 経過時間をRuntimeStateへ蓄積し、指定秒数に到達するまでRunningを返す。
         state_.elapsedTime += context_.deltaTime;
         if (state_.elapsedTime >= node_.waitSeconds)
         {
@@ -637,6 +662,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
 
     case AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL:
     {
+        // Scope設定から監視対象Blackboardを選び、指定Boolが期待値になるまで待機する。
         BlackboardComponent* targetBlackboard_ = ResolveBlackboard(node_, context_);
         if (!targetBlackboard_) return AI_BEHAVIOR_STATUS::RUNNING;
 
@@ -654,7 +680,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
     }
 }
 
-// 繝ｪ繝ｳ繧ｯ諠・ｱ縺九ｉ謖・ｮ壹ヮ繝ｼ繝峨・蟄舌ヮ繝ｼ繝峨ｒ蜿門ｾ励＠縲∝━蜈亥ｺｦ鬆・↓荳ｦ縺ｹ繧・
+// Linkから直接接続された子ノードを集め、PriorityとIDの順に並べて返す。
 std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& node_)
 {
     std::vector<AIBehaviorNode*> children_;
@@ -665,6 +691,7 @@ std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& 
         if (child_) children_.push_back(child_);
     }
 
+    // Priorityの小さいノードを先に評価し、同値の場合はIDで順序を安定させる。
     std::sort(children_.begin(), children_.end(),
         [](const AIBehaviorNode* left_, const AIBehaviorNode* right_)
         {
@@ -674,7 +701,7 @@ std::vector<AIBehaviorNode*> AIBehaviorGraph::GetChildren(const AIBehaviorNode& 
     return children_;
 }
 
-// 繝弱・繝芽ｨｭ螳壹↓蠢懊§縺ｦLocal縺ｾ縺溘・Global縺ｮBlackboard繧貞叙蠕励☆繧・
+// ノードのScope設定に応じてLocalまたはGlobal Blackboardを選択する。
 BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -686,7 +713,7 @@ BlackboardComponent* AIBehaviorGraph::ResolveBlackboard(
     return context_.blackboard;
 }
 
-// Blackboard縺ｮ蛟､縺ｨ繝弱・繝峨↓險ｭ螳壹＆繧後◆豈碑ｼ・擅莉ｶ繧堤・蜷医☆繧・
+// Blackboardの現在値とノードに設定された比較値を照合し、条件成立可否を返す。
 bool AIBehaviorGraph::EvaluateBlackboardCondition(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -695,6 +722,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
     if (!blackboard_) return false;
 
     // 文字列は文字列として比較し、それ以外は数値へ寄せて大小比較できるようにする。
+    // キーの存在確認にも使うため、型変換前のBlackBoardValueを取得する。
     const BlackBoardValue* value_ = blackboard_->GetValue(node_.blackboardCategory, node_.blackboardKey);
 
     if (node_.compareType == AI_BLACKBOARD_COMPARE_TYPE::EXISTS) return value_ != nullptr;
@@ -703,13 +731,13 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
 
     if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::STRING)
     {
-        // 譁・ｭ怜・縺ｯ謨ｰ蛟､蛹悶○縺壹∫ｭ我ｾ｡縺ｾ縺溘・荳堺ｸ閾ｴ縺ｮ譚｡莉ｶ縺縺代ｒ蛻､螳壹☆繧・
         std::string stringValue_;
         if (!blackboard_->GetString(node_.blackboardCategory, node_.blackboardKey, stringValue_)) return false;
         const bool equal_ = stringValue_ == node_.stringValue;
         return node_.compareType == AI_BLACKBOARD_COMPARE_TYPE::NOT_EQUAL ? !equal_ : equal_;
     }
 
+    // 数値・Boolはfloatへ正規化し、共通の大小比較処理へ流す。
     const float currentValue_ = BlackboardComponent::ToFloat(*value_);
     float compareValue_ = node_.floatValue;
     if (node_.valueType == AI_BLACKBOARD_VALUE_TYPE::INT) compareValue_ = static_cast<float>(node_.intValue);
@@ -727,7 +755,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
     }
 }
 
-// 繝弱・繝峨↓險ｭ螳壹＆繧後◆蛟､繧貞ｯｾ雎｡Blackboard縺ｸ譖ｸ縺崎ｾｼ繧
+// ノードに保存された型と値を、選択されたBlackboardへ書き込む。
 void AIBehaviorGraph::SetBlackboardValue(
     const AIBehaviorNode& node_,
     AIBehaviorContext& context_) const
@@ -764,7 +792,7 @@ void AIBehaviorGraph::SetBlackboardValue(
     }
 }
 
-// Action邨ゆｺ・夂衍逕ｨ縺ｮBlackboard蛟､縺荊rue縺ｫ縺ｪ縺｣縺ｦ縺・ｋ縺九ｒ蛻､螳壹☆繧・
+// Action終了監視用のカテゴリとキーを読み、終了フラグがtrueかを確認する。
 bool AIBehaviorGraph::IsActionEndReached(const AIBehaviorNode& node_, BlackboardComponent& blackboard_) const
 {
     bool ended_ = false;
@@ -772,7 +800,7 @@ bool AIBehaviorGraph::IsActionEndReached(const AIBehaviorNode& node_, Blackboard
     return ended_;
 }
 
-// 繧ｰ繝ｩ繝募ｮ溯｡後・髢句ｧ狗せ縺ｫ縺ｪ繧騎oot繝弱・繝峨ｒ蜿門ｾ励☆繧・
+// Graph実行の開始地点となるRootノードを検索する。
 AIBehaviorNode* AIBehaviorGraph::FindRootNode()
 {
     for (AIBehaviorNode& node_ : nodes)

@@ -16,8 +16,8 @@
                         0.0
                     ],
                     "AnchoredPosition": [
-                        108.0,
-                        18.0
+                        124.0,
+                        58.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -29,14 +29,14 @@
                         0.0
                     ],
                     "SizeDelta": [
-                        240.0,
-                        16.0
+                        360.0,
+                        20.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "PlayerHpBar",
-                "ZOrder": 1
+                "ZOrder": 3
             },
             "Enabled": true,
             "LateUpdateEnabled": true,

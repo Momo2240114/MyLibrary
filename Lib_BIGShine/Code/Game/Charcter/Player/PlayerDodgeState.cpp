@@ -13,6 +13,7 @@
 
 #include <algorithm>
 
+// 地上回避または空中回避のどちらとして動くかを受け取ってStateを生成する。
 PlayerDodgeState::PlayerDodgeState(
     const std::shared_ptr<GameObject>& owner_,
     PlayerControllerComponent& playerController_,
@@ -22,6 +23,7 @@ PlayerDodgeState::PlayerDodgeState(
 {
 }
 
+// 回避開始時に方向、Blackboard、ジャスト回避受付状態を初期化する。
 void PlayerDodgeState::Enter()
 {
     RegisterJustDodgeActions();
@@ -47,6 +49,7 @@ void PlayerDodgeState::Enter()
     dodgeBlendInput = player_->GetMoveInputAxis();
     if (dodgeDirection.x == 0.0f && dodgeDirection.z == 0.0f)
     {
+        // 入力なし回避はCamera後方へ出すことで、ロックオンのない場面でも後退回避になる。
         dodgeDirection =
         {
             -cameraForward_.x,
@@ -61,6 +64,7 @@ void PlayerDodgeState::Enter()
 
     if (action == PLAYER_ACTION::AIR_DODGE)
     {
+        // 空中回避はAnimation中の落下を止め、軌道を安定させる。
         SuspendAirDodgeVerticalMovement();
     }
     else
@@ -72,6 +76,7 @@ void PlayerDodgeState::Enter()
     }
 }
 
+// ジャスト回避受付の残り時間を進め、入力情報をAnimationへ送り続ける。
 void PlayerDodgeState::Execute(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -85,6 +90,7 @@ void PlayerDodgeState::Execute(float elapsedTime_)
 
         if (justDodgeFrameTimer <= 0.0f)
         {
+            // Timelineから終了通知が来ない場合でも、保険時間で受付を閉じる。
             EndJustDodgeFrame();
         }
     }
@@ -98,6 +104,7 @@ void PlayerDodgeState::Execute(float elapsedTime_)
     player_->ProcessActionInput();
 }
 
+// 回避終了時に受付フレーム、空中重力変更、水平速度を元へ戻す。
 void PlayerDodgeState::Exit()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -111,6 +118,7 @@ void PlayerDodgeState::Exit()
     player_->SetHorizontalVelocity({ 0.0f, 0.0f, 0.0f }, 0.0f);
 }
 
+// JustDodgeCollider側から成功通知を受け、回避中かつ受付中なら成功処理へ進める。
 void PlayerDodgeState::NotifyJustDodgeSucceeded()
 {
     BS_LOG_INFO(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState NotifyJustDodgeSucceeded entered.");
@@ -141,6 +149,7 @@ void PlayerDodgeState::NotifyJustDodgeSucceeded()
     HandleJustDodgeSuccess();
 }
 
+// 回避Animationから呼ばれるジャスト回避受付ActionをOwnerへ登録する。
 void PlayerDodgeState::RegisterJustDodgeActions()
 {
     if (justDodgeActionsRegistered) return;
@@ -166,18 +175,21 @@ void PlayerDodgeState::RegisterJustDodgeActions()
     justDodgeActionsRegistered = true;
 }
 
+// HurtBox無敵とJustDodgeColliderを同時に有効化する。
 void PlayerDodgeState::ActivateDodgeCollision()
 {
     ExecuteOwnerAction("HurtBoxInvincibleOn");
     ExecuteOwnerAction(justDodgeColliderActivateActionName);
 }
 
+// JustDodgeColliderを閉じてからHurtBox無敵を解除する。
 void PlayerDodgeState::DeactivateDodgeCollision()
 {
     ExecuteOwnerAction(justDodgeColliderDeactivateActionName);
     ExecuteOwnerAction("HurtBoxInvincibleOff");
 }
 
+// 空中回避中に重力で高度が落ちないよう、垂直移動を一時的に止める。
 void PlayerDodgeState::SuspendAirDodgeVerticalMovement()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -201,6 +213,7 @@ void PlayerDodgeState::SuspendAirDodgeVerticalMovement()
     collider_->velocity.y = 0.0f;
 }
 
+// 空中回避前の重力設定を復元し、垂直速度をリセットする。
 void PlayerDodgeState::RestoreAirDodgeVerticalMovement()
 {
     if (!airDodgeGravityOverridden) return;
@@ -224,6 +237,7 @@ void PlayerDodgeState::RestoreAirDodgeVerticalMovement()
     airDodgeGravityOverridden = false;
 }
 
+// Timelineから受付開始を受け取り、JustDodgeColliderを開く。
 void PlayerDodgeState::StartJustDodgeFrame()
 {
     BS_LOG_INFO(LOG_CATEGORY::GAME, "[JustDodge] FrameStart action received.");
@@ -239,6 +253,7 @@ void PlayerDodgeState::StartJustDodgeFrame()
     ActivateDodgeCollision();
 }
 
+// 受付終了時にColliderと無敵を閉じる。
 void PlayerDodgeState::EndJustDodgeFrame()
 {
     BS_LOG_INFO(LOG_CATEGORY::GAME, "[JustDodge] FrameEnd action received.");
@@ -247,6 +262,7 @@ void PlayerDodgeState::EndJustDodgeFrame()
     DeactivateDodgeCollision();
 }
 
+// ジャスト回避成功をBlackboardとReactionComponentへ伝える。
 void PlayerDodgeState::HandleJustDodgeSuccess()
 {
     BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState success. Applying blackboard/reaction.");
@@ -281,6 +297,7 @@ void PlayerDodgeState::HandleJustDodgeSuccess()
     }
 }
 
+// 新しい回避へ入る前に、前回の成功状態とカウンター情報を消す。
 void PlayerDodgeState::ClearJustDodgeBlackboard()
 {
     const std::shared_ptr<BlackboardComponent> blackboard_ =
@@ -305,6 +322,7 @@ void PlayerDodgeState::ClearJustDodgeBlackboard()
     }
 }
 
+// カウンター可能状態をDodge専用カテゴリとPlayer/Animカテゴリへ反映する。
 void PlayerDodgeState::SetCounterAvailable(bool enabled_)
 {
     counterAvailable = enabled_;
@@ -327,6 +345,7 @@ void PlayerDodgeState::SetCounterAvailable(bool enabled_)
     }
 }
 
+// 文字列Action名をOwnerのActionRegistryへ委譲して実行する。
 void PlayerDodgeState::ExecuteOwnerAction(const std::string& actionName_)
 {
     if (actionName_.empty()) return;
@@ -337,6 +356,7 @@ void PlayerDodgeState::ExecuteOwnerAction(const std::string& actionName_)
     owner_->ExecuteAction(actionName_);
 }
 
+// 回避方向をAnimationBlendで参照できるようBlackboardへ書き込む。
 void PlayerDodgeState::SendDodgeInputToBlackboard(
     const DirectX::XMFLOAT3& input_)
 {

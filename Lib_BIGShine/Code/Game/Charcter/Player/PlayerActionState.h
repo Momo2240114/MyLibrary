@@ -4,6 +4,7 @@
 
 class PlayerControllerComponent;
 
+// Guard、Skill、Counterなど、専用Stateを持たないTimeline駆動Actionを扱う汎用State。
 class PlayerActionState : public PlayerState
 {
 public:
@@ -17,5 +18,6 @@ public:
     void Execute(float elapsedTime_) override;
 
 private:
+    // このStateが開始するAction種別。
     PLAYER_ACTION action = PLAYER_ACTION::NONE;
 };

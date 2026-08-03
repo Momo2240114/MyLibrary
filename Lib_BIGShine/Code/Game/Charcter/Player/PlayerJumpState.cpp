@@ -13,6 +13,7 @@ namespace
     inline constexpr const char* DOUBLE_JUMP_STATE_NAME = "Double_Jump_Combat_0_Seq_0";
 }
 
+// Jump開始時の復帰要求を確認し、開始/Loop/着地Endのどこから再開するかを決める。
 void PlayerJumpState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -29,6 +30,7 @@ void PlayerJumpState::Enter()
     hasEnteredDoubleJumpAnimation = false;
     if (!resumeLoop_)
     {
+        // 新規Jumpでは1回目のJumpとして扱う。
         jumpCount = 1;
     }
     else if (jumpCount <= 0)
@@ -37,6 +39,7 @@ void PlayerJumpState::Enter()
     }
     if (resumeLanding_)
     {
+        // 空中Action後に既に接地している場合は、着地フェーズから再開する。
         phase = PLAYER_JUMP_RUNTIME_PHASE::END;
     }
     else if (resumeLoop_)
@@ -79,12 +82,14 @@ void PlayerJumpState::Enter()
     {
         if (CharacterMovementComponent* movement_ = player_->GetMovement())
         {
+            // 新規Jumpだけ上方向インパルスを与える。空中Action復帰では二重加速を避ける。
             BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] First jump impulse.");
             movement_->AddImpulse({ 0.0f, player_->jumpImpulse, 0.0f });
         }
     }
 }
 
+// 空中制御、二段Jump受付、着地判定を処理する。
 void PlayerJumpState::Execute(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -101,6 +106,7 @@ void PlayerJumpState::Execute(float elapsedTime_)
         const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
         if (hasMoveInput_)
         {
+            // 空中では通常移動速度にairControlRateを掛けた目標速度へ補間する。
             targetVelocity_ =
             {
                 input_.x * player_->moveSpeed * player_->airControlRate,
@@ -135,6 +141,7 @@ void PlayerJumpState::Execute(float elapsedTime_)
     const bool isGrounded_ = player_->IsGrounded();
     if (!isGrounded_)
     {
+        // 地面から離れたらStartからLoopへ進め、以降は二段Jump入力を監視する。
         hasLeftGround = true;
         if (phase == PLAYER_JUMP_RUNTIME_PHASE::START)
         {
@@ -166,6 +173,7 @@ void PlayerJumpState::Execute(float elapsedTime_)
 
     if (hasLeftGround)
     {
+        // 接地後はJumpEndフェーズへ入り、移動入力または着地時間経過でActionを終了する。
         if (phase != PLAYER_JUMP_RUNTIME_PHASE::END)
         {
             BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] Grounded after airborne. Enter End.");
@@ -181,6 +189,7 @@ void PlayerJumpState::Execute(float elapsedTime_)
     }
 }
 
+// 空中Loop中にJump入力を消費して二段Jumpを開始する。
 void PlayerJumpState::TryStartDoubleJump(
     PlayerControllerComponent& player_,
     const DirectX::XMFLOAT3& input_)
@@ -196,6 +205,7 @@ void PlayerJumpState::TryStartDoubleJump(
     }
     if (!player_.IsJumpInputPressed()) return;
 
+    // 二段Jumpは垂直速度をリセットしてから専用インパルスを与え、上昇量を安定させる。
     ++jumpCount;
     hasEnteredDoubleJumpAnimation = false;
     BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[Jump] Double jump requested. Sending JumpDouble phase.");
@@ -216,6 +226,7 @@ void PlayerJumpState::TryStartDoubleJump(
     }
 }
 
+// JumpStateを抜けるときに空中ActionContextと入力受付状態を整理する。
 void PlayerJumpState::Exit()
 {
     if (PlayerControllerComponent* player_ = GetPlayerController())
@@ -232,6 +243,7 @@ void PlayerJumpState::Exit()
     }
 }
 
+// Animation側から二段Jump終了を受け取り、空中Loopへ戻す。
 void PlayerJumpState::NotifyJumpLoopRequested()
 {
     if (phase != PLAYER_JUMP_RUNTIME_PHASE::DOUBLE_JUMP)
@@ -247,6 +259,7 @@ void PlayerJumpState::NotifyJumpLoopRequested()
     ChangePhase(PLAYER_JUMP_RUNTIME_PHASE::LOOP);
 }
 
+// Runtimeフェーズを更新し、AnimationStateMachine用のJumpフェーズをBlackboardへ送る。
 void PlayerJumpState::ChangePhase(PLAYER_JUMP_RUNTIME_PHASE phase_)
 {
     if (phase == phase_) return;

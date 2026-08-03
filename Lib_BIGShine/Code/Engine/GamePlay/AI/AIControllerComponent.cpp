@@ -46,13 +46,16 @@ namespace
     }
 }
 
+// AI制御開始時にBlackboard・初期位置・BehaviorGraph・標準Actionを準備する。
 void AIControllerComponent::Start()
 {
     BS_PROFILE_SCOPE("AIControllerComponent::Start");
 
+    // AI判断結果を書き込むBlackboardを、Graph読み込みより先に用意する。
     EnsureBlackboard();
 
     std::shared_ptr<GameObject> owner_ = GetGameObject();
+    // JSONに初期位置が保存されていない場合のみ、配置時のWorld座標を帰還地点として採用する。
     if (!hasSerializedSpawnPosition && owner_ && owner_->transform)
     {
         spawnPosition = owner_->transform->GetWorldPosition();
@@ -66,6 +69,7 @@ void AIControllerComponent::Start()
     RegisterDefaultAIActions();
 }
 
+// 毎フレーム判断材料を更新し、Blackboardへ反映した後にBehaviorGraphを1Tick進める。
 void AIControllerComponent::Update(float deltaTime_)
 {
     if (!isRunning) return;
@@ -74,12 +78,15 @@ void AIControllerComponent::Update(float deltaTime_)
     EnsureBlackboard();
     if (!blackboardComponent) return;
 
+    // Object参照を解決してから、距離・方向などの判断材料を計算する。
     ResolveTarget();
     UpdateAIContext(deltaTime_);
+    // 計算結果をConditionノードが読めるキーへ書き込み、Rootから判断を進める。
     WriteContextBlackboard();
     graph.Tick(context);
 }
 
+// AI実行状態、Graph Asset、索敵距離、移動速度などの調整UIを描画する。
 void AIControllerComponent::Gui()
 {
     EnsureBlackboard();
@@ -139,6 +146,7 @@ void AIControllerComponent::Gui()
     ImGui::TextDisabled("Edit the graph from the AI Behavior Graph workspace.");
 }
 
+// AIController固有の設定値をGameObject保存用JSONへ書き出す。
 void AIControllerComponent::Serialize(nlohmann::json& json_) const
 {
     BS_PROFILE_SCOPE("AIControllerComponent::Serialize");
@@ -156,6 +164,7 @@ void AIControllerComponent::Serialize(nlohmann::json& json_) const
     json_["WriteDebugBlackboard"] = writeDebugBlackboard;
 }
 
+// JSONからAI設定とGraph Assetを復元し、旧形式の埋め込みGraphにも対応する。
 void AIControllerComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("AIControllerComponent::Deserialize");
@@ -195,26 +204,31 @@ void AIControllerComponent::Deserialize(const nlohmann::json& json_)
     }
 }
 
+// BehaviorGraphの更新を再開する。
 void AIControllerComponent::Play()
 {
     isRunning = true;
 }
 
+// BehaviorGraphの更新を停止する。現在のRuntime状態は保持される。
 void AIControllerComponent::Stop()
 {
     isRunning = false;
 }
 
+// 実行中ノード、待機時間、Sequence進行位置などのRuntime状態を初期化する。
 void AIControllerComponent::ResetTree()
 {
     graph.ResetRuntime();
 }
 
+// 現在のBehaviorGraphを指定JSONファイルへ保存する。
 bool AIControllerComponent::SaveGraphAsset(const std::string& path_) const
 {
     return graph.SaveToFile(path_);
 }
 
+// 指定JSONからBehaviorGraphを読み込み、成功時のみAssetパスとRuntime状態を更新する。
 bool AIControllerComponent::LoadGraphAsset(const std::string& path_)
 {
     BS_PROFILE_SCOPE("AIControllerComponent::LoadGraphAsset");
@@ -228,6 +242,7 @@ bool AIControllerComponent::LoadGraphAsset(const std::string& path_)
     return result_;
 }
 
+// OwnerにBlackboardComponentがない場合は追加し、AIが使用する参照を確保する。
 void AIControllerComponent::EnsureBlackboard()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -241,11 +256,13 @@ void AIControllerComponent::EnsureBlackboard()
     blackboardComponent = blackboard_.get();
 }
 
+// Owner・Target・Spawnの位置関係を計算し、BehaviorGraphへ渡すContextを更新する。
 void AIControllerComponent::UpdateAIContext(float deltaTime_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
 
     // BehaviorGraphに直接GameObjectを探させないため、必要な参照と距離情報をContextにまとめる。
+    // Contextには所有権を持たせず、そのTick中に参照するObjectだけを設定する。
     context.owner = owner_.get();
     context.blackboard = blackboardComponent;
     context.globalBlackboard = nullptr;
@@ -281,6 +298,7 @@ void AIControllerComponent::UpdateAIContext(float deltaTime_)
     context.toSpawnDirection = DirectionTo(context.ownerPosition, context.spawnPosition, context.spawnDistance);
 }
 
+// Target名を優先して検索し、見つからない場合はPlayerレイヤーのObjectを対象にする。
 void AIControllerComponent::ResolveTarget()
 {
     context.target = nullptr;
@@ -288,6 +306,7 @@ void AIControllerComponent::ResolveTarget()
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // 明示的な名前指定がある場合は、レイヤー検索より優先して対象を確定する。
     if (!targetName.empty())
     {
         std::shared_ptr<GameObject> namedTarget_ = owner_->GetManager().Find(targetName);
@@ -298,6 +317,7 @@ void AIControllerComponent::ResolveTarget()
         }
     }
 
+    // 名前検索で見つからなかった場合のFallbackとしてPlayerレイヤーを走査する。
     for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
     {
         if (!object_ || object_.get() == owner_.get()) continue;
@@ -310,11 +330,13 @@ void AIControllerComponent::ResolveTarget()
     }
 }
 
+// 距離や範囲判定などのContext情報を、Conditionノードから読めるBlackboard値へ変換する。
 void AIControllerComponent::WriteContextBlackboard()
 {
     if (!blackboardComponent || !writeDebugBlackboard) return;
 
     // EditorやBehaviorGraphから同じキーを読めるよう、AIの判断材料をBlackboardへ集約する。
+    // 生の距離値から、Graphで直接利用しやすいBool条件をまとめて生成する。
     const bool isTargetInDetectRange_ = context.hasTarget && context.targetDistance <= detectRange;
     const bool isTargetInAttackRange_ = context.hasTarget && context.targetDistance <= attackRange;
     const bool isTargetLost_ = !context.hasTarget || context.targetDistance > lostRange;
@@ -334,6 +356,7 @@ void AIControllerComponent::WriteContextBlackboard()
     blackboardComponent->SetVector3(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::TO_SPAWN_DIRECTION, { context.toSpawnDirection.x, context.toSpawnDirection.y, context.toSpawnDirection.z });
 }
 
+// 追跡・帰還・停止・攻撃など、BehaviorGraphから利用する標準AI Actionを登録する。
 void AIControllerComponent::RegisterDefaultAIActions()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -342,11 +365,12 @@ void AIControllerComponent::RegisterDefaultAIActions()
     UnregisterDefaultAIActions();
 
     // BehaviorGraphのPLAY_ACTIONノードから呼ばれる最低限の行動をLocal Actionとして登録する。
+    // 登録名の記録まで共通化し、後から確実に解除できるようにする。
     auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& function_)
-    {
-        owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, function_);
-        registeredDefaultActionNames.push_back(owner_->BuildActionName(actionName_));
-    };
+        {
+            owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, function_);
+            registeredDefaultActionNames.push_back(owner_->BuildActionName(actionName_));
+        };
 
     registerAction_("AI.ChaseTarget", [this]() { ActionChaseTarget(); });
     registerAction_("AI.ReturnToSpawn", [this]() { ActionReturnToSpawn(); });
@@ -355,6 +379,7 @@ void AIControllerComponent::RegisterDefaultAIActions()
     registerAction_("AI.NotifyActionEnd", [this]() { ActionNotifyActionEnd(); });
 }
 
+// このコンポーネントが以前登録した標準AI ActionをOwnerのLocal Registryから解除する。
 void AIControllerComponent::UnregisterDefaultAIActions()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -367,12 +392,14 @@ void AIControllerComponent::UnregisterDefaultAIActions()
     registeredDefaultActionNames.clear();
 }
 
+// Target方向へ追跡速度で移動を要求する。
 void AIControllerComponent::ActionChaseTarget()
 {
     if (!context.hasTarget) return;
     RequestMove(context.toTargetDirection, chaseSpeed);
 }
 
+// 初期位置へ帰還し、停止距離以内まで戻ったら水平移動を止める。
 void AIControllerComponent::ActionReturnToSpawn()
 {
     if (context.spawnDistance <= returnStopDistance)
@@ -384,6 +411,7 @@ void AIControllerComponent::ActionReturnToSpawn()
     RequestMove(context.toSpawnDirection, returnSpeed);
 }
 
+// CharacterMovementComponentの水平移動だけを停止する。
 void AIControllerComponent::ActionStopMove()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -395,6 +423,7 @@ void AIControllerComponent::ActionStopMove()
     }
 }
 
+// 攻撃開始を表す共通Blackboard値を設定する。実際の攻撃処理は別Actionとの連携を想定する。
 void AIControllerComponent::ActionAttack()
 {
     EnsureBlackboard();
@@ -405,6 +434,7 @@ void AIControllerComponent::ActionAttack()
     blackboardComponent->SetBool(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::IS_ACTING, true);
 }
 
+// 現在のAI行動が終了したことをBlackboardへ書き込む。
 void AIControllerComponent::ActionNotifyActionEnd()
 {
     EnsureBlackboard();
@@ -414,6 +444,7 @@ void AIControllerComponent::ActionNotifyActionEnd()
     blackboardComponent->SetBool(AIBlackboardKeys::CATEGORY_AI, AIBlackboardKeys::IS_ACTING, false);
 }
 
+// 指定方向と速度から水平速度を作り、移動方向へOwnerを向ける。
 void AIControllerComponent::RequestMove(const DirectX::XMFLOAT3& direction_, float speed_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -421,6 +452,7 @@ void AIControllerComponent::RequestMove(const DirectX::XMFLOAT3& direction_, flo
 
     if (std::shared_ptr<CharacterMovementComponent> movement_ = owner_->GetComponent<CharacterMovementComponent>())
     {
+        // Y方向は物理や重力処理へ任せ、AIからはXZ平面の速度だけを設定する。
         DirectX::XMFLOAT3 velocity_ =
         {
             direction_.x * speed_,

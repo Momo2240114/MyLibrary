@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fmod_errors.h>
 
+// 音声ファイルからFMOD Soundを生成し、このSourceで再生できる状態にする。
 AudioSource::AudioSource(FMOD::System* system_, const char* filename_)
     : system(system_), filename(filename_ ? filename_ : "")
 {
@@ -15,6 +16,7 @@ AudioSource::AudioSource(FMOD::System* system_, const char* filename_)
     _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
 }
 
+// 再生中チャンネルを停止した後、保持しているFMOD Soundを解放する。
 AudioSource::~AudioSource()
 {
     Stop();
@@ -25,6 +27,7 @@ AudioSource::~AudioSource()
     }
 }
 
+// 主チャンネルを作り直し、保持中の基本設定を適用して2D再生を開始する。
 void AudioSource::Play(bool loop_)
 {
     Stop();
@@ -46,15 +49,18 @@ void AudioSource::Play(bool loop_)
     channel->setPaused(false);
 }
 
+// 新しいチャンネルを生成し、指定された2D／3D設定で既存音へ重ねて再生する。
 void AudioSource::PlayOneShot(const AudioPlaybackSettings& settings_)
 {
     CleanupStoppedChannels();
     if (system == nullptr || sound == nullptr) return;
 
+    // Loop設定と2D／3D設定を組み合わせ、Soundの再生モードを決定する。
     FMOD_MODE mode_ = settings_.loop ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
     mode_ |= settings_.use3D ? FMOD_3D : FMOD_2D;
     sound->setMode(mode_);
 
+    // 主チャンネルとは別のChannelを取得し、同じSoundの重複再生を成立させる。
     FMOD::Channel* newChannel_ = nullptr;
     FMOD_RESULT result_ = system->playSound(sound, nullptr, true, &newChannel_);
     _ASSERT_EXPR_A(result_ == FMOD_OK, FMOD_ErrorString(result_));
@@ -64,6 +70,7 @@ void AudioSource::PlayOneShot(const AudioPlaybackSettings& settings_)
     oneShotChannels.push_back(newChannel_);
 }
 
+// このSourceが開始した全チャンネルを停止し、生成したDSPを解放する。
 void AudioSource::Stop()
 {
     if (channel != nullptr)
@@ -91,6 +98,7 @@ void AudioSource::Stop()
     oneShotDsps.clear();
 }
 
+// 保持する音量を範囲内へ補正し、再生中の全チャンネルへ即時反映する。
 void AudioSource::SetVolume(float volume_)
 {
     CleanupStoppedChannels();
@@ -102,6 +110,7 @@ void AudioSource::SetVolume(float volume_)
     }
 }
 
+// 保持するPitchを範囲内へ補正し、再生中の全チャンネルへ即時反映する。
 void AudioSource::SetPitch(float pitch_)
 {
     CleanupStoppedChannels();
@@ -113,6 +122,7 @@ void AudioSource::SetPitch(float pitch_)
     }
 }
 
+// 左右定位を範囲内へ補正し、再生中の全チャンネルへ即時反映する。
 void AudioSource::SetPan(float pan_)
 {
     CleanupStoppedChannels();
@@ -124,18 +134,21 @@ void AudioSource::SetPan(float pan_)
     }
 }
 
+// こもり効果の有効状態を更新し、主チャンネルのDSP構成を反映する。
 void AudioSource::SetMuffled(bool muffled_)
 {
     muffled = muffled_;
     ApplyPrimaryMuffle();
 }
 
+// ローパスのカットオフ周波数を更新し、主チャンネルのDSPへ反映する。
 void AudioSource::SetLowPassCutoff(float cutoff_)
 {
     lowPassCutoff = std::clamp(cutoff_, 10.0f, 22000.0f);
     ApplyPrimaryMuffle();
 }
 
+// OneShotチャンネル専用のローパスDSPを生成し、指定周波数でこもり効果を付ける。
 void AudioSource::ApplyMuffle(FMOD::Channel* channel_, bool muffled_, float cutoff_)
 {
     if (channel_ == nullptr || system == nullptr || !muffled_) return;
@@ -151,6 +164,7 @@ void AudioSource::ApplyMuffle(FMOD::Channel* channel_, bool muffled_, float cuto
     oneShotDsps.push_back(lowPassDsp_);
 }
 
+// 主チャンネルのこもり設定に応じてローパスDSPを生成・更新・解除する。
 void AudioSource::ApplyPrimaryMuffle()
 {
     if (channel == nullptr || system == nullptr) return;
@@ -185,6 +199,7 @@ void AudioSource::ApplyPrimaryMuffle()
     }
 }
 
+// 共通再生設定と3D音響設定を指定チャンネルへまとめて適用する。
 void AudioSource::ApplySettings(FMOD::Channel* channel_, const AudioPlaybackSettings& settings_)
 {
     if (channel_ == nullptr) return;
@@ -224,6 +239,7 @@ void AudioSource::ApplySettings(FMOD::Channel* channel_, const AudioPlaybackSett
     }
 }
 
+// 再生を終えたOneShotチャンネルを一覧から除外し、以後の一括設定対象から外す。
 void AudioSource::CleanupStoppedChannels()
 {
     oneShotChannels.erase(

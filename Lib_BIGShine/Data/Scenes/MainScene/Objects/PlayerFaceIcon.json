@@ -16,8 +16,8 @@
                         0.0
                     ],
                     "AnchoredPosition": [
-                        0.0,
-                        0.0
+                        18.0,
+                        18.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -29,14 +29,14 @@
                         0.0
                     ],
                     "SizeDelta": [
-                        88.0,
-                        88.0
+                        86.0,
+                        86.0
                     ]
                 },
                 "Version": 1,
                 "Visible": true,
                 "WidgetId": "PlayerFaceIcon",
-                "ZOrder": 0
+                "ZOrder": 2
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -53,21 +53,21 @@
                     0.0
                 ],
                 "CatSize": [
-                    1.0,
-                    1.0
+                    464.0,
+                    464.0
                 ],
                 "Color": [
                     1.0,
                     1.0,
                     1.0,
-                    0.8999999761581421
+                    1.0
                 ],
                 "LocalSize": [
-                    88.0,
-                    88.0
+                    86.0,
+                    86.0
                 ],
                 "ShaderID": 0,
-                "TexturePath": "",
+                "TexturePath": "Data/Sprite/UI/Player/PlayerPortrait_ExpressionSheet.png",
                 "Visible": true,
                 "pivotType": 0
             },
@@ -76,6 +76,27 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ApplyEveryFrame": true,
+                "ColumnCount": 5,
+                "ColumnIndex": 0,
+                "PaddingBottom": 0.0,
+                "PaddingLeft": 0.0,
+                "PaddingRight": 0.0,
+                "PaddingTop": 0.0,
+                "RowCount": 1,
+                "RowIndex": 0,
+                "Version": 1
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UISpriteSheetComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         }

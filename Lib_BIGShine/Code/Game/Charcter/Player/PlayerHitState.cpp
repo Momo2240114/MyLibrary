@@ -8,6 +8,7 @@
 
 #include <algorithm>
 
+// Hitカテゴリから被弾情報を読み取り、Player/Animカテゴリへ反応用の値を書き込む。
 void PlayerHitState::Enter()
 {
     elapsedTime = 0.0f;
@@ -41,6 +42,7 @@ void PlayerHitState::Enter()
     impactPower_ = (std::max)(impactPower_, 0.0f);
     armor_ = (std::max)(armor_, 0.0f);
 
+    // 接地状態と衝撃値から、軽/中/重/空中ノックダウンを判定する。
     airHitReaction = !player_->IsGrounded();
 
     int hitReactionLevel_ = 0;
@@ -131,6 +133,7 @@ void PlayerHitState::Enter()
     }
 }
 
+// HitReaction中は基本的にTimeline終了を待ち、保険時間を超えたらAction終了にする。
 void PlayerHitState::Execute(float elapsedTime_)
 {
     elapsedTime += (std::max)(elapsedTime_, 0.0f);
@@ -140,11 +143,13 @@ void PlayerHitState::Execute(float elapsedTime_)
 
     if (airHitKnockdown && !player_->IsGrounded())
     {
+        // 空中ノックダウンは接地するまで終了させない。
         return;
     }
 
     if (airHitKnockdown)
     {
+        // 接地後もAnimation側の終了通知を優先するため、自動終了しない。
         return;
     }
 
@@ -153,6 +158,7 @@ void PlayerHitState::Execute(float elapsedTime_)
     player_->NotifyActionEnd();
 }
 
+// Hit用Triggerと反応フラグを消し、次の被弾へ状態が残らないようにする。
 void PlayerHitState::Exit()
 {
     const std::shared_ptr<BlackboardComponent> blackboard_ =

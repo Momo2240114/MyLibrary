@@ -51,6 +51,7 @@ namespace
     }
 }
 
+// FMODを初期化し、標準BGM・SEをパス一覧から事前登録する。
 void AudioManager::LoadFile()
 {
     Audio::Instance().Initialize();
@@ -81,19 +82,23 @@ void AudioManager::LoadFile()
     }
 }
 
+// FMODの内部更新を呼び、再生・DSP・3D音響の状態を進める。
 void AudioManager::Update()
 {
     Audio::Instance().Update();
 }
 
+// CameraをListenerとして扱い、位置・速度・前方・上方向をFMODへ渡す。
 void AudioManager::UpdateListenerFromCamera(const CameraComponent* camera_, float deltaTime_)
 {
     if (camera_ == nullptr || Audio::Instance().GetSystem() == nullptr) return;
 
+    // Listener位置にはCameraの視点位置、向きにはCameraの前方・上方向を使用する。
     const DirectX::XMFLOAT3 position_ = camera_->GetEye();
     const DirectX::XMFLOAT3 forward_ = camera_->GetFront();
     const DirectX::XMFLOAT3 up_ = camera_->GetUp();
 
+    // 前フレーム位置との差をdeltaTimeで割り、ドップラー計算に必要なListener速度を求める。
     DirectX::XMFLOAT3 velocity_ = { 0.0f, 0.0f, 0.0f };
     if (hasPreviousListenerPosition && deltaTime_ > 0.0001f)
     {
@@ -117,6 +122,7 @@ void AudioManager::UpdateListenerFromCamera(const CameraComponent* camera_, floa
     previousListenerPosition = position_;
     hasPreviousListenerPosition = true;
 }
+// 管理中の音声をすべて停止・破棄してからFMOD Systemを終了する。
 void AudioManager::Finalize()
 {
     ClearAll();
@@ -199,6 +205,7 @@ void AudioManager::PlaySEByPath(const std::string& path_, bool loop_)
     if (index_ < audioSEs.size()) audioSEs[index_]->Play(loop_);
 }
 
+// パスから音源を取得し、指定設定で既存再生と重ねるOneShot再生を行う。
 void AudioManager::PlayOneShotByPath(
     const std::string& path_,
     const AudioPlaybackSettings& settings_,
@@ -214,6 +221,7 @@ void AudioManager::PlayOneShotByPath(
     if (index_ < audioSEs.size()) audioSEs[index_]->PlayOneShot(settings_);
 }
 
+// BGMとSEの検索テーブルからパスを探し、対応するAudioSourceを停止する。
 void AudioManager::StopByPath(const std::string& path_)
 {
     auto bgmIt_ = bgmPathToIndex.find(path_);
@@ -292,6 +300,7 @@ void AudioManager::SetMuffledByPath(const std::string& path_, bool muffled_, flo
     }
 }
 
+// AudioWorkspace JSONを読み込み、プリセット一覧・検索表・AudioSourceを再構築する。
 bool AudioManager::LoadAudioWorkspace(const std::string& path_)
 {
     std::ifstream file_(path_);
@@ -300,6 +309,7 @@ bool AudioManager::LoadAudioWorkspace(const std::string& path_)
     nlohmann::json json_;
     file_ >> json_;
 
+    // 別Workspaceを読み込むため、前回のプリセット内容と検索テーブルを初期化する。
     workspacePresets.clear();
     workspacePresetToIndex.clear();
 
@@ -307,6 +317,7 @@ bool AudioManager::LoadAudioWorkspace(const std::string& path_)
 
     for (const auto& presetJson_ : json_["Presets"])
     {
+        // JSON 1要素を再生可能なプリセット構造体へ変換する。
         AudioWorkspacePreset preset_;
         preset_.name = presetJson_.value("Name", std::string("New Audio"));
         preset_.actionName = presetJson_.value("ActionName", preset_.name);
@@ -325,6 +336,7 @@ bool AudioManager::LoadAudioWorkspace(const std::string& path_)
     return !workspacePresets.empty();
 }
 
+// WorkspaceプリセットをActionRegistryへ登録し、イベントから名前で再生できるようにする。
 void AudioManager::RegisterAudioWorkspaceActions(const std::string& path_)
 {
     LoadAudioWorkspace(path_);
@@ -338,6 +350,7 @@ void AudioManager::RegisterAudioWorkspaceActions(const std::string& path_)
     }
     registeredWorkspaceActionNames.clear();
 
+    // 各プリセットのAction名を登録し、呼び出された際に同名プリセットを再生する。
     for (const AudioWorkspacePreset& preset_ : workspacePresets)
     {
         const std::string actionName_ = preset_.actionName.empty() ? preset_.name : preset_.actionName;
@@ -352,6 +365,7 @@ void AudioManager::RegisterAudioWorkspaceActions(const std::string& path_)
     }
 }
 
+// プリセット名またはAction名から設定を取得し、重複可否に応じた方法で再生する。
 bool AudioManager::PlayWorkspacePreset(const std::string& presetName_, bool allowOverlap_)
 {
     auto it_ = workspacePresetToIndex.find(presetName_);
@@ -363,6 +377,7 @@ bool AudioManager::PlayWorkspacePreset(const std::string& presetName_, bool allo
     }
 
     const AudioWorkspacePreset& preset_ = workspacePresets[it_->second];
+    // 重複再生または3D音源は独立Channelが必要なため、OneShotとして再生する。
     if (allowOverlap_ || preset_.settings.use3D)
     {
         PlayOneShotByPath(preset_.path, preset_.settings, preset_.isBGM);
@@ -384,6 +399,7 @@ bool AudioManager::PlayWorkspacePreset(const std::string& presetName_, bool allo
     return true;
 }
 
+// Workspace上の名前から音声パスを解決し、対応する再生を停止する。
 bool AudioManager::StopWorkspacePreset(const std::string& presetName_)
 {
     auto it_ = workspacePresetToIndex.find(presetName_);
@@ -409,6 +425,7 @@ std::vector<std::string> AudioManager::GetWorkspacePresetNames() const
     return names_;
 }
 
+// Audioフォルダーを走査し、未ロード音声を手動登録できるImGuiを描画する。
 void AudioManager::DrawGUI()
 {
     namespace fs = std::filesystem;
@@ -455,6 +472,7 @@ void AudioManager::DrawGUI()
     ImGui::End();
 }
 
+// 全BGM・SEを停止し、AudioSourceと各種検索テーブルを空にする。
 void AudioManager::ClearAll()
 {
     StopBGM();
@@ -470,6 +488,7 @@ void AudioManager::ClearAll()
     registeredWorkspaceActionNames.clear();
 }
 
+// 同じ分類・パスの重複読み込みを避けながら、AudioSourceをBGMまたはSEへ登録する。
 size_t AudioManager::AddAudioFromFile(const std::string& path_, bool isBGM_)
 {
     if (path_.empty()) return INVALID_AUDIO_INDEX;

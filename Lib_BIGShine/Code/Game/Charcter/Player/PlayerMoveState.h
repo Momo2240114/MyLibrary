@@ -4,6 +4,7 @@
 
 class PlayerControllerComponent;
 
+// 移動入力がある間、カメラ基準の水平移動をPlayerへ適用するState。
 class PlayerMoveState : public PlayerState
 {
 public:
