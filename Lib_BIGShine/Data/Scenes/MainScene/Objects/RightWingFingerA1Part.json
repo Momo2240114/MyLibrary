@@ -2,7 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "ColliderName": "RightWingFingerA1HurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,

@@ -109,8 +109,18 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
         for (PxU32 contactIndex_ = 0; contactIndex_ < contactCount_; ++contactIndex_)
         {
             const float normalY_ = contacts_[contactIndex_].normal.y;
-            if (normalY_ > 0.5f && !colB_->isStatic) colB_->isGrounded = true;
-            if (normalY_ < -0.5f && !colA_->isStatic) colA_->isGrounded = true;
+            if (normalY_ > 0.5f &&
+                !colB_->isStatic &&
+                colA_->CanBeCharacterGround())
+            {
+                colB_->isGrounded = true;
+            }
+            if (normalY_ < -0.5f &&
+                !colA_->isStatic &&
+                colB_->CanBeCharacterGround())
+            {
+                colA_->isGrounded = true;
+            }
         }
     }
 }

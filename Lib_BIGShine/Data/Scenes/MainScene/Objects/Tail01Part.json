@@ -2,7 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "ColliderName": "Tail01HurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,

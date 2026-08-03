@@ -2,7 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "ColliderName": "LeftWingWebA3B3HurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,

@@ -2,7 +2,7 @@
     "ColliderComponents": [
         {
             "Data": {
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "ColliderName": "HeadHurtBox",
                 "CollisionOwnerObjectName": "TestTarget",
                 "CollisionRole": 3,
@@ -107,7 +107,7 @@
                 "CameraShakeReceiveDuration": 0.11999999731779099,
                 "CameraShakeReceivePositionStrength": 0.02500000037252903,
                 "CameraShakeReceiveRotationStrength": 0.18000000715255737,
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "CanHitOwner": false,
                 "ColliderName": "BiteHitBox",
                 "CollisionOwnerObjectName": "TestTarget",
@@ -199,7 +199,7 @@
                 "CameraShakeReceiveDuration": 0.11999999731779099,
                 "CameraShakeReceivePositionStrength": 0.02500000037252903,
                 "CameraShakeReceiveRotationStrength": 0.18000000715255737,
-                "CanBeCharacterGround": true,
+                "CanBeCharacterGround": false,
                 "CanHitOwner": false,
                 "ColliderName": "HeadChargeHitBox",
                 "CollisionOwnerObjectName": "TestTarget",
