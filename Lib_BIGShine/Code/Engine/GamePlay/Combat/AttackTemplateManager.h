@@ -43,6 +43,8 @@ enum class CAMERA_SHAKE_POWER_LEVEL
     HEAVY
 };
 
+// 生成された攻撃エフェクト側に持たせる当たり判定形状。
+// 武器HitBoxとは別に、飛び道具や範囲攻撃が自前で判定を持つためのテンプレート。
 struct EffectHitBoxTemplate
 {
     bool enabled = false;
@@ -57,6 +59,8 @@ struct EffectHitBoxTemplate
     float halfHeight = 1.0f;
 };
 
+// 攻撃開始時などに出す斬撃VFXの設定。
+// 見た目だけでなく、必要ならEffectHitBoxTemplateで判定も同時に持たせられる。
 struct SlashEffectTemplate
 {
     bool enabled = true;
@@ -73,6 +77,7 @@ struct SlashEffectTemplate
     EffectHitBoxTemplate hitBox;
 };
 
+// 武器や手足など、既存GameObject上のHitBoxを攻撃時間に合わせて有効化する設定。
 struct WeaponHitBoxTemplate
 {
     bool enabled = false;
@@ -84,6 +89,7 @@ struct WeaponHitBoxTemplate
     float activeEndTime = 0.18f;
 };
 
+// ヒットした瞬間に再生するParticle、MeshVFX、法線方向オフセットなどの演出設定。
 struct AttackHitEffectTemplate
 {
     bool spawnOnHit = true;
@@ -133,6 +139,8 @@ struct AttackEffectSpawnTemplate
     std::vector<AttackEffectHitShapeTemplate> hitShapes;
 };
 
+// 1つの攻撃テンプレート本体。
+// ダメージ、HitStop、ノックバック、VFX、派生攻撃エフェクトをJSON保存する単位。
 struct AttackTemplate
 {
     std::string id;
@@ -156,6 +164,7 @@ struct AttackTemplate
     std::vector<AttackEffectSpawnTemplate> attackEffects;
 };
 
+// Data/AttackTemplate以下のJSONを読み書きし、EditorとRuntimeの両方へ攻撃データを渡す管理クラス。
 class AttackTemplateManager
 {
 public:

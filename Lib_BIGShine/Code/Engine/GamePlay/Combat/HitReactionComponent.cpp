@@ -84,6 +84,7 @@ void HitReactionComponent::HandleHit()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // AttackSystemがBlackboardへ公開したHit情報を読み、ダメージ・ヒットストップ・吹き飛びへ分解する。
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         owner_->GetComponent<BlackboardComponent>();
     if (!blackboard_) return;
@@ -119,6 +120,7 @@ void HitReactionComponent::HandleHit()
     CallOwnerAction(damageActionName);
     CallOwnerActions(commonReactionActionNames);
 
+    // HitStopはTimeManagerへ委譲し、対象Layerだけ短時間スローにする。
     if (useHitStop && hitStopDuration_ > 0.0f)
     {
         const std::shared_ptr<TimeManager> timeManager_ =
@@ -144,6 +146,7 @@ void HitReactionComponent::HandleHit()
 
     if (canReact_ && useKnockBack && knockBackPower_ > 0.0f)
     {
+        // Armorを超えた衝撃だけ、BlackboardのHit方向を使って横方向のノックバックを入れる。
         const std::shared_ptr<CharacterMovementComponent> movement_ =
             owner_->GetComponent<CharacterMovementComponent>();
         if (movement_)
@@ -182,6 +185,7 @@ void HitReactionComponent::HandleHit()
 
     if (canReact_)
     {
+        // 地上/空中とImpactPowerのしきい値から、再生するリアクションActionを選ぶ。
         CallOwnerActions(GetReactionActions(DecideReactionKind(*blackboard_, canReact_)));
     }
     CallOwnerAction(overlayStartActionName);
@@ -202,6 +206,7 @@ void HitReactionComponent::RegisterActions()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // AttackSystemから最終的にOnHitで呼ばれる入口。Healthとは別にリアクションを担当する。
     std::weak_ptr<HitReactionComponent> weakReaction_;
     for (const std::shared_ptr<Component>& component_ : owner_->components)
     {
@@ -248,6 +253,7 @@ HIT_REACTION_KIND HitReactionComponent::DecideReactionKind(
         return HIT_REACTION_KIND::GROUND_LIGHT;
     }
 
+    // 接地状態と衝撃値で、軽/中/重/空中リアクションを切り替える。
     bool isGrounded_ = true;
     if (!blackboard_.GetBool("Player", "IsGrounded", isGrounded_))
     {

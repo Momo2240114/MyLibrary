@@ -1,0 +1,670 @@
+{
+    "AssetPath": "Data/Particle/SwordHit_Aqua_Lv02.json",
+    "AssetType": "ParticleEffect",
+    "AssetVersion": 1,
+    "Emitters": [
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 1,
+            "Color": [
+                0.8199999928474426,
+                1.0,
+                0.7200000286102295,
+                1.0
+            ],
+            "ColorEnd": [
+                0.07999999821186066,
+                0.9200000166893005,
+                0.41999998688697815,
+                0.0
+            ],
+            "ColorStart": [
+                0.949999988079071,
+                1.0,
+                0.8799999952316284,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 1,
+            "Fade": [
+                0.0,
+                0.07000000029802322
+            ],
+            "FresnelPower": 1.0,
+            "FresnelStrength": 30.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.07999999821186066,
+                0.11999999731779099
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles 3/masks for particles 3/17.png",
+            "MaterialPath": "",
+            "MaterialPaths": [
+                ""
+            ],
+            "MaxCount": 1,
+            "MeshVertexSampleCount": 2048,
+            "Name": "SwordHit_Flash",
+            "NoiseFrequency": 1.0,
+            "NoiseSpeed": 1.0,
+            "NoiseStrength": 0.0,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                2.700000047683716,
+                4.0
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 0,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.0,
+                0.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 1,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/masks for  particles 3/masks for particles 3/17.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 46,
+            "Color": [
+                0.23999999463558197,
+                1.0,
+                0.5199999809265137,
+                1.0
+            ],
+            "ColorEnd": [
+                0.019999999552965164,
+                0.6200000047683716,
+                0.23999999463558197,
+                0.0
+            ],
+            "ColorStart": [
+                0.8600000143051147,
+                1.0,
+                0.7799999713897705,
+                1.0
+            ],
+            "ConeAngle": [
+                6.0,
+                35.0
+            ],
+            "Delay": 0.014999999664723873,
+            "Drag": 6.0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 1,
+            "Fade": [
+                0.019999999552965164,
+                0.1599999964237213
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.18000000715255737,
+                0.2800000011920929
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "MaterialPath": "",
+            "MaterialPaths": [
+                ""
+            ],
+            "MaxCount": 96,
+            "MeshVertexSampleCount": 2048,
+            "Name": "SwordHit_Streaks",
+            "NoiseFrequency": 3.0,
+            "NoiseSpeed": 8.0,
+            "NoiseStrength": 0.6000000238418579,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 1,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.9599999785423279,
+                1.5800000429153442
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 3,
+            "SpawnShape": 0,
+            "SpawnSpace": 0,
+            "Speed": [
+                9.0,
+                18.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 3.200000047683716,
+            "StretchScale": 0.23999999463558197,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                1.2000000476837158,
+                0.0
+            ],
+            "BlendMode": 1,
+            "BurstCount": 28,
+            "Color": [
+                0.11999999731779099,
+                1.0,
+                0.44999998807907104,
+                1.0
+            ],
+            "ColorEnd": [
+                0.019999999552965164,
+                0.41999998688697815,
+                0.1599999964237213,
+                0.0
+            ],
+            "ColorStart": [
+                0.7799999713897705,
+                1.0,
+                0.7200000286102295,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.03500000014901161,
+            "Drag": 2.799999952316284,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 1,
+            "Fade": [
+                0.029999999329447746,
+                0.2800000011920929
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": -1.2000000476837158,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.30000001192092896,
+                0.5799999833106995
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "MaterialPath": "",
+            "MaterialPaths": [],
+            "MaxCount": 48,
+            "MeshVertexSampleCount": 2048,
+            "Name": "SwordHit_Motes",
+            "NoiseFrequency": 2.0,
+            "NoiseSpeed": 3.0,
+            "NoiseStrength": 1.7000000476837158,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                0.47999998927116394,
+                0.47999998927116394,
+                0.47999998927116394
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                0.09000000357627869,
+                0.2199999988079071
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 3,
+            "SpawnSpace": 0,
+            "Speed": [
+                2.5,
+                6.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 100.0,
+            "StretchScale": 0.03999999910593033,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 1,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                1.2000000476837158,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        },
+        {
+            "Acceleration": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "BlendMode": 0,
+            "BurstCount": 1,
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                0.6274510025978088
+            ],
+            "ColorEnd": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ColorStart": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ConeAngle": [
+                0.0,
+                0.0
+            ],
+            "Delay": 0.0,
+            "Drag": 0.0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "EmissionMode": 1,
+            "Fade": [
+                0.0,
+                0.05999999865889549
+            ],
+            "FresnelPower": 2.0,
+            "FresnelStrength": 1.0,
+            "GradientTexturePath": "",
+            "Gravity": 0.0,
+            "LegacyRadius": [
+                0.0,
+                0.0
+            ],
+            "Lifespan": [
+                0.20000000298023224,
+                0.20000000298023224
+            ],
+            "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/7.png",
+            "MaterialPath": "",
+            "MaterialPaths": [
+                ""
+            ],
+            "MaxCount": 1,
+            "MeshVertexSampleCount": 2048,
+            "Name": "SwordHit_Inpact",
+            "NoiseFrequency": 1.0,
+            "NoiseSpeed": 1.0,
+            "NoiseStrength": 0.0,
+            "OrbitVelocity": 0.0,
+            "PosOffset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "RadialVelocity": 0.0,
+            "RenderType": 0,
+            "RotationSpeed": [
+                0.0,
+                0.0
+            ],
+            "ShapeEnd": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ShapeSize": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "ShapeStart": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Size": [
+                2.0,
+                12.5
+            ],
+            "SizeRandomEnd": [
+                1.0,
+                1.0
+            ],
+            "SizeRandomStart": [
+                1.0,
+                1.0
+            ],
+            "SpawnDirectionMode": 0,
+            "SpawnShape": 0,
+            "SpawnSpace": 0,
+            "Speed": [
+                0.0,
+                0.0
+            ],
+            "SpriteAnimationFps": 12.0,
+            "SpriteAnimationLoop": 1,
+            "SpriteAnimationRange": [
+                0,
+                0
+            ],
+            "SpriteSheetIndex": [
+                0,
+                0
+            ],
+            "StretchMax": 1.0,
+            "StretchScale": 1.0,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "TexturePath": "",
+            "TextureSplitCount": [
+                1,
+                1
+            ],
+            "UseColorOverLife": 0,
+            "UseFresnel": 0,
+            "UseGradient": 0,
+            "UseMask": 1,
+            "UseRandomSize": 0,
+            "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
+            "VerticalSpawnRange": 0.0,
+            "Wind": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "gradientDirection": 0,
+            "gradientEndUv": 1.0,
+            "gradientFixedUv": 0.5,
+            "gradientSampleMode": 0,
+            "gradientStartUv": 0.0,
+            "gradientTexturePath": "",
+            "maskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/7.png",
+            "shadeGradientDirection": 0,
+            "shadeGradientEndUv": 1.0,
+            "shadeGradientFixedUv": 0.5,
+            "shadeGradientSampleMode": 0,
+            "shadeGradientStartUv": 0.0,
+            "shadeGradientTexturePath": "",
+            "texturePath": "",
+            "useGradientTexture": 0,
+            "useShadeGradientTexture": 0
+        }
+    ],
+    "IsPlaying": true
+}

@@ -9,6 +9,8 @@ enum class BLACKBOARD_VALUE_TYPE
     BOOL
 };
 
+// Action実行前にBlackboardへ書き込む値。
+// 攻撃IDやカメラ演出の位置など、Action側へ渡したい一時データに使う。
 struct BlackboardValueWrite
 {
     std::string category = "Attack";
@@ -19,6 +21,8 @@ struct BlackboardValueWrite
     bool boolValue = false;
 };
 
+// Timeline上の1つのAction呼び出し。
+// category/actionNameでActionRegistryを参照し、executionTimeで再生タイミングを決める。
 struct ActionReference {
     std::string category;
     std::string actionName;
@@ -28,6 +32,8 @@ struct ActionReference {
     std::vector<BlackboardValueWrite> blackboardWrites;
 };
 
+// 複数Actionを時間軸でまとめたシーケンスデータ。
+// Animation以外からも、カメラ・VFX・Combatの一連演出を呼べるようにする。
 struct SequenceData {
     std::string name = "New Sequence";
     std::vector<ActionReference> actions;
@@ -44,6 +50,8 @@ struct PendingAction {
     std::vector<BlackboardValueWrite> blackboardWrites;
 };
 
+// Editorで組んだAction列を再生するComponent。
+// 再生中はPendingActionに積み、指定時間にActionRegistryへ実行を流す。
 class ActionSequence : public Component {
 public:
     const std::string& GetName() const override {

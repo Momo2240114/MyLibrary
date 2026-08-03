@@ -76,6 +76,7 @@ void HitBox::ClearHitTargets()
 
 bool HitBox::CanHit(GameObject* target_) const
 {
+    // ownerへの自爆判定と、同一Activation内の多重ヒットをここで止める。
     if (target_ == nullptr) return false;
     if (!canHitOwner && ownerObject == target_) return false;
     return allowMultiHit || alreadyHitTargets.count(target_) == 0u;
@@ -108,6 +109,7 @@ void HitBox::Start()
 
 void HitBox::Activate()
 {
+    // SequencerやActionから有効化される直前に、Blackboardで上書きされた攻撃値を反映する。
     ApplyBlackboardValues();
     if (ownerObject == nullptr)
     {
@@ -419,6 +421,8 @@ void HitBox::ApplyBlackboardValues()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     std::shared_ptr<BlackboardComponent> blackboard_;
+
+    // HitBoxが武器などの子Objectに付いていても、親側Blackboardの攻撃情報を拾えるように上へたどる。
     while (owner_ && owner_->transform)
     {
         blackboard_ = owner_->GetComponent<BlackboardComponent>();
@@ -436,6 +440,7 @@ void HitBox::ApplyBlackboardValues()
     int intValue_ = 0;
     if (attackDataBlackboardOverrideEnabled)
     {
+        // ActionSequenceやAttackTemplateRuntimeが書いた一時値で、ダメージやHitStopを上書きする。
         if (!damageKey.empty() && blackboard_->GetFloat(blackboardCategory, damageKey, value_))
         {
             damage = value_;
@@ -573,6 +578,7 @@ void HitBox::RegisterActions()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // Animation Sequencerから名前でHitBoxをON/OFFできるよう、Local Actionとして公開する。
     std::weak_ptr<HitBox> weakHitBox_;
     for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)
     {

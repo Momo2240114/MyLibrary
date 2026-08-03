@@ -60,6 +60,8 @@ namespace
         uint32_t attackInstanceId_)
     {
         if (!attackTemplate_.weaponHitBox.enabled) return;
+
+        // AttackTemplateの数値と演出設定を、実際に衝突判定を出すHitBoxへ流し込む。
         const std::shared_ptr<HitBox> hitBox_ = FindHitBox(
             GetRoot(owner_), attackTemplate_.weaponHitBox.hitBoxName);
         if (!hitBox_)
@@ -127,6 +129,8 @@ void AttackTemplateRuntime::Start(
     if (!owner_) return;
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
     if (!attackTemplate_) return;
+
+    // AnimEvent側にRuntime状態を持たせ、Update/Endで同じ攻撃インスタンスを追跡する。
     event_.attackTemplateRuntimeActive = true;
     event_.attackTemplateInstanceId = owner_->GetManager().GetAttackSystem().CreateAttackInstance();
     event_.spawnedAttackEffects.assign(attackTemplate_->attackEffects.size(), false);
@@ -135,6 +139,8 @@ void AttackTemplateRuntime::Start(
     for (const SlashEffectTemplate& slash_ : attackTemplate_->slashEffects)
     {
         if (!slash_.enabled || slash_.vfxPath.empty()) continue;
+
+        // SlashEffectは攻撃開始時にまとめて生成し、必要ならVFX側にもHitBox情報を持たせる。
         AttackEffectSpawnRequest request_{};
         request_.ownerObject = owner_.get();
         request_.attackInstanceId = event_.attackTemplateInstanceId;
@@ -182,6 +188,8 @@ void AttackTemplateRuntime::Update(
     if (!owner_ || !event_.attackTemplateRuntimeActive) return;
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
     if (!attackTemplate_) return;
+
+    // アニメーション内の経過時間に合わせて、武器HitBoxと派生攻撃エフェクトを切り替える。
     if (attackTemplate_->weaponHitBox.enabled)
     {
         const std::shared_ptr<HitBox> hitBox_ = FindHitBox(
@@ -216,6 +224,7 @@ void AttackTemplateRuntime::End(
     const AttackTemplate* attackTemplate_ = GetTemplate(event_);
     if (attackTemplate_ && attackTemplate_->weaponHitBox.enabled)
     {
+        // 攻撃終了時は一時的に上書きしたHitBox設定を戻し、次の通常利用へ影響を残さない。
         if (const std::shared_ptr<HitBox> hitBox_ = FindHitBox(
             GetRoot(owner_), attackTemplate_->weaponHitBox.hitBoxName))
         {

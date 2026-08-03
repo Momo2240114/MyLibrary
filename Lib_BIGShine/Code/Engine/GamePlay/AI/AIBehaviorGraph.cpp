@@ -140,6 +140,7 @@ void AIBehaviorGraph::EnsureDefaultGraph()
 {
     if (!nodes.empty()) return;
 
+    // 空のGraphでも実行とEditor表示が成立するよう、RootからSelectorへつながる最小構成を作る。
     // 遨ｺ縺ｮ繧ｰ繝ｩ繝輔↓螳溯｡碁幕蟋狗畑縺ｮRoot縺ｨSelector繧堤函謌舌☆繧・
     AddNode(AI_BEHAVIOR_NODE_TYPE::ROOT, "Root", { 40.0f, 120.0f });
     AddNode(AI_BEHAVIOR_NODE_TYPE::SELECTOR, "Selector", { 280.0f, 120.0f });
@@ -149,6 +150,7 @@ void AIBehaviorGraph::EnsureDefaultGraph()
 // Blackboard縺ｨRoot繝弱・繝峨ｒ遒ｺ隱阪＠縲、I繧ｰ繝ｩ繝輔・螳溯｡檎ｵ先棡繧呈峩譁ｰ縺吶ｋ
 AI_BEHAVIOR_STATUS AIBehaviorGraph::Tick(AIBehaviorContext& context_)
 {
+    // 1TickごとにRuntime表示用のActiveノードを作り直し、Rootから評価を開始する。
     runtimeActiveNodeIds.clear();
     lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
     if (!context_.owner || !context_.blackboard) return lastTickStatus;
@@ -315,6 +317,7 @@ void AIBehaviorGraph::SetIdCounterFloor(uintptr_t minValue_)
 // 繝弱・繝峨√Μ繝ｳ繧ｯ縲∝ｮ溯｡後↓蠢・ｦ√↑險ｭ螳壹ｒJSON縺ｸ螟画鋤縺吶ｋ
 void AIBehaviorGraph::Serialize(nlohmann::json& json_) const
 {
+    // NodeEditorで編集したノード位置、条件、Action名、LinkをそのままJSON Assetへ保存する。
     json_ = nlohmann::json::object();
     json_["Version"] = 1;
     json_["NextId"] = nextId;
@@ -371,6 +374,7 @@ void AIBehaviorGraph::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("AIBehaviorGraph::Deserialize");
 
+    // 保存済みIDを復元しつつ、次に生成するIDが既存要素と衝突しないよう下限を更新する。
     Clear();
     nextId = json_.value("NextId", static_cast<uintptr_t>(1));
 
@@ -500,6 +504,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
     std::vector<AIBehaviorNode*> children_ = GetChildren(node_);
     if (children_.empty()) return AI_BEHAVIOR_STATUS::FAILURE;
 
+    // Compositeは子ノードの順序や重みに従って、次に実行する枝を決める。
     if (node_.type == AI_BEHAVIOR_NODE_TYPE::ROOT || node_.type == AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH)
     {
         return TickNode(*children_.front(), context_);
@@ -583,6 +588,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
     BlackboardComponent& blackboard_ = *context_.blackboard;
     AIBehaviorRuntimeState& state_ = runtimeStates[node_.id];
 
+    // TaskノードはBlackboard操作、Action実行、待機など実際の副作用を担当する。
     switch (node_.type)
     {
     case AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION:
@@ -688,6 +694,7 @@ bool AIBehaviorGraph::EvaluateBlackboardCondition(
     BlackboardComponent* blackboard_ = ResolveBlackboard(node_, context_);
     if (!blackboard_) return false;
 
+    // 文字列は文字列として比較し、それ以外は数値へ寄せて大小比較できるようにする。
     const BlackBoardValue* value_ = blackboard_->GetValue(node_.blackboardCategory, node_.blackboardKey);
 
     if (node_.compareType == AI_BLACKBOARD_COMPARE_TYPE::EXISTS) return value_ != nullptr;
@@ -728,6 +735,7 @@ void AIBehaviorGraph::SetBlackboardValue(
     BlackboardComponent* blackboard_ = ResolveBlackboard(node_, context_);
     if (!blackboard_) return;
 
+    // SET_BLACKBOARDノードで選ばれた型に合わせて、LocalまたはGlobalのBlackboardへ値を書き込む。
     switch (node_.valueType)
     {
     case AI_BLACKBOARD_VALUE_TYPE::FLOAT:

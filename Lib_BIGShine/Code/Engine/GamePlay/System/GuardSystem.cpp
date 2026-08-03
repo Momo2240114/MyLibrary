@@ -23,6 +23,7 @@ namespace
 
     void PlayJustGuardCameraAction(const GuardEvent& event_)
     {
+        // ジャストガード成立位置を実カメラのCameraActionへ渡し、短い演出カメラを再生する。
         const std::shared_ptr<GameObject> defender_ = event_.defender.lock();
         if (!defender_ || !defender_->manager) return;
 
@@ -69,6 +70,7 @@ void GuardSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
     if (attackInstanceId_ == 0u) return;
 
+    // 攻撃IDが終わったら、同じ攻撃に対するガード履歴も破棄する。
     for (auto iterator_ = registeredGuardTargets.begin();
         iterator_ != registeredGuardTargets.end();)
     {
@@ -107,6 +109,7 @@ bool GuardSystem::HandleGuard(
     GuardCollider& guardCollider_,
     const GuardContact& contact_)
 {
+    // 攻撃側と防御側の有効性、同一階層、ガード可能条件を確認してからGuardEvent化する。
     const std::shared_ptr<GameObject> attacker_ = hitBox_.GetAttackOwner();
     const std::shared_ptr<GameObject> defender_ = guardCollider_.GetGuardOwner();
 
@@ -138,6 +141,7 @@ bool GuardSystem::HandleGuard(
 
     guardCollider_.RecordGuardedAttack(hitBox_);
 
+    // 成立したガード情報を、受け手/攻撃側/CameraActionへ配るためのイベントにまとめる。
     GuardEvent event_{};
     event_.defender = defender_;
     event_.attacker = attacker_;
@@ -199,6 +203,7 @@ bool GuardSystem::RegisterGuard(
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
         static_cast<uint64_t>(hitGroupId_);
 
+    // 同じ攻撃判定で同じ防御者へ何度もガード成立しないよう履歴を持つ。
     return registeredGuardTargets[guardKey_].insert(defender_).second;
 }
 
@@ -230,6 +235,7 @@ std::shared_ptr<GameObject> GuardSystem::GetHierarchyRoot(
 
 void GuardSystem::PublishDefenderGuardResult(const GuardEvent& event_)
 {
+    // 防御側には通常ガードかジャストガードかで、書くBlackboardとActionを分ける。
     if (event_.resultType == GUARD_RESULT_TYPE::JUST_GUARD)
     {
         PublishJustGuardToDefender(event_);
@@ -247,6 +253,7 @@ void GuardSystem::PublishAttackerGuardResult(const GuardEvent& event_)
         return;
     }
 
+    // 近接攻撃側には「ガードされた」通知を返し、硬直やキャンセルなどの反応に使う。
     if (event_.resultType == GUARD_RESULT_TYPE::JUST_GUARD)
     {
         PublishJustGuardToAttacker(event_);
@@ -298,6 +305,7 @@ void GuardSystem::PublishJustGuardToDefender(const GuardEvent& event_)
 
     PlayJustGuardCameraAction(event_);
 
+    // ジャストガードでは反撃可能フラグと位置情報もBlackboardへ流す。
     blackboard_->SetBool("Guard", "GuardSucceeded", true);
     blackboard_->SetBool("Guard", "JustGuardSucceeded", true);
     blackboard_->SetTrigger("Guard", "GuardTrigger");
@@ -374,6 +382,7 @@ std::shared_ptr<GameObject> GuardSystem::FindBlackboardReceiver(
 {
     if (!object_) return nullptr;
 
+    // Colliderが子Objectに付いていても、親側のBlackboardを優先してイベントを届ける。
     std::shared_ptr<GameObject> fallback_ = object_;
     while (object_)
     {

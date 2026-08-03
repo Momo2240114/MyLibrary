@@ -143,6 +143,7 @@ namespace
 
 void PlayerControllerComponent::EnsurePlayerInputBindings()
 {
+    // プロジェクト側でまだ入力設定が無い場合だけ、最低限のPlayer操作を登録する。
     KeyConfig& keyConfig_ = KeyConfig::Instance();
     if (keyConfig_.GetActionMap().count(PlayerInputAction::JUMP) == 0)
     {
@@ -169,6 +170,7 @@ void PlayerControllerComponent::Start()
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    // Playerに必要な基本Componentをここでそろえ、Scene配置側の付け忘れを吸収する。
     EnsurePlayerInputBindings();
 
     owner_->SetLayer(LayerType::Player);
@@ -208,6 +210,7 @@ void PlayerControllerComponent::Start()
 
     if (hitSequence_)
     {
+        // 被弾時はHealth処理とPlayer状態遷移を同じSequenceから即時実行する。
         hitSequence_->SetRegisterGlobal(false);
         ActionReference healthAction_{};
         healthAction_.category = "Health";
@@ -221,6 +224,7 @@ void PlayerControllerComponent::Start()
     }
 
     stateMachine.Initialize(*this);
+    // 入力種別ごとにStateを登録し、巨大なUpdate分岐ではなくState単位で処理を分ける。
     stateMachine.AddState<PlayerIdleState>(PLAYER_ACTION::IDLE);
     stateMachine.AddState<PlayerMoveState>(PLAYER_ACTION::MOVE);
     stateMachine.AddState<PlayerDodgeState>(PLAYER_ACTION::DODGE);
@@ -248,6 +252,8 @@ void PlayerControllerComponent::Start()
 void PlayerControllerComponent::Update(float dt_)
 {
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
+
+    // State更新後に、キャンセル受付・空中状態・Blackboard・移動反映をまとめて後処理する。
     stateMachine.Update(dt_);
     TryDodgeCancelInput();
     UpdateAirborneActionContext();
@@ -312,6 +318,7 @@ void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
         return;
     }
 
+    // Timeline終了イベントが来ない場合でも、アニメーション終了やfallback時間で行動を閉じる保険。
     timelineActionSafetyTimer += (std::max)(deltaTime_, 0.0f);
 
     const auto owner_ = GetGameObject();
@@ -393,12 +400,14 @@ bool PlayerControllerComponent::ConsumeJumpLoopResumeRequest()
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInput() const
 {
+    // 入力軸をカメラ基準のワールド移動方向へ変換して、TPS操作として扱う。
     return GetCameraRelativeMoveDirection(gameObject.lock(), GetMoveInputAxis());
 }
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetGuardMoveInput(
     const DirectX::XMFLOAT3& worldMoveInput_) const
 {
+    // ガード中は「前後左右」を敵方向基準に変換し、ロックオン時の防御移動を安定させる。
     const float inputLengthSquared_ =
         worldMoveInput_.x * worldMoveInput_.x +
         worldMoveInput_.z * worldMoveInput_.z;
@@ -553,6 +562,7 @@ void PlayerControllerComponent::SetHorizontalVelocity(
     float speed_,
     bool updateFacing_)
 {
+    // State内で直接Movementへ書かず、最後にApplyPendingMovementでまとめて反映する。
     const float inputLengthSq_ =
         dir_.x * dir_.x +
         dir_.z * dir_.z;
@@ -2173,6 +2183,7 @@ void PlayerControllerComponent::Gui()
 //blackboardに値やカテゴリーを最初に登録する機構
 void PlayerControllerComponent::InitializeBlackboardValues()
 {
+    // PlayerとAnimationの両方から読む初期キーをそろえ、未設定キーによる遷移漏れを防ぐ。
     if (!blackboard)
     {
         auto owner_ = GetGameObject();

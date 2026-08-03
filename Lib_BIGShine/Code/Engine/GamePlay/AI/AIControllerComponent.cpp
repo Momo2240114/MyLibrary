@@ -70,6 +70,7 @@ void AIControllerComponent::Update(float deltaTime_)
 {
     if (!isRunning) return;
 
+    // Graphの条件ノードが読む値を先にそろえてから、RootからAI判断を進める。
     EnsureBlackboard();
     if (!blackboardComponent) return;
 
@@ -243,6 +244,8 @@ void AIControllerComponent::EnsureBlackboard()
 void AIControllerComponent::UpdateAIContext(float deltaTime_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
+
+    // BehaviorGraphに直接GameObjectを探させないため、必要な参照と距離情報をContextにまとめる。
     context.owner = owner_.get();
     context.blackboard = blackboardComponent;
     context.globalBlackboard = nullptr;
@@ -298,6 +301,7 @@ void AIControllerComponent::ResolveTarget()
     for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
     {
         if (!object_ || object_.get() == owner_.get()) continue;
+
         if (object_->layer == LayerType::Player)
         {
             context.target = object_.get();
@@ -310,6 +314,7 @@ void AIControllerComponent::WriteContextBlackboard()
 {
     if (!blackboardComponent || !writeDebugBlackboard) return;
 
+    // EditorやBehaviorGraphから同じキーを読めるよう、AIの判断材料をBlackboardへ集約する。
     const bool isTargetInDetectRange_ = context.hasTarget && context.targetDistance <= detectRange;
     const bool isTargetInAttackRange_ = context.hasTarget && context.targetDistance <= attackRange;
     const bool isTargetLost_ = !context.hasTarget || context.targetDistance > lostRange;
@@ -336,6 +341,7 @@ void AIControllerComponent::RegisterDefaultAIActions()
 
     UnregisterDefaultAIActions();
 
+    // BehaviorGraphのPLAY_ACTIONノードから呼ばれる最低限の行動をLocal Actionとして登録する。
     auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& function_)
     {
         owner_->RegisterAction(AIBlackboardKeys::CATEGORY_AI, actionName_, function_);

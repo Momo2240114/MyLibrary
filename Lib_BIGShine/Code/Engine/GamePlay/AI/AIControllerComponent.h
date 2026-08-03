@@ -9,6 +9,8 @@
 class BlackboardComponent;
 class CharacterMovementComponent;
 
+// AI制御の入口になるComponent。
+// Blackboardへ現在状況を書き込み、BehaviorGraphをTickして、選ばれたActionを実行する。
 class AIControllerComponent : public Component
 {
 public:
@@ -56,6 +58,7 @@ private:
     void RequestMove(const DirectX::XMFLOAT3& direction_, float speed_);
 
 private:
+    // 毎フレームBehaviorGraphへ渡す、ターゲット・距離・スポーン位置などの判断材料。
     AIBehaviorGraph graph;
     AIBehaviorContext context;
     BlackboardComponent* blackboardComponent = nullptr;

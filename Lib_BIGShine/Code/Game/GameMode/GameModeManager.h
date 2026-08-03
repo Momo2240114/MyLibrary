@@ -4,8 +4,8 @@
 
 #include <algorithm>
 
-// Lightweight manager for shared game state and GlobalBlackboard.
-// Movement, attacks, and presentation playback are owned by gameplay systems.
+// ゲーム全体で共有する進行状態とGlobalBlackboardを管理する軽量Manager。
+// 移動、攻撃、演出の実処理は各System側に任せ、ここではロック状態やAI方針だけを集約する。
 class GameModeManager
 {
 public:

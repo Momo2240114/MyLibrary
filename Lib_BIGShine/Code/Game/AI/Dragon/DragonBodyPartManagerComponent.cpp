@@ -11,7 +11,9 @@
 #include "Engine/Physics/HurtBox.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <imgui.h>
+#include <string>
 
 namespace
 {
@@ -29,6 +31,45 @@ namespace
         DRAGON_BODY_PART::RIGHT_WING,
         DRAGON_BODY_PART::TAIL
     };
+
+    float CalculateProgressRatio(float currentValue_, float maxValue_)
+    {
+        if (maxValue_ <= 0.0f)
+        {
+            return 0.0f;
+        }
+
+        return (std::clamp)(currentValue_ / maxValue_, 0.0f, 1.0f);
+    }
+
+    std::string MakeProgressLabel(float currentValue_, float maxValue_)
+    {
+        char label_[64]{};
+        snprintf(
+            label_,
+            sizeof(label_),
+            "%.0f / %.0f",
+            currentValue_,
+            maxValue_);
+        return label_;
+    }
+
+    void DrawBodyPartProgressBar(
+        const char* label_,
+        float currentValue_,
+        float maxValue_,
+        const ImVec4& color_)
+    {
+        ImGui::TextUnformatted(label_);
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color_);
+        const std::string progressLabel_ =
+            MakeProgressLabel(currentValue_, maxValue_);
+        ImGui::ProgressBar(
+            CalculateProgressRatio(currentValue_, maxValue_),
+            ImVec2(-1.0f, 0.0f),
+            progressLabel_.c_str());
+        ImGui::PopStyleColor();
+    }
 }
 
 const char* GetDragonBodyPartName(DRAGON_BODY_PART bodyPart_)
@@ -345,6 +386,8 @@ void DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions(
 
 void DragonBodyPartManagerComponent::Gui()
 {
+    BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::Gui");
+
     EnsureDefaultBodyParts();
     ResolveHealthComponent();
 
@@ -376,11 +419,79 @@ void DragonBodyPartManagerComponent::Gui()
     ImGui::Text("Attacker: %s", lastAttackerName.c_str());
     ImGui::Text("HurtBox: %s", lastHurtBoxName.c_str());
 
+    ImGui::SeparatorText("Body Part Overview");
+    if (ImGui::BeginTable(
+        "DragonBodyPartOverview",
+        4,
+        ImGuiTableFlags_Borders |
+        ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_Resizable))
+    {
+        ImGui::TableSetupColumn("Part", ImGuiTableColumnFlags_WidthFixed, 145.0f);
+        ImGui::TableSetupColumn("Durability", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("Stagger", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("State", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+        ImGui::TableHeadersRow();
+
+        for (const DragonBodyPartStatus& status_ : bodyParts)
+        {
+            ImGui::PushID(static_cast<int>(status_.bodyPart));
+            ImGui::TableNextRow();
+
+            ImGui::TableSetColumnIndex(0);
+            ImGui::TextUnformatted(GetDragonBodyPartName(status_.bodyPart));
+
+            ImGui::TableSetColumnIndex(1);
+            const ImVec4 durabilityColor_ = status_.broken
+                ? ImVec4(0.85f, 0.18f, 0.12f, 1.0f)
+                : ImVec4(0.20f, 0.72f, 0.32f, 1.0f);
+            ImGui::PushStyleColor(ImGuiCol_PlotHistogram, durabilityColor_);
+            const std::string durabilityLabel_ =
+                MakeProgressLabel(status_.currentDurability, status_.maxDurability);
+            ImGui::ProgressBar(
+                CalculateProgressRatio(status_.currentDurability, status_.maxDurability),
+                ImVec2(-1.0f, 0.0f),
+                durabilityLabel_.c_str());
+            ImGui::PopStyleColor();
+
+            ImGui::TableSetColumnIndex(2);
+            ImGui::PushStyleColor(
+                ImGuiCol_PlotHistogram,
+                ImVec4(0.95f, 0.64f, 0.18f, 1.0f));
+            const std::string staggerLabel_ =
+                MakeProgressLabel(status_.currentStagger, status_.currentMaxStagger);
+            ImGui::ProgressBar(
+                CalculateProgressRatio(status_.currentStagger, status_.currentMaxStagger),
+                ImVec2(-1.0f, 0.0f),
+                staggerLabel_.c_str());
+            ImGui::PopStyleColor();
+
+            ImGui::TableSetColumnIndex(3);
+            ImGui::TextUnformatted(status_.broken ? "Broken" : "Active");
+            ImGui::PopID();
+        }
+
+        ImGui::EndTable();
+    }
+
     ImGui::SeparatorText("Body Parts");
     for (DragonBodyPartStatus& status_ : bodyParts)
     {
         if (ImGui::TreeNode(GetDragonBodyPartName(status_.bodyPart)))
         {
+            const ImVec4 durabilityColor_ = status_.broken
+                ? ImVec4(0.85f, 0.18f, 0.12f, 1.0f)
+                : ImVec4(0.20f, 0.72f, 0.32f, 1.0f);
+            DrawBodyPartProgressBar(
+                "Durability",
+                status_.currentDurability,
+                status_.maxDurability,
+                durabilityColor_);
+            DrawBodyPartProgressBar(
+                "Stagger",
+                status_.currentStagger,
+                status_.currentMaxStagger,
+                ImVec4(0.95f, 0.64f, 0.18f, 1.0f));
             ImGui::DragFloat("Max Durability", &status_.maxDurability, 1.0f, 1.0f, 99999.0f);
             status_.currentDurability = (std::clamp)(
                 status_.currentDurability,

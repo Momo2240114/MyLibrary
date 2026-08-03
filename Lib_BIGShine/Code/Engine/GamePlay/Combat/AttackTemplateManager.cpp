@@ -348,6 +348,7 @@ AttackTemplateManager& AttackTemplateManager::Instance()
 
 void AttackTemplateManager::LoadAll()
 {
+    // Data/AttackTemplate配下を走査し、攻撃テンプレートJSONを一覧として読み直す。
     templates.clear();
     const std::filesystem::path root_ = WindowsDialogHelper::Utf8ToPath("Data/AttackTemplate");
     std::error_code error_;
@@ -382,6 +383,7 @@ void AttackTemplateManager::LoadAll()
 
 bool AttackTemplateManager::LoadTemplate(const std::string& path_)
 {
+    // 旧キーも読み取れるようfallbackを多めに持ち、保存済みAssetを壊さず復元する。
     std::ifstream stream_(WindowsDialogHelper::Utf8ToPath(NormalizeAttackTemplatePath(path_)));
     if (!stream_) return false;
     Json_ json_ = Json_::parse(stream_, nullptr, false);
@@ -524,6 +526,8 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
 bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
 {
     if (attackTemplate_.id.empty()) return false;
+
+    // Editorで調整した攻撃データを、Animation Sequencerから参照できるID付きJSONとして保存する。
     std::printf(
         "[AttackTemplateManager::SaveTemplate] id='%s' hitParticleAssetPath='%s' "
         "hitMeshVfxAssetPath='%s'\n",
@@ -629,6 +633,8 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
 bool AttackTemplateManager::DuplicateTemplate(const AttackTemplate& source_, const std::string& newId_)
 {
     if (newId_.empty() || FindTemplate(newId_)) return false;
+
+    // 既存テンプレートをベースに、IDだけ差し替えた新規攻撃Assetを作る。
     AttackTemplate copy_ = source_;
     copy_.id = newId_;
     copy_.displayName = newId_;
@@ -673,6 +679,7 @@ std::string AttackTemplateManager::ResolveRenamedTemplateId(
 
 std::string AttackTemplateManager::NormalizeAttackTemplatePath(const std::string& pathOrId_) const
 {
+    // IDだけ渡された場合でもData/AttackTemplate/*.jsonとして扱えるようパスを正規化する。
     std::filesystem::path path_ = WindowsDialogHelper::Utf8ToPath(pathOrId_);
     if (path_.extension() != ".json") path_ += ".json";
     if (!path_.has_parent_path()) path_ = WindowsDialogHelper::Utf8ToPath("Data/AttackTemplate") / path_;
@@ -681,6 +688,7 @@ std::string AttackTemplateManager::NormalizeAttackTemplatePath(const std::string
 
 void AttackTemplateManager::OpenEditor(const std::string& id_)
 {
+    // Window版Editorを開く前に一覧を読み込み、編集対象IDとリネーム用バッファをそろえる。
     if (!loaded) LoadAll();
     editingTemplateId = id_;
     editingIdBuffer = id_;
@@ -730,6 +738,7 @@ void AttackTemplateManager::DrawInlineEditor(
 
     ImGui::PushID(("AttackTemplateInline_" + id_).c_str());
 
+    // ComponentやAnimEventのInspector内から、対象テンプレートをその場で編集できる入口。
     ImGui::SeparatorText("Attack Template");
     DrawEditorContent(id_, gameObjectManager_);
     if (!renamedTemplateId.empty())
@@ -757,6 +766,7 @@ bool AttackTemplateManager::DrawEditorContent(
         LoadAll();
     }
 
+    // 攻撃数値、武器HitBox、ヒット演出、派生攻撃エフェクトを1画面で編集する本体。
     AttackTemplate* attackTemplate_ = FindTemplate(id_);
     if (!attackTemplate_)
     {
