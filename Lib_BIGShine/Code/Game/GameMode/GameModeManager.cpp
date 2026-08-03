@@ -4,11 +4,13 @@
 
 #include "GameModeBlackboardKeys.h"
 
+// 現在の初期値をGlobalBlackboardへ流し込み、他Systemが参照できる状態にする。
 void GameModeManager::Start()
 {
     WriteBlackboard();
 }
 
+// Manager自身の状態を正として、毎フレームGlobalBlackboardへ同期する。
 void GameModeManager::Update(float deltaTime_)
 {
     (void)deltaTime_;
@@ -16,6 +18,7 @@ void GameModeManager::Update(float deltaTime_)
     WriteBlackboard();
 }
 
+// 戦闘開始前の状態へ戻し、ロックやAI方針が前回戦闘から残らないようにする。
 void GameModeManager::ResetBattleState()
 {
     gameplayLocked = false;
@@ -79,12 +82,14 @@ void GameModeManager::SetCurrentBattlePhase(int phase_)
 
 void GameModeManager::SetPlayerHpRate(float rate_)
 {
+    // HP割合はUIやAI条件でそのまま使うため、0から1の範囲へ丸めて保存する。
     playerHpRate = ClampRate(rate_);
     WriteBlackboard();
 }
 
 void GameModeManager::SetBossHpRate(float rate_)
 {
+    // Boss側も同じ正規化割合として扱い、Blackboardの利用側に補正を持たせない。
     bossHpRate = ClampRate(rate_);
     WriteBlackboard();
 }
@@ -115,6 +120,7 @@ void GameModeManager::SetAIDirectorReduceAggression(bool enabled_)
 
 void GameModeManager::SetAIDirectorAttackDelayRate(float rate_)
 {
+    // 攻撃遅延率は倍率として扱うため、上限は設けず負値だけを防ぐ。
     attackDelayRate = (std::max)(0.0f, rate_);
     WriteBlackboard();
 }
@@ -139,6 +145,7 @@ void GameModeManager::SetAIDirectorAggressionRate(float rate_)
 
 void GameModeManager::WriteBlackboard()
 {
+    // Gameカテゴリには操作や演出のロック状態を集約する。
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::GAMEPLAY_LOCKED,
@@ -164,6 +171,7 @@ void GameModeManager::WriteBlackboard()
         GameModeBlackboardKeys::BATTLE_PAUSED,
         battlePaused);
 
+    // Battleカテゴリには現在フェーズとHP割合を保存し、UIやAIが同じ値を参照できるようにする。
     globalBlackboard.SetInt(
         GameModeBlackboardKeys::CATEGORY_BATTLE,
         GameModeBlackboardKeys::CURRENT_BATTLE_PHASE,
@@ -179,6 +187,7 @@ void GameModeManager::WriteBlackboard()
         GameModeBlackboardKeys::BOSS_HP_RATE,
         bossHpRate);
 
+    // AIDirectorカテゴリには攻撃選択へ影響する方針フラグと重みを保存する。
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_AI_DIRECTOR,
         GameModeBlackboardKeys::PREFER_DELAYED_ATTACK,
@@ -222,5 +231,6 @@ void GameModeManager::WriteBlackboard()
 
 float GameModeManager::ClampRate(float value_) const
 {
+    // 割合として扱う値は、Blackboardへ書く前に有効範囲へ収める。
     return std::clamp(value_, 0.0f, 1.0f);
 }

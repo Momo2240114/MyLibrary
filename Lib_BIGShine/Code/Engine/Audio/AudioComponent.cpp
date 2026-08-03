@@ -9,6 +9,7 @@
 #include <cstring>
 #include <imgui.h>
 
+// 設定された音源またはWorkspaceを準備し、Action登録と自動再生を行う。
 void AudioComponent::Start()
 {
     if (useWorkspacePreset)
@@ -24,6 +25,7 @@ void AudioComponent::Start()
     if (playOnStart) Play();
 }
 
+// 使用モードを判定し、Workspaceプリセットまたは直接指定音声を再生する。
 void AudioComponent::Play()
 {
     if (useWorkspacePreset)
@@ -35,6 +37,7 @@ void AudioComponent::Play()
 
     if (audioPath.empty()) return;
 
+    // 直接指定モードでは、音源を登録してからComponent側の設定をAudioSourceへ反映する。
     AudioManager& audioManager_ = AudioManager::Instance();
     audioManager_.AddAudioFromFile(audioPath, isBGM);
     audioManager_.SetVolumeByPath(audioPath, volume);
@@ -50,6 +53,7 @@ void AudioComponent::Play()
     }
 }
 
+// 使用中の音声指定方式に合わせて、対応する再生を停止する。
 void AudioComponent::Stop()
 {
     if (useWorkspacePreset)
@@ -62,6 +66,7 @@ void AudioComponent::Stop()
     AudioManager::Instance().StopByPath(audioPath);
 }
 
+// こもり状態を保存し、直接指定音声のローパスDSPへ即時反映する。
 void AudioComponent::SetMuffled(bool muffled_)
 {
     muffled = muffled_;
@@ -90,11 +95,13 @@ std::string AudioComponent::GetClearMuffleActionName() const
     return ResolveActionName(clearMuffleActionName);
 }
 
+// Ownerへ再生・停止・こもり切替Actionを登録し、EventSystemから操作可能にする。
 void AudioComponent::RegisterActions()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // Componentごとに解決したAction名と、実際の音声操作関数を対応付ける。
     owner_->RegisterAction("Audio", GetPlayActionName(), [this]()
         {
             Play();
@@ -113,6 +120,7 @@ void AudioComponent::RegisterActions()
         });
 }
 
+// Action接頭辞が設定されている場合だけ、基本名の前へ付加する。
 std::string AudioComponent::ResolveActionName(const std::string& actionName_) const
 {
     if (actionName_.empty()) return {};
@@ -120,6 +128,7 @@ std::string AudioComponent::ResolveActionName(const std::string& actionName_) co
     return actionPrefix + "_" + actionName_;
 }
 
+// 音源選択、再生設定、Workspace、Action名を編集するImGuiを描画する。
 void AudioComponent::Gui()
 {
     ImGui::Checkbox(IM_U8("ワークスペースプリセットを使用##AudioComponent_UseWorkspacePresetCheckbox"), &useWorkspacePreset);
@@ -188,6 +197,7 @@ void AudioComponent::Gui()
         return;
     }
 
+    // 直接指定モードでは音声パス、BGM／SE、Loop、音量、DSP設定を編集する。
     char pathBuffer_[256];
     strncpy_s(pathBuffer_, audioPath.c_str(), sizeof(pathBuffer_));
     if (ImGui::InputText(IM_U8("オーディオパス##AudioComponent_AudioPathInput"), pathBuffer_, sizeof(pathBuffer_)))
@@ -266,6 +276,7 @@ void AudioComponent::Gui()
     }
 }
 
+// Componentの音源指定、再生設定、Action名をJSONへ保存する。
 void AudioComponent::Serialize(nlohmann::json& json_) const
 {
     json_["AudioPath"] = audioPath;
@@ -286,6 +297,7 @@ void AudioComponent::Serialize(nlohmann::json& json_) const
     json_["Muffled"] = muffled;
 }
 
+// JSONから設定を復元し、数値項目は安全な範囲へ補正する。
 void AudioComponent::Deserialize(const nlohmann::json& json_)
 {
     audioPath = json_.value("AudioPath", std::string("Data/Audio/SE/TitleSelect.wav"));

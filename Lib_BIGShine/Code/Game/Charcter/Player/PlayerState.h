@@ -8,8 +8,8 @@
 
 class PlayerControllerComponent;
 
-// PlayerAction は、プレイヤーの入力とミラーAIで共有されされる予定。このフロー定義からは、
-// 入力バインディングを参照しません
+// PlayerActionは、Playerの入力とミラーAIで共有される予定の行動種別。
+// この列挙定義からは、入力バインディングを直接参照しない。
 enum class PLAYER_ACTION
 {
     IDLE,
@@ -33,6 +33,7 @@ enum class PLAYER_ACTION
     NONE
 };
 
+// Actionを移動、攻撃、ガードなどの大きな分類で扱うための種別。
 enum class PLAYER_ACTION_GROUP
 {
     LOCOMOTION,
@@ -44,6 +45,7 @@ enum class PLAYER_ACTION_GROUP
     NONE
 };
 
+// 攻撃ActionをコンボやTimeline側で扱いやすい攻撃種別へ分類する。
 enum class PLAYER_ATTACK_TYPE
 {
     NONE,
@@ -55,6 +57,7 @@ enum class PLAYER_ATTACK_TYPE
     SKILL_B
 };
 
+// 移動Action内でAnimation遷移に使用する詳細フェーズ。
 enum class PLAYER_LOCOMOTION_PHASE
 {
     IDLE,
@@ -70,20 +73,31 @@ enum class PLAYER_LOCOMOTION_PHASE
 
 namespace PlayerBlackboardCategory
 {
+    // Player状態や入力値を保存するカテゴリ。
     inline constexpr const char* PLAYER = "Player";
+    // AnimationStateMachineへ渡すパラメータを保存するカテゴリ。
     inline constexpr const char* ANIM = "Anim";
 }
 
 namespace PlayerBlackboardKey
 {
+    // 現在のPlayerAction名。
     inline constexpr const char* ACTION = "Action";
+    // 現在Actionの大分類。
     inline constexpr const char* ACTION_GROUP = "ActionGroup";
+    // 攻撃Actionの場合に使用する攻撃種別。
     inline constexpr const char* ATTACK_TYPE = "AttackType";
+    // コンボ中の現在段数。
     inline constexpr const char* COMBO_INDEX = "ComboIndex";
+    // 通常移動入力ベクトル。
     inline constexpr const char* MOVE_INPUT = "MoveInput";
+    // ガード中の移動入力ベクトル。
     inline constexpr const char* GUARD_MOVE_INPUT = "GuardMoveInput";
+    // 回避方向の入力ベクトル。
     inline constexpr const char* DODGE_INPUT = "DodgeInput";
+    // ガード入力が押されているかを示す。
     inline constexpr const char* GUARD_INPUT = "GuardInput";
+    // 移動Action内の詳細フェーズ。
     inline constexpr const char* LOCOMOTION_PHASE = "LocomotionPhase";
     inline constexpr const char* IS_RUN_START = "IsRunStart";
     inline constexpr const char* IS_RUN_LOOP = "IsRunLoop";
@@ -126,14 +140,15 @@ namespace PlayerBlackboardKey
     inline constexpr const char* IS_AIR_HIT_REACTION = "IsAirHitReaction";
     inline constexpr const char* IS_AIR_HIT_RECOVERABLE = "IsAirHitRecoverable";
     inline constexpr const char* IS_AIR_HIT_KNOCKDOWN = "IsAirHitKnockdown";
-    //ジャスト回避関係
+    // ジャスト回避に関係するBlackboardキー。
     inline constexpr const char* JUST_DODGE_SUCCEEDED = "JustDodgeSucceeded";
     inline constexpr const char* JUST_DODGE_TRIGGER = "JustDodgeTrigger";
-    //カウンター関係
+    // カウンターに関係するBlackboardキー。
     inline constexpr const char* CAN_COUNTER = "CanCounter";
     inline constexpr const char* DODGED_COUNTER_TAG = "DodgedCounterag";
 }
 
+// PlayerActionをログやBlackboardへ書き込む表示名へ変換する。
 inline const char* GetPlayerActionName(PLAYER_ACTION action_)
 {
     switch (action_)
@@ -159,6 +174,7 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     }
 }
 
+// PlayerActionを、移動・攻撃・ガードなどの大分類へ変換する。
 inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
 {
     switch (action_)
@@ -190,6 +206,7 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
     }
 }
 
+// 攻撃Actionを弱攻撃、強攻撃、スキルなどの攻撃種別へ変換する。
 inline PLAYER_ATTACK_TYPE GetPlayerAttackType(PLAYER_ACTION action_)
 {
     switch (action_)
@@ -214,6 +231,7 @@ inline PLAYER_ATTACK_TYPE GetPlayerAttackType(PLAYER_ACTION action_)
     }
 }
 
+// TimelineやActionSequenceの終了通知で進行するActionかを判定する。
 inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
 {
     switch (action_)
@@ -237,6 +255,8 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     }
 }
 
+// PlayerControllerから実行されるPlayer用Stateの基底クラス。
+// Owner参照、Controller参照、Component取得キャッシュを共通化する。
 class PlayerState
 {
 public:
@@ -252,18 +272,22 @@ public:
 
     virtual const char* GetName() const = 0;
 
+    // Stateへ入った瞬間に、AnimationやBlackboardなどを初期化する。
     virtual void Enter() = 0;
+    // State中の毎フレーム処理。
     virtual void Execute(float elapsedTime_) = 0;
     virtual void LateExecute(float et_) {}
     virtual void Exit() {}
 
 protected:
+    // Ownerが破棄済みの場合はnullptrを返す。
     std::shared_ptr<GameObject> GetOwner() const { return owner.lock(); }
     PlayerControllerComponent* GetPlayerController() const { return playerController; }
 
     template<class T>
     std::shared_ptr<T> GetComponent() const
     {
+        // 同じComponentを何度も検索しないよう、型ごとにweak参照でキャッシュする。
         const std::type_index type_ = std::type_index(typeid(T));
         const auto cachedIterator_ = componentCache.find(type_);
         if (cachedIterator_ != componentCache.end())
@@ -279,6 +303,7 @@ protected:
         const std::shared_ptr<GameObject> owner_ = GetOwner();
         if (!owner_) return nullptr;
 
+        // キャッシュが無効な場合だけGameObjectから取り直し、結果を次回用に保存する。
         const std::shared_ptr<T> component_ = owner_->GetComponent<T>();
         if (component_)
         {
@@ -292,6 +317,8 @@ protected:
     }
 
     std::weak_ptr<GameObject> owner;
+    // Stateから入力状態やAction制御を参照するためのController。
     PlayerControllerComponent* playerController = nullptr;
+    // 型ごとのComponent取得結果を保持する弱参照キャッシュ。
     mutable std::unordered_map<std::type_index, std::weak_ptr<Component>> componentCache;
 };

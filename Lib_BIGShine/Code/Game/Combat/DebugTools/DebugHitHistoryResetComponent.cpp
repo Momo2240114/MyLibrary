@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <imgui.h>
 
+// 開始時にHitBoxを準備し、初期設定を反映して必要なら即座に有効化する。
 void DebugHitHistoryResetComponent::Start()
 {
     ResolveHitBox();
@@ -15,6 +16,7 @@ void DebugHitHistoryResetComponent::Start()
     if (autoActivate) Rearm();
 }
 
+// HitBox設定を更新し、自動有効化が有効なら一定間隔でヒット履歴をリセットする。
 void DebugHitHistoryResetComponent::Update(float elapsedTime_)
 {
     ResolveHitBox();
@@ -24,6 +26,7 @@ void DebugHitHistoryResetComponent::Update(float elapsedTime_)
     ApplySettings();
     if (!autoActivate)
     {
+        // 手動確認中はHitBoxを停止し、再開時に余分な経過時間が残らないようにする。
         hitBox_->Deactivate();
         rearmTimer = 0.0f;
         return;
@@ -35,11 +38,13 @@ void DebugHitHistoryResetComponent::Update(float elapsedTime_)
 
 void DebugHitHistoryResetComponent::ResolveHitBox()
 {
+    // 既に有効な参照がある場合は、毎フレーム検索し直さない。
     if (!hitBox.expired()) return;
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (owner_) hitBox = owner_->GetOrAddComponent<HitBox>();
 }
 
+// GUIまたはJSONから設定された値を安全な範囲へ補正し、HitBoxへ直接反映する。
 void DebugHitHistoryResetComponent::ApplySettings()
 {
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
@@ -56,6 +61,7 @@ void DebugHitHistoryResetComponent::ApplySettings()
     hitBox_->attackTag = "DamageBox";
 }
 
+// HitBoxを再起動し、同一対象へ再度ヒットできる確認状態を作る。
 void DebugHitHistoryResetComponent::Rearm()
 {
     const std::shared_ptr<HitBox> hitBox_ = hitBox.lock();
@@ -65,6 +71,7 @@ void DebugHitHistoryResetComponent::Rearm()
     rearmTimer = 0.0f;
 }
 
+// デバッグ用HitBoxの攻撃値と再有効化間隔を編集するImGuiを描画する。
 void DebugHitHistoryResetComponent::Gui()
 {
     ImGui::Checkbox("Auto Activate", &autoActivate);
@@ -77,6 +84,7 @@ void DebugHitHistoryResetComponent::Gui()
     if (ImGui::Button("Rearm Now")) Rearm();
 }
 
+// デバッグ確認に必要なHitBox設定をJSONへ保存する。
 void DebugHitHistoryResetComponent::Serialize(nlohmann::json& json_) const
 {
     json_["Damage"] = damage;
@@ -88,6 +96,7 @@ void DebugHitHistoryResetComponent::Serialize(nlohmann::json& json_) const
     json_["AutoActivate"] = autoActivate;
 }
 
+// JSONからHitBox設定を復元し、数値項目を有効範囲へ丸める。
 void DebugHitHistoryResetComponent::Deserialize(const nlohmann::json& json_)
 {
     damage = (std::max)(json_.value("Damage", 5.0f), 0.0f);

@@ -4,10 +4,11 @@
 #include <Windows.h>
 #include <mmreg.h>
 
-// オーディオリソース
+// PCM形式のWAVファイルを直接解析し、波形データとWAVEFORMATEXを保持するリソースクラス。
 class AudioResource
 {
 public:
+	// 指定WAVファイルからRIFF、fmt、dataチャンクを読み込む。
 	AudioResource(const char* filename);
 	~AudioResource();
 
@@ -47,9 +48,13 @@ private:
 		UINT16				quantumBits;	// サンプルあたりのビット数(bit/sample)
 	};
 
+	// 読み込んだRIFFヘッダー情報。
 	Riff					riff;
+	// fmtチャンクから取得したPCMフォーマット情報。
 	Fmt						fmt;
+	// dataチャンクから読み込んだPCM波形データ。
 	std::vector<UINT8>		data;
+	// 再生APIへ渡せる形式へ変換したWAVEフォーマット情報。
 	WAVEFORMATEX			wfx;
 
 };

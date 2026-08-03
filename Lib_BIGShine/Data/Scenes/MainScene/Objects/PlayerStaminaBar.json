@@ -34,7 +34,7 @@
                     ]
                 },
                 "Version": 1,
-                "Visible": true,
+                "Visible": false,
                 "WidgetId": "PlayerStaminaBar",
                 "ZOrder": 1
             },
@@ -68,7 +68,7 @@
                 ],
                 "ShaderID": 0,
                 "TexturePath": "",
-                "Visible": true,
+                "Visible": false,
                 "pivotType": 0
             },
             "Enabled": true,

@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 32,
+                "AttackInstanceId": 15,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
@@ -437,7 +437,7 @@
                     }
                 ],
                 "PlaybackSpeed": 1.0,
-                "TrailEmitting": false,
+                "TrailEmitting": true,
                 "TrailLifeTime": 0.23000000417232513,
                 "TrailMaxSampleCount": 96,
                 "TrailMinimumSampleDistance": 0.006000000052154064,

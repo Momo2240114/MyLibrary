@@ -32,12 +32,14 @@ AudioResource::AudioResource(const char* filename)
 		// "WAVE" との一致を確認
 		_ASSERT_EXPR_A(riff.type == MAKE_WAVE_TAG_VALUE('W', 'A', 'V', 'E'), "not in WAVE format");
 
+		// ファイル末尾までチャンクヘッダーを順に読み、必要なfmtとdataを抽出する。
 		while (size > readBytes)
 		{
 			Chunk chunk;
 			fread(&chunk, sizeof(chunk), 1, fp);
 			readBytes += sizeof(chunk);
 
+			// fmtチャンクにはチャンネル数、SampleRate、量子化Bit数などが格納されている。
 			// 'fmt '
 			if (chunk.tag == MAKE_WAVE_TAG_VALUE('f', 'm', 't', ' '))
 			{
@@ -60,6 +62,7 @@ AudioResource::AudioResource(const char* filename)
 					readBytes += extSize;
 				}
 			}
+			// dataチャンクには実際に再生するPCM波形データが格納されている。
 			// 'data'
 			else if (chunk.tag == MAKE_WAVE_TAG_VALUE('d', 'a', 't', 'a'))
 			{
@@ -90,7 +93,7 @@ AudioResource::AudioResource(const char* filename)
 		fclose(fp);
 	}
 
-	// WAV フォーマットをセットアップ
+	// 読み込んだfmt情報をWindows標準のWAVEFORMATEXへ変換する。
 	{
 		wfx.wFormatTag = WAVE_FORMAT_PCM;
 		wfx.nChannels = fmt.channel;

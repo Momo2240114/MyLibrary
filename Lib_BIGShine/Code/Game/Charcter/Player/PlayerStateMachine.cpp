@@ -7,7 +7,7 @@
 void PlayerStateMachine::Initialize(
     PlayerControllerComponent& playerController_)
 {
-    // 各StateがControllerと同じGameObjectを参照できるよう、初期化時に入口情報だけ保持する。
+    // 各StateがControllerと同じGameObjectを参照できるよう、初期化時に入口情報を保持する。
     playerController = &playerController_;
     owner = playerController_.GetGameObject();
 }
@@ -20,7 +20,7 @@ void PlayerStateMachine::ChangeState(PLAYER_ACTION nextAction_)
         return;
     }
 
-    // 状態遷移はExit、参照差し替え、Enterの順に固定して、Stateごとの初期化漏れを防ぐ。
+    // 状態遷移はExit、参照差し替え、Enterの順に固定し、Stateごとの初期化漏れを防ぐ。
     const char* previousStateName_ = currentState ? currentState->GetName() : "None";
     const char* nextStateName_ = it_->second ? it_->second->GetName() : "None";
     const std::shared_ptr<GameObject> owner_ = this->owner.lock();
@@ -41,6 +41,7 @@ void PlayerStateMachine::ChangeState(PLAYER_ACTION nextAction_)
 
 void PlayerStateMachine::Update(float dt_)
 {
+    // 未登録または初期遷移前は実行対象がないため何もしない。
     if (currentState)
     {
         currentState->Execute(dt_);
@@ -49,5 +50,6 @@ void PlayerStateMachine::Update(float dt_)
 
 const char* PlayerStateMachine::GetCurrentStateName() const
 {
+    // Editor表示やログで未設定状態を安全に扱うため、nullptr時は固定文字列を返す。
     return currentState ? currentState->GetName() : "None";
 }

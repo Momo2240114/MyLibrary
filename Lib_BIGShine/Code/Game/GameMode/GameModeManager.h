@@ -5,17 +5,21 @@
 #include <algorithm>
 
 // ゲーム全体で共有する進行状態とGlobalBlackboardを管理する軽量Manager。
-// 移動、攻撃、演出の実処理は各System側に任せ、ここではロック状態やAI方針だけを集約する。
+// 移動、演出、AI判断などのSystem側が参照するロック状態やAI方針を集約する。
 class GameModeManager
 {
 public:
     GameModeManager() = default;
     ~GameModeManager() = default;
 
+    // 初期状態をGlobalBlackboardへ書き込む。
     void Start();
+    // 毎フレーム共有状態をGlobalBlackboardへ同期する。
     void Update(float deltaTime_);
+    // 戦闘進行、HP割合、AI方針を初期値へ戻す。
     void ResetBattleState();
 
+    // 他Systemが参照する共有Blackboardを返す。
     BlackboardComponent& GetGlobalBlackboard() { return globalBlackboard; }
     const BlackboardComponent& GetGlobalBlackboard() const { return globalBlackboard; }
 
@@ -60,29 +64,36 @@ public:
     float GetAIDirectorGuardBreakRate() const { return guardBreakRate; }
     float GetAIDirectorAggressionRate() const { return aggressionRate; }
 
+    // 現在保持している状態値をカテゴリ別にGlobalBlackboardへ反映する。
     void WriteBlackboard();
 
 private:
+    // HP割合やAI重みなど、0から1の範囲で扱う値を補正する。
     float ClampRate(float value_) const;
 
 private:
+    // ゲーム全体で共有するBlackboard本体。
     BlackboardComponent globalBlackboard;
 
+    // Gameplay全体、Player操作、Enemy AI、演出、戦闘停止のロック状態。
     bool gameplayLocked = false;
     bool playerControlLocked = false;
     bool enemyAILocked = false;
     bool presentationPlaying = false;
     bool battlePaused = false;
 
+    // 現在の戦闘フェーズと、Player/BossのHP割合。
     int currentBattlePhase = 0;
     float playerHpRate = 1.0f;
     float bossHpRate = 1.0f;
 
+    // AIDirectorへ渡す攻撃傾向の優先フラグ。
     bool preferDelayedAttack = false;
     bool preferFeintAttack = false;
     bool preferGuardBreak = false;
     bool reduceAggression = false;
 
+    // AIDirectorが攻撃選択の重み付けに使用する係数。
     float attackDelayRate = 1.0f;
     float feintRate = 0.0f;
     float guardBreakRate = 0.0f;

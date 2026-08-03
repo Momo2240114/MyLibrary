@@ -30,6 +30,7 @@ enum class AI_BEHAVIOR_NODE_TYPE
     SUB_GRAPH,
 };
 
+// BlackboardConditionノードで使用する比較方法。
 enum class AI_BLACKBOARD_COMPARE_TYPE
 {
     EXISTS,
@@ -42,6 +43,7 @@ enum class AI_BLACKBOARD_COMPARE_TYPE
     LESS_EQUAL,
 };
 
+// Blackboardへ読み書きする値の型。
 enum class AI_BLACKBOARD_VALUE_TYPE
 {
     FLOAT,
@@ -53,12 +55,14 @@ enum class AI_BLACKBOARD_VALUE_TYPE
     TRIGGER,
 };
 
+// ノードが参照するBlackboardの範囲。
 enum class AI_BLACKBOARD_SCOPE
 {
     LOCAL,
     GLOBAL,
 };
 
+// ノード実行結果。RUNNINGは次Tickでも処理を継続することを示す。
 enum class AI_BEHAVIOR_STATUS
 {
     SUCCESS,
@@ -70,19 +74,32 @@ enum class AI_BEHAVIOR_STATUS
 // Editor上の1ノード分の保存データ。条件用の値、Action名、Wait時間などをここに集約する。
 struct AIBehaviorNode
 {
+    // EditorとRuntimeの両方でノードを識別する一意ID。
     uintptr_t id = 0;
+    // 親Linkを受け取る入力PinのID。Rootでは使用しない。
     uintptr_t inputPinId = 0;
+    // 子Linkを接続する出力PinのID。Taskノードでは使用しない。
     uintptr_t outputPinId = 0;
+    // ノードの実行方法を決める種別。
     AI_BEHAVIOR_NODE_TYPE type = AI_BEHAVIOR_NODE_TYPE::SELECTOR;
+    // Editor上に表示するノード名。
     std::string name = "Node";
+    // ノードの用途をEditor上で補足する自由記述。
     std::string comment;
+    // SubGraphやEditor上の所属範囲を識別する文字列。
     std::string scopeId = "Root";
+    // NodeEditor上での表示位置。
     DirectX::XMFLOAT2 position = { 0.0f, 0.0f };
 
+    // ConditionまたはSet処理で使用するBlackboardカテゴリ。
     std::string blackboardCategory = AIBlackboardKeys::CATEGORY_AI;
+    // 読み書き対象となるBlackboardキー。
     std::string blackboardKey;
+    // LocalとGlobalのどちらのBlackboardを参照するかを指定する。
     AI_BLACKBOARD_SCOPE blackboardScope = AI_BLACKBOARD_SCOPE::LOCAL;
+    // Conditionノードで使用する比較方法。
     AI_BLACKBOARD_COMPARE_TYPE compareType = AI_BLACKBOARD_COMPARE_TYPE::EQUAL;
+    // 比較値または書き込み値として使用するデータ型。
     AI_BLACKBOARD_VALUE_TYPE valueType = AI_BLACKBOARD_VALUE_TYPE::BOOL;
     float floatValue = 0.0f;
     int intValue = 0;
@@ -91,20 +108,29 @@ struct AIBehaviorNode
     DirectX::XMFLOAT3 vector3Value = { 0.0f, 0.0f, 0.0f };
     std::string stringValue;
 
+    // PLAY_ACTIONノードが実行するAction名。
     std::string actionName;
+    // Action終了フラグを待ってからSuccessにするかを指定する。
     bool waitForActionEnd = true;
+    // Action終了判定を読むBlackboardカテゴリ。
     std::string actionEndCategory = AIBlackboardKeys::CATEGORY_AI;
+    // Action終了判定を読むBoolキー。
     std::string actionEndKey = AIBlackboardKeys::ACTION_ENDED;
 
+    // WAITノードが継続する秒数。
     float waitSeconds = 0.0f;
+    // SUB_GRAPHノードが参照するGraph名。
     std::string subGraphName;
+    // 同じ親へ接続された子ノード同士の評価順。小さい値を先に評価する。
     int priority = 0;
+    // RANDOM_SELECTORで選択確率として使用する重み。
     float weight = 1.0f;
 };
 
 // ノード同士の接続情報を保持するリンク
 struct AIBehaviorLink
 {
+    // EditorとRuntimeの両方でノードを識別する一意ID。
     uintptr_t id = 0;
     uintptr_t fromNodeId = 0;
     uintptr_t toNodeId = 0;
@@ -115,26 +141,37 @@ struct AIBehaviorLink
 // 実行中ノードの経過時間や進行位置を保持する
 struct AIBehaviorRuntimeState
 {
+    // WAITノードで蓄積する経過時間。
     float elapsedTime = 0.0f;
+    // Sequenceが次に評価する子ノードのIndex。
     size_t childIndex = 0;
+    // PLAY_ACTIONがすでに開始処理を呼び出したかを示す。
     bool actionStarted = false;
 };
 
 // AIグラフの実行時に参照する対象やBlackboard情報をまとめる
 struct AIBehaviorContext
 {
+    // AIControllerComponentを保持し、Actionを実行するGameObject。
     GameObject* owner = nullptr;
+    // 現在AIが追跡・攻撃対象としているGameObject。
     GameObject* target = nullptr;
+    // Ownerが保持するLocal Blackboard。
     BlackboardComponent* blackboard = nullptr;
+    // GameMode全体で共有されるGlobal Blackboard。
     BlackboardComponent* globalBlackboard = nullptr;
     DirectX::XMFLOAT3 ownerPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 targetPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 spawnPosition = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 toTargetDirection = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 toSpawnDirection = { 0.0f, 0.0f, 0.0f };
+    // OwnerからTargetまでの距離。
     float targetDistance = 0.0f;
+    // OwnerからSpawn位置までの距離。
     float spawnDistance = 0.0f;
+    // WAITなどの時間更新に使用するフレーム経過時間。
     float deltaTime = 0.0f;
+    // targetが有効なObjectを参照しているかを示す。
     bool hasTarget = false;
 };
 
@@ -187,10 +224,16 @@ private:
     AIBehaviorNode* FindRootNode();
 
 private:
+    // Graph Assetを構成する全ノードの保存データ。
     std::vector<AIBehaviorNode> nodes;
+    // 親ノードから子ノードへの接続情報。
     std::vector<AIBehaviorLink> links;
+    // ノードIDごとの待機時間・Sequence進行位置・Action開始状態。
     std::unordered_map<uintptr_t, AIBehaviorRuntimeState> runtimeStates;
+    // 直前のTickで評価されたノードID。Editorの実行中表示に使用する。
     std::vector<uintptr_t> runtimeActiveNodeIds;
+    // 直前にRootから評価したGraph全体の結果。
     AI_BEHAVIOR_STATUS lastTickStatus = AI_BEHAVIOR_STATUS::FAILURE;
+    // 次に生成するノード・Pin・Linkへ割り当てる一意ID。
     uintptr_t nextId = 1;
 };

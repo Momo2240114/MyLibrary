@@ -16,8 +16,8 @@
                         0.0
                     ],
                     "AnchoredPosition": [
-                        24.0,
-                        24.0
+                        32.0,
+                        32.0
                     ],
                     "LocalRotation": 0.0,
                     "LocalScale": [
@@ -29,8 +29,8 @@
                         0.0
                     ],
                     "SizeDelta": [
-                        360.0,
-                        112.0
+                        560.0,
+                        136.0
                     ]
                 },
                 "Version": 1,

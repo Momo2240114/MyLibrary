@@ -32,12 +32,17 @@ namespace
     }
 }
 
+// コンポーネント開始時にBlackboardを確保し、JSONから復元されたAIアクションをOwnerへ登録する。
 void AIActionComponent::Start()
 {
+    // アクション開始時に必ず状態を書き込めるようBlackboardを先に準備する。
     EnsureBlackboard();
+
+    // 保存済みの定義をOwnerのLocal Actionへ登録し、BehaviorGraphから呼び出せる状態にする。
     RegisterActions();
 }
 
+// AIアクション定義の追加・削除・編集・実行テストを行うImGuiを描画する。
 void AIActionComponent::Gui()
 {
     EnsureBlackboard();
@@ -133,9 +138,11 @@ void AIActionComponent::Gui()
     }
 }
 
+// Editorで設定した全AIアクション定義を、復元可能なJSON配列として保存する。
 void AIActionComponent::Serialize(nlohmann::json& json_) const
 {
     json_["Actions"] = nlohmann::json::array();
+    // 現在の定義一覧をそれぞれBehaviorGraphから呼べるブリッジActionへ変換する。
     for (const AIActionDefinition& definition_ : actions)
     {
         json_["Actions"].push_back({
@@ -161,6 +168,7 @@ void AIActionComponent::Serialize(nlohmann::json& json_) const
     }
 }
 
+// JSONからAIアクション定義を復元し、復元後の内容でActionRegistryを再登録する。
 void AIActionComponent::Deserialize(const nlohmann::json& json_)
 {
     actions.clear();
@@ -195,8 +203,10 @@ void AIActionComponent::Deserialize(const nlohmann::json& json_)
     RegisterActions();
 }
 
+// 指定されたAIアクションを開始し、Blackboard・Animation・実処理用Actionを連動させる。
 bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
 {
+    // Graphから渡された名前に対応する設定を探し、未登録名なら実行しない。
     AIActionDefinition* definition_ = FindDefinition(aiActionName_);
     if (!definition_) return false;
     if (!definition_->executeActionName.empty() &&
@@ -205,6 +215,7 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
         return false;
     }
 
+    // 行動開始状態を共有するため、AI用Blackboardを確保して各キーを更新する。
     EnsureBlackboard();
     if (blackboardComponent)
     {
@@ -230,11 +241,13 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
         }
     }
 
+    // AI側の状態更新後に、AnimationController側へ開始状態とTriggerを反映する。
     ApplyAnimationActionStart(*definition_);
 
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return false;
 
+    // 定義に実処理用Actionが設定されている場合は、GlobalまたはOwnerへ振り分けて呼び出す。
     if (!definition_->executeActionName.empty())
     {
         if (definition_->executeTarget == AI_ACTION_EXECUTE_TARGET::GLOBAL)
@@ -247,6 +260,7 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
         }
     }
 
+    // 終了待ちを行わないActionは、呼び出したTick内で完了状態まで更新する。
     if (!definition_->waitForActionEnd)
     {
         NotifyActionEnd(definition_->blackboardCategory);
@@ -255,11 +269,13 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
     return true;
 }
 
+// 指定カテゴリで実行中のAIアクションを終了扱いにし、Animation側にも終了状態を通知する。
 void AIActionComponent::NotifyActionEnd(const std::string& category_)
 {
     EnsureBlackboard();
     if (!blackboardComponent) return;
 
+    // CurrentActionと一致する定義を探し、対応するAnimation終了処理を特定する。
     AIActionDefinition* currentDefinition_ = nullptr;
     for (AIActionDefinition& definition_ : actions)
     {
@@ -288,6 +304,7 @@ void AIActionComponent::NotifyActionEnd(const std::string& category_)
     }
 }
 
+// Blackboard上の共通ActionEndedキーを読み、対象カテゴリの行動が終了したかを返す。
 bool AIActionComponent::IsActionEnded(const std::string& category_) const
 {
     if (!blackboardComponent) return false;
@@ -296,6 +313,7 @@ bool AIActionComponent::IsActionEnded(const std::string& category_) const
     return blackboardComponent->GetBool(category_, AIBlackboardKeys::ACTION_ENDED, ended_) && ended_;
 }
 
+// OwnerにBlackboardComponentが存在することを保証し、以降の処理で使う生ポインタを保持する。
 void AIActionComponent::EnsureBlackboard()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -309,11 +327,13 @@ void AIActionComponent::EnsureBlackboard()
     blackboardComponent = blackboard_.get();
 }
 
+// 以前登録したActionを解除し、現在の定義一覧からAI用ブリッジActionを再構築する。
 void AIActionComponent::RegisterActions()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // 再登録による同名Actionの重複を防ぐため、前回登録分を先に解除する。
     for (const std::string& actionName_ : registeredActionNames)
     {
         owner_->GetLocalRegistry().RemoveAction(AIBlackboardKeys::CATEGORY_AI, actionName_);
@@ -342,6 +362,7 @@ void AIActionComponent::RegisterActions()
     registeredActionNames.push_back(owner_->BuildActionName("AI.NotifyActionEnd"));
 }
 
+// BehaviorGraphから呼ぶAIアクション名を、ExecuteAIActionへ橋渡しするOwner Actionとして登録する。
 void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definition_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -355,6 +376,7 @@ void AIActionComponent::RegisterBridgeAction(const AIActionDefinition& definitio
     registeredActionNames.push_back(owner_->BuildActionName(actionName_));
 }
 
+// AIアクション開始時にAnimation Blackboard、Trigger、Stateを設定してアニメーションを開始する。
 void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& definition_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -363,6 +385,7 @@ void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& defi
     std::shared_ptr<AnimationControllerComponent> animation_ = owner_->GetComponent<AnimationControllerComponent>();
     if (!animation_) return;
 
+    // AnimationControllerの元カテゴリを退避し、一時的にAIアクション用カテゴリへ切り替える。
     const std::string previousCategory_ = animation_->GetBlackboardCategory();
     animation_->SetBlackboardCategory(definition_.animationBlackboardCategory);
 
@@ -384,6 +407,7 @@ void AIActionComponent::ApplyAnimationActionStart(const AIActionDefinition& defi
     animation_->SetBlackboardCategory(previousCategory_);
 }
 
+// AIアクション終了時にAnimation Blackboardと終了Triggerを更新する。
 void AIActionComponent::ApplyAnimationActionEnd(const AIActionDefinition& definition_)
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -408,6 +432,7 @@ void AIActionComponent::ApplyAnimationActionEnd(const AIActionDefinition& defini
     animation_->SetBlackboardCategory(previousCategory_);
 }
 
+// AIアクション名が一致する編集可能な定義を線形検索する。
 AIActionDefinition* AIActionComponent::FindDefinition(const std::string& aiActionName_)
 {
     for (AIActionDefinition& definition_ : actions)
@@ -417,6 +442,7 @@ AIActionDefinition* AIActionComponent::FindDefinition(const std::string& aiActio
     return nullptr;
 }
 
+// AIアクション名が一致する読み取り専用の定義を線形検索する。
 const AIActionDefinition* AIActionComponent::FindDefinition(const std::string& aiActionName_) const
 {
     for (const AIActionDefinition& definition_ : actions)
