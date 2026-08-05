@@ -17,6 +17,7 @@ class GameObject;
 class HealthComponent;
 class ColliderComponent;
 
+// Dragonが実行できる行動種別。
 enum class DRAGON_ACTION_TYPE
 {
     IDLE,
@@ -43,6 +44,7 @@ enum class DRAGON_ACTION_TYPE
     DEATH_HIT_GROUND
 };
 
+// DragonAIの大きな実行状態。
 enum class DRAGON_AI_STATE
 {
     IDLE,
@@ -54,6 +56,7 @@ enum class DRAGON_AI_STATE
     DEAD
 };
 
+// HPや演出状態に応じたDragonの損傷段階。
 enum class DRAGON_DAMAGE_PHASE
 {
     NORMAL,
@@ -62,6 +65,7 @@ enum class DRAGON_DAMAGE_PHASE
     COLLAPSE
 };
 
+// Actionをどの仕組みで終了扱いにするかを示す。
 enum class DRAGON_ACTION_FINISH_MODE
 {
     SEQUENCER,
@@ -70,21 +74,34 @@ enum class DRAGON_ACTION_FINISH_MODE
     MANUAL
 };
 
+// DragonAIが判断に使う現在状況をまとめるContext。
 struct DragonAIContext
 {
+    // 現在HP割合。
     float hpRate = 1.0f;
+    // Dragon本体のWorld座標。
     DirectX::XMFLOAT3 ownerPosition = { 0.0f, 0.0f, 0.0f };
+    // PlayerのWorld座標。
     DirectX::XMFLOAT3 playerPosition = { 0.0f, 0.0f, 0.0f };
+    // DragonからPlayerへ向かう方向。
     DirectX::XMFLOAT3 toPlayer = { 0.0f, 0.0f, 0.0f };
+    // Playerまでの3D距離。
     float playerDistance = 0.0f;
+    // PlayerまでのXZ平面距離。
     float playerHorizontalDistance = 0.0f;
+    // Dragon正面から見たPlayerの角度。
     float playerAngleDegrees = 0.0f;
 
+    // Playerが正面範囲にいるか。
     bool isPlayerInFront = false;
+    // Playerが側面範囲にいるか。
     bool isPlayerInSide = false;
+    // Playerが背面範囲にいるか。
     bool isPlayerBehind = false;
+    // Playerが胴体下にいるか。
     bool isPlayerUnderBody = false;
 
+    // 各Actionが現在使用可能かを示す判定値。
     bool canUseBite = true;
     bool canUseFireBall = true;
     bool canUseSpreadBreath = true;
@@ -94,46 +111,79 @@ struct DragonAIContext
     bool canUseSpinSweep = true;
 };
 
+// 重み付き選択で使うAction候補。
 struct DragonActionCandidate
 {
+    // 候補Action。
     DRAGON_ACTION_TYPE action = DRAGON_ACTION_TYPE::IDLE;
+    // 選択重み。
     float weight = 0.0f;
 };
 
+// 現在実行中ActionのRuntime状態。
 struct DragonActionRuntime
 {
+    // 現在のAction。
     DRAGON_ACTION_TYPE currentAction = DRAGON_ACTION_TYPE::IDLE;
+    // 次に実行するため保存中のAction。
     DRAGON_ACTION_TYPE bufferedAction = DRAGON_ACTION_TYPE::IDLE;
+    // Action開始からの経過時間。
     float actionTimer = 0.0f;
+    // Recovery状態の残り時間。
     float recoveryTimer = 0.0f;
+    // Action開始処理が呼ばれたか。
     bool actionStarted = false;
+    // Action終了通知を受けたか。
     bool actionEnded = false;
+    // 現Actionから別Actionへキャンセル可能か。
     bool canCancel = true;
+    // 入力やAI要求を次ActionとしてBufferできるか。
     bool canBufferAction = false;
 };
 
+// DragonActionごとのAnimation、ActionSequence、Cooldown、終了方法をまとめる定義。
 struct DragonActionDefinition
 {
+    // 定義対象のAction種別。
     DRAGON_ACTION_TYPE action = DRAGON_ACTION_TYPE::IDLE;
+    // Debug表示やAction解決で使う名前。
     std::string actionName = "Idle";
+    // 実行するActionSequence名。
     std::string actionSequenceName;
+    // 直接再生するAnimationState名。
     std::string animationStateName;
+    // AnimationControllerへ送るAction名。
     std::string animationActionName;
+    // IK制御用Action名。
     std::string ikActionName;
+    // HitBox制御用Action名。
     std::string hitBoxActionName;
+    // VFX制御用Action名。
     std::string vfxActionName;
+    // AI_DURATION終了で使う基準時間。
     float duration = 1.0f;
+    // Action後のRecovery時間。
     float recoveryTime = 0.35f;
+    // 再使用までのCooldown時間。
     float cooldownTime = 1.0f;
+    // 重み付き選択で使う基本重み。
     float selectionWeight = 1.0f;
+    // falseならこのActionは選択対象外。
     bool enabled = true;
+    // PLAY_ACTIONノードがActionEndを待つか。
     bool waitForActionEnd = true;
+    // このAction中に次ActionのBufferを許可するか。
     bool allowBuffer = true;
+    // Action終了通知が来ない場合にTimeoutを使うか。
     bool useActionTimeout = true;
+    // Timeoutまでの最大時間。
     float actionTimeout = 5.0f;
+    // Action終了をどの方法で判定するか。
     DRAGON_ACTION_FINISH_MODE finishMode = DRAGON_ACTION_FINISH_MODE::SEQUENCER;
 };
 
+// Dragon専用AIを制御するComponent。
+// BehaviorGraphによる判断、重み付きFallback、Animation/IK/ActionSequence連携、空中状態をまとめて扱う。
 class DragonAIComponent : public Component
 {
 public:
@@ -171,21 +221,37 @@ public:
         std::vector<DragonActionCandidate>& candidates_) const;
 
 private:
+    // 必要なComponent参照を解決する。
     void EnsureDependencies();
+    // DragonActionDefinitionの標準値を構築する。
     void InitializeDefaultDefinitions();
+    // Action定義からRuntimeのキャンセルやBuffer設定を反映する。
     void ApplyActionDefinitionRuntimePolicies();
+    // Player位置、距離、角度、Action使用可否をContextへ更新する。
     void UpdateContext();
+    // 各ActionのCooldownを減算する。
     void UpdateCooldowns(float deltaTime_);
+    // BehaviorGraphを使わない場合の重み付き判断を進める。
     void UpdateDecision(float deltaTime_);
+    // BehaviorGraphを一定間隔でTickする。
     void UpdateBehaviorGraph(float deltaTime_);
+    // 空中待機中に次の空中Actionを選ぶ。
     DRAGON_ACTION_TYPE SelectNextAirAction();
+    // Idle Animationへ戻るまで次Actionを待つべきか判定する。
     bool ShouldWaitForIdleAnimation() const;
+    // AnimationGraphがIdleへ戻ったタイミングでAI判断へ復帰する。
     bool UpdateIdleAnimationGraphReturn();
+    // 現Action中の移動や空中制御を更新する。
     void UpdateActionMotion(float deltaTime_);
+    // AI_CONDITIONで終了するActionの終了条件を判定する。
     bool UpdateAIControlledActionEnd();
+    // AI_DURATIONで終了するActionの時間終了を判定する。
     bool UpdateDurationControlledActionEnd();
+    // Sequencer通知が来ない場合のAction Timeoutを処理する。
     void UpdateActionTimeout();
+    // Action終了を確定し、Recoveryや次状態へ遷移する。
     void CompleteActionEnd();
+    // Animation EventからTarget方向へ向き直す。
     void FaceTargetFromAnimationEvent();
     void MoveForward(float speed_, float deltaTime_);
     void TurnTowardPlayerLimited(float turnSpeed_, float deltaTime_);
@@ -246,20 +312,33 @@ private:
     float GetSelectionWeight(DRAGON_ACTION_TYPE action_) const;
     bool HasBehaviorGraph() const;
 
+    // Targetとして探すPlayer Object名。
     std::string playerObjectName = "Player";
+    // Ownerへ登録するDragonAI Actionのカテゴリ名。
     std::string actionCategory = "AI";
+    // 前回登録したActionカテゴリ名。
     std::string registeredActionCategory;
+    // DragonAI用Blackboardカテゴリ名。
     std::string blackboardCategory = "DragonAI";
 
+    // Dragonが使用するAction定義一覧。
     std::vector<DragonActionDefinition> actionDefinitions;
+    // Action種別ごとの残りCooldown。
     std::vector<float> actionCooldowns;
+    // Ownerへ登録したAction名一覧。
     std::vector<std::string> registeredActionNames;
 
+    // 現在の判断材料。
     DragonAIContext context;
+    // 現在ActionのRuntime状態。
     DragonActionRuntime runtime;
+    // Dragon専用BehaviorGraph。
     AIBehaviorGraph behaviorGraph;
+    // BehaviorGraphへ渡す実行Context。
     AIBehaviorContext behaviorContext;
+    // 現在のAI大状態。
     DRAGON_AI_STATE aiState = DRAGON_AI_STATE::IDLE;
+    // 現在の損傷段階。
     DRAGON_DAMAGE_PHASE damagePhase = DRAGON_DAMAGE_PHASE::NORMAL;
 
     BlackboardComponent* blackboard = nullptr;
@@ -270,8 +349,11 @@ private:
     std::weak_ptr<DragonNeckCommandIKComponent> neckIK;
     std::weak_ptr<DragonTailCommandIKComponent> tailIK;
 
+    // 重み付きFallback判断を有効にするか。
     bool autoDecisionEnabled = true;
+    // BehaviorGraphによる判断を有効にするか。
     bool behaviorGraphEnabled = true;
+    // Debug用HP割合を使うか。
     bool useDebugHpRate = false;
     float decisionInterval = 0.25f;
     float decisionTimer = 0.0f;
@@ -299,6 +381,7 @@ private:
     float runSpeed = 12.0f;
     float animationBlendDuration = 0.2f;
     bool animationGraphDriven = true;
+    // 読み書きするDragon BehaviorGraph Assetパス。
     std::string behaviorGraphAssetPath = "Data/AI/BehaviorGraph/DragonFirstForm.json";
     std::string behaviorGraphStatus;
     std::string statusText;

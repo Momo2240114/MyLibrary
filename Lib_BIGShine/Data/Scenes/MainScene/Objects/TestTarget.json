@@ -34,7 +34,7 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 3.2799999713897705,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "SlideOffNonGround": true,
                 "StartNodeName": "",
                 "StepOffset": 0.38999998569488525,
@@ -213,14 +213,14 @@
                         "OwnerPosition": {
                             "type": "vector3",
                             "value": [
-                                45.83970260620117,
-                                -0.5823202133178711,
-                                10.323271751403809
+                                13.725177764892578,
+                                -0.5823211669921875,
+                                -3.8085293769836426
                             ]
                         },
                         "SpawnDistance": {
                             "type": "float",
-                            "value": 46.99135208129883
+                            "value": 14.255682945251465
                         },
                         "SpawnPosition": {
                             "type": "vector3",
@@ -232,30 +232,30 @@
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 40.984375
+                            "value": 19.0399112701416
                         },
                         "TargetPosition": {
                             "type": "vector3",
                             "value": [
-                                5.774721145629883,
-                                3.8551392555236816,
-                                2.918849468231201
+                                -4.23362922668457,
+                                -0.12279105186462402,
+                                2.499265432357788
                             ]
                         },
                         "ToSpawnDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.9754922986030579,
-                                0.012392072007060051,
-                                -0.21968449652194977
+                                -0.9627864360809326,
+                                0.04084835201501846,
+                                0.2671586871147156
                             ]
                         },
                         "ToTargetDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.977567195892334,
-                                0.10827197879552841,
-                                -0.18066450953483582
+                                -0.9432190656661987,
+                                0.024135097861289978,
+                                0.3312932848930359
                             ]
                         }
                     },
@@ -266,15 +266,15 @@
                         },
                         "ActionTrigger": {
                             "type": "string",
-                            "value": "RunCharge"
+                            "value": "LandingAttack"
                         },
                         "CurrentAction": {
                             "type": "string",
-                            "value": "RunCharge"
+                            "value": "LandingAttack"
                         },
                         "CurrentAnimationState": {
                             "type": "string",
-                            "value": "PlainsDragon_Run"
+                            "value": "PlainsDragon_FlyStationaryToLanding"
                         },
                         "IsActing": {
                             "type": "bool",
@@ -364,7 +364,7 @@
                     "DragonAI": {
                         "Action": {
                             "type": "int",
-                            "value": 2
+                            "value": 13
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -372,11 +372,11 @@
                         },
                         "ActionName": {
                             "type": "string",
-                            "value": "RunCharge"
+                            "value": "LandingAttack"
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 0.9144576787948608
+                            "value": 1.8593896627426147
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -396,7 +396,7 @@
                         },
                         "CanUseAirSpreadBreath": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseBite": {
                             "type": "bool",
@@ -412,11 +412,11 @@
                         },
                         "CanUseLandingAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseRunCharge": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseSpinSweep": {
                             "type": "bool",
@@ -428,7 +428,7 @@
                         },
                         "CanUseSpreadBreathForward": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseTailSweep": {
                             "type": "bool",
@@ -436,7 +436,7 @@
                         },
                         "CanUseTakeOff": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseTurnToPlayer": {
                             "type": "bool",
@@ -444,7 +444,7 @@
                         },
                         "CurrentAction": {
                             "type": "int",
-                            "value": 2
+                            "value": 13
                         },
                         "DamagePhase": {
                             "type": "int",
@@ -456,7 +456,7 @@
                         },
                         "HpRate": {
                             "type": "float",
-                            "value": 0.9200000166893005
+                            "value": 0.7121250033378601
                         },
                         "IsActing": {
                             "type": "bool",
@@ -492,7 +492,7 @@
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": -32.42936706542969
+                            "value": -0.46572113037109375
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -500,11 +500,11 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 40.984375
+                            "value": 19.0399112701416
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 40.74344253540039
+                            "value": 19.034364700317383
                         },
                         "PlayerInFront": {
                             "type": "bool",
@@ -528,15 +528,15 @@
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": -32.42936706542969
+                            "value": -0.46572113037109375
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 40.984375
+                            "value": 19.0399112701416
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 40.74344253540039
+                            "value": 19.034364700317383
                         }
                     },
                     "DragonBodyPart": {
@@ -560,7 +560,7 @@
                     "Health": {
                         "Current": {
                             "type": "float",
-                            "value": 9200.0
+                            "value": 7121.25
                         },
                         "Dead": {
                             "type": "bool",
@@ -578,7 +578,7 @@
                         },
                         "AttackerAirLiftPower": {
                             "type": "float",
-                            "value": 5.0
+                            "value": 0.0
                         },
                         "CurrentHealth": {
                             "type": "float",
@@ -586,7 +586,7 @@
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 250.0
+                            "value": 100.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -595,17 +595,17 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                0.22637955844402313,
-                                0.9740391969680786
+                                -0.7597192525863647,
+                                -0.6502512097358704
                             ]
                         },
                         "HitStopDuration": {
                             "type": "float",
-                            "value": 0.4000000059604645
+                            "value": 0.02500000037252903
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 0.6000000238418579
+                            "value": 0.75
                         },
                         "HitStopTime": {
                             "type": "float",
@@ -613,7 +613,7 @@
                         },
                         "ImpactPower": {
                             "type": "float",
-                            "value": 15.0
+                            "value": 4.0
                         },
                         "ImpactReacted": {
                             "type": "bool",
@@ -621,22 +621,22 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 3.0
+                            "value": 1.2000000476837158
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                0.21364519000053406,
-                                0.3306663930416107,
-                                0.9192472696304321
+                                -0.2501249611377716,
+                                0.944248616695404,
+                                -0.2140844315290451
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                10.57794189453125,
-                                6.239831924438477,
-                                -9.771729469299316
+                                18.012866973876953,
+                                2.576554775238037,
+                                11.397943496704102
                             ]
                         },
                         "Received": {
@@ -3219,7 +3219,7 @@
         },
         {
             "Data": {
-                "CurrentHealth": 9200.0,
+                "CurrentHealth": 7121.25,
                 "MaxHealth": 10000.0
             },
             "Enabled": true,
@@ -3241,7 +3241,7 @@
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
                         "CurrentMaxStagger": 523.8689575195313,
-                        "CurrentStagger": 300.0,
+                        "CurrentStagger": 420.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3264,14 +3264,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 137.3291015625,
+                        "BaseMaxStagger": 268.22088623046875,
                         "BodyPart": "CHEST",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 137.3291015625,
-                        "CurrentStagger": 0.0,
+                        "CurrentMaxStagger": 268.22088623046875,
+                        "CurrentStagger": 100.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3279,14 +3279,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 214.57672119140625,
+                        "BaseMaxStagger": 335.276123046875,
                         "BodyPart": "BODY",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 214.57672119140625,
-                        "CurrentStagger": 125.0,
+                        "CurrentMaxStagger": 335.276123046875,
+                        "CurrentStagger": 225.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3324,14 +3324,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 70.3125,
+                        "BaseMaxStagger": 87.890625,
                         "BodyPart": "LEFT_BACK_LEG",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 70.3125,
-                        "CurrentStagger": 129.60000610351563,
+                        "CurrentMaxStagger": 87.890625,
+                        "CurrentStagger": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3359,9 +3359,9 @@
                         "Broken": false,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
-                        "CurrentDurability": 88.75,
+                        "CurrentDurability": 85.0,
                         "CurrentMaxStagger": 45.0,
-                        "CurrentStagger": 11.25,
+                        "CurrentStagger": 15.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3421,13 +3421,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            45.508056640625,
-            -0.5823202133178711,
-            10.456987380981445
+            13.725177764892578,
+            -0.5823211669921875,
+            -3.8085293769836426
         ],
         "Rot": [
             0.0,
-            291.9415283203125,
+            289.8188781738281,
             0.0
         ],
         "Scale": [

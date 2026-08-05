@@ -33,6 +33,7 @@ namespace
         DRAGON_BODY_PART::TAIL
     };
 
+    // 現在値と最大値からUI表示用の0から1の割合を作る。
     float CalculateProgressRatio(float currentValue_, float maxValue_)
     {
         if (maxValue_ <= 0.0f)
@@ -43,6 +44,7 @@ namespace
         return (std::clamp)(currentValue_ / maxValue_, 0.0f, 1.0f);
     }
 
+    // ProgressBar内に表示する現在値/最大値の文字列を作る。
     std::string MakeProgressLabel(float currentValue_, float maxValue_)
     {
         char label_[64]{};
@@ -55,6 +57,7 @@ namespace
         return label_;
     }
 
+    // 部位耐久や怯み値をImGuiのProgressBarで表示する。
     void DrawBodyPartProgressBar(
         const char* label_,
         float currentValue_,
@@ -73,6 +76,7 @@ namespace
     }
 }
 
+// DRAGON_BODY_PARTを保存やDebug表示に使う文字列へ変換する。
 const char* GetDragonBodyPartName(DRAGON_BODY_PART bodyPart_)
 {
     switch (bodyPart_)
@@ -92,6 +96,7 @@ const char* GetDragonBodyPartName(DRAGON_BODY_PART bodyPart_)
     }
 }
 
+// JSONなどから読んだ文字列をDRAGON_BODY_PARTへ変換する。
 DRAGON_BODY_PART ParseDragonBodyPart(const std::string& bodyPartName_)
 {
     for (const DRAGON_BODY_PART bodyPart_ : DEFAULT_BODY_PARTS)
@@ -104,6 +109,7 @@ DRAGON_BODY_PART ParseDragonBodyPart(const std::string& bodyPartName_)
     return DRAGON_BODY_PART::BODY;
 }
 
+// 部位設定、Health参照、HitCallback、Blackboard初期値を準備する。
 void DragonBodyPartManagerComponent::Start()
 {
     EnsureDefaultBodyParts();
@@ -113,6 +119,7 @@ void DragonBodyPartManagerComponent::Start()
     PublishLastDamageToBlackboard();
 }
 
+// DamageReactionのCooldownとBoss HP割合を毎フレーム更新する。
 void DragonBodyPartManagerComponent::Update(float deltaTime_)
 {
     BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::Update");
@@ -121,6 +128,7 @@ void DragonBodyPartManagerComponent::Update(float deltaTime_)
     UpdateBossHpRate();
 }
 
+// 指定部位にダメージを適用し、本体Health、部位耐久、怯み値、破壊状態を更新する。
 BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     DRAGON_BODY_PART bodyPart_,
     const DamageContext& damageContext_)
@@ -135,6 +143,7 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     if (!status_) return result_;
 
     result_.alreadyBroken = status_->broken;
+    // 破壊済み部位はHealthダメージ倍率だけ追加し、部位耐久は0のまま扱う。
     const float healthDamageRate_ = status_->broken
         ? status_->healthDamageRate * status_->brokenHealthDamageRate
         : status_->healthDamageRate;
@@ -150,6 +159,7 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
 
     if (health)
     {
+        // 部位倍率適用後のダメージを本体HPへ反映する。
         health->ApplyDamage(result_.appliedHealthDamage);
     }
     UpdateBossHpRate();
@@ -162,6 +172,7 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     status_->broken = status_->currentDurability <= 0.0f;
     result_.bodyPartBrokenThisHit = !wasBroken_ && status_->broken;
 
+    // 直近Hit情報を保存し、Debug表示やBlackboard参照へ使えるようにする。
     lastDamageResult = result_;
     lastAttackInstanceId = damageContext_.attackInstanceId;
     if (const std::shared_ptr<GameObject> attacker_ =
@@ -173,6 +184,7 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
 
     if (result_.bodyPartBrokenThisHit)
     {
+        // 破壊がこのHitで初めて発生した場合だけ破壊Actionを実行する。
         ExecuteBodyPartBrokenActions(*status_);
     }
     TryRequestDamageReaction(*status_);
@@ -180,12 +192,14 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     return result_;
 }
 
+// AttackSystemのHitEventを、Dragon部位用のDamageContextへ変換する。
 void DragonBodyPartManagerComponent::HandleAttackHit(
     const AttackHitEvent& event_,
     const DragonBodyPartHurtBoxComponent& hurtBoxComponent_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<GameObject> target_ = event_.target.lock();
+    // このManagerのOwnerがHit対象ではない場合は無視する。
     if (!owner_ || target_ != owner_) return;
 
     DamageContext damageContext_;
@@ -209,6 +223,7 @@ void DragonBodyPartManagerComponent::HandleAttackHit(
     ApplyDamage(hurtBoxComponent_.GetBodyPart(), damageContext_);
 }
 
+// 指定部位の状態を読み取り専用で取得する。
 const DragonBodyPartStatus* DragonBodyPartManagerComponent::GetBodyPartStatus(
     DRAGON_BODY_PART bodyPart_) const
 {
@@ -219,6 +234,7 @@ const DragonBodyPartStatus* DragonBodyPartManagerComponent::GetBodyPartStatus(
     return nullptr;
 }
 
+// 指定部位が破壊済みかを返す。
 bool DragonBodyPartManagerComponent::IsBodyPartBroken(
     DRAGON_BODY_PART bodyPart_) const
 {
@@ -226,6 +242,7 @@ bool DragonBodyPartManagerComponent::IsBodyPartBroken(
     return status_ && status_->broken;
 }
 
+// 全部位の耐久と怯みを初期値へ戻し、直近Hit情報も消す。
 void DragonBodyPartManagerComponent::ResetBodyParts()
 {
     EnsureDefaultBodyParts();
@@ -244,6 +261,7 @@ void DragonBodyPartManagerComponent::ResetBodyParts()
     PublishLastDamageToBlackboard();
 }
 
+// DEFAULT_BODY_PARTSに存在する部位が未登録なら、標準値で追加する。
 void DragonBodyPartManagerComponent::EnsureDefaultBodyParts()
 {
     for (const DRAGON_BODY_PART bodyPart_ : DEFAULT_BODY_PARTS)
@@ -257,6 +275,7 @@ void DragonBodyPartManagerComponent::EnsureDefaultBodyParts()
     }
 }
 
+// bodyParts配列から指定部位を探す。
 DragonBodyPartStatus* DragonBodyPartManagerComponent::FindBodyPartStatus(
     DRAGON_BODY_PART bodyPart_)
 {
@@ -267,6 +286,7 @@ DragonBodyPartStatus* DragonBodyPartManagerComponent::FindBodyPartStatus(
     return nullptr;
 }
 
+// OwnerにHealthComponentがなければ追加し、以降の部位ダメージ反映先にする。
 void DragonBodyPartManagerComponent::ResolveHealthComponent()
 {
     if (health) return;
@@ -277,6 +297,7 @@ void DragonBodyPartManagerComponent::ResolveHealthComponent()
     health = owner_->GetOrAddComponent<HealthComponent>().get();
 }
 
+// 本体Healthの割合をGameModeManagerへ同期し、Boss HP UIや戦闘進行で参照できるようにする。
 void DragonBodyPartManagerComponent::UpdateBossHpRate()
 {
     BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::UpdateBossHpRate");
@@ -301,6 +322,7 @@ void DragonBodyPartManagerComponent::UpdateBossHpRate()
     gameModeManager_->SetBossHpRate(bossHpRate_);
 }
 
+// AttackSystemのHit通知を購読し、DragonBodyPartHurtBoxComponentが付いたHurtBoxだけ処理する。
 void DragonBodyPartManagerComponent::RegisterAttackHitCallback()
 {
     if (callbackRegistered) return;
@@ -335,11 +357,13 @@ void DragonBodyPartManagerComponent::RegisterAttackHitCallback()
                 hurtBoxObject_->GetComponent<DragonBodyPartHurtBoxComponent>();
             if (!hurtBoxComponent_) return;
 
+            // HurtBox側に設定された部位情報を使って、本体ManagerへHit処理を戻す。
             manager_->HandleAttackHit(event_, *hurtBoxComponent_);
         });
     callbackRegistered = true;
 }
 
+// 直近Hitの部位、Healthダメージ、耐久ダメージ、破壊発生をBlackboardへ保存する。
 void DragonBodyPartManagerComponent::PublishLastDamageToBlackboard()
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -367,6 +391,7 @@ void DragonBodyPartManagerComponent::PublishLastDamageToBlackboard()
         lastDamageResult.bodyPartBrokenThisHit);
 }
 
+// 怯み値がしきい値に達した場合、DragonAIへDamageReaction Actionを要求する。
 void DragonBodyPartManagerComponent::TryRequestDamageReaction(
     DragonBodyPartStatus& status_)
 {
@@ -382,6 +407,7 @@ void DragonBodyPartManagerComponent::TryRequestDamageReaction(
     }
 
     status_.currentStagger = 0.0f;
+    // 怯み発生後は次回しきい値を引き上げ、連続怯みが起きすぎないようにする。
     status_.baseMaxStagger *= (std::max)(status_.staggerRecoveryBaseMultiplier, 1.0f);
     status_.currentMaxStagger = status_.baseMaxStagger;
     reactionCooldownTimer = (std::max)(reactionCooldownTime, 0.0f);
@@ -392,6 +418,7 @@ void DragonBodyPartManagerComponent::TryRequestDamageReaction(
     }
 }
 
+// 共通破壊Action、部位名付きAction、部位個別Actionを順に実行する。
 void DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions(
     const DragonBodyPartStatus& status_)
 {
@@ -413,6 +440,7 @@ void DragonBodyPartManagerComponent::ExecuteBodyPartBrokenActions(
     }
 }
 
+// 部位耐久、怯み、直近Hit、破壊Action設定を編集するDebug UIを描画する。
 void DragonBodyPartManagerComponent::Gui()
 {
     BS_PROFILE_SCOPE("DragonBodyPartManagerComponent::Gui");
@@ -548,6 +576,7 @@ void DragonBodyPartManagerComponent::Gui()
     }
 }
 
+// 部位設定、Reaction設定、破壊Action名をJSONへ保存する。
 void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
 {
     json_["DebugLogEnabled"] = debugLogEnabled;
@@ -577,6 +606,7 @@ void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
     }
 }
 
+// JSONから部位設定を復元し、古いキー名も一部Fallbackとして扱う。
 void DragonBodyPartManagerComponent::Deserialize(const nlohmann::json& json_)
 {
     debugLogEnabled = json_.value("DebugLogEnabled", true);

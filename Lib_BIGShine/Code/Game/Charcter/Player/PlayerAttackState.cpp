@@ -22,6 +22,7 @@ namespace
     constexpr float RADIANS_TO_DEGREES = 180.0f / DirectX::XM_PI;
     constexpr float DEGREES_TO_RADIANS = DirectX::XM_PI / 180.0f;
 
+    // ObjectのWorldスケールを考慮したCapsule半径を取得し、接近補正の停止距離に使う。
     float GetWorldCapsuleRadius(const std::shared_ptr<GameObject>& object_)
     {
         if (!object_ || !object_->transform) return 0.0f;
@@ -36,6 +37,7 @@ namespace
         return capsule_->radius * capsule_->shapeSizeScale * horizontalScale_;
     }
 
+    // XZ平面の方向だけを正規化し、長さが足りない場合はfalseを返す。
     bool NormalizeHorizontal(DirectX::XMFLOAT3& direction_)
     {
         direction_.y = 0.0f;
@@ -49,6 +51,7 @@ namespace
         return true;
     }
 
+    // XZ平面だけで内積を計算する。
     float DotHorizontal(
         const DirectX::XMFLOAT3& a_,
         const DirectX::XMFLOAT3& b_)
@@ -56,11 +59,13 @@ namespace
         return a_.x * b_.x + a_.z * b_.z;
     }
 
+    // XZ方向ベクトルをYaw角度へ変換する。
     float GetYawDegrees(const DirectX::XMFLOAT3& direction_)
     {
         return std::atan2(direction_.x, direction_.z) * RADIANS_TO_DEGREES;
     }
 
+    // 角度差を-180から180の範囲へ丸める。
     float NormalizeAngleDegrees(float angle_)
     {
         while (angle_ > 180.0f) angle_ -= 360.0f;
@@ -68,18 +73,21 @@ namespace
         return angle_;
     }
 
+    // Yaw角度からXZ平面の方向ベクトルを作る。
     DirectX::XMFLOAT3 DirectionFromYawDegrees(float yawDegrees_)
     {
         const float radians_ = yawDegrees_ * DEGREES_TO_RADIANS;
         return { std::sin(radians_), 0.0f, std::cos(radians_) };
     }
 
+    // 攻撃補正の開始・終了を滑らかにする補間曲線。
     float SmoothStep(float value_)
     {
         const float clamped_ = std::clamp(value_, 0.0f, 1.0f);
         return clamped_ * clamped_ * (3.0f - 2.0f * clamped_);
     }
 
+    // Animation正規化時間から、そのフレームで使う向き補正の重みを計算する。
     float CalculateFacingAssistWeight(
         float normalizedTime_,
         const PlayerAttackAssistSettings& settings_)
@@ -100,6 +108,7 @@ namespace
     }
 }
 
+// 攻撃Action種別を受け取り、同じState実装で弱/強/空中攻撃を扱う。
 PlayerAttackState::PlayerAttackState(
     const std::shared_ptr<GameObject>& owner_,
     PlayerControllerComponent& playerController_,
@@ -109,6 +118,7 @@ PlayerAttackState::PlayerAttackState(
 {
 }
 
+// 攻撃開始時に補正状態を初期化し、必要なら突進方向や停止速度を設定する。
 void PlayerAttackState::Enter()
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -141,7 +151,7 @@ void PlayerAttackState::Enter()
 
     if (isStrongCharge_)
     {
-        // 溜め強攻撃は開始時の入力方向、入力が無い場合はカメラ前方へ踏み込ませる。
+        // 溜め強攻撃は開始時の入力方向、入力がない場合はカメラ前方へ踏み込ませる。
         DirectX::XMFLOAT3 direction_ = player_->GetMoveInput();
         if (direction_.x == 0.0f && direction_.z == 0.0f)
         {
@@ -158,6 +168,7 @@ void PlayerAttackState::Enter()
     ResolveAttackAssistTarget();
 }
 
+// 攻撃中も入力値をBlackboardへ流し、補正とキャンセル分岐を更新する。
 void PlayerAttackState::Execute(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -170,6 +181,7 @@ void PlayerAttackState::Execute(float elapsedTime_)
     player_->ProcessActionInput();
 }
 
+// 攻撃を抜ける時に先行入力受付を閉じ、設定に応じて補正Targetを破棄する。
 void PlayerAttackState::Exit()
 {
     if (PlayerControllerComponent* player_ = GetPlayerController())
@@ -183,6 +195,7 @@ void PlayerAttackState::Exit()
     }
 }
 
+// 攻撃開始時に使う補正対象を、ロックオン、入力方向、カメラ中央、距離の優先度で選ぶ。
 std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
 {
     const std::shared_ptr<GameObject> owner_ = GetOwner();
@@ -316,13 +329,14 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
     return settings_.nonLockOnUseNearestFallback ? nearestTarget_ : nullptr;
 }
 
+// コンボ中のTarget維持や入力方向優先を考慮して、今回の攻撃補正基準を確定する。
 void PlayerAttackState::ResolveAttackAssistTarget()
 {
     const std::shared_ptr<GameObject> owner_ = GetOwner();
     PlayerControllerComponent* player_ = GetPlayerController();
     if (!owner_ || !owner_->transform || !player_) return;
 
-    // コンボ中の補正先維持や入力方向優先をここで決め、攻撃中に使う基準方向を固定する。
+    // コンボ中の補正先継続や入力方向優先をここで決め、攻撃中に使う基準方向を固定する。
     const PlayerAttackAssistSettings& settings_ = player_->GetAttackAssistSettings();
 
     DirectX::XMFLOAT3 startForward_
@@ -392,6 +406,7 @@ void PlayerAttackState::ResolveAttackAssistTarget()
     }
 }
 
+// 攻撃中のTargetが有効なら、向き補正と位置補正を順に適用する。
 void PlayerAttackState::ApplyAttackAssist(float elapsedTime_)
 {
     PlayerControllerComponent* player_ = GetPlayerController();
@@ -423,6 +438,7 @@ void PlayerAttackState::ApplyAttackAssist(float elapsedTime_)
 }
 
 
+// Animation時間に応じた重みで、Playerの向きをTarget方向へ少しずつ寄せる。
 void PlayerAttackState::ApplyAttackFacingAssist(
     const std::shared_ptr<GameObject>& target_,
     float elapsedTime_)
@@ -439,7 +455,7 @@ void PlayerAttackState::ApplyAttackFacingAssist(
         CalculateFacingAssistWeight(normalizedTime_, settings_) * settings_.strength;
     if (assistWeight_ <= 0.0f) return;
 
-    // アニメーション時間に応じて補正量を変え、攻撃終盤で不自然に回り続けないようにする。
+    // Animation時間に応じて補正量を変え、攻撃終盤で不自然に回り続けないようにする。
     const DirectX::XMFLOAT3 ownerPosition_ = owner_->transform->GetWorldPosition();
     const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
 
@@ -505,6 +521,7 @@ void PlayerAttackState::ApplyAttackFacingAssist(
     player_->SetFacingDirection(correctedDirection_);
 }
 
+// Targetとの間合いが遠い場合だけ、停止距離を残して軽く引き寄せる。
 void PlayerAttackState::ApplyAttackPositionAssist(
     const std::shared_ptr<GameObject>& target_,
     float elapsedTime_)
@@ -555,7 +572,7 @@ void PlayerAttackState::ApplyAttackPositionAssist(
     const float availableDistance_ = distance_ - stopDistance_;
     const float maxCorrectionSpeed_ = (std::max)(settings_.maxPositionCorrection, 0.0f);
 
-    // 近づきすぎない停止距離を残しつつ、届きにくい攻撃だけ軽く吸い付かせる。
+    // 近づきすぎない停止距離を残しつつ、届きにくい攻撃だけを軽く吸い付かせる。
     float assistSpeed_ =
         (std::min)(availableDistance_, maxCorrectionSpeed_) *
         settings_.positionSpeed *
@@ -568,6 +585,7 @@ void PlayerAttackState::ApplyAttackPositionAssist(
     player_->AddHorizontalVelocityAssist(toTarget_, assistSpeed_);
 }
 
+// AnimationControllerの再生時間を優先し、取得できない場合はState経過時間を代用する。
 float PlayerAttackState::GetAttackNormalizedTime()
 {
     const std::shared_ptr<GameObject> owner_ = GetOwner();
@@ -591,6 +609,7 @@ float PlayerAttackState::GetAttackNormalizedTime()
     return std::clamp(attackElapsedTime, 0.0f, 1.0f);
 }
 
+// Scene内からCameraLockOnComponentを探し、攻撃Target選択の優先情報として使う。
 std::shared_ptr<CameraLockOnComponent> PlayerAttackState::ResolveCameraLockOnComponent()
 {
     if (const std::shared_ptr<CameraLockOnComponent> cached_ = cameraLockOnComponent.lock())

@@ -35,6 +35,11 @@
             ],
             "Delay": 0.05000000074505806,
             "Drag": 0.0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
             "EmissionMode": 1,
             "Fade": [
                 0.0,
@@ -54,6 +59,9 @@
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles 3/masks for particles 3/17.png",
             "MaterialPath": "",
+            "MaterialPaths": [
+                ""
+            ],
             "MaxCount": 1,
             "MeshVertexSampleCount": 2048,
             "Name": "SwordHit_Flash",
@@ -89,7 +97,7 @@
             ],
             "Size": [
                 3.0,
-                4.25
+                10.329999923706055
             ],
             "SizeRandomEnd": [
                 1.0,
@@ -118,6 +126,14 @@
             ],
             "StretchMax": 100.0,
             "StretchScale": 0.03999999910593033,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
             "TexturePath": "",
             "TextureSplitCount": [
                 1,
@@ -129,6 +145,7 @@
             "UseMask": 1,
             "UseRandomSize": 0,
             "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
             "VerticalSpawnRange": 0.0,
             "Wind": [
                 0.0,
@@ -184,6 +201,11 @@
             ],
             "Delay": 0.06499999761581421,
             "Drag": 5.5,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
             "EmissionMode": 1,
             "Fade": [
                 0.019999999552965164,
@@ -203,6 +225,7 @@
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
             "MaterialPath": "",
+            "MaterialPaths": [],
             "MaxCount": 64,
             "MeshVertexSampleCount": 2048,
             "Name": "SwordHit_Streaks",
@@ -267,6 +290,14 @@
             ],
             "StretchMax": 2.5,
             "StretchScale": 0.18000000715255737,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
             "TexturePath": "",
             "TextureSplitCount": [
                 1,
@@ -278,6 +309,7 @@
             "UseMask": 1,
             "UseRandomSize": 0,
             "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
             "VerticalSpawnRange": 0.0,
             "Wind": [
                 0.0,
@@ -333,6 +365,11 @@
             ],
             "Delay": 0.08500000089406967,
             "Drag": 1.0,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
             "EmissionMode": 1,
             "Fade": [
                 0.029999999329447746,
@@ -352,6 +389,7 @@
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/9.png",
             "MaterialPath": "",
+            "MaterialPaths": [],
             "MaxCount": 128,
             "MeshVertexSampleCount": 2048,
             "Name": "SwordHit_Motes",
@@ -416,6 +454,14 @@
             ],
             "StretchMax": 100.0,
             "StretchScale": 0.03999999910593033,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
             "TexturePath": "",
             "TextureSplitCount": [
                 1,
@@ -427,6 +473,7 @@
             "UseMask": 1,
             "UseRandomSize": 0,
             "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
             "VerticalSpawnRange": 0.0,
             "Wind": [
                 0.0,
@@ -482,6 +529,11 @@
             ],
             "Delay": 0.0,
             "Drag": 1.4500000476837158,
+            "EmissionAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
             "EmissionMode": 1,
             "Fade": [
                 0.0,
@@ -501,6 +553,7 @@
             ],
             "MaskTexturePath": "Data/Texture/Particle/masks for  particles/masks for  particles/7.png",
             "MaterialPath": "",
+            "MaterialPaths": [],
             "MaxCount": 1,
             "MeshVertexSampleCount": 2048,
             "Name": "SwordHit_Circle",
@@ -565,6 +618,14 @@
             ],
             "StretchMax": 100.0,
             "StretchScale": 0.03999999910593033,
+            "TargetAttractionFalloff": 1.0,
+            "TargetAttractionRange": 0.0,
+            "TargetAttractionStrength": 0.0,
+            "TargetPosition": [
+                0.0,
+                0.0,
+                0.0
+            ],
             "TexturePath": "",
             "TextureSplitCount": [
                 1,
@@ -576,6 +637,7 @@
             "UseMask": 1,
             "UseRandomSize": 0,
             "UseSpriteAnimation": 0,
+            "UseTargetAttraction": 0,
             "VerticalSpawnRange": 0.0,
             "Wind": [
                 0.0,

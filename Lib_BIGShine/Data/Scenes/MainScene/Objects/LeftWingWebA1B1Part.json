@@ -31,7 +31,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 30.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "PlainsDragon_WingL_FingerA_1",
                 "SyncCharacterColliderShape": false,
                 "UseGravity": false,
