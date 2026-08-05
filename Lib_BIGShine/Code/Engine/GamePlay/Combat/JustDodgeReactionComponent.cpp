@@ -12,6 +12,7 @@
 
 ActionRegistry* JustDodgeReactionComponent::GetSelectedRegistry()
 {
+    // GUI設定に応じて、所有者ローカルかSceneグローバルのActionRegistryを選ぶ。
     switch (selectedActionSource)
     {
     case JUST_DODGE_REACTION_ACTION_SOURCE::SELF_LOCAL:
@@ -46,6 +47,7 @@ const ActionRegistry* JustDodgeReactionComponent::GetSelectedRegistry() const
 
 void JustDodgeReactionComponent::ExecuteReaction()
 {
+    // JustDodgeSystem側でBlackboard更新とOnJustDodgeが済んだ後に呼ばれる追加反応。
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,
         "[JustDodge] Reaction ExecuteReaction entered. Action="
@@ -63,12 +65,14 @@ void JustDodgeReactionComponent::ExecuteReaction()
         return;
     }
 
+    // ExecuteActionはLocal/Global両方を探せるため、実行時はAction名だけで呼ぶ。
     BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] Reaction executing action.");
     owner_->ExecuteAction(selectedActionName);
 }
 
 void JustDodgeReactionComponent::Gui()
 {
+    // どのRegistryから反応Actionを選ぶかをEditorで指定する。
     ImGui::TextDisabled("Triggered after the existing OnJustDodge event succeeds.");
 
     const char* sourceNames_[] =
@@ -96,6 +100,7 @@ void JustDodgeReactionComponent::Gui()
     }
 
     std::vector<std::string> categories_ = registry_->GetCategories();
+    // 選択肢を安定表示するため、カテゴリとAction名はソートする。
     std::sort(categories_.begin(), categories_.end());
 
     const char* categoryPreview_ = selectedCategory.empty()
@@ -160,6 +165,7 @@ void JustDodgeReactionComponent::Gui()
         selectedActionName != "---" &&
         registry_->HasActionInCategory(selectedCategory, selectedActionName);
 
+    // 登録済みActionかどうかを即時表示し、名前変更後の取りこぼしに気づきやすくする。
     ImGui::TextColored(
         valid_ ? ImVec4(0.3f, 1.0f, 0.4f, 1.0f) : ImVec4(1.0f, 0.35f, 0.3f, 1.0f),
         valid_ ? "Action Ready" : "Action Not Registered");
@@ -189,6 +195,7 @@ void JustDodgeReactionComponent::Deserialize(const nlohmann::json& json_)
 
     if (selectedActionName == "JustDodgeEventPool_Play")
     {
+        // 古い専用Action名は廃止済みなので、読み込み時に未選択へ戻す。
         selectedCategory = "Sequence";
         selectedActionName.clear();
     }

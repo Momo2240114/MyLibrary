@@ -16,6 +16,7 @@ using namespace DirectX;
 
 namespace
 {
+    // 尻尾IKではYaw/Pitch/Rollを角度で作り、Quaternionに変換して各ボーンへ分配する。
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
     constexpr float EPSILON = 0.00001f;
@@ -32,6 +33,7 @@ namespace
 
     float SmoothStep(float value_)
     {
+        // コマンド開始/終了時の尻尾の動きを滑らかにするための補間関数。
         const float clampedValue_ = std::clamp(value_, 0.0f, 1.0f);
         return clampedValue_ * clampedValue_ * (3.0f - 2.0f * clampedValue_);
     }
@@ -94,6 +96,7 @@ const std::string& DragonTailCommandIKComponent::GetName() const
 void DragonTailCommandIKComponent::Start()
 {
     const auto owner_ = GetGameObject();
+    // 尻尾を動かすモデルとIKチェーンを、コンポーネント開始時に解決する。
     model = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
     ikMap = owner_ ? owner_->GetComponent<IKMapComponent>().get() : nullptr;
 
@@ -121,6 +124,7 @@ void DragonTailCommandIKComponent::LateUpdate(float deltaTime_)
     model->UpdateLoadState();
     if (!model->IsModelReady()) return;
 
+    // アニメーション更新後のLateUpdateでIKを重ね、最終的な尻尾姿勢を作る。
     commandTimer += deltaTime_;
     ApplyTailIK(deltaTime_);
 
@@ -135,6 +139,7 @@ void DragonTailCommandIKComponent::LateUpdate(float deltaTime_)
         commandRate_ >= currentCommand.attackStartRate &&
         commandRate_ <= currentCommand.attackEndRate;
 
+    // 攻撃コマンドが終わったら、尻尾を通常追従状態へ戻す。
     const float totalTime_ =
         currentCommand.blendInTime +
         currentCommand.duration +
@@ -185,6 +190,7 @@ void DragonTailCommandIKComponent::RegisterActions()
     const auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    // AIやアニメーションイベントから尻尾攻撃を発火できるようにActionを登録する。
     UnregisterActions();
     registeredActionCategory = actionCategory;
     registeredGlobalActionCategory = actionCategory;
@@ -268,6 +274,7 @@ void DragonTailCommandIKComponent::StartSweepRight(float duration_)
 void DragonTailCommandIKComponent::StartSpinSweep(float duration_)
 {
     currentCommand = {};
+    // 回転薙ぎ払いはYawを一周寄りに振り、Pitch/Rollも足して大きな攻撃モーションにする。
     currentCommand.mode = DRAGON_TAIL_IK_MODE::SPIN_SWEEP;
     currentCommand.duration = duration_;
     currentCommand.sweepAngleDegrees = 120.0f;
@@ -290,6 +297,7 @@ float DragonTailCommandIKComponent::CalculateBlendRate() const
 {
     if (currentCommand.mode == DRAGON_TAIL_IK_MODE::DISABLED) return 0.0f;
 
+    // コマンドのblendIn/hold/blendOutに応じてIK影響度を返す。
     if (commandTimer < currentCommand.blendInTime)
     {
         if (currentCommand.blendInTime <= 0.0001f) return 1.0f;
@@ -312,6 +320,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
     if (!ikMap->ResolveChainByName(chainName)) return false;
     if (chain_->nodeIndices.size() < 2) return false;
 
+    // アニメーション姿勢へ尻尾IKを後乗せするため、補正前の回転/World行列を保存する。
     auto& nodes_ = model->GetNodes();
     const size_t boneCount_ = chain_->nodeIndices.size();
     for (const int nodeIndex_ : chain_->nodeIndices)
@@ -336,6 +345,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
     const float commandRate_ = CalculateCommandRate();
     const float swingRate_ = std::sin(commandRate_ * 3.1415926535f);
 
+    // コマンド種別ごとに目標Yaw/Pitch/Rollを作る。sin波で中間を一番大きく振る。
     switch (currentCommand.mode)
     {
     case DRAGON_TAIL_IK_MODE::FOLLOW_BODY:
@@ -359,6 +369,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
 
     case DRAGON_TAIL_IK_MODE::AIM_TO_TARGET:
     {
+        // 対象へ尻尾先端を向けるため、先端の現在前方向とターゲット方向の差分角を求める。
         const auto owner_ = GetGameObject();
         if (!owner_ || currentCommand.targetName.empty()) break;
 
@@ -425,6 +436,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
     const float followRate_ =
         1.0f - std::exp(-(std::max)(followSpeed, 0.0f) * safeDeltaTime_);
 
+    // 目標角へ指数補間し、コマンド開始直後や終了時の角度変化をなめらかにする。
     currentYawDegrees +=
         NormalizeAngleDegrees(targetYawDegrees - currentYawDegrees) * followRate_;
     currentPitchDegrees +=
@@ -500,6 +512,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
 
     std::vector<float> weights_(boneCount_, 0.0f);
     float weightTotal_ = 0.0f;
+    // rootWeightからtipWeightへ二乗カーブで寄せ、先端側を強く動かす。
     for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
     {
         const float normalizedPosition_ = boneCount_ <= 1
@@ -551,6 +564,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
 
         const DirectX::XMMATRIX inverseParentWorldMatrix_ =
             DirectX::XMMatrixInverse(nullptr, parentWorldMatrix_);
+        // 基準軸を各ボーンの親ローカルへ変換し、ローカルQuaternionとして適用できる形にする。
         DirectX::XMVECTOR boneYawAxisLocal_ =
             DirectX::XMVector3TransformNormal(aimYawAxisWorld_, inverseParentWorldMatrix_);
         DirectX::XMVECTOR bonePitchAxisLocal_ =
@@ -591,6 +605,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
         const DirectX::XMVECTOR resultRotation_ = DirectX::XMQuaternionNormalize(
             DirectX::XMQuaternionMultiply(animationRotation_, commandRotation_));
 
+        // 元のアニメーション回転へコマンド回転を重ね、チェーン先頭からTransformを更新する。
         DirectX::XMFLOAT4 resultRotationStorage_;
         DirectX::XMStoreFloat4(&resultRotationStorage_, resultRotation_);
         if (!IsFinite(resultRotationStorage_)) continue;
@@ -605,6 +620,7 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
 
 bool DragonTailCommandIKComponent::GetTailTipWorldPosition(DirectX::XMFLOAT3& position_) const
 {
+    // 尻尾先端に攻撃判定やエフェクトを出すため、チェーン末端ノードのWorld座標を返す。
     if (!model || !ikMap) return false;
 
     const auto* chain_ = ikMap->FindChain(chainName);
@@ -621,6 +637,7 @@ bool DragonTailCommandIKComponent::GetTailTipWorldPosition(DirectX::XMFLOAT3& po
 
 bool DragonTailCommandIKComponent::GetTailTipWorldForward(DirectX::XMFLOAT3& forward_) const
 {
+    // 尻尾先端の向きを、エフェクトや判定方向へ渡せるWorld前方向として返す。
     if (!model || !ikMap) return false;
 
     const auto* chain_ = ikMap->FindChain(chainName);
@@ -713,6 +730,7 @@ void DragonTailCommandIKComponent::Gui()
 
 void DragonTailCommandIKComponent::Serialize(nlohmann::json& json_) const
 {
+    // 尻尾IKの対象チェーン、Action登録設定、追従速度だけを保存する。
     json_["ChainName"] = chainName;
     json_["LocalForwardAxis"] = {
         localForwardAxis.x,
@@ -728,6 +746,7 @@ void DragonTailCommandIKComponent::Serialize(nlohmann::json& json_) const
 
 void DragonTailCommandIKComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 保存された調整値を復元し、Action登録も現在のカテゴリで作り直す。
     chainName = json_.value("ChainName", std::string("DragonTail"));
 
     if (json_.contains("LocalForwardAxis"))

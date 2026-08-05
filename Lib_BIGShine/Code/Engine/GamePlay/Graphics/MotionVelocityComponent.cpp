@@ -16,6 +16,7 @@ const std::string& MotionVelocityComponent::GetName() const
 
 void MotionVelocityComponent::Start()
 {
+    // 登録直後の初回Frameで巨大な速度が出ないよう、現在Transformで履歴を初期化する。
     ResetHistory();
     CaptureCurrentWorld();
     CommitHistory();
@@ -23,6 +24,7 @@ void MotionVelocityComponent::Start()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (owner_)
     {
+        // GameObjectManager経由でMotionVelocityRenderSystemへ描画対象として登録する。
         owner_->GetManager().RegisterMotionVelocityComponent(
             owner_->GetComponent<MotionVelocityComponent>());
     }
@@ -35,6 +37,7 @@ void MotionVelocityComponent::LateUpdate(float deltaTime_)
 
 void MotionVelocityComponent::Gui()
 {
+    // MotionBlurへの影響有無と、対象種別ごとの倍率をEditorから調整する。
     ImGui::Checkbox("Velocity Enabled", &velocityEnabled);
 
     if (ImGui::DragFloat("Velocity Scale", &velocityScale, 0.01f, 0.0f, 8.0f, "%.2f"))
@@ -69,6 +72,7 @@ void MotionVelocityComponent::Gui()
 
     if (ImGui::Button("Reset Motion History"))
     {
+        // WarpやTeleport後に残像が伸びすぎる場合、履歴を手動で現在位置へリセットする。
         ResetHistory();
         CaptureCurrentWorld();
     }
@@ -78,6 +82,7 @@ void MotionVelocityComponent::Gui()
 
 void MotionVelocityComponent::Serialize(nlohmann::json& json_) const
 {
+    // Velocity描画の有効状態と倍率だけを保存する。Frame履歴はRuntime状態なので保存しない。
     json_["VelocityEnabled"] = velocityEnabled;
     json_["VelocityScale"] = velocityScale;
     json_["AffectModel"] = affectModel;
@@ -90,6 +95,7 @@ void MotionVelocityComponent::Serialize(nlohmann::json& json_) const
 
 void MotionVelocityComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 古いSceneに項目が無くても既定値で復元し、倍率は0以上に丸める。
     velocityEnabled = json_.value("VelocityEnabled", true);
     velocityScale = json_.value("VelocityScale", 1.0f);
     affectModel = json_.value("AffectModel", true);
@@ -107,6 +113,7 @@ void MotionVelocityComponent::Deserialize(const nlohmann::json& json_)
 
 void MotionVelocityComponent::CaptureCurrentWorld()
 {
+    // OwnerのTransformが無い場合はIdentityとして扱い、Shaderへ不定行列を渡さない。
     DirectX::XMMATRIX world_ = DirectX::XMMatrixIdentity();
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (owner_ && owner_->transform)
@@ -119,12 +126,14 @@ void MotionVelocityComponent::CaptureCurrentWorld()
 
 void MotionVelocityComponent::CommitHistory()
 {
+    // Velocity描画後に呼び、現在Worldを次FrameのPreviousとして使う。
     previousWorld = currentWorld;
     hasHistory = true;
 }
 
 void MotionVelocityComponent::ResetHistory()
 {
+    // 履歴をIdentityで初期化し、次のCapture/Commitで現在Transformに揃える。
     DirectX::XMStoreFloat4x4(&currentWorld, DirectX::XMMatrixIdentity());
     previousWorld = currentWorld;
     hasHistory = false;
@@ -132,5 +141,6 @@ void MotionVelocityComponent::ResetHistory()
 
 float MotionVelocityComponent::ClampScale(float scale_) const
 {
+    // 負の倍率は速度方向反転になって扱いづらいため、0以上に制限する。
     return (std::max)(0.0f, scale_);
 }

@@ -17,6 +17,7 @@ public:
 private:
     enum class AssetType
     {
+        // 拡張子から分類した表示/DragDrop用のアセット種別。
         FILE,
         TEXTURE,
         MODEL,
@@ -27,6 +28,7 @@ private:
 
     struct AssetNode
     {
+        // Data配下のファイル/フォルダをツリー表示するための軽量ノード。
         std::string name;
         std::string path;
         AssetType type = AssetType::FILE;
@@ -36,6 +38,7 @@ private:
 
     struct AssetBrowserIcons
     {
+        // 種別ごとに表示するアイコン画像パス。欠損時はmissingPathへフォールバックする。
         std::string folderPath;
         std::string modelPath;
         std::string texturePath;
@@ -65,11 +68,13 @@ private:
 
 private:
     AssetNode rootNode;
+    // 左のフォルダツリーで選択中のノード。右グリッドの表示元になる。
     AssetNode* selectedFolder = nullptr;
     std::string selectedFolderPath;
     std::string selectedFilePath;
     AssetBrowserIcons assetBrowserIcons;
     char searchText[128]{};
+    // フォルダツリー幅とサムネイルサイズはUI操作で調整される表示状態。
     float folderTreeWidth = 240.0f;
     float iconSize = 72.0f;
 };

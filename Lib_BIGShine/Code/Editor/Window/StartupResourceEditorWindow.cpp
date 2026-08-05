@@ -15,6 +15,7 @@ namespace
 {
     std::string MakeComparablePath(const std::string& filePath_)
     {
+        // 重複比較用にPath表記を正規化し、Windowsでは大小文字差も吸収する。
         std::string normalizedPath_ = StartupResourceConfig::NormalizeResourcePath(filePath_);
 #ifdef _WIN32
         std::transform(normalizedPath_.begin(), normalizedPath_.end(), normalizedPath_.begin(),
@@ -27,6 +28,7 @@ namespace
 StartupResourceEditorWindow::StartupResourceEditorWindow(GameObjectManager* manager_)
     : EditorWindow("Startup Model Settings", manager_)
 {
+    // Startup設定は必要時だけ開くEditor Windowなので初期表示はOFFにする。
     defaultWindowSize = ImVec2(920.0f, 720.0f);
     isVisible = false;
     LoadSettings();
@@ -35,6 +37,7 @@ StartupResourceEditorWindow::StartupResourceEditorWindow(GameObjectManager* mana
 
 void StartupResourceEditorWindow::Draw()
 {
+    // 起動時Model設定の編集、保存、検証を1画面にまとめて表示する。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -65,6 +68,7 @@ void StartupResourceEditorWindow::DrawToolbar()
 {
     if (ImGui::Button("Reload"))
     {
+        // Disk上のJSONを再読み込みして、Editor上の変更状態をリセットする。
         if (LoadSettings())
         {
             statusMessage = "Reloaded.";
@@ -79,6 +83,7 @@ void StartupResourceEditorWindow::DrawToolbar()
     ImGui::SameLine();
     if (ImGui::Button("Save JSON"))
     {
+        // 保存前にValidateし、ErrorがあればSaveSettings側で止める。
         SaveSettings();
         ValidateSettings();
     }
@@ -100,6 +105,7 @@ void StartupResourceEditorWindow::DrawCriticalModelSection()
 {
     if (!ImGui::CollapsingHeader("Critical Models", ImGuiTreeNodeFlags_DefaultOpen)) return;
 
+    // CriticalはTitleSceneが待つため、最初の表示に必要なModelだけ入れる。
     ImGui::TextWrapped("TitleScene waits until these models finish loading.");
     if (ImGui::Button("Add Model...##Critical"))
     {
@@ -116,6 +122,7 @@ void StartupResourceEditorWindow::DrawHighPriorityModelSection()
 {
     if (!ImGui::CollapsingHeader("High Priority Models", ImGuiTreeNodeFlags_DefaultOpen)) return;
 
+    // High Priorityは先読みするが、Title表示の待機条件には含めない。
     ImGui::TextWrapped("These models are requested at startup, but TitleScene does not wait for them.");
     if (ImGui::Button("Add Model...##High"))
     {
@@ -134,6 +141,7 @@ void StartupResourceEditorWindow::DrawModelPathList(
     STARTUP_RESOURCE_PRIORITY priority_)
 {
     const float childHeight_ = (std::min)(360.0f, (std::max)(160.0f, ImGui::GetContentRegionAvail().y * 0.45f));
+    // 一覧が長くなってもWindow全体を押し潰さないよう、Section内だけScrollさせる。
     ImGui::BeginChild(childId_, ImVec2(0.0f, childHeight_), true);
 
     int removeIndex_ = -1;
@@ -151,6 +159,7 @@ void StartupResourceEditorWindow::DrawModelPathList(
         const bool dataPath_ = StartupResourceConfig::IsDataRelativePath(entry_.filePath);
         const bool nameDuplicate_ = HasResourceNameDuplicate(entry_.resourceName, priority_, static_cast<size_t>(index_));
 
+        // 各Entryの妥当性をその場で見せ、保存前に問題を見つけやすくする。
         if (exists_ && supported_ && dataPath_ && !nameDuplicate_)
         {
             ImGui::TextColored(ImVec4(0.35f, 0.95f, 0.45f, 1.0f), "[OK]");
@@ -171,6 +180,7 @@ void StartupResourceEditorWindow::DrawModelPathList(
         ImGui::SetNextItemWidth(-1.0f);
         if (ImGui::InputText("Path", &entry_.filePath))
         {
+            // 手入力Pathも即正規化して、比較や保存形式を安定させる。
             entry_.filePath = StartupResourceConfig::NormalizeResourcePath(entry_.filePath);
             MarkUnsaved();
         }
@@ -216,6 +226,7 @@ void StartupResourceEditorWindow::DrawModelPathList(
 
     if (moveUpIndex_ >= 0)
     {
+        // List操作はLoop中にVectorを変更しないよう、Indexだけ記録して後で処理する。
         MoveModelPath(priority_, static_cast<size_t>(moveUpIndex_), static_cast<size_t>(moveUpIndex_ - 1));
     }
     if (moveDownIndex_ >= 0)
@@ -234,6 +245,7 @@ void StartupResourceEditorWindow::DrawModelPathList(
 
 void StartupResourceEditorWindow::DrawValidationResults()
 {
+    // ValidateSettingsで作った結果を、Error/Warning/OKで色分けして表示する。
     ImGui::TextUnformatted("Validation Results");
     ImGui::BeginChild("StartupValidationResults", ImVec2(0.0f, 150.0f), true);
     for (const std::string& result_ : validationResults)
@@ -270,6 +282,7 @@ void StartupResourceEditorWindow::AddModelPath(
     STARTUP_RESOURCE_PRIORITY priority_)
 {
     const std::string normalizedPath_ = StartupResourceConfig::NormalizeResourcePath(filePath_);
+    // 登録前にPath形式、拡張子、Data配下かどうかを確認する。
     if (normalizedPath_.empty())
     {
         statusMessage = "Invalid path.";
@@ -293,6 +306,7 @@ void StartupResourceEditorWindow::AddModelPath(
     size_t foundIndex_ = 0;
     if (HasPathInAnySection(normalizedPath_, &foundPriority_, &foundIndex_))
     {
+        // 既に登録済みの場合、Criticalへの昇格は許可し、CriticalからHighへの降格は事故防止で止める。
         if (foundPriority_ == priority_)
         {
             statusMessage = "Model is already registered.";
@@ -312,6 +326,7 @@ void StartupResourceEditorWindow::AddModelPath(
         return;
     }
 
+    // Resource名はPathから自動生成し、必要ならEditor上で後から変更できる。
     StartupModelEntry entry_;
     entry_.filePath = normalizedPath_;
     entry_.resourceName = StartupResourceConfig::MakeDefaultResourceName(normalizedPath_);
@@ -337,6 +352,7 @@ void StartupResourceEditorWindow::SetModelPath(
     if (HasPathInAnySection(normalizedPath_, &foundPriority_, &foundIndex_) &&
         (foundPriority_ != priority_ || foundIndex_ != index_))
     {
+        // 同じPathを複数Entryに入れると起動時Load要求が重複するため禁止する。
         statusMessage = "Duplicated model path.";
         return;
     }
@@ -380,6 +396,7 @@ void StartupResourceEditorWindow::ChangePriority(STARTUP_RESOURCE_PRIORITY prior
         ? STARTUP_RESOURCE_PRIORITY::HIGH
         : STARTUP_RESOURCE_PRIORITY::CRITICAL;
 
+    // Sectionを移すと同時に、Entry内のPriorityとTitle待機Flagも移動先に合わせる。
     StartupModelEntry entry_ = sourceEntries_[index_];
     entry_.priority = targetPriority_;
     entry_.requiredBeforeTitle = targetPriority_ == STARTUP_RESOURCE_PRIORITY::CRITICAL;
@@ -403,6 +420,7 @@ bool StartupResourceEditorWindow::SaveSettings()
     NormalizeAllEntries();
     ValidateSettings();
 
+    // Errorが残っている状態では、壊れた起動設定を保存しない。
     for (const std::string& result_ : validationResults)
     {
         if (result_.starts_with("[ERROR]"))
@@ -425,6 +443,7 @@ bool StartupResourceEditorWindow::SaveSettings()
 
 void StartupResourceEditorWindow::ValidateSettings()
 {
+    // 現在の編集内容を保存可能か検査し、画面下のValidation Resultsへ出す。
     validationResults.clear();
     NormalizeAllEntries();
 
@@ -435,6 +454,7 @@ void StartupResourceEditorWindow::ValidateSettings()
     auto validateEntries_ =
         [&](const std::vector<StartupModelEntry>& entries_, const char* sectionName_)
         {
+            // SectionごとにResource名、Path、拡張子、存在確認を行う。
             for (const StartupModelEntry& entry_ : entries_)
             {
                 if (entry_.resourceName.empty())
@@ -473,6 +493,7 @@ void StartupResourceEditorWindow::ValidateSettings()
 
     auto hasDuplicate_ = [](std::vector<std::string> values_)
         {
+            // Sort後に隣同士を見れば重複の有無だけを軽く判定できる。
             std::sort(values_.begin(), values_.end());
             return std::adjacent_find(values_.begin(), values_.end()) != values_.end();
         };
@@ -526,6 +547,7 @@ bool StartupResourceEditorWindow::HasPathInAnySection(
     auto findPath_ =
         [&](const std::vector<StartupModelEntry>& entries_, STARTUP_RESOURCE_PRIORITY priority_) -> bool
         {
+            // 比較用PathでCritical/High両方を検索し、見つかった位置も必要なら返す。
             for (size_t index_ = 0; index_ < entries_.size(); ++index_)
             {
                 if (MakeComparablePath(entries_[index_].filePath) == normalizedPath_)
@@ -569,6 +591,7 @@ void StartupResourceEditorWindow::NormalizeAllEntries()
     auto normalizeEntries_ =
         [](std::vector<StartupModelEntry>& entries_, STARTUP_RESOURCE_PRIORITY priority_)
         {
+            // Entryが所属Sectionと矛盾しないよう、保存/検証前に必ず揃える。
             for (StartupModelEntry& entry_ : entries_)
             {
                 entry_.filePath = StartupResourceConfig::NormalizeResourcePath(entry_.filePath);

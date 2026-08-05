@@ -17,6 +17,7 @@ using namespace DirectX;
 
 namespace
 {
+    // 首IKは角度指定とQuaternion生成を行き来するため、度数法/ラジアン変換を固定で持つ。
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
     constexpr float EPSILON = 0.00001f;
@@ -36,6 +37,7 @@ namespace
 
     DirectX::XMFLOAT3 Normalize(const DirectX::XMFLOAT3& value_)
     {
+        // 無効な方向ベクトルは、首の向き計算に使わないようゼロで返す。
         const float length_ = std::sqrt(
             value_.x * value_.x +
             value_.y * value_.y +
@@ -52,6 +54,7 @@ namespace
 
     float SmoothStep(float value_)
     {
+        // 首の向きが急に切り替わらないよう、ブレンド率に滑らかな立ち上がり/終わりを付ける。
         const float clampedValue_ = std::clamp(value_, 0.0f, 1.0f);
         return clampedValue_ * clampedValue_ * (3.0f - 2.0f * clampedValue_);
     }
@@ -119,6 +122,7 @@ const std::string& DragonNeckCommandIKComponent::GetName() const
 void DragonNeckCommandIKComponent::Start()
 {
     const auto owner_ = GetGameObject();
+    // 首IKはモデルのノード列とIKMapのチェーン定義を使って動くため、開始時に参照を解決する。
     model = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
     ikMap = owner_ ? owner_->GetComponent<IKMapComponent>().get() : nullptr;
 
@@ -151,6 +155,7 @@ void DragonNeckCommandIKComponent::Update(float deltaTime_)
     model->UpdateLoadState();
     if (!model->IsModelReady()) return;
 
+    // 現在のコマンドを毎フレーム評価し、指定時間が終わったら必要に応じて解除する。
     commandTimer += deltaTime_;
     ApplyTargetObjectLookMode();
     ApplyNeckIK(deltaTime_);
@@ -208,6 +213,7 @@ void DragonNeckCommandIKComponent::RegisterActions()
     const auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    // アニメイベントやAIから首の向きを命令できるよう、ローカル/必要ならグローバルActionへ登録する。
     UnregisterActions();
     registeredActionCategory = actionCategory;
     registeredGlobalActionCategory = actionCategory;
@@ -352,6 +358,8 @@ void DragonNeckCommandIKComponent::SetTargetObjectLookMode(bool enabled_)
         return;
     }
 
+    // ターゲット注視モードは長時間のLOOK_AT_TARGETコマンドとして扱い、
+    // 毎フレーム対象位置と制限角度だけ更新する。
     currentCommand = {};
     currentCommand.mode = DRAGON_NECK_IK_MODE::LOOK_AT_TARGET;
     currentCommand.targetName = lookTargetObjectName;
@@ -390,6 +398,7 @@ float DragonNeckCommandIKComponent::CalculateBlendRate() const
 {
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::DISABLED) return 0.0f;
 
+    // blendIn -> hold -> blendOutの3区間で、IKの影響度を0〜1へ変換する。
     if (commandTimer < currentCommand.blendInTime)
     {
         if (currentCommand.blendInTime <= 0.0001f) return 1.0f;
@@ -407,6 +416,7 @@ float DragonNeckCommandIKComponent::CalculateBlendRate() const
 
 bool DragonNeckCommandIKComponent::ResolveTargetPosition(DirectX::XMFLOAT3& targetPosition_)
 {
+    // ワールド座標指定とGameObject名指定を、同じtargetPositionとして扱えるように解決する。
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_WORLD_POSITION)
     {
         targetPosition_ = currentCommand.worldTargetPosition;
@@ -441,6 +451,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
     if (!ikMap->ResolveChainByName(chainName)) return false;
     if (chain_->nodeIndices.size() < 2) return false;
 
+    // アニメーション結果を基準にIK補正を重ねるため、補正前の回転とWorld行列を保持する。
     auto& nodes_ = model->GetNodes();
 
     const size_t boneCount_ = chain_->nodeIndices.size();
@@ -470,6 +481,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
     }
     else if (currentCommand.mode == DRAGON_NECK_IK_MODE::SWEEP_YAW)
     {
+        // Sweepは開始Yawから終了Yawへ、コマンド時間内で滑らかに首を振る。
         const float t_ = currentCommand.duration <= 0.0001f
             ? 1.0f
             : std::clamp(
@@ -488,6 +500,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
         DirectX::XMFLOAT3 targetPosition_;
         if (ResolveTargetPosition(targetPosition_))
         {
+            // 先端ノードの現在向きとターゲット方向を、首の根元基準のローカル方向へ変換して差分角を出す。
             const int aimBaseNodeIndex_ = chain_->nodeIndices[boneCount_ - 2];
             const int aimTipNodeIndex_ = chain_->nodeIndices[boneCount_ - 1];
             const auto& aimBaseNode_ = nodes_.at(aimBaseNodeIndex_);
@@ -537,6 +550,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
         }
     }
 
+    // 首が破綻するほど回らないよう、コマンドごとの最大Yaw/Pitchに制限する。
     targetYawDegrees = std::clamp(
         targetYawDegrees,
         -currentCommand.maxYawDegrees,
@@ -551,6 +565,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
     const float followRate_ =
         1.0f - std::exp(-(std::max)(followSpeed, 0.0f) * safeDeltaTime_);
 
+    // 目標角度へ指数補間で追従させ、コマンド切り替え時の首の跳ねを抑える。
     currentYawDegrees +=
         NormalizeAngleDegrees(targetYawDegrees - currentYawDegrees) * followRate_;
     currentPitchDegrees +=
@@ -607,6 +622,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
     float yawWeightTotal_ = 0.0f;
     float pitchWeightTotal_ = 0.0f;
 
+    // 根元より先端側を強めに回すことで、首全体が自然にしなって目標方向へ向く。
     for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
     {
         const float normalizedPosition_ = boneCount_ <= 1
@@ -658,6 +674,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 
         const DirectX::XMMATRIX inverseParentWorldMatrix_ =
             DirectX::XMMatrixInverse(nullptr, parentWorldMatrix_);
+        // ワールド基準のYaw/Pitch軸を各ボーンの親ローカルへ変換し、ローカル回転として合成する。
         DirectX::XMVECTOR boneYawAxisLocal_ =
             DirectX::XMVector3TransformNormal(aimYawAxisWorld_, inverseParentWorldMatrix_);
         DirectX::XMVECTOR bonePitchAxisLocal_ =
@@ -683,6 +700,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
         const DirectX::XMVECTOR resultRotation_ = DirectX::XMQuaternionNormalize(
             DirectX::XMQuaternionMultiply(animationRotation_, commandRotation_));
 
+        // アニメーション回転へIKの追加回転を重ね、ノード行列を先頭から再計算する。
         DirectX::XMFLOAT4 resultRotationStorage_;
         DirectX::XMStoreFloat4(&resultRotationStorage_, resultRotation_);
         if (!IsFinite(resultRotationStorage_)) continue;
@@ -697,6 +715,7 @@ bool DragonNeckCommandIKComponent::ApplyNeckIK(float deltaTime_)
 
 bool DragonNeckCommandIKComponent::GetMouthWorldPosition(DirectX::XMFLOAT3& position_) const
 {
+    // ブレスや口元エフェクトの発生位置として、設定されたMouthノードのWorld座標を返す。
     if (!model || mouthNodeIndex < 0) return false;
 
     const auto& nodes_ = model->GetNodes();
@@ -708,6 +727,7 @@ bool DragonNeckCommandIKComponent::GetMouthWorldPosition(DirectX::XMFLOAT3& posi
 
 bool DragonNeckCommandIKComponent::GetMouthWorldForward(DirectX::XMFLOAT3& forward_) const
 {
+    // 口元エフェクトの向きに使うため、MouthノードのWorld行列へローカル前方向を変換する。
     if (!model || mouthNodeIndex < 0) return false;
 
     const auto& nodes_ = model->GetNodes();
@@ -833,6 +853,7 @@ void DragonNeckCommandIKComponent::Gui()
 
 void DragonNeckCommandIKComponent::Serialize(nlohmann::json& json_) const
 {
+    // チェーン名、口ノード、Action設定、注視モードの調整値を保存する。
     json_["ChainName"] = chainName;
     json_["MouthNodeName"] = mouthNodeName;
     json_["LocalForwardAxis"] = {
@@ -870,6 +891,7 @@ void DragonNeckCommandIKComponent::Serialize(nlohmann::json& json_) const
 
 void DragonNeckCommandIKComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 保存値を読み戻し、注視モードが有効ならコマンドも再作成しておく。
     chainName = json_.value("ChainName", std::string("DragonNeck"));
     mouthNodeName = json_.value("MouthNodeName", std::string("Mouth"));
 

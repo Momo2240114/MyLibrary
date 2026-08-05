@@ -21,7 +21,7 @@ public:
 
 private:
 
-
+    // 選択中GameObjectから、モデルとAnimationControllerの両方が揃った編集対象を解決する。
     bool ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const;
     void DrawScenePreviewPanel();
     void DrawSceneHierarchyPanel();
@@ -30,11 +30,13 @@ private:
     void DrawAssetBrowserPanel();
 
     AssetBrowserWindow assetBrowser;
+    // 右Inspector、プレビュー、階層、AssetBrowserなどの分割サイズを保持する。
     float rightPanelWidth = 520.0f;
     float scenePreviewHeight = 420.0f;
     float hierarchyWidth = 260.0f;
     float assetBrowserHeight = 260.0f;
     float transitionInspectorWidth = 320.0f;
+    // 新旧接続方式を切り替えて、既存グラフとの互換を保ちながら編集できるようにする。
     ANIM_GRAPH_CONNECTION_MODE graphConnectionMode = ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN;
     bool layoutSizeInitialized = false;
 };

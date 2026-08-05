@@ -2,6 +2,7 @@
 
 #include "EditorWindow.h"
 
+// GraphicsDeviceManagerが持つPostEffect設定をEditorから操作するWindow。
 class PostEffectWindow : public EditorWindow
 {
 public:

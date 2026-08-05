@@ -10,6 +10,7 @@
 
 namespace
 {
+    // InvisibleButtonでドラッグ可能な境界線を作り、Dockingなしでも各パネル幅を調整できるようにする。
     void DrawVerticalSplitter(
         const char* id_,
         float height_,
@@ -67,6 +68,7 @@ namespace
 
 bool AnimNodeEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, AnimationControllerComponent*& animController) const
 {
+    // 現在選択中のGameObjectから、プレビュー対象のモデルとノード編集対象のAnimationControllerを取り出す。
     modelComp = nullptr;
     animController = nullptr;
 
@@ -86,6 +88,7 @@ bool AnimNodeEditorWindow::ResolveTarget(GltfModelCommponennt*& modelComp, Anima
 
 void AnimNodeEditorWindow::Draw()
 {
+    // 左にシーン確認、右にアニメーションノード編集を並べ、1画面で選択から遷移編集まで行える作業空間を作る。
     GltfModelCommponennt* modelComp = nullptr;
     AnimationControllerComponent* animController = nullptr;
     ResolveTarget(modelComp, animController);
@@ -112,6 +115,7 @@ void AnimNodeEditorWindow::Draw()
 
     if (!layoutSizeInitialized)
     {
+        // 初回だけ現在ウィンドウサイズから比率で初期レイアウトを決め、以後はユーザーのドラッグ結果を保持する。
         rightPanelWidth = available_.x * 0.42f;
         scenePreviewHeight = available_.y * 0.64f;
         hierarchyWidth = available_.x * 0.24f;
@@ -123,6 +127,7 @@ void AnimNodeEditorWindow::Draw()
         rightPanelWidth,
         minimumRightWidth_,
         (std::max)(minimumRightWidth_, available_.x - minimumLeftWidth_ - SPLITTER_SIZE));
+    // 各ペインは最小サイズを守ってクランプし、狭いウィンドウでも編集UIが潰れすぎないようにする。
     const float leftWidth_ = (std::max)(
         minimumLeftWidth_,
         available_.x - rightPanelWidth - SPLITTER_SIZE);
@@ -207,6 +212,7 @@ void AnimNodeEditorWindow::Draw()
 
 void AnimNodeEditorWindow::DrawScenePreviewPanel()
 {
+    // メインレンダー結果をワークスペース内へ表示し、ノード編集しながら現在シーンの見た目を確認する。
     ImGui::TextUnformatted("Scene Preview");
     ImGui::Separator();
 
@@ -227,6 +233,7 @@ void AnimNodeEditorWindow::DrawScenePreviewPanel()
 
 void AnimNodeEditorWindow::DrawSceneHierarchyPanel()
 {
+    // GameObjectManagerの既存Hierarchy GUIをそのまま使い、このウィンドウ内でも対象を選べるようにする。
     ImGui::TextUnformatted("Scene Hierarchy");
     ImGui::Separator();
 
@@ -241,6 +248,7 @@ void AnimNodeEditorWindow::DrawSceneHierarchyPanel()
 
 void AnimNodeEditorWindow::DrawSceneInspectorPanel()
 {
+    // 選択中オブジェクトの通常Inspectorを表示し、AnimationController以外の設定も同じ画面で触れるようにする。
     ImGui::TextUnformatted("Inspector");
     ImGui::Separator();
 
@@ -255,6 +263,7 @@ void AnimNodeEditorWindow::DrawSceneInspectorPanel()
 
 void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animController_)
 {
+    // AnimationController側が持つノードエディタ本体と、選択中遷移のInspectorを横並びで描画する。
     ImGui::TextUnformatted("Graph Node");
     ImGui::SameLine();
 
@@ -272,6 +281,7 @@ void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animCont
 
     if (!animController_)
     {
+        // モデルとAnimationControllerが揃っていない場合は、編集対象を選ぶための案内だけを出す。
         ImGui::TextWrapped("Select a Scene GameObject that has GltfModel and AnimationControllerComponent.");
         return;
     }
@@ -309,6 +319,7 @@ void AnimNodeEditorWindow::DrawGraphPanel(AnimationControllerComponent* animCont
 
 void AnimNodeEditorWindow::DrawAssetBrowserPanel()
 {
+    // アニメーションステートや素材を探しながらノード編集できるよう、下段にAssetBrowserを埋め込む。
     ImGui::TextUnformatted("Asset Browser");
     ImGui::Separator();
     assetBrowser.DrawContent();

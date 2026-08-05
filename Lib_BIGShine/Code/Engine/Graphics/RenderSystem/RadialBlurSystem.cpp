@@ -8,11 +8,13 @@
 
 bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
 {
+    // PostEffectは画面全体へ描くため、Viewport設定に使う画面Sizeを保持しておく。
     screenSize = {
         static_cast<float>(width),
         static_cast<float>(height)
     };
 
+    // FullScreenVSは頂点Bufferなしで全画面Triangleを生成する共通Shader。
     CPUResourceLoader::LoadVertexShader(
         device,
         "Shader/FullScreenVS.cso",
@@ -20,11 +22,13 @@ bool RadialBlurSystem::Initialize(ID3D11Device* device, int width, int height)
         nullptr,
         fullScreenVS.GetAddressOf());
 
+    // RadialBlur専用のPixel Shaderを読み込む。
     CPUResourceLoader::LoadPixelShader(
         device,
         "Shader/RadialBlur_PS.cso",
         radialBlurPS.GetAddressOf());
 
+    // Blurパラメータは毎Frame変わる可能性があるためDynamic ConstantBufferにする。
     D3D11_BUFFER_DESC desc{};
     desc.ByteWidth = sizeof(CbRadial);
     desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -52,12 +56,14 @@ void RadialBlurSystem::Execute(
     auto* dc = rc.deviceContext;
     auto* rs = rc.renderState;
 
+    // 必須Resourceが欠けたFrameではPostEffectを実行せず、描画状態を壊さない。
     if (dc == nullptr || rs == nullptr || inputSRV == nullptr || outputRTV == nullptr) {
         return;
     }
 
     UpdateConstantBuffer(dc, params);
 
+    // FullScreen PassなのでDepthは読まず書かず、Cullもしない設定にする。
     dc->RSSetState(rs->GetRasterizerState(RasterizerState::SolidCullNone));
     dc->OMSetDepthStencilState(rs->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
 
@@ -73,6 +79,7 @@ void RadialBlurSystem::Execute(
     vp.MaxDepth = 1.0f;
     dc->RSSetViewports(1, &vp);
 
+    // 出力先RTVへ、入力Scene SRVをSampleしながら全画面描画する。
     dc->OMSetRenderTargets(1, &outputRTV, nullptr);
     dc->VSSetShader(fullScreenVS.Get(), nullptr, 0);
     dc->PSSetShader(radialBlurPS.Get(), nullptr, 0);
@@ -81,6 +88,7 @@ void RadialBlurSystem::Execute(
 
     DrawFullScreenQuad(dc);
 
+    // 同じTextureを次のPassでRTVとして使う可能性があるため、SRV Slotを明示的に解除する。
     ID3D11ShaderResourceView* nullSRV = nullptr;
     dc->PSSetShaderResources(0, 1, &nullSRV);
 
@@ -91,6 +99,7 @@ void RadialBlurSystem::UpdateConstantBuffer(ID3D11DeviceContext* dc, const Param
 {
     D3D11_MAPPED_SUBRESOURCE mapped{};
     if (SUCCEEDED(dc->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped))) {
+        // Shaderのcbufferへ直接書き込み、現在FrameのBlur設定を反映する。
         auto* cb = static_cast<CbRadial*>(mapped.pData);
         cb->blur_radius = params.blurRadius;
         cb->blur_sampling_count = params.blurSamplingCount;
@@ -102,6 +111,7 @@ void RadialBlurSystem::UpdateConstantBuffer(ID3D11DeviceContext* dc, const Param
 
 void RadialBlurSystem::DrawFullScreenQuad(ID3D11DeviceContext* dc)
 {
+    // FullScreenVS側で頂点を生成するため、InputLayoutとVertexBufferは不要。
     dc->IASetInputLayout(nullptr);
     dc->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

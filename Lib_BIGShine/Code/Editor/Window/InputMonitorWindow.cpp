@@ -14,6 +14,7 @@ InputMonitorWindow::InputMonitorWindow(GameObjectManager* manager_)
 
 void InputMonitorWindow::Draw()
 {
+    // 左で監視対象を選び、右で現在値と履歴を確認する入力デバッグ用ウィンドウ。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -58,9 +59,11 @@ void InputMonitorWindow::Draw()
 
 void InputMonitorWindow::UpdateInputState()
 {
+    // 毎フレームKeyConfigを読み、選択中のAction/Axisだけを履歴へ記録する。
     ++frameCounter;
 
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
+    // 入力設定側から削除された名前は監視対象から外し、存在しないAction/Axisを残さない。
     for (auto iterator_ = monitoredActions.begin(); iterator_ != monitoredActions.end();)
     {
         if (keyConfig_.GetActionMap().find(*iterator_) == keyConfig_.GetActionMap().end())
@@ -101,6 +104,7 @@ void InputMonitorWindow::UpdateInputState()
     {
         if (!IsAxisMonitored(axisName_)) continue;
         const float value_ = keyConfig_.GetAxis(axisName_);
+        // Axis履歴はしきい値と前回値との差分で間引き、スティックの微小な揺れで埋まらないようにする。
         const bool shouldRecord_ =
             std::abs(value_) >= axisRecordThreshold ||
             (recordAxisNeutral && std::abs(value_) <= 0.001f);
@@ -134,6 +138,7 @@ void InputMonitorWindow::PushActionHistory(
     const std::string& actionName_,
     const std::string& state_)
 {
+    // 新しい履歴を先頭に積み、最大件数を超えた古い履歴から捨てる。
     actionHistory.push_front({ actionName_, state_, frameCounter });
     while (static_cast<int>(actionHistory.size()) > maxHistoryCount)
     {
@@ -154,6 +159,7 @@ void InputMonitorWindow::PushAxisHistory(
 
 void InputMonitorWindow::DrawActionMonitor()
 {
+    // ActionはHold/In/Outを色分けし、入力が入った瞬間と離した瞬間を目視しやすくする。
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
     ImGui::TextUnformatted("Actions");
     ImGui::Separator();
@@ -186,6 +192,7 @@ void InputMonitorWindow::DrawActionMonitor()
 
 void InputMonitorWindow::DrawAxisMonitor()
 {
+    // Axisはスティックパッドとバー表示を併用し、2D入力と単体軸の両方を確認できるようにする。
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
     ImGui::TextUnformatted("Axes");
     ImGui::Separator();
@@ -233,6 +240,7 @@ void InputMonitorWindow::DrawStickPad(
     const DirectX::XMFLOAT2& value_,
     float size_)
 {
+    // 選択された左右スティック軸を2Dパッドへ描画し、入力方向と倒し具合を直感的に見る。
     ImGui::BeginGroup();
     ImGui::TextUnformatted(label_);
 
@@ -285,6 +293,7 @@ DirectX::XMFLOAT2 InputMonitorWindow::BuildSelectedStickValue(
     AxisCode xCode_,
     AxisCode yCode_) const
 {
+    // 監視中Axisの中から指定スティックX/Yを使うものを合算し、パッド描画用の値にする。
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
     DirectX::XMFLOAT2 value_{ 0.0f, 0.0f };
 
@@ -335,6 +344,7 @@ bool InputMonitorWindow::HasSelectedStickAxis(
 
 void InputMonitorWindow::DrawHistory()
 {
+    // 入力の瞬間をフレーム番号付きで残し、押し漏れやAxis値の変化タイミングを追えるようにする。
     ImGui::TextUnformatted("History");
     if (ImGui::Button("Clear History"))
     {
@@ -368,6 +378,7 @@ void InputMonitorWindow::DrawHistory()
 
 void InputMonitorWindow::DrawMonitorSelector()
 {
+    // 全Action/Axisから監視したいものだけを選ぶ。選択を絞ることで右側の表示と履歴を読みやすくする。
     ImGui::TextUnformatted("Monitor Targets");
     ImGui::Separator();
 
@@ -420,6 +431,7 @@ void InputMonitorWindow::DrawMonitorSelector()
 
 std::vector<std::string> InputMonitorWindow::BuildActionNames() const
 {
+    // KeyConfigの登録順に依存しないよう、表示用のAction名は毎回ソートして返す。
     std::vector<std::string> names_;
     for (const auto& pair_ : KeyConfig::Instance().GetActionMap())
     {

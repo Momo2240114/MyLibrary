@@ -14,12 +14,14 @@ namespace
 {
     std::wstring Utf8ToWide(const std::string& text_)
     {
+        // Project内のパスはUTF-8で持つため、Windows API用にUTF-16へ変換する。
         if (text_.empty()) return {};
 
         const int length_ = MultiByteToWideChar(
             CP_UTF8, MB_ERR_INVALID_CHARS, text_.c_str(), -1, nullptr, 0);
         if (length_ <= 0)
         {
+            // 変換できない文字列でも、filesystem側の変換にフォールバックする。
             return std::filesystem::path(text_).wstring();
         }
 
@@ -31,6 +33,7 @@ namespace
 
     std::string WideToUtf8(const std::wstring& text_)
     {
+        // Windows Dialogから返るUTF-16パスを、Project内で扱うUTF-8文字列へ戻す。
         if (text_.empty()) return {};
 
         const int length_ = WideCharToMultiByte(
@@ -45,6 +48,7 @@ namespace
 
     std::wstring BuildFilterString(const std::vector<WindowsDialogHelper::FilterSpec>& filters_)
     {
+        // OPENFILENAMEWのFilterは「表示名\0パターン\0... \0」という二重終端形式。
         std::wstring filterString_;
         for (const auto& filter_ : filters_)
         {
@@ -60,6 +64,7 @@ namespace
 
     std::filesystem::path ResolveInitialDirectory(const std::string& initialDir_)
     {
+        // 初期パスがファイルなら親フォルダ、相対パスなら絶対化してDialogへ渡す。
         std::error_code error_;
         std::filesystem::path directory_ = initialDir_.empty()
             ? std::filesystem::current_path(error_)
@@ -75,6 +80,7 @@ namespace
         }
         if (error_ || !std::filesystem::is_directory(directory_, error_))
         {
+            // 存在しないフォルダを渡すとDialogが開きづらいため、カレントへ戻す。
             directory_ = std::filesystem::current_path(error_);
         }
         return directory_;
@@ -82,6 +88,7 @@ namespace
 
     std::string MakeProjectRelativePath(const std::filesystem::path& selectedPath_)
     {
+        // Data配下などProject内のAssetは、保存JSONに絶対パスを残さないよう相対化する。
         std::error_code error_;
         const std::filesystem::path basePath_ = std::filesystem::current_path(error_);
         if (!error_)
@@ -107,6 +114,7 @@ std::string WindowsDialogHelper::OpenFileDialog(
     const std::string& initialDir_,
     HWND ownerWindow_)
 {
+    // Windowsの古いCommon Dialog APIは固定バッファを要求するため、大きめに確保する。
     constexpr DWORD BUFFER_LENGTH = 32768;
     std::vector<wchar_t> fileBuffer_(BUFFER_LENGTH, L'\0');
     const std::wstring filterString_ = BuildFilterString(filters_);
@@ -123,6 +131,7 @@ std::string WindowsDialogHelper::OpenFileDialog(
     dialog_.lpstrInitialDir = initialDirectoryText_.c_str();
     dialog_.lpstrTitle = title_;
     dialog_.Flags =
+        // カレントディレクトリをDialog操作で変えないようOFN_NOCHANGEDIRを必ず付ける。
         OFN_EXPLORER |
         OFN_FILEMUSTEXIST |
         OFN_PATHMUSTEXIST |
@@ -141,6 +150,7 @@ std::string WindowsDialogHelper::SaveFileDialog(
     const wchar_t* defaultExtension_,
     HWND ownerWindow_)
 {
+    // initialPath_は「フォルダ」でも「保存候補ファイル」でも受け取れるよう分岐する。
     constexpr DWORD BUFFER_LENGTH = 32768;
     std::vector<wchar_t> fileBuffer_(BUFFER_LENGTH, L'\0');
     const std::filesystem::path requestedPath_ = Utf8ToPath(initialPath_);
@@ -154,6 +164,7 @@ std::string WindowsDialogHelper::SaveFileDialog(
         : std::wstring();
     if (!initialFileName_.empty())
     {
+        // ファイル名候補だけを入力欄へ事前設定する。
         wcsncpy_s(fileBuffer_.data(), fileBuffer_.size(), initialFileName_.c_str(), _TRUNCATE);
     }
     const std::wstring filterString_ = BuildFilterString(filters_);
@@ -281,10 +292,12 @@ std::string WindowsDialogHelper::OpenAssetDialog(
 
 std::filesystem::path WindowsDialogHelper::Utf8ToPath(const std::string& path_)
 {
+    // 日本語パスを壊さないよう、UTF-8文字列から明示的にwide pathを作る。
     return std::filesystem::path(Utf8ToWide(path_));
 }
 
 std::string WindowsDialogHelper::PathToUtf8(const std::filesystem::path& path_)
 {
+    // filesystem::pathをJSON保存向けのUTF-8汎用区切り文字列へ変換する。
     return WideToUtf8(path_.generic_wstring());
 }

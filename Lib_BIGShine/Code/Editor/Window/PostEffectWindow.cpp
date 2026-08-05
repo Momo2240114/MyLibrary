@@ -14,6 +14,7 @@ void PostEffectWindow::Draw()
     if (BeginEditorWindow())
     {
         DrawStylePopup();
+        // PostEffectは描画デバイス側の状態に依存するため、具体的な項目描画はGraphicsDeviceManagerへ委譲する。
         GraphicsDeviceManager::Instance().DrawPostEffectGuiContent();
     }
     EndEditorWindow();

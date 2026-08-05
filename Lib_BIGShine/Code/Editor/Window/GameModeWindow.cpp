@@ -14,6 +14,7 @@ namespace
 {
     std::string ToDisplayString(const BlackBoardValue& value_)
     {
+        // variantで保持されるBlackboard値を、表へそのまま出せる文字列に変換する。
         return std::visit([](auto&& arg_) -> std::string
             {
                 using T = std::decay_t<decltype(arg_)>;
@@ -53,6 +54,7 @@ namespace
 
     const char* ToTypeName(const BlackBoardValue& value_)
     {
+        // Blackboard値の型名を表示し、同じキー名でもデータ種別を判別できるようにする。
         return std::visit([](auto&& arg_) -> const char*
             {
                 using T = std::decay_t<decltype(arg_)>;
@@ -73,6 +75,7 @@ void GameModeWindow::Draw()
 {
     if (!isVisible) return;
 
+    // GameModeManagerの現在状態とGlobalBlackboardをまとめて確認するデバッグWindow。
     if (BeginEditorWindow())
     {
         DrawStylePopup();
@@ -95,6 +98,7 @@ void GameModeWindow::Draw()
 
 void GameModeWindow::DrawState(GameModeManager& gameModeManager_)
 {
+    // 戦闘ロック、AIディレクター傾向、HP率など、GameModeが持つ主要状態を表で表示する。
     if (ImGui::Button("Reset Battle State"))
     {
         gameModeManager_.ResetBattleState();
@@ -108,6 +112,7 @@ void GameModeWindow::DrawState(GameModeManager& gameModeManager_)
 
         auto drawBool_ = [](const char* name_, bool value_)
             {
+                // bool/float/intの行追加処理を分け、GameMode状態表の記述を短く保つ。
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::TextUnformatted(name_);
@@ -156,6 +161,7 @@ void GameModeWindow::DrawState(GameModeManager& gameModeManager_)
 
 void GameModeWindow::DrawGlobalBlackboard(BlackboardComponent& blackboard_)
 {
+    // GlobalBlackboardをカテゴリごとにTree表示し、各キーの型と値を一覧で確認する。
     const auto& board_ = blackboard_.GetBoard();
     if (board_.empty())
     {
@@ -175,6 +181,7 @@ void GameModeWindow::DrawGlobalBlackboard(BlackboardComponent& blackboard_)
 
         if (ImGui::BeginTable("GlobalBlackboardTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg))
         {
+            // カテゴリ内の全キーをKey/Type/Valueで表示し、AIや演出の共有状態を追えるようにする。
             ImGui::TableSetupColumn("Key");
             ImGui::TableSetupColumn("Type");
             ImGui::TableSetupColumn("Value");

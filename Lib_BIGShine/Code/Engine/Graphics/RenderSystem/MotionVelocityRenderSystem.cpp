@@ -14,6 +14,7 @@
 bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
 {
     if (device_ == nullptr) return false;
+    // Shaderが無い環境ではMotionBlurを無効化し、通常描画だけ継続できるようにする。
     if (!std::filesystem::exists("Shader/MotionObjectVelocityVS.cso") ||
         !std::filesystem::exists("Shader/MotionObjectVelocityPS.cso"))
     {
@@ -21,6 +22,7 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
         return false;
     }
 
+    // GltfModelと同じ頂点LayoutでVelocity用Vertex Shaderを読み込む。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
         "Shader/MotionObjectVelocityVS.cso",
@@ -33,6 +35,7 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
         return false;
     }
 
+    // Velocity RTへ速度値を書き込むPixel Shader。
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
         "Shader/MotionObjectVelocityPS.cso",
@@ -42,6 +45,7 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
         return false;
     }
 
+    // Objectごとの現在/前Frame行列を渡すBuffer。
     if (FAILED(CPUResourceLoader::CreateConstantBuffer(
         device_,
         sizeof(CbObjectMotionVelocity),
@@ -51,6 +55,7 @@ bool MotionVelocityRenderSystem::Initialize(ID3D11Device* device_)
         return false;
     }
 
+    // Skinning Mesh用のBone行列Buffer。
     if (FAILED(CPUResourceLoader::CreateConstantBuffer(
         device_,
         sizeof(CbSkeleton),
@@ -69,6 +74,7 @@ void MotionVelocityRenderSystem::Register(const std::shared_ptr<MotionVelocityCo
     if (!component_) return;
 
     RemoveExpiredComponents();
+    // 同じComponentを二重登録しないよう、weak_ptrをlockして実体を比較する。
     const auto exists_ = std::any_of(
         components.begin(),
         components.end(),
@@ -83,6 +89,7 @@ void MotionVelocityRenderSystem::Register(const std::shared_ptr<MotionVelocityCo
 
 void MotionVelocityRenderSystem::Unregister(MotionVelocityComponent* component_)
 {
+    // 指定Componentと、ついでに寿命切れComponentも登録リストから取り除く。
     components.erase(
         std::remove_if(
             components.begin(),
@@ -112,6 +119,7 @@ void MotionVelocityRenderSystem::DrawObjectVelocity(
     if (components.empty()) return;
 
     ID3D11DeviceContext* dc_ = rc_.deviceContext;
+    // Velocity RTと同じ大きさで描画し、Screen Space速度の座標系を合わせる。
     D3D11_VIEWPORT viewport_{};
     viewport_.Width = static_cast<float>(width_);
     viewport_.Height = static_cast<float>(height_);
@@ -119,12 +127,14 @@ void MotionVelocityRenderSystem::DrawObjectVelocity(
     viewport_.MaxDepth = 1.0f;
     dc_->RSSetViewports(1, &viewport_);
 
+    // 通常Depthを使って、見えているObjectだけVelocityを書き込む。
     ID3D11DepthStencilView* depthStencilView_ = GraphicsDeviceManager::Instance().GetDepthStencilView();
     dc_->OMSetRenderTargets(1, &velocityRTV_, depthStencilView_);
     dc_->OMSetDepthStencilState(rc_.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
     dc_->OMSetBlendState(rc_.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
     dc_->RSSetState(rc_.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
+    // 全Componentで共通のVelocity描画Pipelineを設定する。
     dc_->IASetInputLayout(inputLayout.Get());
     dc_->VSSetShader(vertexShader.Get(), nullptr, 0);
     dc_->PSSetShader(pixelShader.Get(), nullptr, 0);
@@ -144,15 +154,18 @@ void MotionVelocityRenderSystem::DrawObjectVelocity(
             continue;
         }
 
+        // 現在Worldを確定してから、前Frameとの差分をShaderへ渡す。
         component_->CaptureCurrentWorld();
         if (!component_->HasHistory())
         {
+            // 初回Frameは前Frame行列が無いため、速度を書かず次Frameから有効にする。
             continue;
         }
 
         DrawModelVelocity(rc_, component_, currentViewProjection_, previousViewProjection_);
     }
 
+    // 後続PassへConstantBuffer参照を残さないよう解除する。
     ID3D11Buffer* nullBuffer_ = nullptr;
     dc_->VSSetConstantBuffers(0, 1, &nullBuffer_);
     dc_->VSSetConstantBuffers(6, 1, &nullBuffer_);
@@ -162,6 +175,7 @@ void MotionVelocityRenderSystem::DrawObjectVelocity(
 void MotionVelocityRenderSystem::CommitHistory()
 {
     RemoveExpiredComponents();
+    // Velocity描画後に現在Transformを履歴へ移し、次Frameのpreviousとして使う。
     for (const std::weak_ptr<MotionVelocityComponent>& registered_ : components)
     {
         const std::shared_ptr<MotionVelocityComponent> component_ = registered_.lock();
@@ -197,6 +211,7 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
     const std::shared_ptr<GltfModelCommponennt> model_ = owner_ ? owner_->GetComponent<GltfModelCommponennt>() : nullptr;
     if (!model_ || !model_->IsEnabled()) return;
 
+    // Model側のWorld/Bone行列が古い場合に更新してからVelocityを計算する。
     model_->UpdateTransformIfDirty();
 
     ID3D11DeviceContext* dc_ = rc_.deviceContext;
@@ -214,6 +229,7 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
         &objectConstants_.inverseCurrentOwnerWorld,
         DirectX::XMMatrixInverse(nullptr, currentOwnerWorld_));
 
+    // Object単位の現在/前Frame情報をShaderへ送る。
     dc_->UpdateSubresource(objectConstantBuffer.Get(), 0, nullptr, &objectConstants_, 0, 0);
 
     const auto& meshes_ = model_->GetMeshes();
@@ -225,6 +241,7 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
         }
         if (mesh_.material && mesh_.material->alphaMode == GltfModelCommponennt::AlphaMode::Blend)
         {
+            // 半透明MeshはDepth/合成の都合で速度のにじみが目立つため、Velocity描画から除外する。
             continue;
         }
 
@@ -237,6 +254,7 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
         CbSkeleton skeleton_{};
         if (!mesh_.bones.empty())
         {
+            // Skinned MeshはBoneごとの現在姿勢をVelocity Shaderへ渡す。
             for (size_t boneIndex_ = 0; boneIndex_ < mesh_.bones.size() && boneIndex_ < 256; ++boneIndex_)
             {
                 const GltfModelCommponennt::Bone& bone_ = mesh_.bones.at(boneIndex_);
@@ -247,10 +265,12 @@ void MotionVelocityRenderSystem::DrawModelVelocity(
         }
         else if (mesh_.node != nullptr)
         {
+            // Static MeshはNodeのWorldを0番Boneとして扱い、Shader側の経路を共通化する。
             skeleton_.boneTransforms[0] = mesh_.node->worldTransform;
         }
         else
         {
+            // Nodeを持たないMeshでもShaderが未初期化行列を読まないようIdentityを入れる。
             DirectX::XMStoreFloat4x4(&skeleton_.boneTransforms[0], DirectX::XMMatrixIdentity());
         }
         dc_->UpdateSubresource(skeletonConstantBuffer.Get(), 0, nullptr, &skeleton_, 0, 0);

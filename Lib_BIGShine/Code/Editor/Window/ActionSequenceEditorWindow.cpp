@@ -16,6 +16,7 @@ ActionSequenceEditorWindow::ActionSequenceEditorWindow(GameObjectManager* manage
 
 void ActionSequenceEditorWindow::Draw()
 {
+    // 選択中GameObjectが持つActionSequenceだけをInspector風に編集する薄いラッパーウィンドウ。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -42,6 +43,7 @@ void ActionSequenceEditorWindow::Draw()
     auto actionSequence_ = selectedObject_->GetComponent<ActionSequence>();
     if (!actionSequence_)
     {
+        // ActionSequenceが無い対象では編集UIを出さず、選択ミスとして分かる表示だけにする。
         ImGui::TextDisabled("Selected GameObject does not have an ActionSequence component.");
         EndEditorWindow();
         return;
@@ -49,6 +51,7 @@ void ActionSequenceEditorWindow::Draw()
 
     ImGui::Text("Target: %s", selectedObject_->GetName().c_str());
     ImGui::Separator();
+    // 実際の編集内容はActionSequence側の専用GUIへ委譲する。
     actionSequence_->DrawEditorGui();
 
     EndEditorWindow();

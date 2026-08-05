@@ -14,6 +14,7 @@ namespace
 {
     void WritePointOptions(nlohmann::json& curveJson_, const CurveTrack& track_)
     {
+        // 各点から次の点への補間方法とBezier接線を、点配列とは別に保存する。
         curveJson_["PointOptions"] = nlohmann::json::array();
         for (const CurvePointOption& option_ : track_.pointOptions)
         {
@@ -27,6 +28,7 @@ namespace
 
     void ReadPointOptions(const nlohmann::json& curveJson_, CurveTrack& track_)
     {
+        // 古いアセットではPointOptionsが無い場合があるため、読み込み後に点数へ合わせて補完する。
         track_.pointOptions.clear();
         if (curveJson_.contains("PointOptions") && curveJson_["PointOptions"].is_array())
         {
@@ -45,6 +47,7 @@ namespace
 
     std::string MakeCurveAssetFileName(const std::string& name_)
     {
+        // トラック名をそのままファイル名に使えるよう、Windowsで使えない文字を置き換える。
         std::string fileName_ = name_.empty() ? "Curve" : name_;
         constexpr const char* INVALID_CHARACTERS = "<>:\"/\\|?*";
         for (char& character_ : fileName_)
@@ -88,6 +91,7 @@ std::string CurveComponent::CreateTrack(const std::string& preferredName_, float
 {
     const std::string trackName_ = MakeUniqueTrackName(preferredName_);
 
+    // 新規トラックは0〜1秒の水平カーブから始め、すぐ編集できる状態にする。
     tracks.emplace_back(trackName_);
     tracks.back().points =
     {
@@ -104,6 +108,7 @@ bool CurveComponent::SaveTrackAsset(size_t trackIndex_, const std::string& asset
 {
     if (trackIndex_ >= tracks.size()) return false;
 
+    // パス未指定時は既存assetPathか、トラック名から作ったData/Curve配下の既定パスへ保存する。
     CurveTrack& track_ = tracks[trackIndex_];
     std::string pathString_ = assetPath_.empty()
         ? (track_.assetPath.empty() ? GetDefaultCurveAssetPath(track_) : track_.assetPath)
@@ -122,6 +127,7 @@ bool CurveComponent::SaveTrackAsset(size_t trackIndex_, const std::string& asset
     }
 
     nlohmann::json curveJson_;
+    // 単体CurveTrackアセットとして再利用できるよう、表示設定と制御点をまとめて書き出す。
     curveJson_["Name"] = track_.name;
     curveJson_["Type"] = static_cast<int>(track_.type);
     curveJson_["Color"] = track_.color;
@@ -160,6 +166,7 @@ bool CurveComponent::LoadTrackAsset(const std::string& assetPath_)
 
     try
     {
+        // 新旧形式の両方に対応するため、Curveキーがあればそこを本体として読む。
         nlohmann::json assetJson_;
         file_ >> assetJson_;
         if (assetJson_.contains("AssetType") &&
@@ -211,6 +218,7 @@ bool CurveComponent::LoadTrackAsset(const std::string& assetPath_)
             [&loadedTrack_](const CurveTrack& track_) { return track_.name == loadedTrack_.name; });
         if (existingTrack_ != tracks.end())
         {
+            // 同名トラックがあれば差し替え、なければ新規トラックとして追加する。
             editingTrackIndex = static_cast<int>(std::distance(tracks.begin(), existingTrack_));
             *existingTrack_ = std::move(loadedTrack_);
         }
@@ -231,6 +239,7 @@ bool CurveComponent::LoadTrackAsset(const std::string& assetPath_)
 void CurveComponent::DrawTrackManager()
 {
     ValidateEditingTrack();
+    // 左側のトラック一覧で、追加/ロード/保存/表示切替/編集対象選択を行う。
     if (ImGui::Button("Add Track"))
     {
         CreateTrack("Track " + std::to_string(tracks.size()), 1.0f);
@@ -241,6 +250,7 @@ void CurveComponent::DrawTrackManager()
     std::string droppedPath_;
     if (ImGui::BeginDragDropTarget())
     {
+        // AssetBrowserからCurveまたはJSONをドロップして、そのままトラックとして読み込めるようにする。
         const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::CURVE);
         if (!payload_) payload_ = ImGui::AcceptDragDropPayload(AssetBrowserPayload::JSON);
         if (payload_)
@@ -372,6 +382,7 @@ void CurveComponent::DrawSelectedPointEditor()
 {
     if (selectedPoints.Size == 1)
     {
+        // 選択点が1つの時だけ、座標と次区間の補間方式を細かく編集する。
         ImCurveEdit::EditPoint& selectedPoint_ = selectedPoints[0];
         const bool validCurve_ =
             selectedPoint_.curveIndex >= 0 &&
@@ -417,6 +428,7 @@ void CurveComponent::DrawSelectedPointEditor()
                 CurvePointOption& option_ = track_.pointOptions[selectedPoint_.pointIndex];
                 if (option_.interpolationType == CURVE_INTERPOLATION_TYPE::BEZIER)
                 {
+                    // Bezierは左右接線を角度として編集し、内部では傾き(tangent)へ戻す。
                     CurvePointOption& nextOption_ = track_.pointOptions[selectedPoint_.pointIndex + 1];
                     constexpr float RADIANS_TO_DEGREES = 57.2957795f;
                     constexpr float DEGREES_TO_RADIANS = 0.0174532925f;
@@ -461,6 +473,7 @@ void CurveComponent::DrawSelectedPointEditor()
 void CurveComponent::DrawEditorContent(const ImVec2& size_)
 {
     ValidateEditingTrack();
+    // 左にトラック管理、右にカーブ編集領域を置き、幅は最低値を保ちながら調整する。
     const float availableWidth_ = ImGui::GetContentRegionAvail().x;
     trackListWidth = (std::clamp)(trackListWidth, 210.0f, (std::max)(210.0f, availableWidth_ - 260.0f));
 
@@ -504,6 +517,7 @@ void CurveComponent::DrawEditorContent(const ImVec2& size_)
     editOptions_.allowCurveMove = false;
     editOptions_.allowPointMove = true;
     editOptions_.allowPointAdd = true;
+    // ImCurveEdit本体へこのCurveComponentをアダプタとして渡し、選択点もここで保持する。
     ImCurveEdit::Edit(
         *this,
         editorSize_,
@@ -534,6 +548,7 @@ void CurveComponent::Gui()
 
 void CurveComponent::Serialize(nlohmann::json& json_) const
 {
+    // シーン保存では、読み込み直しに必要なトラック内容と表示範囲をまとめて保存する。
     json_["MinBounds"] = { minBounds.x, minBounds.y };
     json_["MaxBounds"] = { maxBounds.x, maxBounds.y };
     nlohmann::json tracksJson_ = nlohmann::json::array();

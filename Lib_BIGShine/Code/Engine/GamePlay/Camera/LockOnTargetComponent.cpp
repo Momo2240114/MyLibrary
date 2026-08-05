@@ -13,6 +13,7 @@
 
 DirectX::XMFLOAT3 LockOnTargetComponent::GetFocusPosition() const
 {
+    // Transformが無い場合でもOffsetを返し、呼び出し側が不定値を扱わないようにする。
     auto owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform)
     {
@@ -20,6 +21,7 @@ DirectX::XMFLOAT3 LockOnTargetComponent::GetFocusPosition() const
     }
 
     const DirectX::XMFLOAT3 position_ = owner_->transform->GetWorldPosition();
+    // LockOnの注視点はObject原点ではなく、胸/頭付近へOffsetする。
     return
     {
         position_.x + offset.x,
@@ -30,6 +32,7 @@ DirectX::XMFLOAT3 LockOnTargetComponent::GetFocusPosition() const
 
 std::shared_ptr<GameObject> LockOnTargetComponent::GetCombatOwner() const
 {
+    // 既に解決済みのCombatOwnerがあればそれを使う。
     if (const std::shared_ptr<GameObject> owner_ = combatOwner.lock())
     {
         return owner_;
@@ -40,6 +43,7 @@ std::shared_ptr<GameObject> LockOnTargetComponent::GetCombatOwner() const
 
     if (!combatOwnerName.empty() && currentObject_->manager)
     {
+        // 名前指定がある場合はScene内からCombatOwnerを探す。
         if (const std::shared_ptr<GameObject> namedOwner_ =
             currentObject_->manager->Find(combatOwnerName))
         {
@@ -47,6 +51,7 @@ std::shared_ptr<GameObject> LockOnTargetComponent::GetCombatOwner() const
         }
     }
 
+    // 指定が無い場合はLockOnTarget自身をCombatOwnerとして扱う。
     return currentObject_;
 }
 
@@ -64,6 +69,7 @@ void LockOnTargetComponent::Gui()
 
 void LockOnTargetComponent::Serialize(nlohmann::json& json_) const
 {
+    // LockOn候補として必要な注視点/Owner/優先度設定を保存する。
     json_["Offset"] = { offset.x, offset.y, offset.z };
     json_["CombatOwnerName"] = combatOwnerName;
     json_["LockOnEnabled"] = lockOnEnabled;
@@ -73,6 +79,7 @@ void LockOnTargetComponent::Serialize(nlohmann::json& json_) const
 
 void LockOnTargetComponent::Deserialize(const nlohmann::json& json_)
 {
+    // Offsetは3要素配列のときだけ復元し、古い/壊れたDataでは既定値を残す。
     if (json_.contains("Offset") && json_["Offset"].is_array() && json_["Offset"].size() >= 3)
     {
         offset =

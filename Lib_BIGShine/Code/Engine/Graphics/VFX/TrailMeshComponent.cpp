@@ -26,6 +26,7 @@ namespace
         const DirectX::XMFLOAT3& leftPosition_,
         const DirectX::XMFLOAT3& rightPosition_)
     {
+        // 左右端サンプルの中心を、軌跡の移動距離や補間方向の基準にする。
         return
         {
             (leftPosition_.x + rightPosition_.x) * 0.5f,
@@ -51,6 +52,7 @@ namespace
         const DirectX::XMFLOAT3& point3_,
         float amount_)
     {
+        // 生サンプル間をCatmull-Romで補間し、剣筋の帯が角ばらないようにする。
         DirectX::XMFLOAT3 result_{};
         DirectX::XMStoreFloat3(
             &result_,
@@ -65,6 +67,7 @@ namespace
 
     size_t CalculateRenderSampleCount(size_t sampleCount_, int smoothStep_)
     {
+        // smoothStepで各サンプル間に追加点を挟むため、描画時の実サンプル数を見積もる。
         if (sampleCount_ < 2) return sampleCount_;
         return (sampleCount_ - 1) * static_cast<size_t>((std::max)(smoothStep_, 1)) + 1;
     }
@@ -90,6 +93,7 @@ namespace
 
 TrailMeshComponent::TrailMeshComponent()
 {
+    // TrailMeshはMeshVFX描画経路を使うので、初期状態で加算ブレンドの1パーツを持たせる。
     MeshVFXPart part_{};
     part_.renderEnabled = true;
     part_.useMaterialBaseTexture = false;
@@ -105,6 +109,7 @@ void TrailMeshComponent::RegisterActions()
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    // Trail操作は所有Objectと親Objectの両方から呼べるよう、登録済みActionを整理して再登録する。
     auto unregisterActions_ = [&](ActionRegistry& registry_)
         {
             for (const std::string& actionName_ : registeredActionNames)
@@ -202,6 +207,7 @@ void TrailMeshComponent::Update(float deltaTime_)
     UpdateTrailParticleEmission(deltaTime_);
     if (samples.empty()) return;
 
+    // 古いサンプルは寿命で消し、消えた場合はメッシュを作り直す。
     for (TrailSample& sample_ : samples) sample_.age += deltaTime_;
     const auto removeBegin_ = std::remove_if(
         samples.begin(), samples.end(),
@@ -218,6 +224,7 @@ void TrailMeshComponent::LateUpdate(float deltaTime_)
     BS_PROFILE_SCOPE("TrailMeshComponent::LateUpdate");
     (void)deltaTime_;
     if (!meshDirty) return;
+    // サンプル追加/寿命削除があったフレームだけ、CPUメッシュを再構築してGPUへ転送する。
     RebuildMesh();
     UploadMesh();
     meshDirty = false;
@@ -232,6 +239,7 @@ TRAIL_SAMPLE_RESULT TrailMeshComponent::AddSample(
 
     if (!samples.empty())
     {
+        // ほぼ同じ位置のサンプルは新規追加せず、最新サンプルを更新して頂点数の増えすぎを防ぐ。
         const TrailSample previousSample_ = samples.front();
         const DirectX::XMFLOAT3 currentCenter_ = CalculateCenter(leftPosition_, rightPosition_);
         const DirectX::XMFLOAT3 previousCenter_ =
@@ -249,6 +257,7 @@ TRAIL_SAMPLE_RESULT TrailMeshComponent::AddSample(
         if (useTrailParticle &&
             trailParticleEmissionMode == TRAIL_PARTICLE_EMISSION_MODE::DISTANCE_INTERVAL)
         {
+            // 移動距離で粒子を出すモードでは、新旧サンプル間の移動量から発生位置を補間する。
             const TrailSample currentSample_{ leftPosition_, rightPosition_, 0.0f };
             const float distance_ = std::sqrt(CalculateDistanceSquared(currentCenter_, previousCenter_));
             EmitTrailParticlesAlongMovement(previousSample_, currentSample_, distance_);
@@ -262,6 +271,7 @@ TRAIL_SAMPLE_RESULT TrailMeshComponent::AddSample(
     if (useTrailParticle &&
         trailParticleEmissionMode == TRAIL_PARTICLE_EMISSION_MODE::SAMPLE_INTERVAL)
     {
+        // サンプル追加数を基準に粒子を出すモード。フレーム時間に左右されにくい。
         ++trailParticleAddedSampleCounter;
         const int interval_ = (std::max)(trailParticleSampleInterval, 1);
         if (trailParticleAddedSampleCounter >= interval_)
@@ -332,6 +342,7 @@ bool TrailMeshComponent::CreateBuffers()
 
     const size_t renderSampleCount_ = CalculateRenderSampleCount(maxSampleCount, smoothStep);
 
+    // Trailは毎フレーム形状が変わるため、VB/IBはCPU書き込み可能なDynamicバッファにする。
     D3D11_BUFFER_DESC vertexDescription_{};
     vertexDescription_.ByteWidth = static_cast<UINT>(
         sizeof(GltfModelCommponennt::Vertex) * renderSampleCount_ * 2);
@@ -366,6 +377,7 @@ void TrailMeshComponent::RebuildMesh()
     indices.clear();
     if (samples.size() < 2) return;
 
+    // 生サンプルを補間して描画用サンプルへ増やし、滑らかな帯メッシュにする。
     std::vector<TrailSample> renderSamples_;
     const int clampedSmoothStep_ = (std::max)(smoothStep, 1);
     renderSamples_.reserve(CalculateRenderSampleCount(samples.size(), clampedSmoothStep_));
@@ -407,6 +419,7 @@ void TrailMeshComponent::RebuildMesh()
     indices.reserve((renderSamples_.size() - 1) * 6);
     for (size_t sampleIndex_ = 0; sampleIndex_ < renderSamples_.size(); ++sampleIndex_)
     {
+        // 進行方向と左右幅から法線/接線を求め、MeshVFXのマテリアル計算に渡す。
         const size_t previousIndex_ = sampleIndex_ > 0 ? sampleIndex_ - 1 : sampleIndex_;
         const size_t nextIndex_ = sampleIndex_ + 1 < renderSamples_.size()
             ? sampleIndex_ + 1
@@ -462,6 +475,7 @@ void TrailMeshComponent::RebuildMesh()
     for (uint32_t sampleIndex_ = 0;
         sampleIndex_ + 1 < static_cast<uint32_t>(renderSamples_.size()); ++sampleIndex_)
     {
+        // 隣り合う左右2頂点を四角形としてつなぎ、帯状のTrailメッシュを作る。
         const uint32_t currentLeft_ = sampleIndex_ * 2;
         const uint32_t currentRight_ = currentLeft_ + 1;
         const uint32_t nextLeft_ = currentLeft_ + 2;
@@ -477,6 +491,7 @@ void TrailMeshComponent::UploadMesh()
     if ((!vertexBuffer || !indexBuffer) && !CreateBuffers()) return;
     if (vertices.empty() || indices.empty()) return;
 
+    // RebuildMeshで作ったCPU側頂点/インデックスを、Dynamicバッファへ上書き転送する。
     ID3D11DeviceContext* context_ = GraphicsDeviceManager::Instance().GetContext();
     if (!context_) return;
 
@@ -501,7 +516,7 @@ void TrailMeshComponent::ResetParticleEmissionState()
     trailParticleAddedSampleCounter = 0;
     if (trailParticleClearOnTrailClear)
     {
-        // Spawned pooled particles are owned by EffectManager, so Trail only resets future emission state.
+        // 生成済みのプール粒子はEffectManager側の管理なので、Trail側では今後の発生状態だけをリセットする。
     }
 }
 
@@ -517,6 +532,7 @@ void TrailMeshComponent::UpdateTrailParticleEmission(float deltaTime_)
     }
     if (!emitting && !trailParticleEmitWhileStopping) return;
 
+    // 時間間隔モードでは、最新サンプル上に一定周期で粒子を予約する。
     trailParticleTimeAccumulator += deltaTime_;
     const float interval_ = (std::max)(trailParticleInterval, 0.001f);
     const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
@@ -548,6 +564,7 @@ void TrailMeshComponent::EmitTrailParticlesAtSample(
     const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
     const int spawnCountThisCall_ = (std::min)(clampedSpawnCount_, maxSpawn_);
     EffectManager& effectManager_ = owner_->GetManager().GetEffectManager();
+    // 実際のParticle生成はEffectManagerへキューし、Trail側は左右端と発生幅だけを渡す。
     TrailParticleEmissionRequest request_{};
     request_.assetPath = trailParticleAssetPath;
     request_.emitterName = trailParticleEmitterName;
@@ -574,6 +591,7 @@ void TrailMeshComponent::EmitTrailParticlesAlongMovement(
     trailParticleDistanceAccumulator += (std::max)(distance_, 0.0f);
     int spawned_ = 0;
     const int maxSpawn_ = (std::max)(trailParticleMaximumSpawnPerFrame, 1);
+    // 前回からの移動距離が一定量を超えるたび、移動経路上に粒子を補間発生させる。
     while (trailParticleDistanceAccumulator >= intervalDistance_ && spawned_ < maxSpawn_)
     {
         trailParticleDistanceAccumulator -= intervalDistance_;
@@ -721,6 +739,7 @@ void TrailMeshComponent::Serialize(nlohmann::json& json_) const
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::Serialize");
     MeshVFXComponent::Serialize(json_);
+    // MeshVFXの見た目設定に加え、Trail固有のサンプル寿命と粒子発生設定を保存する。
     json_["TrailLifeTime"] = lifeTime;
     json_["TrailMaxSampleCount"] = maxSampleCount;
     json_["TrailMinimumSampleDistance"] = minimumSampleDistance;
@@ -748,6 +767,7 @@ void TrailMeshComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("TrailMeshComponent::Deserialize");
     MeshVFXComponent::Deserialize(json_);
+    // 読み込み値は描画バッファ確保に使うため、最低値を丸めてから状態を初期化する。
     lifeTime = (std::max)(json_.value("TrailLifeTime", 0.35f), 0.001f);
     maxSampleCount = (std::max)(json_.value("TrailMaxSampleCount", static_cast<size_t>(64)),
         static_cast<size_t>(2));

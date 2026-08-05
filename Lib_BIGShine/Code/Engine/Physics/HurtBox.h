@@ -8,11 +8,13 @@
 class HitBox;
 class CharacterCollider;
 
+// 攻撃を受けるためのCapsuleCollider。
+// HitBoxからのDamage倍率、無敵時間、同一攻撃の重複Hit履歴を管理する。
 class HurtBox : public CapsuleCollider
 {
 public:
-    float damageMultiplier = 1.0f;
-    std::string hurtTag = "Body";
+    float damageMultiplier = 1.0f; // 部位別Damage倍率。
+    std::string hurtTag = "Body"; // HitEventへ渡す受け側Tag。
 
     HurtBox();
 
@@ -31,16 +33,20 @@ public:
     void Deserialize(const nlohmann::json& j_) override;
 
 private:
+    // HurtBox用に固定したCollisionRoleとPhysics挙動を再適用する。
     void EnforceHurtBoxSettings();
+    // ActionSequenceなどから呼ぶ無敵切り替えActionを登録する。
     void RegisterActions();
     void ResolveCharacterCollider();
+    // CharacterColliderと同じ形状に追従する場合、Capsuleサイズを同期する。
     void SyncCharacterColliderShape();
 
 private:
-    float invincibilityDuration = 0.08f;
-    float invincibilityTimer = 0.0f;
-    bool invincible = false;
-    bool syncCharacterColliderShape = true;
+    float invincibilityDuration = 0.08f; // Hit後に自動で付く短い無敵時間。
+    float invincibilityTimer = 0.0f; // 残り無敵時間。
+    bool invincible = false; // 現在無敵かどうか。
+    bool syncCharacterColliderShape = true; // CharacterColliderの形状へ同期するか。
     std::weak_ptr<CharacterCollider> characterCollider;
+    // HitBoxごとのActivation IDを覚え、同じ攻撃判定の重複Hitを防ぐ。
     std::unordered_map<const HitBox*, uint64_t> receivedActivationIds;
 };

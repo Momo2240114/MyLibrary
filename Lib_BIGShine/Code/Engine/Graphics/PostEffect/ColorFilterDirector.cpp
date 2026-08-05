@@ -12,9 +12,11 @@
 
 void ColorFilterDirector::Start()
 {
+    // ColorFilter演出はEasingComponentに時間補間を任せる。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
     const std::shared_ptr<EasingComponent> easing_ = owner_->GetOrAddComponent<EasingComponent>();
+    // Pause中でも画面演出は戻し切りたいのでUnscaled Timeで進める。
     easing_->SetUseUnscaledTime(true);
     easingIndex = easing_->AddEasingAndGetIndex();
     ResetToDefault();
@@ -29,12 +31,14 @@ void ColorFilterDirector::Update(float elapsedTime_)
 
     if (phase == PHASE::HOLD)
     {
+        // Hold中はEasingを使わず、RawDeltaで保持時間だけ進める。
         const std::shared_ptr<TimeManager> timeManager_ = owner_->GetManager().GetTimeManager();
         holdElapsed += timeManager_ ? timeManager_->GetLastRawDeltaTime() : elapsedTime_;
         if (holdElapsed >= holdDuration) BeginTransitionToDefault();
         return;
     }
 
+    // TO_TARGET/TO_DEFAULT中はEasingの現在値をFilter補間率として使う。
     ApplyInterpolated(easing_->GetValue(easingIndex));
     if (!easing_->GetEndFlag(easingIndex)) return;
     if (phase == PHASE::TO_TARGET)
@@ -50,6 +54,7 @@ void ColorFilterDirector::Update(float elapsedTime_)
 
 void ColorFilterDirector::PlayFilter(const ColorFilterWayPoint& wayPoint_)
 {
+    // 現在のFilter設定を始点にすることで、演出の途中再生でも自然につながる。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<EasingComponent> easing_ = owner_
         ? owner_->GetOrAddComponent<EasingComponent>() : nullptr;
@@ -60,6 +65,7 @@ void ColorFilterDirector::PlayFilter(const ColorFilterWayPoint& wayPoint_)
     holdDuration = (std::max)(wayPoint_.holdDuration, 0.0f);
     returnDuration = (std::max)(wayPoint_.returnDuration, 0.0f);
     activeEasing = wayPoint_.easing == EasingType::None ? EasingType::Lerp : wayPoint_.easing;
+    // EasingComponentは速度指定なので、durationの逆数で0->1へ進める。
     easing_->SetStartValue(easingIndex, 0.0f);
     easing_->PlayEasing(easingIndex, activeEasing,
         1.0f / (std::max)(wayPoint_.duration, 0.0001f), 1.0f);
@@ -68,6 +74,7 @@ void ColorFilterDirector::PlayFilter(const ColorFilterWayPoint& wayPoint_)
 
 void ColorFilterDirector::ApplyInterpolated(float ratio_)
 {
+    // 補間結果をGraphicsDeviceManagerへ書き、Bloom/PostEffect側の描画設定として使う。
     GraphicsDeviceManager::Instance().GetFilterParams() =
         LerpFilter(startParams, targetParams, ratio_);
 }
@@ -79,11 +86,13 @@ void ColorFilterDirector::BeginTransitionToDefault()
         ? owner_->GetComponent<EasingComponent>() : nullptr;
     if (!easing_)
     {
+        // Easingが取得できない場合は途中状態を残さずDefaultへ戻す。
         ResetToDefault();
         return;
     }
     startParams = GraphicsDeviceManager::Instance().GetFilterParams();
     targetParams = defaultParams;
+    // 現在値からDefaultへ戻る補間を開始する。
     easing_->SetStartValue(easingIndex, 0.0f);
     easing_->PlayEasing(easingIndex, activeEasing,
         1.0f / (std::max)(returnDuration, 0.0001f), 1.0f);
@@ -92,6 +101,7 @@ void ColorFilterDirector::BeginTransitionToDefault()
 
 void ColorFilterDirector::ResetToDefault()
 {
+    // 演出終了後はDefault値を明示的に戻し、次回再生の基準を安定させる。
     GraphicsDeviceManager::Instance().GetFilterParams() = defaultParams;
     phase = PHASE::IDLE;
     holdElapsed = 0.0f;
@@ -103,6 +113,7 @@ BloomSystem::CbColorFilter ColorFilterDirector::LerpFilter(
     float ratio_)
 {
     const float ratioClamped_ = std::clamp(ratio_, 0.0f, 1.0f);
+    // 色味の各要素を同じ補間率で混ぜる。
     const auto lerp_ = [ratioClamped_](float fromValue_, float toValue_)
     {
         return fromValue_ + (toValue_ - fromValue_) * ratioClamped_;
@@ -121,6 +132,7 @@ BloomSystem::CbColorFilter ColorFilterDirector::LerpFilter(
 
 void ColorFilterDirector::Gui()
 {
+    // Default値は演出終了後に戻る基準としてEditorで調整する。
     ImGui::SliderFloat("Default Hue", &defaultParams.hueShift, -180.0f, 180.0f);
     ImGui::SliderFloat("Default Saturation", &defaultParams.saturation, 0.0f, 2.0f);
     ImGui::SliderFloat("Default Brightness", &defaultParams.brightness, 0.0f, 2.0f);
@@ -129,6 +141,7 @@ void ColorFilterDirector::Gui()
     ImGui::SliderFloat("Default Intensity", &defaultParams.filterIntensity, 0.0f, 1.0f);
     if (ImGui::Button("Capture Color Filter"))
     {
+        // 現在のPostEffect設定をWaypointとして保存し、Actionから再生できるようにする。
         ColorFilterWayPoint wayPoint_;
         wayPoint_.filter = GraphicsDeviceManager::Instance().GetFilterParams();
         editorWaypoints.push_back(wayPoint_);
@@ -143,6 +156,7 @@ void ColorFilterDirector::Gui()
         ColorFilterWayPoint& wayPoint_ = editorWaypoints[index_];
         if (ImGui::TreeNode(("Color Filter " + std::to_string(index_)).c_str()))
         {
+            // Waypointごとに目標Filterと補間時間を調整する。
             ImGui::SliderFloat("Hue", &wayPoint_.filter.hueShift, -180.0f, 180.0f);
             ImGui::SliderFloat("Saturation", &wayPoint_.filter.saturation, 0.0f, 2.0f);
             ImGui::SliderFloat("Brightness", &wayPoint_.filter.brightness, 0.0f, 2.0f);
@@ -166,6 +180,7 @@ void ColorFilterDirector::Gui()
 
 void ColorFilterDirector::RegisterActions()
 {
+    // PostProcessカテゴリにColor_0, Color_1...として登録する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
@@ -179,6 +194,7 @@ void ColorFilterDirector::RegisterActions()
 
 void ColorFilterDirector::Serialize(nlohmann::json& json_) const
 {
+    // CbColorFilterをJSONへ展開する小さな変換関数。
     const auto write_ = [](const BloomSystem::CbColorFilter& value_)
     {
         return nlohmann::json{ { "hue", value_.hueShift }, { "sat", value_.saturation },
@@ -201,6 +217,7 @@ void ColorFilterDirector::Serialize(nlohmann::json& json_) const
 
 void ColorFilterDirector::Deserialize(const nlohmann::json& json_)
 {
+    // 保存時と同じKeyからCbColorFilterを復元する。
     const auto read_ = [](const nlohmann::json& input_, BloomSystem::CbColorFilter& value_)
     {
         value_.hueShift = input_.value("hue", value_.hueShift);
@@ -219,6 +236,7 @@ void ColorFilterDirector::Deserialize(const nlohmann::json& json_)
     {
         for (const nlohmann::json& item_ : json_["ColorFilterWaypoints"])
         {
+            // Waypointが欠けている古いデータでも既定値で補完する。
             ColorFilterWayPoint wayPoint_;
             read_(item_, wayPoint_.filter);
             wayPoint_.duration = item_.value("dur", 1.0f);

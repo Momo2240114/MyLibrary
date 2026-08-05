@@ -11,6 +11,8 @@
 
 GuardCollider::GuardCollider()
 {
+    // GuardColliderも通常時は無効にしておき、Guard中やJustGuard受付中だけActionから有効化する。
+    // Guard専用Roleを固定し、Combat判定以外の物理反応を持たないColliderとして扱う。
     enabled = false;
     EnforceGuardSettings();
     debugPrimitiveColor = { 0.2f, 0.8f, 1.0f, 1.0f };
@@ -24,6 +26,8 @@ const std::string& GuardCollider::GetName() const
 
 void GuardCollider::Start()
 {
+    // CapsuleColliderとして初期化し、ActionSequenceからGuard受付を開閉できるActionを登録する。
+    // Load直後に受付が開きっぱなしにならないよう、最後にDeactivateして状態を揃える。
     CapsuleCollider::Start();
     RegisterActions();
     Deactivate();
@@ -31,6 +35,8 @@ void GuardCollider::Start()
 
 void GuardCollider::Activate()
 {
+    // Guard受付開始時は、前回の攻撃履歴とTrigger状態を消してから有効化する。
+    // これにより同じObjectを再利用しても、古い接触状態で即Guard成立しないようにする。
     ClearGuardedAttackHistory();
     currentTriggers.clear();
     SetEnabled(true);
@@ -38,6 +44,8 @@ void GuardCollider::Activate()
 
 void GuardCollider::Deactivate()
 {
+    // Guard受付を閉じる時はJustGuard受付も必ず閉じる。
+    // Trigger状態と履歴も破棄し、次回のGuard開始を新しい受付窓として扱う。
     justGuardEnabled = false;
     SetEnabled(false);
     currentTriggers.clear();
@@ -46,6 +54,8 @@ void GuardCollider::Deactivate()
 
 bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
 {
+    // GuardSystemへ渡す前に、所有者攻撃、Team、同一activationの重複Guardを除外する。
+    // 実際に通常Guard/JustGuardのどちらになるかは、justGuardEnabledを見てGuardSystem側で決まる。
     const std::shared_ptr<GameObject> owner_ = GetGuardOwner();
     const std::shared_ptr<GameObject> attackOwner_ =
         const_cast<HitBox&>(hitBox_).GetAttackOwner();
@@ -76,21 +86,25 @@ bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
 
 void GuardCollider::RecordGuardedAttack(const HitBox& hitBox_)
 {
+    // 成立済みのHitBox activationを記録し、同じ攻撃判定が何度もGuard成立しないようにする。
     guardedAttackActivationIds[&hitBox_] = hitBox_.GetActivationId();
 }
 
 void GuardCollider::ClearGuardedAttackHistory()
 {
+    // Guard受付を開き直す時やDeserialize時に、過去のGuard履歴をリセットする。
     guardedAttackActivationIds.clear();
 }
 
 void GuardCollider::SetGuardOwner(GameObject* guardOwner_)
 {
+    // 子ObjectにColliderを置く場合でも、明示的に防御主体を差し替えられるようにする。
     guardOwner = guardOwner_;
 }
 
 std::shared_ptr<GameObject> GuardCollider::GetGuardOwner() const
 {
+    // 明示Ownerがあればそれを使い、なければ親階層からBlackboard/Guard Actionを持つObjectを探す。
     if (guardOwner != nullptr)
     {
         return guardOwner->shared_from_this();
@@ -101,11 +115,14 @@ std::shared_ptr<GameObject> GuardCollider::GetGuardOwner() const
 
 void GuardCollider::SetJustGuardEnabled(bool enabled_)
 {
+    // JustGuard受付はGuardCollider自体が有効な時だけONにできる。
+    // Collider無効時にJustGuardだけ残る状態を防ぐ。
     justGuardEnabled = enabled_ && IsEnabled();
 }
 
 void GuardCollider::Gui()
 {
+    // Guard受付状態、JustGuard受付状態、Team、Action名をEditor上で確認・調整する。
     CapsuleCollider::Gui();
 
     ImGui::SeparatorText("Guard Collider");
@@ -146,6 +163,8 @@ void GuardCollider::Gui()
 
 void GuardCollider::Serialize(nlohmann::json& json_) const
 {
+    // Capsule形状に加えて、Guard受付Action名と反応条件を保存する。
+    // 現在受付中かどうかやGuard履歴はFrame中の状態なので保存しない。
     CapsuleCollider::Serialize(json_);
 
     json_["ActionPrefix"] = actionPrefix;
@@ -160,6 +179,8 @@ void GuardCollider::Serialize(nlohmann::json& json_) const
 
 void GuardCollider::Deserialize(const nlohmann::json& json_)
 {
+    // 設定だけを復元し、Runtime状態のJustGuard受付や重複履歴は初期化する。
+    // CollisionRoleなどは保存値に左右されないよう最後に固定設定を再適用する。
     CapsuleCollider::Deserialize(json_);
 
     actionPrefix = json_.value("ActionPrefix", std::string{});
@@ -186,6 +207,7 @@ void GuardCollider::Deserialize(const nlohmann::json& json_)
 
 std::string GuardCollider::GetActionPrefix() const
 {
+    // Prefix未指定ならOwner名を使い、複数ObjectのGuard Action名衝突を避ける。
     if (!actionPrefix.empty())
     {
         return actionPrefix;
@@ -202,6 +224,7 @@ std::string GuardCollider::GetActionPrefix() const
 
 std::string GuardCollider::GetActivateActionName() const
 {
+    // Prefix付きのAction名を作り、ActionSequenceから個別のGuard受付を開けるようにする。
     const std::string prefix_ = GetActionPrefix();
     if (prefix_.empty()) return activateActionName;
     return prefix_ + "_" + activateActionName;
@@ -209,6 +232,7 @@ std::string GuardCollider::GetActivateActionName() const
 
 std::string GuardCollider::GetDeactivateActionName() const
 {
+    // Guard受付終了用Action名も同じPrefix規則で生成する。
     const std::string prefix_ = GetActionPrefix();
     if (prefix_.empty()) return deactivateActionName;
     return prefix_ + "_" + deactivateActionName;
@@ -216,6 +240,7 @@ std::string GuardCollider::GetDeactivateActionName() const
 
 std::string GuardCollider::GetEnableJustGuardActionName() const
 {
+    // JustGuard受付開始は通常Guard受付とは別Actionにし、短い受付窓を作れるようにする。
     const std::string prefix_ = GetActionPrefix();
     if (prefix_.empty()) return enableJustGuardActionName;
     return prefix_ + "_" + enableJustGuardActionName;
@@ -223,6 +248,7 @@ std::string GuardCollider::GetEnableJustGuardActionName() const
 
 std::string GuardCollider::GetDisableJustGuardActionName() const
 {
+    // JustGuard受付終了Action名。GuardCollider自体は開いたまま通常Guardへ戻す用途に使う。
     const std::string prefix_ = GetActionPrefix();
     if (prefix_.empty()) return disableJustGuardActionName;
     return prefix_ + "_" + disableJustGuardActionName;
@@ -230,6 +256,7 @@ std::string GuardCollider::GetDisableJustGuardActionName() const
 
 void GuardCollider::EnforceGuardSettings()
 {
+    // Guard判定は物理的に押し返さず、HitBoxとのTrigger重なりだけを見る。
     collisionRole = CollisionRole::GUARD_BOX;
     usePhysicsResponse = false;
     physicsControlsTransform = false;
@@ -239,6 +266,8 @@ void GuardCollider::EnforceGuardSettings()
 
 void GuardCollider::RegisterActions()
 {
+    // colliderComponents内から自分のshared_ptrを探し、Action lambdaへweak_ptrで渡す。
+    // Guard受付、受付終了、JustGuard開始/終了をActionSequenceから制御できるようにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -286,6 +315,8 @@ void GuardCollider::RegisterActions()
 
 std::shared_ptr<GameObject> GuardCollider::ResolveGuardOwnerFromHierarchy() const
 {
+    // Colliderが手や盾など子Objectに付いている場合でも、親のBlackboardやGuard Actionへ結果を返したい。
+    // そのため親方向へたどり、Guardを受け取れそうなObjectを防御主体として返す。
     std::shared_ptr<GameObject> object_ = gameObject.lock();
     std::shared_ptr<GameObject> rootObject_ = object_;
 
@@ -299,6 +330,7 @@ std::shared_ptr<GameObject> GuardCollider::ResolveGuardOwnerFromHierarchy() cons
             object_->localRegistry.HasAction("OnGuardSucceeded") ||
             object_->localRegistry.HasAction("OnJustGuardSucceeded"))
         {
+            // BlackboardかGuard用Actionを持つObjectを、Guard結果の受け取り先として優先する。
             return object_;
         }
 

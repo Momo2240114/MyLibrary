@@ -50,6 +50,7 @@ std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
 
 void SceneBase::Finalize()
 {
+	// RenderSystem と ActionRegistry を先に解放し、Scene 内参照を次シーンへ持ち越さない。
 	m_SpriteRenderSystem.Finalize();
 	m_ShapeRenderSystem.Finalize();
 	actionRegistry.reset();
@@ -70,6 +71,7 @@ void SceneBase::Initialize()
 
 	editorWindowManager = std::make_unique<EditorWindowManager>(_GameObjectManager.get());
 
+	// EditorWindow は実ファイル階層ではなく、用途別の UI としてここで一括登録する。
 	editorWindowManager->AddWindow(std::make_unique<HierarchyWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InspectorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ShaderWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
@@ -105,7 +107,7 @@ void SceneBase::Initialize()
 	actionRegistry = std::make_shared<ActionRegistry>();
 	ActionRegistry::SetInstance(actionRegistry);
 
-	//モデルのレンダラーを作成
+	// Scene 内で使う描画システムを D3D11Device から初期化し、RenderAll で共有する。
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 	m_ShapeRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
@@ -115,6 +117,7 @@ void SceneBase::Update(float elapsedTime)
 {
 	if (KeyInput::KeyPressedIn(KeyInput::Key::K_F1))
 	{
+		// F1 でエディタ表示を切り替える。非表示時も Scene の更新は通常通り進む。
 		isEditorVisible = !isEditorVisible;
 	}
 
@@ -125,6 +128,7 @@ void SceneBase::Update(float elapsedTime)
 
 	if (isEditorVisible && editorWindowManager && editorWindowManager->ShouldPauseScene())
 	{
+		// エディタが Pause を要求している間は GameObject の Update だけ止める。
 		return;
 	}
 
@@ -138,10 +142,12 @@ void SceneBase::Render(float elapsedTime)
 		editorWindowManager->ShouldPauseScene() &&
 		!editorWindowManager->ShouldRenderSceneWhenPaused())
 	{
+		// Pause 中に Scene 描画もしない設定なら、ImGui 用にバックバッファだけ戻しておく。
 		GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
 		return;
 	}
 
+	// Docked SceneView 使用時は最終出力先を専用 RenderTarget に差し替える。
     const bool useDockedSceneView_ = isEditorVisible &&
         editorWindowManager &&
         editorWindowManager->ShouldUseDockedSceneView();
@@ -152,6 +158,7 @@ void SceneBase::Render(float elapsedTime)
 
     if (useDockedSceneView_)
     {
+		// SceneView 描画後は ImGui を通常のバックバッファへ描けるよう戻す。
         GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
     }
 
@@ -166,6 +173,7 @@ void SceneBase::DrawGUI()
 			sceneRuntimeState_ == SCENE_RUNTIME_STATE::INITIALIZING ||
 			sceneRuntimeState_ == SCENE_RUNTIME_STATE::FAILED)
 		{
+			// 非同期シーンロード中は、EditorWindow とは独立した小さな状態表示を出す。
 			ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(360.0f, 0.0f), ImGuiCond_Always);
 			const ImGuiWindowFlags windowFlags_ =

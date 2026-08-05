@@ -10,6 +10,7 @@
 
 bool EditorPrimitiveRenderer::Initialize(ID3D11Device* device_)
 {
+    // エディタ補助線用の最小構成シェーダ、入力レイアウト、動的頂点バッファを準備する。
     if (!device_) return false;
 
     D3D11_INPUT_ELEMENT_DESC inputElementDesc_[]
@@ -53,6 +54,7 @@ bool EditorPrimitiveRenderer::Initialize(ID3D11Device* device_)
         constantBuffer.GetAddressOf());
 
     D3D11_BUFFER_DESC vertexBufferDesc_{};
+    // 描画する線は毎フレームCPUから詰め替えるため、WRITE_DISCARD可能なDynamic Bufferにする。
     vertexBufferDesc_.ByteWidth = sizeof(Vertex) * VERTEX_CAPACITY;
     vertexBufferDesc_.Usage = D3D11_USAGE_DYNAMIC;
     vertexBufferDesc_.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -71,6 +73,7 @@ void EditorPrimitiveRenderer::AddLine(
     const DirectX::XMFLOAT3& end_,
     const DirectX::XMFLOAT4& color_)
 {
+    // LINELIST描画なので、1本の線を2頂点として蓄積する。
     vertices.push_back({ start_, color_ });
     vertices.push_back({ end_, color_ });
 }
@@ -81,6 +84,7 @@ void EditorPrimitiveRenderer::DrawGrid(
     const DirectX::XMFLOAT4& gridColor_,
     bool drawAxis_)
 {
+    // グリッド設定が0以下でも描画できるよう、最低分割数とセルサイズを保証する。
     subdivisions_ = (std::max)(1, subdivisions_);
     cellSize_ = (std::max)(0.01f, cellSize_);
 
@@ -90,6 +94,7 @@ void EditorPrimitiveRenderer::DrawGrid(
 
     for (int lineIndex_ = -halfCount_; lineIndex_ <= halfCount_; ++lineIndex_)
     {
+        // X/Z平面へ等間隔の線を並べ、原点軸は後で色付きで描くためスキップする。
         const float position_ = static_cast<float>(lineIndex_) * cellSize_;
 
         DirectX::XMFLOAT4 lineColor_ = gridColor_;
@@ -112,6 +117,7 @@ void EditorPrimitiveRenderer::DrawGrid(
 
     if (drawAxis_)
     {
+        // Xは赤、Zは青、Yは上方向の緑として表示し、空間の向きを確認しやすくする。
         const DirectX::XMFLOAT4 xColor_{ 1.0f, 0.15f, 0.15f, 1.0f };
         const DirectX::XMFLOAT4 zColor_{ 0.15f, 0.35f, 1.0f, 1.0f };
         const DirectX::XMFLOAT4 yColor_{ 0.15f, 1.0f, 0.15f, 1.0f };
@@ -135,6 +141,7 @@ void EditorPrimitiveRenderer::DrawGrid(
 
 void EditorPrimitiveRenderer::DrawAxis(float length_)
 {
+    // 原点からXYZの正方向へ伸びる簡易軸を追加する。
     length_ = (std::max)(0.01f, length_);
 
     AddLine(
@@ -158,12 +165,14 @@ void EditorPrimitiveRenderer::Render(
     const DirectX::XMFLOAT4X4& view_,
     const DirectX::XMFLOAT4X4& projection_)
 {
+    // 溜めた補助線を現在のViewProjectionで描画し、描画後はバッファを空にする。
     if (!context_) return;
     if (vertices.empty()) return;
     if (!vertexShader || !pixelShader || !inputLayout || !vertexBuffer || !constantBuffer) return;
 
     DirectX::XMMATRIX viewMatrix_ = DirectX::XMLoadFloat4x4(&view_);
     DirectX::XMMATRIX projectionMatrix_ = DirectX::XMLoadFloat4x4(&projection_);
+    // シェーダ側ではViewProjectionだけを使い、各頂点はワールド座標として送る。
     DirectX::XMMATRIX viewProjectionMatrix_ = viewMatrix_ * projectionMatrix_;
 
     CbScene cbScene_{};
@@ -199,6 +208,7 @@ void EditorPrimitiveRenderer::Render(
 
     while (startVertex_ < totalVertexCount_)
     {
+        // 頂点数がDynamic Buffer容量を超える場合は、複数回Map/Drawして分割描画する。
         const UINT copyCount_ = (std::min)(
             VERTEX_CAPACITY,
             totalVertexCount_ - startVertex_);
@@ -229,5 +239,6 @@ void EditorPrimitiveRenderer::Render(
 
 void EditorPrimitiveRenderer::Clear()
 {
+    // Render後、または外部から明示的に呼ばれた時に、次フレームへ線を持ち越さない。
     vertices.clear();
 }

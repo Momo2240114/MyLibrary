@@ -10,6 +10,7 @@
 
 enum class AssetSlotType
 {
+    // AssetBrowserのPayload種別と、開くファイルダイアログの種類を合わせるための分類。
     TEXTURE,
     MODEL,
     JSON,
@@ -22,6 +23,7 @@ namespace AssetSlotGui
         const ImDrawList*,
         const ImDrawCmd* command_)
     {
+        // ImGuiの描画コマンド完了後に、ImageButton用にAddRefしたSRVをReleaseする。
         ID3D11ShaderResourceView* texture_ =
             static_cast<ID3D11ShaderResourceView*>(command_->UserCallbackData);
         if (texture_)
@@ -32,6 +34,7 @@ namespace AssetSlotGui
 
     inline const char* GetPayloadType(AssetSlotType type_)
     {
+        // AssetSlotの種類から、受け入れるDragDrop Payload名へ変換する。
         switch (type_)
         {
         case AssetSlotType::TEXTURE: return AssetBrowserPayload::TEXTURE;
@@ -44,6 +47,7 @@ namespace AssetSlotGui
 
     inline const char* GetEmptyLabel(AssetSlotType type_)
     {
+        // 未選択時のボタン表示をAsset種別ごとに変える。
         switch (type_)
         {
         case AssetSlotType::TEXTURE: return "[Texture]";
@@ -59,6 +63,7 @@ namespace AssetSlotGui
         const std::string& path_,
         const std::string& initialDirectory_)
     {
+        // 現在のパスがあればその親フォルダ、無ければ初期フォルダを開く。
         std::string directory_ = initialDirectory_;
         if (!path_.empty())
         {
@@ -87,6 +92,7 @@ namespace AssetSlotGui
         ID3D11ShaderResourceView* previewTexture_ = nullptr,
         const char* initialDirectory_ = "Data")
     {
+        // プレビュー画像、Drag&Drop、Browse、Clearを1つにまとめたAssetパス編集UI。
         bool changed_ = false;
         ImGui::PushID(label_);
         ImGui::TextUnformatted(label_);
@@ -95,9 +101,7 @@ namespace AssetSlotGui
         const ImVec2 previewSize_(72.0f, 72.0f);
         if (previewTexture_)
         {
-            // ImGui stores only the raw SRV pointer in its draw command. Asset changes can
-            // rebuild MeshVFX resources later in this frame, so retain the SRV until the
-            // command has actually been rendered.
+            // ImGuiの描画コマンドには生SRVだけが残るため、同フレーム中のリソース再構築に備えて描画完了まで保持する。
             previewTexture_->AddRef();
             browseRequested_ = ImGui::ImageButton(
                 "##AssetPreview",
@@ -114,6 +118,7 @@ namespace AssetSlotGui
 
         if (ImGui::BeginDragDropTarget())
         {
+            // AssetBrowserから対応するPayloadを落とした場合は、即パスを差し替える。
             if (const ImGuiPayload* payload_ = ImGui::AcceptDragDropPayload(GetPayloadType(type_)))
             {
                 path_ = static_cast<const char*>(payload_->Data);

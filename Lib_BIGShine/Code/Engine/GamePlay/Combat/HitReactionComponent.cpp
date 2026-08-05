@@ -17,6 +17,7 @@ namespace
 {
     const char* GetHitReactionKindName(HIT_REACTION_KIND kind_)
     {
+        // Editor表示用のReaction種別名。
         switch (kind_)
         {
         case HIT_REACTION_KIND::GROUND_LIGHT: return "Ground Light";
@@ -30,6 +31,7 @@ namespace
 
     void DrawActionNameList(const char* label_, std::vector<std::string>& actionNames_)
     {
+        // 複数Action名をEditorで追加/削除する共通Gui。
         if (!ImGui::TreeNode(label_)) return;
 
         for (size_t index_ = 0; index_ < actionNames_.size(); ++index_)
@@ -62,6 +64,7 @@ namespace
 
 void HitReactionComponent::Start()
 {
+    // OwnerへOnHit Actionを登録し、HPを範囲内に補正する。
     RegisterActions();
     currentHealth = (std::clamp)(currentHealth, 0.0f, maxHealth);
 }
@@ -70,6 +73,7 @@ void HitReactionComponent::Update(float deltaTime_)
 {
     if (overlayTimer <= 0.0f) return;
 
+    // Hit時に開始したOverlayを一定時間後に止める。
     overlayTimer -= deltaTime_;
     if (overlayTimer <= 0.0f)
     {
@@ -195,6 +199,7 @@ void HitReactionComponent::HandleHit()
 
 void HitReactionComponent::ResetHealth()
 {
+    // DebugやScene開始時にHP/Hit記録を戻す。
     currentHealth = maxHealth;
     lastDamage = 0.0f;
     lastImpactPower = 0.0f;
@@ -230,6 +235,7 @@ void HitReactionComponent::RegisterActions()
 
 void HitReactionComponent::CallOwnerAction(const std::string& actionName_)
 {
+    // OnHit自身を呼ぶと再帰になるため無視する。
     if (actionName_.empty() || actionName_ == "OnHit") return;
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -289,6 +295,7 @@ const std::vector<std::string>& HitReactionComponent::GetReactionActions(HIT_REA
 
 void HitReactionComponent::SetDefaultReactionActionName(const std::string& actionName_)
 {
+    // 旧単一Reaction Action設定を、種別別Action Listへ展開する。
     GetReactionActions(HIT_REACTION_KIND::GROUND_LIGHT).clear();
 
     const HIT_REACTION_KIND reactionKinds_[] =
@@ -315,6 +322,7 @@ void HitReactionComponent::SetReactionImpactThresholds(
     float heavyImpactThreshold_,
     float airHeavyImpactThreshold_)
 {
+    // しきい値が逆転しないよう、HeavyはMedium以上に丸める。
     mediumImpactThreshold = (std::max)(mediumImpactThreshold_, 0.0f);
     heavyImpactThreshold = (std::max)(heavyImpactThreshold_, mediumImpactThreshold);
     airHeavyImpactThreshold = (std::max)(airHeavyImpactThreshold_, 0.0f);
@@ -322,6 +330,7 @@ void HitReactionComponent::SetReactionImpactThresholds(
 
 void HitReactionComponent::AddCommonReactionAction(const std::string& actionName_)
 {
+    // 同じActionを重複登録しない。
     if (actionName_.empty()) return;
     if (std::find(commonReactionActionNames.begin(), commonReactionActionNames.end(), actionName_) ==
         commonReactionActionNames.end())
@@ -342,6 +351,7 @@ void HitReactionComponent::AddReactionAction(HIT_REACTION_KIND kind_, const std:
 
 void HitReactionComponent::Gui()
 {
+    // Hit処理のDebug確認とReaction Action設定をまとめて編集する。
     ImGui::Text("Health: %.1f / %.1f", currentHealth, maxHealth);
     ImGui::Text("Last Damage: %.1f  Last Impact: %.1f  Hit Count: %d", lastDamage, lastImpactPower, hitCount);
     if (ImGui::DragFloat("Max Health", &maxHealth, 1.0f, 1.0f, 999999.0f))
@@ -398,6 +408,7 @@ void HitReactionComponent::Gui()
 
 void HitReactionComponent::Serialize(nlohmann::json& json_) const
 {
+    // RuntimeのOverlayTimerなどは保存せず、調整値とAction名だけ保存する。
     json_["MaxHealth"] = maxHealth;
     json_["CurrentHealth"] = currentHealth;
     json_["Armor"] = armor;
@@ -425,6 +436,7 @@ void HitReactionComponent::Serialize(nlohmann::json& json_) const
 
 void HitReactionComponent::Deserialize(const nlohmann::json& json_)
 {
+    // HP/しきい値を安全な範囲へ丸めながら復元する。
     maxHealth = (std::max)(json_.value("MaxHealth", 100.0f), 1.0f);
     currentHealth = (std::clamp)(
         json_.value("CurrentHealth", maxHealth),
@@ -442,6 +454,7 @@ void HitReactionComponent::Deserialize(const nlohmann::json& json_)
     commonReactionActionNames = json_.value("CommonReactionActionNames", std::vector<std::string>{});
     if (json_.contains("ReactionActionNamesByKind") && json_["ReactionActionNamesByKind"].is_object())
     {
+        // 新形式はReaction種別ごとのAction Listとして復元する。
         const auto& reactionJson_ = json_["ReactionActionNamesByKind"];
         GetReactionActions(HIT_REACTION_KIND::GROUND_LIGHT) =
             reactionJson_.value("GroundLight", std::vector<std::string>{});
@@ -456,6 +469,7 @@ void HitReactionComponent::Deserialize(const nlohmann::json& json_)
     }
     else if (!reactionActionName.empty())
     {
+        // 旧形式の単一ReactionActionNameだけがある場合は、Default設定として展開する。
         SetDefaultReactionActionName(reactionActionName);
     }
     overlayStartActionName = json_.value(

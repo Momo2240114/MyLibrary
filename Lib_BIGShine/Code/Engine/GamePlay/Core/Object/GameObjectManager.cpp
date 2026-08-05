@@ -49,12 +49,14 @@ namespace
 {
     double GetSceneProfileMilliseconds()
     {
+        // Scene Load計測用に、steady_clockの現在時刻をmsで取得する。
         const auto now_ = std::chrono::steady_clock::now().time_since_epoch();
         return std::chrono::duration<double, std::milli>(now_).count();
     }
 
     std::shared_ptr<WidgetBoardComponent> ResolveWidgetBoard(const std::shared_ptr<GameObject>& object_)
     {
+        // UI Spriteが所属するWidgetBoardを、自分から親方向へ探す。
         if (!object_) return nullptr;
 
         auto board_ = object_->GetComponent<WidgetBoardComponent>();
@@ -81,6 +83,7 @@ namespace
 
     int CalculateHierarchyDepth(const std::shared_ptr<GameObject>& object_)
     {
+        // UI描画の同階層順を安定させるため、Transform階層の深さを数える。
         int depth_ = 0;
         if (!object_ || !object_->transform) return depth_;
 
@@ -97,6 +100,7 @@ namespace
 
 void GameObjectManager::Initialize()
 {
+    // Scene全体で共有するSystemを生成し、相互参照と描画Systemを初期化する。
     collisionStepSystem->SetAttackSystem(attackSystem.get());
     collisionStepSystem->SetJustDodgeSystem(justDodgeSystem.get());
     collisionStepSystem->SetGuardSystem(guardSystem.get());
@@ -136,6 +140,7 @@ void GameObjectManager::Initialize()
 
 void GameObjectManager::Update(float elapsedTime_)
 {
+    // Scene Runtime状態に応じて、Load待ち、初期化、通常更新を切り替える。
     switch (sceneRuntimeState)
     {
     case SCENE_RUNTIME_STATE::LOADING:
@@ -160,6 +165,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     float worldDeltaTime_ = elapsedTime_;
 
     {
+        // Hit履歴やJustDodge受付など、Frame単位で消えるSystem状態を先に初期化する。
         BS_PROFILE_SCOPE("AttackSystem::BeginFrame");
         attackSystem->BeginFrame();
     }
@@ -190,6 +196,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     if (!pendingStarts.empty())
     {
+        // Update中に追加されたObjectも、準備できたものだけStartして実行対象へ入れる。
         BS_PROFILE_SCOPE("GameObjectManager::ProcessPendingStarts");
 
         std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
@@ -283,6 +290,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("TimeManager::PrepareCache");
+        // LayerごとのTimeScaleをCacheし、PhysX側にも世界Scaleを同期する。
         timeManager->PrepareCache();
         const float worldScale_ = timeManager->GetCachedScale(0u);
         worldDeltaTime_ = elapsedTime_ * worldScale_;
@@ -291,6 +299,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::SyncFromPhysics");
+        // Physicsから現在のCollider状態を取り込み、Game側Component更新の前提にする。
         collisionStepSystem->SyncFromPhysics(worldDeltaTime_);
     }
 
@@ -299,8 +308,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
         const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
         int updatedObjectCount_ = 0;
 
-        // Animation events can append effects while components are updating.
-        // Capture only the count so every shared_ptr is not copied each frame.
+        // Animation EventでEffectなどが追加されても、生成直後Objectは次Frameから更新する。
         const size_t updateObjectCount_ = objects.size();
         for (size_t index_ = 0; index_ < updateObjectCount_; ++index_)
         {
@@ -316,6 +324,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
             if (auto movement_ = object_->GetComponent<CharacterMovementComponent>())
             {
+                // TimeScale中の移動速度補正用に、元のDeltaTimeも渡しておく。
                 movement_->SetUnscaledDeltaTime(elapsedTime_);
             }
 
@@ -330,6 +339,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("ModelAttachmentComponent::SyncAttachment");
 
+        // ModelのBoneやSocketへ追従するObjectは、通常Update後にAttachmentを同期する。
         for (auto& attachment_ : FindComponents<ModelAttachmentComponent>())
         {
             if (attachment_ && attachment_->IsEnabled())
@@ -342,6 +352,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("ContainmentVolumeComponent::ApplyContainment");
 
+        // 移動後に閉じ込め領域を適用し、CameraやPlayerが範囲外へ出ないようにする。
         for (auto& containment_ : FindComponents<ContainmentVolumeComponent>())
         {
             if (containment_ && containment_->IsEnabled())
@@ -353,6 +364,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::Step");
+        // Game側で決まった速度やCollider状態を元に、Collision/Attack/Guard判定を進める。
         collisionStepSystem->Step(worldDeltaTime_);
     }
 
@@ -361,7 +373,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
         const bool useUnscaledCameraDelta_ = timeManager && timeManager->ShouldUseUnscaledCameraDelta();
         int lateUpdatedObjectCount_ = 0;
 
-        // Objects spawned during Update start updating on the next frame.
+        // Update中に生成されたObjectは次FrameからLateUpdateへ参加させる。
         const size_t lateUpdateObjectCount_ = objects.size();
         for (size_t index_ = 0; index_ < lateUpdateObjectCount_; ++index_)
         {
@@ -385,6 +397,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("GameObjectManager::UpdateTransform");
 
+        // 全Component更新後にTransform行列を確定し、描画や親子同期の基準にする。
         for (auto& object_ : objects)
         {
             if (!object_) continue;
@@ -399,6 +412,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     if (!pendingDestroys.empty())
     {
+        // 削除予約はFrame終端でまとめて反映し、更新中の配列破壊を避ける。
         BS_PROFILE_SCOPE("GameObjectManager::ProcessDestroyedObjects");
 
         std::vector<std::shared_ptr<GameObject>> currentDestroys_ = std::move(pendingDestroys);
@@ -413,6 +427,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("ParticleComponents::EraseExpired");
 
+        // weak_ptr化したParticle参照のうち、Object削除済みのものを掃除する。
         particleComponents.erase(
             std::remove_if(
                 particleComponents.begin(),
@@ -427,6 +442,7 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
 
     {
         BS_PROFILE_SCOPE("CameraManager::Update");
+        // Object更新後のTransformを使ってActiveCameraを更新する。
         cameraManager->Update(elapsedTime_, objects);
     }
 
@@ -452,6 +468,7 @@ void GameObjectManager::UpdateLoadingRuntime(float elapsedTime_)
 
     ProcessPendingStarts();
 
+    // 必須ObjectのAssetとRuntime準備が揃うまではRUNNINGへ進めない。
     sceneLoadProgress = ModelResourceManager::Instance().GetLoadProgress();
 
     if (HasRequiredRuntimeFailure())
@@ -470,6 +487,7 @@ void GameObjectManager::ProcessPendingStarts()
 {
     if (pendingStarts.empty()) return;
 
+    // Load中/Running中どちらからでも使う、Object Start待機リストの共通処理。
     BS_PROFILE_SCOPE("GameObjectManager::ProcessPendingStarts");
 
     std::vector<std::shared_ptr<GameObject>> startList_ = std::move(pendingStarts);
@@ -565,6 +583,7 @@ bool GameObjectManager::WaitRequiredAssets()
 {
     BS_PROFILE_SCOPE("SceneLoading::WaitRequiredAssets");
 
+    // Scene開始に必須なObjectだけ、LoadReadyになるまで待つ。
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
         if (!object_ || !object_->IsRequiredForSceneStart()) continue;
@@ -582,6 +601,7 @@ bool GameObjectManager::WaitRuntimeReady()
 {
     BS_PROFILE_SCOPE("SceneLoading::WaitRuntimeReady");
 
+    // Asset Load後、Runtimeで使える状態になったかをComponentへ問い合わせる。
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
         if (!object_ || !object_->IsRequiredForSceneStart()) continue;
@@ -597,6 +617,7 @@ bool GameObjectManager::WaitRuntimeReady()
 
 bool GameObjectManager::HasRequiredRuntimeFailure()
 {
+    // 必須ObjectのどれかがRuntime失敗を報告したら、SceneをFAILEDへ移す。
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
         if (!object_ || !object_->IsRequiredForSceneStart()) continue;
@@ -610,6 +631,7 @@ void GameObjectManager::FinalizeSceneInitialization()
 {
     BS_PROFILE_SCOPE("SceneLoading::FinalizeInitialization");
 
+    // Load完了後にTransformとCameraを一度確定し、通常更新へ移る準備をする。
     for (const std::shared_ptr<GameObject>& object_ : objects)
     {
         if (!object_) continue;
@@ -646,6 +668,7 @@ void GameObjectManager::FinalizeSceneInitialization()
 
 void GameObjectManager::FailSceneRuntime(const std::string& message_)
 {
+    // 必須Load失敗など、Sceneを通常更新へ進められない状態を記録する。
     sceneRuntimeError = message_;
     sceneRuntimeState = SCENE_RUNTIME_STATE::FAILED;
     BS_LOG_ERROR(LOG_CATEGORY::GAME, "[SceneRuntime] " + sceneRuntimeError);
@@ -653,6 +676,7 @@ void GameObjectManager::FailSceneRuntime(const std::string& message_)
 
 void GameObjectManager::Clear()
 {
+    // Scene切り替え前にObject、各System、描画状態、Action/Eventを初期状態へ戻す。
     sceneLoadProgress = 0.0f;
     sceneRuntimeError.clear();
 
@@ -888,6 +912,7 @@ void GameObjectManager::Gui()
 
 void GameObjectManager::DrawHierarchyGui()
 {
+    // Scene内Objectの作成、選択、階層表示、Prefab生成を行うHierarchy UI。
     static char createName_[64] = "GameObject";
 
     ImGui::Text(IM_U8("ゲームオブジェクト作成"));
@@ -1016,6 +1041,7 @@ void GameObjectManager::DrawHierarchyGui()
 
 void GameObjectManager::DrawInspectorGui()
 {
+    // 選択中ObjectのComponent GUIとCamera操作を表示するInspector UI。
     if (!selectedObject) return;
 
     ImGui::SeparatorText(selectedObject->GetName().c_str());
@@ -1031,6 +1057,7 @@ void GameObjectManager::DrawInspectorGui()
 }
 void GameObjectManager::DrawSceneModals()
 {
+    // Scene保存/Load用のPopupをまとめて描画する。
     if (sceneState.showSavePopup)
     {
         GetSceneDirectories();
@@ -1233,6 +1260,7 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
 
 void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_, ID3D11RenderTargetView* finalRenderTargetView_)
 {
+    // 3D、VFX、Particle、PostEffect、Spriteの順にScene全体を描画する。
     BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
@@ -1442,12 +1470,13 @@ void GameObjectManager::UnregisterMotionVelocityComponent(MotionVelocityComponen
 void GameObjectManager::Destroy(std::shared_ptr<GameObject> object_)
 {
     if (!object_) return;
-    // 即座に消さず、予約リストに入れる
+    // Update中の配列破壊を避けるため、即座に消さず予約リストに入れる。
     pendingDestroys.push_back(object_);
 }
 
 void GameObjectManager::Destroy(std::string objectName_)
 {
+    // 名前からObjectを探し、見つかった最初の1つを削除予約する。
     for (auto& object_ : objects)
     {
         if (object_ && object_->GetName() == objectName_)
@@ -1474,6 +1503,7 @@ void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& 
 
 void GameObjectManager::SaveScene(const std::string& sceneName_)
 {
+    // SceneListとObject個別JSONに分けて保存し、親子順はSceneList側へ記録する。
     std::string basePath = "Data/Scenes/" + sceneName_ + "/";
     std::string objectsPath = basePath + "Objects/";
     std::filesystem::create_directories(objectsPath);
@@ -1532,6 +1562,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
 void GameObjectManager::LoadScene(const std::string& sceneName_)
 {
     BS_PROFILE_SCOPE("GameObjectManager::LoadScene");
+    // SceneListに記録された順番でObject JSONを読み込み、最後に親子関係を復元する。
     const double loadSceneStartTimeMs_ = GetSceneProfileMilliseconds();
     BS_PROFILE_PLOT("ModelLoad.LoadSceneStartTime", loadSceneStartTimeMs_);
 
@@ -1645,6 +1676,7 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
 
 void GameObjectManager::ResolveHierarchy()
 {
+    // Load中に文字列として保持した親Object名を、実際のTransform親子関係へ戻す。
     for (auto& obj : objects)
     {
         if (!obj) continue;
@@ -1715,6 +1747,7 @@ void GameObjectManager::RefreshPrefabList()
 
 void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
 {
+    // Collider登録を外し、子Objectを再帰的に削除してからManagerのリストから外す。
     if (!object_) return;
     for (const std::shared_ptr<ColliderComponent>& collider_ :
         object_->GetComponents<ColliderComponent>())
@@ -1745,6 +1778,7 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
 // プレハブ保存
 void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> object_, const std::string& prefabName_)
 {
+    // 指定Object単体をPrefab JSONとして保存する。
     if (!object_) return;
 
     std::filesystem::create_directories(prefabDirectory);
@@ -1792,6 +1826,7 @@ CameraManager* GameObjectManager::GetCameraManager(){ return cameraManager.get()
 // プレハブから生成
 std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& prefabName_)
 {
+    // Prefab JSONを読み込み、Scene内で重複しない名前を付けてObject化する。
     std::string filePath = prefabDirectory + prefabName_ + ".json";
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -1825,6 +1860,7 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
 
 void GameObjectManager::RegisterAttackCallbacks()
 {
+    // AttackSystemのHit結果を、HitStop、Effect、SE再生へ橋渡しする。
     attackSystem->AddHitCallback(
         [this](const AttackHitEvent& event_)
         {
@@ -1858,6 +1894,7 @@ void GameObjectManager::RegisterAttackCallbacks()
 
 void GameObjectManager::EnsureGlobalActionObjects()
 {
+    // JustDodgeなどScene全体で使うActionSequence用の常駐Objectを保証する。
     constexpr const char* JUST_DODGE_EVENT_POOL_NAME_ = "JustDodgeEventPool";
     std::shared_ptr<GameObject> eventPool_ = Find(JUST_DODGE_EVENT_POOL_NAME_);
     if (!eventPool_)

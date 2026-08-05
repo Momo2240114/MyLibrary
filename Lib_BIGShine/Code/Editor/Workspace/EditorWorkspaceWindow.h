@@ -13,11 +13,13 @@ public:
     }
 
     bool IsEditorWorkspace() const override { return true; }
+    // Workspaceは上部Selectorから切り替えるため、通常のWindowメニューには出さない。
     bool ShouldShowInWindowMenu() const override { return false; }
 
 protected:
     bool BeginWorkspaceWindow(ImGuiWindowFlags flags_ = 0)
     {
+        // MainViewportからWorkspace Selector分を引いた領域いっぱいに作業画面を固定する。
         const ImGuiViewport* viewport_ = ImGui::GetMainViewport();
         if (viewport_)
         {
@@ -34,6 +36,7 @@ protected:
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoSavedSettings;
 
+        // 通常EditorWindowの描画開始処理を使いつつ、Workspace用の固定レイアウトだけ上書きする。
         return BeginEditorWindow(nullptr, flags_);
     }
 };

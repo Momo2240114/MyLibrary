@@ -13,6 +13,7 @@
 
 namespace
 {
+    // HitBox が武器などの子階層に付いていても、攻撃の所有者は一番上の GameObject として扱う。
     std::shared_ptr<GameObject> GetRoot(std::shared_ptr<GameObject> object_)
     {
         while (object_ && object_->transform)
@@ -31,6 +32,8 @@ namespace
         const std::string& hitBoxName_)
     {
         if (!object_) return nullptr;
+
+        // 現在の GameObject に付いている ColliderComponent 群から、名前または ActionPrefix で探す。
         for (const std::shared_ptr<Component>& component_ : object_->colliderComponents)
         {
             const std::shared_ptr<HitBox> hitBox_ = std::dynamic_pointer_cast<HitBox>(component_);
@@ -38,6 +41,8 @@ namespace
                 return hitBox_;
         }
         if (!object_->transform) return nullptr;
+
+        // 見つからない場合は子階層も再帰的に探し、武器やエフェクト用の HitBox を拾う。
         for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
         {
             if (!childTransform_) continue;
@@ -50,6 +55,8 @@ namespace
     const AttackTemplate* GetTemplate(const AnimEvent& event_)
     {
         AttackTemplateManager& manager_ = AttackTemplateManager::Instance();
+
+        // AnimationEvent から直接呼ばれても使えるよう、未ロードならここでテンプレートを読み込む。
         if (manager_.GetTemplates().empty()) manager_.LoadAll();
         return manager_.FindTemplate(event_.attackTemplateId);
     }
@@ -118,6 +125,8 @@ namespace
         hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
         hitBox_->allowMultiHit = attackTemplate_.allowMultiHit;
+
+        // Start 時点では設定だけ済ませ、実際の有効化は Update の activeStart/End で行う。
         hitBox_->Deactivate();
     }
 }
@@ -204,6 +213,8 @@ void AttackTemplateRuntime::Update(
     }
     if (event_.spawnedAttackEffects.size() != attackTemplate_->attackEffects.size())
         event_.spawnedAttackEffects.assign(attackTemplate_->attackEffects.size(), false);
+
+    // 通常の攻撃エフェクトは spawnTimeOffset を越えた瞬間に一度だけ生成する。
     for (size_t effectIndex_ = 0; effectIndex_ < attackTemplate_->attackEffects.size(); ++effectIndex_)
     {
         const AttackEffectSpawnTemplate& effect_ = attackTemplate_->attackEffects[effectIndex_];
@@ -234,5 +245,7 @@ void AttackTemplateRuntime::End(
         }
     }
     event_.attackTemplateRuntimeActive = false;
+
+    // Runtime 中だけ持っていた「どの追加エフェクトを出したか」の印を破棄する。
     event_.spawnedAttackEffects.clear();
 }

@@ -16,6 +16,7 @@ public:
 private:
     struct MaterialEditorSlot
     {
+        // 複数Materialを切り替えながら編集するための1スロット分の状態。
         std::shared_ptr<VFXMaterialResource> materialResource;
         std::string materialPath;
     };
@@ -33,6 +34,7 @@ private:
 
 private:
     std::vector<MaterialEditorSlot> materialSlots;
+    // 現在Inspectorで編集しているMaterial。選択スロットと同期して保存/読込する。
     std::shared_ptr<VFXMaterialResource> materialResource;
     std::string materialPath;
     int selectedMaterialIndex = 0;

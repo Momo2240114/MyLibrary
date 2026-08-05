@@ -17,12 +17,14 @@
 
 namespace
 {
+    // モーションワープは水平面上の補正だけを扱うため、XZ成分の有効判定に使う。
     constexpr float MINIMUM_HORIZONTAL_LENGTH_SQUARED = 0.000001f;
     constexpr float DEGREES_TO_RADIANS = DirectX::XM_PI / 180.0f;
     constexpr float RADIANS_TO_DEGREES = 180.0f / DirectX::XM_PI;
 
     bool NormalizeHorizontal(DirectX::XMFLOAT3& direction_)
     {
+        // 高低差で攻撃方向がぶれないよう、Y成分を落として水平ベクトルとして正規化する。
         direction_.y = 0.0f;
         const float lengthSquared_ =
             direction_.x * direction_.x + direction_.z * direction_.z;
@@ -46,6 +48,7 @@ namespace
 
     float NormalizeAngleDegrees(float angle_)
     {
+        // Yaw差分を最短回転として扱えるよう、-180〜180度に丸める。
         while (angle_ > 180.0f) angle_ -= 360.0f;
         while (angle_ < -180.0f) angle_ += 360.0f;
         return angle_;
@@ -61,6 +64,7 @@ namespace
         float normalizedTime_,
         const MotionWarpPreset& preset_)
     {
+        // 現状は開始〜終了範囲内だけ1.0で補正する。将来カーブ化する時の入口。
         const float start_ = std::clamp(preset_.startNormalizedTime, 0.0f, 1.0f);
         const float end_ = std::clamp(preset_.endNormalizedTime, start_, 1.0f);
         if (normalizedTime_ < start_ || normalizedTime_ > end_) return 0.0f;
@@ -112,6 +116,7 @@ MotionWarpComponent::~MotionWarpComponent()
 
 void MotionWarpComponent::Start()
 {
+    // アセット側にプリセットが無い場合でも、攻撃用の最低限のワープ設定で動けるようにする。
     EnsureDefaultPresets();
     RegisterActions();
 }
@@ -120,6 +125,7 @@ void MotionWarpComponent::EnsureDefaultPresets()
 {
     if (!presets.empty()) return;
 
+    // 弱攻撃、強攻撃、溜め、空中攻撃で補正量を分け、手触りの初期値を用意する。
     MotionWarpPreset weak_;
     weak_.presetName = "WeakAttackWarp";
     weak_.positionMode = MOTION_WARP_POSITION_MODE::DIRECTION_ONLY;
@@ -215,6 +221,7 @@ void MotionWarpComponent::Play(const std::string& presetName_)
 
     request = {};
     request.active = true;
+    // リクエスト名とプリセット名を揃え、Stop側から現在のワープだけを止められるようにする。
     request.requestName = preset_->presetName;
     request.presetName = preset_->presetName;
     if (!ResolveRequestTarget(request, *preset_) &&
@@ -247,6 +254,7 @@ std::shared_ptr<GameObject> MotionWarpComponent::ResolveTarget(
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
 
+    // 攻撃補助ターゲット、ロックオンターゲットなど、プリセットに応じた対象を実行時に解決する。
     if (preset_.targetMode == MOTION_WARP_TARGET_MODE::ATTACK_ASSIST_TARGET)
     {
         if (const std::shared_ptr<PlayerControllerComponent> player_ =
@@ -272,6 +280,7 @@ MotionWarpComponent::ResolveCameraLockOnComponent()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
 
+    // LockOnComponentは所有者に限らないため、シーン内から最初に見つかったものを使う。
     for (const std::shared_ptr<GameObject>& object_ : owner_->GetManager().GetObjects())
     {
         if (!object_) continue;
@@ -287,6 +296,7 @@ bool MotionWarpComponent::ResolveRequestTarget(
     MotionWarpRequest& request_,
     const MotionWarpPreset& preset_)
 {
+    // WorldPosition指定は、外部からrequest_.targetPositionが設定されている前提で成立させる。
     if (preset_.targetMode == MOTION_WARP_TARGET_MODE::WORLD_POSITION)
     {
         return true;
@@ -305,6 +315,7 @@ bool MotionWarpComponent::ResolveRequestTarget(
     };
     if (NormalizeHorizontal(forward_))
     {
+        // ターゲット側の向きも保存しておき、将来的な回転一致モードで利用できるようにする。
         request_.targetForward = forward_;
     }
     return true;
@@ -335,6 +346,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         return result_;
     }
 
+    // アニメーション時間がプリセットのワープ区間外なら、RootMotionをそのまま返す。
     const MotionWarpPreset* preset_ = FindPreset(request.presetName);
     if (!preset_)
     {
@@ -377,6 +389,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
 
     if (target_ && target_->transform)
     {
+        // ターゲットが動く相手でも追従できるよう、毎フレーム現在位置を取り直す。
         request.targetPosition = target_->transform->GetWorldPosition();
     }
 
@@ -392,12 +405,14 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
         targetDistance_ > preset_->maximumWarpTargetDistance ||
         !NormalizeHorizontal(toTarget_))
     {
+        // 近すぎる/遠すぎる対象への補正は不自然になりやすいため、距離条件で弾く。
         debugInactiveReason = "Target distance rejected";
         return result_;
     }
 
     debugIdealStopPosition =
     {
+        // ターゲットの手前targetDistanceで止まる位置を理想停止位置として使う。
         request.targetPosition.x - toTarget_.x * preset_->targetDistance,
         ownerPosition_.y,
         request.targetPosition.z - toTarget_.z * preset_->targetDistance
@@ -412,11 +427,12 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
             result_.rootMotionDelta.deltaPosition.y,
             result_.rootMotionDelta.deltaPosition.z
         };
-        const float originalHorizontalLength_ = GetHorizontalLength(delta_);
-        if (originalHorizontalLength_ >= preset_->minimumRemainingRootMotionDistance)
-        {
-            DirectX::XMFLOAT3 originalDirection_ = delta_;
-            NormalizeHorizontal(originalDirection_);
+            const float originalHorizontalLength_ = GetHorizontalLength(delta_);
+            if (originalHorizontalLength_ >= preset_->minimumRemainingRootMotionDistance)
+            {
+                // 元のRootMotion方向と理想停止位置方向をブレンドし、攻撃の踏み込み方向だけ補正する。
+                DirectX::XMFLOAT3 originalDirection_ = delta_;
+                NormalizeHorizontal(originalDirection_);
 
             DirectX::XMFLOAT3 toStop_
             {
@@ -444,6 +460,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
                     preset_->positionMode == MOTION_WARP_POSITION_MODE::DIRECTION_AND_SCALE ||
                     preset_->positionMode == MOTION_WARP_POSITION_MODE::TARGET_END_POSITION)
                 {
+                    // 目標までの残り距離に合わせてRootMotionの水平距離を伸縮する。
                     scale_ = std::clamp(
                         stopDistance_ / (std::max)(originalHorizontalLength_, 0.001f),
                         preset_->minimumPositionScale,
@@ -470,6 +487,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
                     request.accumulatedPositionCorrection;
                 const float frameCorrectionLimit_ =
                     (std::min)(preset_->maximumPositionCorrectionPerFrame, remainingCorrection_);
+                // 1フレーム/1リクエスト全体の補正量を制限し、急な吸い付きにならないようにする。
                 if (correctionLength_ > frameCorrectionLimit_ &&
                     correctionLength_ > MINIMUM_HORIZONTAL_LENGTH_SQUARED)
                 {
@@ -494,6 +512,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
     if (preset_->warpRotation &&
         preset_->rotationMode == MOTION_WARP_ROTATION_MODE::FACE_TARGET)
     {
+        // 位置補正とは別に、所有者のYawだけをターゲット方向へ少しずつ向ける。
         DirectX::XMFLOAT3 currentForward_
         {
             owner_->transform->GetFront().x,
@@ -542,6 +561,7 @@ MotionWarpResult MotionWarpComponent::ApplyRootMotionWarp(
 void MotionWarpComponent::RegisterActions()
 {
     if (actionsRegistered) return;
+    // アニメーションイベントや外部スクリプトから、名前指定でワープを開始/停止できるようにする。
     ActionRegistry& registry_ = ActionRegistry::Instance();
     registry_.RegisterAction("MotionWarp", "MotionWarp.Play", [this]() { Play(); });
     registry_.RegisterAction("MotionWarp", "MotionWarp.Stop", [this]() { Stop(); });
@@ -562,6 +582,7 @@ void MotionWarpComponent::UnregisterActions()
 void MotionWarpComponent::Gui()
 {
     EnsureDefaultPresets();
+    // デバッグ値は、補正前後のRootMotionと補正が止まった理由を確認するために表示する。
     ImGui::Text("Active: %s", request.active ? "true" : "false");
     ImGui::Text("Preset: %s", request.presetName.c_str());
     ImGui::Text("Inactive Reason: %s", debugInactiveReason.c_str());
@@ -606,6 +627,7 @@ void MotionWarpComponent::Gui()
 
 void MotionWarpComponent::Serialize(nlohmann::json& json_) const
 {
+    // プリセットはアニメーションごとの調整値なので、コンポーネント設定としてまとめて保存する。
     json_["DefaultPresetName"] = defaultPresetName;
     nlohmann::json presetsJson_ = nlohmann::json::array();
     for (const MotionWarpPreset& preset_ : presets)
@@ -645,6 +667,7 @@ void MotionWarpComponent::Serialize(nlohmann::json& json_) const
 void MotionWarpComponent::Deserialize(const nlohmann::json& json_)
 {
     defaultPresetName = json_.value("DefaultPresetName", defaultPresetName);
+    // 保存済みプリセットを読み直し、不正値は範囲内へ丸めてRootMotion補正の暴走を防ぐ。
     presets.clear();
     if (json_.contains("Presets") && json_["Presets"].is_array())
     {

@@ -18,6 +18,7 @@ public:
 private:
     struct TextureEntry
     {
+        // 表示名とSRVの組。SRVがnullptrなら欠損テクスチャとして扱う。
         const char* name;
         ID3D11ShaderResourceView* srv;
     };
@@ -31,6 +32,7 @@ private:
     ImVec2 GetTextureImageSize(ID3D11ShaderResourceView* srv_) const;
 
     float thumbnailSize = 220.0f;
+    // サムネイルの縦横比維持と、未生成SRVを表示するかどうかのUI状態。
     bool keepAspect = true;
     bool showMissingTextures = true;
 };

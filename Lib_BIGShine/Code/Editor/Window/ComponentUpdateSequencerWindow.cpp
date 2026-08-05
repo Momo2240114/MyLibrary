@@ -19,6 +19,7 @@ ComponentUpdateSequencerWindow::ComponentUpdateSequencerWindow(GameObjectManager
 
 void ComponentUpdateSequencerWindow::Draw()
 {
+    // 選択中GameObjectのComponent更新順を、Update/LateUpdateごとに確認・調整する。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -47,6 +48,7 @@ void ComponentUpdateSequencerWindow::Draw()
 
     DrawPhaseTabs();
     ImGui::SameLine();
+    // Colliderや無効Componentは必要な時だけ表示し、普段の一覧を見やすくする。
     ImGui::Checkbox("Colliders", &showColliders);
     ImGui::SameLine();
     ImGui::Checkbox("Disabled", &showDisabledComponents);
@@ -59,6 +61,7 @@ void ComponentUpdateSequencerWindow::Draw()
 
 void ComponentUpdateSequencerWindow::DrawPhaseTabs()
 {
+    // UpdateとLateUpdateは別の優先度を持つため、編集対象フェーズを明示的に切り替える。
     if (ImGui::RadioButton("Update", selectedPhase == COMPONENT_UPDATE_PHASE::UPDATE))
     {
         selectedPhase = COMPONENT_UPDATE_PHASE::UPDATE;
@@ -74,6 +77,7 @@ void ComponentUpdateSequencerWindow::DrawComponentTable(const std::shared_ptr<Ga
 {
     std::vector<ComponentRow> rows_ = BuildRows(object_);
 
+    // 優先度が低いものほど先に実行され、同じ優先度なら元の登録順を保つ。
     std::stable_sort(rows_.begin(), rows_.end(),
         [this](const ComponentRow& left_, const ComponentRow& right_)
         {
@@ -91,6 +95,7 @@ void ComponentUpdateSequencerWindow::DrawComponentTable(const std::shared_ptr<Ga
 
     if (ImGui::Button("Reset Visible Timing"))
     {
+        // 現在一覧に出ているComponentだけを既定の更新設定へ戻す。
         for (ComponentRow& row_ : rows_)
         {
             if (row_.component) row_.component->ResetUpdateTiming();
@@ -131,6 +136,7 @@ void ComponentUpdateSequencerWindow::DrawComponentRow(ComponentRow& row_)
 {
     if (!row_.component) return;
 
+    // 1行でフェーズ使用可否、優先度、簡易シフトを編集できるようにする。
     Component& component_ = *row_.component;
 
     ImGui::PushID(&component_);
@@ -154,6 +160,7 @@ void ComponentUpdateSequencerWindow::DrawComponentRow(ComponentRow& row_)
         : component_.ShouldLateUpdate();
     if (ImGui::Checkbox("##UsePhase", &usePhase_))
     {
+        // 選択中フェーズに応じてUpdateまたはLateUpdateの有効フラグだけを書き換える。
         if (selectedPhase == COMPONENT_UPDATE_PHASE::UPDATE)
         {
             component_.SetUpdateEnabled(usePhase_);
@@ -171,6 +178,7 @@ void ComponentUpdateSequencerWindow::DrawComponentRow(ComponentRow& row_)
     ImGui::SetNextItemWidth(-1.0f);
     if (ImGui::DragInt("##Priority", &priority_, 1.0f, -10000, 10000))
     {
+        // DragIntで細かく、Shiftボタンで大きく優先度を動かせるようにしている。
         if (selectedPhase == COMPONENT_UPDATE_PHASE::UPDATE)
         {
             component_.SetUpdatePriority(priority_);
@@ -194,6 +202,7 @@ void ComponentUpdateSequencerWindow::DrawComponentRow(ComponentRow& row_)
 std::vector<ComponentUpdateSequencerWindow::ComponentRow> ComponentUpdateSequencerWindow::BuildRows(
     const std::shared_ptr<GameObject>& object_) const
 {
+    // GameObjectの通常ComponentとColliderComponentを、表示オプションに合わせて行データへ変換する。
     std::vector<ComponentRow> rows_;
     if (!object_) return rows_;
 
@@ -223,6 +232,7 @@ std::vector<ComponentUpdateSequencerWindow::ComponentRow> ComponentUpdateSequenc
 
 void ComponentUpdateSequencerWindow::MoveComponentPriority(Component& component_, int delta_)
 {
+    // 選択中フェーズの優先度だけを相対的に動かす。
     if (selectedPhase == COMPONENT_UPDATE_PHASE::UPDATE)
     {
         component_.SetUpdatePriority(component_.GetUpdatePriority() + delta_);

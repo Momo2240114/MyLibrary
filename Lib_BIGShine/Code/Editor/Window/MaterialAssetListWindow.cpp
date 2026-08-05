@@ -16,6 +16,7 @@
 MaterialAssetListWindow::MaterialAssetListWindow(GameObjectManager* manager_)
     : EditorWindow("Material Asset Keys", manager_)
 {
+    // Asset Key確認用の補助Windowなので、初期状態では非表示にしておく。
     defaultWindowSize = ImVec2(920.0f, 560.0f);
     SetVisible(false);
     Refresh();
@@ -25,6 +26,7 @@ void MaterialAssetListWindow::Draw()
 {
     BS_PROFILE_SCOPE("MaterialAssetListWindow::Draw");
 
+    // Toolbarで検索/更新し、TableでMaterial Keyを一覧確認できるようにする。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -44,6 +46,7 @@ void MaterialAssetListWindow::Refresh()
     LoadMaterialAssets("Data/VFXMaterials");
 
     std::unordered_map<std::string, int> keyCount_;
+    // まずstemだけをKeyにして数え、同名Materialがあるか確認する。
     for (const MaterialAssetEntry& entry_ : materialAssets)
     {
         ++keyCount_[entry_.key];
@@ -52,6 +55,7 @@ void MaterialAssetListWindow::Refresh()
     for (MaterialAssetEntry& entry_ : materialAssets)
     {
         if (keyCount_[entry_.key] <= 1) continue;
+        // stemが重複する場合はRoot相対PathをKeyにして一意性を保つ。
         entry_.key = BuildAssetKey(entry_.fullPath, "Data/VFXMaterials");
     }
 
@@ -68,6 +72,7 @@ void MaterialAssetListWindow::DrawToolbar()
 {
     BS_PROFILE_SCOPE("MaterialAssetListWindow::DrawToolbar");
 
+    // 検索はKey/Material名/File名/Path/Texture Pathをまとめて対象にする。
     ImGui::InputTextWithHint("##MaterialKeySearch", "Search key, name, file, path...", searchText, sizeof(searchText));
     ImGui::SameLine();
     if (ImGui::Button("Refresh")) Refresh();
@@ -81,6 +86,7 @@ void MaterialAssetListWindow::DrawMaterialTable()
     BS_PROFILE_SCOPE("MaterialAssetListWindow::DrawMaterialTable");
 
     const int columnCount_ = showTextureColumns ? 7 : 4;
+    // Texture列は必要なときだけ表示し、普段はKey/Pathを広く見られるようにする。
     if (!ImGui::BeginTable(
         "MaterialAssetKeyTable",
         columnCount_,
@@ -114,6 +120,7 @@ void MaterialAssetListWindow::DrawMaterialTable()
         ImGui::TableSetColumnIndex(0);
         if (ImGui::Selectable(entry_.key.c_str(), false, ImGuiSelectableFlags_SpanAllColumns))
         {
+            // Key列ClickでClipboardへコピーし、他Editorへ貼り付けやすくする。
             ImGui::SetClipboardText(entry_.key.c_str());
         }
         BeginMaterialDrag(entry_);
@@ -127,6 +134,7 @@ void MaterialAssetListWindow::DrawMaterialTable()
 
         ImGui::TableSetColumnIndex(3);
         ImGui::TextUnformatted(entry_.fullPath.c_str());
+        // Path列Clickでは実ファイルPathをClipboardへコピーする。
         if (ImGui::IsItemClicked()) ImGui::SetClipboardText(entry_.fullPath.c_str());
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Click: copy path");
 
@@ -154,6 +162,7 @@ void MaterialAssetListWindow::LoadMaterialAssets(const std::string& rootPath_)
     const std::filesystem::path root_ = WindowsDialogHelper::Utf8ToPath(rootPath_);
     if (!std::filesystem::is_directory(root_, error_)) return;
 
+    // Root配下を再帰走査し、Materialとして読めるファイルだけ一覧へ追加する。
     for (const std::filesystem::directory_entry& entry_ : std::filesystem::recursive_directory_iterator(root_, error_))
     {
         if (error_) break;
@@ -167,6 +176,7 @@ void MaterialAssetListWindow::LoadMaterialAssets(const std::string& rootPath_)
             extension_.begin(),
             [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
 
+        // VFXMaterialは専用拡張子とJSON形式の両方を許可する。
         if (extension_ != ".vfxmat" && extension_ != ".json") continue;
 
         MaterialAssetEntry materialEntry_{};
@@ -186,6 +196,7 @@ std::string MaterialAssetListWindow::BuildAssetKey(
     const std::filesystem::path fullPathValue_ = WindowsDialogHelper::Utf8ToPath(fullPath_);
     const std::filesystem::path rootPathValue_ = WindowsDialogHelper::Utf8ToPath(rootPath_);
     std::error_code error_;
+    // Rootからの相対PathをKeyにすることで、同名ファイルでもフォルダ込みで区別する。
     std::filesystem::path relativePath_ = std::filesystem::relative(fullPathValue_, rootPathValue_, error_);
     if (error_) relativePath_ = fullPathValue_.filename();
     relativePath_.replace_extension();
@@ -207,6 +218,7 @@ bool MaterialAssetListWindow::MatchesSearch(const MaterialAssetEntry& entry_) co
         entry_.maskTexturePath + " " +
         entry_.noiseTexturePath;
 
+    // 大文字小文字を気にせず検索できるよう、検索語と対象文字列を両方小文字化する。
     std::transform(
         search_.begin(),
         search_.end(),
@@ -226,6 +238,7 @@ bool MaterialAssetListWindow::TryReadMaterialEntry(
 {
     BS_PROFILE_SCOPE("MaterialAssetListWindow::TryReadMaterialEntry");
 
+    // Serializerで読めたファイルだけMaterial Assetとして扱う。
     VFXMaterialData materialData_{};
     if (!VFXMaterialSerializer::Load(fullPath_, materialData_)) return false;
 
@@ -241,6 +254,7 @@ void MaterialAssetListWindow::BeginMaterialDrag(const MaterialAssetEntry& entry_
 {
     BS_PROFILE_SCOPE("MaterialAssetListWindow::BeginMaterialDrag");
 
+    // 他WindowがMaterial Pathを受け取れるよう、Drag&Drop PayloadへFullPathを詰める。
     if (!ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) return;
     ImGui::SetDragDropPayload(
         AssetBrowserPayload::MATERIAL,

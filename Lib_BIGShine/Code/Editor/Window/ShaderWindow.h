@@ -4,6 +4,7 @@
 
 class ModelRenderSystem;
 
+// ModelRenderSystemが持つShader関連のDebug/切り替え設定を表示するWindow。
 class ShaderWindow : public EditorWindow
 {
 public:
@@ -15,5 +16,6 @@ public:
     void Draw() override;
 
 private:
+    // Shader設定は描画パイプライン側の状態と直結するため、ModelRenderSystemを直接参照する。
     ModelRenderSystem& modelRenderSystem;
 };

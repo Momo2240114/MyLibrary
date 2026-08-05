@@ -6,10 +6,13 @@
 class PhysXSystem
 {
 public:
+    // PhysXのFoundation/Physics/Scene/ControllerManagerを生成・破棄する。
     static void Initialize();
     static void Finalize();
+    // 現在のTimeScaleを反映してPhysX Sceneを1Step進める。
     static void Step(float dt);
     static void SetTimeScale(float scale_);
+    // PhysX CharacterController同士の押し合いや重なり回復を先に計算する。
     static void ComputeCharacterControllerInteractions(float deltaTime_);
 
     static physx::PxPhysics* GetPhysics();
@@ -22,9 +25,11 @@ public:
     static physx::PxRigidStatic* CreateGround(const physx::PxVec3& pos);
 
     static physx::PxMaterial* GetDefaultMaterial();
+    // CharacterControllerのMove時に、HitBoxなどのGameplay用Triggerを無視するためのFilter。
     static physx::PxQueryFilterCallback* GetCharacterControllerQueryFilterCallback();
     static physx::PxControllerFilterCallback* GetCharacterControllerFilterCallback();
     static physx::PxControllerBehaviorCallback* GetCharacterControllerBehaviorCallback();
+    // GltfModelなどから渡された頂点配列をPhysX MeshへCookする。
     static physx::PxConvexMesh* CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_);
     static physx::PxTriangleMesh* CreateTriangleMesh(
         const std::vector<DirectX::XMFLOAT3>& vertices_,

@@ -28,6 +28,7 @@ void CameraShakeComponent::Start()
     ResolveCamera();
     if (presets.empty())
     {
+        // Presetが未設定のSceneでもすぐ使えるよう、標準Shakeを用意する。
         CameraShakePreset light_;
         light_.actionName = "Light";
         light_.positionStrength = 0.035f;
@@ -70,11 +71,13 @@ void CameraShakeComponent::LateUpdate(float deltaTime_)
     }
 
     elapsed += deltaTime_;
+    // FadeIn/FadeOutを含むEnvelopeを掛けて、Shakeの立ち上がり/消えを自然にする。
     const float envelope_ = CalculateEnvelope();
     const DirectX::XMFLOAT3 offset_ =
         CalculateOffset(elapsed * activePreset.frequency);
 
     const DirectX::XMFLOAT3 cameraPosition_ = AddFloat3(
+        // 現在Camera位置に位置Shakeを加算する。
         camera_->GetEye(),
         {
             offset_.x * activePreset.positionStrength * envelope_,
@@ -83,6 +86,7 @@ void CameraShakeComponent::LateUpdate(float deltaTime_)
         });
 
     const DirectX::XMFLOAT3 focusPosition_ = RotateFocus(
+        // 注視点側を少し回転させ、Rotation Shakeとして見せる。
         cameraPosition_,
         camera_->GetFocus(),
         offset_.x * activePreset.rotationStrength * envelope_,
@@ -103,6 +107,7 @@ void CameraShakeComponent::PlayShakeByIndex(int index_)
 {
     BS_PROFILE_SCOPE("CameraShakeComponent::PlayShakeByIndex");
     if (index_ < 0 || index_ >= static_cast<int>(presets.size())) return;
+    // 再生中ShakeよりPriorityが低い場合は、強い演出を弱い演出で潰さない。
     if (playing && presets[index_].priority < activePriority) return;
 
     activePreset = presets[index_];
@@ -124,6 +129,7 @@ void CameraShakeComponent::PlayShake(
     int priority_)
 {
     BS_PROFILE_SCOPE("CameraShakeComponent::PlayShake");
+    // Runtime再生でもPresetと同じPriority規則を適用する。
     if (playing && priority_ < activePriority) return;
 
     CameraShakePreset preset_;
@@ -146,6 +152,7 @@ void CameraShakeComponent::StopShake(bool immediate_)
 {
     if (!immediate_ && playing)
     {
+        // 即停止ではなく、FadeOut区間へ飛ばして自然に減衰させる。
         elapsed = (std::max)(elapsed, activePreset.duration * activePreset.fadeOutRate);
         return;
     }
@@ -160,6 +167,7 @@ void CameraShakeComponent::RegisterActions()
     ActionRegistry& registry_ = ActionRegistry::Instance();
     for (const CameraShakePreset& preset_ : presets)
     {
+        // Preset名をCameraShakeカテゴリのGlobal Actionとして登録し、Timeline/Eventから呼べるようにする。
         registry_.RemoveAction("CameraShake", preset_.actionName);
         registry_.RegisterAction("CameraShake", preset_.actionName, [this, actionName_ = preset_.actionName]()
         {
@@ -190,6 +198,7 @@ float CameraShakeComponent::CalculateEnvelope() const
 
     const float rate_ = std::clamp(elapsed / activePreset.duration, 0.0f, 1.0f);
     float envelope_ = 1.0f;
+    // duration内の割合でFadeIn/FadeOutを計算する。
     if (activePreset.fadeInRate > 0.0001f &&
         rate_ < activePreset.fadeInRate)
     {
@@ -207,6 +216,7 @@ float CameraShakeComponent::CalculateEnvelope() const
 
 DirectX::XMFLOAT3 CameraShakeComponent::CalculateOffset(float time_) const
 {
+    // 周波数の違うSin波を重ね、簡易的な揺れOffsetとして使う。
     return
     {
         std::sin(time_ * 6.2831853f),
@@ -221,6 +231,7 @@ DirectX::XMFLOAT3 CameraShakeComponent::RotateFocus(
     float yawDegrees_,
     float pitchDegrees_) const
 {
+    // eyeからfocusへの方向Vectorを少し回転させ、新しいfocus位置を作る。
     DirectX::XMVECTOR direction_ = DirectX::XMVectorSubtract(
         DirectX::XMLoadFloat3(&focus_),
         DirectX::XMLoadFloat3(&eye_));
@@ -238,6 +249,7 @@ DirectX::XMFLOAT3 CameraShakeComponent::RotateFocus(
 
 void CameraShakeComponent::Gui()
 {
+    // Presetの追加、試し再生、Action名変更をEditorから行う。
     ImGui::Text(playing ? "Playing" : "Idle");
     ImGui::Text("Elapsed: %.3f", elapsed);
     if (ImGui::Button("Add Shake"))
@@ -296,6 +308,7 @@ void CameraShakeComponent::Gui()
 
 void CameraShakeComponent::Serialize(nlohmann::json& json_) const
 {
+    // Runtimeの再生状態は保存せず、Preset一覧だけを保存する。
     json_["presets"] = nlohmann::json::array();
     for (const CameraShakePreset& preset_ : presets)
     {
@@ -315,6 +328,7 @@ void CameraShakeComponent::Serialize(nlohmann::json& json_) const
 
 void CameraShakeComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 保存されたPresetを復元する。Action登録はStart側でまとめて行う。
     presets.clear();
     if (!json_.contains("presets") || !json_["presets"].is_array()) return;
 

@@ -43,6 +43,7 @@ namespace
 
 void AnimationControllerComponent::MarkSequenceAdapterDirty()
 {
+    // ステートイベントを編集したあとは、ImSequencer用のフレーム配列を次回表示時に組み直す。
     sequenceAdapterDirty = true;
 }
 
@@ -50,6 +51,7 @@ void AnimationControllerComponent::RefreshSequenceAdapter()
 {
     BS_PROFILE_SCOPE("RefreshSequenceAdapter");
 
+    // SequencerAdapterは編集対象ステートとfpsを持つ表示用キャッシュなので、必要なときだけ同期する。
     if (sequenceAdapterState != editingState)
     {
         sequenceAdapterState = editingState;
@@ -81,6 +83,7 @@ void AnimationControllerComponent::RefreshActionCategoryCache()
 {
     BS_PROFILE_SCOPE("RefreshActionCategoryCache");
 
+    // アクション候補はローカル、親、子、グローバルをまとめてポップアップに出すため、階層ごとに分類して保持する。
     std::shared_ptr<GameObject> ownerShared_ = GetGameObject();
     GameObject* owner_ = ownerShared_.get();
     if (cachedActionOwner != owner_)
@@ -150,6 +153,7 @@ void AnimationControllerComponent::MarkStateGuiCacheDirty()
 
 void AnimationControllerComponent::RefreshStateGuiCache()
 {
+    // ステート数が増えてもGUIが重くならないよう、名前フィルタ後のindexだけをキャッシュしてリスト表示に使う。
     if (!stateGuiCacheDirty) return;
 
     cachedStateGuiEntries.clear();
@@ -175,6 +179,7 @@ void AnimationControllerComponent::MarkBlackboardGuiCacheDirty()
 
 void AnimationControllerComponent::RefreshBlackboardGuiCache()
 {
+    // Blackboardのキー一覧は追加削除時だけ更新し、描画中は安定した順序で参照できるようにする。
     if (!blackboardGuiCacheDirty) return;
 
     const BlackboardCategory& blackboard_ = GetEditableBlackboard();
@@ -197,6 +202,7 @@ void AnimationControllerComponent::RefreshAnimationMaskCache()
 {
     BS_PROFILE_SCOPE("RefreshAnimationMaskCache");
 
+    // ブレンドマスクは階層継承を表示するため、ノード深度と親からの選択状態を先に展開しておく。
     if (animationMaskCacheState != editingState)
     {
         animationMaskCacheState = editingState;
@@ -250,6 +256,7 @@ void AnimationControllerComponent::RefreshEffectAssetCache()
 {
     BS_PROFILE_SCOPE("RefreshEffectAssetCache");
 
+    // イベントから参照するVFXアセットは管理側のキーをGUI選択用に集め、手入力ミスを減らす。
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (cachedEffectAssetOwner != owner_.get())
     {
@@ -287,6 +294,7 @@ void AnimationControllerComponent::PreviewStateAtTime(AnimState* state_, float t
 {
     BS_PROFILE_SCOPE("ScrubAnimationPreview");
 
+    // Sequencer上のフレーム移動は再生状態を変えず、選択ステートの指定時刻だけをモデルへプレビュー反映する。
     if (!state_) return;
     if (animator.GetCurrentState() != state_)
     {
@@ -304,6 +312,7 @@ void AnimationControllerComponent::Gui()
     {
         BS_PROFILE_SCOPE("Animation GUI::Runtime Playback");
 
+        // 実行中の再生状態を確認しつつ、エディタから任意ステートへ遷移できるデバッグ領域。
         ImGui::Text("Model: %s", modelComponent->GetModelName().c_str());
         ImGui::TextDisabled("Animation editors are opened from the main Window menu.");
 
@@ -374,6 +383,7 @@ void AnimationControllerComponent::Gui()
     {
         BS_PROFILE_SCOPE("Animation GUI::Add State From Model Clip");
 
+        // モデル内クリップからステートを作る入口。既存名と衝突する場合は連番を付けて登録する。
         static int selectedAnimIndex_ = -1;
         const auto& animations_ = modelComponent->GetAnimations();
 
@@ -421,6 +431,7 @@ void AnimationControllerComponent::Gui()
     {
         BS_PROFILE_SCOPE("Animation GUI::State List");
 
+        // ステート一覧は検索とListClipperで軽くし、選択時はSequencerとマスクキャッシュも編集対象へ合わせる。
         std::string targetToDelete = "";
 
         ImGui::SetNextItemWidth(-1.0f);
@@ -517,6 +528,7 @@ void AnimationControllerComponent::Gui()
     {
         BS_PROFILE_SCOPE("Animation GUI::State Properties");
 
+        // ここから下は選択中ステートの詳細設定。名前変更、種類、ブレンド、RootMotionまでを直接編集する。
         ImGui::Text("Editing: %s", editingState->name.c_str());
 
         if (stateRenameSourceName != editingState->name)
@@ -618,6 +630,7 @@ void AnimationControllerComponent::Gui()
         const auto& animations_ = modelComponent->GetAnimations();
         auto DrawAnimationIndex_ = [&](const char* label_, int& targetIndex_)
             {
+                // アニメーション参照はインデックスで保存するため、候補名を検索しながら選べる共通UIにしている。
                 ImGui::PushID(label_);
                 const char* selectedName_ =
                     targetIndex_ >= 0 && targetIndex_ < static_cast<int>(animations_.size())
@@ -675,10 +688,12 @@ void AnimationControllerComponent::Gui()
 
         if (editingState->type == AnimStateType::Single)
         {
+            // Singleは1つのアニメーションクリップをそのまま再生する通常ステート。
             DrawAnimationIndex_("Animation Clip", editingState->animationIndex);
         }
         else if (editingState->type == AnimStateType::Blend1D)
         {
+            // Blend1Dはfloatパラメータを入力にして、A/Bクリップの重みと再生位相を補間する。
             DrawAnimationIndex_("Animation A", editingState->animIndexA);
             DrawAnimationIndex_("Animation B", editingState->animIndexB);
 
@@ -745,6 +760,7 @@ void AnimationControllerComponent::Gui()
             }
             if (editingState->blendUseMask)
             {
+                // マスクはAnimation Bを適用するボーン範囲を指定するため、選択ノードの子孫もまとめて対象になる。
                 ImGui::TextDisabled(
                     "Animation B is blended only on selected nodes and their descendants.");
                 if (ImGui::SmallButton("Clear Mask"))
@@ -810,6 +826,7 @@ void AnimationControllerComponent::Gui()
         }
         else if (editingState->type == AnimStateType::BLEND_2D)
         {
+            // Blend2Dは移動入力などのVector2を使い、前後左右や斜め方向のクリップを同期しながら混ぜる。
             ImGui::SeparatorText("Directional Animations");
             if (ImGui::Button("Apply F/B Lateral Template"))
             {
@@ -1005,6 +1022,7 @@ void AnimationControllerComponent::Gui()
             }
 
             ImGui::SeparatorText("Blend Input");
+            // 入力パラメータはVector2型のBlackboardだけに限定して、型違いの設定を避ける。
             if (ImGui::Button(
                 editingState->blend2DParamName.empty()
                 ? "Select Vector2 Parameter"
@@ -1054,6 +1072,7 @@ void AnimationControllerComponent::Gui()
         }
         else if (editingState->type == AnimStateType::Custom)
         {
+            // CustomはPose Animation Creatorで作った独自ポーズ列を参照するため、ライブラリ内の名前から選ぶ。
             if (poseLibrary && !poseLibrary->customAnims.empty())
             {
                 ImGui::TextUnformatted("Custom Animation");
@@ -1089,6 +1108,7 @@ void AnimationControllerComponent::Gui()
         if (ImGui::TreeNode("Root Motion Settings"))
         {
 
+            // RootMotionは見た目のノード移動を抜き取り、GameObject側へ移動量として適用するための設定。
             ImGui::Checkbox("Enable Root Motion", &editingState->rootMotion.enable);
 
             if (editingState->rootMotion.enable)
@@ -1182,6 +1202,7 @@ void AnimationControllerComponent::Gui()
     {
         BS_PROFILE_SCOPE("Animation GUI::Blackboard Params");
 
+        // ステート遷移やブレンド入力に使うランタイムパラメータを、ここで型付きで編集する。
         static char newVarName[64] = "";
         static int selectedType = 0; // 0:Float, 1:Int, 2:Bool, 3:Vector2
         const char* typeNames[] = { "Float", "Int", "Bool", "Vector2" };
@@ -1284,6 +1305,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::ShowSequencerEditor");
 
+    // 別ウィンドウでは選択ステートのイベントタイムラインだけを扱い、Inspector側のステート編集と同期する。
     ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_FirstUseEver);
 
 
@@ -1313,6 +1335,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
         int currentFrame = (int)(animator.GetCurrentFadeTime() * sequenceAdapter.fps);
         const int previousFrame_ = currentFrame;
 
+        // ImSequencerの編集結果はフレーム値で返るため、対象イベントの秒数へ戻して保存する。
 
 
         ImGui::PushItemWidth(-1);
@@ -1399,6 +1422,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 }
 
                 auto ActionField = [&](const char* label, std::string& targetStr) {
+                    // Start/Update/Endの各Actionは直接入力もできるが、登録済みアクションから選ぶのが基本。
                     ImGui::SetNextItemWidth(250.0f);
                     ImGui::InputText(label, &targetStr);
 
@@ -1432,6 +1456,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
                 ActionField("Update Action", ev.updateAction);
                 ActionField("End Action", ev.endAction);
                 ImGui::SeparatorText("Blackboard Writes");
+                // イベント区間に入ったタイミングで書き込む値。攻撃判定やVFX指定をタイムラインから渡す。
                 int removeWriteIndex_ = -1;
                 for (int writeIndex_ = 0;
                     writeIndex_ < static_cast<int>(ev.blackboardWrites.size());

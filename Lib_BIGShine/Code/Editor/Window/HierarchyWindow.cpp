@@ -9,6 +9,7 @@ void HierarchyWindow::Draw()
     BeginEditorWindow(nullptr, windowFlags);
     DrawStylePopup();
 
+    // Objectの親子構造や選択状態はGameObjectManager側が持つため、Hierarchy描画もManagerへ委譲する。
     gameObjectManager->DrawHierarchyGui();
 
     EndEditorWindow();

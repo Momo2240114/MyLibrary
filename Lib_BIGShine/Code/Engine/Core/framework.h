@@ -24,6 +24,7 @@
 #define FULLSCREEN FALSE
 #define APPLICATION_NAME L"BigShine"
 
+// Win32ウィンドウ、メインループ、Scene、基本描画Systemを束ねるアプリケーション本体。
 class framework
 {
 public:
@@ -43,11 +44,13 @@ public:
 
 private:
 	bool initialize();
+	// elapsedTimeは前フレームからの経過秒。Scene更新やEditor更新の基準時間として扱う。
 	void update(float elapsedTime/*Elapsed seconds from last frame*/);
 	void render(float elapsedTime/*Elapsed seconds from last frame*/);
 	bool uninitialize();
 	void GuiDraw();
 private:
+	// FPS計測はhigh_resolution_timerの累積時間を使い、1秒ごとにWindowタイトルへ反映する。
 	high_resolution_timer tictoc;
 	uint32_t frames_per_second{ 0 };
 	float count_by_seconds{ 0.0f };
@@ -64,7 +67,7 @@ private:
 			outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
 			SetWindowTextW(hwnd, outs.str().c_str());
 
-				// Reset for next average.
+			// 次の1秒平均を取り直すため、フレーム数だけリセットして時間基準を進める。
 
 			frames_per_second = 0;
 			count_by_seconds += 1.0f;
@@ -72,8 +75,10 @@ private:
 	}
 
 private:
+	// 2D描画やUI向けSprite描画をまとめるRenderSystem。
 	SpriteRenderSystem spriteRenderSystem;
 
+	// 起動中に切り替える主要Scene。frameworkは生成/破棄とメインループからの呼び出しだけを担当する。
 	std::unique_ptr<SceneGame> m_pSceneGame;
 	std::unique_ptr<SceneStartUp> m_pSceneStartUp;
 };

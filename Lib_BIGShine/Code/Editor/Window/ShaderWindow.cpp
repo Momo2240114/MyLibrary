@@ -12,6 +12,7 @@ void ShaderWindow::Draw() {
 
     if (BeginEditorWindow()) {
         DrawStylePopup();
+        // Shader本体の切り替え設定とOutline設定をまとめて表示し、描画結果の確認をしやすくする。
         modelRenderSystem.ShaderSettingGui();
         modelRenderSystem.OutLineSettingGui();
     }

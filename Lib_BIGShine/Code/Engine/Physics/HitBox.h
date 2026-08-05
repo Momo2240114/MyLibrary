@@ -7,8 +7,11 @@
 
 enum class ATTACK_SOURCE_TYPE
 {
+    // 近接攻撃。Guardされた時に攻撃側へ反応通知を返す。
     MELEE,
+    // 飛び道具。Guardされても攻撃者本人へ硬直通知しない用途。
     PROJECTILE,
+    // 離れた場所で発生する攻撃。罠や範囲攻撃などの扱い。
     REMOTE
 };
 
@@ -18,24 +21,24 @@ class HitBox : public CapsuleCollider
 {
 public:
     // Combat側から流し込まれる攻撃結果データ。Health、HitReaction、VFX生成の入力になる。
-    float damage = 1.0f;
-    float hitStopDuration = 0.0f;
-    float hitStopScale = 0.0f;
-    uint32_t hitStopLayerMask = 3u;
-    GameObject* ownerObject = nullptr;
-    std::string sourceAction;
-    uint32_t attackInstanceId = 0u;
-    uint32_t hitGroupId = 0u;
-    bool allowMultiHit = false;
-    bool canHitOwner = false;
-    int teamId = 0;
-    float impactPower = 1.0f;
-    float knockBackPower = 0.0f;
+    float damage = 1.0f; // Healthへ渡す基礎Damage。
+    float hitStopDuration = 0.0f; // HitStopの長さ。
+    float hitStopScale = 0.0f; // HitStop中のTimeScale。
+    uint32_t hitStopLayerMask = 3u; // HitStop対象Layer。
+    GameObject* ownerObject = nullptr; // 攻撃者として扱うObject。未指定なら所有Object/階層から解決する。
+    std::string sourceAction; // 攻撃元Action名。HitReactionやDebug用にイベントへ流す。
+    uint32_t attackInstanceId = 0u; // 1回の攻撃Actionを識別するID。
+    uint32_t hitGroupId = 0u; // 同一攻撃内の判定Group。複数部位や多段判定を分ける。
+    bool allowMultiHit = false; // 同じ対象へ複数回Hitさせるか。
+    bool canHitOwner = false; // 攻撃者自身へHit可能にするか。
+    int teamId = 0; // Team判定用ID。
+    float impactPower = 1.0f; // HitReactionの強さ。
+    float knockBackPower = 0.0f; // KnockBackに使う力。
     ATTACK_SOURCE_TYPE attackSourceType = ATTACK_SOURCE_TYPE::MELEE;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;
-    bool hitOncePerActivation = true;
-    std::string attackTag = "Attack";
+    bool hitOncePerActivation = true; // Activateごとに同じHurtBoxへ1回だけHitさせるか。
+    std::string attackTag = "Attack"; // Guard/Dodge/Hurt側へ渡す攻撃Tag。
     std::string hitParticleAssetPath;
     std::string hitParticleEmitterName;
     float hitParticleLifeTime = 1.0f;
@@ -53,7 +56,7 @@ public:
     float hitSoundVolume = 1.0f;
     bool hitSoundMuffled = false;
     float hitSoundMuffledCutoff = 1200.0f;
-    bool cameraShakeEnabled = true;
+    bool cameraShakeEnabled = true; // Playerが関係するHitでCameraShakeを再生するか。
     float cameraShakeReceiveDuration = 0.12f;
     float cameraShakeReceivePositionStrength = 0.025f;
     float cameraShakeReceiveRotationStrength = 0.18f;
@@ -67,6 +70,7 @@ public:
     std::string activateActionName = "EnableHitBox";
     std::string deactivateActionName = "DisableHitBox";
 
+    // Activate直前にBlackboardから攻撃値を上書きするための参照先。
     std::string blackboardCategory = "Attack";
     std::string damageKey = "Damage";
     std::string hitStopDurationKey = "HitStopDuration";
@@ -110,8 +114,11 @@ public:
     std::string GetDeactivateActionName() const;
     std::string GetActionPrefix()const;
 private:
+    // HitBox用に固定したCollisionRoleとPhysics挙動を再適用する。
     void EnforceHitBoxSettings();
+    // Action/AttackTemplateがBlackboardへ置いた攻撃値を、Activate直前に読み込む。
     void ApplyBlackboardValues();
+    // Animation/ActionSequenceからHitBoxを開閉するActionを登録する。
     void RegisterActions();
 
 private:

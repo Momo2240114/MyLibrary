@@ -79,6 +79,7 @@
 template<typename T>
 void ComponentRegistry::Register(const std::string& name_, bool callStart_) {
     auto createFunc_ = [=](std::shared_ptr<GameObject> go_, bool overrideStart_) -> std::shared_ptr<Component> {
+        // Scene Deserialize から生成される時は、呼び出し側の overrideStart_ で Start 実行を抑制できる。
         const bool finalStart_ = callStart_ && overrideStart_;
         auto comp_ = go_->AddComponent<T>(finalStart_);
         return std::static_pointer_cast<Component>(comp_);
@@ -89,6 +90,7 @@ void ComponentRegistry::Register(const std::string& name_, bool callStart_) {
     const std::string typeName_ = T().GetName();
     if (!typeName_.empty() && typeName_ != name_)
     {
+        // 保存名と GetName() がズレている古いデータでも読めるよう、両方の名前で登録する。
         AddCreator(typeName_, createFunc_);
     }
 }
@@ -98,6 +100,7 @@ void RegisterAllComponents()
     auto& registry = ComponentRegistry::Instance();
 
     // システム・レンダリング系
+    // Scene JSON の ComponentName から実際の C++ Component を生成できるようにする。
     registry.Register<CameraComponent>("CameraComponent");
     registry.Register<GltfModelCommponennt>("GltfModel");
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
@@ -137,6 +140,7 @@ void RegisterAllComponents()
     registry.Register<ContainmentVolumeComponent>("ContainmentVolumeComponent");
 
     //ゲームシステム
+    // Gameplay/Editor から追加される Component。ActionSequence や UI もここで復元可能にする。
     registry.Register<UIButton>("UIButton");
     registry.Register<WidgetBoardComponent>("WidgetBoardComponent");
     registry.Register<UIWidgetComponent>("UIWidgetComponent");
@@ -191,10 +195,12 @@ std::shared_ptr<Component> ComponentRegistry::Create(
 
     if (!allowDuplicate_)
     {
+        // 単一想定の Component は、同名が既にあれば新規作成せず既存を返す。
         auto existing_ = go_->GetComponentByName(name_);
         if (existing_)
             return existing_;
     }
 
+    // 登録済み Factory を通して、GameObject へ Component を追加する。
     return it->second(go_, callStart_);
 }

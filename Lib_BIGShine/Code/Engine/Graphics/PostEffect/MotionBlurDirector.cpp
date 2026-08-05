@@ -12,16 +12,19 @@
 
 void MotionBlurDirector::Update(float elapsedTime_)
 {
+    // 演出中でない場合はGraphicsDeviceManagerの設定を触らない。
     if (phase == PHASE::IDLE) return;
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<TimeManager> timeManager_ = owner_
         ? owner_->GetManager().GetTimeManager() : nullptr;
+    // MotionBlur演出はPause中でも戻し切りたいので、RawDeltaを優先して進める。
     elapsed += timeManager_ ? timeManager_->GetLastRawDeltaTime() : elapsedTime_;
 
     if (phase == PHASE::HOLD)
     {
         if (elapsed < holdDuration) return;
+        // Holdが終わったら現在値を始点にしてDefaultへ戻る補間へ切り替える。
         startParams = GraphicsDeviceManager::Instance().GetMotionBlurParams();
         targetParams = defaultParams;
         duration = returnDuration;
@@ -30,6 +33,7 @@ void MotionBlurDirector::Update(float elapsedTime_)
     }
 
     const float ratio_ = duration > 0.0f ? std::clamp(elapsed / duration, 0.0f, 1.0f) : 1.0f;
+    // 補間結果をGraphicsDeviceManagerへ反映し、RenderSystem側が次の描画で使う。
     GraphicsDeviceManager::Instance().GetMotionBlurParams() = Lerp(startParams, targetParams, ratio_);
     if (ratio_ < 1.0f) return;
 
@@ -46,6 +50,7 @@ void MotionBlurDirector::Update(float elapsedTime_)
 
 void MotionBlurDirector::Play(const MotionBlurWayPoint& wayPoint_)
 {
+    // 現在のMotionBlur値を始点にすることで、演出の途中再生でも自然につなげる。
     startParams = GraphicsDeviceManager::Instance().GetMotionBlurParams();
     targetParams = wayPoint_.target;
     duration = (std::max)(wayPoint_.timeToTarget, 0.0f);
@@ -61,6 +66,7 @@ MotionBlurSystem::Parameters MotionBlurDirector::Lerp(
     float ratio_)
 {
     const float ratioClamped_ = std::clamp(ratio_, 0.0f, 1.0f);
+    // Scalar値は線形補間し、boolやSample数は中間状態で不安定にならないよう最後に切り替える。
     const auto value_ = [ratioClamped_](float fromValue_, float toValue_)
     {
         return fromValue_ + (toValue_ - fromValue_) * ratioClamped_;
@@ -79,6 +85,7 @@ MotionBlurSystem::Parameters MotionBlurDirector::Lerp(
 
 void MotionBlurDirector::ResetToDefault()
 {
+    // 演出終了後はDefault値を明示的に戻し、次回再生時の基準を安定させる。
     GraphicsDeviceManager::Instance().GetMotionBlurParams() = defaultParams;
     phase = PHASE::IDLE;
     elapsed = 0.0f;
@@ -86,6 +93,7 @@ void MotionBlurDirector::ResetToDefault()
 
 void MotionBlurDirector::Gui()
 {
+    // Default値は演出終了後に戻る基準としてEditorで調整する。
     ImGui::Checkbox("Default Enabled", &defaultParams.enabled);
     ImGui::Checkbox("Default Camera Velocity", &defaultParams.useCameraVelocity);
     ImGui::SliderInt("Default Samples", &defaultParams.sampleCount, 2, 16);
@@ -94,6 +102,7 @@ void MotionBlurDirector::Gui()
 
     if (ImGui::Button("Capture Motion Blur"))
     {
+        // 現在のRenderSystem設定をWaypointとして保存し、Actionから再生できるようにする。
         MotionBlurWayPoint wayPoint_;
         wayPoint_.target = GraphicsDeviceManager::Instance().GetMotionBlurParams();
         editorWaypoints.push_back(wayPoint_);
@@ -108,6 +117,7 @@ void MotionBlurDirector::Gui()
         MotionBlurWayPoint& wayPoint_ = editorWaypoints[index_];
         if (ImGui::TreeNode(("Motion Blur " + std::to_string(index_)).c_str()))
         {
+            // Waypointごとに目標値と遷移時間を調整する。
             ImGui::Checkbox("Enabled", &wayPoint_.target.enabled);
             ImGui::Checkbox("Camera Velocity", &wayPoint_.target.useCameraVelocity);
             ImGui::SliderInt("Samples", &wayPoint_.target.sampleCount, 2, 16);
@@ -130,6 +140,7 @@ void MotionBlurDirector::Gui()
 
 void MotionBlurDirector::RegisterActions()
 {
+    // PostProcessカテゴリにMotionBlur_0, MotionBlur_1...として登録する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -144,6 +155,7 @@ void MotionBlurDirector::RegisterActions()
 
 void MotionBlurDirector::Serialize(nlohmann::json& json_) const
 {
+    // Parameters構造をJSONへ展開する小さな変換関数。
     const auto write_ = [](const MotionBlurSystem::Parameters& value_)
     {
         return nlohmann::json{ { "enabled", value_.enabled },
@@ -166,6 +178,7 @@ void MotionBlurDirector::Serialize(nlohmann::json& json_) const
 
 void MotionBlurDirector::Deserialize(const nlohmann::json& json_)
 {
+    // 保存時と同じKeyからParametersを復元する。
     const auto read_ = [](const nlohmann::json& input_, MotionBlurSystem::Parameters& value_)
     {
         value_.enabled = input_.value("enabled", value_.enabled);
@@ -182,6 +195,7 @@ void MotionBlurDirector::Deserialize(const nlohmann::json& json_)
     {
         for (const nlohmann::json& item_ : json_["Waypoints"])
         {
+            // Waypointが欠けている古いデータでも既定値で補完する。
             MotionBlurWayPoint wayPoint_;
             if (item_.contains("target")) read_(item_["target"], wayPoint_.target);
             wayPoint_.timeToTarget = item_.value("toTarget", 0.1f);

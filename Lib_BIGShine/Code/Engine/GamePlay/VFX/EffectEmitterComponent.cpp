@@ -25,6 +25,7 @@ namespace
         const char* key_,
         const DirectX::XMFLOAT3& fallback_)
     {
+        // JSON側のVector3は配列で保存されるため、形式が違う場合は既定値を使う。
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
         if (!value_.is_array() || value_.size() < 3u) return fallback_;
         return { value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
@@ -37,6 +38,7 @@ namespace
 
     DirectX::XMFLOAT3 NormalizeDirection(const DirectX::XMFLOAT3& direction_)
     {
+        // エフェクトの発生方向が未設定でも前方へ飛ぶよう、ゼロベクトルにはZ+を使う。
         DirectX::XMVECTOR vector_ = DirectX::XMLoadFloat3(&direction_);
         if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(vector_)) <= 0.000001f)
         {
@@ -49,6 +51,7 @@ namespace
 
     DirectX::XMFLOAT3 TransformForward(const DirectX::XMMATRIX& matrix_)
     {
+        // 発生元行列の前方向を、ParticleやMeshVFXの法線/進行方向として使う。
         DirectX::XMFLOAT3 direction_{};
         DirectX::XMStoreFloat3(
             &direction_,
@@ -80,6 +83,7 @@ namespace
 
 void to_json(nlohmann::json& json_, const EffectEmitterEntryTemplate& entry_)
 {
+    // 1つのEmitterテンプレート内に並べる、Particle/MeshVFX/ImpactEffectの個別設定を保存する。
     json_ =
     {
         { "Type", static_cast<int>(entry_.type) },
@@ -102,6 +106,7 @@ void to_json(nlohmann::json& json_, const EffectEmitterEntryTemplate& entry_)
 
 void from_json(const nlohmann::json& json_, EffectEmitterEntryTemplate& entry_)
 {
+    // エントリは単体の寿命や再生速度を持つため、読み込み時に最低値を丸めて扱いやすくする。
     entry_.type = static_cast<EFFECT_EMITTER_ENTRY_TYPE>(std::clamp(json_.value("Type", 0), 0, 2));
     entry_.enabled = json_.value("Enabled", true);
     entry_.assetPath = json_.value("AssetPath", std::string{});
@@ -121,6 +126,7 @@ void from_json(const nlohmann::json& json_, EffectEmitterEntryTemplate& entry_)
 
 void to_json(nlohmann::json& json_, const EffectEmitterHitTemplate& hit_)
 {
+    // 見た目の発生と同時に攻撃判定を出す場合の、HitBoxへ転写する攻撃情報を保存する。
     json_ =
     {
         { "Enabled", hit_.enabled },
@@ -160,6 +166,7 @@ void to_json(nlohmann::json& json_, const EffectEmitterHitTemplate& hit_)
 
 void from_json(const nlohmann::json& json_, EffectEmitterHitTemplate& hit_)
 {
+    // ヒット情報は戦闘処理へ直結するため、負になって困る値は読み込み時に補正する。
     hit_.enabled = json_.value("Enabled", true);
     hit_.damage = json_.value("Damage", 10.0f);
     hit_.impactPower = (std::max)(json_.value("ImpactPower", 10.0f), 0.0f);
@@ -200,6 +207,7 @@ void from_json(const nlohmann::json& json_, EffectEmitterHitTemplate& hit_)
 
 void to_json(nlohmann::json& json_, const EffectEmitterTemplate& template_)
 {
+    // 1回のEmitで使う発生位置、形状、複数エントリ、攻撃判定をまとめて保存する。
     json_ =
     {
         { "Name", template_.name },
@@ -224,6 +232,7 @@ void to_json(nlohmann::json& json_, const EffectEmitterTemplate& template_)
 
 void from_json(const nlohmann::json& json_, EffectEmitterTemplate& template_)
 {
+    // テンプレートの形状値は、判定生成やProjectile移動で破綻しない範囲に丸める。
     template_.name = json_.value("Name", std::string{ "EffectEmitter" });
     template_.actionName = json_.value("ActionName", std::string{ "EffectEmitter_Fire" });
     template_.shapeType = static_cast<EFFECT_EMITTER_SHAPE_TYPE>(std::clamp(json_.value("ShapeType", 1), 0, 3));
@@ -246,6 +255,7 @@ void from_json(const nlohmann::json& json_, EffectEmitterTemplate& template_)
 void EffectEmitterComponent::Start()
 {
     BS_PROFILE_SCOPE("EffectEmitterComponent::Start");
+    // 空のまま置かれてもエディタですぐ試せるよう、最低1つのテンプレートとエントリを用意する。
     if (templates.empty())
     {
         EffectEmitterTemplate template_{};
@@ -261,6 +271,7 @@ void EffectEmitterComponent::RegisterActions()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // インデックス、ActionName、Nameの3種類で登録し、アニメイベントから呼びやすくする。
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
     {
         const std::string indexActionName_ = "EffectEmitter_" + std::to_string(index_);
@@ -288,6 +299,7 @@ void EffectEmitterComponent::Emit(size_t templateIndex_)
     BS_PROFILE_SCOPE("EffectEmitterComponent::Emit");
     if (templateIndex_ >= templates.size()) return;
     const EffectEmitterTemplate& template_ = templates[templateIndex_];
+    // 発生元のワールド位置/方向を一度求め、判定と見た目エントリで同じ基準を使う。
     const EmitFrame frame_ = BuildEmitFrame(template_);
     std::shared_ptr<GameObject> hitObject_;
     if (template_.spawnHit && template_.hit.enabled)
@@ -320,6 +332,7 @@ EffectEmitterComponent::EmitFrame EffectEmitterComponent::BuildEmitFrame(
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform) return {};
 
+    // SourceNodeNameが指定されていれば、キャラクターのボーン/ノード位置を発生元にする。
     DirectX::XMMATRIX sourceMatrix_ = owner_->transform->GetWorldMatrix();
     if (!template_.sourceNodeName.empty())
     {
@@ -340,6 +353,7 @@ EffectEmitterComponent::EmitFrame EffectEmitterComponent::BuildEmitFrame(
         template_.localScale);
     EmitFrame frame_{};
     frame_.sourceMatrix = localMatrix_ * sourceMatrix_;
+    // 後続のSpawn処理で使いやすいよう、行列から位置と前方向を取り出しておく。
     frame_.position = ExtractPosition(frame_.sourceMatrix);
     frame_.direction = TransformForward(frame_.sourceMatrix);
     return frame_;
@@ -366,6 +380,7 @@ void EffectEmitterComponent::SpawnEntry(
 {
     if (!entry_.enabled || entry_.assetPath.empty()) return;
 
+    // テンプレート基準にEntryごとのローカルTransformを重ね、見た目の発生位置を決める。
     EffectManager& effectManager_ = GetManager().GetEffectManager();
     const DirectX::XMMATRIX entryMatrix_ = BuildLocalMatrix(
         entry_.localOffset,
@@ -377,6 +392,7 @@ void EffectEmitterComponent::SpawnEntry(
 
     if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::PARTICLE)
     {
+        // ParticleはVFXManager経由で一時GameObjectとして生成し、Emitter指定があれば個別再生する。
         ParticleSpawnRequest request_{};
         request_.assetPath = entry_.assetPath;
         request_.emitterName = entry_.emitterName;
@@ -388,6 +404,7 @@ void EffectEmitterComponent::SpawnEntry(
     }
     else if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::MESH_VFX)
     {
+        // MeshVFXは生成後に色ランプやブレンドなど、Emitter側の一時上書きを適用できる。
         MeshVFXSpawnRequest request_{};
         request_.assetPath = entry_.assetPath;
         request_.position = position_;
@@ -408,6 +425,7 @@ void EffectEmitterComponent::SpawnEntry(
             followTarget_ &&
             followTarget_->transform)
         {
+            // Projectile判定と見た目を同じ親へぶら下げ、移動する判定に追従させる。
             spawnedObject_->transform->SetParent(followTarget_->transform);
         }
         spawnedObject_->transform->ApplyWorldMatrix(entryMatrix_);
@@ -434,6 +452,7 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
     std::shared_ptr<GameObject> hitObject_ = GetManager().Create("RuntimeEffectEmitterHit");
     if (!hitObject_) return nullptr;
     hitObject_->SetNoSaveObject();
+    // HitObject自体を発生元の向きへ置き、AttackEffectHitComponent側のローカル形状をその上に作る。
     hitObject_->transform->ApplyWorldMatrix(frame_.sourceMatrix);
     hitObject_->UpdateTransform();
 
@@ -442,6 +461,7 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
     if (!attackHit_) return hitObject_;
 
     const EffectEmitterHitTemplate& hit_ = template_.hit;
+    // Emitter用のHit設定をAttackEffectHitComponentへ転写し、既存の戦闘判定システムに乗せる。
     attackHit_->SetOwner(owner_.get());
     attackHit_->SetAttackInstanceId(GetManager().GetAttackSystem().CreateAttackInstance());
     attackHit_->SetHitGroupId(hit_.hitGroupId);
@@ -494,6 +514,7 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
 std::vector<AttackEffectHitShapeTemplate> EffectEmitterComponent::BuildHitShapes(
     const EffectEmitterTemplate& template_) const
 {
+    // Area/Projectile/Beam/Fanの抽象形状を、AttackEffectHitComponentが扱えるHitShapeへ変換する。
     std::vector<AttackEffectHitShapeTemplate> shapes_;
     AttackEffectHitShapeTemplate shape_{};
     shape_.enabled = true;
@@ -525,6 +546,7 @@ std::vector<AttackEffectHitShapeTemplate> EffectEmitterComponent::BuildHitShapes
     }
     else
     {
+        // Fanは扇形を複数のSphereへサンプリングし、広がるブレスのような判定にする。
         shape_.shape = ATTACK_HIT_SHAPE::SPHERE_GROUP;
         const int sampleCount_ = std::clamp(template_.fanSampleCount, 1, 31);
         const int rangeSteps_ = std::clamp(template_.fanRangeSteps, 1, 16);
@@ -565,6 +587,7 @@ void EffectEmitterComponent::ApplyMeshVFXOverrides(
     if (!entry_.overrideMeshVFXColorRamp && !entry_.forceAdditiveBlend && entry_.glowMultiplier == 1.0f) return;
 
     MeshVFXAsset asset_ = meshVFX_->GetAsset();
+    // 元アセットは変更せず、生成済みコンポーネントのコピーにだけ一時的な見た目変更を適用する。
     for (MeshVFXPart& part_ : asset_.parts)
     {
         if (entry_.overrideMeshVFXColorRamp)
@@ -586,6 +609,7 @@ void EffectEmitterComponent::ApplyMeshVFXOverrides(
 void EffectEmitterComponent::Gui()
 {
     BS_PROFILE_SCOPE("EffectEmitterComponent::Gui");
+    // テンプレート、発生エントリ、攻撃判定をまとめて編集し、その場でEmitして確認できるようにする。
     if (ImGui::Button("Register Actions")) RegisterActions();
     ImGui::SameLine();
     if (ImGui::Button("Add Template"))
@@ -748,6 +772,7 @@ void EffectEmitterComponent::Gui()
 
 void EffectEmitterComponent::Serialize(nlohmann::json& json_) const
 {
+    // 複数テンプレートをコンポーネントに持たせ、1つのObjectから複数種類の発生を扱えるようにする。
     json_["ComponentName"] = componentName;
     json_["Templates"] = templates;
 }
@@ -755,6 +780,7 @@ void EffectEmitterComponent::Serialize(nlohmann::json& json_) const
 void EffectEmitterComponent::Deserialize(const nlohmann::json& json_)
 {
     templates = json_.value("Templates", std::vector<EffectEmitterTemplate>{});
+    // 古い/空データでもエディタで編集を続けられるよう、最低1つのテンプレートを補う。
     if (templates.empty())
     {
         EffectEmitterTemplate template_{};

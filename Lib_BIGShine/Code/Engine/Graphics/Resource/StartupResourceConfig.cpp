@@ -11,10 +11,12 @@
 
 namespace
 {
+    // JSON形式のVersion。将来形式を変えたときの分岐用に保存している。
     constexpr int STARTUP_RESOURCE_CONFIG_VERSION = 1;
 
     std::string ToLowerString(std::string text_)
     {
+        // 拡張子やPriority文字列の比較用に小文字化する。
         std::transform(text_.begin(), text_.end(), text_.begin(),
             [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
         return text_;
@@ -23,6 +25,7 @@ namespace
 
 bool StartupResourceConfig::Load(const std::string& filePath_)
 {
+    // 読み込み前に既存設定を破棄し、失敗時に古い設定が混ざらないようにする。
     Clear();
 
     std::ifstream file_(filePath_);
@@ -40,10 +43,12 @@ bool StartupResourceConfig::Load(const std::string& filePath_)
         auto readArray_ =
             [this](const nlohmann::json& array_, STARTUP_RESOURCE_PRIORITY priority_)
             {
+                // criticalModels/highPriorityModelsの各配列を共通処理で読む。
                 if (!array_.is_array()) return;
                 for (const nlohmann::json& item_ : array_)
                 {
                     std::string filePath_ = item_.value("filePath", std::string());
+                    // 古いKey名のPathにも対応して、既存データを読み続けられるようにする。
                     if (filePath_.empty()) filePath_ = item_.value("Path", std::string());
 
                     const std::string normalizedPath_ = NormalizeResourcePath(filePath_);
@@ -60,6 +65,7 @@ bool StartupResourceConfig::Load(const std::string& filePath_)
                     }
 
                     std::string resourceName_ = item_.value("resourceName", std::string());
+                    // ResourceNameの旧Keyにも対応し、無ければPathのstemから自動生成する。
                     if (resourceName_.empty()) resourceName_ = item_.value("ResourceName", std::string());
                     if (resourceName_.empty()) resourceName_ = MakeDefaultResourceName(normalizedPath_);
 
@@ -81,6 +87,7 @@ bool StartupResourceConfig::Load(const std::string& filePath_)
         const nlohmann::json resources_ = json_.value("resources", nlohmann::json::array());
         if (resources_.is_array())
         {
+            // 旧/統合形式のresources配列も読み、requiredBeforeTitleからCritical扱いを復元する。
             for (const nlohmann::json& item_ : resources_)
             {
                 const STARTUP_RESOURCE_PRIORITY priority_ =
@@ -110,6 +117,7 @@ bool StartupResourceConfig::Load(const std::string& filePath_)
 
 bool StartupResourceConfig::Save(const std::string& filePath_) const
 {
+    // 現在形式ではPriorityごとに配列を分けて保存する。
     nlohmann::json json_;
     json_["version"] = STARTUP_RESOURCE_CONFIG_VERSION;
     json_["criticalModels"] = nlohmann::json::array();
@@ -118,6 +126,7 @@ bool StartupResourceConfig::Save(const std::string& filePath_) const
     auto writeArray_ =
         [](nlohmann::json& array_, const std::vector<StartupModelEntry>& entries_)
         {
+            // 保存時はPathを再正規化し、Editorで手入力された表記揺れを吸収する。
             for (const StartupModelEntry& entry_ : entries_)
             {
                 array_.push_back(
@@ -155,6 +164,7 @@ std::string StartupResourceConfig::NormalizeResourcePath(const std::string& file
     std::error_code errorCode_;
     if (path_.is_absolute())
     {
+        // 絶対PathはProject基準の相対Pathへ変換し、JSONを環境依存にしない。
         const std::filesystem::path basePath_ = std::filesystem::current_path(errorCode_);
         if (errorCode_) return {};
         const std::filesystem::path relativePath_ = std::filesystem::relative(path_, basePath_, errorCode_);
@@ -165,6 +175,7 @@ std::string StartupResourceConfig::NormalizeResourcePath(const std::string& file
     std::string normalizedPath_ = path_.lexically_normal().generic_string();
     while (!normalizedPath_.empty() && normalizedPath_.starts_with("./"))
     {
+        // ./Data/... のような表記はData/...へ揃える。
         normalizedPath_.erase(0, 2);
     }
     return normalizedPath_;
@@ -183,6 +194,7 @@ bool StartupResourceConfig::IsSupportedModelPath(const std::string& filePath_)
 
 bool StartupResourceConfig::IsDataRelativePath(const std::string& filePath_)
 {
+    // Startup ResourceはProject内Data配下に限定し、配布時のPath崩れを防ぐ。
     const std::string normalizedPath_ = NormalizeResourcePath(filePath_);
     const std::string lowerPath_ = ToLowerString(normalizedPath_);
     return lowerPath_ == "data" || lowerPath_.starts_with("data/");
@@ -219,6 +231,7 @@ StartupModelEntry StartupResourceConfig::MakeEntry(
     const std::string& filePath_,
     STARTUP_RESOURCE_PRIORITY priority_)
 {
+    // Priorityに応じてrequiredBeforeTitleも同時に決め、Entry内の状態を矛盾させない。
     StartupModelEntry entry_;
     entry_.resourceName = resourceName_;
     entry_.filePath = NormalizeResourcePath(filePath_);
@@ -231,6 +244,7 @@ bool StartupResourceConfig::SaveJsonAtomically(const std::string& filePath_, con
 {
     try
     {
+        // まず.tmpへ書き出し、書き込み成功後に本来のPathへ置き換える。
         const std::filesystem::path outputPath_(filePath_);
         const std::filesystem::path parentPath_ = outputPath_.parent_path();
         if (!parentPath_.empty()) std::filesystem::create_directories(parentPath_);
@@ -249,6 +263,7 @@ bool StartupResourceConfig::SaveJsonAtomically(const std::string& filePath_, con
         std::filesystem::rename(temporaryPath_, outputPath_, errorCode_);
         if (errorCode_)
         {
+            // Windowsでは既存Fileがあるとrenameに失敗する場合があるため、削除して再試行する。
             std::filesystem::remove(outputPath_, errorCode_);
             errorCode_.clear();
             std::filesystem::rename(temporaryPath_, outputPath_, errorCode_);

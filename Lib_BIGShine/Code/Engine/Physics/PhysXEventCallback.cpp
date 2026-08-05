@@ -10,6 +10,7 @@ namespace
 {
 bool IsMaskOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
 {
+    // Layer/Mask上は検知したいが、物理押し返しはしない組み合わせかを判定する。
     auto objA_ = colA_ ? colA_->GetGameObject() : nullptr;
     auto objB_ = colB_ ? colB_->GetGameObject() : nullptr;
     if (!objA_ || !objB_) return false;
@@ -22,6 +23,7 @@ bool IsManualCombatRole(ColliderComponent* collider_)
 {
     if (!collider_) return false;
 
+    // Hit/Hurt/Guard/JustDodgeはCombat側の手動判定で扱うため、PhysX通知では処理しない。
     const ColliderComponent::CollisionRole role_ = collider_->GetCollisionRole();
     return role_ == ColliderComponent::CollisionRole::HIT_BOX ||
         role_ == ColliderComponent::CollisionRole::HURT_BOX ||
@@ -31,6 +33,7 @@ bool IsManualCombatRole(ColliderComponent* collider_)
 
 bool IsDetectionOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
 {
+    // Sensorや物理応答なしColliderは、ContactではなくTrigger相当の通知として扱う。
     return !colA_->UsesPhysicsResponse() || !colB_->UsesPhysicsResponse()
         || colA_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR
         || colB_->GetCollisionRole() == ColliderComponent::CollisionRole::SENSOR;
@@ -39,6 +42,7 @@ bool IsDetectionOnlyPair(ColliderComponent* colA_, ColliderComponent* colB_)
 
 void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
 {
+    // PhysX Trigger通知をCollisionStepSystemへ渡し、Enter/Exit相当の管理をエンジン側へ集約する。
     for (PxU32 i_ = 0; i_ < count; ++i_)
     {
         PxTriggerPair& pair_ = pairs[i_];
@@ -49,6 +53,7 @@ void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
 
         auto colA_ = reinterpret_cast<ColliderComponent*>(pair_.triggerActor ? pair_.triggerActor->userData : nullptr);
         auto colB_ = reinterpret_cast<ColliderComponent*>(pair_.otherActor ? pair_.otherActor->userData : nullptr);
+        // userDataにはColliderComponentを入れているため、PhysX Actorからエンジン側Colliderへ戻す。
         if (!colA_ || !colB_) continue;
         if (IsManualCombatRole(colA_) || IsManualCombatRole(colB_)) continue;
 
@@ -59,11 +64,12 @@ void CollisionCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
 
 void CollisionCallback::onContact(const PxContactPairHeader& header, const PxContactPair* pairs, PxU32 nbPairs)
 {
+    // 物理Contact通知をColliderComponentへ戻し、接触点や接地判定をエンジン側へ反映する。
     auto colA_ = reinterpret_cast<ColliderComponent*>(header.actors[0] ? header.actors[0]->userData : nullptr);
     auto colB_ = reinterpret_cast<ColliderComponent*>(header.actors[1] ? header.actors[1]->userData : nullptr);
     if (!colA_ || !colB_) return;
     if (IsManualCombatRole(colA_) || IsManualCombatRole(colB_)) return;
-    // header.actors[] can point to actors that were removed from the scene.
+    // header.actors[]はSceneから削除済みActorを指すことがあるため、各Pairの内容も確認する。
     for (PxU32 i_ = 0; i_ < nbPairs; ++i_)
     {
         const PxContactPair& pair_ = pairs[i_];
@@ -72,6 +78,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
 
         if (IsMaskOnlyPair(colA_, colB_) || IsDetectionOnlyPair(colA_, colB_))
         {
+            // 検知専用の組み合わせは物理接触として押し返さず、Triggerイベントへ変換する。
             if (touching_ || lost_)
             {
                 colA_->GetManager().GetCollisionStepSystem().HandlePhysXTrigger(colA_, colB_, !lost_);
@@ -86,6 +93,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
 
         PxContactPairPoint contacts_[8];
         const PxU32 contactCount_ = pair_.extractContacts(contacts_, 8);
+        // 代表接触点をA/B双方の向きで持ち、Hit/Collision処理が同じ情報を読めるようにする。
         CollisionContact contactA_{};
         CollisionContact contactB_{};
         if (contactCount_ > 0)
@@ -108,6 +116,7 @@ void CollisionCallback::onContact(const PxContactPairHeader& header, const PxCon
             contactB_);
         for (PxU32 contactIndex_ = 0; contactIndex_ < contactCount_; ++contactIndex_)
         {
+            // 法線の上下方向から、キャラクターが地面として扱えるColliderに乗っているかを判定する。
             const float normalY_ = contacts_[contactIndex_].normal.y;
             if (normalY_ > 0.5f &&
                 !colB_->isStatic &&

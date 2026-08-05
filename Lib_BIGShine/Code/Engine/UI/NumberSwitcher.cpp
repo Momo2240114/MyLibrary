@@ -8,6 +8,7 @@
 
 void NumberSwitcher::Start()
 {
+    // 同じGameObject上のSpriteRendererを取得し、現在の数字を初期反映する。
     auto gameObject_ = GetGameObject();
     if (!gameObject_) return;
 
@@ -17,21 +18,25 @@ void NumberSwitcher::Start()
 
 void NumberSwitcher::SetDigit(int num_)
 {
+    // Grid数が0以下だとIndex計算が壊れるため、最低1に補正する。
     if (maxColumns < 1) maxColumns = 1;
     if (maxRows < 1) maxRows = 1;
 
     const int maxIndex_ = (maxColumns * maxRows) - 1;
+    // Texture内に存在するGrid範囲へ丸める。
     currentDigit = std::clamp(num_, 0, maxIndex_);
 
     auto sr_ = spriteRenderer.lock();
     if (!sr_) return;
 
+    // SpriteRenderer側にGrid Indexを渡し、対応する数字Cellを表示する。
     sr_->SetUVGridIndex(currentDigit, maxColumns, digitSize);
 }
 
 void NumberSwitcher::Gui() 
 {
     if (ImGui::InputInt("Current Digit", &currentDigit)) {
+        // Editorで値を変えたら即座にUVへ反映する。
         SetDigit(currentDigit);
     }
 
@@ -54,6 +59,7 @@ void NumberSwitcher::Gui()
 }
 
 void NumberSwitcher::Serialize(nlohmann::json& j) const {
+    // 数字TextureのGrid設定と現在表示Indexを保存する。
     j["CurrentDigit"] = currentDigit;
     j["MaxColumns"] = maxColumns;
     j["MaxRows"] = maxRows;
@@ -62,6 +68,7 @@ void NumberSwitcher::Serialize(nlohmann::json& j) const {
 
 void NumberSwitcher::Deserialize(const nlohmann::json& j)
 {
+    // 古いSceneで一部Keyが無い場合は現在値を維持する。
     if (j.contains("CurrentDigit")) currentDigit = j["CurrentDigit"];
     if (j.contains("MaxColumns")) maxColumns = j["MaxColumns"];
     if (j.contains("MaxRows")) maxRows = j["MaxRows"];
@@ -70,5 +77,6 @@ void NumberSwitcher::Deserialize(const nlohmann::json& j)
         digitSize.y = j["DigitSize"][1];
     }
 
+    // 読み込み後の設定で表示を更新する。
     SetDigit(currentDigit);
 }

@@ -15,7 +15,7 @@ class ActionRegistry
 public:
     using ActionFunc = std::function<void()>;
 
-
+    // 現在 Scene の ActionRegistry を取得する。SceneBase::Initialize で差し替えられる前提。
     static ActionRegistry& Instance() 
     {
         return *instance;
@@ -28,6 +28,7 @@ public:
     }
 
     // カテゴリを指定して登録する
+    // 例: "Camera" / "Fov_0" のように、Editor 上で探しやすい分類に分ける。
     void RegisterAction(const std::string& category, const std::string& name, ActionFunc func);
 
     // すべてのカテゴリ名を取得
@@ -43,8 +44,10 @@ public:
         return names;
     }
 
+    // カテゴリをまたいで名前検索し、最初に見つかった Action を返す。
     ActionFunc GetAction(const std::string& name);
 
+    // Scene 破棄や Component 再登録時に、古い Action を外す。
     bool RemoveAction(const std::string& category, const std::string& actionName);
 
     // 実行（すべてのカテゴリから検索）
@@ -62,6 +65,7 @@ public:
     {
         if(this)
         {
+            // Scene 切り替え時に前 Scene の Action が残らないよう全消去する。
             actions.clear();
         }
     };
@@ -69,5 +73,6 @@ private:
     static std::shared_ptr<ActionRegistry> instance;
 
     // actions[カテゴリ][アクション名]
+    // 同じカテゴリ内の同名 Action は後から登録したものが上書きされる。
     std::unordered_map<std::string, std::unordered_map<std::string, ActionFunc>> actions;
 };

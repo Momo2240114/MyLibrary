@@ -21,6 +21,8 @@ VFXMaterialEditorWindow::VFXMaterialEditorWindow(GameObjectManager* manager_)
 void VFXMaterialEditorWindow::Draw()
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::Draw");
+
+    // 上部でマテリアルの読み書き、下部で選択中マテリアルの各パラメータを編集する。
     if (!BeginEditorWindow()) { EndEditorWindow(); return; }
     DrawMaterialToolbar();
     ImGui::Separator();
@@ -32,6 +34,7 @@ void VFXMaterialEditorWindow::DrawMaterialToolbar()
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::DrawMaterialToolbar");
 
+    // 複数マテリアルを見比べながら編集できるよう、タブ状の作業スロットとして保持する。
     SyncSelectedMaterialSlot();
     if (ImGui::Button("Add Slot"))
     {
@@ -86,11 +89,13 @@ void VFXMaterialEditorWindow::DrawMaterialToolbar()
         nullptr,
         "Data/VFXMaterials"))
     {
+        // AssetSlotから選んだパスを読み込み、現在スロットの対象リソースとして同期する。
         LoadMaterial(selectedPath_);
     }
 
     if (ImGui::Button("New"))
     {
+        // 新規作成は一時リソースとして始め、Save/Save Asで実ファイルへ書き出す。
         VFXMaterialData materialData_{};
         materialData_.materialName = "NewVFXMaterial";
         materialResource = VFXMaterialResourceManager::GetInstance().CreateTemporary(materialData_);
@@ -135,6 +140,7 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::DrawMaterialEditor");
 
+    // 編集対象が無い場合でも操作できるよう、必要なら一時マテリアルを作ってから編集する。
     EnsureEditableMaterial();
     if (!materialResource) return;
 
@@ -144,6 +150,7 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
 
     if (ImGui::CollapsingHeader("Textures", ImGuiTreeNodeFlags_DefaultOpen))
     {
+        // テクスチャパス変更時はGPUリソースも読み直し、プレビューや実VFXへすぐ反映できる状態にする。
         bool textureChanged_ = false;
         textureChanged_ |= AssetSlotGui::Draw("Base Texture", AssetSlotType::TEXTURE, materialData_.baseTexturePath, materialResource->GetBaseTexture(), "Data/Texture");
         textureChanged_ |= AssetSlotGui::Draw("Mask Texture", AssetSlotType::TEXTURE, materialData_.maskTexturePath, materialResource->GetMaskTexture(), "Data/Texture");
@@ -167,11 +174,13 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
 
     if (ImGui::CollapsingHeader("Color Ramp"))
     {
+        // Color Rampは寿命や時間に応じた色変化を作る追加レイヤーとして編集する。
         DrawColorRampEditor(materialData_.colorRamp);
     }
 
     if (ImGui::CollapsingHeader("Random Color"))
     {
+        // Random Colorは同じVFXでも個体差を出すための色範囲とシードを持つ。
         DrawRandomColorEditor(materialData_.randomColor);
     }
 
@@ -197,6 +206,7 @@ void VFXMaterialEditorWindow::DrawMaterialEditor()
 
     if (ImGui::CollapsingHeader("Render State"))
     {
+        // 半透明/加算、カリング、深度設定は描画順や見え方へ直結するため、素材単位で保存する。
         const char* blendNames_[] = { "Alpha", "Additive" };
         int blendMode_ = static_cast<int>(materialData_.renderState.blendMode);
         if (ImGui::Combo("Blend Mode", &blendMode_, blendNames_, IM_ARRAYSIZE(blendNames_)))
@@ -222,6 +232,7 @@ void VFXMaterialEditorWindow::DrawUvEditor(
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::DrawUvEditor");
 
+    // UVはスケール、オフセット、スクロール、回転をまとめて持ち、テクスチャごとの流れを作る。
     if (!ImGui::TreeNode(label_)) return;
     ImGui::DragFloat2("Scale", &uv_.scale.x, 0.01f);
     ImGui::DragFloat2("Offset", &uv_.offset.x, 0.01f);
@@ -236,6 +247,7 @@ void VFXMaterialEditorWindow::DrawColorRampEditor(VFXMaterialColorRampData& colo
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::DrawColorRampEditor");
 
+    // Ramp Stopは0-1範囲の位置と色を持つ。順序を整えることで補間結果を予測しやすくする。
     ImGui::Checkbox("Ramp Enabled", &colorRamp_.enabled);
 
     const char* sampleSourceNames_[] = { "Life", "Time", "Fixed" };
@@ -277,6 +289,7 @@ void VFXMaterialEditorWindow::DrawColorRampEditor(VFXMaterialColorRampData& colo
 
     if (colorRamp_.stops.empty())
     {
+        // 空のままだと評価できないため、最低限の開始/終了Stopを自動で用意する。
         colorRamp_.stops.push_back({ 0.0f, { 1.0f, 1.0f, 1.0f, 1.0f } });
         colorRamp_.stops.push_back({ 1.0f, { 1.0f, 1.0f, 1.0f, 1.0f } });
     }
@@ -322,6 +335,7 @@ void VFXMaterialEditorWindow::DrawRandomColorEditor(VFXMaterialRandomColorData& 
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::DrawRandomColorEditor");
 
+    // Min/Maxの色範囲とSeedを保存し、再生ごとのランダム色を安定して再現できるようにする。
     ImGui::Checkbox("Random Enabled", &randomColor_.enabled);
     const char* modeNames_[] = { "Multiply", "Override", "Add" };
     int mode_ = static_cast<int>(randomColor_.mode);
@@ -346,6 +360,8 @@ void VFXMaterialEditorWindow::DrawRandomColorEditor(VFXMaterialRandomColorData& 
 void VFXMaterialEditorWindow::LoadMaterial(const std::string& path_)
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::LoadMaterial");
+
+    // ResourceManager経由で読み込むことで、同じパスを参照するVFXとリソースを共有する。
     materialPath = path_;
     materialResource = VFXMaterialResourceManager::GetInstance().Load(materialPath);
     StoreSelectedMaterialSlot();
@@ -354,6 +370,8 @@ void VFXMaterialEditorWindow::LoadMaterial(const std::string& path_)
 void VFXMaterialEditorWindow::SaveMaterial(const std::string& path_)
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::SaveMaterial");
+
+    // 保存前に一時マテリアルを保証し、現在スロットのパスも保存先へ更新する。
     EnsureEditableMaterial();
     if (!materialResource) return;
     VFXMaterialResourceManager::GetInstance().Save(path_, materialResource);
@@ -365,6 +383,7 @@ void VFXMaterialEditorWindow::EnsureEditableMaterial()
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::EnsureEditableMaterial");
 
+    // まだ読み込み先が無い場合は、編集操作の受け皿になる一時リソースを作る。
     if (materialResource) return;
     VFXMaterialData materialData_{};
     materialData_.materialName = "TemporaryVFXMaterial";
@@ -375,6 +394,8 @@ void VFXMaterialEditorWindow::EnsureEditableMaterial()
 void VFXMaterialEditorWindow::SyncSelectedMaterialSlot()
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::SyncSelectedMaterialSlot");
+
+    // selectedMaterialIndexのスロット内容を、画面が直接編集するmaterialResource/materialPathへ戻す。
     if (materialSlots.empty())
     {
         MaterialEditorSlot slot_{};
@@ -393,6 +414,8 @@ void VFXMaterialEditorWindow::SyncSelectedMaterialSlot()
 void VFXMaterialEditorWindow::StoreSelectedMaterialSlot()
 {
     BS_PROFILE_SCOPE("VFXMaterialEditorWindow::StoreSelectedMaterialSlot");
+
+    // 現在の編集対象をスロットへ保存し、タブを切り替えても各スロットの参照先を維持する。
     if (materialSlots.empty())
     {
         materialSlots.emplace_back();

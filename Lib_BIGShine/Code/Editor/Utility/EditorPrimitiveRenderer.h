@@ -9,6 +9,7 @@
 class EditorPrimitiveRenderer
 {
 public:
+    // エディタ専用の線描画Renderer。グリッドやプレビュー補助線を一時頂点として描く。
     bool Initialize(ID3D11Device* device_);
 
     void AddLine(
@@ -32,10 +33,12 @@ public:
     void Clear();
 
 private:
+    // 1回のMapで送る最大頂点数。超えた分はRender内で分割描画される。
     static constexpr UINT VERTEX_CAPACITY = 6 * 1024;
 
     struct Vertex
     {
+        // ワールド座標の線頂点。シェーダではViewProjectionだけを掛ける。
         DirectX::XMFLOAT3 position;
         DirectX::XMFLOAT4 color;
     };
@@ -48,6 +51,7 @@ private:
 private:
     std::vector<Vertex> vertices;
 
+    // 線描画用の最小シェーダ一式と、毎フレーム更新するDynamic VertexBuffer。
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;

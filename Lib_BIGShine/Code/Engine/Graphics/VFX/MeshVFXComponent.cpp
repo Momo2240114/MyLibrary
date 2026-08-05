@@ -28,6 +28,7 @@
 
 namespace
 {
+    // 旧バージョンで保存されていた内部メッシュ名。読み込み時に現在の命名へ変換して互換性を保つ。
     constexpr const char* LEGACY_SHAPE_CYLINDER_MODEL_PATH = "__ShapeCylinder__";
     constexpr const char* LEGACY_SLASH_CRESCENT_MODEL_PATH = "__SlashCrescent__";
     constexpr const char* LEGACY_SLASH_FAN_MODEL_PATH = "__SlashFan__";
@@ -38,6 +39,7 @@ namespace
     constexpr const char* LEGACY_SLASH_VERTICAL_CRESCENT_MODEL_PATH = "__SlashVerticalCrescent__";
     constexpr const char* LEGACY_SLASH_RAISED_CRESCENT_MODEL_PATH = "__SlashRaisedCrescent__";
 
+    // ファイルを持たないエフェクト用メッシュは、この特殊パスをモデル指定の代わりに使う。
     constexpr const char* INTERNAL_MESH__MODEL_PATH = "__InternalMesh__";
     constexpr const char* INTERNAL_MESH_CYLINDER_MODEL_PATH = "__InternalMeshCylinder__";
     constexpr const char* INTERNAL_MESH_CONE_MODEL_PATH = "__InternalMeshCone__";
@@ -61,6 +63,7 @@ namespace
     {
         if (!device_ || mesh_.vertices.empty() || mesh_.indices.empty()) return false;
 
+        // 内部生成メッシュは編集後に形状が変わらないため、IMMUTABLEなVB/IBとしてGPUへ渡す。
         D3D11_BUFFER_DESC vertexDesc_{};
         vertexDesc_.ByteWidth = static_cast<UINT>(
             sizeof(GltfModelCommponennt::Vertex) * mesh_.vertices.size());
@@ -98,6 +101,7 @@ namespace
     std::shared_ptr<ModelResource> CreateGeneratedModelResource(
         const char* modelName_)
     {
+        // GLTFを通らない内部メッシュでも通常モデルと同じ描画経路に乗せるため、最小構成のResourceを作る。
         auto resource_ = std::make_shared<ModelResource>();
         resource_->modelName = modelName_;
 
@@ -119,6 +123,7 @@ namespace
 
     void NormalizeInternalMeshModelPath(std::string& modelPath_)
     {
+        // 古いJSONに残っている名称を現在の内部メッシュキーへ置き換え、既存アセットを読み続けられるようにする。
         if (modelPath_ == LEGACY_SHAPE_CYLINDER_MODEL_PATH)
         {
             modelPath_ = INTERNAL_MESH_CYLINDER_MODEL_PATH;
@@ -162,6 +167,7 @@ namespace
         float u_,
         float v_)
     {
+        // 斬撃用の平面メッシュは上向き法線と横向き接線で統一し、マテリアル側のUV演出を受けやすくする。
         GltfModelCommponennt::Vertex vertex_{};
         vertex_.position = position_;
         vertex_.normal = { 0.0f, 1.0f, 0.0f };
@@ -177,6 +183,7 @@ namespace
         uint32_t rightBottom_,
         uint32_t rightTop_)
     {
+        // 4頂点を2三角形に分解する。内部メッシュ生成の基本単位として各形状から使い回す。
         indices_.push_back(leftBottom_);
         indices_.push_back(leftTop_);
         indices_.push_back(rightBottom_);
@@ -193,6 +200,7 @@ namespace
         const size_t pointCount_ = (std::min)(innerPoints_.size(), outerPoints_.size());
         if (pointCount_ < 2) return;
 
+        // 内側と外側の点列を交互に頂点化し、隣り合う区間を四角形リボンとしてつなぐ。
         const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
         for (size_t index_ = 0; index_ < pointCount_; ++index_)
         {
@@ -222,6 +230,7 @@ namespace
         float angleDegrees_,
         const DirectX::XMFLOAT3& offset_)
     {
+        // 扇形や交差斬撃で使う直線リボン。角度とオフセットだけで配置を決める。
         const float angle_ = DirectX::XMConvertToRadians(angleDegrees_);
         const float cos_ = std::cos(angle_);
         const float sin_ = std::sin(angle_);
@@ -268,6 +277,7 @@ namespace
         float uStart_,
         float uEnd_)
     {
+        // ブレスビームはカメラや裏面から見ても抜けないよう、同じ面を両方向の三角形で持たせる。
         const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
         const DirectX::XMFLOAT3 startA_ = { edgeA_.x, edgeA_.y, 0.0f };
         const DirectX::XMFLOAT3 startB_ = { edgeB_.x, edgeB_.y, 0.0f };
@@ -292,6 +302,7 @@ namespace
     {
         if (!device_) return nullptr;
 
+        // 指定角度の円弧を、内外2本の点列からリボン状の斬撃メッシュとして生成する。
         auto resource_ = CreateGeneratedModelResource(modelPath_);
         auto& mesh_ = resource_->meshes[0];
         mesh_.vertices.reserve((INTERNAL_MESH_SLASH_SEGMENTS + 1) * 2);
@@ -327,6 +338,7 @@ namespace
         float maxWidth_,
         float tipWidth_)
     {
+        // 三日月形の斬撃を作るため、中央を太く、両端を細くした内外点列を作る。
         innerPoints_.clear();
         outerPoints_.clear();
         innerPoints_.reserve(INTERNAL_MESH_SLASH_SEGMENTS + 1);
@@ -343,16 +355,16 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // 0 -> 1 -> 0: wider in the center and sharper at both tips.
+            // 0 -> 1 -> 0 の変化で、中央を太くしつつ先端を細く尖らせる。
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
             const float sharpTaper_ = taper_ * taper_;
 
             const float width_ = tipWidth_ + maxWidth_ * sharpTaper_;
 
-            // Push the center slightly outward to emphasize the slash arc.
+            // 中央を少し外側へ押し出し、斬撃の弧が強く見えるようにする。
             const float currentCenterRadius_ = centerRadius_ + 0.05f * taper_;
 
-            // Keep the inner edge thin and let the outer edge swell.
+            // 内側は細く保ち、外側に厚みを寄せることで刃のシルエットを作る。
             const float innerRadius_ = currentCenterRadius_ - width_ * 0.35f;
             const float outerRadius_ = currentCenterRadius_ + width_ * 1.25f;
 
@@ -376,6 +388,7 @@ namespace
     {
         if (!device_) return nullptr;
 
+        // 標準の三日月斬撃。複数プリセットの基準になる一枚リボン形状。
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_SLASH_CRESCENT_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
 
@@ -420,6 +433,7 @@ namespace
         uint32_t rightBottom_,
         uint32_t rightTop_)
     {
+        // 表裏の両方を描くため、同じ四角形を逆向き三角形でも追加する。
         indices_.push_back(leftBottom_);
         indices_.push_back(leftTop_);
         indices_.push_back(rightBottom_);
@@ -445,6 +459,7 @@ namespace
         float startAngleDegrees_,
         float endAngleDegrees_)
     {
+        // 縦方向に立ち上がる斬撃壁。中央ほど高く厚くし、端は細く消える形にする。
         const uint32_t baseIndex_ = static_cast<uint32_t>(mesh_.vertices.size());
 
         for (int index_ = 0; index_ <= INTERNAL_MESH_SLASH_SEGMENTS; ++index_)
@@ -459,7 +474,7 @@ namespace
             const float sin_ = std::sin(angle_);
             const float cos_ = std::cos(angle_);
 
-            // Make the center taller while keeping both ends narrow.
+            // 両端を細く保ちながら、中央だけ高さと奥行きを強める。
             const float taper_ = std::sin(rate_ * DirectX::XM_PI);
 
             const float currentHeight_ = height_ * (0.18f + 0.82f * taper_);

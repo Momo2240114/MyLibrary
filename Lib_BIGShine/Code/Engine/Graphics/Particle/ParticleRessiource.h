@@ -30,13 +30,19 @@ enum class PARTICLE_SPAWN_DIRECTION_MODE : uint32_t
 
 enum PARTICLE_GRADIENT_SAMPLE_MODE
 {
+    // U 方向で Gradient Texture を参照する。
     PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL = 0,
+
+    // V 方向で Gradient Texture を参照する。
     PARTICLE_GRADIENT_SAMPLE_MODE_VERTICAL = 1,
 };
 
 enum PARTICLE_GRADIENT_DIRECTION
 {
+    // startUv から endUv へそのまま進める。
     PARTICLE_GRADIENT_DIRECTION_FORWARD = 0,
+
+    // start/end の意味を反転して参照する。
     PARTICLE_GRADIENT_DIRECTION_REVERSE = 1,
 };
 
@@ -152,12 +158,15 @@ struct ParticleSystemConstants
     uint32_t cpuSpawnPadding0 = 0;
     uint32_t cpuSpawnPadding1 = 0;
     DirectX::XMFLOAT4 emissionAxis = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+    // Target Attraction を使う時の吸引先ワールド座標。
     DirectX::XMFLOAT4 targetPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
     float targetAttractionStrength = 0.0f;
     float targetAttractionRange = 0.0f;
     float targetAttractionFalloff = 1.0f;
     uint32_t useTargetAttraction = 0;
 
+    // Color Gradient の参照方向と、Shade Gradient Texture の有効状態。
     uint32_t gradientSampleMode = PARTICLE_GRADIENT_SAMPLE_MODE_HORIZONTAL;
     uint32_t gradientDirection = PARTICLE_GRADIENT_DIRECTION_FORWARD;
     uint32_t useShadeGradientTexture = 0;
@@ -177,6 +186,7 @@ static_assert(sizeof(ParticleSystemConstants) % 16 == 0);
 
 struct particle_system_settings
 {
+    // GPU に送る値と、Editor/Asset 保存で必要な Texture パスをまとめた旧形式設定。
     ParticleSystemConstants data;
     std::string texturePath;
     std::string maskTexturePath;

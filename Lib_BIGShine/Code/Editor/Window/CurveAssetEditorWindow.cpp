@@ -16,6 +16,7 @@ void CurveAssetEditorWindow::Draw()
         EndEditorWindow();
         return;
     }
+    // 汎用Curve編集の実処理はCurveComponentに任せ、Window側は表示枠だけを管理する。
     curveEditor.DrawEditorContent();
     DrawStylePopup();
     EndEditorWindow();

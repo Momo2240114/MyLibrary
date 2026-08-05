@@ -19,6 +19,7 @@ namespace
 {
 XMFLOAT3 TransformOffset(const XMFLOAT3& offset_, const XMFLOAT4X4& transform_)
 {
+    // NodeのWorldTransformにローカルオフセットを乗せ、実際の端点位置へ変換する。
     XMFLOAT3 position_;
     XMStoreFloat3(
         &position_,
@@ -31,6 +32,7 @@ XMMATRIX CreateSegmentTransform(
     const XMFLOAT3& endPosition_,
     float thickness_)
 {
+    // start-endをY軸方向とする細長いTransformを作り、MeshVFXやCapsuleへ流用する。
     const XMVECTOR start_ = XMLoadFloat3(&startPosition_);
     const XMVECTOR end_ = XMLoadFloat3(&endPosition_);
     const XMVECTOR difference_ = XMVectorSubtract(end_, start_);
@@ -40,6 +42,7 @@ XMMATRIX CreateSegmentTransform(
     XMVECTOR referenceAxis_ = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
     if (std::abs(XMVectorGetX(XMVector3Dot(yAxis_, referenceAxis_))) > 0.99f)
     {
+        // 線分がZ軸とほぼ平行な場合、外積が潰れないよう参照軸をXへ変える。
         referenceAxis_ = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
     }
 
@@ -68,6 +71,7 @@ void BoneSegmentAttachmentComponent::LateUpdate(float deltaTime_)
 
 std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTargetModel()
 {
+    // 既に解決済みならキャッシュを使う。
     if (auto model_ = targetModel.lock()) return model_;
 
     auto owner_ = GetGameObject();
@@ -75,6 +79,7 @@ std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTar
 
     if (!targetGameObjectName.empty() && owner_->manager)
     {
+        // 明示指定されたGameObject名を優先してModelを探す。
         if (auto targetObject_ = owner_->GetManager().Find(targetGameObjectName))
         {
             if (auto model_ = targetObject_->GetComponent<GltfModelCommponennt>())
@@ -87,6 +92,7 @@ std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTar
 
     if (auto model_ = owner_->GetComponent<GltfModelCommponennt>())
     {
+        // 指定が無ければ所有者自身のModelを使う。
         targetModel = model_;
         targetGameObjectName = owner_->GetName();
         return model_;
@@ -95,6 +101,7 @@ std::shared_ptr<GltfModelCommponennt> BoneSegmentAttachmentComponent::ResolveTar
     auto parent_ = owner_->transform->parent.lock();
     while (parent_)
     {
+        // エフェクトやColliderが子Objectに付くケースに備え、親階層も探索する。
         auto parentObject_ = parent_->gameObject.lock();
         if (parentObject_)
         {
@@ -127,6 +134,7 @@ bool BoneSegmentAttachmentComponent::ResolveNodeIndices(
 
     if (!validStart_) startNodeIndex = model_->GetNodeIndex(startNodeName.c_str());
     if (!validEnd_) endNodeIndex = model_->GetNodeIndex(endNodeName.c_str());
+    // Node名が変わっていなければキャッシュを使い、変わった時だけ再検索する。
     return startNodeIndex >= 0 && endNodeIndex >= 0;
 }
 
@@ -163,6 +171,7 @@ bool BoneSegmentAttachmentComponent::GetSegment(
 
 void BoneSegmentAttachmentComponent::SyncTargets()
 {
+    // Node間線分を求め、Transform/Particle/Capsuleへ同じ結果を同期する。
     auto owner_ = GetGameObject();
     auto model_ = ResolveTargetModel();
     if (!owner_ || !ResolveNodeIndices(model_)) return;
@@ -180,11 +189,13 @@ void BoneSegmentAttachmentComponent::SyncTargets()
         CreateSegmentTransform(startPosition_, endPosition_, (std::max)(meshVFXThickness, 0.0001f));
     if (applyTransform || applyCapsule)
     {
+        // 所有ObjectのTransformを線分中心・線分方向へ合わせる。
         owner_->transform->ApplyWorldMatrix(segmentTransform_);
     }
 
     if (applyParticleLine)
     {
+        // ParticleのLine発生形状を、現在のBone Segmentへ追従させる。
         if (auto particle_ = owner_->GetComponent<ParticleComponent>())
         {
             particle_->SetEmitterLine(particleEmitterName, startPosition_, endPosition_);
@@ -193,6 +204,7 @@ void BoneSegmentAttachmentComponent::SyncTargets()
 
     if (applyCapsule)
     {
+        // CapsuleColliderはObject Transform側で長さを表し、Collider側は単位長の半分を使う。
         if (auto capsule_ = owner_->GetComponent<CapsuleCollider>())
         {
             capsule_->radius = capsuleRadius / (std::max)(meshVFXThickness, 0.0001f);
@@ -275,6 +287,7 @@ void BoneSegmentAttachmentComponent::Deserialize(const nlohmann::json& json_)
     }
 
     targetModel.reset();
+    // Deserialize後はModel/Node参照を必ず解決し直す。
     startNodeIndex = -1;
     endNodeIndex = -1;
 }

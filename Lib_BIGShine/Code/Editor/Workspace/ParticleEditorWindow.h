@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "EditorWorkspaceWindow.h"
 #include "EditorRenderTarget.h"
@@ -58,9 +58,11 @@ private:
     void DrawAssetBrowserPanel();
     void DrawInspectorPanel();
     void RenderPreview(const ImVec2& previewSize_);
+    // Asset一覧はファイル追加/削除をEditor側へ即反映できるよう、種類ごとに再スキャンする。
     void RefreshParticleAssets();
     void RefreshSequenceAssets();
     void RefreshImpactEffectAssets();
+    // Timelineの現在時刻から、Particle/MeshVFX/ImpactPreviewの再生状態を同期する。
     void UpdateSequence(float deltaTime_);
     void ResetSequence();
     bool SaveSequence(const std::string& path_);
@@ -71,6 +73,7 @@ private:
 
 
 private:
+    // Preview用の描画・再生リソース。実SceneのObjectを触らず、Editor専用Objectだけで確認する。
     EditorPrimitiveRenderer editorPrimitiveRenderer; // Preview Grid / Axis描画用。
     EditorRenderTarget previewTarget;       // Preview描画先のRenderTarget。
     ModelRenderSystem modelRenderSystem;    // Previewモデル描画用。
@@ -84,6 +87,7 @@ private:
     std::shared_ptr<ParticleComponent> previewParticle; // 編集対象Particle。
     std::shared_ptr<MeshVFXComponent> previewMeshVFX;   // 編集対象MeshVFX。
     std::shared_ptr<AttackEffectHitComponent> previewAttackHit; // VFX同期攻撃判定。
+    // ImpactEffectは落下接触やDecal発生も見るため、床/Decal用のPreview Objectを別に持つ。
     std::shared_ptr<ImpactEffectComponent> previewImpactEffect;
     std::shared_ptr<GameObject> previewImpactGroundObject;
     std::shared_ptr<GltfModelCommponennt> previewImpactGroundModel;
@@ -91,14 +95,14 @@ private:
     std::shared_ptr<DecalComponent> previewDecal;
     std::vector<std::string> particleAssetPaths;        // Particle Asset候補。
     std::vector<std::string> sequenceAssetPaths;        // Sequence Asset候補。
-    std::vector<std::string> impactEffectAssetPaths;
+    std::vector<std::string> impactEffectAssetPaths;    // ImpactEffect Asset候補。
     std::vector<TimelineTrack> timelineTracks;          // Timeline上の再生トラック一覧。
     int selectedAssetIndex = -1;       // 選択中Particle Asset。
     int selectedSequenceIndex = -1;    // 選択中Sequence Asset。
     int selectedTimelineTrack = -1;    // 選択中Timeline Track。
     int firstTimelineFrame = 0;        // Timeline表示の左端フレーム。
     char sequenceNameBuffer[128] = "NewVFXSequence"; // Sequence保存名入力。
-    char impactEffectNameBuffer[128] = "NewImpactEffect";
+    char impactEffectNameBuffer[128] = "NewImpactEffect"; // ImpactEffect保存名入力。
     float sequenceTime = 0.0f;         // 現在のSequence再生時間。
     float sequenceDuration = 5.0f;     // Sequence全体の長さ。
     float inspectorWidth = 360.0f;     // Inspectorペイン幅。
@@ -109,11 +113,11 @@ private:
     bool sequenceLoop = true;          // Sequence末尾でループするか。
     bool timelineExpanded = true;      // Timeline表示を展開しているか。
     bool showGrid = true;              // PreviewにGridを表示するか。
-    bool impactPreviewMode = false;
-    bool impactPreviewPlaying = false;
-    float impactPreviewHeight = 3.0f;
-    float impactPreviewFallSpeed = 5.0f;
-    float impactPreviewPositionY = 3.0f;
+    bool impactPreviewMode = false;    // ImpactEffect専用の接触プレビューを有効にするか。
+    bool impactPreviewPlaying = false; // 落下接触プレビューを再生中か。
+    float impactPreviewHeight = 3.0f;  // 落下開始高度。
+    float impactPreviewFallSpeed = 5.0f; // 接触位置へ落とす速度。
+    float impactPreviewPositionY = 3.0f; // 現在のPreview落下位置。
 
 
 };

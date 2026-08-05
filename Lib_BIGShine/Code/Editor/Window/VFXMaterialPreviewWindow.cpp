@@ -21,6 +21,7 @@ void VFXMaterialPreviewWindow::Draw()
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::Draw");
     if (!BeginEditorWindow()) { EndEditorWindow(); return; }
 
+    // Materialを選んで球体MeshVFXへ適用し、オフスクリーンで即プレビューする。
     EnsurePreviewObject();
     DrawToolbar();
     ImGui::Separator();
@@ -41,6 +42,7 @@ void VFXMaterialPreviewWindow::EnsurePreviewObject()
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::EnsurePreviewObject");
     if (isInitialized) return;
 
+    // Scene内の実オブジェクトを使わず、プレビュー専用GameObjectとMeshVFXComponentを作る。
     ID3D11Device* device_ = GraphicsDeviceManager::Instance().GetDevice();
     if (!device_) return;
 
@@ -54,6 +56,7 @@ void VFXMaterialPreviewWindow::EnsurePreviewObject()
     previewMeshVFX = previewObject->AddComponent<MeshVFXComponent>();
     MeshVFXAsset asset_{};
     MeshVFXPart part_{};
+    // 球体モデルへ選択Materialを差し替えるだけの最小MeshVFXアセットを初期化する。
     part_.renderEnabled = true;
     part_.modelPath = "Data/Model/VFX/Sphere.glb";
     part_.meshIndex = -1;
@@ -73,6 +76,7 @@ void VFXMaterialPreviewWindow::DrawToolbar()
 {
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::DrawToolbar");
 
+    // AssetSlotでVFXMaterialを選び、変更されたらプレビュー用MeshVFXへ即反映する。
     if (AssetSlotGui::Draw(
         "VFX Material",
         AssetSlotType::MATERIAL,
@@ -92,6 +96,7 @@ void VFXMaterialPreviewWindow::DrawToolbar()
 void VFXMaterialPreviewWindow::DrawPreview(const ImVec2& previewSize_)
 {
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::DrawPreview");
+    // RenderPreviewで描いたRTをImGui画像として表示する。
     RenderPreview(previewSize_);
     if (previewTarget.GetShaderResourceView())
     {
@@ -105,6 +110,7 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
 {
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::RenderPreview");
 
+    // ウィンドウ内サイズに合わせてRTを作り直し、MeshVFXRenderSystemをEditorWindow用出力先で実行する。
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
@@ -118,6 +124,7 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
     previewTarget.Begin(context_, clearColor_);
 
     previewRotation += ImGui::GetIO().DeltaTime * 18.0f;
+    // 回転させながら表示し、MaterialのUVスクロールやノーマルの見え方を確認しやすくする。
     previewObject->transform->localRotation = { 0.0f, previewRotation, 0.0f };
     previewObject->transform->UpdateWorldMatrix();
     previewMeshVFX->Update(ImGui::GetIO().DeltaTime);
@@ -134,6 +141,7 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
 
     DecalManager decalManager_{};
     RenderContext renderContext_{};
+    // 通常描画と同じRenderContext形式に詰めて、MeshVFX側の描画経路をそのまま使う。
     renderContext_.device = device_;
     renderContext_.deviceContext = context_;
     renderContext_.renderState = graphics_.GetRenderState();
@@ -159,6 +167,7 @@ void VFXMaterialPreviewWindow::ApplyPreviewMaterial()
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::ApplyPreviewMaterial");
     if (!previewMeshVFX) return;
 
+    // 現在選択されているMaterialパスだけを先頭Partへ設定し、Runtimeリソースを再構築させる。
     MeshVFXAsset asset_ = previewMeshVFX->GetAsset();
     if (asset_.parts.empty()) asset_.parts.emplace_back();
     MeshVFXPart& part_ = asset_.parts.front();

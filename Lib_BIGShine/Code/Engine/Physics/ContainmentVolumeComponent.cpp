@@ -36,6 +36,8 @@ namespace
         PxTransform& pose_,
         DirectX::XMFLOAT3& scale_)
     {
+        // ObjectのWorld行列からPhysX Actor用のPoseとScaleを取り出す。
+        // PhysX ShapeのサイズにはScaleを焼き込み、Actor Poseには位置/回転だけを渡す。
         if (!owner_ || !owner_->transform) return false;
 
         const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
@@ -76,6 +78,8 @@ namespace
         int segments_,
         bool addCaps_)
     {
+        // 閉じ込め用の円柱壁をTriangle Meshとして作る。
+        // addCapsがtrueなら上下の面も張り、Volume外へ上下から抜けないようにする。
         vertices_.reserve(static_cast<size_t>(segments_) * 2 + 2);
         indices_.reserve(static_cast<size_t>(segments_) * (addCaps_ ? 12 : 6));
 
@@ -130,16 +134,20 @@ namespace
 }
 ContainmentVolumeComponent::~ContainmentVolumeComponent()
 {
+    // Component破棄時にPhysX Sceneへ残ったStatic Actorを必ず解放する。
     ReleasePhysicsVolume();
 }
 
 void ContainmentVolumeComponent::Start()
 {
+    // Scene開始時点で閉じ込め壁をPhysX Sceneへ登録する。
     RebuildPhysicsVolume();
 }
 
 void ContainmentVolumeComponent::Update(float deltaTime_)
 {
+    // UpdateではDebug形状の表示だけを行う。
+    // 実際の閉じ込めはApplyContainmentでPhysX Actorを更新する流れに分けている。
     (void)deltaTime_;
     if (!showDebugShape) return;
 
@@ -163,6 +171,8 @@ void ContainmentVolumeComponent::Update(float deltaTime_)
 
 void ContainmentVolumeComponent::ApplyContainment()
 {
+    // GameObjectManagerの移動処理後に呼ばれ、Transform変更や設定変更をPhysX壁へ反映する。
+    // 手動で対象Objectを押し戻すのではなく、Static Mesh壁として接触解決させる設計。
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -182,6 +192,7 @@ void ContainmentVolumeComponent::ApplyContainment()
 
     if (settingsChanged_)
     {
+        // 形状、Scale、分割数などMesh自体が変わる項目はShapeの作り直しが必要。
         RebuildPhysicsVolume();
         return;
     }
@@ -191,6 +202,8 @@ void ContainmentVolumeComponent::ApplyContainment()
 
 void ContainmentVolumeComponent::RebuildPhysicsVolume()
 {
+    // 現在の半径/高さ/ScaleからTriangle MeshをCookし、Static ActorとしてSceneへ追加する。
+    // 既存Actorは必ず破棄してから作り直し、古い壁がSceneに残らないようにする。
     auto owner_ = GetGameObject();
     auto physics_ = PhysXSystem::GetPhysics();
     auto scene_ = PhysXSystem::GetScene();
@@ -211,6 +224,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     std::vector<uint32_t> indices_;
     AddCylinderMesh(vertices_, indices_, volumeRadius_, volumeHalfHeight_, segments_, constrainHeight);
 
+    // Staticな閉じ込め壁なのでTriangle Meshを使う。動的に動かす用途ではなく、必要時に再構築する。
     auto mesh_ = PhysXSystem::CreateTriangleMesh(vertices_, indices_);
     if (!mesh_) return;
 
@@ -247,6 +261,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     shape_->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
 
     PxFilterData filterData_;
+    // Wall LayerかつPhysics Responseありとして登録し、Characterや物理Colliderを押し返す壁にする。
     filterData_.word0 = static_cast<PxU32>(LayerType::Wall);
     filterData_.word1 = 0;
     filterData_.word2 = PHYSICAL_ROLE;
@@ -258,6 +273,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
     scene_->addActor(*actor);
 
     cachedShape = shape;
+    // 再構築判定用に、PhysXへ反映した設定値をCacheする。
     cachedRadius = radius;
     cachedHalfHeight = halfHeight;
     cachedConstrainHeight = constrainHeight;
@@ -268,6 +284,7 @@ void ContainmentVolumeComponent::RebuildPhysicsVolume()
 
 void ContainmentVolumeComponent::ReleasePhysicsVolume()
 {
+    // ActorがSceneに登録済みならSceneから外してからreleaseする。
     if (!actor) return;
 
     if (auto scene_ = actor->getScene())
@@ -282,11 +299,14 @@ void ContainmentVolumeComponent::ReleasePhysicsVolume()
 
 void ContainmentVolumeComponent::MarkPhysicsDirty()
 {
+    // GUIやDeserializeで設定が変わった時、次回ApplyContainmentでRebuildさせる。
     physicsDirty = true;
 }
 
 void ContainmentVolumeComponent::Gui()
 {
+    // 閉じ込め壁の形状、半径、高さ、Debug表示をEditor上で調整する。
+    // 変更時は即座にPhysXを触らずDirtyにし、通常Updateの流れで安全に再構築する。
     const char* shapeNames_[] = { "Cylinder", "Capsule" };
     int shapeIndex_ = static_cast<int>(shape);
     if (ImGui::Combo("Shape", &shapeIndex_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
@@ -334,6 +354,8 @@ void ContainmentVolumeComponent::Gui()
 
 void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
 {
+    // 壁形状とDebug表示設定をScene JSONへ保存する。
+    // PhysX ActorやCache値はRuntime状態なので保存しない。
     json_["Shape"] = static_cast<int>(shape);
     json_["TargetMask"] = targetMask;
     json_["Radius"] = radius;
@@ -352,6 +374,8 @@ void ContainmentVolumeComponent::Serialize(nlohmann::json& json_) const
 
 void ContainmentVolumeComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 保存値を復元し、Mesh分割数などは安全範囲へ丸める。
+    // 復元後はPhysX Actorを作り直す必要があるためDirtyにする。
     shape = static_cast<CONTAINMENT_SHAPE>(json_.value("Shape", static_cast<int>(shape)));
     targetMask = json_.value("TargetMask", targetMask);
     radius = json_.value("Radius", radius);

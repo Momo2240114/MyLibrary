@@ -27,6 +27,8 @@ namespace
         const DirectX::XMFLOAT3& value_,
         const DirectX::XMFLOAT3& fallback_)
     {
+        // カメラ構図は水平面の左右判定だけに使うため、Y成分を落として正規化する。
+        // 無効な方向の場合はfallbackを使い、それも無効なら前方向へ倒す。
         const float length_ = std::sqrt(value_.x * value_.x + value_.z * value_.z);
         if (length_ <= 0.0001f)
         {
@@ -54,6 +56,7 @@ namespace
 void CombatCameraCompositionComponent::Start()
 {
     BS_PROFILE_SCOPE("CombatCameraCompositionComponent::Start");
+    // BlackboardとLockOnCameraを解決し、プリセットが無ければ攻撃用の初期構図を用意する。
     ResolveReferences();
     if (presets.empty())
     {
@@ -71,6 +74,7 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
     const std::shared_ptr<CameraLockOnComponent> lockOn_ = lockOnCamera.lock();
     if (!lockOn_ || !lockOn_->IsLockOnEnabled())
     {
+        // ロックオンしていない時は構図補正を出さず、デバッグ値も空にする。
         debugAppliedCorrection = {};
         debugCloseRangeAssistWeight = 0.0f;
         return;
@@ -88,6 +92,7 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
 
     if (!hasActiveLayer_)
     {
+        // 攻撃演出などのレイヤーが無い場合でも、近距離だけはプレイヤーが見切れない補正を入れる。
         debugAppliedCorrection =
             ClampCorrection(BuildCloseRangePlayerCorrection());
         if (debugAppliedCorrection.weight > 0.0001f)
@@ -105,6 +110,7 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
     {
         if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) continue;
 
+        // 各レイヤーはENTER -> HOLD -> RETURNの順に進み、RETURN終了で空になる。
         layer_.phaseTimer += (std::max)(deltaTime_, 0.0f);
         const float duration_ = GetPhaseDuration(layer_);
         const bool phaseFinished_ = duration_ <= 0.0001f
@@ -132,6 +138,7 @@ void CombatCameraCompositionComponent::LateUpdate(float deltaTime_)
     }
 
     debugAppliedCorrection = BuildLayeredCorrection();
+    // 最終的な合成補正はLockOnCameraへ渡し、ベース追従カメラの上に重ねる。
     lockOn_->SetCompositionCorrection(debugAppliedCorrection);
 }
 
@@ -158,6 +165,7 @@ void CombatCameraCompositionComponent::PlayPresetByName(
 void CombatCameraCompositionComponent::StopPreset(
     const std::string& presetName_)
 {
+    // 名前指定が空なら全レイヤー、名前があれば一致するプリセットだけをRETURNへ移行する。
     for (CameraCompositionLayerState& layer_ : layers)
     {
         if (layer_.phase == CAMERA_COMPOSITION_PHASE::IDLE) continue;
@@ -183,6 +191,7 @@ void CombatCameraCompositionComponent::StopPreset(
 
 void CombatCameraCompositionComponent::ClearPreset()
 {
+    // すべての構図補正を即座に捨て、LockOnCamera側にも補正解除を通知する。
     for (CameraCompositionLayerState& layer_ : layers)
     {
         layer_ = {};
@@ -198,6 +207,7 @@ void CombatCameraCompositionComponent::ClearPreset()
 void CombatCameraCompositionComponent::RegisterActions()
 {
     ActionRegistry& registry_ = ActionRegistry::Instance();
+    // アニメーションイベントやAIからプリセット名で再生できるよう、ActionRegistryへ登録する。
     registry_.RegisterAction("CameraComposition", "---", nullptr);
     registry_.RemoveAction("CameraComposition", "CameraComposition.Stop");
     registry_.RemoveAction("CameraComposition", "CameraComposition.Clear");
@@ -251,6 +261,7 @@ void CombatCameraCompositionComponent::ResolveReferences()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // 基本は同じGameObject上のBlackboard/LockOnCameraを使い、必要なら指定名のカメラObjectも探す。
     if (blackboard.expired())
     {
         blackboard = owner_->GetComponent<BlackboardComponent>();
@@ -273,6 +284,7 @@ void CombatCameraCompositionComponent::ResolveReferences()
 
 void CombatCameraCompositionComponent::LoadDefaultPresets()
 {
+    // アセット未設定でも攻撃演出が確認できるよう、弱/強攻撃と敵攻撃用の初期構図を登録する。
     CameraCompositionPreset weakLeft_;
     weakLeft_.presetName = "WeakAttackLeft";
     weakLeft_.sideOffset = -0.2f;
@@ -384,6 +396,7 @@ void CombatCameraCompositionComponent::ReadBlackboardRequests()
     const std::shared_ptr<BlackboardComponent> blackboard_ = blackboard.lock();
     if (!blackboard_) return;
 
+    // BlackboardのTriggerを消費して、AI/戦闘側からカメラ構図のPlay/Stop/Clearを指示する。
     if (blackboard_->ConsumeTrigger(blackboardCategory, clearTriggerKey))
     {
         ClearPreset();
@@ -424,6 +437,7 @@ void CombatCameraCompositionComponent::BeginPreset(
 {
     const int layerIndex_ = GetSourceLayerIndex(source_);
     CameraCompositionLayerState& layer_ = layers[layerIndex_];
+    // 同じレイヤーに高優先度の補正が残っている場合、低優先度プリセットでは上書きしない。
     if (layer_.phase != CAMERA_COMPOSITION_PHASE::IDLE &&
         preset_.priority < layer_.activePriority)
     {
@@ -435,6 +449,7 @@ void CombatCameraCompositionComponent::BeginPreset(
     layer_.activePreset.source = source_;
     layer_.activePresetName = preset_.presetName;
     layer_.activePriority = preset_.priority;
+    // 攻撃方向基準の左右補正は、開始時に左右を固定して途中で反転しないようにする。
     layer_.lockedSideSign = ResolveDirectionalSide(
         preset_.sideOffset,
         preset_.useAttackDirectionSide);
@@ -471,6 +486,7 @@ int CombatCameraCompositionComponent::FindPresetIndex(
 int CombatCameraCompositionComponent::GetSourceLayerIndex(
     CAMERA_COMPOSITION_SOURCE source_) const
 {
+    // System/Stage、Player、Enemyでレイヤーを分け、同時発生した補正を後で合成する。
     if (source_ == CAMERA_COMPOSITION_SOURCE::ENEMY) return 2;
     if (source_ == CAMERA_COMPOSITION_SOURCE::STAGE ||
         source_ == CAMERA_COMPOSITION_SOURCE::SYSTEM)
@@ -501,6 +517,7 @@ float CombatCameraCompositionComponent::GetPhaseDuration(
 float CombatCameraCompositionComponent::CalculatePhaseWeight(
     const CameraCompositionLayerState& layer_) const
 {
+    // ENTER/RETURNだけSmoothStepで重みを変え、HOLD中は100%補正として扱う。
     const float duration_ = GetPhaseDuration(layer_);
     const float rate_ = duration_ <= 0.0001f
         ? 1.0f
@@ -523,6 +540,8 @@ float CombatCameraCompositionComponent::ResolveDirectionalSide(
 {
     if (!useAttackDirectionSide_) return sideOffset_ >= 0.0f ? 1.0f : -1.0f;
 
+    // 攻撃方向が画面右へ向いているかで、構図の横ずらし方向を決める。
+    // これにより、攻撃の流れが画面内へ入る方向へカメラを寄せられる。
     const std::shared_ptr<BlackboardComponent> blackboard_ = blackboard.lock();
     const std::shared_ptr<CameraLockOnComponent> lockOn_ = lockOnCamera.lock();
     if (!blackboard_ || !lockOn_) return sideOffset_ >= 0.0f ? 1.0f : -1.0f;
@@ -558,6 +577,7 @@ CombatCameraCompositionComponent::BuildCorrection(
     const CameraCompositionLayerState& layer_) const
 {
     LockOnCameraCompositionCorrection correction_;
+    // プリセット値をLockOnCamera用の補正値へ変換し、現在フェーズの重みも付ける。
     correction_.sideOffset = layer_.activePreset.useAttackDirectionSide
         ? std::abs(layer_.activePreset.sideOffset) * layer_.lockedSideSign
         : layer_.activePreset.sideOffset;
@@ -570,6 +590,7 @@ CombatCameraCompositionComponent::BuildCorrection(
 
     if (const std::shared_ptr<CameraLockOnComponent> lockOn_ = lockOnCamera.lock())
     {
+        // 壁際では横ずらしがめり込みやすいため、ポリシーに応じて横補正を弱める。
         const float wallRate_ = lockOn_->GetWallCameraRate();
         if (layer_.activePreset.wallPolicy == CAMERA_COMPOSITION_WALL_POLICY::DISABLE)
         {
@@ -590,6 +611,7 @@ CombatCameraCompositionComponent::BuildCorrection(
 LockOnCameraCompositionCorrection
 CombatCameraCompositionComponent::BuildLayeredCorrection() const
 {
+    // 近距離補正を土台にし、その上へSystem/Player/Enemyレイヤーの補正を加算する。
     LockOnCameraCompositionCorrection result_ = BuildCloseRangePlayerCorrection();
     for (const CameraCompositionLayerState& layer_ : layers)
     {
@@ -615,6 +637,7 @@ CombatCameraCompositionComponent::BuildLayeredCorrection() const
 float CombatCameraCompositionComponent::CalculateCloseRangeAssistWeight(
     float targetDistance_) const
 {
+    // 近距離補正は指定距離帯の中だけ有効にし、境界では自然にフェードさせる。
     if (!enableCloseRangePlayerAssist) return 0.0f;
     if (closeRangeAssistMaximumDistance <= closeRangeAssistMinimumDistance)
     {
@@ -660,6 +683,7 @@ CombatCameraCompositionComponent::BuildCloseRangePlayerCorrection() const
     debugCloseRangeAssistWeight = weight_;
     if (weight_ <= 0.0001f) return correction_;
 
+    // 敵に近い時は少し距離/高さを調整し、プレイヤーと敵の見切れを防ぐ。
     correction_.distanceOffset = closeRangeAssistDistanceOffset;
     correction_.heightOffset = closeRangeAssistHeightOffset;
     correction_.lookAtHeightOffset = 0.0f;
@@ -671,6 +695,7 @@ LockOnCameraCompositionCorrection
 CombatCameraCompositionComponent::ClampCorrection(
     const LockOnCameraCompositionCorrection& correction_) const
 {
+    // 複数レイヤー加算後でもカメラが破綻しないよう、最終補正量を全項目で制限する。
     LockOnCameraCompositionCorrection result_ = correction_;
     result_.sideOffset = std::clamp(
         result_.sideOffset,

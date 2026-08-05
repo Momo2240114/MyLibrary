@@ -16,6 +16,7 @@
 
 namespace
 {
+    // 成立した JustDodge を、現在アクティブなカメラの CameraActionDirector へ橋渡しする。
     void PlayJustDodgeCameraAction(const JustDodgeEvent& event_)
     {
         // ジャスト回避成立位置を実カメラ側へ渡し、CameraActionの短い回避演出を再生する。
@@ -52,11 +53,13 @@ namespace
 
 void JustDodgeSystem::BeginFrame()
 {
+    // フレームイベントは 1 フレームだけ外部から参照できればよいので毎フレーム空にする。
     frameJustDodgeEvents.clear();
 }
 
 void JustDodgeSystem::Clear()
 {
+    // Scene 切り替えやリロード時に、イベントと重複判定履歴をすべて破棄する。
     frameJustDodgeEvents.clear();
     registeredDodgeTargets.clear();
 }
@@ -90,6 +93,7 @@ void JustDodgeSystem::ClearAttackHitGroup(
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
         static_cast<uint64_t>(hitGroupId_);
 
+    // 指定 HitGroup だけ再度 JustDodge 可能にする。多段攻撃の段ごとの受付に使う。
     registeredDodgeTargets.erase(dodgeKey_);
 }
 
@@ -212,6 +216,7 @@ bool JustDodgeSystem::IsSameHierarchy(
     const std::shared_ptr<GameObject>& objectA_,
     const std::shared_ptr<GameObject>& objectB_) const
 {
+    // 攻撃者と回避者が同じ親を持つ場合、自分自身の攻撃判定として除外する。
     return GetHierarchyRoot(objectA_) == GetHierarchyRoot(objectB_);
 }
 

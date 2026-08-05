@@ -17,6 +17,7 @@ public:
 private:
     struct ActionHistoryEntry
     {
+        // Actionの押下/離しなど、入力変化を履歴へ残すための1行。
         std::string actionName;
         std::string state;
         int frame = 0;
@@ -24,6 +25,7 @@ private:
 
     struct AxisHistoryEntry
     {
+        // Axis値がしきい値以上変化した時に記録する履歴行。
         std::string axisName;
         float value = 0.0f;
         int frame = 0;
@@ -58,12 +60,15 @@ private:
 private:
     std::deque<ActionHistoryEntry> actionHistory;
     std::deque<AxisHistoryEntry> axisHistory;
+    // 表示フレーム番号と履歴上限。古い入力ログを溜め込みすぎないようにする。
     int frameCounter = 0;
     int maxHistoryCount = 120;
     float axisRecordThreshold = 0.15f;
     float axisRecordDelta = 0.08f;
+    // 監視対象を絞るための表示/記録オプション。
     bool showOnlyActiveActions = false;
     bool recordAxisNeutral = false;
     std::unordered_set<std::string> monitoredActions;
+    // 空なら全入力を監視し、要素がある場合は選択されたAction/Axisだけを表示する。
     std::unordered_set<std::string> monitoredAxes;
 };

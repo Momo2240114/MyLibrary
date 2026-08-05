@@ -18,6 +18,7 @@ void DebugTextureViewerWindow::Draw()
 
     BS_PROFILE_SCOPE("DebugTextureViewerWindow::Draw");
 
+    // レンダリング途中のSRVをカテゴリ別タブで確認するデバッグ用ビューア。
     if (BeginEditorWindow("Debug Texture Viewer"))
     {
         DrawStylePopup();
@@ -31,6 +32,7 @@ void DebugTextureViewerWindow::Draw()
         {
             auto drawTab_ = [&](const char* label_, void (DebugTextureViewerWindow::*addTextures_)(std::vector<TextureEntry>&))
                 {
+                    // タブを開いた時だけ対象カテゴリのTextureEntryを集め、現在のRenderSystem状態を表示する。
                     if (ImGui::BeginTabItem(label_))
                     {
                         std::vector<TextureEntry> textures_;
@@ -56,6 +58,7 @@ void DebugTextureViewerWindow::DrawTextureGrid(const std::vector<TextureEntry>& 
 {
     BS_PROFILE_SCOPE("DebugTextureViewerWindow::DrawTextureGrid");
 
+    // ウィンドウ幅とサムネイルサイズから列数を決め、TextureEntryをグリッド表示する。
     const float spacing_ = ImGui::GetStyle().ItemSpacing.x;
     const float availableWidth_ = ImGui::GetContentRegionAvail().x;
     const int columnCount_ = std::max(1, static_cast<int>((availableWidth_ + spacing_) / (thumbnailSize + spacing_)));
@@ -82,6 +85,7 @@ void DebugTextureViewerWindow::DrawTextureGrid(const std::vector<TextureEntry>& 
 
 void DebugTextureViewerWindow::DrawTexture(const TextureEntry& texture_)
 {
+    // SRVが無い項目もShow Missingが有効なら枠だけ表示し、生成漏れを見つけやすくする。
     ImGui::TextUnformatted(texture_.name);
 
     const ImVec2 imageSize_ = GetTextureImageSize(texture_.srv);
@@ -99,6 +103,7 @@ void DebugTextureViewerWindow::DrawTexture(const TextureEntry& texture_)
 
 ImVec2 DebugTextureViewerWindow::GetTextureImageSize(ID3D11ShaderResourceView* srv_) const
 {
+    // Keep Aspectが有効な時はTexture2DのDescから比率を取り、正方形に引き伸ばさないようにする。
     if (!keepAspect || srv_ == nullptr)
     {
         return ImVec2(thumbnailSize, thumbnailSize);
@@ -135,6 +140,7 @@ ImVec2 DebugTextureViewerWindow::GetTextureImageSize(ID3D11ShaderResourceView* s
 
 void DebugTextureViewerWindow::AddSceneTextures(std::vector<TextureEntry>& textures_)
 {
+    // Sceneタブでは最終色、法線、深度、歪み、Dock表示用の基本RTを並べる。
     GraphicsDeviceManager& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
 
     textures_.push_back({ "Scene Color", graphicsDeviceManager_.GetSceneSRV() });
@@ -146,6 +152,7 @@ void DebugTextureViewerWindow::AddSceneTextures(std::vector<TextureEntry>& textu
 
 void DebugTextureViewerWindow::AddGBufferTextures(std::vector<TextureEntry>& textures_)
 {
+    // Deferred/ポスト処理の入力になるGBuffer群を確認する。
     GraphicsDeviceManager& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
 
     textures_.push_back({ "GBuffer Base Color", graphicsDeviceManager_.GetGBufferBaseColorSRV() });
@@ -156,6 +163,7 @@ void DebugTextureViewerWindow::AddGBufferTextures(std::vector<TextureEntry>& tex
 
 void DebugTextureViewerWindow::AddPostEffectTextures(std::vector<TextureEntry>& textures_)
 {
+    // ポストエフェクトの作業バッファと各サブシステムの中間結果を一覧化する。
     GraphicsDeviceManager& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
     PostRenderSystem& postRenderSystem_ = graphicsDeviceManager_.GetPostRenderSystem();
     BloomSystem& bloomSystem_ = postRenderSystem_.GetBloomSystem();
@@ -195,6 +203,7 @@ void DebugTextureViewerWindow::AddPostEffectTextures(std::vector<TextureEntry>& 
 
 void DebugTextureViewerWindow::AddShadowTextures(std::vector<TextureEntry>& textures_)
 {
+    // Cascade Shadowの各カスケードSRVを確認し、シャドウマップの範囲や欠落を見やすくする。
     CascadeShadowMap& cascadeShadowMap_ = GraphicsDeviceManager::Instance().GetCascadeShadowMap();
 
     textures_.push_back({ "Cascade Shadow 0", cascadeShadowMap_.GetSRV(0) });

@@ -14,6 +14,7 @@ class BloomSystem
 {
 public:
     struct Parameters {
+        // Bloom 全体の有効切り替え。無効時は元シーンをそのまま合成する。
         bool enabled = true;
         float threshold = 1.0f;    // どの明るさから光らせるか
         float intensity = 1.0f;    // 光の強さ
@@ -23,25 +24,31 @@ public:
         float exposure = 1.0f;
     };
 
-    // 【新規】カラーフィルター用（Slot 1想定）
+    // Bloom の最終合成時に同時適用するカラーフィルター用定数。
     struct CbColorFilter {
+        // 色相、彩度、明度、コントラストを 1 パスで調整する。
         float hueShift;
         float saturation;
         float brightness;
         float contrast;
 
+        // RGB バランスと、フィルター全体をどの程度混ぜるか。
         DirectX::XMFLOAT3 colorBalance;
         float filterIntensity;
     };
 
+    // 高輝度抽出、Kawase Blur、最終合成に必要な RenderTarget と Shader を作る。
     bool Initialize(ID3D11Device* device, int width, int height);
     void Shutdown();
+
+    // Bloom のみを適用して finalRTV へ出力する基本パス。
     void Execute(
         const RenderContext& rc,
         ID3D11ShaderResourceView* sceneSRV, 
         ID3D11RenderTargetView* finalRTV,
         const Parameters& params);
 
+    // Bloom と ColorFilter を同じ最終合成パスで適用する拡張パス。
     void Execute(
         const RenderContext& rc,
         ID3D11ShaderResourceView* sceneSRV, 
@@ -65,7 +72,10 @@ private:
         float width, height;
     };
 
+    // 指定サイズの RTV/SRV ペアを作成し、抽出・ぼかしパスの中間結果として使う。
     void CreateRenderTarget(ID3D11Device* device, int w, int h, RenderTarget& outRT);
+
+    // 閾値、強度、パスごとの Kawase オフセットを GPU へ渡す。
     void UpdateConstantBuffer(ID3D11DeviceContext* dc, const Parameters& params, float offset, float w, float h);
     // リソース
     RenderTarget brightTarget;           // 高輝度抽出用 (1/2サイズ)
@@ -85,7 +95,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> filterBuffer;
 
-    // エラー解消のための追加
+    // 頂点バッファを使わず FullScreenVS だけで画面全体を描く。
     void DrawFullScreenQuad(ID3D11DeviceContext* dc);
 
     Microsoft::WRL::ComPtr<ID3D11PixelShader>  brightPS;

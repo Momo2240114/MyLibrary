@@ -16,6 +16,7 @@ namespace
 {
     bool IsAudioFile(const std::filesystem::path& path_)
     {
+        // エディタのブラウザ対象を実際に扱える音声拡張子だけに絞る。
         const std::string extension_ = path_.extension().string();
         return extension_ == ".wav" || extension_ == ".mp3" || extension_ == ".ogg";
     }
@@ -24,6 +25,7 @@ namespace
 
 struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::SequenceInterface
 {
+    // ImSequencerはフレーム単位で編集するため、秒指定のイベントを一時的なフレーム範囲へ変換して渡す。
     struct FrameRange
     {
         int start = 0;
@@ -41,6 +43,7 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
 
     void SyncFrames()
     {
+        // イベント配列の現在値から表示用フレームを作り直し、削除・追加後のズレを防ぐ。
         const int count_ = GetItemCount();
         frameRanges.resize(count_);
         for (int eventIndex_ = 0; eventIndex_ < count_; ++eventIndex_)
@@ -62,6 +65,7 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
     void EndEdit() override
     {
         if (!events) return;
+        // タイムライン上で動かされたバーを秒へ戻し、シーケンス長の範囲に収める。
         for (int eventIndex_ = 0;
             eventIndex_ < static_cast<int>(events->size()) && eventIndex_ < static_cast<int>(frameRanges.size());
             ++eventIndex_)
@@ -100,6 +104,7 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
     {
         if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return;
 
+        // バー上にはイベント名と参照プリセット名を出し、音源の割り当てミスを見つけやすくする。
         const SequenceEvent& event_ = (*events)[index_];
         const char* presetName_ = "Missing Preset";
         if (presets && event_.presetIndex >= 0 && event_.presetIndex < static_cast<int>(presets->size()))
@@ -117,6 +122,7 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
     {
         if (!events) return;
 
+        // 追加イベントは最後のイベントの少し後へ置き、連続追加しても重なりにくい初期値にする。
         SequenceEvent event_;
         event_.name = "Event " + std::to_string(static_cast<int>(events->size()) + 1);
         event_.presetIndex = presets && !presets->empty() ? 0 : -1;
@@ -137,6 +143,7 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
     void Duplicate(int index_) override
     {
         if (!events || index_ < 0 || index_ >= static_cast<int>(events->size())) return;
+        // 複製直後に再生済みフラグが残ると鳴らないため、コピー時は未発火へ戻す。
         SequenceEvent copied_ = (*events)[index_];
         copied_.name += " Copy";
         copied_.startTime = (std::min)(sequenceLength, copied_.startTime + 0.2f);
@@ -149,6 +156,7 @@ struct AudioWorkspaceWindow::AudioSequenceAdapter : public ImSequencer::Sequence
 AudioWorkspaceWindow::AudioWorkspaceWindow(GameObjectManager* manager_)
     : EditorWorkspaceWindow("Audio Workspace", manager_)
 {
+    // 空のワークスペースでもすぐ編集できるように、最低1つのプリセットとイベントを用意してから保存データを読む。
     presets.push_back(AudioPreset{});
     sequenceEvents.push_back(SequenceEvent{});
     RefreshAudioFiles();
@@ -159,6 +167,7 @@ void AudioWorkspaceWindow::Update(float deltaTime_)
 {
     if (!sequencePlaying) return;
 
+    // 再生中は現在時刻を進め、開始時刻を超えたイベントだけを一度ずつ発火する。
     sequenceTime += (std::max)(deltaTime_, 0.0f);
     for (SequenceEvent& event_ : sequenceEvents)
     {
@@ -189,6 +198,7 @@ void AudioWorkspaceWindow::Draw()
     const float leftWidth_ = (std::max)(250.0f, available_.x * 0.26f);
     const float browserHeight_ = (std::max)(150.0f, available_.y * 0.28f);
 
+    // 左をプリセット一覧、右上を編集タブ、右下を音声ファイルブラウザに固定して作業導線を分ける。
     ImGui::BeginChild("AudioPresetList", ImVec2(leftWidth_, 0.0f), true);
     DrawPresetList();
     ImGui::EndChild();
@@ -223,6 +233,7 @@ void AudioWorkspaceWindow::Draw()
 
 void AudioWorkspaceWindow::DrawToolbar()
 {
+    // 保存/読込と試聴系の操作を上部に集約し、プリセット調整中にすぐ確認できるようにする。
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::MenuItem("Save")) SaveWorkspace();
@@ -251,6 +262,7 @@ void AudioWorkspaceWindow::DrawToolbar()
 
 void AudioWorkspaceWindow::DrawPresetList()
 {
+    // プリセットはAudioManagerへ登録する1音声設定の単位で、選択すると右側のInspectorへ反映される。
     if (ImGui::Button("Add Preset", ImVec2(-1.0f, 0.0f)))
     {
         AudioPreset preset_;
@@ -314,12 +326,14 @@ void AudioWorkspaceWindow::DrawInspector()
     strncpy_s(pathBuffer_, preset_->path.c_str(), sizeof(pathBuffer_));
     if (ImGui::InputText("Path", pathBuffer_, sizeof(pathBuffer_)))
     {
+        // パスを変えた時点でAudioManagerへ読み込ませ、直後の試聴やパラメータ反映に備える。
         preset_->path = pathBuffer_;
         AudioManager::Instance().AddAudioFromFile(preset_->path, preset_->isBGM);
         ApplySelected();
     }
 
     bool changed_ = false;
+    // 2D/BGM設定と、3D減衰・遮蔽・距離フィルタを同じプリセット上で編集する。
     changed_ |= ImGui::Checkbox("BGM", &preset_->isBGM);
     changed_ |= ImGui::Checkbox("Loop", &preset_->loop);
     changed_ |= ImGui::SliderFloat("Volume", &preset_->volume, 0.0f, 1.0f, "%.2f");
@@ -343,6 +357,7 @@ void AudioWorkspaceWindow::DrawInspector()
 
     if (changed_)
     {
+        // UI入力値をAudioManagerが受け取れる範囲に丸め、破綻した音量や距離設定を保存しないようにする。
         preset_->volume = std::clamp(preset_->volume, 0.0f, 1.0f);
         preset_->pitch = std::clamp(preset_->pitch, 0.01f, 4.0f);
         preset_->pan = std::clamp(preset_->pan, -1.0f, 1.0f);
@@ -374,6 +389,7 @@ void AudioWorkspaceWindow::DrawSequencer()
 {
     ImGui::SeparatorText("Audio Event Sequencer");
 
+    // シーケンサーは秒で保持しつつ、ImSequencerにはフレームへ変換して渡す。
     sequenceLength = (std::max)(0.1f, sequenceLength);
     sequenceTime = std::clamp(sequenceTime, 0.0f, sequenceLength);
 
@@ -382,6 +398,7 @@ void AudioWorkspaceWindow::DrawSequencer()
         sequencePlaying = !sequencePlaying;
         if (sequencePlaying)
         {
+            // 途中位置から再生するときは、現在時刻より前のイベントを発火済みにして二重再生を避ける。
             for (SequenceEvent& event_ : sequenceEvents)
             {
                 event_.fired = event_.startTime < sequenceTime;
@@ -397,6 +414,7 @@ void AudioWorkspaceWindow::DrawSequencer()
     ImGui::SameLine();
     if (ImGui::Button("Add Event", ImVec2(100.0f, 0.0f)))
     {
+        // 新規イベントは現在の再生ヘッド位置に置き、選択中プリセットを初期参照にする。
         SequenceEvent event_;
         event_.name = "Event " + std::to_string(static_cast<int>(sequenceEvents.size()) + 1);
         event_.presetIndex = presets.empty() ? -1 : selectedPresetIndex;
@@ -423,6 +441,7 @@ void AudioWorkspaceWindow::DrawSequencer()
     ImGui::Text("Time: %.2f / %.2f sec", sequenceTime, sequenceLength);
 
     AudioSequenceAdapter adapter_;
+    // 毎フレームアダプタを作り、現在のイベント配列をImSequencerの編集インターフェースへ接続する。
     adapter_.events = &sequenceEvents;
     adapter_.presets = &presets;
     adapter_.sequenceLength = sequenceLength;
@@ -459,6 +478,7 @@ void AudioWorkspaceWindow::DrawSequencer()
 
     if (currentFrame_ != previousFrame_)
     {
+        // ユーザーがタイムラインをスクラブした場合は一時停止し、発火状態をリセットして再確認しやすくする。
         const int clampedFrame_ = (std::max)(adapter_.GetFrameMin(), (std::min)(adapter_.GetFrameMax(), currentFrame_));
         sequenceTime = adapter_.ToTime(clampedFrame_);
         sequencePlaying = false;
@@ -477,6 +497,7 @@ void AudioWorkspaceWindow::DrawSequencer()
     SequenceEvent& event_ = sequenceEvents[selectedSequenceEventIndex];
     ImGui::SeparatorText("Selected Audio Event");
 
+    // 選択イベントではプリセット音に対する音量・ピッチ・パン・位置の上書きだけを編集する。
     char eventNameBuffer_[128];
     strncpy_s(eventNameBuffer_, event_.name.c_str(), sizeof(eventNameBuffer_));
     if (ImGui::InputText("Event Name", eventNameBuffer_, sizeof(eventNameBuffer_))) event_.name = eventNameBuffer_;
@@ -536,6 +557,7 @@ void AudioWorkspaceWindow::DrawSequencer()
 
 void AudioWorkspaceWindow::DrawAudioFileBrowser()
 {
+    // Data/Audio配下のファイルを選ぶと、現在プリセットのパスへ直接割り当てて読み込む。
     if (ImGui::Button("Refresh Audio Files")) RefreshAudioFiles();
     ImGui::Separator();
 
@@ -564,6 +586,7 @@ void AudioWorkspaceWindow::FireSequenceEvent(const SequenceEvent& event_)
 {
     if (event_.presetIndex < 0 || event_.presetIndex >= static_cast<int>(presets.size())) return;
 
+    // プリセット設定をベースに、イベント固有の倍率や位置指定を重ねてワンショット再生する。
     const AudioPreset& preset_ = presets[event_.presetIndex];
     AudioPlaybackSettings settings_ = MakeSettings(preset_);
     settings_.volume = std::clamp(settings_.volume * event_.volumeScale, 0.0f, 1.0f);
@@ -581,6 +604,7 @@ void AudioWorkspaceWindow::PlayPreset(const AudioPreset& preset_, bool allowOver
 {
     if (preset_.path.empty()) return;
 
+    // 重ね再生や3D音は個別インスタンス扱いにし、通常の2D音は既存再生の設定を更新してから鳴らす。
     AudioManager& audioManager_ = AudioManager::Instance();
     audioManager_.AddAudioFromFile(preset_.path, preset_.isBGM);
     if (allowOverlap_ || preset_.use3D)
@@ -613,6 +637,7 @@ void AudioWorkspaceWindow::ApplySelected()
     if (preset_ == nullptr || preset_->path.empty()) return;
 
     AudioManager& audioManager_ = AudioManager::Instance();
+    // Inspectorの値を現在読み込まれている音源へ即時反映し、編集中の試聴結果と保存値をそろえる。
     audioManager_.AddAudioFromFile(preset_->path, preset_->isBGM);
     audioManager_.SetVolumeByPath(preset_->path, preset_->volume);
     audioManager_.SetPitchByPath(preset_->path, preset_->pitch);
@@ -638,6 +663,7 @@ void AudioWorkspaceWindow::StopSequence()
 
 void AudioWorkspaceWindow::SaveWorkspace()
 {
+    // プリセットとシーケンスを1つのJSONへ保存し、ゲーム側のアクション登録にも同じファイルを使う。
     std::filesystem::create_directories(std::filesystem::path(workspacePath).parent_path());
 
     nlohmann::json json_;
@@ -663,6 +689,7 @@ void AudioWorkspaceWindow::LoadWorkspace()
     std::ifstream file_(workspacePath);
     if (!file_.is_open()) return;
 
+    // 保存データを読み直すときは配列を作り直し、空なら編集可能なデフォルト要素を補う。
     nlohmann::json json_;
     file_ >> json_;
 
@@ -699,6 +726,7 @@ void AudioWorkspaceWindow::LoadWorkspace()
 
 void AudioWorkspaceWindow::RefreshAudioFiles()
 {
+    // 音声ブラウザは実ファイル階層を再帰走査し、表示順が安定するよう最後にソートする。
     audioFiles.clear();
     const std::filesystem::path rootPath_("Data/Audio");
     if (!std::filesystem::exists(rootPath_)) return;
@@ -714,6 +742,7 @@ void AudioWorkspaceWindow::RefreshAudioFiles()
 
 nlohmann::json AudioWorkspaceWindow::SerializePreset(const AudioPreset& preset_) const
 {
+    // JSONキー名は既存保存データとの互換を持つため、C++側のメンバ名へ寄せず固定している。
     nlohmann::json json_;
     json_["Name"] = preset_.name;
     json_["ActionName"] = preset_.actionName;
@@ -741,6 +770,7 @@ nlohmann::json AudioWorkspaceWindow::SerializePreset(const AudioPreset& preset_)
 
 void AudioWorkspaceWindow::DeserializePreset(AudioPreset& preset_, const nlohmann::json& json_) const
 {
+    // 読み込み時にも範囲を丸め、古い/手編集されたJSONで不正値が入っても編集状態を壊さない。
     preset_.name = json_.value("Name", std::string("New Audio"));
     preset_.actionName = json_.value("ActionName", preset_.name);
     preset_.path = json_.value("Path", std::string("Data/Audio/SE/TitleSelect.wav"));
@@ -798,6 +828,7 @@ void AudioWorkspaceWindow::DeserializeSequenceEvent(SequenceEvent& event_, const
 
 AudioPlaybackSettings AudioWorkspaceWindow::MakeSettings(const AudioPreset& preset_) const
 {
+    // AudioPresetの編集値をAudioManagerの再生設定へ詰め替える共通経路。
     AudioPlaybackSettings settings_;
     settings_.loop = preset_.loop;
     settings_.volume = preset_.volume;

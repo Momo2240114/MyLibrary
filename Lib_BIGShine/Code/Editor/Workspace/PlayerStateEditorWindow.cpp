@@ -16,6 +16,7 @@ namespace ed = ax::NodeEditor;
 
 namespace
 {
+    // プレイヤー操作で編集対象にする主要Action一覧。グラフ上のノードもこの順番から作る。
     constexpr std::array<PLAYER_ACTION, 16> PLAYER_ACTIONS =
     {
         PLAYER_ACTION::IDLE,
@@ -54,6 +55,7 @@ namespace
 
     void DrawVerticalSplitter(const char* id_, float height_, float& width_, float direction_)
     {
+        // 左右パネル幅をドラッグで調整するため、InvisibleButtonを境界線として使う。
         ImGui::InvisibleButton(id_, ImVec2(SPLITTER_SIZE, height_));
         const bool hovered_ = ImGui::IsItemHovered();
         const bool active_ = ImGui::IsItemActive();
@@ -76,6 +78,7 @@ namespace
 PlayerStateEditorWindow::PlayerStateEditorWindow(GameObjectManager* manager_)
     : EditorWorkspaceWindow("Player State Graph", manager_)
 {
+    // imgui_node_editorはウィンドウ専用Contextを持たせ、他のノードエディタと状態が混ざらないようにする。
     isVisible = false;
     style.backgroundColor = ImVec4(0.065f, 0.07f, 0.08f, 1.0f);
     style.titleBarColor = ImVec4(0.17f, 0.27f, 0.34f, 1.0f);
@@ -100,6 +103,7 @@ PlayerStateEditorWindow::~PlayerStateEditorWindow()
 
 void PlayerStateEditorWindow::Draw()
 {
+    // 左に元Action一覧、中央にキャンセル遷移グラフ、右に詳細Inspectorを並べる。
     PlayerControllerComponent* player_ = ResolveTarget();
 
     if (!BeginWorkspaceWindow(ImGuiWindowFlags_MenuBar))
@@ -146,6 +150,7 @@ void PlayerStateEditorWindow::Draw()
 
 PlayerControllerComponent* PlayerStateEditorWindow::ResolveTarget()
 {
+    // 選択中オブジェクトを優先し、無ければ前回対象、さらに無ければシーン内のPlayerControllerを探す。
     if (!gameObjectManager) return nullptr;
 
     const std::shared_ptr<GameObject> selectedObject_ = gameObjectManager->GetSelectedObject();
@@ -183,6 +188,7 @@ PlayerControllerComponent* PlayerStateEditorWindow::ResolveTarget()
 
 void PlayerStateEditorWindow::DrawToolbar(PlayerControllerComponent* player_)
 {
+    // 編集対象プレイヤーとランタイム中の現在Actionを表示し、複数プレイヤーがある場合も切り替えられるようにする。
     const std::shared_ptr<GameObject> target_ = targetObject.lock();
     ImGui::TextUnformatted("Target");
     ImGui::SameLine();
@@ -215,6 +221,7 @@ void PlayerStateEditorWindow::DrawToolbar(PlayerControllerComponent* player_)
 
 void PlayerStateEditorWindow::DrawStateList(PlayerControllerComponent* player_)
 {
+    // 編集元になるActionを選ぶ一覧。実行中ActionにはActive表示を出して、現在の遷移確認をしやすくする。
     ImGui::SeparatorText("Source State");
     if (!player_)
     {
@@ -244,6 +251,7 @@ void PlayerStateEditorWindow::DrawStateList(PlayerControllerComponent* player_)
 
 void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_)
 {
+    // 選択中Actionから他Actionへ張れるキャンセル/分岐ルートをノードグラフで編集する。
     ImGui::Text("%s Routes", GetPlayerActionName(editingAction));
     if (ImGui::RadioButton("Dodge Cancel", editDodgeCancelRoutes))
     {
@@ -265,6 +273,7 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
         ? player_->GetDodgeCancelTransitions()
         : player_->GetActionBranchTransitions();
 
+    // すべてのActionをノード化し、選択中Actionだけを出力ピン、それ以外を入力ピンとして扱う。
     ed::SetCurrentEditor(nodeEditorContext);
     ed::Begin("PlayerCancelNodeEditor");
 
@@ -360,6 +369,7 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
 
     for (const PlayerCancelTransition& transition_ : activeTransitions_)
     {
+        // 現在編集中Actionから出ている遷移だけをリンクとして描く。
         if (transition_.from != editingAction || transition_.to == editingAction) continue;
         ed::Link(
             GetLinkId(transition_.from, transition_.to),
@@ -380,6 +390,7 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
 
     if (ed::BeginCreate())
     {
+        // 新規リンクは「編集中Actionの出力」から「別Actionの入力」へ接続された場合だけ受け付ける。
         ed::PinId startPin_;
         ed::PinId endPin_;
         if (ed::QueryNewLink(&startPin_, &endPin_))
@@ -408,6 +419,7 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
             const bool duplicate_ = editDodgeCancelRoutes
                 ? player_->HasDodgeCancelTransition(editingAction, targetAction_)
                 : player_->HasActionBranchTransition(editingAction, targetAction_);
+            // Dodge Cancel編集中はDodge系だけ、Action Branch編集中は非Dodgeだけ許可し、重複も拒否する。
             if (!valid_ || !routeTypeValid_ || duplicate_)
             {
                 ed::RejectNewItem(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), 2.0f);
@@ -429,6 +441,7 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
 
     if (ed::BeginDelete())
     {
+        // リンク削除はグラフ表示とPlayerController側の遷移配列を同時に同期する。
         ed::LinkId linkId_;
         while (ed::QueryDeletedLink(&linkId_))
         {
@@ -467,6 +480,7 @@ void PlayerStateEditorWindow::DrawCancelGraph(PlayerControllerComponent* player_
 
 void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
 {
+    // 右側Inspectorでは選択中Actionの分類と、現在モードの遷移先一覧をテキストでも編集できるようにする。
     ImGui::SeparatorText("State Details");
     ImGui::Text("Source: %s", GetPlayerActionName(editingAction));
     ImGui::Text("Group: %s", GetActionGroupName(GetPlayerActionGroup(editingAction)));
@@ -524,6 +538,7 @@ void PlayerStateEditorWindow::DrawInspector(PlayerControllerComponent* player_)
 
 void PlayerStateEditorWindow::ArrangeNodes()
 {
+    // 元Actionを中央へ置き、遷移先候補を円形に並べてリンクの方向を読みやすくする。
     ed::SetNodePosition(GetNodeId(editingAction), ImVec2(0.0f, 0.0f));
 
     int targetIndex_ = 0;
@@ -543,6 +558,7 @@ void PlayerStateEditorWindow::ArrangeNodes()
 
 void PlayerStateEditorWindow::SelectEditingAction(PLAYER_ACTION action_)
 {
+    // 編集元Actionを切り替えたら、次回描画でノード配置も新しい中心Actionへ合わせ直す。
     if (editingAction == action_) return;
     editingAction = action_;
     needsNodeLayout = true;

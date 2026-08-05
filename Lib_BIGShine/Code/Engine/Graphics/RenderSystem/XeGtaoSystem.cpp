@@ -7,6 +7,7 @@
 
 bool XeGtaoSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
+    // AOは半解像度で計算し、最後にSceneへ合成して負荷を抑える。
     width = width_;
     height = height_;
     aoWidth = width_ > 1 ? width_ / 2 : 1;
@@ -19,16 +20,19 @@ bool XeGtaoSystem::Initialize(ID3D11Device* device_, int width_, int height_)
         return false;
     }
 
+    // Depth/NormalからAOを書き出すCompute Shader。
     if (FAILED(CPUResourceLoader::LoadComputeShader(device_, "Shader/XeGTAO_Post_CS.cso", xeGtaoCs.GetAddressOf())))
     {
         return false;
     }
 
+    // AO TextureをScene Colorへ合成するPixel Shader。
     if (FAILED(CPUResourceLoader::LoadPixelShader(device_, "Shader/XeGTAO_CompositePS.cso", compositePs.GetAddressOf())))
     {
         return false;
     }
 
+    // 合成Pass用の全画面三角形VS。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
         "Shader/FullScreenVS.cso",
@@ -76,11 +80,13 @@ void XeGtaoSystem::Execute(
 
     if (dc_ == nullptr || rs_ == nullptr || sceneSRV_ == nullptr || outputRTV_ == nullptr)
     {
+        // 必須リソースが欠けている場合は何もせず、呼び出し側の描画を壊さない。
         return;
     }
 
     const bool aoActive_ = parameters_.enabled && parameters_.intensity > 0.0f && depthSRV_ != nullptr && normalSRV_ != nullptr;
     const int updateInterval_ = parameters_.updateInterval > 0 ? parameters_.updateInterval : 1;
+    // updateIntervalでAO更新頻度を落とし、静止気味の場面でコストを抑える。
     const bool shouldUpdateAo_ = aoActive_ && (!aoReady || updateInterval_ <= 1 || (frameIndex % updateInterval_) == 0);
 
     if (shouldUpdateAo_)
@@ -97,10 +103,12 @@ void XeGtaoSystem::Execute(
         dc_->CSSetUnorderedAccessViews(0, 1, unorderedAccessViews_, nullptr);
         dc_->CSSetSamplers(0, 1, &sampler_);
 
+        // 8x8スレッドグループ前提で、半解像度AO Target全体を覆う。
         const UINT groupCountX_ = static_cast<UINT>((aoWidth + 7) / 8);
         const UINT groupCountY_ = static_cast<UINT>((aoHeight + 7) / 8);
         dc_->Dispatch(groupCountX_, groupCountY_, 1);
 
+        // CSのSRV/UAV参照を外し、後続の合成Passで同じTextureを安全に読めるようにする。
         ID3D11ShaderResourceView* nullSRVs_[2] = { nullptr, nullptr };
         ID3D11UnorderedAccessView* nullUAV_ = nullptr;
         ID3D11SamplerState* nullSampler_ = nullptr;
@@ -114,11 +122,13 @@ void XeGtaoSystem::Execute(
     Parameters compositeParameters_ = parameters_;
     if (!aoActive_ || !aoReady)
     {
+        // AOが使えない時もCompositePSを通し、SceneSRVをそのまま出せる状態にする。
         compositeParameters_.enabled = false;
         compositeParameters_.showOnly = false;
     }
     UpdateConstantBuffer(rc_, compositeParameters_);
 
+    // 最終出力先全体へSceneColor + AOを描き込む。
     dc_->RSSetState(rs_->GetRasterizerState(RasterizerState::SolidCullNone));
     dc_->OMSetDepthStencilState(rs_->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
 
@@ -133,6 +143,7 @@ void XeGtaoSystem::Execute(
     dc_->OMSetRenderTargets(1, &outputRTV_, nullptr);
 
     ID3D11SamplerState* sampler_ = rs_->GetSamplerState(SamplerState::LinearClamp);
+    // t0にSceneColor、t1にAO。AOが無効ならnullptrを渡す。
     ID3D11ShaderResourceView* shaderResources_[] = { sceneSRV_, (aoActive_ && aoReady) ? aoSrv.Get() : nullptr };
 
     dc_->VSSetShader(fullScreenVs.Get(), nullptr, 0);
@@ -151,6 +162,7 @@ void XeGtaoSystem::Execute(
 
 bool XeGtaoSystem::CreateAoTarget(ID3D11Device* device_, int width_, int height_)
 {
+    // AOは1チャンネルfloatで十分なので、R32_FLOATとして確保する。
     D3D11_TEXTURE2D_DESC desc_{};
     desc_.Width = width_;
     desc_.Height = height_;
@@ -187,6 +199,7 @@ void XeGtaoSystem::UpdateConstantBuffer(const RenderContext& rc_, const Paramete
     }
 
     CbXeGtao cb_{};
+    // CSはAO Target解像度で走るため、ViewportもAO側のサイズを渡す。
     cb_.viewportSize = { aoWidth, aoHeight };
     cb_.viewportPixelSize = { 1.0f / static_cast<float>(aoWidth), 1.0f / static_cast<float>(aoHeight) };
     cb_.radius = parameters_.radius;
@@ -209,6 +222,7 @@ void XeGtaoSystem::UpdateConstantBuffer(const RenderContext& rc_, const Paramete
     DirectX::XMStoreFloat4x4(&cb_.invViewProjection, DirectX::XMMatrixIdentity());
     if (rc_.camera != nullptr)
     {
+        // DepthからWorld座標を復元するため、ViewProjectionの逆行列を送る。
         const DirectX::XMMATRIX view_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetView());
         const DirectX::XMMATRIX projection_ = DirectX::XMLoadFloat4x4(&rc_.camera->GetProjection());
         const DirectX::XMMATRIX viewProjection_ = view_ * projection_;
@@ -225,6 +239,7 @@ void XeGtaoSystem::UpdateConstantBuffer(const RenderContext& rc_, const Paramete
 
 void XeGtaoSystem::DrawFullScreenQuad(ID3D11DeviceContext* dc_)
 {
+    // FullScreenVS側で頂点を生成するため、入力レイアウトと頂点バッファは不要。
     dc_->IASetInputLayout(nullptr);
     dc_->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
     dc_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

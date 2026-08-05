@@ -21,6 +21,7 @@ namespace
         const char* key_,
         const DirectX::XMFLOAT3& fallback_)
     {
+        // JSON配列が壊れている場合はfallbackを使い、読み込み失敗で値を壊さない。
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
         if (!value_.is_array() || value_.size() < 3u) return fallback_;
         return { value_[0].get<float>(), value_[1].get<float>(), value_[2].get<float>() };
@@ -41,6 +42,7 @@ namespace
 
 void to_json(nlohmann::json& json_, const ImpactEffectEntry& entry_)
 {
+    // ImpactEffectEntryをAsset JSONへ保存する。
     json_ = {
         { "Type", static_cast<int>(entry_.type) },
         { "Enabled", entry_.enabled },
@@ -56,6 +58,7 @@ void to_json(nlohmann::json& json_, const ImpactEffectEntry& entry_)
 
 void from_json(const nlohmann::json& json_, ImpactEffectEntry& entry_)
 {
+    // Typeは範囲内に丸め、寿命やFadeは安全な範囲に補正する。
     entry_.type = static_cast<IMPACT_EFFECT_ENTRY_TYPE>((std::clamp)(json_.value("Type", 0), 0, 2));
     entry_.enabled = json_.value("Enabled", true);
     entry_.assetPath = json_.value("AssetPath", std::string{});
@@ -87,6 +90,7 @@ void ImpactEffectComponent::Start()
 
 bool ImpactEffectComponent::LoadAsset(const std::string& path_)
 {
+    // AssetTypeでImpactEffect JSONか確認してからComponentへ反映する。
     if (path_.empty()) return false;
     std::ifstream file_(path_);
     if (!file_.is_open()) return false;
@@ -107,6 +111,7 @@ bool ImpactEffectComponent::LoadAsset(const std::string& path_)
 
 bool ImpactEffectComponent::SaveAsset(const std::string& path_) const
 {
+    // 保存先Folderを作成してから、現在のasset内容をJSONとして書き出す。
     if (path_.empty()) return false;
     const std::filesystem::path outputPath_(path_);
     std::filesystem::create_directories(outputPath_.parent_path());
@@ -119,6 +124,7 @@ bool ImpactEffectComponent::SaveAsset(const std::string& path_) const
 
 void ImpactEffectComponent::Update(float deltaTime_)
 {
+    // CoolDownを減らしながら、後から追加されたColliderにもCallbackを接続する。
     coolDownTimer = (std::max)(coolDownTimer - (std::max)(deltaTime_, 0.0f), 0.0f);
     BindColliders();
 }
@@ -131,6 +137,7 @@ void ImpactEffectComponent::BindColliders()
     for (const std::shared_ptr<ColliderComponent>& collider_ :
         owner_->GetComponents<ColliderComponent>())
     {
+        // 同じColliderへCallbackを二重登録しないようSetで管理する。
         if (!collider_ || !boundColliders.insert(collider_.get()).second) continue;
         collider_->onCollisionContactCallbacks.push_back(
             [this](std::shared_ptr<GameObject> other_, const CollisionContact& contact_)
@@ -148,6 +155,7 @@ void ImpactEffectComponent::BindColliders()
 bool ImpactEffectComponent::CanSpawnFor(
     const std::shared_ptr<GameObject>& other_) const
 {
+    // Component無効、相手なし、CoolDown中、Once済みならSpawnしない。
     if (!IsEnabled() || !other_ || coolDownTimer > 0.0f) return false;
     if (spawnOnlyOnce && hasSpawned) return false;
     return (targetLayerMask & other_->GetLayerBit()) != 0u;
@@ -162,9 +170,11 @@ void ImpactEffectComponent::OnCollision(
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
     const DirectX::XMFLOAT3 position_ = contact_.isValid
+        // Contactが有効なら衝突点、不明な場合はOwner位置を使う。
         ? contact_.position
         : owner_->transform->GetWorldPosition();
     const DirectX::XMFLOAT3 normal_ = contact_.isValid
+        // Contact法線が無い場合は上向きを仮法線にする。
         ? contact_.normal
         : DirectX::XMFLOAT3{ 0.0f, 1.0f, 0.0f };
     SpawnAt(position_, normal_);
@@ -179,6 +189,7 @@ void ImpactEffectComponent::OnTrigger(
 
     const DirectX::XMFLOAT3 position_ = owner_->transform->GetWorldPosition();
     const DirectX::XMFLOAT3 otherPosition_ = other_->transform->GetWorldPosition();
+    // TriggerにはContact法線が無いため、自分から相手へ離れる方向を仮法線として作る。
     DirectX::XMFLOAT3 normal_ = {
         position_.x - otherPosition_.x,
         position_.y - otherPosition_.y,
@@ -202,6 +213,7 @@ void ImpactEffectComponent::SpawnAt(
     EffectManager& effectManager_ = GetManager().GetEffectManager();
     if (!assetPath.empty())
     {
+        // 外部Asset指定がある場合はEffectManager側でAssetを読み、まとめてSpawnする。
         effectManager_.SpawnImpactEffectAsset(assetPath, position_, normal_);
         coolDownTimer = (std::max)(coolDown, 0.0f);
         hasSpawned = true;
@@ -209,6 +221,7 @@ void ImpactEffectComponent::SpawnAt(
     }
     for (const ImpactEffectEntry& entry_ : asset.entries)
     {
+        // Component内Assetを使う場合はEntryごとにParticle/MeshVFX/Decalへ変換する。
         if (!entry_.enabled || entry_.assetPath.empty()) continue;
 
         ImpactEffectSpawnRequest request_{};
@@ -216,6 +229,7 @@ void ImpactEffectComponent::SpawnAt(
         request_.normal = normal_;
         if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::PARTICLE)
         {
+            // ParticleはEmitter名と寿命を渡してSpawnする。
             request_.spawnParticle = true;
             request_.particle.assetPath = entry_.assetPath;
             request_.particle.emitterName = entry_.emitterName;
@@ -224,6 +238,7 @@ void ImpactEffectComponent::SpawnAt(
         }
         else if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::MESH_VFX)
         {
+            // Mesh VFXはAsset JSONと寿命を渡してSpawnする。
             request_.spawnMeshVFX = true;
             request_.meshVFX.assetPath = entry_.assetPath;
             request_.meshVFX.lifeTime = entry_.lifeTime;
@@ -231,6 +246,7 @@ void ImpactEffectComponent::SpawnAt(
         }
         else if (entry_.type == IMPACT_EFFECT_ENTRY_TYPE::DECAL)
         {
+            // DecalはTexture/Scale/Color/Fade設定を直接SpawnRequestへ詰める。
             request_.spawnDecal = true;
             request_.decal.texturePath = entry_.assetPath;
             request_.decal.scale = entry_.scale;
@@ -247,6 +263,7 @@ void ImpactEffectComponent::SpawnAt(
 
 void ImpactEffectComponent::Gui()
 {
+    // 外部ImpactEffect Assetを選ぶか、下のEntriesを直接編集する。
     std::string selectedAssetPath_ = assetPath;
     if (AssetSlotGui::Draw(
         "Impact Effect Asset",
@@ -274,6 +291,7 @@ void ImpactEffectComponent::Gui()
     int removeIndex_ = -1;
     for (int index_ = 0; index_ < static_cast<int>(asset.entries.size()); ++index_)
     {
+        // EntryごとにEffect種類を切り替え、種類に応じたAsset欄を表示する。
         ImpactEffectEntry& entry_ = asset.entries[index_];
         ImGui::PushID(index_);
         if (ImGui::TreeNode("Entry", "Effect %d: %s", index_ + 1, typeNames_[static_cast<int>(entry_.type)]))
@@ -330,6 +348,7 @@ void ImpactEffectComponent::Gui()
 
 void ImpactEffectComponent::Serialize(nlohmann::json& json_) const
 {
+    // 外部Asset Pathと、Component内に直接持つEntryの両方を保存する。
     json_["ComponentName"] = componentName;
     json_["TargetLayerMask"] = targetLayerMask;
     json_["CoolDown"] = coolDown;
@@ -341,6 +360,7 @@ void ImpactEffectComponent::Serialize(nlohmann::json& json_) const
 
 void ImpactEffectComponent::Deserialize(const nlohmann::json& json_)
 {
+    // Runtime状態は初期化し、設定値だけを復元する。
     targetLayerMask = json_.value("TargetLayerMask", 0xFFFFFFFFu);
     coolDown = (std::max)(json_.value("CoolDown", 0.1f), 0.0f);
     spawnOnlyOnce = json_.value("SpawnOnlyOnce", true);

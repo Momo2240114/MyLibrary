@@ -31,6 +31,7 @@ namespace
         return (std::max)(0.0f, (std::min)(value_, 1.0f));
     }
 
+    // 2つの線分上で最も近い点を求め、Capsule同士の接触点計算に使う。
     void ClosestPointsOnSegments(
         DirectX::XMVECTOR startA_,
         DirectX::XMVECTOR endA_,
@@ -99,6 +100,7 @@ namespace
         const Capsule& hurtCapsule_,
         const CollisionManifold& manifold_)
     {
+        // HitBoxとHurtBoxのCapsule表面の中間点を、攻撃Hitの接触位置として作る。
         using namespace DirectX;
 
         XMVECTOR closestHit_{};
@@ -144,6 +146,7 @@ namespace
         const Capsule& guardCapsule_,
         const CollisionManifold& manifold_)
     {
+        // HitBoxとGuardColliderのCapsule表面の中間点を、Guard成立位置として作る。
         using namespace DirectX;
 
         XMVECTOR closestHit_{};
@@ -186,6 +189,7 @@ namespace
 
     bool IsCombatOnlyRole(ColliderComponent::CollisionRole role_)
     {
+        // Gameplay用Volume同士は、許可された組み合わせだけTriggerとして扱う。
         return role_ == ColliderComponent::CollisionRole::HIT_BOX ||
             role_ == ColliderComponent::CollisionRole::HURT_BOX ||
             role_ == ColliderComponent::CollisionRole::JUST_DODGE_BOX ||
@@ -221,6 +225,7 @@ namespace
 
     bool ShouldSuppressTriggerPair(ColliderComponent* colliderA_, ColliderComponent* colliderB_)
     {
+        // 同じ所有者内の判定や、Combat用途として不正な組み合わせは通知しない。
         if (!colliderA_ || !colliderB_) return true;
         const uint32_t ownerIdA_ = colliderA_->GetCollisionOwnerId();
         const uint32_t ownerIdB_ = colliderB_->GetCollisionOwnerId();
@@ -230,6 +235,7 @@ namespace
 
     bool CanStepCollider(const std::shared_ptr<ColliderComponent>& collider_)
     {
+        // Load未完了や無効Colliderは、このFrameの判定対象から外す。
         if (!collider_ || !collider_->IsEnabled()) return false;
         if (!collider_->IsStarted()) return false;
 
@@ -241,6 +247,7 @@ namespace
 void CollisionStepSystem::RegisterCollider(
     const std::shared_ptr<ColliderComponent>& collider_)
 {
+    // 同じColliderを二重登録しないよう確認してから弱参照で保持する。
     if (!collider_) return;
 
     RemoveExpiredColliders();
@@ -256,6 +263,7 @@ void CollisionStepSystem::RegisterCollider(
 
 void CollisionStepSystem::UnregisterCollider(ColliderComponent* collider_)
 {
+    // Collider削除時は、他Colliderが持つTrigger中情報からも対象Objectを外す。
     if (!collider_) return;
 
     const std::shared_ptr<GameObject> removedObject_ = collider_->GetGameObject();
@@ -295,6 +303,7 @@ void CollisionStepSystem::Clear()
 
 std::vector<std::shared_ptr<HitBox>> CollisionStepSystem::CollectActiveHitBoxes()
 {
+    // 弱参照を掃除してから、有効なHitBoxだけを収集する。
     RemoveExpiredColliders();
 
     std::vector<std::shared_ptr<HitBox>> hitBoxes_;
@@ -315,6 +324,7 @@ std::vector<std::shared_ptr<HitBox>> CollisionStepSystem::CollectActiveHitBoxes(
 
 void CollisionStepSystem::SyncFromPhysics(float deltaTime_)
 {
+    // PhysXで動いた位置や接地状態を、各ColliderComponentへ反映する。
     RemoveExpiredColliders();
     for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
     {
@@ -353,6 +363,7 @@ void CollisionStepSystem::Step(float deltaTime_)
     }
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::PreparePhysicsStep");
+        // 判定前にFrame用Flagを初期化し、ColliderごとのPhysics準備を行う。
         for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
         {
             const std::shared_ptr<ColliderComponent> collider_ = registeredCollider_.lock();
@@ -384,6 +395,7 @@ void CollisionStepSystem::HandleTriggerPair(
     bool hit_,
     const AttackHitContact* contact_)
 {
+    // Trigger Enter/Stay/Exitを更新し、HitBox/HurtBoxならAttackSystemへ通知する。
     if (!colliderA_ || !colliderB_) return;
 
     const std::shared_ptr<GameObject> objectA_ = colliderA_->GetGameObject();
@@ -470,6 +482,7 @@ void CollisionStepSystem::HandlePhysXContact(
     const CollisionContact& contactA_,
     const CollisionContact& contactB_)
 {
+    // PhysXから渡された接触を、両ColliderのCollision callbackへ橋渡しする。
     if (!colliderA_ || !colliderB_) return;
 
     const std::shared_ptr<GameObject> objectA_ = colliderA_->GetGameObject();
@@ -496,6 +509,7 @@ void CollisionStepSystem::HandlePhysXContact(
 
 void CollisionStepSystem::RemoveExpiredColliders()
 {
+    // GameObject削除などで所有元が消えたCollider参照を掃除する。
     colliders.erase(
         std::remove_if(
             colliders.begin(),
@@ -509,8 +523,7 @@ void CollisionStepSystem::RemoveExpiredColliders()
 
 void CollisionStepSystem::StepCombatPairs()
 {
-    // HitBox, HurtBox, JustDodgeBox and GuardBox are manual gameplay volumes.
-    // They intentionally do not participate in PhysX actor/query events.
+    // HitBox/HurtBox/JustDodge/GuardはGameplay用Volumeなので、PhysXではなく手動で組み合わせ判定する。
     std::vector<std::shared_ptr<HitBox>> hitBoxes_;
     std::vector<std::shared_ptr<HurtBox>> hurtBoxes_;
     std::vector<std::shared_ptr<JustDodgeCollider>> justDodgeColliders_;
@@ -518,6 +531,7 @@ void CollisionStepSystem::StepCombatPairs()
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::BroadPhase");
+        // Collider型ごとに配列を分け、後段の組み合わせ判定を単純化する。
         for (const std::weak_ptr<ColliderComponent>& registeredCollider_ : colliders)
         {
             const std::shared_ptr<ColliderComponent> collider_ =
@@ -594,6 +608,7 @@ void CollisionStepSystem::StepCombatPairs()
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::SensorCollision");
+        // HitBoxとJustDodgeColliderの重なりを先に見て、回避成功を通知する。
         for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
         {
             const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
@@ -644,6 +659,7 @@ void CollisionStepSystem::StepCombatPairs()
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::GuardCollision");
+        // Guardが成立した攻撃はHitBoxを無効化し、後段のHurtBox Hitへ進ませない。
         for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
         {
             const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
@@ -691,6 +707,7 @@ void CollisionStepSystem::StepCombatPairs()
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::HitBoxCollision");
+        // 最後にHitBoxとHurtBoxを判定し、接触情報付きでAttackSystemへ流す。
         BS_PROFILE_PLOT(
             "Collision.NarrowPhasePairCount",
             static_cast<int64_t>(hitBoxes_.size() * hurtBoxes_.size()));

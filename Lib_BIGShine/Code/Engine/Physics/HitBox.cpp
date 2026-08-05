@@ -11,6 +11,8 @@
 
 HitBox::HitBox()
 {
+    // HitBoxは攻撃Action中の受付窓だけ有効にするColliderなので、生成時は無効にしておく。
+    // 物理反応を持たないTriggerとして固定し、色は攻撃判定らしく赤系にする。
     enabled = false;
     EnforceHitBoxSettings();
     debugPrimitiveColor = { 1.0f, 0.2f, 0.2f, 1.0f };
@@ -24,11 +26,13 @@ const std::string& HitBox::GetName() const
 
 void HitBox::SetOwner(GameObject* owner_)
 {
+    // 武器や子ObjectにHitBoxが付いていても、攻撃者として扱うObjectを明示できるようにする。
     ownerObject = owner_;
 }
 
 void HitBox::SetAttackInstanceId(uint32_t attackInstanceId_)
 {
+    // 攻撃Actionが切り替わったら、過去にHitした対象履歴は別攻撃として扱うため消す。
     attackInstanceId = attackInstanceId_;
     ClearHitTargets();
 }
@@ -55,6 +59,8 @@ void HitBox::SetKnockBackPower(float knockBackPower_)
 
 bool HitBox::ShouldNotifyAttackerOnGuard() const
 {
+    // 近接攻撃だけ、Guardされた時に攻撃者側へ硬直/キャンセルなどの反応通知を返す。
+    // ProjectileやRemoteは発生源と攻撃者が離れているため、攻撃者本人へ返さない。
     return attackSourceType == ATTACK_SOURCE_TYPE::MELEE;
 }
 
@@ -66,17 +72,21 @@ void HitBox::SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPow
 
 void HitBox::SetHitEffectPath(const std::string& path_)
 {
+    // 外部のAttackTemplateなどから、Hit時に出すMeshVFXだけを差し替えるための簡易Setter。
     hitMeshVFXAssetPath = path_;
 }
 
 void HitBox::ClearHitTargets()
 {
+    // 同一activation中に既にHitした対象を忘れる。
+    // 新しい攻撃IDやDebug操作で、対象へ再Hitさせたい時に呼ぶ。
     alreadyHitTargets.clear();
 }
 
 bool HitBox::CanHit(GameObject* target_) const
 {
-    // ownerへの自爆判定と、同一Activation内の多重ヒットをここで止める。
+    // ownerへの自爆判定と、同一Activation内の多重Hitをここで止める。
+    // AttackSystem側のattackInstanceId履歴とあわせて、HitBox単体でも最低限の重複防止を持つ。
     if (target_ == nullptr) return false;
     if (!canHitOwner && ownerObject == target_) return false;
     return allowMultiHit || alreadyHitTargets.count(target_) == 0u;
@@ -84,11 +94,14 @@ bool HitBox::CanHit(GameObject* target_) const
 
 void HitBox::RegisterHit(GameObject* target_)
 {
+    // Hit成立後に対象を記録し、allowMultiHitがfalseなら同じ受付窓で再Hitしないようにする。
     if (target_ != nullptr) alreadyHitTargets.insert(target_);
 }
 
 std::shared_ptr<GameObject> HitBox::GetAttackOwner()
 {
+    // 明示Owner、CollisionOwner、HitBox自身のObjectの順で攻撃者を解決する。
+    // 武器や子Colliderから発生したHitでも、親のPlayer/Enemyを攻撃者として扱えるようにする。
     if (ownerObject != nullptr)
     {
         return ownerObject->shared_from_this();
@@ -102,6 +115,8 @@ std::shared_ptr<GameObject> HitBox::GetAttackOwner()
 
 void HitBox::Start()
 {
+    // CapsuleColliderとして初期化し、ActionSequenceからHitBoxを開閉するActionを登録する。
+    // Load直後は必ずDeactivateし、攻撃判定が出っぱなしになるのを防ぐ。
     CapsuleCollider::Start();
     RegisterActions();
     Deactivate();
@@ -110,9 +125,12 @@ void HitBox::Start()
 void HitBox::Activate()
 {
     // SequencerやActionから有効化される直前に、Blackboardで上書きされた攻撃値を反映する。
+    // これにより同じHitBox Componentを使い回しつつ、AttackTemplateごとにDamage/VFX/SEを変えられる。
     ApplyBlackboardValues();
     if (ownerObject == nullptr)
     {
+        // 明示OwnerがないHitBoxは、このActivateを1つの新しい攻撃としてAttackSystemからIDをもらう。
+        // Action側でIDを先に設定している場合は、そのIDを使って多段Hitや複数HitBoxをまとめられる。
         const std::shared_ptr<GameObject> object_ = GetGameObject();
         if (object_)
         {
@@ -123,12 +141,14 @@ void HitBox::Activate()
     ClearHitTargets();
     ++activationId;
     if (activationId == 0) ++activationId;
+    // Trigger状態を消してから有効化し、前回受付窓の接触状態を引きずらないようにする。
     currentTriggers.clear();
     SetEnabled(true);
 }
 
 void HitBox::Deactivate()
 {
+    // 攻撃受付終了時はColliderを無効化し、Trigger状態とHit済み対象を破棄する。
     SetEnabled(false);
     currentTriggers.clear();
     ClearHitTargets();
@@ -136,6 +156,7 @@ void HitBox::Deactivate()
 
 void HitBox::Gui()
 {
+    // 攻撃判定のDamage、HitStop、VFX、SE、CameraShake、Action名、Blackboard参照先をEditorで調整する。
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Attack");
     ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f, 99999.0f);
@@ -256,6 +277,8 @@ void HitBox::Gui()
 
 void HitBox::Serialize(nlohmann::json& j_) const
 {
+    // Capsule形状に加えて、攻撃結果、演出、Action名、Blackboard参照Keyを保存する。
+    // activationIdやHit済み対象などFrame中の履歴は保存しない。
     CapsuleCollider::Serialize(j_);
     j_["Damage"] = damage;
     j_["HitStopDuration"] = hitStopDuration;
@@ -310,6 +333,8 @@ void HitBox::Serialize(nlohmann::json& j_) const
 
 void HitBox::Deserialize(const nlohmann::json& j_)
 {
+    // 保存値を復元しつつ、古いKey名にもFallbackして既存Sceneデータを読めるようにする。
+    // Runtime履歴ではなく設定値だけを復元し、最後にHitBox固定設定を再適用する。
     CapsuleCollider::Deserialize(j_);
     damage = j_.value("Damage", 1.0f);
     hitStopDuration = j_.value("HitStopDuration", j_.value("HitStopTime", 0.0f));
@@ -379,6 +404,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
 
 std::string HitBox::GetActionPrefix() const
 {
+    // Prefix未指定ならOwner名を使い、複数ObjectのHitBox Action名が衝突しないようにする。
     if (!actionPrefix.empty())
     {
         return actionPrefix;
@@ -395,6 +421,7 @@ std::string HitBox::GetActionPrefix() const
 
 std::string HitBox::GetActivateActionName() const
 {
+    // Prefix付きの有効化Action名を作り、Animation/ActionSequenceからこのHitBoxを開けるようにする。
     const std::string prefix_ = GetActionPrefix();
 
     if (prefix_.empty())
@@ -407,6 +434,7 @@ std::string HitBox::GetActivateActionName() const
 
 std::string HitBox::GetDeactivateActionName() const
 {
+    // 有効化と同じPrefix規則で、攻撃受付終了用Action名を作る。
     const std::string prefix_ = GetActionPrefix();
 
     if (prefix_.empty())
@@ -419,6 +447,8 @@ std::string HitBox::GetDeactivateActionName() const
 
 void HitBox::ApplyBlackboardValues()
 {
+    // 攻撃Action実行時にBlackboardへ流された一時データを読み取り、HitBoxの現在値へ反映する。
+    // ComponentのScene保存値は基礎値として残し、実際の攻撃ごとの差分はBlackboardから上書きする設計。
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     std::shared_ptr<BlackboardComponent> blackboard_;
 
@@ -440,7 +470,8 @@ void HitBox::ApplyBlackboardValues()
     int intValue_ = 0;
     if (attackDataBlackboardOverrideEnabled)
     {
-        // ActionSequenceやAttackTemplateRuntimeが書いた一時値で、ダメージやHitStopを上書きする。
+        // ActionSequenceやAttackTemplateRuntimeが書いた一時値で、DamageやHitStopを上書きする。
+        // Key名を設定で持たせているため、攻撃ごとにBlackboard構成が少し違っても使える。
         if (!damageKey.empty() && blackboard_->GetFloat(blackboardCategory, damageKey, value_))
         {
             damage = value_;
@@ -489,6 +520,7 @@ void HitBox::ApplyBlackboardValues()
     }
 
     std::string stringValue_;
+    // Hit演出もBlackboardで上書きできる。AttackTemplateからParticle/MeshVFX/SEを差し替えるための経路。
     if (hitEffectBlackboardOverrideEnabled &&
         blackboard_->GetString(blackboardCategory, "HitParticleAssetPath", stringValue_))
     {
@@ -579,6 +611,7 @@ void HitBox::RegisterActions()
     if (!owner_) return;
 
     // Animation Sequencerから名前でHitBoxをON/OFFできるよう、Local Actionとして公開する。
+    // lambdaはweak_ptr経由にし、Object削除後にActionが呼ばれても安全に抜けるようにする。
     std::weak_ptr<HitBox> weakHitBox_;
     for (const std::shared_ptr<Component>& component_ : owner_->colliderComponents)
     {
@@ -618,6 +651,7 @@ void HitBox::RegisterActions()
     const std::string actionPrefix_ = GetActionPrefix();
     owner_->RegisterAction("Combat", actionPrefix_ + "_NewAttackInstance", [weakHitBox_]()
         {
+            // 複数HitBoxや複数受付窓を同じ攻撃として扱いたい時、Actionから明示的に新しい攻撃IDを作る。
             if (const std::shared_ptr<HitBox> hitBox_ = weakHitBox_.lock())
             {
                 const std::shared_ptr<GameObject> object_ = hitBox_->GetGameObject();
@@ -628,6 +662,7 @@ void HitBox::RegisterActions()
         });
     owner_->RegisterAction("Combat", actionPrefix_ + "_ClearAttackHits", [weakHitBox_]()
         {
+            // 攻撃IDに紐づくHit/Guard/JustDodge履歴をまとめて消し、同じAction内で再判定できる状態に戻す。
             if (const std::shared_ptr<HitBox> hitBox_ = weakHitBox_.lock())
             {
                 hitBox_->ClearHitTargets();
@@ -647,6 +682,7 @@ void HitBox::RegisterActions()
 
 void HitBox::EnforceHitBoxSettings()
 {
+    // HitBoxは物理的に押し返さず、TriggerとしてCombat SystemへHit候補を渡す。
     collisionRole = CollisionRole::HIT_BOX;
     usePhysicsResponse = false;
     physicsControlsTransform = false;

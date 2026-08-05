@@ -24,6 +24,8 @@ static PxControllerManager* gControllerManager = nullptr;
 
 namespace
 {
+    // ColliderComponent::CollisionRoleをPhysX FilterDataへ詰める時のRole番号。
+    // PhysXのFilterShaderやCharacterController Filterは、この番号を見て接触方法を分ける。
     constexpr PxU32 ROLE_PHYSICAL = 0;
     constexpr PxU32 ROLE_CHARACTER = 1;
     constexpr PxU32 ROLE_HIT_BOX = 2;
@@ -35,11 +37,14 @@ namespace
 
     bool HasSameCollisionOwner(PxU32 ownerIdA_, PxU32 ownerIdB_)
     {
+        // 同じObject階層に属するCollider同士は、自分自身との接触として扱い抑制する。
         return ownerIdA_ != 0u && ownerIdB_ != 0u && ownerIdA_ == ownerIdB_;
     }
 
     bool IsCctMoveIgnoredRole(PxU32 role_)
     {
+        // CharacterControllerの移動Queryでは、Combat用Volumeを地形や壁として扱わない。
+        // HitBox/HurtBox/Guard/JustDodgeはCollisionStepSystem側で手動判定する。
         return role_ == ROLE_HIT_BOX ||
             role_ == ROLE_HURT_BOX ||
             role_ == ROLE_SENSOR ||
@@ -56,6 +61,8 @@ namespace
             const PxRigidActor*,
             PxHitFlags&) override
         {
+            // CCT Move中に当たるShapeを選別する。
+            // Combat用Volumeと同一OwnerのShapeは無視し、それ以外は移動を止めるBLOCKにする。
             if (!shape_) return PxQueryHitType::eNONE;
 
             const PxFilterData shapeFilterData_ = shape_->getSimulationFilterData();
@@ -89,6 +96,7 @@ namespace
     public:
         PxControllerBehaviorFlags getBehaviorFlags(const PxShape& shape_, const PxActor&) override
         {
+            // 地面として扱えないColliderや他Characterに乗った時は、上に立たず滑る挙動にする。
             const PxRigidActor* actor_ = shape_.getActor();
             const ColliderComponent* collider_ = actor_
                 ? static_cast<const ColliderComponent*>(actor_->userData)
@@ -122,6 +130,7 @@ namespace
     public:
         bool filter(const PxController& controllerA_, const PxController& controllerB_) override
         {
+            // CharacterController同士の相互作用で、同一Owner内のControllerは無視する。
             const ColliderComponent* colliderA_ =
                 static_cast<const ColliderComponent*>(controllerA_.getUserData());
             const ColliderComponent* colliderB_ =
@@ -153,6 +162,8 @@ static PxFilterFlags PhysXFilterShader(
     const void*,
     PxU32)
 {
+    // PhysX Scene全体の接触ルール。
+    // 物理反応するColliderだけContact Solveし、Combat用Volumeは手動判定へ回すためPhysXでは抑制する。
     const PxU32 rolePhysical_ = 0;
     const PxU32 roleCharacter_ = 1;
     const PxU32 roleHitBox_ = 2;
@@ -166,6 +177,7 @@ static PxFilterFlags PhysXFilterShader(
     const PxU32 ownerId1_ = filterData1_.word3 & ownerMask_;
     if (HasSameCollisionOwner(ownerId0_, ownerId1_))
     {
+        // 同じ所有者のCollider同士は自分自身の部位判定なので、PhysX接触を発生させない。
         return PxFilterFlag::eSUPPRESS;
     }
 
@@ -178,11 +190,14 @@ static PxFilterFlags PhysXFilterShader(
         || filterData1_.word2 == roleGuardBox_;
     if (combatOnlyRole_)
     {
+        // HitBox/HurtBox/Guard/JustDodgeはCollisionStepSystemがCapsule同士で判定する。
+        // PhysX Triggerにも流すと二重通知になるため、ここでは完全に抑制する。
         return PxFilterFlag::eSUPPRESS;
     }
 
     if (PxFilterObjectIsTrigger(attributes0_) || PxFilterObjectIsTrigger(attributes1_))
     {
+        // 通常TriggerはEnter/Stayを受け取れるようにする。
         pairFlags_ = PxPairFlag::eTRIGGER_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_PERSISTS;
         return PxFilterFlag::eDEFAULT;
     }
@@ -207,6 +222,8 @@ static PxFilterFlags PhysXFilterShader(
         && (filterData1_.word2 == rolePhysical_ || filterData1_.word2 == roleCharacter_);
     if (maskOnly_ || !bothRespond_ || !physicalPair_ || characterPair_)
     {
+        // Layer Maskだけで「検知はするが押し返さない」組み合わせや、
+        // Character同士の押し合いはContact Solveを外す。
         pairFlags_.clear(PxPairFlag::eSOLVE_CONTACT);
     }
     return PxFilterFlag::eDEFAULT;
@@ -214,6 +231,7 @@ static PxFilterFlags PhysXFilterShader(
 
 void PhysXSystem::Initialize()
 {
+    // PhysXの基本Object、Scene、PVD、CharacterControllerManagerをまとめて初期化する。
     static PxDefaultErrorCallback gError;
     static PxDefaultAllocator     gAlloc;
 
@@ -274,7 +292,7 @@ void PhysXSystem::Initialize()
 
 void PhysXSystem::Finalize()
 {
-    // Sceneより先に解放
+    // Sceneより先にControllerManagerを解放し、PhysX内部参照が残らない順番で後始末する。
     if (gControllerManager)
     {
         gControllerManager->release();
@@ -302,6 +320,8 @@ void PhysXSystem::Finalize()
 
 void PhysXSystem::Step(float dt)
 {
+    // Game側TimeScaleを反映したdeltaでPhysX Sceneを進める。
+    // scaleが0のHitStop中はsimulateせず、物理状態を止める。
     const float scaledDt_ = dt * gTimeScale;
     if (!gScene || scaledDt_ <= 0.0f) return;
     gScene->simulate(scaledDt_);
@@ -310,11 +330,13 @@ void PhysXSystem::Step(float dt)
 
 void PhysXSystem::SetTimeScale(float scale_)
 {
+    // PhysX側では0から1の範囲だけを受け付け、逆再生や過剰加速はここで防ぐ。
     gTimeScale = (std::max)(0.0f, (std::min)(scale_, 1.0f));
 }
 
 void PhysXSystem::ComputeCharacterControllerInteractions(float deltaTime_)
 {
+    // CharacterController同士の重なり回復を、ColliderComponent更新前に計算する。
     if (!gControllerManager || deltaTime_ <= 0.0f) return;
     gControllerManager->computeInteractions(
         deltaTime_,
@@ -421,6 +443,7 @@ PxControllerManager* PhysXSystem::GetControllerManager()
 
 PxConvexMesh* PhysXSystem::CreateConvexMesh(const std::vector<DirectX::XMFLOAT3>& vertices_)
 {
+    // Dynamicにも使えるConvex MeshをCookする。PhysXの制限に合わせて頂点数を255へ制限する。
     if (!gPhysics || vertices_.size() < 4) return nullptr;
 
     PxConvexMeshDesc desc_;
@@ -438,6 +461,7 @@ PxTriangleMesh* PhysXSystem::CreateTriangleMesh(
     const std::vector<DirectX::XMFLOAT3>& vertices_,
     const std::vector<uint32_t>& indices_)
 {
+    // Static地形や背景用のTriangle MeshをCookする。Dynamic Actorには使わない前提。
     if (!gPhysics || vertices_.size() < 3 || indices_.size() < 3) return nullptr;
 
     PxTriangleMeshDesc desc_;

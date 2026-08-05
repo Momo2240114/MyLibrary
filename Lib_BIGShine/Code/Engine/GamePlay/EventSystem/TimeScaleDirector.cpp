@@ -18,6 +18,8 @@ namespace
 
     uint32_t GetDefaultTimeScaleLayerMask()
     {
+        // TimeScale演出の標準対象はPlayerを除いた反応側Layer。
+        // 回避や攻撃入力の操作感を残しつつ、敵や弾、環境だけをスローにできる。
         return
             ToMask(TarGetLayerType::Enemy) |
             ToMask(TarGetLayerType::EnemyBullet) |
@@ -33,6 +35,8 @@ namespace
         constexpr uint32_t defaultMask_ = static_cast<uint32_t>(TarGetLayerType::Default);
         constexpr uint32_t allMask_ = static_cast<uint32_t>(TarGetLayerType::All);
 
+        // Default/All/空指定はTimeManager全体へ影響が広すぎるため、
+        // Directorでは演出用の標準Layerへ丸めて扱う。
         if (layerMask_ == defaultMask_ || layerMask_ == allMask_)
         {
             return GetDefaultTimeScaleLayerMask();
@@ -49,6 +53,8 @@ namespace
 
 void TimeScaleDirector::Play(size_t index_)
 {
+    // GlobalActionやEditorのPlayボタンから呼ばれる再生入口。
+    // 範囲外IndexやTimeManager未取得時は、演出を発火せず安全に抜ける。
     if (index_ >= editorWaypoints.size()) return;
 
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -60,6 +66,7 @@ void TimeScaleDirector::Play(size_t index_)
 
     const TimeScaleWayPoint& wayPoint_ = editorWaypoints[index_];
 
+    // Layer指定が空の演出は意図しない全体停止にならないよう再生しない。
     if (wayPoint_.layerMask == 0u) return;
 
     timeManager_->PlayTimedScale(
@@ -73,6 +80,8 @@ void TimeScaleDirector::Play(size_t index_)
 
 void TimeScaleDirector::RegisterActions()
 {
+    // Waypointごとに TimeScale_0, TimeScale_1... のGlobalActionを登録する。
+    // Timelineや他Componentから名前でTimeScale演出を呼び出せるようにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
@@ -89,6 +98,7 @@ void TimeScaleDirector::Gui()
 {
     if (ImGui::Button("Add Time Scale"))
     {
+        // 新規Waypointは標準反応Layerを対象にして、追加直後から安全に試せる状態にする。
         editorWaypoints.emplace_back();
         editorWaypoints.back().layerMask = GetDefaultTimeScaleLayerMask();
         RegisterActions();
@@ -102,6 +112,7 @@ void TimeScaleDirector::Gui()
 
         if (ImGui::TreeNode(("Time Scale " + std::to_string(index_)).c_str()))
         {
+            // 1つのWaypointで「Scaleへ移動 -> 維持 -> 戻す」までの一連の時間を調整する。
             ImGui::SliderFloat("Target Scale", &wayPoint_.targetScale, 0.0f, 2.0f);
             ImGui::DragFloat("Time To Target", &wayPoint_.timeToTarget, 0.01f, 0.0f, 60.0f);
             ImGui::DragFloat("Hold Duration", &wayPoint_.holdDuration, 0.01f, 0.0f, 60.0f);
@@ -110,6 +121,7 @@ void TimeScaleDirector::Gui()
 
             wayPoint_.layerMask = SanitizeTimeScaleLayerMask(wayPoint_.layerMask);
 
+            // Layerはbit maskで保持するため、CheckboxのON/OFFをbit操作へ変換する。
             ImGui::SeparatorText("Target Layers");
 
             auto LayerCheckBox_ = [&](const char* label_, TarGetLayerType layerType_)
@@ -145,6 +157,7 @@ void TimeScaleDirector::Gui()
 
             if (ImGui::Button("Use Default Reaction Layers"))
             {
+                // Player以外を止める基本演出へ戻す。
                 wayPoint_.layerMask = GetDefaultTimeScaleLayerMask();
             }
 
@@ -152,6 +165,7 @@ void TimeScaleDirector::Gui()
 
             if (ImGui::Button("Clear Layers"))
             {
+                // 完全な空MaskはPlay時に無効になるため、Editor上では標準Layerへ戻す。
                 wayPoint_.layerMask = GetDefaultTimeScaleLayerMask();
             }
 
@@ -164,6 +178,7 @@ void TimeScaleDirector::Gui()
 
             if (ImGui::Button("Play"))
             {
+                // Editor上で設定値をその場で確認するための手動再生。
                 Play(static_cast<size_t>(index_));
             }
 
@@ -171,6 +186,7 @@ void TimeScaleDirector::Gui()
 
             if (ImGui::Button("Remove") && editorWaypoints.size() > 1)
             {
+                // 最低1つは残し、Action登録やEditor表示が空になりすぎないようにする。
                 editorWaypoints.erase(editorWaypoints.begin() + index_--);
             }
 
@@ -183,6 +199,7 @@ void TimeScaleDirector::Gui()
 
 void TimeScaleDirector::Serialize(nlohmann::json& json_) const
 {
+    // Waypoint配列として保存し、Scene読み込み後もEditor設定とGlobalActionを復元できるようにする。
     json_["Waypoints"] = nlohmann::json::array();
 
     for (const TimeScaleWayPoint& wayPoint_ : editorWaypoints)
@@ -200,6 +217,7 @@ void TimeScaleDirector::Serialize(nlohmann::json& json_) const
 
 void TimeScaleDirector::Deserialize(const nlohmann::json& json_)
 {
+    // 読み込み前にEditor側の一時状態を消し、JSONの内容から作り直す。
     editorWaypoints.clear();
 
     const uint32_t allLayerMask_ = static_cast<uint32_t>(TarGetLayerType::All);
@@ -210,6 +228,7 @@ void TimeScaleDirector::Deserialize(const nlohmann::json& json_)
     {
         for (const nlohmann::json& item_ : json_["Waypoints"])
         {
+            // 古いSceneに項目が無い場合でも既定値で補完し、負の時間やScaleは0以上に丸める。
             TimeScaleWayPoint wayPoint_;
 
             wayPoint_.targetScale = (std::max)(item_.value("TargetScale", 0.4f), 0.0f);
@@ -222,6 +241,7 @@ void TimeScaleDirector::Deserialize(const nlohmann::json& json_)
 
             if (wayPoint_.layerMask == allLayerMask_)
             {
+                // 過去データのAll指定はPlayerまで止めないよう、Player以外のLayerへ変換する。
                 wayPoint_.layerMask = defaultNonPlayerLayerMask_;
             }
 
@@ -231,6 +251,7 @@ void TimeScaleDirector::Deserialize(const nlohmann::json& json_)
 
     if (editorWaypoints.empty())
     {
+        // JSONに有効なWaypointが無い場合でも、Editorで即編集できるよう1件だけ用意する。
         editorWaypoints.emplace_back();
         editorWaypoints.back().layerMask = defaultNonPlayerLayerMask_;
     }

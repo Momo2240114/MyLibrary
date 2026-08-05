@@ -10,6 +10,7 @@
 
 namespace
 {
+    // 色やInfluenceは0～1範囲で扱うための共通Clamp。
     float Clamp01(float value_)
     {
         return std::clamp(value_, 0.0f, 1.0f);
@@ -19,6 +20,7 @@ namespace
         float position_,
         VFX_MATERIAL_COLOR_RAMP_WRAP_MODE wrapMode_)
     {
+        // Ramp参照位置を、Clamp/Repeat/Mirrorの設定に合わせて0～1へ戻す。
         switch (wrapMode_)
         {
         case VFX_MATERIAL_COLOR_RAMP_WRAP_MODE::REPEAT:
@@ -37,6 +39,7 @@ namespace
 
     float SmoothStep(float value_)
     {
+        // RampのSMOOTH補間用。端で速度が0に近づく。
         value_ = Clamp01(value_);
         return value_ * value_ * (3.0f - 2.0f * value_);
     }
@@ -57,6 +60,7 @@ namespace
 
     uint32_t HashColorSeed(uint32_t seed_)
     {
+        // 軽量な整数Hashで、同じSeedから安定した疑似乱数列を作る。
         seed_ ^= seed_ >> 16;
         seed_ *= 0x7feb352du;
         seed_ ^= seed_ >> 15;
@@ -76,6 +80,7 @@ namespace
         float lifeTime_,
         float time_)
     {
+        // Rampを寿命率で見るか、絶対時間で流すか、固定位置で見るかを切り替える。
         switch (colorRamp_.sampleSource)
         {
         case VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::TIME:
@@ -105,6 +110,7 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::SampleColorRamp(
         colorRamp_.wrapMode);
 
     auto stops_ = colorRamp_.stops;
+    // Editorで並び順が崩れていても正しい区間検索ができるよう、評価時に並べ替える。
     std::sort(stops_.begin(), stops_.end(),
         [](const VFXMaterialColorRampStopData& left_, const VFXMaterialColorRampStopData& right_)
         {
@@ -143,6 +149,7 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::SampleRandomColor(
     BS_PROFILE_SCOPE("VFXMaterialColorUtility::SampleRandomColor");
 
     seed_ ^= randomColor_.seed;
+    // 4チャンネルそれぞれに別の乱数を使い、min/maxの範囲内で色を作る。
     const float red_ = Random01(seed_);
     const float green_ = Random01(seed_);
     const float blue_ = Random01(seed_);
@@ -165,6 +172,7 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::ApplyColorRamp(
     BS_PROFILE_SCOPE("VFXMaterialColorUtility::ApplyColorRamp");
 
     if (!colorRamp_.enabled) return baseColor_;
+    // Rampが無効なら元色をそのまま返し、有効ならBlendColorに合成を任せる。
     return BlendColor(
         baseColor_,
         rampColor_,
@@ -206,6 +214,7 @@ DirectX::XMFLOAT4 VFXMaterialColorUtility::BlendColor(
 
     const float influenceClamped_ = Clamp01(influence_);
     DirectX::XMFLOAT4 targetColor_ = baseColor_;
+    // まずBlendModeごとの目標色を作り、最後にinfluenceで元色へ戻す。
     switch (blendMode_)
     {
     case VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::OVERRIDE:

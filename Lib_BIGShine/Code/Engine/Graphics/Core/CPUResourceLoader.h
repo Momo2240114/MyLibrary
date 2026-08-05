@@ -16,6 +16,7 @@ enum class TextureType {
 class CPUResourceLoader
 {
 private:
+	// 同じテクスチャを複数回読み込まないための簡易キャッシュ。
 	static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureResources;
 
 public:
@@ -27,6 +28,7 @@ public:
 		D3D11_TEXTURE2D_DESC* texture2d_desc_ = nullptr,
 		TextureType type = TextureType::Color);;
 
+	// メモリ上の画像データからSRVを作る。組み込み画像やアーカイブ展開後に使う。
 	static HRESULT LoadTextureFromMemory(
 		ID3D11Device* device_,
 		const void* data,
@@ -34,13 +36,16 @@ public:
 		ID3D11ShaderResourceView** shader_resource_view_ = nullptr,
 		TextureType type = TextureType::Color);;
 
+	// テクスチャ未設定時の白/黒など、1x1の代替SRVを作る。
 	static HRESULT CreateDummyTexture(
 		ID3D11Device* device_,
 		UINT colorRGBA8,
 		ID3D11ShaderResourceView** outSRV_);
 
+	// Scene終了やDevice再作成時に、キャッシュしているTexture SRVをすべて解放する。
 	static void ReleaseAllTextures();
 
+	// CSOからVSとInputLayoutをまとめて作る低レベル関数。
 	static HRESULT CreateVSFromCSO(ID3D11Device* device_, const char* csoName_, ID3D11VertexShader** vertexShader_,
 		ID3D11InputLayout** inputLayout_, const D3D11_INPUT_ELEMENT_DESC* inputElementDesc_, UINT numElements_);
 

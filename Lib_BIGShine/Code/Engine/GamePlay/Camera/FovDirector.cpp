@@ -20,6 +20,7 @@ void FovDirector::Start()
 
     if (camera_)
     {
+        // シーン開始時のカメラ FOV を、演出終了後に戻す基準値として保持する。
         defaultFov = camera_->GetFovY();
     }
 
@@ -28,6 +29,7 @@ void FovDirector::Start()
 
     if (!easing_) return;
 
+    // ヒットストップやスロー演出中でも FOV 演出は止めたくないので UnscaledTime を使う。
     easing_->SetUseUnscaledTime(true);
     easingIndex = easing_->AddEasingAndGetIndex();
 
@@ -48,6 +50,7 @@ void FovDirector::Update(float elapsedTime_)
         const std::shared_ptr<TimeManager> timeManager_ =
             owner_->GetManager().GetTimeManager();
 
+        // HOLD 時間も TimeScale の影響を受けないよう RawDelta を優先する。
         holdElapsed += timeManager_
             ? timeManager_->GetLastRawDeltaTime()
             : elapsedTime_;
@@ -106,6 +109,7 @@ void FovDirector::PlayFov(
     startFov = camera_->GetFovY();
     targetFov = wayPoint_.fov;
 
+    // 負の時間設定は扱いづらいので、再生前に 0 以上へ丸める。
     holdDuration = (std::max)(wayPoint_.holdDuration, 0.0f);
     returnDuration = (std::max)(wayPoint_.returnDuration, 0.0f);
 
@@ -116,6 +120,7 @@ void FovDirector::PlayFov(
         ? EasingType::Lerp
         : type_;
 
+    // EasingComponent には 0→1 の進行だけを持たせ、FOV 値への変換は ApplyInterpolated で行う。
     easing_->SetStartValue(easingIndex, 0.0f);
     easing_->PlayEasing(
         easingIndex,
@@ -195,6 +200,7 @@ void FovDirector::BeginTransitionToDefault()
 
     if (returnDuration <= 0.0f)
     {
+        // 戻り時間が 0 の場合は補間スロットを回さず、即座に既定値へ戻す。
         ResetToDefault();
         return;
     }
@@ -296,6 +302,7 @@ void FovDirector::Gui()
 
             if (ImGui::Button("Remove"))
             {
+                // 削除後は Fov_番号 の対応が変わるため、Action を登録し直す。
                 editorWaypoints.erase(editorWaypoints.begin() + index_--);
                 RegisterActions();
                 ImGui::TreePop();
@@ -317,6 +324,7 @@ void FovDirector::RegisterActions()
 
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
     {
+        // ActionSequence から "Camera/Fov_0" のように呼べるよう、番号付き Action を公開する。
         owner_->RegisterGlobalAction(
             "Camera",
             "Fov_" + std::to_string(index_),
@@ -392,6 +400,7 @@ void FovDirector::CaptureCurrentState()
     if (!camera_) return;
 
     FovWayPoint wayPoint_;
+    // 現在のカメラ FOV を WayPoint として取り込み、エディタ調整の初期値にする。
     wayPoint_.fov = camera_->GetFovY();
     wayPoint_.duration = 1.0f;
     wayPoint_.holdDuration = 0.0f;

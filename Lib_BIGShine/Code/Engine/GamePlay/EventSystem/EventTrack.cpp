@@ -21,7 +21,8 @@ EventTrack::EventTrack(const std::string& name, EventType defaultType):
 
 void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
 {
-    // ★重要：再生ヘッドが巻き戻った、あるいはループした判定
+    // 再生ヘッドが巻き戻った、あるいはLoopした場合は、
+    // 範囲外へ出た扱いにしてEnd処理を取りこぼさないようにする。
     static float lastTime = 0;
     bool looped = (currentTime < lastTime);
     lastTime = currentTime;
@@ -30,25 +31,24 @@ void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
     {
         bool inRange = (currentTime >= ev.startTime && currentTime <= ev.endTime);
 
-        // --- A. 範囲内に入った（Start） ---
+        // A. 範囲内に入った最初のFrameでStart Actionを実行する。
         if (inRange && !ev.started) {
             ev.started = true;
             ev.ended = false;
             if (!ev.actionStart.empty()) Execute(ev.actionStart, owner);
-            return; // ★このフレームは Start だけして抜ける（Update を 1フレーム遅らせる）
+            return; // このFrameはStartだけにして、Updateは次Frameから始める。
         }
 
-        // --- B. 継続中（Update） ---
+        // B. Event範囲内にいる間はUpdate Actionを毎Frame実行する。
         if (inRange) {
             if (!ev.actionUpdate.empty()) Execute(ev.actionUpdate, owner);
             return;
         }
 
-        // --- C. 範囲から出た、またはループした（End） ---
-        // 「既に開始しているが、今は範囲外」かつ「まだ終了処理をしていない」場合
+        // C. 範囲から出た、またはLoopで通過したEventのEnd Actionを1回だけ実行する。
         if ((!inRange && ev.started && !ev.ended) || (looped && ev.started && !ev.ended)) {
             ev.ended = true;
-            // started を false に戻すことで次回の再生に備える
+            // startedを戻しておくことで、次回再生時にStartから入り直せる。
             ev.started = false;
 
             if (!ev.actionEnd.empty()) {
@@ -61,14 +61,15 @@ void EventTrack::Update(float currentTime, std::shared_ptr<GameObject> owner)
 
 void EventTrack::Execute(const std::string& name, std::shared_ptr<GameObject> owner)
 {
-    // 1. まず自分の LocalRegistry を探す
+    // まずOwner固有のAction名を優先して探す。
+    // BuildActionName版と素の名前の両方を許可し、登録側の形式違いを吸収する。
     if (owner && owner->localRegistry.HasAction(owner->BuildActionName(name))) {
         owner->localRegistry.Call(owner->BuildActionName(name));
     }
     else if (owner && owner->localRegistry.HasAction(name)) {
         owner->localRegistry.Call(name);
     }
-    // 2. なければ GlobalRegistry を探す
+    // Localに無い場合は、Scene全体で共有されるGlobalRegistryへフォールバックする。
     else if (ActionRegistry::Instance().HasAction(name)) {
         ActionRegistry::Instance().Call(name);
     }
@@ -81,6 +82,7 @@ void EventTrack::Execute(const std::string& name, std::shared_ptr<GameObject> ow
 
 void EventTrack::AddEvent(EventType type, const std::string& label, float start, float end, unsigned int color)
 {
+    // Timeline上に新しいEventを追加する。Action名は後からEditorで設定する。
     events.push_back({ type, start, end, color, label });
 }
 
@@ -93,6 +95,7 @@ void EventTrack::DeleteEvent(int index)
 void EventTrack::DuplicateEvent(int index)
 {
     if (index >= 0 && index < (int)events.size())
+        // 現在の設定をそのまま複製し、細かい調整はEditor側のDrag操作で行う。
         events.push_back(events[index]);
 }
 
@@ -114,12 +117,14 @@ void EventTrack::DoubleClick(int index)
 
 void EventTrack::Copy()
 {
+    // 編集中EventをClipboardへ保存する。
     if (editingEntry >= 0 && editingEntry < (int)events.size())
         clipboard = events[editingEntry];
 }
 
 void EventTrack::Paste()
 {
+    // 編集中EventへClipboard内容を上書きする。
     if (editingEntry >= 0 && editingEntry < (int)events.size())
         events[editingEntry] = clipboard;
 }
@@ -146,11 +151,13 @@ bool EventTrack::DrawSequencer(
     struct CategoryEntry { std::string name; bool isLocal; };
     std::vector<CategoryEntry> allCategories;
     if (owner) {
+        // OwnerのLocalActionを候補に入れ、EventがObject固有の処理を呼べるようにする。
         for (const auto& cat : owner->localRegistry.GetCategories()) allCategories.push_back({ cat, true });
     }
+    // GlobalActionも候補に入れ、Camera/VFXなど共有ActionをTrackから呼べるようにする。
     for (const auto& cat : globalReg.GetCategories()) allCategories.push_back({ cat, false });
 
-    // ズームコントロール
+    // Timelineの横方向Scaleを調整する。
     ImGui::SliderFloat("Zoom", &pixelsPerSecond, 20.0f, 1000.0f, "%.0f px/s");
 
     float itemAreaHeight = (std::max)(160.0f, (float)events.size() * rowHeight);
@@ -161,7 +168,7 @@ bool EventTrack::DrawSequencer(
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 origin = ImGui::GetCursorScreenPos();
 
-    // 背景描画
+    // Eventバーを乗せるTimeline背景。
     draw_list->AddRectFilled(origin, origin + ImVec2((std::max)(contentWidth, ImGui::GetWindowWidth()), itemAreaHeight), IM_COL32(30, 30, 30, 255));
 
     if (*expanded)
@@ -182,12 +189,11 @@ bool EventTrack::DrawSequencer(
                 draw_list->AddRect({ x0, yTop + 2 }, { x1, yTop + rowHeight - 2 }, IM_COL32_WHITE, 4.0f, 0, 2.0f);
             }
 
-            // ラベル（アクション名）を表示
+            // バー上にはpayloadを表示し、未設定Eventを見つけやすくする。
             draw_list->AddText({ x0 + 4, yTop + 4 }, IM_COL32_WHITE, ev.payload.empty() ? "(No Action)" : ev.payload.c_str());
 
-            // --- 3. ドラッグ移動ロジックの追加 ---
+            // バー全体をDragすると、Eventの開始/終了を同じ幅のまま移動する。
             ImGui::SetCursorScreenPos({ x0, yTop });
-            // バー全体を掴むためのボタン
             ImGui::InvisibleButton("move_event", { width, rowHeight });
 
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
@@ -196,7 +202,7 @@ bool EventTrack::DrawSequencer(
                 ev.startTime += deltaTime;
                 ev.endTime += deltaTime;
 
-                // 範囲外チェック
+                // Timeline外へはみ出した分だけ押し戻し、Event長は変えない。
                 if (ev.startTime < 0) {
                     float d = -ev.startTime;
                     ev.startTime += d;
@@ -209,18 +215,17 @@ bool EventTrack::DrawSequencer(
                 }
             }
 
-            // 選択判定
+            // 行全体を押せるようにして、細いバー以外からでも選択できるようにする。
             ImGui::SetCursorScreenPos({ origin.x, yTop });
             if (ImGui::InvisibleButton("row_select", { labelWidth + (lengthSeconds * pixelsPerSecond), rowHeight })) {
                 *selectedEntry = i;
             }
 
-            // --- 選択されているイベントの詳細設定 (アクション選択) ---
+            // 選択中Eventは左Label領域で名前と呼び出すActionを編集する。
             if (*selectedEntry == i) {
-                // ラベルエリアにアクション選択 GUI を表示（または別の場所に表示）
                 ImGui::SetCursorScreenPos({ origin.x, yTop });
 
-                // 名前入力用のバッファ（std::string を直接編集）
+                // std::stringをImGuiで編集するため、一時Bufferへ移してから戻す。
                 char buf[128];
                 strncpy_s(buf, ev.label.c_str(), sizeof(buf));
 
@@ -229,14 +234,11 @@ bool EventTrack::DrawSequencer(
                     ev.label = buf; // 入力があるたびに即座に反映
                 }
 
-                // ペイロードを一時的にカテゴリとアクションに分けるのは手間なので、
-                // 今回は「カテゴリ選択」→「その中のアクション選択」の 2 Step GUI を用意します。
-
                 ImGui::SetNextItemWidth(labelWidth);
                 if (ImGui::BeginCombo("##ev_act_combo", ev.payload.empty() ? "Select..." : ev.payload.c_str(), ImGuiComboFlags_NoArrowButton)) {
                     for (const auto& catEntry : allCategories) {
                         if (ImGui::Selectable(((catEntry.isLocal ? "[L] " : "[G] ") + catEntry.name).c_str())) {
-                            // カテゴリを選択したら、そのカテゴリの最初のアクションを仮設定
+                            // カテゴリ選択後は、そのカテゴリの先頭Actionを仮設定して素早く確認できるようにする。
                             auto names = catEntry.isLocal ? owner->localRegistry.GetActionNames(catEntry.name) : globalReg.GetActionNames(catEntry.name);
                             if (!names.empty()) ev.payload = names[0];
                             ev.label = ev.payload; // ラベルも更新
@@ -249,13 +251,13 @@ bool EventTrack::DrawSequencer(
                 draw_list->AddText({ origin.x + 4, yTop + 4 }, IM_COL32_WHITE, ev.label.c_str());
             }
 
-            // (開始・終了ドラッグの InvisibleButton はここに維持...)
+            // 開始端/終了端Dragは今後の拡張用として、Sequencer側の構造に合わせてここへ置く想定。
 
             ImGui::PopID();
         }
     }
 
-    // 現在時間ライン
+    // 現在の再生位置を赤線で表示する。
     float cx = origin.x + labelWidth + (*currentTime) * pixelsPerSecond;
     draw_list->AddLine({ cx, origin.y }, { cx, origin.y + itemAreaHeight }, IM_COL32(255, 0, 0, 255), 2.0f);
 

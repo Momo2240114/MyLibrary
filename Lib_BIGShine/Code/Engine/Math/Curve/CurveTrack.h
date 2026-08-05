@@ -11,7 +11,10 @@
 
 enum class CURVE_INTERPOLATION_TYPE
 {
+    // 区間開始値を維持する。
     CONSTANT,
+
+    // 直線補間。
     LINEAR,
     SMOOTH,
     EASE_IN,
@@ -22,16 +25,22 @@ enum class CURVE_INTERPOLATION_TYPE
 
 struct CurvePointOption
 {
+    // この点から次の点へ向かう区間の補間方法。
     CURVE_INTERPOLATION_TYPE interpolationType = CURVE_INTERPOLATION_TYPE::LINEAR;
+
+    // BEZIER時に使う左右タンジェント。
     float leftTangent = 0.0f;
     float rightTangent = 0.0f;
 };
 
 struct CurveTrack
 {
+    // Editor表示名と、Assetとして保存した場合のパス。
     std::string name;
     std::string assetPath;
     std::vector<ImVec2> points;
+
+    // pointsと同じIndexで持つ、各点の補間設定。
     std::vector<CurvePointOption> pointOptions;
     ImCurveEdit::CurveType type;
     uint32_t color;
@@ -47,11 +56,13 @@ struct CurveTrack
 
     void EnsurePointOptions()
     {
+        // 点の追加/削除後でも、補間設定配列の数を必ず同期させる。
         pointOptions.resize(points.size());
     }
 
     void Sort()
     {
+        // 時間順に並べ替える時、点と補間設定の対応が崩れないようペアで処理する。
         EnsurePointOptions();
         std::vector<std::pair<ImVec2, CurvePointOption>> entries_;
         entries_.reserve(points.size());
@@ -70,6 +81,7 @@ struct CurveTrack
 
     float ApplyInterpolation(float rate_, CURVE_INTERPOLATION_TYPE interpolationType_) const
     {
+        // 区間内の0～1進行率を、指定Easing形状へ変換する。
         rate_ = (std::clamp)(rate_, 0.0f, 1.0f);
         switch (interpolationType_)
         {
@@ -93,6 +105,7 @@ struct CurveTrack
 
     float Evaluate(float time_) const
     {
+        // 指定時刻の値を、前後のPointと補間設定から求める。
         if (points.empty()) return 0.0f;
         if (time_ <= points.front().x) return points.front().y;
         if (time_ >= points.back().x) return points.back().y;
@@ -110,6 +123,7 @@ struct CurveTrack
                 : CURVE_INTERPOLATION_TYPE::LINEAR;
             if (interpolationType_ == CURVE_INTERPOLATION_TYPE::BEZIER)
             {
+                // 1次元Hermite補間として、左右タンジェントを使って値を曲げる。
                 const float startTangent_ = index_ < pointOptions.size()
                     ? pointOptions[index_].rightTangent : 0.0f;
                 const float endTangent_ = index_ + 1 < pointOptions.size()

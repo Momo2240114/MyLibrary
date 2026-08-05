@@ -25,6 +25,7 @@
 
 namespace
 {
+    // アクション列挙を配列インデックスとして扱うため、最後の要素から総数を決める。
     constexpr int DRAGON_ACTION_COUNT =
         static_cast<int>(DRAGON_ACTION_TYPE::DEATH_HIT_GROUND) + 1;
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
@@ -33,6 +34,7 @@ namespace
 
     float NormalizeAngle(float angle_)
     {
+        // プレイヤーとの向き差は-180から180度に正規化して、左右判定や旋回量へ使いやすくする。
         while (angle_ > 180.0f) angle_ -= 360.0f;
         while (angle_ < -180.0f) angle_ += 360.0f;
         return angle_;
@@ -55,6 +57,7 @@ namespace
 
     int ToIndex(DRAGON_ACTION_TYPE action_)
     {
+        // 不正な列挙値が来てもクールダウン配列の範囲外へ出ないように丸める。
         return std::clamp(static_cast<int>(action_), 0, DRAGON_ACTION_COUNT - 1);
     }
 
@@ -142,6 +145,7 @@ const std::string& DragonAIComponent::GetName() const
 
 void DragonAIComponent::Start()
 {
+    // 依存コンポーネント、アクション定義、BehaviorGraph、ActionRegistryを初期化してAIを起動可能にする。
     randomEngine.seed(std::random_device{}());
     EnsureDependencies();
     InitializeDefaultDefinitions();
@@ -149,6 +153,7 @@ void DragonAIComponent::Start()
         behaviorGraph.GetNodes().empty() &&
         !behaviorGraphAssetPath.empty())
     {
+        // 指定アセットがある場合は外部JSONを優先し、失敗時は従来の重み付きデバッグAIへ落とす。
         if (behaviorGraph.LoadFromFile(behaviorGraphAssetPath))
         {
             behaviorGraphStatus = "Loaded graph asset: " + behaviorGraphAssetPath;
@@ -173,12 +178,14 @@ void DragonAIComponent::Start()
 
 void DragonAIComponent::Update(float deltaTime_)
 {
+    // 毎フレーム依存と状況を更新し、死亡・アクション中・空中・復帰・意思決定の順で処理を分岐する。
     EnsureDependencies();
     UpdateContext();
     UpdateCooldowns(deltaTime_);
 
     if (pendingSequencerActionEnd)
     {
+        // Sequencer通知は次Updateで処理し、アニメーションイベント由来の完了とAI更新タイミングをそろえる。
         pendingSequencerActionEnd = false;
         UpdateContext();
         CompleteActionEnd();
@@ -193,6 +200,7 @@ void DragonAIComponent::Update(float deltaTime_)
 
     if (health && health->IsDead())
     {
+        // HP死亡時は地上/空中に応じて適切な死亡アクションへ強制遷移する。
         if (!IsDeathAction(runtime.currentAction))
         {
             StartAction(IsGrounded()
@@ -205,6 +213,7 @@ void DragonAIComponent::Update(float deltaTime_)
 
     if (aiState == DRAGON_AI_STATE::ACTION)
     {
+        // 地上アクション中は移動/旋回を更新し、AI条件・タイムアウト・時間制御の順に終了判定する。
         UpdateActionMotion(deltaTime_);
         if (UpdateAIControlledActionEnd())
         {
@@ -220,6 +229,7 @@ void DragonAIComponent::Update(float deltaTime_)
     }
     else if (aiState == DRAGON_AI_STATE::AIR)
     {
+        // 空中状態はAIR_HOLDを待機基準にし、着地可能タイミングや空中攻撃選択へつなげる。
         UpdateActionMotion(deltaTime_);
         if (runtime.currentAction == DRAGON_ACTION_TYPE::AIR_HOLD &&
             runtime.actionEnded)
@@ -243,6 +253,7 @@ void DragonAIComponent::Update(float deltaTime_)
     }
     else if (aiState == DRAGON_AI_STATE::RECOVERY)
     {
+        // 復帰中は着地待ちや硬直時間を処理し、終了後に次の判断へ戻す。
         if (waitingForLandingGround)
         {
             StopMovement();
@@ -263,6 +274,7 @@ void DragonAIComponent::Update(float deltaTime_)
 
     if (behaviorGraphEnabled && HasBehaviorGraph())
     {
+        // BehaviorGraphが有効な時はBlackboardへ最新状況を渡し、グラフ側に行動選択を任せる。
         if (UpdateIdleAnimationGraphReturn())
         {
             SendRuntimeToBlackboard();
@@ -272,6 +284,7 @@ void DragonAIComponent::Update(float deltaTime_)
     }
     else
     {
+        // グラフが無い場合は従来の重み付き選択をデバッグ/フォールバックとして使う。
         if (UpdateIdleAnimationGraphReturn())
         {
             SendRuntimeToBlackboard();
@@ -286,6 +299,7 @@ void DragonAIComponent::Gui()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::Gui");
 
+    // GUIはランタイム状態、調整値、Action定義、BehaviorGraphの診断を1コンポーネント内で確認するためのもの。
     const ImVec4 activeColor_(0.20f, 0.85f, 0.35f, 1.0f);
     const ImVec4 inactiveColor_(0.85f, 0.25f, 0.20f, 1.0f);
     const bool controllerDriven_ = !autoDecisionEnabled && !behaviorGraphEnabled;
@@ -651,6 +665,7 @@ bool DragonAIComponent::RequestAction(DRAGON_ACTION_TYPE action_)
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestAction");
 
+    // 通常リクエストは有効/クールダウン/キャンセル可否を見て、必要ならバッファへ積む。
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {
         FinishRecovery();
@@ -692,6 +707,7 @@ bool DragonAIComponent::RequestWeightedAction()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestWeightedAction");
 
+    // フォールバックAIの選択結果を通常リクエストへ流し、候補が無い場合はIdleへ戻す。
     const DRAGON_ACTION_TYPE action_ = SelectNextAction(context);
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {
@@ -714,6 +730,7 @@ void DragonAIComponent::RequestDamageReaction()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestDamageReaction");
 
+    // ダメージ反応は現在の空中/地上状態で使うリアクションを切り替える。
     if (runtime.currentAction == DRAGON_ACTION_TYPE::DEATH ||
         aiState == DRAGON_AI_STATE::DEAD)
     {
@@ -730,6 +747,7 @@ void DragonAIComponent::ForceAction(DRAGON_ACTION_TYPE action_)
 {
     BS_PROFILE_SCOPE("DragonAIComponent::ForceAction");
 
+    // Forceはデバッグやイベント用の即時遷移で、通常のキャンセル可否やクールダウンを無視する。
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {
         FinishRecovery();
@@ -774,6 +792,7 @@ void DragonAIComponent::NotifySequencerActionEnd()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::NotifySequencerActionEnd");
 
+    // Sequencer管理の行動だけ完了通知を受け付け、AI管理行動の誤終了を防ぐ。
     if (!IsSequencerControlledAction(runtime.currentAction))
     {
         statusText = "Ignored SequencerActionEnd: " +
@@ -792,6 +811,7 @@ void DragonAIComponent::NotifySequencerActionEnd()
 void DragonAIComponent::NotifyAIActionEnd()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::NotifyAIActionEnd");
+    // AI管理の行動だけ即時完了させ、Sequencer管理行動はアニメーション側の通知を待つ。
     if (IsSequencerControlledAction(runtime.currentAction))
     {
         statusText = "Ignored AIActionEnd: " +
@@ -807,6 +827,7 @@ void DragonAIComponent::CompleteActionEnd()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::CompleteActionEnd");
 
+    // Sequencer/AIからの完了通知を受けて、空中・死亡・復帰・バッファ消費の次状態を決める。
     if (aiState != DRAGON_AI_STATE::ACTION &&
         aiState != DRAGON_AI_STATE::AIR)
     {
@@ -1266,6 +1287,7 @@ void DragonAIComponent::ApplyActionDefinitionRuntimePolicies()
 
 void DragonAIComponent::UpdateContext()
 {
+    // プレイヤー位置、距離、角度、HP段階、使用可能アクションをまとめて現在の判断材料にする。
     context = {};
 
     if (useDebugHpRate)
@@ -1307,6 +1329,7 @@ void DragonAIComponent::UpdateContext()
 
     const DirectX::XMFLOAT3 ownerRotation_ = owner_->transform->GetWorldRotation();
     const float ownerYawRadians_ = ownerRotation_.y * DEG_TO_RAD;
+    // 自分の前方ベクトルとプレイヤー方向から、正面/側面/背面の判定に使う角度を求める。
     const DirectX::XMFLOAT3 forward_ = {
         std::sin(ownerYawRadians_),
         0.0f,
@@ -1328,6 +1351,7 @@ void DragonAIComponent::UpdateContext()
     context.isPlayerUnderBody = context.playerHorizontalDistance <= underBodyDistance;
 
     context.canUseBite = IsActionAvailable(DRAGON_ACTION_TYPE::BITE);
+    // クールダウンや有効フラグ込みの使用可否をContextへ保存し、Graph/重み選択の共通入力にする。
     context.canUseFireBall = IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL);
     context.canUseSpreadBreath = IsActionAvailable(DRAGON_ACTION_TYPE::SPREAD_BREATH);
     context.canUseTailSweep = IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP);
@@ -1351,6 +1375,7 @@ void DragonAIComponent::UpdateCooldowns(float deltaTime_)
 
 void DragonAIComponent::UpdateDecision(float deltaTime_)
 {
+    // 重み付きフォールバックAIは一定間隔ごとに候補を作り、地上/空中の状態に応じて行動を選ぶ。
     const bool canDecideGroundAction_ =
         autoDecisionEnabled &&
         aiState == DRAGON_AI_STATE::IDLE;
@@ -1381,6 +1406,7 @@ void DragonAIComponent::UpdateDecision(float deltaTime_)
 
 void DragonAIComponent::UpdateBehaviorGraph(float deltaTime_)
 {
+    // BehaviorGraphは一定間隔でTickし、Blackboard条件からPLAY_ACTIONノードを通じて行動を要求する。
     if (!autoDecisionEnabled ||
         aiState != DRAGON_AI_STATE::IDLE ||
         ShouldWaitForIdleAnimation())
@@ -1403,6 +1429,7 @@ void DragonAIComponent::UpdateBehaviorGraph(float deltaTime_)
     }
 
     behaviorContext.owner = owner_.get();
+    // Tickへ渡すContextはGameObject参照とBlackboard、距離情報をまとめたグラフ実行用の入力。
     behaviorContext.target = playerObject.lock().get();
     behaviorContext.blackboard = blackboard;
     behaviorContext.globalBlackboard = nullptr;
@@ -1815,6 +1842,7 @@ void DragonAIComponent::StopMovement()
 
 void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
 {
+    // 実際のアクション開始地点。ランタイム状態、クールダウン、アニメーション、IK、外部Actionをまとめて更新する。
     const DragonActionDefinition* definition_ = FindDefinition(action_);
     if (!definition_) return;
 
@@ -1835,6 +1863,7 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     const bool usesAirbornePhysics_ =
         IsAirborneAction(action_) &&
         action_ != DRAGON_ACTION_TYPE::LANDING_ATTACK;
+    // 空中系アクションでは移動コンポーネント側の重力/接地処理を切り替える。
     SetAirbornePhysicsEnabled(usesAirbornePhysics_);
 
     if (action_ == DRAGON_ACTION_TYPE::AIR_FIRE_BALL ||
@@ -1859,6 +1888,7 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     ExecuteActionDefinition(*definition_);
     if (action_ == DRAGON_ACTION_TYPE::AIR_HOLD)
     {
+        // AIR_HOLDは空中待機状態なので、開始直後に完了扱いにして次の空中判断を受けられるようにする。
         runtime.actionEnded = true;
         runtime.canCancel = true;
         runtime.canBufferAction = true;
@@ -1875,6 +1905,7 @@ void DragonAIComponent::EnterRecovery()
 
 void DragonAIComponent::FinishRecovery()
 {
+    // 硬直終了後は通常Idleへ戻し、空中フラグや保留中の空中判断をクリアする。
     runtime.currentAction = DRAGON_ACTION_TYPE::IDLE;
     runtime.actionTimer = 0.0f;
     runtime.recoveryTimer = 0.0f;
@@ -1897,6 +1928,7 @@ void DragonAIComponent::FinishRecovery()
 
 void DragonAIComponent::UpdateActionTimeout()
 {
+    // SequencerやAI条件から完了が返らない時の保険として、定義済みタイムアウトで強制完了する。
     if (runtime.actionEnded)
     {
         return;
@@ -1917,6 +1949,7 @@ void DragonAIComponent::UpdateActionTimeout()
 
 void DragonAIComponent::ExecuteActionDefinition(const DragonActionDefinition& definition_)
 {
+    // 定義に紐づくアニメーション、Blackboard、オーナーAction、IKを実行開始時にまとめて発火する。
     const std::string animationActionName_ = ResolveAnimationActionName(definition_);
     const std::string animationStateName_ = ResolveAnimationStateName(definition_);
     ApplyAnimationBlackboard(animationActionName_, animationStateName_, true);
@@ -1932,6 +1965,7 @@ void DragonAIComponent::ExecuteActionDefinition(const DragonActionDefinition& de
 std::string DragonAIComponent::ResolveAnimationActionName(
     const DragonActionDefinition& definition_) const
 {
+    // 左右差分のある行動はプレイヤー角度からアニメーション用アクション名を選ぶ。
     switch (definition_.action)
     {
     case DRAGON_ACTION_TYPE::TURN_TO_PLAYER:
@@ -1952,6 +1986,7 @@ std::string DragonAIComponent::ResolveAnimationActionName(
 std::string DragonAIComponent::ResolveAnimationStateName(
     const DragonActionDefinition& definition_) const
 {
+    // 左右差分のある旋回系は、行動定義ではなく現在角度から再生ステートを決める。
     switch (definition_.action)
     {
     case DRAGON_ACTION_TYPE::TURN_TO_PLAYER:
@@ -1971,6 +2006,7 @@ void DragonAIComponent::ApplyAnimationBlackboard(
     const std::string& animationStateName_,
     bool actionTrigger_)
 {
+    // AnimationController側の遷移条件として使う値をBlackboardへ書き込み、AIとアニメーションを同期する。
     const bool isActing_ =
         (aiState == DRAGON_AI_STATE::ACTION ||
             aiState == DRAGON_AI_STATE::AIR) &&
@@ -1984,6 +2020,7 @@ void DragonAIComponent::ApplyAnimationBlackboard(
 
     if (blackboard)
     {
+        // BehaviorGraphや外部デバッグからも読めるよう、同じ値をBlackboardへミラーする。
         blackboard->SetString("Anim", "CurrentAction", animationActionName_);
         blackboard->SetString("Anim", "ActionTrigger", actionTrigger_ ? animationActionName_ : "");
         blackboard->SetBool("Anim", "ActionEnded", runtime.actionEnded);
@@ -1996,6 +2033,7 @@ void DragonAIComponent::ApplyAnimationBlackboard(
     if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
         animationController.lock())
     {
+        // AnimationControllerへは直接Paramとしても渡し、グラフ遷移評価に即反映できるようにする。
         animationController_->SetBlackboardCategory("Anim");
         animationController_->SetParam("CurrentAction", animationActionName_);
         animationController_->SetParam("ActionTrigger", actionTrigger_ ? animationActionName_ : std::string());
@@ -2011,6 +2049,7 @@ void DragonAIComponent::PlayAnimationState(const std::string& stateName_)
 {
     if (stateName_.empty()) return;
 
+    // 遷移グラフを使う場合はステート名からTo_トリガーを作り、他トリガーをリセットしてから発火する。
     if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
         animationController.lock())
     {
@@ -2025,6 +2064,7 @@ void DragonAIComponent::RequestIdleGraphTransition()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestIdleGraphTransition");
 
+    // 地上Idleへ戻る時はReturnToIdleと専用トリガーを立て、待機アニメーションへ確実に戻す。
     if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
         animationController.lock())
     {
@@ -2042,6 +2082,7 @@ void DragonAIComponent::RequestAirIdleGraphTransition()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestAirIdleGraphTransition");
 
+    // 空中待機へ戻る時はReturnToAirIdleを立て、遷移評価まで行って即座にFly系へ寄せる。
     if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
         animationController.lock())
     {
@@ -2060,6 +2101,7 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
 {
     BS_PROFILE_SCOPE("DragonAIComponent::ResetAnimationActionTriggers");
 
+    // 同時に複数のTo_トリガーが残ると意図しない遷移になるため、使う1つ以外を落とす。
     const std::shared_ptr<AnimationControllerComponent> animationController_ =
         animationController.lock();
     if (!animationController_) return;
@@ -2104,6 +2146,7 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
 
 void DragonAIComponent::ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float duration_)
 {
+    // 特定攻撃では首や尻尾IKを直接駆動し、アニメーションだけでは足りない狙い方向を補正する。
     const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock();
     const std::shared_ptr<DragonTailCommandIKComponent> tailIK_ = tailIK.lock();
 
@@ -2151,6 +2194,7 @@ void DragonAIComponent::ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float durati
 
 void DragonAIComponent::ExecuteOwnerAction(const std::string& actionName_)
 {
+    // ヒットボックスやVFXなど、GameObjectへ登録済みの外部Actionを名前で実行する。
     if (actionName_.empty()) return;
     const auto owner_ = GetGameObject();
     if (!owner_) return;
@@ -2161,6 +2205,7 @@ void DragonAIComponent::SendRuntimeToBlackboard()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::SendRuntimeToBlackboard");
 
+    // BehaviorGraphやAnimationGraphが参照する現在状況を、毎フレームBlackboardへミラーリングする。
     if (!blackboard) return;
 
     const bool isActing_ =
@@ -2182,6 +2227,7 @@ void DragonAIComponent::SendRuntimeToBlackboard()
         lastCompletedAttackAction != DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH;
     const bool canUseLandingAttack_ = IsActionAvailable(DRAGON_ACTION_TYPE::LANDING_ATTACK);
 
+    // 上段は読みやすいキー名、下段は互換用の別名も含めて同じ状況を広めに公開している。
     blackboard->SetBool(blackboardCategory, "HasTarget", hasPlayerTarget);
     blackboard->SetFloat(blackboardCategory, "TargetDistance", context.playerDistance);
     blackboard->SetFloat(blackboardCategory, "TargetHorizontalDistance", context.playerHorizontalDistance);
@@ -2247,6 +2293,7 @@ void DragonAIComponent::SendRuntimeToBlackboard()
 
 void DragonAIComponent::EnsureDefaultBehaviorGraph()
 {
+    // グラフ自動生成は行わず、アセットが無い場合はフォールバックAIを使うことを明示する。
     if (HasBehaviorGraph())
     {
         behaviorGraphStatus = "BehaviorGraph asset is active.";
@@ -2270,6 +2317,7 @@ AIBehaviorNode* DragonAIComponent::AddDragonGraphCondition(
     if (!parentNode_) return nullptr;
     const uintptr_t parentNodeId_ = parentNode_->id;
 
+    // 条件分岐はSequence配下にBlackboard条件ノードを置き、後続Actionをつなげる形で構築する。
     AIBehaviorNode* conditionNode_ = behaviorGraph.AddNode(
         AI_BEHAVIOR_NODE_TYPE::SEQUENCE,
         name_ + " Sequence",
@@ -2303,6 +2351,7 @@ AIBehaviorNode* DragonAIComponent::AddDragonGraphAction(
     if (!parentNode_) return nullptr;
     const uintptr_t parentNodeId_ = parentNode_->id;
 
+    // Action名に対応するCanUseキーを挟み、クールダウンや距離条件をBlackboard経由でGraphへ反映する。
     std::string availabilityKey_;
     if (actionName_ == "DragonAI_Bite") availabilityKey_ = "CanUseBite";
     else if (actionName_ == "DragonAI_FireBall") availabilityKey_ = "CanUseFireBall";
@@ -2354,6 +2403,7 @@ bool DragonAIComponent::LoadBehaviorGraphAsset(const std::string& path_)
 {
     BS_PROFILE_SCOPE("DragonAIComponent::LoadBehaviorGraphAsset");
 
+    // 読み込み成功時はパスを保持し、ランタイム状態をリセットして新しいグラフを即使える状態にする。
     const bool result_ = behaviorGraph.LoadFromFile(path_);
     if (result_)
     {
@@ -2381,11 +2431,13 @@ const char* DragonAIComponent::GetBehaviorStatusName(AI_BEHAVIOR_STATUS status_)
 
 void DragonAIComponent::RegisterRuntimeActions()
 {
+    // SequencerやBehaviorGraphからDragonAIを制御するためのランタイムAction名を登録する。
     const auto owner_ = GetGameObject();
     if (!owner_) return;
 
     auto registerAction_ = [this, &owner_](const std::string& actionName_, const ActionRegistry::ActionFunc& function_)
         {
+            // 登録名は後で解除/確認できるよう、BuildActionName後の完全名も保持しておく。
             owner_->RegisterAction(actionCategory, actionName_, function_);
             registeredActionNames.push_back(owner_->BuildActionName(actionName_));
         };
@@ -2491,6 +2543,7 @@ bool DragonAIComponent::IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const
 {
     BS_PROFILE_SCOPE("DragonAIComponent::IsRepeatLimitedAttack");
 
+    // 連続使用を避けたい攻撃は、完了後にlastCompletedAttackActionへ記録して候補から一時的に外す。
     switch (action_)
     {
     case DRAGON_ACTION_TYPE::BITE:
@@ -2523,6 +2576,7 @@ void DragonAIComponent::SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTi
 
 bool DragonAIComponent::IsActionAvailable(DRAGON_ACTION_TYPE action_) const
 {
+    // 有効フラグとクールダウンをまとめた、AI/Graph共通の使用可否判定。
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {
         return true;

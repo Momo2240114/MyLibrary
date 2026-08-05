@@ -15,6 +15,8 @@ namespace
 {
     DirectX::XMFLOAT2 ToNdc(const DirectX::XMFLOAT2& position_, const DirectX::XMFLOAT2& screenSize_)
     {
+        // UI側のピクセル座標を、DirectXのクリップ空間(-1〜1)へ変換する。
+        // Y方向は画面上が0なので、NDCの上方向に合わせて反転する。
         return
         {
             2.0f * position_.x / (std::max)(1.0f, screenSize_.x) - 1.0f,
@@ -26,6 +28,7 @@ namespace
         const DirectX::XMFLOAT4& left_,
         const DirectX::XMFLOAT4& right_)
     {
+        // スプライト色と頂点ごとの補正色を掛け合わせ、フェードや角ごとの色変化を反映する。
         return
         {
             left_.x * right_.x,
@@ -40,6 +43,7 @@ namespace
         const DirectX::XMFLOAT2& pivot_,
         float rotationDegree_)
     {
+        // WidgetのRectを、ピボット位置を中心に2D回転させる。
         const float theta_ = DirectX::XMConvertToRadians(rotationDegree_);
         const float cos_ = std::cos(theta_);
         const float sin_ = std::sin(theta_);
@@ -55,6 +59,7 @@ void SpriteRenderSystem::Finalize()
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::Finalize");
 
+    // デバイス再作成や終了時に、描画キューとD3Dリソースをまとめて解放する。
     drawList.clear();
     nextSubmitOrder = 0;
     vertexBuffer.Reset();
@@ -75,6 +80,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     BS_PROFILE_SCOPE("SpriteRenderSystem::Initialize");
     (void)context_;
 
+    // 再初期化でも古いリソースを残さないよう、先にFinalizeで状態を空にする。
     Finalize();
 
     D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
@@ -85,6 +91,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     };
     const UINT numElements_ = _countof(inputElementDesc);
 
+    // スプライト描画は基本シェーダを1つ登録し、必要に応じてshaderIDで差し替えられる形にしている。
     CreateShader(device_, SpriteShaderID::Default, "Shader/sprite_VS.cso", "Shader/sprite_PS.cso", inputElementDesc, numElements_);
 
     D3D11_BUFFER_DESC cbd_{};
@@ -98,6 +105,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
     samplerDesc_.AddressU = samplerDesc_.AddressV = samplerDesc_.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     device_->CreateSamplerState(&samplerDesc_, samplerState.GetAddressOf());
 
+    // 実際の座標やUVは描画ごとにMapで書き換えるため、初期値は単位四角形として用意する。
     SpriteVertex vertices_[4] =
     {
         { {-0.5f, -0.5f, 0.0f}, {1, 1, 1, 1}, {0, 1} },
@@ -128,6 +136,7 @@ void SpriteRenderSystem::Initialize(ID3D11Device* device_, ID3D11DeviceContext* 
 
 void SpriteRenderSystem::Submit(const SpriteRenderCommand& command_)
 {
+    // 同じ描画優先度のスプライトは、Submitされた順番を最後の並び順として保持する。
     SpriteRenderCommand copiedCommand_ = command_;
     copiedCommand_.submitOrder = nextSubmitOrder++;
     drawList.push_back(copiedCommand_);
@@ -137,6 +146,7 @@ void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::RenderAll");
 
+    // 現在のViewportサイズを基準に、各スプライトをNDCへ変換して描画する。
     D3D11_VIEWPORT viewport_{};
     UINT numViewports_{ 1 };
     context_->RSGetViewports(&numViewports_, &viewport_);
@@ -150,11 +160,13 @@ void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
 
     SortDrawList();
 
+    // 1枚ずつ頂点バッファを更新しながら描画する。UIは枚数より柔軟な変形を優先している。
     for (SpriteRenderCommand& renderCommand_ : drawList)
     {
         RenderSprite(renderCommand_, context_, screenSize_);
     }
 
+    // 後続の描画へSRV/Samplerの束縛が漏れないよう、Sprite描画で使ったスロットを外す。
     ID3D11ShaderResourceView* nullShaderResourceViews_[1] = {};
     ID3D11SamplerState* nullSamplerStates_[3] = {};
     context_->PSSetShaderResources(0, _countof(nullShaderResourceViews_), nullShaderResourceViews_);
@@ -168,6 +180,7 @@ void SpriteRenderSystem::SortDrawList()
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::SortDrawList");
 
+    // Board、Widget、階層、Submit順の順で安定ソートし、UIの前後関係を再現する。
     std::stable_sort(
         drawList.begin(),
         drawList.end(),
@@ -188,6 +201,7 @@ void SpriteRenderSystem::BuildSpriteVertices(
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::BuildSpriteVertices");
 
+    // まず従来SpriteのTransformから四隅を作り、Widget指定があればRectLayoutで上書きする。
     BuildLegacySpriteVertices(renderCommand_, screenSize_, vertices_);
 
     if (renderCommand_.widget)
@@ -214,6 +228,7 @@ void SpriteRenderSystem::BuildLegacySpriteVertices(
     const DirectX::XMFLOAT3 transformPosition_ = transform_->GetWorldPosition();
     const DirectX::XMFLOAT2 drawSize_ = sprite_->GetSize();
 
+    // 旧SpriteはPivotの種類ごとに、Transform位置から見た左上/中央/下中央の基準を切り替える。
     DirectX::XMFLOAT2 pivotOffset_ = { 0.0f, 0.0f };
     switch (sprite_->GetPivot())
     {
@@ -239,6 +254,7 @@ void SpriteRenderSystem::BuildLegacySpriteVertices(
     const float theta_ = DirectX::XMConvertToRadians(transform_->GetWorldRotation().z);
     const DirectX::XMMATRIX rotationMatrix_ = DirectX::XMMatrixRotationZ(theta_);
 
+    // ローカル矩形をZ回転してからWorld座標へ移し、最終的にNDCへ変換する。
     for (DirectX::XMFLOAT2& position_ : positions_)
     {
         DirectX::XMVECTOR positionVector_ = DirectX::XMVectorSet(position_.x, position_.y, 0.0f, 1.0f);
@@ -256,6 +272,7 @@ void SpriteRenderSystem::BuildLegacySpriteVertices(
     textureSize_.x = (std::max)(1.0f, textureSize_.x);
     textureSize_.y = (std::max)(1.0f, textureSize_.y);
 
+    // catPos/catSizeで指定された切り出し範囲を、テクスチャ全体に対するUVへ変換する。
     const float u0_ = catPos_.x / textureSize_.x;
     const float v0_ = catPos_.y / textureSize_.y;
     const float u1_ = (catPos_.x + catSize_.x) / textureSize_.x;
@@ -288,6 +305,7 @@ void SpriteRenderSystem::ApplyWidgetLayout(
 
     if (!renderCommand_.widget || !renderCommand_.sprite) return;
 
+    // 親WidgetのLayoutが必要なため、対象Widgetまでの親階層を先に再計算する。
     CalculateWidgetLayoutRecursive(renderCommand_.widget, renderCommand_.widgetBoard, screenSize_, 0);
 
     const UIScreenRect& rect_ = renderCommand_.widget->GetScreenRect();
@@ -307,6 +325,7 @@ void SpriteRenderSystem::ApplyWidgetLayout(
         DirectX::XMFLOAT2{ rect_.max.x, rect_.max.y }
     };
 
+    // WidgetのRectTransform回転を、ピボット位置を中心に四隅へ反映する。
     for (DirectX::XMFLOAT2& position_ : positions_)
     {
         RotateAroundPivot(position_, pivotPosition_, rectTransform_.localRotation);
@@ -334,6 +353,7 @@ void SpriteRenderSystem::CalculateWidgetLayoutRecursive(
 
     if (!widget_ || depth_ > 32) return;
 
+    // 保存された親IDだけがある場合は、描画直前に実体への参照を解決する。
     if (!widget_->GetParentWidgetId().empty() && !widget_->GetParentWidget())
     {
         widget_->ResolveParentWidget();
@@ -342,6 +362,7 @@ void SpriteRenderSystem::CalculateWidgetLayoutRecursive(
     UIWidgetComponent* parentWidget_ = widget_->GetParentWidget();
     if (parentWidget_)
     {
+        // 子のLayoutは親のRectに依存するため、親から順に計算する。
         CalculateWidgetLayoutRecursive(parentWidget_, board_, screenSize_, depth_ + 1);
     }
 
@@ -357,6 +378,7 @@ void SpriteRenderSystem::ApplyVertexModification(
 
     if (!renderCommand_.vertexModifier) return;
 
+    // 左下、左上、右上、右下の順をUIVertexModifier側の頂点指定へ対応させる。
     const std::array<UI_VERTEX_INDEX, 4> vertexIndexMap_ =
     {
         UI_VERTEX_INDEX::LEFT_BOTTOM,
@@ -367,6 +389,7 @@ void SpriteRenderSystem::ApplyVertexModification(
 
     for (size_t index_ = 0; index_ < vertices_.size(); ++index_)
     {
+        // 位置補正はピクセル単位で指定されるため、NDC上の移動量へ変換して加算する。
         const UIVertexModification& modification_ =
             renderCommand_.vertexModifier->GetVertexModification(vertexIndexMap_[index_]);
         vertices_[index_].pos.x += 2.0f * modification_.positionOffset.x / (std::max)(1.0f, screenSize_.x);
@@ -386,6 +409,7 @@ void SpriteRenderSystem::RenderSprite(
 
     auto sprite_ = renderCommand_.sprite;
     if (!sprite_ || !sprite_->IsVisible()) return;
+    // BoardやWidgetが非表示/無効の場合は、その配下のSpriteだけ描画を止める。
     if (renderCommand_.widgetBoard &&
         (!renderCommand_.widgetBoard->IsVisible() || !renderCommand_.widgetBoard->IsEnabled()))
     {
@@ -400,6 +424,7 @@ void SpriteRenderSystem::RenderSprite(
     std::array<SpriteVertex, 4> vertices_{};
     BuildSpriteVertices(renderCommand_, screenSize_, vertices_);
 
+    // 1枚ごとの形状・UV・色を動的頂点バッファへ書き込み、同じIBで四角形として描く。
     D3D11_MAPPED_SUBRESOURCE mapped_{};
     const HRESULT hr_ = context_->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_);
     if (FAILED(hr_)) return;
@@ -423,6 +448,7 @@ void SpriteRenderSystem::RenderSprite(
     auto shaderIterator_ = shaders.find(renderCommand_.shaderID);
     if (shaderIterator_ == shaders.end())
     {
+        // 指定シェーダが登録されていない場合でも、標準Sprite描画へフォールバックする。
         shaderIterator_ = shaders.find(SpriteShaderID::Default);
     }
     if (shaderIterator_ == shaders.end()) return;
@@ -444,6 +470,7 @@ void SpriteRenderSystem::CreateShader(
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::CreateShader");
 
+    // CSOからVS/PSとInputLayoutを作り、SpriteShaderIDで後から選べるように保持する。
     SpriteShader shader_;
     HRESULT hr_ = CPUResourceLoader::CreateVSFromCSO(
         device_,

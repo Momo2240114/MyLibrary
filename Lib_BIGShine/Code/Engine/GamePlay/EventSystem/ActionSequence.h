@@ -45,8 +45,11 @@ struct SequenceData {
 };
 
 struct PendingAction {
+    // StartSequence後、実行までの残り時間。
     float timer;
+    // timerが0以下になったときに呼ぶAction名。
     std::string actionName;
+    // Action実行直前にBlackboardへ流し込む一時値。
     std::vector<BlackboardValueWrite> blackboardWrites;
 };
 
@@ -62,11 +65,12 @@ public:
     void Update(float elapsedTime_) override;
     void StartSequence(int index_);
     void SetRegisterGlobal(bool registerGlobal_) { registerGlobal = registerGlobal_; }
+    // 指定名の即時実行Sequenceが無ければ作成し、外部から呼べるActionとして登録する。
     void EnsureImmediateSequence(
         const std::string& sequenceName_,
         const std::vector<ActionReference>& actions_);
 
-    // Register actions that start each configured sequence.
+    // 各Sequenceを開始するActionを、OwnerのLocalRegistryへ登録する。
     void RegisterSequence(const std::string& sequenceName_);
 
     void Gui() override;
@@ -76,10 +80,15 @@ public:
     void Deserialize(const nlohmann::json& j);
 
 private:
+    // Action実行前にBlackboardへ値を書き、Action側が必要なパラメータを読めるようにする。
     void ApplyBlackboardWrites(const std::vector<BlackboardValueWrite>& writes_);
+    // OwnerのActionRegistryからAction名を解決して実行する。
     void ExecuteAction(const std::string& actionName_);
 
+    // Editorで作成したSequence一覧。
     std::vector<SequenceData> sequences;
+    // 現在再生中で、まだ実行時間に達していないAction一覧。
     std::vector<PendingAction> pendingActions;
+    // trueならLocalだけでなくGlobalActionにもSequenceを公開する。
     bool registerGlobal = false;
 };

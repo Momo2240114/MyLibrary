@@ -21,6 +21,7 @@ namespace
 {
     bool ContainsCaseInsensitive(const std::string& text_, const std::string& searchText_)
     {
+        // GUIの候補検索用に、大文字小文字を無視して部分一致を調べる。
         if (searchText_.empty()) return true;
 
         auto toLower_ = [](unsigned char character_)
@@ -64,6 +65,7 @@ namespace
         const DirectX::XMFLOAT3& startOffset_,
         const DirectX::XMFLOAT3& tipOffset_)
     {
+        // 旧形式のStart/Tipオフセットから、現在形式のLength + Rotation表現へ変換する。
         const float deltaX_ = tipOffset_.x - startOffset_.x;
         const float deltaY_ = tipOffset_.y - startOffset_.y;
         const float deltaZ_ = tipOffset_.z - startOffset_.z;
@@ -84,6 +86,7 @@ namespace
         const DirectX::XMFLOAT3& endPosition_)
     {
         using namespace DirectX;
+        // デバッグ用カプセルを刃の始点〜終点へ合わせるため、中心と直交基底から行列を作る。
         const XMVECTOR start_ = XMLoadFloat3(&startPosition_);
         const XMVECTOR end_ = XMLoadFloat3(&endPosition_);
         const XMVECTOR direction_ = XMVector3Normalize(XMVectorSubtract(end_, start_));
@@ -118,6 +121,7 @@ void WeaponTrailComponent::LateUpdate(float deltaTime_)
     const bool hasBladeSegment_ = GetBladeSegment(rootPosition_, tipPosition_);
     if (IsEmitting() && hasBladeSegment_)
     {
+        // 刃の根元/先端をTrailMeshの左右端としてサンプリングし、帯状の軌跡にする。
         AddSample(rootPosition_, tipPosition_);
     }
     if (showBladeGuide && hasBladeSegment_)
@@ -125,7 +129,7 @@ void WeaponTrailComponent::LateUpdate(float deltaTime_)
         DrawBladeGuide(rootPosition_, tipPosition_);
     }
 
-    // Upload after sampling so the new segment is visible in this frame.
+    // サンプリング後にアップロードすることで、このフレームで追加した軌跡もすぐ表示する。
     TrailMeshComponent::LateUpdate(deltaTime_);
 }
 
@@ -164,6 +168,7 @@ void WeaponTrailComponent::SetBladeOffsets(
     const DirectX::XMFLOAT3& rootOffset_,
     const DirectX::XMFLOAT3& tipOffset_)
 {
+    // 旧来の始点/終点オフセット指定を、現在の始点 + 長さ + 回転指定へ変換して保持する。
     rootOffset = rootOffset_;
     const float deltaX_ = tipOffset_.x - rootOffset_.x;
     const float deltaY_ = tipOffset_.y - rootOffset_.y;
@@ -197,6 +202,7 @@ void WeaponTrailComponent::EndTrail(bool clearImmediately_)
 
 std::shared_ptr<GameObject> WeaponTrailComponent::ResolveTargetObject()
 {
+    // 対象名が空なら所有Object、自分以外ならGameObjectManagerから名前で探してキャッシュする。
     if (auto targetObject_ = targetObject.lock())
     {
         if (targetGameObjectName.empty() || targetObject_->GetName() == targetGameObjectName)
@@ -231,6 +237,7 @@ std::shared_ptr<GltfModelCommponennt> WeaponTrailComponent::ResolveTargetModel(
     if (auto model_ = targetModel.lock()) return model_;
     if (!targetObject_) return nullptr;
 
+    // 武器Object自身にモデルが無い場合、親階層のキャラクターモデルも探す。
     if (auto model_ = targetObject_->GetComponent<GltfModelCommponennt>())
     {
         targetModel = model_;
@@ -259,6 +266,7 @@ bool WeaponTrailComponent::ResolveTargetNodeIndex(
     const std::string& nodeName_,
     int& nodeIndex_)
 {
+    // ノード名とキャッシュ済みIndexがずれていたら再検索し、モデル読み込み完了後だけ有効化する。
     if (nodeName_.empty())
     {
         nodeIndex_ = -1;
@@ -297,8 +305,8 @@ bool WeaponTrailComponent::GetBladeSegment(
     const bool hasEndNode_ = ResolveTargetNodeIndex(
         model_, targetEndNodeName, targetEndNodeIndex);
 
-    // Explicit Start/End nodes describe the complete blade segment and take priority
-    // over the procedural length and rotation settings.
+    // Start/Endノードが両方ある場合は、ノード間をそのまま刃として扱い、
+    // 手入力の長さ/回転設定より優先する。
     if (hasStartNode_ && hasEndNode_)
     {
         const DirectX::XMFLOAT3 nodeOrigin_ = { 0.0f, 0.0f, 0.0f };
@@ -314,6 +322,7 @@ bool WeaponTrailComponent::GetBladeSegment(
     DirectX::XMMATRIX referenceTransform_ = targetObject_->transform->GetWorldMatrix();
     if (hasStartNode_)
     {
+        // Startノードだけある場合は、そのノードを基準にLength + Rotationで先端を作る。
         referenceTransform_ = DirectX::XMLoadFloat4x4(
             &model_->GetNodes()[targetStartNodeIndex].worldTransform);
     }
@@ -344,6 +353,7 @@ void WeaponTrailComponent::DrawBladeGuide(
     const DirectX::XMFLOAT3& startPosition_,
     const DirectX::XMFLOAT3& endPosition_)
 {
+    // 選択中のObjectだけ刃のデバッグカプセルを表示し、軌跡のサンプル位置を調整しやすくする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->manager) return;
 
@@ -385,6 +395,7 @@ void WeaponTrailComponent::Gui()
     TrailMeshComponent::Gui();
     ImGui::SeparatorText("Weapon Trail");
 
+    // 対象ObjectとStart/Endノードを選び、刃のどこをTrail化するかをエディタ上で指定する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const char* objectPreview_ = targetGameObjectName.empty()
         ? "(Owner)"
@@ -423,6 +434,7 @@ void WeaponTrailComponent::Gui()
         std::string& searchText_,
         int& nodeIndex_)
     {
+        // モデルノード数が多いので、検索付きComboでStart/Endノードを選ぶ。
         const char* preview_ = nodeName_.empty() ? "(None)" : nodeName_.c_str();
         if (!ImGui::BeginCombo(label_, preview_)) return;
 
@@ -487,6 +499,7 @@ void WeaponTrailComponent::Serialize(nlohmann::json& json_) const
 {
     BS_PROFILE_SCOPE("WeaponTrailComponent::Serialize");
     TrailMeshComponent::Serialize(json_);
+    // TrailMesh共通設定に加えて、武器の対象Object/ノード/刃形状を保存する。
     json_["WeaponTargetGameObjectName"] = targetGameObjectName;
     json_["WeaponTargetNodeName"] = targetStartNodeName;
     json_["WeaponTargetStartNodeName"] = targetStartNodeName;
@@ -508,6 +521,7 @@ void WeaponTrailComponent::Deserialize(const nlohmann::json& json_)
     BS_PROFILE_SCOPE("WeaponTrailComponent::Deserialize");
     TrailMeshComponent::Deserialize(json_);
     if (!json_.contains("TrailEmitting")) SetEmitting(false);
+    // 旧WeaponTargetNodeNameもStartNodeとして読み、以前の保存データをそのまま使えるようにする。
     targetGameObjectName = json_.value("WeaponTargetGameObjectName", std::string{});
     targetStartNodeName = json_.value(
         "WeaponTargetStartNodeName",

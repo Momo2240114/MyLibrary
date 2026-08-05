@@ -8,9 +8,13 @@
 // ポーズを構成するキーフレームの記憶
 struct PoseKeyframe 
 {
+    // CustomAnimation内の再生時間。
     float time = 0.0f;
+
+    // poseLibrary内のどのSavedPoseを参照するか。
     int poseIndex = -1;
 
+    // 元アニメーションから切り出した時の参照情報。再編集時の手がかりにする。
     int sourceAnimIdx = -1;
     float sourceTime = 0.0f;
 
@@ -23,7 +27,10 @@ struct PoseKeyframe
 
 struct NaturalMotionSettings
 {
+    // 保存ポーズだけでは固く見える時に、ノードへ小さな揺れを足す設定。
     bool enabled = false;
+
+    // 空なら全ノード、文字列があれば名前に一致するノードだけを揺らす。
     std::string nodeFilter = "";
     float rotationAmplitudeDeg = 2.0f;
     float positionAmplitude = 0.0f;
@@ -36,12 +43,21 @@ struct NaturalMotionSettings
 
 // ポーズを繋ぎ合わせて創り出す、新たなアニメーション
 struct CustomAnimation {
+    // Editor上に表示するCustom Animation名。
     std::string name;
+
+    // ポーズ列全体の再生時間。
     float duration = 1.0f;
+
+    // 下地にする既存Animation。-1ならポーズ補間だけで作る。
     int baseAnimationIndex = -1;
     float baseAnimationStartTime = 0.0f;
     float baseAnimationSpeed = 1.0f;
+
+    // baseAnimationとpose keyframeの混ざり具合。
     float poseBlend = 1.0f;
+
+    // 時間順に並ぶポーズキー。隣同士をinterpolation設定で補間する。
     std::vector<PoseKeyframe> keyframes;
     NaturalMotionSettings naturalMotion;
 
@@ -50,8 +66,13 @@ struct CustomAnimation {
 
 // 切りとられた一瞬のポーズ（姿勢）の記憶
 struct SavedPose {
+    // PoseLibrary内で識別する名前。
     std::string name;
+
+    // モデル全ノードぶんの姿勢。
     std::vector<GltfModelCommponennt::NodePose> nodePoses;
+
+    // どの元アニメーションの何秒から採取したかを残す。
     int sourceAnimIndex = 0;
     float sourceTime = 0.0f;
 };
@@ -64,6 +85,7 @@ inline void to_json(nlohmann::json& j, const SavedPose& p) {
         {"sourceTime", p.sourceTime}
     };
     // nodePoses のシリアライズ（必要に応じて position/rotation/scale を展開して記録）
+    // DirectX型はそのままJSON化できないので、配列へ分解して保存する。
     for (const auto& np : p.nodePoses) {
         j["nodePoses"].push_back({
             {"pos", {np.position.x, np.position.y, np.position.z}},
@@ -79,6 +101,7 @@ inline void from_json(const nlohmann::json& j, SavedPose& p) {
     p.sourceTime = j.value("sourceTime", 0.0f);
     p.nodePoses.clear();
     if (j.contains("nodePoses")) {
+        // 保存時に分解したposition/rotation/scale配列をNodePoseへ戻す。
         for (const auto& npj : j["nodePoses"]) {
             GltfModelCommponennt::NodePose np;
             auto pos = npj["pos"].get<std::vector<float>>();
@@ -98,10 +121,12 @@ class PoseLibraryResource
 public:
     std::string modelName; // 結びつくモデルの真名
 
+    // 1フレーム姿勢の保存棚と、それらを組み合わせたCustom Animation。
     std::vector<SavedPose> poseLibrary;       // 収集されたポーズの書庫
     std::vector<CustomAnimation> customAnims; //　オリジナルアニメーション
 
     void Clear() {
+        // モデル切り替え時に、古いポーズやCustom Animationが混ざらないよう空にする。
         poseLibrary.clear();
         customAnims.clear();
         modelName = "";

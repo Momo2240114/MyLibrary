@@ -20,6 +20,7 @@ namespace
 {
     constexpr float EPSILON = 0.00001f;
 
+    // 上半身リーンではワールド座標、ローカル方向、デバッグ描画を同じ流れで扱うための小さな補助関数群。
     XMFLOAT3 GetTranslation(const XMFLOAT4X4& matrix_)
     {
         return { matrix_._41, matrix_._42, matrix_._43 };
@@ -102,6 +103,7 @@ const std::string& UpperBodyLeanIKComponent::GetName() const
 
 void UpperBodyLeanIKComponent::Start()
 {
+    // IKMapに上半身リーン用チェーンを用意し、移動速度を自動取得する場合の初期位置も保存する。
     ResolveDependencies();
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
@@ -131,6 +133,7 @@ bool UpperBodyLeanIKComponent::IsLoadReady() const
 
 bool UpperBodyLeanIKComponent::ResolveDependencies()
 {
+    // 同じGameObject上のIKMap、モデル、AnimationControllerを必要になった時点で解決する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return false;
 
@@ -179,6 +182,7 @@ void UpperBodyLeanIKComponent::ClearApplyAnimationNames()
 
 std::vector<std::string> UpperBodyLeanIKComponent::GetCurrentAnimationNames() const
 {
+    // 現在ステート名、Sequencer名、参照中クリップ名を集め、アニメーションフィルタの判定材料にする。
     std::vector<std::string> names_;
 
     auto addName_ = [&names_](const std::string& name_)
@@ -249,6 +253,7 @@ bool UpperBodyLeanIKComponent::MatchesAnimationName(const std::string& currentNa
 
 bool UpperBodyLeanIKComponent::ShouldApplyForCurrentAnimation() const
 {
+    // 歩き/走りなど、指定したアニメーション中だけ体を傾けたい場合のON/OFF判定。
     if (!useAnimationFilter) return true;
 
     const std::shared_ptr<AnimationControllerComponent> animationController_ = animationController.lock();
@@ -269,6 +274,7 @@ bool UpperBodyLeanIKComponent::ShouldApplyForCurrentAnimation() const
 
 XMFLOAT3 UpperBodyLeanIKComponent::ResolveMoveVelocity(float deltaTime_)
 {
+    // 手動方向、手動速度、Ownerの移動差分の順に移動情報を決め、リーン角度の入力にする。
     if (useManualDirection)
     {
         return Normalize(manualMoveDirection);
@@ -299,6 +305,7 @@ XMFLOAT3 UpperBodyLeanIKComponent::ResolveMoveVelocity(float deltaTime_)
 
 XMFLOAT3 UpperBodyLeanIKComponent::ToOwnerLocalDirection(const XMFLOAT3& worldDirection_) const
 {
+    // ワールド移動方向をキャラクター基準の前後左右へ変換し、前傾/横傾きへ割り当てやすくする。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform) return {};
 
@@ -318,6 +325,7 @@ void UpperBodyLeanIKComponent::UpdateLeanAngles(
     float deltaTime_,
     bool shouldApply_)
 {
+    // 移動方向と速度から目標リーン角を作り、停止時はreturnSpeed、移動時はsmoothSpeedで追従する。
     float targetForwardLean_ = 0.0f;
     float targetSideLean_ = 0.0f;
 
@@ -353,6 +361,7 @@ void UpperBodyLeanIKComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("UpperBodyLeanIKComponent::LateUpdate");
 
+    // アニメーション姿勢が決まった後に、移動方向に応じた上半身の前後/左右傾きを追加する。
     if (!ResolveDependencies())
     {
         ResetLean();
@@ -395,6 +404,7 @@ void UpperBodyLeanIKComponent::LateUpdate(float deltaTime_)
 
 bool UpperBodyLeanIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
+    // IKMapに登録されたチェーン名から、実際のボーンindex列を解決する。
     if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
     if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
 
@@ -406,6 +416,7 @@ bool UpperBodyLeanIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 
 void UpperBodyLeanIKComponent::ApplyLeanChain(IKMapComponent::IKChain& chain_)
 {
+    // チェーン上の各ボーンに重み付きでローカル回転を足し、腰から胸へ自然に傾きを分配する。
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
     if (!model_) return;
 
@@ -486,6 +497,7 @@ void UpperBodyLeanIKComponent::DrawDebugShapes(const IKMapComponent::IKChain& ch
 
 void UpperBodyLeanIKComponent::Gui()
 {
+    // Inspectorではリーン角度、適用アニメーション、ボーン別重み、デバッグ表示を調整する。
     ResolveDependencies();
 
     ImGui::Checkbox("Enabled", &leanEnabled);
@@ -539,6 +551,7 @@ void UpperBodyLeanIKComponent::Gui()
     ImGui::DragFloat3("Manual Move Velocity", &manualMoveVelocity.x, 0.01f, -20.0f, 20.0f);
 
     ImGui::SeparatorText("Animation Filter");
+    // ステート名やクリップ名で適用対象を絞り、攻撃や待機中に不要な傾きが出ないようにする。
     ImGui::Checkbox("Use Animation Filter", &useAnimationFilter);
     ImGui::Checkbox("Use Partial Name Match", &usePartialNameMatch);
     ImGui::Checkbox("Invert Animation Filter", &invertAnimationFilter);
@@ -628,6 +641,7 @@ void UpperBodyLeanIKComponent::Gui()
     }
 
     ImGui::SeparatorText("Bone Weights");
+    // チェーン解決後の各ボーンへ、どれだけ傾きを分配するかを個別に調整する。
     ImGui::Checkbox("Auto Normalize Weights", &autoNormalizeWeights);
     IKMapComponent::IKChain* chain_ = ikMap_ ? ikMap_->FindChain(ikChainName) : nullptr;
     if (chain_ && chain_->type != IKMapComponent::IK_TYPE::UPPER_BODY_LEAN) chain_ = nullptr;
@@ -671,6 +685,7 @@ void UpperBodyLeanIKComponent::Gui()
 
 void UpperBodyLeanIKComponent::Serialize(nlohmann::json& json_) const
 {
+    // リーン挙動の調整値とアニメーションフィルタを保存し、キャラクターごとの味付けを保持する。
     json_["LeanEnabled"] = leanEnabled;
     json_["IKChainName"] = ikChainName;
     json_["MaxForwardLeanAngle"] = maxForwardLeanAngle;
@@ -697,6 +712,7 @@ void UpperBodyLeanIKComponent::Serialize(nlohmann::json& json_) const
 
 void UpperBodyLeanIKComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 旧データに項目が無くても既定値で復元し、読み込み直後は補間履歴をリセットする。
     leanEnabled = json_.value("LeanEnabled", true);
     ikChainName = json_.value("IKChainName", std::string("UpperBodyLean"));
     maxForwardLeanAngle = json_.value("MaxForwardLeanAngle", 15.0f);

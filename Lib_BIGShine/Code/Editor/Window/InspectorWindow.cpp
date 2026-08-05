@@ -12,10 +12,12 @@ void InspectorWindow::Draw()
 
         if (!gameObjectManager->GetSelectedObject())
         {
+            // 選択Objectがない場合はInspectorに描画すべきComponentがないため、空Windowとして閉じる。
             EndEditorWindow();
             return;
         }
 
+        // 選択ObjectのComponent編集UIはGameObjectManager経由でまとめて描画する。
         gameObjectManager->DrawInspectorGui();
     }
     EndEditorWindow();

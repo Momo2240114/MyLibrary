@@ -7,6 +7,8 @@
 
 void MeshCollider::Start()
 {
+    // MeshColliderはModel AssetのLoad完了後でないとPhysX Meshを作れない。
+    // Start時点でまだModelが未準備なら、Updateで再確認するためwaitingForModelにして抜ける。
     BS_PROFILE_SCOPE("MeshCollision::BuildRuntimeCollision");
     if (!CanBuildMesh())
     {
@@ -16,6 +18,7 @@ void MeshCollider::Start()
 
     waitingForModel = false;
     {
+        // Modelが準備できた時だけColliderComponent::Startへ進み、PhysX Actor/Shapeを作る。
         BS_PROFILE_SCOPE("MeshCollision::RegisterPhysics");
         ColliderComponent::Start();
     }
@@ -23,6 +26,8 @@ void MeshCollider::Start()
 
 void MeshCollider::Update(float)
 {
+    // すでにColliderが作られているなら何もしない。
+    // 非同期Model Load待ちの場合だけ、毎Frame準備完了を確認してColliderを構築する。
     if (!waitingForModel && IsCollisionBuilt())
     {
         return;
@@ -36,11 +41,13 @@ void MeshCollider::Update(float)
 
     waitingForModel = false;
     BS_PROFILE_SCOPE("MeshCollision::BuildRuntimeCollision");
+    // Model Load完了後にPhysX Actorを作り直し、Scene中でColliderを有効化する。
     RecreatePhysXActor();
 }
 
 void MeshCollider::Gui()
 {
+    // MeshColliderのPhysX制約をEditor上で明示し、Convex切り替えや手動再構築を行う。
     ColliderComponent::Gui();
 
     ImGui::TextDisabled("Uses the GltfModel meshes on this GameObject.");
@@ -59,6 +66,7 @@ void MeshCollider::Gui()
 
 bool MeshCollider::CanBuildMesh() const
 {
+    // 同じGameObjectのGltfModelがReadyになり、Mesh配列を持っている時だけCollider作成可能。
     auto owner_ = gameObject.lock();
     if (!owner_) return false;
 
@@ -69,21 +77,25 @@ bool MeshCollider::CanBuildMesh() const
 
 bool MeshCollider::IsCollisionBuilt() const
 {
+    // ActorだけでなくShapeが存在することまで確認し、空のActorをReady扱いしない。
     return actor && actor->getNbShapes() > 0;
 }
 
 bool MeshCollider::IsLoadReady() const
 {
+    // Scene Loading中はModel Meshが読めるまで待つ。
     return CanBuildMesh();
 }
 
 bool MeshCollider::IsRuntimeReady() const
 {
+    // Loadできるだけでなく、実際にPhysX Shapeが作られていることをRuntime Ready条件にする。
     return CanBuildMesh() && IsCollisionBuilt();
 }
 
 bool MeshCollider::HasRuntimeFailure() const
 {
+    // 必須Modelが存在しない、またはModel側がLoad失敗した場合はScene Runtime失敗として扱う。
     auto owner_ = gameObject.lock();
     if (!owner_) return true;
 

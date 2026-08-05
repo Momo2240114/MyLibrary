@@ -7,6 +7,7 @@
 
 enum class UI_SCALE_MODE
 {
+    // 画面解像度に対してWidgetBoardをどうScaleするか。
     CONSTANT_PIXEL_SIZE,
     SCALE_WITH_SCREEN_SIZE,
     EXPAND,
@@ -28,7 +29,9 @@ public:
         return name;
     }
 
+    // 子Widgetの並びやCanvas情報を作り直す入口。
     void RebuildWidgetHierarchy();
+    // Layout計算が必要になったことをUI Systemへ知らせる。
     void MarkLayoutDirty();
     void SetVisible(bool visible_);
     bool IsVisible() const { return visible; }
@@ -42,16 +45,22 @@ public:
     int GetZOrder() const { return zOrder; }
     bool IsLayoutDirty() const { return layoutDirty; }
 
+    // 現在の画面SizeからBoard全体に掛けるScaleを計算する。
     DirectX::XMFLOAT2 CalculateBoardScale(const DirectX::XMFLOAT2& screenSize_) const;
 
 private:
+    // Editor表示名と保存用ID。
     std::string boardName = "WidgetBoard";
     std::string boardId = "widget_board";
+    // Scale計算の基準解像度。
     DirectX::XMFLOAT2 referenceResolution = { 1920.0f, 1080.0f };
+    // 解像度差をどう扱うか。
     UI_SCALE_MODE scaleMode = UI_SCALE_MODE::SCALE_WITH_SCREEN_SIZE;
+    // Boardの大分類Layerと同Layer内の描画順。
     int boardLayer = 0;
     int zOrder = 0;
     bool visible = true;
     bool inputEnabled = true;
+    // trueなら次回UI更新時にLayout再計算が必要。
     bool layoutDirty = true;
 };

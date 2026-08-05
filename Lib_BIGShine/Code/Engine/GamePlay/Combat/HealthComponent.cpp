@@ -12,6 +12,7 @@
 
 namespace
 {
+    // GUI の ProgressBar 用に、現在 HP を 0.0 ～ 1.0 の表示比率へ変換する。
     float CalculateHealthRatio(float currentHealth_, float maxHealth_)
     {
         if (maxHealth_ <= 0.0f)
@@ -22,6 +23,7 @@ namespace
         return (std::clamp)(currentHealth_ / maxHealth_, 0.0f, 1.0f);
     }
 
+    // ImGui::ProgressBar に出す "現在値 / 最大値" の短い表示文字列を作る。
     std::string MakeHealthProgressLabel(float currentHealth_, float maxHealth_)
     {
         char label_[64]{};
@@ -76,12 +78,14 @@ void HealthComponent::ApplyDamage(float damage_)
 
 void HealthComponent::Heal(float amount_)
 {
+    // 回復量は負値を無視し、最大 HP を超えないように丸める。
     currentHealth = (std::min)(currentHealth + (std::max)(amount_, 0.0f), maxHealth);
     PublishToBlackboard();
 }
 
 void HealthComponent::ResetHealth()
 {
+    // デバッグやリトライ時に、死亡フラグも含めて正常な生存状態へ戻す。
     currentHealth = maxHealth;
     PublishToBlackboard();
 }
@@ -154,6 +158,7 @@ void HealthComponent::Gui()
 
     if (ImGui::DragFloat("Max Health", &maxHealth, 1.0f, 1.0f, 999999.0f))
     {
+        // 最大値を下げた時に現在 HP が上限を超えたまま残らないようにする。
         currentHealth = (std::min)(currentHealth, maxHealth);
         PublishToBlackboard();
     }
@@ -189,12 +194,14 @@ void HealthComponent::Gui()
 
 void HealthComponent::Serialize(nlohmann::json& json_) const
 {
+    // Scene 保存では、最大値と現在値の両方を持たせて途中状態も復元できるようにする。
     json_["MaxHealth"] = maxHealth;
     json_["CurrentHealth"] = currentHealth;
 }
 
 void HealthComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 壊れた JSON や古いデータでも、最大 HP は 1 以上、現在 HP は有効範囲へ補正する。
     maxHealth = (std::max)(json_.value("MaxHealth", 100.0f), 1.0f);
     currentHealth = (std::clamp)(
         json_.value("CurrentHealth", maxHealth),

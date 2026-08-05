@@ -9,6 +9,7 @@
 
 namespace
 {
+    // variantで保持している値を、型名付きJSONへ変換してScene保存できる形にする。
     nlohmann::json MakeValueJson(const BlackBoardValue& value_)
     {
         nlohmann::json valueJson_;
@@ -53,6 +54,7 @@ namespace
 
     BlackBoardValue MakeValueFromJson(const nlohmann::json& valueJson_)
     {
+        // 保存時のtype文字列を見て、BlackboardValueの実型へ戻す。
         const std::string type_ = valueJson_.value("type", "float");
 
         if (type_ == "int")
@@ -94,6 +96,7 @@ namespace
 
 void BlackboardComponent::Gui()
 {
+    // Editor上でCategory/Key/型を追加し、現在値をその場で調整するDebug UI。
     static char newCategory_[64] = "Anim";
     static char newKey_[64] = "";
     static int newType_ = 0;
@@ -193,6 +196,7 @@ void BlackboardComponent::Gui()
 
 void BlackboardComponent::Serialize(nlohmann::json& j_) const
 {
+    // CategoryごとにKeyをまとめ、各値は型情報付きで保存する。
     j_ = nlohmann::json::object();
 
     for (const auto& categoryPair_ : board)
@@ -209,6 +213,7 @@ void BlackboardComponent::Serialize(nlohmann::json& j_) const
 
 void BlackboardComponent::Deserialize(const nlohmann::json& j_)
 {
+    // 保存済みCategoryを一度クリアしてから、JSON上の値だけを復元する。
     board.clear();
 
     if (!j_.contains("Categories") || !j_["Categories"].is_object())
@@ -234,6 +239,7 @@ void BlackboardComponent::Deserialize(const nlohmann::json& j_)
 
 void BlackboardComponent::SetValue(const std::string& category_, const std::string& key_, BlackBoardValue value_)
 {
+    // Categoryがなければ自動生成し、Keyへ値を上書きする。
     board[category_][key_] = value_;
 }
 
@@ -269,6 +275,7 @@ void BlackboardComponent::SetString(const std::string& category_, const std::str
 
 void BlackboardComponent::SetTrigger(const std::string& category_, const std::string& key_)
 {
+    // Triggerは一度trueにし、ConsumeTriggerで読み取られたらfalseへ戻す。
     SetBool(category_, key_, true);
 }
 
@@ -375,6 +382,7 @@ bool BlackboardComponent::GetString(const std::string& category_, const std::str
 
 bool BlackboardComponent::ConsumeTrigger(const std::string& category_, const std::string& key_)
 {
+    // Animation遷移などの一度だけ使う信号として読み取り、発火済みならリセットする。
     auto* valuePtr_ = GetValue(category_, key_);
     if (!valuePtr_) return false;
 
@@ -429,6 +437,7 @@ BlackboardCategory& BlackboardComponent::GetOrCreateCategory(const std::string& 
 
 float BlackboardComponent::ToFloat(const BlackBoardValue& value_)
 {
+    // 条件式で扱いやすいよう、数値以外も0/1や長さへ変換する。
     return std::visit([](auto&& arg_) -> float {
         using T = std::decay_t<decltype(arg_)>;
 

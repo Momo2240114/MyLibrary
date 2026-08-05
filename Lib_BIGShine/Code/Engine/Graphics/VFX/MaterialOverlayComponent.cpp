@@ -12,6 +12,7 @@
 
 MaterialOverlayComponent::MaterialOverlayComponent()
 {
+    // MaterialOverlayは所有モデルの上に重ねる用途なので、まず1つのOverlay用Partを用意する。
     MeshVFXPart part_;
     part_.renderEnabled = true;
     part_.useMaterialBaseTexture = true;
@@ -27,6 +28,7 @@ void MaterialOverlayComponent::Start()
 
 void MaterialOverlayComponent::StartOverlay()
 {
+    // 再生開始時はMeshVFXの時間も戻し、FadeInとMaterialアニメーションを同時に始める。
     overlayActive = true;
     Reset();
     Play();
@@ -39,6 +41,7 @@ void MaterialOverlayComponent::StartOverlay()
 
 void MaterialOverlayComponent::StopOverlay()
 {
+    // Stopは即停止ではなく、FadeOut後にMeshVFX自体を止める。
     overlayActive = false;
     if (fadeOutDuration <= 0.0f)
     {
@@ -54,6 +57,7 @@ void MaterialOverlayComponent::ResetOverlay()
 
 void MaterialOverlayComponent::Update(float deltaTime_)
 {
+    // 対象モデルがロード中の間は、Overlayの時間だけ進んで見た目がずれないよう止める。
     if (!IsLoadReady()) return;
 
     MeshVFXComponent::Update(deltaTime_);
@@ -79,12 +83,14 @@ void MaterialOverlayComponent::Update(float deltaTime_)
 
     if (!overlayActive && overlayWeight <= 0.0f)
     {
+        // 完全に透明になったらMeshVFXComponent側の再生も止め、描画対象から外す。
         Stop();
     }
 }
 
 bool MaterialOverlayComponent::IsLoadReady() const
 {
+    // Overlayは所有モデルのMesh情報を参照するため、モデルロード完了まで待つ。
     const std::shared_ptr<GameObject> owner_ =
         const_cast<MaterialOverlayComponent*>(this)->GetGameObject();
     const std::shared_ptr<GltfModelCommponennt> model_ =
@@ -97,6 +103,7 @@ bool MaterialOverlayComponent::IsLoadReady() const
 
 float MaterialOverlayComponent::GetOverlayWeight() const
 {
+    // LinearなweightをSmoothStepへ変換し、出入りの見た目を少し柔らかくする。
     const float weight_ = std::clamp(overlayWeight, 0.0f, 1.0f);
     return weight_ * weight_ * (3.0f - 2.0f * weight_);
 }
@@ -106,6 +113,7 @@ void MaterialOverlayComponent::RegisterActions()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // ActionSequenceから、攻撃中だけ発光/縁取りなどを重ねられるようにする。
     owner_->RegisterAction("MaterialOverlay", "MaterialOverlay_Start", [this]()
         {
             StartOverlay();
@@ -154,6 +162,7 @@ void MaterialOverlayComponent::Gui()
     const auto& meshes_ = model_->GetMeshes();
     for (int partIndex_ = 0; partIndex_ < static_cast<int>(GetAsset().parts.size()); ++partIndex_)
     {
+        // Partごとに適用対象Meshを選べる。-1は全Meshに対するFallbackとして扱う。
         MeshVFXPart& part_ = GetAsset().parts[partIndex_];
         ImGui::PushID(partIndex_);
 
@@ -208,6 +217,7 @@ void MaterialOverlayComponent::Serialize(nlohmann::json& json_) const
 void MaterialOverlayComponent::Deserialize(const nlohmann::json& json_)
 {
     MeshVFXComponent::Deserialize(json_);
+    // 保存時にOverlay中だった場合は、ロード直後から表示状態を復元する。
     overlayActive = json_.value("OverlayActive", false);
     overlayWeight = overlayActive ? 1.0f : 0.0f;
     fadeInDuration = (std::max)(json_.value("FadeInDuration", 0.08f), 0.0f);

@@ -16,6 +16,7 @@ namespace
 {
     float NormalizeAngleDegrees(float degrees_)
     {
+        // 回転差分を扱いやすいよう、角度を-180〜180度の範囲へ寄せる。
         while (degrees_ > 180.0f) degrees_ -= 360.0f;
         while (degrees_ < -180.0f) degrees_ += 360.0f;
         return degrees_;
@@ -24,6 +25,7 @@ namespace
     float GetYawDegreesFromQuaternion(
         const DirectX::SimpleMath::Quaternion& rotation_)
     {
+        // ルートモーションでは水平回転だけが必要なので、QuaternionからYaw成分だけを取り出す。
         return NormalizeAngleDegrees(
             DirectX::XMConvertToDegrees(
                 2.0f * std::atan2(rotation_.y, rotation_.w)));
@@ -35,6 +37,8 @@ static bool CallLocalAnimationAction(const std::shared_ptr<GameObject>& owner_, 
 {
     if (!owner_ || actionName_.empty()) return false;
 
+    // まず所有オブジェクトの命名規則込みのAction名を探し、なければ素の名前でも探す。
+    // これにより、汎用イベント名とオブジェクト固有イベント名の両方を扱える。
     const std::string resolvedActionName_ = owner_->BuildActionName(actionName_);
     if (owner_->localRegistry.HasAction(resolvedActionName_)) {
         owner_->localRegistry.Call(resolvedActionName_);
@@ -53,12 +57,14 @@ static std::shared_ptr<GameObject> GetParentObject(const std::shared_ptr<GameObj
 {
     if (!owner_ || !owner_->transform) return nullptr;
 
+    // Transform階層から親GameObjectを取り出し、アニメイベントの伝搬先を探す。
     auto parentTransform_ = owner_->transform->parent.lock();
     return parentTransform_ ? parentTransform_->gameObject.lock() : nullptr;
 }
 
 static bool CallAncestorAnimationAction(const std::shared_ptr<GameObject>& owner_, const std::string& actionName_)
 {
+    // 武器や子モデル側のアニメから、親キャラクター側に登録されたActionを呼ぶために祖先を辿る。
     auto parent_ = GetParentObject(owner_);
     while (parent_)
     {
@@ -77,6 +83,7 @@ static bool CallChildAnimationAction(const std::shared_ptr<GameObject>& owner_, 
 {
     if (!owner_ || !owner_->transform) return false;
 
+    // 親モデル側のアニメイベントから、武器や子オブジェクト側のActionも拾えるように再帰探索する。
     for (const auto& childTransform_ : owner_->transform->children)
     {
         if (!childTransform_) continue;
@@ -98,6 +105,7 @@ static void SpawnAnimationMeshVFXEvent(
 {
     if (!owner_ || event_.meshVFXAssetPath.empty()) return;
 
+    // アニメーションイベントからEffectManager用のリクエストへ変換し、VFX生成処理を一元化する。
     AttackEffectSpawnRequest request_{};
     request_.ownerObject = owner_.get();
     request_.setting.vfxPath = event_.meshVFXAssetPath;
@@ -115,6 +123,7 @@ static void CallAnimationAction(const std::shared_ptr<GameObject>& owner_, const
 {
     if (actionName_.empty()) return;
 
+    // ローカル、親階層、子階層の順に探し、それでも見つからなければグローバルActionへ委譲する。
     if (CallLocalAnimationAction(owner_, actionName_) ||
         CallAncestorAnimationAction(owner_, actionName_) ||
         CallChildAnimationAction(owner_, actionName_))
@@ -135,6 +144,8 @@ static void ApplyAnimationBlackboardWrites(
         owner_->GetComponent<BlackboardComponent>();
     if (!blackboard_) return;
 
+    // アニメーションイベントからAI/行動制御用のBlackboard値を書き換える。
+    // 型ごとにSet関数を分け、JSON側の値型とランタイム側の保存先を一致させる。
     for (const AnimBlackboardWrite& write_ : writes_)
     {
         if (write_.category.empty() || write_.key.empty()) continue;
@@ -161,6 +172,7 @@ static void CallStateExitEndActions(ModelAnimator::ActiveSlot& slot_, const std:
 {
     if (!slot_.state) return;
 
+    // ステートを途中で抜けた場合でも、開始済みイベントの終了処理だけは取りこぼさない。
     for (auto& ev_ : const_cast<AnimState*>(slot_.state)->events)
     {
         if (!ev_.callEndOnStateExit || !ev_.isFired || ev_.isEndFired)
@@ -184,6 +196,7 @@ static float ApplyPoseInterpolation(int interpolation, float t)
 {
     t = (std::max)(0.0f, (std::min)(1.0f, t));
 
+    // エディタで選んだ補間タイプを、0〜1のブレンド率へ変換する。
     switch (interpolation)
     {
     case 0: return t;
@@ -199,6 +212,7 @@ static float ApplyPoseInterpolation(int interpolation, float t)
 
 static bool MatchesNaturalMotionNode(const std::string& filter, const std::string& nodeName)
 {
+    // フィルタが空なら全ノード対象、文字列があれば名前に含むノードだけを自然揺れ対象にする。
     return filter.empty() || nodeName.find(filter) != std::string::npos;
 }
 
@@ -209,6 +223,7 @@ static float ResolveBlendWeight(
 {
     if (!state_) return 0.0f;
 
+    // ブレンド用Blackboardがない場合は、ステートに設定されたデフォルトウェイトを使う。
     if (!blackboard_ || state_->blendParamName.empty())
     {
         return (std::clamp)(state_->blendDefaultWeight, 0.0f, 1.0f);
