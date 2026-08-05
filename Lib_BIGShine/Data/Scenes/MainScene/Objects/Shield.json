@@ -35,7 +35,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 25.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "ShiledTop",
                 "TeamId": 0,
                 "UseGravity": false,

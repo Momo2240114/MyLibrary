@@ -9,6 +9,7 @@
 
 #include <imgui.h>
 
+// 初回起動時に現在までの統計からRateとPolicyを作り、GameModeへ反映する。
 void AIDirectorComponent::Start()
 {
     UpdateRates();
@@ -20,6 +21,7 @@ void AIDirectorComponent::Start()
     }
 }
 
+// 実行中なら統計値を毎フレーム方針へ変換し、戦闘全体のAI傾向を更新する。
 void AIDirectorComponent::Update(float deltaTime_)
 {
     (void)deltaTime_;
@@ -35,6 +37,7 @@ void AIDirectorComponent::Update(float deltaTime_)
     }
 }
 
+// 統計値、計算済みRate、AI方針、しきい値を確認・調整するDebug UIを描画する。
 void AIDirectorComponent::Gui()
 {
     ImGui::Checkbox(IM_U8("実行##AIDirectorComponent_IsRunning"), &isRunning);
@@ -133,6 +136,7 @@ void AIDirectorComponent::Gui()
         1.0f);
 }
 
+// AI方針を決めるためのしきい値と反映設定をJSONへ保存する。
 void AIDirectorComponent::Serialize(nlohmann::json& json_) const
 {
     json_["IsRunning"] = isRunning;
@@ -150,6 +154,7 @@ void AIDirectorComponent::Serialize(nlohmann::json& json_) const
     json_["AggressionDefault"] = aggressionDefault;
 }
 
+// JSONから調整値を復元し、復元した設定でRateとPolicyを再計算する。
 void AIDirectorComponent::Deserialize(const nlohmann::json& json_)
 {
     isRunning = json_.value("IsRunning", true);
@@ -175,6 +180,7 @@ void AIDirectorComponent::Deserialize(const nlohmann::json& json_)
     }
 }
 
+// 戦闘統計を空にし、AI方針を通常状態へ戻す。
 void AIDirectorComponent::ResetStats()
 {
     stats = {};
@@ -189,48 +195,56 @@ void AIDirectorComponent::ResetStats()
     }
 }
 
+// 敵攻撃が実行された回数を加算する。
 void AIDirectorComponent::NotifyEnemyAttackUsed(const std::string& attackName_)
 {
     (void)attackName_;
     ++stats.totalEnemyAttackUsed;
 }
 
+// 敵攻撃がPlayerへ命中した回数を加算する。
 void AIDirectorComponent::NotifyEnemyAttackHit(const std::string& attackName_)
 {
     (void)attackName_;
     ++stats.totalEnemyAttackHit;
 }
 
+// 敵攻撃が通常回避された回数を加算する。
 void AIDirectorComponent::NotifyEnemyAttackDodged(const std::string& attackName_)
 {
     (void)attackName_;
     ++stats.totalEnemyAttackDodged;
 }
 
+// 敵攻撃がジャスト回避された回数を加算する。
 void AIDirectorComponent::NotifyEnemyAttackJustDodged(const std::string& attackName_)
 {
     (void)attackName_;
     ++stats.totalEnemyAttackJustDodged;
 }
 
+// 敵攻撃がガードされた回数を加算する。
 void AIDirectorComponent::NotifyEnemyAttackGuarded(const std::string& attackName_)
 {
     (void)attackName_;
     ++stats.totalEnemyAttackGuarded;
 }
 
+// 敵攻撃がジャストガードされた回数を加算する。
 void AIDirectorComponent::NotifyEnemyAttackJustGuarded(const std::string& attackName_)
 {
     (void)attackName_;
     ++stats.totalEnemyAttackJustGuarded;
 }
 
+// Playerがダメージを受けた回数と合計ダメージを加算する。
 void AIDirectorComponent::NotifyPlayerDamaged(float damage_)
 {
     ++stats.playerDamagedCount;
     stats.totalPlayerDamage += damage_;
 }
 
+// Ownerが所属するGameObjectManagerからGameModeManagerを取得する。
 GameModeManager* AIDirectorComponent::ResolveGameModeManager()
 {
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -239,6 +253,7 @@ GameModeManager* AIDirectorComponent::ResolveGameModeManager()
     return owner_->GetManager().GetGameModeManager();
 }
 
+// 敵攻撃使用回数を分母にして、命中・回避・ガードの割合を更新する。
 void AIDirectorComponent::UpdateRates()
 {
     const int totalUsed_ = stats.totalEnemyAttackUsed;
@@ -250,6 +265,7 @@ void AIDirectorComponent::UpdateRates()
     rates.justGuardRate = SafeRate(stats.totalEnemyAttackJustGuarded, totalUsed_);
 }
 
+// Playerの反応傾向から、敵AIが次に優先する攻撃方針を決める。
 void AIDirectorComponent::UpdatePolicy()
 {
     policy.preferDelayedAttack = false;
@@ -273,6 +289,7 @@ void AIDirectorComponent::UpdatePolicy()
 
     if (playerReadsAttack_)
     {
+        // Playerが攻撃を読めている場合は、遅延攻撃とフェイントでタイミングをずらす。
         policy.preferDelayedAttack = true;
         policy.preferFeintAttack = true;
         policy.attackDelayRate = maxAttackDelayRate;
@@ -282,12 +299,14 @@ void AIDirectorComponent::UpdatePolicy()
     if (rates.guardRate >= highGuardRateThreshold ||
         rates.justGuardRate >= highGuardRateThreshold)
     {
+        // Guard成功率が高い場合は、ガード崩し攻撃の優先度を上げる。
         policy.preferGuardBreak = true;
         policy.guardBreakRate = maxGuardBreakRate;
     }
 
     if (stats.playerDamagedCount >= playerDamagedCountThreshold)
     {
+        // Playerが被弾しすぎている場合は、難度が上がりすぎないよう攻撃性を下げる。
         policy.reduceAggression = true;
         policy.aggressionRate = aggressionMin;
 
@@ -303,6 +322,7 @@ void AIDirectorComponent::UpdatePolicy()
     }
 }
 
+// 計算済みPolicyをGameModeManagerへ送り、GlobalBlackboard経由で他Systemから参照できるようにする。
 void AIDirectorComponent::ApplyPolicyToGameMode()
 {
     GameModeManager* gameModeManager_ = ResolveGameModeManager();
@@ -319,6 +339,7 @@ void AIDirectorComponent::ApplyPolicyToGameMode()
     gameModeManager_->SetAIDirectorAggressionRate(policy.aggressionRate);
 }
 
+// 分母が0の場合は0を返し、統計がない状態でNaNや除算エラーを出さないようにする。
 float AIDirectorComponent::SafeRate(int value_, int total_) const
 {
     if (total_ <= 0) return 0.0f;

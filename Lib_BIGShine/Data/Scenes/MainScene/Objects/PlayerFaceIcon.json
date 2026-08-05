@@ -67,7 +67,7 @@
                     86.0
                 ],
                 "ShaderID": 0,
-                "TexturePath": "Data/Sprite/UI/Player/PlayerPortrait_ExpressionSheet.png",
+                "TexturePath": "./Data/Sprite/UI/Player/PlayerPortrait_ExpressionSheet.png",
                 "Visible": true,
                 "pivotType": 0
             },

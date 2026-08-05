@@ -74,7 +74,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 60.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "SourceAction": "RightClaw",
                 "StartNodeName": "PlainsDragon_-R-Hand",
                 "TargetAirLiftPower": 0.0,

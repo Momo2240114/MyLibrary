@@ -34,7 +34,7 @@
                 "PhysicsControlsTransform": true,
                 "Radius": 0.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "SlideOffNonGround": true,
                 "StartNodeName": "",
                 "StepOffset": 0.5,
@@ -82,7 +82,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 0.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
                 "SyncCharacterColliderShape": true,
                 "UseGravity": false,
@@ -131,7 +131,7 @@
                 "PhysicsControlsTransform": false,
                 "Radius": 1.5,
                 "RotateVelocityThreshold": 0.0010000000474974513,
-                "ShapeRenderFlg": true,
+                "ShapeRenderFlg": false,
                 "StartNodeName": "",
                 "TeamId": 0,
                 "UseGravity": false,
@@ -455,7 +455,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 13
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -467,7 +467,7 @@
                         },
                         "AttackEnter": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "AttackType": {
                             "type": "int",
@@ -504,7 +504,7 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
+                                -1.0,
                                 0.0
                             ]
                         },
@@ -515,8 +515,8 @@
                         "GuardMoveInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.6847135424613953,
+                                -0.7288122773170471
                             ]
                         },
                         "HitArmor": {
@@ -544,11 +544,11 @@
                         },
                         "IsAirAction": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAirAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAirDodge": {
                             "type": "bool",
@@ -576,7 +576,7 @@
                         },
                         "IsAirWeakAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAttack": {
                             "type": "bool",
@@ -588,7 +588,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -844,7 +844,7 @@
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 13
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -889,7 +889,7 @@
                         "DodgeInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
+                                -1.0,
                                 0.0
                             ]
                         },
@@ -900,8 +900,8 @@
                         "GuardMoveInput": {
                             "type": "vector2",
                             "value": [
-                                0.0,
-                                0.0
+                                -0.6847135424613953,
+                                -0.7288122773170471
                             ]
                         },
                         "HitArmor": {
@@ -929,11 +929,11 @@
                         },
                         "IsAirAction": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAirAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAirDodge": {
                             "type": "bool",
@@ -961,7 +961,7 @@
                         },
                         "IsAirWeakAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsAttack": {
                             "type": "bool",
@@ -973,7 +973,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -38802,13 +38802,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            5.915065288543701,
-            3.793621063232422,
-            2.8852949142456055
+            -4.098959445953369,
+            -0.12279069423675537,
+            2.4264323711395264
         ],
         "Rot": [
             9.363552468111269e-12,
-            103.4462661743164,
+            121.27134704589844,
             1.1004056432284415e-05
         ],
         "Scale": [

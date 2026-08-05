@@ -148,7 +148,6 @@
         "Tail02Part",
         "Tail03Part",
         "GameObject",
-        "TestDamegeBox",
         "JustDodgeEventPool",
         "UI",
         "BossNamePlate",
@@ -171,12 +170,7 @@
         "PlayerHpCurrent",
         "PlayerHpFlash",
         "PlayerHpEdgeHighlight",
-        "PlayerStaminaBar",
-        "ActionButtonStrip",
-        "ActionButtonAttack",
-        "ActionButtonDodge",
-        "ActionButtonSkill",
-        "ActionButtonGuard"
+        "PlayerStaminaBar"
     ],
     "SceneName": "MainScene"
 }
