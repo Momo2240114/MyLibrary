@@ -9,6 +9,7 @@
 
 bool CascadeShadowMap::Initialize(ID3D11Device* device)
 {
+    // 各CascadeごとにDepthStencilとして書き込み、ShaderResourceとして読むTextureを作る。
     D3D11_TEXTURE2D_DESC desc{};
     desc.Width = ShadowmapSize;
     desc.Height = ShadowmapSize;
@@ -32,6 +33,7 @@ bool CascadeShadowMap::Initialize(ID3D11Device* device)
 
     for (int i = 0; i < CascadeCount; ++i)
     {
+        // Cascadeごとに別Textureを持ち、描画時は近距離から遠距離まで順に使う。
         HRESULT hr = device->CreateTexture2D(&desc, nullptr, shadowTextures[i].GetAddressOf());
         if (FAILED(hr)) return false;
 
@@ -73,6 +75,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
 
     const float splitTable[CascadeCount + 1] =
     {
+        // カメラのNearから各分割距離までを、Cascadeごとの視錐台範囲として扱う。
         camera.GetNear(),
         (std::min)(cascadeSplitDistances[0], camera.GetFar()),
         (std::min)(cascadeSplitDistances[1], camera.GetFar()),
@@ -89,6 +92,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
     XMVECTOR lightDir = XMLoadFloat3(&lightDirection);
     if (XMVectorGetX(XMVector3LengthSq(lightDir)) < 0.0001f)
     {
+        // ライト方向が壊れている場合の保険。ゼロ方向だとLookAt行列を作れない。
         lightDir = XMVectorSet(0.0f, -1.0f, 1.0f, 0.0f);
     }
     lightDir = XMVector3Normalize(lightDir);
@@ -97,6 +101,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
     const float lightUpDot_ = std::abs(XMVectorGetX(XMVector3Dot(lightDir, lightUp)));
     if (lightUpDot_ > 0.98f)
     {
+        // Light方向とUpがほぼ平行だとView行列が不安定になるため、別のUpへ切り替える。
         lightUp = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
     }
 
@@ -121,6 +126,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
         XMVECTOR farPosition = XMVectorAdd(cameraPosition, XMVectorScale(cameraFront, farDepth));
 
         XMVECTOR vertex[8];
+        // 対象CascadeのCamera視錐台8頂点をワールド空間で求める。
         vertex[0] = XMVectorAdd(nearPosition, XMVectorAdd(XMVectorScale(cameraUp, nearY), XMVectorScale(cameraRight, nearX)));
         vertex[1] = XMVectorAdd(nearPosition, XMVectorAdd(XMVectorScale(cameraUp, nearY), XMVectorScale(cameraRight, -nearX)));
         vertex[2] = XMVectorAdd(nearPosition, XMVectorAdd(XMVectorScale(cameraUp, -nearY), XMVectorScale(cameraRight, nearX)));
@@ -138,6 +144,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
         cascadeCenter = XMVectorScale(cascadeCenter, 1.0f / 8.0f);
 
         const float safeLightDistance_ = (std::max)(lightDistance, 1.0f);
+        // 視錐台中心をライト方向から見下ろす位置にShadow Cameraを置く。
         XMVECTOR lightPosition = XMVectorSubtract(cascadeCenter, XMVectorScale(lightDir, safeLightDistance_));
         XMMATRIX lightView = XMMatrixLookAtLH(lightPosition, cascadeCenter, lightUp);
 
@@ -145,6 +152,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
         XMFLOAT3 vertexMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
         for (const XMVECTOR& vertex_ : vertex)
         {
+            // Light空間へ変換し、このCascadeを覆う最小のOrtho範囲を作る。
             XMFLOAT3 transformedVertex_;
             XMStoreFloat3(&transformedVertex_, XMVector3TransformCoord(vertex_, lightView));
             vertexMin.x = (std::min)(vertexMin.x, transformedVertex_.x);
@@ -166,6 +174,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
 
         if (texelSnapEnabled)
         {
+            // ShadowMapのテクセル単位へ中心を丸め、カメラ移動時の影の揺れを抑える。
             const float width_ = (std::max)(right_ - left_, 1.0f);
             const float height_ = (std::max)(top_ - bottom_, 1.0f);
             const float texelWidth_ = width_ / static_cast<float>(ShadowmapSize);
@@ -187,6 +196,7 @@ void CascadeShadowMap::UpdateMatrices(const CameraComponent& camera, const Direc
 
 void CascadeShadowMap::SetViewport(ID3D11DeviceContext* dc) const
 {
+    // ShadowMap描画時はCascade用の固定解像度Viewportへ切り替える。
     dc->RSSetViewports(1, &viewport);
 }
 

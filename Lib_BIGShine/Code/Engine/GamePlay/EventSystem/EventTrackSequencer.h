@@ -13,11 +13,11 @@ public:
         : eventTrack(track), framesPerSecond(fps) {
     }
 
-    // Frame range
+    // Trackの秒数をSequencer用のFrame範囲へ変換する。
     int GetFrameMin() const override { return 0; }
     int GetFrameMax() const override { return static_cast<int>(eventTrack->GetLength() * framesPerSecond); }
 
-    // Item count
+    // Sequencer上のItem数はTrack内のEvent数と一致する。
     int GetItemCount() const override { return static_cast<int>(eventTrack->GetItemCount()); }
 
     const char* GetItemLabel(int index) const override
@@ -27,6 +27,7 @@ public:
 
     void Get(int index, int** start, int** end, int* type, unsigned int* color) override
     {
+        // EventTrackの秒数/種別/色をImSequencerが扱うFrame情報へ変換して渡す。
         const auto& ev = eventTrack->GetEvent(index);
         if (start) *start = new int(static_cast<int>(ev.startTime * framesPerSecond));
         if (end)   *end = new int(static_cast<int>(ev.endTime * framesPerSecond));
@@ -36,6 +37,7 @@ public:
 
     void Add(int typeIndex) override
     {
+        // Sequencerから追加されたEventは、まず1秒幅の仮Eventとして置く。
         eventTrack->AddEvent(static_cast<EventType>(typeIndex), "NewEvent", 0.0f, 1.0f, 0xFF00FFFF);
     }
     void Del(int index) override { eventTrack->DeleteEvent(index); }
@@ -50,13 +52,12 @@ public:
     int GetItemTypeCount() const override { return 6; }
     const char* GetItemTypeName(int typeIndex) const override
     {
+        // EventTypeと同じ順番で表示名を返す。
         static const char* names[] = { "Generic", "Animation", "Camera", "Sound", "UI", "Script" };
         return names[typeIndex];
     }
 
-    // -----------------------------
-    // CustomDraw で現在時間に応じてイベント実行
-    // -----------------------------
+    // ImSequencer標準の見た目に加えて、EventバーとDragハンドルを独自描画する。
     void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc,
         const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
     {
@@ -69,7 +70,7 @@ public:
         float yTop = origin.y;
         float yBottom = rc.Max.y;
 
-        // バー描画
+        // Eventのstart/endを矩形として描画する。
         float x0 = origin.x + ev.startTime * pixelsPerSecond;
         float x1 = origin.x + ev.endTime * pixelsPerSecond;
         ImVec2 pMin = { x0, yTop };
@@ -77,7 +78,7 @@ public:
         draw_list->AddRectFilled(pMin, pMax, ev.color);
         draw_list->AddRect(pMin, pMax, IM_COL32(0, 0, 0, 255));
 
-        // ドラッグ用 InvisibleButton（開始端）
+        // 開始端DragでstartTimeだけを編集する。
         ImGui::SetCursorScreenPos({ x0 - 5, yTop });
         ImGui::InvisibleButton(("ev_start_" + std::to_string(index)).c_str(), { 10, yBottom - yTop });
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -86,7 +87,7 @@ public:
             ev.startTime = std::max(0.0f, std::min(mx / pixelsPerSecond, ev.endTime));
         }
 
-        // ドラッグ用 InvisibleButton（終了端）
+        // 終了端DragでendTimeだけを編集する。
         ImGui::SetCursorScreenPos({ x1 - 5, yTop });
         ImGui::InvisibleButton(("ev_end_" + std::to_string(index)).c_str(), { 10, yBottom - yTop });
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -95,7 +96,7 @@ public:
             ev.endTime = std::max(ev.startTime, mx / pixelsPerSecond);
         }
 
-        // バー全体クリックで選択
+        // バー中央は選択用領域として扱う。
         ImGui::SetCursorScreenPos({ x0 + 5, yTop });
         ImGui::InvisibleButton(("ev_full_" + std::to_string(index)).c_str(), { (x1 - x0) - 10, yBottom - yTop });
         if (ImGui::IsItemClicked())
@@ -107,7 +108,9 @@ public:
     void SetCurrentTimePointer(float* timePtr) { currentTimePtr = timePtr; }
 
 private:
+    // 表示/編集対象のEventTrack。所有は外側で管理される。
     EventTrack* eventTrack;
+    // 秒とFrameを変換するための基準FPS。
     float framesPerSecond = 30.0f;
     float* currentTimePtr = nullptr; // 再生中の現在時間を Sequencer から受け取る
 };

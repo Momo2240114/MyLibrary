@@ -21,6 +21,7 @@ void GpuRenderInvestigationWindow::Draw()
 	if (BeginEditorWindow())
 	{
 		DrawStylePopup();
+		// GPU描画の調査項目はRenderSystemの状態と直結するため、設定GuiもRenderSystem側へ委譲する。
 		modelRenderSystem.RenderInvestigationSettingGui();
 	}
 	EndEditorWindow();

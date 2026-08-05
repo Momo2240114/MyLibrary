@@ -10,6 +10,7 @@ namespace
 {
     VFX_MATERIAL_BLEND_MODE ConvertBlendMode(MeshVFXBlendMode blendMode_)
     {
+        // MeshVFX側のBlendModeを共通VFXMaterialのBlendModeへ変換する。
         return blendMode_ == MeshVFXBlendMode::ADDITIVE
             ? VFX_MATERIAL_BLEND_MODE::ADDITIVE
             : VFX_MATERIAL_BLEND_MODE::ALPHA;
@@ -17,6 +18,7 @@ namespace
 
     VFX_MATERIAL_BLEND_MODE ConvertBlendMode(ParticleBlendMode blendMode_)
     {
+        // Particle側のBlendModeも同じ共通形式へ寄せる。
         return blendMode_ == ParticleBlendMode::ADDITIVE
             ? VFX_MATERIAL_BLEND_MODE::ADDITIVE
             : VFX_MATERIAL_BLEND_MODE::ALPHA;
@@ -29,6 +31,7 @@ VFXMaterialData VFXMaterialConversionUtility::FromMeshVFXPart(
 {
     BS_PROFILE_SCOPE("VFXMaterialConversionUtility::FromMeshVFXPart");
 
+    // 既存MeshVFXPartの描画設定を、新しいVFXMaterialDataへ移植する。
     VFXMaterialData materialData_{};
     materialData_.materialName = materialName_.empty() ? "ConvertedMeshVFXMaterial" : materialName_;
     materialData_.baseTexturePath = part_.baseTexturePath;
@@ -49,6 +52,7 @@ VFXMaterialData VFXMaterialConversionUtility::FromMeshVFXPart(
     materialData_.noiseUV.rotation = part_.noiseUVRotation;
     materialData_.noiseUV.rotationSpeed = part_.noiseUVRotationSpeed;
     materialData_.dissolve.enabled = part_.useDissolveEdge || part_.dissolveThreshold > 0.0f;
+    // Dissolve/Distortionは旧Part側の有効Flagとしきい値から復元する。
     materialData_.dissolve.threshold = part_.dissolveThreshold;
     materialData_.dissolve.edgeWidth = part_.dissolveEdgeWidth;
     materialData_.dissolve.edgeColor = part_.dissolveEdgeColor;
@@ -70,6 +74,7 @@ VFXMaterialData VFXMaterialConversionUtility::FromParticleEmitter(
 {
     BS_PROFILE_SCOPE("VFXMaterialConversionUtility::FromParticleEmitter");
 
+    // ParticleEmitterの手動色とColorOverLifeをVFXMaterialへ変換する。
     VFXMaterialData materialData_{};
     materialData_.materialName = emitterName_.empty() ? "ConvertedParticleMaterial" : emitterName_ + "_Material";
     materialData_.baseTexturePath = texturePath_;
@@ -77,6 +82,7 @@ VFXMaterialData VFXMaterialConversionUtility::FromParticleEmitter(
     materialData_.baseColor = settings_.manualColor;
     materialData_.alpha = settings_.manualColor.w;
     materialData_.colorRamp.enabled = settings_.useColorOverLife != 0u;
+    // ParticleのStart/End ColorはLife 0/1のRamp Stopとして表現する。
     materialData_.colorRamp.sampleSource = VFX_MATERIAL_COLOR_RAMP_SAMPLE_SOURCE::LIFE;
     materialData_.colorRamp.blendMode = VFX_MATERIAL_COLOR_RAMP_BLEND_MODE::MULTIPLY;
     materialData_.colorRamp.stops =
@@ -98,6 +104,7 @@ VFXMaterialData VFXMaterialConversionUtility::FromDecal(
 {
     BS_PROFILE_SCOPE("VFXMaterialConversionUtility::FromDecal");
 
+    // DecalはTextureと色だけを持つ単純なAlpha Materialとして変換する。
     VFXMaterialData materialData_{};
     materialData_.materialName = materialName_.empty() ? "ConvertedDecalMaterial" : materialName_;
     materialData_.baseTexturePath = texturePath_;

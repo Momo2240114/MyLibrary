@@ -14,7 +14,10 @@ struct RenderContext;
 class MeshVFXTextureMixer
 {
 public:
+    // 全画面合成用シェーダーと Ping-Pong 用 RenderTarget を準備する。
     bool Initialize(ID3D11Device* device_);
+
+    // 複数の Mask/Noise Texture を 1 枚に合成し、MeshVFXShader へ渡せる SRV を返す。
     ID3D11ShaderResourceView* Mix(
         const RenderContext& renderContext_,
         const std::vector<ID3D11ShaderResourceView*>& textures_,
@@ -48,6 +51,7 @@ private:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView; // 読み取り用SRV。
     };
 
+    // 合成結果を保存する固定サイズの一時テクスチャを作る。
     bool CreateTarget(ID3D11Device* device_, Target& target_);
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> fullScreenVertexShader; // 全画面三角形用VS。
@@ -60,8 +64,13 @@ private:
 class MeshVFXRenderSystem
 {
 public:
+    // MeshVFXShader と補助バッファを初期化する。描画前に一度だけ呼ぶ。
     bool Initialize(ID3D11Device* device_);
+
+    // Component 側の LateUpdate などから、今フレーム描画したい VFX を登録する。
     void PushSubmit(MeshVFXComponent* component_);
+
+    // 登録済み Component をまとめて描画し、最後にキューを空にする。
     void RenderAll(
         const RenderContext& renderContext_,
         bool isEditorWindow_ = false,
@@ -69,17 +78,24 @@ public:
         ID3D11DepthStencilView* activeDepthStencil_ = nullptr);
 
 private:
+    // 歪みや交差フェードに使う SceneColor/Depth を、描画開始前にコピーしておく。
     bool PrepareSceneSampling(
         const RenderContext& renderContext_,
         bool isEditorWindow_,
-        ID3D11RenderTargetView* activeRenderTarget_,
-        ID3D11DepthStencilView* activeDepthStencil_);
+            ID3D11RenderTargetView* activeRenderTarget_,
+            ID3D11DepthStencilView* activeDepthStencil_);
+
+    // 元 SRV と同じサイズのコピー先を確保し、必要なら作り直す。
     bool EnsureCopyTexture(
         ID3D11Device* device_,
         ID3D11ShaderResourceView* source_,
-        Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_);
+            Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture_,
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& shaderResourceView_);
+
+    // Afterimage の姿勢数に合わせて StructuredBuffer を確保する。
     bool EnsureAfterimageBuffers(ID3D11Device* device_, UINT instanceCapacity_);
+
+    // 指定 meshIndex_ のボーン行列とインスタンス情報を GPU へ転送する。
     UINT UpdateAfterimageBuffers(
         const RenderContext& renderContext_,
         const std::vector<const MeshVFXModelPoseView*>& poses_,

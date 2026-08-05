@@ -17,11 +17,15 @@ class GuardCollider;
 
 enum class GUARD_RESULT_TYPE
 {
+    // ガード未成立。
     NONE,
+    // 通常ガード。
     NORMAL_GUARD,
+    // ジャストガード。
     JUST_GUARD
 };
 
+// HitBoxとGuardColliderが重なった時の接触情報。
 struct GuardContact
 {
     DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
@@ -29,6 +33,7 @@ struct GuardContact
     bool isValid = false;
 };
 
+// ガード成立時に、防御側と攻撃側へ通知する情報。
 struct GuardEvent
 {
     std::weak_ptr<GameObject> defender;
@@ -56,6 +61,8 @@ struct GuardEvent
     std::string attackTag;
 };
 
+// GuardColliderとHitBoxの重なりから通常ガード/ジャストガードを確定するSystem。
+// 成立結果はBlackboard、Action、Callbackへ流す。
 class GuardSystem
 {
 public:
@@ -81,6 +88,7 @@ public:
     }
 
 private:
+    // attackInstanceId + hitGroupId + defenderで同じ攻撃の重複Guardを防ぐ。
     bool RegisterGuard(
         uint32_t attackInstanceId_,
         uint32_t hitGroupId_,
@@ -109,5 +117,6 @@ private:
     std::vector<GuardEvent> frameGuardEvents;
     std::vector<GuardCallback> guardCallbacks;
 
+    // keyは上位32bitがattackInstanceId、下位32bitがhitGroupId。
     std::unordered_map<uint64_t, std::unordered_set<const GameObject*>> registeredGuardTargets;
 };

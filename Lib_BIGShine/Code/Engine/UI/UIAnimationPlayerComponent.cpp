@@ -17,6 +17,7 @@
 
 namespace
 {
+    // JSONに保存されたプロパティ名を、実行時に扱うEnumへ変換するための対応表。
     const std::unordered_map<std::string, UI_ANIMATION_PROPERTY> PROPERTY_MAP =
     {
         { "ANCHORED_POSITION_X", UI_ANIMATION_PROPERTY::ANCHORED_POSITION_X },
@@ -59,6 +60,7 @@ namespace
 
     UI_ANIMATION_PROPERTY PropertyFromString(const std::string& name_)
     {
+        // 不明なプロパティは安全側として位置Xに倒し、読み込み自体は継続する。
         const auto iterator_ = PROPERTY_MAP.find(name_);
         if (iterator_ == PROPERTY_MAP.end()) return UI_ANIMATION_PROPERTY::ANCHORED_POSITION_X;
         return iterator_->second;
@@ -100,6 +102,7 @@ namespace
 
     float Ease(float ratio_, UI_ANIMATION_EASING easing_)
     {
+        // キーフレーム間の0〜1進行率を、指定されたイージングカーブへ変換する。
         ratio_ = std::clamp(ratio_, 0.0f, 1.0f);
         switch (easing_)
         {
@@ -125,6 +128,7 @@ namespace
 
     UI_VERTEX_INDEX GetVertexIndex(UI_ANIMATION_PROPERTY property_)
     {
+        // 頂点単位の位置/色トラックから、UIVertexModifierの対象頂点を求める。
         switch (property_)
         {
         case UI_ANIMATION_PROPERTY::VERTEX_LEFT_TOP_POSITION_X:
@@ -157,6 +161,7 @@ namespace
 void UIAnimationPlayerComponent::Start()
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::Start");
+    // コンポーネントにアセットパスが設定されていれば、起動時に自動ロードする。
     if (!animationAssetPath.empty() && animationAssetPath != "Data/UI/Animations/")
     {
         LoadAnimation(animationAssetPath);
@@ -170,6 +175,7 @@ void UIAnimationPlayerComponent::Update(float deltaTime_)
 
     if (!playing || paused) return;
 
+    // 再生時間を進め、終端ではLoop/Stop設定に応じて時間を丸める。
     currentTime += deltaTime_ * playbackSpeed;
     if (duration > 0.0f && currentTime >= duration)
     {
@@ -184,6 +190,7 @@ void UIAnimationPlayerComponent::Update(float deltaTime_)
         }
     }
 
+    // 各トラックを現在時刻で評価し、ValueModeを通してWidget/Spriteへ反映する。
     for (const UIAnimationTrack& track_ : tracks)
     {
         if (!track_.enabled) continue;
@@ -221,6 +228,7 @@ void UIAnimationPlayerComponent::Serialize(nlohmann::json& json_) const
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::Serialize");
 
+    // コンポーネント側には再生設定だけを保存し、キーフレーム本体はAnimationAsset側に持たせる。
     json_["Version"] = 1;
     json_["AnimationAssetPath"] = animationAssetPath;
     json_["PlaybackSpeed"] = playbackSpeed;
@@ -246,6 +254,7 @@ bool UIAnimationPlayerComponent::LoadAnimation(const std::string& assetPath_)
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::LoadAnimation");
 
+    // UIアニメーションアセットを読み込み、各トラックの対象Widgetとキーフレームを復元する。
     std::ifstream file_(assetPath_);
     if (!file_.is_open()) return false;
 
@@ -271,6 +280,7 @@ bool UIAnimationPlayerComponent::LoadAnimation(const std::string& assetPath_)
     {
         for (const nlohmann::json& trackJson_ : json_["Tracks"])
         {
+            // 1トラックは1つのWidgetプロパティを時間変化させる単位として扱う。
             UIAnimationTrack track_;
             track_.trackName = trackJson_.value("TrackName", std::string{});
             track_.targetWidgetId = trackJson_.value("TargetWidgetId", std::string{});
@@ -299,6 +309,7 @@ bool UIAnimationPlayerComponent::LoadAnimation(const std::string& assetPath_)
                 });
             if (!track_.keyframes.empty())
             {
+                // アセット側Durationが短い場合でも、最後のキーフレームまでは再生できるように伸ばす。
                 duration = (std::max)(duration, track_.keyframes.back().time);
             }
             tracks.push_back(track_);
@@ -314,6 +325,7 @@ void UIAnimationPlayerComponent::Play(bool restart_, float playbackSpeed_)
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::Play");
 
+    // 再生開始時に現在値を保存し、相対/復元系のStopModeで基準として使う。
     if (restart_) currentTime = 0.0f;
     if (playbackSpeed_ >= 0.0f) playbackSpeed = playbackSpeed_;
     paused = false;
@@ -329,6 +341,7 @@ void UIAnimationPlayerComponent::Stop(UI_ANIMATION_STOP_MODE stopMode_)
     playing = false;
     paused = false;
 
+    // 停止時の見た目を、開始時へ戻す/終端へ送る/現状維持から選ぶ。
     if (stopMode_ == UI_ANIMATION_STOP_MODE::RESTORE_INITIAL)
     {
         for (const UIAnimationTrack& track_ : tracks)
@@ -356,6 +369,7 @@ void UIAnimationPlayerComponent::Seek(float time_)
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::Seek");
 
+    // 指定時刻へジャンプし、全トラックをその時点の値で即時反映する。
     currentTime = std::clamp(time_, 0.0f, (std::max)(0.0f, duration));
     for (const UIAnimationTrack& track_ : tracks)
     {
@@ -374,6 +388,7 @@ void UIAnimationPlayerComponent::RegisterActions()
     if (!owner_) return;
 
     const std::string prefix_ = actionPrefix.empty() ? animationName : actionPrefix;
+    // 外部イベントからUI演出を操作できるよう、アニメーション名またはPrefixでGlobalActionを登録する。
     owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Play", [this]() { Play(true); });
     owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Stop", [this]() { Stop(stopMode); });
     owner_->RegisterGlobalAction("UIAnimation", prefix_ + "_Pause", [this]() { Pause(); });
@@ -387,6 +402,7 @@ void UIAnimationPlayerComponent::ResolveTrackTargets()
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    // TrackにはWidgetIdだけを保存しているため、現在のシーン内GameObjectから実コンポーネントを探す。
     for (UIAnimationTrack& track_ : tracks)
     {
         track_.targetWidget.reset();
@@ -412,6 +428,7 @@ void UIAnimationPlayerComponent::CaptureInitialValues()
 {
     BS_PROFILE_SCOPE("UIAnimationPlayerComponent::CaptureInitialValues");
 
+    // 相対値や停止時復元で使うため、再生開始直前の各プロパティ値を記録する。
     for (UIAnimationTrack& track_ : tracks)
     {
         float value_ = 0.0f;
@@ -428,6 +445,7 @@ float UIAnimationPlayerComponent::EvaluateTrack(const UIAnimationTrack& track_) 
     if (currentTime <= track_.keyframes.front().time) return track_.keyframes.front().value;
     if (currentTime >= track_.keyframes.back().time) return track_.keyframes.back().value;
 
+    // 現在時刻を挟む2つのキーフレームを探し、右側キーのEasingで補間する。
     for (size_t index_ = 0; index_ + 1 < track_.keyframes.size(); ++index_)
     {
         const UIAnimationKeyframe& left_ = track_.keyframes[index_];
@@ -444,6 +462,7 @@ float UIAnimationPlayerComponent::EvaluateTrack(const UIAnimationTrack& track_) 
 
 float UIAnimationPlayerComponent::ApplyValueMode(const UIAnimationTrack& track_, float sampledValue_) const
 {
+    // 絶対値、開始値からの相対値、現在値への加算の3種類でサンプル値を解釈する。
     switch (track_.valueMode)
     {
     case UI_ANIMATION_VALUE_MODE::VALUE_RELATIVE_TO_INITIAL:
@@ -469,6 +488,7 @@ void UIAnimationPlayerComponent::ApplyTrackValue(const UIAnimationTrack& track_,
     UIVertexModifierComponent* vertexModifier_ = track_.targetVertexModifier.lock().get();
 
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
+    // RectTransform系はLayout再計算が必要なので、値変更後にDirtyを立てる。
     switch (track_.property)
     {
     case UI_ANIMATION_PROPERTY::ANCHORED_POSITION_X:
@@ -519,6 +539,7 @@ void UIAnimationPlayerComponent::ApplyTrackValue(const UIAnimationTrack& track_,
     default:
         if (vertexModifier_)
         {
+            // 頂点単位の変形/色変更はUIVertexModifierへ書き込み、Sprite描画時に反映する。
             UIVertexModification& modification_ =
                 vertexModifier_->GetMutableVertexModification(GetVertexIndex(track_.property));
             if (track_.property == UI_ANIMATION_PROPERTY::VERTEX_LEFT_TOP_POSITION_X ||
@@ -570,6 +591,7 @@ bool UIAnimationPlayerComponent::TryGetCurrentValue(const UIAnimationTrack& trac
     std::shared_ptr<UIWidgetComponent> widget_ = track_.targetWidget.lock();
     if (!widget_) return false;
 
+    // 現在値を読み取れるプロパティだけ、相対再生や停止時復元の基準値として返す。
     const UIRectTransform& rectTransform_ = widget_->GetRectTransform();
     switch (track_.property)
     {

@@ -20,6 +20,7 @@ bool              IKMapComponent::windEnabled = false;
 
 namespace
 {
+// IKMap内の物理計算で使う最小限のベクトル演算。ボーン座標とシミュレーション点を同じ形式で扱う。
 XMFLOAT3 GetTranslation(const XMFLOAT4X4& matrix_)
 {
     return { matrix_._41, matrix_._42, matrix_._43 };
@@ -56,6 +57,7 @@ XMFLOAT3 ApplyRootMotion(
     const XMFLOAT3& position_, const XMFLOAT4X4& previousRootTransform_,
     const XMFLOAT4X4& currentRootTransform_, float rotationFollow_)
 {
+    // ルートボーンの移動と回転をシミュレーション点へ反映し、キャラクター移動時に髪や布だけ取り残されないようにする。
     const XMFLOAT3 previousRootPosition_ = GetTranslation(previousRootTransform_);
     const XMFLOAT3 currentRootPosition_ = GetTranslation(currentRootTransform_);
     const XMMATRIX previousRootMatrix_ = XMLoadFloat4x4(&previousRootTransform_);
@@ -85,6 +87,7 @@ XMFLOAT3 ApplyRootMotion(
 
 float GetStiffnessScale(const IKMapComponent::IKChain& chain_, size_t pointIndex_)
 {
+    // 根元はアニメーション姿勢へ強く戻し、先端ほど揺れを残せるように剛性を段階的に落とす。
     if (chain_.simulatedPositions.size() <= 1) return 1.0f;
 
     const float normalizedPosition_ = static_cast<float>(pointIndex_)
@@ -98,6 +101,7 @@ void SolveDistanceConstraint(
     std::vector<XMFLOAT3>& positions_, size_t indexA_, size_t indexB_,
     float targetLength_, float stiffness_)
 {
+    // Verlet風の点列が伸び縮みしすぎないよう、隣接点や曲げ点の距離を目標長へ近づける。
     XMFLOAT3 difference_ = Subtract(positions_[indexB_], positions_[indexA_]);
     const float distance_ = Length(difference_);
     if (distance_ <= 0.00001f) return;
@@ -124,6 +128,7 @@ const std::string& IKMapComponent::GetName() const
 
 void IKMapComponent::Start()
 {
+    // モデルのボーン配列を取得し、スプリング用の共有シミュレーションコンポーネントも必要なら用意する。
     auto owner_ = GetGameObject();
     model = owner_ ? owner_->GetComponent<GltfModelCommponennt>().get() : nullptr;
     if (owner_)
@@ -157,6 +162,7 @@ bool IKMapComponent::ConsumeSimulationWarmupRequest()
 
 bool IKMapComponent::ResolveChain(IKChain& chain_)
 {
+    // 名前で指定されたroot/tipノードを親方向へたどり、実際に解くボーンindex列へ変換する。
     if (!model || chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
     if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
 
@@ -182,11 +188,13 @@ bool IKMapComponent::ResolveChain(IKChain& chain_)
 
 void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
 {
+    // SPRING_BONE/CLOTH_BONE用の物理更新。アニメーション姿勢を基準にしつつ、重力、慣性、制約で揺れを作る。
     const auto& nodes_ = model->GetNodes();
     if (!chain_.initialized
         || chain_.simulatedPositions.size() != chain_.nodeIndices.size()
         || chain_.segmentLengths.size() + 1 != chain_.nodeIndices.size())
     {
+        // 初期化時は現在のボーン位置をシミュレーション点にし、隣接距離と曲げ距離を制約の基準として保存する。
         chain_.simulatedPositions.clear();
         chain_.previousPositions.clear();
         chain_.segmentLengths.clear();
@@ -217,6 +225,7 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
 
         if (chain_.collideWithBodyColliders)
         {
+            // 開始直後に体コライダーへめり込んだ状態を避けるため、数回だけ衝突解決を先に回しておく。
             const int warmupCount_ = std::clamp(chain_.startCollisionWarmup, 0, 16);
 
             for (int warmupIndex_ = 0; warmupIndex_ < warmupCount_; ++warmupIndex_)
@@ -245,6 +254,7 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
     }
 
     const XMFLOAT4X4 currentRootTransform_ = nodes_.at(chain_.nodeIndices.front()).worldTransform;
+    // ルートの移動/回転を過去位置にも反映し、キャラクター移動分を速度として誤認しないようにする。
     for (size_t pointIndex_ = 0; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
     {
         chain_.simulatedPositions[pointIndex_] = ApplyRootMotion(
@@ -268,6 +278,7 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
 
     for (int substepIndex_ = 0; substepIndex_ < substeps_; ++substepIndex_)
     {
+        // サブステップごとに根元をアニメーションへ固定し、先端側だけ慣性と外力で更新する。
         chain_.simulatedPositions.front() = animatedRoot_;
         chain_.previousPositions.front() = animatedRoot_;
         for (size_t pointIndex_ = 1; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
@@ -297,6 +308,7 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
 
         for (int iterationIndex_ = 0; iterationIndex_ < iterations_; ++iterationIndex_)
         {
+            // 距離制約、曲げ制約、体コライダーの順で反復し、揺れた点列をボーン長に近い形へ戻す。
             chain_.simulatedPositions.front() = animatedRoot_;
             for (size_t pointIndex_ = 1; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
             {
@@ -324,6 +336,7 @@ void IKMapComponent::SimulateSpringChain(IKChain& chain_, float deltaTime_)
 
 void IKMapComponent::BuildClothConstraints()
 {
+    // 同じCloth GroupのチェーンをCloth Order順につなぎ、横方向と斜め方向の簡易布制約を作る。
     clothConstraints.clear();
 
     std::map<int, std::vector<size_t>> groupChainIndices_;
@@ -404,6 +417,7 @@ void IKMapComponent::BuildClothConstraints()
 
 void IKMapComponent::SolveClothConstraints()
 {
+    // 布制約は対象チェーンの最大反復回数に合わせて解き、隣のチェーンとの距離感を保つ。
     if (!clothConstraintsInitialized)
     {
         BuildClothConstraints();
@@ -427,6 +441,7 @@ void IKMapComponent::SolveClothConstraints()
 
 void IKMapComponent::SolveClothConstraint(const ClothConstraint& constraint_)
 {
+    // 横/斜め制約ごとの剛性を使い、2本のチェーン上の対応点を目標距離へ近づける。
     if (constraint_.chainIndexA >= chains.size() || constraint_.chainIndexB >= chains.size()) return;
 
     auto& chainA_ = chains[constraint_.chainIndexA];
@@ -460,6 +475,7 @@ void IKMapComponent::SolveClothConstraint(const ClothConstraint& constraint_)
 
 void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
 {
+    // 髪や布の点が体の球/カプセル状コライダーへ入ったら外側へ押し戻す。
     auto& position_ = chain_.simulatedPositions[pointIndex_];
     for (auto& sphere_ : bodyCollisionSpheres)
     {
@@ -516,6 +532,7 @@ void IKMapComponent::ResolveBodyCollision(IKChain& chain_, size_t pointIndex_)
 
 bool IKMapComponent::GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, XMFLOAT3& center_)
 {
+    // コライダーはノード名とローカルオフセットで指定し、初回だけノードindexを解決して再利用する。
     if (!model || sphere_.nodeName.empty()) return false;
     if (sphere_.nodeIndex < 0)
     {
@@ -533,6 +550,7 @@ bool IKMapComponent::GetBodyCollisionSphereCenter(BodyCollisionSphere& sphere_, 
 
 void IKMapComponent::ApplySpringChain(IKChain& chain_)
 {
+    // シミュレーション点の方向へ各ボーンを回転させ、最終的な揺れをモデルのローカル姿勢へ反映する。
     auto& nodes_ = model->GetNodes();
     bool chainChanged_ = false;
     for (size_t nodeIndex_ = 0; nodeIndex_ + 1 < chain_.nodeIndices.size(); ++nodeIndex_)
@@ -596,6 +614,7 @@ void IKMapComponent::ApplySpringChain(IKChain& chain_)
 
 void IKMapComponent::Gui()
 {
+    // InspectorではIKチェーン定義と体コリジョンをまとめて編集し、実際の解決は各IKコンポーネントやSpring側が利用する。
     if (!model)
     {
         auto owner_ = GetGameObject();
@@ -644,6 +663,7 @@ void IKMapComponent::Gui()
 
     const auto& nodes_ = model->GetNodes();
     ImGui::SeparatorText("Body Collision Spheres");
+    // 髪や布を体へめり込ませないための簡易コライダー。連結すると首や胴体のようなカプセル近似にできる。
     ImGui::TextDisabled("Lightweight approximation used to keep hair outside the body.");
     if (ImGui::Button("Add Body Collision Sphere"))
     {
@@ -692,6 +712,7 @@ void IKMapComponent::Gui()
     }
 
     ImGui::SeparatorText("IK Chains");
+    // チェーンごとにroot/tipと用途を持ち、用途別コンポーネントが同じ定義を参照して解く。
     int removeIndex_ = -1;
     for (size_t chainIndex_ = 0; chainIndex_ < chains.size(); ++chainIndex_)
     {
@@ -761,6 +782,7 @@ void IKMapComponent::Gui()
             }
             if (chain_.type == IK_TYPE::CLOTH_BONE)
             {
+                // Cloth Boneは複数チェーンを横につなぐため、GroupとOrderで隣接関係を決める。
                 if (ImGui::DragInt("Cloth Group", &chain_.clothGroup, 0.1f))
                 {
                     ResetSimulation();
@@ -806,6 +828,7 @@ void IKMapComponent::Gui()
 
             if (chain_.type == IK_TYPE::SPRING_BONE || chain_.type == IK_TYPE::CLOTH_BONE)
             {
+                // 物理系チェーンは揺れや硬さ、体コライダーとの接触をここで調整する。
                 ImGui::DragFloat("Gravity", &chain_.gravity, 0.1f, 0.0f, 100.0f);
                 if (ImGui::Button("Apply Rope Preset"))
                 {
@@ -838,6 +861,7 @@ void IKMapComponent::Gui()
             }
             else if (chain_.type == IK_TYPE::FOOT)
             {
+                // 足IKは接地判定後に解くため、IKMapでは使用ボーンと補正量だけを定義する。
                 ImGui::TextDisabled("Solved by FootIKComponent after the animation pose is applied.");
                 const char* polePreview_ = chain_.footPoleNodeName.empty()
                     ? "Animation Bend Direction"
@@ -870,6 +894,7 @@ void IKMapComponent::Gui()
             }
             else if (chain_.type == IK_TYPE::LOOK_AT)
             {
+                // LookAt系は向く軸、角度上限、ブレンド速度を持ち、頭や上半身の追従幅を制御する。
                 ImGui::TextDisabled("Solved by HumanLookAtIKComponent after the animation pose is applied.");
                 ImGui::DragFloat3("Local Forward Axis", &chain_.lookForwardAxis.x, 0.01f, -1.0f, 1.0f);
                 ImGui::DragFloat("Max Yaw Degrees", &chain_.lookMaxYawDegrees, 1.0f, 0.0f, 180.0f);
@@ -886,6 +911,7 @@ void IKMapComponent::Gui()
             }
             else if (chain_.type == IK_TYPE::SHIELD_BLOCK)
             {
+                // 盾ガードIKは肘から手首までの比率と探索範囲を持ち、攻撃方向へ盾を向けるために使う。
                 ImGui::TextDisabled("Solved by ShieldBlockIKComponent after the animation pose is applied.");
                 ImGui::SliderFloat("Elbow Wrist Ratio", &chain_.shieldElbowWristRatio, 0.0f, 1.0f);
                 ImGui::DragFloat("Search Radius", &chain_.shieldSearchRadius, 0.01f, 0.0f, 100.0f);
@@ -929,6 +955,7 @@ void IKMapComponent::Gui()
 void IKMapComponent::Serialize(nlohmann::json& j_) const
 {
 
+    // 体コライダーとチェーン定義をそのまま保存し、エディタで調整したIK設定をモデルごとに再現する。
 
     j_["ShowBodyCollisionShapes"] = showBodyCollisionShapes;
     j_["BodyCollisionShapeColor"] = {
@@ -1005,6 +1032,7 @@ void IKMapComponent::Serialize(nlohmann::json& j_) const
 
 void IKMapComponent::Deserialize(const nlohmann::json& j_)
 {
+    // 旧データに無い項目は既定値で補い、読み込み後はResolve時にノードindexを再構築する。
     chains.clear();
     bodyCollisionSpheres.clear();
     showBodyCollisionShapes = j_.value("ShowBodyCollisionShapes", true);
@@ -1103,6 +1131,7 @@ void IKMapComponent::Deserialize(const nlohmann::json& j_)
 IKMapComponent::IKChain& IKMapComponent::AddSpringChain(
     const std::string& name_, const std::string& rootNodeName_, const std::string& tipNodeName_)
 {
+    // コード側から標準のスプリングチェーンを登録するためのヘルパー。
     IKChain chain_;
     chain_.name = name_;
     chain_.type = IK_TYPE::SPRING_BONE;
@@ -1117,6 +1146,7 @@ IKMapComponent::IKChain& IKMapComponent::AddFootChain(
     const std::string& rootNodeName_,
     const std::string& tipNodeName_)
 {
+    // 同名の足IKが既にある場合は再利用し、二重登録で設定が増えないようにする。
     const auto existingChain_ = std::find_if(
         chains.begin(),
         chains.end(),
@@ -1141,6 +1171,7 @@ IKMapComponent::IKChain& IKMapComponent::AddLookAtChain(
     const std::string& rootNodeName_,
     const std::string& tipNodeName_)
 {
+    // 視線IK用チェーンは物理衝突を使わないため、登録時にコリジョンを無効化しておく。
     const auto existingChain_ = std::find_if(
         chains.begin(),
         chains.end(),
@@ -1311,6 +1342,7 @@ bool IKMapComponent::ResolveChainByName(const std::string& name_)
 
 void IKMapComponent::ResetSimulation()
 {
+    // ノード解決、布制約、シミュレーション履歴を捨て、次フレームに現在のアニメーション姿勢から作り直す。
     clothConstraints.clear();
     clothConstraintsInitialized = false;
     for (auto& sphere_ : bodyCollisionSpheres)

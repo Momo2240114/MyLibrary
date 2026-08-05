@@ -9,6 +9,7 @@ void ShadowWindow::Draw()
     if (BeginEditorWindow("Shadow Settings"))
     {
         DrawStylePopup();
+        // Shadowの具体的な項目はModelRenderSystem側に集約し、描画設定とUIのズレを防ぐ。
         modelRenderSystem.ShadowSettingGui();
     }
 

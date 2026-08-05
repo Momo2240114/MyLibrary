@@ -15,6 +15,7 @@
 
 ATTACK_HIT_SHAPE NormalizeAttackHitShape(ATTACK_HIT_SHAPE shape_)
 {
+    // 現在のAttackEffectHitComponentで扱える形状だけを通し、未対応形状はCapsuleへ丸める。
     switch (shape_)
     {
     case ATTACK_HIT_SHAPE::NONE:
@@ -39,6 +40,7 @@ const std::string& AttackEffectHitComponent::GetName() const
 
 void AttackEffectHitComponent::Start()
 {
+    // 保存済みのテンプレートから、実際に判定を持つ子GameObject/HitBoxを作り直す。
     RebuildHitShapes();
 }
 
@@ -49,6 +51,7 @@ void AttackEffectHitComponent::Update(float deltaTime_)
     elapsedTime += safeDeltaTime_;
     hitIntervalTimer -= safeDeltaTime_;
 
+    // Projectile系のように、判定オブジェクト自体が毎フレーム前進する演出に対応する。
     const std::shared_ptr<GameObject> object_ = GetGameObject();
     if (object_ && movementSpeed != 0.0f)
     {
@@ -59,6 +62,7 @@ void AttackEffectHitComponent::Update(float deltaTime_)
     }
 
     bool intervalReady_ = false;
+    // hitIntervalが来たら命中履歴を消し、持続判定でも一定間隔で再ヒットできるようにする。
     for (const AttackEffectHitShapeTemplate& shape_ : hitShapes)
     {
         if (shape_.hitInterval > 0.0f && hitIntervalTimer <= 0.0f)
@@ -70,6 +74,7 @@ void AttackEffectHitComponent::Update(float deltaTime_)
     }
     if (intervalReady_) ClearHitHistory();
 
+    // 各HitBoxの有効時間をテンプレートのactiveStart/Endに合わせて切り替える。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
         if (!runtime_.hitBox || runtime_.templateIndex >= hitShapes.size()) continue;
@@ -82,6 +87,7 @@ void AttackEffectHitComponent::Update(float deltaTime_)
 
     if (elapsedTime >= lifeTime)
     {
+        // コンポーネント寿命が終わったら判定を止め、必要なら演出用GameObjectごと消す。
         Stop();
         if (destroyOnLifeEnd && object_) object_->GetManager().Destroy(object_);
     }
@@ -110,6 +116,7 @@ void AttackEffectHitComponent::SetCameraShake(
     float frequency_,
     int priority_)
 {
+    // HitBoxへ渡すカメラシェイク設定をまとめて保持し、生成済み判定へConfigure時に反映する。
     cameraShakeEnabled = enabled_;
     cameraShakeReceiveDuration = (std::max)(receiveDuration_, 0.0f);
     cameraShakeReceivePositionStrength = (std::max)(receivePositionStrength_, 0.0f);
@@ -146,6 +153,7 @@ void AttackEffectHitComponent::SetHitParticleImpactAxis(
     bool enabled_,
     float axisToAttackerBlend_)
 {
+    // ヒット時Particleの向きを、衝突法線と攻撃者方向のどちらへ寄せるかを設定する。
     hitParticleUseImpactAxis = enabled_;
     hitParticleAxisToAttackerBlend = std::clamp(axisToAttackerBlend_, 0.0f, 1.0f);
 }
@@ -156,6 +164,7 @@ void AttackEffectHitComponent::SetHitParticleTargetAttraction(
     float range_,
     float falloff_)
 {
+    // 命中位置をターゲット側へ引き寄せる補正値。大きな敵や広い判定で見た目を合わせるために使う。
     hitParticleUseTargetAttraction = enabled_;
     hitParticleTargetAttractionStrength = strength_;
     hitParticleTargetAttractionRange = (std::max)(range_, 0.0f);
@@ -193,6 +202,7 @@ void AttackEffectHitComponent::SetMovement(const DirectX::XMFLOAT3& direction_, 
 void AttackEffectHitComponent::SetHitShapes(
     const std::vector<AttackEffectHitShapeTemplate>& hitShapes_)
 {
+    // テンプレートを差し替えたら、未対応形状を丸めた上でランタイムHitBoxも作り直す。
     hitShapes = hitShapes_;
     for (AttackEffectHitShapeTemplate& shape_ : hitShapes)
         shape_.shape = NormalizeAttackHitShape(shape_.shape);
@@ -201,12 +211,14 @@ void AttackEffectHitComponent::SetHitShapes(
 
 void AttackEffectHitComponent::Play()
 {
+    // 再生開始時は時間と命中履歴をリセットし、前回再生のヒット対象を引き継がない。
     ResetRuntime();
     playing = true;
 }
 
 void AttackEffectHitComponent::Stop()
 {
+    // 停止時は生成済みHitBoxをすべて無効化し、残った判定が当たり続けないようにする。
     playing = false;
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
         if (runtime_.hitBox) runtime_.hitBox->Deactivate();
@@ -221,6 +233,7 @@ void AttackEffectHitComponent::ResetRuntime()
 
 void AttackEffectHitComponent::SubmitDebugShapes()
 {
+    // デバッグ描画用に、子判定オブジェクトのTransformとHitBox状態だけを即時更新する。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
     {
         if (!runtime_.object || !runtime_.hitBox) continue;
@@ -231,6 +244,7 @@ void AttackEffectHitComponent::SubmitDebugShapes()
 
 void AttackEffectHitComponent::ClearHitHistory()
 {
+    // Attack/JustDodge/Guardの各システムが持つ同一攻撃グループの命中履歴をまとめてリセットする。
     const std::shared_ptr<GameObject> object_ = GetGameObject();
     if (object_ && attackInstanceId != 0u)
     {
@@ -247,6 +261,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     const AttackEffectHitShapeTemplate& shape_,
     const std::string& name_)
 {
+    // コンポーネント側の攻撃情報と、形状テンプレート側のサイズ/多段可否をHitBoxへ転写する。
     hitBox_->actionPrefix = name_;
     hitBox_->SetOwner(ownerObject);
     hitBox_->SetAttackInstanceId(attackInstanceId);
@@ -287,6 +302,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->canHitOwner = canHitOwner;
     hitBox_->radius = (std::max)(shape_.radius, 0.01f);
     const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
+    // Sphereは高さを使わず、Capsule系だけhalfHeightを判定サイズに反映する。
     hitBox_->halfHeight = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE ? 0.0f : (std::max)(shape_.halfHeight, 0.0f);
     hitBox_->Deactivate();
     hitBox_->RecreatePhysXActor();
@@ -294,6 +310,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
 
 void AttackEffectHitComponent::RebuildHitShapes()
 {
+    // 古いランタイム判定を破棄してから、現在のテンプレートを元に子GameObjectを再生成する。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
         if (runtime_.object) runtime_.object->GetManager().Destroy(runtime_.object);
     runtimeHitShapes.clear();
@@ -305,6 +322,7 @@ void AttackEffectHitComponent::RebuildHitShapes()
         const AttackEffectHitShapeTemplate& shape_ = hitShapes[shapeIndex_];
         const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
         if (!shape_.enabled || normalizedShape_ == ATTACK_HIT_SHAPE::NONE) continue;
+        // SphereGroupは複数のSphere HitBoxへ展開し、それ以外は1つのHitBoxとして生成する。
         const size_t sphereCount_ = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP
             ? shape_.spheres.size() : 1u;
         for (size_t sphereIndex_ = 0; sphereIndex_ < sphereCount_; ++sphereIndex_)
@@ -330,6 +348,7 @@ void AttackEffectHitComponent::RebuildHitShapes()
             runtimeShape_.radius = radius_;
             if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP)
             {
+                // グループ内の個別判定はHitBox側では通常Sphereとして扱う。
                 runtimeShape_.shape = ATTACK_HIT_SHAPE::SPHERE;
                 runtimeShape_.halfHeight = 0.0f;
             }
@@ -341,6 +360,7 @@ void AttackEffectHitComponent::RebuildHitShapes()
 
 void AttackEffectHitComponent::Gui()
 {
+    // 攻撃判定の基本値、ヒット演出、形状テンプレートをエディタ上でまとめて調整する。
     int effectType_ = static_cast<int>(effectType);
     const char* effectNames_[] = { "Instant Area", "Projectile", "Area Over Time", "Beam", "Breath" };
     if (ImGui::Combo("Effect Type", &effectType_, effectNames_, IM_ARRAYSIZE(effectNames_)))
@@ -384,6 +404,7 @@ void AttackEffectHitComponent::Gui()
         ImGui::PushID(shapeIndex_);
         if (ImGui::TreeNode("HitShape", "Hit Shape %d", shapeIndex_ + 1))
         {
+            // GUIで選べる形状も、ランタイムが対応しているものだけに限定する。
             shape_.shape = NormalizeAttackHitShape(shape_.shape);
             rebuild_ |= ImGui::Checkbox("Enabled", &shape_.enabled);
             rebuild_ |= ImGui::InputText("HitBox Name", &shape_.hitBoxName);
@@ -421,6 +442,7 @@ void AttackEffectHitComponent::Gui()
             ImGui::Checkbox("Allow Multi Hit", &shape_.allowMultiHit);
             if (shape_.shape == ATTACK_HIT_SHAPE::SPHERE_GROUP)
             {
+                // SphereGroupは一つの攻撃テンプレート内に、複数の局所球判定を並べるための設定。
                 if (ImGui::Button("Add Sphere"))
                 {
                     shape_.spheres.emplace_back();
@@ -458,6 +480,7 @@ void AttackEffectHitComponent::Gui()
 
 void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
 {
+    // 攻撃共通値とヒット時演出、さらに複数HitShapeのテンプレートをまとめて保存する。
     json_["EffectType"] = static_cast<int>(effectType);
     json_["LifeTime"] = lifeTime;
     json_["Damage"] = damage;
@@ -510,6 +533,7 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
 
 void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
 {
+    // JSONから読み込む値は、範囲外の形状や負数になりやすい項目を丸めながら復元する。
     effectType = static_cast<ATTACK_EFFECT_TYPE>((std::clamp)(json_.value("EffectType", 0), 0, 4));
     lifeTime = json_.value("LifeTime", 1.0f);
     damage = json_.value("Damage", 1.0f);
@@ -553,6 +577,7 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     hitShapes.clear();
     for (const nlohmann::json& shapeJson_ : json_.value("HitShapes", nlohmann::json::array()))
     {
+        // Shapeごとの局所Transformと有効時間を読み、最後にRebuildHitShapesで実体化する。
         AttackEffectHitShapeTemplate shape_{};
         shape_.enabled = shapeJson_.value("Enabled", true);
         shape_.hitBoxName = shapeJson_.value("HitBoxName", std::string("AttackEffectHitBox"));

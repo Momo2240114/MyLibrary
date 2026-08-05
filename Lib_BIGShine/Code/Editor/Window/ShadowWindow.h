@@ -4,6 +4,7 @@
 
 class ModelRenderSystem;
 
+// ModelRenderSystemが持つShadowMapや影描画設定をEditorから調整するWindow。
 class ShadowWindow : public EditorWindow
 {
 public:
@@ -15,5 +16,6 @@ public:
     void Draw() override;
 
 private:
+    // 影設定は描画Systemの内部状態なので、Windowは参照を保持してGui呼び出しだけを行う。
     ModelRenderSystem& modelRenderSystem;
 };

@@ -22,6 +22,7 @@ namespace
 {
     struct CameraCollisionLayerView
     {
+        // Editor表示名と実Layerの対応。
         const char* name;
         LayerType layer;
     };
@@ -57,12 +58,14 @@ namespace
 
     ColliderComponent* GetColliderFromActor(const PxRigidActor* actor_)
     {
+        // PhysX ActorのuserDataにはColliderComponentを入れている想定。
         if (!actor_ || !actor_->userData) return nullptr;
         return static_cast<ColliderComponent*>(actor_->userData);
     }
 
     uint32_t GetShapeLayer(const PxShape* shape_)
     {
+        // Query用FilterDataを優先し、未設定ならSimulation側のLayerを見る。
         if (!shape_) return static_cast<uint32_t>(LayerType::Default);
 
         PxFilterData filterData_ = shape_->getQueryFilterData();
@@ -84,6 +87,7 @@ namespace
         const PxRigidActor* actor_,
         uint32_t layerMask_)
     {
+        // Shape/ActorがCamera Collision対象Layerかを判定する。
         if (!shape_ || !actor_) return false;
 
         PxFilterData filterData_ = shape_->getQueryFilterData();
@@ -100,6 +104,7 @@ namespace
 
         if (shapeLayer_ == static_cast<uint32_t>(LayerType::Default))
         {
+            // Default LayerのStatic Physical Colliderだけは、旧設定互換としてCamera衝突対象にする。
             return actor_->is<PxRigidStatic>() &&
                 filterData_.word2 ==
                 static_cast<uint32_t>(ColliderComponent::CollisionRole::PHYSICAL);
@@ -125,6 +130,7 @@ namespace
             const PxRigidActor* actor_,
             PxHitFlags& queryFlags_) override
         {
+            // Scene Query不可、Trigger、Mask外、Ignore対象はSweep/Raycastから除外する。
             (void)filterData_;
             (void)queryFlags_;
             if (!shape_ || !actor_) return PxQueryHitType::eNONE;
@@ -174,6 +180,7 @@ namespace
         const std::shared_ptr<GameObject>& object_,
         std::vector<const void*>& userData_)
     {
+        // 指定Object配下のColliderComponentをPhysX userData比較用に集める。
         if (!object_) return;
         for (const std::shared_ptr<ColliderComponent>& collider_ :
             object_->GetComponents<ColliderComponent>())
@@ -199,6 +206,7 @@ namespace
 
 uint32_t CameraCollisionComponent::GetDefaultCollisionLayerMask()
 {
+    // 通常Cameraが避けるべき環境系Layerだけを標準対象にする。
     return
         static_cast<uint32_t>(LayerType::Environment) |
         static_cast<uint32_t>(LayerType::Terrain) |
@@ -213,6 +221,7 @@ void CameraCollisionComponent::Start()
 void CameraCollisionComponent::LateUpdate(float deltaTime_)
 {
     ResolveReferences();
+    // 他Camera制御やDebug用途でSuppressed中は補正しない。
     if (collisionSuppressed) return;
 
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
@@ -220,6 +229,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
 
     const DirectX::XMFLOAT3 start_ = camera_->GetFocus();
     const DirectX::XMFLOAT3 desiredPosition_ = camera_->GetEye();
+    // Focusから現在Camera位置までを理想Camera Lineとして扱う。
     const DirectX::XMFLOAT3 difference_
     {
         desiredPosition_.x - start_.x,
@@ -235,6 +245,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
     const std::shared_ptr<CameraLockOnComponent> lockOnCamera_ =
         lockOnCamera.lock();
     std::vector<const void*> ignoredUserData_;
+    // 自分自身、追従Target、LockOn対象などはCamera遮蔽物として扱わない。
     CollectIgnoredUserData(GetGameObject(), ignoredUserData_);
     CollectIgnoredUserData(ignoreTarget.lock(), ignoredUserData_);
     CollectIgnoredUserData(ignoreLockOnTarget.lock(), ignoredUserData_);
@@ -266,6 +277,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
     const float safeHitDistance_ = hasHit_
         ? hitDistance_ - (std::max)(collisionOffset, 0.0f)
         : desiredDistance_;
+    // Hitした場合はHit点より少し手前、Hitしない場合は理想距離をそのまま使う。
     const float allowedDistance_ = std::clamp(
         safeHitDistance_,
         safeMinimumDistance_,
@@ -301,6 +313,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         0.95f);
     const float liftRate_ = canLift_
         ? std::clamp(
+            // Cameraが圧縮され始めた量に応じて、上方向への逃がし量を増やす。
             (debugCompressionRate - safeLiftStartRate_) /
                 (1.0f - safeLiftStartRate_),
             0.0f,
@@ -315,6 +328,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
         : collisionLiftDownSpeed;
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
     const float smoothingRate_ = std::clamp(
+        // 持ち上げ/戻しは速度を分け、壁に入った瞬間は速く、戻りはやや遅くする。
         1.0f - std::exp(-(std::max)(liftSpeed_, 0.1f) * safeDeltaTime_),
         0.0f,
         1.0f);
@@ -326,6 +340,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
     DirectX::XMFLOAT3 finalPosition_ = limitedPosition_;
     if (canLift_ && currentCollisionLift > 0.001f)
     {
+        // 上方向へ逃がす際も、天井などに当たらないか追加Sweepする。
         DirectX::XMFLOAT3 liftedPosition_ = limitedPosition_;
         liftedPosition_.y += currentCollisionLift;
 
@@ -351,6 +366,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
 
     if (!hasHit_ && currentCollisionLift <= 0.001f)
     {
+        // 何も補正していないFrameではCamera Poseを書き直さない。
         return;
     }
 
@@ -362,6 +378,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
             currentCollisionLift,
             deltaTime_))
     {
+        // LockOn側が壁際専用構図へ補正できた場合は、ここではPoseを上書きしない。
         return;
     }
     ApplyCameraPose(finalPosition_, start_);
@@ -369,6 +386,7 @@ void CameraCollisionComponent::LateUpdate(float deltaTime_)
 
 void CameraCollisionComponent::ResolveReferences()
 {
+    // 必要なComponentとIgnore対象を、失効している場合だけ再取得する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -413,6 +431,7 @@ bool CameraCollisionComponent::SweepCameraSegment(
     debugLastHitAccepted = false;
 
     const PxVec3 origin_(startPosition_.x, startPosition_.y, startPosition_.z);
+    // PhysX Query用にSegmentを始点、正規化方向、距離へ分解する。
     const PxVec3 direction_(
         (endPosition_.x - startPosition_.x) / distance_,
         (endPosition_.y - startPosition_.y) / distance_,
@@ -421,6 +440,7 @@ bool CameraCollisionComponent::SweepCameraSegment(
     CameraQueryFilter queryFilter_(ignoredUserData_, cameraCollisionLayerMask);
 
     PxQueryFlags queryFlags_ = PxQueryFlag::eSTATIC | PxQueryFlag::ePREFILTER;
+    // 動的ColliderをCamera衝突へ含めるかは設定で切り替える。
     if (includeDynamicColliders) queryFlags_ |= PxQueryFlag::eDYNAMIC;
     const PxQueryFilterData filterData_(
         PxFilterData(cameraCollisionLayerMask, 0u, 0u, 0u),
@@ -432,6 +452,7 @@ bool CameraCollisionComponent::SweepCameraSegment(
 
     if (probeRadius > 0.001f)
     {
+        // Sphere Sweepを先に行い、Cameraに厚みを持たせた衝突補正をする。
         PxSweepBuffer sweepHit_;
         const PxSphereGeometry probeGeometry_((std::max)(probeRadius, 0.001f));
         if (scene_->sweep(
@@ -458,6 +479,7 @@ bool CameraCollisionComponent::SweepCameraSegment(
     }
 
     PxRaycastBuffer rayHit_;
+    // Sphere Sweepで取りこぼす細い形状のため、中心Raycastも併用する。
     if (scene_->raycast(
         origin_,
         direction_,
@@ -491,6 +513,7 @@ void CameraCollisionComponent::DrawCollisionLayerMaskGui()
 {
     ImGui::SeparatorText("Camera Collision Layer Mask");
 
+    // LayerごとのCheckboxをbit maskへ反映する。
     for (const CameraCollisionLayerView& layerView_ : cameraCollisionLayerViews_)
     {
         const uint32_t layerMask_ = static_cast<uint32_t>(layerView_.layer);
@@ -525,6 +548,7 @@ void CameraCollisionComponent::ApplyCameraPose(
     const DirectX::XMFLOAT3& cameraPosition_,
     const DirectX::XMFLOAT3& lookAtPosition_)
 {
+    // CameraのLookAt姿勢をTransformにも反映し、GameObject上のCamera位置と実Viewを同期する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
 
@@ -549,6 +573,7 @@ void CameraCollisionComponent::SetCollisionSuppressed(bool suppressed_)
     collisionSuppressed = suppressed_;
     if (!collisionSuppressed)
     {
+        // 再開時に古い持ち上げ量や圧縮率が残らないよう初期化する。
         currentCollisionLift = 0.0f;
         debugCompressionRate = 0.0f;
     }
@@ -640,6 +665,7 @@ void CameraCollisionComponent::Gui()
 
 void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
 {
+    // Debug値や現在Lift量はRuntime状態なので保存しない。
     json_["ignoreTargetName"] = ignoreTargetName;
     json_["ignoreLockOnTargetName"] = ignoreLockOnTargetName;
 
@@ -659,6 +685,7 @@ void CameraCollisionComponent::Serialize(nlohmann::json& json_) const
 
 void CameraCollisionComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 旧collisionLayerMask Keyにも対応し、過去Sceneから設定を引き継ぐ。
     ignoreTargetName = json_.value("ignoreTargetName", std::string{});
     ignoreLockOnTargetName = json_.value("ignoreLockOnTargetName", std::string{});
 

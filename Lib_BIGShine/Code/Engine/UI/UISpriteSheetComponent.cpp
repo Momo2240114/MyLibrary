@@ -12,6 +12,7 @@
 void UISpriteSheetComponent::Start()
 {
     BS_PROFILE_SCOPE("UISpriteSheetComponent::Start");
+    // 起動時にRendererを解決し、設定を正規化してから初回UVを反映する。
     ResolveSpriteRenderer();
     NormalizeSettings();
     ApplySlice();
@@ -24,11 +25,13 @@ void UISpriteSheetComponent::Update(float deltaTime_)
 
     if (spriteRenderer.expired())
     {
+        // Component追加順やRenderer差し替えに対応するため、失効時は取り直す。
         ResolveSpriteRenderer();
     }
 
     if (applyEveryFrame)
     {
+        // Editor操作や外部処理でTexture/UVが変わった場合でも、指定Sliceへ戻す。
         ApplySlice();
     }
 }
@@ -38,6 +41,7 @@ void UISpriteSheetComponent::Gui()
     BS_PROFILE_SCOPE("UISpriteSheetComponent::Gui");
 
     bool changed_ = false;
+    // SpriteSheetの分割数、表示Index、Atlas余白をEditorから調整する。
     changed_ |= ImGui::DragInt("Column Count", &columnCount, 1.0f, 1, 256);
     changed_ |= ImGui::DragInt("Row Count", &rowCount, 1.0f, 1, 256);
     changed_ |= ImGui::DragInt("Column Index", &columnIndex, 1.0f, 0, 255);
@@ -50,6 +54,7 @@ void UISpriteSheetComponent::Gui()
 
     if (changed_)
     {
+        // 値変更時は範囲を整えてすぐ見た目へ反映する。
         NormalizeSettings();
         ApplySlice();
     }
@@ -102,6 +107,7 @@ void UISpriteSheetComponent::ApplySlice()
     if (!spriteRenderer_) return;
 
     const DirectX::XMFLOAT2 textureSize_ = spriteRenderer_->GetTextureSize();
+    // Paddingを除いた有効領域を分割し、指定CellのPixel Rectを計算する。
     const float usableWidth_ = (std::max)(1.0f, textureSize_.x - paddingLeft - paddingRight);
     const float usableHeight_ = (std::max)(1.0f, textureSize_.y - paddingTop - paddingBottom);
     const float cellWidth_ = usableWidth_ / static_cast<float>((std::max)(1, columnCount));
@@ -109,6 +115,7 @@ void UISpriteSheetComponent::ApplySlice()
     const float left_ = paddingLeft + cellWidth_ * static_cast<float>(columnIndex);
     const float top_ = paddingTop + cellHeight_ * static_cast<float>(rowIndex);
 
+    // SpriteRenderer側はPixel単位のUV Rectを受け取り、描画時にTexture座標へ変換する。
     spriteRenderer_->SetUVRect(left_, top_, cellWidth_, cellHeight_);
 }
 
@@ -124,6 +131,7 @@ void UISpriteSheetComponent::ResolveSpriteRenderer()
 
 void UISpriteSheetComponent::NormalizeSettings()
 {
+    // 0分割や範囲外IndexでUV計算が壊れないよう、ここでまとめて制限する。
     columnCount = (std::max)(1, columnCount);
     rowCount = (std::max)(1, rowCount);
     columnIndex = std::clamp(columnIndex, 0, columnCount - 1);

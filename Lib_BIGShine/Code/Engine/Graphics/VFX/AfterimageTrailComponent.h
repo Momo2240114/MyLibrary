@@ -20,13 +20,21 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
 
 private:
+    // ActionSequenceからTrail開始/停止/クリアを呼べるよう登録する。
     void RegisterActions();
+
+    // 所有者Transformから、現在フレームの帯メッシュ左右端点を求める。
     bool GetTrailSegment(
         DirectX::XMFLOAT3& leftPosition_,
-        DirectX::XMFLOAT3& rightPosition_) const;
+            DirectX::XMFLOAT3& rightPosition_) const;
 
+    // 軌跡帯の基本幅。
     float trailWidth = 1.8f;
+
+    // 所有者原点から少し上へずらして帯を出す。
     float verticalOffset = 0.8f;
+
+    // 幅を時間で揺らすための設定。
     float wobbleAmplitude = 0.35f;
     float wobbleSpeed = 18.0f;
 };

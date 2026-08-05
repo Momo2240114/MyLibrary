@@ -14,14 +14,17 @@
 
 namespace
 {
+    // 履歴とプロファイルは別ファイルとして扱うため、それぞれ個別にバージョンを持たせる。
     constexpr int MODEL_LOAD_HISTORY_VERSION = 1;
     constexpr int MODEL_LOAD_PROFILE_VERSION = 1;
+    // 初回起動やデバッグ停止などで極端に長くなったサンプルは、推定値から除外する。
     constexpr double MODEL_LOAD_ABSOLUTE_SAMPLE_LIMIT_MS = 15000.0;
     constexpr double MODEL_LOAD_OUTLIER_MEDIAN_MULTIPLIER = 3.0;
     constexpr double MODEL_LOAD_OUTLIER_MINIMUM_MARGIN_MS = 2000.0;
 
     double CalculateMedian(const std::vector<double>& sortedValues_)
     {
+        // 呼び出し側でソート済みの読み込み時間から中央値を出す。
         if (sortedValues_.empty()) return 0.0;
         return sortedValues_.size() % 2 == 0
             ? (sortedValues_[sortedValues_.size() / 2 - 1] + sortedValues_[sortedValues_.size() / 2]) * 0.5
@@ -30,6 +33,7 @@ namespace
 
     double CalculateOutlierLimit(double median_)
     {
+        // 中央値が小さいモデルでも余裕を持たせるため、倍率と固定マージンの大きい方を閾値にする。
         return (std::max)(
             median_ * MODEL_LOAD_OUTLIER_MEDIAN_MULTIPLIER,
             median_ + MODEL_LOAD_OUTLIER_MINIMUM_MARGIN_MS);
@@ -37,6 +41,7 @@ namespace
 
     void RemoveLongLoadOutliers(std::vector<double>& values_)
     {
+        // 無効値と絶対上限超えを先に落とし、その後でモデルごとの中央値から外れ値を取り除く。
         values_.erase(
             std::remove_if(
                 values_.begin(),
@@ -67,6 +72,7 @@ namespace
 bool ModelLoadProfileManager::LoadProfile(const std::filesystem::path& filePath_)
 {
     std::lock_guard<std::mutex> lock_(profileMutex);
+    // 読み込み失敗時に古い推定値が残らないよう、先に現在のプロファイルを空にする。
     profileEntries.clear();
 
     std::ifstream file_(filePath_);
@@ -81,6 +87,7 @@ bool ModelLoadProfileManager::LoadProfile(const std::filesystem::path& filePath_
         const nlohmann::json models_ = json_.value("models", nlohmann::json::object());
         for (auto iterator_ = models_.begin(); iterator_ != models_.end(); ++iterator_)
         {
+            // 推定読み込み時間が有効なモデルだけを採用し、壊れた項目は無視する。
             const nlohmann::json& item_ = iterator_.value();
             ModelLoadProfileEntry entry_;
             entry_.estimatedLoadMilliseconds = item_.value("estimatedLoadMilliseconds", 0.0);
@@ -110,6 +117,7 @@ bool ModelLoadProfileManager::SaveProfile(const std::filesystem::path& filePath_
 {
     std::lock_guard<std::mutex> lock_(profileMutex);
 
+    // ランタイムで使う集計済み値だけを書き出し、元サンプルは履歴ファイル側へ分ける。
     nlohmann::json models_ = nlohmann::json::object();
     for (const auto& pair_ : profileEntries)
     {
@@ -141,6 +149,7 @@ bool ModelLoadProfileManager::SaveProfile(const std::filesystem::path& filePath_
 bool ModelLoadProfileManager::LoadHistory(const std::filesystem::path& filePath_)
 {
     std::lock_guard<std::mutex> lock_(profileMutex);
+    // 履歴はプロファイル生成の元データなので、読み込み直し時は一度全消去する。
     historyEntries.clear();
 
     std::ifstream file_(filePath_);
@@ -161,6 +170,7 @@ bool ModelLoadProfileManager::LoadHistory(const std::filesystem::path& filePath_
             entry_.fileSize = item_.value("fileSize", static_cast<uintmax_t>(0));
             entry_.fileLastWriteTime = item_.value("fileLastWriteTime", static_cast<int64_t>(0));
 
+            // 0ms以下のサンプルは計測失敗として扱い、履歴に戻さない。
             for (const nlohmann::json& sampleJson_ : item_.value("samples", nlohmann::json::array()))
             {
                 ModelLoadHistorySample sample_;
@@ -191,6 +201,7 @@ bool ModelLoadProfileManager::SaveHistory(const std::filesystem::path& filePath_
 {
     std::lock_guard<std::mutex> lock_(profileMutex);
 
+    // 次回起動後もプロファイルを再生成できるよう、モデルごとの生サンプルを保存する。
     nlohmann::json models_ = nlohmann::json::object();
     for (const auto& pair_ : historyEntries)
     {
@@ -229,6 +240,7 @@ bool ModelLoadProfileManager::SaveHistory(const std::filesystem::path& filePath_
 bool ModelLoadProfileManager::GenerateProfileFromHistory()
 {
     std::lock_guard<std::mutex> lock_(profileMutex);
+    // 履歴から再集計するため、古い推定値は残さず作り直す。
     profileEntries.clear();
 
     double averageMillisecondsSum_ = 0.0;
@@ -249,6 +261,7 @@ bool ModelLoadProfileManager::GenerateProfileFromHistory()
         RemoveLongLoadOutliers(values_);
         if (values_.empty()) continue;
 
+        // 平均・中央値・分散を出し、読み込みバーなどで使う推定時間へ変換する。
         std::sort(values_.begin(), values_.end());
         const double sum_ = std::accumulate(values_.begin(), values_.end(), 0.0);
         const double average_ = sum_ / static_cast<double>(values_.size());
@@ -287,6 +300,7 @@ bool ModelLoadProfileManager::GenerateProfileFromHistory()
         ? averageMillisecondsSum_ / static_cast<double>(validModelCount_)
         : defaultEstimatedLoadMilliseconds;
 
+    // 相対ウェイトは「平均的なモデルを1.0」として、ロード進捗の配分に使う。
     for (const auto& pair_ : averages_)
     {
         profileEntries[pair_.first].relativeLoadWeight =
@@ -306,6 +320,7 @@ void ModelLoadProfileManager::RecordLoadResult(
     const std::string normalizedPath_ = NormalizePath(modelPath_);
     std::lock_guard<std::mutex> lock_(profileMutex);
 
+    // 既存プロファイルから見て極端に遅い計測値は、偶発的なスパイクとして履歴に入れない。
     auto profileFound_ = profileEntries.find(normalizedPath_);
     if (profileFound_ != profileEntries.end() &&
         profileFound_->second.medianLoadMilliseconds > 0.0)
@@ -324,6 +339,7 @@ void ModelLoadProfileManager::RecordLoadResult(
     entry_.fileSize = GetFileSize(modelPath_);
     entry_.fileLastWriteTime = GetFileLastWriteTime(modelPath_);
 
+    // 現状は総読み込み時間をCPU構築時間としても記録し、詳細計測がない経路でも履歴を残す。
     ModelLoadHistorySample sample_;
     sample_.totalLoadMilliseconds = loadMilliseconds_;
     sample_.cpuBuildMilliseconds = loadMilliseconds_;
@@ -332,6 +348,7 @@ void ModelLoadProfileManager::RecordLoadResult(
     sample_.workerCount = workerCount_;
     entry_.samples.push_back(sample_);
 
+    // 履歴が肥大化しすぎないよう、古いサンプルから削る。
     while (entry_.samples.size() > maximumHistorySampleCount)
     {
         entry_.samples.erase(entry_.samples.begin());
@@ -344,6 +361,7 @@ double ModelLoadProfileManager::GetEstimatedLoadMilliseconds(
     const std::string normalizedPath_ = NormalizePath(modelPath_);
     std::lock_guard<std::mutex> lock_(profileMutex);
 
+    // 完全一致のプロファイルがあればそれを優先し、なければ類似ファイルから推定する。
     auto found_ = profileEntries.find(normalizedPath_);
     if (found_ != profileEntries.end())
     {
@@ -366,6 +384,7 @@ double ModelLoadProfileManager::GetRelativeLoadWeight(
     const std::string normalizedPath_ = NormalizePath(modelPath_);
     std::lock_guard<std::mutex> lock_(profileMutex);
 
+    // ロード進捗の重みとして使うため、極端に小さくならないよう下限を持たせる。
     auto found_ = profileEntries.find(normalizedPath_);
     if (found_ != profileEntries.end())
     {
@@ -380,6 +399,7 @@ double ModelLoadProfileManager::GetRelativeLoadWeight(
 void ModelLoadProfileManager::RemoveInvalidEntries()
 {
     std::lock_guard<std::mutex> lock_(profileMutex);
+    // 読み込みに使えない推定値や空履歴を掃除し、保存ファイルを健全な状態に保つ。
     for (auto iterator_ = profileEntries.begin(); iterator_ != profileEntries.end();)
     {
         if (iterator_->second.estimatedLoadMilliseconds <= 0.0)
@@ -418,6 +438,7 @@ bool ModelLoadProfileManager::SaveJsonAtomically(
 {
     try
     {
+        // 途中で失敗しても既存ファイルを壊しにくいよう、一度tmpへ書いてから置き換える。
         const std::filesystem::path parentPath_ = filePath_.parent_path();
         if (!parentPath_.empty()) std::filesystem::create_directories(parentPath_);
 
@@ -450,6 +471,7 @@ bool ModelLoadProfileManager::SaveJsonAtomically(
 std::string ModelLoadProfileManager::NormalizePath(
     const std::filesystem::path& modelPath_) const
 {
+    // OSや呼び出し場所の差でキーが分裂しないよう、相対表記と区切り文字を正規化する。
     std::string normalizedPath_ = modelPath_.lexically_normal().generic_string();
     while (!normalizedPath_.empty() && normalizedPath_.starts_with("./"))
     {
@@ -468,6 +490,7 @@ double ModelLoadProfileManager::EstimateFromSimilarFiles(
     const std::string extension_ = modelPath_.extension().generic_string();
     const uintmax_t fileSize_ = GetFileSize(modelPath_);
 
+    // 同じ拡張子のモデルを優先し、ファイルサイズが近いほど強い重みで推定に使う。
     double weightedMilliseconds_ = 0.0;
     double totalWeight_ = 0.0;
     double allMilliseconds_ = 0.0;
@@ -501,6 +524,7 @@ double ModelLoadProfileManager::EstimateFromSimilarFiles(
     if (totalWeight_ > 0.0) return weightedMilliseconds_ / totalWeight_;
     if (allCount_ > 0) return allMilliseconds_ / static_cast<double>(allCount_);
 
+    // 参考になる履歴がない場合は、ファイルサイズから最低限の推定値を作る。
     if (fileSize_ > 0)
     {
         const double megabytes_ = static_cast<double>(fileSize_) / (1024.0 * 1024.0);
@@ -549,6 +573,7 @@ int64_t ModelLoadProfileManager::GetFileLastWriteTime(
 
 std::string ModelLoadProfileManager::MakeTimestamp() const
 {
+    // JSONに人間が読める記録時刻を残すため、ローカル時刻をISO風の文字列へ整形する。
     const auto now_ = std::chrono::system_clock::now();
     const std::time_t time_ = std::chrono::system_clock::to_time_t(now_);
     std::tm localTime_{};

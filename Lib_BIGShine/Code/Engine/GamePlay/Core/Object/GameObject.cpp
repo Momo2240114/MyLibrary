@@ -13,6 +13,7 @@
 
 namespace
 {
+    // Component更新時に、優先度と追加順を一緒に扱うための一時構造体。
     struct ComponentUpdateEntry
     {
         std::shared_ptr<Component> component;
@@ -21,6 +22,7 @@ namespace
 
     void SortUpdateEntries(std::vector<ComponentUpdateEntry>& entries_, bool lateUpdate_)
     {
+        // Priorityが同じ場合は追加順を維持し、既存Sceneの挙動が急に変わらないようにする。
         std::stable_sort(entries_.begin(), entries_.end(),
             [lateUpdate_](const ComponentUpdateEntry& left_, const ComponentUpdateEntry& right_)
             {
@@ -38,6 +40,7 @@ namespace
 
     void AddGameObjectProfileText(const GameObject& object_)
     {
+        // Tracy詳細Profileが有効な時だけ、Object状態をFrame情報として付ける。
 #if BS_PROFILE_DETAILED_ENABLED
         char profileText_[256]{};
         const int textLength_ = std::snprintf(
@@ -64,6 +67,7 @@ namespace
 
 void GameObject::SetManager(GameObjectManager* manager_)
 {
+    // Managerが変わる時は、CollisionSystemへの登録先も付け替える。
     if (manager == manager_) return;
 
     UnregisterAllColliderComponents();
@@ -104,11 +108,13 @@ void GameObject::RegisterAction(
     const std::string& name_,
     const ActionRegistry::ActionFunc& func_)
 {
+    // Object名付きActionとして登録し、同名Actionが複数Objectで衝突しないようにする。
     localRegistry.RegisterAction(category_, BuildActionName(name_), func_);
 }
 
 std::string GameObject::BuildActionName(const std::string& actionName_) const
 {
+    // 既にObject名Prefixが付いている場合は二重に付けない。
     if (actionName_.empty()) return {};
     const std::string& objectName_ = GetName();
     if (objectName_.empty()) return actionName_;
@@ -132,6 +138,7 @@ std::string GameObject::RegisterGlobalAction(
 
 void GameObject::DrawGizmo(const float* view, const float* projection)
 {
+    // Editor上のTransform操作をImGuizmoで行い、操作結果をWorld行列として反映する。
     ImGuiIO& io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
@@ -187,6 +194,7 @@ void GameObject::CallAllComponentStart()
 {
     BS_PROFILE_SCOPE("GameObject::CallAllComponentStart");
 
+    // Colliderを先にStartして、通常Componentが初回処理で物理情報を参照できるようにする。
     for (auto& collider_ : colliderComponents)
     {
         if (!collider_->IsStarted())
@@ -239,6 +247,7 @@ void GameObject::CallAllComponentStart()
 bool GameObject::IsReadyToStart()
 {
     BS_PROFILE_SCOPE("GameObject::IsReadyToStart");
+    // Scene開始前に、必要なAssetやRuntime準備が終わっているかComponent単位で確認する。
     for (const std::shared_ptr<Component>& collider_ : colliderComponents)
     {
         if (!collider_ || !collider_->IsEnabled()) continue;
@@ -362,6 +371,7 @@ void GameObject::Update(float et)
     {
         BS_PROFILE_SCOPE("GameObject::UpdateComponents");
 
+        // 通常Componentを先に更新し、CharacterMovementとColliderは後段で専用順に回す。
         std::vector<ComponentUpdateEntry> entries_;
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
@@ -394,6 +404,7 @@ void GameObject::Update(float et)
     {
         BS_PROFILE_SCOPE("GameObject::CharacterMovementUpdate");
 
+        // CharacterMovementは入力やAIが速度を決めた後にまとめて反映する。
         std::vector<ComponentUpdateEntry> entries_;
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
@@ -425,6 +436,7 @@ void GameObject::Update(float et)
     {
         BS_PROFILE_SCOPE("GameObject::ColliderUpdate");
 
+        // Collider系は専用リストから更新し、CollisionSystemとの登録状態を保つ。
         std::vector<ComponentUpdateEntry> entries_;
         for (int order_ = 0; order_ < static_cast<int>(colliderComponents.size()); ++order_)
         {
@@ -461,6 +473,7 @@ void GameObject::LateUpdate(float et)
     {
         BS_PROFILE_SCOPE("GameObject::LateUpdateComponents");
 
+        // 通常LateUpdateを先に回し、PhysicsCollisionComponentは後段へ分ける。
         std::vector<ComponentUpdateEntry> entries_;
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
@@ -492,6 +505,7 @@ void GameObject::LateUpdate(float et)
     {
         BS_PROFILE_SCOPE("GameObject::PhysicsLateUpdate");
 
+        // PhysicsCollisionComponentはTransform更新後の状態でLateUpdateする。
         std::vector<ComponentUpdateEntry> entries_;
         for (int order_ = 0; order_ < static_cast<int>(components.size()); ++order_)
         {
@@ -527,6 +541,7 @@ void GameObject::ExecuteAction(
     const std::string& actionName_,
     std::shared_ptr<GameObject> target_)
 {
+    // 対象Object、親、子、Globalの順でActionを探し、Animation通知を適切なObjectへ届ける。
     const std::shared_ptr<GameObject> startObject_ =
         target_ ? target_ : shared_from_this();
     if (!startObject_ || actionName_.empty()) return;
@@ -581,6 +596,7 @@ void GameObject::ExecuteAction(
 
 void GameObject::Clear()
 {
+    // Scene再読み込み前にComponentとCollider登録を外し、Transformを初期状態へ戻す。
     UnregisterAllColliderComponents();
     // 1. 各コンポーネントの参照を外す前に、必要なら終了処理を呼ぶ
     // (コンポーネント側に終了用関数があればここで呼ぶ)
@@ -608,6 +624,7 @@ void GameObject::TransformGui()
 
 void GameObject::Gui()
 {
+    // Inspector用UI。Object名、Layer、Transform、Component追加/削除をここで操作する。
     // --- 名前編集 UI ---
     if (nameComponent)
     {
@@ -851,6 +868,7 @@ void GameObject::Gui()
 
 nlohmann::json GameObject::Save() const
 {
+    // Object基本情報、Transform、通常Component、ColliderComponentをJSONへまとめる。
     nlohmann::json j;
 
     // 1. 基本情報の保存
@@ -920,6 +938,7 @@ void GameObject::Load(const nlohmann::json& j)
 {
     BS_PROFILE_SCOPE("GameObject::Load");
 
+    // JSONからObject基本情報とComponent構成を復元する。
     // 1. 基本情報の復元
     nameComponent->name = j.value("Name", "GameObject");
     layer = static_cast<LayerType>(j.value("Layer", 0));

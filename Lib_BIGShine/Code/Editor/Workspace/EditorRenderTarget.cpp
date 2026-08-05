@@ -6,6 +6,7 @@
 
 bool EditorRenderTarget::Initialize(ID3D11Device* device_, int width_, int height_)
 {
+    // Editor Preview用RenderTargetは0サイズにならないよう補正してから、Color/Normal/Depthを作り直す。
     width = (std::max)(1, width_);
     height = (std::max)(1, height_);
     Reset();
@@ -13,11 +14,11 @@ bool EditorRenderTarget::Initialize(ID3D11Device* device_, int width_, int heigh
     return CreateColorTarget(device_) && CreateNormalTarget(device_) && CreateDepthTarget(device_);
 }
 
-
 bool EditorRenderTarget::Resize(ID3D11Device* device_, int width_, int height_)
 {
     const int newWidth = (std::max)(1, width_);
     const int newHeight = (std::max)(1, height_);
+    // 既に同じサイズで有効な場合はGPUリソースを作り直さず、そのまま使う。
     if (IsValid() && width == newWidth && height == newHeight)
     {
         return true;
@@ -29,15 +30,16 @@ void EditorRenderTarget::Begin(ID3D11DeviceContext* context_, const float clearC
 {
     if (!context_ || !IsValid()) return;
 
+    // 直前フレームでSRVとして読まれていた可能性があるため、描画先にする前にPSスロットから外す。
     ID3D11ShaderResourceView* nullSrv_ = nullptr;
     context_->PSSetShaderResources(0, 1, &nullSrv_);
 
     context_->ClearRenderTargetView(renderTargetView.Get(), clearColor_);
-    context_->ClearRenderTargetView(normalRenderTargetView.Get(), clearColor_); // ★ノーマルもクリア
+    context_->ClearRenderTargetView(normalRenderTargetView.Get(), clearColor_); // Normal Bufferも同じタイミングでクリアする。
 
     context_->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    // ★ MRTで2枚セット
+    // MRTでColorとNormalの2枚を同時に出力できるようにする。
     ID3D11RenderTargetView* rtvs_[] = {
         renderTargetView.Get(),
         normalRenderTargetView.Get()
@@ -56,6 +58,7 @@ void EditorRenderTarget::End(ID3D11DeviceContext* context_)
 {
     if (!context_) return;
 
+    // 次の描画PassがEditor用RTVを誤って使い続けないよう、描画先を解除する。
     ID3D11RenderTargetView* nullRtv_ = nullptr;
     context_->OMSetRenderTargets(1, &nullRtv_, nullptr);
 }
@@ -63,12 +66,14 @@ void EditorRenderTarget::End(ID3D11DeviceContext* context_)
 bool EditorRenderTarget::CreateNormalTarget(ID3D11Device* device_)
 {
     if (!device_) return false;
+
+    // Preview上で法線確認やDeferred系Debugに使えるよう、HDR相当の精度でNormal Bufferを作成する。
     D3D11_TEXTURE2D_DESC desc_{};
     desc_.Width = static_cast<UINT>(width);
     desc_.Height = static_cast<UINT>(height);
     desc_.MipLevels = 1;
     desc_.ArraySize = 1;
-    desc_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // カラーと同じフォーマット
+    desc_.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // Color Bufferと同じフォーマット。
     desc_.SampleDesc.Count = 1;
     desc_.Usage = D3D11_USAGE_DEFAULT;
     desc_.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -81,6 +86,7 @@ bool EditorRenderTarget::CreateNormalTarget(ID3D11Device* device_)
 
 void EditorRenderTarget::Reset()
 {
+    // ComPtrをResetして参照を解放し、Resize時に古いGPUリソースが残らないようにする。
     colorTexture.Reset();
     renderTargetView.Reset();
     shaderResourceView.Reset();
@@ -96,6 +102,7 @@ bool EditorRenderTarget::CreateColorTarget(ID3D11Device* device_)
 {
     if (!device_) return false;
 
+    // Editor Previewの最終表示に使うColor Buffer。SRVも作り、ImGui::Imageから参照できるようにする。
     D3D11_TEXTURE2D_DESC desc_{};
     desc_.Width = static_cast<UINT>(width);
     desc_.Height = static_cast<UINT>(height);
@@ -117,6 +124,7 @@ bool EditorRenderTarget::CreateDepthTarget(ID3D11Device* device_)
 {
     if (!device_) return false;
 
+    // DepthはDSVとして書き込み、SRVとして深度Debug表示にも使えるTypeless形式で作る。
     D3D11_TEXTURE2D_DESC desc_{};
     desc_.Width = static_cast<UINT>(width);
     desc_.Height = static_cast<UINT>(height);

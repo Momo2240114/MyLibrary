@@ -21,6 +21,7 @@ namespace
 {
     constexpr float EPSILON = 0.00001f;
 
+    // 盾IKでは攻撃位置、腕ボーン、デバッグ線を同じXMFLOAT3で扱うため、局所的なベクトル補助を置く。
     XMFLOAT3 GetTranslation(const XMFLOAT4X4& matrix_)
     {
         return { matrix_._41, matrix_._42, matrix_._43 };
@@ -107,6 +108,7 @@ const std::string& ShieldBlockIKComponent::GetName() const
 
 void ShieldBlockIKComponent::Start()
 {
+    // IKMap側に盾ガード用チェーンを登録しておき、実際のボーン指定はIKMapのGUIで調整できるようにする。
     if (!ResolveDependencies()) return;
 
     const std::shared_ptr<IKMapComponent> ikMap_ = ikMap.lock();
@@ -127,6 +129,7 @@ bool ShieldBlockIKComponent::IsLoadReady() const
 
 bool ShieldBlockIKComponent::ResolveDependencies()
 {
+    // 同じGameObject上のIKMapとモデルを取得し、ロード完了後のLateUpdateで使える状態にする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return false;
 
@@ -140,6 +143,7 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("ShieldBlockIKComponent::LateUpdate");
 
+    // アクティブな攻撃HitBoxを探し、近い攻撃方向へ盾腕を2ボーンIKで向ける。
     if (!enabled || !ResolveDependencies()) return;
 
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
@@ -172,6 +176,7 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
         XMFLOAT3 attackPosition_{};
         const bool hasAttack_ = FindNearestAttack(chain_, animatedPositions_[1], attackPosition_);
 
+        // 攻撃が見つかった時だけ重みを上げ、攻撃が消えたら急に戻らずブレンドして解除する。
         ShieldRuntimeState& state_ = shieldStates[chainIndex_];
         const float desiredWeight_ = hasAttack_ ? 1.0f : 0.0f;
         state_.activeWeight += (desiredWeight_ - state_.activeWeight) * blend_;
@@ -190,6 +195,7 @@ void ShieldBlockIKComponent::LateUpdate(float deltaTime_)
 
 bool ShieldBlockIKComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
+    // rootからtipまで親をたどり、肩/肘/手首の最低3点を持つチェーンとして解決する。
     if (chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
     if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 3;
 
@@ -220,6 +226,7 @@ bool ShieldBlockIKComponent::FindNearestAttack(
     const XMFLOAT3& origin_,
     XMFLOAT3& attackPosition_) const
 {
+    // CollisionStepSystemから現在有効なHitBoxを集め、自分以外で最も近い攻撃中心を盾の向き先にする。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager) return false;
 
@@ -256,6 +263,7 @@ XMFLOAT3 ShieldBlockIKComponent::ClampDirection(
     const XMFLOAT3& from_,
     const XMFLOAT3& to_) const
 {
+    // 攻撃方向をキャラクター基準のyaw/pitch上限内へ収め、腕が無理な方向へねじれないようにする。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform) return Normalize(Subtract(to_, from_));
 
@@ -306,6 +314,7 @@ bool ShieldBlockIKComponent::SolveTwoBone(
     const XMFLOAT3& targetDirection_,
     std::vector<XMFLOAT3>& solvedPositions_) const
 {
+    // 肩から見た防御方向へ手首目標を置き、余弦定理で肘位置を求めて腕の長さを保つ。
     if (animatedPositions_.size() < 3 || solvedPositions_.size() < 3) return false;
 
     const XMFLOAT3 shoulderPosition_ = animatedPositions_[0];
@@ -357,8 +366,7 @@ bool ShieldBlockIKComponent::SolveTwoBone(
     }
     poleVector_ = XMVector3Normalize(poleVector_);
 
-    // Law of cosines: project the elbow along shoulder->wrist, then offset it
-    // perpendicular to that axis so both bone lengths are preserved.
+    // 余弦定理で肩->手首軸上の肘位置を求め、垂直方向へ曲げ高さを足して上下腕の長さを保つ。
     const float projectedLength_ =
         (upperLength_ * upperLength_ - lowerLength_ * lowerLength_ + distance_ * distance_)
         / (2.0f * distance_);
@@ -382,6 +390,7 @@ void ShieldBlockIKComponent::ApplySolvedPose(
     const std::vector<XMFLOAT3>& solvedPositions_,
     float weight_)
 {
+    // 解いた肩/肘/手首の方向に合わせて各ボーンのローカル回転を更新し、現在ポーズへ重み付きで混ぜる。
     const std::shared_ptr<GltfModelCommponennt> model_ = model.lock();
     if (!model_) return;
 
@@ -452,6 +461,7 @@ void ShieldBlockIKComponent::DrawDebugShapes(
     const std::vector<XMFLOAT3>& solvedPositions_,
     const XMFLOAT3& attackPosition_) const
 {
+    // 解決後の腕ラインと攻撃方向を描画し、探索範囲や角度制限の調整をしやすくする。
     (void)chain_;
     if (!showDebugShapes || solvedPositions_.size() < 3) return;
 
@@ -463,6 +473,7 @@ void ShieldBlockIKComponent::DrawDebugShapes(
 
 void ShieldBlockIKComponent::Gui()
 {
+    // 盾IK固有の実行ON/OFFとデバッグ表示だけを持ち、チェーンや角度上限はIKMap側で管理する。
     ImGui::Checkbox("Enabled", &enabled);
     ImGui::Checkbox("Show Debug Shapes", &showDebugShapes);
     if (showDebugShapes)
@@ -475,6 +486,7 @@ void ShieldBlockIKComponent::Gui()
 
 void ShieldBlockIKComponent::Serialize(nlohmann::json& json_) const
 {
+    // このコンポーネント側では実行状態とデバッグ色だけを保存する。
     json_["Enabled"] = enabled;
     json_["ShowDebugShapes"] = showDebugShapes;
     json_["DebugChainColor"] = { debugChainColor.x, debugChainColor.y, debugChainColor.z, debugChainColor.w };
@@ -483,6 +495,7 @@ void ShieldBlockIKComponent::Serialize(nlohmann::json& json_) const
 
 void ShieldBlockIKComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 読み込み時はランタイムのブレンド状態を捨て、現在の攻撃状況から再計算させる。
     enabled = json_.value("Enabled", true);
     showDebugShapes = json_.value("ShowDebugShapes", false);
     if (json_.contains("DebugChainColor"))

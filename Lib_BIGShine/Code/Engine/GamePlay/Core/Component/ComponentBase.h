@@ -25,32 +25,36 @@ class GlTFModel; // 前方宣言
 class Component
 {
 public:
-    bool enabled = true;
+    bool enabled = true; // Component全体の有効/無効。UpdateやGuiの前提判定に使う。
 
     virtual ~Component() = default;
     virtual const std::string& GetName() const = 0;
+    // GameObjectのLifecycleから呼ばれる基本処理。必要なComponentだけoverrideする。
     virtual void Start() {}
     virtual void Update(float deltaTime_) {}
     virtual void LateUpdate(float elapsedTime_) {}
     virtual void Submit(ID3D11DeviceContext* context_) {}
     virtual void Gui() {}
+    // 非同期LoadやRuntime準備が必要なComponent用の状態確認Hook。
     virtual void UpdateLoadState() {}
     virtual bool IsLoadReady() const { return true; }
     virtual bool IsRuntimeReady() const { return true; }
     virtual bool HasRuntimeFailure() const { return false; }
     void DrawGuiProfiled()
     {
+        // ComponentごとのGui負荷をTracyで追えるようにしてからGuiを呼ぶ。
         const std::string profileName_ = "Component GUI::" + GetName();
         BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
         Gui();
     }
 
-    // セーブ用：引数の json オブジェクトに自分の変数を書き込む
+    // Save用: 引数のJSON Objectへ自分の変数を書き込む。
     virtual void Serialize(nlohmann::json& json_) const {}
-    // ロード用：引数の json オブジェクトから自分の変数を読み出す
+    // Load用: 引数のJSON Objectから自分の変数を読み出す。
     virtual void Deserialize(const nlohmann::json& json_) {}
     void DeserializeProfiled(const nlohmann::json& json_)
     {
+        // Load時の重いDeserializeをComponent名単位でProfileする。
         const std::string profileName_ = "Component Deserialize::" + GetName();
         BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
         Deserialize(json_);
@@ -72,7 +76,7 @@ public:
         return gameObject.lock();
     }
 
-    //あたかも自身のメンバであるかのようにマネージャーを返す
+    // Component側から所属ObjectのManagerへ短くアクセスする。
     GameObjectManager& GetManager();
 
 
@@ -89,6 +93,7 @@ public:
     void SetLateUpdatePriority(int priority_) { lateUpdatePriority = priority_; }
     void ResetUpdateTiming()
     {
+        // Editor調整などで変更した更新Timingを標準状態へ戻す。
         updateEnabled = true;
         lateUpdateEnabled = true;
         updatePriority = 0;
@@ -106,9 +111,9 @@ public:
 protected:
     bool isStarted = false;
     bool requiredForSceneStart = false;
-    bool updateEnabled = true;
-    bool lateUpdateEnabled = true;
-    int updatePriority = 0;
-    int lateUpdatePriority = 0;
+    bool updateEnabled = true; // GameObject::Updateで呼ぶかどうか。
+    bool lateUpdateEnabled = true; // GameObject::LateUpdateで呼ぶかどうか。
+    int updatePriority = 0; // 小さい値ほど先にUpdateされる。
+    int lateUpdatePriority = 0; // 小さい値ほど先にLateUpdateされる。
     std::weak_ptr<GameObject> gameObject;
 };

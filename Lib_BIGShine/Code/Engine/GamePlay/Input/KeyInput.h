@@ -7,10 +7,13 @@ class KeyInput
 {
 public:
     //キーが押されているかの検知
+    // 現在フレームでキーが押されている間 true。
     static bool KeyPressed(int key);
     //キー離された時
+    // 前フレームは押されていて、現在フレームで離された瞬間だけ true。
     static bool KeyPressedOut(int key);
     //キー押された時
+    // 前フレームは離されていて、現在フレームで押された瞬間だけ true。
     static bool KeyPressedIn(int key);
 
     //使いかた　KeyPut::KeyPressed(KeyPut::Key::K_A)
@@ -56,6 +59,7 @@ public:
 
 
 private:
+    // KeyPressedIn/Outの差分判定に使う前フレーム状態。
     static std::unordered_map<int, bool> oldState; // 宣言だけ
     // enum Key に定義された全キーを列挙
     static constexpr Key allKeys[] = {

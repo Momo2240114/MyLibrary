@@ -20,6 +20,8 @@ void VFXManager::Initialize(GameObjectManager* gameObjectManager_)
 {
     gameObjectManager = gameObjectManager_;
 
+    // 実行時生成するVFXの参照先を、初回だけディレクトリから集めておく。
+    // ここで遅延ロードにしておくことで、VFXを使わないシーンの初期化負荷を抑える。
     if (!assetCacheLoaded)
     {
         ReloadAssetCache();
@@ -30,6 +32,8 @@ void VFXManager::Update(float deltaTime_)
 {
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
 
+    // VFXManagerが生成した一時オブジェクトだけを寿命管理する。
+    // 各VFXコンポーネントの再生状態ではなく、Spawn時に渡されたlifeTimeで破棄を決める。
     for (ManagedEffect& effect_ : managedEffects)
     {
         effect_.lifeTimer -= safeDeltaTime_;
@@ -62,6 +66,8 @@ void VFXManager::Clear()
 
 void VFXManager::ReloadAssetCache()
 {
+    // エディタや実行時から再読み込みできるように、既存キャッシュを一度完全に捨てる。
+    // 名前リストも同時に作り直し、UI側ではこの配列をそのまま候補として使う。
     particleAssetMap.clear();
     meshVFXAssetMap.clear();
     particleAssetNames.clear();
@@ -129,9 +135,11 @@ std::shared_ptr<GameObject> VFXManager::SpawnParticle(
 {
     if (!gameObjectManager) return nullptr;
 
+    // リクエストは名前指定とパス指定の両方を許可しているため、解決処理は専用関数に集約する。
     const ParticleEffectAsset* asset_ = FindParticleAssetFromRequest(request_);
     if (!asset_) return nullptr;
 
+    // シーン保存対象にしない、実行時専用のGameObjectとして生成する。
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeParticle");
     if (!object_) return nullptr;
@@ -143,6 +151,7 @@ std::shared_ptr<GameObject> VFXManager::SpawnParticle(
         request_.normal,
         request_.normalOffset);
 
+    // ヒット面から少し浮かせたいケースに対応した位置を、Transformへ反映してから再生を始める。
     Vector3 position_(spawnPosition_.x, spawnPosition_.y, spawnPosition_.z);
     object_->transform->SetLocalPosition(position_);
     object_->UpdateTransform();
@@ -161,12 +170,14 @@ std::shared_ptr<GameObject> VFXManager::SpawnParticle(
     bool played_ = false;
     if (!request_.emitterName.empty())
     {
+        // 個別Emitter指定がある場合は、そのEmitterだけを指定位置で発火する。
         played_ = particle_->TriggerEmitterAtPosition(
             request_.emitterName,
             spawnPosition_);
     }
     if (!played_)
     {
+        // Emitter指定が空、または見つからない場合はアセット全体を通常再生する。
         particle_->Play();
     }
 
@@ -179,9 +190,11 @@ std::shared_ptr<GameObject> VFXManager::SpawnMeshVFX(
 {
     if (!gameObjectManager) return nullptr;
 
+    // MeshVFXもParticleと同じく、名前指定とパス指定のどちらからでもアセットを探す。
     const MeshVFXAsset* asset_ = FindMeshVFXAssetFromRequest(request_);
     if (!asset_) return nullptr;
 
+    // 生成したMeshVFXは保存しない一時オブジェクトとして扱う。
     std::shared_ptr<GameObject> object_ =
         gameObjectManager->Create("RuntimeMeshVFX");
     if (!object_) return nullptr;
@@ -217,6 +230,8 @@ void VFXManager::SpawnForHit(const AttackHitEvent& event_)
 {
     if (!event_.hasHitContact) return;
 
+    // 攻撃判定の接触情報から、粒子とメッシュVFXの両方を必要に応じて発生させる。
+    // イベント側に通常化済みの位置・法線・寿命を持たせているため、ここではSpawnRequestへ詰め替えるだけにする。
     if (!event_.hitParticleAssetPath.empty())
     {
         ParticleSpawnRequest request_{};
@@ -248,6 +263,7 @@ void VFXManager::LoadParticleAssetsFromDirectory(
 {
     namespace fs = std::filesystem;
 
+    // Particle直下のjsonだけを効果アセットとして扱い、Emitter部品用のjsonは候補から外す。
     const fs::path rootPath_(rootDirectory_);
     std::error_code error_;
     if (!fs::exists(rootPath_, error_) || !fs::is_directory(rootPath_, error_)) return;
@@ -268,6 +284,7 @@ void VFXManager::LoadParticleAssetsFromDirectory(
             continue;
         }
 
+        // 拡張子なしの相対パスを表示名兼検索キーにする。
         particleAssetMap[assetName_] = asset_;
         particleAssetNames.push_back(assetName_);
     }
@@ -278,6 +295,7 @@ void VFXManager::LoadMeshVFXAssetsFromDirectory(
 {
     namespace fs = std::filesystem;
 
+    // MeshVFXはParts配下に部品jsonがあるため、完成アセットだけをキャッシュ対象にする。
     const fs::path rootPath_(rootDirectory_);
     std::error_code error_;
     if (!fs::exists(rootPath_, error_) || !fs::is_directory(rootPath_, error_)) return;
@@ -309,6 +327,7 @@ std::string VFXManager::BuildAssetName(
 {
     namespace fs = std::filesystem;
 
+    // UI表示や検索で扱いやすいように、ルートからの相対パスかつ拡張子なしに正規化する。
     fs::path relativePath_;
     try
     {
@@ -329,6 +348,8 @@ std::string VFXManager::BuildAssetNameFromRequestPath(
 {
     if (assetPath_.empty()) return {};
 
+    // 外部からはData付きのフルパス、ルート相対パス、拡張子付きなどが混在して来るため、
+    // キャッシュキーと同じ「ルート相対・拡張子なし」の形へ寄せる。
     std::string normalizedPath_ = assetPath_;
     std::replace(
         normalizedPath_.begin(),
@@ -417,6 +438,7 @@ const ParticleEffectAsset* VFXManager::FindParticleAssetFromRequest(
         ReloadAssetCache();
     }
 
+    // まず明示名をそのまま探し、見つからなければパス表記をキャッシュキーへ変換して再検索する。
     if (!request_.assetName.empty())
     {
         if (const ParticleEffectAsset* asset_ = FindParticleAsset(request_.assetName))
@@ -452,6 +474,7 @@ const MeshVFXAsset* VFXManager::FindMeshVFXAssetFromRequest(
         ReloadAssetCache();
     }
 
+    // Particle側と同じ探索順にして、呼び出し側がアセット種別ごとに指定方法を変えなくて済むようにする。
     if (!request_.assetName.empty())
     {
         if (const MeshVFXAsset* asset_ = FindMeshVFXAsset(request_.assetName))
@@ -486,6 +509,7 @@ DirectX::XMFLOAT3 VFXManager::ApplyNormalOffset(
 {
     using namespace DirectX;
 
+    // 法線が無効なヒット情報でもVFXが地面に埋まりにくいよう、上方向を予備の押し出し方向にする。
     XMVECTOR positionVector_ = XMLoadFloat3(&position_);
     XMVECTOR normalVector_ = XMLoadFloat3(&normal_);
     if (XMVectorGetX(XMVector3LengthSq(normalVector_)) <= 0.000001f)
@@ -508,6 +532,7 @@ void VFXManager::RegisterManagedEffect(
 {
     if (!object_) return;
 
+    // lifeTime未指定時でも即破棄にならないよう、最低限の表示時間を持たせて管理リストへ登録する。
     ManagedEffect managedEffect_{};
     managedEffect_.object = object_;
     managedEffect_.lifeTimer = (std::max)(lifeTime_, 0.0f);

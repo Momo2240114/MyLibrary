@@ -15,6 +15,7 @@ void SceneLoading::Initialize()
 	SceneBase::Initialize();
 
 	if (_GameObjectManager) {
+		// LoadingSceneだけは軽量に見せたいので、Shape Debugを切ってロード画面を読み込む。
 		_GameObjectManager->SetShapeRenderEnabled(false);
 		_GameObjectManager->LoadScene("LoadingScene");
 	}
@@ -23,6 +24,7 @@ void SceneLoading::Initialize()
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());
 
 	//スレッド開始
+	// nextSceneのInitializeは重いので、LoadingSceneを表示しながら別スレッドで進める。
 	thread = std::make_unique<std::thread>(LoadingThread, this);
 }
 
@@ -32,6 +34,7 @@ void SceneLoading::Finalize()
 
 
 	if (thread && thread->joinable()) {
+		// 次シーン初期化中にSceneLoadingが破棄されても、スレッド終了を待って安全に閉じる。
 		thread->join(); // スレッドの終了を待機
 	}
 }
@@ -47,6 +50,7 @@ void SceneLoading::Update(float elapsedTime)
 
 	if (nextScene && nextScene->IsReady())
 	{
+		// 初期化済みのSceneをそのまま渡すため、ChangeScene側で再Initializeしない。
 		auto tempScene = std::move(nextScene);
 		SceneManager::ChangeScene(std::move(tempScene), false);
 		return;
@@ -66,9 +70,11 @@ void SceneLoading::DrawGUI()
 void SceneLoading::LoadingThread(SceneLoading* scene)
 {
 	//COM関連の初期化でスレッド毎に呼び必要がある
+	// WICなどCOMを使うリソース読み込みがあるため、ロードスレッド側でも初期化する。
 	CoInitialize(nullptr);
 
 	//次のシーンの初期化を行う
+	// ここでモデルやSceneObjectを作り、完了後にReadyフラグを立てる。
 	scene->nextScene->Initialize();
 
 	//スレッドが終わる前にCOM関連の終了化

@@ -14,22 +14,29 @@ class VFXMaterialResource;
 // MeshVFX blend mode.
 enum class MeshVFXBlendMode
 {
+    // 通常半透明描画。色とアルファを見た目通り重ねる。
     ALPHA,
+    // 加算合成。炎や発光のように明るさを足したいパーツで使う。
     ADDITIVE,
 };
 
 // How additional mask textures are combined.
 enum class MeshVFXMaskBlendMode
 {
+    // 既存マスクへ掛け合わせ、重なった部分だけを残す。
     MULTIPLY,
+    // 複数マスクを合成し、どれかが有効な領域を残す。
     UNION,
 };
 
 // Texture source for edge highlight patterns.
 enum class MESH_VFX_EDGE_PATTERN_MODE
 {
+    // エッジパターンを使わず、色や強度だけで輪郭を作る。
     NONE,
+    // ベーステクスチャを輪郭パターンとして再利用する。
     BASE_TEXTURE,
+    // マスクテクスチャを輪郭パターンとして使う。
     MASK_TEXTURE,
 };
 
@@ -62,6 +69,7 @@ enum class TRAIL_PARTICLE_EMISSION_MODE
 // One mask texture layer.
 struct MeshVFXMaskLayer
 {
+    // 複数マスクを重ねる時の1レイヤー分の設定。
     std::string path;
     MeshVFXMaskBlendMode blendMode = MeshVFXMaskBlendMode::MULTIPLY;
     bool invert = false;
@@ -70,8 +78,10 @@ struct MeshVFXMaskLayer
 // Parameters for built-in generated meshes.
 struct MeshVFXInternalMeshSettings
 {
+    // 内蔵生成メッシュの分割数。円弧や円錐の滑らかさに影響する。
     int segments = 96;
 
+    // 円弧・壁・ビームなど、MeshVFXComponent側で生成する形状の細かい寸法設定。
     float startAngleDegrees = -78.0f;
     float endAngleDegrees = 78.0f;
     float taperPower = 2.0f;
@@ -100,6 +110,7 @@ struct MeshVFXInternalMeshSettings
 
 struct MeshVFXPart
 {
+    // 1つのVFXを構成する描画パーツ。モデル、材質、テクスチャ、時間変化をここへ集約する。
     std::string partAssetPath;
     std::string materialPath;
     std::vector<std::string> materialPaths;
@@ -110,6 +121,7 @@ struct MeshVFXPart
     bool useMaterialNormalTexture = true;
 
     DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
+    // モデルパーツ自体のローカルTransform。OwnerのTransformとはRenderSystem側で合成される。
     DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 scale = { 1.0f, 1.0f, 1.0f };
     float shapeCylinderRadius = 1.0f;
@@ -117,6 +129,7 @@ struct MeshVFXPart
     DirectX::XMFLOAT3 meshRotationSpeed = { 0.0f, 0.0f, 0.0f };
 
     float duration = 0.0f;
+    // durationがある場合はパーツ単位の寿命として扱い、loop=falseなら寿命後は描画しない。
     bool loop = true;
     bool animateScale = false;
     DirectX::XMFLOAT3 scaleStart = { 1.0f, 1.0f, 1.0f };
@@ -126,6 +139,7 @@ struct MeshVFXPart
     float alphaEnd = 1.0f;
 
     std::string baseTexturePath;
+    // テクスチャは役割ごとに分け、シェーダ側でマスク・ノイズ・歪み・輪郭へ使い分ける。
     std::string normalTexturePath;
     std::string maskTexturePath;
     std::string noiseTexturePath;
@@ -138,6 +152,7 @@ struct MeshVFXPart
     std::vector<std::string> noiseTexturePaths;
 
     DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    // UV速度とスケールはテクスチャ種別ごとに持ち、炎や衝撃波の流れを個別に制御する。
     DirectX::XMFLOAT2 baseUVSpeed = { 0.0f, -0.5f };
     DirectX::XMFLOAT2 maskUVSpeed = { 0.0f, -0.2f };
     DirectX::XMFLOAT2 noiseUVSpeed = { 0.2f, -0.8f };
@@ -167,6 +182,7 @@ struct MeshVFXPart
     float uvRadialScaleSpeed = 0.0f;
 
     float alpha = 1.0f;
+    // 発光、法線、ノイズ、フレネル、ディゾルブなどの見た目の強度パラメータ。
     float emissiveStrength = 3.0f;
     float emissivePulseSpeed = 2.0f;
     float emissivePulseAmount = 0.35f;
@@ -195,6 +211,7 @@ struct MeshVFXPart
     DirectX::XMFLOAT3 gradientRegisterPadding{};
 
     DirectX::XMFLOAT4 trailOldRootColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    // Trail用の古い点/新しい点の色設定。軌跡の先端と根元で見た目を分ける。
     DirectX::XMFLOAT4 trailOldTipColor = { 1.0f, 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT4 trailNewRootColor = { 1.0f, 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT4 trailNewTipColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -213,6 +230,7 @@ struct MeshVFXPart
     float fresnelNoiseStrength = 0.0f;
     float backFaceEmissiveStrength = 0.0f;
     std::string alphaCurveName;
+    // CurveComponentで評価する名前。時間に応じた透明度・スケール・ディゾルブなどを外部カーブで変化させる。
     std::string scaleCurveName;
     std::string dissolveCurveName;
     std::string emissiveCurveName;
@@ -220,6 +238,7 @@ struct MeshVFXPart
     std::string uvRotationCurveName;
 
     bool useMask = false;
+    // 各機能の使用フラグ。無効なものはシェーダ側で軽い経路に寄せる。
     bool useNoise = false;
     bool useVertexNoise = false;
     bool useMaskDistortion = false;
@@ -239,6 +258,7 @@ struct MeshVFXPart
 // Runtime cache generated from MeshVFXPart data.
 struct MeshVFXRuntimePart
 {
+    // MeshVFXPartのパス指定から実際に読み込んだGPUリソースを保持するランタイムキャッシュ。
     std::shared_ptr<ModelResource> modelResource;
     std::shared_ptr<VFXMaterialResource> materialResource;
     std::vector<std::shared_ptr<VFXMaterialResource>> materialResources;

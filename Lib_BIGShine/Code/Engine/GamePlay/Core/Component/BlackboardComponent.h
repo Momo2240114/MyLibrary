@@ -13,6 +13,8 @@ using BlackBoardValue = std::variant<float, int, bool,
     std::string>;
 using BlackboardCategory = std::unordered_map<std::string, BlackBoardValue>;
 
+// Category/Key形式でGame状態やAnimation条件を共有するComponent。
+// 型はvariantで保持し、AI、Player、Animationなどが同じ仕組みで値を読み書きできる。
 class BlackboardComponent : public Component
 {
 public:
@@ -31,6 +33,7 @@ public:
     void SetString(const std::string& category_, const std::string& key_, const std::string& value_);
     void SetTrigger(const std::string& category_, const std::string& key_);
 
+    // 値が存在するかを確認し、型付きGetでは取得できた時だけtrueを返す。
     bool HasValue(const std::string& category_, const std::string& key_) const;
     const BlackBoardValue* GetValue(const std::string& category_, const std::string& key_) const;
     BlackBoardValue* GetValue(const std::string& category_, const std::string& key_);
@@ -51,6 +54,7 @@ public:
     BlackboardCategory& GetOrCreateCategory(const std::string& category_);
     const std::unordered_map<std::string, BlackboardCategory>& GetBoard() const { return board; }
 
+    // BoolやVectorも条件判定へ使えるよう、必要に応じてfloatへ変換する。
     static float ToFloat(const BlackBoardValue& value_);
 
 private:

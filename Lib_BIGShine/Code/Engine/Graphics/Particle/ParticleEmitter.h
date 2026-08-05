@@ -18,12 +18,22 @@ public:
 
     ParticleEmitter(ID3D11Device* device, const ParticleSystemConstants& initialSettings, int maxParticles = 1000);
 
+    // 発生、寿命更新、GPU側の生存数更新を1フレーム分進める。
     void Update(ID3D11DeviceContext* context, float dt);
+
+    // PrepareRenderで整えたバッファを使い、Particleを実際に描画する。
     void Render(ID3D11DeviceContext* context);
+
+    // 深度ソートや間接描画引数の準備など、描画直前に必要なGPU処理を行う。
     void PrepareRender(ID3D11DeviceContext* context);
 
+    // GUIやAsset読み込みで変更された設定を、次フレーム以降のEmitterへ反映する。
     void ApplySettings(const ParticleSystemConstants& nextSettings);
+
+    // 生存Particleや発生カウンタを初期化し、再生開始状態へ戻す。
     void ResetRuntime();
+
+    // 初期化済みGPUリソースが揃っているかを確認する。
     bool HasGPUResources() const;
     void SetEmissionEnabled(bool enabled_) { emissionEnabled = enabled_; }
     void SetDepthSortEnabled(bool enabled_) { depthSortEnabled = enabled_; }
@@ -46,8 +56,13 @@ public:
     ID3D11Buffer* GetConstantBuffer() const { return emitterConstantBuffer.Get(); }
     UINT GetMaxParticles() const { return numParticles; }
 
+    // 全Emitterで共有するCS/VS/GS/PSを初期化する。
     static void InitializeSharedShaders(ID3D11Device* device);
+
+    // Scene終了時に共有Shaderをまとめて解放する。
     static void ShutdownSharedShaders();
+
+    // Particle描画用の共有VS/GS/PSをDeviceContextへ設定する。
     static void BindSharedRenderShaders(ID3D11DeviceContext* context);
 
 private:
@@ -83,18 +98,30 @@ private:
     static constexpr UINT NumCurrentParticleOffset = 0;
     static constexpr UINT NumPreviousParticleOffset = NumCurrentParticleOffset + sizeof(UINT);
     static constexpr UINT NumDeadParticleOffset = NumPreviousParticleOffset + sizeof(UINT);
+
+    // indirectDataBuffer内の各引数配置。CSがここへ書き、Dispatch/DrawIndirectが読む。
     static constexpr UINT EmitDispatchIndirectOffset = NumDeadParticleOffset + sizeof(UINT);
     static constexpr UINT UpdateDispatchIndirectOffset = EmitDispatchIndirectOffset + sizeof(dispatch_indirect);
     static constexpr UINT NumEmitParticleIndexOffset = UpdateDispatchIndirectOffset + sizeof(dispatch_indirect);
     static constexpr UINT DrawIndirectOffset = NumEmitParticleIndexOffset + sizeof(UINT);
     static constexpr UINT DrawIndirectSize = DrawIndirectOffset + sizeof(DrawIndirect);
 
+    // Particle本体、Header、Indirect引数などEmitter固有のGPUバッファを作る。
     void CreateGPUResources(ID3D11Device* device);
+
+    // CPU側で作った1Particle分の発生データを今フレームのEmitリストへ積む。
     void Emit(const EmitParticleData& data);
+
+    // settingsの発生モードに従って、今フレーム生成するParticle一覧を作る。
     void BuildEmitList(float dt);
+
+    // seedからランダム値を作り、速度・寿命・色などを初期化したEmitParticleDataを返す。
     EmitParticleData MakeEmitData(UINT seed) const;
+
+    // ParticleHeaderのdepthを使って、GPU上で半透明描画用の順番に並べる。
     void RunBitonicSort(ID3D11DeviceContext* context);
 
+    // Compute Shaderで扱いやすいよう、Particle数を内部都合のよい値へ丸める。
     static UINT RoundParticleCount(UINT count);
     static float Random01(UINT seed);
     static float Lerp(float a, float b, float t);

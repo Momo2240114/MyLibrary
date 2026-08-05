@@ -5,6 +5,7 @@
 
 void CylinderCollider::Gui()
 {
+    // 円柱形状をEditorで調整し、変更時はPhysX Actorを作り直す。
     ColliderComponent::Gui();
 
     bool changed_ = false;
@@ -19,6 +20,7 @@ void CylinderCollider::Update(float dt_)
     (void)dt_;
     if (!shapeRenderEnabled) return;
 
+    // Debug表示用に、ObjectのWorld ScaleとOffsetを反映した円柱を描画する。
     auto owner_ = GetGameObject();
     if (!owner_) return;
 

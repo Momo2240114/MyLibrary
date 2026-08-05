@@ -12,6 +12,7 @@ class UIVertexModifierComponent;
 
 enum class UI_ANIMATION_PROPERTY
 {
+    // UIWidgetComponentのアンカー座標。
     ANCHORED_POSITION_X,
     ANCHORED_POSITION_Y,
     SIZE_X,
@@ -23,6 +24,8 @@ enum class UI_ANIMATION_PROPERTY
     COLOR_G,
     COLOR_B,
     COLOR_A,
+
+    // UIVertexModifierComponentの頂点別位置補正。
     VERTEX_LEFT_TOP_POSITION_X,
     VERTEX_LEFT_TOP_POSITION_Y,
     VERTEX_RIGHT_TOP_POSITION_X,
@@ -47,20 +50,32 @@ enum class UI_ANIMATION_PROPERTY
     VERTEX_RIGHT_BOTTOM_COLOR_G,
     VERTEX_RIGHT_BOTTOM_COLOR_B,
     VERTEX_RIGHT_BOTTOM_COLOR_A,
+
+    // Widgetの表示/非表示を切り替える。
     VISIBLE
 };
 
 enum class UI_ANIMATION_VALUE_MODE
 {
+    // Keyframe値をそのまま適用する。
     VALUE_ABSOLUTE,
+
+    // 再生開始時の値を基準に相対値として適用する。
     VALUE_RELATIVE_TO_INITIAL,
+
+    // 現在値へ加算する。
     VALUE_ADDITIVE
 };
 
 enum class UI_ANIMATION_STOP_MODE
 {
+    // Stop時点の値を保持する。
     KEEP_CURRENT,
+
+    // 再生開始時の値へ戻す。
     RESTORE_INITIAL,
+
+    // 最終Keyframeの値へ移動する。
     MOVE_TO_END
 };
 
@@ -75,20 +90,30 @@ enum class UI_ANIMATION_EASING
 
 struct UIAnimationKeyframe
 {
+    // アニメーション内の秒数。
     float time = 0.0f;
+
+    // 対象Propertyへ適用する値。
     float value = 0.0f;
     UI_ANIMATION_EASING easingType = UI_ANIMATION_EASING::LINEAR;
 };
 
 struct UIAnimationTrack
 {
+    // Editor表示用のTrack名。
     std::string trackName;
+
+    // 対象WidgetのID。ResolveTrackTargetsで参照へ変換する。
     std::string targetWidgetId;
     UI_ANIMATION_PROPERTY property = UI_ANIMATION_PROPERTY::ANCHORED_POSITION_X;
     UI_ANIMATION_VALUE_MODE valueMode = UI_ANIMATION_VALUE_MODE::VALUE_ABSOLUTE;
     bool enabled = true;
     std::vector<UIAnimationKeyframe> keyframes;
+
+    // VALUE_RELATIVE_TO_INITIALやRESTORE_INITIALで使う再生開始時の値。
     float initialValue = 0.0f;
+
+    // 対象Component参照。Propertyに応じて必要なものだけ使う。
     std::weak_ptr<UIWidgetComponent> targetWidget;
     std::weak_ptr<SpriteRenderer> targetSprite;
     std::weak_ptr<UIVertexModifierComponent> targetVertexModifier;
@@ -110,21 +135,33 @@ public:
     }
 
     bool LoadAnimation(const std::string& assetPath_);
+
+    // restart_がtrueなら先頭から、falseなら現在時刻から再生する。
     void Play(bool restart_ = true, float playbackSpeed_ = -1.0f);
     void Stop(UI_ANIMATION_STOP_MODE stopMode_);
     void Pause();
     void Resume();
+
+    // TimelineやEditorから任意時刻へ移動する。
     void Seek(float time_);
 
 private:
+    // ActionSequenceからPlay/Stop/Pauseなどを呼べるよう登録する。
     void RegisterActions();
+
+    // targetWidgetIdからUIWidget/Sprite/VertexModifierを探してTrackへ保持する。
     void ResolveTrackTargets();
+
+    // 再生開始時の各Property値をTrack.initialValueへ保存する。
     void CaptureInitialValues();
+
+    // 現在時刻におけるTrack値をKeyframe補間で求める。
     float EvaluateTrack(const UIAnimationTrack& track_) const;
     float ApplyValueMode(const UIAnimationTrack& track_, float sampledValue_) const;
     void ApplyTrackValue(const UIAnimationTrack& track_, float value_);
     bool TryGetCurrentValue(const UIAnimationTrack& track_, float& value_) const;
 
+    // 読み込んだAnimation名とAssetパス。
     std::string animationName = "UIAnimation";
     std::string animationAssetPath = "Data/UI/Animations/";
     std::string actionPrefix;
@@ -136,5 +173,7 @@ private:
     bool paused = false;
     bool registerGlobalActions = true;
     UI_ANIMATION_STOP_MODE stopMode = UI_ANIMATION_STOP_MODE::KEEP_CURRENT;
+
+    // 複数Propertyを同じ時間軸で再生するTrack群。
     std::vector<UIAnimationTrack> tracks;
 };

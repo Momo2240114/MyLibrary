@@ -16,30 +16,37 @@ struct RenderContext;
 class MeshVFXShader
 {
 public:
+    // MeshVFX 用の VS/PS、InputLayout、ConstantBuffer を作成する。
     bool Initialize(ID3D11Device* device_);
 
+    // 通常描画パスを開始し、SceneColor/Depth も必要なら ShaderResource として束ねる。
     void Begin(
         const RenderContext& renderContext_,
         ID3D11ShaderResourceView* sceneColor_,
         ID3D11ShaderResourceView* sceneDepth_,
-        bool useMaterialOverlay_,
-        bool useInstancedPose_ = false);
+            bool useMaterialOverlay_,
+            bool useInstancedPose_ = false);
 
+    // 背景歪みだけを書き出すパスを開始する。
     void BeginDistortion(
         const RenderContext& renderContext_,
-        bool useMaterialOverlay_,
-        bool useInstancedPose_ = false);
+            bool useMaterialOverlay_,
+            bool useInstancedPose_ = false);
 
+    // GltfModel のボーン行列を Skinning 用 ConstantBuffer へ送る。
     void UpdateSkeleton(
         const RenderContext& renderContext_,
-        const GltfModelCommponennt::Mesh& mesh_);
+            const GltfModelCommponennt::Mesh& mesh_);
 
+    // Afterimage など、外部で作った姿勢行列列を直接 Skinning へ渡す。
     void UpdateSkeleton(
         const RenderContext& renderContext_,
-        const std::vector<DirectX::XMFLOAT4X4>& transforms_);
+            const std::vector<DirectX::XMFLOAT4X4>& transforms_);
 
+    // カメラ、ライト、深度復元用行列など Scene 共通情報を更新する。
     void UpdateScene(const RenderContext& renderContext_);
 
+    // 1 つの MeshVFXPart を描く直前に、Material と Runtime 値を HLSL 用定数へ詰める。
     void UpdatePart(
         const RenderContext& renderContext_,
         const MeshVFXPart& part_,
@@ -50,8 +57,9 @@ public:
         ID3D11ShaderResourceView* noiseTexture_,
         const DirectX::XMMATRIX& world_,
         float partTime_,
-        float alpha_);
+            float alpha_);
 
+    // SRV や Shader 状態を外し、後続パスとの D3D11 リソース競合を避ける。
     void End(const RenderContext& renderContext_);
 
 private:
@@ -200,6 +208,7 @@ private:
     static_assert(sizeof(CbMeshVFX) % 16 == 0, "CbMeshVFX size must be aligned to 16 bytes.");
 
 private:
+    // MeshVFX の描画モードごとに使い分ける Shader 群。
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;                  // 通常MeshVFX用VS
     Microsoft::WRL::ComPtr<ID3D11VertexShader> materialOverlayVertexShader;   // MaterialOverlay用VS
     Microsoft::WRL::ComPtr<ID3D11VertexShader> afterimageInstancedVertexShader; // Afterimage Instancing用VS
@@ -207,8 +216,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;            // 通常MeshVFX用PS
     Microsoft::WRL::ComPtr<ID3D11PixelShader> distortionPixelShader;  // 背景歪み用PS
 
+    // GLTF の頂点レイアウトと MeshVFXShader の入力を対応させる。
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout; // GltfModel頂点形式用InputLayout
 
+    // Scene、Part、Skinning の更新頻度別に分けた ConstantBuffer。
     Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;    // Scene用CB
     Microsoft::WRL::ComPtr<ID3D11Buffer> partConstantBuffer;     // Part用CB
     Microsoft::WRL::ComPtr<ID3D11Buffer> skeletonConstantBuffer; // Skinning用Bone行列CB

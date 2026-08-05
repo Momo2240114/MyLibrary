@@ -6,6 +6,7 @@
 
 CharacterCollider::CharacterCollider()
 {
+    // Character用Colliderは生成時点でRoleとPhysics挙動を固定する。
     EnforceCharacterSettings();
     mass = 1.0f;
     debugPrimitiveColor = { 0.2f, 0.6f, 1.0f, 1.0f };
@@ -19,6 +20,7 @@ const std::string& CharacterCollider::GetName() const
 
 void CharacterCollider::Gui()
 {
+    // CharacterController特有の接地/段差/滑り設定を調整する。
     CapsuleCollider::Gui();
 
     ImGui::SeparatorText("Character Grounding");
@@ -46,6 +48,7 @@ void CharacterCollider::Gui()
 
 void CharacterCollider::Serialize(nlohmann::json& json_) const
 {
+    // Capsule共通設定に加えて、Character移動用の接地設定を保存する。
     CapsuleCollider::Serialize(json_);
     json_["StepOffset"] = stepOffset;
     json_["ContactOffset"] = contactOffset;
@@ -59,6 +62,7 @@ void CharacterCollider::Serialize(nlohmann::json& json_) const
 
 void CharacterCollider::Deserialize(const nlohmann::json& j_)
 {
+    // 保存値を復元し、負値になって困る項目は安全な範囲へ丸める。
     CapsuleCollider::Deserialize(j_);
     stepOffset = (std::max)(j_.value("StepOffset", 0.5f), 0.0f);
     contactOffset = (std::max)(j_.value("ContactOffset", 0.02f), 0.001f);
@@ -73,6 +77,7 @@ void CharacterCollider::Deserialize(const nlohmann::json& j_)
 
 void CharacterCollider::EnforceCharacterSettings()
 {
+    // CharacterColliderはTriggerではなく、TransformをPhysics側から動かすColliderとして固定する。
     collisionRole = CollisionRole::CHARACTER;
     usePhysicsResponse = true;
     physicsControlsTransform = true;

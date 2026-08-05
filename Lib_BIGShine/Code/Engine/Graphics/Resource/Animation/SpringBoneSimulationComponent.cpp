@@ -16,13 +16,14 @@
 
 using namespace DirectX;
 
-//--- テスト用 Static 風パラメータ-- -
+//--- テスト用 Static 風パラメータ ---
 DirectX::XMFLOAT3 SpringBoneSimulationComponent::windDirection = { 1.0f, 0.0f, 0.0f };
 float             SpringBoneSimulationComponent::windStrength = 0.0f;
 bool              SpringBoneSimulationComponent::windEnabled = false;
 
 namespace
 {
+    // スプリング/クロスの点列計算、制約解決、デバッグ描画で使うファイル内ヘルパー。
     XMFLOAT3 GetTranslation(const XMFLOAT4X4& matrix_)
     {
         return { matrix_._41, matrix_._42, matrix_._43 };
@@ -95,6 +96,7 @@ namespace
 
     float GetStiffnessScale(const IKMapComponent::IKChain& chain_, size_t pointIndex_)
     {
+        // 根元側はアニメーション追従を強く、先端側はtipStiffnessScaleで揺れを残す。
         if (chain_.simulatedPositions.size() <= 1) return 1.0f;
 
         const float normalizedPosition_ = static_cast<float>(pointIndex_)
@@ -119,6 +121,7 @@ namespace
 
     float GetMiddleFlexWeight(float normalizedPoint_)
     {
+        // 髪束の中央付近だけ少し柔らかくするため、0.5付近で最大になる重みを返す。
         const float centeredPoint_ = std::abs(normalizedPoint_ - 0.5f) * 2.0f;
         return 1.0f - SmoothStep(centeredPoint_);
     }
@@ -134,6 +137,7 @@ namespace
         std::vector<XMFLOAT3>& positions_, size_t indexA_, size_t indexB_,
         float targetLength_, float stiffness_)
     {
+        // 点同士の距離を元のボーン長へ戻し、髪や布が伸び縮みしすぎないようにする。
         XMFLOAT3 difference_ = Subtract(positions_[indexB_], positions_[indexA_]);
         const float distance_ = Length(difference_);
         if (distance_ <= 0.00001f) return;
@@ -161,6 +165,7 @@ const std::string& SpringBoneSimulationComponent::GetName() const
 
 void SpringBoneSimulationComponent::Start()
 {
+    // IKMapとモデルを解決し、前回のシミュレーション履歴が残らないよう開始時にリセットする。
     ResolveDependencies();
     ResetSimulation();
 }
@@ -177,6 +182,7 @@ bool SpringBoneSimulationComponent::IsLoadReady() const
 
 bool SpringBoneSimulationComponent::ResolveDependencies()
 {
+    // IKMapに定義されたチェーンを、このコンポーネントが毎フレーム解くための参照を取得する。
     auto owner_ = GetGameObject();
     if (!owner_) return false;
 
@@ -196,6 +202,7 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("SpringBoneSimulationComponent::LateUpdate");
 
+    // アニメーション姿勢が更新された後に、Spring BoneとCloth Boneを解いてモデル姿勢へ反映する。
     if (!ResolveDependencies()) return;
     if (model) model->UpdateLoadState();
     if (!model || !model->IsModelReady()) return;
@@ -210,6 +217,7 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
             if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::SPRING_BONE) continue;
             if (!ResolveChain(chain_)) continue;
 
+            // 通常の髪/尻尾チェーンは、点列シミュレーション後すぐにボーン回転へ戻す。
             {
                 BS_PROFILE_SCOPE("SpringBone::SimulateSpringChain");
                 SimulateSpringChain(chain_, safeDeltaTime_);
@@ -232,6 +240,7 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
             if (!chain_.enabled || chain_.type != IKMapComponent::IK_TYPE::CLOTH_BONE) continue;
             if (!ResolveChain(chain_)) continue;
 
+            // Cloth Boneは複数チェーン間の横/斜め制約を後でまとめて解くため、ここでは点列だけ先に更新する。
             SimulateSpringChain(chain_, safeDeltaTime_);
             hasClothChains_ = true;
         }
@@ -265,6 +274,7 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
     {
         BS_PROFILE_SCOPE("SpringBone::WarmupReset");
 
+        // IKMap側でパラメータやコライダーが変わったら、現在姿勢からシミュレーションを作り直す。
         for (auto& chain_ : ikMap->GetChains())
         {
             chain_.initialized = false;
@@ -277,6 +287,7 @@ void SpringBoneSimulationComponent::LateUpdate(float deltaTime_)
 
 bool SpringBoneSimulationComponent::ResolveChain(IKMapComponent::IKChain& chain_)
 {
+    // root/tip名を親方向へたどり、解決対象のボーンindex列をキャッシュする。
     if (!model || chain_.rootNodeName.empty() || chain_.tipNodeName.empty()) return false;
     if (!chain_.nodeIndices.empty()) return chain_.nodeIndices.size() >= 2;
 
@@ -302,11 +313,13 @@ bool SpringBoneSimulationComponent::ResolveChain(IKMapComponent::IKChain& chain_
 
 void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain& chain_, float deltaTime_)
 {
+    // 1本のSpring/ClothチェーンをVerlet風に更新し、距離制約と衝突で破綻を抑える。
     const auto& nodes_ = model->GetNodes();
     if (!chain_.initialized
         || chain_.simulatedPositions.size() != chain_.nodeIndices.size()
         || chain_.segmentLengths.size() + 1 != chain_.nodeIndices.size())
     {
+        // 初期化時は現在ボーン位置から点列を作り、隣接距離と曲げ距離を以後の制約基準として保存する。
         chain_.simulatedPositions.clear();
         chain_.previousPositions.clear();
         chain_.segmentLengths.clear();
@@ -337,6 +350,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
 
         if (chain_.collideWithBodyColliders)
         {
+            // 開始直後に体へめり込まないよう、数回だけ衝突と距離制約を先に回す。
             const int warmupCount_ = std::clamp(chain_.startCollisionWarmup, 0, 16);
 
             for (int warmupIndex_ = 0; warmupIndex_ < warmupCount_; ++warmupIndex_)
@@ -384,6 +398,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
     const float teleportDistance_ = (std::max)(0.5f, chainLength_ * 1.5f);
     if (Length(rootTranslation_) > teleportDistance_)
     {
+        // 大きなワープ移動は速度として扱わず、シミュレーション点も同じ量だけ移動して暴れを防ぐ。
         for (size_t pointIndex_ = 0; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
         {
             chain_.simulatedPositions[pointIndex_] = Add(
@@ -402,6 +417,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
 
     for (int substepIndex_ = 0; substepIndex_ < substeps_; ++substepIndex_)
     {
+        // 根元側はアニメーションへ固定し、先端側ほど慣性、風、リフトを効かせる。
         chain_.simulatedPositions.front() = animatedRoot_;
         chain_.previousPositions.front() = animatedRoot_;
         for (size_t pointIndex_ = chain_.simulatedPositions.size(); pointIndex_-- > 1;)
@@ -459,6 +475,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
 
         for (int iterationIndex_ = 0; iterationIndex_ < iterations_; ++iterationIndex_)
         {
+            // 距離制約、曲げ制約、体コリジョン、前方はみ出し制限を反復して安定させる。
             chain_.simulatedPositions.front() = animatedRoot_;
             for (size_t pointIndex_ = 1; pointIndex_ < chain_.simulatedPositions.size(); ++pointIndex_)
             {
@@ -509,6 +526,7 @@ void SpringBoneSimulationComponent::SimulateSpringChain(IKMapComponent::IKChain&
 
 void SpringBoneSimulationComponent::BuildClothConstraints()
 {
+    // 同じCloth GroupのチェーンをOrder順に並べ、隣接チェーン同士を横/斜めにつなぐ制約を作る。
     clothConstraints.clear();
 
     std::map<int, std::vector<size_t>> groupChainIndices_;
@@ -538,7 +556,7 @@ void SpringBoneSimulationComponent::BuildClothConstraints()
             const size_t pointCount_ = (std::min)(positionsA_.size(), positionsB_.size());
             if (pointCount_ < 2) continue;
 
-            // Match normalized layers so chains with different bone counts still connect at their tips.
+            // ボーン数が違うチェーン同士でも先端まで自然につながるよう、正規化した段で対応点を取る。
             for (size_t layerIndex_ = 1; layerIndex_ < pointCount_; ++layerIndex_)
             {
                 const float normalizedLayer_ = static_cast<float>(layerIndex_)
@@ -589,6 +607,7 @@ void SpringBoneSimulationComponent::BuildClothConstraints()
 
 void SpringBoneSimulationComponent::SolveClothConstraints()
 {
+    // 布制約は全Clothチェーンの最大solverIterationsに合わせて繰り返し、束全体の形を保つ。
     if (!clothConstraintsInitialized)
     {
         BuildClothConstraints();
@@ -612,6 +631,7 @@ void SpringBoneSimulationComponent::SolveClothConstraints()
 
 void SpringBoneSimulationComponent::SolveClothConstraint(const ClothConstraint& constraint_)
 {
+    // 横/斜め制約ごとの剛性を使い、2本のチェーンの対応点を目標距離へ戻す。
     if (constraint_.chainIndexA >= ikMap->GetChains().size() || constraint_.chainIndexB >= ikMap->GetChains().size()) return;
 
     auto& chainA_ = ikMap->GetChains()[constraint_.chainIndexA];
@@ -645,6 +665,7 @@ void SpringBoneSimulationComponent::SolveClothConstraint(const ClothConstraint& 
 
 void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain& chain_, size_t pointIndex_)
 {
+    // 先端側のシミュレーション点だけを体コライダー外へ押し戻し、根元のアニメーション追従は保つ。
     if (pointIndex_ <= 1 || GetNormalizedPointPosition(chain_, pointIndex_) <= 0.35f) return;
 
     auto& position_ = chain_.simulatedPositions[pointIndex_];
@@ -723,6 +744,7 @@ void SpringBoneSimulationComponent::ResolveBodyCollision(IKMapComponent::IKChain
 
 bool SpringBoneSimulationComponent::GetBodyCollisionSphereCenter(IKMapComponent::BodyCollisionSphere& sphere_, XMFLOAT3& center_)
 {
+    // IKMapのコライダー設定はノード名とローカルオフセットで持つため、初回だけノードindexを解決して使う。
     if (!model || sphere_.nodeName.empty()) return false;
     if (sphere_.nodeIndex < 0)
     {
@@ -740,6 +762,7 @@ bool SpringBoneSimulationComponent::GetBodyCollisionSphereCenter(IKMapComponent:
 
 void SpringBoneSimulationComponent::DrawBodyCollisionShapes()
 {
+    // 調整用に体コライダーを可視化する。連結指定がある球同士は途中のサンプル球も描く。
     if (!ikMap || !showBodyCollisionShapes) return;
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
@@ -778,6 +801,7 @@ void SpringBoneSimulationComponent::DrawBodyCollisionShapes()
 
 void SpringBoneSimulationComponent::DrawHairCollisionShapes()
 {
+    // シミュレーション済み点列を線として描き、髪/布がどの形に解けているか確認する。
     if (!showHairCollisionShapes) return;
     if (!model) return;
 
@@ -803,6 +827,7 @@ void SpringBoneSimulationComponent::DrawHairCollisionShapes()
 
 void SpringBoneSimulationComponent::ConstrainHairBehindBody(IKMapComponent::IKChain& chain_)
 {
+    // 髪や布がキャラクター前方へ出すぎないよう、根元から見た前方向距離を制限する。
     if (!model || chain_.simulatedPositions.size() < 2) return;
 
     auto owner_ = GetGameObject();
@@ -846,6 +871,7 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
 {
     BS_PROFILE_SCOPE("SpringBone::ApplySpringChain");
 
+    // 解けた点列の方向へ各ボーンを回転し、ワールド方向の差分をローカル回転へ戻してモデルに反映する。
     auto& nodes_ = model->GetNodes();
     std::vector<XMFLOAT3> targetDirections_;
     targetDirections_.reserve(chain_.simulatedPositions.size() - 1);
@@ -930,6 +956,7 @@ void SpringBoneSimulationComponent::ApplySpringChain(IKMapComponent::IKChain& ch
 
 void SpringBoneSimulationComponent::Gui()
 {
+    // このコンポーネントでは実行時シミュレーションの表示と風テストだけを扱い、チェーン設定はIKMap側に置く。
     ImGui::SeparatorText("Spring Bone Simulation");
     ImGui::Checkbox("Show Body Collision Shapes", &showBodyCollisionShapes);
     if (showBodyCollisionShapes)
@@ -971,6 +998,7 @@ void SpringBoneSimulationComponent::Gui()
 
 void SpringBoneSimulationComponent::Serialize(nlohmann::json& json_) const
 {
+    // シミュレーションそのものではなく、デバッグ表示設定だけを保存する。
     json_["ShowBodyCollisionShapes"] = showBodyCollisionShapes;
     json_["ShowHairCollisionShapes"] = showHairCollisionShapes;
     json_["BodyCollisionShapeColor"] = {
@@ -989,6 +1017,7 @@ void SpringBoneSimulationComponent::Serialize(nlohmann::json& json_) const
 
 void SpringBoneSimulationComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 表示設定を復元する。チェーン定義と物理パラメータはIKMapComponent側で読み込まれる。
     showBodyCollisionShapes = json_.value("ShowBodyCollisionShapes", true);
     showHairCollisionShapes = json_.value("ShowHairCollisionShapes", false);
     if (json_.contains("BodyCollisionShapeColor"))
@@ -1013,6 +1042,7 @@ void SpringBoneSimulationComponent::Deserialize(const nlohmann::json& json_)
 
 void SpringBoneSimulationComponent::ResetSimulation()
 {
+    // 布制約、コライダーindex、各チェーンの点列履歴を破棄し、次回更新で現在姿勢から初期化する。
     clothConstraints.clear();
     clothConstraintsInitialized = false;
     if (!ResolveDependencies()) return;

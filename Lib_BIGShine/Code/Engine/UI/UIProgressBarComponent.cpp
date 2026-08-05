@@ -17,6 +17,7 @@
 
 namespace
 {
+    // Serialize文字列とEditor Combo表示をEnum順に合わせる。
     const char* UI_PROGRESS_SOURCE_NAMES[] =
     {
         "MANUAL",
@@ -29,6 +30,7 @@ namespace
 
     float ClampRate(float rate_)
     {
+        // Barの割合は0.0-1.0の範囲に制限する。
         return std::clamp(rate_, 0.0f, 1.0f);
     }
 
@@ -56,6 +58,7 @@ namespace
 
     void DrawWidgetIdInput(const char* label_, std::string& value_)
     {
+        // std::stringをImGuiで編集するため、一時Bufferへ移してから戻す。
         char buffer_[128]{};
         strncpy_s(buffer_, sizeof(buffer_), value_.c_str(), _TRUNCATE);
         if (ImGui::InputText(label_, buffer_, sizeof(buffer_)))
@@ -87,6 +90,7 @@ namespace
 
     DirectX::XMFLOAT4 WithAlpha(const DirectX::XMFLOAT4& color_, float alpha_)
     {
+        // RGBを保ったままAlphaだけ差し替える。
         return
         {
             color_.x,
@@ -100,6 +104,7 @@ namespace
 void UIProgressBarComponent::Start()
 {
     BS_PROFILE_SCOPE("UIProgressBarComponent::Start");
+    // 保存値を安全範囲へ丸め、参照Widgetを解決して初期表示へ反映する。
     targetRate = ClampRate(targetRate);
     currentRate = ClampRate(currentRate);
     damageDelayRate = ClampRate(damageDelayRate);
@@ -119,12 +124,14 @@ void UIProgressBarComponent::Update(float deltaTime_)
         currentWidget.expired() ||
         damageDelayWidget.expired() || healDelayWidget.expired())
     {
+        // 対象WidgetやSpriteが後から生成/破棄された場合に再解決する。
         ResolveWidgets();
     }
 
     const float previousTargetRate_ = targetRate;
     targetRate = ResolveTargetRate();
 
+    // 目標値が変化した瞬間にFlashを開始し、減少/増加で色を切り替える。
     const float targetDelta_ = targetRate - previousTargetRate_;
     if (std::fabs(targetDelta_) > 0.0001f)
     {
@@ -136,18 +143,21 @@ void UIProgressBarComponent::Update(float deltaTime_)
 
     if (targetRate < currentRate)
     {
+        // ダメージ時は現在値を即座に減らし、DamageDelayだけ遅れて追わせる。
         currentRate = targetRate;
         healDelayRate = targetRate;
         damageDelayRate = MoveRate(damageDelayRate, targetRate, decreaseDelaySpeed, deltaTime_);
     }
     else if (targetRate > currentRate)
     {
+        // 回復時はHealDelayを先に伸ばし、Currentが後から追いつく見せ方にする。
         healDelayRate = targetRate;
         currentRate = MoveRate(currentRate, targetRate, increaseDelaySpeed, deltaTime_);
         damageDelayRate = currentRate;
     }
     else
     {
+        // 目標値が変わっていない間も、遅延BarだけはTargetへ近づけ続ける。
         damageDelayRate = MoveRate(damageDelayRate, targetRate, decreaseDelaySpeed, deltaTime_);
         healDelayRate = targetRate;
     }
@@ -175,6 +185,7 @@ void UIProgressBarComponent::Gui()
 
     if (source == UI_PROGRESS_SOURCE::MANUAL)
     {
+        // Manual時だけEditorから直接Targetを動かせる。
         ImGui::DragFloat("Target Rate", &targetRate, 0.01f, 0.0f, 1.0f);
     }
     ImGui::DragFloat("Decrease Delay Speed", &decreaseDelaySpeed, 0.01f, 0.01f, 10.0f);
@@ -204,6 +215,7 @@ void UIProgressBarComponent::Serialize(nlohmann::json& json_) const
     json_["FlashWidgetId"] = flashWidgetId;
     json_["EdgeHighlightWidgetId"] = edgeHighlightWidgetId;
     json_["Source"] = ToString(source);
+    // Rate系はRuntimeの見た目も保存し、Editor再開時に同じ状態から確認できるようにする。
     json_["TargetRate"] = targetRate;
     json_["CurrentRate"] = currentRate;
     json_["DamageDelayRate"] = damageDelayRate;
@@ -244,6 +256,7 @@ void UIProgressBarComponent::Deserialize(const nlohmann::json& json_)
     DeserializeFloat4(json_, "HealFlashColor", healFlashColor);
     DeserializeFloat4(json_, "EdgeHighlightColor", edgeHighlightColor);
     activeFlashColor = damageFlashColor;
+    // Widget参照はScene読込後のStart/Updateで解決する。
 }
 
 void UIProgressBarComponent::SetTargetRate(float targetRate_)
@@ -264,6 +277,7 @@ void UIProgressBarComponent::ResolveWidgets()
     flashSprite.reset();
     edgeHighlightSprite.reset();
 
+    // GameObjectManager内を走査し、設定IDに一致するUIWidgetを各役割へ割り当てる。
     for (const std::shared_ptr<GameObject>& object_ : GetManager().GetObjects())
     {
         if (!object_) continue;
@@ -306,6 +320,7 @@ void UIProgressBarComponent::ApplyLayoutRates()
     BS_PROFILE_SCOPE("UIProgressBarComponent::ApplyLayoutRates");
 
     ApplyBackgroundLayout();
+    // 背景/Flash/Delay/Current/Edgeの順に各WidgetのAnchorを現在値へ合わせる。
     ApplyFlashLayout();
     ApplyRateToWidget(damageDelayWidget.lock().get(), damageDelayRate);
     ApplyRateToWidget(healDelayWidget.lock().get(), healDelayRate);
@@ -317,6 +332,7 @@ void UIProgressBarComponent::ApplyRateToWidget(UIWidgetComponent* widget_, float
 {
     if (!widget_) return;
 
+    // 横方向AnchorMaxをrateへ合わせることで、親Rect内の表示幅を割合で表現する。
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
     rectTransform_.anchorMin.x = 0.0f;
     rectTransform_.anchorMax.x = ClampRate(rate_);
@@ -333,6 +349,7 @@ void UIProgressBarComponent::ApplyFlashLayout()
     if (!widget_) return;
 
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
+    // FlashはBar全体を覆うOverlayとして配置する。
     rectTransform_.anchorMin.x = 0.0f;
     rectTransform_.anchorMin.y = 0.0f;
     rectTransform_.anchorMax.x = 1.0f;
@@ -353,6 +370,7 @@ void UIProgressBarComponent::ApplyEdgeHighlightLayout()
 
     const float rate_ = ClampRate(currentRate);
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
+    // Highlightは現在Barの右端に細いWidgetとして置く。
     rectTransform_.anchorMin.x = rate_;
     rectTransform_.anchorMin.y = 0.0f;
     rectTransform_.anchorMax.x = rate_;
@@ -373,6 +391,7 @@ void UIProgressBarComponent::ApplyBackgroundLayout()
     if (!widget_) return;
 
     UIRectTransform& rectTransform_ = widget_->GetRectTransform();
+    // Backgroundは親の横幅全体へStretchさせる。
     rectTransform_.anchorMin.x = 0.0f;
     rectTransform_.anchorMax.x = 1.0f;
     rectTransform_.pivot.x = 0.0f;
@@ -387,6 +406,7 @@ void UIProgressBarComponent::ApplyEffectVisuals()
     const float flashRate_ = flashDuration > 0.0f
         ? std::clamp(flashTimer / flashDuration, 0.0f, 1.0f)
         : 0.0f;
+    // 二乗して終端を早めに薄くし、Flashの消え方を自然にする。
     const float easedFlashRate_ = flashRate_ * flashRate_;
 
     if (const std::shared_ptr<SpriteRenderer> sprite_ = flashSprite.lock())
@@ -406,6 +426,7 @@ float UIProgressBarComponent::ResolveTargetRate()
     const GameModeManager* gameModeManager_ = GetManager().GetGameModeManager();
     if (!gameModeManager_)
     {
+        // GameModeが無いEditor/PreviewではManual値を使う。
         return ClampRate(targetRate);
     }
 
@@ -431,6 +452,7 @@ float UIProgressBarComponent::MoveRate(
     const float clampedTargetRate_ = ClampRate(targetRate_);
     const float step_ = (std::max)(0.01f, speed_) * (std::max)(0.0f, deltaTime_);
 
+    // overshootしないよう、targetを越えたらそこで止める。
     if (clampedCurrentRate_ < clampedTargetRate_)
     {
         return (std::min)(clampedCurrentRate_ + step_, clampedTargetRate_);

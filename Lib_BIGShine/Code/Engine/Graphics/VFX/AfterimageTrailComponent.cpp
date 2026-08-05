@@ -13,6 +13,7 @@
 
 namespace
 {
+    // ローカル空間の点をワールド空間へ変換し、軌跡メッシュの端点作成に使う。
     DirectX::XMFLOAT3 TransformPosition(
         const DirectX::XMFLOAT3& position_,
         const DirectX::XMMATRIX& transform_)
@@ -28,6 +29,7 @@ namespace
 
 AfterimageTrailComponent::AfterimageTrailComponent()
 {
+    // 残像の帯はモデルテクスチャに依存せず、加算合成と Fresnel で発光感を作る。
     MeshVFXPart part_{};
     part_.renderEnabled = true;
     part_.useMaterialBaseTexture = false;
@@ -49,6 +51,7 @@ AfterimageTrailComponent::AfterimageTrailComponent()
     asset_.parts.push_back(part_);
     SetAsset(asset_);
 
+    // デフォルトではイベントから開始する想定なので、生成直後はサンプルを溜めない。
     SetEmitting(false);
     SetLifeTime(0.28f);
     SetMaxSampleCount(48);
@@ -68,6 +71,7 @@ void AfterimageTrailComponent::LateUpdate(float deltaTime_)
     DirectX::XMFLOAT3 rightPosition_{};
     if (IsEmitting() && GetTrailSegment(leftPosition_, rightPosition_))
     {
+        // 現在フレームの左右端点を TrailMeshComponent へ渡し、帯状メッシュとして連結する。
         AddSample(leftPosition_, rightPosition_);
     }
 
@@ -111,6 +115,7 @@ void AfterimageTrailComponent::RegisterActions()
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_) return;
 
+    // 攻撃アニメーション側からタイミング指定できるよう、ローカルアクションへ公開する。
     auto& registry_ = owner_->GetLocalRegistry();
     registry_.RegisterAction("VFX", "AfterimageTrailStart", [this]() { StartTrail(); });
     registry_.RegisterAction("VFX", "AfterimageTrailStop", [this]() { StopTrail(); });
@@ -125,10 +130,13 @@ bool AfterimageTrailComponent::GetTrailSegment(
     if (!owner_ || !owner_->transform) return false;
 
     const DirectX::XMMATRIX world_ = owner_->transform->GetWorldMatrix();
+
+    // キャラクター中心から少し上へずらした位置を軌跡の中心として扱う。
     const DirectX::XMFLOAT3 center_ = TransformPosition(
         { 0.0f, verticalOffset, 0.0f },
         world_);
 
+    // ワールド行列の X 軸を左右方向として使う。スケールが潰れている時だけ既定方向へ戻す。
     DirectX::XMVECTOR right_ = DirectX::XMVectorSetW(world_.r[0], 0.0f);
     if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(right_)) < 0.000001f)
     {
@@ -139,6 +147,7 @@ bool AfterimageTrailComponent::GetTrailSegment(
         right_ = DirectX::XMVector3Normalize(right_);
     }
 
+    // 幅に時間揺れを混ぜ、完全に静的な帯に見えないようにする。
     const float wobble_ = std::sin(GetTime() * wobbleSpeed) * wobbleAmplitude;
     const float width_ = (std::max)(trailWidth + wobble_, 0.001f);
     const DirectX::XMVECTOR centerVector_ = DirectX::XMLoadFloat3(&center_);

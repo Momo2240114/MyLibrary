@@ -21,6 +21,7 @@
 
 namespace
 {
+    // Serialize文字列とEditor Combo表示をEnum順に合わせる。
     const char* UI_TEXT_HORIZONTAL_ALIGN_NAMES[] =
     {
         "LEFT",
@@ -86,6 +87,7 @@ namespace
 
     Gdiplus::StringAlignment ToGdiHorizontalAlign(UI_TEXT_HORIZONTAL_ALIGN align_)
     {
+        // Engine側のAlign EnumをGDI+のStringAlignmentへ変換する。
         switch (align_)
         {
         case UI_TEXT_HORIZONTAL_ALIGN::CENTER:
@@ -114,6 +116,7 @@ namespace
 
     void DrawTextInput(const char* label_, std::string& value_, bool& changed_)
     {
+        // std::stringをImGuiで編集するため、一時Bufferへ移してから戻す。
         char buffer_[512]{};
         strncpy_s(buffer_, sizeof(buffer_), value_.c_str(), _TRUNCATE);
         if (ImGui::InputText(label_, buffer_, sizeof(buffer_)))
@@ -125,6 +128,7 @@ namespace
 
     bool EnsureGdiplusStarted()
     {
+        // GDI+はProcess内で一度だけ起動すればよいので、静的状態で管理する。
         static ULONG_PTR gdiplusToken_{};
         static bool started_ = false;
         static bool failed_ = false;
@@ -147,6 +151,7 @@ namespace
 void UITextComponent::Start()
 {
     BS_PROFILE_SCOPE("UITextComponent::Start");
+    // 起動時に描画先を確保し、現在Textから初回Textureを作る。
     ResolveTargets();
     NormalizeSettings();
     RebuildTextTexture();
@@ -159,11 +164,13 @@ void UITextComponent::Update(float deltaTime_)
 
     if (spriteRenderer.expired() || widget.expired())
     {
+        // RendererやWidgetが後から追加/削除された場合に再解決する。
         ResolveTargets();
     }
 
     if (dirty)
     {
+        // TextやFont設定が変わったFrameだけTextureを作り直す。
         RebuildTextTexture();
     }
 }
@@ -173,6 +180,7 @@ void UITextComponent::Gui()
     BS_PROFILE_SCOPE("UITextComponent::Gui");
 
     bool changed_ = false;
+    // 文字列、Font、色、Layout設定をEditorから変更する。
     DrawTextInput("Text", text, changed_);
     DrawTextInput("Font Path", fontPath, changed_);
     changed_ |= ImGui::DragFloat("Font Size", &fontSize, 1.0f, 4.0f, 256.0f);
@@ -205,6 +213,7 @@ void UITextComponent::Gui()
 
     if (changed_)
     {
+        // 入力値を安全な範囲へ丸め、Texture再生成を予約する。
         NormalizeSettings();
         MarkDirty();
     }
@@ -251,6 +260,7 @@ void UITextComponent::Deserialize(const nlohmann::json& json_)
     autoSizeWidget = json_.value("AutoSizeWidget", autoSizeWidget);
     horizontalAlign = HorizontalAlignFromString(json_.value("HorizontalAlign", std::string(ToString(horizontalAlign))));
     verticalAlign = VerticalAlignFromString(json_.value("VerticalAlign", std::string(ToString(verticalAlign))));
+    // 読み込んだ設定でTextureを作り直すためDirtyにする。
     NormalizeSettings();
     MarkDirty();
 }
@@ -273,6 +283,7 @@ void UITextComponent::ResolveTargets()
 
     if (const std::shared_ptr<GameObject> gameObject_ = GetGameObject())
     {
+        // Text表示にはSpriteRendererが必須なので、無ければ追加してTexture受け口を作る。
         spriteRenderer = gameObject_->GetOrAddComponent<SpriteRenderer>();
         widget = gameObject_->GetComponent<UIWidgetComponent>();
     }
@@ -290,12 +301,14 @@ void UITextComponent::RebuildTextTexture()
 
     if (!EnsureGdiplusStarted())
     {
+        // GDI+を起動できない環境ではText Texture生成を諦める。
         return;
     }
 
     const std::wstring text_ = ConvertUtf8ToWide(text);
     const std::wstring fontPath_ = ResolveFontPath();
 
+    // 指定FontをPrivateFontCollectionへ読み込み、失敗時はArialへフォールバックする。
     Gdiplus::PrivateFontCollection fontCollection_;
     const bool loadedPrivateFont_ =
         !fontPath_.empty() &&
@@ -322,6 +335,7 @@ void UITextComponent::RebuildTextTexture()
     Gdiplus::Graphics measureGraphics_(&measureBitmap_);
     measureGraphics_.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
 
+    // 先に文字列を計測し、必要なTexture Sizeを決める。
     const float layoutWidth_ = maxWidth > 0.0f ? maxWidth : 4096.0f;
     Gdiplus::RectF measureLayout_(0.0f, 0.0f, layoutWidth_, 4096.0f);
     Gdiplus::RectF measuredBounds_{};
@@ -340,6 +354,7 @@ void UITextComponent::RebuildTextTexture()
         1,
         static_cast<int>(std::ceil(measuredBounds_.Height + padding * 2.0f)));
 
+    // 透明背景のBitmapへTextを描画する。
     Gdiplus::Bitmap bitmap_(textureWidth_, textureHeight_, PixelFormat32bppARGB);
     Gdiplus::Graphics graphics_(&bitmap_);
     graphics_.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
@@ -358,6 +373,7 @@ void UITextComponent::RebuildTextTexture()
         (std::max)(1.0f, static_cast<float>(textureHeight_) - padding * 2.0f));
     graphics_.DrawString(text_.c_str(), -1, &font_, drawLayout_, &stringFormat_, &brush_);
 
+    // GDI+ BitmapからBGRA Pixelを取り出し、D3D Texture作成用の連続配列へコピーする。
     Gdiplus::BitmapData bitmapData_{};
     Gdiplus::Rect lockRect_(0, 0, textureWidth_, textureHeight_);
     std::vector<unsigned char> pixels_(static_cast<size_t>(textureWidth_) * textureHeight_ * 4);
@@ -379,6 +395,7 @@ void UITextComponent::RebuildTextTexture()
 
     if (CreateTextureFromPixels(pixels_, textureWidth_, textureHeight_) && autoSizeWidget)
     {
+        // Text Textureの大きさに合わせてWidgetのRectも更新する。
         if (const std::shared_ptr<UIWidgetComponent> widget_ = widget.lock())
         {
             UIRectTransform& rectTransform_ = widget_->GetRectTransform();
@@ -401,6 +418,7 @@ bool UITextComponent::CreateTextureFromPixels(
     if (!device_ || pixels_.empty() || width_ <= 0 || height_ <= 0) return false;
 
     D3D11_TEXTURE2D_DESC textureDesc_{};
+    // Text Textureは生成後にCPUから更新しないためImmutableで作る。
     textureDesc_.Width = static_cast<UINT>(width_);
     textureDesc_.Height = static_cast<UINT>(height_);
     textureDesc_.MipLevels = 1;
@@ -428,6 +446,7 @@ bool UITextComponent::CreateTextureFromPixels(
 
     if (const std::shared_ptr<SpriteRenderer> spriteRenderer_ = spriteRenderer.lock())
     {
+        // 作成したSRVをSpriteRendererへ渡し、Textを通常Spriteと同じ描画経路へ乗せる。
         spriteRenderer_->SetTextureResource(shaderResourceView_, textureDesc_);
         spriteRenderer_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
     }
@@ -441,6 +460,7 @@ std::wstring UITextComponent::ConvertUtf8ToWide(const std::string& text_) const
     const int length_ = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text_.c_str(), -1, nullptr, 0);
     if (length_ <= 0)
     {
+        // 不正UTF-8の場合でも空になりすぎないよう、byte列をそのままWideへ変換する。
         return std::wstring(text_.begin(), text_.end());
     }
 
@@ -458,6 +478,7 @@ std::wstring UITextComponent::ResolveFontPath() const
 
 void UITextComponent::NormalizeSettings()
 {
+    // GDI+やTexture生成で極端な値にならないよう、Editor入力を制限する。
     fontSize = std::clamp(fontSize, 4.0f, 256.0f);
     maxWidth = (std::max)(0.0f, maxWidth);
     padding = std::clamp(padding, 0.0f, 256.0f);

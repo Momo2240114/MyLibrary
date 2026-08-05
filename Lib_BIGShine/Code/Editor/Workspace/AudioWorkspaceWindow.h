@@ -21,6 +21,7 @@ public:
 private:
     struct AudioPreset
     {
+        // AudioManagerへ登録・試聴する1音声分の再生設定。
         std::string name = "New Audio";
         std::string actionName = "Audio_NewAudio";
         std::string path = "Data/Audio/SE/TitleSelect.wav";
@@ -32,6 +33,7 @@ private:
         bool muffled = false;
         float lowPassCutoff = 1200.0f;
         bool use3D = false;
+        // 3D再生時だけ使う位置・距離減衰・遮蔽・距離フィルタ設定。
         DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
         float minDistance = 1.0f;
         float maxDistance = 30.0f;
@@ -46,6 +48,7 @@ private:
 
     struct SequenceEvent
     {
+        // シーケンサー上で指定時刻に鳴らすイベント。プリセットに対して倍率や位置を上書きできる。
         std::string name = "Event";
         int presetIndex = 0;
         float startTime = 0.0f;
@@ -54,6 +57,7 @@ private:
         float panOffset = 0.0f;
         bool usePresetPosition = true;
         DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
+        // 再生中の二重発火を防ぐランタイム用フラグ。保存対象ではない。
         bool fired = false;
     };
 
@@ -86,12 +90,14 @@ private:
 private:
     std::vector<AudioPreset> presets;
     std::vector<SequenceEvent> sequenceEvents;
+    // Data/Audio配下から見つけた音声ファイル一覧。ブラウザ表示とプリセット割り当てに使う。
     std::vector<std::string> audioFiles;
     int selectedPresetIndex = 0;
     int selectedSequenceEventIndex = -1;
     float sequenceTime = 0.0f;
     float sequenceLength = 5.0f;
     bool sequencePlaying = false;
+    // ImSequencerの表示位置と展開状態を保持し、スクロール/選択を毎フレーム失わないようにする。
     int firstSequenceFrame = 0;
     bool audioSequencerExpanded = true;
     std::string workspacePath = "Data/Audio/AudioWorkspace.json";

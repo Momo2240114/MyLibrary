@@ -8,6 +8,7 @@
 
 namespace
 {
+    // Serialize KeyとEditor表示名をEnum順に合わせる。
     const char* UI_VERTEX_NAMES[] =
     {
         "LEFT_TOP",
@@ -18,6 +19,7 @@ namespace
 
     size_t ToIndex(UI_VERTEX_INDEX vertexIndex_)
     {
+        // 不正なEnum値で配列外参照にならないよう、0番へ丸める。
         const size_t index_ = static_cast<size_t>(vertexIndex_);
         if (index_ >= static_cast<size_t>(UI_VERTEX_INDEX::MAX))
         {
@@ -28,6 +30,7 @@ namespace
 
     void SerializeFloat2(nlohmann::json& json_, const char* key_, const DirectX::XMFLOAT2& value_)
     {
+        // XMFLOAT2をJSON配列として保存する共通処理。
         json_[key_] = { value_.x, value_.y };
     }
 
@@ -38,6 +41,7 @@ namespace
 
     void DeserializeFloat2(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT2& value_)
     {
+        // Keyが無い古いデータでは現在値を保持する。
         if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2) return;
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
@@ -59,6 +63,7 @@ void UIVertexModifierComponent::Gui()
 
     for (int index_ = 0; index_ < static_cast<int>(UI_VERTEX_INDEX::MAX); ++index_)
     {
+        // 頂点ごとのOffset/UV/Colorを折りたたみ表示で編集する。
         UIVertexModification& modification_ = vertexModifications[static_cast<size_t>(index_)];
         if (ImGui::TreeNode(UI_VERTEX_NAMES[index_]))
         {
@@ -83,6 +88,7 @@ void UIVertexModifierComponent::Serialize(nlohmann::json& json_) const
     nlohmann::json verticesJson_;
     for (int index_ = 0; index_ < static_cast<int>(UI_VERTEX_INDEX::MAX); ++index_)
     {
+        // 頂点名をKeyにすることで、保存後のJSONを直接見てもどの頂点か分かるようにする。
         const UIVertexModification& modification_ = vertexModifications[static_cast<size_t>(index_)];
         nlohmann::json vertexJson_;
         SerializeFloat2(vertexJson_, "PositionOffset", modification_.positionOffset);
@@ -131,6 +137,7 @@ void UIVertexModifierComponent::SetVertexPositionOffset(
 
 void UIVertexModifierComponent::ResetAllModifications()
 {
+    // 既定値の構造体で上書きし、位置/UV/色を一括で無補正に戻す。
     for (UIVertexModification& modification_ : vertexModifications)
     {
         modification_ = UIVertexModification{};

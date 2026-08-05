@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
+// EditorWindowごとの簡易スタイル。Window背景とTitleBarを個別に調整できるようにする。
 struct WindowStyle {
     ImVec4 backgroundColor = ImVec4(0.1f, 0.1f, 0.1f, 0.35f);
     ImVec4 titleBarColor = ImVec4(0.2f, 0.3f, 0.4f, 1.0f);
@@ -19,16 +20,18 @@ public:
     }
     virtual ~EditorWindow() = default;
 
-    virtual void Draw() = 0; // 各ウィンドウ固有の描画
+    virtual void Draw() = 0; // 各Window固有の描画処理。
     virtual void Update(float deltaTime_) {}
     virtual void DrawMenuBar() {}
     virtual void OnVisibilityChanged(bool visible) {}
+    // 専用Workspaceとして扱うWindowはScene EditorのDock表示とは別枠で表示する。
     virtual bool IsEditorWorkspace() const { return false; }
     virtual bool ShouldShowInWindowMenu() const { return true; }
+    // Animation/Particleなど、編集中にScene更新を止めたいWindowがtrueを返す。
     virtual bool ShouldPauseScene() const { return false; }
     virtual bool ShouldRenderSceneWhenPaused() const { return false; }
 
-    // この窓が表示されているかを確認し、設定する
+    // Windowの表示状態を確認・設定する。変更時はOnVisibilityChangedで派生側へ通知する。
     bool IsVisible() const { return isVisible; }
     void SetVisible(bool visible) { if (isVisible != visible) { isVisible = visible; OnVisibilityChanged(visible); } }
     bool IsKeepOnTop() const { return keepOnTop; }
@@ -61,7 +64,7 @@ protected:
     }
 
     WindowStyle style;
-    // 共通のスタイル編集UIを描画する関数
+    // 共通のスタイル編集UIを描画する関数。
     void DrawStylePopup() {
         if (ImGui::BeginPopupContextWindow("WindowSettings", ImGuiPopupFlags_MouseButtonRight)) {
             ImGui::Text("Style Settings");
@@ -82,9 +85,9 @@ protected:
         }
     }
 
-
     bool BeginEditorWindow(const char* overrideName = nullptr, ImGuiWindowFlags flags = 0)
     {
+        // 基本的にEditor WindowはMainViewportへ固定し、MultiViewport時も親Windowからはみ出しにくくする。
         if (const ImGuiViewport* mainViewport = ImGui::GetMainViewport())
         {
             ImGui::SetNextWindowViewport(mainViewport->ID);
@@ -92,14 +95,15 @@ protected:
 
         if (!hasLayoutRect && !hasDockId)
         {
+            // 明示レイアウトやDock指定がないWindowは、初回だけ標準サイズを指定する。
             ImGui::SetNextWindowSize(
                 defaultWindowSize,
                 ImGuiCond_FirstUseEver);
         }
 
-
         if (hasLayoutRect)
         {
+            // Workspace内の固定PanelなどはLayoutRectで位置とサイズを直接指定する。
             ImGuiCond layoutCond = layoutLocked ? ImGuiCond_Always : ImGuiCond_FirstUseEver;
             ImGui::SetNextWindowPos(layoutPos, layoutCond);
             ImGui::SetNextWindowSize(layoutSize, layoutCond);
@@ -112,7 +116,6 @@ protected:
         {
             ImGui::SetNextWindowDockID(dockId, ImGuiCond_Once);
         }
-
 
         ImGui::PushStyleColor(ImGuiCol_WindowBg, style.backgroundColor);
         ImGui::PushStyleColor(ImGuiCol_ChildBg, style.backgroundColor);
@@ -130,6 +133,7 @@ protected:
         const bool clickedWindow = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) && ImGui::IsMouseClicked(ImGuiMouseButton_Left);
         if (keepOnTop && !hasOpenPopup && !menuInteractionActive && clickedWindow)
         {
+            // Windowをクリックした時だけ前面へ出し、メニュー操作中やPopup操作中のZ順暴れを避ける。
             ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
         }
 
@@ -144,12 +148,12 @@ protected:
 
     ImVec2 defaultWindowSize = ImVec2(400.0f, 600.0f);
     std::string windowName;
-    GameObjectManager* gameObjectManager; // データを扱うための窓口
-    bool isVisible; // 顕現のフラグ
-    bool keepOnTop = true;
-    bool lockToMainViewport = true;
-    bool hasLayoutRect = false;
-    bool layoutLocked = true;
+    GameObjectManager* gameObjectManager; // Editor操作対象のObject/Sceneへアクセスするための参照。
+    bool isVisible; // Windowを表示するかどうか。
+    bool keepOnTop = true; // クリックしたWindowを前面へ出すか。
+    bool lockToMainViewport = true; // MainViewport利用設定。現在のWindow生成ではMainViewport指定を標準にしている。
+    bool hasLayoutRect = false; // Workspaceなどから固定位置を指定されているか。
+    bool layoutLocked = true; // 固定レイアウト時にユーザー移動を許可しないか。
     ImVec2 layoutPos = ImVec2(0.0f, 0.0f);
     ImVec2 layoutSize = ImVec2(0.0f, 0.0f);
     bool hasDockId = false;

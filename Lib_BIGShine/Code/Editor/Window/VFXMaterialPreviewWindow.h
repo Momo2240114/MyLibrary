@@ -27,10 +27,12 @@ private:
 
 private:
     EditorRenderTarget previewTarget;
+    // プレビュー専用の描画先、MeshVFX描画システム、カメラをWindow内で完結させる。
     MeshVFXRenderSystem meshVFXRenderSystem;
     CameraComponent previewCamera;
     std::shared_ptr<GameObject> previewObject;
     std::shared_ptr<MeshVFXComponent> previewMeshVFX;
+    // 選択中VFXMaterialのパス。Apply時にプレビュー用MeshVFXへ差し込む。
     std::string materialPath;
     float previewRotation = 0.0f;
     bool isInitialized = false;

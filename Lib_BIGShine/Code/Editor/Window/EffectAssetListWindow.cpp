@@ -18,6 +18,7 @@ EffectAssetListWindow::EffectAssetListWindow(GameObjectManager* manager_)
 
 void EffectAssetListWindow::Draw()
 {
+    // EffectManagerが認識している各種Effect Assetのキー、ファイル名、パスを確認する。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -34,6 +35,7 @@ void EffectAssetListWindow::Draw()
     EffectManager& effectManager_ = gameObjectManager->GetEffectManager();
     if (ImGui::Button("Refresh"))
     {
+        // ファイル走査、キー生成、事前読み込みをまとめて行い、一覧と実行時キャッシュを同期する。
         effectManager_.RefreshAssetCache();
         effectManager_.BuildAssetNameMap();
         effectManager_.PreloadAllEffects();
@@ -41,6 +43,7 @@ void EffectAssetListWindow::Draw()
 
     if (ImGui::BeginTabBar("EffectAssetTabs"))
     {
+        // Asset種別ごとにタブを分け、Particle/MeshVFX/Sequence/Impactを混ぜずに確認する。
         if (ImGui::BeginTabItem("Particle"))
         {
             DrawAssetTable(EFFECT_ASSET_LIST_TYPE::PARTICLE);
@@ -75,6 +78,7 @@ void EffectAssetListWindow::DrawAssetTable(EFFECT_ASSET_LIST_TYPE type_)
 {
     if (!gameObjectManager) return;
 
+    // 指定された種別に応じてEffectManager内の対応リストとTable IDを選ぶ。
     const EffectManager& effectManager_ = gameObjectManager->GetEffectManager();
     const std::vector<EffectAssetEntry>* assets_ = nullptr;
     const char* tableId_ = nullptr;
@@ -108,6 +112,7 @@ void EffectAssetListWindow::DrawAssetTable(EFFECT_ASSET_LIST_TYPE type_)
         ImGuiTableFlags_Resizable |
         ImGuiTableFlags_ScrollY))
     {
+        // Keyはゲーム側から呼び出す名前、Full Pathは実ファイル確認用として表示する。
         ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 180.0f);
         ImGui::TableSetupColumn("File", ImGuiTableColumnFlags_WidthFixed, 180.0f);
         ImGui::TableSetupColumn("Full Path", ImGuiTableColumnFlags_WidthStretch);

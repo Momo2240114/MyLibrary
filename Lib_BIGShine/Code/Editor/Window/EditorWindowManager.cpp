@@ -13,6 +13,7 @@ void EditorWindowManager::BuildDefaultDockLayout(ImGuiID dockspaceId_, const ImV
 {
     BS_PROFILE_SCOPE("EditorWindowManager::BuildDefaultDockLayout");
 
+    // Dock情報が無い時の標準配置を作り、Sceneを中央、Hierarchy/Inspector/Toolを周囲へ分ける。
     ImGui::DockBuilderRemoveNode(dockspaceId_);
     ImGui::DockBuilderAddNode(dockspaceId_, ImGuiDockNodeFlags_DockSpace);
     ImGui::DockBuilderSetNodeSize(dockspaceId_, dockspaceSize_);
@@ -55,6 +56,7 @@ void EditorWindowManager::DrawSceneEditorDockSpace()
     const float workspaceSelectorHeight_ = GetWorkspaceSelectorHeight();
     ImVec2 dockspacePos_ = viewport_->WorkPos;
     ImVec2 dockspaceSize_ = viewport_->WorkSize;
+    // 上部のWorkspace Selector分だけDockSpaceを下げ、Scene Editorの領域と重ならないようにする。
     dockspacePos_.y += workspaceSelectorHeight_;
     dockspaceSize_.y = (std::max)(1.0f, dockspaceSize_.y - workspaceSelectorHeight_);
 
@@ -84,6 +86,7 @@ void EditorWindowManager::DrawSceneEditorDockSpace()
         ImGuiID dockspaceId_ = ImGui::GetID("SceneEditorDockSpace");
         if (!ImGui::DockBuilderGetNode(dockspaceId_))
         {
+            // Dock情報がまだない場合だけ標準レイアウトを構築する。既存のユーザー配置は維持する。
             BuildDefaultDockLayout(dockspaceId_, dockspaceSize_);
         }
 
@@ -109,6 +112,7 @@ void EditorWindowManager::DrawSceneView()
         const ImVec2 available_ = ImGui::GetContentRegionAvail();
         if (sceneSRV_ && available_.x > 1.0f && available_.y > 1.0f)
         {
+            // RenderTargetのアスペクト比を保ったまま、Dock領域の中央へScene画像を表示する。
             const float renderWidth_ = static_cast<float>(graphicsDeviceManager_.GetRenderWidth());
             const float renderHeight_ = static_cast<float>(graphicsDeviceManager_.GetRenderHeight());
             ImVec2 imageSize_ = available_;
@@ -141,6 +145,7 @@ const char* EditorWindowManager::GetWindowMenuCategory(
 {
     const std::string& name_ = window_.GetName();
 
+    // Windowメニューを用途別に整理し、増えたEditor Windowを探しやすくする。
     if (window_.IsEditorWorkspace()) return "Workspace";
     if (name_ == "Hierarchy" || name_ == "InspectorWindow") return "Core";
 	if (name_ == "Shader" ||
@@ -277,6 +282,7 @@ void EditorWindowManager::DrawWorkspaceSelectorBar()
 
     if (ImGui::Begin("Workspace Selector", nullptr, flags))
     {
+        // Scene Editorと専用Workspaceを切り替え、重い専用Editorを必要な時だけ表示する。
         ImGui::TextUnformatted("Workspace");
         ImGui::SameLine();
         ImGui::SetNextItemWidth((std::min)(360.0f, viewport->WorkSize.x - 120.0f));
@@ -310,6 +316,7 @@ void EditorWindowManager::DrawWorkspaceSelectorBar()
 void EditorWindowManager::SetActiveWorkspace(int workspaceIndex_)
 {
     activeWorkspaceIndex = workspaceIndex_;
+    // Workspace型Windowは同時表示せず、選択中のものだけVisibleにする。
     for (int index_ = 0; index_ < static_cast<int>(windows.size()); ++index_)
     {
         if (windows[index_]->IsEditorWorkspace())
@@ -349,6 +356,7 @@ void EditorWindowManager::DrawAll()
     const bool hasActiveWorkspace = activeWorkspaceIndex >= 0;
     DrawWorkspaceSelectorBar();
 
+    // 通常Scene編集時はDockSpaceとSceneViewを表示し、専用Workspace時はそのWindowだけを前面に出す。
     if (!hasActiveWorkspace)
     {
         DrawSceneEditorDockSpace();
@@ -376,6 +384,7 @@ void EditorWindowManager::DrawAll()
         {
             const std::string profileName_ = "EditorWindow::" + window->GetName();
             BS_PROFILE_SCOPE_DYNAMIC(profileName_.c_str());
+            // Window単位でTracy計測を切り、EditorのどのPanelが重いか追えるようにする。
             window->Draw();
         }
     }

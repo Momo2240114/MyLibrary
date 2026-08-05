@@ -10,6 +10,7 @@
 
 VFXMaterialResourceManager& VFXMaterialResourceManager::GetInstance()
 {
+    // Material ResourceはEngine全体で共有するため、SingletonでCacheを持つ。
     static VFXMaterialResourceManager instance_;
     return instance_;
 }
@@ -18,9 +19,11 @@ std::shared_ptr<VFXMaterialResource> VFXMaterialResourceManager::Load(
     const std::string& filePath_)
 {
     BS_PROFILE_SCOPE("VFXMaterialResourceManager::Load");
+    // 空Pathは明確な指定が無い扱いなので、描画が止まらないDefaultへ逃がす。
     if (filePath_.empty()) return GetDefaultMaterial();
 
     const std::string key_ = NormalizePath(filePath_);
+    // 正規化PathでCacheを探し、同じMaterialを複数回読み込まない。
     if (auto found_ = Find(key_)) return found_;
 
     VFXMaterialData materialData_{};
@@ -33,6 +36,7 @@ std::shared_ptr<VFXMaterialResource> VFXMaterialResourceManager::Load(
     auto resource_ = std::make_shared<VFXMaterialResource>();
     resource_->SetSourceFilePath(key_);
     resource_->ApplyLoadedData(materialData_);
+    // Material設定の読み込み後、Device依存のTexture Resourceをまとめて解決する。
     resource_->LoadTextures(GraphicsDeviceManager::Instance().GetDevice());
     materialResources[key_] = resource_;
     return resource_;
@@ -41,6 +45,7 @@ std::shared_ptr<VFXMaterialResource> VFXMaterialResourceManager::Load(
 std::shared_ptr<VFXMaterialResource> VFXMaterialResourceManager::Find(
     const std::string& filePath_) const
 {
+    // 呼び出し側が未正規化Pathを渡しても、Loadと同じKeyで探す。
     const std::string key_ = NormalizePath(filePath_);
     const auto iterator_ = materialResources.find(key_);
     return iterator_ != materialResources.end() ? iterator_->second : nullptr;
@@ -50,6 +55,7 @@ std::shared_ptr<VFXMaterialResource> VFXMaterialResourceManager::GetDefaultMater
 {
     if (defaultMaterial) return defaultMaterial;
 
+    // DefaultはTexture未指定のMaterialDataから作り、各SlotはDummy Textureで埋める。
     VFXMaterialData materialData_{};
     materialData_.materialName = "DefaultVFXMaterial";
     defaultMaterial = std::make_shared<VFXMaterialResource>();
@@ -63,6 +69,7 @@ std::shared_ptr<VFXMaterialResource> VFXMaterialResourceManager::CreateTemporary
     const VFXMaterialData& materialData_)
 {
     BS_PROFILE_SCOPE("VFXMaterialResourceManager::CreateTemporary");
+    // TemporaryはCacheへ入れず、Editor Previewなどの短命な確認用として返す。
     auto resource_ = std::make_shared<VFXMaterialResource>();
     resource_->SetSourceFilePath("__TemporaryVFXMaterial__");
     resource_->ApplyLoadedData(materialData_);
@@ -78,6 +85,7 @@ bool VFXMaterialResourceManager::Reload(const std::string& filePath_)
     auto resource_ = Find(key_);
     if (!resource_)
     {
+        // 未読み込みの場合は通常Loadに委ね、正しく指定PathのResourceが作れたかで成否を見る。
         const auto loadedResource_ = Load(filePath_);
         return loadedResource_ && loadedResource_->GetSourceFilePath() == key_;
     }
@@ -89,6 +97,7 @@ bool VFXMaterialResourceManager::Reload(const std::string& filePath_)
         return false;
     }
     resource_->ApplyLoadedData(materialData_);
+    // Data差し替え後にTextureも読み直し、Editor保存後の見た目を即反映する。
     resource_->LoadTextures(GraphicsDeviceManager::Instance().GetDevice());
     return true;
 }
@@ -100,6 +109,7 @@ bool VFXMaterialResourceManager::Save(
     BS_PROFILE_SCOPE("VFXMaterialResourceManager::Save");
     if (filePath_.empty() || !materialResource_) return false;
     if (!VFXMaterialSerializer::Save(filePath_, materialResource_->GetMaterialData())) return false;
+    // 保存に成功したResourceを、そのPathの正しいCacheとして登録し直す。
     RegisterOrReplace(filePath_, materialResource_);
     materialResource_->SetSourceFilePath(NormalizePath(filePath_));
     return true;
@@ -121,6 +131,7 @@ void VFXMaterialResourceManager::Unload(const std::string& filePath_)
 
 void VFXMaterialResourceManager::Clear()
 {
+    // Scene/Editor終了時にResource参照と失敗Logの記録をまとめて破棄する。
     materialResources.clear();
     loggedLoadFailures.clear();
     defaultMaterial.reset();
@@ -133,8 +144,10 @@ std::string VFXMaterialResourceManager::NormalizePath(const std::string& filePat
     std::error_code errorCode_;
     if (std::filesystem::exists(path_, errorCode_))
     {
+        // 実在するPathは可能な範囲で絶対/正規化し、表記揺れによるCache重複を避ける。
         path_ = std::filesystem::weakly_canonical(path_, errorCode_);
     }
+    // 正規化に失敗した場合でも、入力Pathをlexically_normalしてKeyとして安定させる。
     if (errorCode_) path_ = std::filesystem::path(filePath_);
     return path_.lexically_normal().generic_string();
 }
@@ -144,6 +157,7 @@ void VFXMaterialResourceManager::LogLoadFailureOnce(
     const char* reason_) const
 {
     const std::string key_ = NormalizePath(filePath_) + ":" + reason_;
+    // 同じPath/理由の失敗は一度だけLogに出し、Editor操作中にConsoleを埋めないようにする。
     if (!loggedLoadFailures.insert(key_).second) return;
     std::printf(
         "[VFXMaterialResourceManager] Failed to load material '%s' (%s). Using fallback material.\n",

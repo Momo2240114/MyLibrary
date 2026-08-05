@@ -13,6 +13,7 @@
 
 AfterimageComponent::AfterimageComponent()
 {
+    // 残像の初期表示は「青い加算フレネル」の1パーツにして、設定なしでも効果が見える状態にする。
     MeshVFXPart part_;
     part_.renderEnabled = true;
     part_.useMaterialBaseTexture = false;
@@ -40,6 +41,7 @@ void AfterimageComponent::Update(float deltaTime_)
 void AfterimageComponent::LateUpdate(float deltaTime_)
 {
 
+    // 既に保持しているスナップショットを老化させ、寿命を超えたものから描画対象外にする。
     for (Snapshot& snapshot_ : snapshots)
     {
         snapshot_.age += deltaTime_;
@@ -54,6 +56,7 @@ void AfterimageComponent::LateUpdate(float deltaTime_)
 
     spawnTimer += deltaTime_;
     const float safeInterval_ = (std::max)(spawnInterval, 0.001f);
+    // フレーム落ちでdeltaが大きくなっても、間隔分だけ複数枚を補う。
     while (spawnTimer >= safeInterval_ && (isEmitting || pendingBurstCount > 0))
     {
         spawnTimer -= safeInterval_;
@@ -71,6 +74,7 @@ void AfterimageComponent::LateUpdate(float deltaTime_)
 
 void AfterimageComponent::Gui()
 {
+    // 生成間隔、寿命、補間枚数をエディタで調整しながら、実際の残像密度を確認できるようにする。
     ImGui::SeparatorText("Afterimage");
     ImGui::DragFloat("Spawn Interval", &spawnInterval, 0.005f, 0.001f, 1.0f);
     ImGui::DragFloat("Lifetime", &lifetime, 0.01f, 0.01f, 10.0f);
@@ -99,6 +103,7 @@ void AfterimageComponent::Gui()
 void AfterimageComponent::Serialize(nlohmann::json& json_) const
 {
     MeshVFXComponent::Serialize(json_);
+    // MeshVFXの見た目設定に加えて、残像専用の生成・保持ルールを保存する。
     json_["SpawnInterval"] = spawnInterval;
     json_["Lifetime"] = lifetime;
     json_["StartAlpha"] = startAlpha;
@@ -114,6 +119,7 @@ void AfterimageComponent::Serialize(nlohmann::json& json_) const
 void AfterimageComponent::Deserialize(const nlohmann::json& json_)
 {
     MeshVFXComponent::Deserialize(json_);
+    // 不正な設定値でスナップショット管理が破綻しないよう、読み込み時に範囲を丸める。
     spawnInterval = (std::max)(json_.value("SpawnInterval", 0.06f), 0.001f);
     lifetime = (std::max)(json_.value("Lifetime", 0.4f), 0.01f);
     startAlpha = std::clamp(json_.value("StartAlpha", 0.8f), 0.0f, 1.0f);
@@ -135,6 +141,7 @@ size_t AfterimageComponent::GetMaxRenderParts() const
 bool AfterimageComponent::GetModelPoseViews(std::vector<MeshVFXModelPoseView>& poses_) const
 {
     poses_.clear();
+    // 古いスナップショットをすべて描くと重くなるため、末尾の新しいものだけを描画ビューに変換する。
     const size_t snapshotCount_ = snapshots.size();
     const size_t renderSnapshotCount_ = (std::min)(
         snapshotCount_,
@@ -152,6 +159,7 @@ bool AfterimageComponent::GetModelPoseViews(std::vector<MeshVFXModelPoseView>& p
         const Snapshot& snapshot_ = snapshots[snapshotIndex_];
         const float normalizedAge_ = std::clamp(snapshot_.age / lifetime, 0.0f, 1.0f);
         const float alpha_ = startAlpha * (1.0f - normalizedAge_);
+        // Snapshot内の姿勢情報を直接参照する軽量ビューにして、行列配列のコピーを避ける。
         for (const MeshVFXModelPose& sourcePose_ : snapshot_.poses)
         {
             MeshVFXModelPoseView pose_;
@@ -167,6 +175,7 @@ bool AfterimageComponent::GetModelPoseViews(std::vector<MeshVFXModelPoseView>& p
 
 void AfterimageComponent::StartEmission()
 {
+    // 開始直後に1枚出せるよう、タイマーを生成間隔ぶん進めた状態にする。
     isEmitting = true;
     spawnTimer = spawnInterval;
 }
@@ -179,12 +188,14 @@ void AfterimageComponent::StopEmission()
 
 void AfterimageComponent::Burst()
 {
+    // 単発アクションから複数枚の残像を作る。実際の生成はLateUpdate側で間隔処理に乗せる。
     pendingBurstCount = burstCount;
     spawnTimer = spawnInterval;
 }
 
 void AfterimageComponent::Clear()
 {
+    // 状態リセット時もreserveしておき、戦闘中の再発生で余計な再確保を減らす。
     snapshots.clear();
     snapshots.reserve(static_cast<size_t>(maxSnapshots));
     pendingBurstCount = 0;
@@ -196,6 +207,7 @@ void AfterimageComponent::RegisterActions()
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
+    // アニメーションイベントや他コンポーネントから、名前指定で残像制御できるように登録する。
     auto& registry_ = owner_->GetLocalRegistry();
     registry_.RegisterAction("VFX", "AfterimageStart", [this]() { StartEmission(); });
     registry_.RegisterAction("VFX", "AfterimageStop", [this]() { StopEmission(); });
@@ -208,6 +220,7 @@ bool AfterimageComponent::CaptureSnapshot(Snapshot& snapshot_)
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return false;
 
+    // ルートの現在位置を距離補間用に保存し、描画用のモデル姿勢はCaptureObjectで集める。
     snapshot_.poses.reserve(includeChildren ? 4 : 1);
     DirectX::XMFLOAT4X4 worldTransform_{};
     DirectX::XMStoreFloat4x4(&worldTransform_, owner_->transform->GetWorldMatrix());
@@ -223,6 +236,7 @@ bool AfterimageComponent::CaptureSnapshot(Snapshot& snapshot_)
 
 void AfterimageComponent::AddSnapshot(const Snapshot& snapshot_)
 {
+    // 最大枚数を超えたら最古を捨てる。残像は新しいほど視覚的に重要なので末尾を残す。
     snapshots.push_back(snapshot_);
     while (static_cast<int>(snapshots.size()) > maxSnapshots)
     {
@@ -232,6 +246,7 @@ void AfterimageComponent::AddSnapshot(const Snapshot& snapshot_)
 
 void AfterimageComponent::AddSnapshotWithSpacing(const Snapshot& snapshot_)
 {
+    // 前回位置から大きく移動したフレームでは、間に補間スナップショットを挟んで残像の途切れを防ぐ。
     if (!snapshots.empty() && maximumSnapshotSpacing > 0.0f && maxExtraSnapshotsPerFrame > 0)
     {
         const Snapshot previousSnapshot_ = snapshots.back();
@@ -255,6 +270,7 @@ AfterimageComponent::Snapshot AfterimageComponent::InterpolateSnapshot(
     const Snapshot& secondSnapshot_,
     float ratio_) const
 {
+    // 2つのスナップショット間を線形補間し、瞬間移動のような大きな移動でも軌跡を滑らかにする。
     Snapshot snapshot_;
     const float inverseRatio_ = 1.0f - ratio_;
     snapshot_.samplePosition =
@@ -279,6 +295,7 @@ AfterimageComponent::Snapshot AfterimageComponent::InterpolateSnapshot(
             const std::vector<DirectX::XMFLOAT4X4>& secondTransforms_ =
                 secondPose_.meshTransforms[meshIndex_];
             const size_t transformCount_ = (std::min)(transforms_.size(), secondTransforms_.size());
+            // 行列要素をそのまま補間する。残像用なので厳密な回転補間より見た目の連続性を優先する。
             for (size_t transformIndex_ = 0; transformIndex_ < transformCount_; ++transformIndex_)
             {
                 float* firstValues_ = reinterpret_cast<float*>(&transforms_[transformIndex_]);
@@ -312,6 +329,7 @@ void AfterimageComponent::CaptureObject(
 {
     if (!object_ || !object_->transform) return;
 
+    // 対象GameObjectにモデルがあれば、現在のスキニング/メッシュ姿勢を残像用に保存する。
     const std::shared_ptr<GltfModelCommponennt> model_ =
         object_->GetComponent<GltfModelCommponennt>();
     if (model_)
@@ -327,6 +345,7 @@ void AfterimageComponent::CaptureObject(
             std::vector<DirectX::XMFLOAT4X4>& transforms_ = pose_.meshTransforms[meshIndex_];
             if (!mesh_.bones.empty())
             {
+                // シェーダ側の定数数に合わせ、ボーン行列は最大256本まで保存する。
                 const size_t boneCount_ = (std::min)(mesh_.bones.size(), static_cast<size_t>(256));
                 transforms_.resize(boneCount_);
                 for (size_t boneIndex_ = 0; boneIndex_ < boneCount_; ++boneIndex_)
@@ -343,6 +362,7 @@ void AfterimageComponent::CaptureObject(
             }
             else
             {
+                // ボーンを持たないメッシュはノードのワールド行列1つを姿勢として扱う。
                 transforms_.resize(1);
                 const DirectX::XMMATRIX nodeWorld_ = mesh_.node
                     ? DirectX::XMLoadFloat4x4(&mesh_.node->worldTransform)
@@ -354,6 +374,7 @@ void AfterimageComponent::CaptureObject(
     }
 
     if (!includeChildren) return;
+    // 武器や分割モデルもまとめて残像化したい場合は、子GameObjectを再帰的に拾う。
     for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
     {
         if (!childTransform_) continue;

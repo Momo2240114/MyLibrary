@@ -21,8 +21,10 @@ void SceneTitle::Initialize()
 	SceneBase::Initialize();
 
 
+	// TitleSceneでは現在MainSceneを読み込み、タイトル用の初期シーンとして扱う。
 	_GameObjectManager->LoadScene("MainScene");
 
+	// Sceneロード後に親子関係を解決し、Transform階層を使える状態にする。
 	_GameObjectManager->ResolveHierarchy();
 }
 

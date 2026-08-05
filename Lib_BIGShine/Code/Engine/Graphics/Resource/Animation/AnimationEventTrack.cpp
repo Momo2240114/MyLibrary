@@ -15,6 +15,7 @@ AnimationEventTrack::AnimationEventTrack()
 
 void AnimationEventTrack::AddEvent(const std::string& label_, float start_, float end_, unsigned int color_)
 {
+    // 追加時点では範囲補正せず、呼び出し側が指定した秒数をそのまま保持する。
     events.push_back({ start_, end_, color_, label_ });
 }
 
@@ -28,12 +29,14 @@ void AnimationEventTrack::DeleteEvent(int index_)
 
 void AnimationEventTrack::DuplicateEvent(int index_)
 {
+    // 複製後の位置調整は Editor 側のドラッグで行う想定。
     if (index_ >= 0 && index_ < static_cast<int>(events.size()))
         events.push_back(events[index_]);
 }
 
 void AnimationEventTrack::BeginEdit(int index_)
 {
+    // Copy/Paste の対象を現在選択中のイベントへ切り替える。
     editingEntry = index_;
 }
 
@@ -51,12 +54,14 @@ void AnimationEventTrack::DoubleClick(int index_)
 
 void AnimationEventTrack::Copy()
 {
+    // 編集対象が無い時は clipboard を変更しない。
     if (editingEntry >= 0)
         clipboard = events[editingEntry];
 }
 
 void AnimationEventTrack::Paste()
 {
+    // 既存イベントへ上書きする形の Paste。新規追加ではない点に注意。
     if (editingEntry >= 0)
         events[editingEntry] = clipboard;
 }
@@ -80,6 +85,7 @@ bool AnimationEventTrack::DrawSequencer(
     ImDrawList* drawList_ = ImGui::GetWindowDrawList();
     ImVec2 origin_ = ImGui::GetCursorScreenPos();
 
+    // Sequencer の背景を描き、イベントバーとのコントラストを確保する。
     drawList_->AddRectFilled(origin_, origin_ + ImVec2(contentWidth_, 180), IM_COL32(30, 30, 30, 255));
 
     // 長いアニメーションでも時間位置を把握できるよう、5秒間隔で目盛りを描画する。

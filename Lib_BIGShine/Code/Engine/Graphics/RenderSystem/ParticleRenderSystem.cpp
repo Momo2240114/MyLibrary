@@ -10,8 +10,10 @@
 
 void ParticleRenderSystem::Initialize(ID3D11Device* device)
 {
+    // Emitter間で共有するShaderを先に初期化し、Componentごとの重複作成を避ける。
     ParticleEmitter::InitializeSharedShaders(device);
 
+    // Camera行列など、全Particle Trackで共通に読むConstantBufferを作る。
     D3D11_BUFFER_DESC cbDesc{};
     cbDesc.ByteWidth = sizeof(CbScene);
     cbDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -21,12 +23,14 @@ void ParticleRenderSystem::Initialize(ID3D11Device* device)
 
 void ParticleRenderSystem::PushSubmit(ParticleComponent* component)
 {
+    // 無効ComponentはQueueに積まず、このFrameの描画対象から外す。
     if (!component || !component->IsEnabled()) return;
     drawInfos.push_back({ component });
 }
 
 void ParticleRenderSystem::UpdateAll(ID3D11DeviceContext*, float, const DirectX::XMMATRIX&, const std::vector<std::weak_ptr<ParticleComponent>>& components)
 {
+    // 毎FrameQueueを作り直し、破棄済み/無効化済みComponentが残らないようにする。
     drawInfos.clear();
     for (auto& wp : components)
     {
@@ -41,6 +45,7 @@ void ParticleRenderSystem::ApplySceneConstants(const RenderContext& rc)
     ID3D11DeviceContext* dc = rc.deviceContext;
     if (!dc || !rc.camera || !sceneConstantBuffer) return;
 
+    // Camera行列と逆行列を作り、Particle ShaderでBillboardやDepth復元に使えるようにする。
     CbScene cbScene{};
     DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&rc.camera->GetView());
     DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&rc.camera->GetProjection());
@@ -53,6 +58,7 @@ void ParticleRenderSystem::ApplySceneConstants(const RenderContext& rc)
     cbScene.cameraPosition = { eye.x, eye.y, eye.z, 0.0f };
     dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, nullptr, &cbScene, 0, 0);
 
+    // VS/GS/PSすべてから参照できるよう、同じScene CBをSlot7へBindする。
     ID3D11Buffer* sceneCB = sceneConstantBuffer.Get();
     dc->VSSetConstantBuffers(7, 1, &sceneCB);
     dc->GSSetConstantBuffers(7, 1, &sceneCB);
@@ -76,9 +82,11 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
     {
         BS_PROFILE_SCOPE("ParticleRender::SetupPipeline");
 
+        // Particleは半透明描画が中心なので、DepthはTestだけ行い書き込みはしない。
         dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestOnly), 0);
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
+        // ParticleEmitterはPointListからGeometry Shader等でQuadへ展開する。
         dc->IASetInputLayout(nullptr);
         dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
         ParticleEmitter::BindSharedRenderShaders(dc);
@@ -116,6 +124,7 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
                 {
                     BS_PROFILE_SCOPE("ParticleRender::SetBlendState");
 
+                    // Trackごとに加算/通常透明を切り替えて描画する。
                     dc->OMSetBlendState(
                         rc.renderState->GetBlendState(blendState_), blendFactor, 0xffffffff);
                 }
@@ -131,6 +140,7 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
     {
         BS_PROFILE_SCOPE("ParticleRender::CleanupPipeline");
 
+        // 後続描画へParticle用SRV/CB/Shader/BlendStateが漏れないよう、使ったSlotを明示的に戻す。
         ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr };
         dc->GSSetShaderResources(9, 2, nullSRVs);
 
@@ -163,6 +173,7 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
 
     {
         BS_PROFILE_SCOPE("ParticleRender::ClearDrawInfos");
+        // Submit Queueは1Frame限りなので、描画後に破棄する。
         drawInfos.clear();
     }
 }

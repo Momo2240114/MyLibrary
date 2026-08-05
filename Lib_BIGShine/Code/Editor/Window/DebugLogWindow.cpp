@@ -8,6 +8,7 @@
 
 namespace
 {
+    // 検索文字列とログ本文を同じ小文字へそろえ、大文字小文字を気にせず絞り込めるようにする。
     std::string ToLower(std::string text_)
     {
         std::transform(text_.begin(), text_.end(), text_.begin(),
@@ -29,6 +30,7 @@ void DebugLogWindow::Draw()
 {
     if (!isVisible) return;
 
+    // ツールバー、詳細設定、ログ表の順に描画し、通常はログ確認だけをすぐ見られる構成にする。
     if (BeginEditorWindow())
     {
         DrawStylePopup();
@@ -49,6 +51,7 @@ void DebugLogWindow::Draw()
 
 void DebugLogWindow::DrawToolbar()
 {
+    // 画面上部には件数、クリア、追従表示を置き、ログ確認中の状態をすぐ把握できるようにする。
     DebugLog& log_ = DebugLog::Instance();
     const size_t messageCount_ = log_.GetMessageCount();
 
@@ -78,6 +81,7 @@ void DebugLogWindow::DrawToolbar()
 
 void DebugLogWindow::DrawFilters()
 {
+    // カテゴリとレベルを別々にON/OFFし、必要な種類のログだけを表へ流す。
     if (ImGui::TreeNodeEx("Category", ImGuiTreeNodeFlags_DefaultOpen))
     {
         for (size_t index_ = 0; index_ < static_cast<size_t>(LOG_CATEGORY::COUNT); ++index_)
@@ -103,6 +107,7 @@ void DebugLogWindow::DrawFilters()
 
 void DebugLogWindow::DrawLogSettings()
 {
+    // 検索、保存、カテゴリ/レベルのような低頻度操作は折りたたみ設定側へまとめる。
     DebugLog& log_ = DebugLog::Instance();
 
     if (ImGui::Button("Test Info"))
@@ -133,6 +138,7 @@ void DebugLogWindow::DrawLogSettings()
 
 void DebugLogWindow::DrawDisplayControls(size_t messageCount_)
 {
+    // ログが大量に溜まっても重くならないよう、取得元件数と実際に描画する行数を別々に制限する。
     ImGui::SeparatorText("Display");
 
     ImGui::Checkbox("Live Tail", &liveTailMode);
@@ -154,6 +160,7 @@ void DebugLogWindow::DrawDisplayControls(size_t messageCount_)
 
 void DebugLogWindow::DrawLogTable()
 {
+    // まず表示対象のログ範囲を切り出し、その後にフィルタを通してテーブルへ描画する。
     DebugLog& log_ = DebugLog::Instance();
     const size_t messageCount_ = log_.GetMessageCount();
     const size_t safeMaxSource_ = static_cast<size_t>(std::clamp(maxSourceMessages, 100, 100000));
@@ -162,6 +169,7 @@ void DebugLogWindow::DrawLogTable()
     std::vector<LogMessage> messages_;
     if (liveTailMode)
     {
+        // Live Tailは最新ログを追うモード。秒数制限か最大件数制限のどちらかで取得範囲を絞る。
         if (limitBySeconds)
         {
             const double minElapsedSeconds_ =
@@ -176,6 +184,7 @@ void DebugLogWindow::DrawLogTable()
     }
     else
     {
+        // Browseモードでは古い位置から固定範囲を表示し、大量ログでも過去を確認しやすくする。
         const size_t startIndex_ = static_cast<size_t>((std::max)(browseStartIndex, 0));
         messages_ = log_.GetMessagesRange(startIndex_, safeMaxSource_);
     }
@@ -234,6 +243,7 @@ void DebugLogWindow::DrawLogTable()
 
 bool DebugLogWindow::PassesFilter(const LogMessage& message_) const
 {
+    // カテゴリ、レベル、検索文字列の順に落とし、不要なログ行をテーブル描画前に除外する。
     const size_t categoryIndex_ = static_cast<size_t>(message_.category);
     const size_t levelIndex_ = static_cast<size_t>(message_.level);
     if (categoryIndex_ >= categoryFilters.size() || !categoryFilters[categoryIndex_]) return false;
@@ -250,6 +260,7 @@ bool DebugLogWindow::PassesFilter(const LogMessage& message_) const
 
 ImVec4 DebugLogWindow::GetLevelColor(LOG_LEVEL level_) const
 {
+    // 重要度ごとの色を固定し、一覧内で警告やエラーを見つけやすくする。
     switch (level_)
     {
     case LOG_LEVEL::SUCCESS: return ImVec4(0.35f, 0.9f, 0.45f, 1.0f);

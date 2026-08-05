@@ -17,6 +17,7 @@
 
 namespace
 {
+    // ImSequencerはフレーム単位で編集するため、VFXタイムラインの秒変換に使う基準FPS。
     constexpr float TIMELINE_FPS = 60.0f;
 }
 
@@ -31,6 +32,7 @@ ParticleEditorWindow::ParticleEditorWindow(GameObjectManager* manager_)
 
 void ParticleEditorWindow::Draw()
 {
+    // プレビュー用の一時GameObject群は、ウィンドウを開いたタイミングで遅延初期化する。
     EnsurePreviewObjects();
 
     if (!BeginWorkspaceWindow(ImGuiWindowFlags_MenuBar))
@@ -69,12 +71,14 @@ void ParticleEditorWindow::Draw()
             minimumPreviewHeight_,
             available_.y - timelineHeight - splitterSize_ - verticalSpacing_);
 
+    // 左側にプレビューとタイムライン、右側にInspectorとAssetBrowserを置く編集レイアウト。
     ImGui::BeginGroup();
     ImGui::BeginChild("ParticlePreviewPanel", ImVec2(leftWidth_, previewHeight_), true);
     DrawPreviewPanel();
     ImGui::EndChild();
 
     ImGui::InvisibleButton("##VFXHorizontalSplitter", ImVec2(leftWidth_, splitterSize_));
+    // 横スプリッターでタイムライン高さを調整し、細かいトラック編集と大きなプレビューを切り替えやすくする。
     const bool isHorizontalSplitterHovered_ = ImGui::IsItemHovered();
     const bool isHorizontalSplitterActive_ = ImGui::IsItemActive();
     const ImU32 horizontalSplitterColor_ = ImGui::GetColorU32(
@@ -102,6 +106,7 @@ void ParticleEditorWindow::Draw()
     ImGui::SameLine(0.0f, 0.0f);
 
     ImGui::InvisibleButton("##VFXVerticalSplitter", ImVec2(splitterSize_, available_.y));
+    // 縦スプリッターでInspector幅を調整し、各コンポーネントのGui量に合わせられるようにする。
     const bool isVerticalSplitterHovered_ = ImGui::IsItemHovered();
     const bool isVerticalSplitterActive_ = ImGui::IsItemActive();
     const ImU32 verticalSplitterColor_ = ImGui::GetColorU32(
@@ -134,6 +139,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
 {
     if (isInitialized) return;
 
+    // エディタ内プレビュー専用のレンダーシステムとコンポーネントを生成し、実シーンを汚さず確認できるようにする。
     auto& graphics_ = GraphicsDeviceManager::Instance();
     modelRenderSystem.Initialize(graphics_.GetDevice());
     particleRenderSystem.Initialize(graphics_.GetDevice());
@@ -159,6 +165,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     }
 
     previewImpactGroundObject = std::make_shared<GameObject>("ImpactGroundPreviewObject");
+    // Impactプレビュー用に薄い床モデルを用意し、落下接触時のエフェクトを視覚的に確認する。
     previewImpactGroundObject->SetManager(gameObjectManager);
     previewImpactGroundObject->transform->gameObject = previewImpactGroundObject;
     previewImpactGroundObject->transform->localPosition = { 0.0f, -0.05f, 0.0f };
@@ -174,6 +181,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     }
 
     previewDecalObject = std::make_shared<GameObject>("ImpactDecalPreviewObject");
+    // デカールだけは別オブジェクトにし、接触位置・スケール・寿命をImpact設定から独立して反映する。
     previewDecalObject->SetManager(gameObjectManager);
     previewDecalObject->transform->gameObject = previewDecalObject;
     previewDecal = previewDecalObject->AddComponent<DecalComponent>();
@@ -182,6 +190,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
     editorCamera.ResetPreviewCamera(previewCamera);
     previewCamera.SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 100.0f);
 
+    // 起動時に既存アセット一覧を更新し、保存済みVFXやImpactをすぐ読み込める状態にする。
     RefreshParticleAssets();
     RefreshSequenceAssets();
     RefreshImpactEffectAssets();
@@ -190,6 +199,7 @@ void ParticleEditorWindow::EnsurePreviewObjects()
 
 void ParticleEditorWindow::DrawToolbar()
 {
+    // 再生制御、表示補助、カメラ設定は常に触れるようメニューバーへ集約している。
     if (ImGui::MenuItem("Refresh Assets"))
     {
         RefreshParticleAssets();
@@ -243,6 +253,7 @@ void ParticleEditorWindow::DrawPreviewPanel()
     const bool previewHovered_ =
         ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 
+    // プレビュー領域にマウスがある時だけフリーカメラ入力を受け、他のUI操作と競合しないようにする。
     editorCamera.UpdatePreviewFreeCamera(
         previewCamera,
         ImGui::GetIO().DeltaTime,
@@ -252,6 +263,7 @@ void ParticleEditorWindow::DrawPreviewPanel()
 
     if (previewTarget.GetShaderResourceView())
     {
+        // RenderPreviewで描いたオフスクリーンRTをImGui画像として貼り付ける。
         ImGui::Image(reinterpret_cast<void*>(previewTarget.GetShaderResourceView()), previewSize_);
     }
     else
@@ -268,10 +280,12 @@ void ParticleEditorWindow::DrawPreviewPanel()
 
 void ParticleEditorWindow::DrawAssetBrowserPanel()
 {
+    // 右パネルではImpactEffect、VFXSequence、Particle単体アセットを同じ場所から保存/読込する。
     ImGui::SeparatorText("Impact Effects");
     ImGui::InputText("Impact Name", impactEffectNameBuffer, IM_ARRAYSIZE(impactEffectNameBuffer));
     if (ImGui::Button("Save Impact") && previewImpactEffect)
     {
+        // ImpactEffect保存後はEffectManagerのキャッシュも更新し、ゲーム側の名前解決へ即反映する。
         if (previewImpactEffect->SaveAsset(
             "Data/ImpactEffect/" + std::string(impactEffectNameBuffer) + ".json"))
         {
@@ -298,6 +312,7 @@ void ParticleEditorWindow::DrawAssetBrowserPanel()
         const std::filesystem::path path_(impactEffectAssetPaths[impactIndex_]);
         if (ImGui::Selectable(path_.filename().string().c_str()))
         {
+            // Impactを読み込んだら名前欄をファイル名に合わせ、Drop Previewで即確認できる状態にする。
             if (previewImpactEffect && previewImpactEffect->LoadAsset(impactEffectAssetPaths[impactIndex_]))
             {
                 const std::string name_ = path_.stem().string();
@@ -377,6 +392,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
 {
     struct TimelineSequenceAdapter : public ImSequencer::SequenceInterface
     {
+        // タイムラインのTrackをImSequencerの編集インターフェースへ接続する一時アダプタ。
         std::vector<TimelineTrack>* tracks = nullptr;
         ParticleComponent* particle = nullptr;
         float duration = 0.0f;
@@ -399,6 +415,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
         {
             if (!tracks) return;
 
+            // バー編集後はフレーム範囲を秒へ戻し、1フレーム未満の長さにならないように丸める。
             for (TimelineTrack& track_ : *tracks)
             {
                 track_.frameStart = std::clamp(track_.frameStart, 0, GetFrameMax() - 1);
@@ -413,6 +430,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
             if (!tracks || index_ < 0 || index_ >= static_cast<int>(tracks->size())) return;
 
             TimelineTrack& track_ = (*tracks)[index_];
+            // Trackの秒情報から現在フレームを作り、バー色はParticleとMesh VFXで分ける。
             track_.frameStart = ToFrame(track_.startTime);
             track_.frameEnd = ToFrame(track_.startTime + track_.duration);
             if (start_) *start_ = &track_.frameStart;
@@ -455,6 +473,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
         {
             if (!tracks) return;
 
+            // 追加されたTrackは選択中Particleの先頭Emitter、またはMesh VFX全体を初期ターゲットにする。
             TimelineTrack track_{};
             track_.type = type_ == 0
                 ? TimelineTrackType::PARTICLE_EMITTER
@@ -488,6 +507,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
     ImGui::SetNextItemWidth(140.0f);
     if (ImGui::DragFloat("Duration", &sequenceDuration, 0.05f, 0.1f, 600.0f))
     {
+        // 全体尺が縮んだ時に、既存Trackが範囲外へはみ出さないよう開始/長さを補正する。
         sequenceDuration = (std::max)(0.1f, sequenceDuration);
         const float maximumStartTime_ = (std::max)(0.0f, sequenceDuration - (1.0f / TIMELINE_FPS));
         for (TimelineTrack& track_ : timelineTracks)
@@ -514,6 +534,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
     }
 
     TimelineSequenceAdapter adapter_;
+    // ImSequencer上の編集結果をtimelineTracksへ戻すため、毎フレーム現在データを接続する。
     adapter_.tracks = &timelineTracks;
     adapter_.particle = previewParticle.get();
     adapter_.duration = sequenceDuration;
@@ -535,6 +556,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
     if (currentFrame_ != previousFrame_)
     {
+        // スクラブされた時は再生を止め、時刻だけ移動して任意地点の確認をしやすくする。
         sequencePlaying = false;
         ResetSequence();
         sequenceTime = std::clamp(adapter_.ToTime(currentFrame_), 0.0f, sequenceDuration);
@@ -549,6 +571,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
     TimelineTrack& selectedTrack_ = timelineTracks[selectedTimelineTrack];
     ImGui::SeparatorText("Selected Track");
+    // 選択Trackでは種類、ターゲットEmitter、開始/終了時刻を直接編集する。
     const char* trackTypes_[] = { "Particle Emitter", "Mesh VFX" };
     int selectedType_ = static_cast<int>(selectedTrack_.type);
     if (ImGui::Combo("Type", &selectedType_, trackTypes_, IM_ARRAYSIZE(trackTypes_)))
@@ -590,6 +613,7 @@ void ParticleEditorWindow::DrawTimelinePanel()
 
 void ParticleEditorWindow::DrawInspectorPanel()
 {
+    // 上部は各プレビューコンポーネントの詳細、下部は汎用AssetBrowserという二段構成。
     ImGui::TextUnformatted("VFX Assets / Inspector");
     ImGui::Separator();
 
@@ -629,6 +653,7 @@ void ParticleEditorWindow::DrawInspectorPanel()
         }
         if (ImGui::BeginTabItem("Impact Effect"))
         {
+            // Impactタブを開いた時点で床への落下プレビューを使う前提に切り替える。
             impactPreviewMode = true;
             if (ImGui::Button("Drop Preview")) StartImpactPreview();
             ImGui::SameLine();
@@ -677,6 +702,7 @@ void ParticleEditorWindow::DrawInspectorPanel()
 
 void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 {
+    // プレビューサイズに合わせてRTをリサイズし、通常描画と同じRenderContextでVFXを確認する。
     auto& graphics_ = GraphicsDeviceManager::Instance();
     ID3D11Device* device_ = graphics_.GetDevice();
     ID3D11DeviceContext* context_ = graphics_.GetContext();
@@ -695,7 +721,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     if (previewObject && previewObject->transform)
     {
-        // Keep the preview world matrix synchronized with inspector edits.
+        // Inspectorで編集したTransformを、プレビュー描画前にワールド行列へ反映する。
         previewObject->transform->UpdateWorldMatrix();
     }
 
@@ -710,6 +736,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     }
     UpdateSequence(deltaTime_);
     UpdateImpactPreview(deltaTime_);
+    // 各プレビュー用コンポーネントを通常のゲーム更新と同じ順に進める。
     previewParticle->Update(deltaTime_);
     previewMeshVFX->Update(deltaTime_);
     if (previewDecal) previewDecal->Update(deltaTime_);
@@ -729,6 +756,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     if (showGrid)
     {
+        // グリッドは別描画後にRTを戻し、以降のモデル/パーティクル描画先が外れないようにする。
         editorPrimitiveRenderer.DrawGrid(
             20,
             1.0f,
@@ -747,6 +775,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     if (previewAttackHit) previewAttackHit->SubmitDebugShapes();
     if (impactPreviewMode)
     {
+        // Impact落下中は接触前の仮想弾をデバッグ球で表示する。
         if (impactPreviewPlaying)
         {
             shapeRenderer_.DrawSphere(
@@ -760,6 +789,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
 
     if (previewDecal && previewDecal->IsEnabled())
     {
+        // Impact設定に含まれるデカールは一時DecalManagerへ提出してプレビュー内だけで描画する。
         previewDecal->SubmitDecal(decalManager_);
     }
 
@@ -779,6 +809,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
         (impactPreviewMode && previewImpactGroundModel &&
             !previewImpactGroundModel->GetMeshes().empty()))
     {
+        // モデルがある場合は通常モデル描画を先に行い、無い場合だけ空背景としてスカイボックスを描く。
         modelRenderSystem.RenderAll(renderContext_);
         previewTarget.ResetRenderTarget(context_);
     }
@@ -789,6 +820,7 @@ void ParticleEditorWindow::RenderPreview(const ImVec2& previewSize_)
     }
 
     particleRenderSystem.PushSubmit(previewParticle.get());
+    // Particle、MeshVFX、DebugShapeの順に重ね、最終結果をpreviewTargetへ確定する。
     particleRenderSystem.RenderAll(renderContext_, true);
     previewTarget.ResetRenderTarget(context_);
     meshVFXRenderSystem.PushSubmit(previewMeshVFX.get());
@@ -814,6 +846,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
 {
     if (!sequencePlaying) return;
 
+    // 再生ヘッドの位置に応じてTrackを開始/停止し、タイムライン上の有効区間だけを鳴らす。
     sequenceTime += deltaTime_;
     if (previewAttackHit) previewAttackHit->Update(deltaTime_);
     for (TimelineTrack& track_ : timelineTracks)
@@ -824,6 +857,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
 
         if (shouldBeActive_ && !track_.active)
         {
+            // 区間に入った瞬間だけトリガーし、毎フレーム再発火しないようactiveで管理する。
             track_.active = true;
             if (track_.type == TimelineTrackType::PARTICLE_EMITTER && previewParticle)
             {
@@ -837,6 +871,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
         }
         else if (!shouldBeActive_ && track_.active)
         {
+            // 区間から外れたTrackは停止し、ループやスクラブ時に前回の再生が残らないようにする。
             track_.active = false;
             if (track_.type == TimelineTrackType::PARTICLE_EMITTER && previewParticle)
             {
@@ -851,6 +886,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
 
     if (sequenceTime >= sequenceDuration)
     {
+        // 終端到達時は一度全Trackをリセットし、Loopが有効なら先頭から再開する。
         const bool shouldContinue_ = sequenceLoop;
         ResetSequence();
         sequencePlaying = shouldContinue_;
@@ -860,6 +896,7 @@ void ParticleEditorWindow::UpdateSequence(float deltaTime_)
 
 void ParticleEditorWindow::ResetSequence()
 {
+    // タイムライン再生状態と各プレビューコンポーネントを初期状態へ戻す。
     sequenceTime = 0.0f;
     if (previewParticle) previewParticle->Stop();
     if (previewMeshVFX)
@@ -882,6 +919,7 @@ bool ParticleEditorWindow::SaveSequence(const std::string& path_)
 {
     if (path_.empty()) return false;
 
+    // タイムライン、Particle、MeshVFX、AttackHit設定を1つのVFXSequence JSONへまとめて保存する。
     nlohmann::json sequenceJson_;
     sequenceJson_["AssetType"] = "VFXSequence";
     sequenceJson_["AssetVersion"] = 1;
@@ -934,6 +972,7 @@ bool ParticleEditorWindow::LoadSequence(const std::string& path_)
     file_ >> sequenceJson_;
     if (sequenceJson_.value("AssetType", "") != "VFXSequence") return false;
 
+    // 読み込み前に再生を止め、保存されていたTrackと各コンポーネント設定を復元する。
     sequencePlaying = false;
     ResetSequence();
     sequenceDuration = (std::max)(0.1f, sequenceJson_.value("Duration", 5.0f));
@@ -978,6 +1017,7 @@ bool ParticleEditorWindow::LoadSequence(const std::string& path_)
 
 void ParticleEditorWindow::RefreshParticleAssets()
 {
+    // Particle単体アセットはData/Particle直下のJSONだけを対象にする。
     particleAssetPaths.clear();
     const std::filesystem::path particleDir_("Data/Particle");
     if (!std::filesystem::exists(particleDir_)) return;
@@ -994,6 +1034,7 @@ void ParticleEditorWindow::RefreshParticleAssets()
 
 void ParticleEditorWindow::RefreshSequenceAssets()
 {
+    // VFXSequenceはタイムライン付きの複合アセットとしてData/VFXSequenceから列挙する。
     sequenceAssetPaths.clear();
     const std::filesystem::path sequenceDirectory_("Data/VFXSequence");
     if (!std::filesystem::exists(sequenceDirectory_)) return;
@@ -1007,6 +1048,7 @@ void ParticleEditorWindow::RefreshSequenceAssets()
 
 void ParticleEditorWindow::RefreshImpactEffectAssets()
 {
+    // ImpactEffectはサブフォルダ運用も想定し、再帰的にJSONを集めて表示順を安定させる。
     impactEffectAssetPaths.clear();
     const std::filesystem::path directory_("Data/ImpactEffect");
     if (!std::filesystem::exists(directory_)) return;
@@ -1022,6 +1064,7 @@ void ParticleEditorWindow::RefreshImpactEffectAssets()
 
 void ParticleEditorWindow::StartImpactPreview()
 {
+    // 落下プレビュー開始時は既存VFXを止め、接触時にImpactEffectだけが発火する状態にする。
     impactPreviewPositionY = (std::max)(impactPreviewHeight, 0.1f);
     impactPreviewPlaying = true;
     if (previewParticle) previewParticle->Stop();
@@ -1036,6 +1079,7 @@ void ParticleEditorWindow::StartImpactPreview()
 void ParticleEditorWindow::UpdateImpactPreview(float deltaTime_)
 {
     if (!impactPreviewMode || !impactPreviewPlaying) return;
+    // 指定高さから仮想的に落下させ、地面に触れた瞬間にImpactEffectを再生する。
     impactPreviewPositionY -= (std::max)(impactPreviewFallSpeed, 0.1f) *
         (std::max)(deltaTime_, 0.0f);
     if (impactPreviewPositionY > 0.0f) return;
@@ -1047,6 +1091,7 @@ void ParticleEditorWindow::UpdateImpactPreview(float deltaTime_)
 void ParticleEditorWindow::PlayImpactPreviewAtContact()
 {
     if (!previewImpactEffect) return;
+    // ImpactEffect内の各Entryを種類ごとにプレビュー用コンポーネントへ流し込む。
     const ImpactEffectAsset& asset_ = previewImpactEffect->GetAsset();
     for (const ImpactEffectEntry& entry_ : asset_.entries)
     {

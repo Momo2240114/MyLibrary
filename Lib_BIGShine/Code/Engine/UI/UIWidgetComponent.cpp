@@ -14,11 +14,13 @@ namespace
 {
     void SerializeFloat2(nlohmann::json& json_, const char* key_, const DirectX::XMFLOAT2& value_)
     {
+        // XMFLOAT2をJSON配列として保存する共通処理。
         json_[key_] = { value_.x, value_.y };
     }
 
     void DeserializeFloat2(const nlohmann::json& json_, const char* key_, DirectX::XMFLOAT2& value_)
     {
+        // Keyが無い古いデータでは現在値を残す。
         if (!json_.contains(key_) || !json_[key_].is_array() || json_[key_].size() < 2) return;
         value_.x = json_[key_][0].get<float>();
         value_.y = json_[key_][1].get<float>();
@@ -30,12 +32,14 @@ void UIWidgetComponent::Start()
     BS_PROFILE_SCOPE("UIWidgetComponent::Start");
     if (widgetId.empty())
     {
+        // ID未設定の場合はGameObject名を初期値にし、Editor上で識別しやすくする。
         if (auto gameObject_ = GetGameObject())
         {
             widgetId = gameObject_->GetName();
         }
     }
     ResolveParentWidget();
+    // 初回FrameでLayout計算されるようDirtyにする。
     MarkLayoutDirty();
 }
 
@@ -45,6 +49,7 @@ void UIWidgetComponent::Update(float deltaTime_)
     (void)deltaTime_;
     if (parentWidget.expired())
     {
+        // 親Widgetが後から生成/破棄された場合に再解決する。
         ResolveParentWidget();
     }
 }
@@ -64,6 +69,7 @@ void UIWidgetComponent::Gui()
     strncpy_s(parentWidgetIdBuffer_, sizeof(parentWidgetIdBuffer_), parentWidgetId.c_str(), _TRUNCATE);
     if (ImGui::InputText("Parent Widget Id", parentWidgetIdBuffer_, sizeof(parentWidgetIdBuffer_)))
     {
+        // 親IDを変えたら参照先とLayout基準が変わるため再解決する。
         parentWidgetId = parentWidgetIdBuffer_;
         ResolveParentWidget();
         MarkLayoutDirty();
@@ -115,6 +121,7 @@ void UIWidgetComponent::Deserialize(const nlohmann::json& json_)
 
     if (json_.contains("RectTransform") && json_["RectTransform"].is_object())
     {
+        // RectTransformはまとめてObjectとして保存し、Layout関係の値を一括復元する。
         const nlohmann::json& rectJson_ = json_["RectTransform"];
         DeserializeFloat2(rectJson_, "AnchorMin", rectTransform.anchorMin);
         DeserializeFloat2(rectJson_, "AnchorMax", rectTransform.anchorMax);
@@ -147,6 +154,7 @@ void UIWidgetComponent::ResolveParentWidget()
     auto gameObject_ = GetGameObject();
     if (!gameObject_ || !gameObject_->transform) return;
 
+    // Transform階層を上にたどり、最初に見つかったWidgetを親候補にする。
     auto parentTransform_ = gameObject_->transform->parent.lock();
     while (parentTransform_)
     {
@@ -158,6 +166,7 @@ void UIWidgetComponent::ResolveParentWidget()
             {
                 if (parentWidgetId.empty() || widget_->GetWidgetId() == parentWidgetId)
                 {
+                    // 親ID未指定なら見つかった親WidgetのIDを保存し、次回以降の参照を安定させる。
                     parentWidget = widget_;
                     if (parentWidgetId.empty())
                     {
@@ -183,6 +192,7 @@ void UIWidgetComponent::CalculateLayout(
         ? board_->CalculateBoardScale(screenSize_)
         : DirectX::XMFLOAT2{ 1.0f, 1.0f };
 
+    // 親Widgetがあれば親Rect基準、無ければ画面全体を親Rectとして扱う。
     const UIScreenRect parentRect_ = parentWidget_
         ? parentWidget_->GetScreenRect()
         : UIScreenRect{ { 0.0f, 0.0f }, screenSize_ };
@@ -190,6 +200,7 @@ void UIWidgetComponent::CalculateLayout(
     const DirectX::XMFLOAT2 parentSize_ = parentRect_.GetSize();
     const DirectX::XMFLOAT2 anchorMinPoint_ =
     {
+        // Anchorの0.0-1.0値を親Rect内のScreen座標へ変換する。
         parentRect_.min.x + parentSize_.x * rectTransform.anchorMin.x,
         parentRect_.min.y + parentSize_.y * rectTransform.anchorMin.y
     };
@@ -206,6 +217,7 @@ void UIWidgetComponent::CalculateLayout(
 
     DirectX::XMFLOAT2 size_ =
     {
+        // Anchor範囲のStretch分にsizeDeltaを加え、Board ScaleとLocal Scaleを反映する。
         (anchorSize_.x + rectTransform.sizeDelta.x * scale_.x) * rectTransform.localScale.x,
         (anchorSize_.y + rectTransform.sizeDelta.y * scale_.y) * rectTransform.localScale.y
     };
@@ -214,15 +226,18 @@ void UIWidgetComponent::CalculateLayout(
 
     const DirectX::XMFLOAT2 anchorReference_ =
     {
+        // Anchor範囲内でPivot位置に対応する基準点を求める。
         anchorMinPoint_.x + anchorSize_.x * rectTransform.pivot.x,
         anchorMinPoint_.y + anchorSize_.y * rectTransform.pivot.y
     };
     const DirectX::XMFLOAT2 pivotPosition_ =
     {
+        // anchoredPositionはBoard Scaleを掛けてScreen座標へ反映する。
         anchorReference_.x + rectTransform.anchoredPosition.x * scale_.x,
         anchorReference_.y + rectTransform.anchoredPosition.y * scale_.y
     };
 
+    // Pivot位置からRectの左上/右下を算出する。
     screenRect.min =
     {
         pivotPosition_.x - size_.x * rectTransform.pivot.x,

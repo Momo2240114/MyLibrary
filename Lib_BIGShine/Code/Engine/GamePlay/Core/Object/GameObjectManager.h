@@ -22,9 +22,13 @@ struct ID3D11RenderTargetView;
 
 enum class SCENE_RUNTIME_STATE
 {
+    // Scene Load中。必要Assetや必須Componentの準備完了を待つ。
     LOADING,
+    // Load完了後、TransformやRuntime状態を最終確定する。
     INITIALIZING,
+    // 通常更新中。
     RUNNING,
+    // 必須Asset失敗などでScene実行を止めた状態。
     FAILED
 };
 
@@ -46,7 +50,7 @@ public:
     {
         const std::string& baseName_ = name_; // ← これ追加
 
-        // 重複名数える
+        // 同名Objectがある場合は末尾番号を付け、Scene内で名前が衝突しないようにする。
         int count_ = 0;
         for (auto& o : objects)
         {
@@ -55,7 +59,7 @@ public:
                 count_++;
         }
 
-        // final name 決定
+        // 最終的に使うObject名を決定する。
         std::string finalName_ = baseName_;
         if (count_ > 0)
         {
@@ -64,21 +68,20 @@ public:
             finalName_ += buf_;
         }
 
-        // オブジェクトの生成
+        // Objectを生成し、ManagerとTransformの所有Object参照を設定する。
         auto newObject_ = std::make_shared<GameObject>();
         newObject_->nameComponent->name = finalName_;
         newObject_->transform->gameObject = newObject_;
 
-        //ここで「自身」をオブジェクトに
         newObject_->SetManager(this);
         objects.emplace_back(newObject_);       // 全体リストに追加
-        // --- 既存の pendingStarts への追加や初期化処理 ---
+        // StartはUpdate中の追加にも対応できるよう、即時ではなく待機リストで処理する。
         pendingStarts.push_back(newObject_);
         return newObject_;
     }
 
 
-    // name検索
+    // 名前でObjectを検索する。
     std::shared_ptr<GameObject> Find(const std::string& name_)
     {
         for (auto& o : objects)
@@ -94,7 +97,7 @@ public:
     {
         std::vector<std::shared_ptr<T>> results_;
 
-        // 全オブジェクトを走査
+        // 全Objectから指定型Componentを1つずつ集める。
         for (auto& object_ : objects)
         {
             if (!object_) continue;
@@ -122,15 +125,16 @@ public:
 
     void Submit(ID3D11DeviceContext* context_)
     {
+        // 全Objectの描画Submitをまとめて呼ぶ。
         for (auto& object_ : objects)
             object_->Submit(context_);
     }
 
-    // 1. 指定したオブジェクトを削除する
+    // 指定したObjectを削除予約する。
     void Destroy(std::shared_ptr<GameObject> object_);
     void Destroy(std::string objectName_);
 
-    // 2. 全てのオブジェクトを解放する（Live Object対策）
+    // 全てのObjectを解放する。
     void Clear();
 
     // 選択中オブジェクト
@@ -141,10 +145,10 @@ public:
     void DetachObject(const std::shared_ptr<GameObject>& object_);
     void RemoveObject(const std::string& name_);
 
-    // 状態を尋ねる窓口
+    // 状態を尋ねる窓口。
     const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
 
-    // GUI は選択中オブジェクトだけ表示
+    // GUIは選択中Objectだけ表示する。
     void Gui();
     void DrawHierarchyNode(std::shared_ptr<GameObject> object_, GameObject** objectToDelete_);
 
@@ -195,7 +199,7 @@ public:
         const std::string& rootObjectName_,
         bool includeChildren_ = true);
 
-    //すべてのオブジェクトやコンポーネントが平等にアクセスするための窓口
+    // 全Object/Componentが共有Resourceへアクセスするための窓口。
     ResourceManager* GetResourceManager() { return resourceManager.get(); }
 
     void DrawHierarchyGui();   // ヒストリー(階層)GUI
@@ -213,7 +217,7 @@ public:
     GuardSystem& GetGuardSystem() { return *guardSystem; }
     EffectManager& GetEffectManager() { return *effectManager; }
 private:
-    // unique name helper
+    // 指定名を基準に、Scene内で重複しない名前を作る。
     std::string MakeUniqueName(std::string baseName_)
     {
         std::string name_ = baseName_;
@@ -232,7 +236,7 @@ private:
 
 
 private:
-    // GUIの状態を保持する専用の構造体
+    // Scene保存/Load GUIの状態を保持する専用構造体。
     struct SceneState {
         char name[64] = "MainScene";
         std::vector<std::string> list;
@@ -265,13 +269,13 @@ private:
     std::unique_ptr<EffectManager> effectManager =
         std::make_unique<EffectManager>();
 
-    // 描画システムの所有権はマネージャが保持し、シーン全体で共有する。
+    // 描画Systemの所有権はManagerが保持し、Scene全体で共有する。
     std::unique_ptr<ParticleRenderSystem> particleRenderSystem;
     std::unique_ptr<MeshVFXRenderSystem> meshVFXRenderSystem;
     std::unique_ptr<MotionVelocityRenderSystem> motionVelocityRenderSystem;
-    // パーティクルコンポーネントのみを保持するリスト
+    // ParticleComponentだけを弱参照で保持し、失効したものはFrame終端で掃除する。
     std::vector<std::weak_ptr<ParticleComponent>> particleComponents;
-    //現在のシーン
+    // 現在のScene。
     Scene* currentScene = nullptr;
     std::vector<std::string> prefabFiles; // プレハブ名のリスト
     int selectedPrefabIndex = 0;          // GUIでの選択位置

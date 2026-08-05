@@ -4,6 +4,7 @@
 #include <crtdbg.h>
 
 #if defined( DEBUG ) || defined( _DEBUG )
+// Debugビルド用のANSIメッセージ付きAssert。
 #define _ASSERT_EXPR_A(expr, msg) \
 	(void)((!!(expr)) || \
 	(1 != _CrtDbgReport(_CRT_ASSERT, __FILE__, __LINE__, NULL, "%s", msg)) || \
@@ -16,6 +17,7 @@
 
 inline LPWSTR HRTrace(HRESULT hr)
 {
+	// HRESULTをWindowsのエラーメッセージ文字列へ変換する。
 	LPWSTR msg;
 	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPWSTR>(&msg), 0, NULL);
 	return msg;
@@ -24,6 +26,7 @@ inline LPWSTR HRTrace(HRESULT hr)
 
 class benchmark
 {
+	// QueryPerformanceCounterを使った簡易計測クラス。
 	LARGE_INTEGER ticks_per_second;
 	LARGE_INTEGER start_ticks;
 	LARGE_INTEGER current_ticks;
@@ -43,10 +46,12 @@ public:
 
 	void begin()
 	{
+		// 計測開始時刻を更新する。
 		QueryPerformanceCounter(&start_ticks);
 	}
 	float end()
 	{
+		// beginからの経過秒を返す。
 		QueryPerformanceCounter(&current_ticks);
 		return static_cast<float>(current_ticks.QuadPart - start_ticks.QuadPart) / static_cast<float>(ticks_per_second.QuadPart);
 	}

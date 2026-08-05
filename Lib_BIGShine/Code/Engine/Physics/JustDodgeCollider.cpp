@@ -10,6 +10,8 @@
 
 JustDodgeCollider::JustDodgeCollider()
 {
+    // JustDodgeColliderは常時有効ではなく、Dodge中の受付窓だけActionから有効化する。
+    // 生成時は無効にしておき、誤って通常状態でJustDodge判定が出ないようにする。
     enabled = false;
     EnforceJustDodgeSettings();
     debugPrimitiveColor = { 0.2f, 0.6f, 1.0f, 1.0f };
@@ -23,6 +25,8 @@ const std::string& JustDodgeCollider::GetName() const
 
 void JustDodgeCollider::Start()
 {
+    // CapsuleColliderとしてPhysics/Debug設定を初期化したあと、ActionRegistryへ開閉Actionを登録する。
+    // 最後にDeactivateして、Load直後の状態を必ず「受付なし」に揃える。
     CapsuleCollider::Start();
     RegisterActions();
     Deactivate();
@@ -30,6 +34,8 @@ void JustDodgeCollider::Start()
 
 void JustDodgeCollider::Activate()
 {
+    // 受付窓開始時は、前回の重複判定履歴とTrigger中情報を消してから有効化する。
+    // これにより、古い攻撃との接触状態が残っていても新しい受付窓として判定できる。
     ClearDodgedAttackHistory();
     currentTriggers.clear();
     SetEnabled(true);
@@ -37,6 +43,8 @@ void JustDodgeCollider::Activate()
 
 void JustDodgeCollider::Deactivate()
 {
+    // 受付窓終了時はColliderを無効化し、Trigger状態と成功履歴を破棄する。
+    // 次のDodgeでは必ず新しい攻撃受付として始める。
     SetEnabled(false);
     currentTriggers.clear();
     ClearDodgedAttackHistory();
@@ -44,6 +52,8 @@ void JustDodgeCollider::Deactivate()
 
 bool JustDodgeCollider::CanReactToAttack(const HitBox& hitBox_) const
 {
+    // JustDodgeSystemへ成功候補として渡す前に、所有者攻撃、Team、同一activationを除外する。
+    // ここでは「このColliderがこのHitBoxへ反応してよいか」だけを判断する。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     const std::shared_ptr<GameObject> attackOwner_ =
         const_cast<HitBox&>(hitBox_).GetAttackOwner();
@@ -74,16 +84,19 @@ bool JustDodgeCollider::CanReactToAttack(const HitBox& hitBox_) const
 
 void JustDodgeCollider::RecordDodgedAttack(const HitBox& hitBox_)
 {
+    // 成功済みのHitBox activationを記録し、同じ攻撃判定から複数回JustDodge通知が出ないようにする。
     dodgedAttackActivationIds[&hitBox_] = hitBox_.GetActivationId();
 }
 
 void JustDodgeCollider::ClearDodgedAttackHistory()
 {
+    // 受付窓を開き直す時やLoad復元時に、過去の成功履歴をリセットする。
     dodgedAttackActivationIds.clear();
 }
 
 void JustDodgeCollider::Gui()
 {
+    // 受付状態、Team、重複反応設定、Action名をEditor上で確認・調整する。
     CapsuleCollider::Gui();
 
     ImGui::SeparatorText("Just Dodge Collider");
@@ -120,6 +133,8 @@ void JustDodgeCollider::Gui()
 
 void JustDodgeCollider::Serialize(nlohmann::json& json_) const
 {
+    // Capsule形状に加えて、Action名と反応条件を保存する。
+    // 現在有効かどうかや成功履歴はFrame中の状態なので保存しない。
     CapsuleCollider::Serialize(json_);
 
     json_["ActionPrefix"] = actionPrefix;
@@ -132,6 +147,8 @@ void JustDodgeCollider::Serialize(nlohmann::json& json_) const
 
 void JustDodgeCollider::Deserialize(const nlohmann::json& json_)
 {
+    // 設定だけを復元し、Runtime履歴は初期化する。
+    // CollisionRoleなどは保存値に左右されないよう最後に固定設定を再適用する。
     CapsuleCollider::Deserialize(json_);
 
     actionPrefix = json_.value("ActionPrefix", std::string("JustDodge"));
@@ -152,6 +169,7 @@ void JustDodgeCollider::Deserialize(const nlohmann::json& json_)
 
 std::string JustDodgeCollider::GetActionPrefix() const
 {
+    // Prefix未指定ならOwner名を使い、複数ObjectのAction名衝突を避ける。
     if (!actionPrefix.empty())
     {
         return actionPrefix;
@@ -168,6 +186,7 @@ std::string JustDodgeCollider::GetActionPrefix() const
 
 std::string JustDodgeCollider::GetActivateActionName() const
 {
+    // Object名/Prefix付きのAction名を作り、ActionSequenceから個別Colliderを開けるようにする。
     const std::string prefix_ = GetActionPrefix();
     if (prefix_.empty()) return activateActionName;
     return prefix_ + "_" + activateActionName;
@@ -175,6 +194,7 @@ std::string JustDodgeCollider::GetActivateActionName() const
 
 std::string JustDodgeCollider::GetDeactivateActionName() const
 {
+    // 有効化と同じ命名規則で、受付終了用Action名を作る。
     const std::string prefix_ = GetActionPrefix();
     if (prefix_.empty()) return deactivateActionName;
     return prefix_ + "_" + deactivateActionName;
@@ -182,6 +202,7 @@ std::string JustDodgeCollider::GetDeactivateActionName() const
 
 void JustDodgeCollider::EnforceJustDodgeSettings()
 {
+    // JustDodge判定は物理的に押し返さず、HitBoxとのTrigger重なりだけを見る。
     collisionRole = CollisionRole::JUST_DODGE_BOX;
     usePhysicsResponse = false;
     physicsControlsTransform = false;
@@ -191,6 +212,8 @@ void JustDodgeCollider::EnforceJustDodgeSettings()
 
 void JustDodgeCollider::RegisterActions()
 {
+    // colliderComponents内から自分のshared_ptrを探し、Action lambdaへweak_ptrで渡す。
+    // これによりActionSequenceからEnable/Disableを呼んでも、削除済みColliderを触らない。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 

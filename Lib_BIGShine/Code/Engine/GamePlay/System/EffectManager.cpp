@@ -31,6 +31,7 @@ namespace
     {
         BS_PROFILE_SCOPE("EffectManager::NormalizeOrDefault");
 
+        // ヒット方向や補間方向がゼロベクトルになった場合は、呼び出し側の基準方向を使う。
         const float lengthSq_ =
             vector_.x * vector_.x + vector_.y * vector_.y + vector_.z * vector_.z;
         if (lengthSq_ <= 0.000001f) return fallback_;
@@ -50,6 +51,7 @@ namespace
     {
         BS_PROFILE_SCOPE("EffectManager::LerpDirection");
 
+        // 方向ベクトルは補間後に正規化し、速度や距離の差が向きの計算に混ざらないようにする。
         const float clampedAmount_ = std::clamp(amount_, 0.0f, 1.0f);
         return NormalizeOrDefault(
             {
@@ -65,6 +67,7 @@ namespace
 
     float Clamp01(float value_)
     {
+        // エフェクトの進行率やフェード率を、シェーダへ渡しやすい0〜1範囲に丸める。
         return std::clamp(value_, 0.0f, 1.0f);
     }
 
@@ -73,6 +76,7 @@ namespace
         const DirectX::XMFLOAT3& secondPosition_,
         float amount_)
     {
+        // 軌跡補間用の単純な線形補間。方向補間と違い、位置なので正規化しない。
         return
         {
             firstPosition_.x + (secondPosition_.x - firstPosition_.x) * amount_,
@@ -84,6 +88,8 @@ namespace
 
 void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
 {
+    // 攻撃演出の生成タイミング、姿勢、当たり判定、ヒット演出を1つの設定として保存する。
+    // キー名は既存アセットとの互換を優先して小文字系のまま維持する。
     json_ = {
         { "vfxPath", setting_.vfxPath },
         { "spawnTime", setting_.spawnTime },
@@ -123,11 +129,13 @@ void to_json(nlohmann::json& json_, const SlashEffectSpawnSetting& setting_)
 
 void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
 {
+    // 省略された項目は実戦で破綻しにくい初期値に戻し、古いJSONもそのまま読めるようにする。
     setting_.vfxPath = json_.value("vfxPath", std::string{});
     setting_.spawnTime = json_.value("spawnTime", 0.0f);
     setting_.lifeTime = json_.value("lifeTime", 0.18f);
     auto readVector3_ = [&json_](const char* key_, const DirectX::XMFLOAT3& fallback_)
         {
+            // 配列で保存されたVector3だけを読み、壊れた形式ならフォールバックを返す。
             const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
             if (!value_.is_array() || value_.size() < 3u) return fallback_;
             return DirectX::XMFLOAT3{
@@ -173,6 +181,7 @@ void from_json(const nlohmann::json& json_, SlashEffectSpawnSetting& setting_)
 void EffectManager::Initialize(GameObjectManager* gameObjectManager_)
 {
     gameObjectManager = gameObjectManager_;
+    // アセット名の候補と検索マップを作ってから、プール用に使用頻度の高いEffectを事前生成する。
     RefreshAssetCache();
     BuildAssetNameMap();
     PreloadAllEffects();

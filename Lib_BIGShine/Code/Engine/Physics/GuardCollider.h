@@ -10,6 +10,8 @@
 class GameObject;
 class HitBox;
 
+// ガード受付用のCapsuleCollider。
+// 有効中にHitBoxと重なるとGuardSystemへ渡され、通常ガード/ジャストガードを判定する。
 class GuardCollider : public CapsuleCollider
 {
 public:
@@ -44,22 +46,26 @@ public:
     std::string GetActionPrefix() const;
 
 private:
+    // Guard専用のCollisionRoleとPhysics挙動を再適用する。
     void EnforceGuardSettings();
+    // ActionSequenceからGuard受付やJustGuard受付を切り替えるActionを登録する。
     void RegisterActions();
+    // 子ObjectにGuardColliderがある場合、親方向からGuard所有者を解決する。
     std::shared_ptr<GameObject> ResolveGuardOwnerFromHierarchy() const;
 
 private:
-    std::string actionPrefix;
-    std::string activateActionName = "EnableGuardCollider";
-    std::string deactivateActionName = "DisableGuardCollider";
-    std::string enableJustGuardActionName = "EnableJustGuard";
-    std::string disableJustGuardActionName = "DisableJustGuard";
+    std::string actionPrefix; // 登録Action名のPrefix。
+    std::string activateActionName = "EnableGuardCollider"; // GuardCollider有効化Action名。
+    std::string deactivateActionName = "DisableGuardCollider"; // GuardCollider無効化Action名。
+    std::string enableJustGuardActionName = "EnableJustGuard"; // JustGuard受付開始Action名。
+    std::string disableJustGuardActionName = "DisableJustGuard"; // JustGuard受付終了Action名。
 
-    bool canGuardOwnerAttack = false;
-    bool oncePerAttackActivation = true;
-    int teamId = 0;
-    bool justGuardEnabled = false;
+    bool canGuardOwnerAttack = false; // 自分/同階層の攻撃をGuard対象にするか。
+    bool oncePerAttackActivation = true; // 同じ攻撃判定へ1回だけGuardするか。
+    int teamId = 0; // Team判定用ID。
+    bool justGuardEnabled = false; // 現在JustGuard受付中か。
 
     GameObject* guardOwner = nullptr;
+    // HitBoxごとのActivation IDを覚え、同じ攻撃への重複Guardを防ぐ。
     std::unordered_map<const HitBox*, uint64_t> guardedAttackActivationIds;
 };

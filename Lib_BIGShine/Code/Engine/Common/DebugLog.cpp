@@ -19,6 +19,7 @@ DebugLog& DebugLog::Instance()
 
 void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file_, int line_, const std::string& text_)
 {
+    // 時刻文字列はロック外で作り、messagesの排他時間を短くする。
     const std::chrono::steady_clock::time_point now_ = std::chrono::steady_clock::now();
     LogMessage message_;
     message_.category = category_;
@@ -29,6 +30,7 @@ void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file
     message_.time = MakeTimeString();
 
     std::lock_guard<std::mutex> lock_(mutex);
+    // sequenceとelapsedSecondsは同じ基準で並び替えや差分取得ができるよう、追加時に確定する。
     message_.sequence = nextSequence++;
     message_.elapsedSeconds = std::chrono::duration<double>(now_ - startTime).count();
     messages.emplace_back(std::move(message_));
@@ -37,6 +39,7 @@ void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file
 void DebugLog::Clear()
 {
     std::lock_guard<std::mutex> lock_(mutex);
+    // ログを消した時点を新しい経過時間の基準にする。
     messages.clear();
     nextSequence = 0u;
     startTime = std::chrono::steady_clock::now();
@@ -53,6 +56,7 @@ std::vector<LogMessage> DebugLog::GetMessagesRange(size_t startIndex_, size_t co
     std::lock_guard<std::mutex> lock_(mutex);
     if (startIndex_ >= messages.size() || count_ == 0u) return {};
 
+    // DebugLogWindowの仮想リスト表示用に、必要な範囲だけコピーする。
     const size_t endIndex_ = (std::min)(messages.size(), startIndex_ + count_);
     return std::vector<LogMessage>(messages.begin() + startIndex_, messages.begin() + endIndex_);
 }
@@ -64,6 +68,7 @@ std::vector<LogMessage> DebugLog::GetMessagesSince(double minElapsedSeconds_, si
 
     size_t firstIndex_ = messages.size();
     size_t collectedCount_ = 0u;
+    // 新しいログから後ろ向きに探し、時間条件と最大件数を満たす範囲を切り出す。
     for (size_t index_ = messages.size(); index_ > 0u; --index_)
     {
         const LogMessage& message_ = messages[index_ - 1u];
@@ -96,6 +101,7 @@ bool DebugLog::SaveText(const std::string& path_) const
     const std::filesystem::path outputPath_(path_);
     if (outputPath_.has_parent_path())
     {
+        // 保存先フォルダが無い場合でも、Editorから直接出力できるよう作成する。
         std::filesystem::create_directories(outputPath_.parent_path());
     }
 
@@ -128,6 +134,7 @@ bool DebugLog::SaveJson(const std::string& path_) const
     if (!file_.is_open()) return false;
 
     const std::vector<LogMessage> copy_ = GetMessages();
+    // nlohmannを使わず、ログ専用の軽いJSONとして手書き出力する。
     file_ << "{\n";
     file_ << "  \"Logs\": [\n";
     for (size_t index_ = 0; index_ < copy_.size(); ++index_)
@@ -200,6 +207,7 @@ std::string DebugLog::MakeTimeString()
 std::string DebugLog::EscapeJsonString(const std::string& text_)
 {
     std::ostringstream stream_;
+    // ログ本文に改行や引用符が含まれてもJSONを壊さないようにする。
     for (const char char_ : text_)
     {
         switch (char_)

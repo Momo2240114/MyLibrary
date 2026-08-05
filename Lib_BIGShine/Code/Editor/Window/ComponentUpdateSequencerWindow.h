@@ -17,12 +17,14 @@ public:
 private:
     enum class COMPONENT_UPDATE_PHASE
     {
+        // 通常UpdateとLateUpdateは別々の実行順を持つため、編集対象を分ける。
         UPDATE,
         LATE_UPDATE
     };
 
     struct ComponentRow
     {
+        // 表示用にComponent/Colliderの種別と元の登録順をまとめる。
         std::shared_ptr<Component> component;
         bool isCollider = false;
         int order = 0;
@@ -35,6 +37,7 @@ private:
     void MoveComponentPriority(Component& component_, int delta_);
 
     COMPONENT_UPDATE_PHASE selectedPhase = COMPONENT_UPDATE_PHASE::UPDATE;
+    // 表にColliderや無効Componentを含めるかどうかの表示オプション。
     bool showColliders = true;
     bool showDisabledComponents = true;
 };

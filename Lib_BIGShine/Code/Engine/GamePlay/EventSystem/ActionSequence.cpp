@@ -11,9 +11,12 @@
 
 namespace
 {
+    // ImSequencerはFrame単位で編集するため、ActionSequence内部の秒数と相互変換する。
     constexpr float SEQUENCE_FPS = 60.0f;
     constexpr unsigned int ACTION_COLOR = 0xFF4FA3FF;
 
+    // ImSequencerへSequenceDataを渡すためのAdapter。
+    // Editor上の移動/追加/削除をActionReferenceのexecutionTimeへ反映する。
     struct ActionSequenceAdapter : public ImSequencer::SequenceInterface
     {
         SequenceData* sequence = nullptr;
@@ -21,11 +24,13 @@ namespace
 
         int ToFrame(float time_) const
         {
+            // 秒指定のAction時間をTimeline表示用のFrameへ変換する。
             return static_cast<int>(std::round(time_ * SEQUENCE_FPS));
         }
 
         float ToTime(int frame_) const
         {
+            // Editorで動かしたFrame位置を、実行に使う秒数へ戻す。
             return static_cast<float>(frame_) / SEQUENCE_FPS;
         }
 
@@ -33,6 +38,7 @@ namespace
         {
             if (!sequence) return;
 
+            // executionTimeを正として、表示用の開始/終了Frameを再同期する。
             for (auto& action_ : sequence->actions)
             {
                 action_.timelineStartFrame = ToFrame(action_.executionTime);
@@ -56,6 +62,7 @@ namespace
         {
             if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return "";
             const auto& action_ = sequence->actions[index_];
+            // Action未選択時もTimeline上で空欄にせず、選択待ちだと分かる表示にする。
             return action_.actionName.empty() ? "(Select Action)" : action_.actionName.c_str();
         }
 
@@ -63,6 +70,7 @@ namespace
         {
             if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return;
 
+            // ImSequencerが直接Frame値を編集できるよう、ActionReference内のFrame値のポインタを渡す。
             auto& action_ = sequence->actions[index_];
             if (start_) *start_ = &action_.timelineStartFrame;
             if (end_) *end_ = &action_.timelineEndFrame;
@@ -74,6 +82,7 @@ namespace
         {
             if (!sequence) return;
 
+            // 編集終了時にFrame値を秒数へ戻し、Sequence長がAction位置を下回らないよう補正する。
             for (auto& action_ : sequence->actions)
             {
                 action_.timelineStartFrame = (std::max)(0, action_.timelineStartFrame);
@@ -87,6 +96,7 @@ namespace
         {
             if (!sequence) return;
 
+            // Add時は現在のTimelineカーソル位置へActionを配置する。
             ActionReference action_;
             action_.executionTime = currentFrame ? ToTime(*currentFrame) : 0.0f;
             sequence->actions.push_back(action_);
@@ -96,6 +106,7 @@ namespace
         void Del(int index_) override
         {
             if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return;
+            // Timeline上で選択されたActionをSequenceから削除する。
             sequence->actions.erase(sequence->actions.begin() + index_);
         }
 
@@ -103,6 +114,7 @@ namespace
         {
             if (!sequence || index_ < 0 || index_ >= static_cast<int>(sequence->actions.size())) return;
 
+            // 複製直後に完全に重ならないよう、1Frameだけ後ろへずらす。
             auto action_ = sequence->actions[index_];
             action_.executionTime = (std::min)(sequence->duration, action_.executionTime + (1.0f / SEQUENCE_FPS));
             sequence->actions.push_back(action_);
@@ -113,6 +125,7 @@ namespace
 
 void ActionSequence::Start()
 {
+    // Component開始時に登録済みSequenceをActionRegistryへ公開する。
     RegisterSequence("");
 }
 
@@ -171,6 +184,7 @@ void ActionSequence::EnsureImmediateSequence(
         });
     if (sequenceIterator_ == sequences.end())
     {
+        // Combatなど外部コードから即時Sequenceを要求された場合、Editor用データとしても保持する。
         SequenceData sequence_{};
         sequence_.name = sequenceName_;
         sequence_.duration = 0.1f;
@@ -257,6 +271,7 @@ void ActionSequence::ExecuteAction(const std::string& actionName_)
 
 void ActionSequence::DrawEditorGui()
 {
+    // OwnerのLocalActionと、共有GlobalActionの両方からSequence内で呼ぶActionを選べるようにする。
     auto& globalReg = ActionRegistry::Instance();
     auto owner = gameObject.lock();
 
@@ -268,6 +283,7 @@ void ActionSequence::DrawEditorGui()
     std::vector<CategoryEntry> allCategories;
 
     if (owner) {
+        // LocalActionはOwner固有の行動なので、同名CategoryでもGlobalより優先して候補へ並べる。
         for (const auto& cat : owner->localRegistry.GetCategories()) {
             allCategories.push_back({ cat, true });
         }
@@ -283,6 +299,7 @@ void ActionSequence::DrawEditorGui()
 
         if (ImGui::CollapsingHeader(sequence_.name.empty() ? "Unnamed Sequence" : sequence_.name.c_str(), nullptr, flags))
         {
+            // Sequence名はRegistryへ登録されるAction名でもあるため、ここで編集できるようにする。
             char buf[64];
             strcpy_s(buf, sequence_.name.c_str());
             if (ImGui::InputText("Sequence Name", buf, sizeof(buf))) {
@@ -299,11 +316,13 @@ void ActionSequence::DrawEditorGui()
 
             ImGui::SetNextItemWidth(180.0f);
             if (ImGui::DragFloat("Timeline Length", &sequence_.duration, 0.1f, 0.1f, 600.0f, "%.2f sec")) {
+                // Timeline長は最低0.1秒を保証し、SequencerのFrame範囲が0にならないようにする。
                 sequence_.duration = (std::max)(0.1f, sequence_.duration);
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Sort by Start Time")) {
+                // 実行順を見た目と合わせたいときの手動整列。選択Indexはずれるため解除する。
                 std::stable_sort(
                     sequence_.actions.begin(),
                     sequence_.actions.end(),
@@ -317,6 +336,7 @@ void ActionSequence::DrawEditorGui()
             ActionSequenceAdapter adapter_;
             adapter_.sequence = &sequence_;
             adapter_.currentFrame = &sequence_.currentFrame;
+            // Sequencer表示前に秒数からFrameへ同期し、Editor上の位置を最新化する。
             adapter_.SyncFrames();
 
             const bool showSequencer_ = ImGui::BeginChild("ActionSequenceTimeline", ImVec2(0, 260), true);
@@ -335,6 +355,7 @@ void ActionSequence::DrawEditorGui()
             ImGui::EndChild();
 
             if (ImGui::Button("Register & Play", ImVec2(-1, 25))) {
+                // 編集中のSequenceをRegistryへ反映して、その場で再生確認する。
                 RegisterSequence("");
                 StartSequence(sequenceIndex_);
             }
@@ -347,6 +368,7 @@ void ActionSequence::DrawEditorGui()
                 const std::string categoryLabel_ = action_.category.empty() ? "Category" : action_.category;
                 if (ImGui::BeginCombo("Category", categoryLabel_.c_str())) {
                     for (const auto& entry_ : allCategories) {
+                        // [L]/[G]でLocal/Globalの出所を見分け、同じ名前のCategoryでも判断できるようにする。
                         const std::string label_ = (entry_.isLocal ? "[L] " : "[G] ") + entry_.name;
                         if (ImGui::Selectable(label_.c_str(), action_.category == entry_.name)) {
                             action_.category = entry_.name;
@@ -362,6 +384,7 @@ void ActionSequence::DrawEditorGui()
                     if (ImGui::BeginCombo("Action", actionLabel_.c_str())) {
                         std::vector<std::string> actionNames_;
                         if (owner && owner->localRegistry.HasCategory(action_.category)) {
+                            // Localに同Categoryがある場合はOwner固有Actionを優先して表示する。
                             actionNames_ = owner->localRegistry.GetActionNames(action_.category);
                         }
                         else {
@@ -382,10 +405,13 @@ void ActionSequence::DrawEditorGui()
 
                 ImGui::SetNextItemWidth(180.0f);
                 if (ImGui::DragFloat("Execution Time", &action_.executionTime, 0.01f, 0.0f, sequence_.duration, "%.3f sec")) {
+                    // 数値入力で変更した場合も、Timeline表示のFrameへ即反映する。
                     action_.executionTime = (std::clamp)(action_.executionTime, 0.0f, sequence_.duration);
                     adapter_.SyncFrames();
                 }
 
+                // Blackboard WritesはAction呼び出し直前だけ書く一時パラメータ。
+                // 同じActionをSequenceごとに違う値で使い回せるようにする。
                 ImGui::SeparatorText("Blackboard Writes");
                 int removeWriteIndex_ = -1;
                 for (int writeIndex_ = 0;
@@ -413,6 +439,7 @@ void ActionSequence::DrawEditorGui()
                     const char* typeNames_[] = { "Float", "Int", "Bool" };
                     if (ImGui::Combo("Type", &typeIndex_, typeNames_, 3))
                     {
+                        // 保存時はEnum値として保持し、Guiでは分かりやすい型名に変換する。
                         write_.type = static_cast<BLACKBOARD_VALUE_TYPE>(typeIndex_);
                     }
 
@@ -456,6 +483,7 @@ void ActionSequence::DrawEditorGui()
 
 
 void ActionSequence::Serialize(nlohmann::json& j) const {
+    // SequenceDataをJSONへ保存する。Actionの時刻は現在形式では絶対秒数として記録する。
     nlohmann::json seqArray = nlohmann::json::array();
     for (const auto& seq : sequences) {
         nlohmann::json seqItem;
@@ -473,6 +501,7 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
             nlohmann::json writesArray_ = nlohmann::json::array();
             for (const BlackboardValueWrite& write_ : act.blackboardWrites)
             {
+                // Blackboardへ書く値は型ごとに使う欄が違うため、全型の値を保存してEditor復元を単純にする。
                 writesArray_.push_back({
                     {"category", write_.category},
                     {"key", write_.key},
@@ -494,6 +523,7 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
 
 void ActionSequence::Deserialize(const nlohmann::json& j)
 {
+    // Scene読み込み時にSequenceを復元し、最後にRegistryへ再登録する。
     registerGlobal = j.value("RegisterGlobal", false);
     if (!j.contains("Sequences") || !j["Sequences"].is_array()) return;
     sequences.clear();
@@ -513,11 +543,12 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                     ref.category = actItem.value("cat", "");
                     ref.actionName = actItem.value("name", "");
                     if (actItem.contains("time")) {
+                        // 現在形式はSequence開始からの絶対秒数。
                         ref.executionTime = actItem.value("time", 0.0f);
                         accumulatedTime_ = ref.executionTime;
                     }
                     else {
-                        // Legacy ActionSequence data stored relative delays.
+                        // 旧形式はAction間の相対delay保存だったため、累積して絶対秒数へ変換する。
                         accumulatedTime_ += actItem.value("delay", 0.0f);
                         ref.executionTime = accumulatedTime_;
                     }
@@ -530,6 +561,7 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
                         {
                             if (!writeItem_.is_object()) continue;
 
+                            // 古いデータで値が足りなくても既定値で復元し、型番号は範囲内に丸める。
                             BlackboardValueWrite write_;
                             write_.category = writeItem_.value("category", std::string("Attack"));
                             write_.key = writeItem_.value("key", std::string("Damage"));

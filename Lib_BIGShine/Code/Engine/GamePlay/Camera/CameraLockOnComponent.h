@@ -13,12 +13,17 @@ class ThirdPersonCameraComponent;
 
 struct LockOnCameraCompositionCorrection
 {
+    // 横方向の構図補正。正負で左右へずらす。
     float sideOffset = 0.0f;
+
+    // カメラ距離・高さ・注視点高さへの加算補正。
     float distanceOffset = 0.0f;
     float heightOffset = 0.0f;
     float lookAtHeightOffset = 0.0f;
     float focusTargetRateOffset = 0.0f;
     float fovOffset = 0.0f;
+
+    // 補正全体の混ぜ具合。CombatCameraCompositionComponentから渡される。
     float weight = 0.0f;
 };
 
@@ -37,7 +42,10 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
+    // LockOn制御全体の有効切り替え。
     void SetLockOnEnabled(bool enabled_);
+
+    // CameraActionなど、一時演出中にLockOnの通常制御を止める。
     void SetActionSuppressed(bool suppressed_);
     bool IsLockOnEnabled() const { return lockOnEnabled; }
     bool IsActionSuppressed() const { return actionSuppressed; }
@@ -48,42 +56,65 @@ public:
     DirectX::XMFLOAT3 GetCurrentBaseCameraPosition() const { return currentBaseCameraPosition; }
     DirectX::XMFLOAT3 GetCurrentBaseLookAtPosition() const { return currentBaseLookAtPosition; }
     const LockOnCameraCompositionCorrection& GetCompositionCorrection() const { return compositionCorrection; }
+
+    // 現在のPlayer/Target/FocusTarget参照。
     std::shared_ptr<GameObject> GetPlayerTarget() const { return playerTarget.lock(); }
     std::shared_ptr<GameObject> GetLockOnTarget() const { return lockOnTarget.lock(); }
     std::shared_ptr<GameObject> GetLockOnFocusTarget() const { return lockOnFocusTarget.lock(); }
     void SetPlayerTarget(const std::shared_ptr<GameObject>& playerTarget_);
     void SetLockOnTarget(const std::shared_ptr<GameObject>& lockOnTarget_);
     void SetLockOnFocusTarget(const std::shared_ptr<GameObject>& focusTarget_);
+
+    // Playerから見て、画面位置・距離・優先度が最も良いLockOnTargetを探す。
     std::shared_ptr<GameObject> FindBestLockOnTarget(
         const std::shared_ptr<GameObject>& playerTarget_) const;
+
+    // 入力方向に応じて、現在Targetから左右/上下に近い候補へ切り替える。
     bool SwitchLockOnTarget(const DirectX::XMFLOAT2& inputDirection_);
     bool SwitchLockOnTargetNext();
     bool SwitchLockOnTargetPrevious();
+
+    // Player指定でLockOnのON/OFFを切り替える。
     bool ToggleLockOnForPlayer(const std::shared_ptr<GameObject>& playerTarget_);
+
+    // CameraCollisionComponentから圧縮率を受け取り、壁際用の構図へ補正する。
     bool ApplyCollisionComposition(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& baseLookAtPosition_,
         float compressionRate_,
-        float collisionLift_,
-        float deltaTime_);
+            float collisionLift_,
+            float deltaTime_);
+
+    // CombatCameraCompositionComponentなどから、攻撃中の構図補正を受け取る。
     void SetCompositionCorrection(
         const LockOnCameraCompositionCorrection& correction_);
     void ClearCompositionCorrection();
 
 private:
+    // 所有ObjectからCamera/ThirdPersonCameraを探し、名前指定Targetも解決する。
     void ResolveReferences();
+
+    // LockOn切り替えなどのActionを登録する。
     void RegisterActions();
+
+    // 補間状態や壁カメラ状態を初期化する。
     void ResetTracking();
+
+    // LockOnが通常TPS制御を奪っていた場合に返す。
     void ReleaseThirdPersonCamera();
     void ApplyCameraPose(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_);
+
+    // 外部のFovDirectorなどがFOVを変えた時、baseFovYを同期する。
     void SynchronizeExternalFovChange(const std::shared_ptr<CameraComponent>& camera_);
     DirectX::XMFLOAT3 GetFocusPosition(
         const std::shared_ptr<GameObject>& object_,
         const DirectX::XMFLOAT3& fallbackOffset_) const;
     DirectX::XMFLOAT3 GetPlayerBottomPosition(
         const std::shared_ptr<GameObject>& object_) const;
+
+    // 壁接触時でもPlayer/Targetが画面内に残るよう、注視点を下げたり寄せたりする。
     DirectX::XMFLOAT3 CalculateCollisionLookAt(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& baseLookAtPosition_,
@@ -97,8 +128,10 @@ private:
         const DirectX::XMFLOAT3& lookAtPosition_,
         const DirectX::XMFLOAT3& playerTopPosition_,
         const DirectX::XMFLOAT3& playerBottomPosition_,
-        const DirectX::XMFLOAT3& targetPosition_,
-        float compressionRate_) const;
+            const DirectX::XMFLOAT3& targetPosition_,
+            float compressionRate_) const;
+
+    // 画面内収まりを評価しながら、必要なFOV追加量を求める。
     float CalculateCollisionFov(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_,
@@ -110,8 +143,10 @@ private:
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_,
         const DirectX::XMFLOAT3& worldPosition_,
-        float fovY_,
-        DirectX::XMFLOAT2& screenPosition_) const;
+            float fovY_,
+            DirectX::XMFLOAT2& screenPosition_) const;
+
+    // Player/Targetの画面上の見切れ具合をスコア化する。
     float CalculateProjectionScore(
         const DirectX::XMFLOAT2& playerTopScreen_,
         const DirectX::XMFLOAT2& playerBottomScreen_,
@@ -121,7 +156,9 @@ private:
         bool targetVisible_) const;
     DirectX::XMFLOAT3 CalculateWeightedLookAt(
         const DirectX::XMFLOAT3& playerPosition_,
-        const DirectX::XMFLOAT3& targetPosition_) const;
+            const DirectX::XMFLOAT3& targetPosition_) const;
+
+    // 円形Arena設定が有効な時、カメラ位置をArena外へ出しすぎない。
     DirectX::XMFLOAT3 ClampCameraPositionToArena(
         const DirectX::XMFLOAT3& cameraPosition_) const;
     float CalculateWallCameraCandidateScore(
@@ -134,6 +171,7 @@ private:
         int candidateSide_) const;
     struct LockOnDistanceInfo
     {
+        // PlayerとTarget間の距離情報。カメラ距離や近距離補正の基準になる。
         DirectX::XMFLOAT3 playerPosition{};
         DirectX::XMFLOAT3 targetPosition{};
         DirectX::XMFLOAT3 difference{};
@@ -144,6 +182,7 @@ private:
 
     struct LockOnCandidate
     {
+        // LockOn可能な候補。focusTargetは実際に見る点、combatOwnerは本体Object。
         std::weak_ptr<GameObject> focusTarget;
         std::weak_ptr<GameObject> combatOwner;
         DirectX::XMFLOAT3 worldPosition{};
@@ -153,16 +192,22 @@ private:
         bool isVisible = false;
         bool isDefaultTarget = false;
         bool isCombatOwnerSelf = false;
+
+        // 距離、画面中心、優先度などを合成した選択スコア。
         float score = 0.0f;
     };
 
     LockOnDistanceInfo CalculateLockOnDistanceInfo() const;
     std::vector<LockOnCandidate> CollectLockOnCandidates(
         const std::shared_ptr<GameObject>& playerTarget_) const;
+
+    // 候補一覧から最もスコアの高いTargetを選ぶ。
     LockOnCandidate FindBestLockOnCandidate(
         const std::shared_ptr<GameObject>& playerTarget_) const;
     std::shared_ptr<GameObject> FindDirectionalLockOnTarget(
         const DirectX::XMFLOAT2& inputDirection_) const;
+
+    // 選ばれた候補を現在Targetとして反映する。
     bool ApplyLockOnCandidate(const LockOnCandidate& candidate_);
     bool ResolveFocusTargetFallback();
     void UpdateLockOnSwitchInput(float deltaTime_);
@@ -172,6 +217,7 @@ private:
     void RegisterDefaultSwitchInputBindings();
     void DrawLockOnDebugGui();
 private:
+    // LockOnが追跡するPlayer、Target、注視点Target。
     std::weak_ptr<GameObject> playerTarget;
     std::weak_ptr<GameObject> lockOnTarget;
     std::weak_ptr<GameObject> lockOnFocusTarget;
@@ -184,10 +230,13 @@ private:
     bool lockOnEnabled = false;
     bool actionSuppressed = false;
 
+    // Player/Targetの注視点補正。
     DirectX::XMFLOAT3 playerOffset{ 0.0f, 1.5f, 0.0f };
     DirectX::XMFLOAT3 playerBottomOffset{ 0.0f, 0.05f, 0.0f };
     DirectX::XMFLOAT3 targetOffset{ 0.0f, 1.2f, 0.0f };
     float maxDistance = 28.0f;
+
+    // PlayerとTargetの距離から決める基本カメラ距離。
     float baseDistance = 7.0f;
     float distanceScale = 0.45f;
     float minCameraDistance = 6.0f;
@@ -197,6 +246,8 @@ private:
     float heightDifferenceScale = 0.35f;
     float sideOffset = 1.25f;
     float currentSide = 1.0f;
+
+    // 近距離/遠距離で注視点のPlayer寄り/Target寄りを切り替える。
     float closeDistance = 8.0f;
     float closeFocusBias = 0.28f;
     float farFocusBias = 0.5f;
@@ -217,6 +268,8 @@ private:
     float collisionLookAtInterpolationSpeed = 18.0f;
     float collisionFovMaxAddition = 18.0f;
     float collisionFovInterpolationSpeed = 10.0f;
+
+    // 円形Arenaの外周付近で、壁際カメラへ寄せるための設定。
     bool enableCircularArenaCamera = false;
     DirectX::XMFLOAT3 arenaCenter{ 0.0f, 0.0f, 0.0f };
     float arenaRadius = 15.0f;
@@ -237,6 +290,8 @@ private:
     float wallCameraOppositeSideMinimumHoldTime = 0.85f;
     float wallCameraOppositeSideSwitchScoreThreshold = 0.75f;
     float wallCameraContinuityScoreWeight = 0.12f;
+
+    // LockOnTarget切り替え入力のしきい値とクールダウン。
     float switchStickThreshold = 0.65f;
     float switchStickReleaseThreshold = 0.25f;
     float switchCooldown = 0.18f;
@@ -247,6 +302,7 @@ private:
     float centerDistanceWeight = 0.35f;
     float priorityWeight = 0.25f;
 
+    // カメラ位置と注視点の補間状態。
     DirectX::XMFLOAT3 interpolatedPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 interpolatedLookAt{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 collisionLookAt{ 0.0f, 0.0f, 0.0f };
@@ -255,12 +311,16 @@ private:
     DirectX::XMFLOAT3 previousArenaOutwardDirection{ 0.0f, 0.0f, 1.0f };
     DirectX::XMFLOAT3 currentBaseCameraPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 currentBaseLookAtPosition{ 0.0f, 0.0f, 0.0f };
+
+    // Target切り替え検出用の前回参照。
     std::weak_ptr<GameObject> previousLockOnTarget;
     std::weak_ptr<GameObject> previousFocusTarget;
     LockOnCameraCompositionCorrection compositionCorrection;
     float baseFovY = 60.0f;
     float currentCollisionFov = 60.0f;
     float currentTargetDistance = 0.0f;
+
+    // Debug GUIで表示する画面投影・候補スコア。
     DirectX::XMFLOAT2 debugPlayerScreen{ 0.5f, 0.5f };
     DirectX::XMFLOAT2 debugPlayerBottomScreen{ 0.5f, 0.5f };
     DirectX::XMFLOAT2 debugTargetScreen{ 0.5f, 0.5f };
@@ -291,6 +351,8 @@ private:
     bool debugPlayerBottomCorrection = false;
     bool debugFovCorrection = false;
     bool hasTrackingPose = false;
+
+    // FOVやCollisionCompositionなど、外部から渡された状態の有無。
     bool hasBaseFov = false;
     bool hasCollisionComposition = false;
     bool ownsThirdPersonControl = false;

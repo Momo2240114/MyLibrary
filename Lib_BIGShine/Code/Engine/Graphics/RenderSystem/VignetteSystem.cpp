@@ -9,9 +9,11 @@
 
 bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
 {
+    // ViewportとShaderのUV計算に使う画面Sizeを保持する。
     width = width_;
     height = height_;
 
+    // PostEffect共通のFullScreen Vertex Shaderを使う。
     if (FAILED(CPUResourceLoader::LoadVertexShader(
         device_,
         "Shader/FullScreenVS.cso",
@@ -23,6 +25,7 @@ bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
         return false;
     }
 
+    // Vignette合成専用のPixel Shaderを読み込む。
     if (FAILED(CPUResourceLoader::LoadPixelShader(
         device_,
         "Shader/VignettePS.cso",
@@ -31,6 +34,7 @@ bool VignetteSystem::Initialize(ID3D11Device* device_, int width_, int height_)
         return false;
     }
 
+    // Vignette設定は演出で変わるため、CPUから毎Frame書けるBufferにする。
     D3D11_BUFFER_DESC desc_{};
     desc_.ByteWidth = sizeof(CbVignette);
     desc_.Usage = D3D11_USAGE_DYNAMIC;
@@ -58,6 +62,7 @@ void VignetteSystem::Execute(
     ID3D11DeviceContext* dc_ = rc_.deviceContext;
     const RenderState* rs_ = rc_.renderState;
 
+    // 入出力やRenderStateが無い場合は、現在のFrameではPostEffectをSkipする。
     if (dc_ == nullptr || rs_ == nullptr || sceneSRV_ == nullptr || outputRTV_ == nullptr)
     {
         return;
@@ -65,6 +70,7 @@ void VignetteSystem::Execute(
 
     UpdateConstantBuffer(rc_, parameters_);
 
+    // FullScreen PassなのでDepthを無効化し、面のCullも行わない。
     dc_->RSSetState(rs_->GetRasterizerState(RasterizerState::SolidCullNone));
     dc_->OMSetDepthStencilState(rs_->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
 
@@ -78,6 +84,7 @@ void VignetteSystem::Execute(
     dc_->RSSetViewports(1, &viewport_);
     dc_->OMSetRenderTargets(1, &outputRTV_, nullptr);
 
+    // Scene TextureをSampleして、Vignetteを合成した色をoutputへ書き込む。
     ID3D11SamplerState* sampler_ = rs_->GetSamplerState(SamplerState::LinearClamp);
     dc_->VSSetShader(fullScreenVs.Get(), nullptr, 0);
     dc_->PSSetShader(pixelShader.Get(), nullptr, 0);
@@ -86,6 +93,7 @@ void VignetteSystem::Execute(
     dc_->PSSetShaderResources(0, 1, &sceneSRV_);
     DrawFullScreenQuad(dc_);
 
+    // 次のPassで同じTextureをRTVとして使えるよう、SRV参照を解除しておく。
     ID3D11ShaderResourceView* nullSRV_ = nullptr;
     dc_->PSSetShaderResources(0, 1, &nullSRV_);
     dc_->OMSetDepthStencilState(rs_->GetDepthStencilState(DepthState::TestOnly), 0);
@@ -93,6 +101,7 @@ void VignetteSystem::Execute(
 
 void VignetteSystem::UpdateConstantBuffer(const RenderContext& rc_, const Parameters& parameters_)
 {
+    // Shaderが必要な値をまとめ、未使用領域は0初期化で安定させる。
     CbVignette cb_{};
     cb_.screenSize = { static_cast<float>(width), static_cast<float>(height) };
     cb_.center = parameters_.center;
@@ -107,6 +116,7 @@ void VignetteSystem::UpdateConstantBuffer(const RenderContext& rc_, const Parame
     D3D11_MAPPED_SUBRESOURCE mapped_{};
     if (SUCCEEDED(rc_.deviceContext->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_)))
     {
+        // Dynamic Bufferへ現在FrameのVignette設定を転送する。
         std::memcpy(mapped_.pData, &cb_, sizeof(cb_));
         rc_.deviceContext->Unmap(constantBuffer.Get(), 0);
     }
@@ -114,6 +124,7 @@ void VignetteSystem::UpdateConstantBuffer(const RenderContext& rc_, const Parame
 
 void VignetteSystem::DrawFullScreenQuad(ID3D11DeviceContext* dc_)
 {
+    // FullScreenVSがSV_VertexIDから三角形を作るため、頂点入力は空にする。
     dc_->IASetInputLayout(nullptr);
     dc_->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
     dc_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

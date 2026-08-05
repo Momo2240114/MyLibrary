@@ -7,7 +7,8 @@
 
 class ColliderComponent;
 
-// キャラクターの移動リクエストを収集し、PhysX 互換の速度を 適用させるクラス
+// Characterの移動リクエストを収集し、PhysX互換の速度として適用するComponent。
+// PlayerやAIは速度、RootMotion、Impulse、向きだけを予約し、実際の反映はUpdateでまとめて行う。
 class CharacterMovementComponent : public Component
 {
 public:
@@ -26,6 +27,7 @@ public:
     void SetHorizontalVelocity(const DirectX::XMFLOAT3& velocity_);
     void StopHorizontalMovement();
     void StopHorizontalMovementImmediately();
+    // TimeScale中でも物理速度へ正しく変換するため、元のDeltaTimeを渡す。
     void SetUnscaledDeltaTime(float deltaTime_);
     void AddRootMotionDelta(const DirectX::XMFLOAT3& delta_);
     void AddImpulse(const DirectX::XMFLOAT3& impulse_);
@@ -41,16 +43,18 @@ public:
     std::shared_ptr<ColliderComponent> ResolveCollider();
 private:
 
+    // 予約された向きをTransformへ反映する。
     void ApplyFacing(float deltaTime_);
+    // 1Frameだけ有効なRootMotionや縦Impulseを消す。
     void ClearFrameRequests();
 
 private:
     std::weak_ptr<ColliderComponent> collider;
-    DirectX::XMFLOAT3 desiredHorizontalVelocity{ 0.0f, 0.0f, 0.0f };
-    DirectX::XMFLOAT3 rootMotionDelta{ 0.0f, 0.0f, 0.0f };
-    DirectX::XMFLOAT3 impulseVelocity{ 0.0f, 0.0f, 0.0f };
-    DirectX::XMFLOAT3 facingDirection{ 0.0f, 0.0f, 1.0f };
-    DirectX::XMFLOAT3 lastAppliedVelocity{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 desiredHorizontalVelocity{ 0.0f, 0.0f, 0.0f }; // StateやAIから要求された水平速度。
+    DirectX::XMFLOAT3 rootMotionDelta{ 0.0f, 0.0f, 0.0f }; // Animation由来の1Frame移動量。
+    DirectX::XMFLOAT3 impulseVelocity{ 0.0f, 0.0f, 0.0f }; // Knockbackなどの減衰する外力。
+    DirectX::XMFLOAT3 facingDirection{ 0.0f, 0.0f, 1.0f }; // 次に向ける水平向き。
+    DirectX::XMFLOAT3 lastAppliedVelocity{ 0.0f, 0.0f, 0.0f }; // Debug表示用の最終適用速度。
     float facingTurnSpeed = 10.0f;
     float impulseDamping = 6.0f;
     float unscaledDeltaTime = 0.0f;

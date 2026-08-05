@@ -11,10 +11,12 @@
 
 namespace
 {
+    // VFXMaterial JSONの保存形式バージョン。
     constexpr uint32_t VFX_MATERIAL_VERSION = 1u;
 
     nlohmann::json WriteVector2(const DirectX::XMFLOAT2& value_)
     {
+        // DirectX型はJSONへ直接書けないため、数値配列へ分解する。
         return { value_.x, value_.y };
     }
 
@@ -33,6 +35,7 @@ namespace
         const char* key_,
         const DirectX::XMFLOAT2& fallback_)
     {
+        // 指定キーが無い/配列長が足りない場合は既存値を維持する。
         const nlohmann::json value_ = json_.value(key_, nlohmann::json::array());
         if (!value_.is_array() || value_.size() < 2u) return fallback_;
         return { value_[0].get<float>(), value_[1].get<float>() };
@@ -64,6 +67,7 @@ namespace
 
     const char* ToString(VFX_MATERIAL_BLEND_MODE mode_)
     {
+        // JSONはEditorで読みやすいよう、enum値ではなく文字列で保存する。
         return mode_ == VFX_MATERIAL_BLEND_MODE::ADDITIVE ? "ADDITIVE" : "ALPHA";
     }
 
@@ -129,6 +133,7 @@ namespace
 
     VFX_MATERIAL_BLEND_MODE ParseBlendMode(const nlohmann::json& json_)
     {
+        // 旧データ互換のため、整数enumと文字列の両方を受け付ける。
         if (json_.is_number_integer())
         {
             return static_cast<VFX_MATERIAL_BLEND_MODE>(std::clamp(json_.get<int>(), 0, 1));
@@ -211,6 +216,7 @@ namespace
 
     nlohmann::json WriteUv(const VFXMaterialUVData& uv_)
     {
+        // MainUV/NoiseUVで同じ構造を使うため、共通関数で書き出す。
         return {
             { "Scale", WriteVector2(uv_.scale) },
             { "Offset", WriteVector2(uv_.offset) },
@@ -225,6 +231,7 @@ namespace
         const nlohmann::json& json_,
         VFXMaterialUVData& uv_)
     {
+        // 不足キーは現在のデフォルト値を残し、古いMaterialでも読めるようにする。
         uv_.scale = ReadVector2(json_, "Scale", uv_.scale);
         uv_.offset = ReadVector2(json_, "Offset", uv_.offset);
         uv_.scrollSpeed = ReadVector2(json_, "ScrollSpeed", uv_.scrollSpeed);
@@ -235,6 +242,7 @@ namespace
 
     nlohmann::json WriteColorRamp(const VFXMaterialColorRampData& colorRamp_)
     {
+        // Ramp Stopは任意数なので配列として保存する。
         nlohmann::json stops_ = nlohmann::json::array();
         for (const VFXMaterialColorRampStopData& stop_ : colorRamp_.stops)
         {
@@ -264,6 +272,7 @@ namespace
         const nlohmann::json& json_,
         VFXMaterialColorRampData& colorRamp_)
     {
+        // 大文字キーと小文字キーの両方を読み、過去の保存形式と互換を取る。
         colorRamp_.enabled = json_.value("Enabled", json_.value("enabled", colorRamp_.enabled));
         const nlohmann::json sampleSource_ = json_.contains("SampleSource")
             ? json_["SampleSource"]
@@ -301,11 +310,13 @@ namespace
 
         if (colorRamp_.stops.empty() && json_.contains("StartColor") && json_.contains("EndColor"))
         {
+            // 古いStart/EndだけのRamp形式を、2 StopのRampへ変換する。
             colorRamp_.stops.push_back({ 0.0f, ReadVector4(json_, "StartColor", { 1.0f, 1.0f, 1.0f, 1.0f }) });
             colorRamp_.stops.push_back({ 1.0f, ReadVector4(json_, "EndColor", { 1.0f, 1.0f, 1.0f, 1.0f }) });
         }
         if (colorRamp_.stops.empty())
         {
+            // Stopが無いとサンプリングできないため、白Rampを最低限用意する。
             colorRamp_.stops.push_back({ 0.0f, { 1.0f, 1.0f, 1.0f, 1.0f } });
             colorRamp_.stops.push_back({ 1.0f, { 1.0f, 1.0f, 1.0f, 1.0f } });
         }
@@ -329,6 +340,7 @@ namespace
         const nlohmann::json& json_,
         VFXMaterialRandomColorData& randomColor_)
     {
+        // RandomColorも大文字/小文字キーと整数/文字列enumの両方を許容する。
         randomColor_.enabled = json_.value("Enabled", json_.value("enabled", randomColor_.enabled));
         const nlohmann::json mode_ = json_.contains("Mode")
             ? json_["Mode"]
@@ -353,6 +365,7 @@ bool VFXMaterialSerializer::Load(
 
     try
     {
+        // ここではJSON構造だけを読み、TextureロードはVFXMaterialResource側に任せる。
         nlohmann::json json_;
         file_ >> json_;
         materialData_.version = json_.value("Version", json_.value("version", VFX_MATERIAL_VERSION));
@@ -361,6 +374,7 @@ bool VFXMaterialSerializer::Load(
             json_.value("materialName", materialData_.materialName));
 
         const nlohmann::json textures_ = json_.value("Textures", json_.value("textures", nlohmann::json::object()));
+        // Textureパスは空でも有効。描画側でDummy Textureへフォールバックする。
         materialData_.baseTexturePath = textures_.value("BaseTexturePath", textures_.value("baseTexturePath", materialData_.baseTexturePath));
         materialData_.maskTexturePath = textures_.value("MaskTexturePath", textures_.value("maskTexturePath", materialData_.maskTexturePath));
         materialData_.noiseTexturePath = textures_.value("NoiseTexturePath", textures_.value("noiseTexturePath", materialData_.noiseTexturePath));
@@ -408,6 +422,7 @@ bool VFXMaterialSerializer::Load(
     }
     catch (const std::exception&)
     {
+        // 壊れたJSONや型違いのデータは読み込み失敗として扱う。
         return false;
     }
 }
@@ -421,10 +436,12 @@ bool VFXMaterialSerializer::Save(
     const std::filesystem::path outputPath_(filePath_);
     if (outputPath_.has_parent_path())
     {
+        // Editorから新規Asset保存する時、フォルダが無ければ作る。
         std::filesystem::create_directories(outputPath_.parent_path());
     }
 
     nlohmann::json json_;
+    // 保存は現行形式の大文字キーへ統一し、読み込み側で旧形式を吸収する。
     json_["Version"] = VFX_MATERIAL_VERSION;
     json_["AssetType"] = "VFXMaterial";
     json_["MaterialName"] = materialData_.materialName;

@@ -21,6 +21,7 @@ namespace
 {
     constexpr float SPLITTER_SIZE = 6.0f;
 
+    // ノード種別ごとの色を固定し、グラフを見た時に処理カテゴリを直感的に判別できるようにする。
     ImU32 GetNodeColor(AI_BEHAVIOR_NODE_TYPE type_)
     {
         switch (type_)
@@ -41,6 +42,7 @@ namespace
 
     void DrawVerticalSplitter(const char* id_, float height_, float& width_, float direction_)
     {
+        // InvisibleButtonをスプリッターとして使い、ドラッグ量を左右ペインの幅へ反映する。
         ImGui::InvisibleButton(id_, ImVec2(SPLITTER_SIZE, height_));
         const bool hovered_ = ImGui::IsItemHovered();
         const bool active_ = ImGui::IsItemActive();
@@ -54,6 +56,7 @@ namespace
 
     bool IsCompositeNode(AI_BEHAVIOR_NODE_TYPE type_)
     {
+        // 子ノードの優先度を持つノードだけをCompositeとして扱う。
         return type_ == AI_BEHAVIOR_NODE_TYPE::ROOT ||
             type_ == AI_BEHAVIOR_NODE_TYPE::SELECTOR ||
             type_ == AI_BEHAVIOR_NODE_TYPE::SEQUENCE ||
@@ -68,6 +71,7 @@ namespace
         ImU32 color_,
         float thickness_ = 3.0f)
     {
+        // node_editor標準リンクは透明にし、実行状態を強調できる独自の直線リンクを重ねて描く。
         drawList_->AddLine(startPosition_, endPosition_, color_, thickness_);
 
         ImVec2 direction_(
@@ -108,6 +112,7 @@ AIBehaviorEditorWindow::AIBehaviorEditorWindow(GameObjectManager* manager_)
     : EditorWorkspaceWindow("AI Behavior Graph", manager_)
     , assetBrowser(manager_)
 {
+    // node_editorの設定ファイル保存を無効にし、ノード座標はAIBehaviorGraph側のデータを正とする。
     isVisible = false;
     style.backgroundColor = ImVec4(0.065f, 0.07f, 0.08f, 1.0f);
     style.titleBarColor = ImVec4(0.18f, 0.22f, 0.32f, 1.0f);
@@ -132,6 +137,7 @@ AIBehaviorEditorWindow::~AIBehaviorEditorWindow()
 
 void AIBehaviorEditorWindow::Draw()
 {
+    // 選択中オブジェクト、保持中ターゲット、シーン内候補の順で編集対象のグラフを解決する。
     BehaviorGraphTarget target_ = ResolveTarget();
 
     if (!BeginWorkspaceWindow(ImGuiWindowFlags_MenuBar))
@@ -162,6 +168,7 @@ void AIBehaviorEditorWindow::Draw()
     const float graphWidth_ = (std::max)(260.0f,
         available_.x - targetListWidth - inspectorWidth - SPLITTER_SIZE * 2.0f);
 
+    // 上段はターゲット一覧・グラフ・Inspector、下段はAssetBrowserという編集作業向けの分割にしている。
     ImGui::BeginChild("AIBehaviorTopArea", ImVec2(0.0f, topHeight_), false);
 
     ImGui::BeginChild("AIControllerList", ImVec2(targetListWidth, topHeight_), true);
@@ -188,6 +195,7 @@ void AIBehaviorEditorWindow::Draw()
     ImGui::EndChild();
 
     ImGui::InvisibleButton("##AIAssetBrowserSplitter", ImVec2(-1.0f, SPLITTER_SIZE));
+    // 下段AssetBrowserの高さもドラッグで調整できるようにする。
     const bool hovered_ = ImGui::IsItemHovered();
     const bool active_ = ImGui::IsItemActive();
     ImGui::GetWindowDrawList()->AddRectFilled(
@@ -210,6 +218,7 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
     if (!gameObjectManager) return target_;
 
     const std::shared_ptr<GameObject> selectedObject_ = gameObjectManager->GetSelectedObject();
+    // 現在選択中のGameObjectを最優先にし、AIControllerとDragonAIのどちらも編集できるようにする。
     if (selectedObject_)
     {
         const std::shared_ptr<AIControllerComponent> selectedAI_ =
@@ -236,6 +245,7 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
     const std::shared_ptr<GameObject> currentTarget_ = targetObject.lock();
     if (currentTarget_)
     {
+        // 選択が外れても直前の編集対象が生きていれば、そのまま継続して編集できる。
         const std::shared_ptr<AIControllerComponent> currentAI_ =
             currentTarget_->GetComponent<AIControllerComponent>();
         if (currentAI_)
@@ -257,6 +267,7 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
 
     for (const std::shared_ptr<GameObject>& object_ : gameObjectManager->GetObjects())
     {
+        // まだ対象が無い場合は、シーン内の最初のAIグラフ持ちオブジェクトへフォールバックする。
         if (!object_) continue;
         const std::shared_ptr<AIControllerComponent> aiController_ =
             object_->GetComponent<AIControllerComponent>();
@@ -284,6 +295,7 @@ AIBehaviorEditorWindow::BehaviorGraphTarget AIBehaviorEditorWindow::ResolveTarge
 
 void AIBehaviorEditorWindow::DrawToolbar(const BehaviorGraphTarget& target_)
 {
+    // ランタイムのリセットとグラフ位置の再フォーカスを、対象確認と同じ場所に置く。
     const std::shared_ptr<GameObject> targetObject_ = targetObject.lock();
     ImGui::TextUnformatted("Target");
     ImGui::SameLine();
@@ -300,6 +312,7 @@ void AIBehaviorEditorWindow::DrawToolbar(const BehaviorGraphTarget& target_)
 
 void AIBehaviorEditorWindow::DrawTargetList()
 {
+    // 編集可能なAI/DragonAIコンポーネントだけを一覧化し、クリックで対象グラフを切り替える。
     ImGui::TextUnformatted("AI Behavior Graph Targets");
     ImGui::Separator();
 
@@ -327,6 +340,7 @@ void AIBehaviorEditorWindow::DrawTargetList()
 
 void AIBehaviorEditorWindow::DrawAssetBrowserPanel()
 {
+    // AssetBrowserからJSONをドラッグしてGraph Asset欄へ落とす運用を想定した補助パネル。
     ImGui::TextUnformatted("Asset Browser");
     ImGui::SameLine();
     ImGui::TextDisabled("Drop JSON graph assets onto Graph Asset field to load.");
@@ -346,6 +360,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
     AIBehaviorGraph& graph_ = *graphPointer_;
     graph_.EnsureDefaultGraph();
     activeActionName.clear();
+    // DragonAIの場合は現在アクション名からPLAY_ACTIONノードも実行中として強調できるようにする。
     if (target_.dragonAI)
     {
         activeActionName = "DragonAI_" + std::string(GetDragonActionName(target_.dragonAI->GetCurrentAction()));
@@ -362,6 +377,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     pinPositions.clear();
 
+    // 先に全ノードを描画してピン中心座標を記録し、その後でリンクを独自描画する。
     for (AIBehaviorNode& node_ : graph_.GetNodes())
     {
         DrawNode(node_);
@@ -400,6 +416,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     if (restoreNodePositions)
     {
+        // Focus要求時は保存済み座標をnode_editorへ戻し、画面全体が収まる位置へ移動する。
         for (AIBehaviorNode& node_ : graph_.GetNodes())
         {
             ed::SetNodePosition(ed::NodeId(node_.id), ImVec2(node_.position.x, node_.position.y));
@@ -410,12 +427,14 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     if (nodeToPlaceId != 0)
     {
+        // 追加直後のノードは右クリック位置へ配置し、次の追加位置は少しずらして重なりを避ける。
         ed::SetNodePosition(ed::NodeId(nodeToPlaceId), ImVec2(nextNodePosition.x, nextNodePosition.y));
         nodeToPlaceId = 0;
     }
 
     if (ed::BeginCreate())
     {
+        // リンク作成時は入力ピンと出力ピンの組み合わせだけを受け付け、Rootへの入力は禁止する。
         ed::PinId startPinId_;
         ed::PinId endPinId_;
         if (ed::QueryNewLink(&startPinId_, &endPinId_))
@@ -458,6 +477,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     if (ed::BeginDelete())
     {
+        // node_editor側で削除が承認されたリンク/ノードを、実データのAIBehaviorGraphからも削除する。
         ed::LinkId linkId_;
         while (ed::QueryDeletedLink(&linkId_))
         {
@@ -481,6 +501,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
     ed::Suspend();
     if (ed::ShowBackgroundContextMenu())
     {
+        // 背景右クリック位置をキャンバス座標へ変換し、新規ノードの初期配置に使う。
         ImGui::OpenPopup("Create AI Node");
         ImVec2 mouseCanvasPosition_ = ed::ScreenToCanvas(ImGui::GetMousePos());
         nextNodePosition = DirectX::XMFLOAT2(mouseCanvasPosition_.x, mouseCanvasPosition_.y);
@@ -499,6 +520,7 @@ void AIBehaviorEditorWindow::DrawGraph(const BehaviorGraphTarget& target_)
 
     for (AIBehaviorNode& node_ : graph_.GetNodes())
     {
+        // ドラッグされたノード座標をグラフデータへ戻し、保存や優先度計算へ反映する。
         const ImVec2 position_ = ed::GetNodePosition(ed::NodeId(node_.id));
         node_.position = { position_.x, position_.y };
     }
@@ -515,6 +537,7 @@ void AIBehaviorEditorWindow::DrawGraphAssetBar(const BehaviorGraphTarget& target
     if (!graphAssetPathPointer_) return;
 
     std::string& graphAssetPath_ = *graphAssetPathPointer_;
+    // グラフアセットの読込/保存先は対象コンポーネントが保持し、AIControllerとDragonAIで同じUIを使う。
     ImGui::SetNextItemWidth(340.0f);
     ImGui::InputText("Graph Asset", &graphAssetPath_);
     if (ImGui::BeginDragDropTarget())
@@ -606,6 +629,7 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
     }
 
     ImGui::Text("Type: %s", GetNodeTypeName(node_->type));
+    // 共通項目は全ノードで編集し、種別ごとの設定だけ下に追加表示する。
     ImGui::InputText("Name", &node_->name);
     ImGui::InputTextMultiline("Comment", &node_->comment, ImVec2(0.0f, 70.0f));
     ImGui::InputInt("Priority", &node_->priority);
@@ -616,6 +640,7 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
         node_->type == AI_BEHAVIOR_NODE_TYPE::SET_BLACKBOARD ||
         node_->type == AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL)
     {
+        // Blackboard系ノードは参照先スコープ・キー・比較方法・値をまとめてInspectorから編集する。
         ImGui::SeparatorText("Blackboard");
         const char* scopeNames_[] = { "Local", "Global" };
         int blackboardScope_ = static_cast<int>(node_->blackboardScope);
@@ -653,6 +678,7 @@ void AIBehaviorEditorWindow::DrawInspector(const BehaviorGraphTarget& target_)
 
     if (node_->type == AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION)
     {
+        // PLAY_ACTIONはGameObjectのActionRegistryへ投げる名前を持ち、必要なら完了フラグ待ちにできる。
         ImGui::SeparatorText("Action");
         ImGui::InputText("Action Name", &node_->actionName);
         if (target_.dragonAI)
@@ -698,6 +724,7 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 {
     BS_PROFILE_SCOPE("AIBehaviorEditorWindow::DrawNode");
 
+    // 選択中ノードとランタイム実行中ノードを枠色で分け、デバッグ時に経路を追いやすくする。
     const bool selected_ = selectedNodeId == node_.id;
     const bool runtimeActive_ = IsRuntimeActiveNode(node_);
     const ImU32 categoryColor_ = runtimeActive_ ? IM_COL32(28, 96, 62, 255) : GetNodeColor(node_.type);
@@ -760,6 +787,7 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 
     if (node_.inputPinId != 0)
     {
+        // 入力ピンはノード上側に置き、親から子へ上から下へ流れる見た目にそろえる。
         const ImVec2 inputMin_(
             nodeMin_.x + (nodeWidth_ - portWidth_) * 0.5f,
             nodeMin_.y - portHeight_ * 0.5f);
@@ -785,6 +813,7 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 
     if (node_.outputPinId != 0)
     {
+        // 出力ピンの中心座標を保存し、後でリンクの始点として使う。
         const ImVec2 outputMin_(
             nodeMin_.x + (nodeWidth_ - portWidth_) * 0.5f,
             nodeMax_.y - portHeight_ * 0.5f);
@@ -817,6 +846,7 @@ void AIBehaviorEditorWindow::DrawNode(AIBehaviorNode& node_)
 
 bool AIBehaviorEditorWindow::IsRuntimeActiveNode(const AIBehaviorNode& node_) const
 {
+    // 実行中判定は対象の実グラフを優先し、DragonAIではアクション名一致でも補助的に強調する。
     const std::shared_ptr<GameObject> targetObject_ = targetObject.lock();
     if (targetObject_)
     {
@@ -847,6 +877,7 @@ void AIBehaviorEditorWindow::AddNode(
     if (!graphPointer_) return;
 
     AIBehaviorNode* node_ = graphPointer_->AddNode(type_, name_, nextNodePosition);
+    // 追加直後は新規ノードを選択状態にし、次の追加位置を少しずらすことで連続作成しやすくする。
     if (!node_) return;
 
     nodeToPlaceId = node_->id;
@@ -859,6 +890,7 @@ void AIBehaviorEditorWindow::DrawCreateNodePopup(const BehaviorGraphTarget& targ
 {
     if (!ImGui::BeginPopup("Create AI Node")) return;
 
+    // 右クリックメニューには実行制御、Blackboard操作、Action実行の代表ノードだけを並べる。
     ImGui::TextUnformatted("Create AI Node");
     ImGui::Separator();
 
@@ -888,6 +920,7 @@ void AIBehaviorEditorWindow::RequestAddNode(
 
 void AIBehaviorEditorWindow::UpdatePriorityFromNodePositions(AIBehaviorGraph& graph_)
 {
+    // Compositeの子はX座標が左にあるほど高優先度として扱い、見た目と実行順を一致させる。
     for (AIBehaviorNode& parentNode_ : graph_.GetNodes())
     {
         if (!IsCompositeNode(parentNode_.type)) continue;
@@ -923,6 +956,7 @@ bool AIBehaviorEditorWindow::GetPinInfo(
     bool& isInput_,
     uintptr_t& nodeId_) const
 {
+    // node_editorから返るPinIdを、AIBehaviorGraph上のノードIDと入力/出力種別へ逆引きする。
     for (const AIBehaviorNode& node_ : graph_.GetNodes())
     {
         if (node_.inputPinId == pinId_)
@@ -943,6 +977,7 @@ bool AIBehaviorEditorWindow::GetPinInfo(
 
 AIBehaviorGraph* AIBehaviorEditorWindow::GetGraph(const BehaviorGraphTarget& target_) const
 {
+    // 編集対象の種類を隠蔽し、以降の処理はAIBehaviorGraphとして共通に扱う。
     if (target_.aiController) return &target_.aiController->GetGraph();
     if (target_.dragonAI) return &target_.dragonAI->GetBehaviorGraph();
     return nullptr;

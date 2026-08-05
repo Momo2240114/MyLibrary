@@ -16,6 +16,8 @@
 
 namespace
 {
+    // 2つのNode位置を結ぶCapsuleをDebug描画するため、線分方向をY軸にしたWorld行列を作る。
+    // CapsuleCollider本体のTransformではなくBone/Node間の位置を基準にしたい時に使う。
     DirectX::XMMATRIX CreateSegmentTransform(
         const DirectX::XMFLOAT3& startPosition_,
         const DirectX::XMFLOAT3& endPosition_)
@@ -43,6 +45,8 @@ namespace
 
     physx::PxQuat CreateCapsuleRotation(const physx::PxVec3& direction_)
     {
+        // PhysXのCapsuleはX軸方向が長軸なので、任意方向へ向ける回転を作る。
+        // ほぼ同方向/反対方向の場合は外積が不安定になるため、特別扱いしている。
         using namespace physx;
         const PxVec3 capsuleAxis_(1.0f, 0.0f, 0.0f);
         const float dot_ = (std::clamp)(capsuleAxis_.dot(direction_), -1.0f, 1.0f);
@@ -69,6 +73,8 @@ namespace
         const std::shared_ptr<GameObject>& owner_,
         std::vector<std::shared_ptr<GameObject>>& objects_)
     {
+        // Colliderが武器や部位などの子Objectに付いている場合、
+        // 親階層にあるModel ObjectをNode追従候補としてEditorに出す。
         if (!owner_ || !owner_->transform) return;
 
         std::shared_ptr<Transform> currentParent_ = owner_->transform->parent.lock();
@@ -86,6 +92,8 @@ namespace
 
 void CapsuleCollider::Gui()
 {
+    // Capsuleの基本形状と、Model Node間に追従させるためのNode設定をEditorで調整する。
+    // Nodeを指定しない場合は通常のTransform基準Capsuleとして扱う。
     ColliderComponent::Gui();
 
     ImGui::DragFloat("Radius", &radius, 0.01f, 0.001f, 10.0f);
@@ -165,6 +173,8 @@ void CapsuleCollider::Update(float deltaTime_)
 {
     (void)deltaTime_;
 
+    // Node追従が成立する場合は、Transform基準ではなくStart/End Nodeを結ぶCapsuleをDebug描画する。
+    // Boneに沿ったHitBoxやHurtBoxではこちらの経路が使われる。
     DirectX::XMFLOAT3 startPosition_{};
     DirectX::XMFLOAT3 endPosition_{};
     if (TryGetNodeSegment(startPosition_, endPosition_))
@@ -191,6 +201,7 @@ void CapsuleCollider::Update(float deltaTime_)
     }
 
     auto& renderer_ = GraphicsDeviceManager::Instance().GetShapeRendererSystem();
+    // Node追従できない場合は、ColliderComponentのWorld Transform + Offsetを使う通常Capsuleとして描画する。
     const auto transform_ = GetGameObject()->transform;
     using namespace DirectX;
     const XMFLOAT4X4 worldFloat_ = transform_->GetWorld();
@@ -210,6 +221,8 @@ void CapsuleCollider::Update(float deltaTime_)
 
 void CapsuleCollider::Serialize(nlohmann::json& json_) const
 {
+    // 基本形状に加えて、Node追従に必要なModel Object名とNode名を保存する。
+    // Node IndexはModel読み込み後に解決するCacheなので保存しない。
     ColliderComponent::Serialize(json_);
     json_["Radius"] = radius;
     json_["HalfHeight"] = halfHeight;
@@ -220,6 +233,7 @@ void CapsuleCollider::Serialize(nlohmann::json& json_) const
 
 void CapsuleCollider::Deserialize(const nlohmann::json& json_)
 {
+    // 保存されたNode名を復元し、Index CacheはModel再読み込みに備えて無効化する。
     ColliderComponent::Deserialize(json_);
     radius = json_.value("Radius", 0.5f);
     halfHeight = json_.value("HalfHeight", 1.0f);
@@ -232,6 +246,8 @@ void CapsuleCollider::Deserialize(const nlohmann::json& json_)
 
 void CapsuleCollider::OnPhysicsShapePrepared()
 {
+    // PhysX Shape作成時点でNode追従が有効なら、通常CapsuleではなくNode間CapsuleへShapeを更新する。
+    // これによりDebug描画だけでなく、物理/Trigger判定側もBone位置に追従する。
     DirectX::XMFLOAT3 startPosition_{};
     DirectX::XMFLOAT3 endPosition_{};
     if (TryGetNodeSegment(startPosition_, endPosition_))
@@ -242,6 +258,8 @@ void CapsuleCollider::OnPhysicsShapePrepared()
 
 std::shared_ptr<GltfModelCommponennt> CapsuleCollider::ResolveNodeModel()
 {
+    // nodeModelObjectNameが指定されていればScene内Object名からModelを探し、
+    // 空ならColliderを持つObject自身のModelを使う。未LoadならNode追従は一旦無効扱いにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
 
@@ -270,6 +288,8 @@ bool CapsuleCollider::ResolveNodeIndex(
     const std::string& nodeName_,
     int& nodeIndex_)
 {
+    // Node名からIndexを解決する。前回解決済みのIndexがまだ同じNodeを指す場合はCacheを使う。
+    // Model再読み込みやNode名変更に備えて、名前が一致しない時だけ再検索する。
     if (!model_ || nodeName_.empty())
     {
         nodeIndex_ = -1;
@@ -288,6 +308,8 @@ bool CapsuleCollider::TryGetNodeSegment(
     DirectX::XMFLOAT3& startPosition_,
     DirectX::XMFLOAT3& endPosition_)
 {
+    // Start/End NodeのWorld位置を取得できた時だけ、Node追従Capsuleとして扱う。
+    // どちらか片方でも欠ける場合はfalseを返し、通常Transform基準CapsuleへFallbackする。
     const std::shared_ptr<GltfModelCommponennt> model_ = ResolveNodeModel();
     if (!ResolveNodeIndex(model_, startNodeName, startNodeIndex) ||
         !ResolveNodeIndex(model_, endNodeName, endNodeIndex))
@@ -311,6 +333,8 @@ void CapsuleCollider::UpdateNodeSegmentShape(
     const DirectX::XMFLOAT3& startPosition_,
     const DirectX::XMFLOAT3& endPosition_)
 {
+    // PhysX Shapeを、Start/End Nodeを結ぶCapsuleへ更新する。
+    // Actor自体のPoseはObject Transform基準なので、NodeのWorld中心と方向をActor Localへ変換してShape LocalPoseへ入れる。
     using namespace physx;
     if (!actor) return;
 
@@ -342,6 +366,8 @@ void CapsuleCollider::UpdateNodeSegmentShape(
 
 Capsule CapsuleCollider::GetCapsuleData()
 {
+    // CollisionStepSystemが手動判定で使うCapsuleデータを作る。
+    // Node追従が有効ならBone間Capsule、無効ならTransform基準Capsuleを返す。
     DirectX::XMFLOAT3 startPosition_{};
     DirectX::XMFLOAT3 endPosition_{};
     Capsule capsule_{};
@@ -371,6 +397,8 @@ Capsule CapsuleCollider::GetCapsuleData()
 
 CollisionManifold CapsuleCollider::CheckCollision(std::shared_ptr<ColliderComponent> other_)
 {
+    // 他Colliderの型に応じてCollisionMathへ委譲する。
+    // BoxVsCapsuleは引数順で法線向きが逆になるため、Capsule側から見た法線へ反転する。
     CollisionManifold manifold_{};
     manifold_.isHit = false;
 

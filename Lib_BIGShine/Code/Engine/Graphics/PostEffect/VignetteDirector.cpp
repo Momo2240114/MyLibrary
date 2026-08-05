@@ -12,13 +12,16 @@
 
 void VignetteDirector::Update(float elapsedTime_)
 {
+    // 演出中でない場合はGraphicsDeviceManagerの設定を触らない。
     if (phase == PHASE::IDLE) return;
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<TimeManager> timeManager_ = owner_ ? owner_->GetManager().GetTimeManager() : nullptr;
+    // PostEffect演出はPause中にも完了してほしいため、RawDeltaを優先して進める。
     elapsed += timeManager_ ? timeManager_->GetLastRawDeltaTime() : elapsedTime_;
     if (phase == PHASE::HOLD)
     {
         if (elapsed < holdDuration) return;
+        // Holdが終わったら現在値を始点にしてDefaultへ戻る補間へ切り替える。
         startParams = GraphicsDeviceManager::Instance().GetVignetteParams();
         targetParams = defaultParams;
         duration = returnDuration;
@@ -26,6 +29,7 @@ void VignetteDirector::Update(float elapsedTime_)
         phase = PHASE::TO_DEFAULT;
     }
     const float ratio_ = duration > 0.0f ? std::clamp(elapsed / duration, 0.0f, 1.0f) : 1.0f;
+    // 補間結果をGraphicsDeviceManagerへ反映し、RenderSystem側が次の描画で使う。
     GraphicsDeviceManager::Instance().GetVignetteParams() = Lerp(startParams, targetParams, ratio_);
     if (ratio_ < 1.0f) return;
     if (phase == PHASE::TO_TARGET) { phase = PHASE::HOLD; elapsed = 0.0f; }
@@ -34,6 +38,7 @@ void VignetteDirector::Update(float elapsedTime_)
 
 void VignetteDirector::Play(const VignetteWayPoint& wayPoint_)
 {
+    // 現在のVignette値を始点にすることで、演出の重ね掛け時も自然につなげる。
     startParams = GraphicsDeviceManager::Instance().GetVignetteParams();
     targetParams = wayPoint_.target;
     duration = (std::max)(wayPoint_.timeToTarget, 0.0f);
@@ -46,6 +51,7 @@ void VignetteDirector::Play(const VignetteWayPoint& wayPoint_)
 VignetteSystem::Parameters VignetteDirector::Lerp(
     const VignetteSystem::Parameters& from_, const VignetteSystem::Parameters& to_, float ratio_)
 {
+    // Scalar/Color/Centerは線形補間し、enabledは補間中に片方でもtrueなら有効として扱う。
     const auto value_ = [ratio_](float fromValue_, float toValue_)
     { return fromValue_ + (toValue_ - fromValue_) * ratio_; };
     VignetteSystem::Parameters result_;
@@ -63,6 +69,7 @@ VignetteSystem::Parameters VignetteDirector::Lerp(
 
 void VignetteDirector::ResetToDefault()
 {
+    // 演出終了後はDefault値を明示的に戻し、次回再生時の基準を安定させる。
     GraphicsDeviceManager::Instance().GetVignetteParams() = defaultParams;
     phase = PHASE::IDLE;
     elapsed = 0.0f;
@@ -70,11 +77,13 @@ void VignetteDirector::ResetToDefault()
 
 void VignetteDirector::Gui()
 {
+    // Default値は演出終了後に戻る基準としてEditorで調整する。
     ImGui::Checkbox("Default Enabled", &defaultParams.enabled);
     ImGui::ColorEdit4("Default Color", &defaultParams.color.x);
     ImGui::DragFloat("Default Intensity", &defaultParams.intensity, 0.01f, 0.0f, 4.0f);
     if (ImGui::Button("Capture Vignette"))
     {
+        // 現在のRenderSystem設定をWaypointとして保存し、Actionから再生できるようにする。
         VignetteWayPoint wayPoint_;
         wayPoint_.target = GraphicsDeviceManager::Instance().GetVignetteParams();
         editorWaypoints.push_back(wayPoint_);
@@ -88,6 +97,7 @@ void VignetteDirector::Gui()
         VignetteWayPoint& wayPoint_ = editorWaypoints[index_];
         if (ImGui::TreeNode(("Vignette " + std::to_string(index_)).c_str()))
         {
+            // Waypointごとに目標値と遷移時間を調整する。
             ImGui::Checkbox("Enabled", &wayPoint_.target.enabled);
             ImGui::ColorEdit4("Color", &wayPoint_.target.color.x);
             ImGui::DragFloat2("Center", &wayPoint_.target.center.x, 0.01f, 0.0f, 1.0f);
@@ -106,6 +116,7 @@ void VignetteDirector::Gui()
 
 void VignetteDirector::RegisterActions()
 {
+    // PostProcessカテゴリにVignette_0, Vignette_1...として登録する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
     for (size_t index_ = 0; index_ < editorWaypoints.size(); ++index_)
@@ -117,6 +128,7 @@ void VignetteDirector::RegisterActions()
 
 void VignetteDirector::Serialize(nlohmann::json& json_) const
 {
+    // Parameters構造をJSONへ展開する小さな変換関数。
     const auto write_ = [](const VignetteSystem::Parameters& value_)
     { return nlohmann::json{ { "enabled", value_.enabled },
         { "color", { value_.color.x, value_.color.y, value_.color.z, value_.color.w } },
@@ -135,6 +147,7 @@ void VignetteDirector::Serialize(nlohmann::json& json_) const
 
 void VignetteDirector::Deserialize(const nlohmann::json& json_)
 {
+    // 保存時と同じKeyからParametersを復元する。
     const auto read_ = [](const nlohmann::json& input_, VignetteSystem::Parameters& value_)
     {
         value_.enabled = input_.value("enabled", value_.enabled);
@@ -150,6 +163,7 @@ void VignetteDirector::Deserialize(const nlohmann::json& json_)
     editorWaypoints.clear();
     if (json_.contains("Waypoints")) for (const nlohmann::json& item_ : json_["Waypoints"])
     {
+        // Waypointが欠けている古いデータでも既定値で補完する。
         VignetteWayPoint wayPoint_;
         if (item_.contains("target")) read_(item_["target"], wayPoint_.target);
         wayPoint_.timeToTarget = item_.value("toTarget", 0.1f);

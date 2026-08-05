@@ -12,6 +12,7 @@ void SceneGame::Initialize()
 	SceneBase::Initialize();
 
 
+	// SceneBase側で作られたGameObjectManagerの階層関係を確定させる。
 	_GameObjectManager->ResolveHierarchy();
 }
 

@@ -37,6 +37,7 @@ namespace
 {
     inline constexpr int WEAK_ATTACK_COMBO_COUNT = 4;
 
+    // KeyConfigへ登録するPlayer用Action名。JSONやEditor設定と接続するため文字列は変更しない。
     namespace PlayerInputAction
     {
         inline constexpr const char* MOVE_X = "Player.MoveX";
@@ -57,6 +58,7 @@ namespace
         const DirectX::XMFLOAT3& direction_,
         const DirectX::XMFLOAT3& fallback_)
     {
+        // Player操作では高さ方向を捨て、XZ平面だけの向きとして扱う。
         DirectX::XMFLOAT3 result_{ direction_.x, 0.0f, direction_.z };
         const float lengthSquared_ = result_.x * result_.x + result_.z * result_.z;
         if (lengthSquared_ <= 0.0001f)
@@ -72,6 +74,7 @@ namespace
 
     DirectX::XMFLOAT3 GetCameraForwardDirection(const std::shared_ptr<GameObject>& owner_)
     {
+        // ActiveCameraのView行列から水平前方向を復元し、カメラ基準入力の基準軸にする。
         if (!owner_ || !owner_->manager) return { 0.0f, 0.0f, 1.0f };
 
         auto* cameraManager_ = owner_->GetManager().GetCameraManager();
@@ -96,6 +99,7 @@ namespace
         const std::shared_ptr<GameObject>& owner_,
         const DirectX::XMFLOAT3& input_)
     {
+        // 入力AxisをCameraのForward/Rightへ合成し、画面基準の移動方向へ変換する。
         const float inputLengthSquared_ = input_.x * input_.x + input_.z * input_.z;
         if (inputLengthSquared_ <= 0.0001f)
         {
@@ -167,6 +171,7 @@ void PlayerControllerComponent::EnsurePlayerInputBindings()
 
 void PlayerControllerComponent::Start()
 {
+    // Scene上のPlayer Objectが動作に必要なComponentとAction登録を持つ状態へ整える。
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -276,6 +281,7 @@ bool PlayerControllerComponent::IsJumpInputPressed() const
 
 bool PlayerControllerComponent::IsCurrentAnimationState(const std::string& stateName_)
 {
+    // Timeline通知の補助として、現在AnimationState名を直接確認する。
     const auto owner_ = GetGameObject();
     if (!owner_) return false;
 
@@ -290,6 +296,7 @@ bool PlayerControllerComponent::IsAnimationStateForAction(
     PLAYER_ACTION action_,
     const std::string& stateName_) const
 {
+    // 空中Actionなど、同じActionでもAnimation名が限定されるものだけ個別に検証する。
     switch (action_)
     {
     case PLAYER_ACTION::AIR_WEAK_ATTACK:
@@ -380,6 +387,7 @@ void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
 
 void PlayerControllerComponent::BeginAirborneActionContext()
 {
+    // 空中Action中の接地判定を、開始直後の一瞬だけ誤判定しないようにContext化する。
     airborneActionContextActive = true;
     airborneActionContextLeftGround = !IsGrounded();
 }
@@ -512,7 +520,7 @@ void PlayerControllerComponent::SetFacingDirection(const DirectX::XMFLOAT3& dire
         direction_.x * direction_.x + direction_.z * direction_.z;
     if (horizontalLengthSquared_ <= 0.0001f) return;
 
-    // Dodge start needs an immediate camera-relative basis, so use a full interpolation rate.
+    // Movementがない場合はTransformへ直接反映し、Dodge開始時の即時旋回にも使えるようにする。
     owner_->transform->SetForwardYawOnly(
         { direction_.x, 0.0f, direction_.z },
         1.0f,
@@ -521,6 +529,7 @@ void PlayerControllerComponent::SetFacingDirection(const DirectX::XMFLOAT3& dire
 
 void PlayerControllerComponent::ApplyGuardFacingToTarget()
 {
+    // Guard中はLockOn対象へ向き続け、防御移動の前後左右がぶれないようにする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
 
@@ -632,6 +641,7 @@ void PlayerControllerComponent::AddHorizontalVelocityAssist(
 
 void PlayerControllerComponent::ApplyPendingMovement()
 {
+    // Stateが予約した速度をUpdate終端でまとめてMovementへ渡し、State間の上書き順を安定させる。
     if (!hasPendingHorizontalVelocity) return;
 
     if (movement)
@@ -665,6 +675,7 @@ void PlayerControllerComponent::ApplyPendingMovement()
 
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 {
+    // Action遷移の入口。接地/空中/キャンセル/先行入力の条件をここで一元判定する。
     if (nextAction_ == PLAYER_ACTION::NONE)
     {
         return false;
@@ -690,6 +701,7 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 
     if (currentAction_ == nextAction_)
     {
+        // 同じ弱攻撃入力は即時遷移せず、コンボ段の予約として保持する。
         const bool canQueueCombo_ =
             (currentAction_ == PLAYER_ACTION::WEAK_ATTACK ||
                 currentAction_ == PLAYER_ACTION::AIR_WEAK_ATTACK) &&
@@ -716,6 +728,7 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 
     if (!canChangeImmediately_)
     {
+        // 現在Actionが閉じるまで待つ必要がある入力は、受付窓が開いている時だけBufferへ積む。
         if (actionRuntime.canBufferInput || actionRuntime.canCombo)
         {
             actionRuntime.bufferedAction = nextAction_;
@@ -859,6 +872,7 @@ bool PlayerControllerComponent::RemoveActionBranchTransition(
 
 void PlayerControllerComponent::EnsureDefaultCancelTransitions()
 {
+    // Editor保存が空でも最低限の操作感を保つため、Player標準の派生ルールを補完する。
     constexpr PLAYER_ACTION jumpFromActions_[] =
     {
         PLAYER_ACTION::IDLE,
@@ -938,6 +952,7 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
 std::shared_ptr<CameraLockOnComponent>
 PlayerControllerComponent::ResolveCameraLockOnComponent() const
 {
+    // Player自身ではなくScene上のCamera側Componentを探し、LockOn情報を共有して使う。
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager) return nullptr;
 
@@ -965,6 +980,7 @@ void PlayerControllerComponent::ToggleLockOn()
 
 void PlayerControllerComponent::NotifyGuardedAttack()
 {
+    // Guard成功通知を受けた時、通常GuardからJustGuardへ派生できるようにする。
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (currentAction_ == PLAYER_ACTION::JUST_GUARD)
     {
@@ -1033,6 +1049,7 @@ void PlayerControllerComponent::SetCanCombo(bool enabled_)
 
 void PlayerControllerComponent::SyncCancelGateBlackboard()
 {
+    // Cancel受付状態はGame処理とAnimation条件の両方で参照するため、2カテゴリへ同時に送る。
     if (!blackboard) return;
 
     const bool legacyCanCancel_ = actionRuntime.canActionBranch;
@@ -1052,6 +1069,7 @@ void PlayerControllerComponent::SyncCancelGateBlackboard()
 
 void PlayerControllerComponent::TryConsumeBufferedActionForCancelGate(bool dodgeGate_)
 {
+    // Timeline側から受付Gateが開いた瞬間に、保存済み入力を条件付きで消費する。
     if (actionRuntime.bufferedAction == PLAYER_ACTION::NONE)
     {
         return;
@@ -1095,6 +1113,7 @@ void PlayerControllerComponent::TryConsumeBufferedActionForCancelGate(bool dodge
 
 void PlayerControllerComponent::NotifyComboTransition()
 {
+    // Animation側のコンボ遷移通知で、保存済み弱攻撃入力を次コンボ段として確定する。
     SetCanBufferInput(false);
     SetCanCombo(false);
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
@@ -1112,6 +1131,7 @@ void PlayerControllerComponent::NotifyComboTransition()
 
 void PlayerControllerComponent::NotifyActionEnd()
 {
+    // Timeline駆動Actionの終了通知。Buffer消費後、空中/Guard/移動状態へ戻す。
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (!IsPlayerActionTimelineDriven(currentAction_) &&
         currentAction_ != PLAYER_ACTION::JUMP &&
@@ -1207,6 +1227,7 @@ void PlayerControllerComponent::NotifyJumpLoop()
 
 void PlayerControllerComponent::HandleHitReaction()
 {
+    // 被弾時は受付状態と予約移動をすべて閉じ、HitStateへ強制的に移す。
     actionRuntime.canDodgeCancel = false;
     actionRuntime.canActionBranch = false;
     actionRuntime.canBufferInput = false;
@@ -1254,6 +1275,7 @@ void PlayerControllerComponent::ResetRuntimeArmor()
 
 bool PlayerControllerComponent::ConsumeBufferedAction()
 {
+    // Action終了時に保存済み入力があれば、次Actionとして実行する。
     if (actionRuntime.bufferedAction == PLAYER_ACTION::NONE)
     {
         return false;
@@ -1278,6 +1300,7 @@ bool PlayerControllerComponent::ConsumeBufferedAction()
 
 void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 {
+    // StateMachineからAction開始時に呼ばれ、Runtime受付状態とBlackboard値を初期化する。
     const PLAYER_ACTION previousAction_ = previousAction;
     previousAction = action_;
     if (previousAction_ == PLAYER_ACTION::DODGE &&
@@ -1325,6 +1348,7 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
 
 int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_) const
 {
+    // 弱攻撃だけコンボ段を持つため、同一Actionの予約時だけ次番号を計算する。
     if (nextAction_ != PLAYER_ACTION::WEAK_ATTACK &&
         nextAction_ != PLAYER_ACTION::AIR_WEAK_ATTACK)
     {
@@ -1342,6 +1366,7 @@ int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_)
 
 bool PlayerControllerComponent::UpdateStrongAttackInput()
 {
+    // 強攻撃は押下時間で通常/溜めを分岐し、開始時の空中状態も保持する。
     KeyConfig& keyConfig_ = KeyConfig::Instance();
 
     if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK))
@@ -1421,6 +1446,7 @@ bool PlayerControllerComponent::IsAirAction(PLAYER_ACTION action_) const
 
 bool PlayerControllerComponent::IsAirborneForAction() const
 {
+    // 空中Action中は接地状態だけでなく、ActionContextも見て空中扱いを継続する。
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     return !IsGrounded() &&
         (airborneActionContextActive ||
@@ -1457,6 +1483,7 @@ bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
 
 bool PlayerControllerComponent::ShouldEnterGuardAfterActionEnd() const
 {
+    // 攻撃やDodge終了時にGuard入力が押され続けていれば、Guardへ自然に復帰する。
     if (!IsGrounded() || IsAirborneForAction())
     {
         return false;
@@ -1501,6 +1528,7 @@ void PlayerControllerComponent::StartGroundDodgeCooldown()
 
 void PlayerControllerComponent::UpdateAirborneActionContext()
 {
+    // 一度空中へ出た後に接地したら、空中ActionContextを終了する。
     if (!airborneActionContextActive)
     {
         return;
@@ -1520,6 +1548,7 @@ void PlayerControllerComponent::UpdateAirborneActionContext()
 
 void PlayerControllerComponent::ProcessActionInput()
 {
+    // 優先度の高いActionから順に入力を解釈し、最初に成立したActionだけを要求する。
     auto& keyConfig_ = KeyConfig::Instance();
     const bool guardInput_ = keyConfig_.ActionPressed(PlayerInputAction::GUARD);
     SendGuardInputToBlackboard(guardInput_);
@@ -1573,6 +1602,7 @@ void PlayerControllerComponent::ProcessActionInput()
 
 void PlayerControllerComponent::RegisterPlayerAnimationActions()
 {
+    // Animation/ActionSequence側から呼ばれるPlayer制御用Commandを登録する。
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -1685,6 +1715,7 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
 
 void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
 {
+    // 現在ActionをGame側とAnimation側のBlackboardへ同期し、遷移条件を揃える。
     if (!blackboard)
     {
         auto owner_ = GetGameObject();
@@ -1749,6 +1780,7 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
 
 void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float deltaTime_)
 {
+    // 移動開始/Loop/停止の見た目用Phaseを時間で切り替える。
     locomotionPhaseTimer += (std::max)(deltaTime_, 0.0f);
 
     PLAYER_LOCOMOTION_PHASE phase_ = PLAYER_LOCOMOTION_PHASE::IDLE;
@@ -1779,6 +1811,7 @@ void PlayerControllerComponent::UpdateLocomotionAnimationPhase(float deltaTime_)
 
 void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTION_PHASE phase_)
 {
+    // 同じPhaseの再送を避けつつ、Animation遷移に必要なBoolもまとめて更新する。
     if (!blackboard) return;
     if (hasSentLocomotionPhase && lastSentLocomotionPhase == phase_)
     {
@@ -1841,6 +1874,7 @@ void PlayerControllerComponent::SendLocomotionPhaseToBlackboard(PLAYER_LOCOMOTIO
 
 void PlayerControllerComponent::SendGroundedToBlackboard()
 {
+    // 接地状態は変化した時だけBlackboardへ送る。
     if (!blackboard) return;
 
     const bool isGrounded_ = IsGrounded();
@@ -1874,7 +1908,7 @@ bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
         return false;
     }
 
-    // デバッグ切り替えなので、入力バッファやコンボ待ちを全部リセット
+    // Debug切り替えなので、入力Bufferやコンボ待ちを全部リセットする。
     actionRuntime.canDodgeCancel = true;
     actionRuntime.canActionBranch = true;
     actionRuntime.canBufferInput = false;
@@ -1886,7 +1920,7 @@ bool PlayerControllerComponent::ForceChangeAction(PLAYER_ACTION action_)
     pendingComboIndex = 0;
     comboIndex = 0;
 
-    // ChangeState 内で現在ステートの Exit() が呼ばれる
+    // ChangeState内で現在StateのExitが呼ばれる。
     stateMachine.ChangeState(action_);
     return true;
 }
@@ -1931,6 +1965,7 @@ void PlayerControllerComponent::SendJumpPhaseToBlackboard(
 
 bool PlayerControllerComponent::TryDodgeCancelInput()
 {
+    // Dodge受付が開いている時だけ、現在ActionからDodge派生できるか確認する。
     if (!actionRuntime.canDodgeCancel)
     {
         return false;
@@ -1968,6 +2003,7 @@ bool PlayerControllerComponent::TryDodgeCancelInput()
 
 void PlayerControllerComponent::NotifyJustDodge()
 {
+    // JustDodge判定成功を現在のDodgeStateへ橋渡しする。
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     BS_LOG_INFO(
         LOG_CATEGORY::GAME,
@@ -2000,6 +2036,7 @@ bool PlayerControllerComponent::IsJustDodgeColliderActive() const
 
 void PlayerControllerComponent::Gui()
 {
+    // Runtime状態と調整値をEditor上で確認・変更するためのDebug UI。
     ImGui::Text("State: %s", stateMachine.GetCurrentStateName());
     ImGui::Text("Current Action: %s", GetPlayerActionName(GetCurrentAction()));
 
@@ -2180,7 +2217,7 @@ void PlayerControllerComponent::Gui()
     ImGui::TextDisabled("Priority: Lock-On > Move Input > Camera Forward > Player Forward");
 }
 
-//blackboardに値やカテゴリーを最初に登録する機構
+// Blackboardに値やCategoryを最初に登録する機構。
 void PlayerControllerComponent::InitializeBlackboardValues()
 {
     // PlayerとAnimationの両方から読む初期キーをそろえ、未設定キーによる遷移漏れを防ぐ。
@@ -2262,6 +2299,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
 
 void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
+    // Player調整値とキャンセルルールをScene JSONへ保存する。
     j_["MoveSpeed"] = moveSpeed;
     j_["GuardMoveSpeed"] = guardMoveSpeed;
     j_["JumpImpulse"] = jumpImpulse;
@@ -2326,6 +2364,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
+    // Scene JSONからPlayer調整値を復元し、範囲外の値は安全な範囲へ丸める。
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);

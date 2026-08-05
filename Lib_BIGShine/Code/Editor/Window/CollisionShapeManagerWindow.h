@@ -28,6 +28,7 @@ private:
     void SetTargetObjectName(const std::string& objectName_);
 
     char targetObjectName[128] = {};
+    // 対象GameObjectの子階層を含めるか、一覧を対象だけに絞るかの表示/操作設定。
     bool includeChildren = true;
     bool listTargetOnly = true;
 };

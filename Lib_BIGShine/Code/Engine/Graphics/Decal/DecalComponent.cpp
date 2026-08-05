@@ -21,6 +21,8 @@
 void DecalComponent::Start()
 {
     BS_PROFILE_SCOPE("DecalComponent::Start");
+    // 保存済みの参照情報から、優先度の高いVFXマテリアルを先に復元する。
+    // マテリアルがない古いデータでは、従来のテクスチャ指定をそのまま使う。
     if (!materialPath.empty() && !texture) SetMaterial(materialPath);
     else if (!texturePath.empty() && !texture) SetTexture(texturePath);
     ResetLifeTime();
@@ -29,6 +31,7 @@ void DecalComponent::Start()
 void DecalComponent::SetLifeTime(float lifeTime_, float fadeOutDuration_)
 {
     BS_PROFILE_SCOPE("DecalComponent::SetLifeTime");
+    // 寿命とフェード時間は負数を受け付けず、フェードが寿命を超えない範囲に丸める。
     lifeTime = (std::max)(lifeTime_, 0.0f);
     fadeOutDuration = (std::clamp)(fadeOutDuration_, 0.0f, lifeTime);
     ResetLifeTime();
@@ -37,6 +40,7 @@ void DecalComponent::SetLifeTime(float lifeTime_, float fadeOutDuration_)
 void DecalComponent::ResetLifeTime()
 {
     BS_PROFILE_SCOPE("DecalComponent::ResetLifeTime");
+    // フェードアウト計算の基準になる初期アルファを、再生開始時点の色から保存する。
     elapsedTime = 0.0f;
     materialTime = 0.0f;
     initialAlpha = color.w;
@@ -46,6 +50,7 @@ void DecalComponent::SetTexture(const std::string& path_)
 {
     BS_PROFILE_SCOPE("DecalComponent::SetTexture");
 
+    // 通常テクスチャ指定へ切り替えるため、VFXマテリアル側の参照は一度外す。
     materialPath.clear();
     materialResource.reset();
     texturePath = path_;
@@ -63,6 +68,7 @@ void DecalComponent::SetTexture(const std::string& path_)
         return;
     }
 
+    // 読み込み失敗時も描画側がnullptrを扱わずに済むよう、白ダミーテクスチャを入れておく。
     CPUResourceLoader::CreateDummyTexture(
         device_,
         0xFFFFFFFF,
@@ -81,6 +87,7 @@ void DecalComponent::SetMaterial(const std::string& path_)
 void DecalComponent::SetMaterials(const std::vector<std::string>& paths_)
 {
     BS_PROFILE_SCOPE("DecalComponent::SetMaterials");
+    // 複数マテリアルを受け取りつつ、旧コード互換のため先頭をmaterialPath/materialResourceにも反映する。
     materialPaths = paths_;
     materialPath = materialPaths.empty() ? std::string{} : materialPaths.front();
     materialResource.reset();
@@ -95,6 +102,7 @@ void DecalComponent::SetMaterials(const std::vector<std::string>& paths_)
         if (!loadedMaterial_) continue;
         materialResources.push_back(loadedMaterial_);
         if (!materialResource) materialResource = loadedMaterial_;
+        // プレビューやフォールバック描画で使えるよう、最後に見つかったベーステクスチャを保持する。
         if (loadedMaterial_->GetBaseTexture())
         {
             texture = loadedMaterial_->GetBaseTexture();
@@ -109,6 +117,7 @@ void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
     BS_PROFILE_SCOPE("DecalComponent::ApplyMaterialToDecalData");
 
     if (materialResources.empty() && !materialResource) return;
+    // DecalDataは1つなので、複数マテリアルは色やUVなどを順に合成して最終値へ畳み込む。
     const size_t materialCount_ = materialResources.empty() ? 1u : materialResources.size();
     for (size_t materialIndex_ = 0; materialIndex_ < materialCount_; ++materialIndex_)
     {
@@ -116,6 +125,7 @@ void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
             materialResources.empty() ? materialResource : materialResources[materialIndex_];
         if (!materialResource_) continue;
         const VFXMaterialData& materialData_ = materialResource_->GetMaterialData();
+    // 色はコンポーネント色とマテリアル色を掛け合わせ、alphaもマテリアル側の値を反映する。
     data_.color.x *= materialData_.baseColor.x;
     data_.color.y *= materialData_.baseColor.y;
     data_.color.z *= materialData_.baseColor.z;
@@ -132,6 +142,7 @@ void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
         materialData_.mainUV.offset.x + materialData_.mainUV.scrollSpeed.x * materialTime,
         materialData_.mainUV.offset.y + materialData_.mainUV.scrollSpeed.y * materialTime
     };
+    // materialTimeを使って、デカールでもVFXマテリアルのUVスクロールを再現する。
     data_.noiseUvScaleOffset = {
         materialData_.noiseUV.scale.x,
         materialData_.noiseUV.scale.y,
@@ -147,6 +158,7 @@ void DecalComponent::ApplyMaterialToDecalData(DecalData& data_) const
     data_.dissolveEdgeColor = materialData_.dissolve.edgeColor;
     data_.blendMode = materialData_.renderState.blendMode == VFX_MATERIAL_BLEND_MODE::ADDITIVE ? 1u : 0u;
     data_.useDissolve = materialData_.dissolve.enabled ? 1u : 0u;
+    // 実際のSRVはマテリアル側を優先し、未設定ならSubmit時点のtextureを使い続ける。
     if (materialResource_->GetBaseTexture()) data_.texture = materialResource_->GetBaseTexture();
     if (materialResource_->GetMaskTexture()) data_.maskTexture = materialResource_->GetMaskTexture();
     if (materialResource_->GetNoiseTexture()) data_.noiseTexture = materialResource_->GetNoiseTexture();
@@ -162,6 +174,7 @@ void DecalComponent::SubmitDecal(DecalManager& manager_)
     if (!owner_) return;
 
     DecalData data_{};
+    // 描画システムへ渡すデカール情報を、現在のTransformと素材状態から毎フレーム構築する。
     DirectX::XMStoreFloat4x4(
         &data_.worldMatrix,
         owner_->transform->GetWorldMatrix());
@@ -174,17 +187,20 @@ void DecalComponent::SubmitDecal(DecalManager& manager_)
 void DecalComponent::Update(float elapsedTime_)
 {
     BS_PROFILE_SCOPE("DecalComponent::Update");
+    // 素材アニメーションは寿命とは独立して進める。負のdeltaは外部入力の揺れとして無視する。
     materialTime += (std::max)(elapsedTime_, 0.0f);
     if (lifeTime > 0.0f)
     {
         elapsedTime += (std::max)(elapsedTime_, 0.0f);
         if (fadeOutDuration > 0.0f && elapsedTime > lifeTime - fadeOutDuration)
         {
+            // 終了直前だけ初期アルファから0へ線形に落として、自然に消えるようにする。
             const float remainingTime_ = (std::max)(lifeTime - elapsedTime, 0.0f);
             color.w = initialAlpha * (remainingTime_ / fadeOutDuration);
         }
         if (elapsedTime >= lifeTime)
         {
+            // 寿命を終えたデカールは描画を止め、必要なら所有GameObjectごと破棄する。
             color.w = 0.0f;
             SetEnabled(false);
             if (destroyOnLifeEnd)
@@ -197,6 +213,7 @@ void DecalComponent::Update(float elapsedTime_)
     }
     if (!showDebugBounds) return;
 
+    // デバッグ時は投影範囲をボックスで表示し、向きやスケールの調整を確認しやすくする。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
 
@@ -219,6 +236,7 @@ void DecalComponent::Update(float elapsedTime_)
 void DecalComponent::Gui()
 {
     BS_PROFILE_SCOPE("DecalComponent::Gui");
+    // デカール単体の見た目、寿命、素材差し替えをエディタ上で直接調整する。
     ImGui::ColorEdit4("Decal Color", &color.x);
     ImGui::Checkbox("Show Debug Bounds", &showDebugBounds);
     ImGui::DragFloat("Life Time", &lifeTime, 0.05f, 0.0f, 120.0f);
@@ -237,6 +255,7 @@ void DecalComponent::Gui()
     }
     if (materialPaths.empty()) materialPaths.push_back(materialPath);
     int removeMaterialIndex_ = -1;
+    // 複数スロットは順番に適用されるため、GUI上でも並びを保ったまま編集する。
     for (int materialIndex_ = 0; materialIndex_ < static_cast<int>(materialPaths.size()); ++materialIndex_)
     {
         ImGui::PushID(materialIndex_);
@@ -292,6 +311,7 @@ void DecalComponent::Gui()
 void DecalComponent::Serialize(nlohmann::json& json_) const
 {
     BS_PROFILE_SCOPE("DecalComponent::Serialize");
+    // MaterialPathsは現在形式、MaterialPath/TextureFileは古いデータとの互換用に残す。
     json_["ComponentName"] = componentName;
     json_["MaterialPath"] = materialPath;
     json_["MaterialPaths"] = materialPaths;
@@ -310,6 +330,7 @@ void DecalComponent::Serialize(nlohmann::json& json_) const
 void DecalComponent::Deserialize(const nlohmann::json& json_)
 {
     BS_PROFILE_SCOPE("DecalComponent::Deserialize");
+    // 色は配列形式で保存されるため、古い/壊れたデータでも要素数を確認してから読む。
     if (json_.contains("Color") &&
         json_["Color"].is_array() &&
         json_["Color"].size() >= 4u)
@@ -328,6 +349,7 @@ void DecalComponent::Deserialize(const nlohmann::json& json_)
     destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", false);
     materialPath = json_.value("MaterialPath", std::string{});
     materialPaths.clear();
+    // 新形式の複数マテリアルを優先し、なければ単体MaterialPathへフォールバックする。
     if (json_.contains("MaterialPaths") && json_["MaterialPaths"].is_array())
     {
         for (const auto& materialPathJson_ : json_["MaterialPaths"])
@@ -341,6 +363,7 @@ void DecalComponent::Deserialize(const nlohmann::json& json_)
     std::string loadedPath_ = json_.value("TexturePath", std::string{});
     if (loadedPath_.empty())
     {
+        // TextureFileだけを持つ旧データは、親パスがなければData/Decal配下として扱う。
         const std::string legacyFile_ =
             json_.value("TextureFile", std::string{});
         if (!legacyFile_.empty())

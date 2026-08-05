@@ -4,6 +4,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 
 bool PostRenderSystem::Initialize(ID3D11Device* device, int width, int height) {
+    // 各ポストエフェクトを同じ解像度で初期化し、必要な中間バッファも2枚確保する。
     if (!bloom.Initialize(device, width, height)) return false;
     if (!radialBlur.Initialize(device, width, height)) return false;
     if (!xeGtao.Initialize(device, width, height)) return false;
@@ -35,6 +36,7 @@ void PostRenderSystem::Shutdown() {
 
 void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView* sceneSRV, ID3D11RenderTargetView* finalRTV)
 {
+    // GraphicsDeviceManagerに集約された現在のポストエフェクト設定を読み取る。
     auto& graphics_ = GraphicsDeviceManager::Instance();
     auto tracyGpuContext_ = graphics_.GetTracyGpuContext();
     auto& bloomParams_ = graphics_.GetBloomParams();
@@ -52,12 +54,14 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (!motionBlurEnabled_)
     {
+        // MotionBlurを使っていない時も、次に有効化された瞬間の履歴飛びを防ぐため同期する。
         motionBlur.SynchronizeCameraHistory(rc);
     }
 
     if (!radialBlurEnabled_ && !xeGtaoEnabled_ && !motionBlurEnabled_ && !vignetteEnabled_ && !distortionEnabled_)
     {
         {
+            // BloomはColorFilterの最終合成も兼ねるので、他の効果が無くても最後に通す。
             BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Final Composite");
             bloom.Execute(
                 rc,
@@ -70,6 +74,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
     }
 
     {
+        // 追加効果がある場合は、まずBloom/ColorFilter結果を作業バッファへ出す。
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Bloom");
         bloom.Execute(
             rc,
@@ -84,6 +89,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (radialBlurEnabled_)
     {
+        // 後続パスがある場合だけPing-Pong先へ出し、最後なら直接finalRTVへ書く。
         const bool hasNextPass_ = xeGtaoEnabled_ || motionBlurEnabled_ || vignetteEnabled_ || distortionEnabled_;
         {
             BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::RadialBlur");
@@ -105,6 +111,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (xeGtaoEnabled_)
     {
+        // GTAOはDepth/Normalを参照して現在カラーへAOを合成する。
         const bool hasNextPass_ = motionBlurEnabled_ || vignetteEnabled_ || distortionEnabled_;
         const int nextBufferIndex_ = currentBufferIndex_ == 0 ? 1 : 0;
         {
@@ -129,6 +136,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (motionBlurEnabled_)
     {
+        // MotionBlurはDepthから前フレーム位置を復元するため、MainDepthを渡す。
         const bool hasNextPass_ = vignetteEnabled_ || distortionEnabled_;
         const int nextBufferIndex_ = currentBufferIndex_ == 0 ? 1 : 0;
         {
@@ -152,6 +160,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (vignetteEnabled_)
     {
+        // Vignette後にDistortionが残っていなければ、ここで最終RTへ確定する。
         const bool hasNextPass_ = distortionEnabled_;
         const int nextBufferIndex_ = currentBufferIndex_ == 0 ? 1 : 0;
         {
@@ -173,6 +182,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
     if (distortionEnabled_)
     {
+        // Scene中の歪みマップを最後に適用し、最終カラーとして出力する。
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Final Composite");
         postDistortion.Execute(
             rc,
@@ -184,6 +194,7 @@ void PostRenderSystem::Execute(const RenderContext& rc, ID3D11ShaderResourceView
 
 bool PostRenderSystem::CreatePostBuffer(ID3D11Device* device, int width, int height, PostBuffer& outBuffer)
 {
+    // HDRカラーを維持するため、ポスト処理の作業バッファは16bit float RGBAで作る。
     D3D11_TEXTURE2D_DESC desc{};
     desc.Width = width;
     desc.Height = height;

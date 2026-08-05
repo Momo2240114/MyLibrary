@@ -22,6 +22,7 @@
 
 namespace
 {
+    // カメラ補正では水平面の向きと3D位置を何度も扱うため、このファイル内だけの軽量ヘルパーにまとめる。
     DirectX::XMFLOAT3 AddFloat3(
         const DirectX::XMFLOAT3& left_,
         const DirectX::XMFLOAT3& right_)
@@ -123,6 +124,8 @@ namespace
 void CameraLockOnComponent::Start()
 {
     BS_PROFILE_SCOPE("CameraLockOnComponent::Start");
+
+    // 開始時点のFOVを基準値として保持し、ロックオン中の自動FOV補正の戻り先にする。
     ResolveReferences();
     if (const std::shared_ptr<CameraComponent> camera_ = camera.lock())
     {
@@ -136,6 +139,8 @@ void CameraLockOnComponent::Start()
 void CameraLockOnComponent::LateUpdate(float deltaTime_)
 {
     BS_PROFILE_SCOPE("CameraLockOnComponent::LateUpdate");
+
+    // LateUpdateで実カメラを上書きし、他の移動更新が終わった後のプレイヤー/敵位置を基準に構図を作る。
     ResolveReferences();
     if (actionSuppressed) return;
     if (switchCooldownTimer > 0.0f)
@@ -153,6 +158,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
     const std::shared_ptr<GameObject> player_ = playerTarget.lock();
     const std::shared_ptr<GameObject> enemy_ = lockOnTarget.lock();
+    // フォーカス部位が無効になった場合は、同じ敵の別LockOnTargetや本体へ自動で戻す。
     if (!ResolveFocusTargetFallback())
     {
         SetLockOnEnabled(false);
@@ -172,6 +178,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
     if (thirdPerson_)
     {
+        // ロックオン中はThirdPersonCameraの入力制御を止め、このコンポーネントがカメラ姿勢を所有する。
         thirdPerson_->SetControlSuppressed(true);
         ownsThirdPersonControl = true;
     }
@@ -202,10 +209,12 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
     if (targetDistance_ > maxDistance)
     {
+        // 最大距離を超えたらロックオンを解除し、視点が遠い敵へ引っ張られ続けないようにする。
         SetLockOnEnabled(false);
         return;
     }
 
+    // プレイヤーから敵を見た反対方向を基準に、肩越しの横オフセットを加えた通常カメラ位置を作る。
     DirectX::XMFLOAT3 backDirection_{};
     if (horizontalDistance_ > 0.0001f)
     {
@@ -257,6 +266,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         horizontalDistance_ / (std::max)(closeDistance, 0.001f),
         0.0f,
         1.0f);
+    // 近距離ではプレイヤー寄り、遠距離では敵寄りに注視点をずらして画面内の見やすさを保つ。
     const float enemyFocusWeight_ = std::lerp(
         closeFocusBias,
         farFocusBias,
@@ -272,6 +282,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         std::clamp(compositionCorrection.weight, 0.0f, 1.0f);
     if (compositionWeight_ > 0.0001f)
     {
+        // 攻撃演出などから一時的な構図補正を受け取り、距離/高さ/注視点/FOVへなめらかに混ぜる。
         desiredPosition_ = AddFloat3(
             desiredPosition_,
             ScaleFloat3(
@@ -529,6 +540,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
     }
     if (compositionWeight_ > 0.0001f)
     {
+        // 壁カメラが強く効いているほど、演出側の左右寄せを弱めてアリーナ外へ出にくくする。
         const float sideAllowRate_ = std::clamp(
             1.0f - currentWallCameraRate * 0.8f,
             0.0f,
@@ -555,6 +567,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         previousFocusTarget.lock();
     if (!hasTrackingPose || previousTarget_ != enemy_)
     {
+        // 初回や敵本体の切替直後は現在カメラ位置から始め、別ターゲットの補間履歴を引きずらない。
         interpolatedPosition = camera_->GetEye();
         interpolatedLookAt = camera_->GetFocus();
         previousLockOnTarget = enemy_;
@@ -566,6 +579,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
         previousFocusTarget = focusTarget_;
     }
 
+    // 最終候補へ指数補間で追従し、deltaTimeが変わっても見た目の追従速度が極端に変わらないようにする。
     interpolatedPosition = LerpFloat3(
         interpolatedPosition,
         finalDesiredPosition_,
@@ -597,6 +611,7 @@ void CameraLockOnComponent::LateUpdate(float deltaTime_)
 
 void CameraLockOnComponent::SetLockOnEnabled(bool enabled_)
 {
+    // 有効化時は実際に追える敵とフォーカス点が揃っている場合だけONにし、解除時は補正状態を初期化する。
     if (enabled_) ResolveFocusTargetFallback();
     lockOnEnabled = enabled_ && !lockOnTarget.expired() && !lockOnFocusTarget.expired();
     ResetTracking();
@@ -722,6 +737,7 @@ std::shared_ptr<GameObject> CameraLockOnComponent::FindBestLockOnTarget(
 CameraLockOnComponent::LockOnCandidate CameraLockOnComponent::FindBestLockOnCandidate(
     const std::shared_ptr<GameObject>& playerTarget_) const
 {
+    // 初回ロックオンは画面中央に近く、距離が近く、優先度が高い候補を低スコアとして選ぶ。
     LockOnCandidate bestCandidate_{};
     float bestScore_ = (std::numeric_limits<float>::max)();
     const std::vector<LockOnCandidate> candidates_ =
@@ -758,6 +774,7 @@ std::vector<CameraLockOnComponent::LockOnCandidate>
 CameraLockOnComponent::CollectLockOnCandidates(
     const std::shared_ptr<GameObject>& playerTarget_) const
 {
+    // シーン内のLockOnTargetComponentを走査し、距離、正面方向、画面内への投影結果を候補情報として集める。
     std::vector<LockOnCandidate> candidates_;
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->manager || !playerTarget_ || !playerTarget_->transform)
@@ -865,6 +882,7 @@ CameraLockOnComponent::CollectLockOnCandidates(
 bool CameraLockOnComponent::ToggleLockOnForPlayer(
     const std::shared_ptr<GameObject>& playerTarget_)
 {
+    // プレイヤー指定のトグル入口。OFFなら最良候補を探してからON、ONなら即解除する。
     if (lockOnEnabled)
     {
         SetLockOnEnabled(false);
@@ -890,6 +908,7 @@ bool CameraLockOnComponent::SwitchLockOnTarget(
 
 bool CameraLockOnComponent::SwitchLockOnTargetNext()
 {
+    // 次/前切替は画面X座標順に並べ、現在フォーカスから循環する形で選び直す。
     const std::vector<LockOnCandidate> candidates_ =
         CollectLockOnCandidates(playerTarget.lock());
     if (candidates_.empty()) return false;
@@ -967,6 +986,7 @@ bool CameraLockOnComponent::SwitchLockOnTargetPrevious()
 std::shared_ptr<GameObject> CameraLockOnComponent::FindDirectionalLockOnTarget(
     const DirectX::XMFLOAT2& inputDirection_) const
 {
+    // スティックやマウス方向に近い画面上の候補を探し、中心距離や優先度も加味して切替先を決める。
     const float inputLength_ = std::sqrt(
         inputDirection_.x * inputDirection_.x +
         inputDirection_.y * inputDirection_.y);
@@ -1067,6 +1087,7 @@ bool CameraLockOnComponent::ApplyLockOnCandidate(
 
 bool CameraLockOnComponent::ResolveFocusTargetFallback()
 {
+    // 現在のフォーカスが消えた場合でも、同じ戦闘オーナーに属する別ターゲットへ自然に戻す。
     const std::shared_ptr<GameObject> combatOwner_ = lockOnTarget.lock();
     if (!combatOwner_) return false;
 
@@ -1131,6 +1152,7 @@ bool CameraLockOnComponent::ResolveFocusTargetFallback()
 
 void CameraLockOnComponent::UpdateLockOnSwitchInput(float deltaTime_)
 {
+    // キーボード、ゲームパッド、マウス、ホイールを1つの切替方向へまとめ、ラッチとクールダウンで多重入力を抑える。
     DirectX::XMFLOAT2 inputDirection_ = GetKeyboardSwitchInput();
     const DirectX::XMFLOAT2 controllerInput_ = GetControllerSwitchInput();
     debugControllerSwitchInput = controllerInput_;
@@ -1227,6 +1249,7 @@ DirectX::XMFLOAT2 CameraLockOnComponent::GetControllerSwitchInput() const
 
 DirectX::XMFLOAT2 CameraLockOnComponent::GetMouseSwitchInput(float deltaTime_)
 {
+    // マウス移動は一瞬のデルタだけではなく短時間蓄積し、しきい値を超えた軸方向をターゲット切替に使う。
     const KeyConfig& keyConfig_ = KeyConfig::Instance();
     const DirectX::XMFLOAT2 mouseDelta_
     {
@@ -1265,6 +1288,7 @@ DirectX::XMFLOAT2 CameraLockOnComponent::GetMouseSwitchInput(float deltaTime_)
 
 void CameraLockOnComponent::RegisterDefaultSwitchInputBindings()
 {
+    // プロジェクト側で未設定の場合だけ、ロックオン切替用の標準入力を登録しておく。
     KeyConfig& keyConfig_ = KeyConfig::Instance();
     if (keyConfig_.GetActionMap().count("LockOn_SwitchLeft") == 0)
     {
@@ -1354,6 +1378,7 @@ bool CameraLockOnComponent::ApplyCollisionComposition(
     float collisionLift_,
     float deltaTime_)
 {
+    // 外部の衝突判定から押し戻し量を受け取り、注視点、距離、FOVを再評価して画面内の安全枠へ収める。
     ResolveReferences();
     if (!lockOnEnabled) return false;
 
@@ -1473,6 +1498,7 @@ bool CameraLockOnComponent::ApplyCollisionComposition(
 
 void CameraLockOnComponent::ResolveReferences()
 {
+    // シリアライズされた名前や同一GameObject上のコンポーネントから、弱参照が切れた分だけ再解決する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
@@ -1498,6 +1524,7 @@ void CameraLockOnComponent::ResolveReferences()
 
 void CameraLockOnComponent::RegisterActions()
 {
+    // AnimationイベントやActionRegistryからロックオン制御を呼べるよう、カメラカテゴリへ操作を登録する。
     RegisterDefaultSwitchInputBindings();
     ActionRegistry& registry_ = ActionRegistry::Instance();
     registry_.RegisterAction("Camera", "LockOn_Enable", [this]()
@@ -1546,6 +1573,7 @@ void CameraLockOnComponent::RegisterActions()
 
 void CameraLockOnComponent::ResetTracking()
 {
+    // ターゲットや有効状態が変わったとき、補間履歴、壁カメラ状態、入力ラッチをまとめてリセットする。
     hasTrackingPose = false;
     hasCollisionComposition = false;
     currentWallCameraRate = 0.0f;
@@ -1580,6 +1608,7 @@ void CameraLockOnComponent::ApplyCameraPose(
     const DirectX::XMFLOAT3& cameraPosition_,
     const DirectX::XMFLOAT3& lookAtPosition_)
 {
+    // LookAt行列からGameObjectのワールド姿勢を逆算し、CameraComponentにも同じ視点情報を反映する。
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
 
@@ -1604,6 +1633,7 @@ void CameraLockOnComponent::SynchronizeExternalFovChange(
 {
     BS_PROFILE_SCOPE("CameraLockOnComponent::SynchronizeExternalFovChange");
 
+    // 他システムがFOVを変更した場合は、それを新しい基準として扱いロックオン補正量だけを保つ。
     if (!camera_) return;
 
     const float cameraFov_ = camera_->GetFovY();
@@ -1650,6 +1680,7 @@ DirectX::XMFLOAT3 CameraLockOnComponent::CalculateWeightedLookAt(
     const DirectX::XMFLOAT3& playerPosition_,
     const DirectX::XMFLOAT3& targetPosition_) const
 {
+    // プレイヤーと敵の重み付き中点を作り、近距離でも敵だけを見すぎない注視点にする。
     const float safePlayerWeight_ = (std::max)(playerFocusWeight, 0.0f);
     const float safeTargetWeight_ = (std::max)(targetFocusWeight, 0.0f);
     const float totalWeight_ = (std::max)(
@@ -1669,6 +1700,7 @@ DirectX::XMFLOAT3 CameraLockOnComponent::CalculateWeightedLookAt(
 DirectX::XMFLOAT3 CameraLockOnComponent::ClampCameraPositionToArena(
     const DirectX::XMFLOAT3& cameraPosition_) const
 {
+    // 円形アリーナ外へ出たカメラを内側の許容半径へ戻し、壁抜けや外周越しの視点を防ぐ。
     DirectX::XMFLOAT3 clampedPosition_ = cameraPosition_;
     const float maximumCameraRadius_ = (std::max)(
         arenaRadius - (std::max)(arenaCameraMargin, 0.0f),
@@ -1705,6 +1737,7 @@ float CameraLockOnComponent::CalculateWallCameraCandidateScore(
     float fovY_,
     int candidateSide_) const
 {
+    // 壁際カメラ候補を投影スコアとアリーナ補正量で評価し、現在側には少し保持ボーナスを与える。
     DirectX::XMFLOAT2 playerTopScreen_{};
     DirectX::XMFLOAT2 playerBottomScreen_{};
     DirectX::XMFLOAT2 targetScreen_{};
@@ -1754,6 +1787,7 @@ DirectX::XMFLOAT3 CameraLockOnComponent::CalculateCollisionLookAt(
     float compressionRate_,
     float liftRate_) const
 {
+    // 衝突でカメラが近づいたとき、足元や敵が切れない注視点候補を複数作って最も収まりがよいものを選ぶ。
     const DirectX::XMFLOAT3 weightedLookAt_ = CalculateWeightedLookAt(
         playerTopPosition_,
         targetPosition_);
@@ -1843,6 +1877,7 @@ DirectX::XMFLOAT3 CameraLockOnComponent::CalculateFramingCameraPosition(
     const DirectX::XMFLOAT3& targetPosition_,
     float compressionRate_) const
 {
+    // 縦方向に画面外へ出そうな場合は、注視点から後ろ方向へカメラを少し引いて構図を回復する。
     DirectX::XMFLOAT2 playerTopScreen_{};
     DirectX::XMFLOAT2 playerBottomScreen_{};
     DirectX::XMFLOAT2 targetScreen_{};
@@ -1912,6 +1947,7 @@ float CameraLockOnComponent::CalculateCollisionFov(
     const DirectX::XMFLOAT3& targetPosition_,
     float compressionRate_) const
 {
+    // FOV候補を段階的に試し、画面内収まりを改善しつつ広角になりすぎない値を選ぶ。
     const float wallFovAddition_ = enableCircularArenaCamera
         ? wallCameraMaximumFovAddition * SmoothStep(currentWallCameraRate)
         : 0.0f;
@@ -1977,6 +2013,7 @@ bool CameraLockOnComponent::ProjectToScreenPosition(
     float fovY_,
     DirectX::XMFLOAT2& screenPosition_) const
 {
+    // 指定カメラ姿勢でワールド座標を0-1のスクリーン座標へ投影し、候補評価の共通入力にする。
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!camera_) return false;
 
@@ -2025,6 +2062,7 @@ float CameraLockOnComponent::CalculateProjectionScore(
     bool playerBottomVisible_,
     bool targetVisible_) const
 {
+    // プレイヤー上半身、足元、敵が安全枠から外れるほど高スコアにし、候補選択で避けられるようにする。
     const float safeHorizontalMin_ = std::clamp(horizontalSafeMin, 0.0f, 0.95f);
     const float safeHorizontalMax_ = std::clamp(horizontalSafeMax, safeHorizontalMin_ + 0.01f, 1.0f);
     const float safeVerticalMin_ = std::clamp(verticalSafeMin, 0.0f, 0.95f);
@@ -2071,6 +2109,7 @@ float CameraLockOnComponent::CalculateProjectionScore(
 CameraLockOnComponent::LockOnDistanceInfo
 CameraLockOnComponent::CalculateLockOnDistanceInfo() const
 {
+    // LateUpdateとデバッグ表示の両方で使う、プレイヤーと戦闘対象の距離情報を一箇所で計算する。
     LockOnDistanceInfo info_{};
 
     const std::shared_ptr<GameObject> player_ = playerTarget.lock();
@@ -2109,6 +2148,7 @@ CameraLockOnComponent::CalculateLockOnDistanceInfo() const
 
 void CameraLockOnComponent::DrawLockOnDebugGui()
 {
+    // 調整中に必要な距離、画面内位置、補正ON/OFFをInspectorへまとめて表示する。
     ImGui::SeparatorText("Debug");
 
     ResolveReferences();
@@ -2160,6 +2200,7 @@ void CameraLockOnComponent::DrawLockOnDebugGui()
 
 void CameraLockOnComponent::Gui()
 {
+    // ロックオン挙動の主要パラメータをInspectorから調整できるようにする。
     ImGui::Checkbox("Lock On Enabled", &lockOnEnabled);
 
     char playerBuffer_[128]{};
@@ -2374,6 +2415,7 @@ void CameraLockOnComponent::Gui()
 
 void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
 {
+    // カメラ構図、壁際補正、入力切替しきい値を保存し、エディタ調整値をシーンへ保持する。
     json_["playerTargetName"] = playerTargetName;
     json_["lockOnTargetName"] = lockOnTargetName;
     json_["lockOnFocusTargetName"] = lockOnFocusTargetName;
@@ -2460,6 +2502,7 @@ void CameraLockOnComponent::Serialize(nlohmann::json& json_) const
 
 void CameraLockOnComponent::Deserialize(const nlohmann::json& json_)
 {
+    // 旧データや手編集データでも壊れにくいよう、既定値を入れながら読み込み後に範囲をクランプする。
     playerTargetName = json_.value("playerTargetName", std::string{});
     lockOnTargetName = json_.value("lockOnTargetName", std::string{});
     lockOnFocusTargetName = json_.value("lockOnFocusTargetName", std::string{});

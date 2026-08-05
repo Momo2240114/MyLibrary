@@ -18,6 +18,7 @@ CollisionShapeManagerWindow::CollisionShapeManagerWindow(
 
 void CollisionShapeManagerWindow::Draw()
 {
+    // 全体表示、対象オブジェクト指定、Collider一覧を上から順に並べる管理用ウィンドウ。
     if (!BeginEditorWindow(nullptr, ImGuiWindowFlags_NoCollapse))
     {
         EndEditorWindow();
@@ -42,6 +43,7 @@ void CollisionShapeManagerWindow::Draw()
 
 void CollisionShapeManagerWindow::DrawGlobalControls()
 {
+    // ShapeRenderer全体の有効/無効と、全Colliderの表示状態を一括で切り替える。
     bool renderEnabled_ = gameObjectManager->IsShapeRenderEnabled();
     if (ImGui::Checkbox("Render Debug Shapes", &renderEnabled_))
     {
@@ -64,6 +66,7 @@ void CollisionShapeManagerWindow::DrawGlobalControls()
 
 void CollisionShapeManagerWindow::DrawTargetControls()
 {
+    // 個別対象は選択中オブジェクト、手入力、一覧選択のどれからでも指定できるようにする。
     ImGui::TextUnformatted("Target Object");
 
     if (const std::shared_ptr<GameObject> selectedObject_ =
@@ -89,6 +92,7 @@ void CollisionShapeManagerWindow::DrawTargetControls()
         gameObjectManager->CountCollisionShapesInHierarchy(
             targetObjectName,
             includeChildren);
+    // Include Childrenが有効なら子階層のColliderも含めて数え、表示切り替えにも同じ条件を使う。
     ImGui::Text("Target Collision Shapes: %zu", targetColliderCount_);
 
     const bool hasTarget_ = targetObjectName[0] != '\0';
@@ -115,6 +119,7 @@ void CollisionShapeManagerWindow::DrawTargetControls()
 
 void CollisionShapeManagerWindow::DrawObjectPicker()
 {
+    // Scene内GameObject名をコンボで選び、文字列指定の入力ミスを減らす。
     const char* preview_ = targetObjectName[0] != '\0'
         ? targetObjectName
         : "(none)";
@@ -138,6 +143,7 @@ void CollisionShapeManagerWindow::DrawObjectPicker()
 
 void CollisionShapeManagerWindow::DrawColliderList()
 {
+    // 表示対象のGameObjectを作ってから、各Colliderのデバッグ描画フラグを表形式で編集する。
     const std::vector<std::shared_ptr<GameObject>> objects_ = BuildListedObjects();
     if (objects_.empty())
     {
@@ -187,6 +193,7 @@ void CollisionShapeManagerWindow::DrawColliderList()
             const std::string shapeId_ =
                 "##Shape_" + object_->GetName() + "_" + colliderLabel_ +
                 "_" + std::to_string(colliderIndex_);
+            // チェックボックスは表示名を出さず、ColliderごとのshapeRenderEnabledだけを直接操作する。
             ImGui::Checkbox(shapeId_.c_str(), &collider_->shapeRenderEnabled);
 
             ImGui::TableNextColumn();
@@ -205,6 +212,7 @@ void CollisionShapeManagerWindow::DrawColliderList()
 std::vector<std::shared_ptr<GameObject>>
 CollisionShapeManagerWindow::BuildListedObjects() const
 {
+    // Target Onlyなら対象階層だけ、そうでなければManagerが持つ全GameObjectを一覧対象にする。
     std::vector<std::shared_ptr<GameObject>> objects_;
     if (!gameObjectManager) return objects_;
 
@@ -226,6 +234,7 @@ void CollisionShapeManagerWindow::CollectHierarchyObjects(
 {
     if (!rootObject_) return;
 
+    // includeChildrenが有効な時はTransform階層を再帰的にたどり、子Colliderも表に出す。
     objects_.push_back(rootObject_);
     if (!includeChildren || !rootObject_->transform) return;
 
@@ -240,6 +249,7 @@ void CollisionShapeManagerWindow::CollectHierarchyObjects(
 void CollisionShapeManagerWindow::SetTargetObjectName(
     const std::string& objectName_)
 {
+    // ImGui::InputText用の固定長バッファへ安全にコピーする。
     strncpy_s(
         targetObjectName,
         sizeof(targetObjectName),

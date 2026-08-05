@@ -20,6 +20,7 @@ ControllerInput::~ControllerInput()
 
 bool ControllerInput::Initialize()
 {
+    // SDLのGamepadサブシステムを必要になった時だけ起動し、最初の接続状態を即キャプチャする。
     if (initialized)
     {
         return true;
@@ -32,6 +33,7 @@ bool ControllerInput::Initialize()
     }
 
     gamepadEventsWereEnabled = SDL_GamepadEventsEnabled();
+    // 元のイベント有効状態はShutdownで戻すため保持しておく。
     SDL_SetGamepadEventsEnabled(true);
     SDL_PumpEvents();
     SDL_UpdateGamepads();
@@ -43,6 +45,7 @@ bool ControllerInput::Initialize()
 
 void ControllerInput::Shutdown()
 {
+    // 開いているGamepadを閉じ、SDLサブシステムと入力状態を初期化前へ戻す。
     CloseGamepad();
     state = {};
     previousState = {};
@@ -57,6 +60,7 @@ void ControllerInput::Shutdown()
 
 void ControllerInput::Update()
 {
+    // 押した瞬間/離した瞬間を判定できるよう、更新前の状態をpreviousへ退避する。
     previousState = state;
 
     if (!initialized && !Initialize())
@@ -65,13 +69,13 @@ void ControllerInput::Update()
         return;
     }
 
-    // The engine owns the Win32 message loop, so SDL's device events must be
-    // pumped explicitly before polling the current gamepad state.
+    // Win32側がメッセージループを持つため、SDLの接続イベントはここで明示的に進める。
     SDL_PumpEvents();
     SDL_UpdateGamepads();
 
     if (gamepad != nullptr && !SDL_GamepadConnected(gamepad))
     {
+        // 実行中に抜かれた場合はハンドルを閉じ、次の更新で再接続を試せる状態にする。
         CloseGamepad();
     }
 
@@ -85,6 +89,7 @@ void ControllerInput::Update()
 
 bool ControllerInput::TryOpenGamepad()
 {
+    // SDLが認識しているGamepad候補を列挙し、最初に開けた1台を現在の入力元として使う。
     int gamepadCount_ = 0;
     SDL_JoystickID* gamepadIds_ = SDL_GetGamepads(&gamepadCount_);
 
@@ -108,6 +113,7 @@ bool ControllerInput::TryOpenGamepad()
     connected = gamepad != nullptr;
     if (connected)
     {
+        // デバッグ表示用にデバイス名を保持し、取得できない場合はUnknownとして扱う。
         const char* name_ = SDL_GetGamepadName(gamepad);
         gamepadName = name_ != nullptr ? name_ : "Unknown Gamepad";
     }
@@ -129,6 +135,7 @@ void ControllerInput::CloseGamepad()
 
 void ControllerInput::CaptureState()
 {
+    // 現在フレームのボタン/軸を丸ごと取り直し、未接続時は空状態にする。
     state = {};
     if (gamepad == nullptr || !SDL_GamepadConnected(gamepad))
     {
@@ -140,6 +147,7 @@ void ControllerInput::CaptureState()
 
     for (int buttonIndex_ = 0; buttonIndex_ < SDL_GAMEPAD_BUTTON_COUNT; ++buttonIndex_)
     {
+        // SDLのボタン配列をそのまま保持し、PadCode変換は参照時に行う。
         state.buttons[buttonIndex_] = SDL_GetGamepadButton(
             gamepad, static_cast<SDL_GamepadButton>(buttonIndex_));
     }
@@ -158,16 +166,19 @@ bool ControllerInput::ButtonPressed(PadCode code_) const
 
 bool ControllerInput::ButtonPressedIn(PadCode code_) const
 {
+    // 現在押されていて前フレーム押されていない状態を「押した瞬間」とする。
     return ButtonPressed(state, code_) && !ButtonPressed(previousState, code_);
 }
 
 bool ControllerInput::ButtonPressedOut(PadCode code_) const
 {
+    // 現在離れていて前フレーム押されていた状態を「離した瞬間」とする。
     return !ButtonPressed(state, code_) && ButtonPressed(previousState, code_);
 }
 
 bool ControllerInput::ButtonPressed(const ControllerState& state_, PadCode code_) const
 {
+    // L2/R2はSDL上では軸なので、しきい値以上を仮想ボタンとして扱う。
     if (code_ == PadCode::L2)
     {
         return NormalizeTrigger(state_.axes[SDL_GAMEPAD_AXIS_LEFT_TRIGGER]) >= triggerThreshold;
@@ -184,6 +195,7 @@ bool ControllerInput::ButtonPressed(const ControllerState& state_, PadCode code_
 
     switch (code_)
     {
+    // スティック方向もPadCodeとして扱えるよう、一定以上倒した方向を仮想ボタン化する。
     case PadCode::STICK_L_UP: return leftStick_.y >= virtualButtonThreshold;
     case PadCode::STICK_L_DOWN: return leftStick_.y <= -virtualButtonThreshold;
     case PadCode::STICK_L_LEFT: return leftStick_.x <= -virtualButtonThreshold;
@@ -236,16 +248,19 @@ DirectX::XMFLOAT2 ControllerInput::CalculateStickValue(Sint16 rawX_, Sint16 rawY
     constexpr float axisMax_ = 32767.0f;
 
     float x_ = std::clamp(static_cast<float>(rawX_) / axisMax_, -1.0f, 1.0f);
+    // SDLの生値を-1から1へ正規化し、Y軸はゲーム内の上方向が正になるよう反転する。
     float y_ = std::clamp(-static_cast<float>(rawY_) / axisMax_, -1.0f, 1.0f);
     float magnitude_ = std::sqrt(x_ * x_ + y_ * y_);
 
     if (magnitude_ <= stickDeadZone)
     {
+        // デッドゾーン内は完全な0にして、微小なドリフトを移動入力へ伝えない。
         return {};
     }
 
     float normalizedMagnitude_ = std::min(
         1.0f, (magnitude_ - stickDeadZone) / (1.0f - stickDeadZone));
+    // デッドゾーン外の残り範囲を0から1へ再スケールし、倒し量の感触を保つ。
     float scale_ = normalizedMagnitude_ / magnitude_;
     return { x_ * scale_, y_ * scale_ };
 }
@@ -257,6 +272,7 @@ float ControllerInput::NormalizeTrigger(Sint16 rawValue_) const
 
 SDL_GamepadButton ControllerInput::ConvertButton(PadCode code_) const
 {
+    // Engine側のPadCodeをSDLの標準Gamepadボタンへ変換する。
     switch (code_)
     {
     case PadCode::A: return SDL_GAMEPAD_BUTTON_SOUTH;

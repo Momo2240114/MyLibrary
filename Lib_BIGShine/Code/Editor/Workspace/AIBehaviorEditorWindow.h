@@ -30,6 +30,7 @@ public:
 private:
     struct BehaviorGraphTarget
     {
+        // AIControllerとDragonAIのどちらを編集しているかを共通に扱うための一時ターゲット情報。
         AIControllerComponent* aiController = nullptr;
         DragonAIComponent* dragonAI = nullptr;
         GameObject* owner = nullptr;
@@ -62,15 +63,19 @@ private:
     std::weak_ptr<GameObject> targetObject;
     ax::NodeEditor::EditorContext* nodeEditorContext = nullptr;
     AssetBrowserWindow assetBrowser;
+    // 独自リンク描画で使うため、各ピンIDから画面上の中心座標を引けるように保持する。
     std::unordered_map<uintptr_t, ImVec2> pinPositions;
+    // DragonAIの現在アクション名。PLAY_ACTIONノードのランタイム強調に使う。
     std::string activeActionName;
     uintptr_t selectedNodeId = 0;
     uintptr_t nodeToPlaceId = 0;
+    // 右クリックで新規作成したノードを置くキャンバス座標。
     DirectX::XMFLOAT2 nextNodePosition = { 220.0f, 180.0f };
     bool restoreNodePositions = true;
     std::string graphAssetStatus;
     float targetListWidth = 260.0f;
     float inspectorWidth = 340.0f;
     float assetBrowserHeight = 260.0f;
+    // 初回だけ現在ウィンドウサイズから分割レイアウトを初期化するためのフラグ。
     bool layoutSizeInitialized = false;
 };

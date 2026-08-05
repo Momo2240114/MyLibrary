@@ -14,16 +14,28 @@ class HitBox;
 
 enum class ATTACK_EFFECT_TYPE
 {
+    // 生成した瞬間に範囲判定を置く攻撃。
     INSTANT_AREA,
+
+    // 前方へ移動しながら判定を持つ攻撃。
     PROJECTILE,
+
+    // 一定時間その場に残り、継続して判定する攻撃。
     AREA_OVER_TIME,
+
+    // 直線状に伸びるビーム攻撃。
     BEAM,
+
+    // 広がる息・ブレス系の攻撃。
     BREATH
 };
 
 enum class ATTACK_HIT_SHAPE
 {
+    // 判定なし。
     NONE,
+
+    // 単一球判定。
     SPHERE,
     BOX,
     CAPSULE,
@@ -33,19 +45,28 @@ enum class ATTACK_HIT_SHAPE
     RAY
 };
 
+// 古いデータや未対応形状を、実行時に扱える形状へ丸める。
 ATTACK_HIT_SHAPE NormalizeAttackHitShape(ATTACK_HIT_SHAPE shape_);
 
 struct AttackEffectSphereTemplate
 {
+    // SPHERE_GROUP の各球を、エフェクト基準からどこへ置くか。
     DirectX::XMFLOAT3 localOffset = { 0.0f, 0.0f, 0.0f };
     float radius = 0.5f;
 };
 
 struct AttackEffectHitShapeTemplate
 {
+    // falseならこの形状は生成しない。
     bool enabled = true;
+
+    // Runtimeで生成するHitBox GameObject名。
     std::string hitBoxName = "AttackEffectHitBox";
+
+    // どの形状で攻撃判定を作るか。
     ATTACK_HIT_SHAPE shape = ATTACK_HIT_SHAPE::SPHERE;
+
+    // エフェクト本体を基準にした判定のローカルTransform。
     DirectX::XMFLOAT3 localOffset = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 localRotation = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 localScale = { 1.0f, 1.0f, 1.0f };
@@ -53,11 +74,17 @@ struct AttackEffectHitShapeTemplate
     float halfHeight = 1.0f;
     float range = 5.0f;
     float angle = 45.0f;
+
+    // エフェクト再生時間内で、この判定が有効になる区間。
     float activeStartTime = 0.0f;
     float activeEndTime = 0.1f;
+
+    // 継続判定時、同じ対象へ再Hitできる間隔。
     float hitInterval = 0.0f;
     bool destroyOnHit = false;
     bool allowMultiHit = false;
+
+    // SPHERE_GROUP用の複数球設定。
     std::vector<AttackEffectSphereTemplate> spheres;
 };
 
@@ -71,7 +98,10 @@ public:
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
 
+    // 攻撃者として扱うGameObjectを設定する。
     void SetOwner(GameObject* owner_);
+
+    // AttackSystemの重複Hit管理に使う攻撃インスタンスID。
     void SetAttackInstanceId(uint32_t attackInstanceId_);
     void SetHitGroupId(uint32_t hitGroupId_);
     void SetDamage(float damage_);
@@ -80,6 +110,8 @@ public:
     void SetHitStopScale(float hitStopScale_);
     void SetKnockBackPower(float knockBackPower_);
     void SetAirLiftPower(float targetAirLiftPower_, float attackerAirLiftPower_);
+
+    // Hit成立時にCameraShakeへ渡す揺れ設定。
     void SetCameraShake(
         bool enabled_,
         float receiveDuration_,
@@ -103,36 +135,54 @@ public:
     void SetHitMeshVFXNormalOffset(float normalOffset_);
     void SetAllowMultiHit(bool allowMultiHit_);
     void SetCanHitOwner(bool canHitOwner_);
+
+    // 攻撃タイプによって移動や寿命の扱いを変える。
     void SetEffectType(ATTACK_EFFECT_TYPE effectType_);
     void SetLifeTime(float lifeTime_);
     void SetDestroyOnLifeEnd(bool destroyOnLifeEnd_);
     void SetMovement(const DirectX::XMFLOAT3& direction_, float speed_);
+
+    // 実行時に生成するHitBox形状リストを差し替える。
     void SetHitShapes(const std::vector<AttackEffectHitShapeTemplate>& hitShapes_);
 
+    // 判定再生を開始する。
     void Play();
     void Stop();
     void ResetRuntime();
+
+    // Editor/Debug描画用に、現在のHitShape情報を提出する。
     void SubmitDebugShapes();
 
 private:
     struct RuntimeHitShape
     {
+        // 実際に生成した判定用GameObjectとHitBox。
         std::shared_ptr<GameObject> object;
         std::shared_ptr<HitBox> hitBox;
+
+        // 元になったhitShapesのIndex。時間制御やGUI表示で対応を取る。
         size_t templateIndex = 0u;
     };
 
+    // hitShapesテンプレートをもとにRuntimeHitShapeを作り直す。
     void RebuildHitShapes();
+
+    // AttackSystemへ渡すDamage/VFX/CameraShakeなどをHitBoxへ設定する。
     void ConfigureHitBox(
         const std::shared_ptr<HitBox>& hitBox_,
-        const AttackEffectHitShapeTemplate& shape_,
-        const std::string& name_);
+            const AttackEffectHitShapeTemplate& shape_,
+            const std::string& name_);
+
+    // 継続攻撃や再生し直し時に、HitBox側の重複Hit履歴を消す。
     void ClearHitHistory();
 
+    // 実行中の攻撃タイプと攻撃者情報。
     ATTACK_EFFECT_TYPE effectType = ATTACK_EFFECT_TYPE::INSTANT_AREA;
     GameObject* ownerObject = nullptr;
     uint32_t attackInstanceId = 0u;
     uint32_t hitGroupId = 0u;
+
+    // Hit成立時にAttackSystemへ渡す攻撃パラメータ。
     float damage = 1.0f;
     float impactPower = 1.0f;
     float hitStopDuration = 0.0f;
@@ -140,6 +190,8 @@ private:
     float knockBackPower = 0.0f;
     float targetAirLiftPower = 0.0f;
     float attackerAirLiftPower = 0.0f;
+
+    // Hit成立時のカメラ揺れ。
     bool cameraShakeEnabled = true;
     float cameraShakeReceiveDuration = 0.12f;
     float cameraShakeReceivePositionStrength = 0.025f;
@@ -147,6 +199,8 @@ private:
     float cameraShakeAttackScale = 0.5f;
     float cameraShakeFrequency = 24.0f;
     int cameraShakePriority = 5;
+
+    // Hit成立時に追加で出すParticle/MeshVFX設定。
     std::string hitParticleAssetPath;
     std::string hitParticleEmitterName;
     float hitParticleLifeTime = 1.0f;
@@ -160,6 +214,8 @@ private:
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;
+
+    // この攻撃エフェクト自身の寿命と再生状態。
     float lifeTime = 1.0f;
     float elapsedTime = 0.0f;
     float hitIntervalTimer = 0.0f;
@@ -167,8 +223,12 @@ private:
     bool destroyOnLifeEnd = true;
     bool canHitOwner = false;
     bool allowMultiHit = false;
+
+    // PROJECTILEなどでエフェクト本体を移動させるための設定。
     DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 1.0f };
     float movementSpeed = 0.0f;
     std::vector<AttackEffectHitShapeTemplate> hitShapes;
+
+    // 再生時に生成された実体判定。
     std::vector<RuntimeHitShape> runtimeHitShapes;
 };

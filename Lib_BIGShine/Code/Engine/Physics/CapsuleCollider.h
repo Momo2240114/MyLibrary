@@ -6,6 +6,8 @@
 
 class GltfModelCommponennt;
 
+// Capsule形状のCollider。
+// 通常の位置固定Capsuleに加え、Model Node間へ追従するBone/部位用Capsuleとしても使える。
 class CapsuleCollider : public ColliderComponent
 {
 public:
@@ -15,11 +17,11 @@ public:
         return name_;
     }
 
-    float radius = 0.5f;
-    float halfHeight = 1.0f;
-    std::string nodeModelObjectName;
-    std::string startNodeName;
-    std::string endNodeName;
+    float radius = 0.5f; // Capsule半径。
+    float halfHeight = 1.0f; // 中心から上下球中心までの距離。
+    std::string nodeModelObjectName; // Node追従時に参照するModel Object名。
+    std::string startNodeName; // Capsule始点に使うNode名。
+    std::string endNodeName; // Capsule終点に使うNode名。
 
     ColliderType GetColliderType() const override { return ColliderType::Capsule; }
 
@@ -31,10 +33,12 @@ public:
     bool TryGetNodeSegment(
         DirectX::XMFLOAT3& startPosition_,
         DirectX::XMFLOAT3& endPosition_);
+    // 現在のTransform/Node追従状態からCollisionMath用Capsuleを作る。
     Capsule GetCapsuleData();
     CollisionManifold CheckCollision(std::shared_ptr<ColliderComponent> other_) override;
 
 private:
+    // PhysX Shape作成前にNode追従形状を反映する。
     void OnPhysicsShapePrepared() override;
     std::shared_ptr<GltfModelCommponennt> ResolveNodeModel();
     bool ResolveNodeIndex(
@@ -46,6 +50,7 @@ private:
         const DirectX::XMFLOAT3& endPosition_);
 
 private:
+    // Node名解決後のIndex Cache。
     int startNodeIndex = -1;
     int endNodeIndex = -1;
 };

@@ -23,6 +23,7 @@ namespace
 
     std::string ToLowerString(std::string text_)
     {
+        // 検索と拡張子判定を大文字小文字に左右されないよう小文字へそろえる。
         std::transform(text_.begin(), text_.end(), text_.begin(),
             [](unsigned char character_) { return static_cast<char>(std::tolower(character_)); });
         return text_;
@@ -30,6 +31,7 @@ namespace
 
     std::string FindExistingIconPath(const std::initializer_list<const char*>& fileNames_)
     {
+        // アイコン名は大文字小文字の揺れを許容し、最初に存在したものを採用する。
         for (const char* fileName_ : fileNames_)
         {
             const std::filesystem::path iconPath_ =
@@ -45,6 +47,7 @@ namespace
 
     void RetainDrawTexture(ID3D11ShaderResourceView* texture_)
     {
+        // ImGuiの描画コマンドが実行されるまでSRVを保持し、描画前に解放される事故を避ける。
         if (texture_) texture_->AddRef();
     }
 
@@ -111,6 +114,8 @@ void AssetBrowserWindow::Draw()
 void AssetBrowserWindow::DrawContent()
 {
     BS_PROFILE_SCOPE("AssetBrowserWindow::DrawContent");
+
+    // 左にフォルダツリー、右に選択フォルダ内のアセットグリッドを並べる基本レイアウト。
     ImGui::PushID(this);
     ImGui::InputTextWithHint("##AssetSearch", "Search current folder...", searchText, sizeof(searchText));
     ImGui::SameLine();
@@ -156,6 +161,8 @@ void AssetBrowserWindow::DrawContent()
 void AssetBrowserWindow::Refresh()
 {
     BS_PROFILE_SCOPE("AssetBrowserWindow::Refresh");
+
+    // Data配下を再走査し、選択中フォルダが残っていれば同じパスへ復元する。
     rootNode = {};
     rootNode.name = "Data";
     rootNode.path = "Data";
@@ -172,6 +179,8 @@ void AssetBrowserWindow::Refresh()
 void AssetBrowserWindow::LoadDirectory(const std::filesystem::path& path_, AssetNode& node_)
 {
     BS_PROFILE_SCOPE("AssetBrowserWindow::LoadDirectory");
+
+    // 実ファイル階層を再帰的にAssetNodeへ変換し、ファイルは拡張子やjson内容から種類を分類する。
     std::error_code error_;
     if (!std::filesystem::is_directory(path_, error_)) return;
 
@@ -197,6 +206,7 @@ void AssetBrowserWindow::LoadDirectory(const std::filesystem::path& path_, Asset
 
 void AssetBrowserWindow::DrawFolderTree(AssetNode& node_)
 {
+    // ディレクトリだけをツリー表示し、クリックされたフォルダを右側グリッドの表示対象にする。
     if (!node_.isDirectory) return;
     ImGui::PushID(node_.path.c_str());
     ImGuiTreeNodeFlags flags_ = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -218,6 +228,8 @@ void AssetBrowserWindow::DrawFolderTree(AssetNode& node_)
 void AssetBrowserWindow::DrawGrid()
 {
     BS_PROFILE_SCOPE("AssetBrowserWindow::DrawGrid");
+
+    // 選択フォルダの子要素をアイコンサイズに合わせて列数計算し、検索に合うものだけカード表示する。
     AssetNode* folder_ = selectedFolder ? selectedFolder : &rootNode;
     ImGui::TextUnformatted(folder_->path.c_str());
     ImGui::Separator();
@@ -236,6 +248,8 @@ void AssetBrowserWindow::DrawGrid()
 void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
 {
     BS_PROFILE_SCOPE("AssetBrowserWindow::DrawAssetCard");
+
+    // アセット1件分のアイコン、選択枠、ドラッグ開始、ツールチップをまとめて描く。
     ImGui::PushID(node_.path.c_str());
 
     ID3D11ShaderResourceView* texture_ = GetAssetIcon(node_);
@@ -286,6 +300,7 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
 
 void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
 {
+    // 他のEditor UIへ渡せるよう、種類別のPayload名とパス文字列をDragDropへ積む。
     if (!ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) return;
     BS_PROFILE_SCOPE("AssetBrowserWindow::BeginAssetDrag");
 
@@ -302,6 +317,8 @@ void AssetBrowserWindow::BeginAssetDrag(AssetNode& node_)
 void AssetBrowserWindow::LoadAssetBrowserIcons()
 {
     BS_PROFILE_SCOPE("AssetBrowserWindow::LoadAssetBrowserIcons");
+
+    // 種類別の標準アイコンを起動時に探し、存在しない場合はFallbackで表示できるようにする。
     assetBrowserIcons.folderPath = FindExistingIconPath({ "Folder.png", "folder.png" });
     assetBrowserIcons.modelPath = FindExistingIconPath({ "Model.png", "model.png" });
     assetBrowserIcons.texturePath = FindExistingIconPath({ "Texture.png", "texture.png" });
@@ -314,6 +331,7 @@ void AssetBrowserWindow::LoadAssetBrowserIcons()
 
 ID3D11ShaderResourceView* AssetBrowserWindow::GetAssetIcon(const AssetNode& node_) const
 {
+    // テクスチャは実画像をサムネイルにし、それ以外は種類別アイコンを使う。
     if (node_.isDirectory)
     {
         return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.folderPath));
@@ -373,6 +391,7 @@ const std::string& AssetBrowserWindow::GetFallbackIconPath(const std::string& pr
 
 const char* AssetBrowserWindow::GetPayloadType(const AssetNode& node_) const
 {
+    // ドロップ先が受け取り種類を判別できるよう、AssetTypeをPayload文字列へ変換する。
     switch (node_.type)
     {
     case AssetType::TEXTURE:
@@ -393,6 +412,7 @@ const char* AssetBrowserWindow::GetPayloadType(const AssetNode& node_) const
 
 AssetBrowserWindow::AssetNode* AssetBrowserWindow::FindNode(const std::string& path_, AssetNode& node_)
 {
+    // Refresh後も選択フォルダを保てるよう、保存していたパスから新しいツリー内のノードを探す。
     if (node_.path == path_) return &node_;
     for (AssetNode& child_ : node_.children)
     {
@@ -403,6 +423,7 @@ AssetBrowserWindow::AssetNode* AssetBrowserWindow::FindNode(const std::string& p
 
 bool AssetBrowserWindow::MatchesSearch(const AssetNode& node_) const
 {
+    // 検索は現在フォルダ内の名前だけを対象にし、フォルダ移動なしで一覧を素早く絞る。
     if (searchText[0] == '\0') return true;
     std::string name_ = ToLowerString(node_.name);
     std::string search_ = ToLowerString(searchText);
@@ -427,6 +448,7 @@ bool AssetBrowserWindow::HasPathComponent(
 
 AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::filesystem::path& path_) const
 {
+    // 拡張子を基本にしつつ、jsonはフォルダ名やAssetTypeキーも見てCurve/VFXMaterialを判定する。
     std::string extension_ = ToLowerString(path_.extension().string());
     if (extension_ == ".png" || extension_ == ".jpg" || extension_ == ".jpeg" ||
         extension_ == ".bmp" || extension_ == ".tga" || extension_ == ".dds" || extension_ == ".hdr")

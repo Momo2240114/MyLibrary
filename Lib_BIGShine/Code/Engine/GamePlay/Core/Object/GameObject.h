@@ -32,12 +32,14 @@ enum class LayerType : uint32_t
     Item = 1 << 10,
 };
 
+// Scene上に配置されるObject本体。
+// Transform、Component群、Collider専用Component、Object固有Actionをまとめて保持する。
 class GameObject : public std::enable_shared_from_this<GameObject>
 {
 public: 
 
-    LayerType layer = LayerType::Default;   // ★追加
-    uint32_t mask = (uint32_t)LayerType::Default;//コリジョンマスク
+    LayerType layer = LayerType::Default;   // Collisionや描画判定に使うLayer。
+    uint32_t mask = (uint32_t)LayerType::Default; // Collision対象を絞るMask。
 
     bool saveFlg = true;
     bool requiredForSceneStart = false;
@@ -45,15 +47,15 @@ public:
     std::shared_ptr<Transform> transform;
     std::vector<std::shared_ptr<Component>> components;
 
-    //コリジョン用のコンポーネント
+    // Collision用Componentは通常Componentと分けて、Physics登録と更新順を管理する。
     std::vector<std::shared_ptr<Component>> colliderComponents;
-    // --- 追加：自分専用のレジスタ ---
+    // Object専用Action。AnimationやSequenceからObject単位の処理を呼ぶために使う。
     ActionRegistry localRegistry;
 
-    //自身が属する宇宙（マネージャー）へのポインタ
+    // 自身が属するGameObjectManagerへのポインタ。
     GameObjectManager* manager = nullptr;
 public:
-    //このオブジェクトを統べるマネージャーへのアクセス
+    // このObjectを管理しているManagerへのアクセス。
     GameObjectManager& GetManager() const { return *manager; }
 
     // マネージャーを設定する（生成時に呼ばれる）
@@ -88,13 +90,13 @@ public:
     template<typename T>
     std::shared_ptr<T> GetOrAddComponent(bool collStartFlg = true)
     {
-        // 1. まず現在のリストから検索
+        // 1. まず現在のリストから検索する。
         auto comp = GetComponent<T>();
 
-        // 2. 見つかったらそれを返す（二重生成しない）
+        // 2. 見つかったらそれを返し、二重生成を防ぐ。
         if (comp) return comp;
 
-        // 3. なければ新しく作って追加
+        // 3. なければ新しく作って追加する。
         return AddComponent<T>(collStartFlg);
     }
 
@@ -113,7 +115,7 @@ public:
 
         comp->SetGameObject(shared_from_this());
 
-        //コライダーコンポーネントを来てクラスするクラスがTなのであれば
+        // Collider系はPhysics登録が必要なため、専用リストへ分けて保持する。
         if constexpr (std::is_base_of<ColliderComponent, T>::value)
         {
             colliderComponents.push_back(comp);
@@ -124,7 +126,6 @@ public:
             components.push_back(comp);
         }
 
-        //components.push_back(comp);
         if(collStartFlg)
         {
             if constexpr (std::is_base_of<ColliderComponent, T>::value)
@@ -144,6 +145,7 @@ public:
     template<typename T>
     std::shared_ptr<T> GetComponent()
     {
+        // 通常ComponentとColliderComponentの両方から、指定型に一致するものを探す。
         for (auto& comp : components)
         {
             if (auto casted = std::dynamic_pointer_cast<T>(comp))
@@ -163,6 +165,7 @@ public:
     template<typename T>
     std::vector<std::shared_ptr<T>> GetComponents()
     {
+        // 同じ型のComponentを複数持つ場合に備え、該当するものをすべて返す。
         std::vector<std::shared_ptr<T>> results_;
         for (auto& comp_ : components)
         {
@@ -203,7 +206,7 @@ public:
 
     void Update(float deltaTime_);
    
-    //遅延更新
+    // 遅延更新。
     void LateUpdate(float et);
 
     void UpdateTransform()
@@ -213,6 +216,7 @@ public:
 
     void Submit(ID3D11DeviceContext* context_)
     {
+        // 描画Submitは通常Componentだけを対象にする。
         for (auto& comp : components)
             if (comp->IsEnabled() && comp->IsStarted())
                 comp->Submit(context_);

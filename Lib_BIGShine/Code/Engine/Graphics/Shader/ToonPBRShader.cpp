@@ -11,6 +11,7 @@ namespace
 {
     void SortShadeSteps(DirectX::XMFLOAT4& shadeSteps_)
     {
+        // しきい値の順序が入れ替わるとShader側の段階計算が崩れるため昇順へ揃える。
         float steps_[] = { shadeSteps_.x, shadeSteps_.y, shadeSteps_.z, shadeSteps_.w };
         std::sort(steps_, steps_ + 4);
         shadeSteps_ = { steps_[0], steps_[1], steps_[2], steps_[3] };
@@ -19,6 +20,7 @@ namespace
 
 ToonPBRShader::ToonPBRShader(ID3D11Device* device)
 {
+    // Static Mesh用Vertex Shader。InputLayoutはStatic/Skinnedで同じ頂点定義を使う。
     CPUResourceLoader::LoadVertexShader(
         device,
         "Shader/ToonPBRStaticVS.cso",
@@ -27,6 +29,7 @@ ToonPBRShader::ToonPBRShader(ID3D11Device* device)
         inputLayout.GetAddressOf(),
         staticVertexShader.GetAddressOf());
 
+    // Skinned Mesh用Vertex Shader。Bone変形はShader側で行う。
     CPUResourceLoader::LoadVertexShader(
         device,
         "Shader/ToonPBRSkinnedVS.cso",
@@ -35,16 +38,19 @@ ToonPBRShader::ToonPBRShader(ID3D11Device* device)
         nullptr,
         skinnedVertexShader.GetAddressOf());
 
+    // PBR TextureとToon段階設定を組み合わせて最終色を作るPixel Shader。
     CPUResourceLoader::LoadPixelShader(
         device,
         "Shader/ToonPBRPS.cso",
         pixelShader.GetAddressOf());
 
+    // MeshごとのMaterial値を送るConstantBuffer。
     CPUResourceLoader::CreateConstantBuffer(
         device,
         sizeof(CbMesh),
         meshConstantBuffer.GetAddressOf());
 
+    // glTFのTextureを繰り返しSampleできる標準Linear Wrap Sampler。
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -60,6 +66,7 @@ void ToonPBRShader::Begin(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
+    // Begin時は基本PipelineをBindし、Meshごとの差分はUpdateで上書きする。
     dc->IASetInputLayout(inputLayout.Get());
     dc->VSSetShader(skinnedVertexShader.Get(), nullptr, 0);
     dc->PSSetShader(pixelShader.Get(), nullptr, 0);
@@ -70,6 +77,7 @@ void ToonPBRShader::Begin(const RenderContext& rc)
     auto& gdm = GraphicsDeviceManager::Instance();
     ID3D11ShaderResourceView* iblSRVs[] =
     {
+        // PBRの環境光計算用IBL Texture群。
         gdm.GetIBLDiffuseSRV(),
         gdm.GetIBLSpecularSRV(),
         gdm.GetIBLLutGGXSRV(),
@@ -79,6 +87,7 @@ void ToonPBRShader::Begin(const RenderContext& rc)
 
 void ToonPBRShader::BindVertexShader(const RenderContext& rc_, bool isSkinnedMesh_)
 {
+    // DrawするMeshのBone有無に合わせてVSだけ切り替える。
     ID3D11DeviceContext* dc_ = rc_.deviceContext;
     dc_->VSSetShader(
         isSkinnedMesh_ ? skinnedVertexShader.Get() : staticVertexShader.Get(),
@@ -90,6 +99,7 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
+    // MaterialからPBR値とToon設定を詰め、Pixel Shaderへ送る。
     CbMesh cb{};
     cb.baseColor = mesh.material->baseColor;
     cb.emissiveColor = mesh.material->emissiveColor;
@@ -105,6 +115,7 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
 
     ID3D11ShaderResourceView* srvs[] =
     {
+        // glTF Materialで使うTexture群。欠けているSlotはnullptrのままShader側/Resource側で扱う。
         mesh.material->baseMap.Get(),
         mesh.material->normalMap.Get(),
         mesh.material->emissiveMap.Get(),
@@ -116,6 +127,7 @@ void ToonPBRShader::Update(const RenderContext& rc, const GltfModelCommponennt::
 
 void ToonPBRShader::Gui()
 {
+    // Toonの明暗しきい値はEditorで動かし、常に小さい順へ整列する。
     if (ImGui::SliderFloat4("ToonPBRPS_Shade Thresholds", &shadeSteps.x, 0.001f, 1.0f))
     {
         SortShadeSteps(shadeSteps);
@@ -127,6 +139,7 @@ void ToonPBRShader::Gui()
 
 void ToonPBRShader::SetShadeSettings(const DirectX::XMFLOAT4& shadeSteps_, const DirectX::XMFLOAT4& shadeFeather_)
 {
+    // 外部から設定された場合も、Shaderへ渡す前にしきい値順を保証する。
     shadeSteps = shadeSteps_;
     SortShadeSteps(shadeSteps);
     shadeFeathers = shadeFeather_;
@@ -136,6 +149,7 @@ void ToonPBRShader::End(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
+    // 後続Shaderへ状態が漏れないよう、Shader/InputLayout/SRVを解除する。
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->PSSetShader(nullptr, nullptr, 0);
     dc->IASetInputLayout(nullptr);

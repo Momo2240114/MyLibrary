@@ -22,6 +22,7 @@ private:
 
     struct InputOption
     {
+        // UI上の表示名と、実際に保存するDeviceType/codeの対応。
         const char* name;
         DeviceType device;
         int code;
@@ -29,6 +30,7 @@ private:
 
     struct AxisOption
     {
+        // マウス移動やスティック軸のような連続値入力の表示名とコード。
         const char* name;
         AxisCode code;
     };
@@ -85,6 +87,7 @@ private:
     std::vector<AxisOption> mouseAxisOptions;
     std::vector<AxisOption> stickAxisOptions;
 
+    // KeyConfigを直接変更せず、保存ボタンまで編集内容を保持する作業用マップ。
     std::unordered_map<std::string, std::vector<InputCombo>> draftActionMap;
     std::unordered_map<std::string, AxisBind> draftAxisMap;
 
@@ -99,8 +102,10 @@ private:
     std::string configFilePath = "Data/Input/KeyConfig.json";
     std::string statusMessage;
 
+    // 未保存変更があるかを示し、ToolbarのModified表示に使う。
     bool dirty = false;
 
+    // Capture中に書き戻すInputUnitを一時的に保持する。Popup終了時に必ずnullptrへ戻す。
     bool capturePopupOpen = false;
     InputUnit* captureTarget = nullptr;
 };

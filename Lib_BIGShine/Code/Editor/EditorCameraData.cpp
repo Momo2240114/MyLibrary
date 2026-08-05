@@ -14,6 +14,7 @@
 
 void EditorCameraData::ResetPreviewCamera(CameraComponent& camera_)
 {
+    // エディタ用プレビューカメラを、対象が見やすい初期位置と角度へ戻す。
     previewCameraPosition = { 0.0f, 1.5f, -6.0f };
     previewCameraYaw = 0.0f;
     previewCameraPitch = -0.18f;
@@ -24,6 +25,7 @@ void EditorCameraData::ResetPreviewCamera(CameraComponent& camera_)
 
 void EditorCameraData::ApplyToCamera(CameraComponent& camera_) const
 {
+    // yaw/pitchから前方向を作り、現在位置から1単位先を注視点としてCameraComponentへ渡す。
     const float cosPitch_ = cosf(previewCameraPitch);
 
     const DirectX::XMFLOAT3 forward_
@@ -51,6 +53,7 @@ void EditorCameraData::UpdatePreviewFreeCamera(
     float deltaTime_,
     bool previewHovered_)
 {
+    // プレビュー領域にマウスが乗っている時だけ、右ドラッグ+WASDの自由カメラ操作を受け付ける。
     if (!enablePreviewFreeCamera) return;
     if (!previewHovered_) return;
 
@@ -58,6 +61,7 @@ void EditorCameraData::UpdatePreviewFreeCamera(
 
     if (!mouse_.RightDown())
     {
+        // 右ボタンを押していない時はホイールだけ消費し、他UIへ意図せず速度変更を持ち越さない。
         mouse_.ConsumeWheelDelta();
         return;
     }
@@ -66,11 +70,13 @@ void EditorCameraData::UpdatePreviewFreeCamera(
 
     previewCameraYaw += mouseDelta_.x * previewCameraLookSensitivity;
     previewCameraPitch -= mouseDelta_.y * previewCameraLookSensitivity;
+    // 真上/真下を越えすぎると操作が反転しやすいため、Pitchは実用範囲に制限する。
     previewCameraPitch = std::clamp(previewCameraPitch, -1.5f, 1.5f);
 
     const float wheelDelta_ = mouse_.ConsumeWheelDelta();
     if (wheelDelta_ != 0.0f)
     {
+        // ホイールで一時的な移動倍率を調整し、広いプレビュー空間でも移動しやすくする。
         previewCameraSpeedMultiplier += wheelDelta_ > 0.0f ? 0.1f : -0.1f;
         previewCameraSpeedMultiplier = std::clamp(previewCameraSpeedMultiplier, 0.1f, 20.0f);
     }
@@ -93,6 +99,7 @@ void EditorCameraData::UpdatePreviewFreeCamera(
 
     DirectX::XMFLOAT3 moveDirection_{ 0.0f, 0.0f, 0.0f };
 
+    // WASDは視線基準の前後左右、Q/EはワールドY方向の上下移動として扱う。
     if (KeyInput::KeyPressed(KeyInput::Key::K_W))
     {
         moveDirection_.x += forward_.x;
@@ -129,6 +136,7 @@ void EditorCameraData::UpdatePreviewFreeCamera(
 
     if (moveLengthSq_ > 0.0001f)
     {
+        // 斜め移動だけ速くならないよう正規化し、deltaTime込みの速度で位置へ加算する。
         moveVector_ = DirectX::XMVector3Normalize(moveVector_);
 
         const float finalSpeed_ =
@@ -151,6 +159,7 @@ void EditorCameraData::UpdatePreviewFreeCamera(
 
 void EditorCameraData::Gui()
 {
+    // プレビューカメラの操作設定と現在値をInspector/Window側から調整・確認する。
     ImGui::Checkbox("Enable Free Camera", &enablePreviewFreeCamera);
     ImGui::DragFloat("Move Speed", &previewCameraMoveSpeed, 0.1f, 0.1f, 100.0f);
     ImGui::DragFloat("Look Sensitivity", &previewCameraLookSensitivity, 0.0001f, 0.0001f, 0.05f, "%.4f");

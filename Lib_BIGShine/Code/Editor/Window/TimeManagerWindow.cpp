@@ -8,6 +8,7 @@ void TimeManagerWindow::Draw()
 {
     if (!isVisible) return;
 
+    // TimeManagerのLayer別Scaleと、一時停止/フレーム送りを確認するデバッグWindow。
     if (BeginEditorWindow())
     {
         DrawStylePopup();
@@ -23,6 +24,7 @@ void TimeManagerWindow::Draw()
 
         struct LayerScaleView
         {
+            // 表示名とTimeManager内部で使うLayerTypeを対応付ける。
             const char* name;
             TarGetLayerType layer;
         };
@@ -44,6 +46,7 @@ void TimeManagerWindow::Draw()
 
         if (ImGui::BeginTable("CurrentTimeScales", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg))
         {
+            // 現在キャッシュされている各LayerのScaleを一覧表示する。
             ImGui::TableSetupColumn("Layer");
             ImGui::TableSetupColumn("Scale");
             ImGui::TableHeadersRow();
@@ -64,6 +67,7 @@ void TimeManagerWindow::Draw()
         }
 
         ImGui::SeparatorText("Debug Playback");
+        // Pause/Stepはデバッグ用の再生制御で、ゲーム全体を止めながら1フレームずつ確認できる。
         ImGui::Text("State: %s%s",
             timeManager_->IsPaused() ? "Paused" : "Running",
             timeManager_->IsFrameStepActive() ? " (Step)" : "");
@@ -81,6 +85,7 @@ void TimeManagerWindow::Draw()
         bool cameraUnscaledWhilePaused_ = timeManager_->IsCameraUnscaledWhilePaused();
         if (ImGui::Checkbox("Camera Moves While Paused", &cameraUnscaledWhilePaused_))
         {
+            // 一時停止中でもEditor Cameraを動かしたい時だけ、Camera更新をUnscaled扱いにする。
             timeManager_->SetCameraUnscaledWhilePaused(cameraUnscaledWhilePaused_);
         }
 
@@ -101,6 +106,7 @@ void TimeManagerWindow::Draw()
 
         if (ImGui::Button("Apply Persistent Scale"))
         {
+            // Persistent Scaleは解除するまで全Layerへ目標Scaleを維持する。
             ApplyTimeScale();
         }
 
@@ -111,6 +117,7 @@ void TimeManagerWindow::Draw()
         ImGui::DragFloat("Time To Default", &returnDuration, 0.01f, 0.0f, 60.0f, "%.2f sec");
         if (ImGui::Button("Play Timed Scale"))
         {
+            // Timed Scaleは遷移、保持、復帰の3区間で一時的なスロー/加速を再生する。
             timeManager_->PlayTimedScale(
                 static_cast<uint32_t>(TarGetLayerType::All),
                 targetScale,
@@ -148,6 +155,7 @@ void TimeManagerWindow::Draw()
 
 void TimeManagerWindow::ApplyTimeScale()
 {
+    // UIで設定した目標ScaleをAll Layerへ適用する。
     if (!gameObjectManager) return;
 
     const std::shared_ptr<TimeManager> timeManager_ = gameObjectManager->GetTimeManager();

@@ -13,6 +13,7 @@ InputEditorWindow::InputEditorWindow(GameObjectManager* manager_)
     defaultWindowSize = ImVec2(900.0f, 640.0f);
     isVisible = false;
 
+    // UIで選べるキー一覧を先に固定し、設定データ側にはデバイス種別とコードだけを保存する。
     keyboardOptions = {
         {"A", DeviceType::KBM, 'A'}, {"B", DeviceType::KBM, 'B'}, {"C", DeviceType::KBM, 'C'}, {"D", DeviceType::KBM, 'D'},
         {"E", DeviceType::KBM, 'E'}, {"F", DeviceType::KBM, 'F'}, {"G", DeviceType::KBM, 'G'}, {"H", DeviceType::KBM, 'H'},
@@ -60,6 +61,7 @@ InputEditorWindow::InputEditorWindow(GameObjectManager* manager_)
         {"Pad Touchpad", DeviceType::Gamepad, static_cast<int>(PadCode::TOUCHPAD)}, {"Pad Guide", DeviceType::Gamepad, static_cast<int>(PadCode::GUIDE)}
     };
 
+    // Axis入力はボタン入力とは別に、マウス移動量とスティック軸を選択肢として持つ。
     mouseAxisOptions = {
     {"Mouse X", AxisCode::MouseX},
     {"Mouse Y", AxisCode::MouseY},
@@ -74,6 +76,7 @@ InputEditorWindow::InputEditorWindow(GameObjectManager* manager_)
     };
 
     auto& keyConfig_ = KeyConfig::Instance();
+    // KeyConfig側に既に設定ファイルがある場合はそれを尊重し、無い場合だけエディタ既定パスを登録する。
     if (keyConfig_.GetConfigFile().empty())
     {
         keyConfig_.SetConfigFile(configFilePath);
@@ -84,6 +87,7 @@ InputEditorWindow::InputEditorWindow(GameObjectManager* manager_)
     }
 
     keyConfig_.Load(configFilePath);
+    // 実設定を直接編集せず、画面上のドラフトへコピーしてから編集を始める。
     RefreshDraftFromConfig();
 }
 
@@ -103,6 +107,7 @@ void InputEditorWindow::Draw()
 
     const float leftWidth_ = 250.0f;
 
+    // 左ペインでAction/Axis名を選び、右ペインで選択項目の詳細を編集する。
     ImGui::BeginChild("InputList", ImVec2(leftWidth_, 0.0f), true);
 
     if (editMode == InputEditMode::Action)
@@ -139,6 +144,7 @@ void InputEditorWindow::Draw()
 
 std::vector<std::string> InputEditorWindow::BuildActionNames() const
 {
+    // mapの並びに依存せず、エディタ表示は名前順で安定させる。
     std::vector<std::string> names_;
     for (const auto& pair_ : draftActionMap)
     {
@@ -162,6 +168,7 @@ const std::vector<InputCombo>* InputEditorWindow::GetSelectedCombos() const
 
 void InputEditorWindow::DrawToolbar()
 {
+    // Loadはドラフトを再作成し、SaveはドラフトをKeyConfigへ反映してからファイルへ書き出す。
     ImGui::TextUnformatted("Config");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(-220.0f);
@@ -211,6 +218,7 @@ void InputEditorWindow::DrawToolbar()
 
 void InputEditorWindow::DrawActionList()
 {
+    // Actionは複数のComboを持つ入力名で、ここでは追加と選択だけを担当する。
     ImGui::InputText("New Action", &newActionName);
     if (ImGui::Button("Add Action", ImVec2(-1.0f, 0.0f)))
     {
@@ -248,6 +256,7 @@ void InputEditorWindow::DrawActionEditor()
     ImGui::SameLine();
     if (ImGui::Button("Rename"))
     {
+        // 名前変更はmapのキー差し替えになるため、既存Comboをmoveしてバインド内容を保持する。
         if (!renameBuffer.empty() && draftActionMap.find(renameBuffer) == draftActionMap.end())
         {
             auto movedCombos_ = std::move(*combos_);
@@ -271,6 +280,7 @@ void InputEditorWindow::DrawActionEditor()
     ImGui::Separator();
     if (ImGui::Button("Add Combo"))
     {
+        // ComboはAND条件の入力単位で、初期値としてキーボードAを1つ持たせる。
         combos_->push_back(InputCombo{ InputUnit{ DeviceType::KBM, 'A' } });
         dirty = true;
     }
@@ -285,6 +295,7 @@ void InputEditorWindow::DrawActionEditor()
 
 void InputEditorWindow::DrawComboEditor(InputCombo& combo_, int comboIndex_)
 {
+    // 1つのCombo内に並ぶUnitは同時押し条件として扱う。
     ImGui::Separator();
     ImGui::Text("Combo %d", comboIndex_ + 1);
     ImGui::SameLine();
@@ -323,6 +334,7 @@ void InputEditorWindow::DrawUnitEditor(InputCombo& combo_, InputUnit& unit_, int
     ImGui::SameLine();
     if (ImGui::SmallButton("Capture"))
     {
+        // CaptureはこのUnitのポインタを一時保持し、ポップアップで押されたキーを書き戻す。
         captureTarget = &unit_;
         capturePopupOpen = true;
     }
@@ -336,6 +348,7 @@ void InputEditorWindow::DrawUnitEditor(InputCombo& combo_, InputUnit& unit_, int
 
 void InputEditorWindow::DrawInputPicker(InputUnit& unit_)
 {
+    // キーボード・マウス・ゲームパッドを同じInputUnitへ割り当てるため、共通コンボとして描画する。
     const std::string preview_ = BuildUnitLabel(unit_);
     ImGui::SetNextItemWidth(260.0f);
     if (!ImGui::BeginCombo("##Input", preview_.c_str())) return;
@@ -374,6 +387,7 @@ void InputEditorWindow::DrawCapturePopup()
     if (ImGui::BeginPopupModal("Capture Keyboard Input", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::TextUnformatted("Press any keyboard key.");
+        // Windowsの仮想キーコードを直接拾い、手入力しづらいキーも登録できるようにする。
         const int code_ = CaptureKeyboardCode();
         if (code_ > 0 && captureTarget)
         {
@@ -408,6 +422,7 @@ void InputEditorWindow::DrawStatusLine()
 }
 void InputEditorWindow::RefreshDraftFromConfig()
 {
+    // 保存済み設定からドラフトを作り直し、先頭項目を選んだ状態にして編集を再開しやすくする。
     draftActionMap = KeyConfig::Instance().GetActionMap();
     draftAxisMap = KeyConfig::Instance().GetAxisMap();
 
@@ -443,6 +458,7 @@ void InputEditorWindow::ApplyDraftToConfig()
     auto& keyConfig_ = KeyConfig::Instance();
     keyConfig_.SetConfigFile(configFilePath);
 
+    // KeyConfigには差分更新ではなく、既存登録を一度消してドラフト全体を正として流し込む。
     std::vector<std::string> oldActionNames_;
     for (const auto& pair_ : keyConfig_.GetActionMap())
     {
@@ -485,6 +501,7 @@ void InputEditorWindow::SelectAction(const std::string& action_)
 
 std::string InputEditorWindow::BuildUnitLabel(const InputUnit& unit_) const
 {
+    // 保存されるコード値から、人が読める選択肢名へ戻してプレビュー表示に使う。
     const auto findName_ = [&](const std::vector<InputOption>& options_) -> const char*
         {
             for (const auto& option_ : options_)
@@ -506,6 +523,7 @@ std::string InputEditorWindow::BuildUnitLabel(const InputUnit& unit_) const
 
 int InputEditorWindow::CaptureKeyboardCode() const
 {
+    // 0-6番台はマウスや予約キーが混ざりやすいため、通常キーとして扱いやすい範囲から走査する。
     for (int code_ = 7; code_ < 256; ++code_)
     {
         if ((GetAsyncKeyState(code_) & 0x8000) != 0)
@@ -518,6 +536,7 @@ int InputEditorWindow::CaptureKeyboardCode() const
 
 void InputEditorWindow::DrawModeTabs()
 {
+    // ActionとAxisは編集対象のデータ構造が違うため、簡易タブでペイン内容を切り替える。
     if (ImGui::Button(editMode == InputEditMode::Action ? "[Action]" : "Action"))
     {
         editMode = InputEditMode::Action;
@@ -535,6 +554,7 @@ void InputEditorWindow::DrawModeTabs()
 
 std::vector<std::string> InputEditorWindow::BuildAxisNames() const
 {
+    // Axis一覧もActionと同じく名前順にして、設定ファイルの記述順に表示が揺れないようにする。
     std::vector<std::string> names_;
 
     for (const auto& pair_ : draftAxisMap)
@@ -566,6 +586,7 @@ void InputEditorWindow::SelectAxis(const std::string& axisName_)
 
 void InputEditorWindow::DrawAxisList()
 {
+    // Axisは移動量や視点操作のような連続値入力の名前で、左ペインでは追加と選択を行う。
     ImGui::InputText("New Axis", &newAxisName);
 
     if (ImGui::Button("Add Axis", ImVec2(-1.0f, 0.0f)))
@@ -610,6 +631,7 @@ void InputEditorWindow::DrawAxisEditor()
 
     if (ImGui::Button("Rename"))
     {
+        // Axis名もmapキーなので、バインド配列を保持したまま新しいキーへ移す。
         if (!axisRenameBuffer.empty() && draftAxisMap.find(axisRenameBuffer) == draftAxisMap.end())
         {
             auto movedBinds_ = std::move(*binds_);
@@ -635,6 +657,7 @@ void InputEditorWindow::DrawAxisEditor()
 
     if (ImGui::Button("Add Axis Unit"))
     {
+        // 追加直後にすぐ確認できるよう、標準的なWキー正方向入力を初期値にする。
         AxisUnit unit_{};
         unit_.sourceType = AxisSourceType::Button;
         unit_.device = DeviceType::KBM;
@@ -658,6 +681,7 @@ void InputEditorWindow::DrawAxisEditor()
 
 void InputEditorWindow::DrawAxisUnitEditor(AxisUnit& unit_, int unitIndex_)
 {
+    // AxisUnitは入力ソース、入力コード、出力倍率、必要ならデッドゾーンをまとめた1つの寄与値。
     ImGui::Separator();
 
     ImGui::Text("Axis Unit %d", unitIndex_ + 1);
@@ -718,6 +742,7 @@ void InputEditorWindow::DrawAxisSourcePicker(AxisUnit& unit_)
         sourceNames_,
         IM_ARRAYSIZE(sourceNames_)))
     {
+        // 入力ソースを切り替えた時は、前のコードが別種別で誤解されないよう標準値へリセットする。
         unit_.sourceType =
             static_cast<AxisSourceType>(sourceIndex_);
 
@@ -751,6 +776,7 @@ void InputEditorWindow::DrawAxisCodePicker(AxisUnit& unit_)
 {
     if (unit_.sourceType == AxisSourceType::Button)
     {
+        // ボタン由来のAxisはActionと同じ入力ピッカーを使い、scaleで正負方向を決める。
         InputUnit inputUnit_{ unit_.device, unit_.code };
 
         DrawInputPicker(inputUnit_);
@@ -767,6 +793,7 @@ void InputEditorWindow::DrawAxisCodePicker(AxisUnit& unit_)
 
     if (unit_.sourceType == AxisSourceType::MouseMove)
     {
+        // マウス移動量はKBMデバイスのAxisCodeとして保存し、通常キーコードとは分けて扱う。
         const std::string preview_ = BuildAxisUnitLabel(unit_);
 
         ImGui::SetNextItemWidth(220.0f);
@@ -793,6 +820,7 @@ void InputEditorWindow::DrawAxisCodePicker(AxisUnit& unit_)
 
     if (unit_.sourceType == AxisSourceType::GamepadStick)
     {
+        // スティック入力はGamepadデバイスのAxisCodeとして保存し、deadZoneで微小入力を抑える。
         const std::string preview_ = BuildAxisUnitLabel(unit_);
 
         ImGui::SetNextItemWidth(220.0f);
@@ -822,6 +850,7 @@ void InputEditorWindow::DrawAxisCodePicker(AxisUnit& unit_)
 
 std::string InputEditorWindow::BuildAxisUnitLabel(const AxisUnit& unit_) const
 {
+    // AxisUnitの種類に応じて、保存コードをエディタ用の読みやすい名前へ変換する。
     if (unit_.sourceType == AxisSourceType::Button)
     {
         InputUnit inputUnit_{ unit_.device, unit_.code };
