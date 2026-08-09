@@ -62,6 +62,8 @@ public:
     void PlayOneShot(const AudioPlaybackSettings& settings_);
     // 主チャンネルと全OneShotチャンネルを停止し、関連DSPを解放する。
     void Stop();
+    // 再生が終わったOneShot ChannelとDSPを解放する。
+    void Update();
     void SetVolume(float volume_);
     void SetPitch(float pitch_);
     void SetPan(float pan_);
@@ -70,6 +72,13 @@ public:
     bool IsValid() const { return sound != nullptr; }
 
 private:
+    // OneShot再生へ接続したDSPを、対応するChannelの終了に合わせて解放する。
+    struct OneShotDsp
+    {
+        FMOD::Channel* channel = nullptr;
+        FMOD::DSP* dsp = nullptr;
+    };
+
     // OneShotチャンネルへローパスDSPを追加し、こもり効果を適用する。
     void ApplyMuffle(FMOD::Channel* channel_, bool muffled_, float cutoff_);
     // 主チャンネルのローパスDSPを現在設定に合わせて追加・更新・解除する。
@@ -90,7 +99,7 @@ private:
     // 重複再生中のOneShotチャンネル一覧。
     std::vector<FMOD::Channel*> oneShotChannels;
     // OneShotごとに生成したローパスDSPの解放管理用一覧。
-    std::vector<FMOD::DSP*> oneShotDsps;
+    std::vector<OneShotDsp> oneShotDsps;
     // このAudioSourceが参照する音声ファイルパス。
     std::string filename;
     float volume = 1.0f;

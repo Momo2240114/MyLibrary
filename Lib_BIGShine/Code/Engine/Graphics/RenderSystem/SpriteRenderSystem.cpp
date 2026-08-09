@@ -145,6 +145,13 @@ void SpriteRenderSystem::Submit(const SpriteRenderCommand& command_)
 void SpriteRenderSystem::RenderAll(ID3D11DeviceContext* context_)
 {
     BS_PROFILE_SCOPE("SpriteRenderSystem::RenderAll");
+    if (!context_ || drawList.empty())
+    {
+        // UI描画が行えないフレームでも、Submit順と描画リストは次フレームへ持ち越さない。
+        drawList.clear();
+        nextSubmitOrder = 0;
+        return;
+    }
 
     // 現在のViewportサイズを基準に、各スプライトをNDCへ変換して描画する。
     D3D11_VIEWPORT viewport_{};

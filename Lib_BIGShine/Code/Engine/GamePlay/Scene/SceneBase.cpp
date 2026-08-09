@@ -34,6 +34,7 @@
 #include "Editor/Window/TimeManagerWindow.h"
 #include "Editor/Window/GameModeWindow.h"
 #include "Editor/Window/DebugLogWindow.h"
+#include "Editor/Window/EditorSceneViewWindow.h"
 #include "Editor/NodeEditor/AnimNodeEditorWindow.h"
 #include "Editor/NodeEditor/NodeGraphMonitorWindow.h"
 #include "Editor/Workspace/ParticleEditorWindow.h"
@@ -41,6 +42,7 @@
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
 #include "Editor/Workspace/AIBehaviorEditorWindow.h"
 #include "Editor/Workspace/UIWidgetEditorWindow.h"
+#include "Editor/Workspace/PrefabWorkspaceWindow.h"
 #include <imgui.h>
 
 std::shared_ptr<GameObjectManager> SceneBase::GetGameObjectManager()
@@ -87,6 +89,10 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<TimeManagerWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<GameModeWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<DebugLogWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<EditorSceneViewWindow>(
+		_GameObjectManager.get(),
+		&m_SpriteRenderSystem,
+		&m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<ActionSequenceEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EffectAssetListWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<MaterialAssetListWindow>(_GameObjectManager.get()));
@@ -98,6 +104,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AIBehaviorEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<UIWidgetEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<PrefabWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<CurveAssetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<EasingPresetEditorWindow>(_GameObjectManager.get()));

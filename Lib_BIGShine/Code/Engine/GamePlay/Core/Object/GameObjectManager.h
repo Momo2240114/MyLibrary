@@ -17,6 +17,7 @@ class BoxCollider;
 class GltfModelCommponennt;
 class TimeManager;
 class CameraManager;
+class CameraComponent;
 class MotionVelocityComponent;
 struct ID3D11RenderTargetView;
 
@@ -113,7 +114,12 @@ public:
         return results_;
     }
 
-    void RenderAll(SpriteRenderSystem& spriteSystem, ModelRenderSystem& modelSystem, ID3D11RenderTargetView* finalRenderTargetView_ = nullptr);
+    void RenderAll(
+        SpriteRenderSystem& spriteSystem,
+        ModelRenderSystem& modelSystem,
+        ID3D11RenderTargetView* finalRenderTargetView_ = nullptr,
+        const CameraComponent* overrideCamera_ = nullptr,
+        bool clearSceneRenderTargets_ = false);
     void SetModelRenderSystem(ModelRenderSystem* modelRenderSystem_) { modelRenderSystem = modelRenderSystem_; }
     void RegisterMotionVelocityComponent(const std::shared_ptr<MotionVelocityComponent>& component_);
     void UnregisterMotionVelocityComponent(MotionVelocityComponent* component_);
@@ -184,6 +190,9 @@ public:
     std::shared_ptr<GameObject> Instantiate(const std::string& prefabName_);
     // Prefabsフォルダ内のファイル一覧を更新
     void RefreshPrefabList();
+    const std::vector<std::string>& GetPrefabFiles() const { return prefabFiles; }
+    int GetSelectedPrefabIndex() const { return selectedPrefabIndex; }
+    void SetSelectedPrefabIndex(int selectedPrefabIndex_);
 
     void ApplyDestroys(std::shared_ptr<GameObject> object_);
 

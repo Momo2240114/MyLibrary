@@ -48,6 +48,16 @@ void EditorCameraData::ApplyToCamera(CameraComponent& camera_) const
         { 0.0f, 1.0f, 0.0f });
 }
 
+void EditorCameraData::CaptureFromCamera(const CameraComponent& camera_)
+{
+    // 既存カメラの位置と前方向から、Editor自由カメラの操作値へ変換する。
+    previewCameraPosition = camera_.GetEye();
+    const DirectX::XMFLOAT3& front_ = camera_.GetFront();
+    previewCameraYaw = atan2f(front_.x, front_.z);
+    previewCameraPitch = asinf(std::clamp(front_.y, -1.0f, 1.0f));
+    previewCameraSpeedMultiplier = 1.0f;
+}
+
 void EditorCameraData::UpdatePreviewFreeCamera(
     CameraComponent& camera_,
     float deltaTime_,

@@ -150,6 +150,7 @@ const char* EditorWindowManager::GetWindowMenuCategory(
     if (name_ == "Hierarchy" || name_ == "InspectorWindow") return "Core";
 	if (name_ == "Shader" ||
 		name_ == "GPU Render Investigation" ||
+        name_ == "Editor Scene View" ||
 		name_ == "Shadow" ||
 		name_ == "Post Effect" ||
 		name_ == "Debug Texture Viewer")

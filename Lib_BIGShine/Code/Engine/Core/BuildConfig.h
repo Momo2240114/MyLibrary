@@ -38,7 +38,12 @@
 #define BS_ENABLE_IMGUI 1
 #define BS_ENABLE_GAME_IMGUI_UI 1
 #define BS_ENABLE_DEVELOPER_GUI 1
+#if defined(BS_FORCE_ENABLE_TRACY)
 #define BS_ENABLE_TRACY 1
+#else
+// 通常のメモリ計測ではTracyの収集バッファを作らず、必要な時だけBS_FORCE_ENABLE_TRACYで有効にする。
+#define BS_ENABLE_TRACY 0
+#endif
 #define BS_ENABLE_PROFILING 1
 #define BS_ENABLE_DEBUG_LOG 1
 #define BS_ENABLE_WARNING_LOG 1
@@ -86,7 +91,12 @@
 #define BS_ENABLE_IMGUI 1
 #define BS_ENABLE_GAME_IMGUI_UI 1
 #define BS_ENABLE_DEVELOPER_GUI 1
+#if defined(BS_FORCE_ENABLE_TRACY)
 #define BS_ENABLE_TRACY 1
+#else
+// Release確認時も通常はTracyを止め、計測が必要なビルドだけ明示的に有効化する。
+#define BS_ENABLE_TRACY 0
+#endif
 #define BS_ENABLE_PROFILING 1
 #define BS_ENABLE_DEBUG_LOG 1
 #define BS_ENABLE_WARNING_LOG 1
@@ -97,7 +107,37 @@
 #define BS_ENABLE_EDITOR_FILE_OUTPUT 1
 #endif
 
+#if BS_ENABLE_TRACY && !defined(TRACY_ON_DEMAND)
+// Viewer未接続時は計測イベントを蓄積せず、通常起動中のメモリ増加を抑える。
+#define TRACY_ON_DEMAND
+#endif
+
+#if BS_ENABLE_TRACY && !defined(TRACY_NO_SYSTEM_TRACING)
+// OS側の自動トレースは通常起動時のメモリ増加要因になりやすいため、手動Zone計測だけを使う。
+#define TRACY_NO_SYSTEM_TRACING
+#endif
+
+#if BS_ENABLE_TRACY && !defined(TRACY_NO_SAMPLING)
+// サンプリングプロファイラは常時監視の負荷が大きいため、必要な箇所は明示的なZoneで計測する。
+#define TRACY_NO_SAMPLING
+#endif
+
+#if BS_ENABLE_TRACY && !defined(TRACY_NO_CONTEXT_SWITCH)
+// Context Switch収集を止め、ゲーム実行中に蓄積されるOSイベント量を抑える。
+#define TRACY_NO_CONTEXT_SWITCH
+#endif
+
 #if BS_ENABLE_TRACY && !defined(TRACY_ENABLE)
 // Tracyを使うビルドでは、Tracy側の有効マクロもここで揃える。
 #define TRACY_ENABLE
+#endif
+
+#if !defined(BS_ENABLE_D3D11_DEBUG_LAYER)
+// D3D11 Debug Layerは詳細な追跡を行うため、通常のメモリ計測時は無効にする。
+#define BS_ENABLE_D3D11_DEBUG_LAYER 0
+#endif
+
+#if !defined(BS_ENABLE_PHYSX_PVD)
+// PhysX Visual Debuggerは接触やScene Queryを蓄積・送信するため、通常起動では無効にする。
+#define BS_ENABLE_PHYSX_PVD 0
 #endif

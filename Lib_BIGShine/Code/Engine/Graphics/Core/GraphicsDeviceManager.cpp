@@ -2,6 +2,7 @@
 
 
 #include "GraphicsDeviceManager.h"
+#include "Engine/Core/BuildConfig.h"
 #include "IMGUI.h"
 
 #include <d3d11.h>
@@ -212,7 +213,7 @@ bool GraphicsDeviceManager::Initialize(HWND windowHandle_, int width_, int heigh
 {
     HRESULT hr_ = S_OK;
     UINT createDeviceFlags_ = 0;
-#if defined(DEBUG) || defined(_DEBUG)
+#if BS_ENABLE_D3D11_DEBUG_LAYER && (defined(DEBUG) || defined(_DEBUG))
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
     // 実際のクライアント領域に合わせて描画リソースを作成する。
@@ -532,24 +533,12 @@ void GraphicsDeviceManager::SetFullscreen(bool enabled_)
  */
 void GraphicsDeviceManager::BeginFrame(const float clearColor_[4])
 {
-    // --- 変更点：バックバッファではなく、シーン用HDRバッファをクリアする ---
+    // Scene描画用の中間バッファと、ImGui描画先になるバックバッファをフレーム単位で初期化する。
     sceneDistortionUsed = false;
     UnbindShaderResourceViews(immediateContext.Get());
-    immediateContext->ClearRenderTargetView(sceneRTV.Get(), clearColor_);
-    const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f }; // 修正：{} を使い、変数名を black に
-    immediateContext->ClearRenderTargetView(sceneNormalRTV.Get(), black);
-    if (sceneDistortionRTV)
-    {
-        immediateContext->ClearRenderTargetView(sceneDistortionRTV.Get(), black);
-    }
-    immediateContext->ClearRenderTargetView(gBufferBaseColorRTV.Get(), black);
-    immediateContext->ClearRenderTargetView(gBufferNormalRTV.Get(), black);
-    immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
-    immediateContext->ClearRenderTargetView(gBufferEmissiveRTV.Get(), black);
-
-    // 深度バッファをクリア（これは共通）
-    immediateContext->ClearDepthStencilView(depthStencilView.Get(),
-        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    // Dockingを外したSceneViewのPlatform Windowが動いた跡を残さないよう、ImGui描画先のバックバッファも毎Frame消す。
+    immediateContext->ClearRenderTargetView(renderTargetView.Get(), clearColor_);
+    ClearSceneRenderTargets(clearColor_);
 
     // --- 変更点：描画先を「シーンバッファ」に固定する ---
     // これにより、GameObjectManagerの通常の描画がすべてHDRテクスチャに描き込まれます
@@ -624,6 +613,32 @@ void GraphicsDeviceManager::SetBackBufferRenderTarget()
     UnbindShaderResourceViews(immediateContext.Get());
     immediateContext->RSSetViewports(1, &viewport);
     immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+}
+
+void GraphicsDeviceManager::ClearSceneRenderTargets(const float clearColor_[4])
+{
+    if (!immediateContext) return;
+
+    sceneDistortionUsed = false;
+    UnbindShaderResourceViews(immediateContext.Get());
+
+    // 通常SceneViewとEditor用別視点Viewが同じ中間バッファを使うため、描画Pass単位で明示的に初期化する。
+    const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    immediateContext->ClearRenderTargetView(sceneRTV.Get(), clearColor_);
+    immediateContext->ClearRenderTargetView(sceneNormalRTV.Get(), black);
+    if (sceneDistortionRTV)
+    {
+        immediateContext->ClearRenderTargetView(sceneDistortionRTV.Get(), black);
+    }
+    immediateContext->ClearRenderTargetView(gBufferBaseColorRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferNormalRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferMaterialRTV.Get(), black);
+    immediateContext->ClearRenderTargetView(gBufferEmissiveRTV.Get(), black);
+    immediateContext->ClearDepthStencilView(
+        depthStencilView.Get(),
+        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+        1.0f,
+        0);
 }
 
 void GraphicsDeviceManager::SetSceneRenderTarget()
@@ -890,7 +905,7 @@ bool GraphicsDeviceManager::CreateDeviceAndSwapChain(HWND hwnd_)
     HRESULT result_ = S_OK;
 
     UINT createDeviceFlags_ = 0;
-#if defined(DEBUG) || defined(_DEBUG)
+#if BS_ENABLE_D3D11_DEBUG_LAYER && (defined(DEBUG) || defined(_DEBUG))
     createDeviceFlags_ |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 

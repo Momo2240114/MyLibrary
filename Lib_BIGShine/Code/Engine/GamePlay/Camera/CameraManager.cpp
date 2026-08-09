@@ -10,6 +10,20 @@ void CameraManager::Initialize()
     // マネージャー生成時に、レンダリング用のダミーオブジェクトを作成
     m_proxyObject = std::make_shared<GameObject>("CameraProxy");
     m_proxyCamera = m_proxyObject->AddComponent<CameraComponent>();
+    m_proxyCamera->SetPerspectiveFov(60.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
+    m_proxyCamera->SetLookAt(
+        { 0.0f, 1.0f, -5.0f },
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f });
+
+    // Editor用の別視点カメラはScene内CameraComponentの優先度や遷移へ参加させず、Managerが単独で所有する。
+    editorCameraObject = std::make_shared<GameObject>("EditorSceneViewCamera");
+    editorCameraComponent = editorCameraObject->AddComponent<CameraComponent>();
+    editorCameraComponent->SetPerspectiveFov(45.0f, 16.0f / 9.0f, 0.01f, 1000.0f);
+    editorCameraComponent->SetLookAt(
+        { 0.0f, 2.0f, -8.0f },
+        { 0.0f, 1.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f });
 }
 
 
@@ -92,6 +106,17 @@ std::shared_ptr<CameraComponent> CameraManager::GetActiveCamera() const
 std::shared_ptr<CameraComponent> CameraManager::GetSourceCamera() const
 {
     return isTransitioning && targetCamera ? targetCamera : activeCameraComponent;
+}
+
+void CameraManager::CopyActiveCameraToEditorCamera()
+{
+    if (!editorCameraComponent) return;
+
+    const std::shared_ptr<CameraComponent> sourceCamera_ = GetActiveCamera();
+    if (!sourceCamera_) return;
+
+    // Runtime側のCameraComponentは変更せず、Editor用Cameraへ現在の視点だけ複製する。
+    editorCameraComponent->CopyFrom(sourceCamera_.get());
 }
 
 void CameraManager::StartTransition(std::shared_ptr<CameraComponent> nextCam)

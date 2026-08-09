@@ -91,11 +91,17 @@ void AudioSource::Stop()
     }
     oneShotChannels.clear();
 
-    for (FMOD::DSP* dsp_ : oneShotDsps)
+    for (OneShotDsp& dsp_ : oneShotDsps)
     {
-        if (dsp_) dsp_->release();
+        if (dsp_.channel && dsp_.dsp) dsp_.channel->removeDSP(dsp_.dsp);
+        if (dsp_.dsp) dsp_.dsp->release();
     }
     oneShotDsps.clear();
+}
+
+void AudioSource::Update()
+{
+    CleanupStoppedChannels();
 }
 
 // 保持する音量を範囲内へ補正し、再生中の全チャンネルへ即時反映する。
@@ -161,7 +167,7 @@ void AudioSource::ApplyMuffle(FMOD::Channel* channel_, bool muffled_, float cuto
     lowPassDsp_->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, std::clamp(cutoff_, 10.0f, 22000.0f));
     lowPassDsp_->setActive(true);
     channel_->addDSP(0, lowPassDsp_);
-    oneShotDsps.push_back(lowPassDsp_);
+    oneShotDsps.push_back({ channel_, lowPassDsp_ });
 }
 
 // 主チャンネルのこもり設定に応じてローパスDSPを生成・更新・解除する。
@@ -242,6 +248,33 @@ void AudioSource::ApplySettings(FMOD::Channel* channel_, const AudioPlaybackSett
 // 再生を終えたOneShotチャンネルを一覧から除外し、以後の一括設定対象から外す。
 void AudioSource::CleanupStoppedChannels()
 {
+    oneShotDsps.erase(
+        std::remove_if(
+            oneShotDsps.begin(),
+            oneShotDsps.end(),
+            [](OneShotDsp& dsp_)
+            {
+                if (dsp_.dsp == nullptr) return true;
+
+                bool isPlaying_ = false;
+                if (dsp_.channel != nullptr)
+                {
+                    dsp_.channel->isPlaying(&isPlaying_);
+                }
+                if (isPlaying_) return false;
+
+                // 再生終了済みのOneShotへ接続したDSPを解放し、FMOD側の保持を残さない。
+                if (dsp_.channel != nullptr)
+                {
+                    dsp_.channel->removeDSP(dsp_.dsp);
+                }
+                dsp_.dsp->release();
+                dsp_.dsp = nullptr;
+                dsp_.channel = nullptr;
+                return true;
+            }),
+        oneShotDsps.end());
+
     oneShotChannels.erase(
         std::remove_if(
             oneShotChannels.begin(),

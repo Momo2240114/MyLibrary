@@ -14,6 +14,8 @@ public:
     // レンダリングで呼び出す「今使うべきカメラ」
     std::shared_ptr<CameraComponent> GetActiveCamera() const;
     std::shared_ptr<CameraComponent> GetSourceCamera() const;
+    std::shared_ptr<CameraComponent> GetEditorCamera() const { return editorCameraComponent; }
+    void CopyActiveCameraToEditorCamera();
 
 private:
     void StartTransition(std::shared_ptr<CameraComponent> nextCam);
@@ -25,6 +27,10 @@ private:
     std::shared_ptr<GameObject> m_proxyObject;
     // そのオブジェクトに紐づくコンポーネント（これらをレンダラーに渡す）
     std::shared_ptr<CameraComponent> m_proxyCamera;
+
+    // Editor専用SceneViewで使うランタイム非干渉のカメラ。
+    std::shared_ptr<GameObject> editorCameraObject;
+    std::shared_ptr<CameraComponent> editorCameraComponent;
 
     // 遷移用パラメータ
     bool isTransitioning = false;

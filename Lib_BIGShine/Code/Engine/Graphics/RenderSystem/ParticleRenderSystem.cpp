@@ -69,7 +69,12 @@ void ParticleRenderSystem::RenderAll(const RenderContext& rc, bool isEditorWindo
 {
     BS_PROFILE_SCOPE("Render::Particle");
     ID3D11DeviceContext* dc = rc.deviceContext;
-    if (!dc || !rc.camera || drawInfos.empty()) return;
+    if (!dc || !rc.camera || drawInfos.empty())
+    {
+        // 描画不能なフレームでも、1フレーム用のSubmit Queueは持ち越さない。
+        drawInfos.clear();
+        return;
+    }
     auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
     BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Particle Draw Pass");
 
