@@ -19,7 +19,7 @@ DebugLog& DebugLog::Instance()
 
 void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file_, int line_, const std::string& text_)
 {
-    // 時刻文字列はロック外で作り、messagesの排他時間を短くする。
+    // 時刻文字列はロック外で作り、messagesの操作時間を短くする。
     const std::chrono::steady_clock::time_point now_ = std::chrono::steady_clock::now();
     LogMessage message_;
     message_.category = category_;
@@ -34,6 +34,14 @@ void DebugLog::AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file
     message_.sequence = nextSequence++;
     message_.elapsedSeconds = std::chrono::duration<double>(now_ - startTime).count();
     messages.emplace_back(std::move(message_));
+
+    // 長時間起動中にDebugログだけでメモリが増え続けないよう、古いログをまとめて破棄する。
+    if (messages.size() > MAX_LOG_MESSAGE_COUNT)
+    {
+        const size_t keepCount_ = MAX_LOG_MESSAGE_COUNT - LOG_MESSAGE_TRIM_COUNT;
+        const size_t removeCount_ = messages.size() - keepCount_;
+        messages.erase(messages.begin(), messages.begin() + removeCount_);
+    }
 }
 
 void DebugLog::Clear()
@@ -101,7 +109,7 @@ bool DebugLog::SaveText(const std::string& path_) const
     const std::filesystem::path outputPath_(path_);
     if (outputPath_.has_parent_path())
     {
-        // 保存先フォルダが無い場合でも、Editorから直接出力できるよう作成する。
+        // 保存先フォルダがない場合でも、Editorから直接出力できるよう作成する。
         std::filesystem::create_directories(outputPath_.parent_path());
     }
 
@@ -134,7 +142,7 @@ bool DebugLog::SaveJson(const std::string& path_) const
     if (!file_.is_open()) return false;
 
     const std::vector<LogMessage> copy_ = GetMessages();
-    // nlohmannを使わず、ログ専用の軽いJSONとして手書き出力する。
+    // nlohmannを使わず、ログ専用の軽量JSONとして手書きで出力する。
     file_ << "{\n";
     file_ << "  \"Logs\": [\n";
     for (size_t index_ = 0; index_ < copy_.size(); ++index_)

@@ -10,6 +10,7 @@ struct EditorCameraData
     void UpdatePreviewFreeCamera(CameraComponent& camera_, float deltaTime_, bool previewHovered_);
     void ResetPreviewCamera(CameraComponent& camera_);
     void ApplyToCamera(CameraComponent& camera_) const;
+    void CaptureFromCamera(const CameraComponent& camera_);
     void Gui();
 
     DirectX::XMFLOAT3 previewCameraPosition = { 0.0f, 1.5f, -6.0f };

@@ -85,6 +85,15 @@ void AudioManager::LoadFile()
 // FMODの内部更新を呼び、再生・DSP・3D音響の状態を進める。
 void AudioManager::Update()
 {
+    for (const std::unique_ptr<AudioSource>& audioBGM_ : audioBGMs)
+    {
+        if (audioBGM_) audioBGM_->Update();
+    }
+    for (const std::unique_ptr<AudioSource>& audioSE_ : audioSEs)
+    {
+        if (audioSE_) audioSE_->Update();
+    }
+
     Audio::Instance().Update();
 }
 

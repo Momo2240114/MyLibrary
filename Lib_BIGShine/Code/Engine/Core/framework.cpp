@@ -53,7 +53,7 @@ bool framework::initialize()
 	ImNodes::GetIO().EmulateThreeButtonMouse.Modifier = &ImGui::GetIO().KeyAlt;
 
 //デバッグレイヤー表示
-#if defined(DEBUG) || defined(_DEBUG)
+#if BS_ENABLE_D3D11_DEBUG_LAYER && (defined(DEBUG) || defined(_DEBUG))
 	// デバッグ用のインターフェースを取得する
 	ID3D11InfoQueue* infoQueue = nullptr;
 	HRESULT hr = GraphicsDeviceManager::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&infoQueue);
@@ -62,6 +62,10 @@ bool framework::initialize()
 		// エラー時にブレークさせる設定
 		infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
 		infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
+
+		// DirectX Debug Layerの保存ログが増え続けないよう、直近のメッセージだけ保持する
+		constexpr UINT64 INFO_QUEUE_MESSAGE_LIMIT = 1024u;
+		infoQueue->SetMessageCountLimit(INFO_QUEUE_MESSAGE_LIMIT);
 
 		// 使い終わったら Release する（生ポインタの場合）
 		infoQueue->Release();

@@ -350,6 +350,7 @@
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\PrefabWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\UIWidgetEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
@@ -358,6 +359,7 @@
     <ClCompile Include="Code\Editor\Window\DebugLogWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EffectAssetListWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\MaterialAssetListWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\EditorSceneViewWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp" />
     <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\GpuRenderInvestigationWindow.cpp" />
@@ -641,6 +643,7 @@
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\ParticleEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\PrefabWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\UIWidgetEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
@@ -650,6 +653,7 @@
     <ClInclude Include="Code\Editor\Window\EffectAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\MaterialAssetListWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\EditorSceneViewWindow.h" />
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h" />
     <ClInclude Include="Code\Editor\Window\GameModeWindow.h" />
     <ClInclude Include="Code\Editor\Window\GpuRenderInvestigationWindow.h" />

@@ -145,6 +145,8 @@ void ImGuiRenderer::RenderAll(ID3D11DeviceContext* context)
 
 	{
 		BS_PROFILE_SCOPE("ImGui::RenderDrawData");
+		// SceneViewや追加Viewportの描画後でも、メインImGuiは必ずバックバッファへ描画する。
+		GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	}
 
@@ -155,6 +157,8 @@ void ImGuiRenderer::RenderAll(ID3D11DeviceContext* context)
 		BS_PROFILE_SCOPE("ImGui::RenderPlatformWindows");
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
+		// Platform Window描画後に残るRTV/Viewportを戻し、次のフレーム開始状態を安定させる。
+		GraphicsDeviceManager::Instance().SetBackBufferRenderTarget();
 	}
 }
 

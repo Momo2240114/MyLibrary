@@ -3,6 +3,7 @@
 #include "PhysXSystem.h"
 #include "ColliderComponent.h"
 #include "PhysXEventCallback.h"
+#include "Engine/Core/BuildConfig.h"
 
 #include <algorithm>
 
@@ -238,6 +239,7 @@ void PhysXSystem::Initialize()
     // Foundation
     gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAlloc, gError);
 
+#if BS_ENABLE_PHYSX_PVD
     // =============================
     // ① PVD インスタンス作成
     // =============================
@@ -248,12 +250,18 @@ void PhysXSystem::Initialize()
 
     // PVD へ接続開始
     gPvd->connect(*gPvdTransport, PxPvdInstrumentationFlag::eALL);
+#else
+    // 通常起動ではPVDを生成せず、接触やScene Queryのデバッグ送信を蓄積しない。
+    gPvd = nullptr;
+    gPvdTransport = nullptr;
+#endif
 
     // =============================
     // ② Physics を PVD 対応で作成
     // =============================
     PxTolerancesScale scale;
-    gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, scale, true, gPvd);
+    const bool trackOutstandingAllocations_ = BS_ENABLE_PHYSX_PVD != 0;
+    gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, scale, trackOutstandingAllocations_, gPvd);
 
     // =============================
     // ③ Scene 作成
@@ -276,6 +284,7 @@ void PhysXSystem::Initialize()
         gControllerManager->setOverlapRecoveryModule(true);
     }
 
+#if BS_ENABLE_PHYSX_PVD
     //// Scene 作成後に PVD SceneClient を取得
     PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
     if (pvdClient)
@@ -285,6 +294,7 @@ void PhysXSystem::Initialize()
         pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
         pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
     }
+#endif
 
     // ★ 共通デフォルトマテリアル（摩擦・反発）
     gDefaultMaterial = gPhysics->createMaterial(0.775f, 0.5f, 0.1f);

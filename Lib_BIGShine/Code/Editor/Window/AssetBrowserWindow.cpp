@@ -293,6 +293,40 @@ void AssetBrowserWindow::DrawAssetCard(AssetNode& node_)
         }
     }
     if (!node_.isDirectory) BeginAssetDrag(node_);
+    if (!node_.isDirectory && node_.type == AssetType::PREFAB)
+    {
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            const std::string prefabName_ =
+                std::filesystem::path(node_.path).stem().string();
+            if (prefabOpenHandler)
+            {
+                prefabOpenHandler(std::filesystem::path(node_.path));
+            }
+            else if (gameObjectManager)
+            {
+                gameObjectManager->Instantiate(prefabName_);
+            }
+        }
+
+        if (ImGui::BeginPopupContextItem("PrefabAssetContextMenu"))
+        {
+            if (ImGui::MenuItem(IM_U8("Prefabを編集用に読み込み##AssetBrowser_LoadPrefabForEdit")))
+            {
+                const std::string prefabName_ =
+                    std::filesystem::path(node_.path).stem().string();
+                if (prefabOpenHandler)
+                {
+                    prefabOpenHandler(std::filesystem::path(node_.path));
+                }
+                else if (gameObjectManager)
+                {
+                    gameObjectManager->Instantiate(prefabName_);
+                }
+            }
+            ImGui::EndPopup();
+        }
+    }
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", node_.path.c_str());
     ImGui::TextWrapped("%s", node_.name.c_str());
     ImGui::PopID();
@@ -353,6 +387,8 @@ ID3D11ShaderResourceView* AssetBrowserWindow::GetAssetIcon(const AssetNode& node
         return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.curvePath));
     case AssetType::JSON:
         return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.jsonPath));
+    case AssetType::PREFAB:
+        return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.jsonPath));
     case AssetType::FILE:
     default:
         return GetIconTexture(GetFallbackIconPath(assetBrowserIcons.filePath));
@@ -400,6 +436,8 @@ const char* AssetBrowserWindow::GetPayloadType(const AssetNode& node_) const
         return AssetBrowserPayload::MODEL;
     case AssetType::JSON:
         return AssetBrowserPayload::JSON;
+    case AssetType::PREFAB:
+        return AssetBrowserPayload::PREFAB;
     case AssetType::MATERIAL:
         return AssetBrowserPayload::MATERIAL;
     case AssetType::CURVE:
@@ -465,6 +503,10 @@ AssetBrowserWindow::AssetType AssetBrowserWindow::ClassifyAsset(const std::files
     }
     if (extension_ == ".json")
     {
+        if (HasPathComponent(path_, "Prefabs"))
+        {
+            return AssetType::PREFAB;
+        }
         if (HasPathComponent(path_, "VFXMaterial"))
         {
             return AssetType::MATERIAL;

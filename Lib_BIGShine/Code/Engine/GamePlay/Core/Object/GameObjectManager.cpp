@@ -25,7 +25,9 @@
 #include "Engine/Graphics/PostEffect/VignetteDirector.h"
 #include "Engine/GamePlay/EventSystem/TimeScaleDirector.h"
 
+#include <algorithm>
 #include <fstream>
+#include <unordered_map>
 #include <unordered_set>
 #include"Engine/GamePlay/EventSystem/EventManager.h"
 
@@ -1258,13 +1260,25 @@ void GameObjectManager::DrawHierarchyNode(std::shared_ptr<GameObject> object_, G
     }
 }
 
-void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRenderSystem& modelSystem_, ID3D11RenderTargetView* finalRenderTargetView_)
+void GameObjectManager::RenderAll(
+    SpriteRenderSystem& spriteSystem_,
+    ModelRenderSystem& modelSystem_,
+    ID3D11RenderTargetView* finalRenderTargetView_,
+    const CameraComponent* overrideCamera_,
+    bool clearSceneRenderTargets_)
 {
     // 3D、VFX、Particle、PostEffect、Spriteの順にScene全体を描画する。
     BS_PROFILE_SCOPE("Render::All");
     auto deviceContext_ = GraphicsDeviceManager::Instance().GetContext();
     auto& graphicsDeviceManager_ = GraphicsDeviceManager::Instance();
     auto tracyGpuContext_ = graphicsDeviceManager_.GetTracyGpuContext();
+
+    if (clearSceneRenderTargets_)
+    {
+        const float clearColor_[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+        // 別視点のEditor SceneViewは通常描画後に再度Scene中間バッファを使うため、ここで描画結果を分離する。
+        graphicsDeviceManager_.ClearSceneRenderTargets(clearColor_);
+    }
 
     // --- 追加: ライト情報の収集 ---
     LightManager lightManager_;
@@ -1336,7 +1350,7 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
 
     renderContext_.device = GraphicsDeviceManager::Instance().GetDevice();
     renderContext_.deviceContext = deviceContext_;
-    renderContext_.camera = cameraManager->GetActiveCamera().get();
+    renderContext_.camera = overrideCamera_ ? overrideCamera_ : cameraManager->GetActiveCamera().get();
     renderContext_.renderState = GraphicsDeviceManager::Instance().GetRenderState();
     renderContext_.lights = &lightManager_;
     renderContext_.decal = &decalManager_;
@@ -1444,12 +1458,23 @@ void GameObjectManager::RenderAll(SpriteRenderSystem& spriteSystem_, ModelRender
         }
     }
 
-    deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+    const BlendState spriteBlendState_ = finalRenderTargetView_
+        ? BlendState::TransparencyKeepAlpha
+        : BlendState::Transparency;
+    // Spriteの透明部分がSceneView用RTのAlphaを消さないよう、描画先に応じて合成状態を切り替える。
+    deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(spriteBlendState_), nullptr, 0xFFFFFFFF);
+    deviceContext_->OMSetDepthStencilState(renderContext_.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    deviceContext_->RSSetState(renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
     {
         BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::Sprite");
         spriteSystem_.RenderAll(deviceContext_);
     }
+
+    // Sprite描画で変更した2D用ステートを戻し、後続のImGui/Viewport描画へ状態を残さない。
+    deviceContext_->OMSetBlendState(renderContext_.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+    deviceContext_->OMSetDepthStencilState(renderContext_.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+    deviceContext_->RSSetState(renderContext_.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 }
 
 void GameObjectManager::RegisterMotionVelocityComponent(
@@ -1498,6 +1523,19 @@ void CollectObjectNames(const std::shared_ptr<GameObject>& obj, nlohmann::json& 
     // 子供たちの名前を再帰的に登録
     for (auto& child : obj->transform->children) {
         CollectObjectNames(child ? child->gameObject.lock() : nullptr, listJson);
+    }
+}
+
+void CollectPrefabObjects(const std::shared_ptr<GameObject>& object_, std::vector<std::shared_ptr<GameObject>>& objects_)
+{
+    // Prefab保存対象のRootと子階層を、復元しやすい親先行の順番で集める。
+    if (!object_ || !object_->saveFlg) return;
+
+    objects_.push_back(object_);
+    for (const std::shared_ptr<Transform>& childTransform_ : object_->transform->children)
+    {
+        if (!childTransform_) continue;
+        CollectPrefabObjects(childTransform_->gameObject.lock(), objects_);
     }
 }
 
@@ -1743,6 +1781,32 @@ void GameObjectManager::RefreshPrefabList()
             prefabFiles.push_back(entry.path().stem().string());
         }
     }
+
+    if (prefabFiles.empty())
+    {
+        selectedPrefabIndex = 0;
+    }
+    else
+    {
+        selectedPrefabIndex = std::clamp(
+            selectedPrefabIndex,
+            0,
+            static_cast<int>(prefabFiles.size()) - 1);
+    }
+}
+
+void GameObjectManager::SetSelectedPrefabIndex(int selectedPrefabIndex_)
+{
+    if (prefabFiles.empty())
+    {
+        selectedPrefabIndex = 0;
+        return;
+    }
+
+    selectedPrefabIndex = std::clamp(
+        selectedPrefabIndex_,
+        0,
+        static_cast<int>(prefabFiles.size()) - 1);
 }
 
 void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
@@ -1784,7 +1848,32 @@ void GameObjectManager::SaveAsPrefab(std::shared_ptr<GameObject> object_, const 
     std::filesystem::create_directories(prefabDirectory);
     std::string filePath = prefabDirectory + prefabName_ + ".json";
 
-    nlohmann::json j = object_->Save();
+    std::vector<std::shared_ptr<GameObject>> prefabObjects_;
+    CollectPrefabObjects(object_, prefabObjects_);
+    if (prefabObjects_.empty()) return;
+
+    // Rootと子階層を1つのPrefab Assetとして保存する。
+    nlohmann::json j;
+    j["AssetType"] = "Prefab";
+    j["Version"] = 2;
+    j["RootName"] = object_->GetName();
+    j["ObjectList"] = nlohmann::json::array();
+    j["Objects"] = nlohmann::json::object();
+
+    for (const std::shared_ptr<GameObject>& prefabObject_ : prefabObjects_)
+    {
+        if (!prefabObject_) continue;
+
+        const std::string& objectName_ = prefabObject_->GetName();
+        nlohmann::json objectJson_ = prefabObject_->Save();
+        if (prefabObject_ == object_)
+        {
+            objectJson_["ParentName"] = "";
+        }
+
+        j["ObjectList"].push_back(objectName_);
+        j["Objects"][objectName_] = objectJson_;
+    }
     std::ofstream file(filePath);
     if (file.is_open()) {
         file << j.dump(4);
@@ -1837,6 +1926,68 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
     nlohmann::json prefabJson;
     file >> prefabJson;
 
+    if (prefabJson.contains("Objects"))
+    {
+        const std::string rootName_ = prefabJson.value("RootName", prefabName_);
+        std::unordered_map<std::string, std::string> nameMap_;
+        std::unordered_set<std::string> reservedNames_;
+        std::vector<std::string> objectNames_;
+
+        for (const auto& nameJson_ : prefabJson["ObjectList"])
+        {
+            objectNames_.push_back(nameJson_.get<std::string>());
+        }
+
+        for (const std::string& objectName_ : objectNames_)
+        {
+            const std::string baseName_ = (objectName_ == rootName_) ? prefabName_ : objectName_;
+            std::string uniqueName_ = MakeUniqueName(baseName_);
+            int suffixIndex_ = 1;
+            while (reservedNames_.contains(uniqueName_))
+            {
+                char buffer_[32];
+                sprintf_s(buffer_, sizeof(buffer_), "_%02d", suffixIndex_);
+                uniqueName_ = baseName_ + buffer_;
+                ++suffixIndex_;
+            }
+
+            reservedNames_.insert(uniqueName_);
+            nameMap_[objectName_] = uniqueName_;
+        }
+
+        std::shared_ptr<GameObject> rootObject_ = nullptr;
+        for (const std::string& objectName_ : objectNames_)
+        {
+            if (!prefabJson["Objects"].contains(objectName_)) continue;
+
+            nlohmann::json objectJson_ = prefabJson["Objects"][objectName_];
+            objectJson_["Name"] = nameMap_[objectName_];
+
+            const std::string parentName_ = objectJson_.value("ParentName", "");
+            if (!parentName_.empty())
+            {
+                const auto parentNameIterator_ = nameMap_.find(parentName_);
+                objectJson_["ParentName"] =
+                    parentNameIterator_ != nameMap_.end() ? parentNameIterator_->second : "";
+            }
+
+            std::shared_ptr<GameObject> newObject_ = Create(nameMap_[objectName_]);
+            newObject_->Load(objectJson_);
+            if (objectName_ == rootName_) rootObject_ = newObject_;
+        }
+
+        if (!rootObject_ && !objectNames_.empty())
+        {
+            rootObject_ = Find(nameMap_[objectNames_.front()]);
+        }
+
+        ResolveHierarchy();
+        selectedObject = rootObject_;
+
+        printf("Instantiated Prefab Hierarchy: %s\n", prefabName_.c_str());
+        return rootObject_;
+    }
+
     // 1. 重複しないユニークな名前を生成する
     std::string uniqueName = MakeUniqueName(prefabName_);
 
@@ -1851,9 +2002,6 @@ std::shared_ptr<GameObject> GameObjectManager::Instantiate(const std::string& pr
     // 4. LoadするとJson内の"Name"で上書きされてしまうため、
     //    確定したユニーク名に再度設定し直す
     newObj->SetName(uniqueName.c_str());
-    Vector3 p(0, 0, 0);
-    newObj->transform->SetLocalPosition(p);
-
     printf("Instantiated: %s\n", uniqueName.c_str());
     return newObj;
 }

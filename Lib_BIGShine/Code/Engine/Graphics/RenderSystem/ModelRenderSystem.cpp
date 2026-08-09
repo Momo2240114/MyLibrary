@@ -677,6 +677,13 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 {
 	BS_PROFILE_SCOPE("Render::Model");
 	ID3D11DeviceContext* dc = rc.deviceContext;
+	if (!dc || !rc.camera || !rc.renderState)
+	{
+		// 描画前提が揃わないフレームでは、前フレーム分のSubmit Queueを残さない。
+		drawInfos.clear();
+		transparencyDrawInfos.clear();
+		return;
+	}
 	auto tracyGpuContext_ = GraphicsDeviceManager::Instance().GetTracyGpuContext();
 	BS_PROFILE_GPU_SCOPE(tracyGpuContext_, "GPU::RenderModels");
 	renderProfileFrame = {};

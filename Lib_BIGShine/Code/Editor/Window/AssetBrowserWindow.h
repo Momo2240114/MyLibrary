@@ -4,6 +4,7 @@
 
 #include <d3d11.h>
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,7 @@ public:
     explicit AssetBrowserWindow(GameObjectManager* manager_);
     void Draw() override;
     void DrawContent();
+    void SetPrefabOpenHandler(std::function<void(const std::filesystem::path&)> handler_) { prefabOpenHandler = handler_; }
 
 private:
     enum class AssetType
@@ -22,6 +24,7 @@ private:
         TEXTURE,
         MODEL,
         JSON,
+        PREFAB,
         MATERIAL,
         CURVE,
     };
@@ -73,6 +76,7 @@ private:
     std::string selectedFolderPath;
     std::string selectedFilePath;
     AssetBrowserIcons assetBrowserIcons;
+    std::function<void(const std::filesystem::path&)> prefabOpenHandler;
     char searchText[128]{};
     // フォルダツリー幅とサムネイルサイズはUI操作で調整される表示状態。
     float folderTreeWidth = 240.0f;

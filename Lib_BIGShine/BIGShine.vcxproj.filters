@@ -490,6 +490,9 @@
     <ClCompile Include="Code\Editor\Workspace\PlayerStateEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\PrefabWorkspaceWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Workspace\UIWidgetEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
@@ -497,6 +500,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Editor\Window\InspectorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Window\EditorSceneViewWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
     <ClCompile Include="Code\Editor\Window\EditorWindowManager.cpp">
@@ -1212,6 +1218,9 @@
     <ClInclude Include="Code\Editor\Workspace\PlayerStateEditorWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\PrefabWorkspaceWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\UIWidgetEditorWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
@@ -1219,6 +1228,9 @@
       <Filter>Code\Engine\Graphics\Resource\Animation</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\EditorWindowManager.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\EditorSceneViewWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\InputEditorWindow.h">

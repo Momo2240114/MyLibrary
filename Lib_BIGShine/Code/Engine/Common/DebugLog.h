@@ -52,16 +52,16 @@ class DebugLog
 public:
     static DebugLog& Instance();
 
-    // ファイル名と行番号つきでログを追加する。
+    // ファイル名と行番号付きでログを追加する。
     void AddLog(LOG_CATEGORY category_, LOG_LEVEL level_, const char* file_, int line_, const std::string& text_);
     void Clear();
 
     std::vector<LogMessage> GetMessages() const;
 
-    // UI仮想リスト用に、指定範囲だけ取り出す。
+    // UI仮想リスト表示用に、指定範囲だけをコピーする。
     std::vector<LogMessage> GetMessagesRange(size_t startIndex_, size_t count_) const;
 
-    // 直近ログ表示用に、指定時刻以降のログだけ取り出す。
+    // 直近ログ表示用に、指定時刻以降のログだけをコピーする。
     std::vector<LogMessage> GetMessagesSince(double minElapsedSeconds_, size_t maxCount_) const;
     size_t GetMessageCount() const;
     double GetElapsedSeconds() const;
@@ -83,7 +83,10 @@ private:
     // JSON保存時に壊れないよう特殊文字をエスケープする。
     static std::string EscapeJsonString(const std::string& text_);
 
-    // 複数スレッドからログが飛ぶため、messages操作を保護する。
+    static constexpr size_t MAX_LOG_MESSAGE_COUNT = 10000u;
+    static constexpr size_t LOG_MESSAGE_TRIM_COUNT = 1000u;
+
+    // 複数スレッドからログが追加される可能性があるため、messages操作を保護する。
     mutable std::mutex mutex;
     std::vector<LogMessage> messages;
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();

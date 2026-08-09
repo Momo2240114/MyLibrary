@@ -105,6 +105,7 @@ public:
     void SetSceneDistortionRenderTarget();
     void SetGBufferRenderTargets();
     void SetBackBufferRenderTarget();
+    void ClearSceneRenderTargets(const float clearColor_[4]);
     // シーン用テクスチャからバックバッファへブルームを適用して描画
     void ResolveBloom(const RenderContext& rc);
     void RenderSkyBox(const RenderContext& rc);
