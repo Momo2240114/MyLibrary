@@ -1,6 +1,6 @@
 #include "PrecompiledHeader.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS // ← これを最初に追加
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_internal.h" // もし使っていれば
 #include "ImGuizmo.h"

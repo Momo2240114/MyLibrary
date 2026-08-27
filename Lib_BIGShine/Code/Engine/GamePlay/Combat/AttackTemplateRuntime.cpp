@@ -81,6 +81,11 @@ namespace
         hitBox_->SetAttackInstanceId(attackInstanceId_);
         hitBox_->SetHitGroupId(attackTemplate_.hitGroupId);
         hitBox_->SetDamage(attackTemplate_.damage);
+        hitBox_->SetDamageRate(attackTemplate_.damageRate);
+        hitBox_->SetFixedDamage(attackTemplate_.fixedDamage);
+        hitBox_->SetDamageApplyType(attackTemplate_.damageApplyType);
+        hitBox_->SetDamageHitInterval(attackTemplate_.damageHitInterval);
+        hitBox_->SetMaxHitCount(attackTemplate_.maxHitCount);
         hitBox_->SetImpactPower(attackTemplate_.impactPower);
         hitBox_->hitStopDuration = attackTemplate_.hitStopDuration;
         hitBox_->hitStopScale = attackTemplate_.hitStopScale;
@@ -124,7 +129,9 @@ namespace
         hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
         hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
         hitBox_->canHitOwner = attackTemplate_.canHitOwner;
-        hitBox_->allowMultiHit = attackTemplate_.allowMultiHit;
+        hitBox_->allowMultiHit =
+            attackTemplate_.allowMultiHit ||
+            attackTemplate_.damageApplyType != DAMAGE_APPLY_TYPE::SINGLE_HIT;
 
         // Start 時点では設定だけ済ませ、実際の有効化は Update の activeStart/End で行う。
         hitBox_->Deactivate();
@@ -167,6 +174,11 @@ void AttackTemplateRuntime::Start(
         request_.setting.hitBoxRadius = slash_.hitBox.radius;
         request_.setting.hitBoxHalfHeight = slash_.hitBox.halfHeight;
         request_.setting.damage = attackTemplate_->damage;
+        request_.setting.damageRate = attackTemplate_->damageRate;
+        request_.setting.fixedDamage = attackTemplate_->fixedDamage;
+        request_.setting.damageApplyType = attackTemplate_->damageApplyType;
+        request_.setting.damageHitInterval = attackTemplate_->damageHitInterval;
+        request_.setting.maxHitCount = attackTemplate_->maxHitCount;
         request_.setting.impactPower = attackTemplate_->impactPower;
         request_.setting.knockBackPower = attackTemplate_->knockBackPower;
         request_.setting.targetAirLiftPower = attackTemplate_->targetAirLiftPower;
@@ -175,7 +187,9 @@ void AttackTemplateRuntime::Start(
         request_.setting.hitStopScale = attackTemplate_->hitStopScale;
         request_.setting.hitEffectPath = attackTemplate_->hitEffect.hitMeshVfxAssetPath;
         request_.setting.hitGroupId = attackTemplate_->hitGroupId;
-        request_.setting.allowMultiHit = attackTemplate_->allowMultiHit;
+        request_.setting.allowMultiHit =
+            attackTemplate_->allowMultiHit ||
+            attackTemplate_->damageApplyType != DAMAGE_APPLY_TYPE::SINGLE_HIT;
         request_.setting.cameraShakeEnabled = attackTemplate_->cameraShake.enabled;
         request_.setting.cameraShakeReceiveDuration = attackTemplate_->cameraShake.receiveDuration;
         request_.setting.cameraShakeReceivePositionStrength =

@@ -71,7 +71,11 @@
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
                 "Damage": 9.0,
+                "DamageApplyType": 0,
+                "DamageHitInterval": 0.0,
                 "DamageKey": "Damage",
+                "DamageRate": 0.09000000357627869,
+                "DamageRateKey": "DamageRate",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
                     1.0,
@@ -80,6 +84,8 @@
                     1.0
                 ],
                 "EndNodeName": "",
+                "FixedDamage": 0.0,
+                "FixedDamageKey": "FixedDamage",
                 "GravityScale": 1.0,
                 "HalfHeight": 0.949999988079071,
                 "HitGroupId": 51,
@@ -112,6 +118,7 @@
                 "KnockBackPower": 4.5,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
+                "MaxHitCount": 1,
                 "NodeModelObjectName": "",
                 "Offset": [
                     0.0,

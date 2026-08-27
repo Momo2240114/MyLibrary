@@ -102,7 +102,7 @@ public:
 
     // 名前へのアクセスを簡潔に
     const std::string& GetName() const { return nameComponent->name; }
-    void SetName(const std::string& newName) { nameComponent->name = newName; }
+    void SetName(const std::string& newName_);
 
 
     template<typename T, typename... Args>

@@ -249,7 +249,7 @@ void ShapeRenderSystem::CreateBoxMesh(ID3D11Device* device, float width, float h
 	};
 
 	std::vector<DirectX::XMFLOAT3> vertices;
-	vertices.reserve(32); // ← reserve に変更（resize はダメ）
+	vertices.reserve(32);
 
 	// top
 	vertices.emplace_back(positions[0]);

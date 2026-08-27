@@ -28,6 +28,7 @@ void PlayerJumpState::Enter()
     phaseTimer = 0.0f;
     hasLeftGround = resumeLoop_;
     hasEnteredDoubleJumpAnimation = false;
+    hasAppliedJumpImpulse = resumeLoop_;
     if (!resumeLoop_)
     {
         // 新規Jumpでは1回目のJumpとして扱う。
@@ -78,15 +79,7 @@ void PlayerJumpState::Enter()
         player_->SetHorizontalVelocity(input_, player_->moveSpeed * player_->airControlRate);
     }
 
-    if (!resumeLoop_)
-    {
-        if (CharacterMovementComponent* movement_ = player_->GetMovement())
-        {
-            // 新規Jumpだけ上方向インパルスを与える。空中Action復帰では二重加速を避ける。
-            BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] First jump impulse.");
-            movement_->AddImpulse({ 0.0f, player_->jumpImpulse, 0.0f });
-        }
-    }
+    // 1段目の上方向インパルスはSequencer Actionから発火し、モーションの踏み切りに合わせる。
 }
 
 // 空中制御、二段Jump受付、着地判定を処理する。
@@ -99,6 +92,17 @@ void PlayerJumpState::Execute(float elapsedTime_)
 
     const DirectX::XMFLOAT3 input_ = player_->GetMoveInput();
     player_->SendMoveInputToBlackboard(input_);
+
+    if (phase == PLAYER_JUMP_RUNTIME_PHASE::START &&
+        !hasAppliedJumpImpulse &&
+        player_->jumpImpulseFallbackDuration > 0.0f &&
+        phaseTimer >= player_->jumpImpulseFallbackDuration)
+    {
+        // Sequencer側に踏み切りActionが未設定の場合でも、一定時間後にJumpを成立させる。
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "[Jump] Jump impulse fallback.");
+        ApplyJumpImpulseFromSequence();
+    }
+
     if (CharacterMovementComponent* movement_ = player_->GetMovement())
     {
         const DirectX::XMFLOAT3 currentVelocity_ = movement_->GetDesiredHorizontalVelocity();
@@ -187,6 +191,29 @@ void PlayerJumpState::Execute(float elapsedTime_)
             player_->NotifyActionEnd();
         }
     }
+}
+
+// Sequencerの踏み切りタイミングから1段目Jumpの上方向インパルスを適用する。
+void PlayerJumpState::ApplyJumpImpulseFromSequence()
+{
+    if (phase != PLAYER_JUMP_RUNTIME_PHASE::START || hasAppliedJumpImpulse)
+    {
+        BS_LOG_WARNING(
+            LOG_CATEGORY::GAME,
+            std::string("[Jump] ApplyJumpImpulse ignored. phase=") + GetJumpRuntimePhaseName(phase));
+        return;
+    }
+
+    PlayerControllerComponent* player_ = GetPlayerController();
+    if (!player_) return;
+
+    CharacterMovementComponent* movement_ = player_->GetMovement();
+    if (!movement_) return;
+
+    // 新規Jumpだけ上方向インパルスを与える。空中Action復帰や複数イベントによる二重加速を避ける。
+    hasAppliedJumpImpulse = true;
+    BS_LOG_INFO(LOG_CATEGORY::GAME, "[Jump] First jump impulse from sequencer.");
+    movement_->AddImpulse({ 0.0f, player_->jumpImpulse, 0.0f });
 }
 
 // 空中Loop中にJump入力を消費して二段Jumpを開始する。

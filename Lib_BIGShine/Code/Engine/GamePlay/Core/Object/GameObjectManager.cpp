@@ -140,6 +140,88 @@ void GameObjectManager::Initialize()
     cameraManager->Initialize();
 }
 
+std::shared_ptr<GameObject> GameObjectManager::Find(const std::string& name_)
+{
+    // Object名検索は実行時に何度も通るため、文字列比較ではなくNameIdの索引を優先する。
+    const auto indexIterator_ = objectNameIndex.find(StringIdUtility::Hash(name_));
+    if (indexIterator_ == objectNameIndex.end()) return nullptr;
+
+    auto& candidates_ = indexIterator_->second;
+    for (auto candidateIterator_ = candidates_.begin(); candidateIterator_ != candidates_.end();)
+    {
+        std::shared_ptr<GameObject> object_ = candidateIterator_->lock();
+        if (!object_)
+        {
+            candidateIterator_ = candidates_.erase(candidateIterator_);
+            continue;
+        }
+
+        if (object_->GetName() == name_) return object_;
+        ++candidateIterator_;
+    }
+
+    // Hash衝突などで候補が一致しなかった場合だけ、従来検索で安全確認する。
+    for (const std::shared_ptr<GameObject>& object_ : objects)
+    {
+        if (object_ && object_->GetName() == name_) return object_;
+    }
+
+    return nullptr;
+}
+
+void GameObjectManager::RegisterObjectNameIndex(const std::shared_ptr<GameObject>& object_)
+{
+    if (!object_) return;
+
+    // 同名ObjectもPool用途では存在し得るため、候補リストとして保持する。
+    objectNameIndex[StringIdUtility::Hash(object_->GetName())].push_back(object_);
+}
+
+void GameObjectManager::UnregisterObjectNameIndex(
+    GameObject* object_,
+    const std::string& name_)
+{
+    if (!object_) return;
+
+    const auto indexIterator_ = objectNameIndex.find(StringIdUtility::Hash(name_));
+    if (indexIterator_ == objectNameIndex.end()) return;
+
+    auto& candidates_ = indexIterator_->second;
+    candidates_.erase(
+        std::remove_if(
+            candidates_.begin(),
+            candidates_.end(),
+            [object_](const std::weak_ptr<GameObject>& weakObject_)
+            {
+                const std::shared_ptr<GameObject> lockedObject_ = weakObject_.lock();
+                return !lockedObject_ || lockedObject_.get() == object_;
+            }),
+        candidates_.end());
+
+    if (candidates_.empty())
+    {
+        objectNameIndex.erase(indexIterator_);
+    }
+}
+
+void GameObjectManager::NotifyObjectNameChanged(
+    GameObject* object_,
+    const std::string& oldName_,
+    const std::string& newName_)
+{
+    if (!object_ || oldName_ == newName_) return;
+
+    UnregisterObjectNameIndex(object_, oldName_);
+    for (const std::shared_ptr<GameObject>& candidate_ : objects)
+    {
+        if (candidate_.get() == object_)
+        {
+            RegisterObjectNameIndex(candidate_);
+            return;
+        }
+    }
+}
+
 void GameObjectManager::Update(float elapsedTime_)
 {
     // Scene Runtime状態に応じて、Load待ち、初期化、通常更新を切り替える。
@@ -166,8 +248,8 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     BS_PROFILE_PLOT("GameObject.ActiveCount", static_cast<int64_t>(objects.size()));
     float worldDeltaTime_ = elapsedTime_;
 
+    // Hit履歴やJustDodge受付など、Frame単位で消えるSystem状態を先に初期化する。
     {
-        // Hit履歴やJustDodge受付など、Frame単位で消えるSystem状態を先に初期化する。
         BS_PROFILE_SCOPE("AttackSystem::BeginFrame");
         attackSystem->BeginFrame();
     }
@@ -699,6 +781,7 @@ void GameObjectManager::Clear()
     effectManager->Clear();
 
     objects.clear();
+    objectNameIndex.clear();
     pendingStarts.clear();
     pendingDestroys.clear();
     particleComponents.clear();
@@ -729,6 +812,7 @@ void GameObjectManager::AddObject(std::shared_ptr<GameObject> object_)
         if (collider_) collisionStepSystem->RegisterCollider(collider_);
     }
     objects.push_back(object_);
+    RegisterObjectNameIndex(object_);
     pendingStarts.push_back(object_);
 }
 
@@ -743,6 +827,7 @@ void GameObjectManager::DetachObject(const std::shared_ptr<GameObject>& object_)
     }
 
     if (selectedObject == object_) selectedObject = nullptr;
+    UnregisterObjectNameIndex(object_.get(), object_->GetName());
     objects.erase(
         std::remove(objects.begin(), objects.end(), object_),
         objects.end());
@@ -775,6 +860,7 @@ void GameObjectManager::RemoveObject(const std::string& name_)
         {
             collisionStepSystem->UnregisterCollider(collider_.get());
         }
+        UnregisterObjectNameIndex(object_.get(), object_->GetName());
     }
 
     const auto iterator_ = std::remove_if(
@@ -1036,6 +1122,7 @@ void GameObjectManager::DrawHierarchyGui()
                 selectedObject = nullptr;
             }
 
+            UnregisterObjectNameIndex(targetObject_.get(), targetObject_->GetName());
             objects.erase(iterator_);
         }
     }
@@ -1835,6 +1922,7 @@ void GameObjectManager::ApplyDestroys(std::shared_ptr<GameObject> object_)
     // 3. マネージャーのメインリストから自分を削除
     auto it = std::remove(objects.begin(), objects.end(), object_);
     if (it != objects.end()) {
+        UnregisterObjectNameIndex(object_.get(), object_->GetName());
         objects.erase(it, objects.end());
     }
 }

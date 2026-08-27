@@ -97,6 +97,11 @@ void AttackEffectHitComponent::SetOwner(GameObject* owner_) { ownerObject = owne
 void AttackEffectHitComponent::SetAttackInstanceId(uint32_t attackInstanceId_) { attackInstanceId = attackInstanceId_; }
 void AttackEffectHitComponent::SetHitGroupId(uint32_t hitGroupId_) { hitGroupId = hitGroupId_; }
 void AttackEffectHitComponent::SetDamage(float damage_) { damage = damage_; }
+void AttackEffectHitComponent::SetDamageRate(float damageRate_) { damageRate = (std::max)(damageRate_, 0.0f); }
+void AttackEffectHitComponent::SetFixedDamage(float fixedDamage_) { fixedDamage = fixedDamage_; }
+void AttackEffectHitComponent::SetDamageApplyType(DAMAGE_APPLY_TYPE damageApplyType_) { damageApplyType = damageApplyType_; }
+void AttackEffectHitComponent::SetDamageHitInterval(float damageHitInterval_) { damageHitInterval = (std::max)(damageHitInterval_, 0.0f); }
+void AttackEffectHitComponent::SetMaxHitCount(int maxHitCount_) { maxHitCount = maxHitCount_; }
 void AttackEffectHitComponent::SetImpactPower(float impactPower_) { impactPower = (std::max)(impactPower_, 0.0f); }
 void AttackEffectHitComponent::SetHitStopDuration(float hitStopDuration_) { hitStopDuration = hitStopDuration_; }
 void AttackEffectHitComponent::SetHitStopScale(float hitStopScale_) { hitStopScale = hitStopScale_; }
@@ -205,7 +210,13 @@ void AttackEffectHitComponent::SetHitShapes(
     // テンプレートを差し替えたら、未対応形状を丸めた上でランタイムHitBoxも作り直す。
     hitShapes = hitShapes_;
     for (AttackEffectHitShapeTemplate& shape_ : hitShapes)
+    {
         shape_.shape = NormalizeAttackHitShape(shape_.shape);
+        if (shape_.hitInterval <= 0.0f && damageHitInterval > 0.0f)
+        {
+            shape_.hitInterval = damageHitInterval;
+        }
+    }
     RebuildHitShapes();
 }
 
@@ -267,6 +278,11 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->SetAttackInstanceId(attackInstanceId);
     hitBox_->SetHitGroupId(hitGroupId);
     hitBox_->SetDamage(damage);
+    hitBox_->SetDamageRate(damageRate);
+    hitBox_->SetFixedDamage(fixedDamage);
+    hitBox_->SetDamageApplyType(damageApplyType);
+    hitBox_->SetDamageHitInterval(damageHitInterval);
+    hitBox_->SetMaxHitCount(maxHitCount);
     hitBox_->SetImpactPower(impactPower);
     hitBox_->hitStopDuration = hitStopDuration;
     hitBox_->hitStopScale = hitStopScale;
@@ -368,7 +384,15 @@ void AttackEffectHitComponent::Gui()
     ImGui::DragFloat("Life Time", &lifeTime, 0.01f, 0.0f);
     ImGui::Text("Elapsed: %.3f", elapsedTime);
     ImGui::Checkbox("Playing", &playing);
-    ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f);
+    ImGui::DragFloat("Legacy Damage", &damage, 0.1f, 0.0f);
+    ImGui::DragFloat("Damage Rate", &damageRate, 0.01f, 0.0f);
+    ImGui::DragFloat("Fixed Damage", &fixedDamage, 0.1f, -99999.0f, 99999.0f);
+    const char* damageApplyTypeNames_[] = { "Single Hit", "Multi Hit", "Damage Over Time" };
+    int damageApplyType_ = static_cast<int>(damageApplyType);
+    if (ImGui::Combo("Damage Apply Type", &damageApplyType_, damageApplyTypeNames_, IM_ARRAYSIZE(damageApplyTypeNames_)))
+        damageApplyType = static_cast<DAMAGE_APPLY_TYPE>((std::clamp)(damageApplyType_, 0, 2));
+    ImGui::DragFloat("Damage Hit Interval", &damageHitInterval, 0.01f, 0.0f);
+    ImGui::DragInt("Max Hit Count", &maxHitCount, 1.0f, 0, 9999);
     ImGui::DragFloat("Impact Power", &impactPower, 0.1f, 0.0f);
     ImGui::DragFloat("Hit Stop Duration", &hitStopDuration, 0.001f, 0.0f);
     ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f);
@@ -484,6 +508,11 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["EffectType"] = static_cast<int>(effectType);
     json_["LifeTime"] = lifeTime;
     json_["Damage"] = damage;
+    json_["DamageRate"] = damageRate;
+    json_["FixedDamage"] = fixedDamage;
+    json_["DamageApplyType"] = static_cast<int>(damageApplyType);
+    json_["DamageHitInterval"] = damageHitInterval;
+    json_["MaxHitCount"] = maxHitCount;
     json_["ImpactPower"] = impactPower;
     json_["AttackInstanceId"] = attackInstanceId;
     json_["HitGroupId"] = hitGroupId;
@@ -537,6 +566,12 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     effectType = static_cast<ATTACK_EFFECT_TYPE>((std::clamp)(json_.value("EffectType", 0), 0, 4));
     lifeTime = json_.value("LifeTime", 1.0f);
     damage = json_.value("Damage", 1.0f);
+    damageRate = (std::max)(json_.value("DamageRate", damage / 100.0f), 0.0f);
+    fixedDamage = json_.value("FixedDamage", 0.0f);
+    damageApplyType = static_cast<DAMAGE_APPLY_TYPE>(
+        (std::clamp)(json_.value("DamageApplyType", 0), 0, 2));
+    damageHitInterval = (std::max)(json_.value("DamageHitInterval", 0.0f), 0.0f);
+    maxHitCount = json_.value("MaxHitCount", 1);
     impactPower = (std::max)(json_.value("ImpactPower", damage), 0.0f);
     attackInstanceId = json_.value("AttackInstanceId", 0u);
     hitGroupId = json_.value("HitGroupId", 0u);

@@ -64,7 +64,18 @@ void AnimationControllerComponent::RefreshSequenceAdapter()
 
     if (editingState && modelComponent)
     {
-        sequenceAdapter.duration = modelComponent->GetAnimationDuration(editingState->animationIndex);
+        if (editingState->type == AnimStateType::SEQUENCE)
+        {
+            for (const AnimSequenceClip& clip_ : editingState->sequenceClips)
+            {
+                sequenceAdapter.duration = (std::max)(sequenceAdapter.duration, clip_.endTime);
+            }
+            sequenceAdapter.duration = (std::max)(sequenceAdapter.duration, 1.0f);
+        }
+        else
+        {
+            sequenceAdapter.duration = modelComponent->GetAnimationDuration(editingState->animationIndex);
+        }
     }
 
     if (sequenceAdapterDirty)
@@ -626,6 +637,12 @@ void AnimationControllerComponent::Gui()
             editingState->type = AnimStateType::Custom;
             MarkSequenceAdapterDirty();
         }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Sequence", currentType_ == static_cast<int>(AnimStateType::SEQUENCE)))
+        {
+            editingState->type = AnimStateType::SEQUENCE;
+            MarkSequenceAdapterDirty();
+        }
 
         const auto& animations_ = modelComponent->GetAnimations();
         auto DrawAnimationIndex_ = [&](const char* label_, int& targetIndex_)
@@ -1100,6 +1117,114 @@ void AnimationControllerComponent::Gui()
                 ImGui::TextDisabled("Create a custom animation in Pose Animation Creator.");
             }
         }
+        else if (editingState->type == AnimStateType::SEQUENCE)
+        {
+            // Sequenceは複数クリップを1つのステートとして扱い、コンボやボス行動の時間割を作る。
+            ImGui::SeparatorText("Animation Sequence Clips");
+            if (ImGui::Button("Add Sequence Clip"))
+            {
+                AnimSequenceClip clip_{};
+                clip_.animationIndex = editingState->animationIndex;
+                clip_.fitToRange = true;
+                if (!editingState->sequenceClips.empty())
+                {
+                    clip_.startTime = editingState->sequenceClips.back().endTime;
+                    clip_.endTime = clip_.startTime + 1.0f;
+                }
+                editingState->sequenceClips.push_back(clip_);
+                MarkSequenceAdapterDirty();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Sort By Start"))
+            {
+                std::sort(
+                    editingState->sequenceClips.begin(),
+                    editingState->sequenceClips.end(),
+                    [](const AnimSequenceClip& left_, const AnimSequenceClip& right_)
+                    {
+                        return left_.startTime < right_.startTime;
+                    });
+                MarkSequenceAdapterDirty();
+            }
+
+            int removeClipIndex_ = -1;
+            ImGui::BeginChild("SequenceClipList", ImVec2(0.0f, 220.0f), true);
+            for (int clipIndex_ = 0;
+                clipIndex_ < static_cast<int>(editingState->sequenceClips.size());
+                ++clipIndex_)
+            {
+                AnimSequenceClip& clip_ = editingState->sequenceClips[clipIndex_];
+                ImGui::PushID(clipIndex_);
+
+                const std::string label_ = "Clip " + std::to_string(clipIndex_);
+                if (ImGui::TreeNode(label_.c_str()))
+                {
+                    // 既存ステート名を参照し、Sequence内に小さなステート列を組み立てる。
+                    RefreshStateGuiCache();
+                    const char* selectedStateName_ = clip_.stateName.empty()
+                        ? "Direct Animation Clip"
+                        : clip_.stateName.c_str();
+                    if (ImGui::BeginCombo("Source State", selectedStateName_))
+                    {
+                        if (ImGui::Selectable("Direct Animation Clip", clip_.stateName.empty()))
+                        {
+                            clip_.stateName.clear();
+                        }
+                        ImGui::Separator();
+                        for (const StateGuiEntry& entry_ : cachedStateGuiEntries)
+                        {
+                            if (!entry_.state || entry_.state == editingState) continue;
+
+                            const bool selected_ = clip_.stateName == entry_.name;
+                            if (ImGui::Selectable(entry_.name.c_str(), selected_))
+                            {
+                                clip_.stateName = entry_.name;
+                                clip_.animationIndex = entry_.state->animationIndex;
+                                MarkSequenceAdapterDirty();
+                            }
+                            if (selected_) ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                    if (clip_.stateName.empty())
+                    {
+                        DrawAnimationIndex_("Animation", clip_.animationIndex);
+                    }
+                    if (ImGui::DragFloat("Start Time", &clip_.startTime, 0.01f, 0.0f, clip_.endTime, "%.3f"))
+                    {
+                        clip_.startTime = (std::clamp)(clip_.startTime, 0.0f, clip_.endTime);
+                        MarkSequenceAdapterDirty();
+                    }
+                    if (ImGui::DragFloat("End Time", &clip_.endTime, 0.01f, clip_.startTime, 999.0f, "%.3f"))
+                    {
+                        clip_.endTime = (std::max)(clip_.endTime, clip_.startTime);
+                        MarkSequenceAdapterDirty();
+                    }
+                    ImGui::DragFloat("Clip Start Time", &clip_.clipStartTime, 0.01f, 0.0f, 999.0f, "%.3f");
+                    ImGui::Checkbox("Fit Source To Range", &clip_.fitToRange);
+                    if (!clip_.fitToRange)
+                    {
+                        ImGui::DragFloat("Clip Speed", &clip_.playbackSpeed, 0.05f, 0.01f, 10.0f, "%.2fx");
+                    }
+                    if (ImGui::Button("Remove Clip"))
+                    {
+                        removeClipIndex_ = clipIndex_;
+                    }
+                    ImGui::TreePop();
+                }
+
+                ImGui::PopID();
+            }
+            ImGui::EndChild();
+
+            if (removeClipIndex_ >= 0)
+            {
+                editingState->sequenceClips.erase(
+                    editingState->sequenceClips.begin() + removeClipIndex_);
+                MarkSequenceAdapterDirty();
+            }
+            ImGui::TextDisabled("Events still use the same Animation Sequence Editor timeline.");
+        }
         ImGui::DragFloat("Speed", &editingState->playbackSpeed, 0.05f);
         ImGui::Checkbox("Loop", &editingState->isLoop);
 
@@ -1305,7 +1430,7 @@ void AnimationControllerComponent::ShowSequencerEditor()
 {
     BS_PROFILE_SCOPE("AnimationControllerComponent::ShowSequencerEditor");
 
-    // 別ウィンドウでは選択ステートのイベントタイムラインだけを扱い、Inspector側のステート編集と同期する。
+    // 別ウィンドウでは選択ステートのClipとEventをタイムライン編集し、Inspector側のステート編集と同期する。
     ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_FirstUseEver);
 
 
@@ -1350,13 +1475,23 @@ void AnimationControllerComponent::ShowSequencerEditor()
             {
 
 
-                if (sequencerSelectedEntry >= 0 && sequencerSelectedEntry < (int)sequenceAdapter.targetState->events.size())
+                const int clipCount_ = sequenceAdapter.GetClipCount();
+                if (sequencerSelectedEntry >= 0 && sequencerSelectedEntry < sequenceAdapter.GetItemCount())
                 {
                     int* pStart, * pEnd;
                     sequenceAdapter.Get(sequencerSelectedEntry, &pStart, &pEnd, nullptr, nullptr);
-                    auto& ev = sequenceAdapter.targetState->events[sequencerSelectedEntry];
-                    ev.startTime = sequenceAdapter.ToTime(*pStart);
-                    ev.endTime = sequenceAdapter.ToTime(*pEnd);
+                    if (sequencerSelectedEntry < clipCount_)
+                    {
+                        auto& clip_ = sequenceAdapter.targetState->sequenceClips[sequencerSelectedEntry];
+                        clip_.startTime = sequenceAdapter.ToTime(*pStart);
+                        clip_.endTime = sequenceAdapter.ToTime(*pEnd);
+                    }
+                    else
+                    {
+                        auto& ev = sequenceAdapter.targetState->events[sequencerSelectedEntry - clipCount_];
+                        ev.startTime = sequenceAdapter.ToTime(*pStart);
+                        ev.endTime = sequenceAdapter.ToTime(*pEnd);
+                    }
                 }
                 MarkSequenceAdapterDirty();
             }
@@ -1375,15 +1510,113 @@ void AnimationControllerComponent::ShowSequencerEditor()
         ImGui::PopItemWidth();
 
 
-        if (sequencerSelectedEntry >= 0 && sequencerSelectedEntry < (int)sequenceAdapter.targetState->events.size())
+        const int clipCount_ = sequenceAdapter.GetClipCount();
+        if (sequencerSelectedEntry >= 0 && sequencerSelectedEntry < clipCount_)
+        {
+            if (ImGui::BeginChild("ClipDetails", ImVec2(0, 0), true))
+            {
+                AnimSequenceClip& clip_ = sequenceAdapter.targetState->sequenceClips[sequencerSelectedEntry];
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Editing State Clip #%d", sequencerSelectedEntry);
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.1f, 0.1f, 1.0f));
+                if (ImGui::Button("Delete Clip"))
+                {
+                    sequenceAdapter.Del(sequencerSelectedEntry);
+                    MarkSequenceAdapterDirty();
+                    sequencerSelectedEntry = -1;
+                    ImGui::PopStyleColor(2);
+                    ImGui::EndChild();
+                    ImGui::End();
+                    return;
+                }
+                ImGui::PopStyleColor(2);
+
+                ImGui::SameLine(ImGui::GetWindowWidth() - 100);
+                if (ImGui::Button("Deselect")) { sequencerSelectedEntry = -1; }
+
+                RefreshStateGuiCache();
+                const char* selectedStateName_ = clip_.stateName.empty()
+                    ? "Direct Animation Clip"
+                    : clip_.stateName.c_str();
+                if (ImGui::BeginCombo("Source State", selectedStateName_))
+                {
+                    if (ImGui::Selectable("Direct Animation Clip", clip_.stateName.empty()))
+                    {
+                        clip_.stateName.clear();
+                        MarkSequenceAdapterDirty();
+                    }
+                    ImGui::Separator();
+                    for (const StateGuiEntry& entry_ : cachedStateGuiEntries)
+                    {
+                        if (!entry_.state || entry_.state == editingState) continue;
+
+                        const bool selected_ = clip_.stateName == entry_.name;
+                        if (ImGui::Selectable(entry_.name.c_str(), selected_))
+                        {
+                            clip_.stateName = entry_.name;
+                            clip_.animationIndex = entry_.state->animationIndex;
+                            MarkSequenceAdapterDirty();
+                        }
+                        if (selected_) ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+                if (clip_.stateName.empty())
+                {
+                    const auto& animations_ = modelComponent->GetAnimations();
+                    const char* selectedName_ =
+                        clip_.animationIndex >= 0 && clip_.animationIndex < static_cast<int>(animations_.size())
+                        ? animations_[clip_.animationIndex].name.c_str()
+                        : "None";
+                    if (ImGui::BeginCombo("Animation", selectedName_))
+                    {
+                        for (int index_ = 0; index_ < static_cast<int>(animations_.size()); ++index_)
+                        {
+                            if (ImGui::Selectable(animations_[index_].name.c_str(), clip_.animationIndex == index_))
+                            {
+                                clip_.animationIndex = index_;
+                                MarkSequenceAdapterDirty();
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+
+                ImGui::PushItemWidth(120.0f);
+                if (ImGui::DragFloat("Start (s)", &clip_.startTime, 0.01f, 0.0f, clip_.endTime))
+                {
+                    clip_.frameStart = sequenceAdapter.ToFrame(clip_.startTime);
+                    MarkSequenceAdapterDirty();
+                }
+                ImGui::SameLine();
+                if (ImGui::DragFloat("End (s)", &clip_.endTime, 0.01f, clip_.startTime, 999.0f))
+                {
+                    clip_.frameEnd = sequenceAdapter.ToFrame(clip_.endTime);
+                    MarkSequenceAdapterDirty();
+                }
+                ImGui::PopItemWidth();
+
+                ImGui::DragFloat("Source Start (s)", &clip_.clipStartTime, 0.01f, 0.0f, 999.0f, "%.3f");
+                ImGui::Checkbox("Fit Source To Range", &clip_.fitToRange);
+                if (!clip_.fitToRange)
+                {
+                    ImGui::DragFloat("Playback Speed", &clip_.playbackSpeed, 0.05f, 0.01f, 10.0f, "%.2fx");
+                }
+
+                ImGui::EndChild();
+            }
+        }
+        else if (sequencerSelectedEntry >= clipCount_ && sequencerSelectedEntry < sequenceAdapter.GetItemCount())
         {
 
             if (ImGui::BeginChild("EventDetails", ImVec2(0, 0), true))
             {
-                auto& ev = sequenceAdapter.targetState->events[sequencerSelectedEntry];
+                const int eventIndex_ = sequencerSelectedEntry - clipCount_;
+                auto& ev = sequenceAdapter.targetState->events[eventIndex_];
 
 
-                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Editing Event #%d", sequencerSelectedEntry);
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "Editing Event #%d", eventIndex_);
                 ImGui::SameLine();
 
 

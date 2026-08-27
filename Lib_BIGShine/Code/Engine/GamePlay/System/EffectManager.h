@@ -104,6 +104,11 @@ struct SlashEffectSpawnSetting
     float hitBoxRadius = 0.5f;
     float hitBoxHalfHeight = 1.0f;
     float damage = 10.0f;
+    float damageRate = 0.1f;
+    float fixedDamage = 0.0f;
+    DAMAGE_APPLY_TYPE damageApplyType = DAMAGE_APPLY_TYPE::SINGLE_HIT;
+    float damageHitInterval = 0.0f;
+    int maxHitCount = 1;
     float impactPower = 10.0f;
     float knockBackPower = 3.0f;
     float targetAirLiftPower = 0.0f;

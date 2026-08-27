@@ -112,6 +112,20 @@ void GameObject::RegisterAction(
     localRegistry.RegisterAction(category_, BuildActionName(name_), func_);
 }
 
+void GameObject::SetName(const std::string& newName_)
+{
+    if (!nameComponent) return;
+
+    const std::string oldName_ = nameComponent->name;
+    if (oldName_ == newName_) return;
+
+    nameComponent->name = newName_;
+    if (manager)
+    {
+        manager->NotifyObjectNameChanged(this, oldName_, newName_);
+    }
+}
+
 std::string GameObject::BuildActionName(const std::string& actionName_) const
 {
     // 既にObject名Prefixが付いている場合は二重に付けない。
@@ -635,7 +649,7 @@ void GameObject::Gui()
         if (ImGui::InputText(IM_U8("名前##GameObject_NameInput"), nameBuf, sizeof(nameBuf)))
         {
             // 名前が変更されたらNameComponentに反映
-            nameComponent->name = std::string(nameBuf);
+            SetName(std::string(nameBuf));
         }
         ImGui::Separator();
     }
@@ -940,7 +954,7 @@ void GameObject::Load(const nlohmann::json& j)
 
     // JSONからObject基本情報とComponent構成を復元する。
     // 1. 基本情報の復元
-    nameComponent->name = j.value("Name", "GameObject");
+    SetName(j.value("Name", "GameObject"));
     layer = static_cast<LayerType>(j.value("Layer", 0));
     mask = j.value("CollisionMask", static_cast<uint32_t>(LayerType::Default));
     requiredForSceneStart = j.value("RequiredForSceneStart", false);

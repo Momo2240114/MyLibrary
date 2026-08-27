@@ -41,7 +41,8 @@ enum class DRAGON_ACTION_TYPE
     AIR_GET_HIT,
     AIR_DEATH_FALL_START,
     FALLING,
-    DEATH_HIT_GROUND
+    DEATH_HIT_GROUND,
+    ULTIMATE_ATTACK
 };
 
 // DragonAIの大きな実行状態。
@@ -197,6 +198,7 @@ public:
     bool RequestAction(DRAGON_ACTION_TYPE action_);
     bool RequestWeightedAction();
     void RequestDamageReaction();
+    bool IsUltimateDamageReductionActive() const { return ultimateDamageReductionActive; }
     void ForceAction(DRAGON_ACTION_TYPE action_);
     void SetCanCancel(bool enabled_);
     void SetCanBufferAction(bool enabled_);
@@ -229,6 +231,8 @@ private:
     void ApplyActionDefinitionRuntimePolicies();
     // Player位置、距離、角度、Action使用可否をContextへ更新する。
     void UpdateContext();
+    // HPしきい値を跨いだ時に、必殺技へ移行するための予約を行う。
+    void UpdateUltimateTrigger();
     // 各ActionのCooldownを減算する。
     void UpdateCooldowns(float deltaTime_);
     // BehaviorGraphを使わない場合の重み付き判断を進める。
@@ -237,6 +241,8 @@ private:
     void UpdateBehaviorGraph(float deltaTime_);
     // 空中待機中に次の空中Actionを選ぶ。
     DRAGON_ACTION_TYPE SelectNextAirAction();
+    // 空中攻撃へ移る前に、飛行用の目標高度へ到達しているか確認する。
+    bool IsAirHoverHeightReached();
     // Idle Animationへ戻るまで次Actionを待つべきか判定する。
     bool ShouldWaitForIdleAnimation() const;
     // AnimationGraphがIdleへ戻ったタイミングでAI判断へ復帰する。
@@ -310,6 +316,16 @@ private:
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);
     bool IsActionAvailable(DRAGON_ACTION_TYPE action_) const;
     float GetSelectionWeight(DRAGON_ACTION_TYPE action_) const;
+    float CalculateAggressionMultiplier(const DragonAIContext& context_) const;
+    float CalculateActionSituationWeight(
+        DRAGON_ACTION_TYPE action_,
+        const DragonAIContext& context_,
+        float baseWeight_) const;
+    void AddWeightedActionCandidate(
+        const DragonAIContext& context_,
+        std::vector<DragonActionCandidate>& candidates_,
+        DRAGON_ACTION_TYPE action_,
+        float baseWeight_) const;
     bool HasBehaviorGraph() const;
 
     // Targetとして探すPlayer Object名。
@@ -376,10 +392,24 @@ private:
     float airHoverAdjustSpeed = 8.0f;
     float airLandingAnimationStartHeight = 0.5f;
     float airLandingDescendSpeed = 12.0f;
+    float airHoverHeightTolerance = 0.25f;
+    int maxAirAttackCount = 1;
+    float firstUltimateHpRate = 0.5f;
+    float secondUltimateHpRate = 0.1f;
+    float ultimateDamageRate = 0.1f;
     float turnSpeed = 6.0f;
     float walkSpeed = 5.0f;
     float runSpeed = 12.0f;
     float animationBlendDuration = 0.2f;
+    // HP低下やプレイヤー位置に応じて、怪物らしい圧力の強弱を調整する。
+    float crackedAggressionMultiplier = 1.10f;
+    float darkLeakAggressionMultiplier = 1.25f;
+    float collapseAggressionMultiplier = 1.45f;
+    float repeatActionPenaltyRate = 0.35f;
+    float underBodyPunishMultiplier = 1.60f;
+    float sidePunishMultiplier = 1.35f;
+    float behindPunishMultiplier = 1.70f;
+    float longRangePressureMultiplier = 1.30f;
     bool animationGraphDriven = true;
     // 読み書きするDragon BehaviorGraph Assetパス。
     std::string behaviorGraphAssetPath = "Data/AI/BehaviorGraph/DragonFirstForm.json";
@@ -401,6 +431,13 @@ private:
     bool pendingAirLandingDecision = false;
     bool waitingForLandingGround = false;
     bool airbornePhysicsApplied = false;
+    bool firstUltimateTriggered = false;
+    bool secondUltimateTriggered = false;
+    bool pendingUltimateAction = false;
+    bool ultimateDamageReductionActive = false;
+    bool hasPreviousHpRateForUltimate = false;
+    float previousHpRateForUltimate = 1.0f;
+    int airAttackCount = 0;
 
     DRAGON_ACTION_TYPE debugAction = DRAGON_ACTION_TYPE::BITE;
     std::mt19937 randomEngine;

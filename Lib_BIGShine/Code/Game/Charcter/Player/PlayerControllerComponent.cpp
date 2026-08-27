@@ -1225,6 +1225,22 @@ void PlayerControllerComponent::NotifyJumpLoop()
     jumpState_->NotifyJumpLoopRequested();
 }
 
+void PlayerControllerComponent::NotifyJumpImpulse()
+{
+    if (GetCurrentAction() != PLAYER_ACTION::JUMP)
+    {
+        return;
+    }
+
+    PlayerJumpState* jumpState_ = stateMachine.GetCurrentStateAs<PlayerJumpState>();
+    if (!jumpState_)
+    {
+        return;
+    }
+
+    jumpState_->ApplyJumpImpulseFromSequence();
+}
+
 void PlayerControllerComponent::HandleHitReaction()
 {
     // 被弾時は受付状態と予約移動をすべて閉じ、HitStateへ強制的に移す。
@@ -1702,6 +1718,22 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
         {
             NotifyActionEnd();
         });
+    owner_->RegisterAction("PlayerState", "Player_Jump", [this]()
+        {
+            RequestAction(PLAYER_ACTION::JUMP);
+        });
+    owner_->RegisterAction("PlayerJump", "JumpStart", [this]()
+        {
+            RequestAction(PLAYER_ACTION::JUMP);
+        });
+    owner_->RegisterAction("PlayerJump", "ApplyJumpImpulse", [this]()
+        {
+            NotifyJumpImpulse();
+        });
+    owner_->RegisterAction("PlayerJump", "JumpImpulse", [this]()
+        {
+            NotifyJumpImpulse();
+        });
     owner_->RegisterAction("PlayerJump", "JumpLoop", [this]()
         {
             NotifyJumpLoop();
@@ -2139,6 +2171,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Run Start Duration", &runStartDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Run End Duration", &runEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Jump End Duration", &jumpEndDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Jump Impulse Fallback", &jumpImpulseFallbackDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     if (ImGui::DragFloat("Base Armor", &armor, 0.1f, 0.0f, 99999.0f))
@@ -2312,6 +2345,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["RunStartDuration"] = runStartDuration;
     j_["RunEndDuration"] = runEndDuration;
     j_["JumpEndDuration"] = jumpEndDuration;
+    j_["JumpImpulseFallbackDuration"] = jumpImpulseFallbackDuration;
     j_["TimelineActionFallbackDuration"] = timelineActionFallbackDuration;
     j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
     j_["Armor"] = armor;
@@ -2377,6 +2411,9 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     runStartDuration = (std::max)(j_.value("RunStartDuration", runStartDuration), 0.0f);
     runEndDuration = (std::max)(j_.value("RunEndDuration", runEndDuration), 0.0f);
     jumpEndDuration = (std::max)(j_.value("JumpEndDuration", jumpEndDuration), 0.0f);
+    jumpImpulseFallbackDuration = (std::max)(
+        j_.value("JumpImpulseFallbackDuration", jumpImpulseFallbackDuration),
+        0.0f);
     timelineActionFallbackDuration = (std::max)(
         j_.value("TimelineActionFallbackDuration", timelineActionFallbackDuration),
         0.0f);

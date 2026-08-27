@@ -131,6 +131,7 @@ public:
     void NotifyComboTransition(); // 保存済みコンボ入力へ遷移する。
     void NotifyActionEnd(); // Timeline駆動Actionの終了を通知する。
     void NotifyJumpLoop(); // Jump系AnimationからJumpLoopへ戻る通知を受ける。
+    void NotifyJumpImpulse(); // Jump系Animationから踏み切りインパルス適用を受ける。
     void HandleHitReaction(); // 被弾時の状態リセットとHit遷移を行う。
     void SetRuntimeArmor(float armor_);
     void ResetRuntimeArmor();
@@ -158,6 +159,7 @@ public:
     float runStartDuration = 0.18f;
     float runEndDuration = 0.18f;
     float jumpEndDuration = 0.18f;
+    float jumpImpulseFallbackDuration = 0.18f; // Sequencer未設定時に踏み切りを補完する待機時間。
     float timelineActionFallbackDuration = 1.5f;
     float groundDodgeCooldownDuration = 0.5f;
     float armor = 5.0f;

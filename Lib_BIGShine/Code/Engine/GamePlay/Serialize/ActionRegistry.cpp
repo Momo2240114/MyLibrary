@@ -9,6 +9,7 @@
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Common/DebugLog.h"
 
+#include <string_view>
 
 std::shared_ptr<ActionRegistry> ActionRegistry::instance = nullptr;
 
@@ -16,7 +17,7 @@ void RegisterAllActions()
 {
     auto& reg = ActionRegistry::Instance();
     auto& audio = AudioManager::Instance();
-    //分類の登録
+
     reg.RegisterAction("Transform", "---", nullptr);
     reg.RegisterAction("FOV", "---", nullptr);
     reg.RegisterAction("PostProcess", "---", nullptr);
@@ -26,146 +27,159 @@ void RegisterAllActions()
     reg.RegisterAction("Scene", "---", nullptr);
     audio.RegisterAudioWorkspaceActions();
 
-    //// タイトルBGM
     reg.RegisterAction("Audio", "PlayBGM_Title", [&]() {
         audio.StopBGM();
         audio.PlayBGM(BGM_TITLE);
         });
 
-    // チュートリアルBGM
     reg.RegisterAction("Audio", "PlayBGM_Tutorial", [&]() {
         audio.StopBGM();
         audio.PlayBGM(BGM_TUTORIAL);
         });
 
-    // BGM全停止
     reg.RegisterAction("Audio", "StopAllBGM", [&]() {
         audio.StopBGM();
         });
 
-    // --- SE再生アクション ---
-    // タイトルでのタップ音
     reg.RegisterAction("Audio", "PlaySE_TapStart", [&]() {
         audio.PlaySE(SE_TITLESELECT);
         });
-    // タイトルでのタップ音
+
     reg.RegisterAction("Audio", "PlaySE_TapStartMOVE", [&]() {
         audio.PlaySE(SE_TTILEMOVE);
         });
-    // タイトルでのタップ音
+
     reg.RegisterAction("Audio", "PlaySE_GameOver", [&]() {
         audio.PlaySE(SE_GAMEOVER);
         });
+
     reg.RegisterAction("Audio", "PlaySE_GameClear", [&]() {
         audio.PlaySE(SE_GAMECLEAR);
         });
 
-
-
-    reg.RegisterAction("Scene", "GoSceneGame", []() 
+    reg.RegisterAction("Scene", "GoSceneGame", []()
         {
-        // SceneGame を作って、そのまま SceneLoading に所有権を渡す
-        auto next = std::make_unique<SceneGame>();
-        SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next)));
+            auto next_ = std::make_unique<SceneGame>();
+            SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next_)));
         });
 
-    reg.RegisterAction("Scene", "GoSceneTitle", []() 
+    reg.RegisterAction("Scene", "GoSceneTitle", []()
         {
-        auto next = std::make_unique<SceneTitle>();
-        SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next)));
+            auto next_ = std::make_unique<SceneTitle>();
+            SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next_)));
         });
-    reg.RegisterAction("Scene", "GoSceneTutorial", []() 
+
+    reg.RegisterAction("Scene", "GoSceneTutorial", []()
         {
-        auto next = std::make_unique<SceneTutorial>();
-        SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next)));
+            auto next_ = std::make_unique<SceneTutorial>();
+            SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::move(next_)));
         });
 }
 
-void ActionRegistry::RegisterAction(const std::string& category, const std::string& name, ActionFunc func)
+StringId ActionRegistry::MakeActionId(std::string_view name_)
 {
-    // カテゴリが存在しなければ作る
-    auto& categoryMap = actions[category];
+    return StringIdUtility::Hash(name_);
+}
 
-    // 既に name が存在するなら追加しない
-    if (categoryMap.find(name) != categoryMap.end())
-        return;
+void ActionRegistry::RegisterAction(
+    const std::string& category,
+    const std::string& name,
+    ActionFunc func)
+{
+    auto& categoryMap_ = actions[category];
+    if (categoryMap_.find(name) != categoryMap_.end()) return;
 
-    categoryMap.emplace(name, func);
+    categoryMap_.emplace(name, func);
+
+    // Editor表示用の文字列Mapを残しつつ、実行時呼び出し用のID索引も更新する。
+    const StringId categoryId_ = MakeActionId(category);
+    const StringId actionId_ = MakeActionId(name);
+    categoryIndex[categoryId_].emplace(actionId_, func);
+    actionIndex.emplace(actionId_, func);
 }
 
 std::vector<std::string> ActionRegistry::GetCategories()
 {
-    std::vector<std::string> categories;
-    for (auto const& [cat, _] : actions) categories.push_back(cat);
-    return categories;
+    std::vector<std::string> categories_;
+    for (auto const& [category_, actionMap_] : actions)
+    {
+        (void)actionMap_;
+        categories_.push_back(category_);
+    }
+    return categories_;
 }
 
 ActionRegistry::ActionFunc ActionRegistry::GetAction(const std::string& name)
 {
-    for (auto const& [cat, actionMap] : actions) {
-        auto it = actionMap.find(name);
-        if (it != actionMap.end()) {
-            return it->second;
-        }
-    }
-    return nullptr; // 見つからない場合
+    const auto iterator_ = actionIndex.find(MakeActionId(name));
+    return iterator_ != actionIndex.end() ? iterator_->second : nullptr;
 }
 
-bool ActionRegistry::RemoveAction(const std::string& category, const std::string& actionName)
+bool ActionRegistry::RemoveAction(
+    const std::string& category,
+    const std::string& actionName)
 {
-    auto catIt = actions.find(category);
-    if (catIt != actions.end()) {
-        // アクション名を探して削除
-        if (catIt->second.erase(actionName) > 0) {
-            // カテゴリが空になった場合、カテゴリ自体を削除するかは設計次第
-            // if (catIt->second.empty()) actions.erase(catIt); 
-            return true;
-        }
-    }
-    return false;
-}
+    auto categoryIterator_ = actions.find(category);
+    if (categoryIterator_ == actions.end()) return false;
+    if (categoryIterator_->second.erase(actionName) == 0) return false;
 
+    const StringId categoryId_ = MakeActionId(category);
+    const StringId actionId_ = MakeActionId(actionName);
+    auto categoryIndexIterator_ = categoryIndex.find(categoryId_);
+    if (categoryIndexIterator_ != categoryIndex.end())
+    {
+        categoryIndexIterator_->second.erase(actionId_);
+    }
+
+    RebuildActionIndexForName(actionName);
+    return true;
+}
 
 void ActionRegistry::Call(const std::string& name)
 {
-    auto logAction_ = [&name](const std::string& category_)
-        {
-            BS_LOG_INFO(
-                LOG_CATEGORY::GAME,
-                "Action fired: [" + category_ + "] " + name);
-        };
+    const auto iterator_ = actionIndex.find(MakeActionId(name));
+    if (iterator_ == actionIndex.end()) return;
+    if (!iterator_->second) return;
 
-    for (auto& [cat, actionMap] : actions)
-    {
-        auto it = actionMap.find(name);
-        if (it != actionMap.end()) {
-            if (it->second) logAction_(cat);
-            if (it->second) it->second(); // 関数の中身が空（nullptr）でないかチェック
-            return;
-        }
-    }
+    BS_LOG_INFO(LOG_CATEGORY::GAME, "Action fired: " + name);
+    iterator_->second();
 }
-
 
 bool ActionRegistry::HasAction(const std::string& name)
 {
-    for (auto const& [cat, actionMap] : actions) {
-        if (actionMap.count(name)) return true;
-    }
-    return false;
+    return actionIndex.find(MakeActionId(name)) != actionIndex.end();
 }
 
 bool ActionRegistry::HasCategory(const std::string& category) const
 {
-    return actions.find(category) != actions.end();
+    return categoryIndex.find(StringIdUtility::Hash(category)) != categoryIndex.end();
 }
 
-bool ActionRegistry::HasActionInCategory(const std::string& category, const std::string& actionName) const
+bool ActionRegistry::HasActionInCategory(
+    const std::string& category,
+    const std::string& actionName) const
 {
-    auto catIt = actions.find(category);
-    if (catIt != actions.end()) {
-        return catIt->second.find(actionName) != catIt->second.end();
-    }
-    return false;
+    const auto categoryIterator_ = categoryIndex.find(StringIdUtility::Hash(category));
+    if (categoryIterator_ == categoryIndex.end()) return false;
+
+    return categoryIterator_->second.find(StringIdUtility::Hash(actionName)) !=
+        categoryIterator_->second.end();
 }
 
+void ActionRegistry::RebuildActionIndexForName(const std::string& actionName_)
+{
+    // 同名Actionが別カテゴリに残っている場合、全体呼び出し用Indexだけ登録し直す。
+    const StringId actionId_ = MakeActionId(actionName_);
+    actionIndex.erase(actionId_);
+
+    for (const auto& [category_, actionMap_] : actions)
+    {
+        (void)category_;
+        const auto actionIterator_ = actionMap_.find(actionName_);
+        if (actionIterator_ != actionMap_.end())
+        {
+            actionIndex.emplace(actionId_, actionIterator_->second);
+            return;
+        }
+    }
+}

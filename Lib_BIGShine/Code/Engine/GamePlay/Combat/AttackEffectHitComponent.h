@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CombatDamageTypes.h"
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
 #include <DirectXMath.h>
@@ -105,6 +106,11 @@ public:
     void SetAttackInstanceId(uint32_t attackInstanceId_);
     void SetHitGroupId(uint32_t hitGroupId_);
     void SetDamage(float damage_);
+    void SetDamageRate(float damageRate_);
+    void SetFixedDamage(float fixedDamage_);
+    void SetDamageApplyType(DAMAGE_APPLY_TYPE damageApplyType_);
+    void SetDamageHitInterval(float damageHitInterval_);
+    void SetMaxHitCount(int maxHitCount_);
     void SetImpactPower(float impactPower_);
     void SetHitStopDuration(float hitStopDuration_);
     void SetHitStopScale(float hitStopScale_);
@@ -184,6 +190,11 @@ private:
 
     // Hit成立時にAttackSystemへ渡す攻撃パラメータ。
     float damage = 1.0f;
+    float damageRate = 0.01f;
+    float fixedDamage = 0.0f;
+    DAMAGE_APPLY_TYPE damageApplyType = DAMAGE_APPLY_TYPE::SINGLE_HIT;
+    float damageHitInterval = 0.0f;
+    int maxHitCount = 1;
     float impactPower = 1.0f;
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;

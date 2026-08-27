@@ -47,6 +47,31 @@ void HitBox::SetDamage(float damage_)
     damage = damage_;
 }
 
+void HitBox::SetDamageRate(float damageRate_)
+{
+    damageRate = (std::max)(damageRate_, 0.0f);
+}
+
+void HitBox::SetFixedDamage(float fixedDamage_)
+{
+    fixedDamage = fixedDamage_;
+}
+
+void HitBox::SetDamageApplyType(DAMAGE_APPLY_TYPE damageApplyType_)
+{
+    damageApplyType = damageApplyType_;
+}
+
+void HitBox::SetDamageHitInterval(float damageHitInterval_)
+{
+    damageHitInterval = (std::max)(damageHitInterval_, 0.0f);
+}
+
+void HitBox::SetMaxHitCount(int maxHitCount_)
+{
+    maxHitCount = maxHitCount_;
+}
+
 void HitBox::SetImpactPower(float impactPower_)
 {
     impactPower = (std::max)(impactPower_, 0.0f);
@@ -81,6 +106,7 @@ void HitBox::ClearHitTargets()
     // 同一activation中に既にHitした対象を忘れる。
     // 新しい攻撃IDやDebug操作で、対象へ再Hitさせたい時に呼ぶ。
     alreadyHitTargets.clear();
+    hitTargetCounts.clear();
 }
 
 bool HitBox::CanHit(GameObject* target_) const
@@ -89,13 +115,21 @@ bool HitBox::CanHit(GameObject* target_) const
     // AttackSystem側のattackInstanceId履歴とあわせて、HitBox単体でも最低限の重複防止を持つ。
     if (target_ == nullptr) return false;
     if (!canHitOwner && ownerObject == target_) return false;
-    return allowMultiHit || alreadyHitTargets.count(target_) == 0u;
+    if (!allowMultiHit) return alreadyHitTargets.count(target_) == 0u;
+    if (maxHitCount <= 0) return true;
+
+    const auto iterator_ = hitTargetCounts.find(target_);
+    return iterator_ == hitTargetCounts.end() || iterator_->second < maxHitCount;
 }
 
 void HitBox::RegisterHit(GameObject* target_)
 {
     // Hit成立後に対象を記録し、allowMultiHitがfalseなら同じ受付窓で再Hitしないようにする。
-    if (target_ != nullptr) alreadyHitTargets.insert(target_);
+    if (target_ != nullptr)
+    {
+        alreadyHitTargets.insert(target_);
+        ++hitTargetCounts[target_];
+    }
 }
 
 std::shared_ptr<GameObject> HitBox::GetAttackOwner()
@@ -159,7 +193,22 @@ void HitBox::Gui()
     // 攻撃判定のDamage、HitStop、VFX、SE、CameraShake、Action名、Blackboard参照先をEditorで調整する。
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Attack");
-    ImGui::DragFloat("Damage", &damage, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Legacy Damage", &damage, 0.1f, 0.0f, 99999.0f);
+    ImGui::DragFloat("Damage Rate", &damageRate, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat("Fixed Damage", &fixedDamage, 0.1f, -99999.0f, 99999.0f);
+    const char* damageApplyTypeNames_[] = { "Single Hit", "Multi Hit", "Damage Over Time" };
+    int damageApplyTypeIndex_ = static_cast<int>(damageApplyType);
+    if (ImGui::Combo(
+        "Damage Apply Type",
+        &damageApplyTypeIndex_,
+        damageApplyTypeNames_,
+        IM_ARRAYSIZE(damageApplyTypeNames_)))
+    {
+        damageApplyType = static_cast<DAMAGE_APPLY_TYPE>(
+            (std::clamp)(damageApplyTypeIndex_, 0, 2));
+    }
+    ImGui::DragFloat("Damage Hit Interval", &damageHitInterval, 0.01f, 0.0f, 99999.0f);
+    ImGui::DragInt("Max Hit Count", &maxHitCount, 1.0f, 0, 9999);
     ImGui::DragFloat("Hit Stop Duration", &hitStopDuration, 0.001f, 0.0f, 10.0f, "%.3f s");
     ImGui::DragFloat("Hit Stop Scale", &hitStopScale, 0.01f, 0.0f, 1.0f, "%.2fx");
     ImGui::InputScalar("Hit Stop Layer Mask", ImGuiDataType_U32, &hitStopLayerMask);
@@ -264,6 +313,12 @@ void HitBox::Gui()
     char damageKeyBuffer_[64];
     strncpy_s(damageKeyBuffer_, damageKey.c_str(), sizeof(damageKeyBuffer_));
     if (ImGui::InputText("Damage Key", damageKeyBuffer_, sizeof(damageKeyBuffer_))) damageKey = damageKeyBuffer_;
+    char damageRateKeyBuffer_[64];
+    strncpy_s(damageRateKeyBuffer_, damageRateKey.c_str(), sizeof(damageRateKeyBuffer_));
+    if (ImGui::InputText("Damage Rate Key", damageRateKeyBuffer_, sizeof(damageRateKeyBuffer_))) damageRateKey = damageRateKeyBuffer_;
+    char fixedDamageKeyBuffer_[64];
+    strncpy_s(fixedDamageKeyBuffer_, fixedDamageKey.c_str(), sizeof(fixedDamageKeyBuffer_));
+    if (ImGui::InputText("Fixed Damage Key", fixedDamageKeyBuffer_, sizeof(fixedDamageKeyBuffer_))) fixedDamageKey = fixedDamageKeyBuffer_;
     char hitStopKeyBuffer_[64];
     strncpy_s(hitStopKeyBuffer_, hitStopDurationKey.c_str(), sizeof(hitStopKeyBuffer_));
     if (ImGui::InputText("Hit Stop Duration Key", hitStopKeyBuffer_, sizeof(hitStopKeyBuffer_))) hitStopDurationKey = hitStopKeyBuffer_;
@@ -281,6 +336,11 @@ void HitBox::Serialize(nlohmann::json& j_) const
     // activationIdやHit済み対象などFrame中の履歴は保存しない。
     CapsuleCollider::Serialize(j_);
     j_["Damage"] = damage;
+    j_["DamageRate"] = damageRate;
+    j_["FixedDamage"] = fixedDamage;
+    j_["DamageApplyType"] = static_cast<int>(damageApplyType);
+    j_["DamageHitInterval"] = damageHitInterval;
+    j_["MaxHitCount"] = maxHitCount;
     j_["HitStopDuration"] = hitStopDuration;
     j_["HitStopScale"] = hitStopScale;
     j_["HitStopLayerMask"] = hitStopLayerMask;
@@ -326,6 +386,8 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["DeactivateActionName"] = deactivateActionName;
     j_["BlackboardCategory"] = blackboardCategory;
     j_["DamageKey"] = damageKey;
+    j_["DamageRateKey"] = damageRateKey;
+    j_["FixedDamageKey"] = fixedDamageKey;
     j_["HitStopDurationKey"] = hitStopDurationKey;
     j_["KnockBackPowerKey"] = knockBackPowerKey;
     j_["HitSoundPathKey"] = hitSoundPathKey;
@@ -337,6 +399,12 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     // Runtime履歴ではなく設定値だけを復元し、最後にHitBox固定設定を再適用する。
     CapsuleCollider::Deserialize(j_);
     damage = j_.value("Damage", 1.0f);
+    damageRate = (std::max)(j_.value("DamageRate", damage / 100.0f), 0.0f);
+    fixedDamage = j_.value("FixedDamage", 0.0f);
+    damageApplyType = static_cast<DAMAGE_APPLY_TYPE>(
+        (std::clamp)(j_.value("DamageApplyType", 0), 0, 2));
+    damageHitInterval = (std::max)(j_.value("DamageHitInterval", 0.0f), 0.0f);
+    maxHitCount = j_.value("MaxHitCount", 1);
     hitStopDuration = j_.value("HitStopDuration", j_.value("HitStopTime", 0.0f));
     hitStopScale = (std::clamp)(j_.value("HitStopScale", j_.value("HitStopDir", 0.0f)), 0.0f, 1.0f);
     hitStopLayerMask = j_.value("HitStopLayerMask", 3u);
@@ -391,6 +459,8 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     deactivateActionName = "DisableHitBox";
     blackboardCategory = j_.value("BlackboardCategory", std::string("Attack"));
     damageKey = j_.value("DamageKey", std::string("Damage"));
+    damageRateKey = j_.value("DamageRateKey", std::string("DamageRate"));
+    fixedDamageKey = j_.value("FixedDamageKey", std::string("FixedDamage"));
     hitStopDurationKey = j_.value("HitStopDurationKey", std::string{});
     if (hitStopDurationKey.empty())
     {
@@ -475,6 +545,22 @@ void HitBox::ApplyBlackboardValues()
         if (!damageKey.empty() && blackboard_->GetFloat(blackboardCategory, damageKey, value_))
         {
             damage = value_;
+        }
+        if (!damageRateKey.empty() && blackboard_->GetFloat(blackboardCategory, damageRateKey, value_))
+        {
+            damageRate = (std::max)(value_, 0.0f);
+        }
+        if (!fixedDamageKey.empty() && blackboard_->GetFloat(blackboardCategory, fixedDamageKey, value_))
+        {
+            fixedDamage = value_;
+        }
+        if (blackboard_->GetFloat(blackboardCategory, "DamageHitInterval", value_))
+        {
+            damageHitInterval = (std::max)(value_, 0.0f);
+        }
+        if (blackboard_->GetInt(blackboardCategory, "MaxHitCount", intValue_))
+        {
+            maxHitCount = intValue_;
         }
         if (!hitStopDurationKey.empty() && blackboard_->GetFloat(blackboardCategory, hitStopDurationKey, value_))
         {

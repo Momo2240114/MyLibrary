@@ -3,6 +3,7 @@
 #include "AttackSystem.h"
 
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/GamePlay/Combat/CombatStatsComponent.h"
 #include "Engine/GamePlay/Camera/CameraShakeComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
@@ -17,6 +18,88 @@
 
 namespace
 {
+    bool TryReadAttackerAttackPower(
+        const std::shared_ptr<GameObject>& attacker_,
+        float& attackPower_)
+    {
+        if (!attacker_) return false;
+        if (const std::shared_ptr<CombatStatsComponent> stats_ =
+            attacker_->GetComponent<CombatStatsComponent>())
+        {
+            attackPower_ = stats_->GetAttackPower();
+            return true;
+        }
+        if (const std::shared_ptr<BlackboardComponent> blackboard_ =
+            attacker_->GetComponent<BlackboardComponent>())
+        {
+            if (blackboard_->GetFloat("Combat", "AttackPower", attackPower_))
+            {
+                attackPower_ = (std::max)(attackPower_, 0.0f);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    float ReadAttackerDamageRateModifier(const std::shared_ptr<GameObject>& attacker_)
+    {
+        if (!attacker_) return 1.0f;
+        if (const std::shared_ptr<CombatStatsComponent> stats_ =
+            attacker_->GetComponent<CombatStatsComponent>())
+        {
+            return stats_->GetDamageRateModifier();
+        }
+        if (const std::shared_ptr<BlackboardComponent> blackboard_ =
+            attacker_->GetComponent<BlackboardComponent>())
+        {
+            float rate_ = 1.0f;
+            if (blackboard_->GetFloat("Combat", "DamageRateModifier", rate_))
+            {
+                return (std::max)(rate_, 0.0f);
+            }
+        }
+        return 1.0f;
+    }
+
+    float ReadAttackerFixedDamageModifier(const std::shared_ptr<GameObject>& attacker_)
+    {
+        if (!attacker_) return 0.0f;
+        if (const std::shared_ptr<CombatStatsComponent> stats_ =
+            attacker_->GetComponent<CombatStatsComponent>())
+        {
+            return stats_->GetFixedDamageModifier();
+        }
+        if (const std::shared_ptr<BlackboardComponent> blackboard_ =
+            attacker_->GetComponent<BlackboardComponent>())
+        {
+            float fixedDamage_ = 0.0f;
+            if (blackboard_->GetFloat("Combat", "FixedDamageModifier", fixedDamage_))
+            {
+                return fixedDamage_;
+            }
+        }
+        return 0.0f;
+    }
+
+    float CalculateDamage(
+        const std::shared_ptr<GameObject>& attacker_,
+        const HitBox& hitBox_,
+        const HurtBox& hurtBox_,
+        float& attackerAttackPower_)
+    {
+        // CombatStatsComponentがある攻撃者は「攻撃力×技倍率」、ない場合は旧Damageを直接使う。
+        float rawDamage_ = hitBox_.damage;
+        attackerAttackPower_ = 0.0f;
+        if (TryReadAttackerAttackPower(attacker_, attackerAttackPower_))
+        {
+            const float rateModifier_ = ReadAttackerDamageRateModifier(attacker_);
+            rawDamage_ =
+                attackerAttackPower_ * (std::max)(hitBox_.damageRate, 0.0f) * rateModifier_;
+        }
+        rawDamage_ += hitBox_.fixedDamage + ReadAttackerFixedDamageModifier(attacker_);
+        return (std::max)(rawDamage_, 0.0f) * hurtBox_.damageMultiplier;
+    }
+
     bool IsPlayerObject(const std::shared_ptr<GameObject>& object_)
     {
         if (!object_) return false;
@@ -123,7 +206,12 @@ void AttackSystem::HandleHit(
     event_.target = target_;
     event_.hitBox = &hitBox_;
     event_.hurtBox = &hurtBox_;
-    event_.damage = hitBox_.damage * hurtBox_.damageMultiplier;
+    event_.damage = CalculateDamage(attacker_, hitBox_, hurtBox_, event_.attackerAttackPower);
+    event_.damageRate = hitBox_.damageRate;
+    event_.fixedDamage = hitBox_.fixedDamage;
+    event_.damageApplyType = hitBox_.damageApplyType;
+    event_.damageHitInterval = hitBox_.damageHitInterval;
+    event_.maxHitCount = hitBox_.maxHitCount;
     event_.hitStopDuration = hitBox_.hitStopDuration;
     event_.hitStopScale = hitBox_.hitStopScale;
     event_.hitStopLayerMask = hitBox_.hitStopLayerMask;
@@ -272,6 +360,12 @@ void AttackSystem::PublishHitToBlackboard(const AttackHitEvent& event_)
     if (!blackboard_) return;
 
     blackboard_->SetFloat("Hit", "Damage", event_.damage);
+    blackboard_->SetFloat("Hit", "AttackerAttackPower", event_.attackerAttackPower);
+    blackboard_->SetFloat("Hit", "DamageRate", event_.damageRate);
+    blackboard_->SetFloat("Hit", "FixedDamage", event_.fixedDamage);
+    blackboard_->SetInt("Hit", "DamageApplyType", static_cast<int>(event_.damageApplyType));
+    blackboard_->SetFloat("Hit", "DamageHitInterval", event_.damageHitInterval);
+    blackboard_->SetInt("Hit", "MaxHitCount", event_.maxHitCount);
     blackboard_->SetFloat("Hit", "HitStopDuration", event_.hitStopDuration);
     blackboard_->SetFloat("Hit", "HitStopScale", event_.hitStopScale);
     blackboard_->SetFloat("Hit", "ImpactPower", event_.impactPower);

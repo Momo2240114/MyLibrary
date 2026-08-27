@@ -1,8 +1,10 @@
 #pragma once
 
 #include "CapsuleCollider.h"
+#include "Engine/GamePlay/Combat/CombatDamageTypes.h"
 
 #include <cstdint>
+#include <unordered_map>
 #include <unordered_set>
 
 enum class ATTACK_SOURCE_TYPE
@@ -21,7 +23,12 @@ class HitBox : public CapsuleCollider
 {
 public:
     // Combat側から流し込まれる攻撃結果データ。Health、HitReaction、VFX生成の入力になる。
-    float damage = 1.0f; // Healthへ渡す基礎Damage。
+    float damage = 1.0f; // 旧データ互換用の直接Damage。
+    float damageRate = 0.01f; // 攻撃者のAttackPowerへ掛ける技倍率。
+    float fixedDamage = 0.0f; // 倍率計算後に加算する固定Damage。
+    DAMAGE_APPLY_TYPE damageApplyType = DAMAGE_APPLY_TYPE::SINGLE_HIT;
+    float damageHitInterval = 0.0f; // 多段/継続Damageで同一対象へ再Hitできる間隔。
+    int maxHitCount = 1; // 同一Activation中に同じ対象へ当てられる最大回数。0以下は無制限。
     float hitStopDuration = 0.0f; // HitStopの長さ。
     float hitStopScale = 0.0f; // HitStop中のTimeScale。
     uint32_t hitStopLayerMask = 3u; // HitStop対象Layer。
@@ -73,6 +80,8 @@ public:
     // Activate直前にBlackboardから攻撃値を上書きするための参照先。
     std::string blackboardCategory = "Attack";
     std::string damageKey = "Damage";
+    std::string damageRateKey = "DamageRate";
+    std::string fixedDamageKey = "FixedDamage";
     std::string hitStopDurationKey = "HitStopDuration";
     std::string knockBackPowerKey = "KnockBackPower";
     std::string hitSoundPathKey = "HitSoundPath";
@@ -90,6 +99,11 @@ public:
     void SetAttackInstanceId(uint32_t attackInstanceId_);
     void SetHitGroupId(uint32_t hitGroupId_);
     void SetDamage(float damage_);
+    void SetDamageRate(float damageRate_);
+    void SetFixedDamage(float fixedDamage_);
+    void SetDamageApplyType(DAMAGE_APPLY_TYPE damageApplyType_);
+    void SetDamageHitInterval(float damageHitInterval_);
+    void SetMaxHitCount(int maxHitCount_);
     void SetImpactPower(float impactPower_);
     void SetKnockBackPower(float knockBackPower_);
     bool ShouldNotifyAttackerOnGuard() const;
@@ -127,5 +141,6 @@ private:
     bool hitEffectBlackboardOverrideEnabled = true;
     bool attackDataBlackboardOverrideEnabled = true;
     std::unordered_set<GameObject*> alreadyHitTargets;
+    std::unordered_map<GameObject*, int> hitTargetCounts;
 };
 

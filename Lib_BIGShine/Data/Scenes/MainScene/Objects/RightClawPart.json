@@ -24,7 +24,11 @@
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
                 "Damage": 8.0,
+                "DamageApplyType": 0,
+                "DamageHitInterval": 0.0,
                 "DamageKey": "Damage",
+                "DamageRate": 0.07999999821186066,
+                "DamageRateKey": "DamageRate",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
                     1.0,
@@ -33,6 +37,8 @@
                     1.0
                 ],
                 "EndNodeName": "PlainsDragon_-R-Finger21",
+                "FixedDamage": 0.0,
+                "FixedDamageKey": "FixedDamage",
                 "GravityScale": 1.0,
                 "HalfHeight": 0.41999998688697815,
                 "HitGroupId": 31,
@@ -65,6 +71,7 @@
                 "KnockBackPower": 4.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
+                "MaxHitCount": 1,
                 "NodeModelObjectName": "TestTarget",
                 "Offset": [
                     0.0,

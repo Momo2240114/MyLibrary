@@ -2,8 +2,12 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
+#include "Engine/Common/StringId.h"
 #include "Engine/Math/Vector.h"
 
 void RegisterAllActions();
@@ -30,6 +34,7 @@ public:
     // カテゴリを指定して登録する
     // 例: "Camera" / "Fov_0" のように、Editor 上で探しやすい分類に分ける。
     void RegisterAction(const std::string& category, const std::string& name, ActionFunc func);
+    static StringId MakeActionId(std::string_view name_);
 
     // すべてのカテゴリ名を取得
     std::vector<std::string> GetCategories();
@@ -67,12 +72,18 @@ public:
         {
             // Scene 切り替え時に前 Scene の Action が残らないよう全消去する。
             actions.clear();
+            actionIndex.clear();
+            categoryIndex.clear();
         }
     };
 private:
+    void RebuildActionIndexForName(const std::string& actionName_);
+
     static std::shared_ptr<ActionRegistry> instance;
 
     // actions[カテゴリ][アクション名]
     // 同じカテゴリ内の同名 Action は後から登録したものが上書きされる。
     std::unordered_map<std::string, std::unordered_map<std::string, ActionFunc>> actions;
+    std::unordered_map<StringId, ActionFunc> actionIndex;
+    std::unordered_map<StringId, std::unordered_map<StringId, ActionFunc>> categoryIndex;
 };

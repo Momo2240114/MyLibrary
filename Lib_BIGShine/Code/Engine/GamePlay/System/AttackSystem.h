@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 #include <DirectXMath.h>
+#include "Engine/GamePlay/Combat/CombatDamageTypes.h"
 
 class GameObject;
 class HitBox;
@@ -36,6 +37,12 @@ struct AttackHitEvent
 
     // Health、HitReaction、CameraShake などに渡す攻撃結果パラメータ。
     float damage = 0.0f;
+    float attackerAttackPower = 0.0f;
+    float damageRate = 1.0f;
+    float fixedDamage = 0.0f;
+    DAMAGE_APPLY_TYPE damageApplyType = DAMAGE_APPLY_TYPE::SINGLE_HIT;
+    float damageHitInterval = 0.0f;
+    int maxHitCount = 1;
     float hitStopDuration = 0.0f;
     float hitStopScale = 0.0f;
     uint32_t hitStopLayerMask = 0u;

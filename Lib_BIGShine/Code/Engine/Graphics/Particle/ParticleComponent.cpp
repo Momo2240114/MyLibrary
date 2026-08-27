@@ -166,6 +166,7 @@ void ParticleComponent::Gui()
         // 新規Emitterは、勝手に暴れすぎない安全な初期値から作る。
         EmitterTrack newTrack;
         newTrack.name = "Emitter_" + std::to_string(tracks.size());
+        newTrack.nameId = StringIdUtility::Hash(newTrack.name);
         newTrack.settings = ParticleSystemConstants();
         newTrack.settings.maxParticleCount = 1000;
         newTrack.settings.burstCount = 100;
@@ -184,6 +185,7 @@ void ParticleComponent::Gui()
             newTrack.settings,
             newTrack.settings.maxParticleCount);
         tracks.push_back(std::move(newTrack));
+        RefreshEmitterNameIndex();
         RegisterActions();
     }
 
@@ -253,6 +255,7 @@ void ParticleComponent::Gui()
     {
         tracks.erase(tracks.begin() + selectedEmitterIndex);
         if (selectedEmitterIndex > 0) --selectedEmitterIndex;
+        RefreshEmitterNameIndex();
         RegisterActions();
         return;
     }
@@ -263,7 +266,12 @@ void ParticleComponent::Gui()
     auto& track = tracks[selectedEmitterIndex];
     auto& s = track.settings;
 
-    if (ImGui::InputText("Emitter Name", &track.name)) RegisterActions();
+    if (ImGui::InputText("Emitter Name", &track.name))
+    {
+        track.nameId = StringIdUtility::Hash(track.name);
+        RefreshEmitterNameIndex();
+        RegisterActions();
+    }
     ImGui::SameLine();
     if (ImGui::Button("Play Emitter")) PlayEmitter(track.name);
     ImGui::SameLine();
@@ -1019,6 +1027,7 @@ void ParticleComponent::SetAsset(const ParticleEffectAsset& asset_)
         EmitterTrack track_{};
         track_.settings = emitterAsset_.settings;
         track_.name = emitterAsset_.name;
+        track_.nameId = StringIdUtility::Hash(track_.name);
         track_.materialPath = emitterAsset_.materialPath;
         track_.materialPaths = emitterAsset_.materialPaths;
         if (track_.materialPaths.empty() && !track_.materialPath.empty())
@@ -1197,6 +1206,7 @@ bool ParticleComponent::LoadEmitterAsset(const std::string& path_)
     if (loadedComponent_.tracks.empty()) return false;
 
     tracks.push_back(std::move(loadedComponent_.tracks.front()));
+    RefreshEmitterNameIndex();
     RegisterActions();
     return true;
 }
@@ -1275,11 +1285,8 @@ bool ParticleComponent::SetEmitterLine(
     const DirectX::XMFLOAT3& endPosition_)
 {
     // BoneSegmentなどから線分上にParticleを出すため、対象EmitterをLine形状へ切り替える。
-    bool changed_ = false;
-    for (EmitterTrack& track_ : tracks)
+    auto applyLine_ = [&](EmitterTrack& track_)
     {
-        if (!emitterName_.empty() && track_.name != emitterName_) continue;
-
         track_.settings.spawnShape = 4;
         track_.settings.emissionPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
         track_.settings.shapeStart = {
@@ -1287,6 +1294,21 @@ bool ParticleComponent::SetEmitterLine(
         track_.settings.shapeEnd = {
             endPosition_.x, endPosition_.y, endPosition_.z, 1.0f };
         track_.spawnSpace = ParticleSpawnSpace::WORLD;
+    };
+
+    if (!emitterName_.empty())
+    {
+        EmitterTrack* track_ = FindEmitterTrack(emitterName_);
+        if (!track_) return false;
+
+        applyLine_(*track_);
+        return true;
+    }
+
+    bool changed_ = false;
+    for (EmitterTrack& track_ : tracks)
+    {
+        applyLine_(track_);
         changed_ = true;
     }
     return changed_;
@@ -1458,6 +1480,7 @@ void ParticleComponent::Deserialize(const nlohmann::json& j)
         {
             EmitterTrack track;
             track.name = ej.value("Name", "Emitter_" + std::to_string(tracks.size()));
+            track.nameId = StringIdUtility::Hash(track.name);
             track.spawnSpace = static_cast<ParticleSpawnSpace>(
                 std::clamp(ej.value("SpawnSpace", 0), 0, 1));
             auto& s = track.settings;
@@ -1655,6 +1678,7 @@ void ParticleComponent::RebuildEmitterResources()
 {
     // 設定変更後はGPUバッファとTexture SRVを作り直し、Emitterへ最新設定を反映する
     auto device_ = GraphicsDeviceManager::Instance().GetDevice();
+    RefreshEmitterNameIndex();
     if (!device_) return;
 
     RefreshTextureList();
@@ -1665,6 +1689,7 @@ void ParticleComponent::RebuildEmitterResources()
         const uint32_t useGradientTexture_ = track_.settings.useGradientTexture;
         const uint32_t useShadeGradientTexture_ = track_.settings.useShadeGradientTexture;
         track_.runtimeBlendMode = track_.blendMode;
+        track_.nameId = StringIdUtility::Hash(track_.name);
         track_.emitter = std::make_unique<ParticleEmitter>(device_, track_.settings, track_.settings.maxParticleCount);
         if (!track_.materialPath.empty() || !track_.materialPaths.empty())
         {
@@ -1688,6 +1713,17 @@ void ParticleComponent::RebuildEmitterResources()
     RegisterActions();
 }
 
+void ParticleComponent::RefreshEmitterNameIndex()
+{
+    // Emitter名からTrackを引くための索引を、編集やAsset読み込み後に作り直す。
+    emitterTrackIndexByNameId.clear();
+    for (size_t index_ = 0; index_ < tracks.size(); ++index_)
+    {
+        tracks[index_].nameId = StringIdUtility::Hash(tracks[index_].name);
+        emitterTrackIndexByNameId.emplace(tracks[index_].nameId, index_);
+    }
+}
+
 std::string ParticleComponent::BuildAssetPathFromName() const
 {
     std::string name_ = assetNameBuffer;
@@ -1707,16 +1743,24 @@ std::string ParticleComponent::BuildAssetPathFromName() const
 
 ParticleComponent::EmitterTrack* ParticleComponent::FindEmitterTrack(const std::string& emitterName_)
 {
-    const auto trackIterator_ = std::find_if(tracks.begin(), tracks.end(),
-        [&](const EmitterTrack& track_) { return track_.name == emitterName_; });
-    return trackIterator_ != tracks.end() ? &*trackIterator_ : nullptr;
+    const auto indexIterator_ = emitterTrackIndexByNameId.find(StringIdUtility::Hash(emitterName_));
+    if (indexIterator_ == emitterTrackIndexByNameId.end() ||
+        indexIterator_->second >= tracks.size())
+    {
+        return nullptr;
+    }
+    return &tracks[indexIterator_->second];
 }
 
 const ParticleComponent::EmitterTrack* ParticleComponent::FindEmitterTrack(const std::string& emitterName_) const
 {
-    const auto trackIterator_ = std::find_if(tracks.begin(), tracks.end(),
-        [&](const EmitterTrack& track_) { return track_.name == emitterName_; });
-    return trackIterator_ != tracks.end() ? &*trackIterator_ : nullptr;
+    const auto indexIterator_ = emitterTrackIndexByNameId.find(StringIdUtility::Hash(emitterName_));
+    if (indexIterator_ == emitterTrackIndexByNameId.end() ||
+        indexIterator_->second >= tracks.size())
+    {
+        return nullptr;
+    }
+    return &tracks[indexIterator_->second];
 }
 
 std::string ParticleComponent::BuildEmitterAssetPathFromName(size_t emitterIndex_) const

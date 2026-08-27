@@ -12,6 +12,7 @@ public:
     void Enter() override;
     void Execute(float elapsedTime_) override;
     void Exit() override;
+    void ApplyJumpImpulseFromSequence();
     void NotifyJumpLoopRequested();
 
 private:
@@ -43,4 +44,6 @@ private:
     bool hasLeftGround = false;
     // 二段Jump用Animationへ入ったことを検出済みか。
     bool hasEnteredDoubleJumpAnimation = false;
+    // Sequencerから1段目のJumpインパルスを適用済みか。
+    bool hasAppliedJumpImpulse = false;
 };
