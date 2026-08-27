@@ -164,11 +164,14 @@ const char* EditorWindowManager::GetWindowMenuCategory(
         name_ == "Effect Asset Keys" ||
         name_ == "Effect Asset List" ||
         name_ == "Material Asset Keys" ||
+        name_ == "VFX Material Editor" ||
+        name_ == "VFX Material Preview" ||
         name_ == "Startup Model Settings")
     {
         return "Assets";
     }
     if (name_ == "Animation Editor" ||
+        name_ == "Attack Template Editor" ||
         name_ == "Animation Node Graph" ||
         name_ == "Action Sequence Editor")
     {

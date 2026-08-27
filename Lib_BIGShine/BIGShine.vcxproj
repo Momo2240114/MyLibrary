@@ -354,6 +354,7 @@
     <ClCompile Include="Code\Editor\Workspace\UIWidgetEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ActionSequenceEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\AttackTemplateEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\CollisionShapeManagerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ComponentUpdateSequencerWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\DebugLogWindow.cpp" />
@@ -522,6 +523,8 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
     <ClCompile Include="Code\Engine\Physics\ContainmentVolumeComponent.cpp" />
@@ -546,6 +549,7 @@
     <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp" />
@@ -647,6 +651,7 @@
     <ClInclude Include="Code\Editor\Workspace\UIWidgetEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\ActionSequenceEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Window\AttackTemplateEditorWindow.h" />
     <ClInclude Include="Code\Editor\Window\CollisionShapeManagerWindow.h" />
     <ClInclude Include="Code\Editor\Window\ComponentUpdateSequencerWindow.h" />
     <ClInclude Include="Code\Editor\Window\DebugLogWindow.h" />
@@ -668,6 +673,7 @@
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h" />
     <ClInclude Include="Code\Editor\Window\DebugTextureViewerWindow.h" />
     <ClInclude Include="Code\Engine\Common\misc.h" />
+    <ClInclude Include="Code\Engine\Common\StringId.h" />
     <ClInclude Include="Code\Engine\Common\DebugLog.h" />
     <ClInclude Include="Code\Engine\Debug\TracyProfiler.h" />
     <ClInclude Include="Code\Engine\GamePlay\Camera\CameraDirectorComponent.h" />
@@ -855,6 +861,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\CombatDamageTypes.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />
     <ClInclude Include="Code\Engine\Physics\PhysicsCollisionComponent.h" />
@@ -865,6 +874,7 @@
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h" />
+    <ClInclude Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartManagerComponent.h" />
     <ClInclude Include="Code\Game\AI\Director\AIDirectorBlackboardKeys.h" />

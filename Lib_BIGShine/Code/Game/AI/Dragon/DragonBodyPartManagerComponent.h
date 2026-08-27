@@ -164,6 +164,12 @@ private:
     float reactionCooldownTimer = 0.0f;
     // 怯み発生時にOwnerへ実行するAction名。
     std::string reactionActionName = "DragonAI_DamageReaction";
+    // 必殺技演出中のダメージ軽減状態を読むBlackboardカテゴリ。
+    std::string damageReductionBlackboardCategory = "DragonAI";
+    // 必殺技演出中かどうかを読むBlackboardキー。
+    std::string damageReductionActiveKey = "UltimateDamageReductionActive";
+    // 必殺技演出中の被ダメージ倍率を読むBlackboardキー。
+    std::string damageReductionRateKey = "UltimateDamageRate";
     // 部位破壊時に共通で実行するAction名。
     std::string commonBrokenActionName = "DragonBodyPart_Broken";
     // 直近Hitの結果。

@@ -38,6 +38,8 @@ namespace
     constexpr const char* LEGACY_SLASH_CROSS_CRESCENT_MODEL_PATH = "__SlashCrossCrescent__";
     constexpr const char* LEGACY_SLASH_VERTICAL_CRESCENT_MODEL_PATH = "__SlashVerticalCrescent__";
     constexpr const char* LEGACY_SLASH_RAISED_CRESCENT_MODEL_PATH = "__SlashRaisedCrescent__";
+    constexpr const char* LEGACY_DANGER_AREA_MODEL_PATH = "__DangerArea__";
+    constexpr const char* LEGACY_DANGER_FAN_MODEL_PATH = "__DangerFan__";
 
     // ファイルを持たないエフェクト用メッシュは、この特殊パスをモデル指定の代わりに使う。
     constexpr const char* INTERNAL_MESH__MODEL_PATH = "__InternalMesh__";
@@ -53,6 +55,8 @@ namespace
     constexpr const char* INTERNAL_MESH_SLASH_VERTICAL_CRESCENT_MODEL_PATH = "__InternalMeshSlashVerticalCrescent__";
     constexpr const char* INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH = "__InternalMeshSlashRaisedCrescent__";
     constexpr const char* INTERNAL_MESH_BREATH_BEAM_MODEL_PATH = "__InternalMeshBreathBeam__";
+    constexpr const char* INTERNAL_MESH_DANGER_AREA_MODEL_PATH = "__InternalMeshDangerArea__";
+    constexpr const char* INTERNAL_MESH_DANGER_FAN_MODEL_PATH = "__InternalMeshDangerFan__";
 
     constexpr int INTERNAL_MESH_CYLINDER_SEGMENTS = 256;
     constexpr int INTERNAL_MESH_SLASH_SEGMENTS = 96;
@@ -159,6 +163,14 @@ namespace
         else if (modelPath_ == LEGACY_SLASH_RAISED_CRESCENT_MODEL_PATH)
         {
             modelPath_ = INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_DANGER_AREA_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_DANGER_AREA_MODEL_PATH;
+        }
+        else if (modelPath_ == LEGACY_DANGER_FAN_MODEL_PATH)
+        {
+            modelPath_ = INTERNAL_MESH_DANGER_FAN_MODEL_PATH;
         }
     }
 
@@ -842,6 +854,108 @@ namespace
         }
 
         AddRibbonStrip(mesh_, innerPoints_, outerPoints_);
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshDangerAreaModelResource(
+        ID3D11Device* device_,
+        float radius_,
+        float capsuleLength_)
+    {
+        if (!device_) return nullptr;
+
+        const float safeRadius_ = (std::max)(radius_, 0.0001f);
+        const float safeCapsuleLength_ = (std::max)(capsuleLength_, 0.0f);
+        const float halfLineLength_ = safeCapsuleLength_ * 0.5f;
+        constexpr int HALF_SEGMENT_COUNT = 64;
+
+        // 攻撃カプセルをXZ平面へ投影した形状を作り、VFXMaterialで地面予兆として描画する。
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_DANGER_AREA_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve(static_cast<size_t>(HALF_SEGMENT_COUNT * 2 + 3));
+        mesh_.indices.reserve(static_cast<size_t>(HALF_SEGMENT_COUNT * 2 + 2) * 3);
+
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex({ 0.0f, 0.0f, 0.0f }, 0.5f, 0.5f));
+
+        auto addPerimeterVertex_ = [&mesh_, safeRadius_, halfLineLength_](
+            float x_,
+            float z_)
+            {
+                const float u_ = 0.5f + x_ / (safeRadius_ * 2.0f);
+                const float v_ = 0.5f + z_ / ((halfLineLength_ + safeRadius_) * 2.0f);
+                mesh_.vertices.push_back(CreateInternalMeshSlashVertex({ x_, 0.0f, z_ }, u_, v_));
+            };
+
+        for (int index_ = 0; index_ <= HALF_SEGMENT_COUNT; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) / static_cast<float>(HALF_SEGMENT_COUNT);
+            const float angle_ = DirectX::XM_PI - DirectX::XM_PI * rate_;
+            addPerimeterVertex_(
+                std::sin(angle_) * safeRadius_,
+                halfLineLength_ + std::cos(angle_) * safeRadius_);
+        }
+
+        for (int index_ = 0; index_ <= HALF_SEGMENT_COUNT; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) / static_cast<float>(HALF_SEGMENT_COUNT);
+            const float angle_ = -DirectX::XM_PI * rate_;
+            addPerimeterVertex_(
+                std::sin(angle_) * safeRadius_,
+                -halfLineLength_ + std::cos(angle_) * safeRadius_);
+        }
+
+        const uint32_t perimeterCount_ = static_cast<uint32_t>(mesh_.vertices.size() - 1u);
+        for (uint32_t index_ = 0; index_ < perimeterCount_; ++index_)
+        {
+            const uint32_t current_ = index_ + 1u;
+            const uint32_t next_ = (index_ + 1u) % perimeterCount_ + 1u;
+            mesh_.indices.push_back(0u);
+            mesh_.indices.push_back(current_);
+            mesh_.indices.push_back(next_);
+        }
+
+        return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+    }
+
+    std::shared_ptr<ModelResource> CreateInternalMeshDangerFanModelResource(
+        ID3D11Device* device_,
+        float radius_,
+        float angleDegrees_,
+        int segments_)
+    {
+        if (!device_) return nullptr;
+
+        const float safeRadius_ = (std::max)(radius_, 0.0001f);
+        const float halfAngle_ = DirectX::XMConvertToRadians(
+            std::clamp(angleDegrees_, 0.1f, 360.0f) * 0.5f);
+        const int segmentCount_ = std::clamp(segments_, 3, 512);
+
+        // 扇形攻撃の到達範囲をXZ平面へ投影し、中心から外周へ三角形で埋める。
+        auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_DANGER_FAN_MODEL_PATH);
+        auto& mesh_ = resource_->meshes[0];
+        mesh_.vertices.reserve(static_cast<size_t>(segmentCount_ + 2));
+        mesh_.indices.reserve(static_cast<size_t>(segmentCount_) * 3);
+
+        mesh_.vertices.push_back(CreateInternalMeshSlashVertex({ 0.0f, 0.0f, 0.0f }, 0.5f, 1.0f));
+        for (int index_ = 0; index_ <= segmentCount_; ++index_)
+        {
+            const float rate_ = static_cast<float>(index_) / static_cast<float>(segmentCount_);
+            const float angle_ = -halfAngle_ + halfAngle_ * 2.0f * rate_;
+            const float x_ = std::sin(angle_) * safeRadius_;
+            const float z_ = std::cos(angle_) * safeRadius_;
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertex(
+                { x_, 0.0f, z_ },
+                rate_,
+                0.0f));
+        }
+
+        for (uint32_t index_ = 1u; index_ <= static_cast<uint32_t>(segmentCount_); ++index_)
+        {
+            mesh_.indices.push_back(0u);
+            mesh_.indices.push_back(index_);
+            mesh_.indices.push_back(index_ + 1u);
+        }
+
         return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
     }
 
@@ -1530,6 +1644,8 @@ void MeshVFXComponent::Gui()
             else if (part_.modelPath == INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH) slashPresetPreview_ = "Arc Ribbon";
             else if (part_.modelPath == INTERNAL_MESH_SLASH_CROSS_MODEL_PATH) slashPresetPreview_ = "Cross Slash";
             else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH) slashPresetPreview_ = "Ground Slash";
+            else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH) slashPresetPreview_ = "Danger Area";
+            else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH) slashPresetPreview_ = "Danger Fan";
 
             if (ImGui::BeginCombo("Internal Slash Mesh", slashPresetPreview_))
             {
@@ -1549,6 +1665,8 @@ void MeshVFXComponent::Gui()
                     { "Arc Ribbon", INTERNAL_MESH_SLASH_ARC_RIBBON_MODEL_PATH },
                     { "Cross Slash", INTERNAL_MESH_SLASH_CROSS_MODEL_PATH },
                     { "Ground Slash", INTERNAL_MESH_SLASH_GROUND_MODEL_PATH },
+                    { "Danger Area", INTERNAL_MESH_DANGER_AREA_MODEL_PATH },
+                    { "Danger Fan", INTERNAL_MESH_DANGER_FAN_MODEL_PATH },
                 };
 
                 for (const SlashPresetEntry& preset_ : presets_)
@@ -1892,7 +2010,9 @@ void MeshVFXComponent::Gui()
             ImGui::DragFloat3("Scale", &part_.scale.x, 0.01f);
             if (part_.modelPath == INTERNAL_MESH_CYLINDER_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
-                part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH)
+                part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH)
             {
                 const char* radiusLabel_ = "Internal Cylinder Radius";
                 if (part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH)
@@ -1902,6 +2022,14 @@ void MeshVFXComponent::Gui()
                 else if (part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH)
                 {
                     radiusLabel_ = "Internal Capsule Radius";
+                }
+                else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH)
+                {
+                    radiusLabel_ = "Danger Area Radius";
+                }
+                else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH)
+                {
+                    radiusLabel_ = "Danger Fan Range";
                 }
                 if (ImGui::DragFloat(radiusLabel_, &part_.shapeCylinderRadius, 0.01f, 0.0001f, 100.0f))
                 {
@@ -1913,7 +2041,9 @@ void MeshVFXComponent::Gui()
                 part_.modelPath == INTERNAL_MESH_CONE_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_CAPSULE_MODEL_PATH ||
                 part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH ||
-                part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH;
+                part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH ||
+                part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH;
             if (isEditableInternalMesh_ && ImGui::TreeNode("Internal Mesh Shape"))
             {
                 MeshVFXInternalMeshSettings& settings_ = part_.internalMeshSettings;
@@ -1946,6 +2076,24 @@ void MeshVFXComponent::Gui()
                         0.01f,
                         0.001f,
                         100.0f);
+                }
+                else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH)
+                {
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Danger Area Length",
+                        &settings_.capsuleLength,
+                        0.01f,
+                        0.0f,
+                        100.0f);
+                }
+                else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH)
+                {
+                    shapeChanged_ |= ImGui::DragFloat(
+                        "Danger Fan Angle",
+                        &settings_.endAngleDegrees,
+                        0.5f,
+                        0.1f,
+                        360.0f);
                 }
                 else if (part_.modelPath == INTERNAL_MESH_BREATH_BEAM_MODEL_PATH)
                 {
@@ -3142,6 +3290,21 @@ void MeshVFXComponent::LoadPartResource(size_t partIndex_)
     else if (part_.modelPath == INTERNAL_MESH_SLASH_GROUND_MODEL_PATH)
     {
         runtimePart_.modelResource = CreateInternalMeshSlashGroundModelResource(device_);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_DANGER_AREA_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshDangerAreaModelResource(
+            device_,
+            part_.shapeCylinderRadius,
+            part_.internalMeshSettings.capsuleLength);
+    }
+    else if (part_.modelPath == INTERNAL_MESH_DANGER_FAN_MODEL_PATH)
+    {
+        runtimePart_.modelResource = CreateInternalMeshDangerFanModelResource(
+            device_,
+            part_.shapeCylinderRadius,
+            part_.internalMeshSettings.endAngleDegrees,
+            part_.internalMeshSettings.segments);
     }
     else if (part_.modelPath == INTERNAL_MESH_SLASH_RAISED_CRESCENT_MODEL_PATH)
     {

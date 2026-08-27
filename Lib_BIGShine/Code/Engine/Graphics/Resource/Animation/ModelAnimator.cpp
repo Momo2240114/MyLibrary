@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <functional>
 
 
 namespace
@@ -472,6 +473,98 @@ static float ResolveBlend2DDuration(
     return durationA_ + (durationB_ - durationA_) * selection_.weightB;
 }
 
+static const AnimState* ResolveSequenceReferencedState(
+    const AnimSequenceClip& clip_,
+    const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_)
+{
+    if (!states_ || clip_.stateName.empty()) return nullptr;
+
+    const auto iterator_ = states_->find(clip_.stateName);
+    if (iterator_ == states_->end() || !iterator_->second) return nullptr;
+
+    return iterator_->second.get();
+}
+
+static float ResolveSequenceDuration(const AnimState* state_)
+{
+    if (!state_ || state_->sequenceClips.empty()) return 1.0f;
+
+    float duration_ = 0.0f;
+    for (const AnimSequenceClip& clip_ : state_->sequenceClips)
+    {
+        duration_ = (std::max)(duration_, clip_.endTime);
+    }
+    return (std::max)(duration_, 0.0001f);
+}
+
+static float ResolveStateDuration(
+    const AnimState* state_,
+    GltfModelCommponennt* model_,
+    const std::shared_ptr<PoseLibraryResource>& poseLibrary_,
+    const BlackboardCategory* blackboard_,
+    const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_,
+    int depth_)
+{
+    if (!state_ || !model_ || depth_ > 8) return 1.0f;
+
+    if (state_->type == AnimStateType::Custom &&
+        poseLibrary_ &&
+        state_->customAnimIndex >= 0 &&
+        state_->customAnimIndex < static_cast<int>(poseLibrary_->customAnims.size()))
+    {
+        return (std::max)(poseLibrary_->customAnims[state_->customAnimIndex].duration, 0.0001f);
+    }
+    if (state_->type == AnimStateType::Single)
+    {
+        return IsValidAnimationIndex(model_, state_->animationIndex)
+            ? (std::max)(model_->GetAnimationDuration(state_->animationIndex), 0.0001f)
+            : 1.0f;
+    }
+    if (state_->type == AnimStateType::Blend1D)
+    {
+        return ResolveBlendDuration(state_, model_, blackboard_);
+    }
+    if (state_->type == AnimStateType::BLEND_2D)
+    {
+        return ResolveBlend2DDuration(state_, model_, blackboard_);
+    }
+    if (state_->type == AnimStateType::SEQUENCE)
+    {
+        return ResolveSequenceDuration(state_);
+    }
+
+    return 1.0f;
+}
+
+static const AnimSequenceClip* ResolveSequenceClipAtTime(
+    const AnimState* state_,
+    float time_)
+{
+    if (!state_) return nullptr;
+
+    const AnimSequenceClip* firstClip_ = nullptr;
+    const AnimSequenceClip* previousClip_ = nullptr;
+    for (const AnimSequenceClip& clip_ : state_->sequenceClips)
+    {
+        if (!firstClip_ || clip_.startTime < firstClip_->startTime)
+        {
+            firstClip_ = &clip_;
+        }
+        if (clip_.startTime <= time_ &&
+            (!previousClip_ || clip_.startTime > previousClip_->startTime))
+        {
+            previousClip_ = &clip_;
+        }
+
+        if (time_ >= clip_.startTime && time_ <= clip_.endTime)
+        {
+            return &clip_;
+        }
+    }
+
+    return previousClip_ ? previousClip_ : firstClip_;
+}
+
 static float ResolveBlendSampleTime(
     float stateTime_,
     float stateDuration_,
@@ -542,7 +635,7 @@ void ModelAnimator::SetCurrentTime(float time_)
     hasPrevPose = false;
 }
 
-void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner, const BlackboardCategory* blackboard_)
+void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent* curvecomp, const std::shared_ptr<PoseLibraryResource>& poseLib, std::shared_ptr<GameObject> owner, const BlackboardCategory* blackboard_, const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_)
 {
     BS_PROFILE_SCOPE("ModelAnimator::Update");
     if (!current.state || !model) return;
@@ -579,11 +672,24 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ------------------------------------------------------------
     // 補助: 状態から pose をサンプルする
     // ------------------------------------------------------------
-    auto SamplePose = [&](const AnimState* state, float time, float sampleDuration_, std::vector<GltfModelCommponennt::NodePose>& outPose)
+    std::function<void(const AnimState*, float, float, std::vector<GltfModelCommponennt::NodePose>&, int)> SamplePose;
+    SamplePose = [&](const AnimState* state, float time, float sampleDuration_, std::vector<GltfModelCommponennt::NodePose>& outPose, int depth_)
         {
             BS_PROFILE_SCOPE("ModelAnimator::SampleAnimation");
-            if (!state) return;
+            if (!state || depth_ > 8) return;
             BS_PROFILE_TEXT(state->name.c_str(), state->name.size());
+
+            auto fillBindPose_ = [&]()
+                {
+                    const auto& nodes_ = model->GetNodes();
+                    outPose.resize(nodes_.size());
+                    for (size_t nodeIndex_ = 0; nodeIndex_ < nodes_.size(); ++nodeIndex_)
+                    {
+                        outPose[nodeIndex_].position = nodes_[nodeIndex_].position;
+                        outPose[nodeIndex_].rotation = nodes_[nodeIndex_].rotation;
+                        outPose[nodeIndex_].scale = nodes_[nodeIndex_].scale;
+                    }
+                };
 
             switch (state->type)
             {
@@ -600,11 +706,85 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
                         model
                     );
                 }
+                else
+                {
+                    fillBindPose_();
+                }
                 break;
 
             case AnimStateType::Single:
-                model->ComputeAnimation(state->animationIndex, time, outPose);
+                if (IsValidAnimationIndex(model, state->animationIndex))
+                {
+                    model->ComputeAnimation(state->animationIndex, time, outPose);
+                }
+                else
+                {
+                    fillBindPose_();
+                }
                 break;
+
+            case AnimStateType::SEQUENCE:
+            {
+                BS_PROFILE_SCOPE("ModelAnimator::SequenceAnimation");
+                const AnimSequenceClip* clip_ = ResolveSequenceClipAtTime(state, time);
+                if (!clip_)
+                {
+                    fillBindPose_();
+                    break;
+                }
+
+                const AnimState* referencedState_ = ResolveSequenceReferencedState(*clip_, states_);
+                const float sectionDuration_ = (std::max)(clip_->endTime - clip_->startTime, 0.0001f);
+                float sourceDuration_ = 1.0f;
+                if (referencedState_)
+                {
+                    sourceDuration_ = ResolveStateDuration(
+                        referencedState_,
+                        model,
+                        poseLib,
+                        blackboard_,
+                        states_,
+                        depth_ + 1);
+                }
+                else if (IsValidAnimationIndex(model, clip_->animationIndex))
+                {
+                    sourceDuration_ = (std::max)(
+                        model->GetAnimationDuration(clip_->animationIndex),
+                        0.0001f);
+                }
+                else
+                {
+                    fillBindPose_();
+                    break;
+                }
+
+                const float normalizedTime_ = (std::clamp)(
+                    (time - clip_->startTime) / sectionDuration_,
+                    0.0f,
+                    1.0f);
+                const float fitDuration_ = (std::max)(sourceDuration_ - clip_->clipStartTime, 0.0001f);
+                const float localTime_ = clip_->fitToRange
+                    ? clip_->clipStartTime + normalizedTime_ * fitDuration_
+                    : clip_->clipStartTime + (time - clip_->startTime) * clip_->playbackSpeed;
+                const bool sourceLoop_ = referencedState_ ? referencedState_->isLoop : state->isLoop;
+                const float sampleTime_ = sourceLoop_ && sourceDuration_ > 0.0f
+                    ? std::fmod(localTime_, sourceDuration_)
+                    : (std::clamp)(localTime_, 0.0f, sourceDuration_);
+
+                if (referencedState_ && referencedState_ != state)
+                {
+                    SamplePose(referencedState_, sampleTime_, sourceDuration_, outPose, depth_ + 1);
+                }
+                else if (IsValidAnimationIndex(model, clip_->animationIndex))
+                {
+                    model->ComputeAnimation(clip_->animationIndex, sampleTime_, outPose);
+                }
+                else
+                {
+                    fillBindPose_();
+                }
+            }
+            break;
 
             case AnimStateType::Blend1D:
             {
@@ -757,6 +937,10 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     {
         baseDuration = ResolveBlend2DDuration(current.state, model, blackboard_);
     }
+    else if (current.state->type == AnimStateType::SEQUENCE)
+    {
+        baseDuration = ResolveSequenceDuration(current.state);
+    }
 
     // ------------------------------------------------------------
     // 2. 時間更新
@@ -764,7 +948,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     {
         BS_PROFILE_SCOPE("ModelAnimator::AdvanceAnimationTime");
         if (current.state->type == AnimStateType::Blend1D ||
-            current.state->type == AnimStateType::BLEND_2D)
+            current.state->type == AnimStateType::BLEND_2D ||
+            current.state->type == AnimStateType::SEQUENCE)
         {
             if (current.sampleDuration > 0.0001f &&
                 std::abs(current.sampleDuration - baseDuration) > 0.0001f)
@@ -790,7 +975,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
     // ------------------------------------------------------------
     {
         BS_PROFILE_SCOPE("ModelAnimator::EvaluateCurrentAnimation");
-        SamplePose(current.state, current.time, current.sampleDuration, tempPoseA);
+        SamplePose(current.state, current.time, current.sampleDuration, tempPoseA, 0);
     }
 
     // ------------------------------------------------------------
@@ -811,7 +996,7 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
 
             if (previous.state)
             {
-                SamplePose(previous.state, previous.time, previous.sampleDuration, tempPoseB);
+                SamplePose(previous.state, previous.time, previous.sampleDuration, tempPoseB, 0);
             }
         }
     }
@@ -925,8 +1110,8 @@ void ModelAnimator::Update(float et, GltfModelCommponennt* model, CurveComponent
             if (looped_)
             {
                 const float loopEndTime_ = (std::max)(0.0f, baseDuration - 0.0001f);
-                SamplePose(current.state, 0.0f, baseDuration, rootMotionLoopStartPose);
-                SamplePose(current.state, loopEndTime_, baseDuration, rootMotionLoopEndPose);
+                SamplePose(current.state, 0.0f, baseDuration, rootMotionLoopStartPose, 0);
+                SamplePose(current.state, loopEndTime_, baseDuration, rootMotionLoopEndPose, 0);
 
                 const Vector3 loopStartPos_ = rootMotionLoopStartPose[currentRootNodeIndex_].position;
                 const Vector3 loopEndPos_ = rootMotionLoopEndPose[currentRootNodeIndex_].position;

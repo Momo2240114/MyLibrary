@@ -92,7 +92,22 @@ enum class AnimStateType
     Single,   // 通常の単一再生
     Blend1D,  // 2つのアニメーションをパラメータでブレンド
     Custom,
-    BLEND_2D   // Vector2入力から前後左右のアニメーションをブレンド
+    BLEND_2D,  // Vector2入力から前後左右のアニメーションをブレンド
+    SEQUENCE // 複数のアニメーションクリップを時間順に再生
+};
+
+// Sequenceステート内で再生する1つ分のアニメーションクリップ区間。
+struct AnimSequenceClip
+{
+    std::string stateName;
+    int animationIndex = -1;
+    float startTime = 0.0f;
+    float endTime = 1.0f;
+    float clipStartTime = 0.0f;
+    float playbackSpeed = 1.0f;
+    bool fitToRange = true;
+    int frameStart = 0;
+    int frameEnd = 0;
 };
 
 // ノードエディタ上の各「状態」を表現するベース
@@ -156,6 +171,9 @@ struct AnimState
 
     // --- Custom (ポーズライブラリ) 用データ 【追加】 ---
     int customAnimIndex = -1; // PoseLibraryResource内の customAnims のインデックス
+
+    // --- Sequence 用データ ---
+    std::vector<AnimSequenceClip> sequenceClips;
 
     //animationごとにRootMotionの移動値が違う可能性があるのでそれ用に設定できるように
     float rootMotionScale = 1.0f;
@@ -234,6 +252,8 @@ struct AnimGraphNode {
 // 宣言だけを記述
 void to_json(nlohmann::json& json_, const AnimBlackboardWrite& write_);
 void from_json(const nlohmann::json& json_, AnimBlackboardWrite& write_);
+void to_json(nlohmann::json& json_, const AnimSequenceClip& clip_);
+void from_json(const nlohmann::json& json_, AnimSequenceClip& clip_);
 void to_json(nlohmann::json& j, const AnimEvent& e);
 void from_json(const nlohmann::json& j, AnimEvent& e);
 void to_json(nlohmann::json& j, const AnimState& s);

@@ -451,6 +451,9 @@
     <ClCompile Include="Code\Editor\Window\AnimationEditorWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\AttackTemplateEditorWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\CollisionShapeManagerWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -859,6 +862,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
@@ -943,6 +949,9 @@
     <ClCompile Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.cpp">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.cpp">
+      <Filter>Code\Engine\GamePlay\VFX</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClCompile>
@@ -956,6 +965,9 @@
       <Filter>Code\Game\Logics\AI\Director</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeader.cpp">
@@ -1174,6 +1186,9 @@
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\AnimationEditorWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Window\AttackTemplateEditorWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\CollisionShapeManagerWindow.h">
@@ -1470,6 +1485,9 @@
     <ClInclude Include="Code\Engine\Common\misc.h">
       <Filter>Code\Engine\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Common\StringId.h">
+      <Filter>Code\Engine\Common</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Math\RandomHelper.h">
       <Filter>Code\Engine\Math</Filter>
     </ClInclude>
@@ -1641,6 +1659,12 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\CombatDamageTypes.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
@@ -1746,6 +1770,9 @@
     <ClInclude Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.h">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.h">
+      <Filter>Code\Engine\GamePlay\VFX</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClInclude>
@@ -1768,6 +1795,9 @@
       <Filter>Code\Game\Logics\AI\Director</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h">
+      <Filter>Code\Game\Logics\AI\Dragon</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.h">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Core\PrecompiledHeader\PrecompiledHeaderConfig.h">

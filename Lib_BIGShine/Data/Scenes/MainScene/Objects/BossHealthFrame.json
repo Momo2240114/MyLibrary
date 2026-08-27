@@ -38,7 +38,7 @@
                 "WidgetId": "BossHealthFrame",
                 "ZOrder": 24
             },
-            "Enabled": true,
+            "Enabled": false,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
@@ -71,7 +71,7 @@
                 "Visible": true,
                 "pivotType": 0
             },
-            "Enabled": true,
+            "Enabled": false,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,

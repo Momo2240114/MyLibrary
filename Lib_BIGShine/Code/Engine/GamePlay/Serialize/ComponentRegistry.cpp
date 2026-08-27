@@ -63,11 +63,13 @@
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
+#include "Engine/GamePlay/Combat/CombatStatsComponent.h"
 #include "Game/Combat/DebugTools/DebugHitHistoryResetComponent.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartHurtBoxComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartManagerComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
+#include "Engine/GamePlay/VFX/DangerAreaComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
 #include "Engine/Graphics/VFX/AfterimageComponent.h"
@@ -124,6 +126,7 @@ void RegisterAllComponents()
     registry.Register<AfterimageTrailComponent>("AfterimageTrailComponent");
     registry.Register<AudioComponent>("AudioComponent");
     registry.Register<ImpactEffectComponent>("ImpactEffectComponent");
+    registry.Register<DangerAreaComponent>("DangerAreaComponent");
 
 
     // 物理・コリジョン系
@@ -169,6 +172,7 @@ void RegisterAllComponents()
     registry.Register<HitReactionComponent>("HitReactionComponent");
     registry.Register<JustDodgeReactionComponent>("JustDodgeReactionComponent");
     registry.Register<HealthComponent>("HealthComponent");
+    registry.Register<CombatStatsComponent>("CombatStatsComponent");
     registry.Register<DebugHitHistoryResetComponent>("DamageBoxComponent");
     registry.Register<DragonAIComponent>("DragonAIComponent");
     registry.Register<DragonBodyPartHurtBoxComponent>("DragonBodyPartHurtBoxComponent");

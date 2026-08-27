@@ -11,6 +11,9 @@
 #include "Engine/GamePlay/System/GuardSystem.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Game/GameMode/GameModeManager.h"
+#include "Engine/Common/StringId.h"
+
+#include <unordered_map>
 
 class ColliderComponent;
 class BoxCollider;
@@ -49,7 +52,7 @@ public:
     template<typename... Args>
     std::shared_ptr<GameObject> Create(const std::string& name_, Args&&... args_)
     {
-        const std::string& baseName_ = name_; // ← これ追加
+        const std::string& baseName_ = name_;
 
         // 同名Objectがある場合は末尾番号を付け、Scene内で名前が衝突しないようにする。
         int count_ = 0;
@@ -65,7 +68,7 @@ public:
         if (count_ > 0)
         {
             char buf_[32];
-            sprintf_s(buf_, sizeof(buf_), "_%02d", count_);   // ← こっち
+            sprintf_s(buf_, sizeof(buf_), "_%02d", count_); 
             finalName_ += buf_;
         }
 
@@ -76,6 +79,7 @@ public:
 
         newObject_->SetManager(this);
         objects.emplace_back(newObject_);       // 全体リストに追加
+        RegisterObjectNameIndex(newObject_);
         // StartはUpdate中の追加にも対応できるよう、即時ではなく待機リストで処理する。
         pendingStarts.push_back(newObject_);
         return newObject_;
@@ -83,15 +87,7 @@ public:
 
 
     // 名前でObjectを検索する。
-    std::shared_ptr<GameObject> Find(const std::string& name_)
-    {
-        for (auto& o : objects)
-            if (o->nameComponent->name == name_)
-            {
-                return o;
-            }
-        return nullptr;
-    }
+    std::shared_ptr<GameObject> Find(const std::string& name_);
 
     template <typename T>
     std::vector<std::shared_ptr<T>> FindComponents()
@@ -150,6 +146,10 @@ public:
     void AddObject(std::shared_ptr<GameObject> object_);
     void DetachObject(const std::shared_ptr<GameObject>& object_);
     void RemoveObject(const std::string& name_);
+    void NotifyObjectNameChanged(
+        GameObject* object_,
+        const std::string& oldName_,
+        const std::string& newName_);
 
     // 状態を尋ねる窓口。
     const std::vector<std::shared_ptr<GameObject>>& GetObjects() const { return objects; }
@@ -259,6 +259,7 @@ private:
     std::shared_ptr<GameModeManager> gameModeManager;
     std::unique_ptr<ResourceManager> resourceManager;
     std::vector<std::shared_ptr<GameObject>> objects;
+    std::unordered_map<StringId, std::vector<std::weak_ptr<GameObject>>> objectNameIndex;
     // 更新ループ中の追加・削除を安全に反映するための待機リスト。
     std::vector<std::shared_ptr<GameObject>> pendingStarts;
     std::vector<std::shared_ptr<GameObject>> pendingDestroys;
@@ -305,6 +306,8 @@ private:
     void FailSceneRuntime(const std::string& message_);
     void RegisterAttackCallbacks();
     void EnsureGlobalActionObjects();
+    void RegisterObjectNameIndex(const std::shared_ptr<GameObject>& object_);
+    void UnregisterObjectNameIndex(GameObject* object_, const std::string& name_);
 public:
         SceneState& GetSceneState() { return sceneState; }
 };

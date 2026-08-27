@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AttackEffectHitComponent.h"
+#include "CombatDamageTypes.h"
 
 #include <DirectXMath.h>
 #include <cstdint>
@@ -147,6 +148,11 @@ struct AttackTemplate
     std::string displayName;
     ATTACK_TEMPLATE_OWNER_TARGET ownerTarget = ATTACK_TEMPLATE_OWNER_TARGET::SELF;
     float damage = 5.0f;
+    float damageRate = 0.05f;
+    float fixedDamage = 0.0f;
+    DAMAGE_APPLY_TYPE damageApplyType = DAMAGE_APPLY_TYPE::SINGLE_HIT;
+    float damageHitInterval = 0.0f;
+    int maxHitCount = 1;
     float impactPower = 5.0f;
     float hitStopDuration = 0.05f;
     float hitStopScale = 0.0f;

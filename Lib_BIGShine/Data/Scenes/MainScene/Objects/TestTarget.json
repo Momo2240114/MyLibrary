@@ -38,7 +38,7 @@
                 "SlideOffNonGround": true,
                 "StartNodeName": "",
                 "StepOffset": 0.38999998569488525,
-                "UseGravity": true,
+                "UseGravity": false,
                 "UsePhysicsResponse": true,
                 "VelocityRotationMode": 0,
                 "shapeSizeScale": 1.0
@@ -213,14 +213,14 @@
                         "OwnerPosition": {
                             "type": "vector3",
                             "value": [
-                                13.725177764892578,
-                                -0.5823211669921875,
-                                -3.8085293769836426
+                                -10.424516677856445,
+                                -0.524761974811554,
+                                -2.9552676677703857
                             ]
                         },
                         "SpawnDistance": {
                             "type": "float",
-                            "value": 14.255682945251465
+                            "value": 10.84801959991455
                         },
                         "SpawnPosition": {
                             "type": "vector3",
@@ -232,30 +232,30 @@
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 19.0399112701416
+                            "value": 32.646141052246094
                         },
                         "TargetPosition": {
                             "type": "vector3",
                             "value": [
-                                -4.23362922668457,
-                                -0.12279105186462402,
-                                2.499265432357788
+                                17.20845603942871,
+                                -0.12279093265533447,
+                                -20.334213256835938
                             ]
                         },
                         "ToSpawnDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.9627864360809326,
-                                0.04084835201501846,
-                                0.2671586871147156
+                                0.960960328578949,
+                                0.0483739897608757,
+                                0.2724246382713318
                             ]
                         },
                         "ToTargetDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.9432190656661987,
-                                0.024135097861289978,
-                                0.3312932848930359
+                                0.8464391827583313,
+                                0.01231297291815281,
+                                -0.5323430299758911
                             ]
                         }
                     },
@@ -266,15 +266,15 @@
                         },
                         "ActionTrigger": {
                             "type": "string",
-                            "value": "LandingAttack"
+                            "value": "TakeOff"
                         },
                         "CurrentAction": {
                             "type": "string",
-                            "value": "LandingAttack"
+                            "value": "TakeOff"
                         },
                         "CurrentAnimationState": {
                             "type": "string",
-                            "value": "PlainsDragon_FlyStationaryToLanding"
+                            "value": "PlainsDragon_TakeOff"
                         },
                         "IsActing": {
                             "type": "bool",
@@ -346,7 +346,7 @@
                         },
                         "To_PlainsDragon_TakeOff": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "To_PlainsDragon_Turn90L_RM": {
                             "type": "bool",
@@ -364,7 +364,7 @@
                     "DragonAI": {
                         "Action": {
                             "type": "int",
-                            "value": 13
+                            "value": 9
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -372,11 +372,15 @@
                         },
                         "ActionName": {
                             "type": "string",
-                            "value": "LandingAttack"
+                            "value": "TakeOff"
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 1.8593896627426147
+                            "value": 2.321138858795166
+                        },
+                        "AirAttackCount": {
+                            "type": "int",
+                            "value": 0
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -396,7 +400,7 @@
                         },
                         "CanUseAirSpreadBreath": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseBite": {
                             "type": "bool",
@@ -412,7 +416,7 @@
                         },
                         "CanUseLandingAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanUseRunCharge": {
                             "type": "bool",
@@ -428,7 +432,7 @@
                         },
                         "CanUseSpreadBreathForward": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseTailSweep": {
                             "type": "bool",
@@ -444,11 +448,11 @@
                         },
                         "CurrentAction": {
                             "type": "int",
-                            "value": 13
+                            "value": 9
                         },
                         "DamagePhase": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "HasTarget": {
                             "type": "bool",
@@ -456,7 +460,7 @@
                         },
                         "HpRate": {
                             "type": "float",
-                            "value": 0.7121250033378601
+                            "value": 0.44362500309944153
                         },
                         "IsActing": {
                             "type": "bool",
@@ -482,6 +486,10 @@
                             "type": "bool",
                             "value": false
                         },
+                        "MaxAirAttackCount": {
+                            "type": "int",
+                            "value": 1
+                        },
                         "PendingAirAttackDecision": {
                             "type": "bool",
                             "value": false
@@ -490,9 +498,13 @@
                             "type": "bool",
                             "value": false
                         },
+                        "PendingUltimateAction": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": -0.46572113037109375
+                            "value": -19.130752563476563
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -500,11 +512,11 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 19.0399112701416
+                            "value": 32.64690017700195
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 19.034364700317383
+                            "value": 32.6436653137207
                         },
                         "PlayerInFront": {
                             "type": "bool",
@@ -528,21 +540,29 @@
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": -0.46572113037109375
+                            "value": -19.130752563476563
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 19.0399112701416
+                            "value": 32.64690017700195
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 19.034364700317383
+                            "value": 32.6436653137207
+                        },
+                        "UltimateDamageRate": {
+                            "type": "float",
+                            "value": 0.10000000149011612
+                        },
+                        "UltimateDamageReductionActive": {
+                            "type": "bool",
+                            "value": false
                         }
                     },
                     "DragonBodyPart": {
                         "LastBodyPart": {
                             "type": "int",
-                            "value": 3
+                            "value": 0
                         },
                         "LastBrokenThisHit": {
                             "type": "bool",
@@ -550,17 +570,17 @@
                         },
                         "LastDurabilityDamage": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 120.00000762939453
                         },
                         "LastHealthDamage": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 150.00001525878906
                         }
                     },
                     "Health": {
                         "Current": {
                             "type": "float",
-                            "value": 7121.25
+                            "value": 4436.25
                         },
                         "Dead": {
                             "type": "bool",
@@ -580,13 +600,29 @@
                             "type": "float",
                             "value": 0.0
                         },
+                        "AttackerAttackPower": {
+                            "type": "float",
+                            "value": 0.0
+                        },
                         "CurrentHealth": {
                             "type": "float",
                             "value": 0.0
                         },
                         "Damage": {
                             "type": "float",
-                            "value": 100.0
+                            "value": 120.00000762939453
+                        },
+                        "DamageApplyType": {
+                            "type": "int",
+                            "value": 0
+                        },
+                        "DamageHitInterval": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "DamageRate": {
+                            "type": "float",
+                            "value": 1.0
                         },
                         "Dead": {
                             "type": "bool",
@@ -595,9 +631,13 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.7597192525863647,
-                                -0.6502512097358704
+                                0.5406833291053772,
+                                -0.8412262201309204
                             ]
+                        },
+                        "FixedDamage": {
+                            "type": "float",
+                            "value": 0.0
                         },
                         "HitStopDuration": {
                             "type": "float",
@@ -623,20 +663,24 @@
                             "type": "float",
                             "value": 1.2000000476837158
                         },
+                        "MaxHitCount": {
+                            "type": "int",
+                            "value": 1
+                        },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.2501249611377716,
-                                0.944248616695404,
-                                -0.2140844315290451
+                                0.35004928708076477,
+                                0.7621333003044128,
+                                -0.5446268320083618
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                18.012866973876953,
-                                2.576554775238037,
-                                11.397943496704102
+                                6.744719505310059,
+                                2.2437572479248047,
+                                -17.717540740966797
                             ]
                         },
                         "Received": {
@@ -2772,7 +2816,7 @@
                         "Duration": 2.0,
                         "Enabled": true,
                         "FinishMode": 0,
-                        "HitBoxActionName": "",
+                        "HitBoxActionName": "DragonAttack_PlayBreath",
                         "IKActionName": "",
                         "RecoveryTime": 0.6000000238418579,
                         "SelectionWeight": 0.6000000238418579,
@@ -2792,7 +2836,7 @@
                         "Duration": 1.2000000476837158,
                         "Enabled": true,
                         "FinishMode": 0,
-                        "HitBoxActionName": "",
+                        "HitBoxActionName": "DragonAttack_PlayTailSweep",
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.0,
@@ -2809,16 +2853,16 @@
                         "AnimationActionName": "",
                         "AnimationStateName": "PlainsDragon_Turn90L_RM",
                         "CooldownTime": 5.0,
-                        "Duration": 2.0,
+                        "Duration": 1.7999999523162842,
                         "Enabled": true,
-                        "FinishMode": 0,
-                        "HitBoxActionName": "",
+                        "FinishMode": 2,
+                        "HitBoxActionName": "DragonAttack_PlaySpinSweep",
                         "IKActionName": "",
-                        "RecoveryTime": 0.6499999761581421,
+                        "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.0,
-                        "UseActionTimeout": true,
+                        "UseActionTimeout": false,
                         "VFXActionName": "",
-                        "WaitForActionEnd": true
+                        "WaitForActionEnd": false
                     },
                     {
                         "Action": 9,
@@ -2892,7 +2936,7 @@
                         "Duration": 2.0,
                         "Enabled": true,
                         "FinishMode": 0,
-                        "HitBoxActionName": "",
+                        "HitBoxActionName": "DragonAttack_PlayBreath",
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
@@ -2992,7 +3036,7 @@
                         "Duration": 2.0,
                         "Enabled": true,
                         "FinishMode": 0,
-                        "HitBoxActionName": "",
+                        "HitBoxActionName": "DragonAttack_PlayBreath",
                         "IKActionName": "",
                         "RecoveryTime": 0.6000000238418579,
                         "SelectionWeight": 0.550000011920929,
@@ -3079,12 +3123,33 @@
                         "UseActionTimeout": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
+                    },
+                    {
+                        "Action": 22,
+                        "ActionName": "UltimateAttack",
+                        "ActionSequenceName": "DragonUltimate_Start",
+                        "ActionTimeout": 6.0,
+                        "AllowBuffer": true,
+                        "AnimationActionName": "",
+                        "AnimationStateName": "PlainsDragon_SpreadFire",
+                        "CooldownTime": 0.0,
+                        "Duration": 5.0,
+                        "Enabled": true,
+                        "FinishMode": 0,
+                        "HitBoxActionName": "",
+                        "IKActionName": "",
+                        "RecoveryTime": 0.5,
+                        "SelectionWeight": 0.0,
+                        "UseActionTimeout": true,
+                        "VFXActionName": "",
+                        "WaitForActionEnd": true
                     }
                 ],
                 "AirAttackBackSpeed": 2.0,
                 "AirForwardSpeed": 3.0,
                 "AirHoverAdjustSpeed": 8.0,
                 "AirHoverHeight": 10.0,
+                "AirHoverHeightTolerance": 0.25,
                 "AirLandingAnimationStartHeight": 0.5,
                 "AirLandingDescendSpeed": 12.0,
                 "AirTurnSpeed": 75.0,
@@ -3100,14 +3165,20 @@
                 "DebugHpRate": 1.0,
                 "DecisionInterval": 0.25,
                 "FarDistance": 12.0,
+                "FirstUltimateHpRate": 0.5,
+                "FirstUltimateTriggered": true,
                 "FrontAngleDegrees": 50.0,
                 "GroundMoveTurnSpeed": 2.0,
+                "MaxAirAttackCount": 1,
                 "MediumDistance": 10.0,
                 "PlayerObjectName": "PlayerModel",
                 "RunSpeed": 25.0,
+                "SecondUltimateHpRate": 0.10000000149011612,
+                "SecondUltimateTriggered": false,
                 "SideAngleDegrees": 100.0,
                 "TakeOffBackSpeed": 7.0,
                 "TurnSpeed": 0.0,
+                "UltimateDamageRate": 0.10000000149011612,
                 "UnderBodyDistance": 4.5,
                 "UseDebugHpRate": false,
                 "WalkSpeed": 15.0
@@ -3219,7 +3290,7 @@
         },
         {
             "Data": {
-                "CurrentHealth": 7121.25,
+                "CurrentHealth": 4436.25,
                 "MaxHealth": 10000.0
             },
             "Enabled": true,
@@ -3234,14 +3305,14 @@
             "Data": {
                 "BodyParts": [
                     {
-                        "BaseMaxStagger": 523.8689575195313,
+                        "BaseMaxStagger": 818.5452270507813,
                         "BodyPart": "HEAD",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 523.8689575195313,
-                        "CurrentStagger": 420.0,
+                        "CurrentMaxStagger": 818.5452270507813,
+                        "CurrentStagger": 270.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3264,14 +3335,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 268.22088623046875,
+                        "BaseMaxStagger": 419.09515380859375,
                         "BodyPart": "CHEST",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 268.22088623046875,
-                        "CurrentStagger": 100.0,
+                        "CurrentMaxStagger": 419.09515380859375,
+                        "CurrentStagger": 200.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3286,7 +3357,7 @@
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
                         "CurrentMaxStagger": 335.276123046875,
-                        "CurrentStagger": 225.0,
+                        "CurrentStagger": 325.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3294,14 +3365,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 137.3291015625,
+                        "BaseMaxStagger": 171.661376953125,
                         "BodyPart": "LEFT_FRONT_LEG",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 137.3291015625,
-                        "CurrentStagger": 225.0,
+                        "CurrentMaxStagger": 171.661376953125,
+                        "CurrentStagger": 0.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3309,14 +3380,14 @@
                         "StaggerRecoveryBaseMultiplier": 1.25
                     },
                     {
-                        "BaseMaxStagger": 87.890625,
+                        "BaseMaxStagger": 109.86328125,
                         "BodyPart": "RIGHT_FRONT_LEG",
                         "Broken": true,
                         "BrokenActionName": "",
                         "BrokenHealthDamageRate": 1.25,
                         "CurrentDurability": 0.0,
-                        "CurrentMaxStagger": 87.890625,
-                        "CurrentStagger": 0.0,
+                        "CurrentMaxStagger": 109.86328125,
+                        "CurrentStagger": 18.0,
                         "DurabilityDamageRate": 1.0,
                         "HealthDamageRate": 1.0,
                         "MaxDurability": 100.0,
@@ -3400,6 +3471,9 @@
                     }
                 ],
                 "CommonBrokenActionName": "DragonBodyPart_Broken",
+                "DamageReductionActiveKey": "UltimateDamageReductionActive",
+                "DamageReductionBlackboardCategory": "DragonAI",
+                "DamageReductionRateKey": "UltimateDamageRate",
                 "DebugLogEnabled": true,
                 "ReactionActionName": "DragonAI_DamageReaction",
                 "ReactionCooldownTime": 2.0,
@@ -3413,6 +3487,48 @@
             "TypeName": "DragonBodyPartManagerComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ActionCategory": "DragonAttack",
+                "BreathDamage": 18.0,
+                "BreathDamageRate": 0.18000000715255737,
+                "BreathFixedDamage": 0.0,
+                "BreathForwardOffset": 4.0,
+                "BreathHalfHeight": 4.0,
+                "BreathHitInterval": 0.25,
+                "BreathImpactPower": 12.0,
+                "BreathKnockBackPower": 4.0,
+                "BreathLifeTime": 2.0,
+                "BreathRadius": 1.2000000476837158,
+                "BreathVFXAssetPath": "Data/VFX/DragonBreath.json",
+                "BreathVFXInterval": 0.07999999821186066,
+                "BreathVFXLifeTime": 0.3499999940395355,
+                "DangerAreaEnabled": true,
+                "DangerAreaGroundOffset": 0.029999999329447746,
+                "DangerAreaLengthPadding": 0.0,
+                "DangerAreaVFXAssetPath": "Data/VFX/EnemyDangerArea.json",
+                "ShowDangerAreaOnAttackStart": true,
+                "SpinDamage": 30.0,
+                "SpinDamageRate": 0.30000001192092896,
+                "SpinSweepLifeTime": 1.7999999523162842,
+                "TailDamage": 22.0,
+                "TailDamageRate": 0.2199999988079071,
+                "TailFixedDamage": 0.0,
+                "TailHalfHeight": 1.7999999523162842,
+                "TailHitInterval": 0.3499999940395355,
+                "TailImpactPower": 18.0,
+                "TailKnockBackPower": 8.0,
+                "TailRadius": 1.100000023841858,
+                "TailSweepLifeTime": 1.2000000476837158
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "DragonAttackControllerComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 2,
@@ -3421,13 +3537,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            13.725177764892578,
+            -10.456007957458496,
             -0.5823211669921875,
-            -3.8085293769836426
+            -2.9159631729125977
         ],
         "Rot": [
             0.0,
-            289.8188781738281,
+            141.2974090576172,
             0.0
         ],
         "Scale": [

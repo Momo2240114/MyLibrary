@@ -1,0 +1,138 @@
+{
+    "AssetType": "VFXMaterial",
+    "Version": 1,
+    "MaterialName": "EnemyDangerArea",
+    "Color": {
+        "BaseColor": [
+            1.0,
+            0.08,
+            0.02,
+            0.82
+        ],
+        "Alpha": 0.82,
+        "EmissiveColor": [
+            1.0,
+            0.12,
+            0.04
+        ],
+        "EmissiveIntensity": 1.6
+    },
+    "MainUV": {
+        "Offset": [
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0
+        ],
+        "ScrollSpeed": [
+            0.0,
+            -0.12
+        ],
+        "Rotation": 0.0,
+        "RotationSpeed": 0.0,
+        "Pivot": [
+            0.5,
+            0.5
+        ]
+    },
+    "NoiseUV": {
+        "Offset": [
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0
+        ],
+        "ScrollSpeed": [
+            0.05,
+            -0.05
+        ],
+        "Rotation": 0.0,
+        "RotationSpeed": 0.0,
+        "Pivot": [
+            0.5,
+            0.5
+        ]
+    },
+    "Textures": {
+        "BaseTexturePath": "",
+        "NormalTexturePath": "",
+        "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Trail_Fire.PNG",
+        "NoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG",
+        "DistortionTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+    },
+    "ColorRamp": {
+        "Enabled": false,
+        "SampleSource": "LIFE",
+        "BlendMode": "MULTIPLY",
+        "Interpolation": "LINEAR",
+        "WrapMode": "CLAMP",
+        "Influence": 1.0,
+        "AffectAlpha": true,
+        "FixedPosition": 0.0,
+        "ScrollSpeed": 0.0,
+        "Stops": [
+            {
+                "Position": 0.0,
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "Position": 1.0,
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        ]
+    },
+    "RandomColor": {
+        "Enabled": false,
+        "Mode": "MULTIPLY",
+        "Influence": 1.0,
+        "AffectAlpha": false,
+        "Seed": 0,
+        "MinColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "MaxColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Dissolve": {
+        "Enabled": false,
+        "Threshold": 0.0,
+        "EdgeWidth": 0.05,
+        "EdgeColor": [
+            1.0,
+            0.2,
+            0.05,
+            1.0
+        ]
+    },
+    "Distortion": {
+        "Enabled": false,
+        "Strength": 1.5
+    },
+    "RenderState": {
+        "BlendMode": "ALPHA",
+        "CullMode": "NONE",
+        "DepthTest": true,
+        "DepthWrite": false
+    }
+}

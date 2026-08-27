@@ -78,6 +78,12 @@ namespace
             if (name_ == "BREATH") return Enum_::BREATH;
             return Enum_::INSTANT_AREA;
         }
+        if constexpr (std::is_same_v<Enum_, DAMAGE_APPLY_TYPE>)
+        {
+            if (name_ == "MULTI_HIT") return Enum_::MULTI_HIT;
+            if (name_ == "DAMAGE_OVER_TIME") return Enum_::DAMAGE_OVER_TIME;
+            return Enum_::SINGLE_HIT;
+        }
         if constexpr (std::is_same_v<Enum_, ATTACK_HIT_SHAPE>)
         {
             if (name_ == "NONE") return Enum_::NONE;
@@ -398,6 +404,13 @@ bool AttackTemplateManager::LoadTemplate(const std::string& path_)
     result_.canHitOwner = owner_.value("canHitOwner", false);
     const Json_ attack_ = json_.value("attack", Json_::object());
     result_.damage = attack_.value("damage", 5.0f);
+    result_.damageRate = (std::max)(
+        attack_.value("damageRate", result_.damage / 100.0f),
+        0.0f);
+    result_.fixedDamage = attack_.value("fixedDamage", 0.0f);
+    result_.damageApplyType = ReadEnum(attack_, "damageApplyType", DAMAGE_APPLY_TYPE::SINGLE_HIT);
+    result_.damageHitInterval = (std::max)(attack_.value("damageHitInterval", 0.0f), 0.0f);
+    result_.maxHitCount = attack_.value("maxHitCount", 1);
     result_.impactPower = (std::max)(attack_.value("impactPower", result_.damage), 0.0f);
     result_.hitStopDuration = attack_.value("hitStopDuration", attack_.value("hitStopTime", 0.05f));
     result_.hitStopScale = attack_.value("hitStopScale", 0.0f);
@@ -580,6 +593,11 @@ bool AttackTemplateManager::SaveTemplate(const AttackTemplate& attackTemplate_)
         { "owner", { { "ownerTarget", static_cast<int>(attackTemplate_.ownerTarget) },
             { "canHitOwner", attackTemplate_.canHitOwner } } },
         { "attack", { { "damage", attackTemplate_.damage },
+            { "damageRate", attackTemplate_.damageRate },
+            { "fixedDamage", attackTemplate_.fixedDamage },
+            { "damageApplyType", static_cast<int>(attackTemplate_.damageApplyType) },
+            { "damageHitInterval", attackTemplate_.damageHitInterval },
+            { "maxHitCount", attackTemplate_.maxHitCount },
             { "impactPower", attackTemplate_.impactPower },
             { "hitStopDuration", attackTemplate_.hitStopDuration },
             { "hitStopScale", attackTemplate_.hitStopScale },
@@ -851,10 +869,54 @@ bool AttackTemplateManager::DrawEditorContent(
     if (ImGui::CollapsingHeader("AttackData", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::DragFloat(
-            "Damage",
+            "Legacy Damage",
             &attackTemplate_->damage,
             0.1f,
             0.0f);
+
+        ImGui::DragFloat(
+            "Damage Rate",
+            &attackTemplate_->damageRate,
+            0.01f,
+            0.0f);
+
+        ImGui::DragFloat(
+            "Fixed Damage",
+            &attackTemplate_->fixedDamage,
+            0.1f,
+            -99999.0f,
+            99999.0f);
+
+        int damageApplyType_ = static_cast<int>(attackTemplate_->damageApplyType);
+        const char* damageApplyTypeNames_[] =
+        {
+            "Single Hit",
+            "Multi Hit",
+            "Damage Over Time"
+        };
+        if (ImGui::Combo(
+            "Damage Apply Type",
+            &damageApplyType_,
+            damageApplyTypeNames_,
+            IM_ARRAYSIZE(damageApplyTypeNames_)))
+        {
+            attackTemplate_->damageApplyType =
+                static_cast<DAMAGE_APPLY_TYPE>(
+                    (std::clamp)(damageApplyType_, 0, 2));
+        }
+
+        ImGui::DragFloat(
+            "Damage Hit Interval",
+            &attackTemplate_->damageHitInterval,
+            0.01f,
+            0.0f);
+
+        ImGui::DragInt(
+            "Max Hit Count",
+            &attackTemplate_->maxHitCount,
+            1.0f,
+            0,
+            9999);
 
         ImGui::DragFloat(
             "Impact Power",

@@ -10,10 +10,19 @@
 #include <algorithm>
 #include <imgui.h>
 
+namespace
+{
+    constexpr const char* PREVIEW_SPHERE_MODEL_PATH = "Data/Model/VFX/Sphere.glb";
+    constexpr const char* DEFAULT_PREVIEW_MATERIAL_PATH = "Data/VFXMaterials/NewVFXMaterial.vfxmat";
+}
+
 VFXMaterialPreviewWindow::VFXMaterialPreviewWindow(GameObjectManager* manager_)
     : EditorWindow("VFX Material Preview", manager_)
 {
+    // 必要な時だけWindowメニューから開く補助ビューなので、起動直後は非表示にしておく。
+    isVisible = false;
     defaultWindowSize = ImVec2(420.0f, 520.0f);
+    materialPath = DEFAULT_PREVIEW_MATERIAL_PATH;
 }
 
 void VFXMaterialPreviewWindow::Draw()
@@ -23,6 +32,7 @@ void VFXMaterialPreviewWindow::Draw()
 
     // Materialを選んで球体MeshVFXへ適用し、オフスクリーンで即プレビューする。
     EnsurePreviewObject();
+
     DrawToolbar();
     ImGui::Separator();
 
@@ -34,6 +44,7 @@ void VFXMaterialPreviewWindow::Draw()
     };
     DrawPreview(previewSize_);
 
+    DrawStylePopup();
     EndEditorWindow();
 }
 
@@ -54,22 +65,38 @@ void VFXMaterialPreviewWindow::EnsurePreviewObject()
     previewObject->transform->MarkDirty();
 
     previewMeshVFX = previewObject->AddComponent<MeshVFXComponent>();
+    previewMeshVFX->SetAsset(CreatePreviewAsset());
+    previewMeshVFX->Play();
+
+    isInitialized = true;
+}
+
+MeshVFXAsset VFXMaterialPreviewWindow::CreatePreviewAsset() const
+{
+    BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::CreatePreviewAsset");
+
     MeshVFXAsset asset_{};
     MeshVFXPart part_{};
-    // 球体モデルへ選択Materialを差し替えるだけの最小MeshVFXアセットを初期化する。
+    // 選択中Materialを球へ貼るための、Window専用の最小MeshVFXアセットを組み立てる。
     part_.renderEnabled = true;
-    part_.modelPath = "Data/Model/VFX/Sphere.glb";
+    part_.modelPath = PREVIEW_SPHERE_MODEL_PATH;
     part_.meshIndex = -1;
     part_.blendMode = MeshVFXBlendMode::ALPHA;
     part_.baseSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
     part_.normalSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
     part_.maskSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
     part_.noiseSamplerMode = MESH_VFX_SAMPLER_MODE::WRAP;
-    asset_.parts.push_back(part_);
-    previewMeshVFX->SetAsset(asset_);
-    previewMeshVFX->Play();
+    part_.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    part_.alpha = 1.0f;
 
-    isInitialized = true;
+    const std::string previewMaterialPath_ = materialPath.empty()
+        ? DEFAULT_PREVIEW_MATERIAL_PATH
+        : materialPath;
+    part_.materialPath = previewMaterialPath_;
+    part_.materialPaths.push_back(previewMaterialPath_);
+
+    asset_.parts.push_back(part_);
+    return asset_;
 }
 
 void VFXMaterialPreviewWindow::DrawToolbar()
@@ -91,6 +118,13 @@ void VFXMaterialPreviewWindow::DrawToolbar()
     {
         ApplyPreviewMaterial();
     }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Default"))
+    {
+        materialPath = DEFAULT_PREVIEW_MATERIAL_PATH;
+        ApplyPreviewMaterial();
+    }
 }
 
 void VFXMaterialPreviewWindow::DrawPreview(const ImVec2& previewSize_)
@@ -100,9 +134,26 @@ void VFXMaterialPreviewWindow::DrawPreview(const ImVec2& previewSize_)
     RenderPreview(previewSize_);
     if (previewTarget.GetShaderResourceView())
     {
+        const ImVec2 imageMin_ = ImGui::GetCursorScreenPos();
+        const ImVec2 imageMax_ = ImVec2(imageMin_.x + previewSize_.x, imageMin_.y + previewSize_.y);
+        // RTのAlphaやMaterial設定に関係なく、プレビュー領域そのものがSceneに溶けないよう下地を描く。
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            imageMin_,
+            imageMax_,
+            ImGui::GetColorU32(ImVec4(0.025f, 0.028f, 0.032f, 1.0f)));
         ImGui::Image(
             reinterpret_cast<void*>(previewTarget.GetShaderResourceView()),
             previewSize_);
+        if (previewMeshVFX && !previewMeshVFX->HasRuntimeResources())
+        {
+            ImGui::SetCursorScreenPos(ImVec2(imageMin_.x + 12.0f, imageMin_.y + 12.0f));
+            ImGui::TextDisabled("Preview mesh resource is not ready.");
+            ImGui::SetCursorScreenPos(ImVec2(imageMin_.x, imageMax_.y));
+        }
+    }
+    else
+    {
+        ImGui::TextDisabled("Preview render target is not ready.");
     }
 }
 
@@ -120,7 +171,7 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
     const int height_ = (std::max)(1, static_cast<int>(previewSize_.y));
     if (!previewTarget.Resize(device_, width_, height_)) return;
 
-    const float clearColor_[4] = { 0.025f, 0.028f, 0.032f, 0.0f };
+    const float clearColor_[4] = { 0.025f, 0.028f, 0.032f, 1.0f };
     previewTarget.Begin(context_, clearColor_);
 
     previewRotation += ImGui::GetIO().DeltaTime * 18.0f;
@@ -129,15 +180,7 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
     previewObject->transform->UpdateWorldMatrix();
     previewMeshVFX->Update(ImGui::GetIO().DeltaTime);
 
-    const float aspect_ = static_cast<float>(width_) / static_cast<float>(height_);
-    previewCamera.SetPerspectiveFov(45.0f, aspect_, 0.01f, 100.0f);
-    const DirectX::XMMATRIX view_ = DirectX::XMMatrixLookAtLH(
-        DirectX::XMVectorSet(0.0f, 0.35f, -4.0f, 1.0f),
-        DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-    DirectX::XMFLOAT4X4 viewMatrix_{};
-    DirectX::XMStoreFloat4x4(&viewMatrix_, view_);
-    previewCamera.SetViewMatrix(viewMatrix_);
+    SetupPreviewCamera(width_, height_);
 
     DecalManager decalManager_{};
     RenderContext renderContext_{};
@@ -147,7 +190,7 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
     renderContext_.renderState = graphics_.GetRenderState();
     renderContext_.camera = &previewCamera;
     renderContext_.depthSRV = previewTarget.GetDepthShaderResourceView();
-    renderContext_.baseColorSRV = previewTarget.GetShaderResourceView();
+    renderContext_.baseColorSRV = nullptr;
     renderContext_.decal = &decalManager_;
     renderContext_.screenWidth = static_cast<float>(width_);
     renderContext_.screenHeight = static_cast<float>(height_);
@@ -158,8 +201,10 @@ void VFXMaterialPreviewWindow::RenderPreview(const ImVec2& previewSize_)
         true,
         previewTarget.GetRenderTargetView(),
         previewTarget.GetDepthStencilView());
+    previewTarget.ResetRenderTarget(context_);
 
     previewTarget.End(context_);
+    graphics_.SetBackBufferRenderTarget();
 }
 
 void VFXMaterialPreviewWindow::ApplyPreviewMaterial()
@@ -167,14 +212,25 @@ void VFXMaterialPreviewWindow::ApplyPreviewMaterial()
     BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::ApplyPreviewMaterial");
     if (!previewMeshVFX) return;
 
-    // 現在選択されているMaterialパスだけを先頭Partへ設定し、Runtimeリソースを再構築させる。
-    MeshVFXAsset asset_ = previewMeshVFX->GetAsset();
-    if (asset_.parts.empty()) asset_.parts.emplace_back();
-    MeshVFXPart& part_ = asset_.parts.front();
-    part_.renderEnabled = true;
-    part_.modelPath = "Data/Model/VFX/Sphere.glb";
-    part_.materialPath = materialPath;
-    part_.materialPaths.clear();
-    if (!materialPath.empty()) part_.materialPaths.push_back(materialPath);
-    previewMeshVFX->SetAsset(asset_);
+    // Material変更時はプレビュー専用Assetを作り直し、Runtimeリソースへ即反映する。
+    previewMeshVFX->SetAsset(CreatePreviewAsset());
+    previewMeshVFX->Play();
+}
+
+void VFXMaterialPreviewWindow::SetupPreviewCamera(int width_, int height_)
+{
+    BS_PROFILE_SCOPE("VFXMaterialPreviewWindow::SetupPreviewCamera");
+
+    const float aspect_ = static_cast<float>((std::max)(width_, 1)) /
+        static_cast<float>((std::max)(height_, 1));
+    previewCamera.SetPerspectiveFov(45.0f, aspect_, 0.01f, 100.0f);
+
+    // Window専用の固定カメラで球を斜め前から見る。
+    const DirectX::XMMATRIX view_ = DirectX::XMMatrixLookAtLH(
+        DirectX::XMVectorSet(0.0f, 0.35f, -4.0f, 1.0f),
+        DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+    DirectX::XMFLOAT4X4 viewMatrix_{};
+    DirectX::XMStoreFloat4x4(&viewMatrix_, view_);
+    previewCamera.SetViewMatrix(viewMatrix_);
 }

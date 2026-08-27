@@ -49,9 +49,9 @@
         {
             "Data": {
                 "BackgroundWidgetId": "BossHealthBackground",
-                "CurrentRate": 0.7121250033378601,
+                "CurrentRate": 0.44362500309944153,
                 "CurrentWidgetId": "BossHealthCurrent",
-                "DamageDelayRate": 0.7121250033378601,
+                "DamageDelayRate": 0.44362500309944153,
                 "DamageDelayWidgetId": "BossHealthDamageDelay",
                 "DamageFlashColor": [
                     1.0,
@@ -72,7 +72,7 @@
                 "FlashDuration": 0.2800000011920929,
                 "FlashTimer": 0.0,
                 "FlashWidgetId": "BossHealthFlash",
-                "HealDelayRate": 0.7121250033378601,
+                "HealDelayRate": 0.44362500309944153,
                 "HealDelayWidgetId": "BossHealthHealDelay",
                 "HealFlashColor": [
                     1.0,
@@ -82,7 +82,7 @@
                 ],
                 "IncreaseDelaySpeed": 0.15000000596046448,
                 "Source": "BOSS_HP_RATE",
-                "TargetRate": 0.7121250033378601,
+                "TargetRate": 0.44362500309944153,
                 "Version": 1
             },
             "Enabled": true,

@@ -6,6 +6,7 @@
 #include "PoseLibraryResource.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 
+#include <unordered_map>
 
 
 class GameObject;
@@ -46,7 +47,8 @@ public:
         CurveComponent* curveComponent_,
         const std::shared_ptr<PoseLibraryResource>& poseLibrary_ = nullptr,
         std::shared_ptr<GameObject> owner_ = nullptr,
-        const BlackboardCategory* blackboard_ = nullptr);
+        const BlackboardCategory* blackboard_ = nullptr,
+        const std::unordered_map<std::string, std::unique_ptr<AnimState>>* states_ = nullptr);
 
     // ModelAnimator.h
     // 2つのAnimation Indexを指定して、alphaで手動ブレンドした姿勢を作る。

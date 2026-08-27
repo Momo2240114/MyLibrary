@@ -790,6 +790,30 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
         write_.stringValue = json_.value("stringValue", std::string{});
     }
 
+    void to_json(nlohmann::json& json_, const AnimSequenceClip& clip_)
+    {
+        json_ = nlohmann::json{
+            {"stateName", clip_.stateName},
+            {"animationIndex", clip_.animationIndex},
+            {"startTime", clip_.startTime},
+            {"endTime", clip_.endTime},
+            {"clipStartTime", clip_.clipStartTime},
+            {"playbackSpeed", clip_.playbackSpeed},
+            {"fitToRange", clip_.fitToRange}
+        };
+    }
+
+    void from_json(const nlohmann::json& json_, AnimSequenceClip& clip_)
+    {
+        clip_.stateName = json_.value("stateName", std::string{});
+        clip_.animationIndex = json_.value("animationIndex", -1);
+        clip_.startTime = (std::max)(json_.value("startTime", 0.0f), 0.0f);
+        clip_.endTime = (std::max)(json_.value("endTime", clip_.startTime + 0.1f), clip_.startTime);
+        clip_.clipStartTime = (std::max)(json_.value("clipStartTime", 0.0f), 0.0f);
+        clip_.playbackSpeed = (std::max)(json_.value("playbackSpeed", 1.0f), 0.01f);
+        clip_.fitToRange = json_.value("fitToRange", true);
+    }
+
     void to_json(nlohmann::json & j, const AnimEvent & e) {
         j = nlohmann::json{
             {"label", e.eventLabel},
@@ -894,6 +918,8 @@ void AnimationControllerComponent::SaveAsset(const std::string& assetName_)
             {"events", s.events},
             // Single用
             {"animationIndex", s.animationIndex},
+            // Sequence用
+            {"sequenceClips", s.sequenceClips},
             // Blend1D用
             {"animIndexA", s.animIndexA},
             {"animIndexB", s.animIndexB},
@@ -958,6 +984,9 @@ void from_json(const nlohmann::json& j, AnimState& s)
 
     // Single用復元
     s.animationIndex = j.value("animationIndex", -1);
+    s.sequenceClips = j.value(
+        "sequenceClips",
+        std::vector<AnimSequenceClip>{});
 
     // Blend1D用復元
     s.animIndexA = j.value("animIndexA", -1);

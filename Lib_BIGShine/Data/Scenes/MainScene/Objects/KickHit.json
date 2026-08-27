@@ -24,7 +24,11 @@
                 "CollisionRole": 2,
                 "ContainmentMode": 0,
                 "Damage": 225.0,
+                "DamageApplyType": 0,
+                "DamageHitInterval": 0.0,
                 "DamageKey": "Damage",
+                "DamageRate": 2.25,
+                "DamageRateKey": "DamageRate",
                 "DeactivateActionName": "DisableHitBox",
                 "DebugPrimitiveColor": [
                     1.0,
@@ -33,6 +37,8 @@
                     1.0
                 ],
                 "EndNodeName": "thigh_l",
+                "FixedDamage": 0.0,
+                "FixedDamageKey": "FixedDamage",
                 "GravityScale": 1.0,
                 "HalfHeight": 15.0,
                 "HitGroupId": 1,
@@ -65,6 +71,7 @@
                 "KnockBackPower": 5.5,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
+                "MaxHitCount": 1,
                 "NodeModelObjectName": "PlayerModel",
                 "Offset": [
                     0.0,

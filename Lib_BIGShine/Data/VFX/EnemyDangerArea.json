@@ -1,0 +1,101 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": true,
+        "PlaybackSpeed": 1.0,
+        "Parts": [
+            {
+                "RenderEnabled": true,
+                "ModelPath": "__InternalMeshDangerArea__",
+                "MaterialPath": "Data/VFXMaterials/EnemyDangerArea.vfxmat",
+                "MaterialPaths": [
+                    "Data/VFXMaterials/EnemyDangerArea.vfxmat"
+                ],
+                "MeshIndex": 0,
+                "Position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "InternalMeshCylinderRadius": 1.0,
+                "InternalMeshSettings": {
+                    "Segments": 96,
+                    "CapsuleLength": 2.0
+                },
+                "Duration": 0.0,
+                "Loop": true,
+                "AnimateAlpha": false,
+                "Alpha": 0.75,
+                "BlendMode": 0,
+                "Color": [
+                    1.0,
+                    0.12,
+                    0.04,
+                    1.0
+                ],
+                "EmissiveStrength": 1.8,
+                "EmissivePulseSpeed": 3.0,
+                "EmissivePulseAmount": 0.28,
+                "UseMask": true,
+                "MaskLayers": [
+                    {
+                        "Path": "Data/Texture/VFX/T_Free_Magic_Trail_Fire.PNG",
+                        "BlendMode": 0,
+                        "Invert": false
+                    }
+                ],
+                "MaskUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "MaskUVSpeed": [
+                    0.0,
+                    -0.18
+                ],
+                "UseNoise": true,
+                "NoiseTexturePaths": [
+                    "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                ],
+                "NoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "NoiseUVSpeed": [
+                    0.08,
+                    -0.08
+                ],
+                "NoiseStrength": 0.02,
+                "UseEdgeHighlight": true,
+                "EdgeColor": [
+                    1.0,
+                    0.18,
+                    0.04,
+                    1.0
+                ],
+                "SilhouetteEdgeStrength": 0.5,
+                "SilhouetteEdgePower": 0.7,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "BaseSamplerMode": 1,
+                "NormalSamplerMode": 1,
+                "MaskSamplerMode": 1,
+                "NoiseSamplerMode": 0,
+                "DistortionSamplerMode": 0,
+                "EdgePatternSamplerMode": 1,
+                "EmissiveSamplerMode": 1,
+                "GradientSamplerMode": 1
+            }
+        ]
+    }
+}

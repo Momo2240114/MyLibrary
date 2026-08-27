@@ -143,19 +143,43 @@ BodyPartDamageResult DragonBodyPartManagerComponent::ApplyDamage(
     if (!status_) return result_;
 
     result_.alreadyBroken = status_->broken;
+    float damageReductionRate_ = 1.0f;
+    if (const auto owner_ = GetGameObject())
+    {
+        if (const std::shared_ptr<BlackboardComponent> blackboard_ =
+            owner_->GetComponent<BlackboardComponent>())
+        {
+            bool damageReductionActive_ = false;
+            blackboard_->GetBool(
+                damageReductionBlackboardCategory,
+                damageReductionActiveKey,
+                damageReductionActive_);
+            if (damageReductionActive_)
+            {
+                blackboard_->GetFloat(
+                    damageReductionBlackboardCategory,
+                    damageReductionRateKey,
+                    damageReductionRate_);
+                damageReductionRate_ = (std::clamp)(damageReductionRate_, 0.0f, 1.0f);
+            }
+        }
+    }
     // 破壊済み部位はHealthダメージ倍率だけ追加し、部位耐久は0のまま扱う。
     const float healthDamageRate_ = status_->broken
         ? status_->healthDamageRate * status_->brokenHealthDamageRate
         : status_->healthDamageRate;
     result_.appliedHealthDamage =
         (std::max)(damageContext_.healthDamage, 0.0f) *
-        (std::max)(healthDamageRate_, 0.0f);
+        (std::max)(healthDamageRate_, 0.0f) *
+        damageReductionRate_;
     result_.appliedDurabilityDamage =
         (std::max)(damageContext_.durabilityDamage, 0.0f) *
-        (std::max)(status_->durabilityDamageRate, 0.0f);
+        (std::max)(status_->durabilityDamageRate, 0.0f) *
+        damageReductionRate_;
     const float appliedStaggerDamage_ =
         (std::max)(damageContext_.durabilityDamage, 0.0f) *
-        (std::max)(status_->staggerDamageRate, 0.0f);
+        (std::max)(status_->staggerDamageRate, 0.0f) *
+        damageReductionRate_;
 
     if (health)
     {
@@ -459,6 +483,24 @@ void DragonBodyPartManagerComponent::Gui()
     {
         reactionActionName = reactionActionBuffer_;
     }
+    char reductionCategoryBuffer_[128]{};
+    strncpy_s(reductionCategoryBuffer_, damageReductionBlackboardCategory.c_str(), sizeof(reductionCategoryBuffer_));
+    if (ImGui::InputText("Damage Reduction Category", reductionCategoryBuffer_, sizeof(reductionCategoryBuffer_)))
+    {
+        damageReductionBlackboardCategory = reductionCategoryBuffer_;
+    }
+    char reductionActiveKeyBuffer_[128]{};
+    strncpy_s(reductionActiveKeyBuffer_, damageReductionActiveKey.c_str(), sizeof(reductionActiveKeyBuffer_));
+    if (ImGui::InputText("Damage Reduction Active Key", reductionActiveKeyBuffer_, sizeof(reductionActiveKeyBuffer_)))
+    {
+        damageReductionActiveKey = reductionActiveKeyBuffer_;
+    }
+    char reductionRateKeyBuffer_[128]{};
+    strncpy_s(reductionRateKeyBuffer_, damageReductionRateKey.c_str(), sizeof(reductionRateKeyBuffer_));
+    if (ImGui::InputText("Damage Reduction Rate Key", reductionRateKeyBuffer_, sizeof(reductionRateKeyBuffer_)))
+    {
+        damageReductionRateKey = reductionRateKeyBuffer_;
+    }
     char commonBrokenActionBuffer_[128]{};
     strncpy_s(commonBrokenActionBuffer_, commonBrokenActionName.c_str(), sizeof(commonBrokenActionBuffer_));
     if (ImGui::InputText("Common Broken Action", commonBrokenActionBuffer_, sizeof(commonBrokenActionBuffer_)))
@@ -584,6 +626,9 @@ void DragonBodyPartManagerComponent::Serialize(nlohmann::json& json_) const
     json_["ReactionCooldownTime"] = reactionCooldownTime;
     json_["ReactionCooldownTimer"] = reactionCooldownTimer;
     json_["ReactionActionName"] = reactionActionName;
+    json_["DamageReductionBlackboardCategory"] = damageReductionBlackboardCategory;
+    json_["DamageReductionActiveKey"] = damageReductionActiveKey;
+    json_["DamageReductionRateKey"] = damageReductionRateKey;
     json_["CommonBrokenActionName"] = commonBrokenActionName;
     json_["BodyParts"] = nlohmann::json::array();
     for (const DragonBodyPartStatus& status_ : bodyParts)
@@ -616,6 +661,15 @@ void DragonBodyPartManagerComponent::Deserialize(const nlohmann::json& json_)
     reactionActionName = json_.value(
         "ReactionActionName",
         std::string("DragonAI_DamageReaction"));
+    damageReductionBlackboardCategory = json_.value(
+        "DamageReductionBlackboardCategory",
+        std::string("DragonAI"));
+    damageReductionActiveKey = json_.value(
+        "DamageReductionActiveKey",
+        std::string("UltimateDamageReductionActive"));
+    damageReductionRateKey = json_.value(
+        "DamageReductionRateKey",
+        std::string("UltimateDamageRate"));
     commonBrokenActionName = json_.value(
         "CommonBrokenActionName",
         std::string("DragonBodyPart_Broken"));

@@ -315,7 +315,8 @@ void AnimationControllerComponent::Update(float deltaTime_)
             curveComponent,
             poseLibrary,
             GetGameObject(),
-            &animationBlackboard_);
+            &animationBlackboard_,
+            &states);
     }
 
     {
@@ -592,6 +593,19 @@ bool AnimationControllerComponent::RenameState(
         if (transition_.fromStateName == oldName_) transition_.fromStateName = newName_;
         if (transition_.toStateName == oldName_) transition_.toStateName = newName_;
     }
+    for (auto& [stateName_, statePointer_] : states)
+    {
+        if (!statePointer_) continue;
+
+        // Sequenceステートが参照しているState名も、リネーム後の名前へ追従させる。
+        for (AnimSequenceClip& clip_ : statePointer_->sequenceClips)
+        {
+            if (clip_.stateName == oldName_)
+            {
+                clip_.stateName = newName_;
+            }
+        }
+    }
 
     const auto assetPathIterator_ = stateAssetPaths.find(oldName_);
     if (assetPathIterator_ != stateAssetPaths.end())
@@ -652,6 +666,19 @@ void AnimationControllerComponent::RemoveState(const std::string& stateName_)
     // 削除実行
     states.erase(iterator_);
     stateAssetPaths.erase(stateName_);
+    for (auto& [name_, statePointer_] : states)
+    {
+        if (!statePointer_) continue;
+
+        // 削除されたStateをSequenceが参照し続けないよう、直接クリップ参照へ戻す。
+        for (AnimSequenceClip& clip_ : statePointer_->sequenceClips)
+        {
+            if (clip_.stateName == stateName_)
+            {
+                clip_.stateName.clear();
+            }
+        }
+    }
     MarkStateGuiCacheDirty();
     MarkActionCategoryCacheDirty();
     MarkSequenceAdapterDirty();

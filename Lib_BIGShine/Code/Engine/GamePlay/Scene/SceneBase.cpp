@@ -15,6 +15,7 @@
 #include "Editor/Window/ShaderWindow.h"
 #include "Editor/Window/GpuRenderInvestigationWindow.h"
 #include "Editor/Window/AnimationEditorWindow.h"
+#include "Editor/Window/AttackTemplateEditorWindow.h"
 #include "Editor/Window/AssetBrowserWindow.h"
 #include "Editor/Window/CurveAssetEditorWindow.h"
 #include "Editor/Window/EasingPresetEditorWindow.h"
@@ -97,6 +98,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<EffectAssetListWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<MaterialAssetListWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimationEditorWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<AttackTemplateEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AnimNodeEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<NodeGraphMonitorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<ParticleEditorWindow>(_GameObjectManager.get()));
