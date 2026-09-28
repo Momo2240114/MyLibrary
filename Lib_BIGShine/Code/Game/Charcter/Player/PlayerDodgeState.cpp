@@ -9,6 +9,8 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/Common/DebugLog.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/HurtBox.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "PlayerControllerComponent.h"
 
 #include <algorithm>
@@ -265,8 +267,13 @@ void PlayerDodgeState::EndJustDodgeFrame()
 // ジャスト回避成功をBlackboardとReactionComponentへ伝える。
 void PlayerDodgeState::HandleJustDodgeSuccess()
 {
+    BS_PROFILE_SCOPE("PlayerDodgeState::HandleJustDodgeSuccess");
     BS_LOG_SUCCESS(LOG_CATEGORY::GAME, "[JustDodge] PlayerDodgeState success. Applying blackboard/reaction.");
     justDodgeSucceeded = true;
+    // 回避Animationの無敵解除後も、成功時に付与した時間だけ被弾を拒否する。
+    const auto hurtBox_ = GetComponent<HurtBox>();
+    const auto player_ = GetPlayerController();
+    if (hurtBox_ && player_) hurtBox_->AddInvincibilityTime(player_->justDodgeInvincibilityDuration);
     SetCounterAvailable(true);
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =

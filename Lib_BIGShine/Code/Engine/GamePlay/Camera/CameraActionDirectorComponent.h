@@ -66,7 +66,10 @@ enum class CAMERA_ACTION_POSITION_MODE
     TPS_VIEW_RELATIVE,
 
     // cameraOffset をそのままワールド座標として使う。
-    WORLD_POSITION
+    WORLD_POSITION,
+
+    // TPS追従対象の位置と回転から、保存したカメラ位置・注視点・上方向を復元する。
+    TPS_TARGET_RELATIVE
 };
 
 // ジャスト回避・ジャストガードなど、短時間だけ通常カメラへ上書きする演出プリセット。
@@ -83,6 +86,8 @@ struct CameraActionPreset
     // cameraOffset はカメラ位置、focusOffset は注視点側の補正に使う。
     DirectX::XMFLOAT3 cameraOffset{ 0.0f, 0.5f, -1.5f };
     DirectX::XMFLOAT3 focusOffset{ 0.0f, 0.0f, 0.0f };
+    // TPS_TARGET_RELATIVEで使用する対象ローカルの上方向。カメラの傾きも保持する。
+    DirectX::XMFLOAT3 cameraUp{ 0.0f, 1.0f, 0.0f };
 
     // ENTER/HOLD/RETURN の各フェーズ時間。
     float enterDuration = 0.08f;
@@ -180,7 +185,8 @@ private:
     void ApplyCameraPose(
         const DirectX::XMFLOAT3& cameraPosition_,
         const DirectX::XMFLOAT3& lookAtPosition_,
-        float fov_);
+        float fov_,
+        const DirectX::XMFLOAT3& up_);
 
     // 演出中だけ止めていた通常カメラ制御を元に戻す。
     void ReleaseSuppression();
@@ -202,6 +208,7 @@ private:
     std::weak_ptr<CameraCollisionComponent> collisionCamera;
     std::weak_ptr<BlackboardComponent> blackboard;
     std::weak_ptr<GameObject> activeTarget;
+    std::weak_ptr<GameObject> activeFollowTarget; // 演出開始時のTPS追従対象を演出終了まで保持する。
 
     // エディタで保存する演出一覧と、現在再生中の Preset コピー。
     std::vector<CameraActionPreset> presets;
@@ -213,6 +220,9 @@ private:
     DirectX::XMFLOAT3 startFocusPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 actionCameraPosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 actionFocusPosition{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 startCameraUp{ 0.0f, 1.0f, 0.0f };
+    DirectX::XMFLOAT3 actionCameraUp{ 0.0f, 1.0f, 0.0f };
+    DirectX::XMFLOAT3 returnStartCameraUp{ 0.0f, 1.0f, 0.0f };
 
     // RETURN 開始時の状態。HOLD 中に通常側が動いても、戻りの始点を安定させる。
     DirectX::XMFLOAT3 returnStartCameraPosition{ 0.0f, 0.0f, 0.0f };

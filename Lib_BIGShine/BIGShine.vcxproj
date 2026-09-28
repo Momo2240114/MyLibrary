@@ -157,7 +157,7 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>BS_BUILD_DEBUG;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BS_BUILD_DEBUG;BS_FORCE_ENABLE_TRACY;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_NO_SYSTEM_TRACING;TRACY_NO_SAMPLING;TRACY_NO_CONTEXT_SWITCH;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -207,7 +207,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>BS_BUILD_RELEASE;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BS_BUILD_RELEASE;BS_FORCE_ENABLE_TRACY;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_NO_SYSTEM_TRACING;TRACY_NO_SAMPLING;TRACY_NO_CONTEXT_SWITCH;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -233,7 +233,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>BS_BUILD_DEVELOPMENT_EDITOR;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BS_BUILD_DEVELOPMENT_EDITOR;BS_FORCE_ENABLE_TRACY;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_NO_SYSTEM_TRACING;TRACY_NO_SAMPLING;TRACY_NO_CONTEXT_SWITCH;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -341,11 +341,15 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Code\Editor\EditorCameraData.cpp" />
     <ClCompile Include="Code\Editor\NodeEditor\AnimNodeEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\NodeEditor\NodeGraphMonitorWindow.cpp" />
     <ClCompile Include="Code\Editor\Utility\EditorPrimitiveRenderer.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\AttackWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
@@ -401,6 +405,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\ComponentBase.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\Movement.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MovementComponent.cpp" />
@@ -524,6 +529,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackEffectHitComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\ProjectileMotionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\HitReactionComponent.cpp" />
@@ -642,6 +648,7 @@
     <ClInclude Include="Code\Editor\NodeEditor\NodeGraphMonitorWindow.h" />
     <ClInclude Include="Code\Editor\Utility\EditorPrimitiveRenderer.h" />
     <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\AttackWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />
     <ClInclude Include="Code\Editor\Workspace\AudioWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
@@ -794,6 +801,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\BlackboardComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\CharacterMovementComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\ComponentBase.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObject.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.h" />
@@ -863,6 +871,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\AttackTemplateRuntime.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\CombatDamageTypes.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\ProjectileMotionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\HitReactionComponent.h" />

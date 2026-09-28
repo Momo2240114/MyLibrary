@@ -69,6 +69,9 @@ public:
     // Template名またはAction名から危険範囲を生成する。
     void ShowByName(const std::string& templateName_);
 
+    std::vector<DangerAreaTemplate>& GetTemplates() { return templates; }
+    const std::vector<DangerAreaTemplate>& GetTemplates() const { return templates; }
+
 private:
     struct DangerAreaInstance
     {

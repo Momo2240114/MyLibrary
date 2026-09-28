@@ -862,6 +862,7 @@ namespace
         float radius_,
         float capsuleLength_)
     {
+        BS_PROFILE_SCOPE("CreateInternalMeshDangerAreaModelResource");
         if (!device_) return nullptr;
 
         const float safeRadius_ = (std::max)(radius_, 0.0001f);
@@ -872,6 +873,37 @@ namespace
         // 攻撃カプセルをXZ平面へ投影した形状を作り、VFXMaterialで地面予兆として描画する。
         auto resource_ = CreateGeneratedModelResource(INTERNAL_MESH_DANGER_AREA_MODEL_PATH);
         auto& mesh_ = resource_->meshes[0];
+
+        if (safeCapsuleLength_ <= safeRadius_ * 0.01f)
+        {
+            constexpr int CIRCLE_SEGMENT_COUNT = 96;
+            mesh_.vertices.reserve(static_cast<size_t>(CIRCLE_SEGMENT_COUNT + 2));
+            mesh_.indices.reserve(static_cast<size_t>(CIRCLE_SEGMENT_COUNT) * 3u);
+            mesh_.vertices.push_back(CreateInternalMeshSlashVertex({ 0.0f, 0.0f, 0.0f }, 0.5f, 0.5f));
+
+            // 半径だけの危険範囲は、カプセルの端同士を繋がず真円として生成する。
+            for (int index_ = 0; index_ <= CIRCLE_SEGMENT_COUNT; ++index_)
+            {
+                const float rate_ = static_cast<float>(index_) / static_cast<float>(CIRCLE_SEGMENT_COUNT);
+                const float angle_ = DirectX::XM_2PI * rate_;
+                const float x_ = std::sin(angle_) * safeRadius_;
+                const float z_ = std::cos(angle_) * safeRadius_;
+                mesh_.vertices.push_back(CreateInternalMeshSlashVertex(
+                    { x_, 0.0f, z_ },
+                    0.5f + x_ / (safeRadius_ * 2.0f),
+                    0.5f + z_ / (safeRadius_ * 2.0f)));
+            }
+
+            for (int index_ = 0; index_ < CIRCLE_SEGMENT_COUNT; ++index_)
+            {
+                mesh_.indices.push_back(0u);
+                mesh_.indices.push_back(static_cast<uint32_t>(index_ + 1));
+                mesh_.indices.push_back(static_cast<uint32_t>(index_ + 2));
+            }
+
+            return CreateStaticMeshBuffers(device_, mesh_) ? resource_ : nullptr;
+        }
+
         mesh_.vertices.reserve(static_cast<size_t>(HALF_SEGMENT_COUNT * 2 + 3));
         mesh_.indices.reserve(static_cast<size_t>(HALF_SEGMENT_COUNT * 2 + 2) * 3);
 
@@ -889,19 +921,19 @@ namespace
         for (int index_ = 0; index_ <= HALF_SEGMENT_COUNT; ++index_)
         {
             const float rate_ = static_cast<float>(index_) / static_cast<float>(HALF_SEGMENT_COUNT);
-            const float angle_ = DirectX::XM_PI - DirectX::XM_PI * rate_;
+            const float angle_ = DirectX::XM_PI * rate_;
             addPerimeterVertex_(
-                std::sin(angle_) * safeRadius_,
-                halfLineLength_ + std::cos(angle_) * safeRadius_);
+                std::cos(angle_) * safeRadius_,
+                halfLineLength_ + std::sin(angle_) * safeRadius_);
         }
 
         for (int index_ = 0; index_ <= HALF_SEGMENT_COUNT; ++index_)
         {
             const float rate_ = static_cast<float>(index_) / static_cast<float>(HALF_SEGMENT_COUNT);
-            const float angle_ = -DirectX::XM_PI * rate_;
+            const float angle_ = DirectX::XM_PI + DirectX::XM_PI * rate_;
             addPerimeterVertex_(
-                std::sin(angle_) * safeRadius_,
-                -halfLineLength_ + std::cos(angle_) * safeRadius_);
+                std::cos(angle_) * safeRadius_,
+                -halfLineLength_ + std::sin(angle_) * safeRadius_);
         }
 
         const uint32_t perimeterCount_ = static_cast<uint32_t>(mesh_.vertices.size() - 1u);

@@ -139,6 +139,7 @@ public:
     void SetHitMeshVFXAssetPath(const std::string& path_);
     void SetHitMeshVFXLifeTime(float lifeTime_);
     void SetHitMeshVFXNormalOffset(float normalOffset_);
+    void SetHitImpactEffectAssetPath(const std::string& path_);
     void SetAllowMultiHit(bool allowMultiHit_);
     void SetCanHitOwner(bool canHitOwner_);
 
@@ -225,6 +226,7 @@ private:
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;
+    std::string hitImpactEffectAssetPath;
 
     // この攻撃エフェクト自身の寿命と再生状態。
     float lifeTime = 1.0f;

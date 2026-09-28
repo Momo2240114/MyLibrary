@@ -69,6 +69,53 @@ void AnimationControllerComponent::SetParam(const std::string& name_, BlackBoard
     MarkBlackboardGuiCacheDirty();
 }
 
+void AnimationControllerComponent::SetRootMotionYawLimit(float yawDegrees_)
+{
+    rootMotionYawLimitRemaining = yawDegrees_;
+    rootMotionYawLimitActive = true;
+}
+
+void AnimationControllerComponent::ClearRootMotionYawLimit()
+{
+    rootMotionYawLimitRemaining = 0.0f;
+    rootMotionYawLimitActive = false;
+}
+
+float AnimationControllerComponent::ConsumeRootMotionYawLimit(float yawDegrees_)
+{
+    if (!rootMotionYawLimitActive)
+    {
+        return yawDegrees_;
+    }
+
+    constexpr float MINIMUM_YAW_DEGREES = 0.0001f;
+    if (std::abs(yawDegrees_) <= MINIMUM_YAW_DEGREES)
+    {
+        return 0.0f;
+    }
+
+    if (std::abs(rootMotionYawLimitRemaining) <= MINIMUM_YAW_DEGREES ||
+        yawDegrees_ * rootMotionYawLimitRemaining <= 0.0f)
+    {
+        rootMotionYawLimitRemaining = 0.0f;
+        return 0.0f;
+    }
+
+    // 90度ターンなどのRootMotionを、AIが要求した角度までで止める。
+    const float appliedYawDegrees_ =
+        std::copysign(
+            (std::min)(std::abs(yawDegrees_), std::abs(rootMotionYawLimitRemaining)),
+            rootMotionYawLimitRemaining);
+    rootMotionYawLimitRemaining -= appliedYawDegrees_;
+
+    if (std::abs(rootMotionYawLimitRemaining) <= MINIMUM_YAW_DEGREES)
+    {
+        rootMotionYawLimitRemaining = 0.0f;
+    }
+
+    return appliedYawDegrees_;
+}
+
 BlackboardCategory& AnimationControllerComponent::GetEditableBlackboard()
 {
     static BlackboardCategory fallbackBlackboard_;
@@ -400,6 +447,10 @@ void AnimationControllerComponent::Update(float deltaTime_)
                     transform_->AddMoveOffset(worldDeltaPosition_);
                 }
                 // 微小な誤差を除外し、抽出したYaw回転だけをObjectへ加算する。
+                if (std::abs(rootMotionYawDegrees_) > 0.0001f)
+                {
+                    rootMotionYawDegrees_ = ConsumeRootMotionYawLimit(rootMotionYawDegrees_);
+                }
                 if (std::abs(rootMotionYawDegrees_) > 0.0001f)
                 {
                     transform_->localRotation.y += rootMotionYawDegrees_;

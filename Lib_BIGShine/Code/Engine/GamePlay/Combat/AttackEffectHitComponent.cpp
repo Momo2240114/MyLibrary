@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Physics/HitBox.h"
 
 #include <algorithm>
@@ -40,13 +41,21 @@ const std::string& AttackEffectHitComponent::GetName() const
 
 void AttackEffectHitComponent::Start()
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::Start");
+
     // 保存済みのテンプレートから、実際に判定を持つ子GameObject/HitBoxを作り直す。
     RebuildHitShapes();
 }
 
 void AttackEffectHitComponent::Update(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::Update");
+
     if (!playing) return;
+    BS_PROFILE_PLOT(
+        "AttackEffectHitComponent::RuntimeHitShapeCount",
+        runtimeHitShapes.size());
+
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
     elapsedTime += safeDeltaTime_;
     hitIntervalTimer -= safeDeltaTime_;
@@ -193,6 +202,12 @@ void AttackEffectHitComponent::SetHitMeshVFXNormalOffset(float normalOffset_)
 {
     hitMeshVFXNormalOffset = normalOffset_;
 }
+
+void AttackEffectHitComponent::SetHitImpactEffectAssetPath(const std::string& path_)
+{
+    hitImpactEffectAssetPath = path_;
+}
+
 void AttackEffectHitComponent::SetAllowMultiHit(bool allowMultiHit_) { allowMultiHit = allowMultiHit_; }
 void AttackEffectHitComponent::SetCanHitOwner(bool canHitOwner_) { canHitOwner = canHitOwner_; }
 void AttackEffectHitComponent::SetEffectType(ATTACK_EFFECT_TYPE effectType_) { effectType = effectType_; }
@@ -207,6 +222,8 @@ void AttackEffectHitComponent::SetMovement(const DirectX::XMFLOAT3& direction_, 
 void AttackEffectHitComponent::SetHitShapes(
     const std::vector<AttackEffectHitShapeTemplate>& hitShapes_)
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::SetHitShapes");
+
     // テンプレートを差し替えたら、未対応形状を丸めた上でランタイムHitBoxも作り直す。
     hitShapes = hitShapes_;
     for (AttackEffectHitShapeTemplate& shape_ : hitShapes)
@@ -222,6 +239,8 @@ void AttackEffectHitComponent::SetHitShapes(
 
 void AttackEffectHitComponent::Play()
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::Play");
+
     // 再生開始時は時間と命中履歴をリセットし、前回再生のヒット対象を引き継がない。
     ResetRuntime();
     playing = true;
@@ -229,6 +248,8 @@ void AttackEffectHitComponent::Play()
 
 void AttackEffectHitComponent::Stop()
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::Stop");
+
     // 停止時は生成済みHitBoxをすべて無効化し、残った判定が当たり続けないようにする。
     playing = false;
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
@@ -255,6 +276,8 @@ void AttackEffectHitComponent::SubmitDebugShapes()
 
 void AttackEffectHitComponent::ClearHitHistory()
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::ClearHitHistory");
+
     // Attack/JustDodge/Guardの各システムが持つ同一攻撃グループの命中履歴をまとめてリセットする。
     const std::shared_ptr<GameObject> object_ = GetGameObject();
     if (object_ && attackInstanceId != 0u)
@@ -272,6 +295,8 @@ void AttackEffectHitComponent::ConfigureHitBox(
     const AttackEffectHitShapeTemplate& shape_,
     const std::string& name_)
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::ConfigureHitBox");
+
     // コンポーネント側の攻撃情報と、形状テンプレート側のサイズ/多段可否をHitBoxへ転写する。
     hitBox_->actionPrefix = name_;
     hitBox_->SetOwner(ownerObject);
@@ -308,6 +333,7 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitMeshVFXAssetPath = hitMeshVFXAssetPath;
     hitBox_->hitMeshVFXLifeTime = hitMeshVFXLifeTime;
     hitBox_->hitMeshVFXNormalOffset = hitMeshVFXNormalOffset;
+    hitBox_->hitImpactEffectAssetPath = hitImpactEffectAssetPath;
     hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
     hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
     std::printf(
@@ -326,6 +352,11 @@ void AttackEffectHitComponent::ConfigureHitBox(
 
 void AttackEffectHitComponent::RebuildHitShapes()
 {
+    BS_PROFILE_SCOPE("AttackEffectHitComponent::RebuildHitShapes");
+    BS_PROFILE_PLOT(
+        "AttackEffectHitComponent::HitShapeTemplateCount",
+        hitShapes.size());
+
     // 古いランタイム判定を破棄してから、現在のテンプレートを元に子GameObjectを再生成する。
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
         if (runtime_.object) runtime_.object->GetManager().Destroy(runtime_.object);
@@ -333,45 +364,54 @@ void AttackEffectHitComponent::RebuildHitShapes()
     const std::shared_ptr<GameObject> effectObject_ = GetGameObject();
     if (!effectObject_) return;
 
-    for (size_t shapeIndex_ = 0; shapeIndex_ < hitShapes.size(); ++shapeIndex_)
+    size_t createdHitBoxCount_ = 0u;
     {
-        const AttackEffectHitShapeTemplate& shape_ = hitShapes[shapeIndex_];
-        const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
-        if (!shape_.enabled || normalizedShape_ == ATTACK_HIT_SHAPE::NONE) continue;
-        // SphereGroupは複数のSphere HitBoxへ展開し、それ以外は1つのHitBoxとして生成する。
-        const size_t sphereCount_ = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP
-            ? shape_.spheres.size() : 1u;
-        for (size_t sphereIndex_ = 0; sphereIndex_ < sphereCount_; ++sphereIndex_)
+        BS_PROFILE_SCOPE("AttackEffectHitComponent::RebuildHitShapes::CreateRuntimeHitBoxes");
+
+        for (size_t shapeIndex_ = 0; shapeIndex_ < hitShapes.size(); ++shapeIndex_)
         {
-            const std::shared_ptr<GameObject> hitObject_ = effectObject_->GetManager().Create("RuntimeAttackHitShape");
-            if (!hitObject_) continue;
-            hitObject_->SetNoSaveObject();
-            hitObject_->transform->SetParent(effectObject_->transform);
-            DirectX::XMFLOAT3 offset_ = shape_.localOffset;
-            float radius_ = shape_.radius;
-            if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP && sphereIndex_ < shape_.spheres.size())
+            const AttackEffectHitShapeTemplate& shape_ = hitShapes[shapeIndex_];
+            const ATTACK_HIT_SHAPE normalizedShape_ = NormalizeAttackHitShape(shape_.shape);
+            if (!shape_.enabled || normalizedShape_ == ATTACK_HIT_SHAPE::NONE) continue;
+            // SphereGroupは複数のSphere HitBoxへ展開し、それ以外は1つのHitBoxとして生成する。
+            const size_t sphereCount_ = normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP
+                ? shape_.spheres.size() : 1u;
+            for (size_t sphereIndex_ = 0; sphereIndex_ < sphereCount_; ++sphereIndex_)
             {
-                offset_ = shape_.spheres[sphereIndex_].localOffset;
-                radius_ = shape_.spheres[sphereIndex_].radius;
+                const std::shared_ptr<GameObject> hitObject_ = effectObject_->GetManager().Create("RuntimeAttackHitShape");
+                if (!hitObject_) continue;
+                hitObject_->SetNoSaveObject();
+                hitObject_->transform->SetParent(effectObject_->transform);
+                DirectX::XMFLOAT3 offset_ = shape_.localOffset;
+                float radius_ = shape_.radius;
+                if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP && sphereIndex_ < shape_.spheres.size())
+                {
+                    offset_ = shape_.spheres[sphereIndex_].localOffset;
+                    radius_ = shape_.spheres[sphereIndex_].radius;
+                }
+                hitObject_->transform->localPosition = offset_;
+                hitObject_->transform->localRotation = shape_.localRotation;
+                hitObject_->transform->localScale = shape_.localScale;
+                hitObject_->transform->MarkDirty();
+                std::shared_ptr<HitBox> hitBox_ = hitObject_->AddComponent<HitBox>();
+                AttackEffectHitShapeTemplate runtimeShape_ = shape_;
+                runtimeShape_.shape = normalizedShape_;
+                runtimeShape_.radius = radius_;
+                if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP)
+                {
+                    // グループ内の個別判定はHitBox側では通常Sphereとして扱う。
+                    runtimeShape_.shape = ATTACK_HIT_SHAPE::SPHERE;
+                    runtimeShape_.halfHeight = 0.0f;
+                }
+                ConfigureHitBox(hitBox_, runtimeShape_, shape_.hitBoxName + std::to_string(sphereIndex_));
+                runtimeHitShapes.push_back({ hitObject_, hitBox_, shapeIndex_ });
+                ++createdHitBoxCount_;
             }
-            hitObject_->transform->localPosition = offset_;
-            hitObject_->transform->localRotation = shape_.localRotation;
-            hitObject_->transform->localScale = shape_.localScale;
-            hitObject_->transform->MarkDirty();
-            std::shared_ptr<HitBox> hitBox_ = hitObject_->AddComponent<HitBox>();
-            AttackEffectHitShapeTemplate runtimeShape_ = shape_;
-            runtimeShape_.shape = normalizedShape_;
-            runtimeShape_.radius = radius_;
-            if (normalizedShape_ == ATTACK_HIT_SHAPE::SPHERE_GROUP)
-            {
-                // グループ内の個別判定はHitBox側では通常Sphereとして扱う。
-                runtimeShape_.shape = ATTACK_HIT_SHAPE::SPHERE;
-                runtimeShape_.halfHeight = 0.0f;
-            }
-            ConfigureHitBox(hitBox_, runtimeShape_, shape_.hitBoxName + std::to_string(sphereIndex_));
-            runtimeHitShapes.push_back({ hitObject_, hitBox_, shapeIndex_ });
         }
     }
+    BS_PROFILE_PLOT(
+        "AttackEffectHitComponent::CreatedRuntimeHitBoxCount",
+        createdHitBoxCount_);
 }
 
 void AttackEffectHitComponent::Gui()
@@ -409,6 +449,7 @@ void AttackEffectHitComponent::Gui()
     ImGui::DragFloat("Target Pull Falloff", &hitParticleTargetAttractionFalloff, 0.01f, 0.001f, 8.0f);
     ImGui::EndDisabled();
     ImGui::InputText("Hit Mesh VFX", &hitMeshVFXAssetPath);
+    ImGui::InputText("Hit Impact Effect", &hitImpactEffectAssetPath);
     ImGui::DragFloat3("Movement Direction", &movementDirection.x, 0.01f);
     ImGui::DragFloat("Movement Speed", &movementSpeed, 0.1f);
     if (ImGui::Button("Play")) Play();
@@ -534,6 +575,7 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["HitMeshVFXAssetPath"] = hitMeshVFXAssetPath;
     json_["HitMeshVFXLifeTime"] = hitMeshVFXLifeTime;
     json_["HitMeshVFXNormalOffset"] = hitMeshVFXNormalOffset;
+    json_["HitImpactEffectAssetPath"] = hitImpactEffectAssetPath;
     json_["DestroyOnLifeEnd"] = destroyOnLifeEnd;
     json_["CanHitOwner"] = canHitOwner;
     json_["AllowMultiHit"] = allowMultiHit;
@@ -599,6 +641,7 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     hitMeshVFXAssetPath = json_.value("HitMeshVFXAssetPath", std::string{});
     hitMeshVFXLifeTime = (std::max)(json_.value("HitMeshVFXLifeTime", 1.0f), 0.0f);
     hitMeshVFXNormalOffset = json_.value("HitMeshVFXNormalOffset", 0.0f);
+    hitImpactEffectAssetPath = json_.value("HitImpactEffectAssetPath", std::string{});
     destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", true);
     canHitOwner = json_.value("CanHitOwner", false);
     allowMultiHit = json_.value("AllowMultiHit", false);

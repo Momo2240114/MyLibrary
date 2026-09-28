@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 
@@ -149,6 +150,8 @@ std::shared_ptr<GameObject> HitBox::GetAttackOwner()
 
 void HitBox::Start()
 {
+    BS_PROFILE_SCOPE("HitBox::Start");
+
     // CapsuleColliderとして初期化し、ActionSequenceからHitBoxを開閉するActionを登録する。
     // Load直後は必ずDeactivateし、攻撃判定が出っぱなしになるのを防ぐ。
     CapsuleCollider::Start();
@@ -158,6 +161,8 @@ void HitBox::Start()
 
 void HitBox::Activate()
 {
+    BS_PROFILE_SCOPE("HitBox::Activate");
+
     // SequencerやActionから有効化される直前に、Blackboardで上書きされた攻撃値を反映する。
     // これにより同じHitBox Componentを使い回しつつ、AttackTemplateごとにDamage/VFX/SEを変えられる。
     ApplyBlackboardValues();
@@ -182,6 +187,8 @@ void HitBox::Activate()
 
 void HitBox::Deactivate()
 {
+    BS_PROFILE_SCOPE("HitBox::Deactivate");
+
     // 攻撃受付終了時はColliderを無効化し、Trigger状態とHit済み対象を破棄する。
     SetEnabled(false);
     currentTriggers.clear();
@@ -270,6 +277,9 @@ void HitBox::Gui()
     if (ImGui::InputText("MeshVFX Asset", meshVFXAssetBuffer_, sizeof(meshVFXAssetBuffer_))) hitMeshVFXAssetPath = meshVFXAssetBuffer_;
     ImGui::DragFloat("MeshVFX Life Time", &hitMeshVFXLifeTime, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("MeshVFX Normal Offset", &hitMeshVFXNormalOffset, 0.01f, -10.0f, 10.0f);
+    char impactEffectAssetBuffer_[256];
+    strncpy_s(impactEffectAssetBuffer_, hitImpactEffectAssetPath.c_str(), sizeof(impactEffectAssetBuffer_));
+    if (ImGui::InputText("Impact Effect Asset", impactEffectAssetBuffer_, sizeof(impactEffectAssetBuffer_))) hitImpactEffectAssetPath = impactEffectAssetBuffer_;
 
     ImGui::SeparatorText("Hit Sound");
     char hitSoundPathBuffer_[256];
@@ -370,6 +380,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["HitMeshVFXAssetPath"] = hitMeshVFXAssetPath;
     j_["HitMeshVFXLifeTime"] = hitMeshVFXLifeTime;
     j_["HitMeshVFXNormalOffset"] = hitMeshVFXNormalOffset;
+    j_["HitImpactEffectAssetPath"] = hitImpactEffectAssetPath;
     j_["HitSoundPath"] = hitSoundPath;
     j_["HitSoundVolume"] = hitSoundVolume;
     j_["HitSoundMuffled"] = hitSoundMuffled;
@@ -438,6 +449,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     hitMeshVFXAssetPath = j_.value("HitMeshVFXAssetPath", std::string{});
     hitMeshVFXLifeTime = (std::max)(j_.value("HitMeshVFXLifeTime", 1.0f), 0.0f);
     hitMeshVFXNormalOffset = j_.value("HitMeshVFXNormalOffset", 0.0f);
+    hitImpactEffectAssetPath = j_.value("HitImpactEffectAssetPath", std::string{});
     hitSoundPath = j_.value("HitSoundPath", std::string{});
     hitSoundVolume = (std::max)(j_.value("HitSoundVolume", 1.0f), 0.0f);
     hitSoundMuffled = j_.value("HitSoundMuffled", false);
@@ -517,6 +529,8 @@ std::string HitBox::GetDeactivateActionName() const
 
 void HitBox::ApplyBlackboardValues()
 {
+    BS_PROFILE_SCOPE("HitBox::ApplyBlackboardValues");
+
     // 攻撃Action実行時にBlackboardへ流された一時データを読み取り、HitBoxの現在値へ反映する。
     // ComponentのScene保存値は基礎値として残し、実際の攻撃ごとの差分はBlackboardから上書きする設計。
     std::shared_ptr<GameObject> owner_ = GetGameObject();
@@ -693,6 +707,8 @@ void HitBox::ApplyBlackboardValues()
 
 void HitBox::RegisterActions()
 {
+    BS_PROFILE_SCOPE("HitBox::RegisterActions");
+
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 

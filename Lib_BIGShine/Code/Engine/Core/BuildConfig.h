@@ -59,7 +59,12 @@
 #define BS_ENABLE_IMGUI 1
 #define BS_ENABLE_GAME_IMGUI_UI 1
 #define BS_ENABLE_DEVELOPER_GUI 1
+#if defined(BS_FORCE_ENABLE_TRACY)
+#define BS_ENABLE_TRACY 1
+#else
+// DevelopmentEditorでも、計測が必要な時だけBS_FORCE_ENABLE_TRACYでTracyを有効にする。
 #define BS_ENABLE_TRACY 0
+#endif
 #define BS_ENABLE_PROFILING 0
 #define BS_ENABLE_DEBUG_LOG 0
 #define BS_ENABLE_WARNING_LOG 1
