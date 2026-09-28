@@ -1,0 +1,129 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "id": "DragonBiteSpark",
+    "displayName": "Dragon Bite Spark",
+    "owner": {
+        "ownerTarget": 0,
+        "canHitOwner": false
+    },
+    "attack": {
+        "damage": 20.0,
+        "damageRate": 0.20,
+        "fixedDamage": 0.0,
+        "damageApplyType": 0,
+        "damageHitInterval": 0.0,
+        "maxHitCount": 1,
+        "impactPower": 16.0,
+        "hitStopDuration": 0.06,
+        "hitStopScale": 0.0,
+        "knockBackPower": 6.0,
+        "targetAirLiftPower": 0.0,
+        "attackerAirLiftPower": 0.0,
+        "knockBackType": 0,
+        "hitGroupId": 0,
+        "allowMultiHit": false
+    },
+    "cameraShake": {
+        "enabled": true,
+        "powerLevel": 0,
+        "receiveDuration": 0.10,
+        "receivePositionStrength": 0.024,
+        "receiveRotationStrength": 0.16,
+        "attackScale": 0.45,
+        "frequency": 28.0,
+        "priority": 5
+    },
+    "weaponHitBox": {
+        "enabled": false,
+        "hitBoxName": "HitBox",
+        "startNodeName": "WeaponRoot",
+        "endNodeName": "WeaponTip",
+        "radius": 0.18,
+        "activeStartTime": 0.0,
+        "activeEndTime": 0.18
+    },
+    "hitEffect": {
+        "spawnOnHit": true,
+        "hitParticleAssetPath": "HitFire",
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.35,
+        "hitParticleNormalOffset": 0.05,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleAxisToAttackerBlend": 0.85,
+        "hitParticleUseTargetAttraction": false,
+        "hitParticleTargetAttractionStrength": 0.0,
+        "hitParticleTargetAttractionRange": 0.0,
+        "hitParticleTargetAttractionFalloff": 1.0,
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0
+    },
+    "slashEffects": [],
+    "attackEffects": [
+        {
+            "enabled": true,
+            "effectType": 0,
+            "particlePath": "HitFire",
+            "meshVfxPath": "",
+            "spawnTimeOffset": 0.0,
+            "lifeTime": 0.25,
+            "localOffset": [
+                0.0,
+                1.8,
+                1.2
+            ],
+            "localRotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "localScale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "followOwner": true,
+            "followNode": false,
+            "baseNodeName": "",
+            "speed": 0.0,
+            "localDirection": [
+                0.0,
+                0.0,
+                1.0
+            ],
+            "hitShapes": [
+                {
+                    "enabled": true,
+                    "hitBoxName": "DragonBiteSparkHit",
+                    "shape": 3,
+                    "localOffset": [
+                        0.0,
+                        0.0,
+                        0.4
+                    ],
+                    "localRotation": [
+                        90.0,
+                        0.0,
+                        0.0
+                    ],
+                    "localScale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "radius": 1.1,
+                    "halfHeight": 0.8,
+                    "range": 2.0,
+                    "angle": 45.0,
+                    "activeStartTime": 0.0,
+                    "activeEndTime": 0.25,
+                    "hitInterval": 0.0,
+                    "destroyOnHit": false,
+                    "allowMultiHit": false,
+                    "spheres": []
+                }
+            ]
+        }
+    ]
+}

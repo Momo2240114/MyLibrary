@@ -60,10 +60,12 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
+#include "Engine/GamePlay/Core/Component/PrefabSpawnComponent.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Combat/CombatStatsComponent.h"
+#include "Engine/GamePlay/Combat/ProjectileMotionComponent.h"
 #include "Game/Combat/DebugTools/DebugHitHistoryResetComponent.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartHurtBoxComponent.h"
@@ -169,10 +171,12 @@ void RegisterAllComponents()
     registry.Register<CharacterMovementComponent>("CharacterMovementComponent");
     registry.Register<MotionWarpComponent>("MotionWarpComponent");
     registry.Register<BlackboardComponent>("BlackboardComponent");
+    registry.Register<PrefabSpawnComponent>("PrefabSpawnComponent");
     registry.Register<HitReactionComponent>("HitReactionComponent");
     registry.Register<JustDodgeReactionComponent>("JustDodgeReactionComponent");
     registry.Register<HealthComponent>("HealthComponent");
     registry.Register<CombatStatsComponent>("CombatStatsComponent");
+    registry.Register<ProjectileMotionComponent>("ProjectileMotionComponent");
     registry.Register<DebugHitHistoryResetComponent>("DamageBoxComponent");
     registry.Register<DragonAIComponent>("DragonAIComponent");
     registry.Register<DragonBodyPartHurtBoxComponent>("DragonBodyPartHurtBoxComponent");

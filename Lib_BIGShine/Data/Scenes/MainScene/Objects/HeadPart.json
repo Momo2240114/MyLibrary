@@ -132,6 +132,7 @@
                 "GravityScale": 1.0,
                 "HalfHeight": 0.6200000047683716,
                 "HitGroupId": 10,
+                "HitImpactEffectAssetPath": "",
                 "HitMeshVFXAssetPath": "",
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,
@@ -231,6 +232,7 @@
                 "GravityScale": 1.0,
                 "HalfHeight": 0.8500000238418579,
                 "HitGroupId": 20,
+                "HitImpactEffectAssetPath": "",
                 "HitMeshVFXAssetPath": "",
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,
@@ -315,6 +317,479 @@
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
             "TypeName": "DragonBodyPartHurtBoxComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "AssetPath": "Data/EffectEmitter/DragonBreathLight.json",
+                "ComponentName": "EffectEmitterComponent",
+                "Templates": [
+                    {
+                        "ActionName": "DragonBreath_Charge",
+                        "Entries": [
+                            {
+                                "AssetPath": "DragonBreath_ChargeCore",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": false,
+                                "ForceAdditiveBlend": true,
+                                "GlowMultiplier": 1.399999976158142,
+                                "LifeTime": 1.350000023841858,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    0.11999999731779099
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    1.5499999523162842,
+                                    1.5499999523162842,
+                                    1.5499999523162842
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.0,
+                                "Type": 1
+                            },
+                            {
+                                "AssetPath": "DragonBreath_ChargeGather",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": false,
+                                "ForceAdditiveBlend": false,
+                                "GlowMultiplier": 1.0,
+                                "LifeTime": 1.350000023841858,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    0.07999999821186066
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.0,
+                                "Type": 0
+                            }
+                        ],
+                        "FanAngleDegrees": 45.0,
+                        "FanRangeSteps": 1,
+                        "FanSampleCount": 1,
+                        "FanVisualSampleCount": 1,
+                        "Hit": {
+                            "AllowMultiHit": false,
+                            "AttackerAirLiftPower": 0.0,
+                            "CameraShakeAttackScale": 0.5,
+                            "CameraShakeEnabled": true,
+                            "CameraShakeFrequency": 24.0,
+                            "CameraShakePriority": 5,
+                            "CameraShakeReceiveDuration": 0.11999999731779099,
+                            "CameraShakeReceivePositionStrength": 0.02500000037252903,
+                            "CameraShakeReceiveRotationStrength": 0.18000000715255737,
+                            "CanHitOwner": false,
+                            "Damage": 10.0,
+                            "DestroyOnHit": false,
+                            "Enabled": false,
+                            "HitGroupId": 0,
+                            "HitImpactEffectAssetPath": "",
+                            "HitMeshVFXAssetPath": "",
+                            "HitMeshVFXLifeTime": 1.0,
+                            "HitMeshVFXNormalOffset": 0.0,
+                            "HitParticleAssetPath": "",
+                            "HitParticleAxisToAttackerBlend": 0.0,
+                            "HitParticleEmitterName": "",
+                            "HitParticleLifeTime": 1.0,
+                            "HitParticleNormalOffset": 0.0,
+                            "HitParticleTargetAttractionFalloff": 1.0,
+                            "HitParticleTargetAttractionRange": 0.0,
+                            "HitParticleTargetAttractionStrength": 0.0,
+                            "HitParticleUseImpactAxis": false,
+                            "HitParticleUseTargetAttraction": false,
+                            "HitStopDuration": 0.0,
+                            "HitStopScale": 0.0,
+                            "ImpactPower": 10.0,
+                            "KnockBackPower": 3.0,
+                            "TargetAirLiftPower": 0.0
+                        },
+                        "LifeTime": 1.350000023841858,
+                        "LocalOffset": [
+                            0.0,
+                            0.0,
+                            0.15000000596046448
+                        ],
+                        "LocalRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "LocalScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Name": "DragonBreathCharge",
+                        "ProjectileAcceleration": 0.0,
+                        "ProjectileGravity": 0.0,
+                        "ProjectileMaxSpeed": 0.0,
+                        "ProjectileMotionEnabled": false,
+                        "Radius": 1.0,
+                        "Range": 1.0,
+                        "ShapeType": 0,
+                        "SourceNodeName": "",
+                        "SpawnHit": false,
+                        "Speed": 0.0
+                    },
+                    {
+                        "ActionName": "DragonBreath_LightSingle",
+                        "Entries": [
+                            {
+                                "AssetPath": "DragonBreathProjectile_Core",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": true,
+                                "ForceAdditiveBlend": true,
+                                "GlowMultiplier": 1.0,
+                                "LifeTime": 1.350000023841858,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    2.25,
+                                    2.25,
+                                    2.25
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.0,
+                                "Type": 1
+                            },
+                            {
+                                "AssetPath": "DragonBreathProjectile_Fireball",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": true,
+                                "ForceAdditiveBlend": false,
+                                "GlowMultiplier": 1.0,
+                                "LifeTime": 1.350000023841858,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    2.6500000953674316,
+                                    2.6500000953674316,
+                                    2.6500000953674316
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.0,
+                                "Type": 0
+                            }
+                        ],
+                        "FanAngleDegrees": 45.0,
+                        "FanRangeSteps": 3,
+                        "FanSampleCount": 5,
+                        "FanVisualSampleCount": 1,
+                        "Hit": {
+                            "AllowMultiHit": false,
+                            "AttackerAirLiftPower": 0.0,
+                            "CameraShakeAttackScale": 0.3499999940395355,
+                            "CameraShakeEnabled": true,
+                            "CameraShakeFrequency": 26.0,
+                            "CameraShakePriority": 5,
+                            "CameraShakeReceiveDuration": 0.07999999821186066,
+                            "CameraShakeReceivePositionStrength": 0.017999999225139618,
+                            "CameraShakeReceiveRotationStrength": 0.10000000149011612,
+                            "CanHitOwner": false,
+                            "Damage": 16.0,
+                            "DestroyOnHit": true,
+                            "Enabled": true,
+                            "HitGroupId": 0,
+                            "HitImpactEffectAssetPath": "DragonBreathImpactSmall",
+                            "HitMeshVFXAssetPath": "",
+                            "HitMeshVFXLifeTime": 1.0,
+                            "HitMeshVFXNormalOffset": 0.0,
+                            "HitParticleAssetPath": "",
+                            "HitParticleAxisToAttackerBlend": 0.75,
+                            "HitParticleEmitterName": "",
+                            "HitParticleLifeTime": 0.3499999940395355,
+                            "HitParticleNormalOffset": 0.03999999910593033,
+                            "HitParticleTargetAttractionFalloff": 1.0,
+                            "HitParticleTargetAttractionRange": 0.0,
+                            "HitParticleTargetAttractionStrength": 0.0,
+                            "HitParticleUseImpactAxis": true,
+                            "HitParticleUseTargetAttraction": false,
+                            "HitStopDuration": 0.019999999552965164,
+                            "HitStopScale": 0.0,
+                            "ImpactPower": 12.0,
+                            "KnockBackPower": 5.0,
+                            "TargetAirLiftPower": 0.0
+                        },
+                        "LifeTime": 1.350000023841858,
+                        "LocalOffset": [
+                            0.0,
+                            0.0,
+                            0.3499999940395355
+                        ],
+                        "LocalRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "LocalScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Name": "DragonBreathLightSingle",
+                        "ProjectileAcceleration": 4.0,
+                        "ProjectileGravity": 0.0,
+                        "ProjectileMaxSpeed": 28.0,
+                        "ProjectileMotionEnabled": true,
+                        "Radius": 3.0,
+                        "Range": 15.5,
+                        "ShapeType": 1,
+                        "SourceNodeName": "",
+                        "SpawnHit": true,
+                        "Speed": 26.0
+                    },
+                    {
+                        "ActionName": "DragonBreath_LightBeam",
+                        "Entries": [
+                            {
+                                "AssetPath": "DragonBreath",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": false,
+                                "ForceAdditiveBlend": true,
+                                "GlowMultiplier": 1.2000000476837158,
+                                "LifeTime": 1.4500000476837158,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    9.0
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    2.5,
+                                    2.5,
+                                    5.400000095367432
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.100000023841858,
+                                "Type": 1
+                            }
+                        ],
+                        "FanAngleDegrees": 45.0,
+                        "FanRangeSteps": 3,
+                        "FanSampleCount": 5,
+                        "FanVisualSampleCount": 1,
+                        "Hit": {
+                            "AllowMultiHit": true,
+                            "AttackerAirLiftPower": 0.0,
+                            "CameraShakeAttackScale": 0.25,
+                            "CameraShakeEnabled": true,
+                            "CameraShakeFrequency": 34.0,
+                            "CameraShakePriority": 4,
+                            "CameraShakeReceiveDuration": 0.05000000074505806,
+                            "CameraShakeReceivePositionStrength": 0.009999999776482582,
+                            "CameraShakeReceiveRotationStrength": 0.05999999865889549,
+                            "CanHitOwner": false,
+                            "Damage": 10.0,
+                            "DestroyOnHit": false,
+                            "Enabled": true,
+                            "HitGroupId": 0,
+                            "HitImpactEffectAssetPath": "DragonBreathImpactSmall",
+                            "HitMeshVFXAssetPath": "",
+                            "HitMeshVFXLifeTime": 1.0,
+                            "HitMeshVFXNormalOffset": 0.0,
+                            "HitParticleAssetPath": "",
+                            "HitParticleAxisToAttackerBlend": 0.699999988079071,
+                            "HitParticleEmitterName": "",
+                            "HitParticleLifeTime": 0.25,
+                            "HitParticleNormalOffset": 0.03999999910593033,
+                            "HitParticleTargetAttractionFalloff": 1.0,
+                            "HitParticleTargetAttractionRange": 0.0,
+                            "HitParticleTargetAttractionStrength": 0.0,
+                            "HitParticleUseImpactAxis": true,
+                            "HitParticleUseTargetAttraction": false,
+                            "HitStopDuration": 0.009999999776482582,
+                            "HitStopScale": 0.0,
+                            "ImpactPower": 8.0,
+                            "KnockBackPower": 3.0,
+                            "TargetAirLiftPower": 0.0
+                        },
+                        "LifeTime": 1.4500000476837158,
+                        "LocalOffset": [
+                            0.0,
+                            0.0,
+                            0.3499999940395355
+                        ],
+                        "LocalRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "LocalScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Name": "DragonBreathLightBeam",
+                        "ProjectileAcceleration": 0.0,
+                        "ProjectileGravity": 0.0,
+                        "ProjectileMaxSpeed": 0.0,
+                        "ProjectileMotionEnabled": false,
+                        "Radius": 4.0,
+                        "Range": 18.0,
+                        "ShapeType": 2,
+                        "SourceNodeName": "",
+                        "SpawnHit": true,
+                        "Speed": 0.0
+                    },
+                    {
+                        "ActionName": "DragonBreath_LightFan",
+                        "Entries": [
+                            {
+                                "AssetPath": "DragonBreath_FanFlame",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": false,
+                                "ForceAdditiveBlend": false,
+                                "GlowMultiplier": 1.0,
+                                "LifeTime": 1.350000023841858,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    0.44999998807907104
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.0,
+                                "Type": 0
+                            }
+                        ],
+                        "FanAngleDegrees": 95.0,
+                        "FanRangeSteps": 5,
+                        "FanSampleCount": 13,
+                        "FanVisualSampleCount": 1,
+                        "Hit": {
+                            "AllowMultiHit": true,
+                            "AttackerAirLiftPower": 0.0,
+                            "CameraShakeAttackScale": 0.30000001192092896,
+                            "CameraShakeEnabled": true,
+                            "CameraShakeFrequency": 30.0,
+                            "CameraShakePriority": 4,
+                            "CameraShakeReceiveDuration": 0.05999999865889549,
+                            "CameraShakeReceivePositionStrength": 0.014000000432133675,
+                            "CameraShakeReceiveRotationStrength": 0.07999999821186066,
+                            "CanHitOwner": false,
+                            "Damage": 12.0,
+                            "DestroyOnHit": false,
+                            "Enabled": true,
+                            "HitGroupId": 0,
+                            "HitImpactEffectAssetPath": "DragonBreathImpactSmall",
+                            "HitMeshVFXAssetPath": "",
+                            "HitMeshVFXLifeTime": 1.0,
+                            "HitMeshVFXNormalOffset": 0.0,
+                            "HitParticleAssetPath": "",
+                            "HitParticleAxisToAttackerBlend": 0.699999988079071,
+                            "HitParticleEmitterName": "",
+                            "HitParticleLifeTime": 0.25,
+                            "HitParticleNormalOffset": 0.03999999910593033,
+                            "HitParticleTargetAttractionFalloff": 1.0,
+                            "HitParticleTargetAttractionRange": 0.0,
+                            "HitParticleTargetAttractionStrength": 0.0,
+                            "HitParticleUseImpactAxis": true,
+                            "HitParticleUseTargetAttraction": false,
+                            "HitStopDuration": 0.009999999776482582,
+                            "HitStopScale": 0.0,
+                            "ImpactPower": 9.0,
+                            "KnockBackPower": 4.0,
+                            "TargetAirLiftPower": 0.0
+                        },
+                        "LifeTime": 1.350000023841858,
+                        "LocalOffset": [
+                            0.0,
+                            0.0,
+                            0.3499999940395355
+                        ],
+                        "LocalRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "LocalScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "Name": "DragonBreathLightFan",
+                        "ProjectileAcceleration": 0.0,
+                        "ProjectileGravity": 0.0,
+                        "ProjectileMaxSpeed": 0.0,
+                        "ProjectileMotionEnabled": false,
+                        "Radius": 3.4000000953674316,
+                        "Range": 14.5,
+                        "ShapeType": 3,
+                        "SourceNodeName": "",
+                        "SpawnHit": true,
+                        "Speed": 0.0
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "EffectEmitterComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         }

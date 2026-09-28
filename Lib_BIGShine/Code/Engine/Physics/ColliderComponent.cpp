@@ -12,6 +12,7 @@
 #include "PhysXMath.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 
 #include <algorithm>
@@ -408,11 +409,15 @@ ColliderComponent::~ColliderComponent()
 
 void ColliderComponent::Start()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::Start");
+
     CreatePhysXActor();
 }
 
 void ColliderComponent::ReleasePhysXActor()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::ReleasePhysXActor");
+
     ReleaseCharacterController();
 
     if (!actor && !shapeMaterial) return;
@@ -445,12 +450,16 @@ void ColliderComponent::ReleasePhysXActor()
 
 void ColliderComponent::RecreatePhysXActor()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::RecreatePhysXActor");
+
     ReleasePhysXActor();
     CreatePhysXActor();
 }
 
 void ColliderComponent::CreateCharacterController()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::CreateCharacterController");
+
     auto owner_ = GetGameObject();
     auto physics_ = PhysXSystem::GetPhysics();
     auto scene_ = PhysXSystem::GetScene();
@@ -548,6 +557,8 @@ void ColliderComponent::CreateCharacterController()
 
 void ColliderComponent::ReleaseCharacterController()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::ReleaseCharacterController");
+
     if (characterController)
     {
         if (auto controllerActor_ = characterController->getActor())
@@ -594,6 +605,8 @@ bool ColliderComponent::UsesCharacterController() const
 
 void ColliderComponent::CreatePhysXActor()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::CreatePhysXActor");
+
     if (UsesCharacterController())
     {
         CreateCharacterController();
@@ -651,6 +664,8 @@ void ColliderComponent::CreatePhysXActor()
 
 void ColliderComponent::UpdatePhysXShape()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::UpdatePhysXShape");
+
     if (!actor) return;
 
     PxShape* shape_ = nullptr;
@@ -1005,6 +1020,8 @@ void ColliderComponent::SyncFromPhysics(float dt_)
 
 void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("ColliderComponent::PreparePhysicsStep");
+
     if (collisionRole == CollisionRole::HIT_BOX ||
         collisionRole == CollisionRole::HURT_BOX ||
         collisionRole == CollisionRole::JUST_DODGE_BOX ||
@@ -1015,6 +1032,8 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 
     if (UsesCharacterController())
     {
+        BS_PROFILE_SCOPE("ColliderComponent::PreparePhysicsStep::CharacterController");
+
         if (!characterController)
         {
             RecreatePhysXActor();
@@ -1193,6 +1212,8 @@ void ColliderComponent::PreparePhysicsStep(float deltaTime_)
 
     if (!actor || actorIsStatic != isStatic)
     {
+        BS_PROFILE_SCOPE("ColliderComponent::PreparePhysicsStep::RecreateActor");
+
         RecreatePhysXActor();
     }
     if (!actor) return;
@@ -1319,6 +1340,8 @@ void ColliderComponent::CaptureTransformSnapshot()
 
 void ColliderComponent::PushTransformToPhysics()
 {
+    BS_PROFILE_SCOPE("ColliderComponent::PushTransformToPhysics");
+
     if (!actor) return;
 
     auto owner_ = GetGameObject();

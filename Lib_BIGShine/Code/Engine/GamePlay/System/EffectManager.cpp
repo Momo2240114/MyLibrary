@@ -562,6 +562,14 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     if (!particle_) return object_;
     particle_->SetEnabled(true);
     particle_->ResetRuntime();
+    for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
+    {
+        // EffectManager経由のParticleは生成Objectの位置を基準にし、Asset内のWorld原点固定を避ける。
+        if (track_.spawnSpace == ParticleSpawnSpace::WORLD)
+        {
+            track_.spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE;
+        }
+    }
     if (request_.overrideAxis || request_.overrideTargetAttraction)
     {
         for (ParticleComponent::EmitterTrack& track_ : particle_->GetTracks())
@@ -597,9 +605,7 @@ std::shared_ptr<GameObject> EffectManager::SpawnParticle(
     bool played_ = false;
     if (!request_.emitterName.empty())
     {
-        played_ = particle_->TriggerEmitterAtPosition(
-            request_.emitterName,
-            spawnPosition_);
+        played_ = particle_->PlayEmitter(request_.emitterName);
         if (!played_)
         {
             std::printf(
@@ -1137,6 +1143,11 @@ void EffectManager::SpawnForHit(const AttackHitEvent& event_)
         request_.lifeTime = event_.hitMeshVFXLifeTime;
         request_.normalOffset = event_.hitMeshVFXNormalOffset;
         SpawnMeshVFX(request_);
+    }
+    if (!event_.hitImpactEffectAssetPath.empty())
+    {
+        // 複数のParticle/Mesh/DecalをまとめたImpactEffectを、Hit位置と法線に合わせて再生する。
+        SpawnImpactEffectAsset(event_.hitImpactEffectAssetPath, event_.hitPosition, event_.hitNormal);
     }
 }
 

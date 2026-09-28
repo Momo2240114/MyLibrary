@@ -89,6 +89,7 @@
                 "GravityScale": 1.0,
                 "HalfHeight": 0.949999988079071,
                 "HitGroupId": 51,
+                "HitImpactEffectAssetPath": "",
                 "HitMeshVFXAssetPath": "",
                 "HitMeshVFXLifeTime": 1.0,
                 "HitMeshVFXNormalOffset": 0.0,

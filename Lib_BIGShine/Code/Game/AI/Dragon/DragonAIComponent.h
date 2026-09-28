@@ -259,6 +259,8 @@ private:
     void CompleteActionEnd();
     // Animation EventからTarget方向へ向き直す。
     void FaceTargetFromAnimationEvent();
+    void BeginTurnRootMotionLimit(DRAGON_ACTION_TYPE action_);
+    void ClearTurnRootMotionLimit();
     void MoveForward(float speed_, float deltaTime_);
     void TurnTowardPlayerLimited(float turnSpeed_, float deltaTime_);
     void MoveGround(float speed_, float turnSpeed_, float deltaTime_);
@@ -305,6 +307,10 @@ private:
         const DirectX::XMFLOAT2& position_);
     const char* GetBehaviorStatusName(AI_BEHAVIOR_STATUS status_) const;
     void RegisterRuntimeActions();
+    // アニメーションステート上の仮イベントから、現在Actionに対応する攻撃Actionを発火する。
+    void PlaySequencerAttackAction();
+    // アニメーションステート上の仮イベントから、現在Actionに対応する予兆表示を発火する。
+    void ShowSequencerDangerAction();
     DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_);
     const DragonActionDefinition* FindDefinition(DRAGON_ACTION_TYPE action_) const;
     bool IsAIControlledAction(DRAGON_ACTION_TYPE action_) const;
@@ -378,11 +384,11 @@ private:
     float debugHpRate = 1.0f;
     float frontAngleDegrees = 115.0f;
     float sideAngleDegrees = 135.0f;
-    float underBodyDistance = 4.5f;
-    float biteDistance = 6.5f;
-    float approachEndDistance = 6.0f;
-    float mediumDistance = 10.0f;
-    float farDistance = 12.0f;
+    float underBodyDistance = 3.2f;
+    float biteDistance = 4.8f;
+    float approachEndDistance = 5.2f;
+    float mediumDistance = 16.0f;
+    float farDistance = 22.0f;
     float takeOffBackSpeed = 7.0f;
     float groundMoveTurnSpeed = 2.0f;
     float airForwardSpeed = 3.0f;
@@ -401,6 +407,8 @@ private:
     float walkSpeed = 5.0f;
     float runSpeed = 12.0f;
     float animationBlendDuration = 0.2f;
+    bool limitTurnRootMotion = true;
+    float turnRootMotionLimitPaddingDegrees = 2.0f;
     // HP低下やプレイヤー位置に応じて、怪物らしい圧力の強弱を調整する。
     float crackedAggressionMultiplier = 1.10f;
     float darkLeakAggressionMultiplier = 1.25f;
@@ -409,7 +417,7 @@ private:
     float underBodyPunishMultiplier = 1.60f;
     float sidePunishMultiplier = 1.35f;
     float behindPunishMultiplier = 1.70f;
-    float longRangePressureMultiplier = 1.30f;
+    float longRangePressureMultiplier = 1.45f;
     bool animationGraphDriven = true;
     // 読み書きするDragon BehaviorGraph Assetパス。
     std::string behaviorGraphAssetPath = "Data/AI/BehaviorGraph/DragonFirstForm.json";
@@ -437,6 +445,8 @@ private:
     bool ultimateDamageReductionActive = false;
     bool hasPreviousHpRateForUltimate = false;
     float previousHpRateForUltimate = 1.0f;
+    float turnRootMotionLimitRemainingDegrees = 0.0f;
+    bool turnRootMotionLimitActive = false;
     int airAttackCount = 0;
 
     DRAGON_ACTION_TYPE debugAction = DRAGON_ACTION_TYPE::BITE;

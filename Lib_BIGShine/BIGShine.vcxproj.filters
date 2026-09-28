@@ -481,6 +481,9 @@
     <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\AttackWorkspaceWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
@@ -865,6 +868,9 @@
     <ClCompile Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\ProjectileMotionComponent.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\HealthComponent.cpp">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClCompile>
@@ -893,6 +899,9 @@
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.cpp">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\Animation\AnimationControllerComponent.Asset.cpp">
@@ -1216,6 +1225,9 @@
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\AttackWorkspaceWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h">
@@ -1665,6 +1677,9 @@
     <ClInclude Include="Code\Engine\GamePlay\Combat\CombatStatsComponent.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\ProjectileMotionComponent.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\HealthComponent.h">
       <Filter>Code\Engine\GamePlay</Filter>
     </ClInclude>
@@ -1693,6 +1708,9 @@
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\MotionWarpComponent.h">
+      <Filter>Code\Engine\GamePlay\Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Core\Component\PrefabSpawnComponent.h">
       <Filter>Code\Engine\GamePlay\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\IKMapComponent.h">

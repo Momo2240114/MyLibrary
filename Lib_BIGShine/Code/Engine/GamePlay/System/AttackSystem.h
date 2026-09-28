@@ -80,6 +80,8 @@ struct AttackHitEvent
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;
+    // Hit時にまとめて再生するImpactEffect Asset。
+    std::string hitImpactEffectAssetPath;
 
     // Hit SE の再生設定。
     std::string hitSoundPath;

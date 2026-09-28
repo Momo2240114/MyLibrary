@@ -123,17 +123,24 @@ namespace
 
 void AttackSystem::BeginFrame()
 {
+    BS_PROFILE_SCOPE("AttackSystem::BeginFrame");
+    BS_PROFILE_PLOT("AttackSystem::FrameHitEventCount", frameHitEvents.size());
+
     frameHitEvents.clear();
 }
 
 void AttackSystem::Clear()
 {
+    BS_PROFILE_SCOPE("AttackSystem::Clear");
+
     frameHitEvents.clear();
     registeredHitTargets.clear();
 }
 
 uint32_t AttackSystem::CreateAttackInstance()
 {
+    BS_PROFILE_SCOPE("AttackSystem::CreateAttackInstance");
+
     // 1回の攻撃単位を識別するID。多段ヒットや同一対象への再ヒット制御に使う。
     const uint32_t attackInstanceId_ = nextAttackInstanceId++;
     if (nextAttackInstanceId == 0u) nextAttackInstanceId = 1u;
@@ -142,6 +149,8 @@ uint32_t AttackSystem::CreateAttackInstance()
 
 void AttackSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 {
+    BS_PROFILE_SCOPE("AttackSystem::ClearAttackInstance");
+
     if (attackInstanceId_ == 0u) return;
 
     // 攻撃が終わったら、その攻撃IDに紐づくヒット履歴をまとめて破棄する。
@@ -160,6 +169,8 @@ void AttackSystem::ClearAttackInstance(uint32_t attackInstanceId_)
 
 void AttackSystem::ClearAttackHitGroup(uint32_t attackInstanceId_, uint32_t hitGroupId_)
 {
+    BS_PROFILE_SCOPE("AttackSystem::ClearAttackHitGroup");
+
     if (attackInstanceId_ == 0u) return;
     const uint64_t hitKey_ =
         (static_cast<uint64_t>(attackInstanceId_) << 32u) |
@@ -241,6 +252,7 @@ void AttackSystem::HandleHit(
     event_.hitMeshVFXAssetPath = hitBox_.hitMeshVFXAssetPath;
     event_.hitMeshVFXLifeTime = hitBox_.hitMeshVFXLifeTime;
     event_.hitMeshVFXNormalOffset = hitBox_.hitMeshVFXNormalOffset;
+    event_.hitImpactEffectAssetPath = hitBox_.hitImpactEffectAssetPath;
     event_.hitSoundPath = hitBox_.hitSoundPath;
     event_.hitSoundVolume = hitBox_.hitSoundVolume;
     event_.hitSoundMuffled = hitBox_.hitSoundMuffled;
@@ -295,6 +307,8 @@ bool AttackSystem::RegisterAttackHit(
     const GameObject* target_,
     bool allowMultiHit_)
 {
+    BS_PROFILE_SCOPE("AttackSystem::RegisterAttackHit");
+
     if (allowMultiHit_ || attackInstanceId_ == 0u || target_ == nullptr) return true;
 
     // attackInstanceId + hitGroupIdごとに対象を記録し、同じ攻撃の重複ヒットを防ぐ。

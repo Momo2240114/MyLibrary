@@ -1,0 +1,263 @@
+{
+    "AssetType": "MeshVFX",
+    "AssetVersion": 1,
+    "MeshVFX": {
+        "IsPlaying": false,
+        "Parts": [
+            {
+                "Alpha": 1.0,
+                "AlphaCurveName": "",
+                "AlphaEnd": 1.0,
+                "AlphaStart": 0.0,
+                "AnimateAlpha": true,
+                "AnimateScale": true,
+                "BackFaceColor": [
+                    0.0,
+                    3.047216486639323e+31,
+                    6.544063828396896e-43,
+                    -0.11910265684127808
+                ],
+                "BackFaceEmissiveStrength": 0.0,
+                "BaseSamplerMode": 0,
+                "BaseTexturePath": "Data/Model/Stage/Rock/T_Rock_2_diffuseOriginal.png",
+                "BaseUVRotation": 0.0,
+                "BaseUVRotationSpeed": 0.0,
+                "BaseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "BaseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "BlendMode": 0,
+                "Color": [
+                    0.7200000286102295,
+                    0.5799999833106995,
+                    0.46000000834465027,
+                    1.0
+                ],
+                "DissolveCurveName": "",
+                "DissolveEdgeColor": [
+                    2.4382593279251817e-43,
+                    -3.034623478015419e-05,
+                    4.590373509435236e-41,
+                    1.401298464324817e-45
+                ],
+                "DissolveEdgeStrength": 3.0,
+                "DissolveEdgeWidth": 0.05000000074505806,
+                "DissolveThreshold": 0.0,
+                "DistortionNoiseTexturePath": "",
+                "DistortionNoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "DistortionSamplerMode": 0,
+                "Duration": 0.75,
+                "EdgeColor": [
+                    1.0,
+                    0.6800000071525574,
+                    0.3199999928474426,
+                    1.0
+                ],
+                "EdgePatternMode": 0,
+                "EdgePatternSamplerMode": 0,
+                "EdgePatternStrength": 0.0,
+                "EdgePatternTexturePath": "",
+                "EdgePatternUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "EmissiveCurveName": "",
+                "EmissivePulseAmount": 0.3499999940395355,
+                "EmissivePulseSpeed": 2.0,
+                "EmissiveSamplerMode": 0,
+                "EmissiveStrength": 3.0,
+                "EmissiveTexturePath": "",
+                "EmissiveUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "FresnelNoiseStrength": 0.0,
+                "FresnelPower": 2.4000000953674316,
+                "FresnelStrength": 0.44999998807907104,
+                "GradientDirection": 0,
+                "GradientEndUv": 1.0,
+                "GradientFixedUv": 0.5,
+                "GradientSampleMode": 0,
+                "GradientSamplerMode": 0,
+                "GradientStartUv": 0.0,
+                "GradientTexturePath": "",
+                "InternalMeshCylinderRadius": 1.0,
+                "InternalMeshSettings": {
+                    "BaseRadius": 1.1200000047683716,
+                    "BeamDepthThickness": 0.017999999225139618,
+                    "BeamHalfHeight": 0.44999998807907104,
+                    "BeamHalfWidth": 0.11999999731779099,
+                    "BeamLength": 1.0,
+                    "BeamSidePanelRate": 0.550000011920929,
+                    "CapsuleLength": 2.0,
+                    "CenterWidth": 0.5600000023841858,
+                    "ConeLength": 1.0,
+                    "ConeTipRadiusRate": 0.03500000014901161,
+                    "EndAngleDegrees": 78.0,
+                    "InnerWidthScale": 0.3499999940395355,
+                    "OuterWidthScale": 1.25,
+                    "RadiusTaperAmount": 0.05000000074505806,
+                    "Segments": 96,
+                    "StartAngleDegrees": -78.0,
+                    "TaperPower": 2.0,
+                    "TipRate": 0.019999999552965164,
+                    "TipWidth": 0.009999999776482582,
+                    "WallDepth": 0.5,
+                    "WallHeight": 1.100000023841858,
+                    "WallPositionRate": 0.5
+                },
+                "IntersectionEdgeStrength": 0.0,
+                "IntersectionEdgeWidth": 0.0020000000949949026,
+                "Loop": false,
+                "MaskDistortionOpacity": 0.0,
+                "MaskDistortionStrength": 0.0,
+                "MaskLayers": [],
+                "MaskSamplerMode": 0,
+                "MaskTexturePath": "",
+                "MaskUVRotation": 0.0,
+                "MaskUVRotationSpeed": 0.0,
+                "MaskUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "MaskUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "MaterialPath": "",
+                "MaterialPaths": [
+                    ""
+                ],
+                "MeshIndex": 0,
+                "MeshRotationSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "ModelPath": "Data/Model/VFX/SM_Free_Magic_Stone1.glb",
+                "NoiseSamplerMode": 0,
+                "NoiseStrength": 0.0,
+                "NoiseTexturePath": "",
+                "NoiseTexturePaths": [
+                    ""
+                ],
+                "NoiseUVRotation": 0.0,
+                "NoiseUVRotationSpeed": 0.0,
+                "NoiseUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "NoiseUVSpeed": [
+                    0.0,
+                    0.0
+                ],
+                "NormalSamplerMode": 0,
+                "NormalStrength": 1.0,
+                "NormalTexturePath": "Data/Model/Stage/Rock/T_Rock_2_normal.png",
+                "NormalUVScale": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    -0.550000011920929,
+                    0.0
+                ],
+                "RenderEnabled": true,
+                "Rotation": [
+                    -18.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.4500000476837158,
+                    1.850000023841858,
+                    1.4500000476837158
+                ],
+                "ScaleCurveName": "",
+                "ScaleEnd": [
+                    1.4500000476837158,
+                    1.850000023841858,
+                    1.4500000476837158
+                ],
+                "ScaleStart": [
+                    0.36000001430511475,
+                    0.029999999329447746,
+                    0.36000001430511475
+                ],
+                "SilhouetteEdgePower": 2.0,
+                "SilhouetteEdgeStrength": 0.25,
+                "TrailNewAlpha": 1.0,
+                "TrailNewRootColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailNewTipColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailOldAlpha": 1.0,
+                "TrailOldRootColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailOldTipColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "TrailRecencyIntensity": 1.0,
+                "TrailRecencyPower": 1.0,
+                "TrailTipIntensity": 1.0,
+                "TrailTipPower": 1.0,
+                "TrailUseColorRamp": false,
+                "UVRadialScale": 1.0,
+                "UVRadialScaleSpeed": 0.0,
+                "UVRotationCenter": [
+                    0.5,
+                    0.5
+                ],
+                "UVRotationCurveName": "",
+                "UVScrollCurveName": "",
+                "UseBackFaceBoost": false,
+                "UseDissolveEdge": false,
+                "UseEdgeHighlight": true,
+                "UseFresnel": true,
+                "UseFresnelNoise": false,
+                "UseGradientTexture": false,
+                "UseMask": false,
+                "UseMaskDistortion": false,
+                "UseMaterialBaseTexture": true,
+                "UseMaterialNormalTexture": true,
+                "UseNoise": false,
+                "UseNormal": false,
+                "UseVertexNoise": false,
+                "VertexNoiseHorizontalScale": 1.0,
+                "VertexNoiseHorizontalStrength": 0.0,
+                "VertexNoiseSpeed": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "VertexNoiseTexturePath": "",
+                "VertexNoiseVerticalScale": 1.0,
+                "VertexNoiseVerticalStrength": 0.0
+            }
+        ],
+        "PlaybackSpeed": 1.0
+    }
+}

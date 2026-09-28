@@ -34,6 +34,8 @@ public:
     void BeginReturnBlendFromCurrentCamera();
     // 復帰Blendの進行率をSmoothStepで返す。
     float CalculateReturnBlendRate() const;
+    // 演出カメラがTPSと同じ追従対象を基準にできるよう、参照を解決して返す。
+    std::shared_ptr<GameObject> GetFollowTarget();
 
 private:
     // Camera入力Axisが未登録ならDefault設定を追加する。

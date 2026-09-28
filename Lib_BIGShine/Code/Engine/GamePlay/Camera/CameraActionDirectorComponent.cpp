@@ -12,6 +12,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/Transform/Transform.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 #include <cmath>
@@ -19,6 +20,31 @@
 
 namespace
 {
+    // 対象の拡大率を除外し、Z+を正面とする位置・回転だけの座標系を作る。
+    bool BuildFollowFrame(const std::shared_ptr<GameObject>& target_, DirectX::XMFLOAT4X4& frame_)
+    {
+        if (!target_ || !target_->transform) return false;
+        DirectX::XMVECTOR scale_, rotation_, position_;
+        if (!DirectX::XMMatrixDecompose(&scale_, &rotation_, &position_, target_->transform->GetWorldMatrix())) return false;
+        DirectX::XMStoreFloat4x4(&frame_, DirectX::XMMatrixRotationQuaternion(rotation_) *
+            DirectX::XMMatrixTranslationFromVector(position_));
+        return true;
+    }
+
+    // 保存した対象ローカルの構図を、現在の対象の位置と回転でワールド空間へ戻す。
+    bool ResolveFollowPose(const CameraActionPreset& preset_, const std::shared_ptr<GameObject>& target_,
+        DirectX::XMFLOAT3& eye_, DirectX::XMFLOAT3& focus_, DirectX::XMFLOAT3& up_)
+    {
+        BS_PROFILE_SCOPE("CameraAction::ResolveFollowPose");
+        DirectX::XMFLOAT4X4 frame_;
+        if (!BuildFollowFrame(target_, frame_)) return false;
+        const auto matrix_ = DirectX::XMLoadFloat4x4(&frame_);
+        DirectX::XMStoreFloat3(&eye_, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&preset_.cameraOffset), matrix_));
+        DirectX::XMStoreFloat3(&focus_, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&preset_.focusOffset), matrix_));
+        DirectX::XMStoreFloat3(&up_, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&preset_.cameraUp), matrix_));
+        return true;
+    }
+
     const char* ToString(CAMERA_ACTION_PHASE phase_)
     {
         switch (phase_)
@@ -55,6 +81,7 @@ namespace
         case CAMERA_ACTION_POSITION_MODE::PLAYER_FORWARD_RELATIVE: return "PLAYER_FORWARD_RELATIVE";
         case CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE: return "TPS_VIEW_RELATIVE";
         case CAMERA_ACTION_POSITION_MODE::WORLD_POSITION: return "WORLD_POSITION";
+        case CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE: return "TPS_TARGET_RELATIVE";
         case CAMERA_ACTION_POSITION_MODE::CURRENT_CAMERA_RELATIVE:
         default:
             return "CURRENT_CAMERA_RELATIVE";
@@ -77,6 +104,7 @@ namespace
         if (value_ == "PLAYER_FORWARD_RELATIVE") return CAMERA_ACTION_POSITION_MODE::PLAYER_FORWARD_RELATIVE;
         if (value_ == "TPS_VIEW_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TPS_VIEW_RELATIVE;
         if (value_ == "WORLD_POSITION") return CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
+        if (value_ == "TPS_TARGET_RELATIVE") return CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE;
         return CAMERA_ACTION_POSITION_MODE::CURRENT_CAMERA_RELATIVE;
     }
 
@@ -110,6 +138,24 @@ namespace
             start_.y + (end_.y - start_.y) * rate_,
             start_.z + (end_.z - start_.z) * rate_
         };
+    }
+
+    // 対象を中心とする水平円弧で移動し、反対側への直線補間が対象を横切るのを防ぐ。
+    DirectX::XMFLOAT3 OrbitAroundTarget(
+        const DirectX::XMFLOAT3& start_, const DirectX::XMFLOAT3& end_,
+        const DirectX::XMFLOAT3& center_, float rate_)
+    {
+        const auto from_ = SubtractFloat3(start_, center_);
+        const auto to_ = SubtractFloat3(end_, center_);
+        const float startRadius_ = std::sqrt(from_.x * from_.x + from_.z * from_.z);
+        const float endRadius_ = std::sqrt(to_.x * to_.x + to_.z * to_.z);
+        const float startAngle_ = startRadius_ > 0.0001f ? std::atan2(from_.x, from_.z) : std::atan2(to_.x, to_.z);
+        const float endAngle_ = endRadius_ > 0.0001f ? std::atan2(to_.x, to_.z) : startAngle_;
+        // 最短側へ回り込み、始点・終点より内側へ距離が縮む弦の経路を避ける。
+        const float angle_ = startAngle_ + std::remainder(endAngle_ - startAngle_, DirectX::XM_2PI) * rate_;
+        const float radius_ = startRadius_ + (endRadius_ - startRadius_) * rate_;
+        return { center_.x + std::sin(angle_) * radius_, start_.y + (end_.y - start_.y) * rate_,
+            center_.z + std::cos(angle_) * radius_ };
     }
 
     DirectX::XMFLOAT3 NormalizeOr(
@@ -207,6 +253,7 @@ void CameraActionDirectorComponent::Start()
 
 void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("CameraActionDirectorComponent::LateUpdate");
     ResolveReferences();
     if (phase == CAMERA_ACTION_PHASE::IDLE) return;
 
@@ -218,6 +265,14 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         return;
     }
 
+    // 演出中も同じ対象の現在姿勢から復元し、移動や旋回で構図が取り残されるのを防ぐ。
+    if (activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE &&
+        phase != CAMERA_ACTION_PHASE::RETURN &&
+        !ResolveFollowPose(activePreset, activeFollowTarget.lock(), actionCameraPosition, actionFocusPosition, actionCameraUp))
+    {
+        StopAction(false);
+        return;
+    }
     phaseTimer += deltaTime_;
     float duration_ = GetPhaseDuration();
     const float rate_ = duration_ <= 0.0001f
@@ -227,12 +282,20 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
     DirectX::XMFLOAT3 cameraPosition_ = actionCameraPosition;
     DirectX::XMFLOAT3 focusPosition_ = actionFocusPosition;
     float fov_ = activeFov;
+    DirectX::XMFLOAT3 up_ = actionCameraUp;
+    const auto followTarget_ = activeFollowTarget.lock();
+    const bool useOrbit_ = activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE &&
+        followTarget_ && followTarget_->transform;
+    const auto orbitCenter_ = useOrbit_ ? followTarget_->transform->GetWorldPosition() : DirectX::XMFLOAT3{};
 
     if (phase == CAMERA_ACTION_PHASE::ENTER)
     {
         cameraPosition_ = LerpFloat3(startCameraPosition, actionCameraPosition, rate_);
+        if (useOrbit_) cameraPosition_ = OrbitAroundTarget(startCameraPosition, actionCameraPosition, orbitCenter_, rate_);
         focusPosition_ = LerpFloat3(startFocusPosition, actionFocusPosition, rate_);
         fov_ = startFov + (activeFov - startFov) * rate_;
+        if (activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+            up_ = NormalizeOr(LerpFloat3(startCameraUp, actionCameraUp, rate_), actionCameraUp);
     }
     else if (phase == CAMERA_ACTION_PHASE::RETURN)
     {
@@ -240,8 +303,11 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         const DirectX::XMFLOAT3 normalFocus_ = camera_->GetFocus();
         const float normalFov_ = camera_->GetFovY();
         cameraPosition_ = LerpFloat3(returnStartCameraPosition, normalCamera_, rate_);
+        if (useOrbit_) cameraPosition_ = OrbitAroundTarget(returnStartCameraPosition, normalCamera_, orbitCenter_, rate_);
         focusPosition_ = LerpFloat3(returnStartFocusPosition, normalFocus_, rate_);
         fov_ = returnStartFov + (normalFov_ - returnStartFov) * rate_;
+        if (activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+            up_ = NormalizeOr(LerpFloat3(returnStartCameraUp, camera_->GetUp(), rate_), camera_->GetUp());
     }
 
     if (activePreset.shakeStrength > 0.0001f)
@@ -254,7 +320,7 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         focusPosition_.y += shake_ * 0.35f;
     }
 
-    ApplyCameraPose(cameraPosition_, focusPosition_, fov_);
+    ApplyCameraPose(cameraPosition_, focusPosition_, fov_, up_);
 
     if (phaseTimer < duration_) return;
 
@@ -270,6 +336,7 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
         returnStartCameraPosition = camera_->GetEye();
         returnStartFocusPosition = camera_->GetFocus();
         returnStartFov = camera_->GetFovY();
+        returnStartCameraUp = camera_->GetUp();
         ReleaseSuppression();
         phase = CAMERA_ACTION_PHASE::RETURN;
         phaseTimer = 0.0f;
@@ -338,6 +405,7 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
         phase = CAMERA_ACTION_PHASE::IDLE;
         phaseTimer = 0.0f;
         activePriority = -1;
+        activeFollowTarget.reset();
         ReleaseSuppression();
         return;
     }
@@ -348,6 +416,7 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
     returnStartCameraPosition = camera_ ? camera_->GetEye() : actionCameraPosition;
     returnStartFocusPosition = camera_ ? camera_->GetFocus() : actionFocusPosition;
     returnStartFov = camera_ ? camera_->GetFovY() : activeFov;
+    returnStartCameraUp = camera_ ? camera_->GetUp() : actionCameraUp;
     phase = CAMERA_ACTION_PHASE::RETURN;
     phaseTimer = 0.0f;
     ReleaseSuppression();
@@ -407,6 +476,16 @@ void CameraActionDirectorComponent::BeginAction(
         return;
     }
 
+    // 追従対象が取得できない場合は、再生中の演出や通常カメラを変更しない。
+    std::shared_ptr<GameObject> followTarget_;
+    DirectX::XMFLOAT3 relativeEye_, relativeFocus_, relativeUp_;
+    if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+    {
+        const auto thirdPerson_ = thirdPersonCamera.lock();
+        followTarget_ = thirdPerson_ ? thirdPerson_->GetFollowTarget() : nullptr;
+        if (!ResolveFollowPose(preset_, followTarget_, relativeEye_, relativeFocus_, relativeUp_)) return;
+    }
+
     if (phase != CAMERA_ACTION_PHASE::IDLE)
     {
         ReleaseSuppression();
@@ -414,16 +493,26 @@ void CameraActionDirectorComponent::BeginAction(
 
     activePreset = preset_;
     activeTarget = target_;
+    activeFollowTarget = followTarget_;
     activePriority = preset_.priority;
     startCameraPosition = camera_->GetEye();
     startFocusPosition = camera_->GetFocus();
     startFov = camera_->GetFovY();
+    startCameraUp = camera_->GetUp();
     actionFocusPosition = AddFloat3(focusPosition_, preset_.focusOffset);
     actionCameraPosition = CalculateCameraPosition(
         preset_,
         actionFocusPosition,
         attackDirection_);
     activeFov = ClampFov(preset_.targetFov);
+    actionCameraUp = { 0.0f, 1.0f, 0.0f };
+    if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+    {
+        // 接触位置やTargetModeによる注視点上書きを避け、キャプチャした構図を優先する。
+        actionCameraPosition = relativeEye_;
+        actionFocusPosition = relativeFocus_;
+        actionCameraUp = relativeUp_;
+    }
 
     // 演出中にTPS/LockOn/Collisionが同じCameraComponentを書き換えないよう必要分だけ抑制する。
     if (preset_.suppressThirdPersonControl)
@@ -619,15 +708,23 @@ DirectX::XMFLOAT3 CameraActionDirectorComponent::CalculateCameraPosition(
 void CameraActionDirectorComponent::ApplyCameraPose(
     const DirectX::XMFLOAT3& cameraPosition_,
     const DirectX::XMFLOAT3& lookAtPosition_,
-    float fov_)
+    float fov_,
+    const DirectX::XMFLOAT3& up_)
 {
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_ || !owner_->transform) return;
 
+    // 補間中に上方向と視線が平行になっても、特異なView行列を生成しない。
+    const auto forward_ = NormalizeOr(SubtractFloat3(lookAtPosition_, cameraPosition_), { 0.0f, 0.0f, 1.0f });
+    auto safeUp_ = NormalizeOr(up_, { 0.0f, 1.0f, 0.0f });
+    if (LengthFloat3(CrossFloat3(safeUp_, forward_)) < 0.0001f)
+        safeUp_ = std::abs(forward_.y) < 0.99f ? DirectX::XMFLOAT3{ 0.0f, 1.0f, 0.0f } : DirectX::XMFLOAT3{ 1.0f, 0.0f, 0.0f };
+    const auto safeFocus_ = LengthFloat3(SubtractFloat3(lookAtPosition_, cameraPosition_)) > 0.0001f
+        ? lookAtPosition_ : AddFloat3(cameraPosition_, forward_);
     const DirectX::XMMATRIX viewMatrix_ = DirectX::XMMatrixLookAtLH(
         DirectX::XMLoadFloat3(&cameraPosition_),
-        DirectX::XMLoadFloat3(&lookAtPosition_),
-        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+        DirectX::XMLoadFloat3(&safeFocus_),
+        DirectX::XMLoadFloat3(&safeUp_));
     DirectX::XMVECTOR determinant_;
     owner_->transform->ApplyWorldMatrix(
         DirectX::XMMatrixInverse(&determinant_, viewMatrix_));
@@ -636,8 +733,8 @@ void CameraActionDirectorComponent::ApplyCameraPose(
     {
         camera_->SetLookAt(
             cameraPosition_,
-            lookAtPosition_,
-            { 0.0f, 1.0f, 0.0f });
+            safeFocus_,
+            safeUp_);
         camera_->SetFov(ClampFov(fov_));
     }
 }
@@ -681,13 +778,22 @@ void CameraActionDirectorComponent::ReleaseSuppression()
 void CameraActionDirectorComponent::CaptureCurrentCameraAsPreset(
     CameraActionPreset& preset_) const
 {
+    BS_PROFILE_SCOPE("CameraActionDirectorComponent::CaptureCurrentCameraAsPreset");
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
     if (!camera_) return;
 
-    preset_.cameraOffset = camera_->GetEye();
-    preset_.focusOffset = SubtractFloat3(camera_->GetFocus(), camera_->GetEye());
+    const auto thirdPerson_ = thirdPersonCamera.lock();
+    const auto target_ = thirdPerson_ ? thirdPerson_->GetFollowTarget() : nullptr;
+    DirectX::XMFLOAT4X4 frame_;
+    if (!BuildFollowFrame(target_, frame_)) return;
+
+    // ワールド位置・姿勢を対象の逆変換で保存し、別の位置や向きでも同じ構図を再現する。
+    const auto inverse_ = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&frame_));
+    DirectX::XMStoreFloat3(&preset_.cameraOffset, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&camera_->GetEye()), inverse_));
+    DirectX::XMStoreFloat3(&preset_.focusOffset, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&camera_->GetFocus()), inverse_));
+    DirectX::XMStoreFloat3(&preset_.cameraUp, DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&camera_->GetUp()), inverse_));
     preset_.targetFov = camera_->GetFovY();
-    preset_.positionMode = CAMERA_ACTION_POSITION_MODE::WORLD_POSITION;
+    preset_.positionMode = CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE;
 }
 
 int CameraActionDirectorComponent::FindPresetIndex(
@@ -775,7 +881,7 @@ void CameraActionDirectorComponent::Gui()
             if (ImGui::Combo(
                 "Position Mode",
                 &positionMode_,
-                "CURRENT_CAMERA_RELATIVE\0TARGET_LOCAL_RELATIVE\0PLAYER_FORWARD_RELATIVE\0TPS_VIEW_RELATIVE\0WORLD_POSITION\0"))
+                "CURRENT_CAMERA_RELATIVE\0TARGET_LOCAL_RELATIVE\0PLAYER_FORWARD_RELATIVE\0TPS_VIEW_RELATIVE\0WORLD_POSITION\0TPS_TARGET_RELATIVE\0"))
             {
                 preset_.positionMode =
                     static_cast<CAMERA_ACTION_POSITION_MODE>(positionMode_);
@@ -787,6 +893,11 @@ void CameraActionDirectorComponent::Gui()
             }
             ImGui::DragFloat3("Camera Offset", &preset_.cameraOffset.x, 0.05f);
             ImGui::DragFloat3("Focus Offset", &preset_.focusOffset.x, 0.05f);
+            if (preset_.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE)
+            {
+                ImGui::TextWrapped("Camera and focus are relative to the TPS follow object (+Z forward). Target Mode is ignored. Object scale does not change the distance.");
+                ImGui::DragFloat3("Local Camera Up", &preset_.cameraUp.x, 0.01f);
+            }
             ImGui::DragFloat("Enter", &preset_.enterDuration, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Hold", &preset_.holdDuration, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Return", &preset_.returnDuration, 0.01f, 0.0f, 5.0f);
@@ -868,6 +979,7 @@ void CameraActionDirectorComponent::Serialize(nlohmann::json& json_) const
         presetJson_["holdDuration"] = preset_.holdDuration;
         presetJson_["returnDuration"] = preset_.returnDuration;
         presetJson_["targetFov"] = preset_.targetFov;
+        presetJson_["cameraUp"] = { preset_.cameraUp.x, preset_.cameraUp.y, preset_.cameraUp.z };
         presetJson_["shakeStrength"] = preset_.shakeStrength;
         presetJson_["shakeFrequency"] = preset_.shakeFrequency;
         presetJson_["priority"] = preset_.priority;
@@ -911,6 +1023,7 @@ void CameraActionDirectorComponent::Deserialize(const nlohmann::json& json_)
             preset_.holdDuration = presetJson_.value("holdDuration", 0.12f);
             preset_.returnDuration = presetJson_.value("returnDuration", 0.18f);
             preset_.targetFov = presetJson_.value("targetFov", 45.0f);
+            preset_.cameraUp = LoadFloat3(presetJson_, "cameraUp", { 0.0f, 1.0f, 0.0f });
             preset_.shakeStrength = presetJson_.value("shakeStrength", 0.0f);
             preset_.shakeFrequency = presetJson_.value("shakeFrequency", 20.0f);
             preset_.priority = presetJson_.value("priority", 0);

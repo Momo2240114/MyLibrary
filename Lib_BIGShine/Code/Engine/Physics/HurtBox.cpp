@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "CharacterCollider.h"
 #include "HitBox.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 
@@ -34,6 +35,7 @@ void HurtBox::Start()
 
 void HurtBox::Update(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("HurtBox::Update");
     // Player/Enemyの本体Colliderに追従する設定の場合、毎Frame形状を合わせる。
     // その後、被弾後の短い無敵時間を減らして次のHit受付へ戻す。
     ResolveCharacterCollider();
@@ -42,13 +44,15 @@ void HurtBox::Update(float deltaTime_)
     invincibilityTimer = (std::max)(
         invincibilityTimer - (std::max)(deltaTime_, 0.0f),
         0.0f);
+    grantedInvincibilityTimer = (std::max)(
+        grantedInvincibilityTimer - (std::max)(deltaTime_, 0.0f), 0.0f);
 }
 
 bool HurtBox::CanReceiveHit(const HitBox& hitBox_) const
 {
     // 明示無敵、同じHitBox activationの重複Hit、被弾直後の短い無敵をここでまとめて拒否する。
     // AttackSystem側はこの結果を見て、HitEventを作るかどうかを決める。
-    if (invincible) return false;
+    if (IsInvincible()) return false;
 
     const auto receivedIterator_ = receivedActivationIds.find(&hitBox_);
     if (hitBox_.hitOncePerActivation &&
@@ -68,6 +72,12 @@ void HurtBox::SetInvincible(bool invincible_)
     if (invincible) invincibilityTimer = 0.0f;
 }
 
+void HurtBox::AddInvincibilityTime(float duration_)
+{
+    // Animationの無敵解除や次の回避開始で、成功時の残り時間が失われないよう分離する。
+    grantedInvincibilityTimer = (std::max)(grantedInvincibilityTimer, (std::max)(duration_, 0.0f));
+}
+
 void HurtBox::RecordHit(const HitBox& hitBox_)
 {
     // Hit成立後に呼ばれ、同じHitBoxの同じactivationで再度当たらないよう履歴を残す。
@@ -81,6 +91,7 @@ void HurtBox::ResetHitHistory()
     // DebugやAction切り替え、Deserialize時に、過去のHit履歴とTimerを初期化する。
     receivedActivationIds.clear();
     invincibilityTimer = 0.0f;
+    grantedInvincibilityTimer = 0.0f;
 }
 
 void HurtBox::Gui()
@@ -88,6 +99,7 @@ void HurtBox::Gui()
     // 被弾倍率、無敵時間、CharacterCollider同期の状態をEditor上で確認・調整する。
     CapsuleCollider::Gui();
     ImGui::SeparatorText("Damage Reception");
+    ImGui::Text("Granted Invincibility: %.3f sec", grantedInvincibilityTimer);
     ImGui::Checkbox(
         "Sync Character Collider Shape",
         &syncCharacterColliderShape);

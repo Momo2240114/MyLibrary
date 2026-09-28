@@ -8,20 +8,20 @@
 
 #include <imgui.h>
 
-// 起動時に本体Objectと部位Managerの参照を解決する。
+// 起動時に本体Objectと部位Managerの参照を解決する
 void DragonBodyPartHurtBoxComponent::Start()
 {
     ResolveReferences();
 }
 
-// Hit処理を集約するDragon本体Objectを返す。
+// Hit処理を集約するDragon本体Objectを返す
 std::shared_ptr<GameObject> DragonBodyPartHurtBoxComponent::GetCombatOwner()
 {
     ResolveReferences();
     return cachedCombatOwner.lock();
 }
 
-// Dragon本体側の部位管理Componentを返す。
+// Dragon本体側の部位管理Componentを返す
 std::shared_ptr<DragonBodyPartManagerComponent>
 DragonBodyPartHurtBoxComponent::GetBodyPartManager()
 {
@@ -29,7 +29,7 @@ DragonBodyPartHurtBoxComponent::GetBodyPartManager()
     return cachedBodyPartManager.lock();
 }
 
-// 明示名、ColliderのOwner、親階層の順でDragon本体参照を解決する。
+// 明示名、ColliderのOwner、親階層の順でDragon本体参照を解決する
 void DragonBodyPartHurtBoxComponent::ResolveReferences()
 {
     std::shared_ptr<GameObject> owner_ = cachedCombatOwner.lock();
@@ -40,13 +40,13 @@ void DragonBodyPartHurtBoxComponent::ResolveReferences()
 
         if (!combatOwnerObjectName.empty() && self_->manager)
         {
-            // Editorで本体Object名を指定している場合は、それを最優先で使う。
+            // Editorで本体Object名を指定している場合は、それを最優先で使う
             owner_ = self_->GetManager().Find(combatOwnerObjectName);
         }
 
         if (!owner_)
         {
-            // Colliderが別Objectを戦闘Ownerとして解決できる場合はそれを使う。
+            // Colliderが別Objectを戦闘Ownerとして解決できる場合はそれを使う
             if (const std::shared_ptr<ColliderComponent> collider_ =
                 self_->GetComponent<ColliderComponent>())
             {

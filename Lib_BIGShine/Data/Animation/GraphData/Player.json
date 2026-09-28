@@ -16519,7 +16519,7 @@
                 "blendUseMask": false,
                 "customAnimIndex": -1,
                 "events": [],
-                "loop": true,
+                "loop": false,
                 "name": "Parry_L_Seq",
                 "rootMotion": {
                     "applyPositionX": true,
@@ -35418,6 +35418,17 @@
     "GraphNodes": [
         {
             "childScopeId": "",
+            "id": 324,
+            "inputPin": 325,
+            "nodeType": 0,
+            "outputPin": 326,
+            "posX": 500.0,
+            "posY": 500.0,
+            "scopeId": "Root",
+            "stateName": "Parry_L_Seq"
+        },
+        {
+            "childScopeId": "",
             "id": 5,
             "inputPin": 0,
             "nodeType": 1,
@@ -35913,6 +35924,30 @@
         }
     ],
     "GraphTransitions": [
+        {
+            "conditions": [
+                { "op": 0, "param": "IsParrying", "threshold": 1.0, "type": 0 }
+            ],
+            "duration": 0.05,
+            "from": "__Any__",
+            "id": 327,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Parry_L_Seq"
+        },
+        {
+            "conditions": [
+                { "op": 0, "param": "IsParrying", "threshold": 0.0, "type": 0 },
+                { "op": 0, "param": "IsGuard", "threshold": 1.0, "type": 0 },
+                { "op": 0, "param": "GuardInput", "threshold": 1.0, "type": 0 }
+            ],
+            "duration": 0.1,
+            "from": "Parry_L_Seq",
+            "id": 328,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "Guard_State"
+        },
         {
             "conditions": [
                 {

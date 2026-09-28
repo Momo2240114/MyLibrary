@@ -1,0 +1,39 @@
+{
+    "AssetType": "ImpactEffect",
+    "AssetVersion": 1,
+    "Entries": [
+        {
+            "Type": 0,
+            "Enabled": true,
+            "AssetPath": "DragonBreathProjectile_Impact",
+            "EmitterName": "",
+            "Scale": [1.0, 1.0, 1.0],
+            "Color": [1.0, 0.76, 0.25, 1.0],
+            "LifeTime": 0.35,
+            "FadeOutDuration": 0.05,
+            "NormalOffset": 0.04
+        },
+        {
+            "Type": 1,
+            "Enabled": true,
+            "AssetPath": "DragonBreathProjectile_Core",
+            "EmitterName": "",
+            "Scale": [0.9, 0.9, 0.9],
+            "Color": [1.0, 0.45, 0.10, 1.0],
+            "LifeTime": 0.28,
+            "FadeOutDuration": 0.08,
+            "NormalOffset": 0.05
+        },
+        {
+            "Type": 2,
+            "Enabled": true,
+            "AssetPath": "Data/Texture/Particle/kenney_particle-pack/PNG (Black background)/scorch_03.png",
+            "EmitterName": "",
+            "Scale": [1.6, 1.6, 1.0],
+            "Color": [0.65, 0.30, 0.12, 0.55],
+            "LifeTime": 2.0,
+            "FadeOutDuration": 0.45,
+            "NormalOffset": 0.015
+        }
+    ]
+}

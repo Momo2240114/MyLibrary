@@ -12,6 +12,7 @@ class CharacterMovementComponent;
 class HurtBox;
 class HitBox;
 class JustDodgeCollider;
+class GuardCollider;
 
 // PlayerAction中のキャンセル、先行入力、コンボ受付状態を保持する。
 struct PlayerActionRuntime
@@ -162,12 +163,31 @@ public:
     float jumpImpulseFallbackDuration = 0.18f; // Sequencer未設定時に踏み切りを補完する待機時間。
     float timelineActionFallbackDuration = 1.5f;
     float groundDodgeCooldownDuration = 0.5f;
+    float justDodgeInvincibilityDuration = 0.5f; // ジャスト回避成功後に保証する無敵秒数。
     float armor = 5.0f;
     float hitMediumImpactThreshold = 5.0f;
     float hitHeavyImpactThreshold = 100.0f;
     float airHitKnockdownImpactThreshold = 100.0f;
 
 private:
+    // パリィのアニメーションと前方判定を開始する。
+    void BeginParry();
+    // パリィの受付時間を進め、期限切れの判定を閉じる。
+    void UpdateParry(float deltaTime_);
+    // パリィ成功時に無敵と演出Actionを一度だけ発生させる。
+    void NotifyParrySucceeded();
+    // パリィの時間設定と成功時のAction選択を表示する。
+    void DrawParryGui();
+
+    std::shared_ptr<GuardCollider> parryCollider; // プレイヤー前方のパリィ判定。
+    float parryWindowDuration = 0.25f; // 動作開始から攻撃を受け付ける秒数。
+    float parryInvincibilityDuration = 0.35f; // 成功時に付与する無敵秒数。
+    float parryWindowTimer = 0.0f;
+    bool parrySucceeded = false; // 同じ動作で成功イベントを重複発火させない。
+    bool parryReactionGlobal = false;
+    std::string parryReactionCategory = "Sequence";
+    std::string parryReactionAction; // 成功時に実行するEditor選択Action。
+
     void EnsurePlayerInputBindings(); // Player用InputActionの登録を保証する。
     int GetRequestedComboIndex(PLAYER_ACTION nextAction_) const; // 次に要求するコンボ段番号を計算する。
     void RegisterPlayerAnimationActions(); // Animation/Sequenceから呼ぶPlayer Actionを登録する。

@@ -16,6 +16,8 @@
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
 #include "Engine/Common/DebugLog.h"
+#include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Physics/GuardCollider.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
@@ -145,10 +147,127 @@ namespace
 
 }
 
+// 動作開始時にアニメーションと前方の受付判定を同期する。
+void PlayerControllerComponent::BeginParry()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::BeginParry");
+    parrySucceeded = false;
+    parryWindowTimer = parryWindowDuration;
+    if (blackboard)
+    {
+        blackboard->SetBool("Parry", "Succeeded", false);
+        blackboard->SetBool("Anim", "IsParrying", true);
+    }
+    const auto owner_ = GetGameObject();
+    if (const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr)
+    {
+        animation_->ChangeState("Parry_L_Seq", 0.05f);
+    }
+    if (parryCollider && parryWindowTimer > 0.0f)
+    {
+        parryCollider->Activate();
+        parryCollider->SetJustGuardEnabled(true);
+    }
+}
+
+// 受付終了後もアニメーションは継続し、失敗時の隙を残す。
+void PlayerControllerComponent::UpdateParry(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateParry");
+    if (GetCurrentAction() != PLAYER_ACTION::JUST_GUARD || parryWindowTimer <= 0.0f) return;
+    parryWindowTimer = (std::max)(parryWindowTimer - (std::max)(deltaTime_, 0.0f), 0.0f);
+    if (parryWindowTimer <= 0.0f && parryCollider) parryCollider->Deactivate();
+}
+
+// GuardSystemの成功通知を受け、同フレームの被弾判定前に無敵を付与する。
+void PlayerControllerComponent::NotifyParrySucceeded()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::NotifyParrySucceeded");
+    if (GetCurrentAction() != PLAYER_ACTION::JUST_GUARD || parrySucceeded ||
+        parryWindowTimer <= 0.0f || !parryCollider || !parryCollider->IsEnabled()) return;
+
+    parrySucceeded = true;
+    parryWindowTimer = 0.0f;
+    parryCollider->Deactivate();
+    if (hurtBox) hurtBox->AddInvincibilityTime(parryInvincibilityDuration);
+    if (blackboard)
+    {
+        blackboard->SetBool("Parry", "Succeeded", true);
+        blackboard->SetTrigger("Parry", "SuccessTrigger");
+    }
+
+    // 成功フラグと無敵を確定してから、演出用Sequenceなどの選択Actionを呼ぶ。
+    const auto owner_ = GetGameObject();
+    if (!owner_ || parryReactionAction.empty()) return;
+    ActionRegistry& registry_ = parryReactionGlobal ? ActionRegistry::Instance() : owner_->localRegistry;
+    if (registry_.HasActionInCategory(parryReactionCategory, parryReactionAction))
+    {
+        registry_.Call(parryReactionAction);
+    }
+}
+
+// ジャスト回避と同様に、成功時の反応を既存Actionから選択できるようにする。
+void PlayerControllerComponent::DrawParryGui()
+{
+    if (!ImGui::TreeNode("Parry")) return;
+    ImGui::DragFloat("Window (seconds)", &parryWindowDuration, 0.01f, 0.0f, 5.0f);
+    ImGui::DragFloat("Success Invincibility (seconds)", &parryInvincibilityDuration, 0.01f, 0.0f, 10.0f);
+    ImGui::Text("Window: %.2f / Success: %s", parryWindowTimer, parrySucceeded ? "YES" : "NO");
+    ImGui::TextDisabled("Input: Player.JustGuard (default: C). Shape: GuardCollider.");
+    if (ImGui::Checkbox("Global Reaction", &parryReactionGlobal))
+    {
+        parryReactionCategory.clear();
+        parryReactionAction.clear();
+    }
+    const auto owner_ = GetGameObject();
+    ActionRegistry* registry_ = parryReactionGlobal ? &ActionRegistry::Instance() :
+        (owner_ ? &owner_->localRegistry : nullptr);
+    if (registry_)
+    {
+        auto categories_ = registry_->GetCategories();
+        std::sort(categories_.begin(), categories_.end());
+        if (ImGui::BeginCombo("Reaction Category", parryReactionCategory.c_str()))
+        {
+            for (const auto& category_ : categories_)
+            {
+                if (ImGui::Selectable(category_.c_str(), category_ == parryReactionCategory))
+                {
+                    parryReactionCategory = category_;
+                    parryReactionAction.clear();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        auto actions_ = registry_->GetActionNames(parryReactionCategory);
+        std::sort(actions_.begin(), actions_.end());
+        if (ImGui::BeginCombo("Success Reaction", parryReactionAction.empty() ? "None" : parryReactionAction.c_str()))
+        {
+            if (ImGui::Selectable("None", parryReactionAction.empty())) parryReactionAction.clear();
+            for (const auto& action_ : actions_)
+            {
+                if (action_ == "---") continue;
+                if (ImGui::Selectable(action_.c_str(), action_ == parryReactionAction)) parryReactionAction = action_;
+            }
+            ImGui::EndCombo();
+        }
+        if (!parryReactionAction.empty() && !registry_->HasActionInCategory(parryReactionCategory, parryReactionAction))
+        {
+            ImGui::TextDisabled("Selected reaction is not registered.");
+        }
+    }
+    ImGui::TreePop();
+}
+
 void PlayerControllerComponent::EnsurePlayerInputBindings()
 {
     // プロジェクト側でまだ入力設定が無い場合だけ、最低限のPlayer操作を登録する。
     KeyConfig& keyConfig_ = KeyConfig::Instance();
+    if (keyConfig_.GetActionMap().count(PlayerInputAction::JUST_GUARD) == 0)
+    {
+        // 既存の割り当てを維持し、未設定の場合だけCキーをパリィに割り当てる。
+        keyConfig_.SetBinds(PlayerInputAction::JUST_GUARD,
+            { { { DeviceType::KBM, KeyInput::K_C } } });
+    }
     if (keyConfig_.GetActionMap().count(PlayerInputAction::JUMP) == 0)
     {
         keyConfig_.SetBinds(
@@ -184,6 +303,25 @@ void PlayerControllerComponent::Start()
     hurtBox = owner_->GetOrAddComponent<HurtBox>();
     justDodgeCollider = owner_->GetOrAddComponent<JustDodgeCollider>();
     owner_->GetOrAddComponent<JustDodgeReactionComponent>();
+    parryCollider = owner_->GetComponent<GuardCollider>();
+    if (!parryCollider)
+    {
+        parryCollider = owner_->GetOrAddComponent<GuardCollider>();
+        if (parryCollider)
+        {
+            // ローカル前方へ置き、プレイヤーの向きに追従する防御面を作る。
+            parryCollider->offset = { 0.0f, 1.5f, 1.0f };
+            parryCollider->radius = 0.65f;
+            parryCollider->halfHeight = 0.65f;
+        }
+    }
+    if (parryCollider)
+    {
+        parryCollider->SetGuardOwner(owner_.get());
+        parryCollider->Deactivate();
+    }
+    parryWindowTimer = 0.0f;
+    parrySucceeded = false;
 
     if (collider)
     {
@@ -193,6 +331,8 @@ void PlayerControllerComponent::Start()
 
     blackboard = owner_->GetOrAddComponent<BlackboardComponent>();
     InitializeBlackboardValues();
+    blackboard->SetBool("Anim", "IsParrying", false);
+    blackboard->SetBool("Parry", "Succeeded", false);
 
     owner_->GetOrAddComponent<HealthComponent>();
     RegisterPlayerAnimationActions();
@@ -257,6 +397,7 @@ void PlayerControllerComponent::Start()
 void PlayerControllerComponent::Update(float dt_)
 {
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
+    UpdateParry(dt_);
 
     // State更新後に、キャンセル受付・空中状態・Blackboard・移動反映をまとめて後処理する。
     stateMachine.Update(dt_);
@@ -299,6 +440,8 @@ bool PlayerControllerComponent::IsAnimationStateForAction(
     // 空中Actionなど、同じActionでもAnimation名が限定されるものだけ個別に検証する。
     switch (action_)
     {
+    case PLAYER_ACTION::JUST_GUARD:
+        return stateName_ == "Parry_L_Seq";
     case PLAYER_ACTION::AIR_WEAK_ATTACK:
         return
             stateName_ == "Combo_Attack_Air_01_Seq" ||
@@ -1360,6 +1503,11 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     timelineActionSafetyTimer = 0.0f;
 
     SendActionToBlackboard(action_);
+    // 被弾やキャンセルを含む全遷移で、前のパリィ受付を残さない。
+    if (parryCollider && previousAction_ == PLAYER_ACTION::JUST_GUARD) parryCollider->Deactivate();
+    parryWindowTimer = 0.0f;
+    if (action_ == PLAYER_ACTION::JUST_GUARD) BeginParry();
+    else if (blackboard) blackboard->SetBool("Anim", "IsParrying", false);
 }
 
 int PlayerControllerComponent::GetRequestedComboIndex(PLAYER_ACTION nextAction_) const
@@ -1645,6 +1793,10 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     owner_->RegisterAction("PlayerReaction", "OnJustDodge", [this]()
     {
         NotifyJustDodge();
+    });
+    owner_->RegisterAction("PlayerReaction", "OnJustGuardSucceeded", [this]()
+    {
+        NotifyParrySucceeded();
     });
     owner_->RegisterAction("PlayerCancel", "CanCancelOn", [this]()
         {
@@ -2161,6 +2313,8 @@ void PlayerControllerComponent::Gui()
     ImGui::TextUnformatted("Input: KeyConfig Player.* actions / axes");
     ImGui::DragFloat("Move Speed", &moveSpeed, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Guard Move Speed", &guardMoveSpeed, 0.1f, 0.0f, 100.0f);
+    DrawParryGui();
+    ImGui::DragFloat("Just Dodge Success Invincibility", &justDodgeInvincibilityDuration, 0.01f, 0.0f, 10.0f);
     ImGui::DragFloat("Jump Impulse", &jumpImpulse, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Double Jump Impulse", &doubleJumpImpulse, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat("Air Control Rate", &airControlRate, 0.01f, 0.0f, 2.0f, "%.2f");
@@ -2335,6 +2489,12 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     // Player調整値とキャンセルルールをScene JSONへ保存する。
     j_["MoveSpeed"] = moveSpeed;
     j_["GuardMoveSpeed"] = guardMoveSpeed;
+    j_["ParryWindowDuration"] = parryWindowDuration;
+    j_["ParryInvincibilityDuration"] = parryInvincibilityDuration;
+    j_["ParryReactionGlobal"] = parryReactionGlobal;
+    j_["ParryReactionCategory"] = parryReactionCategory;
+    j_["ParryReactionAction"] = parryReactionAction;
+    j_["JustDodgeInvincibilityDuration"] = justDodgeInvincibilityDuration;
     j_["JumpImpulse"] = jumpImpulse;
     j_["DoubleJumpImpulse"] = doubleJumpImpulse;
     j_["AirControlRate"] = airControlRate;
@@ -2401,6 +2561,15 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
     // Scene JSONからPlayer調整値を復元し、範囲外の値は安全な範囲へ丸める。
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
+    parryWindowDuration = (std::max)(j_.value("ParryWindowDuration", 0.25f), 0.0f);
+    parryInvincibilityDuration = (std::max)(j_.value("ParryInvincibilityDuration", 0.35f), 0.0f);
+    parryReactionGlobal = j_.value("ParryReactionGlobal", false);
+    parryReactionCategory = j_.value("ParryReactionCategory", std::string("Sequence"));
+    parryReactionAction = j_.value("ParryReactionAction", std::string{});
+    justDodgeInvincibilityDuration = (std::max)(j_.value("JustDodgeInvincibilityDuration", 0.5f), 0.0f);
+    parryWindowTimer = 0.0f;
+    parrySucceeded = false;
+    if (parryCollider) parryCollider->Deactivate();
     jumpImpulse = (std::max)(j_.value("JumpImpulse", jumpImpulse), 0.0f);
     doubleJumpImpulse = (std::max)(j_.value("DoubleJumpImpulse", doubleJumpImpulse), 0.0f);
     airControlRate = std::clamp(j_.value("AirControlRate", airControlRate), 0.0f, 2.0f);

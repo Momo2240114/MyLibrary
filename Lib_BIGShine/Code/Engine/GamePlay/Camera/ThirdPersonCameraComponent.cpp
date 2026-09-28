@@ -416,6 +416,12 @@ void ThirdPersonCameraComponent::ResolveTarget()
     if (resolvedTarget_) SetTarget(resolvedTarget_);
 }
 
+std::shared_ptr<GameObject> ThirdPersonCameraComponent::GetFollowTarget()
+{
+    ResolveTarget();
+    return target.lock();
+}
+
 void ThirdPersonCameraComponent::ResolveCamera()
 {
     if (camera.lock()) return;

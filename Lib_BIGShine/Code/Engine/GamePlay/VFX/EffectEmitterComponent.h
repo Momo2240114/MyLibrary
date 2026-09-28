@@ -93,6 +93,8 @@ struct EffectEmitterHitTemplate
     std::string hitMeshVFXAssetPath;
     float hitMeshVFXLifeTime = 1.0f;
     float hitMeshVFXNormalOffset = 0.0f;
+    // Hit位置の法線に合わせて再生するImpactEffect Asset。
+    std::string hitImpactEffectAssetPath;
     bool cameraShakeEnabled = true;
     float cameraShakeReceiveDuration = 0.12f;
     float cameraShakeReceivePositionStrength = 0.025f;
@@ -119,10 +121,16 @@ struct EffectEmitterTemplate
     float speed = 8.0f;
     float lifeTime = 1.0f;
     float fanAngleDegrees = 45.0f;
+    bool projectileMotionEnabled = true;
+    float projectileAcceleration = 0.0f;
+    float projectileGravity = 0.0f;
+    float projectileMaxSpeed = 0.0f;
 
     // FAN形状で複数方向・複数距離にサンプル判定を置くための設定。
     int fanSampleCount = 5;
     int fanRangeSteps = 3;
+    // FAN形状の見た目Entryを何方向に複製するか。判定用サンプル数とは分けて負荷を抑える。
+    int fanVisualSampleCount = 1;
     bool spawnHit = true;
 
     // 同時に生成する見た目演出と、必要なら攻撃判定設定。
@@ -145,6 +153,15 @@ public:
 
     // Template名から検索して発火する。
     void EmitByName(const std::string& templateName_);
+    // 指定したワールド位置と方向を基準に、Template名から検索して発火する。
+    void EmitByNameAt(
+        const std::string& templateName_,
+        const DirectX::XMFLOAT3& position_,
+        const DirectX::XMFLOAT3& direction_);
+    // EffectEmitter Asset JSONを読み込む。
+    bool LoadAsset(const std::string& path_, bool forceReload_ = false);
+    // 現在のTemplate設定をEffectEmitter Asset JSONとして保存する。
+    bool SaveAsset(const std::string& path_) const;
 
     std::vector<EffectEmitterTemplate>& GetTemplates() { return templates; }
     const std::vector<EffectEmitterTemplate>& GetTemplates() const { return templates; }
@@ -162,10 +179,17 @@ private:
 
     // TemplateのsourceNode/localOffsetから、今回の発生基準を作る。
     EmitFrame BuildEmitFrame(const EffectEmitterTemplate& template_) const;
+    // 外部Action側で解決済みのワールド位置と方向から、今回の発生基準を作る。
+    EmitFrame BuildEmitFrameAt(
+        const DirectX::XMFLOAT3& position_,
+        const DirectX::XMFLOAT3& direction_) const;
     DirectX::XMMATRIX BuildLocalMatrix(
         const DirectX::XMFLOAT3& position_,
         const DirectX::XMFLOAT3& rotation_,
         const DirectX::XMFLOAT3& scale_) const;
+    void EmitWithFrame(
+        const EffectEmitterTemplate& template_,
+        const EmitFrame& frame_);
     void SpawnEntry(
         const EffectEmitterTemplate& template_,
         const EffectEmitterEntryTemplate& entry_,
@@ -187,6 +211,10 @@ private:
 private:
     static inline const std::string componentName = "EffectEmitterComponent";
 
+    // 外部EffectEmitter Assetを使う場合のPath。
+    std::string assetPath;
+    // 同じAssetを毎回発射時に読み直さないための、実際に読み込み済みのPath。
+    std::string loadedAssetPath;
     // Editorで保存する発生Template一覧。
     std::vector<EffectEmitterTemplate> templates;
 };

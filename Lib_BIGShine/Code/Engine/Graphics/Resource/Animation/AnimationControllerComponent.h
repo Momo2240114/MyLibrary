@@ -68,6 +68,9 @@ public:
     bool IsAnimationPaused() const { return animationPaused; }
     void SetEditorPoseOverride(bool enabled_) { editorPoseOverride = enabled_; }
     bool IsEditorPoseOverride() const { return editorPoseOverride; }
+    // AIなど外部制御から、RootMotionのYaw回転が指定角度を超えないように制限する。
+    void SetRootMotionYawLimit(float yawDegrees_);
+    void ClearRootMotionYawLimit();
 
     // ーーー 窓にデータを差し出すためのゲッター群 ーーー
     std::vector<AnimGraphNode>& GetGraphNodes() { return graphNodes; }
@@ -206,6 +209,7 @@ private:
     void RefreshEffectAssetCache();
     void MarkEffectAssetCacheDirty();
     void PreviewStateAtTime(AnimState* state_, float time_);
+    float ConsumeRootMotionYawLimit(float yawDegrees_);
 
     bool pendingGraphAssetLoad = false;
     std::string pendingGraphAssetPath;
@@ -213,6 +217,8 @@ private:
     bool useTransitionGraph = true;
 
     DirectX::XMFLOAT3 rootMotionDelta;
+    float rootMotionYawLimitRemaining = 0.0f;
+    bool rootMotionYawLimitActive = false;
 
     // ActionRegistryへの登録名リスト（削除用）
     std::vector<std::string> registeredActionNames;
