@@ -54,8 +54,7 @@ void GuardCollider::Deactivate()
 
 bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
 {
-    // GuardSystemへ渡す前に、所有者攻撃、Team、同一activationの重複Guardを除外する。
-    // 実際に通常Guard/JustGuardのどちらになるかは、justGuardEnabledを見てGuardSystem側で決まる。
+    // Guard/JustGuardのSystemへ渡す前に、所有者攻撃、Team、同一activationの重複Guardを除外する。
     const std::shared_ptr<GameObject> owner_ = GetGuardOwner();
     const std::shared_ptr<GameObject> attackOwner_ =
         const_cast<HitBox&>(hitBox_).GetAttackOwner();
@@ -82,6 +81,19 @@ bool GuardCollider::CanGuardAttack(const HitBox& hitBox_) const
     }
 
     return true;
+}
+
+bool GuardCollider::HasGuardedAttackRecord(const HitBox& hitBox_) const
+{
+    // 成立済みのHitBox activationかを確認し、イベント重複なしでHitだけ抑止する時に使う。
+    if (!oncePerAttackActivation)
+    {
+        return false;
+    }
+
+    const auto iterator_ = guardedAttackActivationIds.find(&hitBox_);
+    return iterator_ != guardedAttackActivationIds.end() &&
+        iterator_->second == hitBox_.GetActivationId();
 }
 
 void GuardCollider::RecordGuardedAttack(const HitBox& hitBox_)
@@ -323,12 +335,12 @@ std::shared_ptr<GameObject> GuardCollider::ResolveGuardOwnerFromHierarchy() cons
     while (object_)
     {
         const std::string guardActionName_ = object_->BuildActionName("OnGuardSucceeded");
-        const std::string justGuardActionName_ = object_->BuildActionName("OnJustGuardSucceeded");
+        const std::string justGuardActionName_ = object_->BuildActionName("OnJustGuard");
         if (object_->GetComponent<BlackboardComponent>() ||
             object_->localRegistry.HasAction(guardActionName_) ||
             object_->localRegistry.HasAction(justGuardActionName_) ||
             object_->localRegistry.HasAction("OnGuardSucceeded") ||
-            object_->localRegistry.HasAction("OnJustGuardSucceeded"))
+            object_->localRegistry.HasAction("OnJustGuard"))
         {
             // BlackboardかGuard用Actionを持つObjectを、Guard結果の受け取り先として優先する。
             return object_;

@@ -853,6 +853,9 @@
     <ClCompile Include="Code\Engine\GamePlay\System\JustDodgeSystem.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\System\JustGuardSystem.cpp">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\System\GuardSystem.cpp">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClCompile>
@@ -955,7 +958,7 @@
     <ClCompile Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.cpp">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.cpp">
+    <ClCompile Include="Code\Engine\GamePlay\VFX\AttackEmitterComponent.cpp">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.cpp">
@@ -989,6 +992,9 @@
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp">
+      <Filter>Code\Game\Logics\Combat</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\JustGuardReactionComponent.cpp">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)External\Tracy\public\TracyClient.cpp">
@@ -1659,6 +1665,9 @@
     <ClInclude Include="Code\Engine\GamePlay\System\JustDodgeSystem.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\System\JustGuardSystem.h">
+      <Filter>Code\Engine\GamePlay\System</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\System\GuardSystem.h">
       <Filter>Code\Engine\GamePlay\System</Filter>
     </ClInclude>
@@ -1785,7 +1794,7 @@
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.h">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.h">
+    <ClInclude Include="Code\Engine\GamePlay\VFX\AttackEmitterComponent.h">
       <Filter>Code\Engine\GamePlay\VFX</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\VFX\DangerAreaComponent.h">
@@ -1834,6 +1843,9 @@
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h">
+      <Filter>Code\Game\Logics\Combat</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\JustGuardReactionComponent.h">
       <Filter>Code\Game\Logics\Combat</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\Debug\TracyProfiler.h">

@@ -302,7 +302,7 @@
                         "FresnelPower": 0.10000000149011612,
                         "FresnelStrength": 10.0,
                         "GradientTexturePath": "",
-                        "Gravity": 0.800000011920929,
+                        "Gravity": 1.5,
                         "LegacyRadius": [
                             0.0,
                             75.0

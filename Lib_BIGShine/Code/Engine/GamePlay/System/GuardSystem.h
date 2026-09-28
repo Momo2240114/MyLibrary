@@ -15,16 +15,6 @@
 class GameObject;
 class GuardCollider;
 
-enum class GUARD_RESULT_TYPE
-{
-    // ガード未成立。
-    NONE,
-    // 通常ガード。
-    NORMAL_GUARD,
-    // ジャストガード。
-    JUST_GUARD
-};
-
 // HitBoxとGuardColliderが重なった時の接触情報。
 struct GuardContact
 {
@@ -42,7 +32,6 @@ struct GuardEvent
     GuardCollider* guardCollider = nullptr;
     HitBox* hitBox = nullptr;
 
-    GUARD_RESULT_TYPE resultType = GUARD_RESULT_TYPE::NONE;
     ATTACK_SOURCE_TYPE attackSourceType = ATTACK_SOURCE_TYPE::MELEE;
 
     DirectX::XMFLOAT3 guardPosition = { 0.0f, 0.0f, 0.0f };
@@ -61,7 +50,7 @@ struct GuardEvent
     std::string attackTag;
 };
 
-// GuardColliderとHitBoxの重なりから通常ガード/ジャストガードを確定するSystem。
+// GuardColliderとHitBoxの重なりから通常ガードを確定するSystem。
 // 成立結果はBlackboard、Action、Callbackへ流す。
 class GuardSystem
 {
@@ -102,15 +91,8 @@ private:
     std::shared_ptr<GameObject> GetHierarchyRoot(
         std::shared_ptr<GameObject> object_) const;
 
-    void PublishDefenderGuardResult(const GuardEvent& event_);
-    void PublishAttackerGuardResult(const GuardEvent& event_);
-    void PublishNormalGuardToDefender(const GuardEvent& event_);
-    void PublishJustGuardToDefender(const GuardEvent& event_);
-    void PublishNormalGuardToAttacker(const GuardEvent& event_);
-    void PublishJustGuardToAttacker(const GuardEvent& event_);
-
-    std::string GetDefenderActionName(GUARD_RESULT_TYPE resultType_) const;
-    std::string GetAttackerActionName(GUARD_RESULT_TYPE resultType_) const;
+    void PublishGuardToDefender(const GuardEvent& event_);
+    void PublishGuardToAttacker(const GuardEvent& event_);
     std::shared_ptr<GameObject> FindBlackboardReceiver(std::shared_ptr<GameObject> object_) const;
 
 private:

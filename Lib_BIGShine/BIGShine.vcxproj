@@ -432,6 +432,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Serialize\RegisterAllComponents.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\GuardSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\JustDodgeSystem.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\System\JustGuardSystem.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\TimeManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\System\EffectManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.cpp" />
@@ -444,7 +445,7 @@
     <ClCompile Include="Code\Engine\Graphics\Core\RenderState.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Decal\DecalComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.cpp" />
-    <ClCompile Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\VFX\AttackEmitterComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleComponent.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.cpp" />
@@ -563,6 +564,7 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerAttackState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerControllerComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\JustGuardReactionComponent.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerDodgeState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerHitState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerIdleState.cpp" />
@@ -708,6 +710,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Scene\SceneTutorial.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\GuardSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\JustDodgeSystem.h" />
+    <ClInclude Include="Code\Engine\GamePlay\System\JustGuardSystem.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\TimeManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\System\EffectManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\Transform\ModelAttachmentComponent.h" />
@@ -728,7 +731,7 @@
     <ClInclude Include="Code\Editor\AssetSlotGui.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectComponent.h" />
-    <ClInclude Include="Code\Engine\GamePlay\VFX\EffectEmitterComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\VFX\AttackEmitterComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\VFX\ImpactEffectAsset.h" />
     <ClInclude Include="Code\Engine\Graphics\Decal\DecalManager.h" />
     <ClInclude Include="Code\Engine\Graphics\PostEffect\ColorFilterDirector.h" />
@@ -893,6 +896,7 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerAttackState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerControllerComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Combat\JustDodgeReactionComponent.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\JustGuardReactionComponent.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerDodgeState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerHitState.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerIdleState.h" />

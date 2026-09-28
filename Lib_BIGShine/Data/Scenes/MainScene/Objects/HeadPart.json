@@ -159,6 +159,7 @@
                 "ImpactPower": 10.0,
                 "IsStatic": false,
                 "IsTrigger": true,
+                "JustGuardedActionName": "",
                 "KnockBackPower": 5.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
@@ -259,6 +260,7 @@
                 "ImpactPower": 12.0,
                 "IsStatic": false,
                 "IsTrigger": true,
+                "JustGuardedActionName": "",
                 "KnockBackPower": 6.0,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,
@@ -322,8 +324,8 @@
         },
         {
             "Data": {
-                "AssetPath": "Data/EffectEmitter/DragonBreathLight.json",
-                "ComponentName": "EffectEmitterComponent",
+                "AssetPath": "Data/AttackEmitter/DragonBreathLight.json",
+                "ComponentName": "AttackEmitterComponent",
                 "Templates": [
                     {
                         "ActionName": "DragonBreath_Charge",
@@ -377,9 +379,9 @@
                                     0.0
                                 ],
                                 "LocalScale": [
-                                    1.0,
-                                    1.0,
-                                    1.0
+                                    1.4500000476837158,
+                                    1.4500000476837158,
+                                    1.2000000476837158
                                 ],
                                 "NormalOffset": 0.0,
                                 "OverrideMeshVFXColorRamp": false,
@@ -465,36 +467,7 @@
                                 "FollowOwner": true,
                                 "ForceAdditiveBlend": true,
                                 "GlowMultiplier": 1.0,
-                                "LifeTime": 1.350000023841858,
-                                "LocalOffset": [
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                "LocalRotation": [
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                "LocalScale": [
-                                    2.25,
-                                    2.25,
-                                    2.25
-                                ],
-                                "NormalOffset": 0.0,
-                                "OverrideMeshVFXColorRamp": false,
-                                "PlaybackSpeed": 1.0,
-                                "Type": 1
-                            },
-                            {
-                                "AssetPath": "DragonBreathProjectile_Fireball",
-                                "ColorRampTexturePath": "",
-                                "EmitterName": "",
-                                "Enabled": true,
-                                "FollowOwner": true,
-                                "ForceAdditiveBlend": false,
-                                "GlowMultiplier": 1.0,
-                                "LifeTime": 1.350000023841858,
+                                "LifeTime": 1.5499999523162842,
                                 "LocalOffset": [
                                     0.0,
                                     0.0,
@@ -509,6 +482,35 @@
                                     2.6500000953674316,
                                     2.6500000953674316,
                                     2.6500000953674316
+                                ],
+                                "NormalOffset": 0.0,
+                                "OverrideMeshVFXColorRamp": false,
+                                "PlaybackSpeed": 1.0,
+                                "Type": 1
+                            },
+                            {
+                                "AssetPath": "DragonBreathProjectile_Fireball",
+                                "ColorRampTexturePath": "",
+                                "EmitterName": "",
+                                "Enabled": true,
+                                "FollowOwner": true,
+                                "ForceAdditiveBlend": false,
+                                "GlowMultiplier": 1.0,
+                                "LifeTime": 1.5499999523162842,
+                                "LocalOffset": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalRotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "LocalScale": [
+                                    3.1500000953674316,
+                                    3.1500000953674316,
+                                    3.1500000953674316
                                 ],
                                 "NormalOffset": 0.0,
                                 "OverrideMeshVFXColorRamp": false,
@@ -555,7 +557,7 @@
                             "KnockBackPower": 5.0,
                             "TargetAirLiftPower": 0.0
                         },
-                        "LifeTime": 1.350000023841858,
+                        "LifeTime": 1.5499999523162842,
                         "LocalOffset": [
                             0.0,
                             0.0,
@@ -572,33 +574,33 @@
                             1.0
                         ],
                         "Name": "DragonBreathLightSingle",
-                        "ProjectileAcceleration": 4.0,
+                        "ProjectileAcceleration": 10.0,
                         "ProjectileGravity": 0.0,
-                        "ProjectileMaxSpeed": 28.0,
+                        "ProjectileMaxSpeed": 58.0,
                         "ProjectileMotionEnabled": true,
-                        "Radius": 3.0,
-                        "Range": 15.5,
+                        "Radius": 3.5,
+                        "Range": 44.0,
                         "ShapeType": 1,
                         "SourceNodeName": "",
                         "SpawnHit": true,
-                        "Speed": 26.0
+                        "Speed": 52.0
                     },
                     {
                         "ActionName": "DragonBreath_LightBeam",
                         "Entries": [
                             {
-                                "AssetPath": "DragonBreath",
+                                "AssetPath": "DragonBreath_FanFlame",
                                 "ColorRampTexturePath": "",
                                 "EmitterName": "",
                                 "Enabled": true,
                                 "FollowOwner": false,
                                 "ForceAdditiveBlend": true,
-                                "GlowMultiplier": 1.2000000476837158,
-                                "LifeTime": 1.4500000476837158,
+                                "GlowMultiplier": 1.4500000476837158,
+                                "LifeTime": 2.200000047683716,
                                 "LocalOffset": [
                                     0.0,
                                     0.0,
-                                    9.0
+                                    0.44999998807907104
                                 ],
                                 "LocalRotation": [
                                     0.0,
@@ -606,14 +608,14 @@
                                     0.0
                                 ],
                                 "LocalScale": [
-                                    2.5,
-                                    2.5,
-                                    5.400000095367432
+                                    2.1500000953674316,
+                                    2.1500000953674316,
+                                    1.75
                                 ],
                                 "NormalOffset": 0.0,
                                 "OverrideMeshVFXColorRamp": false,
-                                "PlaybackSpeed": 1.100000023841858,
-                                "Type": 1
+                                "PlaybackSpeed": 1.2999999523162842,
+                                "Type": 0
                             }
                         ],
                         "FanAngleDegrees": 45.0,
@@ -655,7 +657,7 @@
                             "KnockBackPower": 3.0,
                             "TargetAirLiftPower": 0.0
                         },
-                        "LifeTime": 1.4500000476837158,
+                        "LifeTime": 2.200000047683716,
                         "LocalOffset": [
                             0.0,
                             0.0,
@@ -676,8 +678,8 @@
                         "ProjectileGravity": 0.0,
                         "ProjectileMaxSpeed": 0.0,
                         "ProjectileMotionEnabled": false,
-                        "Radius": 4.0,
-                        "Range": 18.0,
+                        "Radius": 5.199999809265137,
+                        "Range": 52.0,
                         "ShapeType": 2,
                         "SourceNodeName": "",
                         "SpawnHit": true,
@@ -706,9 +708,9 @@
                                     0.0
                                 ],
                                 "LocalScale": [
-                                    1.0,
-                                    1.0,
-                                    1.0
+                                    1.4500000476837158,
+                                    1.4500000476837158,
+                                    1.2000000476837158
                                 ],
                                 "NormalOffset": 0.0,
                                 "OverrideMeshVFXColorRamp": false,
@@ -717,11 +719,11 @@
                             }
                         ],
                         "FanAngleDegrees": 95.0,
-                        "FanRangeSteps": 5,
-                        "FanSampleCount": 13,
-                        "FanVisualSampleCount": 1,
+                        "FanRangeSteps": 3,
+                        "FanSampleCount": 9,
+                        "FanVisualSampleCount": 5,
                         "Hit": {
-                            "AllowMultiHit": true,
+                            "AllowMultiHit": false,
                             "AttackerAirLiftPower": 0.0,
                             "CameraShakeAttackScale": 0.30000001192092896,
                             "CameraShakeEnabled": true,
@@ -789,7 +791,7 @@
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
-            "TypeName": "EffectEmitterComponent",
+            "TypeName": "AttackEmitterComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
         }

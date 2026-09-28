@@ -7,7 +7,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/VFX/DangerAreaComponent.h"
-#include "Engine/GamePlay/VFX/EffectEmitterComponent.h"
+#include "Engine/GamePlay/VFX/AttackEmitterComponent.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Core/LightManager.h"
 #include "Engine/Graphics/Core/RenderContext.h"
@@ -301,11 +301,11 @@ void AttackWorkspaceWindow::DrawActionPanel()
         }
     }
 
-    if (std::shared_ptr<EffectEmitterComponent> emitter_ = target_->GetComponent<EffectEmitterComponent>())
+    if (std::shared_ptr<AttackEmitterComponent> emitter_ = target_->GetComponent<AttackEmitterComponent>())
     {
-        ImGui::SeparatorText("EffectEmitter Templates");
-        const std::vector<EffectEmitterTemplate>& templates_ = emitter_->GetTemplates();
-        for (const EffectEmitterTemplate& template_ : templates_)
+        ImGui::SeparatorText("AttackEmitter Templates");
+        const std::vector<AttackEmitterTemplate>& templates_ = emitter_->GetTemplates();
+        for (const AttackEmitterTemplate& template_ : templates_)
         {
             const std::string label_ = template_.name.empty() ? template_.actionName : template_.name;
             if (ImGui::Button(label_.c_str(), ImVec2(180.0f, 0.0f)))
@@ -362,9 +362,9 @@ void AttackWorkspaceWindow::DrawInspectorPanel()
                 ImGui::EndTabItem();
             }
         }
-        if (std::shared_ptr<EffectEmitterComponent> emitter_ = target_->GetComponent<EffectEmitterComponent>())
+        if (std::shared_ptr<AttackEmitterComponent> emitter_ = target_->GetComponent<AttackEmitterComponent>())
         {
-            if (ImGui::BeginTabItem("EffectEmitter"))
+            if (ImGui::BeginTabItem("AttackEmitter"))
             {
                 emitter_->Gui();
                 ImGui::EndTabItem();
@@ -559,7 +559,7 @@ bool AttackWorkspaceWindow::HasAttackWorkspaceComponents(
 
     return object_->GetComponent<DragonAIComponent>() ||
         object_->GetComponent<DragonAttackControllerComponent>() ||
-        object_->GetComponent<EffectEmitterComponent>() ||
+        object_->GetComponent<AttackEmitterComponent>() ||
         object_->GetComponent<AttackEffectHitComponent>() ||
         object_->GetComponent<DangerAreaComponent>();
 }

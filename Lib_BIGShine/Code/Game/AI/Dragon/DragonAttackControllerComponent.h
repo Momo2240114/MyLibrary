@@ -11,7 +11,7 @@
 class AttackEffectHitComponent;
 class DragonNeckCommandIKComponent;
 class DragonTailCommandIKComponent;
-class EffectEmitterComponent;
+class AttackEmitterComponent;
 class GameObject;
 class MeshVFXComponent;
 
@@ -140,7 +140,7 @@ private:
     bool ResolveStampSourceFrame(
         DirectX::XMFLOAT3& position_,
         DirectX::XMFLOAT3& forward_) const;
-    std::shared_ptr<EffectEmitterComponent> ResolveBreathEmitterComponent(
+    std::shared_ptr<AttackEmitterComponent> ResolveBreathAttackEmitterComponent(
         DirectX::XMFLOAT3& position_,
         DirectX::XMFLOAT3& forward_) const;
     void SpawnBreathProjectile(const std::string& templateName_);
@@ -186,7 +186,7 @@ private:
 private:
     std::weak_ptr<DragonNeckCommandIKComponent> neckIK;
     std::weak_ptr<DragonTailCommandIKComponent> tailIK;
-    std::weak_ptr<EffectEmitterComponent> effectEmitter;
+    std::weak_ptr<AttackEmitterComponent> attackEmitter;
     std::string registeredActionCategory;
     std::vector<std::string> registeredActionNames;
     std::vector<RuntimeAttack> runtimeAttacks;
@@ -194,11 +194,11 @@ private:
 
     std::string actionCategory = "DragonAttack";
     std::string breathVFXAssetPath = "Data/VFX/DragonBreath.json";
-    std::string breathProjectileEmitterAssetPath = "Data/EffectEmitter/DragonBreathLight.json";
+    std::string breathProjectileEmitterAssetPath = "Data/AttackEmitter/DragonBreathLight.json";
     std::string breathChargeEffectTemplateName = "DragonBreathCharge";
     // ブレスの俯角補正で狙うTarget Object名。
     std::string targetObjectName = "PlayerModel";
-    // 空でなければ、このObjectに付いたEffectEmitterComponentをブレス発射元として優先する。
+    // 空でなければ、このObjectに付いたAttackEmitterComponentをブレス発射元として優先する。
     std::string breathEmitterObjectName;
     // ブレス用Emitter Objectが無い場合に、発射位置と危険範囲追従へ使うモデルノード名。
     std::string breathSourceNodeName = "Mouth";

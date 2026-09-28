@@ -11,7 +11,7 @@ class GameObject;
 class HitBox;
 
 // ガード受付用のCapsuleCollider。
-// 有効中にHitBoxと重なるとGuardSystemへ渡され、通常ガード/ジャストガードを判定する。
+// 有効中にHitBoxと重なると通常GuardまたはJustGuardのSystemへ渡される。
 class GuardCollider : public CapsuleCollider
 {
 public:
@@ -30,6 +30,7 @@ public:
     void Deactivate();
 
     bool CanGuardAttack(const HitBox& hitBox_) const;
+    bool HasGuardedAttackRecord(const HitBox& hitBox_) const;
     void RecordGuardedAttack(const HitBox& hitBox_);
     void ClearGuardedAttackHistory();
 

@@ -63,6 +63,7 @@
 #include "Engine/GamePlay/Core/Component/PrefabSpawnComponent.h"
 #include "Engine/GamePlay/Combat/HitReactionComponent.h"
 #include "Engine/GamePlay/Combat/JustDodgeReactionComponent.h"
+#include "Engine/GamePlay/Combat/JustGuardReactionComponent.h"
 #include "Engine/GamePlay/Combat/HealthComponent.h"
 #include "Engine/GamePlay/Combat/CombatStatsComponent.h"
 #include "Engine/GamePlay/Combat/ProjectileMotionComponent.h"
@@ -174,6 +175,7 @@ void RegisterAllComponents()
     registry.Register<PrefabSpawnComponent>("PrefabSpawnComponent");
     registry.Register<HitReactionComponent>("HitReactionComponent");
     registry.Register<JustDodgeReactionComponent>("JustDodgeReactionComponent");
+    registry.Register<JustGuardReactionComponent>("JustGuardReactionComponent");
     registry.Register<HealthComponent>("HealthComponent");
     registry.Register<CombatStatsComponent>("CombatStatsComponent");
     registry.Register<ProjectileMotionComponent>("ProjectileMotionComponent");

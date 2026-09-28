@@ -1,0 +1,91 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "LocalScale": 5.0,
+                "LocalScaleXYZ": [
+                    5.0,
+                    5.0,
+                    5.0
+                ],
+                "MaterialOverrides": [
+                    {
+                        "alphaCutoff": 0.5,
+                        "alphaMode": 0,
+                        "baseColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "disableOutline": true,
+                        "emissiveColor": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "id": 0,
+                        "metalness": 0.0,
+                        "name": "MI_Rock_3.007",
+                        "normalScale": 1.0,
+                        "occlusionStrength": 1.0,
+                        "outlineThicknessOffset": 0.41499999165534973,
+                        "roughness": 0.5527864098548889,
+                        "shaderId": 3,
+                        "toonPbrBlend": 0.800000011920929,
+                        "uvAddressMode": 0,
+                        "uvOffset": [
+                            0.0,
+                            0.0
+                        ],
+                        "uvRotation": 0.0,
+                        "uvScale": [
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
+                "ModelName": "./Data/Model/Stage/Rock/Rock01.gltf",
+                "RootMotionName": "",
+                "ShaderID": 1,
+                "StaticModel": true,
+                "UsedNaviMeshSystemFlg": false,
+                "_RootRotationOffset": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "GltfModel",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "RockWall",
+    "ParentName": "Stage",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            -102.5185546875,
+            -24.505151748657227,
+            18.159936904907227
+        ],
+        "Rot": [
+            0.0,
+            192.5,
+            0.0
+        ],
+        "Scale": [
+            1.000085473060608,
+            1.7000000476837158,
+            1.6100001335144043
+        ]
+    }
+}

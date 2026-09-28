@@ -1,8 +1,9 @@
 #include "PrecompiledHeader.h"
 
-#include "EffectEmitterComponent.h"
+#include "AttackEmitterComponent.h"
 
 #include "Editor/AssetSlotGui.h"
+#include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Combat/ProjectileMotionComponent.h"
@@ -87,20 +88,20 @@ namespace
             DirectX::XMMatrixTranslation(position_.x, position_.y, position_.z);
     }
 
-    const char* GetEntryTypeName(EFFECT_EMITTER_ENTRY_TYPE type_)
+    const char* GetEntryTypeName(ATTACK_EMITTER_ENTRY_TYPE type_)
     {
         static const char* names_[] = { "Particle", "Mesh VFX / Sequence", "Impact Effect" };
         return names_[std::clamp(static_cast<int>(type_), 0, 2)];
     }
 
-    const char* GetShapeTypeName(EFFECT_EMITTER_SHAPE_TYPE type_)
+    const char* GetShapeTypeName(ATTACK_EMITTER_SHAPE_TYPE type_)
     {
         static const char* names_[] = { "Area", "Projectile", "Beam", "Fan" };
         return names_[std::clamp(static_cast<int>(type_), 0, 3)];
     }
 }
 
-void to_json(nlohmann::json& json_, const EffectEmitterEntryTemplate& entry_)
+void to_json(nlohmann::json& json_, const AttackEmitterEntryTemplate& entry_)
 {
     // 1つのEmitterテンプレート内に並べる、Particle/MeshVFX/ImpactEffectの個別設定を保存する。
     json_ =
@@ -123,10 +124,10 @@ void to_json(nlohmann::json& json_, const EffectEmitterEntryTemplate& entry_)
     };
 }
 
-void from_json(const nlohmann::json& json_, EffectEmitterEntryTemplate& entry_)
+void from_json(const nlohmann::json& json_, AttackEmitterEntryTemplate& entry_)
 {
     // エントリは単体の寿命や再生速度を持つため、読み込み時に最低値を丸めて扱いやすくする。
-    entry_.type = static_cast<EFFECT_EMITTER_ENTRY_TYPE>(std::clamp(json_.value("Type", 0), 0, 2));
+    entry_.type = static_cast<ATTACK_EMITTER_ENTRY_TYPE>(std::clamp(json_.value("Type", 0), 0, 2));
     entry_.enabled = json_.value("Enabled", true);
     entry_.assetPath = json_.value("AssetPath", std::string{});
     entry_.emitterName = json_.value("EmitterName", std::string{});
@@ -143,7 +144,7 @@ void from_json(const nlohmann::json& json_, EffectEmitterEntryTemplate& entry_)
     entry_.glowMultiplier = (std::max)(json_.value("GlowMultiplier", 1.0f), 0.0f);
 }
 
-void to_json(nlohmann::json& json_, const EffectEmitterHitTemplate& hit_)
+void to_json(nlohmann::json& json_, const AttackEmitterHitTemplate& hit_)
 {
     // 見た目の発生と同時に攻撃判定を出す場合の、HitBoxへ転写する攻撃情報を保存する。
     json_ =
@@ -160,6 +161,7 @@ void to_json(nlohmann::json& json_, const EffectEmitterHitTemplate& hit_)
         { "AllowMultiHit", hit_.allowMultiHit },
         { "CanHitOwner", hit_.canHitOwner },
         { "DestroyOnHit", hit_.destroyOnHit },
+        { "JustGuardedActionName", hit_.justGuardedActionName },
         { "HitParticleAssetPath", hit_.hitParticleAssetPath },
         { "HitParticleEmitterName", hit_.hitParticleEmitterName },
         { "HitParticleLifeTime", hit_.hitParticleLifeTime },
@@ -184,7 +186,7 @@ void to_json(nlohmann::json& json_, const EffectEmitterHitTemplate& hit_)
     };
 }
 
-void from_json(const nlohmann::json& json_, EffectEmitterHitTemplate& hit_)
+void from_json(const nlohmann::json& json_, AttackEmitterHitTemplate& hit_)
 {
     // ヒット情報は戦闘処理へ直結するため、負になって困る値は読み込み時に補正する。
     hit_.enabled = json_.value("Enabled", true);
@@ -199,6 +201,7 @@ void from_json(const nlohmann::json& json_, EffectEmitterHitTemplate& hit_)
     hit_.allowMultiHit = json_.value("AllowMultiHit", false);
     hit_.canHitOwner = json_.value("CanHitOwner", false);
     hit_.destroyOnHit = json_.value("DestroyOnHit", false);
+    hit_.justGuardedActionName = json_.value("JustGuardedActionName", std::string{});
     hit_.hitParticleAssetPath = json_.value("HitParticleAssetPath", std::string{});
     hit_.hitParticleEmitterName = json_.value("HitParticleEmitterName", std::string{});
     hit_.hitParticleLifeTime = (std::max)(json_.value("HitParticleLifeTime", 1.0f), 0.01f);
@@ -226,7 +229,7 @@ void from_json(const nlohmann::json& json_, EffectEmitterHitTemplate& hit_)
     hit_.cameraShakePriority = json_.value("CameraShakePriority", 5);
 }
 
-void to_json(nlohmann::json& json_, const EffectEmitterTemplate& template_)
+void to_json(nlohmann::json& json_, const AttackEmitterTemplate& template_)
 {
     // 1回のEmitで使う発生位置、形状、複数エントリ、攻撃判定をまとめて保存する。
     json_ =
@@ -256,12 +259,12 @@ void to_json(nlohmann::json& json_, const EffectEmitterTemplate& template_)
     };
 }
 
-void from_json(const nlohmann::json& json_, EffectEmitterTemplate& template_)
+void from_json(const nlohmann::json& json_, AttackEmitterTemplate& template_)
 {
     // テンプレートの形状値は、判定生成やProjectile移動で破綻しない範囲に丸める。
-    template_.name = json_.value("Name", std::string{ "EffectEmitter" });
-    template_.actionName = json_.value("ActionName", std::string{ "EffectEmitter_Fire" });
-    template_.shapeType = static_cast<EFFECT_EMITTER_SHAPE_TYPE>(std::clamp(json_.value("ShapeType", 1), 0, 3));
+    template_.name = json_.value("Name", std::string{ "AttackEmitter" });
+    template_.actionName = json_.value("ActionName", std::string{ "AttackEmitter_Fire" });
+    template_.shapeType = static_cast<ATTACK_EMITTER_SHAPE_TYPE>(std::clamp(json_.value("ShapeType", 1), 0, 3));
     template_.sourceNodeName = json_.value("SourceNodeName", std::string{});
     template_.localOffset = ReadVector3(json_, "LocalOffset", template_.localOffset);
     template_.localRotation = ReadVector3(json_, "LocalRotation", template_.localRotation);
@@ -279,68 +282,68 @@ void from_json(const nlohmann::json& json_, EffectEmitterTemplate& template_)
     template_.fanRangeSteps = std::clamp(json_.value("FanRangeSteps", 3), 1, 16);
     template_.fanVisualSampleCount = std::clamp(json_.value("FanVisualSampleCount", 1), 1, 31);
     template_.spawnHit = json_.value("SpawnHit", true);
-    template_.entries = json_.value("Entries", std::vector<EffectEmitterEntryTemplate>{});
-    template_.hit = json_.value("Hit", EffectEmitterHitTemplate{});
+    template_.entries = json_.value("Entries", std::vector<AttackEmitterEntryTemplate>{});
+    template_.hit = json_.value("Hit", AttackEmitterHitTemplate{});
 }
 
-void EffectEmitterComponent::Start()
+void AttackEmitterComponent::Start()
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::Start");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::Start");
     // 空のまま置かれてもエディタですぐ試せるよう、最低1つのテンプレートとエントリを用意する。
     if (templates.empty())
     {
-        EffectEmitterTemplate template_{};
+        AttackEmitterTemplate template_{};
         template_.entries.push_back({});
         templates.push_back(template_);
     }
     RegisterActions();
 }
 
-void EffectEmitterComponent::RegisterActions()
+void AttackEmitterComponent::RegisterActions()
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::RegisterActions");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::RegisterActions");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return;
 
     // インデックス、ActionName、Nameの3種類で登録し、アニメイベントから呼びやすくする。
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
     {
-        const std::string indexActionName_ = "EffectEmitter_" + std::to_string(index_);
-        owner_->RegisterAction("EffectEmitter", indexActionName_, [this, index_]() { Emit(index_); });
+        const std::string indexActionName_ = "AttackEmitter_" + std::to_string(index_);
+        owner_->RegisterAction("AttackEmitter", indexActionName_, [this, index_]() { Emit(index_); });
 
         if (!templates[index_].actionName.empty())
         {
             owner_->RegisterAction(
-                "EffectEmitter",
+                "AttackEmitter",
                 templates[index_].actionName,
                 [this, index_]() { Emit(index_); });
         }
         if (!templates[index_].name.empty())
         {
             owner_->RegisterAction(
-                "EffectEmitter",
+                "AttackEmitter",
                 templates[index_].name,
                 [this, index_]() { Emit(index_); });
         }
     }
 }
 
-void EffectEmitterComponent::Emit(size_t templateIndex_)
+void AttackEmitterComponent::Emit(size_t templateIndex_)
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::Emit");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::Emit");
     if (templateIndex_ >= templates.size()) return;
-    const EffectEmitterTemplate& template_ = templates[templateIndex_];
+    const AttackEmitterTemplate& template_ = templates[templateIndex_];
     // 発生元のワールド位置/方向を一度求め、判定と見た目エントリで同じ基準を使う。
     const EmitFrame frame_ = BuildEmitFrame(template_);
     EmitWithFrame(template_, frame_);
 }
 
-void EffectEmitterComponent::EmitWithFrame(
-    const EffectEmitterTemplate& template_,
+void AttackEmitterComponent::EmitWithFrame(
+    const AttackEmitterTemplate& template_,
     const EmitFrame& frame_)
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::EmitWithFrame");
-    BS_PROFILE_PLOT("EffectEmitterComponent::EntryCount", template_.entries.size());
+    BS_PROFILE_SCOPE("AttackEmitterComponent::EmitWithFrame");
+    BS_PROFILE_PLOT("AttackEmitterComponent::EntryCount", template_.entries.size());
 
     std::shared_ptr<GameObject> hitObject_;
     if (template_.spawnHit && template_.hit.enabled)
@@ -348,13 +351,13 @@ void EffectEmitterComponent::EmitWithFrame(
         hitObject_ = SpawnHitObject(template_, frame_);
     }
 
-    for (const EffectEmitterEntryTemplate& entry_ : template_.entries)
+    for (const AttackEmitterEntryTemplate& entry_ : template_.entries)
     {
         SpawnEntry(template_, entry_, frame_, hitObject_);
     }
 }
 
-void EffectEmitterComponent::EmitByName(const std::string& templateName_)
+void AttackEmitterComponent::EmitByName(const std::string& templateName_)
 {
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
     {
@@ -367,12 +370,12 @@ void EffectEmitterComponent::EmitByName(const std::string& templateName_)
     }
 }
 
-void EffectEmitterComponent::EmitByNameAt(
+void AttackEmitterComponent::EmitByNameAt(
     const std::string& templateName_,
     const DirectX::XMFLOAT3& position_,
     const DirectX::XMFLOAT3& direction_)
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::EmitByNameAt");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::EmitByNameAt");
 
     const EmitFrame frame_ = BuildEmitFrameAt(position_, direction_);
     for (size_t index_ = 0; index_ < templates.size(); ++index_)
@@ -380,7 +383,7 @@ void EffectEmitterComponent::EmitByNameAt(
         if (templates[index_].name == templateName_ ||
             templates[index_].actionName == templateName_)
         {
-            const EffectEmitterTemplate& template_ = templates[index_];
+            const AttackEmitterTemplate& template_ = templates[index_];
             const DirectX::XMMATRIX localMatrix_ = BuildLocalMatrix(
                 template_.localOffset,
                 template_.localRotation,
@@ -397,9 +400,9 @@ void EffectEmitterComponent::EmitByNameAt(
     }
 }
 
-bool EffectEmitterComponent::LoadAsset(const std::string& path_, bool forceReload_)
+bool AttackEmitterComponent::LoadAsset(const std::string& path_, bool forceReload_)
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::LoadAsset");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::LoadAsset");
 
     // 外部アセットはTemplates配列だけを差し替え、Action登録は読み込み後に作り直す。
     if (path_.empty()) return false;
@@ -415,14 +418,15 @@ bool EffectEmitterComponent::LoadAsset(const std::string& path_, bool forceReloa
     {
         nlohmann::json json_;
         file_ >> json_;
-        if (json_.value("AssetType", std::string{}) != "EffectEmitter") return false;
+        const std::string assetType_ = json_.value("AssetType", std::string{});
+        if (assetType_ != "AttackEmitter" && assetType_ != "EffectEmitter") return false;
 
-        templates = json_.value("Templates", std::vector<EffectEmitterTemplate>{});
+        templates = json_.value("Templates", std::vector<AttackEmitterTemplate>{});
         assetPath = path_;
         loadedAssetPath = path_;
         if (templates.empty())
         {
-            EffectEmitterTemplate template_{};
+            AttackEmitterTemplate template_{};
             template_.entries.push_back({});
             templates.push_back(template_);
         }
@@ -435,11 +439,11 @@ bool EffectEmitterComponent::LoadAsset(const std::string& path_, bool forceReloa
     }
 }
 
-bool EffectEmitterComponent::SaveAsset(const std::string& path_) const
+bool AttackEmitterComponent::SaveAsset(const std::string& path_) const
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::SaveAsset");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::SaveAsset");
 
-    // Componentで調整した複数Templateを、別Objectでも使えるEffectEmitter Assetとして保存する。
+    // Componentで調整した複数Templateを、別Objectでも使えるAttackEmitter Assetとして保存する。
     if (path_.empty()) return false;
 
     const std::filesystem::path outputPath_(path_);
@@ -451,15 +455,15 @@ bool EffectEmitterComponent::SaveAsset(const std::string& path_) const
     if (!file_.is_open()) return false;
 
     nlohmann::json json_;
-    json_["AssetType"] = "EffectEmitter";
+    json_["AssetType"] = "AttackEmitter";
     json_["AssetVersion"] = 1;
     json_["Templates"] = templates;
     file_ << json_.dump(4);
     return file_.good();
 }
 
-EffectEmitterComponent::EmitFrame EffectEmitterComponent::BuildEmitFrame(
-    const EffectEmitterTemplate& template_) const
+AttackEmitterComponent::EmitFrame AttackEmitterComponent::BuildEmitFrame(
+    const AttackEmitterTemplate& template_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform) return {};
@@ -491,7 +495,7 @@ EffectEmitterComponent::EmitFrame EffectEmitterComponent::BuildEmitFrame(
     return frame_;
 }
 
-EffectEmitterComponent::EmitFrame EffectEmitterComponent::BuildEmitFrameAt(
+AttackEmitterComponent::EmitFrame AttackEmitterComponent::BuildEmitFrameAt(
     const DirectX::XMFLOAT3& position_,
     const DirectX::XMFLOAT3& direction_) const
 {
@@ -502,7 +506,7 @@ EffectEmitterComponent::EmitFrame EffectEmitterComponent::BuildEmitFrameAt(
     return frame_;
 }
 
-DirectX::XMMATRIX EffectEmitterComponent::BuildLocalMatrix(
+DirectX::XMMATRIX AttackEmitterComponent::BuildLocalMatrix(
     const DirectX::XMFLOAT3& position_,
     const DirectX::XMFLOAT3& rotation_,
     const DirectX::XMFLOAT3& scale_) const
@@ -515,13 +519,13 @@ DirectX::XMMATRIX EffectEmitterComponent::BuildLocalMatrix(
         DirectX::XMMatrixTranslation(position_.x, position_.y, position_.z);
 }
 
-void EffectEmitterComponent::SpawnEntry(
-    const EffectEmitterTemplate& template_,
-    const EffectEmitterEntryTemplate& entry_,
+void AttackEmitterComponent::SpawnEntry(
+    const AttackEmitterTemplate& template_,
+    const AttackEmitterEntryTemplate& entry_,
     const EmitFrame& frame_,
     const std::shared_ptr<GameObject>& followTarget_)
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::SpawnEntry");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::SpawnEntry");
 
     if (!entry_.enabled || entry_.assetPath.empty()) return;
 
@@ -533,7 +537,7 @@ void EffectEmitterComponent::SpawnEntry(
         const DirectX::XMFLOAT3 direction_ = TransformForward(entryMatrix_);
         std::shared_ptr<GameObject> spawnedObject_;
 
-        if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::PARTICLE)
+        if (entry_.type == ATTACK_EMITTER_ENTRY_TYPE::PARTICLE)
         {
             // ParticleはVFXManager経由で一時GameObjectとして生成し、Emitter指定があれば個別再生する。
             ParticleSpawnRequest request_{};
@@ -541,14 +545,14 @@ void EffectEmitterComponent::SpawnEntry(
             request_.emitterName = entry_.emitterName;
             request_.position = position_;
             request_.normal = direction_;
-            // EffectEmitterの向きに合わせて、Particleの初速軸も発射方向へそろえる。
+            // AttackEmitterの向きに合わせて、Particleの初速軸も発射方向へそろえる。
             request_.axis = direction_;
             request_.overrideAxis = true;
             request_.lifeTime = entry_.lifeTime;
             request_.normalOffset = entry_.normalOffset;
             spawnedObject_ = effectManager_.SpawnParticle(request_);
         }
-        else if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::MESH_VFX)
+        else if (entry_.type == ATTACK_EMITTER_ENTRY_TYPE::MESH_VFX)
         {
             // MeshVFXは生成後に色ランプやブレンドなど、Emitter側の一時上書きを適用できる。
             MeshVFXSpawnRequest request_{};
@@ -560,14 +564,14 @@ void EffectEmitterComponent::SpawnEntry(
             spawnedObject_ = effectManager_.SpawnMeshVFX(request_);
             ApplyMeshVFXOverrides(spawnedObject_, entry_);
         }
-        else if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::IMPACT_EFFECT)
+        else if (entry_.type == ATTACK_EMITTER_ENTRY_TYPE::IMPACT_EFFECT)
         {
             effectManager_.SpawnImpactEffectAsset(entry_.assetPath, position_, direction_);
         }
 
         if (!spawnedObject_ || !spawnedObject_->transform) return;
 
-        if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::PROJECTILE &&
+        if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE &&
             followTarget_ &&
             followTarget_->transform)
         {
@@ -586,13 +590,13 @@ void EffectEmitterComponent::SpawnEntry(
         }
     };
 
-    if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::FAN)
+    if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::FAN)
     {
         const int sampleCount_ = std::clamp(
             template_.fanVisualSampleCount,
             1,
             (std::max)(template_.fanSampleCount, 1));
-        BS_PROFILE_PLOT("EffectEmitterComponent::FanVisualSampleCount", sampleCount_);
+        BS_PROFILE_PLOT("AttackEmitterComponent::FanVisualSampleCount", sampleCount_);
         const float halfAngle_ = DirectX::XMConvertToRadians(template_.fanAngleDegrees * 0.5f);
         for (int sampleIndex_ = 0; sampleIndex_ < sampleCount_; ++sampleIndex_)
         {
@@ -619,15 +623,15 @@ void EffectEmitterComponent::SpawnEntry(
     spawnWithMatrix_(entryMatrix_);
 }
 
-std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
-    const EffectEmitterTemplate& template_,
+std::shared_ptr<GameObject> AttackEmitterComponent::SpawnHitObject(
+    const AttackEmitterTemplate& template_,
     const EmitFrame& frame_)
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::SpawnHitObject");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::SpawnHitObject");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
 
-    std::shared_ptr<GameObject> hitObject_ = GetManager().Create("RuntimeEffectEmitterHit");
+    std::shared_ptr<GameObject> hitObject_ = GetManager().Create("RuntimeAttackEmitterHit");
     if (!hitObject_) return nullptr;
     hitObject_->SetNoSaveObject();
     // HitObject自体を発生元の向きへ置き、AttackEffectHitComponent側のローカル形状をその上に作る。
@@ -638,7 +642,7 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
         hitObject_->AddComponent<AttackEffectHitComponent>();
     if (!attackHit_) return hitObject_;
 
-    const EffectEmitterHitTemplate& hit_ = template_.hit;
+    const AttackEmitterHitTemplate& hit_ = template_.hit;
     // Emitter用のHit設定をAttackEffectHitComponentへ転写し、既存の戦闘判定システムに乗せる。
     attackHit_->SetOwner(owner_.get());
     attackHit_->SetAttackInstanceId(GetManager().GetAttackSystem().CreateAttackInstance());
@@ -675,18 +679,20 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
     attackHit_->SetHitImpactEffectAssetPath(hit_.hitImpactEffectAssetPath);
     attackHit_->SetAllowMultiHit(hit_.allowMultiHit);
     attackHit_->SetCanHitOwner(hit_.canHitOwner);
-    attackHit_->SetEffectType(template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::PROJECTILE
+    attackHit_->SetSourceAction(template_.name);
+    attackHit_->SetJustGuardedActionName(hit_.justGuardedActionName);
+    attackHit_->SetEffectType(template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE
         ? ATTACK_EFFECT_TYPE::PROJECTILE
-        : template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::BEAM
+        : template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::BEAM
         ? ATTACK_EFFECT_TYPE::BEAM
-        : template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::AREA
+        : template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::AREA
         ? ATTACK_EFFECT_TYPE::AREA_OVER_TIME
         : ATTACK_EFFECT_TYPE::BREATH);
     attackHit_->SetLifeTime(template_.lifeTime);
     attackHit_->SetDestroyOnLifeEnd(true);
     attackHit_->SetMovement(frame_.direction, 0.0f);
     attackHit_->SetHitShapes(BuildHitShapes(template_));
-    if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::PROJECTILE &&
+    if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE &&
         template_.projectileMotionEnabled)
     {
         // 弾道制御は専用Componentへ分離し、HitBoxと見た目を同じProjectile Objectへ追従させる。
@@ -702,38 +708,107 @@ std::shared_ptr<GameObject> EffectEmitterComponent::SpawnHitObject(
                 template_.projectileMaxSpeed);
         }
     }
+    if (!hit_.justGuardedActionName.empty())
+    {
+        std::weak_ptr<GameObject> weakHitObject_ = hitObject_;
+        std::weak_ptr<GameObject> weakOwner_ = owner_;
+        std::weak_ptr<AttackEffectHitComponent> weakAttackHit_ = attackHit_;
+        const float projectileSpeed_ = template_.speed;
+        const float projectileAcceleration_ = template_.projectileAcceleration;
+        const float projectileGravity_ = template_.projectileGravity;
+        const float projectileMaxSpeed_ = template_.projectileMaxSpeed;
+
+        hitObject_->RegisterAction(
+            "AttackEmitter",
+            hit_.justGuardedActionName,
+            [weakHitObject_, weakOwner_, weakAttackHit_, projectileSpeed_, projectileAcceleration_, projectileGravity_, projectileMaxSpeed_]()
+            {
+                const std::shared_ptr<GameObject> hitObject_ = weakHitObject_.lock();
+                const std::shared_ptr<AttackEffectHitComponent> attackHit_ = weakAttackHit_.lock();
+                if (!hitObject_ || !hitObject_->transform || !attackHit_) return;
+
+                DirectX::SimpleMath::Vector3 targetPosition_{ 0.0f, 0.0f, 0.0f };
+                std::string reflectOwnerName_;
+                if (const std::shared_ptr<BlackboardComponent> blackboard_ =
+                    hitObject_->GetComponent<BlackboardComponent>())
+                {
+                    blackboard_->GetVector3("GuardReaction", "ReflectTargetPosition", targetPosition_);
+                    blackboard_->GetString("GuardReaction", "ReflectOwnerName", reflectOwnerName_);
+                }
+                if (targetPosition_.LengthSquared() <= 0.000001f)
+                {
+                    if (const std::shared_ptr<GameObject> owner_ = weakOwner_.lock())
+                    {
+                        if (owner_->transform) targetPosition_ = owner_->transform->GetWorldPosition();
+                    }
+                }
+
+                const DirectX::SimpleMath::Vector3 currentPosition_ =
+                    hitObject_->transform->GetWorldPosition();
+                DirectX::SimpleMath::Vector3 direction_ = targetPosition_ - currentPosition_;
+                if (direction_.LengthSquared() <= 0.000001f)
+                {
+                    direction_ = { 0.0f, 0.0f, -1.0f };
+                }
+                direction_.Normalize();
+
+                if (std::shared_ptr<ProjectileMotionComponent> motion_ =
+                    hitObject_->GetComponent<ProjectileMotionComponent>())
+                {
+                    // ジャストガードされたProjectileを、攻撃元へ向けて同じ見た目のまま飛ばし直す。
+                    motion_->Configure(
+                        { direction_.x, direction_.y, direction_.z },
+                        projectileSpeed_,
+                        projectileAcceleration_,
+                        projectileGravity_,
+                        projectileMaxSpeed_);
+                }
+
+                if (!reflectOwnerName_.empty())
+                {
+                    if (const std::shared_ptr<GameObject> reflectOwner_ =
+                        hitObject_->GetManager().Find(reflectOwnerName_))
+                    {
+                        attackHit_->SetRuntimeHitOwner(reflectOwner_.get());
+                    }
+                }
+                attackHit_->SetRuntimeHitTeamId(0);
+                attackHit_->ResetRuntime();
+                hitObject_->SetLayer(LayerType::PlayerBullet);
+            });
+    }
     attackHit_->Play();
     return hitObject_;
 }
 
-std::vector<AttackEffectHitShapeTemplate> EffectEmitterComponent::BuildHitShapes(
-    const EffectEmitterTemplate& template_) const
+std::vector<AttackEffectHitShapeTemplate> AttackEmitterComponent::BuildHitShapes(
+    const AttackEmitterTemplate& template_) const
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::BuildHitShapes");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::BuildHitShapes");
 
     // Area/Projectile/Beam/Fanの抽象形状を、AttackEffectHitComponentが扱えるHitShapeへ変換する。
     std::vector<AttackEffectHitShapeTemplate> shapes_;
     AttackEffectHitShapeTemplate shape_{};
     shape_.enabled = true;
-    shape_.hitBoxName = template_.name.empty() ? "EffectEmitterHit" : template_.name;
+    shape_.hitBoxName = template_.name.empty() ? "AttackEmitterHit" : template_.name;
     shape_.radius = (std::max)(template_.radius, 0.01f);
     shape_.activeStartTime = 0.0f;
     shape_.activeEndTime = template_.lifeTime;
     shape_.destroyOnHit = template_.hit.destroyOnHit;
     shape_.allowMultiHit = template_.hit.allowMultiHit;
 
-    if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::AREA)
+    if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::AREA)
     {
         shape_.shape = ATTACK_HIT_SHAPE::SPHERE;
         shapes_.push_back(shape_);
     }
-    else if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::PROJECTILE)
+    else if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE)
     {
         shape_.shape = ATTACK_HIT_SHAPE::SPHERE;
         shape_.localOffset = { 0.0f, 0.0f, 0.0f };
         shapes_.push_back(shape_);
     }
-    else if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::BEAM)
+    else if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::BEAM)
     {
         shape_.shape = ATTACK_HIT_SHAPE::CAPSULE;
         shape_.localOffset = { 0.0f, 0.0f, template_.range * 0.5f };
@@ -746,8 +821,8 @@ std::vector<AttackEffectHitShapeTemplate> EffectEmitterComponent::BuildHitShapes
         // Fanは根元から先端へ向かって複数Sphereを時間差で有効化し、広がるブレス判定にする。
         const int sampleCount_ = std::clamp(template_.fanSampleCount, 1, 31);
         const int rangeSteps_ = std::clamp(template_.fanRangeSteps, 1, 16);
-        BS_PROFILE_PLOT("EffectEmitterComponent::FanHitSampleCount", sampleCount_);
-        BS_PROFILE_PLOT("EffectEmitterComponent::FanHitRangeSteps", rangeSteps_);
+        BS_PROFILE_PLOT("AttackEmitterComponent::FanHitSampleCount", sampleCount_);
+        BS_PROFILE_PLOT("AttackEmitterComponent::FanHitRangeSteps", rangeSteps_);
         const float halfAngle_ = DirectX::XMConvertToRadians(template_.fanAngleDegrees * 0.5f);
         for (int rangeIndex_ = 1; rangeIndex_ <= rangeSteps_; ++rangeIndex_)
         {
@@ -778,13 +853,13 @@ std::vector<AttackEffectHitShapeTemplate> EffectEmitterComponent::BuildHitShapes
             }
         }
     }
-    BS_PROFILE_PLOT("EffectEmitterComponent::BuiltHitShapeCount", shapes_.size());
+    BS_PROFILE_PLOT("AttackEmitterComponent::BuiltHitShapeCount", shapes_.size());
     return shapes_;
 }
 
-void EffectEmitterComponent::ApplyMeshVFXOverrides(
+void AttackEmitterComponent::ApplyMeshVFXOverrides(
     const std::shared_ptr<GameObject>& object_,
-    const EffectEmitterEntryTemplate& entry_) const
+    const AttackEmitterEntryTemplate& entry_) const
 {
     if (!object_) return;
     std::shared_ptr<MeshVFXComponent> meshVFX_ = object_->GetComponent<MeshVFXComponent>();
@@ -811,30 +886,30 @@ void EffectEmitterComponent::ApplyMeshVFXOverrides(
     meshVFX_->Play();
 }
 
-void EffectEmitterComponent::Gui()
+void AttackEmitterComponent::Gui()
 {
-    BS_PROFILE_SCOPE("EffectEmitterComponent::Gui");
+    BS_PROFILE_SCOPE("AttackEmitterComponent::Gui");
     // テンプレート、発生エントリ、攻撃判定をまとめて編集し、その場でEmitして確認できるようにする。
     std::string selectedAssetPath_ = assetPath;
-    if (AssetSlotGui::Draw("EffectEmitter Asset", AssetSlotType::JSON, selectedAssetPath_, nullptr, "Data/EffectEmitter"))
+    if (AssetSlotGui::Draw("AttackEmitter Asset", AssetSlotType::JSON, selectedAssetPath_, nullptr, "Data/AttackEmitter"))
     {
         assetPath = selectedAssetPath_;
         if (!assetPath.empty()) LoadAsset(assetPath);
     }
     if (!assetPath.empty())
     {
-        if (ImGui::Button("Reload EffectEmitter Asset")) LoadAsset(assetPath, true);
+        if (ImGui::Button("Reload AttackEmitter Asset")) LoadAsset(assetPath, true);
         ImGui::SameLine();
-        if (ImGui::Button("Save EffectEmitter Asset")) SaveAsset(assetPath);
+        if (ImGui::Button("Save AttackEmitter Asset")) SaveAsset(assetPath);
     }
 
     if (ImGui::Button("Register Actions")) RegisterActions();
     ImGui::SameLine();
     if (ImGui::Button("Add Template"))
     {
-        EffectEmitterTemplate template_{};
-        template_.name = "EffectEmitter" + std::to_string(templates.size());
-        template_.actionName = "EffectEmitter_" + std::to_string(templates.size());
+        AttackEmitterTemplate template_{};
+        template_.name = "AttackEmitter" + std::to_string(templates.size());
+        template_.actionName = "AttackEmitter_" + std::to_string(templates.size());
         template_.entries.push_back({});
         templates.push_back(template_);
         RegisterActions();
@@ -845,7 +920,7 @@ void EffectEmitterComponent::Gui()
     static const char* entryTypeNames_[] = { "Particle", "Mesh VFX / Sequence", "Impact Effect" };
     for (int templateIndex_ = 0; templateIndex_ < static_cast<int>(templates.size()); ++templateIndex_)
     {
-        EffectEmitterTemplate& template_ = templates[templateIndex_];
+        AttackEmitterTemplate& template_ = templates[templateIndex_];
         ImGui::PushID(templateIndex_);
         if (ImGui::TreeNode("Template", "%d: %s [%s]", templateIndex_, template_.name.c_str(), GetShapeTypeName(template_.shapeType)))
         {
@@ -857,7 +932,7 @@ void EffectEmitterComponent::Gui()
             int shapeType_ = static_cast<int>(template_.shapeType);
             if (ImGui::Combo("Shape Type", &shapeType_, shapeNames_, IM_ARRAYSIZE(shapeNames_)))
             {
-                template_.shapeType = static_cast<EFFECT_EMITTER_SHAPE_TYPE>(shapeType_);
+                template_.shapeType = static_cast<ATTACK_EMITTER_SHAPE_TYPE>(shapeType_);
             }
             ImGui::InputText("Source Node Name", &template_.sourceNodeName);
             ImGui::DragFloat3("Local Offset", &template_.localOffset.x, 0.01f);
@@ -867,14 +942,14 @@ void EffectEmitterComponent::Gui()
             ImGui::DragFloat("Radius", &template_.radius, 0.01f, 0.01f, 100.0f);
             ImGui::DragFloat("Speed", &template_.speed, 0.1f, 0.0f, 1000.0f);
             ImGui::DragFloat("Life Time", &template_.lifeTime, 0.01f, 0.01f, 120.0f);
-            if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::PROJECTILE)
+            if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE)
             {
                 ImGui::Checkbox("Projectile Motion", &template_.projectileMotionEnabled);
                 ImGui::DragFloat("Projectile Acceleration", &template_.projectileAcceleration, 0.1f, -1000.0f, 1000.0f);
                 ImGui::DragFloat("Projectile Gravity", &template_.projectileGravity, 0.1f, 0.0f, 1000.0f);
                 ImGui::DragFloat("Projectile Max Speed", &template_.projectileMaxSpeed, 0.1f, 0.0f, 1000.0f);
             }
-            if (template_.shapeType == EFFECT_EMITTER_SHAPE_TYPE::FAN)
+            if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::FAN)
             {
                 ImGui::DragFloat("Fan Angle", &template_.fanAngleDegrees, 0.5f, 0.0f, 180.0f);
                 ImGui::SliderInt("Fan Samples", &template_.fanSampleCount, 1, 31);
@@ -887,7 +962,7 @@ void EffectEmitterComponent::Gui()
                 int removeEntryIndex_ = -1;
                 for (int entryIndex_ = 0; entryIndex_ < static_cast<int>(template_.entries.size()); ++entryIndex_)
                 {
-                    EffectEmitterEntryTemplate& entry_ = template_.entries[entryIndex_];
+                    AttackEmitterEntryTemplate& entry_ = template_.entries[entryIndex_];
                     ImGui::PushID(entryIndex_);
                     if (ImGui::TreeNode("Entry", "%d: %s", entryIndex_, GetEntryTypeName(entry_.type)))
                     {
@@ -895,11 +970,11 @@ void EffectEmitterComponent::Gui()
                         int entryType_ = static_cast<int>(entry_.type);
                         if (ImGui::Combo("Type", &entryType_, entryTypeNames_, IM_ARRAYSIZE(entryTypeNames_)))
                         {
-                            entry_.type = static_cast<EFFECT_EMITTER_ENTRY_TYPE>(entryType_);
+                            entry_.type = static_cast<ATTACK_EMITTER_ENTRY_TYPE>(entryType_);
                             entry_.assetPath.clear();
                         }
                         AssetSlotGui::Draw("Effect JSON", AssetSlotType::JSON, entry_.assetPath);
-                        if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::PARTICLE)
+                        if (entry_.type == ATTACK_EMITTER_ENTRY_TYPE::PARTICLE)
                         {
                             ImGui::InputText("Emitter Name", &entry_.emitterName);
                         }
@@ -909,7 +984,7 @@ void EffectEmitterComponent::Gui()
                         ImGui::DragFloat("Life Time", &entry_.lifeTime, 0.01f, 0.01f, 120.0f);
                         ImGui::DragFloat("Normal Offset", &entry_.normalOffset, 0.001f, -100.0f, 100.0f);
                         ImGui::DragFloat("Playback Speed", &entry_.playbackSpeed, 0.01f, 0.0f, 10.0f);
-                        if (entry_.type == EFFECT_EMITTER_ENTRY_TYPE::MESH_VFX)
+                        if (entry_.type == ATTACK_EMITTER_ENTRY_TYPE::MESH_VFX)
                         {
                             ImGui::Checkbox("Override Color Ramp", &entry_.overrideMeshVFXColorRamp);
                             if (entry_.overrideMeshVFXColorRamp)
@@ -932,15 +1007,15 @@ void EffectEmitterComponent::Gui()
                 ImGui::SameLine();
                 if (ImGui::Button("Add Mesh VFX"))
                 {
-                    EffectEmitterEntryTemplate entry_{};
-                    entry_.type = EFFECT_EMITTER_ENTRY_TYPE::MESH_VFX;
+                    AttackEmitterEntryTemplate entry_{};
+                    entry_.type = ATTACK_EMITTER_ENTRY_TYPE::MESH_VFX;
                     template_.entries.push_back(entry_);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Add Impact Effect"))
                 {
-                    EffectEmitterEntryTemplate entry_{};
-                    entry_.type = EFFECT_EMITTER_ENTRY_TYPE::IMPACT_EFFECT;
+                    AttackEmitterEntryTemplate entry_{};
+                    entry_.type = ATTACK_EMITTER_ENTRY_TYPE::IMPACT_EFFECT;
                     template_.entries.push_back(entry_);
                 }
                 ImGui::TreePop();
@@ -961,6 +1036,7 @@ void EffectEmitterComponent::Gui()
                 ImGui::Checkbox("Allow Multi Hit", &template_.hit.allowMultiHit);
                 ImGui::Checkbox("Can Hit Owner", &template_.hit.canHitOwner);
                 ImGui::Checkbox("Destroy On Hit", &template_.hit.destroyOnHit);
+                ImGui::InputText("Just Guarded Action", &template_.hit.justGuardedActionName);
                 AssetSlotGui::Draw("Hit Particle", AssetSlotType::JSON, template_.hit.hitParticleAssetPath);
                 ImGui::InputText("Hit Emitter Name", &template_.hit.hitParticleEmitterName);
                 ImGui::DragFloat("Hit Particle Life Time", &template_.hit.hitParticleLifeTime, 0.01f, 0.0f, 30.0f);
@@ -1002,7 +1078,7 @@ void EffectEmitterComponent::Gui()
     }
 }
 
-void EffectEmitterComponent::Serialize(nlohmann::json& json_) const
+void AttackEmitterComponent::Serialize(nlohmann::json& json_) const
 {
     // 複数テンプレートをコンポーネントに持たせ、1つのObjectから複数種類の発生を扱えるようにする。
     json_["ComponentName"] = componentName;
@@ -1010,10 +1086,10 @@ void EffectEmitterComponent::Serialize(nlohmann::json& json_) const
     json_["Templates"] = templates;
 }
 
-void EffectEmitterComponent::Deserialize(const nlohmann::json& json_)
+void AttackEmitterComponent::Deserialize(const nlohmann::json& json_)
 {
     assetPath = json_.value("AssetPath", std::string{});
-    templates = json_.value("Templates", std::vector<EffectEmitterTemplate>{});
+    templates = json_.value("Templates", std::vector<AttackEmitterTemplate>{});
     if (!assetPath.empty() && LoadAsset(assetPath))
     {
         return;
@@ -1021,11 +1097,11 @@ void EffectEmitterComponent::Deserialize(const nlohmann::json& json_)
     // 古い/空データでもエディタで編集を続けられるよう、最低1つのテンプレートを補う。
     if (templates.empty())
     {
-        EffectEmitterTemplate template_{};
+        AttackEmitterTemplate template_{};
         template_.entries.push_back({});
         templates.push_back(template_);
     }
     RegisterActions();
 }
 
-REGISTER_COMPONENT(EffectEmitterComponent, "EffectEmitterComponent")
+REGISTER_COMPONENT(AttackEmitterComponent, "AttackEmitterComponent")

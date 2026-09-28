@@ -12,9 +12,9 @@
                         ],
                         "bri": 1.0,
                         "con": 1.0,
-                        "dur": 0.10000000149011612,
+                        "dur": 0.18000000715255737,
                         "ease": 1,
-                        "holdDur": 1.0,
+                        "holdDur": 3.0,
                         "hue": 0.0,
                         "intensity": 1.0,
                         "returnDur": 1.0,
@@ -100,16 +100,16 @@
                 },
                 "Waypoints": [
                     {
-                        "hold": 1.559999942779541,
+                        "hold": 0.4000000059604645,
                         "target": {
                             "center": [
                                 0.5,
                                 0.5
                             ],
                             "color": [
-                                1.0,
-                                1.0,
                                 0.0,
+                                1.0,
+                                1.0,
                                 1.0
                             ],
                             "enabled": true,
@@ -137,7 +137,7 @@
                 "Waypoints": [
                     {
                         "DefaultScale": 1.0,
-                        "HoldDuration": 10.0,
+                        "HoldDuration": 5.0,
                         "LayerMask": 4294967294,
                         "TargetScale": 0.4000000059604645,
                         "TimeToDefault": 0.15000000596046448,

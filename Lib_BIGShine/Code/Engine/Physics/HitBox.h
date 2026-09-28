@@ -39,6 +39,7 @@ public:
     bool allowMultiHit = false; // 同じ対象へ複数回Hitさせるか。
     bool canHitOwner = false; // 攻撃者自身へHit可能にするか。
     int teamId = 0; // Team判定用ID。
+    std::string justGuardedActionName; // JustGuardされた時に攻撃判定側で実行するAction名。
     float impactPower = 1.0f; // HitReactionの強さ。
     float knockBackPower = 0.0f; // KnockBackに使う力。
     ATTACK_SOURCE_TYPE attackSourceType = ATTACK_SOURCE_TYPE::MELEE;

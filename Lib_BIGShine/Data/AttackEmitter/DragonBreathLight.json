@@ -1,5 +1,5 @@
 {
-  "AssetType": "EffectEmitter",
+  "AssetType": "AttackEmitter",
   "AssetVersion": 1,
   "Templates": [
     {
@@ -225,7 +225,8 @@
         "CameraShakeReceiveRotationStrength": 0.1,
         "CameraShakeAttackScale": 0.35,
         "CameraShakeFrequency": 26,
-        "CameraShakePriority": 5
+        "CameraShakePriority": 5,
+        "JustGuardedActionName": "AttackEmitter_ReflectToJustGuardDefender"
       }
     },
     {

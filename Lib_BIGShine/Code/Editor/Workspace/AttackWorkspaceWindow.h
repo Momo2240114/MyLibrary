@@ -16,10 +16,10 @@ class AttackEffectHitComponent;
 class DangerAreaComponent;
 class DragonAIComponent;
 class DragonAttackControllerComponent;
-class EffectEmitterComponent;
+class AttackEmitterComponent;
 class GameObject;
 
-// 攻撃判定、危険範囲、EffectEmitterを実シーン上の対象Objectへまとめて調整するWorkspace。
+// 攻撃判定、危険範囲、AttackEmitterを実シーン上の対象Objectへまとめて調整するWorkspace。
 class AttackWorkspaceWindow : public EditorWorkspaceWindow
 {
 public:

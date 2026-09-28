@@ -8,7 +8,7 @@
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/GamePlay/System/EffectManager.h"
-#include "Engine/GamePlay/VFX/EffectEmitterComponent.h"
+#include "Engine/GamePlay/VFX/AttackEmitterComponent.h"
 #include "Engine/GamePlay/Transform/Transform.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
@@ -436,7 +436,7 @@ void DragonAttackControllerComponent::EnsureDependencies()
 
     neckIK = owner_->GetComponent<DragonNeckCommandIKComponent>();
     tailIK = owner_->GetComponent<DragonTailCommandIKComponent>();
-    effectEmitter = owner_->GetComponent<EffectEmitterComponent>();
+    attackEmitter = owner_->GetComponent<AttackEmitterComponent>();
 }
 
 void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
@@ -840,8 +840,8 @@ void DragonAttackControllerComponent::SpawnBreathChargeEffect()
     EnsureDependencies();
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
-    const std::shared_ptr<EffectEmitterComponent> emitter_ =
-        ResolveBreathEmitterComponent(position_, forward_);
+    const std::shared_ptr<AttackEmitterComponent> emitter_ =
+        ResolveBreathAttackEmitterComponent(position_, forward_);
     if (!emitter_) return;
 
     if (!breathProjectileEmitterAssetPath.empty())
@@ -1060,7 +1060,7 @@ bool DragonAttackControllerComponent::ResolveStampSourceFrame(
     return true;
 }
 
-std::shared_ptr<EffectEmitterComponent> DragonAttackControllerComponent::ResolveBreathEmitterComponent(
+std::shared_ptr<AttackEmitterComponent> DragonAttackControllerComponent::ResolveBreathAttackEmitterComponent(
     DirectX::XMFLOAT3& position_,
     DirectX::XMFLOAT3& forward_) const
 {
@@ -1068,14 +1068,14 @@ std::shared_ptr<EffectEmitterComponent> DragonAttackControllerComponent::Resolve
     if (!owner_) return nullptr;
 
     bool hasSourceFrame_ = false;
-    std::shared_ptr<EffectEmitterComponent> sourceEmitter_;
+    std::shared_ptr<AttackEmitterComponent> sourceEmitter_;
     if (!breathEmitterObjectName.empty())
     {
         const std::shared_ptr<GameObject> sourceObject_ = owner_->GetManager().Find(breathEmitterObjectName);
         if (sourceObject_)
         {
             hasSourceFrame_ = ResolveBreathSourceFrame(position_, forward_);
-            sourceEmitter_ = sourceObject_->GetComponent<EffectEmitterComponent>();
+            sourceEmitter_ = sourceObject_->GetComponent<AttackEmitterComponent>();
         }
     }
 
@@ -1087,7 +1087,7 @@ std::shared_ptr<EffectEmitterComponent> DragonAttackControllerComponent::Resolve
         }
     }
 
-    std::shared_ptr<EffectEmitterComponent> ownerEmitter_ = effectEmitter.lock();
+    std::shared_ptr<AttackEmitterComponent> ownerEmitter_ = attackEmitter.lock();
     if (ownerEmitter_ && (hasSourceFrame_ || ResolveBreathSourceFrame(position_, forward_)))
     {
         return ownerEmitter_;
@@ -1103,8 +1103,8 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(const std::string& t
     EnsureDependencies();
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
-    const std::shared_ptr<EffectEmitterComponent> emitter_ =
-        ResolveBreathEmitterComponent(position_, forward_);
+    const std::shared_ptr<AttackEmitterComponent> emitter_ =
+        ResolveBreathAttackEmitterComponent(position_, forward_);
     if (!emitter_) return;
 
     if (!breathProjectileEmitterAssetPath.empty())
@@ -1112,7 +1112,7 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(const std::string& t
         emitter_->LoadAsset(breathProjectileEmitterAssetPath);
     }
 
-    // ブレス本体はEffectEmitter Asset内の判定・モデル・着弾演出をまとめて生成する。
+    // ブレス本体はAttackEmitter Asset内の判定・モデル・着弾演出をまとめて生成する。
     forward_ = Normalize(forward_);
     position_ = Add(position_, Scale(forward_, breathProjectileMouthForwardOffset));
     emitter_->EmitByNameAt(templateName_, position_, forward_);
@@ -1377,7 +1377,7 @@ void DragonAttackControllerComponent::Gui()
 
     ImGui::InputText("Action Category", &actionCategory);
     ImGui::InputText("Breath VFX", &breathVFXAssetPath);
-    ImGui::InputText("Breath Projectile Emitter", &breathProjectileEmitterAssetPath);
+    ImGui::InputText("Breath Projectile AttackEmitter", &breathProjectileEmitterAssetPath);
     ImGui::InputText("Breath Charge Template", &breathChargeEffectTemplateName);
     ImGui::InputText("Breath Target Object", &targetObjectName);
     ImGui::InputText("Breath Emitter Object", &breathEmitterObjectName);
@@ -1590,7 +1590,7 @@ void DragonAttackControllerComponent::Deserialize(const nlohmann::json& json_)
     breathVFXAssetPath = json_.value("BreathVFXAssetPath", std::string("Data/VFX/DragonBreath.json"));
     breathProjectileEmitterAssetPath = json_.value(
         "BreathProjectileEmitterAssetPath",
-        std::string("Data/EffectEmitter/DragonBreathLight.json"));
+        std::string("Data/AttackEmitter/DragonBreathLight.json"));
     breathChargeEffectTemplateName = json_.value(
         "BreathChargeEffectTemplateName",
         std::string("DragonBreathCharge"));

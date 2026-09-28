@@ -1,0 +1,28 @@
+{
+    "AssetType": "ImpactEffect",
+    "AssetVersion": 1,
+    "Entries": [
+        {
+            "Type": 0,
+            "Enabled": true,
+            "AssetPath": "SwordHitCircle_Aqua",
+            "EmitterName": "",
+            "Scale": [1.0, 1.0, 1.0],
+            "Color": [0.45, 0.95, 1.0, 1.0],
+            "LifeTime": 0.35,
+            "FadeOutDuration": 0.05,
+            "NormalOffset": 0.04
+        },
+        {
+            "Type": 0,
+            "Enabled": true,
+            "AssetPath": "SwordHit_Aqua_Lv02",
+            "EmitterName": "",
+            "Scale": [1.0, 1.0, 1.0],
+            "Color": [0.6, 1.0, 1.0, 1.0],
+            "LifeTime": 0.35,
+            "FadeOutDuration": 0.05,
+            "NormalOffset": 0.06
+        }
+    ]
+}

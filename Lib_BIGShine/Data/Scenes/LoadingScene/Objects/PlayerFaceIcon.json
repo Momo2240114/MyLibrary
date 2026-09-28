@@ -1,0 +1,125 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "InputEnabled": false,
+                "ParentWidgetId": "PlayerStatusRoot",
+                "RaycastTarget": false,
+                "RectTransform": {
+                    "AnchorMax": [
+                        0.0,
+                        0.0
+                    ],
+                    "AnchorMin": [
+                        0.0,
+                        0.0
+                    ],
+                    "AnchoredPosition": [
+                        18.0,
+                        18.0
+                    ],
+                    "LocalRotation": 0.0,
+                    "LocalScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "Pivot": [
+                        0.0,
+                        0.0
+                    ],
+                    "SizeDelta": [
+                        86.0,
+                        86.0
+                    ]
+                },
+                "Version": 1,
+                "Visible": true,
+                "WidgetId": "PlayerFaceIcon",
+                "ZOrder": 2
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UIWidgetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "CatPos": [
+                    0.0,
+                    0.0
+                ],
+                "CatSize": [
+                    464.0,
+                    464.0
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "LocalSize": [
+                    86.0,
+                    86.0
+                ],
+                "ShaderID": 0,
+                "TexturePath": "./Data/Sprite/UI/Player/PlayerPortrait_ExpressionSheet.png",
+                "Visible": true,
+                "pivotType": 0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "SpriteRenderer",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ApplyEveryFrame": true,
+                "ColumnCount": 5,
+                "ColumnIndex": 0,
+                "PaddingBottom": 0.0,
+                "PaddingLeft": 0.0,
+                "PaddingRight": 0.0,
+                "PaddingTop": 0.0,
+                "RowCount": 1,
+                "RowIndex": 0,
+                "Version": 1
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "UISpriteSheetComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 16,
+    "Name": "PlayerFaceIcon",
+    "ParentName": "PlayerStatusRoot",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

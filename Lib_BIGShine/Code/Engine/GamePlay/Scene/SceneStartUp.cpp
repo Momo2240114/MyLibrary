@@ -2,6 +2,7 @@
 
 #include "SceneStartUp.h"
 #include "SceneTitle.h"
+#include "SceneLoading.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/Graphics/Resource/ModelResourceManager.h"
 #include "Engine/Common/DebugLog.h"
@@ -53,7 +54,7 @@ void SceneStartUp::Update(float elapsedTime_)
     {
         // Criticalが揃った時点でTitleSceneへ移る。HighPriorityは裏で継続してよい。
         titleSceneRequested = true;
-        SceneManager::ChangeScene(std::make_unique<SceneTitle>());
+        SceneManager::ChangeScene(std::make_unique<SceneLoading>(std::make_unique<SceneTitle>()));
     }
 }
 
