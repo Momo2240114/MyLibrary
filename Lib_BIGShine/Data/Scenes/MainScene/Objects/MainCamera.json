@@ -46,17 +46,17 @@
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    -12.98517894744873,
-                    4.441919803619385,
-                    23.094383239746094
+                    -0.009138444438576698,
+                    6.927277088165283,
+                    -56.191993713378906
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    0.5309237241744995,
-                    0.7069689631462097,
-                    7.034259796142578
+                    -0.008686287328600883,
+                    0.7069681882858276,
+                    -17.546903610229492
                 ],
-                "fovY": 60.00001525878906,
+                "fovY": 60.00000762939453,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
@@ -76,8 +76,8 @@
         {
             "Data": {
                 "baseDistance": 14.0,
-                "currentPitch": -10.089216232299805,
-                "currentYaw": -49.916236877441406,
+                "currentPitch": -9.143893241882324,
+                "currentYaw": 89.99932098388672,
                 "distance": 14.0,
                 "horizontalFollowSpeed": 5.0,
                 "lookSpeedX": 500.0,
@@ -227,28 +227,33 @@
                         "attackDirectionKey": "Normal",
                         "blackboardCategory": "Guard",
                         "cameraOffset": [
-                            0.6000000238418579,
-                            0.4000000059604645,
-                            1.0
+                            -7.5,
+                            6.699999809265137,
+                            10.0
                         ],
-                        "enterDuration": 0.07999999821186066,
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.03999999910593033,
                         "focusOffset": [
                             0.0,
-                            0.15000000596046448,
+                            0.014999999664723873,
                             0.0
                         ],
                         "focusPositionKey": "Position",
-                        "holdDuration": 0.11999999731779099,
-                        "positionMode": "TPS_VIEW_RELATIVE",
+                        "holdDuration": 0.20000000298023224,
+                        "positionMode": "TPS_TARGET_RELATIVE",
                         "priority": 20,
-                        "returnDuration": 0.18000000715255737,
+                        "returnDuration": 0.17499999701976776,
                         "shakeFrequency": 20.0,
                         "shakeStrength": 0.03500000014901161,
                         "suppressCameraCollision": false,
                         "suppressLockOnControl": true,
                         "suppressThirdPersonControl": true,
-                        "targetFov": 42.0,
-                        "targetMode": "HIT_POSITION",
+                        "targetFov": 47.29999923706055,
+                        "targetMode": "PLAYER",
                         "useUnscaledTime": true
                     },
                     {
@@ -256,9 +261,14 @@
                         "attackDirectionKey": "Normal",
                         "blackboardCategory": "Dodge",
                         "cameraOffset": [
-                            0.699999988079071,
-                            0.44999998807907104,
-                            -1.399999976158142
+                            0.0,
+                            10.0,
+                            -22.5
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
                         ],
                         "enterDuration": 0.05999999865889549,
                         "focusOffset": [
@@ -267,10 +277,10 @@
                             0.0
                         ],
                         "focusPositionKey": "Position",
-                        "holdDuration": 0.10000000149011612,
-                        "positionMode": "PLAYER_FORWARD_RELATIVE",
+                        "holdDuration": 0.15000000596046448,
+                        "positionMode": "TPS_TARGET_RELATIVE",
                         "priority": 15,
-                        "returnDuration": 0.1599999964237213,
+                        "returnDuration": 0.09000000357627869,
                         "shakeFrequency": 20.0,
                         "shakeStrength": 0.014999999664723873,
                         "suppressCameraCollision": false,
@@ -395,14 +405,14 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -12.985179901123047,
-            4.441919803619385,
-            23.094383239746094
+            -0.009138443507254124,
+            6.927277088165283,
+            -56.191993713378906
         ],
         "Rot": [
-            10.089216232299805,
-            139.91622924804688,
-            0.0
+            9.143893241882324,
+            0.0006703747785650194,
+            9.896423090738349e-12
         ],
         "Scale": [
             1.0,

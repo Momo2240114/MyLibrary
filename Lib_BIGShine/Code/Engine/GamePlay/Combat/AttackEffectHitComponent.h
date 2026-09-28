@@ -142,6 +142,10 @@ public:
     void SetHitImpactEffectAssetPath(const std::string& path_);
     void SetAllowMultiHit(bool allowMultiHit_);
     void SetCanHitOwner(bool canHitOwner_);
+    void SetSourceAction(const std::string& sourceAction_);
+    void SetJustGuardedActionName(const std::string& actionName_);
+    void SetRuntimeHitOwner(GameObject* owner_);
+    void SetRuntimeHitTeamId(int teamId_);
 
     // 攻撃タイプによって移動や寿命の扱いを変える。
     void SetEffectType(ATTACK_EFFECT_TYPE effectType_);
@@ -236,6 +240,8 @@ private:
     bool destroyOnLifeEnd = true;
     bool canHitOwner = false;
     bool allowMultiHit = false;
+    std::string sourceAction;
+    std::string justGuardedActionName;
 
     // PROJECTILEなどでエフェクト本体を移動させるための設定。
     DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 1.0f };

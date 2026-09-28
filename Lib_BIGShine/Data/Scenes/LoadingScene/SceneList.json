@@ -1,17 +1,90 @@
 {
     "GraphicsSettings": {
         "Bloom": {
-            "blurPasses": 4,
-            "intensity": 1.0,
-            "kawaseScale": 1.0,
-            "threshold": 1.0
+            "blurPasses": 5,
+            "enabled": true,
+            "exposure": 1.0,
+            "intensity": 0.46000000834465027,
+            "kawaseScale": 3.0,
+            "threshold": 1.7000000476837158,
+            "toneMappingEnabled": true
+        },
+        "ShadowMap": {
+            "cascadeDepthPadding": 180.0,
+            "cascadeShadowBias": [
+                0.0008999999845400453,
+                0.0020000000949949026,
+                0.003000000026077032,
+                0.004999999888241291
+            ],
+            "cascadeShadowSoftnessRadius": 2.0,
+            "cascadeShadowSoftnessSampleCount": 8,
+            "cascadeSplitDistances": [
+                25.0,
+                100.0,
+                250.0,
+                1000.0
+            ],
+            "cascadeXyPadding": 8.0,
+            "displayCascadeArea": false,
+            "lightDistance": 500.0,
+            "shadowAttenuation": 0.0,
+            "texelSnapEnabled": true,
+            "useCascadeShadow": true,
+            "useCascadeShadowRandomRotation": true,
+            "useCascadeShadowSoftness": true
+        },
+        "Toon": {
+            "shadeFeathers": [
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806
+            ],
+            "shadeSteps": [
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806,
+                0.05000000074505806
+            ]
+        },
+        "ToonOutline": {
+            "color": [
+                0.1568627506494522,
+                0.0784313753247261,
+                0.0784313753247261,
+                1.0
+            ],
+            "thickness": 0.0
+        },
+        "ToonPBR": {
+            "shadeFeathers": [
+                0.0010000000474974513,
+                0.03500000014901161,
+                0.0010000000474974513,
+                0.0010000000474974513
+            ],
+            "shadeSteps": [
+                0.3720000088214874,
+                0.8349999785423279,
+                0.847000002861023,
+                1.0
+            ]
         }
     },
     "ObjectList": [
         "MainCamera",
-        "Stgae",
-        "Load",
-        "Enemy"
+        "DirLight",
+        "Stage",
+        "RockWall",
+        "RockWall_01",
+        "RockWall_02",
+        "RockWall_03",
+        "RockWall_04",
+        "RockWall_05",
+        "RockWall_06",
+        "RockWall_07",
+        "JustDodgeEventPool"
     ],
     "SceneName": "LoadingScene"
 }

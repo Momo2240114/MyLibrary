@@ -1,0 +1,164 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "ColorFilterWaypoints": [],
+                "DefaultFilter": {
+                    "balance": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "bri": 1.0,
+                    "con": 1.0,
+                    "hue": 0.0,
+                    "intensity": 1.0,
+                    "sat": 1.0
+                }
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "ColorFilterDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "Default": {
+                    "enabled": false,
+                    "maxVelocity": 0.03500000014901161,
+                    "samples": 6,
+                    "strength": 0.6000000238418579,
+                    "useCameraVelocity": false
+                },
+                "Waypoints": []
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "MotionBlurDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "Default": {
+                    "center": [
+                        0.5,
+                        0.5
+                    ],
+                    "maskRadius": 0.5,
+                    "radius": 0.0,
+                    "samples": 16
+                },
+                "Waypoints": []
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "RadialBlurDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "Default": {
+                    "center": [
+                        0.5,
+                        0.5
+                    ],
+                    "color": [
+                        0.20000000298023224,
+                        0.20000000298023224,
+                        0.20000000298023224,
+                        1.0
+                    ],
+                    "enabled": false,
+                    "intensity": 0.5,
+                    "opacity": 1.0,
+                    "rounded": 0.0,
+                    "roundness": 1.0,
+                    "smoothness": 0.20000000298023224
+                },
+                "Waypoints": []
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "VignetteDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "Waypoints": [
+                    {
+                        "DefaultScale": 1.0,
+                        "HoldDuration": 10.0,
+                        "LayerMask": 1770,
+                        "TargetScale": 0.4000000059604645,
+                        "TimeToDefault": 0.15000000596046448,
+                        "TimeToTarget": 0.05000000074505806
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "TimeScaleDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "RegisterGlobal": true,
+                "Sequences": []
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "ActionSequence",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "Easing",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "JustDodgeEventPool",
+    "ParentName": "",
+    "RequiredForSceneStart": false,
+    "Transform": {
+        "Pos": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

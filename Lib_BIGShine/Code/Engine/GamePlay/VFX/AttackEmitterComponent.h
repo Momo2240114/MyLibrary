@@ -12,7 +12,7 @@
 
 class GameObject;
 
-enum class EFFECT_EMITTER_ENTRY_TYPE
+enum class ATTACK_EMITTER_ENTRY_TYPE
 {
     // ParticleComponentを持つ一時GameObjectを生成する。
     PARTICLE,
@@ -24,7 +24,7 @@ enum class EFFECT_EMITTER_ENTRY_TYPE
     IMPACT_EFFECT
 };
 
-enum class EFFECT_EMITTER_SHAPE_TYPE
+enum class ATTACK_EMITTER_SHAPE_TYPE
 {
     // その場の範囲攻撃。
     AREA,
@@ -35,10 +35,10 @@ enum class EFFECT_EMITTER_SHAPE_TYPE
     FAN
 };
 
-struct EffectEmitterEntryTemplate
+struct AttackEmitterEntryTemplate
 {
     // 生成する演出の種類。
-    EFFECT_EMITTER_ENTRY_TYPE type = EFFECT_EMITTER_ENTRY_TYPE::PARTICLE;
+    ATTACK_EMITTER_ENTRY_TYPE type = ATTACK_EMITTER_ENTRY_TYPE::PARTICLE;
     bool enabled = true;
 
     // Particle/MeshVFX/ImpactEffectのAssetパス。
@@ -61,7 +61,7 @@ struct EffectEmitterEntryTemplate
     float glowMultiplier = 1.0f;
 };
 
-struct EffectEmitterHitTemplate
+struct AttackEmitterHitTemplate
 {
     // trueなら演出と一緒にAttackEffectHitComponentも生成する。
     bool enabled = true;
@@ -78,6 +78,7 @@ struct EffectEmitterHitTemplate
     bool allowMultiHit = false;
     bool canHitOwner = false;
     bool destroyOnHit = false;
+    std::string justGuardedActionName;
 
     // Hit成立時に追加で出す演出設定。
     std::string hitParticleAssetPath;
@@ -104,12 +105,12 @@ struct EffectEmitterHitTemplate
     int cameraShakePriority = 5;
 };
 
-struct EffectEmitterTemplate
+struct AttackEmitterTemplate
 {
     // GUI表示名と、ActionSequenceから呼ぶ時のAction名。
-    std::string name = "EffectEmitter";
-    std::string actionName = "EffectEmitter_Fire";
-    EFFECT_EMITTER_SHAPE_TYPE shapeType = EFFECT_EMITTER_SHAPE_TYPE::PROJECTILE;
+    std::string name = "AttackEmitter";
+    std::string actionName = "AttackEmitter_Fire";
+    ATTACK_EMITTER_SHAPE_TYPE shapeType = ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE;
 
     // 指定Nodeがあれば、そのNode Transformを発生基準にする。
     std::string sourceNodeName;
@@ -134,11 +135,11 @@ struct EffectEmitterTemplate
     bool spawnHit = true;
 
     // 同時に生成する見た目演出と、必要なら攻撃判定設定。
-    std::vector<EffectEmitterEntryTemplate> entries;
-    EffectEmitterHitTemplate hit;
+    std::vector<AttackEmitterEntryTemplate> entries;
+    AttackEmitterHitTemplate hit;
 };
 
-class EffectEmitterComponent : public Component, public IActionProvider
+class AttackEmitterComponent : public Component, public IActionProvider
 {
 public:
     const std::string& GetName() const override { return componentName; }
@@ -158,13 +159,13 @@ public:
         const std::string& templateName_,
         const DirectX::XMFLOAT3& position_,
         const DirectX::XMFLOAT3& direction_);
-    // EffectEmitter Asset JSONを読み込む。
+    // AttackEmitter Asset JSONを読み込む。
     bool LoadAsset(const std::string& path_, bool forceReload_ = false);
-    // 現在のTemplate設定をEffectEmitter Asset JSONとして保存する。
+    // 現在のTemplate設定をAttackEmitter Asset JSONとして保存する。
     bool SaveAsset(const std::string& path_) const;
 
-    std::vector<EffectEmitterTemplate>& GetTemplates() { return templates; }
-    const std::vector<EffectEmitterTemplate>& GetTemplates() const { return templates; }
+    std::vector<AttackEmitterTemplate>& GetTemplates() { return templates; }
+    const std::vector<AttackEmitterTemplate>& GetTemplates() const { return templates; }
 
 private:
     struct EmitFrame
@@ -178,7 +179,7 @@ private:
     };
 
     // TemplateのsourceNode/localOffsetから、今回の発生基準を作る。
-    EmitFrame BuildEmitFrame(const EffectEmitterTemplate& template_) const;
+    EmitFrame BuildEmitFrame(const AttackEmitterTemplate& template_) const;
     // 外部Action側で解決済みのワールド位置と方向から、今回の発生基準を作る。
     EmitFrame BuildEmitFrameAt(
         const DirectX::XMFLOAT3& position_,
@@ -188,33 +189,33 @@ private:
         const DirectX::XMFLOAT3& rotation_,
         const DirectX::XMFLOAT3& scale_) const;
     void EmitWithFrame(
-        const EffectEmitterTemplate& template_,
+        const AttackEmitterTemplate& template_,
         const EmitFrame& frame_);
     void SpawnEntry(
-        const EffectEmitterTemplate& template_,
-        const EffectEmitterEntryTemplate& entry_,
+        const AttackEmitterTemplate& template_,
+        const AttackEmitterEntryTemplate& entry_,
         const EmitFrame& frame_,
         const std::shared_ptr<GameObject>& followTarget_);
 
     // spawnHitが有効なTemplateから、攻撃判定用GameObjectを生成する。
     std::shared_ptr<GameObject> SpawnHitObject(
-        const EffectEmitterTemplate& template_,
+        const AttackEmitterTemplate& template_,
         const EmitFrame& frame_);
     std::vector<AttackEffectHitShapeTemplate> BuildHitShapes(
-        const EffectEmitterTemplate& template_) const;
+        const AttackEmitterTemplate& template_) const;
 
     // Entry固有の色RampやBlend設定を生成済みMeshVFXへ反映する。
     void ApplyMeshVFXOverrides(
         const std::shared_ptr<GameObject>& object_,
-        const EffectEmitterEntryTemplate& entry_) const;
+        const AttackEmitterEntryTemplate& entry_) const;
 
 private:
-    static inline const std::string componentName = "EffectEmitterComponent";
+    static inline const std::string componentName = "AttackEmitterComponent";
 
-    // 外部EffectEmitter Assetを使う場合のPath。
+    // 外部AttackEmitter Assetを使う場合のPath。
     std::string assetPath;
     // 同じAssetを毎回発射時に読み直さないための、実際に読み込み済みのPath。
     std::string loadedAssetPath;
     // Editorで保存する発生Template一覧。
-    std::vector<EffectEmitterTemplate> templates;
+    std::vector<AttackEmitterTemplate> templates;
 };

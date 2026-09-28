@@ -159,6 +159,7 @@
                 "ImpactPower": 7.0,
                 "IsStatic": false,
                 "IsTrigger": true,
+                "JustGuardedActionName": "",
                 "KnockBackPower": 3.5,
                 "KnockBackPowerKey": "KnockBackPower",
                 "Mass": 0.0,

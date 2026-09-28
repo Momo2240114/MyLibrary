@@ -250,6 +250,12 @@ void HitBox::Gui()
     char attackTagBuffer_[64];
     strncpy_s(attackTagBuffer_, attackTag.c_str(), sizeof(attackTagBuffer_));
     if (ImGui::InputText("Attack Tag", attackTagBuffer_, sizeof(attackTagBuffer_))) attackTag = attackTagBuffer_;
+    char justGuardedActionBuffer_[128];
+    strncpy_s(justGuardedActionBuffer_, justGuardedActionName.c_str(), sizeof(justGuardedActionBuffer_));
+    if (ImGui::InputText("Just Guarded Action", justGuardedActionBuffer_, sizeof(justGuardedActionBuffer_)))
+    {
+        justGuardedActionName = justGuardedActionBuffer_;
+    }
 
     ImGui::SeparatorText("Hit Particle");
     char particleAssetBuffer_[256];
@@ -360,6 +366,7 @@ void HitBox::Serialize(nlohmann::json& j_) const
     j_["CanHitOwner"] = canHitOwner;
     j_["TeamId"] = teamId;
     j_["SourceAction"] = sourceAction;
+    j_["JustGuardedActionName"] = justGuardedActionName;
     j_["ImpactPower"] = impactPower;
     j_["KnockBackPower"] = knockBackPower;
     j_["AttackSourceType"] = static_cast<int>(attackSourceType);
@@ -425,6 +432,7 @@ void HitBox::Deserialize(const nlohmann::json& j_)
     canHitOwner = j_.value("CanHitOwner", false);
     teamId = j_.value("TeamId", 0);
     sourceAction = j_.value("SourceAction", std::string{});
+    justGuardedActionName = j_.value("JustGuardedActionName", std::string{});
     impactPower = (std::max)(j_.value("ImpactPower", damage), 0.0f);
     knockBackPower = j_.value("KnockBackPower", 0.0f);
     attackSourceType = static_cast<ATTACK_SOURCE_TYPE>(
@@ -774,6 +782,8 @@ void HitBox::RegisterActions()
                     object_->GetManager().GetAttackSystem().ClearAttackInstance(
                         hitBox_->attackInstanceId);
                     object_->GetManager().GetJustDodgeSystem().ClearAttackInstance(
+                        hitBox_->attackInstanceId);
+                    object_->GetManager().GetJustGuardSystem().ClearAttackInstance(
                         hitBox_->attackInstanceId);
                     object_->GetManager().GetGuardSystem().ClearAttackInstance(
                         hitBox_->attackInstanceId);

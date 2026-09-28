@@ -977,7 +977,7 @@ void GameObject::Load(const nlohmann::json& j)
     transform->UpdateWorldMatrix(); // 先に行列を確定させる
 
     // 3. コンポーネントの形成（復元）
-// コンポーネントの復元 (通常のComponentsもColliderComponentも共通の処理へ)
+    // コンポーネントの復元 (通常のComponentsもColliderComponentも共通の処理へ)
     auto loadComponent = [&](const nlohmann::json& cJson, bool allowDuplicate_) {
         std::string typeName = cJson["TypeName"];
         // 1. インスタンス生成

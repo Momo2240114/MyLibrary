@@ -113,6 +113,7 @@ namespace PlayerBlackboardKey
     inline constexpr const char* IS_LOCOMOTION = "IsLocomotion";
     inline constexpr const char* IS_ATTACK = "IsAttack";
     inline constexpr const char* IS_GUARD = "IsGuard";
+    inline constexpr const char* IS_JUST_GUARD = "IsJustGuard";
     inline constexpr const char* IS_DODGE = "IsDodge";
     inline constexpr const char* IS_AIR_ACTION = "IsAirAction";
     inline constexpr const char* IS_AIR_ATTACK = "IsAirAttack";

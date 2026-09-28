@@ -105,6 +105,7 @@ void GameObjectManager::Initialize()
     // Scene全体で共有するSystemを生成し、相互参照と描画Systemを初期化する。
     collisionStepSystem->SetAttackSystem(attackSystem.get());
     collisionStepSystem->SetJustDodgeSystem(justDodgeSystem.get());
+    collisionStepSystem->SetJustGuardSystem(justGuardSystem.get());
     collisionStepSystem->SetGuardSystem(guardSystem.get());
 
     particleRenderSystem = std::make_unique<ParticleRenderSystem>();
@@ -132,7 +133,6 @@ void GameObjectManager::Initialize()
     timeManager = std::make_shared<TimeManager>();
     effectManager->Initialize(this);
     RegisterAttackCallbacks();
-    EnsureGlobalActionObjects();
     ModelResourceManager::Instance().LoadPreloadSettings();
     ModelResourceManager::Instance().StartAsyncLoader();
 
@@ -256,6 +256,10 @@ void GameObjectManager::UpdateRunningRuntime(float elapsedTime_)
     {
         BS_PROFILE_SCOPE("JustDodgeSystem::BeginFrame");
         justDodgeSystem->BeginFrame();
+    }
+    {
+        BS_PROFILE_SCOPE("JustGuardSystem::BeginFrame");
+        justGuardSystem->BeginFrame();
     }
     {
         BS_PROFILE_SCOPE("GuardSystem::BeginFrame");
@@ -1786,15 +1790,15 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
         BS_PROFILE_PLOT("ModelLoad.EnqueueLoadGroupEndTime", GetSceneProfileMilliseconds());
     }
 
-    // ★ここで親子関係を復元する
+    // ここで親子関係を復元する
     {
         BS_PROFILE_SCOPE("LoadScene::ResolveHierarchy");
         ResolveHierarchy();
     }
-    {
-        BS_PROFILE_SCOPE("LoadScene::EnsureGlobalActionObjects");
-        EnsureGlobalActionObjects();
-    }
+    //{
+    //    BS_PROFILE_SCOPE("LoadScene::EnsureGlobalActionObjects");
+    //    EnsureGlobalActionObjects();
+    //}
 
     printf("Scene '%s' loaded from SceneList.json\n", sceneName_.c_str());
 }

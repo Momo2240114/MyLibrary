@@ -19,6 +19,8 @@ void SceneLoading::Initialize()
 		_GameObjectManager->SetShapeRenderEnabled(false);
 		_GameObjectManager->LoadScene("LoadingScene");
 	}
+	_GameObjectManager->SetSceneRuntimeState(SCENE_RUNTIME_STATE::RUNNING);
+
 
 	m_ModelRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice());
 	m_SpriteRenderSystem.Initialize(GraphicsDeviceManager::Instance().GetDevice(), GraphicsDeviceManager::Instance().GetContext());

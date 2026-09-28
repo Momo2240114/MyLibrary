@@ -9,6 +9,7 @@
 #include "PhysXSystem.h"
 #include "Engine/GamePlay/System/GuardSystem.h"
 #include "Engine/GamePlay/System/JustDodgeSystem.h"
+#include "Engine/GamePlay/System/JustGuardSystem.h"
 #include "Engine/Physics/JustDodgeCollider.h"
 
 
@@ -26,6 +27,12 @@
 
 namespace
 {
+    struct SuppressedHitTarget
+    {
+        HitBox* hitBox = nullptr;
+        GameObject* defenderRoot = nullptr;
+    };
+
     float Clamp01(float value_)
     {
         return (std::max)(0.0f, (std::min)(value_, 1.0f));
@@ -241,6 +248,63 @@ namespace
 
         collider_->UpdateLoadState();
         return collider_->IsLoadReady();
+    }
+
+    std::shared_ptr<GameObject> GetHierarchyRoot(std::shared_ptr<GameObject> object_)
+    {
+        while (object_ && object_->transform)
+        {
+            const std::shared_ptr<Transform> parentTransform_ =
+                object_->transform->parent.lock();
+            if (!parentTransform_) break;
+
+            const std::shared_ptr<GameObject> parentObject_ =
+                parentTransform_->gameObject.lock();
+            if (!parentObject_) break;
+
+            object_ = parentObject_;
+        }
+
+        return object_;
+    }
+
+    bool IsHitSuppressedForTarget(
+        HitBox* hitBox_,
+        HurtBox* hurtBox_,
+        const std::vector<SuppressedHitTarget>& suppressedTargets_)
+    {
+        if (!hitBox_ || !hurtBox_) return false;
+
+        const std::shared_ptr<GameObject> hurtObject_ = hurtBox_->GetGameObject();
+        const std::shared_ptr<GameObject> hurtRoot_ = GetHierarchyRoot(hurtObject_);
+        if (!hurtRoot_) return false;
+
+        for (const SuppressedHitTarget& suppressedTarget_ : suppressedTargets_)
+        {
+            if (suppressedTarget_.hitBox == hitBox_ &&
+                suppressedTarget_.defenderRoot == hurtRoot_.get())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void AddSuppressedHitTarget(
+        HitBox* hitBox_,
+        const std::shared_ptr<GameObject>& defender_,
+        std::vector<SuppressedHitTarget>& suppressedTargets_)
+    {
+        // Guard/JustGuard済みの防御者階層だけ、後段HurtBoxへのHit通知を止める。
+        if (!hitBox_ || !defender_) return;
+
+        const std::shared_ptr<GameObject> defenderRoot_ =
+            GetHierarchyRoot(defender_);
+        if (!defenderRoot_) return;
+
+        suppressedTargets_.push_back(
+            { hitBox_, defenderRoot_.get() });
     }
 }
 
@@ -528,6 +592,7 @@ void CollisionStepSystem::StepCombatPairs()
     std::vector<std::shared_ptr<HurtBox>> hurtBoxes_;
     std::vector<std::shared_ptr<JustDodgeCollider>> justDodgeColliders_;
     std::vector<std::shared_ptr<GuardCollider>> guardColliders_;
+    std::vector<SuppressedHitTarget> suppressedHitTargets_;
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::BroadPhase");
@@ -659,7 +724,7 @@ void CollisionStepSystem::StepCombatPairs()
 
     {
         BS_PROFILE_SCOPE("CollisionStepSystem::GuardCollision");
-        // Guardが成立した攻撃はHitBoxを無効化し、後段のHurtBox Hitへ進ませない。
+        // Guard/JustGuardが成立した防御者には、同じHitBoxを後段のHurtBox Hitへ流さない。
         for (size_t hitIndex_ = 0; hitIndex_ < hitBoxes_.size(); ++hitIndex_)
         {
             const std::shared_ptr<HitBox>& hitBox_ = hitBoxes_[hitIndex_];
@@ -693,13 +758,60 @@ void CollisionStepSystem::StepCombatPairs()
 
                 if (isOverlapping_ &&
                     !ShouldSuppressTriggerPair(hitBox_.get(), guardCollider_.get()) &&
+                    guardCollider_->IsJustGuardEnabled() &&
+                    justGuardSystem)
+                {
+                    JustGuardContact justGuardContact_{};
+                    justGuardContact_.position = contact_.position;
+                    justGuardContact_.normal = contact_.normal;
+                    justGuardContact_.isValid = contact_.isValid;
+
+                    const bool justGuarded_ = justGuardSystem->HandleJustGuard(
+                        *hitBox_,
+                        *guardCollider_,
+                        justGuardContact_);
+                    if (justGuarded_)
+                    {
+                        AddSuppressedHitTarget(
+                            hitBox_.get(),
+                            guardCollider_->GetGuardOwner(),
+                            suppressedHitTargets_);
+                        break;
+                    }
+                    if (guardCollider_->HasGuardedAttackRecord(*hitBox_))
+                    {
+                        AddSuppressedHitTarget(
+                            hitBox_.get(),
+                            guardCollider_->GetGuardOwner(),
+                            suppressedHitTargets_);
+                        break;
+                    }
+                }
+
+                if (isOverlapping_ &&
+                    !ShouldSuppressTriggerPair(hitBox_.get(), guardCollider_.get()) &&
                     guardSystem)
                 {
                     const bool guarded_ = guardSystem->HandleGuard(
                         *hitBox_,
                         *guardCollider_,
                         contact_);
-                    if (guarded_) break;
+                    if (guarded_)
+                    {
+                        AddSuppressedHitTarget(
+                            hitBox_.get(),
+                            guardCollider_->GetGuardOwner(),
+                            suppressedHitTargets_);
+                        break;
+                    }
+                    if (guardCollider_->HasGuardedAttackRecord(*hitBox_))
+                    {
+                        AddSuppressedHitTarget(
+                            hitBox_.get(),
+                            guardCollider_->GetGuardOwner(),
+                            suppressedHitTargets_);
+                        break;
+                    }
                 }
             }
         }
@@ -732,6 +844,16 @@ void CollisionStepSystem::StepCombatPairs()
                             hurtCapsules_[hurtIndex_],
                             manifold_);
                     }
+                }
+
+                if (isOverlapping_ &&
+                    IsHitSuppressedForTarget(
+                        hitBox_.get(),
+                        hurtBox_.get(),
+                        suppressedHitTargets_))
+                {
+                    isOverlapping_ = false;
+                    contact_ = {};
                 }
 
                 HandleTriggerPair(

@@ -146,6 +146,57 @@
             "TypeName": "JustDodgeCollider",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "ActionPrefix": "",
+                "ActivateActionName": "EnableGuardCollider",
+                "CanBeCharacterGround": true,
+                "CanGuardOwnerAttack": false,
+                "ColliderName": "",
+                "CollisionOwnerObjectName": "",
+                "CollisionRole": 6,
+                "ContainmentMode": 0,
+                "DeactivateActionName": "DisableGuardCollider",
+                "DebugPrimitiveColor": [
+                    0.20000000298023224,
+                    0.800000011920929,
+                    1.0,
+                    1.0
+                ],
+                "DisableJustGuardActionName": "DisableJustGuard",
+                "EnableJustGuardActionName": "EnableJustGuard",
+                "EndNodeName": "",
+                "GravityScale": 1.0,
+                "HalfHeight": 0.0010000000474974513,
+                "IsStatic": false,
+                "IsTrigger": true,
+                "Mass": 0.0,
+                "NodeModelObjectName": "",
+                "Offset": [
+                    0.0,
+                    1.5,
+                    1.5
+                ],
+                "OncePerAttackActivation": true,
+                "PhysicsControlsTransform": false,
+                "Radius": 1.0,
+                "RotateVelocityThreshold": 0.0010000000474974513,
+                "ShapeRenderFlg": true,
+                "StartNodeName": "",
+                "TeamId": 0,
+                "UseGravity": false,
+                "UsePhysicsResponse": false,
+                "VelocityRotationMode": 0,
+                "shapeSizeScale": 1.0
+            },
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "GuardCollider",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "CollisionMask": 0,
@@ -630,6 +681,10 @@
                             "type": "bool",
                             "value": false
                         },
+                        "IsJustGuard": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "IsLocomotion": {
                             "type": "bool",
                             "value": false
@@ -669,15 +724,15 @@
                         "MoveInput": {
                             "type": "vector2",
                             "value": [
-                                -0.7687773108482361,
-                                -0.6395165920257568
+                                0.0,
+                                0.0
                             ]
                         }
                     },
                     "Attack": {
                         "Damage": {
                             "type": "float",
-                            "value": 30.0
+                            "value": 0.0
                         },
                         "HitParticleAssetPath": {
                             "type": "string",
@@ -707,7 +762,7 @@
                     "Dodge": {
                         "AttackInstanceId": {
                             "type": "int",
-                            "value": 475
+                            "value": 55
                         },
                         "CanCounter": {
                             "type": "bool",
@@ -750,6 +805,72 @@
                             ]
                         }
                     },
+                    "Guard": {
+                        "AttackInstanceId": {
+                            "type": "int",
+                            "value": 208
+                        },
+                        "CanCounter": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "GuardSucceeded": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "GuardTrigger": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "GuardedAttackTag": {
+                            "type": "string",
+                            "value": "DamageBox"
+                        },
+                        "GuardedSourceAction": {
+                            "type": "string",
+                            "value": ""
+                        },
+                        "HitGroupId": {
+                            "type": "int",
+                            "value": 0
+                        },
+                        "JustGuardSucceeded": {
+                            "type": "bool",
+                            "value": false
+                        },
+                        "JustGuardTrigger": {
+                            "type": "bool",
+                            "value": true
+                        },
+                        "Normal": {
+                            "type": "vector3",
+                            "value": [
+                                -0.2300344854593277,
+                                -0.933287501335144,
+                                -0.2757871747016907
+                            ]
+                        },
+                        "Position": {
+                            "type": "vector3",
+                            "value": [
+                                -0.3442431092262268,
+                                1.0324538946151733,
+                                -0.41271135210990906
+                            ]
+                        },
+                        "ReceivedDamage": {
+                            "type": "float",
+                            "value": 5.0
+                        },
+                        "ReceivedImpactPower": {
+                            "type": "float",
+                            "value": 9.0
+                        },
+                        "ReceivedKnockBackPower": {
+                            "type": "float",
+                            "value": 5.0
+                        }
+                    },
                     "Health": {
                         "Current": {
                             "type": "float",
@@ -773,6 +894,10 @@
                             "type": "float",
                             "value": 0.0
                         },
+                        "AttackerAttackPower": {
+                            "type": "float",
+                            "value": 0.0
+                        },
                         "CurrentHealth": {
                             "type": "float",
                             "value": 0.0
@@ -781,6 +906,18 @@
                             "type": "float",
                             "value": 5.0
                         },
+                        "DamageApplyType": {
+                            "type": "int",
+                            "value": 0
+                        },
+                        "DamageHitInterval": {
+                            "type": "float",
+                            "value": 0.0
+                        },
+                        "DamageRate": {
+                            "type": "float",
+                            "value": 0.009999999776482582
+                        },
                         "Dead": {
                             "type": "bool",
                             "value": true
@@ -788,9 +925,13 @@
                         "Direction": {
                             "type": "vector2",
                             "value": [
-                                -0.6704696416854858,
-                                0.7419370412826538
+                                -0.9298470616340637,
+                                -0.3679463565349579
                             ]
+                        },
+                        "FixedDamage": {
+                            "type": "float",
+                            "value": 0.0
                         },
                         "HitStopDuration": {
                             "type": "float",
@@ -798,7 +939,7 @@
                         },
                         "HitStopScale": {
                             "type": "float",
-                            "value": 1.0
+                            "value": 0.0
                         },
                         "ImpactPower": {
                             "type": "float",
@@ -810,22 +951,26 @@
                         },
                         "KnockBackPower": {
                             "type": "float",
-                            "value": 20.0
+                            "value": 5.0
+                        },
+                        "MaxHitCount": {
+                            "type": "int",
+                            "value": 1
                         },
                         "Normal": {
                             "type": "vector3",
                             "value": [
-                                -0.6686106324195862,
-                                -0.07441473752260208,
-                                0.7398799061775208
+                                -0.7735871076583862,
+                                -0.5548493266105652,
+                                -0.3061133027076721
                             ]
                         },
                         "Position": {
                             "type": "vector3",
                             "value": [
-                                38.23536682128906,
-                                2.261380672454834,
-                                1.4637964963912964
+                                -1.2904043197631836,
+                                1.9730721712112427,
+                                -0.5106211304664612
                             ]
                         },
                         "ReactionDirection": {
@@ -1015,6 +1160,10 @@
                             "type": "bool",
                             "value": false
                         },
+                        "IsJustGuard": {
+                            "type": "bool",
+                            "value": false
+                        },
                         "IsLocomotion": {
                             "type": "bool",
                             "value": false
@@ -1054,8 +1203,8 @@
                         "MoveInput": {
                             "type": "vector2",
                             "value": [
-                                -0.7687773108482361,
-                                -0.6395165920257568
+                                0.0,
+                                0.0
                             ]
                         }
                     }
@@ -17696,8 +17845,117 @@
                             "blendSyncNormalizedTime": true,
                             "blendUseMask": false,
                             "customAnimIndex": -1,
-                            "events": [],
-                            "loop": true,
+                            "events": [
+                                {
+                                    "actionEnd": "DisableGuardCollider",
+                                    "actionStart": "EnableGuardCollider",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.699999988079071,
+                                    "eventTemplateType": "NONE",
+                                    "label": "GuardCollider",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.0
+                                },
+                                {
+                                    "actionEnd": "DisableJustGuard",
+                                    "actionStart": "EnableJustGuard",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.25,
+                                    "eventTemplateType": "NONE",
+                                    "label": "JustGuardWindow",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.0
+                                },
+                                {
+                                    "actionEnd": "ActionEnd",
+                                    "actionStart": "ActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.0166666507720947,
+                                    "eventTemplateType": "NONE",
+                                    "label": "ActionEnd",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.8333333134651184
+                                }
+                            ],
+                            "loop": false,
                             "name": "Parry_L_Seq",
                             "rootMotion": {
                                 "applyPositionX": true,
@@ -36939,6 +37197,7 @@
                     "Jump_Combat_End_L_90_Seq": "Data\\Animation\\StateData\\Player\\States\\Jump_Combat_End_L_90_Seq.json",
                     "Jump_Combat_Start_0_Seq": "Data\\Animation\\StateData\\Player\\States\\Jump_Combat_Start_0_Seq.json",
                     "Jump_Combat_Start_0_Seq_0": "Data\\Animation\\StateData\\Player\\States\\Jump_Combat_Start_0_Seq_0.json",
+                    "Parry_L_Seq": "Data\\Animation\\StateData\\Player\\States\\Parry_L_Seq.json",
                     "SS_Attack1": "Data\\Animation\\StateData\\Player\\States\\SS_Attack1.json",
                     "SS_Attack2": "Data\\Animation\\StateData\\Player\\States\\SS_Attack2.json",
                     "SS_Attack3": "Data\\Animation\\StateData\\Player\\States\\SS_Attack3.json",
@@ -37708,6 +37967,7 @@
                 "JumpEndDuration": 0.18000000715255737,
                 "JumpImpulse": 13.0,
                 "JumpImpulseFallbackDuration": 0.18000000715255737,
+                "JustDodgeInvincibilityDuration": 0.5,
                 "MoveSpeed": 22.0,
                 "RunEndDuration": 0.18000000715255737,
                 "RunStartDuration": 0.18000000715255737,
@@ -38889,10 +39149,10 @@
                                 "blackboardWrites": [],
                                 "cat": "Player",
                                 "name": "Player_Hit",
-                                "time": 0.0
+                                "time": 1.0666667222976685
                             }
                         ],
-                        "duration": 0.10000000149011612,
+                        "duration": 1.0666667222976685,
                         "name": "Hit_Player"
                     },
                     {
@@ -38923,13 +39183,58 @@
                             },
                             {
                                 "blackboardWrites": [],
-                                "cat": "Camera",
-                                "name": "MainCamera_Fov_0",
+                                "cat": "CameraAction",
+                                "name": "JustDodgeT",
+                                "time": 0.0
+                            },
+                            {
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "JustDodgeEventPool_Color_0",
+                                "time": 0.10000000149011612
+                            },
+                            {
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "JustDodgeEventPool_Vignette_0",
                                 "time": 0.0
                             }
                         ],
                         "duration": 10.0,
                         "name": "JustAvoid_Player"
+                    },
+                    {
+                        "actions": [
+                            {
+                                "blackboardWrites": [],
+                                "cat": "TimeScale",
+                                "name": "ParryEvantPool_TimeScale_0",
+                                "time": 0.0
+                            },
+                            {
+                                "blackboardWrites": [],
+                                "cat": "PostProcess",
+                                "name": "ParryEvantPool_Color_0",
+                                "time": 0.0
+                            },
+                            {
+                                "blackboardWrites": [
+                                    {
+                                        "boolValue": false,
+                                        "category": "Attack",
+                                        "floatValue": 0.0,
+                                        "intValue": 0,
+                                        "key": "Damage",
+                                        "type": 0
+                                    }
+                                ],
+                                "cat": "CameraAction",
+                                "name": "JustGuard",
+                                "time": 0.0
+                            }
+                        ],
+                        "duration": 10.0,
+                        "name": "Parry_Player"
                     }
                 ]
             },
@@ -39266,6 +39571,20 @@
             "TypeName": "CombatCameraCompositionComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "SelectedActionName": "Parry_Player",
+                "SelectedActionSource": 0,
+                "SelectedCategory": "Sequence"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "JustGuardReactionComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 1,
@@ -39274,13 +39593,13 @@
     "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            -5.062437534332275,
-            -0.12279081344604492,
-            11.91209888458252
+            -0.0788872167468071,
+            -0.12279093265533447,
+            -41.24628448486328
         ],
         "Rot": [
             9.363552468111269e-12,
-            216.6622314453125,
+            0.0,
             1.1004056432284415e-05
         ],
         "Scale": [

@@ -8,6 +8,7 @@
 #include "Engine/Physics/CollisionStepSystem.h"
 #include "Engine/GamePlay/System/AttackSystem.h"
 #include "Engine/GamePlay/System/JustDodgeSystem.h"
+#include "Engine/GamePlay/System/JustGuardSystem.h"
 #include "Engine/GamePlay/System/GuardSystem.h"
 #include "Engine/GamePlay/System/EffectManager.h"
 #include "Game/GameMode/GameModeManager.h"
@@ -122,6 +123,7 @@ public:
 
     void Update(float elapsedTime_);
     SCENE_RUNTIME_STATE GetSceneRuntimeState() const { return sceneRuntimeState; }
+    void SetSceneRuntimeState(SCENE_RUNTIME_STATE state) {  sceneRuntimeState = state; }
     float GetSceneLoadProgress() const { return sceneLoadProgress; }
     const std::string& GetSceneRuntimeError() const { return sceneRuntimeError; }
 
@@ -223,6 +225,7 @@ public:
     CollisionStepSystem& GetCollisionStepSystem() { return *collisionStepSystem; }
     AttackSystem& GetAttackSystem() { return *attackSystem; }
     JustDodgeSystem& GetJustDodgeSystem() { return *justDodgeSystem; }
+    JustGuardSystem& GetJustGuardSystem() { return *justGuardSystem; }
     GuardSystem& GetGuardSystem() { return *guardSystem; }
     EffectManager& GetEffectManager() { return *effectManager; }
 private:
@@ -272,6 +275,8 @@ private:
         std::make_unique<AttackSystem>();
     std::unique_ptr<JustDodgeSystem > justDodgeSystem =
         std::make_unique<JustDodgeSystem >();
+    std::unique_ptr<JustGuardSystem> justGuardSystem =
+        std::make_unique<JustGuardSystem>();
     std::unique_ptr<GuardSystem> guardSystem =
         std::make_unique<GuardSystem>();
     std::unique_ptr<CollisionStepSystem> collisionStepSystem =

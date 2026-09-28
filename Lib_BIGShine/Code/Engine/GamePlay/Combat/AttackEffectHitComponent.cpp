@@ -210,6 +210,8 @@ void AttackEffectHitComponent::SetHitImpactEffectAssetPath(const std::string& pa
 
 void AttackEffectHitComponent::SetAllowMultiHit(bool allowMultiHit_) { allowMultiHit = allowMultiHit_; }
 void AttackEffectHitComponent::SetCanHitOwner(bool canHitOwner_) { canHitOwner = canHitOwner_; }
+void AttackEffectHitComponent::SetSourceAction(const std::string& sourceAction_) { sourceAction = sourceAction_; }
+void AttackEffectHitComponent::SetJustGuardedActionName(const std::string& actionName_) { justGuardedActionName = actionName_; }
 void AttackEffectHitComponent::SetEffectType(ATTACK_EFFECT_TYPE effectType_) { effectType = effectType_; }
 void AttackEffectHitComponent::SetLifeTime(float lifeTime_) { lifeTime = (std::max)(lifeTime_, 0.0f); }
 void AttackEffectHitComponent::SetDestroyOnLifeEnd(bool destroyOnLifeEnd_) { destroyOnLifeEnd = destroyOnLifeEnd_; }
@@ -217,6 +219,23 @@ void AttackEffectHitComponent::SetMovement(const DirectX::XMFLOAT3& direction_, 
 {
     movementDirection = direction_;
     movementSpeed = speed_;
+}
+
+void AttackEffectHitComponent::SetRuntimeHitOwner(GameObject* owner_)
+{
+    ownerObject = owner_;
+    for (RuntimeHitShape& runtime_ : runtimeHitShapes)
+    {
+        if (runtime_.hitBox) runtime_.hitBox->SetOwner(owner_);
+    }
+}
+
+void AttackEffectHitComponent::SetRuntimeHitTeamId(int teamId_)
+{
+    for (RuntimeHitShape& runtime_ : runtimeHitShapes)
+    {
+        if (runtime_.hitBox) runtime_.hitBox->teamId = teamId_;
+    }
 }
 
 void AttackEffectHitComponent::SetHitShapes(
@@ -284,6 +303,7 @@ void AttackEffectHitComponent::ClearHitHistory()
     {
         object_->GetManager().GetAttackSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
         object_->GetManager().GetJustDodgeSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
+        object_->GetManager().GetJustGuardSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
         object_->GetManager().GetGuardSystem().ClearAttackHitGroup(attackInstanceId, hitGroupId);
     }
     for (RuntimeHitShape& runtime_ : runtimeHitShapes)
@@ -302,6 +322,8 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->SetOwner(ownerObject);
     hitBox_->SetAttackInstanceId(attackInstanceId);
     hitBox_->SetHitGroupId(hitGroupId);
+    hitBox_->sourceAction = sourceAction;
+    hitBox_->justGuardedActionName = justGuardedActionName;
     hitBox_->SetDamage(damage);
     hitBox_->SetDamageRate(damageRate);
     hitBox_->SetFixedDamage(fixedDamage);
@@ -336,6 +358,11 @@ void AttackEffectHitComponent::ConfigureHitBox(
     hitBox_->hitImpactEffectAssetPath = hitImpactEffectAssetPath;
     hitBox_->SetHitEffectBlackboardOverrideEnabled(false);
     hitBox_->SetAttackDataBlackboardOverrideEnabled(false);
+    hitBox_->attackSourceType = effectType == ATTACK_EFFECT_TYPE::PROJECTILE
+        ? ATTACK_SOURCE_TYPE::PROJECTILE
+        : effectType == ATTACK_EFFECT_TYPE::INSTANT_AREA
+        ? ATTACK_SOURCE_TYPE::MELEE
+        : ATTACK_SOURCE_TYPE::REMOTE;
     std::printf(
         "[AttackEffectHitComponent::ConfigureHitBox] event particle='%s' meshVFX='%s'\n",
         hitBox_->hitParticleAssetPath.c_str(),
@@ -579,6 +606,8 @@ void AttackEffectHitComponent::Serialize(nlohmann::json& json_) const
     json_["DestroyOnLifeEnd"] = destroyOnLifeEnd;
     json_["CanHitOwner"] = canHitOwner;
     json_["AllowMultiHit"] = allowMultiHit;
+    json_["SourceAction"] = sourceAction;
+    json_["JustGuardedActionName"] = justGuardedActionName;
     json_["MovementDirection"] = { movementDirection.x, movementDirection.y, movementDirection.z };
     json_["MovementSpeed"] = movementSpeed;
     json_["HitShapes"] = nlohmann::json::array();
@@ -645,6 +674,8 @@ void AttackEffectHitComponent::Deserialize(const nlohmann::json& json_)
     destroyOnLifeEnd = json_.value("DestroyOnLifeEnd", true);
     canHitOwner = json_.value("CanHitOwner", false);
     allowMultiHit = json_.value("AllowMultiHit", false);
+    sourceAction = json_.value("SourceAction", std::string{});
+    justGuardedActionName = json_.value("JustGuardedActionName", std::string{});
     movementSpeed = json_.value("MovementSpeed", 0.0f);
     const nlohmann::json movementDirection_ = json_.value("MovementDirection", nlohmann::json::array());
     if (movementDirection_.is_array() && movementDirection_.size() >= 3u)

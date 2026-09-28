@@ -1,69 +1,61 @@
 {
+    "CollisionMask": 0,
     "Components": [
         {
             "Data": {
                 "aspect": 1.7777777910232544,
                 "eye": [
-                    0.0,
-                    2.0,
-                    0.0
+                    1.6609690189361572,
+                    19.435741424560547,
+                    64.45428466796875
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    -1.0,
-                    2.0,
-                    -1.1920930376163597e-07
+                    1.654305100440979,
+                    19.120155334472656,
+                    65.40316009521484
                 ],
                 "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
+                "priority": 0,
                 "up": [
-                    0.0,
-                    1.0,
-                    0.0
+                    -0.002216303488239646,
+                    0.9488966464996338,
+                    0.3155790865421295
                 ]
             },
             "Enabled": true,
-            "TypeName": "CameraComponent"
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         },
         {
-            "Data": {
-                "Color": [
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "InnerAngle": 20.0,
-                "Intensity": 3.200000047683716,
-                "LocalRotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "OffsetPosition": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "OuterAngle": 30.0,
-                "Range": 14.100000381469727,
-                "Type": 2
-            },
+            "Data": null,
             "Enabled": true,
-            "TypeName": "LightComponent"
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraFreeController",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
-    "Layer": 0,
+    "Layer": 1,
     "Name": "MainCamera",
     "ParentName": "",
+    "RequiredForSceneStart": false,
     "Transform": {
         "Pos": [
-            0.0,
-            2.0,
-            0.0
+            1.6609690189361572,
+            19.435741424560547,
+            64.45428466796875
         ],
         "Rot": [
-            0.0,
-            270.0,
+            18.39624786376953,
+            359.5976257324219,
             0.0
         ],
         "Scale": [

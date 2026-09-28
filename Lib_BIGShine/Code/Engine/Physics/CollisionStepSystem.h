@@ -6,6 +6,7 @@
 
 class ColliderComponent;
 class HitBox;
+class JustGuardSystem;
 class JustDodgeSystem;
 class GuardSystem;
 class AttackSystem;
@@ -26,6 +27,11 @@ public:
     {
         // HitBox/JustDodgeCollider の重なりをジャスト回避イベントへ変換する通知先。
         justDodgeSystem = justDodgeSystem_;
+    }
+    void SetJustGuardSystem(JustGuardSystem* justGuardSystem_)
+    {
+        // HitBox/GuardCollider の重なりをジャストガードイベントへ変換する通知先。
+        justGuardSystem = justGuardSystem_;
     }
     void SetGuardSystem(GuardSystem* guardSystem_)
     {
@@ -76,6 +82,7 @@ private:
     std::vector<std::weak_ptr<ColliderComponent>> colliders;
     AttackSystem* attackSystem = nullptr;
     JustDodgeSystem* justDodgeSystem = nullptr;
+    JustGuardSystem* justGuardSystem = nullptr;
     GuardSystem* guardSystem = nullptr;
 
 };
