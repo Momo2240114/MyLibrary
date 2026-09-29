@@ -139,6 +139,7 @@ struct AttackEmitterTemplate
     AttackEmitterHitTemplate hit;
 };
 
+//Effectを伴うbreathなどの攻撃の出現を管理するためのコンポーネント
 class AttackEmitterComponent : public Component, public IActionProvider
 {
 public:

@@ -4,6 +4,10 @@ namespace GameModeBlackboardKeys
 {
     // ゲーム進行や入力制御の共有状態を保存するカテゴリ。
     constexpr const char* CATEGORY_GAME = "Game";
+    // GameScene内の現在進行State。
+    constexpr const char* CURRENT_GAME_STATE = "CurrentGameState";
+    // 現在GameModeManagerが開始要求しているSequence名。
+    constexpr const char* CURRENT_SEQUENCE = "CurrentSequence";
     // Gameplay全体を止める必要があるかを示す。
     constexpr const char* GAMEPLAY_LOCKED = "GameplayLocked";
     // Player入力やPlayer制御を止める必要があるかを示す。

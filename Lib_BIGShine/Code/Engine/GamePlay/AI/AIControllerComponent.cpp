@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
+#include "Game/GameMode/GameModeBlackboardKeys.h"
 #include "Game/GameMode/GameModeManager.h"
 #include "Engine/Platform/WindowsDialogHelper.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
@@ -83,6 +84,18 @@ void AIControllerComponent::Update(float deltaTime_)
     UpdateAIContext(deltaTime_);
     // 計算結果をConditionノードが読めるキーへ書き込み、Rootから判断を進める。
     WriteContextBlackboard();
+    bool enemyAILocked_ = false;
+    if (context.globalBlackboard &&
+        context.globalBlackboard->GetBool(
+            GameModeBlackboardKeys::CATEGORY_GAME,
+            GameModeBlackboardKeys::ENEMY_AI_LOCKED,
+            enemyAILocked_) &&
+        enemyAILocked_)
+    {
+        // GameMode演出中はBehaviorGraphを進めず、現在の移動だけ止める。
+        ActionStopMove();
+        return;
+    }
     graph.Tick(context);
 }
 

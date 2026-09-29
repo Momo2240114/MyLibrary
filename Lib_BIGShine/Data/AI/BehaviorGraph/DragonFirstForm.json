@@ -143,9 +143,44 @@
         {
             "FromNodeId": 11,
             "FromPinId": 13,
+            "Id": 351,
+            "ToNodeId": 333,
+            "ToPinId": 334
+        },
+        {
+            "FromNodeId": 11,
+            "FromPinId": 13,
             "Id": 87,
             "ToNodeId": 84,
             "ToPinId": 85
+        },
+        {
+            "FromNodeId": 333,
+            "FromPinId": 335,
+            "Id": 336,
+            "ToNodeId": 337,
+            "ToPinId": 338
+        },
+        {
+            "FromNodeId": 333,
+            "FromPinId": 335,
+            "Id": 340,
+            "ToNodeId": 341,
+            "ToPinId": 342
+        },
+        {
+            "FromNodeId": 333,
+            "FromPinId": 335,
+            "Id": 344,
+            "ToNodeId": 345,
+            "ToPinId": 346
+        },
+        {
+            "FromNodeId": 333,
+            "FromPinId": 335,
+            "Id": 348,
+            "ToNodeId": 349,
+            "ToPinId": 350
         },
         {
             "FromNodeId": 84,
@@ -342,6 +377,69 @@
             "Id": 211,
             "ToNodeId": 208,
             "ToPinId": 209
+        },
+        {
+            "FromNodeId": 192,
+            "FromPinId": 194,
+            "Id": 375,
+            "ToNodeId": 354,
+            "ToPinId": 355
+        },
+        {
+            "FromNodeId": 354,
+            "FromPinId": 356,
+            "Id": 376,
+            "ToNodeId": 357,
+            "ToPinId": 358
+        },
+        {
+            "FromNodeId": 354,
+            "FromPinId": 356,
+            "Id": 377,
+            "ToNodeId": 359,
+            "ToPinId": 360
+        },
+        {
+            "FromNodeId": 192,
+            "FromPinId": 194,
+            "Id": 378,
+            "ToNodeId": 361,
+            "ToPinId": 362
+        },
+        {
+            "FromNodeId": 361,
+            "FromPinId": 363,
+            "Id": 379,
+            "ToNodeId": 364,
+            "ToPinId": 365
+        },
+        {
+            "FromNodeId": 361,
+            "FromPinId": 363,
+            "Id": 380,
+            "ToNodeId": 366,
+            "ToPinId": 367
+        },
+        {
+            "FromNodeId": 192,
+            "FromPinId": 194,
+            "Id": 381,
+            "ToNodeId": 368,
+            "ToPinId": 369
+        },
+        {
+            "FromNodeId": 368,
+            "FromPinId": 370,
+            "Id": 382,
+            "ToNodeId": 371,
+            "ToPinId": 372
+        },
+        {
+            "FromNodeId": 368,
+            "FromPinId": 370,
+            "Id": 383,
+            "ToNodeId": 373,
+            "ToPinId": 374
         },
         {
             "FromNodeId": 208,
@@ -582,7 +680,7 @@
             "ToPinId": 149
         }
     ],
-    "NextId": 331,
+    "NextId": 384,
     "Nodes": [
         {
             "ActionEndCategory": "DragonAI",
@@ -594,15 +692,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 1,
             "InputPinId": 0,
             "IntValue": 0,
             "Name": "Dragon Root",
             "OutputPinId": 3,
             "Position": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -611,17 +709,17 @@
             "Type": "Root",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -633,171 +731,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
-            "Id": 4,
-            "InputPinId": 5,
+            "FloatValue": 0.0,
+            "Id": 333,
+            "InputPinId": 334,
             "IntValue": 0,
-            "Name": "Dragon Decision Selector",
-            "OutputPinId": 6,
+            "Name": "Behind Tail Sweep Sequence",
+            "OutputPinId": 335,
             "Position": [
-                0,
-                180
-            ],
-            "Priority": 0,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Selector",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0,
-                0
-            ],
-            "Vector3Value": [
-                0,
-                0,
-                0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0,
-            "Id": 8,
-            "InputPinId": 9,
-            "IntValue": 0,
-            "Name": "Air Decision",
-            "OutputPinId": 10,
-            "Position": [
-                -1743,
-                420
-            ],
-            "Priority": 0,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Selector",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0,
-                0
-            ],
-            "Vector3Value": [
-                0,
-                0,
-                0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0,
-            "Id": 11,
-            "InputPinId": 12,
-            "IntValue": 0,
-            "Name": "Ground Turn / Close Decision",
-            "OutputPinId": 13,
-            "Position": [
-                -431,
-                416
-            ],
-            "Priority": 1,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "Selector",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0,
-                0
-            ],
-            "Vector3Value": [
-                0,
-                0,
-                0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0,
-            "Id": 14,
-            "InputPinId": 15,
-            "IntValue": 0,
-            "Name": "Ground Ranged / Move Random",
-            "OutputPinId": 16,
-            "Position": [
-                1137,
-                384
-            ],
-            "Priority": 2,
-            "ScopeId": "Root",
-            "StringValue": "",
-            "SubGraphName": "",
-            "Type": "RandomSelector",
-            "ValueType": "Bool",
-            "Vector2Value": [
-                0,
-                0
-            ],
-            "Vector3Value": [
-                0,
-                0,
-                0
-            ],
-            "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
-        },
-        {
-            "ActionEndCategory": "DragonAI",
-            "ActionEndKey": "ActionEnded",
-            "ActionName": "",
-            "BlackboardCategory": "DragonAI",
-            "BlackboardKey": "",
-            "BlackboardScope": "Local",
-            "BoolValue": false,
-            "Comment": "",
-            "CompareType": "Equal",
-            "FloatValue": 0,
-            "Id": 20,
-            "InputPinId": 21,
-            "IntValue": 0,
-            "Name": "Air Landing Sequence",
-            "OutputPinId": 22,
-            "Position": [
-                -2083,
-                680
+                -1215.0,
+                848.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -806,17 +748,368 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.399999976158142
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "State",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 337,
+            "InputPinId": 338,
+            "IntValue": 0,
+            "Name": "Ground Idle",
+            "OutputPinId": 0,
+            "Position": [
+                -1215.0,
+                1018.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Int",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "IsTargetBehind",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 341,
+            "InputPinId": 342,
+            "IntValue": 0,
+            "Name": "Target Behind",
+            "OutputPinId": 0,
+            "Position": [
+                -1215.0,
+                1133.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseTailSweep",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 345,
+            "InputPinId": 346,
+            "IntValue": 0,
+            "Name": "Can Tail Sweep",
+            "OutputPinId": 0,
+            "Position": [
+                -1215.0,
+                1248.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_TurnTailSweep",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 349,
+            "InputPinId": 350,
+            "IntValue": 0,
+            "Name": "Behind Tail Sweep Action",
+            "OutputPinId": 0,
+            "Position": [
+                -1215.0,
+                1363.0
+            ],
+            "Priority": 3,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 4,
+            "InputPinId": 5,
+            "IntValue": 0,
+            "Name": "Dragon Decision Selector",
+            "OutputPinId": 6,
+            "Position": [
+                0.0,
+                180.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Selector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 8,
+            "InputPinId": 9,
+            "IntValue": 0,
+            "Name": "Air Decision",
+            "OutputPinId": 10,
+            "Position": [
+                -1743.0,
+                420.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Selector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 11,
+            "InputPinId": 12,
+            "IntValue": 0,
+            "Name": "Ground Turn / Close Decision",
+            "OutputPinId": 13,
+            "Position": [
+                -431.0,
+                416.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Selector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 14,
+            "InputPinId": 15,
+            "IntValue": 0,
+            "Name": "Ground Ranged / Move Random",
+            "OutputPinId": 16,
+            "Position": [
+                1137.0,
+                384.0
+            ],
+            "Priority": 2,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "RandomSelector",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 20,
+            "InputPinId": 21,
+            "IntValue": 0,
+            "Name": "Air Landing Sequence",
+            "OutputPinId": 22,
+            "Position": [
+                -2083.0,
+                680.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -828,15 +1121,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 24,
             "InputPinId": 25,
             "IntValue": 0,
             "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                -2083,
-                850
+                -2083.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -845,17 +1138,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -867,15 +1160,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 28,
             "InputPinId": 29,
             "IntValue": 0,
             "Name": "Need Landing",
             "OutputPinId": 0,
             "Position": [
-                -2083,
-                965
+                -2083.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -884,17 +1177,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -906,15 +1199,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 32,
             "InputPinId": 33,
             "IntValue": 0,
             "Name": "Can Landing",
             "OutputPinId": 0,
             "Position": [
-                -2083,
-                1080
+                -2083.0,
+                1080.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -923,17 +1216,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -945,15 +1238,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 36,
             "InputPinId": 37,
             "IntValue": 0,
             "Name": "Air Landing Action",
             "OutputPinId": 0,
             "Position": [
-                -2083,
-                1195
+                -2083.0,
+                1195.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -962,17 +1255,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -984,15 +1277,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 40,
             "InputPinId": 41,
             "IntValue": 0,
             "Name": "Air Spread Breath Sequence",
             "OutputPinId": 42,
             "Position": [
-                -1743,
-                680
+                -1743.0,
+                680.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1001,17 +1294,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1023,15 +1316,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 44,
             "InputPinId": 45,
             "IntValue": 0,
             "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                -1743,
-                850
+                -1743.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1040,17 +1333,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1062,15 +1355,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 48,
             "InputPinId": 49,
             "IntValue": 0,
             "Name": "Need Air Attack",
             "OutputPinId": 0,
             "Position": [
-                -1743,
-                965
+                -1743.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1079,17 +1372,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1101,15 +1394,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "GreaterEqual",
-            "FloatValue": 22,
+            "FloatValue": 22.0,
             "Id": 52,
             "InputPinId": 53,
             "IntValue": 0,
             "Name": "Air Far Range",
             "OutputPinId": 0,
             "Position": [
-                -1743,
-                1080
+                -1743.0,
+                1080.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1118,17 +1411,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1140,15 +1433,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 56,
             "InputPinId": 57,
             "IntValue": 0,
             "Name": "Can Air Spread",
             "OutputPinId": 0,
             "Position": [
-                -1743,
-                1195
+                -1743.0,
+                1195.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1157,17 +1450,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1179,15 +1472,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 60,
             "InputPinId": 61,
             "IntValue": 0,
             "Name": "Air Spread Breath Action",
             "OutputPinId": 0,
             "Position": [
-                -1743,
-                1310
+                -1743.0,
+                1310.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -1196,17 +1489,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1218,15 +1511,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 64,
             "InputPinId": 65,
             "IntValue": 0,
             "Name": "Air Fire Ball Sequence",
             "OutputPinId": 66,
             "Position": [
-                -1403,
-                680
+                -1403.0,
+                680.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1235,17 +1528,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1257,15 +1550,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 68,
             "InputPinId": 69,
             "IntValue": 0,
             "Name": "Air Idle",
             "OutputPinId": 0,
             "Position": [
-                -1403,
-                850
+                -1403.0,
+                850.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1274,17 +1567,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1296,15 +1589,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 72,
             "InputPinId": 73,
             "IntValue": 0,
             "Name": "Need Air Attack",
             "OutputPinId": 0,
             "Position": [
-                -1403,
-                965
+                -1403.0,
+                965.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1313,17 +1606,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1335,15 +1628,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 76,
             "InputPinId": 77,
             "IntValue": 0,
             "Name": "Can Air Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                -1403,
-                1080
+                -1403.0,
+                1080.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1352,17 +1645,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1374,15 +1667,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 80,
             "InputPinId": 81,
             "IntValue": 0,
             "Name": "Air Fire Ball Action",
             "OutputPinId": 0,
             "Position": [
-                -1403,
-                1195
+                -1403.0,
+                1195.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1391,17 +1684,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1413,34 +1706,34 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 84,
             "InputPinId": 85,
             "IntValue": 0,
             "Name": "Turn To Player Sequence",
             "OutputPinId": 86,
             "Position": [
-                -895,
-                848
+                -895.0,
+                848.0
             ],
-            "Priority": 0,
+            "Priority": 1,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1452,15 +1745,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 88,
             "InputPinId": 89,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                -895,
-                1018
+                -895.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1469,17 +1762,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1491,15 +1784,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 92,
             "InputPinId": 93,
             "IntValue": 0,
             "Name": "Has Target",
             "OutputPinId": 0,
             "Position": [
-                -895,
-                1133
+                -895.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1508,17 +1801,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1530,15 +1823,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 96,
             "InputPinId": 97,
             "IntValue": 0,
             "Name": "Not Front",
             "OutputPinId": 0,
             "Position": [
-                -895,
-                1248
+                -895.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1547,17 +1840,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1569,15 +1862,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 100,
             "InputPinId": 101,
             "IntValue": 0,
             "Name": "Can Turn",
             "OutputPinId": 0,
             "Position": [
-                -895,
-                1363
+                -895.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1586,17 +1879,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1608,15 +1901,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 104,
             "InputPinId": 105,
             "IntValue": 0,
             "Name": "Turn To Player Action",
             "OutputPinId": 0,
             "Position": [
-                -895,
-                1478
+                -895.0,
+                1478.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -1625,17 +1918,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1647,15 +1940,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 108,
             "InputPinId": 109,
             "IntValue": 0,
             "Name": "Under Body Bite Sequence",
             "OutputPinId": 110,
             "Position": [
-                -575,
-                848
+                -575.0,
+                848.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1664,17 +1957,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 2.5
+            "WaitSeconds": 0.0,
+            "Weight": 3.5
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1686,15 +1979,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 112,
             "InputPinId": 113,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                -575,
-                1018
+                -575.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1703,17 +1996,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1725,15 +2018,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 116,
             "InputPinId": 117,
             "IntValue": 0,
             "Name": "Under Body",
             "OutputPinId": 0,
             "Position": [
-                -575,
-                1133
+                -575.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1742,17 +2035,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1764,15 +2057,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 120,
             "InputPinId": 121,
             "IntValue": 0,
             "Name": "Can Bite",
             "OutputPinId": 0,
             "Position": [
-                -575,
-                1248
+                -575.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1781,17 +2074,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1803,15 +2096,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 124,
             "InputPinId": 125,
             "IntValue": 0,
             "Name": "Under Body Bite Action",
             "OutputPinId": 0,
             "Position": [
-                -575,
-                1363
+                -575.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -1820,17 +2113,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1842,15 +2135,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 128,
             "InputPinId": 129,
             "IntValue": 0,
             "Name": "Close TakeOff Sequence",
             "OutputPinId": 130,
             "Position": [
-                -255,
-                848
+                -255.0,
+                848.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1859,17 +2152,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 4
+            "WaitSeconds": 0.0,
+            "Weight": 2.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1881,15 +2174,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 132,
             "InputPinId": 133,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                -255,
-                1018
+                -255.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -1898,17 +2191,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1920,15 +2213,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "LessEqual",
-            "FloatValue": 6.3,
+            "FloatValue": 6.300000190734863,
             "Id": 136,
             "InputPinId": 137,
             "IntValue": 0,
             "Name": "Close TakeOff Range",
             "OutputPinId": 0,
             "Position": [
-                -255,
-                1133
+                -255.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -1937,17 +2230,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1959,15 +2252,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 140,
             "InputPinId": 141,
             "IntValue": 0,
             "Name": "Can TakeOff",
             "OutputPinId": 0,
             "Position": [
-                -255,
-                1248
+                -255.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -1976,17 +2269,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -1998,15 +2291,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 144,
             "InputPinId": 145,
             "IntValue": 0,
             "Name": "Close TakeOff Action",
             "OutputPinId": 0,
             "Position": [
-                -255,
-                1363
+                -255.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2015,17 +2308,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2037,15 +2330,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 148,
             "InputPinId": 149,
             "IntValue": 0,
             "Name": "Close Bite Sequence",
             "OutputPinId": 150,
             "Position": [
-                49,
-                848
+                49.0,
+                848.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2054,17 +2347,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 6
+            "WaitSeconds": 0.0,
+            "Weight": 7.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2076,15 +2369,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 152,
             "InputPinId": 153,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                49,
-                1018
+                49.0,
+                1018.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2093,17 +2386,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2115,15 +2408,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 156,
             "InputPinId": 157,
             "IntValue": 0,
             "Name": "Front Bite",
             "OutputPinId": 0,
             "Position": [
-                49,
-                1133
+                49.0,
+                1133.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2132,17 +2425,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2154,15 +2447,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Less",
-            "FloatValue": 4.8,
+            "FloatValue": 4.800000190734863,
             "Id": 160,
             "InputPinId": 161,
             "IntValue": 0,
             "Name": "Bite Range",
             "OutputPinId": 0,
             "Position": [
-                49,
-                1248
+                49.0,
+                1248.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2171,17 +2464,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2193,15 +2486,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 164,
             "InputPinId": 165,
             "IntValue": 0,
             "Name": "Can Bite",
             "OutputPinId": 0,
             "Position": [
-                49,
-                1363
+                49.0,
+                1363.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2210,17 +2503,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2232,15 +2525,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 168,
             "InputPinId": 169,
             "IntValue": 0,
             "Name": "Close Bite Action",
             "OutputPinId": 0,
             "Position": [
-                49,
-                1478
+                49.0,
+                1478.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -2249,17 +2542,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2271,15 +2564,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 172,
             "InputPinId": 173,
             "IntValue": 0,
             "Name": "Mid Fire Ball Sequence",
             "OutputPinId": 174,
             "Position": [
-                717,
-                644
+                717.0,
+                644.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2288,17 +2581,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 2
+            "WaitSeconds": 0.0,
+            "Weight": 2.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2310,15 +2603,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 176,
             "InputPinId": 177,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                717,
-                814
+                433.0,
+                880.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2327,17 +2620,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2349,15 +2642,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 180,
             "InputPinId": 181,
             "IntValue": 0,
             "Name": "Front Fire",
             "OutputPinId": 0,
             "Position": [
-                717,
-                929
+                433.0,
+                1024.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2366,17 +2659,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2388,15 +2681,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "GreaterEqual",
-            "FloatValue": 16,
+            "FloatValue": 16.0,
             "Id": 184,
             "InputPinId": 185,
             "IntValue": 0,
             "Name": "Beyond Bite",
             "OutputPinId": 0,
             "Position": [
-                717,
-                1044
+                433.0,
+                1152.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2405,17 +2698,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2427,15 +2720,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Less",
-            "FloatValue": 22,
+            "FloatValue": 22.0,
             "Id": 188,
             "InputPinId": 189,
             "IntValue": 0,
             "Name": "Mid Range",
             "OutputPinId": 0,
             "Position": [
-                717,
-                1159
+                449.0,
+                1280.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2444,17 +2737,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2466,15 +2759,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 192,
             "InputPinId": 193,
             "IntValue": 0,
             "Name": "Mid Fire Ball Random",
             "OutputPinId": 194,
             "Position": [
-                717,
-                1274
+                593.0,
+                1504.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -2483,17 +2776,17 @@
             "Type": "RandomSelector",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2505,15 +2798,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 196,
             "InputPinId": 197,
             "IntValue": 0,
             "Name": "Fire Ball Choice",
             "OutputPinId": 198,
             "Position": [
-                557,
-                1464
+                -47.0,
+                1808.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2522,17 +2815,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1.2000000476837158
+            "WaitSeconds": 0.0,
+            "Weight": 0.44999998807907104
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2544,15 +2837,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 200,
             "InputPinId": 201,
             "IntValue": 0,
             "Name": "Can Fire Ball",
             "OutputPinId": 0,
             "Position": [
-                557,
-                1634
+                -143.0,
+                1996.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2561,17 +2854,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2583,15 +2876,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 204,
             "InputPinId": 205,
             "IntValue": 0,
             "Name": "Fire Ball Action",
             "OutputPinId": 0,
             "Position": [
-                557,
-                1749
+                65.0,
+                2000.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2600,16 +2893,289 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
+            "Weight": 0.44999998807907104
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 208,
+            "InputPinId": 209,
+            "IntValue": 0,
+            "Name": "Fire Ball Sweep Choice",
+            "OutputPinId": 210,
+            "Position": [
+                1313.0,
+                1904.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0499999523162842
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 354,
+            "InputPinId": 355,
+            "IntValue": 0,
+            "Name": "Fire Ball Front Choice",
+            "OutputPinId": 356,
+            "Position": [
+                1665.0,
+                1780.0
+            ],
+            "Priority": 4,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.100000023841858
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseFireBallFront",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 357,
+            "InputPinId": 358,
+            "IntValue": 0,
+            "Name": "Can Fire Ball Front",
+            "OutputPinId": 0,
+            "Position": [
+                1633.0,
+                1968.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_FireBallFront",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 359,
+            "InputPinId": 360,
+            "IntValue": 0,
+            "Name": "Fire Ball Front Action",
+            "OutputPinId": 0,
+            "Position": [
+                1841.0,
+                1968.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.100000023841858
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 361,
+            "InputPinId": 362,
+            "IntValue": 0,
+            "Name": "Fire Ball Triple Choice",
+            "OutputPinId": 363,
+            "Position": [
+                385.0,
+                1824.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "Sequence",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.2000000476837158
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseFireBallTriple",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 364,
+            "InputPinId": 365,
+            "IntValue": 0,
+            "Name": "Can Fire Ball Triple",
+            "OutputPinId": 0,
+            "Position": [
+                273.0,
+                2000.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_FireBallTriple",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 366,
+            "InputPinId": 367,
+            "IntValue": 0,
+            "Name": "Fire Ball Triple Action",
+            "OutputPinId": 0,
+            "Position": [
+                513.0,
+                2000.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
             "Weight": 1.2000000476837158
         },
         {
@@ -2622,34 +3188,112 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
-            "Id": 208,
-            "InputPinId": 209,
+            "FloatValue": 0.0,
+            "Id": 368,
+            "InputPinId": 369,
             "IntValue": 0,
-            "Name": "Fire Ball Sweep Choice",
-            "OutputPinId": 210,
+            "Name": "Fire Beam Sweep Choice",
+            "OutputPinId": 370,
             "Position": [
-                877,
-                1464
+                833.0,
+                1824.0
             ],
-            "Priority": 1,
+            "Priority": 2,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 0.800000011920929
+            "WaitSeconds": 0.0,
+            "Weight": 1.149999976158142
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "CanUseFireBeamSweep",
+            "BlackboardScope": "Local",
+            "BoolValue": true,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 371,
+            "InputPinId": 372,
+            "IntValue": 0,
+            "Name": "Can Fire Beam Sweep",
+            "OutputPinId": 0,
+            "Position": [
+                737.0,
+                2000.0
+            ],
+            "Priority": 0,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "BlackboardCondition",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
+        },
+        {
+            "ActionEndCategory": "DragonAI",
+            "ActionEndKey": "ActionEnded",
+            "ActionName": "DragonAI_FireBeamSweep",
+            "BlackboardCategory": "DragonAI",
+            "BlackboardKey": "",
+            "BlackboardScope": "Local",
+            "BoolValue": false,
+            "Comment": "",
+            "CompareType": "Equal",
+            "FloatValue": 0.0,
+            "Id": 373,
+            "InputPinId": 374,
+            "IntValue": 0,
+            "Name": "Fire Beam Sweep Action",
+            "OutputPinId": 0,
+            "Position": [
+                961.0,
+                2000.0
+            ],
+            "Priority": 1,
+            "ScopeId": "Root",
+            "StringValue": "",
+            "SubGraphName": "",
+            "Type": "PlayAction",
+            "ValueType": "Bool",
+            "Vector2Value": [
+                0.0,
+                0.0
+            ],
+            "Vector3Value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "WaitForActionEnd": true,
+            "WaitSeconds": 0.0,
+            "Weight": 1.149999976158142
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2661,15 +3305,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 212,
             "InputPinId": 213,
             "IntValue": 0,
             "Name": "Can Fire Ball Sweep",
             "OutputPinId": 0,
             "Position": [
-                877,
-                1634
+                1249.0,
+                2092.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2678,17 +3322,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2700,15 +3344,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 216,
             "InputPinId": 217,
             "IntValue": 0,
             "Name": "Fire Ball Sweep Action",
             "OutputPinId": 0,
             "Position": [
-                877,
-                1749
+                1457.0,
+                2092.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2717,17 +3361,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 0.800000011920929
+            "WaitSeconds": 0.0,
+            "Weight": 1.0499999523162842
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2739,15 +3383,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 220,
             "InputPinId": 221,
             "IntValue": 0,
             "Name": "Far Breath Sequence",
             "OutputPinId": 222,
             "Position": [
-                1297,
-                644
+                1297.0,
+                644.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2756,16 +3400,16 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 1.600000023841858
         },
         {
@@ -2778,15 +3422,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 224,
             "InputPinId": 225,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                1297,
-                814
+                1009.0,
+                784.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2795,17 +3439,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2817,15 +3461,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 228,
             "InputPinId": 229,
             "IntValue": 0,
             "Name": "Front Breath",
             "OutputPinId": 0,
             "Position": [
-                1297,
-                929
+                1009.0,
+                928.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -2834,17 +3478,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2856,15 +3500,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "GreaterEqual",
-            "FloatValue": 22,
+            "FloatValue": 22.0,
             "Id": 232,
             "InputPinId": 233,
             "IntValue": 0,
             "Name": "Far Range",
             "OutputPinId": 0,
             "Position": [
-                1297,
-                1044
+                1025.0,
+                1088.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -2873,17 +3517,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2895,15 +3539,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 236,
             "InputPinId": 237,
             "IntValue": 0,
             "Name": "Far Breath Random",
             "OutputPinId": 238,
             "Position": [
-                1297,
-                1159
+                1121.0,
+                1520.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -2912,17 +3556,17 @@
             "Type": "RandomSelector",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -2934,33 +3578,33 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 240,
             "InputPinId": 241,
             "IntValue": 0,
             "Name": "Spread Breath Choice",
             "OutputPinId": 242,
             "Position": [
-                1137,
-                1349
+                2177.0,
+                1796.0
             ],
-            "Priority": 0,
+            "Priority": 2,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 0.8999999761581421
         },
         {
@@ -2973,15 +3617,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 244,
             "InputPinId": 245,
             "IntValue": 0,
             "Name": "Can Spread Breath",
             "OutputPinId": 0,
             "Position": [
-                1137,
-                1519
+                2081.0,
+                2112.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -2990,17 +3634,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3012,15 +3656,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 248,
             "InputPinId": 249,
             "IntValue": 0,
             "Name": "Spread Breath Action",
             "OutputPinId": 0,
             "Position": [
-                1137,
-                1634
+                2337.0,
+                2096.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3029,16 +3673,16 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 0.8999999761581421
         },
         {
@@ -3051,33 +3695,33 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 252,
             "InputPinId": 253,
             "IntValue": 0,
             "Name": "Spread Breath Forward Choice",
             "OutputPinId": 254,
             "Position": [
-                1457,
-                1349
+                2785.0,
+                1824.0
             ],
-            "Priority": 1,
+            "Priority": 3,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 0.699999988079071
         },
         {
@@ -3090,15 +3734,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 256,
             "InputPinId": 257,
             "IntValue": 0,
             "Name": "Can Spread Breath Forward",
             "OutputPinId": 0,
             "Position": [
-                1457,
-                1519
+                2625.0,
+                2096.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3107,17 +3751,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3129,15 +3773,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 260,
             "InputPinId": 261,
             "IntValue": 0,
             "Name": "Spread Breath Forward Action",
             "OutputPinId": 0,
             "Position": [
-                1457,
-                1634
+                2897.0,
+                2096.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3146,16 +3790,16 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 0.699999988079071
         },
         {
@@ -3168,15 +3812,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 264,
             "InputPinId": 265,
             "IntValue": 0,
             "Name": "Run Charge Sequence",
             "OutputPinId": 266,
             "Position": [
-                1697,
-                644
+                1681.0,
+                644.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3185,16 +3829,16 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 1.5
         },
         {
@@ -3207,15 +3851,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 268,
             "InputPinId": 269,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                1697,
-                814
+                1489.0,
+                816.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3224,17 +3868,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3246,15 +3890,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 272,
             "InputPinId": 273,
             "IntValue": 0,
             "Name": "Front Run",
             "OutputPinId": 0,
             "Position": [
-                1697,
-                929
+                1489.0,
+                944.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3263,17 +3907,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3285,15 +3929,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "GreaterEqual",
-            "FloatValue": 16,
+            "FloatValue": 16.0,
             "Id": 276,
             "InputPinId": 277,
             "IntValue": 0,
             "Name": "Run Range",
             "OutputPinId": 0,
             "Position": [
-                1697,
-                1044
+                1489.0,
+                1072.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3302,17 +3946,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Float",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3324,15 +3968,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 280,
             "InputPinId": 281,
             "IntValue": 0,
             "Name": "Can Run",
             "OutputPinId": 0,
             "Position": [
-                1697,
-                1159
+                1489.0,
+                1200.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3341,17 +3985,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3363,15 +4007,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 284,
             "InputPinId": 285,
             "IntValue": 0,
             "Name": "Run Charge Action",
             "OutputPinId": 0,
             "Position": [
-                1697,
-                1274
+                1729.0,
+                1232.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -3380,17 +4024,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3402,15 +4046,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 288,
             "InputPinId": 289,
             "IntValue": 0,
             "Name": "Low HP Spin Sequence",
             "OutputPinId": 290,
             "Position": [
-                2017,
-                644
+                2017.0,
+                644.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3419,17 +4063,17 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3441,15 +4085,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 292,
             "InputPinId": 293,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                2017,
-                814
+                1921.0,
+                816.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3458,17 +4102,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3480,15 +4124,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "GreaterEqual",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 296,
             "InputPinId": 297,
-            "IntValue": 2,
-            "Name": "Damage Phase",
+            "IntValue": 0,
+            "Name": "Any Damage Phase",
             "OutputPinId": 0,
             "Position": [
-                2017,
-                929
+                1921.0,
+                928.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3497,17 +4141,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3519,15 +4163,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 300,
             "InputPinId": 301,
             "IntValue": 0,
             "Name": "Can Spin",
             "OutputPinId": 0,
             "Position": [
-                2017,
-                1044
+                1921.0,
+                1056.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3536,17 +4180,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3558,15 +4202,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 304,
             "InputPinId": 305,
             "IntValue": 0,
             "Name": "Low HP Spin Action",
             "OutputPinId": 0,
             "Position": [
-                2017,
-                1159
+                2145.0,
+                1184.0
             ],
             "Priority": 3,
             "ScopeId": "Root",
@@ -3575,17 +4219,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3597,15 +4241,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 308,
             "InputPinId": 309,
             "IntValue": 0,
             "Name": "Walk Approach Sequence",
             "OutputPinId": 310,
             "Position": [
-                2337,
-                644
+                2481.0,
+                644.0
             ],
             "Priority": 4,
             "ScopeId": "Root",
@@ -3614,16 +4258,16 @@
             "Type": "Sequence",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
+            "WaitSeconds": 0.0,
             "Weight": 0.5
         },
         {
@@ -3636,15 +4280,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 312,
             "InputPinId": 313,
             "IntValue": 0,
             "Name": "Ground Idle",
             "OutputPinId": 0,
             "Position": [
-                2337,
-                814
+                2257.0,
+                800.0
             ],
             "Priority": 0,
             "ScopeId": "Root",
@@ -3653,17 +4297,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Int",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3675,15 +4319,15 @@
             "BoolValue": true,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 316,
             "InputPinId": 317,
             "IntValue": 0,
             "Name": "Has Target",
             "OutputPinId": 0,
             "Position": [
-                2337,
-                929
+                2273.0,
+                928.0
             ],
             "Priority": 1,
             "ScopeId": "Root",
@@ -3692,17 +4336,17 @@
             "Type": "BlackboardCondition",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3714,15 +4358,15 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 320,
             "InputPinId": 321,
             "IntValue": 0,
             "Name": "Walk Approach Action",
             "OutputPinId": 0,
             "Position": [
-                2337,
-                1044
+                2609.0,
+                928.0
             ],
             "Priority": 2,
             "ScopeId": "Root",
@@ -3731,17 +4375,17 @@
             "Type": "PlayAction",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         },
         {
             "ActionEndCategory": "DragonAI",
@@ -3753,34 +4397,34 @@
             "BoolValue": false,
             "Comment": "",
             "CompareType": "Equal",
-            "FloatValue": 0,
+            "FloatValue": 0.0,
             "Id": 324,
             "InputPinId": 325,
             "IntValue": 0,
             "Name": "Ground Close Random",
             "OutputPinId": 326,
             "Position": [
-                -287,
-                624
+                -271.0,
+                624.0
             ],
-            "Priority": 1,
+            "Priority": 2,
             "ScopeId": "Root",
             "StringValue": "",
             "SubGraphName": "",
             "Type": "RandomSelector",
             "ValueType": "Bool",
             "Vector2Value": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "Vector3Value": [
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
             ],
             "WaitForActionEnd": true,
-            "WaitSeconds": 0,
-            "Weight": 1
+            "WaitSeconds": 0.0,
+            "Weight": 1.0
         }
     ],
     "Version": 1

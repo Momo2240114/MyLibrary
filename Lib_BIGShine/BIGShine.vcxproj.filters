@@ -970,6 +970,12 @@
     <ClCompile Include="Code\Game\GameMode\GameModeManager.cpp">
       <Filter>Code\Game\Logics\GameMode</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Game\GameMode\GameModeDeathNotifierComponent.cpp">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\GameMode\GameModeObjectToggleComponent.cpp">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\GameModeWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -1806,7 +1812,13 @@
     <ClInclude Include="Code\Game\GameMode\GameModeBlackboardKeys.h">
       <Filter>Code\Game\Logics\GameMode</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Game\GameMode\GameModeDeathNotifierComponent.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Game\GameMode\GameModeManager.h">
+      <Filter>Code\Game\Logics\GameMode</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\GameMode\GameModeObjectToggleComponent.h">
       <Filter>Code\Game\Logics\GameMode</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Window\GameModeWindow.h">

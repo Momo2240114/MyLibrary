@@ -1716,6 +1716,11 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
 
     ActionRegistry::Instance().Clear();
     RegisterAllActions();
+    if (gameModeManager)
+    {
+        gameModeManager->ResetBattleState();
+        gameModeManager->RegisterGlobalActions();
+    }
 
     EventManager::Clear();
 

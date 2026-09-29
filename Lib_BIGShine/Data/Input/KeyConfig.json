@@ -36,6 +36,34 @@
                 }
             ]
         ],
+        "Player.Jump": [
+            [
+                {
+                    "code": 32,
+                    "dev": 0
+                }
+            ],
+            [
+                {
+                    "code": 4096,
+                    "dev": 1
+                }
+            ]
+        ],
+        "Player.JustGuard": [
+            [
+                {
+                    "code": 67,
+                    "dev": 0
+                }
+            ],
+            [
+                {
+                    "code": 8192,
+                    "dev": 1
+                }
+            ]
+        ],
         "Player.LockOn": [
             [
                 {
@@ -96,6 +124,42 @@
         ]
     },
     "axes": {
+        "Camera_LookMouseX": [
+            {
+                "code": 0,
+                "deadZone": 0.15000000596046448,
+                "dev": 0,
+                "scale": 1.0,
+                "sourceType": 1
+            }
+        ],
+        "Camera_LookMouseY": [
+            {
+                "code": 1,
+                "deadZone": 0.15000000596046448,
+                "dev": 0,
+                "scale": 1.0,
+                "sourceType": 1
+            }
+        ],
+        "Camera_LookStickX": [
+            {
+                "code": 4,
+                "deadZone": 0.15000000596046448,
+                "dev": 1,
+                "scale": 1.0,
+                "sourceType": 2
+            }
+        ],
+        "Camera_LookStickY": [
+            {
+                "code": 5,
+                "deadZone": 0.15000000596046448,
+                "dev": 1,
+                "scale": 1.0,
+                "sourceType": 2
+            }
+        ],
         "Player.MoveX": [
             {
                 "code": 65,

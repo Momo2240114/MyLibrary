@@ -26,6 +26,8 @@
 #include "Engine/Physics/JustDodgeCollider.h"
 
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Game/GameMode/GameModeBlackboardKeys.h"
+#include "Game/GameMode/GameModeManager.h"
 #include "PlayerActionState.h"
 #include "PlayerAttackState.h"
 #include "PlayerDodgeState.h"
@@ -263,6 +265,14 @@ void PlayerControllerComponent::Start()
 void PlayerControllerComponent::Update(float dt_)
 {
     lastUpdateDeltaTime = (std::max)(dt_, 0.0f);
+    if (IsPlayerControlLockedByGameMode())
+    {
+        // 演出中に直前Frameの移動予約や入力が残らないよう、入力由来の値だけを消す。
+        pendingHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
+        SendMoveInputToBlackboard({ 0.0f, 0.0f, 0.0f });
+        SendGuardInputToBlackboard(false);
+        ResetStrongAttackInput();
+    }
 
     // State更新後に、キャンセル受付・空中状態・Blackboard・移動反映をまとめて後処理する。
     stateMachine.Update(dt_);
@@ -282,6 +292,7 @@ bool PlayerControllerComponent::IsGrounded() const
 
 bool PlayerControllerComponent::IsJumpInputPressed() const
 {
+    if (IsPlayerControlLockedByGameMode()) return false;
     return KeyConfig::Instance().ActionPressedIn(PlayerInputAction::JUMP);
 }
 
@@ -487,6 +498,11 @@ DirectX::XMFLOAT3 PlayerControllerComponent::GetGuardMoveInput(
 
 DirectX::XMFLOAT3 PlayerControllerComponent::GetMoveInputAxis() const
 {
+    if (IsPlayerControlLockedByGameMode())
+    {
+        return { 0.0f, 0.0f, 0.0f };
+    }
+
     auto& keyConfig_ = KeyConfig::Instance();
     DirectX::XMFLOAT3 input_
     {
@@ -1457,6 +1473,26 @@ bool PlayerControllerComponent::IsAirborneForAction() const
             currentAction_ == PLAYER_ACTION::JUMP);
 }
 
+bool PlayerControllerComponent::IsPlayerControlLockedByGameMode() const
+{
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
+    if (!owner_ || !owner_->manager) return false;
+
+    const GameModeManager* gameModeManager_ = owner_->GetManager().GetGameModeManager();
+    if (!gameModeManager_) return false;
+
+    bool locked_ = false;
+    if (gameModeManager_->GetGlobalBlackboard().GetBool(
+        GameModeBlackboardKeys::CATEGORY_GAME,
+        GameModeBlackboardKeys::PLAYER_CONTROL_LOCKED,
+        locked_))
+    {
+        return locked_;
+    }
+
+    return false;
+}
+
 bool PlayerControllerComponent::IsDodgeAction(PLAYER_ACTION action_) const
 {
     return action_ == PLAYER_ACTION::DODGE ||
@@ -1486,6 +1522,11 @@ bool PlayerControllerComponent::CanStartDodgeAction(PLAYER_ACTION action_) const
 
 bool PlayerControllerComponent::ShouldEnterGuardAfterActionEnd() const
 {
+    if (IsPlayerControlLockedByGameMode())
+    {
+        return false;
+    }
+
     // 攻撃やDodge終了時にGuard入力が押され続けていれば、Guardへ自然に復帰する。
     if (!IsGrounded() || IsAirborneForAction())
     {
@@ -1552,6 +1593,13 @@ void PlayerControllerComponent::UpdateAirborneActionContext()
 void PlayerControllerComponent::ProcessActionInput()
 {
     // 優先度の高いActionから順に入力を解釈し、最初に成立したActionだけを要求する。
+    if (IsPlayerControlLockedByGameMode())
+    {
+        SendGuardInputToBlackboard(false);
+        ResetStrongAttackInput();
+        return;
+    }
+
     auto& keyConfig_ = KeyConfig::Instance();
     const bool guardInput_ = keyConfig_.ActionPressed(PlayerInputAction::GUARD);
     SendGuardInputToBlackboard(guardInput_);
@@ -1978,6 +2026,11 @@ void PlayerControllerComponent::SendJumpPhaseToBlackboard(
 
 bool PlayerControllerComponent::TryDodgeCancelInput()
 {
+    if (IsPlayerControlLockedByGameMode())
+    {
+        return false;
+    }
+
     // Dodge受付が開いている時だけ、現在ActionからDodge派生できるか確認する。
     if (!actionRuntime.canDodgeCancel)
     {
