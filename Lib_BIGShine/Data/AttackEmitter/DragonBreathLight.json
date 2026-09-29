@@ -266,7 +266,7 @@
         {
           "Type": 0,
           "Enabled": true,
-          "AssetPath": "DragonBreath_FanFlame",
+          "AssetPath": "DragonBreath_LongFlame",
           "EmitterName": "",
           "LocalOffset": [
             0,

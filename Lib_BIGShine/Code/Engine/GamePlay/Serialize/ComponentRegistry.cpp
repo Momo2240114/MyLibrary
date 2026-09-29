@@ -68,6 +68,8 @@
 #include "Engine/GamePlay/Combat/CombatStatsComponent.h"
 #include "Engine/GamePlay/Combat/ProjectileMotionComponent.h"
 #include "Game/Combat/DebugTools/DebugHitHistoryResetComponent.h"
+#include "Game/GameMode/GameModeDeathNotifierComponent.h"
+#include "Game/GameMode/GameModeObjectToggleComponent.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartHurtBoxComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartManagerComponent.h"
@@ -180,6 +182,8 @@ void RegisterAllComponents()
     registry.Register<CombatStatsComponent>("CombatStatsComponent");
     registry.Register<ProjectileMotionComponent>("ProjectileMotionComponent");
     registry.Register<DebugHitHistoryResetComponent>("DamageBoxComponent");
+    registry.Register<GameModeDeathNotifierComponent>("GameModeDeathNotifierComponent");
+    registry.Register<GameModeObjectToggleComponent>("GameModeObjectToggleComponent");
     registry.Register<DragonAIComponent>("DragonAIComponent");
     registry.Register<DragonBodyPartHurtBoxComponent>("DragonBodyPartHurtBoxComponent");
     registry.Register<DragonBodyPartManagerComponent>("DragonBodyPartManagerComponent");

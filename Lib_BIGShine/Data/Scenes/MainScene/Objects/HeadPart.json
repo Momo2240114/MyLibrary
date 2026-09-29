@@ -130,7 +130,7 @@
                 "FixedDamage": 0.0,
                 "FixedDamageKey": "FixedDamage",
                 "GravityScale": 1.0,
-                "HalfHeight": 0.6200000047683716,
+                "HalfHeight": 3.5209999084472656,
                 "HitGroupId": 10,
                 "HitImpactEffectAssetPath": "",
                 "HitMeshVFXAssetPath": "",
@@ -171,7 +171,7 @@
                     0.5799999833106995
                 ],
                 "PhysicsControlsTransform": false,
-                "Radius": 110.0,
+                "Radius": 10.0,
                 "RotateVelocityThreshold": 0.0010000000474974513,
                 "ShapeRenderFlg": false,
                 "SourceAction": "Bite",
@@ -181,7 +181,7 @@
                 "UseGravity": false,
                 "UsePhysicsResponse": false,
                 "VelocityRotationMode": 0,
-                "shapeSizeScale": 1.0
+                "shapeSizeScale": 20.0
             },
             "Enabled": false,
             "LateUpdateEnabled": true,
@@ -425,6 +425,7 @@
                             "HitStopDuration": 0.0,
                             "HitStopScale": 0.0,
                             "ImpactPower": 10.0,
+                            "JustGuardedActionName": "",
                             "KnockBackPower": 3.0,
                             "TargetAirLiftPower": 0.0
                         },
@@ -554,6 +555,7 @@
                             "HitStopDuration": 0.019999999552965164,
                             "HitStopScale": 0.0,
                             "ImpactPower": 12.0,
+                            "JustGuardedActionName": "AttackEmitter_ReflectToJustGuardDefender",
                             "KnockBackPower": 5.0,
                             "TargetAirLiftPower": 0.0
                         },
@@ -654,6 +656,7 @@
                             "HitStopDuration": 0.009999999776482582,
                             "HitStopScale": 0.0,
                             "ImpactPower": 8.0,
+                            "JustGuardedActionName": "",
                             "KnockBackPower": 3.0,
                             "TargetAirLiftPower": 0.0
                         },
@@ -754,6 +757,7 @@
                             "HitStopDuration": 0.009999999776482582,
                             "HitStopScale": 0.0,
                             "ImpactPower": 9.0,
+                            "JustGuardedActionName": "",
                             "KnockBackPower": 4.0,
                             "TargetAirLiftPower": 0.0
                         },

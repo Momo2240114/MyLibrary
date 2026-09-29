@@ -221,6 +221,9 @@ void ActionSequence::RegisterSequence(const std::string& sequenceName_)
             startSequence_);
         if (registerGlobal)
         {
+            // GameModeなどObjectに依存しない進行制御から呼べるよう、Sequence名そのものもGlobalへ公開する。
+            ActionRegistry::Instance().RemoveAction("Sequence", sequenceName_);
+            ActionRegistry::Instance().RegisterAction("Sequence", sequenceName_, startSequence_);
             owner_->RegisterGlobalAction("Sequence", sequenceName_, startSequence_);
         }
     }

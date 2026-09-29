@@ -15,6 +15,8 @@
 #include "Engine/Graphics/Resource/Animation/DragonNeckCommandIKComponent.h"
 #include "Engine/Graphics/Resource/Animation/DragonTailCommandIKComponent.h"
 #include "Engine/Physics/ColliderComponent.h"
+#include "Game/GameMode/GameModeBlackboardKeys.h"
+#include "Game/GameMode/GameModeManager.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -25,9 +27,9 @@
 
 namespace
 {
-    // アクション列挙を配列インデックスとして扱うため、最後の要素から総数を決める。
+    // アクション列挙を配列インデックスとして扱うため、番兵から総数を決める。
     constexpr int DRAGON_ACTION_COUNT =
-        static_cast<int>(DRAGON_ACTION_TYPE::ULTIMATE_ATTACK) + 1;
+        static_cast<int>(DRAGON_ACTION_TYPE::ACTION_COUNT);
     constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
     constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
     constexpr float MIN_MOVE_DISTANCE = 0.001f;
@@ -100,6 +102,9 @@ const char* GetDragonActionName(DRAGON_ACTION_TYPE action_)
     case DRAGON_ACTION_TYPE::FALLING: return "Falling";
     case DRAGON_ACTION_TYPE::DEATH_HIT_GROUND: return "DeathHitGround";
     case DRAGON_ACTION_TYPE::ULTIMATE_ATTACK: return "UltimateAttack";
+    case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT: return "FireBallFront";
+    case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE: return "FireBallTriple";
+    case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP: return "FireBeamSweep";
     default: return "Idle";
     }
 }
@@ -187,6 +192,13 @@ void DragonAIComponent::Update(float deltaTime_)
     // 毎フレーム依存と状況を更新し、死亡・アクション中・空中・復帰・意思決定の順で処理を分岐する。
     EnsureDependencies();
     UpdateContext();
+    if (IsEnemyAILockedByGameMode())
+    {
+        // GameMode演出中はAI判断と攻撃遷移を進めず、演出Animationを上書きしない。
+        StopMovement();
+        SendRuntimeToBlackboard();
+        return;
+    }
     UpdateUltimateTrigger();
     UpdateCooldowns(deltaTime_);
 
@@ -1094,49 +1106,62 @@ void DragonAIComponent::AddActionCandidates(
 
     if (context_.isPlayerUnderBody && context_.canUseBite)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 2.5f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 5.0f);
     }
     if ((context_.isPlayerUnderBody || context_.playerHorizontalDistance <= biteDistance + 1.5f) &&
         context_.canUseTakeOff)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, 4.0f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, 2.0f);
     }
     if (context_.isPlayerBehind && context_.canUseTailSweep)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, 4.0f);
     }
+    if (context_.isPlayerBehind && context_.canUseSpinSweep)
+    {
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 2.4f);
+    }
+    if (context_.isPlayerInSide && context_.canUseTailSweep)
+    {
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, 1.4f);
+    }
+    if (context_.isPlayerInSide && context_.canUseSpinSweep)
+    {
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 1.2f);
+    }
     if (context_.isPlayerInSide)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TO_PLAYER, 2.0f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TO_PLAYER, 1.2f);
     }
     if (context_.isPlayerInFront && context_.playerHorizontalDistance < biteDistance && context_.canUseBite)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 6.0f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 8.0f);
     }
     if (context_.isPlayerInFront &&
         context_.playerHorizontalDistance >= mediumDistance &&
-        context_.playerHorizontalDistance < farDistance &&
-        context_.canUseFireBall)
+        context_.playerHorizontalDistance < farDistance)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL, 1.2f);
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP, 0.8f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL, 0.7f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL_FRONT, 1.1f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE, 1.2f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP, 1.1f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP, 1.15f);
     }
     if (context_.playerHorizontalDistance >= farDistance && context_.canUseSpreadBreath)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPREAD_BREATH, 0.9f);
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD, 0.7f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPREAD_BREATH, 1.1f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD, 1.0f);
     }
     if (context_.playerHorizontalDistance >= mediumDistance && context_.canUseRunCharge)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::RUN_CHARGE, 1.5f);
     }
-    if (static_cast<int>(damagePhase) >= static_cast<int>(DRAGON_DAMAGE_PHASE::DARK_LEAK) &&
-        context_.canUseSpinSweep)
+    if (context_.canUseSpinSweep)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 1.0f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 0.45f);
     }
 
-    AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::WALK_APPROACH, 0.5f);
+    AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::WALK_APPROACH, 0.25f);
 }
 
 float DragonAIComponent::CalculateAggressionMultiplier(const DragonAIContext& context_) const
@@ -1332,13 +1357,16 @@ void DragonAIComponent::InitializeDefaultDefinitions()
     addMissingDefinition_(DRAGON_ACTION_TYPE::LANDING_ATTACK, "LandingAttack", "PlainsDragon_FlyStationaryToLanding", "", 1.5f, 0.6f, 4.0f, 2.5f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::GET_HIT, "GetHit", "PlainsDragon_GetHit1", "", 0.5f, 0.2f, 0.5f, 1.0f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::DEATH, "Death", "PlainsDragon_Death", "", 3.0f, 0.0f, 0.0f, 5.0f);
-    addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP, "FireBallSweep", "PlainsDragon_SpitFireBall_Sweep", "", 1.6f, 0.5f, 2.5f, 2.8f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP, "FireBallSweep", "PlainsDragon_FireBeam_Sweep45", "", 1.6f, 0.5f, 2.5f, 2.8f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD, "SpreadBreathForward", "PlainsDragon_SpreadFire_Forward", "", 2.0f, 0.6f, 3.5f, 3.5f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::AIR_GET_HIT, "AirGetHit", "PlainsDragon_FlyStationaryGetHit", "", 0.5f, 0.0f, 0.5f, 1.0f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::AIR_DEATH_FALL_START, "AirDeathFallStart", "PlainsDragon_FlyStationaryGetHitToFalling", "", 1.0f, 0.0f, 0.0f, 2.0f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::FALLING, "Falling", "PlainsDragon_Falling", "", 1.0f, 0.0f, 0.0f, 0.0f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::DEATH_HIT_GROUND, "DeathHitGround", "PlainsDragon_DeathHitTheGround", "", 1.5f, 0.0f, 0.0f, 3.0f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::ULTIMATE_ATTACK, "DragonUltimate_Start", "PlainsDragon_SpreadFire", "", 5.0f, 0.5f, 0.0f, 6.0f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT, "FireBallFront", "PlainsDragon_SpitFireBall_Front", "", 2.2f, 0.55f, 4.0f, 3.2f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE, "FireBallTriple", "PlainsDragon_SpitFireBall_Triple", "", 3.4f, 0.70f, 6.0f, 4.4f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP, "FireBeamSweep", "PlainsDragon_FireBeam_Sweep45", "", 3.2f, 0.70f, 6.0f, 4.2f);
 
     ApplyActionDefinitionRuntimePolicies();
 
@@ -1379,39 +1407,70 @@ void DragonAIComponent::ApplyActionDefinitionRuntimePolicies()
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL))
     {
-        definition_->cooldownTime = 4.0f;
-        definition_->selectionWeight = 0.75f;
+        definition_->cooldownTime = 3.0f;
+        definition_->recoveryTime = 0.35f;
+        definition_->selectionWeight = 0.45f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP))
     {
-        definition_->cooldownTime = 5.0f;
-        definition_->selectionWeight = 0.65f;
+        definition_->cooldownTime = 3.5f;
+        definition_->recoveryTime = 0.40f;
+        definition_->selectionWeight = 1.05f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPREAD_BREATH))
     {
-        definition_->cooldownTime = 7.0f;
-        definition_->selectionWeight = 0.6f;
+        definition_->cooldownTime = 5.0f;
+        definition_->recoveryTime = 0.45f;
+        definition_->selectionWeight = 0.85f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD))
     {
-        definition_->cooldownTime = 7.5f;
-        definition_->selectionWeight = 0.55f;
+        definition_->cooldownTime = 5.5f;
+        definition_->recoveryTime = 0.45f;
+        definition_->selectionWeight = 0.85f;
+        definition_->hitBoxActionName.clear();
+        definition_->vfxActionName.clear();
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT))
+    {
+        definition_->cooldownTime = 3.2f;
+        definition_->recoveryTime = 0.35f;
+        definition_->selectionWeight = 1.10f;
+        definition_->hitBoxActionName.clear();
+        definition_->vfxActionName.clear();
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE))
+    {
+        definition_->cooldownTime = 4.0f;
+        definition_->recoveryTime = 0.45f;
+        definition_->selectionWeight = 1.20f;
+        definition_->hitBoxActionName.clear();
+        definition_->vfxActionName.clear();
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP))
+    {
+        definition_->cooldownTime = 4.0f;
+        definition_->recoveryTime = 0.45f;
+        definition_->selectionWeight = 1.15f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP))
     {
+        definition_->selectionWeight = 1.15f;
+        definition_->cooldownTime = 2.4f;
         definition_->hitBoxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP))
     {
         // 専用アニメが無い回転尻尾攻撃はTurn90を土台にし、IKと判定を時間制御で重ねる。
+        definition_->selectionWeight = 1.05f;
         definition_->finishMode = DRAGON_ACTION_FINISH_MODE::AI_DURATION;
         definition_->waitForActionEnd = false;
         definition_->useActionTimeout = false;
@@ -1511,9 +1570,6 @@ void DragonAIComponent::UpdateContext()
     else if (context.hpRate <= 0.4f) damagePhase = DRAGON_DAMAGE_PHASE::DARK_LEAK;
     else if (context.hpRate <= 0.7f) damagePhase = DRAGON_DAMAGE_PHASE::CRACKED;
 
-    context.canUseSpinSweep =
-        static_cast<int>(damagePhase) >= static_cast<int>(DRAGON_DAMAGE_PHASE::DARK_LEAK);
-
     const auto owner_ = GetGameObject();
     const auto player_ = playerObject.lock();
     if (!owner_ || !owner_->transform || !player_ || !player_->transform)
@@ -1564,7 +1620,7 @@ void DragonAIComponent::UpdateContext()
     context.canUseTailSweep = IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP);
     context.canUseTakeOff = IsActionAvailable(DRAGON_ACTION_TYPE::TAKE_OFF);
     context.canUseRunCharge = IsActionAvailable(DRAGON_ACTION_TYPE::RUN_CHARGE);
-    context.canUseSpinSweep = context.canUseSpinSweep && IsActionAvailable(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP);
+    context.canUseSpinSweep = IsActionAvailable(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP);
 }
 
 void DragonAIComponent::UpdateUltimateTrigger()
@@ -1836,8 +1892,11 @@ void DragonAIComponent::UpdateActionMotion(float deltaTime_)
     case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
     case DRAGON_ACTION_TYPE::BITE:
     case DRAGON_ACTION_TYPE::FIRE_BALL:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE:
     case DRAGON_ACTION_TYPE::SPREAD_BREATH:
     case DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP:
+    case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP:
     case DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD:
     case DRAGON_ACTION_TYPE::ULTIMATE_ATTACK:
         StopMovement();
@@ -2410,6 +2469,29 @@ void DragonAIComponent::PlayAnimationState(const std::string& stateName_)
     }
 }
 
+void DragonAIComponent::PlaySequencerLinkedState(const std::string& stateName_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::PlaySequencerLinkedState");
+
+    if (stateName_.empty()) return;
+
+    const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
+    const std::string animationActionName_ = definition_
+        ? ResolveAnimationActionName(*definition_)
+        : GetDragonActionName(runtime.currentAction);
+
+    // 連続攻撃の途中遷移ではAI行動を完了させず、Animation側の現在ステートだけを次段へ同期する。
+    ApplyAnimationBlackboard(animationActionName_, stateName_, true);
+
+    if (const std::shared_ptr<AnimationControllerComponent> animationController_ =
+        animationController.lock())
+    {
+        animationController_->SetUseTransitionGraph(true);
+        ResetAnimationActionTriggers("");
+        animationController_->ChangeState(stateName_, 0.079999998f);
+    }
+}
+
 void DragonAIComponent::RequestIdleGraphTransition()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestIdleGraphTransition");
@@ -2466,6 +2548,11 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
         "PlainsDragon_BiteAttack",
         "PlainsDragon_SpitFireBall",
         "PlainsDragon_SpitFireBall_Sweep",
+        "PlainsDragon_SpitFireBall_Front",
+        "PlainsDragon_SpitFireBall_Triple",
+        "PlainsDragon_SpitFireBall_Triple2",
+        "PlainsDragon_SpitFireBall_Triple3",
+        "PlainsDragon_FireBeam_Sweep45",
         "PlainsDragon_SpreadFire",
         "PlainsDragon_SpreadFire_Forward",
         "PlainsDragon_TakeOff",
@@ -2509,8 +2596,17 @@ void DragonAIComponent::ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float durati
     case DRAGON_ACTION_TYPE::AIR_FIRE_BALL:
         if (neckIK_) neckIK_->LookAtTarget(playerObjectName, duration_);
         break;
+    case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT:
+        if (neckIK_) neckIK_->LookAtYawOffset(0.0f, duration_);
+        break;
+    case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE:
+        if (neckIK_) neckIK_->SweepYaw(-45.0f, 45.0f, duration_);
+        break;
     case DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP:
         if (neckIK_) neckIK_->SweepYaw(-30.0f, 30.0f, duration_);
+        break;
+    case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP:
+        if (neckIK_) neckIK_->SweepYaw(-45.0f, 45.0f, duration_);
         break;
     case DRAGON_ACTION_TYPE::SPREAD_BREATH:
         if (neckIK_) neckIK_->SweepYaw(-30.0f, 30.0f, duration_);
@@ -2566,9 +2662,21 @@ void DragonAIComponent::SendRuntimeToBlackboard()
             aiState == DRAGON_AI_STATE::AIR) &&
         !runtime.actionEnded;
     const bool canUseTurnToPlayer_ = IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER);
+    const bool canUseFireBall_ =
+        context.canUseFireBall &&
+        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL;
     const bool canUseFireBallSweep_ =
         IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP) &&
         lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP;
+    const bool canUseFireBallFront_ =
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT) &&
+        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL_FRONT;
+    const bool canUseFireBallTriple_ =
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE) &&
+        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE;
+    const bool canUseFireBeamSweep_ =
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP) &&
+        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP;
     const bool canUseSpreadBreathForward_ =
         IsActionAvailable(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD) &&
         lastCompletedAttackAction != DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD;
@@ -2590,7 +2698,7 @@ void DragonAIComponent::SendRuntimeToBlackboard()
     blackboard->SetBool(blackboardCategory, "IsTargetBehind", context.isPlayerBehind);
     blackboard->SetBool(blackboardCategory, "IsTargetUnderBody", context.isPlayerUnderBody);
     blackboard->SetBool(blackboardCategory, "CanUseBite", context.canUseBite);
-    blackboard->SetBool(blackboardCategory, "CanUseFireBall", context.canUseFireBall);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBall", canUseFireBall_);
     blackboard->SetBool(blackboardCategory, "CanUseSpreadBreath", context.canUseSpreadBreath);
     blackboard->SetBool(blackboardCategory, "CanUseTailSweep", context.canUseTailSweep);
     blackboard->SetBool(blackboardCategory, "CanUseTakeOff", context.canUseTakeOff);
@@ -2598,6 +2706,9 @@ void DragonAIComponent::SendRuntimeToBlackboard()
     blackboard->SetBool(blackboardCategory, "CanUseSpinSweep", context.canUseSpinSweep);
     blackboard->SetBool(blackboardCategory, "CanUseTurnToPlayer", canUseTurnToPlayer_);
     blackboard->SetBool(blackboardCategory, "CanUseFireBallSweep", canUseFireBallSweep_);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBallFront", canUseFireBallFront_);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBallTriple", canUseFireBallTriple_);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBeamSweep", canUseFireBeamSweep_);
     blackboard->SetBool(blackboardCategory, "CanUseSpreadBreathForward", canUseSpreadBreathForward_);
     blackboard->SetBool(blackboardCategory, "CanUseAirFireBall", canUseAirFireBall_);
     blackboard->SetBool(blackboardCategory, "CanUseAirSpreadBreath", canUseAirSpreadBreath_);
@@ -2634,7 +2745,7 @@ void DragonAIComponent::SendRuntimeToBlackboard()
     blackboard->SetBool(blackboardCategory, "PlayerBehind", context.isPlayerBehind);
     blackboard->SetBool(blackboardCategory, "PlayerUnderBody", context.isPlayerUnderBody);
     blackboard->SetBool(blackboardCategory, "CanUseBite", context.canUseBite);
-    blackboard->SetBool(blackboardCategory, "CanUseFireBall", context.canUseFireBall);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBall", canUseFireBall_);
     blackboard->SetBool(blackboardCategory, "CanUseSpreadBreath", context.canUseSpreadBreath);
     blackboard->SetBool(blackboardCategory, "CanUseTailSweep", context.canUseTailSweep);
     blackboard->SetBool(blackboardCategory, "CanUseTakeOff", context.canUseTakeOff);
@@ -2642,6 +2753,9 @@ void DragonAIComponent::SendRuntimeToBlackboard()
     blackboard->SetBool(blackboardCategory, "CanUseSpinSweep", context.canUseSpinSweep);
     blackboard->SetBool(blackboardCategory, "CanUseTurnToPlayer", canUseTurnToPlayer_);
     blackboard->SetBool(blackboardCategory, "CanUseFireBallSweep", canUseFireBallSweep_);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBallFront", canUseFireBallFront_);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBallTriple", canUseFireBallTriple_);
+    blackboard->SetBool(blackboardCategory, "CanUseFireBeamSweep", canUseFireBeamSweep_);
     blackboard->SetBool(blackboardCategory, "CanUseSpreadBreathForward", canUseSpreadBreathForward_);
     blackboard->SetBool(blackboardCategory, "CanUseAirFireBall", canUseAirFireBall_);
     blackboard->SetBool(blackboardCategory, "CanUseAirSpreadBreath", canUseAirSpreadBreath_);
@@ -2727,6 +2841,9 @@ AIBehaviorNode* DragonAIComponent::AddDragonGraphAction(
     else if (actionName_ == "DragonAI_RunCharge") availabilityKey_ = "CanUseRunCharge";
     else if (actionName_ == "DragonAI_TurnToPlayer") availabilityKey_ = "CanUseTurnToPlayer";
     else if (actionName_ == "DragonAI_FireBallSweep") availabilityKey_ = "CanUseFireBallSweep";
+    else if (actionName_ == "DragonAI_FireBallFront") availabilityKey_ = "CanUseFireBallFront";
+    else if (actionName_ == "DragonAI_FireBallTriple") availabilityKey_ = "CanUseFireBallTriple";
+    else if (actionName_ == "DragonAI_FireBeamSweep") availabilityKey_ = "CanUseFireBeamSweep";
     else if (actionName_ == "DragonAI_SpreadBreathForward") availabilityKey_ = "CanUseSpreadBreathForward";
     else if (actionName_ == "DragonAI_AirFireBall") availabilityKey_ = "CanUseAirFireBall";
     else if (actionName_ == "DragonAI_AirSpreadBreath") availabilityKey_ = "CanUseAirSpreadBreath";
@@ -2817,11 +2934,66 @@ void DragonAIComponent::RegisterRuntimeActions()
     registerAction_("DragonAI_AIActionEnd", [this]() { NotifyAIActionEnd(); });
     registerAction_("DragonAI_PlaySequencerAttack", [this]() { PlaySequencerAttackAction(); });
     registerAction_("DragonAI_ShowSequencerDanger", [this]() { ShowSequencerDangerAction(); });
+    registerAction_("DragonAI_PlayFireBallTripleSecond", [this]()
+        {
+            PlaySequencerLinkedState("PlainsDragon_SpitFireBall_Triple2");
+        });
+    registerAction_("DragonAI_PlayFireBallTripleThird", [this]()
+        {
+            PlaySequencerLinkedState("PlainsDragon_SpitFireBall_Triple3");
+        });
     registerAction_("DragonAI_SelectWeightedAction", [this]() { RequestWeightedAction(); });
     registerAction_("DragonAI_DamageReaction", [this]() { RequestDamageReaction(); });
+    registerAction_("Health_Death", []()
+        {
+            ActionRegistry::Instance().Call("GameMode.NotifyPhase1BossDefeated");
+        });
     registerAction_("DragonAI_GetHit", [this]() { ForceAction(DRAGON_ACTION_TYPE::GET_HIT); });
     registerAction_("DragonAI_AirGetHit", [this]() { ForceAction(DRAGON_ACTION_TYPE::AIR_GET_HIT); });
     registerAction_("DragonAI_FaceTarget", [this]() { FaceTargetFromAnimationEvent(); });
+    // ブレス派生のシーケンサーから、首IKの向きを時間ごとに切り替える。
+    registerAction_("DragonAI_NeckLookTarget", [this]()
+        {
+            if (const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock())
+            {
+                neckIK_->LookAtTarget(playerObjectName, 0.65f, 0.08f, 0.16f);
+            }
+        });
+    registerAction_("DragonAI_NeckLookFront", [this]()
+        {
+            if (const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock())
+            {
+                neckIK_->LookAtYawOffset(0.0f, 0.65f, 0.08f, 0.16f);
+            }
+        });
+    registerAction_("DragonAI_NeckLookLeft45", [this]()
+        {
+            if (const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock())
+            {
+                neckIK_->LookAtYawOffset(-45.0f, 0.55f, 0.08f, 0.12f);
+            }
+        });
+    registerAction_("DragonAI_NeckLookRight45", [this]()
+        {
+            if (const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock())
+            {
+                neckIK_->LookAtYawOffset(45.0f, 0.55f, 0.08f, 0.12f);
+            }
+        });
+    registerAction_("DragonAI_NeckSweepLeft45ToRight45", [this]()
+        {
+            if (const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock())
+            {
+                neckIK_->SweepYaw(-45.0f, 45.0f, 2.0f, 0.12f, 0.18f);
+            }
+        });
+    registerAction_("DragonAI_NeckIKClear", [this]()
+        {
+            if (const std::shared_ptr<DragonNeckCommandIKComponent> neckIK_ = neckIK.lock())
+            {
+                neckIK_->ClearCommand();
+            }
+        });
     registerAction_("DragonAI_Enable", [this]() { autoDecisionEnabled = true; });
     registerAction_("DragonAI_Disable", [this]()
         {
@@ -2853,9 +3025,12 @@ void DragonAIComponent::PlaySequencerAttackAction()
         break;
     case DRAGON_ACTION_TYPE::FIRE_BALL:
     case DRAGON_ACTION_TYPE::AIR_FIRE_BALL:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE:
         ExecuteOwnerAction("DragonAttack_PlayBreathProjectileSingle");
         break;
     case DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP:
+    case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP:
         ExecuteOwnerAction("DragonAttack_PlayBreathProjectileBeam");
         break;
     case DRAGON_ACTION_TYPE::SPREAD_BREATH:
@@ -2890,9 +3065,12 @@ void DragonAIComponent::ShowSequencerDangerAction()
         break;
     case DRAGON_ACTION_TYPE::FIRE_BALL:
     case DRAGON_ACTION_TYPE::AIR_FIRE_BALL:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE:
         ExecuteOwnerAction("DragonAttack_ShowBreathProjectileSingleDangerArea");
         break;
     case DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP:
+    case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP:
         ExecuteOwnerAction("DragonAttack_ShowBreathProjectileBeamDangerArea");
         break;
     case DRAGON_ACTION_TYPE::SPREAD_BREATH:
@@ -2995,11 +3173,36 @@ bool DragonAIComponent::IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const
     case DRAGON_ACTION_TYPE::AIR_FIRE_BALL:
     case DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH:
     case DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT:
+    case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE:
+    case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP:
     case DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD:
+    case DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP:
+    case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
         return true;
     default:
         return false;
     }
+}
+
+bool DragonAIComponent::IsEnemyAILockedByGameMode() const
+{
+    const std::shared_ptr<GameObject> owner_ = gameObject.lock();
+    if (!owner_ || !owner_->manager) return false;
+
+    const GameModeManager* gameModeManager_ = owner_->GetManager().GetGameModeManager();
+    if (!gameModeManager_) return false;
+
+    bool locked_ = false;
+    if (gameModeManager_->GetGlobalBlackboard().GetBool(
+        GameModeBlackboardKeys::CATEGORY_GAME,
+        GameModeBlackboardKeys::ENEMY_AI_LOCKED,
+        locked_))
+    {
+        return locked_;
+    }
+
+    return false;
 }
 
 float DragonAIComponent::GetCooldown(DRAGON_ACTION_TYPE action_) const

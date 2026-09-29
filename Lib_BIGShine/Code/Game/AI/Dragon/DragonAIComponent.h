@@ -42,7 +42,11 @@ enum class DRAGON_ACTION_TYPE
     AIR_DEATH_FALL_START,
     FALLING,
     DEATH_HIT_GROUND,
-    ULTIMATE_ATTACK
+    ULTIMATE_ATTACK,
+    FIRE_BALL_FRONT,
+    FIRE_BALL_TRIPLE,
+    FIRE_BEAM_SWEEP,
+    ACTION_COUNT
 };
 
 // DragonAIの大きな実行状態。
@@ -284,6 +288,8 @@ private:
     void RequestIdleGraphTransition();
     void RequestAirIdleGraphTransition();
     void PlayAnimationState(const std::string& stateName_);
+    // シーケンサー内イベントから、現在のAI行動を維持したまま次のアニメーションステートへ進める。
+    void PlaySequencerLinkedState(const std::string& stateName_);
     void ResetAnimationActionTriggers(const std::string& keepTriggerName_);
     void ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float duration_);
     void ExecuteOwnerAction(const std::string& actionName_);
@@ -317,6 +323,7 @@ private:
     bool IsSequencerControlledAction(DRAGON_ACTION_TYPE action_) const;
     bool IsAirborneAction(DRAGON_ACTION_TYPE action_) const;
     bool IsDeathAction(DRAGON_ACTION_TYPE action_) const;
+    bool IsEnemyAILockedByGameMode() const;
     bool IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const;
     float GetCooldown(DRAGON_ACTION_TYPE action_) const;
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);

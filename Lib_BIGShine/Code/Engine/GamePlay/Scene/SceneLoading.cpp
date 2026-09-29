@@ -34,11 +34,11 @@ void SceneLoading::Finalize()
 {
 	m_SpriteRenderSystem.Finalize();
 
-
 	if (thread && thread->joinable()) {
 		// 次シーン初期化中にSceneLoadingが破棄されても、スレッド終了を待って安全に閉じる。
 		thread->join(); // スレッドの終了を待機
 	}
+
 }
 
 void SceneLoading::Update(float elapsedTime)

@@ -3,6 +3,24 @@
 #include "GameModeManager.h"
 
 #include "GameModeBlackboardKeys.h"
+#include "Engine/GamePlay/Serialize/ActionRegistry.h"
+
+namespace
+{
+    constexpr const char* ACTION_CATEGORY_GAME_MODE = "GameMode";
+    constexpr const char* ACTION_SEQUENCE_FINISHED = "GameMode.SequenceFinished";
+    constexpr const char* ACTION_NOTIFY_PHASE_1_BOSS_DEFEATED = "GameMode.NotifyPhase1BossDefeated";
+    constexpr const char* ACTION_NOTIFY_PHASE_2_BOSS_DEFEATED = "GameMode.NotifyPhase2BossDefeated";
+    constexpr const char* ACTION_BEGIN_BOSS_INTRO = "GameMode.BeginBossIntro";
+    constexpr const char* ACTION_BEGIN_PHASE_1_DEFEAT = "GameMode.BeginPhase1Defeat";
+    constexpr const char* ACTION_BEGIN_PHASE_2_INTRO = "GameMode.BeginPhase2Intro";
+    constexpr const char* ACTION_BEGIN_BOSS_DEFEATED = "GameMode.BeginBossDefeated";
+
+    constexpr const char* SEQUENCE_BOSS_INTRO = "BossIntro";
+    constexpr const char* SEQUENCE_PHASE_1_DEFEAT = "Phase1Defeat";
+    constexpr const char* SEQUENCE_PHASE_2_INTRO = "Phase2Intro";
+    constexpr const char* SEQUENCE_BOSS_DEFEATED = "BossDefeated";
+}
 
 // 現在の初期値をGlobalBlackboardへ流し込み、他Systemが参照できる状態にする。
 void GameModeManager::Start()
@@ -13,8 +31,11 @@ void GameModeManager::Start()
 // Manager自身の状態を正として、毎フレームGlobalBlackboardへ同期する。
 void GameModeManager::Update(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("GameModeManager::Update");
+
     (void)deltaTime_;
 
+    TryStartRequestedSequence();
     WriteBlackboard();
 }
 
@@ -26,6 +47,11 @@ void GameModeManager::ResetBattleState()
     enemyAILocked = false;
     presentationPlaying = false;
     battlePaused = false;
+
+    currentGameState = GameProgressState::GAME_SCENE_START;
+    currentSequenceName.clear();
+    sequenceStartRequested = false;
+    sequenceStartAttempted = false;
 
     currentBattlePhase = 0;
     playerHpRate = 1.0f;
@@ -42,6 +68,16 @@ void GameModeManager::ResetBattleState()
     aggressionRate = 1.0f;
 
     WriteBlackboard();
+}
+
+void GameModeManager::BeginGameSceneFlow()
+{
+    if (currentGameState != GameProgressState::GAME_SCENE_START)
+    {
+        return;
+    }
+
+    BeginBossIntro();
 }
 
 void GameModeManager::SetGameplayLocked(bool locked_)
@@ -146,6 +182,16 @@ void GameModeManager::SetAIDirectorAggressionRate(float rate_)
 void GameModeManager::WriteBlackboard()
 {
     // Gameカテゴリには操作や演出のロック状態を集約する。
+    globalBlackboard.SetInt(
+        GameModeBlackboardKeys::CATEGORY_GAME,
+        GameModeBlackboardKeys::CURRENT_GAME_STATE,
+        static_cast<int>(currentGameState));
+
+    globalBlackboard.SetString(
+        GameModeBlackboardKeys::CATEGORY_GAME,
+        GameModeBlackboardKeys::CURRENT_SEQUENCE,
+        currentSequenceName);
+
     globalBlackboard.SetBool(
         GameModeBlackboardKeys::CATEGORY_GAME,
         GameModeBlackboardKeys::GAMEPLAY_LOCKED,
@@ -233,4 +279,221 @@ float GameModeManager::ClampRate(float value_) const
 {
     // 割合として扱う値は、Blackboardへ書く前に有効範囲へ収める。
     return std::clamp(value_, 0.0f, 1.0f);
+}
+
+const char* GameModeManager::GetCurrentGameStateName() const
+{
+    switch (currentGameState)
+    {
+    case GameProgressState::GAME_SCENE_START: return "GAME_SCENE_START";
+    case GameProgressState::BOSS_INTRO: return "BOSS_INTRO";
+    case GameProgressState::PHASE_1_BATTLE: return "PHASE_1_BATTLE";
+    case GameProgressState::PHASE_1_DEFEAT: return "PHASE_1_DEFEAT";
+    case GameProgressState::PHASE_2_INTRO: return "PHASE_2_INTRO";
+    case GameProgressState::PHASE_2_BATTLE: return "PHASE_2_BATTLE";
+    case GameProgressState::BOSS_DEFEATED: return "BOSS_DEFEATED";
+    case GameProgressState::RESULT: return "RESULT";
+    default: return "UNKNOWN";
+    }
+}
+
+void GameModeManager::RegisterGlobalActions()
+{
+    if (globalActionsRegistered) UnregisterGlobalActions();
+
+    ActionRegistry& registry_ = ActionRegistry::Instance();
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_SEQUENCE_FINISHED, [this]() { NotifySequenceFinished(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_1_BOSS_DEFEATED, [this]() { NotifyPhase1BossDefeated(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_2_BOSS_DEFEATED, [this]() { NotifyPhase2BossDefeated(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_INTRO, [this]() { BeginBossIntro(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT, [this]() { BeginPhase1Defeat(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO, [this]() { BeginPhase2Intro(); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED, [this]() { BeginBossDefeated(); });
+    registry_.RemoveAction("Sequence", SEQUENCE_BOSS_INTRO);
+    registry_.RemoveAction("Sequence", SEQUENCE_PHASE_1_DEFEAT);
+    registry_.RemoveAction("Sequence", SEQUENCE_PHASE_2_INTRO);
+    registry_.RemoveAction("Sequence", SEQUENCE_BOSS_DEFEATED);
+    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_INTRO, [this]() { NotifySequenceFinished(); });
+    registry_.RegisterAction("Sequence", SEQUENCE_PHASE_1_DEFEAT, [this]() { NotifySequenceFinished(); });
+    registry_.RegisterAction("Sequence", SEQUENCE_PHASE_2_INTRO, [this]() { NotifySequenceFinished(); });
+    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, [this]() { NotifySequenceFinished(); });
+    globalActionsRegistered = true;
+}
+
+void GameModeManager::UnregisterGlobalActions()
+{
+    if (!globalActionsRegistered) return;
+
+    ActionRegistry& registry_ = ActionRegistry::Instance();
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_SEQUENCE_FINISHED);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_1_BOSS_DEFEATED);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_NOTIFY_PHASE_2_BOSS_DEFEATED);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_INTRO);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED);
+    registry_.RemoveAction("Sequence", SEQUENCE_BOSS_INTRO);
+    registry_.RemoveAction("Sequence", SEQUENCE_PHASE_1_DEFEAT);
+    registry_.RemoveAction("Sequence", SEQUENCE_PHASE_2_INTRO);
+    registry_.RemoveAction("Sequence", SEQUENCE_BOSS_DEFEATED);
+    globalActionsRegistered = false;
+}
+
+void GameModeManager::NotifySequenceFinished()
+{
+    switch (currentGameState)
+    {
+    case GameProgressState::BOSS_INTRO:
+        TransitionToPhase1Battle();
+        break;
+    case GameProgressState::PHASE_1_DEFEAT:
+        BeginPhase2Intro();
+        break;
+    case GameProgressState::PHASE_2_INTRO:
+        TransitionToPhase2Battle();
+        break;
+    case GameProgressState::BOSS_DEFEATED:
+        TransitionToResult();
+        break;
+    default:
+        break;
+    }
+}
+
+void GameModeManager::NotifyPhase1BossDefeated()
+{
+    if (currentGameState != GameProgressState::PHASE_1_BATTLE)
+    {
+        return;
+    }
+
+    BeginPhase1Defeat();
+}
+
+void GameModeManager::NotifyPhase2BossDefeated()
+{
+    if (currentGameState != GameProgressState::PHASE_2_BATTLE)
+    {
+        return;
+    }
+
+    BeginBossDefeated();
+}
+
+void GameModeManager::BeginBossIntro()
+{
+    SetGameState(GameProgressState::BOSS_INTRO);
+    RequestSequence(SEQUENCE_BOSS_INTRO);
+}
+
+void GameModeManager::BeginPhase1Defeat()
+{
+    SetGameState(GameProgressState::PHASE_1_DEFEAT);
+    RequestSequence(SEQUENCE_PHASE_1_DEFEAT);
+}
+
+void GameModeManager::BeginPhase2Intro()
+{
+    SetGameState(GameProgressState::PHASE_2_INTRO);
+    RequestSequence(SEQUENCE_PHASE_2_INTRO);
+}
+
+void GameModeManager::BeginBossDefeated()
+{
+    SetGameState(GameProgressState::BOSS_DEFEATED);
+    RequestSequence(SEQUENCE_BOSS_DEFEATED);
+}
+
+void GameModeManager::SetGameState(GameProgressState state_)
+{
+    currentGameState = state_;
+    ApplyStateLocks();
+    WriteBlackboard();
+}
+
+void GameModeManager::ApplyStateLocks()
+{
+    const bool isSequenceState_ =
+        currentGameState == GameProgressState::BOSS_INTRO ||
+        currentGameState == GameProgressState::PHASE_1_DEFEAT ||
+        currentGameState == GameProgressState::PHASE_2_INTRO ||
+        currentGameState == GameProgressState::BOSS_DEFEATED;
+
+    presentationPlaying = isSequenceState_;
+    playerControlLocked = isSequenceState_;
+    enemyAILocked = isSequenceState_;
+    gameplayLocked = false;
+    battlePaused = false;
+
+    switch (currentGameState)
+    {
+    case GameProgressState::PHASE_1_BATTLE:
+    case GameProgressState::PHASE_1_DEFEAT:
+        currentBattlePhase = static_cast<int>(BossBattlePhase::PHASE_1);
+        break;
+    case GameProgressState::PHASE_2_INTRO:
+    case GameProgressState::PHASE_2_BATTLE:
+        currentBattlePhase = static_cast<int>(BossBattlePhase::PHASE_2);
+        break;
+    case GameProgressState::BOSS_DEFEATED:
+    case GameProgressState::RESULT:
+        currentBattlePhase = static_cast<int>(BossBattlePhase::DEFEATED);
+        break;
+    default:
+        currentBattlePhase = static_cast<int>(BossBattlePhase::NONE);
+        break;
+    }
+}
+
+void GameModeManager::RequestSequence(const std::string& sequenceName_)
+{
+    currentSequenceName = sequenceName_;
+    sequenceStartRequested = !currentSequenceName.empty();
+    sequenceStartAttempted = false;
+    WriteBlackboard();
+}
+
+bool GameModeManager::TryStartRequestedSequence()
+{
+    if (!sequenceStartRequested || currentSequenceName.empty())
+    {
+        return false;
+    }
+
+    ActionRegistry& registry_ = ActionRegistry::Instance();
+    if (!registry_.HasAction(currentSequenceName))
+    {
+        if (!sequenceStartAttempted)
+        {
+            sequenceStartAttempted = true;
+        }
+        return false;
+    }
+
+    const std::string sequenceName_ = currentSequenceName;
+    sequenceStartRequested = false;
+    sequenceStartAttempted = true;
+    registry_.Call(sequenceName_);
+    return true;
+}
+
+void GameModeManager::TransitionToPhase1Battle()
+{
+    currentSequenceName.clear();
+    sequenceStartRequested = false;
+    SetGameState(GameProgressState::PHASE_1_BATTLE);
+}
+
+void GameModeManager::TransitionToPhase2Battle()
+{
+    currentSequenceName.clear();
+    sequenceStartRequested = false;
+    SetGameState(GameProgressState::PHASE_2_BATTLE);
+}
+
+void GameModeManager::TransitionToResult()
+{
+    currentSequenceName.clear();
+    sequenceStartRequested = false;
+    SetGameState(GameProgressState::RESULT);
 }

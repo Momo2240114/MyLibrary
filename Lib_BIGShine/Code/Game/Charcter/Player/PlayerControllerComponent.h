@@ -180,6 +180,7 @@ private:
     bool IsGroundOnlyAction(PLAYER_ACTION action_) const;
     bool IsAirAction(PLAYER_ACTION action_) const;
     bool IsAirborneForAction() const;
+    bool IsPlayerControlLockedByGameMode() const;
     bool IsAnimationStateForAction(PLAYER_ACTION action_, const std::string& stateName_) const;
     bool IsDodgeAction(PLAYER_ACTION action_) const;
     bool IsDodgeCancelAction(PLAYER_ACTION action_) const;

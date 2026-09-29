@@ -572,7 +572,9 @@
     <ClCompile Include="Code\Game\Charcter\Player\PlayerMoveState.cpp" />
     <ClCompile Include="Code\Game\Charcter\Player\PlayerStateMachine.cpp" />
     <ClCompile Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.cpp" />
+    <ClCompile Include="Code\Game\GameMode\GameModeDeathNotifierComponent.cpp" />
     <ClCompile Include="Code\Game\GameMode\GameModeManager.cpp" />
+    <ClCompile Include="Code\Game\GameMode\GameModeObjectToggleComponent.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <DisableSpecificWarnings>4828;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -915,7 +917,9 @@
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
     <ClInclude Include="Code\Game\GameMode\GameModeBlackboardKeys.h" />
+    <ClInclude Include="Code\Game\GameMode\GameModeDeathNotifierComponent.h" />
     <ClInclude Include="Code\Game\GameMode\GameModeManager.h" />
+    <ClInclude Include="Code\Game\GameMode\GameModeObjectToggleComponent.h" />
     <ClInclude Include="Code\Wip.hpp" />
     <ClInclude Include="External\imgui-docking\imgui_stdlib.h" />
     <ClInclude Include="External\imgui-node-editor\crude_json.h" />

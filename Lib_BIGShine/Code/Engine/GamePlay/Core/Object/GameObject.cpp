@@ -1010,7 +1010,7 @@ void GameObject::Load(const nlohmann::json& j)
 
     // 通常のコンポーネント配列の処理
     if (j.contains("Components")) {
-        for (const auto& cJson : j["Components"]) {
+         for (const auto& cJson : j["Components"]) {
               loadComponent(cJson, false);
         }
     }
