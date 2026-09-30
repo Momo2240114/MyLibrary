@@ -4020,7 +4020,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 0.4833333194255829,
+                                    "endTime": 1.350000023841858,
                                     "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "localPosition": [
@@ -4045,7 +4045,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.4333333373069763
+                                    "startTime": 1.2999999523162842
                                 },
                                 {
                                     "actionEnd": "",
@@ -4081,7 +4081,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.9666666388511658
+                                    "startTime": 2.8499999046325684
                                 },
                                 {
                                     "actionEnd": "",
@@ -4117,7 +4117,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.9666666388511658
+                                    "startTime": 3.0
                                 }
                             ],
                             "loop": false,

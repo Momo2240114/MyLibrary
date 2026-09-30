@@ -44,6 +44,7 @@ namespace
     constexpr const char* ACTION_STOP = "DragonAttack_Stop";
     constexpr const char* DANGER_AREA_MODEL_PATH = "__InternalMeshDangerArea__";
     constexpr const char* DANGER_FAN_MODEL_PATH = "__InternalMeshDangerFan__";
+    constexpr float BREATH_BEAM_TARGET_AIM_BLEND = 1.0f;
 
     DirectX::XMFLOAT3 Normalize(const DirectX::XMFLOAT3& value_)
     {
@@ -158,7 +159,7 @@ void DragonAttackControllerComponent::PlayBreathProjectileBeam()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::PlayBreathProjectileBeam");
 
-    SpawnBreathProjectile("DragonBreathLightBeam");
+    SpawnBreathProjectile("DragonBreathLightBeam", BREATH_BEAM_TARGET_AIM_BLEND);
 }
 
 void DragonAttackControllerComponent::PlayBreathProjectileFan()
@@ -895,7 +896,8 @@ bool DragonAttackControllerComponent::ResolveMouthFrame(
 
 bool DragonAttackControllerComponent::ResolveBreathSourceFrame(
     DirectX::XMFLOAT3& position_,
-    DirectX::XMFLOAT3& forward_) const
+    DirectX::XMFLOAT3& forward_,
+    float targetAimBlendOverride_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_ || !owner_->transform) return false;
@@ -906,13 +908,13 @@ bool DragonAttackControllerComponent::ResolveBreathSourceFrame(
     DirectX::XMFLOAT3 ignoredNodeForward_{ 0.0f, 0.0f, 1.0f };
     if (ResolveActualMouthFrame(position_, ignoredNodeForward_))
     {
-        ResolveBreathAimForward(position_, baseForward_, forward_);
+        ResolveBreathAimForward(position_, baseForward_, forward_, targetAimBlendOverride_);
         return true;
     }
 
     if (ResolveNamedObjectFrame(breathEmitterObjectName, position_, ignoredNodeForward_))
     {
-        ResolveBreathAimForward(position_, baseForward_, forward_);
+        ResolveBreathAimForward(position_, baseForward_, forward_, targetAimBlendOverride_);
         return true;
     }
 
@@ -928,7 +930,7 @@ bool DragonAttackControllerComponent::ResolveBreathSourceFrame(
                 const DirectX::XMMATRIX nodeMatrix_ =
                     DirectX::XMLoadFloat4x4(&model_->GetNodes()[nodeIndex_].worldTransform);
                 position_ = ExtractPosition(nodeMatrix_);
-                ResolveBreathAimForward(position_, baseForward_, forward_);
+                ResolveBreathAimForward(position_, baseForward_, forward_, targetAimBlendOverride_);
                 return true;
             }
         }
@@ -936,7 +938,7 @@ bool DragonAttackControllerComponent::ResolveBreathSourceFrame(
 
     if (ResolveMouthFrame(position_, ignoredNodeForward_))
     {
-        ResolveBreathAimForward(position_, baseForward_, forward_);
+        ResolveBreathAimForward(position_, baseForward_, forward_, targetAimBlendOverride_);
         return true;
     }
 
@@ -960,7 +962,8 @@ bool DragonAttackControllerComponent::ResolveBreathBaseForward(
 bool DragonAttackControllerComponent::ResolveBreathAimForward(
     const DirectX::XMFLOAT3& sourcePosition_,
     const DirectX::XMFLOAT3& fallbackForward_,
-    DirectX::XMFLOAT3& forward_) const
+    DirectX::XMFLOAT3& forward_,
+    float targetAimBlendOverride_) const
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ResolveBreathAimForward");
 
@@ -989,7 +992,11 @@ bool DragonAttackControllerComponent::ResolveBreathAimForward(
         targetPosition_.y - sourcePosition_.y,
         targetPosition_.z - sourcePosition_.z
     });
-    const float blend_ = (std::min)((std::max)(breathTargetAimBlend, 0.0f), 1.0f);
+    // 直線ビームなど、攻撃ごとに本体前方よりターゲット方向を優先したい場合だけ上書きする。
+    const float sourceBlend_ = targetAimBlendOverride_ >= 0.0f
+        ? targetAimBlendOverride_
+        : breathTargetAimBlend;
+    const float blend_ = (std::min)((std::max)(sourceBlend_, 0.0f), 1.0f);
     forward_ = Normalize({
         fallbackForward_.x * (1.0f - blend_) + targetForward_.x * blend_,
         fallbackForward_.y * (1.0f - blend_) + targetForward_.y * blend_,
@@ -1062,7 +1069,8 @@ bool DragonAttackControllerComponent::ResolveStampSourceFrame(
 
 std::shared_ptr<AttackEmitterComponent> DragonAttackControllerComponent::ResolveBreathAttackEmitterComponent(
     DirectX::XMFLOAT3& position_,
-    DirectX::XMFLOAT3& forward_) const
+    DirectX::XMFLOAT3& forward_,
+    float targetAimBlendOverride_) const
 {
     const std::shared_ptr<GameObject> owner_ = gameObject.lock();
     if (!owner_) return nullptr;
@@ -1074,21 +1082,21 @@ std::shared_ptr<AttackEmitterComponent> DragonAttackControllerComponent::Resolve
         const std::shared_ptr<GameObject> sourceObject_ = owner_->GetManager().Find(breathEmitterObjectName);
         if (sourceObject_)
         {
-            hasSourceFrame_ = ResolveBreathSourceFrame(position_, forward_);
+            hasSourceFrame_ = ResolveBreathSourceFrame(position_, forward_, targetAimBlendOverride_);
             sourceEmitter_ = sourceObject_->GetComponent<AttackEmitterComponent>();
         }
     }
 
     if (sourceEmitter_)
     {
-        if (hasSourceFrame_ || ResolveBreathSourceFrame(position_, forward_))
+        if (hasSourceFrame_ || ResolveBreathSourceFrame(position_, forward_, targetAimBlendOverride_))
         {
             return sourceEmitter_;
         }
     }
 
     std::shared_ptr<AttackEmitterComponent> ownerEmitter_ = attackEmitter.lock();
-    if (ownerEmitter_ && (hasSourceFrame_ || ResolveBreathSourceFrame(position_, forward_)))
+    if (ownerEmitter_ && (hasSourceFrame_ || ResolveBreathSourceFrame(position_, forward_, targetAimBlendOverride_)))
     {
         return ownerEmitter_;
     }
@@ -1096,7 +1104,9 @@ std::shared_ptr<AttackEmitterComponent> DragonAttackControllerComponent::Resolve
     return nullptr;
 }
 
-void DragonAttackControllerComponent::SpawnBreathProjectile(const std::string& templateName_)
+void DragonAttackControllerComponent::SpawnBreathProjectile(
+    const std::string& templateName_,
+    float targetAimBlendOverride_)
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnBreathProjectile");
 
@@ -1104,7 +1114,7 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(const std::string& t
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     const std::shared_ptr<AttackEmitterComponent> emitter_ =
-        ResolveBreathAttackEmitterComponent(position_, forward_);
+        ResolveBreathAttackEmitterComponent(position_, forward_, targetAimBlendOverride_);
     if (!emitter_) return;
 
     if (!breathProjectileEmitterAssetPath.empty())

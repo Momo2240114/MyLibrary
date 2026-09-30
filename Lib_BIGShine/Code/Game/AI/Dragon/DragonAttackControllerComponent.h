@@ -126,13 +126,15 @@ private:
         DirectX::XMFLOAT3& forward_) const;
     bool ResolveBreathSourceFrame(
         DirectX::XMFLOAT3& position_,
-        DirectX::XMFLOAT3& forward_) const;
+        DirectX::XMFLOAT3& forward_,
+        float targetAimBlendOverride_ = -1.0f) const;
     bool ResolveBreathBaseForward(
         DirectX::XMFLOAT3& forward_) const;
     bool ResolveBreathAimForward(
         const DirectX::XMFLOAT3& sourcePosition_,
         const DirectX::XMFLOAT3& fallbackForward_,
-        DirectX::XMFLOAT3& forward_) const;
+        DirectX::XMFLOAT3& forward_,
+        float targetAimBlendOverride_ = -1.0f) const;
     bool ResolveNamedObjectFrame(
         const std::string& objectName_,
         DirectX::XMFLOAT3& position_,
@@ -142,8 +144,11 @@ private:
         DirectX::XMFLOAT3& forward_) const;
     std::shared_ptr<AttackEmitterComponent> ResolveBreathAttackEmitterComponent(
         DirectX::XMFLOAT3& position_,
-        DirectX::XMFLOAT3& forward_) const;
-    void SpawnBreathProjectile(const std::string& templateName_);
+        DirectX::XMFLOAT3& forward_,
+        float targetAimBlendOverride_ = -1.0f) const;
+    void SpawnBreathProjectile(
+        const std::string& templateName_,
+        float targetAimBlendOverride_ = -1.0f);
     void SpawnBiteVFX();
     void SpawnStampHit();
     void SpawnStampRockVFX(const DirectX::XMFLOAT3& centerPosition_);
