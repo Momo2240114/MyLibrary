@@ -7,7 +7,7 @@
             "Acceleration": [
                 0.0,
                 0.75,
-                -50.0
+                50.0
             ],
             "BlendMode": 1,
             "BurstCount": 600,
@@ -83,7 +83,7 @@
             "ShapeEnd": [
                 0.0,
                 0.0,
-                -27.5
+                27.5
             ],
             "ShapeSize": [
                 2.0,
@@ -128,11 +128,11 @@
             "StretchScale": 0.8199999928474426,
             "TargetAttractionFalloff": 0.0010000000474974513,
             "TargetAttractionRange": 0.0,
-            "TargetAttractionStrength": -5.300000190734863,
+            "TargetAttractionStrength": 5.300000190734863,
             "TargetPosition": [
                 0.0,
                 0.0,
-                -13.119999885559082
+                13.119999885559082
             ],
             "TexturePath": "",
             "TextureSplitCount": [
@@ -150,7 +150,7 @@
             "Wind": [
                 0.0,
                 0.75,
-                -50.0
+                50.0
             ],
             "gradientDirection": 0,
             "gradientEndUv": 1.0,

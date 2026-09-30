@@ -598,7 +598,7 @@
                                 "FollowOwner": false,
                                 "ForceAdditiveBlend": true,
                                 "GlowMultiplier": 1.4500000476837158,
-                                "LifeTime": 2.200000047683716,
+                                "LifeTime": 1.5499999523162842,
                                 "LocalOffset": [
                                     0.0,
                                     0.0,
@@ -660,7 +660,7 @@
                             "KnockBackPower": 3.0,
                             "TargetAirLiftPower": 0.0
                         },
-                        "LifeTime": 2.200000047683716,
+                        "LifeTime": 1.5499999523162842,
                         "LocalOffset": [
                             0.0,
                             0.0,
