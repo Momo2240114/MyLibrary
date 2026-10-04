@@ -1,0 +1,1019 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "MaxBounds": [
+                    1.0,
+                    5.0
+                ],
+                "MinBounds": [
+                    0.0,
+                    0.0
+                ],
+                "Tracks": [
+                    {
+                        "AssetPath": "",
+                        "Color": 4294954752,
+                        "Name": "GateAlpha",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                0.0
+                            ],
+                            [
+                                0.05999999865889549,
+                                1.0
+                            ],
+                            [
+                                0.6200000047683716,
+                                1.0
+                            ],
+                            [
+                                0.8799999952316284,
+                                0.8999999761581421
+                            ],
+                            [
+                                1.0,
+                                0.0
+                            ]
+                        ],
+                        "Type": 2,
+                        "Visible": true
+                    },
+                    {
+                        "AssetPath": "",
+                        "Color": 4294954752,
+                        "Name": "GateDissolve",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                0.0
+                            ],
+                            [
+                                0.5400000214576721,
+                                0.0
+                            ],
+                            [
+                                0.699999988079071,
+                                0.25
+                            ],
+                            [
+                                0.8999999761581421,
+                                0.8500000238418579
+                            ],
+                            [
+                                1.0,
+                                1.0
+                            ]
+                        ],
+                        "Type": 2,
+                        "Visible": true
+                    },
+                    {
+                        "AssetPath": "",
+                        "Color": 4294954752,
+                        "Name": "GateLight",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                0.3499999940395355
+                            ],
+                            [
+                                0.15000000596046448,
+                                0.699999988079071
+                            ],
+                            [
+                                0.5600000023841858,
+                                0.699999988079071
+                            ],
+                            [
+                                0.6800000071525574,
+                                4.800000190734863
+                            ],
+                            [
+                                0.800000011920929,
+                                4.0
+                            ],
+                            [
+                                0.9399999976158142,
+                                2.200000047683716
+                            ],
+                            [
+                                1.0,
+                                0.0
+                            ]
+                        ],
+                        "Type": 2,
+                        "Visible": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CurveComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "IsPlaying": false,
+                "Parts": [
+                    {
+                        "Alpha": 0.7200000286102295,
+                        "AlphaCurveName": "GateAlpha",
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BackFaceColor": [
+                            0.0,
+                            -1.688849860263936e+17,
+                            6.305843089461677e-43,
+                            5.465064010866787e-44
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
+                        "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "BaseUVSpeed": [
+                            0.014999999664723873,
+                            -0.07999999821186066
+                        ],
+                        "BlendMode": 0,
+                        "Color": [
+                            0.41999998688697815,
+                            0.6100000143051147,
+                            0.7799999713897705,
+                            1.0
+                        ],
+                        "DissolveCurveName": "GateDissolve",
+                        "DissolveEdgeColor": [
+                            0.8500000238418579,
+                            0.949999988079071,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveEdgeStrength": 7.0,
+                        "DissolveEdgeWidth": 0.12999999523162842,
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "DistortionSamplerMode": 0,
+                        "Duration": 3.9000000953674316,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "EmissiveCurveName": "GateLight",
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
+                        "EmissiveStrength": 1.2000000476837158,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelNoiseStrength": 0.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
+                            "CapsuleLength": 2.0,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": false,
+                        "MaskDistortionOpacity": 0.6100000143051147,
+                        "MaskDistortionStrength": 16.0,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                            }
+                        ],
+                        "MaskSamplerMode": 0,
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "MaskUVSpeed": [
+                            -0.02500000037252903,
+                            -0.11999999731779099
+                        ],
+                        "MaterialPath": "",
+                        "MaterialPaths": [],
+                        "MeshIndex": 0,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "Data/Model/VFX/IntroFogGate.gltf",
+                        "NoiseSamplerMode": 0,
+                        "NoiseStrength": 0.03500000014901161,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                        ],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "NoiseUVSpeed": [
+                            0.07000000029802322,
+                            -0.05000000074505806
+                        ],
+                        "NormalSamplerMode": 0,
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "Position": [
+                            0.0,
+                            0.0,
+                            -0.03999999910593033
+                        ],
+                        "RenderEnabled": false,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleCurveName": "",
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0010000000474974513,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": true,
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": false,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
+                        "UseMask": true,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": true,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    },
+                    {
+                        "Alpha": 0.2800000011920929,
+                        "AlphaCurveName": "GateAlpha",
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BackFaceColor": [
+                            0.0,
+                            -1.688849860263936e+17,
+                            6.305843089461677e-43,
+                            5.465064010866787e-44
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
+                        "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "BaseUVSpeed": [
+                            0.014999999664723873,
+                            -0.07999999821186066
+                        ],
+                        "BlendMode": 1,
+                        "Color": [
+                            0.7200000286102295,
+                            0.8600000143051147,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveCurveName": "GateDissolve",
+                        "DissolveEdgeColor": [
+                            0.8500000238418579,
+                            0.949999988079071,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveEdgeStrength": 7.0,
+                        "DissolveEdgeWidth": 0.12999999523162842,
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "DistortionSamplerMode": 0,
+                        "Duration": 3.9000000953674316,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "EmissiveCurveName": "GateLight",
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
+                        "EmissiveStrength": 1.7999999523162842,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelNoiseStrength": 0.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
+                            "CapsuleLength": 2.0,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": false,
+                        "MaskDistortionOpacity": 0.6100000143051147,
+                        "MaskDistortionStrength": 16.0,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                            }
+                        ],
+                        "MaskSamplerMode": 0,
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "MaskUVSpeed": [
+                            -0.02500000037252903,
+                            -0.11999999731779099
+                        ],
+                        "MaterialPath": "",
+                        "MaterialPaths": [],
+                        "MeshIndex": 0,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "Data/Model/VFX/IntroFogGate.gltf",
+                        "NoiseSamplerMode": 0,
+                        "NoiseStrength": 0.03500000014901161,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                        ],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "NoiseUVSpeed": [
+                            0.07000000029802322,
+                            -0.05000000074505806
+                        ],
+                        "NormalSamplerMode": 0,
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "Position": [
+                            0.0,
+                            0.0,
+                            0.03999999910593033
+                        ],
+                        "RenderEnabled": false,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleCurveName": "",
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0010000000474974513,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": true,
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": false,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
+                        "UseMask": true,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": true,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    },
+                    {
+                        "Alpha": 0.699999988079071,
+                        "AlphaCurveName": "GateAlpha",
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BackFaceColor": [
+                            0.0,
+                            -1.688849860263936e+17,
+                            6.305843089461677e-43,
+                            5.465064010866787e-44
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
+                        "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "BaseUVSpeed": [
+                            0.014999999664723873,
+                            -0.07999999821186066
+                        ],
+                        "BlendMode": 1,
+                        "Color": [
+                            0.3499999940395355,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveCurveName": "GateDissolve",
+                        "DissolveEdgeColor": [
+                            0.8500000238418579,
+                            0.949999988079071,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveEdgeStrength": 7.0,
+                        "DissolveEdgeWidth": 0.12999999523162842,
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "",
+                        "DistortionNoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "DistortionSamplerMode": 0,
+                        "Duration": 3.9000000953674316,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "EmissiveCurveName": "GateLight",
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
+                        "EmissiveStrength": 4.5,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelNoiseStrength": 0.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 1.1200000047683716,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
+                            "CapsuleLength": 2.0,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 1.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 96,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": false,
+                        "MaskDistortionOpacity": 0.6100000143051147,
+                        "MaskDistortionStrength": 16.0,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                            }
+                        ],
+                        "MaskSamplerMode": 0,
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "MaskUVSpeed": [
+                            -0.02500000037252903,
+                            -0.11999999731779099
+                        ],
+                        "MaterialPath": "",
+                        "MaterialPaths": [],
+                        "MeshIndex": 1,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "Data/Model/VFX/IntroFogGate.gltf",
+                        "NoiseSamplerMode": 0,
+                        "NoiseStrength": 0.03500000014901161,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                        ],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "NoiseUVSpeed": [
+                            0.07000000029802322,
+                            -0.05000000074505806
+                        ],
+                        "NormalSamplerMode": 0,
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "Position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RenderEnabled": false,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleCurveName": "",
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0010000000474974513,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": true,
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": false,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
+                        "UseMask": true,
+                        "UseMaskDistortion": false,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": true,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    }
+                ],
+                "PlaybackSpeed": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "MeshVFXComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "IntroFogGate",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            -2.9946117401123047,
+            2.076157808303833,
+            -57.03769302368164
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

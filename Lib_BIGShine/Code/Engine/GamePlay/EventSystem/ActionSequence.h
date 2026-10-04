@@ -38,6 +38,7 @@ struct SequenceData {
     std::string name = "New Sequence";
     std::vector<ActionReference> actions;
     float duration = 10.0f;
+    std::string completionAction; // 全Actionの処理後、Sequence終了時に通知するGlobal Action。
     int currentFrame = 0;
     int firstFrame = 0;
     int selectedAction = -1;
@@ -91,4 +92,7 @@ private:
     std::vector<PendingAction> pendingActions;
     // trueならLocalだけでなくGlobalActionにもSequenceを公開する。
     bool registerGlobal = false;
+    float remainingDuration = 0.0f;
+    std::string pendingCompletionAction;
+    unsigned int playbackGeneration = 0; // Action内で別Sequenceが始まった場合に古い予約を中断する。
 };

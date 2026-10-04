@@ -292,14 +292,22 @@ void Transform::UpdateWorldMatrix()
     localRotation.y += rotateOffset.y;
     localRotation.z += rotateOffset.z;
 
-    // --- 角度の正規化 (0 ~ 360度に収める) ---
-    auto NormalizeAngle = [](float& angle) {
-        angle = fmodf(angle, 360.0f);
-        if (angle < 0.0f) angle += 360.0f;
+  // --- 角度の正規化 (-180 ～ 180度に収める) -- -
+    auto NormalizeAngle_ = [](float& angle_)
+        {
+            angle_ = std::fmod(angle_ + 180.0f, 360.0f);
+
+            if (angle_ < 0.0f)
+            {
+                angle_ += 360.0f;
+            }
+
+            angle_ -= 180.0f;
         };
-    NormalizeAngle(localRotation.x);
-    NormalizeAngle(localRotation.y);
-    NormalizeAngle(localRotation.z);
+
+    NormalizeAngle_(localRotation.x);
+    NormalizeAngle_(localRotation.y);
+    NormalizeAngle_(localRotation.z);
 
     // オフセットを使い切ったのでリセット
     moveOffset = { 0, 0, 0 };

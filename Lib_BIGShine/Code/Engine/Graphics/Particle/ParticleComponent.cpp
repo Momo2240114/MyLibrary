@@ -930,10 +930,18 @@ void ParticleComponent::Stop()
 
 void ParticleComponent::ResetRuntime()
 {
+    BS_PROFILE_SCOPE("ParticleComponent::ResetRuntime");
     Stop();
     timer = 0.0f;
     for (EmitterTrack& track_ : tracks)
     {
+        if (track_.hasBeamVisualOverride)
+        {
+            track_.settings = track_.beamVisualSettingsBackup;
+            track_.spawnSpace = track_.beamVisualSpawnSpaceBackup;
+            track_.delay = track_.beamVisualDelayBackup;
+            track_.hasBeamVisualOverride = false;
+        }
         track_.isStarted = false;
         if (!track_.emitter) continue;
         track_.emitter->ResetRuntime();

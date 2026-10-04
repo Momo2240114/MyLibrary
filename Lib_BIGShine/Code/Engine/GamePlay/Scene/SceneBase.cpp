@@ -26,6 +26,7 @@
 #include "Editor/Window/MaterialAssetListWindow.h"
 #include "Editor/Window/ShadowWindow.h"
 #include "Editor/Window/PostEffectWindow.h"
+#include "Editor/Window/IBLSettingsWindow.h"
 #include "Editor/Window/DebugTextureViewerWindow.h"
 #include "Editor/Window/InputEditorWindow.h"
 #include "Editor/Window/InputMonitorWindow.h"
@@ -82,6 +83,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<GpuRenderInvestigationWindow>(_GameObjectManager.get(), m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<ShadowWindow>("",_GameObjectManager.get(),m_ModelRenderSystem));
 	editorWindowManager->AddWindow(std::make_unique<PostEffectWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<IBLSettingsWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<DebugTextureViewerWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InputEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<InputMonitorWindow>(_GameObjectManager.get()));

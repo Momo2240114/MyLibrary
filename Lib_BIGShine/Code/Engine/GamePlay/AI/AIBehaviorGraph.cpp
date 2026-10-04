@@ -517,7 +517,85 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickNode(AIBehaviorNode& node_, AIBehaviorCo
     return TickTask(node_, context_);
 }
 
-// 子ノードの結果を集約し、Root・Sequence・Selector・RandomSelectorの結果を決定する。
+// 条件を満たすAction名を、副作用なしでRootから収集する。
+std::vector<std::string> AIBehaviorGraph::GetSelectableActions(AIBehaviorContext& context_) const
+{
+    BS_PROFILE_SCOPE("AIBehaviorGraph::GetSelectableActions");
+    std::vector<std::string> actions_;
+    std::vector<uintptr_t> path_;
+    for (const AIBehaviorNode& node_ : nodes)
+    {
+        if (node_.type == AI_BEHAVIOR_NODE_TYPE::ROOT)
+        {
+            CollectSelectableActions(node_, context_, actions_, path_);
+            break;
+        }
+    }
+    return actions_;
+}
+
+bool AIBehaviorGraph::CollectSelectableActions(const AIBehaviorNode& node_, AIBehaviorContext& context_,
+    std::vector<std::string>& actions_, std::vector<uintptr_t>& path_) const
+{
+    BS_PROFILE_SCOPE("AIBehaviorGraph::CollectSelectableActions");
+    if (std::find(path_.begin(), path_.end(), node_.id) != path_.end()) return false;
+    if (node_.type == AI_BEHAVIOR_NODE_TYPE::BLACKBOARD_CONDITION)
+        return EvaluateBlackboardCondition(node_, context_);
+    if (node_.type == AI_BEHAVIOR_NODE_TYPE::WAIT_BLACKBOARD_BOOL)
+    {
+        BlackboardComponent* blackboard_ = ResolveBlackboard(node_, context_);
+        bool value_ = false;
+        return blackboard_ && blackboard_->GetBool(node_.blackboardCategory, node_.blackboardKey, value_) && value_ == node_.boolValue;
+    }
+    if (node_.type == AI_BEHAVIOR_NODE_TYPE::PLAY_ACTION)
+    {
+        actions_.push_back(node_.actionName);
+        return true;
+    }
+    path_.push_back(node_.id);
+    if (node_.type == AI_BEHAVIOR_NODE_TYPE::ROOT || node_.type == AI_BEHAVIOR_NODE_TYPE::SUB_GRAPH)
+    {
+        // 実行時と同じPriority・ID順で先頭の子だけを調べる。
+        const AIBehaviorNode* firstChild_ = nullptr;
+        for (const AIBehaviorLink& link_ : links)
+        {
+            if (link_.fromNodeId != node_.id) continue;
+            const AIBehaviorNode* child_ = FindNode(link_.toNodeId);
+            if (child_ && (!firstChild_ || child_->priority < firstChild_->priority ||
+                (child_->priority == firstChild_->priority && child_->id < firstChild_->id))) firstChild_ = child_;
+        }
+        const bool available_ = firstChild_ && CollectSelectableActions(*firstChild_, context_, actions_, path_);
+        path_.pop_back();
+        return available_;
+    }
+    std::vector<std::string> branchActions_;
+    bool available_ = false;
+    bool hasChildren_ = false;
+    for (const AIBehaviorLink& link_ : links)
+    {
+        if (link_.fromNodeId != node_.id) continue;
+        const AIBehaviorNode* child_ = FindNode(link_.toNodeId);
+        if (!child_) continue;
+        hasChildren_ = true;
+        std::vector<std::string> childActions_;
+        const bool childAvailable_ = CollectSelectableActions(*child_, context_, childActions_, path_);
+        if (node_.type == AI_BEHAVIOR_NODE_TYPE::SEQUENCE && !childAvailable_)
+        {
+            path_.pop_back();
+            return false;
+        }
+        if (node_.type == AI_BEHAVIOR_NODE_TYPE::RANDOM_SELECTOR && child_->weight <= 0.0f) continue;
+        available_ = available_ || childAvailable_;
+        if (childAvailable_) branchActions_.insert(branchActions_.end(), childActions_.begin(), childActions_.end());
+    }
+    path_.pop_back();
+    // WAITなどの末端は条件を追加しない。事前判定は副作用を伴わないGraphを対象とする。
+    if (!hasChildren_) return true;
+    if (available_) actions_.insert(actions_.end(), branchActions_.begin(), branchActions_.end());
+    return available_;
+}
+
+// 子ノードの結果を集約し、既存の優先順と抽選重みを維持する。
 AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehaviorContext& context_)
 {
     std::vector<AIBehaviorNode*> children_ = GetChildren(node_);
@@ -556,12 +634,36 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
         // 子のWeightを抽選確率として使用し、失敗した子を候補から外しながら再抽選する。
         static std::mt19937 randomEngineFallback_(std::random_device{}());
         std::vector<AIBehaviorNode*> remainingChildren_ = children_;
+        std::unordered_map<uintptr_t, float> selectionWeights_;
+        for (const AIBehaviorNode* child_ : children_)
+        {
+            float modifier_ = 1.0f;
+            if (context_.actionWeightModifier)
+            {
+                std::vector<std::string> actions_;
+                std::vector<uintptr_t> path_;
+                if (!CollectSelectableActions(*child_, context_, actions_, path_)) modifier_ = 0.0f;
+                else if (!actions_.empty())
+                {
+                    // 複数攻撃をまとめた枝は最大補正を使い、枝内では再び個別抽選する。
+                    modifier_ = 0.0f;
+                    for (const std::string& action_ : actions_)
+                        modifier_ = (std::max)(modifier_, context_.actionWeightModifier(action_));
+                    if (actions_.size() == 1 && context_.actionWeightObserver)
+                        context_.actionWeightObserver(actions_.front(), child_->weight, modifier_);
+                }
+            }
+            selectionWeights_[child_->id] = (std::max)(0.0f, child_->weight) * modifier_;
+        }
+        if (context_.actionWeightModifier)
+            remainingChildren_.erase(std::remove_if(remainingChildren_.begin(), remainingChildren_.end(),
+                [&selectionWeights_](const AIBehaviorNode* child_) { return selectionWeights_[child_->id] <= 0.0f; }), remainingChildren_.end());
         while (!remainingChildren_.empty())
         {
             float totalWeight_ = 0.0f;
             for (const AIBehaviorNode* child_ : remainingChildren_)
             {
-                totalWeight_ += (std::max)(0.0f, child_->weight);
+                totalWeight_ += selectionWeights_[child_->id];
             }
 
             size_t selectedIndex_ = 0;
@@ -571,7 +673,7 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickComposite(AIBehaviorNode& node_, AIBehav
                 float pick_ = distribution_(randomEngineFallback_);
                 for (size_t childIndex_ = 0; childIndex_ < remainingChildren_.size(); ++childIndex_)
                 {
-                    pick_ -= (std::max)(0.0f, remainingChildren_[childIndex_]->weight);
+                    pick_ -= selectionWeights_[remainingChildren_[childIndex_]->id];
                     if (pick_ <= 0.0f)
                     {
                         selectedIndex_ = childIndex_;
@@ -625,6 +727,9 @@ AI_BEHAVIOR_STATUS AIBehaviorGraph::TickTask(AIBehaviorNode& node_, AIBehaviorCo
         // Actionは最初のTickで一度だけ開始し、以降は終了フラグの監視だけを行う。
         if (!state_.actionStarted)
         {
+            // 除外された攻撃を通常Selectorから直接開始する経路も止める。
+            if (context_.actionWeightModifier && context_.actionWeightModifier(node_.actionName) <= 0.0f)
+                return AI_BEHAVIOR_STATUS::FAILURE;
             bool executed_ = false;
             // AIActionComponentがあればBlackboard・Animation連携込みで実行する。
             if (auto aiActionComponent_ = context_.owner->GetComponent<AIActionComponent>())

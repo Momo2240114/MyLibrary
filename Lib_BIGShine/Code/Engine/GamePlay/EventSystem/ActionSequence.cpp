@@ -131,42 +131,46 @@ void ActionSequence::Start()
 
 void ActionSequence::Update(float elapsedTime_)
 {
-    // StartSequenceで予約したActionを、残り時間が0になった順に実行する。
-    for (auto iterator_ = pendingActions.begin(); iterator_ != pendingActions.end(); ) {
-        iterator_->timer -= elapsedTime_;
-        if (iterator_->timer <= 0.0f) {
-            ApplyBlackboardWrites(iterator_->blackboardWrites);
-            ExecuteAction(iterator_->actionName);
-            iterator_ = pendingActions.erase(iterator_);
-        }
-        else {
-            ++iterator_;
-        }
+    BS_PROFILE_SCOPE("ActionSequence::Update");
+    const unsigned int generation_ = playbackGeneration;
+    remainingDuration -= (std::max)(elapsedTime_, 0.0f);
+    for (auto& pending_ : pendingActions) pending_.timer -= (std::max)(elapsedTime_, 0.0f);
+    // 呼び出し先がSequenceを再生してもIteratorを壊さないよう、実行前に予約を取り出す。
+    while (!pendingActions.empty() && pendingActions.front().timer <= 0.0f)
+    {
+        const PendingAction action_ = pendingActions.front();
+        pendingActions.erase(pendingActions.begin());
+        ApplyBlackboardWrites(action_.blackboardWrites);
+        ExecuteAction(action_.actionName);
+        if (generation_ != playbackGeneration) return;
+    }
+    if (remainingDuration <= 0.0f && pendingActions.empty() && !pendingCompletionAction.empty())
+    {
+        const std::string completionAction_ = pendingCompletionAction;
+        pendingCompletionAction.clear();
+        ExecuteAction(completionAction_);
     }
 }
 
 
 void ActionSequence::StartSequence(int index_)
 {
+    BS_PROFILE_SCOPE("ActionSequence::StartSequence");
     if (index_ < 0 || index_ >= (int)sequences.size()) return;
 
     pendingActions.clear();
+    ++playbackGeneration;
+    remainingDuration = sequences[index_].duration;
+    pendingCompletionAction = sequences[index_].completionAction;
 
-    // 0秒のActionは即時実行し、それ以降のActionはUpdateで処理する予約リストへ積む。
+    // Editorで並び順を変更しても実行時刻を優先し、同時刻だけ保存順を維持する。
     for (const ActionReference& action_ : sequences[index_].actions) {
         if (action_.actionName.empty()) continue;
-
-        if (action_.executionTime <= 0.0f) {
-            ApplyBlackboardWrites(action_.blackboardWrites);
-            ExecuteAction(action_.actionName);
-        }
-        else {
-            pendingActions.push_back({
-                action_.executionTime,
-                action_.actionName,
-                action_.blackboardWrites });
-        }
+        pendingActions.push_back({ action_.executionTime, action_.actionName, action_.blackboardWrites });
     }
+    std::stable_sort(pendingActions.begin(), pendingActions.end(),
+        [](const PendingAction& left_, const PendingAction& right_) { return left_.timer < right_.timer; });
+    Update(0.0f);
 }
 
 void ActionSequence::EnsureImmediateSequence(
@@ -316,6 +320,12 @@ void ActionSequence::DrawEditorGui()
                 --sequenceIndex_;
                 continue;
             }
+
+            ImGui::SetNextItemWidth(180.0f);
+            char completionBuffer_[256]{};
+            strncpy_s(completionBuffer_, sequence_.completionAction.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Completion Action", completionBuffer_, sizeof(completionBuffer_)))
+                sequence_.completionAction = completionBuffer_;
 
             ImGui::SetNextItemWidth(180.0f);
             if (ImGui::DragFloat("Timeline Length", &sequence_.duration, 0.1f, 0.1f, 600.0f, "%.2f sec")) {
@@ -492,6 +502,7 @@ void ActionSequence::Serialize(nlohmann::json& j) const {
         nlohmann::json seqItem;
         seqItem["name"] = seq.name;
         seqItem["duration"] = seq.duration;
+        seqItem["completionAction"] = seq.completionAction;
 
         nlohmann::json actArray = nlohmann::json::array();
         for (const auto& act : seq.actions) {
@@ -537,6 +548,7 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
         SequenceData data;
         data.name = seqItem.value("name", "New Sequence");
         data.duration = seqItem.value("duration", 10.0f);
+        data.completionAction = seqItem.value("completionAction", std::string{});
 
         if (seqItem.contains("actions") && seqItem["actions"].is_array()) {
             float accumulatedTime_ = 0.0f;

@@ -256,7 +256,7 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::JUST_GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
-    stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
+    stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
     EnsureDefaultCancelTransitions();
 
     stateMachine.ChangeState(PLAYER_ACTION::IDLE);
@@ -269,9 +269,15 @@ void PlayerControllerComponent::Update(float dt_)
     {
         // 演出中に直前Frameの移動予約や入力が残らないよう、入力由来の値だけを消す。
         pendingHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
+        hasPendingHorizontalVelocity = true;
+        hasPendingFacingDirection = false;
         SendMoveInputToBlackboard({ 0.0f, 0.0f, 0.0f });
         SendGuardInputToBlackboard(false);
         ResetStrongAttackInput();
+        // 演出Stateを通常のIdle/Move更新で上書きせず、予約済み移動だけ停止する。
+        ApplyPendingMovement();
+        SendGroundedToBlackboard();
+        return;
     }
 
     // State更新後に、キャンセル受付・空中状態・Blackboard・移動反映をまとめて後処理する。
@@ -279,6 +285,7 @@ void PlayerControllerComponent::Update(float dt_)
     TryDodgeCancelInput();
     UpdateAirborneActionContext();
     UpdateDodgeRestrictions(dt_);
+    UpdateCounterTags(dt_);
     SendGroundedToBlackboard();
     UpdateLocomotionAnimationPhase(dt_);
     UpdateTimelineActionSafety(dt_);
@@ -328,6 +335,8 @@ bool PlayerControllerComponent::IsAnimationStateForAction(
         return stateName_ == "Attack_Air_To_Floor_Start_01_Seq_0";
     case PLAYER_ACTION::AIR_DODGE:
         return stateName_ == "AirDodge_Blend";
+    case PLAYER_ACTION::COUNTER_ATTACK:
+        return stateName_ == "Run_Attack_01_Seq";
     default:
         return true;
     }
@@ -755,12 +764,21 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
         {
             actionRuntime.bufferedAction = nextAction_;
             actionRuntime.bufferedComboIndex = requestedComboIndex_;
+            if (nextAction_ == PLAYER_ACTION::COUNTER_ATTACK)
+            {
+                // 反撃入力を先行入力として受け付けた時点でTagを消費し、同じTagでの連続使用を防ぐ。
+                ClearCounterTags();
+            }
         }
         return false;
     }
 
     pendingComboIndex = requestedComboIndex_;
     stateMachine.ChangeState(nextAction_);
+    if (nextAction_ == PLAYER_ACTION::COUNTER_ATTACK)
+    {
+        ClearCounterTags();
+    }
     return true;
 }
 
@@ -963,6 +981,9 @@ void PlayerControllerComponent::EnsureDefaultCancelTransitions()
     AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::WEAK_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::STRONG_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::STRONG_CHARGE_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::GUARD, PLAYER_ACTION::COUNTER_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::DODGE, PLAYER_ACTION::COUNTER_ATTACK);
+    AddActionBranchTransition(PLAYER_ACTION::AIR_DODGE, PLAYER_ACTION::COUNTER_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::COUNTER_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::WEAK_ATTACK);
     AddActionBranchTransition(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::STRONG_ATTACK);
@@ -1256,6 +1277,7 @@ void PlayerControllerComponent::HandleHitReaction()
     actionRuntime.bufferedComboIndex = 0;
     pendingComboIndex = 0;
     comboIndex = 0;
+    ClearCounterTags();
     hasPendingHorizontalVelocity = false;
     hasPendingFacingDirection = false;
     pendingHorizontalVelocity = { 0.0f, 0.0f, 0.0f };
@@ -1330,6 +1352,11 @@ void PlayerControllerComponent::EnterAction(PLAYER_ACTION action_)
     if (action_ == PLAYER_ACTION::AIR_DODGE)
     {
         airDodgeConsumed = true;
+    }
+    if (action_ == PLAYER_ACTION::COUNTER_ATTACK)
+    {
+        // 反撃Actionが開始された時点で反撃Tagを消費し、次の入力へ持ち越さない。
+        ClearCounterTags();
     }
     hasSentLocomotionPhase = false;
     if (locomotionPhaseAction != action_)
@@ -1442,7 +1469,6 @@ bool PlayerControllerComponent::IsGroundOnlyAction(PLAYER_ACTION action_) const
     case PLAYER_ACTION::DODGE:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
-    case PLAYER_ACTION::COUNTER_ATTACK:
         return true;
     default:
         return false;
@@ -1618,8 +1644,25 @@ void PlayerControllerComponent::ProcessActionInput()
     if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK) &&
-        RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_WEAK_ATTACK : PLAYER_ACTION::WEAK_ATTACK)) return;
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK))
+    {
+        // 成功直後の反撃Tagが残っている間は、通常攻撃入力を反撃Actionへ差し替える。
+        if (HasCounterAttackTag())
+        {
+            RequestAction(PLAYER_ACTION::COUNTER_ATTACK);
+            return;
+        }
+
+        if (RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_WEAK_ATTACK : PLAYER_ACTION::WEAK_ATTACK)) return;
+    }
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
+        HasCounterAttackTag())
+    {
+        // 反撃Tag中の強攻撃入力も溜め判定へ回さず、即座に反撃Actionとして消費する。
+        RequestAction(PLAYER_ACTION::COUNTER_ATTACK);
+        ResetStrongAttackInput();
+        return;
+    }
     if (actionRuntime.canActionBranch &&
         keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_STRONG_ATTACK : PLAYER_ACTION::STRONG_ATTACK))
@@ -1673,6 +1716,10 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     owner_->RegisterAction("PlayerReaction", "OnJustDodge", [this]()
     {
         NotifyJustDodge();
+    });
+    owner_->RegisterAction("PlayerReaction", "OnJustGuard", [this]()
+    {
+        GrantJustGuardCounterTag();
     });
     owner_->RegisterAction("PlayerCancel", "CanCancelOn", [this]()
         {
@@ -2010,6 +2057,115 @@ void PlayerControllerComponent::SendGuardInputToBlackboard(bool guardInput_)
     blackboard->SetBool(PlayerBlackboardCategory::ANIM, PlayerBlackboardKey::GUARD_INPUT, guardInput_);
 }
 
+void PlayerControllerComponent::GrantJustDodgeCounterTag()
+{
+    // ジャスト回避成功後、通常攻撃入力を反撃へ差し替えるための短時間Tagを付与する。
+    justDodgeCounterTagTimer = (std::max)(counterTagDuration, 0.0f);
+    PromoteBufferedAttackToCounterAttack();
+    SyncCounterTagsToBlackboard();
+}
+
+void PlayerControllerComponent::GrantJustGuardCounterTag()
+{
+    // ジャストガード成功後、反撃Tagと回避派生用の受付状態を同時に開く。
+    justGuardCounterTagTimer = (std::max)(counterTagDuration, 0.0f);
+    SetCanDodgeCancel(true);
+    PromoteBufferedAttackToCounterAttack();
+    SyncCounterTagsToBlackboard();
+}
+
+bool PlayerControllerComponent::HasCounterAttackTag() const
+{
+    return justDodgeCounterTagTimer > 0.0f || justGuardCounterTagTimer > 0.0f;
+}
+
+void PlayerControllerComponent::PromoteBufferedAttackToCounterAttack()
+{
+    const PLAYER_ACTION bufferedAction_ = actionRuntime.bufferedAction;
+    const bool isBufferedGroundAttack_ =
+        bufferedAction_ == PLAYER_ACTION::WEAK_ATTACK ||
+        bufferedAction_ == PLAYER_ACTION::STRONG_ATTACK ||
+        bufferedAction_ == PLAYER_ACTION::STRONG_CHARGE_ATTACK ||
+        bufferedAction_ == PLAYER_ACTION::AIR_WEAK_ATTACK ||
+        bufferedAction_ == PLAYER_ACTION::AIR_STRONG_ATTACK ||
+        bufferedAction_ == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK;
+    if (!isBufferedGroundAttack_)
+    {
+        return;
+    }
+
+    // 反撃Tag付与前に押されていた通常攻撃は、Tag成立後の反撃入力として扱う。
+    actionRuntime.bufferedAction = PLAYER_ACTION::COUNTER_ATTACK;
+    actionRuntime.bufferedComboIndex = 0;
+    if (actionRuntime.canActionBranch)
+    {
+        TryConsumeBufferedActionForCancelGate(false);
+    }
+}
+
+void PlayerControllerComponent::UpdateCounterTags(float deltaTime_)
+{
+    const float previousJustDodgeTimer_ = justDodgeCounterTagTimer;
+    const float previousJustGuardTimer_ = justGuardCounterTagTimer;
+    const float elapsedTime_ = (std::max)(deltaTime_, 0.0f);
+
+    if (justDodgeCounterTagTimer > 0.0f)
+    {
+        justDodgeCounterTagTimer = (std::max)(justDodgeCounterTagTimer - elapsedTime_, 0.0f);
+    }
+    if (justGuardCounterTagTimer > 0.0f)
+    {
+        justGuardCounterTagTimer = (std::max)(justGuardCounterTagTimer - elapsedTime_, 0.0f);
+    }
+
+    if ((previousJustDodgeTimer_ > 0.0f) != (justDodgeCounterTagTimer > 0.0f) ||
+        (previousJustGuardTimer_ > 0.0f) != (justGuardCounterTagTimer > 0.0f))
+    {
+        SyncCounterTagsToBlackboard();
+    }
+}
+
+void PlayerControllerComponent::SyncCounterTagsToBlackboard()
+{
+    if (!blackboard) return;
+
+    const bool hasJustDodgeCounterTag_ = justDodgeCounterTagTimer > 0.0f;
+    const bool hasJustGuardCounterTag_ = justGuardCounterTagTimer > 0.0f;
+    const bool hasCounterTag_ = hasJustDodgeCounterTag_ || hasJustGuardCounterTag_;
+    const std::string source_ = hasJustGuardCounterTag_
+        ? "JustGuard"
+        : (hasJustDodgeCounterTag_ ? "JustDodge" : "");
+
+    constexpr const char* categories_[] =
+    {
+        PlayerBlackboardCategory::PLAYER,
+        PlayerBlackboardCategory::ANIM
+    };
+
+    for (const char* category_ : categories_)
+    {
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_COUNTER, hasCounterTag_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::COUNTER_TAG, hasCounterTag_);
+        blackboard->SetString(category_, PlayerBlackboardKey::COUNTER_TAG_SOURCE, source_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::DODGED_COUNTER_TAG, hasJustDodgeCounterTag_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::GUARDED_COUNTER_TAG, hasJustGuardCounterTag_);
+        blackboard->SetBool(category_, PlayerBlackboardKey::JUST_GUARD_COUNTER_TAG, hasJustGuardCounterTag_);
+    }
+
+    blackboard->SetBool("Dodge", PlayerBlackboardKey::CAN_COUNTER, hasJustDodgeCounterTag_);
+    blackboard->SetBool("Dodge", PlayerBlackboardKey::DODGED_COUNTER_TAG, hasJustDodgeCounterTag_);
+    blackboard->SetBool("Guard", PlayerBlackboardKey::CAN_COUNTER, hasJustGuardCounterTag_);
+    blackboard->SetBool("Guard", PlayerBlackboardKey::GUARDED_COUNTER_TAG, hasJustGuardCounterTag_);
+    blackboard->SetBool("Guard", PlayerBlackboardKey::JUST_GUARD_COUNTER_TAG, hasJustGuardCounterTag_);
+}
+
+void PlayerControllerComponent::ClearCounterTags()
+{
+    justDodgeCounterTagTimer = 0.0f;
+    justGuardCounterTagTimer = 0.0f;
+    SyncCounterTagsToBlackboard();
+}
+
 void PlayerControllerComponent::SendJumpPhaseToBlackboard(
     PLAYER_LOCOMOTION_PHASE phase_)
 {
@@ -2209,6 +2365,7 @@ void PlayerControllerComponent::Gui()
     ImGui::DragFloat("Jump Impulse Fallback", &jumpImpulseFallbackDuration, 0.01f, 0.0f, 5.0f, "%.2f");
     ImGui::DragFloat("Timeline Action Fallback", &timelineActionFallbackDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     ImGui::DragFloat("Ground Dodge Cooldown", &groundDodgeCooldownDuration, 0.01f, 0.0f, 5.0f, "%.2f");
+    ImGui::DragFloat("Counter Tag Duration", &counterTagDuration, 0.01f, 0.0f, 10.0f, "%.2f");
     if (ImGui::DragFloat("Base Armor", &armor, 0.1f, 0.0f, 99999.0f))
     {
         if (!runtimeArmorOverrideActive)
@@ -2352,6 +2509,13 @@ void PlayerControllerComponent::InitializeBlackboardValues()
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_RUN_END, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL, false);
 
+        blackboard->SetBool(category_, PlayerBlackboardKey::CAN_COUNTER, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::COUNTER_TAG, false);
+        blackboard->SetString(category_, PlayerBlackboardKey::COUNTER_TAG_SOURCE, "");
+        blackboard->SetBool(category_, PlayerBlackboardKey::DODGED_COUNTER_TAG, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::GUARDED_COUNTER_TAG, false);
+        blackboard->SetBool(category_, PlayerBlackboardKey::JUST_GUARD_COUNTER_TAG, false);
+
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_DODGE_CANCEL, false);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_ACTION_BRANCH, false);
@@ -2385,6 +2549,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
     j_["JumpImpulseFallbackDuration"] = jumpImpulseFallbackDuration;
     j_["TimelineActionFallbackDuration"] = timelineActionFallbackDuration;
     j_["GroundDodgeCooldownDuration"] = groundDodgeCooldownDuration;
+    j_["CounterTagDuration"] = counterTagDuration;
     j_["Armor"] = armor;
     j_["HitMediumImpactThreshold"] = hitMediumImpactThreshold;
     j_["HitHeavyImpactThreshold"] = hitHeavyImpactThreshold;
@@ -2457,6 +2622,9 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         0.0f);
     groundDodgeCooldownDuration = (std::max)(
         j_.value("GroundDodgeCooldownDuration", groundDodgeCooldownDuration),
+        0.0f);
+    counterTagDuration = (std::max)(
+        j_.value("CounterTagDuration", counterTagDuration),
         0.0f);
     armor = (std::max)(j_.value("Armor", armor), 0.0f);
     if (!runtimeArmorOverrideActive)

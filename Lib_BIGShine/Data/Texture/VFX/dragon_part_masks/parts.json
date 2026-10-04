@@ -1,0 +1,173 @@
+{
+  "resolution": [
+    1024,
+    1024
+  ],
+  "parts": [
+    {
+      "id": 1,
+      "name": "upper_wing_membrane",
+      "label_ja": "上翼膜",
+      "color_rgb": [
+        255,
+        180,
+        40
+      ],
+      "area_px": 238422,
+      "bbox": [
+        3,
+        3,
+        669,
+        566
+      ]
+    },
+    {
+      "id": 2,
+      "name": "lower_wing_membrane",
+      "label_ja": "下翼膜",
+      "color_rgb": [
+        255,
+        140,
+        40
+      ],
+      "area_px": 161098,
+      "bbox": [
+        178,
+        487,
+        804,
+        980
+      ]
+    },
+    {
+      "id": 3,
+      "name": "body_torso",
+      "label_ja": "胴体(中央)",
+      "color_rgb": [
+        180,
+        90,
+        40
+      ],
+      "area_px": 56045,
+      "bbox": [
+        140,
+        423,
+        495,
+        800
+      ]
+    },
+    {
+      "id": 4,
+      "name": "head",
+      "label_ja": "頭部/顔",
+      "color_rgb": [
+        220,
+        60,
+        60
+      ],
+      "area_px": 147421,
+      "bbox": [
+        540,
+        240,
+        1003,
+        950
+      ]
+    },
+    {
+      "id": 5,
+      "name": "nape_armor",
+      "label_ja": "首/背甲(ナぺ)",
+      "color_rgb": [
+        240,
+        200,
+        80
+      ],
+      "area_px": 53973,
+      "bbox": [
+        4,
+        4,
+        893,
+        278
+      ]
+    },
+    {
+      "id": 6,
+      "name": "tail",
+      "label_ja": "尾",
+      "color_rgb": [
+        120,
+        60,
+        40
+      ],
+      "area_px": 56760,
+      "bbox": [
+        820,
+        7,
+        1016,
+        494
+      ]
+    },
+    {
+      "id": 7,
+      "name": "throat_ventral",
+      "label_ja": "喉/腹側鱗",
+      "color_rgb": [
+        200,
+        150,
+        90
+      ],
+      "area_px": 17489,
+      "bbox": [
+        503,
+        349,
+        656,
+        553
+      ]
+    },
+    {
+      "id": 8,
+      "name": "leg_upper_A",
+      "label_ja": "後脚A 大腿",
+      "color_rgb": [
+        255,
+        100,
+        180
+      ],
+      "area_px": 79035,
+      "bbox": [
+        4,
+        641,
+        919,
+        990
+      ]
+    },
+    {
+      "id": 9,
+      "name": "leg_upper_B",
+      "label_ja": "肩/前脚",
+      "color_rgb": [
+        120,
+        255,
+        120
+      ],
+      "area_px": 40253,
+      "bbox": [
+        1,
+        258,
+        202,
+        664
+      ]
+    }
+  ],
+  "verify": {
+    "content_px": 811566,
+    "covered_px": 811380,
+    "gap_px": 186,
+    "double_count_pixels": 0
+  },
+  "packed_channels": {
+    "R": "body+neck+nape+legs",
+    "G": "head (+mouth)",
+    "B": "wing membranes",
+    "A": "tail"
+  }
+}

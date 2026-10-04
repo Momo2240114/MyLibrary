@@ -150,6 +150,7 @@ float4 main(VS_OUT input) : SV_TARGET
         distortionSamplerMode,
         effectTime).rg * 2.0f - 1.0f;
 
-    float opacity = saturate(maskDistortionOpacity * input.instanceAlpha * hiddenMask);
+    // 通常描画と同じAlphaを反映し、歪みも再生カーブに合わせて出現・消散させる。
+    float opacity = saturate(maskDistortionOpacity * alpha * input.instanceAlpha * hiddenMask);
     return float4(distortionNoise * maskDistortionStrength, 0.0f, opacity);
 }

@@ -1,0 +1,438 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "targetGameObjectName": "TestTarget",
+                "targetNodeIndex": 8,
+                "targetStartNodeName": "PlainsDragon_-Head"
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 1000,
+            "RequiredForSceneStart": false,
+            "TypeName": "ModelAttachment",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "MaxBounds": [
+                    1.0,
+                    1.0
+                ],
+                "MinBounds": [
+                    0.0,
+                    0.0
+                ],
+                "Tracks": [
+                    {
+                        "AssetPath": "",
+                        "Color": 4294954752,
+                        "Name": "RoarAirAlpha",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                0.0
+                            ],
+                            [
+                                0.05000000074505806,
+                                1.0
+                            ],
+                            [
+                                0.6499999761581421,
+                                0.800000011920929
+                            ],
+                            [
+                                0.8399999737739563,
+                                0.3499999940395355
+                            ],
+                            [
+                                1.0,
+                                0.0
+                            ]
+                        ],
+                        "Type": 2,
+                        "Visible": true
+                    },
+                    {
+                        "AssetPath": "",
+                        "Color": 4294954752,
+                        "Name": "RoarAirExpand",
+                        "PointOptions": [
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            },
+                            {
+                                "InterpolationType": 1,
+                                "LeftTangent": 0.0,
+                                "RightTangent": 0.0
+                            }
+                        ],
+                        "Points": [
+                            [
+                                0.0,
+                                0.25
+                            ],
+                            [
+                                0.11999999731779099,
+                                0.6499999761581421
+                            ],
+                            [
+                                0.30000001192092896,
+                                1.0
+                            ],
+                            [
+                                1.0,
+                                1.0
+                            ]
+                        ],
+                        "Type": 2,
+                        "Visible": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CurveComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "IsPlaying": false,
+                "Parts": [
+                    {
+                        "Alpha": 1.0,
+                        "AlphaCurveName": "RoarAirAlpha",
+                        "AlphaEnd": 1.0,
+                        "AlphaStart": 1.0,
+                        "AnimateAlpha": false,
+                        "AnimateScale": false,
+                        "BackFaceColor": [
+                            0.0,
+                            -1.688849860263936e+17,
+                            6.305843089461677e-43,
+                            5.465064010866787e-44
+                        ],
+                        "BackFaceEmissiveStrength": 0.0,
+                        "BaseSamplerMode": 0,
+                        "BaseTexturePath": "",
+                        "BaseUVRotation": 0.0,
+                        "BaseUVRotationSpeed": 0.0,
+                        "BaseUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "BaseUVSpeed": [
+                            0.014999999664723873,
+                            -0.07999999821186066
+                        ],
+                        "BlendMode": 0,
+                        "Color": [
+                            0.800000011920929,
+                            0.9019607901573181,
+                            1.0,
+                            0.019607843831181526
+                        ],
+                        "DissolveCurveName": "",
+                        "DissolveEdgeColor": [
+                            0.8500000238418579,
+                            0.949999988079071,
+                            1.0,
+                            1.0
+                        ],
+                        "DissolveEdgeStrength": 7.0,
+                        "DissolveEdgeWidth": 0.12999999523162842,
+                        "DissolveThreshold": 0.0,
+                        "DistortionNoiseTexturePath": "Data/Texture/VFX/T_Free_Magic_Noise2.PNG",
+                        "DistortionNoiseUVScale": [
+                            2.0,
+                            3.0
+                        ],
+                        "DistortionSamplerMode": 0,
+                        "Duration": 2.3575000762939453,
+                        "EdgeColor": [
+                            0.25,
+                            0.75,
+                            1.0,
+                            1.0
+                        ],
+                        "EdgePatternMode": 0,
+                        "EdgePatternSamplerMode": 0,
+                        "EdgePatternStrength": 0.0,
+                        "EdgePatternTexturePath": "",
+                        "EdgePatternUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "EmissiveCurveName": "",
+                        "EmissivePulseAmount": 0.3499999940395355,
+                        "EmissivePulseSpeed": 2.0,
+                        "EmissiveSamplerMode": 0,
+                        "EmissiveStrength": 0.0,
+                        "EmissiveTexturePath": "",
+                        "EmissiveUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "FresnelNoiseStrength": 0.0,
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientDirection": 0,
+                        "GradientEndUv": 1.0,
+                        "GradientFixedUv": 0.5,
+                        "GradientSampleMode": 0,
+                        "GradientSamplerMode": 0,
+                        "GradientStartUv": 0.0,
+                        "GradientTexturePath": "",
+                        "InternalMeshCylinderRadius": 1.0,
+                        "InternalMeshSettings": {
+                            "BaseRadius": 2.5999999046325684,
+                            "BeamDepthThickness": 0.017999999225139618,
+                            "BeamHalfHeight": 0.44999998807907104,
+                            "BeamHalfWidth": 0.11999999731779099,
+                            "BeamLength": 1.0,
+                            "BeamSidePanelRate": 0.550000011920929,
+                            "CapsuleLength": 2.0,
+                            "CenterWidth": 0.5600000023841858,
+                            "ConeLength": 8.0,
+                            "ConeTipRadiusRate": 0.03500000014901161,
+                            "EndAngleDegrees": 78.0,
+                            "InnerWidthScale": 0.3499999940395355,
+                            "OuterWidthScale": 1.25,
+                            "RadiusTaperAmount": 0.05000000074505806,
+                            "Segments": 64,
+                            "StartAngleDegrees": -78.0,
+                            "TaperPower": 2.0,
+                            "TipRate": 0.019999999552965164,
+                            "TipWidth": 0.009999999776482582,
+                            "WallDepth": 0.5,
+                            "WallHeight": 1.100000023841858,
+                            "WallPositionRate": 0.5
+                        },
+                        "IntersectionEdgeStrength": 0.0,
+                        "IntersectionEdgeWidth": 0.0020000000949949026,
+                        "Loop": false,
+                        "MaskDistortionOpacity": 1.0,
+                        "MaskDistortionStrength": 52.20000076293945,
+                        "MaskLayers": [
+                            {
+                                "BlendMode": 0,
+                                "Invert": false,
+                                "Path": "Data/Texture/VFX/T_Free_Magic_Noise1.PNG"
+                            }
+                        ],
+                        "MaskSamplerMode": 0,
+                        "MaskTexturePath": "",
+                        "MaskUVRotation": 0.0,
+                        "MaskUVRotationSpeed": 0.0,
+                        "MaskUVScale": [
+                            2.0,
+                            3.0
+                        ],
+                        "MaskUVSpeed": [
+                            0.0,
+                            -0.4000000059604645
+                        ],
+                        "MaterialPath": "",
+                        "MaterialPaths": [
+                            ""
+                        ],
+                        "MeshIndex": 0,
+                        "MeshRotationSpeed": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ModelPath": "__InternalMeshCone__",
+                        "NoiseSamplerMode": 0,
+                        "NoiseStrength": 0.03500000014901161,
+                        "NoiseTexturePath": "",
+                        "NoiseTexturePaths": [
+                            "Data/Texture/VFX/T_Free_Magic_Noise2.PNG"
+                        ],
+                        "NoiseUVRotation": 0.0,
+                        "NoiseUVRotationSpeed": 0.0,
+                        "NoiseUVScale": [
+                            2.0,
+                            3.0
+                        ],
+                        "NoiseUVSpeed": [
+                            0.10000000149011612,
+                            -0.6499999761581421
+                        ],
+                        "NormalSamplerMode": 0,
+                        "NormalStrength": 1.0,
+                        "NormalTexturePath": "",
+                        "NormalUVScale": [
+                            1.0,
+                            1.0
+                        ],
+                        "Position": [
+                            0.0,
+                            -0.07000000029802322,
+                            -20.0
+                        ],
+                        "RenderEnabled": false,
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            65.0,
+                            65.0,
+                            13.550000190734863
+                        ],
+                        "ScaleCurveName": "RoarAirExpand",
+                        "ScaleEnd": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "ScaleStart": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "SilhouetteEdgePower": 3.0,
+                        "SilhouetteEdgeStrength": 0.0,
+                        "TrailNewAlpha": 1.0,
+                        "TrailNewRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailNewTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldAlpha": 1.0,
+                        "TrailOldRootColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailOldTipColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "TrailRecencyIntensity": 1.0,
+                        "TrailRecencyPower": 1.0,
+                        "TrailTipIntensity": 1.0,
+                        "TrailTipPower": 1.0,
+                        "TrailUseColorRamp": false,
+                        "UVRadialScale": 1.0,
+                        "UVRadialScaleSpeed": 0.0010000000474974513,
+                        "UVRotationCenter": [
+                            0.5,
+                            0.5
+                        ],
+                        "UVRotationCurveName": "",
+                        "UVScrollCurveName": "",
+                        "UseBackFaceBoost": false,
+                        "UseDissolveEdge": false,
+                        "UseEdgeHighlight": false,
+                        "UseFresnel": false,
+                        "UseFresnelNoise": false,
+                        "UseGradientTexture": false,
+                        "UseMask": true,
+                        "UseMaskDistortion": true,
+                        "UseMaterialBaseTexture": false,
+                        "UseMaterialNormalTexture": false,
+                        "UseNoise": true,
+                        "UseNormal": false,
+                        "UseVertexNoise": false,
+                        "VertexNoiseHorizontalScale": 1.0,
+                        "VertexNoiseHorizontalStrength": 0.10000000149011612,
+                        "VertexNoiseSpeed": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "VertexNoiseTexturePath": "",
+                        "VertexNoiseVerticalScale": 1.0,
+                        "VertexNoiseVerticalStrength": 0.10000000149011612
+                    }
+                ],
+                "PlaybackSpeed": 1.0
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "MeshVFXComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "IntroRoarAirCone",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            -40.0,
+            35.0,
+            0.0
+        ],
+        "Rot": [
+            0.0,
+            -90.0,
+            0.0
+        ],
+        "Scale": [
+            28.571428298950195,
+            28.571428298950195,
+            28.571428298950195
+        ]
+    }
+}

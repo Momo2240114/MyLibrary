@@ -6,8 +6,8 @@
         {
             "Acceleration": [
                 0.0,
-                0.75,
-                50.0
+                0.2199999988079071,
+                0.0
             ],
             "BlendMode": 1,
             "BurstCount": 600,
@@ -51,7 +51,7 @@
             "Gravity": -0.10000000149011612,
             "LegacyRadius": [
                 0.0,
-                0.8999999761581421
+                0.0
             ],
             "Lifespan": [
                 5.0,
@@ -67,7 +67,7 @@
             "Name": "FanFlame_CoreFlow",
             "NoiseFrequency": 11.84000015258789,
             "NoiseSpeed": 5.0,
-            "NoiseStrength": 50.0,
+            "NoiseStrength": 25.0,
             "OrbitVelocity": 2.430000066757202,
             "PosOffset": [
                 0.0,
@@ -83,7 +83,7 @@
             "ShapeEnd": [
                 0.0,
                 0.0,
-                27.5
+                0.0
             ],
             "ShapeSize": [
                 2.0,
@@ -109,7 +109,7 @@
             ],
             "SpawnDirectionMode": 3,
             "SpawnShape": 4,
-            "SpawnSpace": 1,
+            "SpawnSpace": 0,
             "Speed": [
                 9.0,
                 20.0
@@ -126,13 +126,13 @@
             ],
             "StretchMax": 7.599999904632568,
             "StretchScale": 0.8199999928474426,
-            "TargetAttractionFalloff": 0.0010000000474974513,
+            "TargetAttractionFalloff": 0.10000000149011612,
             "TargetAttractionRange": 0.0,
-            "TargetAttractionStrength": 5.300000190734863,
+            "TargetAttractionStrength": 25.0,
             "TargetPosition": [
                 0.0,
                 0.0,
-                13.119999885559082
+                100.0
             ],
             "TexturePath": "",
             "TextureSplitCount": [
@@ -145,12 +145,12 @@
             "UseMask": 1,
             "UseRandomSize": 1,
             "UseSpriteAnimation": 1,
-            "UseTargetAttraction": 0,
+            "UseTargetAttraction": 1,
             "VerticalSpawnRange": 0.18000000715255737,
             "Wind": [
                 0.0,
-                0.75,
-                50.0
+                0.2199999988079071,
+                0.0
             ],
             "gradientDirection": 0,
             "gradientEndUv": 1.0,

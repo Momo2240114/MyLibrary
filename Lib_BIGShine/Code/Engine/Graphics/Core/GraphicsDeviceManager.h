@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include <sstream>
+#include <string>
 #include <d3d11.h>
 #include <wrl.h>
 
@@ -76,6 +77,11 @@ public:
     ID3D11ShaderResourceView* GetIBLDiffuseSRV() { return iblDiffuseIemSRV.Get(); }
     ID3D11ShaderResourceView* GetIBLSpecularSRV() { return iblSpecularPmremSRV.Get(); }
     ID3D11ShaderResourceView* GetIBLLutGGXSRV() { return iblLutGgxSRV.Get(); }
+    const std::wstring& GetIBLSpecularHdrPath() const { return iblSpecularHdrPath; }
+    float GetIBLHdrIntensity() const { return iblHdrIntensity; }
+    const std::string& GetLastIBLError() const { return lastIBLError; }
+    bool ReloadIBLTextures();
+    bool ReloadIBLTextures(const std::wstring& specularHdrPath_, float hdrIntensity_);
 
     CascadeShadowMap& GetCascadeShadowMap() { return cascadeShadowMap; }
     PostRenderSystem& GetPostRenderSystem() { return postRenderSystem; }
@@ -218,6 +224,11 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblDiffuseIemSRV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblSpecularPmremSRV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblLutGgxSRV;
+    std::wstring iblDiffusePath = L"Data/Texture/IBL/diffuse_iem.dds";
+    std::wstring iblSpecularHdrPath = L"Data/Texture/IBL/qwantani_dusk_2_2k.hdr";
+    std::wstring iblLutGgxPath = L"Data/Texture/IBL/lut_ggx.dds";
+    float iblHdrIntensity = 0.002f;
+    std::string lastIBLError;
 
     bool LoadIBLTextures();
     BS_PROFILE_GPU_CONTEXT_HANDLE tracyGpuContext = nullptr;

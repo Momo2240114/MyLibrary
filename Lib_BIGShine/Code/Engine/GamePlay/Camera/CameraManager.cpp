@@ -58,10 +58,11 @@ void CameraManager::Update(float et_, const std::vector<std::shared_ptr<GameObje
 
         // 1. 始点と終点の位置・回転を取得
         XMMATRIX startView_ = XMLoadFloat4x4(&startViewMatrix);
-        XMMATRIX endView_ = targetCamera->GetViewProjection();
+        // 優先度切り替えではView同士を補間し、Projectionを姿勢の分解へ混ぜない。
+        XMMATRIX endView_ = XMLoadFloat4x4(&targetCamera->GetView());
 
         // 2. 視界を滑らかに補間 (Slerp等を用いて行列をブレンド)
-        // 実務的には位置(Vector)と回転(Quaternion)を分けて補間し、行列を再構築するのがベストだ
+        // 実務的には位置(Vector)と回転(Quaternion)を分けて補間し、行列を再構築するのがベスト
         XMVECTOR startPos_, startRotQ_, startScale_;
         XMVECTOR endPos_, endRotQ_, endScale_;
         XMMatrixDecompose(&startScale_, &startRotQ_, &startPos_, startView_);

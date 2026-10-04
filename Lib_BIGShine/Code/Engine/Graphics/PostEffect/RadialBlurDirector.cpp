@@ -6,12 +6,14 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 #include <imgui.h>
 
 void RadialBlurDirector::Update(float elapsedTime_)
 {
+    BS_PROFILE_SCOPE("RadialBlurDirector::Update");
     // 演出中でない場合はGraphicsDeviceManagerの設定を触らない。
     if (phase == PHASE::IDLE) return;
     const std::shared_ptr<GameObject> owner_ = GetGameObject();

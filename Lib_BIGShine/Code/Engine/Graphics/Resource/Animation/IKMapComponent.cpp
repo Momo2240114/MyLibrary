@@ -656,6 +656,11 @@ void IKMapComponent::Gui()
         AddUpperBodyLeanChain("UpperBodyLean");
     }
     ImGui::SameLine();
+    if (ImGui::Button("Add Dragon Tail"))
+    {
+        AddDragonTailChain("DragonTail");
+    }
+    ImGui::SameLine();
     if (ImGui::Button("Reset Simulation"))
     {
         ResetSimulation();
@@ -722,6 +727,8 @@ void IKMapComponent::Gui()
         if (chain_.type == IK_TYPE::CLOTH_BONE) chainTreeLabel_ = "Cloth Bone Chain";
         if (chain_.type == IK_TYPE::FOOT) chainTreeLabel_ = "Foot IK Chain";
         if (chain_.type == IK_TYPE::LOOK_AT) chainTreeLabel_ = "Look At IK Chain";
+        if (chain_.type == IK_TYPE::DRAGON_NECK) chainTreeLabel_ = "Dragon Neck IK Chain";
+        if (chain_.type == IK_TYPE::DRAGON_TAIL) chainTreeLabel_ = "Dragon Tail IK Chain";
         if (chain_.type == IK_TYPE::SHIELD_BLOCK) chainTreeLabel_ = "Shield Block IK Chain";
         if (chain_.type == IK_TYPE::UPPER_BODY_LEAN) chainTreeLabel_ = "Upper Body Lean IK Chain";
         if (ImGui::TreeNode(chainTreeLabel_))
@@ -941,6 +948,12 @@ void IKMapComponent::Gui()
             else if (chain_.type == IK_TYPE::UPPER_BODY_LEAN)
             {
                 ImGui::TextDisabled("Solved by UpperBodyLeanIKComponent after the animation pose is applied.");
+            }
+            else if (chain_.type == IK_TYPE::DRAGON_NECK ||
+                chain_.type == IK_TYPE::DRAGON_TAIL)
+            {
+                // ドラゴン専用IKはCommandコンポーネント側で解き、IKMapでは使用ボーン列だけを定義する。
+                ImGui::TextDisabled("Solved by Dragon command IK components after the animation pose is applied.");
             }
             ImGui::SliderFloat("Influence", &chain_.influence, 0.0f, 1.0f);
             ImGui::Text("Resolved Bones: %d", static_cast<int>(chain_.nodeIndices.size()));

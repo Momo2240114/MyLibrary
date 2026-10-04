@@ -275,6 +275,7 @@ void PlayerDodgeState::HandleJustDodgeSuccess()
     const auto player_ = GetPlayerController();
     if (hurtBox_ && player_) hurtBox_->AddInvincibilityTime(player_->justDodgeInvincibilityDuration);
     SetCounterAvailable(true);
+    if (player_) player_->GrantJustDodgeCounterTag();
 
     const std::shared_ptr<BlackboardComponent> blackboard_ =
         GetComponent<BlackboardComponent>();

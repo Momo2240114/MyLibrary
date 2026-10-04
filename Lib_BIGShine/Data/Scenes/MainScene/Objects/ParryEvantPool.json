@@ -53,7 +53,8 @@
                     "hue": 0.0,
                     "intensity": 1.0,
                     "sat": 1.0
-                }
+                },
+                "StartWaypointIndex": -1
             },
             "Enabled": true,
             "LateUpdateEnabled": true,

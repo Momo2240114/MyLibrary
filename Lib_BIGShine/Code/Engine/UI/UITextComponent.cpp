@@ -448,7 +448,8 @@ bool UITextComponent::CreateTextureFromPixels(
     {
         // 作成したSRVをSpriteRendererへ渡し、Textを通常Spriteと同じ描画経路へ乗せる。
         spriteRenderer_->SetTextureResource(shaderResourceView_, textureDesc_);
-        spriteRenderer_->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        // Text再生成時も、表示演出が設定したSpriteの透明度を引き継ぐ。
+        spriteRenderer_->SetColor({ 1.0f, 1.0f, 1.0f, spriteRenderer_->GetColor().w });
     }
     return true;
 }

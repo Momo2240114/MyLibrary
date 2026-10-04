@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -173,6 +174,10 @@ struct AIBehaviorContext
     float deltaTime = 0.0f;
     // targetが有効なObjectを参照しているかを示す。
     bool hasTarget = false;
+    // 未設定なら従来の抽選を維持し、設定時だけ行動別の実行時補正を使用する。
+    std::function<float(const std::string&)> actionWeightModifier;
+    // 単独攻撃の枝で使用した基本重みと補正をデバッグ表示へ通知する。
+    std::function<void(const std::string&, float, float)> actionWeightObserver;
 };
 
 // BlackboardとActionを使用して敵AIの判断グラフを実行する
@@ -183,6 +188,8 @@ public:
     void Clear();
     void EnsureDefaultGraph();
     AI_BEHAVIOR_STATUS Tick(AIBehaviorContext& context_);
+    // 条件を評価するだけで、ActionやBlackboardへの書き込みは実行しない。
+    std::vector<std::string> GetSelectableActions(AIBehaviorContext& context_) const;
     void ResetRuntime();
     bool IsNodeRuntimeActive(uintptr_t nodeId_) const;
 
@@ -213,6 +220,9 @@ public:
     AI_BEHAVIOR_STATUS GetLastTickStatus() const { return lastTickStatus; }
 
 private:
+    // 条件を満たす枝に含まれるActionを収集し、循環リンクは評価しない。
+    bool CollectSelectableActions(const AIBehaviorNode& node_, AIBehaviorContext& context_,
+        std::vector<std::string>& actions_, std::vector<uintptr_t>& path_) const;
     AI_BEHAVIOR_STATUS TickNode(AIBehaviorNode& node_, AIBehaviorContext& context_);
     AI_BEHAVIOR_STATUS TickComposite(AIBehaviorNode& node_, AIBehaviorContext& context_);
     AI_BEHAVIOR_STATUS TickTask(AIBehaviorNode& node_, AIBehaviorContext& context_);

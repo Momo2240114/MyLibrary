@@ -49,7 +49,7 @@ public:
     //グローバル行列
     Matrix m_GlobalMatrix = DirectX::XMMatrixIdentity();
 
-    // --- 追加 --- 移動と回転のオフセット
+    //移動と回転のオフセット
     DirectX::XMFLOAT3 moveOffset{ 0, 0, 0 };      // 移動のオフセット
     DirectX::XMFLOAT3 rotateOffset{ 0, 0, 0 };    // 回転のオフセット（オイラー角）
 

@@ -259,8 +259,9 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
 
     // ENTER/HOLD/RETURNの3段階で通常カメラへ上書きし、終了時に自然に元の制御へ戻す。
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
-    if (!camera_)
+    if (!camera_ || !camera_->CanPlayEventAction())
     {
+        // 演出用優先度が解除されたら、位置の上書きと通常制御の抑制を終了する。
         StopAction(true);
         return;
     }
@@ -282,6 +283,8 @@ void CameraActionDirectorComponent::LateUpdate(float deltaTime_)
     DirectX::XMFLOAT3 cameraPosition_ = actionCameraPosition;
     DirectX::XMFLOAT3 focusPosition_ = actionFocusPosition;
     float fov_ = activeFov;
+    if (activePreset.useExternalFov && phase == CAMERA_ACTION_PHASE::HOLD)
+        fov_ = camera_->GetFovY();
     DirectX::XMFLOAT3 up_ = actionCameraUp;
     const auto followTarget_ = activeFollowTarget.lock();
     const bool useOrbit_ = activePreset.positionMode == CAMERA_ACTION_POSITION_MODE::TPS_TARGET_RELATIVE &&
@@ -425,6 +428,16 @@ void CameraActionDirectorComponent::StopAction(bool immediate_)
 void CameraActionDirectorComponent::RegisterActions()
 {
     ActionRegistry& registry_ = ActionRegistry::Instance();
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    const std::weak_ptr<GameObject> weakOwner_ = owner_;
+    // 最終カットの復帰時間を使い、通常カメラへ補間してから制御を返す。
+    owner_->RegisterGlobalAction("CameraAction", "ReturnToGameplay", [weakOwner_]()
+    {
+        const auto owner_ = weakOwner_.lock();
+        const auto director_ = owner_ ? owner_->GetComponent<CameraActionDirectorComponent>() : nullptr;
+        if (director_) director_->StopAction(false);
+    });
     for (const CameraActionPreset& preset_ : presets)
     {
         registry_.RemoveAction("CameraAction", preset_.actionName);
@@ -467,7 +480,7 @@ void CameraActionDirectorComponent::BeginAction(
 {
     ResolveReferences();
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
-    if (!camera_) return;
+    if (!camera_ || !camera_->CanPlayEventAction()) return;
 
     // 低優先度の演出で、再生中の重要なカメラ演出を上書きしないようにする。
     if (phase != CAMERA_ACTION_PHASE::IDLE &&
@@ -552,6 +565,14 @@ bool CameraActionDirectorComponent::ResolvePresetFocus(
     DirectX::XMFLOAT3& focusPosition_,
     DirectX::XMFLOAT3& attackDirection_)
 {
+    if (!preset_.targetObjectName.empty())
+    {
+        const auto owner_ = GetGameObject();
+        const auto target_ = owner_ ? owner_->GetManager().Find(preset_.targetObjectName) : nullptr;
+        if (!target_ || !target_->transform) return false;
+        focusPosition_ = target_->transform->GetWorldPosition();
+        return true;
+    }
     // Guard/DodgeなどはSystemがBlackboardへ書いた接触位置を優先し、なければ通常の対象位置へ戻す。
     if (TryReadBlackboardVector3(
         preset_.blackboardCategory,
@@ -902,6 +923,11 @@ void CameraActionDirectorComponent::Gui()
             ImGui::DragFloat("Hold", &preset_.holdDuration, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("Return", &preset_.returnDuration, 0.01f, 0.0f, 5.0f);
             ImGui::DragFloat("FOV", &preset_.targetFov, 0.1f, 10.0f, 120.0f);
+            ImGui::Checkbox("Use External FOV In Hold", &preset_.useExternalFov);
+            char targetNameBuffer_[256]{};
+            strncpy_s(targetNameBuffer_, preset_.targetObjectName.c_str(), _TRUNCATE);
+            if (ImGui::InputText("Target Object Name", targetNameBuffer_, sizeof(targetNameBuffer_)))
+                preset_.targetObjectName = targetNameBuffer_;
             ImGui::DragFloat("Shake Strength", &preset_.shakeStrength, 0.005f, 0.0f, 2.0f);
             ImGui::DragFloat("Shake Frequency", &preset_.shakeFrequency, 0.1f, 0.0f, 120.0f);
             ImGui::DragInt("Priority", &preset_.priority);
@@ -979,6 +1005,8 @@ void CameraActionDirectorComponent::Serialize(nlohmann::json& json_) const
         presetJson_["holdDuration"] = preset_.holdDuration;
         presetJson_["returnDuration"] = preset_.returnDuration;
         presetJson_["targetFov"] = preset_.targetFov;
+        presetJson_["useExternalFov"] = preset_.useExternalFov;
+        presetJson_["targetObjectName"] = preset_.targetObjectName;
         presetJson_["cameraUp"] = { preset_.cameraUp.x, preset_.cameraUp.y, preset_.cameraUp.z };
         presetJson_["shakeStrength"] = preset_.shakeStrength;
         presetJson_["shakeFrequency"] = preset_.shakeFrequency;
@@ -1023,6 +1051,8 @@ void CameraActionDirectorComponent::Deserialize(const nlohmann::json& json_)
             preset_.holdDuration = presetJson_.value("holdDuration", 0.12f);
             preset_.returnDuration = presetJson_.value("returnDuration", 0.18f);
             preset_.targetFov = presetJson_.value("targetFov", 45.0f);
+            preset_.useExternalFov = presetJson_.value("useExternalFov", false);
+            preset_.targetObjectName = presetJson_.value("targetObjectName", std::string{});
             preset_.cameraUp = LoadFloat3(presetJson_, "cameraUp", { 0.0f, 1.0f, 0.0f });
             preset_.shakeStrength = presetJson_.value("shakeStrength", 0.0f);
             preset_.shakeFrequency = presetJson_.value("shakeFrequency", 20.0f);

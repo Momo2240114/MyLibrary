@@ -5,7 +5,7 @@
                 "ActionPrefix": "Sword",
                 "ActivateActionName": "EnableHitBox",
                 "AllowMultiHit": false,
-                "AttackInstanceId": 797,
+                "AttackInstanceId": 11,
                 "AttackSourceType": 0,
                 "AttackTag": "Attack",
                 "AttackerAirLiftPower": 0.0,
@@ -778,7 +778,7 @@
             3.0999999046325684
         ],
         "Rot": [
-            335.0,
+            -25.0,
             0.0,
             0.0
         ],

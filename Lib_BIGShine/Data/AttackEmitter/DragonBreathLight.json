@@ -262,6 +262,7 @@
       "FanRangeSteps": 3,
       "FanVisualSampleCount": 1,
       "SpawnHit": true,
+      "FitBeamVisualToHitShape": true,
       "Entries": [
         {
           "Type": 0,
@@ -352,7 +353,7 @@
       "Range": 14.5,
       "Radius": 3.4,
       "Speed": 0,
-      "LifeTime": 1.35,
+      "LifeTime": 2,
       "FanAngleDegrees": 95,
       "ProjectileMotionEnabled": false,
       "ProjectileAcceleration": 0,
@@ -383,7 +384,7 @@
             1.45,
             1.2
           ],
-          "LifeTime": 1.35,
+          "LifeTime": 2,
           "NormalOffset": 0,
           "PlaybackSpeed": 1,
           "FollowOwner": false,

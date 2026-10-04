@@ -72,6 +72,20 @@ private:
         DirectX::XMFLOAT3 dangerAreaLocalOffset = { 0.0f, 0.0f, 0.0f };
         float dangerAreaRadius = 1.0f;
         float dangerAreaHalfHeight = 0.0f;
+        bool dangerAreaIsFan = false;
+        // 直線ブレスは予兆で方向を確定し、発射後の表示位置を保持する。
+        bool dangerAreaFixedFrame = false;
+        DirectX::XMFLOAT3 dangerAreaFixedPosition = { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3 dangerAreaFixedForward = { 0.0f, 0.0f, 1.0f };
+        float dangerAreaFanAngleDegrees = 0.0f;
+        // 地面クエリの結果を短時間保持し、停止中の予兆で毎フレームRayを飛ばさない。
+        bool dangerAreaGroundCached = false;
+        bool dangerAreaGroundResolved = false;
+        float dangerAreaGroundQueryTimer = 0.0f;
+        float dangerAreaGroundHeight = 0.0f;
+        DirectX::XMFLOAT3 dangerAreaGroundSamplePosition = { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3 dangerAreaGroundForward = { 0.0f, 0.0f, 1.0f };
+        DirectX::XMFLOAT3 dangerAreaGroundNormal = { 0.0f, 1.0f, 0.0f };
         float lifeTimer = 0.0f;
         bool followMouth = false;
         bool followBreathSource = false;
@@ -116,6 +130,18 @@ private:
         float hitInterval_);
     void ApplyFollowTransform(RuntimeAttack& runtime_);
     void ApplyDangerAreaTransform(RuntimeAttack& runtime_);
+    // 地面の法線と範囲内の接地点から、危険範囲を埋めない表示高さを求める。
+    bool ResolveDangerAreaGroundHeight(
+        RuntimeAttack& runtime_,
+        const DirectX::XMFLOAT3& position_,
+        const DirectX::XMFLOAT3& forward_,
+        float rayReferenceHeight_,
+        float& height_,
+        DirectX::XMFLOAT3& normal_);
+    // 危険範囲の前方向を維持して、地面法線に沿う回転を求める。
+    DirectX::XMFLOAT3 ResolveDangerAreaGroundRotation(
+        const DirectX::XMFLOAT3& forward_,
+        const DirectX::XMFLOAT3& normal_) const;
     void SpawnBreathVFX();
     void SpawnBreathChargeEffect();
     bool ResolveActualMouthFrame(
@@ -196,6 +222,12 @@ private:
     std::vector<std::string> registeredActionNames;
     std::vector<RuntimeAttack> runtimeAttacks;
     std::vector<PendingStampRock> pendingStampRocks;
+    // 予兆で確定した直線ブレスの発射基準。予兆の寿命を超えた予約は使わない。
+    bool pendingBeamFrameValid = false;
+    float pendingBeamFrameTimer = 0.0f;
+    DirectX::XMFLOAT3 pendingBeamPosition = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 pendingBeamForward = { 0.0f, 0.0f, 1.0f };
+    std::weak_ptr<AttackEmitterComponent> pendingBeamEmitter;
 
     std::string actionCategory = "DragonAttack";
     std::string breathVFXAssetPath = "Data/VFX/DragonBreath.json";
@@ -213,7 +245,13 @@ private:
     bool dangerAreaEnabled = true;
     bool showDangerAreaOnAttackStart = true;
     bool showBreathChargeOnDanger = true;
+    // 地面から法線方向へ浮かせる距離。深度の競合を避けるため正の値で使用する。
     float dangerAreaGroundOffset = 0.03f;
+    float dangerAreaRayStartHeight = 5.0f;
+    float dangerAreaRayDistance = 250.0f;
+    float dangerAreaGroundQueryInterval = 0.05f;
+    bool dangerAreaAlignToGround = true;
+    bool dangerAreaMultiSample = true;
     float dangerAreaLengthPadding = 0.0f;
     float breathLifeTime = 3.2f;
     float breathVFXLifeTime = 0.6f;

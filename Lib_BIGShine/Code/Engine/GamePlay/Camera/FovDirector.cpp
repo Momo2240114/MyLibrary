@@ -34,16 +34,25 @@ void FovDirector::Start()
     easingIndex = easing_->AddEasingAndGetIndex();
 
     ResetToDefault();
+    RegisterActions();
 }
 
 void FovDirector::Update(float elapsedTime_)
 {
+    BS_PROFILE_SCOPE("FovDirector::Update");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<EasingComponent> easing_ = owner_
         ? owner_->GetComponent<EasingComponent>()
         : nullptr;
 
     if (!easing_ || phase == PHASE::IDLE) return;
+    const auto camera_ = owner_->GetComponent<CameraComponent>();
+    if (!camera_ || !camera_->CanPlayEventAction())
+    {
+        // 優先度が戻ったカメラでは、進行中のFOV演出も終了する。
+        ResetToDefault();
+        return;
+    }
 
     if (phase == PHASE::HOLD)
     {
@@ -104,7 +113,7 @@ void FovDirector::PlayFov(
     const std::shared_ptr<EasingComponent> easing_ =
         owner_->GetOrAddComponent<EasingComponent>();
 
-    if (!camera_ || !easing_) return;
+    if (!camera_ || !easing_ || !camera_->CanPlayEventAction()) return;
 
     startFov = camera_->GetFovY();
     targetFov = wayPoint_.fov;

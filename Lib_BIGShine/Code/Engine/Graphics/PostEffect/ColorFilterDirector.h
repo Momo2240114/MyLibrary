@@ -63,6 +63,7 @@ private:
 
     // EasingComponent内でこのDirectorが使うEasing Slot。
     int easingIndex = -1;
+    int startWaypointIndex = -1; // 指定時は初回描画より前に開始色を反映する。
     // 現在の演出Phase。
     PHASE phase = PHASE::IDLE;
     float holdElapsed = 0.0f;

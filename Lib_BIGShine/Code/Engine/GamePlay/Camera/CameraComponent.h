@@ -14,6 +14,11 @@ public:
     // =====================
     CameraComponent() = default;
 
+    // カメラの演出用優先度を切り替えるActionを登録する。
+    void Start() override;
+    // 指定した優先度の間だけ、このカメラの演出Actionを許可する。
+    bool CanPlayEventAction() const { return !useEventPriority || priority == eventPriority; }
+
     void ScreenToWorld(const Vector2& screen, Vector3& world);
 
     void WorldToScreen(Vector2& screen, const Vector3& world);
@@ -96,6 +101,8 @@ public:
         projChanged |= ImGui::DragFloatRange2("Near/Far", &nearZ, &farZ, 0.001f, 0.001f, 5000.0f, "Near: %.2f", "Far: %.2f");
 
         ImGui::DragInt("Priority", &priority);
+        ImGui::Checkbox("Use Event Priority", &useEventPriority);
+        if (useEventPriority) ImGui::DragInt("Event Priority", &eventPriority);
 
         ImGui::Separator();
 
@@ -206,5 +213,9 @@ private:
     bool _isMoving;
 
     int priority = 0;
+    // 演出の有効条件と、終了時に復元するシーン開始時の優先度。
+    bool useEventPriority = false;
+    int eventPriority = 8;
+    int initialPriority = 0;
 };
 

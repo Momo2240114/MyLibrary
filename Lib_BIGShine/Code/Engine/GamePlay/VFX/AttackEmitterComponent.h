@@ -133,6 +133,8 @@ struct AttackEmitterTemplate
     // FAN形状の見た目Entryを何方向に複製するか。判定用サンプル数とは分けて負荷を抑える。
     int fanVisualSampleCount = 1;
     bool spawnHit = true;
+    // 直線Particleを判定カプセルの軸と幅に合わせる。既存Templateは従来の演出を維持する。
+    bool fitBeamVisualToHitShape = false;
 
     // 同時に生成する見た目演出と、必要なら攻撃判定設定。
     std::vector<AttackEmitterEntryTemplate> entries;
@@ -160,6 +162,14 @@ public:
         const std::string& templateName_,
         const DirectX::XMFLOAT3& position_,
         const DirectX::XMFLOAT3& direction_);
+    // 発射補正を含むBEAMの両端と半径を、予兆表示にも同じ形で渡す。
+    bool ResolveBeamGeometryAt(
+        const std::string& templateName_,
+        const DirectX::XMFLOAT3& position_,
+        const DirectX::XMFLOAT3& direction_,
+        DirectX::XMFLOAT3& start_,
+        DirectX::XMFLOAT3& end_,
+        float& radius_) const;
     // AttackEmitter Asset JSONを読み込む。
     bool LoadAsset(const std::string& path_, bool forceReload_ = false);
     // 現在のTemplate設定をAttackEmitter Asset JSONとして保存する。

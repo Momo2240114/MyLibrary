@@ -1,6 +1,33 @@
 #include "PrecompiledHeader.h"
 
 #include "CameraComponent.h"
+#include "Engine/Debug/TracyProfiler.h"
+
+void CameraComponent::Start()
+{
+    BS_PROFILE_SCOPE("CameraComponent::Start");
+    initialPriority = priority;
+    // 描画用・Editor用カメラはRegistry初期化前に生成されるため、演出用カメラだけActionを登録する。
+    if (!useEventPriority) return;
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    const std::weak_ptr<GameObject> weakOwner_ = owner_;
+    // Object名付きActionにして、Mainカメラの優先度を変更せず演出へ切り替える。
+    owner_->RegisterGlobalAction("Camera", "ActivateEventPriority", [weakOwner_]()
+    {
+        BS_PROFILE_SCOPE("CameraComponent::ActivateEventPriority");
+        const auto owner_ = weakOwner_.lock();
+        const auto camera_ = owner_ ? owner_->GetComponent<CameraComponent>() : nullptr;
+        if (camera_) camera_->priority = camera_->eventPriority;
+    });
+    owner_->RegisterGlobalAction("Camera", "RestorePriority", [weakOwner_]()
+    {
+        BS_PROFILE_SCOPE("CameraComponent::RestorePriority");
+        const auto owner_ = weakOwner_.lock();
+        const auto camera_ = owner_ ? owner_->GetComponent<CameraComponent>() : nullptr;
+        if (camera_) camera_->priority = camera_->initialPriority;
+    });
+}
 
 
 void CameraComponent::ScreenToWorld(const Vector2& screen, Vector3& world)
@@ -76,6 +103,8 @@ void CameraComponent::Serialize(nlohmann::json& j) const
     j["nearZ"] = nearZ;
     j["farZ"] = farZ;
     j["priority"] = priority;
+    j["useEventPriority"] = useEventPriority;
+    j["eventPriority"] = eventPriority;
     // 注視点モードを使っている場合のために eye, focus, up も保存
     j["eye"] = { eye.x, eye.y, eye.z };
     j["focus"] = { focus.x, focus.y, focus.z };
@@ -91,6 +120,9 @@ void CameraComponent::Deserialize(const nlohmann::json& j)
     nearZ = j.value("nearZ", 0.001f);
     farZ = j.value("farZ", 1000.0f);
     priority = j.value("priority", 0);
+    // 旧JSONは優先度条件を無効にして、既存のカメラ演出を維持する。
+    useEventPriority = j.value("useEventPriority", false);
+    eventPriority = j.value("eventPriority", 8);
 
     if (j.contains("eye")) {
         eye = { j["eye"][0], j["eye"][1], j["eye"][2] };

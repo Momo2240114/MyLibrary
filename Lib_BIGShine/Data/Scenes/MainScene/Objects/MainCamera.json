@@ -45,25 +45,27 @@
         {
             "Data": {
                 "aspect": 1.7777777910232544,
+                "eventPriority": 8,
                 "eye": [
-                    -1.2217503786087036,
-                    7.198746681213379,
-                    -61.61320877075195
+                    -3.4855871200561523,
+                    7.587185382843018,
+                    -69.32905578613281
                 ],
                 "farZ": 1000.0,
                 "focus": [
-                    -0.6657422184944153,
-                    0.7072011828422546,
-                    -21.183555603027344
+                    -1.9764440059661865,
+                    0.7062740921974182,
+                    -26.322879791259766
                 ],
-                "fovY": 60.00838088989258,
+                "fovY": 60.0,
                 "nearZ": 0.10000000149011612,
                 "priority": 0,
                 "up": [
                     0.0,
                     1.0,
                     0.0
-                ]
+                ],
+                "useEventPriority": false
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -76,8 +78,8 @@
         {
             "Data": {
                 "baseDistance": 14.0,
-                "currentPitch": -9.120931625366211,
-                "currentYaw": 89.21208953857422,
+                "currentPitch": -9.084677696228027,
+                "currentYaw": 87.990234375,
                 "distance": 14.0,
                 "horizontalFollowSpeed": 5.0,
                 "lookSpeedX": 500.0,
@@ -254,6 +256,8 @@
                         "suppressThirdPersonControl": true,
                         "targetFov": 47.29999923706055,
                         "targetMode": "PLAYER",
+                        "targetObjectName": "",
+                        "useExternalFov": false,
                         "useUnscaledTime": true
                     },
                     {
@@ -288,13 +292,15 @@
                         "suppressThirdPersonControl": true,
                         "targetFov": 50.0,
                         "targetMode": "PLAYER",
+                        "targetObjectName": "",
+                        "useExternalFov": false,
                         "useUnscaledTime": true
                     }
                 ]
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
-            "LateUpdatePriority": 0,
+            "LateUpdatePriority": 100,
             "RequiredForSceneStart": false,
             "TypeName": "CameraActionDirectorComponent",
             "UpdateEnabled": true,
@@ -340,7 +346,7 @@
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
-            "LateUpdatePriority": 0,
+            "LateUpdatePriority": 200,
             "RequiredForSceneStart": false,
             "TypeName": "CameraShakeComponent",
             "UpdateEnabled": true,
@@ -402,17 +408,17 @@
     "Layer": 1,
     "Name": "MainCamera",
     "ParentName": "",
-    "RequiredForSceneStart": false,
+    "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            -1.2217503786087036,
-            7.198747634887695,
-            -61.61320877075195
+            -3.4855875968933105,
+            7.587185859680176,
+            -69.32905578613281
         ],
         "Rot": [
-            9.120932579040527,
-            0.7879095673561096,
-            6.7555232519112e-09
+            9.084671020507813,
+            2.009765625,
+            0.0
         ],
         "Scale": [
             1.0,

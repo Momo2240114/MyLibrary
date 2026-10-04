@@ -77,6 +77,7 @@ enum class CAMERA_ACTION_POSITION_MODE
 struct CameraActionPreset
 {
     std::string actionName = "JustGuard";
+    std::string targetObjectName; // 指定時はScene内のObject位置を注視基準にする。
 
     CAMERA_ACTION_TARGET_MODE targetMode =
         CAMERA_ACTION_TARGET_MODE::WORLD_POSITION;
@@ -96,6 +97,7 @@ struct CameraActionPreset
 
     // 演出中だけ差し替える FOV と、必要なら追加する揺れ設定。
     float targetFov = 45.0f;
+    bool useExternalFov = false; // HOLD中はFovDirectorの画角を維持し、独立したFOV演出を重ねる。
     float shakeStrength = 0.0f;
     float shakeFrequency = 20.0f;
 

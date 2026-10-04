@@ -11,6 +11,7 @@
 
 #include "Engine/Graphics/Core/CPUResourceLoader.h"
 #include "Engine/Graphics/Particle/ParticleEmitter.h"
+#include "Engine/Graphics/Resource/HDRTexture.h"
 #include "Engine/Graphics/Resource/ModelResourceManager.h"
 #include "Engine/Graphics/Resource/TextureResourceManager.h"
 #include "Engine/Graphics/VFXMaterial/VFXMaterialResourceManager.h"
@@ -87,42 +88,80 @@ namespace
 
 bool GraphicsDeviceManager::LoadIBLTextures()
 {
-    // ---- プロジェクトに合わせて書き換える ----
-    const wchar_t* diffusePath_ = L"Data/Texture/IBL/diffuse_iem.dds";
-    const wchar_t* specularPath_ = L"Data/Texture/IBL/skybox_highres.dds";
-    const wchar_t* lutPath_ = L"Data/Texture/IBL/lut_ggx.dds";
-    // ---------------------------------------------------------
+    BS_PROFILE_SCOPE("GraphicsDeviceManager::LoadIBLTextures");
 
     D3D11_TEXTURE2D_DESC textureDescription_{};
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseIemSRV_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularPmremSRV_;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> lutGgxSRV_;
 
     // 拡散反射 IEM（IrradianceMap）
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
-        device.Get(), diffusePath_,
-        iblDiffuseIemSRV.GetAddressOf(), &textureDescription_)))
+        device.Get(), iblDiffusePath.c_str(),
+        diffuseIemSRV_.GetAddressOf(), &textureDescription_)))
     {
         OutputDebugStringW(L"[IBL] Failed to load diffuse_iem.dds\n");
+        lastIBLError = "Failed to load diffuse IEM texture.";
         return false;
     }
 
-    // 鏡面反射 PMREM（RadianceMap）
-    if (FAILED(CPUResourceLoader::LoadTextureFromFile(
-        device.Get(), specularPath_,
-        iblSpecularPmremSRV.GetAddressOf(), &textureDescription_)))
+    // 鏡面反射用の環境テクスチャをHDRから読み込む
+    HDRTexture specularHdrTexture_;
+    if (!specularHdrTexture_.Load(device.Get(), immediateContext.Get(), iblSpecularHdrPath.c_str(), iblHdrIntensity))
     {
-        OutputDebugStringW(L"[IBL] Failed to load specular_pmrem.dds\n");
+        OutputDebugStringW(L"[IBL] Failed to load specular HDR texture\n");
+        lastIBLError = "Failed to load specular HDR texture.";
         return false;
     }
+    specularPmremSRV_ = specularHdrTexture_.GetShaderResourceViewComPtr();
 
     // GGX BRDF LUT
     if (FAILED(CPUResourceLoader::LoadTextureFromFile(
-        device.Get(), lutPath_,
-        iblLutGgxSRV.GetAddressOf(), &textureDescription_)))
+        device.Get(), iblLutGgxPath.c_str(),
+        lutGgxSRV_.GetAddressOf(), &textureDescription_)))
     {
         OutputDebugStringW(L"[IBL] Failed to load lut_ggx.dds\n");
+        lastIBLError = "Failed to load GGX LUT texture.";
         return false;
     }
 
+    ID3D11ShaderResourceView* nullShaderResources_[3] = {};
+    immediateContext->PSSetShaderResources(10, 3, nullShaderResources_);
+
+    iblDiffuseIemSRV = diffuseIemSRV_;
+    iblSpecularPmremSRV = specularPmremSRV_;
+    iblLutGgxSRV = lutGgxSRV_;
+    lastIBLError.clear();
     return true;
+}
+
+bool GraphicsDeviceManager::ReloadIBLTextures()
+{
+    return LoadIBLTextures();
+}
+
+bool GraphicsDeviceManager::ReloadIBLTextures(const std::wstring& specularHdrPath_, float hdrIntensity_)
+{
+    if (specularHdrPath_.empty())
+    {
+        lastIBLError = "Specular HDR path is empty.";
+        return false;
+    }
+
+    const std::wstring previousPath_ = iblSpecularHdrPath;
+    const float previousIntensity_ = iblHdrIntensity;
+
+    iblSpecularHdrPath = specularHdrPath_;
+    iblHdrIntensity = std::max(0.0f, hdrIntensity_);
+
+    if (LoadIBLTextures())
+    {
+        return true;
+    }
+
+    iblSpecularHdrPath = previousPath_;
+    iblHdrIntensity = previousIntensity_;
+    return false;
 }
 
 // ----------------------------------------------------------------

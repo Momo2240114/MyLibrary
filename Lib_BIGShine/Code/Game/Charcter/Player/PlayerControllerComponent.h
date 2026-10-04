@@ -145,6 +145,8 @@ public:
     bool TryDodgeCancelInput();
 
     void NotifyJustDodge(); // ジャスト回避成功を現在のDodgeStateへ通知する。
+    void GrantJustDodgeCounterTag(); // ジャスト回避成功後の反撃Tagを一定時間付与する。
+    void GrantJustGuardCounterTag(); // ジャストガード成功後の反撃Tagと派生用Tagを一定時間付与する。
 
     float moveSpeed = 6.0f; // 通常移動速度。
     float guardMoveSpeed = 2.0f;
@@ -162,6 +164,7 @@ public:
     float timelineActionFallbackDuration = 1.5f;
     float groundDodgeCooldownDuration = 0.5f;
     float justDodgeInvincibilityDuration = 0.5f; // ジャスト回避成功後に保証する無敵秒数。
+    float counterTagDuration = 5.0f; // ジャスト回避/ジャストガード成功後に反撃Tagを保持する秒数。
     float armor = 5.0f;
     float hitMediumImpactThreshold = 5.0f;
     float hitHeavyImpactThreshold = 100.0f;
@@ -185,8 +188,14 @@ private:
     bool IsDodgeAction(PLAYER_ACTION action_) const;
     bool IsDodgeCancelAction(PLAYER_ACTION action_) const;
     bool CanStartDodgeAction(PLAYER_ACTION action_) const;
+    bool HasCounterAttackTag() const;
+    // 反撃Tag成立前に保存された通常攻撃入力を、反撃Actionの先行入力へ差し替える。
+    void PromoteBufferedAttackToCounterAttack();
     bool ShouldEnterGuardAfterActionEnd() const;
     void SyncCancelGateBlackboard();
+    void UpdateCounterTags(float deltaTime_);
+    void SyncCounterTagsToBlackboard();
+    void ClearCounterTags();
     void TryConsumeBufferedActionForCancelGate(bool dodgeGate_);
     void UpdateDodgeRestrictions(float deltaTime_);
     void StartGroundDodgeCooldown();
@@ -242,6 +251,8 @@ private:
     float runEndTimer = 0.0f;
     float timelineActionSafetyTimer = 0.0f;
     float groundDodgeCooldownTimer = 0.0f;
+    float justDodgeCounterTagTimer = 0.0f;
+    float justGuardCounterTagTimer = 0.0f;
     float runtimeArmor = 5.0f;
     PLAYER_LOCOMOTION_PHASE lastSentLocomotionPhase = PLAYER_LOCOMOTION_PHASE::IDLE;
     std::weak_ptr<GameObject> attackAssistTarget;

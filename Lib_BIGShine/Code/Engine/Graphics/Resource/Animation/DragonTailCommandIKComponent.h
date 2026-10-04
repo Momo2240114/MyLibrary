@@ -115,6 +115,8 @@ private:
     float targetPitchDegrees = 0.0f;
     float targetRollDegrees = 0.0f;
     float followSpeed = 6.0f;
+    float spinTipLagRate = 0.18f;
+    float spinTipLagStartRate = 0.55f;
     bool attackActive = false;
 
     // 登録済みActionを解除する。
@@ -123,6 +125,8 @@ private:
     float CalculateBlendRate() const;
     // Command全体の0-1進行率を返す。
     float CalculateCommandRate() const;
+    // 回転尻尾攻撃中、先端側だけ遅れた進行率を返す。
+    float CalculateSpinLagRate(float commandRate_, float normalizedPosition_) const;
     // 現在CommandからTail ChainへIK回転を適用する。
     bool ApplyTailIK(float deltaTime_);
 };

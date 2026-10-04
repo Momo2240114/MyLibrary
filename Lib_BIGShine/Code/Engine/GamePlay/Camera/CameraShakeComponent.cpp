@@ -64,8 +64,9 @@ void CameraShakeComponent::LateUpdate(float deltaTime_)
     if (!playing) return;
 
     const std::shared_ptr<CameraComponent> camera_ = camera.lock();
-    if (!camera_)
+    if (!camera_ || !camera_->CanPlayEventAction())
     {
+        // 非選択の演出カメラへ揺れを残さない。
         StopShake(true);
         return;
     }
@@ -107,6 +108,9 @@ void CameraShakeComponent::PlayShakeByIndex(int index_)
 {
     BS_PROFILE_SCOPE("CameraShakeComponent::PlayShakeByIndex");
     if (index_ < 0 || index_ >= static_cast<int>(presets.size())) return;
+    ResolveCamera();
+    const auto camera_ = camera.lock();
+    if (!camera_ || !camera_->CanPlayEventAction()) return;
     // 再生中ShakeよりPriorityが低い場合は、強い演出を弱い演出で潰さない。
     if (playing && presets[index_].priority < activePriority) return;
 
@@ -129,6 +133,9 @@ void CameraShakeComponent::PlayShake(
     int priority_)
 {
     BS_PROFILE_SCOPE("CameraShakeComponent::PlayShake");
+    ResolveCamera();
+    const auto camera_ = camera.lock();
+    if (!camera_ || !camera_->CanPlayEventAction()) return;
     // Runtime再生でもPresetと同じPriority規則を適用する。
     if (playing && priority_ < activePriority) return;
 

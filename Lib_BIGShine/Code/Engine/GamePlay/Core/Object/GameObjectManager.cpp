@@ -44,6 +44,7 @@
 #include "Engine/UI/WidgetBoardComponent.h"
 
 #include "Engine/Debug/TracyProfiler.h"
+#include "Engine/Platform/WindowsDialogHelper.h"
 
 #include <chrono>
 
@@ -97,6 +98,44 @@ namespace
         }
 
         return depth_;
+    }
+
+    void SaveCurrentIBLSettings(nlohmann::json& graphicsJson_)
+    {
+        // Sceneごとに使用するIBLを切り替えられるよう、現在のHDRI設定を保存する。
+        GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
+        graphicsJson_["IBL"] = {
+            {
+                "specularHdrPath",
+                WindowsDialogHelper::PathToUtf8(
+                    std::filesystem::path(graphics_.GetIBLSpecularHdrPath()))
+            },
+            {"hdrIntensity", graphics_.GetIBLHdrIntensity()}
+        };
+    }
+
+    void LoadSceneIBLSettings(const nlohmann::json& graphicsJson_)
+    {
+        // 古いSceneListとの互換性を保つため、IBL設定が無い場合は現在の設定を維持する。
+        if (!graphicsJson_.contains("IBL") || !graphicsJson_["IBL"].is_object())
+        {
+            return;
+        }
+
+        const nlohmann::json& iblJson_ = graphicsJson_["IBL"];
+        const std::string specularHdrPath_ = iblJson_.value("specularHdrPath", "");
+        if (specularHdrPath_.empty())
+        {
+            return;
+        }
+
+        GraphicsDeviceManager& graphics_ = GraphicsDeviceManager::Instance();
+        const float hdrIntensity_ = iblJson_.value("hdrIntensity", graphics_.GetIBLHdrIntensity());
+        const std::filesystem::path hdrPath_ = WindowsDialogHelper::Utf8ToPath(specularHdrPath_);
+        if (!graphics_.ReloadIBLTextures(hdrPath_.wstring(), hdrIntensity_))
+        {
+            BS_LOG_WARNING(LOG_CATEGORY::CORE, "LoadScene IBL reload failed: " + graphics_.GetLastIBLError());
+        }
     }
 }
 
@@ -1641,7 +1680,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
     listJson["SceneName"] = sceneName_;
     listJson["ObjectList"] = nlohmann::json::array(); // 配列を初期化
 
-    // --- グラフィックス設定（そのまま） ---
+    // --- グラフィックス設定 ---
     auto& params = GraphicsDeviceManager::Instance().GetBloomParams();
     listJson["GraphicsSettings"]["Bloom"] = {
         {"enabled", params.enabled},
@@ -1652,6 +1691,7 @@ void GameObjectManager::SaveScene(const std::string& sceneName_)
         {"toneMappingEnabled", params.toneMappingEnabled},
         {"exposure", params.exposure}
     };
+    SaveCurrentIBLSettings(listJson["GraphicsSettings"]);
 
     if (modelRenderSystem)
     {
@@ -1725,7 +1765,7 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
     EventManager::Clear();
 
 
-    // --- ★ グラフィックス設定（ブルーム）の読み込みを追加 ---
+    // --- グラフィックス設定の読み込み ---
     if (listJson.contains("GraphicsSettings")) {
         auto& graphicsJson = listJson["GraphicsSettings"];
 
@@ -1741,6 +1781,8 @@ void GameObjectManager::LoadScene(const std::string& sceneName_)
             params.toneMappingEnabled = bloomJson.value("toneMappingEnabled", true);
             params.exposure = bloomJson.value("exposure", 1.0f);
         }
+
+        LoadSceneIBLSettings(graphicsJson);
 
         if (modelRenderSystem)
         {
