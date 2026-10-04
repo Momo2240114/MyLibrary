@@ -377,6 +377,7 @@
     <ClCompile Include="Code\Editor\Window\ShaderWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\ShadowWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\PostEffectWindow.cpp" />
+    <ClCompile Include="Code\Editor\Window\IBLSettingsWindow.cpp" />
     <ClCompile Include="Code\Editor\Window\DebugTextureViewerWindow.cpp" />
     <ClCompile Include="Code\Engine\Audio\Audio.cpp" />
     <ClCompile Include="Code\Engine\Audio\AudioComponent.cpp" />
@@ -413,6 +414,7 @@
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObject.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Core\Object\GameObjectManager.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActionSequence.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActorPresentationActionComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\EventTrack.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Graphics\LightBlinkerComponent.cpp" />
     <ClCompile Include="Code\Engine\GamePlay\Graphics\MotionVelocityComponent.cpp" />
@@ -487,6 +489,7 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\FbxModel.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFImporter.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFModel.cpp" />
+    <ClCompile Include="Code\Engine\Graphics\Resource\HDRTexture.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelResourceManager.cpp" />
     <ClCompile Include="Code\Engine\Graphics\Resource\StartupResourceConfig.cpp" />
@@ -552,8 +555,10 @@
     <ClCompile Include="Code\Engine\UI\UIProgressBarComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UISpriteSheetComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UITextComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\BossNamePresentationComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIVertexModifierComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp" />
+    <ClCompile Include="Code\Engine\UI\UIWorldAnchorComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp" />
@@ -682,6 +687,7 @@
     <ClInclude Include="Code\Editor\Window\ShaderWindow.h" />
     <ClInclude Include="Code\Editor\Window\ShadowWindow.h" />
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h" />
+    <ClInclude Include="Code\Editor\Window\IBLSettingsWindow.h" />
     <ClInclude Include="Code\Editor\Window\DebugTextureViewerWindow.h" />
     <ClInclude Include="Code\Engine\Common\misc.h" />
     <ClInclude Include="Code\Engine\Common\StringId.h" />
@@ -697,6 +703,7 @@
     <ClInclude Include="Code\Engine\GamePlay\Core\Component\SpinComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\Core\Resource\ResourceManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\ActionSequence.h" />
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\ActorPresentationActionComponent.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\BaseEvent.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\EventManager.h" />
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\EventTrack.h" />
@@ -844,6 +851,7 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\Animation\ModelAnimator.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFImporter.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFModel.h" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\HDRTexture.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.h" />
     <ClInclude Include="Code\Engine\Graphics\Resource\ModelLoadTypes.h" />
@@ -911,8 +919,10 @@
     <ClInclude Include="Code\Engine\UI\UIProgressBarComponent.h" />
     <ClInclude Include="Code\Engine\UI\UISpriteSheetComponent.h" />
     <ClInclude Include="Code\Engine\UI\UITextComponent.h" />
+    <ClInclude Include="Code\Engine\UI\BossNamePresentationComponent.h" />
     <ClInclude Include="Code\Engine\UI\UIVertexModifierComponent.h" />
     <ClInclude Include="Code\Engine\UI\UIWidgetComponent.h" />
+    <ClInclude Include="Code\Engine\UI\UIWorldAnchorComponent.h" />
     <ClInclude Include="Code\Engine\UI\WidgetBoardComponent.h" />
     <ClInclude Include="Code\Game\Charcter\Player\PlayerStateMachine.h" />
     <ClInclude Include="Code\Game\Combat\DebugTools\DebugHitHistoryResetComponent.h" />
@@ -933,6 +943,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
+    <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json" />
     <None Include="Shader\Basic.hlsli" />
     <None Include="Shader\bidirectional_reflectance_distribution_function.hlsli" />
     <None Include="Shader\color_filter.hlsli" />

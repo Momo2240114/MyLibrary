@@ -321,6 +321,9 @@ void AnimationControllerComponent::Update(float deltaTime_)
 
         if (!pendingGraphAssetPath.empty())
         {
+            // 開幕Actionで選んだStateは、遅延Graph読み込みによるState再構築後にも引き継ぐ。
+            const auto presentationState_ = presentationControlled && currentState
+                ? std::make_unique<AnimState>(*currentState) : nullptr;
             {
                 BS_PROFILE_SCOPE("Animation::LoadGraphAsset");
                 LoadGraphAsset(pendingGraphAssetPath);
@@ -333,7 +336,13 @@ void AnimationControllerComponent::Update(float deltaTime_)
 
             {
                 BS_PROFILE_SCOPE("Animation::TryEnterStartState");
-                TryEnterStartState();
+                if (presentationState_)
+                {
+                    AddState(presentationState_->name, presentationState_->animationIndex);
+                    *states.at(presentationState_->name) = *presentationState_;
+                    ChangeState(presentationState_->name, 0.0f);
+                }
+                else TryEnterStartState();
             }
         }
     }
@@ -345,7 +354,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         return;
     }
 
-    if (useTransitionGraph && !animationPaused)
+    if (useTransitionGraph && !animationPaused && !presentationControlled)
     {
         BS_PROFILE_SCOPE("Animation::EvaluateGraphTransitions");
         EvaluateGraphTransitions();

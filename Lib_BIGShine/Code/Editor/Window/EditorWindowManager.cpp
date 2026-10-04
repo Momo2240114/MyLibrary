@@ -153,6 +153,7 @@ const char* EditorWindowManager::GetWindowMenuCategory(
         name_ == "Editor Scene View" ||
 		name_ == "Shadow" ||
 		name_ == "Post Effect" ||
+        name_ == "IBL Settings" ||
 		name_ == "Debug Texture Viewer")
 	{
 		return "Rendering";

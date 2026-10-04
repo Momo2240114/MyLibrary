@@ -6,6 +6,7 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/System/TimeManager.h"
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
+#include "Engine/Debug/TracyProfiler.h"
 
 #include <algorithm>
 #include <imgui.h>
@@ -20,10 +21,14 @@ void ColorFilterDirector::Start()
     easing_->SetUseUnscaledTime(true);
     easingIndex = easing_->AddEasingAndGetIndex();
     ResetToDefault();
+    // Sceneの初期化Frameでも暗転が途切れないよう、保存済みの開始設定を適用する。
+    if (startWaypointIndex >= 0 && startWaypointIndex < static_cast<int>(editorWaypoints.size()))
+        PlayFilter(editorWaypoints[startWaypointIndex]);
 }
 
 void ColorFilterDirector::Update(float elapsedTime_)
 {
+    BS_PROFILE_SCOPE("ColorFilterDirector::Update");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     const std::shared_ptr<EasingComponent> easing_ = owner_
         ? owner_->GetComponent<EasingComponent>() : nullptr;
@@ -65,6 +70,14 @@ void ColorFilterDirector::PlayFilter(const ColorFilterWayPoint& wayPoint_)
     holdDuration = (std::max)(wayPoint_.holdDuration, 0.0f);
     returnDuration = (std::max)(wayPoint_.returnDuration, 0.0f);
     activeEasing = wayPoint_.easing == EasingType::None ? EasingType::Lerp : wayPoint_.easing;
+    if (wayPoint_.duration <= 0.0f)
+    {
+        // 開始Frameから完全な黒にし、次の更新から既存の復帰補間で明転する。
+        GraphicsDeviceManager::Instance().GetFilterParams() = targetParams;
+        holdElapsed = 0.0f;
+        phase = PHASE::HOLD;
+        return;
+    }
     // EasingComponentは速度指定なので、durationの逆数で0->1へ進める。
     easing_->SetStartValue(easingIndex, 0.0f);
     easing_->PlayEasing(easingIndex, activeEasing,
@@ -132,6 +145,7 @@ BloomSystem::CbColorFilter ColorFilterDirector::LerpFilter(
 
 void ColorFilterDirector::Gui()
 {
+    ImGui::InputInt("Start Waypoint (-1: disabled)", &startWaypointIndex);
     // Default値は演出終了後に戻る基準としてEditorで調整する。
     ImGui::SliderFloat("Default Hue", &defaultParams.hueShift, -180.0f, 180.0f);
     ImGui::SliderFloat("Default Saturation", &defaultParams.saturation, 0.0f, 2.0f);
@@ -203,6 +217,7 @@ void ColorFilterDirector::Serialize(nlohmann::json& json_) const
             { "intensity", value_.filterIntensity } };
     };
     json_["DefaultFilter"] = write_(defaultParams);
+    json_["StartWaypointIndex"] = startWaypointIndex;
     json_["ColorFilterWaypoints"] = nlohmann::json::array();
     for (const ColorFilterWayPoint& wayPoint_ : editorWaypoints)
     {
@@ -217,6 +232,7 @@ void ColorFilterDirector::Serialize(nlohmann::json& json_) const
 
 void ColorFilterDirector::Deserialize(const nlohmann::json& json_)
 {
+    startWaypointIndex = json_.value("StartWaypointIndex", -1);
     // 保存時と同じKeyからCbColorFilterを復元する。
     const auto read_ = [](const nlohmann::json& input_, BloomSystem::CbColorFilter& value_)
     {

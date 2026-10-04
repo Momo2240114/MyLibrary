@@ -26,6 +26,9 @@ void RegisterAllActions()
     reg.RegisterAction("Audio", "---", nullptr);
     reg.RegisterAction("Scene", "---", nullptr);
     audio.RegisterAudioWorkspaceActions();
+    // 音声素材の準備後、Sequence Editorで実際のAudio Actionへ差し替えるための空Action。
+    reg.RegisterAction("Audio", "BossIntro.DrawWeaponSound", []() {});
+    reg.RegisterAction("Audio", "BossIntro.RoarSound", []() {});
 
     reg.RegisterAction("Audio", "PlayBGM_Title", [&]() {
         audio.StopBGM();

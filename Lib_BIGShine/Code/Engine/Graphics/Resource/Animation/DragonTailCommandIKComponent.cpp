@@ -7,6 +7,7 @@
 #include "Engine/GamePlay/Core/Object/GameObjectManager.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
 
 #include <algorithm>
@@ -274,7 +275,7 @@ void DragonTailCommandIKComponent::StartSweepRight(float duration_)
 void DragonTailCommandIKComponent::StartSpinSweep(float duration_)
 {
     currentCommand = {};
-    // 回転薙ぎ払いはYawを一周寄りに振り、Pitch/Rollも足して大きな攻撃モーションにする。
+    // 回転薙ぎ払いは根元から動き出し、先端側が遅れて追従するように補正する。
     currentCommand.mode = DRAGON_TAIL_IK_MODE::SPIN_SWEEP;
     currentCommand.duration = duration_;
     currentCommand.sweepAngleDegrees = 120.0f;
@@ -291,6 +292,24 @@ float DragonTailCommandIKComponent::CalculateCommandRate() const
         (commandTimer - currentCommand.blendInTime) / currentCommand.duration,
         0.0f,
         1.0f);
+}
+
+float DragonTailCommandIKComponent::CalculateSpinLagRate(
+    float commandRate_,
+    float normalizedPosition_) const
+{
+    const float lagStartRate_ = std::clamp(spinTipLagStartRate, 0.0f, 0.95f);
+    if (normalizedPosition_ <= lagStartRate_)
+    {
+        return commandRate_;
+    }
+
+    const float tipOnlyRate_ =
+        (normalizedPosition_ - lagStartRate_) / (1.0f - lagStartRate_);
+    const float tipLagRate_ =
+        std::clamp(spinTipLagRate, 0.0f, 0.8f) *
+        std::clamp(tipOnlyRate_, 0.0f, 1.0f);
+    return std::clamp(commandRate_ - tipLagRate_, 0.0f, 1.0f);
 }
 
 float DragonTailCommandIKComponent::CalculateBlendRate() const
@@ -315,6 +334,8 @@ float DragonTailCommandIKComponent::CalculateBlendRate() const
 
 bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("DragonTailCommandIKComponent::ApplyTailIK");
+
     auto* chain_ = ikMap->FindChain(chainName);
     if (!chain_ || !chain_->enabled) return false;
     if (!ikMap->ResolveChainByName(chainName)) return false;
@@ -579,9 +600,29 @@ bool DragonTailCommandIKComponent::ApplyTailIK(float deltaTime_)
             continue;
         }
 
-        const float yawRadians_ = currentYawDegrees * DEG_TO_RAD * weights_[boneIndex_] * influence_;
-        const float pitchRadians_ = currentPitchDegrees * DEG_TO_RAD * weights_[boneIndex_] * influence_;
-        const float rollRadians_ = currentRollDegrees * DEG_TO_RAD * weights_[boneIndex_] * influence_;
+        const float normalizedPosition_ = boneCount_ <= 1
+            ? 1.0f
+            : static_cast<float>(boneIndex_) / static_cast<float>(boneCount_ - 1);
+        float yawDegrees_ = currentYawDegrees;
+        float pitchDegrees_ = currentPitchDegrees;
+        float rollDegrees_ = currentRollDegrees;
+        if (currentCommand.mode == DRAGON_TAIL_IK_MODE::SPIN_SWEEP)
+        {
+            // 根元側は通常通り追従させ、指定位置より先だけ回転タイミングを遅らせる。
+            const float laggedCommandRate_ =
+                CalculateSpinLagRate(commandRate_, normalizedPosition_);
+            const float laggedSwingRate_ =
+                std::sin(laggedCommandRate_ * 3.1415926535f);
+            yawDegrees_ =
+                currentCommand.sweepAngleDegrees *
+                std::sin(laggedCommandRate_ * 6.283185307f);
+            pitchDegrees_ = currentCommand.liftAngleDegrees * laggedSwingRate_;
+            rollDegrees_ = currentCommand.expandAngleDegrees * laggedSwingRate_;
+        }
+
+        const float yawRadians_ = yawDegrees_ * DEG_TO_RAD * weights_[boneIndex_] * influence_;
+        const float pitchRadians_ = pitchDegrees_ * DEG_TO_RAD * weights_[boneIndex_] * influence_;
+        const float rollRadians_ = rollDegrees_ * DEG_TO_RAD * weights_[boneIndex_] * influence_;
 
         const DirectX::XMVECTOR animationRotation_ =
             DirectX::XMLoadFloat4(&animationRotations_[boneIndex_]);
@@ -689,6 +730,8 @@ void DragonTailCommandIKComponent::Gui()
     ImGui::DragFloat("Sweep Action Duration", &actionDuration, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("Spin Action Duration", &spinActionDuration, 0.01f, 0.0f, 30.0f);
     ImGui::DragFloat("Follow Speed", &followSpeed, 0.1f, 0.1f, 30.0f);
+    ImGui::DragFloat("Spin Tip Lag Rate", &spinTipLagRate, 0.01f, 0.0f, 0.8f);
+    ImGui::DragFloat("Spin Tip Lag Start", &spinTipLagStartRate, 0.01f, 0.0f, 0.95f);
     ImGui::Text("Target Yaw: %.2f", targetYawDegrees);
     ImGui::Text("Target Pitch: %.2f", targetPitchDegrees);
     ImGui::Text("Target Roll: %.2f", targetRollDegrees);
@@ -730,7 +773,7 @@ void DragonTailCommandIKComponent::Gui()
 
 void DragonTailCommandIKComponent::Serialize(nlohmann::json& json_) const
 {
-    // 尻尾IKの対象チェーン、Action登録設定、追従速度だけを保存する。
+    // 尻尾IKの対象チェーン、Action登録設定、追従速度、回転攻撃の先端遅れ量を保存する。
     json_["ChainName"] = chainName;
     json_["LocalForwardAxis"] = {
         localForwardAxis.x,
@@ -742,6 +785,8 @@ void DragonTailCommandIKComponent::Serialize(nlohmann::json& json_) const
     json_["ActionDuration"] = actionDuration;
     json_["SpinActionDuration"] = spinActionDuration;
     json_["FollowSpeed"] = followSpeed;
+    json_["SpinTipLagRate"] = spinTipLagRate;
+    json_["SpinTipLagStartRate"] = spinTipLagStartRate;
 }
 
 void DragonTailCommandIKComponent::Deserialize(const nlohmann::json& json_)
@@ -763,6 +808,8 @@ void DragonTailCommandIKComponent::Deserialize(const nlohmann::json& json_)
     actionDuration = json_.value("ActionDuration", 0.8f);
     spinActionDuration = json_.value("SpinActionDuration", 1.6f);
     followSpeed = json_.value("FollowSpeed", 6.0f);
+    spinTipLagRate = json_.value("SpinTipLagRate", 0.18f);
+    spinTipLagStartRate = json_.value("SpinTipLagStartRate", 0.55f);
 
     RegisterActions();
 }

@@ -1,0 +1,205 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": {
+                "AssetPath": "Data/Particle/IntroGateMist.json",
+                "Emitters": [
+                    {
+                        "Acceleration": [
+                            0.0,
+                            0.20000000298023224,
+                            0.0
+                        ],
+                        "BlendMode": 0,
+                        "BurstCount": 38,
+                        "Color": [
+                            0.6000000238418579,
+                            0.75,
+                            0.8999999761581421,
+                            0.20000000298023224
+                        ],
+                        "ColorEnd": [
+                            0.7200000286102295,
+                            0.8500000238418579,
+                            1.0,
+                            0.0
+                        ],
+                        "ColorStart": [
+                            0.5799999833106995,
+                            0.699999988079071,
+                            0.8500000238418579,
+                            0.18000000715255737
+                        ],
+                        "ConeAngle": [
+                            0.0,
+                            45.0
+                        ],
+                        "Delay": 0.0,
+                        "Drag": 0.6499999761581421,
+                        "EmissionAxis": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "EmissionMode": 0,
+                        "Fade": [
+                            0.1599999964237213,
+                            0.4000000059604645
+                        ],
+                        "FresnelPower": 2.0,
+                        "FresnelStrength": 1.0,
+                        "GradientTexturePath": "",
+                        "Gravity": 0.0,
+                        "LegacyRadius": [
+                            0.0,
+                            1.600000023841858
+                        ],
+                        "Lifespan": [
+                            0.6499999761581421,
+                            1.25
+                        ],
+                        "MaskTexturePath": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG",
+                        "MaterialPath": "",
+                        "MaterialPaths": [],
+                        "MaxCount": 220,
+                        "MeshVertexSampleCount": 2048,
+                        "Name": "Mist",
+                        "NoiseFrequency": 1.2999999523162842,
+                        "NoiseSpeed": 0.6000000238418579,
+                        "NoiseStrength": 0.2199999988079071,
+                        "OrbitVelocity": 0.0,
+                        "PosOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "RadialVelocity": 0.0,
+                        "RenderType": 0,
+                        "RotationSpeed": [
+                            -180.0,
+                            180.0
+                        ],
+                        "ShapeEnd": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "ShapeSize": [
+                            3.0,
+                            4.099999904632568,
+                            0.30000001192092896
+                        ],
+                        "ShapeStart": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Size": [
+                            0.6000000238418579,
+                            1.100000023841858
+                        ],
+                        "SizeRandomEnd": [
+                            1.0,
+                            1.600000023841858
+                        ],
+                        "SizeRandomStart": [
+                            0.75,
+                            1.25
+                        ],
+                        "SpawnDirectionMode": 3,
+                        "SpawnShape": 1,
+                        "SpawnSpace": 0,
+                        "Speed": [
+                            0.07999999821186066,
+                            0.3199999928474426
+                        ],
+                        "SpriteAnimationFps": 12.0,
+                        "SpriteAnimationLoop": 1,
+                        "SpriteAnimationRange": [
+                            0,
+                            0
+                        ],
+                        "SpriteSheetIndex": [
+                            0,
+                            0
+                        ],
+                        "StretchMax": 1.5,
+                        "StretchScale": 0.0,
+                        "TargetAttractionFalloff": 1.0,
+                        "TargetAttractionRange": 0.0,
+                        "TargetAttractionStrength": 0.0,
+                        "TargetPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "TexturePath": "",
+                        "TextureSplitCount": [
+                            1,
+                            1
+                        ],
+                        "UseColorOverLife": 1,
+                        "UseFresnel": 0,
+                        "UseGradient": 0,
+                        "UseMask": 1,
+                        "UseRandomSize": 1,
+                        "UseSpriteAnimation": 0,
+                        "UseTargetAttraction": 0,
+                        "VerticalSpawnRange": 0.0,
+                        "Wind": [
+                            0.0,
+                            0.20000000298023224,
+                            0.0
+                        ],
+                        "gradientDirection": 0,
+                        "gradientEndUv": 1.0,
+                        "gradientFixedUv": 0.5,
+                        "gradientSampleMode": 0,
+                        "gradientStartUv": 0.0,
+                        "gradientTexturePath": "",
+                        "maskTexturePath": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG",
+                        "shadeGradientDirection": 0,
+                        "shadeGradientEndUv": 1.0,
+                        "shadeGradientFixedUv": 0.5,
+                        "shadeGradientSampleMode": 0,
+                        "shadeGradientStartUv": 0.0,
+                        "shadeGradientTexturePath": "",
+                        "texturePath": "",
+                        "useGradientTexture": 0,
+                        "useShadeGradientTexture": 0
+                    }
+                ],
+                "IsPlaying": false
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "ParticleComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "IntroGateMist",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            -2.9946117401123047,
+            2.076157808303833,
+            -57.03769302368164
+        ],
+        "Rot": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

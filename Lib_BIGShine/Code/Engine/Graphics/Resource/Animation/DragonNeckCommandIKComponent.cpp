@@ -379,6 +379,13 @@ void DragonNeckCommandIKComponent::ApplyTargetObjectLookMode()
 {
     if (!lookTargetObjectMode) return;
 
+    if (currentCommand.mode != DRAGON_NECK_IK_MODE::DISABLED &&
+        !currentCommand.keepLastDirection)
+    {
+        // アニメイベントなどの一時Command中は、通常のPlayer注視で上書きしない。
+        return;
+    }
+
     if (currentCommand.mode == DRAGON_NECK_IK_MODE::LOOK_AT_TARGET &&
         currentCommand.targetName == lookTargetObjectName &&
         currentCommand.keepLastDirection)

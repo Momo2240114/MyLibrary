@@ -1152,6 +1152,10 @@ bool CameraLockOnComponent::ResolveFocusTargetFallback()
 
 void CameraLockOnComponent::UpdateLockOnSwitchInput(float deltaTime_)
 {
+    const auto owner_ = GetGameObject();
+    const auto gameMode_ = owner_ ? owner_->GetManager().GetGameModeManager() : nullptr;
+    // RETURN中は通常構図を計算しても、手動の対象切り替え入力は受け付けない。
+    if (gameMode_ && gameMode_->IsPlayerControlLocked()) return;
     // キーボード、ゲームパッド、マウス、ホイールを1つの切替方向へまとめ、ラッチとクールダウンで多重入力を抑える。
     DirectX::XMFLOAT2 inputDirection_ = GetKeyboardSwitchInput();
     const DirectX::XMFLOAT2 controllerInput_ = GetControllerSwitchInput();

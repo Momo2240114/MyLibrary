@@ -105,6 +105,7 @@ const char* GetDragonActionName(DRAGON_ACTION_TYPE action_)
     case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT: return "FireBallFront";
     case DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE: return "FireBallTriple";
     case DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP: return "FireBeamSweep";
+    case DRAGON_ACTION_TYPE::GROUND_STAMP: return "GroundStamp";
     default: return "Idle";
     }
 }
@@ -160,6 +161,11 @@ void DragonAIComponent::Start()
     randomEngine.seed(std::random_device{}());
     EnsureDependencies();
     InitializeDefaultDefinitions();
+    actionLastUsedOrders.assign(DRAGON_ACTION_COUNT, -1);
+    historySelectionAvailable.assign(DRAGON_ACTION_COUNT, false);
+    attackExecutionOrder = 0;
+    lastExecutedAttack = DRAGON_ACTION_TYPE::IDLE;
+    excludePreviousAttack = false;
     if (behaviorGraphEnabled &&
         behaviorGraph.GetNodes().empty() &&
         !behaviorGraphAssetPath.empty())
@@ -485,6 +491,7 @@ void DragonAIComponent::Gui()
         ImGui::DragFloat("Animation Blend", &animationBlendDuration, 0.01f, 0.0f, 2.0f);
         ImGui::Checkbox("Limit Turn RootMotion", &limitTurnRootMotion);
         ImGui::DragFloat("Turn RootMotion Padding", &turnRootMotionLimitPaddingDegrees, 0.1f, 0.0f, 30.0f);
+        ImGui::DragFloat("Spin Tail Rotation Degrees", &spinTailRotationDegrees, 1.0f, 0.0f, 360.0f);
         ImGui::SeparatorText("Monster Tactics");
         ImGui::DragFloat("Cracked Aggression", &crackedAggressionMultiplier, 0.01f, 0.1f, 5.0f);
         ImGui::DragFloat("Dark Leak Aggression", &darkLeakAggressionMultiplier, 0.01f, 0.1f, 5.0f);
@@ -531,6 +538,7 @@ void DragonAIComponent::Gui()
         if (ImGui::Button("Test TailSweep")) RequestAction(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP);
     }
 
+    DrawHistoryDebug();
     if (ImGui::CollapsingHeader("Action Toggles", ImGuiTreeNodeFlags_None))
     {
         BS_PROFILE_SCOPE("DragonAI GUI::Action Toggles");
@@ -551,6 +559,9 @@ void DragonAIComponent::Gui()
             }
             ImGui::SameLine();
             ImGui::Checkbox("Timeout", &definition_.useActionTimeout);
+            ImGui::Checkbox("History", &definition_.useHistory);
+            ImGui::DragFloat("Base Weight", &definition_.selectionWeight, 0.05f, 0.0f, 100.0f);
+            ImGui::DragFloat("Cooldown", &definition_.cooldownTime, 0.25f, 0.0f, 300.0f);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(80.0f);
             ImGui::DragFloat("Sec", &definition_.actionTimeout, 0.05f, 0.0f, 30.0f);
@@ -607,10 +618,16 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
     json_["AnimationBlendDuration"] = animationBlendDuration;
     json_["LimitTurnRootMotion"] = limitTurnRootMotion;
     json_["TurnRootMotionLimitPaddingDegrees"] = turnRootMotionLimitPaddingDegrees;
+    json_["SpinTailRotationDegrees"] = spinTailRotationDegrees;
     json_["CrackedAggressionMultiplier"] = crackedAggressionMultiplier;
     json_["DarkLeakAggressionMultiplier"] = darkLeakAggressionMultiplier;
     json_["CollapseAggressionMultiplier"] = collapseAggressionMultiplier;
     json_["RepeatActionPenaltyRate"] = repeatActionPenaltyRate;
+    json_["HistoryEnabled"] = historyEnabled;
+    json_["HistoryRecoveryCount"] = historyRecoveryCount;
+    json_["HistoryStarvationCount"] = historyStarvationCount;
+    json_["HistoryMaxBonus"] = historyMaxBonus;
+    json_["AttackCooldownMultiplier"] = attackCooldownMultiplier;
     json_["UnderBodyPunishMultiplier"] = underBodyPunishMultiplier;
     json_["SidePunishMultiplier"] = sidePunishMultiplier;
     json_["BehindPunishMultiplier"] = behindPunishMultiplier;
@@ -633,6 +650,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
             { "RecoveryTime", definition_.recoveryTime },
             { "CooldownTime", definition_.cooldownTime },
             { "SelectionWeight", definition_.selectionWeight },
+            { "UseHistory", definition_.useHistory },
             { "Enabled", definition_.enabled },
             { "WaitForActionEnd", definition_.waitForActionEnd },
             { "AllowBuffer", definition_.allowBuffer },
@@ -686,10 +704,16 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
     animationBlendDuration = json_.value("AnimationBlendDuration", 0.2f);
     limitTurnRootMotion = json_.value("LimitTurnRootMotion", true);
     turnRootMotionLimitPaddingDegrees = json_.value("TurnRootMotionLimitPaddingDegrees", 2.0f);
+    spinTailRotationDegrees = json_.value("SpinTailRotationDegrees", 180.0f);
     crackedAggressionMultiplier = json_.value("CrackedAggressionMultiplier", 1.10f);
     darkLeakAggressionMultiplier = json_.value("DarkLeakAggressionMultiplier", 1.25f);
     collapseAggressionMultiplier = json_.value("CollapseAggressionMultiplier", 1.45f);
     repeatActionPenaltyRate = json_.value("RepeatActionPenaltyRate", 0.35f);
+    historyEnabled = json_.value("HistoryEnabled", true);
+    historyRecoveryCount = (std::max)(1, json_.value("HistoryRecoveryCount", 3));
+    historyStarvationCount = (std::max)(1, json_.value("HistoryStarvationCount", 5));
+    historyMaxBonus = (std::max)(1.0f, json_.value("HistoryMaxBonus", 4.0f));
+    attackCooldownMultiplier = (std::max)(0.0f, json_.value("AttackCooldownMultiplier", 5.0f));
     underBodyPunishMultiplier = json_.value("UnderBodyPunishMultiplier", 1.60f);
     sidePunishMultiplier = json_.value("SidePunishMultiplier", 1.35f);
     behindPunishMultiplier = json_.value("BehindPunishMultiplier", 1.70f);
@@ -717,6 +741,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
             definition_->recoveryTime = definitionJson_.value("RecoveryTime", definition_->recoveryTime);
             definition_->cooldownTime = definitionJson_.value("CooldownTime", definition_->cooldownTime);
             definition_->selectionWeight = definitionJson_.value("SelectionWeight", definition_->selectionWeight);
+            definition_->useHistory = definitionJson_.value("UseHistory", true);
             definition_->enabled = definitionJson_.value("Enabled", definition_->enabled);
             definition_->waitForActionEnd = definitionJson_.value("WaitForActionEnd", definition_->waitForActionEnd);
             definition_->allowBuffer = definitionJson_.value("AllowBuffer", definition_->allowBuffer);
@@ -744,6 +769,15 @@ bool DragonAIComponent::RequestAction(DRAGON_ACTION_TYPE action_)
 {
     BS_PROFILE_SCOPE("DragonAIComponent::RequestAction");
 
+    if (action_ == DRAGON_ACTION_TYPE::TURN_TO_PLAYER)
+    {
+        const DRAGON_ACTION_TYPE antiFlankAction_ = ResolveAntiFlankAction();
+        if (antiFlankAction_ != DRAGON_ACTION_TYPE::IDLE)
+        {
+            action_ = antiFlankAction_;
+        }
+    }
+
     // 通常リクエストは有効/クールダウン/キャンセル可否を見て、必要ならバッファへ積む。
     if (action_ == DRAGON_ACTION_TYPE::IDLE)
     {
@@ -754,6 +788,70 @@ bool DragonAIComponent::RequestAction(DRAGON_ACTION_TYPE action_)
     {
         lastRejectedAction = action_;
         return false;
+    }
+    if ((action_ == DRAGON_ACTION_TYPE::WALK_APPROACH ||
+        action_ == DRAGON_ACTION_TYPE::RUN_CHARGE) &&
+        !CanUseGroundApproach(context))
+    {
+        statusText = "Rejected ground approach: target is not in approach lane.";
+        lastRejectedAction = action_;
+        return false;
+    }
+    if (action_ == DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP &&
+        !CanUseTurnTailSweep(context))
+    {
+        // Graphから直接呼ばれた尻尾攻撃が届かない時は、停止せず向き直りや離脱へ逃がす。
+        if (context.playerHorizontalDistance <= biteDistance + 1.5f &&
+            IsActionAvailable(DRAGON_ACTION_TYPE::TAKE_OFF))
+        {
+            action_ = DRAGON_ACTION_TYPE::TAKE_OFF;
+        }
+        else if (IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
+        {
+            action_ = DRAGON_ACTION_TYPE::TURN_TO_PLAYER;
+        }
+        else
+        {
+            statusText = "Rejected tail sweep: target is outside tail hit range.";
+            lastRejectedAction = DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP;
+            return false;
+        }
+    }
+    if (action_ == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP &&
+        !CanUseSpinTailSweep(context))
+    {
+        // 回転尻尾も射程外では固まらないよう、状況に合う基本行動へ戻す。
+        if (context.playerHorizontalDistance <= biteDistance + 1.5f &&
+            IsActionAvailable(DRAGON_ACTION_TYPE::TAKE_OFF))
+        {
+            action_ = DRAGON_ACTION_TYPE::TAKE_OFF;
+        }
+        else if (IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
+        {
+            action_ = DRAGON_ACTION_TYPE::TURN_TO_PLAYER;
+        }
+        else
+        {
+            statusText = "Rejected spin tail sweep: target is outside spin hit range.";
+            lastRejectedAction = DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP;
+            return false;
+        }
+    }
+    // 正面足元では、Graphの離陸要求も使用可能な地上近接攻撃へ振り分ける。
+    if (action_ == DRAGON_ACTION_TYPE::TAKE_OFF &&
+        hasPlayerTarget && context.isPlayerInFront &&
+        context.playerHorizontalDistance <= underBodyDistance + 1.0f)
+    {
+        if (IsActionAvailable(DRAGON_ACTION_TYPE::GROUND_STAMP) &&
+            !(historyEnabled && lastExecutedAttack == DRAGON_ACTION_TYPE::GROUND_STAMP))
+        {
+            action_ = DRAGON_ACTION_TYPE::GROUND_STAMP;
+        }
+        else if (IsActionAvailable(DRAGON_ACTION_TYPE::BITE) &&
+            !(historyEnabled && lastExecutedAttack == DRAGON_ACTION_TYPE::BITE))
+        {
+            action_ = DRAGON_ACTION_TYPE::BITE;
+        }
     }
     if (runtime.currentAction == action_)
     {
@@ -917,6 +1015,8 @@ void DragonAIComponent::CompleteActionEnd()
     runtime.canCancel = true;
     runtime.canBufferAction = false;
     ClearTurnRootMotionLimit();
+    DisableSequencerHitBoxes();
+    ClearTailIK();
     if (const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction))
     {
         const std::string animationActionName_ = ResolveAnimationActionName(*definition_);
@@ -1057,6 +1157,7 @@ void DragonAIComponent::RegisterActions()
 
 DRAGON_ACTION_TYPE DragonAIComponent::SelectNextAction(const DragonAIContext& context_)
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::SelectNextAction");
     if (hasPlayerTarget &&
         !context_.isPlayerInFront &&
         IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
@@ -1066,6 +1167,32 @@ DRAGON_ACTION_TYPE DragonAIComponent::SelectNextAction(const DragonAIContext& co
 
     std::vector<DragonActionCandidate> candidates_;
     AddActionCandidates(context_, candidates_);
+    return SelectHistoryWeightedAction(candidates_);
+}
+
+// 条件を満たした候補へ履歴補正と連続使用除外を適用して抽選する。
+DRAGON_ACTION_TYPE DragonAIComponent::SelectHistoryWeightedAction(std::vector<DragonActionCandidate>& candidates_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::SelectHistoryWeightedAction");
+    std::vector<DRAGON_ACTION_TYPE> actions_;
+    for (const DragonActionCandidate& candidate_ : candidates_) actions_.push_back(candidate_.action);
+    PrepareHistorySelection(actions_);
+    for (DragonActionSelectionDebug& debug_ : selectionDebugWeights)
+    {
+        debug_.baseWeight = 0.0f;
+        debug_.finalWeight = 0.0f;
+    }
+    for (DragonActionCandidate& candidate_ : candidates_)
+    {
+        DragonActionSelectionDebug& debug_ = selectionDebugWeights[ToIndex(candidate_.action)];
+        debug_.baseWeight += candidate_.weight;
+        debug_.historyModifier = CalculateHistoryModifier(candidate_.action);
+        candidate_.weight *= CalculateHistoryModifier(candidate_.action);
+        if (excludePreviousAttack && candidate_.action == lastExecutedAttack) candidate_.weight = 0.0f;
+        debug_.finalWeight += candidate_.weight;
+    }
+    candidates_.erase(std::remove_if(candidates_.begin(), candidates_.end(),
+        [](const DragonActionCandidate& candidate_) { return candidate_.weight <= 0.0f; }), candidates_.end());
     if (candidates_.empty())
     {
         return DRAGON_ACTION_TYPE::IDLE;
@@ -1106,34 +1233,57 @@ void DragonAIComponent::AddActionCandidates(
 
     if (context_.isPlayerUnderBody && context_.canUseBite)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 5.0f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 8.0f);
+    }
+    // 前足の近くでは地上スタンプを候補に加え、噛みつきと併せて近接攻撃を選びやすくする。
+    if (context_.isPlayerInFront &&
+        context_.playerHorizontalDistance <= underBodyDistance + 1.0f &&
+        context_.canUseGroundStamp)
+    {
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::GROUND_STAMP, 6.5f);
     }
     if ((context_.isPlayerUnderBody || context_.playerHorizontalDistance <= biteDistance + 1.5f) &&
         context_.canUseTakeOff)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, 2.0f);
+        const float takeOffWeight_ = context_.isPlayerInFront ? 0.7f : 2.0f;
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, takeOffWeight_);
     }
-    if (context_.isPlayerBehind && context_.canUseTailSweep)
+    const bool canUseTurnTailSweep_ =
+        context_.canUseTailSweep &&
+        CanUseTurnTailSweep(context_);
+    const bool canUseSpinTailSweep_ =
+        context_.canUseSpinSweep &&
+        CanUseSpinTailSweep(context_);
+    const float biteCandidateDistance_ = (std::max)(biteDistance, approachEndDistance);
+
+    if (ShouldTurnForCloseFrontTarget(context_) &&
+        IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
+    {
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TO_PLAYER, 3.0f);
+    }
+    if (context_.isPlayerBehind && canUseTurnTailSweep_)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, 4.0f);
     }
-    if (context_.isPlayerBehind && context_.canUseSpinSweep)
+    if (context_.isPlayerBehind && canUseSpinTailSweep_)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 2.4f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 1.2f);
     }
-    if (context_.isPlayerInSide && context_.canUseTailSweep)
+    if (context_.isPlayerInSide && canUseTurnTailSweep_)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, 1.4f);
     }
-    if (context_.isPlayerInSide && context_.canUseSpinSweep)
+    if (context_.isPlayerInSide && canUseSpinTailSweep_)
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 1.2f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 0.6f);
     }
     if (context_.isPlayerInSide)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TO_PLAYER, 1.2f);
     }
-    if (context_.isPlayerInFront && context_.playerHorizontalDistance < biteDistance && context_.canUseBite)
+    if (context_.isPlayerInFront &&
+        context_.playerHorizontalDistance <= biteCandidateDistance_ &&
+        context_.canUseBite)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::BITE, 8.0f);
     }
@@ -1147,21 +1297,28 @@ void DragonAIComponent::AddActionCandidates(
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP, 1.1f);
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP, 1.15f);
     }
-    if (context_.playerHorizontalDistance >= farDistance && context_.canUseSpreadBreath)
+    if (context_.playerHorizontalDistance >= farDistance)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPREAD_BREATH, 1.1f);
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD, 1.0f);
     }
-    if (context_.playerHorizontalDistance >= mediumDistance && context_.canUseRunCharge)
+    if (CanUseGroundApproach(context_) &&
+        context_.playerHorizontalDistance >= mediumDistance &&
+        context_.canUseRunCharge)
     {
         AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::RUN_CHARGE, 1.5f);
     }
-    if (context_.canUseSpinSweep)
+    if (CanUseGroundApproach(context_))
     {
-        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, 0.45f);
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::WALK_APPROACH, 0.25f);
     }
-
-    AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::WALK_APPROACH, 0.25f);
+    else if (context_.isPlayerInFront &&
+        context_.playerHorizontalDistance > biteDistance &&
+        context_.playerHorizontalDistance <= approachEndDistance + 1.0f &&
+        IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER))
+    {
+        AddWeightedActionCandidate(context_, candidates_, DRAGON_ACTION_TYPE::TURN_TO_PLAYER, 1.0f);
+    }
 }
 
 float DragonAIComponent::CalculateAggressionMultiplier(const DragonAIContext& context_) const
@@ -1202,14 +1359,11 @@ float DragonAIComponent::CalculateActionSituationWeight(
     {
         weight_ *= CalculateAggressionMultiplier(context_);
     }
-    if (IsRepeatLimitedAttack(action_) && lastCompletedAttackAction == action_)
-    {
-        weight_ *= std::clamp(repeatActionPenaltyRate, 0.0f, 1.0f);
-    }
 
     if (context_.isPlayerUnderBody &&
         (action_ == DRAGON_ACTION_TYPE::BITE ||
             action_ == DRAGON_ACTION_TYPE::TAKE_OFF ||
+            action_ == DRAGON_ACTION_TYPE::GROUND_STAMP ||
             action_ == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP))
     {
         weight_ *= (std::max)(0.1f, underBodyPunishMultiplier);
@@ -1367,6 +1521,7 @@ void DragonAIComponent::InitializeDefaultDefinitions()
     addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT, "FireBallFront", "PlainsDragon_SpitFireBall_Front", "", 2.2f, 0.55f, 4.0f, 3.2f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE, "FireBallTriple", "PlainsDragon_SpitFireBall_Triple", "", 3.4f, 0.70f, 6.0f, 4.4f);
     addMissingDefinition_(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP, "FireBeamSweep", "PlainsDragon_FireBeam_Sweep45", "", 3.2f, 0.70f, 6.0f, 4.2f);
+    addMissingDefinition_(DRAGON_ACTION_TYPE::GROUND_STAMP, "GroundStamp", "DragonGroundStamp", "", 1.8f, 0.45f, 4.0f, 2.8f);
 
     ApplyActionDefinitionRuntimePolicies();
 
@@ -1376,6 +1531,8 @@ void DragonAIComponent::InitializeDefaultDefinitions()
 void DragonAIComponent::ApplyActionDefinitionRuntimePolicies()
 {
     BS_PROFILE_SCOPE("DragonAIComponent::ApplyActionDefinitionRuntimePolicies");
+
+    // 抽選対象の攻撃のWeightとCooldownは定義・JSON・Editorの設定を優先する。
 
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::WALK_APPROACH))
     {
@@ -1401,98 +1558,85 @@ void DragonAIComponent::ApplyActionDefinitionRuntimePolicies()
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::BITE))
     {
-        definition_->cooldownTime = 0.8f;
-        definition_->selectionWeight = 1.35f;
         definition_->hitBoxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL))
     {
-        definition_->cooldownTime = 3.0f;
         definition_->recoveryTime = 0.35f;
-        definition_->selectionWeight = 0.45f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP))
     {
-        definition_->cooldownTime = 3.5f;
         definition_->recoveryTime = 0.40f;
-        definition_->selectionWeight = 1.05f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPREAD_BREATH))
     {
-        definition_->cooldownTime = 5.0f;
         definition_->recoveryTime = 0.45f;
-        definition_->selectionWeight = 0.85f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD))
     {
-        definition_->cooldownTime = 5.5f;
         definition_->recoveryTime = 0.45f;
-        definition_->selectionWeight = 0.85f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT))
     {
-        definition_->cooldownTime = 3.2f;
         definition_->recoveryTime = 0.35f;
-        definition_->selectionWeight = 1.10f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE))
     {
-        definition_->cooldownTime = 4.0f;
         definition_->recoveryTime = 0.45f;
-        definition_->selectionWeight = 1.20f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP))
     {
-        definition_->cooldownTime = 4.0f;
         definition_->recoveryTime = 0.45f;
-        definition_->selectionWeight = 1.15f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP))
     {
-        definition_->selectionWeight = 1.15f;
-        definition_->cooldownTime = 2.4f;
         definition_->hitBoxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP))
     {
         // 専用アニメが無い回転尻尾攻撃はTurn90を土台にし、IKと判定を時間制御で重ねる。
-        definition_->selectionWeight = 1.05f;
         definition_->finishMode = DRAGON_ACTION_FINISH_MODE::AI_DURATION;
         definition_->waitForActionEnd = false;
         definition_->useActionTimeout = false;
+        definition_->animationStateName = "Turn90L";
+        definition_->duration = 1.8f;
+        definition_->recoveryTime = 0.45f;
+        definition_->hitBoxActionName.clear();
+    }
+    if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::GROUND_STAMP))
+    {
+        // 回転アニメを別ステートで使い、モデル回転なしの足元スタンプとして扱う。
+        definition_->animationStateName = "DragonGroundStamp";
         definition_->duration = 1.8f;
         definition_->recoveryTime = 0.45f;
         definition_->hitBoxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::TAKE_OFF))
     {
-        definition_->cooldownTime = 7.0f;
         definition_->recoveryTime = 0.0f;
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::AIR_FIRE_BALL))
     {
-        definition_->cooldownTime = 4.0f;
         definition_->recoveryTime = 0.0f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
     }
     if (DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH))
     {
-        definition_->cooldownTime = 7.0f;
         definition_->recoveryTime = 0.0f;
         definition_->hitBoxActionName.clear();
         definition_->vfxActionName.clear();
@@ -1617,10 +1761,15 @@ void DragonAIComponent::UpdateContext()
     // クールダウンや有効フラグ込みの使用可否をContextへ保存し、Graph/重み選択の共通入力にする。
     context.canUseFireBall = IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL);
     context.canUseSpreadBreath = IsActionAvailable(DRAGON_ACTION_TYPE::SPREAD_BREATH);
-    context.canUseTailSweep = IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP);
+    context.canUseTailSweep =
+        IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP) &&
+        CanUseTurnTailSweep(context);
     context.canUseTakeOff = IsActionAvailable(DRAGON_ACTION_TYPE::TAKE_OFF);
     context.canUseRunCharge = IsActionAvailable(DRAGON_ACTION_TYPE::RUN_CHARGE);
-    context.canUseSpinSweep = IsActionAvailable(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP);
+    context.canUseSpinSweep =
+        IsActionAvailable(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP) &&
+        CanUseSpinTailSweep(context);
+    context.canUseGroundStamp = IsActionAvailable(DRAGON_ACTION_TYPE::GROUND_STAMP);
 }
 
 void DragonAIComponent::UpdateUltimateTrigger()
@@ -1729,6 +1878,7 @@ void DragonAIComponent::UpdateDecision(float deltaTime_)
 
 void DragonAIComponent::UpdateBehaviorGraph(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::UpdateBehaviorGraph");
     // BehaviorGraphは一定間隔でTickし、Blackboard条件からPLAY_ACTIONノードを通じて行動を要求する。
     if (!autoDecisionEnabled ||
         aiState != DRAGON_AI_STATE::IDLE ||
@@ -1763,6 +1913,36 @@ void DragonAIComponent::UpdateBehaviorGraph(float deltaTime_)
     behaviorContext.deltaTime = deltaTime_;
     behaviorContext.hasTarget = behaviorContext.target != nullptr;
 
+    // 実行中のGraph継続には補正を掛けず、新しい地上行動の選択時だけ候補を調べる。
+    behaviorContext.actionWeightModifier = {};
+    behaviorContext.actionWeightObserver = {};
+    if (aiState == DRAGON_AI_STATE::IDLE)
+    {
+        std::vector<DRAGON_ACTION_TYPE> actions_;
+        for (const std::string& actionName_ : behaviorGraph.GetSelectableActions(behaviorContext))
+        {
+            for (const DragonActionDefinition& definition_ : actionDefinitions)
+                if (actionName_ == "DragonAI_" + definition_.actionName && IsActionAvailable(definition_.action) && definition_.selectionWeight > 0.0f)
+                    actions_.push_back(definition_.action);
+        }
+        PrepareHistorySelection(actions_);
+        behaviorContext.actionWeightModifier = [this](const std::string& actionName_)
+        {
+            return ResolveGraphActionModifier(actionName_);
+        };
+        behaviorContext.actionWeightObserver = [this](const std::string& actionName_, float branchWeight_, float modifier_)
+        {
+            for (const DragonActionDefinition& definition_ : actionDefinitions)
+            {
+                if (actionName_ != "DragonAI_" + definition_.actionName) continue;
+                DragonActionSelectionDebug& debug_ = selectionDebugWeights[ToIndex(definition_.action)];
+                debug_.baseWeight = (std::max)(0.0f, branchWeight_) * GetSelectionWeight(definition_.action);
+                debug_.historyModifier = CalculateHistoryModifier(definition_.action);
+                debug_.finalWeight = (std::max)(0.0f, branchWeight_) * modifier_;
+            }
+        };
+    }
+
     lastBehaviorStatus = behaviorGraph.Tick(behaviorContext);
     ++behaviorGraphTickCount;
 }
@@ -1793,16 +1973,13 @@ DRAGON_ACTION_TYPE DragonAIComponent::SelectNextAirAction()
             pendingAirLandingDecision = true;
             return DRAGON_ACTION_TYPE::AIR_HOLD;
         }
-        if (context.playerDistance >= farDistance &&
-            IsActionAvailable(DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH) &&
-            lastCompletedAttackAction != DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH)
-        {
-            return DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH;
-        }
-        if (IsActionAvailable(DRAGON_ACTION_TYPE::AIR_FIRE_BALL))
-        {
-            return DRAGON_ACTION_TYPE::AIR_FIRE_BALL;
-        }
+        // 高度・攻撃回数・距離条件を通過した空中攻撃にも履歴補正を適用する。
+        std::vector<DragonActionCandidate> candidates_;
+        if (context.playerDistance >= farDistance)
+            AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH, 1.0f);
+        AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::AIR_FIRE_BALL, 1.0f);
+        const DRAGON_ACTION_TYPE action_ = SelectHistoryWeightedAction(candidates_);
+        if (action_ != DRAGON_ACTION_TYPE::IDLE) return action_;
     }
 
     return DRAGON_ACTION_TYPE::LANDING_ATTACK;
@@ -1867,13 +2044,27 @@ void DragonAIComponent::UpdateActionMotion(float deltaTime_)
     switch (runtime.currentAction)
     {
     case DRAGON_ACTION_TYPE::WALK_APPROACH:
+        if (!CanUseGroundApproach(context))
+        {
+            StopMovement();
+            break;
+        }
         MoveGround(walkSpeed, groundMoveTurnSpeed, deltaTime_);
         break;
     case DRAGON_ACTION_TYPE::RUN_CHARGE:
+        if (!CanUseGroundApproach(context))
+        {
+            StopMovement();
+            break;
+        }
         MoveGround(runSpeed, groundMoveTurnSpeed * 0.6f, deltaTime_);
         break;
     case DRAGON_ACTION_TYPE::TURN_TO_PLAYER:
         StopMovement();
+        break;
+    case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
+        StopMovement();
+        UpdateSpinTailSweepRotation(deltaTime_);
         break;
     case DRAGON_ACTION_TYPE::TAKE_OFF:
         MoveForward(-takeOffBackSpeed, deltaTime_);
@@ -1889,7 +2080,7 @@ void DragonAIComponent::UpdateActionMotion(float deltaTime_)
         MoveAir(airForwardSpeed, airTurnSpeed, deltaTime_);
         break;
     case DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP:
-    case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
+    case DRAGON_ACTION_TYPE::GROUND_STAMP:
     case DRAGON_ACTION_TYPE::BITE:
     case DRAGON_ACTION_TYPE::FIRE_BALL:
     case DRAGON_ACTION_TYPE::FIRE_BALL_FRONT:
@@ -1928,10 +2119,7 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
     {
     case DRAGON_ACTION_TYPE::WALK_APPROACH:
     {
-        const float moveEndDistance_ = (std::max)(approachEndDistance, biteDistance + 0.75f);
-        if (!hasPlayerTarget ||
-            !context.isPlayerInFront ||
-            context.playerHorizontalDistance <= moveEndDistance_)
+        if (!CanUseGroundApproach(context))
         {
             StopMovement();
             statusText = !context.isPlayerInFront
@@ -1950,9 +2138,7 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
             return false;
         }
         const float moveEndDistance_ = (std::max)(approachEndDistance, biteDistance + 0.75f);
-        if (!hasPlayerTarget ||
-            !context.isPlayerInFront ||
-            context.playerHorizontalDistance <= moveEndDistance_ ||
+        if (!CanUseGroundApproach(context) ||
             runtime.actionTimer >= definition_->duration)
         {
             StopMovement();
@@ -2234,6 +2420,60 @@ void DragonAIComponent::StopMovement()
     }
 }
 
+void DragonAIComponent::BeginSpinTailSweepRotation()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::BeginSpinTailSweepRotation");
+
+    spinTailRotationDirection = context.playerAngleDegrees >= 0.0f ? 1.0f : -1.0f;
+    spinTailRotationAppliedYaw = 0.0f;
+}
+
+void DragonAIComponent::UpdateSpinTailSweepRotation(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::UpdateSpinTailSweepRotation");
+
+    const auto owner_ = GetGameObject();
+    if (!owner_ || !owner_->transform)
+    {
+        return;
+    }
+
+    const DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP);
+    const float duration_ = definition_ ? (std::max)(definition_->duration, 0.001f) : 1.0f;
+    const float afterRate_ = std::clamp((runtime.actionTimer + deltaTime_) / duration_, 0.0f, 1.0f);
+    constexpr float WINDUP_END_RATE = 0.18f;
+    constexpr float BURST_END_RATE = 0.72f;
+    constexpr float WINDUP_YAW_RATE = 0.04f;
+    constexpr float BURST_YAW_RATE = 0.92f;
+    float rotationRate_ = 0.0f;
+    if (afterRate_ < WINDUP_END_RATE)
+    {
+        const float windupRate_ = afterRate_ / WINDUP_END_RATE;
+        rotationRate_ = WINDUP_YAW_RATE * windupRate_ * windupRate_;
+    }
+    else if (afterRate_ < BURST_END_RATE)
+    {
+        const float burstRate_ = (afterRate_ - WINDUP_END_RATE) / (BURST_END_RATE - WINDUP_END_RATE);
+        const float burstRemainRate_ = 1.0f - burstRate_;
+        rotationRate_ = WINDUP_YAW_RATE +
+            (BURST_YAW_RATE - WINDUP_YAW_RATE) *
+            (1.0f - burstRemainRate_ * burstRemainRate_ * burstRemainRate_);
+    }
+    else
+    {
+        const float settleRate_ = (afterRate_ - BURST_END_RATE) / (1.0f - BURST_END_RATE);
+        const float settleSmoothRate_ = settleRate_ * settleRate_ * (3.0f - 2.0f * settleRate_);
+        rotationRate_ = BURST_YAW_RATE + (1.0f - BURST_YAW_RATE) * settleSmoothRate_;
+    }
+    const float targetAppliedYaw_ = spinTailRotationDegrees * spinTailRotationDirection * rotationRate_;
+    const float yawDelta_ = targetAppliedYaw_ - spinTailRotationAppliedYaw;
+
+    // 溜めから一気に回るカーブにして、尻尾回転攻撃の打撃感を出す。
+    owner_->transform->localRotation.y =
+        NormalizeAngle(owner_->transform->localRotation.y + yawDelta_);
+    spinTailRotationAppliedYaw = targetAppliedYaw_;
+}
+
 void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
 {
     // 実際のアクション開始地点。ランタイム状態、クールダウン、アニメーション、IK、外部Actionをまとめて更新する。
@@ -2243,6 +2483,8 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     lastStartedAction = action_;
     ++actionStartCount;
     pendingSequencerActionEnd = false;
+    DisableSequencerHitBoxes();
+    ClearTailIK();
     runtime.currentAction = action_;
     runtime.bufferedAction = DRAGON_ACTION_TYPE::IDLE;
     runtime.actionTimer = 0.0f;
@@ -2276,6 +2518,11 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
         pendingAirAttackDecision = false;
         pendingAirLandingDecision = false;
     }
+    if (action_ == DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP)
+    {
+        // RMなしのTurn90を使うため、180度回転は毎フレームのAI更新で補間する。
+        BeginSpinTailSweepRotation();
+    }
 
     aiState = DRAGON_AI_STATE::ACTION;
     if (action_ == DRAGON_ACTION_TYPE::AIR_HOLD ||
@@ -2296,7 +2543,9 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
         runtime.canBufferAction = true;
         RequestAirIdleGraphTransition();
     }
-    SetCooldown(action_, definition_->cooldownTime);
+    RecordActionHistory(action_);
+    SetCooldown(action_, definition_->cooldownTime *
+        (UsesActionHistory(action_) ? (std::max)(0.0f, attackCooldownMultiplier) : 1.0f));
     SendRuntimeToBlackboard();
 }
 
@@ -2316,6 +2565,8 @@ void DragonAIComponent::FinishRecovery()
     runtime.canCancel = true;
     runtime.canBufferAction = false;
     ClearTurnRootMotionLimit();
+    DisableSequencerHitBoxes();
+    ClearTailIK();
     aiState = DRAGON_AI_STATE::IDLE;
     pendingAirAttackDecision = false;
     pendingAirLandingDecision = false;
@@ -2507,6 +2758,7 @@ void DragonAIComponent::RequestIdleGraphTransition()
         animationController_->SetParam("ReturnToIdle", true);
         animationController_->SetParam("ReturnToAirIdle", false);
         animationController_->SetTrigger(triggerName_);
+        animationController_->EvaluateGraphTransitions();
     }
 }
 
@@ -2546,6 +2798,7 @@ void DragonAIComponent::ResetAnimationActionTriggers(const std::string& keepTrig
         "PlainsDragon_Turn90L_RM",
         "PlainsDragon_Turn90R_RM",
         "PlainsDragon_BiteAttack",
+        "DragonGroundStamp",
         "PlainsDragon_SpitFireBall",
         "PlainsDragon_SpitFireBall_Sweep",
         "PlainsDragon_SpitFireBall_Front",
@@ -2633,9 +2886,6 @@ void DragonAIComponent::ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float durati
             }
         }
         break;
-    case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
-        if (tailIK_) tailIK_->StartSpinSweep(duration_);
-        break;
     default:
         break;
     }
@@ -2648,6 +2898,66 @@ void DragonAIComponent::ExecuteOwnerAction(const std::string& actionName_)
     const auto owner_ = GetGameObject();
     if (!owner_) return;
     owner_->ExecuteAction(actionName_);
+}
+
+void DragonAIComponent::EnableBiteHitBox()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::EnableBiteHitBox");
+
+    // 頭部HitBoxの攻撃IDを更新してから有効化し、噛みつきごとに新しい攻撃判定として扱う。
+    ExecuteOwnerAction("BiteHitBox_NewAttackInstance");
+    ExecuteOwnerAction("BiteHitBox_ClearAttackHits");
+    ExecuteOwnerAction("BiteHitBox_EnableHitBox");
+}
+
+void DragonAIComponent::DisableBiteHitBox()
+{
+    ExecuteOwnerAction("BiteHitBox_DisableHitBox");
+}
+
+void DragonAIComponent::EnableTailHitBoxes()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::EnableTailHitBoxes");
+
+    // 尻尾は複数部位に分かれているため、同じ攻撃タイミングでまとめて開く。
+    ExecuteOwnerAction("TailAttack01HitBox_NewAttackInstance");
+    ExecuteOwnerAction("TailAttack01HitBox_ClearAttackHits");
+    ExecuteOwnerAction("TailAttack01HitBox_EnableHitBox");
+    ExecuteOwnerAction("TailAttack02HitBox_NewAttackInstance");
+    ExecuteOwnerAction("TailAttack02HitBox_ClearAttackHits");
+    ExecuteOwnerAction("TailAttack02HitBox_EnableHitBox");
+}
+
+void DragonAIComponent::DisableTailHitBoxes()
+{
+    ExecuteOwnerAction("TailAttack01HitBox_DisableHitBox");
+    ExecuteOwnerAction("TailAttack02HitBox_DisableHitBox");
+}
+
+void DragonAIComponent::DisableSequencerHitBoxes()
+{
+    DisableBiteHitBox();
+    DisableTailHitBoxes();
+}
+
+void DragonAIComponent::StartSequencerSpinTailIK()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::StartSequencerSpinTailIK");
+
+    const DragonActionDefinition* definition_ = FindDefinition(DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP);
+    const float duration_ = definition_ ? definition_->duration : 1.8f;
+    if (const std::shared_ptr<DragonTailCommandIKComponent> tailIK_ = tailIK.lock())
+    {
+        tailIK_->StartSpinSweep(duration_);
+    }
+}
+
+void DragonAIComponent::ClearTailIK()
+{
+    if (const std::shared_ptr<DragonTailCommandIKComponent> tailIK_ = tailIK.lock())
+    {
+        tailIK_->SetFollowBody();
+    }
 }
 
 void DragonAIComponent::SendRuntimeToBlackboard()
@@ -2663,30 +2973,24 @@ void DragonAIComponent::SendRuntimeToBlackboard()
         !runtime.actionEnded;
     const bool canUseTurnToPlayer_ = IsActionAvailable(DRAGON_ACTION_TYPE::TURN_TO_PLAYER);
     const bool canUseFireBall_ =
-        context.canUseFireBall &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL;
+        context.canUseFireBall;
     const bool canUseFireBallSweep_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP;
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_SWEEP);
     const bool canUseFireBallFront_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL_FRONT;
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_FRONT);
     const bool canUseFireBallTriple_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE;
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BALL_TRIPLE);
     const bool canUseFireBeamSweep_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP;
+        IsActionAvailable(DRAGON_ACTION_TYPE::FIRE_BEAM_SWEEP);
     const bool canUseSpreadBreathForward_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD;
+        IsActionAvailable(DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD);
     const bool canUseAirFireBall_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::AIR_FIRE_BALL) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::AIR_FIRE_BALL;
+        IsActionAvailable(DRAGON_ACTION_TYPE::AIR_FIRE_BALL);
     const bool canUseAirSpreadBreath_ =
-        IsActionAvailable(DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH) &&
-        lastCompletedAttackAction != DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH;
+        IsActionAvailable(DRAGON_ACTION_TYPE::AIR_SPREAD_BREATH);
     const bool canUseLandingAttack_ = IsActionAvailable(DRAGON_ACTION_TYPE::LANDING_ATTACK);
+    const bool canUseGroundStamp_ =
+        context.canUseGroundStamp;
 
     // 上段は読みやすいキー名、下段は互換用の別名も含めて同じ状況を広めに公開している。
     blackboard->SetBool(blackboardCategory, "HasTarget", hasPlayerTarget);
@@ -2704,6 +3008,7 @@ void DragonAIComponent::SendRuntimeToBlackboard()
     blackboard->SetBool(blackboardCategory, "CanUseTakeOff", context.canUseTakeOff);
     blackboard->SetBool(blackboardCategory, "CanUseRunCharge", context.canUseRunCharge);
     blackboard->SetBool(blackboardCategory, "CanUseSpinSweep", context.canUseSpinSweep);
+    blackboard->SetBool(blackboardCategory, "CanUseGroundStamp", canUseGroundStamp_);
     blackboard->SetBool(blackboardCategory, "CanUseTurnToPlayer", canUseTurnToPlayer_);
     blackboard->SetBool(blackboardCategory, "CanUseFireBallSweep", canUseFireBallSweep_);
     blackboard->SetBool(blackboardCategory, "CanUseFireBallFront", canUseFireBallFront_);
@@ -2838,6 +3143,7 @@ AIBehaviorNode* DragonAIComponent::AddDragonGraphAction(
     else if (actionName_ == "DragonAI_TurnTailSweep") availabilityKey_ = "CanUseTailSweep";
     else if (actionName_ == "DragonAI_TakeOff") availabilityKey_ = "CanUseTakeOff";
     else if (actionName_ == "DragonAI_SpinTailSweep") availabilityKey_ = "CanUseSpinSweep";
+    else if (actionName_ == "DragonAI_GroundStamp") availabilityKey_ = "CanUseGroundStamp";
     else if (actionName_ == "DragonAI_RunCharge") availabilityKey_ = "CanUseRunCharge";
     else if (actionName_ == "DragonAI_TurnToPlayer") availabilityKey_ = "CanUseTurnToPlayer";
     else if (actionName_ == "DragonAI_FireBallSweep") availabilityKey_ = "CanUseFireBallSweep";
@@ -2934,6 +3240,12 @@ void DragonAIComponent::RegisterRuntimeActions()
     registerAction_("DragonAI_AIActionEnd", [this]() { NotifyAIActionEnd(); });
     registerAction_("DragonAI_PlaySequencerAttack", [this]() { PlaySequencerAttackAction(); });
     registerAction_("DragonAI_ShowSequencerDanger", [this]() { ShowSequencerDangerAction(); });
+    registerAction_("DragonAI_EnableBiteHitBox", [this]() { EnableBiteHitBox(); });
+    registerAction_("DragonAI_DisableBiteHitBox", [this]() { DisableBiteHitBox(); });
+    registerAction_("DragonAI_EnableTailHitBox", [this]() { EnableTailHitBoxes(); });
+    registerAction_("DragonAI_DisableTailHitBox", [this]() { DisableTailHitBoxes(); });
+    registerAction_("DragonAI_StartSpinTailIK", [this]() { StartSequencerSpinTailIK(); });
+    registerAction_("DragonAI_ClearTailIK", [this]() { ClearTailIK(); });
     registerAction_("DragonAI_PlayFireBallTripleSecond", [this]()
         {
             PlaySequencerLinkedState("PlainsDragon_SpitFireBall_Triple2");
@@ -3004,6 +3316,7 @@ void DragonAIComponent::RegisterRuntimeActions()
     registerAction_("DragonAI_TestFireBall", [this]() { RequestAction(DRAGON_ACTION_TYPE::FIRE_BALL); });
     registerAction_("DragonAI_TestSpreadBreath", [this]() { RequestAction(DRAGON_ACTION_TYPE::SPREAD_BREATH); });
     registerAction_("DragonAI_TestTailSweep", [this]() { RequestAction(DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP); });
+    registerAction_("DragonAI_TestGroundStamp", [this]() { RequestAction(DRAGON_ACTION_TYPE::GROUND_STAMP); });
     registerAction_("DragonAI_TestTakeOff", [this]() { RequestAction(DRAGON_ACTION_TYPE::TAKE_OFF); });
     registerAction_("DragonAI_TestUltimate", [this]() { ForceAction(DRAGON_ACTION_TYPE::ULTIMATE_ATTACK); });
     registerAction_("DragonAI_UltimateEnd", [this]() { NotifySequencerActionEnd(); });
@@ -3021,7 +3334,7 @@ void DragonAIComponent::PlaySequencerAttackAction()
     switch (runtime.currentAction)
     {
     case DRAGON_ACTION_TYPE::BITE:
-        ExecuteOwnerAction("DragonAttack_PlayBite");
+        EnableBiteHitBox();
         break;
     case DRAGON_ACTION_TYPE::FIRE_BALL:
     case DRAGON_ACTION_TYPE::AIR_FIRE_BALL:
@@ -3039,10 +3352,14 @@ void DragonAIComponent::PlaySequencerAttackAction()
         ExecuteOwnerAction("DragonAttack_PlayBreathProjectileFan");
         break;
     case DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP:
-        ExecuteOwnerAction("DragonAttack_PlayTailSweep");
+        EnableTailHitBoxes();
         break;
     case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
-        ExecuteOwnerAction("DragonAttack_PlaySpinSweep");
+        StartSequencerSpinTailIK();
+        EnableTailHitBoxes();
+        break;
+    case DRAGON_ACTION_TYPE::GROUND_STAMP:
+        ExecuteOwnerAction("DragonAttack_PlayStamp");
         break;
     case DRAGON_ACTION_TYPE::LANDING_ATTACK:
     case DRAGON_ACTION_TYPE::DEATH_HIT_GROUND:
@@ -3084,6 +3401,7 @@ void DragonAIComponent::ShowSequencerDangerAction()
     case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
         ExecuteOwnerAction("DragonAttack_ShowSpinSweepDangerArea");
         break;
+    case DRAGON_ACTION_TYPE::GROUND_STAMP:
     case DRAGON_ACTION_TYPE::LANDING_ATTACK:
     case DRAGON_ACTION_TYPE::DEATH_HIT_GROUND:
         ExecuteOwnerAction("DragonAttack_ShowStampDangerArea");
@@ -3179,6 +3497,7 @@ bool DragonAIComponent::IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const
     case DRAGON_ACTION_TYPE::SPREAD_BREATH_FORWARD:
     case DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP:
     case DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP:
+    case DRAGON_ACTION_TYPE::GROUND_STAMP:
         return true;
     default:
         return false;
@@ -3203,6 +3522,66 @@ bool DragonAIComponent::IsEnemyAILockedByGameMode() const
     }
 
     return false;
+}
+
+bool DragonAIComponent::CanUseGroundApproach(const DragonAIContext& context_) const
+{
+    const float moveEndDistance_ = (std::max)(approachEndDistance, biteDistance + 0.75f);
+    // 地上接近は正面へ捉えている時だけ許可し、横向きの足踏み状態を防ぐ。
+    return hasPlayerTarget &&
+        context_.isPlayerInFront &&
+        context_.playerHorizontalDistance > moveEndDistance_;
+}
+
+bool DragonAIComponent::ShouldTurnForCloseFrontTarget(const DragonAIContext& context_) const
+{
+    const float closeFrontTurnAngleDegrees_ = 35.0f;
+    const float closeFrontTurnDistance_ = (std::max)(approachEndDistance + 1.0f, biteDistance + 1.5f);
+    // 広めの正面判定内でも、近距離で斜めに立たれた時は攻撃前に向きを整える。
+    return hasPlayerTarget &&
+        context_.isPlayerInFront &&
+        std::abs(context_.playerAngleDegrees) >= closeFrontTurnAngleDegrees_ &&
+        context_.playerHorizontalDistance <= closeFrontTurnDistance_;
+}
+
+bool DragonAIComponent::CanUseTurnTailSweep(const DragonAIContext& context_) const
+{
+    const float minimumDistance_ = (std::max)(underBodyDistance * 0.65f, biteDistance * 0.45f);
+    const float maximumDistance_ = (std::max)(biteDistance + 3.5f, approachEndDistance + 2.0f);
+    // 尻尾の横薙ぎは背面寄りで、近すぎず遠すぎない時だけ使う。
+    return hasPlayerTarget &&
+        (context_.isPlayerBehind || context_.isPlayerInSide) &&
+        context_.playerHorizontalDistance >= minimumDistance_ &&
+        context_.playerHorizontalDistance <= maximumDistance_;
+}
+
+bool DragonAIComponent::CanUseSpinTailSweep(const DragonAIContext& context_) const
+{
+    const float minimumDistance_ = (std::max)(biteDistance * 0.75f, underBodyDistance + 0.75f);
+    const float maximumDistance_ = (std::max)(biteDistance + 4.5f, approachEndDistance + 3.0f);
+    // 回転尻尾は届く外周にいる相手への反撃に限定し、当たらない遠距離や密着での連打を避ける。
+    return hasPlayerTarget &&
+        (context_.isPlayerBehind || context_.isPlayerInSide) &&
+        context_.playerHorizontalDistance >= minimumDistance_ &&
+        context_.playerHorizontalDistance <= maximumDistance_;
+}
+
+DRAGON_ACTION_TYPE DragonAIComponent::ResolveAntiFlankAction()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::ResolveAntiFlankAction");
+    if (!hasPlayerTarget || context.isPlayerInFront || context.playerHorizontalDistance > mediumDistance)
+        return DRAGON_ACTION_TYPE::IDLE;
+
+    // 横・背後への反撃も同じ履歴補正を使い、旋回要求からの連続攻撃を防ぐ。
+    std::vector<DragonActionCandidate> candidates_;
+    if (CanUseTurnTailSweep(context))
+        AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::TURN_TAIL_SWEEP, context.isPlayerBehind ? 4.0f : 1.4f);
+    if (CanUseSpinTailSweep(context))
+        AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::SPIN_TAIL_SWEEP, context.isPlayerBehind ? 1.2f : 0.6f);
+    if (context.playerHorizontalDistance <= biteDistance + 1.5f)
+        AddWeightedActionCandidate(context, candidates_, DRAGON_ACTION_TYPE::TAKE_OFF, 2.0f);
+
+    return SelectHistoryWeightedAction(candidates_);
 }
 
 float DragonAIComponent::GetCooldown(DRAGON_ACTION_TYPE action_) const
@@ -3243,6 +3622,112 @@ float DragonAIComponent::GetSelectionWeight(DRAGON_ACTION_TYPE action_) const
         return 0.0f;
     }
     return (std::max)(0.0f, definition_->selectionWeight);
+}
+
+// 選択される攻撃と離陸・突進を履歴対象とし、待機や強制遷移は対象外にする。
+bool DragonAIComponent::UsesActionHistory(DRAGON_ACTION_TYPE action_) const
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::UsesActionHistory");
+    return IsRepeatLimitedAttack(action_) || action_ == DRAGON_ACTION_TYPE::RUN_CHARGE ||
+        action_ == DRAGON_ACTION_TYPE::TAKE_OFF;
+}
+
+void DragonAIComponent::RecordActionHistory(DRAGON_ACTION_TYPE action_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::RecordActionHistory");
+    if (!UsesActionHistory(action_)) return;
+    if (actionLastUsedOrders.size() != DRAGON_ACTION_COUNT) actionLastUsedOrders.assign(DRAGON_ACTION_COUNT, -1);
+    actionLastUsedOrders[ToIndex(action_)] = ++attackExecutionOrder;
+    lastExecutedAttack = action_;
+}
+
+// 回復回数までは抑制を緩め、長期間使っていない攻撃には強い抽選補正を与える。
+float DragonAIComponent::CalculateHistoryModifier(DRAGON_ACTION_TYPE action_) const
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::CalculateHistoryModifier");
+    const DragonActionDefinition* definition_ = FindDefinition(action_);
+    if (!historyEnabled || !UsesActionHistory(action_) || !definition_ || !definition_->useHistory) return 1.0f;
+    const int lastOrder_ = actionLastUsedOrders.size() == DRAGON_ACTION_COUNT ? actionLastUsedOrders[ToIndex(action_)] : -1;
+    const int otherCount_ = lastOrder_ < 0 ? attackExecutionOrder : attackExecutionOrder - lastOrder_;
+    const float recentRate_ = std::clamp(repeatActionPenaltyRate, 0.0f, 1.0f);
+    const float recovery_ = std::clamp(static_cast<float>(otherCount_) / (std::max)(1, historyRecoveryCount), 0.0f, 1.0f);
+    float modifier_ = lastOrder_ < 0 ? 1.0f : recentRate_ + (1.0f - recentRate_) * recovery_;
+    if (otherCount_ >= (std::max)(1, historyStarvationCount)) modifier_ = (std::max)(1.0f, historyMaxBonus);
+    // 唯一実行可能な攻撃は、抑制値がゼロでも抽選候補として残す。
+    return (std::max)(0.001f, modifier_);
+}
+
+void DragonAIComponent::PrepareHistorySelection(const std::vector<DRAGON_ACTION_TYPE>& actions_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::PrepareHistorySelection");
+    historySelectionAvailable.assign(DRAGON_ACTION_COUNT, false);
+    selectionDebugWeights.assign(DRAGON_ACTION_COUNT, {});
+    excludePreviousAttack = false;
+    for (const DRAGON_ACTION_TYPE action_ : actions_)
+    {
+        historySelectionAvailable[ToIndex(action_)] = true;
+        if (historyEnabled && UsesActionHistory(action_) && action_ != lastExecutedAttack)
+            excludePreviousAttack = true;
+    }
+    for (const DragonActionDefinition& definition_ : actionDefinitions)
+    {
+        DragonActionSelectionDebug& debug_ = selectionDebugWeights[ToIndex(definition_.action)];
+        debug_.baseWeight = GetSelectionWeight(definition_.action);
+        debug_.historyModifier = CalculateHistoryModifier(definition_.action);
+        debug_.finalWeight = historySelectionAvailable[ToIndex(definition_.action)] &&
+            !(excludePreviousAttack && definition_.action == lastExecutedAttack) ? debug_.baseWeight * debug_.historyModifier : 0.0f;
+    }
+}
+
+float DragonAIComponent::ResolveGraphActionModifier(const std::string& actionName_) const
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::ResolveGraphActionModifier");
+    for (const DragonActionDefinition& definition_ : actionDefinitions)
+    {
+        if (actionName_ != "DragonAI_" + definition_.actionName) continue;
+        if (!UsesActionHistory(definition_.action)) return 1.0f;
+        if (!IsActionAvailable(definition_.action) || (excludePreviousAttack && definition_.action == lastExecutedAttack)) return 0.0f;
+        return GetSelectionWeight(definition_.action) * CalculateHistoryModifier(definition_.action);
+    }
+    return 1.0f;
+}
+
+// 直近の選択時に使った候補と、現在のCooldown・使用順を表示する。
+void DragonAIComponent::DrawHistoryDebug()
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::DrawHistoryDebug");
+    if (!ImGui::CollapsingHeader("Action Selection History")) return;
+    ImGui::Checkbox("Enable History", &historyEnabled);
+    ImGui::DragFloat("Recent Use Modifier", &repeatActionPenaltyRate, 0.01f, 0.0f, 1.0f);
+    ImGui::DragInt("History Recovery Count", &historyRecoveryCount, 1.0f, 1, 20);
+    ImGui::DragInt("History Starvation Count", &historyStarvationCount, 1.0f, 1, 30);
+    ImGui::DragFloat("History Max Bonus", &historyMaxBonus, 0.1f, 1.0f, 20.0f);
+    ImGui::DragFloat("Attack Cooldown Multiplier", &attackCooldownMultiplier, 0.25f, 0.0f, 10.0f);
+    ImGui::Text("Last selection candidates / order %d / previous %s", attackExecutionOrder, GetDragonActionName(lastExecutedAttack));
+    if (!ImGui::BeginTable("ActionHistory", 7, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) return;
+    ImGui::TableSetupColumn("Action Name");
+    ImGui::TableSetupColumn("Base Weight");
+    ImGui::TableSetupColumn("History Modifier");
+    ImGui::TableSetupColumn("Final Weight");
+    ImGui::TableSetupColumn("Cooldown Remaining");
+    ImGui::TableSetupColumn("Last Used Order");
+    ImGui::TableSetupColumn("Available");
+    ImGui::TableHeadersRow();
+    for (const DragonActionDefinition& definition_ : actionDefinitions)
+    {
+        const int index_ = ToIndex(definition_.action);
+        const bool available_ = historySelectionAvailable.size() == DRAGON_ACTION_COUNT && historySelectionAvailable[index_];
+        const DragonActionSelectionDebug debug_ = selectionDebugWeights.size() == DRAGON_ACTION_COUNT ? selectionDebugWeights[index_] : DragonActionSelectionDebug{};
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::TextUnformatted(definition_.actionName.c_str());
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", debug_.baseWeight);
+        ImGui::TableSetColumnIndex(2); ImGui::Text("%.3f", debug_.historyModifier);
+        ImGui::TableSetColumnIndex(3); ImGui::Text("%.3f", debug_.finalWeight);
+        ImGui::TableSetColumnIndex(4); ImGui::Text("%.2f", GetCooldown(definition_.action));
+        ImGui::TableSetColumnIndex(5); ImGui::Text("%d", actionLastUsedOrders.size() == DRAGON_ACTION_COUNT ? actionLastUsedOrders[index_] : -1);
+        ImGui::TableSetColumnIndex(6); ImGui::TextUnformatted(available_ && debug_.finalWeight > 0.0f ? "Available" : "Unavailable");
+    }
+    ImGui::EndTable();
 }
 
 bool DragonAIComponent::HasBehaviorGraph() const

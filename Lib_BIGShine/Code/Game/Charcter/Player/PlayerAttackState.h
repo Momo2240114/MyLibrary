@@ -35,6 +35,10 @@ private:
     std::shared_ptr<CameraLockOnComponent> ResolveCameraLockOnComponent();
     // 現在攻撃Animationの正規化時間を返す。
     float GetAttackNormalizedTime();
+    // 反撃専用の広めなMotionWarpを開始する。
+    void StartCounterMotionWarp();
+    // 反撃終了時にMotionWarpを停止する。
+    void StopCounterMotionWarp();
 
     // このStateが担当する攻撃Action種別。
     PLAYER_ACTION action = PLAYER_ACTION::NONE;
@@ -54,4 +58,6 @@ private:
     bool hasLockedAssistDirection = false;
     // 攻撃補正Targetの解決を済ませたか。
     bool attackAssistTargetResolved = false;
+    // この攻撃Stateで反撃用MotionWarpを開始したか。
+    bool counterMotionWarpActive = false;
 };

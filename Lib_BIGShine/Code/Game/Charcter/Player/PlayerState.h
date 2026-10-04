@@ -146,7 +146,11 @@ namespace PlayerBlackboardKey
     inline constexpr const char* JUST_DODGE_TRIGGER = "JustDodgeTrigger";
     // カウンターに関係するBlackboardキー。
     inline constexpr const char* CAN_COUNTER = "CanCounter";
-    inline constexpr const char* DODGED_COUNTER_TAG = "DodgedCounterag";
+    inline constexpr const char* COUNTER_TAG = "CounterTag";
+    inline constexpr const char* COUNTER_TAG_SOURCE = "CounterTagSource";
+    inline constexpr const char* DODGED_COUNTER_TAG = "DodgedCounterTag";
+    inline constexpr const char* GUARDED_COUNTER_TAG = "GuardedCounterTag";
+    inline constexpr const char* JUST_GUARD_COUNTER_TAG = "JustGuardCounterTag";
 }
 
 // PlayerActionをログやBlackboardへ書き込む表示名へ変換する。

@@ -46,6 +46,7 @@ enum class DRAGON_ACTION_TYPE
     FIRE_BALL_FRONT,
     FIRE_BALL_TRIPLE,
     FIRE_BEAM_SWEEP,
+    GROUND_STAMP,
     ACTION_COUNT
 };
 
@@ -114,6 +115,7 @@ struct DragonAIContext
     bool canUseTakeOff = true;
     bool canUseRunCharge = true;
     bool canUseSpinSweep = true;
+    bool canUseGroundStamp = true;
 };
 
 // 重み付き選択で使うAction候補。
@@ -146,6 +148,14 @@ struct DragonActionRuntime
     bool canBufferAction = false;
 };
 
+// 直近の選択時に使用した重みを、実行後の履歴更新と分離して保持する。
+struct DragonActionSelectionDebug
+{
+    float baseWeight = 0.0f;
+    float historyModifier = 1.0f;
+    float finalWeight = 0.0f;
+};
+
 // DragonActionごとのAnimation、ActionSequence、Cooldown、終了方法をまとめる定義。
 struct DragonActionDefinition
 {
@@ -173,6 +183,8 @@ struct DragonActionDefinition
     float cooldownTime = 1.0f;
     // 重み付き選択で使う基本重み。
     float selectionWeight = 1.0f;
+    // この行動へ最近の使用履歴による抽選補正を適用する。
+    bool useHistory = true;
     // falseならこのActionは選択対象外。
     bool enabled = true;
     // PLAY_ACTIONノードがActionEndを待つか。
@@ -275,6 +287,9 @@ private:
     bool IsGrounded();
     bool IsReadyToPlayLandingAnimation();
     void StopMovement();
+    // RootMotionを使わない回転尻尾攻撃の本体Yawをコード側で補間する。
+    void BeginSpinTailSweepRotation();
+    void UpdateSpinTailSweepRotation(float deltaTime_);
     void StartAction(DRAGON_ACTION_TYPE action_);
     void EnterRecovery();
     void FinishRecovery();
@@ -293,6 +308,15 @@ private:
     void ResetAnimationActionTriggers(const std::string& keepTriggerName_);
     void ExecuteDirectIK(DRAGON_ACTION_TYPE action_, float duration_);
     void ExecuteOwnerAction(const std::string& actionName_);
+    // 噛みつき攻撃用の頭HitBoxを、アニメーションイベントから開閉する。
+    void EnableBiteHitBox();
+    void DisableBiteHitBox();
+    // 尻尾攻撃用の複数HitBoxを、アニメーションイベントから同時に開閉する。
+    void EnableTailHitBoxes();
+    void DisableTailHitBoxes();
+    void DisableSequencerHitBoxes();
+    void StartSequencerSpinTailIK();
+    void ClearTailIK();
     void SendRuntimeToBlackboard();
     void EnsureDefaultBehaviorGraph();
     AIBehaviorNode* AddDragonGraphCondition(
@@ -325,6 +349,16 @@ private:
     bool IsDeathAction(DRAGON_ACTION_TYPE action_) const;
     bool IsEnemyAILockedByGameMode() const;
     bool IsRepeatLimitedAttack(DRAGON_ACTION_TYPE action_) const;
+    // 地上接近を開始・継続できる状況か判定する。
+    bool CanUseGroundApproach(const DragonAIContext& context_) const;
+    // 近距離の正面斜めで、攻撃前に向き直るべきか判定する。
+    bool ShouldTurnForCloseFrontTarget(const DragonAIContext& context_) const;
+    // 尻尾薙ぎ払いが届く距離と向きにPlayerがいるか判定する。
+    bool CanUseTurnTailSweep(const DragonAIContext& context_) const;
+    // 回転尻尾攻撃が届く距離と向きにPlayerがいるか判定する。
+    bool CanUseSpinTailSweep(const DragonAIContext& context_) const;
+    // 側面や背面からのターン要求を反撃行動へ置き換えられるか判定する。
+    DRAGON_ACTION_TYPE ResolveAntiFlankAction();
     float GetCooldown(DRAGON_ACTION_TYPE action_) const;
     void SetCooldown(DRAGON_ACTION_TYPE action_, float cooldownTime_);
     bool IsActionAvailable(DRAGON_ACTION_TYPE action_) const;
@@ -340,6 +374,15 @@ private:
         DRAGON_ACTION_TYPE action_,
         float baseWeight_) const;
     bool HasBehaviorGraph() const;
+    // 実際に開始した攻撃だけを数え、移動や選択失敗では履歴を進めない。
+    void RecordActionHistory(DRAGON_ACTION_TYPE action_);
+    bool UsesActionHistory(DRAGON_ACTION_TYPE action_) const;
+    float CalculateHistoryModifier(DRAGON_ACTION_TYPE action_) const;
+    // 現在の条件を満たす候補全体から連続使用を除外する。
+    void PrepareHistorySelection(const std::vector<DRAGON_ACTION_TYPE>& actions_);
+    DRAGON_ACTION_TYPE SelectHistoryWeightedAction(std::vector<DragonActionCandidate>& candidates_);
+    float ResolveGraphActionModifier(const std::string& actionName_) const;
+    void DrawHistoryDebug();
 
     // Targetとして探すPlayer Object名。
     std::string playerObjectName = "Player";
@@ -354,6 +397,13 @@ private:
     std::vector<DragonActionDefinition> actionDefinitions;
     // Action種別ごとの残りCooldown。
     std::vector<float> actionCooldowns;
+    // 履歴は戦闘中だけ保持し、シーン保存時には保存しない。
+    std::vector<int> actionLastUsedOrders;
+    std::vector<bool> historySelectionAvailable;
+    std::vector<DragonActionSelectionDebug> selectionDebugWeights;
+    int attackExecutionOrder = 0;
+    DRAGON_ACTION_TYPE lastExecutedAttack = DRAGON_ACTION_TYPE::IDLE;
+    bool excludePreviousAttack = false;
     // Ownerへ登録したAction名一覧。
     std::vector<std::string> registeredActionNames;
 
@@ -421,6 +471,12 @@ private:
     float darkLeakAggressionMultiplier = 1.25f;
     float collapseAggressionMultiplier = 1.45f;
     float repeatActionPenaltyRate = 0.35f;
+    bool historyEnabled = true;
+    int historyRecoveryCount = 3;
+    int historyStarvationCount = 5;
+    float historyMaxBonus = 4.0f;
+    // 各定義のCooldownTimeは維持し、攻撃開始時だけ倍率を適用する。
+    float attackCooldownMultiplier = 5.0f;
     float underBodyPunishMultiplier = 1.60f;
     float sidePunishMultiplier = 1.35f;
     float behindPunishMultiplier = 1.70f;
@@ -454,6 +510,9 @@ private:
     float previousHpRateForUltimate = 1.0f;
     float turnRootMotionLimitRemainingDegrees = 0.0f;
     bool turnRootMotionLimitActive = false;
+    float spinTailRotationDegrees = 180.0f;
+    float spinTailRotationDirection = 1.0f;
+    float spinTailRotationAppliedYaw = 0.0f;
     int airAttackCount = 0;
 
     DRAGON_ACTION_TYPE debugAction = DRAGON_ACTION_TYPE::BITE;

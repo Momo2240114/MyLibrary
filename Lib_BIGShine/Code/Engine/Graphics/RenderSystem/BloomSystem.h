@@ -27,14 +27,14 @@ public:
     // Bloom の最終合成時に同時適用するカラーフィルター用定数。
     struct CbColorFilter {
         // 色相、彩度、明度、コントラストを 1 パスで調整する。
-        float hueShift;
-        float saturation;
-        float brightness;
-        float contrast;
+        float hueShift = 0.0f;
+        float saturation = 1.0f;
+        float brightness = 1.0f;
+        float contrast = 1.0f;
 
         // RGB バランスと、フィルター全体をどの程度混ぜるか。
-        DirectX::XMFLOAT3 colorBalance;
-        float filterIntensity;
+        DirectX::XMFLOAT3 colorBalance = { 1.0f, 1.0f, 1.0f };
+        float filterIntensity = 1.0f;
     };
 
     // 高輝度抽出、Kawase Blur、最終合成に必要な RenderTarget と Shader を作る。

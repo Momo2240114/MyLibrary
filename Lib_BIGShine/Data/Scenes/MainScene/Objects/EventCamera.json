@@ -1,0 +1,319 @@
+{
+    "CollisionMask": 0,
+    "Components": [
+        {
+            "Data": null,
+            "Enabled": false,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraFreeController",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "aspect": 1.7777777910232544,
+                "eventPriority": 8,
+                "eye": [
+                    6.0,
+                    10.000000953674316,
+                    -4.000000476837158
+                ],
+                "farZ": 1000.0,
+                "focus": [
+                    5.737513542175293,
+                    9.930777549743652,
+                    -3.037550926208496
+                ],
+                "fovY": 60.0,
+                "nearZ": 0.10000000149011612,
+                "priority": -1,
+                "up": [
+                    -0.0182137880474329,
+                    0.9976012110710144,
+                    0.0667838528752327
+                ],
+                "useEventPriority": true
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": null,
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "Easing",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "DefaultFov": 60.0,
+                "FovWaypoints": [
+                    {
+                        "dur": 0.10000000149011612,
+                        "ease": 1,
+                        "fov": 72.0,
+                        "holdDur": 0.11999999731779099,
+                        "pr": 0.0,
+                        "pv": 0.0,
+                        "returnDur": 0.47999998927116394
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "FovDirector",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "presets": [
+                    {
+                        "actionName": "IntroGateArrival",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Intro",
+                        "cameraOffset": [
+                            4.005388259887695,
+                            2.276157855987549,
+                            -48.53769302368164
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.0,
+                        "focusOffset": [
+                            0.0,
+                            1.7000000476837158,
+                            -1.5
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 60.0,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 100,
+                        "returnDuration": 1.1375000476837158,
+                        "shakeFrequency": 8.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 55.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "PlayerModel",
+                        "useExternalFov": false,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "IntroPlayer",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Intro",
+                        "cameraOffset": [
+                            -0.29461175203323364,
+                            1.1261578798294067,
+                            -51.137691497802734
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.612500011920929,
+                        "focusOffset": [
+                            0.0,
+                            1.2000000476837158,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 60.0,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 100,
+                        "returnDuration": 1.1375000476837158,
+                        "shakeFrequency": 8.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 50.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "PlayerModel",
+                        "useExternalFov": false,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "IntroShoulder",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Intro",
+                        "cameraOffset": [
+                            -1.899999976158142,
+                            1.649999976158142,
+                            -50.0
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 1.1375000476837158,
+                        "focusOffset": [
+                            0.0,
+                            2.299999952316284,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 60.0,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 100,
+                        "returnDuration": 1.1375000476837158,
+                        "shakeFrequency": 8.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 60.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "TestTarget",
+                        "useExternalFov": false,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "IntroDragonWide",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Intro",
+                        "cameraOffset": [
+                            14.0,
+                            2.0,
+                            5.0
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.9624999761581421,
+                        "focusOffset": [
+                            0.0,
+                            2.5,
+                            0.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 60.0,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 100,
+                        "returnDuration": 1.1375000476837158,
+                        "shakeFrequency": 8.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 60.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "TestTarget",
+                        "useExternalFov": false,
+                        "useUnscaledTime": true
+                    },
+                    {
+                        "actionName": "IntroDragonClose",
+                        "attackDirectionKey": "Normal",
+                        "blackboardCategory": "Intro",
+                        "cameraOffset": [
+                            6.0,
+                            10.0,
+                            -4.0
+                        ],
+                        "cameraUp": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "enterDuration": 0.699999988079071,
+                        "focusOffset": [
+                            0.0,
+                            9.0,
+                            -12.0
+                        ],
+                        "focusPositionKey": "Position",
+                        "holdDuration": 60.0,
+                        "positionMode": "WORLD_POSITION",
+                        "priority": 100,
+                        "returnDuration": 1.1375000476837158,
+                        "shakeFrequency": 8.0,
+                        "shakeStrength": 0.0,
+                        "suppressCameraCollision": true,
+                        "suppressLockOnControl": true,
+                        "suppressThirdPersonControl": true,
+                        "targetFov": 60.0,
+                        "targetMode": "WORLD_POSITION",
+                        "targetObjectName": "TestTarget",
+                        "useExternalFov": true,
+                        "useUnscaledTime": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 100,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraActionDirectorComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "presets": [
+                    {
+                        "actionName": "IntroRoarShake",
+                        "duration": 0.75,
+                        "fadeInRate": 0.07999999821186066,
+                        "fadeOutRate": 0.699999988079071,
+                        "frequency": 7.0,
+                        "positionStrength": 0.18000000715255737,
+                        "priority": 100,
+                        "rotationStrength": 1.25,
+                        "useUnscaledTime": true
+                    }
+                ]
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 200,
+            "RequiredForSceneStart": false,
+            "TypeName": "CameraShakeComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
+        }
+    ],
+    "Layer": 0,
+    "Name": "EventCamera",
+    "ParentName": "",
+    "RequiredForSceneStart": true,
+    "Transform": {
+        "Pos": [
+            6.0,
+            10.000000953674316,
+            -4.000000476837158
+        ],
+        "Rot": [
+            3.9693603515625,
+            -15.255126953125,
+            0.0
+        ],
+        "Scale": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

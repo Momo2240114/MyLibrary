@@ -38,6 +38,8 @@ public:
     std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return poseLibrary; }
     // 特定のステートへ遷移させる（直接呼び出し用）
     void ChangeState(const std::string& stateName_, float duration_ = 0.2f);
+    // 演出再生中は通常グラフの自動遷移だけを抑制し、Animationとイベントは更新する。
+    void SetPresentationControlled(bool controlled_) { presentationControlled = controlled_; }
 
     // セーブ・ロードの実装
     void Serialize(nlohmann::json& json_) const override;
@@ -114,6 +116,7 @@ private:
 
     // ノードエディタで管理されるステート群
     std::unordered_map<std::string, std::unique_ptr<AnimState>> states;
+    bool presentationControlled = false; // 演出Actionが再生Stateを選択している間だけ有効。
     std::unordered_map<std::string, std::string> stateAssetPaths;
     std::unordered_map<std::string, std::string> pendingStateAssetPaths;
     const AnimState* currentState = nullptr;

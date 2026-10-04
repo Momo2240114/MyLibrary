@@ -396,7 +396,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 532.4917602539063
+                            "value": 25.84867286682129
                         },
                         "AggressionMultiplier": {
                             "type": "float",
@@ -450,6 +450,10 @@
                             "type": "bool",
                             "value": true
                         },
+                        "CanUseGroundStamp": {
+                            "type": "bool",
+                            "value": true
+                        },
                         "CanUseLandingAttack": {
                             "type": "bool",
                             "value": true
@@ -460,7 +464,7 @@
                         },
                         "CanUseSpinSweep": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseSpreadBreath": {
                             "type": "bool",
@@ -472,7 +476,7 @@
                         },
                         "CanUseTailSweep": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseTakeOff": {
                             "type": "bool",
@@ -544,7 +548,7 @@
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": 0.649169921875
+                            "value": 2.00982666015625
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -552,11 +556,11 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 77.20220947265625
+                            "value": 85.39144897460938
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 77.20084381103516
+                            "value": 85.39022064208984
                         },
                         "PlayerInFront": {
                             "type": "bool",
@@ -580,15 +584,15 @@
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": 0.649169921875
+                            "value": 2.00982666015625
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 77.20220947265625
+                            "value": 85.39144897460938
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 77.20084381103516
+                            "value": 85.39022064208984
                         },
                         "UltimateDamageRate": {
                             "type": "float",
@@ -1050,7 +1054,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 1.4833333492279053,
+                                    "endTime": 3.1500000953674316,
                                     "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "localPosition": [
@@ -1271,7 +1275,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 0.15000000596046448,
+                                    "endTime": 0.30000001192092896,
                                     "eventTemplateType": "NONE",
                                     "label": "Danger",
                                     "localPosition": [
@@ -1296,7 +1300,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.10000000149011612
+                                    "startTime": 0.0
                                 },
                                 {
                                     "actionEnd": "",
@@ -1307,7 +1311,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 0.5,
+                                    "endTime": 0.699999988079071,
                                     "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "localPosition": [
@@ -1332,7 +1336,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.44999998807907104
+                                    "startTime": 0.3333333432674408
                                 },
                                 {
                                     "actionEnd": "",
@@ -1343,7 +1347,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": true,
-                                    "endTime": 1.0,
+                                    "endTime": 1.0333333015441895,
                                     "eventTemplateType": "NONE",
                                     "label": "ActionEnd",
                                     "localPosition": [
@@ -1368,7 +1372,7 @@
                                     "overridePlaybackSpeed": false,
                                     "ownerTarget": "Self",
                                     "playbackSpeed": 1.0,
-                                    "startTime": 0.949999988079071
+                                    "startTime": 1.0
                                 }
                             ],
                             "loop": false,
@@ -1673,7 +1677,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 2.8333332538604736,
+                                    "endTime": 2.799999952316284,
                                     "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "localPosition": [
@@ -2825,6 +2829,189 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
+                            "animationIndex": 24,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "DragonAI_ShowSequencerDanger",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 0.30000001192092896,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Danger",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.25
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "DragonAI_PlaySequencerAttack",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 0.5,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Attack",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.44999998807907104
+                                },
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "TestTarget_DragonAI_SequencerActionEnd",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 1.2000000476837158,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Action",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 1.149999976158142
+                                }
+                            ],
+                            "loop": false,
+                            "name": "DragonGroundStamp",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
                             "animationIndex": 6,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
@@ -2992,7 +3179,7 @@
                                     "attackTemplateId": "",
                                     "blackboardWrites": [],
                                     "callEndOnStateExit": false,
-                                    "endTime": 2.816666603088379,
+                                    "endTime": 2.5,
                                     "eventTemplateType": "NONE",
                                     "label": "Attack",
                                     "localPosition": [
@@ -3891,7 +4078,7 @@
                         {
                             "animIndexA": -1,
                             "animIndexB": -1,
-                            "animationIndex": 21,
+                            "animationIndex": 22,
                             "blend2DBackwardAnimationIndex": -1,
                             "blend2DBackwardLeft90AnimationIndex": -1,
                             "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -4837,12 +5024,271 @@
                             "speed": 1.0,
                             "speedCurveName": "",
                             "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 24,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [
+                                {
+                                    "actionEnd": "",
+                                    "actionStart": "DragonAI_ShowSequencerDanger",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": false,
+                                    "endTime": 0.25,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Danger",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.01666666753590107
+                                },
+                                {
+                                    "actionEnd": "DragonAI_DisableTailHitBox",
+                                    "actionStart": "DragonAI_PlaySequencerAttack",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 0.6666666865348816,
+                                    "eventTemplateType": "NONE",
+                                    "label": "Attack",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 0.0833333358168602
+                                },
+                                {
+                                    "actionEnd": "DragonAI_ClearTailIK",
+                                    "actionStart": "",
+                                    "actionUpdate": "",
+                                    "attachNodeName": "",
+                                    "attachToOwner": false,
+                                    "attackTemplateId": "",
+                                    "blackboardWrites": [],
+                                    "callEndOnStateExit": true,
+                                    "endTime": 1.7999999523162842,
+                                    "eventTemplateType": "NONE",
+                                    "label": "TailIKEnd",
+                                    "localPosition": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localRotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "localScale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "meshVFXAssetPath": "",
+                                    "meshVFXLifeTime": 1.0,
+                                    "meshVFXPlaybackSpeed": 1.0,
+                                    "mirrorMeshVFX": false,
+                                    "overridePlaybackSpeed": false,
+                                    "ownerTarget": "Self",
+                                    "playbackSpeed": 1.0,
+                                    "startTime": 1.75
+                                }
+                            ],
+                            "loop": false,
+                            "name": "Turn90L",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
+                        },
+                        {
+                            "animIndexA": -1,
+                            "animIndexB": -1,
+                            "animationIndex": 22,
+                            "blend2DBackwardAnimationIndex": -1,
+                            "blend2DBackwardLeft90AnimationIndex": -1,
+                            "blend2DBackwardLeft90PhaseOffset": 0.0,
+                            "blend2DBackwardLeftAnimationIndex": -1,
+                            "blend2DBackwardLeftPhaseOffset": 0.0,
+                            "blend2DBackwardPhaseOffset": 0.0,
+                            "blend2DBackwardRight90AnimationIndex": -1,
+                            "blend2DBackwardRight90PhaseOffset": 0.0,
+                            "blend2DBackwardRightAnimationIndex": -1,
+                            "blend2DBackwardRightPhaseOffset": 0.0,
+                            "blend2DDefaultInput": [
+                                0.0,
+                                1.0
+                            ],
+                            "blend2DForwardAnimationIndex": -1,
+                            "blend2DForwardLeft90AnimationIndex": -1,
+                            "blend2DForwardLeft90PhaseOffset": 0.0,
+                            "blend2DForwardLeftAnimationIndex": -1,
+                            "blend2DForwardLeftPhaseOffset": 0.0,
+                            "blend2DForwardPhaseOffset": 0.0,
+                            "blend2DForwardRight90AnimationIndex": -1,
+                            "blend2DForwardRight90PhaseOffset": 0.0,
+                            "blend2DForwardRightAnimationIndex": -1,
+                            "blend2DForwardRightPhaseOffset": 0.0,
+                            "blend2DIdleAnimationIndex": -1,
+                            "blend2DIdlePhaseOffset": 0.0,
+                            "blend2DIdleThreshold": 0.05000000074505806,
+                            "blend2DLeftAnimationIndex": -1,
+                            "blend2DLeftPhaseOffset": 0.0,
+                            "blend2DParamName": "MoveInput",
+                            "blend2DRightAnimationIndex": -1,
+                            "blend2DRightPhaseOffset": 0.0,
+                            "blend2DSyncNormalizedTime": true,
+                            "blend2DUseEightDirections": false,
+                            "blend2DUseForwardBackwardLateral": false,
+                            "blend2DUseIdleStop": false,
+                            "blendDefaultWeight": 0.5,
+                            "blendMaskRootNodes": [],
+                            "blendParamName": "BlendAlpha",
+                            "blendParameterMax": 1.0,
+                            "blendParameterMin": 0.0,
+                            "blendPhaseOffsetA": 0.0,
+                            "blendPhaseOffsetB": 0.0,
+                            "blendSyncNormalizedTime": true,
+                            "blendUseMask": false,
+                            "customAnimIndex": -1,
+                            "events": [],
+                            "loop": false,
+                            "name": "IntroRoar",
+                            "rootMotion": {
+                                "applyPositionX": true,
+                                "applyPositionY": true,
+                                "applyPositionZ": true,
+                                "applyRotationX": false,
+                                "applyRotationY": false,
+                                "applyRotationZ": false,
+                                "cutVisualPositionX": true,
+                                "cutVisualPositionY": true,
+                                "cutVisualPositionZ": true,
+                                "enable": false,
+                                "sourceNodeName": ""
+                            },
+                            "rootMotionScale": 1.0,
+                            "rootMotionScaleCurveName": "",
+                            "sequenceClips": [],
+                            "sequencer": "",
+                            "speed": 1.0,
+                            "speedCurveName": "",
+                            "type": 0
                         }
                     ]
                 },
                 "AssetPath": "",
                 "GraphAssetPath": "DragonFirstForm_Test",
                 "StateAssets": {
+                    "DragonGroundStamp": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\DragonGroundStamp.json",
+                    "PlainsDragon_BiteAttack": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_BiteAttack.json",
                     "PlainsDragon_FireBeam_Sweep45": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_FireBeam_Sweep45.json",
                     "PlainsDragon_FlyStationarySpitFireBall": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_FlyStationarySpitFireBall.json",
                     "PlainsDragon_FlyStationarySpreadFire": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_FlyStationarySpreadFire.json",
@@ -4857,7 +5303,8 @@
                     "PlainsDragon_SpreadFire_Forward": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_SpreadFire_Forward.json",
                     "PlainsDragon_TakeOff": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_TakeOff.json",
                     "PlainsDragon_Turn90L_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90L_RM.json",
-                    "PlainsDragon_Turn90R_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90R_RM.json"
+                    "PlainsDragon_Turn90R_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90R_RM.json",
+                    "Turn90L": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\Turn90L.json"
                 },
                 "UseTransitionGraph": true
             },
@@ -4925,7 +5372,9 @@
                     1.0
                 ],
                 "RegisterGlobalActions": false,
-                "SpinActionDuration": 1.600000023841858
+                "SpinActionDuration": 1.600000023841858,
+                "SpinTipLagRate": 0.18000000715255737,
+                "SpinTipLagStartRate": 0.550000011920929
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -4956,6 +5405,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -4976,6 +5426,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": false,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -4996,6 +5447,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": false,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5016,6 +5468,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5036,6 +5489,7 @@
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.350000023841858,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5056,6 +5510,7 @@
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 0.44999998807907104,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5076,6 +5531,7 @@
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 0.8500000238418579,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5096,6 +5552,7 @@
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.149999976158142,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5106,8 +5563,8 @@
                         "ActionTimeout": 3.0,
                         "AllowBuffer": true,
                         "AnimationActionName": "",
-                        "AnimationStateName": "PlainsDragon_Turn90L_RM",
-                        "CooldownTime": 3.5,
+                        "AnimationStateName": "Turn90L",
+                        "CooldownTime": 5.0,
                         "Duration": 1.7999999523162842,
                         "Enabled": true,
                         "FinishMode": 2,
@@ -5116,6 +5573,7 @@
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.0499999523162842,
                         "UseActionTimeout": false,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -5136,6 +5594,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5156,6 +5615,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": false,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -5176,6 +5636,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5196,6 +5657,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5216,6 +5678,7 @@
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5236,6 +5699,7 @@
                         "RecoveryTime": 0.20000000298023224,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5256,6 +5720,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5276,6 +5741,7 @@
                         "RecoveryTime": 0.4000000059604645,
                         "SelectionWeight": 1.0499999523162842,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5296,6 +5762,7 @@
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 0.8500000238418579,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5316,6 +5783,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5336,6 +5804,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5356,6 +5825,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": false,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": false
                     },
@@ -5376,6 +5846,7 @@
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5396,6 +5867,7 @@
                         "RecoveryTime": 0.5,
                         "SelectionWeight": 0.0,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5416,6 +5888,7 @@
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.100000023841858,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5436,6 +5909,7 @@
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.2000000476837158,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     },
@@ -5456,6 +5930,28 @@
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.149999976158142,
                         "UseActionTimeout": true,
+                        "UseHistory": true,
+                        "VFXActionName": "",
+                        "WaitForActionEnd": true
+                    },
+                    {
+                        "Action": 26,
+                        "ActionName": "GroundStamp",
+                        "ActionSequenceName": "GroundStamp",
+                        "ActionTimeout": 2.799999952316284,
+                        "AllowBuffer": true,
+                        "AnimationActionName": "",
+                        "AnimationStateName": "DragonGroundStamp",
+                        "CooldownTime": 4.0,
+                        "Duration": 1.7999999523162842,
+                        "Enabled": true,
+                        "FinishMode": 0,
+                        "HitBoxActionName": "",
+                        "IKActionName": "",
+                        "RecoveryTime": 0.44999998807907104,
+                        "SelectionWeight": 1.25,
+                        "UseActionTimeout": true,
+                        "UseHistory": true,
                         "VFXActionName": "",
                         "WaitForActionEnd": true
                     }
@@ -5471,6 +5967,7 @@
                 "AnimationBlendDuration": 0.20000000298023224,
                 "AnimationGraphDriven": true,
                 "ApproachEndDistance": 5.199999809265137,
+                "AttackCooldownMultiplier": 5.0,
                 "AutoDecisionEnabled": false,
                 "BehaviorGraphAssetPath": "Data/AI/BehaviorGraph/DragonFirstForm.json",
                 "BehaviorGraphEnabled": true,
@@ -5488,6 +5985,10 @@
                 "FirstUltimateTriggered": true,
                 "FrontAngleDegrees": 50.0,
                 "GroundMoveTurnSpeed": 2.0,
+                "HistoryEnabled": true,
+                "HistoryMaxBonus": 4.0,
+                "HistoryRecoveryCount": 3,
+                "HistoryStarvationCount": 5,
                 "LimitTurnRootMotion": true,
                 "LongRangePressureMultiplier": 1.4500000476837158,
                 "MaxAirAttackCount": 1,
@@ -5499,6 +6000,7 @@
                 "SecondUltimateTriggered": false,
                 "SideAngleDegrees": 100.0,
                 "SidePunishMultiplier": 1.350000023841858,
+                "SpinTailRotationDegrees": 180.0,
                 "TakeOffBackSpeed": 7.0,
                 "TurnRootMotionLimitPaddingDegrees": 2.0,
                 "TurnSpeed": 0.0,
@@ -5576,6 +6078,57 @@
                         "TipNode": "PlainsDragon_-Head",
                         "TipStiffnessScale": 0.20000000298023224,
                         "Type": 4
+                    },
+                    {
+                        "BendStiffness": 0.019999999552965164,
+                        "ClothGroup": 0,
+                        "ClothOrder": 0,
+                        "CollideWithBodyColliders": false,
+                        "CollisionRadius": 0.019999999552965164,
+                        "Damping": 0.8799999952316284,
+                        "DiagonalStiffness": 0.15000000596046448,
+                        "Enabled": true,
+                        "FootAlignToGround": true,
+                        "FootBendWeight": 0.800000011920929,
+                        "FootHeightOffset": 0.029999999329447746,
+                        "FootIncludeDynamicColliders": false,
+                        "FootMaxStepDown": 0.75,
+                        "FootMaxStepUp": 0.44999998807907104,
+                        "FootPoleNode": "",
+                        "FootPositionSpeed": 18.0,
+                        "FootRotationSpeed": 14.0,
+                        "FootSolverIterations": 8,
+                        "Gravity": 9.800000190734863,
+                        "Influence": 1.0,
+                        "LateralStiffness": 0.3499999940395355,
+                        "LookBlendSpeed": 8.0,
+                        "LookForwardAxis": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "LookMaxPitchDegrees": 35.0,
+                        "LookMaxYawDegrees": 70.0,
+                        "LookRootWeight": 0.18000000715255737,
+                        "LookShieldShoulderYawDegrees": 18.0,
+                        "LookTipWeight": 1.0,
+                        "Name": "DragonTail",
+                        "RootNode": "PlainsDragon_-Tail",
+                        "RootRotationFollow": 0.699999988079071,
+                        "ShieldBlendSpeed": 10.0,
+                        "ShieldElbowWristRatio": 0.699999988079071,
+                        "ShieldMaxPitchDegrees": 55.0,
+                        "ShieldMaxYawDegrees": 80.0,
+                        "ShieldPoleNode": "",
+                        "ShieldSearchRadius": 3.0,
+                        "SolverIterations": 6,
+                        "SolverSubsteps": 4,
+                        "StartCollisionWarmup": 4,
+                        "StartLift": 0.07999999821186066,
+                        "Stiffness": 0.019999999552965164,
+                        "TipNode": "PlainsDragon_-Tail10",
+                        "TipStiffnessScale": 0.20000000298023224,
+                        "Type": 5
                     }
                 ],
                 "ShowBodyCollisionShapes": true
@@ -5858,9 +6411,14 @@
                 "BreathVFXAssetPath": "Data/VFX/DragonBreath.json",
                 "BreathVFXInterval": 0.07999999821186066,
                 "BreathVFXLifeTime": 0.6000000238418579,
+                "DangerAreaAlignToGround": true,
                 "DangerAreaEnabled": true,
                 "DangerAreaGroundOffset": 0.029999999329447746,
+                "DangerAreaGroundQueryInterval": 0.05000000074505806,
                 "DangerAreaLengthPadding": 0.0,
+                "DangerAreaMultiSample": true,
+                "DangerAreaRayDistance": 250.0,
+                "DangerAreaRayStartHeight": 5.0,
                 "DangerAreaVFXAssetPath": "Data/VFX/EnemyDangerArea.json",
                 "ShowBreathChargeOnDanger": true,
                 "ShowDangerAreaOnAttackStart": true,
@@ -5913,7 +6471,7 @@
     "Layer": 2,
     "Name": "TestTarget",
     "ParentName": "",
-    "RequiredForSceneStart": false,
+    "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
             0.0,
@@ -5922,7 +6480,7 @@
         ],
         "Rot": [
             0.0,
-            180.0,
+            -180.0,
             0.0
         ],
         "Scale": [

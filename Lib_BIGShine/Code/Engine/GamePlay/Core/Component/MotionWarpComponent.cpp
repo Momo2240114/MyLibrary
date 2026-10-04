@@ -123,62 +123,102 @@ void MotionWarpComponent::Start()
 
 void MotionWarpComponent::EnsureDefaultPresets()
 {
-    if (!presets.empty()) return;
+    auto hasPreset_ = [this](const std::string& presetName_)
+    {
+        return std::any_of(
+            presets.begin(),
+            presets.end(),
+            [&presetName_](const MotionWarpPreset& preset_)
+            {
+                return preset_.presetName == presetName_;
+            });
+    };
 
     // 弱攻撃、強攻撃、溜め、空中攻撃で補正量を分け、手触りの初期値を用意する。
-    MotionWarpPreset weak_;
-    weak_.presetName = "WeakAttackWarp";
-    weak_.positionMode = MOTION_WARP_POSITION_MODE::DIRECTION_ONLY;
-    weak_.endNormalizedTime = 0.28f;
-    weak_.targetDistance = 1.1f;
-    weak_.positionStrength = 0.35f;
-    weak_.rotationStrength = 0.6f;
-    weak_.minimumPositionScale = 0.9f;
-    weak_.maximumPositionScale = 1.1f;
-    weak_.maximumTotalPositionCorrection = 0.4f;
-    weak_.maximumRotationDegrees = 30.0f;
-    weak_.maximumRotationDegreesPerSecond = 300.0f;
-    presets.push_back(weak_);
+    if (!hasPreset_("WeakAttackWarp"))
+    {
+        MotionWarpPreset weak_;
+        weak_.presetName = "WeakAttackWarp";
+        weak_.positionMode = MOTION_WARP_POSITION_MODE::DIRECTION_ONLY;
+        weak_.endNormalizedTime = 0.28f;
+        weak_.targetDistance = 1.1f;
+        weak_.positionStrength = 0.35f;
+        weak_.rotationStrength = 0.6f;
+        weak_.minimumPositionScale = 0.9f;
+        weak_.maximumPositionScale = 1.1f;
+        weak_.maximumTotalPositionCorrection = 0.4f;
+        weak_.maximumRotationDegrees = 30.0f;
+        weak_.maximumRotationDegreesPerSecond = 300.0f;
+        presets.push_back(weak_);
+    }
 
-    MotionWarpPreset strong_;
-    strong_.presetName = "StrongAttackWarp";
-    strong_.endNormalizedTime = 0.38f;
-    strong_.targetDistance = 1.25f;
-    strong_.positionStrength = 0.65f;
-    strong_.rotationStrength = 0.8f;
-    strong_.minimumPositionScale = 0.8f;
-    strong_.maximumPositionScale = 1.25f;
-    strong_.maximumTotalPositionCorrection = 0.9f;
-    strong_.maximumRotationDegrees = 45.0f;
-    strong_.maximumRotationDegreesPerSecond = 360.0f;
-    presets.push_back(strong_);
+    if (!hasPreset_("StrongAttackWarp"))
+    {
+        MotionWarpPreset strong_;
+        strong_.presetName = "StrongAttackWarp";
+        strong_.endNormalizedTime = 0.38f;
+        strong_.targetDistance = 1.25f;
+        strong_.positionStrength = 0.65f;
+        strong_.rotationStrength = 0.8f;
+        strong_.minimumPositionScale = 0.8f;
+        strong_.maximumPositionScale = 1.25f;
+        strong_.maximumTotalPositionCorrection = 0.9f;
+        strong_.maximumRotationDegrees = 45.0f;
+        strong_.maximumRotationDegreesPerSecond = 360.0f;
+        presets.push_back(strong_);
+    }
 
-    MotionWarpPreset charge_;
-    charge_.presetName = "ChargeAttackWarp";
-    charge_.positionMode = MOTION_WARP_POSITION_MODE::TARGET_END_POSITION;
-    charge_.endNormalizedTime = 0.5f;
-    charge_.targetDistance = 1.4f;
-    charge_.positionStrength = 0.8f;
-    charge_.rotationStrength = 0.65f;
-    charge_.minimumPositionScale = 0.75f;
-    charge_.maximumPositionScale = 1.35f;
-    charge_.maximumTotalPositionCorrection = 1.5f;
-    charge_.maximumRotationDegrees = 35.0f;
-    charge_.maximumRotationDegreesPerSecond = 280.0f;
-    presets.push_back(charge_);
+    if (!hasPreset_("ChargeAttackWarp"))
+    {
+        MotionWarpPreset charge_;
+        charge_.presetName = "ChargeAttackWarp";
+        charge_.positionMode = MOTION_WARP_POSITION_MODE::TARGET_END_POSITION;
+        charge_.endNormalizedTime = 0.5f;
+        charge_.targetDistance = 1.4f;
+        charge_.positionStrength = 0.8f;
+        charge_.rotationStrength = 0.65f;
+        charge_.minimumPositionScale = 0.75f;
+        charge_.maximumPositionScale = 1.35f;
+        charge_.maximumTotalPositionCorrection = 1.5f;
+        charge_.maximumRotationDegrees = 35.0f;
+        charge_.maximumRotationDegreesPerSecond = 280.0f;
+        presets.push_back(charge_);
+    }
 
-    MotionWarpPreset air_;
-    air_.presetName = "AirAttackWarp";
-    air_.positionMode = MOTION_WARP_POSITION_MODE::DIRECTION_ONLY;
-    air_.endNormalizedTime = 0.3f;
-    air_.targetDistance = 1.0f;
-    air_.positionStrength = 0.25f;
-    air_.rotationStrength = 0.5f;
-    air_.minimumPositionScale = 0.95f;
-    air_.maximumPositionScale = 1.05f;
-    air_.maximumTotalPositionCorrection = 0.3f;
-    air_.maximumRotationDegrees = 30.0f;
-    presets.push_back(air_);
+    if (!hasPreset_("AirAttackWarp"))
+    {
+        MotionWarpPreset air_;
+        air_.presetName = "AirAttackWarp";
+        air_.positionMode = MOTION_WARP_POSITION_MODE::DIRECTION_ONLY;
+        air_.endNormalizedTime = 0.3f;
+        air_.targetDistance = 1.0f;
+        air_.positionStrength = 0.25f;
+        air_.rotationStrength = 0.5f;
+        air_.minimumPositionScale = 0.95f;
+        air_.maximumPositionScale = 1.05f;
+        air_.maximumTotalPositionCorrection = 0.3f;
+        air_.maximumRotationDegrees = 30.0f;
+        presets.push_back(air_);
+    }
+
+    if (!hasPreset_("CounterAttackWarp"))
+    {
+        MotionWarpPreset counter_;
+        counter_.presetName = "CounterAttackWarp";
+        counter_.positionMode = MOTION_WARP_POSITION_MODE::TARGET_END_POSITION;
+        counter_.endNormalizedTime = 0.65f;
+        counter_.targetDistance = 1.15f;
+        counter_.positionStrength = 0.95f;
+        counter_.rotationStrength = 1.0f;
+        counter_.minimumPositionScale = 0.65f;
+        counter_.maximumPositionScale = 1.6f;
+        counter_.maximumPositionCorrectionPerFrame = 0.45f;
+        counter_.maximumTotalPositionCorrection = 2.4f;
+        counter_.maximumRotationDegrees = 75.0f;
+        counter_.maximumRotationDegreesPerSecond = 540.0f;
+        counter_.maximumWarpTargetDistance = 16.0f;
+        presets.push_back(counter_);
+    }
 }
 
 MotionWarpPreset* MotionWarpComponent::FindPreset(const std::string& presetName_)

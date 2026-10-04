@@ -15,6 +15,9 @@
 #include "Engine/Graphics/Resource/Animation/DragonNeckCommandIKComponent.h"
 #include "Engine/Graphics/Resource/Animation/DragonTailCommandIKComponent.h"
 #include "Engine/Graphics/VFX/MeshVFXComponent.h"
+#include "Engine/Math/RandomHelper.h"
+#include "Engine/Physics/ColliderComponent.h"
+#include "Engine/Physics/PhysXSystem.h"
 
 #include <algorithm>
 #include <cmath>
@@ -45,6 +48,68 @@ namespace
     constexpr const char* DANGER_AREA_MODEL_PATH = "__InternalMeshDangerArea__";
     constexpr const char* DANGER_FAN_MODEL_PATH = "__InternalMeshDangerFan__";
     constexpr float BREATH_BEAM_TARGET_AIM_BLEND = 1.0f;
+
+    // 地面表示用のRayはステージの物理Colliderだけに当て、攻撃判定やキャラクターを除外する。
+    class DangerAreaGroundQueryFilter : public physx::PxQueryFilterCallback
+    {
+    public:
+        explicit DangerAreaGroundQueryFilter(const std::vector<const void*>& ignoredUserData_)
+            : ignoredUserData(ignoredUserData_)
+        {
+            BS_PROFILE_SCOPE("DangerAreaGroundQueryFilter::DangerAreaGroundQueryFilter");
+        }
+
+        physx::PxQueryHitType::Enum preFilter(
+            const physx::PxFilterData& filterData_,
+            const physx::PxShape* shape_,
+            const physx::PxRigidActor* actor_,
+            physx::PxHitFlags& queryFlags_) override
+        {
+            BS_PROFILE_SCOPE("DangerAreaGroundQueryFilter::preFilter");
+            (void)filterData_;
+            (void)queryFlags_;
+            if (!shape_ || !actor_ ||
+                !shape_->getFlags().isSet(physx::PxShapeFlag::eSCENE_QUERY_SHAPE) ||
+                shape_->getFlags().isSet(physx::PxShapeFlag::eTRIGGER_SHAPE))
+            {
+                return physx::PxQueryHitType::eNONE;
+            }
+            physx::PxFilterData shapeFilter_ = shape_->getQueryFilterData();
+            if (shapeFilter_.word0 == 0u) shapeFilter_ = shape_->getSimulationFilterData();
+            constexpr uint32_t GROUND_LAYERS =
+                static_cast<uint32_t>(LayerType::Environment) | static_cast<uint32_t>(LayerType::Terrain);
+            if ((shapeFilter_.word0 & GROUND_LAYERS) == 0u ||
+                (shapeFilter_.word0 & ~GROUND_LAYERS) != 0u ||
+                shapeFilter_.word2 != static_cast<uint32_t>(ColliderComponent::CollisionRole::PHYSICAL))
+            {
+                return physx::PxQueryHitType::eNONE;
+            }
+            // userDataはCollider以外を指すActorもあるため、型変換せず自己Colliderと比較する。
+            if (std::find(ignoredUserData.begin(), ignoredUserData.end(), actor_->userData) != ignoredUserData.end())
+            {
+                return physx::PxQueryHitType::eNONE;
+            }
+            return physx::PxQueryHitType::eBLOCK;
+        }
+
+        physx::PxQueryHitType::Enum postFilter(
+            const physx::PxFilterData& filterData_,
+            const physx::PxQueryHit& hit_,
+            const physx::PxShape* shape_,
+            const physx::PxRigidActor* actor_) override
+        {
+            BS_PROFILE_SCOPE("DangerAreaGroundQueryFilter::postFilter");
+            (void)filterData_;
+            (void)shape_;
+            (void)actor_;
+            // 裏面やほぼ垂直な壁は地面にしない。
+            const auto& rayHit_ = static_cast<const physx::PxRaycastHit&>(hit_);
+            return rayHit_.normal.y >= 0.2f ? physx::PxQueryHitType::eBLOCK : physx::PxQueryHitType::eNONE;
+        }
+
+    private:
+        const std::vector<const void*>& ignoredUserData;
+    };
 
     DirectX::XMFLOAT3 Normalize(const DirectX::XMFLOAT3& value_)
     {
@@ -270,20 +335,45 @@ void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
 
     SpawnBreathChargeEffect();
 
-    const float safeWidth_ = (std::max)(breathDangerWidth, 0.01f);
-    const float safeRange_ = (std::max)(breathDangerRange, safeWidth_);
-    const float radius_ = safeWidth_ * 0.5f;
-    const float halfHeight_ = (std::max)(safeRange_ - safeWidth_, 0.0f) * 0.5f;
+    pendingBeamFrameValid = false;
+    EnsureDependencies();
+    DirectX::XMFLOAT3 position_{};
+    DirectX::XMFLOAT3 forward_{};
+    const auto emitter_ = ResolveBreathAttackEmitterComponent(position_, forward_, BREATH_BEAM_TARGET_AIM_BLEND);
+    if (!emitter_) return;
+    if (!breathProjectileEmitterAssetPath.empty() && !emitter_->LoadAsset(breathProjectileEmitterAssetPath)) return;
+    forward_ = Normalize(forward_);
+    DirectX::XMFLOAT3 start_{};
+    DirectX::XMFLOAT3 end_{};
+    float radius_ = 0.0f;
+    if (!emitter_->ResolveBeamGeometryAt("DragonBreathLightBeam",
+        Add(position_, Scale(forward_, breathProjectileMouthForwardOffset)), forward_, start_, end_, radius_)) return;
 
-    SpawnDangerArea(
-        "RuntimeDragonBreathDangerArea",
-        breathDangerLifeTime,
-        false,
-        true,
-        false,
-        { 0.0f, 0.0f, breathDangerStartOffset + safeRange_ * 0.5f },
-        radius_,
-        halfHeight_ + dangerAreaLengthPadding);
+    // 判定の両端をXZへ投影する。俯角とTemplateの発射補正も予兆へ反映する。
+    const float deltaX_ = end_.x - start_.x;
+    const float deltaZ_ = end_.z - start_.z;
+    const float horizontalLength_ = std::sqrt(deltaX_ * deltaX_ + deltaZ_ * deltaZ_);
+    pendingBeamPosition = position_;
+    pendingBeamForward = forward_;
+    pendingBeamEmitter = emitter_;
+    pendingBeamFrameTimer = (std::max)(breathDangerLifeTime, 0.0f);
+    pendingBeamFrameValid = pendingBeamFrameTimer > 0.0f;
+    RuntimeAttack runtime_{};
+    runtime_.lifeTimer = breathDangerLifeTime;
+    runtime_.dangerAreaFixedFrame = true;
+    runtime_.dangerAreaFixedPosition = Scale(Add(start_, end_), 0.5f);
+    runtime_.dangerAreaFixedForward = Normalize({ deltaX_, 0.0f, deltaZ_ });
+    runtimeAttacks.erase(std::remove_if(runtimeAttacks.begin(), runtimeAttacks.end(),
+        [this](RuntimeAttack& previous_)
+        {
+            if (!previous_.dangerAreaFixedFrame) return false;
+            StopRuntimeAttack(previous_);
+            return true;
+        }), runtimeAttacks.end());
+    AttachDangerArea(runtime_, "RuntimeDragonBreathDangerArea", { 0.0f, 0.0f, 0.0f },
+        radius_, horizontalLength_ * 0.5f);
+    ApplyDangerAreaTransform(runtime_);
+    if (runtime_.hasDangerArea) runtimeAttacks.push_back(runtime_);
 }
 
 void DragonAttackControllerComponent::ShowBreathProjectileFanDangerArea()
@@ -372,6 +462,9 @@ void DragonAttackControllerComponent::ShowStampDangerArea()
 void DragonAttackControllerComponent::StopAttack()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::StopAttack");
+    pendingBeamFrameValid = false;
+    pendingBeamFrameTimer = 0.0f;
+    pendingBeamEmitter.reset();
 
     for (RuntimeAttack& runtime_ : runtimeAttacks)
     {
@@ -442,11 +535,15 @@ void DragonAttackControllerComponent::EnsureDependencies()
 
 void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
 {
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::UpdateRuntimeAttacks");
     const float safeDeltaTime_ = (std::max)(deltaTime_, 0.0f);
+    pendingBeamFrameTimer = (std::max)(pendingBeamFrameTimer - safeDeltaTime_, 0.0f);
+    if (pendingBeamFrameTimer <= 0.0f) pendingBeamFrameValid = false;
 
     for (RuntimeAttack& runtime_ : runtimeAttacks)
     {
         runtime_.lifeTimer -= safeDeltaTime_;
+        runtime_.dangerAreaGroundQueryTimer -= safeDeltaTime_;
         ApplyFollowTransform(runtime_);
         ApplyDangerAreaTransform(runtime_);
 
@@ -632,6 +729,7 @@ void DragonAttackControllerComponent::ApplyFollowTransform(RuntimeAttack& runtim
 
 void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& runtime_)
 {
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::ApplyDangerAreaTransform");
     if (!runtime_.hasDangerArea || !runtime_.dangerAreaObject || !runtime_.dangerAreaObject->transform)
     {
         return;
@@ -641,7 +739,31 @@ void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& ru
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     bool resolved_ = false;
 
-    if (runtime_.followBreathSource)
+    if (runtime_.dangerAreaFixedFrame)
+    {
+        if (pendingBeamFrameValid)
+        {
+            const auto emitter_ = pendingBeamEmitter.lock();
+            DirectX::XMFLOAT3 sourcePosition_{};
+            DirectX::XMFLOAT3 ignoredForward_{};
+            DirectX::XMFLOAT3 start_{};
+            DirectX::XMFLOAT3 end_{};
+            float radius_ = 0.0f;
+            // 予兆中は口の位置だけ追従し、Targetが動いても確定した発射方向は変えない。
+            if (emitter_ && ResolveBreathSourceFrame(sourcePosition_, ignoredForward_, BREATH_BEAM_TARGET_AIM_BLEND) &&
+                emitter_->ResolveBeamGeometryAt("DragonBreathLightBeam",
+                    Add(sourcePosition_, Scale(pendingBeamForward, breathProjectileMouthForwardOffset)),
+                    pendingBeamForward, start_, end_, radius_))
+            {
+                pendingBeamPosition = sourcePosition_;
+                runtime_.dangerAreaFixedPosition = Scale(Add(start_, end_), 0.5f);
+            }
+        }
+        position_ = runtime_.dangerAreaFixedPosition;
+        forward_ = runtime_.dangerAreaFixedForward;
+        resolved_ = true;
+    }
+    else if (runtime_.followBreathSource)
     {
         resolved_ = ResolveBreathSourceFrame(position_, forward_);
     }
@@ -680,12 +802,187 @@ void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& ru
     const DirectX::XMFLOAT3 right_ = { normalizedForward_.z, 0.0f, -normalizedForward_.x };
     groundPosition_ = Add(groundPosition_, Scale(right_, runtime_.dangerAreaLocalOffset.x));
     groundPosition_ = Add(groundPosition_, Scale(normalizedForward_, runtime_.dangerAreaLocalOffset.z));
-    groundPosition_.y += dangerAreaGroundOffset;
+    DirectX::XMFLOAT3 groundNormal_{ 0.0f, 1.0f, 0.0f };
+    float groundHeight_ = groundPosition_.y;
+    ResolveDangerAreaGroundHeight(runtime_, groundPosition_, normalizedForward_,
+        (std::max)(position_.y, groundPosition_.y), groundHeight_, groundNormal_);
+    // 内部メッシュはY=0の平面なので厚み補正は不要。法線方向の隙間をYへ換算する。
+    groundPosition_.y = groundHeight_ + (std::max)(dangerAreaGroundOffset, 0.001f) / groundNormal_.y;
 
     runtime_.dangerAreaObject->transform->localPosition = groundPosition_;
-    runtime_.dangerAreaObject->transform->localRotation = ResolveForwardRotation(normalizedForward_);
+    runtime_.dangerAreaObject->transform->localRotation =
+        ResolveDangerAreaGroundRotation(normalizedForward_, groundNormal_);
     runtime_.dangerAreaObject->transform->localScale = { 1.0f, 1.0f, 1.0f };
     runtime_.dangerAreaObject->transform->MarkDirty();
+}
+
+bool DragonAttackControllerComponent::ResolveDangerAreaGroundHeight(
+    RuntimeAttack& runtime_,
+    const DirectX::XMFLOAT3& position_,
+    const DirectX::XMFLOAT3& forward_,
+    float rayReferenceHeight_,
+    float& height_,
+    DirectX::XMFLOAT3& normal_)
+{
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::ResolveDangerAreaGroundHeight");
+
+    height_ = position_.y;
+    normal_ = { 0.0f, 1.0f, 0.0f };
+    const float deltaX_ = position_.x - runtime_.dangerAreaGroundSamplePosition.x;
+    const float deltaZ_ = position_.z - runtime_.dangerAreaGroundSamplePosition.z;
+    const float forwardDot_ = forward_.x * runtime_.dangerAreaGroundForward.x +
+        forward_.z * runtime_.dangerAreaGroundForward.z;
+    constexpr float CACHE_MOVE_DISTANCE = 0.1f;
+    constexpr float CACHE_FORWARD_DOT = 0.9961947f; // 約5度以上の向き変更では即座に再取得する。
+    if (runtime_.dangerAreaGroundCached && runtime_.dangerAreaGroundQueryTimer > 0.0f &&
+        deltaX_ * deltaX_ + deltaZ_ * deltaZ_ <= CACHE_MOVE_DISTANCE * CACHE_MOVE_DISTANCE &&
+        forwardDot_ >= CACHE_FORWARD_DOT)
+    {
+        if (runtime_.dangerAreaGroundResolved)
+        {
+            normal_ = runtime_.dangerAreaGroundNormal;
+            // 同じ坂を少し移動した場合はキャッシュした平面上の高さを使う。
+            height_ = runtime_.dangerAreaGroundHeight -
+                (normal_.x * deltaX_ + normal_.z * deltaZ_) / normal_.y;
+        }
+        return runtime_.dangerAreaGroundResolved;
+    }
+
+    physx::PxScene* scene_ = PhysXSystem::GetScene();
+    const std::shared_ptr<GameObject> owner_ = GetGameObject();
+    std::vector<const void*> ignoredUserData_;
+    if (owner_)
+    {
+        for (const auto& collider_ : owner_->GetComponents<ColliderComponent>())
+        {
+            if (collider_) ignoredUserData_.push_back(collider_.get());
+        }
+    }
+    DangerAreaGroundQueryFilter queryFilter_(ignoredUserData_);
+    const physx::PxQueryFlags queryFlags_ = physx::PxQueryFlag::eSTATIC |
+        physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::ePREFILTER | physx::PxQueryFlag::ePOSTFILTER;
+    int rayCount_ = 0;
+    auto queryGround_ = [&](const DirectX::XMFLOAT3& sample_, physx::PxRaycastHit& hit_)
+        {
+            if (!scene_) return false;
+            ++rayCount_;
+            physx::PxRaycastBuffer buffer_;
+            const float rayStartY_ = (std::max)(rayReferenceHeight_, sample_.y) +
+                (std::max)(dangerAreaRayStartHeight, 0.01f);
+            if (!scene_->raycast(
+                physx::PxVec3(sample_.x, rayStartY_, sample_.z),
+                physx::PxVec3(0.0f, -1.0f, 0.0f),
+                (std::max)(dangerAreaRayDistance, 0.01f), buffer_,
+                physx::PxHitFlag::eDEFAULT | physx::PxHitFlag::eMESH_BOTH_SIDES,
+                physx::PxQueryFilterData(physx::PxFilterData(), queryFlags_), &queryFilter_) || !buffer_.hasBlock)
+            {
+                return false;
+            }
+            hit_ = buffer_.block;
+            return true;
+        };
+
+    physx::PxRaycastHit centerHit_;
+    bool resolved_ = queryGround_(position_, centerHit_);
+    if (resolved_)
+    {
+        height_ = centerHit_.position.y;
+        // 直線ブレスは判定のXZ投影寸法を保つため、地面高さだけを補正する。
+        if (dangerAreaAlignToGround && !runtime_.dangerAreaFixedFrame)
+        {
+            normal_ = Normalize({ centerHit_.normal.x, centerHit_.normal.y, centerHit_.normal.z });
+        }
+    }
+
+    if (dangerAreaMultiSample && scene_)
+    {
+        const DirectX::XMFLOAT3 rotation_ = ResolveDangerAreaGroundRotation(forward_, normal_);
+        const DirectX::XMMATRIX rotationMatrix_ = DirectX::XMMatrixRotationRollPitchYaw(
+            DirectX::XMConvertToRadians(rotation_.x), DirectX::XMConvertToRadians(rotation_.y),
+            DirectX::XMConvertToRadians(rotation_.z));
+        const float baseHeight_ = height_;
+        auto sampleOffset_ = [&](float x_, float z_)
+            {
+                DirectX::XMFLOAT3 offset_{};
+                DirectX::XMStoreFloat3(&offset_, DirectX::XMVector3TransformNormal(
+                    DirectX::XMVectorSet(x_, 0.0f, z_, 0.0f), rotationMatrix_));
+                const DirectX::XMFLOAT3 sample_{
+                    position_.x + offset_.x, baseHeight_ + offset_.y, position_.z + offset_.z };
+                physx::PxRaycastHit hit_;
+                if (!queryGround_(sample_, hit_)) return;
+                // 傾斜した表示平面より高い接地点だけを補正し、段差での埋まりを防ぐ。
+                const float requiredHeight_ = hit_.position.y - offset_.y;
+                height_ = resolved_ ? (std::max)(height_, requiredHeight_) : requiredHeight_;
+                resolved_ = true;
+            };
+
+        const float radius_ = (std::max)(runtime_.dangerAreaRadius, 0.01f);
+        const float halfLength_ = (std::max)(runtime_.dangerAreaHalfHeight, 0.0f);
+        if (runtime_.dangerAreaIsFan)
+        {
+            const float halfAngle_ = DirectX::XMConvertToRadians(runtime_.dangerAreaFanAngleDegrees * 0.5f);
+            // 扇は原点に加え、中間半径と外周を左右端を含む5方向で確認する。
+            for (int ring_ = 1; ring_ <= 2; ++ring_)
+            {
+                for (int index_ = 0; index_ < 5; ++index_)
+                {
+                    const float angle_ = -halfAngle_ + halfAngle_ * static_cast<float>(index_) * 0.5f;
+                    const float distance_ = radius_ * static_cast<float>(ring_) * 0.5f;
+                    sampleOffset_(std::sin(angle_) * distance_, std::cos(angle_) * distance_);
+                }
+            }
+        }
+        else if (halfLength_ > EPSILON)
+        {
+            // カプセルの始点・中心・終点で幅も確認し、丸い両端まで含める。
+            for (int row_ = -1; row_ <= 1; ++row_)
+            {
+                for (int column_ = -1; column_ <= 1; ++column_)
+                {
+                    if (row_ == 0 && column_ == 0) continue;
+                    sampleOffset_(radius_ * static_cast<float>(column_), halfLength_ * static_cast<float>(row_));
+                }
+            }
+            sampleOffset_(0.0f, halfLength_ + radius_);
+            sampleOffset_(0.0f, -halfLength_ - radius_);
+        }
+        else
+        {
+            for (int index_ = 0; index_ < 8; ++index_)
+            {
+                const float angle_ = DirectX::XM_2PI * static_cast<float>(index_) / 8.0f;
+                sampleOffset_(std::sin(angle_) * radius_, std::cos(angle_) * radius_);
+            }
+        }
+    }
+
+    // ミスも短時間キャッシュするが、地面が無い場合の本体Yは呼び出しごとに更新する。
+    runtime_.dangerAreaGroundCached = true;
+    runtime_.dangerAreaGroundResolved = resolved_;
+    runtime_.dangerAreaGroundQueryTimer = (std::max)(dangerAreaGroundQueryInterval, 0.0f);
+    runtime_.dangerAreaGroundSamplePosition = position_;
+    runtime_.dangerAreaGroundForward = forward_;
+    runtime_.dangerAreaGroundHeight = height_;
+    runtime_.dangerAreaGroundNormal = normal_;
+    BS_PROFILE_PLOT("DragonAttack::DangerAreaGroundRayCount", rayCount_);
+    return resolved_;
+}
+
+DirectX::XMFLOAT3 DragonAttackControllerComponent::ResolveDangerAreaGroundRotation(
+    const DirectX::XMFLOAT3& forward_,
+    const DirectX::XMFLOAT3& normal_) const
+{
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::ResolveDangerAreaGroundRotation");
+
+    // XZ上の向きを維持した接線を作り、右・上・前の直交基底からTransform用回転へ変換する。
+    const DirectX::XMFLOAT3 tangent_ = Normalize({ forward_.x,
+        -(normal_.x * forward_.x + normal_.z * forward_.z) / normal_.y, forward_.z });
+    const DirectX::XMVECTOR up_ = DirectX::XMLoadFloat3(&normal_);
+    const DirectX::XMVECTOR front_ = DirectX::XMLoadFloat3(&tangent_);
+    const DirectX::XMVECTOR right_ = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(up_, front_));
+    const DirectX::XMMATRIX basis_(right_, up_, front_, DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f));
+    const DirectX::XMFLOAT3 angles_ = QuaternionToEuler(DirectX::XMQuaternionRotationMatrix(basis_));
+    return { angles_.x * RAD_TO_DEG, angles_.y * RAD_TO_DEG, angles_.z * RAD_TO_DEG };
 }
 
 void DragonAttackControllerComponent::SpawnDangerArea(
@@ -778,6 +1075,8 @@ void DragonAttackControllerComponent::AttachDangerArea(
     runtime_.dangerAreaLocalOffset = localOffset_;
     runtime_.dangerAreaRadius = radius_;
     runtime_.dangerAreaHalfHeight = halfHeight_;
+    runtime_.dangerAreaIsFan = useFanShape_;
+    runtime_.dangerAreaFanAngleDegrees = std::clamp(fanAngleDegrees_, 0.1f, 360.0f);
     runtime_.hasDangerArea = true;
 }
 
@@ -1113,19 +1412,49 @@ void DragonAttackControllerComponent::SpawnBreathProjectile(
     EnsureDependencies();
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
-    const std::shared_ptr<AttackEmitterComponent> emitter_ =
-        ResolveBreathAttackEmitterComponent(position_, forward_, targetAimBlendOverride_);
+    const bool isBeam_ = templateName_ == "DragonBreathLightBeam";
+    std::shared_ptr<AttackEmitterComponent> emitter_;
+    if (isBeam_ && pendingBeamFrameValid)
+    {
+        emitter_ = pendingBeamEmitter.lock();
+        position_ = pendingBeamPosition;
+        forward_ = pendingBeamForward;
+        for (RuntimeAttack& runtime_ : runtimeAttacks)
+        {
+            if (runtime_.dangerAreaFixedFrame) ApplyDangerAreaTransform(runtime_);
+        }
+        position_ = pendingBeamPosition;
+    }
+    if (!emitter_)
+    {
+        emitter_ = ResolveBreathAttackEmitterComponent(position_, forward_, targetAimBlendOverride_);
+    }
     if (!emitter_) return;
 
     if (!breathProjectileEmitterAssetPath.empty())
     {
-        emitter_->LoadAsset(breathProjectileEmitterAssetPath);
+        if (!emitter_->LoadAsset(breathProjectileEmitterAssetPath)) return;
     }
 
     // ブレス本体はAttackEmitter Asset内の判定・モデル・着弾演出をまとめて生成する。
     forward_ = Normalize(forward_);
     position_ = Add(position_, Scale(forward_, breathProjectileMouthForwardOffset));
     emitter_->EmitByNameAt(templateName_, position_, forward_);
+    if (isBeam_)
+    {
+        pendingBeamFrameValid = false;
+        pendingBeamEmitter.reset();
+        // 発射後も予兆を残す場合は、実際の判定寿命と同じ時刻に消す。
+        for (const auto& template_ : emitter_->GetTemplates())
+        {
+            if (template_.name != templateName_) continue;
+            for (RuntimeAttack& runtime_ : runtimeAttacks)
+            {
+                if (runtime_.dangerAreaFixedFrame) runtime_.lifeTimer = template_.lifeTime;
+            }
+            break;
+        }
+    }
 }
 
 void DragonAttackControllerComponent::SpawnBiteVFX()
@@ -1398,7 +1727,12 @@ void DragonAttackControllerComponent::Gui()
     ImGui::Checkbox("Show Danger Area On Attack Start", &showDangerAreaOnAttackStart);
     ImGui::Checkbox("Show Breath Charge On Danger", &showBreathChargeOnDanger);
     ImGui::InputText("Danger Area VFX", &dangerAreaVFXAssetPath);
-    ImGui::DragFloat("Danger Area Ground Offset", &dangerAreaGroundOffset, 0.001f, -1.0f, 1.0f);
+    ImGui::DragFloat("Danger Area Ground Offset", &dangerAreaGroundOffset, 0.001f, 0.001f, 1.0f);
+    ImGui::DragFloat("Danger Area Ray Start Height", &dangerAreaRayStartHeight, 0.1f, 0.01f, 1000.0f);
+    ImGui::DragFloat("Danger Area Ray Distance", &dangerAreaRayDistance, 1.0f, 0.01f, 10000.0f);
+    ImGui::DragFloat("Danger Area Ground Query Interval", &dangerAreaGroundQueryInterval, 0.001f, 0.0f, 1.0f);
+    ImGui::Checkbox("Danger Area Align To Ground", &dangerAreaAlignToGround);
+    ImGui::Checkbox("Danger Area Multi Sample", &dangerAreaMultiSample);
     ImGui::DragFloat("Danger Area Length Padding", &dangerAreaLengthPadding, 0.01f, 0.0f, 20.0f);
     ImGui::DragFloat("Breath Life", &breathLifeTime, 0.01f, 0.0f, 10.0f);
     ImGui::DragFloat("Breath VFX Life", &breathVFXLifeTime, 0.01f, 0.0f, 5.0f);
@@ -1414,9 +1748,12 @@ void DragonAttackControllerComponent::Gui()
     ImGui::DragFloat("Breath Target Aim Blend", &breathTargetAimBlend, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Breath Air Ground Aim Height", &breathAirGroundAimHeight, 0.01f, -5.0f, 5.0f);
     ImGui::DragFloat("Breath Danger Life", &breathDangerLifeTime, 0.01f, 0.0f, 10.0f);
-    ImGui::DragFloat("Breath Danger Range", &breathDangerRange, 0.01f, 0.01f, 80.0f);
-    ImGui::DragFloat("Breath Danger Width", &breathDangerWidth, 0.01f, 0.01f, 20.0f);
-    ImGui::DragFloat("Breath Danger Start Offset", &breathDangerStartOffset, 0.01f, -10.0f, 10.0f);
+    // 旧予兆寸法は保存互換用として残し、直線ブレスの寸法はEmitter側で編集する。
+    ImGui::BeginDisabled();
+    ImGui::DragFloat("Legacy Breath Danger Range", &breathDangerRange, 0.01f, 0.01f, 80.0f);
+    ImGui::DragFloat("Legacy Breath Danger Width", &breathDangerWidth, 0.01f, 0.01f, 20.0f);
+    ImGui::DragFloat("Legacy Breath Danger Start Offset", &breathDangerStartOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::EndDisabled();
     ImGui::DragFloat("Breath Single Impact Range", &breathProjectileImpactDangerRange, 0.01f, 0.01f, 80.0f);
     ImGui::DragFloat("Breath Single Impact Radius", &breathProjectileImpactDangerRadius, 0.01f, 0.01f, 20.0f);
     ImGui::DragFloat("Breath Fan Danger Range", &breathFanDangerRange, 0.01f, 0.01f, 80.0f);
@@ -1520,6 +1857,11 @@ void DragonAttackControllerComponent::Serialize(nlohmann::json& json_) const
     json_["ShowDangerAreaOnAttackStart"] = showDangerAreaOnAttackStart;
     json_["ShowBreathChargeOnDanger"] = showBreathChargeOnDanger;
     json_["DangerAreaGroundOffset"] = dangerAreaGroundOffset;
+    json_["DangerAreaRayStartHeight"] = dangerAreaRayStartHeight;
+    json_["DangerAreaRayDistance"] = dangerAreaRayDistance;
+    json_["DangerAreaGroundQueryInterval"] = dangerAreaGroundQueryInterval;
+    json_["DangerAreaAlignToGround"] = dangerAreaAlignToGround;
+    json_["DangerAreaMultiSample"] = dangerAreaMultiSample;
     json_["DangerAreaLengthPadding"] = dangerAreaLengthPadding;
     json_["BreathLifeTime"] = breathLifeTime;
     json_["BreathVFXLifeTime"] = breathVFXLifeTime;
@@ -1596,6 +1938,9 @@ void DragonAttackControllerComponent::Serialize(nlohmann::json& json_) const
 
 void DragonAttackControllerComponent::Deserialize(const nlohmann::json& json_)
 {
+    pendingBeamFrameValid = false;
+    pendingBeamFrameTimer = 0.0f;
+    pendingBeamEmitter.reset();
     actionCategory = json_.value("ActionCategory", std::string("DragonAttack"));
     breathVFXAssetPath = json_.value("BreathVFXAssetPath", std::string("Data/VFX/DragonBreath.json"));
     breathProjectileEmitterAssetPath = json_.value(
@@ -1613,6 +1958,11 @@ void DragonAttackControllerComponent::Deserialize(const nlohmann::json& json_)
     showDangerAreaOnAttackStart = json_.value("ShowDangerAreaOnAttackStart", true);
     showBreathChargeOnDanger = json_.value("ShowBreathChargeOnDanger", true);
     dangerAreaGroundOffset = json_.value("DangerAreaGroundOffset", 0.03f);
+    dangerAreaRayStartHeight = (std::max)(json_.value("DangerAreaRayStartHeight", 5.0f), 0.01f);
+    dangerAreaRayDistance = (std::max)(json_.value("DangerAreaRayDistance", 250.0f), 0.01f);
+    dangerAreaGroundQueryInterval = (std::max)(json_.value("DangerAreaGroundQueryInterval", 0.05f), 0.0f);
+    dangerAreaAlignToGround = json_.value("DangerAreaAlignToGround", true);
+    dangerAreaMultiSample = json_.value("DangerAreaMultiSample", true);
     dangerAreaLengthPadding = json_.value("DangerAreaLengthPadding", 0.0f);
     breathLifeTime = json_.value("BreathLifeTime", 3.2f);
     breathVFXLifeTime = json_.value("BreathVFXLifeTime", 0.6f);

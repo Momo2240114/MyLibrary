@@ -172,7 +172,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 1.4833333492279053,
+                        "endTime": 3.1500000953674316,
                         "eventTemplateType": "NONE",
                         "label": "Attack",
                         "localPosition": [
@@ -467,7 +467,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 0.15000000596046448,
+                        "endTime": 0.30000001192092896,
                         "eventTemplateType": "NONE",
                         "label": "Danger",
                         "localPosition": [
@@ -492,7 +492,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.10000000149011612
+                        "startTime": 0.0
                     },
                     {
                         "actionEnd": "",
@@ -503,7 +503,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 0.5,
+                        "endTime": 0.699999988079071,
                         "eventTemplateType": "NONE",
                         "label": "Attack",
                         "localPosition": [
@@ -528,7 +528,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.44999998807907104
+                        "startTime": 0.3333333432674408
                     },
                     {
                         "actionEnd": "",
@@ -539,7 +539,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": true,
-                        "endTime": 1.0,
+                        "endTime": 1.0333333015441895,
                         "eventTemplateType": "NONE",
                         "label": "ActionEnd",
                         "localPosition": [
@@ -564,7 +564,7 @@
                         "overridePlaybackSpeed": false,
                         "ownerTarget": "Self",
                         "playbackSpeed": 1.0,
-                        "startTime": 0.949999988079071
+                        "startTime": 1.0
                     }
                 ],
                 "loop": false,
@@ -869,7 +869,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 2.8333332538604736,
+                        "endTime": 2.799999952316284,
                         "eventTemplateType": "NONE",
                         "label": "Attack",
                         "localPosition": [
@@ -1727,6 +1727,189 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
+                "animationIndex": 24,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [
+                    {
+                        "actionEnd": "",
+                        "actionStart": "DragonAI_ShowSequencerDanger",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.30000001192092896,
+                        "eventTemplateType": "NONE",
+                        "label": "Danger",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.25
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "DragonAI_PlaySequencerAttack",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.5,
+                        "eventTemplateType": "NONE",
+                        "label": "Attack",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.44999998807907104
+                    },
+                    {
+                        "actionEnd": "",
+                        "actionStart": "TestTarget_DragonAI_SequencerActionEnd",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 1.2000000476837158,
+                        "eventTemplateType": "NONE",
+                        "label": "Action",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 1.149999976158142
+                    }
+                ],
+                "loop": false,
+                "name": "DragonGroundStamp",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
                 "animationIndex": 23,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
@@ -2188,7 +2371,7 @@
                         "attackTemplateId": "",
                         "blackboardWrites": [],
                         "callEndOnStateExit": false,
-                        "endTime": 2.816666603088379,
+                        "endTime": 2.5,
                         "eventTemplateType": "NONE",
                         "label": "Attack",
                         "localPosition": [
@@ -3161,7 +3344,7 @@
             {
                 "animIndexA": -1,
                 "animIndexB": -1,
-                "animationIndex": 21,
+                "animationIndex": 22,
                 "blend2DBackwardAnimationIndex": -1,
                 "blend2DBackwardLeft90AnimationIndex": -1,
                 "blend2DBackwardLeft90PhaseOffset": 0.0,
@@ -4033,6 +4216,189 @@
                 "speed": 1.0,
                 "speedCurveName": "",
                 "type": 0
+            },
+            {
+                "animIndexA": -1,
+                "animIndexB": -1,
+                "animationIndex": 24,
+                "blend2DBackwardAnimationIndex": -1,
+                "blend2DBackwardLeft90AnimationIndex": -1,
+                "blend2DBackwardLeft90PhaseOffset": 0.0,
+                "blend2DBackwardLeftAnimationIndex": -1,
+                "blend2DBackwardLeftPhaseOffset": 0.0,
+                "blend2DBackwardPhaseOffset": 0.0,
+                "blend2DBackwardRight90AnimationIndex": -1,
+                "blend2DBackwardRight90PhaseOffset": 0.0,
+                "blend2DBackwardRightAnimationIndex": -1,
+                "blend2DBackwardRightPhaseOffset": 0.0,
+                "blend2DDefaultInput": [
+                    0.0,
+                    1.0
+                ],
+                "blend2DForwardAnimationIndex": -1,
+                "blend2DForwardLeft90AnimationIndex": -1,
+                "blend2DForwardLeft90PhaseOffset": 0.0,
+                "blend2DForwardLeftAnimationIndex": -1,
+                "blend2DForwardLeftPhaseOffset": 0.0,
+                "blend2DForwardPhaseOffset": 0.0,
+                "blend2DForwardRight90AnimationIndex": -1,
+                "blend2DForwardRight90PhaseOffset": 0.0,
+                "blend2DForwardRightAnimationIndex": -1,
+                "blend2DForwardRightPhaseOffset": 0.0,
+                "blend2DIdleAnimationIndex": -1,
+                "blend2DIdlePhaseOffset": 0.0,
+                "blend2DIdleThreshold": 0.05000000074505806,
+                "blend2DLeftAnimationIndex": -1,
+                "blend2DLeftPhaseOffset": 0.0,
+                "blend2DParamName": "MoveInput",
+                "blend2DRightAnimationIndex": -1,
+                "blend2DRightPhaseOffset": 0.0,
+                "blend2DSyncNormalizedTime": true,
+                "blend2DUseEightDirections": false,
+                "blend2DUseForwardBackwardLateral": false,
+                "blend2DUseIdleStop": false,
+                "blendDefaultWeight": 0.5,
+                "blendMaskRootNodes": [],
+                "blendParamName": "BlendAlpha",
+                "blendParameterMax": 1.0,
+                "blendParameterMin": 0.0,
+                "blendPhaseOffsetA": 0.0,
+                "blendPhaseOffsetB": 0.0,
+                "blendSyncNormalizedTime": true,
+                "blendUseMask": false,
+                "customAnimIndex": -1,
+                "events": [
+                    {
+                        "actionEnd": "",
+                        "actionStart": "DragonAI_ShowSequencerDanger",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": false,
+                        "endTime": 0.25,
+                        "eventTemplateType": "NONE",
+                        "label": "Danger",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.01666666753590107
+                    },
+                    {
+                        "actionEnd": "DragonAI_DisableTailHitBox",
+                        "actionStart": "DragonAI_PlaySequencerAttack",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 0.6666666865348816,
+                        "eventTemplateType": "NONE",
+                        "label": "Attack",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 0.0833333358168602
+                    },
+                    {
+                        "actionEnd": "DragonAI_ClearTailIK",
+                        "actionStart": "",
+                        "actionUpdate": "",
+                        "attachNodeName": "",
+                        "attachToOwner": false,
+                        "attackTemplateId": "",
+                        "blackboardWrites": [],
+                        "callEndOnStateExit": true,
+                        "endTime": 1.7999999523162842,
+                        "eventTemplateType": "NONE",
+                        "label": "TailIKEnd",
+                        "localPosition": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localRotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "localScale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "meshVFXAssetPath": "",
+                        "meshVFXLifeTime": 1.0,
+                        "meshVFXPlaybackSpeed": 1.0,
+                        "mirrorMeshVFX": false,
+                        "overridePlaybackSpeed": false,
+                        "ownerTarget": "Self",
+                        "playbackSpeed": 1.0,
+                        "startTime": 1.75
+                    }
+                ],
+                "loop": false,
+                "name": "Turn90L",
+                "rootMotion": {
+                    "applyPositionX": true,
+                    "applyPositionY": true,
+                    "applyPositionZ": true,
+                    "applyRotationX": false,
+                    "applyRotationY": false,
+                    "applyRotationZ": false,
+                    "cutVisualPositionX": true,
+                    "cutVisualPositionY": true,
+                    "cutVisualPositionZ": true,
+                    "enable": false,
+                    "sourceNodeName": ""
+                },
+                "rootMotionScale": 1.0,
+                "rootMotionScaleCurveName": "",
+                "sequenceClips": [],
+                "sequencer": "",
+                "speed": 1.0,
+                "speedCurveName": "",
+                "type": 0
             }
         ]
     },
@@ -4346,6 +4712,28 @@
             "posY": 380.0,
             "scopeId": "Root",
             "stateName": "PlainsDragon_FireBeam_Sweep45"
+        },
+        {
+            "childScopeId": "",
+            "id": 136,
+            "inputPin": 137,
+            "nodeType": 0,
+            "outputPin": 138,
+            "posX": 0.0,
+            "posY": 0.0,
+            "scopeId": "Root",
+            "stateName": "Turn90L"
+        },
+        {
+            "childScopeId": "",
+            "id": 140,
+            "inputPin": 141,
+            "nodeType": 0,
+            "outputPin": 142,
+            "posX": 420.0,
+            "posY": 500.0,
+            "scopeId": "Root",
+            "stateName": "DragonGroundStamp"
         }
     ],
     "GraphTransitions": [
@@ -4805,9 +5193,27 @@
             "logic": 0,
             "scopeId": "Root",
             "to": "PlainsDragon_DeathHitTheGround"
+        },
+        {
+            "conditions": [
+                {
+                    "op": 0,
+                    "param": "To_DragonGroundStamp",
+                    "threshold": 1.0,
+                    "type": 2
+                }
+            ],
+            "duration": 0.20000000298023224,
+            "from": "__Any__",
+            "id": 143,
+            "logic": 0,
+            "scopeId": "Root",
+            "to": "DragonGroundStamp"
         }
     ],
     "StateAssets": {
+        "DragonGroundStamp": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\DragonGroundStamp.json",
+        "PlainsDragon_BiteAttack": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_BiteAttack.json",
         "PlainsDragon_FireBeam_Sweep45": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_FireBeam_Sweep45.json",
         "PlainsDragon_FlyStationarySpitFireBall": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_FlyStationarySpitFireBall.json",
         "PlainsDragon_FlyStationarySpreadFire": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_FlyStationarySpreadFire.json",
@@ -4822,7 +5228,8 @@
         "PlainsDragon_SpreadFire_Forward": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_SpreadFire_Forward.json",
         "PlainsDragon_TakeOff": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_TakeOff.json",
         "PlainsDragon_Turn90L_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90L_RM.json",
-        "PlainsDragon_Turn90R_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90R_RM.json"
+        "PlainsDragon_Turn90R_RM": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\PlainsDragon_Turn90R_RM.json",
+        "Turn90L": "Data\\Animation\\StateData\\DragonFirstForm_Test\\States\\Turn90L.json"
     },
     "UseTransitionGraph": true
 }

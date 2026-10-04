@@ -3,6 +3,7 @@
 #include "ParticleEmitter.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <vector>
@@ -218,6 +219,20 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
         indirectDataUAV.Get(),
         particleHeaderUAV.Get(),
     };
+    if (!initialized)
+    {
+        BS_PROFILE_SCOPE("ParticleEmitter::ResetGPUArguments");
+        // プール再利用時も生存数と間接実行引数を消し、前回の粒子数で発生枠が埋まることを防ぐ。
+        // UAVへバインドする前にリセットし、粒子本体・空き番号のInitと同じフレームで初期化する。
+        std::array<UINT, DrawIndirectSize / sizeof(UINT)> resetArguments_{};
+        const DrawIndirect drawArguments_{ 0u, 1u, 0u, 0u };
+        std::memcpy(
+            resetArguments_.data() + DrawIndirectOffset / sizeof(UINT),
+            &drawArguments_,
+            sizeof(drawArguments_));
+        context->UpdateSubresource(
+            indirectDataBuffer.Get(), 0, nullptr, resetArguments_.data(), 0, 0);
+    }
     UINT preserve = 0xFFFFFFFF;
     UINT initialCounts[] = { preserve, initialized ? preserve : 0, preserve, preserve };
     context->CSSetUnorderedAccessViews(0, _countof(uavs), uavs, initialCounts);
@@ -284,6 +299,7 @@ void ParticleEmitter::Update(ID3D11DeviceContext* context, float dt)
 
 void ParticleEmitter::ResetRuntime()
 {
+    BS_PROFILE_SCOPE("ParticleEmitter::ResetRuntime");
     initialized = false;
     continuousAccumulator = 0.0f;
     depthSortFrame = 0u;

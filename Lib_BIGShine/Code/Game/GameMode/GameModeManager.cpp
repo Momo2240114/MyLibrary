@@ -309,11 +309,14 @@ void GameModeManager::RegisterGlobalActions()
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT, [this]() { BeginPhase1Defeat(); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO, [this]() { BeginPhase2Intro(); });
     registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED, [this]() { BeginBossDefeated(); });
-    registry_.RemoveAction("Sequence", SEQUENCE_BOSS_INTRO);
     registry_.RemoveAction("Sequence", SEQUENCE_PHASE_1_DEFEAT);
     registry_.RemoveAction("Sequence", SEQUENCE_PHASE_2_INTRO);
     registry_.RemoveAction("Sequence", SEQUENCE_BOSS_DEFEATED);
-    registry_.RegisterAction("Sequence", SEQUENCE_BOSS_INTRO, [this]() { NotifySequenceFinished(); });
+    // BossIntroはScene上のActionSequenceから登録されるまで待ち、仮Actionで戦闘へ進めない。
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisablePlayerControl", [this]() { SetPlayerControlLocked(true); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnablePlayerControl", [this]() { SetPlayerControlLocked(false); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI", [this]() { SetEnemyAILocked(true); });
+    registry_.RegisterAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI", [this]() { SetEnemyAILocked(false); });
     registry_.RegisterAction("Sequence", SEQUENCE_PHASE_1_DEFEAT, [this]() { NotifySequenceFinished(); });
     registry_.RegisterAction("Sequence", SEQUENCE_PHASE_2_INTRO, [this]() { NotifySequenceFinished(); });
     registry_.RegisterAction("Sequence", SEQUENCE_BOSS_DEFEATED, [this]() { NotifySequenceFinished(); });
@@ -332,6 +335,10 @@ void GameModeManager::UnregisterGlobalActions()
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_1_DEFEAT);
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_PHASE_2_INTRO);
     registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, ACTION_BEGIN_BOSS_DEFEATED);
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "DisablePlayerControl");
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "EnablePlayerControl");
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "DisableEnemyAI");
+    registry_.RemoveAction(ACTION_CATEGORY_GAME_MODE, "EnableEnemyAI");
     registry_.RemoveAction("Sequence", SEQUENCE_BOSS_INTRO);
     registry_.RemoveAction("Sequence", SEQUENCE_PHASE_1_DEFEAT);
     registry_.RemoveAction("Sequence", SEQUENCE_PHASE_2_INTRO);
@@ -382,24 +389,40 @@ void GameModeManager::NotifyPhase2BossDefeated()
 
 void GameModeManager::BeginBossIntro()
 {
+    BS_PROFILE_SCOPE("GameModeManager::BeginBossIntro");
+    // ゲーム開始時だけ開幕演出を予約し、戦闘中の再呼び出しを無効にする。
+    if (currentGameState != GameProgressState::GAME_SCENE_START) return;
+
     SetGameState(GameProgressState::BOSS_INTRO);
     RequestSequence(SEQUENCE_BOSS_INTRO);
 }
 
 void GameModeManager::BeginPhase1Defeat()
 {
+    BS_PROFILE_SCOPE("GameModeManager::BeginPhase1Defeat");
+    // 第一形態の戦闘中だけ撃破演出へ進め、重複通知による再開始を防ぐ。
+    if (currentGameState != GameProgressState::PHASE_1_BATTLE) return;
+
     SetGameState(GameProgressState::PHASE_1_DEFEAT);
     RequestSequence(SEQUENCE_PHASE_1_DEFEAT);
 }
 
 void GameModeManager::BeginPhase2Intro()
 {
+    BS_PROFILE_SCOPE("GameModeManager::BeginPhase2Intro");
+    // 第一形態の撃破演出から第二形態への移行演出を開始する。
+    if (currentGameState != GameProgressState::PHASE_1_DEFEAT) return;
+
     SetGameState(GameProgressState::PHASE_2_INTRO);
     RequestSequence(SEQUENCE_PHASE_2_INTRO);
 }
 
 void GameModeManager::BeginBossDefeated()
 {
+    BS_PROFILE_SCOPE("GameModeManager::BeginBossDefeated");
+    // 第二形態の戦闘中だけ最終撃破演出を開始する。
+    if (currentGameState != GameProgressState::PHASE_2_BATTLE) return;
+
     SetGameState(GameProgressState::BOSS_DEFEATED);
     RequestSequence(SEQUENCE_BOSS_DEFEATED);
 }

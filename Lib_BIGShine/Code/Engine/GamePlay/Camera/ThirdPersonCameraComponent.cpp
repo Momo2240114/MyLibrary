@@ -72,7 +72,9 @@ void ThirdPersonCameraComponent::LateUpdate(float deltaTime_)
         return;
     }
 
-    if (!returnBlendActive)
+    const auto gameMode_ = owner_->GetManager().GetGameModeManager();
+    // 復帰先の通常Camera位置は計算し続け、演出中の手動入力だけを停止する。
+    if (!returnBlendActive && (!gameMode_ || !gameMode_->IsPlayerControlLocked()))
     {
         // StickとMouse入力を合成し、Pitch/Yawへ反映する。
         const KeyConfig& keyConfig_ = KeyConfig::Instance();

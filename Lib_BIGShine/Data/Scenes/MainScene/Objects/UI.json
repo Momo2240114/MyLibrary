@@ -68,6 +68,21 @@
             "TypeName": "UIWidgetComponent",
             "UpdateEnabled": true,
             "UpdatePriority": 0
+        },
+        {
+            "Data": {
+                "IncludeColliderComponents": false,
+                "IncludeNormalComponents": true,
+                "RegisteredGlobalActions": true,
+                "StartEnabled": false
+            },
+            "Enabled": true,
+            "LateUpdateEnabled": true,
+            "LateUpdatePriority": 0,
+            "RequiredForSceneStart": false,
+            "TypeName": "GameModeObjectToggleComponent",
+            "UpdateEnabled": true,
+            "UpdatePriority": 0
         }
     ],
     "Layer": 16,

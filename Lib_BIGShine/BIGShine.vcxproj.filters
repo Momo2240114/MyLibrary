@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Data">
+      <UniqueIdentifier>{b54ebd2a-a005-4ebe-9b9b-536b647a69e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Animation">
+      <UniqueIdentifier>{28c8b069-8491-4e1e-945e-848762fa2d39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Animation\States">
+      <UniqueIdentifier>{8c4cf120-14b9-4833-a25e-623e07837202}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{9f64f4ff-d9e0-43d7-88e1-13e6d3656a89}</UniqueIdentifier>
       <Extensions>hlsl;hlsli</Extensions>
@@ -388,6 +397,9 @@
     <ClCompile Include="Code\Engine\Graphics\Resource\GLTFModel.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\Graphics\Resource\HDRTexture.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\Graphics\Resource\ModelLoadProfileManager.cpp">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClCompile>
@@ -568,6 +580,9 @@
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActionSequence.cpp">
       <Filter>Code\Engine\GamePlay\EventSystem</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\EventSystem\ActorPresentationActionComponent.cpp">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\GamePlay\EventSystem\EventTrack.cpp">
       <Filter>Code\Engine\GamePlay\EventSystem</Filter>
     </ClCompile>
@@ -646,6 +661,9 @@
     <ClCompile Include="Code\Editor\Window\PostEffectWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Editor\Window\IBLSettingsWindow.cpp">
+      <Filter>Code\Editor\Window</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Window\DebugTextureViewerWindow.cpp">
       <Filter>Code\Editor\Window</Filter>
     </ClCompile>
@@ -667,10 +685,16 @@
     <ClCompile Include="Code\Engine\UI\UITextComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\UI\BossNamePresentationComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Engine\UI\UIVertexModifierComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\UI\UIWorldAnchorComponent.cpp">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClCompile>
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp">
@@ -1107,6 +1131,9 @@
     <ClInclude Include="Code\Engine\Graphics\Resource\GLTFModel.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\Graphics\Resource\HDRTexture.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\Graphics\Resource\IModel.h">
       <Filter>Code\Engine\Graphics\Resource</Filter>
     </ClInclude>
@@ -1383,6 +1410,9 @@
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\ActionSequence.h">
       <Filter>Code\Engine\GamePlay\EventSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\EventSystem\ActorPresentationActionComponent.h">
+      <Filter>Code\Engine\GamePlay\EventSystem</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\GamePlay\EventSystem\BaseEvent.h">
       <Filter>Code\Engine\GamePlay\EventSystem</Filter>
     </ClInclude>
@@ -1473,6 +1503,9 @@
     <ClInclude Include="Code\Editor\Window\PostEffectWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Editor\Window\IBLSettingsWindow.h">
+      <Filter>Code\Editor\Window</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Editor\Window\DebugTextureViewerWindow.h">
       <Filter>Code\Editor\Window</Filter>
     </ClInclude>
@@ -1497,10 +1530,16 @@
     <ClInclude Include="Code\Engine\UI\UITextComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Engine\UI\BossNamePresentationComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIVertexModifierComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\UIWidgetComponent.h">
+      <Filter>Code\Engine\GamePlay\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\UI\UIWorldAnchorComponent.h">
       <Filter>Code\Engine\GamePlay\UI</Filter>
     </ClInclude>
     <ClInclude Include="Code\Engine\UI\WidgetBoardComponent.h">
@@ -1866,6 +1905,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomExternalDependencies.props" />
+    <None Include="Data\Animation\StateData\DragonFirstForm_Test\States\DragonGroundStamp.json">
+      <Filter>Data\Animation\States</Filter>
+    </None>
     <None Include="Shader\Basic.hlsli">
       <Filter>Shaders\Basic</Filter>
     </None>

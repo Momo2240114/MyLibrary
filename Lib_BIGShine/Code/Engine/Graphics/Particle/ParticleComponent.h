@@ -47,6 +47,11 @@ public:
         ParticleBlendMode blendMode = ParticleBlendMode::ALPHA;
         ParticleBlendMode runtimeBlendMode = ParticleBlendMode::ALPHA;
         ParticleSpawnSpace spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE;
+        // 直線攻撃用の一時補正をPool再利用時に戻し、元のParticle設定へ持ち越さない。
+        bool hasBeamVisualOverride = false;
+        ParticleSystemConstants beamVisualSettingsBackup;
+        ParticleSpawnSpace beamVisualSpawnSpaceBackup = ParticleSpawnSpace::OWNER_RELATIVE;
+        float beamVisualDelayBackup = 0.0f;
         bool isPlaybackEnabled = false;
         bool isStarted = false;
 

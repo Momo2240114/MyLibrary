@@ -97,7 +97,7 @@
                 "attackTemplateId": "",
                 "blackboardWrites": [],
                 "callEndOnStateExit": false,
-                "endTime": 2.8333332538604736,
+                "endTime": 2.800000011920929,
                 "eventTemplateType": "NONE",
                 "label": "Attack",
                 "localPosition": [

@@ -8,6 +8,7 @@
 #include "Engine/GamePlay/Camera/CameraLockOnComponent.h"
 #include "Engine/GamePlay/Camera/CameraManager.h"
 #include "Engine/GamePlay/Core/Component/CharacterMovementComponent.h"
+#include "Engine/GamePlay/Core/Component/MotionWarpComponent.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Physics/CapsuleCollider.h"
 #include "PlayerControllerComponent.h"
@@ -21,6 +22,7 @@ namespace
     constexpr float MINIMUM_HORIZONTAL_LENGTH_SQUARED = 0.000001f;
     constexpr float RADIANS_TO_DEGREES = 180.0f / DirectX::XM_PI;
     constexpr float DEGREES_TO_RADIANS = DirectX::XM_PI / 180.0f;
+    constexpr float ATTACK_ASSIST_VERTICAL_DISTANCE_SCALE = 4.0f;
 
     // ObjectのWorldスケールを考慮したCapsule半径を取得し、接近補正の停止距離に使う。
     float GetWorldCapsuleRadius(const std::shared_ptr<GameObject>& object_)
@@ -57,6 +59,21 @@ namespace
         const DirectX::XMFLOAT3& b_)
     {
         return a_.x * b_.x + a_.z * b_.z;
+    }
+
+    // 高い部位を優先しすぎないよう、高さ差だけ重くした距離を攻撃補正Target選択に使う。
+    float CalculateAttackAssistDistanceSquared(
+        const DirectX::XMFLOAT3& ownerPosition_,
+        const DirectX::XMFLOAT3& targetPosition_)
+    {
+        const float differenceX_ = targetPosition_.x - ownerPosition_.x;
+        const float differenceY_ =
+            (targetPosition_.y - ownerPosition_.y) * ATTACK_ASSIST_VERTICAL_DISTANCE_SCALE;
+        const float differenceZ_ = targetPosition_.z - ownerPosition_.z;
+        return
+            differenceX_ * differenceX_ +
+            differenceY_ * differenceY_ +
+            differenceZ_ * differenceZ_;
     }
 
     // XZ方向ベクトルをYaw角度へ変換する。
@@ -130,6 +147,7 @@ void PlayerAttackState::Enter()
     hasLockedAssistDirection = false;
     attackAssistTargetResolved = false;
     attackAssistTarget.reset();
+    counterMotionWarpActive = false;
     player_->EnterAction(action);
     const bool isStrongCharge_ =
         action == PLAYER_ACTION::STRONG_CHARGE_ATTACK ||
@@ -166,6 +184,10 @@ void PlayerAttackState::Enter()
     }
 
     ResolveAttackAssistTarget();
+    if (action == PLAYER_ACTION::COUNTER_ATTACK)
+    {
+        StartCounterMotionWarp();
+    }
 }
 
 // 攻撃中も入力値をBlackboardへ流し、補正とキャンセル分岐を更新する。
@@ -192,6 +214,7 @@ void PlayerAttackState::Exit()
         {
             player_->ClearAttackAssistTarget();
         }
+        StopCounterMotionWarp();
     }
 }
 
@@ -215,10 +238,12 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
         const DirectX::XMFLOAT3 targetPosition_ = target_->transform->GetWorldPosition();
         const float differenceX_ = targetPosition_.x - ownerPosition_.x;
         const float differenceZ_ = targetPosition_.z - ownerPosition_.z;
-        const float distanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
+        const float horizontalDistanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
+        const float assistDistanceSquared_ =
+            CalculateAttackAssistDistanceSquared(ownerPosition_, targetPosition_);
         return
-            distanceSquared_ <= maximumDistanceSquared_ &&
-            distanceSquared_ > MINIMUM_HORIZONTAL_LENGTH_SQUARED;
+            assistDistanceSquared_ <= maximumDistanceSquared_ &&
+            horizontalDistanceSquared_ > MINIMUM_HORIZONTAL_LENGTH_SQUARED;
     };
 
     const std::shared_ptr<CameraLockOnComponent> lockOn_ = ResolveCameraLockOnComponent();
@@ -288,7 +313,9 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
         const DirectX::XMFLOAT3 candidatePosition_ = candidate_->transform->GetWorldPosition();
         const float differenceX_ = candidatePosition_.x - ownerPosition_.x;
         const float differenceZ_ = candidatePosition_.z - ownerPosition_.z;
-        const float distanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
+        const float horizontalDistanceSquared_ = differenceX_ * differenceX_ + differenceZ_ * differenceZ_;
+        const float assistDistanceSquared_ =
+            CalculateAttackAssistDistanceSquared(ownerPosition_, candidatePosition_);
 
         DirectX::XMFLOAT3 targetDirection_{ differenceX_, 0.0f, differenceZ_ };
         if (!NormalizeHorizontal(targetDirection_)) continue;
@@ -296,9 +323,9 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
         const float primaryDot_ = DotHorizontal(targetDirection_, primaryDirection_);
         if (primaryDot_ < targetThreshold_) continue;
 
-        if (distanceSquared_ < nearestDistanceSquared_)
+        if (assistDistanceSquared_ < nearestDistanceSquared_)
         {
-            nearestDistanceSquared_ = distanceSquared_;
+            nearestDistanceSquared_ = assistDistanceSquared_;
             nearestTarget_ = candidate_;
         }
 
@@ -306,7 +333,7 @@ std::shared_ptr<GameObject> PlayerAttackState::FindAssistTarget()
             ? DotHorizontal(targetDirection_, cameraForward_)
             : primaryDot_;
         const float ownerDot_ = DotHorizontal(targetDirection_, ownerForward_);
-        const float distance_ = std::sqrt(distanceSquared_);
+        const float distance_ = std::sqrt(assistDistanceSquared_);
         const float distanceScore_ = 1.0f - std::clamp(distance_ / (std::max)(settings_.searchDistance, 0.001f), 0.0f, 1.0f);
         const float centerScore_ = hasCameraForward_ && cameraDot_ >= centerThreshold_
             ? 0.2f
@@ -632,4 +659,33 @@ std::shared_ptr<CameraLockOnComponent> PlayerAttackState::ResolveCameraLockOnCom
     }
 
     return nullptr;
+}
+
+void PlayerAttackState::StartCounterMotionWarp()
+{
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    if (!owner_) return;
+
+    // 反撃は成功後のご褒美攻撃なので、通常攻撃より広い補正Presetを明示して再生する。
+    const std::shared_ptr<MotionWarpComponent> motionWarp_ =
+        owner_->GetOrAddComponent<MotionWarpComponent>();
+    if (!motionWarp_) return;
+
+    motionWarp_->Play("CounterAttackWarp");
+    counterMotionWarpActive = true;
+}
+
+void PlayerAttackState::StopCounterMotionWarp()
+{
+    if (!counterMotionWarpActive) return; 
+
+    const std::shared_ptr<GameObject> owner_ = GetOwner();
+    const std::shared_ptr<MotionWarpComponent> motionWarp_ =
+        owner_ ? owner_->GetComponent<MotionWarpComponent>() : nullptr;
+    if (motionWarp_)
+    {
+        motionWarp_->Stop("CounterAttackWarp");
+    }
+
+    counterMotionWarpActive = false;
 }

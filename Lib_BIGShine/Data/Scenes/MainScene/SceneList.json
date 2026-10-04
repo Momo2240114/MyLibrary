@@ -9,6 +9,10 @@
             "threshold": 1.7000000476837158,
             "toneMappingEnabled": true
         },
+        "IBL": {
+            "hdrIntensity": 0.0020000000949949026,
+            "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
+        },
         "ShadowMap": {
             "cascadeDepthPadding": 180.0,
             "cascadeShadowBias": [
@@ -172,7 +176,14 @@
         "PlayerHpEdgeHighlight",
         "PlayerStaminaBar",
         "TestDamge",
-        "ParryEvantPool"
+        "ParryEvantPool",
+        "EventCamera",
+        "BossIntro",
+        "BossIntroName",
+        "IntroFogGate",
+        "IntroGateMist",
+        "IntroGateLight",
+        "IntroRoarAirCone"
     ],
     "SceneName": "MainScene"
 }

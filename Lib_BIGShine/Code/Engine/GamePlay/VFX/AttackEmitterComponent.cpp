@@ -254,6 +254,7 @@ void to_json(nlohmann::json& json_, const AttackEmitterTemplate& template_)
         { "FanRangeSteps", template_.fanRangeSteps },
         { "FanVisualSampleCount", template_.fanVisualSampleCount },
         { "SpawnHit", template_.spawnHit },
+        { "FitBeamVisualToHitShape", template_.fitBeamVisualToHitShape },
         { "Entries", template_.entries },
         { "Hit", template_.hit },
     };
@@ -282,6 +283,7 @@ void from_json(const nlohmann::json& json_, AttackEmitterTemplate& template_)
     template_.fanRangeSteps = std::clamp(json_.value("FanRangeSteps", 3), 1, 16);
     template_.fanVisualSampleCount = std::clamp(json_.value("FanVisualSampleCount", 1), 1, 31);
     template_.spawnHit = json_.value("SpawnHit", true);
+    template_.fitBeamVisualToHitShape = json_.value("FitBeamVisualToHitShape", false);
     template_.entries = json_.value("Entries", std::vector<AttackEmitterEntryTemplate>{});
     template_.hit = json_.value("Hit", AttackEmitterHitTemplate{});
 }
@@ -398,6 +400,31 @@ void AttackEmitterComponent::EmitByNameAt(
             return;
         }
     }
+}
+
+bool AttackEmitterComponent::ResolveBeamGeometryAt(
+    const std::string& templateName_,
+    const DirectX::XMFLOAT3& position_,
+    const DirectX::XMFLOAT3& direction_,
+    DirectX::XMFLOAT3& start_,
+    DirectX::XMFLOAT3& end_,
+    float& radius_) const
+{
+    BS_PROFILE_SCOPE("AttackEmitterComponent::ResolveBeamGeometryAt");
+    for (const AttackEmitterTemplate& template_ : templates)
+    {
+        if ((template_.name != templateName_ && template_.actionName != templateName_) ||
+            template_.shapeType != ATTACK_EMITTER_SHAPE_TYPE::BEAM) continue;
+        const EmitFrame frame_ = BuildEmitFrameAt(position_, direction_);
+        const DirectX::XMMATRIX matrix_ = BuildLocalMatrix(
+            template_.localOffset, template_.localRotation, template_.localScale) * frame_.sourceMatrix;
+        start_ = ExtractPosition(matrix_);
+        DirectX::XMStoreFloat3(&end_, DirectX::XMVector3TransformCoord(
+            DirectX::XMVectorSet(0.0f, 0.0f, template_.range, 1.0f), matrix_));
+        radius_ = template_.radius * (std::max)(std::abs(template_.localScale.x), std::abs(template_.localScale.y));
+        return true;
+    }
+    return false;
 }
 
 bool AttackEmitterComponent::LoadAsset(const std::string& path_, bool forceReload_)
@@ -533,6 +560,8 @@ void AttackEmitterComponent::SpawnEntry(
 
     auto spawnWithMatrix_ = [&](const DirectX::XMMATRIX& entryMatrix_)
     {
+        const bool fitBeamParticle_ = template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::BEAM &&
+            template_.fitBeamVisualToHitShape && entry_.type == ATTACK_EMITTER_ENTRY_TYPE::PARTICLE;
         const DirectX::XMFLOAT3 position_ = ExtractPosition(entryMatrix_);
         const DirectX::XMFLOAT3 direction_ = TransformForward(entryMatrix_);
         std::shared_ptr<GameObject> spawnedObject_;
@@ -548,7 +577,7 @@ void AttackEmitterComponent::SpawnEntry(
             // AttackEmitterの向きに合わせて、Particleの初速軸も発射方向へそろえる。
             request_.axis = direction_;
             request_.overrideAxis = true;
-            request_.lifeTime = entry_.lifeTime;
+            request_.lifeTime = fitBeamParticle_ ? template_.lifeTime : entry_.lifeTime;
             request_.normalOffset = entry_.normalOffset;
             spawnedObject_ = effectManager_.SpawnParticle(request_);
         }
@@ -578,7 +607,8 @@ void AttackEmitterComponent::SpawnEntry(
             // Projectile判定と見た目を同じ親へぶら下げ、移動する判定に追従させる。
             spawnedObject_->transform->SetParent(followTarget_->transform);
         }
-        spawnedObject_->transform->ApplyWorldMatrix(entryMatrix_);
+        // 補正対象の直線炎はEntry独自の移動・拡大を使わず、判定と同じ発射基準に置く。
+        spawnedObject_->transform->ApplyWorldMatrix(fitBeamParticle_ ? frame_.sourceMatrix : entryMatrix_);
         spawnedObject_->UpdateTransform();
         if (std::shared_ptr<MeshVFXComponent> meshVFX_ = spawnedObject_->GetComponent<MeshVFXComponent>())
         {
@@ -586,6 +616,57 @@ void AttackEmitterComponent::SpawnEntry(
         }
         if (std::shared_ptr<ParticleComponent> particle_ = spawnedObject_->GetComponent<ParticleComponent>())
         {
+            if (fitBeamParticle_)
+            {
+                BS_PROFILE_SCOPE("AttackEmitterComponent::FitBeamParticleVisual");
+                DirectX::XMFLOAT3 end_{};
+                DirectX::XMStoreFloat3(&end_, DirectX::XMVector3TransformNormal(
+                    DirectX::XMVectorSet(0.0f, 0.0f, template_.range, 0.0f), frame_.sourceMatrix));
+                const float radius_ = template_.radius *
+                    (std::max)(std::abs(template_.localScale.x), std::abs(template_.localScale.y));
+                float maxSize_ = 0.01f;
+                for (const auto& track_ : particle_->GetTracks())
+                {
+                    maxSize_ = (std::max)({ maxSize_, track_.settings.emissionSize.x, track_.settings.emissionSize.y });
+                }
+                for (auto& track_ : particle_->GetTracks())
+                {
+                    if (!track_.hasBeamVisualOverride)
+                    {
+                        track_.beamVisualSettingsBackup = track_.settings;
+                        track_.beamVisualSpawnSpaceBackup = track_.spawnSpace;
+                        track_.beamVisualDelayBackup = track_.delay;
+                        track_.hasBeamVisualOverride = true;
+                    }
+                    auto& settings_ = track_.settings;
+                    // ParticleのLine座標はワールド軸のオフセット。判定の両端を直接指定する。
+                    track_.spawnSpace = ParticleSpawnSpace::OWNER_RELATIVE;
+                    settings_.emissionPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
+                    settings_.spawnShape = 4u;
+                    settings_.shapeStart = { 0.0f, 0.0f, 0.0f, 1.0f };
+                    settings_.shapeEnd = { end_.x, end_.y, end_.z, 1.0f };
+                    // 判定は発射時から全長が有効なので、炎も全長へ一度に発生させる。
+                    settings_.emissionMode = 1u;
+                    settings_.burstTrigger = 1.0f;
+                    track_.delay = 0.0f;
+                    // 板ポリゴンの四隅まで半径内に収め、炎が判定外へ流れ続ける力を解除する。
+                    const float sizeScale_ = radius_ * 1.41421356f / maxSize_;
+                    settings_.emissionSize.x *= sizeScale_;
+                    settings_.emissionSize.y *= sizeScale_;
+                    settings_.useRandomSize = 0u;
+                    settings_.emissionSpeed = { 0.0f, 0.0f };
+                    settings_.gravity = 0.0f;
+                    settings_.windVelocity = { 0.0f, 0.0f, 0.0f, 0.0f };
+                    settings_.noiseScale = 0.0f;
+                    settings_.noiseStrength = 0.0f;
+                    settings_.radialVelocity = 0.0f;
+                    settings_.orbitVelocity = 0.0f;
+                    settings_.useTargetAttraction = 0u;
+                    settings_.verticalSpawnRange = 0.0f;
+                    settings_.lifespan = { template_.lifeTime, template_.lifeTime };
+                    settings_.type = 0u;
+                }
+            }
             if (!entry_.emitterName.empty()) particle_->PlayEmitter(entry_.emitterName);
         }
     };
@@ -942,6 +1023,10 @@ void AttackEmitterComponent::Gui()
             ImGui::DragFloat("Radius", &template_.radius, 0.01f, 0.01f, 100.0f);
             ImGui::DragFloat("Speed", &template_.speed, 0.1f, 0.0f, 1000.0f);
             ImGui::DragFloat("Life Time", &template_.lifeTime, 0.01f, 0.01f, 120.0f);
+            if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::BEAM)
+            {
+                ImGui::Checkbox("Fit Beam Visual To Hit Shape", &template_.fitBeamVisualToHitShape);
+            }
             if (template_.shapeType == ATTACK_EMITTER_SHAPE_TYPE::PROJECTILE)
             {
                 ImGui::Checkbox("Projectile Motion", &template_.projectileMotionEnabled);
