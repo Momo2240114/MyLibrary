@@ -3,6 +3,7 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "ComponentRegistry.h"
 #include "Engine/Graphics/Resource/GlTFModel.h"
+#include "Engine/GamePlay/Graphics/ModelMaterialComponent.h"
 #include "Engine/Graphics/Resource/Sprite.h"
 #include "Engine/Physics/BoxCollider.h"
 #include "Engine/Physics/CapsuleCollider.h"
@@ -113,6 +114,7 @@ void RegisterAllComponents()
     // Scene JSON の ComponentName から実際の C++ Component を生成できるようにする。
     registry.Register<CameraComponent>("CameraComponent");
     registry.Register<GltfModelCommponennt>("GltfModel");
+    registry.Register<ModelMaterialComponent>("ModelMaterialComponent");
     registry.Register<ModelAttachmentComponent>("ModelAttachment");
     registry.Register<BoneSegmentAttachmentComponent>("BoneSegmentAttachment");
     registry.Register<AnimationControllerComponent>("AnimationControllerComponent");

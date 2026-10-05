@@ -65,6 +65,9 @@ public:
     void Start();
     void Update(float elapsedTime_) override;
     void StartSequence(int index_);
+    // 外部Stateは開始時の世代を保存し、自分の予約だけを停止する。
+    unsigned int GetPlaybackGeneration() const { return playbackGeneration; }
+    void StopPlayback(unsigned int generation_);
     void SetRegisterGlobal(bool registerGlobal_) { registerGlobal = registerGlobal_; }
     // 指定名の即時実行Sequenceが無ければ作成し、外部から呼べるActionとして登録する。
     void EnsureImmediateSequence(

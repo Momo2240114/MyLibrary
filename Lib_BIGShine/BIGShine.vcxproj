@@ -350,6 +350,9 @@
     <ClCompile Include="Code\Editor\Utility\EditorPrimitiveRenderer.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AttackWorkspaceWindow.cpp" />
+    <ClCompile Include="Code\Editor\Workspace\SkillWorkspaceWindow.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\SkillExecution.cpp" />
+    <ClCompile Include="Code\Engine\GamePlay\Combat\SkillDefinition.cpp" />
     <ClCompile Include="Code\Editor\Workspace\EditorRenderTarget.cpp" />
     <ClCompile Include="Code\Editor\Workspace\AudioWorkspaceWindow.cpp" />
     <ClCompile Include="Code\Editor\Workspace\ParticleEditorWindow.cpp" />
@@ -658,6 +661,9 @@
     <ClInclude Include="Code\Editor\Utility\EditorPrimitiveRenderer.h" />
     <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\AttackWorkspaceWindow.h" />
+    <ClInclude Include="Code\Editor\Workspace\SkillWorkspaceWindow.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\SkillExecution.h" />
+    <ClInclude Include="Code\Engine\GamePlay\Combat\SkillDefinition.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorRenderTarget.h" />
     <ClInclude Include="Code\Editor\Workspace\AudioWorkspaceWindow.h" />
     <ClInclude Include="Code\Editor\Workspace\EditorWorkspaceWindow.h" />
@@ -1210,6 +1216,30 @@
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Engine\Graphics\Resource\ModelMaterial.cpp" />
+    <ClInclude Include="Code\Engine\Graphics\Resource\ModelMaterial.h" />
+    <ClCompile Include="Code\Engine\GamePlay\Graphics\ModelMaterialComponent.cpp" />
+    <ClInclude Include="Code\Engine\GamePlay\Graphics\ModelMaterialComponent.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets"></ImportGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerSkillDefinition.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerSkillDefinition.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerInputResolver.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerInputResolver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerSkillState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerSkillState.h" />
+  </ItemGroup>
 </Project>

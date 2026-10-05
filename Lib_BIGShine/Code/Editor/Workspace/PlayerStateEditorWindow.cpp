@@ -17,7 +17,7 @@ namespace ed = ax::NodeEditor;
 namespace
 {
     // プレイヤー操作で編集対象にする主要Action一覧。グラフ上のノードもこの順番から作る。
-    constexpr std::array<PLAYER_ACTION, 16> PLAYER_ACTIONS =
+    constexpr std::array<PLAYER_ACTION, 17> PLAYER_ACTIONS =
     {
         PLAYER_ACTION::IDLE,
         PLAYER_ACTION::MOVE,
@@ -29,6 +29,7 @@ namespace
         PLAYER_ACTION::DODGE,
         PLAYER_ACTION::SKILL_A,
         PLAYER_ACTION::SKILL_B,
+        PLAYER_ACTION::SKILL_C,
         PLAYER_ACTION::COUNTER_ATTACK,
         PLAYER_ACTION::JUMP,
         PLAYER_ACTION::AIR_WEAK_ATTACK,

@@ -15,6 +15,7 @@
 
 void ActorPresentationActionComponent::Start()
 {
+    CaptureMissingSpawnPoints();
     RegisterActions();
 }
 
@@ -23,6 +24,12 @@ void ActorPresentationActionComponent::RegisterActions()
     const auto owner_ = GetGameObject();
     if (!owner_) return;
     const std::weak_ptr<GameObject> weakOwner_ = owner_;
+    owner_->RegisterGlobalAction("ActorPresentation", "RestoreSpawnPoints", [weakOwner_]()
+    {
+        const auto owner_ = weakOwner_.lock();
+        const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr;
+        if (component_) component_->RestoreSpawnPoints();
+    });
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
     {
         if (presets[index_].actionName.empty()) continue;
@@ -32,6 +39,59 @@ void ActorPresentationActionComponent::RegisterActions()
             const auto component_ = owner_ ? owner_->GetComponent<ActorPresentationActionComponent>() : nullptr;
             if (component_) component_->ExecutePreset(index_);
         });
+    }
+}
+
+void ActorPresentationActionComponent::CaptureMissingSpawnPoints()
+{
+    BS_PROFILE_SCOPE("ActorPresentationActionComponent::CaptureMissingSpawnPoints");
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    for (const auto& preset_ : presets)
+    {
+        if (preset_.actorName.empty()) continue;
+        const auto existing_ = std::find_if(spawnPoints.begin(), spawnPoints.end(),
+            [&](const ActorPresentationSpawnPoint& point_) { return point_.actorName == preset_.actorName; });
+        if (existing_ != spawnPoints.end()) continue;
+        const auto actor_ = owner_->GetManager().Find(preset_.actorName);
+        if (!actor_ || !actor_->transform) continue;
+        spawnPoints.push_back({ preset_.actorName,
+            actor_->transform->localPosition, actor_->transform->localRotation });
+    }
+}
+
+void ActorPresentationActionComponent::CaptureSpawnPoints()
+{
+    BS_PROFILE_SCOPE("ActorPresentationActionComponent::CaptureSpawnPoints");
+    CaptureMissingSpawnPoints();
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    for (auto& point_ : spawnPoints)
+    {
+        const auto actor_ = owner_->GetManager().Find(point_.actorName);
+        if (!actor_ || !actor_->transform) continue;
+        point_.position = actor_->transform->localPosition;
+        point_.rotation = actor_->transform->localRotation;
+    }
+}
+
+void ActorPresentationActionComponent::RestoreSpawnPoints()
+{
+    BS_PROFILE_SCOPE("ActorPresentationActionComponent::RestoreSpawnPoints");
+    const auto owner_ = GetGameObject();
+    if (!owner_) return;
+    CaptureMissingSpawnPoints();
+    // 前回の移動・旋回補間が、復元直後の配置を上書きしないようにする。
+    movingActor.reset();
+    turningActor.reset();
+    for (const auto& point_ : spawnPoints)
+    {
+        const auto actor_ = owner_->GetManager().Find(point_.actorName);
+        if (!actor_ || !actor_->transform) continue;
+        actor_->transform->localPosition = point_.position;
+        actor_->transform->localRotation = point_.rotation;
+        actor_->transform->MarkDirty();
+        actor_->transform->UpdateWorldMatrix();
     }
 }
 
@@ -196,6 +256,35 @@ void ActorPresentationActionComponent::UpdateMovement(float deltaTime_)
 
 void ActorPresentationActionComponent::Gui()
 {
+    ImGui::SeparatorText("Spawn Points");
+    ImGui::TextUnformatted("Spawn points are saved separately from current actor transforms.");
+    if (ImGui::Button("Capture Current Positions")) CaptureSpawnPoints();
+    ImGui::SameLine();
+    if (ImGui::Button("Restore Spawn Positions")) RestoreSpawnPoints();
+    ImGui::TextUnformatted("Capture the intended layout, then save the scene.");
+    for (int index_ = 0; index_ < static_cast<int>(spawnPoints.size()); ++index_)
+    {
+        ImGui::PushID(index_);
+        auto& point_ = spawnPoints[index_];
+        if (ImGui::TreeNode(point_.actorName.c_str()))
+        {
+            ImGui::DragFloat3("Spawn Position", &point_.position.x, 0.05f);
+            ImGui::DragFloat3("Spawn Rotation", &point_.rotation.x, 0.5f);
+            if (ImGui::Button("Capture This Actor"))
+            {
+                const auto owner_ = GetGameObject();
+                const auto actor_ = owner_ ? owner_->GetManager().Find(point_.actorName) : nullptr;
+                if (actor_ && actor_->transform)
+                {
+                    point_.position = actor_->transform->localPosition;
+                    point_.rotation = actor_->transform->localRotation;
+                }
+            }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    }
+    ImGui::SeparatorText("Actor Actions");
     const char* TYPES[] = { "Play Animation", "Face Target", "Release Animation", "Move From Offset",
         "Play Mesh VFX", "Stop Mesh VFX", "Play Particle", "Stop Particle" };
     for (int index_ = 0; index_ < static_cast<int>(presets.size()); ++index_)
@@ -221,6 +310,15 @@ void ActorPresentationActionComponent::Gui()
 
 void ActorPresentationActionComponent::Serialize(nlohmann::json& json_) const
 {
+    json_["SpawnPoints"] = nlohmann::json::array();
+    for (const auto& point_ : spawnPoints)
+    {
+        json_["SpawnPoints"].push_back({
+            {"ActorName", point_.actorName},
+            {"Position", {point_.position.x, point_.position.y, point_.position.z}},
+            {"Rotation", {point_.rotation.x, point_.rotation.y, point_.rotation.z}}
+        });
+    }
     json_["Presets"] = nlohmann::json::array();
     for (const auto& preset_ : presets)
         json_["Presets"].push_back({ {"ActionName", preset_.actionName}, {"ActorName", preset_.actorName},
@@ -231,6 +329,22 @@ void ActorPresentationActionComponent::Serialize(nlohmann::json& json_) const
 
 void ActorPresentationActionComponent::Deserialize(const nlohmann::json& json_)
 {
+    spawnPoints.clear();
+    if (json_.contains("SpawnPoints") && json_["SpawnPoints"].is_array())
+    {
+        for (const auto& item_ : json_["SpawnPoints"])
+        {
+            if (!item_.is_object()) continue;
+            ActorPresentationSpawnPoint point_;
+            point_.actorName = item_.value("ActorName", std::string{});
+            if (point_.actorName.empty() || !item_.contains("Position") ||
+                !item_["Position"].is_array() || item_["Position"].size() != 3) continue;
+            point_.position = { item_["Position"][0], item_["Position"][1], item_["Position"][2] };
+            if (item_.contains("Rotation") && item_["Rotation"].is_array() && item_["Rotation"].size() == 3)
+                point_.rotation = { item_["Rotation"][0], item_["Rotation"][1], item_["Rotation"][2] };
+            spawnPoints.push_back(point_);
+        }
+    }
     presets.clear();
     turningActor.reset();
     movingActor.reset();

@@ -1,0 +1,20 @@
+{
+    "Inputs": [
+        { "Action": "SkillA", "ModifierAction": "Player.SkillModifier", "TriggerAction": "Player.StrongAttack", "Priority": 100 },
+        { "Action": "SkillB", "ModifierAction": "Player.SkillModifier", "TriggerAction": "Player.WeakAttack", "Priority": 90 },
+        { "Action": "SkillC", "ModifierAction": "Player.SkillModifier", "TriggerAction": "Player.JustGuard", "Priority": 80 }
+    ],
+    "Skills": [
+        {
+            "Name": "SkillFoundationSample",
+            "Action": "SkillA",
+            "Enabled": true,
+            "Cooldown": 0.0,
+            "CleanupAction": "",
+            "Phases": [
+                { "Animation": "SS_Sp_Skill1", "End": "ANIMATION_END", "MaximumDuration": 10.0, "BlendDuration": 0.1 },
+                { "Animation": "SS_Attack2", "End": "ANIMATION_END", "MaximumDuration": 10.0, "BlendDuration": 0.1 }
+            ]
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AIBlackboardKeys.h"
+#include "Engine/GamePlay/Combat/SkillExecution.h"
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 
 #include <string>
@@ -23,6 +24,8 @@ struct AIActionDefinition
 
     // ActionManagerへ実行要求を出す実アクション名。
     std::string executeActionName;
+    // 設定時は共通スキルを実行し、空なら既存Action呼び出しを使用する。
+    std::string skillName;
 
     // AI側の状態を書き込むBlackboardカテゴリ。
     std::string blackboardCategory = AIBlackboardKeys::CATEGORY_AI;
@@ -86,6 +89,14 @@ public:
     }
 
     void Start() override;
+    // 共通スキルの更新と、既存AI Action終了通知を接続する。
+    void Update(float deltaTime_) override;
+    // Workspaceから共通スキルを既存または新規のAI Actionへ割り当てる。
+    bool SetSkillForAction(const std::string& actionName_, const std::string& skillName_, const std::string& path_);
+    bool ReloadSkillDefinitions(const std::string& path_);
+    void StopSkill();
+    const std::vector<AIActionDefinition>& GetActions() const { return actions; }
+    const SkillExecution& GetSkillExecution() const { return skillExecution; }
     void Gui() override;
     void Serialize(nlohmann::json& json_) const override;
     void Deserialize(const nlohmann::json& json_) override;
@@ -109,6 +120,12 @@ private:
     const AIActionDefinition* FindDefinition(const std::string& aiActionName_) const;
 
 private:
+    // 共通実行をこのAIの更新から一度だけ進める。
+    SkillExecution skillExecution;
+    std::vector<SkillDefinition> skillDefinitions;
+    std::string skillDefinitionsPath = "Data/Skills/PlayerSkills.json";
+    std::string runningSkillCategory;
+    bool skillActionRunning = false;
     std::vector<AIActionDefinition> actions;
     BlackboardComponent* blackboardComponent = nullptr;
     std::vector<std::string> registeredActionNames;

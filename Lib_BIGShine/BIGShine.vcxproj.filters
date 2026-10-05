@@ -493,6 +493,15 @@
     <ClCompile Include="Code\Editor\Workspace\AIBehaviorEditorWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\SkillDefinition.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Engine\GamePlay\Combat\SkillExecution.cpp">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Editor\Workspace\SkillWorkspaceWindow.cpp">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClCompile>
     <ClCompile Include="Code\Editor\Workspace\AttackWorkspaceWindow.cpp">
       <Filter>Code\Editor\Workspace</Filter>
     </ClCompile>
@@ -1264,6 +1273,15 @@
       <Filter>Code\Editor\NodeEditor</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\AIBehaviorEditorWindow.h">
+      <Filter>Code\Editor\Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\SkillDefinition.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Engine\GamePlay\Combat\SkillExecution.h">
+      <Filter>Code\Engine\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Editor\Workspace\SkillWorkspaceWindow.h">
       <Filter>Code\Editor\Workspace</Filter>
     </ClInclude>
     <ClInclude Include="Code\Editor\Workspace\AttackWorkspaceWindow.h">
@@ -2141,5 +2159,49 @@
     <FxCompile Include="Shader\PrimitiveRendererVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Engine\Graphics\Resource\ModelMaterial.cpp">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\Graphics\Resource\ModelMaterial.h">
+      <Filter>Code\Engine\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClCompile Include="Code\Engine\GamePlay\Graphics\ModelMaterialComponent.cpp">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClCompile>
+    <ClInclude Include="Code\Engine\GamePlay\Graphics\ModelMaterialComponent.h">
+      <Filter>Code\Engine\GamePlay\Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerSkillDefinition.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerSkillDefinition.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerInputResolver.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerInputResolver.h">
+      <Filter>Code\Game\Logics\Charcter\Player</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Game\Charcter\Player\PlayerSkillState.cpp">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Game\Charcter\Player\PlayerSkillState.h">
+      <Filter>Code\Game\Logics\Charcter\Player\State</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

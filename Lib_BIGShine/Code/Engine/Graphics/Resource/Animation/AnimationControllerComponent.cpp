@@ -322,7 +322,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         if (!pendingGraphAssetPath.empty())
         {
             // 開幕Actionで選んだStateは、遅延Graph読み込みによるState再構築後にも引き継ぐ。
-            const auto presentationState_ = presentationControlled && currentState
+            const auto presentationState_ = (presentationControlled || skillControlled) && currentState
                 ? std::make_unique<AnimState>(*currentState) : nullptr;
             {
                 BS_PROFILE_SCOPE("Animation::LoadGraphAsset");
@@ -354,7 +354,7 @@ void AnimationControllerComponent::Update(float deltaTime_)
         return;
     }
 
-    if (useTransitionGraph && !animationPaused && !presentationControlled)
+    if (useTransitionGraph && !animationPaused && !presentationControlled && !skillControlled)
     {
         BS_PROFILE_SCOPE("Animation::EvaluateGraphTransitions");
         EvaluateGraphTransitions();
@@ -480,13 +480,13 @@ void AnimationControllerComponent::Update(float deltaTime_)
     }
 }
 
-void AnimationControllerComponent::ChangeState(const std::string& stateName_, float duration_)
+void AnimationControllerComponent::ChangeState(const std::string& stateName_, float duration_, bool restart_)
 {
     auto iterator_ = states.find(stateName_);
     if (iterator_ == states.end()) return;
 
     const AnimState* nextState_ = iterator_->second.get();
-    if (currentState == nextState_) return;
+    if (currentState == nextState_ && !restart_) return;
 
     const std::string previousStateName_ = currentState ? currentState->name : "None";
     const std::string ownerName_ = GetGameObject() ? GetGameObject()->GetName() : "None";
@@ -503,7 +503,7 @@ void AnimationControllerComponent::ChangeState(const std::string& stateName_, fl
     }
 
     // Animatorクラスに遷移を命令
-    animator.CrossFadeTo(nextState_, duration_, GetGameObject());
+    animator.CrossFadeTo(nextState_, duration_, GetGameObject(), restart_);
     currentState = nextState_;
 }
 
@@ -1107,4 +1107,3 @@ void AnimationControllerComponent::EnsureGraphNodeForState(const std::string& st
     node_.scopeId = currentGraphScopeId.empty() ? "Root" : currentGraphScopeId;
     graphNodes.push_back(node_);
 }
-

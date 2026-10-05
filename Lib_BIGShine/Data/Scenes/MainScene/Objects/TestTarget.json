@@ -396,7 +396,7 @@
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 25.84867286682129
+                            "value": 23.080778121948242
                         },
                         "AggressionMultiplier": {
                             "type": "float",
@@ -548,7 +548,7 @@
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": 2.00982666015625
+                            "value": 2.59234619140625
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -556,11 +556,11 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 85.39144897460938
+                            "value": 54.22113037109375
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 85.39022064208984
+                            "value": 54.219181060791016
                         },
                         "PlayerInFront": {
                             "type": "bool",
@@ -584,15 +584,15 @@
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": 2.00982666015625
+                            "value": 2.59234619140625
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 85.39144897460938
+                            "value": 54.22113037109375
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 85.39022064208984
+                            "value": 54.219181060791016
                         },
                         "UltimateDamageRate": {
                             "type": "float",

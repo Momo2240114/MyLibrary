@@ -506,7 +506,7 @@
                     "Anim": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -514,7 +514,7 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackEnter": {
                             "type": "bool",
@@ -522,19 +522,19 @@
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanActionBranch": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -647,7 +647,7 @@
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -655,7 +655,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -675,7 +675,7 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsJump": {
                             "type": "bool",
@@ -703,7 +703,7 @@
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -1009,7 +1009,7 @@
                     "Player": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 2
                         },
                         "ActionEnded": {
                             "type": "bool",
@@ -1017,23 +1017,23 @@
                         },
                         "ActionGroup": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "AttackType": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "CanActionBranch": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanBufferInput": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "CanCancel": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanCombo": {
                             "type": "bool",
@@ -1146,7 +1146,7 @@
                         },
                         "IsAttack": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsDodge": {
                             "type": "bool",
@@ -1154,7 +1154,7 @@
                         },
                         "IsGrounded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsGuard": {
                             "type": "bool",
@@ -1174,7 +1174,7 @@
                         },
                         "IsIdle": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsJump": {
                             "type": "bool",
@@ -1202,7 +1202,7 @@
                         },
                         "IsLocomotion": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "IsMove": {
                             "type": "bool",
@@ -9129,7 +9129,7 @@
                 "StrongChargeAttackSpeed": 14.0,
                 "TimelineActionFallbackDuration": 1.5
             },
-            "Enabled": false,
+            "Enabled": true,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
@@ -10777,9 +10777,9 @@
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            -2.9946117401123047,
-            -0.12384212017059326,
-            -55.33769226074219
+            -2.4574108123779297,
+            -0.12279093265533447,
+            -24.00939178466797
         ],
         "Rot": [
             0.0,
