@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Core/GraphicsDeviceManager.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/Graphics/VFX/MaterialOverlayComponent.h"
+#include "Engine/GamePlay/Graphics/ModelMaterialComponent.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include <algorithm>
 #include <array>
@@ -1044,6 +1045,30 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 			return true;
 		};
 
+	// 元のマテリアルとメッシュを保持し、所有Objectの差し替えテクスチャだけを優先する。
+	auto bindMaterialTextures_ = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh_)
+		{
+			const auto owner_ = model_.GetGameObject();
+			const auto materialComponent_ = owner_ ? owner_->GetComponent<ModelMaterialComponent>() : nullptr;
+			if (!materialComponent_ || !materialComponent_->IsEnabled() || !mesh_.material) return;
+			BS_PROFILE_SCOPE("RenderModels::BindMaterialTextures");
+			materialComponent_->UpdateLoadState();
+			ID3D11ShaderResourceView* textures_[] =
+			{
+				mesh_.material->baseMap.Get(),
+				mesh_.material->normalMap.Get(),
+				mesh_.material->emissiveMap.Get(),
+				mesh_.material->occlusionMap.Get(),
+				mesh_.material->metalnessRoughnessMap.Get()
+			};
+			for (std::size_t index_ = 0; index_ < ModelMaterial::TEXTURE_SLOT_COUNT; ++index_)
+			{
+				textures_[index_] = materialComponent_->ResolveTexture(
+					mesh_.materialIndex, static_cast<ModelMaterial::TextureSlot>(index_), textures_[index_]);
+			}
+			dc->PSSetShaderResources(0, static_cast<UINT>(ModelMaterial::TEXTURE_SLOT_COUNT), textures_);
+		};
+
 	auto drawMesh = [&](GltfModelCommponennt& model_, const GltfModelCommponennt::Mesh& mesh, int meshIndex_, ModelShader* shader)
 		{
 			// 頂点バッファ設定
@@ -1062,6 +1087,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 
 			// 更新
 			shader->Update(rc, mesh);
+			bindMaterialTextures_(model_, mesh);
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
 				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP
@@ -1134,6 +1160,7 @@ void ModelRenderSystem::RenderAll(const RenderContext& rc)
 				mesh.material->metalnessRoughnessMap.Get(),
 			};
 			dc->PSSetShaderResources(0, _countof(materialSrvs_), materialSrvs_);
+			bindMaterialTextures_(model_, mesh);
 
 			ID3D11SamplerState* materialSampler_ = rc.renderState->GetSamplerState(
 				mesh.material->uvAddressMode == GltfModelCommponennt::UV_ADDRESS_MODE::CLAMP

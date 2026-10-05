@@ -5,6 +5,7 @@
 #include "Engine/GamePlay/Core/Component/BlackboardComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/Serialize/ComponentRegistry.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 
@@ -35,6 +36,7 @@ namespace
 // コンポーネント開始時にBlackboardを確保し、JSONから復元されたAIアクションをOwnerへ登録する。
 void AIActionComponent::Start()
 {
+    ReloadSkillDefinitions(skillDefinitionsPath);
     // アクション開始時に必ず状態を書き込めるようBlackboardを先に準備する。
     EnsureBlackboard();
 
@@ -46,6 +48,9 @@ void AIActionComponent::Start()
 void AIActionComponent::Gui()
 {
     EnsureBlackboard();
+    ImGui::InputText("Skill Library", &skillDefinitionsPath);
+    if (ImGui::Button("Reload Skills")) ReloadSkillDefinitions(skillDefinitionsPath);
+    if (skillActionRunning && ImGui::Button("Stop Skill")) StopSkill();
 
     if (ImGui::Button(IM_U8("AIアクション追加##AIActionComponent_AddAiActionButton")))
     {
@@ -117,6 +122,7 @@ void AIActionComponent::Gui()
     ImGui::InputText(IM_U8("IsActingキー##AIActionComponent_IsActingKeyInput"), &definition_.isActingKey);
 
     ImGui::SeparatorText("Animation Graph");
+    ImGui::InputText("Skill Name (optional)", &definition_.skillName);
     ImGui::InputText("Trigger", &definition_.animationTriggerName);
     ImGui::InputText("State", &definition_.animationStateName);
     ImGui::InputText("Anim Category", &definition_.animationBlackboardCategory);
@@ -141,6 +147,7 @@ void AIActionComponent::Gui()
 // Editorで設定した全AIアクション定義を、復元可能なJSON配列として保存する。
 void AIActionComponent::Serialize(nlohmann::json& json_) const
 {
+    json_["SkillDefinitionsPath"] = skillDefinitionsPath;
     json_["Actions"] = nlohmann::json::array();
     // 現在の定義一覧をそれぞれBehaviorGraphから呼べるブリッジActionへ変換する。
     for (const AIActionDefinition& definition_ : actions)
@@ -148,6 +155,7 @@ void AIActionComponent::Serialize(nlohmann::json& json_) const
         json_["Actions"].push_back({
             { "AIActionName", definition_.aiActionName },
             { "ExecuteActionName", definition_.executeActionName },
+            { "SkillName", definition_.skillName },
             { "BlackboardCategory", definition_.blackboardCategory },
             { "CurrentActionKey", definition_.currentActionKey },
             { "ActionEndedKey", definition_.actionEndedKey },
@@ -171,6 +179,7 @@ void AIActionComponent::Serialize(nlohmann::json& json_) const
 // JSONからAIアクション定義を復元し、復元後の内容でActionRegistryを再登録する。
 void AIActionComponent::Deserialize(const nlohmann::json& json_)
 {
+    skillDefinitionsPath = json_.value("SkillDefinitionsPath", std::string("Data/Skills/PlayerSkills.json"));
     actions.clear();
 
     if (json_.contains("Actions") && json_["Actions"].is_array())
@@ -180,6 +189,7 @@ void AIActionComponent::Deserialize(const nlohmann::json& json_)
             AIActionDefinition definition_;
             definition_.aiActionName = actionJson_.value("AIActionName", std::string("AI.Action"));
             definition_.executeActionName = actionJson_.value("ExecuteActionName", std::string{});
+            definition_.skillName = actionJson_.value("SkillName", std::string());
             definition_.blackboardCategory = actionJson_.value("BlackboardCategory", std::string(AIBlackboardKeys::CATEGORY_AI));
             definition_.currentActionKey = actionJson_.value("CurrentActionKey", std::string(AIBlackboardKeys::CURRENT_ACTION));
             definition_.actionEndedKey = actionJson_.value("ActionEndedKey", std::string(AIBlackboardKeys::ACTION_ENDED));
@@ -206,15 +216,31 @@ void AIActionComponent::Deserialize(const nlohmann::json& json_)
 // 指定されたAIアクションを開始し、Blackboard・Animation・実処理用Actionを連動させる。
 bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
 {
+    BS_PROFILE_SCOPE("AIActionComponent::ExecuteAIAction");
     // Graphから渡された名前に対応する設定を探し、未登録名なら実行しない。
     AIActionDefinition* definition_ = FindDefinition(aiActionName_);
     if (!definition_) return false;
-    if (!definition_->executeActionName.empty() &&
+    if (definition_->skillName.empty() && !definition_->executeActionName.empty() &&
         definition_->executeActionName == definition_->aiActionName)
     {
         return false;
     }
 
+    const SkillDefinition* skill_ = nullptr;
+    if (!definition_->skillName.empty())
+    {
+        for (const auto& candidate_ : skillDefinitions)
+            if (candidate_.name == definition_->skillName) { skill_ = &candidate_; break; }
+        if (!skill_) { statusText = "Skill not found: " + definition_->skillName; return false; }
+        if (!SkillExecution::CanExecute(GetGameObject(), *skill_, statusText)) return false;
+    }
+    if (skillExecution.IsActive())
+    {
+        const auto* phase_ = skillExecution.GetCurrentPhase();
+        if (!phase_ || !phase_->canActionBranch) return false;
+        skillExecution.Stop();
+        skillActionRunning = false;
+    }
     // 行動開始状態を共有するため、AI用Blackboardを確保して各キーを更新する。
     EnsureBlackboard();
     if (blackboardComponent)
@@ -242,11 +268,33 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
     }
 
     // AI側の状態更新後に、AnimationController側へ開始状態とTriggerを反映する。
-    ApplyAnimationActionStart(*definition_);
+    if (skill_)
+    {
+        // 共通PhaseがAnimationを開始するため、既存State/Triggerによる二重開始を避ける。
+        AIActionDefinition animationDefinition_ = *definition_;
+        animationDefinition_.animationStateName.clear();
+        animationDefinition_.animationTriggerName.clear();
+        ApplyAnimationActionStart(animationDefinition_);
+    }
+    else ApplyAnimationActionStart(*definition_);
 
     std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return false;
 
+    if (skill_)
+    {
+        runningSkillCategory = definition_->blackboardCategory;
+        skillActionRunning = true;
+        const bool started_ = skillExecution.Start(owner_, *skill_);
+        if (!started_)
+        {
+            skillActionRunning = false;
+            NotifyActionEnd(runningSkillCategory);
+            statusText = skillExecution.GetError();
+            return false;
+        }
+        return true;
+    }
     // 定義に実処理用Actionが設定されている場合は、GlobalまたはOwnerへ振り分けて呼び出す。
     if (!definition_->executeActionName.empty())
     {
@@ -272,6 +320,12 @@ bool AIActionComponent::ExecuteAIAction(const std::string& aiActionName_)
 // 指定カテゴリで実行中のAIアクションを終了扱いにし、Animation側にも終了状態を通知する。
 void AIActionComponent::NotifyActionEnd(const std::string& category_)
 {
+    if (skillActionRunning && category_ == runningSkillCategory)
+    {
+        // クリップ内の終了通知はPhaseだけへ渡し、AI全体の終了は共通実行に任せる。
+        skillExecution.NotifyPhaseEnd();
+        return;
+    }
     EnsureBlackboard();
     if (!blackboardComponent) return;
 
@@ -453,3 +507,54 @@ const AIActionDefinition* AIActionComponent::FindDefinition(const std::string& a
 }
 
 REGISTER_COMPONENT(AIActionComponent, "AIActionComponent")
+
+// AIのUpdate順を維持し、終了時だけ既存BlackboardのActionEndedへ接続する。
+void AIActionComponent::Update(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("AIActionComponent::UpdateSkill");
+    if (!skillActionRunning) return;
+    skillExecution.Update(deltaTime_);
+    if (skillActionRunning && !skillExecution.IsActive())
+    {
+        skillActionRunning = false;
+        NotifyActionEnd(runningSkillCategory);
+    }
+}
+
+// 実行中の定義を差し替えず、待機時にだけ共有ライブラリを反映する。
+bool AIActionComponent::ReloadSkillDefinitions(const std::string& path_)
+{
+    BS_PROFILE_SCOPE("AIActionComponent::ReloadSkillDefinitions");
+    if (skillActionRunning) return false;
+    nlohmann::json document_;
+    if (!LoadSkillDefinitions(path_, skillDefinitions, document_, statusText)) return false;
+    skillDefinitionsPath = path_;
+    return true;
+}
+
+// BehaviorGraphから指定できるAI Action名とSkill名の対応を設定する。
+bool AIActionComponent::SetSkillForAction(const std::string& actionName_, const std::string& skillName_, const std::string& path_)
+{
+    if (actionName_.empty() || !ReloadSkillDefinitions(path_)) return false;
+    auto* definition_ = FindDefinition(actionName_);
+    if (!definition_)
+    {
+        AIActionDefinition newDefinition_;
+        newDefinition_.aiActionName = actionName_;
+        actions.push_back(newDefinition_);
+        definition_ = &actions.back();
+    }
+    definition_->skillName = skillName_;
+    definition_->waitForActionEnd = true;
+    RegisterActions();
+    return true;
+}
+
+// 明示的な中断でも予約Actionを閉じ、AIの待機を解除する。
+void AIActionComponent::StopSkill()
+{
+    if (!skillActionRunning) return;
+    skillExecution.Stop();
+    skillActionRunning = false;
+    NotifyActionEnd(runningSkillCategory);
+}

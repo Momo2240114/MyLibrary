@@ -30,7 +30,8 @@ enum class PLAYER_ACTION
     AIR_STRONG_CHARGE_ATTACK,
     AIR_DODGE,
 
-    NONE
+    NONE,
+    SKILL_C
 };
 
 // Actionを移動、攻撃、ガードなどの大きな分類で扱うための種別。
@@ -54,7 +55,8 @@ enum class PLAYER_ATTACK_TYPE
     STRONG_CHARGE,
     COUNTER,
     SKILL_A,
-    SKILL_B
+    SKILL_B,
+    SKILL_C
 };
 
 // 移動Action内でAnimation遷移に使用する詳細フェーズ。
@@ -81,6 +83,10 @@ namespace PlayerBlackboardCategory
 
 namespace PlayerBlackboardKey
 {
+    // 共通SkillStateの実行状況。行動種別は既存ActionとIsSkillを再利用する。
+    inline constexpr const char* CURRENT_SKILL = "CurrentSkill";
+    inline constexpr const char* SKILL_PHASE = "SkillPhase";
+    inline constexpr const char* IS_SKILL_ACTIVE = "IsSkillActive";
     // 現在のPlayerAction名。
     inline constexpr const char* ACTION = "Action";
     // 現在Actionの大分類。
@@ -168,6 +174,7 @@ inline const char* GetPlayerActionName(PLAYER_ACTION action_)
     case PLAYER_ACTION::JUMP: return "Jump";
     case PLAYER_ACTION::SKILL_A: return "SkillA";
     case PLAYER_ACTION::SKILL_B: return "SkillB";
+    case PLAYER_ACTION::SKILL_C: return "SkillC";
     case PLAYER_ACTION::STRONG_CHARGE_ATTACK: return "StrongChargeAttack";
     case PLAYER_ACTION::AIR_WEAK_ATTACK: return "AirWeakAttack";
     case PLAYER_ACTION::AIR_STRONG_ATTACK: return "AirStrongAttack";
@@ -195,6 +202,7 @@ inline PLAYER_ACTION_GROUP GetPlayerActionGroup(PLAYER_ACTION action_)
     case PLAYER_ACTION::COUNTER_ATTACK:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
+    case PLAYER_ACTION::SKILL_C:
         return PLAYER_ACTION_GROUP::ATTACK;
     case PLAYER_ACTION::HIT:
         return PLAYER_ACTION_GROUP::NONE;
@@ -231,6 +239,8 @@ inline PLAYER_ATTACK_TYPE GetPlayerAttackType(PLAYER_ACTION action_)
         return PLAYER_ATTACK_TYPE::SKILL_A;
     case PLAYER_ACTION::SKILL_B:
         return PLAYER_ATTACK_TYPE::SKILL_B;
+    case PLAYER_ACTION::SKILL_C:
+        return PLAYER_ATTACK_TYPE::SKILL_C;
     default:
         return PLAYER_ATTACK_TYPE::NONE;
     }
@@ -252,6 +262,7 @@ inline bool IsPlayerActionTimelineDriven(PLAYER_ACTION action_)
     case PLAYER_ACTION::AIR_DODGE:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
+    case PLAYER_ACTION::SKILL_C:
     case PLAYER_ACTION::COUNTER_ATTACK:
     case PLAYER_ACTION::HIT:
         return true;

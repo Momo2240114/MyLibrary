@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/GamePlay/Combat/SkillExecution.h"
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "Engine/GamePlay/AI/AIBehaviorGraph.h"
@@ -165,6 +166,8 @@ struct DragonActionDefinition
     std::string actionName = "Idle";
     // 実行するActionSequence名。
     std::string actionSequenceName;
+    // 空なら従来経路を使い、指定時だけ共通Skill Definitionを実行する。
+    std::string skillName;
     // 直接再生するAnimationState名。
     std::string animationStateName;
     // AnimationControllerへ送るAction名。
@@ -213,6 +216,12 @@ public:
 
     bool RequestAction(DRAGON_ACTION_TYPE action_);
     bool RequestWeightedAction();
+    // WorkspaceからAI Actionへ共通スキルを割り当てる。
+    bool SetSkillForAction(DRAGON_ACTION_TYPE action_, const std::string& skillName_, const std::string& path_);
+    bool ReloadSkillDefinitions(const std::string& path_);
+    void StopSkill();
+    const std::vector<DragonActionDefinition>& GetActionDefinitions() const { return actionDefinitions; }
+    const SkillExecution& GetSkillExecution() const { return skillExecution; }
     void RequestDamageReaction();
     bool IsUltimateDamageReductionActive() const { return ultimateDamageReductionActive; }
     void ForceAction(DRAGON_ACTION_TYPE action_);
@@ -395,6 +404,11 @@ private:
 
     // Dragonが使用するAction定義一覧。
     std::vector<DragonActionDefinition> actionDefinitions;
+    // 共通PhaseはDragon AIのUpdateから一度だけ進める。
+    SkillExecution skillExecution;
+    std::vector<SkillDefinition> skillDefinitions;
+    std::string skillDefinitionsPath = "Data/Skills/PlayerSkills.json";
+    bool skillActionRunning = false;
     // Action種別ごとの残りCooldown。
     std::vector<float> actionCooldowns;
     // 履歴は戦闘中だけ保持し、シーン保存時には保存しない。

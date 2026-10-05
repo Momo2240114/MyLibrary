@@ -599,3 +599,14 @@ void ActionSequence::Deserialize(const nlohmann::json& j)
     }
     RegisterSequence("");
 }
+
+// 別のSequenceへ切り替わっている場合は、その予約や終了通知を消さない。
+void ActionSequence::StopPlayback(unsigned int generation_)
+{
+    BS_PROFILE_SCOPE("ActionSequence::StopPlayback");
+    if (generation_ != playbackGeneration) return;
+    ++playbackGeneration;
+    pendingActions.clear();
+    pendingCompletionAction.clear();
+    remainingDuration = 0.0f;
+}

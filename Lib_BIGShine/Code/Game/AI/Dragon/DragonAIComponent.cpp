@@ -157,6 +157,7 @@ const std::string& DragonAIComponent::GetName() const
 
 void DragonAIComponent::Start()
 {
+    ReloadSkillDefinitions(skillDefinitionsPath);
     // 依存コンポーネント、アクション定義、BehaviorGraph、ActionRegistryを初期化してAIを起動可能にする。
     randomEngine.seed(std::random_device{}());
     EnsureDependencies();
@@ -207,6 +208,18 @@ void DragonAIComponent::Update(float deltaTime_)
     }
     UpdateUltimateTrigger();
     UpdateCooldowns(deltaTime_);
+    if (skillActionRunning)
+    {
+        skillExecution.Update(deltaTime_);
+        if (skillActionRunning && !skillExecution.IsActive())
+        {
+            skillActionRunning = false;
+            pendingSequencerActionEnd = false;
+            CompleteActionEnd();
+            SendRuntimeToBlackboard();
+            return;
+        }
+    }
 
     if (pendingSequencerActionEnd)
     {
@@ -558,6 +571,7 @@ void DragonAIComponent::Gui()
                 RequestAction(definition_.action);
             }
             ImGui::SameLine();
+            ImGui::InputText("Skill Name (optional)", &definition_.skillName);
             ImGui::Checkbox("Timeout", &definition_.useActionTimeout);
             ImGui::Checkbox("History", &definition_.useHistory);
             ImGui::DragFloat("Base Weight", &definition_.selectionWeight, 0.05f, 0.0f, 100.0f);
@@ -634,6 +648,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
     json_["LongRangePressureMultiplier"] = longRangePressureMultiplier;
     json_["AnimationGraphDriven"] = animationGraphDriven;
 
+    json_["SkillDefinitionsPath"] = skillDefinitionsPath;
     json_["ActionDefinitions"] = nlohmann::json::array();
     for (const DragonActionDefinition& definition_ : actionDefinitions)
     {
@@ -641,6 +656,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
             { "Action", static_cast<int>(definition_.action) },
             { "ActionName", definition_.actionName },
             { "ActionSequenceName", definition_.actionSequenceName },
+            { "SkillName", definition_.skillName },
             { "AnimationStateName", definition_.animationStateName },
             { "AnimationActionName", definition_.animationActionName },
             { "IKActionName", definition_.ikActionName },
@@ -663,6 +679,7 @@ void DragonAIComponent::Serialize(nlohmann::json& json_) const
 
 void DragonAIComponent::Deserialize(const nlohmann::json& json_)
 {
+    skillDefinitionsPath = json_.value("SkillDefinitionsPath", std::string("Data/Skills/PlayerSkills.json"));
     BS_PROFILE_SCOPE("DragonAIComponent::Deserialize");
 
     playerObjectName = json_.value("PlayerObjectName", std::string("Player"));
@@ -732,6 +749,7 @@ void DragonAIComponent::Deserialize(const nlohmann::json& json_)
 
             definition_->actionName = definitionJson_.value("ActionName", std::string(GetDragonActionName(action_)));
             definition_->actionSequenceName = definitionJson_.value("ActionSequenceName", definition_->actionSequenceName);
+            definition_->skillName = definitionJson_.value("SkillName", std::string());
             definition_->animationStateName = definitionJson_.value("AnimationStateName", definition_->animationStateName);
             definition_->animationActionName = definitionJson_.value("AnimationActionName", definition_->animationActionName);
             definition_->ikActionName = definitionJson_.value("IKActionName", definition_->ikActionName);
@@ -967,6 +985,12 @@ void DragonAIComponent::NotifyActionEnd()
 
 void DragonAIComponent::NotifySequencerActionEnd()
 {
+    if (skillActionRunning)
+    {
+        // 既存Animation Eventの通知をPhaseに渡し、旧Action全体を途中で終了させない。
+        skillExecution.NotifyPhaseEnd();
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAIComponent::NotifySequencerActionEnd");
 
     // Sequencer管理の行動だけ完了通知を受け付け、AI管理行動の誤終了を防ぐ。
@@ -987,6 +1011,11 @@ void DragonAIComponent::NotifySequencerActionEnd()
 
 void DragonAIComponent::NotifyAIActionEnd()
 {
+    if (skillActionRunning)
+    {
+        skillExecution.NotifyPhaseEnd();
+        return;
+    }
     BS_PROFILE_SCOPE("DragonAIComponent::NotifyAIActionEnd");
     // AI管理の行動だけ即時完了させ、Sequencer管理行動はアニメーション側の通知を待つ。
     if (IsSequencerControlledAction(runtime.currentAction))
@@ -1002,6 +1031,11 @@ void DragonAIComponent::NotifyAIActionEnd()
 
 void DragonAIComponent::CompleteActionEnd()
 {
+    if (skillActionRunning)
+    {
+        skillExecution.Stop();
+        skillActionRunning = false;
+    }
     BS_PROFILE_SCOPE("DragonAIComponent::CompleteActionEnd");
 
     // Sequencer/AIからの完了通知を受けて、空中・死亡・復帰・バッファ消費の次状態を決める。
@@ -2108,6 +2142,7 @@ void DragonAIComponent::UpdateActionMotion(float deltaTime_)
 
 bool DragonAIComponent::UpdateAIControlledActionEnd()
 {
+    if (skillActionRunning) return false;
     BS_PROFILE_SCOPE("DragonAIComponent::UpdateAIControlledActionEnd");
 
     if (!IsAIControlledAction(runtime.currentAction))
@@ -2170,6 +2205,7 @@ bool DragonAIComponent::UpdateAIControlledActionEnd()
 
 bool DragonAIComponent::UpdateDurationControlledActionEnd()
 {
+    if (skillActionRunning) return false;
     BS_PROFILE_SCOPE("DragonAIComponent::UpdateDurationControlledActionEnd");
 
     const DragonActionDefinition* definition_ = FindDefinition(runtime.currentAction);
@@ -2476,6 +2512,9 @@ void DragonAIComponent::UpdateSpinTailSweepRotation(float deltaTime_)
 
 void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
 {
+    // 被弾・死亡・キャンセルでも古い共通Phaseの予約を残さない。
+    skillExecution.Stop();
+    skillActionRunning = false;
     // 実際のアクション開始地点。ランタイム状態、クールダウン、アニメーション、IK、外部Actionをまとめて更新する。
     const DragonActionDefinition* definition_ = FindDefinition(action_);
     if (!definition_) return;
@@ -2534,8 +2573,10 @@ void DragonAIComponent::StartAction(DRAGON_ACTION_TYPE action_)
     }
 
     BeginTurnRootMotionLimit(action_);
+    const int startCount_ = actionStartCount;
     ExecuteActionDefinition(*definition_);
-    if (action_ == DRAGON_ACTION_TYPE::AIR_HOLD)
+    if (actionStartCount != startCount_) return;
+    if (action_ == DRAGON_ACTION_TYPE::AIR_HOLD && !skillActionRunning)
     {
         // AIR_HOLDは空中待機状態なので、開始直後に完了扱いにして次の空中判断を受けられるようにする。
         runtime.actionEnded = true;
@@ -2585,6 +2626,7 @@ void DragonAIComponent::FinishRecovery()
 
 void DragonAIComponent::UpdateActionTimeout()
 {
+    if (skillActionRunning) return;
     // SequencerやAI条件から完了が返らない時の保険として、定義済みタイムアウトで強制完了する。
     if (runtime.actionEnded)
     {
@@ -2606,10 +2648,37 @@ void DragonAIComponent::UpdateActionTimeout()
 
 void DragonAIComponent::ExecuteActionDefinition(const DragonActionDefinition& definition_)
 {
+    BS_PROFILE_SCOPE("DragonAIComponent::ExecuteActionDefinition");
     // 定義に紐づくアニメーション、Blackboard、オーナーAction、IKを実行開始時にまとめて発火する。
     const std::string animationActionName_ = ResolveAnimationActionName(definition_);
     const std::string animationStateName_ = ResolveAnimationStateName(definition_);
     ApplyAnimationBlackboard(animationActionName_, animationStateName_, true);
+    if (!definition_.skillName.empty())
+    {
+        const auto iterator_ = std::find_if(skillDefinitions.begin(), skillDefinitions.end(),
+            [&definition_](const SkillDefinition& skill_) { return skill_.name == definition_.skillName; });
+        if (iterator_ == skillDefinitions.end())
+        {
+            statusText = "Skill not found: " + definition_.skillName;
+            pendingSequencerActionEnd = true;
+            return;
+        }
+        // AI判断・Cooldown・RecoveryはDragon側、複数Animationの進行は共通実行側に置く。
+        skillActionRunning = true;
+        const bool started_ = skillExecution.Start(GetGameObject(), *iterator_, [this](const SkillPhase& phase_)
+        {
+            runtime.canCancel = phase_.canActionBranch;
+            runtime.canBufferAction = phase_.canBufferInput;
+            SendRuntimeToBlackboard();
+        });
+        if (!started_)
+        {
+            skillActionRunning = false;
+            statusText = skillExecution.GetError();
+            pendingSequencerActionEnd = true;
+        }
+        return;
+    }
     PlayAnimationState(animationStateName_);
     ExecuteDirectIK(definition_.action, definition_.duration);
     ExecuteOwnerAction(definition_.actionSequenceName);
@@ -3611,6 +3680,13 @@ bool DragonAIComponent::IsActionAvailable(DRAGON_ACTION_TYPE action_) const
     {
         return false;
     }
+    if (!definition_->skillName.empty())
+    {
+        const auto iterator_ = std::find_if(skillDefinitions.begin(), skillDefinitions.end(),
+            [definition_](const SkillDefinition& skill_) { return skill_.name == definition_->skillName; });
+        std::string error_;
+        if (iterator_ == skillDefinitions.end() || !SkillExecution::CanExecute(gameObject.lock(), *iterator_, error_)) return false;
+    }
     return GetCooldown(action_) <= 0.0f;
 }
 
@@ -3736,3 +3812,34 @@ bool DragonAIComponent::HasBehaviorGraph() const
 }
 
 REGISTER_COMPONENT(DragonAIComponent, "DragonAIComponent")
+
+// 待機時だけ共通ライブラリを読み込み、実行中の定義参照を維持する。
+bool DragonAIComponent::ReloadSkillDefinitions(const std::string& path_)
+{
+    BS_PROFILE_SCOPE("DragonAIComponent::ReloadSkillDefinitions");
+    if (skillActionRunning) return false;
+    nlohmann::json document_;
+    if (!LoadSkillDefinitions(path_, skillDefinitions, document_, statusText)) return false;
+    skillDefinitionsPath = path_;
+    return true;
+}
+
+// 既存のAction識別子・BehaviorGraph・重み付き判断を維持してSkill名を接続する。
+bool DragonAIComponent::SetSkillForAction(DRAGON_ACTION_TYPE action_, const std::string& skillName_, const std::string& path_)
+{
+    if (!ReloadSkillDefinitions(path_)) return false;
+    auto* definition_ = FindDefinition(action_);
+    if (!definition_) return false;
+    definition_->skillName = skillName_;
+    return true;
+}
+
+// 明示的な中断でも従来のRecovery・先行入力処理を使用する。
+void DragonAIComponent::StopSkill()
+{
+    if (!skillActionRunning) return;
+    skillExecution.Stop();
+    skillActionRunning = false;
+    pendingSequencerActionEnd = false;
+    CompleteActionEnd();
+}

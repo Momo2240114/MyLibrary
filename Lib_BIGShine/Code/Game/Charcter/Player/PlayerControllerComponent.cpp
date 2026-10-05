@@ -29,6 +29,8 @@
 #include "Game/GameMode/GameModeBlackboardKeys.h"
 #include "Game/GameMode/GameModeManager.h"
 #include "PlayerActionState.h"
+#include "PlayerInputResolver.h"
+#include "PlayerSkillState.h"
 #include "PlayerAttackState.h"
 #include "PlayerDodgeState.h"
 #include "PlayerHitState.h"
@@ -151,6 +153,12 @@ void PlayerControllerComponent::EnsurePlayerInputBindings()
 {
     // プロジェクト側でまだ入力設定が無い場合だけ、最低限のPlayer操作を登録する。
     KeyConfig& keyConfig_ = KeyConfig::Instance();
+    // 物理ボタンへの依存は初期バインドだけに限定し、判定はInput Action名で行う。
+    if (keyConfig_.GetActionMap().count("Player.SkillModifier") == 0)
+    {
+        keyConfig_.SetBinds("Player.SkillModifier",
+            { { { DeviceType::Gamepad, static_cast<int>(PadCode::L1) } } });
+    }
     if (keyConfig_.GetActionMap().count(PlayerInputAction::JUST_GUARD) == 0)
     {
         // 既存の割り当てを維持し、未設定の場合だけCキーをパリィに割り当てる。
@@ -185,6 +193,10 @@ void PlayerControllerComponent::Start()
 
     // Playerに必要な基本Componentをここでそろえ、Scene配置側の付け忘れを吸収する。
     EnsurePlayerInputBindings();
+    if (!LoadPlayerSkillDefinitions(skillDefinitionsPath, skillInputs, skillDefinitions))
+    {
+        BS_LOG_WARNING(LOG_CATEGORY::GAME, "Player skill definitions could not be loaded: " + skillDefinitionsPath);
+    }
 
     owner_->SetLayer(LayerType::Player);
     collider = owner_->GetOrAddComponent<CharacterCollider>();
@@ -254,9 +266,10 @@ void PlayerControllerComponent::Start()
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK, PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::GUARD, PLAYER_ACTION::GUARD);
     stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::JUST_GUARD, PLAYER_ACTION::JUST_GUARD);
-    stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
-    stateMachine.AddState<PlayerActionState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
+    stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_A, PLAYER_ACTION::SKILL_A);
+    stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_B, PLAYER_ACTION::SKILL_B);
     stateMachine.AddState<PlayerAttackState>(PLAYER_ACTION::COUNTER_ATTACK, PLAYER_ACTION::COUNTER_ATTACK);
+    stateMachine.AddState<PlayerSkillState>(PLAYER_ACTION::SKILL_C, PLAYER_ACTION::SKILL_C);
     EnsureDefaultCancelTransitions();
 
     stateMachine.ChangeState(PLAYER_ACTION::IDLE);
@@ -344,6 +357,8 @@ bool PlayerControllerComponent::IsAnimationStateForAction(
 
 void PlayerControllerComponent::UpdateTimelineActionSafety(float deltaTime_)
 {
+    const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
+    if (skillState_ && skillState_->IsActive()) return;
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (!IsPlayerActionTimelineDriven(currentAction_) || actionRuntime.actionEnded)
     {
@@ -706,6 +721,9 @@ void PlayerControllerComponent::ApplyPendingMovement()
 
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 {
+    // 既存の未定義SkillA/Bは維持し、データ定義があるスキルのみ共通検証を行う。
+    if ((GetSkillDefinition(nextAction_) || nextAction_ == PLAYER_ACTION::SKILL_C) &&
+        !CanExecuteSkill(nextAction_)) return false;
     // Action遷移の入口。接地/空中/キャンセル/先行入力の条件をここで一元判定する。
     if (nextAction_ == PLAYER_ACTION::NONE)
     {
@@ -1155,6 +1173,13 @@ void PlayerControllerComponent::NotifyComboTransition()
 
 void PlayerControllerComponent::NotifyActionEnd()
 {
+    auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
+    if (skillState_ && skillState_->IsActive() && !skillState_->IsFinishing())
+    {
+        // Animation/Sequenceからの通知はPhaseへ渡し、全体終了はStateに任せる。
+        skillState_->NotifyPhaseEnd();
+        return;
+    }
     // Timeline駆動Actionの終了通知。Buffer消費後、空中/Guard/移動状態へ戻す。
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
     if (!IsPlayerActionTimelineDriven(currentAction_) &&
@@ -1164,7 +1189,7 @@ void PlayerControllerComponent::NotifyActionEnd()
         return;
     }
 
-    if (IsPlayerActionTimelineDriven(currentAction_))
+    if (IsPlayerActionTimelineDriven(currentAction_) && !(skillState_ && skillState_->IsFinishing()))
     {
         const auto owner_ = GetGameObject();
         const auto animationController_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
@@ -1469,6 +1494,7 @@ bool PlayerControllerComponent::IsGroundOnlyAction(PLAYER_ACTION action_) const
     case PLAYER_ACTION::DODGE:
     case PLAYER_ACTION::SKILL_A:
     case PLAYER_ACTION::SKILL_B:
+    case PLAYER_ACTION::SKILL_C:
         return true;
     default:
         return false;
@@ -1618,6 +1644,7 @@ void PlayerControllerComponent::UpdateAirborneActionContext()
 
 void PlayerControllerComponent::ProcessActionInput()
 {
+    BS_PROFILE_SCOPE("PlayerControllerComponent::ProcessActionInput");
     // 優先度の高いActionから順に入力を解釈し、最初に成立したActionだけを要求する。
     if (IsPlayerControlLockedByGameMode())
     {
@@ -1627,6 +1654,16 @@ void PlayerControllerComponent::ProcessActionInput()
     }
 
     auto& keyConfig_ = KeyConfig::Instance();
+    const PLAYER_ACTION skillAction_ = PlayerInputResolver::ResolveSkill(keyConfig_, skillInputs);
+    const bool strongConsumed_ = PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::STRONG_ATTACK);
+    if (strongConsumed_) ResetStrongAttackInput();
+    if (skillAction_ != PLAYER_ACTION::NONE)
+    {
+        // 遷移拒否や未設定でも複合入力を消費し、通常攻撃との二重発動を防ぐ。
+        ResetStrongAttackInput();
+        if (CanExecuteSkill(skillAction_)) RequestAction(skillAction_);
+        return;
+    }
     const bool guardInput_ = keyConfig_.ActionPressed(PlayerInputAction::GUARD);
     SendGuardInputToBlackboard(guardInput_);
 
@@ -1637,14 +1674,17 @@ void PlayerControllerComponent::ProcessActionInput()
 
     const bool isAirborne_ = IsAirborneForAction();
     if (TryDodgeCancelInput()) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::JUST_GUARD) &&
+    if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::JUST_GUARD) &&
+        keyConfig_.ActionPressedIn(PlayerInputAction::JUST_GUARD) &&
         RequestAction(PLAYER_ACTION::JUST_GUARD)) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) &&
+    if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::DODGE) &&
+        keyConfig_.ActionPressedIn(PlayerInputAction::DODGE) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_DODGE : PLAYER_ACTION::DODGE)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK))
+    if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::WEAK_ATTACK) &&
+        keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK))
     {
         // 成功直後の反撃Tagが残っている間は、通常攻撃入力を反撃Actionへ差し替える。
         if (HasCounterAttackTag())
@@ -1655,7 +1695,7 @@ void PlayerControllerComponent::ProcessActionInput()
 
         if (RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_WEAK_ATTACK : PLAYER_ACTION::WEAK_ATTACK)) return;
     }
-    if (keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
+    if (!strongConsumed_ && keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
         HasCounterAttackTag())
     {
         // 反撃Tag中の強攻撃入力も溜め判定へ回さず、即座に反撃Actionとして消費する。
@@ -1663,14 +1703,14 @@ void PlayerControllerComponent::ProcessActionInput()
         ResetStrongAttackInput();
         return;
     }
-    if (actionRuntime.canActionBranch &&
+    if (!strongConsumed_ && actionRuntime.canActionBranch &&
         keyConfig_.ActionPressedIn(PlayerInputAction::STRONG_ATTACK) &&
         RequestAction(isAirborne_ ? PLAYER_ACTION::AIR_STRONG_ATTACK : PLAYER_ACTION::STRONG_ATTACK))
     {
         ResetStrongAttackInput();
         return;
     }
-    if (UpdateStrongAttackInput()) return;
+    if (!strongConsumed_ && UpdateStrongAttackInput()) return;
 
     if (guardInput_)
     {
@@ -1865,7 +1905,8 @@ void PlayerControllerComponent::SendActionToBlackboard(PLAYER_ACTION action_)
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_STRONG_CHARGE_ATTACK, action_ == PLAYER_ACTION::AIR_STRONG_CHARGE_ATTACK);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_AIR_DODGE, action_ == PLAYER_ACTION::AIR_DODGE);
         blackboard->SetBool(category_, PlayerBlackboardKey::IS_SKILL,
-            attackType_ == PLAYER_ATTACK_TYPE::SKILL_A || attackType_ == PLAYER_ATTACK_TYPE::SKILL_B);
+            attackType_ == PLAYER_ATTACK_TYPE::SKILL_A || attackType_ == PLAYER_ATTACK_TYPE::SKILL_B ||
+            attackType_ == PLAYER_ATTACK_TYPE::SKILL_C);
         const bool legacyCanCancel_ = actionRuntime.canActionBranch;
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_CANCEL, legacyCanCancel_);
         blackboard->SetBool(category_, PlayerBlackboardKey::CAN_DODGE_CANCEL, actionRuntime.canDodgeCancel);
@@ -2182,6 +2223,9 @@ void PlayerControllerComponent::SendJumpPhaseToBlackboard(
 
 bool PlayerControllerComponent::TryDodgeCancelInput()
 {
+    const auto& keyConfig_ = KeyConfig::Instance();
+    if (PlayerInputResolver::ResolveSkill(keyConfig_, skillInputs) != PLAYER_ACTION::NONE ||
+        PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::DODGE)) return false;
     if (IsPlayerControlLockedByGameMode())
     {
         return false;
@@ -2262,6 +2306,21 @@ void PlayerControllerComponent::Gui()
     ImGui::Text("State: %s", stateMachine.GetCurrentStateName());
     ImGui::Text("Current Action: %s", GetPlayerActionName(GetCurrentAction()));
 
+    // 共通Stateの実行状況を既存Player GUIへまとめて表示する。
+    const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
+    ImGui::SeparatorText("Skill");
+    ImGui::Text("Skill Active: %s", skillState_ && skillState_->IsActive() ? "true" : "false");
+    ImGui::Text("Current Skill: %s", skillState_ ? skillState_->GetSkillName().c_str() : "");
+    ImGui::Text("Current Phase: %d", skillState_ ? skillState_->GetPhaseIndex() : -1);
+    const auto owner_ = GetGameObject();
+    const auto animation_ = owner_ ? owner_->GetComponent<AnimationControllerComponent>() : nullptr;
+    const auto* currentAnimation_ = animation_ ? animation_->GetCurrentState() : nullptr;
+    ImGui::Text("Current Animation: %s", currentAnimation_ ? currentAnimation_->name.c_str() : "None");
+    for (const auto& binding_ : skillInputs)
+        ImGui::Text("Skill Input: %s + %s -> %s (priority %d)", binding_.modifierAction.c_str(),
+            binding_.triggerAction.c_str(), GetPlayerActionName(binding_.action), binding_.priority);
+    ImGui::Text("Skill Definitions: %s", skillDefinitionsPath.c_str());
+
     ImGui::SeparatorText("Runtime");
 
     ImGui::Text("Dodge Cancel Gate: %s", actionRuntime.canDodgeCancel ? "true" : "false");
@@ -2300,6 +2359,7 @@ void PlayerControllerComponent::Gui()
             PLAYER_ACTION::AIR_DODGE,
             PLAYER_ACTION::SKILL_A,
             PLAYER_ACTION::SKILL_B,
+            PLAYER_ACTION::SKILL_C,
             PLAYER_ACTION::COUNTER_ATTACK
         };
 
@@ -2454,6 +2514,10 @@ void PlayerControllerComponent::InitializeBlackboardValues()
 
     if (!blackboard) return;
 
+    blackboard->SetString(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::CURRENT_SKILL, "");
+    blackboard->SetInt(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::SKILL_PHASE, -1);
+    blackboard->SetBool(PlayerBlackboardCategory::PLAYER, PlayerBlackboardKey::IS_SKILL_ACTIVE, false);
+
     constexpr const char* categories_[] =
     {
         PlayerBlackboardCategory::PLAYER,
@@ -2533,6 +2597,7 @@ void PlayerControllerComponent::InitializeBlackboardValues()
 void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     // Player調整値とキャンセルルールをScene JSONへ保存する。
+    j_["SkillDefinitionsPath"] = skillDefinitionsPath;
     j_["MoveSpeed"] = moveSpeed;
     j_["GuardMoveSpeed"] = guardMoveSpeed;
     j_["JustDodgeInvincibilityDuration"] = justDodgeInvincibilityDuration;
@@ -2601,6 +2666,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     // Scene JSONからPlayer調整値を復元し、範囲外の値は安全な範囲へ丸める。
+    skillDefinitionsPath = j_.value("SkillDefinitionsPath", skillDefinitionsPath);
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
     justDodgeInvincibilityDuration = (std::max)(j_.value("JustDodgeInvincibilityDuration", 0.5f), 0.0f);
@@ -2724,8 +2790,8 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
         {
             const int from_ = transitionJson_.value("From", static_cast<int>(PLAYER_ACTION::NONE));
             const int to_ = transitionJson_.value("To", static_cast<int>(PLAYER_ACTION::NONE));
-            if (from_ < 0 || from_ >= static_cast<int>(PLAYER_ACTION::NONE) ||
-                to_ < 0 || to_ >= static_cast<int>(PLAYER_ACTION::NONE))
+            if (from_ < 0 || from_ > static_cast<int>(PLAYER_ACTION::SKILL_C) || from_ == static_cast<int>(PLAYER_ACTION::NONE) ||
+                to_ < 0 || to_ > static_cast<int>(PLAYER_ACTION::SKILL_C) || to_ == static_cast<int>(PLAYER_ACTION::NONE))
             {
                 continue;
             }
@@ -2769,3 +2835,35 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 }
 
 REGISTER_COMPONENT(PlayerControllerComponent, "PlayerController")
+
+// 実行条件をここへ集約し、入力ResolverやStateへ消費条件を分散させない。
+bool PlayerControllerComponent::CanExecuteSkill(PLAYER_ACTION action_) const
+{
+    const auto* definition_ = GetSkillDefinition(action_);
+    std::string error_;
+    return definition_ && SkillExecution::CanExecute(gameObject.lock(), *definition_, error_);
+}
+
+// 保存後の共通ライブラリをPlayer入力表へ反映する。
+bool PlayerControllerComponent::ReloadSkillDefinitions(const std::string& path_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::ReloadSkillDefinitions");
+    const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
+    if (skillState_ && skillState_->IsActive()) return false;
+    if (!LoadPlayerSkillDefinitions(path_, skillInputs, skillDefinitions)) return false;
+    skillDefinitionsPath = path_;
+    return true;
+}
+// Skill Actionに対応する定義を取得する。
+const PlayerSkillDefinition* PlayerControllerComponent::GetSkillDefinition(PLAYER_ACTION action_) const
+{
+    for (const auto& definition_ : skillDefinitions)
+        if (definition_.action == action_) return &definition_;
+    return nullptr;
+}
+
+void PlayerControllerComponent::StopSkill()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::StopSkill");
+    if (auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>()) skillState_->StopSkill();
+}

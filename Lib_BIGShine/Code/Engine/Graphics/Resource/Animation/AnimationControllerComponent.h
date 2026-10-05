@@ -29,6 +29,7 @@ public:
     void Gui() override;
     void ShowSequencerEditor();
     void SetSequencerWindowVisible(bool visible_) { showSequencerWindow = visible_; }
+    bool IsSequencerWindowVisible() const { return showSequencerWindow; }
     // エディタ用表示関数
     void OnGuiNodeEditor();
     void DrawNodeEditorContent(ANIM_GRAPH_CONNECTION_MODE connectionMode_ = ANIM_GRAPH_CONNECTION_MODE::LEGACY_TWO_PIN);
@@ -37,9 +38,12 @@ public:
     // エディタ側からポーズライブラリを直接操作・保存できるように、ゲッターを用意すると便利です
     std::shared_ptr<PoseLibraryResource> GetPoseLibrary() { return poseLibrary; }
     // 特定のステートへ遷移させる（直接呼び出し用）
-    void ChangeState(const std::string& stateName_, float duration_ = 0.2f);
+    void ChangeState(const std::string& stateName_, float duration_ = 0.2f, bool restart_ = false);
     // 演出再生中は通常グラフの自動遷移だけを抑制し、Animationとイベントは更新する。
     void SetPresentationControlled(bool controlled_) { presentationControlled = controlled_; }
+    // SkillStateがPhaseを選択中も、Animation EventとRootMotionは通常どおり更新する。
+    void SetSkillControlled(bool controlled_) { skillControlled = controlled_; }
+    bool IsSkillControlled() const { return skillControlled; }
 
     // セーブ・ロードの実装
     void Serialize(nlohmann::json& json_) const override;
@@ -116,6 +120,7 @@ private:
 
     // ノードエディタで管理されるステート群
     std::unordered_map<std::string, std::unique_ptr<AnimState>> states;
+    bool skillControlled = false; // SkillのPhase中は通常グラフによる上書きを防ぐ。
     bool presentationControlled = false; // 演出Actionが再生Stateを選択している間だけ有効。
     std::unordered_map<std::string, std::string> stateAssetPaths;
     std::unordered_map<std::string, std::string> pendingStateAssetPaths;
@@ -232,5 +237,3 @@ public:
     void SetBlackboardCategory(const std::string& category_) { animationBlackboardCategory = category_; }
     const std::string& GetBlackboardCategory() const { return animationBlackboardCategory; }
 };
-
-

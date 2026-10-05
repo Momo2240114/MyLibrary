@@ -34,6 +34,14 @@ struct ActorPresentationActionPreset
     DirectX::XMFLOAT3 positionOffset{ 0.0f, 0.0f, 0.0f };
 };
 
+// 演出開始時の配置を、再生中に変化するTransformとは別に保存する。
+struct ActorPresentationSpawnPoint
+{
+    std::string actorName;
+    DirectX::XMFLOAT3 position{ 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3 rotation{ 0.0f, 0.0f, 0.0f };
+};
+
 // 通常の入力・AIとは独立して、指定した対象へ演出用Actionを公開するComponent。
 class ActorPresentationActionComponent : public Component, public IActionProvider
 {
@@ -54,6 +62,10 @@ public:
     void Deserialize(const nlohmann::json& json_) override;
     // 設定済みのActionを所有Object名付きでGlobal Registryへ公開する。
     void RegisterActions() override;
+    // Editorで配置した対象の位置と向きを、出現位置として登録する。
+    void CaptureSpawnPoints();
+    // 保存済みの配置へ戻し、登場演出を同じ位置から開始できるようにする。
+    void RestoreSpawnPoints();
 
 private:
     // 指定対象のAnimation、移動、VFXの再生・停止と通常遷移への復帰を実行する。
@@ -61,6 +73,9 @@ private:
     // 通常入力とは独立して登場位置を補間し、既存ColliderのTransform同期へ渡す。
     void UpdateMovement(float deltaTime_);
     std::vector<ActorPresentationActionPreset> presets;
+    std::vector<ActorPresentationSpawnPoint> spawnPoints; // 親Transformに対するローカル配置を保存する。
+    // 初回だけ現在の配置を登録し、旧JSONでも再生後の保存による位置ずれを防ぐ。
+    void CaptureMissingSpawnPoints();
     std::weak_ptr<GameObject> movingActor;
     DirectX::XMFLOAT3 startMovePosition{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 targetMovePosition{ 0.0f, 0.0f, 0.0f };

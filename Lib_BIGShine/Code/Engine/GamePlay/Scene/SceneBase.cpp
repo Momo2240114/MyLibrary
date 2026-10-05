@@ -44,6 +44,7 @@
 #include "Editor/Workspace/AudioWorkspaceWindow.h"
 #include "Editor/Workspace/AIBehaviorEditorWindow.h"
 #include "Editor/Workspace/AttackWorkspaceWindow.h"
+#include "Editor/Workspace/SkillWorkspaceWindow.h"
 #include "Editor/Workspace/UIWidgetEditorWindow.h"
 #include "Editor/Workspace/PrefabWorkspaceWindow.h"
 #include <imgui.h>
@@ -109,6 +110,7 @@ void SceneBase::Initialize()
 	editorWindowManager->AddWindow(std::make_unique<AudioWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AIBehaviorEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AttackWorkspaceWindow>(_GameObjectManager.get()));
+	editorWindowManager->AddWindow(std::make_unique<SkillWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<UIWidgetEditorWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<PrefabWorkspaceWindow>(_GameObjectManager.get()));
 	editorWindowManager->AddWindow(std::make_unique<AssetBrowserWindow>(_GameObjectManager.get()));

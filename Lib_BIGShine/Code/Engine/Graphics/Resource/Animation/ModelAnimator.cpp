@@ -1302,10 +1302,10 @@ void ModelAnimator::UpdateBlend(float et, GltfModelCommponennt* model, int index
     }
 }
 
-void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner)
+void ModelAnimator::CrossFadeTo(const AnimState* newState, float duration, std::shared_ptr<GameObject> owner, bool restart_)
 {
     if (!newState) return;
-    if (current.state == newState) return;
+    if (current.state == newState && !restart_) return;
 
     CallStateExitEndActions(current, owner);
     previousRootMotionBasePosition = rootMotionBasePosition;
@@ -1578,5 +1578,3 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
         }
     }
 }
-
-

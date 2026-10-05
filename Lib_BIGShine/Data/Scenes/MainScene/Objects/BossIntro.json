@@ -346,6 +346,86 @@
                         "TargetName": "",
                         "Type": 5
                     }
+                ],
+                "SpawnPoints": [
+                    {
+                        "ActorName": "PlayerModel",
+                        "Position": [
+                            -3.0,
+                            -0.12384212017059326,
+                            -55.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            2.009765625,
+                            1.52587890625e-05
+                        ]
+                    },
+                    {
+                        "ActorName": "TestTarget",
+                        "Position": [
+                            0.0,
+                            -0.5823245048522949,
+                            30.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            -180.0,
+                            0.0
+                        ]
+                    },
+                    {
+                        "ActorName": "IntroFogGate",
+                        "Position": [
+                            -2.9946117401123047,
+                            2.076157808303833,
+                            -57.03769302368164
+                        ],
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    {
+                        "ActorName": "IntroGateMist",
+                        "Position": [
+                            -2.9946117401123047,
+                            2.076157808303833,
+                            -57.03769302368164
+                        ],
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    {
+                        "ActorName": "IntroGateLight",
+                        "Position": [
+                            -2.9946117401123047,
+                            2.076157808303833,
+                            -57.03769302368164
+                        ],
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    {
+                        "ActorName": "IntroRoarAirCone",
+                        "Position": [
+                            -40.0,
+                            35.0,
+                            0.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            -90.0,
+                            0.0
+                        ]
+                    }
                 ]
             },
             "Enabled": true,
@@ -362,6 +442,12 @@
                 "Sequences": [
                     {
                         "actions": [
+                            {
+                                "blackboardWrites": [],
+                                "cat": "ActorPresentation",
+                                "name": "BossIntro_RestoreSpawnPoints",
+                                "time": 0.0
+                            },
                             {
                                 "blackboardWrites": [],
                                 "cat": "Camera",

@@ -2,6 +2,7 @@
 
 #include "Engine/GamePlay/Core/Component/ComponentBase.h"
 #include "PlayerStateMachine.h"
+#include "PlayerSkillDefinition.h"
 #include <algorithm>
 #include <vector>
 
@@ -137,6 +138,15 @@ public:
     float GetCurrentArmor() const { return runtimeArmorOverrideActive ? runtimeArmor : armor; }
     bool ConsumeBufferedAction(); // 保存中の先行入力Actionを消費する。
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する。
+    // スキルの実行可否を集約し、将来のCooldownや消費条件の追加箇所にする。
+    bool CanExecuteSkill(PLAYER_ACTION action_) const;
+    // Workspace保存後、実行中の定義を維持したまま待機時だけ再読込する。
+    bool ReloadSkillDefinitions(const std::string& path_);
+    // 実行中の共通Skillを中断し、既存State終了処理へ接続する。
+    void StopSkill();
+    const std::string& GetSkillDefinitionsPath() const { return skillDefinitionsPath; }
+    // StateはControllerの定義を開始時に複製して使用する。
+    const PlayerSkillDefinition* GetSkillDefinition(PLAYER_ACTION action_) const;
     void ProcessActionInput(); // 入力からAction要求を発行する。
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る。
     void SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
@@ -214,6 +224,15 @@ private:
     std::shared_ptr<JustDodgeCollider> justDodgeCollider; // ジャスト回避判定用Collider。
 
     std::shared_ptr<BlackboardComponent> blackboard; // Player/Animへ状態を渡すBlackboard。
+    // Scene JSONには定義ファイルの参照を保存し、内容は外部JSONで編集する。
+    std::string skillDefinitionsPath = "Data/Skills/PlayerSkills.json";
+    std::vector<PlayerSkillDefinition> skillDefinitions;
+    std::vector<PlayerSkillInputBinding> skillInputs
+    {
+        { PLAYER_ACTION::SKILL_A, "Player.SkillModifier", "Player.StrongAttack", 100 },
+        { PLAYER_ACTION::SKILL_B, "Player.SkillModifier", "Player.WeakAttack", 90 },
+        { PLAYER_ACTION::SKILL_C, "Player.SkillModifier", "Player.JustGuard", 80 }
+    };
     PlayerStateMachine stateMachine; // PlayerのAction状態を管理するStateMachine。
     PlayerActionRuntime actionRuntime; // 現在Action中の入力受付とキャンセル状態。
     PlayerAttackAssistSettings attackAssistSettings; // 攻撃時の向き・位置補正設定。
