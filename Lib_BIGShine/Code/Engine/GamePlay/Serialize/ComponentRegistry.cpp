@@ -75,6 +75,8 @@
 #include "Game/GameMode/GameModeDeathNotifierComponent.h"
 #include "Game/GameMode/GameModeObjectToggleComponent.h"
 #include "Game/AI/Dragon/DragonAIComponent.h"
+#include "Game/AI/Human/HumanBossAIComponent.h"
+#include "Game/AI/Human/HumanBossActionComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartHurtBoxComponent.h"
 #include "Game/AI/Dragon/DragonBodyPartManagerComponent.h"
 #include "Engine/GamePlay/VFX/ImpactEffectComponent.h"
@@ -193,6 +195,8 @@ void RegisterAllComponents()
     registry.Register<GameModeDeathNotifierComponent>("GameModeDeathNotifierComponent");
     registry.Register<GameModeObjectToggleComponent>("GameModeObjectToggleComponent");
     registry.Register<DragonAIComponent>("DragonAIComponent");
+    registry.Register<HumanBossAIComponent>("HumanBossAIComponent");
+    registry.Register<HumanBossActionComponent>("HumanBossActionComponent");
     registry.Register<DragonBodyPartHurtBoxComponent>("DragonBodyPartHurtBoxComponent");
     registry.Register<DragonBodyPartManagerComponent>("DragonBodyPartManagerComponent");
     registry.Register<FollowCameraComponent>("FollowCameraComponent");

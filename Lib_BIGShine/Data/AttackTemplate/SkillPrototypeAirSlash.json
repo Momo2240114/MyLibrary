@@ -1,0 +1,125 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "attackerAirLiftPower": 0.0,
+        "damage": 20,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.025,
+        "hitStopScale": 0.75,
+        "impactPower": 4.0,
+        "knockBackPower": 1.2000000476837158,
+        "knockBackType": 0,
+        "targetAirLiftPower": 4,
+        "maxHitCount": 1,
+        "damageApplyType": 0
+    },
+    "attackEffects": [
+        {
+            "enabled": true,
+            "effectType": "INSTANT_AREA",
+            "particlePath": "",
+            "meshVfxPath": "PlayerSwordArc_Aqua",
+            "spawnTimeOffset": 0.0,
+            "lifeTime": 0.25,
+            "localOffset": [
+                0,
+                1.0,
+                1.1
+            ],
+            "localRotation": [
+                0,
+                0,
+                -35
+            ],
+            "localScale": [
+                1.25,
+                1,
+                1.25
+            ],
+            "followOwner": false,
+            "followNode": false,
+            "baseNodeName": "",
+            "speed": 0.0,
+            "localDirection": [
+                0,
+                0,
+                1
+            ],
+            "hitShapes": [
+                {
+                    "enabled": true,
+                    "hitBoxName": "SkillEffectHit",
+                    "shape": "SPHERE",
+                    "localOffset": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "localRotation": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "localScale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "radius": 0.8,
+                    "halfHeight": 0.0,
+                    "activeStartTime": 0.025,
+                    "activeEndTime": 0.18,
+                    "hitInterval": 0.0,
+                    "destroyOnHit": false,
+                    "allowMultiHit": false,
+                    "spheres": []
+                }
+            ]
+        }
+    ],
+    "cameraShake": {
+        "attackScale": 0.5,
+        "enabled": true,
+        "frequency": 24.0,
+        "powerLevel": 1,
+        "priority": 8,
+        "receiveDuration": 0.18000000715255737,
+        "receivePositionStrength": 0.054999999701976776,
+        "receiveRotationStrength": 0.44999998807907104
+    },
+    "displayName": "SkillPrototypeAirSlash",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleAxisToAttackerBlend": 0.8500000238418579,
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.44999998807907104,
+        "hitParticleNormalOffset": 0.05000000074505806,
+        "hitParticleTargetAttractionFalloff": 1.25,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionStrength": 1.399999976158142,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleUseTargetAttraction": true,
+        "spawnOnHit": true
+    },
+    "id": "SkillPrototypeAirSlash",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.2,
+        "activeStartTime": 0.0,
+        "enabled": true,
+        "endNodeName": "TrailEnd",
+        "hitBoxName": "Sword",
+        "radius": 26.0,
+        "startNodeName": "TrailStart"
+    },
+    "EditorNotes": "武器HitBoxと同じ攻撃Instance/Groupを使う斬撃Effect。単一Hitとし、判定は短時間だけ有効。"
+}

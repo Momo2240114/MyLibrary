@@ -5,6 +5,7 @@
 #include "PlayerSkillDefinition.h"
 #include <algorithm>
 #include <vector>
+#include <unordered_map>
 
 class ColliderComponent;
 class BlackboardComponent;
@@ -136,10 +137,18 @@ public:
     void SetRuntimeArmor(float armor_);
     void ResetRuntimeArmor();
     float GetCurrentArmor() const { return runtimeArmorOverrideActive ? runtimeArmor : armor; }
+    bool HasRuntimeArmorOverride() const { return runtimeArmorOverrideActive; }
     bool ConsumeBufferedAction(); // 保存中の先行入力Actionを消費する。
     void EnterAction(PLAYER_ACTION action_); // Action開始時のRuntime状態を初期化する。
-    // スキルの実行可否を集約し、将来のCooldownや消費条件の追加箇所にする。
+    // スキルの素材とCooldownを含む実行条件を一か所で判定する。
     bool CanExecuteSkill(PLAYER_ACTION action_) const;
+    // HUDやEditorへ定義の秒数と、Assetへ保存しない現在の残り時間を公開する。
+    float GetSkillCooldownDuration(PLAYER_ACTION action_) const;
+    float GetRemainingSkillCooldown(PLAYER_ACTION action_) const;
+    bool IsSkillCooldownReady(PLAYER_ACTION action_) const;
+    // 共通実行の開始成功をStateから受け取り、そのSkillだけの待ち時間を開始する。
+    void NotifySkillStarted(PLAYER_ACTION action_);
+    void ResetSkillCooldowns();
     // Workspace保存後、実行中の定義を維持したまま待機時だけ再読込する。
     bool ReloadSkillDefinitions(const std::string& path_);
     // 実行中の共通Skillを中断し、既存State終了処理へ接続する。
@@ -147,6 +156,16 @@ public:
     const std::string& GetSkillDefinitionsPath() const { return skillDefinitionsPath; }
     // StateはControllerの定義を開始時に複製して使用する。
     const PlayerSkillDefinition* GetSkillDefinition(PLAYER_ACTION action_) const;
+    // 本番SkillSelectも同じAPIで装備を変更し、スロットから使用要求を発行できる。
+    bool SetEquippedSkill(std::size_t slotIndex_, const std::string& skillName_);
+    const std::string& GetEquippedSkillName(std::size_t slotIndex_) const;
+    bool RequestSkillSlot(std::size_t slotIndex_);
+    bool CanEditSkillLoadout() const;
+    const std::vector<PlayerSkillDefinition>& GetSkillCatalog() const { return skillDefinitions; }
+    const PlayerSkillDefinition* GetSkillDefinitionByName(const std::string& skillName_) const;
+    float GetRemainingSkillCooldown(const std::string& skillName_) const;
+    // Player InspectorとSkill Workspaceで同じ装備編集UIを使用する。
+    void DrawSkillLoadoutGui();
     void ProcessActionInput(); // 入力からAction要求を発行する。
     void SendMoveInputToBlackboard(const DirectX::XMFLOAT3& input_); // 移動入力をBlackboardへ送る。
     void SendGuardMoveInputToBlackboard(const DirectX::XMFLOAT3& input_);
@@ -227,11 +246,18 @@ private:
     // Scene JSONには定義ファイルの参照を保存し、内容は外部JSONで編集する。
     std::string skillDefinitionsPath = "Data/Skills/PlayerSkills.json";
     std::vector<PlayerSkillDefinition> skillDefinitions;
+    PlayerSkillLoadout skillLoadout;
+    bool hasExplicitSkillLoadout = false;
+    // 古いSceneにはDefinitionのAction項目から初期装備を移行する。
+    void ApplyLegacySkillLoadout();
+    // Skill名をキーにした実行時情報。Serializeへは書き込まない。
+    std::unordered_map<std::string, float> skillCooldowns;
+    void UpdateSkillCooldowns(float deltaTime_);
     std::vector<PlayerSkillInputBinding> skillInputs
     {
-        { PLAYER_ACTION::SKILL_A, "Player.SkillModifier", "Player.StrongAttack", 100 },
-        { PLAYER_ACTION::SKILL_B, "Player.SkillModifier", "Player.WeakAttack", 90 },
-        { PLAYER_ACTION::SKILL_C, "Player.SkillModifier", "Player.JustGuard", 80 }
+        { 1, "Player.SkillModifier", "Player.StrongAttack", 100 },
+        { 0, "Player.SkillModifier", "Player.WeakAttack", 90 },
+        { 2, "Player.SkillModifier", "Player.JustGuard", 80 }
     };
     PlayerStateMachine stateMachine; // PlayerのAction状態を管理するStateMachine。
     PlayerActionRuntime actionRuntime; // 現在Action中の入力受付とキャンセル状態。

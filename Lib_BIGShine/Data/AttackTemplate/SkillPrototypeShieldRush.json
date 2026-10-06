@@ -1,0 +1,62 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "attackerAirLiftPower": 0.0,
+        "damage": 20,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.025,
+        "hitStopScale": 0.75,
+        "impactPower": 4.0,
+        "knockBackPower": 1.2000000476837158,
+        "knockBackType": 0,
+        "targetAirLiftPower": 0.0,
+        "maxHitCount": 1,
+        "damageApplyType": 0
+    },
+    "attackEffects": [],
+    "cameraShake": {
+        "attackScale": 0.5,
+        "enabled": true,
+        "frequency": 24.0,
+        "powerLevel": 1,
+        "priority": 8,
+        "receiveDuration": 0.18000000715255737,
+        "receivePositionStrength": 0.054999999701976776,
+        "receiveRotationStrength": 0.44999998807907104
+    },
+    "displayName": "SkillPrototypeShieldRush",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "SwordHit_Aqua",
+        "hitParticleAxisToAttackerBlend": 0.8500000238418579,
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.44999998807907104,
+        "hitParticleNormalOffset": 0.05000000074505806,
+        "hitParticleTargetAttractionFalloff": 1.25,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionStrength": 1.399999976158142,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleUseTargetAttraction": true,
+        "spawnOnHit": true
+    },
+    "id": "SkillPrototypeShieldRush",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.22,
+        "activeStartTime": 0.0,
+        "enabled": true,
+        "endNodeName": "ShiledMiddle",
+        "hitBoxName": "Shield",
+        "radius": 25.0,
+        "startNodeName": "ShiledTop"
+    },
+    "EditorNotes": "盾専用HitBox。GuardColliderと分離し、突進中と締めの盾接触を攻撃にする。"
+}

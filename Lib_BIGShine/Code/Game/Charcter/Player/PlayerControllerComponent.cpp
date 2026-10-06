@@ -18,6 +18,7 @@
 #include "Engine/Common/DebugLog.h"
 #include "Engine/Debug/TracyProfiler.h"
 #include "Engine/GamePlay/EventSystem/ActionSequence.h"
+#include "Engine/GamePlay/System/EffectManager.h"
 #include "Engine/GamePlay/Input/KeyConfig.h"
 #include "Engine/Graphics/Resource/Animation/AnimationControllerComponent.h"
 #include "Engine/Physics/CharacterCollider.h"
@@ -56,6 +57,7 @@ namespace
         inline constexpr const char* DODGE = "Player.Dodge";
         inline constexpr const char* SKILL_A = "Player.SkillA";
         inline constexpr const char* SKILL_B = "Player.SkillB";
+        inline constexpr const char* SKILL_C = "Player.SkillC";
     }
 
     DirectX::XMFLOAT3 NormalizeHorizontalDirection(
@@ -198,6 +200,8 @@ void PlayerControllerComponent::Start()
         BS_LOG_WARNING(LOG_CATEGORY::GAME, "Player skill definitions could not be loaded: " + skillDefinitionsPath);
     }
 
+    ApplyLegacySkillLoadout();
+    ResetSkillCooldowns();
     owner_->SetLayer(LayerType::Player);
     collider = owner_->GetOrAddComponent<CharacterCollider>();
     movement = owner_->GetOrAddComponent<CharacterMovementComponent>();
@@ -294,6 +298,7 @@ void PlayerControllerComponent::Update(float dt_)
     }
 
     // State更新後に、キャンセル受付・空中状態・Blackboard・移動反映をまとめて後処理する。
+    UpdateSkillCooldowns(dt_);
     stateMachine.Update(dt_);
     TryDodgeCancelInput();
     UpdateAirborneActionContext();
@@ -722,7 +727,7 @@ void PlayerControllerComponent::ApplyPendingMovement()
 bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
 {
     // 既存の未定義SkillA/Bは維持し、データ定義があるスキルのみ共通検証を行う。
-    if ((GetSkillDefinition(nextAction_) || nextAction_ == PLAYER_ACTION::SKILL_C) &&
+    if ((PlayerSkillLoadout::GetSlotIndex(nextAction_) >= 0) &&
         !CanExecuteSkill(nextAction_)) return false;
     // Action遷移の入口。接地/空中/キャンセル/先行入力の条件をここで一元判定する。
     if (nextAction_ == PLAYER_ACTION::NONE)
@@ -743,7 +748,7 @@ bool PlayerControllerComponent::RequestAction(PLAYER_ACTION nextAction_)
     }
 
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
-    if (IsAirborneForAction() && IsGroundOnlyAction(nextAction_))
+    if (IsAirborneForAction() && IsGroundOnlyAction(nextAction_) && !GetSkillDefinition(nextAction_))
     {
         return false;
     }
@@ -1123,6 +1128,13 @@ void PlayerControllerComponent::TryConsumeBufferedActionForCancelGate(bool dodge
     }
 
     const PLAYER_ACTION nextAction_ = actionRuntime.bufferedAction;
+    // 予約後に状況が変わっても、Cooldownや素材検証を飛ばしてSkillを開始しない。
+    if ((PlayerSkillLoadout::GetSlotIndex(nextAction_) >= 0) && !CanExecuteSkill(nextAction_))
+    {
+        actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+        actionRuntime.bufferedComboIndex = 0;
+        return;
+    }
     const PLAYER_ACTION currentAction_ = GetCurrentAction();
 
     if (dodgeGate_)
@@ -1227,7 +1239,8 @@ void PlayerControllerComponent::NotifyActionEnd()
         return;
     }
 
-    if (IsAirAction(currentAction_))
+    if (IsAirAction(currentAction_) ||
+        (PlayerSkillLoadout::GetSlotIndex(currentAction_) >= 0 && IsAirborneForAction()))
     {
         const DirectX::XMFLOAT3 input_ = GetMoveInput();
         const bool hasMoveInput_ = input_.x != 0.0f || input_.z != 0.0f;
@@ -1292,6 +1305,11 @@ void PlayerControllerComponent::NotifyJumpImpulse()
 
 void PlayerControllerComponent::HandleHitReaction()
 {
+    // 突進の防御PhaseではHitStateへの強制遷移を止めるが、死亡時の処理は妨げない。
+    const auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
+    const auto owner_ = GetGameObject();
+    const auto health_ = owner_ ? owner_->GetComponent<HealthComponent>() : nullptr;
+    if (skillState_ && skillState_->PreventsHitReaction() && health_ && !health_->IsDead()) return;
     // 被弾時は受付状態と予約移動をすべて閉じ、HitStateへ強制的に移す。
     actionRuntime.canDodgeCancel = false;
     actionRuntime.canActionBranch = false;
@@ -1348,6 +1366,13 @@ bool PlayerControllerComponent::ConsumeBufferedAction()
     }
 
     const PLAYER_ACTION nextAction_ = actionRuntime.bufferedAction;
+    // 予約後に状況が変わっても、Cooldownや素材検証を飛ばしてSkillを開始しない。
+    if ((PlayerSkillLoadout::GetSlotIndex(nextAction_) >= 0) && !CanExecuteSkill(nextAction_))
+    {
+        actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
+        actionRuntime.bufferedComboIndex = 0;
+        return false;
+    }
     if (IsDodgeAction(nextAction_) && !CanStartDodgeAction(nextAction_))
     {
         actionRuntime.bufferedAction = PLAYER_ACTION::NONE;
@@ -1654,14 +1679,14 @@ void PlayerControllerComponent::ProcessActionInput()
     }
 
     auto& keyConfig_ = KeyConfig::Instance();
-    const PLAYER_ACTION skillAction_ = PlayerInputResolver::ResolveSkill(keyConfig_, skillInputs);
+    const int skillSlot_ = PlayerInputResolver::ResolveSkillSlot(keyConfig_, skillInputs);
     const bool strongConsumed_ = PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::STRONG_ATTACK);
     if (strongConsumed_) ResetStrongAttackInput();
-    if (skillAction_ != PLAYER_ACTION::NONE)
+    if (skillSlot_ >= 0)
     {
         // 遷移拒否や未設定でも複合入力を消費し、通常攻撃との二重発動を防ぐ。
         ResetStrongAttackInput();
-        if (CanExecuteSkill(skillAction_)) RequestAction(skillAction_);
+        RequestSkillSlot(static_cast<std::size_t>(skillSlot_));
         return;
     }
     const bool guardInput_ = keyConfig_.ActionPressed(PlayerInputAction::GUARD);
@@ -1683,6 +1708,8 @@ void PlayerControllerComponent::ProcessActionInput()
     if (keyConfig_.ActionPressedIn(PlayerInputAction::JUMP) && RequestAction(PLAYER_ACTION::JUMP)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_A) && RequestAction(PLAYER_ACTION::SKILL_A)) return;
     if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_B) && RequestAction(PLAYER_ACTION::SKILL_B)) return;
+    // KeyConfigに登録された単独SkillC入力も、複合入力と同じSlot2へ渡す。
+    if (keyConfig_.ActionPressedIn(PlayerInputAction::SKILL_C) && RequestSkillSlot(2)) return;
     if (!PlayerInputResolver::IsActionConsumed(keyConfig_, skillInputs, PlayerInputAction::WEAK_ATTACK) &&
         keyConfig_.ActionPressedIn(PlayerInputAction::WEAK_ATTACK))
     {
@@ -1733,6 +1760,39 @@ void PlayerControllerComponent::RegisterPlayerAnimationActions()
     auto owner_ = GetGameObject();
     if (!owner_) return;
 
+    // 演出の種類をStateへ埋め込まず、イベントから指定されたParticleを既存Managerへ渡す。
+    const std::weak_ptr<GameObject> weakOwner_ = owner_;
+    owner_->RegisterAction("SkillEffect", "SkillEffect.PlayParticle", [weakOwner_]()
+    {
+        BS_PROFILE_SCOPE("PlayerSkillEffect::PlayParticle");
+        const auto actor_ = weakOwner_.lock();
+        if (!actor_ || !actor_->manager || !actor_->transform) return;
+        const auto blackboard_ = actor_->GetComponent<BlackboardComponent>();
+        ParticleSpawnRequest request_;
+        if (!blackboard_ || !blackboard_->GetString("SkillEffect", "ParticleAsset", request_.assetPath) ||
+            request_.assetPath.empty()) return;
+        blackboard_->GetFloat("SkillEffect", "ParticleLifeTime", request_.lifeTime);
+        float height_ = 0.0f;
+        blackboard_->GetFloat("SkillEffect", "HeightOffset", height_);
+        if (!std::isfinite(request_.lifeTime) || request_.lifeTime <= 0.0f || !std::isfinite(height_)) return;
+        request_.position = actor_->transform->GetWorldPosition();
+        request_.position.y += height_;
+        actor_->GetManager().GetEffectManager().SpawnParticle(request_);
+    });
+    // Skillの終了・中断では武器Trailと既存Dodge用残像の生成をまとめて止める。
+    owner_->RegisterAction("SkillEffect", "SkillEffect.StopTrails", [weakOwner_]()
+    {
+        BS_PROFILE_SCOPE("PlayerSkillEffect::StopTrails");
+        const auto actor_ = weakOwner_.lock();
+        if (!actor_) return;
+        actor_->ExecuteAction("Weapon_Trail_Stop");
+        actor_->ExecuteAction("AfterimageStop");
+    });
+    // Shield子Objectへ登録された攻撃停止Actionを、SkillのExitから呼べるようにする。
+    owner_->RegisterAction("SkillEffect", "SkillEffect.StopShieldAttack", [weakOwner_]()
+    {
+        if (const auto actor_ = weakOwner_.lock()) actor_->ExecuteAction("Shield_DisableHitBox");
+    });
     owner_->RegisterAction("PlayerReaction", "Player_Hit", [this]()
     {
         HandleHitReaction();
@@ -2317,9 +2377,14 @@ void PlayerControllerComponent::Gui()
     const auto* currentAnimation_ = animation_ ? animation_->GetCurrentState() : nullptr;
     ImGui::Text("Current Animation: %s", currentAnimation_ ? currentAnimation_->name.c_str() : "None");
     for (const auto& binding_ : skillInputs)
-        ImGui::Text("Skill Input: %s + %s -> %s (priority %d)", binding_.modifierAction.c_str(),
-            binding_.triggerAction.c_str(), GetPlayerActionName(binding_.action), binding_.priority);
+        ImGui::Text("Skill Input: %s + %s -> SkillSlot%d (priority %d)", binding_.modifierAction.c_str(),
+            binding_.triggerAction.c_str(), binding_.slotIndex, binding_.priority);
     ImGui::Text("Skill Definitions: %s", skillDefinitionsPath.c_str());
+    for (const auto& definition_ : skillDefinitions)
+        ImGui::Text("%s: %.2f / %.2f sec", definition_.name.c_str(),
+            GetRemainingSkillCooldown(definition_.name), definition_.cooldown);
+    DrawSkillLoadoutGui();
+    if (ImGui::Button("Reset Skill Cooldowns")) ResetSkillCooldowns();
 
     ImGui::SeparatorText("Runtime");
 
@@ -2598,6 +2663,7 @@ void PlayerControllerComponent::Serialize(nlohmann::json& j_) const
 {
     // Player調整値とキャンセルルールをScene JSONへ保存する。
     j_["SkillDefinitionsPath"] = skillDefinitionsPath;
+    skillLoadout.Serialize(j_["SkillLoadout"]);
     j_["MoveSpeed"] = moveSpeed;
     j_["GuardMoveSpeed"] = guardMoveSpeed;
     j_["JustDodgeInvincibilityDuration"] = justDodgeInvincibilityDuration;
@@ -2667,6 +2733,8 @@ void PlayerControllerComponent::Deserialize(const nlohmann::json& j_)
 {
     // Scene JSONからPlayer調整値を復元し、範囲外の値は安全な範囲へ丸める。
     skillDefinitionsPath = j_.value("SkillDefinitionsPath", skillDefinitionsPath);
+    skillLoadout = PlayerSkillLoadout();
+    hasExplicitSkillLoadout = j_.contains("SkillLoadout") && skillLoadout.Deserialize(j_.at("SkillLoadout"));
     moveSpeed = (std::max)(j_.value("MoveSpeed", moveSpeed), 0.0f);
     guardMoveSpeed = (std::max)(j_.value("GuardMoveSpeed", guardMoveSpeed), 0.0f);
     justDodgeInvincibilityDuration = (std::max)(j_.value("JustDodgeInvincibilityDuration", 0.5f), 0.0f);
@@ -2841,7 +2909,9 @@ bool PlayerControllerComponent::CanExecuteSkill(PLAYER_ACTION action_) const
 {
     const auto* definition_ = GetSkillDefinition(action_);
     std::string error_;
-    return definition_ && SkillExecution::CanExecute(gameObject.lock(), *definition_, error_);
+    if (!definition_ || !IsSkillCooldownReady(action_)) return false;
+    if (IsAirborneForAction() ? !definition_->canUseInAir : !definition_->canUseOnGround) return false;
+    return SkillExecution::CanExecute(gameObject.lock(), *definition_, error_);
 }
 
 // 保存後の共通ライブラリをPlayer入力表へ反映する。
@@ -2852,18 +2922,145 @@ bool PlayerControllerComponent::ReloadSkillDefinitions(const std::string& path_)
     if (skillState_ && skillState_->IsActive()) return false;
     if (!LoadPlayerSkillDefinitions(path_, skillInputs, skillDefinitions)) return false;
     skillDefinitionsPath = path_;
+    ApplyLegacySkillLoadout();
     return true;
 }
 // Skill Actionに対応する定義を取得する。
 const PlayerSkillDefinition* PlayerControllerComponent::GetSkillDefinition(PLAYER_ACTION action_) const
 {
-    for (const auto& definition_ : skillDefinitions)
-        if (definition_.action == action_) return &definition_;
-    return nullptr;
+    const int slotIndex_ = PlayerSkillLoadout::GetSlotIndex(action_);
+    return slotIndex_ >= 0 ? GetSkillDefinitionByName(skillLoadout.GetSkillName(static_cast<std::size_t>(slotIndex_))) : nullptr;
 }
 
 void PlayerControllerComponent::StopSkill()
 {
     BS_PROFILE_SCOPE("PlayerControllerComponent::StopSkill");
     if (auto* skillState_ = stateMachine.GetCurrentStateAs<PlayerSkillState>()) skillState_->StopSkill();
+}
+
+// Actionの番号ではなく定義名で残り時間を参照し、スロット変更でも同じSkillの待ち時間を維持する。
+float PlayerControllerComponent::GetRemainingSkillCooldown(PLAYER_ACTION action_) const
+{
+    const auto* definition_ = GetSkillDefinition(action_);
+    if (!definition_) return 0.0f;
+    return GetRemainingSkillCooldown(definition_->name);
+}
+
+float PlayerControllerComponent::GetSkillCooldownDuration(PLAYER_ACTION action_) const
+{
+    const auto* definition_ = GetSkillDefinition(action_);
+    return definition_ ? definition_->cooldown : 0.0f;
+}
+
+bool PlayerControllerComponent::IsSkillCooldownReady(PLAYER_ACTION action_) const
+{
+    return GetSkillDefinition(action_) && GetRemainingSkillCooldown(action_) <= 0.0f;
+}
+
+void PlayerControllerComponent::NotifySkillStarted(PLAYER_ACTION action_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::NotifySkillStarted");
+    if (const auto* definition_ = GetSkillDefinition(action_))
+        skillCooldowns[definition_->name] = definition_->cooldown;
+}
+
+// Playerへ渡されたTimeScale適用済みDeltaTimeを使用し、独自の時刻取得は行わない。
+void PlayerControllerComponent::UpdateSkillCooldowns(float deltaTime_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::UpdateSkillCooldowns");
+    const float elapsedTime_ = (std::max)(0.0f, deltaTime_);
+    for (auto& cooldown_ : skillCooldowns)
+        cooldown_.second = (std::max)(0.0f, cooldown_.second - elapsedTime_);
+}
+
+// Scene開始時とデバッグ操作で実行時の待ち時間だけを消す。
+void PlayerControllerComponent::ResetSkillCooldowns()
+{
+    skillCooldowns.clear();
+}
+
+// カタログと装備を分け、どの種類のSkillも名前で同じ経路へ渡す。
+const PlayerSkillDefinition* PlayerControllerComponent::GetSkillDefinitionByName(const std::string& skillName_) const
+{
+    for (const auto& definition_ : skillDefinitions)
+        if (definition_.name == skillName_) return &definition_;
+    return nullptr;
+}
+
+float PlayerControllerComponent::GetRemainingSkillCooldown(const std::string& skillName_) const
+{
+    const auto iterator_ = skillCooldowns.find(skillName_);
+    return iterator_ != skillCooldowns.end() ? iterator_->second : 0.0f;
+}
+
+bool PlayerControllerComponent::CanEditSkillLoadout() const
+{
+    const auto* state_ = stateMachine.GetCurrentStateAs<PlayerSkillState>();
+    return !state_ || !state_->IsActive();
+}
+
+bool PlayerControllerComponent::SetEquippedSkill(std::size_t slotIndex_, const std::string& skillName_)
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::SetEquippedSkill");
+    if (!CanEditSkillLoadout() || slotIndex_ >= PlayerSkillLoadout::SLOT_COUNT) return false;
+    if (!skillName_.empty() && !GetSkillDefinitionByName(skillName_)) return false;
+    if (!skillLoadout.SetSkillName(slotIndex_, skillName_)) return false;
+    hasExplicitSkillLoadout = true;
+    return true;
+}
+
+const std::string& PlayerControllerComponent::GetEquippedSkillName(std::size_t slotIndex_) const
+{
+    return skillLoadout.GetSkillName(slotIndex_);
+}
+
+bool PlayerControllerComponent::RequestSkillSlot(std::size_t slotIndex_)
+{
+    return RequestAction(PlayerSkillLoadout::GetSlotAction(slotIndex_));
+}
+
+// Sceneに装備指定が無い旧データだけを移行し、Editorで変更した装備は再読込でも維持する。
+void PlayerControllerComponent::ApplyLegacySkillLoadout()
+{
+    if (hasExplicitSkillLoadout) return;
+    std::array<bool, PlayerSkillLoadout::SLOT_COUNT> assigned_{};
+    for (const auto& definition_ : skillDefinitions)
+    {
+        const int slotIndex_ = PlayerSkillLoadout::GetSlotIndex(definition_.action);
+        if (slotIndex_ >= 0 && !assigned_[slotIndex_])
+        {
+            skillLoadout.SetSkillName(slotIndex_, definition_.name);
+            assigned_[slotIndex_] = true;
+        }
+    }
+}
+
+// 実行中は編集を止め、選択後はScene保存で装備だけを永続化する。
+void PlayerControllerComponent::DrawSkillLoadoutGui()
+{
+    BS_PROFILE_SCOPE("PlayerControllerComponent::DrawSkillLoadoutGui");
+    ImGui::SeparatorText("Player Skill Loadout");
+    const bool editable_ = CanEditSkillLoadout();
+    if (!editable_) ImGui::TextDisabled("Loadout is locked while a skill is running.");
+    ImGui::BeginDisabled(!editable_);
+    for (std::size_t slotIndex_ = 0; slotIndex_ < PlayerSkillLoadout::SLOT_COUNT; ++slotIndex_)
+    {
+        ImGui::PushID(static_cast<int>(slotIndex_));
+        const std::string currentName_ = GetEquippedSkillName(slotIndex_);
+        const std::string label_ = "SkillSlot" + std::to_string(slotIndex_);
+        if (ImGui::BeginCombo(label_.c_str(), currentName_.empty() ? "(Empty)" : currentName_.c_str()))
+        {
+            if (ImGui::Selectable("(Empty)", currentName_.empty())) SetEquippedSkill(slotIndex_, "");
+            for (const auto& definition_ : skillDefinitions)
+                if (ImGui::Selectable(definition_.name.c_str(), currentName_ == definition_.name))
+                    SetEquippedSkill(slotIndex_, definition_.name);
+            ImGui::EndCombo();
+        }
+        if (const auto* definition_ = GetSkillDefinitionByName(currentName_))
+            ImGui::Text("%s / %.2f / %.2f sec", GetSkillCategoryName(definition_->category),
+                GetRemainingSkillCooldown(currentName_), definition_->cooldown);
+        else if (!currentName_.empty()) ImGui::TextDisabled("Skill is missing from the current library.");
+        ImGui::PopID();
+    }
+    ImGui::EndDisabled();
 }

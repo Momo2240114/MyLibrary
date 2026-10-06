@@ -1,0 +1,1538 @@
+{
+  "ColliderComponents": [
+    {
+      "Data": {
+        "CanBeCharacterGround": true,
+        "ColliderName": "",
+        "CollisionOwnerObjectName": "",
+        "CollisionRole": 1,
+        "ContactOffset": 0.019999999552965164,
+        "ContainmentMode": 0,
+        "DebugPrimitiveColor": [
+          0.20000000298023224,
+          0.6000000238418579,
+          1.0,
+          1.0
+        ],
+        "EndNodeName": "",
+        "GravityScale": 2.0,
+        "GroundSnapDistance": 0.8999999761581421,
+        "HalfHeight": 1.0,
+        "IsStatic": false,
+        "IsTrigger": false,
+        "LimitHorizontalLift": true,
+        "Mass": 1.0,
+        "MaxHorizontalLift": 0.05000000074505806,
+        "NodeModelObjectName": "",
+        "NonGroundLift": 0.1599999964237213,
+        "NonGroundSlideSpeed": 3.0,
+        "Offset": [
+          0.0,
+          1.600000023841858,
+          0.0
+        ],
+        "PhysicsControlsTransform": true,
+        "Radius": 0.5,
+        "RotateVelocityThreshold": 0.0010000000474974513,
+        "ShapeRenderFlg": false,
+        "SlideOffNonGround": true,
+        "StartNodeName": "",
+        "StepOffset": 0.5,
+        "UseGravity": true,
+        "UsePhysicsResponse": true,
+        "VelocityRotationMode": 0,
+        "shapeSizeScale": 1.0
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "CharacterCollider",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "CanBeCharacterGround": true,
+        "ColliderName": "",
+        "CollisionOwnerObjectName": "",
+        "CollisionRole": 3,
+        "ContainmentMode": 0,
+        "DamageMultiplier": 1.0,
+        "DebugPrimitiveColor": [
+          0.20000000298023224,
+          1.0,
+          0.30000001192092896,
+          1.0
+        ],
+        "EndNodeName": "",
+        "GravityScale": 1.0,
+        "HalfHeight": 1.0,
+        "HurtTag": "Body",
+        "InvincibilityDuration": 0.07999999821186066,
+        "IsStatic": false,
+        "IsTrigger": true,
+        "Mass": 0.0,
+        "NodeModelObjectName": "",
+        "Offset": [
+          0.0,
+          1.440000057220459,
+          0.0
+        ],
+        "PhysicsControlsTransform": false,
+        "Radius": 0.5,
+        "RotateVelocityThreshold": 0.0010000000474974513,
+        "ShapeRenderFlg": false,
+        "StartNodeName": "",
+        "SyncCharacterColliderShape": true,
+        "UseGravity": false,
+        "UsePhysicsResponse": false,
+        "VelocityRotationMode": 0,
+        "shapeSizeScale": 1.0
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "HurtBox",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "ActionPrefix": "",
+        "ActivateActionName": "EnableGuardCollider",
+        "CanBeCharacterGround": true,
+        "CanGuardOwnerAttack": false,
+        "ColliderName": "",
+        "CollisionOwnerObjectName": "",
+        "CollisionRole": 6,
+        "ContainmentMode": 0,
+        "DeactivateActionName": "DisableGuardCollider",
+        "DebugPrimitiveColor": [
+          0.20000000298023224,
+          0.800000011920929,
+          1.0,
+          1.0
+        ],
+        "DisableJustGuardActionName": "DisableJustGuard",
+        "EnableJustGuardActionName": "EnableJustGuard",
+        "EndNodeName": "",
+        "GravityScale": 1.0,
+        "HalfHeight": 0.0010000000474974513,
+        "IsStatic": false,
+        "IsTrigger": true,
+        "Mass": 0.0,
+        "NodeModelObjectName": "",
+        "Offset": [
+          0.0,
+          1.5,
+          1.5
+        ],
+        "OncePerAttackActivation": true,
+        "PhysicsControlsTransform": false,
+        "Radius": 1.0,
+        "RotateVelocityThreshold": 0.0010000000474974513,
+        "ShapeRenderFlg": true,
+        "StartNodeName": "",
+        "TeamId": 2,
+        "UseGravity": false,
+        "UsePhysicsResponse": false,
+        "VelocityRotationMode": 0,
+        "shapeSizeScale": 1.0
+      },
+      "Enabled": false,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "GuardCollider",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    }
+  ],
+  "CollisionMask": 0,
+  "Components": [
+    {
+      "Data": {
+        "LocalScale": 0.014999999664723873,
+        "LocalScaleXYZ": [
+          0.014999999664723873,
+          0.014999999664723873,
+          0.014999999664723873
+        ],
+        "MaterialOverrides": [
+          {
+            "alphaCutoff": 0.4560000002384186,
+            "alphaMode": 0,
+            "baseColor": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "disableOutline": true,
+            "emissiveColor": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "id": 0,
+            "metalness": 0.10199999809265137,
+            "name": "Body.002",
+            "normalScale": 1.0,
+            "occlusionStrength": 0.4869999885559082,
+            "outlineThicknessOffset": 0.029999999329447746,
+            "roughness": 1.0,
+            "shaderId": 3,
+            "toonPbrBlend": 1.0,
+            "uvAddressMode": 0,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvRotation": 0.0,
+            "uvScale": [
+              1.0,
+              1.0
+            ]
+          },
+          {
+            "alphaCutoff": 0.5,
+            "alphaMode": 0,
+            "baseColor": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "disableOutline": true,
+            "emissiveColor": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "id": 1,
+            "metalness": 0.0,
+            "name": "Face.002",
+            "normalScale": 1.0,
+            "occlusionStrength": 0.9950000047683716,
+            "outlineThicknessOffset": 0.0020000000949949026,
+            "roughness": 0.8500000238418579,
+            "shaderId": 3,
+            "toonPbrBlend": 0.9940000176429749,
+            "uvAddressMode": 0,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvRotation": 0.0,
+            "uvScale": [
+              1.0,
+              1.0
+            ]
+          },
+          {
+            "alphaCutoff": 0.5,
+            "alphaMode": 0,
+            "baseColor": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "disableOutline": false,
+            "emissiveColor": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "id": 2,
+            "metalness": 0.0,
+            "name": "Eye.002",
+            "normalScale": 1.0,
+            "occlusionStrength": 1.0,
+            "outlineThicknessOffset": 0.019999999552965164,
+            "roughness": 0.75,
+            "shaderId": 3,
+            "toonPbrBlend": 1.0,
+            "uvAddressMode": 0,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvRotation": 0.0,
+            "uvScale": [
+              1.0,
+              1.0
+            ]
+          },
+          {
+            "alphaCutoff": 0.5,
+            "alphaMode": 1,
+            "baseColor": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "disableOutline": true,
+            "emissiveColor": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "id": 3,
+            "metalness": 1.0,
+            "name": "Squire_Cloth.002",
+            "normalScale": 1.0,
+            "occlusionStrength": 0.9330000281333923,
+            "outlineThicknessOffset": 0.02800000086426735,
+            "roughness": 0.9980000257492065,
+            "shaderId": 3,
+            "toonPbrBlend": 0.8999999761581421,
+            "uvAddressMode": 0,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvRotation": 0.0,
+            "uvScale": [
+              1.0,
+              1.0
+            ]
+          },
+          {
+            "alphaCutoff": 0.9990000128746033,
+            "alphaMode": 0,
+            "baseColor": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "disableOutline": true,
+            "emissiveColor": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "id": 4,
+            "metalness": 1.0,
+            "name": "Shiled_Cloth.002",
+            "normalScale": 1.0,
+            "occlusionStrength": 1.0,
+            "outlineThicknessOffset": 0.019999999552965164,
+            "roughness": 0.9819999933242798,
+            "shaderId": 3,
+            "toonPbrBlend": 0.8500000238418579,
+            "uvAddressMode": 0,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvRotation": 0.0,
+            "uvScale": [
+              1.0,
+              1.0
+            ]
+          },
+          {
+            "alphaCutoff": 0.5,
+            "alphaMode": 0,
+            "baseColor": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "disableOutline": true,
+            "emissiveColor": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "id": 5,
+            "metalness": 0.03200000151991844,
+            "name": "Shiled_Hair.002",
+            "normalScale": 1.0,
+            "occlusionStrength": 1.0,
+            "outlineThicknessOffset": 0.012500000186264515,
+            "roughness": 1.0,
+            "shaderId": 3,
+            "toonPbrBlend": 1.0,
+            "uvAddressMode": 0,
+            "uvOffset": [
+              0.0,
+              0.0
+            ],
+            "uvRotation": 0.0,
+            "uvScale": [
+              1.0,
+              1.0
+            ]
+          }
+        ],
+        "ModelName": "./Data/Model/SwordPlayer/CombatGirls_Sword_Shield.gltf",
+        "RootMotionName": "root",
+        "ShaderID": 1,
+        "StaticModel": false,
+        "UsedNaviMeshSystemFlg": false,
+        "_RootRotationOffset": {
+          "w": 0.7141432166099548,
+          "x": 0.6999995708465576,
+          "y": 0.0,
+          "z": 0.0
+        }
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "GltfModel",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "MaxBounds": [
+          1.0,
+          5.0
+        ],
+        "MinBounds": [
+          -0.009999999776482582,
+          0.0
+        ],
+        "Tracks": [
+          {
+            "AssetPath": "",
+            "Color": 4278255615,
+            "Name": "Track 0",
+            "PointOptions": [
+              {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 1,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.003998422995209694,
+                0.23266446590423584
+              ],
+              [
+                0.42075714468955994,
+                1.1926672458648682
+              ],
+              [
+                0.9921689033508301,
+                1.2117706537246704
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/PhantomRush.ComboSpeed.json",
+            "Color": 4282694655,
+            "Name": "PhantomRush.ComboSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                3.0
+              ],
+              [
+                0.11999999731779099,
+                3.4000000953674316
+              ],
+              [
+                0.18000000715255737,
+                2.0
+              ],
+              [
+                0.25,
+                1.649999976158142
+              ],
+              [
+                0.3400000035762787,
+                3.299999952316284
+              ],
+              [
+                1.0,
+                3.299999952316284
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/PhantomRush.FinishSpeed.json",
+            "Color": 4282694655,
+            "Name": "PhantomRush.FinishSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                2.0
+              ],
+              [
+                0.18000000715255737,
+                1.2999999523162842
+              ],
+              [
+                0.27000001072883606,
+                1.149999976158142
+              ],
+              [
+                0.3199999928474426,
+                2.5999999046325684
+              ],
+              [
+                0.36000001430511475,
+                1.0499999523162842
+              ],
+              [
+                0.46000000834465027,
+                1.350000023841858
+              ],
+              [
+                0.699999988079071,
+                1.649999976158142
+              ],
+              [
+                1.0,
+                1.7000000476837158
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Breakthrough.StartSpeed.json",
+            "Color": 4282694655,
+            "Name": "Breakthrough.StartSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                2.0
+              ],
+              [
+                0.20000000298023224,
+                2.5999999046325684
+              ],
+              [
+                0.5,
+                3.200000047683716
+              ],
+              [
+                1.0,
+                3.200000047683716
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Breakthrough.FinishSpeed.json",
+            "Color": 4282694655,
+            "Name": "Breakthrough.FinishSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                2.799999952316284
+              ],
+              [
+                0.12999999523162842,
+                2.799999952316284
+              ],
+              [
+                0.20999999344348907,
+                1.25
+              ],
+              [
+                0.28999999165534973,
+                0.8999999761581421
+              ],
+              [
+                0.3400000035762787,
+                2.9000000953674316
+              ],
+              [
+                1.0,
+                3.0
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Breakthrough.Acceleration.json",
+            "Color": 4282694655,
+            "Name": "Breakthrough.Acceleration",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                0.18000000715255737
+              ],
+              [
+                0.15000000596046448,
+                0.41999998688697815
+              ],
+              [
+                0.3499999940395355,
+                0.8999999761581421
+              ],
+              [
+                0.5,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Breakthrough.Rush.json",
+            "Color": 4282694655,
+            "Name": "Breakthrough.Rush",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                0.6200000047683716
+              ],
+              [
+                0.18000000715255737,
+                1.0
+              ],
+              [
+                0.800000011920929,
+                1.0
+              ],
+              [
+                1.0,
+                0.9200000166893005
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Breakthrough.Brake.json",
+            "Color": 4282694655,
+            "Name": "Breakthrough.Brake",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                1.0
+              ],
+              [
+                0.07999999821186066,
+                0.7200000286102295
+              ],
+              [
+                0.2199999988079071,
+                0.10000000149011612
+              ],
+              [
+                0.30000001192092896,
+                0.0
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/RisingJudgment.LaunchSpeed.json",
+            "Color": 4282694655,
+            "Name": "RisingJudgment.LaunchSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                1.5
+              ],
+              [
+                0.11999999731779099,
+                0.8500000238418579
+              ],
+              [
+                0.23000000417232513,
+                0.6499999761581421
+              ],
+              [
+                0.3499999940395355,
+                2.200000047683716
+              ],
+              [
+                0.5,
+                1.399999976158142
+              ],
+              [
+                1.0,
+                1.399999976158142
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/RisingJudgment.AirSpeed.json",
+            "Color": 4282694655,
+            "Name": "RisingJudgment.AirSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                2.5
+              ],
+              [
+                0.14000000059604645,
+                2.799999952316284
+              ],
+              [
+                0.23999999463558197,
+                1.7999999523162842
+              ],
+              [
+                0.4000000059604645,
+                2.5999999046325684
+              ],
+              [
+                1.0,
+                2.799999952316284
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/RisingJudgment.DiveSpeed.json",
+            "Color": 4282694655,
+            "Name": "RisingJudgment.DiveSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                1.2999999523162842
+              ],
+              [
+                0.15000000596046448,
+                1.0
+              ],
+              [
+                0.44999998807907104,
+                0.75
+              ],
+              [
+                0.699999988079071,
+                0.8500000238418579
+              ],
+              [
+                0.8999999761581421,
+                1.399999976158142
+              ],
+              [
+                1.0,
+                1.7999999523162842
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/RisingJudgment.LandingSpeed.json",
+            "Color": 4282694655,
+            "Name": "RisingJudgment.LandingSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                1.7999999523162842
+              ],
+              [
+                0.10000000149011612,
+                1.4500000476837158
+              ],
+              [
+                0.18000000715255737,
+                2.0999999046325684
+              ],
+              [
+                0.25,
+                0.949999988079071
+              ],
+              [
+                0.3799999952316284,
+                1.149999976158142
+              ],
+              [
+                0.6000000238418579,
+                1.5
+              ],
+              [
+                1.0,
+                1.7000000476837158
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Skill.DiveDescent.json",
+            "Color": 4282694655,
+            "Name": "Skill.DiveDescent",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.30000001192092896,
+                0.0
+              ],
+              [
+                0.41999998688697815,
+                0.25
+              ],
+              [
+                0.5799999833106995,
+                1.0
+              ],
+              [
+                0.75,
+                1.0
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Skill.DiveLoopPose.json",
+            "Color": 4282694655,
+            "Name": "Skill.DiveLoopPose",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                0.699999988079071
+              ],
+              [
+                0.3499999940395355,
+                0.44999998807907104
+              ],
+              [
+                0.699999988079071,
+                0.6000000238418579
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Skill.HeavyCast.json",
+            "Color": 4282694655,
+            "Name": "Skill.HeavyCast",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                1.5
+              ],
+              [
+                0.11999999731779099,
+                1.0
+              ],
+              [
+                0.2199999988079071,
+                1.5
+              ],
+              [
+                0.30000001192092896,
+                1.0499999523162842
+              ],
+              [
+                0.6499999761581421,
+                1.25
+              ],
+              [
+                1.0,
+                1.399999976158142
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          },
+          {
+            "AssetPath": "Data/Curve/Breakthrough.RunFinishSpeed.json",
+            "Color": 4282694655,
+            "Name": "Breakthrough.RunFinishSpeed",
+            "PointOptions": [
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              },
+              {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+              }
+            ],
+            "Points": [
+              [
+                0.0,
+                1.7999999523162842
+              ],
+              [
+                0.18000000715255737,
+                1.25
+              ],
+              [
+                0.30000001192092896,
+                2.0999999046325684
+              ],
+              [
+                0.41999998688697815,
+                0.949999988079071
+              ],
+              [
+                0.6000000238418579,
+                1.2999999523162842
+              ],
+              [
+                1.0,
+                1.7000000476837158
+              ]
+            ],
+            "Type": 3,
+            "Visible": true
+          }
+        ]
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "CurveComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {},
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "BlackboardComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "AssetPath": "HumanBoss",
+        "GraphAssetPath": "",
+        "UseTransitionGraph": false,
+        "StateAssets": {}
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "AnimationControllerComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "FacingTurnSpeed": 10.0,
+        "ImpulseDamping": 6.0,
+        "UsePhysicsVelocity": true
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "CharacterMovementComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "CurrentHealth": 1000.0,
+        "MaxHealth": 1000.0
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "HealthComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "AirHeavyImpactThreshold": 50.0,
+        "Armor": 0.0,
+        "CommonReactionActionNames": [],
+        "CurrentHealth": 1000.0,
+        "DamageActionName": "Health_Hit",
+        "HeavyImpactThreshold": 50.0,
+        "HitStopLayerMask": 0,
+        "MaxHealth": 1000.0,
+        "MediumImpactThreshold": 20.0,
+        "OverlayDuration": 0.11999999731779099,
+        "OverlayStartActionName": "",
+        "OverlayStopActionName": "",
+        "ReactionActionName": "HumanBossHit",
+        "ReactionActionNamesByKind": {
+          "AirHeavy": [
+            "HumanBossHit"
+          ],
+          "AirMedium": [
+            "HumanBossHit"
+          ],
+          "GroundHeavy": [
+            "HumanBossHit"
+          ],
+          "GroundLight": [
+            "HumanBossHit"
+          ],
+          "GroundMedium": [
+            "HumanBossHit"
+          ]
+        },
+        "UseHitStop": true,
+        "UseKnockBack": true
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "HitReactionComponent",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "Data": {
+        "Sequences": [],
+        "RegisterGlobal": false
+      },
+      "Enabled": true,
+      "LateUpdateEnabled": true,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "TypeName": "ActionSequence",
+      "UpdateEnabled": true,
+      "UpdatePriority": 0
+    },
+    {
+      "TypeName": "HumanBossActionComponent",
+      "Enabled": true,
+      "UpdateEnabled": false,
+      "LateUpdateEnabled": false,
+      "UpdatePriority": -10,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "Data": {}
+    },
+    {
+      "TypeName": "HumanBossAIComponent",
+      "Enabled": true,
+      "UpdateEnabled": true,
+      "LateUpdateEnabled": false,
+      "UpdatePriority": -20,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "Data": {
+        "PlayerObjectName": "PlayerModel"
+      }
+    },
+    {
+      "TypeName": "LockOnTargetComponent",
+      "Enabled": true,
+      "UpdateEnabled": false,
+      "LateUpdateEnabled": false,
+      "UpdatePriority": 0,
+      "LateUpdatePriority": 0,
+      "RequiredForSceneStart": false,
+      "Data": {
+        "Offset": [
+          0.0,
+          1.4,
+          0.0
+        ],
+        "CombatOwnerName": "HumanBoss",
+        "LockOnEnabled": true,
+        "DefaultTarget": false,
+        "Priority": 1.0
+      }
+    }
+  ],
+  "Layer": 2,
+  "Name": "HumanBoss",
+  "ParentName": "",
+  "RequiredForSceneStart": true,
+  "Transform": {
+    "Pos": [
+      -5.0,
+      0.0,
+      -40.0
+    ],
+    "Rot": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Scale": [
+      0.9990596175193787,
+      1.0,
+      0.9990569949150085
+    ]
+  }
+}

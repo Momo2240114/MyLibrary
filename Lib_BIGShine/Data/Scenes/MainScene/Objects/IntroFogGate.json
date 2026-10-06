@@ -227,7 +227,7 @@
                         ],
                         "BackFaceEmissiveStrength": 0.0,
                         "BaseSamplerMode": 0,
-                        "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Smoke.PNG",
+                        "BaseTexturePath": "Data/Texture/VFX/T_Free_Magic_Trail_Fire.PNG",
                         "BaseUVRotation": 0.0,
                         "BaseUVRotationSpeed": 0.0,
                         "BaseUVScale": [
@@ -346,7 +346,9 @@
                             -0.11999999731779099
                         ],
                         "MaterialPath": "",
-                        "MaterialPaths": [],
+                        "MaterialPaths": [
+                            ""
+                        ],
                         "MeshIndex": 0,
                         "MeshRotationSpeed": [
                             0.0,

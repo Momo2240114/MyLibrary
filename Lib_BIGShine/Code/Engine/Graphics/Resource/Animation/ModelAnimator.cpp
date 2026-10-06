@@ -1488,7 +1488,8 @@ void ModelAnimator::ActiveSlot::Update(float et, float duration, CurveComponent*
     float currentSpeed = state->playbackSpeed;
 
     // ★カーブの指定があり、コンポーネントが存在する場合
-    if (curveComp && !state->speedCurveName.empty())
+    // Trackが無いActorでは設定済み再生速度へ戻し、GetValueの既定値0による停止を防ぐ。
+    if (curveComp && !state->speedCurveName.empty() && curveComp->HasTrack(state->speedCurveName))
     {
         // アニメーションの正規化時間 (0.0 - 1.0) を計算
         float normalizedTime = (duration > 0.0f) ? (time / duration) : 0.0f;

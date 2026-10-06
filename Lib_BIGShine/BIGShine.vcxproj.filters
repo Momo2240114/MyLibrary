@@ -257,6 +257,9 @@
     <Filter Include="Code\Game\Logics\AI\Director">
       <UniqueIdentifier>{21f7008f-5649-4b10-b9b8-5d47967c6ff8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Game\Logics\AI\Human">
+      <UniqueIdentifier>{b576bfab-8d50-4d7f-b086-5f41c5d5e8c3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Code\Game\Logics\AI\Dragon">
       <UniqueIdentifier>{7e4fe2ff-2f49-4d13-b7bd-29de1e6d20e8}</UniqueIdentifier>
     </Filter>
@@ -1014,6 +1017,12 @@
     </ClCompile>
     <ClCompile Include="Code\Game\AI\Director\AIDirectorComponent.cpp">
       <Filter>Code\Game\Logics\AI\Director</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClCompile>
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>
@@ -1889,6 +1898,12 @@
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Director\AIDirectorComponent.h">
       <Filter>Code\Game\Logics\AI\Director</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Game\AI\Human\HumanBossActionComponent.h">
+      <Filter>Code\Game\Logics\AI\Human</Filter>
     </ClInclude>
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h">
       <Filter>Code\Game\Logics\AI\Dragon</Filter>

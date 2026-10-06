@@ -32,13 +32,14 @@ JSONへの未対応項目は保持し、Phaseの並べ替えでも対応する�
 
 ## プレイヤーへの接続
 
-DefinitionのPlayer SlotをSkillA / SkillB / SkillCへ割り当てます。
-同じスロットへ複数定義を割り当てることはできません。
-Input BindingsでModifier Hold、Trigger Action、Priorityを編集できます。
-入力の詳細と初期サンプルは [README.md](README.md) を参照してください。
-
-`Action` が省略・空・`None`の定義は敵専用または未割り当てとしてPlayerの登録対象から外れます。
-PlayerのA/B/Cは既存の識別子を維持し、共通実行への接続だけをPlayerSkillStateが担当します。
+Player / AIタブ、またはPlayer InspectorのPlayer Skill LoadoutでSkillSlot0 / 1 / 2を編集します。
+初期装備はPhantomRush / Breakthrough / RisingJudgmentです。装備はPlayerのSceneへ保存します。
+同じSkillを複数枠へ装備することもでき、その場合もCooldownはSkill名ごとに共有します。
+DefinitionのActionは新しい装備設定では使用せず、旧Sceneの初期装備移行にだけ参照します。
+Equip / Preview Slotで対象枠を選び、Save & Apply Bindingで編集中のSkillをその枠へ装備できます。
+Save & Playも指定枠から要求します。ライブラリSaveと装備のScene保存は別です。
+Categoryは分類用で、Can Use On Ground / Can Use In AirはPlayerの使用条件へ反映されます。
+詳しくは [SkillLoadout.md](SkillLoadout.md) を参照してください。
 
 ## AIへの接続
 
@@ -59,11 +60,14 @@ SkillNameを指定したActionのAnimation・演出進行は共通Phaseへ切り
 同じActorで同時に複数のSkillExecutionは開始できません。
 スキルのAnimation Stateは対象ActorのState名で解決します。
 プレイヤー用と敵用でState名が異なる場合は、それぞれのDefinitionを作成してください。
-共通DefinitionのCooldownは予約項目です。実際のDragonのCooldownは既存Action設定を使用します。
+共通DefinitionのCooldownはPlayerで使用します。実際のDragonのCooldownは既存Action設定を使用します。
 
 ## 終了・中断
 
-ANIMATION_END、DURATION、ACTION_ENDの3種類でPhaseを進めます。
+ANIMATION_END、DURATION、ACTION_END、GROUND_CONTACTの4種類でPhaseを進めます。
+GROUND_CONTACTはDurationを最短待機時間として接地を待ち、MaximumDurationで通知漏れを防ぎます。
+Forward Speed、Vertical Impulse、Suspend Gravity、Vertical SpeedもPhase Inspectorで編集できます。
+Suspend Gravity中は既存CharacterMovementとColliderの重力係数を使って高さを制御し、終了・中断で元へ戻します。
 ACTION_ENDは既存Player ActionEnd／汎用AI NotifyActionEnd／Dragon AIActionEnd・SequencerActionEndから通知します。
 Phase終了通知が届いても、最後のPhaseまではPlayer／AIの行動全体を完了扱いにしません。
 Animation EndのループStateは最初の時間折り返しで終了を判定します。
@@ -94,3 +98,8 @@ Visual Studioでは共通実行は `Code\Engine\GamePlay`、作成画面は `Cod
 
 ビルドおよび実行確認は行っていません。
 コード上で確認可能な範囲の静的確認のみ実施しました。
+
+Player / AIタブにはPlayerのSkill別Cooldownの残り時間と設定時間、Reset Skill Cooldownsを表示します。
+ライブラリ再読込で同名Skillの残り時間はリセットしません。3種類の初期スキルは [PrototypeSkills.md](PrototypeSkills.md) を参照してください。
+
+Forward Speed Curveでは既存Curve Trackを選択し、Phaseの前進速度へ倍率を適用できます。AnimationのSpeed Curveは再生速度そのものを指定します。最新の連撃・突進調整は [SkillPacing.md](SkillPacing.md) を参照してください。

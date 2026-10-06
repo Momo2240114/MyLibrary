@@ -25,30 +25,35 @@
 #include <stdexcept>
 #include <utility>
 #include "Engine/GamePlay/Serialize/ActionRegistry.h"
+#include "Engine/Math/Curve/CurveComponent.h"
 
 namespace
 {
     constexpr float SKILL_TIMELINE_FPS = 60.0f;
 
-    // Player側の任意メタデータも検証し、Editorの型付き参照と再読込を安全にする。
+    // 新しいSlot形式と、旧Action形式の入力JSONを同じスロット番号へ解決する。
+    int GetInputSlotIndex(const nlohmann::json& input_)
+    {
+        if (input_.contains("Slot"))
+        {
+            if (!input_.at("Slot").is_number_integer()) throw std::runtime_error("Input Slot must be an integer.");
+            return input_.at("Slot").get<int>();
+        }
+        const std::string action_ = input_.value("Action", std::string());
+        return action_ == "SkillB" ? 0 : action_ == "SkillA" ? 1 : action_ == "SkillC" ? 2 : -1;
+    }
+
+    // 装備名はSceneへ分離し、ライブラリ側では入力のスロット番号だけを検証する。
     bool ValidateCallerSettings(const nlohmann::json& document_, std::string& error_)
     {
         try
         {
             if (!document_.at("Inputs").is_array()) throw std::runtime_error("Inputs must be an array.");
-            const auto isPlayerSlot_ = [](const std::string& slot_) { return slot_ == "SkillA" || slot_ == "SkillB" || slot_ == "SkillC"; };
-            std::set<std::string> slots_;
-            for (const auto& skill_ : document_.at("Skills"))
-            {
-                const std::string slot_ = skill_.value("Action", std::string());
-                if (slot_.empty() || slot_ == "None") continue;
-                if (!isPlayerSlot_(slot_)) throw std::runtime_error("Unknown player slot: " + slot_);
-                if (!slots_.insert(slot_).second) throw std::runtime_error("Duplicate player slot: " + slot_);
-            }
             for (const auto& input_ : document_.at("Inputs"))
             {
-                const std::string slot_ = input_.at("Action").get<std::string>();
-                if (!isPlayerSlot_(slot_)) throw std::runtime_error("Unknown input slot: " + slot_);
+                const int slotIndex_ = GetInputSlotIndex(input_);
+                if (slotIndex_ < 0 || slotIndex_ >= static_cast<int>(PlayerSkillLoadout::SLOT_COUNT))
+                    throw std::runtime_error("Input Slot must be 0, 1 or 2.");
                 if (input_.at("ModifierAction").get<std::string>().empty() || input_.at("TriggerAction").get<std::string>().empty())
                     throw std::runtime_error("Input Action names must not be empty.");
                 const int priority_ = input_.value("Priority", 100);
@@ -176,6 +181,11 @@ void SkillWorkspaceWindow::LoadLibrary()
     if (!LoadSkillDefinitions(libraryPath, definitions_, loaded_, statusText)) return;
     if (!loaded_.contains("Inputs")) loaded_["Inputs"] = nlohmann::json::array();
     if (!ValidateCallerSettings(loaded_, statusText)) return;
+    for (auto& input_ : loaded_["Inputs"])
+    {
+        input_["Slot"] = GetInputSlotIndex(input_);
+        input_.erase("Action");
+    }
     document = std::move(loaded_);
     selectedSkill = -1;
     selectedPhase = -1;
@@ -344,22 +354,20 @@ void SkillWorkspaceWindow::DrawInspector()
     if (selectedSkill < 0) { ImGui::TextDisabled("Create or select a skill."); return; }
     dirty |= ImGui::InputText("Name", &draft.name);
     dirty |= ImGui::Checkbox("Enabled", &draft.enabled);
-    dirty |= ImGui::DragFloat("Cooldown (reserved)", &draft.cooldown, 0.05f, 0.0f, 300.0f);
+    dirty |= ImGui::DragFloat("Cooldown", &draft.cooldown, 0.05f, 0.0f, 300.0f);
     dirty |= DrawActionField("Cleanup Action", draft.cleanupAction, targetObject.lock());
-    std::string slot_ = document["Skills"][selectedSkill].value("Action", std::string("None"));
-    if (ImGui::BeginCombo("Player Slot", slot_.c_str()))
+    if (ImGui::BeginCombo("Category", GetSkillCategoryName(draft.category)))
     {
-        for (const char* name_ : { "None", "SkillA", "SkillB", "SkillC" })
+        for (int index_ = 0; index_ <= static_cast<int>(SkillCategory::UTILITY); ++index_)
         {
-            if (ImGui::Selectable(name_, slot_ == name_))
-            {
-                if (std::string(name_) == "None") document["Skills"][selectedSkill].erase("Action");
-                else document["Skills"][selectedSkill]["Action"] = name_;
-                dirty = true;
-            }
+            const auto category_ = static_cast<SkillCategory>(index_);
+            if (ImGui::Selectable(GetSkillCategoryName(category_), draft.category == category_))
+            { draft.category = category_; dirty = true; }
         }
         ImGui::EndCombo();
     }
+    dirty |= ImGui::Checkbox("Can Use On Ground", &draft.canUseOnGround);
+    dirty |= ImGui::Checkbox("Can Use In Air", &draft.canUseInAir);
     ImGui::SeparatorText("Phases");
     if (ImGui::Button("Add Phase"))
     {
@@ -391,17 +399,43 @@ void SkillWorkspaceWindow::DrawPhaseInspector()
         ImGui::EndCombo();
     }
     int end_ = static_cast<int>(phase_.endCondition);
-    const char* endNames_[] = { "Animation End", "Duration", "Action End" };
-    if (ImGui::Combo("End", &end_, endNames_, 3)) { phase_.endCondition = static_cast<SkillPhaseEnd>(end_); dirty = true; }
-    if (phase_.endCondition == SkillPhaseEnd::DURATION) dirty |= ImGui::DragFloat("Duration", &phase_.duration, 0.01f, 0.0f, 120.0f);
+    const char* endNames_[] = { "Animation End", "Duration", "Action End", "Ground Contact" };
+    if (ImGui::Combo("End", &end_, endNames_, 4)) { phase_.endCondition = static_cast<SkillPhaseEnd>(end_); dirty = true; }
+    if (phase_.endCondition == SkillPhaseEnd::DURATION || phase_.endCondition == SkillPhaseEnd::GROUND_CONTACT) dirty |= ImGui::DragFloat("Duration", &phase_.duration, 0.01f, 0.0f, 120.0f);
     dirty |= ImGui::DragFloat("Maximum Duration", &phase_.maximumDuration, 0.1f, 0.1f, 300.0f);
     dirty |= ImGui::DragFloat("Blend Duration", &phase_.blendDuration, 0.01f, 0.0f, 10.0f);
+    dirty |= ImGui::DragFloat("Forward Speed", &phase_.forwardSpeed, 0.1f, -100.0f, 100.0f);
+    dirty |= ImGui::InputText("Forward Speed Curve", &phase_.forwardSpeedCurveName);
+    const auto curve_ = target_ ? target_->GetComponent<CurveComponent>() : nullptr;
+    if (curve_ && ImGui::BeginCombo("Movement Curves", phase_.forwardSpeedCurveName.c_str()))
+    {
+        if (ImGui::Selectable("(None)", phase_.forwardSpeedCurveName.empty()))
+        { phase_.forwardSpeedCurveName.clear(); dirty = true; }
+        for (const auto& name_ : curve_->GetTrackNames())
+            if (ImGui::Selectable(name_.c_str(), phase_.forwardSpeedCurveName == name_))
+            { phase_.forwardSpeedCurveName = name_; dirty = true; }
+        ImGui::EndCombo();
+    }
+    dirty |= ImGui::DragFloat("Warp Height", &phase_.warpHeight, 0.1f, 0.0f, 100.0f);
+    dirty |= ImGui::DragFloat("Vertical Impulse", &phase_.verticalImpulse, 0.1f, -100.0f, 100.0f);
+    dirty |= ImGui::Checkbox("Suspend Gravity", &phase_.suspendGravity);
+    if (phase_.suspendGravity)
+        dirty |= ImGui::DragFloat("Vertical Speed", &phase_.verticalSpeed, 0.1f, -100.0f, 100.0f);
+    if (phase_.suspendGravity)
+        dirty |= ImGui::InputText("Vertical Speed Curve (seconds)", &phase_.verticalSpeedCurveName);
+    else
+    {
+        phase_.verticalSpeed = 0.0f;
+        phase_.verticalSpeedCurveName.clear();
+    }
     dirty |= DrawActionField("Sequence", phase_.sequence, target_, "Sequence");
     dirty |= DrawActionField("Enter Action", phase_.enterAction, target_);
     dirty |= DrawActionField("Exit Action", phase_.exitAction, target_);
     dirty |= ImGui::Checkbox("Dodge Cancel", &phase_.canDodgeCancel);
     dirty |= ImGui::Checkbox("Action Branch", &phase_.canActionBranch);
     dirty |= ImGui::Checkbox("Buffer Input", &phase_.canBufferInput);
+    dirty |= ImGui::Checkbox("Enable Guard", &phase_.enableGuard);
+    dirty |= ImGui::Checkbox("Prevent Flinch", &phase_.preventFlinch);
     if (animation_ && ImGui::Button("Edit Animation Events"))
     {
         if (animation_->SelectStateForEditing(phase_.animationState)) animation_->SetSequencerWindowVisible(true);
@@ -425,7 +459,7 @@ void SkillWorkspaceWindow::DrawInputBindings()
     if (!inputs_.is_array()) { ImGui::TextDisabled("Inputs must be an array."); return; }
     if (ImGui::Button("Add Input Binding"))
     {
-        inputs_.push_back({ { "Action", "SkillA" }, { "ModifierAction", "Player.SkillModifier" },
+        inputs_.push_back({ { "Slot", 1 }, { "ModifierAction", "Player.SkillModifier" },
             { "TriggerAction", "Player.StrongAttack" }, { "Priority", 100 } });
         dirty = true;
     }
@@ -434,17 +468,18 @@ void SkillWorkspaceWindow::DrawInputBindings()
     {
         auto& json_ = inputs_[index_];
         ImGui::PushID(index_);
-        std::string action_ = json_.value("Action", std::string("SkillA"));
+        int slotIndex_ = GetInputSlotIndex(json_);
         std::string modifier_ = json_.value("ModifierAction", std::string());
         std::string trigger_ = json_.value("TriggerAction", std::string());
         int priority_ = json_.value("Priority", 100);
-        bool changed_ = ImGui::InputText("Player Action", &action_);
+        bool changed_ = ImGui::InputInt("SkillSlot (0..2)", &slotIndex_);
         changed_ |= ImGui::InputText("Modifier Hold", &modifier_);
         changed_ |= ImGui::InputText("Trigger Action", &trigger_);
         changed_ |= ImGui::InputInt("Priority", &priority_);
         if (changed_)
         {
-            json_["Action"] = action_; json_["ModifierAction"] = modifier_; json_["TriggerAction"] = trigger_; json_["Priority"] = priority_;
+            json_["Slot"] = (std::clamp)(slotIndex_, 0, 2); json_["ModifierAction"] = modifier_; json_["TriggerAction"] = trigger_; json_["Priority"] = priority_;
+            json_.erase("Action");
             dirty = true;
         }
         if (ImGui::Button("Remove Binding")) remove_ = index_;
@@ -508,7 +543,14 @@ void SkillWorkspaceWindow::DrawExecutionPanel()
     const auto dragon_ = target_->GetComponent<DragonAIComponent>();
     const auto player_ = target_->GetComponent<PlayerControllerComponent>();
     const auto ai_ = target_->GetComponent<AIActionComponent>();
-    if (player_) ImGui::TextUnformatted("Player: choose SkillA / B / C in the Definition inspector.");
+    if (player_)
+    {
+        player_->DrawSkillLoadoutGui();
+        ImGui::TextDisabled("Save the scene to keep the equipped skills.");
+        const char* slotNames_[] = { "SkillSlot0 (Square)", "SkillSlot1 (Triangle)", "SkillSlot2 (Circle)" };
+        ImGui::Combo("Equip / Preview Slot", &selectedPlayerSlot, slotNames_, 3);
+        if (ImGui::Button("Reset Skill Cooldowns")) player_->ResetSkillCooldowns();
+    }
     else if (dragon_)
     {
         const auto& actions_ = dragon_->GetActionDefinitions();
@@ -553,9 +595,8 @@ bool SkillWorkspaceWindow::ApplyBinding()
     if (!target_ || selectedSkill < 0) return false;
     if (const auto player_ = target_->GetComponent<PlayerControllerComponent>())
     {
-        const std::string slot_ = document["Skills"][selectedSkill].value("Action", std::string());
-        if (slot_.empty() || slot_ == "None") { statusText = "Assign a Player Slot first."; return false; }
         if (!player_->ReloadSkillDefinitions(libraryPath)) { statusText = "Player library reload failed or a skill is active."; return false; }
+        if (!player_->SetEquippedSkill(static_cast<std::size_t>(selectedPlayerSlot), draft.name)) { statusText = "Cannot equip the selected skill."; return false; }
         return true;
     }
     if (const auto dragon_ = target_->GetComponent<DragonAIComponent>())
@@ -582,10 +623,7 @@ void SkillWorkspaceWindow::PlaySelected()
     bool requested_ = false;
     if (const auto player_ = target_->GetComponent<PlayerControllerComponent>())
     {
-        const std::string slot_ = document["Skills"][selectedSkill].value("Action", std::string());
-        const PLAYER_ACTION action_ = slot_ == "SkillA" ? PLAYER_ACTION::SKILL_A
-            : slot_ == "SkillB" ? PLAYER_ACTION::SKILL_B : PLAYER_ACTION::SKILL_C;
-        requested_ = player_->RequestAction(action_);
+        requested_ = player_->RequestSkillSlot(static_cast<std::size_t>(selectedPlayerSlot));
     }
     else if (const auto dragon_ = target_->GetComponent<DragonAIComponent>())
         requested_ = dragon_->RequestAction(dragon_->GetActionDefinitions()[selectedDragonAction].action);
