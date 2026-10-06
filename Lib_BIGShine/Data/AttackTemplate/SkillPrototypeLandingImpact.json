@@ -1,0 +1,125 @@
+{
+    "AssetType": "AttackTemplate",
+    "AssetVersion": 1,
+    "attack": {
+        "allowMultiHit": false,
+        "attackerAirLiftPower": 0.0,
+        "damage": 40,
+        "hitGroupId": 0,
+        "hitStopDuration": 0.06,
+        "hitStopScale": 0.25,
+        "impactPower": 4.0,
+        "knockBackPower": 1.2000000476837158,
+        "knockBackType": 0,
+        "targetAirLiftPower": 0,
+        "maxHitCount": 1,
+        "damageApplyType": 0
+    },
+    "attackEffects": [
+        {
+            "enabled": true,
+            "effectType": "INSTANT_AREA",
+            "particlePath": "KickImpact_Aqua",
+            "meshVfxPath": "PlayerKickShockwave_Aqua",
+            "spawnTimeOffset": 0.0,
+            "lifeTime": 0.65,
+            "localOffset": [
+                0,
+                0.1,
+                0
+            ],
+            "localRotation": [
+                0,
+                0,
+                0
+            ],
+            "localScale": [
+                3.0,
+                1.0,
+                3.0
+            ],
+            "followOwner": false,
+            "followNode": false,
+            "baseNodeName": "",
+            "speed": 0.0,
+            "localDirection": [
+                0,
+                0,
+                1
+            ],
+            "hitShapes": [
+                {
+                    "enabled": true,
+                    "hitBoxName": "LandingShockwaveHit",
+                    "shape": "SPHERE",
+                    "localOffset": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "localRotation": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "localScale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "radius": 1.4,
+                    "halfHeight": 0.0,
+                    "activeStartTime": 0.025,
+                    "activeEndTime": 0.2,
+                    "hitInterval": 0.0,
+                    "destroyOnHit": false,
+                    "allowMultiHit": false,
+                    "spheres": []
+                }
+            ]
+        }
+    ],
+    "cameraShake": {
+        "attackScale": 0.5,
+        "enabled": true,
+        "frequency": 24.0,
+        "powerLevel": 1,
+        "priority": 12,
+        "receiveDuration": 0.28,
+        "receivePositionStrength": 0.095,
+        "receiveRotationStrength": 0.75
+    },
+    "displayName": "SkillPrototypeLandingImpact",
+    "hitEffect": {
+        "hitMeshVfxAssetPath": "",
+        "hitMeshVfxLifeTime": 1.0,
+        "hitMeshVfxNormalOffset": 0.0,
+        "hitParticleAssetPath": "SwordHit_Aqua_Lv02",
+        "hitParticleAxisToAttackerBlend": 0.8500000238418579,
+        "hitParticleEmitterName": "",
+        "hitParticleLifeTime": 0.44999998807907104,
+        "hitParticleNormalOffset": 0.05000000074505806,
+        "hitParticleTargetAttractionFalloff": 1.25,
+        "hitParticleTargetAttractionRange": 3.0,
+        "hitParticleTargetAttractionStrength": 1.399999976158142,
+        "hitParticleUseImpactAxis": true,
+        "hitParticleUseTargetAttraction": true,
+        "spawnOnHit": true
+    },
+    "id": "SkillPrototypeLandingImpact",
+    "owner": {
+        "canHitOwner": false,
+        "ownerTarget": 0
+    },
+    "slashEffects": [],
+    "weaponHitBox": {
+        "activeEndTime": 0.2,
+        "activeStartTime": 0.0,
+        "enabled": false,
+        "endNodeName": "TrailEnd",
+        "hitBoxName": "Sword",
+        "radius": 26.0,
+        "startNodeName": "TrailStart"
+    },
+    "EditorNotes": "接地後のEndから生成する着地衝撃波。Sphere半径1.4とEffectのXZスケール3を仮設定。武器HitBoxは使わない。"
+}

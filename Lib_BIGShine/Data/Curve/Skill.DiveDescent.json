@@ -1,0 +1,67 @@
+{
+    "AssetType": "CurveTrack",
+    "AssetVersion": 1,
+    "Curve": {
+        "Name": "Skill.DiveDescent",
+        "Color": 4282694655,
+        "Type": 3,
+        "Visible": true,
+        "Points": [
+            [
+                0,
+                0
+            ],
+            [
+                0.3,
+                0
+            ],
+            [
+                0.42,
+                0.25
+            ],
+            [
+                0.58,
+                1
+            ],
+            [
+                0.75,
+                1
+            ]
+        ],
+        "PointOptions": [
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            },
+            {
+                "InterpolationType": 2,
+                "LeftTangent": 0.0,
+                "RightTangent": 0.0
+            }
+        ]
+    },
+    "MinBounds": [
+        0,
+        0
+    ],
+    "MaxBounds": [
+        1,
+        5
+    ]
+}

@@ -716,7 +716,7 @@
                                 "LocalScale": [
                                     1.4500000476837158,
                                     1.4500000476837158,
-                                    1.2000000476837158
+                                    1.8200000524520874
                                 ],
                                 "NormalOffset": 0.0,
                                 "OverrideMeshVFXColorRamp": false,
@@ -724,10 +724,10 @@
                                 "Type": 0
                             }
                         ],
-                        "FanAngleDegrees": 95.0,
-                        "FanRangeSteps": 3,
-                        "FanSampleCount": 9,
-                        "FanVisualSampleCount": 5,
+                        "FanAngleDegrees": 120.0,
+                        "FanRangeSteps": 5,
+                        "FanSampleCount": 13,
+                        "FanVisualSampleCount": 7,
                         "FitBeamVisualToHitShape": false,
                         "Hit": {
                             "AllowMultiHit": false,
@@ -787,7 +787,7 @@
                         "ProjectileMaxSpeed": 0.0,
                         "ProjectileMotionEnabled": false,
                         "Radius": 3.4000000953674316,
-                        "Range": 14.5,
+                        "Range": 22.0,
                         "ShapeType": 3,
                         "SourceNodeName": "",
                         "SpawnHit": true,

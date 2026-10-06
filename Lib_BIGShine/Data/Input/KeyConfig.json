@@ -94,6 +94,14 @@
                 }
             ]
         ],
+        "Player.SkillC": [
+            [
+                {
+                    "code": 84,
+                    "dev": 0
+                }
+            ]
+        ],
         "Player.StrongAttack": [
             [
                 {

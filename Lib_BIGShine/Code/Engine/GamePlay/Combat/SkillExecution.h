@@ -5,6 +5,8 @@
 #include <memory>
 
 class GameObject;
+class CharacterMovementComponent;
+class ColliderComponent;
 
 // 正常終了と、中断・素材喪失による停止を呼び出し側へ伝える。
 enum class SkillExecutionResult
@@ -62,11 +64,24 @@ private:
     // 共通Skillカテゴリへ実行状況を書き、BehaviorGraphとEditorから参照できるようにする。
     void SyncBlackboard();
 
+    // Phaseごとの移動予約を既存Movementへ渡し、中断時に元の重力設定を戻す。
+    void BeginPhaseMovement(const SkillPhase& phase_);
+    void UpdateMovement(float deltaTime_);
+    void RestoreMovement();
+
+    std::weak_ptr<CharacterMovementComponent> movement;
+    std::weak_ptr<ColliderComponent> movementCollider;
+    bool ownsMovement = false;
+    bool originalUseGravity = false;
+    float originalGravityScale = 1.0f;
+    bool gravitySuspended = false;
+    float pendingVerticalImpulse = 0.0f;
     std::weak_ptr<GameObject> owner;
     SkillDefinition definition;
     PhaseCallback phaseCallback;
     int phaseIndex = -1;
     float phaseTime = 0.0f;
+    float groundedTime = 0.0f; // 一時的な接地フラグで着地攻撃へ進まないための連続確認時間。
     float previousAnimationTime = 0.0f;
     bool active = false;
     bool phaseStarted = false;

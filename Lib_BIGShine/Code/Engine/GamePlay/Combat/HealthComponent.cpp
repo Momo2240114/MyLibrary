@@ -6,6 +6,8 @@
 #include "Engine/GamePlay/Core/Object/GameObject.h"
 
 #include <algorithm>
+#include <cmath>
+#include "Engine/Debug/TracyProfiler.h"
 #include <cstdio>
 #include <imgui.h>
 #include <string>
@@ -114,6 +116,18 @@ void HealthComponent::RegisterActions()
         {
             health_->ApplyHit();
         }
+    });
+    // 回復量はイベントのBlackboard書き込みから受け取り、Skill名や固定値へ依存しない。
+    owner_->RegisterAction("Health", "Health_Heal", [weakHealth_]()
+    {
+        BS_PROFILE_SCOPE("HealthComponent::HealAction");
+        const auto health_ = weakHealth_.lock();
+        const auto actor_ = health_ ? health_->GetGameObject() : nullptr;
+        const auto blackboard_ = actor_ ? actor_->GetComponent<BlackboardComponent>() : nullptr;
+        float amount_ = 0.0f;
+        if (health_ && !health_->IsDead() && blackboard_ &&
+            blackboard_->GetFloat("Health", "HealAmount", amount_) && std::isfinite(amount_))
+            health_->Heal(amount_);
     });
     owner_->RegisterAction("Health", "Health_Reset", [weakHealth_]()
     {

@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 
 #include "DragonAttackControllerComponent.h"
+#include "DragonAIComponent.h"
 
 #include "Engine/GamePlay/Combat/AttackEffectHitComponent.h"
 #include "Engine/GamePlay/Core/Object/GameObject.h"
@@ -47,7 +48,8 @@ namespace
     constexpr const char* ACTION_STOP = "DragonAttack_Stop";
     constexpr const char* DANGER_AREA_MODEL_PATH = "__InternalMeshDangerArea__";
     constexpr const char* DANGER_FAN_MODEL_PATH = "__InternalMeshDangerFan__";
-    constexpr float BREATH_BEAM_TARGET_AIM_BLEND = 1.0f;
+    // 直線ブレスはターゲットの高さへ向けず、本体の水平前方へ発射する。
+    constexpr float BREATH_BEAM_TARGET_AIM_BLEND = 0.0f;
 
     // 地面表示用のRayはステージの物理Colliderだけに当て、攻撃判定やキャラクターを除外する。
     class DangerAreaGroundQueryFilter : public physx::PxQueryFilterCallback
@@ -292,10 +294,10 @@ void DragonAttackControllerComponent::PlaySpinSweep()
         tailFixedDamage,
         tailImpactPower,
         tailKnockBackPower,
-        tailRadius,
-        tailHalfHeight,
+        spinTailRadius,
+        0.5f,
         { 0.0f, 0.0f, 0.0f },
-        tailHitInterval);
+        tailHitInterval, true);
 }
 
 void DragonAttackControllerComponent::PlayStamp()
@@ -349,7 +351,7 @@ void DragonAttackControllerComponent::ShowBreathProjectileBeamDangerArea()
     if (!emitter_->ResolveBeamGeometryAt("DragonBreathLightBeam",
         Add(position_, Scale(forward_, breathProjectileMouthForwardOffset)), forward_, start_, end_, radius_)) return;
 
-    // 判定の両端をXZへ投影する。俯角とTemplateの発射補正も予兆へ反映する。
+    // 判定の両端をXZへ投影し、水平な直線ブレスの全長と発射補正を予兆へ反映する。
     const float deltaX_ = end_.x - start_.x;
     const float deltaZ_ = end_.z - start_.z;
     const float horizontalLength_ = std::sqrt(deltaX_ * deltaX_ + deltaZ_ * deltaZ_);
@@ -425,16 +427,7 @@ void DragonAttackControllerComponent::ShowTailSweepDangerArea()
 void DragonAttackControllerComponent::ShowSpinSweepDangerArea()
 {
     BS_PROFILE_SCOPE("DragonAttackControllerComponent::ShowSpinSweepDangerArea");
-
-    SpawnDangerArea(
-        "RuntimeDragonSpinSweepDangerArea",
-        spinSweepLifeTime,
-        false,
-        false,
-        true,
-        { 0.0f, 0.0f, 0.0f },
-        tailRadius,
-        tailHalfHeight + dangerAreaLengthPadding);
+    SpawnSpinSweepDangerArea(spinSweepLifeTime);
 }
 
 void DragonAttackControllerComponent::ShowStampDangerArea()
@@ -553,13 +546,16 @@ void DragonAttackControllerComponent::UpdateRuntimeAttacks(float deltaTime_)
             const std::shared_ptr<AttackEffectHitComponent> hitComponent_ = runtime_.hitComponent.lock();
             if (hitComponent_)
             {
-                if (tailIK_ && tailIK_->IsAttackActive())
+                if (tailIK_ && tailIK_->IsAttackActive() && (!runtime_.coverTailSpan || runtime_.tailSpanResolved))
                 {
-                    hitComponent_->Play();
+                    // 回転攻撃は有効時間へ入った時だけ再生し、毎フレーム命中履歴を消さない。
+                    if (!runtime_.coverTailSpan || !runtime_.tailAttackPlaying) hitComponent_->Play();
+                    runtime_.tailAttackPlaying = true;
                 }
                 else
                 {
                     hitComponent_->Stop();
+                    runtime_.tailAttackPlaying = false;
                 }
             }
         }
@@ -614,8 +610,9 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
     float radius_,
     float halfHeight_,
     const DirectX::XMFLOAT3& localOffset_,
-    float hitInterval_)
+    float hitInterval_, bool coverTailSpan_)
 {
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnAttackHit");
     const std::shared_ptr<GameObject> owner_ = GetGameObject();
     if (!owner_) return nullptr;
 
@@ -666,9 +663,14 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
     runtime_.lifeTimer = lifeTime_;
     runtime_.followMouth = followMouth_;
     runtime_.followTail = followTail_;
+    runtime_.coverTailSpan = coverTailSpan_;
     runtime_.requireTailAttackActive = requireTailAttackActive_;
     ApplyFollowTransform(runtime_);
-    if (showDangerAreaOnAttackStart)
+    if (showDangerAreaOnAttackStart && coverTailSpan_)
+    {
+        SpawnSpinSweepDangerArea(lifeTime_, true);
+    }
+    else if (showDangerAreaOnAttackStart)
     {
         AttachDangerArea(
             runtime_,
@@ -678,7 +680,8 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
             halfHeight_ + dangerAreaLengthPadding);
         ApplyDangerAreaTransform(runtime_);
     }
-    hitComponent_->Play();
+    if (coverTailSpan_) hitComponent_->Stop();
+    else hitComponent_->Play();
     runtimeAttacks.push_back(runtime_);
 
     return hitComponent_;
@@ -687,6 +690,12 @@ std::shared_ptr<AttackEffectHitComponent> DragonAttackControllerComponent::Spawn
 void DragonAttackControllerComponent::ApplyFollowTransform(RuntimeAttack& runtime_)
 {
     if (!runtime_.object || !runtime_.object->transform) return;
+    if (runtime_.coverTailSpan)
+    {
+        // 尻尾座標を取得できない間は、原点へ判定を出さない。
+        runtime_.tailSpanResolved = ApplyTailSpanTransform(runtime_);
+        return;
+    }
 
     DirectX::XMFLOAT3 position_{ 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
@@ -739,7 +748,15 @@ void DragonAttackControllerComponent::ApplyDangerAreaTransform(RuntimeAttack& ru
     DirectX::XMFLOAT3 forward_{ 0.0f, 0.0f, 1.0f };
     bool resolved_ = false;
 
-    if (runtime_.dangerAreaFixedFrame)
+    if (runtime_.followSpinDanger)
+    {
+        const auto owner_ = GetGameObject();
+        if (!owner_ || !owner_->transform) return;
+        position_ = owner_->transform->GetWorldPosition();
+        forward_ = runtime_.dangerAreaFixedForward;
+        resolved_ = true;
+    }
+    else if (runtime_.dangerAreaFixedFrame)
     {
         if (pendingBeamFrameValid)
         {
@@ -1291,7 +1308,7 @@ bool DragonAttackControllerComponent::ResolveBreathAimForward(
         targetPosition_.y - sourcePosition_.y,
         targetPosition_.z - sourcePosition_.z
     });
-    // 直線ビームなど、攻撃ごとに本体前方よりターゲット方向を優先したい場合だけ上書きする。
+    // 攻撃ごとの補正率で、本体の水平前方とターゲット方向の配分を切り替える。
     const float sourceBlend_ = targetAimBlendOverride_ >= 0.0f
         ? targetAimBlendOverride_
         : breathTargetAimBlend;
@@ -1483,6 +1500,81 @@ void DragonAttackControllerComponent::SpawnBiteVFX()
     request_.lifeTime = biteVFXLifeTime;
     request_.normalOffset = 0.0f;
     owner_->GetManager().GetEffectManager().SpawnMeshVFX(request_);
+}
+
+// カプセルのY軸を尻尾の根元から先端へ向け、長さだけを伸縮させる。
+bool DragonAttackControllerComponent::ApplyTailSpanTransform(RuntimeAttack& runtime_)
+{
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::ApplyTailSpanTransform");
+    const auto tailIK_ = tailIK.lock();
+    DirectX::XMFLOAT3 root_{};
+    DirectX::XMFLOAT3 tip_{};
+    if (!runtime_.object || !runtime_.object->transform || !tailIK_ ||
+        !tailIK_->GetTailRootWorldPosition(root_) || !tailIK_->GetTailTipWorldPosition(tip_)) return false;
+
+    using namespace DirectX;
+    const XMVECTOR segment_ = XMVectorSubtract(XMLoadFloat3(&tip_), XMLoadFloat3(&root_));
+    const float length_ = XMVectorGetX(XMVector3Length(segment_));
+    if (length_ <= EPSILON) return false;
+    const XMVECTOR axis_ = XMVectorScale(segment_, 1.0f / length_);
+    // 垂直に近い尻尾でも外積がゼロにならない参照軸を選ぶ。
+    const XMVECTOR reference_ = std::abs(XMVectorGetY(axis_)) < 0.95f
+        ? XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) : XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    const XMVECTOR right_ = XMVector3Normalize(XMVector3Cross(reference_, axis_));
+    const XMVECTOR forward_ = XMVector3Cross(right_, axis_);
+    XMMATRIX world_ = XMMatrixIdentity();
+    world_.r[0] = right_;
+    world_.r[1] = segment_;
+    world_.r[2] = forward_;
+    world_.r[3] = XMVectorSetW(XMVectorScale(XMVectorAdd(XMLoadFloat3(&root_), XMLoadFloat3(&tip_)), 0.5f), 1.0f);
+    // 基準半長0.5のカプセルをY方向だけ拡大し、球端の半径は一定に保つ。
+    runtime_.object->transform->ApplyWorldMatrix(world_);
+    return true;
+}
+
+void DragonAttackControllerComponent::SpawnSpinSweepDangerArea(float lifeTime_, bool reuseExisting_)
+{
+    BS_PROFILE_SCOPE("DragonAttackControllerComponent::SpawnSpinSweepDangerArea");
+    if (reuseExisting_)
+    {
+        // 攻撃開始時は予告済みの向きを維持し、判定寿命に合わせて表示を延長する。
+        for (RuntimeAttack& runtime_ : runtimeAttacks)
+        {
+            if (!runtime_.followSpinDanger) continue;
+            runtime_.lifeTimer = lifeTime_;
+            return;
+        }
+    }
+    EnsureDependencies();
+    const auto owner_ = GetGameObject();
+    const auto tailIK_ = tailIK.lock();
+    DirectX::XMFLOAT3 root_{};
+    DirectX::XMFLOAT3 tip_{};
+    if (!owner_ || !owner_->transform || !tailIK_ ||
+        !tailIK_->GetTailRootWorldPosition(root_) || !tailIK_->GetTailTipWorldPosition(tip_)) return;
+
+    const auto ai_ = owner_->GetComponent<DragonAIComponent>();
+    const float rotationDegrees_ = ai_ ? std::clamp(ai_->GetSpinTailRotationDegrees(), 0.0f, 360.0f) : 180.0f;
+    const float direction_ = ai_ ? ai_->GetSpinTailRotationDirection() : 1.0f;
+    const DirectX::XMFLOAT3 center_ = owner_->transform->GetWorldPosition();
+    const DirectX::XMFLOAT3 startForward_ = Normalize({ tip_.x - center_.x, 0.0f, tip_.z - center_.z });
+    const float centerYaw_ = std::atan2(startForward_.x, startForward_.z) +
+        DirectX::XMConvertToRadians(rotationDegrees_ * direction_ * 0.5f);
+    const float rootDistance_ = std::sqrt(
+        (root_.x - center_.x) * (root_.x - center_.x) + (root_.z - center_.z) * (root_.z - center_.z));
+    const float tailLength_ = DirectX::XMVectorGetX(DirectX::XMVector3Length(
+        DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&tip_), DirectX::XMLoadFloat3(&root_))));
+
+    RuntimeAttack runtime_{};
+    runtime_.lifeTimer = lifeTime_;
+    runtime_.followSpinDanger = true;
+    // 予兆の向きを開始時に固定し、本体の回転で予告範囲まで回ってしまうことを防ぐ。
+    runtime_.dangerAreaFixedForward = { std::sin(centerYaw_), 0.0f, std::cos(centerYaw_) };
+    AttachDangerArea(runtime_, "RuntimeDragonSpinSweepDangerArea", { 0.0f, 0.0f, 0.0f },
+        rootDistance_ + tailLength_ + (std::max)(spinTailRadius, 0.01f), 0.0f, true,
+        (std::min)(rotationDegrees_ + 60.0f, 360.0f));
+    ApplyDangerAreaTransform(runtime_);
+    if (runtime_.hasDangerArea) runtimeAttacks.push_back(runtime_);
 }
 
 void DragonAttackControllerComponent::SpawnStampHit()
@@ -1785,6 +1877,7 @@ void DragonAttackControllerComponent::Gui()
     ImGui::DragFloat("Tail Hit Interval", &tailHitInterval, 0.01f, 0.0f);
     ImGui::DragFloat("Tail Radius", &tailRadius, 0.01f, 0.01f);
     ImGui::DragFloat("Tail Half Height", &tailHalfHeight, 0.01f, 0.0f);
+    ImGui::DragFloat("Spin Tail Radius", &spinTailRadius, 0.01f, 0.01f);
 
     ImGui::SeparatorText("Stamp");
     ImGui::InputText("Stamp Rock VFX", &stampRockVFXAssetPath);
@@ -1911,6 +2004,7 @@ void DragonAttackControllerComponent::Serialize(nlohmann::json& json_) const
     json_["TailKnockBackPower"] = tailKnockBackPower;
     json_["TailRadius"] = tailRadius;
     json_["TailHalfHeight"] = tailHalfHeight;
+    json_["SpinTailRadius"] = spinTailRadius;
     json_["StampRockVFXAssetPath"] = stampRockVFXAssetPath;
     json_["StampSourceObjectName"] = stampSourceObjectName;
     json_["StampSourceNodeName"] = stampSourceNodeName;
@@ -1985,11 +2079,11 @@ void DragonAttackControllerComponent::Deserialize(const nlohmann::json& json_)
     breathDangerStartOffset = json_.value("BreathDangerStartOffset", 0.25f);
     breathProjectileImpactDangerRange = json_.value("BreathProjectileImpactDangerRange", 44.0f);
     breathProjectileImpactDangerRadius = json_.value("BreathProjectileImpactDangerRadius", 4.2f);
-    breathFanDangerRange = json_.value("BreathFanDangerRange", 14.5f);
-    breathFanDangerAngleDegrees = json_.value("BreathFanDangerAngleDegrees", 95.0f);
+    breathFanDangerRange = json_.value("BreathFanDangerRange", 22.0f);
+    breathFanDangerAngleDegrees = json_.value("BreathFanDangerAngleDegrees", 120.0f);
     breathFanDangerRadius = json_.value("BreathFanDangerRadius", 3.4f);
-    breathFanDangerSampleCount = json_.value("BreathFanDangerSampleCount", 9);
-    breathFanDangerRangeSteps = json_.value("BreathFanDangerRangeSteps", 3);
+    breathFanDangerSampleCount = json_.value("BreathFanDangerSampleCount", 13);
+    breathFanDangerRangeSteps = json_.value("BreathFanDangerRangeSteps", 5);
     biteLifeTime = json_.value("BiteLifeTime", 0.25f);
     biteVFXLifeTime = json_.value("BiteVFXLifeTime", 0.35f);
     biteDamage = json_.value("BiteDamage", 20.0f);
@@ -2012,6 +2106,7 @@ void DragonAttackControllerComponent::Deserialize(const nlohmann::json& json_)
     tailKnockBackPower = json_.value("TailKnockBackPower", 8.0f);
     tailRadius = json_.value("TailRadius", 1.1f);
     tailHalfHeight = json_.value("TailHalfHeight", 1.8f);
+    spinTailRadius = (std::max)(json_.value("SpinTailRadius", 3.0f), 0.01f);
     stampRockVFXAssetPath = json_.value("StampRockVFXAssetPath", std::string("Data/VFX/DragonStampRock.json"));
     stampSourceObjectName = json_.value("StampSourceObjectName", std::string());
     stampSourceNodeName = json_.value("StampSourceNodeName", std::string());
@@ -2022,19 +2117,19 @@ void DragonAttackControllerComponent::Deserialize(const nlohmann::json& json_)
     stampFixedDamage = json_.value("StampFixedDamage", 0.0f);
     stampImpactPower = json_.value("StampImpactPower", 26.0f);
     stampKnockBackPower = json_.value("StampKnockBackPower", 12.0f);
-    stampRadius = json_.value("StampRadius", 9.0f);
+    stampRadius = json_.value("StampRadius", 15.75f);
     stampForwardOffset = json_.value("StampForwardOffset", 2.6f);
     stampRockCount = json_.value("StampRockCount", 20);
-    stampRockRadius = json_.value("StampRockRadius", 7.5f);
+    stampRockRadius = json_.value("StampRockRadius", 13.125f);
     stampRockArcDegrees = json_.value("StampRockArcDegrees", 360.0f);
     stampRockSpawnInterval = (std::max)(json_.value("StampRockSpawnInterval", 0.04f), 0.0f);
     stampRockLifeTime = json_.value("StampRockLifeTime", 1.8f);
     stampRockGroupCount = (std::max)(json_.value("StampRockGroupCount", 5), 1);
     stampRockGroupInterval = (std::max)(json_.value("StampRockGroupInterval", 0.10f), 0.0f);
-    stampRockScaleMin = (std::max)(json_.value("StampRockScaleMin", 0.75f), 0.01f);
-    stampRockScaleMax = (std::max)(json_.value("StampRockScaleMax", 1.35f), 0.01f);
-    stampRockRadiusJitter = (std::max)(json_.value("StampRockRadiusJitter", 1.2f), 0.0f);
-    stampRockRiseStartOffset = json_.value("StampRockRiseStartOffset", -0.65f);
+    stampRockScaleMin = (std::max)(json_.value("StampRockScaleMin", 1.3125f), 0.01f);
+    stampRockScaleMax = (std::max)(json_.value("StampRockScaleMax", 2.3625f), 0.01f);
+    stampRockRadiusJitter = (std::max)(json_.value("StampRockRadiusJitter", 2.1f), 0.0f);
+    stampRockRiseStartOffset = json_.value("StampRockRiseStartOffset", -1.1375f);
 
     RegisterActions();
 }

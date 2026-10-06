@@ -204,23 +204,23 @@
                         },
                         "IsTargetInDetectRange": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "IsTargetLost": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "OwnerPosition": {
                             "type": "vector3",
                             "value": [
-                                -8.154587745666504,
-                                -0.5823211669921875,
-                                27.82283592224121
+                                -1.7664620876312256,
+                                -0.5823249816894531,
+                                -39.90935134887695
                             ]
                         },
                         "SpawnDistance": {
                             "type": "float",
-                            "value": 28.99907875061035
+                            "value": 39.95267105102539
                         },
                         "SpawnPosition": {
                             "type": "vector3",
@@ -232,37 +232,37 @@
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 39.24116134643555
+                            "value": 8.745957374572754
                         },
                         "TargetPosition": {
                             "type": "vector3",
                             "value": [
-                                -44.646156311035156,
-                                -0.12279093265533447,
-                                13.39984130859375
+                                -9.54011058807373,
+                                -0.12279069423675537,
+                                -43.890682220458984
                             ]
                         },
                         "ToSpawnDirection": {
                             "type": "vector3",
                             "value": [
-                                0.2812016010284424,
-                                0.020080678164958954,
-                                -0.9594386219978333
+                                0.04421386867761612,
+                                0.014575370587408543,
+                                0.9989157319068909
                             ]
                         },
                         "ToTargetDirection": {
                             "type": "vector3",
                             "value": [
-                                -0.9299309253692627,
-                                0.011710413731634617,
-                                -0.3675476014614105
+                                -0.8888276219367981,
+                                0.05254247784614563,
+                                -0.455219566822052
                             ]
                         }
                     },
                     "Anim": {
                         "ActionEnded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "ActionTrigger": {
                             "type": "string",
@@ -270,11 +270,11 @@
                         },
                         "CurrentAction": {
                             "type": "string",
-                            "value": "Idle"
+                            "value": "LandingAttack"
                         },
                         "CurrentAnimationState": {
                             "type": "string",
-                            "value": "PlainsDragon_IdleBreathe"
+                            "value": "PlainsDragon_FlyStationaryToLanding"
                         },
                         "IsActing": {
                             "type": "bool",
@@ -286,7 +286,7 @@
                         },
                         "ReturnToIdle": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "To_PlainsDragon_BiteAttack": {
                             "type": "bool",
@@ -384,19 +384,19 @@
                     "DragonAI": {
                         "Action": {
                             "type": "int",
-                            "value": 0
+                            "value": 13
                         },
                         "ActionEnded": {
                             "type": "bool",
-                            "value": false
+                            "value": true
                         },
                         "ActionName": {
                             "type": "string",
-                            "value": "Idle"
+                            "value": "LandingAttack"
                         },
                         "ActionTimer": {
                             "type": "float",
-                            "value": 23.080778121948242
+                            "value": 2.3325841426849365
                         },
                         "AggressionMultiplier": {
                             "type": "float",
@@ -404,7 +404,7 @@
                         },
                         "AirAttackCount": {
                             "type": "int",
-                            "value": 0
+                            "value": 1
                         },
                         "BufferedAction": {
                             "type": "int",
@@ -420,7 +420,7 @@
                         },
                         "CanUseAirFireBall": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseAirSpreadBreath": {
                             "type": "bool",
@@ -456,11 +456,11 @@
                         },
                         "CanUseLandingAttack": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseRunCharge": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseSpinSweep": {
                             "type": "bool",
@@ -480,7 +480,7 @@
                         },
                         "CanUseTakeOff": {
                             "type": "bool",
-                            "value": true
+                            "value": false
                         },
                         "CanUseTurnToPlayer": {
                             "type": "bool",
@@ -488,7 +488,7 @@
                         },
                         "CurrentAction": {
                             "type": "int",
-                            "value": 0
+                            "value": 13
                         },
                         "DamagePhase": {
                             "type": "int",
@@ -528,7 +528,7 @@
                         },
                         "LastCompletedAttackAction": {
                             "type": "int",
-                            "value": 0
+                            "value": 11
                         },
                         "MaxAirAttackCount": {
                             "type": "int",
@@ -548,7 +548,7 @@
                         },
                         "PlayerAngleDegrees": {
                             "type": "float",
-                            "value": 2.59234619140625
+                            "value": 34.01631164550781
                         },
                         "PlayerBehind": {
                             "type": "bool",
@@ -556,11 +556,11 @@
                         },
                         "PlayerDistance": {
                             "type": "float",
-                            "value": 54.22113037109375
+                            "value": 8.745957374572754
                         },
                         "PlayerHorizontalDistance": {
                             "type": "float",
-                            "value": 54.219181060791016
+                            "value": 8.73387622833252
                         },
                         "PlayerInFront": {
                             "type": "bool",
@@ -576,23 +576,23 @@
                         },
                         "RecoveryTimer": {
                             "type": "float",
-                            "value": 0.0
+                            "value": 0.11923664063215256
                         },
                         "State": {
                             "type": "int",
-                            "value": 0
+                            "value": 4
                         },
                         "TargetAngle": {
                             "type": "float",
-                            "value": 2.59234619140625
+                            "value": 34.01631164550781
                         },
                         "TargetDistance": {
                             "type": "float",
-                            "value": 54.22113037109375
+                            "value": 8.745957374572754
                         },
                         "TargetHorizontalDistance": {
                             "type": "float",
-                            "value": 54.219181060791016
+                            "value": 8.73387622833252
                         },
                         "UltimateDamageRate": {
                             "type": "float",
@@ -766,10 +766,12 @@
                         "ExecuteTarget": "Owner",
                         "IsActingKey": "IsActing",
                         "SetIsActing": true,
+                        "SkillName": "",
                         "WaitForActionEnd": true,
                         "WriteAnimationBlackboard": true
                     }
-                ]
+                ],
+                "SkillDefinitionsPath": "Data/Skills/PlayerSkills.json"
             },
             "Enabled": true,
             "LateUpdateEnabled": true,
@@ -797,7 +799,7 @@
                 "TargetName": "PlayerModel",
                 "WriteDebugBlackboard": true
             },
-            "Enabled": false,
+            "Enabled": true,
             "LateUpdateEnabled": true,
             "LateUpdatePriority": 0,
             "RequiredForSceneStart": false,
@@ -5404,6 +5406,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5425,6 +5428,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": false,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5446,6 +5450,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": false,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5467,6 +5472,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5488,6 +5494,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.350000023841858,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5509,6 +5516,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 0.44999998807907104,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5530,6 +5538,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 0.8500000238418579,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5551,6 +5560,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.149999976158142,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5572,6 +5582,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.0499999523162842,
+                        "SkillName": "",
                         "UseActionTimeout": false,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5593,6 +5604,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5614,6 +5626,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": false,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5635,6 +5648,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5656,6 +5670,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5677,6 +5692,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5698,6 +5714,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.20000000298023224,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5719,6 +5736,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5740,6 +5758,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.4000000059604645,
                         "SelectionWeight": 1.0499999523162842,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5761,6 +5780,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 0.8500000238418579,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5782,6 +5802,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5803,6 +5824,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5824,6 +5846,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": false,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5845,6 +5868,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.0,
                         "SelectionWeight": 1.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5866,6 +5890,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.5,
                         "SelectionWeight": 0.0,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5887,6 +5912,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.3499999940395355,
                         "SelectionWeight": 1.100000023841858,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5908,6 +5934,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.2000000476837158,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5929,6 +5956,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.149999976158142,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -5950,6 +5978,7 @@
                         "IKActionName": "",
                         "RecoveryTime": 0.44999998807907104,
                         "SelectionWeight": 1.25,
+                        "SkillName": "",
                         "UseActionTimeout": true,
                         "UseHistory": true,
                         "VFXActionName": "",
@@ -6000,6 +6029,7 @@
                 "SecondUltimateTriggered": false,
                 "SideAngleDegrees": 100.0,
                 "SidePunishMultiplier": 1.350000023841858,
+                "SkillDefinitionsPath": "Data/Skills/PlayerSkills.json",
                 "SpinTailRotationDegrees": 180.0,
                 "TakeOffBackSpeed": 7.0,
                 "TurnRootMotionLimitPaddingDegrees": 2.0,
@@ -6389,11 +6419,11 @@
                 "BreathDangerStartOffset": 0.25,
                 "BreathDangerWidth": 6.0,
                 "BreathEmitterObjectName": "HeadPart",
-                "BreathFanDangerAngleDegrees": 95.0,
+                "BreathFanDangerAngleDegrees": 120.0,
                 "BreathFanDangerRadius": 3.4000000953674316,
-                "BreathFanDangerRange": 14.5,
-                "BreathFanDangerRangeSteps": 3,
-                "BreathFanDangerSampleCount": 9,
+                "BreathFanDangerRange": 22.0,
+                "BreathFanDangerRangeSteps": 5,
+                "BreathFanDangerSampleCount": 13,
                 "BreathFixedDamage": 0.0,
                 "BreathForwardOffset": 4.0,
                 "BreathHalfHeight": 8.0,
@@ -6425,6 +6455,7 @@
                 "SpinDamage": 30.0,
                 "SpinDamageRate": 0.30000001192092896,
                 "SpinSweepLifeTime": 1.7999999523162842,
+                "SpinTailRadius": 3.0,
                 "StampDamage": 28.0,
                 "StampDamageRate": 0.2800000011920929,
                 "StampDangerLifeTime": 1.7999999523162842,
@@ -6433,17 +6464,17 @@
                 "StampImpactPower": 26.0,
                 "StampKnockBackPower": 12.0,
                 "StampLifeTime": 0.5,
-                "StampRadius": 9.0,
+                "StampRadius": 15.75,
                 "StampRockArcDegrees": 360.0,
                 "StampRockCount": 20,
                 "StampRockGroupCount": 5,
                 "StampRockGroupInterval": 0.10000000149011612,
                 "StampRockLifeTime": 1.7999999523162842,
-                "StampRockRadius": 7.5,
-                "StampRockRadiusJitter": 1.2000000476837158,
-                "StampRockRiseStartOffset": -0.6499999761581421,
-                "StampRockScaleMax": 1.350000023841858,
-                "StampRockScaleMin": 0.75,
+                "StampRockRadius": 13.125,
+                "StampRockRadiusJitter": 2.0999999046325684,
+                "StampRockRiseStartOffset": -1.1375000476837158,
+                "StampRockScaleMax": 2.362499952316284,
+                "StampRockScaleMin": 1.3125,
                 "StampRockSpawnInterval": 0.03500000014901161,
                 "StampRockVFXAssetPath": "Data/VFX/DragonStampRock.json",
                 "StampSourceNodeName": "",
@@ -6474,13 +6505,13 @@
     "RequiredForSceneStart": true,
     "Transform": {
         "Pos": [
-            0.0,
-            -0.5823245048522949,
-            30.0
+            -1.7664620876312256,
+            -0.5823249816894531,
+            -39.90935134887695
         ],
         "Rot": [
             0.0,
-            -180.0,
+            -151.13589477539063,
             0.0
         ],
         "Scale": [

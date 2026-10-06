@@ -1,0 +1,232 @@
+{
+    "AssetType": "AnimationState",
+    "AssetVersion": 2,
+    "State": {
+        "animIndexA": -1,
+        "animIndexB": -1,
+        "animationIndex": 70,
+        "blend2DBackwardAnimationIndex": -1,
+        "blend2DBackwardLeft90AnimationIndex": -1,
+        "blend2DBackwardLeft90PhaseOffset": 0.0,
+        "blend2DBackwardLeftAnimationIndex": -1,
+        "blend2DBackwardLeftPhaseOffset": 0.0,
+        "blend2DBackwardPhaseOffset": 0.0,
+        "blend2DBackwardRight90AnimationIndex": -1,
+        "blend2DBackwardRight90PhaseOffset": 0.0,
+        "blend2DBackwardRightAnimationIndex": -1,
+        "blend2DBackwardRightPhaseOffset": 0.0,
+        "blend2DDefaultInput": [
+            0.0,
+            1.0
+        ],
+        "blend2DForwardAnimationIndex": -1,
+        "blend2DForwardLeft90AnimationIndex": -1,
+        "blend2DForwardLeft90PhaseOffset": 0.0,
+        "blend2DForwardLeftAnimationIndex": -1,
+        "blend2DForwardLeftPhaseOffset": 0.0,
+        "blend2DForwardPhaseOffset": 0.0,
+        "blend2DForwardRight90AnimationIndex": -1,
+        "blend2DForwardRight90PhaseOffset": 0.0,
+        "blend2DForwardRightAnimationIndex": -1,
+        "blend2DForwardRightPhaseOffset": 0.0,
+        "blend2DIdleAnimationIndex": -1,
+        "blend2DIdlePhaseOffset": 0.0,
+        "blend2DIdleThreshold": 0.05000000074505806,
+        "blend2DLeftAnimationIndex": -1,
+        "blend2DLeftPhaseOffset": 0.0,
+        "blend2DParamName": "MoveInput",
+        "blend2DRightAnimationIndex": -1,
+        "blend2DRightPhaseOffset": 0.0,
+        "blend2DSyncNormalizedTime": true,
+        "blend2DUseEightDirections": false,
+        "blend2DUseForwardBackwardLateral": false,
+        "blend2DUseIdleStop": false,
+        "blendDefaultWeight": 0.5,
+        "blendMaskRootNodes": [],
+        "blendParamName": "BlendAlpha",
+        "blendParameterMax": 1.0,
+        "blendParameterMin": 0.0,
+        "blendPhaseOffsetA": 0.0,
+        "blendPhaseOffsetB": 0.0,
+        "blendSyncNormalizedTime": true,
+        "blendUseMask": false,
+        "customAnimIndex": -1,
+        "events": [
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "SkillPrototypeAirSlash",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.41000000000000003,
+                "eventTemplateType": "ATTACK_TEMPLATE",
+                "label": "仮HitBox",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.20000000298023224
+            },
+            {
+                "actionEnd": "Weapon_Trail_Stop",
+                "actionStart": "Weapon_Trail_Start",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": true,
+                "endTime": 0.44,
+                "eventTemplateType": "TRAIL_TEMPLATE",
+                "label": "Trailと既存WindParticle",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.05000000074505806
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": true,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.3166666626930237,
+                "eventTemplateType": "VFX_TEMPLATE",
+                "label": "仮MeshVFX",
+                "localPosition": [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    -40.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "PlayerSwordArc_Aqua",
+                "meshVFXLifeTime": 0.25,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.20000000298023224
+            },
+            {
+                "actionEnd": "",
+                "actionStart": "",
+                "actionUpdate": "",
+                "attachNodeName": "",
+                "attachToOwner": false,
+                "attackTemplateId": "",
+                "blackboardWrites": [],
+                "callEndOnStateExit": false,
+                "endTime": 0.20000000298023224,
+                "eventTemplateType": "SOUND_TEMPLATE",
+                "label": "仮Sound：攻撃音Actionを設定",
+                "localPosition": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localRotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "localScale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "meshVFXAssetPath": "",
+                "meshVFXLifeTime": 1.0,
+                "meshVFXPlaybackSpeed": 1.0,
+                "mirrorMeshVFX": false,
+                "overridePlaybackSpeed": false,
+                "ownerTarget": "Self",
+                "playbackSpeed": 1.0,
+                "startTime": 0.20000000298023224
+            },
+            {
+                "label": "次段へ接続",
+                "startTime": 0.48,
+                "endTime": 0.49,
+                "actionStart": "ActionEnd",
+                "actionEnd": "",
+                "eventTemplateType": "NONE",
+                "callEndOnStateExit": false
+            }
+        ],
+        "loop": false,
+        "name": "RisingJudgment_5段目",
+        "rootMotion": {
+            "applyPositionX": true,
+            "applyPositionY": false,
+            "applyPositionZ": true,
+            "applyRotationX": false,
+            "applyRotationY": false,
+            "applyRotationZ": false,
+            "cutVisualPositionX": true,
+            "cutVisualPositionY": true,
+            "cutVisualPositionZ": true,
+            "enable": true,
+            "sourceNodeName": "pelvis"
+        },
+        "rootMotionScale": 0.009999999776482582,
+        "rootMotionScaleCurveName": "",
+        "sequenceClips": [],
+        "sequencer": "",
+        "speed": 2.4,
+        "speedCurveName": "RisingJudgment.AirSpeed",
+        "type": 0
+    }
+}

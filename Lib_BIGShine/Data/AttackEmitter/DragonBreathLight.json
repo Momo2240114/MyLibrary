@@ -350,18 +350,18 @@
         1,
         1
       ],
-      "Range": 14.5,
+      "Range": 22,
       "Radius": 3.4,
       "Speed": 0,
       "LifeTime": 2,
-      "FanAngleDegrees": 95,
+      "FanAngleDegrees": 120,
       "ProjectileMotionEnabled": false,
       "ProjectileAcceleration": 0,
       "ProjectileGravity": 0,
       "ProjectileMaxSpeed": 0,
-      "FanSampleCount": 9,
-      "FanRangeSteps": 3,
-      "FanVisualSampleCount": 5,
+      "FanSampleCount": 13,
+      "FanRangeSteps": 5,
+      "FanVisualSampleCount": 7,
       "SpawnHit": true,
       "Entries": [
         {
@@ -382,7 +382,7 @@
           "LocalScale": [
             1.45,
             1.45,
-            1.2
+            1.82
           ],
           "LifeTime": 2,
           "NormalOffset": 0,

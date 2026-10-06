@@ -91,6 +91,11 @@ private:
         bool followBreathSource = false;
         bool followStampSource = false;
         bool followTail = false;
+        // 回転攻撃だけを根元から先端まで追従させ、予兆は本体中心の扇型にする。
+        bool coverTailSpan = false;
+        bool tailSpanResolved = false;
+        bool tailAttackPlaying = false;
+        bool followSpinDanger = false;
         bool requireTailAttackActive = false;
         bool hasDangerArea = false;
     };
@@ -127,7 +132,7 @@ private:
         float radius_,
         float halfHeight_,
         const DirectX::XMFLOAT3& localOffset_,
-        float hitInterval_);
+        float hitInterval_, bool coverTailSpan_ = false);
     void ApplyFollowTransform(RuntimeAttack& runtime_);
     void ApplyDangerAreaTransform(RuntimeAttack& runtime_);
     // 地面の法線と範囲内の接地点から、危険範囲を埋めない表示高さを求める。
@@ -177,6 +182,10 @@ private:
         float targetAimBlendOverride_ = -1.0f);
     void SpawnBiteVFX();
     void SpawnStampHit();
+    // 本体の回転方向に沿った扇型予兆を、尻尾全体が届く距離で表示する。
+    void SpawnSpinSweepDangerArea(float lifeTime_, bool reuseExisting_ = false);
+    // 根元と先端から、半径を維持した尻尾カプセルのWorld行列を更新する。
+    bool ApplyTailSpanTransform(RuntimeAttack& runtime_);
     void SpawnStampRockVFX(const DirectX::XMFLOAT3& centerPosition_);
     void SpawnStampRockVFXAt(
         const PendingStampRock& pendingRock_);
@@ -275,11 +284,12 @@ private:
     float breathDangerStartOffset = 0.25f;
     float breathProjectileImpactDangerRange = 44.0f;
     float breathProjectileImpactDangerRadius = 4.2f;
-    float breathFanDangerRange = 14.5f;
-    float breathFanDangerAngleDegrees = 95.0f;
+    // 扇型ブレスの射程と角度に合わせて、予兆と判定配置の設定を揃える。
+    float breathFanDangerRange = 22.0f;
+    float breathFanDangerAngleDegrees = 120.0f;
     float breathFanDangerRadius = 3.4f;
-    int breathFanDangerSampleCount = 9;
-    int breathFanDangerRangeSteps = 3;
+    int breathFanDangerSampleCount = 13;
+    int breathFanDangerRangeSteps = 5;
 
     float biteLifeTime = 0.25f;
     float biteVFXLifeTime = 0.35f;
@@ -304,6 +314,8 @@ private:
     float tailKnockBackPower = 8.0f;
     float tailRadius = 1.1f;
     float tailHalfHeight = 1.8f;
+    // 回転攻撃の根元から先端までを覆うカプセル半径。
+    float spinTailRadius = 3.0f;
 
     std::string stampRockVFXAssetPath = "Data/VFX/DragonStampRock.json";
     // 空の場合は敵本体原点を基準にし、必要な場合だけ部位Objectからスタンプを発生させる。
@@ -317,19 +329,19 @@ private:
     float stampFixedDamage = 0.0f;
     float stampImpactPower = 26.0f;
     float stampKnockBackPower = 12.0f;
-    float stampRadius = 9.0f;
+    float stampRadius = 15.75f;
     float stampForwardOffset = 2.6f;
     int stampRockCount = 20;
-    float stampRockRadius = 7.5f;
+    float stampRockRadius = 13.125f;
     float stampRockArcDegrees = 360.0f;
     float stampRockSpawnInterval = 0.04f;
     float stampRockLifeTime = 1.8f;
     int stampRockGroupCount = 5;
     float stampRockGroupInterval = 0.10f;
-    float stampRockScaleMin = 0.75f;
-    float stampRockScaleMax = 1.35f;
-    float stampRockRadiusJitter = 1.2f;
-    float stampRockRiseStartOffset = -0.65f;
+    float stampRockScaleMin = 1.3125f;
+    float stampRockScaleMax = 2.3625f;
+    float stampRockRadiusJitter = 2.1f;
+    float stampRockRiseStartOffset = -1.1375f;
 
     uint32_t nextAttackInstanceId = 1u;
 };

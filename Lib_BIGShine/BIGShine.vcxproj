@@ -563,6 +563,8 @@
     <ClCompile Include="Code\Engine\UI\UIWidgetComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\UIWorldAnchorComponent.cpp" />
     <ClCompile Include="Code\Engine\UI\WidgetBoardComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossAIComponent.cpp" />
+    <ClCompile Include="Code\Game\AI\Human\HumanBossActionComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAIComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.cpp" />
     <ClCompile Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.cpp" />
@@ -901,6 +903,8 @@
     <ClInclude Include="Code\Engine\Physics\SphereCollider.h" />
     <ClInclude Include="Code\Engine\Platform\WindowsDialogHelper.h" />
     <ClInclude Include="Code\Engine\UI\UIButton.h" />
+    <ClInclude Include="Code\Game\AI\Human\HumanBossAIComponent.h" />
+    <ClInclude Include="Code\Game\AI\Human\HumanBossActionComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAIComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonAttackControllerComponent.h" />
     <ClInclude Include="Code\Game\AI\Dragon\DragonBodyPartHurtBoxComponent.h" />

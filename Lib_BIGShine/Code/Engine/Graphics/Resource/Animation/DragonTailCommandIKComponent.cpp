@@ -676,6 +676,20 @@ bool DragonTailCommandIKComponent::GetTailTipWorldPosition(DirectX::XMFLOAT3& po
     return true;
 }
 
+// 尻尾IKと同じチェーンから根元を取得し、判定とモデルの参照先を揃える。
+bool DragonTailCommandIKComponent::GetTailRootWorldPosition(DirectX::XMFLOAT3& position_) const
+{
+    if (!model || !ikMap) return false;
+    const auto* chain_ = ikMap->FindChain(chainName);
+    if (!chain_ || chain_->nodeIndices.empty()) return false;
+
+    const int rootNodeIndex_ = chain_->nodeIndices.front();
+    const auto& nodes_ = model->GetNodes();
+    if (rootNodeIndex_ < 0 || rootNodeIndex_ >= static_cast<int>(nodes_.size())) return false;
+    position_ = GetTranslation(nodes_[rootNodeIndex_].worldTransform);
+    return true;
+}
+
 bool DragonTailCommandIKComponent::GetTailTipWorldForward(DirectX::XMFLOAT3& forward_) const
 {
     // 尻尾先端の向きを、エフェクトや判定方向へ渡せるWorld前方向として返す。

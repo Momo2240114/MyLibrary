@@ -4,13 +4,13 @@
             "blurPasses": 5,
             "enabled": true,
             "exposure": 1.0,
-            "intensity": 0.46000000834465027,
+            "intensity": 0.6000000238418579,
             "kawaseScale": 3.0,
-            "threshold": 1.7000000476837158,
+            "threshold": 1.8899999856948853,
             "toneMappingEnabled": true
         },
         "IBL": {
-            "hdrIntensity": 0.0010000000474974513,
+            "hdrIntensity": 0.003000000026077032,
             "specularHdrPath": "Data/Texture/IBL/qwantani_dusk_2_2k.hdr"
         },
         "ShadowMap": {
@@ -54,7 +54,7 @@
         },
         "ToonOutline": {
             "color": [
-                0.1568627506494522,
+                0.19607843458652496,
                 0.0784313753247261,
                 0.0784313753247261,
                 1.0

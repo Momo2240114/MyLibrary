@@ -73,6 +73,7 @@ private:
     int selectedSkill = -1;
     int selectedPhase = -1;
     int selectedDragonAction = 0;
+    int selectedPlayerSlot = 0;
     int timelineFrame = 0;
     int timelineFirstFrame = 0;
     bool dirty = false;
